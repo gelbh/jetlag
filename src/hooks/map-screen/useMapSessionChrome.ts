@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import html2canvas from "html2canvas";
 import type { RefObject } from "react";
 import {
   isActive,
@@ -112,6 +111,7 @@ export function useMapSessionChrome({
       exportLegendRef.current.style.display = "block";
     }
 
+    const { default: html2canvas } = await import("html2canvas");
     const canvas = await html2canvas(mapShellRef.current, {
       useCORS: true,
       backgroundColor: "#0f172a",

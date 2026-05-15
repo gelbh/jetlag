@@ -1,6 +1,6 @@
 import type { GameArea } from "../domain/annotations";
-import type { LatLngTuple } from "../domain/geometry";
-import { normalizeBoundingBox, simplifyGameArea } from "../domain/geometry";
+import { normalizeBoundingBox } from "../domain/gameAreaBounds";
+import type { LatLngTuple } from "../domain/geometryCore";
 
 const NOMINATIM_ENDPOINT = "https://nominatim.openstreetmap.org/search";
 const NOMINATIM_REVERSE_ENDPOINT =
@@ -35,12 +35,14 @@ interface NominatimResult {
   address?: Record<string, string>;
 }
 
-function geoJsonToGameArea(
+async function geoJsonToGameArea(
   geojson: NominatimGeoJson | undefined,
-): GameArea | undefined {
+): Promise<GameArea | undefined> {
   if (!geojson) {
     return undefined;
   }
+
+  const { simplifyGameArea } = await import("../domain/geometry");
 
   if (geojson.type === "Polygon") {
     return simplifyGameArea({
@@ -59,9 +61,11 @@ function geoJsonToGameArea(
   return undefined;
 }
 
-export function parseNominatimResult(result: NominatimResult): GeocodedPlace {
+export async function parseNominatimResult(
+  result: NominatimResult,
+): Promise<GeocodedPlace> {
   const [south, north, west, east] = result.boundingbox.map(Number);
-  const boundary = geoJsonToGameArea(result.geojson);
+  const boundary = await geoJsonToGameArea(result.geojson);
 
   return {
     id: String(result.place_id),
@@ -97,7 +101,7 @@ export async function searchPlaces(query: string): Promise<GeocodedPlace[]> {
   }
 
   const payload = (await response.json()) as NominatimResult[];
-  return payload.map(parseNominatimResult);
+  return Promise.all(payload.map(parseNominatimResult));
 }
 
 export function placeHasBoundary(place: GeocodedPlace): boolean {
@@ -158,7 +162,7 @@ export async function reverseGeocodePoint(
     return null;
   }
 
-  const place = parseNominatimResult(payload);
+  const place = await parseNominatimResult(payload);
   return {
     ...place,
     displayName: adminLabel,

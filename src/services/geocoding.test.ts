@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { parseNominatimResult } from "./geocoding";
 
 describe("geocoding", () => {
-  it("parses nominatim bounding boxes into map bounds", () => {
-    const place = parseNominatimResult({
+  it("parses nominatim bounding boxes into map bounds", async () => {
+    const place = await parseNominatimResult({
       place_id: 42,
       display_name: "Dublin, County Dublin, Ireland",
       lat: "53.3498",
@@ -22,8 +22,8 @@ describe("geocoding", () => {
     expect(place.boundary).toBeUndefined();
   });
 
-  it("parses administrative boundaries when Nominatim returns geojson", () => {
-    const place = parseNominatimResult({
+  it("parses administrative boundaries when Nominatim returns geojson", async () => {
+    const place = await parseNominatimResult({
       place_id: 43,
       display_name: "County Dublin, Ireland",
       lat: "53.3498",

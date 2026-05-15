@@ -4,6 +4,28 @@ import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: "vendor-firebase",
+              test: /node_modules\/firebase/,
+            },
+            {
+              name: "vendor-leaflet",
+              test: /node_modules\/(leaflet|react-leaflet)/,
+            },
+            {
+              name: "vendor-turf",
+              test: /node_modules\/@turf\//,
+            },
+          ],
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),

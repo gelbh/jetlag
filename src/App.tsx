@@ -1,8 +1,26 @@
+import { lazy, Suspense, type ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { CreateSession } from "./routes/CreateSession";
 import { Home } from "./routes/Home";
 import { JoinSession } from "./routes/JoinSession";
-import { MapScreen } from "./routes/MapScreen";
+
+const MapScreen = lazy(() =>
+  import("./routes/MapScreen").then((m) => ({ default: m.MapScreen })),
+);
+const CreateSession = lazy(() =>
+  import("./routes/CreateSession").then((m) => ({ default: m.CreateSession })),
+);
+
+function RouteFallback() {
+  return (
+    <div className="flex min-h-[100dvh] items-center justify-center text-slate-400">
+      Loading…
+    </div>
+  );
+}
+
+function LazyRoute({ children }: { children: ReactNode }) {
+  return <Suspense fallback={<RouteFallback />}>{children}</Suspense>;
+}
 
 export default function App() {
   return (
@@ -10,9 +28,23 @@ export default function App() {
       <div className="min-h-[100dvh]">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/create" element={<CreateSession />} />
+          <Route
+            path="/create"
+            element={
+              <LazyRoute>
+                <CreateSession />
+              </LazyRoute>
+            }
+          />
           <Route path="/join" element={<JoinSession />} />
-          <Route path="/map" element={<MapScreen />} />
+          <Route
+            path="/map"
+            element={
+              <LazyRoute>
+                <MapScreen />
+              </LazyRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
