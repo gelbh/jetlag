@@ -1,94 +1,295 @@
-import { useCallback } from 'react'
-import type { AnnotationRecord } from '../domain/annotations'
-import { LOCAL_SESSION_ID } from '../domain/annotations'
-import { useAnnotationStore, useSessionStore } from '../state/sessionStore'
-import { isFirebaseConfigured } from '../services/firebase'
-import { writeRemoteAnnotation } from '../services/firestoreAnnotations'
-import { enqueueOfflineWrite } from '../services/offlineQueue'
+import { useCallback } from "react";
+import type { AnnotationRecord } from "../domain/annotations";
+import { LOCAL_SESSION_ID, migrateAnnotations } from "../domain/annotations";
+import {
+  findLastRedoableAnnotation,
+  findLastUndoableAnnotation,
+} from "../domain/mapTools";
+import type { MapTool } from "../state/sessionStore";
+import { useAnnotationStore, useSessionStore } from "../state/sessionStore";
+import {
+  ensureAnonymousUser,
+  isFirebaseConfigured,
+} from "../services/firebase";
+import {
+  ensureRemoteSessionWriteAccess,
+  isFirestorePermissionDenied,
+  joinRemoteSessionByCode,
+  writeRemoteAnnotation,
+} from "../services/firestoreAnnotations";
+import { enqueueOfflineWrite } from "../services/offlineQueue";
 
 export function useAnnotations() {
-  const session = useSessionStore((state) => state.session)
-  const incrementPendingWrites = useSessionStore((state) => state.incrementPendingWrites)
-  const decrementPendingWrites = useSessionStore((state) => state.decrementPendingWrites)
-  const addAnnotation = useAnnotationStore((state) => state.addAnnotation)
-  const softDeleteAnnotation = useAnnotationStore((state) => state.softDeleteAnnotation)
-  const upsertAnnotation = useAnnotationStore((state) => state.upsertAnnotation)
-  const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse)
+  const session = useSessionStore((state) => state.session);
+  const incrementPendingWrites = useSessionStore(
+    (state) => state.incrementPendingWrites,
+  );
+  const decrementPendingWrites = useSessionStore(
+    (state) => state.decrementPendingWrites,
+  );
+  const incrementSyncInFlight = useSessionStore(
+    (state) => state.incrementSyncInFlight,
+  );
+  const decrementSyncInFlight = useSessionStore(
+    (state) => state.decrementSyncInFlight,
+  );
+  const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
+  const setSession = useSessionStore((state) => state.setSession);
+  const addAnnotation = useAnnotationStore((state) => state.addAnnotation);
+  const softDeleteAnnotation = useAnnotationStore(
+    (state) => state.softDeleteAnnotation,
+  );
+  const pushRedoAnnotationId = useAnnotationStore(
+    (state) => state.pushRedoAnnotationId,
+  );
+  const removeRedoAnnotationId = useAnnotationStore(
+    (state) => state.removeRedoAnnotationId,
+  );
+  const clearRedoStack = useAnnotationStore((state) => state.clearRedoStack);
+  const upsertAnnotation = useAnnotationStore(
+    (state) => state.upsertAnnotation,
+  );
+  const markAnnotationPulse = useAnnotationStore(
+    (state) => state.markAnnotationPulse,
+  );
 
   const persistAnnotation = useCallback(
     async (annotation: AnnotationRecord) => {
-      if (!session || session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
-        return
+      if (
+        !session ||
+        session.id === LOCAL_SESSION_ID ||
+        !isFirebaseConfigured()
+      ) {
+        return;
       }
 
-      incrementPendingWrites()
+      incrementPendingWrites();
+      incrementSyncInFlight();
+      setLastSyncError(null);
 
       try {
+        const user = await ensureAnonymousUser();
+
         if (!navigator.onLine) {
-          await enqueueOfflineWrite(session.id, annotation)
-          return
+          await enqueueOfflineWrite(session.id, annotation);
+          return;
         }
 
-        await writeRemoteAnnotation(session.id, annotation)
+        const activeSession = await ensureRemoteSessionWriteAccess(
+          session,
+          user.uid,
+        );
+
+        if (
+          activeSession.id !== session.id ||
+          activeSession.memberUids.join(",") !== session.memberUids.join(",")
+        ) {
+          setSession(activeSession);
+        }
+
+        const writeAnnotation = async () => {
+          await writeRemoteAnnotation(activeSession.id, annotation);
+        };
+
+        try {
+          await writeAnnotation();
+        } catch (error) {
+          if (!isFirestorePermissionDenied(error)) {
+            throw error;
+          }
+
+          const healedSession = await joinRemoteSessionByCode(
+            activeSession.code,
+            user.uid,
+          );
+
+          if (healedSession.status !== "joined") {
+            throw error;
+          }
+
+          setSession(healedSession.session);
+          await writeRemoteAnnotation(healedSession.session.id, annotation);
+        }
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Unable to sync changes.";
+        setLastSyncError(message);
+        if (!navigator.onLine) {
+          await enqueueOfflineWrite(session.id, annotation);
+        }
+        throw new Error(message, { cause: error });
       } finally {
-        decrementPendingWrites()
+        decrementSyncInFlight();
+        decrementPendingWrites();
       }
     },
-    [decrementPendingWrites, incrementPendingWrites, session],
-  )
+    [
+      decrementPendingWrites,
+      decrementSyncInFlight,
+      incrementPendingWrites,
+      incrementSyncInFlight,
+      session,
+      setLastSyncError,
+      setSession,
+    ],
+  );
 
   const createAnnotation = useCallback(
     async (
-      annotation: Omit<AnnotationRecord, 'id' | 'sessionId' | 'status'> & {
-        id?: string
-        sessionId?: string
+      annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status"> & {
+        id?: string;
+        sessionId?: string;
       },
     ) => {
       const created = addAnnotation({
         ...annotation,
         sessionId: session?.id ?? LOCAL_SESSION_ID,
-      })
+      });
 
-      markAnnotationPulse(created.id)
-      await persistAnnotation(created)
-      return created
+      clearRedoStack();
+      markAnnotationPulse(created.id);
+      await persistAnnotation(created);
+      return created;
     },
-    [addAnnotation, markAnnotationPulse, persistAnnotation, session?.id],
-  )
+    [
+      addAnnotation,
+      clearRedoStack,
+      markAnnotationPulse,
+      persistAnnotation,
+      session?.id,
+    ],
+  );
 
   const deleteAnnotation = useCallback(
     async (id: string) => {
-      const existing = useAnnotationStore.getState().annotations.find((item) => item.id === id)
+      const existing = useAnnotationStore
+        .getState()
+        .annotations.find((item) => item.id === id);
       if (!existing) {
-        return
+        return;
       }
 
-      const deleted: AnnotationRecord = { ...existing, status: 'deleted' }
-      softDeleteAnnotation(id)
-      await persistAnnotation(deleted)
+      clearRedoStack();
+      const deleted: AnnotationRecord = { ...existing, status: "deleted" };
+      softDeleteAnnotation(id);
+      await persistAnnotation(deleted);
     },
-    [persistAnnotation, softDeleteAnnotation],
-  )
+    [clearRedoStack, persistAnnotation, softDeleteAnnotation],
+  );
 
-  const replaceAnnotations = useCallback(
-    (annotations: AnnotationRecord[]) => {
-      useAnnotationStore.getState().setAnnotations(annotations)
-    },
-    [],
-  )
+  const replaceAnnotations = useCallback((annotations: AnnotationRecord[]) => {
+    useAnnotationStore
+      .getState()
+      .setAnnotations(migrateAnnotations(annotations));
+  }, []);
 
   const mergeRemoteAnnotation = useCallback(
     (annotation: AnnotationRecord) => {
-      upsertAnnotation(annotation)
-      markAnnotationPulse(annotation.id)
+      upsertAnnotation(migrateAnnotations([annotation])[0]!);
+      markAnnotationPulse(annotation.id);
     },
     [markAnnotationPulse, upsertAnnotation],
-  )
+  );
+
+  const updateAnnotation = useCallback(
+    async (annotation: AnnotationRecord) => {
+      const existing = useAnnotationStore
+        .getState()
+        .annotations.find((item) => item.id === annotation.id);
+      if (!existing) {
+        return;
+      }
+
+      upsertAnnotation(annotation);
+      markAnnotationPulse(annotation.id);
+      await persistAnnotation(annotation);
+    },
+    [markAnnotationPulse, persistAnnotation, upsertAnnotation],
+  );
+
+  const undoLastAnnotation = useCallback(
+    async (tool?: MapTool) => {
+      if (!session) {
+        return;
+      }
+
+      const lastActive = findLastUndoableAnnotation(
+        useAnnotationStore.getState().annotations,
+        session.id,
+        tool,
+      );
+
+      if (!lastActive) {
+        return;
+      }
+
+      const deleted: AnnotationRecord = { ...lastActive, status: "deleted" };
+      softDeleteAnnotation(lastActive.id);
+      pushRedoAnnotationId(lastActive.id);
+      await persistAnnotation(deleted);
+    },
+    [persistAnnotation, pushRedoAnnotationId, session, softDeleteAnnotation],
+  );
+
+  const redoLastAnnotation = useCallback(
+    async (tool?: MapTool) => {
+      if (!session) {
+        return;
+      }
+
+      const { annotations, redoAnnotationIds } = useAnnotationStore.getState();
+      const lastDeleted = findLastRedoableAnnotation(
+        annotations,
+        session.id,
+        redoAnnotationIds,
+        tool,
+      );
+
+      if (!lastDeleted) {
+        return;
+      }
+
+      const restored: AnnotationRecord = { ...lastDeleted, status: "active" };
+      upsertAnnotation(restored);
+      removeRedoAnnotationId(lastDeleted.id);
+      markAnnotationPulse(restored.id);
+      await persistAnnotation(restored);
+    },
+    [
+      markAnnotationPulse,
+      persistAnnotation,
+      removeRedoAnnotationId,
+      session,
+      upsertAnnotation,
+    ],
+  );
+
+  const clearAllAnnotations = useCallback(async () => {
+    if (!session) {
+      return;
+    }
+
+    clearRedoStack();
+    const active = useAnnotationStore
+      .getState()
+      .annotations.filter(
+        (annotation) =>
+          annotation.sessionId === session.id && annotation.status === "active",
+      );
+
+    for (const annotation of active) {
+      await deleteAnnotation(annotation.id);
+    }
+  }, [clearRedoStack, deleteAnnotation, session]);
 
   return {
     createAnnotation,
     deleteAnnotation,
+    updateAnnotation,
+    undoLastAnnotation,
+    redoLastAnnotation,
+    clearAllAnnotations,
     replaceAnnotations,
     mergeRemoteAnnotation,
-  }
+  };
 }
