@@ -1,73 +1,23 @@
-# React + TypeScript + Vite
+# Jet Lag Map Companion
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Live map annotations for Jet Lag Hide & Seek. The app is a Vite + React PWA with Leaflet, Zustand persistence, and optional Firebase sync.
 
-Currently, two official plugins are available:
+## Local development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Copy `.env.example` to `.env.local` and fill in the Firebase `VITE_*` values.
+2. Install dependencies with `npm install`.
+3. Start the dev server with `npm run dev`.
 
-## React Compiler
+Optional transit overlays need `VITE_TRANSIT_PROXY_URL` pointing at the deployed Firebase `vehicles` function, plus `VITE_TRANSITLAND_API_KEY` for static route data.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Quality checks
 
-## Expanding the ESLint configuration
+- `npm run lint`
+- `npm run typecheck`
+- `npm test`
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Production deploy
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+`npm run deploy` runs lint, tests, a production build with validated env, installs Cloud Functions dependencies, then deploys hosting, Firestore rules/indexes, and functions to the default project in `.firebaserc`.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Set production Firebase values in `.env.production.local` or `.env.local` before deploying. After deploy, confirm `VITE_TRANSIT_PROXY_URL` in your production env matches the live `vehicles` function URL.
