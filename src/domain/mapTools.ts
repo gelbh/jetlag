@@ -1,0 +1,151 @@
+import type { AnnotationRecord } from "./annotations";
+import type { MapTool } from "./mapToolTypes";
+
+export type QuestionCardCost = "D3P1" | "D2P1" | "D4P2";
+
+export type DockableMapTool = Exclude<MapTool, "none">;
+
+export interface MapToolDockEntry {
+  id: DockableMapTool;
+  name: string;
+  cost?: QuestionCardCost;
+  enabled: boolean;
+}
+
+export const MAP_TOOL_DOCK_ENTRIES: readonly MapToolDockEntry[] = [
+  { id: "matching", name: "Matching", cost: "D3P1", enabled: true },
+  { id: "measuring", name: "Measuring", cost: "D3P1", enabled: true },
+  { id: "thermometer", name: "Thermometer", cost: "D2P1", enabled: true },
+  { id: "radar", name: "Radar", cost: "D2P1", enabled: true },
+  { id: "tentacle", name: "Tentacles", cost: "D4P2", enabled: true },
+  { id: "zone", name: "Zone", enabled: true },
+  { id: "pin", name: "Pin", enabled: true },
+];
+
+export function mapToolDockLabel(entry: MapToolDockEntry): string {
+  return entry.cost ? `${entry.name} (${entry.cost})` : entry.name;
+}
+
+export function mapToolPlacingLabel(id: DockableMapTool): string {
+  const entry = MAP_TOOL_DOCK_ENTRIES.find((item) => item.id === id);
+  return entry?.name ?? id;
+}
+
+/** Legacy thermometer rows with measuringSubject normalize via migrateAnnotations. */
+function isMeasuringAnnotation(annotation: AnnotationRecord): boolean {
+  if (annotation.type === "measuring") {
+    return true;
+  }
+
+  return (
+    annotation.type === "thermometer" &&
+    annotation.metadata.measuringSubject !== undefined
+  );
+}
+
+export function annotationMatchesMapTool(
+  annotation: AnnotationRecord,
+  tool: MapTool,
+): boolean {
+  if (tool === "none") {
+    return false;
+  }
+
+  if (tool === "measuring") {
+    return isMeasuringAnnotation(annotation);
+  }
+
+  if (tool === "thermometer") {
+    return (
+      annotation.type === "thermometer" && !isMeasuringAnnotation(annotation)
+    );
+  }
+
+  return annotation.type === tool;
+}
+
+export function findAnnotationMapTool(
+  annotation: AnnotationRecord,
+): DockableMapTool | null {
+  if (annotation.type === "thermometer") {
+    return isMeasuringAnnotation(annotation) ? "measuring" : "thermometer";
+  }
+
+  if (annotation.type === "measuring") {
+    return "measuring";
+  }
+
+  if (
+    annotation.type === "radar" ||
+    annotation.type === "matching" ||
+    annotation.type === "zone" ||
+    annotation.type === "pin" ||
+    annotation.type === "tentacle"
+  ) {
+    return annotation.type;
+  }
+
+  return null;
+}
+
+export function findLastUndoableAnnotation(
+  annotations: AnnotationRecord[],
+  sessionId: string,
+  tool?: MapTool,
+): AnnotationRecord | null {
+  const active = annotations.filter(
+    (annotation) =>
+      annotation.sessionId === sessionId && annotation.status === "active",
+  );
+  const sorted = [...active].sort((left, right) =>
+    left.metadata.createdAt.localeCompare(right.metadata.createdAt),
+  );
+  const lastPlaced = sorted.at(-1);
+  const targetTool =
+    tool && tool !== "none"
+      ? tool
+      : lastPlaced
+        ? findAnnotationMapTool(lastPlaced)
+        : null;
+
+  if (!targetTool) {
+    return null;
+  }
+
+  return (
+    sorted
+      .filter((annotation) => annotationMatchesMapTool(annotation, targetTool))
+      .at(-1) ?? null
+  );
+}
+
+export function findLastRedoableAnnotation(
+  annotations: AnnotationRecord[],
+  sessionId: string,
+  redoIds: readonly string[],
+  tool?: MapTool,
+): AnnotationRecord | null {
+  for (let index = redoIds.length - 1; index >= 0; index -= 1) {
+    const annotation = annotations.find((item) => item.id === redoIds[index]);
+
+    if (
+      !annotation ||
+      annotation.sessionId !== sessionId ||
+      annotation.status !== "deleted"
+    ) {
+      continue;
+    }
+
+    if (
+      tool &&
+      tool !== "none" &&
+      !annotationMatchesMapTool(annotation, tool)
+    ) {
+      continue;
+    }
+
+    return annotation;
+  }
+
+  return null;
+}

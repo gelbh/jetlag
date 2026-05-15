@@ -1,10 +1,10 @@
-import type { GameArea, PlayerMode, SessionRecord } from './annotations'
-import { LOCAL_SESSION_ID } from './annotations'
+import type { GameArea, SessionRecord } from "./annotations";
+import { LOCAL_SESSION_ID } from "./annotations";
 
 export interface LocalSessionDraft {
-  id: string
-  code: string
-  gameArea: GameArea | null
+  id: string;
+  code: string;
+  gameArea: GameArea | null;
 }
 
 export function createLocalSessionDraft(code: string): LocalSessionDraft {
@@ -12,7 +12,7 @@ export function createLocalSessionDraft(code: string): LocalSessionDraft {
     id: LOCAL_SESSION_ID,
     code,
     gameArea: null,
-  }
+  };
 }
 
 export function toSessionRecord(
@@ -20,7 +20,7 @@ export function toSessionRecord(
   createdAt = new Date().toISOString(),
 ): SessionRecord | null {
   if (!draft.gameArea) {
-    return null
+    return null;
   }
 
   return {
@@ -29,20 +29,16 @@ export function toSessionRecord(
     gameArea: draft.gameArea,
     createdAt,
     memberUids: [],
-  }
-}
-
-export function defaultPlayerMode(): PlayerMode {
-  return 'seeker'
+  };
 }
 
 export function generateLocalCode(): string {
-  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
-  let code = ''
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  let code = "";
 
   for (let index = 0; index < 4; index += 1) {
-    code += alphabet[Math.floor(Math.random() * alphabet.length)]
+    code += alphabet[Math.floor(Math.random() * alphabet.length)];
   }
 
-  return code
+  return code;
 }
