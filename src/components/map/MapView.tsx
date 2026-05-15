@@ -1,52 +1,117 @@
-import { useEffect } from 'react'
-import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet'
-import type { LatLngBounds, LatLngExpression } from 'leaflet'
+import { useEffect } from "react";
+import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import type {
+  LatLngBounds,
+  LatLngBoundsExpression,
+  LatLngExpression,
+} from "leaflet";
+import { isUsableMapBounds } from "../../domain/geometry";
 
 const OSM_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 
 interface MapViewProps {
-  center?: LatLngExpression
-  zoom?: number
-  className?: string
-  onBoundsChange?: (bounds: LatLngBounds) => void
-  onMapClick?: (lat: number, lng: number) => void
-  interactive?: boolean
-  children?: React.ReactNode
+  center?: LatLngExpression;
+  zoom?: number;
+  className?: string;
+  onBoundsChange?: (bounds: LatLngBounds) => void;
+  onMapClick?: (lat: number, lng: number) => void;
+  interactive?: boolean;
+  focusBounds?: LatLngBoundsExpression | null;
+  children?: React.ReactNode;
+  mapKey?: string;
+}
+
+function MapFocus({
+  focusBounds,
+}: {
+  focusBounds: LatLngBoundsExpression | null;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!focusBounds) {
+      return;
+    }
+
+    map.fitBounds(focusBounds, { padding: [32, 32] });
+  }, [focusBounds, map]);
+
+  return null;
+}
+
+function MapMobileControls() {
+  const map = useMap();
+
+  useEffect(() => {
+    map.zoomControl.setPosition("bottomright");
+  }, [map]);
+
+  return null;
+}
+
+function MapResize() {
+  const map = useMap();
+
+  useEffect(() => {
+    const resize = () => {
+      map.invalidateSize();
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+
+    return () => {
+      window.removeEventListener("resize", resize);
+    };
+  }, [map]);
+
+  return null;
 }
 
 function MapEvents({
   onBoundsChange,
   onMapClick,
 }: {
-  onBoundsChange?: (bounds: LatLngBounds) => void
-  onMapClick?: (lat: number, lng: number) => void
+  onBoundsChange?: (bounds: LatLngBounds) => void;
+  onMapClick?: (lat: number, lng: number) => void;
 }) {
-  const map = useMap()
+  const map = useMap();
 
   useEffect(() => {
     if (!onBoundsChange) {
-      return
+      return;
     }
 
-    const emitBounds = () => onBoundsChange(map.getBounds())
-    emitBounds()
-    map.on('moveend', emitBounds)
-    map.on('zoomend', emitBounds)
+    const emitBounds = () => {
+      if (!onBoundsChange) {
+        return;
+      }
+
+      const nextBounds = map.getBounds();
+      if (!isUsableMapBounds(nextBounds)) {
+        return;
+      }
+
+      onBoundsChange(nextBounds);
+    };
+    emitBounds();
+    map.on("moveend", emitBounds);
+    map.on("zoomend", emitBounds);
 
     return () => {
-      map.off('moveend', emitBounds)
-      map.off('zoomend', emitBounds)
-    }
-  }, [map, onBoundsChange])
+      map.off("moveend", emitBounds);
+      map.off("zoomend", emitBounds);
+    };
+  }, [map, onBoundsChange]);
 
   useMapEvents({
     click(event) {
-      onMapClick?.(event.latlng.lat, event.latlng.lng)
+      onMapClick?.(event.latlng.lat, event.latlng.lng);
     },
-  })
+  });
 
-  return null
+  return null;
 }
 
 export function MapView({
@@ -56,11 +121,14 @@ export function MapView({
   onBoundsChange,
   onMapClick,
   interactive = true,
+  focusBounds = null,
   children,
+  mapKey,
 }: MapViewProps) {
   return (
-    <div className={className ?? 'h-full w-full'}>
+    <div className={className ?? "h-full w-full"}>
       <MapContainer
+        key={mapKey}
         center={center}
         zoom={zoom}
         scrollWheelZoom={interactive}
@@ -68,7 +136,9 @@ export function MapView({
         doubleClickZoom={interactive}
         touchZoom={interactive}
         zoomControl={interactive}
-        className={interactive ? 'h-full w-full' : 'h-full w-full pointer-events-auto'}
+        className={
+          interactive ? "h-full w-full" : "h-full w-full pointer-events-auto"
+        }
       >
         <TileLayer
           attribution={OSM_ATTRIBUTION}
@@ -76,8 +146,11 @@ export function MapView({
           maxZoom={19}
         />
         <MapEvents onBoundsChange={onBoundsChange} onMapClick={onMapClick} />
+        <MapFocus focusBounds={focusBounds} />
+        <MapMobileControls />
+        <MapResize />
         {children}
       </MapContainer>
     </div>
-  )
+  );
 }
