@@ -1,0 +1,46 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+  function sessionData(sessionId) {
+    return get(/databases/$(database)/documents/sessions/$(sessionId)).data;
+  }
+
+  function isSessionMember(sessionId) {
+    return isSignedIn()
+      && sessionData(sessionId).memberUids.hasAny([request.auth.uid]);
+  }
+
+  function validAnnotationType(type) {
+    return type in ['radar', 'thermometer', 'zone', 'pin', 'tentacle'];
+  }
+
+  match /sessions/{sessionId} {
+    allow read: if isSessionMember(sessionId);
+    allow create: if isSignedIn()
+      && request.resource.data.code is string
+      && request.resource.data.code.size() == 4
+      && request.resource.data.gameArea is map
+      && request.resource.data.memberUids is list
+      && request.resource.data.memberUids.size() >= 1
+      && request.resource.data.memberUids.hasAny([request.auth.uid]);
+    allow update: if isSessionMember(sessionId)
+      && request.resource.data.memberUids.hasAny([request.auth.uid]);
+
+    match /annotations/{annotationId} {
+      allow read: if isSessionMember(sessionId);
+      allow create, update: if isSessionMember(sessionId)
+        && request.resource.data.type is string
+        && validAnnotationType(request.resource.data.type)
+        && request.resource.data.status in ['active', 'deleted']
+        && request.resource.data.geometry is map
+        && request.resource.data.metadata is map;
+      allow delete: if false;
+    }
+  }
+  }
+}

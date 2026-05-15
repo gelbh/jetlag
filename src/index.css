@@ -1,0 +1,57 @@
+@import 'tailwindcss';
+@import 'leaflet/dist/leaflet.css';
+
+:root {
+  color-scheme: dark;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overscroll-behavior: none;
+}
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: #0b1220;
+  font: inherit;
+}
+
+.map-crosshair {
+  cursor: crosshair;
+}
+
+.annotation-pulse {
+  animation: annotation-pulse 1.2s ease-out 1;
+}
+
+@keyframes annotation-pulse {
+  0% {
+    filter: brightness(1.35);
+  }
+
+  100% {
+    filter: brightness(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .annotation-pulse {
+    animation: none;
+  }
+}
