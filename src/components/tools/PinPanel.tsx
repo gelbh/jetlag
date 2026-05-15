@@ -1,16 +1,26 @@
 interface PinPanelProps {
-  label: string
-  onLabelChange: (value: string) => void
-  onCommit: () => void
-  hasPoint: boolean
+  label: string;
+  onLabelChange: (value: string) => void;
+  onCommit: () => void;
+  hasPoint: boolean;
 }
 
-export function PinPanel({ label, onLabelChange, onCommit, hasPoint }: PinPanelProps) {
+export function PinPanel({
+  label,
+  onLabelChange,
+  onCommit,
+  hasPoint,
+}: PinPanelProps) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-slate-300">
         Tap the map to place a note for matching or measuring questions.
       </p>
+      {hasPoint ? (
+        <p className="text-sm text-slate-400">
+          Location pinned on the map. Tap again to move it.
+        </p>
+      ) : null}
       <label className="block text-sm text-slate-300">
         Label
         <textarea
@@ -29,5 +39,5 @@ export function PinPanel({ label, onLabelChange, onCommit, hasPoint }: PinPanelP
         Add note
       </button>
     </div>
-  )
+  );
 }

@@ -1,9 +1,9 @@
 interface ZonePanelProps {
-  vertexCount: number
-  label: string
-  onLabelChange: (value: string) => void
-  onClosePolygon: () => void
-  onReset: () => void
+  vertexCount: number;
+  label: string;
+  onLabelChange: (value: string) => void;
+  onClosePolygon: () => void;
+  onReset: () => void;
 }
 
 export function ZonePanel({
@@ -16,7 +16,8 @@ export function ZonePanel({
   return (
     <div className="space-y-4">
       <p className="text-sm text-slate-300">
-        Tap the map to add vertices. Close the polygon when the dead zone is outlined.
+        Tap the map to add vertices. Close the polygon when the dead zone is
+        outlined.
       </p>
       <p className="text-sm text-slate-400">Vertices: {vertexCount}</p>
       <label className="block text-sm text-slate-300">
@@ -46,5 +47,5 @@ export function ZonePanel({
         </button>
       </div>
     </div>
-  )
+  );
 }
