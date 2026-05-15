@@ -15,6 +15,7 @@ import { SessionLog } from "../components/session/SessionLog";
 import { SyncStatusBanner } from "../components/session/SyncStatusBanner";
 import { AnnotationEditSheet } from "../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../components/tools/ToolDock";
+import { PopupCloseButton } from "../components/ui/PopupCloseButton";
 import { useMatchingTool } from "../hooks/tools/useMatchingTool";
 import { useMeasuringTool } from "../hooks/tools/useMeasuringTool";
 import { useRadarTool } from "../hooks/tools/useRadarTool";
@@ -769,7 +770,11 @@ export function MapScreen() {
 
       {activeTool !== "none" && !selectedAnnotation ? (
         <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+0.5rem)] z-[1000] px-3">
-          <div className="mx-auto max-h-[min(42dvh,420px)] max-w-xl overflow-y-auto overscroll-contain rounded-3xl border border-slate-700 bg-slate-950/95 p-4 backdrop-blur">
+          <div className="relative mx-auto max-h-[min(42dvh,420px)] max-w-xl overflow-y-auto overscroll-contain rounded-3xl border border-slate-700 bg-slate-950/95 p-4 pt-10 backdrop-blur">
+            <PopupCloseButton
+              label={`Close ${mapToolPlacingLabel(activeTool)}`}
+              onClick={() => handleSelectTool("none")}
+            />
             {renderPanel()}
           </div>
         </div>
@@ -795,6 +800,11 @@ export function MapScreen() {
       <ToolDock
         activeTool={activeTool}
         timerLabel={timer.formattedElapsed}
+        timerRunning={timer.running}
+        timerHasStarted={timer.hasStarted}
+        onTimerStart={timer.start}
+        onTimerPause={timer.pause}
+        onTimerReset={timer.reset}
         onSelect={handleSelectTool}
       />
 

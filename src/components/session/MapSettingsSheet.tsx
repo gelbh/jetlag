@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { MobileSheet } from "../ui/MobileSheet";
+import { TimerActions } from "../tools/TimerActions";
 import { ShareCode } from "./ShareCode";
 import { TransitControls } from "../map/TransitControls";
 import type { TransitRouteFilter } from "../../domain/transit";
@@ -287,49 +288,6 @@ function SettingsOverlay({
       }}
     >
       <div onClick={(event) => event.stopPropagation()}>{children}</div>
-    </div>
-  );
-}
-
-function TimerActions({
-  timerRunning,
-  timerHasStarted,
-  onTimerStart,
-  onTimerPause,
-  onTimerReset,
-  onOpenLog,
-}: {
-  timerRunning: boolean;
-  timerHasStarted: boolean;
-  onTimerStart: () => void;
-  onTimerPause: () => void;
-  onTimerReset: () => void;
-  onOpenLog: () => void;
-}) {
-  return (
-    <div className="grid grid-cols-3 gap-2">
-      <button
-        type="button"
-        onClick={timerRunning ? onTimerPause : onTimerStart}
-        className="min-h-12 rounded-xl bg-sky-500 px-3 text-sm font-semibold text-slate-950"
-      >
-        {timerRunning ? "Pause" : "Start"}
-      </button>
-      <button
-        type="button"
-        onClick={onTimerReset}
-        disabled={!timerHasStarted}
-        className="min-h-12 rounded-xl bg-slate-800 px-3 text-sm font-medium disabled:opacity-40"
-      >
-        Reset
-      </button>
-      <button
-        type="button"
-        onClick={onOpenLog}
-        className="min-h-12 rounded-xl bg-slate-800 px-3 text-sm font-medium"
-      >
-        Log
-      </button>
     </div>
   );
 }

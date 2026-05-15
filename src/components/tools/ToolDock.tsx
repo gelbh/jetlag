@@ -1,10 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MAP_TOOL_DOCK_ENTRIES, mapToolDockLabel } from "../../domain/mapTools";
 import type { MapTool } from "../../state/sessionStore";
+import { PopupCloseButton } from "../ui/PopupCloseButton";
+import { TimerActions } from "./TimerActions";
 
 interface ToolDockProps {
   activeTool: MapTool;
   timerLabel: string;
+  timerRunning: boolean;
+  timerHasStarted: boolean;
+  onTimerStart: () => void;
+  onTimerPause: () => void;
+  onTimerReset: () => void;
   onSelect: (tool: MapTool) => void;
 }
 
@@ -14,25 +21,60 @@ const utilityToolIndex = MAP_TOOL_DOCK_ENTRIES.findIndex(
 const questionTools = MAP_TOOL_DOCK_ENTRIES.slice(0, utilityToolIndex);
 const utilityTools = MAP_TOOL_DOCK_ENTRIES.slice(utilityToolIndex);
 
-export function ToolDock({ activeTool, timerLabel, onSelect }: ToolDockProps) {
+export function ToolDock({
+  activeTool,
+  timerLabel,
+  timerRunning,
+  timerHasStarted,
+  onTimerStart,
+  onTimerPause,
+  onTimerReset,
+  onSelect,
+}: ToolDockProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [timerMenuOpen, setTimerMenuOpen] = useState(false);
+  const timerDockRef = useRef<HTMLDivElement>(null);
+  const toolsDockRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!menuOpen) {
+    if (!menuOpen && !timerMenuOpen) {
       return;
     }
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+
+      if (
+        timerMenuOpen &&
+        timerDockRef.current &&
+        !timerDockRef.current.contains(target)
+      ) {
+        setTimerMenuOpen(false);
+      }
+
+      if (
+        menuOpen &&
+        toolsDockRef.current &&
+        !toolsDockRef.current.contains(target)
+      ) {
         setMenuOpen(false);
       }
     };
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        setTimerMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("pointerdown", handlePointerDown);
     window.addEventListener("keydown", handleKeyDown);
     return () => {
+      window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [menuOpen]);
+  }, [menuOpen, timerMenuOpen]);
 
   const selectTool = (tool: MapTool) => {
     onSelect(activeTool === tool ? "none" : tool);
@@ -61,14 +103,53 @@ export function ToolDock({ activeTool, timerLabel, onSelect }: ToolDockProps) {
   return (
     <>
       <div
-        className={`pointer-events-auto fixed left-3 z-[1000] ${bottomOffset} flex min-h-12 items-center rounded-xl border border-slate-700/80 bg-slate-950/95 px-3 font-mono text-sm tabular-nums text-slate-100 shadow-lg backdrop-blur`}
-        aria-live="polite"
-        aria-label={`Elapsed time ${timerLabel}`}
+        ref={timerDockRef}
+        className={`pointer-events-auto fixed left-3 z-[1000] ${bottomOffset}`}
       >
-        {timerLabel}
+        {timerMenuOpen ? (
+          <div
+            className="absolute bottom-[calc(100%+0.5rem)] left-0 min-w-[15rem] space-y-2 rounded-2xl border border-slate-700 bg-slate-950/95 p-3 pt-10 shadow-xl backdrop-blur relative"
+            role="menu"
+            aria-label="Timer settings"
+          >
+            <PopupCloseButton
+              label="Close timer settings"
+              onClick={() => setTimerMenuOpen(false)}
+            />
+            <p className="px-1 font-mono text-lg tabular-nums text-slate-50">
+              {timerLabel}
+            </p>
+            <TimerActions
+              timerRunning={timerRunning}
+              timerHasStarted={timerHasStarted}
+              onTimerStart={onTimerStart}
+              onTimerPause={onTimerPause}
+              onTimerReset={onTimerReset}
+            />
+          </div>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => {
+            setTimerMenuOpen((open) => !open);
+            setMenuOpen(false);
+          }}
+          className={`flex min-h-12 items-center rounded-xl border px-3 font-mono text-sm tabular-nums shadow-lg backdrop-blur hover:bg-slate-900 ${
+            timerRunning
+              ? "border-sky-500/60 bg-slate-950/95 text-sky-100"
+              : "border-slate-700/80 bg-slate-950/95 text-slate-100"
+          }`}
+          aria-label={`Elapsed time ${timerLabel}. Open timer settings`}
+          aria-expanded={timerMenuOpen}
+          aria-haspopup="menu"
+          aria-live="polite"
+        >
+          {timerLabel}
+        </button>
       </div>
 
       <div
+        ref={toolsDockRef}
         className={`pointer-events-auto fixed right-3 z-[1000] ${bottomOffset}`}
       >
         {menuOpen ? (
@@ -83,7 +164,10 @@ export function ToolDock({ activeTool, timerLabel, onSelect }: ToolDockProps) {
         ) : null}
         <button
           type="button"
-          onClick={() => setMenuOpen((open) => !open)}
+          onClick={() => {
+            setMenuOpen((open) => !open);
+            setTimerMenuOpen(false);
+          }}
           className="flex min-h-12 min-w-12 items-center justify-center rounded-xl border border-slate-700/80 bg-slate-950/95 text-lg text-slate-100 shadow-lg backdrop-blur"
           aria-label="Map tools"
           aria-expanded={menuOpen}
