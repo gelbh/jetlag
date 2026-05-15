@@ -1,0 +1,15 @@
+{
+  "name": "jetlag-functions",
+  "private": true,
+  "type": "module",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "firebase-functions": "^6.4.0"
+  }
+}
