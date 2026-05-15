@@ -2,45 +2,71 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-  function isSignedIn() {
-    return request.auth != null;
-  }
-
-  function sessionData(sessionId) {
-    return get(/databases/$(database)/documents/sessions/$(sessionId)).data;
-  }
-
-  function isSessionMember(sessionId) {
-    return isSignedIn()
-      && sessionData(sessionId).memberUids.hasAny([request.auth.uid]);
-  }
-
-  function validAnnotationType(type) {
-    return type in ['radar', 'thermometer', 'zone', 'pin', 'tentacle'];
-  }
-
-  match /sessions/{sessionId} {
-    allow read: if isSessionMember(sessionId);
-    allow create: if isSignedIn()
-      && request.resource.data.code is string
-      && request.resource.data.code.size() == 4
-      && request.resource.data.gameArea is map
-      && request.resource.data.memberUids is list
-      && request.resource.data.memberUids.size() >= 1
-      && request.resource.data.memberUids.hasAny([request.auth.uid]);
-    allow update: if isSessionMember(sessionId)
-      && request.resource.data.memberUids.hasAny([request.auth.uid]);
-
-    match /annotations/{annotationId} {
-      allow read: if isSessionMember(sessionId);
-      allow create, update: if isSessionMember(sessionId)
-        && request.resource.data.type is string
-        && validAnnotationType(request.resource.data.type)
-        && request.resource.data.status in ['active', 'deleted']
-        && request.resource.data.geometry is map
-        && request.resource.data.metadata is map;
-      allow delete: if false;
+    function isSignedIn() {
+      return request.auth != null;
     }
-  }
+
+    function sessionData(sessionId) {
+      return get(/databases/$(database)/documents/sessions/$(sessionId)).data;
+    }
+
+    function isSessionMember(sessionId) {
+      return isSignedIn()
+        && request.auth.uid in sessionData(sessionId).memberUids;
+    }
+
+    function validAnnotationType(type) {
+      return type in ['radar', 'thermometer', 'measuring', 'matching', 'zone', 'pin', 'tentacle'];
+    }
+
+    function isSessionHost(sessionId) {
+      return isSignedIn()
+        && request.auth.uid == sessionData(sessionId).hostUid;
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn()
+        && request.resource.data.code is string
+        && request.resource.data.code.size() == 4
+        && request.resource.data.gameArea is map
+        && request.resource.data.gameArea.south is number
+        && request.resource.data.gameArea.west is number
+        && request.resource.data.gameArea.north is number
+        && request.resource.data.gameArea.east is number
+        && (!('geometryJson' in request.resource.data.gameArea)
+          || request.resource.data.gameArea.geometryJson is string)
+        && request.resource.data.hostUid == request.auth.uid
+        && request.resource.data.memberUids is list
+        && request.resource.data.memberUids.size() >= 1
+        && request.auth.uid in request.resource.data.memberUids;
+
+      allow update: if isSignedIn()
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids'])
+        && request.resource.data.memberUids is list
+        && request.auth.uid in request.resource.data.memberUids
+        || isSessionHost(sessionId)
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['endedAt'])
+        && request.resource.data.endedAt is string;
+
+      match /annotations/{annotationId} {
+        allow read: if isSessionMember(sessionId);
+        allow create, update: if isSessionMember(sessionId)
+          && request.resource.data.type is string
+          && validAnnotationType(request.resource.data.type)
+          && request.resource.data.status in ['active', 'deleted']
+          && request.resource.data.geometryJson is string
+          && request.resource.data.metadata is map;
+        allow delete: if false;
+      }
+    }
   }
 }
