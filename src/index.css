@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import 'leaflet/dist/leaflet.css';
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 :root {
   color-scheme: dark;
@@ -8,21 +8,44 @@
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
-    'Segoe UI',
+    "Segoe UI",
     sans-serif;
   background: #0f172a;
   color: #e2e8f0;
+  --dock-height: 3.75rem;
 }
 
-html,
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body,
 #root {
-  height: 100%;
+  min-height: 100%;
+  min-height: 100dvh;
 }
 
 body {
   margin: 0;
   overscroll-behavior: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+  touch-action: manipulation;
+}
+
+input,
+select,
+textarea {
+  font-size: 16px;
 }
 
 .leaflet-container {
@@ -30,10 +53,32 @@ body {
   height: 100%;
   background: #0b1220;
   font: inherit;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+.leaflet-control-zoom {
+  margin-bottom: calc(
+    var(--dock-height) + env(safe-area-inset-bottom) + 0.75rem
+  ) !important;
+  margin-right: max(0.75rem, env(safe-area-inset-right)) !important;
+}
+
+.leaflet-control-attribution {
+  font-size: 10px;
+  max-width: 55vw;
 }
 
 .map-crosshair {
   cursor: crosshair;
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
 }
 
 .annotation-pulse {
@@ -54,4 +99,14 @@ body {
   .annotation-pulse {
     animation: none;
   }
+}
+
+.user-location-icon {
+  background: transparent;
+  border: 0;
+}
+
+.map-dot-icon {
+  background: transparent;
+  border: 0;
 }
