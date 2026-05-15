@@ -1,5 +1,7 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import { booleanPointInPolygon, intersect, point as turfPoint } from "@turf/turf";
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import intersect from "@turf/intersect";
+import { point as turfPoint } from "@turf/helpers";
 import type { GameArea } from "./annotations";
 import type { MatchingAnswer } from "./matchingQuestions";
 import {
@@ -51,9 +53,7 @@ function gridStepsForGameArea(gameArea: GameArea): {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
   const latSpanMeters = (north - south) * 111_320;
   const lngSpanMeters =
-    (east - west) *
-    111_320 *
-    Math.cos((((south + north) / 2) * Math.PI) / 180);
+    (east - west) * 111_320 * Math.cos((((south + north) / 2) * Math.PI) / 180);
 
   const latSteps = Math.min(
     MAX_GRID_STEPS,
@@ -90,12 +90,17 @@ function buildSameNearestRegionFromGrid(
       ];
 
       if (
-        !booleanPointInPolygon(turfPoint([center[1], center[0]]), gameAreaToPolygon(gameArea))
+        !booleanPointInPolygon(
+          turfPoint([center[1], center[0]]),
+          gameAreaToPolygon(gameArea),
+        )
       ) {
         continue;
       }
 
-      if (nearestMatchingFeatureIdForPoint(center, features) !== seekerFeatureId) {
+      if (
+        nearestMatchingFeatureIdForPoint(center, features) !== seekerFeatureId
+      ) {
         continue;
       }
 

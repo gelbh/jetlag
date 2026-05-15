@@ -1,5 +1,5 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import { intersect } from "@turf/turf";
+import intersect from "@turf/intersect";
 import type { GameArea } from "./annotations";
 import type { MatchingAnswer } from "./matchingQuestions";
 import { gameAreaToPolygon, safeDifference } from "./geometry";
@@ -11,7 +11,10 @@ function clipDivisionToGameArea(
 ): Feature<Polygon | MultiPolygon> | null {
   const clipped = intersect({
     type: "FeatureCollection",
-    features: [gameAreaToPolygon(gameArea), gameAreaToPolygon(division.boundary)],
+    features: [
+      gameAreaToPolygon(gameArea),
+      gameAreaToPolygon(division.boundary),
+    ],
   });
 
   if (

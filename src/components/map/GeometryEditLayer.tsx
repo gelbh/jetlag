@@ -1,5 +1,6 @@
 import { Circle, CircleMarker, Polygon, Polyline } from "react-leaflet";
-import { circle as turfCircle, point as turfPoint } from "@turf/turf";
+import turfCircle from "@turf/circle";
+import { point as turfPoint } from "@turf/helpers";
 import type {
   Feature,
   LineString,

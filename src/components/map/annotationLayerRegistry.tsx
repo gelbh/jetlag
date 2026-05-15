@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { Circle, CircleMarker, Polyline, Popup } from "react-leaflet";
-import { circle as turfCircle, point as turfPoint } from "@turf/turf";
+import turfCircle from "@turf/circle";
+import { point as turfPoint } from "@turf/helpers";
 import type {
   Feature,
   MultiPolygon,

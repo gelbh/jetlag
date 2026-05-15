@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { booleanPointInPolygon, point as turfPoint } from "@turf/turf";
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import { point as turfPoint } from "@turf/helpers";
 import type { GameArea } from "./annotations";
 import {
   buildAdminDivisionBoundaryPreview,

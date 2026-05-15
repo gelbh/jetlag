@@ -1,9 +1,7 @@
 import { describe, expect, it } from "vitest";
-import {
-  booleanPointInPolygon,
-  circle as turfCircle,
-  point as turfPoint,
-} from "@turf/turf";
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import turfCircle from "@turf/circle";
+import { point as turfPoint } from "@turf/helpers";
 import type { GameArea } from "./annotations";
 import {
   TENTACLE_ANSWER_RADIUS_METERS,

@@ -1,12 +1,9 @@
 import type { Feature, LineString } from "geojson";
-import {
-  area,
-  booleanIntersects,
-  booleanPointInPolygon,
-  lineString,
-  point as turfPoint,
-  polygonize,
-} from "@turf/turf";
+import area from "@turf/area";
+import booleanIntersects from "@turf/boolean-intersects";
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import { lineString, point as turfPoint } from "@turf/helpers";
+import polygonize from "@turf/polygonize";
 import type { GameArea } from "../domain/annotations";
 import {
   gameAreaToBoundingBox,

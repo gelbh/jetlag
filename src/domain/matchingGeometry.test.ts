@@ -7,7 +7,8 @@ import {
 import type { MatchingFeature } from "../services/matchingFeatures";
 import { pickNearestMatchingFeature } from "../services/matchingFeatures";
 import type { LatLngTuple } from "./geometry";
-import { booleanPointInPolygon, point as turfPoint } from "@turf/turf";
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import { point as turfPoint } from "@turf/helpers";
 import { gameAreaToPolygon } from "./geometry";
 
 const sampleGameArea: GameArea = {

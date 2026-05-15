@@ -3,7 +3,7 @@ import type { AnnotationRecord, GameArea } from "../domain/annotations";
 import {
   boundingBoxToGameArea,
   gameAreaToBoundingBox,
-} from "../domain/geometry";
+} from "../domain/gameAreaBounds";
 
 export interface FirestoreGameArea {
   south: number;

@@ -1,5 +1,6 @@
 import { Circle, CircleMarker, Polygon, Polyline, Popup } from "react-leaflet";
-import { circle as turfCircle, point as turfPoint } from "@turf/turf";
+import turfCircle from "@turf/circle";
+import { point as turfPoint } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { GameArea, TentaclePoi } from "../../domain/annotations";
 import type { MapTool } from "../../state/sessionStore";

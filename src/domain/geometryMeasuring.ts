@@ -1,16 +1,13 @@
 import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
-import {
-  booleanIntersects,
-  buffer,
-  distance as turfDistance,
-  featureCollection,
-  intersect,
-  length as turfLength,
-  nearestPointOnLine,
-  point as turfPoint,
-  simplify,
-  union,
-} from "@turf/turf";
+import booleanIntersects from "@turf/boolean-intersects";
+import buffer from "@turf/buffer";
+import turfDistance from "@turf/distance";
+import { featureCollection, point as turfPoint } from "@turf/helpers";
+import intersect from "@turf/intersect";
+import turfLength from "@turf/length";
+import nearestPointOnLine from "@turf/nearest-point-on-line";
+import simplify from "@turf/simplify";
+import union from "@turf/union";
 import type { GameArea } from "./annotations";
 import type { MeasuringAnswer } from "./measuringQuestions";
 import {

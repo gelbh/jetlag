@@ -1,17 +1,28 @@
 import type { LatLngBounds, LatLngBoundsExpression } from "leaflet";
 import { latLng, latLngBounds } from "leaflet";
 import type { Feature, MultiPolygon, Polygon, Position } from "geojson";
-import {
-  bboxPolygon,
-  booleanPointInPolygon,
-  difference,
-  intersect,
-  multiPolygon,
-  point as turfPoint,
-  polygon as turfPolygon,
-  simplify,
-} from "@turf/turf";
+import bboxPolygon from "@turf/bbox-polygon";
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import difference from "@turf/difference";
+import intersect from "@turf/intersect";
+import { multiPolygon } from "@turf/helpers";
+import { point as turfPoint } from "@turf/helpers";
+import { polygon as turfPolygon } from "@turf/helpers";
+import simplify from "@turf/simplify";
 import type { GameArea } from "./annotations";
+import {
+  boundingBoxToGameArea,
+  gameAreaToBoundingBox,
+  normalizeBoundingBox,
+  type BoundingBox,
+} from "./gameAreaBounds";
+
+export type { BoundingBox } from "./gameAreaBounds";
+export {
+  boundingBoxToGameArea,
+  gameAreaToBoundingBox,
+  normalizeBoundingBox,
+} from "./gameAreaBounds";
 
 const ZERO_GAME_AREA_RING: number[][] = [
   [0, 0],
@@ -34,33 +45,6 @@ export type LatLngTuple = [number, number];
 
 const MIN_GAME_AREA_LAT_SPAN = 0.005;
 const MIN_GAME_AREA_LNG_SPAN = 0.005;
-
-export interface BoundingBox {
-  south: number;
-  west: number;
-  north: number;
-  east: number;
-}
-
-export function normalizeBoundingBox(box: BoundingBox): BoundingBox {
-  let { south, west, north, east } = box;
-  const latSpan = north - south;
-  const lngSpan = east - west;
-
-  if (latSpan < MIN_GAME_AREA_LAT_SPAN) {
-    const centerLat = (north + south) / 2;
-    south = centerLat - MIN_GAME_AREA_LAT_SPAN / 2;
-    north = centerLat + MIN_GAME_AREA_LAT_SPAN / 2;
-  }
-
-  if (lngSpan < MIN_GAME_AREA_LNG_SPAN) {
-    const centerLng = (east + west) / 2;
-    west = centerLng - MIN_GAME_AREA_LNG_SPAN / 2;
-    east = centerLng + MIN_GAME_AREA_LNG_SPAN / 2;
-  }
-
-  return { south, west, north, east };
-}
 
 export function boundingBoxHasMinimumSpan(box: BoundingBox): boolean {
   return (
@@ -91,23 +75,6 @@ export function boundsToGameArea(bounds: LatLngBounds): GameArea {
     north: northEast.lat,
     east: northEast.lng,
   });
-}
-
-export function boundingBoxToGameArea(box: BoundingBox): GameArea {
-  const normalized = normalizeBoundingBox(box);
-
-  return {
-    type: "Polygon",
-    coordinates: [
-      [
-        [normalized.west, normalized.south],
-        [normalized.east, normalized.south],
-        [normalized.east, normalized.north],
-        [normalized.west, normalized.north],
-        [normalized.west, normalized.south],
-      ],
-    ],
-  };
 }
 
 export function boundingBoxToLeafletBounds(box: BoundingBox): LatLngBounds {
@@ -228,19 +195,6 @@ export function gameAreaToLeafletLatLngs(gameArea: GameArea): LatLngTuple[] {
   }
 
   return positions as LatLngTuple[];
-}
-
-export function gameAreaToBoundingBox(gameArea: GameArea): BoundingBox {
-  const positions = collectPositions(gameArea);
-  const lngs = positions.map(([lng]) => lng);
-  const lats = positions.map(([, lat]) => lat);
-
-  return normalizeBoundingBox({
-    south: Math.min(...lats),
-    west: Math.min(...lngs),
-    north: Math.max(...lats),
-    east: Math.max(...lngs),
-  });
 }
 
 export function gameAreaCenter(gameArea: GameArea): LatLngTuple {

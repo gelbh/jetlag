@@ -1,5 +1,8 @@
 import type { Feature, Polygon, MultiPolygon } from "geojson";
-import { bboxPolygon, featureCollection, intersect, union } from "@turf/turf";
+import bboxPolygon from "@turf/bbox-polygon";
+import { featureCollection } from "@turf/helpers";
+import intersect from "@turf/intersect";
+import union from "@turf/union";
 import type { GameArea } from "./annotations";
 import {
   gameAreaToBoundingBox,

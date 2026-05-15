@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bboxPolygon } from "@turf/turf";
+import bboxPolygon from "@turf/bbox-polygon";
 import type { Feature, LineString } from "geojson";
 import {
   buildCoastlineEliminationRegion,

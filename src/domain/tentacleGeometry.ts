@@ -1,13 +1,10 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import {
-  circle as turfCircle,
-  featureCollection,
-  intersect,
-  point as turfPoint,
-  simplify,
-  union,
-  voronoi,
-} from "@turf/turf";
+import turfCircle from "@turf/circle";
+import { featureCollection, point as turfPoint } from "@turf/helpers";
+import intersect from "@turf/intersect";
+import simplify from "@turf/simplify";
+import union from "@turf/union";
+import voronoi from "@turf/voronoi";
 import type { GameArea, TentaclePoi } from "./annotations";
 import {
   gameAreaToBoundingBox,

@@ -1,5 +1,9 @@
 import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
-import { area, buffer, difference, lineString, union } from "@turf/turf";
+import area from "@turf/area";
+import buffer from "@turf/buffer";
+import difference from "@turf/difference";
+import { lineString } from "@turf/helpers";
+import union from "@turf/union";
 import type { GameArea } from "../domain/annotations";
 import {
   featureToGameArea,
