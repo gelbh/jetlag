@@ -26,6 +26,9 @@ export function AnnotationLayer({
   layerVisibility,
   draftEliminationFeatures = [],
 }: AnnotationLayerProps) {
+  const pulsingAnnotationIds = useAnnotationStore(
+    (state) => state.pulsingAnnotationIds,
+  );
   const setSelectedAnnotationId = useAnnotationStore(
     (state) => state.setSelectedAnnotationId,
   );
@@ -46,6 +49,7 @@ export function AnnotationLayer({
         annotations={annotations}
         gameArea={gameArea}
         draftFeatures={draftEliminationFeatures}
+        pulsingAnnotationIds={pulsingAnnotationIds}
       />
       {annotations.filter(isActive).map((annotation) =>
         renderAnnotationLayerItem({

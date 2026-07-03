@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useDeferredValue,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type {
   Feature,
   LineString,
@@ -196,16 +190,14 @@ export function useMeasuringTool({
     ],
   );
 
-  const deferredRegionInput = useDeferredValue(measuringRegionInput);
-
   const measuringBoundaryPreview = useMemo(
-    () => buildMeasuringBoundaryPreview(deferredRegionInput),
-    [deferredRegionInput],
+    () => buildMeasuringBoundaryPreview(measuringRegionInput),
+    [measuringRegionInput],
   );
 
   const measuringEliminationPreview = useMemo(
-    () => buildMeasuringEliminationPreview(deferredRegionInput),
-    [deferredRegionInput],
+    () => buildMeasuringEliminationPreview(measuringRegionInput),
+    [measuringRegionInput],
   );
 
   const setMeasuringSeekerAnchor = (

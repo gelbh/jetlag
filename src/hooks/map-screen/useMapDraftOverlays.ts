@@ -223,6 +223,14 @@ export function buildMapDraftOverlays(
         style: { fillColor: "#fb923c", color: "#fb923c", weight: 0 },
       });
     }
+    if (thermoA && thermoB) {
+      overlays.push({
+        kind: "polyline",
+        id: "thermo-draft-axis",
+        positions: [thermoA, thermoB],
+        style: { color: "#f87171", weight: 4 },
+      });
+    }
     if (thermoA && thermoB && answer) {
       pushElimination(
         buildHalfPlanePolygon(
