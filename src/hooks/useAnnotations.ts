@@ -16,6 +16,7 @@ import {
   isFirestorePermissionDenied,
   joinRemoteSessionByCode,
   writeRemoteAnnotation,
+  writeRemoteAnnotationsBatch,
 } from "../services/firestoreAnnotations";
 import { enqueueOfflineWrite } from "../services/offlineQueue";
 
@@ -38,6 +39,9 @@ export function useAnnotations() {
   const addAnnotation = useAnnotationStore((state) => state.addAnnotation);
   const softDeleteAnnotation = useAnnotationStore(
     (state) => state.softDeleteAnnotation,
+  );
+  const softDeleteAllForSession = useAnnotationStore(
+    (state) => state.softDeleteAllForSession,
   );
   const pushRedoAnnotationId = useAnnotationStore(
     (state) => state.pushRedoAnnotationId,
@@ -67,11 +71,16 @@ export function useAnnotations() {
       incrementSyncInFlight();
       setLastSyncError(null);
 
+      const stampedAnnotation: AnnotationRecord = {
+        ...annotation,
+        updatedAt: new Date().toISOString(),
+      };
+
       try {
         const user = await ensureAnonymousUser();
 
         if (!navigator.onLine) {
-          await enqueueOfflineWrite(session.id, annotation);
+          await enqueueOfflineWrite(session.id, stampedAnnotation);
           return;
         }
 
@@ -88,7 +97,7 @@ export function useAnnotations() {
         }
 
         const writeAnnotation = async () => {
-          await writeRemoteAnnotation(activeSession.id, annotation);
+          await writeRemoteAnnotation(activeSession.id, stampedAnnotation);
         };
 
         try {
@@ -108,14 +117,17 @@ export function useAnnotations() {
           }
 
           setSession(healedSession.session);
-          await writeRemoteAnnotation(healedSession.session.id, annotation);
+          await writeRemoteAnnotation(
+            healedSession.session.id,
+            stampedAnnotation,
+          );
         }
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Unable to sync changes.";
         setLastSyncError(message);
         if (!navigator.onLine) {
-          await enqueueOfflineWrite(session.id, annotation);
+          await enqueueOfflineWrite(session.id, stampedAnnotation);
         }
         throw new Error(message, { cause: error });
       } finally {
@@ -277,10 +289,65 @@ export function useAnnotations() {
           annotation.sessionId === session.id && annotation.status === "active",
       );
 
-    for (const annotation of active) {
-      await deleteAnnotation(annotation.id);
+    if (active.length === 0) {
+      return;
     }
-  }, [clearRedoStack, deleteAnnotation, session]);
+
+    softDeleteAllForSession(session.id);
+
+    if (
+      session.id === LOCAL_SESSION_ID ||
+      !isFirebaseConfigured()
+    ) {
+      return;
+    }
+
+    incrementPendingWrites();
+    incrementSyncInFlight();
+    setLastSyncError(null);
+
+    try {
+      const user = await ensureAnonymousUser();
+      const deleted = active.map(
+        (annotation): AnnotationRecord => ({
+          ...annotation,
+          status: "deleted",
+          updatedAt: new Date().toISOString(),
+        }),
+      );
+
+      if (!navigator.onLine) {
+        for (const annotation of deleted) {
+          await enqueueOfflineWrite(session.id, annotation);
+        }
+        return;
+      }
+
+      const activeSession = await ensureRemoteSessionWriteAccess(
+        session,
+        user.uid,
+      );
+
+      await writeRemoteAnnotationsBatch(activeSession.id, deleted);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to sync changes.";
+      setLastSyncError(message);
+      throw new Error(message, { cause: error });
+    } finally {
+      decrementSyncInFlight();
+      decrementPendingWrites();
+    }
+  }, [
+    clearRedoStack,
+    decrementPendingWrites,
+    decrementSyncInFlight,
+    incrementPendingWrites,
+    incrementSyncInFlight,
+    session,
+    setLastSyncError,
+    softDeleteAllForSession,
+  ]);
 
   return {
     createAnnotation,

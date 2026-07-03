@@ -46,13 +46,13 @@ export function RadarDistancePicker({
   return (
     <div className="space-y-2">
       {showPrompt ? (
-        <p className="text-sm font-medium text-slate-100">
+        <p className="text-sm font-medium text-ink">
           {radarQuestionPrompt(resolvedRadius, distanceUnit)}
         </p>
       ) : null}
-      <p className="text-sm text-slate-300">Distance</p>
+      <p className="text-sm text-ink-muted">Distance</p>
       {availablePresetMiles.length === 0 && !chooseAvailable ? (
-        <p className="text-sm text-amber-200">
+        <p className="text-sm text-status-warning">
           Every radar distance option has already been used this session.
         </p>
       ) : (
@@ -67,7 +67,7 @@ export function RadarDistancePicker({
                 type="button"
                 onClick={() => onPresetSelect(presetMeters)}
                 className={`min-h-12 rounded-xl px-3 text-sm ${
-                  selected ? "bg-sky-500 text-slate-950" : "bg-slate-800"
+                  selected ? "bg-action text-action-ink" : "bg-surface-raised"
                 }`}
               >
                 {radarDistanceOptionLabel(miles, distanceUnit)}
@@ -79,7 +79,7 @@ export function RadarDistancePicker({
               type="button"
               onClick={onChooseSelect}
               className={`min-h-12 rounded-xl px-3 text-sm ${
-                chooseCustom ? "bg-sky-500 text-slate-950" : "bg-slate-800"
+                chooseCustom ? "bg-action text-action-ink" : "bg-surface-raised"
               }`}
             >
               {RADAR_CHOOSE_LABEL}
@@ -88,13 +88,13 @@ export function RadarDistancePicker({
         </div>
       )}
       {chooseCustom && chooseAvailable ? (
-        <label className="mt-3 block text-sm text-slate-300">
+        <label className="mt-3 block text-sm text-ink-muted">
           Custom {distanceUnitLabel(distanceUnit)}
           <input
             value={customRadius}
             onChange={(event) => onCustomRadiusChange(event.target.value)}
             inputMode="decimal"
-            className="mt-1 min-h-12 w-full rounded-xl border border-slate-700 bg-slate-900 px-3"
+            className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-base px-3"
           />
         </label>
       ) : null}
@@ -113,13 +113,13 @@ export function RadarAnswerPicker({
 }: RadarAnswerPickerProps) {
   return (
     <div className="space-y-2">
-      <p className="text-sm text-slate-300">Answer</p>
+      <p className="text-sm text-ink-muted">Answer</p>
       <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={() => onAnswerChange("yes")}
           className={`min-h-12 rounded-xl px-3 text-sm ${
-            answer === "yes" ? "bg-emerald-500 text-slate-950" : "bg-slate-800"
+            answer === "yes" ? "bg-status-success text-action-ink" : "bg-surface-raised"
           }`}
         >
           Yes
@@ -128,7 +128,7 @@ export function RadarAnswerPicker({
           type="button"
           onClick={() => onAnswerChange("no")}
           className={`min-h-12 rounded-xl px-3 text-sm ${
-            answer === "no" ? "bg-rose-500 text-slate-50" : "bg-slate-800"
+            answer === "no" ? "bg-status-negative text-ink" : "bg-surface-raised"
           }`}
         >
           No

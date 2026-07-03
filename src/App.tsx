@@ -1,5 +1,6 @@
 import { lazy, Suspense, type ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { MapErrorBoundary } from "./components/ui/MapErrorBoundary";
 import { Home } from "./routes/Home";
 import { JoinSession } from "./routes/JoinSession";
 
@@ -12,7 +13,7 @@ const CreateSession = lazy(() =>
 
 function RouteFallback() {
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center text-slate-400">
+    <div className="flex min-h-[100dvh] items-center justify-center text-ink-dim">
       Loading…
     </div>
   );
@@ -41,7 +42,9 @@ export default function App() {
             path="/map"
             element={
               <LazyRoute>
-                <MapScreen />
+                <MapErrorBoundary>
+                  <MapScreen />
+                </MapErrorBoundary>
               </LazyRoute>
             }
           />

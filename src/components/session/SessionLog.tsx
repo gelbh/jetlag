@@ -51,7 +51,7 @@ export function SessionLog({
 
   return (
     <div
-      className="pointer-events-auto fixed inset-0 z-[1100] bg-slate-950/70 backdrop-blur-sm"
+      className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] hud-scrim"
       onClick={onClose}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
@@ -60,7 +60,7 @@ export function SessionLog({
       }}
     >
       <div
-        className="absolute inset-x-0 bottom-0 max-h-[min(85dvh,720px)] rounded-t-3xl border border-slate-700 bg-slate-900 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+        className="absolute inset-x-0 bottom-0 max-h-[min(85dvh,720px)] rounded-t-3xl border border-border bg-surface-base p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between gap-3">
@@ -68,7 +68,7 @@ export function SessionLog({
           <button
             type="button"
             onClick={onClose}
-            className="min-h-12 rounded-xl bg-slate-800 px-4 text-sm font-medium"
+            className="min-h-12 rounded-xl bg-surface-raised px-4 text-sm font-medium"
           >
             Close
           </button>
@@ -82,8 +82,8 @@ export function SessionLog({
               onClick={() => setFilter(option)}
               className={`min-h-10 rounded-full px-3 text-sm capitalize ${
                 filter === option
-                  ? "bg-sky-500 text-slate-950"
-                  : "bg-slate-800 text-slate-100"
+                  ? "bg-action text-action-ink"
+                  : "bg-surface-raised text-ink"
               }`}
             >
               {option}
@@ -93,12 +93,12 @@ export function SessionLog({
 
         <div className="space-y-2 overflow-y-auto overscroll-contain">
           {active.length === 0 ? (
-            <p className="text-sm text-slate-400">No annotations yet.</p>
+            <p className="text-sm text-ink-dim">No annotations yet.</p>
           ) : (
             active.map((annotation) => (
               <div
                 key={annotation.id}
-                className="flex items-center justify-between gap-3 rounded-xl bg-slate-800/80 px-3 py-3"
+                className="flex items-center justify-between gap-3 rounded-xl bg-surface-raised/80 px-3 py-3"
               >
                 <button
                   type="button"
@@ -108,7 +108,7 @@ export function SessionLog({
                   <p className="text-sm font-medium">
                     {annotationSummary(annotation, distanceUnit)}
                   </p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-ink-dim">
                     {new Date(
                       annotation.metadata.createdAt,
                     ).toLocaleTimeString()}
@@ -118,14 +118,14 @@ export function SessionLog({
                   <button
                     type="button"
                     onClick={() => onEdit(annotation.id)}
-                    className="min-h-12 rounded-xl bg-slate-700 px-3 text-sm text-slate-100"
+                    className="min-h-12 rounded-xl bg-border px-3 text-sm text-ink"
                   >
                     Edit
                   </button>
                   <button
                     type="button"
                     onClick={() => onDelete(annotation.id)}
-                    className="min-h-12 rounded-xl bg-rose-500/20 px-3 text-sm text-rose-200"
+                    className="min-h-12 rounded-xl bg-status-error-surface px-3 text-sm text-status-error"
                   >
                     Delete
                   </button>

@@ -14,6 +14,10 @@ import {
 } from "../domain/geometry";
 import { queryOverpass } from "./overpassClient";
 import {
+  getOrFetchCached,
+  landmassCacheKey,
+} from "./geographicFeatureCache";
+import {
   classifyAdminDivisionAtPoint,
   type AdminDivisionFeature,
 } from "./adminDivisionBoundaries";
@@ -318,11 +322,13 @@ function buildLandmassQuery(gameArea: GameArea): string {
 export async function fetchLandmassFeaturesInArea(
   gameArea: GameArea,
 ): Promise<LandmassFeature[]> {
-  const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-    buildLandmassQuery(gameArea),
-  );
+  return getOrFetchCached(landmassCacheKey(gameArea), async () => {
+    const payload = await queryOverpass<{ elements: OverpassElement[] }>(
+      buildLandmassQuery(gameArea),
+    );
 
-  return computeLandmassFeatures(gameArea, payload.elements);
+    return computeLandmassFeatures(gameArea, payload.elements);
+  });
 }
 
 export function classifyLandmassAtPoint(

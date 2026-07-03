@@ -8,7 +8,7 @@ export function PopupCloseButton({ label, onClick }: PopupCloseButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      className="absolute top-2 left-2 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+      className="absolute top-2 left-2 flex h-8 w-8 items-center justify-center rounded-[var(--radius-hud-sm)] text-ink-dim hover:bg-surface-raised hover:text-ink"
       aria-label={label}
     >
       <svg

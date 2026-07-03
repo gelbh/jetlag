@@ -1,12 +1,3 @@
-interface TimerActionsProps {
-  timerRunning: boolean;
-  timerHasStarted: boolean;
-  onTimerStart: () => void;
-  onTimerPause: () => void;
-  onTimerReset: () => void;
-  onOpenLog?: () => void;
-}
-
 export function TimerActions({
   timerRunning,
   timerHasStarted,
@@ -14,30 +5,33 @@ export function TimerActions({
   onTimerPause,
   onTimerReset,
   onOpenLog,
-}: TimerActionsProps) {
+}: {
+  timerRunning: boolean;
+  timerHasStarted: boolean;
+  onTimerStart: () => void;
+  onTimerPause: () => void;
+  onTimerReset: () => void;
+  onOpenLog?: () => void;
+}) {
   return (
     <div className={`grid gap-2 ${onOpenLog ? "grid-cols-3" : "grid-cols-2"}`}>
       <button
         type="button"
         onClick={timerRunning ? onTimerPause : onTimerStart}
-        className="min-h-12 rounded-xl bg-sky-500 px-3 text-sm font-semibold text-slate-950"
+        className="btn-primary"
       >
-        {timerRunning ? "Pause" : "Start"}
+        {timerRunning ? "Pause" : timerHasStarted ? "Resume" : "Start"}
       </button>
       <button
         type="button"
         onClick={onTimerReset}
         disabled={!timerHasStarted}
-        className="min-h-12 rounded-xl bg-slate-800 px-3 text-sm font-medium disabled:opacity-40"
+        className="btn-secondary disabled:opacity-40"
       >
         Reset
       </button>
       {onOpenLog ? (
-        <button
-          type="button"
-          onClick={onOpenLog}
-          className="min-h-12 rounded-xl bg-slate-800 px-3 text-sm font-medium"
-        >
+        <button type="button" onClick={onOpenLog} className="btn-secondary">
           Log
         </button>
       ) : null}

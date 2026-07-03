@@ -13,11 +13,11 @@ export function MobileSheet({
 }: MobileSheetProps) {
   return (
     <div
-      className={`pointer-events-auto fixed inset-x-0 bottom-0 z-[1000] border-t border-slate-700/80 bg-slate-950/95 backdrop-blur ${className}`}
+      className={`pointer-events-auto fixed inset-x-0 bottom-0 z-[var(--z-dock)] hud-sheet ${className}`}
     >
       <div className="mx-auto w-full max-w-xl">
         <div
-          className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-slate-600"
+          className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-border-muted"
           aria-hidden="true"
         />
         <div

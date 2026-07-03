@@ -1,6 +1,37 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+@theme {
+  --color-surface-deep: oklch(0.13 0.024 250);
+  --color-surface-base: oklch(0.19 0.03 248);
+  --color-surface-raised: oklch(0.26 0.034 246);
+  --color-surface-panel: oklch(0.16 0.026 250);
+  --color-border: oklch(0.36 0.032 245);
+  --color-border-muted: oklch(0.44 0.028 245);
+  --color-ink: oklch(0.97 0.008 250);
+  --color-ink-secondary: oklch(0.9 0.012 250);
+  --color-ink-muted: oklch(0.78 0.02 250);
+  --color-ink-dim: oklch(0.62 0.025 250);
+  --color-action: oklch(0.72 0.145 205);
+  --color-action-ink: oklch(0.14 0.022 250);
+  --color-action-soft: oklch(0.72 0.145 205 / 0.18);
+  --color-status-error: oklch(0.78 0.11 18);
+  --color-status-error-surface: oklch(0.78 0.11 18 / 0.16);
+  --color-status-warning: oklch(0.88 0.1 85);
+  --color-status-warning-surface: oklch(0.88 0.1 85 / 0.16);
+  --color-status-info: oklch(0.82 0.08 205);
+  --color-status-info-surface: oklch(0.72 0.145 205 / 0.16);
+  --color-status-success: oklch(0.72 0.15 145);
+  --color-status-negative: oklch(0.63 0.2 15);
+  --color-map-canvas: oklch(0.11 0.022 252);
+  --radius-hud-sm: 0.5rem;
+  --radius-hud-md: 0.75rem;
+  --radius-hud-lg: 1rem;
+  --radius-hud-xl: 1.5rem;
+  --shadow-hud-float: 0 8px 20px oklch(0.05 0.02 250 / 0.45);
+  --shadow-hud-menu: 0 16px 32px oklch(0.05 0.02 250 / 0.55);
+}
+
 :root {
   color-scheme: dark;
   font-family:
@@ -10,9 +41,13 @@
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  background: #0f172a;
-  color: #e2e8f0;
-  --dock-height: 3.75rem;
+  background: var(--color-surface-base);
+  color: var(--color-ink-secondary);
+  --dock-height: 4.25rem;
+  --z-dock: 1000;
+  --z-banner: 1001;
+  --z-panel: 1002;
+  --z-modal: 1100;
 }
 
 html {
@@ -48,10 +83,140 @@ textarea {
   font-size: 16px;
 }
 
+@layer components {
+  .hud-chrome {
+    display: flex;
+    min-height: 3rem;
+    min-width: 3rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-hud-md);
+    border: 1px solid oklch(from var(--color-border) l c h / 0.85);
+    background: var(--color-surface-panel);
+    color: var(--color-ink);
+    box-shadow: var(--shadow-hud-float);
+    transition: background 0.15s ease;
+  }
+
+  .hud-chrome:hover:not(:disabled) {
+    background: var(--color-surface-raised);
+  }
+
+  .hud-chrome:disabled {
+    opacity: 0.4;
+  }
+
+  .hud-chrome:focus-visible {
+    outline: 2px solid var(--color-action);
+    outline-offset: 2px;
+  }
+
+  .hud-chrome-active {
+    border-color: oklch(from var(--color-action) l c h / 0.55);
+    background: var(--color-action-soft);
+    color: var(--color-status-info);
+  }
+
+  .hud-panel {
+    border-radius: var(--radius-hud-xl);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-panel);
+    box-shadow: var(--shadow-hud-menu);
+  }
+
+  .hud-sheet {
+    border-top: 1px solid oklch(from var(--color-border) l c h / 0.85);
+    background: var(--color-surface-panel);
+  }
+
+  .hud-scrim {
+    background: oklch(from var(--color-surface-deep) l c h / 0.88);
+  }
+
+  .btn-primary {
+    display: flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-hud-md);
+    border: none;
+    background: var(--color-action);
+    padding-inline: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-action-ink);
+    transition: filter 0.15s ease;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    filter: brightness(1.06);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.45;
+  }
+
+  .btn-primary:focus-visible {
+    outline: 2px solid var(--color-action);
+    outline-offset: 2px;
+  }
+
+  .btn-secondary {
+    display: flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-hud-md);
+    border: none;
+    background: var(--color-surface-raised);
+    padding-inline: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-ink-secondary);
+    transition: background 0.15s ease;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--color-border);
+  }
+
+  .btn-secondary:disabled {
+    opacity: 0.4;
+  }
+
+  .field-input {
+    margin-top: 0.25rem;
+    min-height: 3rem;
+    width: 100%;
+    border-radius: var(--radius-hud-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-base);
+    padding-inline: 0.75rem;
+    color: var(--color-ink);
+  }
+
+  .field-input:focus {
+    outline: 2px solid var(--color-action);
+    outline-offset: 0;
+    border-color: var(--color-action);
+  }
+
+  .field-label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--color-ink-muted);
+  }
+
+  .text-error {
+    font-size: 0.875rem;
+    color: var(--color-status-error);
+  }
+}
+
 .leaflet-container {
   width: 100%;
   height: 100%;
-  background: #0b1220;
+  background: var(--color-map-canvas);
   font: inherit;
   touch-action: pan-x pan-y pinch-zoom;
 }

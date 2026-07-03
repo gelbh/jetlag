@@ -20,6 +20,7 @@ interface PersistedCacheEntry<T> {
 
 const memoryCache = new Map<string, CacheEntry<unknown>>();
 const inFlight = new Map<string, Promise<unknown>>();
+let databasePromise: Promise<IDBDatabase> | null = null;
 
 function stableGameAreaKey(gameArea: GameArea): string {
   return JSON.stringify(gameArea.coordinates);
@@ -51,7 +52,11 @@ function writeMemoryEntry<T>(key: string, value: T): void {
 }
 
 function openDatabase(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
+  if (databasePromise) {
+    return databasePromise;
+  }
+
+  databasePromise = new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
     request.onupgradeneeded = () => {
@@ -62,9 +67,18 @@ function openDatabase(): Promise<IDBDatabase> {
     };
 
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () =>
+    request.onerror = () => {
+      databasePromise = null;
       reject(request.error ?? new Error("IndexedDB open failed"));
+    };
+
+    request.onblocked = () => {
+      databasePromise = null;
+      reject(new Error("IndexedDB upgrade blocked."));
+    };
   });
+
+  return databasePromise;
 }
 
 async function readPersistedEntry<T>(key: string): Promise<T | undefined> {
@@ -92,8 +106,6 @@ async function readPersistedEntry<T>(key: string): Promise<T | undefined> {
       transaction.onerror = () =>
         reject(transaction.error ?? new Error("Cache read failed"));
     });
-
-    database.close();
 
     if (!entry || entry.expiresAt <= Date.now()) {
       return undefined;
@@ -126,8 +138,6 @@ async function writePersistedEntry<T>(key: string, value: T): Promise<void> {
       transaction.onerror = () =>
         reject(transaction.error ?? new Error("Cache write failed"));
     });
-
-    database.close();
   } catch {
     // Ignore persistence failures; memory cache still helps this session.
   }
@@ -191,6 +201,43 @@ export function seaLevelSamplingCacheKey(gameArea: GameArea): string {
   return geographicCacheKey(gameArea, "sea_level:sampling");
 }
 
+export function adminDivisionCacheKey(
+  gameArea: GameArea,
+  adminLevel: number,
+): string {
+  return geographicCacheKey(gameArea, `admin:${adminLevel}`);
+}
+
+export function landmassCacheKey(gameArea: GameArea): string {
+  return geographicCacheKey(gameArea, "landmass");
+}
+
+export function matchingFeaturesCacheKey(
+  gameArea: GameArea,
+  categoryId: string,
+): string {
+  return geographicCacheKey(gameArea, `matching:${categoryId}`);
+}
+
+export function measuringPlacesCacheKey(
+  gameArea: GameArea,
+  category: string,
+): string {
+  return geographicCacheKey(gameArea, `measuring:${category}`);
+}
+
+export function tentaclePoisCacheKey(
+  center: [number, number],
+  radiusMeters: number,
+  categoryId: string,
+): string {
+  return `tentacle:${categoryId}:${center[0]},${center[1]}:${radiusMeters}`;
+}
+
+export function staticTransitCacheKey(gameArea: GameArea): string {
+  return geographicCacheKey(gameArea, "transit:static");
+}
+
 export async function clearGeographicFeatureCacheForTests(): Promise<void> {
   memoryCache.clear();
   inFlight.clear();
@@ -209,8 +256,6 @@ export async function clearGeographicFeatureCacheForTests(): Promise<void> {
       transaction.onerror = () =>
         reject(transaction.error ?? new Error("Cache clear failed"));
     });
-
-    database.close();
   } catch {
     // Ignore persistence failures in tests.
   }

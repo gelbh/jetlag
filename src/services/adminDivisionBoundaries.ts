@@ -12,6 +12,10 @@ import {
   type LatLngTuple,
 } from "../domain/geometry";
 import { queryOverpass } from "./overpassClient";
+import {
+  adminDivisionCacheKey,
+  getOrFetchCached,
+} from "./geographicFeatureCache";
 
 export const MAX_ADMIN_DIVISIONS = 50;
 
@@ -277,11 +281,16 @@ export async function fetchAdminDivisionFeaturesInArea(
   gameArea: GameArea,
   adminLevel: number,
 ): Promise<AdminDivisionFeature[]> {
-  const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-    buildAdminDivisionQuery(gameArea, adminLevel),
-  );
+  return getOrFetchCached(
+    adminDivisionCacheKey(gameArea, adminLevel),
+    async () => {
+      const payload = await queryOverpass<{ elements: OverpassElement[] }>(
+        buildAdminDivisionQuery(gameArea, adminLevel),
+      );
 
-  return parseAdminDivisionFeatures(payload.elements, gameArea, adminLevel);
+      return parseAdminDivisionFeatures(payload.elements, gameArea, adminLevel);
+    },
+  );
 }
 
 export function adminDivisionAreaSquareMeters(boundary: GameArea): number {

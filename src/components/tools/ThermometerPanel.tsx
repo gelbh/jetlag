@@ -10,6 +10,7 @@ import {
   type ThermometerAnswer,
   type ThermometerDistanceOptionMiles,
 } from "../../domain/thermometerQuestions";
+import { hotterColderAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
 
@@ -55,9 +56,9 @@ export function ThermometerPanel({
       helper="Tap the map for the start of movement, then the end. The shaded half follows your answer."
     >
       <div>
-        <p className="text-sm text-slate-300">Distance traveled</p>
+        <p className="text-sm text-ink-muted">Distance traveled</p>
         {availableDistancePresets.length === 0 ? (
-          <p className="mt-2 text-sm text-amber-200">
+          <p className="mt-2 text-sm text-status-warning">
             Every thermometer distance option has already been used this
             session.
           </p>
@@ -70,8 +71,8 @@ export function ThermometerPanel({
                 onClick={() => onDistanceChange(preset)}
                 className={`min-h-12 rounded-xl px-3 text-sm ${
                   distanceMeters === preset
-                    ? "bg-sky-500 text-slate-950"
-                    : "bg-slate-800"
+                    ? "bg-action text-action-ink"
+                    : "bg-surface-raised"
                 }`}
               >
                 {formatPresetDistance(preset, distanceUnit)}
@@ -84,21 +85,10 @@ export function ThermometerPanel({
       <BinaryAnswerPicker
         value={answer}
         onChange={onAnswerChange}
-        options={[
-          {
-            value: "hotter",
-            label: "Hotter",
-            activeClassName: "bg-emerald-500 text-slate-950",
-          },
-          {
-            value: "colder",
-            label: "Colder",
-            activeClassName: "bg-rose-500 text-slate-50",
-          },
-        ]}
+        options={hotterColderAnswerOptions}
       />
 
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-ink-dim">
         {step === "a" && "Waiting for start pin"}
         {step === "b" && "Waiting for end pin"}
         {step === "ready" && answer === null && "Choose hotter or colder"}
@@ -106,13 +96,13 @@ export function ThermometerPanel({
       </p>
 
       {travelMeters !== null ? (
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-ink-muted">
           Movement on map: {formatDistance(travelMeters, distanceUnit)}
         </p>
       ) : null}
 
       {travelTooShort ? (
-        <p className="text-sm text-amber-200">
+        <p className="text-sm text-status-warning">
           Movement is shorter than the selected distance. Confirm before adding.
         </p>
       ) : null}
@@ -121,7 +111,7 @@ export function ThermometerPanel({
         <button
           type="button"
           onClick={onReset}
-          className="min-h-12 rounded-xl bg-slate-800 px-3 text-sm font-medium"
+          className="min-h-12 rounded-xl bg-surface-raised px-3 text-sm font-medium"
         >
           Reset
         </button>
@@ -129,7 +119,7 @@ export function ThermometerPanel({
           type="button"
           onClick={onCommit}
           disabled={!canCommit}
-          className="min-h-12 rounded-xl bg-sky-500 px-3 text-sm font-semibold text-slate-950 disabled:opacity-40"
+          className="btn-primary w-full"
         >
           Add thermometer
         </button>

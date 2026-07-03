@@ -26,6 +26,29 @@ export function mapToolDockLabel(entry: MapToolDockEntry): string {
   return entry.cost ? `${entry.name} (${entry.cost})` : entry.name;
 }
 
+/** Short label for dock menus and chrome — no card cost codes. */
+export function mapToolDockMenuLabel(entry: MapToolDockEntry): string {
+  return entry.name;
+}
+
+const OVERFLOW_TOOL_HINTS: Partial<Record<DockableMapTool, string>> = {
+  matching: "Same category on the map?",
+  measuring: "Closer or further?",
+  thermometer: "Hotter or colder?",
+  tentacle: "Point-to-point questions",
+};
+
+/** One-line helper for overflow menu items (first visit / recall). */
+export function mapToolDockMenuHint(entry: MapToolDockEntry): string | null {
+  return OVERFLOW_TOOL_HINTS[entry.id] ?? null;
+}
+
+export const QUICK_DOCK_TOOL_IDS = ["radar", "zone", "pin"] as const satisfies readonly DockableMapTool[];
+
+export function isQuickDockTool(id: DockableMapTool): id is (typeof QUICK_DOCK_TOOL_IDS)[number] {
+  return (QUICK_DOCK_TOOL_IDS as readonly string[]).includes(id);
+}
+
 export function mapToolPlacingLabel(id: DockableMapTool): string {
   const entry = MAP_TOOL_DOCK_ENTRIES.find((item) => item.id === id);
   return entry?.name ?? id;

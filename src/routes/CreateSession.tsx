@@ -20,6 +20,7 @@ import {
   ensureAnonymousUser,
 } from "../services/firebase";
 import { createRemoteSession } from "../services/firestoreAnnotations";
+import { preloadGameAreaCaches } from "../services/gameAreaPreload";
 import {
   inferTransitMetroId,
   listTransitMetros,
@@ -203,6 +204,7 @@ export function CreateSession() {
         });
       }
 
+      preloadGameAreaCaches(gameArea);
       navigate("/map");
     } catch (nextError) {
       setError(
@@ -228,13 +230,13 @@ export function CreateSession() {
       </MapView>
 
       <MobileSheet maxHeightClassName="max-h-[min(78dvh,720px)]">
-        <h1 className="text-xl font-semibold">Frame the game area</h1>
-        <p className="mt-2 text-sm text-slate-300">
+        <h1 className="text-xl font-semibold text-ink">Frame the game area</h1>
+        <p className="mt-2 text-pretty text-sm text-ink-muted">
           Search for a city or county to use its boundary, or pan and zoom to
           frame a custom play area.
         </p>
 
-        <label className="mt-4 block text-sm text-slate-300">
+        <label className="field-label mt-4">
           City, county, state, or country
           <input
             value={locationQuery}
@@ -249,7 +251,7 @@ export function CreateSession() {
                 void handleSearch();
               }
             }}
-            className="mt-1 min-h-12 w-full rounded-xl border border-slate-700 bg-slate-900 px-3"
+            className="field-input"
             placeholder="Dublin, Ireland"
             autoComplete="off"
             enterKeyHint="search"
@@ -261,22 +263,22 @@ export function CreateSession() {
           type="button"
           onClick={() => void handleSearch()}
           disabled={searchLoading}
-          className="mt-3 min-h-12 w-full rounded-xl bg-slate-800 px-3 text-sm font-medium text-slate-100 disabled:opacity-50"
+          className="btn-secondary mt-3 w-full disabled:opacity-50"
         >
           {searchLoading ? "Searching…" : "Find place"}
         </button>
 
         {searchResults.length > 0 ? (
-          <div className="mt-3 max-h-40 space-y-2 overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 p-2">
+          <div className="mt-3 max-h-40 space-y-2 overflow-y-auto rounded-[var(--radius-hud-md)] border border-border bg-surface-base p-2">
             {searchResults.map((place) => (
               <button
                 key={place.id}
                 type="button"
                 onClick={() => applyPlace(place)}
-                className={`min-h-12 w-full rounded-lg px-3 py-2 text-left text-sm ${
+                className={`min-h-12 w-full rounded-[var(--radius-hud-sm)] px-3 py-2 text-left text-sm ${
                   selectedPlaceId === place.id
-                    ? "bg-sky-500/20 text-sky-100"
-                    : "bg-slate-800/70 text-slate-100"
+                    ? "bg-action-soft text-status-info"
+                    : "bg-surface-raised text-ink"
                 }`}
               >
                 {place.displayName}
@@ -285,12 +287,12 @@ export function CreateSession() {
           </div>
         ) : null}
 
-        <label className="mt-4 block text-sm text-slate-300">
+        <label className="field-label mt-4">
           Transit metro
           <select
             value={transitMetroId}
             onChange={(event) => setTransitMetroOverride(event.target.value)}
-            className="mt-1 min-h-12 w-full rounded-xl border border-slate-700 bg-slate-900 px-3"
+            className="field-input"
           >
             <option value="">Auto / none</option>
             {metros.map((metro) => (
@@ -305,11 +307,11 @@ export function CreateSession() {
           type="button"
           onClick={() => void handleConfirm()}
           disabled={loading}
-          className="mt-4 min-h-12 w-full rounded-xl bg-sky-500 text-sm font-semibold text-slate-950 disabled:opacity-50"
+          className="btn-primary mt-4 w-full disabled:opacity-50"
         >
           {loading ? "Creating…" : "Confirm game area"}
         </button>
-        {error ? <p className="mt-2 text-sm text-rose-300">{error}</p> : null}
+        {error ? <p className="text-error mt-2">{error}</p> : null}
       </MobileSheet>
     </div>
   );

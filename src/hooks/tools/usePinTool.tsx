@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { PinPanel } from "../../components/tools/PinPanel";
 import type { LatLngTuple } from "../../domain/geometry";
 import type { AnnotationRecord } from "../../domain/annotations";
+import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface UsePinToolParams {
   active: boolean;
@@ -46,7 +47,7 @@ export function usePinTool({
       metadata: {
         createdAt: new Date().toISOString(),
         label: pinLabel.trim(),
-        color: "#38bdf8",
+        color: MAP_ANNOTATION_COLORS.pin,
       },
     });
 

@@ -1,7 +1,10 @@
+import { fetchWithTimeout } from "./fetchWithTimeout";
+
 const OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter";
 const OVERPASS_USER_AGENT = "jetlag-map-companion/1.0";
 const OVERPASS_MAX_RETRIES = 3;
 const OVERPASS_BASE_BACKOFF_MS = 750;
+const OVERPASS_FETCH_TIMEOUT_MS = 45_000;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
@@ -32,14 +35,18 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= OVERPASS_MAX_RETRIES; attempt += 1) {
-    const response = await fetch(OVERPASS_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-        "User-Agent": OVERPASS_USER_AGENT,
+    const response = await fetchWithTimeout(
+      OVERPASS_ENDPOINT,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+          "User-Agent": OVERPASS_USER_AGENT,
+        },
+        body: `data=${encodeURIComponent(query)}`,
       },
-      body: `data=${encodeURIComponent(query)}`,
-    });
+      OVERPASS_FETCH_TIMEOUT_MS,
+    );
 
     if (response.ok) {
       return response;
@@ -70,13 +77,17 @@ async function fetchOverpassViaProxy(query: string): Promise<Response> {
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= OVERPASS_MAX_RETRIES; attempt += 1) {
-    const response = await fetch(proxyUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetchWithTimeout(
+      proxyUrl,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query }),
       },
-      body: JSON.stringify({ query }),
-    });
+      OVERPASS_FETCH_TIMEOUT_MS,
+    );
 
     if (response.ok) {
       return response;

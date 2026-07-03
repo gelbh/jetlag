@@ -22,6 +22,10 @@ export interface SeaLevelContext {
   cellElevations: number[];
 }
 
+export function prefetchSeaLevelSampling(gameArea: GameArea): void {
+  void loadSeaLevelSampling(gameArea).catch(() => undefined);
+}
+
 async function loadSeaLevelSampling(
   gameArea: GameArea,
 ): Promise<CachedSeaLevelSampling> {

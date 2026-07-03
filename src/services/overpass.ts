@@ -5,6 +5,10 @@ import {
   type TentacleLocationCategoryId,
 } from "../domain/tentacleQuestions";
 import { queryOverpass } from "./overpassClient";
+import {
+  getOrFetchCached,
+  tentaclePoisCacheKey,
+} from "./geographicFeatureCache";
 
 type OverpassElement = {
   id: number;
@@ -160,9 +164,14 @@ export async function fetchTentaclePois(
   radiusMeters: number,
   categoryId: TentacleLocationCategoryId,
 ): Promise<TentaclePoi[]> {
-  const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-    buildTentacleOverpassQuery(center, radiusMeters, categoryId),
-  );
+  return getOrFetchCached(
+    tentaclePoisCacheKey(center, radiusMeters, categoryId),
+    async () => {
+      const payload = await queryOverpass<{ elements: OverpassElement[] }>(
+        buildTentacleOverpassQuery(center, radiusMeters, categoryId),
+      );
 
-  return parseTentaclePois(payload.elements, categoryId);
+      return parseTentaclePois(payload.elements, categoryId);
+    },
+  );
 }

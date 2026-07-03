@@ -32,6 +32,7 @@ import {
   type MatchingFeature,
 } from "../../services/matchingFeatures";
 import { useToolSessionOptions } from "./useToolSessionOptions";
+import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface UseMatchingToolParams {
   active: boolean;
@@ -360,7 +361,7 @@ export function useMatchingTool({
             ? JSON.stringify(boundaryRegion)
             : undefined,
           matchingFeaturesJson: serializeMatchingFeatures(matchingFeatures),
-          color: "#ef4444",
+          color: MAP_ANNOTATION_COLORS.elimination,
         },
       });
     } catch (error) {

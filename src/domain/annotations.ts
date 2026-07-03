@@ -99,6 +99,7 @@ export interface AnnotationRecord {
   geometry: Feature<Point | LineString | Polygon | MultiPolygon>;
   metadata: AnnotationMetadata;
   status: AnnotationStatus;
+  updatedAt?: string;
 }
 
 export type GameArea =

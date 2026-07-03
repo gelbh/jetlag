@@ -4,9 +4,15 @@ import { useAnnotationStore, useSessionStore } from "../state/sessionStore";
 import {
   isFirebaseConfigured,
   enableOfflinePersistence,
+  isFirestorePersistenceUnavailable,
 } from "../services/firebase";
 import { subscribeToRemoteAnnotations } from "../services/firestoreAnnotations";
-import { readOfflineQueue, removeOfflineWrite } from "../services/offlineQueue";
+import {
+  readOfflineQueueForSession,
+  recordOfflineWriteFailure,
+  removeOfflineWrite,
+  shouldRetryOfflineWrite,
+} from "../services/offlineQueue";
 import { writeRemoteAnnotation } from "../services/firestoreAnnotations";
 
 export function useSessionSync() {
@@ -32,7 +38,13 @@ export function useSessionSync() {
       return;
     }
 
-    void enableOfflinePersistence();
+    void enableOfflinePersistence().then(() => {
+      if (isFirestorePersistenceUnavailable()) {
+        setLastSyncError(
+          "Offline cache unavailable in this browser tab. Sync may be less reliable until you reload.",
+        );
+      }
+    });
 
     const unsubscribe = subscribeToRemoteAnnotations(
       session.id,
@@ -47,8 +59,9 @@ export function useSessionSync() {
           if (
             prior &&
             prior.status === "active" &&
-            JSON.stringify(prior.geometry) !==
-              JSON.stringify(annotation.geometry)
+            annotation.updatedAt &&
+            prior.updatedAt &&
+            prior.updatedAt !== annotation.updatedAt
           ) {
             setRemoteUpdateNotice("Map updated from another device.");
             break;
@@ -98,28 +111,32 @@ export function useSessionSync() {
     }
 
     const flushQueue = async () => {
-      const queue = await readOfflineQueue();
-      const pendingForSession = queue.filter(
-        (entry) => entry.sessionId === session.id,
-      );
+      const pendingForSession = await readOfflineQueueForSession(session.id);
       setPendingWrites(pendingForSession.length);
 
+      let lastError: string | null = null;
+
       for (const entry of pendingForSession) {
+        if (!shouldRetryOfflineWrite(entry)) {
+          continue;
+        }
+
         try {
           await writeRemoteAnnotation(session.id, entry.annotation);
           await removeOfflineWrite(entry.id);
         } catch (error) {
-          setLastSyncError(
-            error instanceof Error ? error.message : "Unable to sync changes.",
-          );
-          break;
+          lastError =
+            error instanceof Error ? error.message : "Unable to sync changes.";
+          await recordOfflineWriteFailure(entry.id);
         }
       }
 
-      const remaining = await readOfflineQueue();
-      setPendingWrites(
-        remaining.filter((entry) => entry.sessionId === session.id).length,
-      );
+      if (lastError) {
+        setLastSyncError(lastError);
+      }
+
+      const remaining = await readOfflineQueueForSession(session.id);
+      setPendingWrites(remaining.length);
     };
 
     const handleOnline = () => {
@@ -141,10 +158,8 @@ export function useSessionSync() {
       }
 
       void (async () => {
-        const queue = await readOfflineQueue();
-        setPendingWrites(
-          queue.filter((entry) => entry.sessionId === session.id).length,
-        );
+        const queue = await readOfflineQueueForSession(session.id);
+        setPendingWrites(queue.length);
       })();
     };
 

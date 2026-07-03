@@ -17,12 +17,12 @@ export function SyncStatusBanner({
 
   const tone =
     status === "error"
-      ? "border-rose-400/40 bg-rose-500/15 text-rose-100"
+      ? "border-status-error/40 bg-status-error-surface text-status-error"
       : status === "offline"
-        ? "border-amber-400/40 bg-amber-500/15 text-amber-100"
+        ? "border-status-warning/40 bg-status-warning-surface text-status-warning"
         : status === "saving"
-          ? "border-sky-400/40 bg-sky-500/15 text-sky-100"
-          : "border-slate-600 bg-slate-900/90 text-slate-200";
+          ? "border-action/40 bg-status-info-surface text-status-info"
+          : "border-border bg-surface-panel text-ink-secondary";
 
   const label =
     message ??
@@ -41,9 +41,9 @@ export function SyncStatusBanner({
   }
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+3.5rem)] z-[1001] px-3">
+    <div className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+3.5rem)] z-[var(--z-banner)] px-3">
       <div
-        className={`mx-auto max-w-xl rounded-2xl border px-3 py-2 text-center text-sm font-medium backdrop-blur ${tone}`}
+        className={`mx-auto max-w-xl rounded-[var(--radius-hud-lg)] border px-3 py-2 text-center text-sm font-medium ${tone}`}
       >
         {label}
       </div>

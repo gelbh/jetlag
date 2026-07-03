@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { Polygon } from "react-leaflet";
 import { AnnotationLayer } from "../components/map/AnnotationLayer";
@@ -10,19 +10,22 @@ import { TransitControls } from "../components/map/TransitControls";
 import { TransitLayer } from "../components/map/TransitLayer";
 import { UserLocationLayer } from "../components/map/UserLocationLayer";
 import { MapModeChip } from "../components/session/MapModeChip";
+import { MapToolsHintBanner } from "../components/session/MapToolsHintBanner";
 import { MapSettingsSheet } from "../components/session/MapSettingsSheet";
 import { SessionLog } from "../components/session/SessionLog";
 import { SyncStatusBanner } from "../components/session/SyncStatusBanner";
 import { AnnotationEditSheet } from "../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../components/tools/ToolDock";
 import { PopupCloseButton } from "../components/ui/PopupCloseButton";
-import { useMatchingTool } from "../hooks/tools/useMatchingTool";
-import { useMeasuringTool } from "../hooks/tools/useMeasuringTool";
+import { HudHomeIcon } from "../components/ui/HudIcons";
 import { useRadarTool } from "../hooks/tools/useRadarTool";
-import { useTentacleTool } from "../hooks/tools/useTentacleTool";
 import { usePinTool } from "../hooks/tools/usePinTool";
 import { useZoneTool } from "../hooks/tools/useZoneTool";
 import { useThermometerTool } from "../hooks/tools/useThermometerTool";
+import {
+  createIdleHeavyMapTools,
+  type HeavyMapToolsApi,
+} from "../hooks/map-screen/heavyMapTools";
 import { useMapGeometryEdit } from "../hooks/map-screen/useMapGeometryEdit";
 import { useMapSessionChrome } from "../hooks/map-screen/useMapSessionChrome";
 import { useMapToolInteraction } from "../hooks/map-screen/useMapToolInteraction";
@@ -39,6 +42,7 @@ import {
   type LatLngTuple,
 } from "../domain/geometry";
 import { LOCAL_SESSION_ID } from "../domain/annotations";
+import { MAP_ZONE_DRAFT_PATH } from "../domain/mapAnnotationColors";
 import { useAnnotations } from "../hooks/useAnnotations";
 import { useGameTimer } from "../hooks/useGameTimer";
 import { useGeolocation } from "../hooks/useGeolocation";
@@ -47,7 +51,6 @@ import { useSessionSync } from "../hooks/useSessionSync";
 import { useSyncStatus } from "../hooks/useSyncStatus";
 import { useTransitLayer } from "../hooks/useTransitLayer";
 import { useWakeLock } from "../hooks/useWakeLock";
-import { ensureRemoteSessionWriteAccess } from "../services/firestoreAnnotations";
 import {
   ensureAnonymousUser,
   isFirebaseConfigured,
@@ -63,9 +66,14 @@ import {
   type MapTool,
 } from "../state/sessionStore";
 
+const HeavyMapToolsSlot = lazy(() =>
+  import("../components/tools/HeavyMapToolsSlot").then((module) => ({
+    default: module.HeavyMapToolsSlot,
+  })),
+);
+
 export function MapScreen() {
   const session = useSessionStore((state) => state.session);
-  const setSession = useSessionStore((state) => state.setSession);
   const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
   const pendingWrites = useSessionStore((state) => state.pendingWrites);
   const activeTool = useMapStore((state) => state.activeTool);
@@ -208,50 +216,24 @@ export function MapScreen() {
     finishPlacement,
     setMapError,
   });
-  const matchingTool = useMatchingTool({
-    active: activeTool === "matching",
-    annotations,
-    gameArea: toolGameArea,
-    createAnnotation,
-    distanceUnit,
-    finishPlacement,
-    gpsLoading,
-    gpsError,
-    mapError,
-    refreshGps: refresh,
-    ensurePointInGameArea,
-  });
-  const measuringTool = useMeasuringTool({
-    active: activeTool === "measuring",
-    annotations,
-    gameArea: toolGameArea,
-    createAnnotation,
-    distanceUnit,
-    finishPlacement,
-    gpsLoading,
-    gpsError,
-    mapError,
-    setMapError,
-    refreshGps: refresh,
-    ensurePointInGameArea,
-  });
-  const tentacleTool = useTentacleTool({
-    active: activeTool === "tentacle",
-    annotations,
-    gameArea: toolGameArea,
-    createAnnotation,
-    distanceUnit,
-    finishPlacement,
-    setMapError,
-    mapError,
-    gpsLoading,
-    gpsError,
-    awaitingPlacement,
-    setAwaitingPlacement,
-    refreshGps: refresh,
-    ensurePointInGameArea,
-    armPlacement,
-  });
+  const idleHeavyMapTools = useMemo(() => createIdleHeavyMapTools(), []);
+  const [heavyMapTools, setHeavyMapTools] =
+    useState<HeavyMapToolsApi>(idleHeavyMapTools);
+  const heavyToolActive =
+    activeTool === "matching" ||
+    activeTool === "measuring" ||
+    activeTool === "tentacle";
+  const handleHeavyToolsChange = useCallback((tools: HeavyMapToolsApi) => {
+    setHeavyMapTools(tools);
+  }, []);
+
+  useEffect(() => {
+    if (!heavyToolActive) {
+      setHeavyMapTools(idleHeavyMapTools);
+    }
+  }, [heavyToolActive, idleHeavyMapTools]);
+
+  const { matchingTool, measuringTool, tentacleTool } = heavyMapTools;
   const pinTool = usePinTool({
     active: activeTool === "pin",
     createAnnotation,
@@ -312,17 +294,6 @@ export function MapScreen() {
       try {
         const user = await ensureAnonymousUser();
         setCurrentUid(user.uid);
-        const activeSession = await ensureRemoteSessionWriteAccess(
-          session,
-          user.uid,
-        );
-
-        if (
-          activeSession.id !== session.id ||
-          activeSession.memberUids.join(",") !== session.memberUids.join(",")
-        ) {
-          setSession(activeSession);
-        }
       } catch (error) {
         setLastSyncError(
           error instanceof Error
@@ -331,7 +302,7 @@ export function MapScreen() {
         );
       }
     })();
-  }, [session, setLastSyncError, setSession]);
+  }, [session, setLastSyncError]);
 
   useEffect(() => {
     if (!transitLiveSupported && transitLiveEnabled) {
@@ -475,6 +446,28 @@ export function MapScreen() {
 
   return (
     <div className="relative min-h-[100dvh] h-full">
+      {heavyToolActive ? (
+        <Suspense fallback={null}>
+          <HeavyMapToolsSlot
+            activeTool={activeTool}
+            annotations={annotations}
+            gameArea={toolGameArea}
+            createAnnotation={createAnnotation}
+            distanceUnit={distanceUnit}
+            finishPlacement={finishPlacement}
+            gpsLoading={gpsLoading}
+            gpsError={gpsError}
+            mapError={mapError}
+            setMapError={setMapError}
+            refreshGps={refresh}
+            ensurePointInGameArea={ensurePointInGameArea}
+            awaitingPlacement={awaitingPlacement}
+            setAwaitingPlacement={setAwaitingPlacement}
+            armPlacement={armPlacement}
+            onToolsChange={handleHeavyToolsChange}
+          />
+        </Suspense>
+      ) : null}
       <div ref={mapShellRef} className="absolute inset-0">
         <MapView
           key={session.id}
@@ -561,17 +554,13 @@ export function MapScreen() {
           {zoneTool.draft.zoneVertices.length > 0 ? (
             <Polygon
               positions={zoneTool.draft.zoneVertices}
-              pathOptions={{
-                color: "#a855f7",
-                dashArray: "6 6",
-                fillOpacity: 0.15,
-              }}
+              pathOptions={MAP_ZONE_DRAFT_PATH}
             />
           ) : null}
         </MapView>
         <div
           ref={exportLegendRef}
-          className="pointer-events-none absolute inset-x-0 bottom-0 hidden bg-slate-950/90 px-4 py-3 text-xs text-slate-200"
+          className="pointer-events-none absolute inset-x-0 bottom-0 hidden bg-surface-deep/90 px-4 py-3 text-xs text-ink-secondary"
         >
           <p className="font-semibold">Session {session.code}</p>
           <p className="mt-1">
@@ -588,19 +577,19 @@ export function MapScreen() {
       />
 
       {geometryEditAnnotation && geometryDraft ? (
-        <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+0.5rem)] z-[1002] px-3">
-          <div className="mx-auto flex max-w-xl gap-2 rounded-3xl border border-slate-700 bg-slate-950/95 p-3 backdrop-blur">
+        <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+0.5rem)] z-[var(--z-panel)] px-3">
+          <div className="hud-panel mx-auto flex max-w-xl gap-2 p-3">
             <button
               type="button"
               onClick={() => void saveGeometryEdit()}
-              className="min-h-12 flex-1 rounded-xl bg-sky-500 px-3 text-sm font-semibold text-slate-950"
+              className="btn-primary min-h-12 flex-1"
             >
               Save shape
             </button>
             <button
               type="button"
               onClick={cancelGeometryEdit}
-              className="min-h-12 flex-1 rounded-xl bg-slate-800 px-3 text-sm font-medium"
+              className="btn-secondary min-h-12 flex-1"
             >
               Cancel
             </button>
@@ -608,90 +597,30 @@ export function MapScreen() {
         </div>
       ) : null}
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-[1000] p-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[var(--z-dock)] p-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div className="pointer-events-auto flex items-stretch justify-between gap-2">
           <Link
             to="/"
-            className="flex min-h-12 min-w-12 self-start items-center justify-center rounded-xl bg-slate-900/90 px-3 text-lg backdrop-blur"
+            className="hud-chrome self-start"
             aria-label="Home"
           >
-            <span aria-hidden="true">🏠</span>
+            <HudHomeIcon className="h-5 w-5" />
           </Link>
           <div className="flex items-stretch gap-2">
             <button
               type="button"
               onClick={() => setSessionChromeOpen((open) => !open)}
-              className="hidden min-h-12 rounded-xl bg-slate-900/90 px-4 text-sm font-medium text-slate-100 backdrop-blur md:inline-flex"
+              className="btn-secondary hidden min-h-12 md:inline-flex"
               aria-expanded={sessionChromeOpen}
             >
               {sessionChromeOpen ? "Hide" : "Session"}
             </button>
-            <div className="flex flex-col gap-2 md:hidden">
-              <button
-                type="button"
-                onClick={() => setSettingsOpen(true)}
-                className="flex min-h-12 min-w-12 items-center justify-center rounded-xl bg-slate-900/90 px-3 text-lg text-slate-100 backdrop-blur"
-                aria-label="Open settings"
-              >
-                <span aria-hidden="true">⚙️</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleUndoLastAnnotation}
-                disabled={!canUndoLastTool}
-                className="flex min-h-12 min-w-12 items-center justify-center rounded-xl bg-slate-900/90 px-3 text-slate-100 backdrop-blur disabled:opacity-40"
-                aria-label={
-                  undoTargetTool
-                    ? `Undo last ${mapToolPlacingLabel(undoTargetTool)}`
-                    : "Undo last tool"
-                }
-              >
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M3 10h11a4 4 0 0 1 0 8H9" />
-                  <path d="M7 6 3 10l4 4" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={handleRedoLastAnnotation}
-                disabled={!canRedoLastTool}
-                className="flex min-h-12 min-w-12 items-center justify-center rounded-xl bg-slate-900/90 px-3 text-slate-100 backdrop-blur disabled:opacity-40"
-                aria-label={
-                  undoTargetTool
-                    ? `Redo last ${mapToolPlacingLabel(undoTargetTool)}`
-                    : "Redo last tool"
-                }
-              >
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21 10H10a4 4 0 0 0 0 8h5" />
-                  <path d="m17 6 4 4-4 4" />
-                </svg>
-              </button>
-            </div>
           </div>
         </div>
         {sessionChromeOpen ? (
           <div className="pointer-events-auto mt-2 hidden space-y-2 md:block">
             {pendingWrites > 0 ? (
-              <p className="rounded-xl bg-amber-500/20 px-4 py-3 text-sm text-amber-100">
+              <p className="rounded-[var(--radius-hud-md)] bg-status-warning-surface px-4 py-3 text-sm text-status-warning">
                 {pendingWrites} pending sync
               </p>
             ) : null}
@@ -769,8 +698,8 @@ export function MapScreen() {
       />
 
       {activeTool !== "none" && !selectedAnnotation ? (
-        <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+0.5rem)] z-[1000] px-3">
-          <div className="relative mx-auto max-h-[min(42dvh,420px)] max-w-xl overflow-y-auto overscroll-contain rounded-3xl border border-slate-700 bg-slate-950/95 p-4 pt-10 backdrop-blur">
+        <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+0.5rem)] z-[var(--z-panel)] px-3">
+          <div className="hud-panel relative mx-auto max-h-[min(42dvh,420px)] max-w-xl overflow-y-auto overscroll-contain p-4 pt-10">
             <PopupCloseButton
               label={`Close ${mapToolPlacingLabel(activeTool)}`}
               onClick={() => handleSelectTool("none")}
@@ -797,6 +726,15 @@ export function MapScreen() {
         />
       ) : null}
 
+      <MapToolsHintBanner
+        hidden={
+          activeTool !== "none" ||
+          settingsOpen ||
+          Boolean(selectedAnnotation) ||
+          Boolean(geometryEditAnnotation && geometryDraft)
+        }
+      />
+
       <ToolDock
         activeTool={activeTool}
         timerLabel={timer.formattedElapsed}
@@ -806,6 +744,11 @@ export function MapScreen() {
         onTimerPause={timer.pause}
         onTimerReset={timer.reset}
         onSelect={handleSelectTool}
+        canUndo={canUndoLastTool}
+        canRedo={canRedoLastTool}
+        onUndo={handleUndoLastAnnotation}
+        onRedo={handleRedoLastAnnotation}
+        onOpenSettings={() => setSettingsOpen(true)}
       />
 
       <SessionLog

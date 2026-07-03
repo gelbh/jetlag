@@ -6,8 +6,10 @@ import type {
   TransitVehicle,
 } from "../domain/transit";
 import { getTransitMetro } from "./transitCatalog";
+import { fetchWithTimeout } from "./fetchWithTimeout";
 
 const TRANSITLAND_API_BASE = "https://transit.land/api/v2/rest";
+const TRANSIT_FETCH_TIMEOUT_MS = 30_000;
 
 function modeFromRouteType(routeType: string | undefined): TransitRouteMode {
   switch (routeType) {
@@ -188,12 +190,16 @@ async function fetchTransitlandJson(
   url: URL,
   apiKey: string,
 ): Promise<unknown> {
-  const response = await fetch(url.toString(), {
-    cache: "no-store",
-    headers: {
-      apikey: apiKey,
+  const response = await fetchWithTimeout(
+    url.toString(),
+    {
+      cache: "no-store",
+      headers: {
+        apikey: apiKey,
+      },
     },
-  });
+    TRANSIT_FETCH_TIMEOUT_MS,
+  );
 
   if (!response.ok) {
     const detail = await readTransitlandError(response);
@@ -263,7 +269,11 @@ export async function fetchLiveTransitVehicles(
     url.searchParams.set("north", String(bounds.north));
     url.searchParams.set("east", String(bounds.east));
 
-    const response = await fetch(url.toString(), { cache: "no-store" });
+    const response = await fetchWithTimeout(
+      url.toString(),
+      { cache: "no-store" },
+      TRANSIT_FETCH_TIMEOUT_MS,
+    );
     if (!response.ok) {
       throw new Error("Transit proxy request failed.");
     }

@@ -58,6 +58,7 @@ import {
   fetchNearestMeasuringPlace,
 } from "./measuringToolResolvers";
 import { useToolSessionOptions } from "./useToolSessionOptions";
+import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface UseMeasuringToolParams {
   active: boolean;
@@ -944,7 +945,7 @@ export function useMeasuringTool({
           ? "Sea level"
           : (measuringTargetPlaceName ?? undefined),
       measuringBoundaryJson: JSON.stringify(nearRegion),
-      color: "#ef4444",
+      color: MAP_ANNOTATION_COLORS.elimination,
     };
 
     if (usesAllPlacesInArea) {

@@ -5,6 +5,7 @@ const ELEVATION_BATCH_SIZE = 100;
 const ELEVATION_CACHE_TTL_MS = 15 * 60 * 1000;
 const ELEVATION_MAX_RETRIES = 4;
 const ELEVATION_BASE_BACKOFF_MS = 500;
+const ELEVATION_MAX_CONCURRENT = 3;
 
 interface OpenMeteoElevationResponse {
   elevation: number[];
@@ -16,7 +17,8 @@ interface CachedElevation {
 }
 
 const elevationCache = new Map<string, CachedElevation>();
-let elevationRequestQueue: Promise<unknown> = Promise.resolve();
+let activeElevationRequests = 0;
+const elevationWaitQueue: Array<() => void> = [];
 
 function elevationCacheKey(point: LatLngTuple): string {
   return `${point[0].toFixed(5)},${point[1].toFixed(5)}`;
@@ -63,15 +65,37 @@ function retryDelayMs(
   return ELEVATION_BASE_BACKOFF_MS * 2 ** attempt;
 }
 
-async function runSerializedElevationRequest<T>(
+async function acquireElevationSlot(): Promise<void> {
+  if (activeElevationRequests < ELEVATION_MAX_CONCURRENT) {
+    activeElevationRequests += 1;
+    return;
+  }
+
+  await new Promise<void>((resolve) => {
+    elevationWaitQueue.push(() => {
+      activeElevationRequests += 1;
+      resolve();
+    });
+  });
+}
+
+function releaseElevationSlot(): void {
+  activeElevationRequests -= 1;
+  const next = elevationWaitQueue.shift();
+  if (next) {
+    next();
+  }
+}
+
+async function runLimitedElevationRequest<T>(
   task: () => Promise<T>,
 ): Promise<T> {
-  const run = elevationRequestQueue.then(task, task);
-  elevationRequestQueue = run.then(
-    () => undefined,
-    () => undefined,
-  );
-  return run;
+  await acquireElevationSlot();
+  try {
+    return await task();
+  } finally {
+    releaseElevationSlot();
+  }
 }
 
 async function fetchElevationBatch(points: LatLngTuple[]): Promise<number[]> {
@@ -150,26 +174,32 @@ export async function fetchElevations(
   }
 
   const pendingPoints = [...pendingByKey.values()];
+  const batchTasks: Promise<void>[] = [];
+
   for (
     let index = 0;
     index < pendingPoints.length;
     index += ELEVATION_BATCH_SIZE
   ) {
     const batch = pendingPoints.slice(index, index + ELEVATION_BATCH_SIZE);
-    const batchPoints = batch.map((entry) => entry.point);
-    const batchElevations = await runSerializedElevationRequest(() =>
-      fetchElevationBatch(batchPoints),
-    );
+    batchTasks.push(
+      runLimitedElevationRequest(async () => {
+        const batchPoints = batch.map((entry) => entry.point);
+        const batchElevations = await fetchElevationBatch(batchPoints);
 
-    for (let batchIndex = 0; batchIndex < batch.length; batchIndex += 1) {
-      const elevation = batchElevations[batchIndex];
-      const key = elevationCacheKey(batch[batchIndex].point);
-      writeCachedElevation(key, elevation);
-      for (const resultIndex of batch[batchIndex].indices) {
-        elevations[resultIndex] = elevation;
-      }
-    }
+        for (let batchIndex = 0; batchIndex < batch.length; batchIndex += 1) {
+          const elevation = batchElevations[batchIndex];
+          const key = elevationCacheKey(batch[batchIndex].point);
+          writeCachedElevation(key, elevation);
+          for (const resultIndex of batch[batchIndex].indices) {
+            elevations[resultIndex] = elevation;
+          }
+        }
+      }),
+    );
   }
+
+  await Promise.all(batchTasks);
 
   return elevations;
 }
@@ -185,5 +215,6 @@ export async function fetchElevation(point: LatLngTuple): Promise<number> {
 
 export function clearElevationCacheForTests(): void {
   elevationCache.clear();
-  elevationRequestQueue = Promise.resolve();
+  activeElevationRequests = 0;
+  elevationWaitQueue.length = 0;
 }

@@ -24,6 +24,10 @@ import {
   landmassToMatchingFeature,
 } from "./landmassFeatures";
 import { queryOverpass } from "./overpassClient";
+import {
+  getOrFetchCached,
+  matchingFeaturesCacheKey,
+} from "./geographicFeatureCache";
 
 export interface MatchingFeature {
   id: string;
@@ -376,26 +380,31 @@ export async function fetchMatchingFeaturesInArea(
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
 ): Promise<MatchingFeature[]> {
-  const category = getMatchingCategory(categoryId);
+  return getOrFetchCached(
+    matchingFeaturesCacheKey(gameArea, categoryId),
+    async () => {
+      const category = getMatchingCategory(categoryId);
 
-  switch (category.resolver) {
-    case "overpassPoint":
-      return fetchOverpassMatchingFeaturesInArea(gameArea, categoryId);
-    case "streetPath":
-      return fetchStreetPathFeaturesInArea(gameArea);
-    case "stationNameLength":
-      return buildStationNameLengthFeatures(
-        await fetchStationFeaturesInArea(gameArea),
-      );
-    case "reverseGeocodeAdmin":
-      return fetchAdminMatchingFeaturesInArea(gameArea, categoryId);
-    case "landmass":
-      return fetchLandmassMatchingFeaturesInArea(gameArea);
-    case "transitLine":
-      return fetchStationFeaturesInArea(gameArea);
-    default:
-      return [];
-  }
+      switch (category.resolver) {
+        case "overpassPoint":
+          return fetchOverpassMatchingFeaturesInArea(gameArea, categoryId);
+        case "streetPath":
+          return fetchStreetPathFeaturesInArea(gameArea);
+        case "stationNameLength":
+          return buildStationNameLengthFeatures(
+            await fetchStationFeaturesInArea(gameArea),
+          );
+        case "reverseGeocodeAdmin":
+          return fetchAdminMatchingFeaturesInArea(gameArea, categoryId);
+        case "landmass":
+          return fetchLandmassMatchingFeaturesInArea(gameArea);
+        case "transitLine":
+          return fetchStationFeaturesInArea(gameArea);
+        default:
+          return [];
+      }
+    },
+  );
 }
 
 export async function findNearestMatchingFeature(

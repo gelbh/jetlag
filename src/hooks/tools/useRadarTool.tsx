@@ -15,6 +15,7 @@ import {
   usedRadarDistanceOptions,
   type RadarAnswer,
 } from "../../domain/radarQuestions";
+import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface UseRadarToolParams {
   active: boolean;
@@ -171,7 +172,7 @@ export function useRadarTool({
         radiusMeters: resolvedRadarRadius,
         radarChooseCustom,
         inside: radarInsideFromAnswer(radarAnswer),
-        color: "#f97316",
+        color: MAP_ANNOTATION_COLORS.radar,
       },
     });
 

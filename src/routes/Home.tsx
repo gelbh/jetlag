@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { LOCAL_SESSION_ID } from "../domain/annotations";
 import { useSessionStore } from "../state/sessionStore";
 import {
@@ -62,15 +62,12 @@ export function Home() {
   };
 
   return (
-    <main className="flex min-h-[100dvh] flex-col justify-between bg-slate-950 px-5 py-8">
+    <main className="flex min-h-[100dvh] flex-col justify-between bg-surface-deep px-5 py-8">
       <div className="space-y-3 pt-[max(1rem,env(safe-area-inset-top))]">
-        <p className="text-sm uppercase tracking-[0.25em] text-sky-300">
-          Jet Lag
-        </p>
-        <h1 className="text-3xl font-semibold text-slate-50 sm:text-4xl">
-          Map Companion
+        <h1 className="text-balance text-3xl font-semibold text-ink sm:text-4xl">
+          Jet Lag Map Companion
         </h1>
-        <p className="max-w-md text-base text-slate-300">
+        <p className="max-w-md text-pretty text-base text-ink-muted">
           Annotate the live search map with radar circles, thermometer arrows,
           zones, and notes.
         </p>
@@ -82,28 +79,23 @@ export function Home() {
             type="button"
             onClick={() => void handleContinue()}
             disabled={continuing}
-            className="flex min-h-14 w-full items-center justify-center rounded-2xl border border-sky-400/40 bg-slate-900 text-base font-semibold text-sky-200 disabled:opacity-50"
+            className="btn-secondary min-h-14 w-full border border-action/40 disabled:opacity-50"
           >
             {continuing
               ? "Checking session…"
               : `Continue session ${session.code}`}
           </button>
         ) : null}
-        <Link
-          to="/create"
-          className="flex min-h-14 items-center justify-center rounded-2xl bg-sky-500 text-base font-semibold text-slate-950"
-        >
+        <Link to="/create" className="btn-primary min-h-14 w-full">
           Create session
         </Link>
         <Link
           to="/join"
-          className="flex min-h-14 items-center justify-center rounded-2xl border border-slate-700 bg-slate-900 text-base font-semibold text-slate-100"
+          className="btn-secondary min-h-14 w-full border border-border"
         >
           Join session
         </Link>
-        {continueError ? (
-          <p className="text-sm text-rose-300">{continueError}</p>
-        ) : null}
+        {continueError ? <p className="text-error">{continueError}</p> : null}
       </div>
     </main>
   );

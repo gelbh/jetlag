@@ -11,6 +11,10 @@ import {
 } from "../domain/measuringQuestions";
 import { queryOverpass } from "./overpassClient";
 import {
+  getOrFetchCached,
+  measuringPlacesCacheKey,
+} from "./geographicFeatureCache";
+import {
   formatOverpassBboxFromGameArea,
   overpassQueryTemplate,
   overpassTaggedBboxClauses,
@@ -115,11 +119,16 @@ export async function fetchMeasuringPlacesInArea(
     return [];
   }
 
-  const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-    buildMeasuringPlacesQuery(gameArea, selectors),
-  );
+  return getOrFetchCached(
+    measuringPlacesCacheKey(gameArea, category),
+    async () => {
+      const payload = await queryOverpass<{ elements: OverpassElement[] }>(
+        buildMeasuringPlacesQuery(gameArea, selectors),
+      );
 
-  return parseMeasuringPlaces(payload.elements, gameArea);
+      return parseMeasuringPlaces(payload.elements, gameArea);
+    },
+  );
 }
 
 export async function findNearestMeasuringPlace(

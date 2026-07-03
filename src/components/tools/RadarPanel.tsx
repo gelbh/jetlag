@@ -85,12 +85,12 @@ export function RadarPanel({
         type="button"
         onClick={onCommit}
         disabled={!canCommit}
-        className="min-h-12 w-full rounded-xl bg-sky-500 px-3 text-sm font-semibold text-slate-950 disabled:opacity-40"
+        className="btn-primary w-full"
       >
         Add radar question
       </button>
 
-      {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+      {error ? <p className="text-sm text-status-error">{error}</p> : null}
     </ToolPanelShell>
   );
 }

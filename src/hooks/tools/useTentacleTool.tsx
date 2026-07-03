@@ -23,6 +23,7 @@ import {
 } from "../../domain/tentacleQuestions";
 import { fetchTentaclePois } from "../../services/overpass";
 import { useToolSessionOptions } from "./useToolSessionOptions";
+import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface UseTentacleToolParams {
   active: boolean;
@@ -231,7 +232,7 @@ export function useTentacleTool({
       tentacleAnswerPoiName: selectedPoi?.name,
       poiIds: tentaclePois.map((poi) => poi.id),
       pois: tentaclePois,
-      color: "#22c55e",
+      color: MAP_ANNOTATION_COLORS.tentacle,
     };
     if (eliminationJson !== undefined) {
       metadata.tentacleEliminationJson = eliminationJson;

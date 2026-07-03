@@ -110,21 +110,21 @@ export function MapSettingsSheet({
             <button
               type="button"
               onClick={onClose}
-              className="min-h-12 rounded-xl bg-slate-800 px-4 text-sm font-medium"
+              className="min-h-12 rounded-xl bg-surface-raised px-4 text-sm font-medium"
             >
               Close
             </button>
           </div>
 
           {pendingWrites > 0 ? (
-            <p className="rounded-xl bg-amber-500/20 px-4 py-3 text-sm text-amber-100">
+            <p className="rounded-xl bg-status-warning-surface px-4 py-3 text-sm text-status-warning">
               {pendingWrites} pending sync
             </p>
           ) : null}
 
           <section className="space-y-3">
-            <p className="text-sm font-medium text-slate-200">Timer</p>
-            <p className="font-mono text-3xl tracking-wide text-slate-50">
+            <p className="text-sm font-medium text-ink-secondary">Timer</p>
+            <p className="font-mono text-3xl tracking-wide text-ink">
               {timerLabel}
             </p>
             <TimerActions
@@ -138,8 +138,8 @@ export function MapSettingsSheet({
           </section>
 
           <section className="space-y-3">
-            <p className="text-sm font-medium text-slate-200">Map</p>
-            <label className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-slate-800 px-4 text-sm text-slate-100">
+            <p className="text-sm font-medium text-ink-secondary">Map</p>
+            <label className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-surface-raised px-4 text-sm text-ink">
               <span>Show my location</span>
               <input
                 type="checkbox"
@@ -147,10 +147,10 @@ export function MapSettingsSheet({
                 onChange={(event) =>
                   onShowCurrentLocationChange(event.target.checked)
                 }
-                className="h-5 w-5 accent-sky-500"
+                className="h-5 w-5 accent-action"
               />
             </label>
-            <label className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-slate-800 px-4 text-sm text-slate-100">
+            <label className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-surface-raised px-4 text-sm text-ink">
               <span>Keep screen awake</span>
               <input
                 type="checkbox"
@@ -158,7 +158,7 @@ export function MapSettingsSheet({
                 onChange={(event) =>
                   onKeepScreenAwakeChange(event.target.checked)
                 }
-                className="h-5 w-5 accent-sky-500"
+                className="h-5 w-5 accent-action"
               />
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -167,8 +167,8 @@ export function MapSettingsSheet({
                 onClick={() => onDistanceUnitChange("metric")}
                 className={`min-h-12 rounded-xl px-3 text-sm ${
                   distanceUnit === "metric"
-                    ? "bg-sky-500 text-slate-950"
-                    : "bg-slate-800 text-slate-100"
+                    ? "bg-action text-action-ink"
+                    : "bg-surface-raised text-ink"
                 }`}
               >
                 Metric (km)
@@ -178,18 +178,18 @@ export function MapSettingsSheet({
                 onClick={() => onDistanceUnitChange("imperial")}
                 className={`min-h-12 rounded-xl px-3 text-sm ${
                   distanceUnit === "imperial"
-                    ? "bg-sky-500 text-slate-950"
-                    : "bg-slate-800 text-slate-100"
+                    ? "bg-action text-action-ink"
+                    : "bg-surface-raised text-ink"
                 }`}
               >
                 Imperial (mi)
               </button>
             </div>
             {locationError ? (
-              <p className="text-sm text-rose-300">{locationError}</p>
+              <p className="text-sm text-status-error">{locationError}</p>
             ) : null}
             <div className="space-y-2">
-              <p className="text-sm text-slate-300">Layer visibility</p>
+              <p className="text-sm text-ink-muted">Layer visibility</p>
               {(
                 [
                   ["radar", "Radar"],
@@ -204,7 +204,7 @@ export function MapSettingsSheet({
               ).map(([layer, label]) => (
                 <label
                   key={layer}
-                  className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-slate-800 px-4 text-sm text-slate-100"
+                  className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-surface-raised px-4 text-sm text-ink"
                 >
                   <span>{label}</span>
                   <input
@@ -213,7 +213,7 @@ export function MapSettingsSheet({
                     onChange={(event) =>
                       onLayerVisibilityChange(layer, event.target.checked)
                     }
-                    className="h-5 w-5 accent-sky-500"
+                    className="h-5 w-5 accent-action"
                   />
                 </label>
               ))}
@@ -221,7 +221,7 @@ export function MapSettingsSheet({
           </section>
 
           <section className="space-y-2">
-            <p className="text-sm font-medium text-slate-200">Transit</p>
+            <p className="text-sm font-medium text-ink-secondary">Transit</p>
             <TransitControls
               enabled={transitEnabled}
               liveEnabled={transitLiveEnabled}
@@ -242,7 +242,7 @@ export function MapSettingsSheet({
           </section>
 
           <section className="space-y-2">
-            <p className="text-sm font-medium text-slate-200">Session</p>
+            <p className="text-sm font-medium text-ink-secondary">Session</p>
             <ShareCode code={sessionCode} remote={remoteSession} />
             <SessionActions onClearMap={onClearMap} onExport={onExport} />
             {isHost ? (
@@ -250,14 +250,14 @@ export function MapSettingsSheet({
                 <button
                   type="button"
                   onClick={onResetBoard}
-                  className="min-h-12 rounded-xl bg-amber-500/20 px-3 text-sm font-medium text-amber-100"
+                  className="min-h-12 rounded-xl bg-status-warning-surface px-3 text-sm font-medium text-status-warning"
                 >
                   Reset board for everyone
                 </button>
                 <button
                   type="button"
                   onClick={onEndSession}
-                  className="min-h-12 rounded-xl bg-rose-500/20 px-3 text-sm font-medium text-rose-100"
+                  className="min-h-12 rounded-xl bg-status-error-surface px-3 text-sm font-medium text-status-error"
                 >
                   End session
                 </button>
@@ -279,7 +279,7 @@ function SettingsOverlay({
 }) {
   return (
     <div
-      className="pointer-events-auto fixed inset-0 z-[1100] bg-slate-950/70 backdrop-blur-sm"
+      className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] hud-scrim"
       onClick={onClose}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
@@ -305,7 +305,7 @@ function SessionActions({
         <button
           type="button"
           onClick={onExport}
-          className="min-h-12 rounded-xl bg-slate-800 px-3 text-sm font-medium text-slate-100"
+          className="min-h-12 rounded-xl bg-surface-raised px-3 text-sm font-medium text-ink"
         >
           Export map
         </button>
@@ -313,7 +313,7 @@ function SessionActions({
       <button
         type="button"
         onClick={onClearMap}
-        className="min-h-12 rounded-xl bg-rose-500/20 px-3 text-sm font-medium text-rose-100"
+        className="min-h-12 rounded-xl bg-status-error-surface px-3 text-sm font-medium text-status-error"
       >
         Clear map
       </button>

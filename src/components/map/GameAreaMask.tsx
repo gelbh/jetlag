@@ -7,22 +7,23 @@ import {
   type LatLngTuple,
 } from "../../domain/geometry";
 
+import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+
 interface GameAreaMaskProps {
   gameArea: GameArea;
   framing?: boolean;
 }
 
-const PLAY_AREA_COLOR = "#38bdf8";
 const FRAMING_OUTSIDE_TINT = {
   color: "transparent",
   weight: 0,
-  fillColor: "#020617",
+  fillColor: MAP_ANNOTATION_COLORS.playAreaMask,
   fillOpacity: 0.58,
 } as const;
 const PLAY_OUTSIDE_TINT = {
-  color: PLAY_AREA_COLOR,
+  color: MAP_ANNOTATION_COLORS.playArea,
   weight: 1,
-  fillColor: PLAY_AREA_COLOR,
+  fillColor: MAP_ANNOTATION_COLORS.playArea,
   fillOpacity: 0.35,
 } as const;
 
@@ -72,7 +73,7 @@ export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
         positions={gameAreaToLeafletPositions(gameArea)}
         interactive={false}
         pathOptions={{
-          color: PLAY_AREA_COLOR,
+          color: MAP_ANNOTATION_COLORS.playArea,
           weight: 2,
           fillOpacity: framing ? 0.08 : 0,
         }}

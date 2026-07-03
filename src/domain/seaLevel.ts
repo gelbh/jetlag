@@ -22,7 +22,7 @@ export interface ElevationSampleCell {
 }
 
 const MAX_SEA_LEVEL_SAMPLE_CELLS = 250;
-const DEFAULT_SEA_LEVEL_DIVISIONS = 20;
+const DEFAULT_SEA_LEVEL_DIVISIONS = 10;
 const MIN_GAME_AREA_LAT_SPAN = 0.005;
 const MIN_GAME_AREA_LNG_SPAN = 0.005;
 

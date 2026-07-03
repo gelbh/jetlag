@@ -1,11 +1,13 @@
 import type { GameArea } from "../domain/annotations";
 import { normalizeBoundingBox } from "../domain/gameAreaBounds";
 import type { LatLngTuple } from "../domain/geometryCore";
+import { fetchWithTimeout } from "./fetchWithTimeout";
 
 const NOMINATIM_ENDPOINT = "https://nominatim.openstreetmap.org/search";
 const NOMINATIM_REVERSE_ENDPOINT =
   "https://nominatim.openstreetmap.org/reverse";
 const USER_AGENT = "JetLagMapCompanion/1.0";
+const NOMINATIM_FETCH_TIMEOUT_MS = 30_000;
 
 export interface GeocodedPlace {
   id: string;
@@ -89,12 +91,16 @@ export async function searchPlaces(query: string): Promise<GeocodedPlace[]> {
   url.searchParams.set("addressdetails", "1");
   url.searchParams.set("polygon_geojson", "1");
 
-  const response = await fetch(url.toString(), {
-    headers: {
-      Accept: "application/json",
-      "User-Agent": USER_AGENT,
+  const response = await fetchWithTimeout(
+    url.toString(),
+    {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": USER_AGENT,
+      },
     },
-  });
+    NOMINATIM_FETCH_TIMEOUT_MS,
+  );
 
   if (!response.ok) {
     throw new Error("Place search failed.");
@@ -145,12 +151,16 @@ export async function reverseGeocodePoint(
   url.searchParams.set("addressdetails", "1");
   url.searchParams.set("zoom", String(adminLevel));
 
-  const response = await fetch(url.toString(), {
-    headers: {
-      Accept: "application/json",
-      "User-Agent": USER_AGENT,
+  const response = await fetchWithTimeout(
+    url.toString(),
+    {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": USER_AGENT,
+      },
     },
-  });
+    NOMINATIM_FETCH_TIMEOUT_MS,
+  );
 
   if (!response.ok) {
     throw new Error("Reverse geocoding failed.");

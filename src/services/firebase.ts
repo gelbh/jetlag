@@ -15,6 +15,11 @@ let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
 let persistenceEnabled = false;
+let persistenceUnavailable = false;
+
+export function isFirestorePersistenceUnavailable(): boolean {
+  return persistenceUnavailable;
+}
 
 function readConfig() {
   const config = {
@@ -86,6 +91,6 @@ export async function enableOfflinePersistence(): Promise<void> {
     await enableIndexedDbPersistence(getFirestoreDb());
     persistenceEnabled = true;
   } catch {
-    persistenceEnabled = true;
+    persistenceUnavailable = true;
   }
 }

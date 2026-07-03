@@ -3,6 +3,7 @@ import type { Feature, Polygon as GeoPolygon } from "geojson";
 import { ZonePanel } from "../../components/tools/ZonePanel";
 import type { LatLngTuple } from "../../domain/geometry";
 import type { AnnotationRecord } from "../../domain/annotations";
+import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface UseZoneToolParams {
   active: boolean;
@@ -51,7 +52,7 @@ export function useZoneTool({
       metadata: {
         createdAt: new Date().toISOString(),
         label: zoneLabel,
-        color: "#a855f7",
+        color: MAP_ANNOTATION_COLORS.zone,
       },
     });
 

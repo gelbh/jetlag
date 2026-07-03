@@ -77,12 +77,12 @@ export function TentaclePanel({
       toolId="tentacle"
       helper="Pick a location type, pin your anchor, and load options within 1 mile. After a named answer, the map shows a 1½ mile radar (within 1 mile plus hiding zone at the limit)."
     >
-      <p className="text-sm font-medium text-slate-100">{prompt}</p>
-      <p className="text-sm text-slate-400">
+      <p className="text-sm font-medium text-ink">{prompt}</p>
+      <p className="text-sm text-ink-dim">
         Search radius is fixed at 1 mile from your anchor.
       </p>
 
-      <label className="block text-sm text-slate-300">
+      <label className="block text-sm text-ink-muted">
         Location type
         <select
           value={categoryId}
@@ -90,7 +90,7 @@ export function TentaclePanel({
             setCopyStatus("idle");
             onCategoryChange(event.target.value as TentacleLocationCategoryId);
           }}
-          className="mt-1 min-h-12 w-full rounded-xl border border-slate-700 bg-slate-900 px-3"
+          className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-base px-3"
         >
           {availableCategories.map((category) => (
             <option key={category.id} value={category.id}>
@@ -116,7 +116,7 @@ export function TentaclePanel({
           onLoadPois();
         }}
         disabled={!hasCenter || loading}
-        className="min-h-12 w-full rounded-xl bg-slate-800 px-3 text-sm font-medium disabled:opacity-40"
+        className="min-h-12 w-full rounded-xl bg-surface-raised px-3 text-sm font-medium disabled:opacity-40"
       >
         {loading ? "Loading…" : "Load locations"}
       </button>
@@ -124,7 +124,7 @@ export function TentaclePanel({
       {poiOptions.length > 0 ? (
         <div className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm text-slate-300">Answer</p>
+            <p className="text-sm text-ink-muted">Answer</p>
             <button
               type="button"
               onClick={() => {
@@ -139,7 +139,7 @@ export function TentaclePanel({
                   setTimeout(() => setCopyStatus("idle"), ok ? 2000 : 3000);
                 })();
               }}
-              className="min-h-9 rounded-lg bg-slate-700 px-3 text-xs font-medium text-slate-100"
+              className="min-h-9 rounded-lg bg-border px-3 text-xs font-medium text-ink"
             >
               {copyStatus === "copied"
                 ? "Copied"
@@ -156,8 +156,8 @@ export function TentaclePanel({
                 onClick={() => onSelectPoi(poi.id)}
                 className={`min-h-12 w-full rounded-xl px-3 text-left text-sm ${
                   selectedPoiId === poi.id
-                    ? "bg-emerald-500 text-slate-950"
-                    : "bg-slate-800"
+                    ? "bg-status-success text-action-ink"
+                    : "bg-surface-raised"
                 }`}
               >
                 {poi.name}
@@ -167,7 +167,7 @@ export function TentaclePanel({
               type="button"
               onClick={() => onOutOfReachChange(true)}
               className={`min-h-12 w-full rounded-xl px-3 text-sm ${
-                outOfReach ? "bg-emerald-500 text-slate-950" : "bg-slate-800"
+                outOfReach ? "bg-status-success text-action-ink" : "bg-surface-raised"
               }`}
             >
               {TENTACLE_NOT_WITHIN_REACH_LABEL}
@@ -180,12 +180,12 @@ export function TentaclePanel({
         type="button"
         onClick={onCommit}
         disabled={!canCommit}
-        className="min-h-12 w-full rounded-xl bg-sky-500 px-3 text-sm font-semibold text-slate-950 disabled:opacity-40"
+        className="btn-primary w-full"
       >
         Add tentacle question
       </button>
 
-      {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+      {error ? <p className="text-sm text-status-error">{error}</p> : null}
     </ToolPanelShell>
   );
 }

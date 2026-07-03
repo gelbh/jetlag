@@ -373,32 +373,32 @@ function AnnotationEditSheetForm({
       ) : null}
 
       {annotation.type === "pin" || annotation.type === "zone" ? (
-        <label className="block text-sm text-slate-300">
+        <label className="block text-sm text-ink-muted">
           Label
           <input
             value={label}
             onChange={(event) => setLabel(event.target.value)}
-            className="mt-1 min-h-12 w-full rounded-xl border border-slate-700 bg-slate-900 px-3"
+            className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-base px-3"
           />
         </label>
       ) : null}
 
       {annotation.type === "tentacle" ? (
         <>
-          <p className="text-sm text-slate-300">
+          <p className="text-sm text-ink-muted">
             {tentacleQuestionPrompt(
               tentacleCategoryIdForAnnotation(annotation) ?? "museum",
               distanceUnit,
               annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS,
             )}
           </p>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-ink-dim">
             Tentacles always use a 1 mile radius from the anchor.
           </p>
           {(annotation.metadata.pois ?? []).length > 0 ? (
             <div className="space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm text-slate-300">Answer</p>
+                <p className="text-sm text-ink-muted">Answer</p>
                 <button
                   type="button"
                   onClick={() => {
@@ -419,7 +419,7 @@ function AnnotationEditSheetForm({
                       );
                     })();
                   }}
-                  className="min-h-9 rounded-lg bg-slate-700 px-3 text-xs font-medium text-slate-100"
+                  className="min-h-9 rounded-lg bg-border px-3 text-xs font-medium text-ink"
                 >
                   {tentacleCopyStatus === "copied"
                     ? "Copied"
@@ -439,8 +439,8 @@ function AnnotationEditSheetForm({
                     }}
                     className={`min-h-12 w-full rounded-xl px-3 text-left text-sm ${
                       tentacleAnswerPoiId === poi.id
-                        ? "bg-emerald-500 text-slate-950"
-                        : "bg-slate-800"
+                        ? "bg-status-success text-action-ink"
+                        : "bg-surface-raised"
                     }`}
                   >
                     {poi.name}
@@ -454,8 +454,8 @@ function AnnotationEditSheetForm({
                   }}
                   className={`min-h-12 w-full rounded-xl px-3 text-sm ${
                     tentacleOutOfReach
-                      ? "bg-emerald-500 text-slate-950"
-                      : "bg-slate-800"
+                      ? "bg-status-success text-action-ink"
+                      : "bg-surface-raised"
                   }`}
                 >
                   {TENTACLE_NOT_WITHIN_REACH_LABEL}
@@ -468,7 +468,7 @@ function AnnotationEditSheetForm({
 
       {annotation.type === "matching" ? (
         <>
-          <p className="text-sm text-slate-300">
+          <p className="text-sm text-ink-muted">
             {
               matchingQuestionFor(
                 annotation.metadata.matchingCategory ?? "commercial_airport",
@@ -485,7 +485,7 @@ function AnnotationEditSheetForm({
 
       {annotation.type === "measuring" ? (
         <>
-          <p className="text-sm text-slate-300">
+          <p className="text-sm text-ink-muted">
             {
               measuringQuestionFor(
                 annotation.metadata.measuringSubject ?? "location",
@@ -503,11 +503,11 @@ function AnnotationEditSheetForm({
 
       {annotation.type === "thermometer" ? (
         <>
-          <p className="text-sm font-medium text-slate-100">
+          <p className="text-sm font-medium text-ink">
             {thermometerQuestionPrompt(thermometerDistanceMeters, distanceUnit)}
           </p>
           <div>
-            <p className="text-sm text-slate-300">Distance traveled</p>
+            <p className="text-sm text-ink-muted">Distance traveled</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {availableThermometerPresets.map((preset) => (
                 <button
@@ -516,8 +516,8 @@ function AnnotationEditSheetForm({
                   onClick={() => setThermometerDistanceMeters(preset)}
                   className={`min-h-12 rounded-xl px-3 text-sm ${
                     thermometerDistanceMeters === preset
-                      ? "bg-sky-500 text-slate-950"
-                      : "bg-slate-800"
+                      ? "bg-action text-action-ink"
+                      : "bg-surface-raised"
                   }`}
                 >
                   {formatPresetDistance(preset, distanceUnit)}
@@ -530,7 +530,7 @@ function AnnotationEditSheetForm({
             onChange={setThermometerAnswer}
             options={hotterColderAnswerOptions}
           />
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-ink-dim">
             Move the thermometer endpoints on the map, then save your changes.
           </p>
         </>
@@ -540,7 +540,7 @@ function AnnotationEditSheetForm({
         <button
           type="button"
           onClick={onEditOnMap}
-          className="min-h-12 w-full rounded-xl bg-slate-800 px-3 text-sm font-medium text-slate-100"
+          className="min-h-12 w-full rounded-xl bg-surface-raised px-3 text-sm font-medium text-ink"
         >
           Edit on map
         </button>
@@ -564,7 +564,7 @@ function EditSheetFrame({
 }) {
   return (
     <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+0.5rem)] z-[1001] px-3">
-      <div className="mx-auto max-h-[min(42dvh,420px)] max-w-xl overflow-y-auto overscroll-contain rounded-3xl border border-slate-700 bg-slate-950/95 p-4 backdrop-blur">
+      <div className="hud-panel mx-auto max-h-[min(42dvh,420px)] max-w-xl overflow-y-auto overscroll-contain p-4">
         <EditSheetHeader title={title} onClose={onClose} />
         <div className="space-y-4">{children}</div>
         <div className="mt-4 grid grid-cols-2 gap-2">
@@ -572,7 +572,7 @@ function EditSheetFrame({
             <button
               type="button"
               onClick={onSave}
-              className="min-h-12 rounded-xl bg-sky-500 px-3 text-sm font-semibold text-slate-950"
+              className="btn-primary w-full"
             >
               Save changes
             </button>
@@ -580,7 +580,7 @@ function EditSheetFrame({
           <button
             type="button"
             onClick={onDelete}
-            className={`min-h-12 rounded-xl bg-rose-500/20 px-3 text-sm font-medium text-rose-200 ${
+            className={`min-h-12 rounded-xl bg-status-error-surface px-3 text-sm font-medium text-status-error ${
               onSave ? "" : "col-span-2"
             }`}
           >
@@ -602,13 +602,13 @@ function EditSheetHeader({
   return (
     <div className="mb-4 flex items-start justify-between gap-3">
       <div>
-        <p className="text-xs uppercase tracking-wide text-slate-400">Edit</p>
+        <p className="text-xs uppercase tracking-wide text-ink-dim">Edit</p>
         <h2 className="text-lg font-semibold">{title}</h2>
       </div>
       <button
         type="button"
         onClick={onClose}
-        className="min-h-12 rounded-xl bg-slate-800 px-4 text-sm font-medium"
+        className="min-h-12 rounded-xl bg-surface-raised px-4 text-sm font-medium"
       >
         Close
       </button>

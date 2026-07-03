@@ -12,13 +12,15 @@ interface TransitLayerProps {
   liveData: TransitRealtimeSnapshot | null;
 }
 
+import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+
 const MODE_COLORS: Record<TransitRouteMode, string> = {
-  rail: "#f8fafc",
-  metro: "#38bdf8",
-  tram: "#22c55e",
-  bus: "#f59e0b",
-  ferry: "#a78bfa",
-  other: "#94a3b8",
+  rail: MAP_ANNOTATION_COLORS.transit.rail,
+  metro: MAP_ANNOTATION_COLORS.transit.metro,
+  tram: MAP_ANNOTATION_COLORS.transit.tram,
+  bus: MAP_ANNOTATION_COLORS.transit.bus,
+  ferry: MAP_ANNOTATION_COLORS.transit.ferry,
+  other: MAP_ANNOTATION_COLORS.transit.other,
 };
 
 function vehicleIcon(bearing: number | undefined, color: string) {

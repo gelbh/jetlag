@@ -7,6 +7,10 @@ import type {
   TransitStop,
 } from "../domain/transit";
 import { queryOverpass } from "./overpassClient";
+import {
+  getOrFetchCached,
+  staticTransitCacheKey,
+} from "./geographicFeatureCache";
 
 const MAX_STOPS = 250;
 const MAX_ROUTES = 80;
@@ -94,41 +98,43 @@ function parseRoute(element: {
 export async function fetchStaticTransit(
   gameArea: GameArea,
 ): Promise<TransitStaticData> {
-  const bounds = gameAreaToBoundingBox(gameArea);
-  const payload = await queryOverpass<{
-    elements: Array<{
-      id: number;
-      type: "node" | "way";
-      lat?: number;
-      lon?: number;
-      tags?: Record<string, string>;
-      geometry?: Array<{ lat: number; lon: number }>;
-    }>;
-  }>(buildStaticTransitQuery(bounds));
+  return getOrFetchCached(staticTransitCacheKey(gameArea), async () => {
+    const bounds = gameAreaToBoundingBox(gameArea);
+    const payload = await queryOverpass<{
+      elements: Array<{
+        id: number;
+        type: "node" | "way";
+        lat?: number;
+        lon?: number;
+        tags?: Record<string, string>;
+        geometry?: Array<{ lat: number; lon: number }>;
+      }>;
+    }>(buildStaticTransitQuery(bounds));
 
-  const stops: TransitStop[] = [];
-  const routes: TransitRouteLine[] = [];
+    const stops: TransitStop[] = [];
+    const routes: TransitRouteLine[] = [];
 
-  for (const element of payload.elements) {
-    if (element.type === "node" && stops.length < MAX_STOPS) {
-      const stop = parseStop(element);
-      if (stop) {
-        stops.push(stop);
+    for (const element of payload.elements) {
+      if (element.type === "node" && stops.length < MAX_STOPS) {
+        const stop = parseStop(element);
+        if (stop) {
+          stops.push(stop);
+        }
+        continue;
       }
-      continue;
+
+      if (element.type === "way" && routes.length < MAX_ROUTES) {
+        const route = parseRoute(element);
+        if (route) {
+          routes.push(route);
+        }
+      }
     }
 
-    if (element.type === "way" && routes.length < MAX_ROUTES) {
-      const route = parseRoute(element);
-      if (route) {
-        routes.push(route);
-      }
-    }
-  }
-
-  return {
-    stops,
-    routes,
-    fetchedAt: new Date().toISOString(),
-  };
+    return {
+      stops,
+      routes,
+      fetchedAt: new Date().toISOString(),
+    };
+  });
 }

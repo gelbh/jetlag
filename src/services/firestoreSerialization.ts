@@ -106,6 +106,23 @@ export function serializeAnnotationForFirestore(
   };
 }
 
+function deserializeFirestoreTimestamp(value: unknown): string | undefined {
+  if (
+    value &&
+    typeof value === "object" &&
+    "toDate" in value &&
+    typeof (value as { toDate: () => Date }).toDate === "function"
+  ) {
+    return (value as { toDate: () => Date }).toDate().toISOString();
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return undefined;
+}
+
 export function deserializeAnnotationFromFirestore(
   sessionId: string,
   annotationId: string,
@@ -123,6 +140,7 @@ export function deserializeAnnotationFromFirestore(
     geometry,
     metadata: data.metadata as AnnotationRecord["metadata"],
     status: data.status as AnnotationRecord["status"],
+    updatedAt: deserializeFirestoreTimestamp(data.updatedAt),
   };
 }
 

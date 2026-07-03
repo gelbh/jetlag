@@ -15,6 +15,7 @@ import {
 } from "../../domain/thermometerQuestions";
 import type { DistanceUnit } from "../../domain/distance";
 import { useToolSessionOptions } from "./useToolSessionOptions";
+import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface UseThermometerToolParams {
   active: boolean;
@@ -129,7 +130,7 @@ export function useThermometerTool({
         hotterTowards: thermometerHotterTowards(thermometerAnswer),
         thermometerDistanceMeters,
         thermometerAnswer,
-        color: "#ef4444",
+        color: MAP_ANNOTATION_COLORS.elimination,
       },
     });
 

@@ -22,6 +22,7 @@ interface AnnotationState {
     },
   ) => AnnotationRecord;
   softDeleteAnnotation: (id: string) => void;
+  softDeleteAllForSession: (sessionId: string) => void;
   pushRedoAnnotationId: (id: string) => void;
   removeRedoAnnotationId: (id: string) => void;
   clearRedoStack: () => void;
@@ -80,6 +81,14 @@ export const useAnnotationStore = create<AnnotationState>()(
               : annotation,
           ),
         })),
+      softDeleteAllForSession: (sessionId) =>
+        set((state) => ({
+          annotations: state.annotations.map((annotation) =>
+            annotation.sessionId === sessionId && annotation.status === "active"
+              ? { ...annotation, status: "deleted" as const }
+              : annotation,
+          ),
+        })),
       pushRedoAnnotationId: (id) =>
         set((state) => ({
           redoAnnotationIds: state.redoAnnotationIds.includes(id)
@@ -123,7 +132,27 @@ export const useAnnotationStore = create<AnnotationState>()(
     }),
     {
       name: "jetlag-annotations",
-      partialize: (state) => ({ annotations: state.annotations }),
+      partialize: (state) => {
+        let sessionId: string | undefined;
+        try {
+          const raw = localStorage.getItem("jetlag-session");
+          sessionId = raw
+            ? (JSON.parse(raw) as { state?: { session?: { id?: string } } })
+                .state?.session?.id
+            : undefined;
+        } catch {
+          sessionId = undefined;
+        }
+
+        const annotations =
+          sessionId === undefined
+            ? state.annotations
+            : state.annotations.filter(
+                (annotation) => annotation.sessionId === sessionId,
+              );
+
+        return { annotations };
+      },
       merge: (persistedState, currentState) => ({
         ...currentState,
         ...((persistedState as AnnotationState | undefined) ?? {}),

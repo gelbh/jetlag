@@ -60,13 +60,13 @@ export function JoinSession() {
   };
 
   return (
-    <main className="flex min-h-full flex-col justify-center gap-6 bg-slate-950 px-5 py-8">
+    <main className="flex min-h-full flex-col justify-center gap-6 bg-surface-deep px-5 py-8">
       <div>
-        <Link to="/" className="text-sm text-slate-400">
+        <Link to="/" className="text-sm text-ink-dim">
           Back
         </Link>
-        <h1 className="mt-4 text-3xl font-semibold">Join session</h1>
-        <p className="mt-2 text-sm text-slate-300">
+        <h1 className="mt-4 text-3xl font-semibold text-ink">Join session</h1>
+        <p className="mt-2 text-sm text-ink-muted">
           Enter the 4-letter code from the host.
         </p>
       </div>
@@ -75,7 +75,7 @@ export function JoinSession() {
         value={code}
         onChange={(event) => setCode(normalizeSessionCode(event.target.value))}
         maxLength={4}
-        className="min-h-14 rounded-2xl border border-slate-700 bg-slate-900 px-4 text-center text-2xl tracking-[0.5em]"
+        className="field-input min-h-14 rounded-[var(--radius-hud-lg)] text-center text-2xl tracking-[0.5em]"
         placeholder="ABCD"
         autoCapitalize="characters"
       />
@@ -84,12 +84,12 @@ export function JoinSession() {
         type="button"
         onClick={() => void handleJoin()}
         disabled={loading}
-        className="min-h-14 rounded-2xl bg-sky-500 text-base font-semibold text-slate-950 disabled:opacity-50"
+        className="btn-primary min-h-14 disabled:opacity-50"
       >
         {loading ? "Joining…" : "Join session"}
       </button>
 
-      {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+      {error ? <p className="text-error">{error}</p> : null}
     </main>
   );
 }

@@ -20,19 +20,19 @@ export function ToolPanelShell({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <p className="text-xs uppercase tracking-wide text-slate-400">
+        <p className="text-xs font-medium text-ink-dim">
           {mapToolPlacingLabel(toolId)}
         </p>
         {prompt ? (
           typeof prompt === "string" ? (
-            <p className="text-sm font-medium text-slate-100">{prompt}</p>
+            <p className="text-sm font-medium text-ink">{prompt}</p>
           ) : (
             prompt
           )
         ) : null}
         {helper ? (
           typeof helper === "string" ? (
-            <p className="text-sm text-slate-300">{helper}</p>
+            <p className="text-sm text-ink-muted">{helper}</p>
           ) : (
             helper
           )

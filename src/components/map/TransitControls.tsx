@@ -45,13 +45,13 @@ export function TransitControls({
   onRouteFilterChange,
 }: TransitControlsProps) {
   return (
-    <div className="pointer-events-auto rounded-2xl border border-slate-700 bg-slate-950/90 p-3 backdrop-blur">
+    <div className="pointer-events-auto hud-panel rounded-[var(--radius-hud-lg)] p-3">
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={onToggleEnabled}
           className={`min-h-12 rounded-xl px-3 text-sm font-medium ${
-            enabled ? "bg-sky-500 text-slate-950" : "bg-slate-800 text-slate-100"
+            enabled ? "bg-action text-action-ink" : "bg-surface-raised text-ink"
           }`}
         >
           Transit
@@ -61,12 +61,12 @@ export function TransitControls({
           onClick={onToggleLive}
           disabled={!enabled || !liveSupported}
           className={`min-h-12 rounded-xl px-3 text-sm font-medium disabled:opacity-40 ${
-            liveEnabled ? "bg-emerald-500 text-slate-950" : "bg-slate-800 text-slate-100"
+            liveEnabled ? "bg-status-success text-action-ink" : "bg-surface-raised text-ink"
           }`}
         >
           Live
         </button>
-        <label className="min-h-12 rounded-xl bg-slate-800 px-3 text-sm text-slate-100">
+        <label className="min-h-12 rounded-xl bg-surface-raised px-3 text-sm text-ink">
           <span className="sr-only">Route filter</span>
           <select
             value={routeFilter}
@@ -85,26 +85,26 @@ export function TransitControls({
         </label>
       </div>
 
-      <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-400">
+      <div className="mt-2 flex flex-wrap gap-3 text-xs text-ink-dim">
         <span className="inline-flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-slate-100" />
+          <span className="h-2 w-2 rounded-full bg-ink" />
           Rail
         </span>
         <span className="inline-flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-sky-400" />
+          <span className="h-2 w-2 rounded-full bg-action" />
           Metro
         </span>
         <span className="inline-flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-emerald-400" />
+          <span className="h-2 w-2 rounded-full bg-status-success" />
           Tram
         </span>
         <span className="inline-flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-amber-400" />
+          <span className="h-2 w-2 rounded-full bg-status-warning" />
           Bus
         </span>
       </div>
 
-      <p className="mt-2 text-xs text-slate-400">
+      <p className="mt-2 text-xs text-ink-dim">
         {metroLabel ? `${metroLabel} · ` : ""}
         {enabled
           ? liveSupported
@@ -120,7 +120,7 @@ export function TransitControls({
         {lastUpdated ? ` · updated ${new Date(lastUpdated).toLocaleTimeString()}` : ""}
       </p>
 
-      {error ? <p className="mt-2 text-xs text-amber-200">{error}</p> : null}
+      {error ? <p className="mt-2 text-xs text-status-warning">{error}</p> : null}
     </div>
   );
 }

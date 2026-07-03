@@ -11,6 +11,7 @@ import {
   setDoc,
   updateDoc,
   where,
+  writeBatch,
   type Unsubscribe,
 } from "firebase/firestore";
 import type {
@@ -43,6 +44,10 @@ export async function ensureRemoteSessionWriteAccess(
   session: SessionRecord,
   uid: string,
 ): Promise<SessionRecord> {
+  if (session.memberUids.includes(uid)) {
+    return session;
+  }
+
   const result = await joinRemoteSessionByCode(session.code, uid);
 
   if (result.status === "joined") {
@@ -178,6 +183,32 @@ export async function writeRemoteAnnotation(
     ...buildAnnotationDocument(annotation),
     updatedAt: serverTimestamp(),
   });
+}
+
+const FIRESTORE_BATCH_LIMIT = 500;
+
+export async function writeRemoteAnnotationsBatch(
+  sessionId: string,
+  annotations: AnnotationRecord[],
+): Promise<void> {
+  if (annotations.length === 0) {
+    return;
+  }
+
+  for (let index = 0; index < annotations.length; index += FIRESTORE_BATCH_LIMIT) {
+    const chunk = annotations.slice(index, index + FIRESTORE_BATCH_LIMIT);
+    const batch = writeBatch(getFirestoreDb());
+
+    for (const annotation of chunk) {
+      const annotationRef = doc(annotationsCollection(sessionId), annotation.id);
+      batch.set(annotationRef, {
+        ...buildAnnotationDocument(annotation),
+        updatedAt: serverTimestamp(),
+      });
+    }
+
+    await batch.commit();
+  }
 }
 
 export async function createRemoteAnnotation(

@@ -19,7 +19,7 @@ export function BinaryAnswerPicker<Value extends string>({
 }: BinaryAnswerPickerProps<Value>) {
   return (
     <div className="space-y-2">
-      <p className="text-sm text-slate-300">{label}</p>
+      <p className="text-sm text-ink-muted">{label}</p>
       <div className="grid grid-cols-2 gap-2">
         {options.map((option) => (
           <button
@@ -27,7 +27,7 @@ export function BinaryAnswerPicker<Value extends string>({
             type="button"
             onClick={() => onChange(option.value)}
             className={`min-h-12 rounded-xl px-3 text-sm ${
-              value === option.value ? option.activeClassName : "bg-slate-800"
+              value === option.value ? option.activeClassName : "bg-surface-raised"
             }`}
           >
             {option.label}
