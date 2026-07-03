@@ -18,6 +18,6 @@ Optional transit overlays need `VITE_TRANSIT_PROXY_URL` pointing at the deployed
 
 ## Production deploy
 
-`npm run deploy` runs lint, tests, a production build with validated env, installs Cloud Functions dependencies, then deploys hosting, Firestore rules/indexes, and functions to the default project in `.firebaserc`.
+The frontend deploys from GitHub to Cloudflare Pages (`jetlag.gelbhart.dev`) on pushes to `main`. Set the `VITE_*` build variables in the Cloudflare Pages project settings.
 
-Set production Firebase values in `.env.production.local` or `.env.local` before deploying. After deploy, confirm `VITE_TRANSIT_PROXY_URL` in your production env matches the live `vehicles` function URL.
+`npm run deploy` runs lint, tests, installs Cloud Functions dependencies, then deploys Firestore rules/indexes and Cloud Functions to the default project in `.firebaserc`. Confirm `VITE_TRANSIT_PROXY_URL` in Cloudflare matches the live `vehicles` function URL when using transit overlays.

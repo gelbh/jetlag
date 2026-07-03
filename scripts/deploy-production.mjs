@@ -1,7 +1,6 @@
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { loadEnv } from "vite";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 
@@ -21,39 +20,6 @@ function readFirebaseProjectId() {
 }
 
 const firebaseProjectId = readFirebaseProjectId();
-const requiredFirebaseEnv = [
-  "VITE_FIREBASE_API_KEY",
-  "VITE_FIREBASE_AUTH_DOMAIN",
-  "VITE_FIREBASE_PROJECT_ID",
-  "VITE_FIREBASE_STORAGE_BUCKET",
-  "VITE_FIREBASE_MESSAGING_SENDER_ID",
-  "VITE_FIREBASE_APP_ID",
-];
-
-function loadProductionEnv() {
-  return {
-    ...loadEnv("production", projectRoot, ""),
-    ...loadEnv("production", projectRoot, "VITE_"),
-    ...process.env,
-  };
-}
-
-function assertProductionEnv() {
-  const env = loadProductionEnv();
-  const missing = requiredFirebaseEnv.filter((key) => !env[key]?.trim());
-
-  if (missing.length > 0) {
-    console.error(
-      `Missing production Firebase env for Vite build: ${missing.join(", ")}`,
-    );
-    console.error(
-      "Set them in .env.production.local or .env.local before running deploy.",
-    );
-    process.exit(1);
-  }
-
-  return env;
-}
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
@@ -87,10 +53,9 @@ function shouldDeployFunctions(env) {
 /**
  * Runs `firebase deploy`, streaming stdio while capturing text for error detection.
  * @param {string} onlyTargets
- * @param {NodeJS.ProcessEnv} env merged over `process.env` for the child process
  */
-function runFirebaseDeploy(onlyTargets, env) {
-  return new Promise((resolve) => {
+function runFirebaseDeploy(onlyTargets) {
+  return new Promise((resolveDeploy) => {
     let output = "";
     const child = spawn(
       "npx",
@@ -102,7 +67,7 @@ function runFirebaseDeploy(onlyTargets, env) {
         "--only",
         onlyTargets,
       ],
-      { cwd: projectRoot, env: { ...process.env, ...env } },
+      { cwd: projectRoot, env: process.env },
     );
 
     const append = (chunk) => {
@@ -119,44 +84,39 @@ function runFirebaseDeploy(onlyTargets, env) {
     });
 
     child.on("close", (code) => {
-      resolve({ code: code ?? 1, output });
+      resolveDeploy({ code: code ?? 1, output });
     });
     child.on("error", (err) => {
       console.error(err);
-      resolve({ code: 1, output });
+      resolveDeploy({ code: 1, output });
     });
   });
 }
 
 async function main() {
-  const productionEnv = assertProductionEnv();
-
   run("npm", ["run", "lint"]);
   run("npm", ["run", "test"]);
-  run("npm", ["run", "build"], {
-    env: { ...process.env, ...productionEnv },
-  });
 
-  const onlyFull = "hosting,firestore,functions";
-  const onlyLite = "hosting,firestore";
+  const onlyFull = "firestore,functions";
+  const onlyLite = "firestore";
 
-  if (!shouldDeployFunctions(productionEnv)) {
+  if (!shouldDeployFunctions(process.env)) {
     console.log(
       "Skipping Cloud Functions (DEPLOY_FIREBASE_FUNCTIONS is 0/false/no/off).",
     );
-    const lite = await runFirebaseDeploy(onlyLite, productionEnv);
+    const lite = await runFirebaseDeploy(onlyLite);
     if (lite.code !== 0) {
       process.exit(lite.code);
     }
-    console.log("Production deploy complete (hosting + Firestore).");
+    console.log("Backend deploy complete (Firestore).");
     return;
   }
 
   run("npm", ["ci"], { cwd: resolve(projectRoot, "functions") });
 
-  let result = await runFirebaseDeploy(onlyFull, productionEnv);
+  let result = await runFirebaseDeploy(onlyFull);
   if (result.code === 0) {
-    console.log("Production deploy complete.");
+    console.log("Backend deploy complete (Firestore + Functions).");
     return;
   }
 
@@ -164,17 +124,17 @@ async function main() {
     console.warn(
       "\nCloud Functions need the Blaze plan on this project. Retrying deploy without Functions...\n",
     );
-    result = await runFirebaseDeploy(onlyLite, productionEnv);
+    result = await runFirebaseDeploy(onlyLite);
     if (result.code !== 0) {
       process.exit(result.code);
     }
     console.warn(
-      "Deployed hosting + Firestore only. TfL vehicle proxy (Functions) was not updated.",
+      "Deployed Firestore only. TfL vehicle proxy (Functions) was not updated.",
     );
     console.warn(
       "Upgrade the Firebase project to Blaze to deploy Functions, or set DEPLOY_FIREBASE_FUNCTIONS=0 to skip the initial failed attempt.\n",
     );
-    console.log("Production deploy complete.");
+    console.log("Backend deploy complete (Firestore).");
     return;
   }
 
