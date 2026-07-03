@@ -44,7 +44,6 @@
   background: var(--color-surface-base);
   color: var(--color-ink-secondary);
   --dock-height: 4.25rem;
-  --dock-prestart-height: 8rem;
   --chrome-gap-above-dock: 0.5rem;
   --z-dock: 1000;
   --z-banner: 1001;
@@ -291,9 +290,6 @@ textarea {
   }
 }
 
-[data-dock-phase="prestart"] {
-  --dock-height: var(--dock-prestart-height);
-}
 
 .leaflet-container {
   width: 100%;

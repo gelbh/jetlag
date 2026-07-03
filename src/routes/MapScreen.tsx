@@ -561,10 +561,7 @@ export function MapScreen() {
   };
 
   return (
-    <div
-      className="relative min-h-[100dvh] h-full"
-      data-dock-phase={timer.hasStarted ? "live" : "prestart"}
-    >
+    <div className="relative min-h-[100dvh] h-full">
       {heavyToolActive ? (
         <Suspense fallback={null}>
           <HeavyMapToolsSlot
@@ -656,6 +653,18 @@ export function MapScreen() {
           syncStatus={syncStatus.status}
           queuedWrites={syncStatus.queuedWrites}
           message={syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError}
+          timerState={timer.timerState}
+          timerRunning={timer.running}
+          timerHasStarted={timer.hasStarted}
+          canStartGame={canControlTimer}
+          onStartGame={timer.start}
+          onTimerStart={timer.start}
+          onTimerPause={timer.pause}
+          onTimerReset={timer.reset}
+          timerControlsDisabled={!canControlTimer}
+          onOpenLog={() => {
+            setLogOpen(true);
+          }}
         />
 
         <MapToolsHintBanner
@@ -672,24 +681,12 @@ export function MapScreen() {
 
         <ToolDock
           activeTool={activeTool}
-          timerState={timer.timerState}
-          timerRunning={timer.running}
-          timerHasStarted={timer.hasStarted}
-          canStartGame={canControlTimer}
-          onStartGame={timer.start}
-          onTimerStart={timer.start}
-          onTimerPause={timer.pause}
-          onTimerReset={timer.reset}
-          timerControlsDisabled={!canControlTimer}
           onSelect={handleSelectTool}
           canUndo={canUndoLastTool}
           canRedo={canRedoLastTool}
           onUndo={handleUndoLastAnnotation}
           onRedo={handleRedoLastAnnotation}
           onOpenSettings={() => setSettingsOpen(true)}
-          onOpenLog={() => {
-            setLogOpen(true);
-          }}
           showToolLabels={showToolLabels}
         />
       </div>

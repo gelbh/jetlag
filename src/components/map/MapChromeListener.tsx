@@ -31,10 +31,8 @@ export function MapChromeListener({
   }, [map]);
 
   useEffect(() => {
-    const hud = chromeHudRef.current;
-
     const setInteracting = (interacting: boolean) => {
-      setHudInteracting(hud, interacting);
+      setHudInteracting(chromeHudRef.current, interacting);
       const zoom = zoomRef.current;
       if (zoom) {
         if (interacting) {
@@ -42,6 +40,12 @@ export function MapChromeListener({
         } else {
           delete zoom.dataset.mapInteracting;
         }
+      }
+    };
+
+    const showIfIdle = () => {
+      if (countRef.current === 0) {
+        setInteracting(false);
       }
     };
 
@@ -57,22 +61,28 @@ export function MapChromeListener({
     };
 
     const end = () => {
-      if (suppressRef?.current) {
+      countRef.current = Math.max(0, countRef.current - 1);
+      showIfIdle();
+    };
+
+    // Recovers missed dragend when touch gestures hand off to pinch-zoom.
+    const onMoveEnd = () => {
+      if (countRef.current === 0) {
         return;
       }
 
-      countRef.current = Math.max(0, countRef.current - 1);
-      if (countRef.current === 0) {
-        setInteracting(false);
-      }
+      countRef.current = 0;
+      setInteracting(false);
     };
 
     map.on("dragstart", start);
     map.on("dragend", end);
+    map.on("moveend", onMoveEnd);
 
     return () => {
       map.off("dragstart", start);
       map.off("dragend", end);
+      map.off("moveend", onMoveEnd);
       setInteracting(false);
       countRef.current = 0;
     };

@@ -9,35 +9,20 @@ import {
 import type { MapTool } from "../../state/sessionStore";
 import {
   HudMoreIcon,
-  HudPlayIcon,
   HudRedoIcon,
   HudSettingsIcon,
   HudToolIcon,
   HudUndoIcon,
 } from "../ui/HudIcons";
-import { PopupCloseButton } from "../ui/PopupCloseButton";
-import { TimerActions } from "./TimerActions";
-import type { TimerState } from "../../domain/timer";
-import { SessionTimerLabel } from "../session/SessionTimerLabel";
 
 interface ToolDockProps {
   activeTool: MapTool;
-  timerState: TimerState;
-  timerRunning: boolean;
-  timerHasStarted: boolean;
-  canStartGame: boolean;
-  onStartGame: () => void;
-  onTimerStart: () => void;
-  onTimerPause: () => void;
-  onTimerReset: () => void;
-  timerControlsDisabled?: boolean;
   onSelect: (tool: MapTool) => void;
   canUndo: boolean;
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
   onOpenSettings: () => void;
-  onOpenLog?: () => void;
   showToolLabels?: boolean;
 }
 
@@ -46,51 +31,37 @@ const overflowTools = MAP_TOOL_DOCK_ENTRIES.filter(
 );
 
 const QUICK_TOOL_LABELS: Record<(typeof QUICK_DOCK_TOOL_IDS)[number], string> = {
-  radar: "Radar",
   zone: "Zone",
   pin: "Pin",
 };
 
 export function ToolDock({
   activeTool,
-  timerState,
-  timerRunning,
-  timerHasStarted,
-  canStartGame,
-  onStartGame,
-  onTimerStart,
-  onTimerPause,
-  onTimerReset,
-  timerControlsDisabled = false,
   onSelect,
   canUndo,
   canRedo,
   onUndo,
   onRedo,
   onOpenSettings,
-  onOpenLog,
   showToolLabels = true,
 }: ToolDockProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [timerMenuOpen, setTimerMenuOpen] = useState(false);
   const dockRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!menuOpen && !timerMenuOpen) {
+    if (!menuOpen) {
       return;
     }
 
     const handlePointerDown = (event: PointerEvent) => {
       if (dockRef.current && !dockRef.current.contains(event.target as Node)) {
         setMenuOpen(false);
-        setTimerMenuOpen(false);
       }
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setMenuOpen(false);
-        setTimerMenuOpen(false);
       }
     };
 
@@ -100,7 +71,7 @@ export function ToolDock({
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [menuOpen, timerMenuOpen]);
+  }, [menuOpen]);
 
   const selectTool = (tool: MapTool) => {
     onSelect(activeTool === tool ? "none" : tool);
@@ -152,31 +123,6 @@ export function ToolDock({
       className="pointer-events-auto fixed inset-x-0 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2"
       style={{ bottom: 0 }}
     >
-      {timerMenuOpen ? (
-        <div
-          className="hud-panel absolute bottom-[calc(100%+var(--chrome-gap-above-dock))] left-2 min-w-[15rem] space-y-2 p-3 pt-10"
-          role="menu"
-          aria-label="Timer settings"
-        >
-          <PopupCloseButton
-            label="Close timer settings"
-            onClick={() => setTimerMenuOpen(false)}
-          />
-          <p className="px-1 font-mono text-lg tabular-nums text-ink">
-            <SessionTimerLabel timerState={timerState} />
-          </p>
-          <TimerActions
-            timerRunning={timerRunning}
-            timerHasStarted={timerHasStarted}
-            onTimerStart={onTimerStart}
-            onTimerPause={onTimerPause}
-            onTimerReset={onTimerReset}
-            onOpenLog={onOpenLog}
-            disabled={timerControlsDisabled}
-          />
-        </div>
-      ) : null}
-
       {menuOpen ? (
         <div
           className="hud-panel absolute bottom-[calc(100%+var(--chrome-gap-above-dock))] right-2 min-w-[15rem] max-w-[min(100vw-1rem,18rem)] overflow-hidden p-2"
@@ -187,45 +133,8 @@ export function ToolDock({
         </div>
       ) : null}
 
-      <div className="mx-auto flex w-full min-w-0 max-w-xl flex-col gap-1.5 rounded-[var(--radius-hud-xl)] border border-border bg-surface-panel px-1.5 py-1.5 shadow-[var(--shadow-hud-float)]">
-        {!timerHasStarted ? (
-          <div className="min-w-0 px-0.5">
-            {canStartGame ? (
-              <button
-                type="button"
-                onClick={onStartGame}
-                className="btn-primary dock-start-game min-h-11 w-full sm:min-h-12"
-              >
-                <HudPlayIcon className="h-4 w-4 shrink-0" />
-                Start game
-              </button>
-            ) : (
-              <p className="dock-waiting-host text-pretty">
-                Waiting for host…
-              </p>
-            )}
-          </div>
-        ) : null}
-
-        <div className="flex min-w-0 items-stretch gap-1 sm:gap-1.5">
-          <div className="dock-segment shrink-0">
-          <button
-            type="button"
-            onClick={() => {
-              setTimerMenuOpen((open) => !open);
-              setMenuOpen(false);
-            }}
-            className={`hud-chrome min-h-11 shrink-0 px-2 font-mono text-xs tabular-nums shadow-none sm:min-h-12 sm:px-3 sm:text-sm ${
-              timerRunning ? "hud-chrome-active" : ""
-            }`}
-            aria-label="Elapsed time. Open timer settings"
-            aria-expanded={timerMenuOpen}
-            aria-haspopup="menu"
-            aria-live="polite"
-          >
-            <SessionTimerLabel timerState={timerState} />
-          </button>
-
+      <div className="mx-auto flex w-full min-w-0 max-w-xl items-stretch gap-1 rounded-[var(--radius-hud-xl)] border border-border bg-surface-panel px-1.5 py-1.5 shadow-[var(--shadow-hud-float)] sm:gap-1.5">
+        <div className="dock-segment shrink-0">
           <button
             type="button"
             onClick={onUndo}
@@ -244,14 +153,14 @@ export function ToolDock({
           >
             <HudRedoIcon className="h-5 w-5" />
           </button>
-          </div>
+        </div>
 
-          <div className="dock-segment-divider shrink-0" aria-hidden="true" />
+        <div className="dock-segment-divider shrink-0" aria-hidden="true" />
 
-          <div
-            className="dock-segment min-w-0 flex-1 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            aria-label="Map tools"
-          >
+        <div
+          className="dock-segment min-w-0 flex-1 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          aria-label="Map tools"
+        >
           {QUICK_DOCK_TOOL_IDS.map((toolId) => {
             const entry = MAP_TOOL_DOCK_ENTRIES.find(
               (item) => item.id === toolId,
@@ -282,10 +191,7 @@ export function ToolDock({
 
           <button
             type="button"
-            onClick={() => {
-              setMenuOpen((open) => !open);
-              setTimerMenuOpen(false);
-            }}
+            onClick={() => setMenuOpen((open) => !open)}
             className={`hud-chrome h-11 w-11 shrink-0 shadow-none sm:h-12 sm:w-12 ${
               menuOpen || overflowTools.some((tool) => tool.id === activeTool)
                 ? "hud-chrome-active"
@@ -310,7 +216,6 @@ export function ToolDock({
           >
             <HudSettingsIcon className="h-5 w-5" />
           </button>
-        </div>
         </div>
       </div>
     </div>
