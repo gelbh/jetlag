@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { LatLngTuple } from "../domain/geometry";
-import {
-  clearElevationCacheForTests,
-  fetchElevation,
-  fetchElevations,
-} from "./elevation";
+import { clearElevationCacheForTests, fetchElevations } from "./elevation";
 
 const dublinPoint: LatLngTuple = [53.29602, -6.139977];
 
@@ -17,6 +13,15 @@ function mockElevationResponse(elevations: number[]) {
   };
 }
 
+async function fetchSingleElevation(point: LatLngTuple): Promise<number> {
+  const [elevation] = await fetchElevations([point]);
+  if (!Number.isFinite(elevation)) {
+    throw new Error("Elevation lookup returned no data for that point.");
+  }
+
+  return elevation;
+}
+
 describe("elevation", () => {
   afterEach(() => {
     clearElevationCacheForTests();
@@ -27,8 +32,8 @@ describe("elevation", () => {
     const fetchMock = vi.fn().mockResolvedValue(mockElevationResponse([42]));
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(fetchElevation(dublinPoint)).resolves.toBe(42);
-    await expect(fetchElevation(dublinPoint)).resolves.toBe(42);
+    await expect(fetchSingleElevation(dublinPoint)).resolves.toBe(42);
+    await expect(fetchSingleElevation(dublinPoint)).resolves.toBe(42);
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
@@ -45,7 +50,7 @@ describe("elevation", () => {
       .mockResolvedValue(mockElevationResponse([18]));
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(fetchElevation(dublinPoint)).resolves.toBe(18);
+    await expect(fetchSingleElevation(dublinPoint)).resolves.toBe(18);
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 

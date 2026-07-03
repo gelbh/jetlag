@@ -4,14 +4,22 @@ import type { DistanceUnit } from "../../domain/distance";
 import {
   isTentacleCategoryAvailable,
   TENTACLE_LOCATION_CATEGORIES,
-  TENTACLE_NOT_WITHIN_REACH_LABEL,
-  tentacleHiderAnswerClipboardText,
   tentacleQuestionPrompt,
   type TentacleLocationCategoryId,
 } from "../../domain/tentacleQuestions";
-import { copyToClipboard } from "../../platform/copyToClipboard";
-import { PlacementActions } from "./shared/PlacementActions";
+import { AnchorControls } from "./shared/AnchorControls";
+import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
+import { ResolvedReadout } from "./shared/ResolvedReadout";
+import { TentacleAnswerPicker } from "./shared/TentacleAnswerPicker";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
+import { ToolSection } from "./shared/ToolSection";
+import { ToolStepper } from "./shared/ToolStepper";
+import { ToolWizardNav } from "./shared/ToolWizardNav";
+import {
+  buildSteps,
+  deriveStepStates,
+  TENTACLE_STEPS,
+} from "./shared/toolStepUtils";
 
 interface TentaclePanelProps {
   categoryId: TentacleLocationCategoryId;
@@ -28,7 +36,6 @@ interface TentaclePanelProps {
   onCategoryChange: (categoryId: TentacleLocationCategoryId) => void;
   onUseGps: () => void;
   onPlaceAtMapTap: () => void;
-  onLoadPois: () => void;
   onSelectPoi: (poiId: string) => void;
   onOutOfReachChange: (outOfReach: boolean) => void;
   onCommit: () => void;
@@ -49,20 +56,20 @@ export function TentaclePanel({
   onCategoryChange,
   onUseGps,
   onPlaceAtMapTap,
-  onLoadPois,
   onSelectPoi,
   onOutOfReachChange,
   onCommit,
 }: TentaclePanelProps) {
-  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">(
-    "idle",
-  );
+  const [stepIndex, setStepIndex] = useState(0);
+  const step = TENTACLE_STEPS[stepIndex]?.id ?? "category";
+
   const prompt = tentacleQuestionPrompt(categoryId, distanceUnit);
   const categorySelectionAvailable = isTentacleCategoryAvailable(
     categoryId,
     usedCategoryIds,
   );
   const hasRecordedAnswer = outOfReach || selectedPoiId !== null;
+  const locationsReady = poiOptions.length > 0 || (!loading && hasCenter);
   const canCommit =
     hasCenter &&
     poiOptions.length > 0 &&
@@ -72,120 +79,118 @@ export function TentaclePanel({
     isTentacleCategoryAvailable(category.id, usedCategoryIds),
   );
 
+  const goNext = () => {
+    setStepIndex((current) => Math.min(current + 1, TENTACLE_STEPS.length - 1));
+  };
+
+  const goBack = () => {
+    setStepIndex((current) => Math.max(current - 1, 0));
+  };
+
+  const stepper = (
+    <ToolStepper
+      steps={buildSteps(
+        TENTACLE_STEPS,
+        deriveStepStates(TENTACLE_STEPS.length, stepIndex),
+      )}
+    />
+  );
+
   return (
-    <ToolPanelShell
-      toolId="tentacle"
-      helper="Pick a location type, pin your anchor, and load options within 1 mile. After a named answer, the map shows a 1½ mile radar (within 1 mile plus hiding zone at the limit)."
-    >
-      <p className="text-sm font-medium text-ink">{prompt}</p>
-      <p className="text-sm text-ink-dim">
-        Search radius is fixed at 1 mile from your anchor.
-      </p>
-
-      <label className="block text-sm text-ink-muted">
-        Location type
-        <select
-          value={categoryId}
-          onChange={(event) => {
-            setCopyStatus("idle");
-            onCategoryChange(event.target.value as TentacleLocationCategoryId);
-          }}
-          className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-base px-3"
-        >
-          {availableCategories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.label}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <PlacementActions
-        awaitingPlacement={awaitingPlacement}
-        hasCenter={hasCenter}
-        gpsLoading={gpsLoading}
-        onUseGps={onUseGps}
-        onPlaceAtMapTap={onPlaceAtMapTap}
-        centerHint="Anchor pinned on the map. Tap again to move it."
-      />
-
-      <button
-        type="button"
-        onClick={() => {
-          setCopyStatus("idle");
-          onLoadPois();
-        }}
-        disabled={!hasCenter || loading}
-        className="min-h-12 w-full rounded-xl bg-surface-raised px-3 text-sm font-medium disabled:opacity-40"
-      >
-        {loading ? "Loading…" : "Load locations"}
-      </button>
-
-      {poiOptions.length > 0 ? (
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm text-ink-muted">Answer</p>
-            <button
-              type="button"
-              onClick={() => {
-                void (async () => {
-                  const text = tentacleHiderAnswerClipboardText(
-                    categoryId,
-                    distanceUnit,
-                    poiOptions,
-                  );
-                  const ok = await copyToClipboard(text);
-                  setCopyStatus(ok ? "copied" : "failed");
-                  setTimeout(() => setCopyStatus("idle"), ok ? 2000 : 3000);
-                })();
-              }}
-              className="min-h-9 rounded-lg bg-border px-3 text-xs font-medium text-ink"
+    <ToolPanelShell toolId="tentacle" stepper={stepper}>
+      {step === "category" ? (
+        <ToolSection first compact status="active">
+          <QuestionPromptBlock
+            prompt={prompt}
+            ruleSummary="Search radius is fixed at 1 mile from your anchor."
+          />
+          <label className="field-label">
+            Location type
+            <select
+              value={categoryId}
+              onChange={(event) =>
+                onCategoryChange(event.target.value as TentacleLocationCategoryId)
+              }
+              className="field-input"
             >
-              {copyStatus === "copied"
-                ? "Copied"
-                : copyStatus === "failed"
-                  ? "Copy failed"
-                  : "Copy list for hiders"}
-            </button>
-          </div>
-          <div className="space-y-2">
-            {poiOptions.map((poi) => (
-              <button
-                key={poi.id}
-                type="button"
-                onClick={() => onSelectPoi(poi.id)}
-                className={`min-h-12 w-full rounded-xl px-3 text-left text-sm ${
-                  selectedPoiId === poi.id
-                    ? "bg-status-success text-action-ink"
-                    : "bg-surface-raised"
-                }`}
-              >
-                {poi.name}
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={() => onOutOfReachChange(true)}
-              className={`min-h-12 w-full rounded-xl px-3 text-sm ${
-                outOfReach ? "bg-status-success text-action-ink" : "bg-surface-raised"
-              }`}
-            >
-              {TENTACLE_NOT_WITHIN_REACH_LABEL}
-            </button>
-          </div>
-        </div>
+              {availableCategories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </ToolSection>
       ) : null}
 
-      <button
-        type="button"
-        onClick={onCommit}
-        disabled={!canCommit}
-        className="btn-primary w-full"
-      >
-        Add tentacle question
-      </button>
+      {step === "anchor" ? (
+        <ToolSection first compact status="active">
+          <AnchorControls
+            awaitingPlacement={awaitingPlacement}
+            hasAnchor={hasCenter}
+            gpsLoading={gpsLoading}
+            onUseGps={onUseGps}
+            onPlaceAtMapTap={onPlaceAtMapTap}
+            anchorHint="Anchor pinned on the map. Tap again to move it."
+            gpsLoadingLabel="Locating…"
+          />
+        </ToolSection>
+      ) : null}
 
-      {error ? <p className="text-sm text-status-error">{error}</p> : null}
+      {step === "locations" ? (
+        <ToolSection first compact status="active">
+          {loading ? (
+            <ResolvedReadout variant="dim">
+              Loading locations within 1 mile…
+            </ResolvedReadout>
+          ) : poiOptions.length > 0 ? (
+            <ResolvedReadout>
+              {poiOptions.length} location{poiOptions.length === 1 ? "" : "s"}{" "}
+              found within 1 mile.
+            </ResolvedReadout>
+          ) : (
+            <ResolvedReadout variant="warning">
+              No named locations were found within 1 mile.
+            </ResolvedReadout>
+          )}
+        </ToolSection>
+      ) : null}
+
+      {step === "answer" ? (
+        <>
+          <TentacleAnswerPicker
+            categoryId={categoryId}
+            distanceUnit={distanceUnit}
+            poiOptions={poiOptions}
+            selectedPoiId={selectedPoiId}
+            outOfReach={outOfReach}
+            onSelectPoi={onSelectPoi}
+            onOutOfReachChange={onOutOfReachChange}
+          />
+          <button
+            type="button"
+            onClick={onCommit}
+            disabled={!canCommit}
+            className="btn-primary w-full disabled:opacity-40"
+          >
+            Add tentacle question
+          </button>
+        </>
+      ) : null}
+
+      <ToolWizardNav
+        stepIndex={stepIndex}
+        stepCount={TENTACLE_STEPS.length}
+        onBack={goBack}
+        onNext={goNext}
+        canGoNext={
+          (step === "category" && categorySelectionAvailable) ||
+          (step === "anchor" && hasCenter) ||
+          (step === "locations" && locationsReady && !loading)
+        }
+      />
+
+      {error ? <p className="text-error">{error}</p> : null}
     </ToolPanelShell>
   );
 }

@@ -1,10 +1,16 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { MobileSheet } from "../ui/MobileSheet";
-import { TimerActions } from "../tools/TimerActions";
 import { ShareCode } from "./ShareCode";
 import { TransitControls } from "../map/TransitControls";
+import {
+  SettingsSegmentControl,
+  type SettingsSegment,
+} from "./SettingsSegmentControl";
+import { SettingsToggleRow } from "./SettingsToggleRow";
+import { LayerVisibilityGrid } from "./LayerVisibilityGrid";
 import type { TransitRouteFilter } from "../../domain/transit";
 import type { DistanceUnit } from "../../domain/distance";
+import type { MapStyle } from "../../domain/mapBasemaps";
 import type { LayerVisibility } from "../../state/sessionStore";
 
 interface MapSettingsSheetProps {
@@ -22,13 +28,9 @@ interface MapSettingsSheetProps {
   ) => void;
   distanceUnit: DistanceUnit;
   onDistanceUnitChange: (unit: DistanceUnit) => void;
+  mapStyle: MapStyle;
+  onMapStyleChange: (style: MapStyle) => void;
   locationError?: string | null;
-  timerRunning: boolean;
-  timerHasStarted: boolean;
-  timerLabel: string;
-  onTimerStart: () => void;
-  onTimerPause: () => void;
-  onTimerReset: () => void;
   transitEnabled: boolean;
   transitLiveEnabled: boolean;
   transitLiveSupported: boolean;
@@ -44,7 +46,6 @@ interface MapSettingsSheetProps {
   onToggleTransit: () => void;
   onToggleLiveTransit: () => void;
   onTransitRouteFilterChange: (value: TransitRouteFilter) => void;
-  onOpenLog: () => void;
   onClearMap: () => void;
   onExport?: () => void;
   isHost?: boolean;
@@ -66,13 +67,9 @@ export function MapSettingsSheet({
   onLayerVisibilityChange,
   distanceUnit,
   onDistanceUnitChange,
+  mapStyle,
+  onMapStyleChange,
   locationError,
-  timerRunning,
-  timerHasStarted,
-  timerLabel,
-  onTimerStart,
-  onTimerPause,
-  onTimerReset,
   transitEnabled,
   transitLiveEnabled,
   transitLiveSupported,
@@ -88,7 +85,6 @@ export function MapSettingsSheet({
   onToggleTransit,
   onToggleLiveTransit,
   onTransitRouteFilterChange,
-  onOpenLog,
   onClearMap,
   onExport,
   isHost = false,
@@ -97,6 +93,8 @@ export function MapSettingsSheet({
   sessionCode,
   remoteSession,
 }: MapSettingsSheetProps) {
+  const [segment, setSegment] = useState<SettingsSegment>("map");
+
   if (!open) {
     return null;
   }
@@ -104,129 +102,47 @@ export function MapSettingsSheet({
   return (
     <SettingsOverlay onClose={onClose}>
       <MobileSheet maxHeightClassName="max-h-[min(85dvh,760px)]">
-        <div className="space-y-5">
+        <div className="sticky top-0 z-10 -mx-4 space-y-3 bg-surface-panel px-4 pb-3">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-lg font-semibold">Settings</h2>
             <button
               type="button"
               onClick={onClose}
-              className="min-h-12 rounded-xl bg-surface-raised px-4 text-sm font-medium"
+              className="min-h-12 rounded-[var(--radius-hud-md)] bg-surface-raised px-4 text-sm font-medium"
             >
               Close
             </button>
           </div>
 
           {pendingWrites > 0 ? (
-            <p className="rounded-xl bg-status-warning-surface px-4 py-3 text-sm text-status-warning">
+            <p className="rounded-[var(--radius-hud-md)] bg-status-warning-surface px-4 py-3 text-sm text-status-warning">
               {pendingWrites} pending sync
             </p>
           ) : null}
 
-          <section className="space-y-3">
-            <p className="text-sm font-medium text-ink-secondary">Timer</p>
-            <p className="font-mono text-3xl tracking-wide text-ink">
-              {timerLabel}
-            </p>
-            <TimerActions
-              timerRunning={timerRunning}
-              timerHasStarted={timerHasStarted}
-              onTimerStart={onTimerStart}
-              onTimerPause={onTimerPause}
-              onTimerReset={onTimerReset}
-              onOpenLog={onOpenLog}
-            />
-          </section>
+          <SettingsSegmentControl value={segment} onChange={setSegment} />
+        </div>
 
-          <section className="space-y-3">
-            <p className="text-sm font-medium text-ink-secondary">Map</p>
-            <label className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-surface-raised px-4 text-sm text-ink">
-              <span>Show my location</span>
-              <input
-                type="checkbox"
-                checked={showCurrentLocation}
-                onChange={(event) =>
-                  onShowCurrentLocationChange(event.target.checked)
-                }
-                className="h-5 w-5 accent-action"
-              />
-            </label>
-            <label className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-surface-raised px-4 text-sm text-ink">
-              <span>Keep screen awake</span>
-              <input
-                type="checkbox"
-                checked={keepScreenAwake}
-                onChange={(event) =>
-                  onKeepScreenAwakeChange(event.target.checked)
-                }
-                className="h-5 w-5 accent-action"
-              />
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => onDistanceUnitChange("metric")}
-                className={`min-h-12 rounded-xl px-3 text-sm ${
-                  distanceUnit === "metric"
-                    ? "bg-action text-action-ink"
-                    : "bg-surface-raised text-ink"
-                }`}
-              >
-                Metric (km)
-              </button>
-              <button
-                type="button"
-                onClick={() => onDistanceUnitChange("imperial")}
-                className={`min-h-12 rounded-xl px-3 text-sm ${
-                  distanceUnit === "imperial"
-                    ? "bg-action text-action-ink"
-                    : "bg-surface-raised text-ink"
-                }`}
-              >
-                Imperial (mi)
-              </button>
-            </div>
-            {locationError ? (
-              <p className="text-sm text-status-error">{locationError}</p>
-            ) : null}
-            <div className="space-y-2">
-              <p className="text-sm text-ink-muted">Layer visibility</p>
-              {(
-                [
-                  ["radar", "Radar"],
-                  ["thermometer", "Thermometer"],
-                  ["measuring", "Measuring"],
-                  ["matching", "Matching"],
-                  ["zone", "Zone"],
-                  ["pin", "Pin"],
-                  ["tentacle", "Tentacle"],
-                  ["transit", "Transit"],
-                ] as const
-              ).map(([layer, label]) => (
-                <label
-                  key={layer}
-                  className="flex min-h-12 items-center justify-between gap-3 rounded-xl bg-surface-raised px-4 text-sm text-ink"
-                >
-                  <span>{label}</span>
-                  <input
-                    type="checkbox"
-                    checked={layerVisibility[layer]}
-                    onChange={(event) =>
-                      onLayerVisibilityChange(layer, event.target.checked)
-                    }
-                    className="h-5 w-5 accent-action"
-                  />
-                </label>
-              ))}
-            </div>
-          </section>
-
-          <section className="space-y-2">
-            <p className="text-sm font-medium text-ink-secondary">Transit</p>
-            <TransitControls
-              enabled={transitEnabled}
-              liveEnabled={transitLiveEnabled}
-              liveSupported={transitLiveSupported}
-              routeFilter={transitRouteFilter}
+        <div
+          key={segment}
+          role="tabpanel"
+          className="motion-safe:animate-[settings-fade-in_150ms_ease-out] motion-reduce:animate-none"
+        >
+          {segment === "map" ? (
+            <MapSegment
+              showCurrentLocation={showCurrentLocation}
+              onShowCurrentLocationChange={onShowCurrentLocationChange}
+              keepScreenAwake={keepScreenAwake}
+              onKeepScreenAwakeChange={onKeepScreenAwakeChange}
+              distanceUnit={distanceUnit}
+              onDistanceUnitChange={onDistanceUnitChange}
+              mapStyle={mapStyle}
+              onMapStyleChange={onMapStyleChange}
+              locationError={locationError}
+              transitEnabled={transitEnabled}
+              transitLiveEnabled={transitLiveEnabled}
+              transitLiveSupported={transitLiveSupported}
+              transitRouteFilter={transitRouteFilter}
               metroLabel={metroLabel}
               loadingStatic={loadingStatic}
               loadingLive={loadingLive}
@@ -234,39 +150,232 @@ export function MapSettingsSheet({
               routeCount={routeCount}
               vehicleCount={vehicleCount}
               lastUpdated={lastUpdated}
-              error={transitError}
-              onToggleEnabled={onToggleTransit}
-              onToggleLive={onToggleLiveTransit}
-              onRouteFilterChange={onTransitRouteFilterChange}
+              transitError={transitError}
+              onToggleTransit={onToggleTransit}
+              onToggleLiveTransit={onToggleLiveTransit}
+              onTransitRouteFilterChange={onTransitRouteFilterChange}
             />
-          </section>
+          ) : null}
 
-          <section className="space-y-2">
-            <p className="text-sm font-medium text-ink-secondary">Session</p>
-            <ShareCode code={sessionCode} remote={remoteSession} />
-            <SessionActions onClearMap={onClearMap} onExport={onExport} />
-            {isHost ? (
-              <div className="grid gap-2">
-                <button
-                  type="button"
-                  onClick={onResetBoard}
-                  className="min-h-12 rounded-xl bg-status-warning-surface px-3 text-sm font-medium text-status-warning"
-                >
-                  Reset board for everyone
-                </button>
-                <button
-                  type="button"
-                  onClick={onEndSession}
-                  className="min-h-12 rounded-xl bg-status-error-surface px-3 text-sm font-medium text-status-error"
-                >
-                  End session
-                </button>
-              </div>
-            ) : null}
-          </section>
+          {segment === "layers" ? (
+            <LayerVisibilityGrid
+              layerVisibility={layerVisibility}
+              onLayerVisibilityChange={onLayerVisibilityChange}
+            />
+          ) : null}
+
+          {segment === "session" ? (
+            <SessionSegment
+              sessionCode={sessionCode}
+              remoteSession={remoteSession}
+              onClearMap={onClearMap}
+              onExport={onExport}
+              isHost={isHost}
+              onResetBoard={onResetBoard}
+              onEndSession={onEndSession}
+            />
+          ) : null}
         </div>
       </MobileSheet>
     </SettingsOverlay>
+  );
+}
+
+function MapSegment({
+  showCurrentLocation,
+  onShowCurrentLocationChange,
+  keepScreenAwake,
+  onKeepScreenAwakeChange,
+  distanceUnit,
+  onDistanceUnitChange,
+  mapStyle,
+  onMapStyleChange,
+  locationError,
+  transitEnabled,
+  transitLiveEnabled,
+  transitLiveSupported,
+  transitRouteFilter,
+  metroLabel,
+  loadingStatic,
+  loadingLive,
+  stopCount,
+  routeCount,
+  vehicleCount,
+  lastUpdated,
+  transitError,
+  onToggleTransit,
+  onToggleLiveTransit,
+  onTransitRouteFilterChange,
+}: {
+  showCurrentLocation: boolean;
+  onShowCurrentLocationChange: (enabled: boolean) => void;
+  keepScreenAwake: boolean;
+  onKeepScreenAwakeChange: (enabled: boolean) => void;
+  distanceUnit: DistanceUnit;
+  onDistanceUnitChange: (unit: DistanceUnit) => void;
+  mapStyle: MapStyle;
+  onMapStyleChange: (style: MapStyle) => void;
+  locationError?: string | null;
+  transitEnabled: boolean;
+  transitLiveEnabled: boolean;
+  transitLiveSupported: boolean;
+  transitRouteFilter: TransitRouteFilter;
+  metroLabel: string | null;
+  loadingStatic: boolean;
+  loadingLive: boolean;
+  stopCount: number;
+  routeCount: number;
+  vehicleCount: number;
+  lastUpdated?: string;
+  transitError?: string | null;
+  onToggleTransit: () => void;
+  onToggleLiveTransit: () => void;
+  onTransitRouteFilterChange: (value: TransitRouteFilter) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <SettingsToggleRow
+        label="Show my location"
+        checked={showCurrentLocation}
+        onChange={onShowCurrentLocationChange}
+      />
+      <SettingsToggleRow
+        label="Keep screen awake"
+        checked={keepScreenAwake}
+        onChange={onKeepScreenAwakeChange}
+      />
+
+      <ChoicePair
+        left={{ value: "metric", label: "Metric (km)" }}
+        right={{ value: "imperial", label: "Imperial (mi)" }}
+        selected={distanceUnit}
+        onSelect={onDistanceUnitChange}
+      />
+
+      <ChoicePair
+        left={{ value: "standard", label: "Standard map" }}
+        right={{ value: "satellite", label: "Satellite" }}
+        selected={mapStyle}
+        onSelect={onMapStyleChange}
+      />
+
+      {locationError ? (
+        <p className="text-sm text-status-error">{locationError}</p>
+      ) : null}
+
+      <TransitControls
+        variant="inline"
+        enabled={transitEnabled}
+        liveEnabled={transitLiveEnabled}
+        liveSupported={transitLiveSupported}
+        routeFilter={transitRouteFilter}
+        metroLabel={metroLabel}
+        loadingStatic={loadingStatic}
+        loadingLive={loadingLive}
+        stopCount={stopCount}
+        routeCount={routeCount}
+        vehicleCount={vehicleCount}
+        lastUpdated={lastUpdated}
+        error={transitError}
+        onToggleEnabled={onToggleTransit}
+        onToggleLive={onToggleLiveTransit}
+        onRouteFilterChange={onTransitRouteFilterChange}
+      />
+    </div>
+  );
+}
+
+function ChoicePair<T extends string>({
+  left,
+  right,
+  selected,
+  onSelect,
+}: {
+  left: { value: T; label: string };
+  right: { value: T; label: string };
+  selected: T;
+  onSelect: (value: T) => void;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {[left, right].map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          onClick={() => onSelect(option.value)}
+          className={`min-h-12 rounded-[var(--radius-hud-md)] px-3 text-sm ${
+            selected === option.value
+              ? "bg-action text-action-ink"
+              : "bg-surface-raised text-ink"
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function SessionSegment({
+  sessionCode,
+  remoteSession,
+  onClearMap,
+  onExport,
+  isHost,
+  onResetBoard,
+  onEndSession,
+}: {
+  sessionCode: string;
+  remoteSession: boolean;
+  onClearMap: () => void;
+  onExport?: () => void;
+  isHost: boolean;
+  onResetBoard?: () => void;
+  onEndSession?: () => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <ShareCode code={sessionCode} remote={remoteSession} />
+
+      {onExport ? (
+        <button
+          type="button"
+          onClick={onExport}
+          className="min-h-12 w-full rounded-[var(--radius-hud-md)] bg-surface-raised px-3 text-sm font-medium text-ink"
+        >
+          Export map
+        </button>
+      ) : null}
+
+      <div className="space-y-2 border-t border-border pt-4">
+        <button
+          type="button"
+          onClick={onClearMap}
+          className="min-h-12 w-full rounded-[var(--radius-hud-md)] bg-status-error-surface px-3 text-sm font-medium text-status-error"
+        >
+          Clear map
+        </button>
+
+        {isHost ? (
+          <>
+            <button
+              type="button"
+              onClick={onResetBoard}
+              className="min-h-12 w-full rounded-[var(--radius-hud-md)] bg-status-warning-surface px-3 text-sm font-medium text-status-warning"
+            >
+              Reset board for everyone
+            </button>
+            <button
+              type="button"
+              onClick={onEndSession}
+              className="min-h-12 w-full rounded-[var(--radius-hud-md)] bg-status-error-surface px-3 text-sm font-medium text-status-error"
+            >
+              End session
+            </button>
+          </>
+        ) : null}
+      </div>
+    </div>
   );
 }
 
@@ -288,35 +397,6 @@ function SettingsOverlay({
       }}
     >
       <div onClick={(event) => event.stopPropagation()}>{children}</div>
-    </div>
-  );
-}
-
-function SessionActions({
-  onClearMap,
-  onExport,
-}: {
-  onClearMap: () => void;
-  onExport?: () => void;
-}) {
-  return (
-    <div className="grid gap-2">
-      {onExport ? (
-        <button
-          type="button"
-          onClick={onExport}
-          className="min-h-12 rounded-xl bg-surface-raised px-3 text-sm font-medium text-ink"
-        >
-          Export map
-        </button>
-      ) : null}
-      <button
-        type="button"
-        onClick={onClearMap}
-        className="min-h-12 rounded-xl bg-status-error-surface px-3 text-sm font-medium text-status-error"
-      >
-        Clear map
-      </button>
     </div>
   );
 }

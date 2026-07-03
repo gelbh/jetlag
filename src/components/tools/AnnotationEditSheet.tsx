@@ -10,13 +10,18 @@ import {
   formatPresetDistance,
   parseDistanceInput,
 } from "../../domain/distance";
-import { RadarAnswerPicker, RadarDistancePicker } from "./RadarDistancePicker";
+import { RadarDistancePicker } from "./RadarDistancePicker";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import {
   closerFurtherAnswerOptions,
   hotterColderAnswerOptions,
   yesNoAnswerOptions,
 } from "./shared/binaryAnswerOptions";
+import { OptionChip, OptionChipRow } from "./shared/OptionChip";
+import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
+import { ResolvedReadout } from "./shared/ResolvedReadout";
+import { TentacleAnswerPicker } from "./shared/TentacleAnswerPicker";
+import { ToolSection } from "./shared/ToolSection";
 import {
   isRadarPresetRadius,
   radarAnswerFromInside,
@@ -39,16 +44,12 @@ import {
 } from "../../services/matchingFeatures";
 import {
   TENTACLE_ANSWER_RADIUS_METERS,
-  TENTACLE_NOT_WITHIN_REACH_LABEL,
   TENTACLE_SEARCH_RADIUS_METERS,
   tentacleCategoryIdForAnnotation,
-  tentacleHiderAnswerClipboardText,
   tentacleQuestionPrompt,
   type TentacleLocationCategoryId,
 } from "../../domain/tentacleQuestions";
 import { tentacleEliminationJsonForAnswer } from "../../domain/tentacleGeometry";
-import { copyToClipboard } from "../../platform/copyToClipboard";
-
 import {
   measuringQuestionFor,
   type MeasuringAnswer,
@@ -161,9 +162,6 @@ function AnnotationEditSheetForm({
       ? (annotation.metadata.highlightedPoiId ?? null)
       : null,
   );
-  const [tentacleCopyStatus, setTentacleCopyStatus] = useState<
-    "idle" | "copied" | "failed"
-  >("idle");
 
   const resolvedRadius = chooseCustom
     ? (parseDistanceInput(customRadius, distanceUnit) ?? radiusMeters)
@@ -365,10 +363,17 @@ function AnnotationEditSheetForm({
             onChooseSelect={() => setChooseCustom(true)}
             onCustomRadiusChange={setCustomRadius}
           />
-          <RadarAnswerPicker
-            answer={radarAnswer}
-            onAnswerChange={setRadarAnswer}
-          />
+          <ToolSection
+            title="Answer"
+            status={radarAnswer !== null ? "complete" : "active"}
+          >
+            <BinaryAnswerPicker
+              value={radarAnswer}
+              onChange={setRadarAnswer}
+              options={yesNoAnswerOptions}
+              label=""
+            />
+          </ToolSection>
         </>
       ) : null}
 
@@ -385,163 +390,132 @@ function AnnotationEditSheetForm({
 
       {annotation.type === "tentacle" ? (
         <>
-          <p className="text-sm text-ink-muted">
-            {tentacleQuestionPrompt(
-              tentacleCategoryIdForAnnotation(annotation) ?? "museum",
-              distanceUnit,
-              annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS,
-            )}
-          </p>
-          <p className="text-sm text-ink-dim">
-            Tentacles always use a 1 mile radius from the anchor.
-          </p>
-          {(annotation.metadata.pois ?? []).length > 0 ? (
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm text-ink-muted">Answer</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    void (async () => {
-                      const cat = (tentacleCategoryIdForAnnotation(
-                        annotation,
-                      ) ?? "museum") as TentacleLocationCategoryId;
-                      const text = tentacleHiderAnswerClipboardText(
-                        cat,
-                        distanceUnit,
-                        annotation.metadata.pois ?? [],
-                      );
-                      const ok = await copyToClipboard(text);
-                      setTentacleCopyStatus(ok ? "copied" : "failed");
-                      setTimeout(
-                        () => setTentacleCopyStatus("idle"),
-                        ok ? 2000 : 3000,
-                      );
-                    })();
-                  }}
-                  className="min-h-9 rounded-lg bg-border px-3 text-xs font-medium text-ink"
-                >
-                  {tentacleCopyStatus === "copied"
-                    ? "Copied"
-                    : tentacleCopyStatus === "failed"
-                      ? "Copy failed"
-                      : "Copy list for hiders"}
-                </button>
-              </div>
-              <div className="space-y-2">
-                {(annotation.metadata.pois ?? []).map((poi) => (
-                  <button
-                    key={poi.id}
-                    type="button"
-                    onClick={() => {
-                      setTentacleOutOfReach(false);
-                      setTentacleAnswerPoiId(poi.id);
-                    }}
-                    className={`min-h-12 w-full rounded-xl px-3 text-left text-sm ${
-                      tentacleAnswerPoiId === poi.id
-                        ? "bg-status-success text-action-ink"
-                        : "bg-surface-raised"
-                    }`}
-                  >
-                    {poi.name}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTentacleOutOfReach(true);
-                    setTentacleAnswerPoiId(null);
-                  }}
-                  className={`min-h-12 w-full rounded-xl px-3 text-sm ${
-                    tentacleOutOfReach
-                      ? "bg-status-success text-action-ink"
-                      : "bg-surface-raised"
-                  }`}
-                >
-                  {TENTACLE_NOT_WITHIN_REACH_LABEL}
-                </button>
-              </div>
-            </div>
-          ) : null}
+          <ToolSection title="Question" first status="active">
+            <QuestionPromptBlock
+              prompt={tentacleQuestionPrompt(
+                tentacleCategoryIdForAnnotation(annotation) ?? "museum",
+                distanceUnit,
+                annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS,
+              )}
+              ruleSummary="Tentacles always use a 1 mile radius from the anchor."
+            />
+          </ToolSection>
+          <TentacleAnswerPicker
+            categoryId={
+              (tentacleCategoryIdForAnnotation(annotation) ??
+                "museum") as TentacleLocationCategoryId
+            }
+            distanceUnit={distanceUnit}
+            poiOptions={annotation.metadata.pois ?? []}
+            selectedPoiId={tentacleAnswerPoiId}
+            outOfReach={tentacleOutOfReach}
+            onSelectPoi={(poiId) => {
+              setTentacleOutOfReach(false);
+              setTentacleAnswerPoiId(poiId);
+            }}
+            onOutOfReachChange={(value) => {
+              setTentacleOutOfReach(value);
+              if (value) {
+                setTentacleAnswerPoiId(null);
+              }
+            }}
+          />
         </>
       ) : null}
 
       {annotation.type === "matching" ? (
         <>
-          <p className="text-sm text-ink-muted">
-            {
-              matchingQuestionFor(
-                annotation.metadata.matchingCategory ?? "commercial_airport",
-              ).prompt
-            }
-          </p>
-          <BinaryAnswerPicker
-            value={matchingAnswer}
-            onChange={setMatchingAnswer}
-            options={yesNoAnswerOptions}
-          />
+          <ToolSection title="Question" first status="active">
+            <QuestionPromptBlock
+              prompt={
+                matchingQuestionFor(
+                  annotation.metadata.matchingCategory ?? "commercial_airport",
+                ).prompt
+              }
+            />
+          </ToolSection>
+          <ToolSection
+            title="Answer"
+            status={matchingAnswer !== null ? "complete" : "active"}
+          >
+            <BinaryAnswerPicker
+              value={matchingAnswer}
+              onChange={setMatchingAnswer}
+              options={yesNoAnswerOptions}
+              label=""
+            />
+          </ToolSection>
         </>
       ) : null}
 
       {annotation.type === "measuring" ? (
         <>
-          <p className="text-sm text-ink-muted">
-            {
-              measuringQuestionFor(
-                annotation.metadata.measuringSubject ?? "location",
-                annotation.metadata.measuringLocationCategory,
-              ).prompt
-            }
-          </p>
-          <BinaryAnswerPicker
-            value={measuringAnswer}
-            onChange={setMeasuringAnswer}
-            options={closerFurtherAnswerOptions}
-          />
+          <ToolSection title="Question" first status="active">
+            <QuestionPromptBlock
+              prompt={
+                measuringQuestionFor(
+                  annotation.metadata.measuringSubject ?? "location",
+                  annotation.metadata.measuringLocationCategory,
+                ).prompt
+              }
+            />
+          </ToolSection>
+          <ToolSection
+            title="Answer"
+            status={measuringAnswer !== null ? "complete" : "active"}
+          >
+            <BinaryAnswerPicker
+              value={measuringAnswer}
+              onChange={setMeasuringAnswer}
+              options={closerFurtherAnswerOptions}
+              label=""
+            />
+          </ToolSection>
         </>
       ) : null}
 
       {annotation.type === "thermometer" ? (
         <>
-          <p className="text-sm font-medium text-ink">
-            {thermometerQuestionPrompt(thermometerDistanceMeters, distanceUnit)}
-          </p>
-          <div>
-            <p className="text-sm text-ink-muted">Distance traveled</p>
-            <div className="mt-2 flex flex-wrap gap-2">
+          <ToolSection title="Question" first status="active">
+            <QuestionPromptBlock
+              prompt={thermometerQuestionPrompt(
+                thermometerDistanceMeters,
+                distanceUnit,
+              )}
+            />
+          </ToolSection>
+          <ToolSection title="Distance traveled" status="active">
+            <OptionChipRow>
               {availableThermometerPresets.map((preset) => (
-                <button
+                <OptionChip
                   key={preset}
-                  type="button"
+                  selected={thermometerDistanceMeters === preset}
                   onClick={() => setThermometerDistanceMeters(preset)}
-                  className={`min-h-12 rounded-xl px-3 text-sm ${
-                    thermometerDistanceMeters === preset
-                      ? "bg-action text-action-ink"
-                      : "bg-surface-raised"
-                  }`}
                 >
                   {formatPresetDistance(preset, distanceUnit)}
-                </button>
+                </OptionChip>
               ))}
-            </div>
-          </div>
-          <BinaryAnswerPicker
-            value={thermometerAnswer}
-            onChange={setThermometerAnswer}
-            options={hotterColderAnswerOptions}
-          />
-          <p className="text-sm text-ink-dim">
+            </OptionChipRow>
+          </ToolSection>
+          <ToolSection
+            title="Answer"
+            status={thermometerAnswer !== null ? "complete" : "active"}
+          >
+            <BinaryAnswerPicker
+              value={thermometerAnswer}
+              onChange={setThermometerAnswer}
+              options={hotterColderAnswerOptions}
+              label=""
+            />
+          </ToolSection>
+          <ResolvedReadout variant="dim">
             Move the thermometer endpoints on the map, then save your changes.
-          </p>
+          </ResolvedReadout>
         </>
       ) : null}
 
       {onEditOnMap ? (
-        <button
-          type="button"
-          onClick={onEditOnMap}
-          className="min-h-12 w-full rounded-xl bg-surface-raised px-3 text-sm font-medium text-ink"
-        >
+        <button type="button" onClick={onEditOnMap} className="btn-secondary w-full">
           Edit on map
         </button>
       ) : null}

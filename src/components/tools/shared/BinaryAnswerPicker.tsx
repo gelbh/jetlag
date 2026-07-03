@@ -19,15 +19,18 @@ export function BinaryAnswerPicker<Value extends string>({
 }: BinaryAnswerPickerProps<Value>) {
   return (
     <div className="space-y-2">
-      <p className="text-sm text-ink-muted">{label}</p>
+      {label ? <p className="field-label m-0">{label}</p> : null}
       <div className="grid grid-cols-2 gap-2">
         {options.map((option) => (
           <button
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            className={`min-h-12 rounded-xl px-3 text-sm ${
-              value === option.value ? option.activeClassName : "bg-surface-raised"
+            aria-pressed={value === option.value}
+            className={`min-h-12 rounded-[var(--radius-hud-md)] px-3 text-sm font-medium ${
+              value === option.value
+                ? option.activeClassName
+                : "bg-surface-raised text-ink-secondary"
             }`}
           >
             {option.label}

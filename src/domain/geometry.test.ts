@@ -15,7 +15,7 @@ import {
   normalizeBoundingBox,
   prepareMeasuringLineSegments,
   safeDifference,
-} from "../domain/geometry";
+} from "./geometry";
 import type { GameArea } from "../domain/annotations";
 
 const sampleGameArea: GameArea = {

@@ -5,15 +5,14 @@ import type {
   LatLngBoundsExpression,
   LatLngExpression,
 } from "leaflet";
+import { getMapBasemap, type MapStyle } from "../../domain/mapBasemaps";
 import { isUsableMapBounds } from "../../domain/geometry";
-
-const OSM_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 
 interface MapViewProps {
   center?: LatLngExpression;
   zoom?: number;
   className?: string;
+  mapStyle?: MapStyle;
   onBoundsChange?: (bounds: LatLngBounds) => void;
   onMapClick?: (lat: number, lng: number) => void;
   interactive?: boolean;
@@ -118,6 +117,7 @@ export function MapView({
   center = [51.505, -0.09],
   zoom = 13,
   className,
+  mapStyle = "standard",
   onBoundsChange,
   onMapClick,
   interactive = true,
@@ -125,6 +125,8 @@ export function MapView({
   children,
   mapKey,
 }: MapViewProps) {
+  const basemap = getMapBasemap(mapStyle);
+
   return (
     <div className={className ?? "h-full w-full"}>
       <MapContainer
@@ -141,9 +143,10 @@ export function MapView({
         }
       >
         <TileLayer
-          attribution={OSM_ATTRIBUTION}
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          maxZoom={19}
+          key={basemap.id}
+          attribution={basemap.attribution}
+          url={basemap.url}
+          maxZoom={basemap.maxZoom}
         />
         <MapEvents onBoundsChange={onBoundsChange} onMapClick={onMapClick} />
         <MapFocus focusBounds={focusBounds} />

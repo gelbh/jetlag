@@ -70,3 +70,24 @@ export function gameAreaToBoundingBox(gameArea: GameArea): BoundingBox {
     east: Math.max(...lngs),
   });
 }
+
+export function expandBoundingBox(
+  box: BoundingBox,
+  bufferMeters: number,
+): BoundingBox {
+  if (bufferMeters <= 0) {
+    return normalizeBoundingBox(box);
+  }
+
+  const centerLat = (box.north + box.south) / 2;
+  const latDelta = bufferMeters / 111_320;
+  const lngDelta =
+    bufferMeters / (111_320 * Math.cos((centerLat * Math.PI) / 180));
+
+  return normalizeBoundingBox({
+    south: box.south - latDelta,
+    west: box.west - lngDelta,
+    north: box.north + latDelta,
+    east: box.east + lngDelta,
+  });
+}

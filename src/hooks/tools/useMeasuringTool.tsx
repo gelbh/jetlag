@@ -15,16 +15,12 @@ import { MeasuringPanel } from "../../components/tools/MeasuringPanel";
 import type { GameArea } from "../../domain/annotations";
 import { isActive, type AnnotationRecord } from "../../domain/annotations";
 import type { LatLngTuple } from "../../domain/geometry";
+import { distanceBetweenPoints } from "../../domain/geometry";
 import {
-  buildCoastlineEliminationRegion,
-  buildCoastlineNearRegion,
-  buildLocationEliminationRegion,
-  buildLocationNearRegion,
-  buildMeasuringEliminationRegion,
-  buildMultiPlaceEliminationRegion,
-  buildMultiPlaceNearRegion,
-  distanceBetweenPoints,
-} from "../../domain/geometry";
+  buildMeasuringBoundaryPreview,
+  buildMeasuringEliminationPreview,
+  buildMeasuringRegions,
+} from "../../domain/measuringRegions";
 import {
   applyMeasuringFromKind,
   DEFAULT_MEASURING_FROM_KIND,
@@ -41,7 +37,6 @@ import {
   type MeasuringSubject,
   type MeasuringTargetMode,
 } from "../../domain/measuringQuestions";
-import { buildSeaLevelEliminationRegion } from "../../domain/seaLevel";
 import type { DistanceUnit } from "../../domain/distance";
 import { measuringLinearNotFoundMessage } from "../../services/measuringLinearFeatures";
 import {
@@ -174,169 +169,44 @@ export function useMeasuringTool({
     }, []),
   });
 
-  const deferredMeasuringDistanceMeters = useDeferredValue(
-    measuringDistanceMeters,
+  const measuringRegionInput = useMemo(
+    () => ({
+      gameArea,
+      measuringSubject,
+      measuringLocationCategory,
+      measuringDistanceMeters,
+      measuringAnswer,
+      measuringTargetPoint,
+      measuringPlaces,
+      measuringCoastSegments,
+      measuringSeaLevelNearRegion,
+      usesAllPlacesInArea,
+    }),
+    [
+      gameArea,
+      measuringAnswer,
+      measuringCoastSegments,
+      measuringDistanceMeters,
+      measuringLocationCategory,
+      measuringPlaces,
+      measuringSeaLevelNearRegion,
+      measuringSubject,
+      measuringTargetPoint,
+      usesAllPlacesInArea,
+    ],
   );
-  const deferredMeasuringAnswer = useDeferredValue(measuringAnswer);
 
-  const measuringLinearNearRegion = useMemo(() => {
-    if (deferredMeasuringDistanceMeters === null) {
-      return null;
-    }
+  const deferredRegionInput = useDeferredValue(measuringRegionInput);
 
-    if (measuringSubject === "coastline") {
-      if (measuringCoastSegments.length === 0) {
-        return null;
-      }
+  const measuringBoundaryPreview = useMemo(
+    () => buildMeasuringBoundaryPreview(deferredRegionInput),
+    [deferredRegionInput],
+  );
 
-      return buildCoastlineNearRegion(
-        measuringCoastSegments,
-        deferredMeasuringDistanceMeters,
-        gameArea,
-      );
-    }
-
-    if (
-      isMeasuringLinearLocation(measuringSubject, measuringLocationCategory)
-    ) {
-      if (measuringCoastSegments.length === 0) {
-        return null;
-      }
-
-      return buildCoastlineNearRegion(
-        measuringCoastSegments,
-        deferredMeasuringDistanceMeters,
-        gameArea,
-      );
-    }
-
-    return null;
-  }, [
-    deferredMeasuringDistanceMeters,
-    gameArea,
-    measuringCoastSegments,
-    measuringLocationCategory,
-    measuringSubject,
-  ]);
-
-  const measuringBoundaryPreview = useMemo(() => {
-    if (deferredMeasuringDistanceMeters === null) {
-      return null;
-    }
-
-    if (measuringLinearNearRegion) {
-      return measuringLinearNearRegion;
-    }
-
-    if (measuringSubject === "sea_level") {
-      return measuringSeaLevelNearRegion;
-    }
-
-    if (usesAllPlacesInArea) {
-      if (measuringPlaces.length === 0) {
-        return null;
-      }
-
-      return buildMultiPlaceNearRegion(
-        measuringPlaces.map((place) => place.point),
-        deferredMeasuringDistanceMeters,
-        gameArea,
-      );
-    }
-
-    if (!measuringTargetPoint) {
-      return null;
-    }
-
-    return buildLocationNearRegion(
-      measuringTargetPoint,
-      deferredMeasuringDistanceMeters,
-      gameArea,
-    );
-  }, [
-    deferredMeasuringDistanceMeters,
-    gameArea,
-    measuringLinearNearRegion,
-    measuringPlaces,
-    measuringSeaLevelNearRegion,
-    measuringSubject,
-    measuringTargetPoint,
-    usesAllPlacesInArea,
-  ]);
-
-  const measuringEliminationPreview = useMemo(() => {
-    if (
-      deferredMeasuringDistanceMeters === null ||
-      deferredMeasuringAnswer === null
-    ) {
-      return null;
-    }
-
-    if (measuringLinearNearRegion) {
-      return buildCoastlineEliminationRegion(
-        measuringCoastSegments,
-        deferredMeasuringDistanceMeters,
-        gameArea,
-        deferredMeasuringAnswer,
-        measuringLinearNearRegion,
-      );
-    }
-
-    if (measuringSubject === "sea_level") {
-      if (!measuringSeaLevelNearRegion) {
-        return null;
-      }
-
-      return buildSeaLevelEliminationRegion(
-        measuringSeaLevelNearRegion,
-        gameArea,
-        deferredMeasuringAnswer,
-      );
-    }
-
-    if (usesAllPlacesInArea) {
-      if (measuringPlaces.length === 0) {
-        return null;
-      }
-
-      return buildMultiPlaceEliminationRegion(
-        measuringPlaces.map((place) => place.point),
-        deferredMeasuringDistanceMeters,
-        gameArea,
-        deferredMeasuringAnswer,
-      );
-    }
-
-    if (!measuringTargetPoint) {
-      return null;
-    }
-
-    const nearRegion = buildLocationNearRegion(
-      measuringTargetPoint,
-      deferredMeasuringDistanceMeters,
-      gameArea,
-    );
-    if (!nearRegion) {
-      return null;
-    }
-
-    return buildMeasuringEliminationRegion(
-      nearRegion,
-      gameArea,
-      deferredMeasuringAnswer,
-    );
-  }, [
-    deferredMeasuringAnswer,
-    deferredMeasuringDistanceMeters,
-    gameArea,
-    measuringCoastSegments,
-    measuringLinearNearRegion,
-    measuringPlaces,
-    measuringSeaLevelNearRegion,
-    measuringSubject,
-    measuringTargetPoint,
-    usesAllPlacesInArea,
-  ]);
+  const measuringEliminationPreview = useMemo(
+    () => buildMeasuringEliminationPreview(deferredRegionInput),
+    [deferredRegionInput],
+  );
 
   const setMeasuringSeekerAnchor = (
     point: LatLngTuple,
@@ -828,90 +698,13 @@ export function useMeasuringTool({
       return;
     }
 
-    let nearRegion;
-    let elimination;
-
-    if (measuringSubject === "coastline") {
-      if (measuringCoastSegments.length === 0) {
-        setMeasuringError("Unable to build coastline distance regions.");
-        return;
-      }
-
-      nearRegion = buildCoastlineNearRegion(
-        measuringCoastSegments,
-        measuringDistanceMeters,
-        gameArea,
-      );
-      elimination = buildCoastlineEliminationRegion(
-        measuringCoastSegments,
-        measuringDistanceMeters,
-        gameArea,
-        measuringAnswer,
-        nearRegion,
-      );
-    } else if (measuringSubject === "sea_level") {
-      nearRegion = measuringSeaLevelNearRegion;
-      if (!nearRegion) {
-        setMeasuringError("Unable to build sea level distance regions.");
-        return;
-      }
-
-      elimination = buildSeaLevelEliminationRegion(
-        nearRegion,
-        gameArea,
-        measuringAnswer,
-      );
-    } else if (
-      isMeasuringLinearLocation(measuringSubject, measuringLocationCategory)
-    ) {
-      if (measuringCoastSegments.length === 0) {
-        setMeasuringError("Unable to build linear measure distance regions.");
-        return;
-      }
-
-      nearRegion = buildCoastlineNearRegion(
-        measuringCoastSegments,
-        measuringDistanceMeters,
-        gameArea,
-      );
-      elimination = buildCoastlineEliminationRegion(
-        measuringCoastSegments,
-        measuringDistanceMeters,
-        gameArea,
-        measuringAnswer,
-        nearRegion,
-      );
-    } else if (usesAllPlacesInArea) {
-      const placePoints = measuringPlaces.map((place) => place.point);
-      nearRegion = buildMultiPlaceNearRegion(
-        placePoints,
-        measuringDistanceMeters,
-        gameArea,
-      );
-      elimination = buildMultiPlaceEliminationRegion(
-        placePoints,
-        measuringDistanceMeters,
-        gameArea,
-        measuringAnswer,
-      );
-    } else {
-      nearRegion = buildLocationNearRegion(
-        measuringTargetPoint!,
-        measuringDistanceMeters,
-        gameArea,
-      );
-      elimination = buildLocationEliminationRegion(
-        measuringTargetPoint!,
-        measuringDistanceMeters,
-        gameArea,
-        measuringAnswer,
-      );
-    }
-
-    if (!nearRegion || !elimination) {
+    const regions = buildMeasuringRegions(measuringRegionInput);
+    if (!regions) {
       setMeasuringError("Unable to build measure distance regions.");
       return;
     }
+
+    const { near: nearRegion, elimination } = regions;
 
     const metadata: AnnotationRecord["metadata"] = {
       createdAt: new Date().toISOString(),

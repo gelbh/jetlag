@@ -9,12 +9,10 @@ import {
 import type { MapTool } from "../../state/sessionStore";
 import {
   HudMoreIcon,
-  HudPinIcon,
-  HudRadarIcon,
   HudRedoIcon,
   HudSettingsIcon,
+  HudToolIcon,
   HudUndoIcon,
-  HudZoneIcon,
 } from "../ui/HudIcons";
 import { PopupCloseButton } from "../ui/PopupCloseButton";
 import { TimerActions } from "./TimerActions";
@@ -27,23 +25,19 @@ interface ToolDockProps {
   onTimerStart: () => void;
   onTimerPause: () => void;
   onTimerReset: () => void;
+  timerControlsDisabled?: boolean;
   onSelect: (tool: MapTool) => void;
   canUndo: boolean;
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
   onOpenSettings: () => void;
+  onOpenLog?: () => void;
 }
 
 const overflowTools = MAP_TOOL_DOCK_ENTRIES.filter(
   (tool) => !isQuickDockTool(tool.id),
 );
-
-const QUICK_TOOL_ICONS = {
-  radar: HudRadarIcon,
-  zone: HudZoneIcon,
-  pin: HudPinIcon,
-} as const;
 
 const DOCK_ICON =
   "hud-chrome h-11 w-11 shrink-0 shadow-none sm:h-12 sm:w-12";
@@ -56,12 +50,14 @@ export function ToolDock({
   onTimerStart,
   onTimerPause,
   onTimerReset,
+  timerControlsDisabled = false,
   onSelect,
   canUndo,
   canRedo,
   onUndo,
   onRedo,
   onOpenSettings,
+  onOpenLog,
 }: ToolDockProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
@@ -154,6 +150,8 @@ export function ToolDock({
             onTimerStart={onTimerStart}
             onTimerPause={onTimerPause}
             onTimerReset={onTimerReset}
+            onOpenLog={onOpenLog}
+            disabled={timerControlsDisabled}
           />
         </div>
       ) : null}
@@ -215,8 +213,7 @@ export function ToolDock({
             const entry = MAP_TOOL_DOCK_ENTRIES.find(
               (item) => item.id === toolId,
             );
-            const Icon = QUICK_TOOL_ICONS[toolId];
-            if (!entry || !Icon) {
+            if (!entry) {
               return null;
             }
 
@@ -232,7 +229,7 @@ export function ToolDock({
                 aria-label={entry.name}
                 aria-pressed={activeTool === toolId}
               >
-                <Icon className="h-5 w-5" />
+                <HudToolIcon tool={toolId} className="h-5 w-5" />
               </button>
             );
           })}

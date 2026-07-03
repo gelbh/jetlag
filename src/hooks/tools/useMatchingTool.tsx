@@ -1,4 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLatestRequest } from "../useLatestRequest";
+import { useDebouncedValue } from "../useDebouncedValue";
 import type {
   Feature,
   MultiPolygon,
@@ -26,6 +28,7 @@ import {
 import type { DistanceUnit } from "../../domain/distance";
 import {
   fetchMatchingFeaturesInArea,
+  countMatchingFeaturesInPlayArea,
   matchingResolveFailureMessage,
   pickMatchingFeatureForAnchor,
   serializeMatchingFeatures,
@@ -88,6 +91,10 @@ export function useMatchingTool({
   const [matchingFeatureCount, setMatchingFeatureCount] = useState<
     number | null
   >(null);
+  const [matchingInPlayAreaFeatureCount, setMatchingInPlayAreaFeatureCount] =
+    useState<number | null>(null);
+  const [matchingNearestOutsidePlayArea, setMatchingNearestOutsidePlayArea] =
+    useState(false);
   const [matchingNullAnswer, setMatchingNullAnswer] = useState(false);
   const [matchingAnswer, setMatchingAnswer] = useState<MatchingAnswer | null>(
     null,
@@ -115,6 +122,8 @@ export function useMatchingTool({
       setMatchingNearestFeaturePoint(null);
       setMatchingDistanceMeters(null);
       setMatchingFeatureCount(null);
+      setMatchingInPlayAreaFeatureCount(null);
+      setMatchingNearestOutsidePlayArea(false);
       setMatchingNullAnswer(false);
       setMatchingAnswer(null);
       setMatchingError(null);
@@ -166,6 +175,111 @@ export function useMatchingTool({
     matchingNullAnswer,
   ]);
 
+  const { beginRequest, cancelRequests, isLatestRequest } = useLatestRequest();
+
+  const resolveForAnchor = useCallback(
+    async (seekerPoint: LatLngTuple, categoryId: MatchingCategoryId) => {
+      if (
+        !isMatchingCategoryEnabled(categoryId) ||
+        !isMatchingCategoryAvailable(categoryId, usedMatchingCategories)
+      ) {
+        setMatchingError("This matching category is not available yet.");
+        return;
+      }
+
+      const requestId = beginRequest();
+      setMatchingLoading(true);
+      setMatchingError(null);
+
+      try {
+        const features = await fetchMatchingFeaturesInArea(gameArea, categoryId);
+
+        if (!isLatestRequest(requestId)) {
+          return;
+        }
+
+        setMatchingFeatures(features);
+        setMatchingFeatureCount(features.length);
+        setMatchingInPlayAreaFeatureCount(countMatchingFeaturesInPlayArea(features));
+
+        if (features.length === 0) {
+          setMatchingNearestFeatureId(null);
+          setMatchingNearestFeatureName(null);
+          setMatchingNearestFeaturePoint(null);
+          setMatchingDistanceMeters(null);
+          setMatchingNearestOutsidePlayArea(false);
+          setMatchingNullAnswer(true);
+          setMatchingAnswer(null);
+          return;
+        }
+
+        const category = getMatchingCategory(categoryId);
+        const usesContainment =
+          category.resolver === "reverseGeocodeAdmin" ||
+          category.resolver === "landmass";
+
+        const nearest = pickMatchingFeatureForAnchor(
+          seekerPoint,
+          features,
+          categoryId,
+        );
+
+        if (!nearest) {
+          setMatchingNearestFeatureId(null);
+          setMatchingNearestFeatureName(null);
+          setMatchingNearestFeaturePoint(null);
+          setMatchingDistanceMeters(null);
+          setMatchingNearestOutsidePlayArea(false);
+          setMatchingNullAnswer(features.length === 0);
+          setMatchingAnswer(null);
+          setMatchingError(
+            matchingResolveFailureMessage(categoryId, features.length),
+          );
+          return;
+        }
+
+        setMatchingNearestFeatureId(nearest.id);
+        setMatchingNearestFeatureName(nearest.name);
+        setMatchingNearestFeaturePoint(nearest.point);
+        setMatchingDistanceMeters(
+          usesContainment ? null : nearest.distanceMeters,
+        );
+        setMatchingNearestOutsidePlayArea(nearest.inPlayArea === false);
+        setMatchingNullAnswer(false);
+        setMatchingAnswer(null);
+      } catch (error) {
+        if (!isLatestRequest(requestId)) {
+          return;
+        }
+
+        setMatchingError(
+          error instanceof Error
+            ? error.message
+            : "Unable to resolve nearest feature.",
+        );
+      } finally {
+        if (isLatestRequest(requestId)) {
+          setMatchingLoading(false);
+        }
+      }
+    },
+    [beginRequest, gameArea, isLatestRequest, usedMatchingCategories],
+  );
+
+  const debouncedSeekerPoint = useDebouncedValue(matchingSeekerPoint, 400);
+
+  useEffect(() => {
+    if (!active || !debouncedSeekerPoint) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void resolveForAnchor(debouncedSeekerPoint, matchingCategoryId);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [active, matchingCategoryId, debouncedSeekerPoint, resolveForAnchor]);
+
   const setMatchingSeekerAnchor = (point: LatLngTuple) => {
     setMatchingSeekerPoint(point);
     setMatchingFeatures([]);
@@ -174,12 +288,16 @@ export function useMatchingTool({
     setMatchingNearestFeaturePoint(null);
     setMatchingDistanceMeters(null);
     setMatchingFeatureCount(null);
+    setMatchingInPlayAreaFeatureCount(null);
+    setMatchingNearestOutsidePlayArea(false);
     setMatchingNullAnswer(false);
     setMatchingAnswer(null);
     setMatchingError(null);
   };
 
   const resetDraft = () => {
+    cancelRequests();
+    setMatchingLoading(false);
     setMatchingSeekerPoint(null);
     setMatchingCategoryId(defaultMatchingCategoryId(usedMatchingCategories));
     setMatchingFeatures([]);
@@ -188,6 +306,8 @@ export function useMatchingTool({
     setMatchingNearestFeaturePoint(null);
     setMatchingDistanceMeters(null);
     setMatchingFeatureCount(null);
+    setMatchingInPlayAreaFeatureCount(null);
+    setMatchingNearestOutsidePlayArea(false);
     setMatchingNullAnswer(false);
     setMatchingAnswer(null);
     setMatchingLoading(false);
@@ -219,78 +339,6 @@ export function useMatchingTool({
       setMatchingError(
         error instanceof Error ? error.message : "Unable to read GPS location.",
       );
-    }
-  };
-
-  const resolveNearest = async () => {
-    if (!matchingSeekerPoint) {
-      return;
-    }
-
-    if (
-      !isMatchingCategoryEnabled(matchingCategoryId) ||
-      !isMatchingCategoryAvailable(matchingCategoryId, usedMatchingCategories)
-    ) {
-      setMatchingError("This matching category is not available yet.");
-      return;
-    }
-
-    setMatchingLoading(true);
-    setMatchingError(null);
-
-    try {
-      const features = await fetchMatchingFeaturesInArea(
-        gameArea,
-        matchingCategoryId,
-      );
-      setMatchingFeatures(features);
-      setMatchingFeatureCount(features.length);
-
-      if (features.length === 0) {
-        setMatchingNearestFeatureId(null);
-        setMatchingNearestFeatureName(null);
-        setMatchingNearestFeaturePoint(null);
-        setMatchingDistanceMeters(null);
-        setMatchingNullAnswer(true);
-        setMatchingAnswer(null);
-        return;
-      }
-
-      const nearest = pickMatchingFeatureForAnchor(
-        matchingSeekerPoint,
-        features,
-        matchingCategoryId,
-      );
-
-      if (!nearest) {
-        setMatchingNearestFeatureId(null);
-        setMatchingNearestFeatureName(null);
-        setMatchingNearestFeaturePoint(null);
-        setMatchingDistanceMeters(null);
-        setMatchingNullAnswer(features.length === 0);
-        setMatchingAnswer(null);
-        setMatchingError(
-          matchingResolveFailureMessage(matchingCategoryId, features.length),
-        );
-        return;
-      }
-
-      setMatchingNearestFeatureId(nearest.id);
-      setMatchingNearestFeatureName(nearest.name);
-      setMatchingNearestFeaturePoint(nearest.point);
-      setMatchingDistanceMeters(
-        matchingUsesContainment ? null : nearest.distanceMeters,
-      );
-      setMatchingNullAnswer(false);
-      setMatchingAnswer(null);
-    } catch (error) {
-      setMatchingError(
-        error instanceof Error
-          ? error.message
-          : "Unable to resolve nearest feature.",
-      );
-    } finally {
-      setMatchingLoading(false);
     }
   };
 
@@ -389,6 +437,8 @@ export function useMatchingTool({
       nearestFeatureName={matchingNearestFeatureName}
       distanceMeters={matchingDistanceMeters}
       featureCount={matchingFeatureCount}
+      inPlayAreaFeatureCount={matchingInPlayAreaFeatureCount}
+      nearestOutsidePlayArea={matchingNearestOutsidePlayArea}
       nullAnswer={matchingNullAnswer}
       loading={matchingLoading}
       gpsLoading={gpsLoading}
@@ -409,12 +459,13 @@ export function useMatchingTool({
         setMatchingNearestFeaturePoint(null);
         setMatchingDistanceMeters(null);
         setMatchingFeatureCount(null);
+        setMatchingInPlayAreaFeatureCount(null);
+        setMatchingNearestOutsidePlayArea(false);
         setMatchingNullAnswer(false);
         setMatchingAnswer(null);
         setMatchingError(null);
       }}
       onUseGps={() => void handleGps()}
-      onResolveNearest={() => void resolveNearest()}
       onAnswerChange={setMatchingAnswer}
       onCommit={() => void commit()}
     />

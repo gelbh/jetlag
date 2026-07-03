@@ -42,7 +42,7 @@ export function isFirebaseConfigured(): boolean {
   return readConfig() !== null;
 }
 
-export function getFirebaseApp(): FirebaseApp {
+function getFirebaseApp(): FirebaseApp {
   if (!app) {
     const config = readConfig();
     if (!config) {

@@ -1,6 +1,5 @@
 import { FirebaseError } from "firebase/app";
 import {
-  addDoc,
   collection,
   doc,
   getDoc,
@@ -19,12 +18,13 @@ import type {
   GameArea,
   SessionRecord,
 } from "../domain/annotations";
+import { timerStateToRemote, type TimerState } from "../domain/timer";
 import { getFirestoreDb } from "./firebase";
 import {
   buildAnnotationDocument,
   buildSessionDocument,
   deserializeAnnotationFromFirestore,
-  deserializeGameAreaFromFirestore,
+  deserializeSessionFromFirestore,
 } from "./firestoreSerialization";
 import { generateSessionCode } from "./sessionCodes";
 
@@ -131,16 +131,10 @@ export async function joinRemoteSessionByCode(
 
   return {
     status: "joined",
-    session: {
-      id: sessionDoc.id,
-      code: data.code,
-      gameArea: deserializeGameAreaFromFirestore(data.gameArea),
-      hostUid: data.hostUid,
-      createdAt: data.createdAt,
+    session: deserializeSessionFromFirestore(sessionDoc.id, {
+      ...data,
       memberUids,
-      transitMetroId: data.transitMetroId,
-      endedAt: data.endedAt,
-    },
+    }),
   };
 }
 
@@ -154,24 +148,45 @@ export async function getRemoteSessionById(
     return null;
   }
 
-  const data = snapshot.data() as Omit<SessionRecord, "id">;
+  const data = snapshot.data() as Record<string, unknown>;
 
-  return {
-    id: snapshot.id,
-    code: data.code,
-    gameArea: deserializeGameAreaFromFirestore(data.gameArea),
-    hostUid: data.hostUid,
-    createdAt: data.createdAt,
-    memberUids: data.memberUids ?? [],
-    transitMetroId: data.transitMetroId,
-    endedAt: data.endedAt,
-  };
+  return deserializeSessionFromFirestore(snapshot.id, data);
 }
 
 export async function endRemoteSession(sessionId: string): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), {
     endedAt: new Date().toISOString(),
   });
+}
+
+export async function updateSessionTimer(
+  sessionId: string,
+  state: TimerState,
+): Promise<void> {
+  await updateDoc(doc(sessionsCollection(), sessionId), timerStateToRemote(state));
+}
+
+export function subscribeToSession(
+  sessionId: string,
+  onChange: (session: SessionRecord) => void,
+  onError: (error: Error) => void,
+): Unsubscribe {
+  return onSnapshot(
+    doc(sessionsCollection(), sessionId),
+    (snapshot) => {
+      if (!snapshot.exists()) {
+        return;
+      }
+
+      onChange(
+        deserializeSessionFromFirestore(
+          snapshot.id,
+          snapshot.data() as Record<string, unknown>,
+        ),
+      );
+    },
+    (error) => onError(error),
+  );
 }
 
 export async function writeRemoteAnnotation(
@@ -209,16 +224,6 @@ export async function writeRemoteAnnotationsBatch(
 
     await batch.commit();
   }
-}
-
-export async function createRemoteAnnotation(
-  sessionId: string,
-  annotation: AnnotationRecord,
-): Promise<void> {
-  await addDoc(annotationsCollection(sessionId), {
-    ...buildAnnotationDocument(annotation),
-    createdAtServer: serverTimestamp(),
-  });
 }
 
 export function subscribeToRemoteAnnotations(

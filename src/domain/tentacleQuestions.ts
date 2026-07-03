@@ -23,9 +23,6 @@ export const TENTACLE_SEARCH_RADIUS_METERS = DEFAULT_RADIUS_METERS;
 /** Post-answer disk: 1 mi reach plus hiding zone on the far side at the limit. */
 export const TENTACLE_ANSWER_RADIUS_METERS = milesToMeters(1.5);
 
-/** @deprecated Use {@link TENTACLE_SEARCH_RADIUS_METERS} for prompts and fetch. */
-export const TENTACLE_RADIUS_METERS = TENTACLE_SEARCH_RADIUS_METERS;
-
 export const TENTACLE_NOT_WITHIN_REACH_LABEL = "Not within reach";
 
 /** Only these four location types are valid for tentacle questions. */
@@ -87,7 +84,7 @@ export function tentacleLocationTypesLabel(categoryId: string): string {
 export function tentacleQuestionPrompt(
   categoryId: string,
   unit: DistanceUnit,
-  radiusMeters: number = TENTACLE_RADIUS_METERS,
+  radiusMeters: number = TENTACLE_SEARCH_RADIUS_METERS,
 ): string {
   const distanceLabel = formatDistance(radiusMeters, unit);
   const typesLabel = tentacleLocationTypesLabel(categoryId);

@@ -1,6 +1,17 @@
-import { RadarAnswerPicker, RadarDistancePicker } from "./RadarDistancePicker";
+import { useState } from "react";
+import { RadarDistancePicker } from "./RadarDistancePicker";
+import { yesNoAnswerOptions } from "./shared/binaryAnswerOptions";
+import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { PlacementActions } from "./shared/PlacementActions";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
+import { ToolSection } from "./shared/ToolSection";
+import { ToolStepper } from "./shared/ToolStepper";
+import { ToolWizardNav } from "./shared/ToolWizardNav";
+import {
+  buildSteps,
+  deriveStepStates,
+  RADAR_STEPS,
+} from "./shared/toolStepUtils";
 import {
   isRadarDistanceOptionAvailable,
   type RadarAnswer,
@@ -47,6 +58,9 @@ export function RadarPanel({
   gpsLoading,
   error,
 }: RadarPanelProps) {
+  const [stepIndex, setStepIndex] = useState(0);
+  const step = RADAR_STEPS[stepIndex]?.id ?? "distance";
+
   const distanceSelectionAvailable = isRadarDistanceOptionAvailable(
     usedDistanceOptions,
     chooseCustom,
@@ -54,43 +68,87 @@ export function RadarPanel({
   );
   const canCommit = hasCenter && answer !== null && distanceSelectionAvailable;
 
+  const goNext = () => {
+    setStepIndex((current) => Math.min(current + 1, RADAR_STEPS.length - 1));
+  };
+
+  const goBack = () => {
+    setStepIndex((current) => Math.max(current - 1, 0));
+  };
+
+  const stepper = (
+    <ToolStepper
+      steps={buildSteps(
+        RADAR_STEPS,
+        deriveStepStates(RADAR_STEPS.length, stepIndex),
+      )}
+    />
+  );
+
   return (
-    <ToolPanelShell
-      toolId="radar"
-      helper="Pick a distance, pin your anchor, then record the answer."
-    >
-      <RadarDistancePicker
-        radiusMeters={radiusMeters}
-        chooseCustom={chooseCustom}
-        customRadius={customRadius}
-        distanceUnit={distanceUnit}
-        usedDistanceOptions={usedDistanceOptions}
-        onPresetSelect={onPresetSelect}
-        onChooseSelect={onChooseSelect}
-        onCustomRadiusChange={onCustomRadiusChange}
+    <ToolPanelShell toolId="radar" stepper={stepper}>
+      {step === "distance" ? (
+        <RadarDistancePicker
+          radiusMeters={radiusMeters}
+          chooseCustom={chooseCustom}
+          customRadius={customRadius}
+          distanceUnit={distanceUnit}
+          usedDistanceOptions={usedDistanceOptions}
+          onPresetSelect={onPresetSelect}
+          onChooseSelect={onChooseSelect}
+          onCustomRadiusChange={onCustomRadiusChange}
+        />
+      ) : null}
+
+      {step === "anchor" ? (
+        <ToolSection first compact status="active">
+          <PlacementActions
+            awaitingPlacement={awaitingPlacement}
+            hasCenter={hasCenter}
+            gpsLoading={gpsLoading}
+            onUseGps={onUseGps}
+            onPlaceAtMapTap={onPlaceAtMapTap}
+            centerHint="Center pinned on the map. Tap again to move it."
+          />
+        </ToolSection>
+      ) : null}
+
+      {step === "answer" ? (
+        <ToolSection first compact status="active">
+          <BinaryAnswerPicker
+            value={answer}
+            onChange={onAnswerChange}
+            options={yesNoAnswerOptions}
+            label=""
+          />
+          {hasCenter && distanceSelectionAvailable ? (
+            <p className="text-xs text-ink-dim">
+              The map shows the shaded area for your choice.
+            </p>
+          ) : null}
+          <button
+            type="button"
+            onClick={onCommit}
+            disabled={!canCommit}
+            className="btn-primary w-full disabled:opacity-40"
+          >
+            Add radar question
+          </button>
+        </ToolSection>
+      ) : null}
+
+      <ToolWizardNav
+        stepIndex={stepIndex}
+        stepCount={RADAR_STEPS.length}
+        onBack={goBack}
+        onNext={goNext}
+        canGoNext={
+          (step === "distance" && distanceSelectionAvailable) ||
+          (step === "anchor" && hasCenter)
+        }
       />
 
-      <PlacementActions
-        awaitingPlacement={awaitingPlacement}
-        hasCenter={hasCenter}
-        gpsLoading={gpsLoading}
-        onUseGps={onUseGps}
-        onPlaceAtMapTap={onPlaceAtMapTap}
-        centerHint="Center pinned on the map. Tap again to move it."
-      />
-
-      <RadarAnswerPicker answer={answer} onAnswerChange={onAnswerChange} />
-
-      <button
-        type="button"
-        onClick={onCommit}
-        disabled={!canCommit}
-        className="btn-primary w-full"
-      >
-        Add radar question
-      </button>
-
-      {error ? <p className="text-sm text-status-error">{error}</p> : null}
+      {error ? <p className="text-error">{error}</p> : null}
     </ToolPanelShell>
   );
 }

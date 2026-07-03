@@ -207,6 +207,27 @@ textarea {
     color: var(--color-ink-muted);
   }
 
+  .tool-panel-compact {
+    --tool-panel-control-height: 2.5rem;
+  }
+
+  .tool-panel-compact .btn-primary,
+  .tool-panel-compact .btn-secondary {
+    min-height: var(--tool-panel-control-height);
+  }
+
+  .tool-panel-compact .field-input {
+    min-height: var(--tool-panel-control-height);
+  }
+
+  .tool-panel-compact .min-h-12 {
+    min-height: var(--tool-panel-control-height);
+  }
+
+  .tool-panel-compact .max-h-40 {
+    max-height: 7rem;
+  }
+
   .text-error {
     font-size: 0.875rem;
     color: var(--color-status-error);
@@ -257,6 +278,16 @@ textarea {
 
   100% {
     filter: brightness(1);
+  }
+}
+
+@keyframes settings-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 

@@ -55,7 +55,17 @@ service cloud.firestore {
         && request.resource.data.hostUid == resource.data.hostUid
         && request.resource.data.memberUids == resource.data.memberUids
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['endedAt'])
-        && request.resource.data.endedAt is string;
+        && request.resource.data.endedAt is string
+        || isSessionHost(sessionId)
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['timerAccumulatedMs', 'timerRunningSince'])
+        && request.resource.data.timerAccumulatedMs is number
+        && request.resource.data.timerAccumulatedMs >= 0
+        && (request.resource.data.timerRunningSince == null
+          || request.resource.data.timerRunningSince is string);
 
       match /annotations/{annotationId} {
         allow read: if isSessionMember(sessionId);

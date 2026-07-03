@@ -3,6 +3,7 @@ import { latLng, latLngBounds } from "leaflet";
 import type { Feature, MultiPolygon, Polygon, Position } from "geojson";
 import bboxPolygon from "@turf/bbox-polygon";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import turfCircle from "@turf/circle";
 import difference from "@turf/difference";
 import intersect from "@turf/intersect";
 import { multiPolygon } from "@turf/helpers";
@@ -253,17 +254,6 @@ export function polygonToLeafletLatLngs(
   return [];
 }
 
-export function expandBounds(
-  bounds: LatLngBounds,
-  paddingRatio = 0.08,
-): LatLngBounds {
-  const latSpan = bounds.getNorth() - bounds.getSouth();
-
-  return bounds.pad(
-    Math.max(paddingRatio, latSpan === 0 ? 0.02 : paddingRatio),
-  );
-}
-
 export function midpoint(a: LatLngTuple, b: LatLngTuple): LatLngTuple {
   return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
 }
@@ -364,4 +354,23 @@ export function isPointInGameArea(
     turfPoint([point[1], point[0]]),
     gameAreaToFeature(gameArea),
   );
+}
+
+export function buildRadarShadedRegion(
+  center: LatLngTuple,
+  radiusMeters: number,
+  gameArea: GameArea,
+  inside: boolean,
+): Feature<Polygon | MultiPolygon> | null {
+  const radarCircle = turfCircle(
+    turfPoint([center[1], center[0]]),
+    radiusMeters / 1000,
+    { steps: 64, units: "kilometers" },
+  );
+
+  if (inside) {
+    return radarCircle as Feature<Polygon>;
+  }
+
+  return safeDifference(gameAreaToPolygon(gameArea), radarCircle as Feature<Polygon>);
 }

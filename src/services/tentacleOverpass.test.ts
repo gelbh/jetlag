@@ -6,7 +6,7 @@ import {
   nearestTentaclePoi,
   parseTentaclePois,
   tentacleCategoryForTags,
-} from "./overpass";
+} from "./tentacleOverpass";
 
 describe("tentacle overpass", () => {
   it("builds a query for the selected category only", () => {

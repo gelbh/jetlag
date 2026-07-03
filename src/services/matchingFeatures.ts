@@ -6,10 +6,15 @@ import {
   type LatLngTuple,
 } from "../domain/geometry";
 import {
+  expandBoundingBox,
+  type BoundingBox,
+} from "../domain/gameAreaBounds";
+import {
   adminLevelForMatchingCategory,
   getMatchingCategory,
   matchingCategoryLabel,
   matchingCategoryOverpassSelectors,
+  matchingUsesExpandedFeatureSearch,
   type MatchingCategoryId,
 } from "../domain/matchingQuestions";
 import {
@@ -26,15 +31,28 @@ import {
 import { queryOverpass } from "./overpassClient";
 import {
   getOrFetchCached,
-  matchingFeaturesCacheKey,
+  geographicCacheKey,
 } from "./geographicFeatureCache";
 
 export interface MatchingFeature {
   id: string;
   name: string;
   point: LatLngTuple;
+  inPlayArea?: boolean;
   adminLevel?: number;
   boundary?: GameArea;
+}
+
+/** How far beyond the play-area bbox to search for nearest-point categories. */
+export const MATCHING_NEAR_FEATURE_SEARCH_BUFFER_METERS = 50_000;
+
+function matchingFeaturesCacheKey(
+  gameArea: GameArea,
+  categoryId: MatchingCategoryId,
+): string {
+  const category = getMatchingCategory(categoryId);
+  const scope = matchingUsesExpandedFeatureSearch(category) ? "near" : "in";
+  return geographicCacheKey(gameArea, `matching:${scope}:${categoryId}`);
 }
 
 type OverpassElement = {
@@ -45,12 +63,30 @@ type OverpassElement = {
   center?: { lat: number; lon: number };
 };
 
+function matchingSearchBoundingBox(
+  gameArea: GameArea,
+  categoryId: MatchingCategoryId,
+): BoundingBox {
+  const bbox = gameAreaToBoundingBox(gameArea);
+  const category = getMatchingCategory(categoryId);
+
+  if (!matchingUsesExpandedFeatureSearch(category)) {
+    return bbox;
+  }
+
+  return expandBoundingBox(bbox, MATCHING_NEAR_FEATURE_SEARCH_BUFFER_METERS);
+}
+
+function formatOverpassBbox(box: BoundingBox): string {
+  return `${box.south},${box.west},${box.north},${box.east}`;
+}
+
 function buildMatchingFeaturesQuery(
   gameArea: GameArea,
+  categoryId: MatchingCategoryId,
   selectors: readonly string[],
 ): string {
-  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
-  const bbox = `${south},${west},${north},${east}`;
+  const bbox = formatOverpassBbox(matchingSearchBoundingBox(gameArea, categoryId));
   const clauses = selectors.flatMap((selector) => [
     `node${selector}(${bbox});`,
     `way${selector}(${bbox});`,
@@ -82,6 +118,24 @@ function isMiniatureGolf(tags: Record<string, string>): boolean {
   return tags.miniature === "yes" || tags.golf === "miniature";
 }
 
+function matchingFeatureName(tags: Record<string, string>): string | null {
+  const candidates = [
+    tags.name,
+    tags["name:en"],
+    tags.official_name,
+    tags["official_name:en"],
+  ];
+
+  for (const candidate of candidates) {
+    const trimmed = candidate?.trim();
+    if (trimmed) {
+      return trimmed;
+    }
+  }
+
+  return null;
+}
+
 function isActiveMatchingFeature(
   tags: Record<string, string> | undefined,
   categoryId: MatchingCategoryId,
@@ -90,7 +144,7 @@ function isActiveMatchingFeature(
     return false;
   }
 
-  const name = tags.name?.trim();
+  const name = matchingFeatureName(tags);
   if (!name) {
     return false;
   }
@@ -115,10 +169,13 @@ export function parseMatchingFeatures(
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
 ): MatchingFeature[] {
+  const includeOutsidePlayArea = matchingUsesExpandedFeatureSearch(
+    getMatchingCategory(categoryId),
+  );
   const seen = new Set<string>();
 
   return elements
-    .map((element) => {
+    .map((element): MatchingFeature | null => {
       if (!isActiveMatchingFeature(element.tags, categoryId)) {
         return null;
       }
@@ -131,7 +188,8 @@ export function parseMatchingFeatures(
       }
 
       const point: LatLngTuple = [lat, lng];
-      if (!isPointInGameArea(point, gameArea)) {
+      const inPlayArea = isPointInGameArea(point, gameArea);
+      if (!includeOutsidePlayArea && !inPlayArea) {
         return null;
       }
 
@@ -144,9 +202,10 @@ export function parseMatchingFeatures(
 
       return {
         id,
-        name: element.tags?.name?.trim() ?? "",
+        name: matchingFeatureName(element.tags!) ?? "",
         point,
-      } satisfies MatchingFeature;
+        inPlayArea,
+      };
     })
     .filter((feature): feature is MatchingFeature => feature !== null);
 }
@@ -233,15 +292,16 @@ async function fetchOverpassMatchingFeaturesInArea(
   }
 
   const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-    buildMatchingFeaturesQuery(gameArea, selectors),
+    buildMatchingFeaturesQuery(gameArea, categoryId, selectors),
   );
 
   return parseMatchingFeatures(payload.elements, gameArea, categoryId);
 }
 
 function buildStreetPathQuery(gameArea: GameArea): string {
-  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
-  const bbox = `${south},${west},${north},${east}`;
+  const bbox = formatOverpassBbox(
+    matchingSearchBoundingBox(gameArea, "street_or_path"),
+  );
 
   return `
     [out:json][timeout:25];
@@ -265,8 +325,9 @@ async function fetchStreetPathFeaturesInArea(
 }
 
 function buildStationQuery(gameArea: GameArea): string {
-  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
-  const bbox = `${south},${west},${north},${east}`;
+  const bbox = formatOverpassBbox(
+    matchingSearchBoundingBox(gameArea, "station_name_length"),
+  );
 
   return `
     [out:json][timeout:25];
@@ -404,6 +465,7 @@ export async function fetchMatchingFeaturesInArea(
           return [];
       }
     },
+    { persistEmpty: false },
   );
 }
 
@@ -455,11 +517,73 @@ export async function findNearestMatchingFeature(
   return nearest;
 }
 
+export function countMatchingFeaturesInPlayArea(
+  features: MatchingFeature[],
+): number {
+  return features.filter((feature) => feature.inPlayArea !== false).length;
+}
+
+export function matchingFeatureCountLabel(
+  featureCount: number,
+  inPlayAreaFeatureCount: number,
+  usesContainmentMatching: boolean,
+  usesLandmassMatching: boolean,
+): string | undefined {
+  if (featureCount <= 0) {
+    return undefined;
+  }
+
+  const noun = usesContainmentMatching
+    ? usesLandmassMatching
+      ? "landmass"
+      : "division"
+    : "feature";
+  const plural = featureCount === 1 ? "" : "s";
+  const nearbyCount = featureCount - inPlayAreaFeatureCount;
+
+  if (usesContainmentMatching || nearbyCount === 0) {
+    return `${featureCount} ${noun}${plural} in play area`;
+  }
+
+  if (inPlayAreaFeatureCount === 0) {
+    return `${featureCount} ${noun}${plural} nearby`;
+  }
+
+  return `${featureCount} ${noun}${plural} (${inPlayAreaFeatureCount} in play area, ${nearbyCount} nearby)`;
+}
+
 export function matchingFeatureNotFoundMessage(
   categoryId: MatchingCategoryId,
 ): string {
   const label = matchingCategoryLabel(categoryId).toLowerCase();
+  const category = getMatchingCategory(categoryId);
+
+  if (matchingUsesExpandedFeatureSearch(category)) {
+    return `No named ${label} found near this play area.`;
+  }
+
   return `No named ${label} found in this play area.`;
+}
+
+export function matchingNullAnswerMessage(
+  categoryId: MatchingCategoryId,
+): string {
+  const category = getMatchingCategory(categoryId);
+  const label = matchingCategoryLabel(categoryId).toLowerCase();
+
+  if (category.resolver === "landmass") {
+    return "No landmass intersects the play area. You can still answer Yes or No and add this as a null match question.";
+  }
+
+  if (category.resolver === "reverseGeocodeAdmin") {
+    return `No ${label} intersects the play area. You can still answer Yes or No and add this as a null match question.`;
+  }
+
+  if (categoryId === "commercial_airport") {
+    return "No commercial airport with a flight code was found near this play area. You can still answer Yes or No and add this as a null match question.";
+  }
+
+  return `No named ${label} found near this play area. You can still answer Yes or No and add this as a null match question.`;
 }
 
 export function matchingResolveFailureMessage(

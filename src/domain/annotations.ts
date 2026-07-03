@@ -121,6 +121,8 @@ export interface SessionRecord {
   memberUids: string[];
   transitMetroId?: string;
   endedAt?: string;
+  timerAccumulatedMs?: number;
+  timerRunningSince?: string | null;
 }
 
 export const LOCAL_SESSION_ID = "local";

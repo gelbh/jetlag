@@ -89,6 +89,16 @@ export function HudPinIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function HudLayersIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="M12 3 3 8l9 5 9-5-9-5Z" />
+      <path d="m3 12 9 5 9-5" />
+      <path d="m3 17 9 5 9-5" />
+    </IconBase>
+  );
+}
+
 const TOOL_ICONS: Partial<
   Record<DockableMapTool, (props: SVGProps<SVGSVGElement>) => React.ReactElement>
 > = {

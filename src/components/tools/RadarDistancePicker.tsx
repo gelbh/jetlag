@@ -3,7 +3,6 @@ import {
   RADAR_DISTANCE_MILES,
   radarDistanceOptionLabel,
   radarQuestionPrompt,
-  type RadarAnswer,
   type RadarDistanceOptionKey,
 } from "../../domain/radarQuestions";
 import {
@@ -12,6 +11,9 @@ import {
   parseDistanceInput,
   type DistanceUnit,
 } from "../../domain/distance";
+import { OptionChip, OptionChipRow } from "./shared/OptionChip";
+import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
+import { ToolSection } from "./shared/ToolSection";
 
 interface RadarDistancePickerProps {
   radiusMeters: number;
@@ -44,96 +46,50 @@ export function RadarDistancePicker({
   const chooseAvailable = !usedDistanceOptions.has("choose");
 
   return (
-    <div className="space-y-2">
+    <ToolSection title="Distance" first status="active">
       {showPrompt ? (
-        <p className="text-sm font-medium text-ink">
-          {radarQuestionPrompt(resolvedRadius, distanceUnit)}
-        </p>
+        <QuestionPromptBlock
+          prompt={radarQuestionPrompt(resolvedRadius, distanceUnit)}
+        />
       ) : null}
-      <p className="text-sm text-ink-muted">Distance</p>
       {availablePresetMiles.length === 0 && !chooseAvailable ? (
         <p className="text-sm text-status-warning">
           Every radar distance option has already been used this session.
         </p>
       ) : (
-        <div className="mt-2 flex flex-wrap gap-2">
+        <OptionChipRow>
           {availablePresetMiles.map((miles) => {
             const presetMeters = milesToMeters(miles);
             const selected = !chooseCustom && radiusMeters === presetMeters;
 
             return (
-              <button
+              <OptionChip
                 key={miles}
-                type="button"
+                selected={selected}
                 onClick={() => onPresetSelect(presetMeters)}
-                className={`min-h-12 rounded-xl px-3 text-sm ${
-                  selected ? "bg-action text-action-ink" : "bg-surface-raised"
-                }`}
               >
                 {radarDistanceOptionLabel(miles, distanceUnit)}
-              </button>
+              </OptionChip>
             );
           })}
           {chooseAvailable ? (
-            <button
-              type="button"
-              onClick={onChooseSelect}
-              className={`min-h-12 rounded-xl px-3 text-sm ${
-                chooseCustom ? "bg-action text-action-ink" : "bg-surface-raised"
-              }`}
-            >
+            <OptionChip selected={chooseCustom} onClick={onChooseSelect}>
               {RADAR_CHOOSE_LABEL}
-            </button>
+            </OptionChip>
           ) : null}
-        </div>
+        </OptionChipRow>
       )}
       {chooseCustom && chooseAvailable ? (
-        <label className="mt-3 block text-sm text-ink-muted">
+        <label className="field-label">
           Custom {distanceUnitLabel(distanceUnit)}
           <input
             value={customRadius}
             onChange={(event) => onCustomRadiusChange(event.target.value)}
             inputMode="decimal"
-            className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-base px-3"
+            className="field-input"
           />
         </label>
       ) : null}
-    </div>
-  );
-}
-
-interface RadarAnswerPickerProps {
-  answer: RadarAnswer | null;
-  onAnswerChange: (answer: RadarAnswer) => void;
-}
-
-export function RadarAnswerPicker({
-  answer,
-  onAnswerChange,
-}: RadarAnswerPickerProps) {
-  return (
-    <div className="space-y-2">
-      <p className="text-sm text-ink-muted">Answer</p>
-      <div className="grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={() => onAnswerChange("yes")}
-          className={`min-h-12 rounded-xl px-3 text-sm ${
-            answer === "yes" ? "bg-status-success text-action-ink" : "bg-surface-raised"
-          }`}
-        >
-          Yes
-        </button>
-        <button
-          type="button"
-          onClick={() => onAnswerChange("no")}
-          className={`min-h-12 rounded-xl px-3 text-sm ${
-            answer === "no" ? "bg-status-negative text-ink" : "bg-surface-raised"
-          }`}
-        >
-          No
-        </button>
-      </div>
-    </div>
+    </ToolSection>
   );
 }

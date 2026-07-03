@@ -1,4 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLatestRequest } from "../useLatestRequest";
+import { useDebouncedValue } from "../useDebouncedValue";
 import { TentaclePanel } from "../../components/tools/TentaclePanel";
 import type { LatLngTuple } from "../../domain/geometry";
 import {
@@ -21,7 +23,7 @@ import {
   usedTentacleCategoryIds,
   type TentacleLocationCategoryId,
 } from "../../domain/tentacleQuestions";
-import { fetchTentaclePois } from "../../services/overpass";
+import { fetchTentaclePois } from "../../services/tentacleOverpass";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
@@ -93,13 +95,71 @@ export function useTentacleTool({
     }, []),
   });
 
+  const { beginRequest, cancelRequests, isLatestRequest } = useLatestRequest();
+
+  const loadPoisForCenter = useCallback(
+    async (center: LatLngTuple, categoryId: TentacleLocationCategoryId) => {
+      const requestId = beginRequest();
+      setTentacleLoading(true);
+      setTentacleError(null);
+      setTentaclePois([]);
+      setTentacleOutOfReach(false);
+      setSelectedPoiId(null);
+
+      try {
+        const pois = await fetchTentaclePois(
+          center,
+          TENTACLE_SEARCH_RADIUS_METERS,
+          categoryId,
+        );
+
+        if (!isLatestRequest(requestId)) {
+          return;
+        }
+
+        setTentaclePois(pois);
+        if (pois.length === 0) {
+          setTentacleError("No named locations were found within 1 mile.");
+        }
+      } catch (error) {
+        if (!isLatestRequest(requestId)) {
+          return;
+        }
+
+        setTentacleError(
+          error instanceof Error ? error.message : "Unable to load locations.",
+        );
+      } finally {
+        if (isLatestRequest(requestId)) {
+          setTentacleLoading(false);
+        }
+      }
+    },
+    [beginRequest, isLatestRequest],
+  );
+
+  const debouncedTentacleCenter = useDebouncedValue(tentacleCenter, 400);
+
+  useEffect(() => {
+    if (!active || !debouncedTentacleCenter) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void loadPoisForCenter(debouncedTentacleCenter, tentacleCategoryId);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [active, tentacleCategoryId, debouncedTentacleCenter, loadPoisForCenter]);
+
   const resetDraft = () => {
+    cancelRequests();
+    setTentacleLoading(false);
     setTentacleCenter(null);
     setTentacleCategoryId(defaultTentacleCategoryId(usedTentacleCategories));
     setTentaclePois([]);
     setTentacleOutOfReach(false);
     setSelectedPoiId(null);
-    setTentacleLoading(false);
     setTentacleError(null);
   };
 
@@ -111,6 +171,7 @@ export function useTentacleTool({
     setTentacleCenter(point);
     setAwaitingPlacement(false);
     setMapError(null);
+    setTentacleError(null);
     return true;
   };
 
@@ -129,36 +190,6 @@ export function useTentacleTool({
       setMapError(
         error instanceof Error ? error.message : "Unable to read GPS location.",
       );
-    }
-  };
-
-  const loadPois = async () => {
-    if (!tentacleCenter) {
-      return;
-    }
-
-    setTentacleLoading(true);
-    setTentacleError(null);
-    setTentaclePois([]);
-    setTentacleOutOfReach(false);
-    setSelectedPoiId(null);
-
-    try {
-      const pois = await fetchTentaclePois(
-        tentacleCenter,
-        TENTACLE_SEARCH_RADIUS_METERS,
-        tentacleCategoryId,
-      );
-      setTentaclePois(pois);
-      if (pois.length === 0) {
-        setTentacleError("No named locations were found within 1 mile.");
-      }
-    } catch (error) {
-      setTentacleError(
-        error instanceof Error ? error.message : "Unable to load locations.",
-      );
-    } finally {
-      setTentacleLoading(false);
     }
   };
 
@@ -194,7 +225,7 @@ export function useTentacleTool({
     }
 
     if (tentaclePois.length === 0) {
-      setMapError("Load locations before adding the tentacle question.");
+      setMapError("No locations found near this anchor.");
       return;
     }
 
@@ -284,7 +315,6 @@ export function useTentacleTool({
       }}
       onUseGps={() => void handleUseGps()}
       onPlaceAtMapTap={armPlacement}
-      onLoadPois={() => void loadPois()}
       onSelectPoi={(poiId) => {
         setTentacleOutOfReach(false);
         setSelectedPoiId(poiId);

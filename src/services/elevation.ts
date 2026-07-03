@@ -204,15 +204,6 @@ export async function fetchElevations(
   return elevations;
 }
 
-export async function fetchElevation(point: LatLngTuple): Promise<number> {
-  const [elevation] = await fetchElevations([point]);
-  if (!Number.isFinite(elevation)) {
-    throw new Error("Elevation lookup returned no data for that point.");
-  }
-
-  return elevation;
-}
-
 export function clearElevationCacheForTests(): void {
   elevationCache.clear();
   activeElevationRequests = 0;

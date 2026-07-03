@@ -14,6 +14,15 @@ export function renderMaskPolygon(
   selectionEnabled: boolean,
   onSelect?: () => void,
 ) {
+  const pathOptions = {
+    stroke: !selected,
+    color: selected ? color : undefined,
+    weight: selected ? 3 : 0,
+    fillColor: color,
+    fillOpacity: 0.35,
+    className: pulsing ? "annotation-pulse" : undefined,
+  };
+
   if (polygon.geometry.type === "MultiPolygon") {
     return polygon.geometry.coordinates.map((rings, index) => {
       const ringsLatLng = rings.map((ring) =>
@@ -25,13 +34,7 @@ export function renderMaskPolygon(
           key={`${key}-${index}`}
           positions={ringsLatLng}
           interactive={selectionEnabled}
-          pathOptions={{
-            color,
-            weight: selected ? 4 : 1,
-            fillColor: color,
-            fillOpacity: 0.35,
-            className: pulsing ? "annotation-pulse" : undefined,
-          }}
+          pathOptions={pathOptions}
           eventHandlers={
             selectionEnabled && onSelect
               ? {
@@ -57,13 +60,7 @@ export function renderMaskPolygon(
       key={key}
       positions={rings}
       interactive={selectionEnabled}
-      pathOptions={{
-        color,
-        weight: selected ? 4 : 1,
-        fillColor: color,
-        fillOpacity: 0.35,
-        className: pulsing ? "annotation-pulse" : undefined,
-      }}
+      pathOptions={pathOptions}
       eventHandlers={
         selectionEnabled && onSelect
           ? {

@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { Polygon } from "react-leaflet";
 import { AnnotationLayer } from "../components/map/AnnotationLayer";
 import { GeometryEditLayer } from "../components/map/GeometryEditLayer";
 import { GameAreaMask } from "../components/map/GameAreaMask";
 import { MapView } from "../components/map/MapView";
-import { ToolDraftLayer } from "../components/map/ToolDraftLayer";
-import { TransitControls } from "../components/map/TransitControls";
+import { MapStyleToggle } from "../components/map/MapStyleToggle";
+import { MapDraftLayer } from "../components/map/MapDraftLayer";
 import { TransitLayer } from "../components/map/TransitLayer";
 import { UserLocationLayer } from "../components/map/UserLocationLayer";
 import { MapModeChip } from "../components/session/MapModeChip";
 import { MapToolsHintBanner } from "../components/session/MapToolsHintBanner";
+import { StartGameBanner } from "../components/session/StartGameBanner";
 import { MapSettingsSheet } from "../components/session/MapSettingsSheet";
 import { SessionLog } from "../components/session/SessionLog";
 import { SyncStatusBanner } from "../components/session/SyncStatusBanner";
@@ -28,6 +28,7 @@ import {
 } from "../hooks/map-screen/heavyMapTools";
 import { useMapGeometryEdit } from "../hooks/map-screen/useMapGeometryEdit";
 import { useMapSessionChrome } from "../hooks/map-screen/useMapSessionChrome";
+import { useMapDraftOverlays } from "../hooks/map-screen/useMapDraftOverlays";
 import { useMapToolInteraction } from "../hooks/map-screen/useMapToolInteraction";
 import {
   findLastRedoableAnnotation,
@@ -42,9 +43,9 @@ import {
   type LatLngTuple,
 } from "../domain/geometry";
 import { LOCAL_SESSION_ID } from "../domain/annotations";
-import { MAP_ZONE_DRAFT_PATH } from "../domain/mapAnnotationColors";
 import { useAnnotations } from "../hooks/useAnnotations";
-import { useGameTimer } from "../hooks/useGameTimer";
+import { useSessionTimer } from "../hooks/useSessionTimer";
+import { useRemoteSessionTimerSync } from "../hooks/useRemoteSessionTimerSync";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { useLiveLocation } from "../hooks/useLiveLocation";
 import { useSessionSync } from "../hooks/useSessionSync";
@@ -94,6 +95,8 @@ export function MapScreen() {
   );
   const distanceUnit = useMapStore((state) => state.distanceUnit);
   const setDistanceUnit = useMapStore((state) => state.setDistanceUnit);
+  const mapStyle = useMapStore((state) => state.mapStyle);
+  const setMapStyle = useMapStore((state) => state.setMapStyle);
   const allAnnotations = useAnnotationStore((state) => state.annotations);
   const sessionId = session?.id;
   const annotations = useMemo(
@@ -155,18 +158,30 @@ export function MapScreen() {
   const { refresh, loading: gpsLoading, error: gpsError } = useGeolocation();
   const { reading: liveLocation, error: liveLocationError } =
     useLiveLocation(showCurrentLocation);
-  const timer = useGameTimer();
+  const [currentUid, setCurrentUid] = useState<string | null>(null);
+  const isHost = Boolean(
+    session?.hostUid && currentUid && session.hostUid === currentUid,
+  );
+  const {
+    isRemote,
+    canControlTimer,
+    remoteState,
+    onControl: onTimerControl,
+  } = useRemoteSessionTimerSync(session?.id, isHost);
+  const timer = useSessionTimer(session?.id, {
+    canControl: canControlTimer,
+    onControl: onTimerControl,
+    remoteState,
+  });
   const mapShellRef = useRef<HTMLDivElement>(null);
   const exportLegendRef = useRef<HTMLDivElement>(null);
   const syncStatus = useSyncStatus();
-  useWakeLock(keepScreenAwake);
+  useWakeLock(keepScreenAwake || timer.running);
 
   const [logOpen, setLogOpen] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
   const [awaitingPlacement, setAwaitingPlacement] = useState(false);
-  const [sessionChromeOpen, setSessionChromeOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [currentUid, setCurrentUid] = useState<string | null>(null);
 
   const finishPlacement = useCallback(() => {
     setActiveTool("none");
@@ -258,9 +273,6 @@ export function MapScreen() {
 
   const transitMetro = getTransitMetro(session?.transitMetroId);
   const transitLiveSupported = metroSupportsLiveVehicles(transitMetro ?? null);
-  const isHost = Boolean(
-    session?.hostUid && currentUid && session.hostUid === currentUid,
-  );
   const {
     staticData: transitStaticData,
     liveData: transitLiveData,
@@ -382,6 +394,53 @@ export function MapScreen() {
       setSettingsOpen,
     });
 
+  const { overlays: mapDraftOverlays, eliminationFeatures: draftEliminationFeatures } =
+    useMapDraftOverlays(
+      {
+        activeTool,
+        gameArea: toolGameArea,
+        radar: {
+          center: radarTool.draft.radarCenter,
+          radiusMeters: radarTool.draft.radarRadius,
+          answer: radarTool.draft.radarAnswer,
+        },
+        pin: { point: pinTool.draft.pinPoint },
+        tentacle: {
+          center: tentacleTool.draft.tentacleCenter,
+          searchRadiusMeters: tentacleTool.draft.tentacleSearchRadiusMeters,
+          answerRadiusMeters: tentacleTool.draft.tentacleAnswerRadiusMeters,
+          pois: tentacleTool.draft.tentaclePois,
+          selectedPoiId: tentacleTool.draft.tentacleSelectedPoiId,
+          outOfReach: tentacleTool.draft.tentacleOutOfReach,
+        },
+        thermometer: {
+          thermoA: thermometerTool.draft.thermoA,
+          thermoB: thermometerTool.draft.thermoB,
+          answer: thermometerTool.draft.thermometerAnswer,
+        },
+        measuring: {
+          seekerPoint: measuringTool.draft.measuringSeekerPoint,
+          targetPoint: measuringTool.draft.measuringTargetPoint,
+          placePoints: measuringTool.draft.measuringPlaces.map(
+            (place) => place.point,
+          ),
+          siteRadiusMeters: measuringTool.draft.measuringDistanceMeters,
+          boundaryPreview: measuringTool.draft.measuringBoundaryPreview,
+          eliminationPreview: measuringTool.draft.measuringEliminationPreview,
+        },
+        matching: {
+          seekerPoint: matchingTool.draft.matchingSeekerPoint,
+          nearestFeaturePoint: matchingTool.draft.matchingNearestFeaturePoint,
+          boundaryPreview: matchingTool.draft.matchingBoundaryPreview,
+          eliminationPreview: matchingTool.draft.matchingEliminationPreview,
+        },
+        zone: { vertices: zoneTool.draft.zoneVertices },
+      },
+      tentacleTool.draft.tentacleEliminationPreview
+        ? [tentacleTool.draft.tentacleEliminationPreview]
+        : [],
+    );
+
   if (!session?.gameArea) {
     return <Navigate to="/create" replace />;
   }
@@ -468,6 +527,7 @@ export function MapScreen() {
         <MapView
           key={session.id}
           mapKey={session.id}
+          mapStyle={mapStyle}
           center={center}
           zoom={12}
           focusBounds={mapFocusBounds}
@@ -491,6 +551,7 @@ export function MapScreen() {
             gameArea={session.gameArea}
             selectedAnnotationId={selectedAnnotationId}
             layerVisibility={layerVisibility}
+            draftEliminationFeatures={draftEliminationFeatures}
           />
           {geometryEditAnnotation && geometryDraft ? (
             <GeometryEditLayer
@@ -499,60 +560,7 @@ export function MapScreen() {
               gameArea={toolGameArea}
             />
           ) : null}
-          <ToolDraftLayer
-            activeTool={activeTool}
-            radarCenter={radarTool.draft.radarCenter}
-            radarRadiusMeters={radarTool.draft.radarRadius}
-            pinPoint={pinTool.draft.pinPoint}
-            tentacleCenter={tentacleTool.draft.tentacleCenter}
-            tentacleSearchRadiusMeters={
-              tentacleTool.draft.tentacleSearchRadiusMeters
-            }
-            tentacleAnswerRadiusMeters={
-              tentacleTool.draft.tentacleAnswerRadiusMeters
-            }
-            tentacleDraftPois={tentacleTool.draft.tentaclePois}
-            tentacleDraftSelectedPoiId={
-              tentacleTool.draft.tentacleSelectedPoiId
-            }
-            tentacleDraftOutOfReach={tentacleTool.draft.tentacleOutOfReach}
-            tentacleEliminationPreview={
-              tentacleTool.draft.tentacleEliminationPreview
-            }
-            thermoA={thermometerTool.draft.thermoA}
-            thermoB={thermometerTool.draft.thermoB}
-            thermoAnswer={thermometerTool.draft.thermometerAnswer}
-            gameArea={session.gameArea}
-            measuringSeekerPoint={measuringTool.draft.measuringSeekerPoint}
-            measuringTargetPoint={measuringTool.draft.measuringTargetPoint}
-            measuringPlacePoints={measuringTool.draft.measuringPlaces.map(
-              (place) => place.point,
-            )}
-            measuringSiteRadiusMeters={
-              measuringTool.draft.measuringDistanceMeters
-            }
-            measuringBoundaryPreview={
-              measuringTool.draft.measuringBoundaryPreview
-            }
-            measuringEliminationPreview={
-              measuringTool.draft.measuringEliminationPreview
-            }
-            matchingSeekerPoint={matchingTool.draft.matchingSeekerPoint}
-            matchingNearestFeaturePoint={
-              matchingTool.draft.matchingNearestFeaturePoint
-            }
-            matchingBoundaryPreview={matchingTool.draft.matchingBoundaryPreview}
-            matchingEliminationPreview={
-              matchingTool.draft.matchingEliminationPreview
-            }
-            zoneVertices={zoneTool.draft.zoneVertices}
-          />
-          {zoneTool.draft.zoneVertices.length > 0 ? (
-            <Polygon
-              positions={zoneTool.draft.zoneVertices}
-              pathOptions={MAP_ZONE_DRAFT_PATH}
-            />
-          ) : null}
+          <MapDraftLayer overlays={mapDraftOverlays} />
         </MapView>
         <div
           ref={exportLegendRef}
@@ -602,48 +610,11 @@ export function MapScreen() {
           >
             <HudHomeIcon className="h-5 w-5" />
           </Link>
-          <div className="flex items-stretch gap-2">
-            <button
-              type="button"
-              onClick={() => setSessionChromeOpen((open) => !open)}
-              className="btn-secondary hidden min-h-12 md:inline-flex"
-              aria-expanded={sessionChromeOpen}
-            >
-              {sessionChromeOpen ? "Hide" : "Session"}
-            </button>
-          </div>
         </div>
-        {sessionChromeOpen ? (
-          <div className="pointer-events-auto mt-2 hidden space-y-2 md:block">
-            {pendingWrites > 0 ? (
-              <p className="rounded-[var(--radius-hud-md)] bg-status-warning-surface px-4 py-3 text-sm text-status-warning">
-                {pendingWrites} pending sync
-              </p>
-            ) : null}
-            <TransitControls
-              enabled={transitEnabled}
-              liveEnabled={transitLiveEnabled}
-              liveSupported={transitLiveSupported}
-              routeFilter={transitRouteFilter}
-              metroLabel={transitMetro?.label ?? null}
-              loadingStatic={transitLoadingStatic}
-              loadingLive={transitLoadingLive}
-              stopCount={transitStaticData?.stops.length ?? 0}
-              routeCount={transitStaticData?.routes.length ?? 0}
-              vehicleCount={transitLiveData?.vehicles.length ?? 0}
-              lastUpdated={
-                transitLiveData?.fetchedAt ?? transitStaticData?.fetchedAt
-              }
-              error={transitError}
-              onToggleEnabled={() => setTransitEnabled(!transitEnabled)}
-              onToggleLive={() => setTransitLiveEnabled(!transitLiveEnabled)}
-              onRouteFilterChange={setTransitRouteFilter}
-            />
-          </div>
-        ) : null}
       </div>
 
       <MapSettingsSheet
+        key={settingsOpen ? "open" : "closed"}
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
         pendingWrites={pendingWrites}
@@ -655,13 +626,9 @@ export function MapScreen() {
         onLayerVisibilityChange={setLayerVisibility}
         distanceUnit={distanceUnit}
         onDistanceUnitChange={setDistanceUnit}
+        mapStyle={mapStyle}
+        onMapStyleChange={setMapStyle}
         locationError={liveLocationError}
-        timerRunning={timer.running}
-        timerHasStarted={timer.hasStarted}
-        timerLabel={timer.formattedElapsed}
-        onTimerStart={timer.start}
-        onTimerPause={timer.pause}
-        onTimerReset={timer.reset}
         transitEnabled={transitEnabled}
         transitLiveEnabled={transitLiveEnabled}
         transitLiveSupported={transitLiveSupported}
@@ -677,10 +644,6 @@ export function MapScreen() {
         onToggleTransit={() => setTransitEnabled(!transitEnabled)}
         onToggleLiveTransit={() => setTransitLiveEnabled(!transitLiveEnabled)}
         onTransitRouteFilterChange={setTransitRouteFilter}
-        onOpenLog={() => {
-          setSettingsOpen(false);
-          setLogOpen(true);
-        }}
         onClearMap={handleClearMap}
         onExport={() => {
           setSettingsOpen(false);
@@ -690,12 +653,12 @@ export function MapScreen() {
         onResetBoard={handleResetBoard}
         onEndSession={() => void handleEndSession()}
         sessionCode={session.code}
-        remoteSession={session.id !== LOCAL_SESSION_ID}
+        remoteSession={isRemote}
       />
 
       {activeTool !== "none" && !selectedAnnotation ? (
         <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+0.5rem)] z-[var(--z-panel)] px-3">
-          <div className="hud-panel relative mx-auto max-h-[min(42dvh,420px)] max-w-xl overflow-y-auto overscroll-contain p-4 pt-10">
+          <div className="tool-panel-compact hud-panel relative mx-auto max-h-[min(34dvh,320px)] max-w-xl overflow-y-auto overscroll-contain p-3 pt-9">
             <PopupCloseButton
               label={`Close ${mapToolPlacingLabel(activeTool)}`}
               onClick={() => handleSelectTool("none")}
@@ -722,14 +685,29 @@ export function MapScreen() {
         />
       ) : null}
 
+      <StartGameBanner
+        hidden={
+          timer.hasStarted ||
+          settingsOpen ||
+          activeTool !== "none" ||
+          Boolean(selectedAnnotation) ||
+          Boolean(geometryEditAnnotation && geometryDraft)
+        }
+        canStart={canControlTimer}
+        onStart={timer.start}
+      />
+
       <MapToolsHintBanner
         hidden={
+          !timer.hasStarted ||
           activeTool !== "none" ||
           settingsOpen ||
           Boolean(selectedAnnotation) ||
           Boolean(geometryEditAnnotation && geometryDraft)
         }
       />
+
+      <MapStyleToggle mapStyle={mapStyle} onMapStyleChange={setMapStyle} />
 
       <ToolDock
         activeTool={activeTool}
@@ -739,12 +717,16 @@ export function MapScreen() {
         onTimerStart={timer.start}
         onTimerPause={timer.pause}
         onTimerReset={timer.reset}
+        timerControlsDisabled={!canControlTimer}
         onSelect={handleSelectTool}
         canUndo={canUndoLastTool}
         canRedo={canRedoLastTool}
         onUndo={handleUndoLastAnnotation}
         onRedo={handleRedoLastAnnotation}
         onOpenSettings={() => setSettingsOpen(true)}
+        onOpenLog={() => {
+          setLogOpen(true);
+        }}
       />
 
       <SessionLog

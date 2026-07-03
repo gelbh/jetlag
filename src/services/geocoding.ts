@@ -1,6 +1,6 @@
 import type { GameArea } from "../domain/annotations";
 import { normalizeBoundingBox } from "../domain/gameAreaBounds";
-import type { LatLngTuple } from "../domain/geometryCore";
+import type { LatLngTuple } from "../domain/geometry";
 import { fetchWithTimeout } from "./fetchWithTimeout";
 
 const NOMINATIM_ENDPOINT = "https://nominatim.openstreetmap.org/search";

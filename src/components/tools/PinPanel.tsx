@@ -12,12 +12,12 @@ export function PinPanel({
   hasPoint,
 }: PinPanelProps) {
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-ink-muted">
+    <div className="space-y-3">
+      <p className="text-xs leading-snug text-ink-muted">
         Tap the map to place a note for matching or measuring questions.
       </p>
       {hasPoint ? (
-        <p className="text-sm text-ink-dim">
+        <p className="text-xs text-ink-dim">
           Location pinned on the map. Tap again to move it.
         </p>
       ) : null}
@@ -26,7 +26,7 @@ export function PinPanel({
         <textarea
           value={label}
           onChange={(event) => onLabelChange(event.target.value)}
-          className="mt-1 min-h-24 w-full rounded-xl border border-border bg-surface-base px-3 py-2"
+          className="mt-1 min-h-20 w-full rounded-xl border border-border bg-surface-base px-3 py-2 text-sm"
           placeholder="Closer to the train station than us"
         />
       </label>

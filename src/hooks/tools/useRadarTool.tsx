@@ -218,6 +218,7 @@ export function useRadarTool({
       radarCenter,
       radarRadius: resolvedRadarRadius,
       radarChooseCustom,
+      radarAnswer,
     },
     placementCrosshair,
     handleMapClick,

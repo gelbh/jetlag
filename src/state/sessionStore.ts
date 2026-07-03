@@ -5,6 +5,7 @@ import type { GameArea, SessionRecord } from "../domain/annotations";
 export type { MapTool } from "../domain/mapToolTypes";
 export { useAnnotationStore } from "./annotationStore";
 export { useMapStore, type LayerVisibility } from "./mapStore";
+export type { MapStyle } from "../domain/mapBasemaps";
 
 interface SessionState {
   session: SessionRecord | null;

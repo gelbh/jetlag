@@ -4,6 +4,7 @@ import type { AnnotationType } from "../domain/annotations";
 import type { DistanceUnit } from "../domain/distance";
 import type { MapTool } from "../domain/mapToolTypes";
 import type { TransitRouteFilter } from "../domain/transit";
+import type { MapStyle } from "../domain/mapBasemaps";
 
 export type LayerVisibility = Record<AnnotationType | "transit", boolean>;
 
@@ -26,6 +27,7 @@ export const useMapStore = create<{
   showCurrentLocation: boolean;
   keepScreenAwake: boolean;
   distanceUnit: DistanceUnit;
+  mapStyle: MapStyle;
   layerVisibility: LayerVisibility;
   setActiveTool: (tool: MapTool) => void;
   setTransitEnabled: (enabled: boolean) => void;
@@ -34,6 +36,7 @@ export const useMapStore = create<{
   setShowCurrentLocation: (enabled: boolean) => void;
   setKeepScreenAwake: (enabled: boolean) => void;
   setDistanceUnit: (unit: DistanceUnit) => void;
+  setMapStyle: (style: MapStyle) => void;
   setLayerVisibility: (layer: keyof LayerVisibility, visible: boolean) => void;
 }>()(
   persist(
@@ -45,6 +48,7 @@ export const useMapStore = create<{
       showCurrentLocation: true,
       keepScreenAwake: false,
       distanceUnit: "imperial",
+      mapStyle: "standard",
       layerVisibility: DEFAULT_LAYER_VISIBILITY,
       setActiveTool: (activeTool) => set({ activeTool }),
       setTransitEnabled: (transitEnabled) => set({ transitEnabled }),
@@ -56,6 +60,7 @@ export const useMapStore = create<{
         set({ showCurrentLocation }),
       setKeepScreenAwake: (keepScreenAwake) => set({ keepScreenAwake }),
       setDistanceUnit: (distanceUnit) => set({ distanceUnit }),
+      setMapStyle: (mapStyle) => set({ mapStyle }),
       setLayerVisibility: (layer, visible) =>
         set((state) => ({
           layerVisibility: {
@@ -79,6 +84,7 @@ export const useMapStore = create<{
       partialize: (state) => ({
         keepScreenAwake: state.keepScreenAwake,
         distanceUnit: state.distanceUnit,
+        mapStyle: state.mapStyle,
         layerVisibility: state.layerVisibility,
       }),
     },

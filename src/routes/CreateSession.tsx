@@ -14,7 +14,7 @@ import {
 } from "../domain/geometry";
 import { generateLocalCode } from "../domain/session";
 import { LOCAL_SESSION_ID } from "../domain/annotations";
-import { useSessionStore } from "../state/sessionStore";
+import { useSessionStore, useMapStore } from "../state/sessionStore";
 import {
   isFirebaseConfigured,
   ensureAnonymousUser,
@@ -38,6 +38,7 @@ function placeToFocusBounds(place: GeocodedPlace): LatLngBoundsExpression {
 export function CreateSession() {
   const navigate = useNavigate();
   const setSession = useSessionStore((state) => state.setSession);
+  const mapStyle = useMapStore((state) => state.mapStyle);
   const [bounds, setBounds] = useState<LatLngBounds | null>(null);
   const [focusBounds, setFocusBounds] = useState<LatLngBoundsExpression | null>(
     null,
@@ -220,6 +221,7 @@ export function CreateSession() {
   return (
     <div className="relative h-full min-h-[100dvh]">
       <MapView
+        mapStyle={mapStyle}
         onBoundsChange={handleBoundsChange}
         zoom={12}
         focusBounds={focusBounds}

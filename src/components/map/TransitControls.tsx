@@ -16,6 +16,7 @@ interface TransitControlsProps {
   onToggleEnabled: () => void;
   onToggleLive: () => void;
   onRouteFilterChange: (value: TransitRouteFilter) => void;
+  variant?: "panel" | "inline";
 }
 
 const FILTER_OPTIONS: Array<{ value: TransitRouteFilter; label: string }> = [
@@ -43,9 +44,15 @@ export function TransitControls({
   onToggleEnabled,
   onToggleLive,
   onRouteFilterChange,
+  variant = "panel",
 }: TransitControlsProps) {
+  const wrapperClassName =
+    variant === "panel"
+      ? "pointer-events-auto hud-panel rounded-[var(--radius-hud-lg)] p-3"
+      : "space-y-2";
+
   return (
-    <div className="pointer-events-auto hud-panel rounded-[var(--radius-hud-lg)] p-3">
+    <div className={wrapperClassName}>
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"

@@ -1,4 +1,3 @@
-import type { Feature, LineString } from "geojson";
 import type { GameArea } from "../domain/annotations";
 import type { ElevationSampleCell } from "../domain/seaLevel";
 
@@ -143,14 +142,33 @@ async function writePersistedEntry<T>(key: string, value: T): Promise<void> {
   }
 }
 
-async function writeCachedValue<T>(key: string, value: T): Promise<void> {
+interface CacheOptions {
+  persistEmpty?: boolean;
+}
+
+async function writeCachedValue<T>(
+  key: string,
+  value: T,
+  options: CacheOptions = {},
+): Promise<void> {
+  const persistEmpty = options.persistEmpty ?? true;
   writeMemoryEntry(key, value);
+
+  if (
+    !persistEmpty &&
+    Array.isArray(value) &&
+    (value as unknown[]).length === 0
+  ) {
+    return;
+  }
+
   await writePersistedEntry(key, value);
 }
 
 export async function getOrFetchCached<T>(
   key: string,
   fetcher: () => Promise<T>,
+  options: CacheOptions = {},
 ): Promise<T> {
   const memoryValue = readMemoryEntry<T>(key);
   if (memoryValue !== undefined) {
@@ -169,7 +187,7 @@ export async function getOrFetchCached<T>(
     }
 
     const value = await fetcher();
-    await writeCachedValue(key, value);
+    await writeCachedValue(key, value, options);
     return value;
   })().finally(() => {
     inFlight.delete(key);
@@ -178,8 +196,6 @@ export async function getOrFetchCached<T>(
   inFlight.set(key, pending);
   return pending;
 }
-
-export type CachedLinearSegments = Feature<LineString>[];
 
 export interface CachedSeaLevelSampling {
   cells: ElevationSampleCell[];
@@ -210,13 +226,6 @@ export function adminDivisionCacheKey(
 
 export function landmassCacheKey(gameArea: GameArea): string {
   return geographicCacheKey(gameArea, "landmass");
-}
-
-export function matchingFeaturesCacheKey(
-  gameArea: GameArea,
-  categoryId: string,
-): string {
-  return geographicCacheKey(gameArea, `matching:${categoryId}`);
 }
 
 export function measuringPlacesCacheKey(

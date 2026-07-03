@@ -397,3 +397,14 @@ export function adminLevelForMatchingCategory(
       return null;
   }
 }
+
+export function matchingUsesExpandedFeatureSearch(
+  category: MatchingCategoryDefinition,
+): boolean {
+  return (
+    category.resolver === "overpassPoint" ||
+    category.resolver === "streetPath" ||
+    category.resolver === "stationNameLength" ||
+    category.resolver === "transitLine"
+  );
+}

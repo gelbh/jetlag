@@ -1,5 +1,5 @@
 import type { Feature, LineString, Point, Polygon } from "geojson";
-import type { AnnotationRecord, GameArea } from "../domain/annotations";
+import type { AnnotationRecord, GameArea, SessionRecord } from "../domain/annotations";
 import {
   boundingBoxToGameArea,
   gameAreaToBoundingBox,
@@ -193,10 +193,43 @@ export function buildSessionDocument(
     createdAt,
     memberUids: [hostUid],
     transitMetroId: transitMetroId ?? null,
+    timerAccumulatedMs: 0,
+    timerRunningSince: null,
   };
 
   assertNoNestedArrays(payload);
   return payload;
+}
+
+export function deserializeSessionFromFirestore(
+  id: string,
+  data: Record<string, unknown>,
+): SessionRecord {
+  return {
+    id,
+    code: String(data.code),
+    gameArea: deserializeGameAreaFromFirestore(
+      data.gameArea as Parameters<typeof deserializeGameAreaFromFirestore>[0],
+    ),
+    hostUid: typeof data.hostUid === "string" ? data.hostUid : undefined,
+    createdAt: String(data.createdAt),
+    memberUids: Array.isArray(data.memberUids)
+      ? data.memberUids.filter((uid): uid is string => typeof uid === "string")
+      : [],
+    transitMetroId:
+      typeof data.transitMetroId === "string" ? data.transitMetroId : undefined,
+    endedAt: typeof data.endedAt === "string" ? data.endedAt : undefined,
+    timerAccumulatedMs:
+      typeof data.timerAccumulatedMs === "number"
+        ? data.timerAccumulatedMs
+        : undefined,
+    timerRunningSince:
+      data.timerRunningSince === null
+        ? null
+        : typeof data.timerRunningSince === "string"
+          ? data.timerRunningSince
+          : undefined,
+  };
 }
 
 export function buildAnnotationDocument(

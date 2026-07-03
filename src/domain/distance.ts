@@ -9,7 +9,6 @@ export function milesToMeters(miles: number): number {
   return miles * METERS_PER_MILE;
 }
 
-export const RADAR_RADIUS_PRESETS = MILE_RADIUS_PRESETS.map(milesToMeters);
 export const DEFAULT_RADIUS_METERS = milesToMeters(1);
 
 export function formatDistance(

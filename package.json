@@ -10,6 +10,8 @@
     "typecheck": "tsc -b --noEmit",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:functions": "npm test --prefix functions",
+    "test:all": "vitest run && npm test --prefix functions",
     "deploy": "node scripts/deploy-production.mjs",
     "prepare": "husky"
   },
