@@ -6,7 +6,7 @@ export const MAP_ANNOTATION_COLORS = {
   playAreaMask: "#020617",
   pin: "#38bdf8",
   pinAccent: "#0ea5e9",
-  radar: "#f97316",
+  radar: "#ef4444",
   zone: "#a855f7",
   zoneDraft: "#a855f7",
   tentacle: "#22c55e",

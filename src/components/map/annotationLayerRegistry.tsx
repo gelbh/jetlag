@@ -1,17 +1,9 @@
-import { Fragment } from "react";
-import { Circle, CircleMarker, Polyline, Popup } from "react-leaflet";
-import type {
-  Feature,
-  Point,
-  Polygon as GeoPolygon,
-} from "geojson";
+import { CircleMarker, Polyline, Popup } from "react-leaflet";
+import type { Feature, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../../domain/annotations";
-import { DEFAULT_RADIUS_METERS } from "../../domain/distance";
-import {
-  polygonFeatureToLeafletRings,
-  type LatLngTuple,
-} from "../../domain/geometry";
+import { polygonFeatureToLeafletRings } from "../../domain/geometry";
 import type { LayerVisibility } from "../../state/sessionStore";
+import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface RenderAnnotationLayerItemParams {
   annotation: AnnotationRecord;
@@ -33,11 +25,12 @@ export function renderAnnotationLayerItem({
     return null;
   }
 
-  const color = annotation.metadata.color ?? "#f97316";
+  const color = annotation.metadata.color ?? MAP_ANNOTATION_COLORS.elimination;
   const selected = annotation.id === selectedAnnotationId;
 
   // Committed question tools: elimination fill only (CombinedEliminationLayer).
   if (
+    annotation.type === "radar" ||
     annotation.type === "matching" ||
     (annotation.type === "measuring" &&
       (annotation.geometry.geometry.type === "Polygon" ||
@@ -48,40 +41,6 @@ export function renderAnnotationLayerItem({
       annotation.geometry.geometry.type === "Point")
   ) {
     return null;
-  }
-
-  if (annotation.type === "radar") {
-    const center = annotation.geometry.geometry as Point;
-    const radius = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
-    const centerTuple: LatLngTuple = [
-      center.coordinates[1],
-      center.coordinates[0],
-    ];
-
-    return (
-      <Fragment key={annotation.id}>
-        <Circle
-          center={centerTuple}
-          radius={radius}
-          interactive={selectionEnabled}
-          pathOptions={{
-            color,
-            weight: selected ? 4 : 2,
-            fillOpacity: 0.05,
-          }}
-          eventHandlers={
-            selectionEnabled
-              ? {
-                  click: (event) => {
-                    event.originalEvent?.stopPropagation();
-                    selectAnnotation();
-                  },
-                }
-              : undefined
-          }
-        />
-      </Fragment>
-    );
   }
 
   if (

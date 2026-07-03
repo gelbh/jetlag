@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { Polygon } from "react-leaflet";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../../domain/annotations";
@@ -16,32 +17,38 @@ interface CombinedEliminationLayerProps {
   hidden?: boolean;
 }
 
-export function CombinedEliminationLayer({
+export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
   annotations,
   gameArea,
   draftFeatures = [],
   pulsingAnnotationIds = [],
   hidden = false,
 }: CombinedEliminationLayerProps) {
-  if (hidden) {
-    return null;
-  }
+  const combinedMask = useMemo(() => {
+    if (hidden) {
+      return null;
+    }
 
-  const combinedMask = buildCombinedEliminationMask(
-    annotations,
-    gameArea,
-    draftFeatures,
+    return buildCombinedEliminationMask(
+      annotations,
+      gameArea,
+      draftFeatures,
+    );
+  }, [annotations, draftFeatures, gameArea, hidden]);
+
+  const pulsing = useMemo(
+    () =>
+      annotations.some(
+        (annotation) =>
+          pulsingAnnotationIds.includes(annotation.id) &&
+          eliminationFeatureForAnnotation(annotation, gameArea) !== null,
+      ),
+    [annotations, gameArea, pulsingAnnotationIds],
   );
 
-  if (!combinedMask) {
+  if (hidden || !combinedMask) {
     return null;
   }
-
-  const pulsing = annotations.some(
-    (annotation) =>
-      pulsingAnnotationIds.includes(annotation.id) &&
-      eliminationFeatureForAnnotation(annotation, gameArea) !== null,
-  );
 
   return (
     <>
@@ -60,4 +67,4 @@ export function CombinedEliminationLayer({
       ))}
     </>
   );
-}
+});

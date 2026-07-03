@@ -152,7 +152,7 @@ export function useTentacleTool({
     return () => window.clearTimeout(timeoutId);
   }, [active, tentacleCategoryId, debouncedTentacleCenter, loadPoisForCenter]);
 
-  const resetDraft = () => {
+  const resetDraft = useCallback(() => {
     cancelRequests();
     setTentacleLoading(false);
     setTentacleCenter(null);
@@ -161,19 +161,22 @@ export function useTentacleTool({
     setTentacleOutOfReach(false);
     setSelectedPoiId(null);
     setTentacleError(null);
-  };
+  }, [cancelRequests, usedTentacleCategories]);
 
-  const handleMapClick = (point: LatLngTuple) => {
-    if (!active) {
-      return false;
-    }
+  const handleMapClick = useCallback(
+    (point: LatLngTuple) => {
+      if (!active) {
+        return false;
+      }
 
-    setTentacleCenter(point);
-    setAwaitingPlacement(false);
-    setMapError(null);
-    setTentacleError(null);
-    return true;
-  };
+      setTentacleCenter(point);
+      setAwaitingPlacement(false);
+      setMapError(null);
+      setTentacleError(null);
+      return true;
+    },
+    [active, setAwaitingPlacement, setMapError],
+  );
 
   const handleUseGps = async () => {
     try {

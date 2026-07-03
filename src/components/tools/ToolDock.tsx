@@ -9,6 +9,7 @@ import {
 import type { MapTool } from "../../state/sessionStore";
 import {
   HudMoreIcon,
+  HudPlayIcon,
   HudRedoIcon,
   HudSettingsIcon,
   HudToolIcon,
@@ -16,10 +17,12 @@ import {
 } from "../ui/HudIcons";
 import { PopupCloseButton } from "../ui/PopupCloseButton";
 import { TimerActions } from "./TimerActions";
+import type { TimerState } from "../../domain/timer";
+import { SessionTimerLabel } from "../session/SessionTimerLabel";
 
 interface ToolDockProps {
   activeTool: MapTool;
-  timerLabel: string;
+  timerState: TimerState;
   timerRunning: boolean;
   timerHasStarted: boolean;
   canStartGame: boolean;
@@ -35,18 +38,22 @@ interface ToolDockProps {
   onRedo: () => void;
   onOpenSettings: () => void;
   onOpenLog?: () => void;
+  showToolLabels?: boolean;
 }
 
 const overflowTools = MAP_TOOL_DOCK_ENTRIES.filter(
   (tool) => !isQuickDockTool(tool.id),
 );
 
-const DOCK_ICON =
-  "hud-chrome h-11 w-11 shrink-0 shadow-none sm:h-12 sm:w-12";
+const QUICK_TOOL_LABELS: Record<(typeof QUICK_DOCK_TOOL_IDS)[number], string> = {
+  radar: "Radar",
+  zone: "Zone",
+  pin: "Pin",
+};
 
 export function ToolDock({
   activeTool,
-  timerLabel,
+  timerState,
   timerRunning,
   timerHasStarted,
   canStartGame,
@@ -62,6 +69,7 @@ export function ToolDock({
   onRedo,
   onOpenSettings,
   onOpenLog,
+  showToolLabels = true,
 }: ToolDockProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
@@ -131,15 +139,22 @@ export function ToolDock({
     );
   };
 
+  const dockIconClass = (active: boolean) =>
+    `flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-[var(--radius-hud-md)] border border-border bg-surface-panel text-ink transition-colors sm:h-12 sm:w-12 ${
+      active
+        ? "border-action/55 bg-action-soft text-status-info"
+        : "hover:bg-surface-raised"
+    }`;
+
   return (
     <div
       ref={dockRef}
-      className="pointer-events-auto fixed inset-x-0 z-[var(--z-dock)] px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2"
+      className="pointer-events-auto fixed inset-x-0 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2"
       style={{ bottom: 0 }}
     >
       {timerMenuOpen ? (
         <div
-          className="hud-panel absolute bottom-[calc(100%+0.5rem)] left-2 min-w-[15rem] space-y-2 p-3 pt-10"
+          className="hud-panel absolute bottom-[calc(100%+var(--chrome-gap-above-dock))] left-2 min-w-[15rem] space-y-2 p-3 pt-10"
           role="menu"
           aria-label="Timer settings"
         >
@@ -147,7 +162,9 @@ export function ToolDock({
             label="Close timer settings"
             onClick={() => setTimerMenuOpen(false)}
           />
-          <p className="px-1 font-mono text-lg tabular-nums text-ink">{timerLabel}</p>
+          <p className="px-1 font-mono text-lg tabular-nums text-ink">
+            <SessionTimerLabel timerState={timerState} />
+          </p>
           <TimerActions
             timerRunning={timerRunning}
             timerHasStarted={timerHasStarted}
@@ -162,7 +179,7 @@ export function ToolDock({
 
       {menuOpen ? (
         <div
-          className="hud-panel absolute bottom-[calc(100%+0.5rem)] right-2 min-w-[15rem] max-w-[min(100vw-1rem,18rem)] overflow-hidden p-2"
+          className="hud-panel absolute bottom-[calc(100%+var(--chrome-gap-above-dock))] right-2 min-w-[15rem] max-w-[min(100vw-1rem,18rem)] overflow-hidden p-2"
           role="menu"
           aria-label="More map tools"
         >
@@ -170,8 +187,28 @@ export function ToolDock({
         </div>
       ) : null}
 
-      <div className="mx-auto flex w-full min-w-0 max-w-xl items-stretch gap-1 rounded-[var(--radius-hud-xl)] border border-border bg-surface-panel px-1.5 py-1.5 shadow-[var(--shadow-hud-float)] sm:gap-1.5 sm:px-2">
-        <div className="flex shrink-0 items-center gap-1">
+      <div className="mx-auto flex w-full min-w-0 max-w-xl flex-col gap-1.5 rounded-[var(--radius-hud-xl)] border border-border bg-surface-panel px-1.5 py-1.5 shadow-[var(--shadow-hud-float)]">
+        {!timerHasStarted ? (
+          <div className="min-w-0 px-0.5">
+            {canStartGame ? (
+              <button
+                type="button"
+                onClick={onStartGame}
+                className="btn-primary dock-start-game min-h-11 w-full sm:min-h-12"
+              >
+                <HudPlayIcon className="h-4 w-4 shrink-0" />
+                Start game
+              </button>
+            ) : (
+              <p className="dock-waiting-host text-pretty">
+                Waiting for host…
+              </p>
+            )}
+          </div>
+        ) : null}
+
+        <div className="flex min-w-0 items-stretch gap-1 sm:gap-1.5">
+          <div className="dock-segment shrink-0">
           <button
             type="button"
             onClick={() => {
@@ -181,19 +218,19 @@ export function ToolDock({
             className={`hud-chrome min-h-11 shrink-0 px-2 font-mono text-xs tabular-nums shadow-none sm:min-h-12 sm:px-3 sm:text-sm ${
               timerRunning ? "hud-chrome-active" : ""
             }`}
-            aria-label={`Elapsed time ${timerLabel}. Open timer settings`}
+            aria-label="Elapsed time. Open timer settings"
             aria-expanded={timerMenuOpen}
             aria-haspopup="menu"
             aria-live="polite"
           >
-            {timerLabel}
+            <SessionTimerLabel timerState={timerState} />
           </button>
 
           <button
             type="button"
             onClick={onUndo}
             disabled={!canUndo}
-            className={DOCK_ICON}
+            className="hud-chrome h-11 w-11 shrink-0 shadow-none sm:h-12 sm:w-12"
             aria-label="Undo last annotation"
           >
             <HudUndoIcon className="h-5 w-5" />
@@ -202,37 +239,19 @@ export function ToolDock({
             type="button"
             onClick={onRedo}
             disabled={!canRedo}
-            className={DOCK_ICON}
+            className="hud-chrome h-11 w-11 shrink-0 shadow-none sm:h-12 sm:w-12"
             aria-label="Redo last annotation"
           >
             <HudRedoIcon className="h-5 w-5" />
           </button>
-        </div>
-
-        {!timerHasStarted ? (
-          <div className="flex min-w-0 flex-1 items-center justify-center px-1">
-            {canStartGame ? (
-              <button
-                type="button"
-                onClick={onStartGame}
-                className="min-h-11 w-full max-w-[11rem] rounded-[var(--radius-hud-lg)] bg-status-success px-4 text-sm font-semibold text-surface-deep shadow-none transition-opacity hover:opacity-90 sm:min-h-12"
-              >
-                Start game
-              </button>
-            ) : (
-              <p className="text-pretty text-center text-xs text-ink-muted sm:text-sm">
-                Waiting for host to start.
-              </p>
-            )}
           </div>
-        ) : null}
 
-        <div
-          className={`flex min-w-0 items-center justify-end gap-1 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
-            timerHasStarted ? "min-w-0 flex-1" : "shrink-0"
-          }`}
-          aria-label="Map tools"
-        >
+          <div className="dock-segment-divider shrink-0" aria-hidden="true" />
+
+          <div
+            className="dock-segment min-w-0 flex-1 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            aria-label="Map tools"
+          >
           {QUICK_DOCK_TOOL_IDS.map((toolId) => {
             const entry = MAP_TOOL_DOCK_ENTRIES.find(
               (item) => item.id === toolId,
@@ -247,25 +266,19 @@ export function ToolDock({
                 type="button"
                 disabled={!entry.enabled}
                 onClick={() => selectTool(toolId)}
-                className={`${DOCK_ICON} ${
-                  activeTool === toolId ? "hud-chrome-active" : ""
-                }`}
+                className={dockIconClass(activeTool === toolId)}
                 aria-label={entry.name}
                 aria-pressed={activeTool === toolId}
               >
-                <HudToolIcon tool={toolId} className="h-5 w-5" />
+                <HudToolIcon tool={toolId} className="h-5 w-5 shrink-0" />
+                {showToolLabels ? (
+                  <span className="mt-0.5 text-[10px] font-medium leading-none text-ink-dim">
+                    {QUICK_TOOL_LABELS[toolId]}
+                  </span>
+                ) : null}
               </button>
             );
           })}
-
-          <button
-            type="button"
-            onClick={onOpenSettings}
-            className={DOCK_ICON}
-            aria-label="Open settings"
-          >
-            <HudSettingsIcon className="h-5 w-5" />
-          </button>
 
           <button
             type="button"
@@ -273,7 +286,7 @@ export function ToolDock({
               setMenuOpen((open) => !open);
               setTimerMenuOpen(false);
             }}
-            className={`${DOCK_ICON} min-w-11 px-2 sm:min-w-12 sm:px-3 ${
+            className={`hud-chrome h-11 w-11 shrink-0 shadow-none sm:h-12 sm:w-12 ${
               menuOpen || overflowTools.some((tool) => tool.id === activeTool)
                 ? "hud-chrome-active"
                 : ""
@@ -284,6 +297,20 @@ export function ToolDock({
           >
             <HudMoreIcon className="h-5 w-5" />
           </button>
+        </div>
+
+        <div className="dock-segment-divider shrink-0" aria-hidden="true" />
+
+        <div className="dock-segment shrink-0">
+          <button
+            type="button"
+            onClick={onOpenSettings}
+            className="hud-chrome h-11 w-11 shrink-0 shadow-none sm:h-12 sm:w-12"
+            aria-label="Open settings"
+          >
+            <HudSettingsIcon className="h-5 w-5" />
+          </button>
+        </div>
         </div>
       </div>
     </div>

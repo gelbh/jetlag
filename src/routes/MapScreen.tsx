@@ -1,22 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { AnnotationLayer } from "../components/map/AnnotationLayer";
 import { GeometryEditLayer } from "../components/map/GeometryEditLayer";
 import { GameAreaMask } from "../components/map/GameAreaMask";
 import { MapView } from "../components/map/MapView";
 import { MapStyleToggle } from "../components/map/MapStyleToggle";
 import { MapDraftLayer } from "../components/map/MapDraftLayer";
-import { TransitLayer } from "../components/map/TransitLayer";
-import { UserLocationLayer } from "../components/map/UserLocationLayer";
-import { MapModeChip } from "../components/session/MapModeChip";
+import { LiveUserLocationLayer } from "../components/map/LiveUserLocationLayer";
+import {
+  MapViewportTracker,
+  type MapViewportState,
+} from "../components/map/MapViewportTracker";
+import { MapFirstRunSheet } from "../components/session/MapFirstRunSheet";
 import { MapToolsHintBanner } from "../components/session/MapToolsHintBanner";
 import { MapSettingsSheet } from "../components/session/MapSettingsSheet";
+import { MapStatusRail } from "../components/session/MapStatusRail";
 import { SessionLog } from "../components/session/SessionLog";
-import { SyncStatusBanner } from "../components/session/SyncStatusBanner";
 import { AnnotationEditSheet } from "../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../components/tools/ToolDock";
 import { PopupCloseButton } from "../components/ui/PopupCloseButton";
-import { HudHomeIcon } from "../components/ui/HudIcons";
 import { useRadarTool } from "../hooks/tools/useRadarTool";
 import { usePinTool } from "../hooks/tools/usePinTool";
 import { useZoneTool } from "../hooks/tools/useZoneTool";
@@ -46,7 +48,6 @@ import { useAnnotations } from "../hooks/useAnnotations";
 import { useSessionTimer } from "../hooks/useSessionTimer";
 import { useRemoteSessionTimerSync } from "../hooks/useRemoteSessionTimerSync";
 import { useGeolocation } from "../hooks/useGeolocation";
-import { useLiveLocation } from "../hooks/useLiveLocation";
 import { useSessionSync } from "../hooks/useSessionSync";
 import { useSessionEndedRedirect } from "../hooks/useSessionEndedRedirect";
 import { useSyncStatus } from "../hooks/useSyncStatus";
@@ -72,6 +73,22 @@ const HeavyMapToolsSlot = lazy(() =>
     default: module.HeavyMapToolsSlot,
   })),
 );
+
+const TransitLayer = lazy(() =>
+  import("../components/map/TransitLayer").then((module) => ({
+    default: module.TransitLayer,
+  })),
+);
+
+const DOCK_LABELS_KEY = "jetlag.dockLabelsHidden";
+
+function readDockLabelsHidden(): boolean {
+  try {
+    return localStorage.getItem(DOCK_LABELS_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 export function MapScreen() {
   const session = useSessionStore((state) => state.session);
@@ -156,8 +173,21 @@ export function MapScreen() {
     clearAllAnnotations,
   } = useAnnotations();
   const { refresh, loading: gpsLoading, error: gpsError } = useGeolocation();
-  const { reading: liveLocation, error: liveLocationError } =
-    useLiveLocation(showCurrentLocation);
+  const [liveLocationError, setLiveLocationError] = useState<string | null>(
+    null,
+  );
+  const [mapViewport, setMapViewport] = useState<MapViewportState | null>(
+    null,
+  );
+  const handleLiveLocationError = useCallback((error: string | null) => {
+    setLiveLocationError(error);
+  }, []);
+  const handleMapViewportChange = useCallback(
+    (viewport: MapViewportState | null) => {
+      setMapViewport(viewport);
+    },
+    [],
+  );
   const [currentUid, setCurrentUid] = useState<string | null>(null);
   const isHost = Boolean(
     session?.hostUid && currentUid && session.hostUid === currentUid,
@@ -174,7 +204,9 @@ export function MapScreen() {
     remoteState,
   });
   const mapShellRef = useRef<HTMLDivElement>(null);
+  const chromeHudRef = useRef<HTMLDivElement>(null);
   const exportLegendRef = useRef<HTMLDivElement>(null);
+  const suppressChromeHideRef = useRef(false);
   const syncStatus = useSyncStatus();
   useWakeLock(keepScreenAwake || timer.running);
 
@@ -182,6 +214,10 @@ export function MapScreen() {
   const [mapError, setMapError] = useState<string | null>(null);
   const [awaitingPlacement, setAwaitingPlacement] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [firstRunDismissed, setFirstRunDismissed] = useState(false);
+  const [showToolLabels, setShowToolLabels] = useState(
+    () => !readDockLabelsHidden(),
+  );
 
   const finishPlacement = useCallback(() => {
     setActiveTool("none");
@@ -291,6 +327,21 @@ export function MapScreen() {
   useSessionEndedRedirect(session?.id, isHost);
 
   useEffect(() => {
+    if (annotations.length === 0 || !showToolLabels) {
+      return;
+    }
+
+    try {
+      localStorage.setItem(DOCK_LABELS_KEY, "1");
+    } catch {
+      // ignore quota / private mode
+    }
+    /* eslint-disable react-hooks/set-state-in-effect -- hide dock labels after first placement */
+    setShowToolLabels(false);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [annotations.length, showToolLabels]);
+
+  useEffect(() => {
     if (
       !session ||
       session.id === LOCAL_SESSION_ID ||
@@ -395,6 +446,19 @@ export function MapScreen() {
       setSettingsOpen,
     });
 
+  const measuringPlacePoints = useMemo(
+    () => measuringTool.draft.measuringPlaces.map((place) => place.point),
+    [measuringTool.draft.measuringPlaces],
+  );
+
+  const tentacleEliminationPreviewExtra = useMemo(
+    () =>
+      tentacleTool.draft.tentacleEliminationPreview
+        ? [tentacleTool.draft.tentacleEliminationPreview]
+        : [],
+    [tentacleTool.draft.tentacleEliminationPreview],
+  );
+
   const { overlays: mapDraftOverlays, eliminationFeatures: draftEliminationFeatures } =
     useMapDraftOverlays(
       {
@@ -422,9 +486,7 @@ export function MapScreen() {
         measuring: {
           seekerPoint: measuringTool.draft.measuringSeekerPoint,
           targetPoint: measuringTool.draft.measuringTargetPoint,
-          placePoints: measuringTool.draft.measuringPlaces.map(
-            (place) => place.point,
-          ),
+          placePoints: measuringPlacePoints,
           siteRadiusMeters: measuringTool.draft.measuringDistanceMeters,
           boundaryPreview: measuringTool.draft.measuringBoundaryPreview,
           eliminationPreview: measuringTool.draft.measuringEliminationPreview,
@@ -437,9 +499,7 @@ export function MapScreen() {
         },
         zone: { vertices: zoneTool.draft.zoneVertices },
       },
-      tentacleTool.draft.tentacleEliminationPreview
-        ? [tentacleTool.draft.tentacleEliminationPreview]
-        : [],
+      tentacleEliminationPreviewExtra,
     );
 
   if (!session?.gameArea) {
@@ -501,7 +561,10 @@ export function MapScreen() {
   };
 
   return (
-    <div className="relative min-h-[100dvh] h-full">
+    <div
+      className="relative min-h-[100dvh] h-full"
+      data-dock-phase={timer.hasStarted ? "live" : "prestart"}
+    >
       {heavyToolActive ? (
         <Suspense fallback={null}>
           <HeavyMapToolsSlot
@@ -533,20 +596,29 @@ export function MapScreen() {
           zoom={12}
           focusBounds={mapFocusBounds}
           onMapClick={handleMapClick}
+          chromeHudRef={chromeHudRef}
+          suppressChromeHideRef={suppressChromeHideRef}
           className={
             placementCrosshair ? "map-crosshair h-full w-full" : "h-full w-full"
           }
         >
+          <MapViewportTracker onViewportChange={handleMapViewportChange} />
           <GameAreaMask gameArea={session.gameArea} />
           {transitEnabled && layerVisibility.transit ? (
-            <TransitLayer
-              staticData={transitStaticData}
-              liveData={transitLiveData}
-            />
+            <Suspense fallback={null}>
+              <TransitLayer
+                staticData={transitStaticData}
+                liveData={transitLiveData}
+                viewport={mapViewport?.bounds ?? null}
+                zoom={mapViewport?.zoom ?? null}
+              />
+            </Suspense>
           ) : null}
-          {showCurrentLocation ? (
-            <UserLocationLayer reading={liveLocation} />
-          ) : null}
+          <LiveUserLocationLayer
+            enabled={showCurrentLocation}
+            highAccuracy={awaitingPlacement}
+            onError={handleLiveLocationError}
+          />
           <AnnotationLayer
             annotations={annotations}
             gameArea={session.gameArea}
@@ -574,15 +646,56 @@ export function MapScreen() {
         </div>
       </div>
 
-      <MapModeChip activeTool={activeTool} />
-      <SyncStatusBanner
-        status={syncStatus.status}
-        queuedWrites={syncStatus.queuedWrites}
-        message={syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError}
-      />
+      <div
+        ref={chromeHudRef}
+        className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)]"
+      >
+        <MapStatusRail
+          sessionCode={session.code}
+          activeTool={activeTool}
+          syncStatus={syncStatus.status}
+          queuedWrites={syncStatus.queuedWrites}
+          message={syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError}
+        />
+
+        <MapToolsHintBanner
+          hidden={
+            !timer.hasStarted ||
+            activeTool !== "none" ||
+            settingsOpen ||
+            Boolean(selectedAnnotation) ||
+            Boolean(geometryEditAnnotation && geometryDraft)
+          }
+        />
+
+        <MapStyleToggle mapStyle={mapStyle} onMapStyleChange={setMapStyle} />
+
+        <ToolDock
+          activeTool={activeTool}
+          timerState={timer.timerState}
+          timerRunning={timer.running}
+          timerHasStarted={timer.hasStarted}
+          canStartGame={canControlTimer}
+          onStartGame={timer.start}
+          onTimerStart={timer.start}
+          onTimerPause={timer.pause}
+          onTimerReset={timer.reset}
+          timerControlsDisabled={!canControlTimer}
+          onSelect={handleSelectTool}
+          canUndo={canUndoLastTool}
+          canRedo={canRedoLastTool}
+          onUndo={handleUndoLastAnnotation}
+          onRedo={handleRedoLastAnnotation}
+          onOpenSettings={() => setSettingsOpen(true)}
+          onOpenLog={() => {
+            setLogOpen(true);
+          }}
+          showToolLabels={showToolLabels}
+        />
+      </div>
 
       {geometryEditAnnotation && geometryDraft ? (
-        <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+0.5rem)] z-[var(--z-panel)] px-3">
+        <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+var(--chrome-gap-above-dock))] z-[var(--z-panel)] px-3">
           <div className="hud-panel mx-auto flex max-w-xl gap-2 p-3">
             <button
               type="button"
@@ -602,17 +715,17 @@ export function MapScreen() {
         </div>
       ) : null}
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-[var(--z-dock)] p-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
-        <div className="pointer-events-auto flex items-stretch justify-between gap-2">
-          <Link
-            to="/"
-            className="hud-chrome self-start"
-            aria-label="Home"
-          >
-            <HudHomeIcon className="h-5 w-5" />
-          </Link>
-        </div>
-      </div>
+      <MapFirstRunSheet
+        open={
+          !timer.hasStarted &&
+          !firstRunDismissed &&
+          !settingsOpen &&
+          activeTool === "none" &&
+          !selectedAnnotation &&
+          !geometryEditAnnotation
+        }
+        onDismiss={() => setFirstRunDismissed(true)}
+      />
 
       <MapSettingsSheet
         key={settingsOpen ? "open" : "closed"}
@@ -658,7 +771,7 @@ export function MapScreen() {
       />
 
       {activeTool !== "none" && !selectedAnnotation ? (
-        <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+0.5rem)] z-[var(--z-panel)] px-3">
+        <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+var(--chrome-gap-above-dock))] z-[var(--z-panel)] px-3">
           <div className="tool-panel-compact hud-panel relative mx-auto max-h-[min(34dvh,320px)] max-w-xl overflow-y-auto overscroll-contain p-3 pt-9">
             <PopupCloseButton
               label={`Close ${mapToolPlacingLabel(activeTool)}`}
@@ -685,40 +798,6 @@ export function MapScreen() {
           onEditOnMap={() => startGeometryEdit(selectedAnnotation.id)}
         />
       ) : null}
-
-      <MapToolsHintBanner
-        hidden={
-          !timer.hasStarted ||
-          activeTool !== "none" ||
-          settingsOpen ||
-          Boolean(selectedAnnotation) ||
-          Boolean(geometryEditAnnotation && geometryDraft)
-        }
-      />
-
-      <MapStyleToggle mapStyle={mapStyle} onMapStyleChange={setMapStyle} />
-
-      <ToolDock
-        activeTool={activeTool}
-        timerLabel={timer.formattedElapsed}
-        timerRunning={timer.running}
-        timerHasStarted={timer.hasStarted}
-        canStartGame={canControlTimer}
-        onStartGame={timer.start}
-        onTimerStart={timer.start}
-        onTimerPause={timer.pause}
-        onTimerReset={timer.reset}
-        timerControlsDisabled={!canControlTimer}
-        onSelect={handleSelectTool}
-        canUndo={canUndoLastTool}
-        canRedo={canRedoLastTool}
-        onUndo={handleUndoLastAnnotation}
-        onRedo={handleRedoLastAnnotation}
-        onOpenSettings={() => setSettingsOpen(true)}
-        onOpenLog={() => {
-          setLogOpen(true);
-        }}
-      />
 
       <SessionLog
         open={logOpen}

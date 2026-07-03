@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type MutableRefObject } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import type {
   LatLngBounds,
@@ -7,6 +7,7 @@ import type {
 } from "leaflet";
 import { getMapBasemap, type MapStyle } from "../../domain/mapBasemaps";
 import { isUsableMapBounds } from "../../domain/geometry";
+import { MapChromeListener } from "./MapChromeListener";
 
 interface MapViewProps {
   center?: LatLngExpression;
@@ -15,6 +16,8 @@ interface MapViewProps {
   mapStyle?: MapStyle;
   onBoundsChange?: (bounds: LatLngBounds) => void;
   onMapClick?: (lat: number, lng: number) => void;
+  chromeHudRef?: MutableRefObject<HTMLElement | null>;
+  suppressChromeHideRef?: MutableRefObject<boolean>;
   interactive?: boolean;
   focusBounds?: LatLngBoundsExpression | null;
   children?: React.ReactNode;
@@ -23,8 +26,10 @@ interface MapViewProps {
 
 function MapFocus({
   focusBounds,
+  suppressChromeHideRef,
 }: {
   focusBounds: LatLngBoundsExpression | null;
+  suppressChromeHideRef?: MutableRefObject<boolean>;
 }) {
   const map = useMap();
 
@@ -33,8 +38,21 @@ function MapFocus({
       return;
     }
 
+    if (suppressChromeHideRef) {
+      suppressChromeHideRef.current = true;
+    }
+
     map.fitBounds(focusBounds, { padding: [32, 32] });
-  }, [focusBounds, map]);
+
+    const onMoveEnd = () => {
+      if (suppressChromeHideRef) {
+        suppressChromeHideRef.current = false;
+      }
+      map.off("moveend", onMoveEnd);
+    };
+
+    map.on("moveend", onMoveEnd);
+  }, [focusBounds, map, suppressChromeHideRef]);
 
   return null;
 }
@@ -120,6 +138,8 @@ export function MapView({
   mapStyle = "standard",
   onBoundsChange,
   onMapClick,
+  chromeHudRef,
+  suppressChromeHideRef,
   interactive = true,
   focusBounds = null,
   children,
@@ -149,7 +169,16 @@ export function MapView({
           maxZoom={basemap.maxZoom}
         />
         <MapEvents onBoundsChange={onBoundsChange} onMapClick={onMapClick} />
-        <MapFocus focusBounds={focusBounds} />
+        {chromeHudRef ? (
+          <MapChromeListener
+            chromeHudRef={chromeHudRef}
+            suppressRef={suppressChromeHideRef}
+          />
+        ) : null}
+        <MapFocus
+          focusBounds={focusBounds}
+          suppressChromeHideRef={suppressChromeHideRef}
+        />
         <MapMobileControls />
         <MapResize />
         {children}

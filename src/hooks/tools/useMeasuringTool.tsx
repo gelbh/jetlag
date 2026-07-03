@@ -448,7 +448,7 @@ export function useMeasuringTool({
     }
   };
 
-  const resetDraft = (additionalUsedKind?: MeasuringFromKind) => {
+  const resetDraft = useCallback((additionalUsedKind?: MeasuringFromKind) => {
     const usedKinds = new Set(usedMeasuringFromKindsSet);
     if (additionalUsedKind) {
       usedKinds.add(additionalUsedKind);
@@ -476,27 +476,7 @@ export function useMeasuringTool({
     setMeasuringAnswer(null);
     setMeasuringError(null);
     setMeasuringPlaces([]);
-  };
-
-  const handleMapClick = (point: LatLngTuple) => {
-    if (!active) {
-      return false;
-    }
-
-    if (
-      measuringSubject === "location" &&
-      !usesAllPlacesInArea &&
-      measuringTargetMode === "map" &&
-      measuringSeekerPoint &&
-      !measuringTargetPoint
-    ) {
-      void resolveMeasuringMapTarget(point);
-      return true;
-    }
-
-    setMeasuringSeekerAnchor(point);
-    return true;
-  };
+  }, [usedMeasuringFromKindsSet]);
 
   const handleGps = async () => {
     setMeasuringError(null);
@@ -615,6 +595,26 @@ export function useMeasuringTool({
     } finally {
       setMeasuringLoading(false);
     }
+  };
+
+  const handleMapClick = (point: LatLngTuple) => {
+    if (!active) {
+      return false;
+    }
+
+    if (
+      measuringSubject === "location" &&
+      !usesAllPlacesInArea &&
+      measuringTargetMode === "map" &&
+      measuringSeekerPoint &&
+      !measuringTargetPoint
+    ) {
+      void resolveMeasuringMapTarget(point);
+      return true;
+    }
+
+    setMeasuringSeekerAnchor(point);
+    return true;
   };
 
   const loadNearest = async () => {

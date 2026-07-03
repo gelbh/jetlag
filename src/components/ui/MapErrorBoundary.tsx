@@ -40,14 +40,14 @@ export class MapErrorBoundary extends Component<
           <div className="flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
-              className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white"
+              className="btn-primary px-4 py-2 text-sm"
               onClick={this.handleReload}
             >
               Reload map
             </button>
             <Link
               to="/"
-              className="rounded-lg border border-border px-4 py-2 text-sm text-ink"
+              className="btn-secondary border border-border px-4 py-2 text-sm"
             >
               Back home
             </Link>

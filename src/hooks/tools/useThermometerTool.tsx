@@ -74,26 +74,29 @@ export function useThermometerTool({
     }, []),
   });
 
-  const resetDraft = () => {
+  const resetDraft = useCallback(() => {
     setThermoA(null);
     setThermoB(null);
     setThermometerDistanceMeters(DEFAULT_THERMOMETER_DISTANCE_METERS);
     setThermometerAnswer(null);
-  };
+  }, []);
 
-  const handleMapClick = (point: LatLngTuple) => {
-    if (!active) {
-      return false;
-    }
+  const handleMapClick = useCallback(
+    (point: LatLngTuple) => {
+      if (!active) {
+        return false;
+      }
 
-    if (!thermoA) {
-      setThermoA(point);
-    } else if (!thermoB) {
-      setThermoB(point);
-    }
+      if (!thermoA) {
+        setThermoA(point);
+      } else if (!thermoB) {
+        setThermoB(point);
+      }
 
-    return true;
-  };
+      return true;
+    },
+    [active, thermoA, thermoB],
+  );
 
   const commit = async () => {
     if (!thermoA || !thermoB || thermometerAnswer === null) {

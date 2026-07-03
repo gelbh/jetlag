@@ -35,6 +35,14 @@ export function useMapToolInteraction({
   pinTool,
   zoneTool,
 }: UseMapToolInteractionParams) {
+  const radarMapClick = radarTool.handleMapClick;
+  const thermometerMapClick = thermometerTool.handleMapClick;
+  const measuringMapClick = measuringTool.handleMapClick;
+  const matchingMapClick = matchingTool.handleMapClick;
+  const tentacleMapClick = tentacleTool.handleMapClick;
+  const pinMapClick = pinTool.handleMapClick;
+  const zoneMapClick = zoneTool.handleMapClick;
+
   const handleMapClick = useCallback(
     (lat: number, lng: number) => {
       const point: LatLngTuple = [lat, lng];
@@ -55,25 +63,25 @@ export function useMapToolInteraction({
 
       switch (activeTool) {
         case "radar":
-          radarTool.handleMapClick(point);
+          radarMapClick(point);
           return;
         case "zone":
-          zoneTool.handleMapClick(point);
+          zoneMapClick(point);
           return;
         case "thermometer":
-          thermometerTool.handleMapClick(point);
+          thermometerMapClick(point);
           return;
         case "pin":
-          pinTool.handleMapClick(point);
+          pinMapClick(point);
           return;
         case "measuring":
-          measuringTool.handleMapClick(point);
+          measuringMapClick(point);
           return;
         case "matching":
-          matchingTool.handleMapClick(point);
+          matchingMapClick(point);
           return;
         case "tentacle":
-          tentacleTool.handleMapClick(point);
+          tentacleMapClick(point);
       }
     },
     [
@@ -81,14 +89,14 @@ export function useMapToolInteraction({
       ensurePointInGameArea,
       geometryEditActive,
       handleGeometryEditClick,
-      matchingTool,
-      measuringTool,
-      pinTool,
-      radarTool,
+      matchingMapClick,
+      measuringMapClick,
+      pinMapClick,
+      radarMapClick,
       setSelectedAnnotationId,
-      tentacleTool,
-      thermometerTool,
-      zoneTool,
+      tentacleMapClick,
+      thermometerMapClick,
+      zoneMapClick,
     ],
   );
 

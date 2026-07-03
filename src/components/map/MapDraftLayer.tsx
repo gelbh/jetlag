@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Circle, CircleMarker, Polygon, Polyline, Popup } from "react-leaflet";
 import type { MapDraftOverlay } from "../../domain/mapDraftOverlay";
 import { polygonFeatureToLeafletPolygonGroups } from "../../domain/geometry";
@@ -6,7 +7,9 @@ interface MapDraftLayerProps {
   overlays: readonly MapDraftOverlay[];
 }
 
-export function MapDraftLayer({ overlays }: MapDraftLayerProps) {
+export const MapDraftLayer = memo(function MapDraftLayer({
+  overlays,
+}: MapDraftLayerProps) {
   return (
     <>
       {overlays.map((overlay) => {
@@ -80,4 +83,4 @@ export function MapDraftLayer({ overlays }: MapDraftLayerProps) {
       })}
     </>
   );
-}
+});

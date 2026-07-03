@@ -65,14 +65,17 @@ export function Home() {
   };
 
   return (
-    <main className="flex min-h-[100dvh] flex-col justify-between bg-surface-deep px-5 py-8">
-      <div className="space-y-3 pt-[max(1rem,env(safe-area-inset-top))]">
-        <h1 className="text-balance text-3xl font-semibold text-ink sm:text-4xl">
+    <main className="home-terminal home-terminal-accent flex min-h-[100dvh] flex-col justify-between px-5 py-8">
+      <div className="space-y-4 pt-[max(1rem,env(safe-area-inset-top))]">
+        <p className="text-xs font-medium uppercase tracking-[0.08em] text-ink-dim">
+          Field map companion
+        </p>
+        <h1 className="text-balance text-[clamp(1.875rem,5vw,2.25rem)] font-semibold leading-tight text-ink">
           Jet Lag Map Companion
         </h1>
         <p className="max-w-md text-pretty text-base text-ink-muted">
-          Annotate the live search map with radar circles, thermometer arrows,
-          zones, and notes.
+          Mark the live search map — radar circles, zones, pins, and question
+          tools for your team.
         </p>
       </div>
 
@@ -82,14 +85,26 @@ export function Home() {
             type="button"
             onClick={() => void handleContinue()}
             disabled={continuing}
-            className="btn-secondary min-h-14 w-full border border-action/40 disabled:opacity-50"
+            className="btn-primary min-h-14 w-full disabled:opacity-50"
           >
-            {continuing
-              ? "Checking session…"
-              : `Continue session ${session.code}`}
+            {continuing ? (
+              "Checking session…"
+            ) : (
+              <>
+                Continue session{" "}
+                <span className="font-mono tabular-nums">{session.code}</span>
+              </>
+            )}
           </button>
         ) : null}
-        <Link to="/create" className="btn-primary min-h-14 w-full">
+        <Link
+          to="/create"
+          className={
+            session
+              ? "btn-secondary min-h-14 w-full border border-border"
+              : "btn-primary min-h-14 w-full"
+          }
+        >
           Create session
         </Link>
         <Link

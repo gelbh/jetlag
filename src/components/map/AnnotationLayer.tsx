@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../../domain/annotations";
 import { isActive } from "../../domain/annotations";
@@ -18,7 +19,7 @@ interface AnnotationLayerProps {
   draftEliminationFeatures?: readonly Feature<GeoPolygon | MultiPolygon>[];
 }
 
-export function AnnotationLayer({
+export const AnnotationLayer = memo(function AnnotationLayer({
   annotations,
   gameArea,
   hidden,
@@ -63,4 +64,4 @@ export function AnnotationLayer({
       )}
     </>
   );
-}
+});

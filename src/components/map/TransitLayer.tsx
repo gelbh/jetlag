@@ -1,18 +1,26 @@
+import { memo, useMemo } from "react";
 import L from "leaflet";
 import { CircleMarker, Marker, Polyline, Popup } from "react-leaflet";
 import type { LatLngTuple } from "../../domain/geometry";
+import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 import type {
   TransitRealtimeSnapshot,
   TransitRouteMode,
   TransitStaticData,
 } from "../../domain/transit";
+import {
+  filterTransitRoutesForViewport,
+  filterTransitStopsForViewport,
+  filterTransitVehiclesForViewport,
+  type MapViewportBounds,
+} from "../../domain/transitViewport";
 
 interface TransitLayerProps {
   staticData: TransitStaticData | null;
   liveData: TransitRealtimeSnapshot | null;
+  viewport?: MapViewportBounds | null;
+  zoom?: number | null;
 }
-
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 const MODE_COLORS: Record<TransitRouteMode, string> = {
   rail: MAP_ANNOTATION_COLORS.transit.rail,
@@ -33,14 +41,33 @@ function vehicleIcon(bearing: number | undefined, color: string) {
   });
 }
 
-export function TransitLayer({ staticData, liveData }: TransitLayerProps) {
+export const TransitLayer = memo(function TransitLayer({
+  staticData,
+  liveData,
+  viewport = null,
+  zoom = null,
+}: TransitLayerProps) {
+  const visibleRoutes = useMemo(
+    () => filterTransitRoutesForViewport(staticData?.routes ?? [], viewport),
+    [staticData?.routes, viewport],
+  );
+  const visibleStops = useMemo(
+    () =>
+      filterTransitStopsForViewport(staticData?.stops ?? [], viewport, zoom),
+    [staticData?.stops, viewport, zoom],
+  );
+  const visibleVehicles = useMemo(
+    () => filterTransitVehiclesForViewport(liveData?.vehicles ?? [], viewport),
+    [liveData?.vehicles, viewport],
+  );
+
   if (!staticData && !liveData) {
     return null;
   }
 
   return (
     <>
-      {staticData?.routes.map((route) => (
+      {visibleRoutes.map((route) => (
         <Polyline
           key={`route-${route.id}`}
           positions={route.positions as LatLngTuple[]}
@@ -57,7 +84,7 @@ export function TransitLayer({ staticData, liveData }: TransitLayerProps) {
         </Polyline>
       ))}
 
-      {staticData?.stops.map((stop) => (
+      {visibleStops.map((stop) => (
         <CircleMarker
           key={`stop-${stop.id}`}
           center={[stop.lat, stop.lng]}
@@ -73,7 +100,7 @@ export function TransitLayer({ staticData, liveData }: TransitLayerProps) {
         </CircleMarker>
       ))}
 
-      {liveData?.vehicles.map((vehicle) => (
+      {visibleVehicles.map((vehicle) => (
         <Marker
           key={`vehicle-${vehicle.id}`}
           position={[vehicle.lat, vehicle.lng]}
@@ -87,4 +114,4 @@ export function TransitLayer({ staticData, liveData }: TransitLayerProps) {
       ))}
     </>
   );
-}
+});

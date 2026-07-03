@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   computeElapsedMs,
-  formatElapsedTime,
   hasTimerStarted,
   INITIAL_TIMER_STATE,
   isTimerRunning,
@@ -31,7 +30,6 @@ export function useSessionTimer(
   const [timerState, setTimerStateInternal] = useState<TimerState>(
     INITIAL_TIMER_STATE,
   );
-  const [tick, setTick] = useState(0);
   const timerStateRef = useRef(timerState);
   const onControlRef = useRef(onControl);
 
@@ -86,34 +84,6 @@ export function useSessionTimer(
       setStoredTimer(sessionId, remoteState);
     }
   }, [canControl, remoteState, sessionId, setStoredTimer]);
-
-  useEffect(() => {
-    if (!isTimerRunning(timerState)) {
-      return;
-    }
-
-    const bump = () => {
-      setTick((value) => value + 1);
-    };
-
-    bump();
-    const interval = window.setInterval(bump, 250);
-
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") {
-        bump();
-      }
-    };
-
-    window.addEventListener("focus", bump);
-    document.addEventListener("visibilitychange", handleVisibility);
-
-    return () => {
-      window.clearInterval(interval);
-      window.removeEventListener("focus", bump);
-      document.removeEventListener("visibilitychange", handleVisibility);
-    };
-  }, [timerState.runningSince]); // eslint-disable-line react-hooks/exhaustive-deps -- restart interval when run anchor changes
 
   useEffect(() => {
     if (!sessionId || !isTimerRunning(timerStateRef.current)) {
@@ -171,15 +141,12 @@ export function useSessionTimer(
     [setTimerState],
   );
 
-  void tick;
-
   const elapsedMs = computeElapsedMs(timerState);
 
   return {
     elapsedMs,
     running: isTimerRunning(timerState),
     hasStarted: hasTimerStarted(timerState),
-    formattedElapsed: formatElapsedTime(elapsedMs),
     timerState,
     start,
     pause,

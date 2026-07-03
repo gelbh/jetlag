@@ -34,14 +34,15 @@ export function MapToolsHintBanner({ hidden = false }: MapToolsHintBannerProps) 
     <div
       className="pointer-events-none fixed inset-x-0 z-[var(--z-banner)] px-3"
       style={{
-        bottom: "calc(var(--dock-height) + env(safe-area-inset-bottom) + 0.35rem)",
+        bottom:
+          "calc(var(--dock-height) + env(safe-area-inset-bottom) + var(--chrome-gap-above-dock))",
       }}
     >
       <div className="pointer-events-auto hud-panel mx-auto flex max-w-xl items-start gap-3 px-3 py-2.5">
         <p className="flex-1 text-pretty text-sm text-ink-muted">
           Radar, zone, and pin are on the bar. Matching, Measuring, Thermometer,
           and Tentacles are under{" "}
-          <span className="font-medium text-ink">More</span>.
+          <span className="font-medium text-ink">More</span> (⋯).
         </p>
         <button
           type="button"

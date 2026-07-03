@@ -295,7 +295,7 @@ export function useMatchingTool({
     setMatchingError(null);
   };
 
-  const resetDraft = () => {
+  const resetDraft = useCallback(() => {
     cancelRequests();
     setMatchingLoading(false);
     setMatchingSeekerPoint(null);
@@ -312,16 +312,19 @@ export function useMatchingTool({
     setMatchingAnswer(null);
     setMatchingLoading(false);
     setMatchingError(null);
-  };
+  }, [cancelRequests, usedMatchingCategories]);
 
-  const handleMapClick = (point: LatLngTuple) => {
-    if (!active) {
-      return false;
-    }
+  const handleMapClick = useCallback(
+    (point: LatLngTuple) => {
+      if (!active) {
+        return false;
+      }
 
-    setMatchingSeekerAnchor(point);
-    return true;
-  };
+      setMatchingSeekerAnchor(point);
+      return true;
+    },
+    [active],
+  );
 
   const handleGps = async () => {
     setMatchingError(null);

@@ -52,6 +52,14 @@ export function HudRedoIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function HudPlayIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="M8 5.5v13l11-6.5-11-6.5Z" fill="currentColor" stroke="none" />
+    </IconBase>
+  );
+}
+
 export function HudMoreIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <IconBase {...props}>

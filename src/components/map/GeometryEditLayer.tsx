@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { Circle, CircleMarker, Polygon, Polyline } from "react-leaflet";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
@@ -27,11 +28,55 @@ interface GeometryEditLayerProps {
   gameArea: GameArea;
 }
 
-export function GeometryEditLayer({
+export const GeometryEditLayer = memo(function GeometryEditLayer({
   annotation,
   draftGeometry,
   gameArea,
 }: GeometryEditLayerProps) {
+  const tentaclePoint = useMemo(() => {
+    if (annotation.type !== "tentacle") {
+      return null;
+    }
+
+    return draftGeometry.geometry as Point;
+  }, [annotation.type, draftGeometry.geometry]);
+
+  const tentacleNoRadarDisk = useMemo(() => {
+    if (!tentaclePoint || !annotation.metadata.tentacleOutOfReach) {
+      return null;
+    }
+
+    return turfCircle(turfPoint(tentaclePoint.coordinates), 
+      (annotation.metadata.radiusMeters ?? TENTACLE_SEARCH_RADIUS_METERS) / 1000,
+      { steps: 64, units: "kilometers" },
+    ) as Feature<GeoPolygon>;
+  }, [annotation.metadata.radiusMeters, annotation.metadata.tentacleOutOfReach, tentaclePoint]);
+
+  const tentacleYesRadarOutside = useMemo(() => {
+    if (!tentaclePoint || annotation.metadata.tentacleOutOfReach) {
+      return null;
+    }
+
+    const answerRadius =
+      annotation.metadata.tentacleAnswerRadiusMeters ??
+      TENTACLE_ANSWER_RADIUS_METERS;
+    const radarCircle = turfCircle(
+      turfPoint(tentaclePoint.coordinates),
+      answerRadius / 1000,
+      { steps: 64, units: "kilometers" },
+    );
+
+    return safeDifference(
+      gameAreaToPolygon(gameArea),
+      radarCircle as Feature<GeoPolygon>,
+    );
+  }, [
+    annotation.metadata.tentacleAnswerRadiusMeters,
+    annotation.metadata.tentacleOutOfReach,
+    gameArea,
+    tentaclePoint,
+  ]);
+
   if (annotation.type === "radar") {
     const point = draftGeometry.geometry as Point;
     const center: LatLngTuple = [point.coordinates[1], point.coordinates[0]];
@@ -74,12 +119,6 @@ export function GeometryEditLayer({
     const tentacleColor = annotation.metadata.color ?? "#22c55e";
 
     if (annotation.metadata.tentacleOutOfReach) {
-      const noRadarDisk = turfCircle(
-        turfPoint(point.coordinates),
-        searchRadius / 1000,
-        { steps: 64, units: "kilometers" },
-      );
-
       return (
         <>
           <Circle
@@ -101,33 +140,25 @@ export function GeometryEditLayer({
               fillOpacity: 1,
             }}
           />
-          {polygonFeatureToLeafletPolygonGroups(
-            noRadarDisk as Feature<GeoPolygon>,
-          ).map((rings, index) => (
-            <Polygon
-              key={`tentacle-edit-no-radar-${index}`}
-              positions={rings}
-              pathOptions={{
-                color: tentacleColor,
-                weight: 1,
-                fillColor: tentacleColor,
-                fillOpacity: 0.35,
-              }}
-            />
-          ))}
+          {tentacleNoRadarDisk
+            ? polygonFeatureToLeafletPolygonGroups(tentacleNoRadarDisk).map(
+                (rings, index) => (
+                  <Polygon
+                    key={`tentacle-edit-no-radar-${index}`}
+                    positions={rings}
+                    pathOptions={{
+                      color: tentacleColor,
+                      weight: 1,
+                      fillColor: tentacleColor,
+                      fillOpacity: 0.35,
+                    }}
+                  />
+                ),
+              )
+            : null}
         </>
       );
     }
-
-    const radarCircle = turfCircle(
-      turfPoint(point.coordinates),
-      answerRadius / 1000,
-      { steps: 64, units: "kilometers" },
-    );
-    const yesRadarOutside = safeDifference(
-      gameAreaToPolygon(gameArea),
-      radarCircle as Feature<GeoPolygon>,
-    );
 
     return (
       <>
@@ -140,8 +171,8 @@ export function GeometryEditLayer({
             fillOpacity: 0.05,
           }}
         />
-        {yesRadarOutside
-          ? polygonFeatureToLeafletPolygonGroups(yesRadarOutside).map(
+        {tentacleYesRadarOutside
+          ? polygonFeatureToLeafletPolygonGroups(tentacleYesRadarOutside).map(
               (rings, index) => (
                 <Polygon
                   key={`tentacle-edit-yes-radar-${index}`}
@@ -262,4 +293,4 @@ export function GeometryEditLayer({
   }
 
   return null;
-}
+});

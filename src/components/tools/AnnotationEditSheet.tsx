@@ -537,7 +537,7 @@ function EditSheetFrame({
   children: ReactNode;
 }) {
   return (
-    <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+0.5rem)] z-[1001] px-3">
+    <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+var(--chrome-gap-above-dock))] z-[var(--z-panel)] px-3">
       <div className="hud-panel mx-auto max-h-[min(42dvh,420px)] max-w-xl overflow-y-auto overscroll-contain p-4">
         <EditSheetHeader title={title} onClose={onClose} />
         <div className="space-y-4">{children}</div>

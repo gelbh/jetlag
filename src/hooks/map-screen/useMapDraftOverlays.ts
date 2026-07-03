@@ -18,6 +18,7 @@ import {
   thermometerShadedSide,
   type ThermometerAnswer,
 } from "../../domain/thermometerQuestions";
+import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 export interface MapDraftOverlaySources {
   activeTool: MapTool;
@@ -100,22 +101,26 @@ export function buildMapDraftOverlays(
 
   if (activeTool === "radar" && sources.radar.center) {
     const { center, radiusMeters, answer } = sources.radar;
-    overlays.push({
-      kind: "circle",
-      id: "radar-draft-range",
-      center,
-      radiusMeters,
-      style: {
-        color: "#38bdf8",
-        dashArray: "6 6",
-        fillOpacity: 0.08,
-      },
-    });
+
+    if (!answer) {
+      overlays.push({
+        kind: "circle",
+        id: "radar-draft-range",
+        center,
+        radiusMeters,
+        style: {
+          color: MAP_ANNOTATION_COLORS.elimination,
+          dashArray: "6 6",
+          fillOpacity: 0.08,
+        },
+      });
+    }
+
     overlays.push({
       kind: "marker",
       id: "radar-draft-center",
       point: center,
-      style: { fillColor: "#38bdf8" },
+      style: { fillColor: MAP_ANNOTATION_COLORS.eliminationSoft },
     });
 
     if (answer) {
@@ -355,6 +360,18 @@ export function useMapDraftOverlays(
   sources: MapDraftOverlaySources,
   extraEliminationFeatures: readonly Feature<GeoPolygon | MultiPolygon>[] = [],
 ): MapDraftOverlayResult {
+  const {
+    activeTool,
+    gameArea,
+    radar,
+    pin,
+    tentacle,
+    thermometer,
+    measuring,
+    matching,
+    zone,
+  } = sources;
+
   return useMemo(() => {
     const built = buildMapDraftOverlays(sources);
     return {
@@ -364,5 +381,34 @@ export function useMapDraftOverlays(
         ...extraEliminationFeatures,
       ],
     };
-  }, [sources, extraEliminationFeatures]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- field deps cover `sources` inputs
+  }, [
+    activeTool,
+    extraEliminationFeatures,
+    gameArea,
+    matching.boundaryPreview,
+    matching.eliminationPreview,
+    matching.nearestFeaturePoint,
+    matching.seekerPoint,
+    measuring.boundaryPreview,
+    measuring.eliminationPreview,
+    measuring.placePoints,
+    measuring.seekerPoint,
+    measuring.siteRadiusMeters,
+    measuring.targetPoint,
+    pin.point,
+    radar.answer,
+    radar.center,
+    radar.radiusMeters,
+    tentacle.answerRadiusMeters,
+    tentacle.center,
+    tentacle.outOfReach,
+    tentacle.pois,
+    tentacle.searchRadiusMeters,
+    tentacle.selectedPoiId,
+    thermometer.answer,
+    thermometer.thermoA,
+    thermometer.thermoB,
+    zone.vertices,
+  ]);
 }

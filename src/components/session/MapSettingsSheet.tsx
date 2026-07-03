@@ -258,6 +258,9 @@ function MapSegment({
         selected={mapStyle}
         onSelect={onMapStyleChange}
       />
+      <p className="text-xs text-ink-dim">
+        Quick toggle: layers button on the map, above the dock.
+      </p>
 
       {locationError ? (
         <p className="text-sm text-status-error">{locationError}</p>

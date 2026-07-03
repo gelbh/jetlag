@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Feature, Point } from "geojson";
 import { RadarPanel } from "../../components/tools/RadarPanel";
 import type { LatLngTuple } from "../../domain/geometry";
@@ -96,24 +96,27 @@ export function useRadarTool({
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [active, usedRadarOptions, radarChooseCustom, radarRadius]);
 
-  const resetDraft = () => {
+  const resetDraft = useCallback(() => {
     setRadarRadius(DEFAULT_RADIUS_METERS);
     setRadarCustomRadius("");
     setRadarChooseCustom(false);
     setRadarAnswer(null);
     setRadarCenter(null);
-  };
+  }, []);
 
-  const handleMapClick = (point: LatLngTuple) => {
-    if (!active) {
-      return false;
-    }
+  const handleMapClick = useCallback(
+    (point: LatLngTuple) => {
+      if (!active) {
+        return false;
+      }
 
-    setRadarCenter(point);
-    setAwaitingPlacement(false);
-    setMapError(null);
-    return true;
-  };
+      setRadarCenter(point);
+      setAwaitingPlacement(false);
+      setMapError(null);
+      return true;
+    },
+    [active, setAwaitingPlacement, setMapError],
+  );
 
   const handleUseGps = async () => {
     try {

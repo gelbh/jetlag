@@ -38,7 +38,11 @@ function geolocationErrorMessage(error: GeolocationPositionError): string {
   }
 }
 
-export function getCurrentPosition(): Promise<GeolocationReading> {
+export function getCurrentPosition(options?: {
+  highAccuracy?: boolean;
+}): Promise<GeolocationReading> {
+  const highAccuracy = options?.highAccuracy ?? true;
+
   return new Promise((resolve, reject) => {
     if (!("geolocation" in navigator)) {
       reject(new Error("Geolocation is not available on this device."));
@@ -53,15 +57,17 @@ export function getCurrentPosition(): Promise<GeolocationReading> {
         reject(new Error(geolocationErrorMessage(error)));
       },
       {
-        enableHighAccuracy: true,
+        enableHighAccuracy: highAccuracy,
         timeout: 15_000,
-        maximumAge: 10_000,
+        maximumAge: highAccuracy ? 10_000 : 30_000,
       },
     );
   });
 }
 
-export async function requestLocationAccess(): Promise<GeolocationReading> {
+export async function requestLocationAccess(options?: {
+  highAccuracy?: boolean;
+}): Promise<GeolocationReading> {
   if ("permissions" in navigator) {
     try {
       const status = await navigator.permissions.query({
@@ -79,13 +85,17 @@ export async function requestLocationAccess(): Promise<GeolocationReading> {
     }
   }
 
-  return getCurrentPosition();
+  return getCurrentPosition(options);
 }
 
 export function watchPosition(
   onUpdate: (reading: GeolocationReading) => void,
   onError: (error: Error) => void,
+  options?: {
+    highAccuracy?: boolean;
+  },
 ): () => void {
+  const highAccuracy = options?.highAccuracy ?? true;
   if (!("geolocation" in navigator)) {
     onError(new Error("Geolocation is not available on this device."));
     return () => {};
@@ -99,8 +109,8 @@ export function watchPosition(
       onError(new Error(geolocationErrorMessage(error)));
     },
     {
-      enableHighAccuracy: true,
-      maximumAge: 5_000,
+      enableHighAccuracy: highAccuracy,
+      maximumAge: highAccuracy ? 5_000 : 20_000,
     },
   );
 
