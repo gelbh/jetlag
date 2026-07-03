@@ -227,13 +227,9 @@ export function MapScreen() {
     setHeavyMapTools(tools);
   }, []);
 
-  useEffect(() => {
-    if (!heavyToolActive) {
-      setHeavyMapTools(idleHeavyMapTools);
-    }
-  }, [heavyToolActive, idleHeavyMapTools]);
-
-  const { matchingTool, measuringTool, tentacleTool } = heavyMapTools;
+  const { matchingTool, measuringTool, tentacleTool } = heavyToolActive
+    ? heavyMapTools
+    : idleHeavyMapTools;
   const pinTool = usePinTool({
     active: activeTool === "pin",
     createAnnotation,
