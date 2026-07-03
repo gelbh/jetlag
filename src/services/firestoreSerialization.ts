@@ -193,6 +193,7 @@ export function buildSessionDocument(
     createdAt,
     memberUids: [hostUid],
     transitMetroId: transitMetroId ?? null,
+    status: "active",
     timerAccumulatedMs: 0,
     timerRunningSince: null,
   };
@@ -207,7 +208,7 @@ export function deserializeSessionFromFirestore(
 ): SessionRecord {
   return {
     id,
-    code: String(data.code),
+    code: typeof data.code === "string" ? data.code : "",
     gameArea: deserializeGameAreaFromFirestore(
       data.gameArea as Parameters<typeof deserializeGameAreaFromFirestore>[0],
     ),
@@ -219,6 +220,10 @@ export function deserializeSessionFromFirestore(
     transitMetroId:
       typeof data.transitMetroId === "string" ? data.transitMetroId : undefined,
     endedAt: typeof data.endedAt === "string" ? data.endedAt : undefined,
+    status:
+      data.status === "active" || data.status === "ended"
+        ? data.status
+        : undefined,
     timerAccumulatedMs:
       typeof data.timerAccumulatedMs === "number"
         ? data.timerAccumulatedMs

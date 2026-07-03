@@ -7,6 +7,14 @@
         { "fieldPath": "code", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "sessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "endedAt", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

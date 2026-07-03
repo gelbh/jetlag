@@ -1,8 +1,9 @@
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { MapErrorBoundary } from "./components/ui/MapErrorBoundary";
 import { Home } from "./routes/Home";
 import { JoinSession } from "./routes/JoinSession";
+import { pruneStaleTimerSessions } from "./services/sessionCleanup";
 
 const MapScreen = lazy(() =>
   import("./routes/MapScreen").then((m) => ({ default: m.MapScreen })),
@@ -24,6 +25,10 @@ function LazyRoute({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    pruneStaleTimerSessions();
+  }, []);
+
   return (
     <BrowserRouter>
       <div className="min-h-[100dvh]">

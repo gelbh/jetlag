@@ -7,6 +7,7 @@ import {
   isFirebaseConfigured,
 } from "../services/firebase";
 import { getRemoteSessionById } from "../services/firestoreAnnotations";
+import { clearSessionLocalArtifacts } from "../services/sessionCleanup";
 
 export function Home() {
   const navigate = useNavigate();
@@ -32,12 +33,14 @@ export function Home() {
       const user = await ensureAnonymousUser();
       const remoteSession = await getRemoteSessionById(session.id);
       if (!remoteSession) {
+        await clearSessionLocalArtifacts(session.id);
         setSession(null);
         setContinueError("That session no longer exists.");
         return;
       }
 
       if (remoteSession.endedAt) {
+        await clearSessionLocalArtifacts(session.id);
         setSession(null);
         setContinueError("That session has ended. Join or create a new one.");
         return;

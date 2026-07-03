@@ -168,3 +168,10 @@ export async function removeOfflineWrite(id: string): Promise<void> {
       reject(transaction.error ?? new Error("Queue delete failed"));
   });
 }
+
+export async function clearOfflineQueueForSession(
+  sessionId: string,
+): Promise<void> {
+  const entries = await readOfflineQueueForSession(sessionId);
+  await Promise.all(entries.map((entry) => removeOfflineWrite(entry.id)));
+}

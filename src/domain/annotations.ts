@@ -121,6 +121,7 @@ export interface SessionRecord {
   memberUids: string[];
   transitMetroId?: string;
   endedAt?: string;
+  status?: "active" | "ended";
   timerAccumulatedMs?: number;
   timerRunningSince?: string | null;
 }

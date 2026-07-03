@@ -22,6 +22,8 @@ interface ToolDockProps {
   timerLabel: string;
   timerRunning: boolean;
   timerHasStarted: boolean;
+  canStartGame: boolean;
+  onStartGame: () => void;
   onTimerStart: () => void;
   onTimerPause: () => void;
   onTimerReset: () => void;
@@ -47,6 +49,8 @@ export function ToolDock({
   timerLabel,
   timerRunning,
   timerHasStarted,
+  canStartGame,
+  onStartGame,
   onTimerStart,
   onTimerPause,
   onTimerReset,
@@ -205,8 +209,28 @@ export function ToolDock({
           </button>
         </div>
 
+        {!timerHasStarted ? (
+          <div className="flex min-w-0 flex-1 items-center justify-center px-1">
+            {canStartGame ? (
+              <button
+                type="button"
+                onClick={onStartGame}
+                className="min-h-11 w-full max-w-[11rem] rounded-[var(--radius-hud-lg)] bg-status-success px-4 text-sm font-semibold text-surface-deep shadow-none transition-opacity hover:opacity-90 sm:min-h-12"
+              >
+                Start game
+              </button>
+            ) : (
+              <p className="text-pretty text-center text-xs text-ink-muted sm:text-sm">
+                Waiting for host to start.
+              </p>
+            )}
+          </div>
+        ) : null}
+
         <div
-          className="flex min-w-0 flex-1 items-center justify-end gap-1 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className={`flex min-w-0 items-center justify-end gap-1 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+            timerHasStarted ? "min-w-0 flex-1" : "shrink-0"
+          }`}
           aria-label="Map tools"
         >
           {QUICK_DOCK_TOOL_IDS.map((toolId) => {

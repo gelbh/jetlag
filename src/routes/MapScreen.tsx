@@ -10,7 +10,6 @@ import { TransitLayer } from "../components/map/TransitLayer";
 import { UserLocationLayer } from "../components/map/UserLocationLayer";
 import { MapModeChip } from "../components/session/MapModeChip";
 import { MapToolsHintBanner } from "../components/session/MapToolsHintBanner";
-import { StartGameBanner } from "../components/session/StartGameBanner";
 import { MapSettingsSheet } from "../components/session/MapSettingsSheet";
 import { SessionLog } from "../components/session/SessionLog";
 import { SyncStatusBanner } from "../components/session/SyncStatusBanner";
@@ -49,6 +48,7 @@ import { useRemoteSessionTimerSync } from "../hooks/useRemoteSessionTimerSync";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { useLiveLocation } from "../hooks/useLiveLocation";
 import { useSessionSync } from "../hooks/useSessionSync";
+import { useSessionEndedRedirect } from "../hooks/useSessionEndedRedirect";
 import { useSyncStatus } from "../hooks/useSyncStatus";
 import { useTransitLayer } from "../hooks/useTransitLayer";
 import { useWakeLock } from "../hooks/useWakeLock";
@@ -288,6 +288,7 @@ export function MapScreen() {
   });
 
   useSessionSync();
+  useSessionEndedRedirect(session?.id, isHost);
 
   useEffect(() => {
     if (
@@ -685,18 +686,6 @@ export function MapScreen() {
         />
       ) : null}
 
-      <StartGameBanner
-        hidden={
-          timer.hasStarted ||
-          settingsOpen ||
-          activeTool !== "none" ||
-          Boolean(selectedAnnotation) ||
-          Boolean(geometryEditAnnotation && geometryDraft)
-        }
-        canStart={canControlTimer}
-        onStart={timer.start}
-      />
-
       <MapToolsHintBanner
         hidden={
           !timer.hasStarted ||
@@ -714,6 +703,8 @@ export function MapScreen() {
         timerLabel={timer.formattedElapsed}
         timerRunning={timer.running}
         timerHasStarted={timer.hasStarted}
+        canStartGame={canControlTimer}
+        onStartGame={timer.start}
         onTimerStart={timer.start}
         onTimerPause={timer.pause}
         onTimerReset={timer.reset}

@@ -3,7 +3,9 @@ import type { AnnotationRecord } from "../domain/annotations";
 import {
   enqueueOfflineWrite,
   readOfflineQueue,
+  readOfflineQueueForSession,
   removeOfflineWrite,
+  clearOfflineQueueForSession,
 } from "./offlineQueue";
 
 const annotation: AnnotationRecord = {
@@ -34,5 +36,18 @@ describe("offlineQueue", () => {
 
     await removeOfflineWrite("ann-offline");
     expect(await readOfflineQueue()).toHaveLength(0);
+  });
+
+  it("clears all queued writes for a session", async () => {
+    await enqueueOfflineWrite("session-1", annotation);
+    await enqueueOfflineWrite("session-2", {
+      ...annotation,
+      id: "ann-other-session",
+    });
+
+    await clearOfflineQueueForSession("session-1");
+
+    expect(await readOfflineQueueForSession("session-1")).toHaveLength(0);
+    expect(await readOfflineQueueForSession("session-2")).toHaveLength(1);
   });
 });

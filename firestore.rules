@@ -40,7 +40,8 @@ service cloud.firestore {
         && request.resource.data.hostUid == request.auth.uid
         && request.resource.data.memberUids is list
         && request.resource.data.memberUids.size() >= 1
-        && request.auth.uid in request.resource.data.memberUids;
+        && request.auth.uid in request.resource.data.memberUids
+        && request.resource.data.status == 'active';
 
       allow update: if isSignedIn()
         && request.resource.data.code == resource.data.code
@@ -50,12 +51,13 @@ service cloud.firestore {
         && request.resource.data.memberUids is list
         && request.auth.uid in request.resource.data.memberUids
         || isSessionHost(sessionId)
-        && request.resource.data.code == resource.data.code
         && request.resource.data.gameArea == resource.data.gameArea
         && request.resource.data.hostUid == resource.data.hostUid
         && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['endedAt'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['endedAt', 'code', 'status'])
         && request.resource.data.endedAt is string
+        && request.resource.data.status == 'ended'
+        && !('code' in request.resource.data)
         || isSessionHost(sessionId)
         && request.resource.data.code == resource.data.code
         && request.resource.data.gameArea == resource.data.gameArea

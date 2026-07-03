@@ -1,9 +1,18 @@
 import { createHash } from "node:crypto";
 import { onRequest } from "firebase-functions/v2/https";
+import { onSchedule } from "firebase-functions/v2/scheduler";
+import { getApps, initializeApp } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 import { setCors } from "./cors.mjs";
 import { fetchWithTimeoutAndRetry } from "./fetchWithTimeout.mjs";
 import { createMemoryCache } from "./memoryCache.mjs";
 import { normalizeTflPayload } from "./tflNormalize.mjs";
+import {
+  computeAbandonedCutoffIso,
+  computeEndedCutoffIso,
+  PURGE_BATCH_LIMIT,
+  selectSessionsToPurge,
+} from "./purgeStaleSessions.mjs";
 
 const FEEDS = {
   london: "https://api.tfl.gov.uk/vehicle/vehiclepositions",
@@ -149,4 +158,49 @@ export const overpass = onRequest(async (req, res) => {
   } catch {
     res.status(504).json({ error: "Overpass timed out." });
   }
+});
+
+function ensureAdminApp() {
+  if (getApps().length === 0) {
+    initializeApp();
+  }
+}
+
+export const purgeStaleSessions = onSchedule("0 4 * * *", async () => {
+  ensureAdminApp();
+  const db = getFirestore();
+  const endedCutoffIso = computeEndedCutoffIso();
+  const abandonedCutoffIso = computeAbandonedCutoffIso();
+
+  const [endedSnapshot, abandonedSnapshot] = await Promise.all([
+    db
+      .collection("sessions")
+      .where("status", "==", "ended")
+      .where("endedAt", "<", endedCutoffIso)
+      .limit(PURGE_BATCH_LIMIT)
+      .get(),
+    db
+      .collection("sessions")
+      .where("createdAt", "<", abandonedCutoffIso)
+      .limit(PURGE_BATCH_LIMIT)
+      .get(),
+  ]);
+
+  const targets = selectSessionsToPurge(
+    endedSnapshot.docs,
+    abandonedSnapshot.docs,
+    endedCutoffIso,
+    abandonedCutoffIso,
+    PURGE_BATCH_LIMIT,
+  );
+
+  let deleted = 0;
+  for (const sessionDoc of targets) {
+    await db.recursiveDelete(sessionDoc.ref);
+    deleted += 1;
+  }
+
+  console.info(
+    `purgeStaleSessions deleted ${deleted} session(s); endedCutoff=${endedCutoffIso}; abandonedCutoff=${abandonedCutoffIso}`,
+  );
 });

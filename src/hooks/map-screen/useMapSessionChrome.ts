@@ -8,6 +8,7 @@ import {
 } from "../../domain/annotations";
 import type { AnnotationRecord } from "../../domain/annotations";
 import { endRemoteSession } from "../../services/firestoreAnnotations";
+import { clearSessionLocalArtifacts } from "../../services/sessionCleanup";
 import { useSessionStore } from "../../state/sessionStore";
 
 interface UseMapSessionChromeParams {
@@ -96,7 +97,9 @@ export function useMapSessionChrome({
       return;
     }
 
-    await endRemoteSession(session.id);
+    const sessionId = session.id;
+    await endRemoteSession(sessionId);
+    await clearSessionLocalArtifacts(sessionId);
     setSession(null);
     setSettingsOpen(false);
     navigate("/");

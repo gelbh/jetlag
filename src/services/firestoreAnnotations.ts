@@ -11,6 +11,7 @@ import {
   updateDoc,
   where,
   writeBatch,
+  deleteField,
   type Unsubscribe,
 } from "firebase/firestore";
 import type {
@@ -156,6 +157,8 @@ export async function getRemoteSessionById(
 export async function endRemoteSession(sessionId: string): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), {
     endedAt: new Date().toISOString(),
+    status: "ended",
+    code: deleteField(),
   });
 }
 

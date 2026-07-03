@@ -5,6 +5,7 @@ import {
   buildSessionDocument,
   deserializeAnnotationFromFirestore,
   deserializeGameAreaFromFirestore,
+  deserializeSessionFromFirestore,
   serializeAnnotationForFirestore,
   serializeGameAreaForFirestore,
 } from "./firestoreSerialization";
@@ -73,6 +74,26 @@ describe("firestoreSerialization", () => {
     expect(() => assertNoNestedArrays(payload)).not.toThrow();
     expect(payload.gameArea).not.toHaveProperty("coordinates");
     expect(payload.memberUids).toEqual(["host-uid"]);
+    expect(payload.status).toBe("active");
+  });
+
+  it("deserializes ended sessions without a code field", () => {
+    const session = deserializeSessionFromFirestore("session-ended", {
+      gameArea: {
+        south: 53.3,
+        west: -6.3,
+        north: 53.4,
+        east: -6.2,
+      },
+      hostUid: "host-uid",
+      createdAt: "2026-05-14T00:00:00.000Z",
+      memberUids: ["host-uid"],
+      endedAt: "2026-05-15T00:00:00.000Z",
+      status: "ended",
+    });
+
+    expect(session.code).toBe("");
+    expect(session.status).toBe("ended");
   });
 
   it("omits undefined metadata fields from Firestore payloads", () => {
