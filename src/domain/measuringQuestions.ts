@@ -387,11 +387,13 @@ export const COASTLINE_MEASURING_QUESTION: MeasuringQuestionDefinition = {
   ruleSummary: COASTLINE_DEFINITION,
 };
 
+export const SEA_LEVEL_DEFINITION =
+  "Sea level refers to your altitude above (or below) 0 m. Closer to sea level means lower altitude; further means higher. Elevation comes from the mapping app, not your phone compass—treat it as approximate.";
+
 export const SEA_LEVEL_MEASURING_QUESTION: MeasuringQuestionDefinition = {
   subject: "sea_level",
   prompt: "Compared to me, are you closer to or further from sea level?",
-  ruleSummary:
-    "Set where you asked from. The shaded region uses your vertical distance from sea level (0 m altitude).",
+  ruleSummary: SEA_LEVEL_DEFINITION,
 };
 
 export function measuringCatalogOption(

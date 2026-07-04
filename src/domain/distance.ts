@@ -1,6 +1,7 @@
 export type DistanceUnit = "metric" | "imperial";
 
 export const METERS_PER_MILE = 1609.344;
+export const METERS_PER_FOOT = 0.3048;
 export const MILE_RADIUS_PRESETS = [
   0.25, 0.5, 1, 3, 5, 10, 25, 50, 100,
 ] as const;
@@ -89,4 +90,34 @@ export function parseDistanceInput(
 
 export function distanceUnitLabel(unit: DistanceUnit): string {
   return unit === "imperial" ? "miles" : "meters";
+}
+
+export function formatAltitude(
+  meters: number,
+  unit: DistanceUnit = "metric",
+): string {
+  if (!Number.isFinite(meters)) {
+    return unit === "imperial" ? "0 ft" : "0 m";
+  }
+
+  if (unit === "imperial") {
+    const feet = Math.round(Math.abs(meters) / METERS_PER_FOOT);
+    return `${feet} ft`;
+  }
+
+  return `${Math.round(Math.abs(meters))} m`;
+}
+
+export function formatAltitudeLabel(
+  meters: number,
+  unit: DistanceUnit = "metric",
+): string {
+  if (!Number.isFinite(meters) || meters === 0) {
+    return "at sea level";
+  }
+
+  const magnitude = formatAltitude(meters, unit);
+  return meters > 0
+    ? `${magnitude} above sea level`
+    : `${magnitude} below sea level`;
 }

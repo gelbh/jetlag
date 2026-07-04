@@ -15,7 +15,12 @@ import {
   type MeasuringTargetMode,
 } from "../../domain/measuringQuestions";
 import type { GeocodedPlace } from "../../services/geocoding";
-import { formatDistance, type DistanceUnit } from "../../domain/distance";
+import {
+  formatAltitudeLabel,
+  formatDistance,
+  type DistanceUnit,
+} from "../../domain/distance";
+import type { SeaLevelEdgeCase } from "../../domain/seaLevel";
 import { closerFurtherAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { AnchorControls } from "./shared/AnchorControls";
@@ -55,6 +60,8 @@ interface MeasuringPanelProps {
   searchLoading: boolean;
   searchRole: MeasuringSearchRole;
   answer: MeasuringAnswer | null;
+  seaLevelEdgeCase?: SeaLevelEdgeCase | null;
+  seaLevelNote?: string | null;
   error?: string | null;
   onMeasureFromChange: (kind: MeasuringFromKind) => void;
   onTargetModeChange: (mode: MeasuringTargetMode) => void;
@@ -66,6 +73,7 @@ interface MeasuringPanelProps {
   ) => void;
   onUseGps: () => void;
   onFindCoastline: () => void;
+  onRetrySeaLevel: () => void;
   onFindLinearFeature: () => void;
   onFindNearest: () => void;
   onAnswerChange: (answer: MeasuringAnswer) => void;
@@ -92,6 +100,8 @@ export function MeasuringPanel({
   searchLoading,
   searchRole,
   answer,
+  seaLevelEdgeCase = null,
+  seaLevelNote = null,
   error,
   onMeasureFromChange,
   onTargetModeChange,
@@ -100,6 +110,7 @@ export function MeasuringPanel({
   onSearchResultSelect,
   onUseGps,
   onFindCoastline,
+  onRetrySeaLevel,
   onFindLinearFeature,
   onFindNearest,
   onAnswerChange,
@@ -122,8 +133,8 @@ export function MeasuringPanel({
   const canFindNearest = measuringSupportsNearest(measureFrom);
   const canUseMapTarget = measuringSupportsMapTarget(measureFrom);
   const targetSummary = isSeaLevel
-    ? hasTargetPoint
-      ? "Sea level reference loaded"
+    ? hasTargetPoint && anchorAltitudeMeters !== null
+      ? `Elevation loaded · ${formatAltitudeLabel(anchorAltitudeMeters, distanceUnit)}`
       : "Set your anchor to read elevation"
     : (targetPlaceName ??
       (hasTargetPoint ? `${targetLabel} pinned` : "No target yet"));
@@ -159,6 +170,11 @@ export function MeasuringPanel({
       )}
     />
   );
+
+  const disabledSeaLevelAnswers =
+    seaLevelEdgeCase === "highest"
+      ? new Set<MeasuringAnswer>(["further"])
+      : undefined;
 
   const targetModeOptions = [
     ...(canUseMapTarget
@@ -214,14 +230,25 @@ export function MeasuringPanel({
           ) : null}
           {hasTargetPoint && anchorAltitudeMeters !== null ? (
             <ResolvedReadout>
-              Your altitude is {Math.round(anchorAltitudeMeters)} m (
-              {formatDistance(distanceMeters ?? 0, distanceUnit)} from sea level).
+              You are {formatAltitudeLabel(anchorAltitudeMeters, distanceUnit)}.
             </ResolvedReadout>
           ) : (
             <ResolvedReadout variant="dim">
               Set your anchor to read elevation from sea level.
             </ResolvedReadout>
           )}
+          {seaLevelNote ? (
+            <ResolvedReadout variant="dim">{seaLevelNote}</ResolvedReadout>
+          ) : null}
+          {error && hasSeekerPoint && !loading ? (
+            <button
+              type="button"
+              onClick={onRetrySeaLevel}
+              className="btn-secondary w-full"
+            >
+              Retry
+            </button>
+          ) : null}
         </>
       );
     }
@@ -425,6 +452,7 @@ export function MeasuringPanel({
             onChange={onAnswerChange}
             options={closerFurtherAnswerOptions}
             label=""
+            disabledValues={disabledSeaLevelAnswers}
           />
           {step === "target" ? (
             <p className="text-xs text-ink-dim">

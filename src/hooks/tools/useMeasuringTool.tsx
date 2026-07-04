@@ -48,6 +48,7 @@ import {
   fetchNearestMeasuringPlace,
 } from "./measuringToolResolvers";
 import { useToolSessionOptions } from "./useToolSessionOptions";
+import type { SeaLevelEdgeCase } from "../../domain/seaLevel";
 import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface UseMeasuringToolParams {
@@ -112,6 +113,11 @@ export function useMeasuringTool({
     useState<Feature<GeoPolygon | MultiPolygon> | null>(null);
   const [measuringAnchorElevationMeters, setMeasuringAnchorElevationMeters] =
     useState<number | null>(null);
+  const [measuringSeaLevelEdgeCase, setMeasuringSeaLevelEdgeCase] =
+    useState<SeaLevelEdgeCase | null>(null);
+  const [measuringSeaLevelNote, setMeasuringSeaLevelNote] = useState<
+    string | null
+  >(null);
   const [measuringTargetMode, setMeasuringTargetMode] =
     useState<MeasuringTargetMode>("map");
   const [measuringSeekerPlaceName, setMeasuringSeekerPlaceName] = useState<
@@ -135,35 +141,6 @@ export function useMeasuringTool({
     measuringLocationCategory,
   );
   const usesAllPlacesInArea = measuringUsesAllPlacesInArea(measureFromKind);
-
-  useToolSessionOptions({
-    active,
-    usedOptions: usedMeasuringFromKindsSet,
-    currentOption: measuringFromKind(
-      measuringSubject,
-      measuringLocationCategory,
-    ),
-    isAvailable: isMeasuringFromKindAvailable,
-    pickNext: firstAvailableMeasuringFromKind,
-    onUnavailable: useCallback((nextKind: MeasuringFromKind) => {
-      const next = applyMeasuringFromKind(nextKind);
-      setMeasuringSubject(next.subject);
-      setMeasuringLocationCategory(next.locationCategory);
-      setMeasuringTargetPoint(null);
-      setMeasuringTargetPlaceName(null);
-      setMeasuringDistanceMeters(null);
-      setMeasuringAnswer(null);
-      setMeasuringError(null);
-      setMeasuringCoastSegments([]);
-      setMeasuringSeaLevelNearRegion(null);
-      setMeasuringAnchorElevationMeters(null);
-      setMeasuringTargetMode("map");
-      setMeasuringSearchQuery("");
-      setMeasuringSearchResults([]);
-      setMeasuringSearchLoading(false);
-      setMeasuringPlaces([]);
-    }, []),
-  });
 
   const resolvedCoastSegments = useMemo(() => {
     if (measuringSubject === "coastline") {
@@ -235,6 +212,8 @@ export function useMeasuringTool({
     setMeasuringCoastSegments([]);
     setMeasuringSeaLevelNearRegion(null);
     setMeasuringAnchorElevationMeters(null);
+    setMeasuringSeaLevelEdgeCase(null);
+    setMeasuringSeaLevelNote(null);
     setMeasuringPlaces([]);
     setMapError(null);
 
@@ -347,13 +326,19 @@ export function useMeasuringTool({
         setMeasuringSeaLevelNearRegion(null);
         setMeasuringAnchorElevationMeters(null);
         setMeasuringDistanceMeters(null);
+        setMeasuringSeaLevelEdgeCase(null);
+        setMeasuringSeaLevelNote(null);
         setMeasuringError(result.message);
         return;
       }
 
       setMeasuringAnchorElevationMeters(result.seekerElevationMeters);
       setMeasuringDistanceMeters(result.distanceFromSeaLevelMeters);
-      setMeasuringSeaLevelNearRegion(result.nearRegion);
+      setMeasuringSeaLevelEdgeCase(result.edgeCase);
+      setMeasuringSeaLevelNote(result.note);
+      startTransition(() => {
+        setMeasuringSeaLevelNearRegion(result.nearRegion);
+      });
     } catch (error) {
       if (requestId !== seaLevelRequestId.current) {
         return;
@@ -362,6 +347,8 @@ export function useMeasuringTool({
       setMeasuringSeaLevelNearRegion(null);
       setMeasuringAnchorElevationMeters(null);
       setMeasuringDistanceMeters(null);
+      setMeasuringSeaLevelEdgeCase(null);
+      setMeasuringSeaLevelNote(null);
       setMeasuringError(
         error instanceof Error ? error.message : "Unable to read elevation.",
       );
@@ -472,6 +459,60 @@ export function useMeasuringTool({
     }
   };
 
+  const handleUnavailableMeasuringOption = useCallback(
+    (nextKind: MeasuringFromKind) => {
+      const next = applyMeasuringFromKind(nextKind);
+      setMeasuringSubject(next.subject);
+      setMeasuringLocationCategory(next.locationCategory);
+      setMeasuringTargetPoint(null);
+      setMeasuringTargetPlaceName(null);
+      setMeasuringDistanceMeters(null);
+      setMeasuringAnswer(null);
+      setMeasuringError(null);
+      setMeasuringCoastSegments([]);
+      setMeasuringSeaLevelNearRegion(null);
+      setMeasuringAnchorElevationMeters(null);
+      setMeasuringSeaLevelEdgeCase(null);
+      setMeasuringSeaLevelNote(null);
+      setMeasuringTargetMode("map");
+      setMeasuringSearchQuery("");
+      setMeasuringSearchResults([]);
+      setMeasuringSearchLoading(false);
+      setMeasuringPlaces([]);
+
+      if (!measuringSeekerPoint) {
+        return;
+      }
+
+      if (next.subject === "sea_level") {
+        void loadSeaLevelContextAt(measuringSeekerPoint);
+        return;
+      }
+
+      if (next.subject === "coastline") {
+        void loadMeasuringCoastlineAt(measuringSeekerPoint);
+        return;
+      }
+
+      if (measuringUsesAllPlacesInArea(nextKind)) {
+        void loadAllPlacesAt(measuringSeekerPoint, next.locationCategory);
+      }
+    },
+    [measuringSeekerPoint],
+  );
+
+  useToolSessionOptions({
+    active,
+    usedOptions: usedMeasuringFromKindsSet,
+    currentOption: measuringFromKind(
+      measuringSubject,
+      measuringLocationCategory,
+    ),
+    isAvailable: isMeasuringFromKindAvailable,
+    pickNext: firstAvailableMeasuringFromKind,
+    onUnavailable: handleUnavailableMeasuringOption,
+  });
+
   const resetDraft = useCallback((additionalUsedKind?: MeasuringFromKind) => {
     const usedKinds = new Set(usedMeasuringFromKindsSet);
     if (additionalUsedKind) {
@@ -497,6 +538,8 @@ export function useMeasuringTool({
     setMeasuringCoastSegments([]);
     setMeasuringSeaLevelNearRegion(null);
     setMeasuringAnchorElevationMeters(null);
+    setMeasuringSeaLevelEdgeCase(null);
+    setMeasuringSeaLevelNote(null);
     setMeasuringAnswer(null);
     setMeasuringError(null);
     setMeasuringPlaces([]);
@@ -820,6 +863,8 @@ export function useMeasuringTool({
       searchLoading={measuringSearchLoading}
       searchRole={measuringSearchRole}
       answer={measuringAnswer}
+      seaLevelEdgeCase={measuringSeaLevelEdgeCase}
+      seaLevelNote={measuringSeaLevelNote}
       error={measuringError ?? gpsError ?? mapError}
       onMeasureFromChange={(kind) => {
         const next = applyMeasuringFromKind(kind);
@@ -833,6 +878,8 @@ export function useMeasuringTool({
         setMeasuringCoastSegments([]);
         setMeasuringSeaLevelNearRegion(null);
         setMeasuringAnchorElevationMeters(null);
+        setMeasuringSeaLevelEdgeCase(null);
+        setMeasuringSeaLevelNote(null);
         setMeasuringTargetMode("map");
         setMeasuringSearchQuery("");
         setMeasuringSearchResults([]);
@@ -840,6 +887,8 @@ export function useMeasuringTool({
         setMeasuringPlaces([]);
         if (next.subject === "coastline" && measuringSeekerPoint) {
           void loadMeasuringCoastlineAt(measuringSeekerPoint);
+        } else if (next.subject === "sea_level" && measuringSeekerPoint) {
+          void loadSeaLevelContextAt(measuringSeekerPoint);
         } else if (measuringSeekerPoint && measuringUsesAllPlacesInArea(kind)) {
           void loadAllPlacesAt(measuringSeekerPoint, next.locationCategory);
         }
@@ -859,6 +908,11 @@ export function useMeasuringTool({
       onFindCoastline={() => {
         if (measuringSeekerPoint) {
           void loadMeasuringCoastlineAt(measuringSeekerPoint);
+        }
+      }}
+      onRetrySeaLevel={() => {
+        if (measuringSeekerPoint) {
+          void loadSeaLevelContextAt(measuringSeekerPoint);
         }
       }}
       onFindLinearFeature={() => {

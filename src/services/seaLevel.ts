@@ -4,6 +4,7 @@ import {
   distanceFromSeaLevelMeters,
   sampleGameAreaCells,
   type ElevationSampleCell,
+  type SeaLevelEdgeCase,
 } from "../domain/seaLevel";
 import type { LatLngTuple } from "../domain/geometry";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
@@ -20,6 +21,13 @@ export interface SeaLevelContext {
   nearRegion: Feature<Polygon | MultiPolygon>;
   cells: ElevationSampleCell[];
   cellElevations: number[];
+  edgeCase: SeaLevelEdgeCase | null;
+}
+
+export type SeaLevelContextFailureReason = "lowest" | "build_failed";
+
+export interface SeaLevelContextFailure {
+  reason: SeaLevelContextFailureReason;
 }
 
 export function prefetchSeaLevelSampling(gameArea: GameArea): void {
@@ -45,22 +53,27 @@ async function loadSeaLevelSampling(
 export async function loadSeaLevelContext(
   seeker: LatLngTuple,
   gameArea: GameArea,
-): Promise<SeaLevelContext | null> {
+): Promise<SeaLevelContext | SeaLevelContextFailure | null> {
   const sampling = await loadSeaLevelSampling(gameArea);
   const elevations = await fetchElevations([seeker]);
   const seekerElevationMeters = elevations[0];
+
+  if (!Number.isFinite(seekerElevationMeters)) {
+    return null;
+  }
+
   const distanceFromSeaLevel = distanceFromSeaLevelMeters(
     seekerElevationMeters,
   );
-  const nearRegion = buildSeaLevelNearRegionFromSamples(
+  const { region: nearRegion, edgeCase } = buildSeaLevelNearRegionFromSamples(
     sampling.cells,
     sampling.cellElevations,
     distanceFromSeaLevel,
     gameArea,
   );
 
-  if (!nearRegion) {
-    return null;
+  if (edgeCase === "lowest" || !nearRegion) {
+    return { reason: "lowest" };
   }
 
   return {
@@ -69,5 +82,6 @@ export async function loadSeaLevelContext(
     nearRegion,
     cells: sampling.cells,
     cellElevations: sampling.cellElevations,
+    edgeCase,
   };
 }
