@@ -373,7 +373,9 @@ textarea {
   height: 100%;
   background: var(--color-map-canvas);
   font: inherit;
-  touch-action: pan-x pan-y pinch-zoom;
+  /* Leaflet calls preventDefault on touchmove while dragging; browser-native pan
+     (pan-x/pan-y) marks those events non-cancelable and triggers Chrome warnings. */
+  touch-action: none;
 }
 
 .leaflet-control-zoom {
