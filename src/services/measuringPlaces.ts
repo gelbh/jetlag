@@ -51,8 +51,15 @@ function buildMeasuringPlacesQuery(
   `);
 }
 
+function isSwimmingPool(tags: Record<string, string>): boolean {
+  return (
+    tags.leisure === "swimming_pool" || tags.amenity === "swimming_pool"
+  );
+}
+
 function isActiveMeasuringPlace(
   tags: Record<string, string> | undefined,
+  category?: MeasuringLocationCategory,
 ): boolean {
   if (!tags) {
     return false;
@@ -67,18 +74,23 @@ function isActiveMeasuringPlace(
     return false;
   }
 
+  if (category === "body_of_water" && isSwimmingPool(tags)) {
+    return false;
+  }
+
   return true;
 }
 
 export function parseMeasuringPlaces(
   elements: OverpassElement[],
   gameArea: GameArea,
+  category?: MeasuringLocationCategory,
 ): MeasuringPlace[] {
   const seen = new Set<string>();
 
   return elements
     .map((element) => {
-      if (!isActiveMeasuringPlace(element.tags)) {
+      if (!isActiveMeasuringPlace(element.tags, category)) {
         return null;
       }
 
@@ -126,7 +138,7 @@ export async function fetchMeasuringPlacesInArea(
         buildMeasuringPlacesQuery(gameArea, selectors),
       );
 
-      return parseMeasuringPlaces(payload.elements, gameArea);
+      return parseMeasuringPlaces(payload.elements, gameArea, category);
     },
   );
 }

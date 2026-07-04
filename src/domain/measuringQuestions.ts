@@ -184,16 +184,19 @@ export const MEASURING_CATALOG = [
     label: "Body of water",
     promptNoun: "a body of water",
     subject: "location",
-    targetKind: "linear",
-    overpassSelectors: [],
-    linearSelectors: [
+    targetKind: "point",
+    overpassSelectors: [
       '["natural"="water"]',
-      '["waterway"="riverbank"]',
       '["water"="lake"]',
+      '["water"="reservoir"]',
+      '["water"="pond"]',
+      '["landuse"="reservoir"]',
+      '["natural"="bay"]',
     ],
+    linearSelectors: [],
     supportsSearch: false,
-    supportsNearest: false,
-    supportsMapTarget: false,
+    supportsNearest: true,
+    supportsMapTarget: true,
   },
   {
     id: "coastline",
@@ -396,6 +399,15 @@ export const SEA_LEVEL_MEASURING_QUESTION: MeasuringQuestionDefinition = {
   ruleSummary: SEA_LEVEL_DEFINITION,
 };
 
+export const BODY_OF_WATER_DEFINITION =
+  "Any named body of water on your mapping app counts, excluding pools. Distance is measured to the map label (center), like parks and other POI measuring questions.";
+
+export const BODY_OF_WATER_MEASURING_QUESTION: MeasuringQuestionDefinition = {
+  subject: "location",
+  prompt: "Compared to me, are you closer to or further from a body of water?",
+  ruleSummary: BODY_OF_WATER_DEFINITION,
+};
+
 export function measuringCatalogOption(
   kind: MeasuringFromKind,
 ): MeasuringCatalogOption | undefined {
@@ -481,6 +493,10 @@ export function measuringQuestionFor(
 
   if (subject === "coastline") {
     return COASTLINE_MEASURING_QUESTION;
+  }
+
+  if (locationCategory === "body_of_water") {
+    return BODY_OF_WATER_MEASURING_QUESTION;
   }
 
   return {
