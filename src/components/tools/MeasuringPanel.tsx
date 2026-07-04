@@ -8,6 +8,7 @@ import {
   measuringSupportsSearch,
   measuringTargetKind,
   measuringTargetLabel,
+  measuringUsesAllPlacesInArea,
   type MeasuringAnswer,
   type MeasuringFromKind,
   type MeasuringLocationCategory,
@@ -24,6 +25,7 @@ import type { SeaLevelEdgeCase } from "../../domain/seaLevel";
 import { closerFurtherAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { AnchorControls } from "./shared/AnchorControls";
+import { LoadingReadout } from "./shared/LoadingReadout";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
 import { ResolvedReadout } from "./shared/ResolvedReadout";
 import { SearchResultsList } from "./shared/SearchResultsList";
@@ -39,6 +41,38 @@ import {
 } from "./shared/toolStepUtils";
 
 type MeasuringSearchRole = "seeker" | "target";
+
+function measuringUsesDebouncedSeekerResolve(
+  subject: MeasuringSubject,
+  measureFrom: MeasuringFromKind,
+): boolean {
+  return (
+    subject === "coastline" ||
+    subject === "sea_level" ||
+    measuringUsesAllPlacesInArea(measureFrom)
+  );
+}
+
+function anchorResolveLoadingMessage(
+  subject: MeasuringSubject,
+  measureFrom: MeasuringFromKind,
+  locationCategory?: MeasuringLocationCategory,
+): string | null {
+  if (!measuringUsesDebouncedSeekerResolve(subject, measureFrom)) {
+    return null;
+  }
+
+  if (subject === "coastline") {
+    return "Finding coastline in the play area…";
+  }
+
+  if (subject === "sea_level") {
+    return "Reading elevation and shading the play area…";
+  }
+
+  const targetLabel = measuringTargetLabel(subject, locationCategory);
+  return `Loading ${targetLabel.toLowerCase()}s in the play area…`;
+}
 
 interface MeasuringPanelProps {
   distanceUnit: DistanceUnit;
@@ -146,7 +180,18 @@ export function MeasuringPanel({
   })).filter((group) => group.options.length > 0);
   const hasAvailableMeasureOptions = availableGroups.length > 0;
 
-  const canAdvanceFromAnchor = hasSeekerPoint;
+  const needsAutoResolve = measuringUsesDebouncedSeekerResolve(
+    subject,
+    measureFrom,
+  );
+  const anchorLoadingMessage = anchorResolveLoadingMessage(
+    subject,
+    measureFrom,
+    locationCategory,
+  );
+  const canAdvanceFromAnchor =
+    hasSeekerPoint &&
+    (!needsAutoResolve || (hasTargetPoint && !loading));
   const canAdvanceFromTarget = hasTargetPoint;
   const canPreviewAnswer =
     hasAvailableMeasureOptions &&
@@ -193,9 +238,7 @@ export function MeasuringPanel({
       return (
         <>
           {loading ? (
-            <ResolvedReadout variant="dim">
-              Finding coastline in the play area…
-            </ResolvedReadout>
+            <LoadingReadout>Finding coastline in the play area…</LoadingReadout>
           ) : null}
           {hasTargetPoint && distanceMeters !== null ? (
             <ResolvedReadout>
@@ -224,9 +267,9 @@ export function MeasuringPanel({
       return (
         <>
           {loading ? (
-            <ResolvedReadout variant="dim">
+            <LoadingReadout>
               Reading elevation and shading the play area…
-            </ResolvedReadout>
+            </LoadingReadout>
           ) : null}
           {hasTargetPoint && anchorAltitudeMeters !== null ? (
             <ResolvedReadout>
@@ -271,10 +314,16 @@ export function MeasuringPanel({
     if (usesAllPlacesInArea) {
       return (
         <>
-          <ResolvedReadout variant="dim">
-            All {targetLabel.toLowerCase()}s in the play area are used for this
-            question. Set your anchor to load them.
-          </ResolvedReadout>
+          {loading ? (
+            <LoadingReadout>
+              {anchorLoadingMessage ?? `Loading ${targetLabel.toLowerCase()}s in the play area…`}
+            </LoadingReadout>
+          ) : (
+            <ResolvedReadout variant="dim">
+              All {targetLabel.toLowerCase()}s in the play area are used for this
+              question. Set your anchor to load them.
+            </ResolvedReadout>
+          )}
           {hasTargetPoint && distanceMeters !== null ? (
             <ResolvedReadout>
               Nearest is {formatDistance(distanceMeters, distanceUnit)} away
@@ -396,6 +445,9 @@ export function MeasuringPanel({
             onUseGps={onUseGps}
             anchorPlaceName={hasSeekerPoint ? seekerPlaceName : null}
           />
+          {loading && hasSeekerPoint && anchorLoadingMessage ? (
+            <LoadingReadout>{anchorLoadingMessage}</LoadingReadout>
+          ) : null}
           {allowsSearch ? (
             <>
               <label className="field-label">

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { AnnotationRecord } from "../../domain/annotations";
 import type { GameArea } from "../../domain/annotations";
 import type { LatLngTuple } from "../../domain/geometry";
@@ -40,12 +40,32 @@ type SharedToolProps = Omit<HeavyMapToolsSlotProps, "activeTool" | "onToolsChang
 
 const idleTools = createIdleHeavyMapTools();
 
+function heavyToolPublishKey(
+  toolName: "matching" | "measuring" | "tentacle",
+  tool: MatchingToolApi | MeasuringToolApi | TentacleToolApi,
+): string {
+  if ("publishSignature" in tool) {
+    return `${toolName}:${tool.publishSignature}:${tool.placementCrosshair}`;
+  }
+
+  return `${toolName}:${JSON.stringify(tool.draft)}:${tool.placementCrosshair}`;
+}
+
 function usePublishHeavyTool(
   toolName: "matching" | "measuring" | "tentacle",
   tool: MatchingToolApi | MeasuringToolApi | TentacleToolApi,
   onToolsChange: (tools: HeavyMapToolsApi) => void,
 ) {
+  const lastPublishKeyRef = useRef<string | null>(null);
+
   useEffect(() => {
+    const publishKey = heavyToolPublishKey(toolName, tool);
+    if (publishKey === lastPublishKeyRef.current) {
+      return;
+    }
+
+    lastPublishKeyRef.current = publishKey;
+
     const nextTools: HeavyMapToolsApi =
       toolName === "matching"
         ? {

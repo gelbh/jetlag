@@ -293,6 +293,7 @@ export function useMatchingTool({
     setMatchingNullAnswer(false);
     setMatchingAnswer(null);
     setMatchingError(null);
+    setMatchingLoading(true);
   };
 
   const resetDraft = useCallback(() => {
@@ -480,6 +481,7 @@ export function useMatchingTool({
       matchingNearestFeaturePoint,
       matchingBoundaryPreview,
       matchingEliminationPreview,
+      seekerResolving: matchingLoading && matchingSeekerPoint !== null,
     },
     placementCrosshair,
     handleMapClick,

@@ -484,6 +484,7 @@ export function MapScreen() {
           pois: tentacleTool.draft.tentaclePois,
           selectedPoiId: tentacleTool.draft.tentacleSelectedPoiId,
           outOfReach: tentacleTool.draft.tentacleOutOfReach,
+          seekerResolving: tentacleTool.draft.seekerResolving,
         },
         thermometer: {
           thermoA: thermometerTool.draft.thermoA,
@@ -497,12 +498,14 @@ export function MapScreen() {
           siteRadiusMeters: measuringTool.draft.measuringDistanceMeters,
           boundaryPreview: measuringTool.draft.measuringBoundaryPreview,
           eliminationPreview: measuringTool.draft.measuringEliminationPreview,
+          seekerResolving: measuringTool.draft.seekerResolving,
         },
         matching: {
           seekerPoint: matchingTool.draft.matchingSeekerPoint,
           nearestFeaturePoint: matchingTool.draft.matchingNearestFeaturePoint,
           boundaryPreview: matchingTool.draft.matchingBoundaryPreview,
           eliminationPreview: matchingTool.draft.matchingEliminationPreview,
+          seekerResolving: matchingTool.draft.seekerResolving,
         },
         zone: { vertices: zoneTool.draft.zoneVertices },
       },

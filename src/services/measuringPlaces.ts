@@ -36,7 +36,7 @@ type OverpassElement = {
   center?: { lat: number; lon: number };
 };
 
-function buildMeasuringPlacesQuery(
+export function buildMeasuringPlacesQuery(
   gameArea: GameArea,
   selectors: readonly string[],
 ): string {

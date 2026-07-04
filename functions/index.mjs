@@ -6,6 +6,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { setCors } from "./cors.mjs";
 import { fetchWithTimeoutAndRetry } from "./fetchWithTimeout.mjs";
 import { createMemoryCache } from "./memoryCache.mjs";
+import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "./overpassEndpoints.mjs";
 import { normalizeTflPayload } from "./tflNormalize.mjs";
 import {
   computeAbandonedCutoffIso,
@@ -18,8 +19,6 @@ const FEEDS = {
   london: "https://api.tfl.gov.uk/vehicle/vehiclepositions",
 };
 
-const OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter";
-const OVERPASS_USER_AGENT = "jetlag-map-companion/1.0";
 const TFL_FETCH_TIMEOUT_MS = 10_000;
 const OVERPASS_FETCH_TIMEOUT_MS = 45_000;
 const VEHICLE_FEED_CACHE_TTL_MS = 15_000;
@@ -30,6 +29,43 @@ const overpassResponseCache = createMemoryCache(OVERPASS_CACHE_TTL_MS);
 
 function overpassCacheKey(query) {
   return createHash("sha256").update(query).digest("hex");
+}
+
+async function fetchOverpassWithFailover(query) {
+  let lastError = null;
+
+  for (const endpoint of OVERPASS_ENDPOINTS) {
+    try {
+      const response = await fetchWithTimeoutAndRetry(
+        endpoint,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            "User-Agent": OVERPASS_USER_AGENT,
+          },
+          body: `data=${encodeURIComponent(query)}`,
+        },
+        OVERPASS_FETCH_TIMEOUT_MS,
+        1,
+      );
+
+      if (response.ok) {
+        return response;
+      }
+
+      if (response.status === 502 || response.status === 504) {
+        lastError = new Error("Overpass timed out.");
+        continue;
+      }
+
+      throw new Error("Overpass query failed.");
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError ?? new Error("Overpass timed out.");
 }
 
 async function loadTflFeed(metro, feedUrl) {
@@ -127,19 +163,7 @@ export const overpass = onRequest(async (req, res) => {
   }
 
   try {
-    const response = await fetchWithTimeoutAndRetry(
-      OVERPASS_ENDPOINT,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-          "User-Agent": OVERPASS_USER_AGENT,
-        },
-        body: `data=${encodeURIComponent(query)}`,
-      },
-      OVERPASS_FETCH_TIMEOUT_MS,
-      1,
-    );
+    const response = await fetchOverpassWithFailover(query);
 
     const text = await response.text();
 

@@ -173,6 +173,7 @@ export function useTentacleTool({
       setAwaitingPlacement(false);
       setMapError(null);
       setTentacleError(null);
+      setTentacleLoading(true);
       return true;
     },
     [active, setAwaitingPlacement, setMapError],
@@ -189,6 +190,7 @@ export function useTentacleTool({
       setTentacleCenter(point);
       setAwaitingPlacement(false);
       setMapError(null);
+      setTentacleLoading(true);
     } catch (error) {
       setMapError(
         error instanceof Error ? error.message : "Unable to read GPS location.",
@@ -341,6 +343,7 @@ export function useTentacleTool({
       tentacleSelectedPoiId: selectedPoiId,
       tentacleOutOfReach,
       tentacleEliminationPreview,
+      seekerResolving: tentacleLoading && tentacleCenter !== null,
     },
     placementCrosshair,
     handleMapClick,

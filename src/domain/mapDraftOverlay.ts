@@ -8,6 +8,7 @@ export interface MapDraftOverlayStyle {
   fillColor?: string;
   fillOpacity?: number;
   markerRadius?: number;
+  pulsing?: boolean;
 }
 
 export type MapDraftOverlay =

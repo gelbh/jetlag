@@ -302,16 +302,16 @@ export function computeLandmassFeatures(
   }));
 }
 
-function buildLandmassQuery(gameArea: GameArea): string {
+export function buildLandmassQuery(gameArea: GameArea): string {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
-  const bbox = `${south},${west},${north},${east}`;
 
   return `
-    [out:json][timeout:60];
+    [out:json][timeout:45][bbox:${south},${west},${north},${east}];
+    area.searchArea;
     (
-      way["waterway"](${bbox});
-      way["natural"="water"](${bbox});
-      relation["place"~"^(island|islet)$"]["name"](${bbox});
+      way(area.searchArea)["natural"="water"];
+      way(area.searchArea)["waterway"~"^(river|canal|stream|ditch|dock)$"];
+      relation(area.searchArea)["place"~"^(island|islet)$"]["name"];
     );
     out center;
     >;

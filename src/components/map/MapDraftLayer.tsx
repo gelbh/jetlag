@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { Fragment, memo } from "react";
 import { Circle, CircleMarker, Polygon, Polyline, Popup } from "react-leaflet";
 import type { MapDraftOverlay } from "../../domain/mapDraftOverlay";
 import { polygonFeatureToLeafletPolygonGroups } from "../../domain/geometry";
@@ -25,6 +25,9 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                   weight: overlay.style?.weight ?? 2,
                   fillColor: overlay.style?.fillColor ?? "#38bdf8",
                   fillOpacity: overlay.style?.fillOpacity ?? 1,
+                  className: overlay.style?.pulsing
+                    ? "draft-seeker-pulse"
+                    : undefined,
                 }}
               >
                 {overlay.popup ? <Popup>{overlay.popup}</Popup> : null}
@@ -47,7 +50,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
             );
           case "polygon":
             return (
-              <>
+              <Fragment key={overlay.id}>
                 {polygonFeatureToLeafletPolygonGroups(overlay.feature).map(
                   (rings, index) => (
                     <Polygon
@@ -63,7 +66,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                     />
                   ),
                 )}
-              </>
+              </Fragment>
             );
           case "polyline":
             return (

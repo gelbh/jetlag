@@ -259,17 +259,17 @@ export function parseAdminDivisionFeatures(
     .slice(0, MAX_ADMIN_DIVISIONS);
 }
 
-function buildAdminDivisionQuery(
+export function buildAdminDivisionQuery(
   gameArea: GameArea,
   adminLevel: number,
 ): string {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
-  const bbox = `${south},${west},${north},${east}`;
 
   return `
-    [out:json][timeout:60];
+    [out:json][timeout:45][bbox:${south},${west},${north},${east}];
+    area.searchArea;
     (
-      relation["boundary"="administrative"]["admin_level"="${adminLevel}"]["name"](${bbox});
+      relation(area.searchArea)["boundary"="administrative"]["admin_level"="${adminLevel}"]["name"];
     );
     out center;
     >;

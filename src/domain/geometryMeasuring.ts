@@ -127,6 +127,153 @@ export function nearestPointToCoastlines(
   return nearest;
 }
 
+const COASTLINE_NEAR_REGION_CACHE_MAX = 32;
+const coastlineNearRegionCache = new Map<
+  string,
+  Feature<Polygon | MultiPolygon>
+>();
+
+function coastlineNearRegionCacheKey(
+  gameArea: GameArea,
+  distanceMeters: number,
+  segmentCount: number,
+): string {
+  return `${JSON.stringify(gameArea.coordinates)}:${distanceMeters}:${segmentCount}`;
+}
+
+export function clearCoastlineNearRegionCacheForTests(): void {
+  coastlineNearRegionCache.clear();
+}
+
+function combinePolygonFeatures(
+  features: Feature<Polygon | MultiPolygon>[],
+): Feature<Polygon | MultiPolygon> | null {
+  if (features.length === 0) {
+    return null;
+  }
+
+  if (features.length === 1) {
+    return features[0];
+  }
+
+  const multiCoordinates: number[][][][] = [];
+
+  for (const feature of features) {
+    if (feature.geometry.type === "Polygon") {
+      multiCoordinates.push(feature.geometry.coordinates);
+      continue;
+    }
+
+    multiCoordinates.push(...feature.geometry.coordinates);
+  }
+
+  if (multiCoordinates.length === 0) {
+    return null;
+  }
+
+  if (multiCoordinates.length === 1) {
+    return {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "Polygon",
+        coordinates: multiCoordinates[0],
+      },
+    };
+  }
+
+  return {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "MultiPolygon",
+      coordinates: multiCoordinates,
+    },
+  };
+}
+
+function unionBufferedFeatures(
+  features: Feature<Polygon | MultiPolygon>[],
+): Feature<Polygon | MultiPolygon> | null {
+  if (features.length === 0) {
+    return null;
+  }
+
+  if (features.length === 1) {
+    return features[0];
+  }
+
+  try {
+    const united = union(featureCollection(features));
+    if (
+      united &&
+      (united.geometry.type === "Polygon" ||
+        united.geometry.type === "MultiPolygon")
+    ) {
+      return united as Feature<Polygon | MultiPolygon>;
+    }
+  } catch {
+    // Fall back to a MultiPolygon shell; point-in-region semantics match union.
+  }
+
+  return combinePolygonFeatures(features);
+}
+
+function clipNearCoastToGameArea(
+  nearCoast: Feature<Polygon | MultiPolygon>,
+  gameArea: GameArea,
+): Feature<Polygon | MultiPolygon> | null {
+  const gameFeature = gameAreaToPolygon(gameArea);
+
+  try {
+    const clipped = intersect({
+      type: "FeatureCollection",
+      features: [gameFeature, nearCoast],
+    });
+
+    if (
+      clipped &&
+      (clipped.geometry.type === "Polygon" ||
+        clipped.geometry.type === "MultiPolygon")
+    ) {
+      return clipped as Feature<Polygon | MultiPolygon>;
+    }
+  } catch {
+    // Fall back to per-buffer clipping below.
+  }
+
+  return null;
+}
+
+function clipBufferedSegmentsToGameArea(
+  bufferedFeatures: Feature<Polygon | MultiPolygon>[],
+  gameArea: GameArea,
+): Feature<Polygon | MultiPolygon> | null {
+  const gameFeature = gameAreaToPolygon(gameArea);
+  const clippedParts: Feature<Polygon | MultiPolygon>[] = [];
+
+  for (const buffered of bufferedFeatures) {
+    try {
+      const clipped = intersect({
+        type: "FeatureCollection",
+        features: [gameFeature, buffered],
+      });
+
+      if (
+        clipped &&
+        (clipped.geometry.type === "Polygon" ||
+          clipped.geometry.type === "MultiPolygon")
+      ) {
+        clippedParts.push(clipped as Feature<Polygon | MultiPolygon>);
+      }
+    } catch {
+      // Skip buffers that fail to clip cleanly.
+    }
+  }
+
+  return combinePolygonFeatures(clippedParts);
+}
+
 export function buildCoastlineNearRegion(
   segments: Feature<LineString>[],
   distanceMeters: number,
@@ -136,57 +283,64 @@ export function buildCoastlineNearRegion(
     return null;
   }
 
-  const bufferedFeatures: Feature<Polygon | MultiPolygon>[] = [];
+  const cacheKey = coastlineNearRegionCacheKey(
+    gameArea,
+    distanceMeters,
+    segments.length,
+  );
+  const cached = coastlineNearRegionCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
 
-  for (const segment of segments) {
-    const buffered = buffer(segment, distanceMeters, {
-      units: "meters",
-      steps: 8,
-    });
+  try {
+    const bufferedFeatures: Feature<Polygon | MultiPolygon>[] = [];
 
-    if (
-      !buffered ||
-      (buffered.geometry.type !== "Polygon" &&
-        buffered.geometry.type !== "MultiPolygon")
-    ) {
-      continue;
+    for (const segment of segments) {
+      const buffered = buffer(segment, distanceMeters, {
+        units: "meters",
+        steps: 8,
+      });
+
+      if (
+        !buffered ||
+        (buffered.geometry.type !== "Polygon" &&
+          buffered.geometry.type !== "MultiPolygon")
+      ) {
+        continue;
+      }
+
+      bufferedFeatures.push(buffered as Feature<Polygon | MultiPolygon>);
     }
 
-    bufferedFeatures.push(buffered as Feature<Polygon | MultiPolygon>);
-  }
+    if (bufferedFeatures.length === 0) {
+      return null;
+    }
 
-  if (bufferedFeatures.length === 0) {
+    const nearCoast = unionBufferedFeatures(bufferedFeatures);
+    if (!nearCoast) {
+      return null;
+    }
+
+    const result =
+      clipNearCoastToGameArea(nearCoast, gameArea) ??
+      clipBufferedSegmentsToGameArea(bufferedFeatures, gameArea);
+
+    if (!result) {
+      return null;
+    }
+
+    if (coastlineNearRegionCache.size >= COASTLINE_NEAR_REGION_CACHE_MAX) {
+      const oldestKey = coastlineNearRegionCache.keys().next().value;
+      if (oldestKey !== undefined) {
+        coastlineNearRegionCache.delete(oldestKey);
+      }
+    }
+    coastlineNearRegionCache.set(cacheKey, result);
+    return result;
+  } catch {
     return null;
   }
-
-  const nearCoast =
-    bufferedFeatures.length === 1
-      ? bufferedFeatures[0]
-      : union(featureCollection(bufferedFeatures));
-
-  if (
-    !nearCoast ||
-    (nearCoast.geometry.type !== "Polygon" &&
-      nearCoast.geometry.type !== "MultiPolygon")
-  ) {
-    return null;
-  }
-
-  const gameFeature = gameAreaToPolygon(gameArea);
-  const clipped = intersect({
-    type: "FeatureCollection",
-    features: [gameFeature, nearCoast],
-  });
-
-  if (
-    !clipped ||
-    (clipped.geometry.type !== "Polygon" &&
-      clipped.geometry.type !== "MultiPolygon")
-  ) {
-    return null;
-  }
-
-  return clipped as Feature<Polygon | MultiPolygon>;
 }
 
 export function buildCoastlineEliminationRegion(

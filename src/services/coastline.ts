@@ -17,7 +17,7 @@ import {
   overpassQueryTemplate,
 } from "./overpass/query";
 
-function buildCoastlineQuery(gameArea: GameArea): string {
+export function buildCoastlineQuery(gameArea: GameArea): string {
   const bbox = formatOverpassBboxFromGameArea(gameArea);
 
   return overpassQueryTemplate(`
@@ -83,6 +83,31 @@ export function getCachedPreparedCoastlineSegments(
   );
 }
 
+export function resolveCoastlineContextFromCache(
+  seeker: LatLngTuple,
+  gameArea: GameArea,
+): {
+  coastPoint: LatLngTuple;
+  distanceMeters: number;
+  segmentCount: number;
+} | null {
+  const prepared = getCachedPreparedCoastlineSegments(gameArea);
+  if (!prepared) {
+    return null;
+  }
+
+  const nearest = nearestPointToCoastlines(seeker, prepared.segments, prepared);
+  if (!nearest) {
+    return null;
+  }
+
+  return {
+    coastPoint: nearest.point,
+    distanceMeters: nearest.distanceMeters,
+    segmentCount: prepared.segments.length,
+  };
+}
+
 export async function loadCoastlineContext(
   seeker: LatLngTuple,
   gameArea: GameArea,
@@ -91,6 +116,11 @@ export async function loadCoastlineContext(
   distanceMeters: number;
   segmentCount: number;
 } | null> {
+  const cached = resolveCoastlineContextFromCache(seeker, gameArea);
+  if (cached) {
+    return cached;
+  }
+
   const prepared = await fetchPreparedCoastlineSegments(gameArea);
   const nearest = nearestPointToCoastlines(seeker, prepared.segments, prepared);
 

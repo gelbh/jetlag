@@ -14,6 +14,7 @@ export interface MatchingToolApi {
     matchingNearestFeaturePoint: LatLngTuple | null;
     matchingBoundaryPreview: Feature<Polygon | MultiPolygon> | null;
     matchingEliminationPreview: Feature<Polygon | MultiPolygon> | null;
+    seekerResolving: boolean;
   };
   placementCrosshair: boolean;
   handleMapClick: (point: LatLngTuple) => void;
@@ -29,8 +30,10 @@ export interface MeasuringToolApi {
     measuringDistanceMeters: number | null;
     measuringBoundaryPreview: Feature<Polygon | MultiPolygon> | null;
     measuringEliminationPreview: Feature<Polygon | MultiPolygon> | null;
+    seekerResolving: boolean;
   };
   placementCrosshair: boolean;
+  publishSignature: string;
   handleMapClick: (point: LatLngTuple) => void;
   resetDraft: () => void;
   panel: ReactNode;
@@ -45,6 +48,7 @@ export interface TentacleToolApi {
     tentacleSelectedPoiId: string | null;
     tentacleOutOfReach: boolean;
     tentacleEliminationPreview: Feature<Polygon | MultiPolygon> | null;
+    seekerResolving: boolean;
   };
   placementCrosshair: boolean;
   handleMapClick: (point: LatLngTuple) => void;
@@ -67,6 +71,7 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
       matchingNearestFeaturePoint: null,
       matchingBoundaryPreview: null,
       matchingEliminationPreview: null,
+      seekerResolving: false,
     },
     placementCrosshair: false,
     handleMapClick: noopMapClick,
@@ -82,8 +87,10 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
       measuringDistanceMeters: null,
       measuringBoundaryPreview: null,
       measuringEliminationPreview: null,
+      seekerResolving: false,
     },
     placementCrosshair: false,
+    publishSignature: "idle",
     handleMapClick: noopMapClick,
     resetDraft: () => undefined,
     panel: null,
@@ -98,6 +105,7 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
       tentacleSelectedPoiId: null,
       tentacleOutOfReach: false,
       tentacleEliminationPreview: null,
+      seekerResolving: false,
     },
     placementCrosshair: false,
     handleMapClick: noopMapClick,

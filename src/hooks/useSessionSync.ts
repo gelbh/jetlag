@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { LOCAL_SESSION_ID, migrateAnnotations } from "../domain/annotations";
 import { useAnnotationStore, useSessionStore } from "../state/sessionStore";
 import {
+  getFirestoreDb,
   isFirebaseConfigured,
-  enableOfflinePersistence,
   isFirestorePersistenceUnavailable,
 } from "../services/firebase";
 import { subscribeToRemoteAnnotations } from "../services/firestoreAnnotations";
@@ -38,13 +38,12 @@ export function useSessionSync() {
       return;
     }
 
-    void enableOfflinePersistence().then(() => {
-      if (isFirestorePersistenceUnavailable()) {
-        setLastSyncError(
-          "Offline cache unavailable in this browser tab. Sync may be less reliable until you reload.",
-        );
-      }
-    });
+    getFirestoreDb();
+    if (isFirestorePersistenceUnavailable()) {
+      setLastSyncError(
+        "Offline cache unavailable in this browser tab. Sync may be less reliable until you reload.",
+      );
+    }
 
     const unsubscribe = subscribeToRemoteAnnotations(
       session.id,

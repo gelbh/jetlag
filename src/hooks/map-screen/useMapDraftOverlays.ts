@@ -36,6 +36,7 @@ export interface MapDraftOverlaySources {
     pois: TentaclePoi[];
     selectedPoiId: string | null;
     outOfReach: boolean;
+    seekerResolving: boolean;
   };
   thermometer: {
     thermoA: LatLngTuple | null;
@@ -49,12 +50,14 @@ export interface MapDraftOverlaySources {
     siteRadiusMeters: number | null;
     boundaryPreview: Feature<GeoPolygon | MultiPolygon> | null;
     eliminationPreview: Feature<GeoPolygon | MultiPolygon> | null;
+    seekerResolving: boolean;
   };
   matching: {
     seekerPoint: LatLngTuple | null;
     nearestFeaturePoint: LatLngTuple | null;
     boundaryPreview: Feature<GeoPolygon | MultiPolygon> | null;
     eliminationPreview: Feature<GeoPolygon | MultiPolygon> | null;
+    seekerResolving: boolean;
   };
   zone: { vertices: LatLngTuple[] };
 }
@@ -151,6 +154,7 @@ export function buildMapDraftOverlays(
       pois,
       selectedPoiId,
       outOfReach,
+      seekerResolving,
     } = sources.tentacle;
     const hasPoiAnswer = !outOfReach && selectedPoiId !== null;
     const displayRadius = hasPoiAnswer
@@ -172,7 +176,7 @@ export function buildMapDraftOverlays(
       kind: "marker",
       id: "tentacle-draft-center",
       point: center,
-      style: { fillColor: "#22c55e" },
+      style: { fillColor: "#22c55e", pulsing: seekerResolving },
     });
 
     if (outOfReach) {
@@ -256,6 +260,7 @@ export function buildMapDraftOverlays(
       siteRadiusMeters,
       boundaryPreview,
       eliminationPreview,
+      seekerResolving,
     } = sources.measuring;
 
     if (siteRadiusMeters !== null) {
@@ -274,7 +279,7 @@ export function buildMapDraftOverlays(
         kind: "marker",
         id: "measuring-draft-seeker",
         point: seekerPoint,
-        style: { fillColor: "#38bdf8" },
+        style: { fillColor: "#38bdf8", pulsing: seekerResolving },
       });
     }
     if (placePoints.length > 1) {
@@ -302,15 +307,20 @@ export function buildMapDraftOverlays(
   }
 
   if (activeTool === "matching") {
-    const { seekerPoint, nearestFeaturePoint, boundaryPreview, eliminationPreview } =
-      sources.matching;
+    const {
+      seekerPoint,
+      nearestFeaturePoint,
+      boundaryPreview,
+      eliminationPreview,
+      seekerResolving,
+    } = sources.matching;
 
     if (seekerPoint) {
       overlays.push({
         kind: "marker",
         id: "matching-draft-seeker",
         point: seekerPoint,
-        style: { fillColor: "#38bdf8" },
+        style: { fillColor: "#38bdf8", pulsing: seekerResolving },
       });
     }
     if (nearestFeaturePoint) {
@@ -390,10 +400,12 @@ export function useMapDraftOverlays(
     matching.eliminationPreview,
     matching.nearestFeaturePoint,
     matching.seekerPoint,
+    matching.seekerResolving,
     measuring.boundaryPreview,
     measuring.eliminationPreview,
     measuring.placePoints,
     measuring.seekerPoint,
+    measuring.seekerResolving,
     measuring.siteRadiusMeters,
     measuring.targetPoint,
     pin.point,
@@ -405,6 +417,7 @@ export function useMapDraftOverlays(
     tentacle.outOfReach,
     tentacle.pois,
     tentacle.searchRadiusMeters,
+    tentacle.seekerResolving,
     tentacle.selectedPoiId,
     thermometer.answer,
     thermometer.thermoA,

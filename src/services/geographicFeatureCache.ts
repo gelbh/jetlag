@@ -1,7 +1,8 @@
 import type { GameArea } from "../domain/annotations";
 import type { ElevationSampleCell } from "../domain/seaLevel";
 
-const CACHE_TTL_MS = 15 * 60 * 1000;
+const DEFAULT_CACHE_TTL_MS = 15 * 60 * 1000;
+const STABLE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const DB_NAME = "jetlag-geographic-cache";
 const STORE_NAME = "entries";
 const DB_VERSION = 1;
@@ -43,10 +44,22 @@ export function readCachedMemoryEntry<T>(key: string): T | undefined {
   return entry.value as T;
 }
 
+function cacheTtlMsForKey(key: string): number {
+  if (
+    key.startsWith("admin:") ||
+    key.startsWith("landmass:") ||
+    key.startsWith("coastline:")
+  ) {
+    return STABLE_CACHE_TTL_MS;
+  }
+
+  return DEFAULT_CACHE_TTL_MS;
+}
+
 function writeMemoryEntry<T>(key: string, value: T): void {
   memoryCache.set(key, {
     value,
-    expiresAt: Date.now() + CACHE_TTL_MS,
+    expiresAt: Date.now() + cacheTtlMsForKey(key),
   });
 }
 
@@ -129,7 +142,7 @@ async function writePersistedEntry<T>(key: string, value: T): Promise<void> {
     store.put({
       key,
       value,
-      expiresAt: Date.now() + CACHE_TTL_MS,
+      expiresAt: Date.now() + cacheTtlMsForKey(key),
     } satisfies PersistedCacheEntry<T>);
 
     await new Promise<void>((resolve, reject) => {

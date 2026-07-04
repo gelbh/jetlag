@@ -1,4 +1,4 @@
-import { startTransition, useCallback, useMemo, useRef, useState } from "react";
+import { startTransition, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type {
   Feature,
   LineString,
@@ -39,7 +39,8 @@ import {
   type MeasuringPlace,
 } from "../../services/measuringPlaces";
 import { searchPlaces, type GeocodedPlace } from "../../services/geocoding";
-import { getCachedPreparedCoastlineSegments } from "../../services/coastline";
+import { getCachedPreparedCoastlineSegments, resolveCoastlineContextFromCache } from "../../services/coastline";
+import { useDebouncedValue } from "../useDebouncedValue";
 import {
   fetchMeasuringCoastlineContext,
   fetchMeasuringLinearContext,
@@ -66,6 +67,19 @@ interface UseMeasuringToolParams {
   setMapError: (message: string | null) => void;
   refreshGps: () => Promise<{ lat: number; lng: number }>;
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
+}
+
+const ANCHOR_RESOLVE_DEBOUNCE_MS = 400;
+
+function usesDebouncedSeekerResolve(
+  subject: MeasuringSubject,
+  kind: MeasuringFromKind,
+): boolean {
+  return (
+    subject === "coastline" ||
+    subject === "sea_level" ||
+    measuringUsesAllPlacesInArea(kind)
+  );
 }
 
 export function useMeasuringTool({
@@ -182,55 +196,43 @@ export function useMeasuringTool({
     ],
   );
 
-  const measuringNearRegion = useMemo(
-    () => buildMeasuringBoundaryPreview(measuringRegionInput),
-    [measuringRegionInput],
+  const deferredDistanceMeters = useDeferredValue(measuringDistanceMeters);
+  const deferredAnswer = useDeferredValue(measuringAnswer);
+
+  const previewRegionInput = useMemo(
+    () => ({
+      ...measuringRegionInput,
+      measuringDistanceMeters: deferredDistanceMeters,
+      measuringAnswer: deferredAnswer,
+    }),
+    [deferredAnswer, deferredDistanceMeters, measuringRegionInput],
   );
+
+  const measuringNearRegion = useMemo(() => {
+    try {
+      return buildMeasuringBoundaryPreview(previewRegionInput);
+    } catch {
+      return null;
+    }
+  }, [previewRegionInput]);
 
   const measuringBoundaryPreview = measuringNearRegion;
 
-  const measuringEliminationPreview = useMemo(
-    () =>
-      buildMeasuringEliminationPreview({
-        ...measuringRegionInput,
+  const measuringEliminationPreview = useMemo(() => {
+    try {
+      return buildMeasuringEliminationPreview({
+        ...previewRegionInput,
         precomputedNearRegion: measuringNearRegion,
-      }),
-    [measuringRegionInput, measuringNearRegion],
+      });
+    } catch {
+      return null;
+    }
+  }, [measuringNearRegion, previewRegionInput]);
+
+  const debouncedSeekerPoint = useDebouncedValue(
+    measuringSeekerPoint,
+    ANCHOR_RESOLVE_DEBOUNCE_MS,
   );
-
-  const setMeasuringSeekerAnchor = (
-    point: LatLngTuple,
-    placeName?: string | null,
-  ) => {
-    setMeasuringSeekerPoint(point);
-    setMeasuringSeekerPlaceName(placeName ?? null);
-    setMeasuringTargetPoint(null);
-    setMeasuringTargetPlaceName(null);
-    setMeasuringDistanceMeters(null);
-    setMeasuringAnswer(null);
-    setMeasuringError(null);
-    setMeasuringCoastSegments([]);
-    setMeasuringSeaLevelNearRegion(null);
-    setMeasuringAnchorElevationMeters(null);
-    setMeasuringSeaLevelEdgeCase(null);
-    setMeasuringSeaLevelNote(null);
-    setMeasuringPlaces([]);
-    setMapError(null);
-
-    if (measuringSubject === "sea_level") {
-      void loadSeaLevelContextAt(point);
-      return;
-    }
-
-    if (measuringSubject === "coastline") {
-      void loadMeasuringCoastlineAt(point);
-      return;
-    }
-
-    if (measuringUsesAllPlacesInArea(measureFromKind)) {
-      void loadAllPlacesAt(point);
-    }
-  };
 
   const setMeasuringTargetAnchor = (
     point: LatLngTuple,
@@ -250,156 +252,181 @@ export function useMeasuringTool({
     setMapError(null);
   };
 
-  const loadAllPlacesAt = async (
-    seekerPoint: LatLngTuple,
-    category: MeasuringLocationCategory = measuringLocationCategory,
-  ) => {
-    const requestId = ++placesRequestId.current;
-    setMeasuringLoading(true);
-    setMeasuringError(null);
+  const loadAllPlacesAt = useCallback(
+    async (
+      seekerPoint: LatLngTuple,
+      category: MeasuringLocationCategory = measuringLocationCategory,
+    ) => {
+      const requestId = ++placesRequestId.current;
+      setMeasuringLoading(true);
+      setMeasuringError(null);
 
-    try {
-      const places = await fetchMeasuringPlacesInArea(gameArea, category);
+      try {
+        const places = await fetchMeasuringPlacesInArea(gameArea, category);
 
-      if (requestId !== placesRequestId.current) {
-        return;
-      }
+        if (requestId !== placesRequestId.current) {
+          return;
+        }
 
-      if (places.length === 0) {
+        if (places.length === 0) {
+          setMeasuringPlaces([]);
+          setMeasuringDistanceMeters(null);
+          setMeasuringTargetPlaceName(null);
+          setMeasuringError(measuringPlaceNotFoundMessage(category));
+          return;
+        }
+
+        let nearestDistance = Infinity;
+        let nearestPlace = places[0];
+
+        for (const place of places) {
+          const distanceMeters = distanceBetweenPoints(seekerPoint, place.point);
+          if (distanceMeters < nearestDistance) {
+            nearestDistance = distanceMeters;
+            nearestPlace = place;
+          }
+        }
+
+        setMeasuringPlaces(places);
+        setMeasuringDistanceMeters(nearestDistance);
+        setMeasuringTargetPoint(nearestPlace.point);
+        setMeasuringTargetPlaceName(
+          measuringMultiPlaceTargetLabel(places.length, measureFromKind),
+        );
+      } catch (error) {
+        if (requestId !== placesRequestId.current) {
+          return;
+        }
+
         setMeasuringPlaces([]);
         setMeasuringDistanceMeters(null);
         setMeasuringTargetPlaceName(null);
-        setMeasuringError(measuringPlaceNotFoundMessage(category));
-        return;
-      }
-
-      let nearestDistance = Infinity;
-      let nearestPlace = places[0];
-
-      for (const place of places) {
-        const distanceMeters = distanceBetweenPoints(seekerPoint, place.point);
-        if (distanceMeters < nearestDistance) {
-          nearestDistance = distanceMeters;
-          nearestPlace = place;
+        setMeasuringError(
+          error instanceof Error
+            ? error.message
+            : "Unable to load places in the play area.",
+        );
+      } finally {
+        if (requestId === placesRequestId.current) {
+          setMeasuringLoading(false);
         }
       }
+    },
+    [gameArea, measureFromKind, measuringLocationCategory],
+  );
 
-      setMeasuringPlaces(places);
-      setMeasuringDistanceMeters(nearestDistance);
-      setMeasuringTargetPoint(nearestPlace.point);
-      setMeasuringTargetPlaceName(
-        measuringMultiPlaceTargetLabel(places.length, measureFromKind),
-      );
-    } catch (error) {
-      if (requestId !== placesRequestId.current) {
-        return;
-      }
+  const loadSeaLevelContextAt = useCallback(
+    async (seekerPoint: LatLngTuple) => {
+      const requestId = ++seaLevelRequestId.current;
+      setMeasuringLoading(true);
+      setMeasuringError(null);
 
-      setMeasuringPlaces([]);
-      setMeasuringDistanceMeters(null);
-      setMeasuringTargetPlaceName(null);
-      setMeasuringError(
-        error instanceof Error
-          ? error.message
-          : "Unable to load places in the play area.",
-      );
-    } finally {
-      if (requestId === placesRequestId.current) {
-        setMeasuringLoading(false);
-      }
-    }
-  };
+      try {
+        const result = await fetchMeasuringSeaLevelContext(seekerPoint, gameArea);
 
-  const loadSeaLevelContextAt = async (seekerPoint: LatLngTuple) => {
-    const requestId = ++seaLevelRequestId.current;
-    setMeasuringLoading(true);
-    setMeasuringError(null);
+        if (requestId !== seaLevelRequestId.current) {
+          return;
+        }
 
-    try {
-      const result = await fetchMeasuringSeaLevelContext(seekerPoint, gameArea);
+        if (!result.ok) {
+          setMeasuringSeaLevelNearRegion(null);
+          setMeasuringAnchorElevationMeters(null);
+          setMeasuringDistanceMeters(null);
+          setMeasuringSeaLevelEdgeCase(null);
+          setMeasuringSeaLevelNote(null);
+          setMeasuringError(result.message);
+          return;
+        }
 
-      if (requestId !== seaLevelRequestId.current) {
-        return;
-      }
+        setMeasuringAnchorElevationMeters(result.seekerElevationMeters);
+        setMeasuringDistanceMeters(result.distanceFromSeaLevelMeters);
+        setMeasuringSeaLevelEdgeCase(result.edgeCase);
+        setMeasuringSeaLevelNote(result.note);
+        startTransition(() => {
+          setMeasuringSeaLevelNearRegion(result.nearRegion);
+        });
+      } catch (error) {
+        if (requestId !== seaLevelRequestId.current) {
+          return;
+        }
 
-      if (!result.ok) {
         setMeasuringSeaLevelNearRegion(null);
         setMeasuringAnchorElevationMeters(null);
         setMeasuringDistanceMeters(null);
         setMeasuringSeaLevelEdgeCase(null);
         setMeasuringSeaLevelNote(null);
-        setMeasuringError(result.message);
-        return;
+        setMeasuringError(
+          error instanceof Error ? error.message : "Unable to read elevation.",
+        );
+      } finally {
+        if (requestId === seaLevelRequestId.current) {
+          setMeasuringLoading(false);
+        }
       }
+    },
+    [gameArea],
+  );
 
-      setMeasuringAnchorElevationMeters(result.seekerElevationMeters);
-      setMeasuringDistanceMeters(result.distanceFromSeaLevelMeters);
-      setMeasuringSeaLevelEdgeCase(result.edgeCase);
-      setMeasuringSeaLevelNote(result.note);
-      startTransition(() => {
-        setMeasuringSeaLevelNearRegion(result.nearRegion);
-      });
-    } catch (error) {
-      if (requestId !== seaLevelRequestId.current) {
-        return;
-      }
+  const loadMeasuringCoastlineAt = useCallback(
+    async (seekerPoint: LatLngTuple) => {
+      const requestId = ++coastlineRequestId.current;
+      setMeasuringLoading(true);
+      setMeasuringError(null);
 
-      setMeasuringSeaLevelNearRegion(null);
-      setMeasuringAnchorElevationMeters(null);
-      setMeasuringDistanceMeters(null);
-      setMeasuringSeaLevelEdgeCase(null);
-      setMeasuringSeaLevelNote(null);
-      setMeasuringError(
-        error instanceof Error ? error.message : "Unable to read elevation.",
-      );
-    } finally {
-      if (requestId === seaLevelRequestId.current) {
+      const syncResult = resolveCoastlineContextFromCache(seekerPoint, gameArea);
+      if (syncResult) {
+        if (requestId !== coastlineRequestId.current) {
+          return;
+        }
+
+        startTransition(() => {
+          setMeasuringTargetPoint(syncResult.coastPoint);
+          setMeasuringDistanceMeters(syncResult.distanceMeters);
+        });
         setMeasuringLoading(false);
-      }
-    }
-  };
-
-  const loadMeasuringCoastlineAt = async (seekerPoint: LatLngTuple) => {
-    const requestId = ++coastlineRequestId.current;
-    setMeasuringLoading(true);
-    setMeasuringError(null);
-
-    try {
-      const result = await fetchMeasuringCoastlineContext(
-        seekerPoint,
-        gameArea,
-      );
-
-      if (requestId !== coastlineRequestId.current) {
         return;
       }
 
-      if (!result.ok) {
+      try {
+        const result = await fetchMeasuringCoastlineContext(
+          seekerPoint,
+          gameArea,
+        );
+
+        if (requestId !== coastlineRequestId.current) {
+          return;
+        }
+
+        if (!result.ok) {
+          setMeasuringTargetPoint(null);
+          setMeasuringDistanceMeters(null);
+          setMeasuringError(result.message);
+          return;
+        }
+
+        startTransition(() => {
+          setMeasuringTargetPoint(result.coastPoint);
+          setMeasuringDistanceMeters(result.distanceMeters);
+          setCoastlineContextVersion((version) => version + 1);
+        });
+      } catch (error) {
+        if (requestId !== coastlineRequestId.current) {
+          return;
+        }
+
         setMeasuringTargetPoint(null);
         setMeasuringDistanceMeters(null);
-        setMeasuringError(result.message);
-        return;
+        setMeasuringError(
+          error instanceof Error ? error.message : "Unable to find coastline.",
+        );
+      } finally {
+        if (requestId === coastlineRequestId.current) {
+          setMeasuringLoading(false);
+        }
       }
-
-      setMeasuringTargetPoint(result.coastPoint);
-      setMeasuringDistanceMeters(result.distanceMeters);
-      setCoastlineContextVersion((version) => version + 1);
-    } catch (error) {
-      if (requestId !== coastlineRequestId.current) {
-        return;
-      }
-
-      setMeasuringTargetPoint(null);
-      setMeasuringDistanceMeters(null);
-      setMeasuringError(
-        error instanceof Error ? error.message : "Unable to find coastline.",
-      );
-    } finally {
-      if (requestId === coastlineRequestId.current) {
-        setMeasuringLoading(false);
-      }
-    }
-  };
+    },
+    [gameArea],
+  );
 
   const loadMeasuringLinearAt = async (seekerPoint: LatLngTuple) => {
     const kind = measuringFromKind(measuringSubject, measuringLocationCategory);
@@ -459,6 +486,89 @@ export function useMeasuringTool({
     }
   };
 
+  const resolveSeekerAnchorAt = useCallback(
+    (seekerPoint: LatLngTuple) => {
+      if (measuringSubject === "sea_level") {
+        void loadSeaLevelContextAt(seekerPoint);
+        return;
+      }
+
+      if (measuringSubject === "coastline") {
+        void loadMeasuringCoastlineAt(seekerPoint);
+        return;
+      }
+
+      if (measuringUsesAllPlacesInArea(measureFromKind)) {
+        void loadAllPlacesAt(seekerPoint);
+      }
+    },
+    [
+      loadAllPlacesAt,
+      loadMeasuringCoastlineAt,
+      loadSeaLevelContextAt,
+      measureFromKind,
+      measuringSubject,
+    ],
+  );
+
+  const resolveSeekerAnchorAtRef = useRef(resolveSeekerAnchorAt);
+
+  useEffect(() => {
+    resolveSeekerAnchorAtRef.current = resolveSeekerAnchorAt;
+  }, [resolveSeekerAnchorAt]);
+
+  useEffect(() => {
+    if (!active || !debouncedSeekerPoint) {
+      return;
+    }
+
+    if (!usesDebouncedSeekerResolve(measuringSubject, measureFromKind)) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      resolveSeekerAnchorAtRef.current(debouncedSeekerPoint);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [active, debouncedSeekerPoint, measureFromKind, measuringSubject]);
+
+  const updateSeekerPosition = useCallback(
+    (point: LatLngTuple, placeName?: string | null) => {
+      setMeasuringSeekerPoint(point);
+      setMeasuringSeekerPlaceName(placeName ?? null);
+      setMeasuringAnswer(null);
+      setMeasuringError(null);
+      setMapError(null);
+
+      if (usesDebouncedSeekerResolve(measuringSubject, measureFromKind)) {
+        setMeasuringLoading(true);
+        return;
+      }
+
+      setMeasuringTargetPoint(null);
+      setMeasuringTargetPlaceName(null);
+      setMeasuringDistanceMeters(null);
+      setMeasuringCoastSegments([]);
+      setMeasuringSeaLevelNearRegion(null);
+      setMeasuringAnchorElevationMeters(null);
+      setMeasuringSeaLevelEdgeCase(null);
+      setMeasuringSeaLevelNote(null);
+      setMeasuringPlaces([]);
+    },
+    [measureFromKind, measuringSubject, setMapError],
+  );
+
+  const setMeasuringSeekerAnchorAndResolve = useCallback(
+    (point: LatLngTuple, placeName?: string | null) => {
+      updateSeekerPosition(point, placeName);
+      if (usesDebouncedSeekerResolve(measuringSubject, measureFromKind)) {
+        resolveSeekerAnchorAt(point);
+      }
+    },
+    [measureFromKind, measuringSubject, resolveSeekerAnchorAt, updateSeekerPosition],
+  );
+
   const handleUnavailableMeasuringOption = useCallback(
     (nextKind: MeasuringFromKind) => {
       const next = applyMeasuringFromKind(nextKind);
@@ -498,7 +608,12 @@ export function useMeasuringTool({
         void loadAllPlacesAt(measuringSeekerPoint, next.locationCategory);
       }
     },
-    [measuringSeekerPoint],
+    [
+      loadAllPlacesAt,
+      loadMeasuringCoastlineAt,
+      loadSeaLevelContextAt,
+      measuringSeekerPoint,
+    ],
   );
 
   useToolSessionOptions({
@@ -556,7 +671,7 @@ export function useMeasuringTool({
         return;
       }
 
-      setMeasuringSeekerAnchor(point);
+      setMeasuringSeekerAnchorAndResolve(point);
     } catch (error) {
       setMeasuringError(
         error instanceof Error ? error.message : "Unable to read GPS location.",
@@ -617,7 +732,7 @@ export function useMeasuringTool({
     setMeasuringError(null);
 
     if (role === "seeker") {
-      setMeasuringSeekerAnchor(place.center, place.displayName);
+      setMeasuringSeekerAnchorAndResolve(place.center, place.displayName);
       return;
     }
 
@@ -680,7 +795,7 @@ export function useMeasuringTool({
       return true;
     }
 
-    setMeasuringSeekerAnchor(point);
+    setMeasuringSeekerAnchorAndResolve(point);
     return true;
   };
 
@@ -839,6 +954,66 @@ export function useMeasuringTool({
         measuringTargetMode === "map" &&
         measuringTargetPoint === null));
 
+  const publishSignature = useMemo(
+    () =>
+      [
+        measuringSeekerPoint?.[0],
+        measuringSeekerPoint?.[1],
+        measuringTargetPoint?.[0],
+        measuringTargetPoint?.[1],
+        measuringDistanceMeters,
+        measuringLoading,
+        measuringError,
+        measuringAnswer,
+        measuringSubject,
+        measuringLocationCategory,
+        measuringTargetMode,
+        measuringSearchQuery,
+        measuringSearchLoading,
+        measuringSearchResults.length,
+        measuringSeekerPlaceName,
+        measuringTargetPlaceName,
+        measuringAnchorElevationMeters,
+        measuringSeaLevelEdgeCase,
+        measuringSeaLevelNote,
+        measuringPlaces.length,
+        measuringCoastSegments.length,
+        coastlineContextVersion,
+        measuringBoundaryPreview
+          ? JSON.stringify(measuringBoundaryPreview.geometry)
+          : null,
+        measuringEliminationPreview
+          ? JSON.stringify(measuringEliminationPreview.geometry)
+          : null,
+        placementCrosshair,
+      ].join("|"),
+    [
+      coastlineContextVersion,
+      measuringAnchorElevationMeters,
+      measuringAnswer,
+      measuringBoundaryPreview,
+      measuringCoastSegments.length,
+      measuringDistanceMeters,
+      measuringEliminationPreview,
+      measuringError,
+      measuringLoading,
+      measuringLocationCategory,
+      measuringPlaces.length,
+      measuringSearchLoading,
+      measuringSearchQuery,
+      measuringSearchResults.length,
+      measuringSeaLevelEdgeCase,
+      measuringSeaLevelNote,
+      measuringSeekerPlaceName,
+      measuringSeekerPoint,
+      measuringSubject,
+      measuringTargetMode,
+      measuringTargetPlaceName,
+      measuringTargetPoint,
+      placementCrosshair,
+    ],
+  );
+
   const panel = (
     <MeasuringPanel
       distanceUnit={distanceUnit}
@@ -936,8 +1111,10 @@ export function useMeasuringTool({
       measuringDistanceMeters,
       measuringBoundaryPreview,
       measuringEliminationPreview,
+      seekerResolving: measuringLoading && measuringSeekerPoint !== null,
     },
     placementCrosshair,
+    publishSignature,
     handleMapClick,
     resetDraft,
     commit,

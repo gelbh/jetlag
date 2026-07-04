@@ -6,15 +6,16 @@ import {
   type User,
 } from "firebase/auth";
 import {
-  getFirestore,
-  enableIndexedDbPersistence,
+  initializeFirestore,
+  memoryLocalCache,
+  persistentLocalCache,
+  persistentMultipleTabManager,
   type Firestore,
 } from "firebase/firestore";
 
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
-let persistenceEnabled = false;
 let persistenceUnavailable = false;
 
 export function isFirestorePersistenceUnavailable(): boolean {
@@ -63,9 +64,26 @@ export function getFirebaseAuth(): Auth {
   return auth;
 }
 
+function createFirestoreDb(): Firestore {
+  const firebaseApp = getFirebaseApp();
+
+  try {
+    return initializeFirestore(firebaseApp, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    });
+  } catch {
+    persistenceUnavailable = true;
+    return initializeFirestore(firebaseApp, {
+      localCache: memoryLocalCache(),
+    });
+  }
+}
+
 export function getFirestoreDb(): Firestore {
   if (!db) {
-    db = getFirestore(getFirebaseApp());
+    db = createFirestoreDb();
   }
 
   return db;
@@ -82,15 +100,3 @@ export async function ensureAnonymousUser(): Promise<User> {
   return credential.user;
 }
 
-export async function enableOfflinePersistence(): Promise<void> {
-  if (persistenceEnabled || !isFirebaseConfigured()) {
-    return;
-  }
-
-  try {
-    await enableIndexedDbPersistence(getFirestoreDb());
-    persistenceEnabled = true;
-  } catch {
-    persistenceUnavailable = true;
-  }
-}

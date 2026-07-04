@@ -10,6 +10,7 @@
     "typecheck": "tsc -b --noEmit",
     "preview": "vite preview",
     "test": "vitest run",
+    "audit:overpass": "RUN_OVERPASS_AUDIT=1 vitest run src/services/overpassAudit.integration.test.ts",
     "test:functions": "npm test --prefix functions",
     "test:all": "vitest run && npm test --prefix functions",
     "deploy": "node scripts/deploy-production.mjs",

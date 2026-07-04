@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { HudPlayIcon } from "../components/ui/HudIcons";
 import { LOCAL_SESSION_ID } from "../domain/annotations";
 import { useSessionStore } from "../state/sessionStore";
 import {
@@ -85,16 +86,32 @@ export function Home() {
             type="button"
             onClick={() => void handleContinue()}
             disabled={continuing}
-            className="btn-primary min-h-14 w-full disabled:opacity-50"
+            aria-busy={continuing}
+            aria-label={
+              continuing
+                ? `Verifying session ${session.code}`
+                : `Return to map for session ${session.code}`
+            }
+            className="btn-primary home-resume-action disabled:opacity-50"
           >
-            {continuing ? (
-              "Checking session…"
-            ) : (
-              <>
-                Continue session{" "}
-                <span className="font-mono tabular-nums">{session.code}</span>
-              </>
-            )}
+            <span className="home-resume-readout">
+              <span className="home-resume-label">Active session</span>
+              <span className="home-resume-code">{session.code}</span>
+            </span>
+            <span
+              className="home-resume-divider"
+              aria-hidden="true"
+            />
+            <span className="home-resume-cta">
+              {continuing ? (
+                "Verifying…"
+              ) : (
+                <>
+                  <HudPlayIcon className="h-4 w-4 shrink-0" />
+                  Return to map
+                </>
+              )}
+            </span>
           </button>
         ) : null}
         <Link

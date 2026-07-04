@@ -15,9 +15,9 @@ import {
 const MAX_STOPS = 250;
 const MAX_ROUTES = 80;
 
-function buildStaticTransitQuery(
-  bounds: ReturnType<typeof gameAreaToBoundingBox>,
-) {
+type TransitBounds = ReturnType<typeof gameAreaToBoundingBox>;
+
+export function buildStaticTransitStopsQuery(bounds: TransitBounds): string {
   const { south, west, north, east } = bounds;
 
   return `
@@ -28,10 +28,20 @@ function buildStaticTransitQuery(
       node["public_transport"="stop_position"](${south},${west},${north},${east});
       node["highway"="bus_stop"](${south},${west},${north},${east});
       node["railway"="tram_stop"](${south},${west},${north},${east});
-      way["railway"~"rail|subway|light_rail|tram"](${south},${west},${north},${east});
-      way["route"~"bus|tram|subway|light_rail|train|ferry"](${south},${west},${north},${east});
     );
-    out body geom ${MAX_STOPS + MAX_ROUTES};
+    out body ${MAX_STOPS};
+  `;
+}
+
+export function buildStaticTransitRoutesQuery(bounds: TransitBounds): string {
+  const { south, west, north, east } = bounds;
+
+  return `
+    [out:json][timeout:25];
+    (
+      way["railway"~"rail|subway|light_rail|tram"](${south},${west},${north},${east});
+    );
+    out body geom ${MAX_ROUTES};
   `;
 }
 
@@ -100,29 +110,42 @@ export async function fetchStaticTransit(
 ): Promise<TransitStaticData> {
   return getOrFetchCached(staticTransitCacheKey(gameArea), async () => {
     const bounds = gameAreaToBoundingBox(gameArea);
-    const payload = await queryOverpass<{
-      elements: Array<{
-        id: number;
-        type: "node" | "way";
-        lat?: number;
-        lon?: number;
-        tags?: Record<string, string>;
-        geometry?: Array<{ lat: number; lon: number }>;
-      }>;
-    }>(buildStaticTransitQuery(bounds));
+    const [stopsPayload, routesPayload] = await Promise.all([
+      queryOverpass<{
+        elements: Array<{
+          id: number;
+          type: "node" | "way";
+          lat?: number;
+          lon?: number;
+          tags?: Record<string, string>;
+          geometry?: Array<{ lat: number; lon: number }>;
+        }>;
+      }>(buildStaticTransitStopsQuery(bounds)),
+      queryOverpass<{
+        elements: Array<{
+          id: number;
+          type: "node" | "way";
+          lat?: number;
+          lon?: number;
+          tags?: Record<string, string>;
+          geometry?: Array<{ lat: number; lon: number }>;
+        }>;
+      }>(buildStaticTransitRoutesQuery(bounds)),
+    ]);
 
     const stops: TransitStop[] = [];
     const routes: TransitRouteLine[] = [];
 
-    for (const element of payload.elements) {
+    for (const element of stopsPayload.elements) {
       if (element.type === "node" && stops.length < MAX_STOPS) {
         const stop = parseStop(element);
         if (stop) {
           stops.push(stop);
         }
-        continue;
       }
+    }
 
+    for (const element of routesPayload.elements) {
       if (element.type === "way" && routes.length < MAX_ROUTES) {
         const route = parseRoute(element);
         if (route) {

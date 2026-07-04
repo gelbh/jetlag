@@ -1,7 +1,6 @@
 import { fetchWithTimeout } from "./fetchWithTimeout";
+import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "./overpass/endpoints";
 
-const OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter";
-const OVERPASS_USER_AGENT = "jetlag-map-companion/1.0";
 const OVERPASS_MAX_RETRIES = 3;
 const OVERPASS_BASE_BACKOFF_MS = 750;
 const OVERPASS_FETCH_TIMEOUT_MS = 45_000;
@@ -31,38 +30,52 @@ function overpassProxyUrl(): string | null {
   return proxyUrl && proxyUrl.length > 0 ? proxyUrl : null;
 }
 
+function isRetryableOverpassStatus(status: number): boolean {
+  return status === 502 || status === 504;
+}
+
+async function postOverpassQuery(
+  endpoint: string,
+  query: string,
+): Promise<Response> {
+  return fetchWithTimeout(
+    endpoint,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+        "User-Agent": OVERPASS_USER_AGENT,
+      },
+      body: `data=${encodeURIComponent(query)}`,
+    },
+    OVERPASS_FETCH_TIMEOUT_MS,
+  );
+}
+
 async function fetchOverpassDirect(query: string): Promise<Response> {
   let lastError: Error | null = null;
 
-  for (let attempt = 0; attempt <= OVERPASS_MAX_RETRIES; attempt += 1) {
-    const response = await fetchWithTimeout(
-      OVERPASS_ENDPOINT,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-          "User-Agent": OVERPASS_USER_AGENT,
-        },
-        body: `data=${encodeURIComponent(query)}`,
-      },
-      OVERPASS_FETCH_TIMEOUT_MS,
-    );
+  for (const endpoint of OVERPASS_ENDPOINTS) {
+    for (let attempt = 0; attempt <= OVERPASS_MAX_RETRIES; attempt += 1) {
+      const response = await postOverpassQuery(endpoint, query);
 
-    if (response.ok) {
-      return response;
+      if (response.ok) {
+        return response;
+      }
+
+      if (isRetryableOverpassStatus(response.status) && attempt < OVERPASS_MAX_RETRIES) {
+        lastError = new Error("Overpass timed out. Try again in a moment.");
+        await sleep(retryDelayMs(attempt, response.headers.get("Retry-After")));
+        continue;
+      }
+
+      if (isRetryableOverpassStatus(response.status)) {
+        lastError = new Error("Overpass timed out. Try again in a moment.");
+        break;
+      }
+
+      throw new Error("Overpass query failed.");
     }
-
-    if (response.status === 504 && attempt < OVERPASS_MAX_RETRIES) {
-      lastError = new Error("Overpass timed out. Try again in a moment.");
-      await sleep(retryDelayMs(attempt, response.headers.get("Retry-After")));
-      continue;
-    }
-
-    if (response.status === 504) {
-      throw new Error("Overpass timed out. Try again in a moment.");
-    }
-
-    throw new Error("Overpass query failed.");
   }
 
   throw lastError ?? new Error("Overpass timed out. Try again in a moment.");
@@ -93,13 +106,13 @@ async function fetchOverpassViaProxy(query: string): Promise<Response> {
       return response;
     }
 
-    if (response.status === 504 && attempt < OVERPASS_MAX_RETRIES) {
+    if (isRetryableOverpassStatus(response.status) && attempt < OVERPASS_MAX_RETRIES) {
       lastError = new Error("Overpass timed out. Try again in a moment.");
       await sleep(retryDelayMs(attempt, response.headers.get("Retry-After")));
       continue;
     }
 
-    if (response.status === 504) {
+    if (isRetryableOverpassStatus(response.status)) {
       throw new Error("Overpass timed out. Try again in a moment.");
     }
 

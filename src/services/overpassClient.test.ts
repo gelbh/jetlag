@@ -45,7 +45,40 @@ describe("overpassClient", () => {
     await expect(queryOverpass("[out:json];")).rejects.toThrow(
       "Overpass timed out. Try again in a moment.",
     );
-    expect(fetchMock).toHaveBeenCalledTimes(4);
+    expect(fetchMock.mock.calls.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("failovers to the next endpoint after repeated gateway timeouts", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementation(async (url: string) => {
+        if (url.includes("kumi.systems")) {
+          return {
+            ok: true,
+            status: 200,
+            headers: new Headers(),
+            text: async () => JSON.stringify({ elements: [] }),
+          };
+        }
+
+        return {
+          ok: false,
+          status: 504,
+          headers: new Headers({ "Retry-After": "0" }),
+          text: async () => "",
+        };
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      queryOverpass<{ elements: unknown[] }>("[out:json];"),
+    ).resolves.toEqual({ elements: [] });
+
+    expect(
+      fetchMock.mock.calls.some(([url]) =>
+        String(url).includes("kumi.systems"),
+      ),
+    ).toBe(true);
   });
 
   it("routes Overpass requests through the configured proxy", async () => {

@@ -14,6 +14,7 @@ import { formatDistance, type DistanceUnit } from "../../domain/distance";
 import { yesNoAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { AnchorControls } from "./shared/AnchorControls";
+import { LoadingReadout } from "./shared/LoadingReadout";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
 import { ResolvedReadout } from "./shared/ResolvedReadout";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
@@ -98,6 +99,11 @@ export function MatchingPanel({
         : "Finding division at your anchor…"
       : "Finding nearest feature…"
     : null;
+
+  const loadingIndicator =
+    loadingMessage !== null ? (
+      <LoadingReadout>{loadingMessage}</LoadingReadout>
+    ) : null;
 
   const featureCountLabel =
     featureCount !== null && inPlayAreaFeatureCount !== null
@@ -191,14 +197,13 @@ export function MatchingPanel({
             hasAnchor={hasSeekerPoint}
             onUseGps={onUseGps}
           />
+          {loading && hasSeekerPoint ? loadingIndicator : null}
         </ToolSection>
       ) : null}
 
       {step === "resolve" ? (
         <ToolSection first compact status="active">
-          {loadingMessage ? (
-            <ResolvedReadout variant="dim">{loadingMessage}</ResolvedReadout>
-          ) : null}
+          {loadingIndicator}
           {nullAnswer ? (
             <ResolvedReadout variant="warning">
               {matchingNullAnswerMessage(categoryId)}
@@ -251,7 +256,10 @@ export function MatchingPanel({
         onNext={goNext}
         canGoNext={
           (step === "category" && categoryAvailable) ||
-          (step === "anchor" && hasSeekerPoint) ||
+          (step === "anchor" &&
+            hasSeekerPoint &&
+            !loading &&
+            resolveComplete) ||
           (step === "resolve" && resolveComplete && !loading)
         }
       />

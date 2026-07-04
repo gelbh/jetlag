@@ -8,6 +8,7 @@ import {
   buildLocationNearRegion,
   buildHalfPlanePolygon,
   boundsToGameArea,
+  clearCoastlineNearRegionCacheForTests,
   distanceBetweenPoints,
   gameAreaOutsideMask,
   isPointInGameArea,
@@ -171,6 +172,27 @@ describe("geometry helpers", () => {
     );
 
     expect(eliminated).toEqual(nearCoast);
+  });
+
+  it("reuses cached coastline near regions for identical inputs", () => {
+    clearCoastlineNearRegionCacheForTests();
+
+    const coast: Feature<LineString> = {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          [-0.2, 51.4],
+          [-0.1, 51.4],
+        ],
+      },
+    };
+
+    const first = buildCoastlineNearRegion([coast], 5_000, sampleGameArea);
+    const second = buildCoastlineNearRegion([coast], 5_000, sampleGameArea);
+
+    expect(first).toBe(second);
   });
 
   it("drops measuring segments that do not intersect the play area", () => {

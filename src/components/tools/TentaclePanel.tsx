@@ -8,6 +8,7 @@ import {
   type TentacleLocationCategoryId,
 } from "../../domain/tentacleQuestions";
 import { AnchorControls } from "./shared/AnchorControls";
+import { LoadingReadout } from "./shared/LoadingReadout";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
 import { ResolvedReadout } from "./shared/ResolvedReadout";
 import { TentacleAnswerPicker } from "./shared/TentacleAnswerPicker";
@@ -134,15 +135,16 @@ export function TentaclePanel({
             anchorHint="Anchor pinned on the map. Tap again to move it."
             gpsLoadingLabel="Locating…"
           />
+          {loading && hasCenter ? (
+            <LoadingReadout>Loading locations within 1 mile…</LoadingReadout>
+          ) : null}
         </ToolSection>
       ) : null}
 
       {step === "locations" ? (
         <ToolSection first compact status="active">
           {loading ? (
-            <ResolvedReadout variant="dim">
-              Loading locations within 1 mile…
-            </ResolvedReadout>
+            <LoadingReadout>Loading locations within 1 mile…</LoadingReadout>
           ) : poiOptions.length > 0 ? (
             <ResolvedReadout>
               {poiOptions.length} location{poiOptions.length === 1 ? "" : "s"}{" "}
@@ -185,7 +187,7 @@ export function TentaclePanel({
         onNext={goNext}
         canGoNext={
           (step === "category" && categorySelectionAvailable) ||
-          (step === "anchor" && hasCenter) ||
+          (step === "anchor" && hasCenter && !loading && locationsReady) ||
           (step === "locations" && locationsReady && !loading)
         }
       />

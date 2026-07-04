@@ -1,5 +1,8 @@
 import type { GameArea } from "../../domain/annotations";
-import { gameAreaToBoundingBox, type BoundingBox } from "../../domain/geometry";
+import {
+  gameAreaToBoundingBox,
+  type BoundingBox,
+} from "../../domain/gameAreaBounds";
 
 export const OVERPASS_JSON_QUERY_HEADER = "[out:json][timeout:25];";
 

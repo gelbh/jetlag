@@ -23,7 +23,7 @@ type OverpassWay = {
   geometry?: Array<{ lat: number; lon: number }>;
 };
 
-function buildLinearFeaturesQuery(
+export function buildLinearFeaturesQuery(
   gameArea: GameArea,
   selectors: readonly string[],
 ): string {

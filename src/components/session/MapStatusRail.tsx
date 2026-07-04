@@ -27,49 +27,92 @@ interface MapStatusRailProps {
   onOpenLog?: () => void;
 }
 
-function syncRailSegment(
+type SyncTone = "error" | "warning" | "info";
+
+function syncToneForStatus(status: SyncStatus): SyncTone {
+  if (status === "error") {
+    return "error";
+  }
+  if (status === "offline") {
+    return "warning";
+  }
+  return "info";
+}
+
+const SYNC_TONE_CLASSES: Record<
+  SyncTone,
+  { text: string; surface: string; border: string }
+> = {
+  error: {
+    text: "text-status-error",
+    surface: "bg-status-error-surface",
+    border: "border-status-error/40",
+  },
+  warning: {
+    text: "text-status-warning",
+    surface: "bg-status-warning-surface",
+    border: "border-status-warning/40",
+  },
+  info: {
+    text: "text-status-info",
+    surface: "bg-status-info-surface",
+    border: "border-status-info/40",
+  },
+};
+
+function syncRailDisplay(
   status: SyncStatus,
   queuedWrites: number,
   message?: string | null,
-): { visible: boolean; label: string | null; tone: string } {
+): {
+  inline: { visible: boolean; label: string | null; tone: SyncTone } | null;
+  banner: { visible: boolean; label: string; tone: SyncTone } | null;
+} {
   if (message) {
-    const tone =
-      status === "error"
-        ? "text-status-error"
-        : status === "offline"
-          ? "text-status-warning"
-          : "text-status-info";
-    return { visible: true, label: message, tone };
+    const tone = syncToneForStatus(status);
+    return {
+      inline: null,
+      banner: { visible: true, label: message, tone },
+    };
   }
 
   if (status === "error") {
     return {
-      visible: true,
-      label: "Sync failed",
-      tone: "text-status-error",
+      inline: {
+        visible: true,
+        label: "Sync failed",
+        tone: "error",
+      },
+      banner: null,
     };
   }
 
   if (status === "offline") {
     return {
-      visible: true,
-      label:
-        queuedWrites > 0
-          ? `Offline · ${queuedWrites} queued`
-          : "Offline",
-      tone: "text-status-warning",
+      inline: {
+        visible: true,
+        label:
+          queuedWrites > 0
+            ? `Offline · ${queuedWrites} queued`
+            : "Offline",
+        tone: "warning",
+      },
+      banner: null,
     };
   }
 
   if (status === "saving") {
     return {
-      visible: true,
-      label: "Saving…",
-      tone: "text-status-info",
+      inline: {
+        visible: true,
+        label: "Saving…",
+        tone: "info",
+      },
+      banner: null,
     };
   }
 
-  return { visible: false, label: null, tone: "" };
+  return { inline: null, banner: null };
 }
 
 export function MapStatusRail({
@@ -94,8 +137,8 @@ export function MapStatusRail({
   const placing = activeTool !== "none";
   const modeLabel = placing
     ? `Placing ${mapToolPlacingLabel(activeTool)}`
-    : "Tap a marker to edit";
-  const sync = syncRailSegment(syncStatus, queuedWrites, message);
+    : "Tap pin or zone";
+  const sync = syncRailDisplay(syncStatus, queuedWrites, message);
 
   useEffect(() => {
     if (!timerMenuOpen) {
@@ -127,32 +170,33 @@ export function MapStatusRail({
       ref={railRef}
       className="pointer-events-none absolute inset-x-0 top-0 z-[var(--z-banner)] px-3 pt-[max(0.5rem,env(safe-area-inset-top))]"
     >
-      {timerMenuOpen ? (
-        <div
-          className="hud-panel pointer-events-auto absolute inset-x-3 top-[calc(100%+var(--chrome-gap-above-dock))] mx-auto max-w-xl space-y-2 p-3 pt-10"
-          role="menu"
-          aria-label="Timer settings"
-        >
-          <PopupCloseButton
-            label="Close timer settings"
-            onClick={() => setTimerMenuOpen(false)}
-          />
-          <p className="px-1 font-mono text-lg tabular-nums text-ink">
-            <SessionTimerLabel timerState={timerState} />
-          </p>
-          <TimerActions
-            timerRunning={timerRunning}
-            timerHasStarted={timerHasStarted}
-            onTimerStart={onTimerStart}
-            onTimerPause={onTimerPause}
-            onTimerReset={onTimerReset}
-            onOpenLog={onOpenLog}
-            disabled={timerControlsDisabled}
-          />
-        </div>
-      ) : null}
+      <div className="relative mx-auto w-full max-w-xl">
+        {timerMenuOpen ? (
+          <div
+            className="hud-panel pointer-events-auto absolute inset-x-0 top-[calc(100%+var(--chrome-gap-above-dock))] z-[var(--z-panel)] space-y-2 p-3 pt-10"
+            role="menu"
+            aria-label="Timer settings"
+          >
+            <PopupCloseButton
+              label="Close timer settings"
+              onClick={() => setTimerMenuOpen(false)}
+            />
+            <p className="px-1 font-mono text-lg tabular-nums text-ink">
+              <SessionTimerLabel timerState={timerState} />
+            </p>
+            <TimerActions
+              timerRunning={timerRunning}
+              timerHasStarted={timerHasStarted}
+              onTimerStart={onTimerStart}
+              onTimerPause={onTimerPause}
+              onTimerReset={onTimerReset}
+              onOpenLog={onOpenLog}
+              disabled={timerControlsDisabled}
+            />
+          </div>
+        ) : null}
 
-      <div className="map-status-rail pointer-events-auto mx-auto flex max-w-xl items-center gap-2 rounded-[var(--radius-hud-lg)] border border-border bg-surface-panel px-2 py-1.5 shadow-[var(--shadow-hud-float)]">
+        <div className="map-status-rail pointer-events-auto flex w-full min-w-0 items-center gap-2 overflow-hidden rounded-[var(--radius-hud-lg)] border border-border bg-surface-panel px-2 py-1.5 shadow-[var(--shadow-hud-float)]">
         <Link
           to="/"
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-hud-md)] text-ink transition-colors hover:bg-surface-raised"
@@ -218,21 +262,32 @@ export function MapStatusRail({
           {modeLabel}
         </p>
 
-        {sync.visible && sync.label ? (
+        {sync.inline?.visible && sync.inline.label ? (
           <>
             <div
               className="hidden h-5 w-px shrink-0 bg-border sm:block"
               aria-hidden="true"
             />
             <p
-              className={`max-w-[7rem] shrink-0 truncate text-xs font-medium sm:max-w-[10rem] sm:text-sm ${sync.tone}`}
-              title={sync.label}
+              className={`max-w-[7rem] shrink-0 truncate text-xs font-medium sm:max-w-[10rem] sm:text-sm ${SYNC_TONE_CLASSES[sync.inline.tone].text}`}
+              title={sync.inline.label}
             >
-              {sync.label}
+              {sync.inline.label}
             </p>
           </>
         ) : null}
+        </div>
       </div>
+
+      {sync.banner?.visible ? (
+        <p
+          className={`pointer-events-auto mx-auto mt-1.5 w-full max-w-xl rounded-[var(--radius-hud-xl)] border px-3 py-2 text-center text-sm font-medium text-pretty ${SYNC_TONE_CLASSES[sync.banner.tone].surface} ${SYNC_TONE_CLASSES[sync.banner.tone].border} ${SYNC_TONE_CLASSES[sync.banner.tone].text}`}
+          role="status"
+          aria-live="polite"
+        >
+          {sync.banner.label}
+        </p>
+      ) : null}
     </div>
   );
 }
