@@ -6,6 +6,12 @@ import {
   type User,
 } from "firebase/auth";
 import {
+  initializeAppCheck,
+  ReCaptchaV3Provider,
+  type AppCheck,
+} from "firebase/app-check";
+import { getFunctions, type Functions } from "firebase/functions";
+import {
   initializeFirestore,
   memoryLocalCache,
   persistentLocalCache,
@@ -16,6 +22,8 @@ import {
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
+let functions: Functions | null = null;
+let appCheck: AppCheck | null = null;
 let persistenceUnavailable = false;
 
 export function isFirestorePersistenceUnavailable(): boolean {
@@ -51,9 +59,34 @@ function getFirebaseApp(): FirebaseApp {
     }
 
     app = initializeApp(config);
+    initializeAppCheckIfConfigured(app);
   }
 
   return app;
+}
+
+function initializeAppCheckIfConfigured(firebaseApp: FirebaseApp): void {
+  const siteKey = import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY?.trim();
+  if (!siteKey) {
+    return;
+  }
+
+  if (appCheck) {
+    return;
+  }
+
+  appCheck = initializeAppCheck(firebaseApp, {
+    provider: new ReCaptchaV3Provider(siteKey),
+    isTokenAutoRefreshEnabled: true,
+  });
+}
+
+export function getFirebaseFunctions(): Functions {
+  if (!functions) {
+    functions = getFunctions(getFirebaseApp());
+  }
+
+  return functions;
 }
 
 export function getFirebaseAuth(): Auth {

@@ -1,5 +1,10 @@
 import type { Feature, LineString, Point, Polygon } from "geojson";
-import type { AnnotationRecord, GameArea, SessionRecord } from "../domain/annotations";
+import type {
+  AnnotationRecord,
+  GameArea,
+  SessionRecord,
+  SessionTier,
+} from "../domain/annotations";
 import {
   boundingBoxToGameArea,
   gameAreaToBoundingBox,
@@ -179,11 +184,16 @@ export function assertNoNestedArrays(value: unknown, path = "document"): void {
   }
 }
 
+function parseSessionTier(value: unknown): SessionTier {
+  return value === "premium" ? "premium" : "free";
+}
+
 export function buildSessionDocument(
   code: string,
   gameArea: GameArea,
   hostUid: string,
   createdAt: string,
+  tier: SessionTier = "free",
   transitMetroId?: string,
 ): Record<string, unknown> {
   const payload = {
@@ -192,6 +202,7 @@ export function buildSessionDocument(
     hostUid,
     createdAt,
     memberUids: [hostUid],
+    tier,
     transitMetroId: transitMetroId ?? null,
     status: "active",
     timerAccumulatedMs: 0,
@@ -217,6 +228,7 @@ export function deserializeSessionFromFirestore(
     memberUids: Array.isArray(data.memberUids)
       ? data.memberUids.filter((uid): uid is string => typeof uid === "string")
       : [],
+    tier: parseSessionTier(data.tier),
     transitMetroId:
       typeof data.transitMetroId === "string" ? data.transitMetroId : undefined,
     endedAt: typeof data.endedAt === "string" ? data.endedAt : undefined,

@@ -74,6 +74,10 @@ function printProxyEnvInstructions(functionUrls) {
     lines.push(`  VITE_TRANSIT_PROXY_URL=${functionUrls.vehicles}`);
   }
 
+  if (functionUrls.transitland) {
+    lines.push(`  VITE_TRANSITLAND_PROXY_URL=${functionUrls.transitland}`);
+  }
+
   if (!functionUrls.overpass && !functionUrls.vehicles) {
     lines.push(
       "  (Function URLs were not found in deploy output — copy them from the Firebase console → Functions.)",

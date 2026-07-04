@@ -43,7 +43,7 @@ import {
   isPointInGameArea,
   type LatLngTuple,
 } from "../domain/geometry";
-import { LOCAL_SESSION_ID } from "../domain/annotations";
+import { LOCAL_SESSION_ID, isPremiumSession } from "../domain/annotations";
 import { useAnnotations } from "../hooks/useAnnotations";
 import { useSessionTimer } from "../hooks/useSessionTimer";
 import { useRemoteSessionTimerSync } from "../hooks/useRemoteSessionTimerSync";
@@ -62,6 +62,7 @@ import {
   metroSupportsLiveVehicles,
 } from "../services/transitCatalog";
 import { preloadGameAreaCaches } from "../services/gameAreaPreload";
+import { setPremiumApiContext } from "../services/premiumApiContext";
 import {
   useAnnotationStore,
   useMapStore,
@@ -315,7 +316,9 @@ export function MapScreen() {
   });
 
   const transitMetro = getTransitMetro(session?.transitMetroId);
-  const transitLiveSupported = metroSupportsLiveVehicles(transitMetro ?? null);
+  const sessionIsPremium = isPremiumSession(session);
+  const transitLiveSupported =
+    sessionIsPremium && metroSupportsLiveVehicles(transitMetro ?? null);
   const {
     staticData: transitStaticData,
     liveData: transitLiveData,
@@ -347,6 +350,10 @@ export function MapScreen() {
     setShowToolLabels(false);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [annotations.length, showToolLabels]);
+
+  useEffect(() => {
+    setPremiumApiContext(session);
+  }, [session]);
 
   useEffect(() => {
     if (
@@ -753,6 +760,7 @@ export function MapScreen() {
         transitEnabled={transitEnabled}
         transitLiveEnabled={transitLiveEnabled}
         transitLiveSupported={transitLiveSupported}
+        sessionIsPremium={sessionIsPremium}
         transitRouteFilter={transitRouteFilter}
         metroLabel={transitMetro?.label ?? null}
         loadingStatic={transitLoadingStatic}

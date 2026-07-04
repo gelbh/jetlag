@@ -18,6 +18,7 @@ import type {
   AnnotationRecord,
   GameArea,
   SessionRecord,
+  SessionTier,
 } from "../domain/annotations";
 import { timerStateToRemote, type TimerState } from "../domain/timer";
 import { getFirestoreDb } from "./firebase";
@@ -65,6 +66,7 @@ export async function ensureRemoteSessionWriteAccess(
 export async function createRemoteSession(
   gameArea: GameArea,
   hostUid: string,
+  tier: SessionTier = "free",
   transitMetroId?: string,
 ): Promise<SessionRecord> {
   let code = generateSessionCode();
@@ -91,15 +93,51 @@ export async function createRemoteSession(
     hostUid,
     createdAt,
     memberUids: [hostUid],
+    tier,
     transitMetroId,
   };
 
   await setDoc(sessionRef, {
-    ...buildSessionDocument(code, gameArea, hostUid, createdAt, transitMetroId),
+    ...buildSessionDocument(
+      code,
+      gameArea,
+      hostUid,
+      createdAt,
+      tier,
+      transitMetroId,
+    ),
     createdAtServer: serverTimestamp(),
   });
 
   return session;
+}
+
+export async function lookupRemoteSessionByCode(
+  code: string,
+): Promise<
+  | { status: "missing" }
+  | { status: "ended" }
+  | { status: "found"; session: SessionRecord }
+> {
+  const snapshot = await getDocs(
+    query(sessionsCollection(), where("code", "==", code)),
+  );
+
+  if (snapshot.empty) {
+    return { status: "missing" };
+  }
+
+  const sessionDoc = snapshot.docs[0];
+  const data = sessionDoc.data() as Record<string, unknown>;
+
+  if (typeof data.endedAt === "string") {
+    return { status: "ended" };
+  }
+
+  return {
+    status: "found",
+    session: deserializeSessionFromFirestore(sessionDoc.id, data),
+  };
 }
 
 export async function joinRemoteSessionByCode(

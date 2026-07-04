@@ -1,4 +1,6 @@
 import { FetchTimeoutError, fetchWithTimeout } from "./fetchWithTimeout";
+import { buildPremiumProxyHeaders } from "./accessControl";
+import { shouldUsePremiumProxies } from "./premiumApiContext";
 import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "./overpass/endpoints";
 import { withOverpassConcurrencyLimit } from "./overpass/requestQueue";
 
@@ -162,6 +164,8 @@ async function fetchOverpassViaProxy(query: string): Promise<Response> {
     return fetchOverpassDirect(query);
   }
 
+  const proxyHeaders = await buildPremiumProxyHeaders();
+
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= OVERPASS_MAX_RETRIES; attempt += 1) {
@@ -172,11 +176,18 @@ async function fetchOverpassViaProxy(query: string): Promise<Response> {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            ...proxyHeaders,
           },
           body: JSON.stringify({ query }),
         },
         OVERPASS_FETCH_TIMEOUT_MS,
       );
+
+      if (response.status === 401 || response.status === 403) {
+        throw new OverpassUnavailableError(
+          "Map data unavailable. Rejoin session or create a new Premium session.",
+        );
+      }
 
       if (response.ok) {
         return response;
@@ -220,7 +231,7 @@ async function fetchOverpassViaProxy(query: string): Promise<Response> {
 }
 
 async function fetchOverpass(query: string): Promise<Response> {
-  if (overpassProxyUrl()) {
+  if (shouldUsePremiumProxies() && overpassProxyUrl()) {
     return fetchOverpassViaProxy(query);
   }
 

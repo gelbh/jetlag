@@ -5,6 +5,31 @@ import {
   overpassErrorMessage,
   queryOverpass,
 } from "./overpassClient";
+import { setPremiumApiContext } from "./premiumApiContext";
+import * as accessControl from "./accessControl";
+import type { SessionRecord } from "../domain/annotations";
+
+function premiumSession(): SessionRecord {
+  return {
+    id: "session-premium",
+    code: "ABCD",
+    gameArea: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [-6.3, 53.3],
+          [-6.2, 53.3],
+          [-6.2, 53.4],
+          [-6.3, 53.4],
+          [-6.3, 53.3],
+        ],
+      ],
+    },
+    createdAt: "2026-05-14T00:00:00.000Z",
+    memberUids: ["host"],
+    tier: "premium",
+  };
+}
 
 function mockOverpassResponse(payload: unknown) {
   return {
@@ -18,6 +43,7 @@ function mockOverpassResponse(payload: unknown) {
 describe("overpassClient", () => {
   beforeEach(() => {
     vi.stubEnv("VITE_OVERPASS_PROXY_URL", "");
+    setPremiumApiContext(null);
   });
 
   afterEach(() => {
@@ -153,6 +179,12 @@ describe("overpassClient", () => {
 
   it("routes Overpass requests through the configured proxy", async () => {
     vi.stubEnv("VITE_OVERPASS_PROXY_URL", "https://proxy.example/overpass");
+    setPremiumApiContext(premiumSession());
+    vi.spyOn(accessControl, "buildPremiumProxyHeaders").mockResolvedValue({
+      Authorization: "Bearer test-token",
+      "X-Session-Id": "session-premium",
+    });
+
     const fetchMock = vi
       .fn()
       .mockResolvedValue(mockOverpassResponse({ elements: [] }));
@@ -172,6 +204,7 @@ describe("overpassClient", () => {
   it("retries the proxy after network errors then throws OverpassUnavailableError", async () => {
     vi.useFakeTimers();
     vi.stubEnv("VITE_OVERPASS_PROXY_URL", "https://proxy.example/overpass");
+    setPremiumApiContext(premiumSession());
     const fetchMock = vi.fn().mockImplementation(async () => {
       throw new TypeError("Failed to fetch");
     });

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { isPremiumSession } from "../domain/annotations";
 import {
   isValidSessionCode,
   normalizeSessionCode,
@@ -9,7 +10,11 @@ import {
   ensureAnonymousUser,
   isFirebaseConfigured,
 } from "../services/firebase";
-import { joinRemoteSessionByCode } from "../services/firestoreAnnotations";
+import {
+  joinRemoteSessionByCode,
+  lookupRemoteSessionByCode,
+} from "../services/firestoreAnnotations";
+import { setPremiumApiContext } from "../services/premiumApiContext";
 
 export function JoinSession() {
   const navigate = useNavigate();
@@ -17,6 +22,54 @@ export function JoinSession() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [previewPremium, setPreviewPremium] = useState(false);
+  const [lookupLoading, setLookupLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isFirebaseConfigured()) {
+      return;
+    }
+
+    const normalized = normalizeSessionCode(code);
+    if (!isValidSessionCode(normalized)) {
+      /* eslint-disable react-hooks/set-state-in-effect -- clear stale preview when code changes */
+      setPreviewPremium(false);
+      setLookupLoading(false);
+      /* eslint-enable react-hooks/set-state-in-effect */
+      return;
+    }
+
+    let cancelled = false;
+    setLookupLoading(true);
+
+    void (async () => {
+      try {
+        const result = await lookupRemoteSessionByCode(normalized);
+        if (cancelled) {
+          return;
+        }
+
+        setPreviewPremium(
+          result.status === "found" && isPremiumSession(result.session),
+        );
+        if (result.status === "missing") {
+          setError(null);
+        }
+      } catch {
+        if (!cancelled) {
+          setPreviewPremium(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setLookupLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [code]);
 
   const handleJoin = async () => {
     const normalized = normalizeSessionCode(code);
@@ -47,6 +100,7 @@ export function JoinSession() {
       }
 
       setSession(result.session);
+      setPremiumApiContext(result.session);
       navigate("/map");
     } catch (nextError) {
       setError(
@@ -79,6 +133,15 @@ export function JoinSession() {
         placeholder="ABCD"
         autoCapitalize="characters"
       />
+
+      {previewPremium ? (
+        <p className="font-mono text-sm text-status-info">
+          Premium · live transit enabled
+        </p>
+      ) : null}
+      {lookupLoading ? (
+        <p className="text-sm text-ink-dim">Checking session…</p>
+      ) : null}
 
       <button
         type="button"

@@ -112,6 +112,8 @@ export type GameArea =
       coordinates: number[][][][];
     };
 
+export type SessionTier = "free" | "premium";
+
 export interface SessionRecord {
   id: string;
   code: string;
@@ -119,11 +121,16 @@ export interface SessionRecord {
   hostUid?: string;
   createdAt: string;
   memberUids: string[];
+  tier?: SessionTier;
   transitMetroId?: string;
   endedAt?: string;
   status?: "active" | "ended";
   timerAccumulatedMs?: number;
   timerRunningSince?: string | null;
+}
+
+export function isPremiumSession(session: SessionRecord | null | undefined): boolean {
+  return session?.tier === "premium";
 }
 
 export const LOCAL_SESSION_ID = "local";

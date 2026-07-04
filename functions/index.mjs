@@ -1,19 +1,29 @@
 import { createHash } from "node:crypto";
-import { onRequest } from "firebase-functions/v2/https";
+import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
+import { defineSecret } from "firebase-functions/params";
 import { getApps, initializeApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { setCors } from "./cors.mjs";
 import { fetchWithTimeoutAndRetry } from "./fetchWithTimeout.mjs";
 import { createMemoryCache } from "./memoryCache.mjs";
 import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "./overpassEndpoints.mjs";
 import { normalizeTflPayload } from "./tflNormalize.mjs";
+import { fetchTransitlandVehicles } from "./transitlandProxy.mjs";
+import {
+  sendProxyAuthFailure,
+  verifyProxyAccess,
+} from "./verifyProxyAccess.mjs";
 import {
   computeAbandonedCutoffIso,
   computeEndedCutoffIso,
   PURGE_BATCH_LIMIT,
   selectSessionsToPurge,
 } from "./purgeStaleSessions.mjs";
+
+const accessCodeSecret = defineSecret("ACCESS_CODE");
+const transitlandApiKeySecret = defineSecret("TRANSITLAND_API_KEY");
 
 const FEEDS = {
   london: "https://api.tfl.gov.uk/vehicle/vehiclepositions",
@@ -23,9 +33,28 @@ const TFL_FETCH_TIMEOUT_MS = 10_000;
 const OVERPASS_FETCH_TIMEOUT_MS = 45_000;
 const VEHICLE_FEED_CACHE_TTL_MS = 15_000;
 const OVERPASS_CACHE_TTL_MS = 60 * 60 * 1000;
+const GRANT_ACCESS_FAILURE_DELAY_MS = 300;
+const GRANT_ACCESS_MAX_FAILURES = 8;
 
 const vehicleFeedCache = createMemoryCache(VEHICLE_FEED_CACHE_TTL_MS);
 const overpassResponseCache = createMemoryCache(OVERPASS_CACHE_TTL_MS);
+const grantAccessFailures = new Map();
+
+function ensureAdminApp() {
+  if (getApps().length === 0) {
+    initializeApp();
+  }
+}
+
+function adminAuth() {
+  ensureAdminApp();
+  return getAuth();
+}
+
+function adminDb() {
+  ensureAdminApp();
+  return getFirestore();
+}
 
 function overpassCacheKey(query) {
   return createHash("sha256").update(query).digest("hex");
@@ -95,11 +124,62 @@ async function loadTflFeed(metro, feedUrl) {
   return payload;
 }
 
+async function requireProxyAccess(req, res) {
+  const authResult = await verifyProxyAccess(adminAuth(), adminDb(), req);
+  if (!authResult.ok) {
+    sendProxyAuthFailure(res, authResult);
+    return false;
+  }
+
+  return true;
+}
+
+export const grantAccess = onCall(
+  { secrets: [accessCodeSecret] },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+
+    const uid = request.auth.uid;
+    const failures = grantAccessFailures.get(uid) ?? 0;
+    if (failures >= GRANT_ACCESS_MAX_FAILURES) {
+      throw new HttpsError(
+        "resource-exhausted",
+        "Too many attempts. Try again later.",
+      );
+    }
+
+    const code =
+      typeof request.data?.code === "string" ? request.data.code.trim() : "";
+    if (!code) {
+      throw new HttpsError("invalid-argument", "Access code required.");
+    }
+
+    const expected = accessCodeSecret.value();
+    if (!expected || code !== expected) {
+      grantAccessFailures.set(uid, failures + 1);
+      await new Promise((resolve) => {
+        setTimeout(resolve, GRANT_ACCESS_FAILURE_DELAY_MS);
+      });
+      throw new HttpsError("permission-denied", "Invalid access code.");
+    }
+
+    grantAccessFailures.delete(uid);
+    await adminAuth().setCustomUserClaims(uid, { access: true });
+    return { granted: true };
+  },
+);
+
 export const vehicles = onRequest(async (req, res) => {
   setCors(res);
 
   if (req.method === "OPTIONS") {
     res.status(204).send("");
+    return;
+  }
+
+  if (!(await requireProxyAccess(req, res))) {
     return;
   }
 
@@ -135,6 +215,58 @@ export const vehicles = onRequest(async (req, res) => {
   }
 });
 
+export const transitland = onRequest(
+  { secrets: [transitlandApiKeySecret] },
+  async (req, res) => {
+    setCors(res);
+
+    if (req.method === "OPTIONS") {
+      res.status(204).send("");
+      return;
+    }
+
+    if (!(await requireProxyAccess(req, res))) {
+      return;
+    }
+
+    const feed = String(req.query.feed ?? "").trim();
+    const bounds = {
+      south: Number(req.query.south),
+      west: Number(req.query.west),
+      north: Number(req.query.north),
+      east: Number(req.query.east),
+    };
+
+    if (!feed) {
+      res.status(400).json({ error: "Missing transit feed." });
+      return;
+    }
+
+    if (
+      !Number.isFinite(bounds.south) ||
+      !Number.isFinite(bounds.west) ||
+      !Number.isFinite(bounds.north) ||
+      !Number.isFinite(bounds.east)
+    ) {
+      res.status(400).json({ error: "Missing bounding box." });
+      return;
+    }
+
+    const apiKey = transitlandApiKeySecret.value();
+    if (!apiKey) {
+      res.status(503).json({ error: "Transitland proxy is not configured." });
+      return;
+    }
+
+    try {
+      const vehicles = await fetchTransitlandVehicles(feed, apiKey, bounds);
+      res.status(200).json(vehicles);
+    } catch {
+      res.status(502).json({ error: "Transitland proxy failed." });
+    }
+  },
+);
+
 export const overpass = onRequest(async (req, res) => {
   setCors(res);
 
@@ -145,6 +277,10 @@ export const overpass = onRequest(async (req, res) => {
 
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed." });
+    return;
+  }
+
+  if (!(await requireProxyAccess(req, res))) {
     return;
   }
 
@@ -189,15 +325,8 @@ export const overpass = onRequest(async (req, res) => {
   }
 });
 
-function ensureAdminApp() {
-  if (getApps().length === 0) {
-    initializeApp();
-  }
-}
-
 export const purgeStaleSessions = onSchedule("0 4 * * *", async () => {
-  ensureAdminApp();
-  const db = getFirestore();
+  const db = adminDb();
   const endedCutoffIso = computeEndedCutoffIso();
   const abandonedCutoffIso = computeAbandonedCutoffIso();
 

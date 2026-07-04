@@ -13,7 +13,7 @@ import {
   placeToGameArea,
 } from "../domain/geometry";
 import { generateLocalCode } from "../domain/session";
-import { LOCAL_SESSION_ID } from "../domain/annotations";
+import { LOCAL_SESSION_ID, type SessionTier } from "../domain/annotations";
 import { useSessionStore, useMapStore } from "../state/sessionStore";
 import {
   isFirebaseConfigured,
@@ -26,6 +26,25 @@ import {
   listTransitMetros,
 } from "../services/transitCatalog";
 import { searchPlaces, type GeocodedPlace } from "../services/geocoding";
+import { grantAccess, hasAccessClaim } from "../services/accessControl";
+import { setPremiumApiContext } from "../services/premiumApiContext";
+
+const TIER_OPTIONS: Array<{
+  value: SessionTier;
+  label: string;
+  summary: string;
+}> = [
+  {
+    value: "free",
+    label: "Free",
+    summary: "All map tools and team sync. Public map data.",
+  },
+  {
+    value: "premium",
+    label: "Premium",
+    summary: "Live transit and faster map data. Host access code required once.",
+  },
+];
 
 function placeToFocusBounds(place: GeocodedPlace): LatLngBoundsExpression {
   const { south, west, north, east } = place.bounds;
@@ -51,10 +70,42 @@ export function CreateSession() {
   );
   const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [accessCodeError, setAccessCodeError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [verifyingAccess, setVerifyingAccess] = useState(false);
+  const [sessionTier, setSessionTier] = useState<SessionTier>("free");
+  const [accessCode, setAccessCode] = useState("");
+  const [hostHasAccessClaim, setHostHasAccessClaim] = useState(false);
   const metros = useMemo(() => listTransitMetros(), []);
   const [userFramedViewport, setUserFramedViewport] = useState(false);
   const ignoreViewportUpdatesRef = useRef(false);
+
+  useEffect(() => {
+    if (!isFirebaseConfigured()) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const user = await ensureAnonymousUser();
+        if (cancelled) {
+          return;
+        }
+
+        setHostHasAccessClaim(await hasAccessClaim(user));
+      } catch {
+        if (!cancelled) {
+          setHostHasAccessClaim(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const inferredTransitMetroId = useMemo(() => {
     const gameArea =
@@ -87,6 +138,10 @@ export function CreateSession() {
   }, [inferredTransitMetroId, transitMetroInferenceSeed]);
 
   const transitMetroId = transitMetroOverride ?? inferredTransitMetroId;
+  const showAccessCodeField =
+    isFirebaseConfigured() &&
+    sessionTier === "premium" &&
+    !hostHasAccessClaim;
 
   const previewGameArea = useMemo(() => {
     if (selectedPlace && !userFramedViewport) {
@@ -169,6 +224,7 @@ export function CreateSession() {
 
     setLoading(true);
     setError(null);
+    setAccessCodeError(null);
 
     try {
       const viewportArea = bounds ? boundsToGameArea(bounds) : null;
@@ -189,23 +245,57 @@ export function CreateSession() {
       }
 
       const metroId = transitMetroId || undefined;
+      const tier =
+        isFirebaseConfigured() && sessionTier === "premium" ? "premium" : "free";
+
+      if (tier === "premium" && !hostHasAccessClaim) {
+        const trimmedCode = accessCode.trim();
+        if (!trimmedCode) {
+          setAccessCodeError("Enter the host access code.");
+          return;
+        }
+
+        setVerifyingAccess(true);
+        try {
+          await grantAccess(trimmedCode);
+          setHostHasAccessClaim(true);
+        } catch (nextError) {
+          setAccessCodeError(
+            nextError instanceof Error
+              ? nextError.message
+              : "Invalid access code.",
+          );
+          return;
+        } finally {
+          setVerifyingAccess(false);
+        }
+      }
 
       if (isFirebaseConfigured()) {
         const user = await ensureAnonymousUser();
-        const session = await createRemoteSession(gameArea, user.uid, metroId);
-        setSession(session);
+        const session = await createRemoteSession(
+          gameArea,
+          user.uid,
+          tier,
+          metroId,
+        );
+        setPremiumApiContext(session);
+        preloadGameAreaCaches(gameArea);
       } else {
-        setSession({
+        const localSession = {
           id: LOCAL_SESSION_ID,
           code: generateLocalCode(),
           gameArea,
           createdAt: new Date().toISOString(),
           memberUids: [],
+          tier: "free" as const,
           transitMetroId: metroId,
-        });
+        };
+        setSession(localSession);
+        setPremiumApiContext(localSession);
+        preloadGameAreaCaches(gameArea);
       }
 
-      preloadGameAreaCaches(gameArea);
       navigate("/map");
     } catch (nextError) {
       setError(
@@ -217,6 +307,12 @@ export function CreateSession() {
       setLoading(false);
     }
   };
+
+  const confirmLabel = verifyingAccess
+    ? "Verifying…"
+    : loading
+      ? "Creating…"
+      : "Confirm game area";
 
   return (
     <div className="relative h-full min-h-[100dvh]">
@@ -305,13 +401,77 @@ export function CreateSession() {
           </select>
         </label>
 
+        {isFirebaseConfigured() ? (
+          <div className="mt-4 space-y-2">
+            <p className="text-sm font-medium text-ink">Session tier</p>
+            <div
+              role="radiogroup"
+              aria-label="Session tier"
+              className="space-y-2"
+            >
+              {TIER_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={sessionTier === option.value}
+                  disabled={loading || verifyingAccess}
+                  onClick={() => {
+                    setSessionTier(option.value);
+                    setAccessCodeError(null);
+                  }}
+                  className={`min-h-12 w-full rounded-[var(--radius-hud-sm)] px-3 py-2 text-left disabled:opacity-50 ${
+                    sessionTier === option.value
+                      ? "bg-action-soft text-status-info"
+                      : "bg-surface-raised text-ink"
+                  }`}
+                >
+                  <span className="block text-sm font-medium">{option.label}</span>
+                  <span className="mt-0.5 block text-xs text-ink-muted">
+                    {option.summary}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <div
+          className={`overflow-hidden motion-safe:transition-[max-height,opacity] motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none ${
+            showAccessCodeField
+              ? "max-h-40 opacity-100"
+              : "max-h-0 opacity-0"
+          }`}
+        >
+          <label className="field-label mt-4">
+            Host access code
+            <input
+              value={accessCode}
+              onChange={(event) => {
+                setAccessCode(event.target.value);
+                setAccessCodeError(null);
+              }}
+              type="password"
+              autoComplete="off"
+              enterKeyHint="done"
+              className="field-input"
+            />
+          </label>
+          <p className="mt-1 text-xs text-ink-dim">
+            Enter once. Friends join with the game code only.
+          </p>
+          {accessCodeError ? (
+            <p className="text-error mt-2">{accessCodeError}</p>
+          ) : null}
+        </div>
+
         <button
           type="button"
           onClick={() => void handleConfirm()}
-          disabled={loading}
+          disabled={loading || verifyingAccess}
           className="btn-primary mt-4 w-full disabled:opacity-50"
         >
-          {loading ? "Creating…" : "Confirm game area"}
+          {confirmLabel}
         </button>
         {error ? <p className="text-error mt-2">{error}</p> : null}
       </MobileSheet>

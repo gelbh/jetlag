@@ -8,9 +8,34 @@ Live map annotations for Jet Lag Hide & Seek. The app is a Vite + React PWA with
 2. Install dependencies with `npm install`.
 3. Start the dev server with `npm run dev`.
 
-Optional transit overlays need `VITE_TRANSIT_PROXY_URL` pointing at the deployed Firebase `vehicles` function, plus `VITE_TRANSITLAND_API_KEY` for static route data.
+## Session tiers
 
-Optional Overpass geographic data goes through the Firebase `overpass` function when `VITE_OVERPASS_PROXY_URL` is set (recommended — reduces rate limits on public instances). Both proxies require the Firebase **Blaze** plan (pay-as-you-go; free tier covers infrequent use).
+When creating a session (with Firebase configured), choose **Free** or **Premium**:
+
+| Tier | What you get | Cost to host |
+|------|----------------|--------------|
+| **Free** | All map tools, team sync, static transit, public Overpass/Nominatim | Firestore only (light) |
+| **Premium** | Everything in Free, plus live transit and Firebase API proxies | Blaze function usage |
+
+- **Free** is the default — anyone can create one without a password.
+- **Premium** prompts the host for a one-time access code (shared with friends you trust).
+- Joiners always use the normal 4-letter game code; they never see the access code.
+
+## Premium setup (host)
+
+1. Upgrade the Firebase project to **Blaze** (Console → Usage and billing).
+2. Set function secrets (one-time):
+   ```bash
+   firebase functions:secrets:set ACCESS_CODE
+   firebase functions:secrets:set TRANSITLAND_API_KEY
+   ```
+3. Run `npm run deploy` and copy the printed proxy URLs into Cloudflare Pages / `.env.local`:
+   - `VITE_OVERPASS_PROXY_URL`
+   - `VITE_TRANSIT_PROXY_URL` (London live vehicles)
+   - `VITE_TRANSITLAND_PROXY_URL` (other metros)
+4. Optional: enable **App Check** with `VITE_FIREBASE_APP_CHECK_SITE_KEY` (reCAPTCHA v3 in Firebase Console → App Check).
+
+Share the access code out-of-band with co-hosts who should be able to create Premium sessions.
 
 ## Quality checks
 
@@ -24,10 +49,4 @@ The frontend deploys from GitHub to Cloudflare Pages (`jetlag.gelbhart.dev`) on 
 
 `npm run deploy` runs lint, tests, installs Cloud Functions dependencies, then deploys Firestore rules/indexes and Cloud Functions to the default project in `.firebaserc`. On success it prints the function URLs to set as `VITE_*` build variables.
 
-**Overpass proxy setup:**
-
-1. Upgrade the Firebase project to Blaze (Console → Usage and billing → Modify plan).
-2. Run `npm run deploy` and copy the printed `VITE_OVERPASS_PROXY_URL`.
-3. Add it to Cloudflare Pages environment variables and redeploy the frontend (or set in `.env.local` for local dev).
-
-Confirm `VITE_TRANSIT_PROXY_URL` in Cloudflare matches the live `vehicles` function URL when using transit overlays.
+Deploy order after changing access rules: functions + Firestore rules first, then frontend (so auth headers are sent).

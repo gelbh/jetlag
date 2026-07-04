@@ -68,6 +68,7 @@ describe("firestoreSerialization", () => {
       sampleGameArea,
       "host-uid",
       "2026-05-14T00:00:00.000Z",
+      "free",
       "dublin",
     );
 
@@ -75,6 +76,37 @@ describe("firestoreSerialization", () => {
     expect(payload.gameArea).not.toHaveProperty("coordinates");
     expect(payload.memberUids).toEqual(["host-uid"]);
     expect(payload.status).toBe("active");
+    expect(payload.tier).toBe("free");
+  });
+
+  it("stores premium tier on session documents", () => {
+    const payload = buildSessionDocument(
+      "ABCD",
+      sampleGameArea,
+      "host-uid",
+      "2026-05-14T00:00:00.000Z",
+      "premium",
+    );
+
+    expect(payload.tier).toBe("premium");
+  });
+
+  it("deserializes session tier with free default", () => {
+    const session = deserializeSessionFromFirestore("session-1", {
+      code: "ABCD",
+      gameArea: {
+        south: 53.3,
+        west: -6.3,
+        north: 53.4,
+        east: -6.2,
+      },
+      hostUid: "host-uid",
+      createdAt: "2026-05-14T00:00:00.000Z",
+      memberUids: ["host-uid"],
+      status: "active",
+    });
+
+    expect(session.tier).toBe("free");
   });
 
   it("deserializes ended sessions without a code field", () => {

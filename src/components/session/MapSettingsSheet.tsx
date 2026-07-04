@@ -34,6 +34,7 @@ interface MapSettingsSheetProps {
   transitEnabled: boolean;
   transitLiveEnabled: boolean;
   transitLiveSupported: boolean;
+  sessionIsPremium?: boolean;
   transitRouteFilter: TransitRouteFilter;
   metroLabel: string | null;
   loadingStatic: boolean;
@@ -73,6 +74,7 @@ export function MapSettingsSheet({
   transitEnabled,
   transitLiveEnabled,
   transitLiveSupported,
+  sessionIsPremium = false,
   transitRouteFilter,
   metroLabel,
   loadingStatic,
@@ -142,6 +144,7 @@ export function MapSettingsSheet({
               transitEnabled={transitEnabled}
               transitLiveEnabled={transitLiveEnabled}
               transitLiveSupported={transitLiveSupported}
+              sessionIsPremium={sessionIsPremium}
               transitRouteFilter={transitRouteFilter}
               metroLabel={metroLabel}
               loadingStatic={loadingStatic}
@@ -194,6 +197,7 @@ function MapSegment({
   transitEnabled,
   transitLiveEnabled,
   transitLiveSupported,
+  sessionIsPremium = false,
   transitRouteFilter,
   metroLabel,
   loadingStatic,
@@ -219,6 +223,7 @@ function MapSegment({
   transitEnabled: boolean;
   transitLiveEnabled: boolean;
   transitLiveSupported: boolean;
+  sessionIsPremium?: boolean;
   transitRouteFilter: TransitRouteFilter;
   metroLabel: string | null;
   loadingStatic: boolean;
@@ -271,6 +276,7 @@ function MapSegment({
         enabled={transitEnabled}
         liveEnabled={transitLiveEnabled}
         liveSupported={transitLiveSupported}
+        premiumSession={sessionIsPremium}
         routeFilter={transitRouteFilter}
         metroLabel={metroLabel}
         loadingStatic={loadingStatic}

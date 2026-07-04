@@ -9,6 +9,7 @@ import {
 } from "../services/firebase";
 import { getRemoteSessionById } from "../services/firestoreAnnotations";
 import { clearSessionLocalArtifacts } from "../services/sessionCleanup";
+import { setPremiumApiContext } from "../services/premiumApiContext";
 
 export function Home() {
   const navigate = useNavigate();
@@ -53,6 +54,7 @@ export function Home() {
       }
 
       setSession(remoteSession);
+      setPremiumApiContext(remoteSession);
       navigate("/map");
     } catch (error) {
       setContinueError(

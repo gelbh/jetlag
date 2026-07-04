@@ -6,6 +6,7 @@ interface TransitControlsProps {
   routeFilter: TransitRouteFilter;
   metroLabel: string | null;
   liveSupported: boolean;
+  premiumSession?: boolean;
   loadingStatic: boolean;
   loadingLive: boolean;
   stopCount: number;
@@ -34,6 +35,7 @@ export function TransitControls({
   routeFilter,
   metroLabel,
   liveSupported,
+  premiumSession = true,
   loadingStatic,
   loadingLive,
   stopCount,
@@ -113,11 +115,13 @@ export function TransitControls({
 
       <p className="mt-2 text-xs text-ink-dim">
         {metroLabel ? `${metroLabel} · ` : ""}
-        {enabled
-          ? liveSupported
-            ? "Static routes and stops. Live vehicles when enabled."
-            : "Static routes and stops only. Live vehicles are unavailable here."
-          : "Transit overlay hidden"}
+        {!premiumSession
+          ? "Live vehicles require a Premium session."
+          : enabled
+            ? liveSupported
+              ? "Static routes and stops. Live vehicles when enabled."
+              : "Static routes and stops only. Live vehicles are unavailable here."
+            : "Transit overlay hidden"}
         {enabled
           ? ` · ${routeCount} routes · ${stopCount} stops${
               liveEnabled ? ` · ${vehicleCount} live vehicles` : ""
