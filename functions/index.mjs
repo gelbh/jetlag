@@ -25,6 +25,10 @@ import {
 const accessCodeSecret = defineSecret("ACCESS_CODE");
 const transitlandApiKeySecret = defineSecret("TRANSITLAND_API_KEY");
 
+if (getApps().length === 0) {
+  initializeApp();
+}
+
 const FEEDS = {
   london: "https://api.tfl.gov.uk/vehicle/vehiclepositions",
 };
@@ -40,19 +44,11 @@ const vehicleFeedCache = createMemoryCache(VEHICLE_FEED_CACHE_TTL_MS);
 const overpassResponseCache = createMemoryCache(OVERPASS_CACHE_TTL_MS);
 const grantAccessFailures = new Map();
 
-function ensureAdminApp() {
-  if (getApps().length === 0) {
-    initializeApp();
-  }
-}
-
 function adminAuth() {
-  ensureAdminApp();
   return getAuth();
 }
 
 function adminDb() {
-  ensureAdminApp();
   return getFirestore();
 }
 
