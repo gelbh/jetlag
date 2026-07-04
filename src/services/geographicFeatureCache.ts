@@ -29,7 +29,7 @@ export function geographicCacheKey(gameArea: GameArea, scope: string): string {
   return `${scope}:${stableGameAreaKey(gameArea)}`;
 }
 
-function readMemoryEntry<T>(key: string): T | undefined {
+export function readCachedMemoryEntry<T>(key: string): T | undefined {
   const entry = memoryCache.get(key);
   if (!entry) {
     return undefined;
@@ -170,7 +170,7 @@ export async function getOrFetchCached<T>(
   fetcher: () => Promise<T>,
   options: CacheOptions = {},
 ): Promise<T> {
-  const memoryValue = readMemoryEntry<T>(key);
+  const memoryValue = readCachedMemoryEntry<T>(key);
   if (memoryValue !== undefined) {
     return memoryValue;
   }

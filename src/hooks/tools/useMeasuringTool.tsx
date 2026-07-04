@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { startTransition, useCallback, useMemo, useRef, useState } from "react";
 import type {
   Feature,
   LineString,
@@ -39,6 +39,7 @@ import {
   type MeasuringPlace,
 } from "../../services/measuringPlaces";
 import { searchPlaces, type GeocodedPlace } from "../../services/geocoding";
+import { getCachedPreparedCoastlineSegments } from "../../services/coastline";
 import {
   fetchMeasuringCoastlineContext,
   fetchMeasuringLinearContext,
@@ -106,6 +107,7 @@ export function useMeasuringTool({
   const [measuringCoastSegments, setMeasuringCoastSegments] = useState<
     Feature<LineString>[]
   >([]);
+  const [coastlineContextVersion, setCoastlineContextVersion] = useState(0);
   const [measuringSeaLevelNearRegion, setMeasuringSeaLevelNearRegion] =
     useState<Feature<GeoPolygon | MultiPolygon> | null>(null);
   const [measuringAnchorElevationMeters, setMeasuringAnchorElevationMeters] =
@@ -163,6 +165,19 @@ export function useMeasuringTool({
     }, []),
   });
 
+  const resolvedCoastSegments = useMemo(() => {
+    if (measuringSubject === "coastline") {
+      return getCachedPreparedCoastlineSegments(gameArea)?.segments ?? [];
+    }
+
+    return measuringCoastSegments;
+  }, [
+    coastlineContextVersion,
+    gameArea,
+    measuringCoastSegments,
+    measuringSubject,
+  ]);
+
   const measuringRegionInput = useMemo(
     () => ({
       gameArea,
@@ -172,32 +187,38 @@ export function useMeasuringTool({
       measuringAnswer,
       measuringTargetPoint,
       measuringPlaces,
-      measuringCoastSegments,
+      measuringCoastSegments: resolvedCoastSegments,
       measuringSeaLevelNearRegion,
       usesAllPlacesInArea,
     }),
     [
       gameArea,
       measuringAnswer,
-      measuringCoastSegments,
       measuringDistanceMeters,
       measuringLocationCategory,
       measuringPlaces,
       measuringSeaLevelNearRegion,
       measuringSubject,
       measuringTargetPoint,
+      resolvedCoastSegments,
       usesAllPlacesInArea,
     ],
   );
 
-  const measuringBoundaryPreview = useMemo(
+  const measuringNearRegion = useMemo(
     () => buildMeasuringBoundaryPreview(measuringRegionInput),
     [measuringRegionInput],
   );
 
+  const measuringBoundaryPreview = measuringNearRegion;
+
   const measuringEliminationPreview = useMemo(
-    () => buildMeasuringEliminationPreview(measuringRegionInput),
-    [measuringRegionInput],
+    () =>
+      buildMeasuringEliminationPreview({
+        ...measuringRegionInput,
+        precomputedNearRegion: measuringNearRegion,
+      }),
+    [measuringRegionInput, measuringNearRegion],
   );
 
   const setMeasuringSeekerAnchor = (
@@ -219,6 +240,11 @@ export function useMeasuringTool({
 
     if (measuringSubject === "sea_level") {
       void loadSeaLevelContextAt(point);
+      return;
+    }
+
+    if (measuringSubject === "coastline") {
+      void loadMeasuringCoastlineAt(point);
       return;
     }
 
@@ -364,14 +390,13 @@ export function useMeasuringTool({
       if (!result.ok) {
         setMeasuringTargetPoint(null);
         setMeasuringDistanceMeters(null);
-        setMeasuringCoastSegments([]);
         setMeasuringError(result.message);
         return;
       }
 
       setMeasuringTargetPoint(result.coastPoint);
       setMeasuringDistanceMeters(result.distanceMeters);
-      setMeasuringCoastSegments(result.segments);
+      setCoastlineContextVersion((version) => version + 1);
     } catch (error) {
       if (requestId !== coastlineRequestId.current) {
         return;
@@ -379,7 +404,6 @@ export function useMeasuringTool({
 
       setMeasuringTargetPoint(null);
       setMeasuringDistanceMeters(null);
-      setMeasuringCoastSegments([]);
       setMeasuringError(
         error instanceof Error ? error.message : "Unable to find coastline.",
       );
@@ -690,7 +714,10 @@ export function useMeasuringTool({
       return;
     }
 
-    const regions = buildMeasuringRegions(measuringRegionInput);
+    const regions = buildMeasuringRegions({
+      ...measuringRegionInput,
+      precomputedNearRegion: measuringNearRegion,
+    });
     if (!regions) {
       setMeasuringError("Unable to build measure distance regions.");
       return;
@@ -811,7 +838,9 @@ export function useMeasuringTool({
         setMeasuringSearchResults([]);
         setMeasuringSearchLoading(false);
         setMeasuringPlaces([]);
-        if (measuringSeekerPoint && measuringUsesAllPlacesInArea(kind)) {
+        if (next.subject === "coastline" && measuringSeekerPoint) {
+          void loadMeasuringCoastlineAt(measuringSeekerPoint);
+        } else if (measuringSeekerPoint && measuringUsesAllPlacesInArea(kind)) {
           void loadAllPlacesAt(measuringSeekerPoint, next.locationCategory);
         }
       }}
@@ -838,7 +867,9 @@ export function useMeasuringTool({
         }
       }}
       onFindNearest={() => void loadNearest()}
-      onAnswerChange={setMeasuringAnswer}
+      onAnswerChange={(answer) => {
+        startTransition(() => setMeasuringAnswer(answer));
+      }}
       onCommit={() => void commit()}
     />
   );

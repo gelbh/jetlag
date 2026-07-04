@@ -29,6 +29,7 @@ export interface MeasuringRegionInput {
   measuringCoastSegments: Feature<LineString>[];
   measuringSeaLevelNearRegion: Feature<GeoPolygon | MultiPolygon> | null;
   usesAllPlacesInArea: boolean;
+  precomputedNearRegion?: Feature<GeoPolygon | MultiPolygon> | null;
 }
 
 export interface MeasuringRegions {
@@ -103,7 +104,7 @@ function buildMeasuringNearRegion(
 export function buildMeasuringRegions(
   input: MeasuringRegionInput,
 ): MeasuringRegions | null {
-  const near = buildMeasuringNearRegion(input);
+  const near = input.precomputedNearRegion ?? buildMeasuringNearRegion(input);
   if (!near || input.measuringDistanceMeters === null || !input.measuringAnswer) {
     return null;
   }

@@ -176,18 +176,29 @@ export function MeasuringPanel({
     if (isCoastline) {
       return (
         <>
-          <button
-            type="button"
-            onClick={onFindCoastline}
-            disabled={!hasSeekerPoint || loading}
-            className="btn-secondary w-full disabled:opacity-40"
-          >
-            {loading ? "Finding coastline…" : "Find coastline in play area"}
-          </button>
           {loading ? (
             <ResolvedReadout variant="dim">
               Finding coastline in the play area…
             </ResolvedReadout>
+          ) : null}
+          {hasTargetPoint && distanceMeters !== null ? (
+            <ResolvedReadout>
+              Nearest coastline is {formatDistance(distanceMeters, distanceUnit)}{" "}
+              away.
+            </ResolvedReadout>
+          ) : (
+            <ResolvedReadout variant="dim">
+              Set your anchor to find the nearest coastline.
+            </ResolvedReadout>
+          )}
+          {error && hasSeekerPoint && !loading ? (
+            <button
+              type="button"
+              onClick={onFindCoastline}
+              className="btn-secondary w-full"
+            >
+              Retry
+            </button>
           ) : null}
         </>
       );

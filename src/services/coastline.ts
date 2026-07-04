@@ -9,6 +9,7 @@ import {
 import {
   coastlineSegmentsCacheKey,
   getOrFetchCached,
+  readCachedMemoryEntry,
 } from "./geographicFeatureCache";
 import { queryOverpass } from "./overpassClient";
 import {
@@ -74,6 +75,14 @@ export async function fetchPreparedCoastlineSegments(
   });
 }
 
+export function getCachedPreparedCoastlineSegments(
+  gameArea: GameArea,
+): PreparedLinearSegments | undefined {
+  return readCachedMemoryEntry<PreparedLinearSegments>(
+    coastlineSegmentsCacheKey(gameArea),
+  );
+}
+
 export async function loadCoastlineContext(
   seeker: LatLngTuple,
   gameArea: GameArea,
@@ -81,7 +90,6 @@ export async function loadCoastlineContext(
   coastPoint: LatLngTuple;
   distanceMeters: number;
   segmentCount: number;
-  segments: Feature<LineString>[];
 } | null> {
   const prepared = await fetchPreparedCoastlineSegments(gameArea);
   const nearest = nearestPointToCoastlines(seeker, prepared.segments, prepared);
@@ -94,7 +102,6 @@ export async function loadCoastlineContext(
     coastPoint: nearest.point,
     distanceMeters: nearest.distanceMeters,
     segmentCount: prepared.segments.length,
-    segments: prepared.segments,
   };
 }
 

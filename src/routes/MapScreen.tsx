@@ -61,6 +61,7 @@ import {
   getTransitMetro,
   metroSupportsLiveVehicles,
 } from "../services/transitCatalog";
+import { preloadGameAreaCaches } from "../services/gameAreaPreload";
 import {
   useAnnotationStore,
   useMapStore,
@@ -209,6 +210,12 @@ export function MapScreen() {
   const suppressChromeHideRef = useRef(false);
   const syncStatus = useSyncStatus();
   useWakeLock(keepScreenAwake || timer.running);
+
+  useEffect(() => {
+    if (session?.gameArea) {
+      preloadGameAreaCaches(session.gameArea);
+    }
+  }, [session?.gameArea]);
 
   const [logOpen, setLogOpen] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);

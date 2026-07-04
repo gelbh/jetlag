@@ -61,7 +61,6 @@ export async function fetchMeasuringCoastlineContext(
     ok: true as const,
     coastPoint: result.coastPoint,
     distanceMeters: result.distanceMeters,
-    segments: result.segments,
   };
 }
 
