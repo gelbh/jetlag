@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FetchTimeoutError } from "./fetchWithTimeout";
 import {
   OverpassUnavailableError,
@@ -16,6 +16,10 @@ function mockOverpassResponse(payload: unknown) {
 }
 
 describe("overpassClient", () => {
+  beforeEach(() => {
+    vi.stubEnv("VITE_OVERPASS_PROXY_URL", "");
+  });
+
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
@@ -25,6 +29,24 @@ describe("overpassClient", () => {
   async function runQueuedOverpassTimers(): Promise<void> {
     await vi.runAllTimersAsync();
   }
+
+  it("retries rate limits before succeeding", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 429,
+        headers: new Headers({ "Retry-After": "0" }),
+        text: async () => "",
+      })
+      .mockResolvedValue(mockOverpassResponse({ elements: [] }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      queryOverpass<{ elements: unknown[] }>("[out:json];"),
+    ).resolves.toEqual({ elements: [] });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 
   it("retries gateway timeouts before succeeding", async () => {
     const fetchMock = vi

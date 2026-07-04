@@ -57,7 +57,7 @@ function overpassProxyUrl(): string | null {
 }
 
 function isRetryableOverpassStatus(status: number): boolean {
-  return status === 502 || status === 504;
+  return status === 429 || status === 502 || status === 503 || status === 504;
 }
 
 function isRetryableOverpassError(error: unknown): boolean {

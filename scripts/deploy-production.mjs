@@ -50,6 +50,39 @@ function shouldDeployFunctions(env) {
   return !/^(0|false|no|off)$/i.test(raw);
 }
 
+function parseFunctionUrls(deployOutput) {
+  const urls = {};
+  const pattern = /Function URL \((\w+)\([^)]+\)\):\s*(https:\/\/\S+)/g;
+  for (const match of deployOutput.matchAll(pattern)) {
+    urls[match[1]] = match[2];
+  }
+  return urls;
+}
+
+function printProxyEnvInstructions(functionUrls) {
+  const lines = ["\nSet these in Cloudflare Pages (and .env.local for dev):"];
+
+  if (functionUrls.overpass) {
+    lines.push(`  VITE_OVERPASS_PROXY_URL=${functionUrls.overpass}`);
+  } else {
+    lines.push(
+      "  VITE_OVERPASS_PROXY_URL=<overpass function URL from Firebase console>",
+    );
+  }
+
+  if (functionUrls.vehicles) {
+    lines.push(`  VITE_TRANSIT_PROXY_URL=${functionUrls.vehicles}`);
+  }
+
+  if (!functionUrls.overpass && !functionUrls.vehicles) {
+    lines.push(
+      "  (Function URLs were not found in deploy output — copy them from the Firebase console → Functions.)",
+    );
+  }
+
+  console.log(lines.join("\n"));
+}
+
 /**
  * Runs `firebase deploy`, streaming stdio while capturing text for error detection.
  * @param {string} onlyTargets
@@ -117,6 +150,7 @@ async function main() {
   let result = await runFirebaseDeploy(onlyFull);
   if (result.code === 0) {
     console.log("Backend deploy complete (Firestore + Functions).");
+    printProxyEnvInstructions(parseFunctionUrls(result.output));
     return;
   }
 
@@ -132,7 +166,10 @@ async function main() {
       "Deployed Firestore only. TfL vehicle proxy (Functions) was not updated.",
     );
     console.warn(
-      "Upgrade the Firebase project to Blaze to deploy Functions, or set DEPLOY_FIREBASE_FUNCTIONS=0 to skip the initial failed attempt.\n",
+      "Upgrade the Firebase project to Blaze to deploy Functions, or set DEPLOY_FIREBASE_FUNCTIONS=0 to skip the initial failed attempt.",
+    );
+    console.warn(
+      "Blaze is pay-as-you-go; at infrequent usage the Overpass proxy stays within the free tier.\n",
     );
     console.log("Backend deploy complete (Firestore).");
     return;

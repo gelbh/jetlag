@@ -22,7 +22,7 @@ const FEEDS = {
 const TFL_FETCH_TIMEOUT_MS = 10_000;
 const OVERPASS_FETCH_TIMEOUT_MS = 45_000;
 const VEHICLE_FEED_CACHE_TTL_MS = 15_000;
-const OVERPASS_CACHE_TTL_MS = 15 * 60 * 1000;
+const OVERPASS_CACHE_TTL_MS = 60 * 60 * 1000;
 
 const vehicleFeedCache = createMemoryCache(VEHICLE_FEED_CACHE_TTL_MS);
 const overpassResponseCache = createMemoryCache(OVERPASS_CACHE_TTL_MS);
@@ -54,7 +54,12 @@ async function fetchOverpassWithFailover(query) {
         return response;
       }
 
-      if (response.status === 502 || response.status === 504) {
+      if (
+        response.status === 429 ||
+        response.status === 502 ||
+        response.status === 503 ||
+        response.status === 504
+      ) {
         lastError = new Error("Overpass timed out.");
         continue;
       }

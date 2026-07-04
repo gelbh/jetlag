@@ -1,8 +1,8 @@
 import type { GameArea } from "../domain/annotations";
 import type { ElevationSampleCell } from "../domain/seaLevel";
 
-const DEFAULT_CACHE_TTL_MS = 15 * 60 * 1000;
-const STABLE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const DEFAULT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const STABLE_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const DB_NAME = "jetlag-geographic-cache";
 const STORE_NAME = "entries";
 const DB_VERSION = 1;
