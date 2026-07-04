@@ -8,6 +8,7 @@ import type {
   Polygon as GeoPolygon,
 } from "geojson";
 import { MatchingPanel } from "../../components/tools/MatchingPanel";
+import { overpassErrorMessage } from "../../services/overpassClient";
 import type { GameArea } from "../../domain/annotations";
 import { isActive, type AnnotationRecord } from "../../domain/annotations";
 import type { LatLngTuple } from "../../domain/geometry";
@@ -253,9 +254,7 @@ export function useMatchingTool({
         }
 
         setMatchingError(
-          error instanceof Error
-            ? error.message
-            : "Unable to resolve nearest feature.",
+          overpassErrorMessage(error, "Unable to resolve nearest feature."),
         );
       } finally {
         if (isLatestRequest(requestId)) {

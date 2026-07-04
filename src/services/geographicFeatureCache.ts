@@ -93,6 +93,52 @@ function openDatabase(): Promise<IDBDatabase> {
   return databasePromise;
 }
 
+function isStableCacheKey(key: string): boolean {
+  return (
+    key.startsWith("admin:") ||
+    key.startsWith("landmass:") ||
+    key.startsWith("coastline:")
+  );
+}
+
+async function readPersistedEntryIgnoringExpiry<T>(
+  key: string,
+): Promise<T | undefined> {
+  if (typeof indexedDB === "undefined") {
+    return undefined;
+  }
+
+  try {
+    const database = await openDatabase();
+    const transaction = database.transaction(STORE_NAME, "readonly");
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get(key);
+
+    const entry = await new Promise<PersistedCacheEntry<T> | undefined>(
+      (resolve, reject) => {
+        request.onsuccess = () =>
+          resolve(request.result as PersistedCacheEntry<T> | undefined);
+        request.onerror = () =>
+          reject(request.error ?? new Error("Cache read failed"));
+      },
+    );
+
+    await new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () =>
+        reject(transaction.error ?? new Error("Cache read failed"));
+    });
+
+    if (!entry) {
+      return undefined;
+    }
+
+    return entry.value;
+  } catch {
+    return undefined;
+  }
+}
+
 async function readPersistedEntry<T>(key: string): Promise<T | undefined> {
   if (typeof indexedDB === "undefined") {
     return undefined;
@@ -199,9 +245,20 @@ export async function getOrFetchCached<T>(
       return persisted;
     }
 
-    const value = await fetcher();
-    await writeCachedValue(key, value, options);
-    return value;
+    try {
+      const value = await fetcher();
+      await writeCachedValue(key, value, options);
+      return value;
+    } catch (error) {
+      if (isStableCacheKey(key)) {
+        const stale = await readPersistedEntryIgnoringExpiry<T>(key);
+        if (stale !== undefined) {
+          return stale;
+        }
+      }
+
+      throw error;
+    }
   })().finally(() => {
     inFlight.delete(key);
   });

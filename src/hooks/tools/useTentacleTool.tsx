@@ -24,6 +24,7 @@ import {
   type TentacleLocationCategoryId,
 } from "../../domain/tentacleQuestions";
 import { fetchTentaclePois } from "../../services/tentacleOverpass";
+import { overpassErrorMessage } from "../../services/overpassClient";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
@@ -127,7 +128,7 @@ export function useTentacleTool({
         }
 
         setTentacleError(
-          error instanceof Error ? error.message : "Unable to load locations.",
+          overpassErrorMessage(error, "Unable to load locations."),
         );
       } finally {
         if (isLatestRequest(requestId)) {

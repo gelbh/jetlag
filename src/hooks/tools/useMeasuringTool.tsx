@@ -33,6 +33,7 @@ import {
 } from "../../domain/measuringQuestions";
 import type { DistanceUnit } from "../../domain/distance";
 import { measuringLinearNotFoundMessage } from "../../services/measuringLinearFeatures";
+import { overpassErrorMessage } from "../../services/overpassClient";
 import {
   fetchMeasuringPlacesInArea,
   measuringPlaceNotFoundMessage,
@@ -302,9 +303,7 @@ export function useMeasuringTool({
         setMeasuringDistanceMeters(null);
         setMeasuringTargetPlaceName(null);
         setMeasuringError(
-          error instanceof Error
-            ? error.message
-            : "Unable to load places in the play area.",
+          overpassErrorMessage(error, "Unable to load places in the play area."),
         );
       } finally {
         if (requestId === placesRequestId.current) {
@@ -417,7 +416,7 @@ export function useMeasuringTool({
         setMeasuringTargetPoint(null);
         setMeasuringDistanceMeters(null);
         setMeasuringError(
-          error instanceof Error ? error.message : "Unable to find coastline.",
+          overpassErrorMessage(error, "Unable to find coastline."),
         );
       } finally {
         if (requestId === coastlineRequestId.current) {
@@ -475,9 +474,7 @@ export function useMeasuringTool({
       setMeasuringDistanceMeters(null);
       setMeasuringCoastSegments([]);
       setMeasuringError(
-        error instanceof Error
-          ? error.message
-          : measuringLinearNotFoundMessage(kind),
+        overpassErrorMessage(error, measuringLinearNotFoundMessage(kind)),
       );
     } finally {
       if (requestId === linearRequestId.current) {
@@ -770,9 +767,7 @@ export function useMeasuringTool({
       setMeasuringTargetAnchor(nearest.point, nearest.name);
     } catch (error) {
       setMeasuringError(
-        error instanceof Error
-          ? error.message
-          : "Unable to find that venue on the map.",
+        overpassErrorMessage(error, "Unable to find that venue on the map."),
       );
     } finally {
       setMeasuringLoading(false);
@@ -831,9 +826,7 @@ export function useMeasuringTool({
       setMeasuringTargetPlaceName(null);
       setMeasuringDistanceMeters(null);
       setMeasuringError(
-        error instanceof Error
-          ? error.message
-          : "Unable to find the nearest place.",
+        overpassErrorMessage(error, "Unable to find the nearest place."),
       );
     } finally {
       setMeasuringLoading(false);
