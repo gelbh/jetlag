@@ -332,6 +332,11 @@ export function useTentacleTool({
         }
       }}
       onCommit={() => void commit()}
+      onRetry={
+        tentacleCenter
+          ? () => void loadPoisForCenter(tentacleCenter, tentacleCategoryId)
+          : undefined
+      }
     />
   );
 

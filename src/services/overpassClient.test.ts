@@ -111,20 +111,20 @@ describe("overpassClient", () => {
     const fetchMock = vi
       .fn()
       .mockImplementation(async (url: string) => {
-        if (url.includes("kumi.systems")) {
+        if (url.includes("overpass-api.de")) {
           return {
-            ok: true,
-            status: 200,
-            headers: new Headers(),
-            text: async () => JSON.stringify({ elements: [] }),
+            ok: false,
+            status: 504,
+            headers: new Headers({ "Retry-After": "0" }),
+            text: async () => "",
           };
         }
 
         return {
-          ok: false,
-          status: 504,
-          headers: new Headers({ "Retry-After": "0" }),
-          text: async () => "",
+          ok: true,
+          status: 200,
+          headers: new Headers(),
+          text: async () => JSON.stringify({ elements: [] }),
         };
       });
     vi.stubGlobal("fetch", fetchMock);
@@ -135,7 +135,12 @@ describe("overpassClient", () => {
 
     expect(
       fetchMock.mock.calls.some(([url]) =>
-        String(url).includes("kumi.systems"),
+        String(url).includes("overpass-api.de"),
+      ),
+    ).toBe(true);
+    expect(
+      fetchMock.mock.calls.some(([url]) =>
+        String(url).includes("mail.ru"),
       ),
     ).toBe(true);
   });
@@ -143,7 +148,7 @@ describe("overpassClient", () => {
   it("failovers to the next endpoint after network errors", async () => {
     vi.useFakeTimers();
     const fetchMock = vi.fn().mockImplementation(async (url: string) => {
-      if (url.includes("kumi.systems")) {
+      if (url.includes("mail.ru")) {
         return mockOverpassResponse({ elements: [] });
       }
 
@@ -156,14 +161,33 @@ describe("overpassClient", () => {
     await expect(resultPromise).resolves.toEqual({ elements: [] });
 
     expect(
-      fetchMock.mock.calls.some(([url]) => String(url).includes("kumi.systems")),
+      fetchMock.mock.calls.some(([url]) => String(url).includes("mail.ru")),
     ).toBe(true);
+  });
+
+  it("failovers to the next endpoint after a fetch timeout", async () => {
+    const fetchMock = vi.fn().mockImplementation(async (url: string) => {
+      if (url.includes("overpass-api.de")) {
+        throw new FetchTimeoutError(25_000);
+      }
+
+      return mockOverpassResponse({ elements: [] });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      queryOverpass<{ elements: unknown[] }>("[out:json];"),
+    ).resolves.toEqual({ elements: [] });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("overpass-api.de");
+    expect(String(fetchMock.mock.calls[1]?.[0])).toContain("mail.ru");
   });
 
   it("throws OverpassUnavailableError after repeated fetch timeouts", async () => {
     vi.useFakeTimers();
     const fetchMock = vi.fn().mockImplementation(async () => {
-      throw new FetchTimeoutError(45_000);
+      throw new FetchTimeoutError(25_000);
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -175,6 +199,7 @@ describe("overpassClient", () => {
     });
     await runQueuedOverpassTimers();
     await assertion;
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   it("routes Overpass requests through the configured proxy", async () => {

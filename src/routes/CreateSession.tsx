@@ -279,6 +279,7 @@ export function CreateSession() {
           tier,
           metroId,
         );
+        setSession(session);
         setPremiumApiContext(session);
         preloadGameAreaCaches(gameArea);
       } else {

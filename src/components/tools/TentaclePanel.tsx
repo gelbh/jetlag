@@ -8,6 +8,7 @@ import {
   type TentacleLocationCategoryId,
 } from "../../domain/tentacleQuestions";
 import { AnchorControls } from "./shared/AnchorControls";
+import { ErrorWithRetry } from "./shared/ErrorWithRetry";
 import { LoadingReadout } from "./shared/LoadingReadout";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
 import { ResolvedReadout } from "./shared/ResolvedReadout";
@@ -40,6 +41,7 @@ interface TentaclePanelProps {
   onSelectPoi: (poiId: string) => void;
   onOutOfReachChange: (outOfReach: boolean) => void;
   onCommit: () => void;
+  onRetry?: () => void;
 }
 
 export function TentaclePanel({
@@ -60,6 +62,7 @@ export function TentaclePanel({
   onSelectPoi,
   onOutOfReachChange,
   onCommit,
+  onRetry,
 }: TentaclePanelProps) {
   const [stepIndex, setStepIndex] = useState(0);
   const step = TENTACLE_STEPS[stepIndex]?.id ?? "category";
@@ -192,7 +195,7 @@ export function TentaclePanel({
         }
       />
 
-      {error ? <p className="text-error">{error}</p> : null}
+      {error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null}
     </ToolPanelShell>
   );
 }

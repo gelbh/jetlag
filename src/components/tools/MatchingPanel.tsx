@@ -14,6 +14,7 @@ import { formatDistance, type DistanceUnit } from "../../domain/distance";
 import { yesNoAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { AnchorControls } from "./shared/AnchorControls";
+import { ErrorWithRetry } from "./shared/ErrorWithRetry";
 import { LoadingReadout } from "./shared/LoadingReadout";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
 import { ResolvedReadout } from "./shared/ResolvedReadout";
@@ -47,6 +48,7 @@ interface MatchingPanelProps {
   onUseGps: () => void;
   onAnswerChange: (answer: MatchingAnswer) => void;
   onCommit: () => void;
+  onRetry?: () => void;
 }
 
 export function MatchingPanel({
@@ -69,6 +71,7 @@ export function MatchingPanel({
   onUseGps,
   onAnswerChange,
   onCommit,
+  onRetry,
 }: MatchingPanelProps) {
   const [stepIndex, setStepIndex] = useState(0);
   const step = MATCHING_STEPS[stepIndex]?.id ?? "category";
@@ -264,7 +267,7 @@ export function MatchingPanel({
         }
       />
 
-      {error ? <p className="text-error">{error}</p> : null}
+      {error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null}
     </ToolPanelShell>
   );
 }

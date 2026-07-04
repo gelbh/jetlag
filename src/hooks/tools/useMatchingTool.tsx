@@ -471,6 +471,12 @@ export function useMatchingTool({
       onUseGps={() => void handleGps()}
       onAnswerChange={setMatchingAnswer}
       onCommit={() => void commit()}
+      onRetry={
+        matchingSeekerPoint
+          ? () =>
+              void resolveForAnchor(matchingSeekerPoint, matchingCategoryId)
+          : undefined
+      }
     />
   );
 

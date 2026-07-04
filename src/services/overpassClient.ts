@@ -6,7 +6,7 @@ import { withOverpassConcurrencyLimit } from "./overpass/requestQueue";
 
 const OVERPASS_MAX_RETRIES = 3;
 const OVERPASS_BASE_BACKOFF_MS = 750;
-const OVERPASS_FETCH_TIMEOUT_MS = 45_000;
+const OVERPASS_FETCH_TIMEOUT_MS = 25_000;
 
 const OVERPASS_UNAVAILABLE_MESSAGE =
   "Map data is temporarily unavailable. Check your connection and try again.";
@@ -64,7 +64,7 @@ function isRetryableOverpassStatus(status: number): boolean {
 
 function isRetryableOverpassError(error: unknown): boolean {
   if (error instanceof FetchTimeoutError) {
-    return true;
+    return false;
   }
 
   if (error instanceof TypeError) {
@@ -138,6 +138,11 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
       } catch (error) {
         if (isNonRetryableOverpassFailure(error)) {
           throw error;
+        }
+
+        if (error instanceof FetchTimeoutError) {
+          lastError = new OverpassUnavailableError();
+          break;
         }
 
         if (!isRetryableOverpassError(error)) {

@@ -6,7 +6,7 @@ import { getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { setCors } from "./cors.mjs";
-import { fetchWithTimeoutAndRetry } from "./fetchWithTimeout.mjs";
+import { fetchWithTimeout, fetchWithTimeoutAndRetry } from "./fetchWithTimeout.mjs";
 import { createMemoryCache } from "./memoryCache.mjs";
 import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "./overpassEndpoints.mjs";
 import { normalizeTflPayload } from "./tflNormalize.mjs";
@@ -34,7 +34,7 @@ const FEEDS = {
 };
 
 const TFL_FETCH_TIMEOUT_MS = 10_000;
-const OVERPASS_FETCH_TIMEOUT_MS = 45_000;
+const OVERPASS_FETCH_TIMEOUT_MS = 25_000;
 const VEHICLE_FEED_CACHE_TTL_MS = 15_000;
 const OVERPASS_CACHE_TTL_MS = 60 * 60 * 1000;
 const GRANT_ACCESS_FAILURE_DELAY_MS = 300;
@@ -61,7 +61,7 @@ async function fetchOverpassWithFailover(query) {
 
   for (const endpoint of OVERPASS_ENDPOINTS) {
     try {
-      const response = await fetchWithTimeoutAndRetry(
+      const response = await fetchWithTimeout(
         endpoint,
         {
           method: "POST",
@@ -72,7 +72,6 @@ async function fetchOverpassWithFailover(query) {
           body: `data=${encodeURIComponent(query)}`,
         },
         OVERPASS_FETCH_TIMEOUT_MS,
-        1,
       );
 
       if (response.ok) {
