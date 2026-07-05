@@ -39,6 +39,7 @@ interface MapSettingsSheetProps {
   metroLabel: string | null;
   loadingStatic: boolean;
   loadingLive: boolean;
+  liveDataStale?: boolean;
   stopCount: number;
   routeCount: number;
   vehicleCount: number;
@@ -79,6 +80,7 @@ export function MapSettingsSheet({
   metroLabel,
   loadingStatic,
   loadingLive,
+  liveDataStale = false,
   stopCount,
   routeCount,
   vehicleCount,
@@ -149,6 +151,7 @@ export function MapSettingsSheet({
               metroLabel={metroLabel}
               loadingStatic={loadingStatic}
               loadingLive={loadingLive}
+              liveDataStale={liveDataStale}
               stopCount={stopCount}
               routeCount={routeCount}
               vehicleCount={vehicleCount}
@@ -202,6 +205,7 @@ function MapSegment({
   metroLabel,
   loadingStatic,
   loadingLive,
+  liveDataStale = false,
   stopCount,
   routeCount,
   vehicleCount,
@@ -228,6 +232,7 @@ function MapSegment({
   metroLabel: string | null;
   loadingStatic: boolean;
   loadingLive: boolean;
+  liveDataStale?: boolean;
   stopCount: number;
   routeCount: number;
   vehicleCount: number;
@@ -281,6 +286,7 @@ function MapSegment({
         metroLabel={metroLabel}
         loadingStatic={loadingStatic}
         loadingLive={loadingLive}
+        liveDataStale={liveDataStale}
         stopCount={stopCount}
         routeCount={routeCount}
         vehicleCount={vehicleCount}

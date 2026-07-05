@@ -1,7 +1,8 @@
-export type SyncStatus = "synced" | "saving" | "offline" | "error";
+export type SyncStatus = "synced" | "saving" | "offline" | "degraded" | "error";
 
 export function resolveSyncStatus(input: {
   online: boolean;
+  reachable: boolean | null;
   inFlightWrites: number;
   queuedWrites: number;
   lastSyncError: string | null;
@@ -16,6 +17,10 @@ export function resolveSyncStatus(input: {
 
   if (!input.online || input.queuedWrites > 0) {
     return "offline";
+  }
+
+  if (input.reachable === false) {
+    return "degraded";
   }
 
   return "synced";

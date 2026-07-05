@@ -65,7 +65,19 @@ export default defineConfig({
             options: {
               cacheName: "osm-tiles",
               expiration: {
-                maxEntries: 250,
+                maxEntries: 500,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
+              },
+            },
+          },
+          {
+            urlPattern:
+              /^https:\/\/server\.arcgisonline\.com\/ArcGIS\/rest\/services\/World_Imagery\/MapServer\/tile\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "esri-satellite-tiles",
+              expiration: {
+                maxEntries: 500,
                 maxAgeSeconds: 60 * 60 * 24 * 7,
               },
             },

@@ -14,6 +14,7 @@ import {
   joinRemoteSessionByCode,
   lookupRemoteSessionByCode,
 } from "../services/firestoreAnnotations";
+import { retryAsync } from "../services/retryAsync";
 import { setPremiumApiContext } from "../services/premiumApiContext";
 
 export function JoinSession() {
@@ -44,7 +45,9 @@ export function JoinSession() {
 
     void (async () => {
       try {
-        const result = await lookupRemoteSessionByCode(normalized);
+        const result = await retryAsync(() =>
+          lookupRemoteSessionByCode(normalized),
+        );
         if (cancelled) {
           return;
         }
@@ -87,8 +90,10 @@ export function JoinSession() {
         return;
       }
 
-      const user = await ensureAnonymousUser();
-      const result = await joinRemoteSessionByCode(normalized, user.uid);
+      const user = await retryAsync(() => ensureAnonymousUser());
+      const result = await retryAsync(() =>
+        joinRemoteSessionByCode(normalized, user.uid),
+      );
       if (result.status === "missing") {
         setError("No session found for that code.");
         return;

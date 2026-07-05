@@ -86,6 +86,19 @@ describe("geographicFeatureCache stale fallback", () => {
     ).resolves.toEqual(staleValue);
   });
 
+  it("returns expired measuring cache entries when the fetcher rejects", async () => {
+    const key = geographicCacheKey(sampleGameArea, "measuring:park");
+    const staleValue = [{ id: "stale-park" }];
+
+    await writeExpiredPersistedEntry(key, staleValue);
+
+    await expect(
+      getOrFetchCached(key, async () => {
+        throw new Error("network down");
+      }),
+    ).resolves.toEqual(staleValue);
+  });
+
   it("rethrows when the fetcher rejects and no stale stable cache exists", async () => {
     const key = adminDivisionCacheKey(sampleGameArea, 6);
 

@@ -15,6 +15,8 @@ import {
 } from "../services/offlineQueue";
 import { writeRemoteAnnotation } from "../services/firestoreAnnotations";
 
+const QUEUE_FLUSH_INTERVAL_MS = 45_000;
+
 export function useSessionSync() {
   const session = useSessionStore((state) => state.session);
   const setPendingWrites = useSessionStore((state) => state.setPendingWrites);
@@ -113,6 +115,10 @@ export function useSessionSync() {
       const pendingForSession = await readOfflineQueueForSession(session.id);
       setPendingWrites(pendingForSession.length);
 
+      if (pendingForSession.length === 0) {
+        return;
+      }
+
       let lastError: string | null = null;
 
       for (const entry of pendingForSession) {
@@ -132,6 +138,8 @@ export function useSessionSync() {
 
       if (lastError) {
         setLastSyncError(lastError);
+      } else {
+        setLastSyncError(null);
       }
 
       const remaining = await readOfflineQueueForSession(session.id);
@@ -145,8 +153,13 @@ export function useSessionSync() {
     window.addEventListener("online", handleOnline);
     void flushQueue();
 
+    const intervalId = window.setInterval(() => {
+      void flushQueue();
+    }, QUEUE_FLUSH_INTERVAL_MS);
+
     return () => {
       window.removeEventListener("online", handleOnline);
+      window.clearInterval(intervalId);
     };
   }, [session, setLastSyncError, setPendingWrites]);
 

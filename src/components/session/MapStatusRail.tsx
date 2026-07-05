@@ -33,7 +33,7 @@ function syncToneForStatus(status: SyncStatus): SyncTone {
   if (status === "error") {
     return "error";
   }
-  if (status === "offline") {
+  if (status === "offline" || status === "degraded") {
     return "warning";
   }
   return "info";
@@ -95,6 +95,20 @@ function syncRailDisplay(
           queuedWrites > 0
             ? `Offline · ${queuedWrites} queued`
             : "Offline",
+        tone: "warning",
+      },
+      banner: null,
+    };
+  }
+
+  if (status === "degraded") {
+    return {
+      inline: {
+        visible: true,
+        label:
+          queuedWrites > 0
+            ? `Connection unstable · ${queuedWrites} queued`
+            : "Connection unstable",
         tone: "warning",
       },
       banner: null,

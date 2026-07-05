@@ -20,7 +20,11 @@ import {
   ensureAnonymousUser,
 } from "../services/firebase";
 import { createRemoteSession } from "../services/firestoreAnnotations";
-import { preloadGameAreaCaches } from "../services/gameAreaPreload";
+import {
+  preloadCriticalGameAreaCaches,
+  preloadGameAreaCaches,
+} from "../services/gameAreaPreload";
+import { retryAsync } from "../services/retryAsync";
 import {
   inferTransitMetroId,
   listTransitMetros,
@@ -272,16 +276,16 @@ export function CreateSession() {
       }
 
       if (isFirebaseConfigured()) {
-        const user = await ensureAnonymousUser();
-        const session = await createRemoteSession(
-          gameArea,
-          user.uid,
-          tier,
-          metroId,
+        const user = await retryAsync(() => ensureAnonymousUser());
+        const session = await retryAsync(() =>
+          createRemoteSession(gameArea, user.uid, tier, metroId),
         );
         setSession(session);
         setPremiumApiContext(session);
         preloadGameAreaCaches(gameArea);
+        if (navigator.onLine) {
+          await preloadCriticalGameAreaCaches(gameArea);
+        }
       } else {
         const localSession = {
           id: LOCAL_SESSION_ID,
@@ -295,6 +299,9 @@ export function CreateSession() {
         setSession(localSession);
         setPremiumApiContext(localSession);
         preloadGameAreaCaches(gameArea);
+        if (navigator.onLine) {
+          await preloadCriticalGameAreaCaches(gameArea);
+        }
       }
 
       navigate("/map");

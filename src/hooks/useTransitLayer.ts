@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GameArea } from "../domain/annotations";
 import type {
   TransitRealtimeSnapshot,
@@ -32,6 +32,12 @@ export function useTransitLayer({
   const [loadingStatic, setLoadingStatic] = useState(false);
   const [loadingLive, setLoadingLive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [liveDataStale, setLiveDataStale] = useState(false);
+  const liveDataRef = useRef<TransitRealtimeSnapshot | null>(null);
+
+  useEffect(() => {
+    liveDataRef.current = liveData;
+  }, [liveData]);
 
   const refreshStatic = useCallback(async () => {
     setLoadingStatic(true);
@@ -57,12 +63,19 @@ export function useTransitLayer({
     try {
       const next = await fetchLiveTransitVehicles(gameArea, metroId);
       setLiveData(next);
+      setLiveDataStale(false);
       setError(next.message ?? null);
     } catch (nextError) {
+      const hasCachedLiveData = liveDataRef.current !== null;
+      setLiveDataStale(hasCachedLiveData);
       setError(
         nextError instanceof Error
-          ? nextError.message
-          : "Unable to refresh live vehicles.",
+          ? hasCachedLiveData
+            ? "Live data delayed. Showing last update."
+            : nextError.message
+          : hasCachedLiveData
+            ? "Live data delayed. Showing last update."
+            : "Unable to refresh live vehicles.",
       );
     } finally {
       setLoadingLive(false);
@@ -164,6 +177,7 @@ export function useTransitLayer({
     liveData: filteredLive,
     loadingStatic,
     loadingLive,
+    liveDataStale,
     error,
     refreshStatic,
     refreshLive,

@@ -166,28 +166,30 @@ describe("overpassClient", () => {
   });
 
   it("failovers to the next endpoint after a fetch timeout", async () => {
+    vi.useFakeTimers();
+    let firstEndpointAttempts = 0;
     const fetchMock = vi.fn().mockImplementation(async (url: string) => {
       if (url.includes("overpass-api.de")) {
-        throw new FetchTimeoutError(25_000);
+        firstEndpointAttempts += 1;
+        throw new FetchTimeoutError(15_000);
       }
 
       return mockOverpassResponse({ elements: [] });
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    await expect(
-      queryOverpass<{ elements: unknown[] }>("[out:json];"),
-    ).resolves.toEqual({ elements: [] });
+    const resultPromise = queryOverpass<{ elements: unknown[] }>("[out:json];");
+    await runQueuedOverpassTimers();
+    await expect(resultPromise).resolves.toEqual({ elements: [] });
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("overpass-api.de");
-    expect(String(fetchMock.mock.calls[1]?.[0])).toContain("mail.ru");
+    expect(firstEndpointAttempts).toBe(4);
+    expect(String(fetchMock.mock.calls.at(-1)?.[0])).toContain("mail.ru");
   });
 
   it("throws OverpassUnavailableError after repeated fetch timeouts", async () => {
     vi.useFakeTimers();
     const fetchMock = vi.fn().mockImplementation(async () => {
-      throw new FetchTimeoutError(25_000);
+      throw new FetchTimeoutError(15_000);
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -199,7 +201,7 @@ describe("overpassClient", () => {
     });
     await runQueuedOverpassTimers();
     await assertion;
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock).toHaveBeenCalledTimes(12);
   });
 
   it("routes Overpass requests through the configured proxy", async () => {

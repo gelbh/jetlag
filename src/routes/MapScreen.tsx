@@ -14,6 +14,7 @@ import {
 import { MapFirstRunSheet } from "../components/session/MapFirstRunSheet";
 import { MapToolsHintBanner } from "../components/session/MapToolsHintBanner";
 import { MapSettingsSheet } from "../components/session/MapSettingsSheet";
+import { GameAreaPreloadBanner } from "../components/session/GameAreaPreloadBanner";
 import { MapStatusRail } from "../components/session/MapStatusRail";
 import { SessionLog } from "../components/session/SessionLog";
 import { AnnotationEditSheet } from "../components/tools/AnnotationEditSheet";
@@ -324,6 +325,7 @@ export function MapScreen() {
     liveData: transitLiveData,
     loadingStatic: transitLoadingStatic,
     loadingLive: transitLoadingLive,
+    liveDataStale: transitLiveDataStale,
     error: transitError,
   } = useTransitLayer({
     gameArea: fallbackGameArea(session?.gameArea),
@@ -664,6 +666,7 @@ export function MapScreen() {
         ref={chromeHudRef}
         className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)]"
       >
+        <GameAreaPreloadBanner />
         <MapStatusRail
           sessionCode={session.code}
           activeTool={activeTool}
@@ -765,6 +768,7 @@ export function MapScreen() {
         metroLabel={transitMetro?.label ?? null}
         loadingStatic={transitLoadingStatic}
         loadingLive={transitLoadingLive}
+        liveDataStale={transitLiveDataStale}
         stopCount={transitStaticData?.stops.length ?? 0}
         routeCount={transitStaticData?.routes.length ?? 0}
         vehicleCount={transitLiveData?.vehicles.length ?? 0}

@@ -6,6 +6,7 @@ describe("resolveSyncStatus", () => {
     expect(
       resolveSyncStatus({
         online: true,
+        reachable: true,
         inFlightWrites: 2,
         queuedWrites: 3,
         lastSyncError: "Write failed",
@@ -17,6 +18,7 @@ describe("resolveSyncStatus", () => {
     expect(
       resolveSyncStatus({
         online: true,
+        reachable: true,
         inFlightWrites: 1,
         queuedWrites: 0,
         lastSyncError: null,
@@ -28,6 +30,7 @@ describe("resolveSyncStatus", () => {
     expect(
       resolveSyncStatus({
         online: false,
+        reachable: false,
         inFlightWrites: 0,
         queuedWrites: 0,
         lastSyncError: null,
@@ -37,6 +40,7 @@ describe("resolveSyncStatus", () => {
     expect(
       resolveSyncStatus({
         online: true,
+        reachable: true,
         inFlightWrites: 0,
         queuedWrites: 2,
         lastSyncError: null,
@@ -44,10 +48,23 @@ describe("resolveSyncStatus", () => {
     ).toBe("offline");
   });
 
+  it("reports degraded when online but unreachable", () => {
+    expect(
+      resolveSyncStatus({
+        online: true,
+        reachable: false,
+        inFlightWrites: 0,
+        queuedWrites: 0,
+        lastSyncError: null,
+      }),
+    ).toBe("degraded");
+  });
+
   it("reports synced when online with no pending work", () => {
     expect(
       resolveSyncStatus({
         online: true,
+        reachable: true,
         inFlightWrites: 0,
         queuedWrites: 0,
         lastSyncError: null,

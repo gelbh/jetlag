@@ -175,3 +175,10 @@ export async function clearOfflineQueueForSession(
   const entries = await readOfflineQueueForSession(sessionId);
   await Promise.all(entries.map((entry) => removeOfflineWrite(entry.id)));
 }
+
+export async function countOfflineQueueForSession(
+  sessionId: string,
+): Promise<number> {
+  const entries = await readOfflineQueueForSession(sessionId);
+  return entries.length;
+}

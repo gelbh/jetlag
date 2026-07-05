@@ -9,6 +9,7 @@ interface TransitControlsProps {
   premiumSession?: boolean;
   loadingStatic: boolean;
   loadingLive: boolean;
+  liveDataStale?: boolean;
   stopCount: number;
   routeCount: number;
   vehicleCount: number;
@@ -38,6 +39,7 @@ export function TransitControls({
   premiumSession = true,
   loadingStatic,
   loadingLive,
+  liveDataStale = false,
   stopCount,
   routeCount,
   vehicleCount,
@@ -128,6 +130,7 @@ export function TransitControls({
             }`
           : ""}
         {loadingStatic || loadingLive ? " · updating…" : ""}
+        {liveDataStale ? " · live data delayed" : ""}
         {lastUpdated ? ` · updated ${new Date(lastUpdated).toLocaleTimeString()}` : ""}
       </p>
 

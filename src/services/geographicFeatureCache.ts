@@ -20,6 +20,7 @@ interface PersistedCacheEntry<T> {
 
 const memoryCache = new Map<string, CacheEntry<unknown>>();
 const inFlight = new Map<string, Promise<unknown>>();
+const staleServedKeys = new Set<string>();
 let databasePromise: Promise<IDBDatabase> | null = null;
 
 function stableGameAreaKey(gameArea: GameArea): string {
@@ -45,11 +46,7 @@ export function readCachedMemoryEntry<T>(key: string): T | undefined {
 }
 
 function cacheTtlMsForKey(key: string): number {
-  if (
-    key.startsWith("admin:") ||
-    key.startsWith("landmass:") ||
-    key.startsWith("coastline:")
-  ) {
+  if (isStableCacheKey(key)) {
     return STABLE_CACHE_TTL_MS;
   }
 
@@ -99,6 +96,16 @@ function isStableCacheKey(key: string): boolean {
     key.startsWith("landmass:") ||
     key.startsWith("coastline:")
   );
+}
+
+export function staleCacheCaptionForKey(key: string): string | undefined {
+  return staleServedKeys.has(key)
+    ? "Showing cached data — tap to refresh"
+    : undefined;
+}
+
+export function clearStaleCacheNoticesForTests(): void {
+  staleServedKeys.clear();
 }
 
 async function readPersistedEntryIgnoringExpiry<T>(
@@ -247,14 +254,14 @@ export async function getOrFetchCached<T>(
 
     try {
       const value = await fetcher();
+      staleServedKeys.delete(key);
       await writeCachedValue(key, value, options);
       return value;
     } catch (error) {
-      if (isStableCacheKey(key)) {
-        const stale = await readPersistedEntryIgnoringExpiry<T>(key);
-        if (stale !== undefined) {
-          return stale;
-        }
+      const stale = await readPersistedEntryIgnoringExpiry<T>(key);
+      if (stale !== undefined) {
+        staleServedKeys.add(key);
+        return stale;
       }
 
       throw error;
@@ -320,6 +327,7 @@ export function staticTransitCacheKey(gameArea: GameArea): string {
 export async function clearGeographicFeatureCacheForTests(): Promise<void> {
   memoryCache.clear();
   inFlight.clear();
+  staleServedKeys.clear();
 
   if (typeof indexedDB === "undefined") {
     return;
