@@ -1,5 +1,6 @@
-import { initializeApp, type FirebaseApp } from "firebase/app";
+import { deleteApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import {
+  connectAuthEmulator,
   getAuth,
   signInAnonymously,
   type Auth,
@@ -12,6 +13,7 @@ import {
 } from "firebase/app-check";
 import { getFunctions, type Functions } from "firebase/functions";
 import {
+  connectFirestoreEmulator,
   initializeFirestore,
   memoryLocalCache,
   persistentLocalCache,
@@ -25,6 +27,11 @@ let db: Firestore | null = null;
 let functions: Functions | null = null;
 let appCheck: AppCheck | null = null;
 let persistenceUnavailable = false;
+let emulatorsConnected = false;
+
+function firebaseUsesEmulator(): boolean {
+  return import.meta.env.VITE_USE_FIREBASE_EMULATOR === "true";
+}
 
 export function isFirestorePersistenceUnavailable(): boolean {
   return persistenceUnavailable;
@@ -51,6 +58,21 @@ export function isFirebaseConfigured(): boolean {
   return readConfig() !== null;
 }
 
+function connectEmulatorsIfConfigured(
+  firestore: Firestore,
+  firebaseAuth: Auth,
+): void {
+  if (!firebaseUsesEmulator() || emulatorsConnected) {
+    return;
+  }
+
+  connectFirestoreEmulator(firestore, "127.0.0.1", 8180);
+  connectAuthEmulator(firebaseAuth, "http://127.0.0.1:9199", {
+    disableWarnings: true,
+  });
+  emulatorsConnected = true;
+}
+
 function getFirebaseApp(): FirebaseApp {
   if (!app) {
     const config = readConfig();
@@ -59,7 +81,9 @@ function getFirebaseApp(): FirebaseApp {
     }
 
     app = initializeApp(config);
-    initializeAppCheckIfConfigured(app);
+    if (!firebaseUsesEmulator()) {
+      initializeAppCheckIfConfigured(app);
+    }
   }
 
   return app;
@@ -100,6 +124,14 @@ export function getFirebaseAuth(): Auth {
 function createFirestoreDb(): Firestore {
   const firebaseApp = getFirebaseApp();
 
+  if (firebaseUsesEmulator()) {
+    const firestore = initializeFirestore(firebaseApp, {
+      localCache: memoryLocalCache(),
+    });
+    connectEmulatorsIfConfigured(firestore, getFirebaseAuth());
+    return firestore;
+  }
+
   try {
     return initializeFirestore(firebaseApp, {
       localCache: persistentLocalCache({
@@ -131,5 +163,19 @@ export async function ensureAnonymousUser(): Promise<User> {
 
   const credential = await signInAnonymously(firebaseAuth);
   return credential.user;
+}
+
+export async function resetFirebaseForTests(): Promise<void> {
+  for (const existingApp of getApps()) {
+    await deleteApp(existingApp);
+  }
+
+  app = null;
+  auth = null;
+  db = null;
+  functions = null;
+  appCheck = null;
+  persistenceUnavailable = false;
+  emulatorsConnected = false;
 }
 

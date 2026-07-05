@@ -56,7 +56,8 @@ service cloud.firestore {
           || hasHostAccess()
         );
 
-      allow update: if isSignedIn()
+      allow update: if (
+        isSignedIn()
         && request.resource.data.code == resource.data.code
         && request.resource.data.gameArea == resource.data.gameArea
         && request.resource.data.hostUid == resource.data.hostUid
@@ -64,8 +65,8 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids'])
         && request.resource.data.memberUids is list
         && request.auth.uid in request.resource.data.memberUids
-        || isSessionHost(sessionId)
-        && request.resource.data.code == resource.data.code
+      ) || (
+        isSessionHost(sessionId)
         && request.resource.data.gameArea == resource.data.gameArea
         && request.resource.data.hostUid == resource.data.hostUid
         && request.resource.data.memberUids == resource.data.memberUids
@@ -74,7 +75,8 @@ service cloud.firestore {
         && request.resource.data.endedAt is string
         && request.resource.data.status == 'ended'
         && !('code' in request.resource.data)
-        || isSessionHost(sessionId)
+      ) || (
+        isSessionHost(sessionId)
         && request.resource.data.code == resource.data.code
         && request.resource.data.gameArea == resource.data.gameArea
         && request.resource.data.hostUid == resource.data.hostUid
@@ -84,7 +86,8 @@ service cloud.firestore {
         && request.resource.data.timerAccumulatedMs is number
         && request.resource.data.timerAccumulatedMs >= 0
         && (request.resource.data.timerRunningSince == null
-          || request.resource.data.timerRunningSince is string);
+          || request.resource.data.timerRunningSince is string)
+      );
 
       match /annotations/{annotationId} {
         allow read: if isSessionMember(sessionId);

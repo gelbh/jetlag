@@ -41,7 +41,14 @@ Share the access code out-of-band with co-hosts who should be able to create Pre
 
 - `npm run lint`
 - `npm run typecheck`
-- `npm test`
+- `npm test` — Vitest unit/integration suite
+- `npm run test:coverage` — Vitest with coverage thresholds
+- `npm run test:functions` — Firebase Cloud Functions tests
+- `npm run test:emulator` — Firestore/auth emulator integration tests (requires `firebase emulators:exec` or running emulators locally)
+- `npm run test:e2e` — Playwright browser flows
+- `npm run test:all` — Vitest + Functions (also runs in Husky pre-commit and `npm run deploy`)
+
+See [``]() for manual flaky-network checks and the automated tests that cover each scenario.
 
 ## Production deploy
 
