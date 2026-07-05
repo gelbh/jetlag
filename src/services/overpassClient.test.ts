@@ -232,6 +232,10 @@ describe("overpassClient", () => {
     vi.useFakeTimers();
     vi.stubEnv("VITE_OVERPASS_PROXY_URL", "https://proxy.example/overpass");
     setPremiumApiContext(premiumSession());
+    vi.spyOn(accessControl, "buildPremiumProxyHeaders").mockResolvedValue({
+      Authorization: "Bearer test-token",
+      "X-Session-Id": "session-premium",
+    });
     const fetchMock = vi.fn().mockImplementation(async () => {
       throw new TypeError("Failed to fetch");
     });
