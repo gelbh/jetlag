@@ -1,7 +1,8 @@
+import { useShallow } from "zustand/react/shallow";
 import { selectPreloadBanner, usePreloadStore } from "../../state/preloadStore";
 
 export function GameAreaPreloadBanner() {
-  const banner = usePreloadStore(selectPreloadBanner);
+  const banner = usePreloadStore(useShallow(selectPreloadBanner));
   const dismiss = usePreloadStore((state) => state.dismiss);
 
   if (!banner.visible) {
