@@ -62,53 +62,7 @@ service cloud.firestore {
     }
 
     function validOptionalTentacleRadiusMeters(value) {
-      return !(value is int) || (value >= 200 && value <= 50000);
-    }
-
-    function validSessionRulesUpdate() {
-      return isSessionHost(sessionId)
-        && timerNeverStarted(resource.data)
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.memberRoles == resource.data.memberRoles
-        && request.resource.data.timerAccumulatedMs == resource.data.timerAccumulatedMs
-        && request.resource.data.timerRunningSince == resource.data.timerRunningSince
-        && request.resource.data.hidingZoneRadiusMeters is number
-        && request.resource.data.hidingZoneRadiusMeters >= 100
-        && request.resource.data.hidingZoneRadiusMeters <= 800
-        && validOptionalHidingPeriodMinutes(request.resource.data.hidingPeriodMinutes)
-        && validOptionalPhotoDeadlineMinutes(request.resource.data.photoAnswerDeadlineMinutes)
-        && validOptionalQuestionDeadlineMinutes(request.resource.data.questionAnswerDeadlineMinutes)
-        && (
-          !('disabledTools' in request.resource.data)
-          || validDisabledTools(request.resource.data.disabledTools)
-        )
-        && (
-          !('tentaclesEnabled' in request.resource.data)
-          || request.resource.data.tentaclesEnabled is bool
-        )
-        && (
-          !('thermometerPresetMiles' in request.resource.data)
-          || validThermometerPresetMiles(request.resource.data.thermometerPresetMiles)
-        )
-        && validOptionalTentacleRadiusMeters(request.resource.data.tentacleMediumRadiusMeters)
-        && validOptionalTentacleRadiusMeters(request.resource.data.tentacleLargeRadiusMeters)
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly([
-            'hidingZoneRadiusMeters',
-            'hidingPeriodMinutes',
-            'photoAnswerDeadlineMinutes',
-            'questionAnswerDeadlineMinutes',
-            'disabledTools',
-            'tentaclesEnabled',
-            'thermometerPresetMiles',
-            'tentacleMediumRadiusMeters',
-            'tentacleLargeRadiusMeters'
-          ]);
+      return value == null || !(value is int) || (value >= 200 && value <= 50000);
     }
 
     function sessionData(sessionId) {
@@ -169,6 +123,72 @@ service cloud.firestore {
         && request.auth.uid == sessionData(sessionId).hostUid;
     }
 
+    function validSessionRulesUpdate(sessionId) {
+      return isSessionHost(sessionId)
+        && timerNeverStarted(resource.data)
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.memberRoles == resource.data.memberRoles
+        && request.resource.data.timerAccumulatedMs == resource.data.timerAccumulatedMs
+        && request.resource.data.timerRunningSince == resource.data.timerRunningSince
+        && request.resource.data.hidingZoneRadiusMeters is number
+        && request.resource.data.hidingZoneRadiusMeters >= 100
+        && request.resource.data.hidingZoneRadiusMeters <= 800
+        && validOptionalHidingPeriodMinutes(request.resource.data.hidingPeriodMinutes)
+        && (
+          !('photoAnswerDeadlineMinutes' in request.resource.data)
+          || validOptionalPhotoDeadlineMinutes(
+            request.resource.data.photoAnswerDeadlineMinutes
+          )
+        )
+        && (
+          !('questionAnswerDeadlineMinutes' in request.resource.data)
+          || validOptionalQuestionDeadlineMinutes(
+            request.resource.data.questionAnswerDeadlineMinutes
+          )
+        )
+        && (
+          !('disabledTools' in request.resource.data)
+          || validDisabledTools(request.resource.data.disabledTools)
+        )
+        && (
+          !('tentaclesEnabled' in request.resource.data)
+          || request.resource.data.tentaclesEnabled is bool
+        )
+        && (
+          !('thermometerPresetMiles' in request.resource.data)
+          || validThermometerPresetMiles(request.resource.data.thermometerPresetMiles)
+        )
+        && (
+          !('tentacleMediumRadiusMeters' in request.resource.data)
+          || validOptionalTentacleRadiusMeters(
+            request.resource.data.tentacleMediumRadiusMeters
+          )
+        )
+        && (
+          !('tentacleLargeRadiusMeters' in request.resource.data)
+          || validOptionalTentacleRadiusMeters(
+            request.resource.data.tentacleLargeRadiusMeters
+          )
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'hidingZoneRadiusMeters',
+            'hidingPeriodMinutes',
+            'photoAnswerDeadlineMinutes',
+            'questionAnswerDeadlineMinutes',
+            'disabledTools',
+            'tentaclesEnabled',
+            'thermometerPresetMiles',
+            'tentacleMediumRadiusMeters',
+            'tentacleLargeRadiusMeters'
+          ]);
+    }
+
     function joinRoleUnchanged() {
       return !(request.auth.uid in resource.data.memberRoles)
         || resource.data.memberRoles[request.auth.uid]
@@ -207,7 +227,7 @@ service cloud.firestore {
           || hasHostAccess()
         );
 
-      allow update: if (
+      allow update: if validSessionRulesUpdate(sessionId) || (
         isSignedIn()
         && request.resource.data.code == resource.data.code
         && request.resource.data.gameArea == resource.data.gameArea
@@ -250,7 +270,7 @@ service cloud.firestore {
         && request.resource.data.timerAccumulatedMs >= 0
         && (request.resource.data.timerRunningSince == null
           || request.resource.data.timerRunningSince is string)
-      ) || validSessionRulesUpdate();
+      );
 
       match /annotations/{annotationId} {
         allow read: if isSessionMember(sessionId);
