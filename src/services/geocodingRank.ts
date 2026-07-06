@@ -120,6 +120,45 @@ export interface RankedGeocodedPlaceCandidate {
   fromCityQuery: boolean;
 }
 
+const BOUNDS_FINGERPRINT_PRECISION = 3;
+
+export function placeBoundsFingerprint(
+  place: Pick<GeocodedPlace, "bounds">,
+): string {
+  const round = (value: number) =>
+    Number(value.toFixed(BOUNDS_FINGERPRINT_PRECISION));
+  const { south, west, north, east } = place.bounds;
+  return `${round(south)}|${round(west)}|${round(north)}|${round(east)}`;
+}
+
+function candidateQualityScore(candidate: RankedGeocodedPlaceCandidate): number {
+  let score = candidate.importance;
+
+  if (candidate.place.boundary !== undefined) {
+    score += 1_000;
+  }
+
+  if (candidate.fromCityQuery) {
+    score += 100;
+  }
+
+  return score;
+}
+
+export function mergeRankedGeocodedPlaceCandidates(
+  left: RankedGeocodedPlaceCandidate,
+  right: RankedGeocodedPlaceCandidate,
+): RankedGeocodedPlaceCandidate {
+  const winner =
+    candidateQualityScore(right) > candidateQualityScore(left) ? right : left;
+
+  return {
+    place: winner.place,
+    importance: Math.max(left.importance, right.importance),
+    fromCityQuery: left.fromCityQuery || right.fromCityQuery,
+  };
+}
+
 function placeContainsPoint(place: GeocodedPlace, point: LatLngTuple): boolean {
   const gameArea = place.boundary ?? placeToGameArea(place);
   return isPointInGameArea(point, gameArea);

@@ -150,6 +150,128 @@ describe("geocoding integration", () => {
     expect(fetchMock.mock.calls.length).toBeGreaterThan(2);
   });
 
+  it("dedupes identical bounding boxes from different Nominatim place_ids", async () => {
+    const countyBounds = ["53.2", "53.5", "-6.5", "-6.0"];
+    const countyGeoJson = {
+      type: "Polygon" as const,
+      coordinates: [
+        [
+          [-6.5, 53.2],
+          [-6.0, 53.2],
+          [-6.0, 53.5],
+          [-6.5, 53.5],
+          [-6.5, 53.2],
+        ],
+      ],
+    };
+
+    const fetchMock = vi.fn().mockImplementation(async (input: string) => {
+      const url = new URL(input);
+      const featureType = url.searchParams.get("featureType");
+
+      if (featureType === "city") {
+        return {
+          ok: true,
+          json: async () => [
+            {
+              place_id: 102,
+              display_name: "County Dublin, Leinster, Ireland",
+              lat: "53.3498",
+              lon: "-6.2603",
+              boundingbox: countyBounds,
+              addresstype: "county",
+              importance: 0.6,
+              geojson: countyGeoJson,
+            },
+          ],
+        };
+      }
+
+      return {
+        ok: true,
+        json: async () => [
+          {
+            place_id: 100,
+            display_name: "County Dublin, Leinster, Ireland",
+            lat: "53.3498",
+            lon: "-6.2603",
+            boundingbox: countyBounds,
+            addresstype: "county",
+            importance: 0.5,
+          },
+          {
+            place_id: 101,
+            display_name: "County Dublin, Leinster, Ireland",
+            lat: "53.3498",
+            lon: "-6.2603",
+            boundingbox: countyBounds,
+            addresstype: "county",
+            importance: 0.45,
+          },
+        ],
+      };
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const results = await searchPlaces("co dublin");
+    expect(results).toHaveLength(1);
+    expect(results[0]?.id).toBe("102");
+    expect(results[0]?.boundary?.type).toBe("Polygon");
+  });
+
+  it("dedupes identical counties across biased and unbiased searches", async () => {
+    const countyBounds = ["53.2", "53.5", "-6.5", "-6.0"];
+
+    const fetchMock = vi.fn().mockImplementation(async (input: string) => {
+      const url = new URL(input);
+      const hasViewbox = url.searchParams.has("viewbox");
+      const featureType = url.searchParams.get("featureType");
+
+      if (featureType === "city") {
+        return { ok: true, json: async () => [] };
+      }
+
+      if (hasViewbox) {
+        return {
+          ok: true,
+          json: async () => [
+            {
+              place_id: 41,
+              display_name: "County Dublin, Leinster, Ireland",
+              lat: "53.3498",
+              lon: "-6.2603",
+              boundingbox: countyBounds,
+              addresstype: "county",
+              importance: 0.55,
+            },
+          ],
+        };
+      }
+
+      return {
+        ok: true,
+        json: async () => [
+          {
+            place_id: 40,
+            display_name: "County Dublin, Leinster, Ireland",
+            lat: "53.3498",
+            lon: "-6.2603",
+            boundingbox: countyBounds,
+            addresstype: "county",
+            importance: 0.5,
+          },
+        ],
+      };
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const results = await searchPlaces("co dublin", { near: [53.35, -6.26] });
+    expect(results).toHaveLength(1);
+    expect(results[0]?.displayName).toContain("County Dublin");
+  });
+
   it("merges biased and unbiased results when near is set", async () => {
     let biasedCallCount = 0;
     const fetchMock = vi.fn().mockImplementation(async (input: string) => {

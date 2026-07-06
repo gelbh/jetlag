@@ -3,6 +3,8 @@ import type { LatLngTuple } from "../domain/geometry";
 import type { GeocodedPlace } from "./geocoding";
 import {
   formatPlaceSearchSubtitle,
+  mergeRankedGeocodedPlaceCandidates,
+  placeBoundsFingerprint,
   placeCategoryLabel,
   rankGeocodedPlaceCandidates,
 } from "./geocodingRank";
@@ -35,6 +37,68 @@ describe("geocodingRank", () => {
   it("prefers addresstype for settlement categories", () => {
     expect(placeCategoryLabel({ addresstype: "city" })).toBe("city");
     expect(placeCategoryLabel({ addresstype: "town" })).toBe("town");
+  });
+
+  it("fingerprints identical bounds to the same key", () => {
+    const bounds = { south: 53.2, west: -6.5, north: 53.5, east: -6.0 };
+    const left = samplePlace({ id: "1", displayName: "A", bounds });
+    const right = samplePlace({ id: "2", displayName: "B", bounds });
+
+    expect(placeBoundsFingerprint(left)).toBe(placeBoundsFingerprint(right));
+  });
+
+  it("fingerprints materially different bounds to different keys", () => {
+    const dublin = samplePlace({
+      id: "1",
+      displayName: "Dublin",
+      bounds: { south: 53.2, west: -6.5, north: 53.5, east: -6.0 },
+    });
+    const ohio = samplePlace({
+      id: "2",
+      displayName: "Dublin, Ohio",
+      bounds: { south: 40.0, west: -83.2, north: 40.2, east: -83.0 },
+    });
+
+    expect(placeBoundsFingerprint(dublin)).not.toBe(placeBoundsFingerprint(ohio));
+  });
+
+  it("merges duplicate candidates by importance, boundary, and city query", () => {
+    const merged = mergeRankedGeocodedPlaceCandidates(
+      {
+        place: samplePlace({
+          id: "low",
+          displayName: "County Dublin, Ireland",
+          approximateAreaSqMi: 350,
+        }),
+        importance: 0.4,
+        fromCityQuery: false,
+      },
+      {
+        place: samplePlace({
+          id: "high",
+          displayName: "County Dublin, Leinster, Ireland",
+          approximateAreaSqMi: 350,
+          boundary: {
+            type: "Polygon",
+            coordinates: [
+              [
+                [-6.5, 53.2],
+                [-6.0, 53.2],
+                [-6.0, 53.5],
+                [-6.5, 53.5],
+                [-6.5, 53.2],
+              ],
+            ],
+          },
+        }),
+        importance: 0.55,
+        fromCityQuery: true,
+      },
+    );
+
+    expect(merged.place.id).toBe("high");
+    expect(merged.importance).toBe(0.55);
+    expect(merged.fromCityQuery).toBe(true);
   });
 
   it("formats search subtitles with category and area", () => {

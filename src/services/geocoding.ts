@@ -3,6 +3,8 @@ import { normalizeBoundingBox } from "../domain/gameAreaBounds";
 import type { LatLngTuple } from "../domain/geometry";
 import {
   computeApproximateAreaSqMi,
+  mergeRankedGeocodedPlaceCandidates,
+  placeBoundsFingerprint,
   placeCategoryLabel,
   rankGeocodedPlaceCandidates,
   type RankedGeocodedPlaceCandidate,
@@ -72,7 +74,7 @@ function geocodeSearchCacheKey(query: string): string {
       type: "Polygon",
       coordinates: [[[0, 0]]],
     },
-    `geocode:search:v2:${normalizeSearchQuery(query)}`,
+    `geocode:search:v3:${normalizeSearchQuery(query)}`,
   );
 }
 
@@ -88,7 +90,7 @@ function geocodeSearchBiasCacheKey(query: string, near: LatLngTuple): string {
       type: "Polygon",
       coordinates: [[[near[0], near[1]]]],
     },
-    `geocode:search:bias:v1:${normalizeSearchQuery(query)}:${locationBucketKey(near)}`,
+    `geocode:search:bias:v2:${normalizeSearchQuery(query)}:${locationBucketKey(near)}`,
   );
 }
 
@@ -268,23 +270,19 @@ async function candidatesFromResults(
 }
 
 function mergeSearchCandidates(
-  defaultCandidates: RankedGeocodedPlaceCandidate[],
-  cityCandidates: RankedGeocodedPlaceCandidate[],
+  ...groups: RankedGeocodedPlaceCandidate[][]
 ): RankedGeocodedPlaceCandidate[] {
   const merged = new Map<string, RankedGeocodedPlaceCandidate>();
 
-  for (const candidate of [...defaultCandidates, ...cityCandidates]) {
-    const existing = merged.get(candidate.place.id);
-    if (!existing) {
-      merged.set(candidate.place.id, candidate);
-      continue;
-    }
-
-    merged.set(candidate.place.id, {
-      place: candidate.place,
-      importance: Math.max(existing.importance, candidate.importance),
-      fromCityQuery: existing.fromCityQuery || candidate.fromCityQuery,
-    });
+  for (const candidate of groups.flat()) {
+    const key = placeBoundsFingerprint(candidate.place);
+    const existing = merged.get(key);
+    merged.set(
+      key,
+      existing
+        ? mergeRankedGeocodedPlaceCandidates(existing, candidate)
+        : candidate,
+    );
   }
 
   return [...merged.values()];
