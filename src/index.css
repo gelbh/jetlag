@@ -68,6 +68,12 @@
   );
 }
 
+@media (max-width: 639px) {
+  :root {
+    --hider-action-bar-height: 6.5rem;
+  }
+}
+
 html {
   height: 100%;
   -webkit-text-size-adjust: 100%;

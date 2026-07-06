@@ -156,8 +156,8 @@ export function ChatPanel({
           : undefined
       }
     >
-      <div className="tool-panel-compact hud-panel mx-auto flex max-h-[min(50dvh,420px)] max-w-xl flex-col overflow-hidden p-3">
-        <div className="mb-3 flex items-center justify-between gap-2">
+      <div className="tool-panel-compact hud-panel mx-auto flex min-h-0 max-h-[min(50dvh,420px)] max-w-xl flex-col overflow-hidden p-3">
+        <div className="mb-3 flex shrink-0 items-center justify-between gap-2">
           <div className="flex gap-2">
             <button
               type="button"
@@ -190,7 +190,7 @@ export function ChatPanel({
             Close
           </button>
         </div>
-        <div className="min-h-0 flex-1">
+        <div className="jl-game-chat-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {tab === "social" ? (
             <SocialChatTab
               messages={messages}

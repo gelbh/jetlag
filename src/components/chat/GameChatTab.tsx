@@ -70,7 +70,7 @@ export function GameChatTab({
   }, []);
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-2 overflow-y-auto">
+    <div className="flex flex-col gap-2">
       {answerError ? (
         <p className="rounded-lg border border-status-error/40 bg-status-error-surface px-3 py-2 text-sm text-status-error">
           {answerError}
