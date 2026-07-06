@@ -80,3 +80,37 @@ jobs:
         with:
           name: playwright-report-full
           path: playwright-report
+
+  deploy-backend:
+    runs-on: ubuntu-latest
+    needs: [unit, emulator, e2e-full]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect backend changes
+        id: changes
+        run: |
+          if [[ "${{ github.event.before }}" == 0000000* ]]; then
+            echo "backend=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed="$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}")"
+          if echo "$changed" | grep -qE '^(functions/|firestore\.(rules|indexes\.json)|firebase\.json|scripts/deploy-production\.mjs|\.firebaserc)'; then
+            echo "backend=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "backend=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v4
+        if: steps.changes.outputs.backend == 'true'
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+        if: steps.changes.outputs.backend == 'true'
+      - name: Deploy Firestore and Functions
+        if: steps.changes.outputs.backend == 'true'
+        run: npm run deploy
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
