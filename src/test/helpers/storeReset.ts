@@ -26,6 +26,13 @@ export function resetAllStores(): void {
     showCurrentLocation: true,
     keepScreenAwake: false,
     lowPowerMode: false,
+    notificationPreferences: {
+      enabled: false,
+      newQuestions: true,
+      timerChanges: true,
+      chatMessages: false,
+      liveActivities: true,
+    },
     distanceUnit: "imperial",
     mapStyle: "standard",
     layerVisibility: {

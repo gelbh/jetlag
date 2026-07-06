@@ -4,6 +4,8 @@ import type { AnnotationType } from "../domain/annotations";
 import type { DistanceUnit } from "../domain/distance";
 import type { MapTool } from "../domain/mapToolTypes";
 import type { TransitRouteFilter } from "../domain/transit";
+import type { NotificationPreferences } from "../domain/notifications";
+import { DEFAULT_NOTIFICATION_PREFERENCES } from "../domain/notifications";
 import type { MapStyle } from "../domain/mapBasemaps";
 
 export type LayerVisibility = Record<AnnotationType | "transit", boolean>;
@@ -27,6 +29,7 @@ export const useMapStore = create<{
   showCurrentLocation: boolean;
   keepScreenAwake: boolean;
   lowPowerMode: boolean;
+  notificationPreferences: NotificationPreferences;
   distanceUnit: DistanceUnit;
   mapStyle: MapStyle;
   layerVisibility: LayerVisibility;
@@ -37,6 +40,7 @@ export const useMapStore = create<{
   setShowCurrentLocation: (enabled: boolean) => void;
   setKeepScreenAwake: (enabled: boolean) => void;
   setLowPowerMode: (enabled: boolean) => void;
+  setNotificationPreferences: (preferences: NotificationPreferences) => void;
   setDistanceUnit: (unit: DistanceUnit) => void;
   setMapStyle: (style: MapStyle) => void;
   setLayerVisibility: (layer: keyof LayerVisibility, visible: boolean) => void;
@@ -50,6 +54,7 @@ export const useMapStore = create<{
       showCurrentLocation: true,
       keepScreenAwake: false,
       lowPowerMode: false,
+      notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
       distanceUnit: "imperial",
       mapStyle: "standard",
       layerVisibility: DEFAULT_LAYER_VISIBILITY,
@@ -63,6 +68,8 @@ export const useMapStore = create<{
         set({ showCurrentLocation }),
       setKeepScreenAwake: (keepScreenAwake) => set({ keepScreenAwake }),
       setLowPowerMode: (lowPowerMode) => set({ lowPowerMode }),
+      setNotificationPreferences: (notificationPreferences) =>
+        set({ notificationPreferences }),
       setDistanceUnit: (distanceUnit) => set({ distanceUnit }),
       setMapStyle: (mapStyle) => set({ mapStyle }),
       setLayerVisibility: (layer, visible) =>
@@ -88,6 +95,7 @@ export const useMapStore = create<{
       partialize: (state) => ({
         keepScreenAwake: state.keepScreenAwake,
         lowPowerMode: state.lowPowerMode,
+        notificationPreferences: state.notificationPreferences,
         distanceUnit: state.distanceUnit,
         mapStyle: state.mapStyle,
         layerVisibility: state.layerVisibility,

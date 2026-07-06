@@ -48,6 +48,25 @@ vi.mock("../hooks/useWakeLock", () => ({
   useWakeLock: () => undefined,
 }));
 
+vi.mock("../hooks/useSessionNotifications", () => ({
+  useSessionNotifications: () => ({
+    nativeSupported: false,
+    notificationPreferences: {
+      enabled: false,
+      newQuestions: true,
+      timerChanges: true,
+      chatMessages: false,
+      liveActivities: true,
+    },
+    enableNotifications: vi.fn(),
+    updateNotificationPreferences: vi.fn(),
+  }),
+}));
+
+vi.mock("../hooks/useLiveActivitySync", () => ({
+  useLiveActivitySync: () => undefined,
+}));
+
 vi.mock("../services/gameAreaPreload", () => ({
   preloadGameAreaCaches: vi.fn(),
 }));

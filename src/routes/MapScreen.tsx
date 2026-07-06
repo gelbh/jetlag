@@ -73,6 +73,8 @@ import { useSyncStatus } from "../hooks/useSyncStatus";
 import { useTransitLayer } from "../hooks/useTransitLayer";
 import { useMapOverlayState } from "../hooks/useMapOverlayState";
 import { useWakeLock } from "../hooks/useWakeLock";
+import { useSessionNotifications } from "../hooks/useSessionNotifications";
+import { useLiveActivitySync } from "../hooks/useLiveActivitySync";
 import {
   ensureAnonymousUser,
   isFirebaseConfigured,
@@ -183,6 +185,9 @@ export function MapScreen() {
   const keepScreenAwake = useMapStore((state) => state.keepScreenAwake);
   const setKeepScreenAwake = useMapStore((state) => state.setKeepScreenAwake);
   const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
+  const notificationPreferences = useMapStore(
+    (state) => state.notificationPreferences,
+  );
   const setLayerVisibility = useMapStore((state) => state.setLayerVisibility);
   const {
     createAnnotation,
@@ -231,6 +236,15 @@ export function MapScreen() {
   const syncStatus = useSyncStatus();
   useWakeLock(keepScreenAwake || (timer.running && !lowPowerMode));
   const firebaseAuthReady = useFirebaseAuthReady(session);
+  const {
+    notificationPreferences: liveNotificationPreferences,
+    enableNotifications,
+    updateNotificationPreferences,
+  } = useSessionNotifications({
+    sessionId: session?.id,
+    uid: uid ?? undefined,
+    role: myRole ?? undefined,
+  });
 
   useEffect(() => {
     if (!session?.gameArea || !firebaseAuthReady || lowPowerMode) {
@@ -253,6 +267,16 @@ export function MapScreen() {
   const hidingZones = useHidingZonesSync(session?.id);
   const playerLocations = usePlayerLocationsSync(session?.id);
   const chatMessages = useSessionMessagesSync(session?.id);
+
+  useLiveActivitySync({
+    enabled: Boolean(session?.id),
+    sessionId: session?.id,
+    gameSize: session?.gameSize ?? "medium",
+    timerState: timer.timerState,
+    timerHasStarted: timer.hasStarted,
+    pendingQuestions,
+    preferences: liveNotificationPreferences,
+  });
 
   useQuestionDeadlineEnforcement({
     sessionId: session?.id,
@@ -977,6 +1001,9 @@ export function MapScreen() {
         onEndSession={() => void handleEndSession()}
         sessionCode={session.code}
         remoteSession={isRemote}
+        notificationPreferences={notificationPreferences}
+        onNotificationPreferencesChange={updateNotificationPreferences}
+        onEnableNotifications={enableNotifications}
       />
 
       {activeTool !== "none" && !selectedAnnotation ? (

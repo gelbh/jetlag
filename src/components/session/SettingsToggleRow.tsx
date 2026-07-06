@@ -3,6 +3,7 @@ interface SettingsToggleRowProps {
   description?: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
+  disabled?: boolean;
 }
 
 export function SettingsToggleRow({
@@ -10,9 +11,10 @@ export function SettingsToggleRow({
   description,
   checked,
   onChange,
+  disabled = false,
 }: SettingsToggleRowProps) {
   return (
-    <label className="jl-toggle-row">
+    <label className={`jl-toggle-row ${disabled ? "opacity-50" : ""}`}>
       <span className="min-w-0 flex-1">
         <span className="font-display text-xs font-semibold uppercase tracking-wide">
           {label}
@@ -26,6 +28,7 @@ export function SettingsToggleRow({
       <input
         type="checkbox"
         checked={checked}
+        disabled={disabled}
         onChange={(event) => onChange(event.target.checked)}
         className="h-5 w-5 shrink-0 accent-action"
       />

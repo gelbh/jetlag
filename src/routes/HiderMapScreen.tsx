@@ -42,6 +42,8 @@ import {
 } from "../hooks/useSessionExtrasSync";
 import { useSyncStatus } from "../hooks/useSyncStatus";
 import { useWakeLock } from "../hooks/useWakeLock";
+import { useSessionNotifications } from "../hooks/useSessionNotifications";
+import { useLiveActivitySync } from "../hooks/useLiveActivitySync";
 import { useSessionSync } from "../hooks/useSessionSync";
 import { ensureAnonymousUser } from "../services/firebase";
 import { setPremiumApiContext } from "../services/premiumApiContext";
@@ -66,6 +68,9 @@ export function HiderMapScreen() {
   const keepScreenAwake = useMapStore((state) => state.keepScreenAwake);
   const setKeepScreenAwake = useMapStore((state) => state.setKeepScreenAwake);
   const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
+  const notificationPreferences = useMapStore(
+    (state) => state.notificationPreferences,
+  );
 
   const overlay = useMapOverlayState();
   const [currentUid, setCurrentUid] = useState<string | null>(myUid);
@@ -115,6 +120,25 @@ export function HiderMapScreen() {
   });
   const syncStatus = useSyncStatus();
   useWakeLock(keepScreenAwake || (timer.running && !lowPowerMode));
+  const {
+    notificationPreferences: liveNotificationPreferences,
+    enableNotifications,
+    updateNotificationPreferences,
+  } = useSessionNotifications({
+    sessionId,
+    uid: uid ?? undefined,
+    role: "hider",
+  });
+
+  useLiveActivitySync({
+    enabled: Boolean(sessionId),
+    sessionId,
+    gameSize: session?.gameSize ?? "medium",
+    timerState: timer.timerState,
+    timerHasStarted: timer.hasStarted,
+    pendingQuestions,
+    preferences: liveNotificationPreferences,
+  });
   const { answerPendingQuestion, postSystemMessage } = usePendingQuestionActions();
 
   const postGameSystem = useCallback(
@@ -444,6 +468,9 @@ export function HiderMapScreen() {
         onEndSession={() => undefined}
         sessionCode={session.code}
         remoteSession={isRemote}
+        notificationPreferences={notificationPreferences}
+        onNotificationPreferencesChange={updateNotificationPreferences}
+        onEnableNotifications={enableNotifications}
       />
 
       <SessionLog

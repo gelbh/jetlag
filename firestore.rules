@@ -227,6 +227,11 @@ service cloud.firestore {
           isSeekerMember(sessionId)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'resolvedAnnotationId'])
           && request.resource.data.status in ['resolved', 'cancelled']
+        ) || (
+          isSessionMember(sessionId)
+          && resource.data.status == 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deadlineExpiredAt'])
+          && request.resource.data.deadlineExpiredAt is string
         );
         allow delete: if false;
       }
@@ -245,6 +250,19 @@ service cloud.firestore {
           && request.resource.data.status == 'confirmed'
           && request.resource.data.confirmedAt is string;
         allow delete: if false;
+      }
+
+      match /devices/{deviceUid} {
+        allow read: if isSessionMember(sessionId) && request.auth.uid == deviceUid;
+        allow create, update: if isSessionMember(sessionId)
+          && request.auth.uid == deviceUid
+          && request.resource.data.token is string
+          && request.resource.data.platform in ['ios', 'android', 'web']
+          && request.resource.data.role in ['seeker', 'hider']
+          && request.resource.data.updatedAt is string
+          && request.resource.data.preferences is map
+          && request.resource.data.preferences.enabled is bool;
+        allow delete: if isSessionMember(sessionId) && request.auth.uid == deviceUid;
       }
     }
 

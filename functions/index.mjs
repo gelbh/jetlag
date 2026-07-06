@@ -22,6 +22,12 @@ import {
   PURGE_BATCH_LIMIT,
   selectSessionsToPurge,
 } from "./purgeStaleSessions.mjs";
+import {
+  handlePendingQuestionWrite,
+  handleSessionMessageWrite,
+  handleSessionTimerWrite,
+} from "./sessionNotificationTriggers.mjs";
+import { onDocumentWritten } from "firebase-functions/v2/firestore";
 
 const accessCodeSecret = defineSecret("ACCESS_CODE");
 const transitlandApiKeySecret = defineSecret("TRANSITLAND_API_KEY");
@@ -368,3 +374,24 @@ export const purgeStaleSessions = onSchedule("0 4 * * *", async () => {
     `purgeStaleSessions deleted ${deleted} session(s); endedCutoff=${endedCutoffIso}; abandonedCutoff=${abandonedCutoffIso}`,
   );
 });
+
+export const notifyPendingQuestion = onDocumentWritten(
+  "sessions/{sessionId}/pendingQuestions/{questionId}",
+  async (event) => {
+    await handlePendingQuestionWrite(adminDb(), event);
+  },
+);
+
+export const notifySessionTimer = onDocumentWritten(
+  "sessions/{sessionId}",
+  async (event) => {
+    await handleSessionTimerWrite(adminDb(), event);
+  },
+);
+
+export const notifySessionMessage = onDocumentWritten(
+  "sessions/{sessionId}/messages/{messageId}",
+  async (event) => {
+    await handleSessionMessageWrite(adminDb(), event);
+  },
+);

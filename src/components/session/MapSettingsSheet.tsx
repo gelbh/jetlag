@@ -13,6 +13,8 @@ import type { TransitRouteFilter } from "../../domain/transit";
 import type { DistanceUnit } from "../../domain/distance";
 import type { MapStyle } from "../../domain/mapBasemaps";
 import type { LayerVisibility } from "../../state/sessionStore";
+import type { NotificationPreferences } from "../../domain/notifications";
+import { isNativeNotificationsSupported } from "../../services/notifications";
 
 interface MapSettingsSheetProps {
   open: boolean;
@@ -58,6 +60,12 @@ interface MapSettingsSheetProps {
   onEndSession?: () => void;
   sessionCode: string;
   remoteSession: boolean;
+  notificationPreferences?: NotificationPreferences;
+  nativeNotificationsSupported?: boolean;
+  onNotificationPreferencesChange?: (
+    patch: Partial<NotificationPreferences>,
+  ) => void;
+  onEnableNotifications?: () => Promise<boolean>;
 }
 
 export function MapSettingsSheet({
@@ -101,6 +109,10 @@ export function MapSettingsSheet({
   onEndSession,
   sessionCode,
   remoteSession,
+  notificationPreferences,
+  nativeNotificationsSupported = isNativeNotificationsSupported(),
+  onNotificationPreferencesChange,
+  onEnableNotifications,
 }: MapSettingsSheetProps) {
   const [segment, setSegment] = useState<SettingsSegment>("map");
   useScrollLock(open);
@@ -175,6 +187,10 @@ export function MapSettingsSheet({
               onToggleTransit={onToggleTransit}
               onToggleLiveTransit={onToggleLiveTransit}
               onTransitRouteFilterChange={onTransitRouteFilterChange}
+              notificationPreferences={notificationPreferences}
+              nativeNotificationsSupported={nativeNotificationsSupported}
+              onNotificationPreferencesChange={onNotificationPreferencesChange}
+              onEnableNotifications={onEnableNotifications}
             />
           ) : null}
 
@@ -235,6 +251,10 @@ function MapSegment({
   onToggleTransit,
   onToggleLiveTransit,
   onTransitRouteFilterChange,
+  notificationPreferences,
+  nativeNotificationsSupported,
+  onNotificationPreferencesChange,
+  onEnableNotifications,
 }: {
   showCurrentLocation: boolean;
   onShowCurrentLocationChange: (enabled: boolean) => void;
@@ -264,6 +284,12 @@ function MapSegment({
   onToggleTransit: () => void;
   onToggleLiveTransit: () => void;
   onTransitRouteFilterChange: (value: TransitRouteFilter) => void;
+  notificationPreferences?: NotificationPreferences;
+  nativeNotificationsSupported?: boolean;
+  onNotificationPreferencesChange?: (
+    patch: Partial<NotificationPreferences>,
+  ) => void;
+  onEnableNotifications?: () => Promise<boolean>;
 }) {
   return (
     <div className="space-y-3">
@@ -283,6 +309,16 @@ function MapSegment({
         checked={lowPowerMode}
         onChange={onLowPowerModeChange}
       />
+
+      {nativeNotificationsSupported &&
+      notificationPreferences &&
+      onNotificationPreferencesChange ? (
+        <NotificationPreferencesSection
+          preferences={notificationPreferences}
+          onChange={onNotificationPreferencesChange}
+          onEnableNotifications={onEnableNotifications}
+        />
+      ) : null}
 
       <ChoicePair
         left={{ value: "metric", label: "Metric (km)" }}
@@ -324,6 +360,67 @@ function MapSegment({
         onToggleEnabled={onToggleTransit}
         onToggleLive={onToggleLiveTransit}
         onRouteFilterChange={onTransitRouteFilterChange}
+      />
+    </div>
+  );
+}
+
+function NotificationPreferencesSection({
+  preferences,
+  onChange,
+  onEnableNotifications,
+}: {
+  preferences: NotificationPreferences;
+  onChange: (patch: Partial<NotificationPreferences>) => void;
+  onEnableNotifications?: () => Promise<boolean>;
+}) {
+  const handleMasterToggle = async (enabled: boolean) => {
+    if (enabled && onEnableNotifications) {
+      const granted = await onEnableNotifications();
+      onChange({ enabled: granted });
+      return;
+    }
+
+    onChange({ enabled });
+  };
+
+  return (
+    <div className="space-y-3 border-t-2 border-border pt-3">
+      <p className="font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-blue">
+        Phone alerts
+      </p>
+      <SettingsToggleRow
+        label="Push notifications"
+        description="Alerts when questions arrive, timers change, or chat messages are sent while the app is in the background."
+        checked={preferences.enabled}
+        onChange={(enabled) => {
+          void handleMasterToggle(enabled);
+        }}
+      />
+      <SettingsToggleRow
+        label="New questions"
+        checked={preferences.newQuestions}
+        onChange={(newQuestions) => onChange({ newQuestions })}
+        disabled={!preferences.enabled}
+      />
+      <SettingsToggleRow
+        label="Timer changes"
+        checked={preferences.timerChanges}
+        onChange={(timerChanges) => onChange({ timerChanges })}
+        disabled={!preferences.enabled}
+      />
+      <SettingsToggleRow
+        label="Chat messages"
+        checked={preferences.chatMessages}
+        onChange={(chatMessages) => onChange({ chatMessages })}
+        disabled={!preferences.enabled}
+      />
+      <SettingsToggleRow
+        label="Live Activities / ongoing alerts"
+        description="Lock screen countdown for question deadlines and session timers on supported phones."
+        checked={preferences.liveActivities}
+        onChange={(liveActivities) => onChange({ liveActivities })}
+        disabled={!preferences.enabled}
       />
     </div>
   );

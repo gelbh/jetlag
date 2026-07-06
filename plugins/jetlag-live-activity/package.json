@@ -1,0 +1,36 @@
+{
+  "name": "jetlag-live-activity",
+  "version": "0.0.1",
+  "description": "Jet Lag Live Activities and Android ongoing notifications",
+  "main": "dist/plugin.cjs.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "unpkg": "dist/plugin.js",
+  "files": [
+    "dist/",
+    "ios/",
+    "android/",
+    "JetlagLiveActivity.podspec"
+  ],
+  "author": "gelbhart",
+  "license": "MIT",
+  "peerDependencies": {
+    "@capacitor/core": "^8.0.0"
+  },
+  "capacitor": {
+    "ios": {
+      "src": "ios"
+    },
+    "android": {
+      "src": "android"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "@capacitor/core": "^8.1.0",
+    "typescript": "~6.0.2"
+  }
+}

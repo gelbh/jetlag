@@ -547,4 +547,79 @@ describe("firestore.rules", () => {
 
     expect(snapshot.data()?.hostUid).toBe("host-1");
   });
+
+  it("allows session members to register their own device token", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+        }),
+      );
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("devices")
+        .doc("host-1")
+        .set({
+          token: "seeker-device-token",
+          platform: "ios",
+          role: "seeker",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          preferences: {
+            enabled: true,
+            newQuestions: true,
+            timerChanges: true,
+            chatMessages: false,
+            liveActivities: true,
+          },
+        }),
+    );
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("devices")
+        .doc("hider-1")
+        .set({
+          token: "hider-device-token",
+          platform: "android",
+          role: "hider",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          preferences: {
+            enabled: true,
+            newQuestions: true,
+            timerChanges: true,
+            chatMessages: false,
+            liveActivities: true,
+          },
+        }),
+    );
+
+    await assertFails(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("devices")
+        .doc("host-1")
+        .set({
+          token: "stolen-token",
+          platform: "android",
+          role: "seeker",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          preferences: { enabled: true },
+        }),
+    );
+  });
 });
