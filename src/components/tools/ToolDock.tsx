@@ -15,6 +15,7 @@ import type { MapTool } from "../../state/sessionStore";
 import {
   HudDrawIcon,
   HudLayersIcon,
+  HudMoreIcon,
   HudRedoIcon,
   HudSettingsIcon,
   HudToolIcon,
@@ -53,22 +54,25 @@ export function ToolDock({
   onMapStyleChange,
 }: ToolDockProps) {
   const [drawMenuOpen, setDrawMenuOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const dockRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!drawMenuOpen) {
+    if (!drawMenuOpen && !moreMenuOpen) {
       return;
     }
 
     const handlePointerDown = (event: PointerEvent) => {
       if (dockRef.current && !dockRef.current.contains(event.target as Node)) {
         setDrawMenuOpen(false);
+        setMoreMenuOpen(false);
       }
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setDrawMenuOpen(false);
+        setMoreMenuOpen(false);
       }
     };
 
@@ -78,21 +82,29 @@ export function ToolDock({
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [drawMenuOpen]);
+  }, [drawMenuOpen, moreMenuOpen]);
 
   const selectTool = (tool: MapTool) => {
     onSelect(activeTool === tool ? "none" : tool);
     setDrawMenuOpen(false);
+    setMoreMenuOpen(false);
   };
 
   const markupActive = MARKUP_DOCK_TOOL_IDS.some((toolId) => activeTool === toolId);
   const nextMapStyle = mapStyle === "standard" ? "satellite" : "standard";
   const mapStyleLabel =
     mapStyle === "standard" ? "Switch to satellite view" : "Switch to map view";
+  const mapStyleMenuLabel =
+    mapStyle === "standard" ? "Satellite view" : "Map view";
 
   const visibleQuestionTools = QUESTION_DOCK_TOOL_IDS.filter((toolId) =>
     toolDockEnabled(toolId, gameSize),
   );
+
+  const moreMenuActive =
+    moreMenuOpen ||
+    markupActive ||
+    (mapStyle === "satellite" && onMapStyleChange !== undefined);
 
   const renderQuestionTool = (
     toolId: (typeof QUESTION_DOCK_TOOL_IDS)[number],
@@ -154,15 +166,70 @@ export function ToolDock({
     );
   };
 
+  const renderMoreMenuItem = (
+    label: string,
+    onClick: () => void,
+    active = false,
+    hint?: string,
+  ) => (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={onClick}
+      className={`jl-tool-menu-item ${
+        active ? "jl-tool-menu-item-active" : "jl-tool-menu-item-default"
+      }`}
+    >
+      <span className="font-display text-sm font-semibold uppercase tracking-wide">
+        {label}
+      </span>
+      {hint ? (
+        <span
+          className={`text-xs leading-snug ${
+            active ? "text-action-ink/80" : "text-ink-dim"
+          }`}
+        >
+          {hint}
+        </span>
+      ) : null}
+    </button>
+  );
+
   return (
     <div ref={dockRef} className="jl-tool-dock pointer-events-auto">
       {drawMenuOpen ? (
         <div
-          className="jl-tool-menu jl-tool-menu-dock hud-panel"
+          className="jl-tool-menu jl-tool-menu-dock jl-tool-dock-wide-only hud-panel"
           role="menu"
           aria-label="Draw on map"
         >
           {markupTools.map(renderMarkupItem)}
+        </div>
+      ) : null}
+
+      {moreMenuOpen ? (
+        <div
+          className="jl-tool-menu jl-tool-menu-dock jl-tool-dock-compact-only hud-panel"
+          role="menu"
+          aria-label="More tools"
+        >
+          {markupTools.map(renderMarkupItem)}
+          {mapStyle && onMapStyleChange
+            ? renderMoreMenuItem(mapStyleMenuLabel, () => {
+                onMapStyleChange(nextMapStyle);
+                setMoreMenuOpen(false);
+              })
+            : null}
+          {onOpenChat
+            ? renderMoreMenuItem("Chat", () => {
+                onOpenChat();
+                setMoreMenuOpen(false);
+              })
+            : null}
+          {renderMoreMenuItem("Setup", () => {
+            onOpenSettings();
+            setMoreMenuOpen(false);
+          })}
         </div>
       ) : null}
 
@@ -205,10 +272,13 @@ export function ToolDock({
 
         <div className="jl-tool-dock-divider" aria-hidden="true" />
 
-        <div className="jl-tool-dock-group jl-tool-dock-group-end">
+        <div className="jl-tool-dock-group jl-tool-dock-group-end jl-tool-dock-wide-only">
           <button
             type="button"
-            onClick={() => setDrawMenuOpen((open) => !open)}
+            onClick={() => {
+              setMoreMenuOpen(false);
+              setDrawMenuOpen((open) => !open);
+            }}
             className={`jl-tool-slot ${
               drawMenuOpen || markupActive ? "jl-tool-slot-active" : ""
             }`}
@@ -262,6 +332,26 @@ export function ToolDock({
               <HudSettingsIcon className="h-5 w-5" />
             </span>
             <span className="jl-tool-slot-label">Setup</span>
+          </button>
+        </div>
+
+        <div className="jl-tool-dock-group jl-tool-dock-group-end jl-tool-dock-compact-only">
+          <button
+            type="button"
+            onClick={() => {
+              setDrawMenuOpen(false);
+              setMoreMenuOpen((open) => !open);
+            }}
+            className={`jl-tool-slot ${moreMenuActive ? "jl-tool-slot-active" : ""}`}
+            aria-label="More tools"
+            aria-expanded={moreMenuOpen}
+            aria-haspopup="menu"
+            title="Draw, map style, chat, setup"
+          >
+            <span className="jl-tool-slot-icon">
+              <HudMoreIcon className="h-5 w-5" />
+            </span>
+            <span className="jl-tool-slot-label">More</span>
           </button>
         </div>
       </div>

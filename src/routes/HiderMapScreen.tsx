@@ -32,6 +32,7 @@ import {
   useSessionMessagesSync,
 } from "../hooks/useSessionExtrasSync";
 import { useSyncStatus } from "../hooks/useSyncStatus";
+import { useWakeLock } from "../hooks/useWakeLock";
 import { useSessionSync } from "../hooks/useSessionSync";
 import { ensureAnonymousUser } from "../services/firebase";
 import { setPremiumApiContext } from "../services/premiumApiContext";
@@ -98,6 +99,7 @@ export function HiderMapScreen() {
     remoteState,
   });
   const syncStatus = useSyncStatus();
+  useWakeLock(keepScreenAwake || timer.running);
   const { answerPendingQuestion, postSystemMessage } = usePendingQuestionActions();
 
   const postGameSystem = useCallback(
@@ -185,6 +187,7 @@ export function HiderMapScreen() {
         <MapStatusRail
           sessionCode={session.code}
           gameSize={session.gameSize ?? "medium"}
+          playerRole="hider"
           activeTool="none"
           syncStatus={syncStatus.status}
           queuedWrites={syncStatus.queuedWrites}
@@ -202,12 +205,12 @@ export function HiderMapScreen() {
         />
       </div>
 
-      <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+var(--chrome-gap-above-dock))] z-[var(--z-panel)] flex justify-center gap-2 px-3">
+      <div className="pointer-events-auto absolute inset-x-0 jl-panel-hider-actions z-[var(--z-panel)] flex flex-col justify-center gap-2 px-3 sm:flex-row sm:justify-center">
         {!zoneTool.hasZone || zoneTool.wizardOpen ? (
           <button
             type="button"
             onClick={zoneTool.openWizard}
-            className="btn-primary min-h-12 flex-1 max-w-xs"
+            className="btn-primary min-h-12 w-full flex-1 sm:max-w-xs"
           >
             {myZone ? "Change hiding zone" : "Set hiding zone"}
           </button>
@@ -215,29 +218,34 @@ export function HiderMapScreen() {
           <button
             type="button"
             onClick={() => void zoneTool.startMove()}
-            className="btn-secondary min-h-12 flex-1 max-w-xs"
+            className="btn-secondary min-h-12 w-full flex-1 sm:max-w-xs"
           >
             Play Move
           </button>
         )}
-        <button
-          type="button"
-          onClick={() => setChatOpen(true)}
-          className="btn-secondary min-h-12 px-4"
-        >
-          Chat
-        </button>
-        <button
-          type="button"
-          onClick={() => setSettingsOpen(true)}
-          className="btn-secondary min-h-12 px-4"
-        >
-          Settings
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              zoneTool.closeWizard();
+              setChatOpen(true);
+            }}
+            className="btn-secondary min-h-12 flex-1 px-4 sm:flex-none"
+          >
+            Chat
+          </button>
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            className="btn-secondary min-h-12 flex-1 px-4 sm:flex-none"
+          >
+            Settings
+          </button>
+        </div>
       </div>
 
       {zoneTool.wizardOpen ? (
-        <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+var(--chrome-gap-above-dock)+4.5rem)] z-[var(--z-panel)] px-3">
+        <div className="pointer-events-auto absolute inset-x-0 jl-panel-hider-wizard z-[var(--z-panel)] px-3">
           <div className="tool-panel-compact hud-panel mx-auto max-h-[min(40dvh,360px)] max-w-xl overflow-y-auto p-3">
             <HidingZonePanel
               gameSize={session.gameSize ?? "medium"}
@@ -260,6 +268,7 @@ export function HiderMapScreen() {
       <ChatPanel
         open={chatOpen}
         onClose={() => setChatOpen(false)}
+        bottomClassName="jl-panel-hider-wizard"
         messages={messages}
         pendingQuestions={pendingQuestions}
         gameSize={session.gameSize ?? "medium"}

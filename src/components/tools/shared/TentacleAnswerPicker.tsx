@@ -58,7 +58,7 @@ export function TentacleAnswerPicker({
               setTimeout(() => setCopyStatus("idle"), ok ? 2000 : 3000);
             })();
           }}
-          className="btn-secondary min-h-9 px-3 text-xs"
+          className="btn-secondary min-h-12 px-3 text-xs"
         >
           {copyStatus === "copied"
             ? "Copied"

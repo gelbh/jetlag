@@ -32,11 +32,7 @@ export function MapToolsHintBanner({ hidden = false }: MapToolsHintBannerProps) 
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 z-[var(--z-banner)] px-3"
-      style={{
-        bottom:
-          "calc(var(--dock-height) + env(safe-area-inset-bottom) + var(--chrome-gap-above-dock))",
-      }}
+      className="pointer-events-none fixed inset-x-0 bottom-[var(--map-panel-bottom)] z-[var(--z-banner)] px-3"
     >
       <div className="pointer-events-auto hud-panel mx-auto flex max-w-md items-start gap-3 px-3 py-2.5">
         <p className="flex-1 text-pretty text-sm leading-snug text-ink-muted">

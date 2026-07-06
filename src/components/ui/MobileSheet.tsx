@@ -6,6 +6,8 @@ interface MobileSheetProps {
   maxHeightClassName?: string;
   /** Nested in a split layout (not floating over a full-bleed map). */
   variant?: "overlay" | "nested";
+  /** Split layout: children manage their own scroll regions (e.g. sticky footer). */
+  layout?: "scroll" | "split";
 }
 
 export function MobileSheet({
@@ -13,17 +15,30 @@ export function MobileSheet({
   className = "",
   maxHeightClassName = "max-h-[min(72dvh,640px)]",
   variant = "overlay",
+  layout = "scroll",
 }: MobileSheetProps) {
   const positionClass =
     variant === "nested"
       ? "relative shrink-0"
       : "pointer-events-auto fixed inset-x-0 bottom-0 z-[var(--z-dock)]";
 
+  if (variant === "nested" && layout === "split") {
+    return (
+      <div className={`${positionClass} hud-sheet ${className}`}>
+        <div
+          className={`mx-auto flex w-full max-w-xl flex-col ${maxHeightClassName}`}
+        >
+          {children}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`${positionClass} hud-sheet ${className}`}>
       <div className="mx-auto w-full max-w-xl">
         <div
-          className={`${maxHeightClassName} overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3`}
+          className={`${maxHeightClassName} overflow-y-auto overscroll-contain scroll-pb-4 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3`}
         >
           {variant === "overlay" ? (
             <div className="jl-sheet-handle" aria-hidden="true" />

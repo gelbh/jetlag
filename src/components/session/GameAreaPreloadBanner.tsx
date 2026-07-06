@@ -11,7 +11,7 @@ export function GameAreaPreloadBanner() {
 
   return (
     <div
-      className={`pointer-events-auto absolute inset-x-3 top-3 z-[500] rounded-xl border px-3 py-2 text-sm shadow-lg ${
+      className={`pointer-events-auto absolute inset-x-3 top-[calc(env(safe-area-inset-top)+var(--status-bar-height)+0.75rem)] z-[var(--z-panel)] rounded-xl border px-3 py-2 text-sm shadow-lg ${
         banner.failed
           ? "border-status-warning/40 bg-status-warning-surface text-status-warning"
           : "border-status-info/40 bg-status-info-surface text-status-info"

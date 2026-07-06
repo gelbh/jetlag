@@ -123,7 +123,7 @@ export function JoinSession() {
   };
 
   return (
-    <main className="home-poster home-terminal-accent flex min-h-full flex-col justify-center gap-8 px-5 py-8">
+    <main className="home-poster home-terminal-accent flex min-h-[100dvh] flex-col justify-center gap-8 overflow-y-auto px-5 py-8 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div>
         <Link
           to="/"

@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { MobileSheet } from "../ui/MobileSheet";
 import { ShareCode } from "./ShareCode";
+import { useScrollLock } from "../../hooks/useScrollLock";
 import { TransitControls } from "../map/TransitControls";
 import {
   SettingsSegmentControl,
@@ -98,6 +99,7 @@ export function MapSettingsSheet({
   remoteSession,
 }: MapSettingsSheetProps) {
   const [segment, setSegment] = useState<SettingsSegment>("map");
+  useScrollLock(open);
 
   if (!open) {
     return null;
@@ -404,7 +406,7 @@ function SettingsOverlay({
 }) {
   return (
     <div
-      className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] hud-scrim"
+      className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] overscroll-contain hud-scrim"
       onClick={onClose}
       onKeyDown={(event) => {
         if (event.key === "Escape") {

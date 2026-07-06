@@ -41,6 +41,7 @@ import { useMapToolInteraction } from "../hooks/map-screen/useMapToolInteraction
 import {
   findLastRedoableAnnotation,
   findLastUndoableAnnotation,
+  isWizardDockTool,
   mapToolPlacingLabel,
 } from "../domain/mapTools";
 import {
@@ -632,6 +633,7 @@ export function MapScreen() {
     zoneTool.resetDraft();
     setSelectedAnnotationId(null);
     setAwaitingPlacement(false);
+    setChatOpen(false);
     setActiveTool(tool);
   };
 
@@ -768,6 +770,7 @@ export function MapScreen() {
         <MapStatusRail
           sessionCode={session.code}
           gameSize={session.gameSize ?? "medium"}
+          playerRole="seeker"
           activeTool={activeTool}
           syncStatus={syncStatus.status}
           queuedWrites={syncStatus.queuedWrites}
@@ -804,15 +807,21 @@ export function MapScreen() {
           canRedo={canRedoLastTool}
           onUndo={handleUndoLastAnnotation}
           onRedo={handleRedoLastAnnotation}
-          onOpenSettings={() => setSettingsOpen(true)}
-          onOpenChat={() => setChatOpen(true)}
+          onOpenSettings={() => {
+            setChatOpen(false);
+            setSettingsOpen(true);
+          }}
+          onOpenChat={() => {
+            handleSelectTool("none");
+            setChatOpen(true);
+          }}
           mapStyle={mapStyle}
           onMapStyleChange={setMapStyle}
         />
       </div>
 
       {geometryEditAnnotation && geometryDraft ? (
-        <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+var(--chrome-gap-above-dock))] z-[var(--z-panel)] px-3">
+        <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock z-[var(--z-panel)] px-3">
           <div className="hud-panel mx-auto flex max-w-xl gap-2 p-3">
             <button
               type="button"
@@ -890,8 +899,14 @@ export function MapScreen() {
       />
 
       {activeTool !== "none" && !selectedAnnotation ? (
-        <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+var(--chrome-gap-above-dock))] z-[var(--z-panel)] px-3">
-          <div className="tool-panel-compact hud-panel relative mx-auto max-h-[min(34dvh,320px)] max-w-xl overflow-y-auto overscroll-contain p-3 pt-9">
+        <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock z-[var(--z-panel)] px-3">
+          <div
+            className={`tool-panel-compact hud-panel relative mx-auto max-w-xl overflow-y-auto overscroll-contain p-3 pt-9 ${
+              isWizardDockTool(activeTool)
+                ? "max-h-[min(54dvh,480px)]"
+                : "max-h-[min(34dvh,320px)]"
+            }`}
+          >
             <PopupCloseButton
               label={`Close ${mapToolPlacingLabel(activeTool)}`}
               onClick={() => handleSelectTool("none")}

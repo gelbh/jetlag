@@ -347,9 +347,11 @@ export function CreateSession() {
 
       <MobileSheet
         variant="nested"
+        layout="split"
         maxHeightClassName="max-h-[min(58dvh,640px)]"
-        className="flex-1 min-h-0"
+        className="flex min-h-0 flex-1 flex-col"
       >
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 px-4 pt-3">
         <AppLogo variant="lockup" size="md" />
         <p className="mt-3 font-display text-xs font-semibold uppercase tracking-[0.14em] text-brand-blue">
           New game
@@ -512,15 +514,19 @@ export function CreateSession() {
           ) : null}
         </div>
 
+        </div>
+
+        <div className="sticky bottom-0 shrink-0 border-t border-border bg-surface-deep px-4 pt-3 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
         <button
           type="button"
           onClick={() => void handleConfirm()}
           disabled={loading || verifyingAccess}
-          className="btn-primary mt-4 w-full disabled:opacity-50"
+          className="btn-primary w-full disabled:opacity-50"
         >
           {confirmLabel}
         </button>
         {error ? <p className="text-error mt-2">{error}</p> : null}
+        </div>
       </MobileSheet>
     </div>
   );

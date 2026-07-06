@@ -59,6 +59,18 @@ export const QUESTION_DOCK_TOOL_IDS = [
 
 export const MARKUP_DOCK_TOOL_IDS = ["zone", "pin"] as const satisfies readonly DockableMapTool[];
 
+export const WIZARD_DOCK_TOOL_IDS = [
+  "matching",
+  "measuring",
+  "tentacle",
+] as const satisfies readonly DockableMapTool[];
+
+export function isWizardDockTool(
+  id: MapTool,
+): id is (typeof WIZARD_DOCK_TOOL_IDS)[number] {
+  return (WIZARD_DOCK_TOOL_IDS as readonly string[]).includes(id);
+}
+
 const DOCK_SHORT_LABELS: Record<(typeof QUESTION_DOCK_TOOL_IDS)[number], string> = {
   matching: "Match",
   measuring: "Measure",

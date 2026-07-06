@@ -5,6 +5,7 @@ import {
   type AnnotationRecord,
   type AnnotationType,
 } from "../../domain/annotations";
+import { useScrollLock } from "../../hooks/useScrollLock";
 import { useMapStore } from "../../state/sessionStore";
 
 const FILTER_OPTIONS: Array<AnnotationType | "all"> = [
@@ -35,6 +36,7 @@ export function SessionLog({
 }: SessionLogProps) {
   const distanceUnit = useMapStore((state) => state.distanceUnit);
   const [filter, setFilter] = useState<AnnotationType | "all">("all");
+  useScrollLock(open);
 
   const active = useMemo(() => {
     const items = annotations.filter(isActive).slice().reverse();
@@ -51,7 +53,7 @@ export function SessionLog({
 
   return (
     <div
-      className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] hud-scrim"
+      className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] overscroll-contain hud-scrim"
       onClick={onClose}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
@@ -60,10 +62,10 @@ export function SessionLog({
       }}
     >
       <div
-        className="absolute inset-x-0 bottom-0 max-h-[min(85dvh,720px)] rounded-t-3xl border border-border bg-surface-base p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+        className="absolute inset-x-0 bottom-0 flex max-h-[min(85dvh,720px)] flex-col overflow-hidden rounded-t-3xl border border-border bg-surface-base p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">Session log</h2>
           <button
             type="button"
@@ -74,7 +76,7 @@ export function SessionLog({
           </button>
         </div>
 
-        <div className="mb-3 flex flex-wrap gap-2">
+        <div className="mb-3 flex shrink-0 flex-wrap gap-2">
           {FILTER_OPTIONS.map((option) => (
             <button
               key={option}
@@ -91,7 +93,7 @@ export function SessionLog({
           ))}
         </div>
 
-        <div className="space-y-2 overflow-y-auto overscroll-contain">
+        <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain">
           {active.length === 0 ? (
             <p className="text-sm text-ink-dim">No annotations yet.</p>
           ) : (

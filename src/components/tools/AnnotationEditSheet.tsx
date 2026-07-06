@@ -540,11 +540,15 @@ function EditSheetFrame({
   children: ReactNode;
 }) {
   return (
-    <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+var(--chrome-gap-above-dock))] z-[var(--z-panel)] px-3">
-      <div className="hud-panel mx-auto max-h-[min(42dvh,420px)] max-w-xl overflow-y-auto overscroll-contain p-4">
-        <EditSheetHeader title={title} onClose={onClose} />
-        <div className="space-y-4">{children}</div>
-        <div className="mt-4 grid grid-cols-2 gap-2">
+    <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock z-[var(--z-panel)] px-3">
+      <div className="hud-panel mx-auto flex max-h-[min(42dvh,420px)] max-w-xl flex-col overflow-hidden">
+        <div className="shrink-0 p-4 pb-0">
+          <EditSheetHeader title={title} onClose={onClose} />
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-3">
+          <div className="space-y-4">{children}</div>
+        </div>
+        <div className="grid shrink-0 grid-cols-2 gap-2 border-t border-border p-4">
           {onSave ? (
             <button
               type="button"

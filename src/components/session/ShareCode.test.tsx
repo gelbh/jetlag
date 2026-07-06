@@ -8,7 +8,7 @@ describe("ShareCode", () => {
     renderWithRouter(<ShareCode code="WXYZ" remote />);
     expect(screen.getByText("WXYZ")).toBeInTheDocument();
     expect(
-      screen.getByText("Give this code to your team."),
+      screen.getByText(/Tap code to copy\. Give it to your team\./),
     ).toBeInTheDocument();
   });
 });

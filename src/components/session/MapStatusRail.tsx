@@ -10,11 +10,13 @@ import { TimerActions } from "../tools/TimerActions";
 import { SessionTimerLabel } from "./SessionTimerLabel";
 
 import type { GameSize } from "../../domain/gameSize";
+import type { PlayerRole } from "../../domain/playerRole";
 import { HidingPeriodLabel } from "./HidingPeriodLabel";
 
 interface MapStatusRailProps {
   sessionCode: string;
   gameSize?: GameSize;
+  playerRole?: PlayerRole;
   activeTool: MapTool;
   syncStatus: SyncStatus;
   queuedWrites: number;
@@ -133,9 +135,14 @@ function syncRailDisplay(
   return { inline: null, banner: null };
 }
 
+function idleModeLabel(playerRole: PlayerRole): string {
+  return playerRole === "hider" ? "Set your zone" : "Ready to seek";
+}
+
 export function MapStatusRail({
   sessionCode,
   gameSize = "medium",
+  playerRole = "seeker",
   activeTool,
   syncStatus,
   queuedWrites,
@@ -156,7 +163,7 @@ export function MapStatusRail({
   const placing = activeTool !== "none";
   const modeLabel = placing
     ? mapToolPlacingLabel(activeTool)
-    : "Ready to seek";
+    : idleModeLabel(playerRole);
   const sync = syncRailDisplay(syncStatus, queuedWrites, message);
 
   useEffect(() => {
@@ -187,7 +194,7 @@ export function MapStatusRail({
   return (
     <div
       ref={railRef}
-      className="pointer-events-none absolute inset-x-0 top-0 z-[var(--z-banner)] pt-[max(0px,env(safe-area-inset-top))]"
+      className="jl-status-rail pointer-events-none absolute inset-x-0 top-0 z-[var(--z-banner)] bg-surface-deep pt-[max(0px,env(safe-area-inset-top))]"
     >
       <div className="relative">
         {timerMenuOpen ? (
@@ -276,8 +283,9 @@ export function MapStatusRail({
 
             {sync.inline?.visible && sync.inline.label ? (
               <p
-                className={`hidden max-w-[5.5rem] shrink-0 truncate text-[10px] font-semibold uppercase tracking-wide sm:block sm:max-w-[8rem] sm:text-xs ${SYNC_TONE_CLASSES[sync.inline.tone].text}`}
+                className={`max-w-[4.5rem] shrink-0 truncate text-[10px] font-semibold uppercase tracking-wide sm:max-w-[8rem] sm:text-xs ${SYNC_TONE_CLASSES[sync.inline.tone].text}`}
                 title={sync.inline.label}
+                aria-live="polite"
               >
                 {sync.inline.label}
               </p>

@@ -85,7 +85,7 @@ export function Home() {
     <main className="home-poster home-terminal-accent flex min-h-[100dvh] flex-col justify-between px-5 py-8">
       <div className="space-y-3 pt-[max(1.25rem,env(safe-area-inset-top))]">
         <AppLogo variant="lockup" size="lg" />
-        <h1 className="font-display text-balance text-[clamp(2.75rem,14vw,4.25rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
+        <h1 className="font-display text-balance text-[clamp(2.25rem,12vw,4.25rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
           Hide +
           <br />
           Seek

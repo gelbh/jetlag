@@ -7,6 +7,7 @@ import type {
 import { createMessageId } from "../../domain/sessionChat";
 import type { PlayerRole } from "../../domain/playerRole";
 import { postSocialMessage } from "../../services/firestoreSessionExtras";
+import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
 import { GameChatTab } from "./GameChatTab";
 
 interface SocialChatTabProps {
@@ -52,7 +53,7 @@ export function SocialChatTab({
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
-      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto">
+      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain">
         {socialMessages.length === 0 ? (
           <p className="text-sm text-ink-dim">No messages yet.</p>
         ) : (
@@ -109,6 +110,7 @@ interface ChatPanelProps {
   senderUid: string;
   senderRole: PlayerRole;
   isHider: boolean;
+  bottomClassName?: string;
   onAnswerQuestion: (
     pendingQuestionId: string,
     messageId: string,
@@ -127,16 +129,25 @@ export function ChatPanel({
   senderUid,
   senderRole,
   isHider,
+  bottomClassName = "jl-panel-above-dock",
   onAnswerQuestion,
 }: ChatPanelProps) {
   const [tab, setTab] = useState<"social" | "game">("game");
+  const keyboardInset = useVisualViewportBottomInset(open);
 
   if (!open) {
     return null;
   }
 
   return (
-    <div className="pointer-events-auto absolute inset-x-0 bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+var(--chrome-gap-above-dock))] z-[var(--z-panel)] px-3">
+    <div
+      className={`pointer-events-auto absolute inset-x-0 z-[var(--z-panel)] px-3 ${bottomClassName}`}
+      style={
+        keyboardInset > 0
+          ? { transform: `translateY(-${keyboardInset}px)` }
+          : undefined
+      }
+    >
       <div className="tool-panel-compact hud-panel mx-auto flex max-h-[min(50dvh,420px)] max-w-xl flex-col overflow-hidden p-3">
         <div className="mb-3 flex items-center justify-between gap-2">
           <div className="flex gap-2">
@@ -163,7 +174,11 @@ export function ChatPanel({
               Social
             </button>
           </div>
-          <button type="button" onClick={onClose} className="btn-secondary min-h-9 px-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn-secondary flex min-h-11 min-w-11 items-center justify-center px-3"
+          >
             Close
           </button>
         </div>

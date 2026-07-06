@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MobileSheet } from "../ui/MobileSheet";
+import { useScrollLock } from "../../hooks/useScrollLock";
 
 const STORAGE_KEY = "jetlag.mapFirstRunDismissed";
 
@@ -18,6 +19,7 @@ interface MapFirstRunSheetProps {
 
 export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
   const [dismissed] = useState(readDismissed);
+  useScrollLock(open && !dismissed);
 
   if (!open || dismissed) {
     return null;
@@ -33,7 +35,7 @@ export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
   };
 
   return (
-    <div className="pointer-events-auto fixed inset-0 z-[var(--z-modal)]">
+    <div className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] overscroll-contain">
       <button
         type="button"
         className="absolute inset-0 hud-scrim"
@@ -46,27 +48,24 @@ export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
             <div className="space-y-1">
               <h2 className="text-lg font-semibold text-ink">Map tools</h2>
               <p className="text-pretty text-sm text-ink-muted">
-                Mark the live search map for your team. Quick tools sit on the
-                bottom bar; question tools live under More.
+                Mark the live search map for your team. Question tools sit on
+                the bottom bar; zone and pin live under Draw (or More on narrow
+                phones).
               </p>
             </div>
 
             <ul className="space-y-2 text-sm text-ink-secondary">
               <li>
-                <span className="font-medium text-ink">Radar.</span> Draw a
-                search circle on the map.
+                <span className="font-medium text-ink">Match, Measure, Thermo, Radar, Tent.</span>{" "}
+                The five game questions — always on the dock.
               </li>
               <li>
-                <span className="font-medium text-ink">Zone.</span> Outline an
-                area to search or rule out.
+                <span className="font-medium text-ink">Draw.</span> Zone and pin
+                markup tools.
               </li>
               <li>
-                <span className="font-medium text-ink">Pin.</span> Drop a note
-                at a point.
-              </li>
-              <li>
-                <span className="font-medium text-ink">More.</span> Matching,
-                Measuring, Thermometer, Tentacles.
+                <span className="font-medium text-ink">Setup.</span> Layers,
+                timer, and session options.
               </li>
             </ul>
 

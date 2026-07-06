@@ -49,8 +49,19 @@
   color: var(--color-ink-secondary);
   --dock-height: 4.25rem;
   --status-bar-height: 3.25rem;
+  --hider-action-bar-height: 3.75rem;
   --chrome-gap-above-dock: 0.5rem;
   --chrome-gap-bottom: 0.75rem;
+  --map-panel-bottom: calc(
+    var(--dock-height) + env(safe-area-inset-bottom) + var(--chrome-gap-above-dock)
+  );
+  --hider-panel-bottom: calc(
+    env(safe-area-inset-bottom) + var(--chrome-gap-above-dock)
+  );
+  --hider-wizard-bottom: calc(
+    env(safe-area-inset-bottom) + var(--chrome-gap-above-dock) +
+      var(--hider-action-bar-height)
+  );
   --z-dock: 1000;
   --z-banner: 1001;
   --z-panel: 1002;
@@ -427,6 +438,10 @@ textarea {
   }
 
   /* —— Broadcast status bar (map top) —— */
+  .jl-status-rail {
+    box-shadow: 0 4px 24px oklch(0.06 0.04 265 / 0.65);
+  }
+
   .jl-status-bar {
     pointer-events: auto;
     width: 100%;
@@ -551,6 +566,8 @@ textarea {
   }
 
   .jl-tool-dock-bar {
+    container-type: inline-size;
+    container-name: tool-dock;
     display: flex;
     align-items: stretch;
     gap: 0.25rem;
@@ -561,6 +578,38 @@ textarea {
     background: oklch(from var(--color-surface-deep) l c h / 0.96);
     padding: 0.25rem 0.375rem;
     box-shadow: var(--shadow-hud-menu);
+  }
+
+  .jl-tool-dock-wide-only {
+    display: flex;
+  }
+
+  .jl-tool-dock-compact-only {
+    display: none;
+  }
+
+  @container tool-dock (max-width: 26rem) {
+    .jl-tool-dock-bar .jl-tool-slot-label {
+      display: none;
+    }
+
+    .jl-tool-dock-wide-only {
+      display: none;
+    }
+
+    .jl-tool-dock-compact-only {
+      display: flex;
+    }
+
+    .jl-tool-dock-group-main .jl-tool-slot {
+      min-width: 2.75rem;
+      flex: 1 1 0;
+    }
+
+    .jl-tool-dock-group:not(.jl-tool-dock-group-main) .jl-tool-slot {
+      min-width: 2.75rem;
+      flex: 0 0 auto;
+    }
   }
 
   .jl-tool-dock-group {
@@ -657,6 +706,18 @@ textarea {
       font-size: 0.5rem;
       letter-spacing: 0.04em;
     }
+  }
+
+  .jl-panel-above-dock {
+    bottom: var(--map-panel-bottom);
+  }
+
+  .jl-panel-hider-actions {
+    bottom: var(--hider-panel-bottom);
+  }
+
+  .jl-panel-hider-wizard {
+    bottom: var(--hider-wizard-bottom);
   }
 
   .jl-tool-slot-icon {
@@ -904,7 +965,20 @@ textarea {
 
 .leaflet-control-attribution {
   font-size: 10px;
-  max-width: 55vw;
+  max-width: 45vw;
+}
+
+@media (max-width: 28rem) {
+  .leaflet-bottom.leaflet-right {
+    margin-bottom: calc(
+      env(safe-area-inset-bottom) + var(--dock-height) + var(--chrome-gap-above-dock) +
+        2.5rem
+    ) !important;
+  }
+
+  .leaflet-control-attribution {
+    max-width: 38vw;
+  }
 }
 
 .map-crosshair {
@@ -970,7 +1044,9 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .annotation-pulse {
+  .annotation-pulse,
+  .draft-seeker-pulse,
+  .loading-spinner {
     animation: none;
   }
 

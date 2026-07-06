@@ -14,7 +14,7 @@ const CreateSession = lazy(() =>
 
 function RouteFallback() {
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center text-ink-dim">
+    <div className="flex min-h-[100dvh] items-center justify-center px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] text-ink-dim">
       Loading…
     </div>
   );
