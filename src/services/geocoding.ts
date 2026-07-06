@@ -2,6 +2,12 @@ import type { GameArea } from "../domain/annotations";
 import { normalizeBoundingBox } from "../domain/gameAreaBounds";
 import type { LatLngTuple } from "../domain/geometry";
 import {
+  computeApproximateAreaSqMi,
+  placeCategoryLabel,
+  rankGeocodedPlaceCandidates,
+  type RankedGeocodedPlaceCandidate,
+} from "./geocodingRank";
+import {
   getOrFetchCached,
   geographicCacheKey,
 } from "./geographicFeatureCache";
@@ -14,6 +20,7 @@ const NOMINATIM_REVERSE_ENDPOINT =
 const USER_AGENT = "JetLagMapCompanion/1.0";
 const NOMINATIM_FETCH_TIMEOUT_MS = 15_000;
 const NOMINATIM_MAX_RETRIES = 2;
+const SEARCH_RESULT_LIMIT = 8;
 
 export interface GeocodedPlace {
   id: string;
@@ -26,6 +33,8 @@ export interface GeocodedPlace {
   };
   center: LatLngTuple;
   boundary?: GameArea;
+  placeCategory: string;
+  approximateAreaSqMi: number;
 }
 
 interface NominatimGeoJson {
@@ -41,6 +50,11 @@ interface NominatimResult {
   boundingbox: [string, string, string, string];
   geojson?: NominatimGeoJson;
   address?: Record<string, string>;
+  type?: string;
+  class?: string;
+  addresstype?: string;
+  place_rank?: number;
+  importance?: number;
 }
 
 function normalizeSearchQuery(query: string): string {
@@ -53,7 +67,7 @@ function geocodeSearchCacheKey(query: string): string {
       type: "Polygon",
       coordinates: [[[0, 0]]],
     },
-    `geocode:search:${normalizeSearchQuery(query)}`,
+    `geocode:search:v2:${normalizeSearchQuery(query)}`,
   );
 }
 
@@ -147,19 +161,87 @@ async function geoJsonToGameArea(
   return undefined;
 }
 
+function enrichParsedPlace(
+  partial: Omit<GeocodedPlace, "placeCategory" | "approximateAreaSqMi">,
+  metadata: { addresstype?: string; type?: string; class?: string },
+): GeocodedPlace {
+  return {
+    ...partial,
+    placeCategory: placeCategoryLabel(metadata),
+    approximateAreaSqMi: computeApproximateAreaSqMi(partial),
+  };
+}
+
 export async function parseNominatimResult(
   result: NominatimResult,
 ): Promise<GeocodedPlace> {
   const [south, north, west, east] = result.boundingbox.map(Number);
   const boundary = await geoJsonToGameArea(result.geojson);
 
-  return {
-    id: String(result.place_id),
-    displayName: result.display_name,
-    bounds: normalizeBoundingBox({ south, west, north, east }),
-    center: [Number(result.lat), Number(result.lon)],
-    boundary,
-  };
+  return enrichParsedPlace(
+    {
+      id: String(result.place_id),
+      displayName: result.display_name,
+      bounds: normalizeBoundingBox({ south, west, north, east }),
+      center: [Number(result.lat), Number(result.lon)],
+      boundary,
+    },
+    result,
+  );
+}
+
+async function fetchNominatimSearch(
+  query: string,
+  options?: { featureType?: "city" },
+): Promise<NominatimResult[]> {
+  const url = new URL(NOMINATIM_ENDPOINT);
+  url.searchParams.set("q", query);
+  url.searchParams.set("format", "json");
+  url.searchParams.set("limit", "5");
+  url.searchParams.set("addressdetails", "1");
+  url.searchParams.set("polygon_geojson", "1");
+
+  if (options?.featureType) {
+    url.searchParams.set("featureType", options.featureType);
+  }
+
+  return (await fetchNominatim(url)) as NominatimResult[];
+}
+
+async function candidatesFromResults(
+  results: NominatimResult[],
+  fromCityQuery: boolean,
+): Promise<RankedGeocodedPlaceCandidate[]> {
+  return Promise.all(
+    results.map(async (result) => ({
+      place: await parseNominatimResult(result),
+      importance: result.importance ?? 0,
+      fromCityQuery,
+    })),
+  );
+}
+
+function mergeSearchCandidates(
+  defaultCandidates: RankedGeocodedPlaceCandidate[],
+  cityCandidates: RankedGeocodedPlaceCandidate[],
+): RankedGeocodedPlaceCandidate[] {
+  const merged = new Map<string, RankedGeocodedPlaceCandidate>();
+
+  for (const candidate of [...defaultCandidates, ...cityCandidates]) {
+    const existing = merged.get(candidate.place.id);
+    if (!existing) {
+      merged.set(candidate.place.id, candidate);
+      continue;
+    }
+
+    merged.set(candidate.place.id, {
+      place: candidate.place,
+      importance: Math.max(existing.importance, candidate.importance),
+      fromCityQuery: existing.fromCityQuery || candidate.fromCityQuery,
+    });
+  }
+
+  return [...merged.values()];
 }
 
 export async function searchPlaces(query: string): Promise<GeocodedPlace[]> {
@@ -169,15 +251,20 @@ export async function searchPlaces(query: string): Promise<GeocodedPlace[]> {
   }
 
   return getOrFetchCached(geocodeSearchCacheKey(trimmed), async () => {
-    const url = new URL(NOMINATIM_ENDPOINT);
-    url.searchParams.set("q", trimmed);
-    url.searchParams.set("format", "json");
-    url.searchParams.set("limit", "5");
-    url.searchParams.set("addressdetails", "1");
-    url.searchParams.set("polygon_geojson", "1");
+    const [defaultResults, cityResults] = await Promise.all([
+      fetchNominatimSearch(trimmed),
+      fetchNominatimSearch(trimmed, { featureType: "city" }),
+    ]);
 
-    const payload = (await fetchNominatim(url)) as NominatimResult[];
-    return Promise.all(payload.map(parseNominatimResult));
+    const merged = mergeSearchCandidates(
+      await candidatesFromResults(defaultResults, false),
+      await candidatesFromResults(cityResults, true),
+    );
+
+    return rankGeocodedPlaceCandidates(merged, trimmed).slice(
+      0,
+      SEARCH_RESULT_LIMIT,
+    );
   });
 }
 

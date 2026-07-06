@@ -32,6 +32,8 @@ const dublinPlace: GeocodedPlace = {
       ],
     ],
   },
+  placeCategory: "city",
+  approximateAreaSqMi: 180,
 };
 
 vi.mock("../services/geocoding", () => ({
@@ -141,5 +143,37 @@ describe("CreateSession", () => {
     fireEvent.click(screen.getByRole("radio", { name: /Hider/i }));
 
     expect(screen.getAllByText(/sq mi play area/i).length).toBeGreaterThan(0);
+  });
+
+  it("shows place category and area in search results", async () => {
+    const { searchPlaces } = await import("../services/geocoding");
+    const cityPlace: GeocodedPlace = {
+      ...dublinPlace,
+      id: "dublin-city",
+      displayName: "Dublin, County Dublin, Ireland",
+      placeCategory: "city",
+      approximateAreaSqMi: 42,
+    };
+    const countyPlace: GeocodedPlace = {
+      ...dublinPlace,
+      id: "dublin-county",
+      displayName: "County Dublin, Ireland",
+      placeCategory: "county",
+      approximateAreaSqMi: 350,
+    };
+
+    vi.mocked(searchPlaces).mockResolvedValueOnce([cityPlace, countyPlace]);
+
+    renderWithRouter(<CreateSession />);
+
+    fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
+      target: { value: "Dublin" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Find place" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("city · ~42 sq mi")).toBeInTheDocument();
+      expect(screen.getByText("county · ~350 sq mi")).toBeInTheDocument();
+    });
   });
 });

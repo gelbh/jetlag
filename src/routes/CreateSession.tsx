@@ -41,6 +41,7 @@ import {
   listTransitMetros,
 } from "../services/transitCatalog";
 import { searchPlaces, type GeocodedPlace } from "../services/geocoding";
+import { formatPlaceSearchSubtitle } from "../services/geocodingRank";
 import { grantAccess, hasAccessClaim } from "../services/accessControl";
 import { setPremiumApiContext } from "../services/premiumApiContext";
 
@@ -455,10 +456,19 @@ export function CreateSession() {
                     : "bg-transparent text-ink hover:bg-surface-raised"
                 }`}
               >
-                {place.displayName}
+                <span className="block">{place.displayName}</span>
+                <span className="mt-0.5 block text-xs font-normal normal-case tracking-normal text-ink-dim">
+                  {formatPlaceSearchSubtitle(place)}
+                </span>
               </button>
             ))}
           </div>
+        ) : null}
+
+        {selectedPlace && searchResults.length === 0 ? (
+          <p className="text-xs text-ink-dim">
+            {formatPlaceSearchSubtitle(selectedPlace)}
+          </p>
         ) : null}
 
         <label className="field-label font-display text-xs uppercase tracking-[0.1em]">

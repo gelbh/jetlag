@@ -9,6 +9,7 @@ describe("geocoding", () => {
       lat: "53.3498",
       lon: "-6.2603",
       boundingbox: ["53.2", "53.5", "-6.5", "-6.0"],
+      addresstype: "city",
     });
 
     expect(place.displayName).toContain("Dublin");
@@ -20,6 +21,8 @@ describe("geocoding", () => {
     });
     expect(place.center).toEqual([53.3498, -6.2603]);
     expect(place.boundary).toBeUndefined();
+    expect(place.placeCategory).toBe("city");
+    expect(place.approximateAreaSqMi).toBeGreaterThan(0);
   });
 
   it("parses administrative boundaries when Nominatim returns geojson", async () => {
@@ -29,6 +32,7 @@ describe("geocoding", () => {
       lat: "53.3498",
       lon: "-6.2603",
       boundingbox: ["53.2", "53.5", "-6.5", "-6.0"],
+      addresstype: "county",
       geojson: {
         type: "Polygon",
         coordinates: [
@@ -45,5 +49,7 @@ describe("geocoding", () => {
 
     expect(place.boundary?.type).toBe("Polygon");
     expect(place.boundary?.coordinates[0]).toHaveLength(5);
+    expect(place.placeCategory).toBe("county");
+    expect(place.approximateAreaSqMi).toBeGreaterThan(0);
   });
 });
