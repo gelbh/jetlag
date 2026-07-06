@@ -25,7 +25,7 @@ async function waitForSendToHiders(page: Page) {
   });
 }
 
-async function dismissActiveToolPanel(page: Page) {
+export async function dismissActiveToolPanel(page: Page) {
   const closeTool = page.getByRole("button", { name: /^Close / });
   if (await closeTool.isVisible({ timeout: 500 }).catch(() => false)) {
     await closeTool.click({ timeout: 5_000 }).catch(() => undefined);

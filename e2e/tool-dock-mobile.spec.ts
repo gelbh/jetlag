@@ -2,11 +2,7 @@ import { test, expect } from "./fixtures";
 import { openMapWithLocalSession, placePin } from "./fixtures";
 
 test.describe("mobile tool dock", () => {
-  test.beforeEach(async ({ page }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== "mobile",
-      "Compact dock behavior is mobile-only",
-    );
+  test.beforeEach(async ({ page }) => {
     await openMapWithLocalSession(page);
   });
 

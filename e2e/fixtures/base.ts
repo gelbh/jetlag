@@ -17,6 +17,20 @@ export const LOCAL_GAME_AREA = {
   ],
 };
 
+/** Nominatim bounding box for County Dublin, Ireland (marketing screenshots). */
+export const COUNTY_DUBLIN_GAME_AREA = {
+  type: "Polygon" as const,
+  coordinates: [
+    [
+      [-6.5468919, 53.1782636],
+      [-5.9945041, 53.1782636],
+      [-5.9945041, 53.6347254],
+      [-6.5468919, 53.6347254],
+      [-6.5468919, 53.1782636],
+    ],
+  ],
+};
+
 const OVERPASS_API_HOSTS = new Set([
   "overpass-api.de",
   "maps.mail.ru",
@@ -30,6 +44,10 @@ const TILE_PNG = Buffer.from(
 
 export interface BlockExternalAssetsOptions {
   overpassProfile?: OverpassFixtureProfile;
+  /** When false, map tiles load from the network (for marketing screenshots). */
+  stubMapTiles?: boolean;
+  /** When false, Nominatim geocoding hits the network (for marketing screenshots). */
+  stubGeocoding?: boolean;
 }
 
 function extractOverpassQuery(postData: string): string {
@@ -64,6 +82,8 @@ export async function blockExternalAssets(
   options: BlockExternalAssetsOptions = {},
 ) {
   const overpassProfile = options.overpassProfile ?? "default";
+  const stubMapTiles = options.stubMapTiles ?? true;
+  const stubGeocoding = options.stubGeocoding ?? true;
 
   await page.route("**/*", async (route) => {
     const url = route.request().url();
@@ -83,7 +103,11 @@ export async function blockExternalAssets(
 
     const { hostname, pathname } = parsed;
 
-    if (hostname === "nominatim.openstreetmap.org" && pathname.includes("/search")) {
+    if (
+      stubGeocoding &&
+      hostname === "nominatim.openstreetmap.org" &&
+      pathname.includes("/search")
+    ) {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -101,9 +125,10 @@ export async function blockExternalAssets(
     }
 
     if (
-      hostname === "tile.openstreetmap.org" ||
-      hostname.endsWith(".basemaps.cartocdn.com") ||
-      hostname.includes("arcgisonline.com")
+      stubMapTiles &&
+      (hostname === "tile.openstreetmap.org" ||
+        hostname.endsWith(".basemaps.cartocdn.com") ||
+        hostname.includes("arcgisonline.com"))
     ) {
       await route.fulfill({
         status: 200,
@@ -134,10 +159,7 @@ export async function blockExternalAssets(
   });
 }
 
-export async function prepareE2EPage(
-  page: Page,
-  options: BlockExternalAssetsOptions = {},
-) {
+async function applyPageCaptureInit(page: Page) {
   await page.addInitScript(() => {
     localStorage.setItem("jetlag.mapFirstRunDismissed", "1");
     try {
@@ -146,7 +168,26 @@ export async function prepareE2EPage(
       // IndexedDB may be unavailable in some contexts.
     }
   });
+}
+
+export async function prepareE2EPage(
+  page: Page,
+  options: BlockExternalAssetsOptions = {},
+) {
+  await applyPageCaptureInit(page);
   await blockExternalAssets(page, options);
+}
+
+export async function prepareMarketingPage(
+  page: Page,
+  options: BlockExternalAssetsOptions = {},
+) {
+  await applyPageCaptureInit(page);
+  await blockExternalAssets(page, {
+    ...options,
+    stubMapTiles: false,
+    stubGeocoding: false,
+  });
 }
 
 export async function dismissMapOnboarding(page: Page) {
@@ -199,7 +240,9 @@ export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
   }
 
   await page.getByRole("button", { name: "More tools" }).click();
-  await page.getByRole("button", { name: toolName }).click();
+  const sheet = page.getByRole("dialog", { name: "More tools" });
+  await sheet.waitFor({ state: "visible" });
+  await sheet.getByRole("button", { name: toolName }).click();
 }
 
 export async function clickToolDockButton(page: Page, name: string) {

@@ -9,6 +9,7 @@ export interface LocalSessionSeedOptions {
   myRole?: PlayerRole;
   gameSize?: GameSize;
   sessionId?: string;
+  gameArea?: typeof LOCAL_GAME_AREA;
 }
 
 export async function seedLocalSession(
@@ -20,6 +21,7 @@ export async function seedLocalSession(
     myRole = "seeker",
     gameSize = "medium",
     sessionId = "local",
+    gameArea = LOCAL_GAME_AREA,
   } = options;
 
   await page.addInitScript(
@@ -61,7 +63,7 @@ export async function seedLocalSession(
       sessionState: {
         id: sessionId,
         code,
-        gameArea: LOCAL_GAME_AREA,
+        gameArea,
         createdAt: "2026-01-01T00:00:00.000Z",
         memberUids: [],
         tier: "free",
