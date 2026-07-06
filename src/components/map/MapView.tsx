@@ -42,6 +42,7 @@ function MapFocus({
       suppressChromeHideRef.current = true;
     }
 
+    map.invalidateSize();
     map.fitBounds(focusBounds, { padding: [32, 32] });
 
     const onMoveEnd = () => {
@@ -71,15 +72,29 @@ function MapResize() {
   const map = useMap();
 
   useEffect(() => {
+    const container = map.getContainer();
+    const target = container.parentElement;
+    let timeoutId = 0;
+
     const resize = () => {
-      map.invalidateSize();
+      window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
     };
 
     resize();
     window.addEventListener("resize", resize);
 
+    const observer = target ? new ResizeObserver(resize) : null;
+    if (target && observer) {
+      observer.observe(target);
+    }
+
     return () => {
+      window.clearTimeout(timeoutId);
       window.removeEventListener("resize", resize);
+      observer?.disconnect();
     };
   }, [map]);
 

@@ -186,7 +186,26 @@ export function CreateSession() {
       return;
     }
 
-    setBounds(nextBounds);
+    setBounds((previous) => {
+      if (previous) {
+        const prevSw = previous.getSouthWest();
+        const prevNe = previous.getNorthEast();
+        const nextSw = nextBounds.getSouthWest();
+        const nextNe = nextBounds.getNorthEast();
+        const epsilon = 1e-6;
+
+        if (
+          Math.abs(prevSw.lat - nextSw.lat) < epsilon &&
+          Math.abs(prevSw.lng - nextSw.lng) < epsilon &&
+          Math.abs(prevNe.lat - nextNe.lat) < epsilon &&
+          Math.abs(prevNe.lng - nextNe.lng) < epsilon
+        ) {
+          return previous;
+        }
+      }
+
+      return nextBounds;
+    });
     setUserFramedViewport(true);
   };
 

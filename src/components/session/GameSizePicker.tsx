@@ -41,8 +41,11 @@ export function GameSizePicker({
       return;
     }
 
-    onChange(recommendGameSize(gameArea));
-  }, [gameArea, onChange, userOverrode]);
+    const next = recommendGameSize(gameArea);
+    if (next !== value) {
+      onChange(next);
+    }
+  }, [gameArea, onChange, userOverrode, value]);
 
   return (
     <div className="space-y-2">

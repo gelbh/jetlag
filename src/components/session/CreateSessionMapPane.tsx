@@ -36,18 +36,20 @@ export function CreateSessionMapPane({
     recommendedSize !== null && recommendedSize !== selectedGameSize;
 
   return (
-    <div className="relative min-h-[32dvh] max-h-[45dvh] flex-1 shrink-0">
-      <MapView
-        mapStyle={mapStyle}
-        onBoundsChange={onBoundsChange}
-        zoom={12}
-        focusBounds={focusBounds}
-        className="h-full w-full"
-      >
-        {previewGameArea ? (
-          <GameAreaMask gameArea={previewGameArea} framing />
-        ) : null}
-      </MapView>
+    <div className="relative min-h-[32dvh] max-h-[45dvh] flex-[1_0_40dvh] shrink-0">
+      <div className="absolute inset-0">
+        <MapView
+          mapStyle={mapStyle}
+          onBoundsChange={onBoundsChange}
+          zoom={12}
+          focusBounds={focusBounds}
+          className="h-full w-full"
+        >
+          {previewGameArea ? (
+            <GameAreaMask gameArea={previewGameArea} framing />
+          ) : null}
+        </MapView>
+      </div>
 
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-banner)] flex justify-center px-3 pb-3"

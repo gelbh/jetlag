@@ -82,6 +82,19 @@ export async function openMapWithLocalSession(
   await page.getByRole("button", { name: "Radar" }).waitFor();
 }
 
+export async function expectCreatePageMapPreviewLoaded(page: Page) {
+  const map = page.locator(".leaflet-container");
+  await map.waitFor({ state: "visible", timeout: 10_000 });
+
+  await expect
+    .poll(async () => (await map.boundingBox())?.height ?? 0)
+    .toBeGreaterThan(200);
+
+  await expect
+    .poll(async () => page.locator(".leaflet-tile-pane img").count())
+    .toBeGreaterThan(0);
+}
+
 export async function createSessionFromCreatePage(page: Page) {
   await page.goto("/create");
   await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
@@ -89,6 +102,7 @@ export async function createSessionFromCreatePage(page: Page) {
   await expect(page.getByText(/sq mi play area/i).first()).toBeVisible({
     timeout: 10_000,
   });
+  await expectCreatePageMapPreviewLoaded(page);
   await page.getByRole("button", { name: "Confirm game area" }).click();
   await expect(page).toHaveURL(/\/map/, { timeout: 15_000 });
   await expect(page.getByRole("button", { name: "Radar" })).toBeVisible({
