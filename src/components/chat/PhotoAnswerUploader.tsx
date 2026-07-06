@@ -86,14 +86,16 @@ export function PhotoAnswerUploader({
         ref={inputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={(event) => void handleFileChange(event)}
       />
       <button
         type="button"
         disabled={uploading}
-        onClick={() => inputRef.current?.click()}
+        onClick={(event) => {
+          event.stopPropagation();
+          inputRef.current?.click();
+        }}
         className="btn-primary min-h-11 w-full disabled:opacity-50"
       >
         {uploading ? "Uploading photo…" : "Upload photo"}

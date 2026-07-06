@@ -95,4 +95,18 @@ describe("PhotoAnswerUploader", () => {
       false,
     );
   });
+
+  it("does not use capture on the file input", () => {
+    render(
+      <PhotoAnswerUploader
+        sessionId="session-1"
+        pendingQuestion={pendingQuestion}
+        messageId="msg-1"
+        onAnswerQuestion={vi.fn()}
+      />,
+    );
+
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    expect(input.hasAttribute("capture")).toBe(false);
+  });
 });

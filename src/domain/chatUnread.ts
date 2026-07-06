@@ -67,6 +67,15 @@ export function allMessageFingerprints(
   return messages.map((message) => messageFingerprint(message));
 }
 
+export function baselineAcknowledgedFingerprints(
+  messages: readonly SessionMessageRecord[],
+  viewerUid: string,
+): string[] {
+  return messages
+    .filter((message) => !isUnreadEligibleMessage(message, viewerUid))
+    .map((message) => messageFingerprint(message));
+}
+
 export function chatReadStorageKey(
   sessionId: string,
   viewerUid: string,

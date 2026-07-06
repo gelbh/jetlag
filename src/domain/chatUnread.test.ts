@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  baselineAcknowledgedFingerprints,
   collectUnreadFingerprints,
   hasUnreadChatMessages,
   isUnreadEligibleMessage,
@@ -149,5 +150,44 @@ describe("hasUnreadChatMessages", () => {
 
     expect(unread).toHaveLength(1);
     expect(unread[0]).toBe(messageFingerprint(gameQuestion()));
+  });
+});
+
+describe("baselineAcknowledgedFingerprints", () => {
+  it("excludes pending seeker questions for the hider", () => {
+    const baseline = baselineAcknowledgedFingerprints(
+      [gameQuestion()],
+      hiderUid,
+    );
+
+    expect(baseline).toHaveLength(0);
+    expect(hasUnreadChatMessages([gameQuestion()], hiderUid, new Set(baseline))).toBe(
+      true,
+    );
+  });
+
+  it("includes own social messages and answered questions", () => {
+    const ownSocial = socialMessage({ senderUid: hiderUid, senderRole: "hider" });
+    const answered = gameQuestion({
+      status: "answered",
+      selectedReply: "yes",
+    });
+
+    const baseline = baselineAcknowledgedFingerprints(
+      [ownSocial, answered],
+      hiderUid,
+    );
+
+    expect(baseline).toContain(messageFingerprint(ownSocial));
+    expect(baseline).toContain(messageFingerprint(answered));
+  });
+
+  it("leaves new fingerprints unread after baseline", () => {
+    const baseline = new Set(
+      baselineAcknowledgedFingerprints([], hiderUid),
+    );
+    const question = gameQuestion();
+
+    expect(hasUnreadChatMessages([question], hiderUid, baseline)).toBe(true);
   });
 });

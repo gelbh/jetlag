@@ -412,8 +412,10 @@ export function HiderMapScreen() {
               hasUnreadChat ? "Open chat, unread messages" : "Open chat"
             }
           >
-            Chat
-            {hasUnreadChat ? <ChatUnreadBadge /> : null}
+            <span className="jl-unread-badge-host">
+              Chat
+              {hasUnreadChat ? <ChatUnreadBadge /> : null}
+            </span>
           </button>
           <button
             type="button"
@@ -523,7 +525,6 @@ export function HiderMapScreen() {
                   ?.label ?? selectedReply;
               setTruthReveal({ truth, selectedReply, selectedLabel });
             }
-            overlay.closeSheet();
           } catch (error) {
             setChatAnswerError(
               error instanceof Error

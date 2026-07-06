@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   allMessageFingerprints,
+  baselineAcknowledgedFingerprints,
   chatReadStorageKey,
   hasUnreadChatMessages,
 } from "../domain/chatUnread";
@@ -85,7 +86,9 @@ export function useChatUnread({
       return;
     }
 
-    const baseline = new Set(allMessageFingerprints(messages));
+    const baseline = new Set(
+      baselineAcknowledgedFingerprints(messages, viewerUid),
+    );
     baselinedRef.current = true;
     /* eslint-disable react-hooks/set-state-in-effect -- baseline historical messages on first snapshot */
     setAcknowledged(baseline);
