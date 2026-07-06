@@ -238,18 +238,23 @@ export function HiderMapScreen() {
     }
 
     void zoneTool.searchStationsInArea(searchViewportBounds());
-  }, [zoneTool.wizardOpen]);
+  }, [
+    zoneTool.wizardOpen,
+    zoneTool.manualMode,
+    zoneTool.searchStationsInArea,
+    searchViewportBounds,
+  ]);
 
   const openWizardExclusive = useCallback(() => {
     overlay.closeSheet();
     zoneTool.openWizard();
-  }, [overlay, zoneTool]);
+  }, [overlay, zoneTool.openWizard]);
 
   const openChatExclusive = useCallback(() => {
     zoneTool.closeWizard();
     setChatAnswerError(null);
     overlay.openChat();
-  }, [overlay, zoneTool]);
+  }, [overlay, zoneTool.closeWizard]);
 
   const dismissTruthReveal = useCallback(() => {
     setTruthReveal(null);
@@ -258,18 +263,18 @@ export function HiderMapScreen() {
   const openSettingsExclusive = useCallback(() => {
     zoneTool.closeWizard();
     overlay.openSettings();
-  }, [overlay, zoneTool]);
+  }, [overlay, zoneTool.closeWizard]);
 
   const openLogExclusive = useCallback(() => {
     zoneTool.closeWizard();
     overlay.openLog();
-  }, [overlay, zoneTool]);
+  }, [overlay, zoneTool.closeWizard]);
 
   const handleMapClick = useCallback(
     (lat: number, lng: number) => {
       zoneTool.handleMapClick([lat, lng]);
     },
-    [zoneTool],
+    [zoneTool.handleMapClick],
   );
 
   if (!session) {

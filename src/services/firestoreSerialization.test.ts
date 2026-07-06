@@ -242,6 +242,33 @@ describe("firestoreSerialization", () => {
     expect(restored).toEqual(annotation);
   });
 
+  it("deserializes Firestore timestamp objects with seconds and nanoseconds", () => {
+    const annotation = {
+      type: "pin",
+      geometryJson: JSON.stringify({
+        type: "Feature",
+        properties: {},
+        geometry: { type: "Point", coordinates: [-6.26, 53.35] },
+      }),
+      metadata: {
+        label: "Test",
+        createdAt: "2026-05-14T00:00:00.000Z",
+      },
+      status: "active",
+      updatedAt: { seconds: 1_715_686_400, nanoseconds: 0 },
+    };
+
+    const restored = deserializeAnnotationFromFirestore(
+      "session-1",
+      "ann-1",
+      annotation,
+    );
+
+    expect(restored.updatedAt).toBe(
+      new Date(1_715_686_400 * 1000).toISOString(),
+    );
+  });
+
   it("omits undefined hiding zone fields from Firestore payloads", () => {
     const payload = buildHidingZoneDocument({
       hiderUid: "hider-1",

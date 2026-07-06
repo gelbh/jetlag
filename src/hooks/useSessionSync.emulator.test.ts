@@ -74,8 +74,8 @@ describe("useSessionSync emulator", () => {
     await waitFor(() => {
       expect(useAnnotationStore.getState().annotations).toHaveLength(1);
       expect(
-        useAnnotationStore.getState().annotations[0]?.updatedAt,
-      ).toBeTruthy();
+        useAnnotationStore.getState().annotations[0]?.metadata.label,
+      ).toBe("Test pin");
     });
 
     await writeRemoteAnnotation(session.id, {

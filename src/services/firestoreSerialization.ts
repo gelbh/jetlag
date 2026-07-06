@@ -130,6 +130,19 @@ function deserializeFirestoreTimestamp(value: unknown): string | undefined {
     return (value as { toDate: () => Date }).toDate().toISOString();
   }
 
+  if (
+    value &&
+    typeof value === "object" &&
+    "seconds" in value &&
+    typeof (value as { seconds: unknown }).seconds === "number"
+  ) {
+    const record = value as { seconds: number; nanoseconds?: number };
+    const seconds = record.seconds;
+    const nanoseconds = record.nanoseconds ?? 0;
+
+    return new Date(seconds * 1000 + nanoseconds / 1_000_000).toISOString();
+  }
+
   if (typeof value === "string") {
     return value;
   }
