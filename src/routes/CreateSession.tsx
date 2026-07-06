@@ -5,15 +5,20 @@ import { AppLogo } from "../components/ui/AppLogo";
 import { CreateSessionMapPane } from "../components/session/CreateSessionMapPane";
 import { MobileSheet } from "../components/ui/MobileSheet";
 import {
+  LOCAL_SESSION_ID,
+  type GameArea,
+  type SessionTier,
+} from "../domain/annotations";
+import {
   boundsToGameArea,
   boundingBoxHasMinimumSpan,
   boundingBoxToLeafletBounds,
   gameAreaToBoundingBox,
+  gameAreaToBoundsExpression,
   isUsableMapBounds,
   placeToGameArea,
 } from "../domain/geometry";
 import { generateLocalCode } from "../domain/session";
-import { LOCAL_SESSION_ID, type SessionTier } from "../domain/annotations";
 import type { GameSize } from "../domain/gameSize";
 import { hidingZoneRadiusMeters } from "../domain/gameSize";
 import type { PlayerRole } from "../domain/playerRole";
@@ -44,6 +49,7 @@ import { searchPlaces, type GeocodedPlace } from "../services/geocoding";
 import { formatPlaceSearchSubtitle } from "../services/geocodingRank";
 import { grantAccess, hasAccessClaim } from "../services/accessControl";
 import { setPremiumApiContext } from "../services/premiumApiContext";
+import { parseBoundaryFile } from "../services/kmzImport";
 
 const TIER_OPTIONS: Array<{
   value: SessionTier;
@@ -100,7 +106,12 @@ export function CreateSession() {
   const [hostHasAccessClaim, setHostHasAccessClaim] = useState(false);
   const metros = useMemo(() => listTransitMetros(), []);
   const [userFramedViewport, setUserFramedViewport] = useState(false);
+  const [importedGameArea, setImportedGameArea] = useState<GameArea | null>(
+    null,
+  );
+  const [importLoading, setImportLoading] = useState(false);
   const ignoreViewportUpdatesRef = useRef(false);
+  const importFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
@@ -131,18 +142,19 @@ export function CreateSession() {
 
   const inferredTransitMetroId = useMemo(() => {
     const gameArea =
-      selectedPlace && !userFramedViewport
+      importedGameArea ??
+      (selectedPlace && !userFramedViewport
         ? placeToGameArea(selectedPlace)
         : bounds
           ? boundsToGameArea(bounds)
-          : null;
+          : null);
 
     if (!gameArea) {
       return "";
     }
 
     return inferTransitMetroId(gameArea) ?? "";
-  }, [bounds, selectedPlace, userFramedViewport]);
+  }, [bounds, importedGameArea, selectedPlace, userFramedViewport]);
   const [transitMetroOverride, setTransitMetroOverride] = useState<
     string | null
   >(null);
@@ -166,6 +178,10 @@ export function CreateSession() {
     !hostHasAccessClaim;
 
   const previewGameArea = useMemo(() => {
+    if (importedGameArea) {
+      return importedGameArea;
+    }
+
     if (selectedPlace && !userFramedViewport) {
       return placeToGameArea(selectedPlace);
     }
@@ -175,9 +191,26 @@ export function CreateSession() {
     }
 
     return null;
-  }, [bounds, selectedPlace, userFramedViewport]);
+  }, [bounds, importedGameArea, selectedPlace, userFramedViewport]);
+
+  const applyImportedBoundary = (gameArea: GameArea, filename: string) => {
+    setImportedGameArea(gameArea);
+    setSelectedPlaceId(null);
+    setSelectedPlace(null);
+    setSearchResults([]);
+    setLocationQuery(filename);
+    setUserFramedViewport(false);
+    ignoreViewportUpdatesRef.current = true;
+    setBounds(boundingBoxToLeafletBounds(gameAreaToBoundingBox(gameArea)));
+    setFocusBounds(gameAreaToBoundsExpression(gameArea));
+    setError(null);
+    window.setTimeout(() => {
+      ignoreViewportUpdatesRef.current = false;
+    }, 600);
+  };
 
   const applyPlace = (place: GeocodedPlace) => {
+    setImportedGameArea(null);
     setSelectedPlaceId(place.id);
     setSelectedPlace(place);
     setSearchResults([]);
@@ -227,6 +260,32 @@ export function CreateSession() {
     setUserFramedViewport(true);
   }, []);
 
+  const handleBoundaryImport = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) {
+      return;
+    }
+
+    setImportLoading(true);
+    setError(null);
+
+    try {
+      const gameArea = await parseBoundaryFile(file);
+      applyImportedBoundary(gameArea, file.name);
+    } catch (nextError) {
+      setError(
+        nextError instanceof Error
+          ? nextError.message
+          : "Could not import boundary file.",
+      );
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
   const handleSearch = async () => {
     const trimmed = locationQuery.trim();
     if (trimmed.length < 2) {
@@ -263,9 +322,9 @@ export function CreateSession() {
   };
 
   const handleConfirm = async () => {
-    if (!bounds && !selectedPlace) {
+    if (!importedGameArea && !bounds && !selectedPlace) {
       setError(
-        "Search for a place or move the map until the play area is framed.",
+        "Search for a place, import a boundary, or move the map until the play area is framed.",
       );
       return;
     }
@@ -276,10 +335,11 @@ export function CreateSession() {
 
     try {
       const viewportArea = bounds ? boundsToGameArea(bounds) : null;
-      const gameArea =
-        viewportArea &&
-        userFramedViewport &&
-        boundingBoxHasMinimumSpan(gameAreaToBoundingBox(viewportArea))
+      const gameArea = importedGameArea
+        ? importedGameArea
+        : viewportArea &&
+            userFramedViewport &&
+            boundingBoxHasMinimumSpan(gameAreaToBoundingBox(viewportArea))
           ? viewportArea
           : selectedPlace
             ? placeToGameArea(selectedPlace)
@@ -287,7 +347,7 @@ export function CreateSession() {
 
       if (!gameArea) {
         setError(
-          "Search for a place or move the map until the play area is framed.",
+          "Search for a place, import a boundary, or move the map until the play area is framed.",
         );
         return;
       }
@@ -410,8 +470,8 @@ export function CreateSession() {
           Frame the game area
         </h1>
         <p className="mt-2 text-pretty text-sm leading-relaxed text-ink-muted">
-          Search for a city or county to use its boundary, or pan and zoom to
-          frame a custom play area.
+          Search for a city or county to use its boundary, import a KML/KMZ
+          boundary, or pan and zoom to frame a custom play area.
         </p>
 
         <div className="jl-field-frame mt-4 space-y-3">
@@ -423,6 +483,7 @@ export function CreateSession() {
               setLocationQuery(event.target.value);
               setSelectedPlaceId(null);
               setSelectedPlace(null);
+              setImportedGameArea(null);
             }}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
@@ -443,10 +504,27 @@ export function CreateSession() {
         <button
           type="button"
           onClick={() => void handleSearch()}
-          disabled={searchLoading}
+          disabled={searchLoading || importLoading}
           className="btn-secondary w-full disabled:opacity-50"
         >
           {searchLoading ? "Searching…" : "Find place"}
+        </button>
+
+        <input
+          ref={importFileInputRef}
+          type="file"
+          accept=".kml,.kmz"
+          className="hidden"
+          onChange={(event) => void handleBoundaryImport(event)}
+        />
+
+        <button
+          type="button"
+          onClick={() => importFileInputRef.current?.click()}
+          disabled={searchLoading || importLoading}
+          className="btn-secondary w-full disabled:opacity-50"
+        >
+          {importLoading ? "Importing…" : "Import KML/KMZ"}
         </button>
 
         {searchResults.length > 0 ? (

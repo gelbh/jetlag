@@ -39,6 +39,7 @@
     "@capacitor/push-notifications": "^8.1.1",
     "@fontsource/barlow-semi-condensed": "^5.2.7",
     "@fontsource/source-sans-3": "^5.2.9",
+    "@tmcw/togeojson": "^7.1.2",
     "@turf/area": "^7.3.5",
     "@turf/bbox-polygon": "^7.3.5",
     "@turf/boolean-intersects": "^7.3.5",
@@ -56,8 +57,9 @@
     "@turf/union": "^7.3.5",
     "@turf/voronoi": "^7.3.5",
     "firebase": "^12.13.0",
-    "jetlag-live-activity": "file:plugins/jetlag-live-activity",
     "html2canvas": "^1.4.1",
+    "jetlag-live-activity": "file:plugins/jetlag-live-activity",
+    "jszip": "^3.10.1",
     "leaflet": "^1.9.4",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
@@ -66,6 +68,8 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.0",
+    "@commitlint/config-conventional": "^21.2.0",
     "@eslint/js": "^10.0.1",
     "@firebase/rules-unit-testing": "^5.0.1",
     "@playwright/test": "^1.61.1",
