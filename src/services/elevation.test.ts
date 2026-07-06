@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { LatLngTuple } from "../domain/geometry";
 import { clearElevationCacheForTests, fetchElevations } from "./elevation";
 
@@ -11,6 +11,13 @@ function mockElevationResponse(elevations: number[]) {
     headers: new Headers(),
     json: async () => ({ elevation: elevations }),
   };
+}
+
+function uniquePoints(count: number): LatLngTuple[] {
+  return Array.from({ length: count }, (_, index) => [
+    53 + index * 0.001,
+    -6 + index * 0.001,
+  ]);
 }
 
 async function fetchSingleElevation(point: LatLngTuple): Promise<number> {
@@ -26,6 +33,7 @@ describe("elevation", () => {
   afterEach(() => {
     clearElevationCacheForTests();
     vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   it("reuses cached elevations for repeated coordinates", async () => {
@@ -82,5 +90,52 @@ describe("elevation", () => {
     expect(second).toEqual([20]);
     expect(order).toEqual(["first", "second"]);
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("fetches multi-batch inputs sequentially", async () => {
+    const callOrder: number[] = [];
+    const points = uniquePoints(101);
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = new URL(String(input));
+      const batchSize = url.searchParams.get("latitude")?.split(",").length ?? 0;
+      callOrder.push(batchSize);
+      return mockElevationResponse(Array.from({ length: batchSize }, () => 42));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const elevations = await fetchElevations(points);
+
+    expect(elevations).toHaveLength(101);
+    expect(elevations.every((value) => value === 42)).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(callOrder).toEqual([100, 1]);
+  });
+
+  describe("request throttling", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    it("waits at least 250ms between batch requests", async () => {
+      const points = uniquePoints(101);
+      const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+        const url = new URL(String(input));
+        const batchSize = url.searchParams.get("latitude")?.split(",").length ?? 0;
+        return mockElevationResponse(Array.from({ length: batchSize }, () => 7));
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      const pending = fetchElevations(points);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(249);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(1);
+      await pending;
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
   });
 });

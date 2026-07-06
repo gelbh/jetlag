@@ -4,8 +4,10 @@ const OPEN_METEO_ELEVATION_ENDPOINT = "https://api.open-meteo.com/v1/elevation";
 const ELEVATION_BATCH_SIZE = 100;
 const ELEVATION_CACHE_TTL_MS = 15 * 60 * 1000;
 const ELEVATION_MAX_RETRIES = 4;
-const ELEVATION_BASE_BACKOFF_MS = 500;
-const ELEVATION_MAX_CONCURRENT = 3;
+const ELEVATION_BASE_BACKOFF_MS = 1000;
+const ELEVATION_MAX_BACKOFF_MS = 30_000;
+const ELEVATION_MIN_REQUEST_GAP_MS = 250;
+const ELEVATION_MAX_CONCURRENT = 1;
 
 interface OpenMeteoElevationResponse {
   elevation: number[];
@@ -18,6 +20,7 @@ interface CachedElevation {
 
 const elevationCache = new Map<string, CachedElevation>();
 let activeElevationRequests = 0;
+let lastElevationRequestAt = 0;
 const elevationWaitQueue: Array<() => void> = [];
 
 function elevationCacheKey(point: LatLngTuple): string {
@@ -58,11 +61,33 @@ function retryDelayMs(
   if (retryAfterHeader) {
     const retryAfterSeconds = Number.parseInt(retryAfterHeader, 10);
     if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
-      return retryAfterSeconds * 1000;
+      return Math.min(
+        ELEVATION_MAX_BACKOFF_MS,
+        retryAfterSeconds * 1000,
+      );
     }
   }
 
-  return ELEVATION_BASE_BACKOFF_MS * 2 ** attempt;
+  return Math.min(
+    ELEVATION_MAX_BACKOFF_MS,
+    ELEVATION_BASE_BACKOFF_MS * 2 ** attempt,
+  );
+}
+
+async function waitForElevationRequestGap(): Promise<void> {
+  if (lastElevationRequestAt === 0) {
+    return;
+  }
+
+  const elapsed = Date.now() - lastElevationRequestAt;
+  const remaining = ELEVATION_MIN_REQUEST_GAP_MS - elapsed;
+  if (remaining > 0) {
+    await sleep(remaining);
+  }
+}
+
+function markElevationRequestCompleted(): void {
+  lastElevationRequestAt = Date.now();
 }
 
 async function acquireElevationSlot(): Promise<void> {
@@ -142,6 +167,28 @@ async function fetchElevationBatch(points: LatLngTuple[]): Promise<number[]> {
   throw lastError ?? new Error("Elevation lookup failed.");
 }
 
+async function fetchElevationBatchAndWrite(
+  batch: Array<{ point: LatLngTuple; indices: number[] }>,
+  elevations: number[],
+): Promise<void> {
+  await waitForElevationRequestGap();
+  try {
+    const batchPoints = batch.map((entry) => entry.point);
+    const batchElevations = await fetchElevationBatch(batchPoints);
+
+    for (let batchIndex = 0; batchIndex < batch.length; batchIndex += 1) {
+      const elevation = batchElevations[batchIndex];
+      const key = elevationCacheKey(batch[batchIndex].point);
+      writeCachedElevation(key, elevation);
+      for (const resultIndex of batch[batchIndex].indices) {
+        elevations[resultIndex] = elevation;
+      }
+    }
+  } finally {
+    markElevationRequestCompleted();
+  }
+}
+
 export async function fetchElevations(
   points: LatLngTuple[],
 ): Promise<number[]> {
@@ -174,7 +221,6 @@ export async function fetchElevations(
   }
 
   const pendingPoints = [...pendingByKey.values()];
-  const batchTasks: Promise<void>[] = [];
 
   for (
     let index = 0;
@@ -182,24 +228,10 @@ export async function fetchElevations(
     index += ELEVATION_BATCH_SIZE
   ) {
     const batch = pendingPoints.slice(index, index + ELEVATION_BATCH_SIZE);
-    batchTasks.push(
-      runLimitedElevationRequest(async () => {
-        const batchPoints = batch.map((entry) => entry.point);
-        const batchElevations = await fetchElevationBatch(batchPoints);
-
-        for (let batchIndex = 0; batchIndex < batch.length; batchIndex += 1) {
-          const elevation = batchElevations[batchIndex];
-          const key = elevationCacheKey(batch[batchIndex].point);
-          writeCachedElevation(key, elevation);
-          for (const resultIndex of batch[batchIndex].indices) {
-            elevations[resultIndex] = elevation;
-          }
-        }
-      }),
+    await runLimitedElevationRequest(() =>
+      fetchElevationBatchAndWrite(batch, elevations),
     );
   }
-
-  await Promise.all(batchTasks);
 
   return elevations;
 }
@@ -207,5 +239,6 @@ export async function fetchElevations(
 export function clearElevationCacheForTests(): void {
   elevationCache.clear();
   activeElevationRequests = 0;
+  lastElevationRequestAt = 0;
   elevationWaitQueue.length = 0;
 }
