@@ -6,7 +6,7 @@ test("starts, pauses, and resumes the session timer", async ({ page }) => {
 
   await page.getByRole("button", { name: "Start" }).click();
   await page
-    .getByRole("button", { name: "Elapsed time. Open timer settings" })
+    .getByRole("button", { name: /Open timer settings/i })
     .click();
   await page.getByRole("button", { name: "Pause" }).click();
   await expect(page.getByRole("button", { name: "Resume" })).toBeVisible();

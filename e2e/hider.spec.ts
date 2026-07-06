@@ -55,14 +55,14 @@ test.describe("hider flows", () => {
     await waitForHidingZoneWizard(guestPage);
     await selectTransitStation(guestPage, "Dublin Central");
     await confirmHidingZone(guestPage, true);
-    await expect(guestPage.getByText(/different station/i)).toBeVisible();
+    await expect(guestPage.getByText(/different location/i)).toBeVisible();
 
     await selectTransitStation(guestPage, "North Station");
     await confirmHidingZone(guestPage, true);
 
     await openChat(hostPage);
     await expect(
-      hostPage.getByText(/relocated to North Station/i),
+      hostPage.getByText(/relocated from Dublin Central/i),
     ).toBeVisible({
       timeout: 15_000,
     });
