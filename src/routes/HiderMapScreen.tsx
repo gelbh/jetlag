@@ -11,6 +11,10 @@ import { ChatPanel } from "../components/chat/ChatPanel";
 import { HidingZonePanel } from "../components/hider/HidingZonePanel";
 import { hidingZonePreviewPositions } from "../domain/hidingZone";
 import { MapStatusRail } from "../components/session/MapStatusRail";
+import {
+  HiderTruthRevealBanner,
+  type HiderTruthRevealState,
+} from "../components/session/HiderTruthRevealBanner";
 import { MapSettingsSheet } from "../components/session/MapSettingsSheet";
 import { SessionLog } from "../components/session/SessionLog";
 import {
@@ -18,6 +22,8 @@ import {
   gameAreaCenter,
   gameAreaToBoundsExpression,
 } from "../domain/geometry";
+import type { LatLngTuple } from "../domain/geometry";
+import { computeHiderTruthReplyAsync } from "../domain/hiderTruthAnswer";
 import { MAP_ANNOTATION_COLORS } from "../domain/mapAnnotationColors";
 import { useHiderZoneTool } from "../hooks/useHiderZoneTool";
 import { useMapOverlayState } from "../hooks/useMapOverlayState";
@@ -60,6 +66,10 @@ export function HiderMapScreen() {
   const overlay = useMapOverlayState();
   const [currentUid, setCurrentUid] = useState<string | null>(myUid);
   const [recenterToken, setRecenterToken] = useState(0);
+  const [truthReveal, setTruthReveal] = useState<HiderTruthRevealState | null>(
+    null,
+  );
+  const [chatAnswerError, setChatAnswerError] = useState<string | null>(null);
 
   useSessionSync();
 
@@ -132,8 +142,13 @@ export function HiderMapScreen() {
 
   const openChatExclusive = useCallback(() => {
     zoneTool.closeWizard();
+    setChatAnswerError(null);
     overlay.openChat();
   }, [overlay, zoneTool]);
+
+  const dismissTruthReveal = useCallback(() => {
+    setTruthReveal(null);
+  }, []);
 
   const openSettingsExclusive = useCallback(() => {
     zoneTool.closeWizard();
@@ -163,7 +178,7 @@ export function HiderMapScreen() {
     overlay.isChatOpen || overlay.isSettingsOpen || overlay.isLogOpen;
 
   return (
-    <div className="relative min-h-[100dvh] h-full">
+    <div className="map-screen-shell">
       <div className="absolute inset-0">
         <MapView
           key={session.id}
@@ -216,6 +231,10 @@ export function HiderMapScreen() {
       </div>
 
       <div className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible">
+        <HiderTruthRevealBanner
+          reveal={truthReveal}
+          onDismiss={dismissTruthReveal}
+        />
         <MapStatusRail
           sessionCode={session.code}
           gameSize={session.gameSize ?? "medium"}
@@ -318,6 +337,7 @@ export function HiderMapScreen() {
         senderUid={uid ?? ""}
         senderRole="hider"
         isHider
+        answerError={chatAnswerError}
         onAnswerQuestion={async (
           pendingQuestionId,
           messageId,
@@ -329,21 +349,52 @@ export function HiderMapScreen() {
             return;
           }
 
-          const user = await ensureAnonymousUser();
-          await answerPendingQuestion(
-            sessionId,
-            pendingQuestionId,
-            messageId,
-            answer,
-            selectedReply,
-            deadlineExpired
-              ? {
-                  deadlineExpired: true,
-                  senderUid: user.uid,
-                  senderRole: "hider",
-                }
-              : undefined,
+          setChatAnswerError(null);
+
+          const pending = pendingQuestions.find(
+            (question) => question.id === pendingQuestionId,
           );
+          if (!pending) {
+            setChatAnswerError("Could not find that question. Try again.");
+            return;
+          }
+
+          const stationCenter: LatLngTuple | null = myZone
+            ? [myZone.center.lat, myZone.center.lng]
+            : null;
+
+          try {
+            const user = await ensureAnonymousUser();
+            await answerPendingQuestion(
+              sessionId,
+              pendingQuestionId,
+              messageId,
+              answer,
+              selectedReply,
+              deadlineExpired
+                ? {
+                    deadlineExpired: true,
+                    senderUid: user.uid,
+                    senderRole: "hider",
+                  }
+                : undefined,
+            );
+
+            const truth = await computeHiderTruthReplyAsync(
+              pending,
+              stationCenter,
+            );
+            if (truth) {
+              setTruthReveal({ truth, selectedReply });
+            }
+            overlay.closeSheet();
+          } catch (error) {
+            setChatAnswerError(
+              error instanceof Error
+                ? error.message
+                : "Could not save your answer. Try again.",
+            );
+          }
         }}
       />
 

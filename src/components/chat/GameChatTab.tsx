@@ -14,6 +14,7 @@ interface GameChatTabProps {
   gameSize: GameSize;
   isHider: boolean;
   senderUid: string;
+  answerError?: string | null;
   onAnswerQuestion: (
     pendingQuestionId: string,
     messageId: string,
@@ -40,6 +41,7 @@ export function GameChatTab({
   gameSize,
   isHider,
   senderUid,
+  answerError = null,
   onAnswerQuestion,
 }: GameChatTabProps) {
   const [nowMs, setNowMs] = useState(0);
@@ -58,6 +60,11 @@ export function GameChatTab({
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-2 overflow-y-auto">
+      {answerError ? (
+        <p className="rounded-lg border border-status-error/40 bg-status-error-surface px-3 py-2 text-sm text-status-error">
+          {answerError}
+        </p>
+      ) : null}
       {gameMessages.length === 0 ? (
         <p className="text-sm text-ink-dim">No game messages yet.</p>
       ) : (

@@ -111,6 +111,7 @@ interface ChatPanelProps {
   senderRole: PlayerRole;
   isHider: boolean;
   bottomClassName?: string;
+  answerError?: string | null;
   onAnswerQuestion: (
     pendingQuestionId: string,
     messageId: string,
@@ -131,6 +132,7 @@ export function ChatPanel({
   senderRole,
   isHider,
   bottomClassName = "jl-panel-above-dock",
+  answerError = null,
   onAnswerQuestion,
 }: ChatPanelProps) {
   const [tab, setTab] = useState<"social" | "game">("game");
@@ -198,6 +200,7 @@ export function ChatPanel({
               gameSize={gameSize}
               isHider={isHider}
               senderUid={senderUid}
+              answerError={answerError}
               onAnswerQuestion={onAnswerQuestion}
             />
           )}

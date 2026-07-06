@@ -199,7 +199,7 @@ export function ToolDock({
       ref={dockRef}
       className="jl-tool-dock pointer-events-auto"
       style={{
-        bottom: `calc(env(safe-area-inset-bottom) + ${viewportBottomInset}px)`,
+        bottom: `${viewportBottomInset}px`,
       }}
     >
       {drawMenuOpen ? (

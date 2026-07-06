@@ -2,6 +2,7 @@ import { test, expect } from "../fixtures";
 import {
   answerInChat,
   closePanel,
+  confirmInitialHidingZoneAtStation,
   createHostSession,
   createMultiplayerContexts,
   expectChatAnswer,
@@ -19,9 +20,7 @@ test("@smoke seeker asks via radar and hider answers in game chat", async ({
   const { code } = await createHostSession(hostPage);
   await joinAsRole(guestPage, code, "hider");
 
-  await expect(
-    guestPage.getByRole("button", { name: "Set hiding zone" }),
-  ).toBeVisible({ timeout: 15_000 });
+  await confirmInitialHidingZoneAtStation(guestPage, "Dublin Central");
 
   await sendRadarToHiders(hostPage);
 
@@ -36,7 +35,16 @@ test("@smoke seeker asks via radar and hider answers in game chat", async ({
     timeout: 20_000,
   });
   await answerInChat(guestPage, "Yes");
-  await expectChatAnswer(guestPage, "yes");
+
+  await expect(guestPage.getByRole("button", { name: "Close", exact: true })).toBeHidden({
+    timeout: 10_000,
+  });
+  await expect(guestPage.getByTestId("hider-truth-reveal-banner")).toBeVisible({
+    timeout: 10_000,
+  });
+  await expect(guestPage.getByTestId("hider-truth-reveal-banner")).toContainText(
+    /Truthful answer:/i,
+  );
 
   await openChat(hostPage);
   await expectChatAnswer(hostPage, "yes");

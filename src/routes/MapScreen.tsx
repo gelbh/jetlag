@@ -733,7 +733,7 @@ export function MapScreen() {
   };
 
   return (
-    <div className="relative min-h-[100dvh] h-full">
+    <div className="map-screen-shell">
       {heavyToolActive ? (
         <Suspense fallback={null}>
           <HeavyMapToolsSlot
