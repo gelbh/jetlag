@@ -58,11 +58,41 @@ export async function seedLocalSession(page: Page, code = "TEST") {
   );
 }
 
+const OVERPASS_API_HOSTS = new Set([
+  "overpass-api.de",
+  "maps.mail.ru",
+  "overpass.kumi.systems",
+]);
+
+function isLocalAppRequest(url: string): boolean {
+  try {
+    const { hostname } = new URL(url);
+    return hostname === "127.0.0.1" || hostname === "localhost";
+  } catch {
+    return false;
+  }
+}
+
 export async function blockExternalAssets(page: Page) {
   await page.route("**/*", async (route) => {
     const url = route.request().url();
 
-    if (url.includes("nominatim.openstreetmap.org/search")) {
+    if (isLocalAppRequest(url)) {
+      await route.continue();
+      return;
+    }
+
+    let parsed: URL;
+    try {
+      parsed = new URL(url);
+    } catch {
+      await route.continue();
+      return;
+    }
+
+    const { hostname, pathname } = parsed;
+
+    if (hostname === "nominatim.openstreetmap.org" && pathname.includes("/search")) {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -79,24 +109,31 @@ export async function blockExternalAssets(page: Page) {
       return;
     }
 
-    if (
-      url.includes("tile.openstreetmap.org") ||
-      url.includes("arcgisonline.com") ||
-      url.includes("nominatim.openstreetmap.org") ||
-      url.includes("overpass")
-    ) {
-      if (url.includes(".png") || url.includes("tile")) {
-        await route.fulfill({
-          status: 200,
-          contentType: "image/png",
-          body: Buffer.from(
-            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
-            "base64",
-          ),
-        });
-        return;
-      }
+    if (hostname === "tile.openstreetmap.org") {
+      await route.fulfill({
+        status: 200,
+        contentType: "image/png",
+        body: Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+          "base64",
+        ),
+      });
+      return;
+    }
 
+    if (hostname.includes("arcgisonline.com")) {
+      await route.fulfill({
+        status: 200,
+        contentType: "image/png",
+        body: Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+          "base64",
+        ),
+      });
+      return;
+    }
+
+    if (OVERPASS_API_HOSTS.has(hostname)) {
       await route.fulfill({
         status: 200,
         contentType: "application/json",

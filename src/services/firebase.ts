@@ -27,7 +27,6 @@ let db: Firestore | null = null;
 let functions: Functions | null = null;
 let appCheck: AppCheck | null = null;
 let persistenceUnavailable = false;
-let emulatorsConnected = false;
 
 function firebaseUsesEmulator(): boolean {
   return import.meta.env.VITE_USE_FIREBASE_EMULATOR === "true";
@@ -58,19 +57,27 @@ export function isFirebaseConfigured(): boolean {
   return readConfig() !== null;
 }
 
-function connectEmulatorsIfConfigured(
-  firestore: Firestore,
-  firebaseAuth: Auth,
-): void {
-  if (!firebaseUsesEmulator() || emulatorsConnected) {
+let authEmulatorConnected = false;
+let firestoreEmulatorConnected = false;
+
+function connectAuthEmulatorIfConfigured(firebaseAuth: Auth): void {
+  if (!firebaseUsesEmulator() || authEmulatorConnected) {
+    return;
+  }
+
+  connectAuthEmulator(firebaseAuth, "http://127.0.0.1:9199", {
+    disableWarnings: true,
+  });
+  authEmulatorConnected = true;
+}
+
+function connectFirestoreEmulatorIfConfigured(firestore: Firestore): void {
+  if (!firebaseUsesEmulator() || firestoreEmulatorConnected) {
     return;
   }
 
   connectFirestoreEmulator(firestore, "127.0.0.1", 8180);
-  connectAuthEmulator(firebaseAuth, "http://127.0.0.1:9199", {
-    disableWarnings: true,
-  });
-  emulatorsConnected = true;
+  firestoreEmulatorConnected = true;
 }
 
 function getFirebaseApp(): FirebaseApp {
@@ -116,6 +123,7 @@ export function getFirebaseFunctions(): Functions {
 export function getFirebaseAuth(): Auth {
   if (!auth) {
     auth = getAuth(getFirebaseApp());
+    connectAuthEmulatorIfConfigured(auth);
   }
 
   return auth;
@@ -128,7 +136,7 @@ function createFirestoreDb(): Firestore {
     const firestore = initializeFirestore(firebaseApp, {
       localCache: memoryLocalCache(),
     });
-    connectEmulatorsIfConfigured(firestore, getFirebaseAuth());
+    connectFirestoreEmulatorIfConfigured(firestore);
     return firestore;
   }
 
@@ -176,6 +184,7 @@ export async function resetFirebaseForTests(): Promise<void> {
   functions = null;
   appCheck = null;
   persistenceUnavailable = false;
-  emulatorsConnected = false;
+  authEmulatorConnected = false;
+  firestoreEmulatorConnected = false;
 }
 
