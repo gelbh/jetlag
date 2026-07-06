@@ -4,7 +4,9 @@ import type {
 } from "./matchingQuestions";
 import {
   MATCHING_CATEGORIES,
+  customCategoryToMatchingDefinition,
   matchingUsesExpandedFeatureSearch,
+  resolveMatchingCategory,
 } from "./matchingQuestions";
 import type {
   MeasuringCatalogOption,
@@ -21,27 +23,16 @@ import { isSessionCustomCategoryId } from "./sessionCustomContent";
 import type { MeasuringPlace } from "../services/measuringPlaces";
 import type { TentaclePoi } from "./annotations";
 import type { LatLngTuple } from "./geometry";
-import { distanceBetweenPoints } from "./geometry";
+import turfDistance from "@turf/distance";
+import { point as turfPoint } from "@turf/helpers";
 
-const CUSTOM_MATCHING_GROUP = "public_utilities" as const;
-
-function mapIconPoiRule(promptNoun: string): string {
-  return `Use the nearest ${promptNoun} on the map. Measure to its icon.`;
-}
-
-export function customCategoryToMatchingDefinition(
-  category: SessionCustomCategory,
-): MatchingCategoryDefinition {
-  return {
-    id: category.id as MatchingCategoryId,
-    groupId: CUSTOM_MATCHING_GROUP,
-    label: category.label,
-    promptNoun: category.promptNoun,
-    ruleSummary: mapIconPoiRule(category.promptNoun),
-    phase: 1,
-    resolver: "overpassPoint",
-    overpassSelectors: category.overpassSelectors,
-  };
+function distanceBetweenLatLngPoints(
+  from: LatLngTuple,
+  to: LatLngTuple,
+): number {
+  return turfDistance(turfPoint([from[1], from[0]]), turfPoint([to[1], to[0]]), {
+    units: "meters",
+  });
 }
 
 export function customCategoryToMeasuringOption(
@@ -64,18 +55,7 @@ export function customCategoryToMeasuringOption(
   };
 }
 
-export function resolveMatchingCategory(
-  categoryId: string,
-  customCategories: readonly SessionCustomCategory[] = [],
-): MatchingCategoryDefinition | null {
-  const builtIn = MATCHING_CATEGORIES.find((item) => item.id === categoryId);
-  if (builtIn) {
-    return builtIn;
-  }
-
-  const custom = customCategories.find((item) => item.id === categoryId);
-  return custom ? customCategoryToMatchingDefinition(custom) : null;
-}
+export { resolveMatchingCategory };
 
 export function matchingCategoriesForSession(
   customCategories: readonly SessionCustomCategory[] = [],
@@ -181,7 +161,7 @@ export function manualPinsWithinRadius(
       lat: pin.point[0],
       lng: pin.point[1],
       category: categoryId,
-      distanceMeters: distanceBetweenPoints(center, pin.point),
+      distanceMeters: distanceBetweenLatLngPoints(center, pin.point),
     }))
     .filter((poi) => poi.distanceMeters <= radiusMeters)
     .map((poi) => ({

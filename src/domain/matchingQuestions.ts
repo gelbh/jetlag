@@ -6,7 +6,6 @@ import {
   firstUnusedCatalogOption,
 } from "./toolSessionOptions";
 import type { SessionCustomCategory } from "./sessionCustomContent";
-import { resolveMatchingCategory } from "./sessionCustomCatalog";
 
 export type MatchingAnswer = "yes" | "no";
 
@@ -297,6 +296,34 @@ export const MATCHING_CATEGORIES = [
     ],
   },
 ] as const satisfies readonly MatchingCategoryDefinition[];
+
+export function customCategoryToMatchingDefinition(
+  category: SessionCustomCategory,
+): MatchingCategoryDefinition {
+  return {
+    id: category.id as MatchingCategoryId,
+    groupId: "public_utilities",
+    label: category.label,
+    promptNoun: category.promptNoun,
+    ruleSummary: mapIconPoiRule(category.promptNoun),
+    phase: 1,
+    resolver: "overpassPoint",
+    overpassSelectors: category.overpassSelectors,
+  };
+}
+
+export function resolveMatchingCategory(
+  categoryId: string,
+  customCategories: readonly SessionCustomCategory[] = [],
+): MatchingCategoryDefinition | null {
+  const builtIn = MATCHING_CATEGORIES.find((item) => item.id === categoryId);
+  if (builtIn) {
+    return builtIn;
+  }
+
+  const custom = customCategories.find((item) => item.id === categoryId);
+  return custom ? customCategoryToMatchingDefinition(custom) : null;
+}
 
 export function getMatchingCategory(
   categoryId: MatchingCategoryId,
