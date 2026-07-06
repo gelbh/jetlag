@@ -9,6 +9,7 @@ import {
   type GameArea,
   type SessionTier,
 } from "../domain/annotations";
+import type { LatLngTuple } from "../domain/geometry";
 import {
   boundsToGameArea,
   boundingBoxHasMinimumSpan,
@@ -47,6 +48,7 @@ import {
 } from "../services/transitCatalog";
 import { searchPlaces, type GeocodedPlace } from "../services/geocoding";
 import { formatPlaceSearchSubtitle } from "../services/geocodingRank";
+import { getCurrentPosition } from "../services/geolocation";
 import { grantAccess, hasAccessClaim } from "../services/accessControl";
 import { setPremiumApiContext } from "../services/premiumApiContext";
 import { parseBoundaryFile } from "../services/kmzImport";
@@ -112,6 +114,17 @@ export function CreateSession() {
   const [importLoading, setImportLoading] = useState(false);
   const ignoreViewportUpdatesRef = useRef(false);
   const importFileInputRef = useRef<HTMLInputElement>(null);
+  const userLocationRef = useRef<LatLngTuple | null>(null);
+
+  useEffect(() => {
+    void getCurrentPosition({ highAccuracy: false })
+      .then((reading) => {
+        userLocationRef.current = [reading.lat, reading.lng];
+      })
+      .catch(() => {
+        // Best-effort location bias only; search works without GPS.
+      });
+  }, []);
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
@@ -297,7 +310,10 @@ export function CreateSession() {
     setError(null);
 
     try {
-      const results = await searchPlaces(trimmed);
+      const results = await searchPlaces(
+        trimmed,
+        userLocationRef.current ? { near: userLocationRef.current } : undefined,
+      );
       if (results.length === 0) {
         setSearchResults([]);
         setError("No matching places found. Try a more specific name.");

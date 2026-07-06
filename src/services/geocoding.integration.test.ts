@@ -120,4 +120,81 @@ describe("geocoding integration", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+
+  it("includes viewbox when searching near the user", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [
+        {
+          place_id: 3,
+          display_name: "County Dublin, Ireland",
+          lat: "53.3498",
+          lon: "-6.2603",
+          boundingbox: ["53.2", "53.5", "-6.5", "-6.0"],
+          addresstype: "county",
+        },
+      ],
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const near: [number, number] = [53.35, -6.26];
+    await searchPlaces("co dublin", { near });
+
+    const urls = fetchMock.mock.calls.map(([input]) => new URL(String(input)));
+    const viewboxUrls = urls.filter((url) => url.searchParams.has("viewbox"));
+    expect(viewboxUrls.length).toBeGreaterThan(0);
+    expect(viewboxUrls[0]?.searchParams.get("viewbox")).toMatch(
+      /^-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?$/,
+    );
+    expect(fetchMock.mock.calls.length).toBeGreaterThan(2);
+  });
+
+  it("merges biased and unbiased results when near is set", async () => {
+    let biasedCallCount = 0;
+    const fetchMock = vi.fn().mockImplementation(async (input: string) => {
+      const url = new URL(input);
+      const hasViewbox = url.searchParams.has("viewbox");
+
+      if (hasViewbox) {
+        biasedCallCount += 1;
+        return {
+          ok: true,
+          json: async () => [
+            {
+              place_id: 20,
+              display_name: "County Dublin, Ireland",
+              lat: "53.3498",
+              lon: "-6.2603",
+              boundingbox: ["53.2", "53.5", "-6.5", "-6.0"],
+              addresstype: "county",
+              importance: 0.55,
+            },
+          ],
+        };
+      }
+
+      return {
+        ok: true,
+        json: async () => [
+          {
+            place_id: 21,
+            display_name: "Dublin, Franklin County, Ohio, United States",
+            lat: "40.0992",
+            lon: "-83.1141",
+            boundingbox: ["40.0", "40.2", "-83.2", "-83.0"],
+            addresstype: "city",
+            importance: 0.7,
+          },
+        ],
+      };
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const results = await searchPlaces("Dublin", { near: [53.35, -6.26] });
+    expect(results).toHaveLength(2);
+    expect(results.map((place) => place.id).sort()).toEqual(["20", "21"]);
+    expect(biasedCallCount).toBeGreaterThan(0);
+  });
 });

@@ -1,5 +1,7 @@
 import { formatPlayAreaSummary, gameAreaSquareMiles } from "../domain/gameSize";
-import { placeToGameArea } from "../domain/geometryCore";
+import type { LatLngTuple } from "../domain/geometry";
+import { isPointInGameArea, placeToGameArea } from "../domain/geometryCore";
+import { haversineMeters } from "../domain/hidingZone";
 import type { GeocodedPlace } from "./geocoding";
 
 const SETTLEMENT_CATEGORIES = new Set([
@@ -118,9 +120,31 @@ export interface RankedGeocodedPlaceCandidate {
   fromCityQuery: boolean;
 }
 
+function placeContainsPoint(place: GeocodedPlace, point: LatLngTuple): boolean {
+  const gameArea = place.boundary ?? placeToGameArea(place);
+  return isPointInGameArea(point, gameArea);
+}
+
+function containsUserScore(place: GeocodedPlace, near?: LatLngTuple): number {
+  if (!near) {
+    return 0;
+  }
+
+  return placeContainsPoint(place, near) ? 1 : 0;
+}
+
+function distanceToCenterScore(place: GeocodedPlace, near?: LatLngTuple): number {
+  if (!near) {
+    return 0;
+  }
+
+  return -haversineMeters(near, place.center);
+}
+
 export function rankGeocodedPlaceCandidates(
   candidates: RankedGeocodedPlaceCandidate[],
   query: string,
+  near?: LatLngTuple,
 ): GeocodedPlace[] {
   return [...candidates]
     .sort((left, right) => {
@@ -129,6 +153,22 @@ export function rankGeocodedPlaceCandidates(
         nameMatchScore(left.place.displayName, query);
       if (nameDelta !== 0) {
         return nameDelta;
+      }
+
+      if (near) {
+        const containsDelta =
+          containsUserScore(right.place, near) -
+          containsUserScore(left.place, near);
+        if (containsDelta !== 0) {
+          return containsDelta;
+        }
+
+        const distanceDelta =
+          distanceToCenterScore(right.place, near) -
+          distanceToCenterScore(left.place, near);
+        if (distanceDelta !== 0) {
+          return distanceDelta;
+        }
       }
 
       const settlementDelta =

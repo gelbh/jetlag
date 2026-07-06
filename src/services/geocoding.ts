@@ -21,6 +21,11 @@ const USER_AGENT = "JetLagMapCompanion/1.0";
 const NOMINATIM_FETCH_TIMEOUT_MS = 15_000;
 const NOMINATIM_MAX_RETRIES = 2;
 const SEARCH_RESULT_LIMIT = 8;
+const VIEWBOX_RADIUS_DEG = 2.25;
+
+export interface SearchPlacesOptions {
+  near?: LatLngTuple;
+}
 
 export interface GeocodedPlace {
   id: string;
@@ -69,6 +74,39 @@ function geocodeSearchCacheKey(query: string): string {
     },
     `geocode:search:v2:${normalizeSearchQuery(query)}`,
   );
+}
+
+function locationBucketKey(point: LatLngTuple): string {
+  const lat = Math.round(point[0] * 2) / 2;
+  const lon = Math.round(point[1] * 2) / 2;
+  return `${lat},${lon}`;
+}
+
+function geocodeSearchBiasCacheKey(query: string, near: LatLngTuple): string {
+  return geographicCacheKey(
+    {
+      type: "Polygon",
+      coordinates: [[[near[0], near[1]]]],
+    },
+    `geocode:search:bias:v1:${normalizeSearchQuery(query)}:${locationBucketKey(near)}`,
+  );
+}
+
+function viewboxForPoint(point: LatLngTuple): {
+  west: number;
+  north: number;
+  east: number;
+  south: number;
+} {
+  const [lat, lon] = point;
+  const lonDelta = VIEWBOX_RADIUS_DEG / Math.cos((lat * Math.PI) / 180);
+
+  return {
+    west: lon - lonDelta,
+    north: lat + VIEWBOX_RADIUS_DEG,
+    east: lon + lonDelta,
+    south: lat - VIEWBOX_RADIUS_DEG,
+  };
 }
 
 function geocodeReverseCacheKey(point: LatLngTuple, adminLevel: number): string {
@@ -192,7 +230,10 @@ export async function parseNominatimResult(
 
 async function fetchNominatimSearch(
   query: string,
-  options?: { featureType?: "city" },
+  options?: {
+    featureType?: "city";
+    viewbox?: { west: number; north: number; east: number; south: number };
+  },
 ): Promise<NominatimResult[]> {
   const url = new URL(NOMINATIM_ENDPOINT);
   url.searchParams.set("q", query);
@@ -203,6 +244,11 @@ async function fetchNominatimSearch(
 
   if (options?.featureType) {
     url.searchParams.set("featureType", options.featureType);
+  }
+
+  if (options?.viewbox) {
+    const { west, north, east, south } = options.viewbox;
+    url.searchParams.set("viewbox", `${west},${north},${east},${south}`);
   }
 
   return (await fetchNominatim(url)) as NominatimResult[];
@@ -244,28 +290,56 @@ function mergeSearchCandidates(
   return [...merged.values()];
 }
 
-export async function searchPlaces(query: string): Promise<GeocodedPlace[]> {
+async function fetchSearchCandidates(
+  query: string,
+  options?: {
+    viewbox?: { west: number; north: number; east: number; south: number };
+  },
+): Promise<RankedGeocodedPlaceCandidate[]> {
+  const [defaultResults, cityResults] = await Promise.all([
+    fetchNominatimSearch(query, { viewbox: options?.viewbox }),
+    fetchNominatimSearch(query, { featureType: "city", viewbox: options?.viewbox }),
+  ]);
+
+  return mergeSearchCandidates(
+    await candidatesFromResults(defaultResults, false),
+    await candidatesFromResults(cityResults, true),
+  );
+}
+
+export async function searchPlaces(
+  query: string,
+  options?: SearchPlacesOptions,
+): Promise<GeocodedPlace[]> {
   const trimmed = query.trim();
   if (trimmed.length < 2) {
     return [];
   }
 
-  return getOrFetchCached(geocodeSearchCacheKey(trimmed), async () => {
-    const [defaultResults, cityResults] = await Promise.all([
-      fetchNominatimSearch(trimmed),
-      fetchNominatimSearch(trimmed, { featureType: "city" }),
-    ]);
+  if (!options?.near) {
+    return getOrFetchCached(geocodeSearchCacheKey(trimmed), async () => {
+      const candidates = await fetchSearchCandidates(trimmed);
+      return rankGeocodedPlaceCandidates(candidates, trimmed).slice(
+        0,
+        SEARCH_RESULT_LIMIT,
+      );
+    });
+  }
 
-    const merged = mergeSearchCandidates(
-      await candidatesFromResults(defaultResults, false),
-      await candidatesFromResults(cityResults, true),
-    );
+  const near = options.near;
+  const [unbiasedCandidates, biasedCandidates] = await Promise.all([
+    fetchSearchCandidates(trimmed),
+    getOrFetchCached(
+      geocodeSearchBiasCacheKey(trimmed, near),
+      () => fetchSearchCandidates(trimmed, { viewbox: viewboxForPoint(near) }),
+    ),
+  ]);
 
-    return rankGeocodedPlaceCandidates(merged, trimmed).slice(
-      0,
-      SEARCH_RESULT_LIMIT,
-    );
-  });
+  const merged = mergeSearchCandidates(unbiasedCandidates, biasedCandidates);
+  return rankGeocodedPlaceCandidates(merged, trimmed, near).slice(
+    0,
+    SEARCH_RESULT_LIMIT,
+  );
 }
 
 export function placeHasBoundary(place: GeocodedPlace): boolean {

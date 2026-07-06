@@ -40,6 +40,15 @@ vi.mock("../services/geocoding", () => ({
   searchPlaces: vi.fn(async () => [dublinPlace]),
 }));
 
+vi.mock("../services/geolocation", () => ({
+  getCurrentPosition: vi.fn().mockResolvedValue({
+    lat: 53.35,
+    lng: -6.26,
+    accuracy: null,
+    heading: null,
+  }),
+}));
+
 vi.mock("../components/map/MapView", () => ({
   MapView: ({
     onBoundsChange,
@@ -174,6 +183,28 @@ describe("CreateSession", () => {
     await waitFor(() => {
       expect(screen.getByText("city · ~42 sq mi")).toBeInTheDocument();
       expect(screen.getByText("county · ~350 sq mi")).toBeInTheDocument();
+    });
+  });
+
+  it("passes user location into place search when GPS is available", async () => {
+    const { searchPlaces } = await import("../services/geocoding");
+    const { getCurrentPosition } = await import("../services/geolocation");
+
+    renderWithRouter(<CreateSession />);
+
+    await waitFor(() => {
+      expect(getCurrentPosition).toHaveBeenCalled();
+    });
+
+    fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
+      target: { value: "Dublin" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Find place" }));
+
+    await waitFor(() => {
+      expect(searchPlaces).toHaveBeenCalledWith("Dublin", {
+        near: [53.35, -6.26],
+      });
     });
   });
 });
