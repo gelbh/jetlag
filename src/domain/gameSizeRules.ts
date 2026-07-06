@@ -2,10 +2,7 @@ import type { AnnotationType } from "./annotations";
 import type { MapTool } from "./mapToolTypes";
 import { milesToMeters } from "./distance";
 import type { GameSize } from "./gameSize";
-import {
-  THERMOMETER_DISTANCE_PRESETS_MILES,
-  type ThermometerDistanceOptionMiles,
-} from "./thermometerQuestions";
+import type { ThermometerDistanceOptionMiles } from "./thermometerQuestions";
 import type { TentacleLocationCategoryId } from "./tentacleQuestions";
 
 const HIDING_PERIOD_MINUTES: Record<GameSize, number> = {
@@ -192,6 +189,3 @@ export function gameSizeRulesSummary(gameSize: GameSize): {
     thermometerMaxLabel,
   };
 }
-
-/** For tests — official preset list reference */
-export const OFFICIAL_THERMOMETER_PRESETS = THERMOMETER_DISTANCE_PRESETS_MILES;
