@@ -22,11 +22,15 @@ import {
   getMatchingCategory,
   isMatchingCategoryAvailable,
   isMatchingCategoryEnabled,
+  matchingCategoryUseCount,
+  matchingCategoryUseCountFromPending,
   matchingQuestionFor,
   usedMatchingCategoryIds,
   type MatchingAnswer,
   type MatchingCategoryId,
 } from "../../domain/matchingQuestions";
+import { questionCostBreakdown } from "../../domain/questionRules";
+import type { PendingQuestionRecord } from "../../domain/sessionChat";
 import type { DistanceUnit } from "../../domain/distance";
 import { yesNoAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
@@ -44,6 +48,7 @@ import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 interface UseMatchingToolParams {
   active: boolean;
   annotations: AnnotationRecord[];
+  pendingQuestions?: readonly PendingQuestionRecord[];
   gameArea: GameArea;
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
@@ -69,6 +74,7 @@ interface UseMatchingToolParams {
 export function useMatchingTool({
   active,
   annotations,
+  pendingQuestions = [],
   gameArea,
   createAnnotation,
   awaitHiderAnswer = false,
@@ -91,6 +97,18 @@ export function useMatchingTool({
     useState<LatLngTuple | null>(null);
   const [matchingCategoryId, setMatchingCategoryId] =
     useState<MatchingCategoryId>(defaultMatchingCategoryId());
+  const matchingUseCount = Math.max(
+    matchingCategoryUseCount(
+      annotations.filter(isActive),
+      matchingCategoryId,
+    ),
+    matchingCategoryUseCountFromPending(
+      pendingQuestions,
+      matchingCategoryId,
+    ),
+  );
+  const { label: costLabel, draw: cardDraw, keep: cardKeep } =
+    questionCostBreakdown("D3P1", matchingUseCount);
   const [matchingFeatures, setMatchingFeatures] = useState<MatchingFeature[]>(
     [],
   );
@@ -416,6 +434,8 @@ export function useMatchingTool({
               matchingFeaturesJson: serializeMatchingFeatures(matchingFeatures),
             },
           },
+          cardDraw,
+          cardKeep,
         });
       } catch (error) {
         setMatchingError(
@@ -553,6 +573,7 @@ export function useMatchingTool({
       onAnswerChange={setMatchingAnswer}
       onCommit={() => void commit()}
       awaitHiderAnswer={awaitHiderAnswer}
+      costLabel={costLabel}
       onRetry={
         matchingSeekerPoint
           ? () =>

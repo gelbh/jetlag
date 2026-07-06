@@ -23,6 +23,8 @@ import {
   isMeasuringFromKindAvailable,
   isMeasuringLinearLocation,
   measuringFromKind,
+  measuringFromKindUseCount,
+  measuringFromKindUseCountFromPending,
   measuringMultiPlaceTargetLabel,
   measuringUsesAllPlacesInArea,
   measuringQuestionFor,
@@ -33,6 +35,8 @@ import {
   type MeasuringSubject,
   type MeasuringTargetMode,
 } from "../../domain/measuringQuestions";
+import { questionCostBreakdown } from "../../domain/questionRules";
+import type { PendingQuestionRecord } from "../../domain/sessionChat";
 import type { DistanceUnit } from "../../domain/distance";
 import { closerFurtherAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
@@ -60,6 +64,7 @@ import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 interface UseMeasuringToolParams {
   active: boolean;
   annotations: AnnotationRecord[];
+  pendingQuestions?: readonly PendingQuestionRecord[];
   gameArea: GameArea;
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
@@ -99,6 +104,7 @@ function usesDebouncedSeekerResolve(
 export function useMeasuringTool({
   active,
   annotations,
+  pendingQuestions = [],
   gameArea,
   createAnnotation,
   awaitHiderAnswer = false,
@@ -948,6 +954,14 @@ export function useMeasuringTool({
         );
       }
 
+      const { draw: cardDraw, keep: cardKeep } = questionCostBreakdown(
+        "D3P1",
+        Math.max(
+          measuringFromKindUseCount(annotations.filter(isActive), committedKind),
+          measuringFromKindUseCountFromPending(pendingQuestions, committedKind),
+        ),
+      );
+
       await submitPendingQuestion({
         promptText: question.prompt,
         replyOptions: closerFurtherAnswerOptions.map((option) => ({
@@ -958,6 +972,8 @@ export function useMeasuringTool({
           geometryJson: JSON.stringify(geometry),
           metadata,
         },
+        cardDraw,
+        cardKeep,
       });
 
       resetDraft(committedKind);
@@ -1111,6 +1127,14 @@ export function useMeasuringTool({
     ],
   );
 
+  const questionCost = useMemo(() => {
+    const useCount = Math.max(
+      measuringFromKindUseCount(annotations.filter(isActive), measureFromKind),
+      measuringFromKindUseCountFromPending(pendingQuestions, measureFromKind),
+    );
+    return questionCostBreakdown("D3P1", useCount);
+  }, [annotations, measureFromKind, pendingQuestions]);
+
   const panel = (
     <MeasuringPanel
       distanceUnit={distanceUnit}
@@ -1198,6 +1222,7 @@ export function useMeasuringTool({
       }}
       onCommit={() => void commit()}
       awaitHiderAnswer={awaitHiderAnswer}
+      costLabel={questionCost.label}
     />
   );
 

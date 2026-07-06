@@ -39,6 +39,7 @@ interface RadarPanelProps {
   gpsLoading: boolean;
   error?: string | null;
   awaitHiderAnswer?: boolean;
+  costLabel?: string;
 }
 
 export function RadarPanel({
@@ -60,6 +61,7 @@ export function RadarPanel({
   gpsLoading,
   error,
   awaitHiderAnswer = false,
+  costLabel = "D2P1",
 }: RadarPanelProps) {
   const steps = stepsForMode(RADAR_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
@@ -126,7 +128,7 @@ export function RadarPanel({
                 disabled={!canCommit}
                 className="btn-primary w-full disabled:opacity-40"
               >
-                Send to hiders
+                Send to hiders ({costLabel})
               </button>
             </>
           ) : null}

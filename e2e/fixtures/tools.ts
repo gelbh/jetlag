@@ -20,10 +20,14 @@ async function waitForWizardNext(page: Page) {
 }
 
 async function waitForSendToHiders(page: Page) {
-  await expect(page.getByRole("button", { name: "Send to hiders" })).toBeEnabled({
+  await expect(
+    page.getByRole("button", { name: /^Send to hiders \(D\d+P\d+\)$/ }),
+  ).toBeEnabled({
     timeout: 15_000,
   });
 }
+
+const SEND_TO_HIDERS_BUTTON = /^Send to hiders \(D\d+P\d+\)$/;
 
 export async function dismissActiveToolPanel(page: Page) {
   const closeTool = page.getByRole("button", { name: /^Close / });
@@ -49,7 +53,7 @@ export async function sendRadarToHiders(page: Page) {
   await clickToolDockButton(page, "Radar");
   await advanceWizard(page);
   await clickMapCenter(page);
-  const sendButton = page.getByRole("button", { name: "Send to hiders" });
+  const sendButton = page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON });
   await expect(sendButton).toBeVisible({ timeout: 15_000 });
   await sendButton.click();
   await dismissActiveToolPanel(page);
@@ -78,7 +82,7 @@ export async function sendMatchingToHiders(page: Page) {
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForSendToHiders(page);
-  await page.getByRole("button", { name: "Send to hiders" }).click();
+  await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
 }
 
@@ -104,7 +108,7 @@ export async function sendMeasuringToHiders(page: Page) {
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForSendToHiders(page);
-  await page.getByRole("button", { name: "Send to hiders" }).click();
+  await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
 }
 
@@ -127,7 +131,7 @@ export async function sendThermometerToHiders(page: Page) {
   await advanceWizard(page);
   await clickMapAt(page, 0.35, 0.5);
   await clickMapAt(page, 0.65, 0.5);
-  const sendButton = page.getByRole("button", { name: "Send to hiders" });
+  const sendButton = page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON });
   await expect(sendButton).toBeEnabled({ timeout: 15_000 });
   await sendButton.click();
   await dismissActiveToolPanel(page);
@@ -154,7 +158,7 @@ export async function sendTentacleToHiders(page: Page) {
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForSendToHiders(page);
-  await page.getByRole("button", { name: "Send to hiders" }).click();
+  await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
 }
 

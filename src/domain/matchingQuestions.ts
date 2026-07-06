@@ -1,4 +1,6 @@
 import type { AnnotationRecord } from "./annotations";
+import type { PendingQuestionRecord } from "./sessionChat";
+import { isCountablePendingQuestionStatus } from "./questionRules";
 import {
   collectUsedAnnotationOptions,
   firstUnusedCatalogOption,
@@ -378,6 +380,42 @@ export function matchingCategoryUseCount(
       continue;
     }
     if (annotation.metadata.matchingCategory === categoryId) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
+export function readMatchingCategoryFromPending(
+  question: PendingQuestionRecord,
+): MatchingCategoryId | null {
+  if (question.toolType !== "matching") {
+    return null;
+  }
+
+  const categoryId = question.placement.metadata.matchingCategory;
+  return typeof categoryId === "string"
+    ? (categoryId as MatchingCategoryId)
+    : null;
+}
+
+export function matchingCategoryUseCountFromPending(
+  pendingQuestions: readonly PendingQuestionRecord[],
+  categoryId: MatchingCategoryId,
+  exceptQuestionId?: string,
+): number {
+  let count = 0;
+  for (const question of pendingQuestions) {
+    if (question.toolType !== "matching") {
+      continue;
+    }
+    if (exceptQuestionId && question.id === exceptQuestionId) {
+      continue;
+    }
+    if (!isCountablePendingQuestionStatus(question.status)) {
+      continue;
+    }
+    if (readMatchingCategoryFromPending(question) === categoryId) {
       count += 1;
     }
   }

@@ -10,7 +10,7 @@ import {
   usedPhotoCategoryIds,
   type PhotoCategoryId,
 } from "../../domain/photoQuestions";
-import { questionCostLabel } from "../../domain/questionRules";
+import { questionCostBreakdown } from "../../domain/questionRules";
 import type { SubmitPendingQuestionInput } from "../usePendingQuestionActions";
 import type { PendingQuestionRecord } from "../../domain/sessionChat";
 
@@ -65,7 +65,10 @@ export function usePhotoTool({
   }, [gameSize, selectedCategoryId, usedCategories]);
 
   const useCount = photoCategoryUseCount(pendingQuestions, categoryId);
-  const costLabel = questionCostLabel("D1P1", useCount);
+  const { label: costLabel, draw: cardDraw, keep: cardKeep } = questionCostBreakdown(
+    "D1P1",
+    useCount,
+  );
 
   const commit = useCallback(async () => {
     if (!awaitHiderAnswer || !submitPendingQuestion || !sessionId || !senderUid) {
@@ -90,12 +93,16 @@ export function usePhotoTool({
           photoCategoryId: categoryId,
         },
       },
+      cardDraw,
+      cardKeep,
     });
 
     setMapError(null);
     finishPlacement();
   }, [
     awaitHiderAnswer,
+    cardDraw,
+    cardKeep,
     categoryId,
     finishPlacement,
     senderUid,

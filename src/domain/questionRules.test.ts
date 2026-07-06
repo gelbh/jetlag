@@ -3,10 +3,12 @@ import type { AnnotationRecord } from "./annotations";
 import {
   countAnnotationUses,
   formatAnswerCountdown,
+  formatDrawPickSummary,
   formatExpiredAnswerCountdown,
   hasOpenPendingQuestion,
   isQuestionAnswerDeadlineExpired,
   questionAnswerDeadlineMs,
+  questionCostBreakdown,
   questionCostLabel,
 } from "./questionRules";
 import { answerDeadlineMs } from "./gameSizeRules";
@@ -20,6 +22,25 @@ describe("questionRules", () => {
     expect(questionCostLabel("D4P2", 2)).toBe("D12P6");
     expect(questionCostLabel("D1P1", 0)).toBe("D1P1");
     expect(questionCostLabel("D1P1", 2)).toBe("D3P3");
+  });
+
+  it("returns cost breakdown with draw and keep counts", () => {
+    expect(questionCostBreakdown("D2P1", 0)).toEqual({
+      label: "D2P1",
+      draw: 2,
+      keep: 1,
+    });
+    expect(questionCostBreakdown("D3P1", 1)).toEqual({
+      label: "D6P2",
+      draw: 6,
+      keep: 2,
+    });
+  });
+
+  it("formats draw and pick summaries", () => {
+    expect(formatDrawPickSummary(1, 1)).toBe("Draw 1, pick 1");
+    expect(formatDrawPickSummary(2, 1)).toBe("Draw 2, pick 1");
+    expect(formatDrawPickSummary(6, 2)).toBe("Draw 6, pick 2");
   });
 
   it("detects open pending questions", () => {

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import type { PendingQuestionRecord } from "../../domain/sessionChat";
 import type { AnnotationRecord } from "../../domain/annotations";
 import type { AnnotationType, GameArea } from "../../domain/annotations";
 import type { LatLngTuple } from "../../domain/geometry";
@@ -21,6 +22,7 @@ interface HeavyMapToolsSlotProps {
   sessionRules: SessionRulesInput;
   activeTool: MapTool;
   annotations: AnnotationRecord[];
+  pendingQuestions?: readonly PendingQuestionRecord[];
   gameArea: GameArea;
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
@@ -115,6 +117,7 @@ function MatchingToolRunner({
 }: SharedToolProps & { onToolsChange: (tools: HeavyMapToolsApi) => void }) {
   const matchingTool = useMatchingTool({
     active: true,
+    pendingQuestions: sharedProps.pendingQuestions,
     ...sharedProps,
     awaitHiderAnswer,
     sessionId,
@@ -141,6 +144,7 @@ function MeasuringToolRunner({
 }: SharedToolProps & { onToolsChange: (tools: HeavyMapToolsApi) => void }) {
   const measuringTool = useMeasuringTool({
     active: true,
+    pendingQuestions: sharedProps.pendingQuestions,
     ...sharedProps,
     awaitHiderAnswer,
     sessionId,
@@ -167,6 +171,7 @@ function TentacleToolRunner({
 }: SharedToolProps & { onToolsChange: (tools: HeavyMapToolsApi) => void }) {
   const tentacleTool = useTentacleTool({
     active: true,
+    pendingQuestions: sharedProps.pendingQuestions,
     ...sharedProps,
     awaitHiderAnswer,
     sessionId,

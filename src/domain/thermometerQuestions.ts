@@ -4,6 +4,8 @@ import {
   type DistanceUnit,
 } from "./distance";
 import type { AnnotationRecord } from "./annotations";
+import type { PendingQuestionRecord } from "./sessionChat";
+import { isCountablePendingQuestionStatus } from "./questionRules";
 import type { GameSize } from "./gameSize";
 import { thermometerPresetsMetersForGameSize } from "./gameSizeRules";
 import {
@@ -169,6 +171,35 @@ export function thermometerUseCount(
       annotation.metadata.thermometerDistanceMeters ?? 0,
     );
     const target = thermometerPresetMilesForMeters(distanceMeters);
+    if (preset !== null && preset === target) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
+export function thermometerUseCountFromPending(
+  pendingQuestions: readonly PendingQuestionRecord[],
+  distanceMeters: number,
+  exceptQuestionId?: string,
+): number {
+  const target = thermometerPresetMilesForMeters(distanceMeters);
+  let count = 0;
+  for (const question of pendingQuestions) {
+    if (question.toolType !== "thermometer") {
+      continue;
+    }
+    if (exceptQuestionId && question.id === exceptQuestionId) {
+      continue;
+    }
+    if (!isCountablePendingQuestionStatus(question.status)) {
+      continue;
+    }
+    const pendingDistance = question.placement.metadata.thermometerDistanceMeters;
+    if (typeof pendingDistance !== "number") {
+      continue;
+    }
+    const preset = thermometerPresetMilesForMeters(pendingDistance);
     if (preset !== null && preset === target) {
       count += 1;
     }

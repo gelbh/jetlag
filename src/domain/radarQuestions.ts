@@ -1,4 +1,6 @@
 import type { AnnotationRecord } from "./annotations";
+import type { PendingQuestionRecord } from "./sessionChat";
+import { isCountablePendingQuestionStatus } from "./questionRules";
 import {
   collectUsedAnnotationOptions,
   firstUnusedPreset,
@@ -58,6 +60,30 @@ export function radarDistanceOptionForAnnotation(
   return presetMiles ?? "choose";
 }
 
+export function radarDistanceOptionForPending(
+  question: PendingQuestionRecord,
+): RadarDistanceOptionKey | null {
+  if (question.toolType !== "radar") {
+    return null;
+  }
+
+  const metadata = question.placement.metadata;
+  const radiusMeters =
+    typeof metadata.radiusMeters === "number"
+      ? metadata.radiusMeters
+      : milesToMeters(1);
+  if (metadata.radarChooseCustom === true) {
+    return "choose";
+  }
+
+  const presetMiles = radarPresetMilesForRadius(radiusMeters);
+  if (metadata.radarChooseCustom === false) {
+    return presetMiles ?? "choose";
+  }
+
+  return presetMiles ?? "choose";
+}
+
 export function usedRadarDistanceOptions(
   annotations: AnnotationRecord[],
   exceptAnnotationId?: string,
@@ -110,6 +136,33 @@ export function radarDistanceUseCount(
       ? "choose"
       : radarPresetMilesForRadius(radiusMeters);
     if (optionKey === targetKey) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
+export function radarDistanceUseCountFromPending(
+  pendingQuestions: readonly PendingQuestionRecord[],
+  chooseCustom: boolean,
+  radiusMeters: number,
+  exceptQuestionId?: string,
+): number {
+  const targetKey = chooseCustom
+    ? "choose"
+    : radarPresetMilesForRadius(radiusMeters);
+  let count = 0;
+  for (const question of pendingQuestions) {
+    if (question.toolType !== "radar") {
+      continue;
+    }
+    if (exceptQuestionId && question.id === exceptQuestionId) {
+      continue;
+    }
+    if (!isCountablePendingQuestionStatus(question.status)) {
+      continue;
+    }
+    if (radarDistanceOptionForPending(question) === targetKey) {
       count += 1;
     }
   }

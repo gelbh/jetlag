@@ -216,7 +216,7 @@ export function ThermometerPanel({
                 disabled={!canCommit}
                 className="btn-primary w-full disabled:opacity-40"
               >
-                Send to hiders
+                Send to hiders ({costLabel})
               </button>
             </>
           ) : null}

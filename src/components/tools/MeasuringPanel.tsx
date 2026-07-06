@@ -114,6 +114,7 @@ interface MeasuringPanelProps {
   onAnswerChange: (answer: MeasuringAnswer) => void;
   onCommit: () => void;
   awaitHiderAnswer?: boolean;
+  costLabel?: string;
 }
 
 export function MeasuringPanel({
@@ -152,6 +153,7 @@ export function MeasuringPanel({
   onAnswerChange,
   onCommit,
   awaitHiderAnswer = false,
+  costLabel = "D3P1",
 }: MeasuringPanelProps) {
   const steps = stepsForMode(MEASURING_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
@@ -521,7 +523,7 @@ export function MeasuringPanel({
                   }
                   className="btn-primary w-full disabled:opacity-40"
                 >
-                  Send to hiders
+                  Send to hiders ({costLabel})
                 </button>
               </>
             ) : null

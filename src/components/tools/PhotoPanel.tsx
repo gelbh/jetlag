@@ -75,7 +75,7 @@ export function PhotoPanel({
           disabled={!canCommit}
           className="btn-primary min-h-12 w-full"
         >
-          Ask hider ({costLabel})
+          Send to hiders ({costLabel})
         </button>
         {error ? (
           <p className="text-sm text-status-error">{error}</p>

@@ -22,10 +22,14 @@ import {
   isTentacleCategoryAvailableInSession,
   tentacleSearchRadiusMetersForSession,
   TENTACLE_NOT_WITHIN_REACH_LABEL,
+  tentacleCategoryUseCount,
+  tentacleCategoryUseCountFromPending,
   tentacleQuestionPrompt,
   usedTentacleCategoryIds,
   type TentacleExtendedCategoryId,
 } from "../../domain/tentacleQuestions";
+import { questionCostBreakdown } from "../../domain/questionRules";
+import type { PendingQuestionRecord } from "../../domain/sessionChat";
 import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
 import { fetchTentaclePois } from "../../services/tentacleOverpass";
 import { overpassErrorMessage } from "../../services/overpassClient";
@@ -35,6 +39,7 @@ import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 interface UseTentacleToolParams {
   active: boolean;
   annotations: AnnotationRecord[];
+  pendingQuestions?: readonly PendingQuestionRecord[];
   gameArea: GameArea;
   sessionRules: SessionRulesInput;
   createAnnotation: (
@@ -65,6 +70,7 @@ interface UseTentacleToolParams {
 export function useTentacleTool({
   active,
   annotations,
+  pendingQuestions = [],
   gameArea,
   sessionRules,
   createAnnotation,
@@ -95,6 +101,18 @@ export function useTentacleTool({
     useState<TentacleExtendedCategoryId>(
       defaultTentacleCategoryIdForSession(sessionRules),
     );
+  const tentacleUseCount = Math.max(
+    tentacleCategoryUseCount(
+      annotations.filter(isActive),
+      tentacleCategoryId,
+    ),
+    tentacleCategoryUseCountFromPending(
+      pendingQuestions,
+      tentacleCategoryId,
+    ),
+  );
+  const { label: costLabel, draw: cardDraw, keep: cardKeep } =
+    questionCostBreakdown("D4P2", tentacleUseCount);
   const [tentaclePois, setTentaclePois] = useState<TentaclePoi[]>([]);
   const [tentacleOutOfReach, setTentacleOutOfReach] = useState(false);
   const [selectedPoiId, setSelectedPoiId] = useState<string | null>(null);
@@ -313,6 +331,8 @@ export function useTentacleTool({
             poisJson: JSON.stringify(tentaclePois),
           },
         },
+        cardDraw,
+        cardKeep,
       });
 
       setTentacleCenter(null);
@@ -414,6 +434,7 @@ export function useTentacleTool({
       }}
       onCommit={() => void commit()}
       awaitHiderAnswer={awaitHiderAnswer}
+      costLabel={costLabel}
       onRetry={
         tentacleCenter
           ? () => void loadPoisForCenter(tentacleCenter, tentacleCategoryId)

@@ -135,6 +135,8 @@ export async function updatePendingQuestion(
       | "answerableAt"
       | "deadlineExpiredAt"
       | "answeredLate"
+      | "cardDraw"
+      | "cardKeep"
     >
   >,
 ): Promise<void> {

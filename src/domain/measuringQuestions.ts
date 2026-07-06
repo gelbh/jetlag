@@ -1,4 +1,6 @@
 import type { AnnotationRecord } from "./annotations";
+import type { PendingQuestionRecord } from "./sessionChat";
+import { isCountablePendingQuestionStatus } from "./questionRules";
 import {
   collectUsedAnnotationOptions,
   firstUnusedCatalogOption,
@@ -635,6 +637,50 @@ export function measuringFromKindUseCount(
       annotation.metadata.measuringLocationCategory,
     );
     if (annotationKind === kind) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
+export function readMeasuringFromKindFromPending(
+  question: PendingQuestionRecord,
+): MeasuringFromKind | null {
+  if (question.toolType !== "measuring") {
+    return null;
+  }
+
+  const subject = question.placement.metadata.measuringSubject;
+  if (subject !== "coastline" && subject !== "location" && subject !== "sea_level") {
+    return null;
+  }
+
+  const locationCategory = question.placement.metadata.measuringLocationCategory;
+  return measuringFromKind(
+    subject,
+    typeof locationCategory === "string"
+      ? (locationCategory as MeasuringLocationCategory | "place")
+      : undefined,
+  );
+}
+
+export function measuringFromKindUseCountFromPending(
+  pendingQuestions: readonly PendingQuestionRecord[],
+  kind: MeasuringFromKind,
+  exceptQuestionId?: string,
+): number {
+  let count = 0;
+  for (const question of pendingQuestions) {
+    if (question.toolType !== "measuring") {
+      continue;
+    }
+    if (exceptQuestionId && question.id === exceptQuestionId) {
+      continue;
+    }
+    if (!isCountablePendingQuestionStatus(question.status)) {
+      continue;
+    }
+    if (readMeasuringFromKindFromPending(question) === kind) {
       count += 1;
     }
   }

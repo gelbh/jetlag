@@ -11,6 +11,8 @@ import {
   type SessionRulesInput,
 } from "./sessionRules";
 import type { AnnotationRecord } from "./annotations";
+import type { PendingQuestionRecord } from "./sessionChat";
+import { isCountablePendingQuestionStatus } from "./questionRules";
 import {
   collectUsedAnnotationOptions,
   firstUnusedCatalogOption,
@@ -283,6 +285,42 @@ export function tentacleCategoryUseCount(
       continue;
     }
     if (tentacleCategoryIdForAnnotation(annotation) === categoryId) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
+export function readTentacleCategoryFromPending(
+  question: PendingQuestionRecord,
+): TentacleExtendedCategoryId | null {
+  if (question.toolType !== "tentacle") {
+    return null;
+  }
+
+  const categoryId = question.placement.metadata.tentacleCategoryId;
+  return typeof categoryId === "string"
+    ? (categoryId as TentacleExtendedCategoryId)
+    : null;
+}
+
+export function tentacleCategoryUseCountFromPending(
+  pendingQuestions: readonly PendingQuestionRecord[],
+  categoryId: TentacleExtendedCategoryId,
+  exceptQuestionId?: string,
+): number {
+  let count = 0;
+  for (const question of pendingQuestions) {
+    if (question.toolType !== "tentacle") {
+      continue;
+    }
+    if (exceptQuestionId && question.id === exceptQuestionId) {
+      continue;
+    }
+    if (!isCountablePendingQuestionStatus(question.status)) {
+      continue;
+    }
+    if (readTentacleCategoryFromPending(question) === categoryId) {
       count += 1;
     }
   }

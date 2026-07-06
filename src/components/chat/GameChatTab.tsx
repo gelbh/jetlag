@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { SessionRulesInput } from "../../domain/sessionRules";
 import {
+  formatDrawPickSummary,
   formatExpiredAnswerCountdown,
   questionAnswerDeadlineMs,
 } from "../../domain/questionRules";
@@ -132,6 +133,13 @@ export function GameChatTab({
                 {toolLabel}
               </p>
               <p className="mt-1 text-sm text-ink">{message.promptText}</p>
+              {isHider &&
+              pending?.cardDraw != null &&
+              pending?.cardKeep != null ? (
+                <p className="mt-1 text-xs text-ink-dim">
+                  {formatDrawPickSummary(pending.cardDraw, pending.cardKeep)}
+                </p>
+              ) : null}
               {walking ? (
                 <p className="mt-2 text-xs text-brand-gold">
                   Seeker is walking — answer when the full question arrives.

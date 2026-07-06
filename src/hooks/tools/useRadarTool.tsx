@@ -11,11 +11,15 @@ import {
 import {
   firstAvailableRadarDistanceSelection,
   isRadarDistanceOptionAvailable,
+  radarDistanceUseCount,
+  radarDistanceUseCountFromPending,
   radarInsideFromAnswer,
   radarQuestionPrompt,
   usedRadarDistanceOptions,
   type RadarAnswer,
 } from "../../domain/radarQuestions";
+import { questionCostBreakdown } from "../../domain/questionRules";
+import type { PendingQuestionRecord } from "../../domain/sessionChat";
 import { yesNoAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
 import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
@@ -23,6 +27,7 @@ import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 interface UseRadarToolParams {
   active: boolean;
   annotations: AnnotationRecord[];
+  pendingQuestions?: readonly PendingQuestionRecord[];
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
   ) => Promise<AnnotationRecord>;
@@ -52,6 +57,7 @@ interface UseRadarToolParams {
 export function useRadarTool({
   active,
   annotations,
+  pendingQuestions = [],
   createAnnotation,
   awaitHiderAnswer = false,
   submitPendingQuestion,
@@ -82,6 +88,21 @@ export function useRadarTool({
   const resolvedRadarRadius = radarChooseCustom
     ? (parseDistanceInput(radarCustomRadius, distanceUnit) ?? radarRadius)
     : radarRadius;
+
+  const radarUseCount = Math.max(
+    radarDistanceUseCount(
+      annotations.filter(isActive),
+      radarChooseCustom,
+      resolvedRadarRadius,
+    ),
+    radarDistanceUseCountFromPending(
+      pendingQuestions,
+      radarChooseCustom,
+      resolvedRadarRadius,
+    ),
+  );
+  const { label: costLabel, draw: cardDraw, keep: cardKeep } =
+    questionCostBreakdown("D2P1", radarUseCount);
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- keep draft distance in sync with session usage */
@@ -185,6 +206,8 @@ export function useRadarTool({
             radarChooseCustom,
           },
         },
+        cardDraw,
+        cardKeep,
       });
 
       setRadarCenter(null);
@@ -248,6 +271,7 @@ export function useRadarTool({
       gpsLoading={gpsLoading}
       error={mapError ?? gpsError}
       awaitHiderAnswer={awaitHiderAnswer}
+      costLabel={costLabel}
     />
   );
 

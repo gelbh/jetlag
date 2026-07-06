@@ -420,6 +420,7 @@ export function MapScreen() {
   const radarTool = useRadarTool({
     active: activeTool === "radar",
     annotations,
+    pendingQuestions,
     createAnnotation,
     awaitHiderAnswer,
     submitPendingQuestion: awaitHiderAnswer
@@ -859,6 +860,7 @@ export function MapScreen() {
             activeTool={activeTool}
             sessionRules={session}
             annotations={annotations}
+            pendingQuestions={pendingQuestions}
             gameArea={toolGameArea}
             createAnnotation={createAnnotation}
             distanceUnit={distanceUnit}

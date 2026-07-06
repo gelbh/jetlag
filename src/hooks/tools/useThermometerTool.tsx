@@ -6,7 +6,7 @@ import { distanceBetweenPoints } from "../../domain/geometry";
 import { isActive, type AnnotationRecord } from "../../domain/annotations";
 import type { SessionRulesInput } from "../../domain/sessionRules";
 import { sessionGameSize } from "../../domain/sessionRules";
-import { hasOpenPendingQuestion } from "../../domain/questionRules";
+import { hasOpenPendingQuestion, questionCostBreakdown } from "../../domain/questionRules";
 import type { PendingQuestionRecord } from "../../domain/sessionChat";
 import {
   DEFAULT_THERMOMETER_DISTANCE_METERS,
@@ -15,6 +15,7 @@ import {
   thermometerHotterTowards,
   thermometerQuestionPrompt,
   thermometerUseCount,
+  thermometerUseCountFromPending,
   type ThermometerAnswer,
 } from "../../domain/thermometerQuestions";
 import type { DistanceUnit } from "../../domain/distance";
@@ -26,7 +27,6 @@ import {
   useThermometerWalk,
 } from "./useThermometerWalk";
 import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
-import { questionCostLabel } from "../../domain/questionRules";
 
 type PlacementMode = "gps" | "manual";
 
@@ -53,6 +53,8 @@ interface UseThermometerToolParams {
     distanceMeters: number;
     promptText: string;
     replyOptions: { id: string; label: string }[];
+    cardDraw?: number;
+    cardKeep?: number;
   }) => Promise<void>;
   sessionId?: string;
   senderUid?: string | null;
@@ -111,11 +113,15 @@ export function useThermometerTool({
   const thermoTravelMeters =
     thermoA && thermoB ? distanceBetweenPoints(thermoA, thermoB) : null;
 
-  const presetUseCount = thermometerUseCount(
-    activeAnnotations,
-    thermometerDistanceMeters,
+  const presetUseCount = Math.max(
+    thermometerUseCount(activeAnnotations, thermometerDistanceMeters),
+    thermometerUseCountFromPending(
+      pendingQuestions,
+      thermometerDistanceMeters,
+    ),
   );
-  const costLabel = questionCostLabel("D2P1", presetUseCount);
+  const { label: costLabel, draw: cardDraw, keep: cardKeep } =
+    questionCostBreakdown("D2P1", presetUseCount);
 
   const handleWalkComplete = useCallback(
     async (endPoint: LatLngTuple) => {
@@ -138,6 +144,8 @@ export function useThermometerTool({
           id: option.value,
           label: option.label,
         })),
+        cardDraw,
+        cardKeep,
       });
 
       setWalkingQuestionId(null);
@@ -146,6 +154,8 @@ export function useThermometerTool({
       finishPlacement();
     },
     [
+      cardDraw,
+      cardKeep,
       completeThermometerWalk,
       distanceUnit,
       finishPlacement,
@@ -315,6 +325,8 @@ export function useThermometerTool({
           metadata: { thermometerDistanceMeters },
         },
         status: "pending",
+        cardDraw,
+        cardKeep,
       });
 
       resetDraft();

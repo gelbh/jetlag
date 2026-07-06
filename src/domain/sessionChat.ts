@@ -56,6 +56,8 @@ export interface PendingQuestionRecord {
   deadlineExpiredAt?: string;
   answeredLate?: boolean;
   resolvedAnnotationId?: string;
+  cardDraw?: number;
+  cardKeep?: number;
 }
 
 export interface PlayerLocationRecord {

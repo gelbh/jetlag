@@ -46,6 +46,7 @@ interface TentaclePanelProps {
   onOutOfReachChange: (outOfReach: boolean) => void;
   onCommit: () => void;
   awaitHiderAnswer?: boolean;
+  costLabel?: string;
   onRetry?: () => void;
 }
 
@@ -69,6 +70,7 @@ export function TentaclePanel({
   onOutOfReachChange,
   onCommit,
   awaitHiderAnswer = false,
+  costLabel = "D4P2",
   onRetry,
 }: TentaclePanelProps) {
   const steps = stepsForMode(TENTACLE_STEPS, awaitHiderAnswer);
@@ -177,7 +179,7 @@ export function TentaclePanel({
                 disabled={!canCommit}
                 className="btn-primary w-full disabled:opacity-40"
               >
-                Send to hiders
+                Send to hiders ({costLabel})
               </button>
             </>
           ) : null}

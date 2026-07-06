@@ -1,5 +1,6 @@
 import type { AnnotationRecord } from "./annotations";
 import type { MapTool } from "./mapToolTypes";
+import type { PendingQuestionToolType } from "./sessionChat";
 
 export type QuestionCardCost = "D3P1" | "D2P1" | "D4P2" | "D1P1";
 
@@ -25,6 +26,16 @@ export const MAP_TOOL_DOCK_ENTRIES: readonly MapToolDockEntry[] = [
 
 export function mapToolDockLabel(entry: MapToolDockEntry): string {
   return entry.cost ? `${entry.name} (${entry.cost})` : entry.name;
+}
+
+export function baseQuestionCostForTool(
+  toolType: PendingQuestionToolType,
+): QuestionCardCost {
+  const entry = MAP_TOOL_DOCK_ENTRIES.find((item) => item.id === toolType);
+  if (!entry?.cost) {
+    throw new Error(`No question card cost for tool: ${toolType}`);
+  }
+  return entry.cost;
 }
 
 export function mapToolDockMenuLabel(entry: MapToolDockEntry): string {

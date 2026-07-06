@@ -27,6 +27,8 @@ export interface SubmitPendingQuestionInput {
   replyOptions: GameReplyOption[];
   placement: PendingQuestionPlacement;
   status?: "pending" | "walking";
+  cardDraw?: number;
+  cardKeep?: number;
 }
 
 export function usePendingQuestionActions() {
@@ -40,6 +42,8 @@ export function usePendingQuestionActions() {
       replyOptions,
       placement,
       status = "pending",
+      cardDraw,
+      cardKeep,
     }: SubmitPendingQuestionInput) => {
       const pendingQuestionId = createPendingQuestionId();
       const messageId = createMessageId();
@@ -57,6 +61,8 @@ export function usePendingQuestionActions() {
         replyOptions,
         promptText,
         answerableAt,
+        cardDraw,
+        cardKeep,
       });
 
       if (status === "walking") {
@@ -101,6 +107,8 @@ export function usePendingQuestionActions() {
       distanceMeters,
       promptText,
       replyOptions,
+      cardDraw,
+      cardKeep,
     }: {
       sessionId: string;
       pendingQuestionId: string;
@@ -111,6 +119,8 @@ export function usePendingQuestionActions() {
       distanceMeters: number;
       promptText: string;
       replyOptions: GameReplyOption[];
+      cardDraw?: number;
+      cardKeep?: number;
     }) => {
       const geometry: Feature<LineString> = buildThermometerLineGeometry(
         startPoint,
@@ -130,6 +140,8 @@ export function usePendingQuestionActions() {
         promptText,
         replyOptions,
         answerableAt,
+        cardDraw,
+        cardKeep,
       });
 
       await writeSessionMessage(sessionId, {

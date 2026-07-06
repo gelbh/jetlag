@@ -579,6 +579,8 @@ export function buildPendingQuestionDocument(
     deadlineExpiredAt: question.deadlineExpiredAt,
     answeredLate: question.answeredLate,
     resolvedAnnotationId: question.resolvedAnnotationId,
+    cardDraw: question.cardDraw,
+    cardKeep: question.cardKeep,
   }) as Record<string, unknown>;
   assertNoNestedArrays(payload);
   return payload;
@@ -625,5 +627,7 @@ export function deserializePendingQuestionFromFirestore(
       typeof data.resolvedAnnotationId === "string"
         ? data.resolvedAnnotationId
         : undefined,
+    cardDraw: typeof data.cardDraw === "number" ? data.cardDraw : undefined,
+    cardKeep: typeof data.cardKeep === "number" ? data.cardKeep : undefined,
   };
 }

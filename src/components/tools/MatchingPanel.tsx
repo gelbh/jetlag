@@ -50,6 +50,7 @@ interface MatchingPanelProps {
   onAnswerChange: (answer: MatchingAnswer) => void;
   onCommit: () => void;
   awaitHiderAnswer?: boolean;
+  costLabel?: string;
   onRetry?: () => void;
 }
 
@@ -74,6 +75,7 @@ export function MatchingPanel({
   onAnswerChange,
   onCommit,
   awaitHiderAnswer = false,
+  costLabel = "D3P1",
   onRetry,
 }: MatchingPanelProps) {
   const steps = stepsForMode(MATCHING_STEPS, awaitHiderAnswer);
@@ -229,7 +231,7 @@ export function MatchingPanel({
                 disabled={!canCommit}
                 className="btn-primary w-full disabled:opacity-40"
               >
-                Send to hiders
+                Send to hiders ({costLabel})
               </button>
             </>
           ) : null}

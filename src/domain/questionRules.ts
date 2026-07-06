@@ -1,7 +1,11 @@
 import type { AnnotationRecord, SessionRecord } from "./annotations";
 import type { QuestionCardCost } from "./mapTools";
 import type { GameSize } from "./gameSize";
-import type { PendingQuestionRecord, PendingQuestionToolType } from "./sessionChat";
+import type {
+  PendingQuestionRecord,
+  PendingQuestionStatus,
+  PendingQuestionToolType,
+} from "./sessionChat";
 import { resolveAnswerDeadlineMs } from "./sessionRules";
 
 export type QuestionToolType = Extract<
@@ -17,13 +21,49 @@ const BASE_COST_MULTIPLIERS: Record<QuestionCardCost, { draw: number; keep: numb
     D1P1: { draw: 1, keep: 1 },
   };
 
+export interface QuestionCostBreakdown {
+  label: string;
+  draw: number;
+  keep: number;
+}
+
+export function questionCostBreakdown(
+  baseCost: QuestionCardCost,
+  useCount: number,
+): QuestionCostBreakdown {
+  const multiplier = useCount + 1;
+  const { draw, keep } = BASE_COST_MULTIPLIERS[baseCost];
+  const scaledDraw = draw * multiplier;
+  const scaledKeep = keep * multiplier;
+  return {
+    label: `D${scaledDraw}P${scaledKeep}`,
+    draw: scaledDraw,
+    keep: scaledKeep,
+  };
+}
+
 export function questionCostLabel(
   baseCost: QuestionCardCost,
   useCount: number,
 ): string {
-  const multiplier = useCount + 1;
-  const { draw, keep } = BASE_COST_MULTIPLIERS[baseCost];
-  return `D${draw * multiplier}P${keep * multiplier}`;
+  return questionCostBreakdown(baseCost, useCount).label;
+}
+
+export function formatDrawPickSummary(draw: number, keep: number): string {
+  const drawLabel = draw === 1 ? "Draw 1" : `Draw ${draw}`;
+  const pickLabel = keep === 1 ? "pick 1" : `pick ${keep}`;
+  return `${drawLabel}, ${pickLabel}`;
+}
+
+export function isCountablePendingQuestionStatus(
+  status: PendingQuestionStatus,
+): boolean {
+  return (
+    status === "pending" ||
+    status === "answered" ||
+    status === "resolved" ||
+    status === "walking"
+  );
 }
 
 export function hasOpenPendingQuestion(
