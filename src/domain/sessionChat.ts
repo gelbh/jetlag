@@ -51,6 +51,8 @@ export interface PendingQuestionRecord {
   promptText: string;
   answer?: unknown;
   answerableAt?: string;
+  deadlineExpiredAt?: string;
+  answeredLate?: boolean;
   resolvedAnnotationId?: string;
 }
 

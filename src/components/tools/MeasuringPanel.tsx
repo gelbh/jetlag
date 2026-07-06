@@ -38,6 +38,7 @@ import {
   buildSteps,
   deriveStepStates,
   MEASURING_STEPS,
+  stepsForMode,
 } from "./shared/toolStepUtils";
 
 type MeasuringSearchRole = "seeker" | "target";
@@ -152,8 +153,9 @@ export function MeasuringPanel({
   onCommit,
   awaitHiderAnswer = false,
 }: MeasuringPanelProps) {
+  const steps = stepsForMode(MEASURING_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
-  const step = MEASURING_STEPS[stepIndex]?.id ?? "source";
+  const step = steps[stepIndex]?.id ?? "source";
 
   const locationCategory =
     subject === "location"
@@ -202,7 +204,7 @@ export function MeasuringPanel({
     distanceMeters !== null;
 
   const goNext = () => {
-    setStepIndex((current) => Math.min(current + 1, MEASURING_STEPS.length - 1));
+    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
   };
 
   const goBack = () => {
@@ -211,10 +213,7 @@ export function MeasuringPanel({
 
   const stepper = (
     <ToolStepper
-      steps={buildSteps(
-        MEASURING_STEPS,
-        deriveStepStates(MEASURING_STEPS.length, stepIndex),
-      )}
+      steps={buildSteps(steps, deriveStepStates(steps.length, stepIndex))}
     />
   );
 
@@ -502,40 +501,58 @@ export function MeasuringPanel({
             </ResolvedReadout>
           ) : null}
           {awaitHiderAnswer ? (
-            <p className="text-sm text-ink-muted">
-              Hiders will answer closer or further in game chat.
-            </p>
+            step === "target" ? (
+              <>
+                <p className="text-xs text-ink-dim">
+                  Hiders answer closer or further in game chat once you send
+                  this question.
+                </p>
+                <button
+                  type="button"
+                  onClick={onCommit}
+                  disabled={
+                    !hasAvailableMeasureOptions ||
+                    !hasSeekerPoint ||
+                    !hasTargetPoint
+                  }
+                  className="btn-primary w-full disabled:opacity-40"
+                >
+                  Send to hiders
+                </button>
+              </>
+            ) : null
           ) : (
-            <BinaryAnswerPicker
-              value={answer}
-              onChange={onAnswerChange}
-              options={closerFurtherAnswerOptions}
-              label=""
-              disabledValues={disabledSeaLevelAnswers}
-            />
+            <>
+              <BinaryAnswerPicker
+                value={answer}
+                onChange={onAnswerChange}
+                options={closerFurtherAnswerOptions}
+                label=""
+                disabledValues={disabledSeaLevelAnswers}
+              />
+              {step === "target" ? (
+                <p className="text-xs text-ink-dim">
+                  The map shows the shaded area for your choice. Tap Next when
+                  ready to add the question.
+                </p>
+              ) : null}
+              {step === "answer" ? (
+                <button
+                  type="button"
+                  onClick={onCommit}
+                  disabled={
+                    !hasAvailableMeasureOptions ||
+                    !hasSeekerPoint ||
+                    !hasTargetPoint ||
+                    answer === null
+                  }
+                  className="btn-primary w-full disabled:opacity-40"
+                >
+                  Add measure question
+                </button>
+              ) : null}
+            </>
           )}
-          {step === "target" ? (
-            <p className="text-xs text-ink-dim">
-              {awaitHiderAnswer
-                ? "Tap Next when ready to send the question to hiders."
-                : "The map shows the shaded area for your choice. Tap Next when ready to add the question."}
-            </p>
-          ) : null}
-          {step === "answer" ? (
-            <button
-              type="button"
-              onClick={onCommit}
-              disabled={
-                !hasAvailableMeasureOptions ||
-                !hasSeekerPoint ||
-                !hasTargetPoint ||
-                (!awaitHiderAnswer && answer === null)
-              }
-              className="btn-primary w-full disabled:opacity-40"
-            >
-              {awaitHiderAnswer ? "Send to hiders" : "Add measure question"}
-            </button>
-          ) : null}
         </ToolSection>
       ) : null}
 
@@ -548,7 +565,7 @@ export function MeasuringPanel({
 
       <ToolWizardNav
         stepIndex={stepIndex}
-        stepCount={MEASURING_STEPS.length}
+        stepCount={steps.length}
         onBack={goBack}
         onNext={goNext}
         canGoNext={

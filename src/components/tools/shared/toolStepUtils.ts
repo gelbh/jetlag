@@ -60,3 +60,15 @@ export const MEASURING_STEPS = [
   { id: "target", label: "Target" },
   { id: "answer", label: "Answer" },
 ] as const;
+
+/** Multiplayer drops the Answer step — hiders respond in game chat. */
+export function stepsForMode<T extends readonly ToolStepDefinition[]>(
+  allSteps: T,
+  awaitHiderAnswer: boolean,
+): readonly ToolStepDefinition[] {
+  if (!awaitHiderAnswer) {
+    return allSteps;
+  }
+
+  return allSteps.filter((step) => step.id !== "answer");
+}

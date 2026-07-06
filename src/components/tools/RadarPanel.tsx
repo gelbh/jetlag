@@ -11,6 +11,7 @@ import {
   buildSteps,
   deriveStepStates,
   RADAR_STEPS,
+  stepsForMode,
 } from "./shared/toolStepUtils";
 import {
   isRadarDistanceOptionAvailable,
@@ -60,8 +61,9 @@ export function RadarPanel({
   error,
   awaitHiderAnswer = false,
 }: RadarPanelProps) {
+  const steps = stepsForMode(RADAR_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
-  const step = RADAR_STEPS[stepIndex]?.id ?? "distance";
+  const step = steps[stepIndex]?.id ?? "distance";
 
   const distanceSelectionAvailable = isRadarDistanceOptionAvailable();
   const canCommit =
@@ -70,7 +72,7 @@ export function RadarPanel({
     (awaitHiderAnswer || answer !== null);
 
   const goNext = () => {
-    setStepIndex((current) => Math.min(current + 1, RADAR_STEPS.length - 1));
+    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
   };
 
   const goBack = () => {
@@ -79,10 +81,7 @@ export function RadarPanel({
 
   const stepper = (
     <ToolStepper
-      steps={buildSteps(
-        RADAR_STEPS,
-        deriveStepStates(RADAR_STEPS.length, stepIndex),
-      )}
+      steps={buildSteps(steps, deriveStepStates(steps.length, stepIndex))}
     />
   );
 
@@ -94,15 +93,15 @@ export function RadarPanel({
             Radar tests your location at answer time, not your hiding zone.
           </p>
           <RadarDistancePicker
-          radiusMeters={radiusMeters}
-          chooseCustom={chooseCustom}
-          customRadius={customRadius}
-          distanceUnit={distanceUnit}
-          usedDistanceOptions={usedDistanceOptions}
-          onPresetSelect={onPresetSelect}
-          onChooseSelect={onChooseSelect}
-          onCustomRadiusChange={onCustomRadiusChange}
-        />
+            radiusMeters={radiusMeters}
+            chooseCustom={chooseCustom}
+            customRadius={customRadius}
+            distanceUnit={distanceUnit}
+            usedDistanceOptions={usedDistanceOptions}
+            onPresetSelect={onPresetSelect}
+            onChooseSelect={onChooseSelect}
+            onCustomRadiusChange={onCustomRadiusChange}
+          />
         </ToolSection>
       ) : null}
 
@@ -116,28 +115,35 @@ export function RadarPanel({
             onPlaceAtMapTap={onPlaceAtMapTap}
             centerHint="Center pinned on the map. Tap again to move it."
           />
+          {awaitHiderAnswer && hasCenter && distanceSelectionAvailable ? (
+            <>
+              <p className="text-xs text-ink-dim">
+                Hiders answer yes or no in game chat once you send this question.
+              </p>
+              <button
+                type="button"
+                onClick={onCommit}
+                disabled={!canCommit}
+                className="btn-primary w-full disabled:opacity-40"
+              >
+                Send to hiders
+              </button>
+            </>
+          ) : null}
         </ToolSection>
       ) : null}
 
       {step === "answer" ? (
         <ToolSection first compact status="active">
-          {awaitHiderAnswer ? (
-            <p className="text-sm text-ink-muted">
-              Hiders will answer yes or no in game chat.
-            </p>
-          ) : (
-            <BinaryAnswerPicker
-              value={answer}
-              onChange={onAnswerChange}
-              options={yesNoAnswerOptions}
-              label=""
-            />
-          )}
+          <BinaryAnswerPicker
+            value={answer}
+            onChange={onAnswerChange}
+            options={yesNoAnswerOptions}
+            label=""
+          />
           {hasCenter && distanceSelectionAvailable ? (
             <p className="text-xs text-ink-dim">
-              {awaitHiderAnswer
-                ? "The question goes to hiders once you send it."
-                : "The map shows the shaded area for your choice."}
+              The map shows the shaded area for your choice.
             </p>
           ) : null}
           <button
@@ -146,14 +152,14 @@ export function RadarPanel({
             disabled={!canCommit}
             className="btn-primary w-full disabled:opacity-40"
           >
-            {awaitHiderAnswer ? "Send to hiders" : "Add radar question"}
+            Add radar question
           </button>
         </ToolSection>
       ) : null}
 
       <ToolWizardNav
         stepIndex={stepIndex}
-        stepCount={RADAR_STEPS.length}
+        stepCount={steps.length}
         onBack={goBack}
         onNext={goNext}
         canGoNext={

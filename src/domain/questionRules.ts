@@ -62,6 +62,31 @@ export function formatAnswerCountdown(
   return `${minutes}:${seconds.toString().padStart(2, "0")} remaining`;
 }
 
+export function isQuestionAnswerDeadlineExpired(
+  answerableAt: string | undefined,
+  deadlineMs: number,
+  nowMs: number = Date.now(),
+): boolean {
+  if (!answerableAt) {
+    return false;
+  }
+
+  return nowMs - Date.parse(answerableAt) >= deadlineMs;
+}
+
+export function formatExpiredAnswerCountdown(
+  answerableAt: string | undefined,
+  deadlineMs: number,
+  deadlineExpiredAt: string | undefined,
+  nowMs: number = Date.now(),
+): string | null {
+  if (deadlineExpiredAt || isQuestionAnswerDeadlineExpired(answerableAt, deadlineMs, nowMs)) {
+    return "Time expired — timer paused";
+  }
+
+  return formatAnswerCountdown(answerableAt, deadlineMs, nowMs);
+}
+
 export function countAnnotationUses<T extends string>(
   annotations: readonly AnnotationRecord[],
   readKey: (annotation: AnnotationRecord) => T | null,

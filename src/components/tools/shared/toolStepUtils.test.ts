@@ -1,22 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { deriveStepStates } from "./toolStepUtils";
+import {
+  MATCHING_STEPS,
+  RADAR_STEPS,
+  stepsForMode,
+} from "./toolStepUtils";
 
-describe("deriveStepStates", () => {
-  it("marks the active wizard step as current", () => {
-    expect(deriveStepStates(4, 3)).toEqual([
-      "complete",
-      "complete",
-      "complete",
-      "current",
+describe("stepsForMode", () => {
+  it("drops the answer step in multiplayer", () => {
+    expect(stepsForMode(RADAR_STEPS, true).map((step) => step.id)).toEqual([
+      "distance",
+      "anchor",
+    ]);
+    expect(stepsForMode(MATCHING_STEPS, true).map((step) => step.id)).toEqual([
+      "category",
+      "anchor",
+      "resolve",
     ]);
   });
 
-  it("updates the current step when navigating backward", () => {
-    expect(deriveStepStates(4, 1)).toEqual([
-      "complete",
-      "current",
-      "upcoming",
-      "upcoming",
-    ]);
+  it("keeps all steps in solo mode", () => {
+    expect(stepsForMode(RADAR_STEPS, false)).toEqual(RADAR_STEPS);
   });
 });

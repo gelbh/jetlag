@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { GameSize } from "../../domain/gameSize";
 import { answerDeadlineMs } from "../../domain/gameSizeRules";
 import {
-  formatAnswerCountdown,
+  formatExpiredAnswerCountdown,
   questionAnswerDeadlineMs,
 } from "../../domain/questionRules";
 import type { SessionMessageRecord } from "../../domain/sessionChat";
@@ -19,6 +19,7 @@ interface GameChatTabProps {
     messageId: string,
     answer: unknown,
     selectedReply: string,
+    deadlineExpired?: boolean,
   ) => Promise<void>;
 }
 
@@ -88,8 +89,16 @@ export function GameChatTab({
             : answerDeadlineMs("matching", gameSize);
           const countdown =
             !walking && !answered && pending?.answerableAt
-              ? formatAnswerCountdown(pending.answerableAt, deadlineMs, nowMs)
+              ? formatExpiredAnswerCountdown(
+                  pending.answerableAt,
+                  deadlineMs,
+                  pending.deadlineExpiredAt,
+                  nowMs,
+                )
               : null;
+          const expired =
+            pending?.deadlineExpiredAt !== undefined ||
+            countdown === "Time expired — timer paused";
 
           return (
             <div
@@ -106,8 +115,15 @@ export function GameChatTab({
                 </p>
               ) : null}
               {countdown ? (
-                <p className="mt-1 text-xs tabular-nums text-ink-dim">
+                <p
+                  className={`mt-1 text-xs tabular-nums ${expired ? "text-status-warning" : "text-ink-dim"}`}
+                >
                   {countdown}
+                </p>
+              ) : null}
+              {pending?.answeredLate ? (
+                <p className="mt-1 text-xs text-status-warning">
+                  Answered late — card draw forfeited.
                 </p>
               ) : null}
               {isHider && !answered && !walking && message.replyOptions ? (
@@ -122,6 +138,7 @@ export function GameChatTab({
                           message.id,
                           option.id === "null" ? null : option.id,
                           option.id,
+                          expired,
                         )
                       }
                       className="btn-secondary min-h-11"

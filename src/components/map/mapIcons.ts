@@ -74,3 +74,15 @@ export function createPoiIcon(color: string, highlighted: boolean) {
     borderWidth: highlighted ? 3 : 2,
   });
 }
+
+export function createCountdownBadgeIcon(label: string, expired: boolean) {
+  const background = expired ? "#C55B40" : "#1D2835";
+  const text = expired ? "Expired" : label;
+
+  return L.divIcon({
+    className: "pending-question-countdown-badge",
+    html: `<span style="display:inline-block;padding:2px 8px;border-radius:9999px;background:${background};color:#ffffff;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;box-shadow:0 1px 4px rgba(15,23,42,0.35);">${text}</span>`,
+    iconSize: [0, 0],
+    iconAnchor: [0, 24],
+  });
+}

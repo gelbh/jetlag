@@ -28,6 +28,7 @@ import { useRadarTool } from "../hooks/tools/useRadarTool";
 import { usePinTool } from "../hooks/tools/usePinTool";
 import { useZoneTool } from "../hooks/tools/useZoneTool";
 import { ActiveThermometerWalkLayer } from "../components/map/ActiveThermometerWalkLayer";
+import { PendingQuestionLayer } from "../components/map/PendingQuestionLayer";
 import { useThermometerTool } from "../hooks/tools/useThermometerTool";
 import { hasOpenPendingQuestion } from "../domain/questionRules";
 import {
@@ -59,6 +60,7 @@ import { useGeolocation } from "../hooks/useGeolocation";
 import { useSessionSync } from "../hooks/useSessionSync";
 import { useSessionEndedRedirect } from "../hooks/useSessionEndedRedirect";
 import { usePendingQuestionActions } from "../hooks/usePendingQuestionActions";
+import { useQuestionDeadlineEnforcement } from "../hooks/useQuestionDeadlineEnforcement";
 import { usePendingQuestionResolver } from "../hooks/usePendingQuestionResolver";
 import { useSeekerLocationSync } from "../hooks/useSeekerLocationSync";
 import {
@@ -235,13 +237,31 @@ export function MapScreen() {
   const [firstRunDismissed, setFirstRunDismissed] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const awaitHiderAnswer = sessionHasHiders(session?.memberRoles);
-  const { submitPendingQuestion, answerPendingQuestion, completeThermometerWalk } =
+  const { submitPendingQuestion, answerPendingQuestion, completeThermometerWalk, postSystemMessage } =
     usePendingQuestionActions();
   const pendingQuestions = usePendingQuestionsSync(session?.id);
   const canSubmitQuestion = !hasOpenPendingQuestion(pendingQuestions);
   const hidingZones = useHidingZonesSync(session?.id);
   const playerLocations = usePlayerLocationsSync(session?.id);
   const chatMessages = useSessionMessagesSync(session?.id);
+
+  useQuestionDeadlineEnforcement({
+    sessionId: session?.id,
+    enabled: canControlTimer,
+    gameSize: session?.gameSize ?? "medium",
+    pendingQuestions,
+    hidingZones,
+    timerRunning: timer.running,
+    pauseTimer: timer.pause,
+    resumeTimer: timer.start,
+    postSystemMessage: async (text) => {
+      if (!session?.id || !uid) {
+        return;
+      }
+
+      await postSystemMessage(session.id, uid, "seeker", text);
+    },
+  });
 
   const finishPlacement = useCallback(() => {
     setActiveTool("none");
@@ -742,6 +762,11 @@ export function MapScreen() {
             pendingQuestions={pendingQuestions}
             seekerPosition={thermometerTool.walkCurrentPoint}
           />
+          <PendingQuestionLayer
+            pendingQuestions={pendingQuestions}
+            gameArea={session.gameArea}
+            gameSize={session.gameSize ?? "medium"}
+          />
           {geometryEditAnnotation && geometryDraft ? (
             <GeometryEditLayer
               annotation={geometryEditAnnotation}
@@ -961,6 +986,7 @@ export function MapScreen() {
           messageId,
           answer,
           selectedReply,
+          deadlineExpired,
         ) => {
           await answerPendingQuestion(
             session.id,
@@ -968,6 +994,13 @@ export function MapScreen() {
             messageId,
             answer,
             selectedReply,
+            deadlineExpired
+              ? {
+                  deadlineExpired: true,
+                  senderUid: uid ?? "",
+                  senderRole: "seeker",
+                }
+              : undefined,
           );
         }}
       />

@@ -3,10 +3,13 @@ import type { AnnotationRecord } from "./annotations";
 import {
   countAnnotationUses,
   formatAnswerCountdown,
+  formatExpiredAnswerCountdown,
   hasOpenPendingQuestion,
+  isQuestionAnswerDeadlineExpired,
   questionAnswerDeadlineMs,
   questionCostLabel,
 } from "./questionRules";
+import { answerDeadlineMs } from "./gameSizeRules";
 import type { PendingQuestionRecord } from "./sessionChat";
 
 describe("questionRules", () => {
@@ -31,6 +34,28 @@ describe("questionRules", () => {
   it("uses five minute answer deadlines for question tools", () => {
     expect(questionAnswerDeadlineMs("radar", "small")).toBe(5 * 60 * 1000);
     expect(questionAnswerDeadlineMs("matching", "large")).toBe(5 * 60 * 1000);
+  });
+
+  it("uses photo answer deadlines by game size", () => {
+    expect(answerDeadlineMs("photo", "small")).toBe(10 * 60 * 1000);
+    expect(answerDeadlineMs("photo", "medium")).toBe(10 * 60 * 1000);
+    expect(answerDeadlineMs("photo", "large")).toBe(20 * 60 * 1000);
+  });
+
+  it("detects expired answer deadlines", () => {
+    const answerableAt = "2026-01-01T00:00:00.000Z";
+    const now = Date.parse("2026-01-01T00:06:00.000Z");
+    expect(
+      isQuestionAnswerDeadlineExpired(answerableAt, 5 * 60 * 1000, now),
+    ).toBe(true);
+    expect(
+      formatExpiredAnswerCountdown(
+        answerableAt,
+        5 * 60 * 1000,
+        undefined,
+        now,
+      ),
+    ).toBe("Time expired — timer paused");
   });
 
   it("formats answer countdowns", () => {

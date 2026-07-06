@@ -26,6 +26,7 @@ import {
   buildSteps,
   deriveStepStates,
   MATCHING_STEPS,
+  stepsForMode,
 } from "./shared/toolStepUtils";
 
 interface MatchingPanelProps {
@@ -75,8 +76,9 @@ export function MatchingPanel({
   awaitHiderAnswer = false,
   onRetry,
 }: MatchingPanelProps) {
+  const steps = stepsForMode(MATCHING_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
-  const step = MATCHING_STEPS[stepIndex]?.id ?? "category";
+  const step = steps[stepIndex]?.id ?? "category";
 
   const question = matchingQuestionFor(categoryId);
   const category = getMatchingCategory(categoryId);
@@ -126,7 +128,7 @@ export function MatchingPanel({
     : null;
 
   const goNext = () => {
-    setStepIndex((current) => Math.min(current + 1, MATCHING_STEPS.length - 1));
+    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
   };
 
   const goBack = () => {
@@ -135,10 +137,7 @@ export function MatchingPanel({
 
   const stepper = (
     <ToolStepper
-      steps={buildSteps(
-        MATCHING_STEPS,
-        deriveStepStates(MATCHING_STEPS.length, stepIndex),
-      )}
+      steps={buildSteps(steps, deriveStepStates(steps.length, stepIndex))}
     />
   );
 
@@ -219,6 +218,21 @@ export function MatchingPanel({
               Set your anchor to look up the nearest feature.
             </ResolvedReadout>
           ) : null}
+          {awaitHiderAnswer ? (
+            <>
+              <p className="text-xs text-ink-dim">
+                Hiders answer yes or no in game chat once you send this question.
+              </p>
+              <button
+                type="button"
+                onClick={onCommit}
+                disabled={!canCommit}
+                className="btn-primary w-full disabled:opacity-40"
+              >
+                Send to hiders
+              </button>
+            </>
+          ) : null}
         </ToolSection>
       ) : null}
 
@@ -229,23 +243,15 @@ export function MatchingPanel({
               {nearestFeatureSummary}
             </ResolvedReadout>
           ) : null}
-          {awaitHiderAnswer ? (
-            <p className="text-sm text-ink-muted">
-              Hiders will answer yes or no in game chat.
-            </p>
-          ) : (
-            <BinaryAnswerPicker
-              value={answer}
-              onChange={onAnswerChange}
-              options={yesNoAnswerOptions}
-              label=""
-            />
-          )}
+          <BinaryAnswerPicker
+            value={answer}
+            onChange={onAnswerChange}
+            options={yesNoAnswerOptions}
+            label=""
+          />
           {resolveComplete && !nullAnswer ? (
             <p className="text-xs text-ink-dim">
-              {awaitHiderAnswer
-                ? "The question goes to hiders once you send it."
-                : "The map shows the shaded area for your choice."}
+              The map shows the shaded area for your choice.
             </p>
           ) : null}
           <button
@@ -254,14 +260,14 @@ export function MatchingPanel({
             disabled={!canCommit}
             className="btn-primary w-full disabled:opacity-40"
           >
-            {awaitHiderAnswer ? "Send to hiders" : "Add match question"}
+            Add match question
           </button>
         </ToolSection>
       ) : null}
 
       <ToolWizardNav
         stepIndex={stepIndex}
-        stepCount={MATCHING_STEPS.length}
+        stepCount={steps.length}
         onBack={goBack}
         onNext={goNext}
         canGoNext={

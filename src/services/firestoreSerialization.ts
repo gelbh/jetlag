@@ -452,6 +452,8 @@ export function buildPendingQuestionDocument(
     promptText: question.promptText,
     answer: question.answer,
     answerableAt: question.answerableAt,
+    deadlineExpiredAt: question.deadlineExpiredAt,
+    answeredLate: question.answeredLate,
     resolvedAnnotationId: question.resolvedAnnotationId,
   }) as Record<string, unknown>;
   assertNoNestedArrays(payload);
@@ -489,6 +491,12 @@ export function deserializePendingQuestionFromFirestore(
     answer: data.answer,
     answerableAt:
       typeof data.answerableAt === "string" ? data.answerableAt : undefined,
+    deadlineExpiredAt:
+      typeof data.deadlineExpiredAt === "string"
+        ? data.deadlineExpiredAt
+        : undefined,
+    answeredLate:
+      typeof data.answeredLate === "boolean" ? data.answeredLate : undefined,
     resolvedAnnotationId:
       typeof data.resolvedAnnotationId === "string"
         ? data.resolvedAnnotationId

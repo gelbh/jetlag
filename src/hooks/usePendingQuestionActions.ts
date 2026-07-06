@@ -157,12 +157,32 @@ export function usePendingQuestionActions() {
       messageId: string,
       answer: unknown,
       selectedReply: string,
+      options?: {
+        deadlineExpired?: boolean;
+        senderUid?: string;
+        senderRole?: PlayerRole;
+      },
     ) => {
       await updatePendingQuestion(sessionId, pendingQuestionId, {
         answer,
         status: "answered",
+        answeredLate: options?.deadlineExpired ? true : undefined,
       });
       await updateGameMessageAnswer(sessionId, messageId, selectedReply);
+
+      if (
+        options?.deadlineExpired &&
+        options.senderUid &&
+        options.senderRole
+      ) {
+        await postGameSystemMessage(
+          sessionId,
+          options.senderUid,
+          options.senderRole,
+          "Answer received late — hider forfeits card draw for this question.",
+          createMessageId(),
+        );
+      }
     },
     [],
   );

@@ -116,6 +116,7 @@ interface ChatPanelProps {
     messageId: string,
     answer: unknown,
     selectedReply: string,
+    deadlineExpired?: boolean,
   ) => Promise<void>;
 }
 

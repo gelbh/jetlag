@@ -24,6 +24,7 @@ import {
   buildSteps,
   deriveStepStates,
   THERMOMETER_STEPS,
+  stepsForMode,
 } from "./shared/toolStepUtils";
 
 type PlacementMode = "gps" | "manual";
@@ -91,8 +92,9 @@ export function ThermometerPanel({
   awaitHiderAnswer = false,
   canSubmitQuestion = true,
 }: ThermometerPanelProps) {
+  const steps = stepsForMode(THERMOMETER_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
-  const step = THERMOMETER_STEPS[stepIndex]?.id ?? "distance";
+  const step = steps[stepIndex]?.id ?? "distance";
 
   const travelTooShort =
     travelMeters !== null && travelMeters + 1 < distanceMeters;
@@ -111,9 +113,7 @@ export function ThermometerPanel({
     canSubmitQuestion;
 
   const goNext = () => {
-    setStepIndex((current) =>
-      Math.min(current + 1, THERMOMETER_STEPS.length - 1),
-    );
+    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
   };
 
   const goBack = () => {
@@ -122,10 +122,7 @@ export function ThermometerPanel({
 
   const stepper = (
     <ToolStepper
-      steps={buildSteps(
-        THERMOMETER_STEPS,
-        deriveStepStates(THERMOMETER_STEPS.length, stepIndex),
-      )}
+      steps={buildSteps(steps, deriveStepStates(steps.length, stepIndex))}
     />
   );
 
@@ -202,6 +199,27 @@ export function ThermometerPanel({
               Start walk
             </button>
           ) : null}
+          {awaitHiderAnswer &&
+          placementMode === "manual" &&
+          pinsReady &&
+          distanceAvailable &&
+          !travelTooShort &&
+          canSubmitQuestion ? (
+            <>
+              <p className="text-xs text-ink-dim">
+                Hiders answer hotter or colder in game chat once you send this
+                question.
+              </p>
+              <button
+                type="button"
+                onClick={onCommit}
+                disabled={!canCommit}
+                className="btn-primary w-full disabled:opacity-40"
+              >
+                Send to hiders
+              </button>
+            </>
+          ) : null}
           <button type="button" onClick={onReset} className="btn-secondary w-full">
             Reset
           </button>
@@ -210,18 +228,12 @@ export function ThermometerPanel({
 
       {step === "answer" ? (
         <ToolSection first compact status="active">
-          {awaitHiderAnswer ? (
-            <p className="text-sm text-ink-muted">
-              Hiders answer hotter or colder in game chat once the walk ends.
-            </p>
-          ) : (
-            <BinaryAnswerPicker
-              value={answer}
-              onChange={onAnswerChange}
-              options={hotterColderAnswerOptions}
-              label=""
-            />
-          )}
+          <BinaryAnswerPicker
+            value={answer}
+            onChange={onAnswerChange}
+            options={hotterColderAnswerOptions}
+            label=""
+          />
           {placementMode === "manual" ? (
             <button
               type="button"
@@ -229,7 +241,7 @@ export function ThermometerPanel({
               disabled={!canCommit}
               className="btn-primary w-full disabled:opacity-40"
             >
-              {awaitHiderAnswer ? "Send to hiders" : "Add thermometer"}
+              Add thermometer
             </button>
           ) : null}
         </ToolSection>
@@ -237,7 +249,7 @@ export function ThermometerPanel({
 
       <ToolWizardNav
         stepIndex={stepIndex}
-        stepCount={THERMOMETER_STEPS.length}
+        stepCount={steps.length}
         onBack={goBack}
         onNext={goNext}
         canGoNext={

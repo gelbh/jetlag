@@ -43,7 +43,6 @@ export async function sendRadarToHiders(page: Page) {
   await clickToolDockButton(page, "Radar");
   await advanceWizard(page);
   await clickMapCenter(page);
-  await advanceWizard(page);
   const sendButton = page.getByRole("button", { name: "Send to hiders" });
   await expect(sendButton).toBeVisible({ timeout: 15_000 });
   await sendButton.click();
@@ -73,7 +72,6 @@ export async function sendMatchingToHiders(page: Page) {
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForWizardNext(page);
-  await advanceWizard(page);
   const sendButton = page.getByRole("button", { name: "Send to hiders" });
   await expect(sendButton).toBeEnabled({ timeout: 15_000 });
   await sendButton.click();
@@ -102,7 +100,6 @@ export async function sendMeasuringToHiders(page: Page) {
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForWizardNext(page);
-  await advanceWizard(page);
   const sendButton = page.getByRole("button", { name: "Send to hiders" });
   await expect(sendButton).toBeEnabled({ timeout: 15_000 });
   await sendButton.click();
@@ -128,8 +125,6 @@ export async function sendThermometerToHiders(page: Page) {
   await advanceWizard(page);
   await clickMapAt(page, 0.35, 0.5);
   await clickMapAt(page, 0.65, 0.5);
-  await waitForWizardNext(page);
-  await advanceWizard(page);
   const sendButton = page.getByRole("button", { name: "Send to hiders" });
   await expect(sendButton).toBeEnabled({ timeout: 15_000 });
   await sendButton.click();
@@ -157,7 +152,6 @@ export async function sendTentacleToHiders(page: Page) {
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForWizardNext(page);
-  await advanceWizard(page);
   const sendButton = page.getByRole("button", { name: "Send to hiders" });
   await expect(sendButton).toBeEnabled({ timeout: 15_000 });
   await sendButton.click();

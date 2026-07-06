@@ -133,6 +133,8 @@ export async function updatePendingQuestion(
       | "promptText"
       | "replyOptions"
       | "answerableAt"
+      | "deadlineExpiredAt"
+      | "answeredLate"
     >
   >,
 ): Promise<void> {

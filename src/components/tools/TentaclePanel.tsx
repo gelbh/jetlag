@@ -22,6 +22,7 @@ import {
   buildSteps,
   deriveStepStates,
   TENTACLE_STEPS,
+  stepsForMode,
 } from "./shared/toolStepUtils";
 
 interface TentaclePanelProps {
@@ -70,8 +71,9 @@ export function TentaclePanel({
   awaitHiderAnswer = false,
   onRetry,
 }: TentaclePanelProps) {
+  const steps = stepsForMode(TENTACLE_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
-  const step = TENTACLE_STEPS[stepIndex]?.id ?? "category";
+  const step = steps[stepIndex]?.id ?? "category";
 
   const prompt = tentacleQuestionPrompt(
     categoryId,
@@ -92,7 +94,7 @@ export function TentaclePanel({
   const availableCategories = tentacleCategoriesForGameSize(gameSize);
 
   const goNext = () => {
-    setStepIndex((current) => Math.min(current + 1, TENTACLE_STEPS.length - 1));
+    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
   };
 
   const goBack = () => {
@@ -101,10 +103,7 @@ export function TentaclePanel({
 
   const stepper = (
     <ToolStepper
-      steps={buildSteps(
-        TENTACLE_STEPS,
-        deriveStepStates(TENTACLE_STEPS.length, stepIndex),
-      )}
+      steps={buildSteps(steps, deriveStepStates(steps.length, stepIndex))}
     />
   );
 
@@ -166,41 +165,51 @@ export function TentaclePanel({
               No named locations were found within 1 mile.
             </ResolvedReadout>
           )}
+          {awaitHiderAnswer && locationsReady && !loading && poiOptions.length > 0 ? (
+            <>
+              <p className="text-xs text-ink-dim">
+                Hiders pick a location or &quot;Not within reach&quot; in game
+                chat once you send this question.
+              </p>
+              <button
+                type="button"
+                onClick={onCommit}
+                disabled={!canCommit}
+                className="btn-primary w-full disabled:opacity-40"
+              >
+                Send to hiders
+              </button>
+            </>
+          ) : null}
         </ToolSection>
       ) : null}
 
       {step === "answer" ? (
         <>
-          {awaitHiderAnswer ? (
-            <p className="text-sm text-ink-muted">
-              Hiders pick a location or &quot;Not within reach&quot; in game chat.
-            </p>
-          ) : (
-            <TentacleAnswerPicker
-              categoryId={categoryId}
-              distanceUnit={distanceUnit}
-              searchRadiusMeters={searchRadiusMeters}
-              poiOptions={poiOptions}
-              selectedPoiId={selectedPoiId}
-              outOfReach={outOfReach}
-              onSelectPoi={onSelectPoi}
-              onOutOfReachChange={onOutOfReachChange}
-            />
-          )}
+          <TentacleAnswerPicker
+            categoryId={categoryId}
+            distanceUnit={distanceUnit}
+            searchRadiusMeters={searchRadiusMeters}
+            poiOptions={poiOptions}
+            selectedPoiId={selectedPoiId}
+            outOfReach={outOfReach}
+            onSelectPoi={onSelectPoi}
+            onOutOfReachChange={onOutOfReachChange}
+          />
           <button
             type="button"
             onClick={onCommit}
             disabled={!canCommit}
             className="btn-primary w-full disabled:opacity-40"
           >
-            {awaitHiderAnswer ? "Send to hiders" : "Add tentacle question"}
+            Add tentacle question
           </button>
         </>
       ) : null}
 
       <ToolWizardNav
         stepIndex={stepIndex}
-        stepCount={TENTACLE_STEPS.length}
+        stepCount={steps.length}
         onBack={goBack}
         onNext={goNext}
         canGoNext={

@@ -25,6 +25,7 @@ import { useRemoteSessionTimerSync } from "../hooks/useRemoteSessionTimerSync";
 import { useSessionEndedRedirect } from "../hooks/useSessionEndedRedirect";
 import { useSessionTimer } from "../hooks/useSessionTimer";
 import { ActiveThermometerWalkLayer } from "../components/map/ActiveThermometerWalkLayer";
+import { PendingQuestionLayer } from "../components/map/PendingQuestionLayer";
 import {
   useHidingZonesSync,
   usePendingQuestionsSync,
@@ -180,6 +181,11 @@ export function HiderMapScreen() {
                 : null
             }
           />
+          <PendingQuestionLayer
+            pendingQuestions={pendingQuestions}
+            gameArea={session.gameArea}
+            gameSize={session.gameSize ?? "medium"}
+          />
         </MapView>
       </div>
 
@@ -276,8 +282,14 @@ export function HiderMapScreen() {
         senderUid={uid ?? ""}
         senderRole="hider"
         isHider
-        onAnswerQuestion={async (pendingQuestionId, messageId, answer, selectedReply) => {
-          if (!sessionId) {
+        onAnswerQuestion={async (
+          pendingQuestionId,
+          messageId,
+          answer,
+          selectedReply,
+          deadlineExpired,
+        ) => {
+          if (!sessionId || !uid) {
             return;
           }
 
@@ -287,6 +299,13 @@ export function HiderMapScreen() {
             messageId,
             answer,
             selectedReply,
+            deadlineExpired
+              ? {
+                  deadlineExpired: true,
+                  senderUid: uid,
+                  senderRole: "hider",
+                }
+              : undefined,
           );
         }}
       />
