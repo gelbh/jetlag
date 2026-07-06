@@ -153,6 +153,7 @@ export function MapView({
         key={mapKey}
         center={center}
         zoom={zoom}
+        attributionControl={false}
         scrollWheelZoom={interactive}
         dragging={interactive}
         doubleClickZoom={interactive}

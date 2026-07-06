@@ -978,21 +978,12 @@ textarea {
   transition: none;
 }
 
-.leaflet-control-attribution {
-  font-size: 10px;
-  max-width: 45vw;
-}
-
 @media (max-width: 28rem) {
   .leaflet-bottom.leaflet-right {
     margin-bottom: calc(
       env(safe-area-inset-bottom) + var(--dock-height) + var(--chrome-gap-above-dock) +
         2.5rem
     ) !important;
-  }
-
-  .leaflet-control-attribution {
-    max-width: 38vw;
   }
 }
 
