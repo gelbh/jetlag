@@ -59,6 +59,64 @@ function parseFunctionUrls(deployOutput) {
   return urls;
 }
 
+const HTTP_FUNCTION_IDS = ["overpass", "vehicles", "transitland"];
+
+/** @returns {Record<string, string>} */
+function listFunctionUrlsFromCli(projectId) {
+  const result = spawnSync(
+    "npx",
+    ["firebase", "functions:list", "--project", projectId, "--json"],
+    { cwd: projectRoot, encoding: "utf8" },
+  );
+
+  if (result.status !== 0) {
+    console.warn(
+      "Could not list Cloud Functions for proxy URLs:",
+      result.stderr?.trim() || result.stdout?.trim() || "unknown error",
+    );
+    return {};
+  }
+
+  try {
+    const payload = JSON.parse(result.stdout);
+    const functions = payload.result ?? payload;
+    if (!Array.isArray(functions)) {
+      return {};
+    }
+
+    const urls = {};
+    for (const fn of functions) {
+      if (
+        typeof fn.id === "string" &&
+        typeof fn.uri === "string" &&
+        fn.uri.startsWith("https://") &&
+        HTTP_FUNCTION_IDS.includes(fn.id)
+      ) {
+        urls[fn.id] = fn.uri;
+      }
+    }
+    return urls;
+  } catch (error) {
+    console.warn(
+      "Could not parse firebase functions:list output:",
+      error instanceof Error ? error.message : error,
+    );
+    return {};
+  }
+}
+
+/** @param {string} deployOutput */
+function resolveFunctionUrls(deployOutput) {
+  const fromDeploy = parseFunctionUrls(deployOutput);
+  const needsFallback = HTTP_FUNCTION_IDS.some((id) => !fromDeploy[id]);
+  if (!needsFallback) {
+    return fromDeploy;
+  }
+
+  const fromList = listFunctionUrlsFromCli(firebaseProjectId);
+  return { ...fromList, ...fromDeploy };
+}
+
 function printProxyEnvInstructions(functionUrls) {
   const lines = ["\nSet these in Cloudflare Pages (and .env.local for dev):"];
 
@@ -84,9 +142,13 @@ function printProxyEnvInstructions(functionUrls) {
 
   if (!functionUrls.overpass && !functionUrls.vehicles) {
     lines.push(
-      "  (Function URLs were not found in deploy output — copy them from the Firebase console → Functions.)",
+      "  (Function URLs were not found — copy them from the Firebase console → Functions.)",
     );
   }
+
+  lines.push(
+    `\n  Firebase Console → Functions: https://console.firebase.google.com/project/${firebaseProjectId}/functions`,
+  );
 
   console.log(lines.join("\n"));
   printAppCheckRolloutInstructions();
@@ -124,6 +186,7 @@ function runFirebaseDeploy(onlyTargets) {
         firebaseProjectId,
         "--only",
         onlyTargets,
+        "--force",
       ],
       { cwd: projectRoot, env: process.env },
     );
@@ -175,7 +238,7 @@ async function main() {
   let result = await runFirebaseDeploy(onlyFull);
   if (result.code === 0) {
     console.log("Backend deploy complete (Firestore + Functions).");
-    printProxyEnvInstructions(parseFunctionUrls(result.output));
+    printProxyEnvInstructions(resolveFunctionUrls(result.output));
     return;
   }
 

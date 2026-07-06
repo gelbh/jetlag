@@ -60,7 +60,7 @@ service cloud.firestore {
         && request.auth.uid == sessionData(sessionId).hostUid;
     }
 
-    function joinRoleUnchanged(sessionId) {
+    function joinRoleUnchanged() {
       return !(request.auth.uid in resource.data.memberRoles)
         || resource.data.memberRoles[request.auth.uid]
           == request.resource.data.memberRoles[request.auth.uid];
@@ -112,7 +112,7 @@ service cloud.firestore {
         && request.resource.data.memberRoles is map
         && request.resource.data.memberRoles[request.auth.uid] is string
         && validPlayerRole(request.resource.data.memberRoles[request.auth.uid])
-        && joinRoleUnchanged(sessionId)
+        && joinRoleUnchanged()
       ) || (
         isSessionHost(sessionId)
         && request.resource.data.gameArea == resource.data.gameArea

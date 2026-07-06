@@ -59,6 +59,7 @@ export function MapTimerCluster({
     }, timerTickMs);
 
     return () => window.clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- restart interval when run anchor changes
   }, [timerHasStarted, timerState.runningSince, timerTickMs]);
 
   void tick;

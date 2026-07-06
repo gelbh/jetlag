@@ -33,6 +33,7 @@ export function HidingPeriodLabel({
     }, 1000);
 
     return () => window.clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- restart interval when run anchor changes
   }, [timerHasStarted, timerState.runningSince]);
 
   void tick;

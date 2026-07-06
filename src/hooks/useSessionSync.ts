@@ -60,6 +60,7 @@ export function useSessionSync() {
     );
 
     return unsubscribe;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
   }, [myUid, session?.id, setLastSyncError, setSession]);
 
   useEffect(() => {
@@ -127,6 +128,7 @@ export function useSessionSync() {
     );
 
     return unsubscribe;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
   }, [
     markAnnotationPulse,
     replaceAnnotations,
@@ -196,6 +198,7 @@ export function useSessionSync() {
       window.removeEventListener("online", handleOnline);
       window.clearInterval(intervalId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
   }, [queueFlushMs, session?.id, setLastSyncError, setPendingWrites]);
 
   useEffect(() => {

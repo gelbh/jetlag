@@ -278,7 +278,7 @@ export function useMatchingTool({
         }
       }
     },
-    [beginRequest, gameArea, isLatestRequest, usedMatchingCategories],
+    [beginRequest, gameArea, isLatestRequest],
   );
 
   const debouncedSeekerPoint = useDebouncedValue(matchingSeekerPoint, 400);

@@ -180,6 +180,7 @@ export function useMeasuringTool({
     }
 
     return measuringCoastSegments;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- coastlineContextVersion busts coastline cache
   }, [
     coastlineContextVersion,
     gameArea,
