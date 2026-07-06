@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { LatLngBounds, LatLngBoundsExpression } from "leaflet";
+import { AppLogo } from "../components/ui/AppLogo";
 import { MapView } from "../components/map/MapView";
 import { GameAreaMask } from "../components/map/GameAreaMask";
 import { MobileSheet } from "../components/ui/MobileSheet";
@@ -41,12 +42,12 @@ const TIER_OPTIONS: Array<{
   {
     value: "free",
     label: "Free",
-    summary: "All map tools and team sync. Public map data.",
+    summary: "All tools, public map data.",
   },
   {
     value: "premium",
     label: "Premium",
-    summary: "Live transit and faster map data. Host access code required once.",
+    summary: "Live transit, faster map loads. Host enters access code once.",
   },
 ];
 
@@ -211,7 +212,7 @@ export function CreateSession() {
       setError(
         nextError instanceof Error
           ? nextError.message
-          : "Unable to search for that place.",
+          : "Place search failed.",
       );
     } finally {
       setSearchLoading(false);
@@ -305,7 +306,7 @@ export function CreateSession() {
       setError(
         nextError instanceof Error
           ? nextError.message
-          : "Unable to create session.",
+          : "Couldn't create session.",
       );
     } finally {
       setLoading(false);
@@ -332,7 +333,8 @@ export function CreateSession() {
       </MapView>
 
       <MobileSheet maxHeightClassName="max-h-[min(78dvh,720px)]">
-        <p className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-brand-blue">
+        <AppLogo variant="lockup" size="md" />
+        <p className="mt-3 font-display text-xs font-semibold uppercase tracking-[0.14em] text-brand-blue">
           New game
         </p>
         <h1 className="mt-1 font-display text-2xl font-bold uppercase leading-tight tracking-tight text-ink">

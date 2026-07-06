@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { AppLogo } from "../components/ui/AppLogo";
 import { isPremiumSession } from "../domain/annotations";
 import {
   isValidSessionCode,
@@ -111,7 +112,7 @@ export function JoinSession() {
       setError(
         nextError instanceof Error
           ? nextError.message
-          : "Unable to join session.",
+          : "Couldn't join that session.",
       );
     } finally {
       setLoading(false);
@@ -127,7 +128,10 @@ export function JoinSession() {
         >
           ← Back
         </Link>
-        <p className="mt-6 font-display text-sm font-semibold uppercase tracking-[0.2em] text-brand-blue">
+        <div className="mt-6">
+          <AppLogo variant="lockup" size="md" />
+        </div>
+        <p className="mt-3 font-display text-sm font-semibold uppercase tracking-[0.2em] text-brand-blue">
           Join game
         </p>
         <h1 className="mt-2 font-display text-4xl font-bold uppercase leading-none tracking-tight text-ink">

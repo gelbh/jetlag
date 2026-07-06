@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { AppLogo } from "../components/ui/AppLogo";
 import { HudPlayIcon } from "../components/ui/HudIcons";
 import { LOCAL_SESSION_ID } from "../domain/annotations";
 import { useSessionStore } from "../state/sessionStore";
@@ -60,7 +61,7 @@ export function Home() {
       setContinueError(
         error instanceof Error
           ? error.message
-          : "Unable to continue that session.",
+          : "Couldn't continue that session.",
       );
     } finally {
       setContinuing(false);
@@ -70,17 +71,15 @@ export function Home() {
   return (
     <main className="home-poster home-terminal-accent flex min-h-[100dvh] flex-col justify-between px-5 py-8">
       <div className="space-y-3 pt-[max(1.25rem,env(safe-area-inset-top))]">
-        <p className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-brand-blue">
-          Jet Lag
-        </p>
+        <AppLogo variant="lockup" size="lg" />
         <h1 className="font-display text-balance text-[clamp(2.75rem,14vw,4.25rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
           Hide +
           <br />
           Seek
         </h1>
         <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
-          Live map tools for seekers and hiders — radar, zones, pins, and
-          question overlays synced to your team.
+          Mark the map for your team. Radar, zones, pins, and question tools
+          stay in sync.
         </p>
       </div>
 

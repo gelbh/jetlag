@@ -1,5 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Jetlag">
-  <rect width="192" height="192" rx="36" fill="#0E132C" />
-  <circle cx="96" cy="96" r="54" fill="none" stroke="#C55B40" stroke-width="12" />
-  <path d="M96 42v108M42 96h108" stroke="#4378B1" stroke-width="9" stroke-linecap="round" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Jetlag">
+  <rect width="512" height="512" rx="96" fill="#0E132C" />
+  <circle cx="256" cy="256" r="144" fill="none" stroke="#C55B40" stroke-width="32" />
+  <circle cx="256" cy="256" r="96" fill="none" stroke="#4378B1" stroke-width="20" />
+  <path d="M256 256 L357.6 154.4 A144 144 0 0 1 357.6 357.6 Z" fill="#E4B352" fill-opacity="0.35" />
+  <path d="M256 128v256M128 256h256" stroke="#4378B1" stroke-width="16" stroke-linecap="round" />
+  <circle cx="256" cy="256" r="20" fill="#F3F4F5" />
 </svg>
