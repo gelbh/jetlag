@@ -6,6 +6,10 @@ import { gameAreaToBoundingBox } from "./gameAreaBounds";
 
 export type GameSize = "small" | "medium" | "large";
 
+export const HIDING_ZONE_RADIUS_MIN_METERS = 100;
+export const HIDING_ZONE_RADIUS_MAX_METERS = 800;
+export const HIDING_ZONE_RADIUS_BUS_PRESET_METERS = 250;
+
 const SQ_METERS_PER_SQ_MILE = 2_589_988.110336;
 
 const GAME_SIZE_THRESHOLDS_SQ_MI = {
@@ -60,6 +64,48 @@ export function recommendGameSize(gameArea: GameArea): GameSize {
 
 export function hidingZoneRadiusMeters(gameSize: GameSize): number {
   return gameSize === "large" ? milesToMeters(0.5) : milesToMeters(0.25);
+}
+
+export function clampHidingZoneRadiusMeters(radiusMeters: number): number {
+  return Math.min(
+    HIDING_ZONE_RADIUS_MAX_METERS,
+    Math.max(HIDING_ZONE_RADIUS_MIN_METERS, radiusMeters),
+  );
+}
+
+export function effectiveHidingZoneRadiusMeters(session: {
+  gameSize?: GameSize;
+  hidingZoneRadiusMeters?: number;
+}): number {
+  if (typeof session.hidingZoneRadiusMeters === "number") {
+    return session.hidingZoneRadiusMeters;
+  }
+
+  return hidingZoneRadiusMeters(session.gameSize ?? "medium");
+}
+
+export function formatHidingZoneRadiusLabel(
+  radiusMeters: number,
+  unit: "metric" | "imperial" = "imperial",
+): string {
+  if (unit === "metric") {
+    if (radiusMeters >= 1000) {
+      return `${(radiusMeters / 1000).toFixed(1)} km`;
+    }
+
+    return `${Math.round(radiusMeters)} m`;
+  }
+
+  const miles = radiusMeters / milesToMeters(1);
+  if (Math.abs(miles - 0.25) < 0.01) {
+    return "¼ mile";
+  }
+
+  if (Math.abs(miles - 0.5) < 0.01) {
+    return "½ mile";
+  }
+
+  return `${miles.toFixed(2)} mi`;
 }
 
 export function gameSizeLabel(size: GameSize): {

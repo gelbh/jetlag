@@ -19,6 +19,12 @@ const DUBLIN_STATIONS = [
     lat: 53.32,
     lon: -6.22,
   },
+  {
+    id: 1004,
+    tags: { highway: "bus_stop", ref: "51" },
+    lat: 53.345,
+    lon: -6.255,
+  },
 ] as const;
 
 const DUBLIN_MUSEUMS = [
@@ -80,7 +86,8 @@ export function resolveOverpassResponse(
   if (
     normalized.includes("railway") ||
     normalized.includes("public_transport") ||
-    normalized.includes("station=")
+    normalized.includes("station=") ||
+    normalized.includes("bus_stop")
   ) {
     return fixtureBody(DUBLIN_STATIONS);
   }

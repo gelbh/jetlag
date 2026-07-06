@@ -8,6 +8,10 @@ import type {
 } from "../domain/transit";
 import { queryOverpass } from "./overpassClient";
 import {
+  buildTransitStopOverpassQuery,
+  transitStopDisplayName,
+} from "./transitStops";
+import {
   getOrFetchCached,
   staticTransitCacheKey,
 } from "./geographicFeatureCache";
@@ -18,19 +22,7 @@ const MAX_ROUTES = 80;
 type TransitBounds = ReturnType<typeof gameAreaToBoundingBox>;
 
 export function buildStaticTransitStopsQuery(bounds: TransitBounds): string {
-  const { south, west, north, east } = bounds;
-
-  return `
-    [out:json][timeout:25];
-    (
-      node["railway"="station"](${south},${west},${north},${east});
-      node["railway"="halt"](${south},${west},${north},${east});
-      node["public_transport"="stop_position"](${south},${west},${north},${east});
-      node["highway"="bus_stop"](${south},${west},${north},${east});
-      node["railway"="tram_stop"](${south},${west},${north},${east});
-    );
-    out body ${MAX_STOPS};
-  `;
+  return buildTransitStopOverpassQuery(bounds, MAX_STOPS, "body");
 }
 
 export function buildStaticTransitRoutesQuery(bounds: TransitBounds): string {
@@ -80,7 +72,7 @@ function parseStop(element: {
 
   return {
     id: String(element.id),
-    name: element.tags?.name ?? "Transit stop",
+    name: transitStopDisplayName(element.tags),
     lat: element.lat,
     lng: element.lon,
     mode: modeFromTags(element.tags),

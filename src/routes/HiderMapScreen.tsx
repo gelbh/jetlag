@@ -14,6 +14,7 @@ import {
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { ChatUnreadBadge } from "../components/chat/ChatUnreadBadge";
 import { HidingZonePanel } from "../components/hider/HidingZonePanel";
+import { effectiveHidingZoneRadiusMeters, formatHidingZoneRadiusLabel } from "../domain/gameSize";
 import { hidingZonePreviewPositions } from "../domain/hidingZone";
 import { MapStatusRail } from "../components/session/MapStatusRail";
 import {
@@ -54,13 +55,16 @@ import { useWakeLock } from "../hooks/useWakeLock";
 import { useSessionNotifications } from "../hooks/useSessionNotifications";
 import { useLiveActivitySync } from "../hooks/useLiveActivitySync";
 import { useSessionSync } from "../hooks/useSessionSync";
+import { useFirebaseAuthReady } from "../hooks/useFirebaseAuthReady";
+import { ensureRemoteSessionWriteAccess } from "../services/firestoreAnnotations";
 import { ensureAnonymousUser } from "../services/firebase";
 import { setPremiumApiContext } from "../services/premiumApiContext";
 import { useAnnotationStore, useMapStore, useSessionStore } from "../state/sessionStore";
 
 export function HiderMapScreen() {
   const session = useSessionStore((state) => state.session);
-  const myUid = useSessionStore((state) => state.myUid);
+  const setSession = useSessionStore((state) => state.setSession);
+  const setMyUid = useSessionStore((state) => state.setMyUid);
   const allAnnotations = useAnnotationStore((state) => state.annotations);
   const layerVisibility = useMapStore((state) => state.layerVisibility);
   const mapStyle = useMapStore((state) => state.mapStyle);
@@ -82,7 +86,8 @@ export function HiderMapScreen() {
   );
 
   const overlay = useMapOverlayState();
-  const [currentUid, setCurrentUid] = useState<string | null>(myUid);
+  const authReady = useFirebaseAuthReady(session);
+  const [authUid, setAuthUid] = useState<string | null>(null);
   const [recenterToken, setRecenterToken] = useState(0);
   const [truthReveal, setTruthReveal] = useState<HiderTruthRevealState | null>(
     null,
@@ -106,10 +111,20 @@ export function HiderMapScreen() {
   }, [session]);
 
   useEffect(() => {
-    void ensureAnonymousUser().then((user) => setCurrentUid(user.uid));
-  }, []);
+    void ensureAnonymousUser().then((user) => {
+      setAuthUid(user.uid);
+      setMyUid(user.uid);
+    });
+  }, [setMyUid]);
 
-  const uid = currentUid ?? myUid;
+  const uid = authReady ? authUid : null;
+  const hidingZoneRadius = session
+    ? effectiveHidingZoneRadiusMeters(session)
+    : effectiveHidingZoneRadiusMeters({ gameSize: "medium" });
+  const hidingZoneRadiusLabel = formatHidingZoneRadiusLabel(
+    hidingZoneRadius,
+    distanceUnit === "metric" ? "metric" : "imperial",
+  );
   const sessionId = session?.id;
   const annotations = useMemo(
     () =>
@@ -185,15 +200,28 @@ export function HiderMapScreen() {
     [postSystemMessage, sessionId, uid],
   );
 
+  const ensureHiderWriteAccess = useCallback(async () => {
+    if (!session || !uid) {
+      throw new Error("Sign in and rejoin the session as Hider, then try again.");
+    }
+
+    const updatedSession = await ensureRemoteSessionWriteAccess(session, uid);
+    if (updatedSession !== session) {
+      setSession(updatedSession, uid);
+    }
+  }, [session, setSession, uid]);
+
   const zoneTool = useHiderZoneTool({
     sessionId: sessionId ?? "",
     hiderUid: uid ?? "",
     gameArea: session?.gameArea ?? fallbackGameArea(),
-    gameSize: session?.gameSize ?? "medium",
+    radiusMeters: hidingZoneRadius,
     existingZone: myZone,
     postSystemMessage: postGameSystem,
     pauseTimer: timer.pause,
     resumeTimer: timer.start,
+    ensureWriteAccess: ensureHiderWriteAccess,
+    writesEnabled: authReady && Boolean(uid),
   });
 
   const searchViewportBounds = useCallback((): MapViewportBounds => {
@@ -347,7 +375,8 @@ export function HiderMapScreen() {
           <button
             type="button"
             onClick={openWizardExclusive}
-            className="btn-primary min-h-12 w-full flex-1 sm:max-w-xs"
+            disabled={!zoneTool.writesEnabled}
+            className="btn-primary min-h-12 w-full flex-1 sm:max-w-xs disabled:opacity-50"
           >
             {myZone ? "Change hiding zone" : "Set hiding zone"}
           </button>
@@ -355,7 +384,8 @@ export function HiderMapScreen() {
           <button
             type="button"
             onClick={() => void zoneTool.startMove()}
-            className="btn-secondary min-h-12 w-full flex-1 sm:max-w-xs"
+            disabled={!zoneTool.writesEnabled}
+            className="btn-secondary min-h-12 w-full flex-1 sm:max-w-xs disabled:opacity-50"
           >
             Play Move
           </button>
@@ -394,7 +424,7 @@ export function HiderMapScreen() {
         <div className="pointer-events-auto absolute inset-x-0 jl-panel-hider-wizard z-[var(--z-panel)] px-3">
           <div className="tool-panel-compact hud-panel mx-auto max-h-[min(40dvh,360px)] max-w-xl overflow-y-auto p-3">
             <HidingZonePanel
-              gameSize={session.gameSize ?? "medium"}
+              radiusLabel={hidingZoneRadiusLabel}
               query={zoneTool.query}
               onQueryChange={zoneTool.setQuery}
               stations={zoneTool.filteredStations}
@@ -411,6 +441,7 @@ export function HiderMapScreen() {
               saving={zoneTool.saving}
               error={zoneTool.error}
               moveMode={zoneTool.moveMode}
+              confirmDisabled={!zoneTool.writesEnabled}
             />
           </div>
         </div>

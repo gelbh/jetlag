@@ -74,6 +74,7 @@ export async function createRemoteSession(
   transitMetroId?: string,
   hostRole: PlayerRole = "seeker",
   gameSize: GameSize = "medium",
+  hidingZoneRadiusOverrideMeters?: number,
 ): Promise<SessionRecord> {
   let code = generateSessionCode();
   let attempts = 0;
@@ -90,7 +91,10 @@ export async function createRemoteSession(
 
   const sessionRef = doc(sessionsCollection());
   const createdAt = new Date().toISOString();
-  const radiusMeters = hidingZoneRadiusMeters(gameSize);
+  const radiusMeters =
+    typeof hidingZoneRadiusOverrideMeters === "number"
+      ? hidingZoneRadiusOverrideMeters
+      : hidingZoneRadiusMeters(gameSize);
   const session: SessionRecord = {
     id: sessionRef.id,
     code,
@@ -115,6 +119,7 @@ export async function createRemoteSession(
       transitMetroId,
       hostRole,
       gameSize,
+      radiusMeters,
     ),
     createdAtServer: serverTimestamp(),
   });

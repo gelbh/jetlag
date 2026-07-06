@@ -19,6 +19,11 @@ import { hidingZoneRadiusMeters } from "../domain/gameSize";
 import type { PlayerRole } from "../domain/playerRole";
 import { RolePicker } from "../components/session/RolePicker";
 import { GameSizePicker } from "../components/session/GameSizePicker";
+import {
+  defaultAdvancedSessionSettings,
+  resolveAdvancedHidingZoneRadiusMeters,
+} from "../domain/advancedSessionSettings";
+import { AdvancedSessionSettings } from "../components/session/AdvancedSessionSettings";
 import { useSessionStore, useMapStore } from "../state/sessionStore";
 import {
   isFirebaseConfigured,
@@ -87,6 +92,9 @@ export function CreateSession() {
   const [sessionTier, setSessionTier] = useState<SessionTier>("free");
   const [playerRole, setPlayerRole] = useState<PlayerRole>("seeker");
   const [gameSize, setGameSize] = useState<GameSize>("medium");
+  const [advancedSettings, setAdvancedSettings] = useState(() =>
+    defaultAdvancedSessionSettings("medium"),
+  );
   const [accessCode, setAccessCode] = useState("");
   const [hostHasAccessClaim, setHostHasAccessClaim] = useState(false);
   const metros = useMemo(() => listTransitMetros(), []);
@@ -320,6 +328,7 @@ export function CreateSession() {
             metroId,
             playerRole,
             gameSize,
+            resolveAdvancedHidingZoneRadiusMeters(gameSize, advancedSettings),
           ),
         );
         setSession(session, user.uid);
@@ -333,7 +342,9 @@ export function CreateSession() {
           memberUids: [],
           memberRoles: { local: playerRole },
           gameSize,
-          hidingZoneRadiusMeters: hidingZoneRadiusMeters(gameSize),
+          hidingZoneRadiusMeters:
+            resolveAdvancedHidingZoneRadiusMeters(gameSize, advancedSettings) ??
+            hidingZoneRadiusMeters(gameSize),
           tier: "free" as const,
           transitMetroId: metroId,
         };
@@ -514,7 +525,20 @@ export function CreateSession() {
         <GameSizePicker
           gameArea={previewGameArea}
           value={gameSize}
-          onChange={setGameSize}
+          onChange={(size) => {
+            setGameSize(size);
+            setAdvancedSettings((current) => ({
+              ...current,
+              hidingZoneRadiusMeters: hidingZoneRadiusMeters(size),
+            }));
+          }}
+          disabled={loading || verifyingAccess}
+        />
+
+        <AdvancedSessionSettings
+          gameSize={gameSize}
+          value={advancedSettings}
+          onChange={setAdvancedSettings}
           disabled={loading || verifyingAccess}
         />
         </div>

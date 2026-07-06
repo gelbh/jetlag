@@ -229,8 +229,12 @@ export function buildSessionDocument(
   transitMetroId?: string,
   hostRole: PlayerRole = "seeker",
   gameSize: GameSize = "medium",
+  hidingZoneRadiusOverrideMeters?: number,
 ): Record<string, unknown> {
-  const radiusMeters = hidingZoneRadiusMeters(gameSize);
+  const radiusMeters =
+    typeof hidingZoneRadiusOverrideMeters === "number"
+      ? hidingZoneRadiusOverrideMeters
+      : hidingZoneRadiusMeters(gameSize);
   const payload: Record<string, unknown> = {
     code,
     gameArea: serializeGameAreaForFirestore(gameArea),

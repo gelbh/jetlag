@@ -1,7 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
 import type { GameArea } from "../domain/annotations";
-import { hidingZoneRadiusMeters } from "../domain/gameSize";
-import type { GameSize } from "../domain/gameSize";
 import type { LatLngTuple } from "../domain/geometry";
 import { isPointInGameArea } from "../domain/geometry";
 import {
@@ -14,6 +12,7 @@ import {
   type TransitStation,
 } from "../domain/hidingZone";
 import type { MapViewportBounds } from "../domain/transitViewport";
+import { isFirestorePermissionDenied } from "../services/firestoreAnnotations";
 import { fetchTransitStationsForHidingZoneViewport } from "../services/matchingFeatures";
 import { writeHidingZone } from "../services/firestoreSessionExtras";
 
@@ -23,24 +22,27 @@ interface UseHiderZoneToolParams {
   sessionId: string;
   hiderUid: string;
   gameArea: GameArea;
-  gameSize: GameSize;
+  radiusMeters: number;
   existingZone: HidingZoneRecord | null;
   postSystemMessage: (text: string) => Promise<void>;
   pauseTimer: () => void;
   resumeTimer: () => void;
+  ensureWriteAccess?: () => Promise<void>;
+  writesEnabled?: boolean;
 }
 
 export function useHiderZoneTool({
   sessionId,
   hiderUid,
   gameArea,
-  gameSize,
+  radiusMeters,
   existingZone,
   postSystemMessage,
   pauseTimer,
   resumeTimer,
+  ensureWriteAccess,
+  writesEnabled = true,
 }: UseHiderZoneToolParams) {
-  const radiusMeters = hidingZoneRadiusMeters(gameSize);
   const [stations, setStations] = useState<TransitStation[]>([]);
   const [stationsLoading, setStationsLoading] = useState(false);
   const [stationsError, setStationsError] = useState<string | null>(null);
@@ -125,7 +127,7 @@ export function useHiderZoneTool({
   }, [resetWizardDraft]);
 
   const startMove = useCallback(async () => {
-    if (!existingZone) {
+    if (!existingZone || !writesEnabled || !hiderUid) {
       return;
     }
 
@@ -140,14 +142,38 @@ export function useHiderZoneTool({
     setMoveMode(true);
     setWizardOpen(true);
     resetWizardDraft();
-    await postSystemMessage(
-      "Move card played — timer paused. Seekers must stay put. Hider is relocating.",
-    );
-    await writeHidingZone(sessionId, {
-      ...existingZone,
-      moveInProgress: true,
-    });
-  }, [existingZone, pauseTimer, postSystemMessage, resetWizardDraft, sessionId]);
+
+    try {
+      await ensureWriteAccess?.();
+      await postSystemMessage(
+        "Move card played — timer paused. Seekers must stay put. Hider is relocating.",
+      );
+      await writeHidingZone(sessionId, {
+        ...existingZone,
+        hiderUid,
+        moveInProgress: true,
+      });
+    } catch (nextError) {
+      setMoveMode(false);
+      setWizardOpen(false);
+      setError(
+        isFirestorePermissionDenied(nextError)
+          ? "Couldn't save — rejoin the session as Hider and try again."
+          : nextError instanceof Error
+            ? nextError.message
+            : "Couldn't save hiding zone.",
+      );
+    }
+  }, [
+    ensureWriteAccess,
+    existingZone,
+    hiderUid,
+    pauseTimer,
+    postSystemMessage,
+    resetWizardDraft,
+    sessionId,
+    writesEnabled,
+  ]);
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
@@ -182,6 +208,11 @@ export function useHiderZoneTool({
   );
 
   const confirmZone = useCallback(async () => {
+    if (!writesEnabled || !hiderUid) {
+      setError("Sign in and rejoin the session as Hider, then try again.");
+      return;
+    }
+
     let center: LatLngTuple | null = null;
     let stationId = "";
     let stationName = "";
@@ -221,6 +252,7 @@ export function useHiderZoneTool({
     setError(null);
 
     try {
+      await ensureWriteAccess?.();
       const circle = buildHidingZoneCircle(center, radiusMeters);
       const confirmedAt = new Date().toISOString();
       const zone: HidingZoneRecord = {
@@ -274,14 +306,17 @@ export function useHiderZoneTool({
       resetWizardDraft();
     } catch (nextError) {
       setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Couldn't save hiding zone.",
+        isFirestorePermissionDenied(nextError)
+          ? "Couldn't save — rejoin the session as Hider and try again."
+          : nextError instanceof Error
+            ? nextError.message
+            : "Couldn't save hiding zone.",
       );
     } finally {
       setSaving(false);
     }
   }, [
+    ensureWriteAccess,
     existingZone,
     hiderUid,
     manualCenter,
@@ -293,6 +328,7 @@ export function useHiderZoneTool({
     resumeTimer,
     selectedStation,
     sessionId,
+    writesEnabled,
   ]);
 
   const setManualModeEnabled = useCallback((enabled: boolean) => {
@@ -333,5 +369,6 @@ export function useHiderZoneTool({
     hasZone: Boolean(existingZone),
     hasPlacement,
     locked: Boolean(existingZone) && !wizardOpen,
+    writesEnabled,
   };
 }

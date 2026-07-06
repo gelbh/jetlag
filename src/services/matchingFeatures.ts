@@ -1,8 +1,5 @@
 import type { GameArea } from "../domain/annotations";
-import {
-  dedupeTransitStations,
-  type TransitStation,
-} from "../domain/hidingZone";
+import type { TransitStation } from "../domain/hidingZone";
 import {
   distanceBetweenPoints,
   gameAreaToBoundingBox,
@@ -35,6 +32,12 @@ import {
 } from "./landmassFeatures";
 import type { MapViewportBounds } from "../domain/transitViewport";
 import { queryOverpass } from "./overpassClient";
+import {
+  buildTransitStopOverpassQuery,
+  overpassTransitStopsToMatchingFeatures,
+  parseOverpassTransitStops,
+  type OverpassTransitStopElement,
+} from "./transitStops";
 import {
   getOrFetchCached,
   geographicCacheKey,
@@ -330,77 +333,44 @@ async function fetchStreetPathFeaturesInArea(
   return parseMatchingFeatures(payload.elements, gameArea, "street_or_path");
 }
 
-function buildStationQueryForBbox(bbox: BoundingBox): string {
-  const formatted = formatOverpassBbox(bbox);
-
-  return `
-    [out:json][timeout:25];
-  (
-    node["railway"~"^(station|halt|stop)$"]["name"](${formatted});
-    node["public_transport"="stop_position"]["train"="yes"]["name"](${formatted});
-    node["station"="subway"]["name"](${formatted});
-    node["station"="light_rail"]["name"](${formatted});
-  );
-  out center 200;
-  `;
-}
-
 function buildStationQuery(gameArea: GameArea): string {
-  return buildStationQueryForBbox(
+  return buildTransitStopOverpassQuery(
     matchingSearchBoundingBox(gameArea, "station_name_length"),
   );
 }
 
-function matchingFeaturesToTransitStations(
-  features: MatchingFeature[],
+function overpassStopsToMatchingFeatures(
+  elements: readonly OverpassTransitStopElement[],
   gameArea: GameArea,
-): TransitStation[] {
-  return dedupeTransitStations(
-    features
-      .filter((feature) => isPointInGameArea(feature.point, gameArea))
-      .map((feature) => ({
-        id: feature.id,
-        name: feature.name,
-        lat: feature.point[0],
-        lng: feature.point[1],
-      })),
-  );
-}
-
-async function fetchStationFeaturesInBbox(
-  bbox: BoundingBox,
-  gameArea: GameArea,
-): Promise<MatchingFeature[]> {
-  const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-    buildStationQueryForBbox(bbox),
-  );
-
-  return parseMatchingFeatures(
-    payload.elements,
-    gameArea,
-    "station_name_length",
+): MatchingFeature[] {
+  return overpassTransitStopsToMatchingFeatures(elements, gameArea).map(
+    (station) => ({
+      id: station.id,
+      name: station.name,
+      point: station.point,
+      inPlayArea: true,
+    }),
   );
 }
 
 async function fetchStationFeaturesInArea(
   gameArea: GameArea,
 ): Promise<MatchingFeature[]> {
-  const payload = await queryOverpass<{ elements: OverpassElement[] }>(
+  const payload = await queryOverpass<{ elements: OverpassTransitStopElement[] }>(
     buildStationQuery(gameArea),
   );
 
-  return parseMatchingFeatures(
-    payload.elements,
-    gameArea,
-    "station_name_length",
-  );
+  return overpassStopsToMatchingFeatures(payload.elements, gameArea);
 }
 
 export async function fetchTransitStationsForHidingZone(
   gameArea: GameArea,
 ): Promise<TransitStation[]> {
-  const features = await fetchStationFeaturesInArea(gameArea);
-  return matchingFeaturesToTransitStations(features, gameArea);
+  const payload = await queryOverpass<{ elements: OverpassTransitStopElement[] }>(
+    buildStationQuery(gameArea),
+  );
+
+  return parseOverpassTransitStops(payload.elements, gameArea);
 }
 
 export async function fetchTransitStationsForHidingZoneViewport(
@@ -414,8 +384,11 @@ export async function fetchTransitStationsForHidingZoneViewport(
     return [];
   }
 
-  const features = await fetchStationFeaturesInBbox(clipped, gameArea);
-  return matchingFeaturesToTransitStations(features, gameArea);
+  const payload = await queryOverpass<{ elements: OverpassTransitStopElement[] }>(
+    buildTransitStopOverpassQuery(clipped),
+  );
+
+  return parseOverpassTransitStops(payload.elements, gameArea);
 }
 
 function stationNameLength(name: string): number {

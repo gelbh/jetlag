@@ -32,6 +32,19 @@ test.describe("hider flows", () => {
     await cleanup();
   });
 
+  test("loads bus stops by ref in the station picker", async ({ browser }) => {
+    const { hostPage, guestPage, cleanup } =
+      await createMultiplayerContexts(browser);
+
+    const { code } = await createHostSession(hostPage);
+    await joinAsRole(guestPage, code, "hider");
+
+    await openHidingZoneWizard(guestPage);
+    await expect(guestPage.getByRole("button", { name: "51" })).toBeVisible();
+
+    await cleanup();
+  });
+
   test("confirms a hiding zone at a transit station", async ({ browser }) => {
     const { hostPage, guestPage, cleanup } =
       await createMultiplayerContexts(browser);

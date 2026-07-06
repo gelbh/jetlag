@@ -1,8 +1,7 @@
 import type { TransitStation } from "../../domain/hidingZone";
-import { gameSizeLabel, type GameSize } from "../../domain/gameSize";
 
 interface HidingZonePanelProps {
-  gameSize: GameSize;
+  radiusLabel: string;
   query: string;
   onQueryChange: (value: string) => void;
   stations: readonly TransitStation[];
@@ -19,10 +18,11 @@ interface HidingZonePanelProps {
   saving: boolean;
   error: string | null;
   moveMode: boolean;
+  confirmDisabled?: boolean;
 }
 
 export function HidingZonePanel({
-  gameSize,
+  radiusLabel,
   query,
   onQueryChange,
   stations,
@@ -39,9 +39,8 @@ export function HidingZonePanel({
   saving,
   error,
   moveMode,
+  confirmDisabled = false,
 }: HidingZonePanelProps) {
-  const radiusLabel = gameSizeLabel(gameSize).hidingRadiusLabel;
-
   return (
     <div className="space-y-3">
       <p className="text-sm text-ink-muted">
@@ -125,7 +124,7 @@ export function HidingZonePanel({
       <button
         type="button"
         onClick={onConfirm}
-        disabled={!hasPlacement || saving}
+        disabled={!hasPlacement || saving || confirmDisabled}
         className="btn-primary w-full disabled:opacity-50"
       >
         {saving ? "Saving…" : moveMode ? "Confirm new zone" : "Confirm hiding zone"}

@@ -17,20 +17,6 @@ export const LOCAL_GAME_AREA = {
   ],
 };
 
-/** Nominatim bounding box for County Dublin, Ireland (marketing screenshots). */
-export const COUNTY_DUBLIN_GAME_AREA = {
-  type: "Polygon" as const,
-  coordinates: [
-    [
-      [-6.5468919, 53.1782636],
-      [-5.9945041, 53.1782636],
-      [-5.9945041, 53.6347254],
-      [-6.5468919, 53.6347254],
-      [-6.5468919, 53.1782636],
-    ],
-  ],
-};
-
 const OVERPASS_API_HOSTS = new Set([
   "overpass-api.de",
   "maps.mail.ru",
@@ -44,10 +30,6 @@ const TILE_PNG = Buffer.from(
 
 export interface BlockExternalAssetsOptions {
   overpassProfile?: OverpassFixtureProfile;
-  /** When false, map tiles load from the network (for marketing screenshots). */
-  stubMapTiles?: boolean;
-  /** When false, Nominatim geocoding hits the network (for marketing screenshots). */
-  stubGeocoding?: boolean;
 }
 
 function extractOverpassQuery(postData: string): string {
@@ -82,8 +64,6 @@ export async function blockExternalAssets(
   options: BlockExternalAssetsOptions = {},
 ) {
   const overpassProfile = options.overpassProfile ?? "default";
-  const stubMapTiles = options.stubMapTiles ?? true;
-  const stubGeocoding = options.stubGeocoding ?? true;
 
   await page.route("**/*", async (route) => {
     const url = route.request().url();
@@ -104,7 +84,6 @@ export async function blockExternalAssets(
     const { hostname, pathname } = parsed;
 
     if (
-      stubGeocoding &&
       hostname === "nominatim.openstreetmap.org" &&
       pathname.includes("/search")
     ) {
@@ -125,10 +104,9 @@ export async function blockExternalAssets(
     }
 
     if (
-      stubMapTiles &&
-      (hostname === "tile.openstreetmap.org" ||
-        hostname.endsWith(".basemaps.cartocdn.com") ||
-        hostname.includes("arcgisonline.com"))
+      hostname === "tile.openstreetmap.org" ||
+      hostname.endsWith(".basemaps.cartocdn.com") ||
+      hostname.includes("arcgisonline.com")
     ) {
       await route.fulfill({
         status: 200,
@@ -176,18 +154,6 @@ export async function prepareE2EPage(
 ) {
   await applyPageCaptureInit(page);
   await blockExternalAssets(page, options);
-}
-
-export async function prepareMarketingPage(
-  page: Page,
-  options: BlockExternalAssetsOptions = {},
-) {
-  await applyPageCaptureInit(page);
-  await blockExternalAssets(page, {
-    ...options,
-    stubMapTiles: false,
-    stubGeocoding: false,
-  });
 }
 
 export async function dismissMapOnboarding(page: Page) {
