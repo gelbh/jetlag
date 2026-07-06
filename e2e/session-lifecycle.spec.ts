@@ -63,7 +63,7 @@ test.describe("session lifecycle", () => {
     await page.goto("/create");
     await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
     await page.getByRole("button", { name: "Find place" }).click();
-    await expect(page.getByText(/sq mi play area/i)).toBeVisible({
+    await expect(page.getByText(/sq mi play area/i).first()).toBeVisible({
       timeout: 10_000,
     });
 

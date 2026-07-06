@@ -2,6 +2,7 @@ import { type Page, expect } from "@playwright/test";
 import {
   clickMapAt,
   clickMapCenter,
+  clickToolDockButton,
   expectMapHasAnnotations,
   selectDrawTool,
 } from "./base";
@@ -27,7 +28,7 @@ export const PENDING_QUESTION_TEXT =
   /Are you within|closer to or further|hotter or colder|nearest to|same as my nearest/i;
 
 export async function completeRadarSolo(page: Page) {
-  await page.getByRole("button", { name: "Radar" }).click();
+  await clickToolDockButton(page, "Radar");
   await advanceWizard(page);
   await clickMapCenter(page);
   await advanceWizard(page);
@@ -37,7 +38,7 @@ export async function completeRadarSolo(page: Page) {
 }
 
 export async function sendRadarToHiders(page: Page) {
-  await page.getByRole("button", { name: "Radar" }).click();
+  await clickToolDockButton(page, "Radar");
   await advanceWizard(page);
   await clickMapCenter(page);
   await advanceWizard(page);
@@ -48,7 +49,7 @@ export async function sendRadarToHiders(page: Page) {
 }
 
 export async function completeMatchingSolo(page: Page) {
-  await page.getByRole("button", { name: "Matching" }).click();
+  await clickToolDockButton(page, "Matching");
   await page.locator("select.field-input").selectOption("museum");
   await advanceWizard(page);
   await clickMapCenter(page);
@@ -63,7 +64,7 @@ export async function completeMatchingSolo(page: Page) {
 }
 
 export async function sendMatchingToHiders(page: Page) {
-  await page.getByRole("button", { name: "Matching" }).click();
+  await clickToolDockButton(page, "Matching");
   await page.locator("select.field-input").selectOption("museum");
   await advanceWizard(page);
   await clickMapCenter(page);
@@ -78,7 +79,7 @@ export async function sendMatchingToHiders(page: Page) {
 }
 
 export async function completeMeasuringSolo(page: Page) {
-  await page.getByRole("button", { name: "Measuring" }).click();
+  await clickToolDockButton(page, "Measuring");
   await page.locator("select.field-input").selectOption("custom_place");
   await advanceWizard(page);
   await clickMapCenter(page);
@@ -92,7 +93,7 @@ export async function completeMeasuringSolo(page: Page) {
 }
 
 export async function sendMeasuringToHiders(page: Page) {
-  await page.getByRole("button", { name: "Measuring" }).click();
+  await clickToolDockButton(page, "Measuring");
   await page.locator("select.field-input").selectOption("custom_place");
   await advanceWizard(page);
   await clickMapCenter(page);
@@ -107,7 +108,7 @@ export async function sendMeasuringToHiders(page: Page) {
 }
 
 export async function completeThermometerSolo(page: Page) {
-  await page.getByRole("button", { name: "Thermometer" }).click();
+  await clickToolDockButton(page, "Thermometer");
   await advanceWizard(page);
   await clickMapAt(page, 0.4, 0.5);
   await clickMapAt(page, 0.6, 0.5);
@@ -118,7 +119,7 @@ export async function completeThermometerSolo(page: Page) {
 }
 
 export async function sendThermometerToHiders(page: Page) {
-  await page.getByRole("button", { name: "Thermometer" }).click();
+  await clickToolDockButton(page, "Thermometer");
   await advanceWizard(page);
   await clickMapAt(page, 0.4, 0.5);
   await clickMapAt(page, 0.6, 0.5);
@@ -130,7 +131,7 @@ export async function sendThermometerToHiders(page: Page) {
 }
 
 export async function completeTentacleSolo(page: Page) {
-  await page.getByRole("button", { name: "Tentacles" }).click();
+  await clickToolDockButton(page, "Tentacles");
   await advanceWizard(page);
   await clickMapCenter(page);
   await waitForWizardNext(page);
@@ -144,7 +145,7 @@ export async function completeTentacleSolo(page: Page) {
 }
 
 export async function sendTentacleToHiders(page: Page) {
-  await page.getByRole("button", { name: "Tentacles" }).click();
+  await clickToolDockButton(page, "Tentacles");
   await advanceWizard(page);
   await clickMapCenter(page);
   await waitForWizardNext(page);
@@ -186,7 +187,13 @@ export async function redoAnnotation(page: Page) {
 }
 
 export async function openSettings(page: Page) {
-  await page.getByRole("button", { name: "Open settings" }).click();
+  const settingsButton = page.getByRole("button", { name: "Open settings" });
+  if (await settingsButton.isVisible().catch(() => false)) {
+    await settingsButton.click();
+  } else {
+    await page.getByRole("button", { name: "More tools" }).click();
+    await page.getByRole("menuitem", { name: "Setup" }).click();
+  }
   await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
 }
 
@@ -194,11 +201,18 @@ export async function openChat(page: Page) {
   await dismissActiveToolPanel(page);
   const dockChat = page.getByRole("button", { name: "Open chat" });
   if (await dockChat.isVisible().catch(() => false)) {
-    await dockChat.click({ force: true });
+    await dockChat.click();
     return;
   }
 
-  await page.getByRole("button", { name: "Chat", exact: true }).click({ force: true });
+  const chatTab = page.getByRole("button", { name: "Chat", exact: true });
+  if (await chatTab.isVisible().catch(() => false)) {
+    await chatTab.click();
+    return;
+  }
+
+  await page.getByRole("button", { name: "More tools" }).click();
+  await page.getByRole("menuitem", { name: "Chat" }).click();
 }
 
 export async function closePanel(page: Page) {
