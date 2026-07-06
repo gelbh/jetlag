@@ -1,7 +1,7 @@
 import type { SessionMessageRecord } from "./sessionChat";
 
 export function messageFingerprint(message: SessionMessageRecord): string {
-  return `${message.id}|${message.status ?? ""}|${message.selectedReply ?? ""}|${message.text ?? ""}`;
+  return `${message.id}|${message.status ?? ""}|${message.selectedReply ?? ""}`;
 }
 
 export function isUnreadEligibleMessage(

@@ -54,6 +54,15 @@ describe("messageFingerprint", () => {
 
     expect(messageFingerprint(pending)).not.toBe(messageFingerprint(answered));
   });
+
+  it("does not embed social message text", () => {
+    const message = socialMessage({ text: "Secret hello" });
+
+    expect(messageFingerprint(message)).not.toContain("Secret hello");
+    expect(messageFingerprint(message)).toBe(
+      messageFingerprint(socialMessage({ text: "Different text" })),
+    );
+  });
 });
 
 describe("isUnreadEligibleMessage", () => {
