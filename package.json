@@ -22,6 +22,9 @@
     "test:ci": "npm run test:coverage && npm run test:functions",
     "emulators:start": "firebase emulators:start --only auth,firestore",
     "deploy": "node scripts/deploy-production.mjs",
+    "verify:app-check": "node scripts/verify-app-check-readiness.mjs",
+    "print:cloudflare-app-check-env": "node scripts/print-cloudflare-app-check-env.mjs",
+    "app-check:rollout": "node scripts/app-check-rollout-checklist.mjs",
     "prepare": "husky"
   },
   "dependencies": {

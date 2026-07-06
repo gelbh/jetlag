@@ -141,7 +141,7 @@ async function requireOverpassProxyAccess(req, res) {
 }
 
 export const grantAccess = onCall(
-  { secrets: [accessCodeSecret] },
+  { secrets: [accessCodeSecret], enforceAppCheck: true },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");

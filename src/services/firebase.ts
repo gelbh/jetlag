@@ -96,6 +96,24 @@ function getFirebaseApp(): FirebaseApp {
   return app;
 }
 
+function enableAppCheckDebugProviderIfDev(): void {
+  if (!import.meta.env.DEV || import.meta.env.MODE === "test") {
+    return;
+  }
+
+  const debugToken = import.meta.env.VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN?.trim();
+  const globalScope = globalThis as typeof globalThis & {
+    FIREBASE_APPCHECK_DEBUG_TOKEN?: boolean | string;
+  };
+
+  if (debugToken) {
+    globalScope.FIREBASE_APPCHECK_DEBUG_TOKEN = debugToken;
+    return;
+  }
+
+  globalScope.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+}
+
 function initializeAppCheckIfConfigured(firebaseApp: FirebaseApp): void {
   const siteKey = import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY?.trim();
   if (!siteKey) {
@@ -105,6 +123,8 @@ function initializeAppCheckIfConfigured(firebaseApp: FirebaseApp): void {
   if (appCheck) {
     return;
   }
+
+  enableAppCheckDebugProviderIfDev();
 
   appCheck = initializeAppCheck(firebaseApp, {
     provider: new ReCaptchaV3Provider(siteKey),
