@@ -23,6 +23,11 @@ import type { MapTool } from "./mapToolTypes";
 import type { GameSize } from "./gameSize";
 import type { MemberRoles } from "./playerRole";
 import type { ThermometerDistanceOptionMiles } from "./thermometerQuestions";
+import type {
+  CustomMatchingAreasByLevel,
+  SessionCustomCategory,
+  SessionCustomLocationPin,
+} from "./sessionCustomContent";
 
 export type { GameSize } from "./gameSize";
 export type { MemberRoles, PlayerRole } from "./playerRole";
@@ -130,6 +135,7 @@ export interface SessionRecord {
   memberUids: string[];
   memberRoles?: MemberRoles;
   gameSize?: GameSize;
+  distanceUnit?: DistanceUnit;
   hidingZoneRadiusMeters?: number;
   hidingPeriodMinutes?: number;
   photoAnswerDeadlineMinutes?: number;
@@ -137,8 +143,12 @@ export interface SessionRecord {
   disabledTools?: readonly Exclude<MapTool, "none">[];
   tentaclesEnabled?: boolean;
   thermometerPresetMiles?: readonly ThermometerDistanceOptionMiles[];
+  thermometerPresetMeters?: readonly number[];
   tentacleMediumRadiusMeters?: number;
   tentacleLargeRadiusMeters?: number;
+  customMatchingAreas?: CustomMatchingAreasByLevel;
+  customCategories?: readonly SessionCustomCategory[];
+  customLocationPins?: readonly SessionCustomLocationPin[];
   tier?: SessionTier;
   transitMetroId?: string;
   endedAt?: string;

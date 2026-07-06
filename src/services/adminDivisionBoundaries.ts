@@ -12,6 +12,7 @@ import {
   type LatLngTuple,
 } from "../domain/geometry";
 import { queryOverpass } from "./overpassClient";
+import { parseMatchingAreaGeoJson } from "./matchingAreaGeoJson";
 import {
   adminDivisionCacheKey,
   getOrFetchCached,
@@ -280,7 +281,12 @@ export function buildAdminDivisionQuery(
 export async function fetchAdminDivisionFeaturesInArea(
   gameArea: GameArea,
   adminLevel: number,
+  customAreasJson?: string,
 ): Promise<AdminDivisionFeature[]> {
+  if (customAreasJson) {
+    return parseMatchingAreaGeoJson(customAreasJson, gameArea, adminLevel);
+  }
+
   return getOrFetchCached(
     adminDivisionCacheKey(gameArea, adminLevel),
     async () => {

@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import type { GameArea } from "../../domain/annotations";
+import type { DistanceUnit } from "../../domain/distance";
 import type { GameSize } from "../../domain/gameSize";
 import {
   GAME_SIZE_OPTIONS,
   formatPlayAreaSummary,
+  gameAreaSquareKilometers,
   gameAreaSquareMiles,
   gameSizeLabel,
+  playAreaValueForUnit,
   recommendGameSize,
 } from "../../domain/gameSize";
 import { gameSizeRulesSummary } from "../../domain/gameSizeRules";
@@ -14,6 +17,7 @@ interface GameSizePickerProps {
   gameArea: GameArea | null;
   value: GameSize;
   onChange: (size: GameSize) => void;
+  distanceUnit?: DistanceUnit;
   disabled?: boolean;
 }
 
@@ -21,19 +25,23 @@ export function GameSizePicker({
   gameArea,
   value,
   onChange,
+  distanceUnit = "imperial",
   disabled,
 }: GameSizePickerProps) {
   const recommended = useMemo(
-    () => (gameArea ? recommendGameSize(gameArea) : null),
-    [gameArea],
+    () => (gameArea ? recommendGameSize(gameArea, distanceUnit) : null),
+    [gameArea, distanceUnit],
   );
   const playAreaSummary = useMemo(() => {
     if (!gameArea) {
       return null;
     }
 
-    return formatPlayAreaSummary(gameAreaSquareMiles(gameArea));
-  }, [gameArea]);
+    return formatPlayAreaSummary(
+      playAreaValueForUnit(gameArea, distanceUnit),
+      distanceUnit,
+    );
+  }, [gameArea, distanceUnit]);
   const [userOverrode, setUserOverrode] = useState(false);
 
   useEffect(() => {
@@ -41,11 +49,17 @@ export function GameSizePicker({
       return;
     }
 
-    const next = recommendGameSize(gameArea);
+    const next = recommendGameSize(gameArea, distanceUnit);
     if (next !== value) {
       onChange(next);
     }
-  }, [gameArea, onChange, userOverrode, value]);
+  }, [gameArea, distanceUnit, onChange, userOverrode, value]);
+
+  const compactArea = gameArea
+    ? distanceUnit === "metric"
+      ? gameAreaSquareKilometers(gameArea) < 25
+      : gameAreaSquareMiles(gameArea) < 10
+    : false;
 
   return (
     <div className="space-y-2">
@@ -59,8 +73,8 @@ export function GameSizePicker({
       </div>
       <div role="radiogroup" aria-label="Game size" className="space-y-1.5">
         {GAME_SIZE_OPTIONS.map((size) => {
-          const meta = gameSizeLabel(size);
-          const rules = gameSizeRulesSummary(size);
+          const meta = gameSizeLabel(size, distanceUnit);
+          const rules = gameSizeRulesSummary(size, distanceUnit);
           const isRecommended = recommended === size && gameArea !== null;
 
           return (
@@ -100,7 +114,7 @@ export function GameSizePicker({
           );
         })}
       </div>
-      {gameArea && gameAreaSquareMiles(gameArea) < 10 ? (
+      {compactArea ? (
         <p className="text-xs text-ink-dim">
           Compact area — good for a short local game.
         </p>

@@ -1,3 +1,4 @@
+import type { DistanceUnit } from "./distance";
 import type { SessionRecord } from "./annotations";
 import type { GameSize } from "./gameSize";
 import {
@@ -8,9 +9,17 @@ import {
   answerDeadlineMs,
   hidingPeriodMinutes,
   tentacleRadiusMeters,
+  thermometerPresetsMetersForGameSize,
   thermometerPresetsMilesForGameSize,
 } from "./gameSizeRules";
+import { sessionDistanceUnit } from "./sessionDistanceUnit";
+import { resolveDistanceUnit } from "./distancePresets";
 import type { ThermometerDistanceOptionMiles } from "./thermometerQuestions";
+import type {
+  CustomMatchingAreasByLevel,
+  SessionCustomCategory,
+  SessionCustomLocationPin,
+} from "./sessionCustomContent";
 import {
   ALL_CONFIGURABLE_TOOLS,
   clampHidingPeriodMinutes,
@@ -33,14 +42,19 @@ export interface AdvancedSessionSettingsValue {
   tentaclesEnabledOverride: boolean;
   customThermometerPresetsEnabled: boolean;
   thermometerPresetMiles: readonly ThermometerDistanceOptionMiles[];
+  thermometerPresetMeters: readonly number[];
   customTentacleMediumRadiusEnabled: boolean;
   tentacleMediumRadiusMeters: number;
   customTentacleLargeRadiusEnabled: boolean;
   tentacleLargeRadiusMeters: number;
+  customMatchingAreas: CustomMatchingAreasByLevel;
+  customCategories: readonly SessionCustomCategory[];
+  customLocationPins: readonly SessionCustomLocationPin[];
 }
 
 export type SessionRulesPatch = Pick<
   SessionRecord,
+  | "distanceUnit"
   | "hidingZoneRadiusMeters"
   | "hidingPeriodMinutes"
   | "photoAnswerDeadlineMinutes"
@@ -48,16 +62,22 @@ export type SessionRulesPatch = Pick<
   | "disabledTools"
   | "tentaclesEnabled"
   | "thermometerPresetMiles"
+  | "thermometerPresetMeters"
   | "tentacleMediumRadiusMeters"
   | "tentacleLargeRadiusMeters"
+  | "customMatchingAreas"
+  | "customCategories"
+  | "customLocationPins"
 >;
 
 export function defaultAdvancedSessionSettings(
   gameSize: GameSize,
+  unit: DistanceUnit = "imperial",
 ): AdvancedSessionSettingsValue {
+  const resolved = resolveDistanceUnit(unit);
   return {
     customHidingZoneRadiusEnabled: false,
-    hidingZoneRadiusMeters: hidingZoneRadiusMeters(gameSize),
+    hidingZoneRadiusMeters: hidingZoneRadiusMeters(gameSize, resolved),
     customHidingPeriodEnabled: false,
     hidingPeriodMinutes: hidingPeriodMinutes(gameSize),
     customPhotoAnswerDeadlineEnabled: false,
@@ -70,10 +90,25 @@ export function defaultAdvancedSessionSettings(
     tentaclesEnabledOverride: false,
     customThermometerPresetsEnabled: false,
     thermometerPresetMiles: thermometerPresetsMilesForGameSize(gameSize),
+    thermometerPresetMeters: thermometerPresetsMetersForGameSize(
+      gameSize,
+      resolved,
+    ),
     customTentacleMediumRadiusEnabled: false,
-    tentacleMediumRadiusMeters: tentacleRadiusMeters("museum", gameSize),
+    tentacleMediumRadiusMeters: tentacleRadiusMeters(
+      "museum",
+      gameSize,
+      resolved,
+    ),
     customTentacleLargeRadiusEnabled: false,
-    tentacleLargeRadiusMeters: tentacleRadiusMeters("metro_line", "large"),
+    tentacleLargeRadiusMeters: tentacleRadiusMeters(
+      "metro_line",
+      "large",
+      resolved,
+    ),
+    customMatchingAreas: {},
+    customCategories: [],
+    customLocationPins: [],
   };
 }
 
@@ -81,16 +116,20 @@ export function advancedSettingsFromSession(
   session: SessionRecord,
 ): AdvancedSessionSettingsValue {
   const gameSize = session.gameSize ?? "medium";
-  const defaults = defaultAdvancedSessionSettings(gameSize);
-  const defaultRadius = hidingZoneRadiusMeters(gameSize);
+  const unit = sessionDistanceUnit(session);
+  const defaults = defaultAdvancedSessionSettings(gameSize, unit);
+  const defaultRadius = hidingZoneRadiusMeters(gameSize, unit);
   const hasCustomRadius =
     typeof session.hidingZoneRadiusMeters === "number" &&
     Math.abs(session.hidingZoneRadiusMeters - defaultRadius) >= 1;
 
-  const availableThermoPresets = thermometerPresetsMilesForGameSize(gameSize);
-  const sessionThermoPresets = session.thermometerPresetMiles?.filter(
-    (miles): miles is ThermometerDistanceOptionMiles =>
-      availableThermoPresets.includes(miles as ThermometerDistanceOptionMiles),
+  const availableThermoMeters = thermometerPresetsMetersForGameSize(
+    gameSize,
+    unit,
+  );
+  const sessionThermoMeters = session.thermometerPresetMeters?.filter(
+    (meters) =>
+      availableThermoMeters.some((preset) => Math.abs(preset - meters) < 5),
   );
 
   return {
@@ -112,11 +151,12 @@ export function advancedSettingsFromSession(
       defaults.questionAnswerDeadlineMinutes,
     disabledTools: session.disabledTools ?? [],
     tentaclesEnabledOverride: session.tentaclesEnabled === true,
-    customThermometerPresetsEnabled: (sessionThermoPresets?.length ?? 0) > 0,
-    thermometerPresetMiles:
-      sessionThermoPresets?.length
-        ? sessionThermoPresets
-        : defaults.thermometerPresetMiles,
+    customThermometerPresetsEnabled: (sessionThermoMeters?.length ?? 0) > 0,
+    thermometerPresetMiles: defaults.thermometerPresetMiles,
+    thermometerPresetMeters:
+      sessionThermoMeters?.length
+        ? sessionThermoMeters
+        : defaults.thermometerPresetMeters,
     customTentacleMediumRadiusEnabled:
       typeof session.tentacleMediumRadiusMeters === "number",
     tentacleMediumRadiusMeters:
@@ -125,14 +165,19 @@ export function advancedSettingsFromSession(
       typeof session.tentacleLargeRadiusMeters === "number",
     tentacleLargeRadiusMeters:
       session.tentacleLargeRadiusMeters ?? defaults.tentacleLargeRadiusMeters,
+    customMatchingAreas: session.customMatchingAreas ?? {},
+    customCategories: session.customCategories ?? [],
+    customLocationPins: session.customLocationPins ?? [],
   };
 }
 
 export function sessionRulesPatchFromAdvancedSettings(
   gameSize: GameSize,
   settings: AdvancedSessionSettingsValue,
+  unit: DistanceUnit = "imperial",
 ): SessionRulesPatch {
   const patch: SessionRulesPatch = {};
+  const resolved = resolveDistanceUnit(unit);
 
   if (settings.customHidingZoneRadiusEnabled) {
     patch.hidingZoneRadiusMeters = clampHidingZoneRadiusMeters(
@@ -167,12 +212,12 @@ export function sessionRulesPatchFromAdvancedSettings(
   }
 
   if (settings.customThermometerPresetsEnabled) {
-    const available = thermometerPresetsMilesForGameSize(gameSize);
-    const selected = settings.thermometerPresetMiles.filter((miles) =>
-      available.includes(miles),
+    const available = thermometerPresetsMetersForGameSize(gameSize, resolved);
+    const selected = settings.thermometerPresetMeters.filter((meters) =>
+      available.some((preset) => Math.abs(preset - meters) < 5),
     );
     if (selected.length > 0) {
-      patch.thermometerPresetMiles = selected;
+      patch.thermometerPresetMeters = selected;
     }
   }
 
@@ -188,6 +233,18 @@ export function sessionRulesPatchFromAdvancedSettings(
     );
   }
 
+  if (Object.keys(settings.customMatchingAreas).length > 0) {
+    patch.customMatchingAreas = { ...settings.customMatchingAreas };
+  }
+
+  if (settings.customCategories.length > 0) {
+    patch.customCategories = [...settings.customCategories];
+  }
+
+  if (settings.customLocationPins.length > 0) {
+    patch.customLocationPins = [...settings.customLocationPins];
+  }
+
   return patch;
 }
 
@@ -196,13 +253,14 @@ export function mergeSessionRulesPatch(
   patch: SessionRulesPatch,
 ): SessionRecord {
   const gameSize = session.gameSize ?? "medium";
+  const unit = sessionDistanceUnit(session);
 
   return {
     ...session,
     hidingZoneRadiusMeters:
       patch.hidingZoneRadiusMeters ??
       session.hidingZoneRadiusMeters ??
-      hidingZoneRadiusMeters(gameSize),
+      hidingZoneRadiusMeters(gameSize, unit),
     hidingPeriodMinutes:
       patch.hidingPeriodMinutes !== undefined
         ? patch.hidingPeriodMinutes
@@ -227,6 +285,10 @@ export function mergeSessionRulesPatch(
       patch.thermometerPresetMiles !== undefined
         ? patch.thermometerPresetMiles
         : session.thermometerPresetMiles,
+    thermometerPresetMeters:
+      patch.thermometerPresetMeters !== undefined
+        ? patch.thermometerPresetMeters
+        : session.thermometerPresetMeters,
     tentacleMediumRadiusMeters:
       patch.tentacleMediumRadiusMeters !== undefined
         ? patch.tentacleMediumRadiusMeters
@@ -235,6 +297,18 @@ export function mergeSessionRulesPatch(
       patch.tentacleLargeRadiusMeters !== undefined
         ? patch.tentacleLargeRadiusMeters
         : session.tentacleLargeRadiusMeters,
+    customMatchingAreas:
+      patch.customMatchingAreas !== undefined
+        ? patch.customMatchingAreas
+        : session.customMatchingAreas,
+    customCategories:
+      patch.customCategories !== undefined
+        ? patch.customCategories
+        : session.customCategories,
+    customLocationPins:
+      patch.customLocationPins !== undefined
+        ? patch.customLocationPins
+        : session.customLocationPins,
   };
 }
 
@@ -276,30 +350,34 @@ export function toggleToolInSettings(
 
 export function toggleThermometerPresetInSettings(
   settings: AdvancedSessionSettingsValue,
-  miles: ThermometerDistanceOptionMiles,
+  presetMeters: number,
   gameSize: GameSize,
+  unit: DistanceUnit = "imperial",
 ): AdvancedSessionSettingsValue {
-  const available = thermometerPresetsMilesForGameSize(gameSize);
-  if (!available.includes(miles)) {
+  const available = thermometerPresetsMetersForGameSize(gameSize, unit);
+  if (!available.some((preset) => Math.abs(preset - presetMeters) < 5)) {
     return settings;
   }
 
-  const current = new Set(settings.thermometerPresetMiles);
-  if (current.has(miles)) {
+  const current = new Set(settings.thermometerPresetMeters);
+  if ([...current].some((value) => Math.abs(value - presetMeters) < 5)) {
     if (current.size <= 1) {
       return settings;
     }
-    current.delete(miles);
-  } else {
-    current.add(miles);
+    const next = [...current].filter(
+      (value) => Math.abs(value - presetMeters) >= 5,
+    );
+    return {
+      ...settings,
+      customThermometerPresetsEnabled: true,
+      thermometerPresetMeters: next,
+    };
   }
-
-  const nextPresets = available.filter((preset) => current.has(preset));
 
   return {
     ...settings,
     customThermometerPresetsEnabled: true,
-    thermometerPresetMiles: nextPresets,
+    thermometerPresetMeters: [...current, presetMeters].sort((a, b) => a - b),
   };
 }
 
@@ -315,17 +393,28 @@ export function sessionRecordFromAdvancedSettings(
     | "disabledTools"
     | "tentaclesEnabled"
     | "thermometerPresetMiles"
+    | "thermometerPresetMeters"
     | "tentacleMediumRadiusMeters"
     | "tentacleLargeRadiusMeters"
+    | "customMatchingAreas"
+    | "customCategories"
+    | "customLocationPins"
   >,
+  unit: DistanceUnit = "imperial",
 ): SessionRecord {
-  const patch = sessionRulesPatchFromAdvancedSettings(gameSize, settings);
+  const patch = sessionRulesPatchFromAdvancedSettings(
+    gameSize,
+    settings,
+    unit,
+  );
   const merged = mergeSessionRulesPatch(
     {
       ...base,
       gameSize,
+      distanceUnit: unit,
       hidingZoneRadiusMeters:
-        patch.hidingZoneRadiusMeters ?? hidingZoneRadiusMeters(gameSize),
+        patch.hidingZoneRadiusMeters ??
+        hidingZoneRadiusMeters(gameSize, unit),
     },
     patch,
   );

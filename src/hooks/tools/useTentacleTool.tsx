@@ -161,6 +161,10 @@ export function useTentacleTool({
           center,
           searchRadiusMeters,
           categoryId,
+          {
+            customCategories: sessionRules.customCategories,
+            customLocationPins: sessionRules.customLocationPins,
+          },
         );
 
         if (!isLatestRequest(requestId)) {
@@ -187,7 +191,7 @@ export function useTentacleTool({
         }
       }
     },
-    [beginRequest, isLatestRequest, searchRadiusMeters],
+    [beginRequest, isLatestRequest, searchRadiusMeters, sessionRules],
   );
 
   const debouncedTentacleCenter = useDebouncedValue(tentacleCenter, 400);

@@ -111,6 +111,7 @@ function MatchingToolRunner({
   onToolsChange,
   awaitHiderAnswer,
   submitToolQuestion,
+  sessionRules,
   sessionId,
   senderUid,
   ...sharedProps
@@ -118,6 +119,7 @@ function MatchingToolRunner({
   const matchingTool = useMatchingTool({
     active: true,
     pendingQuestions: sharedProps.pendingQuestions,
+    sessionRules,
     ...sharedProps,
     awaitHiderAnswer,
     sessionId,
@@ -138,6 +140,7 @@ function MeasuringToolRunner({
   onToolsChange,
   awaitHiderAnswer,
   submitToolQuestion,
+  sessionRules,
   sessionId,
   senderUid,
   ...sharedProps
@@ -145,6 +148,7 @@ function MeasuringToolRunner({
   const measuringTool = useMeasuringTool({
     active: true,
     pendingQuestions: sharedProps.pendingQuestions,
+    sessionRules,
     ...sharedProps,
     awaitHiderAnswer,
     sessionId,

@@ -1,6 +1,13 @@
 import type { AnnotationType } from "./annotations";
 import type { MapTool } from "./mapToolTypes";
+import type { DistanceUnit } from "./distance";
 import { milesToMeters } from "./distance";
+import {
+  resolveDistanceUnit,
+  tentacleLargeRadiusMeters,
+  tentacleMediumRadiusMeters,
+  thermometerPresetsMetersForGameSizeAndUnit,
+} from "./distancePresets";
 import type { GameSize } from "./gameSize";
 import type { ThermometerDistanceOptionMiles } from "./thermometerQuestions";
 import type { TentacleLocationCategoryId } from "./tentacleQuestions";
@@ -65,16 +72,21 @@ export function thermometerPresetsMilesForGameSize(
 
 export function thermometerPresetsMetersForGameSize(
   gameSize: GameSize,
+  unit: DistanceUnit = "imperial",
 ): number[] {
-  return thermometerPresetsMilesForGameSize(gameSize).map(milesToMeters);
+  return thermometerPresetsMetersForGameSizeAndUnit(
+    gameSize,
+    resolveDistanceUnit(unit),
+  );
 }
 
 export function isThermometerPresetAvailableForGameSize(
   gameSize: GameSize,
   distanceMeters: number,
+  unit: DistanceUnit = "imperial",
 ): boolean {
-  const tolerance = 1;
-  return thermometerPresetsMetersForGameSize(gameSize).some(
+  const tolerance = 5;
+  return thermometerPresetsMetersForGameSize(gameSize, unit).some(
     (preset) => Math.abs(preset - distanceMeters) < tolerance,
   );
 }
@@ -86,18 +98,21 @@ export function tentacleEnabledForGameSize(gameSize: GameSize): boolean {
 export function tentacleRadiusMeters(
   categoryId: TentacleGameSizeCategoryId,
   gameSize: GameSize,
+  unit: DistanceUnit = "imperial",
 ): number {
+  const resolved = resolveDistanceUnit(unit);
   if (
     gameSize === "large" &&
     (TENTACLE_LARGE_CATEGORIES as readonly string[]).includes(categoryId)
   ) {
-    return milesToMeters(15);
+    return tentacleLargeRadiusMeters(resolved);
   }
-  return milesToMeters(1);
+  return tentacleMediumRadiusMeters(resolved);
 }
 
 export function tentacleOptionsForGameSize(
   gameSize: GameSize,
+  unit: DistanceUnit = "imperial",
 ): readonly TentacleOptionForGameSize[] {
   if (!tentacleEnabledForGameSize(gameSize)) {
     return [];
@@ -105,7 +120,7 @@ export function tentacleOptionsForGameSize(
 
   const medium = TENTACLE_MEDIUM_CATEGORIES.map((categoryId) => ({
     categoryId,
-    radiusMeters: tentacleRadiusMeters(categoryId, gameSize),
+    radiusMeters: tentacleRadiusMeters(categoryId, gameSize, unit),
   }));
 
   if (gameSize !== "large") {
@@ -114,7 +129,7 @@ export function tentacleOptionsForGameSize(
 
   const large = TENTACLE_LARGE_CATEGORIES.map((categoryId) => ({
     categoryId,
-    radiusMeters: tentacleRadiusMeters(categoryId, gameSize),
+    radiusMeters: tentacleRadiusMeters(categoryId, gameSize, unit),
   }));
 
   return [...medium, ...large];
@@ -153,12 +168,16 @@ export function answerDeadlineMs(
   return QUESTION_ANSWER_DEADLINE_MS;
 }
 
-export function gameSizeRulesSummary(gameSize: GameSize): {
+export function gameSizeRulesSummary(
+  gameSize: GameSize,
+  unit: DistanceUnit = "imperial",
+): {
   hidingPeriodLabel: string;
   hidingZoneLabel: string;
   tentacleLabel: string;
   thermometerMaxLabel: string;
 } {
+  const resolved = resolveDistanceUnit(unit);
   const hidingMinutes = hidingPeriodMinutes(gameSize);
   const hidingHours = hidingMinutes / 60;
   const hidingPeriodLabel =
@@ -167,24 +186,42 @@ export function gameSizeRulesSummary(gameSize: GameSize): {
       : `${hidingHours} hr hiding period`;
 
   const hidingZoneLabel =
-    gameSize === "large" ? "½ mi hiding zones" : "¼ mi hiding zones";
+    resolved === "metric"
+      ? gameSize === "large"
+        ? "800 m hiding zones"
+        : "400 m hiding zones"
+      : gameSize === "large"
+        ? "½ mi hiding zones"
+        : "¼ mi hiding zones";
 
   const tentacleLabel = tentacleEnabledForGameSize(gameSize)
-    ? gameSize === "large"
-      ? "Tentacles @ 1 mi and 15 mi"
-      : "Tentacles @ 1 mi"
+    ? resolved === "metric"
+      ? gameSize === "large"
+        ? "Tentacles @ 2 km and 25 km"
+        : "Tentacles @ 2 km"
+      : gameSize === "large"
+        ? "Tentacles @ 1 mi and 15 mi"
+        : "Tentacles @ 1 mi"
     : "No tentacles";
 
-  const thermoMiles = thermometerPresetsMilesForGameSize(gameSize);
-  const maxThermo = thermoMiles[thermoMiles.length - 1];
+  const thermoPresets = thermometerPresetsMetersForGameSize(gameSize, resolved);
+  const maxThermo = thermoPresets[thermoPresets.length - 1] ?? 0;
   const thermometerMaxLabel =
-    maxThermo === 0.5
-      ? "Thermo up to ½ mi"
-      : maxThermo === 3
-        ? "Thermo up to 3 mi"
-        : maxThermo === 10
+    resolved === "metric"
+      ? maxThermo >= 50_000
+        ? "Thermo up to 50 km"
+        : maxThermo >= 25_000
+          ? "Thermo up to 25 km"
+          : maxThermo >= 10_000
+            ? "Thermo up to 10 km"
+            : "Thermo up to 1 km"
+      : maxThermo >= milesToMeters(50)
+        ? "Thermo up to 50 mi"
+        : maxThermo >= milesToMeters(10)
           ? "Thermo up to 10 mi"
-          : "Thermo up to 50 mi";
+          : maxThermo >= milesToMeters(3)
+            ? "Thermo up to 3 mi"
+            : "Thermo up to ½ mi";
 
   return {
     hidingPeriodLabel,

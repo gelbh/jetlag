@@ -44,7 +44,8 @@ export type MeasuringFromKind =
   | "hospital"
   | "library"
   | "foreign_consulate"
-  | "custom_place";
+  | "custom_place"
+  | `custom:${string}`;
 
 export type MeasuringLocationCategory = Exclude<
   MeasuringFromKind,

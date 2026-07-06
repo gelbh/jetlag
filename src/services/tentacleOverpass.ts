@@ -1,5 +1,13 @@
 import { distanceBetweenPoints, type LatLngTuple } from "../domain/geometry";
 import type { TentaclePoi } from "../domain/annotations";
+import type {
+  SessionCustomCategory,
+  SessionCustomLocationPin,
+} from "../domain/sessionCustomContent";
+import {
+  manualPinsWithinRadius,
+  tentacleOverpassSelectorsForCategory,
+} from "../domain/sessionCustomCatalog";
 import {
   tentacleCategoryOverpassSelectors,
   type TentacleExtendedCategoryId,
@@ -27,6 +35,7 @@ export function buildTentacleOverpassQuery(
   center: LatLngTuple,
   radiusMeters: number,
   categoryId: TentacleExtendedCategoryId,
+  customCategories: readonly SessionCustomCategory[] = [],
 ): string {
   if (categoryId === "metro_line") {
     return `
@@ -38,7 +47,10 @@ export function buildTentacleOverpassQuery(
     `;
   }
 
-  const clauses = tentacleCategoryOverpassSelectors(categoryId).flatMap(
+  const clauses = tentacleOverpassSelectorsForCategory(
+    categoryId,
+    customCategories,
+  ).flatMap(
     (selector) => {
       const filter = selectorToFilter(selector);
 
@@ -192,15 +204,35 @@ export async function fetchTentaclePois(
   center: LatLngTuple,
   radiusMeters: number,
   categoryId: TentacleExtendedCategoryId,
+  options?: {
+    customCategories?: readonly SessionCustomCategory[];
+    customLocationPins?: readonly SessionCustomLocationPin[];
+  },
 ): Promise<TentaclePoi[]> {
-  return getOrFetchCached(
+  const customCategories = options?.customCategories ?? [];
+  const overpassPois = await getOrFetchCached(
     tentaclePoisCacheKey(center, radiusMeters, categoryId),
     async () => {
       const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-        buildTentacleOverpassQuery(center, radiusMeters, categoryId),
+        buildTentacleOverpassQuery(
+          center,
+          radiusMeters,
+          categoryId,
+          customCategories,
+        ),
       );
 
       return parseTentaclePois(payload.elements, categoryId);
     },
   );
+
+  const pinPois = manualPinsWithinRadius(
+    options?.customLocationPins ?? [],
+    center,
+    radiusMeters,
+    categoryId,
+  );
+
+  const seen = new Set(overpassPois.map((poi) => poi.id));
+  return [...overpassPois, ...pinPois.filter((poi) => !seen.has(poi.id))];
 }

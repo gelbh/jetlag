@@ -96,6 +96,7 @@ import { preloadGameAreaCaches } from "../services/gameAreaPreload";
 import { startSeaLevelBackgroundSampling } from "../services/seaLevelProgressive";
 import { setPremiumApiContext } from "../services/premiumApiContext";
 import { useFirebaseAuthReady } from "../hooks/useFirebaseAuthReady";
+import { useSessionDistanceUnit } from "../hooks/useSessionDistanceUnit";
 import {
   useAnnotationStore,
   useMapStore,
@@ -138,8 +139,7 @@ export function MapScreen() {
   const setShowCurrentLocation = useMapStore(
     (state) => state.setShowCurrentLocation,
   );
-  const distanceUnit = useMapStore((state) => state.distanceUnit);
-  const setDistanceUnit = useMapStore((state) => state.setDistanceUnit);
+  const distanceUnit = useSessionDistanceUnit();
   const mapStyle = useMapStore((state) => state.mapStyle);
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
@@ -740,6 +740,7 @@ export function MapScreen() {
     const patch = sessionRulesPatchFromAdvancedSettings(
       gameSize,
       draftAdvancedSettings,
+      session.distanceUnit ?? "imperial",
     );
     const merged = mergeSessionRulesPatch(session, patch);
 
@@ -759,6 +760,21 @@ export function MapScreen() {
     setSession,
     uid,
   ]);
+
+  const handleDistanceUnitChange = useCallback(
+    async (unit: typeof distanceUnit) => {
+      if (!session || !gameRulesEditable) {
+        return;
+      }
+
+      const merged = { ...session, distanceUnit: unit };
+      if (session.id !== LOCAL_SESSION_ID && isRemote) {
+        await updateSessionRules(session.id, { distanceUnit: unit });
+      }
+      setSession(merged, uid ?? undefined);
+    },
+    [distanceUnit, gameRulesEditable, isRemote, session, setSession, uid],
+  );
 
   if (!session?.gameArea) {
     return <Navigate to="/create" replace />;
@@ -1059,7 +1075,10 @@ export function MapScreen() {
         layerVisibility={layerVisibility}
         onLayerVisibilityChange={setLayerVisibility}
         distanceUnit={distanceUnit}
-        onDistanceUnitChange={setDistanceUnit}
+        onDistanceUnitChange={(unit) => {
+          void handleDistanceUnitChange(unit);
+        }}
+        distanceUnitEditable={gameRulesEditable}
         mapStyle={mapStyle}
         onMapStyleChange={setMapStyle}
         locationError={liveLocationError}

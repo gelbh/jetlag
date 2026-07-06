@@ -11,14 +11,20 @@ import {
   intersectBoundingBoxes,
   type BoundingBox,
 } from "../domain/gameAreaBounds";
+import type { CustomMatchingAreasByLevel } from "../domain/sessionCustomContent";
+import type { SessionCustomCategory } from "../domain/sessionCustomContent";
+import { customMatchingAreasCacheSuffix } from "./matchingAreaGeoJson";
 import {
   adminLevelForMatchingCategory,
   getMatchingCategory,
   matchingCategoryLabel,
-  matchingCategoryOverpassSelectors,
   matchingUsesExpandedFeatureSearch,
   type MatchingCategoryId,
 } from "../domain/matchingQuestions";
+import {
+  matchingOverpassSelectorsForCategory,
+  resolveMatchingCategory,
+} from "../domain/sessionCustomCatalog";
 import {
   adminDivisionToMatchingFeature,
   classifyAdminDivisionAtPoint,
@@ -55,13 +61,32 @@ export interface MatchingFeature {
 /** How far beyond the play-area bbox to search for nearest-point categories. */
 export const MATCHING_NEAR_FEATURE_SEARCH_BUFFER_METERS = 50_000;
 
+export interface MatchingFetchOptions {
+  customMatchingAreas?: CustomMatchingAreasByLevel;
+  customCategories?: readonly SessionCustomCategory[];
+}
+
 function matchingFeaturesCacheKey(
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
+  options?: MatchingFetchOptions,
 ): string {
-  const category = getMatchingCategory(categoryId);
+  const category =
+    resolveMatchingCategory(categoryId, options?.customCategories ?? []) ??
+    getMatchingCategory(categoryId);
   const scope = matchingUsesExpandedFeatureSearch(category) ? "near" : "in";
-  return geographicCacheKey(gameArea, `matching:${scope}:${categoryId}`);
+  const adminLevel = adminLevelForMatchingCategory(categoryId);
+  const customSuffix =
+    adminLevel !== null
+      ? customMatchingAreasCacheSuffix(
+          options?.customMatchingAreas as Record<number, string> | undefined,
+          adminLevel,
+        )
+      : "";
+  return geographicCacheKey(
+    gameArea,
+    `matching:${scope}:${categoryId}${customSuffix}`,
+  );
 }
 
 type OverpassElement = {
@@ -75,9 +100,12 @@ type OverpassElement = {
 function matchingSearchBoundingBox(
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
+  customCategories: readonly SessionCustomCategory[] = [],
 ): BoundingBox {
   const bbox = gameAreaToBoundingBox(gameArea);
-  const category = getMatchingCategory(categoryId);
+  const category =
+    resolveMatchingCategory(categoryId, customCategories) ??
+    getMatchingCategory(categoryId);
 
   if (!matchingUsesExpandedFeatureSearch(category)) {
     return bbox;
@@ -94,8 +122,11 @@ function buildMatchingFeaturesQuery(
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
   selectors: readonly string[],
+  customCategories: readonly SessionCustomCategory[] = [],
 ): string {
-  const bbox = formatOverpassBbox(matchingSearchBoundingBox(gameArea, categoryId));
+  const bbox = formatOverpassBbox(
+    matchingSearchBoundingBox(gameArea, categoryId, customCategories),
+  );
   const clauses = selectors.flatMap((selector) => [
     `node${selector}(${bbox});`,
     `way${selector}(${bbox});`,
@@ -177,10 +208,12 @@ export function parseMatchingFeatures(
   elements: OverpassElement[],
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
+  customCategories: readonly SessionCustomCategory[] = [],
 ): MatchingFeature[] {
-  const includeOutsidePlayArea = matchingUsesExpandedFeatureSearch(
-    getMatchingCategory(categoryId),
-  );
+  const category =
+    resolveMatchingCategory(categoryId, customCategories) ??
+    getMatchingCategory(categoryId);
+  const includeOutsidePlayArea = matchingUsesExpandedFeatureSearch(category);
   const seen = new Set<string>();
 
   return elements
@@ -294,17 +327,26 @@ export function pickMatchingFeatureForAnchor(
 async function fetchOverpassMatchingFeaturesInArea(
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
+  customCategories: readonly SessionCustomCategory[] = [],
 ): Promise<MatchingFeature[]> {
-  const selectors = matchingCategoryOverpassSelectors(categoryId);
+  const selectors = matchingOverpassSelectorsForCategory(
+    categoryId,
+    customCategories,
+  );
   if (selectors.length === 0) {
     return [];
   }
 
   const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-    buildMatchingFeaturesQuery(gameArea, categoryId, selectors),
+    buildMatchingFeaturesQuery(gameArea, categoryId, selectors, customCategories),
   );
 
-  return parseMatchingFeatures(payload.elements, gameArea, categoryId);
+  return parseMatchingFeatures(
+    payload.elements,
+    gameArea,
+    categoryId,
+    customCategories,
+  );
 }
 
 function buildStreetPathQuery(gameArea: GameArea): string {
@@ -427,15 +469,20 @@ function buildStationNameLengthFeatures(
 async function fetchAdminMatchingFeaturesInArea(
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
+  customMatchingAreas?: CustomMatchingAreasByLevel,
 ): Promise<MatchingFeature[]> {
   const adminLevel = adminLevelForMatchingCategory(categoryId);
   if (adminLevel === null) {
     return [];
   }
 
+  const customJson =
+    customMatchingAreas?.[adminLevel as keyof CustomMatchingAreasByLevel];
+
   const divisions = await fetchAdminDivisionFeaturesInArea(
     gameArea,
     adminLevel,
+    customJson,
   );
   return divisions.map(adminDivisionToMatchingFeature);
 }
@@ -476,15 +523,24 @@ async function fetchLandmassMatchingFeaturesInArea(
 export async function fetchMatchingFeaturesInArea(
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
+  options?: MatchingFetchOptions,
 ): Promise<MatchingFeature[]> {
+  const customCategories = options?.customCategories ?? [];
+
   return getOrFetchCached(
-    matchingFeaturesCacheKey(gameArea, categoryId),
+    matchingFeaturesCacheKey(gameArea, categoryId, options),
     async () => {
-      const category = getMatchingCategory(categoryId);
+      const category =
+        resolveMatchingCategory(categoryId, customCategories) ??
+        getMatchingCategory(categoryId);
 
       switch (category.resolver) {
         case "overpassPoint":
-          return fetchOverpassMatchingFeaturesInArea(gameArea, categoryId);
+          return fetchOverpassMatchingFeaturesInArea(
+            gameArea,
+            categoryId,
+            customCategories,
+          );
         case "streetPath":
           return fetchStreetPathFeaturesInArea(gameArea);
         case "stationNameLength":
@@ -492,13 +548,19 @@ export async function fetchMatchingFeaturesInArea(
             await fetchStationFeaturesInArea(gameArea),
           );
         case "reverseGeocodeAdmin":
-          return fetchAdminMatchingFeaturesInArea(gameArea, categoryId);
+          return fetchAdminMatchingFeaturesInArea(
+            gameArea,
+            categoryId,
+            options?.customMatchingAreas,
+          );
         case "landmass":
           return fetchLandmassMatchingFeaturesInArea(gameArea);
         case "transitLine":
           return fetchStationFeaturesInArea(gameArea);
-        default:
-          return [];
+        default: {
+          const _exhaustive: never = category.resolver;
+          return _exhaustive;
+        }
       }
     },
     { persistEmpty: false },
@@ -509,8 +571,12 @@ export async function findNearestMatchingFeature(
   anchor: LatLngTuple,
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
+  options?: MatchingFetchOptions,
 ): Promise<(MatchingFeature & { distanceMeters: number }) | null> {
-  const category = getMatchingCategory(categoryId);
+  const customCategories = options?.customCategories ?? [];
+  const category =
+    resolveMatchingCategory(categoryId, customCategories) ??
+    getMatchingCategory(categoryId);
 
   if (category.resolver === "reverseGeocodeAdmin") {
     const adminLevel = adminLevelForMatchingCategory(categoryId);
@@ -521,6 +587,7 @@ export async function findNearestMatchingFeature(
     const divisions = await fetchAdminDivisionFeaturesInArea(
       gameArea,
       adminLevel,
+      options?.customMatchingAreas?.[adminLevel as keyof CustomMatchingAreasByLevel],
     );
     const division = classifyAdminDivisionAtPoint(anchor, divisions);
     if (!division) {
@@ -548,7 +615,11 @@ export async function findNearestMatchingFeature(
     };
   }
 
-  const features = await fetchMatchingFeaturesInArea(gameArea, categoryId);
+  const features = await fetchMatchingFeaturesInArea(
+    gameArea,
+    categoryId,
+    options,
+  );
   const nearest = pickNearestMatchingFeature(anchor, features);
   return nearest;
 }

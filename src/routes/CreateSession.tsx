@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import type { LatLngBounds, LatLngBoundsExpression } from "leaflet";
 import { AppLogo } from "../components/ui/AppLogo";
 import { CreateSessionMapPane } from "../components/session/CreateSessionMapPane";
@@ -20,8 +20,8 @@ import {
   placeToGameArea,
 } from "../domain/geometry";
 import { generateLocalCode } from "../domain/session";
-import type { GameSize } from "../domain/gameSize";
-import { hidingZoneRadiusMeters } from "../domain/gameSize";
+import type { DistanceUnit } from "../domain/distance";
+import { hidingZoneRadiusMeters, type GameSize } from "../domain/gameSize";
 import type { PlayerRole } from "../domain/playerRole";
 import { RolePicker } from "../components/session/RolePicker";
 import { GameSizePicker } from "../components/session/GameSizePicker";
@@ -52,6 +52,11 @@ import { getCurrentPosition } from "../services/geolocation";
 import { grantAccess, hasAccessClaim } from "../services/accessControl";
 import { setPremiumApiContext } from "../services/premiumApiContext";
 import { parseBoundaryFile } from "../services/kmzImport";
+import {
+  createSessionDraftToGamePreset,
+  gamePresetToCreateSessionDraft,
+} from "../domain/gamePreset";
+import { useGamePresetStore } from "../state/gamePresetStore";
 
 const TIER_OPTIONS: Array<{
   value: SessionTier;
@@ -80,6 +85,9 @@ function placeToFocusBounds(place: GeocodedPlace): LatLngBoundsExpression {
 
 export function CreateSession() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const presets = useGamePresetStore((state) => state.presets);
+  const savePreset = useGamePresetStore((state) => state.savePreset);
   const setSession = useSessionStore((state) => state.setSession);
   const mapStyle = useMapStore((state) => state.mapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
@@ -101,8 +109,9 @@ export function CreateSession() {
   const [sessionTier, setSessionTier] = useState<SessionTier>("free");
   const [playerRole, setPlayerRole] = useState<PlayerRole>("seeker");
   const [gameSize, setGameSize] = useState<GameSize>("medium");
+  const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>("imperial");
   const [advancedSettings, setAdvancedSettings] = useState(() =>
-    defaultAdvancedSessionSettings("medium"),
+    defaultAdvancedSessionSettings("medium", "imperial"),
   );
   const [accessCode, setAccessCode] = useState("");
   const [hostHasAccessClaim, setHostHasAccessClaim] = useState(false);
@@ -115,6 +124,42 @@ export function CreateSession() {
   const ignoreViewportUpdatesRef = useRef(false);
   const importFileInputRef = useRef<HTMLInputElement>(null);
   const userLocationRef = useRef<LatLngTuple | null>(null);
+
+  useEffect(() => {
+    const presetId = searchParams.get("preset");
+    if (!presetId) {
+      return;
+    }
+
+    const preset = presets.find((entry) => entry.id === presetId);
+    if (!preset) {
+      return;
+    }
+
+    const draft = gamePresetToCreateSessionDraft(preset);
+    /* eslint-disable react-hooks/set-state-in-effect -- apply preset query param once when store hydrates */
+    setGameSize(draft.gameSize);
+    setDistanceUnit(draft.distanceUnit);
+    setAdvancedSettings({
+      ...draft.advancedSettings,
+      customMatchingAreas:
+        draft.customMatchingAreas ?? draft.advancedSettings.customMatchingAreas,
+      customCategories:
+        draft.customCategories ?? draft.advancedSettings.customCategories,
+      customLocationPins:
+        draft.customLocationPins ?? draft.advancedSettings.customLocationPins,
+    });
+    if (draft.sessionTier) {
+      setSessionTier(draft.sessionTier);
+    }
+    if (draft.gameArea) {
+      setImportedGameArea(draft.gameArea);
+    }
+    if (draft.placeLabel) {
+      setLocationQuery(draft.placeLabel);
+    }
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [presets, searchParams]);
 
   useEffect(() => {
     void getCurrentPosition({ highAccuracy: false })
@@ -398,6 +443,7 @@ export function CreateSession() {
       const rulesPatch = sessionRulesPatchFromAdvancedSettings(
         gameSize,
         advancedSettings,
+        distanceUnit,
       );
 
       if (isFirebaseConfigured()) {
@@ -411,6 +457,7 @@ export function CreateSession() {
             playerRole,
             gameSize,
             rulesPatch,
+            distanceUnit,
           ),
         );
         setSession(session, user.uid);
@@ -424,12 +471,13 @@ export function CreateSession() {
           memberUids: [],
           memberRoles: { local: playerRole },
           gameSize,
+          distanceUnit,
           tier: "free" as const,
           transitMetroId: metroId,
           ...rulesPatch,
           hidingZoneRadiusMeters:
             rulesPatch.hidingZoneRadiusMeters ??
-            hidingZoneRadiusMeters(gameSize),
+            hidingZoneRadiusMeters(gameSize, distanceUnit),
         };
         setSession(localSession, "local");
         setPremiumApiContext(localSession);
@@ -632,14 +680,96 @@ export function CreateSession() {
           disabled={loading || verifyingAccess}
         />
 
+        <div className="space-y-2">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+            Game preset
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <select
+              disabled={loading || verifyingAccess}
+              className="field-input min-h-11 flex-1"
+              defaultValue=""
+              onChange={(event) => {
+                const presetId = event.target.value;
+                if (!presetId) {
+                  return;
+                }
+                navigate(`/create?preset=${presetId}`);
+              }}
+            >
+              <option value="">Load preset…</option>
+              {presets.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  {preset.name}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              disabled={loading || verifyingAccess}
+              onClick={() => {
+                const name = window.prompt("Preset name");
+                if (!name?.trim()) {
+                  return;
+                }
+
+                savePreset(
+                  createSessionDraftToGamePreset(
+                    {
+                      gameSize,
+                      distanceUnit,
+                      advancedSettings,
+                      gameArea: previewGameArea,
+                      placeLabel: selectedPlace?.displayName ?? locationQuery,
+                      sessionTier,
+                    },
+                    name.trim(),
+                  ),
+                );
+              }}
+              className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-brand-blue disabled:opacity-50"
+            >
+              Save as preset
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+            Distance edition
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {(["imperial", "metric"] as const).map((unit) => (
+              <button
+                key={unit}
+                type="button"
+                disabled={loading || verifyingAccess}
+                onClick={() => {
+                  setDistanceUnit(unit);
+                  setAdvancedSettings(defaultAdvancedSessionSettings(gameSize, unit));
+                }}
+                className={`min-h-11 border-2 px-3 py-2 text-sm font-semibold disabled:opacity-50 ${
+                  distanceUnit === unit
+                    ? "border-highlight bg-highlight-soft text-highlight"
+                    : "border-border bg-surface-deep text-ink"
+                }`}
+              >
+                {unit === "metric" ? "Metric (km)" : "Imperial (mi)"}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <GameSizePicker
           gameArea={previewGameArea}
           value={gameSize}
+          distanceUnit={distanceUnit}
           onChange={(size) => {
             setGameSize(size);
             setAdvancedSettings((current) => ({
+              ...defaultAdvancedSessionSettings(size, distanceUnit),
               ...current,
-              hidingZoneRadiusMeters: hidingZoneRadiusMeters(size),
+              hidingZoneRadiusMeters: hidingZoneRadiusMeters(size, distanceUnit),
             }));
           }}
           disabled={loading || verifyingAccess}
@@ -647,6 +777,8 @@ export function CreateSession() {
 
         <AdvancedSessionSettings
           gameSize={gameSize}
+          distanceUnit={distanceUnit}
+          gameArea={previewGameArea}
           value={advancedSettings}
           onChange={setAdvancedSettings}
           disabled={loading || verifyingAccess}

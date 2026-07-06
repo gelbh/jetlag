@@ -4,6 +4,8 @@ import {
   toggleThermometerPresetInSettings,
   toggleToolInSettings,
 } from "../../domain/advancedSessionSettings";
+import type { DistanceUnit } from "../../domain/distance";
+import { formatPresetDistance } from "../../domain/distance";
 import type { GameSize } from "../../domain/gameSize";
 import {
   clampHidingZoneRadiusMeters,
@@ -13,8 +15,8 @@ import {
   HIDING_ZONE_RADIUS_MIN_METERS,
   hidingZoneRadiusMeters,
 } from "../../domain/gameSize";
-import { thermometerPresetsMilesForGameSize } from "../../domain/gameSizeRules";
-import { formatPresetDistance } from "../../domain/distance";
+import { thermometerPresetsMetersForGameSize } from "../../domain/gameSizeRules";
+import { tentacleRadiusPresetMeters } from "../../domain/distancePresets";
 import { MAP_TOOL_DOCK_ENTRIES } from "../../domain/mapTools";
 import {
   ALL_CONFIGURABLE_TOOLS,
@@ -32,13 +34,15 @@ import {
   QUESTION_ANSWER_DEADLINE_MINUTES_MIN,
   QUESTION_ANSWER_DEADLINE_PRESET_MINUTES,
   sessionRulesSummary,
-  TENTACLE_RADIUS_PRESET_METERS,
   type ConfigurableMapTool,
 } from "../../domain/sessionRules";
-import type { ThermometerDistanceOptionMiles } from "../../domain/thermometerQuestions";
+import type { GameArea } from "../../domain/annotations";
+import { SessionCustomContentSettings } from "./SessionCustomContentSettings";
 
 interface AdvancedSessionSettingsProps {
   gameSize: GameSize;
+  distanceUnit?: DistanceUnit;
+  gameArea?: GameArea | null;
   value: AdvancedSessionSettingsValue;
   onChange: (value: AdvancedSessionSettingsValue) => void;
   disabled?: boolean;
@@ -73,6 +77,8 @@ function PresetButton({
 
 export function AdvancedSessionSettings({
   gameSize,
+  distanceUnit = "imperial",
+  gameArea = null,
   value,
   onChange,
   disabled,
@@ -80,10 +86,15 @@ export function AdvancedSessionSettings({
 }: AdvancedSessionSettingsProps) {
   const [open, setOpen] = useState(!collapsible);
   const panelId = useId();
-  const defaultRadius = hidingZoneRadiusMeters(gameSize);
-  const availableThermoPresets = thermometerPresetsMilesForGameSize(gameSize);
+  const defaultRadius = hidingZoneRadiusMeters(gameSize, distanceUnit);
+  const availableThermoPresets = thermometerPresetsMetersForGameSize(
+    gameSize,
+    distanceUnit,
+  );
+  const tentacleRadiusPresets = tentacleRadiusPresetMeters(distanceUnit);
   const effectiveSummary = sessionRulesSummary({
     gameSize,
+    distanceUnit,
     hidingZoneRadiusMeters: value.customHidingZoneRadiusEnabled
       ? value.hidingZoneRadiusMeters
       : undefined,
@@ -98,8 +109,8 @@ export function AdvancedSessionSettings({
       : undefined,
     disabledTools: value.disabledTools,
     tentaclesEnabled: value.tentaclesEnabledOverride ? true : undefined,
-    thermometerPresetMiles: value.customThermometerPresetsEnabled
-      ? value.thermometerPresetMiles
+    thermometerPresetMeters: value.customThermometerPresetsEnabled
+      ? value.thermometerPresetMeters
       : undefined,
     tentacleMediumRadiusMeters: value.customTentacleMediumRadiusEnabled
       ? value.tentacleMediumRadiusMeters
@@ -458,9 +469,9 @@ export function AdvancedSessionSettings({
               onChange({
                 ...value,
                 customThermometerPresetsEnabled: event.target.checked,
-                thermometerPresetMiles: event.target.checked
-                  ? value.thermometerPresetMiles
-                  : thermometerPresetsMilesForGameSize(gameSize),
+                thermometerPresetMeters: event.target.checked
+                  ? value.thermometerPresetMeters
+                  : thermometerPresetsMetersForGameSize(gameSize, distanceUnit),
               })
             }
             className="mt-1"
@@ -472,19 +483,22 @@ export function AdvancedSessionSettings({
 
         {value.customThermometerPresetsEnabled ? (
           <div className="flex flex-wrap gap-2">
-            {availableThermoPresets.map((miles) => {
-              const selected = value.thermometerPresetMiles.includes(miles);
+            {availableThermoPresets.map((presetMeters) => {
+              const selected = value.thermometerPresetMeters.some(
+                (meters) => Math.abs(meters - presetMeters) < 5,
+              );
               return (
                 <button
-                  key={miles}
+                  key={presetMeters}
                   type="button"
                   disabled={disabled}
                   onClick={() =>
                     onChange(
                       toggleThermometerPresetInSettings(
                         value,
-                        miles as ThermometerDistanceOptionMiles,
+                        presetMeters,
                         gameSize,
+                        distanceUnit,
                       ),
                     )
                   }
@@ -494,7 +508,7 @@ export function AdvancedSessionSettings({
                       : "border-border text-brand-blue"
                   }`}
                 >
-                  {formatPresetDistance(miles, "imperial")}
+                  {formatPresetDistance(presetMeters, distanceUnit)}
                 </button>
               );
             })}
@@ -548,10 +562,10 @@ export function AdvancedSessionSettings({
               />
             </label>
             <div className="flex flex-wrap gap-2">
-              {TENTACLE_RADIUS_PRESET_METERS.slice(0, 2).map((meters) => (
+              {tentacleRadiusPresets.slice(0, 2).map((meters) => (
                 <PresetButton
                   key={meters}
-                  label={formatHidingZoneRadiusLabel(meters, "metric")}
+                  label={formatHidingZoneRadiusLabel(meters, distanceUnit)}
                   disabled={disabled}
                   onClick={() =>
                     onChange({
@@ -615,10 +629,10 @@ export function AdvancedSessionSettings({
                   />
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {TENTACLE_RADIUS_PRESET_METERS.map((meters) => (
+                  {tentacleRadiusPresets.map((meters) => (
                     <PresetButton
                       key={meters}
-                      label={formatHidingZoneRadiusLabel(meters, "metric")}
+                      label={formatHidingZoneRadiusLabel(meters, distanceUnit)}
                       disabled={disabled}
                       onClick={() =>
                         onChange({
@@ -634,6 +648,13 @@ export function AdvancedSessionSettings({
           </>
         ) : null}
       </div>
+
+      <SessionCustomContentSettings
+        value={value}
+        onChange={onChange}
+        gameArea={gameArea}
+        disabled={disabled}
+      />
     </div>
   );
 

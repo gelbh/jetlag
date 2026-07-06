@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { useLatestRequest } from "./useLatestRequest";
 import type { GameArea } from "../domain/annotations";
 import type { LatLngTuple } from "../domain/geometry";
 import { isPointInGameArea } from "../domain/geometry";
@@ -67,8 +68,11 @@ export function useHiderZoneTool({
     setStationsError(null);
   }, []);
 
+  const { beginRequest, isLatestRequest } = useLatestRequest();
+
   const searchStationsInArea = useCallback(
     async (viewport: MapViewportBounds) => {
+      const requestId = beginRequest();
       setStationsLoading(true);
       setStationsError(null);
 
@@ -77,6 +81,10 @@ export function useHiderZoneTool({
           viewport,
           gameArea,
         );
+        if (!isLatestRequest(requestId)) {
+          return;
+        }
+
         setStations(loaded);
         setSelectedStation((current) =>
           current && loaded.some((station) => station.id === current.id)
@@ -84,12 +92,18 @@ export function useHiderZoneTool({
             : null,
         );
       } catch {
+        if (!isLatestRequest(requestId)) {
+          return;
+        }
+
         setStationsError("Couldn't load transit stations for this area.");
       } finally {
-        setStationsLoading(false);
+        if (isLatestRequest(requestId)) {
+          setStationsLoading(false);
+        }
       }
     },
-    [gameArea],
+    [beginRequest, gameArea, isLatestRequest],
   );
 
   const filteredStations = useMemo(

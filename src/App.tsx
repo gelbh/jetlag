@@ -13,6 +13,12 @@ const MapScreen = lazy(() =>
 const CreateSession = lazy(() =>
   import("./routes/CreateSession").then((m) => ({ default: m.CreateSession })),
 );
+const GamePresetList = lazy(() =>
+  import("./routes/GamePresets").then((m) => ({ default: m.GamePresetList })),
+);
+const GamePresetEditor = lazy(() =>
+  import("./routes/GamePresets").then((m) => ({ default: m.GamePresetEditor })),
+);
 
 function RouteFallback() {
   return (
@@ -48,6 +54,30 @@ export default function App() {
             }
           />
           <Route path="/join" element={<JoinSession />} />
+          <Route
+            path="/presets"
+            element={
+              <LazyRoute>
+                <GamePresetList />
+              </LazyRoute>
+            }
+          />
+          <Route
+            path="/presets/new"
+            element={
+              <LazyRoute>
+                <GamePresetEditor />
+              </LazyRoute>
+            }
+          />
+          <Route
+            path="/presets/:id/edit"
+            element={
+              <LazyRoute>
+                <GamePresetEditor />
+              </LazyRoute>
+            }
+          />
           <Route
             path="/map"
             element={

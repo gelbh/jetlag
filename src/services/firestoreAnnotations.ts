@@ -77,6 +77,7 @@ export async function createRemoteSession(
   hostRole: PlayerRole = "seeker",
   gameSize: GameSize = "medium",
   rulesPatch: SessionRulesPatch = {},
+  distanceUnit: SessionRecord["distanceUnit"] = "imperial",
 ): Promise<SessionRecord> {
   let code = generateSessionCode();
   let attempts = 0;
@@ -96,7 +97,7 @@ export async function createRemoteSession(
   const radiusMeters =
     typeof rulesPatch.hidingZoneRadiusMeters === "number"
       ? rulesPatch.hidingZoneRadiusMeters
-      : hidingZoneRadiusMeters(gameSize);
+      : hidingZoneRadiusMeters(gameSize, distanceUnit ?? "imperial");
   const session: SessionRecord = {
     id: sessionRef.id,
     code,
@@ -106,6 +107,7 @@ export async function createRemoteSession(
     memberUids: [hostUid],
     memberRoles: { [hostUid]: hostRole },
     gameSize,
+    distanceUnit: distanceUnit ?? "imperial",
     hidingZoneRadiusMeters: radiusMeters,
     tier,
     transitMetroId,
@@ -123,6 +125,7 @@ export async function createRemoteSession(
       hostRole,
       gameSize,
       rulesPatch,
+      distanceUnit ?? "imperial",
     ),
     createdAtServer: serverTimestamp(),
   });

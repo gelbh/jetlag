@@ -5,6 +5,8 @@ import {
   collectUsedAnnotationOptions,
   firstUnusedCatalogOption,
 } from "./toolSessionOptions";
+import type { SessionCustomCategory } from "./sessionCustomContent";
+import { resolveMatchingCategory } from "./sessionCustomCatalog";
 
 export type MatchingAnswer = "yes" | "no";
 
@@ -36,7 +38,8 @@ export type MatchingCategoryId =
   | "movie_theater"
   | "hospital"
   | "library"
-  | "foreign_consulate";
+  | "foreign_consulate"
+  | `custom:${string}`;
 
 export type MatchingCategoryGroupId =
   | "transit"
@@ -313,8 +316,11 @@ export function matchingCategoryOverpassSelectors(
 
 export function matchingQuestionFor(
   categoryId: MatchingCategoryId,
+  customCategories: readonly SessionCustomCategory[] = [],
 ): MatchingQuestionDefinition {
-  const category = getMatchingCategory(categoryId);
+  const category =
+    resolveMatchingCategory(categoryId, customCategories) ??
+    getMatchingCategory(categoryId);
 
   return {
     category: categoryId,

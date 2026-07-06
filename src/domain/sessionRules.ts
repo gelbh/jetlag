@@ -1,11 +1,17 @@
 import type { AnnotationType, SessionRecord } from "./annotations";
 import type { MapTool } from "./mapToolTypes";
+import type { DistanceUnit } from "./distance";
 import { milesToMeters } from "./distance";
+import {
+  PRESET_MATCH_TOLERANCE_METERS,
+  tentacleRadiusPresetMeters,
+} from "./distancePresets";
 import type { GameSize } from "./gameSize";
 import {
   effectiveHidingZoneRadiusMeters,
   hidingZoneRadiusMeters,
 } from "./gameSize";
+import { sessionDistanceUnit } from "./sessionDistanceUnit";
 import {
   answerDeadlineMs,
   hidingPeriodMinutes,
@@ -15,7 +21,9 @@ import {
   tentacleOptionsForGameSize,
   tentacleRadiusMeters,
   thermometerPresetsMilesForGameSize,
+  thermometerPresetsMetersForGameSize,
   toolDockEnabled,
+  gameSizeRulesSummary,
   type TentacleGameSizeCategoryId,
   type TentacleOptionForGameSize,
 } from "./gameSizeRules";
@@ -33,11 +41,13 @@ export const TENTACLE_RADIUS_METERS_MAX = 50_000;
 export const HIDING_PERIOD_PRESET_MINUTES = [15, 30, 60, 120, 180] as const;
 export const PHOTO_ANSWER_DEADLINE_PRESET_MINUTES = [10, 15, 20, 30] as const;
 export const QUESTION_ANSWER_DEADLINE_PRESET_MINUTES = [5] as const;
-export const TENTACLE_RADIUS_PRESET_METERS = [
-  milesToMeters(1),
-  milesToMeters(5),
-  milesToMeters(15),
-] as const;
+export const TENTACLE_RADIUS_PRESET_METERS = tentacleRadiusPresetMeters("imperial");
+
+export function tentacleRadiusPresetsForSession(
+  session: SessionRulesInput,
+): readonly number[] {
+  return tentacleRadiusPresetMeters(sessionDistanceUnit(session));
+}
 
 export const ALL_CONFIGURABLE_TOOLS = [
   "matching",
@@ -55,6 +65,7 @@ export type ConfigurableMapTool = (typeof ALL_CONFIGURABLE_TOOLS)[number];
 export type SessionRulesInput = Pick<
   SessionRecord,
   | "gameSize"
+  | "distanceUnit"
   | "hidingZoneRadiusMeters"
   | "hidingPeriodMinutes"
   | "photoAnswerDeadlineMinutes"
@@ -62,8 +73,12 @@ export type SessionRulesInput = Pick<
   | "disabledTools"
   | "tentaclesEnabled"
   | "thermometerPresetMiles"
+  | "thermometerPresetMeters"
   | "tentacleMediumRadiusMeters"
   | "tentacleLargeRadiusMeters"
+  | "customMatchingAreas"
+  | "customCategories"
+  | "customLocationPins"
 >;
 
 export function sessionGameSize(session: SessionRulesInput): GameSize {
@@ -149,6 +164,7 @@ export function resolveHidingZoneRadiusMeters(
   return effectiveHidingZoneRadiusMeters({
     gameSize: sessionGameSize(session),
     hidingZoneRadiusMeters: session.hidingZoneRadiusMeters,
+    distanceUnit: sessionDistanceUnit(session),
   });
 }
 
@@ -187,7 +203,11 @@ function resolveTentacleRadiusForCategory(
     return clampTentacleRadiusMeters(session.tentacleMediumRadiusMeters);
   }
 
-  return tentacleRadiusMeters(categoryId, gameSize);
+  return tentacleRadiusMeters(
+    categoryId,
+    gameSize,
+    sessionDistanceUnit(session),
+  );
 }
 
 export function resolveTentacleOptions(
@@ -198,7 +218,10 @@ export function resolveTentacleOptions(
   }
 
   const gameSize = sessionGameSize(session);
-  const defaults = tentacleOptionsForGameSize(gameSize);
+  const defaults = tentacleOptionsForGameSize(
+    gameSize,
+    sessionDistanceUnit(session),
+  );
 
   if (defaults.length === 0 && session.tentaclesEnabled === true) {
     const mediumCategories = [
@@ -260,16 +283,43 @@ export function resolveThermometerPresetsMiles(
 export function resolveThermometerPresetsMeters(
   session: SessionRulesInput,
 ): number[] {
-  return resolveThermometerPresetsMiles(session).map(milesToMeters);
+  const gameSize = sessionGameSize(session);
+  const unit = sessionDistanceUnit(session);
+  const defaults = thermometerPresetsMetersForGameSize(gameSize, unit);
+
+  if (session.thermometerPresetMeters?.length) {
+    const allowed = new Set(defaults);
+    const selected = session.thermometerPresetMeters.filter((meters) =>
+      [...allowed].some(
+        (preset) => Math.abs(preset - meters) < PRESET_MATCH_TOLERANCE_METERS,
+      ),
+    );
+    return selected.length > 0 ? selected : defaults;
+  }
+
+  if (session.thermometerPresetMiles?.length) {
+    const allowed = new Set(defaults);
+    const selected = session.thermometerPresetMiles
+      .map(milesToMeters)
+      .filter((meters) =>
+        [...allowed].some(
+          (preset) =>
+            Math.abs(preset - meters) < PRESET_MATCH_TOLERANCE_METERS,
+        ),
+      );
+    return selected.length > 0 ? selected : defaults;
+  }
+
+  return defaults;
 }
 
 export function resolveIsThermometerPresetAvailable(
   session: SessionRulesInput,
   distanceMeters: number,
 ): boolean {
-  const tolerance = 1;
   return resolveThermometerPresetsMeters(session).some(
-    (preset) => Math.abs(preset - distanceMeters) < tolerance,
+    (preset) =>
+      Math.abs(preset - distanceMeters) < PRESET_MATCH_TOLERANCE_METERS,
   );
 }
 
@@ -304,6 +354,20 @@ export function parseDisabledTools(value: unknown): ConfigurableMapTool[] | unde
   return tools.length > 0 ? tools : undefined;
 }
 
+export function parseThermometerPresetMeters(
+  value: unknown,
+): number[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const presets = value.filter(
+    (item): item is number => typeof item === "number" && item > 0,
+  );
+
+  return presets.length > 0 ? presets : undefined;
+}
+
 export function parseThermometerPresetMiles(
   value: unknown,
 ): ThermometerDistanceOptionMiles[] | undefined {
@@ -317,6 +381,10 @@ export function parseThermometerPresetMiles(
   );
 
   return presets.length > 0 ? presets : undefined;
+}
+
+export function parseDistanceUnit(value: unknown): DistanceUnit | undefined {
+  return value === "metric" || value === "imperial" ? value : undefined;
 }
 
 /** @deprecated Use resolveIsThermometerPresetAvailable with session */
@@ -345,39 +413,29 @@ export function sessionRulesSummary(session: SessionRulesInput): {
       ? `${hidingMinutes} min hiding period`
       : `${hidingHours} hr hiding period`;
 
+  const base = gameSizeRulesSummary(
+    sessionGameSize(session),
+    sessionDistanceUnit(session),
+  );
+
   const radiusMeters = resolveHidingZoneRadiusMeters(session);
-  const defaultRadius = hidingZoneRadiusMeters(sessionGameSize(session));
+  const defaultRadius = hidingZoneRadiusMeters(
+    sessionGameSize(session),
+    sessionDistanceUnit(session),
+  );
   const hidingZoneLabel =
-    Math.abs(radiusMeters - defaultRadius) < 1
-      ? sessionGameSize(session) === "large"
-        ? "½ mi hiding zones"
-        : "¼ mi hiding zones"
+    Math.abs(radiusMeters - defaultRadius) < PRESET_MATCH_TOLERANCE_METERS
+      ? base.hidingZoneLabel
       : `${Math.round(radiusMeters)} m hiding zones`;
 
   const tentacleEnabled = resolveTentaclesEnabledForSession(session);
-  const tentacleLabel = tentacleEnabled
-    ? sessionGameSize(session) === "large" ||
-        typeof session.tentacleLargeRadiusMeters === "number"
-      ? "Tentacles enabled"
-      : "Tentacles @ 1 mi"
-    : "No tentacles";
-
-  const thermoMiles = resolveThermometerPresetsMiles(session);
-  const maxThermo = thermoMiles[thermoMiles.length - 1];
-  const thermometerMaxLabel =
-    maxThermo === 0.5
-      ? "Thermo up to ½ mi"
-      : maxThermo === 3
-        ? "Thermo up to 3 mi"
-        : maxThermo === 10
-          ? "Thermo up to 10 mi"
-          : "Thermo up to 50 mi";
+  const tentacleLabel = tentacleEnabled ? base.tentacleLabel : "No tentacles";
 
   return {
     hidingPeriodLabel,
     hidingZoneLabel,
     tentacleLabel,
-    thermometerMaxLabel,
+    thermometerMaxLabel: base.thermometerMaxLabel,
   };
 }
 

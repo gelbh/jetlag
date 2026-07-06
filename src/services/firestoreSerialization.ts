@@ -10,6 +10,8 @@ import type { GameSize } from "../domain/gameSize";
 import { hidingZoneRadiusMeters } from "../domain/gameSize";
 import {
   parseDisabledTools,
+  parseDistanceUnit,
+  parseThermometerPresetMeters,
   parseThermometerPresetMiles,
   clampHidingPeriodMinutes,
   clampPhotoAnswerDeadlineMinutes,
@@ -29,6 +31,11 @@ import type {
   PlayerLocationRecord,
   SessionMessageRecord,
 } from "../domain/sessionChat";
+import {
+  parseCustomCategories,
+  parseCustomLocationPins,
+  parseCustomMatchingAreas,
+} from "../domain/sessionCustomContent";
 import {
   boundingBoxToGameArea,
   gameAreaToBoundingBox,
@@ -271,6 +278,9 @@ export function sessionRulesPatchToFirestore(
 ): Record<string, unknown> {
   const payload: Record<string, unknown> = {};
 
+  if (patch.distanceUnit !== undefined) {
+    payload.distanceUnit = patch.distanceUnit;
+  }
   if (typeof patch.hidingZoneRadiusMeters === "number") {
     payload.hidingZoneRadiusMeters = patch.hidingZoneRadiusMeters;
   }
@@ -295,11 +305,26 @@ export function sessionRulesPatchToFirestore(
         ? [...patch.thermometerPresetMiles]
         : [];
   }
+  if (patch.thermometerPresetMeters !== undefined) {
+    payload.thermometerPresetMeters =
+      patch.thermometerPresetMeters.length > 0
+        ? [...patch.thermometerPresetMeters]
+        : [];
+  }
   if (typeof patch.tentacleMediumRadiusMeters === "number") {
     payload.tentacleMediumRadiusMeters = patch.tentacleMediumRadiusMeters;
   }
   if (typeof patch.tentacleLargeRadiusMeters === "number") {
     payload.tentacleLargeRadiusMeters = patch.tentacleLargeRadiusMeters;
+  }
+  if (patch.customMatchingAreas !== undefined) {
+    payload.customMatchingAreas = { ...patch.customMatchingAreas };
+  }
+  if (patch.customCategories !== undefined) {
+    payload.customCategories = [...patch.customCategories];
+  }
+  if (patch.customLocationPins !== undefined) {
+    payload.customLocationPins = [...patch.customLocationPins];
   }
 
   return payload;
@@ -315,11 +340,13 @@ export function buildSessionDocument(
   hostRole: PlayerRole = "seeker",
   gameSize: GameSize = "medium",
   rulesPatch: SessionRulesPatch = {},
+  distanceUnit?: SessionRecord["distanceUnit"],
 ): Record<string, unknown> {
+  const unit = distanceUnit ?? "imperial";
   const radiusMeters =
     typeof rulesPatch.hidingZoneRadiusMeters === "number"
       ? rulesPatch.hidingZoneRadiusMeters
-      : hidingZoneRadiusMeters(gameSize);
+      : hidingZoneRadiusMeters(gameSize, unit);
   const payload: Record<string, unknown> = {
     code,
     gameArea: serializeGameAreaForFirestore(gameArea),
@@ -328,6 +355,7 @@ export function buildSessionDocument(
     memberUids: [hostUid],
     memberRoles: { [hostUid]: hostRole },
     gameSize,
+    distanceUnit: unit,
     hidingZoneRadiusMeters: radiusMeters,
     tier,
     status: "active",
@@ -361,6 +389,7 @@ export function deserializeSessionFromFirestore(
       : [],
     memberRoles: parseMemberRoles(data.memberRoles),
     gameSize: parseGameSize(data.gameSize),
+    distanceUnit: parseDistanceUnit(data.distanceUnit),
     hidingZoneRadiusMeters:
       typeof data.hidingZoneRadiusMeters === "number"
         ? data.hidingZoneRadiusMeters
@@ -391,6 +420,9 @@ export function deserializeSessionFromFirestore(
     thermometerPresetMiles: parseThermometerPresetMiles(
       data.thermometerPresetMiles,
     ),
+    thermometerPresetMeters: parseThermometerPresetMeters(
+      data.thermometerPresetMeters,
+    ),
     tentacleMediumRadiusMeters:
       typeof data.tentacleMediumRadiusMeters === "number"
         ? clampTentacleRadiusMeters(data.tentacleMediumRadiusMeters)
@@ -399,6 +431,9 @@ export function deserializeSessionFromFirestore(
       typeof data.tentacleLargeRadiusMeters === "number"
         ? clampTentacleRadiusMeters(data.tentacleLargeRadiusMeters)
         : undefined,
+    customMatchingAreas: parseCustomMatchingAreas(data.customMatchingAreas),
+    customCategories: parseCustomCategories(data.customCategories),
+    customLocationPins: parseCustomLocationPins(data.customLocationPins),
     tier: parseSessionTier(data.tier),
     transitMetroId:
       typeof data.transitMetroId === "string" ? data.transitMetroId : undefined,

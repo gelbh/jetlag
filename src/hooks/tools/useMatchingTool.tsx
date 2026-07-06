@@ -29,11 +29,15 @@ import {
   type MatchingAnswer,
   type MatchingCategoryId,
 } from "../../domain/matchingQuestions";
+import { resolveMatchingCategory } from "../../domain/sessionCustomCatalog";
 import { questionCostBreakdown } from "../../domain/questionRules";
 import type { PendingQuestionRecord } from "../../domain/sessionChat";
-import type { DistanceUnit } from "../../domain/distance";
+import type { SessionRulesInput } from "../../domain/sessionRules";
+import type { MatchingFetchOptions } from "../../services/matchingFeatures";
+import { sessionCustomContentFromRules } from "../../domain/sessionCustomCatalog";
 import { yesNoAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
+import type { DistanceUnit } from "../../domain/distance";
 import {
   fetchMatchingFeaturesInArea,
   countMatchingFeaturesInPlayArea,
@@ -62,6 +66,7 @@ interface UseMatchingToolParams {
   ) => Promise<void>;
   sessionId?: string;
   senderUid?: string | null;
+  sessionRules?: SessionRulesInput;
   distanceUnit: DistanceUnit;
   finishPlacement: () => void;
   gpsLoading: boolean;
@@ -81,6 +86,7 @@ export function useMatchingTool({
   submitPendingQuestion,
   sessionId,
   senderUid,
+  sessionRules,
   distanceUnit,
   finishPlacement,
   gpsLoading,
@@ -137,7 +143,24 @@ export function useMatchingTool({
   const [matchingLoading, setMatchingLoading] = useState(false);
   const [matchingError, setMatchingError] = useState<string | null>(null);
 
-  const matchingCategory = getMatchingCategory(matchingCategoryId);
+  const matchingFetchOptions = useMemo((): MatchingFetchOptions => {
+    const content = sessionRules
+      ? sessionCustomContentFromRules(sessionRules)
+      : {
+          customMatchingAreas: undefined,
+          customCategories: [],
+          customLocationPins: [],
+        };
+    return {
+      customMatchingAreas: content.customMatchingAreas,
+      customCategories: content.customCategories,
+    };
+  }, [sessionRules]);
+
+  const customCategories = matchingFetchOptions.customCategories ?? [];
+  const matchingCategory =
+    resolveMatchingCategory(matchingCategoryId, customCategories) ??
+    getMatchingCategory(matchingCategoryId);
   const matchingUsesContainment =
     matchingCategory.resolver === "reverseGeocodeAdmin" ||
     matchingCategory.resolver === "landmass";
@@ -227,7 +250,11 @@ export function useMatchingTool({
       setMatchingError(null);
 
       try {
-        const features = await fetchMatchingFeaturesInArea(gameArea, categoryId);
+        const features = await fetchMatchingFeaturesInArea(
+          gameArea,
+          categoryId,
+          matchingFetchOptions,
+        );
 
         if (!isLatestRequest(requestId)) {
           return;
@@ -296,7 +323,7 @@ export function useMatchingTool({
         }
       }
     },
-    [beginRequest, gameArea, isLatestRequest],
+    [beginRequest, gameArea, isLatestRequest, matchingFetchOptions],
   );
 
   const debouncedSeekerPoint = useDebouncedValue(matchingSeekerPoint, 400);

@@ -1,16 +1,17 @@
 import {
   RADAR_CHOOSE_LABEL,
-  RADAR_DISTANCE_MILES,
   radarDistanceOptionLabel,
   radarQuestionPrompt,
   type RadarDistanceOptionKey,
 } from "../../domain/radarQuestions";
 import {
   distanceUnitLabel,
+  formatDistance,
   milesToMeters,
   parseDistanceInput,
   type DistanceUnit,
 } from "../../domain/distance";
+import { radarPresetMetersForUnit } from "../../domain/distancePresets";
 import { OptionChip, OptionChipRow } from "./shared/OptionChip";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
 import { ToolSection } from "./shared/ToolSection";
@@ -40,9 +41,14 @@ export function RadarDistancePicker({
 }: RadarDistancePickerProps) {
   const resolvedRadius =
     parseDistanceInput(customRadius, distanceUnit) ?? radiusMeters;
-  const availablePresetMiles = RADAR_DISTANCE_MILES.filter(
-    (miles) => !usedDistanceOptions.has(miles),
-  );
+  const presetMeters = radarPresetMetersForUnit(distanceUnit);
+  const availablePresets = presetMeters.filter((preset) => {
+    if (distanceUnit === "metric") {
+      return !usedDistanceOptions.has(preset as RadarDistanceOptionKey);
+    }
+    const miles = preset / milesToMeters(1);
+    return !usedDistanceOptions.has(miles as RadarDistanceOptionKey);
+  });
   const chooseAvailable = !usedDistanceOptions.has("choose");
 
   return (
@@ -52,23 +58,27 @@ export function RadarDistancePicker({
           prompt={radarQuestionPrompt(resolvedRadius, distanceUnit)}
         />
       ) : null}
-      {availablePresetMiles.length === 0 && !chooseAvailable ? (
+      {availablePresets.length === 0 && !chooseAvailable ? (
         <p className="text-sm text-status-warning">
           Every radar distance option has already been used this session.
         </p>
       ) : (
         <OptionChipRow>
-          {availablePresetMiles.map((miles) => {
-            const presetMeters = milesToMeters(miles);
-            const selected = !chooseCustom && radiusMeters === presetMeters;
+          {availablePresets.map((preset) => {
+            const selected = !chooseCustom && radiusMeters === preset;
 
             return (
               <OptionChip
-                key={miles}
+                key={preset}
                 selected={selected}
-                onClick={() => onPresetSelect(presetMeters)}
+                onClick={() => onPresetSelect(preset)}
               >
-                {radarDistanceOptionLabel(miles, distanceUnit)}
+                {distanceUnit === "metric"
+                  ? formatDistance(preset, distanceUnit)
+                  : radarDistanceOptionLabel(
+                      preset / milesToMeters(1),
+                      distanceUnit,
+                    )}
               </OptionChip>
             );
           })}

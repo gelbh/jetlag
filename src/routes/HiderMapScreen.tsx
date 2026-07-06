@@ -56,6 +56,7 @@ import { useSessionNotifications } from "../hooks/useSessionNotifications";
 import { useLiveActivitySync } from "../hooks/useLiveActivitySync";
 import { useSessionSync } from "../hooks/useSessionSync";
 import { useFirebaseAuthReady } from "../hooks/useFirebaseAuthReady";
+import { useSessionDistanceUnit } from "../hooks/useSessionDistanceUnit";
 import { ensureRemoteSessionWriteAccess } from "../services/firestoreAnnotations";
 import { ensureAnonymousUser } from "../services/firebase";
 import { setPremiumApiContext } from "../services/premiumApiContext";
@@ -74,8 +75,7 @@ export function HiderMapScreen() {
   const setShowCurrentLocation = useMapStore(
     (state) => state.setShowCurrentLocation,
   );
-  const distanceUnit = useMapStore((state) => state.distanceUnit);
-  const setDistanceUnit = useMapStore((state) => state.setDistanceUnit);
+  const distanceUnit = useSessionDistanceUnit();
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const setLayerVisibility = useMapStore((state) => state.setLayerVisibility);
   const keepScreenAwake = useMapStore((state) => state.keepScreenAwake);
@@ -238,12 +238,8 @@ export function HiderMapScreen() {
     }
 
     void zoneTool.searchStationsInArea(searchViewportBounds());
-  }, [
-    zoneTool.wizardOpen,
-    zoneTool.manualMode,
-    zoneTool.searchStationsInArea,
-    searchViewportBounds,
-  ]);
+    // Intentionally omit searchViewportBounds — pan/zoom must not re-fetch; use "Search this area".
+  }, [zoneTool.wizardOpen, zoneTool.manualMode, zoneTool.searchStationsInArea]);
 
   const openWizardExclusive = useCallback(() => {
     overlay.closeSheet();
@@ -549,7 +545,8 @@ export function HiderMapScreen() {
         layerVisibility={layerVisibility}
         onLayerVisibilityChange={setLayerVisibility}
         distanceUnit={distanceUnit}
-        onDistanceUnitChange={setDistanceUnit}
+        onDistanceUnitChange={() => {}}
+        distanceUnitEditable={false}
         mapStyle={mapStyle}
         onMapStyleChange={setMapStyle}
         locationError={null}

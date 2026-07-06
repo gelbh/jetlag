@@ -6,7 +6,7 @@ import {
   type AnnotationType,
 } from "../../domain/annotations";
 import { useScrollLock } from "../../hooks/useScrollLock";
-import { useMapStore } from "../../state/sessionStore";
+import { useSessionDistanceUnit } from "../../hooks/useSessionDistanceUnit";
 
 const FILTER_OPTIONS: Array<AnnotationType | "all"> = [
   "all",
@@ -34,7 +34,7 @@ export function SessionLog({
   onDelete,
   onEdit,
 }: SessionLogProps) {
-  const distanceUnit = useMapStore((state) => state.distanceUnit);
+  const distanceUnit = useSessionDistanceUnit();
   const [filter, setFilter] = useState<AnnotationType | "all">("all");
   useScrollLock(open);
 

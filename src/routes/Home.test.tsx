@@ -32,6 +32,10 @@ describe("Home", () => {
       "href",
       "/join",
     );
+    expect(screen.getByRole("link", { name: "Custom game presets" })).toHaveAttribute(
+      "href",
+      "/presets",
+    );
   });
 
   it("continues a local session without remote verification", () => {

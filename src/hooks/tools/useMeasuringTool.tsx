@@ -38,6 +38,8 @@ import {
 import { questionCostBreakdown } from "../../domain/questionRules";
 import type { PendingQuestionRecord } from "../../domain/sessionChat";
 import type { DistanceUnit } from "../../domain/distance";
+import type { SessionRulesInput } from "../../domain/sessionRules";
+import { manualPinAsMeasuringPlace } from "../../domain/sessionCustomCatalog";
 import { closerFurtherAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
 import { measuringLinearNotFoundMessage } from "../../services/measuringLinearFeatures";
@@ -78,6 +80,7 @@ interface UseMeasuringToolParams {
   ) => Promise<void>;
   sessionId?: string;
   senderUid?: string | null;
+  sessionRules?: SessionRulesInput;
   distanceUnit: DistanceUnit;
   finishPlacement: () => void;
   gpsLoading: boolean;
@@ -111,6 +114,7 @@ export function useMeasuringTool({
   submitPendingQuestion,
   sessionId,
   senderUid,
+  sessionRules,
   distanceUnit,
   finishPlacement,
   gpsLoading,
@@ -287,7 +291,20 @@ export function useMeasuringTool({
       setMeasuringError(null);
 
       try {
-        const places = await fetchMeasuringPlacesInArea(gameArea, category);
+        const customCategories = sessionRules?.customCategories ?? [];
+        const overpassPlaces = await fetchMeasuringPlacesInArea(
+          gameArea,
+          category,
+          customCategories,
+        );
+        const pinPlaces = (sessionRules?.customLocationPins ?? []).map(
+          manualPinAsMeasuringPlace,
+        );
+        const seen = new Set(overpassPlaces.map((place) => place.id));
+        const places = [
+          ...overpassPlaces,
+          ...pinPlaces.filter((place) => !seen.has(place.id)),
+        ];
 
         if (requestId !== placesRequestId.current) {
           return;
@@ -335,7 +352,7 @@ export function useMeasuringTool({
         }
       }
     },
-    [gameArea, measureFromKind, measuringLocationCategory],
+    [gameArea, measureFromKind, measuringLocationCategory, sessionRules],
   );
 
   const loadSeaLevelContextAt = useCallback(

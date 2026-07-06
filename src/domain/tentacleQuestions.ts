@@ -46,7 +46,9 @@ export type TentacleExtendedCategoryId =
   | "metro_line"
   | "zoo"
   | "aquarium"
-  | "amusement_park";
+  | "amusement_park"
+  | `custom:${string}`
+  | `pin:${string}`;
 
 export type TentacleAnswerCategoryId = TentacleExtendedCategoryId;
 
@@ -99,9 +101,15 @@ export function tentacleCategoriesForGameSize(
 export function tentacleCategoriesForSession(
   session: SessionRulesInput,
 ): readonly TentacleLocationCategoryDefinition[] {
-  return resolveTentacleOptions(session).map((option) =>
+  const builtIn = resolveTentacleOptions(session).map((option) =>
     tentacleCategoryDefinition(option.categoryId),
   );
+  const custom = (session.customCategories ?? []).map((category) => ({
+    id: category.id as TentacleExtendedCategoryId,
+    label: category.label,
+    promptNoun: category.promptNoun,
+  }));
+  return [...builtIn, ...custom];
 }
 
 export function getTentacleLocationCategory(

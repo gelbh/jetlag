@@ -1,7 +1,13 @@
 import area from "@turf/area";
 import { polygon as turfPolygon } from "@turf/helpers";
 import type { GameArea } from "./annotations";
+import type { DistanceUnit } from "./distance";
 import { milesToMeters } from "./distance";
+import {
+  GAME_SIZE_THRESHOLDS_SQ_KM,
+  hidingZoneDefaultRadiusMeters,
+  resolveDistanceUnit,
+} from "./distancePresets";
 import { gameAreaToBoundingBox } from "./gameAreaBounds";
 
 export type GameSize = "small" | "medium" | "large";
@@ -11,6 +17,7 @@ export const HIDING_ZONE_RADIUS_MAX_METERS = 800;
 export const HIDING_ZONE_RADIUS_BUS_PRESET_METERS = 250;
 
 const SQ_METERS_PER_SQ_MILE = 2_589_988.110336;
+const SQ_METERS_PER_SQ_KM = 1_000_000;
 
 const GAME_SIZE_THRESHOLDS_SQ_MI = {
   medium: 100,
@@ -23,7 +30,7 @@ export const GAME_SIZE_OPTIONS: readonly GameSize[] = [
   "large",
 ] as const;
 
-export function gameAreaSquareMiles(gameArea: GameArea): number {
+function gameAreaSquareMeters(gameArea: GameArea): number {
   const positions =
     gameArea.type === "MultiPolygon"
       ? gameArea.coordinates.flatMap((poly) => poly[0] ?? [])
@@ -36,7 +43,7 @@ export function gameAreaSquareMiles(gameArea: GameArea): number {
     const centerLat = (box.north + box.south) / 2;
     const latMeters = latSpan * 111_320;
     const lngMeters = lngSpan * 111_320 * Math.cos((centerLat * Math.PI) / 180);
-    return (latMeters * lngMeters) / SQ_METERS_PER_SQ_MILE;
+    return latMeters * lngMeters;
   }
 
   const feature = turfPolygon(
@@ -45,25 +52,49 @@ export function gameAreaSquareMiles(gameArea: GameArea): number {
       : gameArea.coordinates,
   );
 
-  return area(feature) / SQ_METERS_PER_SQ_MILE;
+  return area(feature);
 }
 
-export function recommendGameSize(gameArea: GameArea): GameSize {
-  const sqMi = gameAreaSquareMiles(gameArea);
+export function gameAreaSquareMiles(gameArea: GameArea): number {
+  return gameAreaSquareMeters(gameArea) / SQ_METERS_PER_SQ_MILE;
+}
 
+export function gameAreaSquareKilometers(gameArea: GameArea): number {
+  return gameAreaSquareMeters(gameArea) / SQ_METERS_PER_SQ_KM;
+}
+
+export function recommendGameSize(
+  gameArea: GameArea,
+  unit: DistanceUnit = "imperial",
+): GameSize {
+  const resolved = resolveDistanceUnit(unit);
+
+  if (resolved === "metric") {
+    const sqKm = gameAreaSquareKilometers(gameArea);
+    if (sqKm >= GAME_SIZE_THRESHOLDS_SQ_KM.large) {
+      return "large";
+    }
+    if (sqKm >= GAME_SIZE_THRESHOLDS_SQ_KM.medium) {
+      return "medium";
+    }
+    return "small";
+  }
+
+  const sqMi = gameAreaSquareMiles(gameArea);
   if (sqMi >= GAME_SIZE_THRESHOLDS_SQ_MI.large) {
     return "large";
   }
-
   if (sqMi >= GAME_SIZE_THRESHOLDS_SQ_MI.medium) {
     return "medium";
   }
-
   return "small";
 }
 
-export function hidingZoneRadiusMeters(gameSize: GameSize): number {
-  return gameSize === "large" ? milesToMeters(0.5) : milesToMeters(0.25);
+export function hidingZoneRadiusMeters(
+  gameSize: GameSize,
+  unit: DistanceUnit = "imperial",
+): number {
+  return hidingZoneDefaultRadiusMeters(gameSize, resolveDistanceUnit(unit));
 }
 
 export function clampHidingZoneRadiusMeters(radiusMeters: number): number {
@@ -76,19 +107,31 @@ export function clampHidingZoneRadiusMeters(radiusMeters: number): number {
 export function effectiveHidingZoneRadiusMeters(session: {
   gameSize?: GameSize;
   hidingZoneRadiusMeters?: number;
+  distanceUnit?: DistanceUnit;
 }): number {
   if (typeof session.hidingZoneRadiusMeters === "number") {
     return session.hidingZoneRadiusMeters;
   }
 
-  return hidingZoneRadiusMeters(session.gameSize ?? "medium");
+  return hidingZoneRadiusMeters(
+    session.gameSize ?? "medium",
+    session.distanceUnit,
+  );
 }
 
 export function formatHidingZoneRadiusLabel(
   radiusMeters: number,
-  unit: "metric" | "imperial" = "imperial",
+  unit: DistanceUnit = "imperial",
 ): string {
-  if (unit === "metric") {
+  const resolved = resolveDistanceUnit(unit);
+
+  if (resolved === "metric") {
+    if (Math.abs(radiusMeters - 400) < 5) {
+      return "400 m";
+    }
+    if (Math.abs(radiusMeters - 800) < 5) {
+      return "800 m";
+    }
     if (radiusMeters >= 1000) {
       return `${(radiusMeters / 1000).toFixed(1)} km`;
     }
@@ -108,29 +151,51 @@ export function formatHidingZoneRadiusLabel(
   return `${miles.toFixed(2)} mi`;
 }
 
-export function gameSizeLabel(size: GameSize): {
+export function gameSizeLabel(
+  size: GameSize,
+  unit: DistanceUnit = "imperial",
+): {
   label: string;
   summary: string;
   hidingRadiusLabel: string;
 } {
+  const resolved = resolveDistanceUnit(unit);
+  const hidingRadiusLabel =
+    resolved === "metric"
+      ? size === "large"
+        ? "800 m"
+        : "400 m"
+      : size === "large"
+        ? "½ mile"
+        : "¼ mile";
+
   switch (size) {
     case "small":
       return {
         label: "Small",
-        summary: "Town or neighborhood — ¼ mi hiding zones",
-        hidingRadiusLabel: "¼ mile",
+        summary:
+          resolved === "metric"
+            ? "Town or neighborhood — 400 m hiding zones"
+            : "Town or neighborhood — ¼ mi hiding zones",
+        hidingRadiusLabel,
       };
     case "medium":
       return {
         label: "Medium",
-        summary: "City or metro area — ¼ mi hiding zones",
-        hidingRadiusLabel: "¼ mile",
+        summary:
+          resolved === "metric"
+            ? "City or metro area — 400 m hiding zones"
+            : "City or metro area — ¼ mi hiding zones",
+        hidingRadiusLabel,
       };
     case "large":
       return {
         label: "Large",
-        summary: "Region or country — ½ mi hiding zones",
-        hidingRadiusLabel: "½ mile",
+        summary:
+          resolved === "metric"
+            ? "Region or country — 800 m hiding zones"
+            : "Region or country — ½ mi hiding zones",
+        hidingRadiusLabel,
       };
     default: {
       const never: never = size;
@@ -139,14 +204,36 @@ export function gameSizeLabel(size: GameSize): {
   }
 }
 
-export function formatPlayAreaSummary(sqMi: number): string {
-  if (sqMi < 1) {
-    return `~${sqMi.toFixed(1)} sq mi play area`;
+export function formatPlayAreaSummary(
+  areaValue: number,
+  unit: DistanceUnit = "imperial",
+): string {
+  const resolved = resolveDistanceUnit(unit);
+
+  if (resolved === "metric") {
+    if (areaValue < 1) {
+      return `~${areaValue.toFixed(1)} km² play area`;
+    }
+    if (areaValue < 100) {
+      return `~${Math.round(areaValue)} km² play area`;
+    }
+    return `~${Math.round(areaValue).toLocaleString()} km² play area`;
   }
 
-  if (sqMi < 100) {
-    return `~${Math.round(sqMi)} sq mi play area`;
+  if (areaValue < 1) {
+    return `~${areaValue.toFixed(1)} sq mi play area`;
   }
+  if (areaValue < 100) {
+    return `~${Math.round(areaValue)} sq mi play area`;
+  }
+  return `~${Math.round(areaValue).toLocaleString()} sq mi play area`;
+}
 
-  return `~${Math.round(sqMi).toLocaleString()} sq mi play area`;
+export function playAreaValueForUnit(
+  gameArea: GameArea,
+  unit: DistanceUnit,
+): number {
+  return resolveDistanceUnit(unit) === "metric"
+    ? gameAreaSquareKilometers(gameArea)
+    : gameAreaSquareMiles(gameArea);
 }

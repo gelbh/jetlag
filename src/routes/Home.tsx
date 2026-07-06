@@ -147,6 +147,14 @@ export function Home() {
           <span>Join session</span>
           <span className="home-card-btn-hint">Enter 4-letter code</span>
         </Link>
+        <Link
+          to="/presets"
+          aria-label="Custom game presets"
+          className="home-card-btn home-card-btn-secondary"
+        >
+          <span>Custom game</span>
+          <span className="home-card-btn-hint">Saved templates</span>
+        </Link>
         {continueError ? <p className="text-error">{continueError}</p> : null}
       </div>
     </main>

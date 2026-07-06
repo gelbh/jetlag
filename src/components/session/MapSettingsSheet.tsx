@@ -38,6 +38,7 @@ interface MapSettingsSheetProps {
   ) => void;
   distanceUnit: DistanceUnit;
   onDistanceUnitChange: (unit: DistanceUnit) => void;
+  distanceUnitEditable?: boolean;
   mapStyle: MapStyle;
   onMapStyleChange: (style: MapStyle) => void;
   locationError?: string | null;
@@ -93,6 +94,7 @@ export function MapSettingsSheet({
   onLayerVisibilityChange,
   distanceUnit,
   onDistanceUnitChange,
+  distanceUnitEditable = false,
   mapStyle,
   onMapStyleChange,
   locationError,
@@ -184,6 +186,7 @@ export function MapSettingsSheet({
               onLowPowerModeChange={onLowPowerModeChange}
               distanceUnit={distanceUnit}
               onDistanceUnitChange={onDistanceUnitChange}
+              distanceUnitEditable={distanceUnitEditable}
               mapStyle={mapStyle}
               onMapStyleChange={onMapStyleChange}
               locationError={locationError}
@@ -228,6 +231,7 @@ export function MapSettingsSheet({
               ) : null}
               <AdvancedSessionSettings
                 gameSize={gameSize}
+                distanceUnit={distanceUnit}
                 value={advancedSettings}
                 onChange={onAdvancedSettingsChange}
                 disabled={!gameRulesEditable}
@@ -275,6 +279,7 @@ function MapSegment({
   onLowPowerModeChange,
   distanceUnit,
   onDistanceUnitChange,
+  distanceUnitEditable = false,
   mapStyle,
   onMapStyleChange,
   locationError,
@@ -308,6 +313,7 @@ function MapSegment({
   onLowPowerModeChange: (enabled: boolean) => void;
   distanceUnit: DistanceUnit;
   onDistanceUnitChange: (unit: DistanceUnit) => void;
+  distanceUnitEditable?: boolean;
   mapStyle: MapStyle;
   onMapStyleChange: (style: MapStyle) => void;
   locationError?: string | null;
@@ -368,8 +374,13 @@ function MapSegment({
         left={{ value: "metric", label: "Metric (km)" }}
         right={{ value: "imperial", label: "Imperial (mi)" }}
         selected={distanceUnit}
-        onSelect={onDistanceUnitChange}
+        onSelect={distanceUnitEditable ? onDistanceUnitChange : () => {}}
       />
+      {!distanceUnitEditable ? (
+        <p className="text-xs text-ink-dim">
+          Distance edition is set for this session by the host.
+        </p>
+      ) : null}
 
       <ChoicePair
         left={{ value: "standard", label: "Standard map" }}

@@ -29,7 +29,8 @@ import {
   usedRadarDistanceOptions,
   type RadarAnswer,
 } from "../../domain/radarQuestions";
-import { useAnnotationStore, useMapStore } from "../../state/sessionStore";
+import { useAnnotationStore } from "../../state/sessionStore";
+import { useSessionDistanceUnit } from "../../hooks/useSessionDistanceUnit";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
@@ -102,7 +103,7 @@ function AnnotationEditSheetForm({
   onDelete,
   onEditOnMap,
 }: AnnotationEditSheetProps) {
-  const distanceUnit = useMapStore((state) => state.distanceUnit);
+  const distanceUnit = useSessionDistanceUnit();
   const annotations = useAnnotationStore((state) => state.annotations);
   const usedRadarOptions = useMemo(
     () =>

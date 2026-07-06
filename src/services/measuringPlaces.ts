@@ -4,9 +4,10 @@ import {
   isPointInGameArea,
   type LatLngTuple,
 } from "../domain/geometry";
+import type { SessionCustomCategory } from "../domain/sessionCustomContent";
+import { measuringOverpassSelectorsForKind } from "../domain/sessionCustomCatalog";
 import {
   measuringLocationLabel,
-  measuringLocationOverpassSelectors,
   type MeasuringLocationCategory,
 } from "../domain/measuringQuestions";
 import { queryOverpass } from "./overpassClient";
@@ -125,14 +126,18 @@ export function parseMeasuringPlaces(
 export async function fetchMeasuringPlacesInArea(
   gameArea: GameArea,
   category: MeasuringLocationCategory,
+  customCategories: readonly SessionCustomCategory[] = [],
 ): Promise<MeasuringPlace[]> {
-  const selectors = measuringLocationOverpassSelectors(category);
+  const selectors = measuringOverpassSelectorsForKind(category, customCategories);
   if (selectors.length === 0) {
     return [];
   }
 
+  const cacheScope =
+    customCategories.length > 0 ? `${category}:custom` : category;
+
   return getOrFetchCached(
-    measuringPlacesCacheKey(gameArea, category),
+    measuringPlacesCacheKey(gameArea, cacheScope),
     async () => {
       const payload = await queryOverpass<{ elements: OverpassElement[] }>(
         buildMeasuringPlacesQuery(gameArea, selectors),
