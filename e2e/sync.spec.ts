@@ -64,7 +64,7 @@ test.describe("cross-device sync", () => {
 
     await hostPage.getByRole("button", { name: "Start" }).click();
 
-    await expect(guestPage.getByText(/\d{2}:\d{2}/)).toBeVisible({
+    await expect(guestPage.getByText(/\d{2}:\d{2}/).first()).toBeVisible({
       timeout: 15_000,
     });
 

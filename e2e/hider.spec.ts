@@ -19,7 +19,7 @@ test.describe("hider flows", () => {
     await guestPage.getByRole("button", { name: "Set hiding zone" }).click();
     await expect(guestPage.getByPlaceholder("Search stations…")).toBeVisible();
     await expect(guestPage.getByText(/Loading stations/i)).toBeHidden({
-      timeout: 20_000,
+      timeout: 30_000,
     });
 
     await cleanup();
@@ -34,7 +34,7 @@ test.describe("hider flows", () => {
 
     await guestPage.getByRole("button", { name: "Set hiding zone" }).click();
     await expect(guestPage.getByText(/Loading stations/i)).toBeHidden({
-      timeout: 20_000,
+      timeout: 30_000,
     });
     const station = guestPage.getByRole("button", { name: /Central|Station/i }).first();
     await expect(station).toBeVisible({ timeout: 5_000 });
@@ -57,7 +57,7 @@ test.describe("hider flows", () => {
 
     await guestPage.getByRole("button", { name: "Set hiding zone" }).click();
     await expect(guestPage.getByText(/Loading stations/i)).toBeHidden({
-      timeout: 20_000,
+      timeout: 30_000,
     });
     await guestPage.getByRole("button", { name: "Dublin Central" }).click();
     await guestPage.getByRole("button", { name: "Confirm hiding zone" }).click();

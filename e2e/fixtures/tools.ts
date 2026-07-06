@@ -8,7 +8,9 @@ import {
 } from "./base";
 
 async function advanceWizard(page: Page) {
-  await page.getByRole("button", { name: "Next" }).click();
+  const next = page.getByRole("button", { name: "Next" });
+  await expect(next).toBeEnabled({ timeout: 15_000 });
+  await next.click();
 }
 
 async function waitForWizardNext(page: Page) {
@@ -80,12 +82,12 @@ export async function sendMatchingToHiders(page: Page) {
 
 export async function completeMeasuringSolo(page: Page) {
   await clickToolDockButton(page, "Measuring");
-  await page.locator("select.field-input").selectOption("custom_place");
+  await page.locator("select.field-input").selectOption("museum");
   await advanceWizard(page);
   await clickMapCenter(page);
+  await waitForWizardNext(page);
   await advanceWizard(page);
-  await page.getByRole("button", { name: "Map", exact: true }).click();
-  await clickMapAt(page, 0.6, 0.4);
+  await waitForWizardNext(page);
   await advanceWizard(page);
   await page.getByRole("button", { name: "Closer" }).click();
   await page.getByRole("button", { name: "Add measure question" }).click();
@@ -94,12 +96,12 @@ export async function completeMeasuringSolo(page: Page) {
 
 export async function sendMeasuringToHiders(page: Page) {
   await clickToolDockButton(page, "Measuring");
-  await page.locator("select.field-input").selectOption("custom_place");
+  await page.locator("select.field-input").selectOption("museum");
   await advanceWizard(page);
   await clickMapCenter(page);
+  await waitForWizardNext(page);
   await advanceWizard(page);
-  await page.getByRole("button", { name: "Map", exact: true }).click();
-  await clickMapAt(page, 0.6, 0.4);
+  await waitForWizardNext(page);
   await advanceWizard(page);
   const sendButton = page.getByRole("button", { name: "Send to hiders" });
   await expect(sendButton).toBeEnabled({ timeout: 15_000 });
@@ -109,9 +111,11 @@ export async function sendMeasuringToHiders(page: Page) {
 
 export async function completeThermometerSolo(page: Page) {
   await clickToolDockButton(page, "Thermometer");
+  await page.getByRole("button", { name: "Manual pins" }).click();
   await advanceWizard(page);
-  await clickMapAt(page, 0.4, 0.5);
-  await clickMapAt(page, 0.6, 0.5);
+  await clickMapAt(page, 0.35, 0.5);
+  await clickMapAt(page, 0.65, 0.5);
+  await waitForWizardNext(page);
   await advanceWizard(page);
   await page.getByRole("button", { name: "Hotter" }).click();
   await page.getByRole("button", { name: "Add thermometer" }).click();
@@ -120,9 +124,11 @@ export async function completeThermometerSolo(page: Page) {
 
 export async function sendThermometerToHiders(page: Page) {
   await clickToolDockButton(page, "Thermometer");
+  await page.getByRole("button", { name: "Manual pins" }).click();
   await advanceWizard(page);
-  await clickMapAt(page, 0.4, 0.5);
-  await clickMapAt(page, 0.6, 0.5);
+  await clickMapAt(page, 0.35, 0.5);
+  await clickMapAt(page, 0.65, 0.5);
+  await waitForWizardNext(page);
   await advanceWizard(page);
   const sendButton = page.getByRole("button", { name: "Send to hiders" });
   await expect(sendButton).toBeEnabled({ timeout: 15_000 });
