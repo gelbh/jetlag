@@ -6,16 +6,18 @@ export interface MapBasemapDefinition {
   url: string;
   attribution: string;
   maxZoom: number;
+  subdomains?: string;
 }
 
 export const MAP_BASEMAPS = {
   standard: {
     id: "standard",
-    label: "Standard",
-    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    label: "Map",
+    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
     attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 19,
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    maxZoom: 20,
+    subdomains: "abcd",
   },
   satellite: {
     id: "satellite",

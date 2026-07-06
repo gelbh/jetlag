@@ -75,7 +75,7 @@ describe("MapScreen", () => {
 
     renderWithRouter(<MapScreen />, { route: "/map", resetStores: false });
 
-    expect(screen.getByRole("button", { name: "Pin" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Matching" })).toBeInTheDocument();
     expect(screen.getByTestId("map-screen-view")).toBeInTheDocument();
   });
 

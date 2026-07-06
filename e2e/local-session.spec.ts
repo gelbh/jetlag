@@ -8,7 +8,7 @@ test("creates a local session from home and opens the map", async ({ page }) => 
   await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
   await page.getByRole("button", { name: "Find place" }).click();
   await page.getByRole("button", { name: "Confirm game area" }).click();
-  await expect(page.getByRole("button", { name: "Pin" })).toBeVisible({
+  await expect(page.getByRole("button", { name: "Matching" })).toBeVisible({
     timeout: 15_000,
   });
 });

@@ -25,7 +25,11 @@ export function renderAnnotationLayerItem({
     return null;
   }
 
-  const color = annotation.metadata.color ?? MAP_ANNOTATION_COLORS.elimination;
+  const color =
+    annotation.metadata.color ??
+    (annotation.type === "pin"
+      ? MAP_ANNOTATION_COLORS.pin
+      : MAP_ANNOTATION_COLORS.elimination);
   const selected = annotation.id === selectedAnnotationId;
 
   // Committed question tools: elimination fill only (CombinedEliminationLayer).
@@ -84,7 +88,7 @@ export function renderAnnotationLayerItem({
         radius={8}
         interactive={selectionEnabled}
         pathOptions={{
-          color: "#ffffff",
+          color: MAP_ANNOTATION_COLORS.strokeLight,
           weight: 2,
           fillColor: color,
           fillOpacity: 1,

@@ -26,9 +26,9 @@ export function ToolPanelShell({
   return (
     <div className="space-y-2.5">
       {showHeader ? (
-        <div className="space-y-1">
+        <div className="space-y-1 border-b-2 border-border pb-2">
           {!prompt ? (
-            <p className="text-xs font-medium text-ink-dim">
+            <p className="font-display text-xs font-semibold uppercase tracking-[0.12em] text-highlight">
               {mapToolPlacingLabel(toolId)}
             </p>
           ) : null}

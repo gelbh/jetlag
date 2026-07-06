@@ -10,8 +10,10 @@ export function SettingsToggleRow({
   onChange,
 }: SettingsToggleRowProps) {
   return (
-    <label className="flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-[var(--radius-hud-md)] bg-surface-raised px-4 text-sm text-ink">
-      <span>{label}</span>
+    <label className="jl-toggle-row">
+      <span className="font-display text-xs font-semibold uppercase tracking-wide">
+        {label}
+      </span>
       <input
         type="checkbox"
         checked={checked}

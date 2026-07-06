@@ -21,6 +21,7 @@ import {
   safeDifference,
   type LatLngTuple,
 } from "../../domain/geometry";
+import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface GeometryEditLayerProps {
   annotation: AnnotationRecord;
@@ -88,7 +89,7 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
           center={center}
           radius={radius}
           pathOptions={{
-            color: "#38bdf8",
+            color: MAP_ANNOTATION_COLORS.radar,
             weight: 2,
             dashArray: "6 6",
             fillOpacity: 0.08,
@@ -98,9 +99,9 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
           center={center}
           radius={8}
           pathOptions={{
-            color: "#ffffff",
+            color: MAP_ANNOTATION_COLORS.strokeLight,
             weight: 2,
-            fillColor: "#38bdf8",
+            fillColor: MAP_ANNOTATION_COLORS.radar,
             fillOpacity: 1,
           }}
         />
@@ -116,7 +117,7 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
     const answerRadius =
       annotation.metadata.tentacleAnswerRadiusMeters ??
       TENTACLE_ANSWER_RADIUS_METERS;
-    const tentacleColor = annotation.metadata.color ?? "#22c55e";
+    const tentacleColor = annotation.metadata.color ?? MAP_ANNOTATION_COLORS.tentacle;
 
     if (annotation.metadata.tentacleOutOfReach) {
       return (
@@ -134,7 +135,7 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
             center={center}
             radius={8}
             pathOptions={{
-              color: "#ffffff",
+              color: MAP_ANNOTATION_COLORS.strokeLight,
               weight: 2,
               fillColor: tentacleColor,
               fillOpacity: 1,
@@ -191,7 +192,7 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
           center={center}
           radius={8}
           pathOptions={{
-            color: "#ffffff",
+            color: MAP_ANNOTATION_COLORS.strokeLight,
             weight: 2,
             fillColor: tentacleColor,
             fillOpacity: 1,
@@ -209,9 +210,9 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
         center={[point.coordinates[1], point.coordinates[0]]}
         radius={8}
         pathOptions={{
-          color: "#ffffff",
+          color: MAP_ANNOTATION_COLORS.strokeLight,
           weight: 2,
-          fillColor: "#38bdf8",
+          fillColor: MAP_ANNOTATION_COLORS.pin,
           fillOpacity: 1,
         }}
       />
@@ -233,15 +234,15 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
       <>
         <Polyline
           positions={[pointA, pointB]}
-          pathOptions={{ color: "#f87171", weight: 4, dashArray: "6 6" }}
+          pathOptions={{ color: MAP_ANNOTATION_COLORS.thermometerAxis, weight: 4, dashArray: "6 6" }}
         />
         <CircleMarker
           center={pointA}
           radius={7}
           pathOptions={{
-            color: "#fff",
+            color: MAP_ANNOTATION_COLORS.strokeLight,
             weight: 2,
-            fillColor: "#f87171",
+            fillColor: MAP_ANNOTATION_COLORS.thermometerA,
             fillOpacity: 1,
           }}
         />
@@ -249,9 +250,9 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
           center={pointB}
           radius={7}
           pathOptions={{
-            color: "#fff",
+            color: MAP_ANNOTATION_COLORS.strokeLight,
             weight: 2,
-            fillColor: "#fb923c",
+            fillColor: MAP_ANNOTATION_COLORS.thermometerB,
             fillOpacity: 1,
           }}
         />
@@ -270,7 +271,7 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
         <Polygon
           positions={ring}
           pathOptions={{
-            color: "#c084fc",
+            color: MAP_ANNOTATION_COLORS.zoneDraft,
             weight: 2,
             dashArray: "6 6",
             fillOpacity: 0.12,
@@ -282,8 +283,8 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
             center={vertex}
             radius={6}
             pathOptions={{
-              color: "#c084fc",
-              fillColor: "#c084fc",
+              color: MAP_ANNOTATION_COLORS.zoneDraft,
+              fillColor: MAP_ANNOTATION_COLORS.zoneDraft,
               fillOpacity: 1,
             }}
           />

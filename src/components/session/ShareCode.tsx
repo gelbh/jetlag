@@ -11,25 +11,19 @@ export function ShareCode({
 }: ShareCodeProps) {
   if (compact) {
     return (
-      <div className="min-h-12 flex-1 rounded-xl border border-border bg-surface-base/90 px-3 py-2 text-center">
-        <p className="text-[10px] uppercase tracking-[0.18em] text-ink-dim">
-          Code
-        </p>
-        <p className="text-lg font-bold tracking-[0.28em] text-status-info">
-          {code}
-        </p>
+      <div className="jl-stamp min-h-12 flex-1 justify-center text-center">
+        <span className="jl-stamp-label">Code</span>
+        <span className="jl-stamp-code text-lg">{code}</span>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-surface-base/90 px-4 py-3 text-center">
-      <p className="text-xs uppercase tracking-[0.2em] text-ink-dim">
-        Session code
-      </p>
-      <p className="mt-1 text-3xl font-bold tracking-[0.35em] text-status-info">
+    <div className="jl-stamp w-full items-center py-3 text-center">
+      <span className="jl-stamp-label">Session code</span>
+      <span className="jl-stamp-code mt-0.5 text-3xl tracking-[0.35em]">
         {code}
-      </p>
+      </span>
       <p className="mt-2 text-xs text-ink-dim">
         {remote
           ? "Share with others to sync live."

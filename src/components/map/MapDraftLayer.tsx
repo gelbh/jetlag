@@ -2,6 +2,7 @@ import { Fragment, memo } from "react";
 import { Circle, CircleMarker, Polygon, Polyline, Popup } from "react-leaflet";
 import type { MapDraftOverlay } from "../../domain/mapDraftOverlay";
 import { polygonFeatureToLeafletPolygonGroups } from "../../domain/geometry";
+import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface MapDraftLayerProps {
   overlays: readonly MapDraftOverlay[];
@@ -10,6 +11,8 @@ interface MapDraftLayerProps {
 export const MapDraftLayer = memo(function MapDraftLayer({
   overlays,
 }: MapDraftLayerProps) {
+  const c = MAP_ANNOTATION_COLORS;
+
   return (
     <>
       {overlays.map((overlay) => {
@@ -21,9 +24,9 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                 center={overlay.point}
                 radius={overlay.style?.markerRadius ?? 8}
                 pathOptions={{
-                  color: overlay.style?.color ?? "#ffffff",
+                  color: overlay.style?.color ?? c.strokeLight,
                   weight: overlay.style?.weight ?? 2,
-                  fillColor: overlay.style?.fillColor ?? "#38bdf8",
+                  fillColor: overlay.style?.fillColor ?? c.pin,
                   fillOpacity: overlay.style?.fillOpacity ?? 1,
                   className: overlay.style?.pulsing
                     ? "draft-seeker-pulse"
@@ -40,7 +43,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                 center={overlay.center}
                 radius={overlay.radiusMeters}
                 pathOptions={{
-                  color: overlay.style?.color ?? "#38bdf8",
+                  color: overlay.style?.color ?? c.radar,
                   weight: overlay.style?.weight ?? 2,
                   dashArray: overlay.style?.dashArray,
                   fillColor: overlay.style?.fillColor,
@@ -57,10 +60,10 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                       key={`${overlay.id}-${index}`}
                       positions={rings}
                       pathOptions={{
-                        color: overlay.style?.color ?? "#0ea5e9",
+                        color: overlay.style?.color ?? c.boundary,
                         weight: overlay.style?.weight ?? 1,
                         dashArray: overlay.style?.dashArray,
-                        fillColor: overlay.style?.fillColor ?? "#0ea5e9",
+                        fillColor: overlay.style?.fillColor ?? c.boundary,
                         fillOpacity: overlay.style?.fillOpacity ?? 0.2,
                       }}
                     />
@@ -74,7 +77,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                 key={overlay.id}
                 positions={overlay.positions}
                 pathOptions={{
-                  color: overlay.style?.color ?? "#f87171",
+                  color: overlay.style?.color ?? c.thermometerAxis,
                   weight: overlay.style?.weight ?? 4,
                   dashArray: overlay.style?.dashArray,
                 }}

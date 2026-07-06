@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
-import { clickMapCenter, openMapWithLocalSession } from "./fixtures/app";
+import { clickMapCenter, openMapWithLocalSession, selectDrawTool } from "./fixtures/app";
 
 test("supports undo after placing annotations", async ({ page }) => {
   await openMapWithLocalSession(page);
 
-  await page.getByRole("button", { name: "Pin" }).click();
+  await selectDrawTool(page, "Pin");
   await clickMapCenter(page);
   await expect(page.getByText("Location pinned on the map.")).toBeVisible();
   await page.getByPlaceholder("Closer to the train station than us").fill("Camp");

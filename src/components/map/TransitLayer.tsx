@@ -35,7 +35,7 @@ function vehicleIcon(bearing: number | undefined, color: string) {
   const rotation = bearing ?? 0;
   return L.divIcon({
     className: "",
-    html: `<div style="transform: rotate(${rotation}deg); width: 14px; height: 14px; border-radius: 9999px; background:${color}; border:2px solid #0f172a; box-shadow:0 0 0 1px ${color};"></div>`,
+    html: `<div style="transform: rotate(${rotation}deg); width: 14px; height: 14px; border-radius: 9999px; background:${color}; border:2px solid ${MAP_ANNOTATION_COLORS.playAreaMask}; box-shadow:0 0 0 1px ${color};"></div>`,
     iconSize: [14, 14],
     iconAnchor: [7, 7],
   });

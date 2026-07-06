@@ -36,8 +36,8 @@ export default defineConfig({
         name: "Jet Lag Map Companion",
         short_name: "Jetlag",
         description: "Live map annotations for Jet Lag Hide & Seek",
-        theme_color: "#0f172a",
-        background_color: "#0f172a",
+        theme_color: "#0E132C",
+        background_color: "#0E132C",
         display: "standalone",
         orientation: "portrait",
         start_url: "/",
@@ -59,6 +59,18 @@ export default defineConfig({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,svg,woff2}"],
         runtimeCaching: [
+          {
+            urlPattern:
+              /^https:\/\/([a-d]\.)?basemaps\.cartocdn\.com\/rastertiles\/voyager\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "carto-voyager-tiles",
+              expiration: {
+                maxEntries: 500,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
+              },
+            },
+          },
           {
             urlPattern: /^https:\/\/tile\.openstreetmap\.org\/.*/i,
             handler: "CacheFirst",

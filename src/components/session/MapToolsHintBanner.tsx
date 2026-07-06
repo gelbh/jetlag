@@ -38,11 +38,17 @@ export function MapToolsHintBanner({ hidden = false }: MapToolsHintBannerProps) 
           "calc(var(--dock-height) + env(safe-area-inset-bottom) + var(--chrome-gap-above-dock))",
       }}
     >
-      <div className="pointer-events-auto hud-panel mx-auto flex max-w-xl items-start gap-3 px-3 py-2.5">
-        <p className="flex-1 text-pretty text-sm text-ink-muted">
-          Radar, zone, and pin are on the bar. Matching, Measuring, Thermometer,
-          and Tentacles are under{" "}
-          <span className="font-medium text-ink">More</span> (⋯).
+      <div className="pointer-events-auto hud-panel mx-auto flex max-w-md items-start gap-3 px-3 py-2.5">
+        <p className="flex-1 text-pretty text-sm leading-snug text-ink-muted">
+          The five question tools are on the{" "}
+          <span className="font-display font-semibold uppercase tracking-wide text-ink">
+            bottom bar
+          </span>
+          . Use{" "}
+          <span className="font-display font-semibold uppercase tracking-wide text-ink">
+            Draw
+          </span>{" "}
+          for zone and pin markup.
         </p>
         <button
           type="button"

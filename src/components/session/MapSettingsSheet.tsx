@@ -106,20 +106,27 @@ export function MapSettingsSheet({
   return (
     <SettingsOverlay onClose={onClose}>
       <MobileSheet maxHeightClassName="max-h-[min(85dvh,760px)]">
-        <div className="sticky top-0 z-10 -mx-4 space-y-3 bg-surface-panel px-4 pb-3">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold">Settings</h2>
+        <div className="sticky top-0 z-10 -mx-4 space-y-3 bg-surface-panel px-4 pb-3 pt-1">
+          <div className="jl-settings-header flex items-center justify-between gap-3">
+            <div>
+              <p className="font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-blue">
+                Setup
+              </p>
+              <h2 className="font-display text-xl font-bold uppercase tracking-tight text-ink">
+                Settings
+              </h2>
+            </div>
             <button
               type="button"
               onClick={onClose}
-              className="min-h-12 rounded-[var(--radius-hud-md)] bg-surface-raised px-4 text-sm font-medium"
+              className="btn-secondary min-h-10 px-4 text-xs"
             >
               Close
             </button>
           </div>
 
           {pendingWrites > 0 ? (
-            <p className="rounded-[var(--radius-hud-md)] bg-status-warning-surface px-4 py-3 text-sm text-status-warning">
+            <p className="border-2 border-status-warning/40 bg-status-warning-surface px-3 py-2 text-sm font-semibold text-status-warning">
               {pendingWrites} pending sync
             </p>
           ) : null}
@@ -269,7 +276,7 @@ function MapSegment({
         onSelect={onMapStyleChange}
       />
       <p className="text-xs text-ink-dim">
-        Quick toggle: layers button on the map, above the dock.
+        Quick toggle: Map / Sat on the bottom tool bar.
       </p>
 
       {locationError ? (
@@ -312,16 +319,14 @@ function ChoicePair<T extends string>({
   onSelect: (value: T) => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="jl-choice-pair">
       {[left, right].map((option) => (
         <button
           key={option.value}
           type="button"
           onClick={() => onSelect(option.value)}
-          className={`min-h-12 rounded-[var(--radius-hud-md)] px-3 text-sm ${
-            selected === option.value
-              ? "bg-action text-action-ink"
-              : "bg-surface-raised text-ink"
+          className={`jl-choice-btn ${
+            selected === option.value ? "jl-choice-btn-selected" : ""
           }`}
         >
           {option.label}
@@ -353,20 +358,16 @@ function SessionSegment({
       <ShareCode code={sessionCode} remote={remoteSession} />
 
       {onExport ? (
-        <button
-          type="button"
-          onClick={onExport}
-          className="min-h-12 w-full rounded-[var(--radius-hud-md)] bg-surface-raised px-3 text-sm font-medium text-ink"
-        >
+        <button type="button" onClick={onExport} className="btn-secondary w-full">
           Export map
         </button>
       ) : null}
 
-      <div className="space-y-2 border-t border-border pt-4">
+      <div className="space-y-2 border-t-2 border-border pt-4">
         <button
           type="button"
           onClick={onClearMap}
-          className="min-h-12 w-full rounded-[var(--radius-hud-md)] bg-status-error-surface px-3 text-sm font-medium text-status-error"
+          className="btn-secondary w-full border-status-error/50 bg-status-error-surface text-status-error"
         >
           Clear map
         </button>
@@ -376,14 +377,14 @@ function SessionSegment({
             <button
               type="button"
               onClick={onResetBoard}
-              className="min-h-12 w-full rounded-[var(--radius-hud-md)] bg-status-warning-surface px-3 text-sm font-medium text-status-warning"
+              className="btn-secondary w-full border-status-warning/50 bg-status-warning-surface text-status-warning"
             >
               Reset board for everyone
             </button>
             <button
               type="button"
               onClick={onEndSession}
-              className="min-h-12 w-full rounded-[var(--radius-hud-md)] bg-status-error-surface px-3 text-sm font-medium text-status-error"
+              className="btn-secondary w-full border-status-error/50 bg-status-error-surface text-status-error"
             >
               End session
             </button>

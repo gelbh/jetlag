@@ -39,15 +39,65 @@ const OVERFLOW_TOOL_HINTS: Partial<Record<DockableMapTool, string>> = {
   tentacle: "Point-to-point questions",
 };
 
+const MARKUP_TOOL_HINTS: Partial<Record<DockableMapTool, string>> = {
+  zone: "Draw a play boundary",
+  pin: "Mark a point on the map",
+};
+
 /** One-line helper for overflow menu items (first visit / recall). */
 export function mapToolDockMenuHint(entry: MapToolDockEntry): string | null {
-  return OVERFLOW_TOOL_HINTS[entry.id] ?? null;
+  return (
+    OVERFLOW_TOOL_HINTS[entry.id] ?? MARKUP_TOOL_HINTS[entry.id] ?? null
+  );
 }
 
-export const QUICK_DOCK_TOOL_IDS = ["zone", "pin"] as const satisfies readonly DockableMapTool[];
+/** Five main question cards — always on the tool dock. */
+export const QUESTION_DOCK_TOOL_IDS = [
+  "matching",
+  "measuring",
+  "thermometer",
+  "radar",
+  "tentacle",
+] as const satisfies readonly DockableMapTool[];
 
-export function isQuickDockTool(id: DockableMapTool): id is (typeof QUICK_DOCK_TOOL_IDS)[number] {
-  return (QUICK_DOCK_TOOL_IDS as readonly string[]).includes(id);
+/** Map markup tools — zone and pin live in the Draw menu. */
+export const MARKUP_DOCK_TOOL_IDS = ["zone", "pin"] as const satisfies readonly DockableMapTool[];
+
+const DOCK_SHORT_LABELS: Record<(typeof QUESTION_DOCK_TOOL_IDS)[number], string> = {
+  matching: "Match",
+  measuring: "Measure",
+  thermometer: "Thermo",
+  radar: "Radar",
+  tentacle: "Tent",
+};
+
+export function isQuestionDockTool(
+  id: DockableMapTool,
+): id is (typeof QUESTION_DOCK_TOOL_IDS)[number] {
+  return (QUESTION_DOCK_TOOL_IDS as readonly string[]).includes(id);
+}
+
+export function isMarkupDockTool(
+  id: DockableMapTool,
+): id is (typeof MARKUP_DOCK_TOOL_IDS)[number] {
+  return (MARKUP_DOCK_TOOL_IDS as readonly string[]).includes(id);
+}
+
+/** Compact label for dock slots on narrow viewports. */
+export function mapToolDockShortLabel(id: DockableMapTool): string {
+  if (isQuestionDockTool(id)) {
+    return DOCK_SHORT_LABELS[id];
+  }
+
+  const entry = MAP_TOOL_DOCK_ENTRIES.find((item) => item.id === id);
+  return entry?.name ?? id;
+}
+
+/** @deprecated Use {@link MARKUP_DOCK_TOOL_IDS} — zone and pin moved to Draw menu. */
+export const QUICK_DOCK_TOOL_IDS = MARKUP_DOCK_TOOL_IDS;
+
+export function isQuickDockTool(id: DockableMapTool): id is (typeof MARKUP_DOCK_TOOL_IDS)[number] {
+  return isMarkupDockTool(id);
 }
 
 export function mapToolPlacingLabel(id: DockableMapTool): string {

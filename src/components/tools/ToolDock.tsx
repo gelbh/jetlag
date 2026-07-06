@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState } from "react";
+import type { MapStyle } from "../../domain/mapBasemaps";
 import {
   MAP_TOOL_DOCK_ENTRIES,
-  QUICK_DOCK_TOOL_IDS,
-  isQuickDockTool,
+  MARKUP_DOCK_TOOL_IDS,
+  QUESTION_DOCK_TOOL_IDS,
+  isMarkupDockTool,
   mapToolDockMenuHint,
   mapToolDockMenuLabel,
+  mapToolDockShortLabel,
 } from "../../domain/mapTools";
 import type { MapTool } from "../../state/sessionStore";
 import {
-  HudMoreIcon,
+  HudDrawIcon,
+  HudLayersIcon,
   HudRedoIcon,
   HudSettingsIcon,
   HudToolIcon,
@@ -23,17 +27,13 @@ interface ToolDockProps {
   onUndo: () => void;
   onRedo: () => void;
   onOpenSettings: () => void;
-  showToolLabels?: boolean;
+  mapStyle?: MapStyle;
+  onMapStyleChange?: (style: MapStyle) => void;
 }
 
-const overflowTools = MAP_TOOL_DOCK_ENTRIES.filter(
-  (tool) => !isQuickDockTool(tool.id),
+const markupTools = MAP_TOOL_DOCK_ENTRIES.filter((tool) =>
+  isMarkupDockTool(tool.id),
 );
-
-const QUICK_TOOL_LABELS: Record<(typeof QUICK_DOCK_TOOL_IDS)[number], string> = {
-  zone: "Zone",
-  pin: "Pin",
-};
 
 export function ToolDock({
   activeTool,
@@ -43,25 +43,26 @@ export function ToolDock({
   onUndo,
   onRedo,
   onOpenSettings,
-  showToolLabels = true,
+  mapStyle,
+  onMapStyleChange,
 }: ToolDockProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [drawMenuOpen, setDrawMenuOpen] = useState(false);
   const dockRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!menuOpen) {
+    if (!drawMenuOpen) {
       return;
     }
 
     const handlePointerDown = (event: PointerEvent) => {
       if (dockRef.current && !dockRef.current.contains(event.target as Node)) {
-        setMenuOpen(false);
+        setDrawMenuOpen(false);
       }
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setMenuOpen(false);
+        setDrawMenuOpen(false);
       }
     };
 
@@ -71,17 +72,50 @@ export function ToolDock({
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [menuOpen]);
+  }, [drawMenuOpen]);
 
   const selectTool = (tool: MapTool) => {
     onSelect(activeTool === tool ? "none" : tool);
-    setMenuOpen(false);
+    setDrawMenuOpen(false);
   };
 
-  const renderOverflowItem = (
-    tool: (typeof MAP_TOOL_DOCK_ENTRIES)[number],
+  const markupActive = MARKUP_DOCK_TOOL_IDS.some((toolId) => activeTool === toolId);
+  const nextMapStyle = mapStyle === "standard" ? "satellite" : "standard";
+  const mapStyleLabel =
+    mapStyle === "standard" ? "Switch to satellite view" : "Switch to map view";
+
+  const renderQuestionTool = (
+    toolId: (typeof QUESTION_DOCK_TOOL_IDS)[number],
   ) => {
+    const entry = MAP_TOOL_DOCK_ENTRIES.find((item) => item.id === toolId);
+    if (!entry) {
+      return null;
+    }
+
+    const active = activeTool === toolId;
+
+    return (
+      <button
+        key={toolId}
+        type="button"
+        disabled={!entry.enabled}
+        onClick={() => selectTool(toolId)}
+        className={`jl-tool-slot ${active ? "jl-tool-slot-active" : ""}`}
+        aria-label={entry.name}
+        aria-pressed={active}
+        title={mapToolDockMenuHint(entry) ?? entry.name}
+      >
+        <span className="jl-tool-slot-icon">
+          <HudToolIcon tool={toolId} className="h-5 w-5 shrink-0" />
+        </span>
+        <span className="jl-tool-slot-label">{mapToolDockShortLabel(toolId)}</span>
+      </button>
+    );
+  };
+
+  const renderMarkupItem = (tool: (typeof MAP_TOOL_DOCK_ENTRIES)[number]) => {
     const hint = mapToolDockMenuHint(tool);
+    const active = activeTool === tool.id;
 
     return (
       <button
@@ -90,17 +124,17 @@ export function ToolDock({
         role="menuitem"
         disabled={!tool.enabled}
         onClick={() => selectTool(tool.id)}
-        className={`flex min-h-12 w-full flex-col items-start justify-center rounded-[var(--radius-hud-md)] px-3 py-2 text-left disabled:opacity-40 ${
-          activeTool === tool.id
-            ? "bg-action text-action-ink"
-            : "text-ink hover:bg-surface-raised"
+        className={`jl-tool-menu-item disabled:opacity-40 ${
+          active ? "jl-tool-menu-item-active" : "jl-tool-menu-item-default"
         }`}
       >
-        <span className="text-sm font-medium">{mapToolDockMenuLabel(tool)}</span>
+        <span className="font-display text-sm font-semibold uppercase tracking-wide">
+          {mapToolDockMenuLabel(tool)}
+        </span>
         {hint ? (
           <span
-            className={`text-xs ${
-              activeTool === tool.id ? "text-action-ink/80" : "text-ink-dim"
+            className={`text-xs leading-snug ${
+              active ? "text-action-ink/80" : "text-ink-dim"
             }`}
           >
             {hint}
@@ -110,111 +144,102 @@ export function ToolDock({
     );
   };
 
-  const dockIconClass = (active: boolean) =>
-    `flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-[var(--radius-hud-md)] border border-border bg-surface-panel text-ink transition-colors sm:h-12 sm:w-12 ${
-      active
-        ? "border-action/55 bg-action-soft text-status-info"
-        : "hover:bg-surface-raised"
-    }`;
-
   return (
-    <div
-      ref={dockRef}
-      className="pointer-events-auto fixed inset-x-0 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2"
-      style={{ bottom: 0 }}
-    >
-      {menuOpen ? (
+    <div ref={dockRef} className="jl-tool-dock pointer-events-auto">
+      {drawMenuOpen ? (
         <div
-          className="hud-panel absolute bottom-[calc(100%+var(--chrome-gap-above-dock))] right-2 min-w-[15rem] max-w-[min(100vw-1rem,18rem)] overflow-hidden p-2"
+          className="jl-tool-menu jl-tool-menu-dock hud-panel"
           role="menu"
-          aria-label="More map tools"
+          aria-label="Draw on map"
         >
-          {overflowTools.map(renderOverflowItem)}
+          {markupTools.map(renderMarkupItem)}
         </div>
       ) : null}
 
-      <div className="mx-auto flex w-full min-w-0 max-w-xl items-stretch gap-1 rounded-[var(--radius-hud-xl)] border border-border bg-surface-panel px-1.5 py-1.5 shadow-[var(--shadow-hud-float)] sm:gap-1.5">
-        <div className="dock-segment shrink-0">
+      <div className="jl-tool-dock-bar">
+        <div className="jl-tool-dock-group" aria-label="History">
           <button
             type="button"
             onClick={onUndo}
             disabled={!canUndo}
-            className="hud-chrome h-11 w-11 shrink-0 shadow-none sm:h-12 sm:w-12"
+            className="jl-tool-slot"
             aria-label="Undo last annotation"
           >
-            <HudUndoIcon className="h-5 w-5" />
+            <span className="jl-tool-slot-icon">
+              <HudUndoIcon className="h-5 w-5" />
+            </span>
+            <span className="jl-tool-slot-label">Undo</span>
           </button>
           <button
             type="button"
             onClick={onRedo}
             disabled={!canRedo}
-            className="hud-chrome h-11 w-11 shrink-0 shadow-none sm:h-12 sm:w-12"
+            className="jl-tool-slot"
             aria-label="Redo last annotation"
           >
-            <HudRedoIcon className="h-5 w-5" />
+            <span className="jl-tool-slot-icon">
+              <HudRedoIcon className="h-5 w-5" />
+            </span>
+            <span className="jl-tool-slot-label">Redo</span>
           </button>
         </div>
 
-        <div className="dock-segment-divider shrink-0" aria-hidden="true" />
+        <div className="jl-tool-dock-divider" aria-hidden="true" />
 
         <div
-          className="dock-segment min-w-0 flex-1 overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          aria-label="Map tools"
+          className="jl-tool-dock-group jl-tool-dock-group-main"
+          aria-label="Question tools"
         >
-          {QUICK_DOCK_TOOL_IDS.map((toolId) => {
-            const entry = MAP_TOOL_DOCK_ENTRIES.find(
-              (item) => item.id === toolId,
-            );
-            if (!entry) {
-              return null;
-            }
-
-            return (
-              <button
-                key={toolId}
-                type="button"
-                disabled={!entry.enabled}
-                onClick={() => selectTool(toolId)}
-                className={dockIconClass(activeTool === toolId)}
-                aria-label={entry.name}
-                aria-pressed={activeTool === toolId}
-              >
-                <HudToolIcon tool={toolId} className="h-5 w-5 shrink-0" />
-                {showToolLabels ? (
-                  <span className="mt-0.5 text-[10px] font-medium leading-none text-ink-dim">
-                    {QUICK_TOOL_LABELS[toolId]}
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-
-          <button
-            type="button"
-            onClick={() => setMenuOpen((open) => !open)}
-            className={`hud-chrome h-11 w-11 shrink-0 shadow-none sm:h-12 sm:w-12 ${
-              menuOpen || overflowTools.some((tool) => tool.id === activeTool)
-                ? "hud-chrome-active"
-                : ""
-            }`}
-            aria-label="More map tools"
-            aria-expanded={menuOpen}
-            aria-haspopup="menu"
-          >
-            <HudMoreIcon className="h-5 w-5" />
-          </button>
+          {QUESTION_DOCK_TOOL_IDS.map((toolId) => renderQuestionTool(toolId))}
         </div>
 
-        <div className="dock-segment-divider shrink-0" aria-hidden="true" />
+        <div className="jl-tool-dock-divider" aria-hidden="true" />
 
-        <div className="dock-segment shrink-0">
+        <div className="jl-tool-dock-group jl-tool-dock-group-end">
+          <button
+            type="button"
+            onClick={() => setDrawMenuOpen((open) => !open)}
+            className={`jl-tool-slot ${
+              drawMenuOpen || markupActive ? "jl-tool-slot-active" : ""
+            }`}
+            aria-label="Draw on map"
+            aria-expanded={drawMenuOpen}
+            aria-haspopup="menu"
+            title="Zone and pin"
+          >
+            <span className="jl-tool-slot-icon">
+              <HudDrawIcon className="h-5 w-5" />
+            </span>
+            <span className="jl-tool-slot-label">Draw</span>
+          </button>
+
+          {mapStyle && onMapStyleChange ? (
+            <button
+              type="button"
+              onClick={() => onMapStyleChange(nextMapStyle)}
+              className="jl-tool-slot"
+              aria-label={mapStyleLabel}
+              title={mapStyleLabel}
+            >
+              <span className="jl-tool-slot-icon">
+                <HudLayersIcon className="h-5 w-5" />
+              </span>
+              <span className="jl-tool-slot-label">
+                {mapStyle === "standard" ? "Map" : "Sat"}
+              </span>
+            </button>
+          ) : null}
+
           <button
             type="button"
             onClick={onOpenSettings}
-            className="hud-chrome h-11 w-11 shrink-0 shadow-none sm:h-12 sm:w-12"
+            className="jl-tool-slot"
             aria-label="Open settings"
           >
-            <HudSettingsIcon className="h-5 w-5" />
+            <span className="jl-tool-slot-icon">
+              <HudSettingsIcon className="h-5 w-5" />
+            </span>
+            <span className="jl-tool-slot-label">Setup</span>
           </button>
         </div>
       </div>

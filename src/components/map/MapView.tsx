@@ -167,6 +167,7 @@ export function MapView({
           attribution={basemap.attribution}
           url={basemap.url}
           maxZoom={basemap.maxZoom}
+          {...(basemap.subdomains ? { subdomains: basemap.subdomains } : {})}
         />
         <MapEvents onBoundsChange={onBoundsChange} onMapClick={onMapClick} />
         {chromeHudRef ? (

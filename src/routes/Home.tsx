@@ -68,21 +68,23 @@ export function Home() {
   };
 
   return (
-    <main className="home-terminal home-terminal-accent flex min-h-[100dvh] flex-col justify-between px-5 py-8">
-      <div className="space-y-4 pt-[max(1rem,env(safe-area-inset-top))]">
-        <p className="text-xs font-medium uppercase tracking-[0.08em] text-ink-dim">
-          Field map companion
+    <main className="home-poster home-terminal-accent flex min-h-[100dvh] flex-col justify-between px-5 py-8">
+      <div className="space-y-3 pt-[max(1.25rem,env(safe-area-inset-top))]">
+        <p className="font-display text-sm font-semibold uppercase tracking-[0.2em] text-brand-blue">
+          Jet Lag
         </p>
-        <h1 className="text-balance text-[clamp(1.875rem,5vw,2.25rem)] font-semibold leading-tight text-ink">
-          Jet Lag Map Companion
+        <h1 className="font-display text-balance text-[clamp(2.75rem,14vw,4.25rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
+          Hide +
+          <br />
+          Seek
         </h1>
-        <p className="max-w-md text-pretty text-base text-ink-muted">
-          Mark the live search map — radar circles, zones, pins, and question
-          tools for your team.
+        <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
+          Live map tools for seekers and hiders — radar, zones, pins, and
+          question overlays synced to your team.
         </p>
       </div>
 
-      <div className="space-y-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="home-enter-actions space-y-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
         {session ? (
           <button
             type="button"
@@ -94,23 +96,21 @@ export function Home() {
                 ? `Verifying session ${session.code}`
                 : `Return to map for session ${session.code}`
             }
-            className="btn-primary home-resume-action disabled:opacity-50"
+            className="home-card-btn home-card-btn-primary disabled:opacity-50"
           >
-            <span className="home-resume-readout">
-              <span className="home-resume-label">Active session</span>
-              <span className="home-resume-code">{session.code}</span>
+            <span>
+              <span className="home-card-btn-hint block">Active session</span>
+              <span className="font-mono text-xl font-bold tracking-[0.22em]">
+                {session.code}
+              </span>
             </span>
-            <span
-              className="home-resume-divider"
-              aria-hidden="true"
-            />
-            <span className="home-resume-cta">
+            <span className="flex items-center gap-1.5 text-sm">
               {continuing ? (
                 "Verifying…"
               ) : (
                 <>
-                  <HudPlayIcon className="h-4 w-4 shrink-0" />
-                  Return to map
+                  <HudPlayIcon className="h-4 w-4" />
+                  Map
                 </>
               )}
             </span>
@@ -118,19 +118,19 @@ export function Home() {
         ) : null}
         <Link
           to="/create"
+          aria-label="Create session"
           className={
             session
-              ? "btn-secondary min-h-14 w-full border border-border"
-              : "btn-primary min-h-14 w-full"
+              ? "home-card-btn home-card-btn-secondary"
+              : "home-card-btn home-card-btn-primary"
           }
         >
-          Create session
+          <span>Create session</span>
+          <span className="home-card-btn-hint">Host a game</span>
         </Link>
-        <Link
-          to="/join"
-          className="btn-secondary min-h-14 w-full border border-border"
-        >
-          Join session
+        <Link to="/join" aria-label="Join session" className="home-card-btn home-card-btn-secondary">
+          <span>Join session</span>
+          <span className="home-card-btn-hint">Enter 4-letter code</span>
         </Link>
         {continueError ? <p className="text-error">{continueError}</p> : null}
       </div>

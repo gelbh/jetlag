@@ -49,15 +49,17 @@ export function LayerVisibilityGrid({
       {LAYER_ITEMS.map(({ key, label, color }) => (
         <label
           key={key}
-          className="flex min-h-12 cursor-pointer items-center justify-between gap-2 rounded-[var(--radius-hud-md)] bg-surface-raised px-3 text-sm text-ink"
+          className="jl-toggle-row text-sm"
         >
           <span className="flex min-w-0 items-center gap-2">
             <span
-              className="h-2.5 w-2.5 shrink-0 rounded-full"
+              className="h-2.5 w-2.5 shrink-0"
               style={{ backgroundColor: color }}
               aria-hidden="true"
             />
-            <span className="truncate">{label}</span>
+            <span className="truncate font-display text-xs font-semibold uppercase tracking-wide">
+              {label}
+            </span>
           </span>
           <input
             type="checkbox"

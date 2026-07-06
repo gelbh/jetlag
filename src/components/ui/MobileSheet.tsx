@@ -17,12 +17,9 @@ export function MobileSheet({
     >
       <div className="mx-auto w-full max-w-xl">
         <div
-          className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-border-muted"
-          aria-hidden="true"
-        />
-        <div
           className={`${maxHeightClassName} overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3`}
         >
+          <div className="jl-sheet-handle" aria-hidden="true" />
           {children}
         </div>
       </div>

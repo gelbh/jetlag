@@ -107,8 +107,8 @@ function syncRailDisplay(
         visible: true,
         label:
           queuedWrites > 0
-            ? `Connection unstable · ${queuedWrites} queued`
-            : "Connection unstable",
+            ? `Unstable · ${queuedWrites} queued`
+            : "Unstable",
         tone: "warning",
       },
       banner: null,
@@ -150,8 +150,8 @@ export function MapStatusRail({
   const railRef = useRef<HTMLDivElement>(null);
   const placing = activeTool !== "none";
   const modeLabel = placing
-    ? `Placing ${mapToolPlacingLabel(activeTool)}`
-    : "Tap pin or zone";
+    ? mapToolPlacingLabel(activeTool)
+    : "Ready to seek";
   const sync = syncRailDisplay(syncStatus, queuedWrites, message);
 
   useEffect(() => {
@@ -182,12 +182,12 @@ export function MapStatusRail({
   return (
     <div
       ref={railRef}
-      className="pointer-events-none absolute inset-x-0 top-0 z-[var(--z-banner)] px-3 pt-[max(0.5rem,env(safe-area-inset-top))]"
+      className="pointer-events-none absolute inset-x-0 top-0 z-[var(--z-banner)] pt-[max(0px,env(safe-area-inset-top))]"
     >
-      <div className="relative mx-auto w-full max-w-xl">
+      <div className="relative">
         {timerMenuOpen ? (
           <div
-            className="hud-panel pointer-events-auto absolute inset-x-0 top-[calc(100%+var(--chrome-gap-above-dock))] z-[var(--z-panel)] space-y-2 p-3 pt-10"
+            className="hud-panel pointer-events-auto absolute inset-x-3 top-[calc(100%+0.375rem)] z-[var(--z-panel)] mx-auto max-w-md space-y-2 p-3 pt-10"
             role="menu"
             aria-label="Timer settings"
           >
@@ -195,7 +195,7 @@ export function MapStatusRail({
               label="Close timer settings"
               onClick={() => setTimerMenuOpen(false)}
             />
-            <p className="px-1 font-mono text-lg tabular-nums text-ink">
+            <p className="px-1 font-mono text-2xl font-bold tabular-nums text-ink">
               <SessionTimerLabel timerState={timerState} />
             </p>
             <TimerActions
@@ -210,98 +210,79 @@ export function MapStatusRail({
           </div>
         ) : null}
 
-        <div className="map-status-rail pointer-events-auto flex w-full min-w-0 items-center gap-2 overflow-hidden rounded-[var(--radius-hud-lg)] border border-border bg-surface-panel px-2 py-1.5 shadow-[var(--shadow-hud-float)]">
-        <Link
-          to="/"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-hud-md)] text-ink transition-colors hover:bg-surface-raised"
-          aria-label="Home"
-        >
-          <HudHomeIcon className="h-5 w-5" />
-        </Link>
+        <div className="jl-status-bar">
+          <div className="jl-status-bar-inner">
+            <Link
+              to="/"
+              className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-transparent text-ink transition-colors hover:border-border hover:bg-surface-raised"
+              aria-label="Home"
+            >
+              <HudHomeIcon className="h-5 w-5" />
+            </Link>
 
-        <div
-          className="hidden h-5 w-px shrink-0 bg-border sm:block"
-          aria-hidden="true"
-        />
+            <div className="jl-stamp">
+              <span className="jl-stamp-label">Session</span>
+              <span className="jl-stamp-code">{sessionCode}</span>
+            </div>
 
-        <div className="flex min-w-0 shrink-0 flex-col leading-tight">
-          <span className="text-[10px] font-medium uppercase tracking-[0.06em] text-ink-dim">
-            Session
-          </span>
-          <span className="font-mono text-sm font-medium tabular-nums text-ink">
-            {sessionCode}
-          </span>
+            <p
+              className={`jl-mode-ticker flex-1 ${
+                placing ? "text-highlight" : "text-ink-muted"
+              }`}
+            >
+              {modeLabel}
+            </p>
+
+            {!timerHasStarted ? (
+              canStartGame ? (
+                <button
+                  type="button"
+                  onClick={onStartGame}
+                  className="btn-primary min-h-10 shrink-0 px-3 text-xs sm:text-sm"
+                >
+                  <HudPlayIcon className="h-4 w-4 shrink-0" />
+                  Start
+                </button>
+              ) : (
+                <p className="dock-waiting-host max-w-[6.5rem] shrink-0 px-2 text-[10px] sm:max-w-none">
+                  Waiting…
+                </p>
+              )
+            ) : (
+              <button
+                type="button"
+                onClick={() => setTimerMenuOpen((open) => !open)}
+                className={`jl-ticker ${timerRunning ? "jl-ticker-active" : "jl-ticker-idle"}`}
+                aria-label="Elapsed time. Open timer settings"
+                aria-expanded={timerMenuOpen}
+                aria-haspopup="menu"
+                aria-live="polite"
+              >
+                <SessionTimerLabel timerState={timerState} />
+              </button>
+            )}
+
+            {sync.inline?.visible && sync.inline.label ? (
+              <p
+                className={`hidden max-w-[5.5rem] shrink-0 truncate text-[10px] font-semibold uppercase tracking-wide sm:block sm:max-w-[8rem] sm:text-xs ${SYNC_TONE_CLASSES[sync.inline.tone].text}`}
+                title={sync.inline.label}
+              >
+                {sync.inline.label}
+              </p>
+            ) : null}
+          </div>
         </div>
 
-        <div className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
-
-        {!timerHasStarted ? (
-          canStartGame ? (
-            <button
-              type="button"
-              onClick={onStartGame}
-              className="btn-primary dock-start-game min-h-10 shrink-0 px-3 text-sm sm:min-h-11"
-            >
-              <HudPlayIcon className="h-4 w-4 shrink-0" />
-              Start game
-            </button>
-          ) : (
-            <p className="dock-waiting-host max-w-[7rem] shrink-0 px-2 text-xs sm:max-w-none sm:text-sm">
-              Waiting for host…
-            </p>
-          )
-        ) : (
-          <button
-            type="button"
-            onClick={() => setTimerMenuOpen((open) => !open)}
-            className={`hud-chrome min-h-10 shrink-0 px-2 font-mono text-xs tabular-nums shadow-none sm:min-h-11 sm:px-3 sm:text-sm ${
-              timerRunning ? "hud-chrome-active" : ""
-            }`}
-            aria-label="Elapsed time. Open timer settings"
-            aria-expanded={timerMenuOpen}
-            aria-haspopup="menu"
+        {sync.banner?.visible ? (
+          <p
+            className={`pointer-events-auto mx-3 mt-1.5 border-2 px-3 py-2 text-center text-sm font-semibold text-pretty ${SYNC_TONE_CLASSES[sync.banner.tone].surface} ${SYNC_TONE_CLASSES[sync.banner.tone].border} ${SYNC_TONE_CLASSES[sync.banner.tone].text}`}
+            role="status"
             aria-live="polite"
           >
-            <SessionTimerLabel timerState={timerState} />
-          </button>
-        )}
-
-        <div className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
-
-        <p
-          className={`min-w-0 flex-1 truncate text-sm font-medium ${
-            placing ? "text-status-info" : "text-ink-secondary"
-          }`}
-        >
-          {modeLabel}
-        </p>
-
-        {sync.inline?.visible && sync.inline.label ? (
-          <>
-            <div
-              className="hidden h-5 w-px shrink-0 bg-border sm:block"
-              aria-hidden="true"
-            />
-            <p
-              className={`max-w-[7rem] shrink-0 truncate text-xs font-medium sm:max-w-[10rem] sm:text-sm ${SYNC_TONE_CLASSES[sync.inline.tone].text}`}
-              title={sync.inline.label}
-            >
-              {sync.inline.label}
-            </p>
-          </>
+            {sync.banner.label}
+          </p>
         ) : null}
-        </div>
       </div>
-
-      {sync.banner?.visible ? (
-        <p
-          className={`pointer-events-auto mx-auto mt-1.5 w-full max-w-xl rounded-[var(--radius-hud-xl)] border px-3 py-2 text-center text-sm font-medium text-pretty ${SYNC_TONE_CLASSES[sync.banner.tone].surface} ${SYNC_TONE_CLASSES[sync.banner.tone].border} ${SYNC_TONE_CLASSES[sync.banner.tone].text}`}
-          role="status"
-          aria-live="polite"
-        >
-          {sync.banner.label}
-        </p>
-      ) : null}
     </div>
   );
 }

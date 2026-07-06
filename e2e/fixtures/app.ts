@@ -109,7 +109,10 @@ export async function blockExternalAssets(page: Page) {
       return;
     }
 
-    if (hostname === "tile.openstreetmap.org") {
+    if (
+      hostname === "tile.openstreetmap.org" ||
+      hostname.endsWith(".basemaps.cartocdn.com")
+    ) {
       await route.fulfill({
         status: 200,
         contentType: "image/png",
@@ -167,9 +170,14 @@ export async function createSessionFromCreatePage(page: Page) {
   await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
   await page.getByRole("button", { name: "Find place" }).click();
   await page.getByRole("button", { name: "Confirm game area" }).click();
-  await expect(page.getByRole("button", { name: "Pin" })).toBeVisible({
+  await expect(page.getByRole("button", { name: "Matching" })).toBeVisible({
     timeout: 15_000,
   });
+}
+
+export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
+  await page.getByRole("button", { name: "Draw on map" }).click();
+  await page.getByRole("menuitem", { name: toolName }).click();
 }
 
 export async function prepareE2EPage(page: Page) {
@@ -190,5 +198,5 @@ export async function openMapWithLocalSession(page: Page) {
   await prepareE2EPage(page);
   await seedLocalSession(page);
   await page.goto("/map");
-  await page.getByRole("button", { name: "Pin" }).waitFor();
+  await page.getByRole("button", { name: "Matching" }).waitFor();
 }

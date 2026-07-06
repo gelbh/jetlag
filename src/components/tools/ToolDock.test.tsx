@@ -4,7 +4,7 @@ import { ToolDock } from "./ToolDock";
 import { renderWithRouter } from "../../test/renderWithRouter";
 
 describe("ToolDock", () => {
-  it("exposes quick tools and overflow menu entries", () => {
+  it("exposes question tools on the dock and markup tools in Draw", () => {
     renderWithRouter(
       <ToolDock
         activeTool="none"
@@ -17,14 +17,14 @@ describe("ToolDock", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: "Pin" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Zone" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Matching" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Measuring" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Radar" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Pin" })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "More map tools" }));
+    fireEvent.click(screen.getByRole("button", { name: "Draw on map" }));
 
-    expect(screen.getByRole("menuitem", { name: /Radar/i })).toBeInTheDocument();
-    expect(
-      screen.getByRole("menuitem", { name: /Measuring/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: /Pin/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: /Zone/i })).toBeInTheDocument();
   });
 });

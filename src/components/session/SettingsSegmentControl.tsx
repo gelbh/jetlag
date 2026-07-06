@@ -17,7 +17,7 @@ export function SettingsSegmentControl({
 }: SettingsSegmentControlProps) {
   return (
     <div
-      className="grid grid-cols-3 gap-1 rounded-[var(--radius-hud-md)] bg-surface-raised p-1"
+      className="jl-segment-control"
       role="tablist"
       aria-label="Settings sections"
     >
@@ -31,10 +31,8 @@ export function SettingsSegmentControl({
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(segment.id)}
-            className={`min-h-12 rounded-[var(--radius-hud-sm)] px-2 text-sm font-medium transition-[background-color,color] duration-150 ease-out motion-reduce:transition-none ${
-              selected
-                ? "bg-action text-action-ink"
-                : "text-ink-secondary hover:text-ink"
+            className={`jl-segment-btn ${
+              selected ? "jl-segment-btn-selected" : ""
             }`}
           >
             {segment.label}

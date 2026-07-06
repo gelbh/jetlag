@@ -282,10 +282,6 @@ export function CreateSession() {
         );
         setSession(session);
         setPremiumApiContext(session);
-        preloadGameAreaCaches(gameArea);
-        if (navigator.onLine) {
-          await preloadCriticalGameAreaCaches(gameArea);
-        }
       } else {
         const localSession = {
           id: LOCAL_SESSION_ID,
@@ -298,12 +294,12 @@ export function CreateSession() {
         };
         setSession(localSession);
         setPremiumApiContext(localSession);
-        preloadGameAreaCaches(gameArea);
-        if (navigator.onLine) {
-          await preloadCriticalGameAreaCaches(gameArea);
-        }
       }
 
+      preloadGameAreaCaches(gameArea);
+      if (navigator.onLine) {
+        void preloadCriticalGameAreaCaches(gameArea);
+      }
       navigate("/map");
     } catch (nextError) {
       setError(
@@ -336,13 +332,19 @@ export function CreateSession() {
       </MapView>
 
       <MobileSheet maxHeightClassName="max-h-[min(78dvh,720px)]">
-        <h1 className="text-xl font-semibold text-ink">Frame the game area</h1>
-        <p className="mt-2 text-pretty text-sm text-ink-muted">
+        <p className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-brand-blue">
+          New game
+        </p>
+        <h1 className="mt-1 font-display text-2xl font-bold uppercase leading-tight tracking-tight text-ink">
+          Frame the game area
+        </h1>
+        <p className="mt-2 text-pretty text-sm leading-relaxed text-ink-muted">
           Search for a city or county to use its boundary, or pan and zoom to
           frame a custom play area.
         </p>
 
-        <label className="field-label mt-4">
+        <div className="jl-field-frame mt-4 space-y-3">
+        <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
           City, county, state, or country
           <input
             value={locationQuery}
@@ -369,22 +371,22 @@ export function CreateSession() {
           type="button"
           onClick={() => void handleSearch()}
           disabled={searchLoading}
-          className="btn-secondary mt-3 w-full disabled:opacity-50"
+          className="btn-secondary w-full disabled:opacity-50"
         >
           {searchLoading ? "Searching…" : "Find place"}
         </button>
 
         {searchResults.length > 0 ? (
-          <div className="mt-3 max-h-40 space-y-2 overflow-y-auto rounded-[var(--radius-hud-md)] border border-border bg-surface-base p-2">
+          <div className="max-h-40 space-y-1 overflow-y-auto border-2 border-border bg-surface-deep p-1.5">
             {searchResults.map((place) => (
               <button
                 key={place.id}
                 type="button"
                 onClick={() => applyPlace(place)}
-                className={`min-h-12 w-full rounded-[var(--radius-hud-sm)] px-3 py-2 text-left text-sm ${
+                className={`min-h-11 w-full px-3 py-2 text-left text-sm ${
                   selectedPlaceId === place.id
-                    ? "bg-action-soft text-status-info"
-                    : "bg-surface-raised text-ink"
+                    ? "bg-highlight-soft font-display font-semibold uppercase tracking-wide text-highlight"
+                    : "bg-transparent text-ink hover:bg-surface-raised"
                 }`}
               >
                 {place.displayName}
@@ -393,7 +395,7 @@ export function CreateSession() {
           </div>
         ) : null}
 
-        <label className="field-label mt-4">
+        <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
           Transit metro
           <select
             value={transitMetroId}
@@ -410,12 +412,14 @@ export function CreateSession() {
         </label>
 
         {isFirebaseConfigured() ? (
-          <div className="mt-4 space-y-2">
-            <p className="text-sm font-medium text-ink">Session tier</p>
+          <div className="space-y-2">
+            <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+              Session tier
+            </p>
             <div
               role="radiogroup"
               aria-label="Session tier"
-              className="space-y-2"
+              className="space-y-1.5"
             >
               {TIER_OPTIONS.map((option) => (
                 <button
@@ -428,13 +432,15 @@ export function CreateSession() {
                     setSessionTier(option.value);
                     setAccessCodeError(null);
                   }}
-                  className={`min-h-12 w-full rounded-[var(--radius-hud-sm)] px-3 py-2 text-left disabled:opacity-50 ${
+                  className={`min-h-12 w-full border-2 px-3 py-2 text-left disabled:opacity-50 ${
                     sessionTier === option.value
-                      ? "bg-action-soft text-status-info"
-                      : "bg-surface-raised text-ink"
+                      ? "border-highlight bg-highlight-soft text-highlight"
+                      : "border-border bg-surface-deep text-ink hover:border-brand-blue"
                   }`}
                 >
-                  <span className="block text-sm font-medium">{option.label}</span>
+                  <span className="font-display text-sm font-semibold uppercase tracking-wide">
+                    {option.label}
+                  </span>
                   <span className="mt-0.5 block text-xs text-ink-muted">
                     {option.summary}
                   </span>
@@ -443,6 +449,7 @@ export function CreateSession() {
             </div>
           </div>
         ) : null}
+        </div>
 
         <div
           className={`overflow-hidden motion-safe:transition-[max-height,opacity] motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none ${
@@ -451,7 +458,7 @@ export function CreateSession() {
               : "max-h-0 opacity-0"
           }`}
         >
-          <label className="field-label mt-4">
+          <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
             Host access code
             <input
               value={accessCode}

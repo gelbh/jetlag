@@ -119,45 +119,61 @@ export function JoinSession() {
   };
 
   return (
-    <main className="flex min-h-full flex-col justify-center gap-6 bg-surface-deep px-5 py-8">
+    <main className="home-poster home-terminal-accent flex min-h-full flex-col justify-center gap-8 px-5 py-8">
       <div>
-        <Link to="/" className="text-sm text-ink-dim">
-          Back
+        <Link
+          to="/"
+          className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-ink-dim"
+        >
+          ← Back
         </Link>
-        <h1 className="mt-4 text-3xl font-semibold text-ink">Join session</h1>
-        <p className="mt-2 text-sm text-ink-muted">
-          Enter the 4-letter code from the host.
+        <p className="mt-6 font-display text-sm font-semibold uppercase tracking-[0.2em] text-brand-blue">
+          Join game
+        </p>
+        <h1 className="mt-2 font-display text-4xl font-bold uppercase leading-none tracking-tight text-ink">
+          Session code
+        </h1>
+        <p className="mt-3 max-w-sm text-sm leading-relaxed text-ink-muted">
+          Enter the four letters your host shared. Everyone in the session sees
+          the same live map.
         </p>
       </div>
 
-      <input
-        value={code}
-        onChange={(event) => setCode(normalizeSessionCode(event.target.value))}
-        maxLength={4}
-        className="field-input min-h-14 rounded-[var(--radius-hud-lg)] text-center text-2xl tracking-[0.5em]"
-        placeholder="ABCD"
-        autoCapitalize="characters"
-      />
+      <div className="jl-field-frame space-y-4">
+        <label className="field-label font-display text-xs uppercase tracking-[0.12em]">
+          Code
+          <input
+            value={code}
+            onChange={(event) =>
+              setCode(normalizeSessionCode(event.target.value))
+            }
+            maxLength={4}
+            className="field-input mt-2 min-h-16 border-0 bg-transparent p-0 text-center font-mono text-4xl font-bold tracking-[0.45em] focus:outline-none"
+            placeholder="ABCD"
+            autoCapitalize="characters"
+          />
+        </label>
 
-      {previewPremium ? (
-        <p className="font-mono text-sm text-status-info">
-          Premium · live transit enabled
-        </p>
-      ) : null}
-      {lookupLoading ? (
-        <p className="text-sm text-ink-dim">Checking session…</p>
-      ) : null}
+        {previewPremium ? (
+          <p className="font-display text-xs font-semibold uppercase tracking-wide text-status-info">
+            Premium · live transit
+          </p>
+        ) : null}
+        {lookupLoading ? (
+          <p className="text-sm text-ink-dim">Checking session…</p>
+        ) : null}
 
-      <button
-        type="button"
-        onClick={() => void handleJoin()}
-        disabled={loading}
-        className="btn-primary min-h-14 disabled:opacity-50"
-      >
-        {loading ? "Joining…" : "Join session"}
-      </button>
+        <button
+          type="button"
+          onClick={() => void handleJoin()}
+          disabled={loading}
+          className="btn-primary min-h-14 w-full disabled:opacity-50"
+        >
+          {loading ? "Joining…" : "Join session"}
+        </button>
 
-      {error ? <p className="text-error">{error}</p> : null}
+        {error ? <p className="text-error">{error}</p> : null}
+      </div>
     </main>
   );
 }

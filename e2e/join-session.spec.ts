@@ -20,7 +20,7 @@ test("host and guest share annotations through the emulator", async ({
   await guestPage.goto("/join");
   await guestPage.getByPlaceholder("ABCD").fill(codeText ?? "ABCD");
   await guestPage.getByRole("button", { name: "Join session" }).click();
-  await expect(guestPage.getByRole("button", { name: "Pin" })).toBeVisible({
+  await expect(guestPage.getByRole("button", { name: "Matching" })).toBeVisible({
     timeout: 15_000,
   });
 

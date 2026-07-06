@@ -73,6 +73,7 @@ export function buildMapDraftOverlays(
   const overlays: MapDraftOverlay[] = [];
   const eliminationFeatures: Feature<GeoPolygon | MultiPolygon>[] = [];
   const { activeTool, gameArea } = sources;
+  const c = MAP_ANNOTATION_COLORS;
 
   const pushBoundary = (
     id: string,
@@ -88,8 +89,8 @@ export function buildMapDraftOverlays(
       feature,
       layer: "boundary",
       style: {
-        color: "#38bdf8",
-        fillColor: "#38bdf8",
+        color: c.boundary,
+        fillColor: c.boundary,
         fillOpacity: 0.15,
         weight: 0,
       },
@@ -112,7 +113,7 @@ export function buildMapDraftOverlays(
         center,
         radiusMeters,
         style: {
-          color: MAP_ANNOTATION_COLORS.elimination,
+          color: c.radarDraft,
           dashArray: "6 6",
           fillOpacity: 0.08,
         },
@@ -123,7 +124,7 @@ export function buildMapDraftOverlays(
       kind: "marker",
       id: "radar-draft-center",
       point: center,
-      style: { fillColor: MAP_ANNOTATION_COLORS.eliminationSoft },
+      style: { fillColor: c.radar },
     });
 
     if (answer) {
@@ -167,7 +168,7 @@ export function buildMapDraftOverlays(
       center,
       radiusMeters: displayRadius,
       style: {
-        color: "#4ade80",
+        color: c.tentacleAccent,
         dashArray: outOfReach ? undefined : "6 6",
         fillOpacity: outOfReach || selectedPoiId ? 0.05 : 0.06,
       },
@@ -176,7 +177,7 @@ export function buildMapDraftOverlays(
       kind: "marker",
       id: "tentacle-draft-center",
       point: center,
-      style: { fillColor: "#22c55e", pulsing: seekerResolving },
+      style: { fillColor: c.tentacle, pulsing: seekerResolving },
     });
 
     if (outOfReach) {
@@ -190,8 +191,8 @@ export function buildMapDraftOverlays(
         ) as Feature<GeoPolygon>,
         layer: "decoration",
         style: {
-          color: "#22c55e",
-          fillColor: "#22c55e",
+          color: c.tentacle,
+          fillColor: c.tentacle,
           fillOpacity: 0.35,
         },
       });
@@ -204,9 +205,9 @@ export function buildMapDraftOverlays(
           point: [poi.lat, poi.lng],
           popup: poi.name,
           style: {
-            color: selected ? "#fef08a" : "#ffffff",
+            color: selected ? c.highlight : c.strokeLight,
             weight: selected ? 3 : 2,
-            fillColor: "#22c55e",
+            fillColor: c.tentacle,
             markerRadius: selected ? 7 : 6,
           },
         });
@@ -221,7 +222,11 @@ export function buildMapDraftOverlays(
         kind: "marker",
         id: "thermo-draft-a",
         point: thermoA,
-        style: { fillColor: "#f87171", color: "#f87171", weight: 0 },
+        style: {
+          fillColor: c.thermometerA,
+          color: c.thermometerA,
+          weight: 0,
+        },
       });
     }
     if (thermoB) {
@@ -229,7 +234,11 @@ export function buildMapDraftOverlays(
         kind: "marker",
         id: "thermo-draft-b",
         point: thermoB,
-        style: { fillColor: "#fb923c", color: "#fb923c", weight: 0 },
+        style: {
+          fillColor: c.thermometerB,
+          color: c.thermometerB,
+          weight: 0,
+        },
       });
     }
     if (thermoA && thermoB) {
@@ -237,7 +246,7 @@ export function buildMapDraftOverlays(
         kind: "polyline",
         id: "thermo-draft-axis",
         positions: [thermoA, thermoB],
-        style: { color: "#f87171", weight: 4 },
+        style: { color: c.thermometerAxis, weight: 4 },
       });
     }
     if (thermoA && thermoB && answer) {
@@ -279,7 +288,7 @@ export function buildMapDraftOverlays(
         kind: "marker",
         id: "measuring-draft-seeker",
         point: seekerPoint,
-        style: { fillColor: "#38bdf8", pulsing: seekerResolving },
+        style: { fillColor: c.pin, pulsing: seekerResolving },
       });
     }
     if (placePoints.length > 1) {
@@ -288,7 +297,7 @@ export function buildMapDraftOverlays(
           kind: "marker",
           id: `measuring-draft-place-${index}`,
           point: place,
-          style: { fillColor: "#0ea5e9", markerRadius: 6 },
+          style: { fillColor: c.pinAccent, markerRadius: 6 },
         });
       }
     } else if (targetPoint) {
@@ -296,7 +305,7 @@ export function buildMapDraftOverlays(
         kind: "marker",
         id: "measuring-draft-target",
         point: targetPoint,
-        style: { fillColor: "#0ea5e9" },
+        style: { fillColor: c.pinAccent },
       });
     }
 
@@ -320,7 +329,7 @@ export function buildMapDraftOverlays(
         kind: "marker",
         id: "matching-draft-seeker",
         point: seekerPoint,
-        style: { fillColor: "#38bdf8", pulsing: seekerResolving },
+        style: { fillColor: c.pin, pulsing: seekerResolving },
       });
     }
     if (nearestFeaturePoint) {
@@ -328,7 +337,7 @@ export function buildMapDraftOverlays(
         kind: "marker",
         id: "matching-draft-nearest",
         point: nearestFeaturePoint,
-        style: { fillColor: "#0ea5e9" },
+        style: { fillColor: c.pinAccent },
       });
     }
 
@@ -345,8 +354,8 @@ export function buildMapDraftOverlays(
         id: `zone-draft-vertex-${index}`,
         point: vertex,
         style: {
-          fillColor: "#c084fc",
-          color: "#c084fc",
+          fillColor: c.zoneDraft,
+          color: c.zoneDraft,
           weight: 0,
           markerRadius: 6,
         },
@@ -357,12 +366,11 @@ export function buildMapDraftOverlays(
         kind: "polyline",
         id: "zone-draft-outline",
         positions: [...sources.zone.vertices, sources.zone.vertices[0]!],
-        style: { color: "#c084fc", weight: 2 },
+        style: { color: c.zoneDraft, weight: 2 },
       });
     }
   }
 
-  // Tentacle Voronoi elimination is computed in the hook and merged by the caller.
   return { overlays, eliminationFeatures };
 }
 

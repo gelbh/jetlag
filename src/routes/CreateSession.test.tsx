@@ -55,4 +55,21 @@ describe("CreateSession", () => {
       expect(navigate).toHaveBeenCalledWith("/map");
     });
   });
+
+  it("navigates to the map even when critical preload hangs", async () => {
+    const { preloadCriticalGameAreaCaches } = await import(
+      "../services/gameAreaPreload"
+    );
+    vi.mocked(preloadCriticalGameAreaCaches).mockImplementation(
+      () => new Promise(() => undefined),
+    );
+
+    renderWithRouter(<CreateSession />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Confirm game area" }));
+
+    await waitFor(() => {
+      expect(navigate).toHaveBeenCalledWith("/map");
+    });
+  });
 });

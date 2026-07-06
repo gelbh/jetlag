@@ -4,7 +4,6 @@ import { AnnotationLayer } from "../components/map/AnnotationLayer";
 import { GeometryEditLayer } from "../components/map/GeometryEditLayer";
 import { GameAreaMask } from "../components/map/GameAreaMask";
 import { MapView } from "../components/map/MapView";
-import { MapStyleToggle } from "../components/map/MapStyleToggle";
 import { MapDraftLayer } from "../components/map/MapDraftLayer";
 import { LiveUserLocationLayer } from "../components/map/LiveUserLocationLayer";
 import {
@@ -82,16 +81,6 @@ const TransitLayer = lazy(() =>
     default: module.TransitLayer,
   })),
 );
-
-const DOCK_LABELS_KEY = "jetlag.dockLabelsHidden";
-
-function readDockLabelsHidden(): boolean {
-  try {
-    return localStorage.getItem(DOCK_LABELS_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
 
 export function MapScreen() {
   const session = useSessionStore((state) => state.session);
@@ -224,9 +213,6 @@ export function MapScreen() {
   const [awaitingPlacement, setAwaitingPlacement] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [firstRunDismissed, setFirstRunDismissed] = useState(false);
-  const [showToolLabels, setShowToolLabels] = useState(
-    () => !readDockLabelsHidden(),
-  );
 
   const finishPlacement = useCallback(() => {
     setActiveTool("none");
@@ -337,21 +323,6 @@ export function MapScreen() {
 
   useSessionSync();
   useSessionEndedRedirect(session?.id, isHost);
-
-  useEffect(() => {
-    if (annotations.length === 0 || !showToolLabels) {
-      return;
-    }
-
-    try {
-      localStorage.setItem(DOCK_LABELS_KEY, "1");
-    } catch {
-      // ignore quota / private mode
-    }
-    /* eslint-disable react-hooks/set-state-in-effect -- hide dock labels after first placement */
-    setShowToolLabels(false);
-    /* eslint-enable react-hooks/set-state-in-effect */
-  }, [annotations.length, showToolLabels]);
 
   useEffect(() => {
     setPremiumApiContext(session);
@@ -697,8 +668,6 @@ export function MapScreen() {
           }
         />
 
-        <MapStyleToggle mapStyle={mapStyle} onMapStyleChange={setMapStyle} />
-
         <ToolDock
           activeTool={activeTool}
           onSelect={handleSelectTool}
@@ -707,7 +676,8 @@ export function MapScreen() {
           onUndo={handleUndoLastAnnotation}
           onRedo={handleRedoLastAnnotation}
           onOpenSettings={() => setSettingsOpen(true)}
-          showToolLabels={showToolLabels}
+          mapStyle={mapStyle}
+          onMapStyleChange={setMapStyle}
         />
       </div>
 
