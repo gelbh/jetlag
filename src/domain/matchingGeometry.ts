@@ -1,144 +1,127 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import { featureCollection, point as turfPoint } from "@turf/helpers";
 import intersect from "@turf/intersect";
-import { point as turfPoint } from "@turf/helpers";
+import simplify from "@turf/simplify";
+import voronoi from "@turf/voronoi";
 import type { GameArea } from "./annotations";
 import type { MatchingAnswer } from "./matchingQuestions";
 import {
   gameAreaToBoundingBox,
   gameAreaToPolygon,
   safeDifference,
-  type LatLngTuple,
 } from "./geometry";
 import type { MatchingFeature } from "../services/matchingFeatures";
-import {
-  matchingFeaturesToAdminDivisions,
-  nearestMatchingFeatureIdForPoint,
-} from "../services/matchingFeatures";
+import { matchingFeaturesToAdminDivisions } from "../services/matchingFeatures";
 import {
   buildAdminDivisionBoundaryPreview,
   buildAdminDivisionEliminationRegion,
   findAdminDivisionById,
 } from "./adminDivisionGeometry";
 
-const MIN_GRID_STEPS = 24;
-const MAX_GRID_STEPS = 48;
-const TARGET_CELL_METERS = 750;
+const VORONOI_BBOX_MARGIN_DEG = 0.0004;
+const SIMPLIFY_TOLERANCE = 0.000012;
 
 function clipToGameArea(
   feature: Feature<Polygon | MultiPolygon>,
   gameArea: GameArea,
 ): Feature<Polygon | MultiPolygon> | null {
   const gameFeature = gameAreaToPolygon(gameArea);
-  const clipped = intersect({
-    type: "FeatureCollection",
-    features: [gameFeature, feature],
-  });
+  try {
+    const clipped = intersect({
+      type: "FeatureCollection",
+      features: [gameFeature, feature],
+    });
 
-  if (
-    !clipped ||
-    (clipped.geometry.type !== "Polygon" &&
-      clipped.geometry.type !== "MultiPolygon")
-  ) {
-    return null;
+    if (
+      clipped &&
+      (clipped.geometry.type === "Polygon" ||
+        clipped.geometry.type === "MultiPolygon")
+    ) {
+      return clipped as Feature<Polygon | MultiPolygon>;
+    }
+  } catch {
+    /* polyclip / intersect can throw on complex polygons */
   }
 
-  return clipped as Feature<Polygon | MultiPolygon>;
+  return null;
 }
 
-function gridStepsForGameArea(gameArea: GameArea): {
-  latSteps: number;
-  lngSteps: number;
-} {
-  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
-  const latSpanMeters = (north - south) * 111_320;
-  const lngSpanMeters =
-    (east - west) * 111_320 * Math.cos((((south + north) / 2) * Math.PI) / 180);
+function matchingVoronoiBbox(
+  features: MatchingFeature[],
+  gameArea: GameArea,
+): [number, number, number, number] {
+  const gameBb = gameAreaToBoundingBox(gameArea);
+  let south = gameBb.south - VORONOI_BBOX_MARGIN_DEG;
+  let north = gameBb.north + VORONOI_BBOX_MARGIN_DEG;
+  let west = gameBb.west - VORONOI_BBOX_MARGIN_DEG;
+  let east = gameBb.east + VORONOI_BBOX_MARGIN_DEG;
 
-  const latSteps = Math.min(
-    MAX_GRID_STEPS,
-    Math.max(MIN_GRID_STEPS, Math.ceil(latSpanMeters / TARGET_CELL_METERS)),
-  );
-  const lngSteps = Math.min(
-    MAX_GRID_STEPS,
-    Math.max(MIN_GRID_STEPS, Math.ceil(lngSpanMeters / TARGET_CELL_METERS)),
-  );
+  for (const feature of features) {
+    const [lat, lng] = feature.point;
+    south = Math.min(south, lat - VORONOI_BBOX_MARGIN_DEG);
+    north = Math.max(north, lat + VORONOI_BBOX_MARGIN_DEG);
+    west = Math.min(west, lng - VORONOI_BBOX_MARGIN_DEG);
+    east = Math.max(east, lng + VORONOI_BBOX_MARGIN_DEG);
+  }
 
-  return { latSteps, lngSteps };
+  if (south >= north || west >= east) {
+    return [gameBb.west, gameBb.south, gameBb.east, gameBb.north];
+  }
+
+  return [west, south, east, north];
 }
 
-function buildSameNearestRegionFromGrid(
+function buildSameNearestRegionFromVoronoi(
   features: MatchingFeature[],
   seekerFeatureId: string,
   gameArea: GameArea,
 ): Feature<Polygon | MultiPolygon> | null {
-  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
-  const { latSteps, lngSteps } = gridStepsForGameArea(gameArea);
-  const latStep = (north - south) / latSteps;
-  const lngStep = (east - west) / lngSteps;
-  const matchingCells: number[][][][] = [];
+  const bbox = matchingVoronoiBbox(features, gameArea);
+  const sites = featureCollection(
+    features.map((feature) =>
+      turfPoint([feature.point[1], feature.point[0]], {
+        featureId: feature.id,
+      }),
+    ),
+  );
 
-  for (let latIndex = 0; latIndex < latSteps; latIndex += 1) {
-    for (let lngIndex = 0; lngIndex < lngSteps; lngIndex += 1) {
-      const cellSouth = south + latIndex * latStep;
-      const cellNorth = cellSouth + latStep;
-      const cellWest = west + lngIndex * lngStep;
-      const cellEast = cellWest + lngStep;
-      const center: LatLngTuple = [
-        (cellSouth + cellNorth) / 2,
-        (cellWest + cellEast) / 2,
-      ];
-
-      if (
-        !booleanPointInPolygon(
-          turfPoint([center[1], center[0]]),
-          gameAreaToPolygon(gameArea),
-        )
-      ) {
-        continue;
-      }
-
-      if (
-        nearestMatchingFeatureIdForPoint(center, features) !== seekerFeatureId
-      ) {
-        continue;
-      }
-
-      matchingCells.push([
-        [
-          [cellWest, cellSouth],
-          [cellEast, cellSouth],
-          [cellEast, cellNorth],
-          [cellWest, cellNorth],
-          [cellWest, cellSouth],
-        ],
-      ]);
-    }
-  }
-
-  if (matchingCells.length === 0) {
+  let cells;
+  try {
+    cells = voronoi(sites, { bbox });
+  } catch {
     return null;
   }
 
-  if (matchingCells.length === 1) {
-    return {
-      type: "Feature",
-      properties: {},
-      geometry: {
-        type: "Polygon",
-        coordinates: matchingCells[0],
-      },
-    };
+  const seekerCell = cells.features.find(
+    (cell) =>
+      (cell.properties as { featureId?: string } | null)?.featureId ===
+      seekerFeatureId,
+  );
+
+  if (
+    !seekerCell ||
+    (seekerCell.geometry.type !== "Polygon" &&
+      seekerCell.geometry.type !== "MultiPolygon")
+  ) {
+    return null;
   }
 
-  return {
-    type: "Feature",
-    properties: {},
-    geometry: {
-      type: "MultiPolygon",
-      coordinates: matchingCells,
-    },
-  };
+  const clipped = clipToGameArea(
+    seekerCell as Feature<Polygon | MultiPolygon>,
+    gameArea,
+  );
+  if (!clipped) {
+    return null;
+  }
+
+  try {
+    return simplify(clipped, {
+      tolerance: SIMPLIFY_TOLERANCE,
+      highQuality: true,
+    }) as Feature<Polygon | MultiPolygon>;
+  } catch {
+    return clipped;
+  }
 }
 
 export function buildSameNearestRegion(
@@ -164,17 +147,11 @@ export function buildSameNearestRegion(
     return gameAreaToPolygon(gameArea);
   }
 
-  const region = buildSameNearestRegionFromGrid(
+  return buildSameNearestRegionFromVoronoi(
     features,
     seekerFeatureId,
     gameArea,
   );
-
-  if (!region) {
-    return null;
-  }
-
-  return clipToGameArea(region, gameArea);
 }
 
 export function buildMatchingEliminationRegion(

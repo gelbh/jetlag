@@ -72,10 +72,11 @@ describe("matching geometry", () => {
     ).toBe(true);
   });
 
-  it("classifies grid cells with the same nearest-feature metric as the anchor", () => {
+  it("partitions the play area by nearest feature using Voronoi cells", () => {
     const region = buildSameNearestRegion(features, "west", sampleGameArea);
 
     expect(region).not.toBeNull();
+    expect(region?.geometry.type).toBe("Polygon");
     expect(
       booleanPointInPolygon(
         turfPoint([-0.17, 51.45]),
@@ -88,6 +89,23 @@ describe("matching geometry", () => {
         region ?? gameAreaToPolygon(sampleGameArea),
       ),
     ).toBe(false);
+  });
+
+  it("produces a smooth single polygon rather than a coarse grid of rectangles", () => {
+    const region = buildSameNearestRegion(features, "west", sampleGameArea);
+
+    expect(region).not.toBeNull();
+    expect(region?.geometry.type).toBe("Polygon");
+
+    const ring =
+      region?.geometry.type === "Polygon"
+        ? region.geometry.coordinates[0]
+        : null;
+    expect(ring).not.toBeNull();
+    // A Voronoi cell clipped to a rectangle has a modest vertex count;
+    // the old grid produced a MultiPolygon of hundreds of axis-aligned rects.
+    expect(ring!.length).toBeLessThan(20);
+    expect(ring!.length).toBeGreaterThan(4);
   });
 
   it("eliminates the complement on yes and the same-nearest region on no", () => {
