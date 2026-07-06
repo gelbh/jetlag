@@ -70,6 +70,7 @@ import {
 import { useSyncStatus } from "../hooks/useSyncStatus";
 import { useTransitLayer } from "../hooks/useTransitLayer";
 import { useMapOverlayState } from "../hooks/useMapOverlayState";
+import { useChatUnread } from "../hooks/useChatUnread";
 import { useWakeLock } from "../hooks/useWakeLock";
 import { useSessionNotifications } from "../hooks/useSessionNotifications";
 import { useLiveActivitySync } from "../hooks/useLiveActivitySync";
@@ -265,6 +266,12 @@ export function MapScreen() {
   const hidingZones = useHidingZonesSync(session?.id);
   const playerLocations = usePlayerLocationsSync(session?.id);
   const chatMessages = useSessionMessagesSync(session?.id);
+  const { hasUnreadChat } = useChatUnread({
+    sessionId: session?.id,
+    viewerUid: uid ?? undefined,
+    messages: chatMessages,
+    isChatOpen: overlay.isChatOpen,
+  });
 
   useLiveActivitySync({
     enabled: Boolean(session?.id),
@@ -915,6 +922,7 @@ export function MapScreen() {
           onRedo={handleRedoLastAnnotation}
           onOpenSettings={handleOpenSettings}
           onOpenChat={handleOpenChat}
+          hasUnreadChat={hasUnreadChat}
           mapStyle={mapStyle}
           onMapStyleChange={setMapStyle}
         />

@@ -808,6 +808,22 @@ textarea {
     justify-content: center;
   }
 
+  .jl-unread-badge-host {
+    position: relative;
+  }
+
+  .jl-unread-badge {
+    position: absolute;
+    top: -0.125rem;
+    right: -0.125rem;
+    height: 0.5rem;
+    width: 0.5rem;
+    border-radius: 9999px;
+    border: 2px solid var(--color-surface-deep);
+    background: var(--color-highlight);
+    pointer-events: none;
+  }
+
   .jl-tool-menu {
     display: flex;
     flex-direction: column;

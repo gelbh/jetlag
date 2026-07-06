@@ -9,6 +9,7 @@ import {
 import type { MapTool } from "../../state/sessionStore";
 import { useScrollLock } from "../../hooks/useScrollLock";
 import { MobileSheet } from "../ui/MobileSheet";
+import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 import {
   HudLayersIcon,
   HudPinIcon,
@@ -29,6 +30,7 @@ interface ToolOverflowSheetProps {
   onRedo: () => void;
   onOpenSettings: () => void;
   onOpenChat?: () => void;
+  hasUnreadChat?: boolean;
   mapStyle?: MapStyle;
   onMapStyleChange?: (style: MapStyle) => void;
 }
@@ -43,6 +45,7 @@ interface ToolOverflowRowProps {
   hint?: string;
   active?: boolean;
   disabled?: boolean;
+  showBadge?: boolean;
   onClick: () => void;
   ariaLabel: string;
 }
@@ -53,6 +56,7 @@ function ToolOverflowRow({
   hint,
   active = false,
   disabled = false,
+  showBadge = false,
   onClick,
   ariaLabel,
 }: ToolOverflowRowProps) {
@@ -64,7 +68,10 @@ function ToolOverflowRow({
       aria-label={ariaLabel}
       className={`jl-tool-overflow-row ${active ? "jl-tool-overflow-row-active" : ""}`}
     >
-      <span className="jl-tool-overflow-row-icon">{icon}</span>
+      <span className="jl-tool-overflow-row-icon jl-unread-badge-host">
+        {icon}
+        {showBadge ? <ChatUnreadBadge /> : null}
+      </span>
       <span className="jl-tool-overflow-row-text">
         <span className="font-display text-sm font-semibold uppercase tracking-wide">
           {title}
@@ -110,6 +117,7 @@ export function ToolOverflowSheet({
   onRedo,
   onOpenSettings,
   onOpenChat,
+  hasUnreadChat = false,
   mapStyle,
   onMapStyleChange,
 }: ToolOverflowSheetProps) {
@@ -208,8 +216,11 @@ export function ToolOverflowSheet({
               }
               title="Chat"
               hint="Game and social messages"
+              showBadge={hasUnreadChat}
               onClick={() => closeAnd(onOpenChat)}
-              ariaLabel="Open chat"
+              ariaLabel={
+                hasUnreadChat ? "Open chat, unread messages" : "Open chat"
+              }
             />
           ) : null}
 

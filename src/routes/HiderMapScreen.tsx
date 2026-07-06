@@ -12,6 +12,7 @@ import {
   type MapViewportState,
 } from "../components/map/MapViewportTracker";
 import { ChatPanel } from "../components/chat/ChatPanel";
+import { ChatUnreadBadge } from "../components/chat/ChatUnreadBadge";
 import { HidingZonePanel } from "../components/hider/HidingZonePanel";
 import { hidingZonePreviewPositions } from "../domain/hidingZone";
 import { MapStatusRail } from "../components/session/MapStatusRail";
@@ -34,6 +35,7 @@ import { computeHiderTruthReplyAsync } from "../domain/hiderTruthAnswer";
 import { MAP_ANNOTATION_COLORS } from "../domain/mapAnnotationColors";
 import { useHiderZoneTool } from "../hooks/useHiderZoneTool";
 import { useMapOverlayState } from "../hooks/useMapOverlayState";
+import { useChatUnread } from "../hooks/useChatUnread";
 import { usePendingQuestionActions } from "../hooks/usePendingQuestionActions";
 import { useRemoteSessionTimerSync } from "../hooks/useRemoteSessionTimerSync";
 import { useSessionEndedRedirect } from "../hooks/useSessionEndedRedirect";
@@ -117,6 +119,12 @@ export function HiderMapScreen() {
   const pendingQuestions = usePendingQuestionsSync(sessionId);
   const playerLocations = usePlayerLocationsSync(sessionId);
   const messages = useSessionMessagesSync(sessionId);
+  const { hasUnreadChat } = useChatUnread({
+    sessionId,
+    viewerUid: uid ?? undefined,
+    messages,
+    isChatOpen: overlay.isChatOpen,
+  });
   const myZone = hidingZones.find((zone) => zone.hiderUid === uid) ?? null;
 
   const isHost = Boolean(
@@ -355,9 +363,13 @@ export function HiderMapScreen() {
           <button
             type="button"
             onClick={openChatExclusive}
-            className="btn-secondary min-h-12 flex-1 px-4 sm:flex-none"
+            className="btn-secondary relative min-h-12 flex-1 px-4 sm:flex-none"
+            aria-label={
+              hasUnreadChat ? "Open chat, unread messages" : "Open chat"
+            }
           >
             Chat
+            {hasUnreadChat ? <ChatUnreadBadge /> : null}
           </button>
           <button
             type="button"

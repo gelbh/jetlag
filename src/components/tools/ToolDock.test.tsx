@@ -28,6 +28,50 @@ describe("ToolDock", () => {
     expect(screen.getByRole("menuitem", { name: /Pin/i })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: /Zone/i })).toBeInTheDocument();
   });
+
+  it("shows unread badge on chat and more buttons when hasUnreadChat is true", () => {
+    renderWithRouter(
+      <ToolDock
+        activeTool="none"
+        onSelect={vi.fn()}
+        canUndo={false}
+        canRedo={false}
+        onUndo={vi.fn()}
+        onRedo={vi.fn()}
+        onOpenSettings={vi.fn()}
+        onOpenChat={vi.fn()}
+        hasUnreadChat
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Open chat, unread messages" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "More tools, unread chat" }),
+    ).toBeInTheDocument();
+    expect(document.querySelectorAll(".jl-unread-badge")).toHaveLength(2);
+  });
+
+  it("hides unread badge when hasUnreadChat is false", () => {
+    renderWithRouter(
+      <ToolDock
+        activeTool="none"
+        onSelect={vi.fn()}
+        canUndo={false}
+        canRedo={false}
+        onUndo={vi.fn()}
+        onRedo={vi.fn()}
+        onOpenSettings={vi.fn()}
+        onOpenChat={vi.fn()}
+        hasUnreadChat={false}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Open chat" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "More tools" })).toBeInTheDocument();
+    expect(document.querySelector(".jl-unread-badge")).toBeNull();
+  });
 });
 
 describe("ToolOverflowSheet", () => {
@@ -55,6 +99,15 @@ describe("ToolOverflowSheet", () => {
     expect(screen.getByText("Draw a play boundary")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Open settings" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Open chat" })).toBeInTheDocument();
+  });
+
+  it("shows unread badge on chat row when hasUnreadChat is true", () => {
+    renderWithRouter(<ToolOverflowSheet {...baseProps} hasUnreadChat />);
+
+    expect(
+      screen.getByRole("button", { name: "Open chat, unread messages" }),
+    ).toBeInTheDocument();
+    expect(document.querySelector(".jl-unread-badge")).toBeInTheDocument();
   });
 
   it("disables undo when canUndo is false", () => {

@@ -24,6 +24,7 @@ import {
   HudUndoIcon,
   HudZoneIcon,
 } from "../ui/HudIcons";
+import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 import { ToolOverflowSheet } from "./ToolOverflowSheet";
 
 interface ToolDockProps {
@@ -36,6 +37,7 @@ interface ToolDockProps {
   onRedo: () => void;
   onOpenSettings: () => void;
   onOpenChat?: () => void;
+  hasUnreadChat?: boolean;
   mapStyle?: MapStyle;
   onMapStyleChange?: (style: MapStyle) => void;
 }
@@ -54,6 +56,7 @@ export function ToolDock({
   onRedo,
   onOpenSettings,
   onOpenChat,
+  hasUnreadChat = false,
   mapStyle,
   onMapStyleChange,
 }: ToolDockProps) {
@@ -225,6 +228,7 @@ export function ToolDock({
         onRedo={onRedo}
         onOpenSettings={onOpenSettings}
         onOpenChat={onOpenChat}
+        hasUnreadChat={hasUnreadChat}
         mapStyle={mapStyle}
         onMapStyleChange={onMapStyleChange}
       />
@@ -317,9 +321,14 @@ export function ToolDock({
               type="button"
               onClick={onOpenChat}
               className="jl-tool-slot"
-              aria-label="Open chat"
+              aria-label={
+                hasUnreadChat ? "Open chat, unread messages" : "Open chat"
+              }
             >
-              <span className="jl-tool-slot-icon text-xs font-bold">@</span>
+              <span className="jl-tool-slot-icon jl-unread-badge-host text-xs font-bold">
+                @
+                {hasUnreadChat ? <ChatUnreadBadge /> : null}
+              </span>
               <span className="jl-tool-slot-label">Chat</span>
             </button>
           ) : null}
@@ -345,13 +354,16 @@ export function ToolDock({
               setMoreMenuOpen((open) => !open);
             }}
             className={`jl-tool-slot ${moreMenuActive ? "jl-tool-slot-active" : ""}`}
-            aria-label="More tools"
+            aria-label={
+              hasUnreadChat ? "More tools, unread chat" : "More tools"
+            }
             aria-expanded={moreMenuOpen}
             aria-haspopup="dialog"
             title="Draw, map style, chat, setup"
           >
-            <span className="jl-tool-slot-icon">
+            <span className="jl-tool-slot-icon jl-unread-badge-host">
               <HudMoreIcon className="h-5 w-5" />
+              {hasUnreadChat ? <ChatUnreadBadge /> : null}
             </span>
             <span className="jl-tool-slot-label">More</span>
           </button>
