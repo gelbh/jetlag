@@ -444,6 +444,93 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows hider to answer a radar question in game chat", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+        }),
+      );
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-radar")
+        .set({
+          toolType: "radar",
+          createdByUid: "host-1",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          status: "pending",
+          placement: {
+            geometryJson: JSON.stringify({
+              type: "Feature",
+              properties: {},
+              geometry: { type: "Point", coordinates: [-6.26, 53.35] },
+            }),
+            metadata: { radiusMeters: 1609.344 },
+          },
+          replyOptions: [
+            { id: "yes", label: "Yes" },
+            { id: "no", label: "No" },
+          ],
+          promptText: "Are you within 1.0 mi of me?",
+          answerableAt: "2026-01-01T00:00:00.000Z",
+        }),
+    );
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("messages")
+        .doc("msg-radar")
+        .set({
+          channel: "game",
+          senderUid: "host-1",
+          senderRole: "seeker",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          kind: "question",
+          pendingQuestionId: "pq-radar",
+          toolType: "radar",
+          promptText: "Are you within 1.0 mi of me?",
+          replyOptions: [
+            { id: "yes", label: "Yes" },
+            { id: "no", label: "No" },
+          ],
+          status: "pending",
+        }),
+    );
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-radar")
+        .update({ answer: "yes", status: "answered" }),
+    );
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("messages")
+        .doc("msg-radar")
+        .update({ selectedReply: "yes", status: "answered" }),
+    );
+  });
+
   it("stores session documents with expected host uid", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

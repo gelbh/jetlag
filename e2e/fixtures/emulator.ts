@@ -26,9 +26,10 @@ export async function endSessionInEmulator(
   sessionId: string,
 ): Promise<void> {
   await page.evaluate(async (id) => {
-    const { endRemoteSession } = await import(
-      "/src/services/firestoreAnnotations.ts"
-    );
-    await endRemoteSession(id);
+    const bridge = window.__JETLAG_E2E__;
+    if (!bridge?.endRemoteSession) {
+      throw new Error("E2E bridge is not installed.");
+    }
+    await bridge.endRemoteSession(id);
   }, sessionId);
 }

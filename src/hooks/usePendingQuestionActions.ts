@@ -166,7 +166,7 @@ export function usePendingQuestionActions() {
       await updatePendingQuestion(sessionId, pendingQuestionId, {
         answer,
         status: "answered",
-        answeredLate: options?.deadlineExpired ? true : undefined,
+        ...(options?.deadlineExpired ? { answeredLate: true } : {}),
       });
       await updateGameMessageAnswer(sessionId, messageId, selectedReply);
 

@@ -289,10 +289,11 @@ export function HiderMapScreen() {
           selectedReply,
           deadlineExpired,
         ) => {
-          if (!sessionId || !uid) {
+          if (!sessionId) {
             return;
           }
 
+          const user = await ensureAnonymousUser();
           await answerPendingQuestion(
             sessionId,
             pendingQuestionId,
@@ -302,7 +303,7 @@ export function HiderMapScreen() {
             deadlineExpired
               ? {
                   deadlineExpired: true,
-                  senderUid: uid,
+                  senderUid: user.uid,
                   senderRole: "hider",
                 }
               : undefined,

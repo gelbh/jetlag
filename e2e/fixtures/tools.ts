@@ -19,6 +19,12 @@ async function waitForWizardNext(page: Page) {
   });
 }
 
+async function waitForSendToHiders(page: Page) {
+  await expect(page.getByRole("button", { name: "Send to hiders" })).toBeEnabled({
+    timeout: 15_000,
+  });
+}
+
 async function dismissActiveToolPanel(page: Page) {
   const closeTool = page.getByRole("button", { name: /^Close / });
   if (await closeTool.isVisible({ timeout: 500 }).catch(() => false)) {
@@ -71,10 +77,8 @@ export async function sendMatchingToHiders(page: Page) {
   await clickMapCenter(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
-  await waitForWizardNext(page);
-  const sendButton = page.getByRole("button", { name: "Send to hiders" });
-  await expect(sendButton).toBeEnabled({ timeout: 15_000 });
-  await sendButton.click();
+  await waitForSendToHiders(page);
+  await page.getByRole("button", { name: "Send to hiders" }).click();
   await dismissActiveToolPanel(page);
 }
 
@@ -99,10 +103,8 @@ export async function sendMeasuringToHiders(page: Page) {
   await clickMapCenter(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
-  await waitForWizardNext(page);
-  const sendButton = page.getByRole("button", { name: "Send to hiders" });
-  await expect(sendButton).toBeEnabled({ timeout: 15_000 });
-  await sendButton.click();
+  await waitForSendToHiders(page);
+  await page.getByRole("button", { name: "Send to hiders" }).click();
   await dismissActiveToolPanel(page);
 }
 
@@ -151,10 +153,8 @@ export async function sendTentacleToHiders(page: Page) {
   await clickMapCenter(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
-  await waitForWizardNext(page);
-  const sendButton = page.getByRole("button", { name: "Send to hiders" });
-  await expect(sendButton).toBeEnabled({ timeout: 15_000 });
-  await sendButton.click();
+  await waitForSendToHiders(page);
+  await page.getByRole("button", { name: "Send to hiders" }).click();
   await dismissActiveToolPanel(page);
 }
 
@@ -269,6 +269,7 @@ export async function answerYesInChat(page: Page) {
 }
 
 export async function expectChatAnswer(page: Page, answer: string) {
+  await openChat(page);
   await expect(page.getByText(new RegExp(`Answered: ${answer}`, "i"))).toBeVisible({
     timeout: 20_000,
   });
