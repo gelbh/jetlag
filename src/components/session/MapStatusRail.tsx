@@ -9,8 +9,12 @@ import { PopupCloseButton } from "../ui/PopupCloseButton";
 import { TimerActions } from "../tools/TimerActions";
 import { SessionTimerLabel } from "./SessionTimerLabel";
 
+import type { GameSize } from "../../domain/gameSize";
+import { HidingPeriodLabel } from "./HidingPeriodLabel";
+
 interface MapStatusRailProps {
   sessionCode: string;
+  gameSize?: GameSize;
   activeTool: MapTool;
   syncStatus: SyncStatus;
   queuedWrites: number;
@@ -131,6 +135,7 @@ function syncRailDisplay(
 
 export function MapStatusRail({
   sessionCode,
+  gameSize = "medium",
   activeTool,
   syncStatus,
   queuedWrites,
@@ -249,17 +254,24 @@ export function MapStatusRail({
                 </p>
               )
             ) : (
-              <button
-                type="button"
-                onClick={() => setTimerMenuOpen((open) => !open)}
-                className={`jl-ticker ${timerRunning ? "jl-ticker-active" : "jl-ticker-idle"}`}
-                aria-label="Elapsed time. Open timer settings"
-                aria-expanded={timerMenuOpen}
-                aria-haspopup="menu"
-                aria-live="polite"
-              >
-                <SessionTimerLabel timerState={timerState} />
-              </button>
+              <div className="flex shrink-0 flex-col items-end gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => setTimerMenuOpen((open) => !open)}
+                  className={`jl-ticker ${timerRunning ? "jl-ticker-active" : "jl-ticker-idle"}`}
+                  aria-label="Elapsed time. Open timer settings"
+                  aria-expanded={timerMenuOpen}
+                  aria-haspopup="menu"
+                  aria-live="polite"
+                >
+                  <SessionTimerLabel timerState={timerState} />
+                </button>
+                <HidingPeriodLabel
+                  gameSize={gameSize}
+                  timerState={timerState}
+                  timerHasStarted={timerHasStarted}
+                />
+              </div>
             )}
 
             {sync.inline?.visible && sync.inline.label ? (

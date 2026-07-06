@@ -35,7 +35,7 @@ describe("thermometerQuestions", () => {
       "3 miles",
     );
     expect(thermometerQuestionPrompt(milesToMeters(10), "imperial")).toBe(
-      "I've just traveled (at least) 10 miles. Am I hotter or colder?",
+      "After traveling 10 miles, am I hotter or colder?",
     );
   });
 
@@ -84,17 +84,10 @@ describe("thermometerQuestions", () => {
         usedThermometerDistanceOptions([thermometer]),
       ),
     ).toBe(halfMile);
-    expect(
-      isThermometerDistanceOptionAvailable(
-        usedThermometerDistanceOptions([thermometer]),
-        threeMiles,
-      ),
-    ).toBe(false);
-    expect(
-      availableThermometerDistancePresets(
-        usedThermometerDistanceOptions([thermometer]),
-      ),
-    ).toEqual([halfMile, milesToMeters(10), milesToMeters(50)]);
+    expect(isThermometerDistanceOptionAvailable("large", threeMiles)).toBe(true);
+    expect(availableThermometerDistancePresets("large")).toEqual(
+      THERMOMETER_DISTANCE_PRESETS,
+    );
   });
 });
 
@@ -127,7 +120,7 @@ describe("annotationSummary for thermometers", () => {
     );
 
     expect(summary).toBe(
-      "I've just traveled (at least) 3 miles. Am I hotter or colder? · hotter",
+      "After traveling 3 miles, am I hotter or colder? · hotter",
     );
   });
 });

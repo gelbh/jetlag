@@ -4,12 +4,12 @@ import {
   formatPresetDistance,
   type DistanceUnit,
 } from "../../domain/distance";
+import type { GameSize } from "../../domain/gameSize";
 import {
   availableThermometerDistancePresets,
   isThermometerDistanceOptionAvailable,
   thermometerQuestionPrompt,
   type ThermometerAnswer,
-  type ThermometerDistanceOptionMiles,
 } from "../../domain/thermometerQuestions";
 import { hotterColderAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
@@ -26,21 +26,42 @@ import {
   THERMOMETER_STEPS,
 } from "./shared/toolStepUtils";
 
+type PlacementMode = "gps" | "manual";
+
 interface ThermometerPanelProps {
   distanceUnit: DistanceUnit;
+  gameSize: GameSize;
   distanceMeters: number;
   travelMeters: number | null;
   answer: ThermometerAnswer | null;
   step: "a" | "b" | "ready";
-  usedDistanceOptions: ReadonlySet<ThermometerDistanceOptionMiles>;
+  presetUseCount: number;
+  costLabel: string;
+  placementMode: PlacementMode;
+  walkingActive: boolean;
+  onPlacementModeChange: (mode: PlacementMode) => void;
   onDistanceChange: (distanceMeters: number) => void;
   onAnswerChange: (answer: ThermometerAnswer) => void;
   onReset: () => void;
+  onStartWalk: () => void;
   onCommit: () => void;
   awaitHiderAnswer?: boolean;
+  canSubmitQuestion?: boolean;
 }
 
-function placementStatus(step: "a" | "b" | "ready"): string {
+function placementStatus(
+  step: "a" | "b" | "ready",
+  placementMode: PlacementMode,
+  walkingActive: boolean,
+): string {
+  if (walkingActive) {
+    return "Walking — line updates live for hiders.";
+  }
+
+  if (placementMode === "gps") {
+    return "GPS walk sets start automatically when you begin.";
+  }
+
   if (step === "a") {
     return "Tap the map for the start of movement.";
   }
@@ -52,31 +73,42 @@ function placementStatus(step: "a" | "b" | "ready"): string {
 
 export function ThermometerPanel({
   distanceUnit,
+  gameSize,
   distanceMeters,
   travelMeters,
   answer,
   step: mapStep,
-  usedDistanceOptions,
+  presetUseCount,
+  costLabel,
+  placementMode,
+  walkingActive,
+  onPlacementModeChange,
   onDistanceChange,
   onAnswerChange,
   onReset,
+  onStartWalk,
   onCommit,
   awaitHiderAnswer = false,
+  canSubmitQuestion = true,
 }: ThermometerPanelProps) {
   const [stepIndex, setStepIndex] = useState(0);
   const step = THERMOMETER_STEPS[stepIndex]?.id ?? "distance";
 
   const travelTooShort =
     travelMeters !== null && travelMeters + 1 < distanceMeters;
-  const availableDistancePresets =
-    availableThermometerDistancePresets(usedDistanceOptions);
+  const availableDistancePresets = availableThermometerDistancePresets(gameSize);
   const distanceAvailable = isThermometerDistanceOptionAvailable(
-    usedDistanceOptions,
+    gameSize,
     distanceMeters,
   );
   const pinsReady = mapStep === "ready";
   const canCommit =
-    pinsReady && (awaitHiderAnswer || answer !== null) && distanceAvailable;
+    pinsReady &&
+    placementMode === "manual" &&
+    (awaitHiderAnswer || answer !== null) &&
+    distanceAvailable &&
+    !travelTooShort &&
+    canSubmitQuestion;
 
   const goNext = () => {
     setStepIndex((current) =>
@@ -104,45 +136,74 @@ export function ThermometerPanel({
           <QuestionPromptBlock
             prompt={thermometerQuestionPrompt(distanceMeters, distanceUnit)}
           />
-          {availableDistancePresets.length === 0 ? (
-            <p className="text-sm text-status-warning">
-              Every thermometer distance option has already been used this
-              session.
-            </p>
-          ) : (
-            <OptionChipRow>
-              {availableDistancePresets.map((preset) => (
+          <OptionChipRow>
+            {availableDistancePresets.map((preset) => {
+              const reuse =
+                presetUseCount > 0 && preset === distanceMeters
+                  ? costLabel
+                  : null;
+              return (
                 <OptionChip
                   key={preset}
                   selected={distanceMeters === preset}
                   onClick={() => onDistanceChange(preset)}
                 >
                   {formatPresetDistance(preset, distanceUnit)}
+                  {reuse ? ` · ${reuse}` : ""}
                 </OptionChip>
-              ))}
-            </OptionChipRow>
-          )}
+              );
+            })}
+          </OptionChipRow>
+          <OptionChipRow>
+            <OptionChip
+              selected={placementMode === "gps"}
+              onClick={() => onPlacementModeChange("gps")}
+            >
+              GPS walk
+            </OptionChip>
+            <OptionChip
+              selected={placementMode === "manual"}
+              onClick={() => onPlacementModeChange("manual")}
+            >
+              Manual pins
+            </OptionChip>
+          </OptionChipRow>
         </ToolSection>
       ) : null}
 
       {step === "placement" ? (
         <ToolSection first compact status="active">
           <ResolvedReadout variant="dim">
-            {placementStatus(mapStep)}
+            {placementStatus(mapStep, placementMode, walkingActive)}
           </ResolvedReadout>
           {travelMeters !== null ? (
             <ResolvedReadout>
-              Movement on map: {formatDistance(travelMeters, distanceUnit)}
+              {placementMode === "gps" ? "Crow-flies: " : "Movement on map: "}
+              {formatDistance(travelMeters, distanceUnit)}
             </ResolvedReadout>
           ) : null}
           {travelTooShort ? (
             <ResolvedReadout variant="warning">
-              Movement is shorter than the selected distance. Confirm before
-              adding.
+              Movement is shorter than the selected distance.
             </ResolvedReadout>
           ) : null}
+          {!canSubmitQuestion ? (
+            <ResolvedReadout variant="warning">
+              Finish the open question before starting another.
+            </ResolvedReadout>
+          ) : null}
+          {placementMode === "gps" && !walkingActive ? (
+            <button
+              type="button"
+              onClick={onStartWalk}
+              disabled={!distanceAvailable || !canSubmitQuestion}
+              className="btn-primary w-full disabled:opacity-40"
+            >
+              Start walk
+            </button>
+          ) : null}
           <button type="button" onClick={onReset} className="btn-secondary w-full">
-            Reset pins
+            Reset
           </button>
         </ToolSection>
       ) : null}
@@ -151,7 +212,7 @@ export function ThermometerPanel({
         <ToolSection first compact status="active">
           {awaitHiderAnswer ? (
             <p className="text-sm text-ink-muted">
-              Hiders will answer hotter or colder in game chat.
+              Hiders answer hotter or colder in game chat once the walk ends.
             </p>
           ) : (
             <BinaryAnswerPicker
@@ -161,21 +222,16 @@ export function ThermometerPanel({
               label=""
             />
           )}
-          {pinsReady ? (
-            <p className="text-xs text-ink-dim">
-              {awaitHiderAnswer
-                ? "The question goes to hiders once you send it."
-                : "The map shows the shaded half for your choice."}
-            </p>
+          {placementMode === "manual" ? (
+            <button
+              type="button"
+              onClick={onCommit}
+              disabled={!canCommit}
+              className="btn-primary w-full disabled:opacity-40"
+            >
+              {awaitHiderAnswer ? "Send to hiders" : "Add thermometer"}
+            </button>
           ) : null}
-          <button
-            type="button"
-            onClick={onCommit}
-            disabled={!canCommit}
-            className="btn-primary w-full disabled:opacity-40"
-          >
-            {awaitHiderAnswer ? "Send to hiders" : "Add thermometer"}
-          </button>
         </ToolSection>
       ) : null}
 
@@ -186,7 +242,8 @@ export function ThermometerPanel({
         onNext={goNext}
         canGoNext={
           (step === "distance" && distanceAvailable) ||
-          (step === "placement" && pinsReady)
+          (step === "placement" &&
+            (walkingActive || pinsReady || placementMode === "gps"))
         }
       />
     </ToolPanelShell>

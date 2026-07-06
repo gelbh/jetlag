@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
-import type { SessionMessageRecord } from "../../domain/sessionChat";
+import type { GameSize } from "../../domain/gameSize";
+import type {
+  PendingQuestionRecord,
+  SessionMessageRecord,
+} from "../../domain/sessionChat";
 import { createMessageId } from "../../domain/sessionChat";
 import type { PlayerRole } from "../../domain/playerRole";
 import { postSocialMessage } from "../../services/firestoreSessionExtras";
@@ -99,6 +103,8 @@ interface ChatPanelProps {
   open: boolean;
   onClose: () => void;
   messages: readonly SessionMessageRecord[];
+  pendingQuestions?: readonly PendingQuestionRecord[];
+  gameSize?: GameSize;
   sessionId: string;
   senderUid: string;
   senderRole: PlayerRole;
@@ -115,6 +121,8 @@ export function ChatPanel({
   open,
   onClose,
   messages,
+  pendingQuestions = [],
+  gameSize = "medium",
   sessionId,
   senderUid,
   senderRole,
@@ -170,6 +178,8 @@ export function ChatPanel({
           ) : (
             <GameChatTab
               messages={messages}
+              pendingQuestions={pendingQuestions}
+              gameSize={gameSize}
               isHider={isHider}
               senderUid={senderUid}
               onAnswerQuestion={onAnswerQuestion}

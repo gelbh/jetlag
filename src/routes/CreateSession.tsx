@@ -2,8 +2,7 @@ import { useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { LatLngBounds, LatLngBoundsExpression } from "leaflet";
 import { AppLogo } from "../components/ui/AppLogo";
-import { MapView } from "../components/map/MapView";
-import { GameAreaMask } from "../components/map/GameAreaMask";
+import { CreateSessionMapPane } from "../components/session/CreateSessionMapPane";
 import { MobileSheet } from "../components/ui/MobileSheet";
 import {
   boundsToGameArea,
@@ -337,19 +336,20 @@ export function CreateSession() {
       : "Confirm game area";
 
   return (
-    <div className="relative h-full min-h-[100dvh]">
-      <MapView
+    <div className="flex h-full min-h-[100dvh] flex-col bg-surface-deep">
+      <CreateSessionMapPane
         mapStyle={mapStyle}
-        onBoundsChange={handleBoundsChange}
-        zoom={12}
         focusBounds={focusBounds}
-      >
-        {previewGameArea ? (
-          <GameAreaMask gameArea={previewGameArea} framing />
-        ) : null}
-      </MapView>
+        previewGameArea={previewGameArea}
+        selectedGameSize={gameSize}
+        onBoundsChange={handleBoundsChange}
+      />
 
-      <MobileSheet maxHeightClassName="max-h-[min(78dvh,720px)]">
+      <MobileSheet
+        variant="nested"
+        maxHeightClassName="max-h-[min(58dvh,640px)]"
+        className="flex-1 min-h-0"
+      >
         <AppLogo variant="lockup" size="md" />
         <p className="mt-3 font-display text-xs font-semibold uppercase tracking-[0.14em] text-brand-blue">
           New game

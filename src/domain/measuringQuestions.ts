@@ -2,7 +2,6 @@ import type { AnnotationRecord } from "./annotations";
 import {
   collectUsedAnnotationOptions,
   firstUnusedCatalogOption,
-  isCatalogOptionAvailable,
 } from "./toolSessionOptions";
 
 export type MeasuringGroupId =
@@ -391,7 +390,7 @@ export const COASTLINE_MEASURING_QUESTION: MeasuringQuestionDefinition = {
 };
 
 export const SEA_LEVEL_DEFINITION =
-  "Sea level is your altitude above or below 0 m. Closer to sea level means lower altitude; further means higher. Elevation comes from the mapping app, not your phone compass. Treat it as approximate.";
+  "Sea level is your altitude above or below 0 m. Closer to sea level means lower altitude; further means higher. Use your phone compass altitude as the official measure.";
 
 export const SEA_LEVEL_MEASURING_QUESTION: MeasuringQuestionDefinition = {
   subject: "sea_level",
@@ -611,9 +610,33 @@ export function firstAvailableMeasuringFromKind(
   return firstUnusedCatalogOption(MEASURING_CATALOG, usedKinds);
 }
 
-export function isMeasuringFromKindAvailable(
-  usedKinds: ReadonlySet<MeasuringFromKind>,
+export function isMeasuringFromKindAvailable(): boolean {
+  return true;
+}
+
+export function measuringFromKindUseCount(
+  annotations: readonly AnnotationRecord[],
   kind: MeasuringFromKind,
-): boolean {
-  return isCatalogOptionAvailable(kind, usedKinds);
+  exceptAnnotationId?: string,
+): number {
+  let count = 0;
+  for (const annotation of annotations) {
+    if (annotation.status !== "active" || annotation.type !== "measuring") {
+      continue;
+    }
+    if (exceptAnnotationId && annotation.id === exceptAnnotationId) {
+      continue;
+    }
+    if (!annotation.metadata.measuringSubject) {
+      continue;
+    }
+    const annotationKind = measuringFromKind(
+      annotation.metadata.measuringSubject,
+      annotation.metadata.measuringLocationCategory,
+    );
+    if (annotationKind === kind) {
+      count += 1;
+    }
+  }
+  return count;
 }

@@ -637,7 +637,7 @@ export function useMeasuringTool({
       measuringSubject,
       measuringLocationCategory,
     ),
-    isAvailable: isMeasuringFromKindAvailable,
+    isAvailable: () => isMeasuringFromKindAvailable(),
     pickNext: firstAvailableMeasuringFromKind,
     onUnavailable: handleUnavailableMeasuringOption,
   });
@@ -860,7 +860,7 @@ export function useMeasuringTool({
       measuringLocationCategory,
     );
     if (
-      !isMeasuringFromKindAvailable(usedMeasuringFromKindsSet, committedKind)
+      !isMeasuringFromKindAvailable()
     ) {
       setMeasuringError("That measure category has already been added.");
       return;

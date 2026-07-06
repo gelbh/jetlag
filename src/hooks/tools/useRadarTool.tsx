@@ -89,13 +89,11 @@ export function useRadarTool({
       return;
     }
 
-    if (
-      isRadarDistanceOptionAvailable(
-        usedRadarOptions,
-        radarChooseCustom,
-        radarRadius,
-      )
-    ) {
+    if (!active) {
+      return;
+    }
+
+    if (isRadarDistanceOptionAvailable()) {
       return;
     }
 
@@ -159,13 +157,7 @@ export function useRadarTool({
       return;
     }
 
-    if (
-      !isRadarDistanceOptionAvailable(
-        usedRadarOptions,
-        radarChooseCustom,
-        resolvedRadarRadius,
-      )
-    ) {
+    if (!isRadarDistanceOptionAvailable()) {
       setMapError("That radar distance was already used this session.");
       return;
     }

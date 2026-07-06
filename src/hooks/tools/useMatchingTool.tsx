@@ -128,8 +128,8 @@ export function useMatchingTool({
     active,
     usedOptions: usedMatchingCategories,
     currentOption: matchingCategoryId,
-    isAvailable: (usedOptions, currentOption) =>
-      isMatchingCategoryAvailable(currentOption, usedOptions),
+    isAvailable: (_usedOptions, currentOption) =>
+      isMatchingCategoryAvailable(currentOption),
     pickNext: firstAvailableMatchingCategoryId,
     onUnavailable: useCallback((nextCategory: MatchingCategoryId) => {
       setMatchingCategoryId(nextCategory);
@@ -198,7 +198,7 @@ export function useMatchingTool({
     async (seekerPoint: LatLngTuple, categoryId: MatchingCategoryId) => {
       if (
         !isMatchingCategoryEnabled(categoryId) ||
-        !isMatchingCategoryAvailable(categoryId, usedMatchingCategories)
+        !isMatchingCategoryAvailable(categoryId)
       ) {
         setMatchingError("This matching category is not available yet.");
         return;
@@ -385,10 +385,15 @@ export function useMatchingTool({
       try {
         await submitPendingQuestion({
           promptText: question.prompt,
-          replyOptions: yesNoAnswerOptions.map((option) => ({
-            id: option.value,
-            label: option.label,
-          })),
+          replyOptions: [
+            ...yesNoAnswerOptions.map((option) => ({
+              id: option.value,
+              label: option.label,
+            })),
+            ...(matchingNullAnswer
+              ? [{ id: "null", label: "Null (not in play area)" }]
+              : []),
+          ],
           placement: {
             geometryJson: JSON.stringify(geometry),
             metadata: {
@@ -526,7 +531,7 @@ export function useMatchingTool({
       onCategoryChange={(categoryId) => {
         if (
           !isMatchingCategoryEnabled(categoryId) ||
-          !isMatchingCategoryAvailable(categoryId, usedMatchingCategories)
+          !isMatchingCategoryAvailable(categoryId)
         ) {
           return;
         }

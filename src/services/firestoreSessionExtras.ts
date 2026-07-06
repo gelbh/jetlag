@@ -126,7 +126,13 @@ export async function updatePendingQuestion(
   patch: Partial<
     Pick<
       PendingQuestionRecord,
-      "status" | "answer" | "resolvedAnnotationId"
+      | "status"
+      | "answer"
+      | "resolvedAnnotationId"
+      | "placement"
+      | "promptText"
+      | "replyOptions"
+      | "answerableAt"
     >
   >,
 ): Promise<void> {

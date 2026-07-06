@@ -24,8 +24,10 @@ import { usePendingQuestionActions } from "../hooks/usePendingQuestionActions";
 import { useRemoteSessionTimerSync } from "../hooks/useRemoteSessionTimerSync";
 import { useSessionEndedRedirect } from "../hooks/useSessionEndedRedirect";
 import { useSessionTimer } from "../hooks/useSessionTimer";
+import { ActiveThermometerWalkLayer } from "../components/map/ActiveThermometerWalkLayer";
 import {
   useHidingZonesSync,
+  usePendingQuestionsSync,
   usePlayerLocationsSync,
   useSessionMessagesSync,
 } from "../hooks/useSessionExtrasSync";
@@ -75,6 +77,7 @@ export function HiderMapScreen() {
     [allAnnotations, sessionId],
   );
   const hidingZones = useHidingZonesSync(sessionId);
+  const pendingQuestions = usePendingQuestionsSync(sessionId);
   const playerLocations = usePlayerLocationsSync(sessionId);
   const messages = useSessionMessagesSync(sessionId);
   const myZone = hidingZones.find((zone) => zone.hiderUid === uid) ?? null;
@@ -167,12 +170,21 @@ export function HiderMapScreen() {
             />
           ) : null}
           <LiveSeekerLocationsLayer locations={playerLocations} />
+          <ActiveThermometerWalkLayer
+            pendingQuestions={pendingQuestions}
+            seekerPosition={
+              playerLocations[0]
+                ? [playerLocations[0].lat, playerLocations[0].lng]
+                : null
+            }
+          />
         </MapView>
       </div>
 
       <div className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)]">
         <MapStatusRail
           sessionCode={session.code}
+          gameSize={session.gameSize ?? "medium"}
           activeTool="none"
           syncStatus={syncStatus.status}
           queuedWrites={syncStatus.queuedWrites}
@@ -249,6 +261,8 @@ export function HiderMapScreen() {
         open={chatOpen}
         onClose={() => setChatOpen(false)}
         messages={messages}
+        pendingQuestions={pendingQuestions}
+        gameSize={session.gameSize ?? "medium"}
         sessionId={session.id}
         senderUid={uid ?? ""}
         senderRole="hider"

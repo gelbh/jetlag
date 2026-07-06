@@ -1,25 +1,26 @@
+import type { GameSize } from "./gameSize";
+import {
+  isTentacleCategoryAvailableForGameSize,
+  tentacleOptionsForGameSize,
+  tentacleRadiusMeters,
+  type TentacleGameSizeCategoryId,
+} from "./gameSizeRules";
 import type { AnnotationRecord } from "./annotations";
 import {
   collectUsedAnnotationOptions,
   firstUnusedCatalogOption,
-  isCatalogOptionAvailable,
 } from "./toolSessionOptions";
 import {
-  DEFAULT_RADIUS_METERS,
   formatDistance,
   milesToMeters,
   type DistanceUnit,
 } from "./distance";
+import type { MatchingCategoryId } from "./matchingQuestions";
 import {
   getMatchingCategory,
   MATCHING_CATEGORIES,
   matchingCategoryOverpassSelectors,
-  type MatchingCategoryId,
 } from "./matchingQuestions";
-
-export const TENTACLE_SEARCH_RADIUS_METERS = DEFAULT_RADIUS_METERS;
-
-export const TENTACLE_ANSWER_RADIUS_METERS = milesToMeters(1.5);
 
 export const TENTACLE_NOT_WITHIN_REACH_LABEL = "Not within reach";
 
@@ -33,55 +34,104 @@ export const TENTACLE_LOCATION_CATEGORY_IDS = [
 export type TentacleLocationCategoryId =
   (typeof TENTACLE_LOCATION_CATEGORY_IDS)[number];
 
-export type TentacleAnswerCategoryId = TentacleLocationCategoryId;
+export type TentacleExtendedCategoryId =
+  | TentacleLocationCategoryId
+  | "metro_line"
+  | "zoo"
+  | "aquarium"
+  | "amusement_park";
+
+export type TentacleAnswerCategoryId = TentacleExtendedCategoryId;
 
 export interface TentacleLocationCategoryDefinition {
-  id: TentacleLocationCategoryId;
+  id: TentacleExtendedCategoryId;
   label: string;
   promptNoun: string;
 }
 
+const EXTENDED_CATEGORY_LABELS: Record<
+  Exclude<TentacleExtendedCategoryId, TentacleLocationCategoryId>,
+  { label: string; promptNoun: string }
+> = {
+  metro_line: { label: "Metro Line", promptNoun: "metro line" },
+  zoo: { label: "Zoo", promptNoun: "zoo" },
+  aquarium: { label: "Aquarium", promptNoun: "aquarium" },
+  amusement_park: { label: "Amusement Park", promptNoun: "amusement park" },
+};
+
 const TENTACLE_PROMPT_TEMPLATE =
   "Within [DISTANCE] of me, which [TYPES] are you nearest to? (You must also be within [DISTANCE])";
 
-export const TENTACLE_LOCATION_CATEGORIES = TENTACLE_LOCATION_CATEGORY_IDS.map(
-  (id) => ({
-    id,
-    label: getMatchingCategory(id).label,
-    promptNoun: getMatchingCategory(id).promptNoun,
-  }),
-) satisfies readonly TentacleLocationCategoryDefinition[];
-
-export function getTentacleLocationCategory(
-  categoryId: TentacleLocationCategoryId,
+function tentacleCategoryDefinition(
+  categoryId: TentacleExtendedCategoryId,
 ): TentacleLocationCategoryDefinition {
-  return TENTACLE_LOCATION_CATEGORIES.find((item) => item.id === categoryId)!;
+  if (categoryId in EXTENDED_CATEGORY_LABELS) {
+    return {
+      id: categoryId,
+      ...EXTENDED_CATEGORY_LABELS[
+        categoryId as keyof typeof EXTENDED_CATEGORY_LABELS
+      ],
+    };
+  }
+
+  return {
+    id: categoryId,
+    label: getMatchingCategory(categoryId as MatchingCategoryId).label,
+    promptNoun: getMatchingCategory(categoryId as MatchingCategoryId).promptNoun,
+  };
 }
 
+export function tentacleCategoriesForGameSize(
+  gameSize: GameSize,
+): readonly TentacleLocationCategoryDefinition[] {
+  return tentacleOptionsForGameSize(gameSize).map((option) =>
+    tentacleCategoryDefinition(option.categoryId),
+  );
+}
+
+export function getTentacleLocationCategory(
+  categoryId: TentacleExtendedCategoryId,
+): TentacleLocationCategoryDefinition {
+  return tentacleCategoryDefinition(categoryId);
+}
+
+export function tentacleSearchRadiusMeters(
+  categoryId: TentacleExtendedCategoryId,
+  gameSize: GameSize,
+): number {
+  return tentacleRadiusMeters(categoryId as TentacleGameSizeCategoryId, gameSize);
+}
+
+/** @deprecated Use tentacleSearchRadiusMeters */
+export const TENTACLE_SEARCH_RADIUS_METERS = milesToMeters(1);
+
+/** @deprecated Unified radius — search and answer use the same distance */
+export const TENTACLE_ANSWER_RADIUS_METERS = milesToMeters(1);
+
 export function tentacleCategoryOverpassSelectors(
-  categoryId: TentacleLocationCategoryId,
+  categoryId: TentacleExtendedCategoryId,
 ): readonly string[] {
-  return matchingCategoryOverpassSelectors(categoryId);
+  if (categoryId === "metro_line") {
+    return [
+      "[route=light_rail]",
+      "[route=subway]",
+      "[route=tram]",
+      "[route=monorail]",
+    ];
+  }
+
+  return matchingCategoryOverpassSelectors(categoryId as MatchingCategoryId);
 }
 
 export function tentacleLocationTypesLabel(categoryId: string): string {
-  const known = TENTACLE_LOCATION_CATEGORIES.find((c) => c.id === categoryId);
-  if (known) {
-    return known.label.toLowerCase();
-  }
-
-  const legacy = MATCHING_CATEGORIES.find((c) => c.id === categoryId);
-  if (legacy) {
-    return legacy.label.toLowerCase();
-  }
-
-  return "locations";
+  const known = tentacleCategoryDefinition(categoryId as TentacleExtendedCategoryId);
+  return known.promptNoun;
 }
 
 export function tentacleQuestionPrompt(
   categoryId: string,
   unit: DistanceUnit,
-  radiusMeters: number = TENTACLE_SEARCH_RADIUS_METERS,
+  radiusMeters: number,
 ): string {
   const distanceLabel = formatDistance(radiusMeters, unit);
   const typesLabel = tentacleLocationTypesLabel(categoryId);
@@ -93,11 +143,12 @@ export function tentacleQuestionPrompt(
 }
 
 export function tentacleHiderAnswerClipboardText(
-  categoryId: TentacleLocationCategoryId,
+  categoryId: TentacleExtendedCategoryId,
   unit: DistanceUnit,
   pois: readonly { name: string }[],
+  radiusMeters: number,
 ): string {
-  const header = tentacleQuestionPrompt(categoryId, unit);
+  const header = tentacleQuestionPrompt(categoryId, unit, radiusMeters);
   if (pois.length === 0) {
     return header;
   }
@@ -120,46 +171,60 @@ export function tentacleCategoryIdForAnnotation(
   );
 }
 
-const TENTACLE_CATEGORY_ID_SET = new Set<string>(
-  TENTACLE_LOCATION_CATEGORY_IDS,
-);
-
 export function usedTentacleCategoryIds(
   annotations: AnnotationRecord[],
   exceptAnnotationId?: string,
-): Set<TentacleLocationCategoryId> {
+): Set<TentacleExtendedCategoryId> {
   const raw = collectUsedAnnotationOptions(
     annotations,
     (annotation) => tentacleCategoryIdForAnnotation(annotation),
     exceptAnnotationId,
   );
-  const used = new Set<TentacleLocationCategoryId>();
-  for (const id of raw) {
-    if (id && TENTACLE_CATEGORY_ID_SET.has(id)) {
-      used.add(id as TentacleLocationCategoryId);
-    }
-  }
-
-  return used;
+  return new Set(
+    [...raw].filter((id): id is TentacleExtendedCategoryId => Boolean(id)),
+  );
 }
 
 export function firstAvailableTentacleCategoryId(
-  usedCategories: ReadonlySet<TentacleLocationCategoryId>,
-): TentacleLocationCategoryId | null {
-  return firstUnusedCatalogOption(TENTACLE_LOCATION_CATEGORIES, usedCategories);
+  gameSize: GameSize,
+  usedCategories: ReadonlySet<TentacleExtendedCategoryId> = new Set(),
+): TentacleExtendedCategoryId | null {
+  const categories = tentacleCategoriesForGameSize(gameSize);
+  return firstUnusedCatalogOption(categories, usedCategories);
 }
 
 export function isTentacleCategoryAvailable(
-  categoryId: TentacleLocationCategoryId,
-  usedCategories: ReadonlySet<TentacleLocationCategoryId>,
+  gameSize: GameSize,
+  categoryId: TentacleExtendedCategoryId,
 ): boolean {
-  return isCatalogOptionAvailable(categoryId, usedCategories);
+  return isTentacleCategoryAvailableForGameSize(gameSize, categoryId);
 }
 
 export function defaultTentacleCategoryId(
-  usedCategories: ReadonlySet<TentacleLocationCategoryId> = new Set(),
-): TentacleLocationCategoryId {
-  return firstAvailableTentacleCategoryId(usedCategories) ?? "museum";
+  gameSize: GameSize,
+  usedCategories: ReadonlySet<TentacleExtendedCategoryId> = new Set(),
+): TentacleExtendedCategoryId {
+  return firstAvailableTentacleCategoryId(gameSize, usedCategories) ?? "museum";
+}
+
+export function tentacleCategoryUseCount(
+  annotations: readonly AnnotationRecord[],
+  categoryId: TentacleExtendedCategoryId,
+  exceptAnnotationId?: string,
+): number {
+  let count = 0;
+  for (const annotation of annotations) {
+    if (annotation.status !== "active" || annotation.type !== "tentacle") {
+      continue;
+    }
+    if (exceptAnnotationId && annotation.id === exceptAnnotationId) {
+      continue;
+    }
+    if (tentacleCategoryIdForAnnotation(annotation) === categoryId) {
+      count += 1;
+    }
+  }
+  return count;
 }
 
 export function tentacleAnswerLabel(
@@ -185,13 +250,12 @@ export function tentacleAnswerLabel(
 
   if (annotation.metadata.tentacleAnswerCategory) {
     const id = annotation.metadata.tentacleAnswerCategory;
-    const known = TENTACLE_LOCATION_CATEGORIES.find((c) => c.id === id);
-    if (known) {
-      return known.label;
+    try {
+      return tentacleCategoryDefinition(id as TentacleExtendedCategoryId).label;
+    } catch {
+      const legacy = MATCHING_CATEGORIES.find((c) => c.id === id);
+      return legacy?.label ?? null;
     }
-
-    const legacy = MATCHING_CATEGORIES.find((c) => c.id === id);
-    return legacy?.label ?? null;
   }
 
   return null;

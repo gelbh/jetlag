@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import type { Feature, LineString } from "geojson";
 import type { AnnotationType } from "../domain/annotations";
 import type { PlayerRole } from "../domain/playerRole";
 import type { GameReplyOption } from "../domain/sessionChat";
@@ -7,6 +8,8 @@ import {
   createPendingQuestionId,
   type PendingQuestionPlacement,
 } from "../domain/sessionChat";
+import { buildThermometerLineGeometry } from "../domain/thermometerWalk";
+import type { LatLngTuple } from "../domain/geometry";
 import {
   postGameSystemMessage,
   updateGameMessageAnswer,
@@ -23,6 +26,7 @@ export interface SubmitPendingQuestionInput {
   promptText: string;
   replyOptions: GameReplyOption[];
   placement: PendingQuestionPlacement;
+  status?: "pending" | "walking";
 }
 
 export function usePendingQuestionActions() {
@@ -35,10 +39,12 @@ export function usePendingQuestionActions() {
       promptText,
       replyOptions,
       placement,
+      status = "pending",
     }: SubmitPendingQuestionInput) => {
       const pendingQuestionId = createPendingQuestionId();
       const messageId = createMessageId();
       const createdAt = new Date().toISOString();
+      const answerableAt = status === "pending" ? createdAt : undefined;
 
       await writePendingQuestion(sessionId, {
         id: pendingQuestionId,
@@ -46,11 +52,23 @@ export function usePendingQuestionActions() {
         toolType,
         createdByUid: senderUid,
         createdAt,
-        status: "pending",
+        status,
         placement,
         replyOptions,
         promptText,
+        answerableAt,
       });
+
+      if (status === "walking") {
+        await postGameSystemMessage(
+          sessionId,
+          senderUid,
+          senderRole,
+          promptText,
+          messageId,
+        );
+        return pendingQuestionId;
+      }
 
       await writeSessionMessage(sessionId, {
         id: messageId,
@@ -62,6 +80,68 @@ export function usePendingQuestionActions() {
         kind: "question",
         pendingQuestionId,
         toolType,
+        promptText,
+        replyOptions,
+        status: "pending",
+      });
+
+      return pendingQuestionId;
+    },
+    [],
+  );
+
+  const completeThermometerWalk = useCallback(
+    async ({
+      sessionId,
+      pendingQuestionId,
+      senderUid,
+      senderRole,
+      startPoint,
+      endPoint,
+      distanceMeters,
+      promptText,
+      replyOptions,
+    }: {
+      sessionId: string;
+      pendingQuestionId: string;
+      senderUid: string;
+      senderRole: PlayerRole;
+      startPoint: LatLngTuple;
+      endPoint: LatLngTuple;
+      distanceMeters: number;
+      promptText: string;
+      replyOptions: GameReplyOption[];
+    }) => {
+      const geometry: Feature<LineString> = buildThermometerLineGeometry(
+        startPoint,
+        endPoint,
+      );
+      const answerableAt = new Date().toISOString();
+      const messageId = createMessageId();
+
+      await updatePendingQuestion(sessionId, pendingQuestionId, {
+        status: "pending",
+        placement: {
+          geometryJson: JSON.stringify(geometry),
+          metadata: {
+            thermometerDistanceMeters: distanceMeters,
+          },
+        },
+        promptText,
+        replyOptions,
+        answerableAt,
+      });
+
+      await writeSessionMessage(sessionId, {
+        id: messageId,
+        sessionId,
+        channel: "game",
+        senderUid,
+        senderRole,
+        createdAt: answerableAt,
+        kind: "question",
+        pendingQuestionId,
+        toolType: "thermometer",
         promptText,
         replyOptions,
         status: "pending",
@@ -107,6 +187,7 @@ export function usePendingQuestionActions() {
 
   return {
     submitPendingQuestion,
+    completeThermometerWalk,
     answerPendingQuestion,
     postSystemMessage,
   };

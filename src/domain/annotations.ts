@@ -17,7 +17,7 @@ import type {
 import { measuringQuestionLabel } from "./measuringQuestions";
 import type { ThermometerAnswer } from "./thermometerQuestions";
 import { thermometerQuestionPrompt } from "./thermometerQuestions";
-import type { TentacleLocationCategoryId } from "./tentacleQuestions";
+import type { TentacleExtendedCategoryId } from "./tentacleQuestions";
 import { tentacleAnnotationSummary } from "./tentacleQuestions";
 import type { GameSize } from "./gameSize";
 import type { MemberRoles } from "./playerRole";
@@ -50,15 +50,15 @@ export interface AnnotationMetadata {
   poiIds?: string[];
   highlightedPoiId?: string;
   pois?: TentaclePoi[];
-  tentacleCategoryId?: TentacleLocationCategoryId;
+  tentacleCategoryId?: TentacleExtendedCategoryId;
   tentacleChooseCustom?: boolean;
   tentacleOutOfReach?: boolean;
   tentacleAnswerPoiName?: string;
-  tentacleAnswerCategory?: TentacleLocationCategoryId;
+  tentacleAnswerCategory?: TentacleExtendedCategoryId;
   tentacleHiderAnchor?: { lat: number; lng: number };
   tentacleNearestByCategory?: Partial<
     Record<
-      TentacleLocationCategoryId,
+      TentacleExtendedCategoryId,
       { poiId: string; distanceMeters: number }
     >
   >;
@@ -94,7 +94,7 @@ export interface TentaclePoi {
   name: string;
   lat: number;
   lng: number;
-  category: TentacleLocationCategoryId;
+  category: TentacleExtendedCategoryId;
 }
 
 export interface AnnotationRecord {

@@ -57,7 +57,7 @@ describe("matchingQuestions", () => {
     const used = new Set(["commercial_airport", "transit_line"] as const);
 
     expect(firstAvailableMatchingCategoryId(used)).toBe("station_name_length");
-    expect(isMatchingCategoryAvailable("commercial_airport", used)).toBe(false);
-    expect(isMatchingCategoryAvailable("station_name_length", used)).toBe(true);
+    expect(isMatchingCategoryAvailable("commercial_airport")).toBe(true);
+    expect(isMatchingCategoryAvailable("station_name_length")).toBe(true);
   });
 });

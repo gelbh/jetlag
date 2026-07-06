@@ -6,6 +6,7 @@ export type ChatChannel = "social" | "game";
 export type GameMessageKind = "question" | "answer" | "system";
 
 export type PendingQuestionStatus =
+  | "walking"
   | "pending"
   | "answered"
   | "resolved"
@@ -49,6 +50,7 @@ export interface PendingQuestionRecord {
   replyOptions: GameReplyOption[];
   promptText: string;
   answer?: unknown;
+  answerableAt?: string;
   resolvedAnnotationId?: string;
 }
 

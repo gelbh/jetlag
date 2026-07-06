@@ -124,11 +124,7 @@ describe("radarQuestions", () => {
       chooseCustom: false,
       radiusMeters: milesToMeters(0.25),
     });
-    expect(
-      isRadarDistanceOptionAvailable(new Set([3]), false, milesToMeters(3)),
-    ).toBe(false);
-    expect(isRadarDistanceOptionAvailable(new Set(["choose"]), true, 0)).toBe(
-      false,
-    );
+    expect(isRadarDistanceOptionAvailable()).toBe(true);
+    expect(isRadarDistanceOptionAvailable()).toBe(true);
   });
 });

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import type { TentaclePoi } from "../../domain/annotations";
 import type { DistanceUnit } from "../../domain/distance";
+import type { GameSize } from "../../domain/gameSize";
 import {
   isTentacleCategoryAvailable,
-  TENTACLE_LOCATION_CATEGORIES,
+  tentacleCategoriesForGameSize,
   tentacleQuestionPrompt,
-  type TentacleLocationCategoryId,
+  type TentacleExtendedCategoryId,
 } from "../../domain/tentacleQuestions";
 import { AnchorControls } from "./shared/AnchorControls";
 import { ErrorWithRetry } from "./shared/ErrorWithRetry";
@@ -24,8 +25,10 @@ import {
 } from "./shared/toolStepUtils";
 
 interface TentaclePanelProps {
-  categoryId: TentacleLocationCategoryId;
-  usedCategoryIds: ReadonlySet<TentacleLocationCategoryId>;
+  gameSize: GameSize;
+  categoryId: TentacleExtendedCategoryId;
+  searchRadiusMeters: number;
+  usedCategoryIds: ReadonlySet<TentacleExtendedCategoryId>;
   distanceUnit: DistanceUnit;
   poiOptions: TentaclePoi[];
   selectedPoiId: string | null;
@@ -35,7 +38,7 @@ interface TentaclePanelProps {
   hasCenter: boolean;
   gpsLoading?: boolean;
   error?: string | null;
-  onCategoryChange: (categoryId: TentacleLocationCategoryId) => void;
+  onCategoryChange: (categoryId: TentacleExtendedCategoryId) => void;
   onUseGps: () => void;
   onPlaceAtMapTap: () => void;
   onSelectPoi: (poiId: string) => void;
@@ -46,8 +49,9 @@ interface TentaclePanelProps {
 }
 
 export function TentaclePanel({
+  gameSize,
   categoryId,
-  usedCategoryIds,
+  searchRadiusMeters,
   distanceUnit,
   poiOptions,
   selectedPoiId,
@@ -69,10 +73,14 @@ export function TentaclePanel({
   const [stepIndex, setStepIndex] = useState(0);
   const step = TENTACLE_STEPS[stepIndex]?.id ?? "category";
 
-  const prompt = tentacleQuestionPrompt(categoryId, distanceUnit);
-  const categorySelectionAvailable = isTentacleCategoryAvailable(
+  const prompt = tentacleQuestionPrompt(
     categoryId,
-    usedCategoryIds,
+    distanceUnit,
+    searchRadiusMeters,
+  );
+  const categorySelectionAvailable = isTentacleCategoryAvailable(
+    gameSize,
+    categoryId,
   );
   const hasRecordedAnswer = outOfReach || selectedPoiId !== null;
   const locationsReady = poiOptions.length > 0 || (!loading && hasCenter);
@@ -81,9 +89,7 @@ export function TentaclePanel({
     poiOptions.length > 0 &&
     (awaitHiderAnswer || hasRecordedAnswer) &&
     categorySelectionAvailable;
-  const availableCategories = TENTACLE_LOCATION_CATEGORIES.filter((category) =>
-    isTentacleCategoryAvailable(category.id, usedCategoryIds),
-  );
+  const availableCategories = tentacleCategoriesForGameSize(gameSize);
 
   const goNext = () => {
     setStepIndex((current) => Math.min(current + 1, TENTACLE_STEPS.length - 1));
@@ -115,7 +121,7 @@ export function TentaclePanel({
             <select
               value={categoryId}
               onChange={(event) =>
-                onCategoryChange(event.target.value as TentacleLocationCategoryId)
+                onCategoryChange(event.target.value as TentacleExtendedCategoryId)
               }
               className="field-input"
             >
@@ -173,6 +179,7 @@ export function TentaclePanel({
             <TentacleAnswerPicker
               categoryId={categoryId}
               distanceUnit={distanceUnit}
+              searchRadiusMeters={searchRadiusMeters}
               poiOptions={poiOptions}
               selectedPoiId={selectedPoiId}
               outOfReach={outOfReach}

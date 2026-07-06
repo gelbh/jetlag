@@ -3,6 +3,7 @@ import type { AnnotationRecord } from "../../domain/annotations";
 import type { AnnotationType, GameArea } from "../../domain/annotations";
 import type { LatLngTuple } from "../../domain/geometry";
 import type { DistanceUnit } from "../../domain/distance";
+import type { GameSize } from "../../domain/gameSize";
 import type { MapTool } from "../../state/sessionStore";
 import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
 import { useMatchingTool } from "../../hooks/tools/useMatchingTool";
@@ -17,6 +18,7 @@ import {
 } from "../../hooks/map-screen/heavyMapTools";
 
 interface HeavyMapToolsSlotProps {
+  gameSize: GameSize;
   activeTool: MapTool;
   annotations: AnnotationRecord[];
   gameArea: GameArea;
@@ -41,7 +43,7 @@ interface HeavyMapToolsSlotProps {
       SubmitPendingQuestionInput,
       "sessionId" | "senderUid" | "senderRole" | "toolType"
     >,
-  ) => Promise<void>;
+  ) => Promise<void | string | undefined>;
   sessionId?: string;
   senderUid?: string | null;
   onToolsChange: (tools: HeavyMapToolsApi) => void;
@@ -119,7 +121,8 @@ function MatchingToolRunner({
     senderUid,
     submitPendingQuestion:
       awaitHiderAnswer && submitToolQuestion
-        ? (input) => submitToolQuestion("matching", input)
+        ? (input) =>
+            submitToolQuestion("matching", input).then(() => undefined)
         : undefined,
   });
 
@@ -144,7 +147,8 @@ function MeasuringToolRunner({
     senderUid,
     submitPendingQuestion:
       awaitHiderAnswer && submitToolQuestion
-        ? (input) => submitToolQuestion("measuring", input)
+        ? (input) =>
+            submitToolQuestion("measuring", input).then(() => undefined)
         : undefined,
   });
 
@@ -169,7 +173,8 @@ function TentacleToolRunner({
     senderUid,
     submitPendingQuestion:
       awaitHiderAnswer && submitToolQuestion
-        ? (input) => submitToolQuestion("tentacle", input)
+        ? (input) =>
+            submitToolQuestion("tentacle", input).then(() => undefined)
         : undefined,
   });
 

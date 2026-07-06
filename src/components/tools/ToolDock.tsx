@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { MapStyle } from "../../domain/mapBasemaps";
+import type { GameSize } from "../../domain/gameSize";
+import { toolDockEnabled } from "../../domain/gameSizeRules";
 import {
   MAP_TOOL_DOCK_ENTRIES,
   MARKUP_DOCK_TOOL_IDS,
@@ -21,6 +23,7 @@ import {
 
 interface ToolDockProps {
   activeTool: MapTool;
+  gameSize?: GameSize;
   onSelect: (tool: MapTool) => void;
   canUndo: boolean;
   canRedo: boolean;
@@ -38,6 +41,7 @@ const markupTools = MAP_TOOL_DOCK_ENTRIES.filter((tool) =>
 
 export function ToolDock({
   activeTool,
+  gameSize = "medium",
   onSelect,
   canUndo,
   canRedo,
@@ -85,6 +89,10 @@ export function ToolDock({
   const nextMapStyle = mapStyle === "standard" ? "satellite" : "standard";
   const mapStyleLabel =
     mapStyle === "standard" ? "Switch to satellite view" : "Switch to map view";
+
+  const visibleQuestionTools = QUESTION_DOCK_TOOL_IDS.filter((toolId) =>
+    toolDockEnabled(toolId, gameSize),
+  );
 
   const renderQuestionTool = (
     toolId: (typeof QUESTION_DOCK_TOOL_IDS)[number],
@@ -192,7 +200,7 @@ export function ToolDock({
           className="jl-tool-dock-group jl-tool-dock-group-main"
           aria-label="Question tools"
         >
-          {QUESTION_DOCK_TOOL_IDS.map((toolId) => renderQuestionTool(toolId))}
+          {visibleQuestionTools.map((toolId) => renderQuestionTool(toolId))}
         </div>
 
         <div className="jl-tool-dock-divider" aria-hidden="true" />

@@ -81,10 +81,7 @@ export function MatchingPanel({
   const question = matchingQuestionFor(categoryId);
   const category = getMatchingCategory(categoryId);
   const usesLandmassMatching = category.resolver === "landmass";
-  const categoryAvailable = isMatchingCategoryAvailable(
-    categoryId,
-    usedCategoryIds,
-  );
+  const categoryAvailable = isMatchingCategoryAvailable(categoryId);
   const resolveComplete = nullAnswer || nearestFeatureName !== null;
   const canCommit =
     hasSeekerPoint &&

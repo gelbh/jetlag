@@ -2,7 +2,6 @@ import type { AnnotationRecord } from "./annotations";
 import {
   collectUsedAnnotationOptions,
   firstUnusedCatalogOption,
-  isCatalogOptionAvailable,
 } from "./toolSessionOptions";
 
 export type MatchingAnswer = "yes" | "no";
@@ -361,11 +360,28 @@ export function firstAvailableMatchingCategoryId(
 
 export function isMatchingCategoryAvailable(
   categoryId: MatchingCategoryId,
-  usedCategories: ReadonlySet<MatchingCategoryId>,
 ): boolean {
-  return isCatalogOptionAvailable(categoryId, usedCategories, (value) =>
-    isMatchingCategoryEnabled(value),
-  );
+  return isMatchingCategoryEnabled(categoryId);
+}
+
+export function matchingCategoryUseCount(
+  annotations: readonly AnnotationRecord[],
+  categoryId: MatchingCategoryId,
+  exceptAnnotationId?: string,
+): number {
+  let count = 0;
+  for (const annotation of annotations) {
+    if (annotation.status !== "active" || annotation.type !== "matching") {
+      continue;
+    }
+    if (exceptAnnotationId && annotation.id === exceptAnnotationId) {
+      continue;
+    }
+    if (annotation.metadata.matchingCategory === categoryId) {
+      count += 1;
+    }
+  }
+  return count;
 }
 
 export function defaultMatchingCategoryId(

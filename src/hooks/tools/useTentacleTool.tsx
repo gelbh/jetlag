@@ -14,16 +14,16 @@ import {
   tentacleEliminationJsonForAnswer,
 } from "../../domain/tentacleGeometry";
 import type { DistanceUnit } from "../../domain/distance";
+import type { GameSize } from "../../domain/gameSize";
 import {
   defaultTentacleCategoryId,
   firstAvailableTentacleCategoryId,
   isTentacleCategoryAvailable,
-  TENTACLE_ANSWER_RADIUS_METERS,
+  tentacleSearchRadiusMeters,
   TENTACLE_NOT_WITHIN_REACH_LABEL,
-  TENTACLE_SEARCH_RADIUS_METERS,
   tentacleQuestionPrompt,
   usedTentacleCategoryIds,
-  type TentacleLocationCategoryId,
+  type TentacleExtendedCategoryId,
 } from "../../domain/tentacleQuestions";
 import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
 import { fetchTentaclePois } from "../../services/tentacleOverpass";
@@ -35,6 +35,7 @@ interface UseTentacleToolParams {
   active: boolean;
   annotations: AnnotationRecord[];
   gameArea: GameArea;
+  gameSize: GameSize;
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
   ) => Promise<AnnotationRecord>;
@@ -64,6 +65,7 @@ export function useTentacleTool({
   active,
   annotations,
   gameArea,
+  gameSize,
   createAnnotation,
   awaitHiderAnswer = false,
   submitPendingQuestion,
@@ -89,33 +91,42 @@ export function useTentacleTool({
     null,
   );
   const [tentacleCategoryId, setTentacleCategoryId] =
-    useState<TentacleLocationCategoryId>(defaultTentacleCategoryId());
+    useState<TentacleExtendedCategoryId>(defaultTentacleCategoryId(gameSize));
   const [tentaclePois, setTentaclePois] = useState<TentaclePoi[]>([]);
   const [tentacleOutOfReach, setTentacleOutOfReach] = useState(false);
   const [selectedPoiId, setSelectedPoiId] = useState<string | null>(null);
   const [tentacleLoading, setTentacleLoading] = useState(false);
   const [tentacleError, setTentacleError] = useState<string | null>(null);
 
+  const searchRadiusMeters = tentacleSearchRadiusMeters(
+    tentacleCategoryId,
+    gameSize,
+  );
+
   useToolSessionOptions({
     active,
     usedOptions: usedTentacleCategories,
     currentOption: tentacleCategoryId,
-    isAvailable: (usedOptions, currentOption) =>
-      isTentacleCategoryAvailable(currentOption, usedOptions),
-    pickNext: firstAvailableTentacleCategoryId,
-    onUnavailable: useCallback((nextCategory: TentacleLocationCategoryId) => {
-      setTentacleCategoryId(nextCategory);
-      setTentaclePois([]);
-      setTentacleOutOfReach(false);
-      setSelectedPoiId(null);
-      setTentacleError(null);
-    }, []),
+    isAvailable: (_usedOptions, currentOption) =>
+      isTentacleCategoryAvailable(gameSize, currentOption),
+    pickNext: (usedOptions) =>
+      firstAvailableTentacleCategoryId(gameSize, usedOptions) ?? "museum",
+    onUnavailable: useCallback(
+      (nextCategory: TentacleExtendedCategoryId) => {
+        setTentacleCategoryId(nextCategory);
+        setTentaclePois([]);
+        setTentacleOutOfReach(false);
+        setSelectedPoiId(null);
+        setTentacleError(null);
+      },
+      [],
+    ),
   });
 
   const { beginRequest, cancelRequests, isLatestRequest } = useLatestRequest();
 
   const loadPoisForCenter = useCallback(
-    async (center: LatLngTuple, categoryId: TentacleLocationCategoryId) => {
+    async (center: LatLngTuple, categoryId: TentacleExtendedCategoryId) => {
       const requestId = beginRequest();
       setTentacleLoading(true);
       setTentacleError(null);
@@ -126,7 +137,7 @@ export function useTentacleTool({
       try {
         const pois = await fetchTentaclePois(
           center,
-          TENTACLE_SEARCH_RADIUS_METERS,
+          searchRadiusMeters,
           categoryId,
         );
 
@@ -136,7 +147,9 @@ export function useTentacleTool({
 
         setTentaclePois(pois);
         if (pois.length === 0) {
-          setTentacleError("No named locations were found within 1 mile.");
+          setTentacleError(
+            `No named locations were found within ${searchRadiusMeters < 5000 ? "1 mile" : "15 miles"}.`,
+          );
         }
       } catch (error) {
         if (!isLatestRequest(requestId)) {
@@ -152,7 +165,7 @@ export function useTentacleTool({
         }
       }
     },
-    [beginRequest, isLatestRequest],
+    [beginRequest, isLatestRequest, searchRadiusMeters],
   );
 
   const debouncedTentacleCenter = useDebouncedValue(tentacleCenter, 400);
@@ -173,12 +186,12 @@ export function useTentacleTool({
     cancelRequests();
     setTentacleLoading(false);
     setTentacleCenter(null);
-    setTentacleCategoryId(defaultTentacleCategoryId(usedTentacleCategories));
+    setTentacleCategoryId(defaultTentacleCategoryId(gameSize, usedTentacleCategories));
     setTentaclePois([]);
     setTentacleOutOfReach(false);
     setSelectedPoiId(null);
     setTentacleError(null);
-  }, [cancelRequests, usedTentacleCategories]);
+  }, [cancelRequests, gameSize, usedTentacleCategories]);
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
@@ -227,7 +240,7 @@ export function useTentacleTool({
 
     return buildTentacleEliminationRegion(
       tentacleCenter,
-      TENTACLE_ANSWER_RADIUS_METERS,
+      searchRadiusMeters,
       tentaclePois,
       selectedPoiId,
       gameArea,
@@ -236,6 +249,7 @@ export function useTentacleTool({
     gameArea,
     selectedPoiId,
     tentacleCenter,
+    searchRadiusMeters,
     tentacleOutOfReach,
     tentaclePois,
   ]);
@@ -251,10 +265,8 @@ export function useTentacleTool({
       return;
     }
 
-    if (
-      !isTentacleCategoryAvailable(tentacleCategoryId, usedTentacleCategories)
-    ) {
-      setMapError("That location type was already used this session.");
+    if (!isTentacleCategoryAvailable(gameSize, tentacleCategoryId)) {
+      setMapError("That location type is not available for this game size.");
       return;
     }
 
@@ -269,7 +281,11 @@ export function useTentacleTool({
 
     if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
       await submitPendingQuestion({
-        promptText: tentacleQuestionPrompt(tentacleCategoryId, distanceUnit),
+        promptText: tentacleQuestionPrompt(
+          tentacleCategoryId,
+          distanceUnit,
+          searchRadiusMeters,
+        ),
         replyOptions: [
           ...tentaclePois.map((poi) => ({
             id: poi.id,
@@ -310,7 +326,7 @@ export function useTentacleTool({
     const selectedPoi = tentaclePois.find((poi) => poi.id === selectedPoiId);
     const eliminationJson = tentacleEliminationJsonForAnswer({
       anchor: tentacleCenter,
-      radiusMeters: TENTACLE_ANSWER_RADIUS_METERS,
+      radiusMeters: searchRadiusMeters,
       pois: tentaclePois,
       answeredPoiId: selectedPoi?.id,
       outOfReach: tentacleOutOfReach,
@@ -319,10 +335,7 @@ export function useTentacleTool({
 
     const metadata: AnnotationRecord["metadata"] = {
       createdAt: new Date().toISOString(),
-      radiusMeters: TENTACLE_SEARCH_RADIUS_METERS,
-      tentacleAnswerRadiusMeters: tentacleOutOfReach
-        ? undefined
-        : TENTACLE_ANSWER_RADIUS_METERS,
+      radiusMeters: searchRadiusMeters,
       tentacleCategoryId,
       tentacleOutOfReach,
       highlightedPoiId: selectedPoi?.id,
@@ -361,7 +374,9 @@ export function useTentacleTool({
 
   const panel = (
     <TentaclePanel
+      gameSize={gameSize}
       categoryId={tentacleCategoryId}
+      searchRadiusMeters={searchRadiusMeters}
       usedCategoryIds={usedTentacleCategories}
       distanceUnit={distanceUnit}
       poiOptions={tentaclePois}
@@ -404,8 +419,8 @@ export function useTentacleTool({
   return {
     draft: {
       tentacleCenter,
-      tentacleSearchRadiusMeters: TENTACLE_SEARCH_RADIUS_METERS,
-      tentacleAnswerRadiusMeters: TENTACLE_ANSWER_RADIUS_METERS,
+      tentacleSearchRadiusMeters: searchRadiusMeters,
+      tentacleAnswerRadiusMeters: searchRadiusMeters,
       tentaclePois,
       tentacleSelectedPoiId: selectedPoiId,
       tentacleOutOfReach,

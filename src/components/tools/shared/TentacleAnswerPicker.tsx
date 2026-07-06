@@ -4,15 +4,16 @@ import type { DistanceUnit } from "../../../domain/distance";
 import {
   TENTACLE_NOT_WITHIN_REACH_LABEL,
   tentacleHiderAnswerClipboardText,
-  type TentacleLocationCategoryId,
+  type TentacleExtendedCategoryId,
 } from "../../../domain/tentacleQuestions";
 import { copyToClipboard } from "../../../platform/copyToClipboard";
 import { ListSelectRow } from "./ListSelectRow";
 import { ToolSection } from "./ToolSection";
 
 interface TentacleAnswerPickerProps {
-  categoryId: TentacleLocationCategoryId;
+  categoryId: TentacleExtendedCategoryId;
   distanceUnit: DistanceUnit;
+  searchRadiusMeters: number;
   poiOptions: TentaclePoi[];
   selectedPoiId: string | null;
   outOfReach: boolean;
@@ -23,6 +24,7 @@ interface TentacleAnswerPickerProps {
 export function TentacleAnswerPicker({
   categoryId,
   distanceUnit,
+  searchRadiusMeters,
   poiOptions,
   selectedPoiId,
   outOfReach,
@@ -49,6 +51,7 @@ export function TentacleAnswerPicker({
                 categoryId,
                 distanceUnit,
                 poiOptions,
+                searchRadiusMeters,
               );
               const ok = await copyToClipboard(text);
               setCopyStatus(ok ? "copied" : "failed");
@@ -61,10 +64,10 @@ export function TentacleAnswerPicker({
             ? "Copied"
             : copyStatus === "failed"
               ? "Copy failed"
-              : "Copy list for hiders"}
+              : "Copy for hider"}
         </button>
       </div>
-      <div className="space-y-2">
+      <div className="space-y-1">
         {poiOptions.map((poi) => (
           <ListSelectRow
             key={poi.id}
@@ -76,7 +79,6 @@ export function TentacleAnswerPicker({
         ))}
         <ListSelectRow
           selected={outOfReach}
-          align="center"
           onClick={() => onOutOfReachChange(true)}
         >
           {TENTACLE_NOT_WITHIN_REACH_LABEL}

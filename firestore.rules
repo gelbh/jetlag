@@ -206,7 +206,7 @@ service cloud.firestore {
           && validAnnotationType(request.resource.data.toolType)
           && request.resource.data.createdByUid == request.auth.uid
           && request.resource.data.createdAt is string
-          && request.resource.data.status == 'pending'
+          && request.resource.data.status in ['pending', 'walking']
           && request.resource.data.placement is map
           && request.resource.data.replyOptions is list
           && request.resource.data.promptText is string;
@@ -215,6 +215,14 @@ service cloud.firestore {
           && resource.data.status == 'pending'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['answer', 'status'])
           && request.resource.data.status == 'answered'
+        ) || (
+          isSeekerMember(sessionId)
+          && resource.data.status == 'walking'
+          && request.resource.data.status == 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'status', 'placement', 'promptText', 'replyOptions', 'answerableAt'
+          ])
+          && request.resource.data.answerableAt is string
         ) || (
           isSeekerMember(sessionId)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'resolvedAnnotationId'])

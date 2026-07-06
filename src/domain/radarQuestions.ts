@@ -2,7 +2,6 @@ import type { AnnotationRecord } from "./annotations";
 import {
   collectUsedAnnotationOptions,
   firstUnusedPreset,
-  isPresetOptionAvailable,
   presetMetersForMiles,
 } from "./toolSessionOptions";
 import {
@@ -88,17 +87,33 @@ export function firstAvailableRadarDistanceSelection(
   return null;
 }
 
-export function isRadarDistanceOptionAvailable(
-  usedOptions: ReadonlySet<RadarDistanceOptionKey>,
+export function isRadarDistanceOptionAvailable(): boolean {
+  return true;
+}
+
+export function radarDistanceUseCount(
+  annotations: readonly AnnotationRecord[],
   chooseCustom: boolean,
   radiusMeters: number,
-): boolean {
-  if (chooseCustom) {
-    return !usedOptions.has("choose");
+  exceptAnnotationId?: string,
+): number {
+  let count = 0;
+  for (const annotation of annotations) {
+    if (annotation.status !== "active" || annotation.type !== "radar") {
+      continue;
+    }
+    if (exceptAnnotationId && annotation.id === exceptAnnotationId) {
+      continue;
+    }
+    const optionKey = radarDistanceOptionForAnnotation(annotation);
+    const targetKey = chooseCustom
+      ? "choose"
+      : radarPresetMilesForRadius(radiusMeters);
+    if (optionKey === targetKey) {
+      count += 1;
+    }
   }
-
-  const presetMiles = radarPresetMilesForRadius(radiusMeters);
-  return isPresetOptionAvailable(presetMiles, usedOptions);
+  return count;
 }
 
 export function radarDistanceOptionLabel(

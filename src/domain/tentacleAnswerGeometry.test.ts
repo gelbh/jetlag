@@ -48,9 +48,7 @@ describe("tentacle yes-radar shading (game minus answer disk)", () => {
     expect(booleanPointInPolygon(outsideDisk, exterior!)).toBe(true);
   });
 
-  it("answer radius is larger than search radius", () => {
-    expect(TENTACLE_ANSWER_RADIUS_METERS).toBeGreaterThan(
-      TENTACLE_SEARCH_RADIUS_METERS,
-    );
+  it("search and answer radius are unified per official rules", () => {
+    expect(TENTACLE_ANSWER_RADIUS_METERS).toBe(TENTACLE_SEARCH_RADIUS_METERS);
   });
 });

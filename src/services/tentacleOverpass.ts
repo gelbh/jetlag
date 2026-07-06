@@ -2,7 +2,7 @@ import { distanceBetweenPoints, type LatLngTuple } from "../domain/geometry";
 import type { TentaclePoi } from "../domain/annotations";
 import {
   tentacleCategoryOverpassSelectors,
-  type TentacleLocationCategoryId,
+  type TentacleExtendedCategoryId,
 } from "../domain/tentacleQuestions";
 import { queryOverpass } from "./overpassClient";
 import {
@@ -12,6 +12,7 @@ import {
 
 type OverpassElement = {
   id: number;
+  type?: string;
   tags?: Record<string, string>;
   lat?: number;
   lon?: number;
@@ -25,8 +26,18 @@ function selectorToFilter(selector: string): string {
 export function buildTentacleOverpassQuery(
   center: LatLngTuple,
   radiusMeters: number,
-  categoryId: TentacleLocationCategoryId,
+  categoryId: TentacleExtendedCategoryId,
 ): string {
+  if (categoryId === "metro_line") {
+    return `
+      [out:json][timeout:25];
+      (
+        relation(around:${radiusMeters},${center[0]},${center[1]})["route"~"subway|light_rail|tram|monorail"]["name"];
+      );
+      out center 40;
+    `;
+  }
+
   const clauses = tentacleCategoryOverpassSelectors(categoryId).flatMap(
     (selector) => {
       const filter = selectorToFilter(selector);
@@ -81,8 +92,21 @@ function matchesSelector(
 
 export function tentacleCategoryForTags(
   tags: Record<string, string>,
-  categoryId: TentacleLocationCategoryId,
-): TentacleLocationCategoryId | null {
+  categoryId: TentacleExtendedCategoryId,
+): TentacleExtendedCategoryId | null {
+  if (categoryId === "metro_line") {
+    const route = tags.route;
+    if (
+      route === "subway" ||
+      route === "light_rail" ||
+      route === "tram" ||
+      route === "monorail"
+    ) {
+      return "metro_line";
+    }
+    return null;
+  }
+
   const selectors = tentacleCategoryOverpassSelectors(categoryId);
   if (selectors.some((selector) => matchesSelector(tags, selector))) {
     return categoryId;
@@ -93,7 +117,7 @@ export function tentacleCategoryForTags(
 
 export function parseTentaclePois(
   elements: OverpassElement[],
-  categoryId: TentacleLocationCategoryId,
+  categoryId: TentacleExtendedCategoryId,
 ): TentaclePoi[] {
   const seen = new Set<string>();
 
@@ -122,9 +146,14 @@ export function parseTentaclePois(
 
       seen.add(id);
 
+      const displayName =
+        element.tags!.ref?.trim() && categoryId === "metro_line"
+          ? `${element.tags!.name!.trim()} (${element.tags!.ref!.trim()})`
+          : element.tags!.name!.trim();
+
       return {
         id,
-        name: element.tags!.name!.trim(),
+        name: displayName,
         lat,
         lng,
         category,
@@ -162,7 +191,7 @@ export function nearestTentaclePoi(
 export async function fetchTentaclePois(
   center: LatLngTuple,
   radiusMeters: number,
-  categoryId: TentacleLocationCategoryId,
+  categoryId: TentacleExtendedCategoryId,
 ): Promise<TentaclePoi[]> {
   return getOrFetchCached(
     tentaclePoisCacheKey(center, radiusMeters, categoryId),

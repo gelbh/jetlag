@@ -321,6 +321,93 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows seeker walking thermometer flow and hider answer after pending", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+        }),
+      );
+
+    const questionRef = host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .collection("pendingQuestions")
+      .doc("pq-walk");
+
+    await assertSucceeds(
+      questionRef.set({
+        toolType: "thermometer",
+        createdByUid: "host-1",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        status: "walking",
+        placement: {
+          geometryJson: JSON.stringify({
+            type: "Feature",
+            properties: {},
+            geometry: { type: "Point", coordinates: [-6.26, 53.35] },
+          }),
+          metadata: { thermometerDistanceMeters: 1609.344 },
+        },
+        replyOptions: [],
+        promptText: "Thermometer walk started",
+      }),
+    );
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await assertFails(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-walk")
+        .update({ answer: "hotter", status: "answered" }),
+    );
+
+    await assertSucceeds(
+      questionRef.update({
+        status: "pending",
+        answerableAt: "2026-01-01T00:05:00.000Z",
+        promptText: "After traveling 1 mile, am I hotter or colder?",
+        replyOptions: [
+          { id: "hotter", label: "Hotter" },
+          { id: "colder", label: "Colder" },
+        ],
+        placement: {
+          geometryJson: JSON.stringify({
+            type: "Feature",
+            properties: {},
+            geometry: {
+              type: "LineString",
+              coordinates: [
+                [-6.26, 53.35],
+                [-6.25, 53.36],
+              ],
+            },
+          }),
+          metadata: { thermometerDistanceMeters: 1609.344 },
+        },
+      }),
+    );
+
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-walk")
+        .update({ answer: "hotter", status: "answered" }),
+    );
+  });
+
   it("stores session documents with expected host uid", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

@@ -8,6 +8,7 @@ import {
   gameSizeLabel,
   recommendGameSize,
 } from "../../domain/gameSize";
+import { gameSizeRulesSummary } from "../../domain/gameSizeRules";
 
 interface GameSizePickerProps {
   gameArea: GameArea | null;
@@ -56,6 +57,7 @@ export function GameSizePicker({
       <div role="radiogroup" aria-label="Game size" className="space-y-1.5">
         {GAME_SIZE_OPTIONS.map((size) => {
           const meta = gameSizeLabel(size);
+          const rules = gameSizeRulesSummary(size);
           const isRecommended = recommended === size && gameArea !== null;
 
           return (
@@ -86,7 +88,10 @@ export function GameSizePicker({
                 ) : null}
               </span>
               <span className="mt-0.5 block text-xs text-ink-muted">
-                {meta.summary}
+                {meta.summary} · {rules.hidingPeriodLabel} · {rules.tentacleLabel}
+              </span>
+              <span className="mt-0.5 block text-xs text-ink-dim">
+                {rules.thermometerMaxLabel}
               </span>
             </button>
           );

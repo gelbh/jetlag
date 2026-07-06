@@ -47,7 +47,7 @@ import {
   TENTACLE_SEARCH_RADIUS_METERS,
   tentacleCategoryIdForAnnotation,
   tentacleQuestionPrompt,
-  type TentacleLocationCategoryId,
+  type TentacleExtendedCategoryId,
 } from "../../domain/tentacleQuestions";
 import { tentacleEliminationJsonForAnswer } from "../../domain/tentacleGeometry";
 import {
@@ -403,9 +403,12 @@ function AnnotationEditSheetForm({
           <TentacleAnswerPicker
             categoryId={
               (tentacleCategoryIdForAnnotation(annotation) ??
-                "museum") as TentacleLocationCategoryId
+                "museum") as TentacleExtendedCategoryId
             }
             distanceUnit={distanceUnit}
+            searchRadiusMeters={
+              annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS
+            }
             poiOptions={annotation.metadata.pois ?? []}
             selectedPoiId={tentacleAnswerPoiId}
             outOfReach={tentacleOutOfReach}

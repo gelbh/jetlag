@@ -451,6 +451,7 @@ export function buildPendingQuestionDocument(
     replyOptions: question.replyOptions,
     promptText: question.promptText,
     answer: question.answer,
+    answerableAt: question.answerableAt,
     resolvedAnnotationId: question.resolvedAnnotationId,
   }) as Record<string, unknown>;
   assertNoNestedArrays(payload);
@@ -470,6 +471,7 @@ export function deserializePendingQuestionFromFirestore(
     createdByUid: String(data.createdByUid ?? ""),
     createdAt: String(data.createdAt ?? ""),
     status:
+      data.status === "walking" ||
       data.status === "pending" ||
       data.status === "answered" ||
       data.status === "resolved" ||
@@ -485,6 +487,8 @@ export function deserializePendingQuestionFromFirestore(
       : [],
     promptText: String(data.promptText ?? ""),
     answer: data.answer,
+    answerableAt:
+      typeof data.answerableAt === "string" ? data.answerableAt : undefined,
     resolvedAnnotationId:
       typeof data.resolvedAnnotationId === "string"
         ? data.resolvedAnnotationId

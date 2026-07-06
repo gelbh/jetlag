@@ -63,11 +63,7 @@ export function RadarPanel({
   const [stepIndex, setStepIndex] = useState(0);
   const step = RADAR_STEPS[stepIndex]?.id ?? "distance";
 
-  const distanceSelectionAvailable = isRadarDistanceOptionAvailable(
-    usedDistanceOptions,
-    chooseCustom,
-    radiusMeters,
-  );
+  const distanceSelectionAvailable = isRadarDistanceOptionAvailable();
   const canCommit =
     hasCenter &&
     distanceSelectionAvailable &&
@@ -93,7 +89,11 @@ export function RadarPanel({
   return (
     <ToolPanelShell toolId="radar" stepper={stepper}>
       {step === "distance" ? (
-        <RadarDistancePicker
+        <ToolSection first compact status="active">
+          <p className="text-xs text-ink-dim">
+            Radar tests your location at answer time, not your hiding zone.
+          </p>
+          <RadarDistancePicker
           radiusMeters={radiusMeters}
           chooseCustom={chooseCustom}
           customRadius={customRadius}
@@ -103,6 +103,7 @@ export function RadarPanel({
           onChooseSelect={onChooseSelect}
           onCustomRadiusChange={onCustomRadiusChange}
         />
+        </ToolSection>
       ) : null}
 
       {step === "anchor" ? (

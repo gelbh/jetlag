@@ -49,6 +49,7 @@ describe("CreateSession", () => {
   it("creates a local session and navigates to the map", async () => {
     renderWithRouter(<CreateSession />);
 
+    expect(screen.getByTestId("create-map")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Confirm game area" }));
 
     await waitFor(() => {
@@ -66,6 +67,7 @@ describe("CreateSession", () => {
 
     renderWithRouter(<CreateSession />);
 
+    expect(screen.getByTestId("create-map")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Confirm game area" }));
 
     await waitFor(() => {

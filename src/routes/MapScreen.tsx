@@ -27,7 +27,9 @@ import { PopupCloseButton } from "../components/ui/PopupCloseButton";
 import { useRadarTool } from "../hooks/tools/useRadarTool";
 import { usePinTool } from "../hooks/tools/usePinTool";
 import { useZoneTool } from "../hooks/tools/useZoneTool";
+import { ActiveThermometerWalkLayer } from "../components/map/ActiveThermometerWalkLayer";
 import { useThermometerTool } from "../hooks/tools/useThermometerTool";
+import { hasOpenPendingQuestion } from "../domain/questionRules";
 import {
   createIdleHeavyMapTools,
   type HeavyMapToolsApi,
@@ -232,9 +234,10 @@ export function MapScreen() {
   const [firstRunDismissed, setFirstRunDismissed] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const awaitHiderAnswer = sessionHasHiders(session?.memberRoles);
-  const { submitPendingQuestion, answerPendingQuestion } =
+  const { submitPendingQuestion, answerPendingQuestion, completeThermometerWalk } =
     usePendingQuestionActions();
   const pendingQuestions = usePendingQuestionsSync(session?.id);
+  const canSubmitQuestion = !hasOpenPendingQuestion(pendingQuestions);
   const hidingZones = useHidingZonesSync(session?.id);
   const playerLocations = usePlayerLocationsSync(session?.id);
   const chatMessages = useSessionMessagesSync(session?.id);
@@ -275,7 +278,7 @@ export function MapScreen() {
         return;
       }
 
-      await submitPendingQuestion({
+      return submitPendingQuestion({
         ...input,
         sessionId: session.id,
         senderUid: uid,
@@ -300,13 +303,41 @@ export function MapScreen() {
     gameArea: toolGameArea,
   });
 
+  const completeThermometerWalkForSession = useCallback(
+    async (input: {
+      pendingQuestionId: string;
+      startPoint: LatLngTuple;
+      endPoint: LatLngTuple;
+      distanceMeters: number;
+      promptText: string;
+      replyOptions: { id: string; label: string }[];
+    }) => {
+      if (!session?.id || !uid) {
+        return;
+      }
+
+      await completeThermometerWalk({
+        sessionId: session.id,
+        pendingQuestionId: input.pendingQuestionId,
+        senderUid: uid,
+        senderRole: "seeker",
+        startPoint: input.startPoint,
+        endPoint: input.endPoint,
+        distanceMeters: input.distanceMeters,
+        promptText: input.promptText,
+        replyOptions: input.replyOptions,
+      });
+    },
+    [completeThermometerWalk, session, uid],
+  );
+
   const radarTool = useRadarTool({
     active: activeTool === "radar",
     annotations,
     createAnnotation,
     awaitHiderAnswer,
     submitPendingQuestion: awaitHiderAnswer
-      ? (input) => submitToolQuestion("radar", input)
+      ? (input) => submitToolQuestion("radar", input).then(() => undefined)
       : undefined,
     sessionId: session?.id,
     senderUid: uid,
@@ -326,10 +357,16 @@ export function MapScreen() {
   const thermometerTool = useThermometerTool({
     active: activeTool === "thermometer",
     annotations,
+    gameSize: session?.gameSize ?? "medium",
+    pendingQuestions,
+    canSubmitQuestion,
     createAnnotation,
     awaitHiderAnswer,
     submitPendingQuestion: awaitHiderAnswer
       ? (input) => submitToolQuestion("thermometer", input)
+      : undefined,
+    completeThermometerWalk: awaitHiderAnswer
+      ? completeThermometerWalkForSession
       : undefined,
     sessionId: session?.id,
     senderUid: uid,
@@ -635,6 +672,7 @@ export function MapScreen() {
         <Suspense fallback={null}>
           <HeavyMapToolsSlot
             activeTool={activeTool}
+            gameSize={session.gameSize ?? "medium"}
             annotations={annotations}
             gameArea={toolGameArea}
             createAnnotation={createAnnotation}
@@ -698,6 +736,10 @@ export function MapScreen() {
           />
           <HidingZonesLayer zones={hidingZones} myUid={uid} />
           <LiveSeekerLocationsLayer locations={playerLocations} />
+          <ActiveThermometerWalkLayer
+            pendingQuestions={pendingQuestions}
+            seekerPosition={thermometerTool.walkCurrentPoint}
+          />
           {geometryEditAnnotation && geometryDraft ? (
             <GeometryEditLayer
               annotation={geometryEditAnnotation}
@@ -725,6 +767,7 @@ export function MapScreen() {
         <GameAreaPreloadBanner />
         <MapStatusRail
           sessionCode={session.code}
+          gameSize={session.gameSize ?? "medium"}
           activeTool={activeTool}
           syncStatus={syncStatus.status}
           queuedWrites={syncStatus.queuedWrites}
@@ -755,6 +798,7 @@ export function MapScreen() {
 
         <ToolDock
           activeTool={activeTool}
+          gameSize={session.gameSize ?? "medium"}
           onSelect={handleSelectTool}
           canUndo={canUndoLastTool}
           canRedo={canRedoLastTool}
@@ -891,6 +935,8 @@ export function MapScreen() {
         open={chatOpen}
         onClose={() => setChatOpen(false)}
         messages={chatMessages}
+        pendingQuestions={pendingQuestions}
+        gameSize={session.gameSize ?? "medium"}
         sessionId={session.id}
         senderUid={uid ?? ""}
         senderRole="seeker"
