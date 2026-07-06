@@ -180,11 +180,46 @@ export async function drawZone(page: Page, label = "Search zone") {
 }
 
 export async function undoAnnotation(page: Page) {
-  await page.getByRole("button", { name: "Undo last annotation" }).click();
+  const undoDock = page.getByRole("button", { name: "Undo last annotation" });
+  if (await undoDock.isVisible().catch(() => false)) {
+    await undoDock.click();
+    return;
+  }
+
+  await page.getByRole("button", { name: "More tools" }).click();
+  await page
+    .getByRole("dialog", { name: "More tools" })
+    .getByRole("button", { name: "Undo last annotation" })
+    .click();
 }
 
 export async function redoAnnotation(page: Page) {
-  await page.getByRole("button", { name: "Redo last annotation" }).click();
+  const redoDock = page.getByRole("button", { name: "Redo last annotation" });
+  if (await redoDock.isVisible().catch(() => false)) {
+    await redoDock.click();
+    return;
+  }
+
+  await page.getByRole("button", { name: "More tools" }).click();
+  await page
+    .getByRole("dialog", { name: "More tools" })
+    .getByRole("button", { name: "Redo last annotation" })
+    .click();
+}
+
+export async function expectRedoEnabled(page: Page) {
+  const redoDock = page.getByRole("button", { name: "Redo last annotation" });
+  if (await redoDock.isVisible().catch(() => false)) {
+    await expect(redoDock).toBeEnabled();
+    return;
+  }
+
+  await page.getByRole("button", { name: "More tools" }).click();
+  await expect(
+    page
+      .getByRole("dialog", { name: "More tools" })
+      .getByRole("button", { name: "Redo last annotation" }),
+  ).toBeEnabled();
 }
 
 export async function openSettings(page: Page) {
@@ -193,7 +228,7 @@ export async function openSettings(page: Page) {
     await settingsButton.click();
   } else {
     await page.getByRole("button", { name: "More tools" }).click();
-    await page.getByRole("menuitem", { name: "Setup" }).click();
+    await page.getByRole("button", { name: "Open settings" }).click();
   }
   await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
 }
@@ -213,7 +248,7 @@ export async function openChat(page: Page) {
   }
 
   await page.getByRole("button", { name: "More tools" }).click();
-  await page.getByRole("menuitem", { name: "Chat" }).click();
+  await page.getByRole("button", { name: "Open chat" }).click();
 }
 
 export async function closePanel(page: Page) {

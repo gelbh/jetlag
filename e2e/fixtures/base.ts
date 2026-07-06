@@ -194,10 +194,12 @@ export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
   const drawButton = page.getByRole("button", { name: "Draw on map" });
   if (await drawButton.isVisible().catch(() => false)) {
     await drawButton.click();
-  } else {
-    await page.getByRole("button", { name: "More tools" }).click();
+    await page.getByRole("menuitem", { name: toolName }).click();
+    return;
   }
-  await page.getByRole("menuitem", { name: toolName }).click();
+
+  await page.getByRole("button", { name: "More tools" }).click();
+  await page.getByRole("button", { name: toolName }).click();
 }
 
 export async function clickToolDockButton(page: Page, name: string) {

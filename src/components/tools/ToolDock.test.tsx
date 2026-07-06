@@ -1,6 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ToolDock } from "./ToolDock";
+import { ToolOverflowSheet } from "./ToolOverflowSheet";
 import { renderWithRouter } from "../../test/renderWithRouter";
 
 describe("ToolDock", () => {
@@ -26,5 +27,64 @@ describe("ToolDock", () => {
 
     expect(screen.getByRole("menuitem", { name: /Pin/i })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: /Zone/i })).toBeInTheDocument();
+  });
+});
+
+describe("ToolOverflowSheet", () => {
+  const baseProps = {
+    open: true,
+    onClose: vi.fn(),
+    activeTool: "none" as const,
+    onSelect: vi.fn(),
+    canUndo: false,
+    canRedo: false,
+    onUndo: vi.fn(),
+    onRedo: vi.fn(),
+    onOpenSettings: vi.fn(),
+    mapStyle: "standard" as const,
+    onMapStyleChange: vi.fn(),
+    onOpenChat: vi.fn(),
+  };
+
+  it("renders overflow rows with icons and hints", () => {
+    renderWithRouter(<ToolOverflowSheet {...baseProps} />);
+
+    expect(screen.getByRole("dialog", { name: "More tools" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Zone" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Pin" })).toBeInTheDocument();
+    expect(screen.getByText("Draw a play boundary")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open settings" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open chat" })).toBeInTheDocument();
+  });
+
+  it("disables undo when canUndo is false", () => {
+    renderWithRouter(<ToolOverflowSheet {...baseProps} canUndo={false} />);
+
+    expect(screen.getByRole("button", { name: "Undo last annotation" })).toBeDisabled();
+  });
+
+  it("calls onUndo and closes when undo is enabled", () => {
+    const onUndo = vi.fn();
+    const onClose = vi.fn();
+
+    renderWithRouter(
+      <ToolOverflowSheet
+        {...baseProps}
+        canUndo
+        onUndo={onUndo}
+        onClose={onClose}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Undo last annotation" }));
+
+    expect(onUndo).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns null when closed", () => {
+    renderWithRouter(<ToolOverflowSheet {...baseProps} open={false} />);
+
+    expect(screen.queryByRole("dialog", { name: "More tools" })).not.toBeInTheDocument();
   });
 });

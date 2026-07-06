@@ -1,6 +1,7 @@
-import { test, expect } from "../fixtures";
+import { test } from "../fixtures";
 import {
   completeRadarSolo,
+  expectRedoEnabled,
   openMapWithLocalSession,
   placePin,
   undoAnnotation,
@@ -15,7 +16,5 @@ test("@smoke places a pin and supports undo", async ({ page }) => {
   await openMapWithLocalSession(page);
   await placePin(page);
   await undoAnnotation(page);
-  await expect(
-    page.getByRole("button", { name: "Redo last annotation" }),
-  ).toBeEnabled();
+  await expectRedoEnabled(page);
 });

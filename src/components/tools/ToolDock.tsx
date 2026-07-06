@@ -16,11 +16,14 @@ import {
   HudDrawIcon,
   HudLayersIcon,
   HudMoreIcon,
+  HudPinIcon,
   HudRedoIcon,
   HudSettingsIcon,
   HudToolIcon,
   HudUndoIcon,
+  HudZoneIcon,
 } from "../ui/HudIcons";
+import { ToolOverflowSheet } from "./ToolOverflowSheet";
 
 interface ToolDockProps {
   activeTool: MapTool;
@@ -58,14 +61,13 @@ export function ToolDock({
   const dockRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!drawMenuOpen && !moreMenuOpen) {
+    if (!drawMenuOpen) {
       return;
     }
 
     const handlePointerDown = (event: PointerEvent) => {
       if (dockRef.current && !dockRef.current.contains(event.target as Node)) {
         setDrawMenuOpen(false);
-        setMoreMenuOpen(false);
       }
     };
 
@@ -82,7 +84,24 @@ export function ToolDock({
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [drawMenuOpen, moreMenuOpen]);
+  }, [drawMenuOpen]);
+
+  useEffect(() => {
+    if (!moreMenuOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMoreMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [moreMenuOpen]);
 
   const selectTool = (tool: MapTool) => {
     onSelect(activeTool === tool ? "none" : tool);
@@ -94,8 +113,6 @@ export function ToolDock({
   const nextMapStyle = mapStyle === "standard" ? "satellite" : "standard";
   const mapStyleLabel =
     mapStyle === "standard" ? "Switch to satellite view" : "Switch to map view";
-  const mapStyleMenuLabel =
-    mapStyle === "standard" ? "Satellite view" : "Map view";
 
   const visibleQuestionTools = QUESTION_DOCK_TOOL_IDS.filter((toolId) =>
     toolDockEnabled(toolId, gameSize),
@@ -138,6 +155,12 @@ export function ToolDock({
   const renderMarkupItem = (tool: (typeof MAP_TOOL_DOCK_ENTRIES)[number]) => {
     const hint = mapToolDockMenuHint(tool);
     const active = activeTool === tool.id;
+    const icon =
+      tool.id === "zone" ? (
+        <HudZoneIcon className="h-5 w-5" />
+      ) : (
+        <HudPinIcon className="h-5 w-5" />
+      );
 
     return (
       <button
@@ -150,50 +173,24 @@ export function ToolDock({
           active ? "jl-tool-menu-item-active" : "jl-tool-menu-item-default"
         }`}
       >
-        <span className="font-display text-sm font-semibold uppercase tracking-wide">
-          {mapToolDockMenuLabel(tool)}
-        </span>
-        {hint ? (
-          <span
-            className={`text-xs leading-snug ${
-              active ? "text-action-ink/80" : "text-ink-dim"
-            }`}
-          >
-            {hint}
+        <span className="jl-tool-menu-item-icon">{icon}</span>
+        <span className="jl-tool-menu-item-body">
+          <span className="font-display text-sm font-semibold uppercase tracking-wide">
+            {mapToolDockMenuLabel(tool)}
           </span>
-        ) : null}
+          {hint ? (
+            <span
+              className={`text-xs leading-snug ${
+                active ? "text-action-ink/80" : "text-ink-muted"
+              }`}
+            >
+              {hint}
+            </span>
+          ) : null}
+        </span>
       </button>
     );
   };
-
-  const renderMoreMenuItem = (
-    label: string,
-    onClick: () => void,
-    active = false,
-    hint?: string,
-  ) => (
-    <button
-      type="button"
-      role="menuitem"
-      onClick={onClick}
-      className={`jl-tool-menu-item ${
-        active ? "jl-tool-menu-item-active" : "jl-tool-menu-item-default"
-      }`}
-    >
-      <span className="font-display text-sm font-semibold uppercase tracking-wide">
-        {label}
-      </span>
-      {hint ? (
-        <span
-          className={`text-xs leading-snug ${
-            active ? "text-action-ink/80" : "text-ink-dim"
-          }`}
-        >
-          {hint}
-        </span>
-      ) : null}
-    </button>
-  );
 
   return (
     <div ref={dockRef} className="jl-tool-dock pointer-events-auto">
@@ -207,34 +204,26 @@ export function ToolDock({
         </div>
       ) : null}
 
-      {moreMenuOpen ? (
-        <div
-          className="jl-tool-menu jl-tool-menu-dock jl-tool-dock-compact-only hud-panel"
-          role="menu"
-          aria-label="More tools"
-        >
-          {markupTools.map(renderMarkupItem)}
-          {mapStyle && onMapStyleChange
-            ? renderMoreMenuItem(mapStyleMenuLabel, () => {
-                onMapStyleChange(nextMapStyle);
-                setMoreMenuOpen(false);
-              })
-            : null}
-          {onOpenChat
-            ? renderMoreMenuItem("Chat", () => {
-                onOpenChat();
-                setMoreMenuOpen(false);
-              })
-            : null}
-          {renderMoreMenuItem("Setup", () => {
-            onOpenSettings();
-            setMoreMenuOpen(false);
-          })}
-        </div>
-      ) : null}
+      <ToolOverflowSheet
+        open={moreMenuOpen}
+        onClose={() => setMoreMenuOpen(false)}
+        activeTool={activeTool}
+        onSelect={onSelect}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={onUndo}
+        onRedo={onRedo}
+        onOpenSettings={onOpenSettings}
+        onOpenChat={onOpenChat}
+        mapStyle={mapStyle}
+        onMapStyleChange={onMapStyleChange}
+      />
 
       <div className="jl-tool-dock-bar">
-        <div className="jl-tool-dock-group" aria-label="History">
+        <div
+          className="jl-tool-dock-group jl-tool-dock-group-history"
+          aria-label="History"
+        >
           <button
             type="button"
             onClick={onUndo}
@@ -261,7 +250,10 @@ export function ToolDock({
           </button>
         </div>
 
-        <div className="jl-tool-dock-divider" aria-hidden="true" />
+        <div
+          className="jl-tool-dock-divider jl-tool-dock-divider-history"
+          aria-hidden="true"
+        />
 
         <div
           className="jl-tool-dock-group jl-tool-dock-group-main"
@@ -345,7 +337,7 @@ export function ToolDock({
             className={`jl-tool-slot ${moreMenuActive ? "jl-tool-slot-active" : ""}`}
             aria-label="More tools"
             aria-expanded={moreMenuOpen}
-            aria-haspopup="menu"
+            aria-haspopup="dialog"
             title="Draw, map style, chat, setup"
           >
             <span className="jl-tool-slot-icon">
