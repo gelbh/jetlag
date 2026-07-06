@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { LatLngBounds, LatLngBoundsExpression } from "leaflet";
 import { AppLogo } from "../components/ui/AppLogo";
@@ -181,7 +181,7 @@ export function CreateSession() {
     }, 600);
   };
 
-  const handleBoundsChange = (nextBounds: LatLngBounds) => {
+  const handleBoundsChange = useCallback((nextBounds: LatLngBounds) => {
     if (ignoreViewportUpdatesRef.current || !isUsableMapBounds(nextBounds)) {
       return;
     }
@@ -206,8 +206,15 @@ export function CreateSession() {
 
       return nextBounds;
     });
+  }, []);
+
+  const handleUserViewportFramed = useCallback(() => {
+    if (ignoreViewportUpdatesRef.current) {
+      return;
+    }
+
     setUserFramedViewport(true);
-  };
+  }, []);
 
   const handleSearch = async () => {
     const trimmed = locationQuery.trim();
@@ -362,6 +369,7 @@ export function CreateSession() {
         previewGameArea={previewGameArea}
         selectedGameSize={gameSize}
         onBoundsChange={handleBoundsChange}
+        onUserViewportFramed={handleUserViewportFramed}
       />
 
       <MobileSheet

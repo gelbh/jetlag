@@ -17,6 +17,7 @@ interface CreateSessionMapPaneProps {
   previewGameArea: GameArea | null;
   selectedGameSize: GameSize;
   onBoundsChange: (bounds: import("leaflet").LatLngBounds) => void;
+  onUserViewportFramed: () => void;
 }
 
 export function CreateSessionMapPane({
@@ -25,6 +26,7 @@ export function CreateSessionMapPane({
   previewGameArea,
   selectedGameSize,
   onBoundsChange,
+  onUserViewportFramed,
 }: CreateSessionMapPaneProps) {
   const recommendedSize = previewGameArea
     ? recommendGameSize(previewGameArea)
@@ -41,6 +43,7 @@ export function CreateSessionMapPane({
         <MapView
           mapStyle={mapStyle}
           onBoundsChange={onBoundsChange}
+          onUserViewportFramed={onUserViewportFramed}
           zoom={12}
           focusBounds={focusBounds}
           className="h-full w-full"

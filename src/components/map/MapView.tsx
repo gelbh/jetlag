@@ -1,9 +1,10 @@
-import { useEffect, type MutableRefObject } from "react";
+import { useEffect, useRef, type MutableRefObject } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import type {
   LatLngBounds,
   LatLngBoundsExpression,
   LatLngExpression,
+  LeafletEvent,
 } from "leaflet";
 import { getMapBasemap, type MapStyle } from "../../domain/mapBasemaps";
 import { isUsableMapBounds } from "../../domain/geometry";
@@ -15,6 +16,8 @@ interface MapViewProps {
   className?: string;
   mapStyle?: MapStyle;
   onBoundsChange?: (bounds: LatLngBounds) => void;
+  /** Fired when the user pans or zooms the map (not programmatic fit/resize). */
+  onUserViewportFramed?: () => void;
   onMapClick?: (lat: number, lng: number) => void;
   chromeHudRef?: MutableRefObject<HTMLElement | null>;
   suppressChromeHideRef?: MutableRefObject<boolean>;
@@ -103,39 +106,66 @@ function MapResize() {
 
 function MapEvents({
   onBoundsChange,
+  onUserViewportFramed,
   onMapClick,
 }: {
   onBoundsChange?: (bounds: LatLngBounds) => void;
+  onUserViewportFramed?: () => void;
   onMapClick?: (lat: number, lng: number) => void;
 }) {
   const map = useMap();
+  const onBoundsChangeRef = useRef(onBoundsChange);
+  const onUserViewportFramedRef = useRef(onUserViewportFramed);
 
   useEffect(() => {
-    if (!onBoundsChange) {
-      return;
-    }
+    onBoundsChangeRef.current = onBoundsChange;
+    onUserViewportFramedRef.current = onUserViewportFramed;
+  }, [onBoundsChange, onUserViewportFramed]);
 
+  useEffect(() => {
     const emitBounds = () => {
-      if (!onBoundsChange) {
-        return;
-      }
-
       const nextBounds = map.getBounds();
       if (!isUsableMapBounds(nextBounds)) {
         return;
       }
 
-      onBoundsChange(nextBounds);
+      onBoundsChangeRef.current?.(nextBounds);
     };
+
+    let userZoom = false;
+
+    const handleUserViewportFramed = () => {
+      onUserViewportFramedRef.current?.();
+    };
+
+    const handleZoomStart = (event: LeafletEvent) => {
+      if ("originalEvent" in event && event.originalEvent) {
+        userZoom = true;
+      }
+    };
+
+    const handleZoomEnd = () => {
+      if (userZoom) {
+        userZoom = false;
+        handleUserViewportFramed();
+      }
+    };
+
     emitBounds();
     map.on("moveend", emitBounds);
     map.on("zoomend", emitBounds);
+    map.on("dragend", handleUserViewportFramed);
+    map.on("zoomstart", handleZoomStart);
+    map.on("zoomend", handleZoomEnd);
 
     return () => {
       map.off("moveend", emitBounds);
       map.off("zoomend", emitBounds);
+      map.off("dragend", handleUserViewportFramed);
+      map.off("zoomstart", handleZoomStart);
+      map.off("zoomend", handleZoomEnd);
     };
-  }, [map, onBoundsChange]);
+  }, [map]);
 
   useMapEvents({
     click(event) {
@@ -152,6 +182,7 @@ export function MapView({
   className,
   mapStyle = "standard",
   onBoundsChange,
+  onUserViewportFramed,
   onMapClick,
   chromeHudRef,
   suppressChromeHideRef,
@@ -185,7 +216,11 @@ export function MapView({
           maxZoom={basemap.maxZoom}
           {...(basemap.subdomains ? { subdomains: basemap.subdomains } : {})}
         />
-        <MapEvents onBoundsChange={onBoundsChange} onMapClick={onMapClick} />
+        <MapEvents
+          onBoundsChange={onBoundsChange}
+          onUserViewportFramed={onUserViewportFramed}
+          onMapClick={onMapClick}
+        />
         {chromeHudRef ? (
           <MapChromeListener
             chromeHudRef={chromeHudRef}

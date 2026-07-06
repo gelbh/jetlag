@@ -1,24 +1,71 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { CreateSession } from "./CreateSession";
 import { renderWithRouter } from "../test/renderWithRouter";
+import type { GeocodedPlace } from "../services/geocoding";
 
 const mockBounds = {
   getSouthWest: () => ({ lat: 53.27, lng: -6.45 }),
   getNorthEast: () => ({ lat: 53.42, lng: -6.08 }),
 };
 
+const dublinPlace: GeocodedPlace = {
+  id: "dublin",
+  displayName: "Dublin, Ireland",
+  bounds: {
+    south: 53.27,
+    west: -6.45,
+    north: 53.42,
+    east: -6.08,
+  },
+  center: [53.35, -6.26] as const,
+  boundary: {
+    type: "Polygon",
+    coordinates: [
+      [
+        [-6.45, 53.27],
+        [-6.08, 53.27],
+        [-6.08, 53.42],
+        [-6.45, 53.42],
+        [-6.45, 53.27],
+      ],
+    ],
+  },
+};
+
+vi.mock("../services/geocoding", () => ({
+  searchPlaces: vi.fn(async () => [dublinPlace]),
+}));
+
 vi.mock("../components/map/MapView", () => ({
   MapView: ({
     onBoundsChange,
+    onUserViewportFramed,
   }: {
     onBoundsChange?: (bounds: typeof mockBounds) => void;
+    onUserViewportFramed?: () => void;
   }) => {
+    const onBoundsChangeRef = useRef(onBoundsChange);
+
     useEffect(() => {
-      onBoundsChange?.(mockBounds);
+      onBoundsChangeRef.current = onBoundsChange;
     }, [onBoundsChange]);
-    return <div data-testid="create-map" />;
+
+    useEffect(() => {
+      onBoundsChangeRef.current?.(mockBounds);
+    }, [onBoundsChange]);
+
+    return (
+      <div data-testid="create-map">
+        <button
+          type="button"
+          onClick={() => onUserViewportFramed?.()}
+        >
+          Simulate user map frame
+        </button>
+      </div>
+    );
   },
 }));
 
@@ -73,5 +120,22 @@ describe("CreateSession", () => {
     await waitFor(() => {
       expect(navigate).toHaveBeenCalledWith("/map");
     });
+  });
+
+  it("keeps place-based preview after changing session settings", async () => {
+    renderWithRouter(<CreateSession />);
+
+    fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
+      target: { value: "Dublin" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Find place" }));
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/sq mi play area/i).length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getByRole("radio", { name: /Hider/i }));
+
+    expect(screen.getAllByText(/sq mi play area/i).length).toBeGreaterThan(0);
   });
 });
