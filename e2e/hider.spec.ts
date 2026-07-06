@@ -1,9 +1,14 @@
 import { test, expect } from "./fixtures";
 import {
+  confirmHidingZone,
+  confirmInitialHidingZoneAtStation,
   createHostSession,
   createMultiplayerContexts,
   joinAsRole,
   openChat,
+  openHidingZoneWizard,
+  selectTransitStation,
+  waitForHidingZoneWizard,
 } from "./fixtures";
 
 test.describe("hider flows", () => {
@@ -16,65 +21,49 @@ test.describe("hider flows", () => {
     const { code } = await createHostSession(hostPage);
     await joinAsRole(guestPage, code, "hider");
 
-    await guestPage.getByRole("button", { name: "Set hiding zone" }).click();
-    await expect(guestPage.getByPlaceholder("Search stations…")).toBeVisible();
-    await expect(guestPage.getByText(/Loading stations/i)).toBeHidden({
-      timeout: 30_000,
-    });
+    await openHidingZoneWizard(guestPage);
+    await expect(
+      guestPage.getByRole("button", { name: "Dublin Central" }),
+    ).toBeVisible();
 
     await cleanup();
   });
 
-  test.skip("confirms a hiding zone at a transit station", async ({ browser }) => {
+  test("confirms a hiding zone at a transit station", async ({ browser }) => {
     const { hostPage, guestPage, cleanup } =
       await createMultiplayerContexts(browser);
 
     const { code } = await createHostSession(hostPage);
     await joinAsRole(guestPage, code, "hider");
 
-    await guestPage.getByRole("button", { name: "Set hiding zone" }).click();
-    await expect(guestPage.getByText(/Loading stations/i)).toBeHidden({
-      timeout: 30_000,
-    });
-    const station = guestPage.getByRole("button", { name: /Central|Station/i }).first();
-    await expect(station).toBeVisible({ timeout: 5_000 });
-    await station.click();
-    await guestPage.getByRole("button", { name: "Confirm hiding zone" }).click();
-
-    await expect(guestPage.getByRole("button", { name: "Play Move" })).toBeVisible({
-      timeout: 15_000,
-    });
+    await confirmInitialHidingZoneAtStation(guestPage, "Dublin Central");
 
     await cleanup();
   });
 
-  test.skip("play move requires a different station", async ({ browser }) => {
+  test("play move requires a different station", async ({ browser }) => {
     const { hostPage, guestPage, cleanup } =
       await createMultiplayerContexts(browser);
 
     const { code } = await createHostSession(hostPage);
     await joinAsRole(guestPage, code, "hider");
 
-    await guestPage.getByRole("button", { name: "Set hiding zone" }).click();
-    await expect(guestPage.getByText(/Loading stations/i)).toBeHidden({
-      timeout: 30_000,
-    });
-    await guestPage.getByRole("button", { name: "Dublin Central" }).click();
-    await guestPage.getByRole("button", { name: "Confirm hiding zone" }).click();
-    await expect(guestPage.getByRole("button", { name: "Play Move" })).toBeVisible({
-      timeout: 15_000,
-    });
+    await confirmInitialHidingZoneAtStation(guestPage, "Dublin Central");
 
     guestPage.once("dialog", (dialog) => dialog.accept());
     await guestPage.getByRole("button", { name: "Play Move" }).click();
-    await guestPage.getByRole("button", { name: "Dublin Central" }).click();
+    await waitForHidingZoneWizard(guestPage);
+    await selectTransitStation(guestPage, "Dublin Central");
+    await confirmHidingZone(guestPage, true);
     await expect(guestPage.getByText(/different station/i)).toBeVisible();
 
-    await guestPage.getByRole("button", { name: "North Station" }).click();
-    await guestPage.getByRole("button", { name: "Confirm hiding zone" }).click();
+    await selectTransitStation(guestPage, "North Station");
+    await confirmHidingZone(guestPage, true);
 
     await openChat(hostPage);
-    await expect(hostPage.getByText(/relocated to North Station/i)).toBeVisible({
+    await expect(
+      hostPage.getByText(/relocated to North Station/i),
+    ).toBeVisible({
       timeout: 15_000,
     });
 

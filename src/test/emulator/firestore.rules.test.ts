@@ -221,6 +221,42 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows hiders to post game system messages", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .update({
+        memberUids: ["host-1", "hider-1"],
+        memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+      });
+
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("messages")
+        .doc("msg-1")
+        .set({
+          channel: "game",
+          senderUid: "hider-1",
+          senderRole: "hider",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          kind: "system",
+          text: "Hider confirmed zone at Dublin Central.",
+        }),
+    );
+  });
+
   it("denies annotation writes from non-members", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

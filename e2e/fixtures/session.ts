@@ -128,6 +128,16 @@ export async function joinAsRole(
     .click();
   await guestPage.getByPlaceholder("ABCD").fill(code);
   await guestPage.getByRole("button", { name: "Join session" }).click();
+
+  if (role === "hider") {
+    await expect(
+      guestPage.getByRole("button", { name: /Set hiding zone|Play Move/i }),
+    ).toBeVisible({ timeout: 15_000 });
+  } else {
+    await expect(guestPage.getByRole("button", { name: "Radar" })).toBeVisible({
+      timeout: 15_000,
+    });
+  }
 }
 
 export async function createHostSession(page: Page) {

@@ -244,3 +244,43 @@ export async function expectChatAnswer(page: Page, answer: string) {
     timeout: 20_000,
   });
 }
+
+export async function waitForHidingZoneWizard(page: Page) {
+  await expect(page.getByPlaceholder("Search stations…")).toBeVisible();
+  await expect(page.getByText(/Loading stations/i)).toBeHidden({
+    timeout: 30_000,
+  });
+}
+
+export async function openHidingZoneWizard(page: Page) {
+  await page.getByRole("button", { name: /Set hiding zone|Change hiding zone/i }).click();
+  await waitForHidingZoneWizard(page);
+}
+
+export async function selectTransitStation(page: Page, name: string | RegExp) {
+  const station = page.getByRole("button", { name });
+  await expect(station).toBeVisible({ timeout: 10_000 });
+  await station.click();
+}
+
+export async function confirmHidingZone(page: Page, moveMode = false) {
+  const label = moveMode ? "Confirm new zone" : "Confirm hiding zone";
+  const confirm = page.getByRole("button", { name: label });
+  await expect(confirm).toBeEnabled({ timeout: 10_000 });
+  await confirm.click();
+  await expect(page.getByText(/PERMISSION_DENIED/i)).toBeHidden({
+    timeout: 5_000,
+  });
+}
+
+export async function confirmInitialHidingZoneAtStation(
+  page: Page,
+  stationName: string | RegExp,
+) {
+  await openHidingZoneWizard(page);
+  await selectTransitStation(page, stationName);
+  await confirmHidingZone(page);
+  await expect(page.getByRole("button", { name: "Play Move" })).toBeVisible({
+    timeout: 15_000,
+  });
+}

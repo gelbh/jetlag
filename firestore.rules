@@ -178,7 +178,7 @@ service cloud.firestore {
               && request.resource.data.text.size() > 0
             ) || (
               request.resource.data.channel == 'game'
-              && isSeekerMember(sessionId)
+              && isSessionMember(sessionId)
               && request.resource.data.kind == 'system'
               && request.resource.data.text is string
             ) || (
