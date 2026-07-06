@@ -278,6 +278,8 @@ export async function getOrFetchCached<T>(
 export interface CachedSeaLevelSampling {
   cells: ElevationSampleCell[];
   cellElevations: number[];
+  divisions: number;
+  complete: boolean;
 }
 
 export function coastlineSegmentsCacheKey(gameArea: GameArea): string {
@@ -293,6 +295,34 @@ export function linearSegmentsCacheKey(
 
 export function seaLevelSamplingCacheKey(gameArea: GameArea): string {
   return geographicCacheKey(gameArea, "sea_level:sampling");
+}
+
+export function readSeaLevelSamplingCache(
+  gameArea: GameArea,
+): CachedSeaLevelSampling | undefined {
+  return readCachedMemoryEntry<CachedSeaLevelSampling>(
+    seaLevelSamplingCacheKey(gameArea),
+  );
+}
+
+export async function readSeaLevelSamplingCacheAsync(
+  gameArea: GameArea,
+): Promise<CachedSeaLevelSampling | undefined> {
+  const memoryValue = readSeaLevelSamplingCache(gameArea);
+  if (memoryValue !== undefined) {
+    return memoryValue;
+  }
+
+  return readPersistedEntry<CachedSeaLevelSampling>(
+    seaLevelSamplingCacheKey(gameArea),
+  );
+}
+
+export async function writeSeaLevelSamplingCache(
+  gameArea: GameArea,
+  value: CachedSeaLevelSampling,
+): Promise<void> {
+  await writeCachedValue(seaLevelSamplingCacheKey(gameArea), value);
 }
 
 export function adminDivisionCacheKey(

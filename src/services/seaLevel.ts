@@ -2,18 +2,14 @@ import type { GameArea } from "../domain/annotations";
 import {
   buildSeaLevelNearRegionFromSamples,
   distanceFromSeaLevelMeters,
-  sampleGameAreaCells,
   type ElevationSampleCell,
   type SeaLevelEdgeCase,
 } from "../domain/seaLevel";
 import type { LatLngTuple } from "../domain/geometry";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { fetchElevations } from "./elevation";
-import {
-  getOrFetchCached,
-  seaLevelSamplingCacheKey,
-  type CachedSeaLevelSampling,
-} from "./geographicFeatureCache";
+import type { CachedSeaLevelSampling } from "./geographicFeatureCache";
+import { ensureSeaLevelSamplingComplete } from "./seaLevelProgressive";
 
 export interface SeaLevelContext {
   seekerElevationMeters: number;
@@ -30,32 +26,12 @@ export interface SeaLevelContextFailure {
   reason: SeaLevelContextFailureReason;
 }
 
-export function prefetchSeaLevelSampling(gameArea: GameArea): void {
-  void loadSeaLevelSampling(gameArea).catch(() => undefined);
-}
-
-async function loadSeaLevelSampling(
-  gameArea: GameArea,
-): Promise<CachedSeaLevelSampling> {
-  return getOrFetchCached(seaLevelSamplingCacheKey(gameArea), async () => {
-    const cells = sampleGameAreaCells(gameArea);
-    const cellElevations = await fetchElevations(
-      cells.map((cell) => cell.point),
-    );
-
-    return {
-      cells,
-      cellElevations,
-    };
-  });
-}
-
 export async function loadSeaLevelContext(
   seeker: LatLngTuple,
   gameArea: GameArea,
 ): Promise<SeaLevelContext | SeaLevelContextFailure | null> {
-  const sampling = await loadSeaLevelSampling(gameArea);
-  const elevations = await fetchElevations([seeker]);
+  const sampling = await ensureSeaLevelSamplingComplete(gameArea);
+  const elevations = await fetchElevations([seeker], { profile: "foreground" });
   const seekerElevationMeters = elevations[0];
 
   if (!Number.isFinite(seekerElevationMeters)) {
@@ -70,6 +46,7 @@ export async function loadSeaLevelContext(
     sampling.cellElevations,
     distanceFromSeaLevel,
     gameArea,
+    sampling.divisions,
   );
 
   if (edgeCase === "lowest" || !nearRegion) {
@@ -85,3 +62,5 @@ export async function loadSeaLevelContext(
     edgeCase,
   };
 }
+
+export type { CachedSeaLevelSampling };

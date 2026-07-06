@@ -83,6 +83,10 @@ vi.mock("../services/gameAreaPreload", () => ({
   preloadCriticalGameAreaCaches: vi.fn(async () => undefined),
 }));
 
+vi.mock("../services/seaLevelProgressive", () => ({
+  startSeaLevelBackgroundSampling: vi.fn(),
+}));
+
 const navigate = vi.fn();
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");

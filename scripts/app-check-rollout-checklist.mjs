@@ -25,6 +25,11 @@ grantAccess already has enforceAppCheck: true in code (deployed). Until the
 production frontend initializes App Check, premium access-code redemption may
 fail — set the Cloudflare env var and redeploy as soon as possible.
 
+Benign console noise (safe to ignore when App Check metrics look healthy):
+  - Unrecognized feature: 'private-token' — reCAPTCHA probing Apple PAT support
+  - POST https://www.google.com/recaptcha/api2/pat 401 — expected PAT handshake
+  These do NOT block App Check unless you also see exchangeRecaptchaV3Token 403.
+
 Local dev against production Firebase (not emulators):
   - npm run dev with VITE_FIREBASE_APP_CHECK_SITE_KEY in .env.local
   - Copy the debug token from the browser console

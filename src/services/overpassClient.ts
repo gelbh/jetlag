@@ -1,12 +1,14 @@
 import { FetchTimeoutError, fetchWithTimeout } from "./fetchWithTimeout";
 import { buildPremiumProxyHeaders } from "./accessControl";
 import { getFirebaseAuth } from "./firebase";
+import { waitForFirebaseAuth } from "./firebaseAuthReady";
 import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "./overpass/endpoints";
 import { withOverpassConcurrencyLimit } from "./overpass/requestQueue";
 
 const OVERPASS_MAX_RETRIES = 3;
 const OVERPASS_BASE_BACKOFF_MS = 750;
 const OVERPASS_FETCH_TIMEOUT_MS = 15_000;
+const OVERPASS_AUTH_WAIT_MS = 10_000;
 
 const OVERPASS_UNAVAILABLE_MESSAGE =
   "Map data didn't load. Check your connection and try again.";
@@ -266,6 +268,11 @@ async function fetchOverpass(query: string): Promise<Response> {
   }
 
   let proxyHeaders = await buildPremiumProxyHeaders();
+  if (!proxyHeadersIncludeAuth(proxyHeaders)) {
+    await waitForFirebaseAuth(OVERPASS_AUTH_WAIT_MS);
+    proxyHeaders = await buildPremiumProxyHeaders();
+  }
+
   if (!proxyHeadersIncludeAuth(proxyHeaders)) {
     return fetchOverpassDirect(query);
   }

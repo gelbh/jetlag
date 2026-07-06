@@ -82,7 +82,9 @@ import {
   metroSupportsLiveVehicles,
 } from "../services/transitCatalog";
 import { preloadGameAreaCaches } from "../services/gameAreaPreload";
+import { startSeaLevelBackgroundSampling } from "../services/seaLevelProgressive";
 import { setPremiumApiContext } from "../services/premiumApiContext";
+import { useFirebaseAuthReady } from "../hooks/useFirebaseAuthReady";
 import {
   useAnnotationStore,
   useMapStore,
@@ -224,12 +226,16 @@ export function MapScreen() {
   const suppressChromeHideRef = useRef(false);
   const syncStatus = useSyncStatus();
   useWakeLock(keepScreenAwake || timer.running);
+  const firebaseAuthReady = useFirebaseAuthReady(session);
 
   useEffect(() => {
-    if (session?.gameArea) {
-      preloadGameAreaCaches(session.gameArea);
+    if (!session?.gameArea || !firebaseAuthReady) {
+      return;
     }
-  }, [session?.gameArea]);
+
+    preloadGameAreaCaches(session.gameArea);
+    startSeaLevelBackgroundSampling(session.gameArea);
+  }, [session?.gameArea, firebaseAuthReady]);
 
   const overlay = useMapOverlayState();
   const [mapError, setMapError] = useState<string | null>(null);

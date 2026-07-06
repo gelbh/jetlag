@@ -3,6 +3,7 @@ import type { LatLngTuple } from "../domain/geometry";
 import {
   clearElevationCacheForTests,
   fetchElevations,
+  openElevationCircuitForTests,
   requestGapMsForBatchSize,
 } from "./elevation";
 
@@ -64,6 +65,33 @@ describe("elevation", () => {
 
     await expect(fetchSingleElevation(dublinPoint)).resolves.toBe(18);
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("opens a circuit breaker after repeated rate limits in background mode", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 429,
+      headers: new Headers(),
+      json: async () => ({}),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const points = uniquePoints(3);
+    const elevations = await fetchElevations(points, { profile: "background" });
+
+    expect(elevations.every((value) => Number.isNaN(value))).toBe(true);
+    expect(fetchMock.mock.calls.length).toBeLessThanOrEqual(9);
+  });
+
+  it("skips network calls while the circuit breaker is open", async () => {
+    openElevationCircuitForTests();
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const elevations = await fetchElevations([dublinPoint]);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(Number.isNaN(elevations[0])).toBe(true);
   });
 
   it("serializes concurrent elevation requests", async () => {

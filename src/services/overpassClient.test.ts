@@ -8,6 +8,7 @@ import {
 import { setPremiumApiContext } from "./premiumApiContext";
 import * as accessControl from "./accessControl";
 import * as firebase from "./firebase";
+import * as firebaseAuthReady from "./firebaseAuthReady";
 import type { SessionRecord } from "../domain/annotations";
 
 function premiumSession(): SessionRecord {
@@ -229,6 +230,41 @@ describe("overpassClient", () => {
     );
   });
 
+  it("waits for Firebase auth before falling back to public Overpass", async () => {
+    vi.stubEnv("VITE_OVERPASS_PROXY_URL", "https://proxy.example/overpass");
+    const waitForAuth = vi
+      .spyOn(firebaseAuthReady, "waitForFirebaseAuth")
+      .mockResolvedValue(true);
+
+    let authAttempts = 0;
+    vi.spyOn(accessControl, "buildPremiumProxyHeaders").mockImplementation(
+      async () => {
+        authAttempts += 1;
+        if (authAttempts === 1) {
+          return {} as Record<string, string>;
+        }
+
+        return {
+          Authorization: "Bearer test-token",
+          "X-Session-Id": "session-premium",
+        };
+      },
+    );
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(mockOverpassResponse({ elements: [] }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await queryOverpass<{ elements: unknown[] }>("[out:json];");
+
+    expect(waitForAuth).toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://proxy.example/overpass",
+      expect.any(Object),
+    );
+  });
+
   it("uses public Overpass when the proxy URL is not configured", async () => {
     vi.stubEnv("VITE_OVERPASS_PROXY_URL", "");
     vi.spyOn(accessControl, "buildPremiumProxyHeaders").mockResolvedValue({
@@ -273,6 +309,7 @@ describe("overpassClient", () => {
   it("uses public Overpass when premium proxy auth is not ready", async () => {
     vi.stubEnv("VITE_OVERPASS_PROXY_URL", "https://proxy.example/overpass");
     setPremiumApiContext(premiumSession());
+    vi.spyOn(firebaseAuthReady, "waitForFirebaseAuth").mockResolvedValue(false);
     vi.spyOn(accessControl, "buildPremiumProxyHeaders").mockResolvedValue({
       "X-Session-Id": "session-premium",
     });

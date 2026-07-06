@@ -20,9 +20,10 @@ export interface ElevationSampleCell {
   col: number;
 }
 
-const MAX_SEA_LEVEL_SAMPLE_CELLS = 250;
+const MAX_SEA_LEVEL_SAMPLE_CELLS = 600;
+export const COARSE_SEA_LEVEL_DIVISIONS = 8;
 const DEFAULT_SEA_LEVEL_DIVISIONS = 10;
-const MAX_SMALL_AREA_DIVISIONS = 30;
+const MAX_SMALL_AREA_DIVISIONS = 45;
 const MIN_GAME_AREA_DIVISIONS = 8;
 const MIN_GAME_AREA_LAT_SPAN = 0.005;
 const MIN_GAME_AREA_LNG_SPAN = 0.005;
@@ -41,6 +42,14 @@ interface MergedRect {
   rowEnd: number;
   colStart: number;
   colEnd: number;
+}
+
+export function resolveCoarseSeaLevelDivisions(): number {
+  return COARSE_SEA_LEVEL_DIVISIONS;
+}
+
+export function resolveFineSeaLevelDivisions(gameArea: GameArea): number {
+  return resolveGameAreaCellDivisions(gameArea);
 }
 
 export function resolveGameAreaCellDivisions(gameArea: GameArea): number {

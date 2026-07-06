@@ -5,11 +5,11 @@ import { fetchPreparedCoastlineSegments } from "./coastline";
 import { fetchLandmassFeaturesInArea } from "./landmassFeatures";
 import { fetchMeasuringPlacesInArea } from "./measuringPlaces";
 import { fetchPreparedMeasuringLinearSegments } from "./measuringLinearFeatures";
-import { prefetchSeaLevelSampling } from "./seaLevel";
 import { fetchStaticTransit } from "./transitStatic";
 import { usePreloadStore } from "../state/preloadStore";
 
 const PRELOAD_ADMIN_LEVELS = [4, 6, 8] as const;
+const PRELOAD_JOB_GAP_MS = 400;
 
 const PRELOAD_MEASURING_CATEGORIES = [
   "commercial_airport",
@@ -30,9 +30,6 @@ function buildPreloadJobs(
 ): Array<() => Promise<unknown>> {
   const jobs: Array<() => Promise<unknown>> = [
     () => fetchPreparedCoastlineSegments(gameArea),
-    async () => {
-      prefetchSeaLevelSampling(gameArea);
-    },
     () => fetchLandmassFeaturesInArea(gameArea),
     () => fetchStaticTransit(gameArea),
   ];
@@ -52,17 +49,34 @@ function buildPreloadJobs(
   return jobs;
 }
 
-function runTrackedPreloadJob(
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function runTrackedPreloadJob(
   gameAreaKey: string,
   task: () => Promise<unknown>,
-): void {
-  void task()
-    .then(() => {
-      usePreloadStore.getState().recordSuccess(gameAreaKey);
-    })
-    .catch(() => {
-      usePreloadStore.getState().recordFailure(gameAreaKey);
-    });
+): Promise<void> {
+  try {
+    await task();
+    usePreloadStore.getState().recordSuccess(gameAreaKey);
+  } catch {
+    usePreloadStore.getState().recordFailure(gameAreaKey);
+  }
+}
+
+async function runPreloadQueue(
+  gameAreaKey: string,
+  jobs: Array<() => Promise<unknown>>,
+): Promise<void> {
+  for (let index = 0; index < jobs.length; index += 1) {
+    await runTrackedPreloadJob(gameAreaKey, jobs[index]);
+    if (index < jobs.length - 1) {
+      await sleep(PRELOAD_JOB_GAP_MS);
+    }
+  }
 }
 
 export function preloadGameAreaCaches(gameArea: GameArea): void {
@@ -70,9 +84,7 @@ export function preloadGameAreaCaches(gameArea: GameArea): void {
   const jobs = buildPreloadJobs(gameArea);
   usePreloadStore.getState().reset(gameAreaKey, jobs.length);
 
-  for (const job of jobs) {
-    runTrackedPreloadJob(gameAreaKey, job);
-  }
+  void runPreloadQueue(gameAreaKey, jobs);
 }
 
 export async function preloadCriticalGameAreaCaches(
@@ -85,4 +97,8 @@ export async function preloadCriticalGameAreaCaches(
       fetchAdminDivisionFeaturesInArea(gameArea, adminLevel),
     ),
   ]);
+}
+
+export function preloadJobGapMsForTests(): number {
+  return PRELOAD_JOB_GAP_MS;
 }

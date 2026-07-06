@@ -29,6 +29,7 @@ import {
   preloadCriticalGameAreaCaches,
   preloadGameAreaCaches,
 } from "../services/gameAreaPreload";
+import { startSeaLevelBackgroundSampling } from "../services/seaLevelProgressive";
 import { retryAsync } from "../services/retryAsync";
 import {
   inferTransitMetroId,
@@ -340,6 +341,7 @@ export function CreateSession() {
       }
 
       preloadGameAreaCaches(gameArea);
+      startSeaLevelBackgroundSampling(gameArea);
       if (navigator.onLine) {
         void preloadCriticalGameAreaCaches(gameArea);
       }

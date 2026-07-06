@@ -52,6 +52,10 @@ vi.mock("../services/gameAreaPreload", () => ({
   preloadGameAreaCaches: vi.fn(),
 }));
 
+vi.mock("../services/seaLevelProgressive", () => ({
+  startSeaLevelBackgroundSampling: vi.fn(),
+}));
+
 vi.mock("../services/firebase", () => ({
   isFirebaseConfigured: () => false,
   ensureAnonymousUser: vi.fn(),

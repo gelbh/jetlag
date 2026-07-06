@@ -182,6 +182,8 @@ export function getFirestoreDb(): Firestore {
   return db;
 }
 
+let anonymousSignInPromise: Promise<User> | null = null;
+
 export async function ensureAnonymousUser(): Promise<User> {
   const firebaseAuth = getFirebaseAuth();
 
@@ -189,8 +191,15 @@ export async function ensureAnonymousUser(): Promise<User> {
     return firebaseAuth.currentUser;
   }
 
-  const credential = await signInAnonymously(firebaseAuth);
-  return credential.user;
+  if (!anonymousSignInPromise) {
+    anonymousSignInPromise = signInAnonymously(firebaseAuth)
+      .then((credential) => credential.user)
+      .finally(() => {
+        anonymousSignInPromise = null;
+      });
+  }
+
+  return anonymousSignInPromise;
 }
 
 export async function resetFirebaseForTests(): Promise<void> {
@@ -206,5 +215,6 @@ export async function resetFirebaseForTests(): Promise<void> {
   persistenceUnavailable = false;
   authEmulatorConnected = false;
   firestoreEmulatorConnected = false;
+  anonymousSignInPromise = null;
 }
 

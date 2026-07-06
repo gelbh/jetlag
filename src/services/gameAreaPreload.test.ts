@@ -5,6 +5,7 @@ import {
   gameAreaPreloadKey,
   preloadCriticalGameAreaCaches,
   preloadGameAreaCaches,
+  preloadJobGapMsForTests,
 } from "./gameAreaPreload";
 
 vi.mock("./adminDivisionBoundaries", () => ({
@@ -27,10 +28,6 @@ vi.mock("./measuringLinearFeatures", () => ({
   fetchPreparedMeasuringLinearSegments: vi.fn(async () => []),
 }));
 
-vi.mock("./seaLevel", () => ({
-  prefetchSeaLevelSampling: vi.fn(),
-}));
-
 vi.mock("./transitStatic", () => ({
   fetchStaticTransit: vi.fn(async () => ({
     stops: [],
@@ -41,6 +38,7 @@ vi.mock("./transitStatic", () => ({
 
 describe("gameAreaPreload", () => {
   beforeEach(() => {
+    vi.useRealTimers();
     usePreloadStore.setState({
       activeGameAreaKey: null,
       totalJobs: 0,
@@ -57,16 +55,21 @@ describe("gameAreaPreload", () => {
   });
 
   it("tracks background preload progress in the preload store", async () => {
+    vi.useFakeTimers();
     const key = gameAreaPreloadKey(DUBLIN_CITY_GAME_AREA);
 
     preloadGameAreaCaches(DUBLIN_CITY_GAME_AREA);
 
     expect(usePreloadStore.getState().activeGameAreaKey).toBe(key);
-    expect(usePreloadStore.getState().totalJobs).toBeGreaterThan(0);
+    const jobCount = usePreloadStore.getState().totalJobs;
+    expect(jobCount).toBeGreaterThan(0);
 
-    await vi.waitFor(() => {
-      expect(selectPreloadBanner(usePreloadStore.getState()).loading).toBe(false);
-    });
+    await vi.advanceTimersByTimeAsync(
+      jobCount * preloadJobGapMsForTests() + 100,
+    );
+
+    expect(selectPreloadBanner(usePreloadStore.getState()).loading).toBe(false);
+    expect(usePreloadStore.getState().completedJobs).toBe(jobCount);
   });
 
   it("warms critical caches without throwing", async () => {

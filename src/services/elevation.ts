@@ -3,13 +3,22 @@ import type { LatLngTuple } from "../domain/geometry";
 const OPEN_METEO_ELEVATION_ENDPOINT = "https://api.open-meteo.com/v1/elevation";
 const ELEVATION_BATCH_SIZE = 100;
 const ELEVATION_CACHE_TTL_MS = 15 * 60 * 1000;
-const ELEVATION_MAX_RETRIES = 6;
+const ELEVATION_MAX_RETRIES_FOREGROUND = 6;
+const ELEVATION_MAX_RETRIES_BACKGROUND = 2;
 const ELEVATION_BASE_BACKOFF_MS = 1000;
 const ELEVATION_MAX_BACKOFF_MS = 30_000;
 const ELEVATION_MIN_429_BACKOFF_MS = 2000;
 const ELEVATION_MIN_REQUEST_GAP_MS = 250;
 const ELEVATION_WEIGHTED_CALLS_PER_MINUTE = 400;
 const ELEVATION_MAX_CONCURRENT = 1;
+const ELEVATION_CIRCUIT_BREAKER_THRESHOLD = 3;
+const ELEVATION_CIRCUIT_BREAKER_COOLDOWN_MS = 5 * 60 * 1000;
+
+export type ElevationFetchProfile = "background" | "foreground";
+
+export interface FetchElevationsOptions {
+  profile?: ElevationFetchProfile;
+}
 
 interface OpenMeteoElevationResponse {
   elevation: number[];
@@ -25,11 +34,35 @@ let activeElevationRequests = 0;
 let lastElevationRequestAt = 0;
 let lastElevationBatchSize = 0;
 const elevationWaitQueue: Array<() => void> = [];
+let consecutive429Count = 0;
+let circuitBreakerOpenUntil = 0;
 
 export function requestGapMsForBatchSize(batchSize: number): number {
   const weightedGap =
     (batchSize / ELEVATION_WEIGHTED_CALLS_PER_MINUTE) * 60_000;
   return Math.max(ELEVATION_MIN_REQUEST_GAP_MS, Math.ceil(weightedGap));
+}
+
+export function isElevationCircuitOpen(): boolean {
+  return Date.now() < circuitBreakerOpenUntil;
+}
+
+function maxRetriesForProfile(profile: ElevationFetchProfile): number {
+  return profile === "foreground"
+    ? ELEVATION_MAX_RETRIES_FOREGROUND
+    : ELEVATION_MAX_RETRIES_BACKGROUND;
+}
+
+function record429Response(): void {
+  consecutive429Count += 1;
+  if (consecutive429Count >= ELEVATION_CIRCUIT_BREAKER_THRESHOLD) {
+    circuitBreakerOpenUntil = Date.now() + ELEVATION_CIRCUIT_BREAKER_COOLDOWN_MS;
+    consecutive429Count = 0;
+  }
+}
+
+function recordSuccessfulElevationResponse(): void {
+  consecutive429Count = 0;
 }
 
 function elevationCacheKey(point: LatLngTuple): string {
@@ -134,19 +167,24 @@ async function runLimitedElevationRequest<T>(
   }
 }
 
-async function fetchElevationBatch(points: LatLngTuple[]): Promise<number[]> {
+async function fetchElevationBatch(
+  points: LatLngTuple[],
+  profile: ElevationFetchProfile,
+): Promise<number[]> {
+  const maxRetries = maxRetriesForProfile(profile);
   const url = new URL(OPEN_METEO_ELEVATION_ENDPOINT);
   url.searchParams.set("latitude", points.map((point) => point[0]).join(","));
   url.searchParams.set("longitude", points.map((point) => point[1]).join(","));
 
   let lastError: Error | null = null;
 
-  for (let attempt = 0; attempt <= ELEVATION_MAX_RETRIES; attempt += 1) {
+  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
     const response = await fetch(url.toString(), {
       headers: { Accept: "application/json" },
     });
 
     if (response.ok) {
+      recordSuccessfulElevationResponse();
       const payload = (await response.json()) as OpenMeteoElevationResponse;
       if (
         !Array.isArray(payload.elevation) ||
@@ -158,7 +196,8 @@ async function fetchElevationBatch(points: LatLngTuple[]): Promise<number[]> {
       return payload.elevation;
     }
 
-    if (response.status === 429 && attempt < ELEVATION_MAX_RETRIES) {
+    if (response.status === 429 && attempt < maxRetries) {
+      record429Response();
       lastError = new Error(
         "Elevation lookup is temporarily rate-limited. Try again in a moment.",
       );
@@ -172,6 +211,7 @@ async function fetchElevationBatch(points: LatLngTuple[]): Promise<number[]> {
     }
 
     if (response.status === 429) {
+      record429Response();
       throw new Error(
         "Elevation lookup is temporarily rate-limited. Try again in a moment.",
       );
@@ -186,11 +226,12 @@ async function fetchElevationBatch(points: LatLngTuple[]): Promise<number[]> {
 async function fetchElevationBatchAndWrite(
   batch: Array<{ point: LatLngTuple; indices: number[] }>,
   elevations: number[],
+  profile: ElevationFetchProfile,
 ): Promise<void> {
   await waitForElevationBatchGap();
   try {
     const batchPoints = batch.map((entry) => entry.point);
-    const batchElevations = await fetchElevationBatch(batchPoints);
+    const batchElevations = await fetchElevationBatch(batchPoints, profile);
 
     for (let batchIndex = 0; batchIndex < batch.length; batchIndex += 1) {
       const elevation = batchElevations[batchIndex];
@@ -200,6 +241,16 @@ async function fetchElevationBatchAndWrite(
         elevations[resultIndex] = elevation;
       }
     }
+  } catch (error) {
+    if (profile === "background") {
+      for (const entry of batch) {
+        for (const resultIndex of entry.indices) {
+          elevations[resultIndex] = Number.NaN;
+        }
+      }
+    } else {
+      throw error;
+    }
   } finally {
     markElevationRequestCompleted(batch.length);
   }
@@ -207,7 +258,10 @@ async function fetchElevationBatchAndWrite(
 
 export async function fetchElevations(
   points: LatLngTuple[],
+  options: FetchElevationsOptions = {},
 ): Promise<number[]> {
+  const profile = options.profile ?? "foreground";
+
   if (points.length === 0) {
     return [];
   }
@@ -227,6 +281,11 @@ export async function fetchElevations(
       continue;
     }
 
+    if (isElevationCircuitOpen()) {
+      elevations[index] = Number.NaN;
+      continue;
+    }
+
     const pending = pendingByKey.get(key);
     if (pending) {
       pending.indices.push(index);
@@ -238,6 +297,10 @@ export async function fetchElevations(
 
   const pendingPoints = [...pendingByKey.values()];
 
+  if (pendingPoints.length === 0 || isElevationCircuitOpen()) {
+    return elevations;
+  }
+
   for (
     let index = 0;
     index < pendingPoints.length;
@@ -245,7 +308,7 @@ export async function fetchElevations(
   ) {
     const batch = pendingPoints.slice(index, index + ELEVATION_BATCH_SIZE);
     await runLimitedElevationRequest(() =>
-      fetchElevationBatchAndWrite(batch, elevations),
+      fetchElevationBatchAndWrite(batch, elevations, profile),
     );
   }
 
@@ -258,4 +321,10 @@ export function clearElevationCacheForTests(): void {
   lastElevationRequestAt = 0;
   lastElevationBatchSize = 0;
   elevationWaitQueue.length = 0;
+  consecutive429Count = 0;
+  circuitBreakerOpenUntil = 0;
+}
+
+export function openElevationCircuitForTests(untilMs = Date.now() + 60_000): void {
+  circuitBreakerOpenUntil = untilMs;
 }
