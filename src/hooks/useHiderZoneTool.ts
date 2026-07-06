@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { GameArea } from "../domain/annotations";
 import { hidingZoneRadiusMeters } from "../domain/gameSize";
 import type { GameSize } from "../domain/gameSize";
@@ -13,7 +13,8 @@ import {
   type HidingZoneRecord,
   type TransitStation,
 } from "../domain/hidingZone";
-import { fetchTransitStationsForHidingZone } from "../services/matchingFeatures";
+import type { MapViewportBounds } from "../domain/transitViewport";
+import { fetchTransitStationsForHidingZoneViewport } from "../services/matchingFeatures";
 import { writeHidingZone } from "../services/firestoreSessionExtras";
 
 const MOVE_MIN_DISTANCE_METERS = 50;
@@ -60,35 +61,34 @@ export function useHiderZoneTool({
     setManualMode(false);
     setQuery("");
     setError(null);
+    setStations([]);
+    setStationsError(null);
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    void (async () => {
+  const searchStationsInArea = useCallback(
+    async (viewport: MapViewportBounds) => {
       setStationsLoading(true);
       setStationsError(null);
 
       try {
-        const loaded = await fetchTransitStationsForHidingZone(gameArea);
-        if (!cancelled) {
-          setStations(loaded);
-        }
+        const loaded = await fetchTransitStationsForHidingZoneViewport(
+          viewport,
+          gameArea,
+        );
+        setStations(loaded);
+        setSelectedStation((current) =>
+          current && loaded.some((station) => station.id === current.id)
+            ? current
+            : null,
+        );
       } catch {
-        if (!cancelled) {
-          setStationsError("Couldn't load transit stations for this area.");
-        }
+        setStationsError("Couldn't load transit stations for this area.");
       } finally {
-        if (!cancelled) {
-          setStationsLoading(false);
-        }
+        setStationsLoading(false);
       }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [gameArea]);
+    },
+    [gameArea],
+  );
 
   const filteredStations = useMemo(
     () => searchStations(query, stations),
@@ -303,6 +303,7 @@ export function useHiderZoneTool({
   }, []);
 
   return {
+    stations,
     stationsLoading,
     stationsError,
     filteredStations,
@@ -328,6 +329,7 @@ export function useHiderZoneTool({
     saving,
     error,
     handleMapClick,
+    searchStationsInArea,
     hasZone: Boolean(existingZone),
     hasPlacement,
     locked: Boolean(existingZone) && !wizardOpen,

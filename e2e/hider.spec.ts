@@ -23,6 +23,9 @@ test.describe("hider flows", () => {
 
     await openHidingZoneWizard(guestPage);
     await expect(
+      guestPage.getByRole("button", { name: "Search this area" }),
+    ).toBeVisible();
+    await expect(
       guestPage.getByRole("button", { name: "Dublin Central" }),
     ).toBeVisible();
 

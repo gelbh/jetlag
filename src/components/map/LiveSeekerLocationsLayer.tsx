@@ -1,7 +1,6 @@
 import { CircleMarker, Tooltip } from "react-leaflet";
 import type { LatLngTuple } from "../../domain/geometry";
 import type { PlayerLocationRecord } from "../../domain/sessionChat";
-import { shortPlayerLabel } from "../../domain/hidingZone";
 import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface LiveSeekerLocationsLayerProps {
@@ -29,7 +28,7 @@ export function LiveSeekerLocationsLayer({
             }}
           >
             <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-              Seeker {shortPlayerLabel(location.uid)}
+              Seeker
             </Tooltip>
           </CircleMarker>
         );

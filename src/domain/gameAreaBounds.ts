@@ -31,6 +31,22 @@ export function normalizeBoundingBox(box: BoundingBox): BoundingBox {
   return { south, west, north, east };
 }
 
+export function intersectBoundingBoxes(
+  a: BoundingBox,
+  b: BoundingBox,
+): BoundingBox | null {
+  const south = Math.max(a.south, b.south);
+  const west = Math.max(a.west, b.west);
+  const north = Math.min(a.north, b.north);
+  const east = Math.min(a.east, b.east);
+
+  if (south >= north || west >= east) {
+    return null;
+  }
+
+  return normalizeBoundingBox({ south, west, north, east });
+}
+
 function collectPositions(gameArea: GameArea): Position[] {
   if (gameArea.type === "MultiPolygon") {
     return gameArea.coordinates.flatMap((polygon) =>

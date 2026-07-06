@@ -4,9 +4,13 @@ import { Polygon } from "react-leaflet";
 import { AnnotationLayer } from "../components/map/AnnotationLayer";
 import { GameAreaMask } from "../components/map/GameAreaMask";
 import { HidingZonesLayer } from "../components/map/HidingZonesLayer";
+import { HidingZoneStationsLayer } from "../components/map/HidingZoneStationsLayer";
 import { LiveSeekerLocationsLayer } from "../components/map/LiveSeekerLocationsLayer";
 import { MapView } from "../components/map/MapView";
-import { MapViewportTracker } from "../components/map/MapViewportTracker";
+import {
+  MapViewportTracker,
+  type MapViewportState,
+} from "../components/map/MapViewportTracker";
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { HidingZonePanel } from "../components/hider/HidingZonePanel";
 import { hidingZonePreviewPositions } from "../domain/hidingZone";
@@ -21,8 +25,10 @@ import {
   fallbackGameArea,
   gameAreaCenter,
   gameAreaToBoundsExpression,
+  gameAreaToBoundingBox,
   type LatLngTuple,
 } from "../domain/geometry";
+import type { MapViewportBounds } from "../domain/transitViewport";
 import { effectiveMapStyle } from "../domain/powerProfile";
 import { computeHiderTruthReplyAsync } from "../domain/hiderTruthAnswer";
 import { MAP_ANNOTATION_COLORS } from "../domain/mapAnnotationColors";
@@ -79,6 +85,16 @@ export function HiderMapScreen() {
     null,
   );
   const [chatAnswerError, setChatAnswerError] = useState<string | null>(null);
+  const [mapViewport, setMapViewport] = useState<MapViewportState | null>(
+    null,
+  );
+
+  const handleMapViewportChange = useCallback(
+    (viewport: MapViewportState | null) => {
+      setMapViewport(viewport);
+    },
+    [],
+  );
 
   useSessionSync();
 
@@ -163,6 +179,22 @@ export function HiderMapScreen() {
     resumeTimer: timer.start,
   });
 
+  const searchViewportBounds = useCallback((): MapViewportBounds => {
+    return mapViewport?.bounds ?? gameAreaToBoundingBox(session?.gameArea ?? fallbackGameArea());
+  }, [mapViewport?.bounds, session?.gameArea]);
+
+  const handleSearchThisArea = useCallback(() => {
+    void zoneTool.searchStationsInArea(searchViewportBounds());
+  }, [searchViewportBounds, zoneTool.searchStationsInArea]);
+
+  useEffect(() => {
+    if (!zoneTool.wizardOpen || zoneTool.manualMode) {
+      return;
+    }
+
+    void zoneTool.searchStationsInArea(searchViewportBounds());
+  }, [zoneTool.wizardOpen]);
+
   const openWizardExclusive = useCallback(() => {
     overlay.closeSheet();
     zoneTool.openWizard();
@@ -221,7 +253,7 @@ export function HiderMapScreen() {
           onMapClick={handleMapClick}
           className="h-full w-full"
         >
-          <MapViewportTracker onViewportChange={() => undefined} />
+          <MapViewportTracker onViewportChange={handleMapViewportChange} />
           <GameAreaMask gameArea={session.gameArea} />
           <AnnotationLayer
             annotations={annotations}
@@ -229,6 +261,13 @@ export function HiderMapScreen() {
             layerVisibility={layerVisibility}
           />
           <HidingZonesLayer zones={hidingZones} myUid={uid} />
+          {zoneTool.wizardOpen && !zoneTool.manualMode ? (
+            <HidingZoneStationsLayer
+              stations={zoneTool.stations}
+              selectedStation={zoneTool.selectedStation}
+              onSelectStation={zoneTool.setSelectedStation}
+            />
+          ) : null}
           {previewRing.length > 0 ? (
             <Polygon
               positions={previewRing}
@@ -342,6 +381,8 @@ export function HiderMapScreen() {
               stationsError={zoneTool.stationsError}
               selectedStation={zoneTool.selectedStation}
               onSelectStation={zoneTool.setSelectedStation}
+              onSearchThisArea={handleSearchThisArea}
+              searchDisabled={zoneTool.stationsLoading}
               manualMode={zoneTool.manualMode}
               onManualModeChange={zoneTool.setManualModeEnabled}
               hasPlacement={zoneTool.hasPlacement}

@@ -1,5 +1,9 @@
 import type { GameArea } from "../domain/annotations";
 import {
+  dedupeTransitStations,
+  type TransitStation,
+} from "../domain/hidingZone";
+import {
   distanceBetweenPoints,
   gameAreaToBoundingBox,
   isPointInGameArea,
@@ -7,6 +11,7 @@ import {
 } from "../domain/geometry";
 import {
   expandBoundingBox,
+  intersectBoundingBoxes,
   type BoundingBox,
 } from "../domain/gameAreaBounds";
 import {
@@ -28,6 +33,7 @@ import {
   fetchLandmassFeaturesInArea,
   landmassToMatchingFeature,
 } from "./landmassFeatures";
+import type { MapViewportBounds } from "../domain/transitViewport";
 import { queryOverpass } from "./overpassClient";
 import {
   getOrFetchCached,
@@ -324,21 +330,56 @@ async function fetchStreetPathFeaturesInArea(
   return parseMatchingFeatures(payload.elements, gameArea, "street_or_path");
 }
 
-function buildStationQuery(gameArea: GameArea): string {
-  const bbox = formatOverpassBbox(
-    matchingSearchBoundingBox(gameArea, "station_name_length"),
-  );
+function buildStationQueryForBbox(bbox: BoundingBox): string {
+  const formatted = formatOverpassBbox(bbox);
 
   return `
     [out:json][timeout:25];
   (
-    node["railway"~"^(station|halt|stop)$"]["name"](${bbox});
-    node["public_transport"="stop_position"]["train"="yes"]["name"](${bbox});
-    node["station"="subway"]["name"](${bbox});
-    node["station"="light_rail"]["name"](${bbox});
+    node["railway"~"^(station|halt|stop)$"]["name"](${formatted});
+    node["public_transport"="stop_position"]["train"="yes"]["name"](${formatted});
+    node["station"="subway"]["name"](${formatted});
+    node["station"="light_rail"]["name"](${formatted});
   );
   out center 200;
   `;
+}
+
+function buildStationQuery(gameArea: GameArea): string {
+  return buildStationQueryForBbox(
+    matchingSearchBoundingBox(gameArea, "station_name_length"),
+  );
+}
+
+function matchingFeaturesToTransitStations(
+  features: MatchingFeature[],
+  gameArea: GameArea,
+): TransitStation[] {
+  return dedupeTransitStations(
+    features
+      .filter((feature) => isPointInGameArea(feature.point, gameArea))
+      .map((feature) => ({
+        id: feature.id,
+        name: feature.name,
+        lat: feature.point[0],
+        lng: feature.point[1],
+      })),
+  );
+}
+
+async function fetchStationFeaturesInBbox(
+  bbox: BoundingBox,
+  gameArea: GameArea,
+): Promise<MatchingFeature[]> {
+  const payload = await queryOverpass<{ elements: OverpassElement[] }>(
+    buildStationQueryForBbox(bbox),
+  );
+
+  return parseMatchingFeatures(
+    payload.elements,
+    gameArea,
+    "station_name_length",
+  );
 }
 
 async function fetchStationFeaturesInArea(
@@ -357,14 +398,24 @@ async function fetchStationFeaturesInArea(
 
 export async function fetchTransitStationsForHidingZone(
   gameArea: GameArea,
-): Promise<Array<{ id: string; name: string; lat: number; lng: number }>> {
+): Promise<TransitStation[]> {
   const features = await fetchStationFeaturesInArea(gameArea);
-  return features.map((feature) => ({
-    id: feature.id,
-    name: feature.name,
-    lat: feature.point[0],
-    lng: feature.point[1],
-  }));
+  return matchingFeaturesToTransitStations(features, gameArea);
+}
+
+export async function fetchTransitStationsForHidingZoneViewport(
+  viewport: MapViewportBounds,
+  gameArea: GameArea,
+): Promise<TransitStation[]> {
+  const gameAreaBox = gameAreaToBoundingBox(gameArea);
+  const clipped = intersectBoundingBoxes(viewport, gameAreaBox);
+
+  if (!clipped) {
+    return [];
+  }
+
+  const features = await fetchStationFeaturesInBbox(clipped, gameArea);
+  return matchingFeaturesToTransitStations(features, gameArea);
 }
 
 function stationNameLength(name: string): number {

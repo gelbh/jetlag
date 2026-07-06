@@ -4,7 +4,6 @@ import { sessionHasHiders } from "../domain/playerRole";
 import { HiderMapScreen } from "./HiderMapScreen";
 import { AnnotationLayer } from "../components/map/AnnotationLayer";
 import { ChatPanel } from "../components/chat/ChatPanel";
-import { HidingZonesLayer } from "../components/map/HidingZonesLayer";
 import { LiveSeekerLocationsLayer } from "../components/map/LiveSeekerLocationsLayer";
 import { GeometryEditLayer } from "../components/map/GeometryEditLayer";
 import { GameAreaMask } from "../components/map/GameAreaMask";
@@ -835,7 +834,6 @@ export function MapScreen() {
             layerVisibility={layerVisibility}
             draftEliminationFeatures={draftEliminationFeatures}
           />
-          <HidingZonesLayer zones={hidingZones} myUid={uid} />
           <LiveSeekerLocationsLayer locations={playerLocations} />
           <ActiveThermometerWalkLayer
             pendingQuestions={pendingQuestions}

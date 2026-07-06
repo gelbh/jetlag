@@ -71,6 +71,37 @@ export function nearestStation(
   return best;
 }
 
+const STATION_DEDUPE_PROXIMITY_METERS = 120;
+
+function normalizedStationName(name: string): string {
+  return name.trim().toLowerCase();
+}
+
+export function dedupeTransitStations(
+  stations: readonly TransitStation[],
+  proximityMeters = STATION_DEDUPE_PROXIMITY_METERS,
+): TransitStation[] {
+  const result: TransitStation[] = [];
+
+  for (const station of stations) {
+    const name = normalizedStationName(station.name);
+    const duplicate = result.find(
+      (existing) =>
+        normalizedStationName(existing.name) === name &&
+        haversineMeters(
+          [existing.lat, existing.lng],
+          [station.lat, station.lng],
+        ) <= proximityMeters,
+    );
+
+    if (!duplicate) {
+      result.push(station);
+    }
+  }
+
+  return result;
+}
+
 export function searchStations(
   query: string,
   stations: readonly TransitStation[],

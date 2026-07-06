@@ -10,6 +10,8 @@ interface HidingZonePanelProps {
   stationsError: string | null;
   selectedStation: TransitStation | null;
   onSelectStation: (station: TransitStation) => void;
+  onSearchThisArea: () => void;
+  searchDisabled: boolean;
   manualMode: boolean;
   onManualModeChange: (enabled: boolean) => void;
   hasPlacement: boolean;
@@ -28,6 +30,8 @@ export function HidingZonePanel({
   stationsError,
   selectedStation,
   onSelectStation,
+  onSearchThisArea,
+  searchDisabled,
   manualMode,
   onManualModeChange,
   hasPlacement,
@@ -59,6 +63,14 @@ export function HidingZonePanel({
             className="field-input min-h-11 w-full"
             placeholder="Search stations…"
           />
+          <button
+            type="button"
+            onClick={onSearchThisArea}
+            disabled={searchDisabled}
+            className="btn-secondary min-h-10 w-full disabled:opacity-50"
+          >
+            Search this area
+          </button>
           {stationsLoading ? (
             <p className="text-sm text-ink-dim">Loading stations…</p>
           ) : null}
@@ -86,9 +98,13 @@ export function HidingZonePanel({
               Selected:{" "}
               <span className="font-medium">{selectedStation.name}</span>
             </p>
+          ) : stations.length === 0 && !stationsLoading && !stationsError ? (
+            <p className="text-sm text-ink-dim">
+              Pan the map, then search this area.
+            </p>
           ) : (
             <p className="text-sm text-ink-dim">
-              Or tap the map near a station to snap to it.
+              Or tap a station on the map to select it.
             </p>
           )}
         </>
