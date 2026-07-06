@@ -256,7 +256,7 @@ export async function closePanel(page: Page) {
 }
 
 export async function answerInChat(page: Page, label: string) {
-  const answerButton = page.getByRole("button", { name: label });
+  const answerButton = page.getByRole("button", { name: `Send answer: ${label}` });
   if (!(await answerButton.isVisible().catch(() => false))) {
     await openChat(page);
   }

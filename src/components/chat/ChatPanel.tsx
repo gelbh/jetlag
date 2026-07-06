@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { GameSize } from "../../domain/gameSize";
+import type { HiderTruthResult } from "../../domain/hiderTruthAnswer";
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,
@@ -111,6 +112,8 @@ interface ChatPanelProps {
   senderRole: PlayerRole;
   isHider: boolean;
   bottomClassName?: string;
+  questionTruths?: ReadonlyMap<string, HiderTruthResult>;
+  truthsLoading?: boolean;
   answerError?: string | null;
   onAnswerQuestion: (
     pendingQuestionId: string,
@@ -132,6 +135,8 @@ export function ChatPanel({
   senderRole,
   isHider,
   bottomClassName = "jl-panel-above-dock",
+  questionTruths,
+  truthsLoading = false,
   answerError = null,
   onAnswerQuestion,
 }: ChatPanelProps) {
@@ -200,6 +205,8 @@ export function ChatPanel({
               gameSize={gameSize}
               isHider={isHider}
               senderUid={senderUid}
+              questionTruths={questionTruths}
+              truthsLoading={truthsLoading}
               answerError={answerError}
               onAnswerQuestion={onAnswerQuestion}
             />

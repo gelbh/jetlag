@@ -5,8 +5,10 @@ import {
   formatExpiredAnswerCountdown,
   questionAnswerDeadlineMs,
 } from "../../domain/questionRules";
+import type { HiderTruthResult } from "../../domain/hiderTruthAnswer";
 import type { SessionMessageRecord } from "../../domain/sessionChat";
 import type { PendingQuestionRecord } from "../../domain/sessionChat";
+import { HiderAnswerPicker } from "./HiderAnswerPicker";
 
 interface GameChatTabProps {
   messages: readonly SessionMessageRecord[];
@@ -14,6 +16,8 @@ interface GameChatTabProps {
   gameSize: GameSize;
   isHider: boolean;
   senderUid: string;
+  questionTruths?: ReadonlyMap<string, HiderTruthResult>;
+  truthsLoading?: boolean;
   answerError?: string | null;
   onAnswerQuestion: (
     pendingQuestionId: string,
@@ -41,6 +45,8 @@ export function GameChatTab({
   gameSize,
   isHider,
   senderUid,
+  questionTruths,
+  truthsLoading = false,
   answerError = null,
   onAnswerQuestion,
 }: GameChatTabProps) {
@@ -134,26 +140,24 @@ export function GameChatTab({
                 </p>
               ) : null}
               {isHider && !answered && !walking && message.replyOptions ? (
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  {message.replyOptions.map((option) => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() =>
-                        void onAnswerQuestion(
-                          message.pendingQuestionId!,
-                          message.id,
-                          option.id === "null" ? null : option.id,
-                          option.id,
-                          expired,
-                        )
-                      }
-                      className="btn-secondary min-h-11"
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
+                <HiderAnswerPicker
+                  replyOptions={message.replyOptions}
+                  truth={
+                    message.pendingQuestionId
+                      ? (questionTruths?.get(message.pendingQuestionId) ?? null)
+                      : null
+                  }
+                  loading={truthsLoading}
+                  onSelect={(option) =>
+                    void onAnswerQuestion(
+                      message.pendingQuestionId!,
+                      message.id,
+                      option.id === "null" ? null : option.id,
+                      option.id,
+                      expired,
+                    )
+                  }
+                />
               ) : null}
               {answered ? (
                 <p className="mt-2 text-xs text-ink-dim">

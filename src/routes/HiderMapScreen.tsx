@@ -33,6 +33,7 @@ import type { MapViewportBounds } from "../domain/transitViewport";
 import { effectiveMapStyle } from "../domain/powerProfile";
 import { computeHiderTruthReplyAsync } from "../domain/hiderTruthAnswer";
 import { MAP_ANNOTATION_COLORS } from "../domain/mapAnnotationColors";
+import { useHiderQuestionTruths } from "../hooks/useHiderQuestionTruths";
 import { useHiderZoneTool } from "../hooks/useHiderZoneTool";
 import { useMapOverlayState } from "../hooks/useMapOverlayState";
 import { useChatUnread } from "../hooks/useChatUnread";
@@ -126,6 +127,14 @@ export function HiderMapScreen() {
     isChatOpen: overlay.isChatOpen,
   });
   const myZone = hidingZones.find((zone) => zone.hiderUid === uid) ?? null;
+  const stationCenter = useMemo<LatLngTuple | null>(
+    () => (myZone ? [myZone.center.lat, myZone.center.lng] : null),
+    [myZone],
+  );
+  const { questionTruths, loading: truthsLoading } = useHiderQuestionTruths(
+    pendingQuestions,
+    stationCenter,
+  );
 
   const isHost = Boolean(
     session?.hostUid && uid && session.hostUid === uid,
@@ -418,6 +427,8 @@ export function HiderMapScreen() {
         senderUid={uid ?? ""}
         senderRole="hider"
         isHider
+        questionTruths={questionTruths}
+        truthsLoading={truthsLoading}
         answerError={chatAnswerError}
         onAnswerQuestion={async (
           pendingQuestionId,
@@ -440,7 +451,7 @@ export function HiderMapScreen() {
             return;
           }
 
-          const stationCenter: LatLngTuple | null = myZone
+          const stationCenterForAnswer: LatLngTuple | null = myZone
             ? [myZone.center.lat, myZone.center.lng]
             : null;
 
@@ -463,10 +474,18 @@ export function HiderMapScreen() {
 
             const truth = await computeHiderTruthReplyAsync(
               pending,
-              stationCenter,
+              stationCenterForAnswer,
             );
-            if (truth) {
-              setTruthReveal({ truth, selectedReply });
+            if (
+              truth &&
+              !truth.unavailable &&
+              truth.replyId.length > 0 &&
+              selectedReply !== truth.replyId
+            ) {
+              const selectedLabel =
+                pending.replyOptions.find((option) => option.id === selectedReply)
+                  ?.label ?? selectedReply;
+              setTruthReveal({ truth, selectedReply, selectedLabel });
             }
             overlay.closeSheet();
           } catch (error) {

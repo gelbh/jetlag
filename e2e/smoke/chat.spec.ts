@@ -39,12 +39,9 @@ test("@smoke seeker asks via radar and hider answers in game chat", async ({
   await expect(guestPage.getByRole("button", { name: "Close", exact: true })).toBeHidden({
     timeout: 10_000,
   });
-  await expect(guestPage.getByTestId("hider-truth-reveal-banner")).toBeVisible({
-    timeout: 10_000,
+  await expect(guestPage.getByTestId("hider-truth-reveal-banner")).toBeHidden({
+    timeout: 5_000,
   });
-  await expect(guestPage.getByTestId("hider-truth-reveal-banner")).toContainText(
-    /Truthful answer:/i,
-  );
 
   await openChat(hostPage);
   await expectChatAnswer(hostPage, "yes");
