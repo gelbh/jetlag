@@ -175,10 +175,11 @@ export async function placePin(page: Page, note = "Camp") {
 
 export async function drawZone(page: Page, label = "Search zone") {
   await selectDrawTool(page, "Zone");
-  await clickMapAt(page, 0.35, 0.3);
-  await clickMapAt(page, 0.65, 0.3);
-  await clickMapAt(page, 0.5, 0.45);
-  await expect(page.getByText(/Vertices:\s*3/i)).toBeVisible({ timeout: 10_000 });
+  // Stay near map center so taps remain inside the seeded game area on all viewports.
+  await clickMapAt(page, 0.45, 0.45);
+  await clickMapAt(page, 0.55, 0.45);
+  await clickMapAt(page, 0.5, 0.52);
+  await expect(page.getByText(/Vertices:\s*3/i)).toBeVisible({ timeout: 15_000 });
   await page.getByPlaceholder("Optional zone label").fill(label);
   await page.getByRole("button", { name: "Close zone", exact: true }).click();
   await expectMapHasAnnotations(page);

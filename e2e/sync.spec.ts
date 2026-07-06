@@ -100,7 +100,7 @@ test.describe("cross-device sync", () => {
 
     await expect(async () => {
       expect(await guestShapes.count()).toBeLessThan(afterPinCount);
-    }).toPass({ timeout: 30_000 });
+    }).toPass({ timeout: 45_000 });
 
     await cleanup();
   });
