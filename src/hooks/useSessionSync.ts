@@ -6,19 +6,24 @@ import {
   isFirebaseConfigured,
   isFirestorePersistenceUnavailable,
 } from "../services/firebase";
-import { subscribeToRemoteAnnotations } from "../services/firestoreAnnotations";
+import {
+  subscribeToRemoteAnnotations,
+  subscribeToSession,
+  writeRemoteAnnotation,
+} from "../services/firestoreAnnotations";
 import {
   readOfflineQueueForSession,
   recordOfflineWriteFailure,
   removeOfflineWrite,
   shouldRetryOfflineWrite,
 } from "../services/offlineQueue";
-import { writeRemoteAnnotation } from "../services/firestoreAnnotations";
 
 const QUEUE_FLUSH_INTERVAL_MS = 45_000;
 
 export function useSessionSync() {
   const session = useSessionStore((state) => state.session);
+  const myUid = useSessionStore((state) => state.myUid);
+  const setSession = useSessionStore((state) => state.setSession);
   const setPendingWrites = useSessionStore((state) => state.setPendingWrites);
   const setRemoteUpdateNotice = useSessionStore(
     (state) => state.setRemoteUpdateNotice,
@@ -40,6 +45,32 @@ export function useSessionSync() {
       return;
     }
 
+    const unsubscribe = subscribeToSession(
+      session.id,
+      (remoteSession) => {
+        setSession(remoteSession, myUid);
+      },
+      (error) => {
+        setLastSyncError(
+          error instanceof Error ? error.message : "Session sync failed.",
+        );
+      },
+    );
+
+    return unsubscribe;
+  }, [myUid, session?.id, setLastSyncError, setSession]);
+
+  useEffect(() => {
+    if (
+      !session ||
+      session.id === LOCAL_SESSION_ID ||
+      !isFirebaseConfigured()
+    ) {
+      return;
+    }
+
+    const sessionId = session.id;
+
     getFirestoreDb();
     if (isFirestorePersistenceUnavailable()) {
       setLastSyncError(
@@ -48,7 +79,7 @@ export function useSessionSync() {
     }
 
     const unsubscribe = subscribeToRemoteAnnotations(
-      session.id,
+      sessionId,
       (annotations) => {
         const previous = useAnnotationStore.getState().annotations;
         const previousById = new Map(
@@ -88,7 +119,7 @@ export function useSessionSync() {
         setLastSyncError(
           error instanceof Error
             ? error.message
-            : "Unable to sync annotations.",
+            : "Annotation sync failed.",
         );
       },
     );
@@ -97,7 +128,7 @@ export function useSessionSync() {
   }, [
     markAnnotationPulse,
     replaceAnnotations,
-    session,
+    session?.id,
     setLastSyncError,
     setRemoteUpdateNotice,
   ]);
@@ -111,8 +142,10 @@ export function useSessionSync() {
       return;
     }
 
+    const sessionId = session.id;
+
     const flushQueue = async () => {
-      const pendingForSession = await readOfflineQueueForSession(session.id);
+      const pendingForSession = await readOfflineQueueForSession(sessionId);
       setPendingWrites(pendingForSession.length);
 
       if (pendingForSession.length === 0) {
@@ -127,11 +160,11 @@ export function useSessionSync() {
         }
 
         try {
-          await writeRemoteAnnotation(session.id, entry.annotation);
+          await writeRemoteAnnotation(sessionId, entry.annotation);
           await removeOfflineWrite(entry.id);
         } catch (error) {
           lastError =
-            error instanceof Error ? error.message : "Unable to sync changes.";
+            error instanceof Error ? error.message : "Sync failed.";
           await recordOfflineWriteFailure(entry.id);
         }
       }
@@ -142,7 +175,7 @@ export function useSessionSync() {
         setLastSyncError(null);
       }
 
-      const remaining = await readOfflineQueueForSession(session.id);
+      const remaining = await readOfflineQueueForSession(sessionId);
       setPendingWrites(remaining.length);
     };
 
@@ -161,16 +194,17 @@ export function useSessionSync() {
       window.removeEventListener("online", handleOnline);
       window.clearInterval(intervalId);
     };
-  }, [session, setLastSyncError, setPendingWrites]);
+  }, [session?.id, setLastSyncError, setPendingWrites]);
 
   useEffect(() => {
     const handleOffline = () => {
-      if (!session || session.id === LOCAL_SESSION_ID) {
+      const currentSession = useSessionStore.getState().session;
+      if (!currentSession || currentSession.id === LOCAL_SESSION_ID) {
         return;
       }
 
       void (async () => {
-        const queue = await readOfflineQueueForSession(session.id);
+        const queue = await readOfflineQueueForSession(currentSession.id);
         setPendingWrites(queue.length);
       })();
     };
@@ -180,5 +214,5 @@ export function useSessionSync() {
     return () => {
       window.removeEventListener("offline", handleOffline);
     };
-  }, [session, setPendingWrites]);
+  }, [setPendingWrites]);
 }

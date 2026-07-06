@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { GameArea, SessionRecord } from "../domain/annotations";
+import type { PlayerRole } from "../domain/playerRole";
+import { resolvePlayerRole } from "../domain/playerRole";
 
 export type { MapTool } from "../domain/mapToolTypes";
 export { useAnnotationStore } from "./annotationStore";
@@ -9,11 +11,14 @@ export type { MapStyle } from "../domain/mapBasemaps";
 
 interface SessionState {
   session: SessionRecord | null;
+  myUid: string | null;
+  myRole: PlayerRole | null;
   pendingWrites: number;
   syncInFlight: number;
   lastSyncError: string | null;
   remoteUpdateNotice: string | null;
-  setSession: (session: SessionRecord | null) => void;
+  setSession: (session: SessionRecord | null, myUid?: string | null) => void;
+  setMyUid: (uid: string | null) => void;
   setGameArea: (gameArea: GameArea) => void;
   setPendingWrites: (count: number) => void;
   incrementPendingWrites: () => void;
@@ -28,11 +33,32 @@ export const useSessionStore = create<SessionState>()(
   persist(
     (set) => ({
       session: null,
+      myUid: null,
+      myRole: null,
       pendingWrites: 0,
       syncInFlight: 0,
       lastSyncError: null,
       remoteUpdateNotice: null,
-      setSession: (session) => set({ session }),
+      setSession: (session, myUid) =>
+        set((state) => {
+          const uid = myUid === undefined ? state.myUid : myUid;
+          return {
+            session,
+            myUid: uid,
+            myRole:
+              session && uid
+                ? resolvePlayerRole(session.memberRoles, uid)
+                : null,
+          };
+        }),
+      setMyUid: (myUid) =>
+        set((state) => ({
+          myUid,
+          myRole:
+            state.session && myUid
+              ? resolvePlayerRole(state.session.memberRoles, myUid)
+              : state.myRole,
+        })),
       setGameArea: (gameArea) =>
         set((state) =>
           state.session
@@ -65,6 +91,8 @@ export const useSessionStore = create<SessionState>()(
       name: "jetlag-session",
       partialize: (state) => ({
         session: state.session,
+        myUid: state.myUid,
+        myRole: state.myRole,
       }),
     },
   ),

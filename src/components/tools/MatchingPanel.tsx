@@ -48,6 +48,7 @@ interface MatchingPanelProps {
   onUseGps: () => void;
   onAnswerChange: (answer: MatchingAnswer) => void;
   onCommit: () => void;
+  awaitHiderAnswer?: boolean;
   onRetry?: () => void;
 }
 
@@ -71,6 +72,7 @@ export function MatchingPanel({
   onUseGps,
   onAnswerChange,
   onCommit,
+  awaitHiderAnswer = false,
   onRetry,
 }: MatchingPanelProps) {
   const [stepIndex, setStepIndex] = useState(0);
@@ -86,7 +88,7 @@ export function MatchingPanel({
   const resolveComplete = nullAnswer || nearestFeatureName !== null;
   const canCommit =
     hasSeekerPoint &&
-    answer !== null &&
+    (awaitHiderAnswer || answer !== null) &&
     resolveComplete &&
     categoryAvailable &&
     !loading;
@@ -230,15 +232,23 @@ export function MatchingPanel({
               {nearestFeatureSummary}
             </ResolvedReadout>
           ) : null}
-          <BinaryAnswerPicker
-            value={answer}
-            onChange={onAnswerChange}
-            options={yesNoAnswerOptions}
-            label=""
-          />
+          {awaitHiderAnswer ? (
+            <p className="text-sm text-ink-muted">
+              Hiders will answer yes or no in game chat.
+            </p>
+          ) : (
+            <BinaryAnswerPicker
+              value={answer}
+              onChange={onAnswerChange}
+              options={yesNoAnswerOptions}
+              label=""
+            />
+          )}
           {resolveComplete && !nullAnswer ? (
             <p className="text-xs text-ink-dim">
-              The map shows the shaded area for your choice.
+              {awaitHiderAnswer
+                ? "The question goes to hiders once you send it."
+                : "The map shows the shaded area for your choice."}
             </p>
           ) : null}
           <button
@@ -247,7 +257,7 @@ export function MatchingPanel({
             disabled={!canCommit}
             className="btn-primary w-full disabled:opacity-40"
           >
-            Add match question
+            {awaitHiderAnswer ? "Send to hiders" : "Add match question"}
           </button>
         </ToolSection>
       ) : null}

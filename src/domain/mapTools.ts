@@ -26,7 +26,6 @@ export function mapToolDockLabel(entry: MapToolDockEntry): string {
   return entry.cost ? `${entry.name} (${entry.cost})` : entry.name;
 }
 
-/** Short label for dock menus and chrome — no card cost codes. */
 export function mapToolDockMenuLabel(entry: MapToolDockEntry): string {
   return entry.name;
 }
@@ -44,14 +43,12 @@ const MARKUP_TOOL_HINTS: Partial<Record<DockableMapTool, string>> = {
   pin: "Mark a point on the map",
 };
 
-/** One-line helper for overflow menu items (first visit / recall). */
 export function mapToolDockMenuHint(entry: MapToolDockEntry): string | null {
   return (
     OVERFLOW_TOOL_HINTS[entry.id] ?? MARKUP_TOOL_HINTS[entry.id] ?? null
   );
 }
 
-/** Five main question cards — always on the tool dock. */
 export const QUESTION_DOCK_TOOL_IDS = [
   "matching",
   "measuring",
@@ -60,7 +57,6 @@ export const QUESTION_DOCK_TOOL_IDS = [
   "tentacle",
 ] as const satisfies readonly DockableMapTool[];
 
-/** Map markup tools — zone and pin live in the Draw menu. */
 export const MARKUP_DOCK_TOOL_IDS = ["zone", "pin"] as const satisfies readonly DockableMapTool[];
 
 const DOCK_SHORT_LABELS: Record<(typeof QUESTION_DOCK_TOOL_IDS)[number], string> = {
@@ -83,7 +79,6 @@ export function isMarkupDockTool(
   return (MARKUP_DOCK_TOOL_IDS as readonly string[]).includes(id);
 }
 
-/** Compact label for dock slots on narrow viewports. */
 export function mapToolDockShortLabel(id: DockableMapTool): string {
   if (isQuestionDockTool(id)) {
     return DOCK_SHORT_LABELS[id];

@@ -27,6 +27,7 @@ interface ToolDockProps {
   onUndo: () => void;
   onRedo: () => void;
   onOpenSettings: () => void;
+  onOpenChat?: () => void;
   mapStyle?: MapStyle;
   onMapStyleChange?: (style: MapStyle) => void;
 }
@@ -43,6 +44,7 @@ export function ToolDock({
   onUndo,
   onRedo,
   onOpenSettings,
+  onOpenChat,
   mapStyle,
   onMapStyleChange,
 }: ToolDockProps) {
@@ -227,6 +229,18 @@ export function ToolDock({
               <span className="jl-tool-slot-label">
                 {mapStyle === "standard" ? "Map" : "Sat"}
               </span>
+            </button>
+          ) : null}
+
+          {onOpenChat ? (
+            <button
+              type="button"
+              onClick={onOpenChat}
+              className="jl-tool-slot"
+              aria-label="Open chat"
+            >
+              <span className="jl-tool-slot-icon text-xs font-bold">@</span>
+              <span className="jl-tool-slot-label">Chat</span>
             </button>
           ) : null}
 

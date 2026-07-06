@@ -9,11 +9,14 @@ import {
   firstAvailableThermometerDistanceMeters,
   isThermometerDistanceOptionAvailable,
   thermometerHotterTowards,
+  thermometerQuestionPrompt,
   usedThermometerDistanceOptions,
   type ThermometerAnswer,
   type ThermometerDistanceOptionMiles,
 } from "../../domain/thermometerQuestions";
 import type { DistanceUnit } from "../../domain/distance";
+import { hotterColderAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
+import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
@@ -23,6 +26,15 @@ interface UseThermometerToolParams {
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
   ) => Promise<AnnotationRecord>;
+  awaitHiderAnswer?: boolean;
+  submitPendingQuestion?: (
+    input: Omit<
+      SubmitPendingQuestionInput,
+      "sessionId" | "senderUid" | "senderRole" | "toolType"
+    >,
+  ) => Promise<void>;
+  sessionId?: string;
+  senderUid?: string | null;
   distanceUnit: DistanceUnit;
   finishPlacement: () => void;
   setMapError: (message: string | null) => void;
@@ -32,6 +44,10 @@ export function useThermometerTool({
   active,
   annotations,
   createAnnotation,
+  awaitHiderAnswer = false,
+  submitPendingQuestion,
+  sessionId,
+  senderUid,
   distanceUnit,
   finishPlacement,
   setMapError,
@@ -99,7 +115,7 @@ export function useThermometerTool({
   );
 
   const commit = async () => {
-    if (!thermoA || !thermoB || thermometerAnswer === null) {
+    if (!thermoA || !thermoB) {
       return;
     }
 
@@ -124,6 +140,33 @@ export function useThermometerTool({
         ],
       },
     };
+
+    if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
+      await submitPendingQuestion({
+        promptText: thermometerQuestionPrompt(
+          thermometerDistanceMeters,
+          distanceUnit,
+        ),
+        replyOptions: hotterColderAnswerOptions.map((option) => ({
+          id: option.value,
+          label: option.label,
+        })),
+        placement: {
+          geometryJson: JSON.stringify(geometry),
+          metadata: {
+            thermometerDistanceMeters,
+          },
+        },
+      });
+
+      resetDraft();
+      finishPlacement();
+      return;
+    }
+
+    if (thermometerAnswer === null) {
+      return;
+    }
 
     await createAnnotation({
       type: "thermometer",
@@ -155,6 +198,7 @@ export function useThermometerTool({
       onAnswerChange={setThermometerAnswer}
       onReset={resetDraft}
       onCommit={() => void commit()}
+      awaitHiderAnswer={awaitHiderAnswer}
     />
   );
 

@@ -41,6 +41,7 @@ interface TentaclePanelProps {
   onSelectPoi: (poiId: string) => void;
   onOutOfReachChange: (outOfReach: boolean) => void;
   onCommit: () => void;
+  awaitHiderAnswer?: boolean;
   onRetry?: () => void;
 }
 
@@ -62,6 +63,7 @@ export function TentaclePanel({
   onSelectPoi,
   onOutOfReachChange,
   onCommit,
+  awaitHiderAnswer = false,
   onRetry,
 }: TentaclePanelProps) {
   const [stepIndex, setStepIndex] = useState(0);
@@ -77,7 +79,7 @@ export function TentaclePanel({
   const canCommit =
     hasCenter &&
     poiOptions.length > 0 &&
-    hasRecordedAnswer &&
+    (awaitHiderAnswer || hasRecordedAnswer) &&
     categorySelectionAvailable;
   const availableCategories = TENTACLE_LOCATION_CATEGORIES.filter((category) =>
     isTentacleCategoryAvailable(category.id, usedCategoryIds),
@@ -163,22 +165,28 @@ export function TentaclePanel({
 
       {step === "answer" ? (
         <>
-          <TentacleAnswerPicker
-            categoryId={categoryId}
-            distanceUnit={distanceUnit}
-            poiOptions={poiOptions}
-            selectedPoiId={selectedPoiId}
-            outOfReach={outOfReach}
-            onSelectPoi={onSelectPoi}
-            onOutOfReachChange={onOutOfReachChange}
-          />
+          {awaitHiderAnswer ? (
+            <p className="text-sm text-ink-muted">
+              Hiders pick a location or &quot;Not within reach&quot; in game chat.
+            </p>
+          ) : (
+            <TentacleAnswerPicker
+              categoryId={categoryId}
+              distanceUnit={distanceUnit}
+              poiOptions={poiOptions}
+              selectedPoiId={selectedPoiId}
+              outOfReach={outOfReach}
+              onSelectPoi={onSelectPoi}
+              onOutOfReachChange={onOutOfReachChange}
+            />
+          )}
           <button
             type="button"
             onClick={onCommit}
             disabled={!canCommit}
             className="btn-primary w-full disabled:opacity-40"
           >
-            Add tentacle question
+            {awaitHiderAnswer ? "Send to hiders" : "Add tentacle question"}
           </button>
         </>
       ) : null}

@@ -14,6 +14,14 @@ service cloud.firestore {
       return tier in ['free', 'premium'];
     }
 
+    function validGameSize(size) {
+      return size in ['small', 'medium', 'large'];
+    }
+
+    function validPlayerRole(role) {
+      return role in ['seeker', 'hider'];
+    }
+
     function sessionData(sessionId) {
       return get(/databases/$(database)/documents/sessions/$(sessionId)).data;
     }
@@ -21,6 +29,26 @@ service cloud.firestore {
     function isSessionMember(sessionId) {
       return isSignedIn()
         && request.auth.uid in sessionData(sessionId).memberUids;
+    }
+
+    function memberRole(sessionId) {
+      return sessionData(sessionId).memberRoles[request.auth.uid];
+    }
+
+    function isLegacySession(sessionId) {
+      return !('memberRoles' in sessionData(sessionId))
+        || sessionData(sessionId).memberRoles == null;
+    }
+
+    function isSeekerMember(sessionId) {
+      return isSessionMember(sessionId)
+        && (isLegacySession(sessionId) || memberRole(sessionId) == 'seeker');
+    }
+
+    function isHiderMember(sessionId) {
+      return isSessionMember(sessionId)
+        && !isLegacySession(sessionId)
+        && memberRole(sessionId) == 'hider';
     }
 
     function validAnnotationType(type) {
@@ -32,8 +60,17 @@ service cloud.firestore {
         && request.auth.uid == sessionData(sessionId).hostUid;
     }
 
+    function joinRoleUnchanged(sessionId) {
+      return !(request.auth.uid in resource.data.memberRoles)
+        || resource.data.memberRoles[request.auth.uid]
+          == request.resource.data.memberRoles[request.auth.uid];
+    }
+
     match /sessions/{sessionId} {
-      allow read: if isSignedIn();
+      allow get: if isSessionMember(sessionId)
+        || (isSignedIn() && resource.data.status == 'active');
+
+      allow list: if false;
 
       allow create: if isSignedIn()
         && request.resource.data.code is string
@@ -51,6 +88,11 @@ service cloud.firestore {
         && request.auth.uid in request.resource.data.memberUids
         && request.resource.data.status == 'active'
         && validTier(request.resource.data.tier)
+        && validGameSize(request.resource.data.gameSize)
+        && request.resource.data.hidingZoneRadiusMeters is number
+        && request.resource.data.memberRoles is map
+        && request.resource.data.memberRoles[request.auth.uid] is string
+        && validPlayerRole(request.resource.data.memberRoles[request.auth.uid])
         && (
           request.resource.data.tier == 'free'
           || hasHostAccess()
@@ -62,15 +104,24 @@ service cloud.firestore {
         && request.resource.data.gameArea == resource.data.gameArea
         && request.resource.data.hostUid == resource.data.hostUid
         && request.resource.data.tier == resource.data.tier
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids'])
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'memberRoles'])
         && request.resource.data.memberUids is list
         && request.auth.uid in request.resource.data.memberUids
+        && request.resource.data.memberRoles is map
+        && request.resource.data.memberRoles[request.auth.uid] is string
+        && validPlayerRole(request.resource.data.memberRoles[request.auth.uid])
+        && joinRoleUnchanged(sessionId)
       ) || (
         isSessionHost(sessionId)
         && request.resource.data.gameArea == resource.data.gameArea
         && request.resource.data.hostUid == resource.data.hostUid
         && request.resource.data.memberUids == resource.data.memberUids
         && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.memberRoles == resource.data.memberRoles
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['endedAt', 'code', 'status'])
         && request.resource.data.endedAt is string
         && request.resource.data.status == 'ended'
@@ -82,6 +133,9 @@ service cloud.firestore {
         && request.resource.data.hostUid == resource.data.hostUid
         && request.resource.data.memberUids == resource.data.memberUids
         && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.memberRoles == resource.data.memberRoles
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['timerAccumulatedMs', 'timerRunningSince'])
         && request.resource.data.timerAccumulatedMs is number
         && request.resource.data.timerAccumulatedMs >= 0
@@ -91,7 +145,7 @@ service cloud.firestore {
 
       match /annotations/{annotationId} {
         allow read: if isSessionMember(sessionId);
-        allow create, update: if isSessionMember(sessionId)
+        allow create, update: if isSeekerMember(sessionId)
           && request.resource.data.type is string
           && validAnnotationType(request.resource.data.type)
           && request.resource.data.status in ['active', 'deleted']
@@ -99,6 +153,104 @@ service cloud.firestore {
           && request.resource.data.metadata is map;
         allow delete: if false;
       }
+
+      match /playerLocations/{uid} {
+        allow read: if isSessionMember(sessionId);
+        allow create, update: if isSeekerMember(sessionId)
+          && request.auth.uid == uid
+          && request.resource.data.lat is number
+          && request.resource.data.lng is number
+          && request.resource.data.updatedAt is string;
+        allow delete: if false;
+      }
+
+      match /messages/{messageId} {
+        allow read: if isSessionMember(sessionId);
+        allow create: if isSessionMember(sessionId)
+          && request.resource.data.channel in ['social', 'game']
+          && request.resource.data.senderUid == request.auth.uid
+          && validPlayerRole(request.resource.data.senderRole)
+          && request.resource.data.createdAt is string
+          && (
+            (
+              request.resource.data.channel == 'social'
+              && request.resource.data.text is string
+              && request.resource.data.text.size() > 0
+            ) || (
+              request.resource.data.channel == 'game'
+              && isSeekerMember(sessionId)
+              && request.resource.data.kind == 'system'
+              && request.resource.data.text is string
+            ) || (
+              request.resource.data.channel == 'game'
+              && isSeekerMember(sessionId)
+              && request.resource.data.kind == 'question'
+              && request.resource.data.pendingQuestionId is string
+              && request.resource.data.promptText is string
+            )
+          );
+        allow update: if isSessionMember(sessionId)
+          && resource.data.channel == 'game'
+          && resource.data.kind == 'question'
+          && isHiderMember(sessionId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['selectedReply', 'status'])
+          && request.resource.data.selectedReply is string
+          && request.resource.data.status == 'answered';
+        allow delete: if false;
+      }
+
+      match /pendingQuestions/{questionId} {
+        allow read: if isSessionMember(sessionId);
+        allow create: if isSeekerMember(sessionId)
+          && request.resource.data.toolType is string
+          && validAnnotationType(request.resource.data.toolType)
+          && request.resource.data.createdByUid == request.auth.uid
+          && request.resource.data.createdAt is string
+          && request.resource.data.status == 'pending'
+          && request.resource.data.placement is map
+          && request.resource.data.replyOptions is list
+          && request.resource.data.promptText is string;
+        allow update: if (
+          isHiderMember(sessionId)
+          && resource.data.status == 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['answer', 'status'])
+          && request.resource.data.status == 'answered'
+        ) || (
+          isSeekerMember(sessionId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'resolvedAnnotationId'])
+          && request.resource.data.status in ['resolved', 'cancelled']
+        );
+        allow delete: if false;
+      }
+
+      match /hidingZones/{hiderUid} {
+        allow read: if isSessionMember(sessionId);
+        allow create, update: if isHiderMember(sessionId)
+          && request.auth.uid == hiderUid
+          && request.resource.data.stationId is string
+          && request.resource.data.stationName is string
+          && request.resource.data.center is map
+          && request.resource.data.center.lat is number
+          && request.resource.data.center.lng is number
+          && request.resource.data.radiusMeters is number
+          && request.resource.data.geometryJson is string
+          && request.resource.data.status == 'confirmed'
+          && request.resource.data.confirmedAt is string;
+        allow delete: if false;
+      }
+    }
+
+    match /sessionCodes/{code} {
+      allow get: if isSignedIn()
+        && code.size() == 4
+        && (resource == null || resource.data.sessionId is string);
+
+      allow create: if isSignedIn()
+        && code.size() == 4
+        && request.resource.data.sessionId is string
+        && request.resource.data.hostUid == request.auth.uid;
+
+      allow update, delete: if false;
     }
   }
 }

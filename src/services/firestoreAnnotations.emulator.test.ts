@@ -81,7 +81,7 @@ describe("firestoreAnnotations emulator", () => {
     await endRemoteSession(session.id);
 
     const lookup = await lookupRemoteSessionByCode(sessionCode);
-    expect(lookup.status).toBe("missing");
+    expect(lookup.status).toBe("ended");
 
     const fetched = await getRemoteSessionById(session.id);
     expect(fetched?.endedAt).toBeTruthy();

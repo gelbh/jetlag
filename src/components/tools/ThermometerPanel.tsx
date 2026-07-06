@@ -37,6 +37,7 @@ interface ThermometerPanelProps {
   onAnswerChange: (answer: ThermometerAnswer) => void;
   onReset: () => void;
   onCommit: () => void;
+  awaitHiderAnswer?: boolean;
 }
 
 function placementStatus(step: "a" | "b" | "ready"): string {
@@ -60,6 +61,7 @@ export function ThermometerPanel({
   onAnswerChange,
   onReset,
   onCommit,
+  awaitHiderAnswer = false,
 }: ThermometerPanelProps) {
   const [stepIndex, setStepIndex] = useState(0);
   const step = THERMOMETER_STEPS[stepIndex]?.id ?? "distance";
@@ -73,7 +75,8 @@ export function ThermometerPanel({
     distanceMeters,
   );
   const pinsReady = mapStep === "ready";
-  const canCommit = pinsReady && answer !== null && distanceAvailable;
+  const canCommit =
+    pinsReady && (awaitHiderAnswer || answer !== null) && distanceAvailable;
 
   const goNext = () => {
     setStepIndex((current) =>
@@ -146,15 +149,23 @@ export function ThermometerPanel({
 
       {step === "answer" ? (
         <ToolSection first compact status="active">
-          <BinaryAnswerPicker
-            value={answer}
-            onChange={onAnswerChange}
-            options={hotterColderAnswerOptions}
-            label=""
-          />
+          {awaitHiderAnswer ? (
+            <p className="text-sm text-ink-muted">
+              Hiders will answer hotter or colder in game chat.
+            </p>
+          ) : (
+            <BinaryAnswerPicker
+              value={answer}
+              onChange={onAnswerChange}
+              options={hotterColderAnswerOptions}
+              label=""
+            />
+          )}
           {pinsReady ? (
             <p className="text-xs text-ink-dim">
-              The map shows the shaded half for your choice.
+              {awaitHiderAnswer
+                ? "The question goes to hiders once you send it."
+                : "The map shows the shaded half for your choice."}
             </p>
           ) : null}
           <button
@@ -163,7 +174,7 @@ export function ThermometerPanel({
             disabled={!canCommit}
             className="btn-primary w-full disabled:opacity-40"
           >
-            Add thermometer
+            {awaitHiderAnswer ? "Send to hiders" : "Add thermometer"}
           </button>
         </ToolSection>
       ) : null}

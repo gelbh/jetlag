@@ -83,6 +83,6 @@ export function selectPreloadBanner(state: PreloadStoreState): {
     visible: true,
     loading: false,
     failed: true,
-    label: "Some map data failed — tools may be slower until you retry.",
+    label: "Some map data failed. Tools may be slower until you retry.",
   };
 }

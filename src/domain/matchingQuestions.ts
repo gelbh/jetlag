@@ -66,6 +66,10 @@ export interface MatchingQuestionDefinition {
   ruleSummary: string;
 }
 
+function mapIconPoiRule(category: string): string {
+  return `Use the nearest ${category} on the map. Measure to its icon.`;
+}
+
 export const MATCHING_CATEGORY_GROUPS = [
   { id: "transit", label: "Transit" },
   { id: "administrative_divisions", label: "Administrative Divisions" },
@@ -164,8 +168,7 @@ export const MATCHING_CATEGORIES = [
     groupId: "natural",
     label: "Mountain",
     promptNoun: "mountain",
-    ruleSummary:
-      "Anything classified as a mountain by your mapping app. Measure distance from the map icon.",
+    ruleSummary: mapIconPoiRule("mountain"),
     phase: 1,
     resolver: "overpassPoint",
     overpassSelectors: [
@@ -189,8 +192,7 @@ export const MATCHING_CATEGORIES = [
     groupId: "natural",
     label: "Park",
     promptNoun: "park",
-    ruleSummary:
-      "Anything classified as a park by your mapping app. Measure distance from the map icon.",
+    ruleSummary: mapIconPoiRule("park"),
     phase: 1,
     resolver: "overpassPoint",
     overpassSelectors: ["[leisure=park]", "[leisure=nature_reserve]"],
@@ -200,8 +202,7 @@ export const MATCHING_CATEGORIES = [
     groupId: "places_of_interest",
     label: "Amusement Park",
     promptNoun: "amusement park",
-    ruleSummary:
-      "Anything categorized as an amusement park by your mapping app. Measure distance from the map icon.",
+    ruleSummary: mapIconPoiRule("amusement park"),
     phase: 1,
     resolver: "overpassPoint",
     overpassSelectors: ["[tourism=theme_park]"],
@@ -211,8 +212,7 @@ export const MATCHING_CATEGORIES = [
     groupId: "places_of_interest",
     label: "Zoo",
     promptNoun: "zoo",
-    ruleSummary:
-      "Anything categorized as a zoo by your mapping app. Measure distance from the map icon.",
+    ruleSummary: mapIconPoiRule("zoo"),
     phase: 1,
     resolver: "overpassPoint",
     overpassSelectors: ["[tourism=zoo]"],
@@ -222,8 +222,7 @@ export const MATCHING_CATEGORIES = [
     groupId: "places_of_interest",
     label: "Aquarium",
     promptNoun: "aquarium",
-    ruleSummary:
-      "Anything categorized as an aquarium by your mapping app. Measure distance from the map icon.",
+    ruleSummary: mapIconPoiRule("aquarium"),
     phase: 1,
     resolver: "overpassPoint",
     overpassSelectors: ["[tourism=aquarium]", "[amenity=aquarium]"],
@@ -244,8 +243,7 @@ export const MATCHING_CATEGORIES = [
     groupId: "places_of_interest",
     label: "Museum",
     promptNoun: "museum",
-    ruleSummary:
-      "Anything categorized as a museum by your mapping app. Measure distance from the map icon.",
+    ruleSummary: mapIconPoiRule("museum"),
     phase: 1,
     resolver: "overpassPoint",
     overpassSelectors: ["[tourism=museum]", "[amenity=museum]"],
@@ -255,8 +253,7 @@ export const MATCHING_CATEGORIES = [
     groupId: "places_of_interest",
     label: "Movie Theater",
     promptNoun: "movie theater",
-    ruleSummary:
-      "Anything categorized as a movie theater by your mapping app. Measure distance from the map icon.",
+    ruleSummary: mapIconPoiRule("movie theater"),
     phase: 1,
     resolver: "overpassPoint",
     overpassSelectors: ["[amenity=cinema]"],
@@ -266,8 +263,7 @@ export const MATCHING_CATEGORIES = [
     groupId: "public_utilities",
     label: "Hospital",
     promptNoun: "hospital",
-    ruleSummary:
-      "Anything categorized as a hospital by your mapping app. Measure distance from the map icon.",
+    ruleSummary: mapIconPoiRule("hospital"),
     phase: 1,
     resolver: "overpassPoint",
     overpassSelectors: ["[amenity=hospital]"],
@@ -277,8 +273,7 @@ export const MATCHING_CATEGORIES = [
     groupId: "public_utilities",
     label: "Library",
     promptNoun: "library",
-    ruleSummary:
-      "Anything categorized as a library by your mapping app. Measure distance from the map icon.",
+    ruleSummary: mapIconPoiRule("library"),
     phase: 1,
     resolver: "overpassPoint",
     overpassSelectors: ["[amenity=library]"],

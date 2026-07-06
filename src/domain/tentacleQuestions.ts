@@ -17,15 +17,12 @@ import {
   type MatchingCategoryId,
 } from "./matchingQuestions";
 
-/** POI search, pre-answer circle, and question prompt distance. */
 export const TENTACLE_SEARCH_RADIUS_METERS = DEFAULT_RADIUS_METERS;
 
-/** Post-answer disk: 1 mi reach plus hiding zone on the far side at the limit. */
 export const TENTACLE_ANSWER_RADIUS_METERS = milesToMeters(1.5);
 
 export const TENTACLE_NOT_WITHIN_REACH_LABEL = "Not within reach";
 
-/** Only these four location types are valid for tentacle questions. */
 export const TENTACLE_LOCATION_CATEGORY_IDS = [
   "museum",
   "library",
@@ -95,7 +92,6 @@ export function tentacleQuestionPrompt(
   ).replace("[TYPES]", typesLabel);
 }
 
-/** Text to paste to hiders: full question plus numbered candidate names and out-of-reach line. */
 export function tentacleHiderAnswerClipboardText(
   categoryId: TentacleLocationCategoryId,
   unit: DistanceUnit,

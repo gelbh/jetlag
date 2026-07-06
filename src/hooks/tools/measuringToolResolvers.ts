@@ -26,10 +26,10 @@ import {
 import { loadSeaLevelContext } from "../../services/seaLevel";
 
 const SEA_LEVEL_LOWEST_MESSAGE =
-  "You're at the lowest elevation in this play area—a \"closer\" answer may be impossible.";
+  'You\'re at the lowest elevation in this play area. A "closer" answer may be impossible.';
 
 const SEA_LEVEL_HIGHEST_NOTE =
-  "You're at the highest elevation in this play area—a \"further\" answer may be impossible.";
+  'You\'re at the highest elevation in this play area. A "further" answer may be impossible.';
 
 export async function fetchMeasuringSeaLevelContext(
   seekerPoint: LatLngTuple,
@@ -41,7 +41,7 @@ export async function fetchMeasuringSeaLevelContext(
     return {
       ok: false as const,
       message:
-        "Unable to read elevation at your anchor. Try a nearby point or retry in a moment.",
+        "Couldn't read elevation at your anchor. Try a nearby point or retry.",
     };
   }
 
@@ -51,7 +51,7 @@ export async function fetchMeasuringSeaLevelContext(
       message:
         result.reason === "lowest"
           ? SEA_LEVEL_LOWEST_MESSAGE
-          : "Unable to build a sea level region for this play area.",
+          : "Couldn't build a sea level region for this play area.",
     };
   }
 

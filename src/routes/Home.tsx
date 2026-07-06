@@ -3,6 +3,7 @@ import { useState } from "react";
 import { AppLogo } from "../components/ui/AppLogo";
 import { HudPlayIcon } from "../components/ui/HudIcons";
 import { LOCAL_SESSION_ID } from "../domain/annotations";
+import { playerRoleLabel, resolvePlayerRole } from "../domain/playerRole";
 import { useSessionStore } from "../state/sessionStore";
 import {
   ensureAnonymousUser,
@@ -15,6 +16,7 @@ import { setPremiumApiContext } from "../services/premiumApiContext";
 export function Home() {
   const navigate = useNavigate();
   const session = useSessionStore((state) => state.session);
+  const myRole = useSessionStore((state) => state.myRole);
   const setSession = useSessionStore((state) => state.setSession);
   const [continueError, setContinueError] = useState<string | null>(null);
   const [continuing, setContinuing] = useState(false);
@@ -54,7 +56,18 @@ export function Home() {
         return;
       }
 
-      setSession(remoteSession);
+      const role = resolvePlayerRole(remoteSession.memberRoles, user.uid);
+      if (
+        myRole &&
+        remoteSession.memberRoles &&
+        remoteSession.memberRoles[user.uid] &&
+        myRole !== role
+      ) {
+        setContinueError("Your role changed for this session. Rejoin with a new code.");
+        return;
+      }
+
+      setSession(remoteSession, user.uid);
       setPremiumApiContext(remoteSession);
       navigate("/map");
     } catch (error) {
@@ -78,8 +91,8 @@ export function Home() {
           Seek
         </h1>
         <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
-          Mark the map for your team. Radar, zones, pins, and question tools
-          stay in sync.
+          Seekers ask questions on the live map. Hiders answer, set hiding zones,
+          and watch the search unfold.
         </p>
       </div>
 
@@ -98,7 +111,10 @@ export function Home() {
             className="home-card-btn home-card-btn-primary disabled:opacity-50"
           >
             <span>
-              <span className="home-card-btn-hint block">Active session</span>
+              <span className="home-card-btn-hint block">
+                Active session
+                {myRole ? ` · ${playerRoleLabel(myRole)}` : ""}
+              </span>
               <span className="font-mono text-xl font-bold tracking-[0.22em]">
                 {session.code}
               </span>

@@ -19,6 +19,6 @@ describe("isRetriableSyncError", () => {
 
   it("accepts generic network failures", () => {
     expect(isRetriableSyncError(new TypeError("Failed to fetch"))).toBe(true);
-    expect(isRetriableSyncError(new Error("Unable to sync changes."))).toBe(true);
+    expect(isRetriableSyncError(new Error("Sync failed."))).toBe(true);
   });
 });

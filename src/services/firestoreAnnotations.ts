@@ -3,13 +3,10 @@ import {
   collection,
   doc,
   getDoc,
-  getDocs,
   onSnapshot,
-  query,
   serverTimestamp,
   setDoc,
   updateDoc,
-  where,
   writeBatch,
   deleteField,
   type Unsubscribe,
@@ -20,6 +17,9 @@ import type {
   SessionRecord,
   SessionTier,
 } from "../domain/annotations";
+import type { GameSize } from "../domain/gameSize";
+import { hidingZoneRadiusMeters } from "../domain/gameSize";
+import type { PlayerRole } from "../domain/playerRole";
 import { timerStateToRemote, type TimerState } from "../domain/timer";
 import { getFirestoreDb } from "./firebase";
 import {
@@ -32,6 +32,10 @@ import { generateSessionCode } from "./sessionCodes";
 
 function sessionsCollection() {
   return collection(getFirestoreDb(), "sessions");
+}
+
+function sessionCodeDoc(code: string) {
+  return doc(getFirestoreDb(), "sessionCodes", code);
 }
 
 function annotationsCollection(sessionId: string) {
@@ -60,7 +64,7 @@ export async function ensureRemoteSessionWriteAccess(
     throw new Error("That session has ended. Join or create a new one.");
   }
 
-  throw new Error("Unable to access that session.");
+  throw new Error("No access to that session.");
 }
 
 export async function createRemoteSession(
@@ -68,15 +72,15 @@ export async function createRemoteSession(
   hostUid: string,
   tier: SessionTier = "free",
   transitMetroId?: string,
+  hostRole: PlayerRole = "seeker",
+  gameSize: GameSize = "medium",
 ): Promise<SessionRecord> {
   let code = generateSessionCode();
   let attempts = 0;
 
   while (attempts < 8) {
-    const existing = await getDocs(
-      query(sessionsCollection(), where("code", "==", code)),
-    );
-    if (existing.empty) {
+    const existing = await getDoc(sessionCodeDoc(code));
+    if (!existing.exists()) {
       break;
     }
 
@@ -86,6 +90,7 @@ export async function createRemoteSession(
 
   const sessionRef = doc(sessionsCollection());
   const createdAt = new Date().toISOString();
+  const radiusMeters = hidingZoneRadiusMeters(gameSize);
   const session: SessionRecord = {
     id: sessionRef.id,
     code,
@@ -93,6 +98,9 @@ export async function createRemoteSession(
     hostUid,
     createdAt,
     memberUids: [hostUid],
+    memberRoles: { [hostUid]: hostRole },
+    gameSize,
+    hidingZoneRadiusMeters: radiusMeters,
     tier,
     transitMetroId,
   };
@@ -105,8 +113,16 @@ export async function createRemoteSession(
       createdAt,
       tier,
       transitMetroId,
+      hostRole,
+      gameSize,
     ),
     createdAtServer: serverTimestamp(),
+  });
+
+  await setDoc(sessionCodeDoc(code), {
+    sessionId: sessionRef.id,
+    hostUid,
+    createdAt,
   });
 
   return session;
@@ -119,15 +135,21 @@ export async function lookupRemoteSessionByCode(
   | { status: "ended" }
   | { status: "found"; session: SessionRecord }
 > {
-  const snapshot = await getDocs(
-    query(sessionsCollection(), where("code", "==", code)),
-  );
-
-  if (snapshot.empty) {
+  const codeDoc = await getDoc(sessionCodeDoc(code));
+  if (!codeDoc.exists()) {
     return { status: "missing" };
   }
 
-  const sessionDoc = snapshot.docs[0];
+  const sessionId = codeDoc.data().sessionId;
+  if (typeof sessionId !== "string") {
+    return { status: "missing" };
+  }
+
+  const sessionDoc = await getDoc(doc(sessionsCollection(), sessionId));
+  if (!sessionDoc.exists()) {
+    return { status: "missing" };
+  }
+
   const data = sessionDoc.data() as Record<string, unknown>;
 
   if (typeof data.endedAt === "string") {
@@ -143,29 +165,49 @@ export async function lookupRemoteSessionByCode(
 export async function joinRemoteSessionByCode(
   code: string,
   uid: string,
+  role: PlayerRole = "seeker",
 ): Promise<
   | { status: "missing" }
   | { status: "ended" }
   | { status: "joined"; session: SessionRecord }
 > {
-  const snapshot = await getDocs(
-    query(sessionsCollection(), where("code", "==", code)),
-  );
-
-  if (snapshot.empty) {
+  const codeDoc = await getDoc(sessionCodeDoc(code));
+  if (!codeDoc.exists()) {
     return { status: "missing" };
   }
 
-  const sessionDoc = snapshot.docs[0];
-  const data = sessionDoc.data() as Omit<SessionRecord, "id">;
-  if (data.endedAt) {
+  const sessionId = codeDoc.data().sessionId;
+  if (typeof sessionId !== "string") {
+    return { status: "missing" };
+  }
+
+  const sessionDoc = await getDoc(doc(sessionsCollection(), sessionId));
+  if (!sessionDoc.exists()) {
+    return { status: "missing" };
+  }
+
+  const data = sessionDoc.data() as Record<string, unknown>;
+  if (typeof data.endedAt === "string") {
     return { status: "ended" };
   }
 
-  const memberUids = Array.from(new Set([...(data.memberUids ?? []), uid]));
+  const existingRoles =
+    data.memberRoles && typeof data.memberRoles === "object"
+      ? (data.memberRoles as Record<string, PlayerRole>)
+      : {};
+  const existingMemberUids = Array.isArray(data.memberUids)
+    ? data.memberUids.filter((memberUid): memberUid is string => typeof memberUid === "string")
+    : [];
+  const memberUids = Array.from(new Set([...existingMemberUids, uid]));
+  const memberRoles = {
+    ...existingRoles,
+    [uid]: existingRoles[uid] ?? role,
+  };
 
-  if (!data.memberUids?.includes(uid)) {
-    await updateDoc(sessionDoc.ref, { memberUids });
+  if (!existingMemberUids.includes(uid)) {
+    await updateDoc(sessionDoc.ref, { memberUids, memberRoles });
+  } else if (!existingRoles[uid]) {
+    await updateDoc(sessionDoc.ref, { memberRoles });
   }
 
   return {
@@ -173,6 +215,7 @@ export async function joinRemoteSessionByCode(
     session: deserializeSessionFromFirestore(sessionDoc.id, {
       ...data,
       memberUids,
+      memberRoles,
     }),
   };
 }

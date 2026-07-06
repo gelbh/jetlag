@@ -19,10 +19,13 @@ import {
   firstAvailableTentacleCategoryId,
   isTentacleCategoryAvailable,
   TENTACLE_ANSWER_RADIUS_METERS,
+  TENTACLE_NOT_WITHIN_REACH_LABEL,
   TENTACLE_SEARCH_RADIUS_METERS,
+  tentacleQuestionPrompt,
   usedTentacleCategoryIds,
   type TentacleLocationCategoryId,
 } from "../../domain/tentacleQuestions";
+import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
 import { fetchTentaclePois } from "../../services/tentacleOverpass";
 import { overpassErrorMessage } from "../../services/overpassClient";
 import { useToolSessionOptions } from "./useToolSessionOptions";
@@ -35,6 +38,15 @@ interface UseTentacleToolParams {
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
   ) => Promise<AnnotationRecord>;
+  awaitHiderAnswer?: boolean;
+  submitPendingQuestion?: (
+    input: Omit<
+      SubmitPendingQuestionInput,
+      "sessionId" | "senderUid" | "senderRole" | "toolType"
+    >,
+  ) => Promise<void>;
+  sessionId?: string;
+  senderUid?: string | null;
   distanceUnit: DistanceUnit;
   finishPlacement: () => void;
   setMapError: (message: string | null) => void;
@@ -53,6 +65,10 @@ export function useTentacleTool({
   annotations,
   gameArea,
   createAnnotation,
+  awaitHiderAnswer = false,
+  submitPendingQuestion,
+  sessionId,
+  senderUid,
   distanceUnit,
   finishPlacement,
   setMapError,
@@ -128,7 +144,7 @@ export function useTentacleTool({
         }
 
         setTentacleError(
-          overpassErrorMessage(error, "Unable to load locations."),
+          overpassErrorMessage(error, "Locations didn't load."),
         );
       } finally {
         if (isLatestRequest(requestId)) {
@@ -194,7 +210,7 @@ export function useTentacleTool({
       setTentacleLoading(true);
     } catch (error) {
       setMapError(
-        error instanceof Error ? error.message : "Unable to read GPS location.",
+        error instanceof Error ? error.message : "GPS location unavailable.",
       );
     }
   };
@@ -235,15 +251,59 @@ export function useTentacleTool({
       return;
     }
 
-    if (!tentacleOutOfReach && !selectedPoiId) {
-      setMapError("Record the answer before adding the tentacle question.");
-      return;
-    }
-
     if (
       !isTentacleCategoryAvailable(tentacleCategoryId, usedTentacleCategories)
     ) {
       setMapError("That location type was already used this session.");
+      return;
+    }
+
+    const geometry = {
+      type: "Feature" as const,
+      properties: {},
+      geometry: {
+        type: "Point" as const,
+        coordinates: [tentacleCenter[1], tentacleCenter[0]],
+      },
+    };
+
+    if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
+      await submitPendingQuestion({
+        promptText: tentacleQuestionPrompt(tentacleCategoryId, distanceUnit),
+        replyOptions: [
+          ...tentaclePois.map((poi) => ({
+            id: poi.id,
+            label: poi.name,
+          })),
+          {
+            id: "out-of-reach",
+            label: TENTACLE_NOT_WITHIN_REACH_LABEL,
+          },
+        ],
+        placement: {
+          geometryJson: JSON.stringify(geometry),
+          metadata: {
+            tentacleCategoryId,
+            centerJson: JSON.stringify({
+              lat: tentacleCenter[0],
+              lng: tentacleCenter[1],
+            }),
+            poisJson: JSON.stringify(tentaclePois),
+          },
+        },
+      });
+
+      setTentacleCenter(null);
+      setTentaclePois([]);
+      setTentacleOutOfReach(false);
+      setSelectedPoiId(null);
+      setMapError(null);
+      finishPlacement();
+      return;
+    }
+
+    if (!tentacleOutOfReach && !selectedPoiId) {
+      setMapError("Record the answer before adding the tentacle question.");
       return;
     }
 
@@ -332,6 +392,7 @@ export function useTentacleTool({
         }
       }}
       onCommit={() => void commit()}
+      awaitHiderAnswer={awaitHiderAnswer}
       onRetry={
         tentacleCenter
           ? () => void loadPoisForCenter(tentacleCenter, tentacleCategoryId)

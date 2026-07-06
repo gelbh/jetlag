@@ -34,8 +34,7 @@ export class MapErrorBoundary extends Component<
         <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 px-6 text-center">
           <h1 className="text-xl font-semibold text-ink">Map failed to load</h1>
           <p className="max-w-md text-sm text-ink-dim">
-            {this.state.error.message ||
-              "Something went wrong while rendering the map."}
+            {this.state.error.message || "The map crashed."}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <button

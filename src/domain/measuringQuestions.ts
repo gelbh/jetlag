@@ -379,10 +379,10 @@ export const MEASURING_CATALOG = [
 export const DEFAULT_MEASURING_FROM_KIND: MeasuringLocationCategory = "zoo";
 
 export const MEASURE_RULE_SUMMARY =
-  "Set where you asked from, then mark or find what you are measuring from. The shaded region uses your distance to that target.";
+  "Set your anchor, then pick what you're measuring from. The shade uses your distance to that target.";
 
 export const COASTLINE_DEFINITION =
-  "A coastline is any place where land meets either the ocean, a great lake, or a body of water that flows directly into the ocean or a great lake via a waterway that is never less than one mile across.";
+  "A coastline is where land meets the ocean, a great lake, or a body of water that flows into the ocean or a great lake. That waterway must stay at least one mile wide along its whole route.";
 
 export const COASTLINE_MEASURING_QUESTION: MeasuringQuestionDefinition = {
   subject: "coastline",
@@ -391,7 +391,7 @@ export const COASTLINE_MEASURING_QUESTION: MeasuringQuestionDefinition = {
 };
 
 export const SEA_LEVEL_DEFINITION =
-  "Sea level refers to your altitude above (or below) 0 m. Closer to sea level means lower altitude; further means higher. Elevation comes from the mapping app, not your phone compass—treat it as approximate.";
+  "Sea level is your altitude above or below 0 m. Closer to sea level means lower altitude; further means higher. Elevation comes from the mapping app, not your phone compass. Treat it as approximate.";
 
 export const SEA_LEVEL_MEASURING_QUESTION: MeasuringQuestionDefinition = {
   subject: "sea_level",
@@ -400,7 +400,7 @@ export const SEA_LEVEL_MEASURING_QUESTION: MeasuringQuestionDefinition = {
 };
 
 export const BODY_OF_WATER_DEFINITION =
-  "Any named body of water on your mapping app counts, excluding pools. Distance is measured to the map label (center), like parks and other POI measuring questions.";
+  "Any named body of water on your mapping app counts, except pools. Measure to the map label at its center, same as parks and other POI measuring questions.";
 
 export const BODY_OF_WATER_MEASURING_QUESTION: MeasuringQuestionDefinition = {
   subject: "location",
@@ -535,7 +535,6 @@ export function measuringSupportsMapTarget(kind: MeasuringFromKind): boolean {
   return measuringCatalogOption(kind)?.supportsMapTarget ?? false;
 }
 
-/** Point POIs in the play area (not custom place): shade vs every site of that type. */
 export function measuringUsesAllPlacesInArea(kind: MeasuringFromKind): boolean {
   const option = measuringCatalogOption(kind);
   if (!option) {

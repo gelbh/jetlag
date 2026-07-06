@@ -16,6 +16,8 @@ import { useAnnotationStore, useSessionStore } from "../state/sessionStore";
 import { useSessionSync } from "./useSessionSync";
 
 describe("useSessionSync emulator", () => {
+  let testUid: string;
+
   beforeEach(async () => {
     localStorage.clear();
     sessionStorage.clear();
@@ -35,18 +37,17 @@ describe("useSessionSync emulator", () => {
     });
 
     await teardownEmulatorsForTests();
-    await connectEmulatorsForTests();
+    ({ uid: testUid } = await connectEmulatorsForTests());
   });
 
   it("mirrors remote annotation updates into the annotation store", async () => {
-    const { uid } = await connectEmulatorsForTests();
-    const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, uid);
+    const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, testUid);
     const annotation = createTestPinAnnotation({
       id: "ann-sync-1",
       sessionId: session.id,
     });
 
-    useSessionStore.getState().setSession(session);
+    useSessionStore.getState().setSession(session, testUid);
     renderHook(() => useSessionSync());
 
     await writeRemoteAnnotation(session.id, annotation);
@@ -60,14 +61,13 @@ describe("useSessionSync emulator", () => {
   });
 
   it("applies remote annotation updates after the initial sync", async () => {
-    const { uid } = await connectEmulatorsForTests();
-    const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, uid);
+    const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, testUid);
     const annotation = createTestPinAnnotation({
       id: "ann-sync-2",
       sessionId: session.id,
     });
 
-    useSessionStore.getState().setSession(session);
+    useSessionStore.getState().setSession(session, testUid);
     renderHook(() => useSessionSync());
 
     await writeRemoteAnnotation(session.id, annotation);
@@ -91,8 +91,7 @@ describe("useSessionSync emulator", () => {
   });
 
   it("does not subscribe for local-only sessions", async () => {
-    const { uid } = await connectEmulatorsForTests();
-    const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, uid);
+    const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, testUid);
     const remoteAnnotation = createTestPinAnnotation({
       sessionId: session.id,
       id: "ann-local-skip",

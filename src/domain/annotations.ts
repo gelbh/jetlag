@@ -19,6 +19,11 @@ import type { ThermometerAnswer } from "./thermometerQuestions";
 import { thermometerQuestionPrompt } from "./thermometerQuestions";
 import type { TentacleLocationCategoryId } from "./tentacleQuestions";
 import { tentacleAnnotationSummary } from "./tentacleQuestions";
+import type { GameSize } from "./gameSize";
+import type { MemberRoles } from "./playerRole";
+
+export type { GameSize } from "./gameSize";
+export type { MemberRoles, PlayerRole } from "./playerRole";
 
 export type AnnotationType =
   | "radar"
@@ -121,6 +126,9 @@ export interface SessionRecord {
   hostUid?: string;
   createdAt: string;
   memberUids: string[];
+  memberRoles?: MemberRoles;
+  gameSize?: GameSize;
+  hidingZoneRadiusMeters?: number;
   tier?: SessionTier;
   transitMetroId?: string;
   endedAt?: string;

@@ -50,7 +50,7 @@ export function useTransitLayer({
       setError(
         nextError instanceof Error
           ? nextError.message
-          : "Unable to load transit lines.",
+          : "Transit lines didn't load.",
       );
     } finally {
       setLoadingStatic(false);
@@ -75,7 +75,7 @@ export function useTransitLayer({
             : nextError.message
           : hasCachedLiveData
             ? "Live data delayed. Showing last update."
-            : "Unable to refresh live vehicles.",
+            : "Live vehicles didn't refresh.",
       );
     } finally {
       setLoadingLive(false);
@@ -108,7 +108,7 @@ export function useTransitLayer({
         setError(
           nextError instanceof Error
             ? nextError.message
-            : "Unable to load transit lines.",
+            : "Transit lines didn't load.",
         );
       } finally {
         if (!cancelled) {

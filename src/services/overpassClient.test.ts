@@ -7,6 +7,7 @@ import {
 } from "./overpassClient";
 import { setPremiumApiContext } from "./premiumApiContext";
 import * as accessControl from "./accessControl";
+import * as firebase from "./firebase";
 import type { SessionRecord } from "../domain/annotations";
 
 function premiumSession(): SessionRecord {
@@ -197,7 +198,7 @@ describe("overpassClient", () => {
     const assertion = expect(resultPromise).rejects.toMatchObject({
       name: "OverpassUnavailableError",
       message:
-        "Map data is temporarily unavailable. Check your connection and try again.",
+        "Map data didn't load. Check your connection and try again.",
     });
     await runQueuedOverpassTimers();
     await assertion;
@@ -228,6 +229,25 @@ describe("overpassClient", () => {
     );
   });
 
+  it("uses public Overpass when the proxy URL is not configured", async () => {
+    vi.stubEnv("VITE_OVERPASS_PROXY_URL", "");
+    vi.spyOn(accessControl, "buildPremiumProxyHeaders").mockResolvedValue({
+      Authorization: "Bearer test-token",
+    });
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(mockOverpassResponse({ elements: [] }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await queryOverpass<{ elements: unknown[] }>("[out:json];");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("overpass-api.de"),
+      expect.any(Object),
+    );
+  });
+
   it("retries the proxy after network errors then throws OverpassUnavailableError", async () => {
     vi.useFakeTimers();
     vi.stubEnv("VITE_OVERPASS_PROXY_URL", "https://proxy.example/overpass");
@@ -250,6 +270,64 @@ describe("overpassClient", () => {
     expect(fetchMock.mock.calls.length).toBeGreaterThan(1);
   });
 
+  it("uses public Overpass when premium proxy auth is not ready", async () => {
+    vi.stubEnv("VITE_OVERPASS_PROXY_URL", "https://proxy.example/overpass");
+    setPremiumApiContext(premiumSession());
+    vi.spyOn(accessControl, "buildPremiumProxyHeaders").mockResolvedValue({
+      "X-Session-Id": "session-premium",
+    });
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(mockOverpassResponse({ elements: [] }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await queryOverpass<{ elements: unknown[] }>("[out:json];");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("overpass-api.de"),
+      expect.any(Object),
+    );
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "https://proxy.example/overpass",
+      expect.any(Object),
+    );
+  });
+
+  it("retries the proxy with a refreshed token after 401", async () => {
+    vi.stubEnv("VITE_OVERPASS_PROXY_URL", "https://proxy.example/overpass");
+    setPremiumApiContext(premiumSession());
+    vi.spyOn(accessControl, "buildPremiumProxyHeaders").mockResolvedValue({
+      Authorization: "Bearer stale-token",
+      "X-Session-Id": "session-premium",
+    });
+    vi.spyOn(firebase, "getFirebaseAuth").mockReturnValue({
+      currentUser: {
+        getIdToken: vi.fn().mockResolvedValue("fresh-token"),
+      },
+    } as never);
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        headers: new Headers(),
+        text: async () => "",
+      })
+      .mockResolvedValue(mockOverpassResponse({ elements: [{ id: 1 }] }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      queryOverpass<{ elements: unknown[] }>("[out:json];"),
+    ).resolves.toEqual({ elements: [{ id: 1 }] });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[1]?.[1]?.headers?.Authorization).toBe(
+      "Bearer fresh-token",
+    );
+  });
+
   it("throws immediately for other failed responses", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
@@ -269,7 +347,7 @@ describe("overpassClient", () => {
     expect(
       overpassErrorMessage(new OverpassUnavailableError()),
     ).toBe(
-      "Map data is temporarily unavailable. Check your connection and try again.",
+      "Map data didn't load. Check your connection and try again.",
     );
   });
 });

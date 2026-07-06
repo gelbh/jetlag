@@ -1,6 +1,6 @@
 import { FetchTimeoutError, fetchWithTimeout } from "./fetchWithTimeout";
 import { buildPremiumProxyHeaders } from "./accessControl";
-import { shouldUsePremiumProxies } from "./premiumApiContext";
+import { getFirebaseAuth } from "./firebase";
 import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "./overpass/endpoints";
 import { withOverpassConcurrencyLimit } from "./overpass/requestQueue";
 
@@ -9,7 +9,7 @@ const OVERPASS_BASE_BACKOFF_MS = 750;
 const OVERPASS_FETCH_TIMEOUT_MS = 15_000;
 
 const OVERPASS_UNAVAILABLE_MESSAGE =
-  "Map data is temporarily unavailable. Check your connection and try again.";
+  "Map data didn't load. Check your connection and try again.";
 
 export class OverpassUnavailableError extends Error {
   constructor(message = OVERPASS_UNAVAILABLE_MESSAGE) {
@@ -20,7 +20,7 @@ export class OverpassUnavailableError extends Error {
 
 export function overpassErrorMessage(
   error: unknown,
-  fallback = "Unable to load map data.",
+  fallback = "Map data didn't load.",
 ): string {
   if (error instanceof OverpassUnavailableError) {
     return error.message;
@@ -168,13 +168,28 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
   throw lastError ?? new OverpassUnavailableError();
 }
 
-async function fetchOverpassViaProxy(query: string): Promise<Response> {
+function proxyHeadersIncludeAuth(headers: HeadersInit): boolean {
+  if (headers instanceof Headers) {
+    return headers.has("Authorization");
+  }
+
+  if (Array.isArray(headers)) {
+    return headers.some(([key]) => key.toLowerCase() === "authorization");
+  }
+
+  return Object.keys(headers as Record<string, string>).some(
+    (key) => key.toLowerCase() === "authorization",
+  );
+}
+
+async function fetchOverpassViaProxy(
+  query: string,
+  proxyHeaders: HeadersInit,
+): Promise<Response> {
   const proxyUrl = overpassProxyUrl();
   if (!proxyUrl) {
     return fetchOverpassDirect(query);
   }
-
-  const proxyHeaders = await buildPremiumProxyHeaders();
 
   let lastError: Error | null = null;
 
@@ -193,7 +208,11 @@ async function fetchOverpassViaProxy(query: string): Promise<Response> {
         OVERPASS_FETCH_TIMEOUT_MS,
       );
 
-      if (response.status === 401 || response.status === 403) {
+      if (response.status === 401) {
+        return response;
+      }
+
+      if (response.status === 403) {
         throw new OverpassUnavailableError(
           "Map data unavailable. Rejoin session or create a new Premium session.",
         );
@@ -241,11 +260,41 @@ async function fetchOverpassViaProxy(query: string): Promise<Response> {
 }
 
 async function fetchOverpass(query: string): Promise<Response> {
-  if (shouldUsePremiumProxies() && overpassProxyUrl()) {
-    return fetchOverpassViaProxy(query);
+  const proxyUrl = overpassProxyUrl();
+  if (!proxyUrl) {
+    return fetchOverpassDirect(query);
   }
 
-  return fetchOverpassDirect(query);
+  let proxyHeaders = await buildPremiumProxyHeaders();
+  if (!proxyHeadersIncludeAuth(proxyHeaders)) {
+    return fetchOverpassDirect(query);
+  }
+
+  let response = await fetchOverpassViaProxy(query, proxyHeaders);
+  if (response.status !== 401) {
+    return response;
+  }
+
+  const user = getFirebaseAuth().currentUser;
+  if (!user) {
+    throw new OverpassUnavailableError(
+      "Map data unavailable. Sign in and try again.",
+    );
+  }
+
+  const freshToken = await user.getIdToken(true);
+  proxyHeaders = {
+    ...(proxyHeaders as Record<string, string>),
+    Authorization: `Bearer ${freshToken}`,
+  };
+  response = await fetchOverpassViaProxy(query, proxyHeaders);
+  if (response.status === 401 || response.status === 403) {
+    throw new OverpassUnavailableError(
+      "Map data unavailable. Rejoin session or create a new Premium session.",
+    );
+  }
+
+  return response;
 }
 
 export async function queryOverpass<T>(query: string): Promise<T> {

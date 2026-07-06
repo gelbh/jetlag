@@ -15,6 +15,11 @@ import {
 } from "../domain/geometry";
 import { generateLocalCode } from "../domain/session";
 import { LOCAL_SESSION_ID, type SessionTier } from "../domain/annotations";
+import type { GameSize } from "../domain/gameSize";
+import { hidingZoneRadiusMeters } from "../domain/gameSize";
+import type { PlayerRole } from "../domain/playerRole";
+import { RolePicker } from "../components/session/RolePicker";
+import { GameSizePicker } from "../components/session/GameSizePicker";
 import { useSessionStore, useMapStore } from "../state/sessionStore";
 import {
   isFirebaseConfigured,
@@ -79,6 +84,8 @@ export function CreateSession() {
   const [loading, setLoading] = useState(false);
   const [verifyingAccess, setVerifyingAccess] = useState(false);
   const [sessionTier, setSessionTier] = useState<SessionTier>("free");
+  const [playerRole, setPlayerRole] = useState<PlayerRole>("seeker");
+  const [gameSize, setGameSize] = useState<GameSize>("medium");
   const [accessCode, setAccessCode] = useState("");
   const [hostHasAccessClaim, setHostHasAccessClaim] = useState(false);
   const metros = useMemo(() => listTransitMetros(), []);
@@ -279,9 +286,16 @@ export function CreateSession() {
       if (isFirebaseConfigured()) {
         const user = await retryAsync(() => ensureAnonymousUser());
         const session = await retryAsync(() =>
-          createRemoteSession(gameArea, user.uid, tier, metroId),
+          createRemoteSession(
+            gameArea,
+            user.uid,
+            tier,
+            metroId,
+            playerRole,
+            gameSize,
+          ),
         );
-        setSession(session);
+        setSession(session, user.uid);
         setPremiumApiContext(session);
       } else {
         const localSession = {
@@ -290,10 +304,13 @@ export function CreateSession() {
           gameArea,
           createdAt: new Date().toISOString(),
           memberUids: [],
+          memberRoles: { local: playerRole },
+          gameSize,
+          hidingZoneRadiusMeters: hidingZoneRadiusMeters(gameSize),
           tier: "free" as const,
           transitMetroId: metroId,
         };
-        setSession(localSession);
+        setSession(localSession, "local");
         setPremiumApiContext(localSession);
       }
 
@@ -451,6 +468,19 @@ export function CreateSession() {
             </div>
           </div>
         ) : null}
+
+        <RolePicker
+          value={playerRole}
+          onChange={setPlayerRole}
+          disabled={loading || verifyingAccess}
+        />
+
+        <GameSizePicker
+          gameArea={previewGameArea}
+          value={gameSize}
+          onChange={setGameSize}
+          disabled={loading || verifyingAccess}
+        />
         </div>
 
         <div

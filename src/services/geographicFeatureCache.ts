@@ -100,7 +100,7 @@ function isStableCacheKey(key: string): boolean {
 
 export function staleCacheCaptionForKey(key: string): string | undefined {
   return staleServedKeys.has(key)
-    ? "Showing cached data — tap to refresh"
+    ? "Showing cached data. Tap to refresh."
     : undefined;
 }
 

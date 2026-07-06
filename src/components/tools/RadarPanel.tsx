@@ -37,6 +37,7 @@ interface RadarPanelProps {
   onCommit: () => void;
   gpsLoading: boolean;
   error?: string | null;
+  awaitHiderAnswer?: boolean;
 }
 
 export function RadarPanel({
@@ -57,6 +58,7 @@ export function RadarPanel({
   onCommit,
   gpsLoading,
   error,
+  awaitHiderAnswer = false,
 }: RadarPanelProps) {
   const [stepIndex, setStepIndex] = useState(0);
   const step = RADAR_STEPS[stepIndex]?.id ?? "distance";
@@ -66,7 +68,10 @@ export function RadarPanel({
     chooseCustom,
     radiusMeters,
   );
-  const canCommit = hasCenter && answer !== null && distanceSelectionAvailable;
+  const canCommit =
+    hasCenter &&
+    distanceSelectionAvailable &&
+    (awaitHiderAnswer || answer !== null);
 
   const goNext = () => {
     setStepIndex((current) => Math.min(current + 1, RADAR_STEPS.length - 1));
@@ -115,15 +120,23 @@ export function RadarPanel({
 
       {step === "answer" ? (
         <ToolSection first compact status="active">
-          <BinaryAnswerPicker
-            value={answer}
-            onChange={onAnswerChange}
-            options={yesNoAnswerOptions}
-            label=""
-          />
+          {awaitHiderAnswer ? (
+            <p className="text-sm text-ink-muted">
+              Hiders will answer yes or no in game chat.
+            </p>
+          ) : (
+            <BinaryAnswerPicker
+              value={answer}
+              onChange={onAnswerChange}
+              options={yesNoAnswerOptions}
+              label=""
+            />
+          )}
           {hasCenter && distanceSelectionAvailable ? (
             <p className="text-xs text-ink-dim">
-              The map shows the shaded area for your choice.
+              {awaitHiderAnswer
+                ? "The question goes to hiders once you send it."
+                : "The map shows the shaded area for your choice."}
             </p>
           ) : null}
           <button
@@ -132,7 +145,7 @@ export function RadarPanel({
             disabled={!canCommit}
             className="btn-primary w-full disabled:opacity-40"
           >
-            Add radar question
+            {awaitHiderAnswer ? "Send to hiders" : "Add radar question"}
           </button>
         </ToolSection>
       ) : null}

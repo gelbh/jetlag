@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
+import { sessionHasHiders } from "../domain/playerRole";
+import { HiderMapScreen } from "./HiderMapScreen";
 import { AnnotationLayer } from "../components/map/AnnotationLayer";
+import { ChatPanel } from "../components/chat/ChatPanel";
+import { HidingZonesLayer } from "../components/map/HidingZonesLayer";
+import { LiveSeekerLocationsLayer } from "../components/map/LiveSeekerLocationsLayer";
 import { GeometryEditLayer } from "../components/map/GeometryEditLayer";
 import { GameAreaMask } from "../components/map/GameAreaMask";
 import { MapView } from "../components/map/MapView";
@@ -50,6 +55,15 @@ import { useRemoteSessionTimerSync } from "../hooks/useRemoteSessionTimerSync";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { useSessionSync } from "../hooks/useSessionSync";
 import { useSessionEndedRedirect } from "../hooks/useSessionEndedRedirect";
+import { usePendingQuestionActions } from "../hooks/usePendingQuestionActions";
+import { usePendingQuestionResolver } from "../hooks/usePendingQuestionResolver";
+import { useSeekerLocationSync } from "../hooks/useSeekerLocationSync";
+import {
+  useHidingZonesSync,
+  usePendingQuestionsSync,
+  usePlayerLocationsSync,
+  useSessionMessagesSync,
+} from "../hooks/useSessionExtrasSync";
 import { useSyncStatus } from "../hooks/useSyncStatus";
 import { useTransitLayer } from "../hooks/useTransitLayer";
 import { useWakeLock } from "../hooks/useWakeLock";
@@ -84,6 +98,8 @@ const TransitLayer = lazy(() =>
 
 export function MapScreen() {
   const session = useSessionStore((state) => state.session);
+  const myRole = useSessionStore((state) => state.myRole);
+  const myUid = useSessionStore((state) => state.myUid);
   const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
   const pendingWrites = useSessionStore((state) => state.pendingWrites);
   const activeTool = useMapStore((state) => state.activeTool);
@@ -181,8 +197,9 @@ export function MapScreen() {
     [],
   );
   const [currentUid, setCurrentUid] = useState<string | null>(null);
+  const uid = currentUid ?? myUid;
   const isHost = Boolean(
-    session?.hostUid && currentUid && session.hostUid === currentUid,
+    session?.hostUid && uid && session.hostUid === uid,
   );
   const {
     isRemote,
@@ -213,6 +230,14 @@ export function MapScreen() {
   const [awaitingPlacement, setAwaitingPlacement] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [firstRunDismissed, setFirstRunDismissed] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const awaitHiderAnswer = sessionHasHiders(session?.memberRoles);
+  const { submitPendingQuestion, answerPendingQuestion } =
+    usePendingQuestionActions();
+  const pendingQuestions = usePendingQuestionsSync(session?.id);
+  const hidingZones = useHidingZonesSync(session?.id);
+  const playerLocations = usePlayerLocationsSync(session?.id);
+  const chatMessages = useSessionMessagesSync(session?.id);
 
   const finishPlacement = useCallback(() => {
     setActiveTool("none");
@@ -238,10 +263,54 @@ export function MapScreen() {
 
   const toolGameArea = fallbackGameArea(session?.gameArea);
 
+  const submitToolQuestion = useCallback(
+    async (
+      toolType: import("../domain/annotations").AnnotationType,
+      input: Omit<
+        Parameters<typeof submitPendingQuestion>[0],
+        "sessionId" | "senderUid" | "senderRole" | "toolType"
+      >,
+    ) => {
+      if (!session?.id || !uid) {
+        return;
+      }
+
+      await submitPendingQuestion({
+        ...input,
+        sessionId: session.id,
+        senderUid: uid,
+        senderRole: "seeker",
+        toolType,
+      });
+    },
+    [session, submitPendingQuestion, uid],
+  );
+
+  useSeekerLocationSync({
+    sessionId: session?.id,
+    uid: uid,
+    enabled: myRole !== "hider",
+  });
+
+  usePendingQuestionResolver({
+    sessionId: session?.id,
+    enabled: myRole !== "hider" && awaitHiderAnswer,
+    pendingQuestions,
+    createAnnotation,
+    gameArea: toolGameArea,
+  });
+
   const radarTool = useRadarTool({
     active: activeTool === "radar",
     annotations,
     createAnnotation,
+    awaitHiderAnswer,
+    submitPendingQuestion: awaitHiderAnswer
+      ? (input) => submitToolQuestion("radar", input)
+      : undefined,
+    sessionId: session?.id,
+    senderUid: uid,
+    senderRole: "seeker",
     distanceUnit,
     finishPlacement,
     setMapError,
@@ -258,6 +327,12 @@ export function MapScreen() {
     active: activeTool === "thermometer",
     annotations,
     createAnnotation,
+    awaitHiderAnswer,
+    submitPendingQuestion: awaitHiderAnswer
+      ? (input) => submitToolQuestion("thermometer", input)
+      : undefined,
+    sessionId: session?.id,
+    senderUid: uid,
     distanceUnit,
     finishPlacement,
     setMapError,
@@ -345,7 +420,7 @@ export function MapScreen() {
         setLastSyncError(
           error instanceof Error
             ? error.message
-            : "Unable to access this session.",
+            : "No access to this session.",
         );
       }
     })();
@@ -496,6 +571,10 @@ export function MapScreen() {
     return <Navigate to="/create" replace />;
   }
 
+  if (myRole === "hider") {
+    return <HiderMapScreen />;
+  }
+
   const placementCrosshair =
     zoneTool.placementCrosshair ||
     awaitingPlacement ||
@@ -570,6 +649,10 @@ export function MapScreen() {
             awaitingPlacement={awaitingPlacement}
             setAwaitingPlacement={setAwaitingPlacement}
             armPlacement={armPlacement}
+            awaitHiderAnswer={awaitHiderAnswer}
+            submitToolQuestion={submitToolQuestion}
+            sessionId={session?.id}
+            senderUid={uid}
             onToolsChange={handleHeavyToolsChange}
           />
         </Suspense>
@@ -613,6 +696,8 @@ export function MapScreen() {
             layerVisibility={layerVisibility}
             draftEliminationFeatures={draftEliminationFeatures}
           />
+          <HidingZonesLayer zones={hidingZones} myUid={uid} />
+          <LiveSeekerLocationsLayer locations={playerLocations} />
           {geometryEditAnnotation && geometryDraft ? (
             <GeometryEditLayer
               annotation={geometryEditAnnotation}
@@ -676,6 +761,7 @@ export function MapScreen() {
           onUndo={handleUndoLastAnnotation}
           onRedo={handleRedoLastAnnotation}
           onOpenSettings={() => setSettingsOpen(true)}
+          onOpenChat={() => setChatOpen(true)}
           mapStyle={mapStyle}
           onMapStyleChange={setMapStyle}
         />
@@ -798,6 +884,30 @@ export function MapScreen() {
           setActiveTool("none");
           setAwaitingPlacement(false);
           setSelectedAnnotationId(id);
+        }}
+      />
+
+      <ChatPanel
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        messages={chatMessages}
+        sessionId={session.id}
+        senderUid={uid ?? ""}
+        senderRole="seeker"
+        isHider={false}
+        onAnswerQuestion={async (
+          pendingQuestionId,
+          messageId,
+          answer,
+          selectedReply,
+        ) => {
+          await answerPendingQuestion(
+            session.id,
+            pendingQuestionId,
+            messageId,
+            answer,
+            selectedReply,
+          );
         }}
       />
     </div>

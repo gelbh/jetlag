@@ -13,6 +13,7 @@ import { normalizeTflPayload } from "./tflNormalize.mjs";
 import { fetchTransitlandVehicles } from "./transitlandProxy.mjs";
 import {
   sendProxyAuthFailure,
+  verifyOverpassProxyAccess,
   verifyProxyAccess,
 } from "./verifyProxyAccess.mjs";
 import {
@@ -121,6 +122,16 @@ async function loadTflFeed(metro, feedUrl) {
 
 async function requireProxyAccess(req, res) {
   const authResult = await verifyProxyAccess(adminAuth(), adminDb(), req);
+  if (!authResult.ok) {
+    sendProxyAuthFailure(res, authResult);
+    return false;
+  }
+
+  return true;
+}
+
+async function requireOverpassProxyAccess(req, res) {
+  const authResult = await verifyOverpassProxyAccess(adminAuth(), adminDb(), req);
   if (!authResult.ok) {
     sendProxyAuthFailure(res, authResult);
     return false;
@@ -275,7 +286,7 @@ export const overpass = onRequest(async (req, res) => {
     return;
   }
 
-  if (!(await requireProxyAccess(req, res))) {
+  if (!(await requireOverpassProxyAccess(req, res))) {
     return;
   }
 

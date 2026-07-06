@@ -47,7 +47,7 @@ export function LoadingReadout({
       </div>
       {stale ? (
         <p className="text-xs text-ink-dim motion-reduce:opacity-100">
-          Map data is still loading — this can take up to a minute on slow
+          Map data is still loading. This can take up to a minute on slow
           connections.
         </p>
       ) : null}

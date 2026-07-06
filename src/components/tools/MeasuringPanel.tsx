@@ -112,6 +112,7 @@ interface MeasuringPanelProps {
   onFindNearest: () => void;
   onAnswerChange: (answer: MeasuringAnswer) => void;
   onCommit: () => void;
+  awaitHiderAnswer?: boolean;
 }
 
 export function MeasuringPanel({
@@ -149,6 +150,7 @@ export function MeasuringPanel({
   onFindNearest,
   onAnswerChange,
   onCommit,
+  awaitHiderAnswer = false,
 }: MeasuringPanelProps) {
   const [stepIndex, setStepIndex] = useState(0);
   const step = MEASURING_STEPS[stepIndex]?.id ?? "source";
@@ -499,17 +501,24 @@ export function MeasuringPanel({
               {formatDistance(distanceMeters, distanceUnit)} from you.
             </ResolvedReadout>
           ) : null}
-          <BinaryAnswerPicker
-            value={answer}
-            onChange={onAnswerChange}
-            options={closerFurtherAnswerOptions}
-            label=""
-            disabledValues={disabledSeaLevelAnswers}
-          />
+          {awaitHiderAnswer ? (
+            <p className="text-sm text-ink-muted">
+              Hiders will answer closer or further in game chat.
+            </p>
+          ) : (
+            <BinaryAnswerPicker
+              value={answer}
+              onChange={onAnswerChange}
+              options={closerFurtherAnswerOptions}
+              label=""
+              disabledValues={disabledSeaLevelAnswers}
+            />
+          )}
           {step === "target" ? (
             <p className="text-xs text-ink-dim">
-              The map shows the shaded area for your choice. Tap Next when ready
-              to add the question.
+              {awaitHiderAnswer
+                ? "Tap Next when ready to send the question to hiders."
+                : "The map shows the shaded area for your choice. Tap Next when ready to add the question."}
             </p>
           ) : null}
           {step === "answer" ? (
@@ -520,11 +529,11 @@ export function MeasuringPanel({
                 !hasAvailableMeasureOptions ||
                 !hasSeekerPoint ||
                 !hasTargetPoint ||
-                answer === null
+                (!awaitHiderAnswer && answer === null)
               }
               className="btn-primary w-full disabled:opacity-40"
             >
-              Add measure question
+              {awaitHiderAnswer ? "Send to hiders" : "Add measure question"}
             </button>
           ) : null}
         </ToolSection>

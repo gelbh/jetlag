@@ -144,7 +144,7 @@ export function useAnnotations() {
         }
 
         const message =
-          error instanceof Error ? error.message : "Unable to sync changes.";
+          error instanceof Error ? error.message : "Sync failed.";
         setLastSyncError(message);
         throw new Error(message, { cause: error });
       } finally {
@@ -364,7 +364,7 @@ export function useAnnotations() {
       }
 
       const message =
-        error instanceof Error ? error.message : "Unable to sync changes.";
+        error instanceof Error ? error.message : "Sync failed.";
       setLastSyncError(message);
       throw new Error(message, { cause: error });
     } finally {

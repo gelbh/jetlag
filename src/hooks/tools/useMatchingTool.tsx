@@ -22,11 +22,14 @@ import {
   getMatchingCategory,
   isMatchingCategoryAvailable,
   isMatchingCategoryEnabled,
+  matchingQuestionFor,
   usedMatchingCategoryIds,
   type MatchingAnswer,
   type MatchingCategoryId,
 } from "../../domain/matchingQuestions";
 import type { DistanceUnit } from "../../domain/distance";
+import { yesNoAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
+import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
 import {
   fetchMatchingFeaturesInArea,
   countMatchingFeaturesInPlayArea,
@@ -45,6 +48,15 @@ interface UseMatchingToolParams {
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
   ) => Promise<AnnotationRecord>;
+  awaitHiderAnswer?: boolean;
+  submitPendingQuestion?: (
+    input: Omit<
+      SubmitPendingQuestionInput,
+      "sessionId" | "senderUid" | "senderRole" | "toolType"
+    >,
+  ) => Promise<void>;
+  sessionId?: string;
+  senderUid?: string | null;
   distanceUnit: DistanceUnit;
   finishPlacement: () => void;
   gpsLoading: boolean;
@@ -59,6 +71,10 @@ export function useMatchingTool({
   annotations,
   gameArea,
   createAnnotation,
+  awaitHiderAnswer = false,
+  submitPendingQuestion,
+  sessionId,
+  senderUid,
   distanceUnit,
   finishPlacement,
   gpsLoading,
@@ -254,7 +270,7 @@ export function useMatchingTool({
         }
 
         setMatchingError(
-          overpassErrorMessage(error, "Unable to resolve nearest feature."),
+          overpassErrorMessage(error, "Couldn't resolve nearest feature."),
         );
       } finally {
         if (isLatestRequest(requestId)) {
@@ -340,17 +356,77 @@ export function useMatchingTool({
       setMatchingSeekerAnchor(point);
     } catch (error) {
       setMatchingError(
-        error instanceof Error ? error.message : "Unable to read GPS location.",
+        error instanceof Error ? error.message : "GPS location unavailable.",
       );
     }
   };
 
   const commit = async () => {
-    if (!matchingSeekerPoint || matchingAnswer === null) {
+    if (!matchingSeekerPoint) {
       return;
     }
 
     if (!matchingNullAnswer && !matchingNearestFeatureId) {
+      return;
+    }
+
+    const question = matchingQuestionFor(matchingCategoryId);
+
+    if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
+      const geometry: Feature<Point> = {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Point",
+          coordinates: [matchingSeekerPoint[1], matchingSeekerPoint[0]],
+        },
+      };
+
+      try {
+        await submitPendingQuestion({
+          promptText: question.prompt,
+          replyOptions: yesNoAnswerOptions.map((option) => ({
+            id: option.value,
+            label: option.label,
+          })),
+          placement: {
+            geometryJson: JSON.stringify(geometry),
+            metadata: {
+              matchingCategory: matchingCategoryId,
+              matchingAnchor: {
+                lat: matchingSeekerPoint[0],
+                lng: matchingSeekerPoint[1],
+              },
+              matchingNearestFeatureId: matchingNearestFeatureId ?? undefined,
+              matchingNearestFeatureName: matchingNearestFeatureName ?? undefined,
+              matchingNearestFeaturePoint: matchingNearestFeaturePoint
+                ? {
+                    lat: matchingNearestFeaturePoint[0],
+                    lng: matchingNearestFeaturePoint[1],
+                  }
+                : undefined,
+              matchingDistanceMeters: matchingDistanceMeters ?? undefined,
+              matchingFeatureCount: matchingFeatureCount ?? undefined,
+              matchingNullAnswer,
+              matchingFeaturesJson: serializeMatchingFeatures(matchingFeatures),
+            },
+          },
+        });
+      } catch (error) {
+        setMatchingError(
+          error instanceof Error
+            ? error.message
+            : "Couldn't send this match question.",
+        );
+        return;
+      }
+
+      resetDraft();
+      finishPlacement();
+      return;
+    }
+
+    if (matchingAnswer === null) {
       return;
     }
 
@@ -371,7 +447,7 @@ export function useMatchingTool({
         );
 
     if (!matchingNullAnswer && (!boundaryRegion || !eliminationRegion)) {
-      setMatchingError("Unable to build matching elimination regions.");
+      setMatchingError("Couldn't build matching elimination regions.");
       return;
     }
 
@@ -419,7 +495,7 @@ export function useMatchingTool({
       setMatchingError(
         error instanceof Error
           ? error.message
-          : "Unable to save this match question.",
+          : "Couldn't save this match question.",
       );
       return;
     }
@@ -471,6 +547,7 @@ export function useMatchingTool({
       onUseGps={() => void handleGps()}
       onAnswerChange={setMatchingAnswer}
       onCommit={() => void commit()}
+      awaitHiderAnswer={awaitHiderAnswer}
       onRetry={
         matchingSeekerPoint
           ? () =>

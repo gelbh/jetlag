@@ -355,6 +355,18 @@ async function fetchStationFeaturesInArea(
   );
 }
 
+export async function fetchTransitStationsForHidingZone(
+  gameArea: GameArea,
+): Promise<Array<{ id: string; name: string; lat: number; lng: number }>> {
+  const features = await fetchStationFeaturesInArea(gameArea);
+  return features.map((feature) => ({
+    id: feature.id,
+    name: feature.name,
+    lat: feature.point[0],
+    lng: feature.point[1],
+  }));
+}
+
 function stationNameLength(name: string): number {
   return name.length;
 }
@@ -570,20 +582,21 @@ export function matchingNullAnswerMessage(
 ): string {
   const category = getMatchingCategory(categoryId);
   const label = matchingCategoryLabel(categoryId).toLowerCase();
+  const nullSuffix = " You can still answer Yes or No as a null match.";
 
   if (category.resolver === "landmass") {
-    return "No landmass intersects the play area. You can still answer Yes or No and add this as a null match question.";
+    return `No landmass intersects the play area.${nullSuffix}`;
   }
 
   if (category.resolver === "reverseGeocodeAdmin") {
-    return `No ${label} intersects the play area. You can still answer Yes or No and add this as a null match question.`;
+    return `No ${label} intersects the play area.${nullSuffix}`;
   }
 
   if (categoryId === "commercial_airport") {
-    return "No commercial airport with a flight code was found near this play area. You can still answer Yes or No and add this as a null match question.";
+    return `No commercial airport with a flight code was found near this play area.${nullSuffix}`;
   }
 
-  return `No named ${label} found near this play area. You can still answer Yes or No and add this as a null match question.`;
+  return `No named ${label} found near this play area.${nullSuffix}`;
 }
 
 export function matchingResolveFailureMessage(

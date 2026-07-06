@@ -25,7 +25,7 @@ export function MapToolsHintBanner({ hidden = false }: MapToolsHintBannerProps) 
     try {
       localStorage.setItem(STORAGE_KEY, "1");
     } catch {
-      // ignore quota / private mode
+      // localStorage unavailable
     }
     setDismissed(true);
   };
@@ -40,22 +40,22 @@ export function MapToolsHintBanner({ hidden = false }: MapToolsHintBannerProps) 
     >
       <div className="pointer-events-auto hud-panel mx-auto flex max-w-md items-start gap-3 px-3 py-2.5">
         <p className="flex-1 text-pretty text-sm leading-snug text-ink-muted">
-          The five question tools are on the{" "}
+          Question tools are on the{" "}
           <span className="font-display font-semibold uppercase tracking-wide text-ink">
             bottom bar
           </span>
-          . Use{" "}
+          . Zone and pin live under{" "}
           <span className="font-display font-semibold uppercase tracking-wide text-ink">
             Draw
-          </span>{" "}
-          for zone and pin markup.
+          </span>
+          .
         </p>
         <button
           type="button"
           onClick={dismiss}
           className="btn-secondary shrink-0 px-3 py-2 text-xs"
         >
-          Got it
+          Close
         </button>
       </div>
     </div>

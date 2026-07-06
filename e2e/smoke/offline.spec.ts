@@ -1,7 +1,7 @@
-import { test, expect } from "@playwright/test";
-import { openMapWithLocalSession, selectDrawTool } from "./fixtures/app";
+import { test, expect } from "../fixtures";
+import { openMapWithLocalSession, selectDrawTool } from "../fixtures";
 
-test("keeps the map usable while offline", async ({ page, context }) => {
+test("@smoke keeps the map usable while offline", async ({ page, context }) => {
   await openMapWithLocalSession(page);
   await context.setOffline(true);
 

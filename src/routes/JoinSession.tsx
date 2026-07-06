@@ -7,6 +7,8 @@ import {
   normalizeSessionCode,
 } from "../services/sessionCodes";
 import { useSessionStore } from "../state/sessionStore";
+import type { PlayerRole } from "../domain/playerRole";
+import { RolePicker } from "../components/session/RolePicker";
 import {
   ensureAnonymousUser,
   isFirebaseConfigured,
@@ -26,6 +28,7 @@ export function JoinSession() {
   const [loading, setLoading] = useState(false);
   const [previewPremium, setPreviewPremium] = useState(false);
   const [lookupLoading, setLookupLoading] = useState(false);
+  const [playerRole, setPlayerRole] = useState<PlayerRole>("hider");
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
@@ -93,7 +96,7 @@ export function JoinSession() {
 
       const user = await retryAsync(() => ensureAnonymousUser());
       const result = await retryAsync(() =>
-        joinRemoteSessionByCode(normalized, user.uid),
+        joinRemoteSessionByCode(normalized, user.uid, playerRole),
       );
       if (result.status === "missing") {
         setError("No session found for that code.");
@@ -105,7 +108,7 @@ export function JoinSession() {
         return;
       }
 
-      setSession(result.session);
+      setSession(result.session, user.uid);
       setPremiumApiContext(result.session);
       navigate("/map");
     } catch (nextError) {
@@ -166,6 +169,12 @@ export function JoinSession() {
         {lookupLoading ? (
           <p className="text-sm text-ink-dim">Checking session…</p>
         ) : null}
+
+        <RolePicker
+          value={playerRole}
+          onChange={setPlayerRole}
+          disabled={loading}
+        />
 
         <button
           type="button"

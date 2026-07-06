@@ -2,10 +2,8 @@ interface AnchorControlsProps {
   gpsLoading: boolean;
   hasAnchor: boolean;
   onUseGps: () => void;
-  /** Interactive map placement button (radar, tentacle). Omit for passive map-tap (matching, measuring). */
   onPlaceAtMapTap?: () => void;
   awaitingPlacement?: boolean;
-  /** Named place when anchor was resolved via search. */
   anchorPlaceName?: string | null;
   anchorHint?: string;
   gpsLabel?: string;

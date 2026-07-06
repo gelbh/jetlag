@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   hasPremiumAccessClaim,
   isPremiumSessionMember,
+  isSessionMember,
 } from "../verifyProxyAccess.mjs";
 
 describe("verifyProxyAccess helpers", () => {
@@ -32,6 +33,17 @@ describe("verifyProxyAccess helpers", () => {
         { tier: "premium", memberUids: ["host"] },
         "guest",
       ),
+      false,
+    );
+  });
+
+  it("detects free and premium session membership", () => {
+    assert.equal(
+      isSessionMember({ memberUids: ["host", "guest"] }, "guest"),
+      true,
+    );
+    assert.equal(
+      isSessionMember({ memberUids: ["host"] }, "guest"),
       false,
     );
   });

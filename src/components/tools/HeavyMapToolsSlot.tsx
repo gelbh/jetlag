@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
 import type { AnnotationRecord } from "../../domain/annotations";
-import type { GameArea } from "../../domain/annotations";
+import type { AnnotationType, GameArea } from "../../domain/annotations";
 import type { LatLngTuple } from "../../domain/geometry";
 import type { DistanceUnit } from "../../domain/distance";
 import type { MapTool } from "../../state/sessionStore";
+import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
 import { useMatchingTool } from "../../hooks/tools/useMatchingTool";
 import { useMeasuringTool } from "../../hooks/tools/useMeasuringTool";
 import { useTentacleTool } from "../../hooks/tools/useTentacleTool";
@@ -33,10 +34,23 @@ interface HeavyMapToolsSlotProps {
   awaitingPlacement: boolean;
   setAwaitingPlacement: (awaiting: boolean) => void;
   armPlacement: () => void;
+  awaitHiderAnswer?: boolean;
+  submitToolQuestion?: (
+    toolType: AnnotationType,
+    input: Omit<
+      SubmitPendingQuestionInput,
+      "sessionId" | "senderUid" | "senderRole" | "toolType"
+    >,
+  ) => Promise<void>;
+  sessionId?: string;
+  senderUid?: string | null;
   onToolsChange: (tools: HeavyMapToolsApi) => void;
 }
 
-type SharedToolProps = Omit<HeavyMapToolsSlotProps, "activeTool" | "onToolsChange">;
+type SharedToolProps = Omit<
+  HeavyMapToolsSlotProps,
+  "activeTool" | "onToolsChange"
+>;
 
 const idleTools = createIdleHeavyMapTools();
 
@@ -91,11 +105,22 @@ function usePublishHeavyTool(
 
 function MatchingToolRunner({
   onToolsChange,
+  awaitHiderAnswer,
+  submitToolQuestion,
+  sessionId,
+  senderUid,
   ...sharedProps
 }: SharedToolProps & { onToolsChange: (tools: HeavyMapToolsApi) => void }) {
   const matchingTool = useMatchingTool({
     active: true,
     ...sharedProps,
+    awaitHiderAnswer,
+    sessionId,
+    senderUid,
+    submitPendingQuestion:
+      awaitHiderAnswer && submitToolQuestion
+        ? (input) => submitToolQuestion("matching", input)
+        : undefined,
   });
 
   usePublishHeavyTool("matching", matchingTool, onToolsChange);
@@ -105,11 +130,22 @@ function MatchingToolRunner({
 
 function MeasuringToolRunner({
   onToolsChange,
+  awaitHiderAnswer,
+  submitToolQuestion,
+  sessionId,
+  senderUid,
   ...sharedProps
 }: SharedToolProps & { onToolsChange: (tools: HeavyMapToolsApi) => void }) {
   const measuringTool = useMeasuringTool({
     active: true,
     ...sharedProps,
+    awaitHiderAnswer,
+    sessionId,
+    senderUid,
+    submitPendingQuestion:
+      awaitHiderAnswer && submitToolQuestion
+        ? (input) => submitToolQuestion("measuring", input)
+        : undefined,
   });
 
   usePublishHeavyTool("measuring", measuringTool, onToolsChange);
@@ -119,11 +155,22 @@ function MeasuringToolRunner({
 
 function TentacleToolRunner({
   onToolsChange,
+  awaitHiderAnswer,
+  submitToolQuestion,
+  sessionId,
+  senderUid,
   ...sharedProps
 }: SharedToolProps & { onToolsChange: (tools: HeavyMapToolsApi) => void }) {
   const tentacleTool = useTentacleTool({
     active: true,
     ...sharedProps,
+    awaitHiderAnswer,
+    sessionId,
+    senderUid,
+    submitPendingQuestion:
+      awaitHiderAnswer && submitToolQuestion
+        ? (input) => submitToolQuestion("tentacle", input)
+        : undefined,
   });
 
   usePublishHeavyTool("tentacle", tentacleTool, onToolsChange);

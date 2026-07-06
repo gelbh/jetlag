@@ -5,6 +5,15 @@ import type {
   SessionRecord,
   SessionTier,
 } from "../domain/annotations";
+import type { GameSize } from "../domain/gameSize";
+import { hidingZoneRadiusMeters } from "../domain/gameSize";
+import type { MemberRoles, PlayerRole } from "../domain/playerRole";
+import type { HidingZoneRecord } from "../domain/hidingZone";
+import type {
+  PendingQuestionRecord,
+  PlayerLocationRecord,
+  SessionMessageRecord,
+} from "../domain/sessionChat";
 import {
   boundingBoxToGameArea,
   gameAreaToBoundingBox,
@@ -188,6 +197,29 @@ function parseSessionTier(value: unknown): SessionTier {
   return value === "premium" ? "premium" : "free";
 }
 
+function parseMemberRoles(value: unknown): MemberRoles | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const roles: MemberRoles = {};
+  for (const [uid, role] of Object.entries(value as Record<string, unknown>)) {
+    if (role === "seeker" || role === "hider") {
+      roles[uid] = role;
+    }
+  }
+
+  return Object.keys(roles).length > 0 ? roles : undefined;
+}
+
+function parseGameSize(value: unknown): GameSize | undefined {
+  if (value === "small" || value === "medium" || value === "large") {
+    return value;
+  }
+
+  return undefined;
+}
+
 export function buildSessionDocument(
   code: string,
   gameArea: GameArea,
@@ -195,19 +227,28 @@ export function buildSessionDocument(
   createdAt: string,
   tier: SessionTier = "free",
   transitMetroId?: string,
+  hostRole: PlayerRole = "seeker",
+  gameSize: GameSize = "medium",
 ): Record<string, unknown> {
-  const payload = {
+  const radiusMeters = hidingZoneRadiusMeters(gameSize);
+  const payload: Record<string, unknown> = {
     code,
     gameArea: serializeGameAreaForFirestore(gameArea),
     hostUid,
     createdAt,
     memberUids: [hostUid],
+    memberRoles: { [hostUid]: hostRole },
+    gameSize,
+    hidingZoneRadiusMeters: radiusMeters,
     tier,
-    transitMetroId: transitMetroId ?? null,
     status: "active",
     timerAccumulatedMs: 0,
     timerRunningSince: null,
   };
+
+  if (transitMetroId) {
+    payload.transitMetroId = transitMetroId;
+  }
 
   assertNoNestedArrays(payload);
   return payload;
@@ -228,6 +269,12 @@ export function deserializeSessionFromFirestore(
     memberUids: Array.isArray(data.memberUids)
       ? data.memberUids.filter((uid): uid is string => typeof uid === "string")
       : [],
+    memberRoles: parseMemberRoles(data.memberRoles),
+    gameSize: parseGameSize(data.gameSize),
+    hidingZoneRadiusMeters:
+      typeof data.hidingZoneRadiusMeters === "number"
+        ? data.hidingZoneRadiusMeters
+        : undefined,
     tier: parseSessionTier(data.tier),
     transitMetroId:
       typeof data.transitMetroId === "string" ? data.transitMetroId : undefined,
@@ -255,4 +302,192 @@ export function buildAnnotationDocument(
   const payload = serializeAnnotationForFirestore(annotation);
   assertNoNestedArrays(payload);
   return payload;
+}
+
+export function buildHidingZoneDocument(
+  zone: HidingZoneRecord,
+): Record<string, unknown> {
+  const payload = stripUndefinedValues({
+    stationId: zone.stationId,
+    stationName: zone.stationName,
+    center: zone.center,
+    radiusMeters: zone.radiusMeters,
+    geometryJson: zone.geometryJson,
+    status: zone.status,
+    confirmedAt: zone.confirmedAt,
+    originalStation: zone.originalStation,
+    previousStations: zone.previousStations,
+    moveInProgress: zone.moveInProgress,
+  }) as Record<string, unknown>;
+  assertNoNestedArrays(payload);
+  return payload;
+}
+
+export function deserializeHidingZoneFromFirestore(
+  hiderUid: string,
+  sessionId: string,
+  data: Record<string, unknown>,
+): HidingZoneRecord {
+  const center = data.center as Record<string, unknown> | undefined;
+  return {
+    hiderUid,
+    sessionId,
+    stationId: String(data.stationId ?? ""),
+    stationName: String(data.stationName ?? ""),
+    center: {
+      lat: Number(center?.lat ?? 0),
+      lng: Number(center?.lng ?? 0),
+    },
+    radiusMeters: Number(data.radiusMeters ?? 0),
+    geometryJson: String(data.geometryJson ?? ""),
+    status: "confirmed",
+    confirmedAt: String(data.confirmedAt ?? ""),
+    originalStation: data.originalStation as HidingZoneRecord["originalStation"],
+    previousStations: Array.isArray(data.previousStations)
+      ? (data.previousStations as HidingZoneRecord["previousStations"])
+      : undefined,
+    moveInProgress:
+      typeof data.moveInProgress === "boolean" ? data.moveInProgress : undefined,
+  };
+}
+
+export function buildPlayerLocationDocument(
+  location: PlayerLocationRecord,
+): Record<string, unknown> {
+  return {
+    lat: location.lat,
+    lng: location.lng,
+    accuracyMeters: location.accuracyMeters,
+    updatedAt: location.updatedAt,
+  };
+}
+
+export function deserializePlayerLocationFromFirestore(
+  uid: string,
+  sessionId: string,
+  data: Record<string, unknown>,
+): PlayerLocationRecord {
+  return {
+    uid,
+    sessionId,
+    lat: Number(data.lat),
+    lng: Number(data.lng),
+    accuracyMeters:
+      typeof data.accuracyMeters === "number" ? data.accuracyMeters : undefined,
+    updatedAt: String(data.updatedAt ?? ""),
+  };
+}
+
+export function buildSessionMessageDocument(
+  message: SessionMessageRecord,
+): Record<string, unknown> {
+  const payload = stripUndefinedValues({
+    channel: message.channel,
+    senderUid: message.senderUid,
+    senderRole: message.senderRole,
+    createdAt: message.createdAt,
+    text: message.text,
+    kind: message.kind,
+    pendingQuestionId: message.pendingQuestionId,
+    toolType: message.toolType,
+    promptText: message.promptText,
+    replyOptions: message.replyOptions,
+    selectedReply: message.selectedReply,
+    status: message.status,
+  }) as Record<string, unknown>;
+  assertNoNestedArrays(payload);
+  return payload;
+}
+
+export function deserializeSessionMessageFromFirestore(
+  id: string,
+  sessionId: string,
+  data: Record<string, unknown>,
+): SessionMessageRecord {
+  return {
+    id,
+    sessionId,
+    channel: data.channel === "game" ? "game" : "social",
+    senderUid: String(data.senderUid ?? ""),
+    senderRole: data.senderRole === "hider" ? "hider" : "seeker",
+    createdAt: String(data.createdAt ?? ""),
+    text: typeof data.text === "string" ? data.text : undefined,
+    kind:
+      data.kind === "question" ||
+      data.kind === "answer" ||
+      data.kind === "system"
+        ? data.kind
+        : undefined,
+    pendingQuestionId:
+      typeof data.pendingQuestionId === "string"
+        ? data.pendingQuestionId
+        : undefined,
+    toolType: data.toolType as SessionMessageRecord["toolType"],
+    promptText: typeof data.promptText === "string" ? data.promptText : undefined,
+    replyOptions: Array.isArray(data.replyOptions)
+      ? (data.replyOptions as SessionMessageRecord["replyOptions"])
+      : undefined,
+    selectedReply:
+      typeof data.selectedReply === "string" ? data.selectedReply : undefined,
+    status:
+      data.status === "pending" ||
+      data.status === "answered" ||
+      data.status === "resolved" ||
+      data.status === "cancelled"
+        ? data.status
+        : undefined,
+  };
+}
+
+export function buildPendingQuestionDocument(
+  question: PendingQuestionRecord,
+): Record<string, unknown> {
+  const payload = stripUndefinedValues({
+    toolType: question.toolType,
+    createdByUid: question.createdByUid,
+    createdAt: question.createdAt,
+    status: question.status,
+    placement: question.placement,
+    replyOptions: question.replyOptions,
+    promptText: question.promptText,
+    answer: question.answer,
+    resolvedAnnotationId: question.resolvedAnnotationId,
+  }) as Record<string, unknown>;
+  assertNoNestedArrays(payload);
+  return payload;
+}
+
+export function deserializePendingQuestionFromFirestore(
+  id: string,
+  sessionId: string,
+  data: Record<string, unknown>,
+): PendingQuestionRecord {
+  const placement = data.placement as Record<string, unknown> | undefined;
+  return {
+    id,
+    sessionId,
+    toolType: data.toolType as PendingQuestionRecord["toolType"],
+    createdByUid: String(data.createdByUid ?? ""),
+    createdAt: String(data.createdAt ?? ""),
+    status:
+      data.status === "pending" ||
+      data.status === "answered" ||
+      data.status === "resolved" ||
+      data.status === "cancelled"
+        ? data.status
+        : "pending",
+    placement: {
+      geometryJson: String(placement?.geometryJson ?? ""),
+      metadata: (placement?.metadata as Record<string, unknown>) ?? {},
+    },
+    replyOptions: Array.isArray(data.replyOptions)
+      ? (data.replyOptions as PendingQuestionRecord["replyOptions"])
+      : [],
+    promptText: String(data.promptText ?? ""),
+    answer: data.answer,
+    resolvedAnnotationId:
+      typeof data.resolvedAnnotationId === "string"
+        ? data.resolvedAnnotationId
+        : undefined,
+  };
 }

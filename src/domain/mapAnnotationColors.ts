@@ -24,6 +24,9 @@ export const MAP_ANNOTATION_COLORS = {
   boundary: "#4378B1",
   strokeLight: "#ffffff",
   userLocation: "#26599B",
+  seekerLive: "#E4B352",
+  hidingZone: "#22c55e",
+  hidingZoneOwn: "#4ade80",
   transit: {
     rail: "#1D2835",
     metro: "#4378B1",

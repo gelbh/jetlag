@@ -26,7 +26,7 @@ export function ShareCode({
       </span>
       <p className="mt-2 text-xs text-ink-dim">
         {remote
-          ? "Share with others to sync live."
+          ? "Give this code to your team."
           : "Local-only session for solo play."}
       </p>
     </div>

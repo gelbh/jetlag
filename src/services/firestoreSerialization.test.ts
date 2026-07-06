@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../domain/annotations";
 import {
   assertNoNestedArrays,
+  buildHidingZoneDocument,
   buildSessionDocument,
   deserializeAnnotationFromFirestore,
   deserializeGameAreaFromFirestore,
@@ -239,5 +240,24 @@ describe("firestoreSerialization", () => {
     );
 
     expect(restored).toEqual(annotation);
+  });
+
+  it("omits undefined hiding zone fields from Firestore payloads", () => {
+    const payload = buildHidingZoneDocument({
+      hiderUid: "hider-1",
+      sessionId: "session-1",
+      stationId: "station-1",
+      stationName: "Test Station",
+      center: { lat: 53.35, lng: -6.26 },
+      radiusMeters: 400,
+      geometryJson: '{"type":"Polygon","coordinates":[]}',
+      status: "confirmed",
+      confirmedAt: "2026-05-14T00:00:00.000Z",
+    });
+
+    expect(payload).not.toHaveProperty("originalStation");
+    expect(payload).not.toHaveProperty("previousStations");
+    expect(payload).not.toHaveProperty("moveInProgress");
+    expect(() => assertNoNestedArrays(payload)).not.toThrow();
   });
 });

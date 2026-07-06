@@ -1,4 +1,3 @@
-/** Best-effort clipboard write (Clipboard API with textarea fallback). */
 export async function copyToClipboard(text: string): Promise<boolean> {
   try {
     if (navigator.clipboard?.writeText) {
@@ -6,7 +5,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
       return true;
     }
   } catch {
-    // fall through
+    // fall through to execCommand fallback
   }
 
   try {

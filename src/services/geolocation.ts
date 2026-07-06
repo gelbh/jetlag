@@ -22,7 +22,7 @@ function readPosition(position: GeolocationPosition): GeolocationReading {
 export function unknownGeolocationErrorMessage(error: unknown): string {
   return error instanceof Error
     ? error.message
-    : "Unable to read GPS location.";
+    : "GPS location unavailable.";
 }
 
 function geolocationErrorMessage(error: GeolocationPositionError): string {
@@ -34,7 +34,7 @@ function geolocationErrorMessage(error: GeolocationPositionError): string {
     case error.TIMEOUT:
       return "Timed out while waiting for your location.";
     default:
-      return error.message || "Unable to read GPS location.";
+      return error.message || "GPS location unavailable.";
   }
 }
 

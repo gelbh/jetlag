@@ -3,7 +3,7 @@ import { isFirestorePermissionDenied } from "../services/firestoreAnnotations";
 
 const NON_RETRIABLE_MESSAGE_FRAGMENTS = [
   "session has ended",
-  "Unable to access that session",
+  "No access to that session",
   "Rejoin session or create a new Premium session",
 ] as const;
 

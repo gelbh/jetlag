@@ -3,6 +3,7 @@ import type {
   Feature,
   LineString,
   MultiPolygon,
+  Point,
   Polygon as GeoPolygon,
 } from "geojson";
 import { MeasuringPanel } from "../../components/tools/MeasuringPanel";
@@ -24,6 +25,7 @@ import {
   measuringFromKind,
   measuringMultiPlaceTargetLabel,
   measuringUsesAllPlacesInArea,
+  measuringQuestionFor,
   usedMeasuringFromKinds,
   type MeasuringAnswer,
   type MeasuringFromKind,
@@ -32,6 +34,8 @@ import {
   type MeasuringTargetMode,
 } from "../../domain/measuringQuestions";
 import type { DistanceUnit } from "../../domain/distance";
+import { closerFurtherAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
+import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
 import { measuringLinearNotFoundMessage } from "../../services/measuringLinearFeatures";
 import { overpassErrorMessage } from "../../services/overpassClient";
 import {
@@ -60,6 +64,15 @@ interface UseMeasuringToolParams {
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
   ) => Promise<AnnotationRecord>;
+  awaitHiderAnswer?: boolean;
+  submitPendingQuestion?: (
+    input: Omit<
+      SubmitPendingQuestionInput,
+      "sessionId" | "senderUid" | "senderRole" | "toolType"
+    >,
+  ) => Promise<void>;
+  sessionId?: string;
+  senderUid?: string | null;
   distanceUnit: DistanceUnit;
   finishPlacement: () => void;
   gpsLoading: boolean;
@@ -88,6 +101,10 @@ export function useMeasuringTool({
   annotations,
   gameArea,
   createAnnotation,
+  awaitHiderAnswer = false,
+  submitPendingQuestion,
+  sessionId,
+  senderUid,
   distanceUnit,
   finishPlacement,
   gpsLoading,
@@ -303,7 +320,7 @@ export function useMeasuringTool({
         setMeasuringDistanceMeters(null);
         setMeasuringTargetPlaceName(null);
         setMeasuringError(
-          overpassErrorMessage(error, "Unable to load places in the play area."),
+          overpassErrorMessage(error, "Places in the play area didn't load."),
         );
       } finally {
         if (requestId === placesRequestId.current) {
@@ -355,7 +372,7 @@ export function useMeasuringTool({
         setMeasuringSeaLevelEdgeCase(null);
         setMeasuringSeaLevelNote(null);
         setMeasuringError(
-          error instanceof Error ? error.message : "Unable to read elevation.",
+          error instanceof Error ? error.message : "Elevation unavailable.",
         );
       } finally {
         if (requestId === seaLevelRequestId.current) {
@@ -416,7 +433,7 @@ export function useMeasuringTool({
         setMeasuringTargetPoint(null);
         setMeasuringDistanceMeters(null);
         setMeasuringError(
-          overpassErrorMessage(error, "Unable to find coastline."),
+          overpassErrorMessage(error, "Coastline not found."),
         );
       } finally {
         if (requestId === coastlineRequestId.current) {
@@ -671,7 +688,7 @@ export function useMeasuringTool({
       setMeasuringSeekerAnchorAndResolve(point);
     } catch (error) {
       setMeasuringError(
-        error instanceof Error ? error.message : "Unable to read GPS location.",
+        error instanceof Error ? error.message : "GPS location unavailable.",
       );
     }
   };
@@ -708,7 +725,7 @@ export function useMeasuringTool({
       setMeasuringError(
         error instanceof Error
           ? error.message
-          : "Unable to search for that place.",
+          : "Place search failed.",
       );
     } finally {
       setMeasuringSearchLoading(false);
@@ -767,7 +784,7 @@ export function useMeasuringTool({
       setMeasuringTargetAnchor(nearest.point, nearest.name);
     } catch (error) {
       setMeasuringError(
-        overpassErrorMessage(error, "Unable to find that venue on the map."),
+        overpassErrorMessage(error, "That venue wasn't found on the map."),
       );
     } finally {
       setMeasuringLoading(false);
@@ -826,7 +843,7 @@ export function useMeasuringTool({
       setMeasuringTargetPlaceName(null);
       setMeasuringDistanceMeters(null);
       setMeasuringError(
-        overpassErrorMessage(error, "Unable to find the nearest place."),
+        overpassErrorMessage(error, "Nearest place wasn't found."),
       );
     } finally {
       setMeasuringLoading(false);
@@ -834,11 +851,7 @@ export function useMeasuringTool({
   };
 
   const commit = async () => {
-    if (
-      !measuringSeekerPoint ||
-      measuringDistanceMeters === null ||
-      measuringAnswer === null
-    ) {
+    if (!measuringSeekerPoint || measuringDistanceMeters === null) {
       return;
     }
 
@@ -865,12 +878,102 @@ export function useMeasuringTool({
       return;
     }
 
+    const locationCategory =
+      measuringSubject === "location" ? measuringLocationCategory : undefined;
+    const question = measuringQuestionFor(measuringSubject, locationCategory);
+
+    if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
+      const regionInputWithoutAnswer = {
+        gameArea,
+        measuringSubject,
+        measuringLocationCategory,
+        measuringDistanceMeters,
+        measuringTargetPoint,
+        measuringPlaces,
+        measuringCoastSegments: resolvedCoastSegments,
+        measuringSeaLevelNearRegion,
+        usesAllPlacesInArea,
+      };
+
+      const geometry: Feature<Point> = {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Point",
+          coordinates: [measuringSeekerPoint[1], measuringSeekerPoint[0]],
+        },
+      };
+
+      const metadata: Record<string, unknown> = {
+        measuringSubject,
+        measuringLocationCategory:
+          measuringSubject === "location" ? measuringLocationCategory : undefined,
+        measuringDistanceMeters,
+        measuringAnchor: {
+          lat: measuringSeekerPoint[0],
+          lng: measuringSeekerPoint[1],
+        },
+        measuringAnchorAltitudeMeters:
+          measuringSubject === "sea_level"
+            ? (measuringAnchorElevationMeters ?? undefined)
+            : undefined,
+        measuringCoastPoint:
+          measuringSubject === "sea_level"
+            ? {
+                lat: measuringSeekerPoint[0],
+                lng: measuringSeekerPoint[1],
+              }
+            : measuringTargetPoint
+              ? {
+                  lat: measuringTargetPoint[0],
+                  lng: measuringTargetPoint[1],
+                }
+              : undefined,
+        measuringTargetName:
+          measuringSubject === "sea_level"
+            ? "Sea level"
+            : (measuringTargetPlaceName ?? undefined),
+        measuringRegionInputJson: JSON.stringify(regionInputWithoutAnswer),
+      };
+
+      if (usesAllPlacesInArea) {
+        metadata.measuringPlacesJson = JSON.stringify(
+          measuringPlaces.map((place) => ({
+            id: place.id,
+            name: place.name,
+            lat: place.point[0],
+            lng: place.point[1],
+          })),
+        );
+      }
+
+      await submitPendingQuestion({
+        promptText: question.prompt,
+        replyOptions: closerFurtherAnswerOptions.map((option) => ({
+          id: option.value,
+          label: option.label,
+        })),
+        placement: {
+          geometryJson: JSON.stringify(geometry),
+          metadata,
+        },
+      });
+
+      resetDraft(committedKind);
+      finishPlacement();
+      return;
+    }
+
+    if (measuringAnswer === null) {
+      return;
+    }
+
     const regions = buildMeasuringRegions({
       ...measuringRegionInput,
       precomputedNearRegion: measuringNearRegion,
     });
     if (!regions) {
-      setMeasuringError("Unable to build measure distance regions.");
+      setMeasuringError("Couldn't build measure distance regions.");
       return;
     }
 
@@ -1093,6 +1196,7 @@ export function useMeasuringTool({
         startTransition(() => setMeasuringAnswer(answer));
       }}
       onCommit={() => void commit()}
+      awaitHiderAnswer={awaitHiderAnswer}
     />
   );
 

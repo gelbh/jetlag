@@ -1,0 +1,16 @@
+{
+  "elements": [
+    {
+      "id": 2001,
+      "tags": { "tourism": "museum", "name": "National Museum" },
+      "lat": 53.34,
+      "lon": -6.25
+    },
+    {
+      "id": 2002,
+      "tags": { "amenity": "museum", "name": "City Gallery" },
+      "lat": 53.36,
+      "lon": -6.28
+    }
+  ]
+}

@@ -27,7 +27,7 @@ export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
     try {
       localStorage.setItem(STORAGE_KEY, "1");
     } catch {
-      // ignore quota / private mode
+      // localStorage unavailable
     }
     onDismiss();
   };
@@ -53,20 +53,20 @@ export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
 
             <ul className="space-y-2 text-sm text-ink-secondary">
               <li>
-                <span className="font-medium text-ink">Radar</span> — draw a
-                search circle on the map
+                <span className="font-medium text-ink">Radar.</span> Draw a
+                search circle on the map.
               </li>
               <li>
-                <span className="font-medium text-ink">Zone</span> — outline an
-                area to search or rule out
+                <span className="font-medium text-ink">Zone.</span> Outline an
+                area to search or rule out.
               </li>
               <li>
-                <span className="font-medium text-ink">Pin</span> — drop a note
-                at a point
+                <span className="font-medium text-ink">Pin.</span> Drop a note
+                at a point.
               </li>
               <li>
-                <span className="font-medium text-ink">More</span> — Matching,
-                Measuring, Thermometer, Tentacles
+                <span className="font-medium text-ink">More.</span> Matching,
+                Measuring, Thermometer, Tentacles.
               </li>
             </ul>
 
@@ -75,7 +75,7 @@ export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
               onClick={dismiss}
               className="btn-primary min-h-12 w-full"
             >
-              Got it
+              Close
             </button>
           </div>
         </MobileSheet>

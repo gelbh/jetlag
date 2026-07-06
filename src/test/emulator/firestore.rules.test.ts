@@ -8,6 +8,7 @@ import {
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { milesToMeters } from "../../domain/distance";
 import { serializeGameAreaForFirestore } from "../../services/firestoreSerialization";
 import { DUBLIN_CITY_GAME_AREA } from "../fixtures/dublinGameArea";
 
@@ -20,6 +21,9 @@ function sessionPayload(hostUid: string, overrides: Record<string, unknown> = {}
     hostUid,
     createdAt: "2026-01-01T00:00:00.000Z",
     memberUids: [hostUid],
+    memberRoles: { [hostUid]: "seeker" },
+    gameSize: "medium",
+    hidingZoneRadiusMeters: milesToMeters(0.25),
     tier: "free",
     status: "active",
     timerAccumulatedMs: 0,
@@ -38,6 +42,28 @@ function annotationPayload() {
     }),
     metadata: { createdAt: "2026-01-01T00:00:00.000Z", label: "Test" },
     status: "active",
+  };
+}
+
+function hidingZonePayload() {
+  return {
+    stationId: "station-1",
+    stationName: "Test Station",
+    center: { lat: 53.35, lng: -6.26 },
+    radiusMeters: milesToMeters(0.25),
+    geometryJson: JSON.stringify({
+      type: "Polygon",
+      coordinates: [
+        [
+          [-6.26, 53.35],
+          [-6.25, 53.35],
+          [-6.25, 53.36],
+          [-6.26, 53.35],
+        ],
+      ],
+    }),
+    status: "confirmed",
+    confirmedAt: "2026-01-01T00:00:00.000Z",
   };
 }
 
@@ -75,6 +101,28 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows signed-in users to look up sessions by code", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+    await host
+      .firestore()
+      .collection("sessionCodes")
+      .doc("ABCD")
+      .set({ sessionId: "session-1", hostUid: "host-1" });
+
+    const guest = testEnv.authenticatedContext("guest-1");
+    await assertSucceeds(
+      guest.firestore().collection("sessionCodes").doc("ABCD").get(),
+    );
+    await assertSucceeds(
+      guest.firestore().collection("sessions").doc("session-1").get(),
+    );
+  });
+
   it("denies premium session creation without host access claim", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await assertFails(
@@ -86,7 +134,7 @@ describe("firestore.rules", () => {
     );
   });
 
-  it("allows members to read and write annotations", async () => {
+  it("allows seeker members to read and write annotations", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
       .firestore()
@@ -99,7 +147,10 @@ describe("firestore.rules", () => {
       .firestore()
       .collection("sessions")
       .doc("session-1")
-      .update({ memberUids: ["host-1", "guest-1"] });
+      .update({
+        memberUids: ["host-1", "guest-1"],
+        memberRoles: { "host-1": "seeker", "guest-1": "seeker" },
+      });
 
     await assertSucceeds(
       guest
@@ -109,6 +160,64 @@ describe("firestore.rules", () => {
         .collection("annotations")
         .doc("ann-1")
         .set(annotationPayload()),
+    );
+  });
+
+  it("denies annotation writes from hiders", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .update({
+        memberUids: ["host-1", "hider-1"],
+        memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+      });
+
+    await assertFails(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("annotations")
+        .doc("ann-1")
+        .set(annotationPayload()),
+    );
+  });
+
+  it("allows hiders to write their own hiding zone", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .update({
+        memberUids: ["host-1", "hider-1"],
+        memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+      });
+
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("hidingZones")
+        .doc("hider-1")
+        .set(hidingZonePayload()),
     );
   });
 
@@ -195,6 +304,20 @@ describe("firestore.rules", () => {
         .collection("sessions")
         .doc("session-1")
         .get(),
+    );
+  });
+
+  it("denies session collection listing for non-members", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+
+    const outsider = testEnv.authenticatedContext("outsider-1");
+    await assertFails(
+      outsider.firestore().collection("sessions").get(),
     );
   });
 

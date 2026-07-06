@@ -12,9 +12,12 @@ import {
   firstAvailableRadarDistanceSelection,
   isRadarDistanceOptionAvailable,
   radarInsideFromAnswer,
+  radarQuestionPrompt,
   usedRadarDistanceOptions,
   type RadarAnswer,
 } from "../../domain/radarQuestions";
+import { yesNoAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
+import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
 import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface UseRadarToolParams {
@@ -23,6 +26,16 @@ interface UseRadarToolParams {
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
   ) => Promise<AnnotationRecord>;
+  awaitHiderAnswer?: boolean;
+  submitPendingQuestion?: (
+    input: Omit<
+      SubmitPendingQuestionInput,
+      "sessionId" | "senderUid" | "senderRole" | "toolType"
+    >,
+  ) => Promise<void>;
+  sessionId?: string;
+  senderUid?: string | null;
+  senderRole?: "seeker" | "hider";
   distanceUnit: DistanceUnit;
   finishPlacement: () => void;
   setMapError: (message: string | null) => void;
@@ -40,6 +53,10 @@ export function useRadarTool({
   active,
   annotations,
   createAnnotation,
+  awaitHiderAnswer = false,
+  submitPendingQuestion,
+  sessionId,
+  senderUid,
   distanceUnit,
   finishPlacement,
   setMapError,
@@ -131,7 +148,7 @@ export function useRadarTool({
       setMapError(null);
     } catch (error) {
       setMapError(
-        error instanceof Error ? error.message : "Unable to read GPS location.",
+        error instanceof Error ? error.message : "GPS location unavailable.",
       );
     }
   };
@@ -139,11 +156,6 @@ export function useRadarTool({
   const commit = async () => {
     if (!radarCenter) {
       setMapError("Choose a center with GPS or a map tap.");
-      return;
-    }
-
-    if (!radarAnswer) {
-      setMapError("Record the answer before adding the radar question.");
       return;
     }
 
@@ -166,6 +178,36 @@ export function useRadarTool({
         coordinates: [radarCenter[1], radarCenter[0]],
       },
     };
+
+    if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
+      await submitPendingQuestion({
+        promptText: radarQuestionPrompt(resolvedRadarRadius, distanceUnit),
+        replyOptions: yesNoAnswerOptions.map((option) => ({
+          id: option.value,
+          label: option.label,
+        })),
+        placement: {
+          geometryJson: JSON.stringify(geometry),
+          metadata: {
+            radiusMeters: resolvedRadarRadius,
+            radarChooseCustom,
+          },
+        },
+      });
+
+      setRadarCenter(null);
+      setRadarAnswer(null);
+      setRadarChooseCustom(false);
+      setRadarCustomRadius("");
+      setMapError(null);
+      finishPlacement();
+      return;
+    }
+
+    if (!radarAnswer) {
+      setMapError("Record the answer before adding the radar question.");
+      return;
+    }
 
     await createAnnotation({
       type: "radar",
@@ -213,6 +255,7 @@ export function useRadarTool({
       onCommit={() => void commit()}
       gpsLoading={gpsLoading}
       error={mapError ?? gpsError}
+      awaitHiderAnswer={awaitHiderAnswer}
     />
   );
 
