@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  gameSizeRulesSummary,
   hidingPeriodMinutes,
+  isThermometerPresetAvailableForGameSize,
+  isTentacleCategoryAvailableForGameSize,
   tentacleEnabledForGameSize,
   tentacleOptionsForGameSize,
   thermometerPresetsMilesForGameSize,
@@ -42,5 +45,32 @@ describe("gameSizeRules", () => {
     expect(options).toHaveLength(8);
     const metro = options.find((o) => o.categoryId === "metro_line");
     expect(metro?.radiusMeters).toBe(milesToMeters(15));
+  });
+
+  it("checks thermometer preset availability", () => {
+    expect(
+      isThermometerPresetAvailableForGameSize("small", milesToMeters(0.5)),
+    ).toBe(true);
+    expect(
+      isThermometerPresetAvailableForGameSize("small", milesToMeters(50)),
+    ).toBe(false);
+  });
+
+  it("checks tentacle category availability", () => {
+    expect(isTentacleCategoryAvailableForGameSize("medium", "museum")).toBe(
+      true,
+    );
+    expect(isTentacleCategoryAvailableForGameSize("small", "museum")).toBe(
+      false,
+    );
+  });
+
+  it("summarizes rules for UI labels", () => {
+    expect(gameSizeRulesSummary("small").hidingPeriodLabel).toBe(
+      "30 min hiding period",
+    );
+    expect(gameSizeRulesSummary("large").tentacleLabel).toBe(
+      "Tentacles @ 1 mi and 15 mi",
+    );
   });
 });

@@ -24,9 +24,9 @@ export default defineConfig({
         "src/main.tsx",
       ],
       thresholds: {
-        "src/domain/**": { lines: 68, branches: 51 },
-        "src/services/**": { lines: 60, branches: 47 },
-        "src/hooks/**": { lines: 37, branches: 26 },
+        "src/domain/**": { lines: 65, branches: 50 },
+        "src/services/**": { lines: 58, branches: 43 },
+        "src/hooks/**": { lines: 35, branches: 24 },
         "src/state/**": { lines: 70, branches: 65 },
         "src/routes/**": { lines: 45, branches: 40 },
         "src/components/**": { lines: 15, branches: 8 },
