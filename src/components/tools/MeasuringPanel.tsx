@@ -368,6 +368,8 @@ export function MeasuringPanel({
                 className="field-input"
                 placeholder="Address, business, or landmark"
                 autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
                 enterKeyHint="search"
                 inputMode="search"
               />
@@ -465,6 +467,8 @@ export function MeasuringPanel({
                   className="field-input"
                   placeholder="Address, business, or landmark"
                   autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
                   enterKeyHint="search"
                   inputMode="search"
                 />

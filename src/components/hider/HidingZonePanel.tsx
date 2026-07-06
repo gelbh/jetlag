@@ -47,7 +47,9 @@ export function HidingZonePanel({
       <p className="text-sm text-ink-muted">
         {moveMode
           ? "Pick a new location for your hiding zone."
-          : "Center your hiding zone on a transit station."}{" "}
+          : manualMode
+            ? "Place your hiding zone on the map."
+            : "Center your hiding zone on a transit station."}{" "}
         Radius: {radiusLabel}.
       </p>
 
@@ -62,6 +64,11 @@ export function HidingZonePanel({
             onChange={(event) => onQueryChange(event.target.value)}
             className="field-input min-h-11 w-full"
             placeholder="Search stations…"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            enterKeyHint="search"
+            inputMode="search"
           />
           <button
             type="button"
@@ -93,12 +100,7 @@ export function HidingZonePanel({
               </button>
             ))}
           </div>
-          {selectedStation ? (
-            <p className="text-sm text-ink-secondary">
-              Selected:{" "}
-              <span className="font-medium">{selectedStation.name}</span>
-            </p>
-          ) : stations.length === 0 && !stationsLoading && !stationsError ? (
+          {stations.length === 0 && !stationsLoading && !stationsError ? (
             <p className="text-sm text-ink-dim">
               Pan the map, then search this area.
             </p>

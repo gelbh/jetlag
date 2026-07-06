@@ -86,6 +86,8 @@ export function RadarDistancePicker({
             value={customRadius}
             onChange={(event) => onCustomRadiusChange(event.target.value)}
             inputMode="decimal"
+            autoCorrect="off"
+            spellCheck={false}
             className="field-input"
           />
         </label>

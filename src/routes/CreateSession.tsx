@@ -415,6 +415,8 @@ export function CreateSession() {
             className="field-input"
             placeholder="Dublin, Ireland"
             autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
             enterKeyHint="search"
             inputMode="search"
           />
@@ -534,6 +536,8 @@ export function CreateSession() {
               }}
               type="password"
               autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
               enterKeyHint="done"
               className="field-input"
             />

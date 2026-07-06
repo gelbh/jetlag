@@ -158,6 +158,8 @@ export function JoinSession() {
             className="field-input mt-2 min-h-16 border-0 bg-transparent p-0 text-center font-mono text-4xl font-bold tracking-[0.45em] focus:outline-none"
             placeholder="ABCD"
             autoCapitalize="characters"
+            autoCorrect="off"
+            spellCheck={false}
           />
         </label>
 
