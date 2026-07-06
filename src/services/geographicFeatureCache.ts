@@ -94,7 +94,8 @@ function isStableCacheKey(key: string): boolean {
   return (
     key.startsWith("admin:") ||
     key.startsWith("landmass:") ||
-    key.startsWith("coastline:")
+    key.startsWith("coastline:") ||
+    key.startsWith("sea_level:sampling:")
   );
 }
 

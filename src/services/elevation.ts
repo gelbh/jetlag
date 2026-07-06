@@ -3,10 +3,12 @@ import type { LatLngTuple } from "../domain/geometry";
 const OPEN_METEO_ELEVATION_ENDPOINT = "https://api.open-meteo.com/v1/elevation";
 const ELEVATION_BATCH_SIZE = 100;
 const ELEVATION_CACHE_TTL_MS = 15 * 60 * 1000;
-const ELEVATION_MAX_RETRIES = 4;
+const ELEVATION_MAX_RETRIES = 6;
 const ELEVATION_BASE_BACKOFF_MS = 1000;
 const ELEVATION_MAX_BACKOFF_MS = 30_000;
+const ELEVATION_MIN_429_BACKOFF_MS = 2000;
 const ELEVATION_MIN_REQUEST_GAP_MS = 250;
+const ELEVATION_WEIGHTED_CALLS_PER_MINUTE = 400;
 const ELEVATION_MAX_CONCURRENT = 1;
 
 interface OpenMeteoElevationResponse {
@@ -21,7 +23,14 @@ interface CachedElevation {
 const elevationCache = new Map<string, CachedElevation>();
 let activeElevationRequests = 0;
 let lastElevationRequestAt = 0;
+let lastElevationBatchSize = 0;
 const elevationWaitQueue: Array<() => void> = [];
+
+export function requestGapMsForBatchSize(batchSize: number): number {
+  const weightedGap =
+    (batchSize / ELEVATION_WEIGHTED_CALLS_PER_MINUTE) * 60_000;
+  return Math.max(ELEVATION_MIN_REQUEST_GAP_MS, Math.ceil(weightedGap));
+}
 
 function elevationCacheKey(point: LatLngTuple): string {
   return `${point[0].toFixed(5)},${point[1].toFixed(5)}`;
@@ -74,20 +83,22 @@ function retryDelayMs(
   );
 }
 
-async function waitForElevationRequestGap(): Promise<void> {
+async function waitForElevationBatchGap(): Promise<void> {
   if (lastElevationRequestAt === 0) {
     return;
   }
 
+  const requiredGap = requestGapMsForBatchSize(lastElevationBatchSize);
   const elapsed = Date.now() - lastElevationRequestAt;
-  const remaining = ELEVATION_MIN_REQUEST_GAP_MS - elapsed;
+  const remaining = requiredGap - elapsed;
   if (remaining > 0) {
     await sleep(remaining);
   }
 }
 
-function markElevationRequestCompleted(): void {
+function markElevationRequestCompleted(batchSize: number): void {
   lastElevationRequestAt = Date.now();
+  lastElevationBatchSize = batchSize;
 }
 
 async function acquireElevationSlot(): Promise<void> {
@@ -151,7 +162,12 @@ async function fetchElevationBatch(points: LatLngTuple[]): Promise<number[]> {
       lastError = new Error(
         "Elevation lookup is temporarily rate-limited. Try again in a moment.",
       );
-      await sleep(retryDelayMs(attempt, response.headers.get("Retry-After")));
+      await sleep(
+        Math.max(
+          ELEVATION_MIN_429_BACKOFF_MS,
+          retryDelayMs(attempt, response.headers.get("Retry-After")),
+        ),
+      );
       continue;
     }
 
@@ -171,7 +187,7 @@ async function fetchElevationBatchAndWrite(
   batch: Array<{ point: LatLngTuple; indices: number[] }>,
   elevations: number[],
 ): Promise<void> {
-  await waitForElevationRequestGap();
+  await waitForElevationBatchGap();
   try {
     const batchPoints = batch.map((entry) => entry.point);
     const batchElevations = await fetchElevationBatch(batchPoints);
@@ -185,7 +201,7 @@ async function fetchElevationBatchAndWrite(
       }
     }
   } finally {
-    markElevationRequestCompleted();
+    markElevationRequestCompleted(batch.length);
   }
 }
 
@@ -240,5 +256,6 @@ export function clearElevationCacheForTests(): void {
   elevationCache.clear();
   activeElevationRequests = 0;
   lastElevationRequestAt = 0;
+  lastElevationBatchSize = 0;
   elevationWaitQueue.length = 0;
 }

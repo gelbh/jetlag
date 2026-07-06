@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { LatLngTuple } from "../domain/geometry";
-import { clearElevationCacheForTests, fetchElevations } from "./elevation";
+import {
+  clearElevationCacheForTests,
+  fetchElevations,
+  requestGapMsForBatchSize,
+} from "./elevation";
 
 const dublinPoint: LatLngTuple = [53.29602, -6.139977];
 
@@ -93,6 +97,7 @@ describe("elevation", () => {
   });
 
   it("fetches multi-batch inputs sequentially", async () => {
+    vi.useFakeTimers();
     const callOrder: number[] = [];
     const points = uniquePoints(101);
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
@@ -103,7 +108,10 @@ describe("elevation", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const elevations = await fetchElevations(points);
+    const pending = fetchElevations(points);
+    await vi.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(requestGapMsForBatchSize(100));
+    const elevations = await pending;
 
     expect(elevations).toHaveLength(101);
     expect(elevations.every((value) => value === 42)).toBe(true);
@@ -116,7 +124,13 @@ describe("elevation", () => {
       vi.useFakeTimers();
     });
 
-    it("waits at least 250ms between batch requests", async () => {
+    it("computes weighted gaps from batch size", () => {
+      expect(requestGapMsForBatchSize(1)).toBe(250);
+      expect(requestGapMsForBatchSize(33)).toBe(4950);
+      expect(requestGapMsForBatchSize(100)).toBe(15_000);
+    });
+
+    it("waits for the previous batch weight before the next request", async () => {
       const points = uniquePoints(101);
       const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
         const url = new URL(String(input));
@@ -125,11 +139,12 @@ describe("elevation", () => {
       });
       vi.stubGlobal("fetch", fetchMock);
 
+      const secondBatchGapMs = requestGapMsForBatchSize(100);
       const pending = fetchElevations(points);
       await vi.advanceTimersByTimeAsync(0);
       expect(fetchMock).toHaveBeenCalledTimes(1);
 
-      await vi.advanceTimersByTimeAsync(249);
+      await vi.advanceTimersByTimeAsync(secondBatchGapMs - 1);
       expect(fetchMock).toHaveBeenCalledTimes(1);
 
       await vi.advanceTimersByTimeAsync(1);
