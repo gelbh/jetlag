@@ -38,7 +38,7 @@ export function HiderTruthRevealBanner({
       type="button"
       onClick={onDismiss}
       data-testid="hider-truth-reveal-banner"
-      className="pointer-events-auto absolute inset-x-3 top-[calc(env(safe-area-inset-top)+var(--status-bar-height)+0.75rem)] z-[var(--z-banner)] w-auto rounded-xl border border-border bg-surface-deep/95 px-3 py-2.5 text-left shadow-lg"
+      className="map-float-alert pointer-events-auto absolute inset-x-3 top-[calc(env(safe-area-inset-top)+var(--status-bar-height)+0.75rem)] z-[var(--z-banner)] w-auto border border-status-info/40 bg-status-info-surface px-3 py-2.5 text-left"
     >
       <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
         Bluff sent

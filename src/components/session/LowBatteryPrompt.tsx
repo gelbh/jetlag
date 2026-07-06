@@ -52,7 +52,7 @@ export function LowBatteryPrompt() {
       aria-labelledby="low-battery-prompt-title"
       aria-describedby="low-battery-prompt-body"
     >
-      <div className="hud-panel mx-auto max-w-xl border-status-warning/40 px-3 py-3">
+      <div className="map-float-alert mx-auto max-w-xl border-2 border-status-warning/40 bg-status-warning-surface px-3 py-3">
         <p
           id="low-battery-prompt-title"
           className="font-display text-xs font-semibold uppercase tracking-wide text-status-warning"

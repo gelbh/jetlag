@@ -205,7 +205,7 @@ export function MapStatusRail({
   return (
     <div
       ref={railRef}
-      className="jl-status-rail pointer-events-none absolute inset-x-0 top-0 z-[var(--z-banner)] bg-surface-deep pt-[max(0px,env(safe-area-inset-top))]"
+      className="jl-status-rail pointer-events-none absolute inset-x-0 top-0 z-[var(--z-banner)] pt-[max(0px,env(safe-area-inset-top))]"
     >
       <div className="relative">
         {showTimerMenu ? (
@@ -297,7 +297,7 @@ export function MapStatusRail({
 
         {sync.banner?.visible ? (
           <p
-            className={`pointer-events-auto mx-3 mt-1.5 border-2 px-3 py-2 text-center text-sm font-semibold text-pretty ${SYNC_TONE_CLASSES[sync.banner.tone].surface} ${SYNC_TONE_CLASSES[sync.banner.tone].border} ${SYNC_TONE_CLASSES[sync.banner.tone].text}`}
+            className={`map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 px-3 py-2 text-center text-sm font-semibold text-pretty ${SYNC_TONE_CLASSES[sync.banner.tone].surface} ${SYNC_TONE_CLASSES[sync.banner.tone].border} ${SYNC_TONE_CLASSES[sync.banner.tone].text}`}
             role="status"
             aria-live="polite"
           >

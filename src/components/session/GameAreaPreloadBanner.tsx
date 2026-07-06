@@ -11,7 +11,7 @@ export function GameAreaPreloadBanner() {
 
   return (
     <div
-      className={`pointer-events-auto mx-3 mt-2 rounded-xl border px-3 py-2 text-sm shadow-lg ${
+      className={`map-float-alert pointer-events-auto mx-3 mt-2 border px-3 py-2 text-sm ${
         banner.failed
           ? "border-status-warning/40 bg-status-warning-surface text-status-warning"
           : "border-status-info/40 bg-status-info-surface text-status-info"

@@ -446,8 +446,9 @@ textarea {
   }
 
   /* —— Broadcast status bar (map top) —— */
-  .jl-status-rail {
-    box-shadow: 0 4px 24px oklch(0.06 0.04 265 / 0.65);
+  .map-float-alert {
+    border-radius: var(--radius-hud-xl);
+    box-shadow: var(--shadow-hud-float);
   }
 
   .jl-status-bar {
