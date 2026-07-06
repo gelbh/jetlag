@@ -13,12 +13,12 @@ import { MapTimerCluster } from "./MapTimerCluster";
 import { QuestionAlertBanner } from "./QuestionAlertBanner";
 import { GameAreaPreloadBanner } from "./GameAreaPreloadBanner";
 
-import type { GameSize } from "../../domain/gameSize";
+import type { SessionRulesInput } from "../../domain/sessionRules";
 import type { PlayerRole } from "../../domain/playerRole";
 
 interface MapStatusRailProps {
   sessionCode: string;
-  gameSize?: GameSize;
+  sessionRules?: SessionRulesInput;
   playerRole?: PlayerRole;
   activeTool: MapTool;
   syncStatus: SyncStatus;
@@ -148,7 +148,7 @@ function idleModeLabel(playerRole: PlayerRole): string {
 
 export function MapStatusRail({
   sessionCode,
-  gameSize = "medium",
+  sessionRules = { gameSize: "medium" },
   playerRole = "seeker",
   activeTool,
   syncStatus,
@@ -273,7 +273,7 @@ export function MapStatusRail({
               )
             ) : (
               <MapTimerCluster
-                gameSize={gameSize}
+                sessionRules={sessionRules}
                 timerState={timerState}
                 timerRunning={timerRunning}
                 timerHasStarted={timerHasStarted}
@@ -307,7 +307,7 @@ export function MapStatusRail({
 
         <QuestionAlertBanner
           pendingQuestions={pendingQuestions}
-          gameSize={gameSize}
+          sessionRules={sessionRules}
         />
 
         {showPreloadBanner ? <GameAreaPreloadBanner /> : null}

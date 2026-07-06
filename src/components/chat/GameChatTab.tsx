@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import type { GameSize } from "../../domain/gameSize";
-import { answerDeadlineMs } from "../../domain/gameSizeRules";
+import type { SessionRulesInput } from "../../domain/sessionRules";
 import {
   formatExpiredAnswerCountdown,
   questionAnswerDeadlineMs,
@@ -16,7 +15,7 @@ import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 interface GameChatTabProps {
   messages: readonly SessionMessageRecord[];
   pendingQuestions: readonly PendingQuestionRecord[];
-  gameSize: GameSize;
+  sessionRules: SessionRulesInput;
   sessionId: string;
   isHider: boolean;
   senderUid: string;
@@ -46,7 +45,7 @@ function pendingQuestionForMessage(
 export function GameChatTab({
   messages,
   pendingQuestions,
-  gameSize,
+  sessionRules,
   sessionId,
   isHider,
   senderUid,
@@ -103,8 +102,8 @@ export function GameChatTab({
           const answered =
             message.status === "answered" || message.status === "resolved";
           const deadlineMs = pending
-            ? questionAnswerDeadlineMs(pending.toolType, gameSize)
-            : answerDeadlineMs("matching", gameSize);
+            ? questionAnswerDeadlineMs(pending.toolType, sessionRules)
+            : questionAnswerDeadlineMs("matching", sessionRules);
           const countdown =
             !walking && !answered && pending?.answerableAt
               ? formatExpiredAnswerCountdown(

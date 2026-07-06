@@ -10,7 +10,7 @@ describe("useThermometerTool", () => {
       useThermometerTool({
         active: true,
         annotations: mocks.annotations,
-        gameSize: "large",
+        sessionRules: { gameSize: "large" },
         createAnnotation: mocks.createAnnotation,
         distanceUnit: mocks.distanceUnit,
         finishPlacement: mocks.finishPlacement,
@@ -38,7 +38,7 @@ describe("useThermometerTool", () => {
       useThermometerTool({
         active: true,
         annotations: mocks.annotations,
-        gameSize: "large",
+        sessionRules: { gameSize: "large" },
         createAnnotation: mocks.createAnnotation,
         distanceUnit: mocks.distanceUnit,
         finishPlacement: mocks.finishPlacement,

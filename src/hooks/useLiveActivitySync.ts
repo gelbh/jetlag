@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
-import type { GameSize } from "../domain/gameSize";
+import type { SessionRulesInput } from "../domain/sessionRules";
 import {
   formatHidingPeriodCountdown,
   hidingPeriodRemainingMs,
@@ -24,7 +24,7 @@ const ANDROID_TIMER_NOTIFICATION_ID = 1002;
 interface UseLiveActivitySyncParams {
   enabled: boolean;
   sessionId: string | undefined;
-  gameSize: GameSize;
+  sessionRules: SessionRulesInput;
   timerState: TimerState;
   timerHasStarted: boolean;
   pendingQuestions: readonly PendingQuestionRecord[];
@@ -42,7 +42,7 @@ function formatQuestionBody(countdownLabel: string, toolLabel: string): string {
 export function useLiveActivitySync({
   enabled,
   sessionId,
-  gameSize,
+  sessionRules,
   timerState,
   timerHasStarted,
   pendingQuestions,
@@ -66,7 +66,7 @@ export function useLiveActivitySync({
     const sync = () => {
       const questionTimer = selectPrimaryQuestionTimer(
         pendingQuestions,
-        gameSize,
+        sessionRules,
       );
 
       if (questionTimer) {
@@ -123,12 +123,12 @@ export function useLiveActivitySync({
 
       if (timerHasStarted) {
         const elapsed = computeElapsedMs(timerState);
-        const hidingActive = isHidingPeriodActive(gameSize, elapsed);
-        const hidingRemaining = hidingPeriodRemainingMs(gameSize, elapsed);
+        const hidingActive = isHidingPeriodActive(sessionRules, elapsed);
+        const hidingRemaining = hidingPeriodRemainingMs(sessionRules, elapsed);
         const phaseLabel = hidingActive ? "Hiding period" : "Seek phase";
         const displayTime = hidingActive
           ? formatHidingPeriodCountdown(hidingRemaining).replace(/^HIDING\s/, "")
-          : formatElapsedTime(seekPhaseElapsedMs(gameSize, elapsed));
+          : formatElapsedTime(seekPhaseElapsedMs(sessionRules, elapsed));
         const running = isTimerRunning(timerState);
 
         if (platform === "ios") {
@@ -199,7 +199,7 @@ export function useLiveActivitySync({
     };
   }, [
     enabled,
-    gameSize,
+    sessionRules,
     pendingQuestions,
     platform,
     preferences.enabled,

@@ -181,7 +181,7 @@ export function HiderMapScreen() {
   useLiveActivitySync({
     enabled: Boolean(sessionId),
     sessionId,
-    gameSize: session?.gameSize ?? "medium",
+    sessionRules: session ?? { gameSize: "medium" },
     timerState: timer.timerState,
     timerHasStarted: timer.hasStarted,
     pendingQuestions,
@@ -342,7 +342,7 @@ export function HiderMapScreen() {
           <PendingQuestionLayer
             pendingQuestions={pendingQuestions}
             gameArea={session.gameArea}
-            gameSize={session.gameSize ?? "medium"}
+            sessionRules={session}
           />
         </MapView>
       </div>
@@ -354,7 +354,7 @@ export function HiderMapScreen() {
         />
         <MapStatusRail
           sessionCode={session.code}
-          gameSize={session.gameSize ?? "medium"}
+          sessionRules={session}
           playerRole="hider"
           activeTool="none"
           syncStatus={syncStatus.status}
@@ -458,7 +458,7 @@ export function HiderMapScreen() {
         bottomClassName="jl-panel-hider-wizard"
         messages={messages}
         pendingQuestions={pendingQuestions}
-        gameSize={session.gameSize ?? "medium"}
+        sessionRules={session}
         sessionId={session.id}
         senderUid={uid ?? ""}
         senderRole="hider"

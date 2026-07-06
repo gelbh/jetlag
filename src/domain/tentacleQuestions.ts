@@ -5,6 +5,11 @@ import {
   tentacleRadiusMeters,
   type TentacleGameSizeCategoryId,
 } from "./gameSizeRules";
+import {
+  resolveTentacleOptions,
+  sessionGameSize,
+  type SessionRulesInput,
+} from "./sessionRules";
 import type { AnnotationRecord } from "./annotations";
 import {
   collectUsedAnnotationOptions,
@@ -89,6 +94,14 @@ export function tentacleCategoriesForGameSize(
   );
 }
 
+export function tentacleCategoriesForSession(
+  session: SessionRulesInput,
+): readonly TentacleLocationCategoryDefinition[] {
+  return resolveTentacleOptions(session).map((option) =>
+    tentacleCategoryDefinition(option.categoryId),
+  );
+}
+
 export function getTentacleLocationCategory(
   categoryId: TentacleExtendedCategoryId,
 ): TentacleLocationCategoryDefinition {
@@ -100,6 +113,30 @@ export function tentacleSearchRadiusMeters(
   gameSize: GameSize,
 ): number {
   return tentacleRadiusMeters(categoryId as TentacleGameSizeCategoryId, gameSize);
+}
+
+export function tentacleSearchRadiusMetersForSession(
+  session: SessionRulesInput,
+  categoryId: TentacleExtendedCategoryId,
+): number {
+  const option = resolveTentacleOptions(session).find(
+    (entry) => entry.categoryId === categoryId,
+  );
+
+  if (option) {
+    return option.radiusMeters;
+  }
+
+  return tentacleSearchRadiusMeters(categoryId, sessionGameSize(session));
+}
+
+export function isTentacleCategoryAvailableForSession(
+  session: SessionRulesInput,
+  categoryId: string,
+): boolean {
+  return resolveTentacleOptions(session).some(
+    (option) => option.categoryId === categoryId,
+  );
 }
 
 /** @deprecated Use tentacleSearchRadiusMeters */
@@ -193,6 +230,14 @@ export function firstAvailableTentacleCategoryId(
   return firstUnusedCatalogOption(categories, usedCategories);
 }
 
+export function firstAvailableTentacleCategoryIdForSession(
+  session: SessionRulesInput,
+  usedCategories: ReadonlySet<TentacleExtendedCategoryId> = new Set(),
+): TentacleExtendedCategoryId | null {
+  const categories = tentacleCategoriesForSession(session);
+  return firstUnusedCatalogOption(categories, usedCategories);
+}
+
 export function isTentacleCategoryAvailable(
   gameSize: GameSize,
   categoryId: TentacleExtendedCategoryId,
@@ -200,11 +245,28 @@ export function isTentacleCategoryAvailable(
   return isTentacleCategoryAvailableForGameSize(gameSize, categoryId);
 }
 
+export function isTentacleCategoryAvailableInSession(
+  session: SessionRulesInput,
+  categoryId: TentacleExtendedCategoryId,
+): boolean {
+  return isTentacleCategoryAvailableForSession(session, categoryId);
+}
+
 export function defaultTentacleCategoryId(
   gameSize: GameSize,
   usedCategories: ReadonlySet<TentacleExtendedCategoryId> = new Set(),
 ): TentacleExtendedCategoryId {
   return firstAvailableTentacleCategoryId(gameSize, usedCategories) ?? "museum";
+}
+
+export function defaultTentacleCategoryIdForSession(
+  session: SessionRulesInput,
+  usedCategories: ReadonlySet<TentacleExtendedCategoryId> = new Set(),
+): TentacleExtendedCategoryId {
+  return (
+    firstAvailableTentacleCategoryIdForSession(session, usedCategories) ??
+    "museum"
+  );
 }
 
 export function tentacleCategoryUseCount(

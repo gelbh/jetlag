@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { GameSize } from "../../domain/gameSize";
+import type { SessionRulesInput } from "../../domain/sessionRules";
 import {
   selectPrimaryQuestionTimer,
   type ActiveQuestionTimer,
@@ -7,24 +7,24 @@ import {
 
 interface QuestionAlertBannerProps {
   pendingQuestions: readonly import("../../domain/sessionChat").PendingQuestionRecord[];
-  gameSize: GameSize;
+  sessionRules: SessionRulesInput;
 }
 
 export function QuestionAlertBanner({
   pendingQuestions,
-  gameSize,
+  sessionRules,
 }: QuestionAlertBannerProps) {
   const [active, setActive] = useState<ActiveQuestionTimer | null>(null);
 
   useEffect(() => {
     const refresh = () => {
-      setActive(selectPrimaryQuestionTimer(pendingQuestions, gameSize));
+      setActive(selectPrimaryQuestionTimer(pendingQuestions, sessionRules));
     };
 
     refresh();
     const interval = window.setInterval(refresh, 1000);
     return () => window.clearInterval(interval);
-  }, [gameSize, pendingQuestions]);
+  }, [sessionRules, pendingQuestions]);
 
   if (!active) {
     return null;

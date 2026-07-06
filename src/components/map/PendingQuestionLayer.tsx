@@ -1,7 +1,7 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import { Marker } from "react-leaflet";
 import type { GameArea } from "../../domain/annotations";
-import type { GameSize } from "../../domain/gameSize";
+import type { SessionRulesInput } from "../../domain/sessionRules";
 import { buildPendingQuestionOverlays } from "../../domain/pendingQuestionOverlays";
 import {
   formatAnswerCountdown,
@@ -15,13 +15,13 @@ import { createCountdownBadgeIcon } from "./mapIcons";
 interface PendingQuestionLayerProps {
   pendingQuestions: readonly PendingQuestionRecord[];
   gameArea: GameArea;
-  gameSize: GameSize;
+  sessionRules: SessionRulesInput;
 }
 
 export const PendingQuestionLayer = memo(function PendingQuestionLayer({
   pendingQuestions,
   gameArea,
-  gameSize,
+  sessionRules,
 }: PendingQuestionLayerProps) {
   const [nowMs, setNowMs] = useState(() => Date.now());
 
@@ -56,7 +56,10 @@ export const PendingQuestionLayer = memo(function PendingQuestionLayer({
         return [];
       }
 
-      const deadlineMs = questionAnswerDeadlineMs(question.toolType, gameSize);
+      const deadlineMs = questionAnswerDeadlineMs(
+        question.toolType,
+        sessionRules,
+      );
       const expired =
         question.deadlineExpiredAt !== undefined ||
         isQuestionAnswerDeadlineExpired(
@@ -79,7 +82,7 @@ export const PendingQuestionLayer = memo(function PendingQuestionLayer({
         },
       ];
     });
-  }, [gameSize, nowMs, overlayResults, pendingQuestions]);
+  }, [sessionRules, nowMs, overlayResults, pendingQuestions]);
 
   if (overlays.length === 0 && badges.length === 0) {
     return null;

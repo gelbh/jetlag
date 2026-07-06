@@ -4,18 +4,19 @@ import { ThermometerPanel } from "../../components/tools/ThermometerPanel";
 import type { LatLngTuple } from "../../domain/geometry";
 import { distanceBetweenPoints } from "../../domain/geometry";
 import { isActive, type AnnotationRecord } from "../../domain/annotations";
-import type { GameSize } from "../../domain/gameSize";
+import type { SessionRulesInput } from "../../domain/sessionRules";
+import { sessionGameSize } from "../../domain/sessionRules";
 import { hasOpenPendingQuestion } from "../../domain/questionRules";
 import type { PendingQuestionRecord } from "../../domain/sessionChat";
 import {
   DEFAULT_THERMOMETER_DISTANCE_METERS,
-  isThermometerDistanceOptionAvailable,
+  availableThermometerDistancePresetsForSession,
+  isThermometerDistanceOptionAvailableForSession,
   thermometerHotterTowards,
   thermometerQuestionPrompt,
   thermometerUseCount,
   type ThermometerAnswer,
 } from "../../domain/thermometerQuestions";
-import { thermometerPresetsMetersForGameSize } from "../../domain/gameSizeRules";
 import type { DistanceUnit } from "../../domain/distance";
 import { hotterColderAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
@@ -32,7 +33,7 @@ type PlacementMode = "gps" | "manual";
 interface UseThermometerToolParams {
   active: boolean;
   annotations: AnnotationRecord[];
-  gameSize: GameSize;
+  sessionRules: SessionRulesInput;
   pendingQuestions?: readonly PendingQuestionRecord[];
   canSubmitQuestion?: boolean;
   createAnnotation: (
@@ -63,7 +64,7 @@ interface UseThermometerToolParams {
 export function useThermometerTool({
   active,
   annotations,
-  gameSize,
+  sessionRules,
   pendingQuestions = [],
   canSubmitQuestion = true,
   createAnnotation,
@@ -88,7 +89,8 @@ export function useThermometerTool({
     null,
   );
   const [thermometerDistanceMeters, setThermometerDistanceMeters] = useState(
-    () => thermometerPresetsMetersForGameSize(gameSize)[0] ??
+    () =>
+      availableThermometerDistancePresetsForSession(sessionRules)[0] ??
       DEFAULT_THERMOMETER_DISTANCE_METERS,
   );
   const [thermometerAnswer, setThermometerAnswer] =
@@ -170,10 +172,10 @@ export function useThermometerTool({
     setWalkingQuestionId(null);
     setThermometerAnswer(null);
     setThermometerDistanceMeters(
-      thermometerPresetsMetersForGameSize(gameSize)[0] ??
+      availableThermometerDistancePresetsForSession(sessionRules)[0] ??
         DEFAULT_THERMOMETER_DISTANCE_METERS,
     );
-  }, [gameSize, walkTracker]);
+  }, [sessionRules, walkTracker]);
 
   const startGpsWalk = useCallback(async () => {
     if (!canSubmitQuestion || hasOpenPendingQuestion(pendingQuestions)) {
@@ -181,7 +183,12 @@ export function useThermometerTool({
       return;
     }
 
-    if (!isThermometerDistanceOptionAvailable(gameSize, thermometerDistanceMeters)) {
+    if (
+      !isThermometerDistanceOptionAvailableForSession(
+        sessionRules,
+        thermometerDistanceMeters,
+      )
+    ) {
       setMapError("That distance is not available for this game size.");
       return;
     }
@@ -222,7 +229,7 @@ export function useThermometerTool({
     awaitHiderAnswer,
     canSubmitQuestion,
     distanceUnit,
-    gameSize,
+    sessionRules,
     gpsReading,
     pendingQuestions,
     sessionId,
@@ -341,7 +348,7 @@ export function useThermometerTool({
   const panel = (
     <ThermometerPanel
       distanceUnit={distanceUnit}
-      gameSize={gameSize}
+      gameSize={sessionGameSize(sessionRules)}
       distanceMeters={thermometerDistanceMeters}
       travelMeters={walkTracker.distanceTraveledMeters ?? thermoTravelMeters}
       answer={thermometerAnswer}

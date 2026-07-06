@@ -19,8 +19,10 @@ import type { ThermometerAnswer } from "./thermometerQuestions";
 import { thermometerQuestionPrompt } from "./thermometerQuestions";
 import type { TentacleExtendedCategoryId } from "./tentacleQuestions";
 import { tentacleAnnotationSummary } from "./tentacleQuestions";
+import type { MapTool } from "./mapToolTypes";
 import type { GameSize } from "./gameSize";
 import type { MemberRoles } from "./playerRole";
+import type { ThermometerDistanceOptionMiles } from "./thermometerQuestions";
 
 export type { GameSize } from "./gameSize";
 export type { MemberRoles, PlayerRole } from "./playerRole";
@@ -129,6 +131,14 @@ export interface SessionRecord {
   memberRoles?: MemberRoles;
   gameSize?: GameSize;
   hidingZoneRadiusMeters?: number;
+  hidingPeriodMinutes?: number;
+  photoAnswerDeadlineMinutes?: number;
+  questionAnswerDeadlineMinutes?: number;
+  disabledTools?: readonly Exclude<MapTool, "none">[];
+  tentaclesEnabled?: boolean;
+  thermometerPresetMiles?: readonly ThermometerDistanceOptionMiles[];
+  tentacleMediumRadiusMeters?: number;
+  tentacleLargeRadiusMeters?: number;
   tier?: SessionTier;
   transitMetroId?: string;
   endedAt?: string;

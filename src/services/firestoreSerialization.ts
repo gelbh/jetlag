@@ -5,8 +5,23 @@ import type {
   SessionRecord,
   SessionTier,
 } from "../domain/annotations";
+import type { SessionRulesPatch } from "../domain/advancedSessionSettings";
 import type { GameSize } from "../domain/gameSize";
 import { hidingZoneRadiusMeters } from "../domain/gameSize";
+import {
+  parseDisabledTools,
+  parseThermometerPresetMiles,
+  clampHidingPeriodMinutes,
+  clampPhotoAnswerDeadlineMinutes,
+  clampQuestionAnswerDeadlineMinutes,
+  clampTentacleRadiusMeters,
+  HIDING_PERIOD_MINUTES_MIN,
+  HIDING_PERIOD_MINUTES_MAX,
+  PHOTO_ANSWER_DEADLINE_MINUTES_MIN,
+  PHOTO_ANSWER_DEADLINE_MINUTES_MAX,
+  QUESTION_ANSWER_DEADLINE_MINUTES_MIN,
+  QUESTION_ANSWER_DEADLINE_MINUTES_MAX,
+} from "../domain/sessionRules";
 import type { MemberRoles, PlayerRole } from "../domain/playerRole";
 import type { HidingZoneRecord } from "../domain/hidingZone";
 import type {
@@ -233,6 +248,63 @@ function parseGameSize(value: unknown): GameSize | undefined {
   return undefined;
 }
 
+function parseOptionalMinutes(
+  value: unknown,
+  min: number,
+  max: number,
+  clamp: (minutes: number) => number,
+): number | undefined {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return undefined;
+  }
+
+  const clamped = clamp(value);
+  if (clamped < min || clamped > max) {
+    return undefined;
+  }
+
+  return clamped;
+}
+
+export function sessionRulesPatchToFirestore(
+  patch: SessionRulesPatch,
+): Record<string, unknown> {
+  const payload: Record<string, unknown> = {};
+
+  if (typeof patch.hidingZoneRadiusMeters === "number") {
+    payload.hidingZoneRadiusMeters = patch.hidingZoneRadiusMeters;
+  }
+  if (typeof patch.hidingPeriodMinutes === "number") {
+    payload.hidingPeriodMinutes = patch.hidingPeriodMinutes;
+  }
+  if (typeof patch.photoAnswerDeadlineMinutes === "number") {
+    payload.photoAnswerDeadlineMinutes = patch.photoAnswerDeadlineMinutes;
+  }
+  if (typeof patch.questionAnswerDeadlineMinutes === "number") {
+    payload.questionAnswerDeadlineMinutes = patch.questionAnswerDeadlineMinutes;
+  }
+  if (patch.disabledTools !== undefined) {
+    payload.disabledTools = patch.disabledTools.length > 0 ? [...patch.disabledTools] : [];
+  }
+  if (typeof patch.tentaclesEnabled === "boolean") {
+    payload.tentaclesEnabled = patch.tentaclesEnabled;
+  }
+  if (patch.thermometerPresetMiles !== undefined) {
+    payload.thermometerPresetMiles =
+      patch.thermometerPresetMiles.length > 0
+        ? [...patch.thermometerPresetMiles]
+        : [];
+  }
+  if (typeof patch.tentacleMediumRadiusMeters === "number") {
+    payload.tentacleMediumRadiusMeters = patch.tentacleMediumRadiusMeters;
+  }
+  if (typeof patch.tentacleLargeRadiusMeters === "number") {
+    payload.tentacleLargeRadiusMeters = patch.tentacleLargeRadiusMeters;
+  }
+
+  return payload;
+}
+
 export function buildSessionDocument(
   code: string,
   gameArea: GameArea,
@@ -242,11 +314,11 @@ export function buildSessionDocument(
   transitMetroId?: string,
   hostRole: PlayerRole = "seeker",
   gameSize: GameSize = "medium",
-  hidingZoneRadiusOverrideMeters?: number,
+  rulesPatch: SessionRulesPatch = {},
 ): Record<string, unknown> {
   const radiusMeters =
-    typeof hidingZoneRadiusOverrideMeters === "number"
-      ? hidingZoneRadiusOverrideMeters
+    typeof rulesPatch.hidingZoneRadiusMeters === "number"
+      ? rulesPatch.hidingZoneRadiusMeters
       : hidingZoneRadiusMeters(gameSize);
   const payload: Record<string, unknown> = {
     code,
@@ -261,6 +333,7 @@ export function buildSessionDocument(
     status: "active",
     timerAccumulatedMs: 0,
     timerRunningSince: null,
+    ...sessionRulesPatchToFirestore(rulesPatch),
   };
 
   if (transitMetroId) {
@@ -291,6 +364,40 @@ export function deserializeSessionFromFirestore(
     hidingZoneRadiusMeters:
       typeof data.hidingZoneRadiusMeters === "number"
         ? data.hidingZoneRadiusMeters
+        : undefined,
+    hidingPeriodMinutes: parseOptionalMinutes(
+      data.hidingPeriodMinutes,
+      HIDING_PERIOD_MINUTES_MIN,
+      HIDING_PERIOD_MINUTES_MAX,
+      clampHidingPeriodMinutes,
+    ),
+    photoAnswerDeadlineMinutes: parseOptionalMinutes(
+      data.photoAnswerDeadlineMinutes,
+      PHOTO_ANSWER_DEADLINE_MINUTES_MIN,
+      PHOTO_ANSWER_DEADLINE_MINUTES_MAX,
+      clampPhotoAnswerDeadlineMinutes,
+    ),
+    questionAnswerDeadlineMinutes: parseOptionalMinutes(
+      data.questionAnswerDeadlineMinutes,
+      QUESTION_ANSWER_DEADLINE_MINUTES_MIN,
+      QUESTION_ANSWER_DEADLINE_MINUTES_MAX,
+      clampQuestionAnswerDeadlineMinutes,
+    ),
+    disabledTools: parseDisabledTools(data.disabledTools),
+    tentaclesEnabled:
+      typeof data.tentaclesEnabled === "boolean"
+        ? data.tentaclesEnabled
+        : undefined,
+    thermometerPresetMiles: parseThermometerPresetMiles(
+      data.thermometerPresetMiles,
+    ),
+    tentacleMediumRadiusMeters:
+      typeof data.tentacleMediumRadiusMeters === "number"
+        ? clampTentacleRadiusMeters(data.tentacleMediumRadiusMeters)
+        : undefined,
+    tentacleLargeRadiusMeters:
+      typeof data.tentacleLargeRadiusMeters === "number"
+        ? clampTentacleRadiusMeters(data.tentacleLargeRadiusMeters)
         : undefined,
     tier: parseSessionTier(data.tier),
     transitMetroId:

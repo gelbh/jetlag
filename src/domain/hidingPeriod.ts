@@ -1,26 +1,37 @@
 import type { GameSize } from "./gameSize";
-import { hidingPeriodMs } from "./gameSizeRules";
+import type { SessionRulesInput } from "./sessionRules";
+import { resolveHidingPeriodMs } from "./sessionRules";
 
 export function hidingPeriodRemainingMs(
-  gameSize: GameSize,
+  sessionOrGameSize: SessionRulesInput | GameSize,
   elapsedMs: number,
 ): number {
-  return Math.max(0, hidingPeriodMs(gameSize) - elapsedMs);
+  const periodMs =
+    typeof sessionOrGameSize === "string"
+      ? resolveHidingPeriodMs({ gameSize: sessionOrGameSize })
+      : resolveHidingPeriodMs(sessionOrGameSize);
+
+  return Math.max(0, periodMs - elapsedMs);
 }
 
 export function isHidingPeriodActive(
-  gameSize: GameSize,
+  sessionOrGameSize: SessionRulesInput | GameSize,
   elapsedMs: number,
 ): boolean {
-  return hidingPeriodRemainingMs(gameSize, elapsedMs) > 0;
+  return hidingPeriodRemainingMs(sessionOrGameSize, elapsedMs) > 0;
 }
 
 /** Seek-phase clock: elapsed time since hiding period ended (display-only offset). */
 export function seekPhaseElapsedMs(
-  gameSize: GameSize,
+  sessionOrGameSize: SessionRulesInput | GameSize,
   elapsedMs: number,
 ): number {
-  return Math.max(0, elapsedMs - hidingPeriodMs(gameSize));
+  const periodMs =
+    typeof sessionOrGameSize === "string"
+      ? resolveHidingPeriodMs({ gameSize: sessionOrGameSize })
+      : resolveHidingPeriodMs(sessionOrGameSize);
+
+  return Math.max(0, elapsedMs - periodMs);
 }
 
 export function formatHidingPeriodCountdown(remainingMs: number): string {

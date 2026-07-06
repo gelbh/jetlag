@@ -19,6 +19,7 @@ import type {
 } from "../domain/annotations";
 import type { GameSize } from "../domain/gameSize";
 import { hidingZoneRadiusMeters } from "../domain/gameSize";
+import type { SessionRulesPatch } from "../domain/advancedSessionSettings";
 import type { PlayerRole } from "../domain/playerRole";
 import { timerStateToRemote, type TimerState } from "../domain/timer";
 import { getFirestoreDb } from "./firebase";
@@ -27,6 +28,7 @@ import {
   buildSessionDocument,
   deserializeAnnotationFromFirestore,
   deserializeSessionFromFirestore,
+  sessionRulesPatchToFirestore,
 } from "./firestoreSerialization";
 import { generateSessionCode } from "./sessionCodes";
 
@@ -74,7 +76,7 @@ export async function createRemoteSession(
   transitMetroId?: string,
   hostRole: PlayerRole = "seeker",
   gameSize: GameSize = "medium",
-  hidingZoneRadiusOverrideMeters?: number,
+  rulesPatch: SessionRulesPatch = {},
 ): Promise<SessionRecord> {
   let code = generateSessionCode();
   let attempts = 0;
@@ -92,8 +94,8 @@ export async function createRemoteSession(
   const sessionRef = doc(sessionsCollection());
   const createdAt = new Date().toISOString();
   const radiusMeters =
-    typeof hidingZoneRadiusOverrideMeters === "number"
-      ? hidingZoneRadiusOverrideMeters
+    typeof rulesPatch.hidingZoneRadiusMeters === "number"
+      ? rulesPatch.hidingZoneRadiusMeters
       : hidingZoneRadiusMeters(gameSize);
   const session: SessionRecord = {
     id: sessionRef.id,
@@ -107,6 +109,7 @@ export async function createRemoteSession(
     hidingZoneRadiusMeters: radiusMeters,
     tier,
     transitMetroId,
+    ...rulesPatch,
   };
 
   await setDoc(sessionRef, {
@@ -119,7 +122,7 @@ export async function createRemoteSession(
       transitMetroId,
       hostRole,
       gameSize,
-      radiusMeters,
+      rulesPatch,
     ),
     createdAtServer: serverTimestamp(),
   });
@@ -253,6 +256,16 @@ export async function updateSessionTimer(
   state: TimerState,
 ): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), timerStateToRemote(state));
+}
+
+export async function updateSessionRules(
+  sessionId: string,
+  patch: SessionRulesPatch,
+): Promise<void> {
+  await updateDoc(
+    doc(sessionsCollection(), sessionId),
+    sessionRulesPatchToFirestore(patch),
+  );
 }
 
 export function subscribeToSession(

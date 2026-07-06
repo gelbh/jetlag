@@ -11,7 +11,7 @@ describe("useTentacleTool", () => {
         active: true,
         annotations: mocks.annotations,
         gameArea: mocks.gameArea,
-        gameSize: "medium",
+        sessionRules: { gameSize: "medium" },
         createAnnotation: mocks.createAnnotation,
         distanceUnit: mocks.distanceUnit,
         finishPlacement: mocks.finishPlacement,

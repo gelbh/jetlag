@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { GameSize } from "../../domain/gameSize";
+import type { SessionRulesInput } from "../../domain/sessionRules";
 import type { HiderTruthResult } from "../../domain/hiderTruthAnswer";
 import type {
   PendingQuestionRecord,
@@ -106,7 +106,7 @@ interface ChatPanelProps {
   onClose: () => void;
   messages: readonly SessionMessageRecord[];
   pendingQuestions?: readonly PendingQuestionRecord[];
-  gameSize?: GameSize;
+  sessionRules?: SessionRulesInput;
   sessionId: string;
   senderUid: string;
   senderRole: PlayerRole;
@@ -129,7 +129,7 @@ export function ChatPanel({
   onClose,
   messages,
   pendingQuestions = [],
-  gameSize = "medium",
+  sessionRules = { gameSize: "medium" },
   sessionId,
   senderUid,
   senderRole,
@@ -202,7 +202,7 @@ export function ChatPanel({
             <GameChatTab
               messages={messages}
               pendingQuestions={pendingQuestions}
-              gameSize={gameSize}
+              sessionRules={sessionRules}
               sessionId={sessionId}
               isHider={isHider}
               senderUid={senderUid}

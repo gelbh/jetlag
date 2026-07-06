@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { GameSize } from "../../domain/gameSize";
+import type { SessionRulesInput } from "../../domain/sessionRules";
 import { getPowerProfile } from "../../domain/powerProfile";
 import {
   computeElapsedMs,
@@ -18,7 +18,7 @@ import { selectPrimaryQuestionTimer } from "../../domain/questionTimerDisplay";
 import { useMapStore } from "../../state/mapStore";
 
 interface MapTimerClusterProps {
-  gameSize: GameSize;
+  sessionRules: SessionRulesInput;
   timerState: TimerState;
   timerRunning: boolean;
   timerHasStarted: boolean;
@@ -27,9 +27,12 @@ interface MapTimerClusterProps {
   timerMenuOpen: boolean;
 }
 
-function formatSeekPhaseTime(gameSize: GameSize, timerState: TimerState): string {
+function formatSeekPhaseTime(
+  sessionRules: SessionRulesInput,
+  timerState: TimerState,
+): string {
   const elapsed = computeElapsedMs(timerState);
-  return formatElapsedTime(seekPhaseElapsedMs(gameSize, elapsed));
+  return formatElapsedTime(seekPhaseElapsedMs(sessionRules, elapsed));
 }
 
 function formatSessionElapsedDuringHiding(timerState: TimerState): string {
@@ -37,7 +40,7 @@ function formatSessionElapsedDuringHiding(timerState: TimerState): string {
 }
 
 export function MapTimerCluster({
-  gameSize,
+  sessionRules,
   timerState,
   timerRunning,
   timerHasStarted,
@@ -69,10 +72,10 @@ export function MapTimerCluster({
   }
 
   const elapsed = computeElapsedMs(timerState);
-  const hidingActive = isHidingPeriodActive(gameSize, elapsed);
-  const hidingRemaining = hidingPeriodRemainingMs(gameSize, elapsed);
+  const hidingActive = isHidingPeriodActive(sessionRules, elapsed);
+  const hidingRemaining = hidingPeriodRemainingMs(sessionRules, elapsed);
   const hidingLabel = formatHidingPeriodCountdown(hidingRemaining);
-  const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, gameSize);
+  const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules);
   const tickerRunningClass = timerRunning
     ? "jl-ticker-active"
     : "jl-ticker-idle";
@@ -102,7 +105,7 @@ export function MapTimerCluster({
           >
             <span className="jl-ticker-phase">SEEK</span>
             <span className="jl-ticker-value tabular-nums">
-              {formatSeekPhaseTime(gameSize, timerState)}
+              {formatSeekPhaseTime(sessionRules, timerState)}
             </span>
           </button>
         )}
@@ -146,7 +149,7 @@ export function MapTimerCluster({
       >
         <span className="jl-ticker-phase">SEEK</span>
         <span className="jl-ticker-value tabular-nums">
-          {formatSeekPhaseTime(gameSize, timerState)}
+          {formatSeekPhaseTime(sessionRules, timerState)}
         </span>
       </button>
     </div>

@@ -680,4 +680,70 @@ describe("firestore.rules", () => {
         }),
     );
   });
+
+  it("allows host to update session rules before timer starts", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          hidingPeriodMinutes: 45,
+          hidingZoneRadiusMeters: milesToMeters(0.25),
+        }),
+    );
+  });
+
+  it("rejects session rules update after timer has started", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          timerAccumulatedMs: 1000,
+          timerRunningSince: null,
+        }),
+      );
+
+    await assertFails(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          hidingPeriodMinutes: 45,
+          hidingZoneRadiusMeters: milesToMeters(0.25),
+        }),
+    );
+  });
+
+  it("rejects non-host session rules update", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+
+    const guest = testEnv.authenticatedContext("guest-1");
+    await assertFails(
+      guest
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          hidingPeriodMinutes: 45,
+          hidingZoneRadiusMeters: milesToMeters(0.25),
+        }),
+    );
+  });
 });

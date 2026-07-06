@@ -11,6 +11,11 @@ import { SettingsToggleRow } from "./SettingsToggleRow";
 import { LayerVisibilityGrid } from "./LayerVisibilityGrid";
 import type { TransitRouteFilter } from "../../domain/transit";
 import type { DistanceUnit } from "../../domain/distance";
+import type { GameSize } from "../../domain/gameSize";
+import {
+  type AdvancedSessionSettingsValue,
+} from "../../domain/advancedSessionSettings";
+import { AdvancedSessionSettings } from "./AdvancedSessionSettings";
 import type { MapStyle } from "../../domain/mapBasemaps";
 import type { LayerVisibility } from "../../state/sessionStore";
 import type { NotificationPreferences } from "../../domain/notifications";
@@ -66,6 +71,12 @@ interface MapSettingsSheetProps {
     patch: Partial<NotificationPreferences>,
   ) => void;
   onEnableNotifications?: () => Promise<boolean>;
+  gameRulesEditable?: boolean;
+  gameSize?: GameSize;
+  advancedSettings?: AdvancedSessionSettingsValue;
+  onAdvancedSettingsChange?: (value: AdvancedSessionSettingsValue) => void;
+  onSaveGameRules?: () => void | Promise<void>;
+  gameRulesSaveLabel?: string;
 }
 
 export function MapSettingsSheet({
@@ -113,6 +124,12 @@ export function MapSettingsSheet({
   nativeNotificationsSupported = isNativeNotificationsSupported(),
   onNotificationPreferencesChange,
   onEnableNotifications,
+  gameRulesEditable = false,
+  gameSize = "medium",
+  advancedSettings,
+  onAdvancedSettingsChange,
+  onSaveGameRules,
+  gameRulesSaveLabel = "Save game rules",
 }: MapSettingsSheetProps) {
   const [segment, setSegment] = useState<SettingsSegment>("map");
   useScrollLock(open);
@@ -199,6 +216,33 @@ export function MapSettingsSheet({
               layerVisibility={layerVisibility}
               onLayerVisibilityChange={onLayerVisibilityChange}
             />
+          ) : null}
+
+          {segment === "rules" && advancedSettings && onAdvancedSettingsChange ? (
+            <div className="space-y-3">
+              {!gameRulesEditable ? (
+                <p className="border-2 border-border bg-surface-deep px-3 py-2 text-sm text-ink-muted">
+                  Game rules lock after the timer starts. Host can edit before
+                  start.
+                </p>
+              ) : null}
+              <AdvancedSessionSettings
+                gameSize={gameSize}
+                value={advancedSettings}
+                onChange={onAdvancedSettingsChange}
+                disabled={!gameRulesEditable}
+                collapsible={false}
+              />
+              {gameRulesEditable && onSaveGameRules ? (
+                <button
+                  type="button"
+                  onClick={() => void onSaveGameRules()}
+                  className="btn-primary min-h-11 w-full"
+                >
+                  {gameRulesSaveLabel}
+                </button>
+              ) : null}
+            </div>
           ) : null}
 
           {segment === "session" ? (

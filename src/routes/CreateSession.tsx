@@ -21,7 +21,7 @@ import { RolePicker } from "../components/session/RolePicker";
 import { GameSizePicker } from "../components/session/GameSizePicker";
 import {
   defaultAdvancedSessionSettings,
-  resolveAdvancedHidingZoneRadiusMeters,
+  sessionRulesPatchFromAdvancedSettings,
 } from "../domain/advancedSessionSettings";
 import { AdvancedSessionSettings } from "../components/session/AdvancedSessionSettings";
 import { useSessionStore, useMapStore } from "../state/sessionStore";
@@ -319,6 +319,11 @@ export function CreateSession() {
         }
       }
 
+      const rulesPatch = sessionRulesPatchFromAdvancedSettings(
+        gameSize,
+        advancedSettings,
+      );
+
       if (isFirebaseConfigured()) {
         const user = await retryAsync(() => ensureAnonymousUser());
         const session = await retryAsync(() =>
@@ -329,7 +334,7 @@ export function CreateSession() {
             metroId,
             playerRole,
             gameSize,
-            resolveAdvancedHidingZoneRadiusMeters(gameSize, advancedSettings),
+            rulesPatch,
           ),
         );
         setSession(session, user.uid);
@@ -343,11 +348,12 @@ export function CreateSession() {
           memberUids: [],
           memberRoles: { local: playerRole },
           gameSize,
-          hidingZoneRadiusMeters:
-            resolveAdvancedHidingZoneRadiusMeters(gameSize, advancedSettings) ??
-            hidingZoneRadiusMeters(gameSize),
           tier: "free" as const,
           transitMetroId: metroId,
+          ...rulesPatch,
+          hidingZoneRadiusMeters:
+            rulesPatch.hidingZoneRadiusMeters ??
+            hidingZoneRadiusMeters(gameSize),
         };
         setSession(localSession, "local");
         setPremiumApiContext(localSession);

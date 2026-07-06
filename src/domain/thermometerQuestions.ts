@@ -7,6 +7,11 @@ import type { AnnotationRecord } from "./annotations";
 import type { GameSize } from "./gameSize";
 import { thermometerPresetsMetersForGameSize } from "./gameSizeRules";
 import {
+  resolveIsThermometerPresetAvailable,
+  resolveThermometerPresetsMeters,
+  type SessionRulesInput,
+} from "./sessionRules";
+import {
   collectUsedAnnotationOptions,
   firstUnusedPreset,
   isPresetOptionAvailable,
@@ -102,6 +107,19 @@ export function availableThermometerDistancePresets(
     const presetMiles = thermometerPresetMilesForMeters(presetMeters);
     return presetMiles !== null && !gameSizeOrUsedOptions.has(presetMiles);
   });
+}
+
+export function availableThermometerDistancePresetsForSession(
+  session: SessionRulesInput,
+): number[] {
+  return resolveThermometerPresetsMeters(session);
+}
+
+export function isThermometerDistanceOptionAvailableForSession(
+  session: SessionRulesInput,
+  distanceMeters: number,
+): boolean {
+  return resolveIsThermometerPresetAvailable(session, distanceMeters);
 }
 
 export function thermometerDistanceLabel(

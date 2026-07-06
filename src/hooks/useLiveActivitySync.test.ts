@@ -56,7 +56,7 @@ describe("useLiveActivitySync", () => {
       useLiveActivitySync({
         enabled: true,
         sessionId: "session-1",
-        gameSize: "medium",
+        sessionRules: { gameSize: "medium" },
         timerState: { accumulatedMs: 0, runningSince: null },
         timerHasStarted: false,
         pendingQuestions,
@@ -99,7 +99,9 @@ describe("selectPrimaryQuestionTimer", () => {
       },
     ];
 
-    const timer = selectPrimaryQuestionTimer(pendingQuestions, "medium");
+    const timer = selectPrimaryQuestionTimer(pendingQuestions, {
+      gameSize: "medium",
+    });
     expect(timer?.countdownLabel).toBe("WALKING");
   });
 });

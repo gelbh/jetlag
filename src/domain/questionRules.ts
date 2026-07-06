@@ -1,8 +1,8 @@
-import type { AnnotationRecord } from "./annotations";
+import type { AnnotationRecord, SessionRecord } from "./annotations";
 import type { QuestionCardCost } from "./mapTools";
 import type { GameSize } from "./gameSize";
-import { answerDeadlineMs } from "./gameSizeRules";
 import type { PendingQuestionRecord, PendingQuestionToolType } from "./sessionChat";
+import { resolveAnswerDeadlineMs } from "./sessionRules";
 
 export type QuestionToolType = Extract<
   PendingQuestionToolType,
@@ -36,9 +36,18 @@ export function hasOpenPendingQuestion(
 
 export function questionAnswerDeadlineMs(
   toolType: PendingQuestionToolType,
-  gameSize: GameSize,
+  sessionOrGameSize: Pick<
+    SessionRecord,
+    | "gameSize"
+    | "photoAnswerDeadlineMinutes"
+    | "questionAnswerDeadlineMinutes"
+  > | GameSize,
 ): number {
-  return answerDeadlineMs(toolType, gameSize);
+  if (typeof sessionOrGameSize === "string") {
+    return resolveAnswerDeadlineMs({ gameSize: sessionOrGameSize }, toolType);
+  }
+
+  return resolveAnswerDeadlineMs(sessionOrGameSize, toolType);
 }
 
 export function formatAnswerCountdown(

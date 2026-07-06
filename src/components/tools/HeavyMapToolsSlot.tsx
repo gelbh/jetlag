@@ -3,7 +3,7 @@ import type { AnnotationRecord } from "../../domain/annotations";
 import type { AnnotationType, GameArea } from "../../domain/annotations";
 import type { LatLngTuple } from "../../domain/geometry";
 import type { DistanceUnit } from "../../domain/distance";
-import type { GameSize } from "../../domain/gameSize";
+import type { SessionRulesInput } from "../../domain/sessionRules";
 import type { MapTool } from "../../state/sessionStore";
 import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
 import { useMatchingTool } from "../../hooks/tools/useMatchingTool";
@@ -18,7 +18,7 @@ import {
 } from "../../hooks/map-screen/heavyMapTools";
 
 interface HeavyMapToolsSlotProps {
-  gameSize: GameSize;
+  sessionRules: SessionRulesInput;
   activeTool: MapTool;
   annotations: AnnotationRecord[];
   gameArea: GameArea;

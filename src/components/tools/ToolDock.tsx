@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import type { MapStyle } from "../../domain/mapBasemaps";
 import type { GameSize } from "../../domain/gameSize";
 import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
-import { toolDockEnabled } from "../../domain/gameSizeRules";
+import type { SessionRulesInput } from "../../domain/sessionRules";
+import { resolveToolDockEnabled } from "../../domain/sessionRules";
 import {
   MAP_TOOL_DOCK_ENTRIES,
   MARKUP_DOCK_TOOL_IDS,
@@ -29,6 +30,7 @@ import { ToolOverflowSheet } from "./ToolOverflowSheet";
 
 interface ToolDockProps {
   activeTool: MapTool;
+  sessionRules?: SessionRulesInput;
   gameSize?: GameSize;
   hasHiders?: boolean;
   onSelect: (tool: MapTool) => void;
@@ -49,6 +51,7 @@ const markupTools = MAP_TOOL_DOCK_ENTRIES.filter((tool) =>
 
 export function ToolDock({
   activeTool,
+  sessionRules,
   gameSize = "medium",
   hasHiders = false,
   onSelect,
@@ -121,8 +124,10 @@ export function ToolDock({
   const mapStyleLabel =
     mapStyle === "standard" ? "Switch to satellite view" : "Switch to map view";
 
+  const rulesInput = sessionRules ?? { gameSize };
+
   const visibleQuestionTools = QUESTION_DOCK_TOOL_IDS.filter((toolId) =>
-    toolDockEnabled(toolId, gameSize, { hasHiders }),
+    resolveToolDockEnabled(rulesInput, toolId, { hasHiders }),
   );
 
   const moreMenuActive =

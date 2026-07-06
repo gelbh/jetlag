@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { GameSize } from "../domain/gameSize";
+import type { SessionRulesInput } from "../domain/sessionRules";
 import type { HidingZoneRecord } from "../domain/hidingZone";
 import {
   isQuestionAnswerDeadlineExpired,
@@ -14,7 +14,7 @@ const DEADLINE_EXPIRED_MESSAGE =
 interface UseQuestionDeadlineEnforcementParams {
   sessionId: string | undefined;
   enabled: boolean;
-  gameSize: GameSize;
+  sessionRules: SessionRulesInput;
   pendingQuestions: readonly PendingQuestionRecord[];
   hidingZones: readonly HidingZoneRecord[];
   timerRunning: boolean;
@@ -32,7 +32,7 @@ function hasMoveInProgress(
 export function useQuestionDeadlineEnforcement({
   sessionId,
   enabled,
-  gameSize,
+  sessionRules,
   pendingQuestions,
   hidingZones,
   timerRunning,
@@ -61,7 +61,10 @@ export function useQuestionDeadlineEnforcement({
       );
 
       for (const question of openQuestions) {
-        const deadlineMs = questionAnswerDeadlineMs(question.toolType, gameSize);
+        const deadlineMs = questionAnswerDeadlineMs(
+          question.toolType,
+          sessionRules,
+        );
         const expired =
           question.deadlineExpiredAt !== undefined ||
           isQuestionAnswerDeadlineExpired(
@@ -122,7 +125,7 @@ export function useQuestionDeadlineEnforcement({
     return () => window.clearInterval(interval);
   }, [
     enabled,
-    gameSize,
+    sessionRules,
     hidingZones,
     pauseTimer,
     pendingQuestions,

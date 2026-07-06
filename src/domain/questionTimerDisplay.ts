@@ -1,4 +1,4 @@
-import type { GameSize } from "./gameSize";
+import type { SessionRulesInput } from "./sessionRules";
 import { questionAnswerDeadlineMs } from "./questionRules";
 import type { PendingQuestionRecord } from "./sessionChat";
 import { mapToolDockShortLabel } from "./mapTools";
@@ -17,7 +17,7 @@ function toolLabelForQuestion(question: PendingQuestionRecord): string {
 
 export function selectPrimaryQuestionTimer(
   pendingQuestions: readonly PendingQuestionRecord[],
-  gameSize: GameSize,
+  sessionRules: SessionRulesInput,
   nowMs: number = Date.now(),
 ): ActiveQuestionTimer | null {
   let best: ActiveQuestionTimer | null = null;
@@ -47,7 +47,7 @@ export function selectPrimaryQuestionTimer(
       continue;
     }
 
-    const deadlineMs = questionAnswerDeadlineMs(question.toolType, gameSize);
+    const deadlineMs = questionAnswerDeadlineMs(question.toolType, sessionRules);
     const elapsed = nowMs - Date.parse(question.answerableAt);
     const remainingMs = deadlineMs - elapsed;
 

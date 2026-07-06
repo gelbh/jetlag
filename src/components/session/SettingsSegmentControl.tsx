@@ -1,8 +1,9 @@
-export type SettingsSegment = "map" | "layers" | "session";
+export type SettingsSegment = "map" | "layers" | "rules" | "session";
 
 const SEGMENTS: ReadonlyArray<{ id: SettingsSegment; label: string }> = [
   { id: "map", label: "Map" },
   { id: "layers", label: "Layers" },
+  { id: "rules", label: "Rules" },
   { id: "session", label: "Session" },
 ];
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { GameSize } from "../../domain/gameSize";
+import type { SessionRulesInput } from "../../domain/sessionRules";
 import {
   formatHidingPeriodCountdown,
   hidingPeriodRemainingMs,
@@ -11,13 +11,13 @@ import {
 } from "../../domain/timer";
 
 interface HidingPeriodLabelProps {
-  gameSize: GameSize;
+  sessionRules: SessionRulesInput;
   timerState: TimerState;
   timerHasStarted: boolean;
 }
 
 export function HidingPeriodLabel({
-  gameSize,
+  sessionRules,
   timerState,
   timerHasStarted,
 }: HidingPeriodLabelProps) {
@@ -43,7 +43,7 @@ export function HidingPeriodLabel({
   }
 
   const remaining = hidingPeriodRemainingMs(
-    gameSize,
+    sessionRules,
     computeElapsedMs(timerState),
   );
 

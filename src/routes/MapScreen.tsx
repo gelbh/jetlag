@@ -52,6 +52,14 @@ import {
   type LatLngTuple,
 } from "../domain/geometry";
 import { LOCAL_SESSION_ID, isPremiumSession } from "../domain/annotations";
+import {
+  advancedSettingsFromSession,
+  mergeSessionRulesPatch,
+  sessionRulesPatchFromAdvancedSettings,
+  type AdvancedSessionSettingsValue,
+} from "../domain/advancedSessionSettings";
+import { resolveToolDockEnabled } from "../domain/sessionRules";
+import { updateSessionRules } from "../services/firestoreAnnotations";
 import { useAnnotations } from "../hooks/useAnnotations";
 import { useSessionTimer } from "../hooks/useSessionTimer";
 import { useRemoteSessionTimerSync } from "../hooks/useRemoteSessionTimerSync";
@@ -109,6 +117,7 @@ const TransitLayer = lazy(() =>
 
 export function MapScreen() {
   const session = useSessionStore((state) => state.session);
+  const setSession = useSessionStore((state) => state.setSession);
   const myRole = useSessionStore((state) => state.myRole);
   const myUid = useSessionStore((state) => state.myUid);
   const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
@@ -229,6 +238,23 @@ export function MapScreen() {
     onControl: onTimerControl,
     remoteState,
   });
+  const [draftAdvancedSettings, setDraftAdvancedSettings] =
+    useState<AdvancedSessionSettingsValue | null>(() =>
+      session ? advancedSettingsFromSession(session) : null,
+    );
+  const [draftSourceSessionId, setDraftSourceSessionId] = useState<string | null>(
+    null,
+  );
+  const currentSessionId = session?.id ?? null;
+
+  if (currentSessionId !== draftSourceSessionId) {
+    setDraftSourceSessionId(currentSessionId);
+    setDraftAdvancedSettings(
+      session ? advancedSettingsFromSession(session) : null,
+    );
+  }
+
+  const gameRulesEditable = isHost && !timer.hasStarted;
   const mapShellRef = useRef<HTMLDivElement>(null);
   const chromeHudRef = useRef<HTMLDivElement>(null);
   const exportLegendRef = useRef<HTMLDivElement>(null);
@@ -277,7 +303,7 @@ export function MapScreen() {
   useLiveActivitySync({
     enabled: Boolean(session?.id),
     sessionId: session?.id,
-    gameSize: session?.gameSize ?? "medium",
+    sessionRules: session ?? { gameSize: "medium" },
     timerState: timer.timerState,
     timerHasStarted: timer.hasStarted,
     pendingQuestions,
@@ -287,7 +313,7 @@ export function MapScreen() {
   useQuestionDeadlineEnforcement({
     sessionId: session?.id,
     enabled: canControlTimer,
-    gameSize: session?.gameSize ?? "medium",
+    sessionRules: session ?? { gameSize: "medium" },
     pendingQuestions,
     hidingZones,
     timerRunning: timer.running,
@@ -431,7 +457,7 @@ export function MapScreen() {
   const thermometerTool = useThermometerTool({
     active: activeTool === "thermometer",
     annotations,
-    gameSize: session?.gameSize ?? "medium",
+    sessionRules: session ?? { gameSize: "medium" },
     pendingQuestions,
     canSubmitQuestion,
     createAnnotation,
@@ -704,6 +730,35 @@ export function MapScreen() {
     setAwaitingPlacement(false);
   }, [cancelGeometryEdit, overlay, setSelectedAnnotationId]);
 
+  const handleSaveGameRules = useCallback(async () => {
+    if (!session || !draftAdvancedSettings || !gameRulesEditable) {
+      return;
+    }
+
+    const gameSize = session.gameSize ?? "medium";
+    const patch = sessionRulesPatchFromAdvancedSettings(
+      gameSize,
+      draftAdvancedSettings,
+    );
+    const merged = mergeSessionRulesPatch(session, patch);
+
+    if (session.id !== LOCAL_SESSION_ID && isRemote) {
+      await updateSessionRules(session.id, {
+        ...patch,
+        hidingZoneRadiusMeters: merged.hidingZoneRadiusMeters,
+      });
+    }
+
+    setSession(merged, uid ?? undefined);
+  }, [
+    draftAdvancedSettings,
+    gameRulesEditable,
+    isRemote,
+    session,
+    setSession,
+    uid,
+  ]);
+
   if (!session?.gameArea) {
     return <Navigate to="/create" replace />;
   }
@@ -723,6 +778,14 @@ export function MapScreen() {
     tentacleTool.placementCrosshair;
 
   const handleSelectTool = (tool: MapTool) => {
+    if (
+      tool !== "none" &&
+      session &&
+      !resolveToolDockEnabled(session, tool, { hasHiders: awaitHiderAnswer })
+    ) {
+      return;
+    }
+
     resetToolDrafts();
     dismissTransientUi();
     setActiveTool(tool);
@@ -794,7 +857,7 @@ export function MapScreen() {
         <Suspense fallback={null}>
           <HeavyMapToolsSlot
             activeTool={activeTool}
-            gameSize={session.gameSize ?? "medium"}
+            sessionRules={session}
             annotations={annotations}
             gameArea={toolGameArea}
             createAnnotation={createAnnotation}
@@ -865,7 +928,7 @@ export function MapScreen() {
           <PendingQuestionLayer
             pendingQuestions={pendingQuestions}
             gameArea={session.gameArea}
-            gameSize={session.gameSize ?? "medium"}
+            sessionRules={session}
           />
           {geometryEditAnnotation && geometryDraft ? (
             <GeometryEditLayer
@@ -893,7 +956,7 @@ export function MapScreen() {
       >
         <MapStatusRail
           sessionCode={session.code}
-          gameSize={session.gameSize ?? "medium"}
+          sessionRules={session}
           playerRole="seeker"
           showPreloadBanner
           activeTool={activeTool}
@@ -931,6 +994,7 @@ export function MapScreen() {
 
         <ToolDock
           activeTool={activeTool}
+          sessionRules={session}
           gameSize={session.gameSize ?? "medium"}
           hasHiders={awaitHiderAnswer}
           onSelect={handleSelectTool}
@@ -1027,6 +1091,11 @@ export function MapScreen() {
         notificationPreferences={notificationPreferences}
         onNotificationPreferencesChange={updateNotificationPreferences}
         onEnableNotifications={enableNotifications}
+        gameRulesEditable={gameRulesEditable && isHost}
+        gameSize={session.gameSize ?? "medium"}
+        advancedSettings={draftAdvancedSettings ?? undefined}
+        onAdvancedSettingsChange={setDraftAdvancedSettings}
+        onSaveGameRules={handleSaveGameRules}
       />
 
       {activeTool !== "none" && !selectedAnnotation ? (
@@ -1082,7 +1151,7 @@ export function MapScreen() {
         onClose={overlay.closeSheet}
         messages={chatMessages}
         pendingQuestions={pendingQuestions}
-        gameSize={session.gameSize ?? "medium"}
+        sessionRules={session}
         sessionId={session.id}
         senderUid={uid ?? ""}
         senderRole="seeker"

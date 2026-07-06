@@ -14,12 +14,13 @@ import {
   tentacleEliminationJsonForAnswer,
 } from "../../domain/tentacleGeometry";
 import type { DistanceUnit } from "../../domain/distance";
-import type { GameSize } from "../../domain/gameSize";
+import type { SessionRulesInput } from "../../domain/sessionRules";
+import { sessionGameSize } from "../../domain/sessionRules";
 import {
-  defaultTentacleCategoryId,
-  firstAvailableTentacleCategoryId,
-  isTentacleCategoryAvailable,
-  tentacleSearchRadiusMeters,
+  defaultTentacleCategoryIdForSession,
+  firstAvailableTentacleCategoryIdForSession,
+  isTentacleCategoryAvailableInSession,
+  tentacleSearchRadiusMetersForSession,
   TENTACLE_NOT_WITHIN_REACH_LABEL,
   tentacleQuestionPrompt,
   usedTentacleCategoryIds,
@@ -35,7 +36,7 @@ interface UseTentacleToolParams {
   active: boolean;
   annotations: AnnotationRecord[];
   gameArea: GameArea;
-  gameSize: GameSize;
+  sessionRules: SessionRulesInput;
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
   ) => Promise<AnnotationRecord>;
@@ -65,7 +66,7 @@ export function useTentacleTool({
   active,
   annotations,
   gameArea,
-  gameSize,
+  sessionRules,
   createAnnotation,
   awaitHiderAnswer = false,
   submitPendingQuestion,
@@ -91,16 +92,18 @@ export function useTentacleTool({
     null,
   );
   const [tentacleCategoryId, setTentacleCategoryId] =
-    useState<TentacleExtendedCategoryId>(defaultTentacleCategoryId(gameSize));
+    useState<TentacleExtendedCategoryId>(
+      defaultTentacleCategoryIdForSession(sessionRules),
+    );
   const [tentaclePois, setTentaclePois] = useState<TentaclePoi[]>([]);
   const [tentacleOutOfReach, setTentacleOutOfReach] = useState(false);
   const [selectedPoiId, setSelectedPoiId] = useState<string | null>(null);
   const [tentacleLoading, setTentacleLoading] = useState(false);
   const [tentacleError, setTentacleError] = useState<string | null>(null);
 
-  const searchRadiusMeters = tentacleSearchRadiusMeters(
+  const searchRadiusMeters = tentacleSearchRadiusMetersForSession(
+    sessionRules,
     tentacleCategoryId,
-    gameSize,
   );
 
   useToolSessionOptions({
@@ -108,9 +111,10 @@ export function useTentacleTool({
     usedOptions: usedTentacleCategories,
     currentOption: tentacleCategoryId,
     isAvailable: (_usedOptions, currentOption) =>
-      isTentacleCategoryAvailable(gameSize, currentOption),
+      isTentacleCategoryAvailableInSession(sessionRules, currentOption),
     pickNext: (usedOptions) =>
-      firstAvailableTentacleCategoryId(gameSize, usedOptions) ?? "museum",
+      firstAvailableTentacleCategoryIdForSession(sessionRules, usedOptions) ??
+      "museum",
     onUnavailable: useCallback(
       (nextCategory: TentacleExtendedCategoryId) => {
         setTentacleCategoryId(nextCategory);
@@ -186,12 +190,14 @@ export function useTentacleTool({
     cancelRequests();
     setTentacleLoading(false);
     setTentacleCenter(null);
-    setTentacleCategoryId(defaultTentacleCategoryId(gameSize, usedTentacleCategories));
+    setTentacleCategoryId(
+      defaultTentacleCategoryIdForSession(sessionRules, usedTentacleCategories),
+    );
     setTentaclePois([]);
     setTentacleOutOfReach(false);
     setSelectedPoiId(null);
     setTentacleError(null);
-  }, [cancelRequests, gameSize, usedTentacleCategories]);
+  }, [cancelRequests, sessionRules, usedTentacleCategories]);
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
@@ -265,7 +271,7 @@ export function useTentacleTool({
       return;
     }
 
-    if (!isTentacleCategoryAvailable(gameSize, tentacleCategoryId)) {
+    if (!isTentacleCategoryAvailableInSession(sessionRules, tentacleCategoryId)) {
       setMapError("That location type is not available for this game size.");
       return;
     }
@@ -374,7 +380,7 @@ export function useTentacleTool({
 
   const panel = (
     <TentaclePanel
-      gameSize={gameSize}
+      gameSize={sessionGameSize(sessionRules)}
       categoryId={tentacleCategoryId}
       searchRadiusMeters={searchRadiusMeters}
       usedCategoryIds={usedTentacleCategories}
