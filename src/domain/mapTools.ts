@@ -1,7 +1,7 @@
 import type { AnnotationRecord } from "./annotations";
 import type { MapTool } from "./mapToolTypes";
 
-export type QuestionCardCost = "D3P1" | "D2P1" | "D4P2";
+export type QuestionCardCost = "D3P1" | "D2P1" | "D4P2" | "D1P1";
 
 export type DockableMapTool = Exclude<MapTool, "none">;
 
@@ -18,6 +18,7 @@ export const MAP_TOOL_DOCK_ENTRIES: readonly MapToolDockEntry[] = [
   { id: "thermometer", name: "Thermometer", cost: "D2P1", enabled: true },
   { id: "radar", name: "Radar", cost: "D2P1", enabled: true },
   { id: "tentacle", name: "Tentacles", cost: "D4P2", enabled: true },
+  { id: "photo", name: "Photo", cost: "D1P1", enabled: true },
   { id: "zone", name: "Zone", enabled: true },
   { id: "pin", name: "Pin", enabled: true },
 ];
@@ -36,6 +37,7 @@ const OVERFLOW_TOOL_HINTS: Partial<Record<DockableMapTool, string>> = {
   thermometer: "Hotter or colder?",
   radar: "Inside or outside a circle?",
   tentacle: "Point-to-point questions",
+  photo: "Send me a photo of…",
 };
 
 const MARKUP_TOOL_HINTS: Partial<Record<DockableMapTool, string>> = {
@@ -55,6 +57,7 @@ export const QUESTION_DOCK_TOOL_IDS = [
   "thermometer",
   "radar",
   "tentacle",
+  "photo",
 ] as const satisfies readonly DockableMapTool[];
 
 export const MARKUP_DOCK_TOOL_IDS = ["zone", "pin"] as const satisfies readonly DockableMapTool[];
@@ -77,6 +80,7 @@ const DOCK_SHORT_LABELS: Record<(typeof QUESTION_DOCK_TOOL_IDS)[number], string>
   thermometer: "Thermo",
   radar: "Radar",
   tentacle: "Tent",
+  photo: "Photo",
 };
 
 export function isQuestionDockTool(

@@ -6,14 +6,18 @@ import {
   questionAnswerDeadlineMs,
 } from "../../domain/questionRules";
 import type { HiderTruthResult } from "../../domain/hiderTruthAnswer";
+import { mapToolDockShortLabel, isQuestionDockTool } from "../../domain/mapTools";
 import type { SessionMessageRecord } from "../../domain/sessionChat";
 import type { PendingQuestionRecord } from "../../domain/sessionChat";
 import { HiderAnswerPicker } from "./HiderAnswerPicker";
+import { PhotoAnswerPreview } from "./PhotoAnswerPreview";
+import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 
 interface GameChatTabProps {
   messages: readonly SessionMessageRecord[];
   pendingQuestions: readonly PendingQuestionRecord[];
   gameSize: GameSize;
+  sessionId: string;
   isHider: boolean;
   senderUid: string;
   questionTruths?: ReadonlyMap<string, HiderTruthResult>;
@@ -43,6 +47,7 @@ export function GameChatTab({
   messages,
   pendingQuestions,
   gameSize,
+  sessionId,
   isHider,
   senderUid,
   questionTruths,
@@ -113,13 +118,19 @@ export function GameChatTab({
             pending?.deadlineExpiredAt !== undefined ||
             countdown === "Time expired — timer paused";
 
+          const isPhotoQuestion = pending?.toolType === "photo";
+          const toolLabel =
+            message.toolType && isQuestionDockTool(message.toolType)
+              ? mapToolDockShortLabel(message.toolType)
+              : (message.toolType ?? "Question");
+
           return (
             <div
               key={message.id}
               className="rounded-xl border border-border bg-surface-deep px-3 py-3"
             >
               <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
-                {message.toolType ?? "Question"}
+                {toolLabel}
               </p>
               <p className="mt-1 text-sm text-ink">{message.promptText}</p>
               {walking ? (
@@ -139,7 +150,20 @@ export function GameChatTab({
                   Answered late — card draw forfeited.
                 </p>
               ) : null}
-              {isHider && !answered && !walking && message.replyOptions ? (
+              {isHider && !answered && !walking && isPhotoQuestion && pending ? (
+                <PhotoAnswerUploader
+                  sessionId={sessionId}
+                  pendingQuestion={pending}
+                  messageId={message.id}
+                  deadlineExpired={expired}
+                  onAnswerQuestion={onAnswerQuestion}
+                />
+              ) : null}
+              {isHider &&
+              !answered &&
+              !walking &&
+              !isPhotoQuestion &&
+              message.replyOptions ? (
                 <HiderAnswerPicker
                   replyOptions={message.replyOptions}
                   truth={
@@ -159,7 +183,9 @@ export function GameChatTab({
                   }
                 />
               ) : null}
-              {answered ? (
+              {answered && isPhotoQuestion ? (
+                <PhotoAnswerPreview answer={pending?.answer} />
+              ) : answered ? (
                 <p className="mt-2 text-xs text-ink-dim">
                   Answered: {message.selectedReply ?? "—"}
                 </p>

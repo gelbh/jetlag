@@ -1,12 +1,12 @@
-import type { AnnotationRecord, AnnotationType } from "./annotations";
+import type { AnnotationRecord } from "./annotations";
 import type { QuestionCardCost } from "./mapTools";
 import type { GameSize } from "./gameSize";
 import { answerDeadlineMs } from "./gameSizeRules";
-import type { PendingQuestionRecord } from "./sessionChat";
+import type { PendingQuestionRecord, PendingQuestionToolType } from "./sessionChat";
 
 export type QuestionToolType = Extract<
-  AnnotationType,
-  "matching" | "measuring" | "radar" | "thermometer" | "tentacle"
+  PendingQuestionToolType,
+  "matching" | "measuring" | "radar" | "thermometer" | "tentacle" | "photo"
 >;
 
 const BASE_COST_MULTIPLIERS: Record<QuestionCardCost, { draw: number; keep: number }> =
@@ -14,6 +14,7 @@ const BASE_COST_MULTIPLIERS: Record<QuestionCardCost, { draw: number; keep: numb
     D3P1: { draw: 3, keep: 1 },
     D2P1: { draw: 2, keep: 1 },
     D4P2: { draw: 4, keep: 2 },
+    D1P1: { draw: 1, keep: 1 },
   };
 
 export function questionCostLabel(
@@ -34,7 +35,7 @@ export function hasOpenPendingQuestion(
 }
 
 export function questionAnswerDeadlineMs(
-  toolType: AnnotationType,
+  toolType: PendingQuestionToolType,
   gameSize: GameSize,
 ): number {
   return answerDeadlineMs(toolType, gameSize);

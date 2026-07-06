@@ -55,6 +55,26 @@ service cloud.firestore {
       return type in ['radar', 'thermometer', 'measuring', 'matching', 'zone', 'pin', 'tentacle'];
     }
 
+    function validPendingQuestionToolType(type) {
+      return validAnnotationType(type) || type == 'photo';
+    }
+
+    function validPhotoAnswer(answer) {
+      return answer == null
+        || answer is string
+        || (
+          answer is map
+          && answer.kind is string
+          && (
+            answer.kind == 'cannot_answer'
+            || (
+              answer.kind == 'photo'
+              && answer.storagePath is string
+            )
+          )
+        );
+    }
+
     function isSessionHost(sessionId) {
       return isSignedIn()
         && request.auth.uid == sessionData(sessionId).hostUid;
@@ -203,7 +223,7 @@ service cloud.firestore {
         allow read: if isSessionMember(sessionId);
         allow create: if isSeekerMember(sessionId)
           && request.resource.data.toolType is string
-          && validAnnotationType(request.resource.data.toolType)
+          && validPendingQuestionToolType(request.resource.data.toolType)
           && request.resource.data.createdByUid == request.auth.uid
           && request.resource.data.createdAt is string
           && request.resource.data.status in ['pending', 'walking']
@@ -215,6 +235,7 @@ service cloud.firestore {
           && resource.data.status == 'pending'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['answer', 'status', 'answeredLate'])
           && request.resource.data.status == 'answered'
+          && validPhotoAnswer(request.resource.data.answer)
         ) || (
           isSeekerMember(sessionId)
           && resource.data.status == 'walking'

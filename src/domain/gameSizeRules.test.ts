@@ -32,6 +32,12 @@ describe("gameSizeRules", () => {
     expect(tentacleOptionsForGameSize("small")).toEqual([]);
   });
 
+  it("requires hiders for photo tool in dock", () => {
+    expect(toolDockEnabled("photo", "medium")).toBe(false);
+    expect(toolDockEnabled("photo", "medium", { hasHiders: false })).toBe(false);
+    expect(toolDockEnabled("photo", "medium", { hasHiders: true })).toBe(true);
+  });
+
   it("exposes medium tentacle categories at 1 mile", () => {
     const options = tentacleOptionsForGameSize("medium");
     expect(options).toHaveLength(4);

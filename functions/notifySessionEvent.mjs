@@ -4,6 +4,7 @@ const TOOL_LABELS = {
   measuring: "Measuring",
   matching: "Matching",
   tentacle: "Tentacles",
+  photo: "Photo",
   zone: "Zone",
   pin: "Pin",
 };

@@ -151,6 +151,15 @@ export function HudTentacleIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function HudPhotoIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="M4 7h3l1.5-2h7L17 7h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z" />
+      <circle cx="12" cy="13" r="3.5" />
+    </IconBase>
+  );
+}
+
 const TOOL_ICONS: Partial<
   Record<DockableMapTool, (props: SVGProps<SVGSVGElement>) => React.ReactElement>
 > = {
@@ -159,6 +168,7 @@ const TOOL_ICONS: Partial<
   thermometer: HudThermometerIcon,
   radar: HudRadarIcon,
   tentacle: HudTentacleIcon,
+  photo: HudPhotoIcon,
   zone: HudZoneIcon,
   pin: HudPinIcon,
 };

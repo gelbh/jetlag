@@ -203,6 +203,7 @@ export function ChatPanel({
               messages={messages}
               pendingQuestions={pendingQuestions}
               gameSize={gameSize}
+              sessionId={sessionId}
               isHider={isHider}
               senderUid={senderUid}
               questionTruths={questionTruths}

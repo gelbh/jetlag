@@ -1,0 +1,125 @@
+import { useCallback, useMemo, useState } from "react";
+import { PhotoPanel } from "../../components/tools/PhotoPanel";
+import type { GameSize } from "../../domain/gameSize";
+import {
+  firstAvailablePhotoCategoryId,
+  isPhotoCategoryAvailableForGameSize,
+  PHOTO_REPLY_OPTIONS,
+  photoCategoryUseCount,
+  photoQuestionPrompt,
+  usedPhotoCategoryIds,
+  type PhotoCategoryId,
+} from "../../domain/photoQuestions";
+import { questionCostLabel } from "../../domain/questionRules";
+import type { SubmitPendingQuestionInput } from "../usePendingQuestionActions";
+import type { PendingQuestionRecord } from "../../domain/sessionChat";
+
+interface UsePhotoToolParams {
+  active: boolean;
+  gameSize: GameSize;
+  pendingQuestions: readonly PendingQuestionRecord[];
+  awaitHiderAnswer?: boolean;
+  submitPendingQuestion?: (
+    input: Omit<
+      SubmitPendingQuestionInput,
+      "sessionId" | "senderUid" | "senderRole" | "toolType"
+    >,
+  ) => Promise<void>;
+  sessionId?: string;
+  senderUid?: string | null;
+  finishPlacement: () => void;
+  setMapError: (message: string | null) => void;
+  mapError: string | null;
+}
+
+export function usePhotoTool({
+  active,
+  gameSize,
+  pendingQuestions,
+  awaitHiderAnswer = false,
+  submitPendingQuestion,
+  sessionId,
+  senderUid,
+  finishPlacement,
+  setMapError,
+  mapError,
+}: UsePhotoToolParams) {
+  const usedCategories = useMemo(
+    () => usedPhotoCategoryIds(pendingQuestions),
+    [pendingQuestions],
+  );
+  const [selectedCategoryId, setSelectedCategoryId] =
+    useState<PhotoCategoryId>("tree");
+  const categoryId = useMemo(() => {
+    if (
+      !usedCategories.has(selectedCategoryId) &&
+      isPhotoCategoryAvailableForGameSize(gameSize, selectedCategoryId)
+    ) {
+      return selectedCategoryId;
+    }
+
+    return (
+      firstAvailablePhotoCategoryId(gameSize, usedCategories) ??
+      selectedCategoryId
+    );
+  }, [gameSize, selectedCategoryId, usedCategories]);
+
+  const useCount = photoCategoryUseCount(pendingQuestions, categoryId);
+  const costLabel = questionCostLabel("D1P1", useCount);
+
+  const commit = useCallback(async () => {
+    if (!awaitHiderAnswer || !submitPendingQuestion || !sessionId || !senderUid) {
+      setMapError("Photo questions require a hider in the session.");
+      return;
+    }
+
+    if (usedCategories.has(categoryId)) {
+      setMapError("That photo question was already used this session.");
+      return;
+    }
+
+    await submitPendingQuestion({
+      promptText: photoQuestionPrompt(categoryId),
+      replyOptions: [...PHOTO_REPLY_OPTIONS],
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "FeatureCollection",
+          features: [],
+        }),
+        metadata: {
+          photoCategoryId: categoryId,
+        },
+      },
+    });
+
+    setMapError(null);
+    finishPlacement();
+  }, [
+    awaitHiderAnswer,
+    categoryId,
+    finishPlacement,
+    senderUid,
+    sessionId,
+    setMapError,
+    submitPendingQuestion,
+    usedCategories,
+  ]);
+
+  const panel =
+    active && awaitHiderAnswer ? (
+      <PhotoPanel
+        gameSize={gameSize}
+        categoryId={categoryId}
+        usedCategoryIds={usedCategories}
+        costLabel={costLabel}
+        onCategoryChange={setSelectedCategoryId}
+        onCommit={() => void commit()}
+        error={mapError}
+      />
+    ) : null;
+
+  return {
+    panel,
+    handleMapClick: () => false,
+  };
+}

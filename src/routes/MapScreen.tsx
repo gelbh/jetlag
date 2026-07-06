@@ -23,6 +23,7 @@ import { AnnotationEditSheet } from "../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../components/tools/ToolDock";
 import { PopupCloseButton } from "../components/ui/PopupCloseButton";
 import { useRadarTool } from "../hooks/tools/useRadarTool";
+import { usePhotoTool } from "../hooks/tools/usePhotoTool";
 import { usePinTool } from "../hooks/tools/usePinTool";
 import { useZoneTool } from "../hooks/tools/useZoneTool";
 import { ActiveThermometerWalkLayer } from "../components/map/ActiveThermometerWalkLayer";
@@ -327,7 +328,7 @@ export function MapScreen() {
 
   const submitToolQuestion = useCallback(
     async (
-      toolType: import("../domain/annotations").AnnotationType,
+      toolType: import("../domain/sessionChat").PendingQuestionToolType,
       input: Omit<
         Parameters<typeof submitPendingQuestion>[0],
         "sessionId" | "senderUid" | "senderRole" | "toolType"
@@ -412,6 +413,20 @@ export function MapScreen() {
     refreshGps: refresh,
     ensurePointInGameArea,
     armPlacement,
+  });
+  const photoTool = usePhotoTool({
+    active: activeTool === "photo",
+    gameSize: session?.gameSize ?? "medium",
+    pendingQuestions,
+    awaitHiderAnswer,
+    submitPendingQuestion: awaitHiderAnswer
+      ? (input) => submitToolQuestion("photo", input).then(() => undefined)
+      : undefined,
+    sessionId: session?.id,
+    senderUid: uid,
+    finishPlacement,
+    setMapError,
+    mapError,
   });
   const thermometerTool = useThermometerTool({
     active: activeTool === "thermometer",
@@ -766,6 +781,8 @@ export function MapScreen() {
         return pinTool.panel;
       case "tentacle":
         return tentacleTool.panel;
+      case "photo":
+        return photoTool.panel;
       default:
         return null;
     }
@@ -915,6 +932,7 @@ export function MapScreen() {
         <ToolDock
           activeTool={activeTool}
           gameSize={session.gameSize ?? "medium"}
+          hasHiders={awaitHiderAnswer}
           onSelect={handleSelectTool}
           canUndo={canUndoLastTool}
           canRedo={canRedoLastTool}

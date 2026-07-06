@@ -1,6 +1,8 @@
 import type { AnnotationType } from "./annotations";
 import type { PlayerRole } from "./playerRole";
 
+export type PendingQuestionToolType = AnnotationType | "photo";
+
 export type ChatChannel = "social" | "game";
 
 export type GameMessageKind = "question" | "answer" | "system";
@@ -27,7 +29,7 @@ export interface SessionMessageRecord {
   text?: string;
   kind?: GameMessageKind;
   pendingQuestionId?: string;
-  toolType?: AnnotationType;
+  toolType?: PendingQuestionToolType;
   promptText?: string;
   replyOptions?: GameReplyOption[];
   selectedReply?: string;
@@ -42,7 +44,7 @@ export interface PendingQuestionPlacement {
 export interface PendingQuestionRecord {
   id: string;
   sessionId: string;
-  toolType: AnnotationType;
+  toolType: PendingQuestionToolType;
   createdByUid: string;
   createdAt: string;
   status: PendingQuestionStatus;

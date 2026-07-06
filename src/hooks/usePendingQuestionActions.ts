@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import type { Feature, LineString } from "geojson";
-import type { AnnotationType } from "../domain/annotations";
+import type { PendingQuestionToolType } from "../domain/sessionChat";
 import type { PlayerRole } from "../domain/playerRole";
 import type { GameReplyOption } from "../domain/sessionChat";
 import {
@@ -22,7 +22,7 @@ export interface SubmitPendingQuestionInput {
   sessionId: string;
   senderUid: string;
   senderRole: PlayerRole;
-  toolType: AnnotationType;
+  toolType: PendingQuestionToolType;
   promptText: string;
   replyOptions: GameReplyOption[];
   placement: PendingQuestionPlacement;

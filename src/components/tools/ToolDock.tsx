@@ -30,6 +30,7 @@ import { ToolOverflowSheet } from "./ToolOverflowSheet";
 interface ToolDockProps {
   activeTool: MapTool;
   gameSize?: GameSize;
+  hasHiders?: boolean;
   onSelect: (tool: MapTool) => void;
   canUndo: boolean;
   canRedo: boolean;
@@ -49,6 +50,7 @@ const markupTools = MAP_TOOL_DOCK_ENTRIES.filter((tool) =>
 export function ToolDock({
   activeTool,
   gameSize = "medium",
+  hasHiders = false,
   onSelect,
   canUndo,
   canRedo,
@@ -120,7 +122,7 @@ export function ToolDock({
     mapStyle === "standard" ? "Switch to satellite view" : "Switch to map view";
 
   const visibleQuestionTools = QUESTION_DOCK_TOOL_IDS.filter((toolId) =>
-    toolDockEnabled(toolId, gameSize),
+    toolDockEnabled(toolId, gameSize, { hasHiders }),
   );
 
   const moreMenuActive =

@@ -18,6 +18,8 @@ describe("questionRules", () => {
     expect(questionCostLabel("D3P1", 1)).toBe("D6P2");
     expect(questionCostLabel("D2P1", 1)).toBe("D4P2");
     expect(questionCostLabel("D4P2", 2)).toBe("D12P6");
+    expect(questionCostLabel("D1P1", 0)).toBe("D1P1");
+    expect(questionCostLabel("D1P1", 2)).toBe("D3P3");
   });
 
   it("detects open pending questions", () => {
@@ -37,6 +39,11 @@ describe("questionRules", () => {
   });
 
   it("uses photo answer deadlines by game size", () => {
+    expect(questionAnswerDeadlineMs("photo", "small")).toBe(10 * 60 * 1000);
+    expect(questionAnswerDeadlineMs("photo", "large")).toBe(20 * 60 * 1000);
+  });
+
+  it("uses photo answer deadlines from gameSizeRules", () => {
     expect(answerDeadlineMs("photo", "small")).toBe(10 * 60 * 1000);
     expect(answerDeadlineMs("photo", "medium")).toBe(10 * 60 * 1000);
     expect(answerDeadlineMs("photo", "large")).toBe(20 * 60 * 1000);

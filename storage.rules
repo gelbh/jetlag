@@ -1,0 +1,29 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function sessionData(sessionId) {
+      return firestore.get(/databases/(default)/documents/sessions/$(sessionId)).data;
+    }
+
+    function isSessionMember(sessionId) {
+      return request.auth != null
+        && request.auth.uid in sessionData(sessionId).memberUids;
+    }
+
+    function isHiderMember(sessionId) {
+      return request.auth != null
+        && ('memberRoles' in sessionData(sessionId))
+        && sessionData(sessionId).memberRoles != null
+        && request.auth.uid in sessionData(sessionId).memberRoles
+        && sessionData(sessionId).memberRoles[request.auth.uid] == 'hider';
+    }
+
+    match /sessions/{sessionId}/photoAnswers/{questionId}/{fileName} {
+      allow read: if isSessionMember(sessionId);
+      allow write: if isHiderMember(sessionId)
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

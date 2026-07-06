@@ -13,6 +13,11 @@ import {
 } from "firebase/app-check";
 import { getFunctions, type Functions } from "firebase/functions";
 import {
+  connectStorageEmulator,
+  getStorage,
+  type FirebaseStorage,
+} from "firebase/storage";
+import {
   connectFirestoreEmulator,
   initializeFirestore,
   memoryLocalCache,
@@ -25,6 +30,7 @@ let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
 let functions: Functions | null = null;
+let storage: FirebaseStorage | null = null;
 let appCheck: AppCheck | null = null;
 let persistenceUnavailable = false;
 
@@ -59,6 +65,7 @@ export function isFirebaseConfigured(): boolean {
 
 let authEmulatorConnected = false;
 let firestoreEmulatorConnected = false;
+let storageEmulatorConnected = false;
 
 function connectAuthEmulatorIfConfigured(firebaseAuth: Auth): void {
   if (!firebaseUsesEmulator() || authEmulatorConnected) {
@@ -130,6 +137,24 @@ function initializeAppCheckIfConfigured(firebaseApp: FirebaseApp): void {
     provider: new ReCaptchaV3Provider(siteKey),
     isTokenAutoRefreshEnabled: true,
   });
+}
+
+function connectStorageEmulatorIfConfigured(firebaseStorage: FirebaseStorage): void {
+  if (!firebaseUsesEmulator() || storageEmulatorConnected) {
+    return;
+  }
+
+  connectStorageEmulator(firebaseStorage, "127.0.0.1", 9198);
+  storageEmulatorConnected = true;
+}
+
+export function getFirebaseStorage(): FirebaseStorage {
+  if (!storage) {
+    storage = getStorage(getFirebaseApp());
+    connectStorageEmulatorIfConfigured(storage);
+  }
+
+  return storage;
 }
 
 export function getFirebaseFunctions(): Functions {
@@ -211,10 +236,12 @@ export async function resetFirebaseForTests(): Promise<void> {
   auth = null;
   db = null;
   functions = null;
+  storage = null;
   appCheck = null;
   persistenceUnavailable = false;
   authEmulatorConnected = false;
   firestoreEmulatorConnected = false;
+  storageEmulatorConnected = false;
   anonymousSignInPromise = null;
 }
 

@@ -132,7 +132,11 @@ export function isTentacleCategoryAvailableForGameSize(
 export function toolDockEnabled(
   toolId: Exclude<MapTool, "none">,
   gameSize: GameSize,
+  options?: { hasHiders?: boolean },
 ): boolean {
+  if (toolId === "photo") {
+    return options?.hasHiders === true;
+  }
   if (toolId === "tentacle") {
     return tentacleEnabledForGameSize(gameSize);
   }

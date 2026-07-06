@@ -88,6 +88,8 @@ async function resolvePendingQuestion(
         typeof answer === "string" ? answer : String(answer);
       return resolveTentaclePendingQuestion(pending, tentacleAnswer, gameArea);
     }
+    case "photo":
+      return null;
     default:
       return null;
   }
@@ -122,6 +124,13 @@ export function usePendingQuestionResolver({
         try {
           const annotation = await resolvePendingQuestion(pending, gameArea);
           if (!annotation) {
+            if (pending.toolType === "photo") {
+              await updatePendingQuestion(sessionId, pending.id, {
+                status: "resolved",
+              });
+              return;
+            }
+
             await updatePendingQuestion(sessionId, pending.id, {
               status: "cancelled",
             });
