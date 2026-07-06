@@ -20,6 +20,7 @@ import {
 } from "../domain/geometry";
 import { MAP_ANNOTATION_COLORS } from "../domain/mapAnnotationColors";
 import { useHiderZoneTool } from "../hooks/useHiderZoneTool";
+import { useMapOverlayState } from "../hooks/useMapOverlayState";
 import { usePendingQuestionActions } from "../hooks/usePendingQuestionActions";
 import { useRemoteSessionTimerSync } from "../hooks/useRemoteSessionTimerSync";
 import { useSessionEndedRedirect } from "../hooks/useSessionEndedRedirect";
@@ -56,10 +57,9 @@ export function HiderMapScreen() {
   const keepScreenAwake = useMapStore((state) => state.keepScreenAwake);
   const setKeepScreenAwake = useMapStore((state) => state.setKeepScreenAwake);
 
+  const overlay = useMapOverlayState();
   const [currentUid, setCurrentUid] = useState<string | null>(myUid);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [logOpen, setLogOpen] = useState(false);
+  const [recenterToken, setRecenterToken] = useState(0);
 
   useSessionSync();
 
@@ -125,6 +125,26 @@ export function HiderMapScreen() {
     resumeTimer: timer.start,
   });
 
+  const openWizardExclusive = useCallback(() => {
+    overlay.closeSheet();
+    zoneTool.openWizard();
+  }, [overlay, zoneTool]);
+
+  const openChatExclusive = useCallback(() => {
+    zoneTool.closeWizard();
+    overlay.openChat();
+  }, [overlay, zoneTool]);
+
+  const openSettingsExclusive = useCallback(() => {
+    zoneTool.closeWizard();
+    overlay.openSettings();
+  }, [overlay, zoneTool]);
+
+  const openLogExclusive = useCallback(() => {
+    zoneTool.closeWizard();
+    overlay.openLog();
+  }, [overlay, zoneTool]);
+
   const handleMapClick = useCallback(
     (lat: number, lng: number) => {
       zoneTool.handleMapClick([lat, lng]);
@@ -136,8 +156,11 @@ export function HiderMapScreen() {
     return <Navigate to="/" replace />;
   }
 
+  const mapFocusBounds = gameAreaToBoundsExpression(session.gameArea);
   const center = gameAreaCenter(session.gameArea);
   const previewRing = hidingZonePreviewPositions(zoneTool.previewCircle);
+  const sheetBlocksWizard =
+    overlay.isChatOpen || overlay.isSettingsOpen || overlay.isLogOpen;
 
   return (
     <div className="relative min-h-[100dvh] h-full">
@@ -148,7 +171,10 @@ export function HiderMapScreen() {
           mapStyle={mapStyle}
           center={center}
           zoom={12}
-          focusBounds={gameAreaToBoundsExpression(session.gameArea)}
+          focusBounds={mapFocusBounds}
+          fitBoundsMode="once"
+          recenterToken={recenterToken}
+          showZoomControl={false}
           onMapClick={handleMapClick}
           className="h-full w-full"
         >
@@ -189,7 +215,7 @@ export function HiderMapScreen() {
         </MapView>
       </div>
 
-      <div className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)]">
+      <div className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible">
         <MapStatusRail
           sessionCode={session.code}
           gameSize={session.gameSize ?? "medium"}
@@ -207,7 +233,9 @@ export function HiderMapScreen() {
           onTimerPause={timer.pause}
           onTimerReset={timer.reset}
           timerControlsDisabled={!canControlTimer}
-          onOpenLog={() => setLogOpen(true)}
+          onOpenLog={openLogExclusive}
+          pendingQuestions={pendingQuestions}
+          closeTimerMenu={overlay.sheet !== "none" || zoneTool.wizardOpen}
         />
       </div>
 
@@ -215,7 +243,7 @@ export function HiderMapScreen() {
         {!zoneTool.hasZone || zoneTool.wizardOpen ? (
           <button
             type="button"
-            onClick={zoneTool.openWizard}
+            onClick={openWizardExclusive}
             className="btn-primary min-h-12 w-full flex-1 sm:max-w-xs"
           >
             {myZone ? "Change hiding zone" : "Set hiding zone"}
@@ -232,17 +260,22 @@ export function HiderMapScreen() {
         <div className="flex gap-2">
           <button
             type="button"
-            onClick={() => {
-              zoneTool.closeWizard();
-              setChatOpen(true);
-            }}
+            onClick={() => setRecenterToken((value) => value + 1)}
+            className="btn-secondary min-h-12 flex-1 px-3 sm:flex-none"
+            aria-label="Recenter map on play area"
+          >
+            Recenter
+          </button>
+          <button
+            type="button"
+            onClick={openChatExclusive}
             className="btn-secondary min-h-12 flex-1 px-4 sm:flex-none"
           >
             Chat
           </button>
           <button
             type="button"
-            onClick={() => setSettingsOpen(true)}
+            onClick={openSettingsExclusive}
             className="btn-secondary min-h-12 flex-1 px-4 sm:flex-none"
           >
             Settings
@@ -250,7 +283,7 @@ export function HiderMapScreen() {
         </div>
       </div>
 
-      {zoneTool.wizardOpen ? (
+      {zoneTool.wizardOpen && !sheetBlocksWizard ? (
         <div className="pointer-events-auto absolute inset-x-0 jl-panel-hider-wizard z-[var(--z-panel)] px-3">
           <div className="tool-panel-compact hud-panel mx-auto max-h-[min(40dvh,360px)] max-w-xl overflow-y-auto p-3">
             <HidingZonePanel
@@ -262,6 +295,9 @@ export function HiderMapScreen() {
               stationsError={zoneTool.stationsError}
               selectedStation={zoneTool.selectedStation}
               onSelectStation={zoneTool.setSelectedStation}
+              manualMode={zoneTool.manualMode}
+              onManualModeChange={zoneTool.setManualModeEnabled}
+              hasPlacement={zoneTool.hasPlacement}
               onConfirm={() => void zoneTool.confirmZone()}
               saving={zoneTool.saving}
               error={zoneTool.error}
@@ -272,8 +308,8 @@ export function HiderMapScreen() {
       ) : null}
 
       <ChatPanel
-        open={chatOpen}
-        onClose={() => setChatOpen(false)}
+        open={overlay.isChatOpen}
+        onClose={overlay.closeSheet}
         bottomClassName="jl-panel-hider-wizard"
         messages={messages}
         pendingQuestions={pendingQuestions}
@@ -312,9 +348,9 @@ export function HiderMapScreen() {
       />
 
       <MapSettingsSheet
-        key={settingsOpen ? "open" : "closed"}
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
+        key={overlay.isSettingsOpen ? "open" : "closed"}
+        open={overlay.isSettingsOpen}
+        onClose={overlay.closeSheet}
         pendingWrites={0}
         showCurrentLocation={showCurrentLocation}
         onShowCurrentLocationChange={setShowCurrentLocation}
@@ -345,7 +381,7 @@ export function HiderMapScreen() {
         onToggleLiveTransit={() => undefined}
         onTransitRouteFilterChange={() => undefined}
         onClearMap={() => undefined}
-        onExport={() => setSettingsOpen(false)}
+        onExport={overlay.closeSheet}
         isHost={isHost}
         onResetBoard={() => undefined}
         onEndSession={() => undefined}
@@ -354,11 +390,11 @@ export function HiderMapScreen() {
       />
 
       <SessionLog
-        open={logOpen}
+        open={overlay.isLogOpen}
         annotations={annotations}
-        onClose={() => setLogOpen(false)}
+        onClose={overlay.closeSheet}
         onDelete={() => undefined}
-        onEdit={() => setLogOpen(false)}
+        onEdit={overlay.closeSheet}
       />
     </div>
   );

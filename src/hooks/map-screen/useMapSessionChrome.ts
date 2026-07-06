@@ -19,7 +19,7 @@ interface UseMapSessionChromeParams {
   exportLegendRef: RefObject<HTMLDivElement | null>;
   clearAllAnnotations: () => Promise<void>;
   setSelectedAnnotationId: (id: string | null) => void;
-  setSettingsOpen: (open: boolean) => void;
+  closeSettingsPanel: () => void;
 }
 
 export function useMapSessionChrome({
@@ -30,7 +30,7 @@ export function useMapSessionChrome({
   exportLegendRef,
   clearAllAnnotations,
   setSelectedAnnotationId,
-  setSettingsOpen,
+  closeSettingsPanel,
 }: UseMapSessionChromeParams) {
   const navigate = useNavigate();
   const setSession = useSessionStore((state) => state.setSession);
@@ -50,13 +50,13 @@ export function useMapSessionChrome({
     }
 
     setSelectedAnnotationId(null);
-    setSettingsOpen(false);
+    closeSettingsPanel();
     void clearAllAnnotations();
   }, [
     annotations,
     clearAllAnnotations,
+    closeSettingsPanel,
     setSelectedAnnotationId,
-    setSettingsOpen,
   ]);
 
   const handleResetBoard = useCallback(() => {
@@ -78,14 +78,14 @@ export function useMapSessionChrome({
     }
 
     setSelectedAnnotationId(null);
-    setSettingsOpen(false);
+    closeSettingsPanel();
     void clearAllAnnotations();
   }, [
     annotations,
     clearAllAnnotations,
     isHost,
     setSelectedAnnotationId,
-    setSettingsOpen,
+    closeSettingsPanel,
   ]);
 
   const handleEndSession = useCallback(async () => {
@@ -101,9 +101,9 @@ export function useMapSessionChrome({
     await endRemoteSession(sessionId);
     await clearSessionLocalArtifacts(sessionId);
     setSession(null);
-    setSettingsOpen(false);
+    closeSettingsPanel();
     navigate("/");
-  }, [isHost, navigate, session, setSession, setSettingsOpen]);
+  }, [isHost, navigate, session, setSession, closeSettingsPanel]);
 
   const exportMap = useCallback(async () => {
     if (!session || !mapShellRef.current) {

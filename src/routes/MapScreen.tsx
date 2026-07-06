@@ -71,6 +71,7 @@ import {
 } from "../hooks/useSessionExtrasSync";
 import { useSyncStatus } from "../hooks/useSyncStatus";
 import { useTransitLayer } from "../hooks/useTransitLayer";
+import { useMapOverlayState } from "../hooks/useMapOverlayState";
 import { useWakeLock } from "../hooks/useWakeLock";
 import {
   ensureAnonymousUser,
@@ -230,12 +231,10 @@ export function MapScreen() {
     }
   }, [session?.gameArea]);
 
-  const [logOpen, setLogOpen] = useState(false);
+  const overlay = useMapOverlayState();
   const [mapError, setMapError] = useState<string | null>(null);
   const [awaitingPlacement, setAwaitingPlacement] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [firstRunDismissed, setFirstRunDismissed] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
   const awaitHiderAnswer = sessionHasHiders(session?.memberRoles);
   const { submitPendingQuestion, answerPendingQuestion, completeThermometerWalk, postSystemMessage } =
     usePendingQuestionActions();
@@ -512,8 +511,9 @@ export function MapScreen() {
     /* eslint-disable react-hooks/set-state-in-effect -- clear placement when an annotation is selected */
     setActiveTool("none");
     setAwaitingPlacement(false);
+    overlay.closeSheet();
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [selectedAnnotationId, setActiveTool]);
+  }, [overlay, selectedAnnotationId, setActiveTool]);
 
   const center = useMemo<LatLngTuple>(() => {
     if (!session?.gameArea) {
@@ -563,7 +563,7 @@ export function MapScreen() {
       exportLegendRef,
       clearAllAnnotations,
       setSelectedAnnotationId,
-      setSettingsOpen,
+      closeSettingsPanel: overlay.closeSheet,
     });
 
   const measuringPlacePoints = useMemo(
@@ -625,6 +625,31 @@ export function MapScreen() {
       tentacleEliminationPreviewExtra,
     );
 
+  const resetToolDrafts = useCallback(() => {
+    measuringTool.resetDraft();
+    matchingTool.resetDraft();
+    thermometerTool.resetDraft();
+    radarTool.resetDraft();
+    tentacleTool.resetDraft();
+    pinTool.resetDraft();
+    zoneTool.resetDraft();
+  }, [
+    matchingTool,
+    measuringTool,
+    pinTool,
+    radarTool,
+    tentacleTool,
+    thermometerTool,
+    zoneTool,
+  ]);
+
+  const dismissTransientUi = useCallback(() => {
+    overlay.closeSheet();
+    setSelectedAnnotationId(null);
+    cancelGeometryEdit();
+    setAwaitingPlacement(false);
+  }, [cancelGeometryEdit, overlay, setSelectedAnnotationId]);
+
   if (!session?.gameArea) {
     return <Navigate to="/create" replace />;
   }
@@ -644,17 +669,36 @@ export function MapScreen() {
     tentacleTool.placementCrosshair;
 
   const handleSelectTool = (tool: MapTool) => {
-    measuringTool.resetDraft();
-    matchingTool.resetDraft();
-    thermometerTool.resetDraft();
-    radarTool.resetDraft();
-    tentacleTool.resetDraft();
-    pinTool.resetDraft();
-    zoneTool.resetDraft();
-    setSelectedAnnotationId(null);
-    setAwaitingPlacement(false);
-    setChatOpen(false);
+    resetToolDrafts();
+    dismissTransientUi();
     setActiveTool(tool);
+  };
+
+  const handleOpenChat = () => {
+    resetToolDrafts();
+    setActiveTool("none");
+    setAwaitingPlacement(false);
+    setSelectedAnnotationId(null);
+    cancelGeometryEdit();
+    overlay.openChat();
+  };
+
+  const handleOpenSettings = () => {
+    resetToolDrafts();
+    setActiveTool("none");
+    setAwaitingPlacement(false);
+    setSelectedAnnotationId(null);
+    cancelGeometryEdit();
+    overlay.openSettings();
+  };
+
+  const handleOpenLog = () => {
+    resetToolDrafts();
+    setActiveTool("none");
+    setAwaitingPlacement(false);
+    setSelectedAnnotationId(null);
+    cancelGeometryEdit();
+    overlay.openLog();
   };
 
   const handleUndoLastAnnotation = () => {
@@ -789,7 +833,7 @@ export function MapScreen() {
 
       <div
         ref={chromeHudRef}
-        className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)]"
+        className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
       >
         <GameAreaPreloadBanner />
         <MapStatusRail
@@ -809,16 +853,21 @@ export function MapScreen() {
           onTimerPause={timer.pause}
           onTimerReset={timer.reset}
           timerControlsDisabled={!canControlTimer}
-          onOpenLog={() => {
-            setLogOpen(true);
-          }}
+          onOpenLog={handleOpenLog}
+          pendingQuestions={pendingQuestions}
+          closeTimerMenu={
+            overlay.sheet !== "none" ||
+            activeTool !== "none" ||
+            Boolean(selectedAnnotation) ||
+            Boolean(geometryEditAnnotation && geometryDraft)
+          }
         />
 
         <MapToolsHintBanner
           hidden={
             !timer.hasStarted ||
             activeTool !== "none" ||
-            settingsOpen ||
+            overlay.isSettingsOpen ||
             Boolean(selectedAnnotation) ||
             Boolean(geometryEditAnnotation && geometryDraft)
           }
@@ -832,14 +881,8 @@ export function MapScreen() {
           canRedo={canRedoLastTool}
           onUndo={handleUndoLastAnnotation}
           onRedo={handleRedoLastAnnotation}
-          onOpenSettings={() => {
-            setChatOpen(false);
-            setSettingsOpen(true);
-          }}
-          onOpenChat={() => {
-            handleSelectTool("none");
-            setChatOpen(true);
-          }}
+          onOpenSettings={handleOpenSettings}
+          onOpenChat={handleOpenChat}
           mapStyle={mapStyle}
           onMapStyleChange={setMapStyle}
         />
@@ -870,7 +913,7 @@ export function MapScreen() {
         open={
           !timer.hasStarted &&
           !firstRunDismissed &&
-          !settingsOpen &&
+          overlay.sheet === "none" &&
           activeTool === "none" &&
           !selectedAnnotation &&
           !geometryEditAnnotation
@@ -879,9 +922,9 @@ export function MapScreen() {
       />
 
       <MapSettingsSheet
-        key={settingsOpen ? "open" : "closed"}
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
+        key={overlay.isSettingsOpen ? "open" : "closed"}
+        open={overlay.isSettingsOpen}
+        onClose={overlay.closeSheet}
         pendingWrites={pendingWrites}
         showCurrentLocation={showCurrentLocation}
         onShowCurrentLocationChange={setShowCurrentLocation}
@@ -913,7 +956,7 @@ export function MapScreen() {
         onTransitRouteFilterChange={setTransitRouteFilter}
         onClearMap={handleClearMap}
         onExport={() => {
-          setSettingsOpen(false);
+          overlay.closeSheet();
           void exportMap();
         }}
         isHost={isHost}
@@ -959,12 +1002,12 @@ export function MapScreen() {
       ) : null}
 
       <SessionLog
-        open={logOpen}
+        open={overlay.isLogOpen}
         annotations={annotations}
-        onClose={() => setLogOpen(false)}
+        onClose={overlay.closeSheet}
         onDelete={(id) => void deleteAnnotation(id)}
         onEdit={(id) => {
-          setLogOpen(false);
+          overlay.closeSheet();
           setActiveTool("none");
           setAwaitingPlacement(false);
           setSelectedAnnotationId(id);
@@ -972,8 +1015,8 @@ export function MapScreen() {
       />
 
       <ChatPanel
-        open={chatOpen}
-        onClose={() => setChatOpen(false)}
+        open={overlay.isChatOpen}
+        onClose={overlay.closeSheet}
         messages={chatMessages}
         pendingQuestions={pendingQuestions}
         gameSize={session.gameSize ?? "medium"}

@@ -4,14 +4,16 @@ import { mapToolPlacingLabel } from "../../domain/mapTools";
 import type { SyncStatus } from "../../domain/sync";
 import type { TimerState } from "../../domain/timer";
 import type { MapTool } from "../../state/sessionStore";
+import type { PendingQuestionRecord } from "../../domain/sessionChat";
 import { HudHomeIcon, HudPlayIcon } from "../ui/HudIcons";
 import { PopupCloseButton } from "../ui/PopupCloseButton";
 import { TimerActions } from "../tools/TimerActions";
 import { SessionTimerLabel } from "./SessionTimerLabel";
+import { MapTimerCluster } from "./MapTimerCluster";
+import { QuestionAlertBanner } from "./QuestionAlertBanner";
 
 import type { GameSize } from "../../domain/gameSize";
 import type { PlayerRole } from "../../domain/playerRole";
-import { HidingPeriodLabel } from "./HidingPeriodLabel";
 
 interface MapStatusRailProps {
   sessionCode: string;
@@ -31,6 +33,9 @@ interface MapStatusRailProps {
   onTimerReset: () => void;
   timerControlsDisabled?: boolean;
   onOpenLog?: () => void;
+  pendingQuestions?: readonly PendingQuestionRecord[];
+  /** When true, closes the timer settings dropdown (e.g. another overlay opened). */
+  closeTimerMenu?: boolean;
 }
 
 type SyncTone = "error" | "warning" | "info";
@@ -157,6 +162,8 @@ export function MapStatusRail({
   onTimerReset,
   timerControlsDisabled = false,
   onOpenLog,
+  pendingQuestions = [],
+  closeTimerMenu = false,
 }: MapStatusRailProps) {
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
@@ -165,9 +172,10 @@ export function MapStatusRail({
     ? mapToolPlacingLabel(activeTool)
     : idleModeLabel(playerRole);
   const sync = syncRailDisplay(syncStatus, queuedWrites, message);
+  const showTimerMenu = timerMenuOpen && !closeTimerMenu;
 
   useEffect(() => {
-    if (!timerMenuOpen) {
+    if (!showTimerMenu) {
       return;
     }
 
@@ -189,7 +197,7 @@ export function MapStatusRail({
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [timerMenuOpen]);
+  }, [showTimerMenu]);
 
   return (
     <div
@@ -197,7 +205,7 @@ export function MapStatusRail({
       className="jl-status-rail pointer-events-none absolute inset-x-0 top-0 z-[var(--z-banner)] bg-surface-deep pt-[max(0px,env(safe-area-inset-top))]"
     >
       <div className="relative">
-        {timerMenuOpen ? (
+        {showTimerMenu ? (
           <div
             className="hud-panel pointer-events-auto absolute inset-x-3 top-[calc(100%+0.375rem)] z-[var(--z-panel)] mx-auto max-w-md space-y-2 p-3 pt-10"
             role="menu"
@@ -261,24 +269,15 @@ export function MapStatusRail({
                 </p>
               )
             ) : (
-              <div className="flex shrink-0 flex-col items-end gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => setTimerMenuOpen((open) => !open)}
-                  className={`jl-ticker ${timerRunning ? "jl-ticker-active" : "jl-ticker-idle"}`}
-                  aria-label="Elapsed time. Open timer settings"
-                  aria-expanded={timerMenuOpen}
-                  aria-haspopup="menu"
-                  aria-live="polite"
-                >
-                  <SessionTimerLabel timerState={timerState} />
-                </button>
-                <HidingPeriodLabel
-                  gameSize={gameSize}
-                  timerState={timerState}
-                  timerHasStarted={timerHasStarted}
-                />
-              </div>
+              <MapTimerCluster
+                gameSize={gameSize}
+                timerState={timerState}
+                timerRunning={timerRunning}
+                timerHasStarted={timerHasStarted}
+                pendingQuestions={pendingQuestions}
+                onOpenTimerMenu={() => setTimerMenuOpen((open) => !open)}
+                timerMenuOpen={showTimerMenu}
+              />
             )}
 
             {sync.inline?.visible && sync.inline.label ? (
@@ -302,6 +301,11 @@ export function MapStatusRail({
             {sync.banner.label}
           </p>
         ) : null}
+
+        <QuestionAlertBanner
+          pendingQuestions={pendingQuestions}
+          gameSize={gameSize}
+        />
       </div>
     </div>
   );

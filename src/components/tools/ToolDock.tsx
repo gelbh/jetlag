@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { MapStyle } from "../../domain/mapBasemaps";
 import type { GameSize } from "../../domain/gameSize";
+import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
 import { toolDockEnabled } from "../../domain/gameSizeRules";
 import {
   MAP_TOOL_DOCK_ENTRIES,
@@ -59,6 +60,7 @@ export function ToolDock({
   const [drawMenuOpen, setDrawMenuOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const dockRef = useRef<HTMLDivElement>(null);
+  const viewportBottomInset = useVisualViewportBottomInset(true);
 
   useEffect(() => {
     if (!drawMenuOpen) {
@@ -193,7 +195,13 @@ export function ToolDock({
   };
 
   return (
-    <div ref={dockRef} className="jl-tool-dock pointer-events-auto">
+    <div
+      ref={dockRef}
+      className="jl-tool-dock pointer-events-auto"
+      style={{
+        bottom: `calc(env(safe-area-inset-bottom) + ${viewportBottomInset}px)`,
+      }}
+    >
       {drawMenuOpen ? (
         <div
           className="jl-tool-menu jl-tool-menu-dock jl-tool-dock-wide-only hud-panel"

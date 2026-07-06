@@ -46,6 +46,10 @@ export function HidingPeriodLabel({
     computeElapsedMs(timerState),
   );
 
+  if (remaining <= 0) {
+    return null;
+  }
+
   return (
     <p className="px-1 text-xs font-medium tabular-nums text-brand-gold">
       {formatHidingPeriodCountdown(remaining)}

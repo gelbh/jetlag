@@ -3,8 +3,11 @@ import type { GameArea } from "../domain/annotations";
 import { hidingZoneRadiusMeters } from "../domain/gameSize";
 import type { GameSize } from "../domain/gameSize";
 import type { LatLngTuple } from "../domain/geometry";
+import { isPointInGameArea } from "../domain/geometry";
 import {
   buildHidingZoneCircle,
+  haversineMeters,
+  MANUAL_STATION_ID,
   nearestStation,
   searchStations,
   type HidingZoneRecord,
@@ -12,6 +15,8 @@ import {
 } from "../domain/hidingZone";
 import { fetchTransitStationsForHidingZone } from "../services/matchingFeatures";
 import { writeHidingZone } from "../services/firestoreSessionExtras";
+
+const MOVE_MIN_DISTANCE_METERS = 50;
 
 interface UseHiderZoneToolParams {
   sessionId: string;
@@ -42,10 +47,20 @@ export function useHiderZoneTool({
   const [selectedStation, setSelectedStation] = useState<TransitStation | null>(
     null,
   );
+  const [manualMode, setManualMode] = useState(false);
+  const [manualCenter, setManualCenter] = useState<LatLngTuple | null>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [moveMode, setMoveMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const resetWizardDraft = useCallback(() => {
+    setSelectedStation(null);
+    setManualCenter(null);
+    setManualMode(false);
+    setQuery("");
+    setError(null);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -81,6 +96,10 @@ export function useHiderZoneTool({
   );
 
   const previewCircle = useMemo(() => {
+    if (manualMode && manualCenter) {
+      return buildHidingZoneCircle(manualCenter, radiusMeters);
+    }
+
     if (!selectedStation) {
       return null;
     }
@@ -89,14 +108,21 @@ export function useHiderZoneTool({
       [selectedStation.lat, selectedStation.lng],
       radiusMeters,
     );
-  }, [radiusMeters, selectedStation]);
+  }, [manualCenter, manualMode, radiusMeters, selectedStation]);
+
+  const hasPlacement = manualMode
+    ? manualCenter !== null
+    : selectedStation !== null;
 
   const openWizard = useCallback(() => {
     setWizardOpen(true);
-    setSelectedStation(null);
-    setQuery("");
-    setError(null);
-  }, []);
+    resetWizardDraft();
+  }, [resetWizardDraft]);
+
+  const closeWizard = useCallback(() => {
+    setWizardOpen(false);
+    resetWizardDraft();
+  }, [resetWizardDraft]);
 
   const startMove = useCallback(async () => {
     if (!existingZone) {
@@ -113,7 +139,7 @@ export function useHiderZoneTool({
     pauseTimer();
     setMoveMode(true);
     setWizardOpen(true);
-    setSelectedStation(null);
+    resetWizardDraft();
     await postSystemMessage(
       "Move card played — timer paused. Seekers must stay put. Hider is relocating.",
     );
@@ -121,12 +147,24 @@ export function useHiderZoneTool({
       ...existingZone,
       moveInProgress: true,
     });
-  }, [existingZone, pauseTimer, postSystemMessage, sessionId]);
+  }, [existingZone, pauseTimer, postSystemMessage, resetWizardDraft, sessionId]);
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
       if (!wizardOpen) {
         return false;
+      }
+
+      if (manualMode) {
+        if (!isPointInGameArea(point, gameArea)) {
+          setError("That point is outside the play area.");
+          return false;
+        }
+
+        setManualCenter(point);
+        setSelectedStation(null);
+        setError(null);
+        return true;
       }
 
       const station = nearestStation(point, stations);
@@ -136,24 +174,46 @@ export function useHiderZoneTool({
       }
 
       setSelectedStation(station);
+      setManualCenter(null);
       setError(null);
       return true;
     },
-    [stations, wizardOpen],
+    [gameArea, manualMode, stations, wizardOpen],
   );
 
   const confirmZone = useCallback(async () => {
-    if (!selectedStation) {
-      setError("Pick a transit station first.");
+    let center: LatLngTuple | null = null;
+    let stationId = "";
+    let stationName = "";
+
+    if (manualMode && manualCenter) {
+      center = manualCenter;
+      stationId = MANUAL_STATION_ID;
+      stationName = "";
+    } else if (selectedStation) {
+      center = [selectedStation.lat, selectedStation.lng];
+      stationId = selectedStation.id;
+      stationName = selectedStation.name;
+    }
+
+    if (!center) {
+      setError(
+        manualMode
+          ? "Tap the map inside the play area to place your zone."
+          : "Pick a transit station first.",
+      );
       return;
     }
 
     if (
       moveMode &&
       existingZone &&
-      selectedStation.id === existingZone.stationId
+      haversineMeters(center, [
+        existingZone.center.lat,
+        existingZone.center.lng,
+      ]) < MOVE_MIN_DISTANCE_METERS
     ) {
-      setError("Move requires a different station.");
+      setError("Move requires a different location.");
       return;
     }
 
@@ -161,17 +221,14 @@ export function useHiderZoneTool({
     setError(null);
 
     try {
-      const circle = buildHidingZoneCircle(
-        [selectedStation.lat, selectedStation.lng],
-        radiusMeters,
-      );
+      const circle = buildHidingZoneCircle(center, radiusMeters);
       const confirmedAt = new Date().toISOString();
       const zone: HidingZoneRecord = {
         hiderUid,
         sessionId,
-        stationId: selectedStation.id,
-        stationName: selectedStation.name,
-        center: { lat: selectedStation.lat, lng: selectedStation.lng },
+        stationId,
+        stationName,
+        center: { lat: center[0], lng: center[1] },
         radiusMeters,
         geometryJson: JSON.stringify(circle.geometry),
         status: "confirmed",
@@ -200,8 +257,12 @@ export function useHiderZoneTool({
       await writeHidingZone(sessionId, zone);
       await postSystemMessage(
         moveMode && existingZone
-          ? `Hider relocated to ${selectedStation.name}. Original station: ${existingZone.stationName}.`
-          : `Hider confirmed zone at ${selectedStation.name}.`,
+          ? existingZone.stationName
+            ? `Hider relocated from ${existingZone.stationName}.`
+            : "Hider relocated to a new zone."
+          : stationName
+            ? `Hider confirmed zone at ${stationName}.`
+            : "Hider confirmed hiding zone.",
       );
 
       if (moveMode) {
@@ -210,7 +271,7 @@ export function useHiderZoneTool({
 
       setMoveMode(false);
       setWizardOpen(false);
-      setSelectedStation(null);
+      resetWizardDraft();
     } catch (nextError) {
       setError(
         nextError instanceof Error
@@ -223,13 +284,23 @@ export function useHiderZoneTool({
   }, [
     existingZone,
     hiderUid,
+    manualCenter,
+    manualMode,
     moveMode,
     postSystemMessage,
     radiusMeters,
+    resetWizardDraft,
     resumeTimer,
     selectedStation,
     sessionId,
   ]);
+
+  const setManualModeEnabled = useCallback((enabled: boolean) => {
+    setManualMode(enabled);
+    setSelectedStation(null);
+    setManualCenter(null);
+    setError(null);
+  }, []);
 
   return {
     stationsLoading,
@@ -238,11 +309,19 @@ export function useHiderZoneTool({
     query,
     setQuery,
     selectedStation,
-    setSelectedStation,
+    setSelectedStation: (station: TransitStation) => {
+      setManualMode(false);
+      setManualCenter(null);
+      setSelectedStation(station);
+      setError(null);
+    },
+    manualMode,
+    setManualModeEnabled,
+    manualCenter,
     previewCircle,
     wizardOpen,
     openWizard,
-    closeWizard: () => setWizardOpen(false),
+    closeWizard,
     startMove,
     moveMode,
     confirmZone,
@@ -250,6 +329,7 @@ export function useHiderZoneTool({
     error,
     handleMapClick,
     hasZone: Boolean(existingZone),
+    hasPlacement,
     locked: Boolean(existingZone) && !wizardOpen,
   };
 }

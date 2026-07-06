@@ -23,23 +23,45 @@ interface MapViewProps {
   suppressChromeHideRef?: MutableRefObject<boolean>;
   interactive?: boolean;
   focusBounds?: LatLngBoundsExpression | null;
+  /** When "once", fitBounds runs on mount and on recenterToken changes only. */
+  fitBoundsMode?: "once" | "always";
+  /** Increment to programmatically refit focusBounds (e.g. Recenter button). */
+  recenterToken?: number;
+  showZoomControl?: boolean;
   children?: React.ReactNode;
   mapKey?: string;
 }
 
 function MapFocus({
   focusBounds,
+  fitBoundsMode,
+  recenterToken = 0,
   suppressChromeHideRef,
 }: {
   focusBounds: LatLngBoundsExpression | null;
+  fitBoundsMode: "once" | "always";
+  recenterToken: number;
   suppressChromeHideRef?: MutableRefObject<boolean>;
 }) {
   const map = useMap();
+  const hasFittedRef = useRef(false);
+  const lastRecenterRef = useRef(recenterToken);
 
   useEffect(() => {
     if (!focusBounds) {
       return;
     }
+
+    const recenterRequested = recenterToken !== lastRecenterRef.current;
+    if (
+      fitBoundsMode === "once" &&
+      hasFittedRef.current &&
+      !recenterRequested
+    ) {
+      return;
+    }
+
+    lastRecenterRef.current = recenterToken;
 
     if (suppressChromeHideRef) {
       suppressChromeHideRef.current = true;
@@ -47,6 +69,7 @@ function MapFocus({
 
     map.invalidateSize();
     map.fitBounds(focusBounds, { padding: [32, 32] });
+    hasFittedRef.current = true;
 
     const onMoveEnd = () => {
       if (suppressChromeHideRef) {
@@ -56,17 +79,21 @@ function MapFocus({
     };
 
     map.on("moveend", onMoveEnd);
-  }, [focusBounds, map, suppressChromeHideRef]);
+  }, [focusBounds, fitBoundsMode, map, recenterToken, suppressChromeHideRef]);
 
   return null;
 }
 
-function MapMobileControls() {
+function MapMobileControls({ enabled }: { enabled: boolean }) {
   const map = useMap();
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     map.zoomControl.setPosition("bottomright");
-  }, [map]);
+  }, [enabled, map]);
 
   return null;
 }
@@ -188,10 +215,14 @@ export function MapView({
   suppressChromeHideRef,
   interactive = true,
   focusBounds = null,
+  fitBoundsMode = "always",
+  recenterToken = 0,
+  showZoomControl,
   children,
   mapKey,
 }: MapViewProps) {
   const basemap = getMapBasemap(mapStyle);
+  const zoomControlEnabled = showZoomControl ?? interactive;
 
   return (
     <div className={className ?? "h-full w-full"}>
@@ -204,14 +235,14 @@ export function MapView({
         dragging={interactive}
         doubleClickZoom={interactive}
         touchZoom={interactive}
-        zoomControl={interactive}
+        zoomControl={zoomControlEnabled}
         className={
           interactive ? "h-full w-full" : "h-full w-full pointer-events-auto"
         }
       >
         <TileLayer
           key={basemap.id}
-          attribution={basemap.attribution}
+          attribution=""
           url={basemap.url}
           maxZoom={basemap.maxZoom}
           {...(basemap.subdomains ? { subdomains: basemap.subdomains } : {})}
@@ -229,9 +260,11 @@ export function MapView({
         ) : null}
         <MapFocus
           focusBounds={focusBounds}
+          fitBoundsMode={fitBoundsMode}
+          recenterToken={recenterToken}
           suppressChromeHideRef={suppressChromeHideRef}
         />
-        <MapMobileControls />
+        <MapMobileControls enabled={zoomControlEnabled} />
         <MapResize />
         {children}
       </MapContainer>

@@ -191,6 +191,10 @@ export function MapSettingsSheet({
             />
           ) : null}
         </div>
+
+        <p className="mt-6 border-t-2 border-border pt-3 text-[10px] leading-relaxed text-ink-dim">
+          Map data © OpenStreetMap contributors · © CARTO
+        </p>
       </MobileSheet>
     </SettingsOverlay>
   );

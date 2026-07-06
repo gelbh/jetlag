@@ -8,9 +8,24 @@ export function hidingPeriodRemainingMs(
   return Math.max(0, hidingPeriodMs(gameSize) - elapsedMs);
 }
 
+export function isHidingPeriodActive(
+  gameSize: GameSize,
+  elapsedMs: number,
+): boolean {
+  return hidingPeriodRemainingMs(gameSize, elapsedMs) > 0;
+}
+
+/** Seek-phase clock: elapsed time since hiding period ended (display-only offset). */
+export function seekPhaseElapsedMs(
+  gameSize: GameSize,
+  elapsedMs: number,
+): number {
+  return Math.max(0, elapsedMs - hidingPeriodMs(gameSize));
+}
+
 export function formatHidingPeriodCountdown(remainingMs: number): string {
   if (remainingMs <= 0) {
-    return "Hiding period ended";
+    return "";
   }
 
   const totalSeconds = Math.ceil(remainingMs / 1000);
@@ -19,8 +34,8 @@ export function formatHidingPeriodCountdown(remainingMs: number): string {
   const seconds = totalSeconds % 60;
 
   if (hours > 0) {
-    return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")} hiding left`;
+    return `HIDING ${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   }
 
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")} hiding left`;
+  return `HIDING ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }

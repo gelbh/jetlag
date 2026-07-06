@@ -86,7 +86,9 @@ export function searchStations(
     .slice(0, limit);
 }
 
-function haversineMeters(a: LatLngTuple, b: LatLngTuple): number {
+export const MANUAL_STATION_ID = "manual";
+
+export function haversineMeters(a: LatLngTuple, b: LatLngTuple): number {
   const earthRadius = 6_371_000;
   const latDelta = ((b[0] - a[0]) * Math.PI) / 180;
   const lngDelta = ((b[1] - a[1]) * Math.PI) / 180;

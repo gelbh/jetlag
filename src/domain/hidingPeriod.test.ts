@@ -14,9 +14,9 @@ describe("hidingPeriod", () => {
   });
 
   it("formats countdown labels", () => {
-    expect(formatHidingPeriodCountdown(0)).toBe("Hiding period ended");
-    expect(formatHidingPeriodCountdown(-1000)).toBe("Hiding period ended");
-    expect(formatHidingPeriodCountdown(90_000)).toBe("01:30 hiding left");
-    expect(formatHidingPeriodCountdown(3_661_000)).toBe("1:01:01 hiding left");
+    expect(formatHidingPeriodCountdown(0)).toBe("");
+    expect(formatHidingPeriodCountdown(-1000)).toBe("");
+    expect(formatHidingPeriodCountdown(90_000)).toBe("HIDING 01:30");
+    expect(formatHidingPeriodCountdown(3_661_000)).toBe("HIDING 1:01:01");
   });
 });
