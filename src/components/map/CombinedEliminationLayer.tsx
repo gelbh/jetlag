@@ -1,13 +1,14 @@
-import { memo, useMemo } from "react";
+import { Fragment, memo, useMemo } from "react";
 import { Polygon } from "react-leaflet";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../../domain/annotations";
 import {
   buildCombinedEliminationMask,
   eliminationFeatureForAnnotation,
-  ELIMINATION_FILL_COLOR,
 } from "../../domain/combinedEliminationMask";
 import { polygonFeatureToLeafletPolygonGroups } from "../../domain/geometry";
+import { getEliminationOverlayLayers } from "../../domain/mapEliminationOverlayStyle";
+import { useMapStore } from "../../state/sessionStore";
 
 interface CombinedEliminationLayerProps {
   annotations: AnnotationRecord[];
@@ -24,6 +25,12 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
   pulsingAnnotationIds = [],
   hidden = false,
 }: CombinedEliminationLayerProps) {
+  const mapStyle = useMapStore((state) => state.mapStyle);
+  const overlayLayers = useMemo(
+    () => getEliminationOverlayLayers(mapStyle),
+    [mapStyle],
+  );
+
   const combinedMask = useMemo(() => {
     if (hidden) {
       return null;
@@ -53,17 +60,26 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
   return (
     <>
       {polygonFeatureToLeafletPolygonGroups(combinedMask).map((rings, index) => (
-        <Polygon
-          key={`combined-elimination-${index}`}
-          positions={rings}
-          interactive={false}
-          pathOptions={{
-            stroke: false,
-            fillColor: ELIMINATION_FILL_COLOR,
-            fillOpacity: 0.35,
-            className: pulsing ? "annotation-pulse" : undefined,
-          }}
-        />
+        <Fragment key={`combined-elimination-${index}`}>
+          {overlayLayers.map((layer, layerIndex) => {
+            const isTopLayer = layerIndex === overlayLayers.length - 1;
+
+            return (
+              <Polygon
+                key={`combined-elimination-${index}-${layerIndex}`}
+                positions={rings}
+                interactive={false}
+                pathOptions={{
+                  ...layer,
+                  className:
+                    pulsing && isTopLayer
+                      ? "annotation-pulse"
+                      : layer.className,
+                }}
+              />
+            );
+          })}
+        </Fragment>
       ))}
     </>
   );
