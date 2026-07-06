@@ -22,6 +22,8 @@ interface MapSettingsSheetProps {
   onShowCurrentLocationChange: (enabled: boolean) => void;
   keepScreenAwake: boolean;
   onKeepScreenAwakeChange: (enabled: boolean) => void;
+  lowPowerMode: boolean;
+  onLowPowerModeChange: (enabled: boolean) => void;
   layerVisibility: LayerVisibility;
   onLayerVisibilityChange: (
     layer: keyof LayerVisibility,
@@ -66,6 +68,8 @@ export function MapSettingsSheet({
   onShowCurrentLocationChange,
   keepScreenAwake,
   onKeepScreenAwakeChange,
+  lowPowerMode,
+  onLowPowerModeChange,
   layerVisibility,
   onLayerVisibilityChange,
   distanceUnit,
@@ -107,7 +111,7 @@ export function MapSettingsSheet({
 
   return (
     <SettingsOverlay onClose={onClose}>
-      <MobileSheet maxHeightClassName="max-h-[min(85dvh,760px)]">
+      <MobileSheet maxHeightClassName="max-h-[min(85dvh,760px)]" className="hud-sheet-enter">
         <div className="sticky top-0 z-10 -mx-4 space-y-3 bg-surface-panel px-4 pb-3 pt-1">
           <div className="jl-settings-header flex items-center justify-between gap-3">
             <div>
@@ -147,6 +151,8 @@ export function MapSettingsSheet({
               onShowCurrentLocationChange={onShowCurrentLocationChange}
               keepScreenAwake={keepScreenAwake}
               onKeepScreenAwakeChange={onKeepScreenAwakeChange}
+              lowPowerMode={lowPowerMode}
+              onLowPowerModeChange={onLowPowerModeChange}
               distanceUnit={distanceUnit}
               onDistanceUnitChange={onDistanceUnitChange}
               mapStyle={mapStyle}
@@ -205,6 +211,8 @@ function MapSegment({
   onShowCurrentLocationChange,
   keepScreenAwake,
   onKeepScreenAwakeChange,
+  lowPowerMode,
+  onLowPowerModeChange,
   distanceUnit,
   onDistanceUnitChange,
   mapStyle,
@@ -232,6 +240,8 @@ function MapSegment({
   onShowCurrentLocationChange: (enabled: boolean) => void;
   keepScreenAwake: boolean;
   onKeepScreenAwakeChange: (enabled: boolean) => void;
+  lowPowerMode: boolean;
+  onLowPowerModeChange: (enabled: boolean) => void;
   distanceUnit: DistanceUnit;
   onDistanceUnitChange: (unit: DistanceUnit) => void;
   mapStyle: MapStyle;
@@ -266,6 +276,12 @@ function MapSegment({
         label="Keep screen awake"
         checked={keepScreenAwake}
         onChange={onKeepScreenAwakeChange}
+      />
+      <SettingsToggleRow
+        label="Low power mode"
+        description="Reduces GPS polling, live transit, animations, and background downloads. Core session sync and tools stay available."
+        checked={lowPowerMode}
+        onChange={onLowPowerModeChange}
       />
 
       <ChoicePair
@@ -410,7 +426,7 @@ function SettingsOverlay({
 }) {
   return (
     <div
-      className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] overscroll-contain hud-scrim"
+      className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] overscroll-contain hud-scrim hud-scrim-enter"
       onClick={onClose}
       onKeyDown={(event) => {
         if (event.key === "Escape") {

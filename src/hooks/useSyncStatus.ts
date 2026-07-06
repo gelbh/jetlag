@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { LOCAL_SESSION_ID } from "../domain/annotations";
+import { getPowerProfile } from "../domain/powerProfile";
 import { resolveSyncStatus, type SyncStatus } from "../domain/sync";
 import { useReachability } from "./useReachability";
+import { useMapStore } from "../state/mapStore";
 import { useSessionStore } from "../state/sessionStore";
 
 export function useSyncStatus(): {
@@ -23,7 +25,9 @@ export function useSyncStatus(): {
   const reachabilityEnabled =
     Boolean(session) &&
     session?.id !== LOCAL_SESSION_ID;
-  const { reachable } = useReachability(reachabilityEnabled);
+  const lowPowerMode = useMapStore((state) => state.lowPowerMode);
+  const reachabilityProbeMs = getPowerProfile(lowPowerMode).reachabilityProbeMs;
+  const { reachable } = useReachability(reachabilityEnabled, reachabilityProbeMs);
 
   useEffect(() => {
     const handleOnline = () => setOnline(true);

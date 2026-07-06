@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { GameSize } from "../../domain/gameSize";
+import { getPowerProfile } from "../../domain/powerProfile";
 import {
   computeElapsedMs,
   formatElapsedTime,
@@ -14,6 +15,7 @@ import {
 } from "../../domain/hidingPeriod";
 import type { PendingQuestionRecord } from "../../domain/sessionChat";
 import { selectPrimaryQuestionTimer } from "../../domain/questionTimerDisplay";
+import { useMapStore } from "../../state/mapStore";
 
 interface MapTimerClusterProps {
   gameSize: GameSize;
@@ -43,6 +45,8 @@ export function MapTimerCluster({
   onOpenTimerMenu,
   timerMenuOpen,
 }: MapTimerClusterProps) {
+  const lowPowerMode = useMapStore((state) => state.lowPowerMode);
+  const timerTickMs = getPowerProfile(lowPowerMode).timerTickMs;
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
@@ -52,10 +56,10 @@ export function MapTimerCluster({
 
     const interval = window.setInterval(() => {
       setTick((value) => value + 1);
-    }, 250);
+    }, timerTickMs);
 
     return () => window.clearInterval(interval);
-  }, [timerHasStarted, timerState.runningSince]);
+  }, [timerHasStarted, timerState.runningSince, timerTickMs]);
 
   void tick;
 

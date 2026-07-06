@@ -68,6 +68,7 @@ export function CreateSession() {
   const navigate = useNavigate();
   const setSession = useSessionStore((state) => state.setSession);
   const mapStyle = useMapStore((state) => state.mapStyle);
+  const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const [bounds, setBounds] = useState<LatLngBounds | null>(null);
   const [focusBounds, setFocusBounds] = useState<LatLngBoundsExpression | null>(
     null,
@@ -340,10 +341,12 @@ export function CreateSession() {
         setPremiumApiContext(localSession);
       }
 
-      preloadGameAreaCaches(gameArea);
-      startSeaLevelBackgroundSampling(gameArea);
-      if (navigator.onLine) {
-        void preloadCriticalGameAreaCaches(gameArea);
+      if (!lowPowerMode) {
+        preloadGameAreaCaches(gameArea);
+        startSeaLevelBackgroundSampling(gameArea);
+        if (navigator.onLine) {
+          void preloadCriticalGameAreaCaches(gameArea);
+        }
       }
       navigate("/map");
     } catch (nextError) {

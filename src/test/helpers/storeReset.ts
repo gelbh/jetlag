@@ -25,6 +25,7 @@ export function resetAllStores(): void {
     transitRouteFilter: "all",
     showCurrentLocation: true,
     keepScreenAwake: false,
+    lowPowerMode: false,
     distanceUnit: "imperial",
     mapStyle: "standard",
     layerVisibility: {

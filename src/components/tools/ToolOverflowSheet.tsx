@@ -86,7 +86,7 @@ function ToolOverflowOverlay({
 }) {
   return (
     <div
-      className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] overscroll-contain hud-scrim"
+      className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] overscroll-contain hud-scrim hud-scrim-enter"
       onClick={onClose}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
@@ -140,7 +140,7 @@ export function ToolOverflowSheet({
   return (
     <ToolOverflowOverlay onClose={onClose}>
       <MobileSheet
-        className="jl-tool-overflow-sheet"
+        className="hud-sheet-enter"
         maxHeightClassName="max-h-[min(50dvh,420px)]"
       >
         <div

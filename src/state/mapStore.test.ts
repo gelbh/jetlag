@@ -28,11 +28,13 @@ describe("mapStore", () => {
     expect(useMapStore.getState().layerVisibility.zone).toBe(true);
   });
 
-  it("updates distance unit and screen wake lock preference", () => {
+  it("updates distance unit, screen wake lock, and low power preference", () => {
     useMapStore.getState().setDistanceUnit("metric");
     useMapStore.getState().setKeepScreenAwake(true);
+    useMapStore.getState().setLowPowerMode(true);
 
     expect(useMapStore.getState().distanceUnit).toBe("metric");
     expect(useMapStore.getState().keepScreenAwake).toBe(true);
+    expect(useMapStore.getState().lowPowerMode).toBe(true);
   });
 });

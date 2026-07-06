@@ -21,8 +21,9 @@ import {
   fallbackGameArea,
   gameAreaCenter,
   gameAreaToBoundsExpression,
+  type LatLngTuple,
 } from "../domain/geometry";
-import type { LatLngTuple } from "../domain/geometry";
+import { effectiveMapStyle } from "../domain/powerProfile";
 import { computeHiderTruthReplyAsync } from "../domain/hiderTruthAnswer";
 import { MAP_ANNOTATION_COLORS } from "../domain/mapAnnotationColors";
 import { useHiderZoneTool } from "../hooks/useHiderZoneTool";
@@ -52,6 +53,8 @@ export function HiderMapScreen() {
   const allAnnotations = useAnnotationStore((state) => state.annotations);
   const layerVisibility = useMapStore((state) => state.layerVisibility);
   const mapStyle = useMapStore((state) => state.mapStyle);
+  const lowPowerMode = useMapStore((state) => state.lowPowerMode);
+  const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
   const showCurrentLocation = useMapStore((state) => state.showCurrentLocation);
   const setShowCurrentLocation = useMapStore(
     (state) => state.setShowCurrentLocation,
@@ -62,6 +65,7 @@ export function HiderMapScreen() {
   const setLayerVisibility = useMapStore((state) => state.setLayerVisibility);
   const keepScreenAwake = useMapStore((state) => state.keepScreenAwake);
   const setKeepScreenAwake = useMapStore((state) => state.setKeepScreenAwake);
+  const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
 
   const overlay = useMapOverlayState();
   const [currentUid, setCurrentUid] = useState<string | null>(myUid);
@@ -110,7 +114,7 @@ export function HiderMapScreen() {
     remoteState,
   });
   const syncStatus = useSyncStatus();
-  useWakeLock(keepScreenAwake || timer.running);
+  useWakeLock(keepScreenAwake || (timer.running && !lowPowerMode));
   const { answerPendingQuestion, postSystemMessage } = usePendingQuestionActions();
 
   const postGameSystem = useCallback(
@@ -183,7 +187,7 @@ export function HiderMapScreen() {
         <MapView
           key={session.id}
           mapKey={session.id}
-          mapStyle={mapStyle}
+          mapStyle={effectiveBasemapStyle}
           center={center}
           zoom={12}
           focusBounds={mapFocusBounds}
@@ -407,6 +411,8 @@ export function HiderMapScreen() {
         onShowCurrentLocationChange={setShowCurrentLocation}
         keepScreenAwake={keepScreenAwake}
         onKeepScreenAwakeChange={setKeepScreenAwake}
+        lowPowerMode={lowPowerMode}
+        onLowPowerModeChange={setLowPowerMode}
         layerVisibility={layerVisibility}
         onLayerVisibilityChange={setLayerVisibility}
         distanceUnit={distanceUnit}

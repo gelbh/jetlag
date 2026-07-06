@@ -144,7 +144,7 @@ export function ChatPanel({
 
   return (
     <div
-      className={`pointer-events-auto absolute inset-x-0 z-[var(--z-panel)] px-3 ${bottomClassName}`}
+      className={`pointer-events-auto absolute inset-x-0 z-[var(--z-panel)] px-3 jl-panel-enter ${bottomClassName}`}
       style={
         keyboardInset > 0
           ? { transform: `translateY(-${keyboardInset}px)` }

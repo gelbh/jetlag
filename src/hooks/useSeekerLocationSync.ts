@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { LOCAL_SESSION_ID } from "../domain/annotations";
+import { getPowerProfile } from "../domain/powerProfile";
 import type { PlayerLocationRecord } from "../domain/sessionChat";
+import { useMapStore } from "../state/mapStore";
 import { useLiveLocation } from "./useLiveLocation";
 import { isFirebaseConfigured } from "../services/firebase";
 import { writePlayerLocation } from "../services/firestoreSessionExtras";
@@ -16,11 +18,9 @@ export function useSeekerLocationSync({
   uid,
   enabled,
 }: UseSeekerLocationSyncParams) {
-  const { reading, error } = useLiveLocation(enabled, {
-    highAccuracy: true,
-    minIntervalMs: 2000,
-    minDistanceMeters: 8,
-  });
+  const lowPowerMode = useMapStore((state) => state.lowPowerMode);
+  const profile = getPowerProfile(lowPowerMode).seekerLocationSync;
+  const { reading, error } = useLiveLocation(enabled, profile);
 
   useEffect(() => {
     if (

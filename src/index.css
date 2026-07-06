@@ -412,7 +412,7 @@ textarea {
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .home-resume-action[aria-busy="true"] .home-resume-cta {
+    html:not([data-motion="reduced"]) .home-resume-action[aria-busy="true"] .home-resume-cta {
       animation: home-resume-pulse 1.2s ease-in-out infinite;
     }
   }
@@ -574,7 +574,13 @@ textarea {
   }
 
   .jl-ticker-active {
-    animation: jl-ticker-glow 2s ease-in-out infinite;
+    animation: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion="reduced"]) .jl-ticker-active {
+      animation: jl-ticker-glow 2s ease-in-out infinite;
+    }
   }
 
   @keyframes jl-ticker-glow {
@@ -864,8 +870,21 @@ textarea {
     background: var(--color-surface-raised);
   }
 
-  .jl-tool-overflow-sheet {
-    animation: tool-overflow-sheet-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  .jl-tool-overflow-sheet,
+  .hud-sheet-enter {
+    animation: hud-sheet-enter 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .hud-scrim-enter {
+    animation: hud-scrim-enter 180ms ease-out both;
+  }
+
+  .jl-panel-enter {
+    animation: jl-panel-enter 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .route-loading-enter {
+    animation: route-loading-enter 0.2s ease-out both;
   }
 
   .jl-tool-overflow-row {
@@ -1200,6 +1219,50 @@ textarea {
   }
 }
 
+@keyframes hud-sheet-enter {
+  from {
+    opacity: 0.92;
+    transform: translateY(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hud-scrim-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes jl-panel-enter {
+  from {
+    opacity: 0.92;
+    transform: translateY(0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes route-loading-enter {
+  from {
+    opacity: 0.7;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes tool-overflow-sheet-in {
   from {
     opacity: 0.92;
@@ -1215,17 +1278,41 @@ textarea {
 @media (prefers-reduced-motion: reduce) {
   .annotation-pulse,
   .draft-seeker-pulse,
-  .loading-spinner {
+  .loading-spinner,
+  .home-enter-actions,
+  .home-resume-action[aria-busy="true"] .home-resume-cta {
     animation: none;
   }
 
-  .jl-tool-overflow-sheet {
+  .jl-tool-overflow-sheet,
+  .hud-sheet-enter,
+  .hud-scrim-enter,
+  .jl-panel-enter,
+  .route-loading-enter {
     animation: none;
   }
 
   .map-chrome-hud {
     transition: none;
   }
+}
+
+html[data-motion="reduced"] .annotation-pulse,
+html[data-motion="reduced"] .draft-seeker-pulse,
+html[data-motion="reduced"] .loading-spinner,
+html[data-motion="reduced"] .home-enter-actions,
+html[data-motion="reduced"] .home-resume-action[aria-busy="true"] .home-resume-cta,
+html[data-motion="reduced"] .jl-ticker-active,
+html[data-motion="reduced"] .jl-tool-overflow-sheet,
+html[data-motion="reduced"] .hud-sheet-enter,
+html[data-motion="reduced"] .hud-scrim-enter,
+html[data-motion="reduced"] .jl-panel-enter,
+html[data-motion="reduced"] .route-loading-enter {
+  animation: none;
+}
+
+html[data-motion="reduced"] .map-chrome-hud {
+  transition: none;
 }
 
 .user-location-icon {

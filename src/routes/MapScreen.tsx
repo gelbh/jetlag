@@ -81,6 +81,7 @@ import {
   getTransitMetro,
   metroSupportsLiveVehicles,
 } from "../services/transitCatalog";
+import { effectiveMapStyle } from "../domain/powerProfile";
 import { preloadGameAreaCaches } from "../services/gameAreaPreload";
 import { startSeaLevelBackgroundSampling } from "../services/seaLevelProgressive";
 import { setPremiumApiContext } from "../services/premiumApiContext";
@@ -130,6 +131,8 @@ export function MapScreen() {
   const setDistanceUnit = useMapStore((state) => state.setDistanceUnit);
   const mapStyle = useMapStore((state) => state.mapStyle);
   const setMapStyle = useMapStore((state) => state.setMapStyle);
+  const lowPowerMode = useMapStore((state) => state.lowPowerMode);
+  const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
   const allAnnotations = useAnnotationStore((state) => state.annotations);
   const sessionId = session?.id;
   const annotations = useMemo(
@@ -179,6 +182,7 @@ export function MapScreen() {
   const layerVisibility = useMapStore((state) => state.layerVisibility);
   const keepScreenAwake = useMapStore((state) => state.keepScreenAwake);
   const setKeepScreenAwake = useMapStore((state) => state.setKeepScreenAwake);
+  const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
   const setLayerVisibility = useMapStore((state) => state.setLayerVisibility);
   const {
     createAnnotation,
@@ -225,17 +229,17 @@ export function MapScreen() {
   const exportLegendRef = useRef<HTMLDivElement>(null);
   const suppressChromeHideRef = useRef(false);
   const syncStatus = useSyncStatus();
-  useWakeLock(keepScreenAwake || timer.running);
+  useWakeLock(keepScreenAwake || (timer.running && !lowPowerMode));
   const firebaseAuthReady = useFirebaseAuthReady(session);
 
   useEffect(() => {
-    if (!session?.gameArea || !firebaseAuthReady) {
+    if (!session?.gameArea || !firebaseAuthReady || lowPowerMode) {
       return;
     }
 
     preloadGameAreaCaches(session.gameArea);
     startSeaLevelBackgroundSampling(session.gameArea);
-  }, [session?.gameArea, firebaseAuthReady]);
+  }, [session?.gameArea, firebaseAuthReady, lowPowerMode]);
 
   const overlay = useMapOverlayState();
   const [mapError, setMapError] = useState<string | null>(null);
@@ -455,7 +459,7 @@ export function MapScreen() {
     gameArea: fallbackGameArea(session?.gameArea),
     metroId: session?.transitMetroId,
     enabled: transitEnabled && Boolean(session?.gameArea),
-    liveEnabled: transitLiveEnabled,
+    liveEnabled: transitLiveEnabled && !lowPowerMode,
     routeFilter: transitRouteFilter,
   });
 
@@ -771,7 +775,7 @@ export function MapScreen() {
         <MapView
           key={session.id}
           mapKey={session.id}
-          mapStyle={mapStyle}
+          mapStyle={effectiveBasemapStyle}
           center={center}
           zoom={12}
           focusBounds={mapFocusBounds}
@@ -797,6 +801,7 @@ export function MapScreen() {
           <LiveUserLocationLayer
             enabled={showCurrentLocation}
             highAccuracy={awaitingPlacement}
+            lowPowerMode={lowPowerMode}
             onError={handleLiveLocationError}
           />
           <AnnotationLayer
@@ -895,7 +900,7 @@ export function MapScreen() {
       </div>
 
       {geometryEditAnnotation && geometryDraft ? (
-        <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock z-[var(--z-panel)] px-3">
+        <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock jl-panel-enter z-[var(--z-panel)] px-3">
           <div className="hud-panel mx-auto flex max-w-xl gap-2 p-3">
             <button
               type="button"
@@ -936,6 +941,8 @@ export function MapScreen() {
         onShowCurrentLocationChange={setShowCurrentLocation}
         keepScreenAwake={keepScreenAwake}
         onKeepScreenAwakeChange={setKeepScreenAwake}
+        lowPowerMode={lowPowerMode}
+        onLowPowerModeChange={setLowPowerMode}
         layerVisibility={layerVisibility}
         onLayerVisibilityChange={setLayerVisibility}
         distanceUnit={distanceUnit}
@@ -973,7 +980,7 @@ export function MapScreen() {
       />
 
       {activeTool !== "none" && !selectedAnnotation ? (
-        <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock z-[var(--z-panel)] px-3">
+        <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock jl-panel-enter z-[var(--z-panel)] px-3">
           <div
             className={`tool-panel-compact hud-panel relative mx-auto max-w-xl overflow-y-auto overscroll-contain p-3 pt-9 ${
               isWizardDockTool(activeTool)

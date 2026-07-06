@@ -11,6 +11,8 @@ const baseProps = {
   onShowCurrentLocationChange: vi.fn(),
   keepScreenAwake: false,
   onKeepScreenAwakeChange: vi.fn(),
+  lowPowerMode: false,
+  onLowPowerModeChange: vi.fn(),
   layerVisibility: {
     radar: true,
     thermometer: true,

@@ -26,6 +26,7 @@ export const useMapStore = create<{
   transitRouteFilter: TransitRouteFilter;
   showCurrentLocation: boolean;
   keepScreenAwake: boolean;
+  lowPowerMode: boolean;
   distanceUnit: DistanceUnit;
   mapStyle: MapStyle;
   layerVisibility: LayerVisibility;
@@ -35,6 +36,7 @@ export const useMapStore = create<{
   setTransitRouteFilter: (filter: TransitRouteFilter) => void;
   setShowCurrentLocation: (enabled: boolean) => void;
   setKeepScreenAwake: (enabled: boolean) => void;
+  setLowPowerMode: (enabled: boolean) => void;
   setDistanceUnit: (unit: DistanceUnit) => void;
   setMapStyle: (style: MapStyle) => void;
   setLayerVisibility: (layer: keyof LayerVisibility, visible: boolean) => void;
@@ -47,6 +49,7 @@ export const useMapStore = create<{
       transitRouteFilter: "all",
       showCurrentLocation: true,
       keepScreenAwake: false,
+      lowPowerMode: false,
       distanceUnit: "imperial",
       mapStyle: "standard",
       layerVisibility: DEFAULT_LAYER_VISIBILITY,
@@ -59,6 +62,7 @@ export const useMapStore = create<{
       setShowCurrentLocation: (showCurrentLocation) =>
         set({ showCurrentLocation }),
       setKeepScreenAwake: (keepScreenAwake) => set({ keepScreenAwake }),
+      setLowPowerMode: (lowPowerMode) => set({ lowPowerMode }),
       setDistanceUnit: (distanceUnit) => set({ distanceUnit }),
       setMapStyle: (mapStyle) => set({ mapStyle }),
       setLayerVisibility: (layer, visible) =>
@@ -83,6 +87,7 @@ export const useMapStore = create<{
       }),
       partialize: (state) => ({
         keepScreenAwake: state.keepScreenAwake,
+        lowPowerMode: state.lowPowerMode,
         distanceUnit: state.distanceUnit,
         mapStyle: state.mapStyle,
         layerVisibility: state.layerVisibility,

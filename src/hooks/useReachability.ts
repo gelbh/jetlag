@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchWithTimeout } from "../services/fetchWithTimeout";
 
-const PROBE_INTERVAL_MS = 15_000;
 const PROBE_TIMEOUT_MS = 5_000;
 const PROBE_URL = "/health";
 const UNREACHABLE_FAILURE_THRESHOLD = 2;
@@ -23,7 +22,10 @@ async function probeReachability(): Promise<boolean> {
   }
 }
 
-export function useReachability(enabled: boolean): {
+export function useReachability(
+  enabled: boolean,
+  probeIntervalMs = 15_000,
+): {
   reachable: boolean | null;
   lastProbeAt: number | null;
 } {
@@ -60,7 +62,7 @@ export function useReachability(enabled: boolean): {
     void runProbe();
     const intervalId = window.setInterval(() => {
       void runProbe();
-    }, PROBE_INTERVAL_MS);
+    }, probeIntervalMs);
 
     const handleOnline = () => {
       consecutiveFailures = 0;
@@ -74,7 +76,7 @@ export function useReachability(enabled: boolean): {
       window.clearInterval(intervalId);
       window.removeEventListener("online", handleOnline);
     };
-  }, [enabled]);
+  }, [enabled, probeIntervalMs]);
 
   return { reachable, lastProbeAt };
 }

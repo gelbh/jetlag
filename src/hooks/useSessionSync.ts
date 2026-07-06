@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { LOCAL_SESSION_ID, migrateAnnotations } from "../domain/annotations";
-import { useAnnotationStore, useSessionStore } from "../state/sessionStore";
+import { getPowerProfile } from "../domain/powerProfile";
+import { useAnnotationStore, useMapStore, useSessionStore } from "../state/sessionStore";
 import {
   getFirestoreDb,
   isFirebaseConfigured,
@@ -18,9 +19,10 @@ import {
   shouldRetryOfflineWrite,
 } from "../services/offlineQueue";
 
-const QUEUE_FLUSH_INTERVAL_MS = 45_000;
 
 export function useSessionSync() {
+  const lowPowerMode = useMapStore((state) => state.lowPowerMode);
+  const queueFlushMs = getPowerProfile(lowPowerMode).queueFlushMs;
   const session = useSessionStore((state) => state.session);
   const myUid = useSessionStore((state) => state.myUid);
   const setSession = useSessionStore((state) => state.setSession);
@@ -188,13 +190,13 @@ export function useSessionSync() {
 
     const intervalId = window.setInterval(() => {
       void flushQueue();
-    }, QUEUE_FLUSH_INTERVAL_MS);
+    }, queueFlushMs);
 
     return () => {
       window.removeEventListener("online", handleOnline);
       window.clearInterval(intervalId);
     };
-  }, [session?.id, setLastSyncError, setPendingWrites]);
+  }, [queueFlushMs, session?.id, setLastSyncError, setPendingWrites]);
 
   useEffect(() => {
     const handleOffline = () => {

@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { MapErrorBoundary } from "./components/ui/MapErrorBoundary";
+import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
+import { useMotionProfile } from "./hooks/useMotionProfile";
 import { Home } from "./routes/Home";
 import { JoinSession } from "./routes/JoinSession";
 import { pruneStaleTimerSessions } from "./services/sessionCleanup";
@@ -14,7 +16,7 @@ const CreateSession = lazy(() =>
 
 function RouteFallback() {
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] text-ink-dim">
+    <div className="route-loading-enter flex min-h-[100dvh] items-center justify-center px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] text-ink-dim">
       Loading…
     </div>
   );
@@ -25,6 +27,8 @@ function LazyRoute({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
+  useMotionProfile();
+
   useEffect(() => {
     pruneStaleTimerSessions();
   }, []);
@@ -32,6 +36,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className="min-h-[100dvh]">
+        <LowBatteryPrompt />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route

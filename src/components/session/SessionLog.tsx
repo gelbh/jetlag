@@ -53,7 +53,7 @@ export function SessionLog({
 
   return (
     <div
-      className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] overscroll-contain hud-scrim"
+      className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] overscroll-contain hud-scrim hud-scrim-enter"
       onClick={onClose}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
@@ -62,7 +62,7 @@ export function SessionLog({
       }}
     >
       <div
-        className="absolute inset-x-0 bottom-0 flex max-h-[min(85dvh,720px)] flex-col overflow-hidden rounded-t-3xl border border-border bg-surface-base p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+        className="hud-sheet-enter absolute inset-x-0 bottom-0 flex max-h-[min(85dvh,720px)] flex-col overflow-hidden rounded-t-3xl border border-border bg-surface-base p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-4 flex shrink-0 items-center justify-between gap-3">

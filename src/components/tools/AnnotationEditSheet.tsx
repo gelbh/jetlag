@@ -540,7 +540,7 @@ function EditSheetFrame({
   children: ReactNode;
 }) {
   return (
-    <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock z-[var(--z-panel)] px-3">
+    <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock jl-panel-enter z-[var(--z-panel)] px-3">
       <div className="hud-panel mx-auto flex max-h-[min(42dvh,420px)] max-w-xl flex-col overflow-hidden">
         <div className="shrink-0 p-4 pb-0">
           <EditSheetHeader title={title} onClose={onClose} />
