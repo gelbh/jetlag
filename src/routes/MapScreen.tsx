@@ -17,7 +17,6 @@ import {
 import { MapFirstRunSheet } from "../components/session/MapFirstRunSheet";
 import { MapToolsHintBanner } from "../components/session/MapToolsHintBanner";
 import { MapSettingsSheet } from "../components/session/MapSettingsSheet";
-import { GameAreaPreloadBanner } from "../components/session/GameAreaPreloadBanner";
 import { MapStatusRail } from "../components/session/MapStatusRail";
 import { SessionLog } from "../components/session/SessionLog";
 import { AnnotationEditSheet } from "../components/tools/AnnotationEditSheet";
@@ -868,11 +867,11 @@ export function MapScreen() {
         ref={chromeHudRef}
         className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
       >
-        <GameAreaPreloadBanner />
         <MapStatusRail
           sessionCode={session.code}
           gameSize={session.gameSize ?? "medium"}
           playerRole="seeker"
+          showPreloadBanner
           activeTool={activeTool}
           syncStatus={syncStatus.status}
           queuedWrites={syncStatus.queuedWrites}

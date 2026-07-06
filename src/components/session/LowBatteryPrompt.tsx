@@ -47,7 +47,7 @@ export function LowBatteryPrompt() {
 
   return (
     <div
-      className="pointer-events-auto fixed inset-x-3 top-[calc(env(safe-area-inset-top)+var(--status-bar-height)+0.75rem)] z-[var(--z-panel)]"
+      className="jl-map-banner-top pointer-events-auto fixed inset-x-3 z-[var(--z-panel)]"
       role="dialog"
       aria-labelledby="low-battery-prompt-title"
       aria-describedby="low-battery-prompt-body"

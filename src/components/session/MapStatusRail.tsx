@@ -11,6 +11,7 @@ import { TimerActions } from "../tools/TimerActions";
 import { SessionTimerLabel } from "./SessionTimerLabel";
 import { MapTimerCluster } from "./MapTimerCluster";
 import { QuestionAlertBanner } from "./QuestionAlertBanner";
+import { GameAreaPreloadBanner } from "./GameAreaPreloadBanner";
 
 import type { GameSize } from "../../domain/gameSize";
 import type { PlayerRole } from "../../domain/playerRole";
@@ -36,6 +37,7 @@ interface MapStatusRailProps {
   pendingQuestions?: readonly PendingQuestionRecord[];
   /** When true, closes the timer settings dropdown (e.g. another overlay opened). */
   closeTimerMenu?: boolean;
+  showPreloadBanner?: boolean;
 }
 
 type SyncTone = "error" | "warning" | "info";
@@ -164,6 +166,7 @@ export function MapStatusRail({
   onOpenLog,
   pendingQuestions = [],
   closeTimerMenu = false,
+  showPreloadBanner = false,
 }: MapStatusRailProps) {
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
@@ -306,6 +309,8 @@ export function MapStatusRail({
           pendingQuestions={pendingQuestions}
           gameSize={gameSize}
         />
+
+        {showPreloadBanner ? <GameAreaPreloadBanner /> : null}
       </div>
     </div>
   );

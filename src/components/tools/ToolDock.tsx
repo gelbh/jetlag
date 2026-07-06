@@ -198,9 +198,11 @@ export function ToolDock({
     <div
       ref={dockRef}
       className="jl-tool-dock pointer-events-auto"
-      style={{
-        bottom: `${viewportBottomInset}px`,
-      }}
+      style={
+        viewportBottomInset > 0
+          ? { bottom: `${viewportBottomInset}px` }
+          : undefined
+      }
     >
       {drawMenuOpen ? (
         <div

@@ -73,3 +73,58 @@ test.describe("mobile tool dock", () => {
     ).toBeEnabled();
   });
 });
+
+test.describe("iPhone 14 Pro Max tool dock", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize({ width: 430, height: 932 });
+    await openMapWithLocalSession(page);
+  });
+
+  test("renders a single dock bar without a stacked duplicate", async ({ page }) => {
+    await expect(page.locator(".jl-tool-dock-bar")).toHaveCount(1);
+
+    const metrics = await page.evaluate(() => {
+      const bars = [...document.querySelectorAll(".jl-tool-dock-bar")];
+      const dock = document.querySelector(".jl-tool-dock");
+      const dockRect = dock?.getBoundingClientRect();
+      const barRect = bars[0]?.getBoundingClientRect();
+      return {
+        barCount: bars.length,
+        viewportHeight: window.innerHeight,
+        barBottom: barRect?.bottom ?? 0,
+        dockBottom: dockRect?.bottom ?? 0,
+      };
+    });
+
+    expect(metrics.barCount).toBe(1);
+    expect(metrics.barBottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
+    expect(metrics.dockBottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
+  });
+
+  test("dock fits without clipping question tools at 430px", async ({ page }) => {
+    const metrics = await page.evaluate(() => {
+      const bar = document.querySelector(".jl-tool-dock-bar");
+      const barRect = bar?.getBoundingClientRect();
+      const slots = [...document.querySelectorAll(".jl-tool-slot")].filter(
+        (el) => el.getBoundingClientRect().width > 0,
+      );
+      return {
+        barRight: barRect?.right ?? 0,
+        viewportWidth: window.innerWidth,
+        overflowSlots: slots.filter((el) => {
+          const rect = el.getBoundingClientRect();
+          return rect.right > (barRect?.right ?? 0) + 1;
+        }).length,
+      };
+    });
+
+    expect(metrics.overflowSlots).toBe(0);
+    expect(metrics.barRight).toBeLessThanOrEqual(metrics.viewportWidth);
+  });
+
+  test("matches compact dock screenshots at 430px", async ({ page }) => {
+    await expect(page.locator(".jl-tool-dock-bar")).toHaveScreenshot(
+      "tool-dock-compact-14-pro-max.png",
+    );
+  });
+});

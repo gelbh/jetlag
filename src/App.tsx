@@ -16,7 +16,7 @@ const CreateSession = lazy(() =>
 
 function RouteFallback() {
   return (
-    <div className="route-loading-enter flex min-h-[100dvh] items-center justify-center px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] text-ink-dim">
+    <div className="route-loading-enter flex min-h-full items-center justify-center px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] text-ink-dim">
       Loading…
     </div>
   );
@@ -35,7 +35,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-[100dvh]">
+      <div className="h-full overflow-y-auto overscroll-y-none">
         <LowBatteryPrompt />
         <Routes>
           <Route path="/" element={<Home />} />
