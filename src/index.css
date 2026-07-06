@@ -612,6 +612,21 @@ textarea {
     }
   }
 
+  @media (max-width: 26rem) {
+    .jl-tool-dock-bar .jl-tool-slot-label {
+      display: none;
+    }
+
+    .jl-tool-dock-wide-only {
+      display: none !important;
+      pointer-events: none;
+    }
+
+    .jl-tool-dock-compact-only {
+      display: flex;
+    }
+  }
+
   .jl-tool-dock-group {
     display: flex;
     shrink: 0;
