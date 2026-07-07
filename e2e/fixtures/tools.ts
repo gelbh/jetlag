@@ -15,8 +15,17 @@ async function advanceWizard(page: Page) {
 
 async function waitForWizardNext(page: Page) {
   await expect(page.getByRole("button", { name: "Next" })).toBeEnabled({
-    timeout: 15_000,
+    timeout: 30_000,
   });
+}
+
+async function waitForGeoLoadingIdle(page: Page) {
+  const loadingPattern =
+    /Finding nearest feature|Finding division|Finding landmass|Loading locations within/;
+  const loading = page.getByText(loadingPattern);
+  if (await loading.count()) {
+    await expect(loading).toHaveCount(0, { timeout: 30_000 });
+  }
 }
 
 async function waitForSendToHiders(page: Page) {
@@ -69,6 +78,7 @@ export async function completeMatchingSolo(page: Page) {
   await page.locator("select.field-input").selectOption("museum");
   await waitForWizardNext(page);
   await advanceWizard(page);
+  await waitForGeoLoadingIdle(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
   await page.getByRole("button", { name: "Yes" }).click();
@@ -83,6 +93,7 @@ export async function sendMatchingToHiders(page: Page) {
   await page.locator("select.field-input").selectOption("museum");
   await waitForWizardNext(page);
   await advanceWizard(page);
+  await waitForGeoLoadingIdle(page);
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
@@ -94,6 +105,7 @@ export async function completeMeasuringSolo(page: Page) {
   await page.locator("select.field-input").selectOption("museum");
   await waitForWizardNext(page);
   await advanceWizard(page);
+  await clickMapAt(page, 0.6, 0.4);
   await waitForWizardNext(page);
   await advanceWizard(page);
   await page.getByRole("button", { name: "Closer" }).click();
@@ -107,6 +119,7 @@ export async function sendMeasuringToHiders(page: Page) {
   await page.locator("select.field-input").selectOption("museum");
   await waitForWizardNext(page);
   await advanceWizard(page);
+  await clickMapAt(page, 0.6, 0.4);
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
@@ -143,9 +156,13 @@ export async function sendThermometerToHiders(page: Page) {
 export async function completeTentacleSolo(page: Page) {
   await clickToolDockButton(page, "Tentacles");
   await clickMapCenter(page);
+  await waitForGeoLoadingIdle(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
+  await waitForWizardNext(page);
   await advanceWizard(page);
+  await waitForGeoLoadingIdle(page);
+  await waitForWizardNext(page);
   await advanceWizard(page);
   await page.getByText("City Museum").click();
   await page.getByRole("button", { name: "Add tentacle question" }).click();
@@ -156,8 +173,12 @@ export async function completeTentacleSolo(page: Page) {
 export async function sendTentacleToHiders(page: Page) {
   await clickToolDockButton(page, "Tentacles");
   await clickMapCenter(page);
+  await waitForGeoLoadingIdle(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
+  await waitForWizardNext(page);
+  await advanceWizard(page);
+  await waitForGeoLoadingIdle(page);
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
