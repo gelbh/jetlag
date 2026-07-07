@@ -2,6 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { AppLogo } from "../components/ui/AppLogo";
 import { HudPlayIcon } from "../components/ui/HudIcons";
+import { VersionChangelogSheet } from "../components/ui/VersionChangelogSheet";
+import { APP_VERSION } from "../domain/changelog";
 import { LOCAL_SESSION_ID } from "../domain/annotations";
 import { githubIssuesUrl } from "../domain/githubFeedback";
 import { playerRoleLabel, resolvePlayerRole } from "../domain/playerRole";
@@ -21,6 +23,7 @@ export function Home() {
   const setSession = useSessionStore((state) => state.setSession);
   const [continueError, setContinueError] = useState<string | null>(null);
   const [continuing, setContinuing] = useState(false);
+  const [changelogOpen, setChangelogOpen] = useState(false);
 
   const handleContinue = async () => {
     if (!session) {
@@ -85,7 +88,17 @@ export function Home() {
   return (
     <main className="home-poster home-terminal-accent flex min-h-[100dvh] flex-col justify-between px-5 py-8">
       <div className="space-y-3 pt-[max(1.25rem,env(safe-area-inset-top))]">
-        <AppLogo variant="lockup" size="lg" />
+        <div className="flex items-start justify-between gap-3">
+          <AppLogo variant="lockup" size="lg" />
+          <button
+            type="button"
+            onClick={() => setChangelogOpen(true)}
+            className="hud-chrome shrink-0 px-2.5 py-1.5 font-mono text-xs font-bold tracking-wide text-ink-muted"
+            aria-label={`Version ${APP_VERSION}. Open changelog`}
+          >
+            v{APP_VERSION}
+          </button>
+        </div>
         <h1 className="font-display text-balance text-[clamp(2.25rem,12vw,4.25rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
           Hide +
           <br />
@@ -160,14 +173,18 @@ export function Home() {
           href={githubIssuesUrl()}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Suggest a feature or report a bug on GitHub"
-          className="home-card-btn home-card-btn-secondary min-h-12"
+          aria-label="Send feedback on GitHub"
+          className="home-feedback-link"
         >
-          <span>Suggest a feature · Report a bug</span>
-          <span className="home-card-btn-hint">GitHub Issues</span>
+          Feedback
         </a>
         {continueError ? <p className="text-error">{continueError}</p> : null}
       </div>
+
+      <VersionChangelogSheet
+        open={changelogOpen}
+        onClose={() => setChangelogOpen(false)}
+      />
     </main>
   );
 }

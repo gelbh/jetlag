@@ -63,7 +63,7 @@ describe("Home", () => {
 
     expect(
       screen.getByRole("link", {
-        name: "Suggest a feature or report a bug on GitHub",
+        name: "Send feedback on GitHub",
       }),
     ).toHaveAttribute("href", "https://github.com/gelbh/jetlag/issues/new");
   });

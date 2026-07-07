@@ -87,7 +87,7 @@ export function MapTimerCluster({
           className="jl-ticker jl-ticker-question jl-ticker-active"
           aria-live="polite"
         >
-          <span className="jl-ticker-phase">QUESTION</span>
+          <span className="jl-ticker-phase">{questionTimer.toolLabel}</span>
           <span className="jl-ticker-value tabular-nums">
             {questionTimer.countdownLabel}
           </span>

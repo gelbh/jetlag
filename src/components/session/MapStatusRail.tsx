@@ -10,7 +10,6 @@ import { PopupCloseButton } from "../ui/PopupCloseButton";
 import { TimerActions } from "../tools/TimerActions";
 import { SessionTimerLabel } from "./SessionTimerLabel";
 import { MapTimerCluster } from "./MapTimerCluster";
-import { QuestionAlertBanner } from "./QuestionAlertBanner";
 import { GameAreaPreloadBanner } from "./GameAreaPreloadBanner";
 
 import type { SessionRulesInput } from "../../domain/sessionRules";
@@ -38,8 +37,6 @@ interface MapStatusRailProps {
   /** When true, closes the timer settings dropdown (e.g. another overlay opened). */
   closeTimerMenu?: boolean;
   showPreloadBanner?: boolean;
-  showStartEndGame?: boolean;
-  onStartEndGame?: () => void;
   endGameActive?: boolean;
 }
 
@@ -170,8 +167,6 @@ export function MapStatusRail({
   pendingQuestions = [],
   closeTimerMenu = false,
   showPreloadBanner = false,
-  showStartEndGame = false,
-  onStartEndGame,
   endGameActive = false,
 }: MapStatusRailProps) {
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
@@ -257,7 +252,7 @@ export function MapStatusRail({
             <p
               className={`jl-mode-ticker flex-1 ${
                 placing ? "text-highlight" : "text-ink-muted"
-              }`}
+              } ${timerHasStarted ? "sr-only" : ""}`}
             >
               {modeLabel}
             </p>
@@ -311,18 +306,6 @@ export function MapStatusRail({
           </p>
         ) : null}
 
-        {showStartEndGame && onStartEndGame ? (
-          <div className="pointer-events-auto mx-3 mt-1.5 flex justify-center">
-            <button
-              type="button"
-              onClick={onStartEndGame}
-              className="btn-secondary min-h-12 px-4 text-sm"
-            >
-              Start end game
-            </button>
-          </div>
-        ) : null}
-
         {endGameActive ? (
           <p
             className="map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 border-highlight bg-surface-deep px-3 py-2 text-center text-sm font-semibold text-ink"
@@ -331,11 +314,6 @@ export function MapStatusRail({
             End game started
           </p>
         ) : null}
-
-        <QuestionAlertBanner
-          pendingQuestions={pendingQuestions}
-          sessionRules={sessionRules}
-        />
 
         {showPreloadBanner ? <GameAreaPreloadBanner /> : null}
       </div>
