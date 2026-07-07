@@ -155,6 +155,14 @@ export interface SessionRecord {
   status?: "active" | "ended";
   timerAccumulatedMs?: number;
   timerRunningSince?: string | null;
+  endGameStartedAt?: string;
+  endGameStartedByUid?: string;
+}
+
+export function isEndGameActive(
+  session: Pick<SessionRecord, "endGameStartedAt"> | null | undefined,
+): boolean {
+  return typeof session?.endGameStartedAt === "string";
 }
 
 export function isPremiumSession(session: SessionRecord | null | undefined): boolean {

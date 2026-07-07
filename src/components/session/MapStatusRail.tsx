@@ -38,6 +38,9 @@ interface MapStatusRailProps {
   /** When true, closes the timer settings dropdown (e.g. another overlay opened). */
   closeTimerMenu?: boolean;
   showPreloadBanner?: boolean;
+  showStartEndGame?: boolean;
+  onStartEndGame?: () => void;
+  endGameActive?: boolean;
 }
 
 type SyncTone = "error" | "warning" | "info";
@@ -167,6 +170,9 @@ export function MapStatusRail({
   pendingQuestions = [],
   closeTimerMenu = false,
   showPreloadBanner = false,
+  showStartEndGame = false,
+  onStartEndGame,
+  endGameActive = false,
 }: MapStatusRailProps) {
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
@@ -302,6 +308,27 @@ export function MapStatusRail({
             aria-live="polite"
           >
             {sync.banner.label}
+          </p>
+        ) : null}
+
+        {showStartEndGame && onStartEndGame ? (
+          <div className="pointer-events-auto mx-3 mt-1.5 flex justify-center">
+            <button
+              type="button"
+              onClick={onStartEndGame}
+              className="btn-secondary min-h-12 px-4 text-sm"
+            >
+              Start end game
+            </button>
+          </div>
+        ) : null}
+
+        {endGameActive ? (
+          <p
+            className="map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 border-highlight bg-surface-deep px-3 py-2 text-center text-sm font-semibold text-ink"
+            role="status"
+          >
+            End game started
           </p>
         ) : null}
 

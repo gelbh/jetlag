@@ -51,7 +51,7 @@ import {
   isPointInGameArea,
   type LatLngTuple,
 } from "../domain/geometry";
-import { LOCAL_SESSION_ID, isPremiumSession } from "../domain/annotations";
+import { LOCAL_SESSION_ID, isEndGameActive, isPremiumSession } from "../domain/annotations";
 import {
   advancedSettingsFromSession,
   mergeSessionRulesPatch,
@@ -59,7 +59,11 @@ import {
   type AdvancedSessionSettingsValue,
 } from "../domain/advancedSessionSettings";
 import { resolveToolDockEnabled } from "../domain/sessionRules";
-import { updateSessionRules } from "../services/firestoreAnnotations";
+import {
+  startEndGameSession,
+  updateSessionRules,
+} from "../services/firestoreAnnotations";
+import { useActiveThermometerWalk } from "../hooks/useActiveThermometerWalk";
 import { useAnnotations } from "../hooks/useAnnotations";
 import { useSessionTimer } from "../hooks/useSessionTimer";
 import { useRemoteSessionTimerSync } from "../hooks/useRemoteSessionTimerSync";
@@ -222,6 +226,7 @@ export function MapScreen() {
     },
     [],
   );
+  const [endGameNotice, setEndGameNotice] = useState<string | null>(null);
   const [currentUid, setCurrentUid] = useState<string | null>(null);
   const uid = currentUid ?? myUid;
   const isHost = Boolean(
@@ -474,6 +479,12 @@ export function MapScreen() {
     distanceUnit,
     finishPlacement,
     setMapError,
+  });
+  const activeThermometerWalk = useActiveThermometerWalk({
+    pendingQuestions,
+    playerLocations,
+    myUid: uid,
+    localLivePoint: thermometerTool.walkCurrentPoint,
   });
   const idleHeavyMapTools = useMemo(() => createIdleHeavyMapTools(), []);
   const [heavyMapTools, setHeavyMapTools] =
@@ -731,6 +742,51 @@ export function MapScreen() {
     setAwaitingPlacement(false);
   }, [cancelGeometryEdit, overlay, setSelectedAnnotationId]);
 
+  const handleDismissPanelsOnPan = useCallback(() => {
+    resetToolDrafts();
+    setActiveTool("none");
+    dismissTransientUi();
+  }, [dismissTransientUi, resetToolDrafts, setActiveTool]);
+
+  const confirmedHidingZones = useMemo(
+    () => hidingZones.filter((zone) => zone.status === "confirmed"),
+    [hidingZones],
+  );
+  const canStartEndGame =
+    myRole !== "hider" &&
+    timer.hasStarted &&
+    !isEndGameActive(session) &&
+    confirmedHidingZones.length > 0;
+
+  const handleStartEndGame = useCallback(async () => {
+    if (!session?.id || !uid || !canStartEndGame) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Start end game?\n\nConfirm seekers have entered the hiding zone and left transit. Map will show only the hiding zone circle; hider must stay at one spot until found.",
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    if (session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
+      setSession(
+        {
+          ...session,
+          endGameStartedAt: new Date().toISOString(),
+          endGameStartedByUid: uid,
+        },
+        uid,
+      );
+      setEndGameNotice("End game started");
+      return;
+    }
+
+    await startEndGameSession(session.id, uid);
+    setEndGameNotice("End game started");
+  }, [canStartEndGame, session, setSession, uid]);
+
   const handleSaveGameRules = useCallback(async () => {
     if (!session || !draftAdvancedSettings || !gameRulesEditable) {
       return;
@@ -913,7 +969,10 @@ export function MapScreen() {
             placementCrosshair ? "map-crosshair h-full w-full" : "h-full w-full"
           }
         >
-          <MapViewportTracker onViewportChange={handleMapViewportChange} />
+          <MapViewportTracker
+            onViewportChange={handleMapViewportChange}
+            onUserPan={handleDismissPanelsOnPan}
+          />
           <GameAreaMask gameArea={session.gameArea} />
           {transitEnabled && layerVisibility.transit ? (
             <Suspense fallback={null}>
@@ -937,11 +996,13 @@ export function MapScreen() {
             selectedAnnotationId={selectedAnnotationId}
             layerVisibility={layerVisibility}
             draftEliminationFeatures={draftEliminationFeatures}
+            session={session}
+            hidingZones={confirmedHidingZones}
           />
           <LiveSeekerLocationsLayer locations={playerLocations} />
           <ActiveThermometerWalkLayer
-            pendingQuestions={pendingQuestions}
-            seekerPosition={thermometerTool.walkCurrentPoint}
+            start={activeThermometerWalk.start}
+            livePoint={activeThermometerWalk.livePoint}
           />
           <PendingQuestionLayer
             pendingQuestions={pendingQuestions}
@@ -980,7 +1041,14 @@ export function MapScreen() {
           activeTool={activeTool}
           syncStatus={syncStatus.status}
           queuedWrites={syncStatus.queuedWrites}
-          message={syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError}
+          message={
+            endGameNotice ??
+            syncStatus.remoteUpdateNotice ??
+            syncStatus.lastSyncError
+          }
+          showStartEndGame={canStartEndGame}
+          onStartEndGame={() => void handleStartEndGame()}
+          endGameActive={isEndGameActive(session)}
           timerState={timer.timerState}
           timerRunning={timer.running}
           timerHasStarted={timer.hasStarted}

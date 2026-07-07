@@ -43,6 +43,17 @@ describe("sessionStore", () => {
     );
   });
 
+  it("clears sync notices when switching sessions", () => {
+    useSessionStore.getState().setSession(createTestSession({ id: "session-a" }));
+    useSessionStore.getState().setRemoteUpdateNotice("Updated remotely");
+    useSessionStore.getState().setLastSyncError("offline");
+
+    useSessionStore.getState().setSession(createTestSession({ id: "session-b" }));
+
+    expect(useSessionStore.getState().remoteUpdateNotice).toBeNull();
+    expect(useSessionStore.getState().lastSyncError).toBeNull();
+  });
+
   it("tracks sync in-flight counters without going negative", () => {
     useSessionStore.getState().incrementSyncInFlight();
     useSessionStore.getState().decrementSyncInFlight();

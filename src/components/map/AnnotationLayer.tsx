@@ -1,6 +1,7 @@
 import { memo } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import type { AnnotationRecord, GameArea } from "../../domain/annotations";
+import type { AnnotationRecord, GameArea, SessionRecord } from "../../domain/annotations";
+import type { HidingZoneRecord } from "../../domain/hidingZone";
 import { isActive } from "../../domain/annotations";
 import {
   useAnnotationStore,
@@ -17,6 +18,8 @@ interface AnnotationLayerProps {
   selectedAnnotationId?: string | null;
   layerVisibility?: LayerVisibility;
   draftEliminationFeatures?: readonly Feature<GeoPolygon | MultiPolygon>[];
+  session?: Pick<SessionRecord, "endGameStartedAt"> | null;
+  hidingZones?: readonly HidingZoneRecord[];
 }
 
 export const AnnotationLayer = memo(function AnnotationLayer({
@@ -26,6 +29,8 @@ export const AnnotationLayer = memo(function AnnotationLayer({
   selectedAnnotationId = null,
   layerVisibility,
   draftEliminationFeatures = [],
+  session = null,
+  hidingZones = [],
 }: AnnotationLayerProps) {
   const pulsingAnnotationIds = useAnnotationStore(
     (state) => state.pulsingAnnotationIds,
@@ -51,6 +56,8 @@ export const AnnotationLayer = memo(function AnnotationLayer({
         gameArea={gameArea}
         draftFeatures={draftEliminationFeatures}
         pulsingAnnotationIds={pulsingAnnotationIds}
+        session={session}
+        hidingZones={hidingZones}
       />
       {annotations.filter(isActive).map((annotation) =>
         renderAnnotationLayerItem({

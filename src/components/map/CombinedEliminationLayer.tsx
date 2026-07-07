@@ -1,7 +1,13 @@
 import { Fragment, memo, useMemo } from "react";
 import { Polygon } from "react-leaflet";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import type { AnnotationRecord, GameArea } from "../../domain/annotations";
+import type {
+  AnnotationRecord,
+  GameArea,
+  SessionRecord,
+} from "../../domain/annotations";
+import { isEndGameActive } from "../../domain/annotations";
+import type { HidingZoneRecord } from "../../domain/hidingZone";
 import {
   buildCombinedEliminationMask,
   eliminationFeatureForAnnotation,
@@ -16,6 +22,8 @@ interface CombinedEliminationLayerProps {
   draftFeatures?: readonly Feature<GeoPolygon | MultiPolygon>[];
   pulsingAnnotationIds?: readonly string[];
   hidden?: boolean;
+  session?: Pick<SessionRecord, "endGameStartedAt"> | null;
+  hidingZones?: readonly HidingZoneRecord[];
 }
 
 export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
@@ -24,11 +32,19 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
   draftFeatures = [],
   pulsingAnnotationIds = [],
   hidden = false,
+  session = null,
+  hidingZones = [],
 }: CombinedEliminationLayerProps) {
   const mapStyle = useMapStore((state) => state.mapStyle);
   const overlayLayers = useMemo(
     () => getEliminationOverlayLayers(mapStyle),
     [mapStyle],
+  );
+
+  const endGameActive = isEndGameActive(session);
+  const endGameZones = useMemo(
+    () => (endGameActive ? hidingZones : []),
+    [endGameActive, hidingZones],
   );
 
   const combinedMask = useMemo(() => {
@@ -40,8 +56,9 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
       annotations,
       gameArea,
       draftFeatures,
+      endGameZones,
     );
-  }, [annotations, draftFeatures, gameArea, hidden]);
+  }, [annotations, draftFeatures, endGameZones, gameArea, hidden]);
 
   const pulsing = useMemo(
     () =>

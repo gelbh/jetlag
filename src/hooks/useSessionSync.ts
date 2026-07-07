@@ -73,6 +73,7 @@ export function useSessionSync() {
     }
 
     const sessionId = session.id;
+    let hasBaseline = false;
 
     getFirestoreDb();
     if (isFirestorePersistenceUnavailable()) {
@@ -88,6 +89,12 @@ export function useSessionSync() {
         const previousById = new Map(
           previous.map((annotation) => [annotation.id, annotation]),
         );
+
+        if (!hasBaseline) {
+          hasBaseline = true;
+          replaceAnnotations(migrateAnnotations(annotations));
+          return;
+        }
 
         for (const annotation of annotations) {
           const prior = previousById.get(annotation.id);

@@ -42,6 +42,10 @@ export const useSessionStore = create<SessionState>()(
       setSession: (session, myUid) =>
         set((state) => {
           const uid = myUid === undefined ? state.myUid : myUid;
+          const sessionChanged =
+            session?.id !== state.session?.id ||
+            (session === null && state.session !== null);
+
           return {
             session,
             myUid: uid,
@@ -49,6 +53,9 @@ export const useSessionStore = create<SessionState>()(
               session && uid
                 ? resolvePlayerRole(session.memberRoles, uid)
                 : null,
+            ...(sessionChanged
+              ? { remoteUpdateNotice: null, lastSyncError: null }
+              : {}),
           };
         }),
       setMyUid: (myUid) =>

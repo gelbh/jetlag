@@ -271,6 +271,23 @@ export async function updateSessionRules(
   );
 }
 
+export async function startEndGameSession(
+  sessionId: string,
+  startedByUid: string,
+): Promise<void> {
+  await updateDoc(doc(sessionsCollection(), sessionId), {
+    endGameStartedAt: new Date().toISOString(),
+    endGameStartedByUid: startedByUid,
+  });
+}
+
+export async function resetEndGameSession(sessionId: string): Promise<void> {
+  await updateDoc(doc(sessionsCollection(), sessionId), {
+    endGameStartedAt: deleteField(),
+    endGameStartedByUid: deleteField(),
+  });
+}
+
 export function subscribeToSession(
   sessionId: string,
   onChange: (session: SessionRecord) => void,

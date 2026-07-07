@@ -6,6 +6,8 @@ export async function clearSessionLocalArtifacts(
   sessionId: string,
 ): Promise<void> {
   useTimerStore.getState().clearTimer(sessionId);
+  useSessionStore.getState().setRemoteUpdateNotice(null);
+  useSessionStore.getState().setLastSyncError(null);
   await clearOfflineQueueForSession(sessionId);
 }
 

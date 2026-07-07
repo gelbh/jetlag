@@ -13,12 +13,24 @@ export interface MapViewportState {
 
 interface MapViewportTrackerProps {
   onViewportChange: (viewport: MapViewportState | null) => void;
+  onUserPan?: () => void;
 }
 
-export function MapViewportTracker({ onViewportChange }: MapViewportTrackerProps) {
+export function MapViewportTracker({
+  onViewportChange,
+  onUserPan,
+}: MapViewportTrackerProps) {
   const map = useMap();
 
   useMapEvents({
+    dragstart: () => {
+      onUserPan?.();
+    },
+    movestart: (event) => {
+      if ("originalEvent" in event && event.originalEvent) {
+        onUserPan?.();
+      }
+    },
     moveend: () => {
       publishViewport(map, onViewportChange);
     },

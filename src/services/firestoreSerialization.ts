@@ -452,6 +452,14 @@ export function deserializeSessionFromFirestore(
         : typeof data.timerRunningSince === "string"
           ? data.timerRunningSince
           : undefined,
+    endGameStartedAt:
+      typeof data.endGameStartedAt === "string"
+        ? data.endGameStartedAt
+        : undefined,
+    endGameStartedByUid:
+      typeof data.endGameStartedByUid === "string"
+        ? data.endGameStartedByUid
+        : undefined,
   };
 }
 

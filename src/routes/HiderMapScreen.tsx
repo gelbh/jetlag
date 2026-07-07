@@ -43,7 +43,9 @@ import { useRemoteSessionTimerSync } from "../hooks/useRemoteSessionTimerSync";
 import { useSessionEndedRedirect } from "../hooks/useSessionEndedRedirect";
 import { useSessionTimer } from "../hooks/useSessionTimer";
 import { ActiveThermometerWalkLayer } from "../components/map/ActiveThermometerWalkLayer";
+import { LiveUserLocationLayer } from "../components/map/LiveUserLocationLayer";
 import { PendingQuestionLayer } from "../components/map/PendingQuestionLayer";
+import { useActiveThermometerWalk } from "../hooks/useActiveThermometerWalk";
 import {
   useHidingZonesSync,
   usePendingQuestionsSync,
@@ -134,6 +136,16 @@ export function HiderMapScreen() {
   const hidingZones = useHidingZonesSync(sessionId);
   const pendingQuestions = usePendingQuestionsSync(sessionId);
   const playerLocations = usePlayerLocationsSync(sessionId);
+  const activeThermometerWalk = useActiveThermometerWalk({
+    pendingQuestions,
+    playerLocations,
+    myUid: uid,
+    localLivePoint: null,
+  });
+  const confirmedHidingZones = useMemo(
+    () => hidingZones.filter((zone) => zone.status === "confirmed"),
+    [hidingZones],
+  );
   const messages = useSessionMessagesSync(sessionId);
   const { hasUnreadChat } = useChatUnread({
     sessionId,
@@ -261,6 +273,11 @@ export function HiderMapScreen() {
     overlay.openSettings();
   }, [overlay, zoneTool.closeWizard]);
 
+  const handleDismissPanelsOnPan = useCallback(() => {
+    zoneTool.closeWizard();
+    overlay.closeSheet();
+  }, [overlay, zoneTool.closeWizard]);
+
   const openLogExclusive = useCallback(() => {
     zoneTool.closeWizard();
     overlay.openLog();
@@ -299,12 +316,17 @@ export function HiderMapScreen() {
           onMapClick={handleMapClick}
           className="h-full w-full"
         >
-          <MapViewportTracker onViewportChange={handleMapViewportChange} />
+          <MapViewportTracker
+            onViewportChange={handleMapViewportChange}
+            onUserPan={handleDismissPanelsOnPan}
+          />
           <GameAreaMask gameArea={session.gameArea} />
           <AnnotationLayer
             annotations={annotations}
             gameArea={session.gameArea}
             layerVisibility={layerVisibility}
+            session={session}
+            hidingZones={confirmedHidingZones}
           />
           <HidingZonesLayer zones={hidingZones} myUid={uid} />
           {zoneTool.wizardOpen && !zoneTool.manualMode ? (
@@ -327,13 +349,10 @@ export function HiderMapScreen() {
             />
           ) : null}
           <LiveSeekerLocationsLayer locations={playerLocations} />
+          <LiveUserLocationLayer enabled={showCurrentLocation} lowPowerMode={lowPowerMode} />
           <ActiveThermometerWalkLayer
-            pendingQuestions={pendingQuestions}
-            seekerPosition={
-              playerLocations[0]
-                ? [playerLocations[0].lat, playerLocations[0].lng]
-                : null
-            }
+            start={activeThermometerWalk.start}
+            livePoint={activeThermometerWalk.livePoint}
           />
           <PendingQuestionLayer
             pendingQuestions={pendingQuestions}
@@ -368,6 +387,7 @@ export function HiderMapScreen() {
           onOpenLog={openLogExclusive}
           pendingQuestions={pendingQuestions}
           closeTimerMenu={overlay.sheet !== "none" || zoneTool.wizardOpen}
+          endGameActive={Boolean(session.endGameStartedAt)}
         />
       </div>
 

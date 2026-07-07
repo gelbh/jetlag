@@ -1,4 +1,5 @@
 import union from "@turf/union";
+import difference from "@turf/difference";
 import { featureCollection } from "@turf/helpers";
 import type {
   Feature,
@@ -7,6 +8,8 @@ import type {
 } from "geojson";
 import type { AnnotationRecord, GameArea } from "./annotations";
 import { isActive } from "./annotations";
+import type { HidingZoneRecord } from "./hidingZone";
+import { buildHidingZoneCircle } from "./hidingZone";
 import {
   buildHalfPlanePolygon,
   buildRadarShadedRegion,
@@ -143,7 +146,12 @@ export function buildCombinedEliminationMask(
   annotations: readonly AnnotationRecord[],
   gameArea: GameArea,
   draftFeatures: readonly Feature<GeoPolygon | MultiPolygon>[] = [],
+  endGameHidingZones: readonly HidingZoneRecord[] = [],
 ): Feature<GeoPolygon | MultiPolygon> | null {
+  if (endGameHidingZones.length > 0) {
+    return buildEndGameEliminationMask(gameArea, endGameHidingZones);
+  }
+
   const committed = annotations
     .map((annotation) => eliminationFeatureForAnnotation(annotation, gameArea))
     .filter(
@@ -152,4 +160,35 @@ export function buildCombinedEliminationMask(
     );
 
   return unionEliminationFeatures([...committed, ...draftFeatures]);
+}
+
+export function buildEndGameEliminationMask(
+  gameArea: GameArea,
+  hidingZones: readonly HidingZoneRecord[],
+): Feature<GeoPolygon | MultiPolygon> | null {
+  const playArea: Feature<GeoPolygon | MultiPolygon> = {
+    type: "Feature",
+    properties: {},
+    geometry: gameArea,
+  };
+
+  const zoneFeatures = hidingZones.map((zone) =>
+    buildHidingZoneCircle([zone.center.lat, zone.center.lng], zone.radiusMeters),
+  );
+
+  const revealedZones = unionEliminationFeatures(zoneFeatures);
+  if (!revealedZones) {
+    return playArea;
+  }
+
+  const eliminated = difference(featureCollection([playArea, revealedZones]));
+  if (
+    eliminated &&
+    (eliminated.geometry.type === "Polygon" ||
+      eliminated.geometry.type === "MultiPolygon")
+  ) {
+    return eliminated as Feature<GeoPolygon | MultiPolygon>;
+  }
+
+  return playArea;
 }
