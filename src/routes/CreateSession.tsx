@@ -51,6 +51,7 @@ import { formatPlaceSearchSubtitle } from "../services/geocodingRank";
 import { getCurrentPosition } from "../services/geolocation";
 import { grantAccess, hasAccessClaim } from "../services/accessControl";
 import { setPremiumApiContext } from "../services/premiumApiContext";
+import { unionGameAreas } from "../domain/unionGameAreas";
 import { parseBoundaryFile } from "../services/kmzImport";
 import {
   createSessionDraftToGamePreset,
@@ -120,6 +121,7 @@ export function CreateSession() {
   const [importedGameArea, setImportedGameArea] = useState<GameArea | null>(
     null,
   );
+  const [selectedAreas, setSelectedAreas] = useState<GameArea[]>([]);
   const [importLoading, setImportLoading] = useState(false);
   const ignoreViewportUpdatesRef = useRef(false);
   const importFileInputRef = useRef<HTMLInputElement>(null);
@@ -250,6 +252,45 @@ export function CreateSession() {
 
     return null;
   }, [bounds, importedGameArea, selectedPlace, userFramedViewport]);
+
+  const mapPreviewGameArea = useMemo(() => {
+    const areas = [...selectedAreas];
+    if (previewGameArea) {
+      areas.push(previewGameArea);
+    }
+
+    if (areas.length === 0) {
+      return null;
+    }
+
+    if (areas.length === 1) {
+      return areas[0] ?? null;
+    }
+
+    return unionGameAreas(areas);
+  }, [previewGameArea, selectedAreas]);
+
+  const addCurrentArea = () => {
+    if (!previewGameArea) {
+      setError("Frame or search for an area before adding another.");
+      return;
+    }
+
+    setSelectedAreas((current) => [...current, previewGameArea]);
+    setImportedGameArea(null);
+    setSelectedPlaceId(null);
+    setSelectedPlace(null);
+    setSearchResults([]);
+    setLocationQuery("");
+    setBounds(null);
+    setFocusBounds(null);
+    setUserFramedViewport(false);
+    setError(null);
+  };
+
+  const removeSelectedArea = (index: number) => {
+    setSelectedAreas((current) => current.filter((_, itemIndex) => itemIndex !== index));
+  };
 
   const applyImportedBoundary = (gameArea: GameArea, filename: string) => {
     setImportedGameArea(gameArea);
@@ -396,7 +437,7 @@ export function CreateSession() {
 
     try {
       const viewportArea = bounds ? boundsToGameArea(bounds) : null;
-      const gameArea = importedGameArea
+      const draftArea = importedGameArea
         ? importedGameArea
         : viewportArea &&
             userFramedViewport &&
@@ -405,6 +446,17 @@ export function CreateSession() {
           : selectedPlace
             ? placeToGameArea(selectedPlace)
             : viewportArea;
+
+      const areasForSession = draftArea
+        ? [...selectedAreas, draftArea]
+        : selectedAreas;
+
+      const gameArea =
+        areasForSession.length === 0
+          ? null
+          : areasForSession.length === 1
+            ? areasForSession[0]!
+            : unionGameAreas(areasForSession);
 
       if (!gameArea) {
         setError(
@@ -513,7 +565,7 @@ export function CreateSession() {
       <CreateSessionMapPane
         mapStyle={mapStyle}
         focusBounds={focusBounds}
-        previewGameArea={previewGameArea}
+        previewGameArea={mapPreviewGameArea ?? previewGameArea}
         selectedGameSize={gameSize}
         onBoundsChange={handleBoundsChange}
         onUserViewportFramed={handleUserViewportFramed}
@@ -535,8 +587,24 @@ export function CreateSession() {
         </h1>
         <p className="mt-2 text-pretty text-sm leading-relaxed text-ink-muted">
           Search for a city or county to use its boundary, import a KML/KMZ
-          boundary, or pan and zoom to frame a custom play area.
+          boundary, or pan and zoom to frame a custom play area. Add multiple
+          areas for admin splits or metro cross-border games.
         </p>
+
+        {selectedAreas.length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {selectedAreas.map((area, index) => (
+              <button
+                key={`${index}-${area.type}`}
+                type="button"
+                onClick={() => removeSelectedArea(index)}
+                className="rounded-full border border-border bg-surface-raised px-3 py-1.5 text-xs font-semibold text-ink"
+              >
+                Area {index + 1} · Remove
+              </button>
+            ))}
+          </div>
+        ) : null}
 
         <div className="jl-field-frame mt-4 space-y-3">
         <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
@@ -572,6 +640,15 @@ export function CreateSession() {
           className="btn-secondary w-full disabled:opacity-50"
         >
           {searchLoading ? "Searching…" : "Find place"}
+        </button>
+
+        <button
+          type="button"
+          onClick={addCurrentArea}
+          disabled={!previewGameArea || searchLoading || importLoading}
+          className="btn-secondary w-full disabled:opacity-50"
+        >
+          Add another area
         </button>
 
         <input

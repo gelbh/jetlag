@@ -57,4 +57,14 @@ describe("Home", () => {
     renderWithRouter(<Home />, { resetStores: false });
     expect(screen.getByText("WXYZ")).toBeInTheDocument();
   });
+
+  it("links to GitHub Issues for feedback", () => {
+    renderWithRouter(<Home />);
+
+    expect(
+      screen.getByRole("link", {
+        name: "Suggest a feature or report a bug on GitHub",
+      }),
+    ).toHaveAttribute("href", "https://github.com/gelbh/jetlag/issues/new");
+  });
 });

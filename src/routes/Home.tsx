@@ -3,6 +3,7 @@ import { useState } from "react";
 import { AppLogo } from "../components/ui/AppLogo";
 import { HudPlayIcon } from "../components/ui/HudIcons";
 import { LOCAL_SESSION_ID } from "../domain/annotations";
+import { githubIssuesUrl } from "../domain/githubFeedback";
 import { playerRoleLabel, resolvePlayerRole } from "../domain/playerRole";
 import { useSessionStore } from "../state/sessionStore";
 import {
@@ -155,6 +156,16 @@ export function Home() {
           <span>Custom game</span>
           <span className="home-card-btn-hint">Saved templates</span>
         </Link>
+        <a
+          href={githubIssuesUrl()}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Suggest a feature or report a bug on GitHub"
+          className="home-card-btn home-card-btn-secondary min-h-12"
+        >
+          <span>Suggest a feature · Report a bug</span>
+          <span className="home-card-btn-hint">GitHub Issues</span>
+        </a>
         {continueError ? <p className="text-error">{continueError}</p> : null}
       </div>
     </main>
