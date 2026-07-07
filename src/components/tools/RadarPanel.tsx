@@ -67,7 +67,7 @@ export function RadarPanel({
 }: RadarPanelProps) {
   const steps = stepsForMode(RADAR_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
-  const step = steps[stepIndex]?.id ?? "distance";
+  const step = steps[stepIndex]?.id ?? "anchor";
 
   const distanceSelectionAvailable = isRadarDistanceOptionAvailable();
   const canCommit =
@@ -170,8 +170,8 @@ export function RadarPanel({
         onBack={goBack}
         onNext={goNext}
         canGoNext={
-          (step === "distance" && distanceSelectionAvailable) ||
-          (step === "anchor" && hasCenter)
+          (step === "anchor" && hasCenter) ||
+          (step === "distance" && distanceSelectionAvailable)
         }
       />
 

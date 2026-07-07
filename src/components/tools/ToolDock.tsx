@@ -43,6 +43,9 @@ interface ToolDockProps {
   hasUnreadChat?: boolean;
   mapStyle?: MapStyle;
   onMapStyleChange?: (style: MapStyle) => void;
+  dismissOverflowMenus?: boolean;
+  canStartEndGame?: boolean;
+  onStartEndGame?: () => void;
 }
 
 const markupTools = MAP_TOOL_DOCK_ENTRIES.filter((tool) =>
@@ -64,11 +67,17 @@ export function ToolDock({
   hasUnreadChat = false,
   mapStyle,
   onMapStyleChange,
+  dismissOverflowMenus = false,
+  canStartEndGame = false,
+  onStartEndGame,
 }: ToolDockProps) {
   const [drawMenuOpen, setDrawMenuOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const dockRef = useRef<HTMLDivElement>(null);
   const viewportBottomInset = useVisualViewportBottomInset(true);
+
+  const drawMenuVisible = drawMenuOpen && !dismissOverflowMenus;
+  const moreMenuVisible = moreMenuOpen && !dismissOverflowMenus;
 
   useEffect(() => {
     if (!drawMenuOpen) {
@@ -131,7 +140,7 @@ export function ToolDock({
   );
 
   const moreMenuActive =
-    moreMenuOpen ||
+    moreMenuVisible ||
     markupActive ||
     (mapStyle === "satellite" && onMapStyleChange !== undefined);
 
@@ -214,7 +223,7 @@ export function ToolDock({
           : undefined
       }
     >
-      {drawMenuOpen ? (
+      {drawMenuVisible ? (
         <div
           className="jl-tool-menu jl-tool-menu-dock jl-tool-dock-wide-only hud-panel"
           role="menu"
@@ -225,7 +234,7 @@ export function ToolDock({
       ) : null}
 
       <ToolOverflowSheet
-        open={moreMenuOpen}
+        open={moreMenuVisible}
         onClose={() => setMoreMenuOpen(false)}
         activeTool={activeTool}
         onSelect={onSelect}
@@ -238,6 +247,8 @@ export function ToolDock({
         hasUnreadChat={hasUnreadChat}
         mapStyle={mapStyle}
         onMapStyleChange={onMapStyleChange}
+        canStartEndGame={canStartEndGame}
+        onStartEndGame={onStartEndGame}
       />
 
       <div className="jl-tool-dock-bar">

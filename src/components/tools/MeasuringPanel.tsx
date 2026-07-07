@@ -159,7 +159,7 @@ export function MeasuringPanel({
 }: MeasuringPanelProps) {
   const steps = stepsForMode(MEASURING_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
-  const step = steps[stepIndex]?.id ?? "source";
+  const step = steps[stepIndex]?.id ?? "anchor";
 
   const locationCategory =
     subject === "location"
@@ -579,8 +579,8 @@ export function MeasuringPanel({
         onBack={goBack}
         onNext={goNext}
         canGoNext={
-          (step === "source" && hasAvailableMeasureOptions) ||
           (step === "anchor" && canAdvanceFromAnchor) ||
+          (step === "source" && hasAvailableMeasureOptions) ||
           (step === "target" && canAdvanceFromTarget)
         }
       />

@@ -798,6 +798,23 @@ textarea {
     bottom: var(--map-panel-bottom);
   }
 
+  .jl-panel-above-dock.jl-panel-peeked {
+    transform: translateY(calc(100% - 3rem));
+  }
+
+  .jl-panel-above-dock.jl-panel-minimized {
+    transform: translateY(calc(100% - 2.75rem));
+  }
+
+  .jl-panel-drag-handle {
+    touch-action: none;
+    cursor: grab;
+  }
+
+  .jl-panel-drag-handle:active {
+    cursor: grabbing;
+  }
+
   .jl-panel-hider-actions {
     bottom: var(--hider-panel-bottom);
     padding-bottom: env(safe-area-inset-bottom);
@@ -1038,6 +1055,23 @@ textarea {
     font-weight: 500;
     letter-spacing: 0.06em;
     opacity: 0.75;
+  }
+
+  .home-feedback-link {
+    display: block;
+    margin-top: 0.25rem;
+    padding: 0.625rem 0.25rem;
+    text-align: center;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    text-decoration: none;
+  }
+
+  .home-feedback-link:hover {
+    color: var(--color-highlight);
   }
 
   .jl-field-frame {

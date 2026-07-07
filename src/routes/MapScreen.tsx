@@ -21,7 +21,10 @@ import { MapStatusRail } from "../components/session/MapStatusRail";
 import { SessionLog } from "../components/session/SessionLog";
 import { AnnotationEditSheet } from "../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../components/tools/ToolDock";
-import { PopupCloseButton } from "../components/ui/PopupCloseButton";
+import {
+  ToolFloatingPanel,
+} from "../components/tools/ToolFloatingPanel";
+import { useToolPanelChrome } from "../hooks/useToolPanelChrome";
 import { useRadarTool } from "../hooks/tools/useRadarTool";
 import { usePhotoTool } from "../hooks/tools/usePhotoTool";
 import { usePinTool } from "../hooks/tools/usePinTool";
@@ -41,8 +44,6 @@ import { useMapToolInteraction } from "../hooks/map-screen/useMapToolInteraction
 import {
   findLastRedoableAnnotation,
   findLastUndoableAnnotation,
-  isWizardDockTool,
-  mapToolPlacingLabel,
 } from "../domain/mapTools";
 import {
   fallbackGameArea,
@@ -742,11 +743,13 @@ export function MapScreen() {
     setAwaitingPlacement(false);
   }, [cancelGeometryEdit, overlay, setSelectedAnnotationId]);
 
-  const handleDismissPanelsOnPan = useCallback(() => {
-    resetToolDrafts();
-    setActiveTool("none");
-    dismissTransientUi();
-  }, [dismissTransientUi, resetToolDrafts, setActiveTool]);
+  const {
+    panelPeeked,
+    panelMinimized,
+    setPanelMinimized,
+    handleMapPanStart,
+    handleMapPanEnd,
+  } = useToolPanelChrome(activeTool);
 
   const confirmedHidingZones = useMemo(
     () => hidingZones.filter((zone) => zone.status === "confirmed"),
@@ -861,6 +864,7 @@ export function MapScreen() {
 
     resetToolDrafts();
     dismissTransientUi();
+    setMapError(null);
     setActiveTool(tool);
   };
 
@@ -971,7 +975,8 @@ export function MapScreen() {
         >
           <MapViewportTracker
             onViewportChange={handleMapViewportChange}
-            onUserPan={handleDismissPanelsOnPan}
+            onUserPanStart={handleMapPanStart}
+            onUserPanEnd={handleMapPanEnd}
           />
           <GameAreaMask gameArea={session.gameArea} />
           {transitEnabled && layerVisibility.transit ? (
@@ -1046,8 +1051,6 @@ export function MapScreen() {
             syncStatus.remoteUpdateNotice ??
             syncStatus.lastSyncError
           }
-          showStartEndGame={canStartEndGame}
-          onStartEndGame={() => void handleStartEndGame()}
           endGameActive={isEndGameActive(session)}
           timerState={timer.timerState}
           timerRunning={timer.running}
@@ -1093,6 +1096,9 @@ export function MapScreen() {
           hasUnreadChat={hasUnreadChat}
           mapStyle={mapStyle}
           onMapStyleChange={setMapStyle}
+          dismissOverflowMenus={overlay.sheet !== "none"}
+          canStartEndGame={canStartEndGame}
+          onStartEndGame={() => void handleStartEndGame()}
         />
       </div>
 
@@ -1188,21 +1194,15 @@ export function MapScreen() {
       />
 
       {activeTool !== "none" && !selectedAnnotation ? (
-        <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock jl-panel-enter z-[var(--z-panel)] px-3">
-          <div
-            className={`tool-panel-compact hud-panel relative mx-auto max-w-xl overflow-y-auto overscroll-contain p-3 pt-9 ${
-              isWizardDockTool(activeTool)
-                ? "max-h-[min(54dvh,480px)]"
-                : "max-h-[min(34dvh,320px)]"
-            }`}
-          >
-            <PopupCloseButton
-              label={`Close ${mapToolPlacingLabel(activeTool)}`}
-              onClick={() => handleSelectTool("none")}
-            />
-            {renderPanel()}
-          </div>
-        </div>
+        <ToolFloatingPanel
+          toolId={activeTool}
+          peeked={panelPeeked}
+          minimized={panelMinimized}
+          onMinimizedChange={setPanelMinimized}
+          onClose={() => handleSelectTool("none")}
+        >
+          {renderPanel()}
+        </ToolFloatingPanel>
       ) : null}
 
       {selectedAnnotation ? (

@@ -273,10 +273,17 @@ export function HiderMapScreen() {
     overlay.openSettings();
   }, [overlay, zoneTool.closeWizard]);
 
-  const handleDismissPanelsOnPan = useCallback(() => {
-    zoneTool.closeWizard();
-    overlay.closeSheet();
-  }, [overlay, zoneTool.closeWizard]);
+  const [wizardPeeked, setWizardPeeked] = useState(false);
+
+  const handleMapPanStart = useCallback(() => {
+    if (zoneTool.wizardOpen) {
+      setWizardPeeked(true);
+    }
+  }, [zoneTool.wizardOpen]);
+
+  const handleMapPanEnd = useCallback(() => {
+    setWizardPeeked(false);
+  }, []);
 
   const openLogExclusive = useCallback(() => {
     zoneTool.closeWizard();
@@ -318,7 +325,8 @@ export function HiderMapScreen() {
         >
           <MapViewportTracker
             onViewportChange={handleMapViewportChange}
-            onUserPan={handleDismissPanelsOnPan}
+            onUserPanStart={handleMapPanStart}
+            onUserPanEnd={handleMapPanEnd}
           />
           <GameAreaMask gameArea={session.gameArea} />
           <AnnotationLayer
@@ -444,7 +452,11 @@ export function HiderMapScreen() {
       </div>
 
       {zoneTool.wizardOpen && !sheetBlocksWizard ? (
-        <div className="pointer-events-auto absolute inset-x-0 jl-panel-hider-wizard z-[var(--z-panel)] px-3">
+        <div
+          className={`pointer-events-auto absolute inset-x-0 jl-panel-hider-wizard z-[var(--z-panel)] px-3 transition-transform duration-200 ease-out motion-reduce:transition-none ${
+            wizardPeeked ? "jl-panel-peeked" : ""
+          }`}
+        >
           <div className="tool-panel-compact hud-panel mx-auto max-h-[min(40dvh,360px)] max-w-xl overflow-y-auto p-3">
             <HidingZonePanel
               radiusLabel={hidingZoneRadiusLabel}

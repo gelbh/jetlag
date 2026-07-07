@@ -29,34 +29,34 @@ export function buildSteps(
 }
 
 export const MATCHING_STEPS = [
-  { id: "category", label: "Category" },
   { id: "anchor", label: "Anchor" },
+  { id: "category", label: "Category" },
   { id: "resolve", label: "Feature" },
   { id: "answer", label: "Answer" },
 ] as const;
 
 export const RADAR_STEPS = [
-  { id: "distance", label: "Distance" },
   { id: "anchor", label: "Anchor" },
+  { id: "distance", label: "Distance" },
   { id: "answer", label: "Answer" },
 ] as const;
 
 export const THERMOMETER_STEPS = [
+  { id: "placement", label: "Anchor" },
   { id: "distance", label: "Distance" },
-  { id: "placement", label: "Movement" },
   { id: "answer", label: "Answer" },
 ] as const;
 
 export const TENTACLE_STEPS = [
-  { id: "category", label: "Category" },
   { id: "anchor", label: "Anchor" },
+  { id: "category", label: "Category" },
   { id: "locations", label: "Locations" },
   { id: "answer", label: "Answer" },
 ] as const;
 
 export const MEASURING_STEPS = [
-  { id: "source", label: "Question" },
   { id: "anchor", label: "Anchor" },
+  { id: "source", label: "Question" },
   { id: "target", label: "Target" },
   { id: "answer", label: "Answer" },
 ] as const;

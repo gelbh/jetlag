@@ -27,6 +27,12 @@ async function waitForSendToHiders(page: Page) {
   });
 }
 
+async function placeAnchorAndAdvance(page: Page) {
+  await clickMapCenter(page);
+  await waitForWizardNext(page);
+  await advanceWizard(page);
+}
+
 const SEND_TO_HIDERS_BUTTON = /^Send to hiders \(D\d+P\d+\)$/;
 
 export async function dismissActiveToolPanel(page: Page) {
@@ -41,8 +47,8 @@ export const PENDING_QUESTION_TEXT =
 
 export async function completeRadarSolo(page: Page) {
   await clickToolDockButton(page, "Radar");
-  await advanceWizard(page);
-  await clickMapCenter(page);
+  await placeAnchorAndAdvance(page);
+  await waitForWizardNext(page);
   await advanceWizard(page);
   await page.getByRole("button", { name: "Yes" }).click();
   await page.getByRole("button", { name: "Add radar question" }).click();
@@ -51,19 +57,16 @@ export async function completeRadarSolo(page: Page) {
 
 export async function sendRadarToHiders(page: Page) {
   await clickToolDockButton(page, "Radar");
-  await advanceWizard(page);
   await clickMapCenter(page);
-  const sendButton = page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON });
-  await expect(sendButton).toBeVisible({ timeout: 15_000 });
-  await sendButton.click();
+  await waitForSendToHiders(page);
+  await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
 }
 
 export async function completeMatchingSolo(page: Page) {
   await clickToolDockButton(page, "Matching");
+  await placeAnchorAndAdvance(page);
   await page.locator("select.field-input").selectOption("museum");
-  await advanceWizard(page);
-  await clickMapCenter(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForWizardNext(page);
@@ -76,9 +79,8 @@ export async function completeMatchingSolo(page: Page) {
 
 export async function sendMatchingToHiders(page: Page) {
   await clickToolDockButton(page, "Matching");
+  await placeAnchorAndAdvance(page);
   await page.locator("select.field-input").selectOption("museum");
-  await advanceWizard(page);
-  await clickMapCenter(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForSendToHiders(page);
@@ -88,9 +90,8 @@ export async function sendMatchingToHiders(page: Page) {
 
 export async function completeMeasuringSolo(page: Page) {
   await clickToolDockButton(page, "Measuring");
+  await placeAnchorAndAdvance(page);
   await page.locator("select.field-input").selectOption("museum");
-  await advanceWizard(page);
-  await clickMapCenter(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForWizardNext(page);
@@ -102,9 +103,8 @@ export async function completeMeasuringSolo(page: Page) {
 
 export async function sendMeasuringToHiders(page: Page) {
   await clickToolDockButton(page, "Measuring");
+  await placeAnchorAndAdvance(page);
   await page.locator("select.field-input").selectOption("museum");
-  await advanceWizard(page);
-  await clickMapCenter(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForSendToHiders(page);
@@ -114,11 +114,13 @@ export async function sendMeasuringToHiders(page: Page) {
 
 export async function completeThermometerSolo(page: Page) {
   await clickToolDockButton(page, "Thermometer");
-  await page.getByRole("button", { name: "Manual pins" }).click();
   await advanceWizard(page);
+  await page.getByRole("button", { name: "Manual pins" }).click();
+  await page.getByRole("button", { name: "Back" }).click();
   await clickMapAt(page, 0.35, 0.5);
   await clickMapAt(page, 0.65, 0.5);
   await waitForWizardNext(page);
+  await advanceWizard(page);
   await advanceWizard(page);
   await page.getByRole("button", { name: "Hotter" }).click();
   await page.getByRole("button", { name: "Add thermometer" }).click();
@@ -127,8 +129,9 @@ export async function completeThermometerSolo(page: Page) {
 
 export async function sendThermometerToHiders(page: Page) {
   await clickToolDockButton(page, "Thermometer");
-  await page.getByRole("button", { name: "Manual pins" }).click();
   await advanceWizard(page);
+  await page.getByRole("button", { name: "Manual pins" }).click();
+  await page.getByRole("button", { name: "Back" }).click();
   await clickMapAt(page, 0.35, 0.5);
   await clickMapAt(page, 0.65, 0.5);
   const sendButton = page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON });
@@ -139,11 +142,10 @@ export async function sendThermometerToHiders(page: Page) {
 
 export async function completeTentacleSolo(page: Page) {
   await clickToolDockButton(page, "Tentacles");
-  await advanceWizard(page);
   await clickMapCenter(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
-  await waitForWizardNext(page);
+  await advanceWizard(page);
   await advanceWizard(page);
   await page.getByText("City Museum").click();
   await page.getByRole("button", { name: "Add tentacle question" }).click();
@@ -153,7 +155,6 @@ export async function completeTentacleSolo(page: Page) {
 
 export async function sendTentacleToHiders(page: Page) {
   await clickToolDockButton(page, "Tentacles");
-  await advanceWizard(page);
   await clickMapCenter(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
@@ -163,6 +164,7 @@ export async function sendTentacleToHiders(page: Page) {
 }
 
 export async function placePin(page: Page, note = "Camp") {
+  await dismissActiveToolPanel(page);
   await selectDrawTool(page, "Pin");
   await clickMapCenter(page);
   await expect(page.getByText("Location pinned on the map.")).toBeVisible();
@@ -183,6 +185,16 @@ export async function drawZone(page: Page, label = "Search zone") {
   await expectMapHasAnnotations(page);
 }
 
+async function clickOverflowToolButton(page: Page, name: string) {
+  await page.getByRole("button", { name: "More tools" }).click();
+  const sheet = page.getByRole("dialog", { name: "More tools" });
+  await sheet.waitFor({ state: "visible" });
+  const button = sheet.getByRole("button", { name });
+  await expect(button).toBeVisible();
+  await button.scrollIntoViewIfNeeded();
+  await button.click({ force: true });
+}
+
 export async function undoAnnotation(page: Page) {
   const undoDock = page.getByRole("button", { name: "Undo last annotation" });
   if (await undoDock.isVisible().catch(() => false)) {
@@ -190,11 +202,7 @@ export async function undoAnnotation(page: Page) {
     return;
   }
 
-  await page.getByRole("button", { name: "More tools" }).click();
-  await page
-    .getByRole("dialog", { name: "More tools" })
-    .getByRole("button", { name: "Undo last annotation" })
-    .click();
+  await clickOverflowToolButton(page, "Undo last annotation");
 }
 
 export async function redoAnnotation(page: Page) {
@@ -204,11 +212,7 @@ export async function redoAnnotation(page: Page) {
     return;
   }
 
-  await page.getByRole("button", { name: "More tools" }).click();
-  await page
-    .getByRole("dialog", { name: "More tools" })
-    .getByRole("button", { name: "Redo last annotation" })
-    .click();
+  await clickOverflowToolButton(page, "Redo last annotation");
 }
 
 export async function expectRedoEnabled(page: Page) {

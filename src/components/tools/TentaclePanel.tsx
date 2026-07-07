@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { TentaclePoi } from "../../domain/annotations";
-import type { DistanceUnit } from "../../domain/distance";
+import { formatPresetDistance, type DistanceUnit } from "../../domain/distance";
 import type { GameSize } from "../../domain/gameSize";
 import {
   isTentacleCategoryAvailable,
@@ -77,12 +77,16 @@ export function TentaclePanel({
 }: TentaclePanelProps) {
   const steps = stepsForMode(TENTACLE_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
-  const step = steps[stepIndex]?.id ?? "category";
+  const step = steps[stepIndex]?.id ?? "anchor";
 
   const prompt = tentacleQuestionPrompt(
     categoryId,
     distanceUnit,
     searchRadiusMeters,
+  );
+  const searchRadiusLabel = formatPresetDistance(
+    searchRadiusMeters,
+    distanceUnit,
   );
   const categorySelectionAvailable = isTentacleCategoryAvailable(
     gameSize,
@@ -118,7 +122,7 @@ export function TentaclePanel({
         <ToolSection first compact status="active">
           <QuestionPromptBlock
             prompt={prompt}
-            ruleSummary="Search radius is fixed at 1 mile from your anchor."
+            ruleSummary={`Search radius is fixed at ${searchRadiusLabel} from your anchor.`}
           />
           <label className="field-label">
             Location type
@@ -151,7 +155,9 @@ export function TentaclePanel({
             gpsLoadingLabel="Locating…"
           />
           {loading && hasCenter ? (
-            <LoadingReadout>Loading locations within 1 mile…</LoadingReadout>
+            <LoadingReadout>
+              Loading locations within {searchRadiusLabel}…
+            </LoadingReadout>
           ) : null}
         </ToolSection>
       ) : null}
@@ -159,15 +165,17 @@ export function TentaclePanel({
       {step === "locations" ? (
         <ToolSection first compact status="active">
           {loading ? (
-            <LoadingReadout>Loading locations within 1 mile…</LoadingReadout>
+            <LoadingReadout>
+              Loading locations within {searchRadiusLabel}…
+            </LoadingReadout>
           ) : poiOptions.length > 0 ? (
             <ResolvedReadout>
               {poiOptions.length} location{poiOptions.length === 1 ? "" : "s"}{" "}
-              found within 1 mile.
+              found within {searchRadiusLabel}.
             </ResolvedReadout>
           ) : (
             <ResolvedReadout variant="warning">
-              No named locations were found within 1 mile.
+              No named locations were found within {searchRadiusLabel}.
             </ResolvedReadout>
           )}
           {awaitHiderAnswer && locationsReady && !loading && poiOptions.length > 0 ? (
@@ -219,8 +227,8 @@ export function TentaclePanel({
         onBack={goBack}
         onNext={goNext}
         canGoNext={
-          (step === "category" && categorySelectionAvailable) ||
           (step === "anchor" && hasCenter && !loading && locationsReady) ||
+          (step === "category" && categorySelectionAvailable) ||
           (step === "locations" && locationsReady && !loading)
         }
       />

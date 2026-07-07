@@ -1,4 +1,4 @@
-import { type Page } from "@playwright/test";
+import { type Page, expect } from "@playwright/test";
 import {
   resolveOverpassResponse,
   type OverpassFixtureProfile,
@@ -208,7 +208,14 @@ export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
   await page.getByRole("button", { name: "More tools" }).click();
   const sheet = page.getByRole("dialog", { name: "More tools" });
   await sheet.waitFor({ state: "visible" });
-  await sheet.getByRole("button", { name: toolName }).click();
+  const toolButton = sheet.getByRole("button", { name: toolName });
+  await expect(toolButton).toBeVisible();
+  await toolButton.scrollIntoViewIfNeeded();
+  await toolButton.evaluate((element) => {
+    element.dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true }),
+    );
+  });
 }
 
 export async function clickToolDockButton(page: Page, name: string) {

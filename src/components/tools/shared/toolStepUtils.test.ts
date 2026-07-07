@@ -8,12 +8,12 @@ import {
 describe("stepsForMode", () => {
   it("drops the answer step in multiplayer", () => {
     expect(stepsForMode(RADAR_STEPS, true).map((step) => step.id)).toEqual([
-      "distance",
       "anchor",
+      "distance",
     ]);
     expect(stepsForMode(MATCHING_STEPS, true).map((step) => step.id)).toEqual([
-      "category",
       "anchor",
+      "category",
       "resolve",
     ]);
   });

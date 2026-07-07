@@ -33,6 +33,8 @@ interface ToolOverflowSheetProps {
   hasUnreadChat?: boolean;
   mapStyle?: MapStyle;
   onMapStyleChange?: (style: MapStyle) => void;
+  canStartEndGame?: boolean;
+  onStartEndGame?: () => void;
 }
 
 const markupTools = MAP_TOOL_DOCK_ENTRIES.filter((tool) =>
@@ -120,6 +122,8 @@ export function ToolOverflowSheet({
   hasUnreadChat = false,
   mapStyle,
   onMapStyleChange,
+  canStartEndGame = false,
+  onStartEndGame,
 }: ToolOverflowSheetProps) {
   useScrollLock(open);
 
@@ -195,6 +199,29 @@ export function ToolOverflowSheet({
           })}
 
           <div className="jl-tool-overflow-divider" aria-hidden="true" />
+
+          {canStartEndGame && onStartEndGame ? (
+            <ToolOverflowRow
+              icon={
+                <span className="text-sm font-bold" aria-hidden="true">
+                  !
+                </span>
+              }
+              title="Start end game"
+              hint="Reveal hiding zone only — hider must stay put"
+              onClick={() =>
+                closeAnd(() => {
+                  const confirmed = window.confirm(
+                    "Start end game?\n\nConfirm seekers have entered the hiding zone and left transit. Map will show only the hiding zone circle; hider must stay at one spot until found.",
+                  );
+                  if (confirmed) {
+                    onStartEndGame();
+                  }
+                })
+              }
+              ariaLabel="Start end game"
+            />
+          ) : null}
 
           {mapStyle && onMapStyleChange ? (
             <ToolOverflowRow

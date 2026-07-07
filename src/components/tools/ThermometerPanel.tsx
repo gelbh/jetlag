@@ -96,7 +96,7 @@ export function ThermometerPanel({
 }: ThermometerPanelProps) {
   const steps = stepsForMode(THERMOMETER_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
-  const step = steps[stepIndex]?.id ?? "distance";
+  const step = steps[stepIndex]?.id ?? "placement";
 
   const travelTooShort =
     travelMeters !== null && travelMeters + 1 < distanceMeters;
@@ -258,9 +258,9 @@ export function ThermometerPanel({
         onBack={goBack}
         onNext={goNext}
         canGoNext={
-          (step === "distance" && distanceAvailable) ||
           (step === "placement" &&
-            (walkingActive || pinsReady || placementMode === "gps"))
+            (walkingActive || pinsReady || placementMode === "gps")) ||
+          (step === "distance" && distanceAvailable)
         }
       />
     </ToolPanelShell>
