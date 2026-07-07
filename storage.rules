@@ -6,17 +6,33 @@ service firebase.storage {
       return firestore.get(/databases/(default)/documents/sessions/$(sessionId)).data;
     }
 
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
     function isSessionMember(sessionId) {
-      return request.auth != null
+      return isSignedIn()
         && request.auth.uid in sessionData(sessionId).memberUids;
     }
 
+    function isLegacySession(sessionId) {
+      return !('memberRoles' in sessionData(sessionId))
+        || sessionData(sessionId).memberRoles == null;
+    }
+
+    function memberRole(sessionId) {
+      return sessionData(sessionId).memberRoles[request.auth.uid];
+    }
+
+    function isSeekerMember(sessionId) {
+      return isSessionMember(sessionId)
+        && (isLegacySession(sessionId) || memberRole(sessionId) == 'seeker');
+    }
+
     function isHiderMember(sessionId) {
-      return request.auth != null
-        && ('memberRoles' in sessionData(sessionId))
-        && sessionData(sessionId).memberRoles != null
-        && request.auth.uid in sessionData(sessionId).memberRoles
-        && sessionData(sessionId).memberRoles[request.auth.uid] == 'hider';
+      return isSessionMember(sessionId)
+        && !isLegacySession(sessionId)
+        && memberRole(sessionId) == 'hider';
     }
 
     match /sessions/{sessionId}/photoAnswers/{questionId}/{fileName} {
