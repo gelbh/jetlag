@@ -904,6 +904,17 @@ export function useMeasuringTool({
       return;
     }
 
+    if (
+      measuringSubject === "sea_level" &&
+      !measuringSeaLevelNearRegion
+    ) {
+      setMeasuringError(
+        measuringSeaLevelNote ??
+          "Sea level region isn't ready yet. Wait for elevation sampling or tap Retry.",
+      );
+      return;
+    }
+
     const locationCategory =
       measuringSubject === "location" ? measuringLocationCategory : undefined;
     const question = measuringQuestionFor(measuringSubject, locationCategory);
@@ -1073,7 +1084,8 @@ export function useMeasuringTool({
 
   const hasMeasuringTarget =
     measuringSubject === "sea_level"
-      ? measuringAnchorElevationMeters !== null
+      ? measuringAnchorElevationMeters !== null &&
+        measuringSeaLevelNearRegion !== null
       : usesAllPlacesInArea
         ? measuringPlaces.length > 0 && measuringDistanceMeters !== null
         : measuringTargetPoint !== null;
