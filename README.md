@@ -42,6 +42,12 @@ Markup tools live under **Draw**:
 
 Unofficial fan companion for [Jet Lag: The Game](https://jetlagthegame.com/). Not affiliated with the show, board game, or Nebula.
 
+## Development
+
+- [Third-party library opportunities]()
+- [Sentry setup]()
+- [CSP rollout]()
+
 ## Official Jet Lag
 
 - [Jet Lag: The Game on YouTube](https://jetlagthegame.com/)
