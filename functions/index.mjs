@@ -24,6 +24,12 @@ import {
   selectSessionsToPurge,
 } from "./purgeStaleSessions.mjs";
 import {
+  parseBoundingBoxQuery,
+  parseOverpassQueryBody,
+  parseTransitlandFeedQuery,
+  parseVehiclesMetroQuery,
+} from "./proxyValidation.mjs";
+import {
   handlePendingQuestionWrite,
   handleSessionMessageWrite,
   handleSessionTimerWrite,
@@ -196,29 +202,22 @@ export const vehicles = onRequest(async (req, res) => {
     return;
   }
 
-  const metro = String(req.query.metro ?? "");
-  const bounds = {
-    south: Number(req.query.south),
-    west: Number(req.query.west),
-    north: Number(req.query.north),
-    east: Number(req.query.east),
-  };
-
-  if (
-    !Number.isFinite(bounds.south) ||
-    !Number.isFinite(bounds.west) ||
-    !Number.isFinite(bounds.north) ||
-    !Number.isFinite(bounds.east)
-  ) {
-    res.status(400).json({ error: "Missing bounding box." });
+  const metroResult = parseVehiclesMetroQuery(req.query);
+  if (!metroResult.ok) {
+    res.status(404).json({ error: metroResult.error });
     return;
   }
+
+  const boundsResult = parseBoundingBoxQuery(req.query);
+  if (!boundsResult.ok) {
+    res.status(400).json({ error: boundsResult.error });
+    return;
+  }
+
+  const metro = metroResult.value;
+  const bounds = boundsResult.value;
 
   const feedUrl = FEEDS[metro];
-  if (!feedUrl) {
-    res.status(404).json({ error: "Unknown metro feed." });
-    return;
-  }
 
   try {
     const payload = await loadTflFeed(metro, feedUrl);
@@ -242,28 +241,20 @@ export const transitland = onRequest(
       return;
     }
 
-    const feed = String(req.query.feed ?? "").trim();
-    const bounds = {
-      south: Number(req.query.south),
-      west: Number(req.query.west),
-      north: Number(req.query.north),
-      east: Number(req.query.east),
-    };
-
-    if (!feed) {
-      res.status(400).json({ error: "Missing transit feed." });
+    const feedResult = parseTransitlandFeedQuery(req.query);
+    if (!feedResult.ok) {
+      res.status(400).json({ error: feedResult.error });
       return;
     }
 
-    if (
-      !Number.isFinite(bounds.south) ||
-      !Number.isFinite(bounds.west) ||
-      !Number.isFinite(bounds.north) ||
-      !Number.isFinite(bounds.east)
-    ) {
-      res.status(400).json({ error: "Missing bounding box." });
+    const boundsResult = parseBoundingBoxQuery(req.query);
+    if (!boundsResult.ok) {
+      res.status(400).json({ error: boundsResult.error });
       return;
     }
+
+    const feed = feedResult.value;
+    const bounds = boundsResult.value;
 
     const apiKey = transitlandApiKeySecret.value();
     if (!apiKey) {
@@ -297,17 +288,13 @@ export const overpass = onRequest(async (req, res) => {
     return;
   }
 
-  const query =
-    typeof req.body?.query === "string"
-      ? req.body.query
-      : typeof req.body === "string"
-        ? req.body
-        : null;
-
-  if (!query || query.trim().length === 0) {
-    res.status(400).json({ error: "Missing Overpass query." });
+  const queryResult = parseOverpassQueryBody(req.body);
+  if (!queryResult.ok) {
+    res.status(400).json({ error: queryResult.error });
     return;
   }
+
+  const query = queryResult.value;
 
   const cacheKey = overpassCacheKey(query);
   const cached = overpassResponseCache.get(cacheKey);
