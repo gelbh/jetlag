@@ -3,6 +3,7 @@ import { questionAnswerDeadlineMs } from "./questionRules";
 import type { PendingQuestionRecord } from "../session/sessionChat";
 import { mapToolDockShortLabel } from "../map/mapTools";
 import type { QuestionToolType } from "./questionRules";
+import { formatShortCountdownFromMs } from "../time/formatClockDuration";
 
 export interface ActiveQuestionTimer {
   pendingQuestionId: string;
@@ -51,13 +52,10 @@ export function selectPrimaryQuestionTimer(
     const elapsed = nowMs - Date.parse(question.answerableAt);
     const remainingMs = deadlineMs - elapsed;
 
-    const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
     const countdownLabel =
       remainingMs <= 0
         ? "EXPIRED"
-        : `${minutes}:${String(seconds).padStart(2, "0")}`;
+        : formatShortCountdownFromMs(remainingMs, { ceilSeconds: true });
 
     const candidate: ActiveQuestionTimer = {
       pendingQuestionId: question.id,

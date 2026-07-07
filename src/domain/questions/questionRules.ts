@@ -7,6 +7,9 @@ import type {
   PendingQuestionToolType,
 } from "../session/sessionChat";
 import { resolveAnswerDeadlineMs } from "../session/sessionRules";
+import {
+  formatRemainingCountdownFromMs,
+} from "../time/formatClockDuration";
 
 export type QuestionToolType = Extract<
   PendingQuestionToolType,
@@ -106,10 +109,7 @@ export function formatAnswerCountdown(
     return "Time expired";
   }
 
-  const totalSeconds = Math.ceil(remaining / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes}:${seconds.toString().padStart(2, "0")} remaining`;
+  return formatRemainingCountdownFromMs(remaining);
 }
 
 export function isQuestionAnswerDeadlineExpired(

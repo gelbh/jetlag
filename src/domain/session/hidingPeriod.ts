@@ -1,6 +1,7 @@
 import type { GameSize } from "./gameSize";
 import type { SessionRulesInput } from "./sessionRules";
 import { resolveHidingPeriodMs } from "./sessionRules";
+import { formatPrefixedClockDuration } from "../time/formatClockDuration";
 
 export function hidingPeriodRemainingMs(
   sessionOrGameSize: SessionRulesInput | GameSize,
@@ -39,14 +40,5 @@ export function formatHidingPeriodCountdown(remainingMs: number): string {
     return "";
   }
 
-  const totalSeconds = Math.ceil(remainingMs / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  if (hours > 0) {
-    return `HIDING ${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-  }
-
-  return `HIDING ${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  return formatPrefixedClockDuration("HIDING", remainingMs, { ceilSeconds: true });
 }
