@@ -62,6 +62,7 @@
     "d3-geo": "^3.1.1",
     "d3-geo-projection": "^4.0.0",
     "d3-geo-voronoi": "^2.1.0",
+    "date-fns": "^4.4.0",
     "firebase": "^12.13.0",
     "html2canvas": "^1.4.1",
     "jetlag-live-activity": "file:plugins/jetlag-live-activity",
@@ -71,6 +72,7 @@
     "react-dom": "^19.2.6",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.15.0",
+    "zod": "^4.4.3",
     "zustand": "^5.0.13"
   },
   "devDependencies": {
