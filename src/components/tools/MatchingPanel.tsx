@@ -8,9 +8,9 @@ import {
   matchingQuestionFor,
   type MatchingAnswer,
   type MatchingCategoryId,
-} from "../../domain/matchingQuestions";
-import { matchingFeatureCountLabel, matchingNullAnswerMessage } from "../../services/matchingFeatures";
-import { formatDistance, type DistanceUnit } from "../../domain/distance";
+} from "../../domain/questions/matchingQuestions";
+import { matchingFeatureCountLabel, matchingNullAnswerMessage } from "../../services/geo/matchingFeatures";
+import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
 import { yesNoAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { AnchorControls } from "./shared/AnchorControls";

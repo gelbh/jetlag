@@ -1,14 +1,14 @@
 import { useId, useRef, useState } from "react";
-import type { AdvancedSessionSettingsValue } from "../../domain/advancedSessionSettings";
-import type { LatLngTuple } from "../../domain/geometry";
+import type { AdvancedSessionSettingsValue } from "../../domain/session/advancedSessionSettings";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
   createSessionCustomCategoryId,
   type MatchingAdminLevel,
   type SessionCustomCategory,
   type SessionCustomLocationPin,
-} from "../../domain/sessionCustomContent";
-import { parseMatchingAreaGeoJson } from "../../services/matchingAreaGeoJson";
-import type { GameArea } from "../../domain/annotations";
+} from "../../domain/session/sessionCustomContent";
+import { parseMatchingAreaGeoJson } from "../../services/geo/matchingAreaGeoJson";
+import type { GameArea } from "../../domain/map/annotations";
 
 const ADMIN_LEVEL_LABELS: Record<MatchingAdminLevel, string> = {
   4: "1st division (admin level 4)",

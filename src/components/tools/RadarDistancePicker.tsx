@@ -3,15 +3,15 @@ import {
   radarDistanceOptionLabel,
   radarQuestionPrompt,
   type RadarDistanceOptionKey,
-} from "../../domain/radarQuestions";
+} from "../../domain/questions/radarQuestions";
 import {
   distanceUnitLabel,
   formatDistance,
   milesToMeters,
   parseDistanceInput,
   type DistanceUnit,
-} from "../../domain/distance";
-import { radarPresetMetersForUnit } from "../../domain/distancePresets";
+} from "../../domain/map/distance";
+import { radarPresetMetersForUnit } from "../../domain/map/distancePresets";
 import { OptionChip, OptionChipRow } from "./shared/OptionChip";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
 import { ToolSection } from "./shared/ToolSection";

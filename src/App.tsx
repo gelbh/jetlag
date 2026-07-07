@@ -2,10 +2,10 @@ import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { MapErrorBoundary } from "./components/ui/MapErrorBoundary";
 import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
-import { useMotionProfile } from "./hooks/useMotionProfile";
+import { useMotionProfile } from "./hooks/location/useMotionProfile";
 import { Home } from "./routes/Home";
 import { JoinSession } from "./routes/JoinSession";
-import { pruneStaleTimerSessions } from "./services/sessionCleanup";
+import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";
 
 const MapScreen = lazy(() =>
   import("./routes/MapScreen").then((m) => ({ default: m.MapScreen })),

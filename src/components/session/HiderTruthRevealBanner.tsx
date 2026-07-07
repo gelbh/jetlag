@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import type { HiderTruthResult } from "../../domain/hiderTruthAnswer";
+import type { HiderTruthResult } from "../../domain/questions/hiderTruthAnswer";
 
 export interface HiderTruthRevealState {
   truth: HiderTruthResult;

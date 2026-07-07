@@ -1,13 +1,13 @@
 import { useState } from "react";
-import type { TentaclePoi } from "../../domain/annotations";
-import { formatPresetDistance, type DistanceUnit } from "../../domain/distance";
-import type { GameSize } from "../../domain/gameSize";
+import type { TentaclePoi } from "../../domain/map/annotations";
+import { formatPresetDistance, type DistanceUnit } from "../../domain/map/distance";
+import type { GameSize } from "../../domain/session/gameSize";
 import {
   isTentacleCategoryAvailable,
   tentacleCategoriesForGameSize,
   tentacleQuestionPrompt,
   type TentacleExtendedCategoryId,
-} from "../../domain/tentacleQuestions";
+} from "../../domain/questions/tentacleQuestions";
 import { AnchorControls } from "./shared/AnchorControls";
 import { ErrorWithRetry } from "./shared/ErrorWithRetry";
 import { LoadingReadout } from "./shared/LoadingReadout";

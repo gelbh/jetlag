@@ -3,18 +3,18 @@ import { useState } from "react";
 import { AppLogo } from "../components/ui/AppLogo";
 import { HudPlayIcon } from "../components/ui/HudIcons";
 import { VersionChangelogSheet } from "../components/ui/VersionChangelogSheet";
-import { APP_VERSION } from "../domain/changelog";
-import { LOCAL_SESSION_ID } from "../domain/annotations";
-import { githubIssuesUrl } from "../domain/githubFeedback";
-import { playerRoleLabel, resolvePlayerRole } from "../domain/playerRole";
+import { APP_VERSION } from "../domain/device/changelog";
+import { LOCAL_SESSION_ID } from "../domain/map/annotations";
+import { githubIssuesUrl } from "../domain/device/githubFeedback";
+import { playerRoleLabel, resolvePlayerRole } from "../domain/session/playerRole";
 import { useSessionStore } from "../state/sessionStore";
 import {
   ensureAnonymousUser,
   isFirebaseConfigured,
-} from "../services/firebase";
-import { getRemoteSessionById } from "../services/firestoreAnnotations";
-import { clearSessionLocalArtifacts } from "../services/sessionCleanup";
-import { setPremiumApiContext } from "../services/premiumApiContext";
+} from "../services/core/firebase";
+import { getRemoteSessionById } from "../services/firestore/firestoreAnnotations";
+import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
+import { setPremiumApiContext } from "../services/core/premiumApiContext";
 
 export function Home() {
   const navigate = useNavigate();

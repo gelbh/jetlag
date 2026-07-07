@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
-import type { SessionRulesInput } from "../../domain/sessionRules";
-import type { HiderTruthResult } from "../../domain/hiderTruthAnswer";
+import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import type { HiderTruthResult } from "../../domain/questions/hiderTruthAnswer";
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,
-} from "../../domain/sessionChat";
-import { createMessageId } from "../../domain/sessionChat";
-import type { PlayerRole } from "../../domain/playerRole";
-import { postSocialMessage } from "../../services/firestoreSessionExtras";
+} from "../../domain/session/sessionChat";
+import { createMessageId } from "../../domain/session/sessionChat";
+import type { PlayerRole } from "../../domain/session/playerRole";
+import { postSocialMessage } from "../../services/firestore/firestoreSessionExtras";
 import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
 import { GameChatTab } from "./GameChatTab";
 

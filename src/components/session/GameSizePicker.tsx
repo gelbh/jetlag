@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import type { GameArea } from "../../domain/annotations";
-import type { DistanceUnit } from "../../domain/distance";
-import type { GameSize } from "../../domain/gameSize";
+import type { GameArea } from "../../domain/map/annotations";
+import type { DistanceUnit } from "../../domain/map/distance";
+import type { GameSize } from "../../domain/session/gameSize";
 import {
   GAME_SIZE_OPTIONS,
   formatPlayAreaSummary,
@@ -10,8 +10,8 @@ import {
   gameSizeLabel,
   playAreaValueForUnit,
   recommendGameSize,
-} from "../../domain/gameSize";
-import { gameSizeRulesSummary } from "../../domain/gameSizeRules";
+} from "../../domain/session/gameSize";
+import { gameSizeRulesSummary } from "../../domain/session/gameSizeRules";
 
 interface GameSizePickerProps {
   gameArea: GameArea | null;

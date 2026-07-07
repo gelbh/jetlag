@@ -4,8 +4,8 @@ import {
   dismissLowBatteryPromptForSession,
   readLowBatteryPromptDismissed,
   shouldOfferLowPowerMode,
-} from "../../domain/batteryPrompt";
-import { useBatteryStatus } from "../../hooks/useBatteryStatus";
+} from "../../domain/device/batteryPrompt";
+import { useBatteryStatus } from "../../hooks/location/useBatteryStatus";
 import { useMapStore } from "../../state/mapStore";
 
 export function LowBatteryPrompt() {

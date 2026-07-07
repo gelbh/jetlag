@@ -1,12 +1,12 @@
 import { useId, useState } from "react";
-import type { AdvancedSessionSettingsValue } from "../../domain/advancedSessionSettings";
+import type { AdvancedSessionSettingsValue } from "../../domain/session/advancedSessionSettings";
 import {
   toggleThermometerPresetInSettings,
   toggleToolInSettings,
-} from "../../domain/advancedSessionSettings";
-import type { DistanceUnit } from "../../domain/distance";
-import { formatPresetDistance } from "../../domain/distance";
-import type { GameSize } from "../../domain/gameSize";
+} from "../../domain/session/advancedSessionSettings";
+import type { DistanceUnit } from "../../domain/map/distance";
+import { formatPresetDistance } from "../../domain/map/distance";
+import type { GameSize } from "../../domain/session/gameSize";
 import {
   clampHidingZoneRadiusMeters,
   formatHidingZoneRadiusLabel,
@@ -14,10 +14,10 @@ import {
   HIDING_ZONE_RADIUS_MAX_METERS,
   HIDING_ZONE_RADIUS_MIN_METERS,
   hidingZoneRadiusMeters,
-} from "../../domain/gameSize";
-import { thermometerPresetsMetersForGameSize } from "../../domain/gameSizeRules";
-import { tentacleRadiusPresetMeters } from "../../domain/distancePresets";
-import { MAP_TOOL_DOCK_ENTRIES } from "../../domain/mapTools";
+} from "../../domain/session/gameSize";
+import { thermometerPresetsMetersForGameSize } from "../../domain/session/gameSizeRules";
+import { tentacleRadiusPresetMeters } from "../../domain/map/distancePresets";
+import { MAP_TOOL_DOCK_ENTRIES } from "../../domain/map/mapTools";
 import {
   ALL_CONFIGURABLE_TOOLS,
   clampHidingPeriodMinutes,
@@ -35,8 +35,8 @@ import {
   QUESTION_ANSWER_DEADLINE_PRESET_MINUTES,
   sessionRulesSummary,
   type ConfigurableMapTool,
-} from "../../domain/sessionRules";
-import type { GameArea } from "../../domain/annotations";
+} from "../../domain/session/sessionRules";
+import type { GameArea } from "../../domain/map/annotations";
 import { SessionCustomContentSettings } from "./SessionCustomContentSettings";
 
 interface AdvancedSessionSettingsProps {

@@ -6,7 +6,7 @@ import {
   isWizardDockTool,
   mapToolPlacingLabel,
   type DockableMapTool,
-} from "../../domain/mapTools";
+} from "../../domain/map/mapTools";
 import { PopupCloseButton } from "../ui/PopupCloseButton";
 
 const MINIMIZE_DRAG_THRESHOLD_PX = 72;

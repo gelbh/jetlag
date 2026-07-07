@@ -1,8 +1,8 @@
 import { Fragment, memo } from "react";
 import { Circle, CircleMarker, Polygon, Polyline, Popup } from "react-leaflet";
-import type { MapDraftOverlay } from "../../domain/mapDraftOverlay";
-import { polygonFeatureToLeafletPolygonGroups } from "../../domain/geometry";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
+import { polygonFeatureToLeafletPolygonGroups } from "../../domain/geometry/geometry";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 interface MapDraftLayerProps {
   overlays: readonly MapDraftOverlay[];

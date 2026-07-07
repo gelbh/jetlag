@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import type { AnnotationRecord } from "../../domain/annotations";
+import type { AnnotationRecord } from "../../domain/map/annotations";
 import { DUBLIN_CITY_GAME_AREA } from "../fixtures/dublinGameArea";
 
 export function createToolHookMocks() {

@@ -1,11 +1,11 @@
 import { useState } from "react";
-import type { TentaclePoi } from "../../../domain/annotations";
-import type { DistanceUnit } from "../../../domain/distance";
+import type { TentaclePoi } from "../../../domain/map/annotations";
+import type { DistanceUnit } from "../../../domain/map/distance";
 import {
   TENTACLE_NOT_WITHIN_REACH_LABEL,
   tentacleHiderAnswerClipboardText,
   type TentacleExtendedCategoryId,
-} from "../../../domain/tentacleQuestions";
+} from "../../../domain/questions/tentacleQuestions";
 import { copyToClipboard } from "../../../platform/copyToClipboard";
 import { ListSelectRow } from "./ListSelectRow";
 import { ToolSection } from "./ToolSection";

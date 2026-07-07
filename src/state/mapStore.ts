@@ -1,12 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { AnnotationType } from "../domain/annotations";
-import type { DistanceUnit } from "../domain/distance";
-import type { MapTool } from "../domain/mapToolTypes";
-import type { TransitRouteFilter } from "../domain/transit";
-import type { NotificationPreferences } from "../domain/notifications";
-import { DEFAULT_NOTIFICATION_PREFERENCES } from "../domain/notifications";
-import type { MapStyle } from "../domain/mapBasemaps";
+import type { AnnotationType } from "../domain/map/annotations";
+import type { DistanceUnit } from "../domain/map/distance";
+import type { MapTool } from "../domain/map/mapToolTypes";
+import type { TransitRouteFilter } from "../domain/map/transit";
+import type { NotificationPreferences } from "../domain/device/notifications";
+import { DEFAULT_NOTIFICATION_PREFERENCES } from "../domain/device/notifications";
+import type { MapStyle } from "../domain/map/mapBasemaps";
 
 export type LayerVisibility = Record<AnnotationType | "transit", boolean>;
 

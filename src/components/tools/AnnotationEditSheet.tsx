@@ -4,12 +4,12 @@ import {
   isActive,
   type AnnotationRecord,
   type GameArea,
-} from "../../domain/annotations";
+} from "../../domain/map/annotations";
 import {
   DEFAULT_RADIUS_METERS,
   formatPresetDistance,
   parseDistanceInput,
-} from "../../domain/distance";
+} from "../../domain/map/distance";
 import { RadarDistancePicker } from "./RadarDistancePicker";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import {
@@ -28,33 +28,33 @@ import {
   radarInsideFromAnswer,
   usedRadarDistanceOptions,
   type RadarAnswer,
-} from "../../domain/radarQuestions";
+} from "../../domain/questions/radarQuestions";
 import { useAnnotationStore } from "../../state/sessionStore";
-import { useSessionDistanceUnit } from "../../hooks/useSessionDistanceUnit";
+import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
-} from "../../domain/matchingGeometry";
+} from "../../domain/geometry/matchingGeometry";
 import {
   matchingQuestionFor,
   type MatchingAnswer,
-} from "../../domain/matchingQuestions";
+} from "../../domain/questions/matchingQuestions";
 import {
   deserializeMatchingFeatures,
   serializeMatchingFeatures,
-} from "../../services/matchingFeatures";
+} from "../../services/geo/matchingFeatures";
 import {
   TENTACLE_ANSWER_RADIUS_METERS,
   TENTACLE_SEARCH_RADIUS_METERS,
   tentacleCategoryIdForAnnotation,
   tentacleQuestionPrompt,
   type TentacleExtendedCategoryId,
-} from "../../domain/tentacleQuestions";
-import { tentacleEliminationJsonForAnswer } from "../../domain/tentacleGeometry";
+} from "../../domain/questions/tentacleQuestions";
+import { tentacleEliminationJsonForAnswer } from "../../domain/geometry/tentacleGeometry";
 import {
   measuringQuestionFor,
   type MeasuringAnswer,
-} from "../../domain/measuringQuestions";
+} from "../../domain/questions/measuringQuestions";
 import {
   availableThermometerDistancePresets,
   DEFAULT_THERMOMETER_DISTANCE_METERS,
@@ -63,7 +63,7 @@ import {
   thermometerHotterTowards,
   usedThermometerDistanceOptions,
   type ThermometerAnswer,
-} from "../../domain/thermometerQuestions";
+} from "../../domain/questions/thermometerQuestions";
 
 interface AnnotationEditSheetProps {
   annotation: AnnotationRecord;

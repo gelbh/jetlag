@@ -1,4 +1,4 @@
-import type { TransitStation } from "../../domain/hidingZone";
+import type { TransitStation } from "../../domain/session/hidingZone";
 
 interface HidingZonePanelProps {
   radiusLabel: string;

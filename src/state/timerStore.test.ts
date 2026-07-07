@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { INITIAL_TIMER_STATE, startTimer } from "../domain/timer";
+import { INITIAL_TIMER_STATE, startTimer } from "../domain/session/timer";
 import { useTimerStore } from "./timerStore";
 import { resetAllStores } from "../test/helpers/storeReset";
 

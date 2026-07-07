@@ -9,17 +9,17 @@ import {
 } from "./SettingsSegmentControl";
 import { SettingsToggleRow } from "./SettingsToggleRow";
 import { LayerVisibilityGrid } from "./LayerVisibilityGrid";
-import type { TransitRouteFilter } from "../../domain/transit";
-import type { DistanceUnit } from "../../domain/distance";
-import type { GameSize } from "../../domain/gameSize";
+import type { TransitRouteFilter } from "../../domain/map/transit";
+import type { DistanceUnit } from "../../domain/map/distance";
+import type { GameSize } from "../../domain/session/gameSize";
 import {
   type AdvancedSessionSettingsValue,
-} from "../../domain/advancedSessionSettings";
+} from "../../domain/session/advancedSessionSettings";
 import { AdvancedSessionSettings } from "./AdvancedSessionSettings";
-import type { MapStyle } from "../../domain/mapBasemaps";
+import type { MapStyle } from "../../domain/map/mapBasemaps";
 import type { LayerVisibility } from "../../state/sessionStore";
-import type { NotificationPreferences } from "../../domain/notifications";
-import { isNativeNotificationsSupported } from "../../services/notifications";
+import type { NotificationPreferences } from "../../domain/device/notifications";
+import { isNativeNotificationsSupported } from "../../services/core/notifications";
 
 interface MapSettingsSheetProps {
   open: boolean;

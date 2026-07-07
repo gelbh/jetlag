@@ -5,10 +5,10 @@ import {
   photoAnswerSelectedReply,
   readPhotoCategoryId,
   type PhotoAnswer,
-} from "../../domain/photoQuestions";
-import { photoUploadAccessError } from "../../domain/photoUploadAccess";
-import type { PendingQuestionRecord } from "../../domain/sessionChat";
-import { uploadPhotoAnswer } from "../../services/photoStorage";
+} from "../../domain/questions/photoQuestions";
+import { photoUploadAccessError } from "../../domain/questions/photoUploadAccess";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import { uploadPhotoAnswer } from "../../services/core/photoStorage";
 import { useSessionStore } from "../../state/sessionStore";
 
 interface PhotoAnswerUploaderProps {

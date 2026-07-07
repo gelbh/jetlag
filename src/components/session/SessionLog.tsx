@@ -4,9 +4,9 @@ import {
   isActive,
   type AnnotationRecord,
   type AnnotationType,
-} from "../../domain/annotations";
+} from "../../domain/map/annotations";
 import { useScrollLock } from "../../hooks/useScrollLock";
-import { useSessionDistanceUnit } from "../../hooks/useSessionDistanceUnit";
+import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 
 const FILTER_OPTIONS: Array<AnnotationType | "all"> = [
   "all",

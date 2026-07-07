@@ -1,5 +1,5 @@
-import type { AnnotationRecord, GameArea, SessionRecord } from "../../domain/annotations";
-import { LOCAL_SESSION_ID } from "../../domain/annotations";
+import type { AnnotationRecord, GameArea, SessionRecord } from "../../domain/map/annotations";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { DUBLIN_CITY_GAME_AREA } from "./dublinGameArea";
 
 export { DUBLIN_CITY_GAME_AREA };

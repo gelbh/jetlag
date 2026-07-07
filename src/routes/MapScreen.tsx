@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
-import { sessionHasHiders } from "../domain/playerRole";
+import { sessionHasHiders } from "../domain/session/playerRole";
 import { HiderMapScreen } from "./HiderMapScreen";
 import { AnnotationLayer } from "../components/map/AnnotationLayer";
 import { ChatPanel } from "../components/chat/ChatPanel";
@@ -32,7 +32,7 @@ import { useZoneTool } from "../hooks/tools/useZoneTool";
 import { ActiveThermometerWalkLayer } from "../components/map/ActiveThermometerWalkLayer";
 import { PendingQuestionLayer } from "../components/map/PendingQuestionLayer";
 import { useThermometerTool } from "../hooks/tools/useThermometerTool";
-import { hasOpenPendingQuestion } from "../domain/questionRules";
+import { hasOpenPendingQuestion } from "../domain/questions/questionRules";
 import {
   createIdleHeavyMapTools,
   type HeavyMapToolsApi,
@@ -44,64 +44,64 @@ import { useMapToolInteraction } from "../hooks/map-screen/useMapToolInteraction
 import {
   findLastRedoableAnnotation,
   findLastUndoableAnnotation,
-} from "../domain/mapTools";
+} from "../domain/map/mapTools";
 import {
   fallbackGameArea,
   gameAreaCenter,
   gameAreaToBoundsExpression,
   isPointInGameArea,
   type LatLngTuple,
-} from "../domain/geometry";
-import { LOCAL_SESSION_ID, isEndGameActive, isPremiumSession } from "../domain/annotations";
+} from "../domain/geometry/geometry";
+import { LOCAL_SESSION_ID, isEndGameActive, isPremiumSession } from "../domain/map/annotations";
 import {
   advancedSettingsFromSession,
   mergeSessionRulesPatch,
   sessionRulesPatchFromAdvancedSettings,
   type AdvancedSessionSettingsValue,
-} from "../domain/advancedSessionSettings";
-import { resolveToolDockEnabled } from "../domain/sessionRules";
+} from "../domain/session/advancedSessionSettings";
+import { resolveToolDockEnabled } from "../domain/session/sessionRules";
 import {
   startEndGameSession,
   updateSessionRules,
-} from "../services/firestoreAnnotations";
-import { useActiveThermometerWalk } from "../hooks/useActiveThermometerWalk";
-import { useAnnotations } from "../hooks/useAnnotations";
-import { useSessionTimer } from "../hooks/useSessionTimer";
-import { useRemoteSessionTimerSync } from "../hooks/useRemoteSessionTimerSync";
-import { useGeolocation } from "../hooks/useGeolocation";
-import { useSessionSync } from "../hooks/useSessionSync";
-import { useSessionEndedRedirect } from "../hooks/useSessionEndedRedirect";
-import { usePendingQuestionActions } from "../hooks/usePendingQuestionActions";
-import { useQuestionDeadlineEnforcement } from "../hooks/useQuestionDeadlineEnforcement";
-import { usePendingQuestionResolver } from "../hooks/usePendingQuestionResolver";
-import { useSeekerLocationSync } from "../hooks/useSeekerLocationSync";
+} from "../services/firestore/firestoreAnnotations";
+import { useActiveThermometerWalk } from "../hooks/location/useActiveThermometerWalk";
+import { useAnnotations } from "../hooks/map/useAnnotations";
+import { useSessionTimer } from "../hooks/session/useSessionTimer";
+import { useRemoteSessionTimerSync } from "../hooks/session/useRemoteSessionTimerSync";
+import { useGeolocation } from "../hooks/location/useGeolocation";
+import { useSessionSync } from "../hooks/session/useSessionSync";
+import { useSessionEndedRedirect } from "../hooks/session/useSessionEndedRedirect";
+import { usePendingQuestionActions } from "../hooks/sync/usePendingQuestionActions";
+import { useQuestionDeadlineEnforcement } from "../hooks/session/useQuestionDeadlineEnforcement";
+import { usePendingQuestionResolver } from "../hooks/sync/usePendingQuestionResolver";
+import { useSeekerLocationSync } from "../hooks/sync/useSeekerLocationSync";
 import {
   useHidingZonesSync,
   usePendingQuestionsSync,
   usePlayerLocationsSync,
   useSessionMessagesSync,
-} from "../hooks/useSessionExtrasSync";
-import { useSyncStatus } from "../hooks/useSyncStatus";
-import { useTransitLayer } from "../hooks/useTransitLayer";
-import { useMapOverlayState } from "../hooks/useMapOverlayState";
-import { useChatUnread } from "../hooks/useChatUnread";
-import { useWakeLock } from "../hooks/useWakeLock";
-import { useSessionNotifications } from "../hooks/useSessionNotifications";
-import { useLiveActivitySync } from "../hooks/useLiveActivitySync";
+} from "../hooks/session/useSessionExtrasSync";
+import { useSyncStatus } from "../hooks/sync/useSyncStatus";
+import { useTransitLayer } from "../hooks/map/useTransitLayer";
+import { useMapOverlayState } from "../hooks/map/useMapOverlayState";
+import { useChatUnread } from "../hooks/session/useChatUnread";
+import { useWakeLock } from "../hooks/location/useWakeLock";
+import { useSessionNotifications } from "../hooks/session/useSessionNotifications";
+import { useLiveActivitySync } from "../hooks/sync/useLiveActivitySync";
 import {
   ensureAnonymousUser,
   isFirebaseConfigured,
-} from "../services/firebase";
+} from "../services/core/firebase";
 import {
   getTransitMetro,
   metroSupportsLiveVehicles,
-} from "../services/transitCatalog";
-import { effectiveMapStyle } from "../domain/powerProfile";
-import { preloadGameAreaCaches } from "../services/gameAreaPreload";
-import { startSeaLevelBackgroundSampling } from "../services/seaLevelProgressive";
-import { setPremiumApiContext } from "../services/premiumApiContext";
-import { useFirebaseAuthReady } from "../hooks/useFirebaseAuthReady";
-import { useSessionDistanceUnit } from "../hooks/useSessionDistanceUnit";
+} from "../services/transit/transitCatalog";
+import { effectiveMapStyle } from "../domain/device/powerProfile";
+import { preloadGameAreaCaches } from "../services/session/gameAreaPreload";
+import { startSeaLevelBackgroundSampling } from "../services/geo/seaLevelProgressive";
+import { setPremiumApiContext } from "../services/core/premiumApiContext";
+import { useFirebaseAuthReady } from "../hooks/sync/useFirebaseAuthReady";
+import { useSessionDistanceUnit } from "../hooks/session/useSessionDistanceUnit";
 import {
   useAnnotationStore,
   useMapStore,
@@ -360,7 +360,7 @@ export function MapScreen() {
 
   const submitToolQuestion = useCallback(
     async (
-      toolType: import("../domain/sessionChat").PendingQuestionToolType,
+      toolType: import("../domain/session/sessionChat").PendingQuestionToolType,
       input: Omit<
         Parameters<typeof submitPendingQuestion>[0],
         "sessionId" | "senderUid" | "senderRole" | "toolType"

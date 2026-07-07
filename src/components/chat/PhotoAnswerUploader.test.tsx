@@ -1,9 +1,9 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
-import type { PendingQuestionRecord } from "../../domain/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 
-vi.mock("../../services/photoStorage", () => ({
+vi.mock("../../services/core/photoStorage", () => ({
   uploadPhotoAnswer: vi.fn(),
 }));
 
@@ -19,7 +19,7 @@ vi.mock("../../state/sessionStore", () => ({
     }),
 }));
 
-import { uploadPhotoAnswer } from "../../services/photoStorage";
+import { uploadPhotoAnswer } from "../../services/core/photoStorage";
 
 const pendingQuestion: PendingQuestionRecord = {
   id: "pq-photo",

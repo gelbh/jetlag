@@ -4,7 +4,7 @@ import type { Map as LeafletMap } from "leaflet";
 import {
   latLngBoundsToViewport,
   type MapViewportBounds,
-} from "../../domain/transitViewport";
+} from "../../domain/map/transitViewport";
 
 export interface MapViewportState {
   bounds: MapViewportBounds;

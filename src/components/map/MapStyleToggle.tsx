@@ -1,4 +1,4 @@
-import type { MapStyle } from "../../domain/mapBasemaps";
+import type { MapStyle } from "../../domain/map/mapBasemaps";
 import { HudLayersIcon } from "../ui/HudIcons";
 
 interface MapStyleToggleProps {

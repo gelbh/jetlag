@@ -5,15 +5,15 @@ import type {
   AnnotationRecord,
   GameArea,
   SessionRecord,
-} from "../../domain/annotations";
-import { isEndGameActive } from "../../domain/annotations";
-import type { HidingZoneRecord } from "../../domain/hidingZone";
+} from "../../domain/map/annotations";
+import { isEndGameActive } from "../../domain/map/annotations";
+import type { HidingZoneRecord } from "../../domain/session/hidingZone";
 import {
   buildCombinedEliminationMask,
   eliminationFeatureForAnnotation,
-} from "../../domain/combinedEliminationMask";
-import { polygonFeatureToLeafletPolygonGroups } from "../../domain/geometry";
-import { getEliminationOverlayLayers } from "../../domain/mapEliminationOverlayStyle";
+} from "../../domain/geometry/combinedEliminationMask";
+import { polygonFeatureToLeafletPolygonGroups } from "../../domain/geometry/geometry";
+import { getEliminationOverlayLayers } from "../../domain/map/mapEliminationOverlayStyle";
 import { useMapStore } from "../../state/sessionStore";
 
 interface CombinedEliminationLayerProps {

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import type { SessionRulesInput } from "../../domain/sessionRules";
+import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import {
   selectPrimaryQuestionTimer,
   type ActiveQuestionTimer,
-} from "../../domain/questionTimerDisplay";
+} from "../../domain/questions/questionTimerDisplay";
 
 interface QuestionAlertBannerProps {
-  pendingQuestions: readonly import("../../domain/sessionChat").PendingQuestionRecord[];
+  pendingQuestions: readonly import("../../domain/session/sessionChat").PendingQuestionRecord[];
   sessionRules: SessionRulesInput;
 }
 

@@ -1,4 +1,4 @@
-import { endRemoteSession } from "../services/firestoreAnnotations";
+import { endRemoteSession } from "../services/firestore/firestoreAnnotations";
 
 declare global {
   interface Window {

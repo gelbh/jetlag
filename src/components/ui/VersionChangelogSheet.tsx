@@ -1,5 +1,5 @@
 import { useScrollLock } from "../../hooks/useScrollLock";
-import { APP_VERSION, CHANGELOG } from "../../domain/changelog";
+import { APP_VERSION, CHANGELOG } from "../../domain/device/changelog";
 import { MobileSheet } from "./MobileSheet";
 
 interface VersionChangelogSheetProps {

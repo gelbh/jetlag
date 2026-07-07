@@ -1,11 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { AnnotationRecord } from "../domain/annotations";
+import type { AnnotationRecord } from "../domain/map/annotations";
 import {
   LOCAL_SESSION_ID,
   createAnnotationId,
   migrateAnnotations,
-} from "../domain/annotations";
+} from "../domain/map/annotations";
 
 interface AnnotationState {
   annotations: AnnotationRecord[];

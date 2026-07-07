@@ -1,13 +1,13 @@
 import { Fragment, useMemo } from "react";
 import { Polygon } from "react-leaflet";
-import type { GameArea } from "../../domain/annotations";
+import type { GameArea } from "../../domain/map/annotations";
 import {
   gameAreaOutsideMask,
   gameAreaToLeafletPositions,
   type LatLngTuple,
-} from "../../domain/geometry";
+} from "../../domain/geometry/geometry";
 
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 interface GameAreaMaskProps {
   gameArea: GameArea;

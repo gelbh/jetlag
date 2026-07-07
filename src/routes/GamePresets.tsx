@@ -6,14 +6,14 @@ import { GameSizePicker } from "../components/session/GameSizePicker";
 import {
   defaultAdvancedSessionSettings,
   type AdvancedSessionSettingsValue,
-} from "../domain/advancedSessionSettings";
-import type { DistanceUnit } from "../domain/distance";
-import { hidingZoneRadiusMeters, type GameSize } from "../domain/gameSize";
+} from "../domain/session/advancedSessionSettings";
+import type { DistanceUnit } from "../domain/map/distance";
+import { hidingZoneRadiusMeters, type GameSize } from "../domain/session/gameSize";
 import {
   createGamePresetId,
   createSessionDraftToGamePreset,
   type CreateSessionDraft,
-} from "../domain/gamePreset";
+} from "../domain/session/gamePreset";
 import { useGamePresetStore } from "../state/gamePresetStore";
 
 export function GamePresetEditor() {

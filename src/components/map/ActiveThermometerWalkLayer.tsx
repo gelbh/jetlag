@@ -1,6 +1,6 @@
 import { Polyline } from "react-leaflet";
-import type { LatLngTuple } from "../../domain/geometry";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 interface ActiveThermometerWalkLayerProps {
   start: LatLngTuple | null;

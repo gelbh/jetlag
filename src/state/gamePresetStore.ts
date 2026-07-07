@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { GamePreset } from "../domain/gamePreset";
+import type { GamePreset } from "../domain/session/gamePreset";
 
 interface GamePresetState {
   presets: GamePreset[];

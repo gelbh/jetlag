@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { useGamePresetStore } from "./gamePresetStore";
-import { defaultAdvancedSessionSettings } from "../domain/advancedSessionSettings";
+import { defaultAdvancedSessionSettings } from "../domain/session/advancedSessionSettings";
 import {
   createSessionDraftToGamePreset,
   gamePresetToCreateSessionDraft,
-} from "../domain/gamePreset";
+} from "../domain/session/gamePreset";
 
 describe("gamePresetStore", () => {
   beforeEach(() => {

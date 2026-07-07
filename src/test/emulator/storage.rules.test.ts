@@ -7,8 +7,8 @@ import {
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
 import { afterAll, beforeAll, beforeEach, describe, it } from "vitest";
-import { milesToMeters } from "../../domain/distance";
-import { serializeGameAreaForFirestore } from "../../services/firestoreSerialization";
+import { milesToMeters } from "../../domain/map/distance";
+import { serializeGameAreaForFirestore } from "../../services/firestore/firestoreSerialization";
 import { DUBLIN_CITY_GAME_AREA } from "../fixtures/dublinGameArea";
 
 const PROJECT_ID = "jet-lag-map-companion";

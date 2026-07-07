@@ -1,5 +1,5 @@
 import type { SVGProps } from "react";
-import type { DockableMapTool } from "../../domain/mapTools";
+import type { DockableMapTool } from "../../domain/map/mapTools";
 
 function IconBase(props: SVGProps<SVGSVGElement>) {
   return (

@@ -8,8 +8,8 @@ import {
   LOCAL_SESSION_ID,
   type GameArea,
   type SessionTier,
-} from "../domain/annotations";
-import type { LatLngTuple } from "../domain/geometry";
+} from "../domain/map/annotations";
+import type { LatLngTuple } from "../domain/geometry/geometry";
 import {
   boundsToGameArea,
   boundingBoxHasMinimumSpan,
@@ -18,45 +18,45 @@ import {
   gameAreaToBoundsExpression,
   isUsableMapBounds,
   placeToGameArea,
-} from "../domain/geometry";
-import { generateLocalCode } from "../domain/session";
-import type { DistanceUnit } from "../domain/distance";
-import { hidingZoneRadiusMeters, type GameSize } from "../domain/gameSize";
-import type { PlayerRole } from "../domain/playerRole";
+} from "../domain/geometry/geometry";
+import { generateLocalCode } from "../domain/session/session";
+import type { DistanceUnit } from "../domain/map/distance";
+import { hidingZoneRadiusMeters, type GameSize } from "../domain/session/gameSize";
+import type { PlayerRole } from "../domain/session/playerRole";
 import { RolePicker } from "../components/session/RolePicker";
 import { GameSizePicker } from "../components/session/GameSizePicker";
 import {
   defaultAdvancedSessionSettings,
   sessionRulesPatchFromAdvancedSettings,
-} from "../domain/advancedSessionSettings";
+} from "../domain/session/advancedSessionSettings";
 import { AdvancedSessionSettings } from "../components/session/AdvancedSessionSettings";
 import { useSessionStore, useMapStore } from "../state/sessionStore";
 import {
   isFirebaseConfigured,
   ensureAnonymousUser,
-} from "../services/firebase";
-import { createRemoteSession } from "../services/firestoreAnnotations";
+} from "../services/core/firebase";
+import { createRemoteSession } from "../services/firestore/firestoreAnnotations";
 import {
   preloadCriticalGameAreaCaches,
   preloadGameAreaCaches,
-} from "../services/gameAreaPreload";
-import { startSeaLevelBackgroundSampling } from "../services/seaLevelProgressive";
-import { retryAsync } from "../services/retryAsync";
+} from "../services/session/gameAreaPreload";
+import { startSeaLevelBackgroundSampling } from "../services/geo/seaLevelProgressive";
+import { retryAsync } from "../services/core/retryAsync";
 import {
   inferTransitMetroId,
   listTransitMetros,
-} from "../services/transitCatalog";
-import { searchPlaces, type GeocodedPlace } from "../services/geocoding";
-import { formatPlaceSearchSubtitle } from "../services/geocodingRank";
-import { getCurrentPosition } from "../services/geolocation";
-import { grantAccess, hasAccessClaim } from "../services/accessControl";
-import { setPremiumApiContext } from "../services/premiumApiContext";
-import { unionGameAreas } from "../domain/unionGameAreas";
-import { parseBoundaryFile } from "../services/kmzImport";
+} from "../services/transit/transitCatalog";
+import { searchPlaces, type GeocodedPlace } from "../services/geo/geocoding";
+import { formatPlaceSearchSubtitle } from "../services/geo/geocodingRank";
+import { getCurrentPosition } from "../services/core/geolocation";
+import { grantAccess, hasAccessClaim } from "../services/core/accessControl";
+import { setPremiumApiContext } from "../services/core/premiumApiContext";
+import { unionGameAreas } from "../domain/geometry/unionGameAreas";
+import { parseBoundaryFile } from "../services/core/kmzImport";
 import {
   createSessionDraftToGamePreset,
   gamePresetToCreateSessionDraft,
-} from "../domain/gamePreset";
+} from "../domain/session/gamePreset";
 import { useGamePresetStore } from "../state/gamePresetStore";
 
 const TIER_OPTIONS: Array<{

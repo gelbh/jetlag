@@ -1,7 +1,7 @@
 import { CircleMarker, Tooltip } from "react-leaflet";
-import type { LatLngTuple } from "../../domain/geometry";
-import type { PlayerLocationRecord } from "../../domain/sessionChat";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { PlayerLocationRecord } from "../../domain/session/sessionChat";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 interface LiveSeekerLocationsLayerProps {
   locations: readonly PlayerLocationRecord[];

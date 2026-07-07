@@ -11,7 +11,7 @@ const batteryStatus = {
   charging: false,
 };
 
-vi.mock("../../hooks/useBatteryStatus", () => ({
+vi.mock("../../hooks/location/useBatteryStatus", () => ({
   useBatteryStatus: () => batteryStatus,
 }));
 

@@ -1,4 +1,4 @@
-import type { TransitRouteFilter } from "../../domain/transit";
+import type { TransitRouteFilter } from "../../domain/map/transit";
 
 interface TransitControlsProps {
   enabled: boolean;

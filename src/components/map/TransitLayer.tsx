@@ -1,19 +1,19 @@
 import { memo, useMemo } from "react";
 import L from "leaflet";
 import { CircleMarker, Marker, Polyline, Popup } from "react-leaflet";
-import type { LatLngTuple } from "../../domain/geometry";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 import type {
   TransitRealtimeSnapshot,
   TransitRouteMode,
   TransitStaticData,
-} from "../../domain/transit";
+} from "../../domain/map/transit";
 import {
   filterTransitRoutesForViewport,
   filterTransitStopsForViewport,
   filterTransitVehiclesForViewport,
   type MapViewportBounds,
-} from "../../domain/transitViewport";
+} from "../../domain/map/transitViewport";
 
 interface TransitLayerProps {
   staticData: TransitStaticData | null;

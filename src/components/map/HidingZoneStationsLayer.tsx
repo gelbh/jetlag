@@ -1,7 +1,7 @@
 import { CircleMarker } from "react-leaflet";
-import type { LatLngTuple } from "../../domain/geometry";
-import type { TransitStation } from "../../domain/hidingZone";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { TransitStation } from "../../domain/session/hidingZone";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 interface HidingZoneStationsLayerProps {
   stations: readonly TransitStation[];

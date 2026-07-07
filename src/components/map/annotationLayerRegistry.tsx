@@ -1,9 +1,9 @@
 import { CircleMarker, Polyline, Popup } from "react-leaflet";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
-import type { AnnotationRecord, GameArea } from "../../domain/annotations";
-import { polygonFeatureToLeafletRings } from "../../domain/geometry";
+import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
+import { polygonFeatureToLeafletRings } from "../../domain/geometry/geometry";
 import type { LayerVisibility } from "../../state/sessionStore";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 interface RenderAnnotationLayerItemParams {
   annotation: AnnotationRecord;

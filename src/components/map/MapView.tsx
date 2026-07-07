@@ -6,8 +6,8 @@ import type {
   LatLngExpression,
   LeafletEvent,
 } from "leaflet";
-import { getMapBasemap, type MapStyle } from "../../domain/mapBasemaps";
-import { isUsableMapBounds } from "../../domain/geometry";
+import { getMapBasemap, type MapStyle } from "../../domain/map/mapBasemaps";
+import { isUsableMapBounds } from "../../domain/geometry/geometry";
 import { MapChromeListener } from "./MapChromeListener";
 
 interface MapViewProps {

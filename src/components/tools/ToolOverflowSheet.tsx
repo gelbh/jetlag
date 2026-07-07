@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
-import type { MapStyle } from "../../domain/mapBasemaps";
+import type { MapStyle } from "../../domain/map/mapBasemaps";
 import {
   MAP_TOOL_DOCK_ENTRIES,
   isMarkupDockTool,
   mapToolDockMenuHint,
   mapToolDockMenuLabel,
-} from "../../domain/mapTools";
+} from "../../domain/map/mapTools";
 import type { MapTool } from "../../state/sessionStore";
 import { useScrollLock } from "../../hooks/useScrollLock";
 import { MobileSheet } from "../ui/MobileSheet";

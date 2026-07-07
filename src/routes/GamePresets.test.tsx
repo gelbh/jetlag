@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { GamePresetEditor, GamePresetList } from "./GamePresets";
 import { renderWithRouter } from "../test/renderWithRouter";
 import { useGamePresetStore } from "../state/gamePresetStore";
-import { defaultAdvancedSessionSettings } from "../domain/advancedSessionSettings";
+import { defaultAdvancedSessionSettings } from "../domain/session/advancedSessionSettings";
 
 const navigate = vi.fn();
 

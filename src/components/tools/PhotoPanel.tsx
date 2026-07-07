@@ -3,8 +3,8 @@ import {
   photoCategoriesForGameSize,
   photoQuestionFor,
   type PhotoCategoryId,
-} from "../../domain/photoQuestions";
-import type { GameSize } from "../../domain/gameSize";
+} from "../../domain/questions/photoQuestions";
+import type { GameSize } from "../../domain/session/gameSize";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";

@@ -17,8 +17,8 @@ import {
   isRadarDistanceOptionAvailable,
   type RadarAnswer,
   type RadarDistanceOptionKey,
-} from "../../domain/radarQuestions";
-import type { DistanceUnit } from "../../domain/distance";
+} from "../../domain/questions/radarQuestions";
+import type { DistanceUnit } from "../../domain/map/distance";
 
 interface RadarPanelProps {
   radiusMeters: number;

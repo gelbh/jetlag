@@ -9,19 +9,19 @@ import type {
   Point,
   Polygon as GeoPolygon,
 } from "geojson";
-import type { AnnotationRecord, GameArea } from "../../domain/annotations";
-import { DEFAULT_RADIUS_METERS } from "../../domain/distance";
+import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
+import { DEFAULT_RADIUS_METERS } from "../../domain/map/distance";
 import {
   TENTACLE_ANSWER_RADIUS_METERS,
   TENTACLE_SEARCH_RADIUS_METERS,
-} from "../../domain/tentacleQuestions";
+} from "../../domain/questions/tentacleQuestions";
 import {
   gameAreaToPolygon,
   polygonFeatureToLeafletPolygonGroups,
   safeDifference,
   type LatLngTuple,
-} from "../../domain/geometry";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+} from "../../domain/geometry/geometry";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 interface GeometryEditLayerProps {
   annotation: AnnotationRecord;

@@ -1,5 +1,5 @@
-import type { HiderTruthResult } from "../../domain/hiderTruthAnswer";
-import type { GameReplyOption } from "../../domain/sessionChat";
+import type { HiderTruthResult } from "../../domain/questions/hiderTruthAnswer";
+import type { GameReplyOption } from "../../domain/session/sessionChat";
 import { LoadingReadout } from "../tools/shared/LoadingReadout";
 
 interface HiderAnswerPickerProps {

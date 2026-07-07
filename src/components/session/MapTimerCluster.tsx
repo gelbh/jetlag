@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
-import type { SessionRulesInput } from "../../domain/sessionRules";
-import { getPowerProfile } from "../../domain/powerProfile";
+import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import { getPowerProfile } from "../../domain/device/powerProfile";
 import {
   computeElapsedMs,
   formatElapsedTime,
   isTimerRunning,
   type TimerState,
-} from "../../domain/timer";
+} from "../../domain/session/timer";
 import {
   formatHidingPeriodCountdown,
   hidingPeriodRemainingMs,
   isHidingPeriodActive,
   seekPhaseElapsedMs,
-} from "../../domain/hidingPeriod";
-import type { PendingQuestionRecord } from "../../domain/sessionChat";
-import { selectPrimaryQuestionTimer } from "../../domain/questionTimerDisplay";
+} from "../../domain/session/hidingPeriod";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import { selectPrimaryQuestionTimer } from "../../domain/questions/questionTimerDisplay";
 import { useMapStore } from "../../state/mapStore";
 
 interface MapTimerClusterProps {

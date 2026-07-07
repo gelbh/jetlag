@@ -1,13 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { GameArea, SessionRecord } from "../domain/annotations";
-import type { PlayerRole } from "../domain/playerRole";
-import { resolvePlayerRole } from "../domain/playerRole";
+import type { GameArea, SessionRecord } from "../domain/map/annotations";
+import type { PlayerRole } from "../domain/session/playerRole";
+import { resolvePlayerRole } from "../domain/session/playerRole";
 
-export type { MapTool } from "../domain/mapToolTypes";
+export type { MapTool } from "../domain/map/mapToolTypes";
 export { useAnnotationStore } from "./annotationStore";
 export { useMapStore, type LayerVisibility } from "./mapStore";
-export type { MapStyle } from "../domain/mapBasemaps";
+export type { MapStyle } from "../domain/map/mapBasemaps";
 
 interface SessionState {
   session: SessionRecord | null;

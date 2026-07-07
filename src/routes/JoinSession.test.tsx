@@ -13,7 +13,7 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-vi.mock("../services/firebase", () => ({
+vi.mock("../services/core/firebase", () => ({
   isFirebaseConfigured: () => false,
   ensureAnonymousUser: vi.fn(),
 }));

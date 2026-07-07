@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { mapToolPlacingLabel } from "../../domain/mapTools";
-import type { SyncStatus } from "../../domain/sync";
-import type { TimerState } from "../../domain/timer";
+import { mapToolPlacingLabel } from "../../domain/map/mapTools";
+import type { SyncStatus } from "../../domain/device/sync";
+import type { TimerState } from "../../domain/session/timer";
 import type { MapTool } from "../../state/sessionStore";
-import type { PendingQuestionRecord } from "../../domain/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { HudHomeIcon, HudPlayIcon } from "../ui/HudIcons";
 import { PopupCloseButton } from "../ui/PopupCloseButton";
 import { TimerActions } from "../tools/TimerActions";
@@ -12,8 +12,8 @@ import { SessionTimerLabel } from "./SessionTimerLabel";
 import { MapTimerCluster } from "./MapTimerCluster";
 import { GameAreaPreloadBanner } from "./GameAreaPreloadBanner";
 
-import type { SessionRulesInput } from "../../domain/sessionRules";
-import type { PlayerRole } from "../../domain/playerRole";
+import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import type { PlayerRole } from "../../domain/session/playerRole";
 
 interface MapStatusRailProps {
   sessionCode: string;

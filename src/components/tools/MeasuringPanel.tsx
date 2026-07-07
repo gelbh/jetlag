@@ -14,14 +14,14 @@ import {
   type MeasuringLocationCategory,
   type MeasuringSubject,
   type MeasuringTargetMode,
-} from "../../domain/measuringQuestions";
-import type { GeocodedPlace } from "../../services/geocoding";
+} from "../../domain/questions/measuringQuestions";
+import type { GeocodedPlace } from "../../services/geo/geocoding";
 import {
   formatAltitudeLabel,
   formatDistance,
   type DistanceUnit,
-} from "../../domain/distance";
-import type { SeaLevelEdgeCase } from "../../domain/seaLevel";
+} from "../../domain/map/distance";
+import type { SeaLevelEdgeCase } from "../../domain/geometry/seaLevel";
 import { closerFurtherAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { AnchorControls } from "./shared/AnchorControls";

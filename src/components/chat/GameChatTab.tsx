@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import type { SessionRulesInput } from "../../domain/sessionRules";
+import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import {
   formatDrawPickSummary,
   formatExpiredAnswerCountdown,
   questionAnswerDeadlineMs,
-} from "../../domain/questionRules";
-import type { HiderTruthResult } from "../../domain/hiderTruthAnswer";
-import { mapToolDockShortLabel, isQuestionDockTool } from "../../domain/mapTools";
-import type { SessionMessageRecord } from "../../domain/sessionChat";
-import type { PendingQuestionRecord } from "../../domain/sessionChat";
+} from "../../domain/questions/questionRules";
+import type { HiderTruthResult } from "../../domain/questions/hiderTruthAnswer";
+import { mapToolDockShortLabel, isQuestionDockTool } from "../../domain/map/mapTools";
+import type { SessionMessageRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { HiderAnswerPicker } from "./HiderAnswerPicker";
 import { PhotoAnswerPreview } from "./PhotoAnswerPreview";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";

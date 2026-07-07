@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import type { MapStyle } from "../../domain/mapBasemaps";
-import type { GameSize } from "../../domain/gameSize";
+import type { MapStyle } from "../../domain/map/mapBasemaps";
+import type { GameSize } from "../../domain/session/gameSize";
 import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
-import type { SessionRulesInput } from "../../domain/sessionRules";
-import { resolveToolDockEnabled } from "../../domain/sessionRules";
+import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import { resolveToolDockEnabled } from "../../domain/session/sessionRules";
 import {
   MAP_TOOL_DOCK_ENTRIES,
   MARKUP_DOCK_TOOL_IDS,
@@ -12,7 +12,7 @@ import {
   mapToolDockMenuHint,
   mapToolDockMenuLabel,
   mapToolDockShortLabel,
-} from "../../domain/mapTools";
+} from "../../domain/map/mapTools";
 import type { MapTool } from "../../state/sessionStore";
 import {
   HudDrawIcon,

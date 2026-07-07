@@ -1,4 +1,4 @@
-// Parallel implementation: src/services/fetchWithTimeout.ts (Vite client).
+// Parallel implementation: src/services/core/fetchWithTimeout.ts (Vite client).
 export async function fetchWithTimeout(url, init, timeoutMs) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);

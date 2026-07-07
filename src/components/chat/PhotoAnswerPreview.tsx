@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import {
   parsePhotoAnswer,
   PHOTO_CANNOT_ANSWER_LABEL,
-} from "../../domain/photoQuestions";
-import { getPhotoDownloadUrl } from "../../services/photoStorage";
+} from "../../domain/questions/photoQuestions";
+import { getPhotoDownloadUrl } from "../../services/core/photoStorage";
 
 interface PhotoAnswerPreviewProps {
   answer: unknown;

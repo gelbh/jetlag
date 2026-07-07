@@ -3,7 +3,7 @@ import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import {
   polygonToLeafletLatLngs,
   type LatLngTuple,
-} from "../../domain/geometry";
+} from "../../domain/geometry/geometry";
 
 export function renderMaskPolygon(
   polygon: Feature<GeoPolygon | MultiPolygon>,

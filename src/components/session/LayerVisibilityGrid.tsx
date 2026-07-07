@@ -1,4 +1,4 @@
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 import type { LayerVisibility } from "../../state/sessionStore";
 
 const LAYER_ITEMS: ReadonlyArray<{

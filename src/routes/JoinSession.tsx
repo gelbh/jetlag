@@ -1,24 +1,24 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AppLogo } from "../components/ui/AppLogo";
-import { isPremiumSession } from "../domain/annotations";
+import { isPremiumSession } from "../domain/map/annotations";
 import {
   isValidSessionCode,
   normalizeSessionCode,
-} from "../services/sessionCodes";
+} from "../services/session/sessionCodes";
 import { useSessionStore } from "../state/sessionStore";
-import type { PlayerRole } from "../domain/playerRole";
+import type { PlayerRole } from "../domain/session/playerRole";
 import { RolePicker } from "../components/session/RolePicker";
 import {
   ensureAnonymousUser,
   isFirebaseConfigured,
-} from "../services/firebase";
+} from "../services/core/firebase";
 import {
   joinRemoteSessionByCode,
   lookupRemoteSessionByCode,
-} from "../services/firestoreAnnotations";
-import { retryAsync } from "../services/retryAsync";
-import { setPremiumApiContext } from "../services/premiumApiContext";
+} from "../services/firestore/firestoreAnnotations";
+import { retryAsync } from "../services/core/retryAsync";
+import { setPremiumApiContext } from "../services/core/premiumApiContext";
 
 export function JoinSession() {
   const navigate = useNavigate();

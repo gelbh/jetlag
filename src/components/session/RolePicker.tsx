@@ -1,5 +1,5 @@
-import type { PlayerRole } from "../../domain/playerRole";
-import { playerRoleLabel } from "../../domain/playerRole";
+import type { PlayerRole } from "../../domain/session/playerRole";
+import { playerRoleLabel } from "../../domain/session/playerRole";
 
 interface RolePickerProps {
   value: PlayerRole;

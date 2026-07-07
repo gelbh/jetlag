@@ -2,7 +2,7 @@ import {
   ensureAnonymousUser,
   getFirestoreDb,
   resetFirebaseForTests,
-} from "../../services/firebase";
+} from "../../services/core/firebase";
 
 export async function connectEmulatorsForTests(): Promise<{
   uid: string;

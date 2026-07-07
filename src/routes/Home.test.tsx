@@ -1,12 +1,12 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Home } from "./Home";
-import { LOCAL_SESSION_ID } from "../domain/annotations";
+import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { renderWithRouter } from "../test/renderWithRouter";
 import { createTestSession } from "../test/fixtures/sessions";
 import { useSessionStore } from "../state/sessionStore";
 
-vi.mock("../services/firebase", () => ({
+vi.mock("../services/core/firebase", () => ({
   isFirebaseConfigured: () => false,
   ensureAnonymousUser: vi.fn(),
 }));

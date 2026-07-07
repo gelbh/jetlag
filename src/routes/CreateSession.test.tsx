@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { CreateSession } from "./CreateSession";
 import { renderWithRouter } from "../test/renderWithRouter";
-import type { GeocodedPlace } from "../services/geocoding";
+import type { GeocodedPlace } from "../services/geo/geocoding";
 
 const mockBounds = {
   getSouthWest: () => ({ lat: 53.27, lng: -6.45 }),
@@ -36,11 +36,11 @@ const dublinPlace: GeocodedPlace = {
   approximateAreaSqMi: 180,
 };
 
-vi.mock("../services/geocoding", () => ({
+vi.mock("../services/geo/geocoding", () => ({
   searchPlaces: vi.fn(async () => [dublinPlace]),
 }));
 
-vi.mock("../services/geolocation", () => ({
+vi.mock("../services/core/geolocation", () => ({
   getCurrentPosition: vi.fn().mockResolvedValue({
     lat: 53.35,
     lng: -6.26,
@@ -84,17 +84,17 @@ vi.mock("../components/map/GameAreaMask", () => ({
   GameAreaMask: () => null,
 }));
 
-vi.mock("../services/firebase", () => ({
+vi.mock("../services/core/firebase", () => ({
   isFirebaseConfigured: () => false,
   ensureAnonymousUser: vi.fn(),
 }));
 
-vi.mock("../services/gameAreaPreload", () => ({
+vi.mock("../services/session/gameAreaPreload", () => ({
   preloadGameAreaCaches: vi.fn(),
   preloadCriticalGameAreaCaches: vi.fn(async () => undefined),
 }));
 
-vi.mock("../services/seaLevelProgressive", () => ({
+vi.mock("../services/geo/seaLevelProgressive", () => ({
   startSeaLevelBackgroundSampling: vi.fn(),
 }));
 
@@ -121,7 +121,7 @@ describe("CreateSession", () => {
 
   it("navigates to the map even when critical preload hangs", async () => {
     const { preloadCriticalGameAreaCaches } = await import(
-      "../services/gameAreaPreload"
+      "../services/session/gameAreaPreload"
     );
     vi.mocked(preloadCriticalGameAreaCaches).mockImplementation(
       () => new Promise(() => undefined),
@@ -155,7 +155,7 @@ describe("CreateSession", () => {
   });
 
   it("shows place category and area in search results", async () => {
-    const { searchPlaces } = await import("../services/geocoding");
+    const { searchPlaces } = await import("../services/geo/geocoding");
     const cityPlace: GeocodedPlace = {
       ...dublinPlace,
       id: "dublin-city",
@@ -187,8 +187,8 @@ describe("CreateSession", () => {
   });
 
   it("passes user location into place search when GPS is available", async () => {
-    const { searchPlaces } = await import("../services/geocoding");
-    const { getCurrentPosition } = await import("../services/geolocation");
+    const { searchPlaces } = await import("../services/geo/geocoding");
+    const { getCurrentPosition } = await import("../services/core/geolocation");
 
     renderWithRouter(<CreateSession />);
 

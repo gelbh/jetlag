@@ -36,19 +36,19 @@ vi.mock("../components/map/MapDraftLayer", () => ({
   MapDraftLayer: () => null,
 }));
 
-vi.mock("../hooks/useSessionSync", () => ({
+vi.mock("../hooks/session/useSessionSync", () => ({
   useSessionSync: () => undefined,
 }));
 
-vi.mock("../hooks/useSessionEndedRedirect", () => ({
+vi.mock("../hooks/session/useSessionEndedRedirect", () => ({
   useSessionEndedRedirect: () => undefined,
 }));
 
-vi.mock("../hooks/useWakeLock", () => ({
+vi.mock("../hooks/location/useWakeLock", () => ({
   useWakeLock: () => undefined,
 }));
 
-vi.mock("../hooks/useSessionNotifications", () => ({
+vi.mock("../hooks/session/useSessionNotifications", () => ({
   useSessionNotifications: () => ({
     nativeSupported: false,
     notificationPreferences: {
@@ -63,19 +63,19 @@ vi.mock("../hooks/useSessionNotifications", () => ({
   }),
 }));
 
-vi.mock("../hooks/useLiveActivitySync", () => ({
+vi.mock("../hooks/sync/useLiveActivitySync", () => ({
   useLiveActivitySync: () => undefined,
 }));
 
-vi.mock("../services/gameAreaPreload", () => ({
+vi.mock("../services/session/gameAreaPreload", () => ({
   preloadGameAreaCaches: vi.fn(),
 }));
 
-vi.mock("../services/seaLevelProgressive", () => ({
+vi.mock("../services/geo/seaLevelProgressive", () => ({
   startSeaLevelBackgroundSampling: vi.fn(),
 }));
 
-vi.mock("../services/firebase", () => ({
+vi.mock("../services/core/firebase", () => ({
   isFirebaseConfigured: () => false,
   ensureAnonymousUser: vi.fn(),
 }));

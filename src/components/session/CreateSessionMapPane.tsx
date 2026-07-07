@@ -1,15 +1,15 @@
 import type { LatLngBoundsExpression } from "leaflet";
 import { MapView } from "../map/MapView";
 import { GameAreaMask } from "../map/GameAreaMask";
-import type { GameArea } from "../../domain/annotations";
-import type { MapStyle } from "../../domain/mapBasemaps";
+import type { GameArea } from "../../domain/map/annotations";
+import type { MapStyle } from "../../domain/map/mapBasemaps";
 import {
   formatPlayAreaSummary,
   gameAreaSquareMiles,
   gameSizeLabel,
   recommendGameSize,
   type GameSize,
-} from "../../domain/gameSize";
+} from "../../domain/session/gameSize";
 
 interface CreateSessionMapPaneProps {
   mapStyle: MapStyle;

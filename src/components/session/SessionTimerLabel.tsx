@@ -4,7 +4,7 @@ import {
   formatElapsedTime,
   isTimerRunning,
   type TimerState,
-} from "../../domain/timer";
+} from "../../domain/session/timer";
 
 interface SessionTimerLabelProps {
   timerState: TimerState;

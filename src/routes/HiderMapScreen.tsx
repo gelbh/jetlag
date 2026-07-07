@@ -14,8 +14,8 @@ import {
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { ChatUnreadBadge } from "../components/chat/ChatUnreadBadge";
 import { HidingZonePanel } from "../components/hider/HidingZonePanel";
-import { effectiveHidingZoneRadiusMeters, formatHidingZoneRadiusLabel } from "../domain/gameSize";
-import { hidingZonePreviewPositions } from "../domain/hidingZone";
+import { effectiveHidingZoneRadiusMeters, formatHidingZoneRadiusLabel } from "../domain/session/gameSize";
+import { hidingZonePreviewPositions } from "../domain/session/hidingZone";
 import { MapStatusRail } from "../components/session/MapStatusRail";
 import {
   HiderTruthRevealBanner,
@@ -29,39 +29,39 @@ import {
   gameAreaToBoundsExpression,
   gameAreaToBoundingBox,
   type LatLngTuple,
-} from "../domain/geometry";
-import type { MapViewportBounds } from "../domain/transitViewport";
-import { effectiveMapStyle } from "../domain/powerProfile";
-import { computeHiderTruthReplyAsync } from "../domain/hiderTruthAnswer";
-import { MAP_ANNOTATION_COLORS } from "../domain/mapAnnotationColors";
-import { useHiderQuestionTruths } from "../hooks/useHiderQuestionTruths";
-import { useHiderZoneTool } from "../hooks/useHiderZoneTool";
-import { useMapOverlayState } from "../hooks/useMapOverlayState";
-import { useChatUnread } from "../hooks/useChatUnread";
-import { usePendingQuestionActions } from "../hooks/usePendingQuestionActions";
-import { useRemoteSessionTimerSync } from "../hooks/useRemoteSessionTimerSync";
-import { useSessionEndedRedirect } from "../hooks/useSessionEndedRedirect";
-import { useSessionTimer } from "../hooks/useSessionTimer";
+} from "../domain/geometry/geometry";
+import type { MapViewportBounds } from "../domain/map/transitViewport";
+import { effectiveMapStyle } from "../domain/device/powerProfile";
+import { computeHiderTruthReplyAsync } from "../domain/questions/hiderTruthAnswer";
+import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
+import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
+import { useHiderZoneTool } from "../hooks/session/useHiderZoneTool";
+import { useMapOverlayState } from "../hooks/map/useMapOverlayState";
+import { useChatUnread } from "../hooks/session/useChatUnread";
+import { usePendingQuestionActions } from "../hooks/sync/usePendingQuestionActions";
+import { useRemoteSessionTimerSync } from "../hooks/session/useRemoteSessionTimerSync";
+import { useSessionEndedRedirect } from "../hooks/session/useSessionEndedRedirect";
+import { useSessionTimer } from "../hooks/session/useSessionTimer";
 import { ActiveThermometerWalkLayer } from "../components/map/ActiveThermometerWalkLayer";
 import { LiveUserLocationLayer } from "../components/map/LiveUserLocationLayer";
 import { PendingQuestionLayer } from "../components/map/PendingQuestionLayer";
-import { useActiveThermometerWalk } from "../hooks/useActiveThermometerWalk";
+import { useActiveThermometerWalk } from "../hooks/location/useActiveThermometerWalk";
 import {
   useHidingZonesSync,
   usePendingQuestionsSync,
   usePlayerLocationsSync,
   useSessionMessagesSync,
-} from "../hooks/useSessionExtrasSync";
-import { useSyncStatus } from "../hooks/useSyncStatus";
-import { useWakeLock } from "../hooks/useWakeLock";
-import { useSessionNotifications } from "../hooks/useSessionNotifications";
-import { useLiveActivitySync } from "../hooks/useLiveActivitySync";
-import { useSessionSync } from "../hooks/useSessionSync";
-import { useFirebaseAuthReady } from "../hooks/useFirebaseAuthReady";
-import { useSessionDistanceUnit } from "../hooks/useSessionDistanceUnit";
-import { ensureRemoteSessionWriteAccess } from "../services/firestoreAnnotations";
-import { ensureAnonymousUser } from "../services/firebase";
-import { setPremiumApiContext } from "../services/premiumApiContext";
+} from "../hooks/session/useSessionExtrasSync";
+import { useSyncStatus } from "../hooks/sync/useSyncStatus";
+import { useWakeLock } from "../hooks/location/useWakeLock";
+import { useSessionNotifications } from "../hooks/session/useSessionNotifications";
+import { useLiveActivitySync } from "../hooks/sync/useLiveActivitySync";
+import { useSessionSync } from "../hooks/session/useSessionSync";
+import { useFirebaseAuthReady } from "../hooks/sync/useFirebaseAuthReady";
+import { useSessionDistanceUnit } from "../hooks/session/useSessionDistanceUnit";
+import { ensureRemoteSessionWriteAccess } from "../services/firestore/firestoreAnnotations";
+import { ensureAnonymousUser } from "../services/core/firebase";
+import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useAnnotationStore, useMapStore, useSessionStore } from "../state/sessionStore";
 
 export function HiderMapScreen() {

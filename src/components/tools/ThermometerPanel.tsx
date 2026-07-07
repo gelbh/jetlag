@@ -3,14 +3,14 @@ import {
   formatDistance,
   formatPresetDistance,
   type DistanceUnit,
-} from "../../domain/distance";
-import type { GameSize } from "../../domain/gameSize";
+} from "../../domain/map/distance";
+import type { GameSize } from "../../domain/session/gameSize";
 import {
   availableThermometerDistancePresets,
   isThermometerDistanceOptionAvailable,
   thermometerQuestionPrompt,
   type ThermometerAnswer,
-} from "../../domain/thermometerQuestions";
+} from "../../domain/questions/thermometerQuestions";
 import { hotterColderAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { OptionChip, OptionChipRow } from "./shared/OptionChip";
