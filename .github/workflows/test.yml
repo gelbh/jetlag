@@ -32,7 +32,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npx firebase emulators:exec --only auth,firestore "npm run test:emulator"
+      - run: npm run test:emulator
 
   e2e-full:
     runs-on: ubuntu-latest
