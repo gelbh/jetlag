@@ -46,6 +46,7 @@ export default defineConfig({
             org: sentryOrg,
             project: sentryProject,
             authToken: sentryAuthToken,
+            url: "https://de.sentry.io",
             release: {
               name: `jetlag@${appVersion}`,
             },
