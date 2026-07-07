@@ -31,6 +31,7 @@ const clientEnvSchema = firebaseEnvSchema
     VITE_TRANSITLAND_PROXY_URL: optionalUrl,
     VITE_SENTRY_DSN: optionalUrl,
     VITE_SENTRY_ENVIRONMENT: optionalNonEmptyString,
+    VITE_GA_MEASUREMENT_ID: optionalNonEmptyString,
   })
   .superRefine((env, ctx) => {
     const firebaseFields = [
@@ -85,6 +86,7 @@ function readRawClientEnv(): Record<string, unknown> {
     VITE_TRANSITLAND_PROXY_URL: import.meta.env.VITE_TRANSITLAND_PROXY_URL,
     VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
     VITE_SENTRY_ENVIRONMENT: import.meta.env.VITE_SENTRY_ENVIRONMENT,
+    VITE_GA_MEASUREMENT_ID: import.meta.env.VITE_GA_MEASUREMENT_ID,
   };
 }
 
