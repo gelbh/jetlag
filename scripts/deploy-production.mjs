@@ -118,7 +118,7 @@ function resolveFunctionUrls(deployOutput) {
 }
 
 function printProxyEnvInstructions(functionUrls) {
-  const lines = ["\nSet these in Cloudflare Pages (and .env.local for dev):"];
+  const lines = ["\nSet these in Cloudflare Pages:"];
 
   lines.push(
     "  VITE_FIREBASE_APP_CHECK_SITE_KEY=<reCAPTCHA v3 site key from Firebase App Check>",
@@ -151,23 +151,6 @@ function printProxyEnvInstructions(functionUrls) {
   );
 
   console.log(lines.join("\n"));
-  printAppCheckRolloutInstructions();
-}
-
-function printAppCheckRolloutInstructions() {
-  console.log(`
-App Check rollout (jet-lag-map-companion):
-  1. Register jetlag-web in Firebase Console → App Check with reCAPTCHA v3:
-     https://console.firebase.google.com/project/jet-lag-map-companion/appcheck
-  2. Set VITE_FIREBASE_APP_CHECK_SITE_KEY in Cloudflare Pages, then redeploy the frontend.
-  3. Monitor verified vs unverified metrics for 2–7 days before enforcing.
-  4. grantAccess now requires App Check (enforceAppCheck: true). Enforce only after
-     metrics look healthy:
-     - Firestore: App Check → APIs → Cloud Firestore → Enforce
-     - Callable: App Check → APIs → Cloud Functions → Enforce
-  5. Local dev against prod Firebase: run npm run dev, copy the debug token from the
-     browser console, register it under jetlag-web → Manage debug tokens.
-`);
 }
 
 /**
