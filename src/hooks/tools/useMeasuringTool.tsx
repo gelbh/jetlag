@@ -42,6 +42,7 @@ import type { SessionRulesInput } from "../../domain/sessionRules";
 import { manualPinAsMeasuringPlace } from "../../domain/sessionCustomCatalog";
 import { closerFurtherAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
+import { useSubmitLock } from "../useSubmitLock";
 import { measuringLinearNotFoundMessage } from "../../services/measuringLinearFeatures";
 import { overpassErrorMessage } from "../../services/overpassClient";
 import {
@@ -124,6 +125,7 @@ export function useMeasuringTool({
   refreshGps,
   ensurePointInGameArea,
 }: UseMeasuringToolParams) {
+  const { isSubmitting, runLocked } = useSubmitLock();
   const seaLevelRequestId = useRef(0);
   const coastlineRequestId = useRef(0);
   const linearRequestId = useRef(0);
@@ -1237,9 +1239,10 @@ export function useMeasuringTool({
       onAnswerChange={(answer) => {
         startTransition(() => setMeasuringAnswer(answer));
       }}
-      onCommit={() => void commit()}
+      onCommit={() => void runLocked(commit)}
       awaitHiderAnswer={awaitHiderAnswer}
       costLabel={questionCost.label}
+      isSubmitting={isSubmitting}
     />
   );
 

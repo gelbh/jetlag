@@ -21,7 +21,12 @@ import {
 import type { DistanceUnit } from "../../domain/distance";
 import { hotterColderAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
+import { useSubmitLock } from "../useSubmitLock";
 import { useLiveLocation } from "../useLiveLocation";
+import {
+  parseThermometerStartPoint,
+  isThermometerWalkActive,
+} from "../../domain/thermometerWalk";
 import {
   thermometerWalkStartPlacement,
   useThermometerWalk,
@@ -79,17 +84,49 @@ export function useThermometerTool({
   finishPlacement,
   setMapError,
 }: UseThermometerToolParams) {
+  const { isSubmitting, runLocked } = useSubmitLock();
   const activeAnnotations = useMemo(
     () => annotations.filter(isActive),
     [annotations],
   );
 
-  const [placementMode, setPlacementMode] = useState<PlacementMode>("gps");
-  const [thermoA, setThermoA] = useState<LatLngTuple | null>(null);
-  const [thermoB, setThermoB] = useState<LatLngTuple | null>(null);
-  const [walkingQuestionId, setWalkingQuestionId] = useState<string | null>(
-    null,
+  const syncedWalkingQuestion = useMemo(
+    () =>
+      pendingQuestions.find(
+        (question) =>
+          isThermometerWalkActive(question) &&
+          (!senderUid || question.createdByUid === senderUid),
+      ) ?? null,
+    [pendingQuestions, senderUid],
   );
+
+  const syncedWalkDraft = useMemo(() => {
+    if (!syncedWalkingQuestion) {
+      return null;
+    }
+
+    const start = parseThermometerStartPoint(syncedWalkingQuestion.placement);
+    if (!start) {
+      return null;
+    }
+
+    const distanceMeters =
+      syncedWalkingQuestion.placement.metadata?.thermometerDistanceMeters;
+
+    return {
+      questionId: syncedWalkingQuestion.id,
+      startPoint: start,
+      distanceMeters:
+        typeof distanceMeters === "number" ? distanceMeters : null,
+    };
+  }, [syncedWalkingQuestion]);
+
+  const [placementMode, setPlacementMode] = useState<PlacementMode>("gps");
+  const [localThermoA, setLocalThermoA] = useState<LatLngTuple | null>(null);
+  const [thermoB, setThermoB] = useState<LatLngTuple | null>(null);
+  const [localWalkingQuestionId, setLocalWalkingQuestionId] = useState<
+    string | null
+  >(null);
   const [thermometerDistanceMeters, setThermometerDistanceMeters] = useState(
     () =>
       availableThermometerDistancePresetsForSession(sessionRules)[0] ??
@@ -97,6 +134,21 @@ export function useThermometerTool({
   );
   const [thermometerAnswer, setThermometerAnswer] =
     useState<ThermometerAnswer | null>(null);
+
+  const walkingQuestionId =
+    localWalkingQuestionId ?? syncedWalkDraft?.questionId ?? null;
+  const thermoA =
+    localThermoA ??
+    (syncedWalkDraft && walkingQuestionId === syncedWalkDraft.questionId
+      ? syncedWalkDraft.startPoint
+      : null);
+  const activeThermometerDistanceMeters =
+    localWalkingQuestionId === null &&
+    syncedWalkDraft &&
+    walkingQuestionId === syncedWalkDraft.questionId &&
+    syncedWalkDraft.distanceMeters !== null
+      ? syncedWalkDraft.distanceMeters
+      : thermometerDistanceMeters;
 
   const { reading: gpsReading } = useLiveLocation(active && placementMode === "gps", {
     highAccuracy: true,
@@ -114,10 +166,10 @@ export function useThermometerTool({
     thermoA && thermoB ? distanceBetweenPoints(thermoA, thermoB) : null;
 
   const presetUseCount = Math.max(
-    thermometerUseCount(activeAnnotations, thermometerDistanceMeters),
+    thermometerUseCount(activeAnnotations, activeThermometerDistanceMeters),
     thermometerUseCountFromPending(
       pendingQuestions,
-      thermometerDistanceMeters,
+      activeThermometerDistanceMeters,
     ),
   );
   const { label: costLabel, draw: cardDraw, keep: cardKeep } =
@@ -130,7 +182,7 @@ export function useThermometerTool({
       }
 
       const promptText = thermometerQuestionPrompt(
-        thermometerDistanceMeters,
+        activeThermometerDistanceMeters,
         distanceUnit,
       );
 
@@ -138,7 +190,7 @@ export function useThermometerTool({
         pendingQuestionId: walkingQuestionId,
         startPoint: thermoA,
         endPoint,
-        distanceMeters: thermometerDistanceMeters,
+        distanceMeters: activeThermometerDistanceMeters,
         promptText,
         replyOptions: hotterColderAnswerOptions.map((option) => ({
           id: option.value,
@@ -148,8 +200,8 @@ export function useThermometerTool({
         cardKeep,
       });
 
-      setWalkingQuestionId(null);
-      setThermoA(null);
+      setLocalWalkingQuestionId(null);
+      setLocalThermoA(null);
       setThermoB(null);
       finishPlacement();
     },
@@ -160,26 +212,27 @@ export function useThermometerTool({
       distanceUnit,
       finishPlacement,
       thermoA,
-      thermometerDistanceMeters,
+      activeThermometerDistanceMeters,
       walkingQuestionId,
     ],
   );
 
+  const walkTrackingActive =
+    walkingQuestionId !== null && thermoA !== null;
+
   const walkTracker = useThermometerWalk({
-    active: active && thermoStep === "walking",
+    active: walkTrackingActive,
     startPoint: thermoA,
-    targetDistanceMeters: thermometerDistanceMeters,
-    onAutoStop: (endPoint) => {
-      setThermoB(endPoint);
-      void handleWalkComplete(endPoint);
-    },
+    targetDistanceMeters: activeThermometerDistanceMeters,
+    onAutoStop: handleWalkComplete,
+    onError: setMapError,
   });
 
   const resetDraft = useCallback(() => {
     walkTracker.cancelWalk();
-    setThermoA(null);
+    setLocalThermoA(null);
     setThermoB(null);
-    setWalkingQuestionId(null);
+    setLocalWalkingQuestionId(null);
     setThermometerAnswer(null);
     setThermometerDistanceMeters(
       availableThermometerDistancePresetsForSession(sessionRules)[0] ??
@@ -196,7 +249,7 @@ export function useThermometerTool({
     if (
       !isThermometerDistanceOptionAvailableForSession(
         sessionRules,
-        thermometerDistanceMeters,
+        activeThermometerDistanceMeters,
       )
     ) {
       setMapError("That distance is not available for this game size.");
@@ -209,12 +262,12 @@ export function useThermometerTool({
     }
 
     const start: LatLngTuple = [gpsReading.lat, gpsReading.lng];
-    setThermoA(start);
+    setLocalThermoA(start);
     setThermoB(null);
 
     if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
       const distanceLabel = thermometerQuestionPrompt(
-        thermometerDistanceMeters,
+        activeThermometerDistanceMeters,
         distanceUnit,
       );
       const startMessage = `Thermometer walk started — ${distanceLabel}`;
@@ -223,13 +276,13 @@ export function useThermometerTool({
         replyOptions: [],
         placement: thermometerWalkStartPlacement(
           start,
-          thermometerDistanceMeters,
+          activeThermometerDistanceMeters,
         ),
         status: "walking",
       });
 
       if (typeof questionId === "string") {
-        setWalkingQuestionId(questionId);
+        setLocalWalkingQuestionId(questionId);
       }
       return;
     }
@@ -246,7 +299,7 @@ export function useThermometerTool({
     senderUid,
     setMapError,
     submitPendingQuestion,
-    thermometerDistanceMeters,
+    activeThermometerDistanceMeters,
   ]);
 
   const handleMapClick = useCallback(
@@ -256,7 +309,7 @@ export function useThermometerTool({
       }
 
       if (!thermoA) {
-        setThermoA(point);
+        setLocalThermoA(point);
       } else if (!thermoB) {
         setThermoB(point);
       }
@@ -278,7 +331,7 @@ export function useThermometerTool({
 
     if (
       thermoTravelMeters !== null &&
-      thermoTravelMeters + 1 < thermometerDistanceMeters
+      thermoTravelMeters + 1 < activeThermometerDistanceMeters
     ) {
       setMapError("Movement is shorter than the selected distance.");
       return;
@@ -297,7 +350,7 @@ export function useThermometerTool({
     };
 
     const promptText = thermometerQuestionPrompt(
-      thermometerDistanceMeters,
+      activeThermometerDistanceMeters,
       distanceUnit,
     );
 
@@ -308,7 +361,7 @@ export function useThermometerTool({
           replyOptions: [],
           placement: thermometerWalkStartPlacement(
             thermoA,
-            thermometerDistanceMeters,
+            activeThermometerDistanceMeters,
           ),
           status: "walking",
         });
@@ -322,7 +375,7 @@ export function useThermometerTool({
         })),
         placement: {
           geometryJson: JSON.stringify(geometry),
-          metadata: { thermometerDistanceMeters },
+          metadata: { thermometerDistanceMeters: activeThermometerDistanceMeters },
         },
         status: "pending",
         cardDraw,
@@ -344,7 +397,7 @@ export function useThermometerTool({
       metadata: {
         createdAt: new Date().toISOString(),
         hotterTowards: thermometerHotterTowards(thermometerAnswer),
-        thermometerDistanceMeters,
+        thermometerDistanceMeters: activeThermometerDistanceMeters,
         thermometerAnswer,
         color: MAP_ANNOTATION_COLORS.elimination,
       },
@@ -354,6 +407,11 @@ export function useThermometerTool({
     finishPlacement();
   };
 
+  const commitManualLocked = () =>
+    runLocked(async () => {
+      await commitManual();
+    });
+
   const placementCrosshair =
     active && placementMode === "manual" && thermoStep !== "ready";
 
@@ -361,7 +419,7 @@ export function useThermometerTool({
     <ThermometerPanel
       distanceUnit={distanceUnit}
       gameSize={sessionGameSize(sessionRules)}
-      distanceMeters={thermometerDistanceMeters}
+      distanceMeters={activeThermometerDistanceMeters}
       travelMeters={walkTracker.distanceTraveledMeters ?? thermoTravelMeters}
       answer={thermometerAnswer}
       step={thermoStep === "walking" ? "b" : thermoStep}
@@ -374,9 +432,10 @@ export function useThermometerTool({
       onAnswerChange={setThermometerAnswer}
       onReset={resetDraft}
       onStartWalk={() => void startGpsWalk()}
-      onCommit={() => void commitManual()}
+      onCommit={() => void commitManualLocked()}
       awaitHiderAnswer={awaitHiderAnswer}
       canSubmitQuestion={canSubmitQuestion}
+      isSubmitting={isSubmitting}
     />
   );
 
@@ -385,13 +444,13 @@ export function useThermometerTool({
       thermoA,
       thermoB,
       thermometerAnswer,
-      thermometerDistanceMeters,
+      thermometerDistanceMeters: activeThermometerDistanceMeters,
       walkingQuestionId,
     },
     placementCrosshair,
     handleMapClick,
     resetDraft,
-    commit: commitManual,
+    commit: commitManualLocked,
     panel,
     walkCurrentPoint: walkTracker.currentPoint,
   };

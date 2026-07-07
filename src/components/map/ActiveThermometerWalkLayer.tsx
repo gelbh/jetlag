@@ -1,34 +1,23 @@
 import { Polyline } from "react-leaflet";
 import type { LatLngTuple } from "../../domain/geometry";
-import type { PendingQuestionRecord } from "../../domain/sessionChat";
-import {
-  isThermometerWalkActive,
-  parseThermometerStartPoint,
-} from "../../domain/thermometerWalk";
 import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface ActiveThermometerWalkLayerProps {
-  pendingQuestions: readonly PendingQuestionRecord[];
-  seekerPosition: LatLngTuple | null;
+  start: LatLngTuple | null;
+  livePoint: LatLngTuple | null;
 }
 
 export function ActiveThermometerWalkLayer({
-  pendingQuestions,
-  seekerPosition,
+  start,
+  livePoint,
 }: ActiveThermometerWalkLayerProps) {
-  const walking = pendingQuestions.find(isThermometerWalkActive);
-  if (!walking || !seekerPosition) {
-    return null;
-  }
-
-  const start = parseThermometerStartPoint(walking.placement);
-  if (!start) {
+  if (!start || !livePoint) {
     return null;
   }
 
   return (
     <Polyline
-      positions={[start, seekerPosition]}
+      positions={[start, livePoint]}
       pathOptions={{
         color: MAP_ANNOTATION_COLORS.thermometerAxis,
         weight: 4,

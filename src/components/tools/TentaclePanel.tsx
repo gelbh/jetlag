@@ -47,6 +47,7 @@ interface TentaclePanelProps {
   onCommit: () => void;
   awaitHiderAnswer?: boolean;
   costLabel?: string;
+  isSubmitting?: boolean;
   onRetry?: () => void;
 }
 
@@ -71,6 +72,7 @@ export function TentaclePanel({
   onCommit,
   awaitHiderAnswer = false,
   costLabel = "D4P2",
+  isSubmitting = false,
   onRetry,
 }: TentaclePanelProps) {
   const steps = stepsForMode(TENTACLE_STEPS, awaitHiderAnswer);
@@ -92,7 +94,8 @@ export function TentaclePanel({
     hasCenter &&
     poiOptions.length > 0 &&
     (awaitHiderAnswer || hasRecordedAnswer) &&
-    categorySelectionAvailable;
+    categorySelectionAvailable &&
+    !isSubmitting;
   const availableCategories = tentacleCategoriesForGameSize(gameSize);
 
   const goNext = () => {
@@ -177,9 +180,10 @@ export function TentaclePanel({
                 type="button"
                 onClick={onCommit}
                 disabled={!canCommit}
+                aria-busy={isSubmitting}
                 className="btn-primary w-full disabled:opacity-40"
               >
-                Send to hiders ({costLabel})
+                {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
               </button>
             </>
           ) : null}

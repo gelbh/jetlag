@@ -51,6 +51,7 @@ interface MatchingPanelProps {
   onCommit: () => void;
   awaitHiderAnswer?: boolean;
   costLabel?: string;
+  isSubmitting?: boolean;
   onRetry?: () => void;
 }
 
@@ -76,6 +77,7 @@ export function MatchingPanel({
   onCommit,
   awaitHiderAnswer = false,
   costLabel = "D3P1",
+  isSubmitting = false,
   onRetry,
 }: MatchingPanelProps) {
   const steps = stepsForMode(MATCHING_STEPS, awaitHiderAnswer);
@@ -92,7 +94,13 @@ export function MatchingPanel({
     (awaitHiderAnswer || answer !== null) &&
     resolveComplete &&
     categoryAvailable &&
-    !loading;
+    !loading &&
+    !isSubmitting;
+  const selectableCategories = MATCHING_CATEGORIES.filter(
+    (item) =>
+      isMatchingCategoryEnabled(item.id) &&
+      (!usedCategoryIds.has(item.id) || item.id === categoryId),
+  );
   const availableCategories = MATCHING_CATEGORIES.filter(
     (item) =>
       isMatchingCategoryEnabled(item.id) && !usedCategoryIds.has(item.id),
@@ -155,6 +163,7 @@ export function MatchingPanel({
             <label className="field-label">
               Match category
               <select
+                key={categoryId}
                 value={categoryId}
                 onChange={(event) =>
                   onCategoryChange(event.target.value as MatchingCategoryId)
@@ -162,11 +171,8 @@ export function MatchingPanel({
                 className="field-input"
               >
                 {MATCHING_CATEGORY_GROUPS.map((group) => {
-                  const categories = MATCHING_CATEGORIES.filter(
-                    (cat) =>
-                      cat.groupId === group.id &&
-                      isMatchingCategoryEnabled(cat.id) &&
-                      !usedCategoryIds.has(cat.id),
+                  const categories = selectableCategories.filter(
+                    (cat) => cat.groupId === group.id,
                   );
 
                   if (categories.length === 0) {
@@ -229,9 +235,10 @@ export function MatchingPanel({
                 type="button"
                 onClick={onCommit}
                 disabled={!canCommit}
+                aria-busy={isSubmitting}
                 className="btn-primary w-full disabled:opacity-40"
               >
-                Send to hiders ({costLabel})
+                {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
               </button>
             </>
           ) : null}
@@ -260,9 +267,10 @@ export function MatchingPanel({
             type="button"
             onClick={onCommit}
             disabled={!canCommit}
+            aria-busy={isSubmitting}
             className="btn-primary w-full disabled:opacity-40"
           >
-            Add match question
+            {isSubmitting ? "Sending…" : "Add match question"}
           </button>
         </ToolSection>
       ) : null}

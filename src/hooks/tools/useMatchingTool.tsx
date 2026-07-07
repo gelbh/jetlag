@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLatestRequest } from "../useLatestRequest";
 import { useDebouncedValue } from "../useDebouncedValue";
+import { useSubmitLock } from "../useSubmitLock";
 import type {
   Feature,
   MultiPolygon,
@@ -95,6 +96,7 @@ export function useMatchingTool({
   refreshGps,
   ensurePointInGameArea,
 }: UseMatchingToolParams) {
+  const { isSubmitting, runLocked } = useSubmitLock();
   const usedMatchingCategories = useMemo(
     () => usedMatchingCategoryIds(annotations.filter(isActive)),
     [annotations],
@@ -598,9 +600,10 @@ export function useMatchingTool({
       }}
       onUseGps={() => void handleGps()}
       onAnswerChange={setMatchingAnswer}
-      onCommit={() => void commit()}
+      onCommit={() => void runLocked(commit)}
       awaitHiderAnswer={awaitHiderAnswer}
       costLabel={costLabel}
+      isSubmitting={isSubmitting}
       onRetry={
         matchingSeekerPoint
           ? () =>

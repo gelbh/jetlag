@@ -115,6 +115,7 @@ interface MeasuringPanelProps {
   onCommit: () => void;
   awaitHiderAnswer?: boolean;
   costLabel?: string;
+  isSubmitting?: boolean;
 }
 
 export function MeasuringPanel({
@@ -154,6 +155,7 @@ export function MeasuringPanel({
   onCommit,
   awaitHiderAnswer = false,
   costLabel = "D3P1",
+  isSubmitting = false,
 }: MeasuringPanelProps) {
   const steps = stepsForMode(MEASURING_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
@@ -519,11 +521,13 @@ export function MeasuringPanel({
                   disabled={
                     !hasAvailableMeasureOptions ||
                     !hasSeekerPoint ||
-                    !hasTargetPoint
+                    !hasTargetPoint ||
+                    isSubmitting
                   }
+                  aria-busy={isSubmitting}
                   className="btn-primary w-full disabled:opacity-40"
                 >
-                  Send to hiders ({costLabel})
+                  {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
                 </button>
               </>
             ) : null

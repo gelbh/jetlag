@@ -12,6 +12,7 @@ import {
 } from "../../domain/photoQuestions";
 import { questionCostBreakdown } from "../../domain/questionRules";
 import type { SubmitPendingQuestionInput } from "../usePendingQuestionActions";
+import { useSubmitLock } from "../useSubmitLock";
 import type { PendingQuestionRecord } from "../../domain/sessionChat";
 
 interface UsePhotoToolParams {
@@ -44,6 +45,7 @@ export function usePhotoTool({
   setMapError,
   mapError,
 }: UsePhotoToolParams) {
+  const { isSubmitting, runLocked } = useSubmitLock();
   const usedCategories = useMemo(
     () => usedPhotoCategoryIds(pendingQuestions),
     [pendingQuestions],
@@ -120,8 +122,9 @@ export function usePhotoTool({
         usedCategoryIds={usedCategories}
         costLabel={costLabel}
         onCategoryChange={setSelectedCategoryId}
-        onCommit={() => void commit()}
+        onCommit={() => void runLocked(commit)}
         error={mapError}
+        isSubmitting={isSubmitting}
       />
     ) : null;
 

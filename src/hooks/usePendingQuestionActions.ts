@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import type { Feature, LineString } from "geojson";
 import type { PendingQuestionToolType } from "../domain/sessionChat";
 import type { PlayerRole } from "../domain/playerRole";
@@ -32,6 +32,8 @@ export interface SubmitPendingQuestionInput {
 }
 
 export function usePendingQuestionActions() {
+  const submitInFlightRef = useRef(false);
+
   const submitPendingQuestion = useCallback(
     async ({
       sessionId,
@@ -45,6 +47,12 @@ export function usePendingQuestionActions() {
       cardDraw,
       cardKeep,
     }: SubmitPendingQuestionInput) => {
+      if (submitInFlightRef.current) {
+        return;
+      }
+
+      submitInFlightRef.current = true;
+      try {
       const pendingQuestionId = createPendingQuestionId();
       const messageId = createMessageId();
       const createdAt = new Date().toISOString();
@@ -92,6 +100,9 @@ export function usePendingQuestionActions() {
       });
 
       return pendingQuestionId;
+      } finally {
+        submitInFlightRef.current = false;
+      }
     },
     [],
   );

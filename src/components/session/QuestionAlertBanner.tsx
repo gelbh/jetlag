@@ -32,7 +32,7 @@ export function QuestionAlertBanner({
 
   return (
     <p
-      className="map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 border-highlight/50 bg-highlight-soft px-3 py-2 text-center text-sm font-semibold uppercase tracking-wide text-pretty text-highlight"
+      className="map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 border-highlight bg-surface-deep px-3 py-2 text-center text-sm font-semibold uppercase tracking-wide text-pretty text-ink"
       role="status"
       aria-live="polite"
     >

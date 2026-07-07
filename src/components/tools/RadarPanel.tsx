@@ -40,6 +40,7 @@ interface RadarPanelProps {
   error?: string | null;
   awaitHiderAnswer?: boolean;
   costLabel?: string;
+  isSubmitting?: boolean;
 }
 
 export function RadarPanel({
@@ -62,6 +63,7 @@ export function RadarPanel({
   error,
   awaitHiderAnswer = false,
   costLabel = "D2P1",
+  isSubmitting = false,
 }: RadarPanelProps) {
   const steps = stepsForMode(RADAR_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
@@ -71,7 +73,8 @@ export function RadarPanel({
   const canCommit =
     hasCenter &&
     distanceSelectionAvailable &&
-    (awaitHiderAnswer || answer !== null);
+    (awaitHiderAnswer || answer !== null) &&
+    !isSubmitting;
 
   const goNext = () => {
     setStepIndex((current) => Math.min(current + 1, steps.length - 1));
@@ -126,9 +129,10 @@ export function RadarPanel({
                 type="button"
                 onClick={onCommit}
                 disabled={!canCommit}
+                aria-busy={isSubmitting}
                 className="btn-primary w-full disabled:opacity-40"
               >
-                Send to hiders ({costLabel})
+                {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
               </button>
             </>
           ) : null}
@@ -152,9 +156,10 @@ export function RadarPanel({
             type="button"
             onClick={onCommit}
             disabled={!canCommit}
+            aria-busy={isSubmitting}
             className="btn-primary w-full disabled:opacity-40"
           >
-            Add radar question
+            {isSubmitting ? "Sending…" : "Add radar question"}
           </button>
         </ToolSection>
       ) : null}

@@ -30,6 +30,7 @@ import {
 } from "../../domain/tentacleQuestions";
 import { questionCostBreakdown } from "../../domain/questionRules";
 import type { PendingQuestionRecord } from "../../domain/sessionChat";
+import { useSubmitLock } from "../useSubmitLock";
 import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
 import { fetchTentaclePois } from "../../services/tentacleOverpass";
 import { overpassErrorMessage } from "../../services/overpassClient";
@@ -90,6 +91,7 @@ export function useTentacleTool({
   ensurePointInGameArea,
   armPlacement,
 }: UseTentacleToolParams) {
+  const { isSubmitting, runLocked } = useSubmitLock();
   const usedTentacleCategories = useMemo(
     () => usedTentacleCategoryIds(annotations.filter(isActive)),
     [annotations],
@@ -436,9 +438,10 @@ export function useTentacleTool({
           setSelectedPoiId(null);
         }
       }}
-      onCommit={() => void commit()}
+      onCommit={() => void runLocked(commit)}
       awaitHiderAnswer={awaitHiderAnswer}
       costLabel={costLabel}
+      isSubmitting={isSubmitting}
       onRetry={
         tentacleCenter
           ? () => void loadPoisForCenter(tentacleCenter, tentacleCategoryId)

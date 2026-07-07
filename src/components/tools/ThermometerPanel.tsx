@@ -48,6 +48,7 @@ interface ThermometerPanelProps {
   onCommit: () => void;
   awaitHiderAnswer?: boolean;
   canSubmitQuestion?: boolean;
+  isSubmitting?: boolean;
 }
 
 function placementStatus(
@@ -91,6 +92,7 @@ export function ThermometerPanel({
   onCommit,
   awaitHiderAnswer = false,
   canSubmitQuestion = true,
+  isSubmitting = false,
 }: ThermometerPanelProps) {
   const steps = stepsForMode(THERMOMETER_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
@@ -110,7 +112,8 @@ export function ThermometerPanel({
     (awaitHiderAnswer || answer !== null) &&
     distanceAvailable &&
     !travelTooShort &&
-    canSubmitQuestion;
+    canSubmitQuestion &&
+    !isSubmitting;
 
   const goNext = () => {
     setStepIndex((current) => Math.min(current + 1, steps.length - 1));
@@ -170,7 +173,7 @@ export function ThermometerPanel({
 
       {step === "placement" ? (
         <ToolSection first compact status="active">
-          <ResolvedReadout variant="dim">
+          <ResolvedReadout variant={walkingActive ? "default" : "dim"}>
             {placementStatus(mapStep, placementMode, walkingActive)}
           </ResolvedReadout>
           {travelMeters !== null ? (
@@ -214,9 +217,10 @@ export function ThermometerPanel({
                 type="button"
                 onClick={onCommit}
                 disabled={!canCommit}
+                aria-busy={isSubmitting}
                 className="btn-primary w-full disabled:opacity-40"
               >
-                Send to hiders ({costLabel})
+                {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
               </button>
             </>
           ) : null}
@@ -239,9 +243,10 @@ export function ThermometerPanel({
               type="button"
               onClick={onCommit}
               disabled={!canCommit}
+              aria-busy={isSubmitting}
               className="btn-primary w-full disabled:opacity-40"
             >
-              Add thermometer
+              {isSubmitting ? "Sending…" : "Add thermometer"}
             </button>
           ) : null}
         </ToolSection>

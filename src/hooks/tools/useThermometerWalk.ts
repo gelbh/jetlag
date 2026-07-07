@@ -7,11 +7,15 @@ import {
 import type { PendingQuestionPlacement } from "../../domain/sessionChat";
 import { useLiveLocation } from "../useLiveLocation";
 
+const DEFAULT_MAX_WALK_DURATION_MS = 30 * 60 * 1000;
+
 interface UseThermometerWalkParams {
   active: boolean;
   startPoint: LatLngTuple | null;
   targetDistanceMeters: number;
-  onAutoStop: (endPoint: LatLngTuple) => void;
+  onAutoStop: (endPoint: LatLngTuple) => void | Promise<void>;
+  onError?: (message: string) => void;
+  maxDurationMs?: number;
 }
 
 export function useThermometerWalk({
@@ -19,9 +23,13 @@ export function useThermometerWalk({
   startPoint,
   targetDistanceMeters,
   onAutoStop,
+  onError,
+  maxDurationMs = DEFAULT_MAX_WALK_DURATION_MS,
 }: UseThermometerWalkParams) {
   const onAutoStopRef = useRef(onAutoStop);
+  const onErrorRef = useRef(onError);
   const completedRef = useRef(false);
+  const stoppingRef = useRef(false);
   const [currentPoint, setCurrentPoint] = useState<LatLngTuple | null>(null);
 
   useEffect(() => {
@@ -29,8 +37,13 @@ export function useThermometerWalk({
   }, [onAutoStop]);
 
   useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
+
+  useEffect(() => {
     if (!active) {
       completedRef.current = false;
+      stoppingRef.current = false;
     }
   }, [active]);
 
@@ -48,6 +61,30 @@ export function useThermometerWalk({
     return crowFliesDistanceMeters(startPoint, currentPoint);
   }, [currentPoint, startPoint]);
 
+  const finishWalk = useCallback(async (point: LatLngTuple) => {
+    if (completedRef.current || stoppingRef.current) {
+      return;
+    }
+
+    stoppingRef.current = true;
+    try {
+      await onAutoStopRef.current(point);
+      completedRef.current = true;
+      if (typeof navigator.vibrate === "function") {
+        navigator.vibrate(200);
+      }
+    } catch (error) {
+      completedRef.current = false;
+      onErrorRef.current?.(
+        error instanceof Error
+          ? error.message
+          : "Thermometer walk could not finish. Try again.",
+      );
+    } finally {
+      stoppingRef.current = false;
+    }
+  }, []);
+
   useEffect(() => {
     if (!active || !startPoint || !reading || completedRef.current) {
       return;
@@ -58,16 +95,30 @@ export function useThermometerWalk({
 
     const traveled = crowFliesDistanceMeters(startPoint, point);
     if (traveled >= targetDistanceMeters) {
-      completedRef.current = true;
-      if (typeof navigator.vibrate === "function") {
-        navigator.vibrate(200);
-      }
-      onAutoStopRef.current(point);
+      void finishWalk(point);
     }
-  }, [active, reading, startPoint, targetDistanceMeters]);
+  }, [active, finishWalk, reading, startPoint, targetDistanceMeters]);
+
+  useEffect(() => {
+    if (!active || !startPoint || maxDurationMs <= 0) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      if (completedRef.current || stoppingRef.current) {
+        return;
+      }
+
+      const fallbackPoint = currentPoint ?? startPoint;
+      void finishWalk(fallbackPoint);
+    }, maxDurationMs);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [active, currentPoint, finishWalk, maxDurationMs, startPoint]);
 
   const cancelWalk = useCallback(() => {
     completedRef.current = false;
+    stoppingRef.current = false;
     setCurrentPoint(null);
   }, []);
 

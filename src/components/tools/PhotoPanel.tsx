@@ -17,6 +17,7 @@ interface PhotoPanelProps {
   onCategoryChange: (categoryId: PhotoCategoryId) => void;
   onCommit: () => void;
   error?: string | null;
+  isSubmitting?: boolean;
 }
 
 export function PhotoPanel({
@@ -27,6 +28,7 @@ export function PhotoPanel({
   onCategoryChange,
   onCommit,
   error,
+  isSubmitting = false,
 }: PhotoPanelProps) {
   const availableCategories = photoCategoriesForGameSize(gameSize).filter(
     (category) => !usedCategoryIds.has(category.id),
@@ -35,7 +37,8 @@ export function PhotoPanel({
   const canCommit =
     availableCategories.length > 0 &&
     isPhotoCategoryAvailableForGameSize(gameSize, categoryId) &&
-    !usedCategoryIds.has(categoryId);
+    !usedCategoryIds.has(categoryId) &&
+    !isSubmitting;
 
   return (
     <ToolPanelShell toolId="photo">
@@ -73,9 +76,10 @@ export function PhotoPanel({
           type="button"
           onClick={onCommit}
           disabled={!canCommit}
-          className="btn-primary min-h-12 w-full"
+          aria-busy={isSubmitting}
+          className="btn-primary min-h-12 w-full disabled:opacity-40"
         >
-          Send to hiders ({costLabel})
+          {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
         </button>
         {error ? (
           <p className="text-sm text-status-error">{error}</p>

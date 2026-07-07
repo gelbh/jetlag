@@ -22,6 +22,7 @@ import { questionCostBreakdown } from "../../domain/questionRules";
 import type { PendingQuestionRecord } from "../../domain/sessionChat";
 import { yesNoAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
+import { useSubmitLock } from "../useSubmitLock";
 import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
 
 interface UseRadarToolParams {
@@ -75,6 +76,7 @@ export function useRadarTool({
   ensurePointInGameArea,
   armPlacement,
 }: UseRadarToolParams) {
+  const { isSubmitting, runLocked } = useSubmitLock();
   const usedRadarOptions = useMemo(
     () => usedRadarDistanceOptions(annotations.filter(isActive)),
     [annotations],
@@ -267,11 +269,12 @@ export function useRadarTool({
       onPlaceAtMapTap={armPlacement}
       awaitingPlacement={awaitingPlacement}
       hasCenter={radarCenter !== null}
-      onCommit={() => void commit()}
+      onCommit={() => void runLocked(commit)}
       gpsLoading={gpsLoading}
       error={mapError ?? gpsError}
       awaitHiderAnswer={awaitHiderAnswer}
       costLabel={costLabel}
+      isSubmitting={isSubmitting}
     />
   );
 
