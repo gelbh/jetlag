@@ -25,6 +25,12 @@ import {
   persistentMultipleTabManager,
   type Firestore,
 } from "firebase/firestore";
+import {
+  clientEnvUsesFirebaseEmulator,
+  getClientEnv,
+  isFirebaseConfiguredFromEnv,
+  readFirebaseConfigFromEnv,
+} from "../../config/env";
 
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
@@ -35,7 +41,7 @@ let appCheck: AppCheck | null = null;
 let persistenceUnavailable = false;
 
 function firebaseUsesEmulator(): boolean {
-  return import.meta.env.VITE_USE_FIREBASE_EMULATOR === "true";
+  return clientEnvUsesFirebaseEmulator();
 }
 
 export function isFirestorePersistenceUnavailable(): boolean {
@@ -43,24 +49,11 @@ export function isFirestorePersistenceUnavailable(): boolean {
 }
 
 function readConfig() {
-  const config = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  };
-
-  return Object.values(config).every(
-    (value) => typeof value === "string" && value.length > 0,
-  )
-    ? config
-    : null;
+  return readFirebaseConfigFromEnv();
 }
 
 export function isFirebaseConfigured(): boolean {
-  return readConfig() !== null;
+  return isFirebaseConfiguredFromEnv();
 }
 
 let authEmulatorConnected = false;
@@ -108,7 +101,7 @@ function enableAppCheckDebugProviderIfDev(): void {
     return;
   }
 
-  const debugToken = import.meta.env.VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN?.trim();
+  const debugToken = getClientEnv().VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN;
   const globalScope = globalThis as typeof globalThis & {
     FIREBASE_APPCHECK_DEBUG_TOKEN?: boolean | string;
   };
@@ -122,8 +115,8 @@ function enableAppCheckDebugProviderIfDev(): void {
 }
 
 function initializeAppCheckIfConfigured(firebaseApp: FirebaseApp): void {
-  const siteKey = import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY?.trim();
-  if (!siteKey) {
+  const siteKey = getClientEnv().VITE_FIREBASE_APP_CHECK_SITE_KEY;
+  if (!siteKey || siteKey.length === 0) {
     return;
   }
 
