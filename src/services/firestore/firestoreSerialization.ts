@@ -40,6 +40,13 @@ import {
   boundingBoxToGameArea,
   gameAreaToBoundingBox,
 } from "../../domain/geometry/gameAreaBounds";
+import { parseFirestoreDocument } from "./zodConverter";
+import {
+  annotationDocumentSchema,
+  firestoreGameAreaSchema,
+  pendingQuestionDocumentSchema,
+  sessionDocumentSchema,
+} from "./schemas/firestoreDocuments";
 
 export interface FirestoreGameArea {
   south: number;
@@ -85,6 +92,7 @@ export function serializeGameAreaForFirestore(
 
 export function deserializeGameAreaFromFirestore(value: unknown): GameArea {
   if (isFirestoreGameArea(value)) {
+    parseFirestoreDocument(firestoreGameAreaSchema, value, "game area");
     if (typeof value.geometryJson === "string") {
       return JSON.parse(value.geometryJson) as GameArea;
     }
@@ -177,7 +185,12 @@ export function deserializeAnnotationFromFirestore(
   annotationId: string,
   data: Record<string, unknown>,
 ): AnnotationRecord {
-  const geometry = deserializeAnnotationGeometry(data);
+  const document = parseFirestoreDocument(
+    annotationDocumentSchema,
+    data,
+    `annotation ${annotationId}`,
+  );
+  const geometry = deserializeAnnotationGeometry(document);
   if (!geometry) {
     throw new Error(`Annotation ${annotationId} is missing geometry.`);
   }
@@ -185,11 +198,11 @@ export function deserializeAnnotationFromFirestore(
   return {
     id: annotationId,
     sessionId,
-    type: data.type as AnnotationRecord["type"],
+    type: document.type as AnnotationRecord["type"],
     geometry,
-    metadata: data.metadata as AnnotationRecord["metadata"],
-    status: data.status as AnnotationRecord["status"],
-    updatedAt: deserializeFirestoreTimestamp(data.updatedAt),
+    metadata: document.metadata as AnnotationRecord["metadata"],
+    status: document.status as AnnotationRecord["status"],
+    updatedAt: deserializeFirestoreTimestamp(document.updatedAt),
   };
 }
 
@@ -376,89 +389,95 @@ export function deserializeSessionFromFirestore(
   id: string,
   data: Record<string, unknown>,
 ): SessionRecord {
+  const document = parseFirestoreDocument(
+    sessionDocumentSchema,
+    data,
+    `session ${id}`,
+  );
+
   return {
     id,
-    code: typeof data.code === "string" ? data.code : "",
-    gameArea: deserializeGameAreaFromFirestore(
-      data.gameArea as Parameters<typeof deserializeGameAreaFromFirestore>[0],
-    ),
-    hostUid: typeof data.hostUid === "string" ? data.hostUid : undefined,
-    createdAt: String(data.createdAt),
-    memberUids: Array.isArray(data.memberUids)
-      ? data.memberUids.filter((uid): uid is string => typeof uid === "string")
+    code: typeof document.code === "string" ? document.code : "",
+    gameArea: deserializeGameAreaFromFirestore(document.gameArea),
+    hostUid: typeof document.hostUid === "string" ? document.hostUid : undefined,
+    createdAt: String(document.createdAt),
+    memberUids: Array.isArray(document.memberUids)
+      ? document.memberUids.filter((uid): uid is string => typeof uid === "string")
       : [],
-    memberRoles: parseMemberRoles(data.memberRoles),
-    gameSize: parseGameSize(data.gameSize),
-    distanceUnit: parseDistanceUnit(data.distanceUnit),
+    memberRoles: parseMemberRoles(document.memberRoles),
+    gameSize: parseGameSize(document.gameSize),
+    distanceUnit: parseDistanceUnit(document.distanceUnit),
     hidingZoneRadiusMeters:
-      typeof data.hidingZoneRadiusMeters === "number"
-        ? data.hidingZoneRadiusMeters
+      typeof document.hidingZoneRadiusMeters === "number"
+        ? document.hidingZoneRadiusMeters
         : undefined,
     hidingPeriodMinutes: parseOptionalMinutes(
-      data.hidingPeriodMinutes,
+      document.hidingPeriodMinutes,
       HIDING_PERIOD_MINUTES_MIN,
       HIDING_PERIOD_MINUTES_MAX,
       clampHidingPeriodMinutes,
     ),
     photoAnswerDeadlineMinutes: parseOptionalMinutes(
-      data.photoAnswerDeadlineMinutes,
+      document.photoAnswerDeadlineMinutes,
       PHOTO_ANSWER_DEADLINE_MINUTES_MIN,
       PHOTO_ANSWER_DEADLINE_MINUTES_MAX,
       clampPhotoAnswerDeadlineMinutes,
     ),
     questionAnswerDeadlineMinutes: parseOptionalMinutes(
-      data.questionAnswerDeadlineMinutes,
+      document.questionAnswerDeadlineMinutes,
       QUESTION_ANSWER_DEADLINE_MINUTES_MIN,
       QUESTION_ANSWER_DEADLINE_MINUTES_MAX,
       clampQuestionAnswerDeadlineMinutes,
     ),
-    disabledTools: parseDisabledTools(data.disabledTools),
+    disabledTools: parseDisabledTools(document.disabledTools),
     tentaclesEnabled:
-      typeof data.tentaclesEnabled === "boolean"
-        ? data.tentaclesEnabled
+      typeof document.tentaclesEnabled === "boolean"
+        ? document.tentaclesEnabled
         : undefined,
     thermometerPresetMiles: parseThermometerPresetMiles(
-      data.thermometerPresetMiles,
+      document.thermometerPresetMiles,
     ),
     thermometerPresetMeters: parseThermometerPresetMeters(
-      data.thermometerPresetMeters,
+      document.thermometerPresetMeters,
     ),
     tentacleMediumRadiusMeters:
-      typeof data.tentacleMediumRadiusMeters === "number"
-        ? clampTentacleRadiusMeters(data.tentacleMediumRadiusMeters)
+      typeof document.tentacleMediumRadiusMeters === "number"
+        ? clampTentacleRadiusMeters(document.tentacleMediumRadiusMeters)
         : undefined,
     tentacleLargeRadiusMeters:
-      typeof data.tentacleLargeRadiusMeters === "number"
-        ? clampTentacleRadiusMeters(data.tentacleLargeRadiusMeters)
+      typeof document.tentacleLargeRadiusMeters === "number"
+        ? clampTentacleRadiusMeters(document.tentacleLargeRadiusMeters)
         : undefined,
-    customMatchingAreas: parseCustomMatchingAreas(data.customMatchingAreas),
-    customCategories: parseCustomCategories(data.customCategories),
-    customLocationPins: parseCustomLocationPins(data.customLocationPins),
-    tier: parseSessionTier(data.tier),
+    customMatchingAreas: parseCustomMatchingAreas(document.customMatchingAreas),
+    customCategories: parseCustomCategories(document.customCategories),
+    customLocationPins: parseCustomLocationPins(document.customLocationPins),
+    tier: parseSessionTier(document.tier),
     transitMetroId:
-      typeof data.transitMetroId === "string" ? data.transitMetroId : undefined,
-    endedAt: typeof data.endedAt === "string" ? data.endedAt : undefined,
+      typeof document.transitMetroId === "string"
+        ? document.transitMetroId
+        : undefined,
+    endedAt: typeof document.endedAt === "string" ? document.endedAt : undefined,
     status:
-      data.status === "active" || data.status === "ended"
-        ? data.status
+      document.status === "active" || document.status === "ended"
+        ? document.status
         : undefined,
     timerAccumulatedMs:
-      typeof data.timerAccumulatedMs === "number"
-        ? data.timerAccumulatedMs
+      typeof document.timerAccumulatedMs === "number"
+        ? document.timerAccumulatedMs
         : undefined,
     timerRunningSince:
-      data.timerRunningSince === null
+      document.timerRunningSince === null
         ? null
-        : typeof data.timerRunningSince === "string"
-          ? data.timerRunningSince
+        : typeof document.timerRunningSince === "string"
+          ? document.timerRunningSince
           : undefined,
     endGameStartedAt:
-      typeof data.endGameStartedAt === "string"
-        ? data.endGameStartedAt
+      typeof document.endGameStartedAt === "string"
+        ? document.endGameStartedAt
         : undefined,
     endGameStartedByUid:
-      typeof data.endGameStartedByUid === "string"
-        ? data.endGameStartedByUid
+      typeof document.endGameStartedByUid === "string"
+        ? document.endGameStartedByUid
         : undefined,
   };
 }
@@ -634,43 +653,48 @@ export function deserializePendingQuestionFromFirestore(
   sessionId: string,
   data: Record<string, unknown>,
 ): PendingQuestionRecord {
-  const placement = data.placement as Record<string, unknown> | undefined;
+  const document = parseFirestoreDocument(
+    pendingQuestionDocumentSchema,
+    data,
+    `pending question ${id}`,
+  );
+  const placement = document.placement;
   return {
     id,
     sessionId,
-    toolType: data.toolType as PendingQuestionRecord["toolType"],
-    createdByUid: String(data.createdByUid ?? ""),
-    createdAt: String(data.createdAt ?? ""),
+    toolType: document.toolType as PendingQuestionRecord["toolType"],
+    createdByUid: String(document.createdByUid ?? ""),
+    createdAt: String(document.createdAt ?? ""),
     status:
-      data.status === "walking" ||
-      data.status === "pending" ||
-      data.status === "answered" ||
-      data.status === "resolved" ||
-      data.status === "cancelled"
-        ? data.status
+      document.status === "walking" ||
+      document.status === "pending" ||
+      document.status === "answered" ||
+      document.status === "resolved" ||
+      document.status === "cancelled"
+        ? document.status
         : "pending",
     placement: {
       geometryJson: String(placement?.geometryJson ?? ""),
       metadata: (placement?.metadata as Record<string, unknown>) ?? {},
     },
-    replyOptions: Array.isArray(data.replyOptions)
-      ? (data.replyOptions as PendingQuestionRecord["replyOptions"])
+    replyOptions: Array.isArray(document.replyOptions)
+      ? (document.replyOptions as PendingQuestionRecord["replyOptions"])
       : [],
-    promptText: String(data.promptText ?? ""),
-    answer: data.answer,
+    promptText: String(document.promptText ?? ""),
+    answer: document.answer,
     answerableAt:
-      typeof data.answerableAt === "string" ? data.answerableAt : undefined,
+      typeof document.answerableAt === "string" ? document.answerableAt : undefined,
     deadlineExpiredAt:
-      typeof data.deadlineExpiredAt === "string"
-        ? data.deadlineExpiredAt
+      typeof document.deadlineExpiredAt === "string"
+        ? document.deadlineExpiredAt
         : undefined,
     answeredLate:
-      typeof data.answeredLate === "boolean" ? data.answeredLate : undefined,
+      typeof document.answeredLate === "boolean" ? document.answeredLate : undefined,
     resolvedAnnotationId:
-      typeof data.resolvedAnnotationId === "string"
-        ? data.resolvedAnnotationId
+      typeof document.resolvedAnnotationId === "string"
+        ? document.resolvedAnnotationId
         : undefined,
-    cardDraw: typeof data.cardDraw === "number" ? data.cardDraw : undefined,
-    cardKeep: typeof data.cardKeep === "number" ? data.cardKeep : undefined,
+    cardDraw: typeof document.cardDraw === "number" ? document.cardDraw : undefined,
+    cardKeep: typeof document.cardKeep === "number" ? document.cardKeep : undefined,
   };
 }
