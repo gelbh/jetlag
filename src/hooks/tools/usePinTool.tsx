@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import { PinPanel } from "../../components/tools/PinPanel";
-import type { LatLngTuple } from "../../domain/geometry";
-import type { AnnotationRecord } from "../../domain/annotations";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { AnnotationRecord } from "../../domain/map/annotations";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 interface UsePinToolParams {
   active: boolean;

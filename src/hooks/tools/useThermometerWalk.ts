@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { LatLngTuple } from "../../domain/geometry";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
   buildThermometerStartPointGeometry,
   crowFliesDistanceMeters,
-} from "../../domain/thermometerWalk";
-import type { PendingQuestionPlacement } from "../../domain/sessionChat";
-import { useLiveLocation } from "../useLiveLocation";
+} from "../../domain/questions/thermometerWalk";
+import type { PendingQuestionPlacement } from "../../domain/session/sessionChat";
+import { useLiveLocation } from "../location/useLiveLocation";
 
 const DEFAULT_MAX_WALK_DURATION_MS = 30 * 60 * 1000;
 

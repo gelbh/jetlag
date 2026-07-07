@@ -4,26 +4,26 @@ import type {
   Polygon as GeoPolygon,
   MultiPolygon,
 } from "geojson";
-import type { GameArea } from "../../domain/annotations";
-import type { LatLngTuple } from "../../domain/geometry";
-import type { SeaLevelEdgeCase } from "../../domain/seaLevel";
+import type { GameArea } from "../../domain/map/annotations";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { SeaLevelEdgeCase } from "../../domain/geometry/seaLevel";
 import {
   isMeasuringLinearLocation,
   measuringFromKind,
   type MeasuringLocationCategory,
   type MeasuringSubject,
-} from "../../domain/measuringQuestions";
-import { loadCoastlineContext } from "../../services/coastline";
+} from "../../domain/questions/measuringQuestions";
+import { loadCoastlineContext } from "../../services/geo/coastline";
 import {
   findNearestMeasuringPlace,
   measuringPlaceNotFoundMessage,
   MEASURING_MAP_SNAP_RADIUS_METERS,
-} from "../../services/measuringPlaces";
+} from "../../services/geo/measuringPlaces";
 import {
   loadMeasuringLinearContext,
   measuringLinearNotFoundMessage,
-} from "../../services/measuringLinearFeatures";
-import { loadSeaLevelContext } from "../../services/seaLevel";
+} from "../../services/geo/measuringLinearFeatures";
+import { loadSeaLevelContext } from "../../services/geo/seaLevel";
 
 const SEA_LEVEL_LOWEST_MESSAGE =
   'You\'re at the lowest elevation in this play area. A "closer" answer may be impossible.';

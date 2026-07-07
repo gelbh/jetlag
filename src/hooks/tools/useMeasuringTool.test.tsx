@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { useMeasuringTool } from "./useMeasuringTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 
-vi.mock("../../services/measuringPlaces", () => ({
+vi.mock("../../services/geo/measuringPlaces", () => ({
   fetchMeasuringPlacesInArea: vi.fn(async () => ({ ok: true, places: [] })),
   fetchNearestMeasuringPlace: vi.fn(async () => ({
     ok: false,

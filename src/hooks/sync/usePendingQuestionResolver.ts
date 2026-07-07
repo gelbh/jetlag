@@ -1,26 +1,26 @@
 import { useEffect, useRef } from "react";
-import type { AnnotationRecord, GameArea } from "../domain/annotations";
+import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import {
   radarAnswerFromReplyId,
   resolveRadarPendingQuestion,
-} from "../domain/questionResolution/radar";
+} from "../../domain/questions/questionResolution/radar";
 import {
   resolveThermometerPendingQuestion,
   thermometerAnswerFromReplyId,
-} from "../domain/questionResolution/thermometer";
+} from "../../domain/questions/questionResolution/thermometer";
 import {
   resolveMeasuringPendingQuestion,
   measuringAnswerFromReplyId,
-} from "../domain/questionResolution/measuring";
+} from "../../domain/questions/questionResolution/measuring";
 import {
   resolveMatchingPendingQuestion,
   matchingAnswerFromReplyId,
-} from "../domain/questionResolution/matching";
+} from "../../domain/questions/questionResolution/matching";
 import {
   resolveTentaclePendingQuestion,
-} from "../domain/questionResolution/tentacle";
-import type { PendingQuestionRecord } from "../domain/sessionChat";
-import { updatePendingQuestion } from "../services/firestoreSessionExtras";
+} from "../../domain/questions/questionResolution/tentacle";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import { updatePendingQuestion } from "../../services/firestore/firestoreSessionExtras";
 
 interface UsePendingQuestionResolverParams {
   sessionId: string | undefined;

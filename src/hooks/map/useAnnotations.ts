@@ -1,29 +1,29 @@
 import { useCallback } from "react";
-import type { AnnotationRecord } from "../domain/annotations";
-import { LOCAL_SESSION_ID, migrateAnnotations } from "../domain/annotations";
+import type { AnnotationRecord } from "../../domain/map/annotations";
+import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
 import {
   findLastRedoableAnnotation,
   findLastUndoableAnnotation,
-} from "../domain/mapTools";
-import type { MapTool } from "../state/sessionStore";
-import { useAnnotationStore, useSessionStore } from "../state/sessionStore";
+} from "../../domain/map/mapTools";
+import type { MapTool } from "../../state/sessionStore";
+import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import {
   ensureAnonymousUser,
   isFirebaseConfigured,
-} from "../services/firebase";
+} from "../../services/core/firebase";
 import {
   ensureRemoteSessionWriteAccess,
   isFirestorePermissionDenied,
   joinRemoteSessionByCode,
   writeRemoteAnnotation,
   writeRemoteAnnotationsBatch,
-} from "../services/firestoreAnnotations";
-import { registerAnnotationBackgroundSync } from "../services/backgroundSync";
+} from "../../services/firestore/firestoreAnnotations";
+import { registerAnnotationBackgroundSync } from "../../services/session/backgroundSync";
 import {
   countOfflineQueueForSession,
   enqueueOfflineWrite,
-} from "../services/offlineQueue";
-import { isRetriableSyncError } from "../domain/syncRetry";
+} from "../../services/session/offlineQueue";
+import { isRetriableSyncError } from "../../domain/device/syncRetry";
 
 export function useAnnotations() {
   const session = useSessionStore((state) => state.session);

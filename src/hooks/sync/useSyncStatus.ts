@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { LOCAL_SESSION_ID } from "../domain/annotations";
-import { getPowerProfile } from "../domain/powerProfile";
-import { resolveSyncStatus, type SyncStatus } from "../domain/sync";
-import { useReachability } from "./useReachability";
-import { useMapStore } from "../state/mapStore";
-import { useSessionStore } from "../state/sessionStore";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
+import { getPowerProfile } from "../../domain/device/powerProfile";
+import { resolveSyncStatus, type SyncStatus } from "../../domain/device/sync";
+import { useReachability } from "../location/useReachability";
+import { useMapStore } from "../../state/mapStore";
+import { useSessionStore } from "../../state/sessionStore";
 
 export function useSyncStatus(): {
   status: SyncStatus;

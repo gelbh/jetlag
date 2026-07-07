@@ -1,13 +1,13 @@
 import { useCallback, useMemo, useState } from "react";
 import type { Feature, LineString } from "geojson";
 import { ThermometerPanel } from "../../components/tools/ThermometerPanel";
-import type { LatLngTuple } from "../../domain/geometry";
-import { distanceBetweenPoints } from "../../domain/geometry";
-import { isActive, type AnnotationRecord } from "../../domain/annotations";
-import type { SessionRulesInput } from "../../domain/sessionRules";
-import { sessionGameSize } from "../../domain/sessionRules";
-import { hasOpenPendingQuestion, questionCostBreakdown } from "../../domain/questionRules";
-import type { PendingQuestionRecord } from "../../domain/sessionChat";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import { distanceBetweenPoints } from "../../domain/geometry/geometry";
+import { isActive, type AnnotationRecord } from "../../domain/map/annotations";
+import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import { sessionGameSize } from "../../domain/session/sessionRules";
+import { hasOpenPendingQuestion, questionCostBreakdown } from "../../domain/questions/questionRules";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import {
   DEFAULT_THERMOMETER_DISTANCE_METERS,
   availableThermometerDistancePresetsForSession,
@@ -17,21 +17,21 @@ import {
   thermometerUseCount,
   thermometerUseCountFromPending,
   type ThermometerAnswer,
-} from "../../domain/thermometerQuestions";
-import type { DistanceUnit } from "../../domain/distance";
+} from "../../domain/questions/thermometerQuestions";
+import type { DistanceUnit } from "../../domain/map/distance";
 import { hotterColderAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
-import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
+import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import { useSubmitLock } from "../useSubmitLock";
-import { useLiveLocation } from "../useLiveLocation";
+import { useLiveLocation } from "../location/useLiveLocation";
 import {
   parseThermometerStartPoint,
   isThermometerWalkActive,
-} from "../../domain/thermometerWalk";
+} from "../../domain/questions/thermometerWalk";
 import {
   thermometerWalkStartPlacement,
   useThermometerWalk,
 } from "./useThermometerWalk";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 type PlacementMode = "gps" | "manual";
 

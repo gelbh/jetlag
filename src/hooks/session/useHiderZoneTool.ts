@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
-import { useLatestRequest } from "./useLatestRequest";
-import type { GameArea } from "../domain/annotations";
-import type { LatLngTuple } from "../domain/geometry";
-import { isPointInGameArea } from "../domain/geometry";
+import { useLatestRequest } from "../useLatestRequest";
+import type { GameArea } from "../../domain/map/annotations";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import { isPointInGameArea } from "../../domain/geometry/geometry";
 import {
   buildHidingZoneCircle,
   haversineMeters,
@@ -11,11 +11,11 @@ import {
   searchStations,
   type HidingZoneRecord,
   type TransitStation,
-} from "../domain/hidingZone";
-import type { MapViewportBounds } from "../domain/transitViewport";
-import { isFirestorePermissionDenied } from "../services/firestoreAnnotations";
-import { fetchTransitStationsForHidingZoneViewport } from "../services/matchingFeatures";
-import { writeHidingZone } from "../services/firestoreSessionExtras";
+} from "../../domain/session/hidingZone";
+import type { MapViewportBounds } from "../../domain/map/transitViewport";
+import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
+import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matchingFeatures";
+import { writeHidingZone } from "../../services/firestore/firestoreSessionExtras";
 
 const MOVE_MIN_DISTANCE_METERS = 50;
 

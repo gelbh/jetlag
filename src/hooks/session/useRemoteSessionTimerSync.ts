@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { LOCAL_SESSION_ID } from "../domain/annotations";
-import { timerStateFromRemote, type TimerState } from "../domain/timer";
-import { isFirebaseConfigured } from "../services/firebase";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
+import { timerStateFromRemote, type TimerState } from "../../domain/session/timer";
+import { isFirebaseConfigured } from "../../services/core/firebase";
 import {
   subscribeToSession,
   updateSessionTimer,
-} from "../services/firestoreAnnotations";
+} from "../../services/firestore/firestoreAnnotations";
 
 interface RemoteTimerSnapshot {
   sessionId: string;

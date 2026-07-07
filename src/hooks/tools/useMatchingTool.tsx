@@ -9,14 +9,14 @@ import type {
   Polygon as GeoPolygon,
 } from "geojson";
 import { MatchingPanel } from "../../components/tools/MatchingPanel";
-import { overpassErrorMessage } from "../../services/overpassClient";
-import type { GameArea } from "../../domain/annotations";
-import { isActive, type AnnotationRecord } from "../../domain/annotations";
-import type { LatLngTuple } from "../../domain/geometry";
+import { overpassErrorMessage } from "../../services/core/overpassClient";
+import type { GameArea } from "../../domain/map/annotations";
+import { isActive, type AnnotationRecord } from "../../domain/map/annotations";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
-} from "../../domain/matchingGeometry";
+} from "../../domain/geometry/matchingGeometry";
 import {
   defaultMatchingCategoryId,
   firstAvailableMatchingCategoryId,
@@ -29,16 +29,16 @@ import {
   usedMatchingCategoryIds,
   type MatchingAnswer,
   type MatchingCategoryId,
-} from "../../domain/matchingQuestions";
-import { resolveMatchingCategory } from "../../domain/sessionCustomCatalog";
-import { questionCostBreakdown } from "../../domain/questionRules";
-import type { PendingQuestionRecord } from "../../domain/sessionChat";
-import type { SessionRulesInput } from "../../domain/sessionRules";
-import type { MatchingFetchOptions } from "../../services/matchingFeatures";
-import { sessionCustomContentFromRules } from "../../domain/sessionCustomCatalog";
+} from "../../domain/questions/matchingQuestions";
+import { resolveMatchingCategory } from "../../domain/session/sessionCustomCatalog";
+import { questionCostBreakdown } from "../../domain/questions/questionRules";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import type { MatchingFetchOptions } from "../../services/geo/matchingFeatures";
+import { sessionCustomContentFromRules } from "../../domain/session/sessionCustomCatalog";
 import { yesNoAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
-import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
-import type { DistanceUnit } from "../../domain/distance";
+import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
+import type { DistanceUnit } from "../../domain/map/distance";
 import {
   fetchMatchingFeaturesInArea,
   countMatchingFeaturesInPlayArea,
@@ -46,9 +46,9 @@ import {
   pickMatchingFeatureForAnchor,
   serializeMatchingFeatures,
   type MatchingFeature,
-} from "../../services/matchingFeatures";
+} from "../../services/geo/matchingFeatures";
 import { useToolSessionOptions } from "./useToolSessionOptions";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 interface UseMatchingToolParams {
   active: boolean;

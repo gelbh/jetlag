@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { LOCAL_SESSION_ID } from "../domain/annotations";
-import type { HidingZoneRecord } from "../domain/hidingZone";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
+import type { HidingZoneRecord } from "../../domain/session/hidingZone";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
   SessionMessageRecord,
-} from "../domain/sessionChat";
-import { isFirebaseConfigured } from "../services/firebase";
+} from "../../domain/session/sessionChat";
+import { isFirebaseConfigured } from "../../services/core/firebase";
 import {
   subscribeToHidingZones,
   subscribeToPendingQuestions,
   subscribeToPlayerLocations,
   subscribeToSessionMessages,
-} from "../services/firestoreSessionExtras";
+} from "../../services/firestore/firestoreSessionExtras";
 
 function isRemoteSession(sessionId: string | undefined): sessionId is string {
   return (

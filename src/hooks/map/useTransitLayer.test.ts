@@ -1,16 +1,16 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { TransitStaticData } from "../domain/transit";
-import { DUBLIN_CITY_GAME_AREA } from "../test/fixtures/dublinGameArea";
-import { fetchLiveTransitVehicles } from "../services/transitRealtime";
-import { fetchStaticTransit } from "../services/transitStatic";
+import type { TransitStaticData } from "../../domain/map/transit";
+import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
+import { fetchLiveTransitVehicles } from "../../services/transit/transitRealtime";
+import { fetchStaticTransit } from "../../services/transit/transitStatic";
 import { useTransitLayer } from "./useTransitLayer";
 
-vi.mock("../services/transitStatic", () => ({
+vi.mock("../../services/transit/transitStatic", () => ({
   fetchStaticTransit: vi.fn(),
 }));
 
-vi.mock("../services/transitRealtime", () => ({
+vi.mock("../../services/transit/transitRealtime", () => ({
   fetchLiveTransitVehicles: vi.fn(),
 }));
 

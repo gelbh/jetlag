@@ -5,10 +5,10 @@ import {
   isActive,
   LOCAL_SESSION_ID,
   type SessionRecord,
-} from "../../domain/annotations";
-import type { AnnotationRecord } from "../../domain/annotations";
-import { endRemoteSession } from "../../services/firestoreAnnotations";
-import { clearSessionLocalArtifacts } from "../../services/sessionCleanup";
+} from "../../domain/map/annotations";
+import type { AnnotationRecord } from "../../domain/map/annotations";
+import { endRemoteSession } from "../../services/firestore/firestoreAnnotations";
+import { clearSessionLocalArtifacts } from "../../services/session/sessionCleanup";
 import { useSessionStore } from "../../state/sessionStore";
 
 interface UseMapSessionChromeParams {

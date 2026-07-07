@@ -7,15 +7,15 @@ import type {
   Polygon as GeoPolygon,
 } from "geojson";
 import { MeasuringPanel } from "../../components/tools/MeasuringPanel";
-import type { GameArea } from "../../domain/annotations";
-import { isActive, type AnnotationRecord } from "../../domain/annotations";
-import type { LatLngTuple } from "../../domain/geometry";
-import { distanceBetweenPoints } from "../../domain/geometry";
+import type { GameArea } from "../../domain/map/annotations";
+import { isActive, type AnnotationRecord } from "../../domain/map/annotations";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import { distanceBetweenPoints } from "../../domain/geometry/geometry";
 import {
   buildMeasuringBoundaryPreview,
   buildMeasuringEliminationPreview,
   buildMeasuringRegions,
-} from "../../domain/measuringRegions";
+} from "../../domain/geometry/measuringRegions";
 import {
   applyMeasuringFromKind,
   DEFAULT_MEASURING_FROM_KIND,
@@ -34,24 +34,24 @@ import {
   type MeasuringLocationCategory,
   type MeasuringSubject,
   type MeasuringTargetMode,
-} from "../../domain/measuringQuestions";
-import { questionCostBreakdown } from "../../domain/questionRules";
-import type { PendingQuestionRecord } from "../../domain/sessionChat";
-import type { DistanceUnit } from "../../domain/distance";
-import type { SessionRulesInput } from "../../domain/sessionRules";
-import { manualPinAsMeasuringPlace } from "../../domain/sessionCustomCatalog";
+} from "../../domain/questions/measuringQuestions";
+import { questionCostBreakdown } from "../../domain/questions/questionRules";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { DistanceUnit } from "../../domain/map/distance";
+import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import { manualPinAsMeasuringPlace } from "../../domain/session/sessionCustomCatalog";
 import { closerFurtherAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
-import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
+import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import { useSubmitLock } from "../useSubmitLock";
-import { measuringLinearNotFoundMessage } from "../../services/measuringLinearFeatures";
-import { overpassErrorMessage } from "../../services/overpassClient";
+import { measuringLinearNotFoundMessage } from "../../services/geo/measuringLinearFeatures";
+import { overpassErrorMessage } from "../../services/core/overpassClient";
 import {
   fetchMeasuringPlacesInArea,
   measuringPlaceNotFoundMessage,
   type MeasuringPlace,
-} from "../../services/measuringPlaces";
-import { searchPlaces, type GeocodedPlace } from "../../services/geocoding";
-import { getCachedPreparedCoastlineSegments, resolveCoastlineContextFromCache } from "../../services/coastline";
+} from "../../services/geo/measuringPlaces";
+import { searchPlaces, type GeocodedPlace } from "../../services/geo/geocoding";
+import { getCachedPreparedCoastlineSegments, resolveCoastlineContextFromCache } from "../../services/geo/coastline";
 import { useDebouncedValue } from "../useDebouncedValue";
 import {
   fetchMeasuringCoastlineContext,
@@ -61,8 +61,8 @@ import {
   fetchNearestMeasuringPlace,
 } from "./measuringToolResolvers";
 import { useToolSessionOptions } from "./useToolSessionOptions";
-import type { SeaLevelEdgeCase } from "../../domain/seaLevel";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import type { SeaLevelEdgeCase } from "../../domain/geometry/seaLevel";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 interface UseMeasuringToolParams {
   active: boolean;

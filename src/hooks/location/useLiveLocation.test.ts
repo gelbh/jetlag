@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   createMockGeolocationPosition,
   mockGeolocation,
-} from "../test/mocks/geolocation";
+} from "../../test/mocks/geolocation";
 import { useLiveLocation } from "./useLiveLocation";
 
 describe("useLiveLocation", () => {

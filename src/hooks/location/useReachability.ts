@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchWithTimeout } from "../services/fetchWithTimeout";
+import { fetchWithTimeout } from "../../services/core/fetchWithTimeout";
 
 const PROBE_TIMEOUT_MS = 5_000;
 const PROBE_URL = "/health";

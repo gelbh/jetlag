@@ -1,8 +1,8 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useLiveActivitySync } from "./useLiveActivitySync";
-import type { PendingQuestionRecord } from "../domain/sessionChat";
-import { DEFAULT_NOTIFICATION_PREFERENCES } from "../domain/notifications";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import { DEFAULT_NOTIFICATION_PREFERENCES } from "../../domain/device/notifications";
 
 const { showOngoingNotification, dismissOngoingNotification } = vi.hoisted(
   () => ({
@@ -18,7 +18,7 @@ vi.mock("@capacitor/core", () => ({
   },
 }));
 
-vi.mock("../services/notifications", () => ({
+vi.mock("../../services/core/notifications", () => ({
   JetlagLiveActivity: {
     startQuestionActivity: vi.fn(),
     updateQuestionActivity: vi.fn(),
@@ -83,7 +83,7 @@ describe("useLiveActivitySync", () => {
 describe("selectPrimaryQuestionTimer", () => {
   it("prioritizes walking questions", async () => {
     const { selectPrimaryQuestionTimer } = await import(
-      "../domain/questionTimerDisplay"
+      "../../domain/questions/questionTimerDisplay"
     );
     const pendingQuestions: PendingQuestionRecord[] = [
       {

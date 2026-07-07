@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { DockableMapTool } from "../domain/mapTools";
+import type { DockableMapTool } from "../domain/map/mapTools";
 
 export function useToolPanelChrome(activeTool: DockableMapTool | "none") {
   const [panelPeeked, setPanelPeeked] = useState(false);

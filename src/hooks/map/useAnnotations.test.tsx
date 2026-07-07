@@ -1,12 +1,12 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { LOCAL_SESSION_ID } from "../domain/annotations";
-import { createTestPinAnnotation, createTestSession } from "../test/fixtures/sessions";
-import { resetAllStores } from "../test/helpers/storeReset";
-import { useAnnotationStore, useSessionStore } from "../state/sessionStore";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
+import { createTestPinAnnotation, createTestSession } from "../../test/fixtures/sessions";
+import { resetAllStores } from "../../test/helpers/storeReset";
+import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import { useAnnotations } from "./useAnnotations";
 
-vi.mock("../services/firebase", () => ({
+vi.mock("../../services/core/firebase", () => ({
   isFirebaseConfigured: () => false,
   ensureAnonymousUser: vi.fn(),
 }));

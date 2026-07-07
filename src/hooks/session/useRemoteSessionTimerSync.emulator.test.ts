@@ -1,14 +1,14 @@
 // @vitest-environment jsdom
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
-import { updateSessionTimer } from "../services/firestoreAnnotations";
+import { updateSessionTimer } from "../../services/firestore/firestoreAnnotations";
 import {
   connectEmulatorsForTests,
   teardownEmulatorsForTests,
-} from "../test/emulator/connectEmulators";
-import { DUBLIN_CITY_GAME_AREA } from "../test/fixtures/dublinGameArea";
-import { createRemoteSession } from "../services/firestoreAnnotations";
-import { startTimer, INITIAL_TIMER_STATE } from "../domain/timer";
+} from "../../test/emulator/connectEmulators";
+import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
+import { createRemoteSession } from "../../services/firestore/firestoreAnnotations";
+import { startTimer, INITIAL_TIMER_STATE } from "../../domain/session/timer";
 import { useRemoteSessionTimerSync } from "./useRemoteSessionTimerSync";
 
 describe("useRemoteSessionTimerSync emulator", () => {

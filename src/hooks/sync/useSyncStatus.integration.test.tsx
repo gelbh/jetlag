@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
-import { LOCAL_SESSION_ID } from "../domain/annotations";
-import { useSessionStore } from "../state/sessionStore";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
+import { useSessionStore } from "../../state/sessionStore";
 import { useSyncStatus } from "./useSyncStatus";
 
 describe("useSyncStatus integration", () => {

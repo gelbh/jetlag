@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
 import { ZonePanel } from "../../components/tools/ZonePanel";
-import type { LatLngTuple } from "../../domain/geometry";
-import type { AnnotationRecord } from "../../domain/annotations";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { AnnotationRecord } from "../../domain/map/annotations";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 interface UseZoneToolParams {
   active: boolean;

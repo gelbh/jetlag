@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { GameArea } from "../domain/annotations";
+import type { GameArea } from "../../domain/map/annotations";
 import type {
   TransitRealtimeSnapshot,
   TransitRouteFilter,
   TransitStaticData,
-} from "../domain/transit";
-import { fetchLiveTransitVehicles } from "../services/transitRealtime";
-import { fetchStaticTransit } from "../services/transitStatic";
+} from "../../domain/map/transit";
+import { fetchLiveTransitVehicles } from "../../services/transit/transitRealtime";
+import { fetchStaticTransit } from "../../services/transit/transitStatic";
 
 const LIVE_REFRESH_MS = 20_000;
 

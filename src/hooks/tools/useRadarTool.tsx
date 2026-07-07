@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Feature, Point } from "geojson";
 import { RadarPanel } from "../../components/tools/RadarPanel";
-import type { LatLngTuple } from "../../domain/geometry";
-import { isActive, type AnnotationRecord } from "../../domain/annotations";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import { isActive, type AnnotationRecord } from "../../domain/map/annotations";
 import {
   parseDistanceInput,
   type DistanceUnit,
-} from "../../domain/distance";
-import { defaultRadarPresetMeters } from "../../domain/distancePresets";
+} from "../../domain/map/distance";
+import { defaultRadarPresetMeters } from "../../domain/map/distancePresets";
 import {
   firstAvailableRadarDistanceSelection,
   isRadarDistanceOptionAvailable,
@@ -17,13 +17,13 @@ import {
   radarQuestionPrompt,
   usedRadarDistanceOptions,
   type RadarAnswer,
-} from "../../domain/radarQuestions";
-import { questionCostBreakdown } from "../../domain/questionRules";
-import type { PendingQuestionRecord } from "../../domain/sessionChat";
+} from "../../domain/questions/radarQuestions";
+import { questionCostBreakdown } from "../../domain/questions/questionRules";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { yesNoAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
-import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
+import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import { useSubmitLock } from "../useSubmitLock";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 interface UseRadarToolParams {
   active: boolean;

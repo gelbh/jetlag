@@ -6,13 +6,13 @@ import type {
   Point,
   Polygon as GeoPolygon,
 } from "geojson";
-import type { LatLngTuple } from "../../domain/geometry";
-import type { AnnotationRecord, GameArea } from "../../domain/annotations";
-import { tentacleEliminationJsonForAnswer } from "../../domain/tentacleGeometry";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
+import { tentacleEliminationJsonForAnswer } from "../../domain/geometry/tentacleGeometry";
 import {
   TENTACLE_ANSWER_RADIUS_METERS,
   TENTACLE_SEARCH_RADIUS_METERS,
-} from "../../domain/tentacleQuestions";
+} from "../../domain/questions/tentacleQuestions";
 import { useAnnotationStore, useMapStore } from "../../state/sessionStore";
 
 interface UseMapGeometryEditParams {

@@ -2,23 +2,23 @@ import { useMemo } from "react";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import type { GameArea, TentaclePoi } from "../../domain/annotations";
-import type { MapDraftOverlay } from "../../domain/mapDraftOverlay";
+import type { GameArea, TentaclePoi } from "../../domain/map/annotations";
+import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
 import type { MapTool } from "../../state/sessionStore";
 import {
   buildHalfPlanePolygon,
   buildRadarShadedRegion,
   type LatLngTuple,
-} from "../../domain/geometry";
+} from "../../domain/geometry/geometry";
 import {
   radarInsideFromAnswer,
   type RadarAnswer,
-} from "../../domain/radarQuestions";
+} from "../../domain/questions/radarQuestions";
 import {
   thermometerShadedSide,
   type ThermometerAnswer,
-} from "../../domain/thermometerQuestions";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+} from "../../domain/questions/thermometerQuestions";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 export interface MapDraftOverlaySources {
   activeTool: MapTool;

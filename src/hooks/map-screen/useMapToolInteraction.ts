@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import type { LatLngTuple } from "../../domain/geometry";
-import type { MapTool } from "../../domain/mapToolTypes";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { MapTool } from "../../domain/map/mapToolTypes";
 
 interface ToolMapClickHandler {
   handleMapClick: (point: LatLngTuple) => void;

@@ -3,7 +3,7 @@ import {
   getCurrentPosition,
   unknownGeolocationErrorMessage,
   type GeolocationReading,
-} from "../services/geolocation";
+} from "../../services/core/geolocation";
 
 export function useGeolocation() {
   const [reading, setReading] = useState<GeolocationReading | null>(null);

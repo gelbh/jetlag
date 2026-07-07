@@ -2,10 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import {
   computeHiderTruthReplyAsync,
   type HiderTruthResult,
-} from "../domain/hiderTruthAnswer";
-import type { LatLngTuple } from "../domain/geometry";
-import type { PendingQuestionRecord } from "../domain/sessionChat";
-import { useLatestRequest } from "./useLatestRequest";
+} from "../../domain/questions/hiderTruthAnswer";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import { useLatestRequest } from "../useLatestRequest";
 
 const EMPTY_TRUTHS = new Map<string, HiderTruthResult>();
 

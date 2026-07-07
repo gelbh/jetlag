@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useMapStore } from "../state/mapStore";
+import { useMapStore } from "../../state/mapStore";
 
 function readPrefersReducedMotion(): boolean {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {

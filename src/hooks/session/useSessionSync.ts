@@ -1,23 +1,23 @@
 import { useEffect } from "react";
-import { LOCAL_SESSION_ID, migrateAnnotations } from "../domain/annotations";
-import { getPowerProfile } from "../domain/powerProfile";
-import { useAnnotationStore, useMapStore, useSessionStore } from "../state/sessionStore";
+import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
+import { getPowerProfile } from "../../domain/device/powerProfile";
+import { useAnnotationStore, useMapStore, useSessionStore } from "../../state/sessionStore";
 import {
   getFirestoreDb,
   isFirebaseConfigured,
   isFirestorePersistenceUnavailable,
-} from "../services/firebase";
+} from "../../services/core/firebase";
 import {
   subscribeToRemoteAnnotations,
   subscribeToSession,
   writeRemoteAnnotation,
-} from "../services/firestoreAnnotations";
+} from "../../services/firestore/firestoreAnnotations";
 import {
   readOfflineQueueForSession,
   recordOfflineWriteFailure,
   removeOfflineWrite,
   shouldRetryOfflineWrite,
-} from "../services/offlineQueue";
+} from "../../services/session/offlineQueue";
 
 
 export function useSessionSync() {

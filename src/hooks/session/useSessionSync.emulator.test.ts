@@ -4,15 +4,15 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   connectEmulatorsForTests,
   teardownEmulatorsForTests,
-} from "../test/emulator/connectEmulators";
-import { DUBLIN_CITY_GAME_AREA } from "../test/fixtures/dublinGameArea";
-import { createTestPinAnnotation } from "../test/fixtures/sessions";
+} from "../../test/emulator/connectEmulators";
+import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
+import { createTestPinAnnotation } from "../../test/fixtures/sessions";
 import {
   createRemoteSession,
   writeRemoteAnnotation,
-} from "../services/firestoreAnnotations";
-import { LOCAL_SESSION_ID } from "../domain/annotations";
-import { useAnnotationStore, useSessionStore } from "../state/sessionStore";
+} from "../../services/firestore/firestoreAnnotations";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
+import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import { useSessionSync } from "./useSessionSync";
 
 describe("useSessionSync emulator", () => {

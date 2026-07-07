@@ -1,14 +1,14 @@
 import { useCallback, useEffect } from "react";
-import type { NotificationPreferences } from "../domain/notifications";
-import type { PlayerRole } from "../domain/playerRole";
-import { useMapStore } from "../state/mapStore";
+import type { NotificationPreferences } from "../../domain/device/notifications";
+import type { PlayerRole } from "../../domain/session/playerRole";
+import { useMapStore } from "../../state/mapStore";
 import {
   initializeNativeNotifications,
   isNativeNotificationsSupported,
   refreshActivityPushToken,
   requestNotificationPermission,
   syncSessionDeviceRegistration,
-} from "../services/notifications";
+} from "../../services/core/notifications";
 
 interface UseSessionNotificationsParams {
   sessionId: string | undefined;

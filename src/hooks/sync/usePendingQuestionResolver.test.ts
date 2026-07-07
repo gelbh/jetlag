@@ -1,13 +1,13 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { AnnotationRecord, GameArea } from "../domain/annotations";
-import type { PendingQuestionRecord } from "../domain/sessionChat";
+import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { usePendingQuestionResolver } from "./usePendingQuestionResolver";
 
 const updatePendingQuestion = vi.fn();
 const createAnnotation = vi.fn();
 
-vi.mock("../services/firestoreSessionExtras", () => ({
+vi.mock("../../services/firestore/firestoreSessionExtras", () => ({
   updatePendingQuestion: (...args: unknown[]) => updatePendingQuestion(...args),
 }));
 

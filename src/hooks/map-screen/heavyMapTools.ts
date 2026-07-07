@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import type { LatLngTuple } from "../../domain/geometry";
-import type { MeasuringPlace } from "../../services/measuringPlaces";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { MeasuringPlace } from "../../services/geo/measuringPlaces";
 import {
   TENTACLE_ANSWER_RADIUS_METERS,
   TENTACLE_SEARCH_RADIUS_METERS,
-} from "../../domain/tentacleQuestions";
-import type { TentaclePoi } from "../../domain/annotations";
+} from "../../domain/questions/tentacleQuestions";
+import type { TentaclePoi } from "../../domain/map/annotations";
 
 export interface MatchingToolApi {
   draft: {

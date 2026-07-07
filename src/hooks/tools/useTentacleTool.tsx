@@ -2,20 +2,20 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLatestRequest } from "../useLatestRequest";
 import { useDebouncedValue } from "../useDebouncedValue";
 import { TentaclePanel } from "../../components/tools/TentaclePanel";
-import type { LatLngTuple } from "../../domain/geometry";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
   isActive,
   type AnnotationRecord,
   type GameArea,
   type TentaclePoi,
-} from "../../domain/annotations";
+} from "../../domain/map/annotations";
 import {
   buildTentacleEliminationRegion,
   tentacleEliminationJsonForAnswer,
-} from "../../domain/tentacleGeometry";
-import type { DistanceUnit } from "../../domain/distance";
-import type { SessionRulesInput } from "../../domain/sessionRules";
-import { sessionGameSize } from "../../domain/sessionRules";
+} from "../../domain/geometry/tentacleGeometry";
+import type { DistanceUnit } from "../../domain/map/distance";
+import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import { sessionGameSize } from "../../domain/session/sessionRules";
 import {
   defaultTentacleCategoryIdForSession,
   firstAvailableTentacleCategoryIdForSession,
@@ -27,15 +27,15 @@ import {
   tentacleQuestionPrompt,
   usedTentacleCategoryIds,
   type TentacleExtendedCategoryId,
-} from "../../domain/tentacleQuestions";
-import { questionCostBreakdown } from "../../domain/questionRules";
-import type { PendingQuestionRecord } from "../../domain/sessionChat";
+} from "../../domain/questions/tentacleQuestions";
+import { questionCostBreakdown } from "../../domain/questions/questionRules";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { useSubmitLock } from "../useSubmitLock";
-import type { SubmitPendingQuestionInput } from "../../hooks/usePendingQuestionActions";
-import { fetchTentaclePois } from "../../services/tentacleOverpass";
-import { overpassErrorMessage } from "../../services/overpassClient";
+import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
+import { fetchTentaclePois } from "../../services/geo/tentacleOverpass";
+import { overpassErrorMessage } from "../../services/core/overpassClient";
 import { useToolSessionOptions } from "./useToolSessionOptions";
-import { MAP_ANNOTATION_COLORS } from "../../domain/mapAnnotationColors";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 interface UseTentacleToolParams {
   active: boolean;

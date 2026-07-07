@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import { LOCAL_SESSION_ID } from "../domain/annotations";
-import { getPowerProfile } from "../domain/powerProfile";
-import type { PlayerLocationRecord } from "../domain/sessionChat";
-import { useMapStore } from "../state/mapStore";
-import { useLiveLocation } from "./useLiveLocation";
-import { isFirebaseConfigured } from "../services/firebase";
-import { writePlayerLocation } from "../services/firestoreSessionExtras";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
+import { getPowerProfile } from "../../domain/device/powerProfile";
+import type { PlayerLocationRecord } from "../../domain/session/sessionChat";
+import { useMapStore } from "../../state/mapStore";
+import { useLiveLocation } from "../location/useLiveLocation";
+import { isFirebaseConfigured } from "../../services/core/firebase";
+import { writePlayerLocation } from "../../services/firestore/firestoreSessionExtras";
 
 interface UseSeekerLocationSyncParams {
   sessionId: string | undefined;

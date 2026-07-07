@@ -8,8 +8,8 @@ import {
   resetTimer,
   startTimer,
   type TimerState,
-} from "../domain/timer";
-import { useTimerStore } from "../state/timerStore";
+} from "../../domain/session/timer";
+import { useTimerStore } from "../../state/timerStore";
 
 interface UseSessionTimerOptions {
   canControl?: boolean;

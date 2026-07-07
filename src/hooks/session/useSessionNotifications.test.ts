@@ -1,10 +1,10 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useSessionNotifications } from "./useSessionNotifications";
-import { resetAllStores } from "../test/helpers/storeReset";
-import { useMapStore } from "../state/mapStore";
+import { resetAllStores } from "../../test/helpers/storeReset";
+import { useMapStore } from "../../state/mapStore";
 
-vi.mock("../services/notifications", () => ({
+vi.mock("../../services/core/notifications", () => ({
   initializeNativeNotifications: vi.fn(),
   isNativeNotificationsSupported: vi.fn(() => true),
   refreshActivityPushToken: vi.fn(),
@@ -17,7 +17,7 @@ import {
   refreshActivityPushToken,
   requestNotificationPermission,
   syncSessionDeviceRegistration,
-} from "../services/notifications";
+} from "../../services/core/notifications";
 
 describe("useSessionNotifications", () => {
   beforeEach(() => {

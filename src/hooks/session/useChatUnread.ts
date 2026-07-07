@@ -4,8 +4,8 @@ import {
   baselineAcknowledgedFingerprints,
   chatReadStorageKey,
   hasUnreadChatMessages,
-} from "../domain/chatUnread";
-import type { SessionMessageRecord } from "../domain/sessionChat";
+} from "../../domain/device/chatUnread";
+import type { SessionMessageRecord } from "../../domain/session/sessionChat";
 
 interface UseChatUnreadParams {
   sessionId: string | undefined;

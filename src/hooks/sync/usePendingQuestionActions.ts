@@ -1,15 +1,15 @@
 import { useCallback, useRef } from "react";
 import type { Feature, LineString } from "geojson";
-import type { PendingQuestionToolType } from "../domain/sessionChat";
-import type { PlayerRole } from "../domain/playerRole";
-import type { GameReplyOption } from "../domain/sessionChat";
+import type { PendingQuestionToolType } from "../../domain/session/sessionChat";
+import type { PlayerRole } from "../../domain/session/playerRole";
+import type { GameReplyOption } from "../../domain/session/sessionChat";
 import {
   createMessageId,
   createPendingQuestionId,
   type PendingQuestionPlacement,
-} from "../domain/sessionChat";
-import { buildThermometerLineGeometry } from "../domain/thermometerWalk";
-import type { LatLngTuple } from "../domain/geometry";
+} from "../../domain/session/sessionChat";
+import { buildThermometerLineGeometry } from "../../domain/questions/thermometerWalk";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
   deletePendingQuestion,
   postGameSystemMessage,
@@ -17,7 +17,7 @@ import {
   updatePendingQuestion,
   writePendingQuestion,
   writeSessionMessage,
-} from "../services/firestoreSessionExtras";
+} from "../../services/firestore/firestoreSessionExtras";
 
 export interface SubmitPendingQuestionInput {
   sessionId: string;

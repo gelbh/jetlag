@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { LOCAL_SESSION_ID } from "../domain/annotations";
-import { isFirebaseConfigured } from "../services/firebase";
-import { subscribeToSession } from "../services/firestoreAnnotations";
-import { clearSessionLocalArtifacts } from "../services/sessionCleanup";
-import { useSessionStore } from "../state/sessionStore";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
+import { isFirebaseConfigured } from "../../services/core/firebase";
+import { subscribeToSession } from "../../services/firestore/firestoreAnnotations";
+import { clearSessionLocalArtifacts } from "../../services/session/sessionCleanup";
+import { useSessionStore } from "../../state/sessionStore";
 
 export function useSessionEndedRedirect(
   sessionId: string | undefined,
