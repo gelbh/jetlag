@@ -1,6 +1,21 @@
 # Changelog
 
-## 0.1.0 — 2026-07-07
+## 0.1.1 - 2026-07-07
+
+### Improvements
+
+- Error reporting: Sentry captures map crashes when `VITE_SENTRY_DSN` is configured
+- Config validation: startup checks catch incomplete Firebase or proxy env settings
+- Session data: Firestore session, annotation, and question payloads validated on read
+- Security: content security policy runs in report-only mode before enforcement
+
+### Technical
+
+- Timer display: shared date-fns clock formatting helpers
+- E2E: Playwright visual baselines for home and join screens
+- Functions: Zod validation on transit and Overpass proxy inputs
+
+## 0.1.0 - 2026-07-07
 
 ### Fixes
 

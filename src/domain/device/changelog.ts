@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.1.0";
+export const APP_VERSION = "0.1.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,29 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.1.1",
+    date: "2026-07-07",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Error reporting: Sentry captures map crashes when VITE_SENTRY_DSN is configured",
+          "Config validation: startup checks catch incomplete Firebase or proxy env settings",
+          "Session data: Firestore session, annotation, and question payloads validated on read",
+          "Security: content security policy runs in report-only mode before enforcement",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Timer display: shared date-fns clock formatting helpers",
+          "E2E: Playwright visual baselines for home and join screens",
+          "Functions: Zod validation on transit and Overpass proxy inputs",
+        ],
+      },
+    ],
+  },
   {
     version: "0.1.0",
     date: "2026-07-07",
