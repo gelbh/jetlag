@@ -1,12 +1,11 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import { featureCollection, point as turfPoint } from "@turf/helpers";
 import intersect from "@turf/intersect";
 import simplify from "@turf/simplify";
-import voronoi from "@turf/voronoi";
 import type { GameArea } from "./annotations";
 import type { MatchingAnswer } from "./matchingQuestions";
+import { geoSpatialVoronoiFromSites } from "./geoSpatialVoronoi";
+import { voronoiCellSiteId } from "./voronoiCellSiteId";
 import {
-  gameAreaToBoundingBox,
   gameAreaToPolygon,
   safeDifference,
 } from "./geometry";
@@ -18,7 +17,6 @@ import {
   findAdminDivisionById,
 } from "./adminDivisionGeometry";
 
-const VORONOI_BBOX_MARGIN_DEG = 0.0004;
 const SIMPLIFY_TOLERANCE = 0.000012;
 
 function clipToGameArea(
@@ -46,56 +44,21 @@ function clipToGameArea(
   return null;
 }
 
-function matchingVoronoiBbox(
-  features: MatchingFeature[],
-  gameArea: GameArea,
-): [number, number, number, number] {
-  const gameBb = gameAreaToBoundingBox(gameArea);
-  let south = gameBb.south - VORONOI_BBOX_MARGIN_DEG;
-  let north = gameBb.north + VORONOI_BBOX_MARGIN_DEG;
-  let west = gameBb.west - VORONOI_BBOX_MARGIN_DEG;
-  let east = gameBb.east + VORONOI_BBOX_MARGIN_DEG;
-
-  for (const feature of features) {
-    const [lat, lng] = feature.point;
-    south = Math.min(south, lat - VORONOI_BBOX_MARGIN_DEG);
-    north = Math.max(north, lat + VORONOI_BBOX_MARGIN_DEG);
-    west = Math.min(west, lng - VORONOI_BBOX_MARGIN_DEG);
-    east = Math.max(east, lng + VORONOI_BBOX_MARGIN_DEG);
-  }
-
-  if (south >= north || west >= east) {
-    return [gameBb.west, gameBb.south, gameBb.east, gameBb.north];
-  }
-
-  return [west, south, east, north];
-}
-
 function buildSameNearestRegionFromVoronoi(
   features: MatchingFeature[],
   seekerFeatureId: string,
   gameArea: GameArea,
 ): Feature<Polygon | MultiPolygon> | null {
-  const bbox = matchingVoronoiBbox(features, gameArea);
-  const sites = featureCollection(
-    features.map((feature) =>
-      turfPoint([feature.point[1], feature.point[0]], {
-        featureId: feature.id,
-      }),
-    ),
+  const cells = geoSpatialVoronoiFromSites(
+    features.map((feature) => ({
+      lng: feature.point[1],
+      lat: feature.point[0],
+      properties: { featureId: feature.id },
+    })),
   );
 
-  let cells;
-  try {
-    cells = voronoi(sites, { bbox });
-  } catch {
-    return null;
-  }
-
   const seekerCell = cells.features.find(
-    (cell) =>
-      (cell.properties as { featureId?: string } | null)?.featureId ===
-      seekerFeatureId,
+    (cell) => voronoiCellSiteId(cell, ["featureId"]) === seekerFeatureId,
   );
 
   if (

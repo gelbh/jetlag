@@ -1,6 +1,6 @@
 import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import booleanIntersects from "@turf/boolean-intersects";
-import buffer from "@turf/buffer";
+import turfCircle from "@turf/circle";
 import turfDistance from "@turf/distance";
 import { featureCollection, point as turfPoint } from "@turf/helpers";
 import intersect from "@turf/intersect";
@@ -10,6 +10,7 @@ import simplify from "@turf/simplify";
 import union from "@turf/union";
 import type { GameArea } from "./annotations";
 import type { MeasuringAnswer } from "./measuringQuestions";
+import { geodesicLineBuffer } from "./geodesicLineBuffer";
 import {
   gameAreaToFeature,
   gameAreaToPolygon,
@@ -297,20 +298,13 @@ export function buildCoastlineNearRegion(
     const bufferedFeatures: Feature<Polygon | MultiPolygon>[] = [];
 
     for (const segment of segments) {
-      const buffered = buffer(segment, distanceMeters, {
-        units: "meters",
-        steps: 8,
-      });
+      const buffered = geodesicLineBuffer(segment, distanceMeters);
 
-      if (
-        !buffered ||
-        (buffered.geometry.type !== "Polygon" &&
-          buffered.geometry.type !== "MultiPolygon")
-      ) {
+      if (!buffered) {
         continue;
       }
 
-      bufferedFeatures.push(buffered as Feature<Polygon | MultiPolygon>);
+      bufferedFeatures.push(buffered);
     }
 
     if (bufferedFeatures.length === 0) {
@@ -381,9 +375,9 @@ export function buildLocationNearRegion(
     return null;
   }
 
-  const buffered = buffer(turfPoint([target[1], target[0]]), distanceMeters, {
-    units: "meters",
+  const buffered = turfCircle(turfPoint([target[1], target[0]]), distanceMeters / 1000, {
     steps: 16,
+    units: "kilometers",
   });
 
   if (
@@ -442,9 +436,9 @@ export function buildMultiPlaceNearRegion(
   const bufferedFeatures: Feature<Polygon | MultiPolygon>[] = [];
 
   for (const place of places) {
-    const buffered = buffer(turfPoint([place[1], place[0]]), distanceMeters, {
-      units: "meters",
+    const buffered = turfCircle(turfPoint([place[1], place[0]]), distanceMeters / 1000, {
       steps: 16,
+      units: "kilometers",
     });
 
     if (

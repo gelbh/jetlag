@@ -1,9 +1,9 @@
 import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import area from "@turf/area";
-import buffer from "@turf/buffer";
 import difference from "@turf/difference";
 import { lineString } from "@turf/helpers";
 import union from "@turf/union";
+import { geodesicLineBuffer } from "../domain/geodesicLineBuffer";
 import type { GameArea } from "../domain/annotations";
 import {
   featureToGameArea,
@@ -159,17 +159,10 @@ export function obstacleFeaturesFromElements(
         continue;
       }
 
-      const buffered = buffer(line, WATERWAY_BUFFER_METERS, {
-        units: "meters",
-        steps: 4,
-      });
+      const buffered = geodesicLineBuffer(line, WATERWAY_BUFFER_METERS);
 
-      if (
-        buffered &&
-        (buffered.geometry.type === "Polygon" ||
-          buffered.geometry.type === "MultiPolygon")
-      ) {
-        obstacles.push(buffered as Feature<Polygon | MultiPolygon>);
+      if (buffered) {
+        obstacles.push(buffered);
       }
     }
   }

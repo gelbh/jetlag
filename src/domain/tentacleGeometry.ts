@@ -4,15 +4,14 @@ import { featureCollection, point as turfPoint } from "@turf/helpers";
 import intersect from "@turf/intersect";
 import simplify from "@turf/simplify";
 import union from "@turf/union";
-import voronoi from "@turf/voronoi";
 import type { GameArea, TentaclePoi } from "./annotations";
+import { geoSpatialVoronoiFromSites } from "./geoSpatialVoronoi";
+import { voronoiCellSiteId } from "./voronoiCellSiteId";
 import {
-  gameAreaToBoundingBox,
   gameAreaToPolygon,
   type LatLngTuple,
 } from "./geometry";
 
-const VORONOI_BBOX_MARGIN_DEG = 0.0004;
 const SIMPLIFY_TOLERANCE = 0.000012;
 const DISK_STEPS = 64;
 
@@ -41,46 +40,9 @@ function clipToGameArea(
   return feature;
 }
 
-function tentacleVoronoiBbox(
-  anchor: LatLngTuple,
-  radiusMeters: number,
-  pois: readonly TentaclePoi[],
-  gameArea: GameArea,
-): [number, number, number, number] {
-  const gameBb = gameAreaToBoundingBox(gameArea);
-  const [latA, lngA] = anchor;
-  const padLat = radiusMeters / 111_320;
-  const cosLat = Math.cos((latA * Math.PI) / 180);
-  const padLng = radiusMeters / (111_320 * Math.max(cosLat, 0.2));
-
-  let south = latA - padLat * 1.08;
-  let north = latA + padLat * 1.08;
-  let west = lngA - padLng * 1.08;
-  let east = lngA + padLng * 1.08;
-
-  for (const p of pois) {
-    south = Math.min(south, p.lat);
-    north = Math.max(north, p.lat);
-    west = Math.min(west, p.lng);
-    east = Math.max(east, p.lng);
-  }
-
-  south = Math.max(gameBb.south, south - VORONOI_BBOX_MARGIN_DEG);
-  north = Math.min(gameBb.north, north + VORONOI_BBOX_MARGIN_DEG);
-  west = Math.max(gameBb.west, west - VORONOI_BBOX_MARGIN_DEG);
-  east = Math.min(gameBb.east, east + VORONOI_BBOX_MARGIN_DEG);
-
-  if (south >= north || west >= east) {
-    return [gameBb.west, gameBb.south, gameBb.east, gameBb.north];
-  }
-
-  return [west, south, east, north];
-}
-
 /**
- * Within the seeker's radius, where another loaded POI is the planar nearest
- * site (Voronoi cell), clipped to the disk — smooth polygons like measuring
- * coastline buffers, not a coarse grid.
+ * Within the seeker's radius, where another loaded POI is the geodesic nearest
+ * site (spatial Voronoi cell), clipped to the disk.
  */
 export function buildTentacleEliminationRegion(
   anchor: LatLngTuple,
@@ -98,15 +60,19 @@ export function buildTentacleEliminationRegion(
     return null;
   }
 
-  const bbox = tentacleVoronoiBbox(anchor, radiusMeters, pois, gameArea);
-  const sites = featureCollection(
-    pois.map((poi) => turfPoint([poi.lng, poi.lat], { poiId: poi.id })),
+  const cells = geoSpatialVoronoiFromSites(
+    pois.map((poi) => ({
+      lng: poi.lng,
+      lat: poi.lat,
+      properties: { poiId: poi.id },
+    })),
   );
-
-  const cells = voronoi(sites, { bbox });
   const wrongCells = cells.features.filter(
-    (f) => (f.properties as { poiId?: string } | null)?.poiId !== answeredPoiId,
-  );
+    (feature) =>
+      voronoiCellSiteId(feature, ["poiId"]) !== answeredPoiId &&
+      (feature.geometry.type === "Polygon" ||
+        feature.geometry.type === "MultiPolygon"),
+  ) as Feature<Polygon | MultiPolygon>[];
 
   if (wrongCells.length === 0) {
     return null;
