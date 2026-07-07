@@ -12,6 +12,10 @@ import {
   milesToMeters,
   type DistanceUnit,
 } from "./distance";
+import {
+  matchPresetMeters,
+  METRIC_RADAR_PRESET_METERS,
+} from "./distancePresets";
 
 export const RADAR_DISTANCE_MILES = MILE_RADIUS_PRESETS;
 
@@ -24,10 +28,27 @@ export type RadarAnswer = "yes" | "no";
 
 export type RadarDistanceOptionKey =
   | (typeof RADAR_DISTANCE_MILES)[number]
+  | (typeof METRIC_RADAR_PRESET_METERS)[number]
   | "choose";
 
 const RADAR_PROMPT_TEMPLATE = "Are you within [DISTANCE] of me?";
 const RADAR_PRESET_MATCH_TOLERANCE_METERS = 1;
+
+export function radarPresetForRadius(
+  radiusMeters: number,
+  unit: DistanceUnit,
+): RadarDistanceOptionKey | null {
+  if (unit === "metric") {
+    const preset = matchPresetMeters(
+      radiusMeters,
+      METRIC_RADAR_PRESET_METERS,
+      RADAR_PRESET_MATCH_TOLERANCE_METERS,
+    );
+    return preset as RadarDistanceOptionKey | null;
+  }
+
+  return radarPresetMilesForRadius(radiusMeters);
+}
 
 export function radarPresetMilesForRadius(
   radiusMeters: number,
@@ -42,6 +63,7 @@ export function radarPresetMilesForRadius(
 
 export function radarDistanceOptionForAnnotation(
   annotation: AnnotationRecord,
+  unit: DistanceUnit = "imperial",
 ): RadarDistanceOptionKey | null {
   if (annotation.type !== "radar") {
     return null;
@@ -52,16 +74,17 @@ export function radarDistanceOptionForAnnotation(
     return "choose";
   }
 
-  const presetMiles = radarPresetMilesForRadius(radiusMeters);
+  const preset = radarPresetForRadius(radiusMeters, unit);
   if (annotation.metadata.radarChooseCustom === false) {
-    return presetMiles ?? "choose";
+    return preset ?? "choose";
   }
 
-  return presetMiles ?? "choose";
+  return preset ?? "choose";
 }
 
 export function radarDistanceOptionForPending(
   question: PendingQuestionRecord,
+  unit: DistanceUnit = "imperial",
 ): RadarDistanceOptionKey | null {
   if (question.toolType !== "radar") {
     return null;
@@ -76,38 +99,51 @@ export function radarDistanceOptionForPending(
     return "choose";
   }
 
-  const presetMiles = radarPresetMilesForRadius(radiusMeters);
+  const preset = radarPresetForRadius(radiusMeters, unit);
   if (metadata.radarChooseCustom === false) {
-    return presetMiles ?? "choose";
+    return preset ?? "choose";
   }
 
-  return presetMiles ?? "choose";
+  return preset ?? "choose";
 }
 
 export function usedRadarDistanceOptions(
   annotations: AnnotationRecord[],
+  unit: DistanceUnit = "imperial",
   exceptAnnotationId?: string,
 ): Set<RadarDistanceOptionKey> {
   return collectUsedAnnotationOptions(
     annotations,
-    (annotation) => radarDistanceOptionForAnnotation(annotation),
+    (annotation) => radarDistanceOptionForAnnotation(annotation, unit),
     exceptAnnotationId,
   );
 }
 
 export function firstAvailableRadarDistanceSelection(
   usedOptions: ReadonlySet<RadarDistanceOptionKey>,
+  unit: DistanceUnit = "imperial",
 ): { chooseCustom: boolean; radiusMeters: number } | null {
-  const presetMiles = firstUnusedPreset(RADAR_DISTANCE_MILES, usedOptions);
-  if (presetMiles !== null) {
-    return {
-      chooseCustom: false,
-      radiusMeters: milesToMeters(Number(presetMiles)),
-    };
+  if (unit === "metric") {
+    for (const preset of METRIC_RADAR_PRESET_METERS) {
+      if (!usedOptions.has(preset)) {
+        return { chooseCustom: false, radiusMeters: preset };
+      }
+    }
+  } else {
+    const presetMiles = firstUnusedPreset(RADAR_DISTANCE_MILES, usedOptions);
+    if (presetMiles !== null) {
+      return {
+        chooseCustom: false,
+        radiusMeters: milesToMeters(Number(presetMiles)),
+      };
+    }
   }
 
   if (!usedOptions.has("choose")) {
-    return { chooseCustom: true, radiusMeters: milesToMeters(1) };
+    return {
+      chooseCustom: true,
+      radiusMeters: unit === "metric" ? 1000 : milesToMeters(1),
+    };
   }
 
   return null;
@@ -121,6 +157,7 @@ export function radarDistanceUseCount(
   annotations: readonly AnnotationRecord[],
   chooseCustom: boolean,
   radiusMeters: number,
+  unit: DistanceUnit = "imperial",
   exceptAnnotationId?: string,
 ): number {
   let count = 0;
@@ -131,10 +168,10 @@ export function radarDistanceUseCount(
     if (exceptAnnotationId && annotation.id === exceptAnnotationId) {
       continue;
     }
-    const optionKey = radarDistanceOptionForAnnotation(annotation);
+    const optionKey = radarDistanceOptionForAnnotation(annotation, unit);
     const targetKey = chooseCustom
       ? "choose"
-      : radarPresetMilesForRadius(radiusMeters);
+      : radarPresetForRadius(radiusMeters, unit);
     if (optionKey === targetKey) {
       count += 1;
     }
@@ -146,11 +183,12 @@ export function radarDistanceUseCountFromPending(
   pendingQuestions: readonly PendingQuestionRecord[],
   chooseCustom: boolean,
   radiusMeters: number,
+  unit: DistanceUnit = "imperial",
   exceptQuestionId?: string,
 ): number {
   const targetKey = chooseCustom
     ? "choose"
-    : radarPresetMilesForRadius(radiusMeters);
+    : radarPresetForRadius(radiusMeters, unit);
   let count = 0;
   for (const question of pendingQuestions) {
     if (question.toolType !== "radar") {
@@ -162,7 +200,7 @@ export function radarDistanceUseCountFromPending(
     if (!isCountablePendingQuestionStatus(question.status)) {
       continue;
     }
-    if (radarDistanceOptionForPending(question) === targetKey) {
+    if (radarDistanceOptionForPending(question, unit) === targetKey) {
       count += 1;
     }
   }

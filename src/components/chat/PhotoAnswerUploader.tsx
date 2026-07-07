@@ -6,8 +6,10 @@ import {
   readPhotoCategoryId,
   type PhotoAnswer,
 } from "../../domain/photoQuestions";
+import { photoUploadAccessError } from "../../domain/photoUploadAccess";
 import type { PendingQuestionRecord } from "../../domain/sessionChat";
 import { uploadPhotoAnswer } from "../../services/photoStorage";
+import { useSessionStore } from "../../state/sessionStore";
 
 interface PhotoAnswerUploaderProps {
   sessionId: string;
@@ -33,11 +35,14 @@ export function PhotoAnswerUploader({
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const session = useSessionStore((state) => state.session);
+  const myUid = useSessionStore((state) => state.myUid);
 
   const categoryId = readPhotoCategoryId(pendingQuestion);
   const ruleSummary = categoryId
     ? getPhotoCategory(categoryId).ruleSummary
     : null;
+  const accessError = photoUploadAccessError(session, myUid);
 
   const submitAnswer = async (answer: PhotoAnswer) => {
     setError(null);
@@ -64,6 +69,8 @@ export function PhotoAnswerUploader({
         sessionId,
         pendingQuestion.id,
         file,
+        session,
+        myUid,
       );
       await submitAnswer({ kind: "photo", storagePath });
     } catch (uploadError) {
@@ -82,6 +89,9 @@ export function PhotoAnswerUploader({
       {ruleSummary ? (
         <p className="text-xs leading-snug text-ink-dim">{ruleSummary}</p>
       ) : null}
+      {accessError ? (
+        <p className="text-sm text-status-warning">{accessError}</p>
+      ) : null}
       <input
         ref={inputRef}
         type="file"
@@ -91,7 +101,7 @@ export function PhotoAnswerUploader({
       />
       <button
         type="button"
-        disabled={uploading}
+        disabled={uploading || accessError !== null}
         onClick={(event) => {
           event.stopPropagation();
           inputRef.current?.click();

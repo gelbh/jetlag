@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   onSnapshot,
   orderBy,
@@ -118,6 +119,13 @@ export async function writePendingQuestion(
     doc(pendingQuestionsCollection(sessionId), question.id),
     buildPendingQuestionDocument(question),
   );
+}
+
+export async function deletePendingQuestion(
+  sessionId: string,
+  questionId: string,
+): Promise<void> {
+  await deleteDoc(doc(pendingQuestionsCollection(sessionId), questionId));
 }
 
 export async function updatePendingQuestion(

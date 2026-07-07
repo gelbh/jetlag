@@ -7,6 +7,18 @@ vi.mock("../../services/photoStorage", () => ({
   uploadPhotoAnswer: vi.fn(),
 }));
 
+vi.mock("../../state/sessionStore", () => ({
+  useSessionStore: (selector: (state: unknown) => unknown) =>
+    selector({
+      session: {
+        id: "session-1",
+        memberUids: ["hider-1"],
+        memberRoles: { "hider-1": "hider" },
+      },
+      myUid: "hider-1",
+    }),
+}));
+
 import { uploadPhotoAnswer } from "../../services/photoStorage";
 
 const pendingQuestion: PendingQuestionRecord = {
@@ -81,6 +93,12 @@ describe("PhotoAnswerUploader", () => {
         "session-1",
         "pq-photo",
         file,
+        {
+          id: "session-1",
+          memberUids: ["hider-1"],
+          memberRoles: { "hider-1": "hider" },
+        },
+        "hider-1",
       );
     });
 

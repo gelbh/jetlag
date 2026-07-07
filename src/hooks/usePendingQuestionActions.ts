@@ -11,6 +11,7 @@ import {
 import { buildThermometerLineGeometry } from "../domain/thermometerWalk";
 import type { LatLngTuple } from "../domain/geometry";
 import {
+  deletePendingQuestion,
   postGameSystemMessage,
   updateGameMessageAnswer,
   updatePendingQuestion,
@@ -52,54 +53,61 @@ export function usePendingQuestionActions() {
       }
 
       submitInFlightRef.current = true;
-      try {
       const pendingQuestionId = createPendingQuestionId();
       const messageId = createMessageId();
       const createdAt = new Date().toISOString();
-      const answerableAt = status === "pending" ? createdAt : undefined;
 
-      await writePendingQuestion(sessionId, {
-        id: pendingQuestionId,
-        sessionId,
-        toolType,
-        createdByUid: senderUid,
-        createdAt,
-        status,
-        placement,
-        replyOptions,
-        promptText,
-        answerableAt,
-        cardDraw,
-        cardKeep,
-      });
-
-      if (status === "walking") {
-        await postGameSystemMessage(
+      try {
+        await writePendingQuestion(sessionId, {
+          id: pendingQuestionId,
           sessionId,
-          senderUid,
-          senderRole,
+          toolType,
+          createdByUid: senderUid,
+          createdAt,
+          status,
+          placement,
+          replyOptions,
           promptText,
-          messageId,
-        );
+          cardDraw,
+          cardKeep,
+        });
+
+        if (status === "walking") {
+          await postGameSystemMessage(
+            sessionId,
+            senderUid,
+            senderRole,
+            promptText,
+            messageId,
+          );
+          return pendingQuestionId;
+        }
+
+        try {
+          await writeSessionMessage(sessionId, {
+            id: messageId,
+            sessionId,
+            channel: "game",
+            senderUid,
+            senderRole,
+            createdAt,
+            kind: "question",
+            pendingQuestionId,
+            toolType,
+            promptText,
+            replyOptions,
+            status: "pending",
+          });
+        } catch (messageError) {
+          await deletePendingQuestion(sessionId, pendingQuestionId);
+          throw messageError;
+        }
+
+        await updatePendingQuestion(sessionId, pendingQuestionId, {
+          answerableAt: createdAt,
+        });
+
         return pendingQuestionId;
-      }
-
-      await writeSessionMessage(sessionId, {
-        id: messageId,
-        sessionId,
-        channel: "game",
-        senderUid,
-        senderRole,
-        createdAt,
-        kind: "question",
-        pendingQuestionId,
-        toolType,
-        promptText,
-        replyOptions,
-        status: "pending",
-      });
-
-      return pendingQuestionId;
       } finally {
         submitInFlightRef.current = false;
       }

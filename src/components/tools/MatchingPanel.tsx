@@ -82,7 +82,15 @@ export function MatchingPanel({
 }: MatchingPanelProps) {
   const steps = stepsForMode(MATCHING_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
-  const step = steps[stepIndex]?.id ?? "category";
+  const step = steps[stepIndex]?.id ?? "anchor";
+  const categoryStepIndex = steps.findIndex((item) => item.id === "category");
+
+  const handleCategoryChange = (nextCategoryId: MatchingCategoryId) => {
+    onCategoryChange(nextCategoryId);
+    if (categoryStepIndex >= 0) {
+      setStepIndex(categoryStepIndex);
+    }
+  };
 
   const question = matchingQuestionFor(categoryId);
   const category = getMatchingCategory(categoryId);
@@ -163,10 +171,11 @@ export function MatchingPanel({
             <label className="field-label">
               Match category
               <select
-                key={categoryId}
                 value={categoryId}
                 onChange={(event) =>
-                  onCategoryChange(event.target.value as MatchingCategoryId)
+                  handleCategoryChange(
+                    event.target.value as MatchingCategoryId,
+                  )
                 }
                 className="field-input"
               >
@@ -281,11 +290,11 @@ export function MatchingPanel({
         onBack={goBack}
         onNext={goNext}
         canGoNext={
-          (step === "category" && categoryAvailable) ||
           (step === "anchor" &&
             hasSeekerPoint &&
             !loading &&
             resolveComplete) ||
+          (step === "category" && categoryAvailable) ||
           (step === "resolve" && resolveComplete && !loading)
         }
       />

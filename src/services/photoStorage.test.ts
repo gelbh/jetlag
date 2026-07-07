@@ -13,6 +13,7 @@ vi.mock("firebase/storage", () => ({
 }));
 
 vi.mock("./firebase", () => ({
+  ensureAnonymousUser: vi.fn(),
   getFirebaseStorage: vi.fn(() => ({ bucket: "demo" })),
 }));
 
@@ -95,6 +96,11 @@ describe("photoStorage", () => {
         "session-1",
         "question-1",
         new File(["image"], "photo.jpg", { type: "image/jpeg" }),
+        {
+          memberUids: ["hider-1"],
+          memberRoles: { "hider-1": "hider" },
+        },
+        "hider-1",
       );
 
       expect(path).toBe(

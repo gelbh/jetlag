@@ -109,6 +109,7 @@ function AnnotationEditSheetForm({
     () =>
       usedRadarDistanceOptions(
         annotations.filter(isActive),
+        distanceUnit,
         annotation.type === "radar" ? annotation.id : undefined,
       ),
     [annotations, annotation],
@@ -398,7 +399,10 @@ function AnnotationEditSheetForm({
                 distanceUnit,
                 annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS,
               )}
-              ruleSummary="Tentacles always use a 1 mile radius from the anchor."
+              ruleSummary={`Tentacles always use a ${formatPresetDistance(
+                annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS,
+                distanceUnit,
+              )} radius from the anchor.`}
             />
           </ToolSection>
           <TentacleAnswerPicker

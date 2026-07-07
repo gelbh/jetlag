@@ -24,6 +24,9 @@ describe("radarQuestions", () => {
     expect(radarQuestionPrompt(2500, "metric")).toBe(
       "Are you within 2.5 km of me?",
     );
+    expect(radarQuestionPrompt(2000, "metric")).toBe(
+      "Are you within 2 km of me?",
+    );
   });
 
   it("labels card distance options in imperial and metric modes", () => {
@@ -112,14 +115,18 @@ describe("radarQuestions", () => {
       },
     };
 
-    expect(usedRadarDistanceOptions([presetRadar, chooseRadar])).toEqual(
-      new Set([3, "choose"]),
-    );
     expect(
-      usedRadarDistanceOptions([presetRadar, chooseRadar], "radar-preset"),
+      usedRadarDistanceOptions([presetRadar, chooseRadar], "imperial"),
+    ).toEqual(new Set([3, "choose"]));
+    expect(
+      usedRadarDistanceOptions(
+        [presetRadar, chooseRadar],
+        "imperial",
+        "radar-preset",
+      ),
     ).toEqual(new Set(["choose"]));
     expect(
-      firstAvailableRadarDistanceSelection(new Set([3, "choose"])),
+      firstAvailableRadarDistanceSelection(new Set([3, "choose"]), "imperial"),
     ).toEqual({
       chooseCustom: false,
       radiusMeters: milesToMeters(0.25),

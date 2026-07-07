@@ -60,6 +60,10 @@ export function radarPresetMetersForUnit(unit: DistanceUnit): readonly number[] 
 
 export function defaultRadarPresetMeters(unit: DistanceUnit): number {
   const presets = radarPresetMetersForUnit(unit);
+  if (unit === "metric") {
+    return presets[1] ?? 1000;
+  }
+
   return presets[Math.min(2, presets.length - 1)] ?? milesToMeters(1);
 }
 

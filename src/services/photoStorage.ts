@@ -4,7 +4,12 @@ import {
   uploadBytes,
   type UploadMetadata,
 } from "firebase/storage";
-import { getFirebaseStorage } from "./firebase";
+import type { SessionRecord } from "../domain/annotations";
+import {
+  formatPhotoStorageError,
+  photoUploadAccessError,
+} from "../domain/photoUploadAccess";
+import { ensureAnonymousUser, getFirebaseStorage } from "./firebase";
 
 const MAX_DIMENSION = 1920;
 const JPEG_QUALITY = 0.85;
@@ -96,7 +101,18 @@ export async function uploadPhotoAnswer(
   sessionId: string,
   questionId: string,
   file: File,
+  session?: Pick<SessionRecord, "memberUids" | "memberRoles"> | null,
+  myUid?: string | null,
 ): Promise<string> {
+  const accessError = photoUploadAccessError(session, myUid ?? null);
+  if (accessError) {
+    throw new Error(accessError);
+  }
+
+  if (!myUid) {
+    await ensureAnonymousUser();
+  }
+
   const blob = await compressPhotoForUpload(file);
   const extension =
     blob.type === "image/png"
@@ -111,7 +127,12 @@ export async function uploadPhotoAnswer(
     contentType: blob.type,
   };
 
-  await uploadBytes(storageRef, blob, metadata);
+  try {
+    await uploadBytes(storageRef, blob, metadata);
+  } catch (error) {
+    throw new Error(formatPhotoStorageError(error), { cause: error });
+  }
+
   return storagePath;
 }
 

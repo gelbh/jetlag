@@ -4,10 +4,10 @@ import { RadarPanel } from "../../components/tools/RadarPanel";
 import type { LatLngTuple } from "../../domain/geometry";
 import { isActive, type AnnotationRecord } from "../../domain/annotations";
 import {
-  DEFAULT_RADIUS_METERS,
   parseDistanceInput,
   type DistanceUnit,
 } from "../../domain/distance";
+import { defaultRadarPresetMeters } from "../../domain/distancePresets";
 import {
   firstAvailableRadarDistanceSelection,
   isRadarDistanceOptionAvailable,
@@ -78,10 +78,11 @@ export function useRadarTool({
 }: UseRadarToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
   const usedRadarOptions = useMemo(
-    () => usedRadarDistanceOptions(annotations.filter(isActive)),
-    [annotations],
+    () => usedRadarDistanceOptions(annotations.filter(isActive), distanceUnit),
+    [annotations, distanceUnit],
   );
-  const [radarRadius, setRadarRadius] = useState(DEFAULT_RADIUS_METERS);
+  const defaultRadius = defaultRadarPresetMeters(distanceUnit);
+  const [radarRadius, setRadarRadius] = useState(defaultRadius);
   const [radarCustomRadius, setRadarCustomRadius] = useState("");
   const [radarChooseCustom, setRadarChooseCustom] = useState(false);
   const [radarAnswer, setRadarAnswer] = useState<RadarAnswer | null>(null);
@@ -96,22 +97,30 @@ export function useRadarTool({
       annotations.filter(isActive),
       radarChooseCustom,
       resolvedRadarRadius,
+      distanceUnit,
     ),
     radarDistanceUseCountFromPending(
       pendingQuestions,
       radarChooseCustom,
       resolvedRadarRadius,
+      distanceUnit,
     ),
   );
   const { label: costLabel, draw: cardDraw, keep: cardKeep } =
     questionCostBreakdown("D2P1", radarUseCount);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- keep draft distance in sync with session usage */
+    /* eslint-disable react-hooks/set-state-in-effect -- sync default when unit changes */
     if (!active) {
       return;
     }
 
+    setRadarRadius(defaultRadarPresetMeters(distanceUnit));
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [active, distanceUnit]);
+
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- keep draft distance in sync with session usage */
     if (!active) {
       return;
     }
@@ -121,7 +130,7 @@ export function useRadarTool({
     }
 
     const nextSelection =
-      firstAvailableRadarDistanceSelection(usedRadarOptions);
+      firstAvailableRadarDistanceSelection(usedRadarOptions, distanceUnit);
     if (!nextSelection) {
       setRadarChooseCustom(false);
       setRadarCustomRadius("");
@@ -132,15 +141,15 @@ export function useRadarTool({
     setRadarRadius(nextSelection.radiusMeters);
     setRadarCustomRadius("");
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [active, usedRadarOptions, radarChooseCustom, radarRadius]);
+  }, [active, usedRadarOptions, radarChooseCustom, radarRadius, distanceUnit]);
 
   const resetDraft = useCallback(() => {
-    setRadarRadius(DEFAULT_RADIUS_METERS);
+    setRadarRadius(defaultRadarPresetMeters(distanceUnit));
     setRadarCustomRadius("");
     setRadarChooseCustom(false);
     setRadarAnswer(null);
     setRadarCenter(null);
-  }, []);
+  }, [distanceUnit]);
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {

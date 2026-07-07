@@ -35,9 +35,15 @@ export function formatDistance(
 
   if (meters >= 1000) {
     const kilometers = meters / 1000;
-    return kilometers >= 10
-      ? `${Math.round(kilometers)} km`
-      : `${kilometers.toFixed(1)} km`;
+    if (kilometers >= 10) {
+      return `${Math.round(kilometers)} km`;
+    }
+
+    if (Number.isInteger(kilometers)) {
+      return `${kilometers} km`;
+    }
+
+    return `${kilometers.toFixed(1)} km`;
   }
 
   return `${Math.round(meters)} m`;

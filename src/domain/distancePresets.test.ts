@@ -15,7 +15,7 @@ import { defaultAdvancedSessionSettings } from "./advancedSessionSettings";
 describe("distancePresets", () => {
   it("uses native metric radar presets", () => {
     expect(radarPresetMetersForUnit("metric")).toEqual(METRIC_RADAR_PRESET_METERS);
-    expect(defaultRadarPresetMeters("metric")).toBe(2000);
+    expect(defaultRadarPresetMeters("metric")).toBe(1000);
   });
 
   it("uses metric hiding zone radii", () => {
