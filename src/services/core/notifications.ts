@@ -5,14 +5,14 @@ import {
   type PushNotificationSchema,
   type Token,
 } from "@capacitor/push-notifications";
-import type { JetlagLiveActivityPlugin } from "../../plugins/jetlag-live-activity/src/definitions";
+import type { JetlagLiveActivityPlugin } from "../../../plugins/jetlag-live-activity/src/definitions";
 import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   type NotificationPlatform,
   type NotificationPreferences,
-} from "../domain/notifications";
-import type { PlayerRole } from "../domain/playerRole";
-import { upsertSessionDevice } from "./firestoreDevices";
+} from "../../domain/device/notifications";
+import type { PlayerRole } from "../../domain/session/playerRole";
+import { upsertSessionDevice } from "../firestore/firestoreDevices";
 
 export const JetlagLiveActivity = registerPlugin<JetlagLiveActivityPlugin>(
   "JetlagLiveActivity",

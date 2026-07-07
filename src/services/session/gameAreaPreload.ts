@@ -1,12 +1,12 @@
-import type { GameArea } from "../domain/annotations";
-import type { MeasuringLocationCategory } from "../domain/measuringQuestions";
-import { fetchAdminDivisionFeaturesInArea } from "./adminDivisionBoundaries";
-import { fetchPreparedCoastlineSegments } from "./coastline";
-import { fetchLandmassFeaturesInArea } from "./landmassFeatures";
-import { fetchMeasuringPlacesInArea } from "./measuringPlaces";
-import { fetchPreparedMeasuringLinearSegments } from "./measuringLinearFeatures";
-import { fetchStaticTransit } from "./transitStatic";
-import { usePreloadStore } from "../state/preloadStore";
+import type { GameArea } from "../../domain/map/annotations";
+import type { MeasuringLocationCategory } from "../../domain/questions/measuringQuestions";
+import { fetchAdminDivisionFeaturesInArea } from "../geo/adminDivisionBoundaries";
+import { fetchPreparedCoastlineSegments } from "../geo/coastline";
+import { fetchLandmassFeaturesInArea } from "../geo/landmassFeatures";
+import { fetchMeasuringPlacesInArea } from "../geo/measuringPlaces";
+import { fetchPreparedMeasuringLinearSegments } from "../geo/measuringLinearFeatures";
+import { fetchStaticTransit } from "../transit/transitStatic";
+import { usePreloadStore } from "../../state/preloadStore";
 
 const PRELOAD_ADMIN_LEVELS = [4, 6, 8] as const;
 const PRELOAD_JOB_GAP_MS = 400;

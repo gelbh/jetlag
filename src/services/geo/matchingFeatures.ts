@@ -1,18 +1,18 @@
-import type { GameArea } from "../domain/annotations";
-import type { TransitStation } from "../domain/hidingZone";
+import type { GameArea } from "../../domain/map/annotations";
+import type { TransitStation } from "../../domain/session/hidingZone";
 import {
   distanceBetweenPoints,
   gameAreaToBoundingBox,
   isPointInGameArea,
   type LatLngTuple,
-} from "../domain/geometry";
+} from "../../domain/geometry/geometry";
 import {
   expandBoundingBox,
   intersectBoundingBoxes,
   type BoundingBox,
-} from "../domain/gameAreaBounds";
-import type { CustomMatchingAreasByLevel } from "../domain/sessionCustomContent";
-import type { SessionCustomCategory } from "../domain/sessionCustomContent";
+} from "../../domain/geometry/gameAreaBounds";
+import type { CustomMatchingAreasByLevel } from "../../domain/session/sessionCustomContent";
+import type { SessionCustomCategory } from "../../domain/session/sessionCustomContent";
 import { customMatchingAreasCacheSuffix } from "./matchingAreaGeoJson";
 import {
   adminLevelForMatchingCategory,
@@ -20,11 +20,11 @@ import {
   matchingCategoryLabel,
   matchingUsesExpandedFeatureSearch,
   type MatchingCategoryId,
-} from "../domain/matchingQuestions";
+} from "../../domain/questions/matchingQuestions";
 import {
   matchingOverpassSelectorsForCategory,
   resolveMatchingCategory,
-} from "../domain/sessionCustomCatalog";
+} from "../../domain/session/sessionCustomCatalog";
 import {
   adminDivisionToMatchingFeature,
   classifyAdminDivisionAtPoint,
@@ -36,14 +36,14 @@ import {
   fetchLandmassFeaturesInArea,
   landmassToMatchingFeature,
 } from "./landmassFeatures";
-import type { MapViewportBounds } from "../domain/transitViewport";
-import { queryOverpass } from "./overpassClient";
+import type { MapViewportBounds } from "../../domain/map/transitViewport";
+import { queryOverpass } from "../core/overpassClient";
 import {
   buildTransitStopOverpassQuery,
   overpassTransitStopsToMatchingFeatures,
   parseOverpassTransitStops,
   type OverpassTransitStopElement,
-} from "./transitStops";
+} from "../transit/transitStops";
 import {
   getOrFetchCached,
   geographicCacheKey,

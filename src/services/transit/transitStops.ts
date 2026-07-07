@@ -1,10 +1,10 @@
-import type { GameArea } from "../domain/annotations";
+import type { GameArea } from "../../domain/map/annotations";
 import {
   dedupeTransitStations,
   type TransitStation,
-} from "../domain/hidingZone";
-import type { BoundingBox } from "../domain/gameAreaBounds";
-import { isPointInGameArea } from "../domain/geometry";
+} from "../../domain/session/hidingZone";
+import type { BoundingBox } from "../../domain/geometry/gameAreaBounds";
+import { isPointInGameArea } from "../../domain/geometry/geometry";
 
 export const TRANSIT_STOP_OVERPASS_LIMIT = 250;
 

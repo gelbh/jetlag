@@ -1,16 +1,16 @@
-import type { GameArea } from "../domain/annotations";
+import type { GameArea } from "../../domain/map/annotations";
 import {
   distanceBetweenPoints,
   isPointInGameArea,
   type LatLngTuple,
-} from "../domain/geometry";
-import type { SessionCustomCategory } from "../domain/sessionCustomContent";
-import { measuringOverpassSelectorsForKind } from "../domain/sessionCustomCatalog";
+} from "../../domain/geometry/geometry";
+import type { SessionCustomCategory } from "../../domain/session/sessionCustomContent";
+import { measuringOverpassSelectorsForKind } from "../../domain/session/sessionCustomCatalog";
 import {
   measuringLocationLabel,
   type MeasuringLocationCategory,
-} from "../domain/measuringQuestions";
-import { queryOverpass } from "./overpassClient";
+} from "../../domain/questions/measuringQuestions";
+import { queryOverpass } from "../core/overpassClient";
 import {
   getOrFetchCached,
   measuringPlacesCacheKey,
@@ -19,7 +19,7 @@ import {
   formatOverpassBboxFromGameArea,
   overpassQueryTemplate,
   overpassTaggedBboxClauses,
-} from "./overpass/query";
+} from "../overpass/query";
 
 export interface MeasuringPlace {
   id: string;

@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   type NotificationPreferences,
-} from "../domain/notifications";
-import { mergeNotificationPreferences } from "../services/notifications";
+} from "../../domain/device/notifications";
+import { mergeNotificationPreferences } from "./notifications";
 
 describe("mergeNotificationPreferences", () => {
   it("fills defaults for partial preferences", () => {

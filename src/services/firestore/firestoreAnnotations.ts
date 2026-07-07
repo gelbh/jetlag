@@ -16,13 +16,13 @@ import type {
   GameArea,
   SessionRecord,
   SessionTier,
-} from "../domain/annotations";
-import type { GameSize } from "../domain/gameSize";
-import { hidingZoneRadiusMeters } from "../domain/gameSize";
-import type { SessionRulesPatch } from "../domain/advancedSessionSettings";
-import type { PlayerRole } from "../domain/playerRole";
-import { timerStateToRemote, type TimerState } from "../domain/timer";
-import { getFirestoreDb } from "./firebase";
+} from "../../domain/map/annotations";
+import type { GameSize } from "../../domain/session/gameSize";
+import { hidingZoneRadiusMeters } from "../../domain/session/gameSize";
+import type { SessionRulesPatch } from "../../domain/session/advancedSessionSettings";
+import type { PlayerRole } from "../../domain/session/playerRole";
+import { timerStateToRemote, type TimerState } from "../../domain/session/timer";
+import { getFirestoreDb } from "../core/firebase";
 import {
   buildAnnotationDocument,
   buildSessionDocument,
@@ -30,7 +30,7 @@ import {
   deserializeSessionFromFirestore,
   sessionRulesPatchToFirestore,
 } from "./firestoreSerialization";
-import { generateSessionCode } from "./sessionCodes";
+import { generateSessionCode } from "../session/sessionCodes";
 
 function sessionsCollection() {
   return collection(getFirestoreDb(), "sessions");

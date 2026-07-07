@@ -2,8 +2,8 @@ import { FetchTimeoutError, fetchWithTimeout } from "./fetchWithTimeout";
 import { buildPremiumProxyHeaders } from "./accessControl";
 import { getFirebaseAuth } from "./firebase";
 import { waitForFirebaseAuth } from "./firebaseAuthReady";
-import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "./overpass/endpoints";
-import { withOverpassConcurrencyLimit } from "./overpass/requestQueue";
+import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "../overpass/endpoints";
+import { withOverpassConcurrencyLimit } from "../overpass/requestQueue";
 
 const OVERPASS_MAX_RETRIES = 3;
 const OVERPASS_BASE_BACKOFF_MS = 750;

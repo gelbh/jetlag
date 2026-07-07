@@ -1,18 +1,18 @@
-import { distanceBetweenPoints, type LatLngTuple } from "../domain/geometry";
-import type { TentaclePoi } from "../domain/annotations";
+import { distanceBetweenPoints, type LatLngTuple } from "../../domain/geometry/geometry";
+import type { TentaclePoi } from "../../domain/map/annotations";
 import type {
   SessionCustomCategory,
   SessionCustomLocationPin,
-} from "../domain/sessionCustomContent";
+} from "../../domain/session/sessionCustomContent";
 import {
   manualPinsWithinRadius,
   tentacleOverpassSelectorsForCategory,
-} from "../domain/sessionCustomCatalog";
+} from "../../domain/session/sessionCustomCatalog";
 import {
   tentacleCategoryOverpassSelectors,
   type TentacleExtendedCategoryId,
-} from "../domain/tentacleQuestions";
-import { queryOverpass } from "./overpassClient";
+} from "../../domain/questions/tentacleQuestions";
+import { queryOverpass } from "../core/overpassClient";
 import {
   getOrFetchCached,
   tentaclePoisCacheKey,

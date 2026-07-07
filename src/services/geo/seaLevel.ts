@@ -1,11 +1,11 @@
-import type { GameArea } from "../domain/annotations";
+import type { GameArea } from "../../domain/map/annotations";
 import {
   buildSeaLevelNearRegionFromSamples,
   distanceFromSeaLevelMeters,
   type ElevationSampleCell,
   type SeaLevelEdgeCase,
-} from "../domain/seaLevel";
-import type { LatLngTuple } from "../domain/geometry";
+} from "../../domain/geometry/seaLevel";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { fetchElevations } from "./elevation";
 import type { CachedSeaLevelSampling } from "./geographicFeatureCache";

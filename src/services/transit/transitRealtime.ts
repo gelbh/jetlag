@@ -1,14 +1,14 @@
-import type { GameArea } from "../domain/annotations";
-import { gameAreaToBoundingBox } from "../domain/geometry";
+import type { GameArea } from "../../domain/map/annotations";
+import { gameAreaToBoundingBox } from "../../domain/geometry/geometry";
 import type {
   TransitRealtimeSnapshot,
   TransitRouteMode,
   TransitVehicle,
-} from "../domain/transit";
+} from "../../domain/map/transit";
 import { getTransitMetro } from "./transitCatalog";
-import { fetchWithTimeout } from "./fetchWithTimeout";
-import { buildPremiumProxyHeaders } from "./accessControl";
-import { shouldUsePremiumProxies } from "./premiumApiContext";
+import { fetchWithTimeout } from "../core/fetchWithTimeout";
+import { buildPremiumProxyHeaders } from "../core/accessControl";
+import { shouldUsePremiumProxies } from "../core/premiumApiContext";
 
 const TRANSIT_FETCH_TIMEOUT_MS = 30_000;
 

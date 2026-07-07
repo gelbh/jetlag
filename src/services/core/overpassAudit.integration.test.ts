@@ -5,7 +5,7 @@ import {
   formatOverpassAuditReport,
   runOverpassAudit,
 } from "./overpassAudit";
-import { DUBLIN_CITY_GAME_AREA } from "../test/fixtures/dublinGameArea";
+import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 
 const runLiveAudit =
   (

@@ -3,16 +3,16 @@ import area from "@turf/area";
 import difference from "@turf/difference";
 import { lineString } from "@turf/helpers";
 import union from "@turf/union";
-import { geodesicLineBuffer } from "../domain/geodesicLineBuffer";
-import type { GameArea } from "../domain/annotations";
+import { geodesicLineBuffer } from "../../domain/geometry/geodesicLineBuffer";
+import type { GameArea } from "../../domain/map/annotations";
 import {
   featureToGameArea,
   gameAreaToBoundingBox,
   gameAreaToPolygon,
   simplifyGameArea,
   type LatLngTuple,
-} from "../domain/geometry";
-import { queryOverpass } from "./overpassClient";
+} from "../../domain/geometry/geometry";
+import { queryOverpass } from "../core/overpassClient";
 import {
   getOrFetchCached,
   landmassCacheKey,

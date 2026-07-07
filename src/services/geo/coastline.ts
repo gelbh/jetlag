@@ -1,21 +1,21 @@
 import type { Feature, LineString } from "geojson";
-import type { GameArea } from "../domain/annotations";
+import type { GameArea } from "../../domain/map/annotations";
 import {
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
   type LatLngTuple,
   type PreparedLinearSegments,
-} from "../domain/geometry";
+} from "../../domain/geometry/geometry";
 import {
   coastlineSegmentsCacheKey,
   getOrFetchCached,
   readCachedMemoryEntry,
 } from "./geographicFeatureCache";
-import { queryOverpass } from "./overpassClient";
+import { queryOverpass } from "../core/overpassClient";
 import {
   formatOverpassBboxFromGameArea,
   overpassQueryTemplate,
-} from "./overpass/query";
+} from "../overpass/query";
 
 export function buildCoastlineQuery(gameArea: GameArea): string {
   const bbox = formatOverpassBboxFromGameArea(gameArea);

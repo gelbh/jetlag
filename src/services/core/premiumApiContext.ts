@@ -3,7 +3,7 @@ import {
   LOCAL_SESSION_ID,
   type SessionRecord,
   type SessionTier,
-} from "../domain/annotations";
+} from "../../domain/map/annotations";
 
 interface PremiumApiContext {
   sessionId: string | null;

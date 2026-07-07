@@ -1,7 +1,7 @@
 import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { AnnotationRecord } from "../domain/annotations";
-import { isRetriableSyncError } from "../domain/syncRetry";
+import type { AnnotationRecord } from "../../domain/map/annotations";
+import { isRetriableSyncError } from "../../domain/device/syncRetry";
 import {
   countOfflineQueueForSession,
   enqueueOfflineWrite,

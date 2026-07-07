@@ -1,5 +1,5 @@
-import { useTimerStore } from "../state/timerStore";
-import { useSessionStore } from "../state/sessionStore";
+import { useTimerStore } from "../../state/timerStore";
+import { useSessionStore } from "../../state/sessionStore";
 import { clearOfflineQueueForSession } from "./offlineQueue";
 
 export async function clearSessionLocalArtifacts(

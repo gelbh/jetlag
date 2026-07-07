@@ -1,5 +1,5 @@
-import type { GameArea } from "../domain/annotations";
-import type { ElevationSampleCell } from "../domain/seaLevel";
+import type { GameArea } from "../../domain/map/annotations";
+import type { ElevationSampleCell } from "../../domain/geometry/seaLevel";
 
 const DEFAULT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const STABLE_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;

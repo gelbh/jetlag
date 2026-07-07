@@ -1,13 +1,13 @@
-import type { GameArea } from "../domain/annotations";
-import { gameAreaToBoundingBox } from "../domain/gameAreaBounds";
+import type { GameArea } from "../../domain/map/annotations";
+import { gameAreaToBoundingBox } from "../../domain/geometry/gameAreaBounds";
 import {
   buildOverpassAuditCases,
   type OverpassAuditCase,
-} from "./overpass/auditQueries";
+} from "../overpass/auditQueries";
 import {
   OVERPASS_ENDPOINTS,
   OVERPASS_USER_AGENT,
-} from "./overpass/endpoints";
+} from "../overpass/endpoints";
 
 export type { OverpassAuditCase };
 export { buildOverpassAuditCases };

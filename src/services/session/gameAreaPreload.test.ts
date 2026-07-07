@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DUBLIN_CITY_GAME_AREA } from "../test/fixtures/dublinGameArea";
-import { selectPreloadBanner, usePreloadStore } from "../state/preloadStore";
+import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
+import { selectPreloadBanner, usePreloadStore } from "../../state/preloadStore";
 import {
   gameAreaPreloadKey,
   preloadCriticalGameAreaCaches,
@@ -8,27 +8,27 @@ import {
   preloadJobGapMsForTests,
 } from "./gameAreaPreload";
 
-vi.mock("./adminDivisionBoundaries", () => ({
+vi.mock("../geo/adminDivisionBoundaries", () => ({
   fetchAdminDivisionFeaturesInArea: vi.fn(async () => []),
 }));
 
-vi.mock("./coastline", () => ({
+vi.mock("../geo/coastline", () => ({
   fetchPreparedCoastlineSegments: vi.fn(async () => []),
 }));
 
-vi.mock("./landmassFeatures", () => ({
+vi.mock("../geo/landmassFeatures", () => ({
   fetchLandmassFeaturesInArea: vi.fn(async () => []),
 }));
 
-vi.mock("./measuringPlaces", () => ({
+vi.mock("../geo/measuringPlaces", () => ({
   fetchMeasuringPlacesInArea: vi.fn(async () => []),
 }));
 
-vi.mock("./measuringLinearFeatures", () => ({
+vi.mock("../geo/measuringLinearFeatures", () => ({
   fetchPreparedMeasuringLinearSegments: vi.fn(async () => []),
 }));
 
-vi.mock("./transitStatic", () => ({
+vi.mock("../transit/transitStatic", () => ({
   fetchStaticTransit: vi.fn(async () => ({
     stops: [],
     routes: [],

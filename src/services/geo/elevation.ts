@@ -1,4 +1,4 @@
-import type { LatLngTuple } from "../domain/geometry";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
 
 const OPEN_METEO_ELEVATION_ENDPOINT = "https://api.open-meteo.com/v1/elevation";
 const ELEVATION_BATCH_SIZE = 100;

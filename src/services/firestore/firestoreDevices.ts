@@ -3,9 +3,9 @@ import type {
   NotificationPreferences,
   NotificationPlatform,
   SessionDeviceRecord,
-} from "../domain/notifications";
-import type { PlayerRole } from "../domain/playerRole";
-import { getFirestoreDb } from "./firebase";
+} from "../../domain/device/notifications";
+import type { PlayerRole } from "../../domain/session/playerRole";
+import { getFirestoreDb } from "../core/firebase";
 
 export async function upsertSessionDevice(
   sessionId: string,

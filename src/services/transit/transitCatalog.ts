@@ -1,6 +1,6 @@
-import type { GameArea } from "../domain/annotations";
-import { gameAreaCenter } from "../domain/geometry";
-import type { TransitMetro } from "../domain/transit";
+import type { GameArea } from "../../domain/map/annotations";
+import { gameAreaCenter } from "../../domain/geometry/geometry";
+import type { TransitMetro } from "../../domain/map/transit";
 
 const EARTH_RADIUS_KM = 6_371;
 

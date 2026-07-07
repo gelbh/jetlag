@@ -3,10 +3,10 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import JSZip from "jszip";
 import { describe, expect, it } from "vitest";
-import { gameAreaToBoundingBox } from "../domain/geometry";
+import { gameAreaToBoundingBox } from "../../domain/geometry/geometry";
 import { parseBoundaryFile, parseBoundaryKml } from "./kmzImport";
 
-const fixturesDir = join(dirname(fileURLToPath(import.meta.url)), "../test/fixtures");
+const fixturesDir = join(dirname(fileURLToPath(import.meta.url)), "../../test/fixtures");
 
 function readFixture(name: string): string {
   return readFileSync(join(fixturesDir, name), "utf8");

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AnnotationRecord } from "../domain/annotations";
+import type { AnnotationRecord } from "../../domain/map/annotations";
 import {
   assertNoNestedArrays,
   buildHidingZoneDocument,

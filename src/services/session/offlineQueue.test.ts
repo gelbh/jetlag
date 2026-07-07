@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { AnnotationRecord } from "../domain/annotations";
+import type { AnnotationRecord } from "../../domain/map/annotations";
 import {
   enqueueOfflineWrite,
   readOfflineQueue,

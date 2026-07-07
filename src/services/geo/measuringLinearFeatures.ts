@@ -1,22 +1,22 @@
 import type { Feature, LineString } from "geojson";
-import type { GameArea } from "../domain/annotations";
+import type { GameArea } from "../../domain/map/annotations";
 import {
   gameAreaToBoundingBox,
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
   type LatLngTuple,
   type PreparedLinearSegments,
-} from "../domain/geometry";
+} from "../../domain/geometry/geometry";
 import {
   measuringLinearOverpassSelectors,
   measuringLocationLabel,
   type MeasuringFromKind,
-} from "../domain/measuringQuestions";
+} from "../../domain/questions/measuringQuestions";
 import {
   getOrFetchCached,
   linearSegmentsCacheKey,
 } from "./geographicFeatureCache";
-import { queryOverpass } from "./overpassClient";
+import { queryOverpass } from "../core/overpassClient";
 
 type OverpassWay = {
   type: string;

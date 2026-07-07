@@ -4,14 +4,14 @@ import booleanIntersects from "@turf/boolean-intersects";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { lineString, point as turfPoint } from "@turf/helpers";
 import polygonize from "@turf/polygonize";
-import type { GameArea } from "../domain/annotations";
+import type { GameArea } from "../../domain/map/annotations";
 import {
   gameAreaToBoundingBox,
   gameAreaToPolygon,
   simplifyGameArea,
   type LatLngTuple,
-} from "../domain/geometry";
-import { queryOverpass } from "./overpassClient";
+} from "../../domain/geometry/geometry";
+import { queryOverpass } from "../core/overpassClient";
 import { parseMatchingAreaGeoJson } from "./matchingAreaGeoJson";
 import {
   adminDivisionCacheKey,

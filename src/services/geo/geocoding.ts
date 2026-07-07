@@ -1,6 +1,6 @@
-import type { GameArea } from "../domain/annotations";
-import { normalizeBoundingBox } from "../domain/gameAreaBounds";
-import type { LatLngTuple } from "../domain/geometry";
+import type { GameArea } from "../../domain/map/annotations";
+import { normalizeBoundingBox } from "../../domain/geometry/gameAreaBounds";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
   computeApproximateAreaSqMi,
   mergeRankedGeocodedPlaceCandidates,
@@ -13,8 +13,8 @@ import {
   getOrFetchCached,
   geographicCacheKey,
 } from "./geographicFeatureCache";
-import { FetchTimeoutError, fetchWithTimeout } from "./fetchWithTimeout";
-import { retryAsync } from "./retryAsync";
+import { FetchTimeoutError, fetchWithTimeout } from "../core/fetchWithTimeout";
+import { retryAsync } from "../core/retryAsync";
 
 const NOMINATIM_ENDPOINT = "https://nominatim.openstreetmap.org/search";
 const NOMINATIM_REVERSE_ENDPOINT =
@@ -182,7 +182,7 @@ async function geoJsonToGameArea(
     return undefined;
   }
 
-  const { simplifyGameArea } = await import("../domain/geometry");
+  const { simplifyGameArea } = await import("../../domain/geometry/geometry");
 
   if (geojson.type === "Polygon") {
     return simplifyGameArea({

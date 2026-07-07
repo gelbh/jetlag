@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { LatLngTuple } from "../domain/geometry";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
   clearElevationCacheForTests,
   fetchElevations,

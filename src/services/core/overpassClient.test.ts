@@ -9,7 +9,7 @@ import { setPremiumApiContext } from "./premiumApiContext";
 import * as accessControl from "./accessControl";
 import * as firebase from "./firebase";
 import * as firebaseAuthReady from "./firebaseAuthReady";
-import type { SessionRecord } from "../domain/annotations";
+import type { SessionRecord } from "../../domain/map/annotations";
 
 function premiumSession(): SessionRecord {
   return {

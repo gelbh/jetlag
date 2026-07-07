@@ -1,12 +1,12 @@
-import type { GameArea } from "../domain/annotations";
-import { gameAreaToBoundingBox } from "../domain/geometry";
+import type { GameArea } from "../../domain/map/annotations";
+import { gameAreaToBoundingBox } from "../../domain/geometry/geometry";
 import type {
   TransitRouteLine,
   TransitRouteMode,
   TransitStaticData,
   TransitStop,
-} from "../domain/transit";
-import { queryOverpass } from "./overpassClient";
+} from "../../domain/map/transit";
+import { queryOverpass } from "../core/overpassClient";
 import {
   buildTransitStopOverpassQuery,
   transitStopDisplayName,
@@ -14,7 +14,7 @@ import {
 import {
   getOrFetchCached,
   staticTransitCacheKey,
-} from "./geographicFeatureCache";
+} from "../geo/geographicFeatureCache";
 
 const MAX_STOPS = 250;
 const MAX_ROUTES = 80;

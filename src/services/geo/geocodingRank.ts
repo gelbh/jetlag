@@ -1,7 +1,7 @@
-import { formatPlayAreaSummary, gameAreaSquareMiles } from "../domain/gameSize";
-import type { LatLngTuple } from "../domain/geometry";
-import { isPointInGameArea, placeToGameArea } from "../domain/geometryCore";
-import { haversineMeters } from "../domain/hidingZone";
+import { formatPlayAreaSummary, gameAreaSquareMiles } from "../../domain/session/gameSize";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import { isPointInGameArea, placeToGameArea } from "../../domain/geometry/geometryCore";
+import { haversineMeters } from "../../domain/session/hidingZone";
 import type { GeocodedPlace } from "./geocoding";
 
 const SETTLEMENT_CATEGORIES = new Set([

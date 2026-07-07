@@ -4,10 +4,10 @@ import type {
   GameArea,
   SessionRecord,
   SessionTier,
-} from "../domain/annotations";
-import type { SessionRulesPatch } from "../domain/advancedSessionSettings";
-import type { GameSize } from "../domain/gameSize";
-import { hidingZoneRadiusMeters } from "../domain/gameSize";
+} from "../../domain/map/annotations";
+import type { SessionRulesPatch } from "../../domain/session/advancedSessionSettings";
+import type { GameSize } from "../../domain/session/gameSize";
+import { hidingZoneRadiusMeters } from "../../domain/session/gameSize";
 import {
   parseDisabledTools,
   parseDistanceUnit,
@@ -23,23 +23,23 @@ import {
   PHOTO_ANSWER_DEADLINE_MINUTES_MAX,
   QUESTION_ANSWER_DEADLINE_MINUTES_MIN,
   QUESTION_ANSWER_DEADLINE_MINUTES_MAX,
-} from "../domain/sessionRules";
-import type { MemberRoles, PlayerRole } from "../domain/playerRole";
-import type { HidingZoneRecord } from "../domain/hidingZone";
+} from "../../domain/session/sessionRules";
+import type { MemberRoles, PlayerRole } from "../../domain/session/playerRole";
+import type { HidingZoneRecord } from "../../domain/session/hidingZone";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
   SessionMessageRecord,
-} from "../domain/sessionChat";
+} from "../../domain/session/sessionChat";
 import {
   parseCustomCategories,
   parseCustomLocationPins,
   parseCustomMatchingAreas,
-} from "../domain/sessionCustomContent";
+} from "../../domain/session/sessionCustomContent";
 import {
   boundingBoxToGameArea,
   gameAreaToBoundingBox,
-} from "../domain/gameAreaBounds";
+} from "../../domain/geometry/gameAreaBounds";
 
 export interface FirestoreGameArea {
   south: number;

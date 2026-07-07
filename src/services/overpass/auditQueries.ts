@@ -1,12 +1,12 @@
-import type { GameArea } from "../../domain/annotations";
-import { gameAreaToBoundingBox } from "../../domain/gameAreaBounds";
+import type { GameArea } from "../../domain/map/annotations";
+import { gameAreaToBoundingBox } from "../../domain/geometry/gameAreaBounds";
 import {
   MEASURING_CATALOG,
   measuringLinearOverpassSelectors,
   measuringLocationOverpassSelectors,
   type MeasuringFromKind,
   type MeasuringLocationCategory,
-} from "../../domain/measuringQuestions";
+} from "../../domain/questions/measuringQuestions";
 import {
   formatOverpassBboxFromGameArea,
   overpassQueryTemplate,

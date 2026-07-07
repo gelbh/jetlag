@@ -5,7 +5,7 @@ import {
   summarizeOverpassAuditRuns,
   type OverpassAuditRunResult,
 } from "./overpassAudit";
-import { DUBLIN_CITY_GAME_AREA } from "../test/fixtures/dublinGameArea";
+import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 
 describe("overpassAudit", () => {
   it("builds audit cases for admin, landmass, measuring, and transit", () => {

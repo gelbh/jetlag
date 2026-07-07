@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { useSessionStore } from "../state/sessionStore";
-import { useTimerStore } from "../state/timerStore";
-import { resetAllStores } from "../test/helpers/storeReset";
+import { useSessionStore } from "../../state/sessionStore";
+import { useTimerStore } from "../../state/timerStore";
+import { resetAllStores } from "../../test/helpers/storeReset";
 import {
   clearSessionLocalArtifacts,
   pruneStaleTimerSessions,

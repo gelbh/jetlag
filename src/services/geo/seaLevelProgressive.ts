@@ -1,10 +1,10 @@
-import type { GameArea } from "../domain/annotations";
+import type { GameArea } from "../../domain/map/annotations";
 import {
   resolveCoarseSeaLevelDivisions,
   resolveFineSeaLevelDivisions,
   sampleGameAreaCells,
   type ElevationSampleCell,
-} from "../domain/seaLevel";
+} from "../../domain/geometry/seaLevel";
 import { fetchElevations, type ElevationFetchProfile } from "./elevation";
 import {
   readSeaLevelSamplingCache,
@@ -12,7 +12,7 @@ import {
   writeSeaLevelSamplingCache,
   type CachedSeaLevelSampling,
 } from "./geographicFeatureCache";
-import { gameAreaPreloadKey } from "./gameAreaPreload";
+import { gameAreaPreloadKey } from "../session/gameAreaPreload";
 
 const SAMPLING_BATCH_SIZE = 50;
 const BACKGROUND_BATCH_GAP_MS = 400;

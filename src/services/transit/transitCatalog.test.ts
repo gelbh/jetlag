@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { GameArea } from "../domain/annotations";
-import { inferTransitMetroId } from "../services/transitCatalog";
+import type { GameArea } from "../../domain/map/annotations";
+import { inferTransitMetroId } from "./transitCatalog";
 
 const londonGameArea: GameArea = {
   type: "Polygon",

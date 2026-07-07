@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import * as overpassClient from "./overpassClient";
+import * as overpassClient from "../core/overpassClient";
 import {
   buildTentacleOverpassQuery,
   fetchTentaclePois,

@@ -10,14 +10,14 @@ import {
   updateDoc,
   type Unsubscribe,
 } from "firebase/firestore";
-import type { PlayerRole } from "../domain/playerRole";
-import type { HidingZoneRecord } from "../domain/hidingZone";
+import type { PlayerRole } from "../../domain/session/playerRole";
+import type { HidingZoneRecord } from "../../domain/session/hidingZone";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
   SessionMessageRecord,
-} from "../domain/sessionChat";
-import { getFirestoreDb } from "./firebase";
+} from "../../domain/session/sessionChat";
+import { getFirestoreDb } from "../core/firebase";
 import {
   buildHidingZoneDocument,
   buildPendingQuestionDocument,

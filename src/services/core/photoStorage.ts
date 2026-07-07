@@ -4,11 +4,11 @@ import {
   uploadBytes,
   type UploadMetadata,
 } from "firebase/storage";
-import type { SessionRecord } from "../domain/annotations";
+import type { SessionRecord } from "../../domain/map/annotations";
 import {
   formatPhotoStorageError,
   photoUploadAccessError,
-} from "../domain/photoUploadAccess";
+} from "../../domain/questions/photoUploadAccess";
 import { ensureAnonymousUser, getFirebaseStorage } from "./firebase";
 
 const MAX_DIMENSION = 1920;

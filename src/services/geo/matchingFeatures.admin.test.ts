@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { GameArea } from "../domain/annotations";
+import type { GameArea } from "../../domain/map/annotations";
 import * as adminDivisionBoundaries from "./adminDivisionBoundaries";
 import {
   fetchMatchingFeaturesInArea,

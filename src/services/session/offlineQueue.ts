@@ -1,4 +1,4 @@
-import type { AnnotationRecord } from "../domain/annotations";
+import type { AnnotationRecord } from "../../domain/map/annotations";
 
 const DB_NAME = "jetlag-offline-queue";
 const STORE_NAME = "writes";
