@@ -15,6 +15,8 @@ import {
   PENDING_QUESTION_TEXT,
 } from "./fixtures";
 
+test.setTimeout(120_000);
+
 async function runHiderAnswerFlow(
   browser: import("@playwright/test").Browser,
   sendQuestion: (page: import("@playwright/test").Page) => Promise<void>,

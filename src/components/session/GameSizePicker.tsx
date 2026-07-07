@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { GameArea } from "../../domain/map/annotations";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/gameSize";
@@ -43,17 +43,22 @@ export function GameSizePicker({
     );
   }, [gameArea, distanceUnit]);
   const [userOverrode, setUserOverrode] = useState(false);
+  const onChangeRef = useRef(onChange);
 
   useEffect(() => {
-    if (!gameArea || userOverrode) {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    if (!gameArea || userOverrode || disabled) {
       return;
     }
 
     const next = recommendGameSize(gameArea, distanceUnit);
     if (next !== value) {
-      onChange(next);
+      onChangeRef.current(next);
     }
-  }, [gameArea, distanceUnit, onChange, userOverrode, value]);
+  }, [disabled, gameArea, distanceUnit, userOverrode, value]);
 
   const compactArea = gameArea
     ? distanceUnit === "metric"

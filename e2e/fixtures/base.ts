@@ -210,7 +210,6 @@ export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
   await sheet.waitFor({ state: "visible" });
   const toolButton = sheet.getByRole("button", { name: toolName });
   await expect(toolButton).toBeVisible();
-  await toolButton.scrollIntoViewIfNeeded();
   await toolButton.evaluate((element) => {
     element.dispatchEvent(
       new MouseEvent("click", { bubbles: true, cancelable: true }),

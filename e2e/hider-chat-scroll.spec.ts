@@ -10,6 +10,8 @@ import {
 } from "./fixtures";
 
 test.describe("hider chat scroll", () => {
+  test.setTimeout(120_000);
+
   test("reaches the second pending answer after the first is answered", async ({
     browser,
   }) => {

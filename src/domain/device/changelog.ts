@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.1.1";
+export const APP_VERSION = "0.1.2";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,25 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.1.2",
+    date: "2026-07-08",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Map screen: fix render loop that blocked session create and the tool dock",
+          "Photo answers: hider can submit photo and cannot-answer replies in game chat",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "E2E: refresh visual baselines and align smoke session timeouts",
+        ],
+      },
+    ],
+  },
   {
     version: "0.1.1",
     date: "2026-07-07",

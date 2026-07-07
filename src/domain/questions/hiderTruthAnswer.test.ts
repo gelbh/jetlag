@@ -5,7 +5,7 @@ import {
 } from "./hiderTruthAnswer";
 import type { PendingQuestionRecord } from "../session/sessionChat";
 
-vi.mock("../services/geo/elevation", () => ({
+vi.mock("../../services/geo/elevation", () => ({
   fetchElevations: vi.fn(async (points: [number, number][]) =>
     points.map(() => 10),
   ),

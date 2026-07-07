@@ -81,6 +81,40 @@ export type SessionRulesInput = Pick<
   | "customLocationPins"
 >;
 
+export const DEFAULT_SESSION_RULES: SessionRulesInput = { gameSize: "medium" };
+
+export function sessionRulesFromRecord(
+  session: SessionRecord | null | undefined,
+): SessionRulesInput {
+  if (!session) {
+    return DEFAULT_SESSION_RULES;
+  }
+
+  return {
+    gameSize: session.gameSize,
+    distanceUnit: session.distanceUnit,
+    hidingZoneRadiusMeters: session.hidingZoneRadiusMeters,
+    hidingPeriodMinutes: session.hidingPeriodMinutes,
+    photoAnswerDeadlineMinutes: session.photoAnswerDeadlineMinutes,
+    questionAnswerDeadlineMinutes: session.questionAnswerDeadlineMinutes,
+    disabledTools: session.disabledTools,
+    tentaclesEnabled: session.tentaclesEnabled,
+    thermometerPresetMiles: session.thermometerPresetMiles,
+    thermometerPresetMeters: session.thermometerPresetMeters,
+    tentacleMediumRadiusMeters: session.tentacleMediumRadiusMeters,
+    tentacleLargeRadiusMeters: session.tentacleLargeRadiusMeters,
+    customMatchingAreas: session.customMatchingAreas,
+    customCategories: session.customCategories,
+    customLocationPins: session.customLocationPins,
+  };
+}
+
+export function sessionRulesSnapshot(
+  session: SessionRecord | null | undefined,
+): string {
+  return JSON.stringify(sessionRulesFromRecord(session));
+}
+
 export function sessionGameSize(session: SessionRulesInput): GameSize {
   return session.gameSize ?? "medium";
 }

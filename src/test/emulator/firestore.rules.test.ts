@@ -589,6 +589,268 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows hider to answer a photo question with an uploaded photo", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+        }),
+      );
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-photo")
+        .set({
+          toolType: "photo",
+          createdByUid: "host-1",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          status: "pending",
+          placement: {
+            geometryJson: JSON.stringify({
+              type: "FeatureCollection",
+              features: [],
+            }),
+            metadata: { photoCategoryId: "tree" },
+          },
+          replyOptions: [
+            { id: "photo", label: "Photo uploaded" },
+            { id: "cannot_answer", label: "Cannot answer" },
+          ],
+          promptText: "Send a photo of a tree.",
+          answerableAt: "2026-01-01T00:00:00.000Z",
+        }),
+    );
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-photo")
+        .update({
+          answer: {
+            kind: "photo",
+            storagePath: "sessions/session-1/pendingQuestions/pq-photo/photo.jpg",
+          },
+          status: "answered",
+        }),
+    );
+  });
+
+  it("allows hider to answer a photo question with cannot answer", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+        }),
+      );
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-photo-na")
+        .set({
+          toolType: "photo",
+          createdByUid: "host-1",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          status: "pending",
+          placement: {
+            geometryJson: JSON.stringify({
+              type: "FeatureCollection",
+              features: [],
+            }),
+            metadata: { photoCategoryId: "tree" },
+          },
+          replyOptions: [
+            { id: "photo", label: "Photo uploaded" },
+            { id: "cannot_answer", label: "Cannot answer" },
+          ],
+          promptText: "Send a photo of a tree.",
+          answerableAt: "2026-01-01T00:00:00.000Z",
+        }),
+    );
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-photo-na")
+        .update({
+          answer: { kind: "cannot_answer" },
+          status: "answered",
+        }),
+    );
+  });
+
+  it("allows hider to answer a photo question late with answeredLate", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+        }),
+      );
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-photo-late")
+        .set({
+          toolType: "photo",
+          createdByUid: "host-1",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          status: "pending",
+          placement: {
+            geometryJson: JSON.stringify({
+              type: "FeatureCollection",
+              features: [],
+            }),
+            metadata: { photoCategoryId: "tree" },
+          },
+          replyOptions: [
+            { id: "photo", label: "Photo uploaded" },
+            { id: "cannot_answer", label: "Cannot answer" },
+          ],
+          promptText: "Send a photo of a tree.",
+          answerableAt: "2026-01-01T00:00:00.000Z",
+          deadlineExpiredAt: "2026-01-01T00:10:00.000Z",
+        }),
+    );
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-photo-late")
+        .update({
+          answer: { kind: "cannot_answer" },
+          status: "answered",
+          answeredLate: true,
+        }),
+    );
+  });
+
+  it("allows hider to update game chat message after photo answer", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+        }),
+      );
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-photo-msg")
+        .set({
+          toolType: "photo",
+          createdByUid: "host-1",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          status: "pending",
+          placement: {
+            geometryJson: JSON.stringify({
+              type: "FeatureCollection",
+              features: [],
+            }),
+            metadata: { photoCategoryId: "tree" },
+          },
+          replyOptions: [
+            { id: "photo", label: "Photo uploaded" },
+            { id: "cannot_answer", label: "Cannot answer" },
+          ],
+          promptText: "Send a photo of a tree.",
+          answerableAt: "2026-01-01T00:00:00.000Z",
+        }),
+    );
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("messages")
+        .doc("msg-photo")
+        .set({
+          channel: "game",
+          senderUid: "host-1",
+          senderRole: "seeker",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          kind: "question",
+          pendingQuestionId: "pq-photo-msg",
+          toolType: "photo",
+          promptText: "Send a photo of a tree.",
+          replyOptions: [
+            { id: "photo", label: "Photo uploaded" },
+            { id: "cannot_answer", label: "Cannot answer" },
+          ],
+          status: "pending",
+        }),
+    );
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-photo-msg")
+        .update({
+          answer: { kind: "cannot_answer" },
+          status: "answered",
+        }),
+    );
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("messages")
+        .doc("msg-photo")
+        .update({ selectedReply: "cannot_answer", status: "answered" }),
+    );
+  });
+
   it("stores session documents with expected host uid", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

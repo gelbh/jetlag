@@ -59,7 +59,7 @@ import {
   sessionRulesPatchFromAdvancedSettings,
   type AdvancedSessionSettingsValue,
 } from "../domain/session/advancedSessionSettings";
-import { resolveToolDockEnabled } from "../domain/session/sessionRules";
+import { resolveToolDockEnabled, sessionRulesFromRecord, sessionRulesSnapshot } from "../domain/session/sessionRules";
 import {
   startEndGameSession,
   updateSessionRules,
@@ -97,7 +97,7 @@ import {
   metroSupportsLiveVehicles,
 } from "../services/transit/transitCatalog";
 import { effectiveMapStyle } from "../domain/device/powerProfile";
-import { preloadGameAreaCaches } from "../services/session/gameAreaPreload";
+import { preloadGameAreaCaches, gameAreaPreloadKey } from "../services/session/gameAreaPreload";
 import { startSeaLevelBackgroundSampling } from "../services/geo/seaLevelProgressive";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useFirebaseAuthReady } from "../hooks/sync/useFirebaseAuthReady";
@@ -248,17 +248,24 @@ export function MapScreen() {
     useState<AdvancedSessionSettingsValue | null>(() =>
       session ? advancedSettingsFromSession(session) : null,
     );
-  const [draftSourceSessionId, setDraftSourceSessionId] = useState<string | null>(
-    null,
-  );
   const currentSessionId = session?.id ?? null;
 
-  if (currentSessionId !== draftSourceSessionId) {
-    setDraftSourceSessionId(currentSessionId);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset draft when switching sessions only
     setDraftAdvancedSettings(
       session ? advancedSettingsFromSession(session) : null,
     );
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset draft when switching sessions only
+  }, [currentSessionId]);
+
+  const sessionRulesKey = sessionRulesSnapshot(session);
+  const sessionRules = useMemo(
+    () => sessionRulesFromRecord(session),
+    [sessionRulesKey],
+  );
+  const preloadGameAreaKey = session?.gameArea
+    ? gameAreaPreloadKey(session.gameArea)
+    : null;
 
   const gameRulesEditable = isHost && !timer.hasStarted;
   const mapShellRef = useRef<HTMLDivElement>(null);
@@ -279,13 +286,13 @@ export function MapScreen() {
   });
 
   useEffect(() => {
-    if (!session?.gameArea || !firebaseAuthReady || lowPowerMode) {
+    if (!preloadGameAreaKey || !session?.gameArea || !firebaseAuthReady || lowPowerMode) {
       return;
     }
 
     preloadGameAreaCaches(session.gameArea);
     startSeaLevelBackgroundSampling(session.gameArea);
-  }, [session?.gameArea, firebaseAuthReady, lowPowerMode]);
+  }, [firebaseAuthReady, lowPowerMode, preloadGameAreaKey, session?.gameArea]);
 
   const overlay = useMapOverlayState();
   const [mapError, setMapError] = useState<string | null>(null);
@@ -309,29 +316,34 @@ export function MapScreen() {
   useLiveActivitySync({
     enabled: Boolean(session?.id),
     sessionId: session?.id,
-    sessionRules: session ?? { gameSize: "medium" },
+    sessionRules,
     timerState: timer.timerState,
     timerHasStarted: timer.hasStarted,
     pendingQuestions,
     preferences: liveNotificationPreferences,
   });
 
-  useQuestionDeadlineEnforcement({
-    sessionId: session?.id,
-    enabled: canControlTimer,
-    sessionRules: session ?? { gameSize: "medium" },
-    pendingQuestions,
-    hidingZones,
-    timerRunning: timer.running,
-    pauseTimer: timer.pause,
-    resumeTimer: timer.start,
-    postSystemMessage: async (text) => {
+  const postDeadlineSystemMessage = useCallback(
+    async (text: string) => {
       if (!session?.id || !uid) {
         return;
       }
 
       await postSystemMessage(session.id, uid, "seeker", text);
     },
+    [postSystemMessage, session, uid],
+  );
+
+  useQuestionDeadlineEnforcement({
+    sessionId: session?.id,
+    enabled: canControlTimer,
+    sessionRules,
+    pendingQuestions,
+    hidingZones,
+    timerRunning: timer.running,
+    pauseTimer: timer.pause,
+    resumeTimer: timer.start,
+    postSystemMessage: postDeadlineSystemMessage,
   });
 
   const finishPlacement = useCallback(() => {
@@ -464,7 +476,7 @@ export function MapScreen() {
   const thermometerTool = useThermometerTool({
     active: activeTool === "thermometer",
     annotations,
-    sessionRules: session ?? { gameSize: "medium" },
+    sessionRules,
     pendingQuestions,
     canSubmitQuestion,
     createAnnotation,
@@ -555,7 +567,7 @@ export function MapScreen() {
 
   useEffect(() => {
     setPremiumApiContext(session);
-  }, [session]);
+  }, [session?.id, session?.tier]);
 
   useEffect(() => {
     if (
@@ -578,7 +590,7 @@ export function MapScreen() {
         );
       }
     })();
-  }, [session, setLastSyncError]);
+  }, [session?.id, setLastSyncError]);
 
   useEffect(() => {
     if (!transitLiveSupported && transitLiveEnabled) {
@@ -610,7 +622,7 @@ export function MapScreen() {
     setAwaitingPlacement(false);
     overlay.closeSheet();
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [overlay, selectedAnnotationId, setActiveTool]);
+  }, [overlay.closeSheet, selectedAnnotationId, setActiveTool]);
 
   const gameArea = session?.gameArea;
 
@@ -747,7 +759,7 @@ export function MapScreen() {
     setSelectedAnnotationId(null);
     cancelGeometryEdit();
     setAwaitingPlacement(false);
-  }, [cancelGeometryEdit, overlay, setSelectedAnnotationId]);
+  }, [cancelGeometryEdit, overlay.closeSheet, setSelectedAnnotationId]);
 
   const {
     panelPeeked,

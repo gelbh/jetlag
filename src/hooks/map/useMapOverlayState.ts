@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 export type MapSheetOverlay = "none" | "chat" | "settings" | "log";
 
@@ -32,14 +32,17 @@ export function useMapOverlayState(): UseMapOverlayStateResult {
     setSheet("none");
   }, []);
 
-  return {
-    sheet,
-    isChatOpen: sheet === "chat",
-    isSettingsOpen: sheet === "settings",
-    isLogOpen: sheet === "log",
-    openChat,
-    openSettings,
-    openLog,
-    closeSheet,
-  };
+  return useMemo(
+    () => ({
+      sheet,
+      isChatOpen: sheet === "chat",
+      isSettingsOpen: sheet === "settings",
+      isLogOpen: sheet === "log",
+      openChat,
+      openSettings,
+      openLog,
+      closeSheet,
+    }),
+    [sheet, openChat, openSettings, openLog, closeSheet],
+  );
 }

@@ -17,7 +17,7 @@ export const useTimerStore = create<TimerStoreState>()(
     (set, get) => ({
       bySessionId: {},
       getTimer: (sessionId) =>
-        get().bySessionId[sessionId] ?? { ...INITIAL_TIMER_STATE },
+        get().bySessionId[sessionId] ?? INITIAL_TIMER_STATE,
       setTimer: (sessionId, state) =>
         set((current) => ({
           bySessionId: {

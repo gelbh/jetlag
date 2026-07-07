@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import type { LatLngBoundsExpression } from "leaflet";
 import { AppLogo } from "../components/ui/AppLogo";
@@ -117,6 +117,17 @@ export function CreateSession() {
   );
   const [accessCode, setAccessCode] = useState("");
   const [hostHasAccessClaim, setHostHasAccessClaim] = useState(false);
+  const handleGameSizeChange = useCallback(
+    (size: GameSize) => {
+      setGameSize(size);
+      setAdvancedSettings((current) => ({
+        ...defaultAdvancedSessionSettings(size, distanceUnit),
+        ...current,
+        hidingZoneRadiusMeters: hidingZoneRadiusMeters(size, distanceUnit),
+      }));
+    },
+    [distanceUnit],
+  );
   const metros = useMemo(() => listTransitMetros(), []);
   const [importedGameArea, setImportedGameArea] = useState<GameArea | null>(
     null,
@@ -125,10 +136,15 @@ export function CreateSession() {
   const [importLoading, setImportLoading] = useState(false);
   const importFileInputRef = useRef<HTMLInputElement>(null);
   const userLocationRef = useRef<LatLngTuple | null>(null);
+  const appliedPresetRef = useRef<string | null>(null);
 
   useEffect(() => {
     const presetId = searchParams.get("preset");
     if (!presetId) {
+      return;
+    }
+
+    if (appliedPresetRef.current === presetId) {
       return;
     }
 
@@ -137,6 +153,7 @@ export function CreateSession() {
       return;
     }
 
+    appliedPresetRef.current = presetId;
     const draft = gamePresetToCreateSessionDraft(preset);
     /* eslint-disable react-hooks/set-state-in-effect -- apply preset query param once when store hydrates */
     setGameSize(draft.gameSize);
@@ -161,7 +178,7 @@ export function CreateSession() {
       setLocationQuery(draft.placeLabel);
     }
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [framing, presets, searchParams]); // eslint-disable-line react-hooks/exhaustive-deps -- apply preset once when store hydrates
+  }, [framing.applyFocusToGameArea, presets, searchParams]);
 
   useEffect(() => {
     void getCurrentPosition({ highAccuracy: false })
@@ -873,14 +890,7 @@ export function CreateSession() {
           gameArea={previewGameArea}
           value={gameSize}
           distanceUnit={distanceUnit}
-          onChange={(size) => {
-            setGameSize(size);
-            setAdvancedSettings((current) => ({
-              ...defaultAdvancedSessionSettings(size, distanceUnit),
-              ...current,
-              hidingZoneRadiusMeters: hidingZoneRadiusMeters(size, distanceUnit),
-            }));
-          }}
+          onChange={handleGameSizeChange}
           disabled={loading || verifyingAccess}
         />
 

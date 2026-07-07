@@ -2,6 +2,7 @@ import { test, expect } from "../fixtures";
 import {
   createHostSession,
   createMultiplayerContexts,
+  dismissMapOnboarding,
   expectCreatePageMapPreviewLoaded,
   joinAsRole,
   prepareE2EPage,
@@ -21,7 +22,10 @@ test("@smoke creates a session from home and reaches the map", async ({
   await expectCreatePageMapPreviewLoaded(page);
   await page.getByRole("button", { name: "Confirm game area" }).click();
   await expect(page).toHaveURL(/\/map/, { timeout: 15_000 });
-  await expect(page.getByRole("button", { name: "Radar" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Radar" })).toBeVisible({
+    timeout: 15_000,
+  });
+  await dismissMapOnboarding(page);
 });
 
 test("@smoke host and guest join the same emulator session", async ({

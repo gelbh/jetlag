@@ -1,5 +1,5 @@
 import { type Browser, type Page, expect } from "@playwright/test";
-import { LOCAL_GAME_AREA, prepareE2EPage } from "./base";
+import { LOCAL_GAME_AREA, dismissMapOnboarding, prepareE2EPage } from "./base";
 
 type PlayerRole = "seeker" | "hider";
 type GameSize = "small" | "medium" | "large";
@@ -80,6 +80,7 @@ export async function openMapWithLocalSession(
   await seedLocalSession(page, options);
   await page.goto("/map");
   await page.getByRole("button", { name: "Radar" }).waitFor();
+  await dismissMapOnboarding(page);
 }
 
 export async function expectCreatePageMapPreviewLoaded(page: Page) {
@@ -108,6 +109,7 @@ export async function createSessionFromCreatePage(page: Page) {
   await expect(page.getByRole("button", { name: "Radar" })).toBeVisible({
     timeout: 15_000,
   });
+  await dismissMapOnboarding(page);
 }
 
 export async function readSessionCode(page: Page): Promise<string> {
@@ -138,6 +140,7 @@ export async function joinAsRole(
       timeout: 15_000,
     });
   }
+  await dismissMapOnboarding(guestPage);
 }
 
 export async function createHostSession(page: Page) {

@@ -14,7 +14,11 @@ import {
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { ChatUnreadBadge } from "../components/chat/ChatUnreadBadge";
 import { HidingZonePanel } from "../components/hider/HidingZonePanel";
-import { effectiveHidingZoneRadiusMeters, formatHidingZoneRadiusLabel } from "../domain/session/gameSize";
+import { DEFAULT_SESSION_RULES } from "../domain/session/sessionRules";
+import {
+  effectiveHidingZoneRadiusMeters,
+  formatHidingZoneRadiusLabel,
+} from "../domain/session/gameSize";
 import { hidingZonePreviewPositions } from "../domain/session/hidingZone";
 import { MapStatusRail } from "../components/session/MapStatusRail";
 import {
@@ -193,7 +197,7 @@ export function HiderMapScreen() {
   useLiveActivitySync({
     enabled: Boolean(sessionId),
     sessionId,
-    sessionRules: session ?? { gameSize: "medium" },
+    sessionRules: session ?? DEFAULT_SESSION_RULES,
     timerState: timer.timerState,
     timerHasStarted: timer.hasStarted,
     pendingQuestions,
@@ -256,13 +260,13 @@ export function HiderMapScreen() {
   const openWizardExclusive = useCallback(() => {
     overlay.closeSheet();
     zoneTool.openWizard();
-  }, [overlay, zoneTool.openWizard]);
+  }, [overlay.closeSheet, zoneTool.openWizard]);
 
   const openChatExclusive = useCallback(() => {
     zoneTool.closeWizard();
     setChatAnswerError(null);
     overlay.openChat();
-  }, [overlay, zoneTool.closeWizard]);
+  }, [overlay.openChat, zoneTool.closeWizard]);
 
   const dismissTruthReveal = useCallback(() => {
     setTruthReveal(null);
@@ -271,7 +275,7 @@ export function HiderMapScreen() {
   const openSettingsExclusive = useCallback(() => {
     zoneTool.closeWizard();
     overlay.openSettings();
-  }, [overlay, zoneTool.closeWizard]);
+  }, [overlay.openSettings, zoneTool.closeWizard]);
 
   const [wizardPeeked, setWizardPeeked] = useState(false);
 
@@ -288,7 +292,7 @@ export function HiderMapScreen() {
   const openLogExclusive = useCallback(() => {
     zoneTool.closeWizard();
     overlay.openLog();
-  }, [overlay, zoneTool.closeWizard]);
+  }, [overlay.openLog, zoneTool.closeWizard]);
 
   const handleMapClick = useCallback(
     (lat: number, lng: number) => {

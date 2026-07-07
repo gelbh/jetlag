@@ -51,6 +51,7 @@ export function CreateSessionMapPane({
           onMapClick={onMapClick}
           zoom={10}
           focusBounds={focusBounds}
+          fitBoundsMode="once"
           fitBoundsPadding={[48, 48]}
           className="h-full w-full"
         >

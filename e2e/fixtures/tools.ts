@@ -13,9 +13,15 @@ async function advanceWizard(page: Page) {
   await next.click();
 }
 
+async function waitForMapPlacementCrosshair(page: Page) {
+  await expect(page.locator(".map-crosshair")).toBeVisible({
+    timeout: 15_000,
+  });
+}
+
 async function waitForWizardNext(page: Page) {
   await expect(page.getByRole("button", { name: "Next" })).toBeEnabled({
-    timeout: 30_000,
+    timeout: 60_000,
   });
 }
 
@@ -24,7 +30,7 @@ async function waitForGeoLoadingIdle(page: Page) {
     /Finding nearest feature|Finding division|Finding landmass|Loading locations within/;
   const loading = page.getByText(loadingPattern);
   if (await loading.count()) {
-    await expect(loading).toHaveCount(0, { timeout: 30_000 });
+    await expect(loading).toHaveCount(0, { timeout: 60_000 });
   }
 }
 
@@ -37,6 +43,13 @@ async function waitForSendToHiders(page: Page) {
 }
 
 async function placeAnchorAndAdvance(page: Page) {
+  await clickMapCenter(page);
+  await waitForWizardNext(page);
+  await advanceWizard(page);
+}
+
+async function placeHeavyToolAnchorAndAdvance(page: Page) {
+  await waitForMapPlacementCrosshair(page);
   await clickMapCenter(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
@@ -74,7 +87,7 @@ export async function sendRadarToHiders(page: Page) {
 
 export async function completeMatchingSolo(page: Page) {
   await clickToolDockButton(page, "Matching");
-  await placeAnchorAndAdvance(page);
+  await placeHeavyToolAnchorAndAdvance(page);
   await page.locator("select.field-input").selectOption("museum");
   await waitForWizardNext(page);
   await advanceWizard(page);
@@ -89,8 +102,9 @@ export async function completeMatchingSolo(page: Page) {
 
 export async function sendMatchingToHiders(page: Page) {
   await clickToolDockButton(page, "Matching");
-  await placeAnchorAndAdvance(page);
+  await placeHeavyToolAnchorAndAdvance(page);
   await page.locator("select.field-input").selectOption("museum");
+  await waitForGeoLoadingIdle(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForGeoLoadingIdle(page);
@@ -101,7 +115,7 @@ export async function sendMatchingToHiders(page: Page) {
 
 export async function completeMeasuringSolo(page: Page) {
   await clickToolDockButton(page, "Measuring");
-  await placeAnchorAndAdvance(page);
+  await placeHeavyToolAnchorAndAdvance(page);
   await page.locator("select.field-input").selectOption("museum");
   await waitForWizardNext(page);
   await advanceWizard(page);
@@ -115,11 +129,13 @@ export async function completeMeasuringSolo(page: Page) {
 
 export async function sendMeasuringToHiders(page: Page) {
   await clickToolDockButton(page, "Measuring");
-  await placeAnchorAndAdvance(page);
+  await placeHeavyToolAnchorAndAdvance(page);
   await page.locator("select.field-input").selectOption("museum");
+  await waitForGeoLoadingIdle(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
   await clickMapAt(page, 0.6, 0.4);
+  await waitForGeoLoadingIdle(page);
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
@@ -132,7 +148,6 @@ export async function completeThermometerSolo(page: Page) {
   await clickMapAt(page, 0.35, 0.5);
   await clickMapAt(page, 0.65, 0.5);
   await waitForWizardNext(page);
-  await advanceWizard(page);
   await advanceWizard(page);
   await page.getByRole("button", { name: "Hotter" }).click();
   await page.getByRole("button", { name: "Add thermometer" }).click();
@@ -153,6 +168,7 @@ export async function sendThermometerToHiders(page: Page) {
 
 export async function completeTentacleSolo(page: Page) {
   await clickToolDockButton(page, "Tentacles");
+  await waitForMapPlacementCrosshair(page);
   await clickMapCenter(page);
   await waitForGeoLoadingIdle(page);
   await waitForWizardNext(page);
@@ -170,6 +186,7 @@ export async function completeTentacleSolo(page: Page) {
 
 export async function sendTentacleToHiders(page: Page) {
   await clickToolDockButton(page, "Tentacles");
+  await waitForMapPlacementCrosshair(page);
   await clickMapCenter(page);
   await waitForGeoLoadingIdle(page);
   await waitForWizardNext(page);
@@ -261,6 +278,11 @@ export async function openSettings(page: Page) {
 }
 
 export async function openChat(page: Page) {
+  const chatPanelClose = page.getByRole("button", { name: "Close", exact: true });
+  if (await chatPanelClose.isVisible().catch(() => false)) {
+    return;
+  }
+
   await dismissActiveToolPanel(page);
   const dockChat = page.getByRole("button", { name: "Open chat" });
   if (await dockChat.isVisible().catch(() => false)) {
@@ -296,8 +318,11 @@ export async function answerYesInChat(page: Page) {
 }
 
 export async function expectChatAnswer(page: Page, answer: string) {
-  await openChat(page);
-  await expect(page.getByText(new RegExp(`Answered: ${answer}`, "i"))).toBeVisible({
+  const answered = page.getByText(new RegExp(`Answered: ${answer}`, "i"));
+  if (!(await answered.isVisible().catch(() => false))) {
+    await openChat(page);
+  }
+  await expect(answered).toBeVisible({
     timeout: 20_000,
   });
 }

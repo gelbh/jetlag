@@ -4,6 +4,21 @@ import type { GameArea, SessionRecord } from "../domain/map/annotations";
 import type { PlayerRole } from "../domain/session/playerRole";
 import { resolvePlayerRole } from "../domain/session/playerRole";
 
+function sessionRecordsEqual(
+  left: SessionRecord | null,
+  right: SessionRecord | null,
+): boolean {
+  if (left === right) {
+    return true;
+  }
+
+  if (!left || !right) {
+    return false;
+  }
+
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
 export type { MapTool } from "../domain/map/mapToolTypes";
 export { useAnnotationStore } from "./annotationStore";
 export { useMapStore, type LayerVisibility } from "./mapStore";
@@ -42,6 +57,13 @@ export const useSessionStore = create<SessionState>()(
       setSession: (session, myUid) =>
         set((state) => {
           const uid = myUid === undefined ? state.myUid : myUid;
+          if (
+            sessionRecordsEqual(session, state.session) &&
+            uid === state.myUid
+          ) {
+            return state;
+          }
+
           const sessionChanged =
             session?.id !== state.session?.id ||
             (session === null && state.session !== null);

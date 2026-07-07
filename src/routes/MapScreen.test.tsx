@@ -69,6 +69,7 @@ vi.mock("../hooks/sync/useLiveActivitySync", () => ({
 
 vi.mock("../services/session/gameAreaPreload", () => ({
   preloadGameAreaCaches: vi.fn(),
+  gameAreaPreloadKey: () => "test-game-area",
 }));
 
 vi.mock("../services/geo/seaLevelProgressive", () => ({

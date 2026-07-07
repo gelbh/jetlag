@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.2 - 2026-07-08
+
+### Fixes
+
+- Map screen: fix render loop that blocked session create and the tool dock
+- Photo answers: hider can submit photo and cannot-answer replies in game chat
+
+### Technical
+
+- E2E: refresh visual baselines and align smoke session timeouts
+
 ## 0.1.1 - 2026-07-07
 
 ### Fixes
