@@ -250,7 +250,7 @@ export function MapStatusRail({
             </div>
 
             <p
-              className={`jl-mode-ticker flex-1 ${
+              className={`jl-mode-ticker ${timerHasStarted ? "" : "flex-1"} ${
                 placing ? "text-highlight" : "text-ink-muted"
               } ${timerHasStarted ? "sr-only" : ""}`}
             >
@@ -272,27 +272,33 @@ export function MapStatusRail({
                   Waiting…
                 </p>
               )
-            ) : (
-              <MapTimerCluster
-                sessionRules={sessionRules}
-                timerState={timerState}
-                timerRunning={timerRunning}
-                timerHasStarted={timerHasStarted}
-                pendingQuestions={pendingQuestions}
-                onOpenTimerMenu={() => setTimerMenuOpen((open) => !open)}
-                timerMenuOpen={showTimerMenu}
-              />
-            )}
-
-            {sync.inline?.visible && sync.inline.label ? (
-              <p
-                className={`max-w-[4.5rem] shrink-0 truncate text-[10px] font-semibold uppercase tracking-wide sm:max-w-[8rem] sm:text-xs ${SYNC_TONE_CLASSES[sync.inline.tone].text}`}
-                title={sync.inline.label}
-                aria-live="polite"
-              >
-                {sync.inline.label}
-              </p>
             ) : null}
+
+            <div
+              className={`flex shrink-0 items-center gap-2 ${timerHasStarted ? "ml-auto" : ""}`}
+            >
+              {timerHasStarted ? (
+                <MapTimerCluster
+                  sessionRules={sessionRules}
+                  timerState={timerState}
+                  timerRunning={timerRunning}
+                  timerHasStarted={timerHasStarted}
+                  pendingQuestions={pendingQuestions}
+                  onOpenTimerMenu={() => setTimerMenuOpen((open) => !open)}
+                  timerMenuOpen={showTimerMenu}
+                />
+              ) : null}
+
+              {sync.inline?.visible && sync.inline.label ? (
+                <p
+                  className={`max-w-[4.5rem] shrink-0 truncate text-[10px] font-semibold uppercase tracking-wide sm:max-w-[8rem] sm:text-xs ${SYNC_TONE_CLASSES[sync.inline.tone].text}`}
+                  title={sync.inline.label}
+                  aria-live="polite"
+                >
+                  {sync.inline.label}
+                </p>
+              ) : null}
+            </div>
           </div>
         </div>
 

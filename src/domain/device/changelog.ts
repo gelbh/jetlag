@@ -15,9 +15,20 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-07-07",
     sections: [
       {
+        title: "Fixes",
+        items: [
+          "Seeker map: pan and zoom no longer snap back on every sync",
+          "Thermometer: distance step comes first; Start walk works after picking a distance",
+          "Thermometer: Start walk shows errors in the panel and works in solo sessions",
+          "Matching and measuring: map previews stay blank until you pick a category",
+          "Tool dock: More menu closes an open question panel",
+          "Status bar: game timer sits on the right after the round starts",
+        ],
+      },
+      {
         title: "Improvements",
         items: [
-          "Error reporting: Sentry captures map crashes when VITE_SENTRY_DSN is configured",
+          "Error reporting: Sentry captures map crashes",
           "Config validation: startup checks catch incomplete Firebase or proxy env settings",
           "Session data: Firestore session, annotation, and question payloads validated on read",
           "Security: content security policy runs in report-only mode before enforcement",

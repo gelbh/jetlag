@@ -104,17 +104,20 @@ export function useMatchingTool({
   const [matchingSeekerPoint, setMatchingSeekerPoint] =
     useState<LatLngTuple | null>(null);
   const [matchingCategoryId, setMatchingCategoryId] =
-    useState<MatchingCategoryId>(defaultMatchingCategoryId());
-  const matchingUseCount = Math.max(
-    matchingCategoryUseCount(
-      annotations.filter(isActive),
-      matchingCategoryId,
-    ),
-    matchingCategoryUseCountFromPending(
-      pendingQuestions,
-      matchingCategoryId,
-    ),
-  );
+    useState<MatchingCategoryId | null>(null);
+  const [matchingCategoryChosen, setMatchingCategoryChosen] = useState(false);
+  const matchingUseCount = matchingCategoryId
+    ? Math.max(
+        matchingCategoryUseCount(
+          annotations.filter(isActive),
+          matchingCategoryId,
+        ),
+        matchingCategoryUseCountFromPending(
+          pendingQuestions,
+          matchingCategoryId,
+        ),
+      )
+    : 0;
   const { label: costLabel, draw: cardDraw, keep: cardKeep } =
     questionCostBreakdown("D3P1", matchingUseCount);
   const [matchingFeatures, setMatchingFeatures] = useState<MatchingFeature[]>(
@@ -160,17 +163,18 @@ export function useMatchingTool({
   }, [sessionRules]);
 
   const customCategories = matchingFetchOptions.customCategories ?? [];
-  const matchingCategory =
-    resolveMatchingCategory(matchingCategoryId, customCategories) ??
-    getMatchingCategory(matchingCategoryId);
+  const matchingCategory = matchingCategoryId
+    ? (resolveMatchingCategory(matchingCategoryId, customCategories) ??
+      getMatchingCategory(matchingCategoryId))
+    : null;
   const matchingUsesContainment =
-    matchingCategory.resolver === "reverseGeocodeAdmin" ||
-    matchingCategory.resolver === "landmass";
+    matchingCategory?.resolver === "reverseGeocodeAdmin" ||
+    matchingCategory?.resolver === "landmass";
 
   useToolSessionOptions({
-    active,
+    active: active && matchingCategoryId !== null,
     usedOptions: usedMatchingCategories,
-    currentOption: matchingCategoryId,
+    currentOption: matchingCategoryId ?? defaultMatchingCategoryId(),
     isAvailable: (_usedOptions, currentOption) =>
       isMatchingCategoryAvailable(currentOption),
     pickNext: firstAvailableMatchingCategoryId,
@@ -331,7 +335,12 @@ export function useMatchingTool({
   const debouncedSeekerPoint = useDebouncedValue(matchingSeekerPoint, 400);
 
   useEffect(() => {
-    if (!active || !debouncedSeekerPoint) {
+    if (
+      !active ||
+      !debouncedSeekerPoint ||
+      !matchingCategoryId ||
+      !matchingCategoryChosen
+    ) {
       return;
     }
 
@@ -340,7 +349,13 @@ export function useMatchingTool({
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-  }, [active, matchingCategoryId, debouncedSeekerPoint, resolveForAnchor]);
+  }, [
+    active,
+    matchingCategoryChosen,
+    matchingCategoryId,
+    debouncedSeekerPoint,
+    resolveForAnchor,
+  ]);
 
   const setMatchingSeekerAnchor = (point: LatLngTuple) => {
     setMatchingSeekerPoint(point);
@@ -355,14 +370,17 @@ export function useMatchingTool({
     setMatchingNullAnswer(false);
     setMatchingAnswer(null);
     setMatchingError(null);
-    setMatchingLoading(true);
+    if (matchingCategoryChosen && matchingCategoryId) {
+      setMatchingLoading(true);
+    }
   };
 
   const resetDraft = useCallback(() => {
     cancelRequests();
     setMatchingLoading(false);
     setMatchingSeekerPoint(null);
-    setMatchingCategoryId(defaultMatchingCategoryId(usedMatchingCategories));
+    setMatchingCategoryId(null);
+    setMatchingCategoryChosen(false);
     setMatchingFeatures([]);
     setMatchingNearestFeatureId(null);
     setMatchingNearestFeatureName(null);
@@ -375,7 +393,7 @@ export function useMatchingTool({
     setMatchingAnswer(null);
     setMatchingLoading(false);
     setMatchingError(null);
-  }, [cancelRequests, usedMatchingCategories]);
+  }, [cancelRequests]);
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
@@ -409,7 +427,7 @@ export function useMatchingTool({
   };
 
   const commit = async () => {
-    if (!matchingSeekerPoint) {
+    if (!matchingSeekerPoint || !matchingCategoryId) {
       return;
     }
 
@@ -564,6 +582,7 @@ export function useMatchingTool({
     <MatchingPanel
       distanceUnit={distanceUnit}
       categoryId={matchingCategoryId}
+      categoryChosen={matchingCategoryChosen}
       usedCategoryIds={usedMatchingCategories}
       usesContainmentMatching={matchingUsesContainment}
       hasSeekerPoint={matchingSeekerPoint !== null}
@@ -585,6 +604,7 @@ export function useMatchingTool({
           return;
         }
 
+        setMatchingCategoryChosen(true);
         setMatchingCategoryId(categoryId);
         setMatchingFeatures([]);
         setMatchingNearestFeatureId(null);
@@ -605,7 +625,7 @@ export function useMatchingTool({
       costLabel={costLabel}
       isSubmitting={isSubmitting}
       onRetry={
-        matchingSeekerPoint
+        matchingSeekerPoint && matchingCategoryId
           ? () =>
               void resolveForAnchor(matchingSeekerPoint, matchingCategoryId)
           : undefined

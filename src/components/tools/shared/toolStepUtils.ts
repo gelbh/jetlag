@@ -42,8 +42,8 @@ export const RADAR_STEPS = [
 ] as const;
 
 export const THERMOMETER_STEPS = [
-  { id: "placement", label: "Anchor" },
   { id: "distance", label: "Distance" },
+  { id: "placement", label: "Anchor" },
   { id: "answer", label: "Answer" },
 ] as const;
 

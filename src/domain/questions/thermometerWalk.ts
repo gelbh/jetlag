@@ -31,6 +31,15 @@ export function isThermometerWalkActive(
   return question.toolType === "thermometer" && question.status === "walking";
 }
 
+/** Client-only walk id when tracking a solo GPS walk without Firestore. */
+export const LOCAL_THERMOMETER_WALK_ID = "__local_thermometer_walk__";
+
+export function isLocalThermometerWalkId(
+  questionId: string | null | undefined,
+): boolean {
+  return questionId === LOCAL_THERMOMETER_WALK_ID;
+}
+
 export function crowFliesDistanceMeters(a: LatLngTuple, b: LatLngTuple): number {
   return distanceBetweenPoints(a, b);
 }

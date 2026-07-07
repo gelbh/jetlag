@@ -369,7 +369,11 @@ export function ToolDock({
             type="button"
             onClick={() => {
               setDrawMenuOpen(false);
-              setMoreMenuOpen((open) => !open);
+              const opening = !moreMenuOpen;
+              setMoreMenuOpen(opening);
+              if (opening && activeTool !== "none") {
+                onSelect("none");
+              }
             }}
             className={`jl-tool-slot ${moreMenuActive ? "jl-tool-slot-active" : ""}`}
             aria-label={

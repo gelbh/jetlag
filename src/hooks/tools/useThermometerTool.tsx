@@ -5,7 +5,6 @@ import type { LatLngTuple } from "../../domain/geometry/geometry";
 import { distanceBetweenPoints } from "../../domain/geometry/geometry";
 import { isActive, type AnnotationRecord } from "../../domain/map/annotations";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
-import { sessionGameSize } from "../../domain/session/sessionRules";
 import { hasOpenPendingQuestion, questionCostBreakdown } from "../../domain/questions/questionRules";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import {
@@ -23,9 +22,12 @@ import { hotterColderAnswerOptions } from "../../components/tools/shared/binaryA
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import { useSubmitLock } from "../useSubmitLock";
 import { useLiveLocation } from "../location/useLiveLocation";
+import type { GeolocationReading } from "../../services/core/geolocation";
 import {
-  parseThermometerStartPoint,
+  isLocalThermometerWalkId,
   isThermometerWalkActive,
+  LOCAL_THERMOMETER_WALK_ID,
+  parseThermometerStartPoint,
 } from "../../domain/questions/thermometerWalk";
 import {
   thermometerWalkStartPlacement,
@@ -66,6 +68,10 @@ interface UseThermometerToolParams {
   distanceUnit: DistanceUnit;
   finishPlacement: () => void;
   setMapError: (message: string | null) => void;
+  gpsLoading?: boolean;
+  gpsError?: string | null;
+  refreshGps?: () => Promise<GeolocationReading>;
+  ensurePointInGameArea?: (point: LatLngTuple) => boolean;
 }
 
 export function useThermometerTool({
@@ -83,6 +89,10 @@ export function useThermometerTool({
   distanceUnit,
   finishPlacement,
   setMapError,
+  gpsLoading = false,
+  gpsError = null,
+  refreshGps,
+  ensurePointInGameArea,
 }: UseThermometerToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
   const activeAnnotations = useMemo(
@@ -134,6 +144,7 @@ export function useThermometerTool({
   );
   const [thermometerAnswer, setThermometerAnswer] =
     useState<ThermometerAnswer | null>(null);
+  const [panelError, setPanelError] = useState<string | null>(null);
 
   const walkingQuestionId =
     localWalkingQuestionId ?? syncedWalkDraft?.questionId ?? null;
@@ -177,7 +188,19 @@ export function useThermometerTool({
 
   const handleWalkComplete = useCallback(
     async (endPoint: LatLngTuple) => {
-      if (!thermoA || !walkingQuestionId || !completeThermometerWalk) {
+      if (!thermoA || !walkingQuestionId) {
+        return;
+      }
+
+      if (isLocalThermometerWalkId(walkingQuestionId)) {
+        setThermoB(endPoint);
+        setLocalWalkingQuestionId(null);
+        setPanelError(null);
+        return;
+      }
+
+      if (!completeThermometerWalk) {
+        setPanelError("Walk finished but couldn't save. Try again.");
         return;
       }
 
@@ -186,19 +209,28 @@ export function useThermometerTool({
         distanceUnit,
       );
 
-      await completeThermometerWalk({
-        pendingQuestionId: walkingQuestionId,
-        startPoint: thermoA,
-        endPoint,
-        distanceMeters: activeThermometerDistanceMeters,
-        promptText,
-        replyOptions: hotterColderAnswerOptions.map((option) => ({
-          id: option.value,
-          label: option.label,
-        })),
-        cardDraw,
-        cardKeep,
-      });
+      try {
+        await completeThermometerWalk({
+          pendingQuestionId: walkingQuestionId,
+          startPoint: thermoA,
+          endPoint,
+          distanceMeters: activeThermometerDistanceMeters,
+          promptText,
+          replyOptions: hotterColderAnswerOptions.map((option) => ({
+            id: option.value,
+            label: option.label,
+          })),
+          cardDraw,
+          cardKeep,
+        });
+      } catch (error) {
+        setPanelError(
+          error instanceof Error
+            ? error.message
+            : "Thermometer walk could not finish. Try again.",
+        );
+        return;
+      }
 
       setLocalWalkingQuestionId(null);
       setLocalThermoA(null);
@@ -234,6 +266,7 @@ export function useThermometerTool({
     setThermoB(null);
     setLocalWalkingQuestionId(null);
     setThermometerAnswer(null);
+    setPanelError(null);
     setThermometerDistanceMeters(
       availableThermometerDistancePresetsForSession(sessionRules)[0] ??
         DEFAULT_THERMOMETER_DISTANCE_METERS,
@@ -241,8 +274,11 @@ export function useThermometerTool({
   }, [sessionRules, walkTracker]);
 
   const startGpsWalk = useCallback(async () => {
+    setPanelError(null);
+    setMapError(null);
+
     if (!canSubmitQuestion || hasOpenPendingQuestion(pendingQuestions)) {
-      setMapError("Finish the current question before starting another.");
+      setPanelError("Finish the current question before starting another.");
       return;
     }
 
@@ -252,25 +288,54 @@ export function useThermometerTool({
         activeThermometerDistanceMeters,
       )
     ) {
-      setMapError("That distance is not available for this game size.");
+      setPanelError("That distance is not available for this game size.");
       return;
     }
 
-    if (!gpsReading) {
-      setMapError("Waiting for GPS fix…");
+    let reading = gpsReading;
+    if (!reading && refreshGps) {
+      try {
+        reading = await refreshGps();
+      } catch (error) {
+        setPanelError(
+          error instanceof Error ? error.message : "GPS location unavailable.",
+        );
+        return;
+      }
+    }
+
+    if (!reading) {
+      setPanelError("Waiting for GPS fix…");
       return;
     }
 
-    const start: LatLngTuple = [gpsReading.lat, gpsReading.lng];
+    const start: LatLngTuple = [reading.lat, reading.lng];
+    if (ensurePointInGameArea && !ensurePointInGameArea(start)) {
+      setPanelError("That point is outside the play area.");
+      return;
+    }
+
     setLocalThermoA(start);
     setThermoB(null);
 
-    if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
-      const distanceLabel = thermometerQuestionPrompt(
-        activeThermometerDistanceMeters,
-        distanceUnit,
-      );
-      const startMessage = `Thermometer walk started — ${distanceLabel}`;
+    if (!awaitHiderAnswer) {
+      setLocalWalkingQuestionId(LOCAL_THERMOMETER_WALK_ID);
+      return;
+    }
+
+    if (!submitPendingQuestion || !sessionId || !senderUid) {
+      setPanelError("Session is still loading. Try again in a moment.");
+      setLocalThermoA(null);
+      return;
+    }
+
+    const distanceLabel = thermometerQuestionPrompt(
+      activeThermometerDistanceMeters,
+      distanceUnit,
+    );
+    const startMessage = `Thermometer walk started — ${distanceLabel}`;
+
+    try {
       const questionId = await submitPendingQuestion({
         promptText: startMessage,
         replyOptions: [],
@@ -281,20 +346,30 @@ export function useThermometerTool({
         status: "walking",
       });
 
-      if (typeof questionId === "string") {
-        setLocalWalkingQuestionId(questionId);
+      if (typeof questionId !== "string") {
+        setPanelError("Couldn't start the walk. Try again.");
+        setLocalThermoA(null);
+        return;
       }
-      return;
-    }
 
-    setMapError("Multiplayer required for GPS thermometer walks.");
+      setLocalWalkingQuestionId(questionId);
+    } catch (error) {
+      setPanelError(
+        error instanceof Error
+          ? error.message
+          : "Couldn't start the walk. Try again.",
+      );
+      setLocalThermoA(null);
+    }
   }, [
     awaitHiderAnswer,
     canSubmitQuestion,
     distanceUnit,
+    ensurePointInGameArea,
     sessionRules,
     gpsReading,
     pendingQuestions,
+    refreshGps,
     sessionId,
     senderUid,
     setMapError,
@@ -418,7 +493,7 @@ export function useThermometerTool({
   const panel = (
     <ThermometerPanel
       distanceUnit={distanceUnit}
-      gameSize={sessionGameSize(sessionRules)}
+      sessionRules={sessionRules}
       distanceMeters={activeThermometerDistanceMeters}
       travelMeters={walkTracker.distanceTraveledMeters ?? thermoTravelMeters}
       answer={thermometerAnswer}
@@ -431,11 +506,13 @@ export function useThermometerTool({
       onDistanceChange={setThermometerDistanceMeters}
       onAnswerChange={setThermometerAnswer}
       onReset={resetDraft}
-      onStartWalk={() => void startGpsWalk()}
+      onStartWalk={() => void runLocked(startGpsWalk)}
       onCommit={() => void commitManualLocked()}
       awaitHiderAnswer={awaitHiderAnswer}
       canSubmitQuestion={canSubmitQuestion}
       isSubmitting={isSubmitting}
+      gpsLoading={gpsLoading}
+      error={panelError ?? gpsError ?? walkTracker.gpsError}
     />
   );
 

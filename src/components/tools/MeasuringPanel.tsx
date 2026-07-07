@@ -77,6 +77,7 @@ function anchorResolveLoadingMessage(
 
 interface MeasuringPanelProps {
   distanceUnit: DistanceUnit;
+  optionChosen: boolean;
   measureFrom: MeasuringFromKind;
   usesAllPlacesInArea: boolean;
   usedMeasuringFromKinds: ReadonlySet<MeasuringFromKind>;
@@ -120,6 +121,7 @@ interface MeasuringPanelProps {
 
 export function MeasuringPanel({
   distanceUnit,
+  optionChosen,
   measureFrom,
   usesAllPlacesInArea,
   usedMeasuringFromKinds,
@@ -165,7 +167,10 @@ export function MeasuringPanel({
     subject === "location"
       ? (measureFrom as MeasuringLocationCategory)
       : undefined;
-  const question = measuringQuestionFor(subject, locationCategory);
+  const question =
+    optionChosen && locationCategory
+      ? measuringQuestionFor(subject, locationCategory)
+      : null;
   const targetLabel = measuringTargetLabel(subject, locationCategory);
   const targetKind = measuringTargetKind(measureFrom);
   const isCoastline = targetKind === "coastline";
@@ -199,7 +204,7 @@ export function MeasuringPanel({
   );
   const canAdvanceFromAnchor =
     hasSeekerPoint &&
-    (!needsAutoResolve || (hasTargetPoint && !loading));
+    (!optionChosen || !needsAutoResolve || (hasTargetPoint && !loading));
   const canAdvanceFromTarget = hasTargetPoint;
   const canPreviewAnswer =
     hasAvailableMeasureOptions &&
@@ -414,13 +419,20 @@ export function MeasuringPanel({
           <label className="field-label">
             Measuring from
             <select
-              value={measureFrom}
-              onChange={(event) =>
-                onMeasureFromChange(event.target.value as MeasuringFromKind)
-              }
+              value={optionChosen ? measureFrom : ""}
+              onChange={(event) => {
+                if (!event.target.value) {
+                  return;
+                }
+
+                onMeasureFromChange(event.target.value as MeasuringFromKind);
+              }}
               disabled={!hasAvailableMeasureOptions}
               className="field-input disabled:opacity-40"
             >
+              <option value="" disabled>
+                Choose what to measure
+              </option>
               {availableGroups.map((group) => (
                 <optgroup key={group.id} label={group.label}>
                   {group.options.map((option) => (
@@ -437,10 +449,12 @@ export function MeasuringPanel({
               Every measure category has already been added to this session.
             </p>
           ) : null}
-          <QuestionPromptBlock
-            prompt={question.prompt}
-            ruleSummary={question.ruleSummary}
-          />
+          {question ? (
+            <QuestionPromptBlock
+              prompt={question.prompt}
+              ruleSummary={question.ruleSummary}
+            />
+          ) : null}
         </ToolSection>
       ) : null}
 
@@ -580,7 +594,7 @@ export function MeasuringPanel({
         onNext={goNext}
         canGoNext={
           (step === "anchor" && canAdvanceFromAnchor) ||
-          (step === "source" && hasAvailableMeasureOptions) ||
+          (step === "source" && optionChosen && hasAvailableMeasureOptions) ||
           (step === "target" && canAdvanceFromTarget)
         }
       />

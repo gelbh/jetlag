@@ -1,16 +1,15 @@
 import { useState } from "react";
 import {
-  formatDistance,
   formatPresetDistance,
   type DistanceUnit,
 } from "../../domain/map/distance";
-import type { GameSize } from "../../domain/session/gameSize";
 import {
-  availableThermometerDistancePresets,
-  isThermometerDistanceOptionAvailable,
+  availableThermometerDistancePresetsForSession,
+  isThermometerDistanceOptionAvailableForSession,
   thermometerQuestionPrompt,
   type ThermometerAnswer,
 } from "../../domain/questions/thermometerQuestions";
+import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import { hotterColderAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { OptionChip, OptionChipRow } from "./shared/OptionChip";
@@ -31,7 +30,7 @@ type PlacementMode = "gps" | "manual";
 
 interface ThermometerPanelProps {
   distanceUnit: DistanceUnit;
-  gameSize: GameSize;
+  sessionRules: SessionRulesInput;
   distanceMeters: number;
   travelMeters: number | null;
   answer: ThermometerAnswer | null;
@@ -49,6 +48,8 @@ interface ThermometerPanelProps {
   awaitHiderAnswer?: boolean;
   canSubmitQuestion?: boolean;
   isSubmitting?: boolean;
+  gpsLoading?: boolean;
+  error?: string | null;
 }
 
 function placementStatus(
@@ -75,7 +76,7 @@ function placementStatus(
 
 export function ThermometerPanel({
   distanceUnit,
-  gameSize,
+  sessionRules,
   distanceMeters,
   travelMeters,
   answer,
@@ -93,16 +94,19 @@ export function ThermometerPanel({
   awaitHiderAnswer = false,
   canSubmitQuestion = true,
   isSubmitting = false,
+  gpsLoading = false,
+  error = null,
 }: ThermometerPanelProps) {
   const steps = stepsForMode(THERMOMETER_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
-  const step = steps[stepIndex]?.id ?? "placement";
+  const step = steps[stepIndex]?.id ?? "distance";
 
   const travelTooShort =
     travelMeters !== null && travelMeters + 1 < distanceMeters;
-  const availableDistancePresets = availableThermometerDistancePresets(gameSize);
-  const distanceAvailable = isThermometerDistanceOptionAvailable(
-    gameSize,
+  const availableDistancePresets =
+    availableThermometerDistancePresetsForSession(sessionRules);
+  const distanceAvailable = isThermometerDistanceOptionAvailableForSession(
+    sessionRules,
     distanceMeters,
   );
   const pinsReady = mapStep === "ready";
@@ -179,7 +183,7 @@ export function ThermometerPanel({
           {travelMeters !== null ? (
             <ResolvedReadout>
               {placementMode === "gps" ? "Crow-flies: " : "Movement on map: "}
-              {formatDistance(travelMeters, distanceUnit)}
+              {formatPresetDistance(travelMeters, distanceUnit)}
             </ResolvedReadout>
           ) : null}
           {travelTooShort ? (
@@ -196,10 +200,13 @@ export function ThermometerPanel({
             <button
               type="button"
               onClick={onStartWalk}
-              disabled={!distanceAvailable || !canSubmitQuestion}
+              disabled={
+                !distanceAvailable || !canSubmitQuestion || isSubmitting
+              }
+              aria-busy={gpsLoading || isSubmitting}
               className="btn-primary w-full disabled:opacity-40"
             >
-              Start walk
+              {gpsLoading ? "Getting GPS…" : "Start walk"}
             </button>
           ) : null}
           {awaitHiderAnswer &&
@@ -263,6 +270,10 @@ export function ThermometerPanel({
           (step === "distance" && distanceAvailable)
         }
       />
+
+      {error ? (
+        <ResolvedReadout variant="warning">{error}</ResolvedReadout>
+      ) : null}
     </ToolPanelShell>
   );
 }

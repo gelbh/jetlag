@@ -31,7 +31,8 @@ import {
 
 interface MatchingPanelProps {
   distanceUnit: DistanceUnit;
-  categoryId: MatchingCategoryId;
+  categoryId: MatchingCategoryId | null;
+  categoryChosen: boolean;
   usedCategoryIds: ReadonlySet<MatchingCategoryId>;
   usesContainmentMatching: boolean;
   hasSeekerPoint: boolean;
@@ -58,6 +59,7 @@ interface MatchingPanelProps {
 export function MatchingPanel({
   distanceUnit,
   categoryId,
+  categoryChosen,
   usedCategoryIds,
   usesContainmentMatching,
   hasSeekerPoint,
@@ -92,10 +94,11 @@ export function MatchingPanel({
     }
   };
 
-  const question = matchingQuestionFor(categoryId);
-  const category = getMatchingCategory(categoryId);
-  const usesLandmassMatching = category.resolver === "landmass";
-  const categoryAvailable = isMatchingCategoryAvailable(categoryId);
+  const question = categoryId ? matchingQuestionFor(categoryId) : null;
+  const category = categoryId ? getMatchingCategory(categoryId) : null;
+  const usesLandmassMatching = category?.resolver === "landmass";
+  const categoryAvailable =
+    categoryId !== null && isMatchingCategoryAvailable(categoryId);
   const resolveComplete = nullAnswer || nearestFeatureName !== null;
   const canCommit =
     hasSeekerPoint &&
@@ -171,14 +174,21 @@ export function MatchingPanel({
             <label className="field-label">
               Match category
               <select
-                value={categoryId}
-                onChange={(event) =>
+                value={categoryChosen && categoryId ? categoryId : ""}
+                onChange={(event) => {
+                  if (!event.target.value) {
+                    return;
+                  }
+
                   handleCategoryChange(
                     event.target.value as MatchingCategoryId,
-                  )
-                }
+                  );
+                }}
                 className="field-input"
               >
+                <option value="" disabled>
+                  Choose a category
+                </option>
                 {MATCHING_CATEGORY_GROUPS.map((group) => {
                   const categories = selectableCategories.filter(
                     (cat) => cat.groupId === group.id,
@@ -201,10 +211,12 @@ export function MatchingPanel({
               </select>
             </label>
           )}
-          <QuestionPromptBlock
-            prompt={question.prompt}
-            ruleSummary={question.ruleSummary}
-          />
+          {question ? (
+            <QuestionPromptBlock
+              prompt={question.prompt}
+              ruleSummary={question.ruleSummary}
+            />
+          ) : null}
         </ToolSection>
       ) : null}
 
@@ -222,7 +234,7 @@ export function MatchingPanel({
       {step === "resolve" ? (
         <ToolSection first compact status="active">
           {loadingIndicator}
-          {nullAnswer ? (
+          {nullAnswer && categoryId ? (
             <ResolvedReadout variant="warning">
               {matchingNullAnswerMessage(categoryId)}
             </ResolvedReadout>
@@ -290,11 +302,8 @@ export function MatchingPanel({
         onBack={goBack}
         onNext={goNext}
         canGoNext={
-          (step === "anchor" &&
-            hasSeekerPoint &&
-            !loading &&
-            resolveComplete) ||
-          (step === "category" && categoryAvailable) ||
+          (step === "anchor" && hasSeekerPoint && !loading) ||
+          (step === "category" && categoryAvailable && categoryChosen) ||
           (step === "resolve" && resolveComplete && !loading)
         }
       />

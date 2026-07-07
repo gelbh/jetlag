@@ -480,6 +480,10 @@ export function MapScreen() {
     distanceUnit,
     finishPlacement,
     setMapError,
+    gpsLoading,
+    gpsError,
+    refreshGps: refresh,
+    ensurePointInGameArea,
   });
   const activeThermometerWalk = useActiveThermometerWalk({
     pendingQuestions,
@@ -608,21 +612,23 @@ export function MapScreen() {
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [overlay, selectedAnnotationId, setActiveTool]);
 
+  const gameArea = session?.gameArea;
+
   const center = useMemo<LatLngTuple>(() => {
-    if (!session?.gameArea) {
+    if (!gameArea) {
       return [51.505, -0.09];
     }
 
-    return gameAreaCenter(session.gameArea);
-  }, [session]);
+    return gameAreaCenter(gameArea);
+  }, [gameArea]);
 
   const mapFocusBounds = useMemo(() => {
-    if (!session?.gameArea) {
+    if (!gameArea) {
       return null;
     }
 
-    return gameAreaToBoundsExpression(session.gameArea);
-  }, [session]);
+    return gameAreaToBoundsExpression(gameArea);
+  }, [gameArea]);
 
   const selectedAnnotation = useMemo(
     () =>
@@ -966,6 +972,7 @@ export function MapScreen() {
           center={center}
           zoom={12}
           focusBounds={mapFocusBounds}
+          fitBoundsMode="once"
           onMapClick={handleMapClick}
           chromeHudRef={chromeHudRef}
           suppressChromeHideRef={suppressChromeHideRef}

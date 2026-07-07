@@ -179,6 +179,7 @@ export function useMeasuringTool({
     "seeker" | "target"
   >("seeker");
   const [measuringPlaces, setMeasuringPlaces] = useState<MeasuringPlace[]>([]);
+  const [measuringOptionChosen, setMeasuringOptionChosen] = useState(false);
 
   const measureFromKind = measuringFromKind(
     measuringSubject,
@@ -558,7 +559,7 @@ export function useMeasuringTool({
   }, [resolveSeekerAnchorAt]);
 
   useEffect(() => {
-    if (!active || !debouncedSeekerPoint) {
+    if (!active || !debouncedSeekerPoint || !measuringOptionChosen) {
       return;
     }
 
@@ -571,7 +572,13 @@ export function useMeasuringTool({
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-  }, [active, debouncedSeekerPoint, measureFromKind, measuringSubject]);
+  }, [
+    active,
+    debouncedSeekerPoint,
+    measureFromKind,
+    measuringOptionChosen,
+    measuringSubject,
+  ]);
 
   const updateSeekerPosition = useCallback(
     (point: LatLngTuple, placeName?: string | null) => {
@@ -581,7 +588,10 @@ export function useMeasuringTool({
       setMeasuringError(null);
       setMapError(null);
 
-      if (usesDebouncedSeekerResolve(measuringSubject, measureFromKind)) {
+      if (
+        measuringOptionChosen &&
+        usesDebouncedSeekerResolve(measuringSubject, measureFromKind)
+      ) {
         setMeasuringLoading(true);
         return;
       }
@@ -596,22 +606,32 @@ export function useMeasuringTool({
       setMeasuringSeaLevelNote(null);
       setMeasuringPlaces([]);
     },
-    [measureFromKind, measuringSubject, setMapError],
+    [measureFromKind, measuringOptionChosen, measuringSubject, setMapError],
   );
 
   const setMeasuringSeekerAnchorAndResolve = useCallback(
     (point: LatLngTuple, placeName?: string | null) => {
       updateSeekerPosition(point, placeName);
-      if (usesDebouncedSeekerResolve(measuringSubject, measureFromKind)) {
+      if (
+        measuringOptionChosen &&
+        usesDebouncedSeekerResolve(measuringSubject, measureFromKind)
+      ) {
         resolveSeekerAnchorAt(point);
       }
     },
-    [measureFromKind, measuringSubject, resolveSeekerAnchorAt, updateSeekerPosition],
+    [
+      measureFromKind,
+      measuringOptionChosen,
+      measuringSubject,
+      resolveSeekerAnchorAt,
+      updateSeekerPosition,
+    ],
   );
 
   const handleUnavailableMeasuringOption = useCallback(
     (nextKind: MeasuringFromKind) => {
       const next = applyMeasuringFromKind(nextKind);
+      setMeasuringOptionChosen(true);
       setMeasuringSubject(next.subject);
       setMeasuringLocationCategory(next.locationCategory);
       setMeasuringTargetPoint(null);
@@ -657,7 +677,7 @@ export function useMeasuringTool({
   );
 
   useToolSessionOptions({
-    active,
+    active: active && measuringOptionChosen,
     usedOptions: usedMeasuringFromKindsSet,
     currentOption: measuringFromKind(
       measuringSubject,
@@ -698,6 +718,7 @@ export function useMeasuringTool({
     setMeasuringAnswer(null);
     setMeasuringError(null);
     setMeasuringPlaces([]);
+    setMeasuringOptionChosen(false);
   }, [usedMeasuringFromKindsSet]);
 
   const handleGps = async () => {
@@ -1169,6 +1190,7 @@ export function useMeasuringTool({
   const panel = (
     <MeasuringPanel
       distanceUnit={distanceUnit}
+      optionChosen={measuringOptionChosen}
       usedMeasuringFromKinds={usedMeasuringFromKindsSet}
       measureFrom={measuringFromKind(
         measuringSubject,
@@ -1194,6 +1216,7 @@ export function useMeasuringTool({
       seaLevelNote={measuringSeaLevelNote}
       error={measuringError ?? gpsError ?? mapError}
       onMeasureFromChange={(kind) => {
+        setMeasuringOptionChosen(true);
         const next = applyMeasuringFromKind(kind);
         setMeasuringSubject(next.subject);
         setMeasuringLocationCategory(next.locationCategory);

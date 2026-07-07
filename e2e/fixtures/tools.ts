@@ -127,9 +127,8 @@ export async function sendMeasuringToHiders(page: Page) {
 
 export async function completeThermometerSolo(page: Page) {
   await clickToolDockButton(page, "Thermometer");
-  await advanceWizard(page);
   await page.getByRole("button", { name: "Manual pins" }).click();
-  await page.getByRole("button", { name: "Back" }).click();
+  await advanceWizard(page);
   await clickMapAt(page, 0.35, 0.5);
   await clickMapAt(page, 0.65, 0.5);
   await waitForWizardNext(page);
@@ -142,9 +141,8 @@ export async function completeThermometerSolo(page: Page) {
 
 export async function sendThermometerToHiders(page: Page) {
   await clickToolDockButton(page, "Thermometer");
-  await advanceWizard(page);
   await page.getByRole("button", { name: "Manual pins" }).click();
-  await page.getByRole("button", { name: "Back" }).click();
+  await advanceWizard(page);
   await clickMapAt(page, 0.35, 0.5);
   await clickMapAt(page, 0.65, 0.5);
   const sendButton = page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON });
