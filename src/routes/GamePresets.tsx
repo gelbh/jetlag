@@ -2,23 +2,34 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppLogo } from "../components/ui/AppLogo";
 import { AdvancedSessionSettings } from "../components/session/AdvancedSessionSettings";
+import { GameAreaFramingModal } from "../components/session/GameAreaFramingModal";
 import { GameSizePicker } from "../components/session/GameSizePicker";
 import {
   defaultAdvancedSessionSettings,
   type AdvancedSessionSettingsValue,
 } from "../domain/session/advancedSessionSettings";
 import type { DistanceUnit } from "../domain/map/distance";
-import { hidingZoneRadiusMeters, type GameSize } from "../domain/session/gameSize";
+import type { GameArea } from "../domain/map/annotations";
+import type { BoundingBox } from "../domain/geometry/gameAreaBounds";
+import {
+  formatPlayAreaSummary,
+  gameAreaSquareMiles,
+  hidingZoneRadiusMeters,
+  type GameSize,
+} from "../domain/session/gameSize";
 import {
   createGamePresetId,
   createSessionDraftToGamePreset,
   type CreateSessionDraft,
 } from "../domain/session/gamePreset";
+import { useGameAreaFraming } from "../hooks/session/useGameAreaFraming";
 import { useGamePresetStore } from "../state/gamePresetStore";
+import { useMapStore } from "../state/sessionStore";
 
 export function GamePresetEditor() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const mapStyle = useMapStore((state) => state.mapStyle);
   const presets = useGamePresetStore((state) => state.presets);
   const savePreset = useGamePresetStore((state) => state.savePreset);
   const deletePreset = useGamePresetStore((state) => state.deletePreset);
@@ -28,6 +39,18 @@ export function GamePresetEditor() {
     [id, presets],
   );
 
+  const framing = useGameAreaFraming({
+    initialGameArea: existing?.gameArea ?? null,
+    initialFocusBounds: existing?.focusBounds ?? null,
+  });
+  const [framingModalOpen, setFramingModalOpen] = useState(false);
+  const [gameArea, setGameArea] = useState<GameArea | null>(
+    existing?.gameArea ?? null,
+  );
+  const [placeLabel, setPlaceLabel] = useState(existing?.placeLabel ?? "");
+  const [focusBounds, setFocusBounds] = useState<BoundingBox | null>(
+    existing?.focusBounds ?? null,
+  );
   const [name, setName] = useState(existing?.name ?? "");
   const [gameSize, setGameSize] = useState<GameSize>(existing?.gameSize ?? "medium");
   const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>(
@@ -52,6 +75,9 @@ export function GamePresetEditor() {
       gameSize,
       distanceUnit,
       advancedSettings,
+      gameArea,
+      placeLabel: placeLabel || undefined,
+      focusBounds,
     };
 
     const preset = createSessionDraftToGamePreset(
@@ -64,9 +90,6 @@ export function GamePresetEditor() {
       ...preset,
       createdAt: existing?.createdAt ?? preset.createdAt,
       updatedAt: new Date().toISOString(),
-      gameArea: existing?.gameArea,
-      placeLabel: existing?.placeLabel,
-      focusBounds: existing?.focusBounds,
       sessionTier: existing?.sessionTier,
     });
 
@@ -75,11 +98,62 @@ export function GamePresetEditor() {
 
   return (
     <main className="flex min-h-[100dvh] flex-col px-5 py-8">
+      <GameAreaFramingModal
+        open={framingModalOpen}
+        mapStyle={mapStyle}
+        framing={framing}
+        onClose={() => setFramingModalOpen(false)}
+        onConfirm={(result) => {
+          setGameArea(result.gameArea);
+          setFocusBounds(result.focusBounds);
+          framing.loadFramingResult(result);
+        }}
+      />
+
       <div className="space-y-4 pt-[max(1rem,env(safe-area-inset-top))]">
         <AppLogo variant="mark" size="sm" />
         <h1 className="font-display text-2xl font-bold uppercase tracking-tight text-ink">
           {existing ? "Edit preset" : "New preset"}
         </h1>
+
+        <button
+          type="button"
+          onClick={() => setFramingModalOpen(true)}
+          className="btn-secondary w-full"
+        >
+          Frame game area
+        </button>
+
+        {gameArea ? (
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="font-mono text-xs tabular-nums text-ink">
+              {formatPlayAreaSummary(gameAreaSquareMiles(gameArea))}
+            </span>
+            <button
+              type="button"
+              onClick={() => setFramingModalOpen(true)}
+              className="text-xs font-semibold text-brand-blue"
+            >
+              Reframe
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setGameArea(null);
+                setPlaceLabel("");
+                setFocusBounds(null);
+                framing.resetManualFraming();
+              }}
+              className="text-xs font-semibold text-error"
+            >
+              Clear
+            </button>
+          </div>
+        ) : (
+          <p className="text-xs text-ink-dim">
+            Optional. You can also frame the area when hosting.
+          </p>
+        )}
 
         <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
           Preset name
@@ -119,7 +193,7 @@ export function GamePresetEditor() {
         </div>
 
         <GameSizePicker
-          gameArea={null}
+          gameArea={gameArea}
           value={gameSize}
           distanceUnit={distanceUnit}
           onChange={(size) => {

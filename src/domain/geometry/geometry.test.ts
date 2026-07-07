@@ -8,6 +8,8 @@ import {
   buildLocationNearRegion,
   buildHalfPlanePolygon,
   boundsToGameArea,
+  centerToViewportEdgeRadiusMeters,
+  circleToGameArea,
   clearCoastlineNearRegionCacheForTests,
   distanceBetweenPoints,
   gameAreaOutsideMask,
@@ -42,6 +44,24 @@ describe("geometry helpers", () => {
     const gameArea = boundsToGameArea(bounds as never);
     expect(gameArea.coordinates[0][0]).toEqual([-0.2, 51.4]);
     expect(gameArea.coordinates[0]).toHaveLength(5);
+  });
+
+  it("measures circle radius from center to nearest viewport edge", () => {
+    const bounds = {
+      getSouthWest: () => ({ lat: 51.4, lng: -0.2 }),
+      getNorthEast: () => ({ lat: 51.5, lng: -0.1 }),
+    };
+    const center: [number, number] = [51.45, -0.15];
+
+    const radiusMeters = centerToViewportEdgeRadiusMeters(center, bounds as never);
+    expect(radiusMeters).toBeGreaterThan(0);
+    expect(radiusMeters).toBeLessThan(15_000);
+  });
+
+  it("builds a circular game area from center and radius", () => {
+    const gameArea = circleToGameArea([51.45, -0.15], 2_000);
+    expect(gameArea.type).toBe("Polygon");
+    expect(gameArea.coordinates[0].length).toBeGreaterThan(8);
   });
 
   it("expands collapsed bounding boxes before building a game area", () => {

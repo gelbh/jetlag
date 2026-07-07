@@ -19,6 +19,9 @@
 - Single question timer in the top status bar (removed map duplicate)
 - Reworked GPS anchor button and compact Home feedback link
 - PWA update toast when a new version is available
+- Create session: square, circle, or polygon play-area shapes with a clearer map boundary
+- Create session and presets: fullscreen map for framing the game area
+- Presets: save a framed game area from the editor
 
 ### Technical
 

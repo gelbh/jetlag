@@ -1,9 +1,14 @@
-import { useCallback, useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import type { LatLngBounds, LatLngBoundsExpression } from "leaflet";
+import type { LatLngBoundsExpression } from "leaflet";
 import { AppLogo } from "../components/ui/AppLogo";
 import { CreateSessionMapPane } from "../components/session/CreateSessionMapPane";
+import { GameAreaFramingModal } from "../components/session/GameAreaFramingModal";
 import { MobileSheet } from "../components/ui/MobileSheet";
+import {
+  useGameAreaFraming,
+  type FramingMode,
+} from "../hooks/session/useGameAreaFraming";
 import {
   LOCAL_SESSION_ID,
   type GameArea,
@@ -11,12 +16,8 @@ import {
 } from "../domain/map/annotations";
 import type { LatLngTuple } from "../domain/geometry/geometry";
 import {
-  boundsToGameArea,
   boundingBoxHasMinimumSpan,
-  boundingBoxToLeafletBounds,
   gameAreaToBoundingBox,
-  gameAreaToBoundsExpression,
-  isUsableMapBounds,
   placeToGameArea,
 } from "../domain/geometry/geometry";
 import { generateLocalCode } from "../domain/session/session";
@@ -84,6 +85,12 @@ function placeToFocusBounds(place: GeocodedPlace): LatLngBoundsExpression {
   ];
 }
 
+const FRAMING_MODES: Array<{ value: FramingMode; label: string }> = [
+  { value: "rectangle", label: "Square" },
+  { value: "circle", label: "Circle" },
+  { value: "polygon", label: "Polygon" },
+];
+
 export function CreateSession() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -92,10 +99,8 @@ export function CreateSession() {
   const setSession = useSessionStore((state) => state.setSession);
   const mapStyle = useMapStore((state) => state.mapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
-  const [bounds, setBounds] = useState<LatLngBounds | null>(null);
-  const [focusBounds, setFocusBounds] = useState<LatLngBoundsExpression | null>(
-    null,
-  );
+  const framing = useGameAreaFraming();
+  const [framingModalOpen, setFramingModalOpen] = useState(false);
   const [locationQuery, setLocationQuery] = useState("");
   const [searchResults, setSearchResults] = useState<GeocodedPlace[]>([]);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
@@ -117,13 +122,11 @@ export function CreateSession() {
   const [accessCode, setAccessCode] = useState("");
   const [hostHasAccessClaim, setHostHasAccessClaim] = useState(false);
   const metros = useMemo(() => listTransitMetros(), []);
-  const [userFramedViewport, setUserFramedViewport] = useState(false);
   const [importedGameArea, setImportedGameArea] = useState<GameArea | null>(
     null,
   );
   const [selectedAreas, setSelectedAreas] = useState<GameArea[]>([]);
   const [importLoading, setImportLoading] = useState(false);
-  const ignoreViewportUpdatesRef = useRef(false);
   const importFileInputRef = useRef<HTMLInputElement>(null);
   const userLocationRef = useRef<LatLngTuple | null>(null);
 
@@ -156,12 +159,13 @@ export function CreateSession() {
     }
     if (draft.gameArea) {
       setImportedGameArea(draft.gameArea);
+      framing.applyFocusToGameArea(draft.gameArea);
     }
     if (draft.placeLabel) {
       setLocationQuery(draft.placeLabel);
     }
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [presets, searchParams]);
+  }, [framing, presets, searchParams]); // eslint-disable-line react-hooks/exhaustive-deps -- apply preset once when store hydrates
 
   useEffect(() => {
     void getCurrentPosition({ highAccuracy: false })
@@ -203,18 +207,16 @@ export function CreateSession() {
   const inferredTransitMetroId = useMemo(() => {
     const gameArea =
       importedGameArea ??
-      (selectedPlace && !userFramedViewport
+      (selectedPlace && !framing.userFramed
         ? placeToGameArea(selectedPlace)
-        : bounds
-          ? boundsToGameArea(bounds)
-          : null);
+        : framing.manualGameArea);
 
     if (!gameArea) {
       return "";
     }
 
     return inferTransitMetroId(gameArea) ?? "";
-  }, [bounds, importedGameArea, selectedPlace, userFramedViewport]);
+  }, [framing.manualGameArea, framing.userFramed, importedGameArea, selectedPlace]);
   const [transitMetroOverride, setTransitMetroOverride] = useState<
     string | null
   >(null);
@@ -242,16 +244,27 @@ export function CreateSession() {
       return importedGameArea;
     }
 
-    if (selectedPlace && !userFramedViewport) {
+    if (selectedPlace && !framing.userFramed) {
       return placeToGameArea(selectedPlace);
     }
 
-    if (bounds) {
-      return boundsToGameArea(bounds);
+    return framing.manualGameArea;
+  }, [framing.manualGameArea, framing.userFramed, importedGameArea, selectedPlace]);
+
+  const manualFramingActive =
+    !importedGameArea && (!selectedPlace || framing.userFramed);
+
+  const mapFocusBounds = useMemo(() => {
+    if (importedGameArea) {
+      return framing.focusBounds;
     }
 
-    return null;
-  }, [bounds, importedGameArea, selectedPlace, userFramedViewport]);
+    if (selectedPlace && !framing.userFramed) {
+      return placeToFocusBounds(selectedPlace);
+    }
+
+    return framing.focusBounds;
+  }, [framing.focusBounds, framing.userFramed, importedGameArea, selectedPlace]);
 
   const mapPreviewGameArea = useMemo(() => {
     const areas = [...selectedAreas];
@@ -282,9 +295,7 @@ export function CreateSession() {
     setSelectedPlace(null);
     setSearchResults([]);
     setLocationQuery("");
-    setBounds(null);
-    setFocusBounds(null);
-    setUserFramedViewport(false);
+    framing.resetManualFraming();
     setError(null);
   };
 
@@ -298,14 +309,9 @@ export function CreateSession() {
     setSelectedPlace(null);
     setSearchResults([]);
     setLocationQuery(filename);
-    setUserFramedViewport(false);
-    ignoreViewportUpdatesRef.current = true;
-    setBounds(boundingBoxToLeafletBounds(gameAreaToBoundingBox(gameArea)));
-    setFocusBounds(gameAreaToBoundsExpression(gameArea));
+    framing.resetManualFraming();
+    framing.applyFocusToGameArea(gameArea);
     setError(null);
-    window.setTimeout(() => {
-      ignoreViewportUpdatesRef.current = false;
-    }, 600);
   };
 
   const applyPlace = (place: GeocodedPlace) => {
@@ -314,50 +320,10 @@ export function CreateSession() {
     setSelectedPlace(place);
     setSearchResults([]);
     setLocationQuery(place.displayName);
-    setUserFramedViewport(false);
-    ignoreViewportUpdatesRef.current = true;
-    setBounds(boundingBoxToLeafletBounds(place.bounds));
-    setFocusBounds(placeToFocusBounds(place));
+    framing.resetManualFraming();
+    framing.applyFocusToGameArea(placeToGameArea(place));
     setError(null);
-    window.setTimeout(() => {
-      ignoreViewportUpdatesRef.current = false;
-    }, 600);
   };
-
-  const handleBoundsChange = useCallback((nextBounds: LatLngBounds) => {
-    if (ignoreViewportUpdatesRef.current || !isUsableMapBounds(nextBounds)) {
-      return;
-    }
-
-    setBounds((previous) => {
-      if (previous) {
-        const prevSw = previous.getSouthWest();
-        const prevNe = previous.getNorthEast();
-        const nextSw = nextBounds.getSouthWest();
-        const nextNe = nextBounds.getNorthEast();
-        const epsilon = 1e-6;
-
-        if (
-          Math.abs(prevSw.lat - nextSw.lat) < epsilon &&
-          Math.abs(prevSw.lng - nextSw.lng) < epsilon &&
-          Math.abs(prevNe.lat - nextNe.lat) < epsilon &&
-          Math.abs(prevNe.lng - nextNe.lng) < epsilon
-        ) {
-          return previous;
-        }
-      }
-
-      return nextBounds;
-    });
-  }, []);
-
-  const handleUserViewportFramed = useCallback(() => {
-    if (ignoreViewportUpdatesRef.current) {
-      return;
-    }
-
-    setUserFramedViewport(true);
-  }, []);
 
   const handleBoundaryImport = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -424,7 +390,7 @@ export function CreateSession() {
   };
 
   const handleConfirm = async () => {
-    if (!importedGameArea && !bounds && !selectedPlace) {
+    if (!importedGameArea && !framing.manualGameArea && !selectedPlace) {
       setError(
         "Search for a place, import a boundary, or move the map until the play area is framed.",
       );
@@ -436,16 +402,21 @@ export function CreateSession() {
     setAccessCodeError(null);
 
     try {
-      const viewportArea = bounds ? boundsToGameArea(bounds) : null;
+      const manualArea =
+        framing.userFramed &&
+        framing.manualGameArea &&
+        boundingBoxHasMinimumSpan(
+          gameAreaToBoundingBox(framing.manualGameArea),
+        )
+          ? framing.manualGameArea
+          : null;
       const draftArea = importedGameArea
         ? importedGameArea
-        : viewportArea &&
-            userFramedViewport &&
-            boundingBoxHasMinimumSpan(gameAreaToBoundingBox(viewportArea))
-          ? viewportArea
+        : manualArea
+          ? manualArea
           : selectedPlace
             ? placeToGameArea(selectedPlace)
-            : viewportArea;
+            : framing.manualGameArea;
 
       const areasForSession = draftArea
         ? [...selectedAreas, draftArea]
@@ -564,11 +535,36 @@ export function CreateSession() {
     <div className="flex h-full min-h-[100dvh] flex-col bg-surface-deep">
       <CreateSessionMapPane
         mapStyle={mapStyle}
-        focusBounds={focusBounds}
+        focusBounds={mapFocusBounds}
         previewGameArea={mapPreviewGameArea ?? previewGameArea}
         selectedGameSize={gameSize}
-        onBoundsChange={handleBoundsChange}
-        onUserViewportFramed={handleUserViewportFramed}
+        manualFramingActive={manualFramingActive}
+        framingMode={framing.framingMode}
+        circleCenter={framing.circleCenter}
+        circleRadiusMeters={framing.circleRadiusMeters}
+        polygonVertices={framing.polygonVertices}
+        onBoundsChange={framing.handleBoundsChange}
+        onUserViewportFramed={framing.handleUserViewportFramed}
+        onMapClick={
+          manualFramingActive &&
+          (framing.framingMode === "circle" ||
+            framing.framingMode === "polygon")
+            ? framing.handleMapClick
+            : undefined
+        }
+      />
+
+      <GameAreaFramingModal
+        open={framingModalOpen}
+        mapStyle={mapStyle}
+        framing={framing}
+        onClose={() => setFramingModalOpen(false)}
+        onConfirm={(result) => {
+          setImportedGameArea(null);
+          setSelectedPlaceId(null);
+          setSelectedPlace(null);
+          framing.loadFramingResult(result);
+        }}
       />
 
       <MobileSheet
@@ -586,10 +582,66 @@ export function CreateSession() {
           Frame the game area
         </h1>
         <p className="mt-2 text-pretty text-sm leading-relaxed text-ink-muted">
-          Search for a city or county to use its boundary, import a KML/KMZ
-          boundary, or pan and zoom to frame a custom play area. Add multiple
-          areas for admin splits or metro cross-border games.
+          Search for a place or import KML/KMZ, or draw a play area on the map.
+          Square uses pan and zoom; circle uses a tap then zoom; polygon uses
+          corner taps. Add multiple areas for cross-border games.
         </p>
+
+        <div className="mt-4 space-y-2">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+            Play area shape
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {FRAMING_MODES.map((mode) => (
+              <button
+                key={mode.value}
+                type="button"
+                disabled={searchLoading || importLoading}
+                onClick={() => {
+                  setImportedGameArea(null);
+                  framing.setFramingMode(mode.value);
+                }}
+                className={`min-h-11 border-2 px-2 py-2 text-xs font-semibold disabled:opacity-50 ${
+                  framing.framingMode === mode.value
+                    ? "border-highlight bg-highlight-soft text-highlight"
+                    : "border-border bg-surface-deep text-ink"
+                }`}
+              >
+                {mode.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setFramingModalOpen(true)}
+          disabled={searchLoading || importLoading}
+          className="btn-secondary mt-3 w-full disabled:opacity-50"
+        >
+          Frame on map
+        </button>
+
+        {framing.framingMode === "polygon" && manualFramingActive ? (
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => framing.closePolygon()}
+              disabled={framing.polygonVertices.length < 3}
+              className="btn-primary min-h-11 disabled:opacity-50"
+            >
+              Close polygon
+            </button>
+            <button
+              type="button"
+              onClick={() => framing.resetPolygonVertices()}
+              disabled={framing.polygonVertices.length === 0}
+              className="min-h-11 rounded-xl bg-surface-raised px-3 text-sm font-medium disabled:opacity-50"
+            >
+              Reset polygon
+            </button>
+          </div>
+        ) : null}
 
         {selectedAreas.length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-2">

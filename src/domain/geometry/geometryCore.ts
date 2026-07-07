@@ -78,6 +78,68 @@ export function boundsToGameArea(bounds: LatLngBounds): GameArea {
   });
 }
 
+function geodesicMeters(a: LatLngTuple, b: LatLngTuple): number {
+  const earthRadius = 6_371_000;
+  const latDelta = ((b[0] - a[0]) * Math.PI) / 180;
+  const lngDelta = ((b[1] - a[1]) * Math.PI) / 180;
+  const lat1 = (a[0] * Math.PI) / 180;
+  const lat2 = (b[0] * Math.PI) / 180;
+  const h =
+    Math.sin(latDelta / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(lngDelta / 2) ** 2;
+
+  return 2 * earthRadius * Math.asin(Math.sqrt(h));
+}
+
+/** Geodesic distance from center to the nearest viewport edge. */
+export function centerToViewportEdgeRadiusMeters(
+  center: LatLngTuple,
+  bounds: LatLngBounds,
+): number {
+  const southWest = bounds.getSouthWest();
+  const northEast = bounds.getNorthEast();
+  const south = southWest.lat;
+  const west = southWest.lng;
+  const north = northEast.lat;
+  const east = northEast.lng;
+  const [lat, lng] = center;
+
+  return Math.min(
+    geodesicMeters(center, [south, lng]),
+    geodesicMeters(center, [north, lng]),
+    geodesicMeters(center, [lat, west]),
+    geodesicMeters(center, [lat, east]),
+  );
+}
+
+export function circleToGameArea(
+  center: LatLngTuple,
+  radiusMeters: number,
+): GameArea {
+  const circle = turfCircle([center[1], center[0]], radiusMeters / 1000, {
+    steps: 64,
+    units: "kilometers",
+  });
+
+  return featureToGameArea(circle as Feature<Polygon>);
+}
+
+export function verticesToGameArea(
+  vertices: readonly LatLngTuple[],
+): GameArea | null {
+  if (vertices.length < 3) {
+    return null;
+  }
+
+  const ring = vertices.map(([lat, lng]) => [lng, lat] as [number, number]);
+  ring.push(ring[0]!);
+
+  return {
+    type: "Polygon",
+    coordinates: [ring],
+  };
+}
+
 export function boundingBoxToLeafletBounds(box: BoundingBox): LatLngBounds {
   const normalized = normalizeBoundingBox(box);
   return latLngBounds(

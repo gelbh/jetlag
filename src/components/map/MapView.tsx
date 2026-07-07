@@ -25,6 +25,8 @@ interface MapViewProps {
   focusBounds?: LatLngBoundsExpression | null;
   /** When "once", fitBounds runs on mount and on recenterToken changes only. */
   fitBoundsMode?: "once" | "always";
+  /** Leaflet fitBounds padding in pixels. */
+  fitBoundsPadding?: [number, number];
   /** Increment to programmatically refit focusBounds (e.g. Recenter button). */
   recenterToken?: number;
   showZoomControl?: boolean;
@@ -37,11 +39,13 @@ function MapFocus({
   fitBoundsMode,
   recenterToken = 0,
   suppressChromeHideRef,
+  fitBoundsPadding = [32, 32],
 }: {
   focusBounds: LatLngBoundsExpression | null;
   fitBoundsMode: "once" | "always";
   recenterToken: number;
   suppressChromeHideRef?: MutableRefObject<boolean>;
+  fitBoundsPadding?: [number, number];
 }) {
   const map = useMap();
   const hasFittedRef = useRef(false);
@@ -68,7 +72,7 @@ function MapFocus({
     }
 
     map.invalidateSize();
-    map.fitBounds(focusBounds, { padding: [32, 32] });
+    map.fitBounds(focusBounds, { padding: fitBoundsPadding });
     hasFittedRef.current = true;
 
     const onMoveEnd = () => {
@@ -79,7 +83,7 @@ function MapFocus({
     };
 
     map.on("moveend", onMoveEnd);
-  }, [focusBounds, fitBoundsMode, map, recenterToken, suppressChromeHideRef]);
+  }, [focusBounds, fitBoundsMode, fitBoundsPadding, map, recenterToken, suppressChromeHideRef]);
 
   return null;
 }
@@ -216,6 +220,7 @@ export function MapView({
   interactive = true,
   focusBounds = null,
   fitBoundsMode = "always",
+  fitBoundsPadding,
   recenterToken = 0,
   showZoomControl,
   children,
@@ -263,6 +268,7 @@ export function MapView({
           fitBoundsMode={fitBoundsMode}
           recenterToken={recenterToken}
           suppressChromeHideRef={suppressChromeHideRef}
+          fitBoundsPadding={fitBoundsPadding}
         />
         <MapMobileControls enabled={zoomControlEnabled} />
         <MapResize />

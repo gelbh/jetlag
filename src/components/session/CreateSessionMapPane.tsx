@@ -1,8 +1,11 @@
 import type { LatLngBoundsExpression } from "leaflet";
 import { MapView } from "../map/MapView";
+import { FramingPreviewLayers } from "../map/FramingPreviewLayers";
 import { GameAreaMask } from "../map/GameAreaMask";
 import type { GameArea } from "../../domain/map/annotations";
 import type { MapStyle } from "../../domain/map/mapBasemaps";
+import type { FramingMode } from "../../hooks/session/useGameAreaFraming";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
   formatPlayAreaSummary,
   gameAreaSquareMiles,
@@ -16,8 +19,14 @@ interface CreateSessionMapPaneProps {
   focusBounds: LatLngBoundsExpression | null;
   previewGameArea: GameArea | null;
   selectedGameSize: GameSize;
+  manualFramingActive: boolean;
+  framingMode: FramingMode;
+  circleCenter: LatLngTuple | null;
+  circleRadiusMeters: number | null;
+  polygonVertices: readonly LatLngTuple[];
   onBoundsChange: (bounds: import("leaflet").LatLngBounds) => void;
   onUserViewportFramed: () => void;
+  onMapClick?: (lat: number, lng: number) => void;
 }
 
 export function CreateSessionMapPane({
@@ -25,8 +34,14 @@ export function CreateSessionMapPane({
   focusBounds,
   previewGameArea,
   selectedGameSize,
+  manualFramingActive,
+  framingMode,
+  circleCenter,
+  circleRadiusMeters,
+  polygonVertices,
   onBoundsChange,
   onUserViewportFramed,
+  onMapClick,
 }: CreateSessionMapPaneProps) {
   const recommendedSize = previewGameArea
     ? recommendGameSize(previewGameArea)
@@ -44,11 +59,21 @@ export function CreateSessionMapPane({
           mapStyle={mapStyle}
           onBoundsChange={onBoundsChange}
           onUserViewportFramed={onUserViewportFramed}
-          zoom={12}
+          onMapClick={onMapClick}
+          zoom={10}
           focusBounds={focusBounds}
+          fitBoundsPadding={[48, 48]}
           className="h-full w-full"
         >
-          {previewGameArea ? (
+          {manualFramingActive ? (
+            <FramingPreviewLayers
+              gameArea={previewGameArea}
+              framingMode={framingMode}
+              circleCenter={circleCenter}
+              circleRadiusMeters={circleRadiusMeters}
+              polygonVertices={polygonVertices}
+            />
+          ) : previewGameArea ? (
             <GameAreaMask gameArea={previewGameArea} framing />
           ) : null}
         </MapView>

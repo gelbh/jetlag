@@ -15,6 +15,18 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
+vi.mock("../components/map/MapView", () => ({
+  MapView: () => <div data-testid="framing-map" />,
+}));
+
+vi.mock("../components/map/GameAreaMask", () => ({
+  GameAreaMask: () => null,
+}));
+
+vi.mock("../components/map/FramingPreviewLayers", () => ({
+  FramingPreviewLayers: () => null,
+}));
+
 describe("GamePresetList", () => {
   it("renders empty state and new preset action", () => {
     useGamePresetStore.setState({ presets: [] });
@@ -59,6 +71,18 @@ describe("GamePresetList", () => {
 });
 
 describe("GamePresetEditor", () => {
+  it("shows frame game area control on the editor", () => {
+    useGamePresetStore.setState({ presets: [] });
+    renderWithRouter(<GamePresetEditor />, {
+      route: "/presets/new",
+      resetStores: false,
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Frame game area" }),
+    ).toBeInTheDocument();
+  });
+
   it("creates a preset from the new editor form", () => {
     useGamePresetStore.setState({ presets: [] });
     renderWithRouter(<GamePresetEditor />, {

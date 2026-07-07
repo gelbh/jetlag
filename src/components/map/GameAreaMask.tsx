@@ -63,6 +63,18 @@ function renderGameAreaPolygons(
 export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
   const outsideMask = useMemo(() => gameAreaOutsideMask(gameArea), [gameArea]);
   const outsideTint = framing ? FRAMING_OUTSIDE_TINT : PLAY_OUTSIDE_TINT;
+  const borderOptions = framing
+    ? {
+        color: MAP_ANNOTATION_COLORS.playArea,
+        weight: 3,
+        dashArray: "8 6",
+        fillOpacity: 0.08,
+      }
+    : {
+        color: MAP_ANNOTATION_COLORS.playArea,
+        weight: 2,
+        fillOpacity: 0,
+      };
 
   return (
     <Fragment>
@@ -72,11 +84,7 @@ export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
       <Polygon
         positions={gameAreaToLeafletPositions(gameArea)}
         interactive={false}
-        pathOptions={{
-          color: MAP_ANNOTATION_COLORS.playArea,
-          weight: 2,
-          fillOpacity: framing ? 0.08 : 0,
-        }}
+        pathOptions={borderOptions}
       />
     </Fragment>
   );
