@@ -6,6 +6,7 @@ import "@fontsource/barlow-semi-condensed/700.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
+import { AppUpdateBanner } from "./components/ui/AppUpdateBanner.tsx";
 import { installE2EBridgeIfConfigured } from "./test/e2eBridge";
 import "./index.css";
 
@@ -13,6 +14,7 @@ installE2EBridgeIfConfigured();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
+    <AppUpdateBanner />
     <App />
   </StrictMode>,
 );

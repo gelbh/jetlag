@@ -1,0 +1,47 @@
+export const APP_VERSION = "0.1.0";
+
+export interface ChangelogEntry {
+  version: string;
+  date: string;
+  sections: Array<{
+    title: string;
+    items: string[];
+  }>;
+}
+
+export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.1.0",
+    date: "2026-07-07",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Photo uploads: clearer permission errors and hider role checks before upload",
+          "Matching wizard: category dropdown selection works reliably on mobile",
+          "Metric sessions: radar defaults to 1 km; tentacle copy uses session units",
+          "Question send: answer timer starts only after the question fully syncs",
+          "Sea level measuring: send blocked until elevation region is ready",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Map pan hides tool panels without clearing your in-progress draft",
+          "Drag tool panel handle down to minimize; tap the pill to expand again",
+          "Wizard steps start with anchor / location before question options",
+          "End game moved to More tools menu",
+          "Single question timer in the top status bar",
+          "Reworked GPS anchor button and compact Home feedback link",
+          "PWA update toast when a new version is available",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Spatial Voronoi and geodesic buffers for more accurate elimination zones",
+        ],
+      },
+    ],
+  },
+];

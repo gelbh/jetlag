@@ -30,7 +30,8 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: "autoUpdate",
+      injectRegister: false,
+      registerType: "prompt",
       includeAssets: ["favicon.svg", "icons/*.svg"],
       manifest: {
         name: "Jet Lag Map Companion",
