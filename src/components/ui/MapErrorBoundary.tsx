@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { captureException } from "../../services/core/sentry";
 
 interface MapErrorBoundaryProps {
   children: ReactNode;
@@ -20,6 +21,7 @@ export class MapErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
+    captureException(error);
     console.error("Map screen crashed:", error, info.componentStack);
   }
 

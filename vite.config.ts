@@ -1,10 +1,23 @@
+import { readFileSync } from "node:fs";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
+const appVersion = (
+  JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as {
+    version: string;
+  }
+).version;
+
+const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
+const sentryOrg = process.env.SENTRY_ORG;
+const sentryProject = process.env.SENTRY_PROJECT;
+
 export default defineConfig({
   build: {
+    sourcemap: true,
     rolldownOptions: {
       output: {
         codeSplitting: {
@@ -27,6 +40,18 @@ export default defineConfig({
     },
   },
   plugins: [
+    ...(sentryAuthToken && sentryOrg && sentryProject
+      ? [
+          sentryVitePlugin({
+            org: sentryOrg,
+            project: sentryProject,
+            authToken: sentryAuthToken,
+            release: {
+              name: `jetlag@${appVersion}`,
+            },
+          }),
+        ]
+      : []),
     react(),
     tailwindcss(),
     VitePWA({
