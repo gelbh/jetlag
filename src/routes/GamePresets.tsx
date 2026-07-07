@@ -1,9 +1,16 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import type { LatLngBoundsExpression } from "leaflet";
 import { AppLogo } from "../components/ui/AppLogo";
 import { AdvancedSessionSettings } from "../components/session/AdvancedSessionSettings";
 import { GameAreaFramingModal } from "../components/session/GameAreaFramingModal";
+import { GameAreaFramingStats } from "../components/session/GameAreaFramingControls";
+import { PlaceAreaSearchFields } from "../components/session/PlaceAreaSearchFields";
 import { GameSizePicker } from "../components/session/GameSizePicker";
+import {
+  gameAreaToBoundingBox,
+  placeToGameArea,
+} from "../domain/geometry/geometry";
 import {
   defaultAdvancedSessionSettings,
   type AdvancedSessionSettingsValue,
@@ -11,20 +18,17 @@ import {
 import type { DistanceUnit } from "../domain/map/distance";
 import type { GameArea } from "../domain/map/annotations";
 import type { BoundingBox } from "../domain/geometry/gameAreaBounds";
-import {
-  formatPlayAreaSummary,
-  gameAreaSquareMiles,
-  hidingZoneRadiusMeters,
-  type GameSize,
-} from "../domain/session/gameSize";
+import { hidingZoneRadiusMeters, type GameSize } from "../domain/session/gameSize";
 import {
   createGamePresetId,
   createSessionDraftToGamePreset,
   type CreateSessionDraft,
 } from "../domain/session/gamePreset";
 import { useGameAreaFraming } from "../hooks/session/useGameAreaFraming";
+import { usePlaceAreaSearch } from "../hooks/session/usePlaceAreaSearch";
 import { useGamePresetStore } from "../state/gamePresetStore";
 import { useMapStore } from "../state/sessionStore";
+import type { GeocodedPlace } from "../services/geo/geocoding";
 
 export function GamePresetEditor() {
   const navigate = useNavigate();
@@ -51,6 +55,21 @@ export function GamePresetEditor() {
   const [focusBounds, setFocusBounds] = useState<BoundingBox | null>(
     existing?.focusBounds ?? null,
   );
+  const applyPlaceToPreset = useCallback(
+    (place: GeocodedPlace) => {
+      const area = placeToGameArea(place);
+      setGameArea(area);
+      setPlaceLabel(place.displayName);
+      setFocusBounds(gameAreaToBoundingBox(area));
+      framing.resetManualFraming();
+      framing.applyFocusToGameArea(area);
+    },
+    [framing],
+  );
+  const placeSearch = usePlaceAreaSearch({
+    initialQuery: existing?.placeLabel ?? "",
+    onPlaceApplied: applyPlaceToPreset,
+  });
   const [name, setName] = useState(existing?.name ?? "");
   const [gameSize, setGameSize] = useState<GameSize>(existing?.gameSize ?? "medium");
   const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>(
@@ -96,16 +115,36 @@ export function GamePresetEditor() {
     navigate("/presets");
   };
 
+  const referenceFocusBounds = useMemo(() => {
+    if (!focusBounds) {
+      return null;
+    }
+
+    return [
+      [focusBounds.south, focusBounds.west],
+      [focusBounds.north, focusBounds.east],
+    ] satisfies LatLngBoundsExpression;
+  }, [focusBounds]);
+
   return (
     <main className="flex min-h-[100dvh] flex-col px-5 py-8">
       <GameAreaFramingModal
         open={framingModalOpen}
         mapStyle={mapStyle}
         framing={framing}
+        referenceGameArea={!framing.userFramed ? gameArea : null}
+        referenceFocusBounds={
+          !framing.userFramed ? referenceFocusBounds : null
+        }
         onClose={() => setFramingModalOpen(false)}
         onConfirm={(result) => {
+          const manualResult = framing.userFramed;
           setGameArea(result.gameArea);
           setFocusBounds(result.focusBounds);
+          if (manualResult) {
+            setPlaceLabel("");
+            placeSearch.resetSearch();
+          }
           framing.loadFramingResult(result);
         }}
       />
@@ -116,44 +155,68 @@ export function GamePresetEditor() {
           {existing ? "Edit preset" : "New preset"}
         </h1>
 
-        <button
-          type="button"
-          onClick={() => setFramingModalOpen(true)}
-          className="btn-secondary w-full"
-        >
-          Frame game area
-        </button>
-
-        {gameArea ? (
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <span className="font-mono text-xs tabular-nums text-ink">
-              {formatPlayAreaSummary(gameAreaSquareMiles(gameArea))}
-            </span>
-            <button
-              type="button"
-              onClick={() => setFramingModalOpen(true)}
-              className="text-xs font-semibold text-brand-blue"
-            >
-              Reframe
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setGameArea(null);
-                setPlaceLabel("");
-                setFocusBounds(null);
-                framing.resetManualFraming();
-              }}
-              className="text-xs font-semibold text-error"
-            >
-              Clear
-            </button>
+        <div className="jl-field-frame space-y-3">
+          <div className="space-y-1">
+            <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+              Play boundary
+            </p>
+            <p className="text-xs leading-snug text-ink-muted">
+              Optional. Search for a place or draw the play area on the map.
+            </p>
           </div>
-        ) : (
-          <p className="text-xs text-ink-dim">
-            Optional. You can also frame the area when hosting.
-          </p>
-        )}
+
+          <PlaceAreaSearchFields
+            locationQuery={placeSearch.locationQuery}
+            onLocationQueryChange={placeSearch.setLocationQuery}
+            onSearch={() => void placeSearch.handleSearch()}
+            searchLoading={placeSearch.searchLoading}
+            searchResults={placeSearch.searchResults}
+            selectedPlaceId={placeSearch.selectedPlaceId}
+            selectedPlace={placeSearch.selectedPlace}
+            onSelectPlace={placeSearch.applyPlace}
+          />
+
+          {placeSearch.searchError ? (
+            <p className="text-sm text-error">{placeSearch.searchError}</p>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={() => setFramingModalOpen(true)}
+            disabled={placeSearch.searchLoading}
+            className="btn-primary w-full disabled:opacity-50"
+          >
+            Open fullscreen map
+          </button>
+
+          {gameArea ? (
+            <div className="space-y-2 border-t border-border pt-3">
+              <GameAreaFramingStats gameArea={gameArea} compact />
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFramingModalOpen(true)}
+                  className="font-display text-xs font-semibold uppercase tracking-wide text-brand-blue"
+                >
+                  Reframe
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGameArea(null);
+                    setPlaceLabel("");
+                    setFocusBounds(null);
+                    placeSearch.resetSearch();
+                    framing.resetManualFraming();
+                  }}
+                  className="font-display text-xs font-semibold uppercase tracking-wide text-error"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </div>
 
         <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
           Preset name

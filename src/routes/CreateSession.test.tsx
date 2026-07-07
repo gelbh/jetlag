@@ -111,10 +111,10 @@ describe("CreateSession", () => {
   it("renders shape picker and fullscreen framing entry point", () => {
     renderWithRouter(<CreateSession />);
 
-    expect(screen.getByRole("button", { name: "Square" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Circle" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Polygon" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Frame on map" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Square" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Circle" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Polygon" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open fullscreen map" })).toBeInTheDocument();
   });
 
   it("creates a local session and navigates to the map", async () => {

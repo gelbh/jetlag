@@ -22,6 +22,8 @@
 - Create session: square, circle, or polygon play-area shapes with a clearer map boundary
 - Create session and presets: fullscreen map for framing the game area
 - Presets: save a framed game area from the editor
+- Presets: search for a place when setting the play area
+- Fullscreen play-area map: searched places show exact boundaries like the game map
 
 ### Technical
 

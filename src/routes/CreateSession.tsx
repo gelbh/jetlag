@@ -4,11 +4,13 @@ import type { LatLngBoundsExpression } from "leaflet";
 import { AppLogo } from "../components/ui/AppLogo";
 import { CreateSessionMapPane } from "../components/session/CreateSessionMapPane";
 import { GameAreaFramingModal } from "../components/session/GameAreaFramingModal";
-import { MobileSheet } from "../components/ui/MobileSheet";
 import {
-  useGameAreaFraming,
-  type FramingMode,
-} from "../hooks/session/useGameAreaFraming";
+  FramingModeSegmentControl,
+  GameAreaFramingPolygonActions,
+} from "../components/session/GameAreaFramingControls";
+import { framingModeHint } from "../components/session/gameAreaFramingUi";
+import { MobileSheet } from "../components/ui/MobileSheet";
+import { useGameAreaFraming } from "../hooks/session/useGameAreaFraming";
 import {
   LOCAL_SESSION_ID,
   type GameArea,
@@ -84,12 +86,6 @@ function placeToFocusBounds(place: GeocodedPlace): LatLngBoundsExpression {
     [north, east],
   ];
 }
-
-const FRAMING_MODES: Array<{ value: FramingMode; label: string }> = [
-  { value: "rectangle", label: "Square" },
-  { value: "circle", label: "Circle" },
-  { value: "polygon", label: "Polygon" },
-];
 
 export function CreateSession() {
   const navigate = useNavigate();
@@ -558,11 +554,15 @@ export function CreateSession() {
         open={framingModalOpen}
         mapStyle={mapStyle}
         framing={framing}
+        referenceGameArea={!manualFramingActive ? previewGameArea : null}
+        referenceFocusBounds={!manualFramingActive ? mapFocusBounds : null}
         onClose={() => setFramingModalOpen(false)}
         onConfirm={(result) => {
-          setImportedGameArea(null);
-          setSelectedPlaceId(null);
-          setSelectedPlace(null);
+          if (framing.userFramed) {
+            setImportedGameArea(null);
+            setSelectedPlaceId(null);
+            setSelectedPlace(null);
+          }
           framing.loadFramingResult(result);
         }}
       />
@@ -581,67 +581,47 @@ export function CreateSession() {
         <h1 className="mt-1 font-display text-2xl font-bold uppercase leading-tight tracking-tight text-ink">
           Frame the game area
         </h1>
-        <p className="mt-2 text-pretty text-sm leading-relaxed text-ink-muted">
-          Search for a place or import KML/KMZ, or draw a play area on the map.
-          Square uses pan and zoom; circle uses a tap then zoom; polygon uses
-          corner taps. Add multiple areas for cross-border games.
+        <p className="mt-2 text-pretty text-sm leading-relaxed text-ink-secondary">
+          Search or import a boundary, or draw the play area on the map below.
         </p>
 
-        <div className="mt-4 space-y-2">
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
-            Play area shape
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            {FRAMING_MODES.map((mode) => (
-              <button
-                key={mode.value}
-                type="button"
-                disabled={searchLoading || importLoading}
-                onClick={() => {
-                  setImportedGameArea(null);
-                  framing.setFramingMode(mode.value);
-                }}
-                className={`min-h-11 border-2 px-2 py-2 text-xs font-semibold disabled:opacity-50 ${
-                  framing.framingMode === mode.value
-                    ? "border-highlight bg-highlight-soft text-highlight"
-                    : "border-border bg-surface-deep text-ink"
-                }`}
-              >
-                {mode.label}
-              </button>
-            ))}
+        <div className="jl-field-frame mt-4 space-y-3">
+          <div className="space-y-1">
+            <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+              Draw on map
+            </p>
+            <p className="text-xs leading-snug text-ink-muted">
+              {framingModeHint(framing.framingMode)}
+            </p>
           </div>
+
+          <FramingModeSegmentControl
+            value={framing.framingMode}
+            disabled={searchLoading || importLoading}
+            onChange={(mode) => {
+              setImportedGameArea(null);
+              framing.setFramingMode(mode);
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={() => setFramingModalOpen(true)}
+            disabled={searchLoading || importLoading}
+            className="btn-primary w-full disabled:opacity-50"
+          >
+            Open fullscreen map
+          </button>
+
+          {framing.framingMode === "polygon" && manualFramingActive ? (
+            <GameAreaFramingPolygonActions
+              layout="inline"
+              vertexCount={framing.polygonVertices.length}
+              onClose={() => framing.closePolygon()}
+              onReset={() => framing.resetPolygonVertices()}
+            />
+          ) : null}
         </div>
-
-        <button
-          type="button"
-          onClick={() => setFramingModalOpen(true)}
-          disabled={searchLoading || importLoading}
-          className="btn-secondary mt-3 w-full disabled:opacity-50"
-        >
-          Frame on map
-        </button>
-
-        {framing.framingMode === "polygon" && manualFramingActive ? (
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => framing.closePolygon()}
-              disabled={framing.polygonVertices.length < 3}
-              className="btn-primary min-h-11 disabled:opacity-50"
-            >
-              Close polygon
-            </button>
-            <button
-              type="button"
-              onClick={() => framing.resetPolygonVertices()}
-              disabled={framing.polygonVertices.length === 0}
-              className="min-h-11 rounded-xl bg-surface-raised px-3 text-sm font-medium disabled:opacity-50"
-            >
-              Reset polygon
-            </button>
-          </div>
-        ) : null}
 
         {selectedAreas.length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-2">

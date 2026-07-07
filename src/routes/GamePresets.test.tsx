@@ -27,6 +27,18 @@ vi.mock("../components/map/FramingPreviewLayers", () => ({
   FramingPreviewLayers: () => null,
 }));
 
+const dublinPlace = {
+  id: "dublin-ie",
+  displayName: "Dublin, Ireland",
+  bounds: { south: 53.2, west: -6.5, north: 53.5, east: -6.0 },
+  center: [53.35, -6.25] as [number, number],
+  category: "city" as const,
+};
+
+vi.mock("../services/geo/geocoding", () => ({
+  searchPlaces: vi.fn(async () => [dublinPlace]),
+}));
+
 describe("GamePresetList", () => {
   it("renders empty state and new preset action", () => {
     useGamePresetStore.setState({ presets: [] });
@@ -79,8 +91,30 @@ describe("GamePresetEditor", () => {
     });
 
     expect(
-      screen.getByRole("button", { name: "Frame game area" }),
+      screen.getByRole("button", { name: "Open fullscreen map" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Find place" }),
+    ).toBeInTheDocument();
+  });
+
+  it("enables Done in the fullscreen map after searching for a place", async () => {
+    useGamePresetStore.setState({ presets: [] });
+    renderWithRouter(<GamePresetEditor />, {
+      route: "/presets/new",
+      resetStores: false,
+    });
+
+    fireEvent.change(
+      screen.getByLabelText(/City, county, state, or country/i),
+      { target: { value: "Dublin" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Find place" }));
+    expect(await screen.findByText(/Suggested/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Open fullscreen map" }));
+
+    expect(screen.getByRole("button", { name: "Done" })).toBeEnabled();
   });
 
   it("creates a preset from the new editor form", () => {

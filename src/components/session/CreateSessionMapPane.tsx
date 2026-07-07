@@ -7,12 +7,10 @@ import type { MapStyle } from "../../domain/map/mapBasemaps";
 import type { FramingMode } from "../../hooks/session/useGameAreaFraming";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
-  formatPlayAreaSummary,
-  gameAreaSquareMiles,
-  gameSizeLabel,
-  recommendGameSize,
-  type GameSize,
-} from "../../domain/session/gameSize";
+  GameAreaFramingStats,
+} from "./GameAreaFramingControls";
+import { framingModeHint } from "./gameAreaFramingUi";
+import { type GameSize } from "../../domain/session/gameSize";
 
 interface CreateSessionMapPaneProps {
   mapStyle: MapStyle;
@@ -43,17 +41,8 @@ export function CreateSessionMapPane({
   onUserViewportFramed,
   onMapClick,
 }: CreateSessionMapPaneProps) {
-  const recommendedSize = previewGameArea
-    ? recommendGameSize(previewGameArea)
-    : null;
-  const playAreaSummary = previewGameArea
-    ? formatPlayAreaSummary(gameAreaSquareMiles(previewGameArea))
-    : null;
-  const sizeMismatch =
-    recommendedSize !== null && recommendedSize !== selectedGameSize;
-
   return (
-    <div className="relative min-h-[32dvh] max-h-[45dvh] flex-[1_0_40dvh] shrink-0">
+    <div className="relative min-h-[34dvh] max-h-[46dvh] flex-[1_0_42dvh] shrink-0">
       <div className="absolute inset-0">
         <MapView
           mapStyle={mapStyle}
@@ -79,33 +68,23 @@ export function CreateSessionMapPane({
         </MapView>
       </div>
 
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-banner)] flex justify-center px-3 pb-3"
-        aria-live="polite"
-      >
-        {previewGameArea && playAreaSummary ? (
-          <div className="hud-chrome flex max-w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-[var(--radius-hud-md)] px-3 py-2 text-xs">
-            <span className="font-mono text-xs tabular-nums text-ink">
-              {playAreaSummary}
-            </span>
-            {recommendedSize ? (
-              <span className="text-ink-muted">
-                Suggested{" "}
-                <span className="font-medium text-brand-blue">
-                  {gameSizeLabel(recommendedSize).label}
-                </span>
-              </span>
-            ) : null}
-            {sizeMismatch ? (
-              <span className="text-status-warning">
-                Selected size differs from suggestion
-              </span>
-            ) : null}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-banner)] flex justify-center px-3 pb-3">
+        {previewGameArea ? (
+          <div className="hud-panel max-w-full px-3 py-2.5 pt-3.5">
+            <GameAreaFramingStats
+              gameArea={previewGameArea}
+              selectedGameSize={selectedGameSize}
+              compact
+            />
           </div>
         ) : (
-          <p className="hud-chrome rounded-[var(--radius-hud-md)] px-3 py-2 text-xs text-ink-dim">
-            Search or pan to set play area
-          </p>
+          <div className="hud-panel max-w-md px-3 py-2.5 pt-3.5">
+            <p className="text-xs leading-snug text-ink-secondary">
+              {manualFramingActive
+                ? framingModeHint(framingMode)
+                : "Search a place or draw on the map."}
+            </p>
+          </div>
         )}
       </div>
     </div>
