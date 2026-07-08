@@ -52,16 +52,16 @@ export function AppUpdateBanner() {
       role="status"
       aria-live="polite"
     >
-      <div className="mx-auto flex max-w-xl items-center justify-between gap-3 border-2 border-highlight bg-surface-deep px-3 py-2 shadow-hud-float">
-        <p className="text-sm font-medium text-ink">Update available</p>
+      <div className="hud-panel mx-auto flex max-w-xl items-center justify-between gap-3 px-3 py-2.5 pt-3.5 shadow-hud-float">
+        <p className="text-sm font-medium text-ink">New version ready</p>
         <button
           type="button"
-          className="btn-primary min-h-10 shrink-0 px-3 text-xs"
+          className="btn-primary min-h-10 shrink-0 px-4 text-xs"
           onClick={() => {
             void updateSW?.(true);
           }}
         >
-          Reload
+          Reload to update
         </button>
       </div>
     </div>

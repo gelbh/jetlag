@@ -1,6 +1,6 @@
 import { memo, useMemo } from "react";
 import L from "leaflet";
-import { CircleMarker, Marker, Polyline, Popup } from "react-leaflet";
+import { Marker, Polyline, Popup } from "react-leaflet";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 import type {
@@ -14,6 +14,7 @@ import {
   filterTransitVehiclesForViewport,
   type MapViewportBounds,
 } from "../../domain/map/transitViewport";
+import { transitStopDivIcon } from "./transitStopIcons";
 
 interface TransitLayerProps {
   staticData: TransitStaticData | null;
@@ -30,6 +31,15 @@ const MODE_COLORS: Record<TransitRouteMode, string> = {
   ferry: MAP_ANNOTATION_COLORS.transit.ferry,
   other: MAP_ANNOTATION_COLORS.transit.other,
 };
+
+function stopIcon(mode: TransitRouteMode) {
+  return L.divIcon({
+    className: "",
+    html: transitStopDivIcon(mode),
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+  });
+}
 
 function vehicleIcon(bearing: number | undefined, color: string) {
   const rotation = bearing ?? 0;
@@ -85,19 +95,13 @@ export const TransitLayer = memo(function TransitLayer({
       ))}
 
       {visibleStops.map((stop) => (
-        <CircleMarker
+        <Marker
           key={`stop-${stop.id}`}
-          center={[stop.lat, stop.lng]}
-          radius={5}
-          pathOptions={{
-            color: MODE_COLORS[stop.mode],
-            fillColor: MODE_COLORS[stop.mode],
-            fillOpacity: 0.9,
-            weight: 1,
-          }}
+          position={[stop.lat, stop.lng]}
+          icon={stopIcon(stop.mode)}
         >
           <Popup>{stop.name}</Popup>
-        </CircleMarker>
+        </Marker>
       ))}
 
       {visibleVehicles.map((vehicle) => (
