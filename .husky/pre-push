@@ -1,1 +1,16 @@
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+    continue
+  fi
+
+  range="${remote_sha}..${local_sha}"
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    range="$local_sha"
+  fi
+
+  if git diff --name-only $range | grep -qE '^(package\.json|CHANGELOG\.md|src/domain/device/changelog\.ts)$'; then
+    npm run release:check || exit 1
+  fi
+done
+
 npm run build

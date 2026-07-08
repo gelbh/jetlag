@@ -482,5 +482,9 @@ service cloud.firestore {
 
       allow update, delete: if false;
     }
+
+    match /_rateLimits/{docId} {
+      allow read, write: if false;
+    }
   }
 }

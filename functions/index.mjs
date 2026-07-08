@@ -34,6 +34,12 @@ import {
   handleSessionMessageWrite,
   handleSessionTimerWrite,
 } from "./sessionNotificationTriggers.mjs";
+import {
+  clearGrantAccessFailures,
+  consumeRateLimit,
+  getGrantAccessFailureCount,
+  recordGrantAccessFailure,
+} from "./firestoreRateLimit.mjs";
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
 
 const accessCodeSecret = defineSecret("ACCESS_CODE");
@@ -53,10 +59,16 @@ const VEHICLE_FEED_CACHE_TTL_MS = 15_000;
 const OVERPASS_CACHE_TTL_MS = 60 * 60 * 1000;
 const GRANT_ACCESS_FAILURE_DELAY_MS = 300;
 const GRANT_ACCESS_MAX_FAILURES = 8;
+const GRANT_ACCESS_WINDOW_MS = 15 * 60 * 1000;
+
+const PROXY_RATE_LIMITS = {
+  overpass: { limit: 20, windowMs: 60_000 },
+  transitland: { limit: 30, windowMs: 60_000 },
+  vehicles: { limit: 30, windowMs: 60_000 },
+};
 
 const vehicleFeedCache = createMemoryCache(VEHICLE_FEED_CACHE_TTL_MS);
 const overpassResponseCache = createMemoryCache(OVERPASS_CACHE_TTL_MS);
-const grantAccessFailures = new Map();
 
 function adminAuth() {
   return getAuth();
@@ -133,24 +145,42 @@ async function loadTflFeed(metro, feedUrl) {
   return payload;
 }
 
-async function requireProxyAccess(req, res) {
-  const authResult = await verifyProxyAccess(adminAuth(), adminDb(), req);
-  if (!authResult.ok) {
-    sendProxyAuthFailure(res, authResult);
+function sendRateLimitFailure(res, retryAfterMs) {
+  if (retryAfterMs > 0) {
+    res.set("Retry-After", String(Math.ceil(retryAfterMs / 1000)));
+  }
+  res.status(429).json({ error: "Too many requests. Try again later." });
+}
+
+async function enforceRateLimit(res, route, uid) {
+  const { limit, windowMs } = PROXY_RATE_LIMITS[route];
+  const result = await consumeRateLimit(adminDb(), { route, uid, limit, windowMs });
+  if (!result.allowed) {
+    sendRateLimitFailure(res, result.retryAfterMs ?? 0);
     return false;
   }
 
   return true;
 }
 
+async function requireProxyAccess(req, res) {
+  const authResult = await verifyProxyAccess(adminAuth(), adminDb(), req);
+  if (!authResult.ok) {
+    sendProxyAuthFailure(res, authResult);
+    return null;
+  }
+
+  return authResult;
+}
+
 async function requireOverpassProxyAccess(req, res) {
   const authResult = await verifyOverpassProxyAccess(adminAuth(), adminDb(), req);
   if (!authResult.ok) {
     sendProxyAuthFailure(res, authResult);
-    return false;
+    return null;
   }
 
-  return true;
+  return authResult;
 }
 
 export const grantAccess = onCall(
@@ -161,7 +191,9 @@ export const grantAccess = onCall(
     }
 
     const uid = request.auth.uid;
-    const failures = grantAccessFailures.get(uid) ?? 0;
+    const failures = await getGrantAccessFailureCount(adminDb(), uid, {
+      windowMs: GRANT_ACCESS_WINDOW_MS,
+    });
     if (failures >= GRANT_ACCESS_MAX_FAILURES) {
       throw new HttpsError(
         "resource-exhausted",
@@ -177,14 +209,17 @@ export const grantAccess = onCall(
 
     const expected = accessCodeSecret.value();
     if (!expected || code !== expected) {
-      grantAccessFailures.set(uid, failures + 1);
+      await recordGrantAccessFailure(adminDb(), uid, {
+        maxFailures: GRANT_ACCESS_MAX_FAILURES,
+        windowMs: GRANT_ACCESS_WINDOW_MS,
+      });
       await new Promise((resolve) => {
         setTimeout(resolve, GRANT_ACCESS_FAILURE_DELAY_MS);
       });
       throw new HttpsError("permission-denied", "Invalid access code.");
     }
 
-    grantAccessFailures.delete(uid);
+    await clearGrantAccessFailures(adminDb(), uid);
     await adminAuth().setCustomUserClaims(uid, { access: true });
     return { granted: true };
   },
@@ -198,7 +233,12 @@ export const vehicles = onRequest(async (req, res) => {
     return;
   }
 
-  if (!(await requireProxyAccess(req, res))) {
+  const authResult = await requireProxyAccess(req, res);
+  if (!authResult) {
+    return;
+  }
+
+  if (!(await enforceRateLimit(res, "vehicles", authResult.uid))) {
     return;
   }
 
@@ -237,7 +277,12 @@ export const transitland = onRequest(
       return;
     }
 
-    if (!(await requireProxyAccess(req, res))) {
+    const authResult = await requireProxyAccess(req, res);
+    if (!authResult) {
+      return;
+    }
+
+    if (!(await enforceRateLimit(res, "transitland", authResult.uid))) {
       return;
     }
 
@@ -284,7 +329,12 @@ export const overpass = onRequest(async (req, res) => {
     return;
   }
 
-  if (!(await requireOverpassProxyAccess(req, res))) {
+  const authResult = await requireOverpassProxyAccess(req, res);
+  if (!authResult) {
+    return;
+  }
+
+  if (!(await enforceRateLimit(res, "overpass", authResult.uid))) {
     return;
   }
 

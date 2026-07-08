@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.1.3";
+export const APP_VERSION = "0.1.4";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,26 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.1.4",
+    date: "2026-07-08",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Web analytics: optional GA4 page views in production",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Functions: Firestore-backed rate limits on Overpass, transit, and vehicle proxies",
+          "Functions: grantAccess failure throttling survives cold starts",
+          "Release tooling: Changesets versions package.json and syncs in-app changelog",
+        ],
+      }
+    ],
+  },
   {
     version: "0.1.3",
     date: "2026-07-08",
@@ -42,7 +62,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Firestore: allow answerableAt patch on pending questions; end-game request and accept rules",
         ],
-      },
+      }
     ],
   },
   {
@@ -63,7 +83,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "E2E: refresh visual baselines and align smoke session timeouts",
         ],
-      },
+      }
     ],
   },
   {
@@ -97,7 +117,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "E2E: Playwright visual baselines for home and join screens",
           "Functions: Zod validation on transit and Overpass proxy inputs",
         ],
-      },
+      }
     ],
   },
   {
@@ -109,7 +129,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Photo uploads: clearer permission errors and hider role checks before upload",
           "Matching wizard: category dropdown selection works reliably on mobile",
-          "Metric sessions: radar defaults to 1 km; tentacle copy uses session units",
+          "Metric sessions: radar defaults to 1 km; tentacle copy and distance labels use session units",
           "Question send: answer timer starts only after the question fully syncs",
           "Sea level measuring: send blocked until elevation region is ready",
         ],
@@ -121,7 +141,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Drag tool panel handle down to minimize; tap the pill to expand again",
           "Wizard steps start with anchor / location before question options",
           "End game moved to More tools menu",
-          "Single question timer in the top status bar",
+          "Single question timer in the top status bar (removed map duplicate)",
           "Reworked GPS anchor button and compact Home feedback link",
           "PWA update toast when a new version is available",
           "Create session: square, circle, or polygon play-area shapes with a clearer map boundary",
@@ -134,9 +154,9 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Technical",
         items: [
-          "Spatial Voronoi and geodesic buffers for more accurate elimination zones",
+          "Spatial Voronoi and geodesic buffers for more accurate elimination zones (matching & tentacles)",
         ],
-      },
+      }
     ],
-  },
+  }
 ];

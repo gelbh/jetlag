@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.4 - 2026-07-08
+
+### Improvements
+
+- Web analytics: optional GA4 page views in production
+
+### Technical
+
+- Functions: Firestore-backed rate limits on Overpass, transit, and vehicle proxies
+- Functions: grantAccess failure throttling survives cold starts
+- Release tooling: Changesets versions package.json and syncs in-app changelog
+
 ## 0.1.3 - 2026-07-08
 
 ### Fixes
