@@ -113,7 +113,7 @@ export function deserializeGameAreaFromFirestore(value: unknown): GameArea {
   throw new Error("Session game area is missing or invalid.");
 }
 
-function stripUndefinedValues(value: unknown): unknown {
+export function stripUndefinedValues(value: unknown): unknown {
   if (value === undefined) {
     return undefined;
   }
@@ -478,6 +478,14 @@ export function deserializeSessionFromFirestore(
     endGameStartedByUid:
       typeof document.endGameStartedByUid === "string"
         ? document.endGameStartedByUid
+        : undefined,
+    endGameRequestedAt:
+      typeof document.endGameRequestedAt === "string"
+        ? document.endGameRequestedAt
+        : undefined,
+    endGameRequestedByUid:
+      typeof document.endGameRequestedByUid === "string"
+        ? document.endGameRequestedByUid
         : undefined,
   };
 }

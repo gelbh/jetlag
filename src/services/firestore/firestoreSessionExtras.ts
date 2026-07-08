@@ -27,6 +27,7 @@ import {
   deserializePendingQuestionFromFirestore,
   deserializePlayerLocationFromFirestore,
   deserializeSessionMessageFromFirestore,
+  stripUndefinedValues,
 } from "./firestoreSerialization";
 
 function sessionDoc(sessionId: string) {
@@ -148,7 +149,10 @@ export async function updatePendingQuestion(
     >
   >,
 ): Promise<void> {
-  await updateDoc(doc(pendingQuestionsCollection(sessionId), questionId), patch);
+  await updateDoc(
+    doc(pendingQuestionsCollection(sessionId), questionId),
+    stripUndefinedValues(patch) as Record<string, unknown>,
+  );
 }
 
 export async function updateGameMessageAnswer(

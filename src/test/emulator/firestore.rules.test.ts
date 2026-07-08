@@ -589,6 +589,54 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows seeker to set answerableAt after creating a pending photo question", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+        }),
+      );
+
+    const questionRef = host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .collection("pendingQuestions")
+      .doc("pq-photo-timer");
+
+    await assertSucceeds(
+      questionRef.set({
+        toolType: "photo",
+        createdByUid: "host-1",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        status: "pending",
+        placement: {
+          geometryJson: JSON.stringify({
+            type: "Feature",
+            properties: {},
+            geometry: { type: "Point", coordinates: [-6.26, 53.35] },
+          }),
+        },
+        replyOptions: [
+          { id: "upload", label: "Upload photo" },
+          { id: "cannot", label: "Cannot answer" },
+        ],
+        promptText: "Send a photo of a red door.",
+      }),
+    );
+
+    await assertSucceeds(
+      questionRef.update({
+        answerableAt: "2026-01-01T00:00:00.000Z",
+      }),
+    );
+  });
+
   it("allows hider to answer a photo question with an uploaded photo", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

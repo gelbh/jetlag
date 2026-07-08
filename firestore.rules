@@ -282,10 +282,35 @@ service cloud.firestore {
           !('endGameStartedAt' in resource.data)
           || resource.data.endGameStartedAt == null
         )
+        && (
+          !('endGameRequestedAt' in resource.data)
+          || resource.data.endGameRequestedAt == null
+        )
         && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['endGameStartedAt', 'endGameStartedByUid'])
+          .hasOnly(['endGameRequestedAt', 'endGameRequestedByUid'])
+        && request.resource.data.endGameRequestedAt is string
+        && request.resource.data.endGameRequestedByUid == request.auth.uid
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.memberRoles == resource.data.memberRoles
+      ) || (
+        isHiderMember(sessionId)
+        && resource.data.endGameRequestedAt is string
+        && (
+          !('endGameStartedAt' in resource.data)
+          || resource.data.endGameStartedAt == null
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['endGameStartedAt', 'endGameStartedByUid', 'endGameRequestedAt', 'endGameRequestedByUid'])
         && request.resource.data.endGameStartedAt is string
         && request.resource.data.endGameStartedByUid == request.auth.uid
+        && !('endGameRequestedAt' in request.resource.data)
+        && !('endGameRequestedByUid' in request.resource.data)
         && request.resource.data.code == resource.data.code
         && request.resource.data.gameArea == resource.data.gameArea
         && request.resource.data.hostUid == resource.data.hostUid
@@ -296,10 +321,16 @@ service cloud.firestore {
         && request.resource.data.memberRoles == resource.data.memberRoles
       ) || (
         isSessionHost(sessionId)
-        && resource.data.endGameStartedAt is string
+        && (
+          resource.data.endGameStartedAt is string
+          || resource.data.endGameRequestedAt is string
+        )
         && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['endGameStartedAt', 'endGameStartedByUid'])
+          .hasOnly(['endGameStartedAt', 'endGameStartedByUid', 'endGameRequestedAt', 'endGameRequestedByUid'])
         && !('endGameStartedAt' in request.resource.data)
+        && !('endGameStartedByUid' in request.resource.data)
+        && !('endGameRequestedAt' in request.resource.data)
+        && !('endGameRequestedByUid' in request.resource.data)
         && request.resource.data.code == resource.data.code
         && request.resource.data.gameArea == resource.data.gameArea
         && request.resource.data.hostUid == resource.data.hostUid
@@ -385,10 +416,15 @@ service cloud.firestore {
           && validHiderPendingAnswer(resource.data.toolType, request.resource.data.answer)
         ) || (
           isSeekerMember(sessionId)
+          && resource.data.status == 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['answerableAt'])
+          && request.resource.data.answerableAt is string
+        ) || (
+          isSeekerMember(sessionId)
           && resource.data.status == 'walking'
           && request.resource.data.status == 'pending'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'status', 'placement', 'promptText', 'replyOptions', 'answerableAt'
+            'status', 'placement', 'promptText', 'replyOptions', 'answerableAt', 'cardDraw', 'cardKeep'
           ])
           && request.resource.data.answerableAt is string
         ) || (

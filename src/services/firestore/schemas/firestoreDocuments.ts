@@ -41,6 +41,8 @@ export const sessionDocumentSchema = z
     timerRunningSince: z.union([z.string(), z.null()]).optional(),
     endGameStartedAt: z.string().optional(),
     endGameStartedByUid: z.string().optional(),
+    endGameRequestedAt: z.string().optional(),
+    endGameRequestedByUid: z.string().optional(),
   })
   .passthrough()
   .refine((value) => value.gameArea !== undefined && value.gameArea !== null, {

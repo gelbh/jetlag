@@ -271,20 +271,41 @@ export async function updateSessionRules(
   );
 }
 
+export async function requestEndGameSession(
+  sessionId: string,
+  requestedByUid: string,
+): Promise<void> {
+  await updateDoc(doc(sessionsCollection(), sessionId), {
+    endGameRequestedAt: new Date().toISOString(),
+    endGameRequestedByUid: requestedByUid,
+  });
+}
+
+export async function acceptEndGameSession(
+  sessionId: string,
+  acceptedByUid: string,
+): Promise<void> {
+  await updateDoc(doc(sessionsCollection(), sessionId), {
+    endGameStartedAt: new Date().toISOString(),
+    endGameStartedByUid: acceptedByUid,
+    endGameRequestedAt: deleteField(),
+    endGameRequestedByUid: deleteField(),
+  });
+}
+
 export async function startEndGameSession(
   sessionId: string,
   startedByUid: string,
 ): Promise<void> {
-  await updateDoc(doc(sessionsCollection(), sessionId), {
-    endGameStartedAt: new Date().toISOString(),
-    endGameStartedByUid: startedByUid,
-  });
+  await requestEndGameSession(sessionId, startedByUid);
 }
 
 export async function resetEndGameSession(sessionId: string): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), {
     endGameStartedAt: deleteField(),
     endGameStartedByUid: deleteField(),
+    endGameRequestedAt: deleteField(),
+    endGameRequestedByUid: deleteField(),
   });
 }
 
