@@ -29,12 +29,13 @@ test("@smoke enforces answer deadlines with a system message and timer pause", a
 
   const sessionId = await readPersistedSessionId(hostPage);
   await expect(async () => {
-    const questionIds = await listPendingQuestionIds(sessionId);
+    const questionIds = await listPendingQuestionIds(hostPage, sessionId);
     expect(questionIds.length).toBeGreaterThan(0);
   }).toPass({ timeout: 20_000 });
 
-  const [questionId] = await listPendingQuestionIds(sessionId);
+  const [questionId] = await listPendingQuestionIds(hostPage, sessionId);
   await patchPendingQuestionAnswerableAt(
+    hostPage,
     sessionId,
     questionId,
     new Date(Date.now() - 10 * 60 * 1000).toISOString(),

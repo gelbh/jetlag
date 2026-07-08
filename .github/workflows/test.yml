@@ -53,7 +53,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npx firebase emulators:exec --only auth,firestore,storage "npm run test:e2e:smoke"
+      - run: npx firebase emulators:exec --project demo-jetlag --only auth,firestore,storage "npm run test:e2e:smoke"
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -76,7 +76,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npx firebase emulators:exec --only auth,firestore,storage "npm run test:e2e"
+      - run: npx firebase emulators:exec --project demo-jetlag --only auth,firestore,storage "npm run test:e2e"
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

@@ -1,6 +1,7 @@
 import { FirebaseError } from "firebase/app";
 import {
   collection,
+  deleteField,
   doc,
   getDoc,
   onSnapshot,
@@ -8,7 +9,6 @@ import {
   setDoc,
   updateDoc,
   writeBatch,
-  deleteField,
   type Unsubscribe,
 } from "firebase/firestore";
 import type {
@@ -258,7 +258,16 @@ export async function updateSessionTimer(
   sessionId: string,
   state: TimerState,
 ): Promise<void> {
-  await updateDoc(doc(sessionsCollection(), sessionId), timerStateToRemote(state));
+  const remote = timerStateToRemote(state);
+  const patch =
+    remote.timerRunningSince === null
+      ? {
+          timerAccumulatedMs: remote.timerAccumulatedMs,
+          timerRunningSince: deleteField(),
+        }
+      : remote;
+
+  await updateDoc(doc(sessionsCollection(), sessionId), patch);
 }
 
 export async function updateSessionRules(

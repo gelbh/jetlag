@@ -373,7 +373,6 @@ export function buildSessionDocument(
     tier,
     status: "active",
     timerAccumulatedMs: 0,
-    timerRunningSince: null,
     ...sessionRulesPatchToFirestore(rulesPatch),
   };
 

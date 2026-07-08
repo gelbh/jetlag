@@ -335,6 +335,17 @@ export async function answerInChat(page: Page, label: string) {
   await answerButton.click();
 }
 
+export async function answerPhotoCannotInChat(page: Page) {
+  const answerButton = page.getByRole("button", {
+    name: "I cannot answer the question",
+  });
+  if (!(await answerButton.isVisible().catch(() => false))) {
+    await openChat(page);
+  }
+  await expect(answerButton).toBeVisible({ timeout: 20_000 });
+  await answerButton.click();
+}
+
 export async function answerYesInChat(page: Page) {
   await answerInChat(page, "Yes");
 }

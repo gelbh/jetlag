@@ -1,48 +1,38 @@
 import { type Page } from "@playwright/test";
 
-const FIRESTORE_EMULATOR_HOST = "http://127.0.0.1:8180";
-const FIRESTORE_PROJECT_ID = "demo-jetlag";
-
 export async function listPendingQuestionIds(
+  page: Page,
   sessionId: string,
 ): Promise<string[]> {
-  const response = await fetch(
-    `${FIRESTORE_EMULATOR_HOST}/v1/projects/${FIRESTORE_PROJECT_ID}/databases/(default)/documents/sessions/${sessionId}/pendingQuestions`,
-  );
-  if (!response.ok) {
-    throw new Error(`Failed to list pending questions: ${response.status}`);
-  }
-
-  const payload = (await response.json()) as {
-    documents?: Array<{ name?: string }>;
-  };
-
-  return (payload.documents ?? [])
-    .map((document) => document.name?.split("/").pop())
-    .filter((id): id is string => Boolean(id));
+  return page.evaluate(async (id) => {
+    const bridge = window.__JETLAG_E2E__;
+    if (!bridge?.listPendingQuestionIds) {
+      throw new Error("E2E bridge is not installed.");
+    }
+    return bridge.listPendingQuestionIds(id);
+  }, sessionId);
 }
 
 export async function patchPendingQuestionAnswerableAt(
+  page: Page,
   sessionId: string,
   questionId: string,
   answerableAt: string,
 ): Promise<void> {
-  const response = await fetch(
-    `${FIRESTORE_EMULATOR_HOST}/v1/projects/${FIRESTORE_PROJECT_ID}/databases/(default)/documents/sessions/${sessionId}/pendingQuestions/${questionId}?updateMask.fieldPaths=answerableAt`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fields: {
-          answerableAt: { stringValue: answerableAt },
-        },
-      }),
+  await page.evaluate(
+    async ({ id, questionId: pendingQuestionId, answerableAt: nextAnswerableAt }) => {
+      const bridge = window.__JETLAG_E2E__;
+      if (!bridge?.patchPendingQuestionAnswerableAt) {
+        throw new Error("E2E bridge is not installed.");
+      }
+      await bridge.patchPendingQuestionAnswerableAt(
+        id,
+        pendingQuestionId,
+        nextAnswerableAt,
+      );
     },
+    { id: sessionId, questionId, answerableAt },
   );
-
-  if (!response.ok) {
-    throw new Error(`Failed to patch pending question: ${response.status}`);
-  }
 }
 
 export async function advanceLocalTimerElapsedMs(

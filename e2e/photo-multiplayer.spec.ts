@@ -1,6 +1,8 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { test, expect } from "./fixtures";
 import {
-  answerInChat,
+  answerPhotoCannotInChat,
   createHostSession,
   createMultiplayerContexts,
   expectChatAnswer,
@@ -8,6 +10,9 @@ import {
   openChat,
   sendPhotoToHiders,
 } from "./fixtures";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const MINIMAL_JPEG = path.join(__dirname, "fixtures/minimal.jpg");
 
 test.setTimeout(120_000);
 
@@ -33,11 +38,11 @@ test("@smoke photo question syncs cannot-answer replies through chat", async ({
     ).toBeVisible();
   }).toPass({ timeout: 30_000 });
 
-  await answerInChat(guestPage, "I cannot answer the question");
-  await expectChatAnswer(guestPage, "cannot answer");
+  await answerPhotoCannotInChat(guestPage);
+  await expectChatAnswer(guestPage, "I cannot answer the question");
 
   await openChat(hostPage);
-  await expectChatAnswer(hostPage, "cannot answer");
+  await expectChatAnswer(hostPage, "I cannot answer the question");
 
   await cleanup();
 });
@@ -57,13 +62,7 @@ test("photo question accepts an uploaded answer", async ({ browser }) => {
   }).toPass({ timeout: 30_000 });
 
   const fileInput = guestPage.locator('input[type="file"]');
-  await fileInput.setInputFiles({
-    name: "answer.jpg",
-    mimeType: "image/jpeg",
-    buffer: Buffer.from([
-      0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01,
-    ]),
-  });
+  await fileInput.setInputFiles(MINIMAL_JPEG);
 
   await expect(guestPage.getByText(/Answered with photo|Answered: photo/i)).toBeVisible({
     timeout: 30_000,
