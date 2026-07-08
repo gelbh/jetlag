@@ -5,6 +5,7 @@ import type { PlayerLocationRecord } from "../../domain/session/sessionChat";
 import { useMapStore } from "../../state/mapStore";
 import { useLiveLocation } from "../location/useLiveLocation";
 import { isFirebaseConfigured } from "../../services/core/firebase";
+import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
 import { writePlayerLocation } from "../../services/firestore/firestoreSessionExtras";
 
 interface UseSeekerLocationSyncParams {
@@ -43,7 +44,11 @@ export function useSeekerLocationSync({
       updatedAt: new Date().toISOString(),
     };
 
-    void writePlayerLocation(sessionId, location);
+    void writePlayerLocation(sessionId, location).catch((error: unknown) => {
+      if (!isFirestorePermissionDenied(error)) {
+        throw error;
+      }
+    });
   }, [enabled, reading, sessionId, uid]);
 
   return { error };

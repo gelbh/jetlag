@@ -4,6 +4,26 @@ import { getClientEnv } from "../../config/env";
 import { APP_VERSION } from "../../domain/device/changelog";
 
 const SESSION_CODE_PATTERN = /\b[A-Z0-9]{4}\b/g;
+const FIRESTORE_PERMISSION_DENIED =
+  /missing or insufficient permissions/i;
+
+function isFirestorePermissionDeniedEvent(
+  event: Parameters<
+    NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>
+  >[0],
+): boolean {
+  for (const exception of event.exception?.values ?? []) {
+    if (
+      exception.type === "FirebaseError" &&
+      typeof exception.value === "string" &&
+      FIRESTORE_PERMISSION_DENIED.test(exception.value)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 function scrubEvent(
   event: Parameters<
@@ -20,6 +40,10 @@ function scrubEvent(
     if (typeof exception.value === "string") {
       exception.value = exception.value.replace(SESSION_CODE_PATTERN, "****");
     }
+  }
+
+  if (isFirestorePermissionDeniedEvent(event)) {
+    return null;
   }
 
   return event;

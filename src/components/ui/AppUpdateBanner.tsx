@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { tryUpdateServiceWorker } from "../../domain/device/serviceWorkerUpdate";
 
 type ServiceWorkerReloader = (reloadPage?: boolean) => Promise<void>;
 
@@ -19,19 +20,21 @@ export function AppUpdateBanner() {
         onNeedRefresh() {
           setNeedsRefresh(true);
         },
+        onRegistered(nextRegistration) {
+          registration = nextRegistration;
+        },
+        onRegisterError() {
+          // Registration failures are handled by the browser.
+        },
       });
       setUpdateSW(() => applyUpdate);
     });
 
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
-        void registration?.update();
+        tryUpdateServiceWorker(registration);
       }
     };
-
-    void navigator.serviceWorker?.ready.then((readyRegistration) => {
-      registration = readyRegistration;
-    });
 
     document.addEventListener("visibilitychange", handleVisibility);
     return () => {

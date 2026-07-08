@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import type { NotificationPreferences } from "../../domain/device/notifications";
 import type { PlayerRole } from "../../domain/session/playerRole";
 import { useMapStore } from "../../state/mapStore";
+import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
 import {
   initializeNativeNotifications,
   isNativeNotificationsSupported,
@@ -9,6 +10,12 @@ import {
   requestNotificationPermission,
   syncSessionDeviceRegistration,
 } from "../../services/core/notifications";
+
+function ignoreFirestorePermissionDenied(error: unknown): void {
+  if (!isFirestorePermissionDenied(error)) {
+    throw error;
+  }
+}
 
 interface UseSessionNotificationsParams {
   sessionId: string | undefined;
@@ -49,7 +56,7 @@ export function useSessionNotifications({
       uid,
       role,
       preferences: notificationPreferences,
-    });
+    }).catch(ignoreFirestorePermissionDenied);
   }, [nativeSupported, notificationPreferences, role, sessionId, uid]);
 
   useEffect(() => {
@@ -68,7 +75,7 @@ export function useSessionNotifications({
       uid,
       role,
       preferences: notificationPreferences,
-    });
+    }).catch(ignoreFirestorePermissionDenied);
   }, [
     notificationPreferences,
     notificationPreferences.enabled,

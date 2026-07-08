@@ -7,9 +7,9 @@ import { useMapStore } from "../../state/mapStore";
 vi.mock("../../services/core/notifications", () => ({
   initializeNativeNotifications: vi.fn(),
   isNativeNotificationsSupported: vi.fn(() => true),
-  refreshActivityPushToken: vi.fn(),
+  refreshActivityPushToken: vi.fn(async () => undefined),
   requestNotificationPermission: vi.fn(async () => true),
-  syncSessionDeviceRegistration: vi.fn(),
+  syncSessionDeviceRegistration: vi.fn(async () => undefined),
 }));
 
 import {

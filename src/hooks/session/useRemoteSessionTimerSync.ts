@@ -3,6 +3,7 @@ import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { timerStateFromRemote, type TimerState } from "../../domain/session/timer";
 import { isFirebaseConfigured } from "../../services/core/firebase";
 import {
+  isFirestorePermissionDenied,
   subscribeToSession,
   updateSessionTimer,
 } from "../../services/firestore/firestoreAnnotations";
@@ -51,7 +52,11 @@ export function useRemoteSessionTimerSync(
         return;
       }
 
-      void updateSessionTimer(sessionId, state);
+      void updateSessionTimer(sessionId, state).catch((error: unknown) => {
+        if (!isFirestorePermissionDenied(error)) {
+          throw error;
+        }
+      });
     },
     [isHost, isRemote, sessionId],
   );

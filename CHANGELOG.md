@@ -6,6 +6,8 @@
 
 - Map screen: fix render loop that blocked session create and the tool dock
 - Photo answers: hider can submit photo and cannot-answer replies in game chat
+- PWA updates: skip broken service worker refresh on iOS Safari
+- Map sync: stop reporting expected permission errors to Sentry
 
 ### Technical
 
