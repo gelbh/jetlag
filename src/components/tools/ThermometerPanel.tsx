@@ -58,11 +58,11 @@ function placementStatus(
   walkingActive: boolean,
 ): string {
   if (walkingActive) {
-    return "Walking — line updates live for hiders.";
+    return "Moving — line updates live for hiders.";
   }
 
   if (placementMode === "gps") {
-    return "GPS walk sets start automatically when you begin.";
+    return "GPS track sets start automatically when you begin.";
   }
 
   if (step === "a") {
@@ -140,38 +140,50 @@ export function ThermometerPanel({
           <QuestionPromptBlock
             prompt={thermometerQuestionPrompt(distanceMeters, distanceUnit)}
           />
-          <OptionChipRow>
-            {availableDistancePresets.map((preset) => {
-              const reuse =
-                presetUseCount > 0 && preset === distanceMeters
-                  ? costLabel
-                  : null;
-              return (
+          <div className="space-y-3">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                Distance
+              </p>
+              <OptionChipRow>
+                {availableDistancePresets.map((preset) => {
+                  const reuse =
+                    presetUseCount > 0 && preset === distanceMeters
+                      ? costLabel
+                      : null;
+                  return (
+                    <OptionChip
+                      key={preset}
+                      selected={distanceMeters === preset}
+                      onClick={() => onDistanceChange(preset)}
+                    >
+                      {formatPresetDistance(preset, distanceUnit)}
+                      {reuse ? ` · ${reuse}` : ""}
+                    </OptionChip>
+                  );
+                })}
+              </OptionChipRow>
+            </div>
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                Movement mode
+              </p>
+              <OptionChipRow>
                 <OptionChip
-                  key={preset}
-                  selected={distanceMeters === preset}
-                  onClick={() => onDistanceChange(preset)}
+                  selected={placementMode === "gps"}
+                  onClick={() => onPlacementModeChange("gps")}
                 >
-                  {formatPresetDistance(preset, distanceUnit)}
-                  {reuse ? ` · ${reuse}` : ""}
+                  GPS track
                 </OptionChip>
-              );
-            })}
-          </OptionChipRow>
-          <OptionChipRow>
-            <OptionChip
-              selected={placementMode === "gps"}
-              onClick={() => onPlacementModeChange("gps")}
-            >
-              GPS walk
-            </OptionChip>
-            <OptionChip
-              selected={placementMode === "manual"}
-              onClick={() => onPlacementModeChange("manual")}
-            >
-              Manual pins
-            </OptionChip>
-          </OptionChipRow>
+                <OptionChip
+                  selected={placementMode === "manual"}
+                  onClick={() => onPlacementModeChange("manual")}
+                >
+                  Manual pins
+                </OptionChip>
+              </OptionChipRow>
+            </div>
+          </div>
         </ToolSection>
       ) : null}
 
@@ -206,7 +218,7 @@ export function ThermometerPanel({
               aria-busy={gpsLoading || isSubmitting}
               className="btn-primary w-full disabled:opacity-40"
             >
-              {gpsLoading ? "Getting GPS…" : "Start walk"}
+              {gpsLoading ? "Getting GPS…" : "Start track"}
             </button>
           ) : null}
           {awaitHiderAnswer &&

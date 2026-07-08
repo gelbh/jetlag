@@ -430,18 +430,6 @@ export function useThermometerTool({
     );
 
     if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
-      if (thermoA) {
-        await submitPendingQuestion({
-          promptText: `Thermometer — start pin placed.`,
-          replyOptions: [],
-          placement: thermometerWalkStartPlacement(
-            thermoA,
-            activeThermometerDistanceMeters,
-          ),
-          status: "walking",
-        });
-      }
-
       await submitPendingQuestion({
         promptText,
         replyOptions: hotterColderAnswerOptions.map((option) => ({
