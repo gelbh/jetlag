@@ -79,6 +79,11 @@ test.describe("hider flows", () => {
     await openChat(hostPage);
     await expect(
       hostPage.getByText(/relocated from Dublin Central/i),
+    ).toBeHidden({
+      timeout: 5_000,
+    });
+    await expect(
+      hostPage.getByText(/Move card played/i),
     ).toBeVisible({
       timeout: 15_000,
     });

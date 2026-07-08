@@ -166,13 +166,17 @@ export async function sendThermometerToHiders(page: Page) {
   await dismissActiveToolPanel(page);
 }
 
+async function selectTentacleCategory(page: Page, categoryId = "museum") {
+  await page.locator("select.field-input").selectOption(categoryId);
+}
+
 export async function completeTentacleSolo(page: Page) {
   await clickToolDockButton(page, "Tentacles");
   await waitForMapPlacementCrosshair(page);
   await clickMapCenter(page);
-  await waitForGeoLoadingIdle(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
+  await selectTentacleCategory(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForGeoLoadingIdle(page);
@@ -188,9 +192,9 @@ export async function sendTentacleToHiders(page: Page) {
   await clickToolDockButton(page, "Tentacles");
   await waitForMapPlacementCrosshair(page);
   await clickMapCenter(page);
-  await waitForGeoLoadingIdle(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
+  await selectTentacleCategory(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForGeoLoadingIdle(page);
@@ -221,7 +225,7 @@ export async function drawZone(page: Page, label = "Search zone") {
   await expectMapHasAnnotations(page);
 }
 
-async function clickOverflowToolButton(page: Page, name: string) {
+export async function clickOverflowToolButton(page: Page, name: string) {
   await page.getByRole("button", { name: "More tools" }).click();
   const sheet = page.getByRole("dialog", { name: "More tools" });
   await sheet.waitFor({ state: "visible" });
