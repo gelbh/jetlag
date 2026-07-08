@@ -116,7 +116,7 @@ export function GameChatTab({
               : null;
           const expired =
             pending?.deadlineExpiredAt !== undefined ||
-            countdown === "Time expired — timer paused";
+            countdown === "Time expired. Timer paused";
 
           const isPhotoQuestion = pending?.toolType === "photo";
           const toolLabel =
@@ -142,7 +142,7 @@ export function GameChatTab({
               ) : null}
               {walking ? (
                 <p className="mt-2 text-xs text-brand-gold">
-                  Seeker is walking — answer when the full question arrives.
+                  Seeker is walking. Answer when the full question arrives.
                 </p>
               ) : null}
               {countdown ? (
@@ -154,7 +154,7 @@ export function GameChatTab({
               ) : null}
               {pending?.answeredLate ? (
                 <p className="mt-1 text-xs text-status-warning">
-                  Answered late — card draw forfeited.
+                  Answered late. Card draw forfeited.
                 </p>
               ) : null}
               {isHider && !answered && !walking && isPhotoQuestion && pending ? (
@@ -194,7 +194,7 @@ export function GameChatTab({
                 <PhotoAnswerPreview answer={pending?.answer} />
               ) : answered ? (
                 <p className="mt-2 text-xs text-ink-dim">
-                  Answered: {message.selectedReply ?? "—"}
+                  Answered: {message.selectedReply ?? "-"}
                 </p>
               ) : !isHider && !walking ? (
                 <p className="mt-2 text-xs text-ink-dim">Waiting for hider…</p>

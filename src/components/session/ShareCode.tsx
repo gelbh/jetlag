@@ -51,7 +51,7 @@ export function ShareCode({
         {copyStatus === "copied"
           ? "Copied to clipboard."
           : copyStatus === "failed"
-            ? "Copy failed — select and copy manually."
+            ? "Copy failed. Select and copy manually."
             : remote
               ? "Tap code to copy. Give it to your team."
               : "Tap code to copy. Local-only session for solo play."}

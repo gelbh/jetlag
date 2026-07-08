@@ -1,5 +1,5 @@
 /**
- * Leaflet overlay stroke/fill colors. for map annotations, not HUD UI tokens.
+ * Leaflet overlay stroke/fill colors for map annotations, not HUD UI tokens.
  * Palette aligned with Jet Lag show broadcast maps and Hide+Seek product art.
  */
 export const MAP_ANNOTATION_COLORS = {

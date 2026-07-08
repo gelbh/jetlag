@@ -210,7 +210,7 @@ export function usePendingQuestionActions() {
           sessionId,
           options.senderUid,
           options.senderRole,
-          "Answer received late — hider forfeits card draw for this question.",
+          "Answer received late. Hider forfeits card draw for this question.",
           createMessageId(),
         );
       }

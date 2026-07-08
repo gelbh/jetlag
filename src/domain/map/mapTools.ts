@@ -115,7 +115,7 @@ export function mapToolDockShortLabel(id: DockableMapTool): string {
   return entry?.name ?? id;
 }
 
-/** @deprecated Use {@link MARKUP_DOCK_TOOL_IDS} — zone and pin moved to Draw menu. */
+/** @deprecated Use {@link MARKUP_DOCK_TOOL_IDS}; zone and pin moved to Draw menu. */
 export const QUICK_DOCK_TOOL_IDS = MARKUP_DOCK_TOOL_IDS;
 
 export function isQuickDockTool(id: DockableMapTool): id is (typeof MARKUP_DOCK_TOOL_IDS)[number] {

@@ -58,7 +58,7 @@ function placementStatus(
   walkingActive: boolean,
 ): string {
   if (walkingActive) {
-    return "Moving — line updates live for hiders.";
+    return "Moving. Line updates live for hiders.";
   }
 
   if (placementMode === "gps") {

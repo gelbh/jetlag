@@ -83,7 +83,7 @@ describe("questionRules", () => {
         undefined,
         now,
       ),
-    ).toBe("Time expired — timer paused");
+    ).toBe("Time expired. Timer paused.");
   });
 
   it("formats answer countdowns", () => {

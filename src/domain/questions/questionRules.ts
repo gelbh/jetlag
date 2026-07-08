@@ -131,7 +131,7 @@ export function formatExpiredAnswerCountdown(
   nowMs: number = Date.now(),
 ): string | null {
   if (deadlineExpiredAt || isQuestionAnswerDeadlineExpired(answerableAt, deadlineMs, nowMs)) {
-    return "Time expired — timer paused";
+    return "Time expired. Timer paused.";
   }
 
   return formatAnswerCountdown(answerableAt, deadlineMs, nowMs);

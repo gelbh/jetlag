@@ -280,7 +280,7 @@ export function HiderMapScreen() {
     }
 
     void zoneTool.searchStationsInArea(searchViewportBounds());
-    // Intentionally omit searchViewportBounds — pan/zoom must not re-fetch; use "Search this area".
+    // Intentionally omit searchViewportBounds; pan/zoom must not re-fetch. Use "Search this area".
   }, [zoneTool.wizardOpen, zoneTool.manualMode, zoneTool.searchStationsInArea]);
 
   const openWizardExclusive = useCallback(() => {

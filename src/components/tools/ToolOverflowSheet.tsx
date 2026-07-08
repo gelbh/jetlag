@@ -208,7 +208,7 @@ export function ToolOverflowSheet({
                 </span>
               }
               title="Start end game"
-              hint="Reveal hiding zone only — hider must stay put"
+              hint="Reveal hiding zone only. Hider must stay put"
               onClick={() => closeAnd(onStartEndGame)}
               ariaLabel="Start end game"
             />

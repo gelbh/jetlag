@@ -9,7 +9,7 @@ import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { updatePendingQuestion } from "../../services/firestore/firestoreSessionExtras";
 
 const DEADLINE_EXPIRED_MESSAGE =
-  "Answer deadline passed — hiding timer paused. Hider forfeits card draw for this question.";
+  "Answer deadline passed. Hiding timer paused. Hider forfeits card draw for this question.";
 
 interface UseQuestionDeadlineEnforcementParams {
   sessionId: string | undefined;

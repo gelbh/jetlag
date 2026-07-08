@@ -49,7 +49,7 @@ describe("computeHiderTruthReply", () => {
     expect(result?.label).toMatch(/set your hiding zone/i);
   });
 
-  it("uses station center only — GPS-only point does not affect radar truth", () => {
+  it("uses station center only; GPS-only point does not affect radar truth", () => {
     const pending = basePending({
       placement: {
         geometryJson: JSON.stringify({

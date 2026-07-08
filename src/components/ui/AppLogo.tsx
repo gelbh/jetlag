@@ -17,7 +17,7 @@ type RadarSweepMarkProps = SVGProps<SVGSVGElement> & {
   compact?: boolean;
 };
 
-/** Radar sweep icon geometry — shared by AppLogo and static PWA assets */
+/** Radar sweep icon geometry, shared by AppLogo and static PWA assets */
 export function RadarSweepMark({
   compact = false,
   ...props

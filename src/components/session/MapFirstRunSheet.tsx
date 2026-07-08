@@ -57,7 +57,7 @@ export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
             <ul className="space-y-2 text-sm text-ink-secondary">
               <li>
                 <span className="font-medium text-ink">Match, Measure, Thermo, Radar, Tent.</span>{" "}
-                The five game questions — always on the dock.
+                The five game questions, always on the dock.
               </li>
               <li>
                 <span className="font-medium text-ink">Draw.</span> Zone and pin

@@ -44,7 +44,7 @@ export function HiderTruthRevealBanner({
         Bluff sent
       </p>
       <p className="mt-1 text-sm text-ink">
-        Sent: {selectedLabel} — station truth was {truth.label}
+        Sent: {selectedLabel}, station truth was {truth.label}
       </p>
       <p className="mt-1.5 inline-flex rounded-md bg-status-warning-surface px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-status-warning">
         Does not match

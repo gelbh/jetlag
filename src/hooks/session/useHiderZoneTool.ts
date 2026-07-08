@@ -160,7 +160,7 @@ export function useHiderZoneTool({
     try {
       await ensureWriteAccess?.();
       await postSystemMessage(
-        "Move card played — timer paused. Seekers must stay put. Hider is relocating.",
+        "Move card played. Timer paused. Seekers must stay put. Hider is relocating.",
       );
       await writeHidingZone(sessionId, {
         ...existingZone,
@@ -172,7 +172,7 @@ export function useHiderZoneTool({
       setWizardOpen(false);
       setError(
         isFirestorePermissionDenied(nextError)
-          ? "Couldn't save — rejoin the session as Hider and try again."
+          ? "Couldn't save. Rejoin the session as Hider and try again."
           : nextError instanceof Error
             ? nextError.message
             : "Couldn't save hiding zone.",
@@ -209,7 +209,7 @@ export function useHiderZoneTool({
 
       const station = nearestStation(point, stations);
       if (!station) {
-        setError("No transit station here — search or move closer to a stop.");
+        setError("No transit station here. Search or move closer to a stop.");
         return false;
       }
 
@@ -312,7 +312,7 @@ export function useHiderZoneTool({
     } catch (nextError) {
       setError(
         isFirestorePermissionDenied(nextError)
-          ? "Couldn't save — rejoin the session as Hider and try again."
+          ? "Couldn't save. Rejoin the session as Hider and try again."
           : nextError instanceof Error
             ? nextError.message
             : "Couldn't save hiding zone.",

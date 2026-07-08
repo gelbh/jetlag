@@ -451,7 +451,7 @@ textarea {
     color: var(--color-ink-muted);
   }
 
-  /* —— Broadcast status bar (map top) —— */
+  /* Broadcast status bar (map top) */
   .map-float-alert {
     border-radius: var(--radius-hud-xl);
     box-shadow: var(--shadow-hud-float);
@@ -609,7 +609,7 @@ textarea {
     }
   }
 
-  /* —— Bottom tool dock (map) —— */
+  /* Bottom tool dock (map) */
   .jl-tool-dock {
     position: fixed;
     z-index: var(--z-dock);
@@ -994,7 +994,7 @@ textarea {
     background: oklch(from var(--color-border) l c h / 0.85);
   }
 
-  /* —— Home / join poster —— */
+  /* Home / join poster */
   .home-poster {
     background-color: var(--color-surface-deep);
     background-image:

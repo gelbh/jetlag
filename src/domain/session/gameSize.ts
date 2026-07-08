@@ -175,8 +175,8 @@ export function gameSizeLabel(
         label: "Small",
         summary:
           resolved === "metric"
-            ? "Town or neighborhood — 400 m hiding zones"
-            : "Town or neighborhood — ¼ mi hiding zones",
+            ? "Town or neighborhood, 400 m hiding zones"
+            : "Town or neighborhood, ¼ mi hiding zones",
         hidingRadiusLabel,
       };
     case "medium":
@@ -184,8 +184,8 @@ export function gameSizeLabel(
         label: "Medium",
         summary:
           resolved === "metric"
-            ? "City or metro area — 400 m hiding zones"
-            : "City or metro area — ¼ mi hiding zones",
+            ? "City or metro area, 400 m hiding zones"
+            : "City or metro area, ¼ mi hiding zones",
         hidingRadiusLabel,
       };
     case "large":
@@ -193,8 +193,8 @@ export function gameSizeLabel(
         label: "Large",
         summary:
           resolved === "metric"
-            ? "Region or country — 800 m hiding zones"
-            : "Region or country — ½ mi hiding zones",
+            ? "Region or country, 800 m hiding zones"
+            : "Region or country, ½ mi hiding zones",
         hidingRadiusLabel,
       };
     default: {

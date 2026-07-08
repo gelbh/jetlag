@@ -12,7 +12,7 @@ export const FRAMING_MODE_OPTIONS: ReadonlyArray<{
 export function framingModeHint(mode: FramingMode): string {
   switch (mode) {
     case "rectangle":
-      return "Pan and zoom — the dashed line is your play boundary.";
+      return "Pan and zoom. The dashed line is your play boundary.";
     case "circle":
       return "Tap the map for center, then zoom to set radius.";
     case "polygon":

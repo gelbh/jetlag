@@ -33,8 +33,8 @@ export interface HiderTruthResult {
 }
 
 const UNAVAILABLE_NO_ZONE =
-  "Truth unavailable — set your hiding zone first.";
-const UNAVAILABLE_GENERIC = "Truth unavailable — cannot compute.";
+  "Truth unavailable. Set your hiding zone first.";
+const UNAVAILABLE_GENERIC = "Truth unavailable. Cannot compute.";
 
 function truthUnavailable(reason = UNAVAILABLE_GENERIC): HiderTruthResult {
   return {

@@ -121,7 +121,7 @@ export function GameSizePicker({
       </div>
       {compactArea ? (
         <p className="text-xs text-ink-dim">
-          Compact area — good for a short local game.
+          Compact area, good for a short local game.
         </p>
       ) : null}
     </div>

@@ -333,7 +333,7 @@ export function useThermometerTool({
       activeThermometerDistanceMeters,
       distanceUnit,
     );
-    const startMessage = `Thermometer walk started — ${distanceLabel}`;
+    const startMessage = `Thermometer walk started. ${distanceLabel}`;
 
     try {
       const questionId = await submitPendingQuestion({

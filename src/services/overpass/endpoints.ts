@@ -2,7 +2,7 @@
 
 export const OVERPASS_USER_AGENT = "jetlag-map-companion/1.0";
 
-/** Ordered free public Overpass interpreters — first is preferred. */
+/** Ordered free public Overpass interpreters; first is preferred. */
 export const OVERPASS_ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
   "https://maps.mail.ru/osm/tools/overpass/api/interpreter",

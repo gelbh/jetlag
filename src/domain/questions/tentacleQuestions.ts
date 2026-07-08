@@ -152,7 +152,7 @@ export function isTentacleCategoryAvailableForSession(
 /** @deprecated Use tentacleSearchRadiusMeters */
 export const TENTACLE_SEARCH_RADIUS_METERS = milesToMeters(1);
 
-/** @deprecated Unified radius — search and answer use the same distance */
+/** @deprecated Unified radius; search and answer use the same distance */
 export const TENTACLE_ANSWER_RADIUS_METERS = milesToMeters(1);
 
 export function tentacleCategoryOverpassSelectors(
