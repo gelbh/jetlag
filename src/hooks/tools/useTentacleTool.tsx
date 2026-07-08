@@ -17,7 +17,6 @@ import type { DistanceUnit } from "../../domain/map/distance";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import { sessionGameSize } from "../../domain/session/sessionRules";
 import {
-  defaultTentacleCategoryIdForSession,
   firstAvailableTentacleCategoryIdForSession,
   isTentacleCategoryAvailableInSession,
   tentacleSearchRadiusMetersForSession,
@@ -66,6 +65,7 @@ interface UseTentacleToolParams {
   refreshGps: () => Promise<{ lat: number; lng: number }>;
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
   armPlacement: () => void;
+  canSubmitQuestion?: boolean;
 }
 
 export function useTentacleTool({
@@ -90,6 +90,7 @@ export function useTentacleTool({
   refreshGps,
   ensurePointInGameArea,
   armPlacement,
+  canSubmitQuestion = true,
 }: UseTentacleToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
   const usedTentacleCategories = useMemo(
@@ -100,19 +101,20 @@ export function useTentacleTool({
     null,
   );
   const [tentacleCategoryId, setTentacleCategoryId] =
-    useState<TentacleExtendedCategoryId>(
-      defaultTentacleCategoryIdForSession(sessionRules),
-    );
-  const tentacleUseCount = Math.max(
-    tentacleCategoryUseCount(
-      annotations.filter(isActive),
-      tentacleCategoryId,
-    ),
-    tentacleCategoryUseCountFromPending(
-      pendingQuestions,
-      tentacleCategoryId,
-    ),
-  );
+    useState<TentacleExtendedCategoryId | null>(null);
+  const [tentacleCategoryChosen, setTentacleCategoryChosen] = useState(false);
+  const tentacleUseCount = tentacleCategoryId
+    ? Math.max(
+        tentacleCategoryUseCount(
+          annotations.filter(isActive),
+          tentacleCategoryId,
+        ),
+        tentacleCategoryUseCountFromPending(
+          pendingQuestions,
+          tentacleCategoryId,
+        ),
+      )
+    : 0;
   const { label: costLabel, draw: cardDraw, keep: cardKeep } =
     questionCostBreakdown("D4P2", tentacleUseCount);
   const [tentaclePois, setTentaclePois] = useState<TentaclePoi[]>([]);
@@ -121,15 +123,14 @@ export function useTentacleTool({
   const [tentacleLoading, setTentacleLoading] = useState(false);
   const [tentacleError, setTentacleError] = useState<string | null>(null);
 
-  const searchRadiusMeters = tentacleSearchRadiusMetersForSession(
-    sessionRules,
-    tentacleCategoryId,
-  );
+  const searchRadiusMeters = tentacleCategoryId
+    ? tentacleSearchRadiusMetersForSession(sessionRules, tentacleCategoryId)
+    : 0;
 
   useToolSessionOptions({
-    active,
+    active: active && tentacleCategoryChosen && tentacleCategoryId !== null,
     usedOptions: usedTentacleCategories,
-    currentOption: tentacleCategoryId,
+    currentOption: tentacleCategoryId ?? "museum",
     isAvailable: (_usedOptions, currentOption) =>
       isTentacleCategoryAvailableInSession(sessionRules, currentOption),
     pickNext: (usedOptions) =>
@@ -199,7 +200,7 @@ export function useTentacleTool({
   const debouncedTentacleCenter = useDebouncedValue(tentacleCenter, 400);
 
   useEffect(() => {
-    if (!active || !debouncedTentacleCenter) {
+    if (!active || !debouncedTentacleCenter || !tentacleCategoryChosen || !tentacleCategoryId) {
       return;
     }
 
@@ -208,20 +209,25 @@ export function useTentacleTool({
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-  }, [active, tentacleCategoryId, debouncedTentacleCenter, loadPoisForCenter]);
+  }, [
+    active,
+    tentacleCategoryChosen,
+    tentacleCategoryId,
+    debouncedTentacleCenter,
+    loadPoisForCenter,
+  ]);
 
   const resetDraft = useCallback(() => {
     cancelRequests();
     setTentacleLoading(false);
     setTentacleCenter(null);
-    setTentacleCategoryId(
-      defaultTentacleCategoryIdForSession(sessionRules, usedTentacleCategories),
-    );
+    setTentacleCategoryId(null);
+    setTentacleCategoryChosen(false);
     setTentaclePois([]);
     setTentacleOutOfReach(false);
     setSelectedPoiId(null);
     setTentacleError(null);
-  }, [cancelRequests, sessionRules, usedTentacleCategories]);
+  }, [cancelRequests]);
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
@@ -233,7 +239,6 @@ export function useTentacleTool({
       setAwaitingPlacement(false);
       setMapError(null);
       setTentacleError(null);
-      setTentacleLoading(true);
       return true;
     },
     [active, setAwaitingPlacement, setMapError],
@@ -250,7 +255,7 @@ export function useTentacleTool({
       setTentacleCenter(point);
       setAwaitingPlacement(false);
       setMapError(null);
-      setTentacleLoading(true);
+      setTentacleError(null);
     } catch (error) {
       setMapError(
         error instanceof Error ? error.message : "GPS location unavailable.",
@@ -285,6 +290,16 @@ export function useTentacleTool({
   ]);
 
   const commit = async () => {
+    if (!canSubmitQuestion) {
+      setMapError("Finish the open question before starting another.");
+      return;
+    }
+
+    if (!tentacleCategoryChosen || !tentacleCategoryId) {
+      setMapError("Choose a category before sending this question.");
+      return;
+    }
+
     if (!tentacleCenter) {
       setMapError("Choose a center with GPS or a map tap.");
       return;
@@ -408,6 +423,7 @@ export function useTentacleTool({
     <TentaclePanel
       gameSize={sessionGameSize(sessionRules)}
       categoryId={tentacleCategoryId}
+      categoryChosen={tentacleCategoryChosen}
       searchRadiusMeters={searchRadiusMeters}
       usedCategoryIds={usedTentacleCategories}
       distanceUnit={distanceUnit}
@@ -421,6 +437,7 @@ export function useTentacleTool({
       error={tentacleError ?? mapError ?? gpsError}
       onCategoryChange={(nextCategory) => {
         setTentacleCategoryId(nextCategory);
+        setTentacleCategoryChosen(true);
         setTentaclePois([]);
         setTentacleOutOfReach(false);
         setSelectedPoiId(null);
@@ -443,7 +460,7 @@ export function useTentacleTool({
       costLabel={costLabel}
       isSubmitting={isSubmitting}
       onRetry={
-        tentacleCenter
+        tentacleCenter && tentacleCategoryId
           ? () => void loadPoisForCenter(tentacleCenter, tentacleCategoryId)
           : undefined
       }

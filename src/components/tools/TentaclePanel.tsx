@@ -27,7 +27,8 @@ import {
 
 interface TentaclePanelProps {
   gameSize: GameSize;
-  categoryId: TentacleExtendedCategoryId;
+  categoryId: TentacleExtendedCategoryId | null;
+  categoryChosen: boolean;
   searchRadiusMeters: number;
   usedCategoryIds: ReadonlySet<TentacleExtendedCategoryId>;
   distanceUnit: DistanceUnit;
@@ -54,6 +55,7 @@ interface TentaclePanelProps {
 export function TentaclePanel({
   gameSize,
   categoryId,
+  categoryChosen,
   searchRadiusMeters,
   distanceUnit,
   poiOptions,
@@ -79,22 +81,21 @@ export function TentaclePanel({
   const [stepIndex, setStepIndex] = useState(0);
   const step = steps[stepIndex]?.id ?? "anchor";
 
-  const prompt = tentacleQuestionPrompt(
-    categoryId,
-    distanceUnit,
-    searchRadiusMeters,
-  );
-  const searchRadiusLabel = formatPresetDistance(
-    searchRadiusMeters,
-    distanceUnit,
-  );
-  const categorySelectionAvailable = isTentacleCategoryAvailable(
-    gameSize,
-    categoryId,
-  );
+  const prompt =
+    categoryId !== null
+      ? tentacleQuestionPrompt(categoryId, distanceUnit, searchRadiusMeters)
+      : "Choose a category to build your tentacle question.";
+  const searchRadiusLabel =
+    categoryId !== null
+      ? formatPresetDistance(searchRadiusMeters, distanceUnit)
+      : null;
+  const categorySelectionAvailable =
+    categoryId !== null && isTentacleCategoryAvailable(gameSize, categoryId);
   const hasRecordedAnswer = outOfReach || selectedPoiId !== null;
   const locationsReady = poiOptions.length > 0 || (!loading && hasCenter);
   const canCommit =
+    categoryChosen &&
+    categoryId !== null &&
     hasCenter &&
     poiOptions.length > 0 &&
     (awaitHiderAnswer || hasRecordedAnswer) &&
@@ -122,17 +123,26 @@ export function TentaclePanel({
         <ToolSection first compact status="active">
           <QuestionPromptBlock
             prompt={prompt}
-            ruleSummary={`Search radius is fixed at ${searchRadiusLabel} from your anchor.`}
+            ruleSummary={
+              searchRadiusLabel
+                ? `Search radius is fixed at ${searchRadiusLabel} from your anchor.`
+                : undefined
+            }
           />
           <label className="field-label">
             Location type
             <select
-              value={categoryId}
-              onChange={(event) =>
-                onCategoryChange(event.target.value as TentacleExtendedCategoryId)
-              }
+              value={categoryChosen && categoryId ? categoryId : ""}
+              onChange={(event) => {
+                const value = event.target.value;
+                if (!value) {
+                  return;
+                }
+                onCategoryChange(event.target.value as TentacleExtendedCategoryId);
+              }}
               className="field-input"
             >
+              <option value="">Choose a category</option>
               {availableCategories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.label}
@@ -154,7 +164,7 @@ export function TentaclePanel({
             anchorHint="Anchor pinned on the map. Tap again to move it."
             gpsLoadingLabel="Locating…"
           />
-          {loading && hasCenter ? (
+          {loading && hasCenter && categoryChosen ? (
             <LoadingReadout>
               Loading locations within {searchRadiusLabel}…
             </LoadingReadout>
@@ -198,7 +208,7 @@ export function TentaclePanel({
         </ToolSection>
       ) : null}
 
-      {step === "answer" ? (
+      {step === "answer" && categoryId ? (
         <>
           <TentacleAnswerPicker
             categoryId={categoryId}
