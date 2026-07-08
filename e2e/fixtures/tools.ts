@@ -1,4 +1,4 @@
-import { type Page, expect } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 import {
   clickMapAt,
   clickMapCenter,
@@ -225,34 +225,45 @@ export async function drawZone(page: Page, label = "Search zone") {
   await expectMapHasAnnotations(page);
 }
 
+async function clickSheetButton(sheet: Locator, name: string) {
+  const button = sheet.getByRole("button", { name });
+  await expect(button).toBeVisible();
+  await button.scrollIntoViewIfNeeded();
+  await button.evaluate((element) => {
+    element.dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true }),
+    );
+  });
+}
+
 export async function clickOverflowToolButton(page: Page, name: string) {
   await page.getByRole("button", { name: "More tools" }).click();
   const sheet = page.getByRole("dialog", { name: "More tools" });
   await sheet.waitFor({ state: "visible" });
-  const button = sheet.getByRole("button", { name });
-  await expect(button).toBeVisible();
-  await button.scrollIntoViewIfNeeded();
-  await button.click({ force: true });
+  await clickSheetButton(sheet, name);
+}
+
+async function clickAnnotationHistoryButton(page: Page, name: string) {
+  const dockButton = page.getByRole("button", { name });
+  if (await dockButton.isVisible().catch(() => false)) {
+    await dockButton.scrollIntoViewIfNeeded();
+    await dockButton.evaluate((element) => {
+      element.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+    });
+    return;
+  }
+
+  await clickOverflowToolButton(page, name);
 }
 
 export async function undoAnnotation(page: Page) {
-  const undoDock = page.getByRole("button", { name: "Undo last annotation" });
-  if (await undoDock.isVisible().catch(() => false)) {
-    await undoDock.click();
-    return;
-  }
-
-  await clickOverflowToolButton(page, "Undo last annotation");
+  await clickAnnotationHistoryButton(page, "Undo last annotation");
 }
 
 export async function redoAnnotation(page: Page) {
-  const redoDock = page.getByRole("button", { name: "Redo last annotation" });
-  if (await redoDock.isVisible().catch(() => false)) {
-    await redoDock.click();
-    return;
-  }
-
-  await clickOverflowToolButton(page, "Redo last annotation");
+  await clickAnnotationHistoryButton(page, "Redo last annotation");
 }
 
 export async function expectRedoEnabled(page: Page) {

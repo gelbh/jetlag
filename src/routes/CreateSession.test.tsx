@@ -146,6 +146,26 @@ describe("CreateSession", () => {
     });
   });
 
+  it("keeps place-based preview after user map pan", async () => {
+    renderWithRouter(<CreateSession />);
+
+    fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
+      target: { value: "Dublin" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Find place" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("city · ~180 sq mi")).toBeInTheDocument();
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Simulate user map frame" }),
+    );
+
+    expect(screen.getByText("city · ~180 sq mi")).toBeInTheDocument();
+    expect(screen.getAllByText(/sq mi play area/i).length).toBeGreaterThan(0);
+  });
+
   it("keeps place-based preview after changing session settings", async () => {
     renderWithRouter(<CreateSession />);
 

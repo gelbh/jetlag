@@ -1,3 +1,4 @@
+import { APP_VERSION } from "../src/domain/device/changelog";
 import { test, expect } from "./fixtures";
 import {
   clickMapCenter,
@@ -21,10 +22,13 @@ test.describe("release 0.1.3", () => {
     await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
     await page.getByRole("button", { name: "Find place" }).click();
 
-    const playArea = page.getByText(/sq mi play area/i).first();
+    const playArea = page.locator(".hud-panel").getByText(/sq mi play area/i);
     await expect(playArea).toBeVisible({ timeout: 10_000 });
-    const areaBeforePan = await playArea.textContent();
     await expectCreatePageMapPreviewLoaded(page);
+    await expect
+      .poll(async () => playArea.textContent())
+      .toMatch(/sq mi play area/i);
+    const areaBeforePan = await playArea.textContent();
 
     const map = page.locator(".leaflet-container");
     const box = await map.boundingBox();
@@ -45,9 +49,15 @@ test.describe("release 0.1.3", () => {
   test("changelog sheet hides Technical sections", async ({ page }) => {
     await prepareE2EPage(page);
     await page.goto("/");
-    await page.getByRole("button", { name: /Version 0\.1\.3/i }).click();
+    await page
+      .getByRole("button", { name: new RegExp(`Version ${APP_VERSION}`, "i") })
+      .click();
     await expect(page.getByRole("dialog", { name: "Changelog" })).toBeVisible();
-    await expect(page.getByText("End game: hiders accept")).toBeVisible();
+    await expect(
+      page.getByText(
+        "End game: hiders accept before the hiding zone reveal applies",
+      ),
+    ).toBeVisible();
     await expect(page.getByText("Technical")).toBeHidden();
     await expect(page.getByText("Firestore: allow answerableAt")).toBeHidden();
   });

@@ -267,6 +267,20 @@ export function CreateSession() {
   const manualFramingActive =
     !importedGameArea && (!selectedPlace || framing.userFramed);
 
+  const handleUserViewportFramed = useCallback(() => {
+    if ((selectedPlace || importedGameArea) && !framing.userFramed) {
+      return;
+    }
+
+    framing.handleUserViewportFramed();
+  }, [
+    framing,
+    framing.handleUserViewportFramed,
+    framing.userFramed,
+    importedGameArea,
+    selectedPlace,
+  ]);
+
   const mapFocusBounds = useMemo(() => {
     if (importedGameArea) {
       return framing.focusBounds;
@@ -557,7 +571,7 @@ export function CreateSession() {
         circleRadiusMeters={framing.circleRadiusMeters}
         polygonVertices={framing.polygonVertices}
         onBoundsChange={framing.handleBoundsChange}
-        onUserViewportFramed={framing.handleUserViewportFramed}
+        onUserViewportFramed={handleUserViewportFramed}
         onMapClick={
           manualFramingActive &&
           (framing.framingMode === "circle" ||
