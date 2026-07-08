@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.1.3 - 2026-07-08
+
+### Fixes
+
+- Create session: panning after place search keeps the searched boundary
+- Photo answers: upload re-checks server role; clearer denial messages
+- Questions: timers start and block new questions until the current one finishes
+- Thermometer: GPS track completes without Firestore errors
+- Sea level measuring: preview no longer shades the full play area at highest elevation
+- Tentacle: choose a category before map preview loads
+- Tentacle: Next works on anchor step before you pick a category
+- Thermometer: manual pins send one answer prompt in multiplayer
+
+### Improvements
+
+- End game: hiders accept before the hiding zone reveal applies
+- PWA updates: clearer reload banner
+- Transit map: distinct stop icons per mode
+- Hiding zone confirm no longer posts to seeker chat
+- Thermometer wizard: movement-neutral copy and clearer distance step layout
+
+### Technical
+
+- Firestore: allow answerableAt patch on pending questions; end-game request and accept rules
+
 ## 0.1.2 - 2026-07-08
 
 ### Fixes

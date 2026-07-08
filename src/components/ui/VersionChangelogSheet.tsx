@@ -1,6 +1,15 @@
 import { useScrollLock } from "../../hooks/useScrollLock";
-import { APP_VERSION, CHANGELOG } from "../../domain/device/changelog";
+import { APP_VERSION, CHANGELOG, type ChangelogEntry } from "../../domain/device/changelog";
 import { MobileSheet } from "./MobileSheet";
+
+function userFacingChangelog(entries: readonly ChangelogEntry[]): ChangelogEntry[] {
+  return entries
+    .map((entry) => ({
+      ...entry,
+      sections: entry.sections.filter((section) => section.title !== "Technical"),
+    }))
+    .filter((entry) => entry.sections.length > 0);
+}
 
 interface VersionChangelogSheetProps {
   open: boolean;
@@ -12,6 +21,7 @@ export function VersionChangelogSheet({
   onClose,
 }: VersionChangelogSheetProps) {
   useScrollLock(open);
+  const visibleChangelog = userFacingChangelog(CHANGELOG);
 
   if (!open) {
     return null;
@@ -52,7 +62,7 @@ export function VersionChangelogSheet({
             </p>
 
             <div className="space-y-5 overflow-y-auto pr-1">
-              {CHANGELOG.map((entry) => (
+              {visibleChangelog.map((entry) => (
                 <section key={entry.version} className="space-y-2">
                   <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-highlight">
                     v{entry.version}
