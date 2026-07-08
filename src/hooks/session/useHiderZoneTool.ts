@@ -301,15 +301,6 @@ export function useHiderZoneTool({
       };
 
       await writeHidingZone(sessionId, zone);
-      await postSystemMessage(
-        moveMode && existingZone
-          ? existingZone.stationName
-            ? `Hider relocated from ${existingZone.stationName}.`
-            : "Hider relocated to a new zone."
-          : stationName
-            ? `Hider confirmed zone at ${stationName}.`
-            : "Hider confirmed hiding zone.",
-      );
 
       if (moveMode) {
         resumeTimer();
