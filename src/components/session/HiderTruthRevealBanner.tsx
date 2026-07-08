@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import type { HiderTruthResult } from "../../domain/questions/hiderTruthAnswer";
+import { AnimatedBanner } from "../ui/AnimatedBanner";
 
 export interface HiderTruthRevealState {
   truth: HiderTruthResult;
@@ -27,28 +28,30 @@ export function HiderTruthRevealBanner({
     return () => window.clearTimeout(timeoutId);
   }, [reveal, onDismiss]);
 
-  if (!reveal) {
-    return null;
-  }
-
-  const { truth, selectedLabel } = reveal;
-
   return (
-    <button
-      type="button"
-      onClick={onDismiss}
-      data-testid="hider-truth-reveal-banner"
-      className="map-float-alert pointer-events-auto absolute inset-x-3 top-[calc(env(safe-area-inset-top)+var(--status-bar-height)+0.75rem)] z-[var(--z-banner)] w-auto border border-status-info/40 bg-status-info-surface px-3 py-2.5 text-left"
+    <AnimatedBanner
+      visible={Boolean(reveal)}
+      onDismiss={onDismiss}
+      className="pointer-events-auto absolute inset-x-3 top-[calc(env(safe-area-inset-top)+var(--status-bar-height)+0.75rem)] z-[var(--z-banner)]"
     >
-      <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
-        Bluff sent
-      </p>
-      <p className="mt-1 text-sm text-ink">
-        Sent: {selectedLabel}, station truth was {truth.label}
-      </p>
-      <p className="mt-1.5 inline-flex rounded-md bg-status-warning-surface px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-status-warning">
-        Does not match
-      </p>
-    </button>
+      {reveal ? (
+        <button
+          type="button"
+          onClick={onDismiss}
+          data-testid="hider-truth-reveal-banner"
+          className="map-float-alert w-auto border border-status-info/40 bg-status-info-surface px-3 py-2.5 text-left"
+        >
+          <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
+            Bluff sent
+          </p>
+          <p className="mt-1 text-sm text-ink">
+            Sent: {reveal.selectedLabel}, station truth was {reveal.truth.label}
+          </p>
+          <p className="mt-1.5 inline-flex rounded-md bg-status-warning-surface px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-status-warning">
+            Does not match
+          </p>
+        </button>
+      ) : null}
+    </AnimatedBanner>
   );
 }

@@ -16,6 +16,11 @@ const sentryOrg = process.env.SENTRY_ORG;
 const sentryProject = process.env.SENTRY_PROJECT;
 
 export default defineConfig({
+  server: {
+    // Avoid colliding with `vite preview` / Playwright (4173), which registers a SW.
+    port: 5173,
+    strictPort: false,
+  },
   build: {
     sourcemap: true,
     rolldownOptions: {

@@ -31,15 +31,21 @@ export function usePrefersReducedMotion(): boolean {
   return prefersReducedMotion;
 }
 
+let motionProfileSubscriberCount = 0;
+
 export function useMotionProfile() {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const prefersReducedMotion = usePrefersReducedMotion();
   const animate = !lowPowerMode && !prefersReducedMotion;
 
   useEffect(() => {
+    motionProfileSubscriberCount += 1;
     document.documentElement.dataset.motion = animate ? "full" : "reduced";
     return () => {
-      delete document.documentElement.dataset.motion;
+      motionProfileSubscriberCount -= 1;
+      if (motionProfileSubscriberCount === 0) {
+        delete document.documentElement.dataset.motion;
+      }
     };
   }, [animate]);
 

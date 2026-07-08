@@ -25,4 +25,20 @@ describe("useMotionProfile", () => {
     expect(result.current.animate).toBe(true);
     expect(document.documentElement.dataset.motion).toBe("full");
   });
+
+  it("keeps data-motion reduced when one of multiple hooks unmounts with low power on", () => {
+    useMapStore.getState().setLowPowerMode(true);
+
+    const first = renderHook(() => useMotionProfile());
+    const second = renderHook(() => useMotionProfile());
+
+    expect(document.documentElement.dataset.motion).toBe("reduced");
+
+    first.unmount();
+
+    expect(document.documentElement.dataset.motion).toBe("reduced");
+
+    second.unmount();
+    expect(document.documentElement.dataset.motion).toBeUndefined();
+  });
 });

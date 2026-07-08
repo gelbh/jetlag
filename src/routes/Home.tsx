@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AppLogo } from "../components/ui/AppLogo";
 import { HudPlayIcon } from "../components/ui/HudIcons";
@@ -15,9 +15,10 @@ import {
 import { getRemoteSessionById } from "../services/firestore/firestoreAnnotations";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
+import { useViewTransitionNavigate } from "../hooks/useViewTransitionNavigate";
 
 export function Home() {
-  const navigate = useNavigate();
+  const navigate = useViewTransitionNavigate();
   const session = useSessionStore((state) => state.session);
   const myRole = useSessionStore((state) => state.myRole);
   const setSession = useSessionStore((state) => state.setSession);
@@ -129,7 +130,7 @@ export function Home() {
                 Active session
                 {myRole ? ` · ${playerRoleLabel(myRole)}` : ""}
               </span>
-              <span className="font-mono text-xl font-bold tracking-[0.22em]">
+              <span className="font-mono text-xl font-bold tracking-[0.22em] jl-view-transition-session-code">
                 {session.code}
               </span>
             </span>

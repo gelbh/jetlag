@@ -282,12 +282,13 @@ export async function expectRedoEnabled(page: Page) {
 }
 
 export async function openSettings(page: Page) {
-  const settingsButton = page.getByRole("button", { name: "Open settings" });
-  if (await settingsButton.isVisible().catch(() => false)) {
-    await settingsButton.click();
+  const wideSetup = page
+    .locator(".jl-tool-dock-wide-only")
+    .getByRole("button", { name: "Open settings" });
+  if (await wideSetup.isVisible().catch(() => false)) {
+    await wideSetup.click();
   } else {
-    await page.getByRole("button", { name: "More tools" }).click();
-    await page.getByRole("button", { name: "Open settings" }).click();
+    await clickOverflowToolButton(page, "Open settings");
   }
   await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
 }
@@ -311,8 +312,7 @@ export async function openChat(page: Page) {
     return;
   }
 
-  await page.getByRole("button", { name: "More tools" }).click();
-  await page.getByRole("button", { name: "Open chat" }).click();
+  await clickOverflowToolButton(page, "Open chat");
 }
 
 export async function closePanel(page: Page) {

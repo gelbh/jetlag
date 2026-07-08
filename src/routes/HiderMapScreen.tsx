@@ -14,6 +14,7 @@ import {
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { ChatUnreadBadge } from "../components/chat/ChatUnreadBadge";
 import { HidingZonePanel } from "../components/hider/HidingZonePanel";
+import { HiderZoneWizardShell } from "../components/hider/HiderZoneWizardShell";
 import { DEFAULT_SESSION_RULES } from "../domain/session/sessionRules";
 import {
   effectiveHidingZoneRadiusMeters,
@@ -483,36 +484,32 @@ export function HiderMapScreen() {
         </div>
       </div>
 
-      {zoneTool.wizardOpen && !sheetBlocksWizard ? (
-        <div
-          className={`pointer-events-auto absolute inset-x-0 jl-panel-hider-wizard z-[var(--z-panel)] px-3 transition-transform duration-200 ease-out motion-reduce:transition-none ${
-            wizardPeeked ? "jl-panel-peeked" : ""
-          }`}
-        >
-          <div className="tool-panel-compact hud-panel mx-auto max-h-[min(40dvh,360px)] max-w-xl overflow-y-auto p-3">
-            <HidingZonePanel
-              radiusLabel={hidingZoneRadiusLabel}
-              query={zoneTool.query}
-              onQueryChange={zoneTool.setQuery}
-              stations={zoneTool.filteredStations}
-              stationsLoading={zoneTool.stationsLoading}
-              stationsError={zoneTool.stationsError}
-              selectedStation={zoneTool.selectedStation}
-              onSelectStation={zoneTool.setSelectedStation}
-              onSearchThisArea={handleSearchThisArea}
-              searchDisabled={zoneTool.stationsLoading}
-              manualMode={zoneTool.manualMode}
-              onManualModeChange={zoneTool.setManualModeEnabled}
-              hasPlacement={zoneTool.hasPlacement}
-              onConfirm={() => void zoneTool.confirmZone()}
-              saving={zoneTool.saving}
-              error={zoneTool.error}
-              moveMode={zoneTool.moveMode}
-              confirmDisabled={!zoneTool.writesEnabled}
-            />
-          </div>
-        </div>
-      ) : null}
+      <HiderZoneWizardShell
+        open={zoneTool.wizardOpen && !sheetBlocksWizard}
+        peeked={wizardPeeked}
+        onPeekedChange={setWizardPeeked}
+      >
+        <HidingZonePanel
+          radiusLabel={hidingZoneRadiusLabel}
+          query={zoneTool.query}
+          onQueryChange={zoneTool.setQuery}
+          stations={zoneTool.filteredStations}
+          stationsLoading={zoneTool.stationsLoading}
+          stationsError={zoneTool.stationsError}
+          selectedStation={zoneTool.selectedStation}
+          onSelectStation={zoneTool.setSelectedStation}
+          onSearchThisArea={handleSearchThisArea}
+          searchDisabled={zoneTool.stationsLoading}
+          manualMode={zoneTool.manualMode}
+          onManualModeChange={zoneTool.setManualModeEnabled}
+          hasPlacement={zoneTool.hasPlacement}
+          onConfirm={() => void zoneTool.confirmZone()}
+          saving={zoneTool.saving}
+          error={zoneTool.error}
+          moveMode={zoneTool.moveMode}
+          confirmDisabled={!zoneTool.writesEnabled}
+        />
+      </HiderZoneWizardShell>
 
       <ChatPanel
         open={overlay.isChatOpen}

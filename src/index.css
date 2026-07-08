@@ -63,6 +63,12 @@
   --z-banner: 1001;
   --z-panel: 1002;
   --z-modal: 1100;
+  --motion-instant: 100ms;
+  --motion-fast: 150ms;
+  --motion-base: 200ms;
+  --motion-sheet: 280ms;
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring-subtle: cubic-bezier(0.32, 1.28, 0.54, 1);
   --map-banner-top: calc(
     env(safe-area-inset-top) + var(--status-bar-height) + 1.25rem
   );
@@ -120,7 +126,20 @@ textarea {
     background: var(--color-surface-panel);
     color: var(--color-ink);
     box-shadow: var(--shadow-hud-float);
-    transition: background 0.15s ease;
+  }
+
+  html:not([data-motion="reduced"]) .hud-chrome {
+    transition:
+      background var(--motion-instant) ease,
+      transform var(--motion-instant) var(--ease-out-quint);
+  }
+
+  html:not([data-motion="reduced"]) .hud-chrome:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  html[data-motion="reduced"] .hud-chrome {
+    transition: none;
   }
 
   .hud-chrome:hover:not(:disabled) {
@@ -308,8 +327,11 @@ textarea {
   }
 
   .map-chrome-hud {
-    transition: opacity 0.12s ease-out;
     overflow: visible;
+  }
+
+  html:not([data-motion="reduced"]) .map-chrome-hud {
+    transition: opacity var(--motion-base) var(--ease-out-quint);
   }
 
   .home-terminal {
@@ -621,6 +643,7 @@ textarea {
   .jl-tool-dock-bar {
     container-type: inline-size;
     container-name: tool-dock;
+    position: relative;
     display: flex;
     align-items: stretch;
     gap: 0.25rem;
@@ -631,6 +654,36 @@ textarea {
     background: oklch(from var(--color-surface-deep) l c h / 0.96);
     padding: 0.25rem 0.375rem;
     box-shadow: var(--shadow-hud-menu);
+  }
+
+  .jl-tool-dock-highlight {
+    position: absolute;
+    z-index: 0;
+    border-radius: var(--radius-hud-md);
+    border: 2px solid oklch(from var(--color-highlight) l c h / 0.55);
+    background: var(--color-highlight-soft);
+    pointer-events: none;
+  }
+
+  html:not([data-motion="reduced"]) .jl-tool-dock-highlight {
+    transition:
+      transform var(--motion-fast) var(--ease-out-quint),
+      width var(--motion-fast) var(--ease-out-quint),
+      height var(--motion-fast) var(--ease-out-quint),
+      opacity var(--motion-fast) var(--ease-out-quint);
+  }
+
+  .jl-tool-dock-group-main {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    flex: 1;
+    justify-content: space-evenly;
+  }
+
+  html:not([data-motion="reduced"]) .jl-tool-menu {
+    animation: jl-menu-enter var(--motion-fast) var(--ease-out-quint) both;
+    transform-origin: bottom center;
   }
 
   .jl-map-banner-top {
@@ -704,11 +757,6 @@ textarea {
     }
   }
 
-  .jl-tool-dock-group-main {
-    min-width: 0;
-    flex: 1;
-    justify-content: space-evenly;
-  }
 
   .jl-tool-dock-group-end {
     margin-left: auto;
@@ -734,10 +782,22 @@ textarea {
     background: transparent;
     padding: 0.25rem 0.125rem;
     color: var(--color-ink-secondary);
+  }
+
+  html:not([data-motion="reduced"]) .jl-tool-slot {
     transition:
-      background 0.18s ease-out,
-      border-color 0.18s ease-out,
-      color 0.18s ease-out;
+      background var(--motion-fast) var(--ease-out-quint),
+      border-color var(--motion-fast) var(--ease-out-quint),
+      color var(--motion-fast) var(--ease-out-quint),
+      transform var(--motion-instant) var(--ease-out-quint);
+  }
+
+  html:not([data-motion="reduced"]) .jl-tool-slot:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  html[data-motion="reduced"] .jl-tool-slot {
+    transition: none;
   }
 
   .jl-tool-dock-group:not(.jl-tool-dock-group-main) .jl-tool-slot {
@@ -822,6 +882,20 @@ textarea {
 
   .jl-panel-hider-wizard {
     bottom: var(--hider-wizard-bottom);
+  }
+
+  .jl-panel-hider-wizard.jl-panel-peeked {
+    transform: translateY(calc(100% - 3rem));
+  }
+
+  html:not([data-motion="reduced"]) .jl-panel-above-dock,
+  html:not([data-motion="reduced"]) .jl-panel-hider-wizard {
+    transition: transform var(--motion-base) var(--ease-out-quint);
+  }
+
+  html[data-motion="reduced"] .jl-panel-above-dock,
+  html[data-motion="reduced"] .jl-panel-hider-wizard {
+    transition: none;
   }
 
   .jl-tool-slot-icon {
@@ -917,19 +991,92 @@ textarea {
 
   .jl-tool-overflow-sheet,
   .hud-sheet-enter {
-    animation: hud-sheet-enter 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    animation: hud-sheet-enter var(--motion-sheet) var(--ease-out-quint) both;
+  }
+
+  .hud-sheet-exit {
+    animation: hud-sheet-exit calc(var(--motion-sheet) * 0.75) var(--ease-out-quint)
+      both;
   }
 
   .hud-scrim-enter {
-    animation: hud-scrim-enter 180ms ease-out both;
+    animation: hud-scrim-enter var(--motion-base) var(--ease-out-quint) both;
+  }
+
+  .hud-scrim-exit {
+    animation: hud-scrim-exit calc(var(--motion-base) * 0.75) var(--ease-out-quint)
+      both;
   }
 
   .jl-panel-enter {
-    animation: jl-panel-enter 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: jl-panel-enter var(--motion-base) var(--ease-out-quint) both;
+  }
+
+  .jl-panel-exit {
+    animation: jl-panel-exit calc(var(--motion-base) * 0.75) var(--ease-out-quint) both;
+  }
+
+  .jl-panel-crossfade-enter {
+    animation: jl-panel-crossfade-enter var(--motion-fast) var(--ease-out-quint) both;
+  }
+
+  .jl-step-enter {
+    animation: jl-step-enter var(--motion-fast) var(--ease-out-quint) both;
+  }
+
+  .jl-banner-enter {
+    animation: jl-banner-enter var(--motion-base) var(--ease-out-quint) both;
+  }
+
+  .jl-banner-exit {
+    animation: jl-banner-exit calc(var(--motion-base) * 0.75) var(--ease-out-quint)
+      both;
+  }
+
+  .jl-chat-tab-enter {
+    animation: jl-chat-tab-enter var(--motion-fast) var(--ease-out-quint) both;
   }
 
   .route-loading-enter {
-    animation: route-loading-enter 0.2s ease-out both;
+    animation: route-loading-enter var(--motion-base) var(--ease-out-quint) both;
+  }
+
+  .jl-sheet-drag-handle {
+    touch-action: none;
+    cursor: grab;
+    border: 0;
+    background: transparent;
+    color: inherit;
+  }
+
+  .jl-sheet-drag-handle:active {
+    cursor: grabbing;
+  }
+
+  html:not([data-motion="reduced"]) .jl-chat-keyboard-inset {
+    transition: transform var(--motion-base) var(--ease-out-quint);
+  }
+
+  html:not([data-motion="reduced"]) .jl-tool-dock {
+    transition: bottom var(--motion-base) var(--ease-out-quint);
+  }
+
+  html:not([data-motion="reduced"]) .btn-primary,
+  html:not([data-motion="reduced"]) .btn-secondary {
+    transition: transform var(--motion-instant) var(--ease-out-quint);
+  }
+
+  html:not([data-motion="reduced"]) .btn-primary:active:not(:disabled),
+  html:not([data-motion="reduced"]) .btn-secondary:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  html:not([data-motion="reduced"]) .home-card-btn:active {
+    transform: scale(0.97);
+  }
+
+  .jl-view-transition-session-code {
+    view-transition-name: jl-session-code;
   }
 
   .jl-tool-overflow-row {
@@ -942,10 +1089,49 @@ textarea {
     padding: 0.5rem 0.625rem;
     text-align: left;
     color: var(--color-ink-secondary);
+  }
+
+  html:not([data-motion="reduced"]) .jl-tool-overflow-row {
     transition:
-      background 0.18s ease-out,
-      border-color 0.18s ease-out,
-      color 0.18s ease-out;
+      background var(--motion-fast) var(--ease-out-quint),
+      border-color var(--motion-fast) var(--ease-out-quint),
+      color var(--motion-fast) var(--ease-out-quint),
+      transform var(--motion-instant) var(--ease-out-quint);
+  }
+
+  html:not([data-motion="reduced"]) .jl-tool-overflow-row:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  html[data-motion="reduced"] .jl-tool-overflow-row {
+    transition: none;
+  }
+
+  .route-fallback-skeleton {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    background: var(--color-surface-deep);
+  }
+
+  .route-fallback-status {
+    height: var(--status-bar-height);
+    border-bottom: 2px solid var(--color-highlight);
+    background: var(--color-surface-deep);
+  }
+
+  .route-fallback-map {
+    flex: 1;
+    background: var(--color-map-canvas);
+    opacity: 0.35;
+  }
+
+  .route-fallback-dock {
+    height: var(--dock-height);
+    margin: 0.375rem;
+    border: 2px solid var(--color-border);
+    border-top: 3px solid var(--color-highlight);
+    background: oklch(from var(--color-surface-deep) l c h / 0.96);
   }
 
   .jl-tool-overflow-row:hover:not(:disabled) {
@@ -1028,10 +1214,17 @@ textarea {
     font-weight: 600;
     letter-spacing: 0.07em;
     text-transform: uppercase;
+  }
+
+  html:not([data-motion="reduced"]) .home-card-btn {
     transition:
-      background 0.18s ease-out,
-      border-color 0.18s ease-out,
-      transform 0.18s ease-out;
+      background var(--motion-fast) var(--ease-out-quint),
+      border-color var(--motion-fast) var(--ease-out-quint),
+      transform var(--motion-instant) var(--ease-out-quint);
+  }
+
+  html[data-motion="reduced"] .home-card-btn {
+    transition: none;
   }
 
   .home-card-btn-primary {
@@ -1315,6 +1508,108 @@ textarea {
   }
 }
 
+@keyframes hud-sheet-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0.92;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes hud-scrim-exit {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes jl-panel-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0.92;
+    transform: translateY(0.5rem);
+  }
+}
+
+@keyframes jl-panel-crossfade-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes jl-step-enter {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes jl-banner-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes jl-banner-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+}
+
+@keyframes jl-chat-tab-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes jl-menu-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @keyframes route-loading-enter {
   from {
     opacity: 0.7;
@@ -1325,16 +1620,23 @@ textarea {
   }
 }
 
-@keyframes tool-overflow-sheet-in {
-  from {
-    opacity: 0.92;
-    transform: translateY(100%);
-  }
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--motion-base);
+}
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
+}
+
+html[data-motion="reduced"] ::view-transition-group(*),
+html[data-motion="reduced"] ::view-transition-old(*),
+html[data-motion="reduced"] ::view-transition-new(*) {
+  animation: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1348,13 +1650,34 @@ textarea {
 
   .jl-tool-overflow-sheet,
   .hud-sheet-enter,
+  .hud-sheet-exit,
   .hud-scrim-enter,
+  .hud-scrim-exit,
   .jl-panel-enter,
+  .jl-panel-exit,
+  .jl-panel-crossfade-enter,
+  .jl-step-enter,
+  .jl-banner-enter,
+  .jl-banner-exit,
+  .jl-chat-tab-enter,
+  .jl-tool-menu,
   .route-loading-enter {
     animation: none;
   }
 
   .map-chrome-hud {
+    transition: none;
+  }
+
+  .jl-tool-dock-highlight,
+  .jl-tool-dock,
+  .jl-chat-keyboard-inset,
+  .home-card-btn,
+  .hud-chrome,
+  .btn-primary,
+  .btn-secondary,
+  .jl-tool-slot,
+  .jl-tool-overflow-row {
     transition: none;
   }
 }
@@ -1367,13 +1690,31 @@ html[data-motion="reduced"] .home-resume-action[aria-busy="true"] .home-resume-c
 html[data-motion="reduced"] .jl-ticker-active,
 html[data-motion="reduced"] .jl-tool-overflow-sheet,
 html[data-motion="reduced"] .hud-sheet-enter,
+html[data-motion="reduced"] .hud-sheet-exit,
 html[data-motion="reduced"] .hud-scrim-enter,
+html[data-motion="reduced"] .hud-scrim-exit,
 html[data-motion="reduced"] .jl-panel-enter,
+html[data-motion="reduced"] .jl-panel-exit,
+html[data-motion="reduced"] .jl-panel-crossfade-enter,
+html[data-motion="reduced"] .jl-step-enter,
+html[data-motion="reduced"] .jl-banner-enter,
+html[data-motion="reduced"] .jl-banner-exit,
+html[data-motion="reduced"] .jl-chat-tab-enter,
+html[data-motion="reduced"] .jl-tool-menu,
 html[data-motion="reduced"] .route-loading-enter {
   animation: none;
 }
 
-html[data-motion="reduced"] .map-chrome-hud {
+html[data-motion="reduced"] .map-chrome-hud,
+html[data-motion="reduced"] .jl-tool-dock-highlight,
+html[data-motion="reduced"] .jl-tool-dock,
+html[data-motion="reduced"] .jl-chat-keyboard-inset,
+html[data-motion="reduced"] .home-card-btn,
+html[data-motion="reduced"] .hud-chrome,
+html[data-motion="reduced"] .btn-primary,
+html[data-motion="reduced"] .btn-secondary,
+html[data-motion="reduced"] .jl-tool-slot,
+html[data-motion="reduced"] .jl-tool-overflow-row {
   transition: none;
 }
 

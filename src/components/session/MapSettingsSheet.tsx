@@ -1,7 +1,6 @@
-import { useState, type ReactNode } from "react";
-import { MobileSheet } from "../ui/MobileSheet";
+import { useState } from "react";
+import { AnimatedOverlay } from "../ui/AnimatedOverlay";
 import { ShareCode } from "./ShareCode";
-import { useScrollLock } from "../../hooks/useScrollLock";
 import { TransitControls } from "../map/TransitControls";
 import {
   SettingsSegmentControl,
@@ -134,15 +133,14 @@ export function MapSettingsSheet({
   gameRulesSaveLabel = "Save game rules",
 }: MapSettingsSheetProps) {
   const [segment, setSegment] = useState<SettingsSegment>("map");
-  useScrollLock(open);
-
-  if (!open) {
-    return null;
-  }
 
   return (
-    <SettingsOverlay onClose={onClose}>
-      <MobileSheet maxHeightClassName="max-h-[min(85dvh,760px)]" className="hud-sheet-enter">
+    <AnimatedOverlay
+      open={open}
+      onClose={onClose}
+      ariaLabel="Settings"
+      maxHeightClassName="max-h-[min(85dvh,760px)]"
+    >
         <div className="sticky top-0 z-10 -mx-4 space-y-3 bg-surface-panel px-4 pb-3 pt-1">
           <div className="jl-settings-header flex items-center justify-between gap-3">
             <div>
@@ -174,7 +172,7 @@ export function MapSettingsSheet({
         <div
           key={segment}
           role="tabpanel"
-          className="motion-safe:animate-[settings-fade-in_150ms_ease-out] motion-reduce:animate-none"
+          className="jl-step-enter motion-reduce:animate-none"
         >
           {segment === "map" ? (
             <MapSegment
@@ -265,8 +263,7 @@ export function MapSettingsSheet({
         <p className="mt-6 border-t-2 border-border pt-3 text-[10px] leading-relaxed text-ink-dim">
           Map data © OpenStreetMap contributors · © CARTO
         </p>
-      </MobileSheet>
-    </SettingsOverlay>
+    </AnimatedOverlay>
   );
 }
 
@@ -565,28 +562,6 @@ function SessionSegment({
           </>
         ) : null}
       </div>
-    </div>
-  );
-}
-
-function SettingsOverlay({
-  onClose,
-  children,
-}: {
-  onClose: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <div
-      className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] overscroll-contain hud-scrim hud-scrim-enter"
-      onClick={onClose}
-      onKeyDown={(event) => {
-        if (event.key === "Escape") {
-          onClose();
-        }
-      }}
-    >
-      <div onClick={(event) => event.stopPropagation()}>{children}</div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.1.4";
+export const APP_VERSION = "0.1.5";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,22 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.1.5",
+    date: "2026-07-08",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Sheets: swipe down or scrim tap to dismiss; exit animations on map and home overlays",
+          "Tool panel: drag handle with live feedback; dock highlight follows the active question tool",
+          "Home → Map: view transition on session code when motion is enabled",
+          "Map load: HUD skeleton instead of plain loading text",
+          "Low power mode and reduced motion: instant transitions, no drag springs",
+        ],
+      }
+    ],
+  },
   {
     version: "0.1.4",
     date: "2026-07-08",

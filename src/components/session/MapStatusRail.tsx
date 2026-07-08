@@ -250,7 +250,9 @@ export function MapStatusRail({
 
             <div className="jl-stamp">
               <span className="jl-stamp-label">Session</span>
-              <span className="jl-stamp-code">{sessionCode}</span>
+              <span className="jl-stamp-code jl-view-transition-session-code">
+                {sessionCode}
+              </span>
             </div>
 
             <p

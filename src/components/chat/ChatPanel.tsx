@@ -9,6 +9,7 @@ import { createMessageId } from "../../domain/session/sessionChat";
 import type { PlayerRole } from "../../domain/session/playerRole";
 import { postSocialMessage } from "../../services/firestore/firestoreSessionExtras";
 import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
+import { useAnimatedPresence } from "../../hooks/useAnimatedPresence";
 import { GameChatTab } from "./GameChatTab";
 
 interface SocialChatTabProps {
@@ -142,14 +143,22 @@ export function ChatPanel({
 }: ChatPanelProps) {
   const [tab, setTab] = useState<"social" | "game">("game");
   const keyboardInset = useVisualViewportBottomInset(open);
+  const { mounted, animClass, setAnimNode } = useAnimatedPresence({
+    open,
+    onClose,
+    enterClass: "jl-panel-enter",
+    exitClass: "jl-panel-exit",
+    durationMs: 200,
+  });
 
-  if (!open) {
+  if (!mounted) {
     return null;
   }
 
   return (
     <div
-      className={`pointer-events-auto absolute inset-x-0 z-[var(--z-panel)] px-3 jl-panel-enter ${bottomClassName}`}
+      ref={setAnimNode}
+      className={`jl-chat-keyboard-inset pointer-events-auto absolute inset-x-0 z-[var(--z-panel)] px-3 ${animClass} ${bottomClassName}`}
       style={
         keyboardInset > 0
           ? { transform: `translateY(-${keyboardInset}px)` }
@@ -190,7 +199,10 @@ export function ChatPanel({
             Close
           </button>
         </div>
-        <div className="jl-game-chat-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div
+          key={tab}
+          className="jl-game-chat-scroll jl-chat-tab-enter min-h-0 flex-1 overflow-y-auto overscroll-contain motion-reduce:animate-none"
+        >
           {tab === "social" ? (
             <SocialChatTab
               messages={messages}

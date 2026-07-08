@@ -4,6 +4,7 @@ import {
   selectPrimaryQuestionTimer,
   type ActiveQuestionTimer,
 } from "../../domain/questions/questionTimerDisplay";
+import { AnimatedBanner } from "../ui/AnimatedBanner";
 
 interface QuestionAlertBannerProps {
   pendingQuestions: readonly import("../../domain/session/sessionChat").PendingQuestionRecord[];
@@ -14,11 +15,16 @@ export function QuestionAlertBanner({
   pendingQuestions,
   sessionRules,
 }: QuestionAlertBannerProps) {
-  const [active, setActive] = useState<ActiveQuestionTimer | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [content, setContent] = useState<ActiveQuestionTimer | null>(null);
 
   useEffect(() => {
     const refresh = () => {
-      setActive(selectPrimaryQuestionTimer(pendingQuestions, sessionRules));
+      const next = selectPrimaryQuestionTimer(pendingQuestions, sessionRules);
+      setVisible(Boolean(next));
+      if (next) {
+        setContent(next);
+      }
     };
 
     refresh();
@@ -26,17 +32,21 @@ export function QuestionAlertBanner({
     return () => window.clearInterval(interval);
   }, [sessionRules, pendingQuestions]);
 
-  if (!active) {
-    return null;
-  }
-
   return (
-    <p
-      className="map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 border-highlight bg-surface-deep px-3 py-2 text-center text-sm font-semibold uppercase tracking-wide text-pretty text-ink"
-      role="status"
-      aria-live="polite"
+    <AnimatedBanner
+      visible={visible}
+      onDismiss={() => setContent(null)}
+      className="pointer-events-auto mx-3 mt-1.5"
     >
-      {active.toolLabel} · {active.countdownLabel}
-    </p>
+      {content ? (
+        <p
+          className="map-float-alert border-2 border-highlight bg-surface-deep px-3 py-2 text-center text-sm font-semibold uppercase tracking-wide text-pretty text-ink"
+          role="status"
+          aria-live="polite"
+        >
+          {content.toolLabel} · {content.countdownLabel}
+        </p>
+      ) : null}
+    </AnimatedBanner>
   );
 }

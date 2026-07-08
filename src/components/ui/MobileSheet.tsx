@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useRef, type ReactNode, type RefObject } from "react";
+import type { SheetHandleProps } from "../../hooks/useSheetGesture";
 
 interface MobileSheetProps {
   children: ReactNode;
@@ -8,6 +9,8 @@ interface MobileSheetProps {
   variant?: "overlay" | "nested";
   /** Split layout: children manage their own scroll regions (e.g. sticky footer). */
   layout?: "scroll" | "split";
+  scrollRef?: RefObject<HTMLDivElement | null>;
+  handleProps?: SheetHandleProps;
 }
 
 export function MobileSheet({
@@ -16,11 +19,29 @@ export function MobileSheet({
   maxHeightClassName = "max-h-[min(72dvh,640px)]",
   variant = "overlay",
   layout = "scroll",
+  scrollRef: externalScrollRef,
+  handleProps,
 }: MobileSheetProps) {
+  const internalScrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = externalScrollRef ?? internalScrollRef;
+
   const positionClass =
     variant === "nested"
       ? "relative shrink-0"
       : "pointer-events-auto fixed inset-x-0 bottom-0 z-[var(--z-dock)]";
+
+  const handle = handleProps ? (
+    <button
+      type="button"
+      aria-label="Drag sheet down to dismiss"
+      className="jl-sheet-drag-handle mx-auto mb-3 flex w-full justify-center py-1"
+      {...handleProps}
+    >
+      <span className="jl-sheet-handle" aria-hidden="true" />
+    </button>
+  ) : variant === "overlay" ? (
+    <div className="jl-sheet-handle" aria-hidden="true" />
+  ) : null;
 
   if (variant === "nested" && layout === "split") {
     return (
@@ -38,11 +59,10 @@ export function MobileSheet({
     <div className={`${positionClass} hud-sheet ${className}`}>
       <div className="mx-auto w-full max-w-xl">
         <div
+          ref={scrollRef}
           className={`${maxHeightClassName} overflow-y-auto overscroll-contain scroll-pb-4 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3`}
         >
-          {variant === "overlay" ? (
-            <div className="jl-sheet-handle" aria-hidden="true" />
-          ) : null}
+          {handle}
           {children}
         </div>
       </div>

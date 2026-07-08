@@ -52,6 +52,7 @@ export async function seedLocalSession(
               tentacle: true,
               transit: true,
             },
+            lowPowerMode: true,
           },
           version: 0,
         }),

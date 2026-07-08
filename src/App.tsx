@@ -29,8 +29,14 @@ const GamePresetEditor = lazy(() =>
 
 function RouteFallback() {
   return (
-    <div className="route-loading-enter flex min-h-full items-center justify-center px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] text-ink-dim">
-      Loading…
+    <div
+      className="route-fallback-skeleton route-loading-enter"
+      aria-busy="true"
+      aria-label="Loading map"
+    >
+      <div className="route-fallback-status" />
+      <div className="route-fallback-map" />
+      <div className="route-fallback-dock" />
     </div>
   );
 }

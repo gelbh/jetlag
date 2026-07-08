@@ -46,7 +46,7 @@ describe("Home", () => {
       screen.getByRole("button", { name: /Return to map for session TEST/i }),
     );
 
-    expect(navigate).toHaveBeenCalledWith("/map");
+    expect(navigate).toHaveBeenCalledWith("/map", { viewTransition: true });
   });
 
   it("shows resume action when a session exists", () => {

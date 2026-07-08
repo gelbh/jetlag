@@ -52,7 +52,10 @@ export function ToolStepper({ steps }: ToolStepperProps) {
         ))}
       </div>
       {currentStep ? (
-        <p className="text-center text-xs leading-snug text-ink-muted">
+        <p
+          key={currentStep.id}
+          className="jl-step-enter text-center text-xs leading-snug text-ink-muted motion-reduce:animate-none"
+        >
           <span className="font-medium text-ink">{currentStep.label}</span>
           <span aria-hidden="true"> · </span>
           <span className="tabular-nums">

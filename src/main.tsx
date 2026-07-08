@@ -3,6 +3,7 @@ import "@fontsource/source-sans-3/500.css";
 import "@fontsource/source-sans-3/600.css";
 import "@fontsource/barlow-semi-condensed/600.css";
 import "@fontsource/barlow-semi-condensed/700.css";
+import { unregisterDevServiceWorkers } from "./domain/device/unregisterDevServiceWorkers.ts";
 import { initAnalytics } from "./services/core/analytics.ts";
 import { initSentry } from "./services/core/sentry.ts";
 import { StrictMode } from "react";
@@ -16,9 +17,19 @@ installE2EBridgeIfConfigured();
 initAnalytics();
 initSentry();
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <AppUpdateBanner />
-    <App />
-  </StrictMode>,
-);
+function renderApp() {
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <AppUpdateBanner />
+      <App />
+    </StrictMode>,
+  );
+}
+
+void unregisterDevServiceWorkers().then((cleared) => {
+  if (cleared) {
+    window.location.reload();
+    return;
+  }
+  renderApp();
+});

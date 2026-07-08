@@ -1,15 +1,10 @@
-import {
-  useRef,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
+import { usePanelDrag } from "../../hooks/usePanelDrag";
 import {
   isWizardDockTool,
   mapToolPlacingLabel,
   type DockableMapTool,
 } from "../../domain/map/mapTools";
 import { PopupCloseButton } from "../ui/PopupCloseButton";
-
-const MINIMIZE_DRAG_THRESHOLD_PX = 72;
 
 interface ToolFloatingPanelProps {
   toolId: DockableMapTool;
@@ -28,39 +23,13 @@ export function ToolFloatingPanel({
   onClose,
   children,
 }: ToolFloatingPanelProps) {
-  const dragStartY = useRef<number | null>(null);
-
-  const handleHandlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    dragStartY.current = event.clientY;
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-
-  const handleHandlePointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (dragStartY.current === null) {
-      return;
-    }
-
-    const delta = event.clientY - dragStartY.current;
-    if (delta >= MINIMIZE_DRAG_THRESHOLD_PX) {
-      onMinimizedChange(true);
-      dragStartY.current = null;
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-  };
-
-  const handleHandlePointerUp = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (dragStartY.current !== null) {
-      const delta = event.clientY - dragStartY.current;
-      if (delta >= MINIMIZE_DRAG_THRESHOLD_PX) {
-        onMinimizedChange(true);
-      }
-    }
-    dragStartY.current = null;
-    event.currentTarget.releasePointerCapture(event.pointerId);
-  };
+  const { panelStyle, handleProps } = usePanelDrag({
+    minimized,
+    onMinimizedChange,
+  });
 
   const panelClassName = [
-    "pointer-events-auto absolute inset-x-0 jl-panel-above-dock z-[var(--z-panel)] px-3 transition-transform duration-200 ease-out motion-reduce:transition-none",
+    "pointer-events-auto absolute inset-x-0 jl-panel-above-dock z-[var(--z-panel)] px-3",
     peeked && !minimized ? "jl-panel-peeked" : "",
     minimized ? "jl-panel-minimized" : "jl-panel-enter",
   ]
@@ -69,7 +38,7 @@ export function ToolFloatingPanel({
 
   if (minimized) {
     return (
-      <div className={panelClassName}>
+      <div className={panelClassName} style={panelStyle}>
         <button
           type="button"
           onClick={() => onMinimizedChange(false)}
@@ -86,7 +55,7 @@ export function ToolFloatingPanel({
   }
 
   return (
-    <div className={panelClassName}>
+    <div className={panelClassName} style={panelStyle}>
       <div
         className={`tool-panel-compact hud-panel relative mx-auto max-w-xl overflow-y-auto overscroll-contain p-3 pt-9 ${
           isWizardDockTool(toolId)
@@ -98,10 +67,7 @@ export function ToolFloatingPanel({
           type="button"
           aria-label="Drag panel down to minimize"
           className="jl-panel-drag-handle absolute inset-x-0 top-0 flex justify-center py-2"
-          onPointerDown={handleHandlePointerDown}
-          onPointerMove={handleHandlePointerMove}
-          onPointerUp={handleHandlePointerUp}
-          onPointerCancel={handleHandlePointerUp}
+          {...handleProps}
         >
           <span className="jl-sheet-handle" aria-hidden="true" />
         </button>
@@ -109,7 +75,9 @@ export function ToolFloatingPanel({
           label={`Close ${mapToolPlacingLabel(toolId)}`}
           onClick={onClose}
         />
-        {children}
+        <div key={toolId} className="jl-panel-crossfade-enter motion-reduce:animate-none">
+          {children}
+        </div>
       </div>
     </div>
   );

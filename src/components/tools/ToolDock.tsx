@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { MapStyle } from "../../domain/map/mapBasemaps";
 import type { GameSize } from "../../domain/session/gameSize";
 import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
@@ -76,6 +76,13 @@ export function ToolDock({
   const [drawMenuOpen, setDrawMenuOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const dockRef = useRef<HTMLDivElement>(null);
+  const mainGroupRef = useRef<HTMLDivElement>(null);
+  const [dockHighlight, setDockHighlight] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
   const viewportBottomInset = useVisualViewportBottomInset(true);
 
   const drawMenuVisible = drawMenuOpen && !dismissOverflowMenus;
@@ -140,6 +147,39 @@ export function ToolDock({
   const visibleQuestionTools = QUESTION_DOCK_TOOL_IDS.filter((toolId) =>
     resolveToolDockEnabled(rulesInput, toolId, { hasHiders }),
   );
+
+  const updateDockHighlight = useCallback(() => {
+    const group = mainGroupRef.current;
+    const isQuestionTool = QUESTION_DOCK_TOOL_IDS.includes(
+      activeTool as (typeof QUESTION_DOCK_TOOL_IDS)[number],
+    );
+
+    if (!group || activeTool === "none" || !isQuestionTool) {
+      setDockHighlight(null);
+      return;
+    }
+
+    const slot = group.querySelector<HTMLButtonElement>('[aria-pressed="true"]');
+    if (!slot) {
+      setDockHighlight(null);
+      return;
+    }
+
+    const groupRect = group.getBoundingClientRect();
+    const slotRect = slot.getBoundingClientRect();
+    setDockHighlight({
+      x: slotRect.left - groupRect.left,
+      y: slotRect.top - groupRect.top,
+      width: slotRect.width,
+      height: slotRect.height,
+    });
+  }, [activeTool]);
+
+  useEffect(() => {
+    updateDockHighlight();
+    window.addEventListener("resize", updateDockHighlight);
+    return () => window.removeEventListener("resize", updateDockHighlight);
+  }, [updateDockHighlight, viewportBottomInset, visibleQuestionTools.length]);
 
   const moreMenuActive =
     moreMenuVisible ||
@@ -256,6 +296,18 @@ export function ToolDock({
       />
 
       <div className="jl-tool-dock-bar">
+        {dockHighlight ? (
+          <span
+            className="jl-tool-dock-highlight"
+            aria-hidden="true"
+            style={{
+              transform: `translate(${dockHighlight.x}px, ${dockHighlight.y}px)`,
+              width: dockHighlight.width,
+              height: dockHighlight.height,
+            }}
+          />
+        ) : null}
+
         <div
           className="jl-tool-dock-group jl-tool-dock-group-history"
           aria-label="History"
@@ -292,6 +344,7 @@ export function ToolDock({
         />
 
         <div
+          ref={mainGroupRef}
           className="jl-tool-dock-group jl-tool-dock-group-main"
           aria-label="Question tools"
         >

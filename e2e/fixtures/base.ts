@@ -145,6 +145,21 @@ async function applyPageCaptureInit(page: Page) {
     } catch {
       // IndexedDB may be unavailable in some contexts.
     }
+
+    const matchMedia = window.matchMedia.bind(window);
+    window.matchMedia = (query: string) => {
+      if (query.includes("prefers-reduced-motion")) {
+        return {
+          matches: true,
+          media: query,
+          onchange: null,
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          dispatchEvent: () => false,
+        } as MediaQueryList;
+      }
+      return matchMedia(query);
+    };
   });
 }
 
