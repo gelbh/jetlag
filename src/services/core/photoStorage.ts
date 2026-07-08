@@ -9,6 +9,7 @@ import {
   formatPhotoStorageError,
   photoUploadAccessError,
 } from "../../domain/questions/photoUploadAccess";
+import { getRemoteSessionById } from "../firestore/firestoreAnnotations";
 import { ensureAnonymousUser, getFirebaseStorage } from "./firebase";
 
 const MAX_DIMENSION = 1920;
@@ -101,16 +102,29 @@ export async function uploadPhotoAnswer(
   sessionId: string,
   questionId: string,
   file: File,
-  session?: Pick<SessionRecord, "memberUids" | "memberRoles"> | null,
+  session?: Pick<SessionRecord, "id" | "memberUids" | "memberRoles"> | null,
   myUid?: string | null,
 ): Promise<string> {
-  const accessError = photoUploadAccessError(session, myUid ?? null);
-  if (accessError) {
-    throw new Error(accessError);
+  const user = await ensureAnonymousUser();
+  const authUid = user.uid;
+
+  if (myUid && myUid !== authUid) {
+    throw new Error(
+      "Your sign-in changed. Rejoin the session and try uploading again.",
+    );
   }
 
-  if (!myUid) {
-    await ensureAnonymousUser();
+  let activeSession = session ?? null;
+  if (session?.id) {
+    const remoteSession = await getRemoteSessionById(session.id);
+    if (remoteSession) {
+      activeSession = remoteSession;
+    }
+  }
+
+  const accessError = photoUploadAccessError(activeSession, authUid);
+  if (accessError) {
+    throw new Error(accessError);
   }
 
   const blob = await compressPhotoForUpload(file);
@@ -130,7 +144,10 @@ export async function uploadPhotoAnswer(
   try {
     await uploadBytes(storageRef, blob, metadata);
   } catch (error) {
-    throw new Error(formatPhotoStorageError(error), { cause: error });
+    throw new Error(
+      formatPhotoStorageError(error, activeSession, authUid),
+      { cause: error },
+    );
   }
 
   return storagePath;

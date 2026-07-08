@@ -23,13 +23,29 @@ export function photoUploadAccessError(
   return null;
 }
 
-export function formatPhotoStorageError(error: unknown): string {
+export function formatPhotoStorageError(
+  error: unknown,
+  session?: Pick<SessionRecord, "memberUids" | "memberRoles"> | null,
+  myUid?: string | null,
+): string {
   const message =
     error instanceof Error ? error.message : "Could not upload the photo.";
 
-  if (message.includes("storage/unauthorized")) {
-    return "Photo upload denied. Rejoin as hider, or ask the host to start a new session.";
+  if (!message.includes("storage/unauthorized")) {
+    return message;
   }
 
-  return message;
+  if (!session?.memberRoles || Object.keys(session.memberRoles).length === 0) {
+    return "This session was created before role tracking. Ask the host to start a new session for photo answers.";
+  }
+
+  if (myUid && !session.memberUids?.includes(myUid)) {
+    return "You are not a member of this session. Rejoin with the session code.";
+  }
+
+  if (myUid && session.memberRoles[myUid] !== "hider") {
+    return "Only hiders can upload photo answers. Rejoin as hider if you switched roles.";
+  }
+
+  return "Photo upload denied. Rejoin as hider, or ask the host to start a new session.";
 }

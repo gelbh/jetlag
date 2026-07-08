@@ -13,8 +13,16 @@ vi.mock("firebase/storage", () => ({
 }));
 
 vi.mock("./firebase", () => ({
-  ensureAnonymousUser: vi.fn(),
+  ensureAnonymousUser: vi.fn().mockResolvedValue({ uid: "hider-1" }),
   getFirebaseStorage: vi.fn(() => ({ bucket: "demo" })),
+}));
+
+vi.mock("../firestore/firestoreAnnotations", () => ({
+  getRemoteSessionById: vi.fn().mockResolvedValue({
+    id: "session-1",
+    memberUids: ["hider-1"],
+    memberRoles: { "hider-1": "hider" },
+  }),
 }));
 
 import { getDownloadURL, uploadBytes } from "firebase/storage";
@@ -97,6 +105,7 @@ describe("photoStorage", () => {
         "question-1",
         new File(["image"], "photo.jpg", { type: "image/jpeg" }),
         {
+          id: "session-1",
           memberUids: ["hider-1"],
           memberRoles: { "hider-1": "hider" },
         },
