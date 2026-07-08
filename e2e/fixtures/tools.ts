@@ -203,6 +203,13 @@ export async function sendTentacleToHiders(page: Page) {
   await dismissActiveToolPanel(page);
 }
 
+export async function sendPhotoToHiders(page: Page) {
+  await clickToolDockButton(page, "Photo");
+  await waitForSendToHiders(page);
+  await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
+  await dismissActiveToolPanel(page);
+}
+
 export async function placePin(page: Page, note = "Camp") {
   await dismissActiveToolPanel(page);
   await selectDrawTool(page, "Pin");

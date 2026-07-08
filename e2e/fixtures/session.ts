@@ -9,6 +9,7 @@ export interface LocalSessionSeedOptions {
   myRole?: PlayerRole;
   gameSize?: GameSize;
   sessionId?: string;
+  hidingPeriodMinutes?: number;
 }
 
 export async function seedLocalSession(
@@ -20,6 +21,7 @@ export async function seedLocalSession(
     myRole = "seeker",
     gameSize = "medium",
     sessionId = "local",
+    hidingPeriodMinutes,
   } = options;
 
   await page.addInitScript(
@@ -67,6 +69,7 @@ export async function seedLocalSession(
         memberUids: [],
         tier: "free",
         gameSize,
+        ...(hidingPeriodMinutes !== undefined ? { hidingPeriodMinutes } : {}),
       },
       role: myRole,
     },
