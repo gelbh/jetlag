@@ -11,7 +11,7 @@ import { milesToMeters } from "../../domain/map/distance";
 import { serializeGameAreaForFirestore } from "../../services/firestore/firestoreSerialization";
 import { DUBLIN_CITY_GAME_AREA } from "../fixtures/dublinGameArea";
 
-const PROJECT_ID = "jet-lag-map-companion";
+const PROJECT_ID = "demo-jetlag";
 
 function sessionPayload(
   hostUid: string,
