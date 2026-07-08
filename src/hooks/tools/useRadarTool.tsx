@@ -53,6 +53,7 @@ interface UseRadarToolParams {
   refreshGps: () => Promise<{ lat: number; lng: number }>;
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
   armPlacement: () => void;
+  canSubmitQuestion?: boolean;
 }
 
 export function useRadarTool({
@@ -75,6 +76,7 @@ export function useRadarTool({
   refreshGps,
   ensurePointInGameArea,
   armPlacement,
+  canSubmitQuestion = true,
 }: UseRadarToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
   const usedRadarOptions = useMemo(
@@ -184,6 +186,11 @@ export function useRadarTool({
   };
 
   const commit = async () => {
+    if (!canSubmitQuestion) {
+      setMapError("Finish the open question before starting another.");
+      return;
+    }
+
     if (!radarCenter) {
       setMapError("Choose a center with GPS or a map tap.");
       return;

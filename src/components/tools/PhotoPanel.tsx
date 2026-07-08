@@ -18,6 +18,7 @@ interface PhotoPanelProps {
   onCommit: () => void;
   error?: string | null;
   isSubmitting?: boolean;
+  canSubmitQuestion?: boolean;
 }
 
 export function PhotoPanel({
@@ -29,12 +30,14 @@ export function PhotoPanel({
   onCommit,
   error,
   isSubmitting = false,
+  canSubmitQuestion = true,
 }: PhotoPanelProps) {
   const availableCategories = photoCategoriesForGameSize(gameSize).filter(
     (category) => !usedCategoryIds.has(category.id),
   );
   const question = photoQuestionFor(categoryId);
   const canCommit =
+    canSubmitQuestion &&
     availableCategories.length > 0 &&
     isPhotoCategoryAvailableForGameSize(gameSize, categoryId) &&
     !usedCategoryIds.has(categoryId) &&
@@ -72,6 +75,11 @@ export function PhotoPanel({
         <p className="text-xs text-ink-dim">
           Hiders upload a photo or reply that they cannot answer in game chat.
         </p>
+        {!canSubmitQuestion ? (
+          <p className="text-sm text-status-warning">
+            Finish the open question before starting another.
+          </p>
+        ) : null}
         <button
           type="button"
           onClick={onCommit}

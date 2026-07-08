@@ -46,6 +46,7 @@ interface ToolDockProps {
   dismissOverflowMenus?: boolean;
   canStartEndGame?: boolean;
   onStartEndGame?: () => void;
+  canSubmitQuestion?: boolean;
 }
 
 const markupTools = MAP_TOOL_DOCK_ENTRIES.filter((tool) =>
@@ -70,6 +71,7 @@ export function ToolDock({
   dismissOverflowMenus = false,
   canStartEndGame = false,
   onStartEndGame,
+  canSubmitQuestion = true,
 }: ToolDockProps) {
   const [drawMenuOpen, setDrawMenuOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -153,12 +155,14 @@ export function ToolDock({
     }
 
     const active = activeTool === toolId;
+    const blockedByOpenQuestion =
+      !canSubmitQuestion && QUESTION_DOCK_TOOL_IDS.includes(toolId);
 
     return (
       <button
         key={toolId}
         type="button"
-        disabled={!entry.enabled}
+        disabled={!entry.enabled || blockedByOpenQuestion}
         onClick={() => selectTool(toolId)}
         className={`jl-tool-slot ${active ? "jl-tool-slot-active" : ""}`}
         aria-label={entry.name}

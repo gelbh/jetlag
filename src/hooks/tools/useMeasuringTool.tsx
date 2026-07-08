@@ -90,6 +90,7 @@ interface UseMeasuringToolParams {
   setMapError: (message: string | null) => void;
   refreshGps: () => Promise<{ lat: number; lng: number }>;
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
+  canSubmitQuestion?: boolean;
 }
 
 const ANCHOR_RESOLVE_DEBOUNCE_MS = 400;
@@ -124,6 +125,7 @@ export function useMeasuringTool({
   setMapError,
   refreshGps,
   ensurePointInGameArea,
+  canSubmitQuestion = true,
 }: UseMeasuringToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
   const seaLevelRequestId = useRef(0);
@@ -248,7 +250,16 @@ export function useMeasuringTool({
     }
   }, [previewRegionInput]);
 
-  const measuringBoundaryPreview = measuringNearRegion;
+  const measuringBoundaryPreview = useMemo(() => {
+    if (
+      measuringSubject === "sea_level" &&
+      measuringSeaLevelEdgeCase === "highest"
+    ) {
+      return null;
+    }
+
+    return measuringNearRegion;
+  }, [measuringNearRegion, measuringSeaLevelEdgeCase, measuringSubject]);
 
   const measuringEliminationPreview = useMemo(() => {
     try {
@@ -898,6 +909,11 @@ export function useMeasuringTool({
   };
 
   const commit = async () => {
+    if (!canSubmitQuestion) {
+      setMeasuringError("Finish the open question before starting another.");
+      return;
+    }
+
     if (!measuringSeekerPoint || measuringDistanceMeters === null) {
       return;
     }

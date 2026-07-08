@@ -31,6 +31,7 @@ interface UsePhotoToolParams {
   finishPlacement: () => void;
   setMapError: (message: string | null) => void;
   mapError: string | null;
+  canSubmitQuestion?: boolean;
 }
 
 export function usePhotoTool({
@@ -44,6 +45,7 @@ export function usePhotoTool({
   finishPlacement,
   setMapError,
   mapError,
+  canSubmitQuestion = true,
 }: UsePhotoToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
   const usedCategories = useMemo(
@@ -73,6 +75,11 @@ export function usePhotoTool({
   );
 
   const commit = useCallback(async () => {
+    if (!canSubmitQuestion) {
+      setMapError("Finish the open question before starting another.");
+      return;
+    }
+
     if (!awaitHiderAnswer || !submitPendingQuestion || !sessionId || !senderUid) {
       setMapError("Photo questions require a hider in the session.");
       return;
@@ -112,6 +119,7 @@ export function usePhotoTool({
     setMapError,
     submitPendingQuestion,
     usedCategories,
+    canSubmitQuestion,
   ]);
 
   const panel =
@@ -125,6 +133,7 @@ export function usePhotoTool({
         onCommit={() => void runLocked(commit)}
         error={mapError}
         isSubmitting={isSubmitting}
+        canSubmitQuestion={canSubmitQuestion}
       />
     ) : null;
 

@@ -75,6 +75,7 @@ interface UseMatchingToolParams {
   mapError: string | null;
   refreshGps: () => Promise<{ lat: number; lng: number }>;
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
+  canSubmitQuestion?: boolean;
 }
 
 export function useMatchingTool({
@@ -95,6 +96,7 @@ export function useMatchingTool({
   mapError,
   refreshGps,
   ensurePointInGameArea,
+  canSubmitQuestion = true,
 }: UseMatchingToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
   const usedMatchingCategories = useMemo(
@@ -427,6 +429,11 @@ export function useMatchingTool({
   };
 
   const commit = async () => {
+    if (!canSubmitQuestion) {
+      setMatchingError("Finish the open question before starting another.");
+      return;
+    }
+
     if (!matchingSeekerPoint || !matchingCategoryId) {
       return;
     }

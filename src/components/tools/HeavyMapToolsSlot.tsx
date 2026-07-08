@@ -49,6 +49,7 @@ interface HeavyMapToolsSlotProps {
   sessionId?: string;
   senderUid?: string | null;
   onToolsChange: (tools: HeavyMapToolsApi) => void;
+  canSubmitQuestion?: boolean;
 }
 
 type SharedToolProps = Omit<
@@ -114,8 +115,12 @@ function MatchingToolRunner({
   sessionRules,
   sessionId,
   senderUid,
+  canSubmitQuestion,
   ...sharedProps
-}: SharedToolProps & { onToolsChange: (tools: HeavyMapToolsApi) => void }) {
+}: SharedToolProps & {
+  onToolsChange: (tools: HeavyMapToolsApi) => void;
+  canSubmitQuestion?: boolean;
+}) {
   const matchingTool = useMatchingTool({
     active: true,
     pendingQuestions: sharedProps.pendingQuestions,
@@ -124,6 +129,7 @@ function MatchingToolRunner({
     awaitHiderAnswer,
     sessionId,
     senderUid,
+    canSubmitQuestion,
     submitPendingQuestion:
       awaitHiderAnswer && submitToolQuestion
         ? (input) =>
@@ -143,8 +149,12 @@ function MeasuringToolRunner({
   sessionRules,
   sessionId,
   senderUid,
+  canSubmitQuestion,
   ...sharedProps
-}: SharedToolProps & { onToolsChange: (tools: HeavyMapToolsApi) => void }) {
+}: SharedToolProps & {
+  onToolsChange: (tools: HeavyMapToolsApi) => void;
+  canSubmitQuestion?: boolean;
+}) {
   const measuringTool = useMeasuringTool({
     active: true,
     pendingQuestions: sharedProps.pendingQuestions,
@@ -153,6 +163,7 @@ function MeasuringToolRunner({
     awaitHiderAnswer,
     sessionId,
     senderUid,
+    canSubmitQuestion,
     submitPendingQuestion:
       awaitHiderAnswer && submitToolQuestion
         ? (input) =>
@@ -171,8 +182,12 @@ function TentacleToolRunner({
   submitToolQuestion,
   sessionId,
   senderUid,
+  canSubmitQuestion,
   ...sharedProps
-}: SharedToolProps & { onToolsChange: (tools: HeavyMapToolsApi) => void }) {
+}: SharedToolProps & {
+  onToolsChange: (tools: HeavyMapToolsApi) => void;
+  canSubmitQuestion?: boolean;
+}) {
   const tentacleTool = useTentacleTool({
     active: true,
     pendingQuestions: sharedProps.pendingQuestions,
@@ -180,6 +195,7 @@ function TentacleToolRunner({
     awaitHiderAnswer,
     sessionId,
     senderUid,
+    canSubmitQuestion,
     submitPendingQuestion:
       awaitHiderAnswer && submitToolQuestion
         ? (input) =>
@@ -195,20 +211,33 @@ function TentacleToolRunner({
 export function HeavyMapToolsSlot({
   activeTool,
   onToolsChange,
+  canSubmitQuestion,
   ...sharedProps
 }: HeavyMapToolsSlotProps) {
   switch (activeTool) {
     case "matching":
       return (
-        <MatchingToolRunner onToolsChange={onToolsChange} {...sharedProps} />
+        <MatchingToolRunner
+          onToolsChange={onToolsChange}
+          canSubmitQuestion={canSubmitQuestion}
+          {...sharedProps}
+        />
       );
     case "measuring":
       return (
-        <MeasuringToolRunner onToolsChange={onToolsChange} {...sharedProps} />
+        <MeasuringToolRunner
+          onToolsChange={onToolsChange}
+          canSubmitQuestion={canSubmitQuestion}
+          {...sharedProps}
+        />
       );
     case "tentacle":
       return (
-        <TentacleToolRunner onToolsChange={onToolsChange} {...sharedProps} />
+        <TentacleToolRunner
+          onToolsChange={onToolsChange}
+          canSubmitQuestion={canSubmitQuestion}
+          {...sharedProps}
+        />
       );
     default:
       return null;
