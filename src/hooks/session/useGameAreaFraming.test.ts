@@ -61,6 +61,28 @@ describe("useGameAreaFraming", () => {
     expect(result.current.manualGameArea?.coordinates[0]).toHaveLength(4);
   });
 
+  it("does not frame from viewport pan while place geometry is active", () => {
+    const { result } = renderHook(() =>
+      useGameAreaFraming({
+        initialFocusBounds: {
+          south: 53.27,
+          west: -6.45,
+          north: 53.42,
+          east: -6.08,
+        },
+      }),
+    );
+
+    act(() => {
+      result.current.resetManualFraming();
+      result.current.handleBoundsChange(mockBounds as never);
+      result.current.handleUserViewportFramed();
+    });
+
+    expect(result.current.userFramed).toBe(false);
+    expect(result.current.manualGameArea).toBeNull();
+  });
+
   it("clears manual draft when switching shape mode", () => {
     const { result } = renderHook(() => useGameAreaFraming());
 
@@ -79,5 +101,6 @@ describe("useGameAreaFraming", () => {
 
     expect(result.current.circleCenter).toBeNull();
     expect(result.current.manualGameArea).toBeNull();
+    expect(result.current.userFramed).toBe(true);
   });
 });

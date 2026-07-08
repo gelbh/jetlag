@@ -59,6 +59,9 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
   const [userFramed, setUserFramed] = useState(
     Boolean(options.initialGameArea),
   );
+  const [manualDrawingEnabled, setManualDrawingEnabled] = useState(
+    Boolean(options.initialGameArea) || !options.initialFocusBounds,
+  );
   const ignoreViewportUpdatesRef = useRef(false);
   const boundsRef = useRef<LatLngBounds | null>(
     options.initialFocusBounds
@@ -139,7 +142,10 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
         return nextBounds;
       });
 
-      if (framingMode === "rectangle" || framingMode === "circle") {
+      if (
+        manualDrawingEnabled &&
+        (framingMode === "rectangle" || framingMode === "circle")
+      ) {
         const nextArea = computeManualGameArea(
           framingMode,
           nextBounds,
@@ -151,22 +157,29 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
         }
       }
     },
-    [circleCenter, computeManualGameArea, framingMode, polygonVertices],
+    [
+      circleCenter,
+      computeManualGameArea,
+      framingMode,
+      manualDrawingEnabled,
+      polygonVertices,
+    ],
   );
 
   const handleUserViewportFramed = useCallback(() => {
-    if (ignoreViewportUpdatesRef.current) {
+    if (ignoreViewportUpdatesRef.current || !manualDrawingEnabled) {
       return;
     }
 
     setUserFramed(true);
-  }, []);
+  }, [manualDrawingEnabled]);
 
   const handleMapClick = useCallback(
     (lat: number, lng: number) => {
       const point: LatLngTuple = [lat, lng];
 
       if (framingMode === "circle") {
+        setManualDrawingEnabled(true);
         setCircleCenter(point);
         setUserFramed(true);
         const currentBounds = boundsRef.current;
@@ -185,6 +198,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
       }
 
       if (framingMode === "polygon") {
+        setManualDrawingEnabled(true);
         setPolygonVertices((current) => [...current, point]);
         setUserFramed(true);
       }
@@ -198,6 +212,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
       return false;
     }
 
+    setManualDrawingEnabled(true);
     setManualGameArea(nextArea);
     setUserFramed(true);
     setFocusBounds(gameAreaToBoundsExpression(nextArea));
@@ -220,6 +235,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
     setCircleCenter(null);
     setPolygonVertices([]);
     setUserFramed(false);
+    setManualDrawingEnabled(false);
   }, []);
 
   const setFramingMode = useCallback((mode: FramingMode) => {
@@ -227,7 +243,8 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
     setCircleCenter(null);
     setPolygonVertices([]);
     setManualGameArea(null);
-    setUserFramed(false);
+    setManualDrawingEnabled(true);
+    setUserFramed(true);
   }, []);
 
   const loadFramingResult = useCallback(
@@ -235,6 +252,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
       const nextBounds = boundingBoxToLeafletBounds(
         gameAreaToBoundingBox(result.gameArea),
       );
+      setManualDrawingEnabled(true);
       setManualGameArea(result.gameArea);
       setFocusBounds(gameAreaToBoundsExpression(result.gameArea));
       suppressViewportUpdates();
