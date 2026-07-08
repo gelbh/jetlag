@@ -52,7 +52,7 @@ import {
   isPointInGameArea,
   type LatLngTuple,
 } from "../domain/geometry/geometry";
-import { LOCAL_SESSION_ID, isEndGameActive, isPremiumSession } from "../domain/map/annotations";
+import { LOCAL_SESSION_ID, isEndGameActive, isEndGamePending, isPremiumSession } from "../domain/map/annotations";
 import {
   advancedSettingsFromSession,
   mergeSessionRulesPatch,
@@ -61,7 +61,7 @@ import {
 } from "../domain/session/advancedSessionSettings";
 import { resolveToolDockEnabled, sessionRulesFromRecord, sessionRulesSnapshot } from "../domain/session/sessionRules";
 import {
-  startEndGameSession,
+  requestEndGameSession,
   updateSessionRules,
 } from "../services/firestore/firestoreAnnotations";
 import { useActiveThermometerWalk } from "../hooks/location/useActiveThermometerWalk";
@@ -227,7 +227,6 @@ export function MapScreen() {
     },
     [],
   );
-  const [endGameNotice, setEndGameNotice] = useState<string | null>(null);
   const [currentUid, setCurrentUid] = useState<string | null>(null);
   const uid = currentUid ?? myUid;
   const isHost = Boolean(
@@ -415,6 +414,8 @@ export function MapScreen() {
       distanceMeters: number;
       promptText: string;
       replyOptions: { id: string; label: string }[];
+      cardDraw?: number;
+      cardKeep?: number;
     }) => {
       if (!session?.id || !uid) {
         return;
@@ -430,6 +431,8 @@ export function MapScreen() {
         distanceMeters: input.distanceMeters,
         promptText: input.promptText,
         replyOptions: input.replyOptions,
+        cardDraw: input.cardDraw,
+        cardKeep: input.cardKeep,
       });
     },
     [completeThermometerWalk, session, uid],
@@ -458,6 +461,7 @@ export function MapScreen() {
     refreshGps: refresh,
     ensurePointInGameArea,
     armPlacement,
+    canSubmitQuestion,
   });
   const photoTool = usePhotoTool({
     active: activeTool === "photo",
@@ -472,6 +476,7 @@ export function MapScreen() {
     finishPlacement,
     setMapError,
     mapError,
+    canSubmitQuestion,
   });
   const thermometerTool = useThermometerTool({
     active: activeTool === "thermometer",
@@ -777,6 +782,7 @@ export function MapScreen() {
     myRole !== "hider" &&
     timer.hasStarted &&
     !isEndGameActive(session) &&
+    !isEndGamePending(session) &&
     confirmedHidingZones.length > 0;
 
   const handleStartEndGame = useCallback(async () => {
@@ -795,17 +801,15 @@ export function MapScreen() {
       setSession(
         {
           ...session,
-          endGameStartedAt: new Date().toISOString(),
-          endGameStartedByUid: uid,
+          endGameRequestedAt: new Date().toISOString(),
+          endGameRequestedByUid: uid,
         },
         uid,
       );
-      setEndGameNotice("End game started");
       return;
     }
 
-    await startEndGameSession(session.id, uid);
-    setEndGameNotice("End game started");
+    await requestEndGameSession(session.id, uid);
   }, [canStartEndGame, session, setSession, uid]);
 
   const handleSaveGameRules = useCallback(async () => {
@@ -972,6 +976,7 @@ export function MapScreen() {
             submitToolQuestion={submitToolQuestion}
             sessionId={session?.id}
             senderUid={uid}
+            canSubmitQuestion={canSubmitQuestion}
             onToolsChange={handleHeavyToolsChange}
           />
         </Suspense>
@@ -1066,11 +1071,10 @@ export function MapScreen() {
           syncStatus={syncStatus.status}
           queuedWrites={syncStatus.queuedWrites}
           message={
-            endGameNotice ??
-            syncStatus.remoteUpdateNotice ??
-            syncStatus.lastSyncError
+            syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError
           }
           endGameActive={isEndGameActive(session)}
+          endGamePending={isEndGamePending(session)}
           timerState={timer.timerState}
           timerRunning={timer.running}
           timerHasStarted={timer.hasStarted}
@@ -1116,6 +1120,7 @@ export function MapScreen() {
           mapStyle={mapStyle}
           onMapStyleChange={setMapStyle}
           dismissOverflowMenus={overlay.sheet !== "none"}
+          canSubmitQuestion={canSubmitQuestion}
           canStartEndGame={canStartEndGame}
           onStartEndGame={() => void handleStartEndGame()}
         />
