@@ -209,16 +209,7 @@ export function ToolOverflowSheet({
               }
               title="Start end game"
               hint="Reveal hiding zone only — hider must stay put"
-              onClick={() =>
-                closeAnd(() => {
-                  const confirmed = window.confirm(
-                    "Start end game?\n\nConfirm seekers have entered the hiding zone and left transit. Map will show only the hiding zone circle; hider must stay at one spot until found.",
-                  );
-                  if (confirmed) {
-                    onStartEndGame();
-                  }
-                })
-              }
+              onClick={() => closeAnd(onStartEndGame)}
               ariaLabel="Start end game"
             />
           ) : null}

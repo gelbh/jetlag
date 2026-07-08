@@ -38,6 +38,8 @@ interface MapStatusRailProps {
   closeTimerMenu?: boolean;
   showPreloadBanner?: boolean;
   endGameActive?: boolean;
+  endGamePending?: boolean;
+  onAcceptEndGame?: () => void;
 }
 
 type SyncTone = "error" | "warning" | "info";
@@ -168,6 +170,8 @@ export function MapStatusRail({
   closeTimerMenu = false,
   showPreloadBanner = false,
   endGameActive = false,
+  endGamePending = false,
+  onAcceptEndGame,
 }: MapStatusRailProps) {
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
@@ -309,6 +313,28 @@ export function MapStatusRail({
             aria-live="polite"
           >
             {sync.banner.label}
+          </p>
+        ) : null}
+
+        {endGamePending && playerRole === "hider" && onAcceptEndGame ? (
+          <div className="map-float-alert pointer-events-auto mx-3 mt-1.5 flex items-center justify-between gap-3 border-2 border-highlight bg-surface-deep px-3 py-2">
+            <p className="text-sm font-semibold text-ink">
+              Seekers requested end game
+            </p>
+            <button
+              type="button"
+              onClick={onAcceptEndGame}
+              className="btn-primary min-h-10 shrink-0 px-3 text-xs"
+            >
+              Accept
+            </button>
+          </div>
+        ) : endGamePending ? (
+          <p
+            className="map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 border-highlight bg-surface-deep px-3 py-2 text-center text-sm font-semibold text-ink"
+            role="status"
+          >
+            Waiting for hider to accept end game
           </p>
         ) : null}
 

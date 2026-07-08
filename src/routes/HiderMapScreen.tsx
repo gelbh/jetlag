@@ -63,8 +63,12 @@ import { useLiveActivitySync } from "../hooks/sync/useLiveActivitySync";
 import { useSessionSync } from "../hooks/session/useSessionSync";
 import { useFirebaseAuthReady } from "../hooks/sync/useFirebaseAuthReady";
 import { useSessionDistanceUnit } from "../hooks/session/useSessionDistanceUnit";
-import { ensureRemoteSessionWriteAccess } from "../services/firestore/firestoreAnnotations";
-import { ensureAnonymousUser } from "../services/core/firebase";
+import { isEndGameActive, isEndGamePending, LOCAL_SESSION_ID } from "../domain/map/annotations";
+import {
+  acceptEndGameSession,
+  ensureRemoteSessionWriteAccess,
+} from "../services/firestore/firestoreAnnotations";
+import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useAnnotationStore, useMapStore, useSessionStore } from "../state/sessionStore";
 
@@ -225,6 +229,28 @@ export function HiderMapScreen() {
     if (updatedSession !== session) {
       setSession(updatedSession, uid);
     }
+  }, [session, setSession, uid]);
+
+  const handleAcceptEndGame = useCallback(async () => {
+    if (!session?.id || !uid || !isEndGamePending(session)) {
+      return;
+    }
+
+    if (session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
+      setSession(
+        {
+          ...session,
+          endGameStartedAt: new Date().toISOString(),
+          endGameStartedByUid: uid,
+          endGameRequestedAt: undefined,
+          endGameRequestedByUid: undefined,
+        },
+        uid,
+      );
+      return;
+    }
+
+    await acceptEndGameSession(session.id, uid);
   }, [session, setSession, uid]);
 
   const zoneTool = useHiderZoneTool({
@@ -399,7 +425,9 @@ export function HiderMapScreen() {
           onOpenLog={openLogExclusive}
           pendingQuestions={pendingQuestions}
           closeTimerMenu={overlay.sheet !== "none" || zoneTool.wizardOpen}
-          endGameActive={Boolean(session.endGameStartedAt)}
+          endGameActive={isEndGameActive(session)}
+          endGamePending={isEndGamePending(session)}
+          onAcceptEndGame={() => void handleAcceptEndGame()}
         />
       </div>
 
