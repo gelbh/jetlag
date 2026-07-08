@@ -84,14 +84,20 @@ describe("firestoreSessionExtras emulator", () => {
     });
 
     await updatePendingQuestion(session.id, question.id, {
-      status: "answered",
-      answer: { kind: "reply", replyId: "yes" },
+      answerableAt: "2026-01-02T00:00:00.000Z",
+    });
+
+    await viWaitFor(() => {
+      const updated = received.find((item) => item.id === question.id);
+      expect(updated?.answerableAt).toBe("2026-01-02T00:00:00.000Z");
+    });
+
+    await updatePendingQuestion(session.id, question.id, {
       deadlineExpiredAt: "2026-01-01T00:10:00.000Z",
     });
 
     await viWaitFor(() => {
       const updated = received.find((item) => item.id === question.id);
-      expect(updated?.status).toBe("answered");
       expect(updated?.deadlineExpiredAt).toBe("2026-01-01T00:10:00.000Z");
     });
 

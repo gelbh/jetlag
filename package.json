@@ -22,7 +22,7 @@
     "test:e2e:smoke": "E2E_SMOKE=1 playwright test",
     "test:e2e:ui": "playwright test --ui",
     "audit:overpass": "RUN_OVERPASS_AUDIT=1 vitest run src/services/core/overpassAudit.integration.test.ts",
-    "test:functions": "npm test --prefix functions",
+    "test:functions": "npm ci --prefix functions && npm test --prefix functions",
     "test:unit": "vitest run && npm test --prefix functions",
     "test:ci": "npm run test:coverage && npm run test:functions",
     "emulators:start": "firebase emulators:start --only auth,firestore,storage",
