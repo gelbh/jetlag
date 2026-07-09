@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.1.5";
+export const APP_VERSION = "0.1.6";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,33 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.1.6",
+    date: "2026-07-09",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Timer: host leave pauses Firestore timer; guests see \"Syncing timer…\" while the session timer loads",
+          "Photo uploads: wait for role sync; retry once on storage denial; clearer error copy",
+          "Tentacles: committed out-of-reach answers shade the full search disk on the map",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "End game: hiders can decline; seekers and hosts can cancel; clear map and reset board disabled during end game",
+          "Radar: pick a distance before sending; multiplayer sends on the distance step",
+          "Question tools: open in preview while another question is pending",
+          "Sync rail: link-lamp on the map top-right; tap opens a compact sync status popover",
+          "Chat: unread count on the dock badge; system game events count as unread",
+          "Hider map: banner when GPS shows you outside your hiding zone after the hiding period",
+          "Settings: leave session navigates home instead of the create flow; leave locally without ending the game for others; create session back link to home",
+          "Preload: cancels background jobs when the app is hidden",
+        ],
+      }
+    ],
+  },
   {
     version: "0.1.5",
     date: "2026-07-08",
