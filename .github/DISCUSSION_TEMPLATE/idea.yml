@@ -1,0 +1,50 @@
+title: "[Idea]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    value: |
+      Browse [existing ideas](https://github.com/gelbh/jetlag/discussions/categories/ideas) first. Upvote or comment on a match instead of posting a duplicate.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Setup / create session
+        - Map / tools
+        - Matching
+        - Measuring
+        - Thermometer
+        - Radar
+        - Tentacles
+        - Photo uploads
+        - Hider / hiding zone
+        - Sync / multiplayer
+        - Timer
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: What is hard, missing, or confusing today?
+      placeholder: When hosting a coastal small game, coastline measuring ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Your idea
+      description: What would you like to see?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Game context (optional)
+      description: Game size, region, or how you run games today

@@ -5,7 +5,6 @@ import { HudPlayIcon } from "../components/ui/HudIcons";
 import { VersionChangelogSheet } from "../components/ui/VersionChangelogSheet";
 import { APP_VERSION } from "../domain/device/changelog";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
-import { githubIssuesUrl } from "../domain/device/githubFeedback";
 import { playerRoleLabel, resolvePlayerRole } from "../domain/session/playerRole";
 import { useSessionStore } from "../state/sessionStore";
 import {
@@ -170,15 +169,13 @@ export function Home() {
           <span>Custom game</span>
           <span className="home-card-btn-hint">Saved templates</span>
         </Link>
-        <a
-          href={githubIssuesUrl()}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Send feedback on GitHub"
+        <Link
+          to="/feedback"
+          aria-label="Feedback and suggestions"
           className="home-feedback-link"
         >
           Feedback
-        </a>
+        </Link>
         {continueError ? <p className="text-error">{continueError}</p> : null}
       </div>
 

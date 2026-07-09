@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7 - 2026-07-09
+
+### Improvements
+
+- Feedback: separate bug reports and improvement ideas; browse existing threads before posting
+
 ## 0.1.6 - 2026-07-09
 
 ### Fixes

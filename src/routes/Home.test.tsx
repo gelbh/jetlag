@@ -58,13 +58,13 @@ describe("Home", () => {
     expect(screen.getByText("WXYZ")).toBeInTheDocument();
   });
 
-  it("links to GitHub Issues for feedback", () => {
+  it("links to the feedback page", () => {
     renderWithRouter(<Home />);
 
     expect(
       screen.getByRole("link", {
-        name: "Send feedback on GitHub",
+        name: "Feedback and suggestions",
       }),
-    ).toHaveAttribute("href", "https://github.com/gelbh/jetlag/issues/new");
+    ).toHaveAttribute("href", "/feedback");
   });
 });

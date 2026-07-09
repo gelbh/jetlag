@@ -12,6 +12,7 @@ import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
 import { useMotionProfile } from "./hooks/location/useMotionProfile";
 import { Home } from "./routes/Home";
 import { JoinSession } from "./routes/JoinSession";
+import { Feedback } from "./routes/Feedback";
 import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";
 
 const MapScreen = lazy(() =>
@@ -69,6 +70,7 @@ export default function App() {
         <LowBatteryPrompt />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/feedback" element={<Feedback />} />
           <Route
             path="/create"
             element={
