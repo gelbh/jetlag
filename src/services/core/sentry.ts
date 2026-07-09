@@ -75,3 +75,16 @@ export function initSentry(): void {
 export function captureException(error: unknown): void {
   Sentry.captureException(error);
 }
+
+export function addPhotoUploadBreadcrumb(details: Record<string, unknown>): void {
+  if (import.meta.env.MODE === "test") {
+    return;
+  }
+
+  Sentry.addBreadcrumb({
+    category: "photo.upload",
+    message: "Photo upload attempt",
+    level: "info",
+    data: details,
+  });
+}

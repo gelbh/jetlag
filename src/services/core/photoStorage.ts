@@ -11,6 +11,7 @@ import {
 } from "../../domain/questions/photoUploadAccess";
 import { getRemoteSessionById } from "../firestore/firestoreAnnotations";
 import { ensureAnonymousUser, getFirebaseStorage } from "./firebase";
+import { addPhotoUploadBreadcrumb } from "./sentry";
 
 const MAX_DIMENSION = 1920;
 const JPEG_QUALITY = 0.85;
@@ -127,6 +128,15 @@ export async function uploadPhotoAnswer(
     throw new Error(accessError);
   }
 
+  addPhotoUploadBreadcrumb({
+    authUid,
+    myUid: myUid ?? null,
+    memberUids: activeSession?.memberUids ?? [],
+    memberRole: activeSession?.memberRoles?.[authUid] ?? null,
+    sessionId,
+    questionId,
+  });
+
   const blob = await compressPhotoForUpload(file);
   const extension =
     blob.type === "image/png"
@@ -144,6 +154,30 @@ export async function uploadPhotoAnswer(
   try {
     await uploadBytes(storageRef, blob, metadata);
   } catch (error) {
+    const message =
+      error instanceof Error ? error.message : String(error);
+    if (message.includes("storage/unauthorized")) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const refreshed = session?.id
+        ? await getRemoteSessionById(session.id)
+        : null;
+      if (refreshed) {
+        activeSession = refreshed;
+      }
+      const retryAccessError = photoUploadAccessError(activeSession, authUid);
+      if (!retryAccessError) {
+        try {
+          await uploadBytes(storageRef, blob, metadata);
+          return storagePath;
+        } catch (retryError) {
+          throw new Error(
+            formatPhotoStorageError(retryError, activeSession, authUid),
+            { cause: retryError },
+          );
+        }
+      }
+    }
+
     throw new Error(
       formatPhotoStorageError(error, activeSession, authUid),
       { cause: error },

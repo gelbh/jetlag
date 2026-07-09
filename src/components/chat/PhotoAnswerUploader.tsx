@@ -43,6 +43,9 @@ export function PhotoAnswerUploader({
     ? getPhotoCategory(categoryId).ruleSummary
     : null;
   const accessError = photoUploadAccessError(session, myUid);
+  const syncPending =
+    accessError !== null &&
+    (accessError.startsWith("Syncing") || accessError.includes("still syncing"));
 
   const submitAnswer = async (answer: PhotoAnswer) => {
     setError(null);
@@ -90,7 +93,13 @@ export function PhotoAnswerUploader({
         <p className="text-xs leading-snug text-ink-dim">{ruleSummary}</p>
       ) : null}
       {accessError ? (
-        <p className="text-sm text-status-warning">{accessError}</p>
+        <p
+          className={
+            syncPending ? "text-sm text-ink-muted" : "text-sm text-status-warning"
+          }
+        >
+          {accessError}
+        </p>
       ) : null}
       <input
         ref={inputRef}
