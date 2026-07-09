@@ -45,7 +45,7 @@ export function Feedback() {
           className="home-card-btn home-card-btn-secondary"
         >
           <span>Browse ideas</span>
-          <span className="home-card-btn-hint">GitHub Discussions</span>
+          <span className="home-card-btn-hint">GitHub Issues</span>
         </a>
         <a
           href={githubIdeaSubmitUrl()}
@@ -54,7 +54,7 @@ export function Feedback() {
           className="home-card-btn home-card-btn-primary"
         >
           <span>Suggest improvement</span>
-          <span className="home-card-btn-hint">New idea thread</span>
+          <span className="home-card-btn-hint">New idea issue</span>
         </a>
 
         <p className="pt-2 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">

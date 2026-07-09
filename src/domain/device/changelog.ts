@@ -15,6 +15,12 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-07-09",
     sections: [
       {
+        title: "Fixes",
+        items: [
+          "Feedback: bug and idea links use GitHub Mobile-friendly issue templates",
+        ],
+      },
+      {
         title: "Improvements",
         items: [
           "Expansion Pack Vol. 1: host toggle, time trap placement on valid transit stations, and searchable curse reference (30 curses, rules text only)",

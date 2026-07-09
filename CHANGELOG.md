@@ -2,6 +2,10 @@
 
 ## 0.2.0 - 2026-07-09
 
+### Fixes
+
+- Feedback: bug and idea links use GitHub Mobile-friendly issue templates
+
 ### Improvements
 
 - Expansion Pack Vol. 1: host toggle, time trap placement on valid transit stations, and searchable curse reference (30 curses, rules text only)

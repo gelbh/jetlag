@@ -1,5 +1,3 @@
-import { APP_VERSION } from "./changelog";
-
 const GITHUB_REPO = "https://github.com/gelbh/jetlag";
 
 const DEFAULT_GITHUB_ISSUES_URL = `${GITHUB_REPO}/issues/new`;
@@ -8,12 +6,9 @@ export function githubIssuesUrl(): string {
   return DEFAULT_GITHUB_ISSUES_URL;
 }
 
+/** Markdown issue templates — GitHub Mobile supports these; YAML forms and Discussions do not. */
 export function githubBugReportUrl(): string {
-  const params = new URLSearchParams({
-    template: "bug_report.yml",
-    version: APP_VERSION,
-  });
-  return `${GITHUB_REPO}/issues/new?${params.toString()}`;
+  return `${GITHUB_REPO}/issues/new?template=bug_report.md`;
 }
 
 export function githubBugsBrowseUrl(): string {
@@ -21,9 +16,9 @@ export function githubBugsBrowseUrl(): string {
 }
 
 export function githubIdeasBrowseUrl(): string {
-  return `${GITHUB_REPO}/discussions/categories/ideas`;
+  return `${GITHUB_REPO}/issues?q=is%3Aissue+label%3Aenhancement`;
 }
 
 export function githubIdeaSubmitUrl(): string {
-  return `${GITHUB_REPO}/discussions/new?category=ideas`;
+  return `${GITHUB_REPO}/issues/new?template=idea_report.md`;
 }
