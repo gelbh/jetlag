@@ -9,6 +9,7 @@ import {
   startTimer,
   timerStateFromRemote,
   timerStateToRemote,
+  reconcileTimerState,
 } from "./timer";
 
 describe("formatElapsedTime", () => {
@@ -69,5 +70,30 @@ describe("timer state machine", () => {
       remote.timerRunningSince,
     );
     expect(computeElapsedMs(restored, t0 + 10_000)).toBe(40_000);
+  });
+});
+
+describe("reconcileTimerState", () => {
+  const t0 = 1_000_000;
+
+  it("returns initial when neither side has started", () => {
+    expect(reconcileTimerState(INITIAL_TIMER_STATE, INITIAL_TIMER_STATE, t0)).toEqual(
+      INITIAL_TIMER_STATE,
+    );
+  });
+
+  it("prefers remote when local is stale", () => {
+    const local = pauseTimer(startTimer(INITIAL_TIMER_STATE, t0), t0 + 5_000);
+    const remote = startTimer({ accumulatedMs: 60_000, runningSince: t0 + 30_000 }, t0 + 60_000);
+    const reconciled = reconcileTimerState(local, remote, t0 + 60_000);
+    expect(computeElapsedMs(reconciled, t0 + 60_000)).toBe(90_000);
+  });
+
+  it("prefers remote running state when elapsed times are close", () => {
+    const local = pauseTimer(startTimer(INITIAL_TIMER_STATE, t0), t0 + 10_000);
+    const remote = startTimer({ accumulatedMs: 10_000, runningSince: t0 + 10_000 }, t0 + 12_000);
+    expect(reconcileTimerState(local, remote, t0 + 12_000).runningSince).toBe(
+      remote.runningSince,
+    );
   });
 });

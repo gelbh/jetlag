@@ -82,6 +82,38 @@ export function timerStateFromRemote(
   };
 }
 
+/** Pick authoritative timer state when local cache and Firestore diverge. */
+export function reconcileTimerState(
+  local: TimerState,
+  remote: TimerState,
+  now = Date.now(),
+): TimerState {
+  if (!hasTimerStarted(local) && !hasTimerStarted(remote)) {
+    return { ...INITIAL_TIMER_STATE };
+  }
+
+  if (!hasTimerStarted(local)) {
+    return remote;
+  }
+
+  if (!hasTimerStarted(remote)) {
+    return local;
+  }
+
+  const localElapsed = computeElapsedMs(local, now);
+  const remoteElapsed = computeElapsedMs(remote, now);
+  const elapsedDiff = remoteElapsed - localElapsed;
+
+  if (Math.abs(elapsedDiff) <= 2_000) {
+    if (isTimerRunning(local) !== isTimerRunning(remote)) {
+      return remote;
+    }
+    return local;
+  }
+
+  return remoteElapsed >= localElapsed ? remote : local;
+}
+
 export function timerStateToRemote(state: TimerState): {
   timerAccumulatedMs: number;
   timerRunningSince: string | null;

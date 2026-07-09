@@ -5,6 +5,7 @@ import {
   INITIAL_TIMER_STATE,
   isTimerRunning,
   pauseTimer,
+  reconcileTimerState,
   resetTimer,
   startTimer,
   type TimerState,
@@ -16,13 +17,20 @@ interface UseSessionTimerOptions {
   onControl?: (state: TimerState) => void;
   /** undefined = waiting for remote snapshot; null = local/host mode */
   remoteState?: TimerState | null | undefined;
+  /** Firestore snapshot for host remount reconcile */
+  remoteSnapshot?: TimerState | undefined;
 }
 
 export function useSessionTimer(
   sessionId: string | undefined,
   options: UseSessionTimerOptions = {},
 ) {
-  const { canControl = true, onControl, remoteState = null } = options;
+  const {
+    canControl = true,
+    onControl,
+    remoteState = null,
+    remoteSnapshot,
+  } = options;
   const getStoredTimer = useTimerStore((state) => state.getTimer);
   const setStoredTimer = useTimerStore((state) => state.setTimer);
   const clearStoredTimer = useTimerStore((state) => state.clearTimer);
@@ -67,8 +75,14 @@ export function useSessionTimer(
       return;
     }
 
-    setTimerStateInternal(getStoredTimer(sessionId));
-  }, [canControl, getStoredTimer, sessionId]);
+    const local = getStoredTimer(sessionId);
+    const next =
+      remoteSnapshot !== undefined
+        ? reconcileTimerState(local, remoteSnapshot)
+        : local;
+    setTimerStateInternal(next);
+    timerStateRef.current = next;
+  }, [canControl, getStoredTimer, remoteSnapshot, sessionId]);
 
   useEffect(() => {
     if (canControl || remoteState === null || remoteState === undefined) {
@@ -86,15 +100,16 @@ export function useSessionTimer(
   }, [canControl, remoteState, sessionId, setStoredTimer]);
 
   useEffect(() => {
-    if (!sessionId || !isTimerRunning(timerStateRef.current)) {
+    if (!sessionId || !canControl || !isTimerRunning(timerStateRef.current)) {
       return;
     }
 
     return () => {
       const paused = pauseTimer(timerStateRef.current);
       setStoredTimer(sessionId, paused);
+      onControlRef.current?.(paused);
     };
-  }, [sessionId, setStoredTimer]);
+  }, [canControl, sessionId, setStoredTimer]);
 
   const start = useCallback(() => {
     if (!canControl) {

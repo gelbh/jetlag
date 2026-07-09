@@ -61,17 +61,20 @@ export function useRemoteSessionTimerSync(
     [isHost, isRemote, sessionId],
   );
 
+  const remoteSnapshot =
+    snapshot && snapshot.sessionId === sessionId ? snapshot.state : undefined;
+
   const remoteState =
-    isRemote && !isHost
-      ? snapshot && snapshot.sessionId === sessionId
-        ? snapshot.state
-        : undefined
-      : null;
+    isRemote && !isHost ? remoteSnapshot : null;
+
+  const timerSyncing = isRemote && !isHost && remoteSnapshot === undefined;
 
   return {
     isRemote,
     canControlTimer: !isRemote || isHost,
     remoteState,
+    remoteSnapshot: isRemote ? remoteSnapshot : undefined,
+    timerSyncing,
     onControl: isRemote && isHost ? onControl : undefined,
   };
 }
