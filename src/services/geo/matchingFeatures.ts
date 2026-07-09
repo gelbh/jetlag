@@ -466,6 +466,72 @@ function buildStationNameLengthFeatures(
   return [...byLength.values()];
 }
 
+function stationFirstLetter(name: string): string {
+  const trimmed = name.trim();
+  return trimmed.length > 0 ? trimmed[0]!.toUpperCase() : "?";
+}
+
+function stationFirstLetterFeatureId(name: string): string {
+  return `station-first-letter:${stationFirstLetter(name)}`;
+}
+
+function stationFirstLetterFeatureName(name: string): string {
+  return `Letter ${stationFirstLetter(name)} (${name})`;
+}
+
+function buildStationFirstLetterFeatures(
+  stations: MatchingFeature[],
+): MatchingFeature[] {
+  const byLetter = new Map<string, MatchingFeature>();
+
+  for (const station of stations) {
+    const id = stationFirstLetterFeatureId(station.name);
+    const existing = byLetter.get(id);
+
+    if (!existing || station.name.localeCompare(existing.name) < 0) {
+      byLetter.set(id, {
+        id,
+        name: stationFirstLetterFeatureName(station.name),
+        point: station.point,
+      });
+    }
+  }
+
+  return [...byLetter.values()];
+}
+
+function letterZoneFeatureId(name: string): string {
+  const letter = name.trim()[0]?.toUpperCase() ?? "?";
+  return `letter-zone:${letter}`;
+}
+
+function letterZoneFeatureName(name: string): string {
+  const letter = name.trim()[0]?.toUpperCase() ?? "?";
+  return `Letter ${letter} (${name})`;
+}
+
+function buildLetterZoneFeatures(
+  divisions: AdminDivisionFeature[],
+): MatchingFeature[] {
+  const byLetter = new Map<string, MatchingFeature>();
+
+  for (const division of divisions) {
+    const id = letterZoneFeatureId(division.name);
+    const existing = byLetter.get(id);
+
+    if (!existing || division.name.localeCompare(existing.name) < 0) {
+      byLetter.set(id, {
+        id,
+        name: letterZoneFeatureName(division.name),
+        point: division.representativePoint,
+        boundary: division.boundary,
+      });
+    }
+  }
+
+  return [...byLetter.values()];
+}
+
 async function fetchAdminMatchingFeaturesInArea(
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
@@ -547,6 +613,18 @@ export async function fetchMatchingFeaturesInArea(
           return buildStationNameLengthFeatures(
             await fetchStationFeaturesInArea(gameArea),
           );
+        case "stationFirstLetter":
+          return buildStationFirstLetterFeatures(
+            await fetchStationFeaturesInArea(gameArea),
+          );
+        case "letterZone": {
+          const divisions = await fetchAdminDivisionFeaturesInArea(
+            gameArea,
+            4,
+            options?.customMatchingAreas?.[4],
+          );
+          return buildLetterZoneFeatures(divisions);
+        }
         case "reverseGeocodeAdmin":
           return fetchAdminMatchingFeaturesInArea(
             gameArea,
@@ -578,8 +656,11 @@ export async function findNearestMatchingFeature(
     resolveMatchingCategory(categoryId, customCategories) ??
     getMatchingCategory(categoryId);
 
-  if (category.resolver === "reverseGeocodeAdmin") {
-    const adminLevel = adminLevelForMatchingCategory(categoryId);
+  if (category.resolver === "reverseGeocodeAdmin" || category.resolver === "letterZone") {
+    const adminLevel =
+      category.resolver === "letterZone"
+        ? 4
+        : adminLevelForMatchingCategory(categoryId);
     if (adminLevel === null) {
       return null;
     }
@@ -594,7 +675,16 @@ export async function findNearestMatchingFeature(
       return null;
     }
 
-    const feature = adminDivisionToMatchingFeature(division);
+    const feature =
+      category.resolver === "letterZone"
+        ? buildLetterZoneFeatures([division]).find(
+            (item) => item.id === letterZoneFeatureId(division.name),
+          )
+        : adminDivisionToMatchingFeature(division);
+    if (!feature) {
+      return null;
+    }
+
     return {
       ...feature,
       distanceMeters: 0,

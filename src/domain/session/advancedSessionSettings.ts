@@ -20,6 +20,7 @@ import type {
   SessionCustomCategory,
   SessionCustomLocationPin,
 } from "./sessionCustomContent";
+import type { SessionCustomMeasureGeometry } from "./customMeasureGeometry";
 import {
   ALL_CONFIGURABLE_TOOLS,
   clampHidingPeriodMinutes,
@@ -50,6 +51,10 @@ export interface AdvancedSessionSettingsValue {
   customMatchingAreas: CustomMatchingAreasByLevel;
   customCategories: readonly SessionCustomCategory[];
   customLocationPins: readonly SessionCustomLocationPin[];
+  customMeasureGeometries: readonly SessionCustomMeasureGeometry[];
+  expansionPackEnabled: boolean;
+  customQuestionPackEnabled: boolean;
+  previewQuestionBeforeSend: boolean;
 }
 
 export type SessionRulesPatch = Pick<
@@ -68,6 +73,10 @@ export type SessionRulesPatch = Pick<
   | "customMatchingAreas"
   | "customCategories"
   | "customLocationPins"
+  | "customMeasureGeometries"
+  | "expansionPackEnabled"
+  | "customQuestionPackEnabled"
+  | "previewQuestionBeforeSend"
 >;
 
 export function defaultAdvancedSessionSettings(
@@ -109,6 +118,10 @@ export function defaultAdvancedSessionSettings(
     customMatchingAreas: {},
     customCategories: [],
     customLocationPins: [],
+    customMeasureGeometries: [],
+    expansionPackEnabled: false,
+    customQuestionPackEnabled: false,
+    previewQuestionBeforeSend: false,
   };
 }
 
@@ -168,6 +181,10 @@ export function advancedSettingsFromSession(
     customMatchingAreas: session.customMatchingAreas ?? {},
     customCategories: session.customCategories ?? [],
     customLocationPins: session.customLocationPins ?? [],
+    customMeasureGeometries: session.customMeasureGeometries ?? [],
+    expansionPackEnabled: session.expansionPackEnabled === true,
+    customQuestionPackEnabled: session.customQuestionPackEnabled === true,
+    previewQuestionBeforeSend: session.previewQuestionBeforeSend === true,
   };
 }
 
@@ -245,6 +262,22 @@ export function sessionRulesPatchFromAdvancedSettings(
     patch.customLocationPins = [...settings.customLocationPins];
   }
 
+  if (settings.customMeasureGeometries.length > 0) {
+    patch.customMeasureGeometries = [...settings.customMeasureGeometries];
+  }
+
+  if (settings.expansionPackEnabled) {
+    patch.expansionPackEnabled = true;
+  }
+
+  if (settings.customQuestionPackEnabled) {
+    patch.customQuestionPackEnabled = true;
+  }
+
+  if (settings.previewQuestionBeforeSend) {
+    patch.previewQuestionBeforeSend = true;
+  }
+
   return patch;
 }
 
@@ -309,6 +342,22 @@ export function mergeSessionRulesPatch(
       patch.customLocationPins !== undefined
         ? patch.customLocationPins
         : session.customLocationPins,
+    customMeasureGeometries:
+      patch.customMeasureGeometries !== undefined
+        ? patch.customMeasureGeometries
+        : session.customMeasureGeometries,
+    expansionPackEnabled:
+      patch.expansionPackEnabled !== undefined
+        ? patch.expansionPackEnabled
+        : session.expansionPackEnabled,
+    customQuestionPackEnabled:
+      patch.customQuestionPackEnabled !== undefined
+        ? patch.customQuestionPackEnabled
+        : session.customQuestionPackEnabled,
+    previewQuestionBeforeSend:
+      patch.previewQuestionBeforeSend !== undefined
+        ? patch.previewQuestionBeforeSend
+        : session.previewQuestionBeforeSend,
   };
 }
 
@@ -399,6 +448,10 @@ export function sessionRecordFromAdvancedSettings(
     | "customMatchingAreas"
     | "customCategories"
     | "customLocationPins"
+    | "customMeasureGeometries"
+    | "expansionPackEnabled"
+    | "customQuestionPackEnabled"
+    | "previewQuestionBeforeSend"
   >,
   unit: DistanceUnit = "imperial",
 ): SessionRecord {

@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import type { PlayerRole } from "../../domain/session/playerRole";
 import type { HidingZoneRecord } from "../../domain/session/hidingZone";
+import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
@@ -23,10 +24,12 @@ import {
   buildPendingQuestionDocument,
   buildPlayerLocationDocument,
   buildSessionMessageDocument,
+  buildTimeTrapDocument,
   deserializeHidingZoneFromFirestore,
   deserializePendingQuestionFromFirestore,
   deserializePlayerLocationFromFirestore,
   deserializeSessionMessageFromFirestore,
+  deserializeTimeTrapFromFirestore,
   stripUndefinedValues,
 } from "./firestoreSerialization";
 
@@ -48,6 +51,10 @@ function pendingQuestionsCollection(sessionId: string) {
 
 function hidingZonesCollection(sessionId: string) {
   return collection(getFirestoreDb(), "sessions", sessionId, "hidingZones");
+}
+
+function timeTrapsCollection(sessionId: string) {
+  return collection(getFirestoreDb(), "sessions", sessionId, "timeTraps");
 }
 
 export async function writePlayerLocation(
@@ -213,6 +220,37 @@ export function subscribeToHidingZones(
         ),
       );
       onChange(zones);
+    },
+    (error) => onError(error),
+  );
+}
+
+export async function writeTimeTrap(
+  sessionId: string,
+  trap: TimeTrapRecord,
+): Promise<void> {
+  await setDoc(
+    doc(timeTrapsCollection(sessionId), trap.hiderUid),
+    buildTimeTrapDocument(trap),
+  );
+}
+
+export function subscribeToTimeTraps(
+  sessionId: string,
+  onChange: (traps: TimeTrapRecord[]) => void,
+  onError: (error: Error) => void,
+): Unsubscribe {
+  return onSnapshot(
+    timeTrapsCollection(sessionId),
+    (snapshot) => {
+      const traps = snapshot.docs.map((trapDoc) =>
+        deserializeTimeTrapFromFirestore(
+          trapDoc.id,
+          sessionId,
+          trapDoc.data() as Record<string, unknown>,
+        ),
+      );
+      onChange(traps);
     },
     (error) => onError(error),
   );

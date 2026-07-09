@@ -79,6 +79,10 @@ export type SessionRulesInput = Pick<
   | "customMatchingAreas"
   | "customCategories"
   | "customLocationPins"
+  | "customMeasureGeometries"
+  | "expansionPackEnabled"
+  | "customQuestionPackEnabled"
+  | "previewQuestionBeforeSend"
 >;
 
 export const DEFAULT_SESSION_RULES: SessionRulesInput = { gameSize: "medium" };
@@ -106,6 +110,10 @@ export function sessionRulesFromRecord(
     customMatchingAreas: session.customMatchingAreas,
     customCategories: session.customCategories,
     customLocationPins: session.customLocationPins,
+    customMeasureGeometries: session.customMeasureGeometries,
+    expansionPackEnabled: session.expansionPackEnabled,
+    customQuestionPackEnabled: session.customQuestionPackEnabled,
+    previewQuestionBeforeSend: session.previewQuestionBeforeSend,
   };
 }
 

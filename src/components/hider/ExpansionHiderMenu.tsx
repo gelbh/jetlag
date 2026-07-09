@@ -1,0 +1,69 @@
+import { AnimatedOverlay } from "../ui/AnimatedOverlay";
+
+interface ExpansionHiderMenuProps {
+  open: boolean;
+  onClose: () => void;
+  canPlaceTimeTrap: boolean;
+  trapPlaced: boolean;
+  onPlaceTimeTrap: () => void;
+  onOpenCurseReference: () => void;
+}
+
+export function ExpansionHiderMenu({
+  open,
+  onClose,
+  canPlaceTimeTrap,
+  trapPlaced,
+  onPlaceTimeTrap,
+  onOpenCurseReference,
+}: ExpansionHiderMenuProps) {
+  return (
+    <AnimatedOverlay
+      open={open}
+      onClose={onClose}
+      ariaLabel="Expansion Pack options"
+      sheetClassName="mx-auto max-w-lg"
+      maxHeightClassName="max-h-[min(40dvh,320px)]"
+    >
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <h2 className="font-display text-lg font-bold uppercase tracking-tight text-ink">
+          Expansion Pack
+        </h2>
+        <button
+          type="button"
+          onClick={onClose}
+          className="btn-secondary min-h-10 px-4 text-xs"
+        >
+          Close
+        </button>
+      </div>
+
+      <div className="space-y-2">
+        {canPlaceTimeTrap ? (
+          <button
+            type="button"
+            onClick={onPlaceTimeTrap}
+            className="btn-primary min-h-12 w-full"
+          >
+            Place time trap
+          </button>
+        ) : trapPlaced ? (
+          <p className="text-sm text-ink-muted">
+            Time trap already placed this round.
+          </p>
+        ) : (
+          <p className="text-sm text-ink-muted">
+            Set your hiding zone before placing a time trap.
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={onOpenCurseReference}
+          className="btn-secondary min-h-12 w-full"
+        >
+          Curse reference
+        </button>
+      </div>
+    </AnimatedOverlay>
+  );
+}

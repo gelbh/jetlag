@@ -1253,6 +1253,7 @@ export function MapScreen() {
         advancedSettings={draftAdvancedSettings ?? undefined}
         onAdvancedSettingsChange={setDraftAdvancedSettings}
         onSaveGameRules={handleSaveGameRules}
+        expansionPackEnabled={session.expansionPackEnabled === true}
       />
 
       {activeTool !== "none" && !selectedAnnotation ? (

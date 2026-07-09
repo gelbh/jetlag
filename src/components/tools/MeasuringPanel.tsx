@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
+  MEASURING_CATALOG,
   MEASURING_GROUPS,
-  measuringCatalogOptionsForGroup,
   measuringQuestionFor,
   measuringSupportsMapTarget,
   measuringSupportsNearest,
@@ -10,6 +10,7 @@ import {
   measuringTargetLabel,
   measuringUsesAllPlacesInArea,
   type MeasuringAnswer,
+  type MeasuringCatalogOption,
   type MeasuringFromKind,
   type MeasuringLocationCategory,
   type MeasuringSubject,
@@ -24,6 +25,7 @@ import {
 import type { SeaLevelEdgeCase } from "../../domain/geometry/seaLevel";
 import { closerFurtherAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
+import { CoordinateCopyButton } from "./shared/CoordinateCopyButton";
 import { AnchorControls } from "./shared/AnchorControls";
 import { LoadingReadout } from "./shared/LoadingReadout";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
@@ -81,6 +83,9 @@ interface MeasuringPanelProps {
   measureFrom: MeasuringFromKind;
   usesAllPlacesInArea: boolean;
   usedMeasuringFromKinds: ReadonlySet<MeasuringFromKind>;
+  catalogOptions?: readonly MeasuringCatalogOption[];
+  anchorLat?: number | null;
+  anchorLng?: number | null;
   subject: MeasuringSubject;
   targetMode: MeasuringTargetMode;
   anchorAltitudeMeters: number | null;
@@ -125,6 +130,9 @@ export function MeasuringPanel({
   measureFrom,
   usesAllPlacesInArea,
   usedMeasuringFromKinds,
+  catalogOptions,
+  anchorLat = null,
+  anchorLng = null,
   subject,
   targetMode,
   anchorAltitudeMeters,
@@ -175,7 +183,7 @@ export function MeasuringPanel({
   const targetKind = measuringTargetKind(measureFrom);
   const isCoastline = targetKind === "coastline";
   const isSeaLevel = targetKind === "sea_level";
-  const isLinear = targetKind === "linear";
+  const isLinear = targetKind === "linear" || targetKind === "polygon";
   const allowsSearch = measuringSupportsSearch(measureFrom);
   const canFindNearest = measuringSupportsNearest(measureFrom);
   const canUseMapTarget = measuringSupportsMapTarget(measureFrom);
@@ -185,10 +193,12 @@ export function MeasuringPanel({
       : "Set your anchor to read elevation"
     : (targetPlaceName ??
       (hasTargetPoint ? `${targetLabel} pinned` : "No target yet"));
+  const measureCatalog = catalogOptions ?? MEASURING_CATALOG;
   const availableGroups = MEASURING_GROUPS.map((group) => ({
     ...group,
-    options: measuringCatalogOptionsForGroup(group.id).filter(
-      (option) => !usedMeasuringFromKinds.has(option.id),
+    options: measureCatalog.filter(
+      (option) =>
+        option.groupId === group.id && !usedMeasuringFromKinds.has(option.id),
     ),
   })).filter((group) => group.options.length > 0);
   const hasAvailableMeasureOptions = availableGroups.length > 0;
@@ -466,6 +476,11 @@ export function MeasuringPanel({
             onUseGps={onUseGps}
             anchorPlaceName={hasSeekerPoint ? seekerPlaceName : null}
           />
+          {hasSeekerPoint &&
+          typeof anchorLat === "number" &&
+          typeof anchorLng === "number" ? (
+            <CoordinateCopyButton lat={anchorLat} lng={anchorLng} className="w-full" />
+          ) : null}
           {loading && hasSeekerPoint && anchorLoadingMessage ? (
             <LoadingReadout>{anchorLoadingMessage}</LoadingReadout>
           ) : null}

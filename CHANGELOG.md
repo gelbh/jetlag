@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 - 2026-07-09
+
+### Improvements
+
+- Expansion Pack Vol. 1: host toggle, time trap placement on valid transit stations, and searchable curse reference (30 curses, rules text only)
+- Advanced settings: custom question pack (7-Eleven, letter zone, major city, etc.), custom LineString/Polygon measuring geometry import, and optional question preview before send
+- Map tools: copy anchor coordinates in matching and measuring wizards; default catalogs stay official base-game only unless hosts opt in
+- Hider map: expansion actions grouped in one menu; time trap search has labeled field and empty-state guidance
+- Copy coordinates: larger tap target with copy failure feedback
+- Advanced settings: expansion toggles grouped in a fieldset
+
 ## 0.1.7 - 2026-07-09
 
 ### Fixes

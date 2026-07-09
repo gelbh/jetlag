@@ -1,3 +1,4 @@
+import { resolveCustomPackMeasuringOption } from "./customQuestionPack";
 import type { AnnotationRecord } from "../map/annotations";
 import type { PendingQuestionRecord } from "../session/sessionChat";
 import { isCountablePendingQuestionStatus } from "./questionRules";
@@ -21,6 +22,7 @@ export type MeasuringTargetKind =
   | "sea_level"
   | "coastline"
   | "linear"
+  | "polygon"
   | "point";
 
 export type MeasuringFromKind =
@@ -45,7 +47,9 @@ export type MeasuringFromKind =
   | "library"
   | "foreign_consulate"
   | "custom_place"
-  | `custom:${string}`;
+  | `custom:${string}`
+  | `pack:${string}`
+  | `custom_geo:${string}`;
 
 export type MeasuringLocationCategory = Exclude<
   MeasuringFromKind,
@@ -413,7 +417,12 @@ export const BODY_OF_WATER_MEASURING_QUESTION: MeasuringQuestionDefinition = {
 export function measuringCatalogOption(
   kind: MeasuringFromKind,
 ): MeasuringCatalogOption | undefined {
-  return MEASURING_CATALOG.find((option) => option.id === kind);
+  const builtIn = MEASURING_CATALOG.find((option) => option.id === kind);
+  if (builtIn) {
+    return builtIn;
+  }
+
+  return resolveCustomPackMeasuringOption(kind) ?? undefined;
 }
 
 export function measuringCatalogOptionsForGroup(
@@ -577,10 +586,10 @@ export function isMeasuringLinearLocation(
     return false;
   }
 
-  return (
-    measuringTargetKind(measuringFromKind(subject, locationCategory)) ===
-    "linear"
+  const targetKind = measuringTargetKind(
+    measuringFromKind(subject, locationCategory),
   );
+  return targetKind === "linear" || targetKind === "polygon";
 }
 
 export function usedMeasuringFromKinds(

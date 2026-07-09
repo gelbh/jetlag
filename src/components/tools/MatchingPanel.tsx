@@ -1,19 +1,21 @@
 import { useState } from "react";
 import {
-  getMatchingCategory,
   isMatchingCategoryEnabled,
   isMatchingCategoryAvailable,
   MATCHING_CATEGORIES,
   MATCHING_CATEGORY_GROUPS,
   matchingQuestionFor,
   type MatchingAnswer,
+  type MatchingCategoryDefinition,
   type MatchingCategoryId,
 } from "../../domain/questions/matchingQuestions";
+import { resolveMatchingCategory } from "../../domain/session/sessionCustomCatalog";
 import { matchingFeatureCountLabel, matchingNullAnswerMessage } from "../../services/geo/matchingFeatures";
 import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
 import { yesNoAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { AnchorControls } from "./shared/AnchorControls";
+import { CoordinateCopyButton } from "./shared/CoordinateCopyButton";
 import { ErrorWithRetry } from "./shared/ErrorWithRetry";
 import { LoadingReadout } from "./shared/LoadingReadout";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
@@ -34,6 +36,9 @@ interface MatchingPanelProps {
   categoryId: MatchingCategoryId | null;
   categoryChosen: boolean;
   usedCategoryIds: ReadonlySet<MatchingCategoryId>;
+  catalogCategories?: readonly MatchingCategoryDefinition[];
+  anchorLat?: number | null;
+  anchorLng?: number | null;
   usesContainmentMatching: boolean;
   hasSeekerPoint: boolean;
   nearestFeatureName: string | null;
@@ -61,6 +66,9 @@ export function MatchingPanel({
   categoryId,
   categoryChosen,
   usedCategoryIds,
+  catalogCategories = MATCHING_CATEGORIES,
+  anchorLat = null,
+  anchorLng = null,
   usesContainmentMatching,
   hasSeekerPoint,
   nearestFeatureName,
@@ -95,7 +103,9 @@ export function MatchingPanel({
   };
 
   const question = categoryId ? matchingQuestionFor(categoryId) : null;
-  const category = categoryId ? getMatchingCategory(categoryId) : null;
+  const category = categoryId
+    ? resolveMatchingCategory(categoryId)
+    : null;
   const usesLandmassMatching = category?.resolver === "landmass";
   const categoryAvailable =
     categoryId !== null && isMatchingCategoryAvailable(categoryId);
@@ -107,12 +117,12 @@ export function MatchingPanel({
     categoryAvailable &&
     !loading &&
     !isSubmitting;
-  const selectableCategories = MATCHING_CATEGORIES.filter(
+  const selectableCategories = catalogCategories.filter(
     (item) =>
       isMatchingCategoryEnabled(item.id) &&
       (!usedCategoryIds.has(item.id) || item.id === categoryId),
   );
-  const availableCategories = MATCHING_CATEGORIES.filter(
+  const availableCategories = catalogCategories.filter(
     (item) =>
       isMatchingCategoryEnabled(item.id) && !usedCategoryIds.has(item.id),
   );
@@ -227,6 +237,11 @@ export function MatchingPanel({
             hasAnchor={hasSeekerPoint}
             onUseGps={onUseGps}
           />
+          {hasSeekerPoint &&
+          typeof anchorLat === "number" &&
+          typeof anchorLng === "number" ? (
+            <CoordinateCopyButton lat={anchorLat} lng={anchorLng} className="w-full" />
+          ) : null}
           {loading && hasSeekerPoint ? loadingIndicator : null}
         </ToolSection>
       ) : null}

@@ -28,6 +28,7 @@ import type {
   SessionCustomCategory,
   SessionCustomLocationPin,
 } from "../session/sessionCustomContent";
+import type { SessionCustomMeasureGeometry } from "../session/customMeasureGeometry";
 
 export type { GameSize } from "../session/gameSize";
 export type { MemberRoles, PlayerRole } from "../session/playerRole";
@@ -149,6 +150,10 @@ export interface SessionRecord {
   customMatchingAreas?: CustomMatchingAreasByLevel;
   customCategories?: readonly SessionCustomCategory[];
   customLocationPins?: readonly SessionCustomLocationPin[];
+  customMeasureGeometries?: readonly SessionCustomMeasureGeometry[];
+  expansionPackEnabled?: boolean;
+  customQuestionPackEnabled?: boolean;
+  previewQuestionBeforeSend?: boolean;
   tier?: SessionTier;
   transitMetroId?: string;
   endedAt?: string;

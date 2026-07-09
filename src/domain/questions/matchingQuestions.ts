@@ -5,6 +5,7 @@ import {
   collectUsedAnnotationOptions,
   firstUnusedCatalogOption,
 } from "../session/toolSessionOptions";
+import { resolveCustomPackMatchingCategory } from "./customQuestionPack";
 import type { SessionCustomCategory } from "../session/sessionCustomContent";
 
 export type MatchingAnswer = "yes" | "no";
@@ -15,6 +16,8 @@ export type MatchingResolver =
   | "transitLine"
   | "streetPath"
   | "stationNameLength"
+  | "stationFirstLetter"
+  | "letterZone"
   | "landmass";
 
 export type MatchingCategoryId =
@@ -38,7 +41,8 @@ export type MatchingCategoryId =
   | "hospital"
   | "library"
   | "foreign_consulate"
-  | `custom:${string}`;
+  | `custom:${string}`
+  | `pack:${string}`;
 
 export type MatchingCategoryGroupId =
   | "transit"
@@ -321,6 +325,11 @@ export function resolveMatchingCategory(
     return builtIn;
   }
 
+  const pack = resolveCustomPackMatchingCategory(categoryId);
+  if (pack) {
+    return pack;
+  }
+
   const custom = customCategories.find((item) => item.id === categoryId);
   return custom ? customCategoryToMatchingDefinition(custom) : null;
 }
@@ -328,11 +337,13 @@ export function resolveMatchingCategory(
 export function getMatchingCategory(
   categoryId: MatchingCategoryId,
 ): MatchingCategoryDefinition {
-  return MATCHING_CATEGORIES.find((item) => item.id === categoryId)!;
+  return (
+    resolveMatchingCategory(categoryId) ?? MATCHING_CATEGORIES[0]!
+  );
 }
 
 export function matchingCategoryLabel(categoryId: MatchingCategoryId): string {
-  return getMatchingCategory(categoryId).label;
+  return resolveMatchingCategory(categoryId)?.label ?? categoryId;
 }
 
 export function matchingCategoryOverpassSelectors(
@@ -363,7 +374,8 @@ export function matchingQuestionLabel(categoryId: MatchingCategoryId): string {
 export function isMatchingCategoryEnabled(
   categoryId: MatchingCategoryId,
 ): boolean {
-  return getMatchingCategory(categoryId).phase === 1;
+  const category = resolveMatchingCategory(categoryId);
+  return category?.phase === 1;
 }
 
 export function usedMatchingCategoryIds(

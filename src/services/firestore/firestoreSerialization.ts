@@ -36,6 +36,8 @@ import {
   parseCustomLocationPins,
   parseCustomMatchingAreas,
 } from "../../domain/session/sessionCustomContent";
+import { parseCustomMeasureGeometries } from "../../domain/session/customMeasureGeometry";
+import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
 import {
   boundingBoxToGameArea,
   gameAreaToBoundingBox,
@@ -339,6 +341,18 @@ export function sessionRulesPatchToFirestore(
   if (patch.customLocationPins !== undefined) {
     payload.customLocationPins = [...patch.customLocationPins];
   }
+  if (patch.customMeasureGeometries !== undefined) {
+    payload.customMeasureGeometries = [...patch.customMeasureGeometries];
+  }
+  if (typeof patch.expansionPackEnabled === "boolean") {
+    payload.expansionPackEnabled = patch.expansionPackEnabled;
+  }
+  if (typeof patch.customQuestionPackEnabled === "boolean") {
+    payload.customQuestionPackEnabled = patch.customQuestionPackEnabled;
+  }
+  if (typeof patch.previewQuestionBeforeSend === "boolean") {
+    payload.previewQuestionBeforeSend = patch.previewQuestionBeforeSend;
+  }
 
   return payload;
 }
@@ -450,6 +464,21 @@ export function deserializeSessionFromFirestore(
     customMatchingAreas: parseCustomMatchingAreas(document.customMatchingAreas),
     customCategories: parseCustomCategories(document.customCategories),
     customLocationPins: parseCustomLocationPins(document.customLocationPins),
+    customMeasureGeometries: parseCustomMeasureGeometries(
+      document.customMeasureGeometries,
+    ),
+    expansionPackEnabled:
+      typeof document.expansionPackEnabled === "boolean"
+        ? document.expansionPackEnabled
+        : undefined,
+    customQuestionPackEnabled:
+      typeof document.customQuestionPackEnabled === "boolean"
+        ? document.customQuestionPackEnabled
+        : undefined,
+    previewQuestionBeforeSend:
+      typeof document.previewQuestionBeforeSend === "boolean"
+        ? document.previewQuestionBeforeSend
+        : undefined,
     tier: parseSessionTier(document.tier),
     transitMetroId:
       typeof document.transitMetroId === "string"
@@ -495,6 +524,40 @@ export function buildAnnotationDocument(
   const payload = serializeAnnotationForFirestore(annotation);
   assertNoNestedArrays(payload);
   return payload;
+}
+
+export function buildTimeTrapDocument(
+  trap: TimeTrapRecord,
+): Record<string, unknown> {
+  const payload = stripUndefinedValues({
+    stationId: trap.stationId,
+    stationName: trap.stationName,
+    center: trap.center,
+    bonusMinutes: trap.bonusMinutes,
+    placedAt: trap.placedAt,
+  }) as Record<string, unknown>;
+  assertNoNestedArrays(payload);
+  return payload;
+}
+
+export function deserializeTimeTrapFromFirestore(
+  hiderUid: string,
+  sessionId: string,
+  data: Record<string, unknown>,
+): TimeTrapRecord {
+  const center = data.center as Record<string, unknown> | undefined;
+  return {
+    hiderUid,
+    sessionId,
+    stationId: String(data.stationId ?? ""),
+    stationName: String(data.stationName ?? ""),
+    center: {
+      lat: Number(center?.lat ?? 0),
+      lng: Number(center?.lng ?? 0),
+    },
+    bonusMinutes: Number(data.bonusMinutes ?? 5),
+    placedAt: String(data.placedAt ?? ""),
+  };
 }
 
 export function buildHidingZoneDocument(

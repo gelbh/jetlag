@@ -40,6 +40,11 @@ import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import { manualPinAsMeasuringPlace } from "../../domain/session/sessionCustomCatalog";
+import {
+  availableMeasuringCatalog,
+  isPreviewQuestionBeforeSendEnabled,
+} from "../../domain/session/sessionCatalogAvailability";
+import { QuestionPreviewSheet } from "../../components/tools/shared/QuestionPreviewSheet";
 import { closerFurtherAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import { useSubmitLock } from "../useSubmitLock";
@@ -182,6 +187,18 @@ export function useMeasuringTool({
   >("seeker");
   const [measuringPlaces, setMeasuringPlaces] = useState<MeasuringPlace[]>([]);
   const [measuringOptionChosen, setMeasuringOptionChosen] = useState(false);
+  const customMeasureGeometries = sessionRules?.customMeasureGeometries ?? [];
+  const measuringCatalog = useMemo(
+    () =>
+      sessionRules
+        ? availableMeasuringCatalog(sessionRules)
+        : availableMeasuringCatalog({ gameSize: "medium" }),
+    [sessionRules],
+  );
+  const previewBeforeSend = isPreviewQuestionBeforeSendEnabled(
+    sessionRules ?? { gameSize: "medium" },
+  );
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const measureFromKind = measuringFromKind(
     measuringSubject,
@@ -500,6 +517,7 @@ export function useMeasuringTool({
         gameArea,
         measuringSubject,
         measuringLocationCategory,
+        customMeasureGeometries,
       );
 
       if (requestId !== linearRequestId.current) {
@@ -918,10 +936,6 @@ export function useMeasuringTool({
       return;
     }
 
-    const committedKind = measuringFromKind(
-      measuringSubject,
-      measuringLocationCategory,
-    );
     if (
       !isMeasuringFromKindAvailable()
     ) {
@@ -951,6 +965,24 @@ export function useMeasuringTool({
       );
       return;
     }
+
+    if (previewBeforeSend) {
+      setPreviewOpen(true);
+      return;
+    }
+
+    await performCommit();
+  };
+
+  const performCommit = async () => {
+    if (!measuringSeekerPoint || measuringDistanceMeters === null) {
+      return;
+    }
+
+    const committedKind = measuringFromKind(
+      measuringSubject,
+      measuringLocationCategory,
+    );
 
     const locationCategory =
       measuringSubject === "location" ? measuringLocationCategory : undefined;
@@ -1116,6 +1148,7 @@ export function useMeasuringTool({
     });
 
     resetDraft(committedKind);
+    setPreviewOpen(false);
     finishPlacement();
   };
 
@@ -1204,10 +1237,14 @@ export function useMeasuringTool({
   }, [annotations, measureFromKind, pendingQuestions]);
 
   const panel = (
+    <>
     <MeasuringPanel
       distanceUnit={distanceUnit}
       optionChosen={measuringOptionChosen}
       usedMeasuringFromKinds={usedMeasuringFromKindsSet}
+      catalogOptions={measuringCatalog}
+      anchorLat={measuringSeekerPoint?.[0] ?? null}
+      anchorLng={measuringSeekerPoint?.[1] ?? null}
       measureFrom={measuringFromKind(
         measuringSubject,
         measuringLocationCategory,
@@ -1295,6 +1332,32 @@ export function useMeasuringTool({
       costLabel={questionCost.label}
       isSubmitting={isSubmitting}
     />
+    <QuestionPreviewSheet
+      open={previewOpen}
+      prompt={
+        measuringQuestionFor(
+          measuringSubject,
+          measuringSubject === "location"
+            ? measuringLocationCategory
+            : undefined,
+        ).prompt
+      }
+      ruleSummary={
+        measuringQuestionFor(
+          measuringSubject,
+          measuringSubject === "location"
+            ? measuringLocationCategory
+            : undefined,
+        ).ruleSummary
+      }
+      anchorLat={measuringSeekerPoint?.[0] ?? null}
+      anchorLng={measuringSeekerPoint?.[1] ?? null}
+      costLabel={questionCost.label}
+      onConfirm={() => void runLocked(performCommit)}
+      onCancel={() => setPreviewOpen(false)}
+      isSubmitting={isSubmitting}
+    />
+    </>
   );
 
   return {

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AnimatedOverlay } from "../ui/AnimatedOverlay";
+import { CurseReferenceSheet } from "../expansion/CurseReferenceSheet";
 import { ShareCode } from "./ShareCode";
 import { TransitControls } from "../map/TransitControls";
 import {
@@ -79,6 +80,7 @@ interface MapSettingsSheetProps {
   onSaveGameRules?: () => void | Promise<void>;
   gameRulesSaveLabel?: string;
   endGameBlocked?: boolean;
+  expansionPackEnabled?: boolean;
 }
 
 export function MapSettingsSheet({
@@ -135,8 +137,10 @@ export function MapSettingsSheet({
   onSaveGameRules,
   gameRulesSaveLabel = "Save game rules",
   endGameBlocked = false,
+  expansionPackEnabled = false,
 }: MapSettingsSheetProps) {
   const [segment, setSegment] = useState<SettingsSegment>("map");
+  const [curseSheetOpen, setCurseSheetOpen] = useState(false);
 
   return (
     <AnimatedOverlay
@@ -262,6 +266,8 @@ export function MapSettingsSheet({
               onEndSession={onEndSession}
               onLeaveSession={onLeaveSession}
               endGameBlocked={endGameBlocked}
+              expansionPackEnabled={expansionPackEnabled}
+              onOpenCurseReference={() => setCurseSheetOpen(true)}
             />
           ) : null}
         </div>
@@ -269,6 +275,11 @@ export function MapSettingsSheet({
         <p className="mt-6 border-t-2 border-border pt-3 text-[10px] leading-relaxed text-ink-dim">
           Map data © OpenStreetMap contributors · © CARTO
         </p>
+
+      <CurseReferenceSheet
+        open={curseSheetOpen}
+        onClose={() => setCurseSheetOpen(false)}
+      />
     </AnimatedOverlay>
   );
 }
@@ -523,6 +534,8 @@ function SessionSegment({
   onEndSession,
   onLeaveSession,
   endGameBlocked = false,
+  expansionPackEnabled = false,
+  onOpenCurseReference,
 }: {
   sessionCode: string;
   remoteSession: boolean;
@@ -533,10 +546,22 @@ function SessionSegment({
   onEndSession?: () => void;
   onLeaveSession?: () => void;
   endGameBlocked?: boolean;
+  expansionPackEnabled?: boolean;
+  onOpenCurseReference?: () => void;
 }) {
   return (
     <div className="space-y-4">
       <ShareCode code={sessionCode} remote={remoteSession} />
+
+      {expansionPackEnabled && onOpenCurseReference ? (
+        <button
+          type="button"
+          onClick={onOpenCurseReference}
+          className="btn-secondary w-full"
+        >
+          Expansion curse reference
+        </button>
+      ) : null}
 
       {onExport ? (
         <button type="button" onClick={onExport} className="btn-secondary w-full">

@@ -31,6 +31,11 @@ import {
   type MatchingCategoryId,
 } from "../../domain/questions/matchingQuestions";
 import { resolveMatchingCategory } from "../../domain/session/sessionCustomCatalog";
+import {
+  availableMatchingCategories,
+  isPreviewQuestionBeforeSendEnabled,
+} from "../../domain/session/sessionCatalogAvailability";
+import { QuestionPreviewSheet } from "../../components/tools/shared/QuestionPreviewSheet";
 import { questionCostBreakdown } from "../../domain/questions/questionRules";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
@@ -171,7 +176,21 @@ export function useMatchingTool({
     : null;
   const matchingUsesContainment =
     matchingCategory?.resolver === "reverseGeocodeAdmin" ||
+    matchingCategory?.resolver === "letterZone" ||
     matchingCategory?.resolver === "landmass";
+
+  const matchingCatalog = useMemo(
+    () =>
+      sessionRules
+        ? availableMatchingCategories(sessionRules)
+        : availableMatchingCategories({ gameSize: "medium" }),
+    [sessionRules],
+  );
+
+  const previewBeforeSend = isPreviewQuestionBeforeSendEnabled(
+    sessionRules ?? { gameSize: "medium" },
+  );
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useToolSessionOptions({
     active: active && matchingCategoryId !== null,
@@ -442,6 +461,19 @@ export function useMatchingTool({
       return;
     }
 
+    if (previewBeforeSend) {
+      setPreviewOpen(true);
+      return;
+    }
+
+    await performCommit();
+  };
+
+  const performCommit = async () => {
+    if (!matchingSeekerPoint || !matchingCategoryId) {
+      return;
+    }
+
     const question = matchingQuestionFor(matchingCategoryId);
 
     if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
@@ -580,17 +612,27 @@ export function useMatchingTool({
     }
 
     resetDraft();
+    setPreviewOpen(false);
     finishPlacement();
   };
 
   const placementCrosshair = active && matchingSeekerPoint === null;
 
+  const previewQuestion =
+    matchingCategoryId !== null
+      ? matchingQuestionFor(matchingCategoryId, customCategories)
+      : null;
+
   const panel = (
+    <>
     <MatchingPanel
       distanceUnit={distanceUnit}
       categoryId={matchingCategoryId}
       categoryChosen={matchingCategoryChosen}
       usedCategoryIds={usedMatchingCategories}
+      catalogCategories={matchingCatalog}
+      anchorLat={matchingSeekerPoint?.[0] ?? null}
+      anchorLng={matchingSeekerPoint?.[1] ?? null}
       usesContainmentMatching={matchingUsesContainment}
       hasSeekerPoint={matchingSeekerPoint !== null}
       nearestFeatureName={matchingNearestFeatureName}
@@ -638,6 +680,18 @@ export function useMatchingTool({
           : undefined
       }
     />
+    <QuestionPreviewSheet
+      open={previewOpen}
+      prompt={previewQuestion?.prompt ?? ""}
+      ruleSummary={previewQuestion?.ruleSummary}
+      anchorLat={matchingSeekerPoint?.[0] ?? null}
+      anchorLng={matchingSeekerPoint?.[1] ?? null}
+      costLabel={costLabel}
+      onConfirm={() => void runLocked(performCommit)}
+      onCancel={() => setPreviewOpen(false)}
+      isSubmitting={isSubmitting}
+    />
+    </>
   );
 
   return {

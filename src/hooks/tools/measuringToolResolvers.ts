@@ -23,6 +23,9 @@ import {
   loadMeasuringLinearContext,
   measuringLinearNotFoundMessage,
 } from "../../services/geo/measuringLinearFeatures";
+import { loadCustomMeasureGeometryContext } from "../../services/geo/customMeasureGeometryFeatures";
+import { isCustomMeasureGeometryId } from "../../domain/session/customMeasureGeometry";
+import type { SessionCustomMeasureGeometry } from "../../domain/session/customMeasureGeometry";
 import { loadSeaLevelContext } from "../../services/geo/seaLevel";
 
 const SEA_LEVEL_LOWEST_MESSAGE =
@@ -93,12 +96,42 @@ export async function fetchMeasuringLinearContext(
   gameArea: GameArea,
   subject: MeasuringSubject,
   locationCategory: MeasuringLocationCategory,
+  customMeasureGeometries: readonly SessionCustomMeasureGeometry[] = [],
 ) {
   const kind = measuringFromKind(subject, locationCategory);
   if (!isMeasuringLinearLocation(subject, locationCategory)) {
     return {
       ok: false as const,
       message: measuringLinearNotFoundMessage(kind),
+    };
+  }
+
+  if (isCustomMeasureGeometryId(kind)) {
+    const geometry = customMeasureGeometries.find((item) => item.id === kind);
+    if (!geometry) {
+      return {
+        ok: false as const,
+        message: "Custom measuring geometry is not configured for this session.",
+      };
+    }
+
+    const result = await loadCustomMeasureGeometryContext(
+      seekerPoint,
+      gameArea,
+      geometry,
+    );
+    if (!result) {
+      return {
+        ok: false as const,
+        message: `No ${geometry.label} intersects the play area near your anchor.`,
+      };
+    }
+
+    return {
+      ok: true as const,
+      point: result.point,
+      distanceMeters: result.distanceMeters,
+      segments: result.segments,
     };
   }
 
