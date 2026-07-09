@@ -1,4 +1,4 @@
-import { collection, getDocs } from "firebase/firestore";
+import { collection, doc, getDocs, updateDoc } from "firebase/firestore";
 import { getFirestoreDb } from "../services/core/firebase";
 import { endRemoteSession } from "../services/firestore/firestoreAnnotations";
 import { updatePendingQuestion } from "../services/firestore/firestoreSessionExtras";
@@ -18,12 +18,23 @@ async function patchPendingQuestionAnswerableAt(
   await updatePendingQuestion(sessionId, questionId, { answerableAt });
 }
 
+async function patchSessionTimer(
+  sessionId: string,
+  elapsedMs: number,
+): Promise<void> {
+  await updateDoc(doc(getFirestoreDb(), "sessions", sessionId), {
+    timerAccumulatedMs: elapsedMs,
+    timerRunningSince: null,
+  });
+}
+
 declare global {
   interface Window {
     __JETLAG_E2E__?: {
       endRemoteSession: typeof endRemoteSession;
       listPendingQuestionIds: typeof listPendingQuestionIds;
       patchPendingQuestionAnswerableAt: typeof patchPendingQuestionAnswerableAt;
+      patchSessionTimer: typeof patchSessionTimer;
     };
   }
 }
@@ -37,5 +48,6 @@ export function installE2EBridgeIfConfigured(): void {
     endRemoteSession,
     listPendingQuestionIds,
     patchPendingQuestionAnswerableAt,
+    patchSessionTimer,
   };
 }

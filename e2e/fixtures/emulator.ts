@@ -94,3 +94,20 @@ export async function endSessionInEmulator(
     await bridge.endRemoteSession(id);
   }, sessionId);
 }
+
+export async function advanceRemoteSessionTimerInEmulator(
+  page: Page,
+  sessionId: string,
+  elapsedMs: number,
+): Promise<void> {
+  await page.evaluate(
+    async ({ id, ms }) => {
+      const bridge = window.__JETLAG_E2E__;
+      if (!bridge?.patchSessionTimer) {
+        throw new Error("E2E bridge is not installed.");
+      }
+      await bridge.patchSessionTimer(id, ms);
+    },
+    { id: sessionId, ms: elapsedMs },
+  );
+}
