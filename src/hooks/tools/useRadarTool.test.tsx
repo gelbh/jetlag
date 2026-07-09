@@ -55,6 +55,7 @@ describe("useRadarTool", () => {
       result.current.handleMapClick([53.35, -6.26]);
     });
     act(() => {
+      result.current.panel.props.onPresetSelect(500);
       result.current.panel.props.onAnswerChange("yes");
     });
 

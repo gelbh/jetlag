@@ -4,6 +4,7 @@ import { yesNoAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { PlacementActions } from "./shared/PlacementActions";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
+import { ViewOnlyQuestionBanner } from "./shared/ViewOnlyQuestionBanner";
 import { ToolSection } from "./shared/ToolSection";
 import { ToolStepper } from "./shared/ToolStepper";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
@@ -21,7 +22,7 @@ import {
 import type { DistanceUnit } from "../../domain/map/distance";
 
 interface RadarPanelProps {
-  radiusMeters: number;
+  radiusMeters: number | null;
   chooseCustom: boolean;
   customRadius: string;
   awaitingPlacement: boolean;
@@ -41,6 +42,7 @@ interface RadarPanelProps {
   awaitHiderAnswer?: boolean;
   costLabel?: string;
   isSubmitting?: boolean;
+  viewOnly?: boolean;
 }
 
 export function RadarPanel({
@@ -64,17 +66,26 @@ export function RadarPanel({
   awaitHiderAnswer = false,
   costLabel = "D2P1",
   isSubmitting = false,
+  viewOnly = false,
 }: RadarPanelProps) {
   const steps = stepsForMode(RADAR_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
   const step = steps[stepIndex]?.id ?? "anchor";
 
-  const distanceSelectionAvailable = isRadarDistanceOptionAvailable();
+  const distanceSelectionAvailable =
+    radiusMeters !== null && isRadarDistanceOptionAvailable();
   const canCommit =
     hasCenter &&
     distanceSelectionAvailable &&
     (awaitHiderAnswer || answer !== null) &&
     !isSubmitting;
+  const canSendToHiders =
+    !viewOnly &&
+    awaitHiderAnswer &&
+    hasCenter &&
+    distanceSelectionAvailable &&
+    !isSubmitting;
+  const canCommitActions = !viewOnly && canCommit;
 
   const goNext = () => {
     setStepIndex((current) => Math.min(current + 1, steps.length - 1));
@@ -92,13 +103,14 @@ export function RadarPanel({
 
   return (
     <ToolPanelShell toolId="radar" stepper={stepper}>
+      {viewOnly ? <ViewOnlyQuestionBanner /> : null}
       {step === "distance" ? (
         <ToolSection first compact status="active">
           <p className="text-xs text-ink-dim">
             Radar tests your location at answer time, not your hiding zone.
           </p>
           <RadarDistancePicker
-            radiusMeters={radiusMeters}
+            radiusMeters={radiusMeters ?? 0}
             chooseCustom={chooseCustom}
             customRadius={customRadius}
             distanceUnit={distanceUnit}
@@ -107,6 +119,22 @@ export function RadarPanel({
             onChooseSelect={onChooseSelect}
             onCustomRadiusChange={onCustomRadiusChange}
           />
+          {awaitHiderAnswer ? (
+            <>
+              <p className="text-xs text-ink-dim">
+                Hiders answer yes or no in game chat once you send this question.
+              </p>
+              <button
+                type="button"
+                onClick={onCommit}
+                disabled={!canSendToHiders}
+                aria-busy={isSubmitting}
+                className="btn-primary w-full disabled:opacity-40"
+              >
+                {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
+              </button>
+            </>
+          ) : null}
         </ToolSection>
       ) : null}
 
@@ -120,22 +148,6 @@ export function RadarPanel({
             onPlaceAtMapTap={onPlaceAtMapTap}
             centerHint="Center pinned on the map. Tap again to move it."
           />
-          {awaitHiderAnswer && hasCenter && distanceSelectionAvailable ? (
-            <>
-              <p className="text-xs text-ink-dim">
-                Hiders answer yes or no in game chat once you send this question.
-              </p>
-              <button
-                type="button"
-                onClick={onCommit}
-                disabled={!canCommit}
-                aria-busy={isSubmitting}
-                className="btn-primary w-full disabled:opacity-40"
-              >
-                {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
-              </button>
-            </>
-          ) : null}
         </ToolSection>
       ) : null}
 
@@ -155,7 +167,7 @@ export function RadarPanel({
           <button
             type="button"
             onClick={onCommit}
-            disabled={!canCommit}
+            disabled={!canCommitActions}
             aria-busy={isSubmitting}
             className="btn-primary w-full disabled:opacity-40"
           >

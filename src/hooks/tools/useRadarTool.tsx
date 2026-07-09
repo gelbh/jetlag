@@ -84,15 +84,15 @@ export function useRadarTool({
     [annotations, distanceUnit],
   );
   const defaultRadius = defaultRadarPresetMeters(distanceUnit);
-  const [radarRadius, setRadarRadius] = useState(defaultRadius);
+  const [radarRadius, setRadarRadius] = useState<number | null>(null);
   const [radarCustomRadius, setRadarCustomRadius] = useState("");
   const [radarChooseCustom, setRadarChooseCustom] = useState(false);
   const [radarAnswer, setRadarAnswer] = useState<RadarAnswer | null>(null);
   const [radarCenter, setRadarCenter] = useState<LatLngTuple | null>(null);
 
   const resolvedRadarRadius = radarChooseCustom
-    ? (parseDistanceInput(radarCustomRadius, distanceUnit) ?? radarRadius)
-    : radarRadius;
+    ? (parseDistanceInput(radarCustomRadius, distanceUnit) ?? radarRadius ?? defaultRadius)
+    : (radarRadius ?? defaultRadius);
 
   const radarUseCount = Math.max(
     radarDistanceUseCount(
@@ -112,14 +112,18 @@ export function useRadarTool({
     questionCostBreakdown("D2P1", radarUseCount);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- sync default when unit changes */
-    if (!active) {
+    /* eslint-disable react-hooks/set-state-in-effect -- reset draft when tool closes */
+    if (active) {
       return;
     }
 
-    setRadarRadius(defaultRadarPresetMeters(distanceUnit));
+    setRadarRadius(null);
+    setRadarCustomRadius("");
+    setRadarChooseCustom(false);
+    setRadarAnswer(null);
+    setRadarCenter(null);
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [active, distanceUnit]);
+  }, [active]);
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- keep draft distance in sync with session usage */
@@ -146,7 +150,7 @@ export function useRadarTool({
   }, [active, usedRadarOptions, radarChooseCustom, radarRadius, distanceUnit]);
 
   const resetDraft = useCallback(() => {
-    setRadarRadius(defaultRadarPresetMeters(distanceUnit));
+    setRadarRadius(null);
     setRadarCustomRadius("");
     setRadarChooseCustom(false);
     setRadarAnswer(null);
@@ -193,6 +197,11 @@ export function useRadarTool({
 
     if (!radarCenter) {
       setMapError("Choose a center with GPS or a map tap.");
+      return;
+    }
+
+    if (radarRadius === null && !radarChooseCustom) {
+      setMapError("Choose a radar distance.");
       return;
     }
 
@@ -291,6 +300,7 @@ export function useRadarTool({
       awaitHiderAnswer={awaitHiderAnswer}
       costLabel={costLabel}
       isSubmitting={isSubmitting}
+      viewOnly={!canSubmitQuestion}
     />
   );
 
