@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { APP_VERSION } from "./changelog";
 import {
   githubBugReportUrl,
   githubBugsBrowseUrl,
@@ -13,7 +14,7 @@ describe("githubFeedback", () => {
       "https://github.com/gelbh/jetlag/issues/new",
     );
     expect(githubBugReportUrl()).toBe(
-      "https://github.com/gelbh/jetlag/issues/new?template=bug_report",
+      `https://github.com/gelbh/jetlag/issues/new?template=bug_report.yml&version=${APP_VERSION}`,
     );
     expect(githubBugsBrowseUrl()).toBe(
       "https://github.com/gelbh/jetlag/issues?q=is%3Aissue+label%3Abug",

@@ -1,3 +1,5 @@
+import { APP_VERSION } from "./changelog";
+
 const GITHUB_REPO = "https://github.com/gelbh/jetlag";
 
 const DEFAULT_GITHUB_ISSUES_URL = `${GITHUB_REPO}/issues/new`;
@@ -7,7 +9,11 @@ export function githubIssuesUrl(): string {
 }
 
 export function githubBugReportUrl(): string {
-  return `${GITHUB_REPO}/issues/new?template=bug_report`;
+  const params = new URLSearchParams({
+    template: "bug_report.yml",
+    version: APP_VERSION,
+  });
+  return `${GITHUB_REPO}/issues/new?${params.toString()}`;
 }
 
 export function githubBugsBrowseUrl(): string {

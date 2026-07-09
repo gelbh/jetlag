@@ -15,6 +15,12 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-07-09",
     sections: [
       {
+        title: "Fixes",
+        items: [
+          "Feedback: GitHub bug and idea links open the structured templates",
+        ],
+      },
+      {
         title: "Improvements",
         items: [
           "Feedback: separate bug reports and improvement ideas; browse existing threads before posting",

@@ -2,6 +2,10 @@
 
 ## 0.1.7 - 2026-07-09
 
+### Fixes
+
+- Feedback: GitHub bug and idea links open the structured templates
+
 ### Improvements
 
 - Feedback: separate bug reports and improvement ideas; browse existing threads before posting
