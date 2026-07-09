@@ -9,7 +9,7 @@ export function isUnreadEligibleMessage(
   viewerUid: string,
 ): boolean {
   if (message.channel === "game" && message.kind === "system") {
-    return false;
+    return message.senderUid !== viewerUid;
   }
 
   if (message.channel === "social") {

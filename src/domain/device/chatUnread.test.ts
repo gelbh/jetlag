@@ -87,14 +87,14 @@ describe("isUnreadEligibleMessage", () => {
     expect(isUnreadEligibleMessage(answered, hiderUid)).toBe(false);
   });
 
-  it("ignores system game messages", () => {
+  it("counts system game messages from other players", () => {
     const system = gameQuestion({
       kind: "system",
       text: "Timer paused",
       promptText: undefined,
     });
 
-    expect(isUnreadEligibleMessage(system, hiderUid)).toBe(false);
+    expect(isUnreadEligibleMessage(system, hiderUid)).toBe(true);
   });
 });
 

@@ -3,7 +3,7 @@ import {
   allMessageFingerprints,
   baselineAcknowledgedFingerprints,
   chatReadStorageKey,
-  hasUnreadChatMessages,
+  collectUnreadFingerprints,
 } from "../../domain/device/chatUnread";
 import type { SessionMessageRecord } from "../../domain/session/sessionChat";
 
@@ -52,7 +52,7 @@ export function useChatUnread({
   viewerUid,
   messages,
   isChatOpen,
-}: UseChatUnreadParams): { hasUnreadChat: boolean } {
+}: UseChatUnreadParams): { hasUnreadChat: boolean; unreadCount: number } {
   const storageKey =
     sessionId && viewerUid
       ? chatReadStorageKey(sessionId, viewerUid)
@@ -108,13 +108,15 @@ export function useChatUnread({
     saveAcknowledgedFingerprints(storageKey, nextAcknowledged);
   }, [isChatOpen, messages, storageKey]);
 
-  const hasUnreadChat = useMemo(() => {
+  const unreadCount = useMemo(() => {
     if (isChatOpen || !viewerUid) {
-      return false;
+      return 0;
     }
 
-    return hasUnreadChatMessages(messages, viewerUid, acknowledged);
+    return collectUnreadFingerprints(messages, viewerUid, acknowledged).length;
   }, [acknowledged, isChatOpen, messages, viewerUid]);
 
-  return { hasUnreadChat };
+  const hasUnreadChat = unreadCount > 0;
+
+  return { hasUnreadChat, unreadCount };
 }
