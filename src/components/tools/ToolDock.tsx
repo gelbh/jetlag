@@ -41,6 +41,7 @@ interface ToolDockProps {
   onOpenSettings: () => void;
   onOpenChat?: () => void;
   hasUnreadChat?: boolean;
+  unreadCount?: number;
   mapStyle?: MapStyle;
   onMapStyleChange?: (style: MapStyle) => void;
   dismissOverflowMenus?: boolean;
@@ -66,6 +67,7 @@ export function ToolDock({
   onOpenSettings,
   onOpenChat,
   hasUnreadChat = false,
+  unreadCount = 0,
   mapStyle,
   onMapStyleChange,
   dismissOverflowMenus = false,
@@ -202,12 +204,16 @@ export function ToolDock({
       <button
         key={toolId}
         type="button"
-        disabled={!entry.enabled || blockedByOpenQuestion}
+        disabled={!entry.enabled}
         onClick={() => selectTool(toolId)}
         className={`jl-tool-slot ${active ? "jl-tool-slot-active" : ""}`}
         aria-label={entry.name}
         aria-pressed={active}
-        title={mapToolDockMenuHint(entry) ?? entry.name}
+        title={
+          blockedByOpenQuestion
+            ? "Preview only — finish the open question before sending"
+            : (mapToolDockMenuHint(entry) ?? entry.name)
+        }
       >
         <span className="jl-tool-slot-icon">
           <HudToolIcon tool={toolId} className="h-5 w-5 shrink-0" />
@@ -289,6 +295,7 @@ export function ToolDock({
         onOpenSettings={onOpenSettings}
         onOpenChat={onOpenChat}
         hasUnreadChat={hasUnreadChat}
+        unreadCount={unreadCount}
         mapStyle={mapStyle}
         onMapStyleChange={onMapStyleChange}
         canStartEndGame={canStartEndGame}
@@ -402,7 +409,7 @@ export function ToolDock({
             >
               <span className="jl-tool-slot-icon jl-unread-badge-host text-xs font-bold">
                 @
-                {hasUnreadChat ? <ChatUnreadBadge /> : null}
+                {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
               </span>
               <span className="jl-tool-slot-label">Chat</span>
             </button>
@@ -442,7 +449,7 @@ export function ToolDock({
           >
             <span className="jl-tool-slot-icon jl-unread-badge-host">
               <HudMoreIcon className="h-5 w-5" />
-              {hasUnreadChat ? <ChatUnreadBadge /> : null}
+              {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
             </span>
             <span className="jl-tool-slot-label">More</span>
           </button>

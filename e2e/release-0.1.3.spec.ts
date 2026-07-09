@@ -70,8 +70,12 @@ test.describe("release 0.1.3", () => {
     await joinAsRole(guestPage, code, "hider");
 
     await sendRadarToHiders(hostPage);
-    await expect(hostPage.getByRole("button", { name: "Matching" })).toBeDisabled();
-    await expect(hostPage.getByRole("button", { name: "Radar" })).toBeDisabled();
+    const matching = hostPage.getByRole("button", { name: "Matching" });
+    await expect(matching).toBeEnabled();
+    await expect(matching).toHaveAttribute(
+      "title",
+      "Preview only — finish the open question before sending",
+    );
 
     await cleanup();
   });

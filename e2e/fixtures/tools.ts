@@ -67,9 +67,16 @@ export async function dismissActiveToolPanel(page: Page) {
 export const PENDING_QUESTION_TEXT =
   /Are you within|closer to or further|hotter or colder|nearest to|same as my nearest/i;
 
+async function selectFirstRadarDistance(page: Page) {
+  const preset = page.getByRole("button", { name: /Mile|km/i }).first();
+  await expect(preset).toBeVisible({ timeout: 15_000 });
+  await preset.click();
+}
+
 export async function completeRadarSolo(page: Page) {
   await clickToolDockButton(page, "Radar");
   await placeAnchorAndAdvance(page);
+  await selectFirstRadarDistance(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
   await page.getByRole("button", { name: "Yes" }).click();
@@ -80,6 +87,9 @@ export async function completeRadarSolo(page: Page) {
 export async function sendRadarToHiders(page: Page) {
   await clickToolDockButton(page, "Radar");
   await clickMapCenter(page);
+  await waitForWizardNext(page);
+  await advanceWizard(page);
+  await selectFirstRadarDistance(page);
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);

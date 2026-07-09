@@ -41,6 +41,7 @@ describe("ToolDock", () => {
         onOpenSettings={vi.fn()}
         onOpenChat={vi.fn()}
         hasUnreadChat
+        unreadCount={1}
       />,
     );
 
@@ -102,7 +103,9 @@ describe("ToolOverflowSheet", () => {
   });
 
   it("shows unread badge on chat row when hasUnreadChat is true", () => {
-    renderWithRouter(<ToolOverflowSheet {...baseProps} hasUnreadChat />);
+    renderWithRouter(
+      <ToolOverflowSheet {...baseProps} hasUnreadChat unreadCount={1} />
+    );
 
     expect(
       screen.getByRole("button", { name: "Open chat, unread messages" }),

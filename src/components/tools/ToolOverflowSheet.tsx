@@ -30,6 +30,7 @@ interface ToolOverflowSheetProps {
   onOpenSettings: () => void;
   onOpenChat?: () => void;
   hasUnreadChat?: boolean;
+  unreadCount?: number;
   mapStyle?: MapStyle;
   onMapStyleChange?: (style: MapStyle) => void;
   canStartEndGame?: boolean;
@@ -47,6 +48,7 @@ interface ToolOverflowRowProps {
   active?: boolean;
   disabled?: boolean;
   showBadge?: boolean;
+  unreadCount?: number;
   onClick: () => void;
   ariaLabel: string;
 }
@@ -58,6 +60,7 @@ function ToolOverflowRow({
   active = false,
   disabled = false,
   showBadge = false,
+  unreadCount = 0,
   onClick,
   ariaLabel,
 }: ToolOverflowRowProps) {
@@ -71,7 +74,7 @@ function ToolOverflowRow({
     >
       <span className="jl-tool-overflow-row-icon jl-unread-badge-host">
         {icon}
-        {showBadge ? <ChatUnreadBadge /> : null}
+        {showBadge ? <ChatUnreadBadge count={unreadCount} /> : null}
       </span>
       <span className="jl-tool-overflow-row-text">
         <span className="font-display text-sm font-semibold uppercase tracking-wide">
@@ -97,6 +100,7 @@ export function ToolOverflowSheet({
   onOpenSettings,
   onOpenChat,
   hasUnreadChat = false,
+  unreadCount = 0,
   mapStyle,
   onMapStyleChange,
   canStartEndGame = false,
@@ -202,6 +206,7 @@ export function ToolOverflowSheet({
             title="Chat"
             hint="Game and social messages"
             showBadge={hasUnreadChat}
+            unreadCount={unreadCount}
             onClick={() => closeAnd(onOpenChat)}
             ariaLabel={
               hasUnreadChat ? "Open chat, unread messages" : "Open chat"
