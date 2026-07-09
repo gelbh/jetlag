@@ -1,6 +1,7 @@
 import union from "@turf/union";
 import difference from "@turf/difference";
-import { featureCollection } from "@turf/helpers";
+import turfCircle from "@turf/circle";
+import { featureCollection, point as turfPoint } from "@turf/helpers";
 import type {
   Feature,
   MultiPolygon,
@@ -65,17 +66,36 @@ export function eliminationFeatureForAnnotation(
     );
   }
 
-  if (
-    annotation.type === "tentacle" &&
-    annotation.metadata.tentacleEliminationJson
-  ) {
-    try {
-      return JSON.parse(
-        annotation.metadata.tentacleEliminationJson,
+  if (annotation.type === "tentacle") {
+    if (
+      annotation.metadata.tentacleOutOfReach === true &&
+      annotation.geometry.geometry.type === "Point"
+    ) {
+      const coordinates = annotation.geometry.geometry.coordinates;
+      const center: LatLngTuple = [coordinates[1], coordinates[0]];
+      const searchRadiusMeters =
+        annotation.metadata.tentacleAnswerRadiusMeters ??
+        annotation.metadata.radiusMeters ??
+        DEFAULT_RADIUS_METERS;
+
+      return turfCircle(
+        turfPoint([center[1], center[0]]),
+        searchRadiusMeters / 1000,
+        { steps: 64, units: "kilometers" },
       ) as Feature<GeoPolygon | MultiPolygon>;
-    } catch {
-      return null;
     }
+
+    if (annotation.metadata.tentacleEliminationJson) {
+      try {
+        return JSON.parse(
+          annotation.metadata.tentacleEliminationJson,
+        ) as Feature<GeoPolygon | MultiPolygon>;
+      } catch {
+        return null;
+      }
+    }
+
+    return null;
   }
 
   if (annotation.type === "radar") {
