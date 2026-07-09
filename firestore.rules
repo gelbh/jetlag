@@ -320,6 +320,45 @@ service cloud.firestore {
         && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
         && request.resource.data.memberRoles == resource.data.memberRoles
       ) || (
+        isHiderMember(sessionId)
+        && resource.data.endGameRequestedAt is string
+        && (
+          !('endGameStartedAt' in resource.data)
+          || resource.data.endGameStartedAt == null
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['endGameRequestedAt', 'endGameRequestedByUid'])
+        && !('endGameRequestedAt' in request.resource.data)
+        && !('endGameRequestedByUid' in request.resource.data)
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.memberRoles == resource.data.memberRoles
+      ) || (
+        isSeekerMember(sessionId)
+        && resource.data.endGameRequestedAt is string
+        && resource.data.endGameRequestedByUid == request.auth.uid
+        && (
+          !('endGameStartedAt' in resource.data)
+          || resource.data.endGameStartedAt == null
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['endGameRequestedAt', 'endGameRequestedByUid'])
+        && !('endGameRequestedAt' in request.resource.data)
+        && !('endGameRequestedByUid' in request.resource.data)
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.memberRoles == resource.data.memberRoles
+      ) || (
         isSessionHost(sessionId)
         && (
           resource.data.endGameStartedAt is string
