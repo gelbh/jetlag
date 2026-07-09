@@ -58,7 +58,10 @@ import {
   useSessionMessagesSync,
 } from "../hooks/session/useSessionExtrasSync";
 import { useSyncStatus } from "../hooks/sync/useSyncStatus";
+import { useHiderZoneAdvisory } from "../hooks/location/useHiderZoneAdvisory";
+import { useLiveLocation } from "../hooks/location/useLiveLocation";
 import { useWakeLock } from "../hooks/location/useWakeLock";
+import { getPowerProfile } from "../domain/device/powerProfile";
 import { useSessionNotifications } from "../hooks/session/useSessionNotifications";
 import { useLiveActivitySync } from "../hooks/sync/useLiveActivitySync";
 import { useSessionSync } from "../hooks/session/useSessionSync";
@@ -67,6 +70,7 @@ import { useSessionDistanceUnit } from "../hooks/session/useSessionDistanceUnit"
 import { isEndGameActive, isEndGamePending, LOCAL_SESSION_ID } from "../domain/map/annotations";
 import {
   acceptEndGameSession,
+  resetEndGameSession,
   ensureRemoteSessionWriteAccess,
 } from "../services/firestore/firestoreAnnotations";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase";
@@ -156,7 +160,7 @@ export function HiderMapScreen() {
     [hidingZones],
   );
   const messages = useSessionMessagesSync(sessionId);
-  const { hasUnreadChat } = useChatUnread({
+  const { hasUnreadChat, unreadCount } = useChatUnread({
     sessionId,
     viewerUid: uid ?? undefined,
     messages,
@@ -179,6 +183,8 @@ export function HiderMapScreen() {
   const {
     canControlTimer,
     remoteState,
+    remoteSnapshot,
+    timerSyncing,
     onControl: onTimerControl,
     isRemote,
   } = useRemoteSessionTimerSync(sessionId, isHost);
@@ -186,8 +192,28 @@ export function HiderMapScreen() {
     canControl: canControlTimer,
     onControl: onTimerControl,
     remoteState,
+    remoteSnapshot,
   });
   const syncStatus = useSyncStatus();
+  const liveLocationProfile = getPowerProfile(lowPowerMode).liveLocation;
+  const { reading: liveLocationReading } = useLiveLocation(showCurrentLocation, {
+    highAccuracy: liveLocationProfile.highAccuracy,
+    minIntervalMs: liveLocationProfile.minIntervalMs,
+    minDistanceMeters: liveLocationProfile.minDistanceMeters,
+  });
+  const hiderOutsideZone = useHiderZoneAdvisory({
+    enabled:
+      showCurrentLocation &&
+      !isEndGameActive(session) &&
+      !isEndGamePending(session),
+    zone: myZone,
+    location: liveLocationReading
+      ? { lat: liveLocationReading.lat, lng: liveLocationReading.lng }
+      : null,
+    accuracyMeters: liveLocationReading?.accuracy ?? null,
+    sessionRules: session ?? DEFAULT_SESSION_RULES,
+    timerState: timer.timerState,
+  });
   useWakeLock(keepScreenAwake || (timer.running && !lowPowerMode));
   const {
     notificationPreferences: liveNotificationPreferences,
@@ -252,6 +278,28 @@ export function HiderMapScreen() {
     }
 
     await acceptEndGameSession(session.id, uid);
+  }, [session, setSession, uid]);
+
+  const handleResetEndGame = useCallback(async () => {
+    if (!session?.id || !uid) {
+      return;
+    }
+
+    if (session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
+      setSession(
+        {
+          ...session,
+          endGameStartedAt: undefined,
+          endGameStartedByUid: undefined,
+          endGameRequestedAt: undefined,
+          endGameRequestedByUid: undefined,
+        },
+        uid,
+      );
+      return;
+    }
+
+    await resetEndGameSession(session.id);
   }, [session, setSession, uid]);
 
   const zoneTool = useHiderZoneTool({
@@ -417,6 +465,7 @@ export function HiderMapScreen() {
           timerState={timer.timerState}
           timerRunning={timer.running}
           timerHasStarted={timer.hasStarted}
+          timerSyncing={timerSyncing}
           canStartGame={canControlTimer}
           onStartGame={timer.start}
           onTimerStart={timer.start}
@@ -428,7 +477,12 @@ export function HiderMapScreen() {
           closeTimerMenu={overlay.sheet !== "none" || zoneTool.wizardOpen}
           endGameActive={isEndGameActive(session)}
           endGamePending={isEndGamePending(session)}
+          endGameRequestedByUid={session.endGameRequestedByUid}
+          myUid={uid ?? undefined}
+          isHost={isHost}
+          onResetEndGame={() => void handleResetEndGame()}
           onAcceptEndGame={() => void handleAcceptEndGame()}
+          hiderOutsideZone={hiderOutsideZone}
         />
       </div>
 
@@ -471,7 +525,7 @@ export function HiderMapScreen() {
           >
             <span className="jl-unread-badge-host">
               Chat
-              {hasUnreadChat ? <ChatUnreadBadge /> : null}
+              {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
             </span>
           </button>
           <button
@@ -629,6 +683,7 @@ export function HiderMapScreen() {
         onToggleLiveTransit={() => undefined}
         onTransitRouteFilterChange={() => undefined}
         onClearMap={() => undefined}
+        endGameBlocked={isEndGameActive(session) || isEndGamePending(session)}
         onExport={overlay.closeSheet}
         isHost={isHost}
         onResetBoard={() => undefined}

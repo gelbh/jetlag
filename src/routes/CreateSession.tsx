@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import type { LatLngBoundsExpression } from "leaflet";
+import { Link } from "react-router-dom";
 import { AppLogo } from "../components/ui/AppLogo";
 import { CreateSessionMapPane } from "../components/session/CreateSessionMapPane";
 import { GameAreaFramingModal } from "../components/session/GameAreaFramingModal";
@@ -605,7 +606,15 @@ export function CreateSession() {
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 px-4 pt-3">
+        <Link
+          to="/"
+          className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-ink-dim"
+        >
+          ← Back
+        </Link>
+        <div className="mt-6">
         <AppLogo variant="lockup" size="md" />
+        </div>
         <p className="mt-3 font-display text-xs font-semibold uppercase tracking-[0.14em] text-brand-blue">
           New game
         </p>

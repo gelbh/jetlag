@@ -11,6 +11,14 @@ import { TimerActions } from "../tools/TimerActions";
 import { SessionTimerLabel } from "./SessionTimerLabel";
 import { MapTimerCluster } from "./MapTimerCluster";
 import { GameAreaPreloadBanner } from "./GameAreaPreloadBanner";
+import { SyncStatusBeacon } from "./SyncStatusDot";
+import { SyncStatusDetailPanel } from "./SyncStatusDetailPanel";
+import {
+  syncDetailContent,
+  syncToneForStatus,
+} from "./syncStatusDetailContent";
+import { HudErrorBanner } from "../ui/HudErrorBanner";
+import { userErrorFromSyncMessage } from "../../domain/device/userErrors";
 
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import type { PlayerRole } from "../../domain/session/playerRole";
@@ -26,6 +34,7 @@ interface MapStatusRailProps {
   timerState: TimerState;
   timerRunning: boolean;
   timerHasStarted: boolean;
+  timerSyncing?: boolean;
   canStartGame: boolean;
   onStartGame: () => void;
   onTimerStart: () => void;
@@ -37,22 +46,18 @@ interface MapStatusRailProps {
   /** When true, closes the timer settings dropdown (e.g. another overlay opened). */
   closeTimerMenu?: boolean;
   showPreloadBanner?: boolean;
-  endGameActive?: boolean;
   endGamePending?: boolean;
+  endGameActive?: boolean;
+  endGameRequestedByUid?: string;
+  myUid?: string;
+  isHost?: boolean;
   onAcceptEndGame?: () => void;
+  onResetEndGame?: () => void;
+  hiderOutsideZone?: boolean;
+  onSyncErrorAction?: () => void;
 }
 
 type SyncTone = "error" | "warning" | "info";
-
-function syncToneForStatus(status: SyncStatus): SyncTone {
-  if (status === "error") {
-    return "error";
-  }
-  if (status === "offline" || status === "degraded") {
-    return "warning";
-  }
-  return "info";
-}
 
 const SYNC_TONE_CLASSES: Record<
   SyncTone,
@@ -148,6 +153,25 @@ function idleModeLabel(playerRole: PlayerRole): string {
   return playerRole === "hider" ? "Set your zone" : "Ready to seek";
 }
 
+function syncBeaconAriaLabel(status: SyncStatus): string {
+  switch (status) {
+    case "synced":
+      return "Synced. Show sync details";
+    case "saving":
+      return "Saving changes. Show sync details";
+    case "offline":
+      return "Offline. Show sync details";
+    case "degraded":
+      return "Unstable connection. Show sync details";
+    case "error":
+      return "Sync failed. Show sync details";
+    default: {
+      const exhaustive: never = status;
+      return exhaustive;
+    }
+  }
+}
+
 export function MapStatusRail({
   sessionCode,
   sessionRules = { gameSize: "medium" },
@@ -159,6 +183,7 @@ export function MapStatusRail({
   timerState,
   timerRunning,
   timerHasStarted,
+  timerSyncing = false,
   canStartGame,
   onStartGame,
   onTimerStart,
@@ -171,31 +196,60 @@ export function MapStatusRail({
   showPreloadBanner = false,
   endGameActive = false,
   endGamePending = false,
+  endGameRequestedByUid,
+  myUid,
+  isHost = false,
   onAcceptEndGame,
+  onResetEndGame,
+  hiderOutsideZone = false,
+  onSyncErrorAction,
 }: MapStatusRailProps) {
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
+  const [syncMenuOpen, setSyncMenuOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
   const placing = activeTool !== "none";
   const modeLabel = placing
     ? mapToolPlacingLabel(activeTool)
     : idleModeLabel(playerRole);
   const sync = syncRailDisplay(syncStatus, queuedWrites, message);
+  const syncErrorDisplay = userErrorFromSyncMessage(message);
+  const syncDetail = syncDetailContent(
+    syncStatus,
+    queuedWrites,
+    message,
+    syncErrorDisplay,
+  );
+  const showSyncDot =
+    syncStatus === "synced" ||
+    sync.inline?.visible ||
+    syncStatus === "error" ||
+    syncStatus === "offline" ||
+    syncStatus === "degraded" ||
+    syncStatus === "saving";
   const showTimerMenu = timerMenuOpen && !closeTimerMenu;
+  const showSyncMenu = syncMenuOpen && !closeTimerMenu;
+  const syncActionLabel =
+    syncErrorDisplay?.actionLabel ??
+    (syncStatus === "offline" || syncStatus === "degraded" || syncStatus === "error"
+      ? "Retry"
+      : null);
 
   useEffect(() => {
-    if (!showTimerMenu) {
+    if (!showTimerMenu && !showSyncMenu) {
       return;
     }
 
     const handlePointerDown = (event: PointerEvent) => {
       if (railRef.current && !railRef.current.contains(event.target as Node)) {
         setTimerMenuOpen(false);
+        setSyncMenuOpen(false);
       }
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setTimerMenuOpen(false);
+        setSyncMenuOpen(false);
       }
     };
 
@@ -205,7 +259,7 @@ export function MapStatusRail({
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [showTimerMenu]);
+  }, [showSyncMenu, showTimerMenu]);
 
   return (
     <div
@@ -213,6 +267,42 @@ export function MapStatusRail({
       className="jl-status-rail pointer-events-none absolute inset-x-0 top-0 z-[var(--z-banner)] pt-[max(0px,env(safe-area-inset-top))]"
     >
       <div className="relative">
+        {showSyncDot ? (
+          <div className="jl-sync-map-indicator">
+            <button
+              type="button"
+              className={`jl-sync-map-indicator__btn${showSyncMenu ? " jl-sync-map-indicator__btn--open" : ""}`}
+              onClick={() => {
+                setSyncMenuOpen((open) => !open);
+                setTimerMenuOpen(false);
+              }}
+              aria-expanded={showSyncMenu}
+              aria-haspopup="dialog"
+              aria-label={syncBeaconAriaLabel(syncStatus)}
+            >
+              <SyncStatusBeacon status={syncStatus} size="md" />
+            </button>
+
+            {showSyncMenu ? (
+              <SyncStatusDetailPanel
+                status={syncStatus}
+                title={syncDetail.title}
+                body={syncDetail.body}
+                actionLabel={syncActionLabel}
+                onAction={
+                  syncActionLabel && onSyncErrorAction
+                    ? () => {
+                        onSyncErrorAction();
+                        setSyncMenuOpen(false);
+                      }
+                    : undefined
+                }
+                onClose={() => setSyncMenuOpen(false)}
+              />
+            ) : null}
+          </div>
+        ) : null}
+
         {showTimerMenu ? (
           <div
             className="hud-panel pointer-events-auto absolute inset-x-3 top-[calc(100%+0.375rem)] z-[var(--z-panel)] mx-auto max-w-md space-y-2 p-3 pt-10"
@@ -256,65 +346,74 @@ export function MapStatusRail({
             </div>
 
             <p
-              className={`jl-mode-ticker ${timerHasStarted ? "" : "flex-1"} ${
+              className={`jl-mode-ticker min-w-0 flex-1 ${
                 placing ? "text-highlight" : "text-ink-muted"
               } ${timerHasStarted ? "sr-only" : ""}`}
             >
               {modeLabel}
             </p>
 
-            {!timerHasStarted ? (
-              canStartGame ? (
-                <button
-                  type="button"
-                  onClick={onStartGame}
-                  className="btn-primary min-h-10 shrink-0 px-3 text-xs sm:text-sm"
-                >
-                  <HudPlayIcon className="h-4 w-4 shrink-0" />
-                  Start
-                </button>
+            <div className="jl-status-bar-timer">
+              {!timerHasStarted ? (
+                timerSyncing ? (
+                  <p className="dock-waiting-host max-w-[6.5rem] shrink-0 px-2 text-[10px] sm:max-w-none">
+                    Syncing timer…
+                  </p>
+                ) : canStartGame ? (
+                  <button
+                    type="button"
+                    onClick={onStartGame}
+                    className="btn-primary min-h-10 shrink-0 px-3 text-xs sm:text-sm"
+                  >
+                    <HudPlayIcon className="h-4 w-4 shrink-0" />
+                    Start
+                  </button>
+                ) : (
+                  <p className="dock-waiting-host max-w-[6.5rem] shrink-0 px-2 text-[10px] sm:max-w-none">
+                    Waiting…
+                  </p>
+                )
               ) : (
-                <p className="dock-waiting-host max-w-[6.5rem] shrink-0 px-2 text-[10px] sm:max-w-none">
-                  Waiting…
-                </p>
-              )
-            ) : null}
-
-            <div
-              className={`flex shrink-0 items-center gap-2 ${timerHasStarted ? "ml-auto" : ""}`}
-            >
-              {timerHasStarted ? (
                 <MapTimerCluster
                   sessionRules={sessionRules}
                   timerState={timerState}
                   timerRunning={timerRunning}
                   timerHasStarted={timerHasStarted}
                   pendingQuestions={pendingQuestions}
-                  onOpenTimerMenu={() => setTimerMenuOpen((open) => !open)}
+                  onOpenTimerMenu={() => {
+                    setTimerMenuOpen((open) => !open);
+                    setSyncMenuOpen(false);
+                  }}
                   timerMenuOpen={showTimerMenu}
                 />
-              ) : null}
-
-              {sync.inline?.visible && sync.inline.label ? (
-                <p
-                  className={`max-w-[4.5rem] shrink-0 truncate text-[10px] font-semibold uppercase tracking-wide sm:max-w-[8rem] sm:text-xs ${SYNC_TONE_CLASSES[sync.inline.tone].text}`}
-                  title={sync.inline.label}
-                  aria-live="polite"
-                >
-                  {sync.inline.label}
-                </p>
-              ) : null}
+              )}
             </div>
           </div>
         </div>
 
         {sync.banner?.visible ? (
+          syncErrorDisplay && onSyncErrorAction ? (
+            <HudErrorBanner
+              error={syncErrorDisplay}
+              onAction={onSyncErrorAction}
+            />
+          ) : (
+            <p
+              className={`map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 px-3 py-2 text-center text-sm font-semibold text-pretty ${SYNC_TONE_CLASSES[sync.banner.tone].surface} ${SYNC_TONE_CLASSES[sync.banner.tone].border} ${SYNC_TONE_CLASSES[sync.banner.tone].text}`}
+              role="status"
+              aria-live="polite"
+            >
+              {sync.banner.label}
+            </p>
+          )
+        ) : null}
+
+        {hiderOutsideZone ? (
           <p
-            className={`map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 px-3 py-2 text-center text-sm font-semibold text-pretty ${SYNC_TONE_CLASSES[sync.banner.tone].surface} ${SYNC_TONE_CLASSES[sync.banner.tone].border} ${SYNC_TONE_CLASSES[sync.banner.tone].text}`}
+            className="map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 border-status-warning/40 bg-status-warning-surface px-3 py-2 text-center text-sm font-semibold text-status-warning"
             role="status"
-            aria-live="polite"
           >
-            {sync.banner.label}
+            You&apos;re outside your hiding zone. Use a move card to relocate.
           </p>
         ) : null}
 
@@ -323,12 +422,49 @@ export function MapStatusRail({
             <p className="text-sm font-semibold text-ink">
               Seekers requested end game
             </p>
+            <div className="flex shrink-0 gap-2">
+              {onResetEndGame ? (
+                <button
+                  type="button"
+                  onClick={onResetEndGame}
+                  className="btn-secondary min-h-10 px-3 text-xs"
+                >
+                  Decline
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={onAcceptEndGame}
+                className="btn-primary min-h-10 shrink-0 px-3 text-xs"
+              >
+                Accept
+              </button>
+            </div>
+          </div>
+        ) : endGamePending && myUid && endGameRequestedByUid === myUid && onResetEndGame ? (
+          <div className="map-float-alert pointer-events-auto mx-3 mt-1.5 flex items-center justify-between gap-3 border-2 border-highlight bg-surface-deep px-3 py-2">
+            <p className="text-sm font-semibold text-ink">
+              Waiting for hider to accept end game
+            </p>
             <button
               type="button"
-              onClick={onAcceptEndGame}
-              className="btn-primary min-h-10 shrink-0 px-3 text-xs"
+              onClick={onResetEndGame}
+              className="btn-secondary min-h-10 shrink-0 px-3 text-xs"
             >
-              Accept
+              Cancel request
+            </button>
+          </div>
+        ) : endGamePending && isHost && onResetEndGame ? (
+          <div className="map-float-alert pointer-events-auto mx-3 mt-1.5 flex items-center justify-between gap-3 border-2 border-highlight bg-surface-deep px-3 py-2">
+            <p className="text-sm font-semibold text-ink">
+              End game pending hider acceptance
+            </p>
+            <button
+              type="button"
+              onClick={onResetEndGame}
+              className="btn-secondary min-h-10 shrink-0 px-3 text-xs"
+            >
+              Cancel end game
             </button>
           </div>
         ) : endGamePending ? (
@@ -341,12 +477,25 @@ export function MapStatusRail({
         ) : null}
 
         {endGameActive ? (
-          <p
-            className="map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 border-highlight bg-surface-deep px-3 py-2 text-center text-sm font-semibold text-ink"
-            role="status"
-          >
-            End game started
-          </p>
+          isHost && onResetEndGame ? (
+            <div className="map-float-alert pointer-events-auto mx-3 mt-1.5 flex items-center justify-between gap-3 border-2 border-highlight bg-surface-deep px-3 py-2">
+              <p className="text-sm font-semibold text-ink">End game started</p>
+              <button
+                type="button"
+                onClick={onResetEndGame}
+                className="btn-secondary min-h-10 shrink-0 px-3 text-xs"
+              >
+                End end game
+              </button>
+            </div>
+          ) : (
+            <p
+              className="map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 border-highlight bg-surface-deep px-3 py-2 text-center text-sm font-semibold text-ink"
+              role="status"
+            >
+              End game started
+            </p>
+          )
         ) : null}
 
         {showPreloadBanner ? <GameAreaPreloadBanner /> : null}

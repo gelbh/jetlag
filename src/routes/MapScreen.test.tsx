@@ -83,12 +83,16 @@ vi.mock("../services/core/firebase", () => ({
 
 describe("MapScreen", () => {
   it("redirects to create when no session game area exists", () => {
+    useSessionStore.getState().setSession(
+      createTestSession({ gameArea: undefined }),
+    );
+
     renderWithRouter(
       <Routes>
         <Route path="/map" element={<MapScreen />} />
         <Route path="/create" element={<div>Create session landing</div>} />
       </Routes>,
-      { route: "/map" },
+      { route: "/map", resetStores: false },
     );
 
     expect(screen.getByText("Create session landing")).toBeInTheDocument();

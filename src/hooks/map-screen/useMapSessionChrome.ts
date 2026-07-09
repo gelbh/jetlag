@@ -20,6 +20,7 @@ interface UseMapSessionChromeParams {
   clearAllAnnotations: () => Promise<void>;
   setSelectedAnnotationId: (id: string | null) => void;
   closeSettingsPanel: () => void;
+  endGameBlocked?: boolean;
 }
 
 export function useMapSessionChrome({
@@ -31,11 +32,16 @@ export function useMapSessionChrome({
   clearAllAnnotations,
   setSelectedAnnotationId,
   closeSettingsPanel,
+  endGameBlocked = false,
 }: UseMapSessionChromeParams) {
   const navigate = useNavigate();
   const setSession = useSessionStore((state) => state.setSession);
 
   const handleClearMap = useCallback(() => {
+    if (endGameBlocked) {
+      return;
+    }
+
     const activeCount = annotations.filter(isActive).length;
     if (activeCount === 0) {
       return;
@@ -56,10 +62,15 @@ export function useMapSessionChrome({
     annotations,
     clearAllAnnotations,
     closeSettingsPanel,
+    endGameBlocked,
     setSelectedAnnotationId,
   ]);
 
   const handleResetBoard = useCallback(() => {
+    if (endGameBlocked) {
+      return;
+    }
+
     if (!isHost) {
       return;
     }
@@ -84,6 +95,7 @@ export function useMapSessionChrome({
     annotations,
     clearAllAnnotations,
     isHost,
+    endGameBlocked,
     setSelectedAnnotationId,
     closeSettingsPanel,
   ]);
@@ -99,11 +111,31 @@ export function useMapSessionChrome({
 
     const sessionId = session.id;
     await endRemoteSession(sessionId);
+    closeSettingsPanel();
+    navigate("/", { replace: true });
     await clearSessionLocalArtifacts(sessionId);
     setSession(null);
-    closeSettingsPanel();
-    navigate("/");
   }, [isHost, navigate, session, setSession, closeSettingsPanel]);
+
+  const handleLeaveSession = useCallback(async () => {
+    if (!session) {
+      return;
+    }
+
+    if (
+      !window.confirm(
+        "Leave this session on this device? Other players can keep playing.",
+      )
+    ) {
+      return;
+    }
+
+    const sessionId = session.id;
+    closeSettingsPanel();
+    navigate("/", { replace: true });
+    await clearSessionLocalArtifacts(sessionId);
+    setSession(null);
+  }, [closeSettingsPanel, navigate, session, setSession]);
 
   const exportMap = useCallback(async () => {
     if (!session || !mapShellRef.current) {
@@ -134,6 +166,7 @@ export function useMapSessionChrome({
     handleClearMap,
     handleResetBoard,
     handleEndSession,
+    handleLeaveSession,
     exportMap,
   };
 }

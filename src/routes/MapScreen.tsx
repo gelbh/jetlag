@@ -62,6 +62,7 @@ import {
 import { resolveToolDockEnabled, sessionRulesFromRecord, sessionRulesSnapshot } from "../domain/session/sessionRules";
 import {
   requestEndGameSession,
+  resetEndGameSession,
   updateSessionRules,
 } from "../services/firestore/firestoreAnnotations";
 import { useActiveThermometerWalk } from "../hooks/location/useActiveThermometerWalk";
@@ -236,12 +237,15 @@ export function MapScreen() {
     isRemote,
     canControlTimer,
     remoteState,
+    remoteSnapshot,
+    timerSyncing,
     onControl: onTimerControl,
   } = useRemoteSessionTimerSync(session?.id, isHost);
   const timer = useSessionTimer(session?.id, {
     canControl: canControlTimer,
     onControl: onTimerControl,
     remoteState,
+    remoteSnapshot,
   });
   const [draftAdvancedSettings, setDraftAdvancedSettings] =
     useState<AdvancedSessionSettingsValue | null>(() =>
@@ -305,7 +309,7 @@ export function MapScreen() {
   const hidingZones = useHidingZonesSync(session?.id);
   const playerLocations = usePlayerLocationsSync(session?.id);
   const chatMessages = useSessionMessagesSync(session?.id);
-  const { hasUnreadChat } = useChatUnread({
+  const { hasUnreadChat, unreadCount } = useChatUnread({
     sessionId: session?.id,
     viewerUid: uid ?? undefined,
     messages: chatMessages,
@@ -670,7 +674,10 @@ export function MapScreen() {
     zoneTool,
   });
 
-  const { handleClearMap, handleResetBoard, handleEndSession, exportMap } =
+  const endGameBlocked =
+    isEndGameActive(session) || isEndGamePending(session);
+
+  const { handleClearMap, handleResetBoard, handleEndSession, handleLeaveSession, exportMap } =
     useMapSessionChrome({
       session,
       isHost,
@@ -680,6 +687,7 @@ export function MapScreen() {
       clearAllAnnotations,
       setSelectedAnnotationId,
       closeSettingsPanel: overlay.closeSheet,
+      endGameBlocked,
     });
 
   const measuringPlacePoints = useMemo(
@@ -812,6 +820,28 @@ export function MapScreen() {
     await requestEndGameSession(session.id, uid);
   }, [canStartEndGame, session, setSession, uid]);
 
+  const handleResetEndGame = useCallback(async () => {
+    if (!session?.id || !uid) {
+      return;
+    }
+
+    if (session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
+      setSession(
+        {
+          ...session,
+          endGameStartedAt: undefined,
+          endGameStartedByUid: undefined,
+          endGameRequestedAt: undefined,
+          endGameRequestedByUid: undefined,
+        },
+        uid,
+      );
+      return;
+    }
+
+    await resetEndGameSession(session.id);
+  }, [session, setSession, uid]);
+
   const handleSaveGameRules = useCallback(async () => {
     if (!session || !draftAdvancedSettings || !gameRulesEditable) {
       return;
@@ -858,7 +888,7 @@ export function MapScreen() {
   );
 
   if (!session?.gameArea) {
-    return <Navigate to="/create" replace />;
+    return <Navigate to={session ? "/create" : "/"} replace />;
   }
 
   if (myRole === "hider") {
@@ -1075,9 +1105,14 @@ export function MapScreen() {
           }
           endGameActive={isEndGameActive(session)}
           endGamePending={isEndGamePending(session)}
+          endGameRequestedByUid={session.endGameRequestedByUid}
+          myUid={uid ?? undefined}
+          isHost={isHost}
+          onResetEndGame={() => void handleResetEndGame()}
           timerState={timer.timerState}
           timerRunning={timer.running}
           timerHasStarted={timer.hasStarted}
+          timerSyncing={timerSyncing}
           canStartGame={canControlTimer}
           onStartGame={timer.start}
           onTimerStart={timer.start}
@@ -1117,6 +1152,7 @@ export function MapScreen() {
           onOpenSettings={handleOpenSettings}
           onOpenChat={handleOpenChat}
           hasUnreadChat={hasUnreadChat}
+          unreadCount={unreadCount}
           mapStyle={mapStyle}
           onMapStyleChange={setMapStyle}
           dismissOverflowMenus={overlay.sheet !== "none"}
@@ -1198,6 +1234,7 @@ export function MapScreen() {
         onToggleLiveTransit={() => setTransitLiveEnabled(!transitLiveEnabled)}
         onTransitRouteFilterChange={setTransitRouteFilter}
         onClearMap={handleClearMap}
+        endGameBlocked={endGameBlocked}
         onExport={() => {
           overlay.closeSheet();
           void exportMap();
@@ -1205,6 +1242,7 @@ export function MapScreen() {
         isHost={isHost}
         onResetBoard={handleResetBoard}
         onEndSession={() => void handleEndSession()}
+        onLeaveSession={() => void handleLeaveSession()}
         sessionCode={session.code}
         remoteSession={isRemote}
         notificationPreferences={notificationPreferences}

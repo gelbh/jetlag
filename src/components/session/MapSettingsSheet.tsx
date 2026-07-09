@@ -63,6 +63,7 @@ interface MapSettingsSheetProps {
   isHost?: boolean;
   onResetBoard?: () => void;
   onEndSession?: () => void;
+  onLeaveSession?: () => void;
   sessionCode: string;
   remoteSession: boolean;
   notificationPreferences?: NotificationPreferences;
@@ -77,6 +78,7 @@ interface MapSettingsSheetProps {
   onAdvancedSettingsChange?: (value: AdvancedSessionSettingsValue) => void;
   onSaveGameRules?: () => void | Promise<void>;
   gameRulesSaveLabel?: string;
+  endGameBlocked?: boolean;
 }
 
 export function MapSettingsSheet({
@@ -119,6 +121,7 @@ export function MapSettingsSheet({
   isHost = false,
   onResetBoard,
   onEndSession,
+  onLeaveSession,
   sessionCode,
   remoteSession,
   notificationPreferences,
@@ -131,6 +134,7 @@ export function MapSettingsSheet({
   onAdvancedSettingsChange,
   onSaveGameRules,
   gameRulesSaveLabel = "Save game rules",
+  endGameBlocked = false,
 }: MapSettingsSheetProps) {
   const [segment, setSegment] = useState<SettingsSegment>("map");
 
@@ -256,6 +260,8 @@ export function MapSettingsSheet({
               isHost={isHost}
               onResetBoard={onResetBoard}
               onEndSession={onEndSession}
+              onLeaveSession={onLeaveSession}
+              endGameBlocked={endGameBlocked}
             />
           ) : null}
         </div>
@@ -515,6 +521,8 @@ function SessionSegment({
   isHost,
   onResetBoard,
   onEndSession,
+  onLeaveSession,
+  endGameBlocked = false,
 }: {
   sessionCode: string;
   remoteSession: boolean;
@@ -523,6 +531,8 @@ function SessionSegment({
   isHost: boolean;
   onResetBoard?: () => void;
   onEndSession?: () => void;
+  onLeaveSession?: () => void;
+  endGameBlocked?: boolean;
 }) {
   return (
     <div className="space-y-4">
@@ -535,10 +545,16 @@ function SessionSegment({
       ) : null}
 
       <div className="space-y-2 border-t-2 border-border pt-4">
+        {endGameBlocked ? (
+          <p className="text-sm text-ink-muted">
+            Clear map and reset board are unavailable during end game.
+          </p>
+        ) : null}
         <button
           type="button"
           onClick={onClearMap}
-          className="btn-secondary w-full border-status-error/50 bg-status-error-surface text-status-error"
+          disabled={endGameBlocked}
+          className="btn-secondary w-full border-status-error/50 bg-status-error-surface text-status-error disabled:opacity-50"
         >
           Clear map
         </button>
@@ -548,7 +564,8 @@ function SessionSegment({
             <button
               type="button"
               onClick={onResetBoard}
-              className="btn-secondary w-full border-status-warning/50 bg-status-warning-surface text-status-warning"
+              disabled={endGameBlocked}
+              className="btn-secondary w-full border-status-warning/50 bg-status-warning-surface text-status-warning disabled:opacity-50"
             >
               Reset board for everyone
             </button>
@@ -557,9 +574,19 @@ function SessionSegment({
               onClick={onEndSession}
               className="btn-secondary w-full border-status-error/50 bg-status-error-surface text-status-error"
             >
-              End session
+              End session for everyone
             </button>
           </>
+        ) : null}
+
+        {onLeaveSession ? (
+          <button
+            type="button"
+            onClick={onLeaveSession}
+            className="btn-secondary w-full"
+          >
+            Leave session
+          </button>
         ) : null}
       </div>
     </div>

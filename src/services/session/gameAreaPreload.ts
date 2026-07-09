@@ -70,13 +70,39 @@ async function runTrackedPreloadJob(
 async function runPreloadQueue(
   gameAreaKey: string,
   jobs: Array<() => Promise<unknown>>,
+  signal?: AbortSignal,
 ): Promise<void> {
   for (let index = 0; index < jobs.length; index += 1) {
+    if (signal?.aborted) {
+      return;
+    }
+
     await runTrackedPreloadJob(gameAreaKey, jobs[index]);
+    if (signal?.aborted) {
+      return;
+    }
+
     if (index < jobs.length - 1) {
       await sleep(PRELOAD_JOB_GAP_MS);
     }
   }
+}
+
+let activePreloadAbort: AbortController | null = null;
+
+function handleVisibilityForPreload(): void {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  if (document.visibilityState === "hidden") {
+    activePreloadAbort?.abort();
+    activePreloadAbort = null;
+  }
+}
+
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", handleVisibilityForPreload);
 }
 
 export function preloadGameAreaCaches(gameArea: GameArea): void {
@@ -84,7 +110,15 @@ export function preloadGameAreaCaches(gameArea: GameArea): void {
   const jobs = buildPreloadJobs(gameArea);
   usePreloadStore.getState().reset(gameAreaKey, jobs.length);
 
-  void runPreloadQueue(gameAreaKey, jobs);
+  activePreloadAbort?.abort();
+  activePreloadAbort = new AbortController();
+  const { signal } = activePreloadAbort;
+
+  if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+    return;
+  }
+
+  void runPreloadQueue(gameAreaKey, jobs, signal);
 }
 
 export async function preloadCriticalGameAreaCaches(
