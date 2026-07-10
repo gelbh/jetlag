@@ -18,7 +18,7 @@ export function MapStyleToggle({
     <button
       type="button"
       onClick={() => onMapStyleChange(nextStyle)}
-      className="pointer-events-auto fixed z-[var(--z-dock)] hud-chrome bottom-[calc(var(--dock-height)+env(safe-area-inset-bottom)+0.75rem)] left-[max(0.75rem,env(safe-area-inset-left))] h-11 w-11 shadow-none sm:h-12 sm:w-12"
+      className="pointer-events-auto fixed z-[var(--z-dock)] hud-chrome bottom-[calc(var(--dock-total-height)+var(--chrome-gap-bottom))] left-[max(0.75rem,env(safe-area-inset-left))] h-11 w-11 shadow-none sm:h-12 sm:w-12"
       aria-label={label}
       title={label}
     >

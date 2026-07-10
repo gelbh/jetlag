@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Map: tool dock no longer shows empty space below icons on iPhone home-screen installs
+- Map: compact tool dock height on iPhone no longer stacks icon row and safe-area padding
 - Map: tool panel minimizes instantly when panning and stays pinned to the screen bottom while the dock hides
 - Photo uploads: fix production Storage permissions so hiders can upload on mobile
 - Photo uploads: accept gallery picks with missing file types; clearer unsupported format errors

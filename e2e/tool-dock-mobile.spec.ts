@@ -172,6 +172,12 @@ test.describe("iPhone 13 PWA safe area", () => {
           : 0,
         lowestSlotBottom,
         gapBelowDock: window.innerHeight - (dockRect?.bottom ?? 0),
+        deadSpaceBelowIcons:
+          (barRect?.bottom ?? 0) -
+          lowestSlotBottom -
+          (bar
+            ? Number.parseFloat(getComputedStyle(bar).paddingBottom)
+            : 0),
       };
     });
 
@@ -187,9 +193,16 @@ test.describe("iPhone 13 PWA safe area", () => {
       1,
     );
     expect(metrics.wrapperBandHeight).toBeLessThanOrEqual(1);
-    expect(metrics.barHeight).toBeLessThan(90);
+    expect(metrics.barHeight).toBeLessThanOrEqual(90);
+    expect(metrics.deadSpaceBelowIcons).toBeLessThanOrEqual(8);
     expect(metrics.lowestSlotBottom).toBeLessThanOrEqual(
       metrics.barBottom - SIMULATED_SAFE_AREA_BOTTOM_PX + 4,
+    );
+  });
+
+  test("matches compact dock screenshot with safe area", async ({ page }) => {
+    await expect(page.locator(".jl-tool-dock-bar")).toHaveScreenshot(
+      "tool-dock-compact-iphone13-safe-area.png",
     );
   });
 });
