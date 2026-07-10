@@ -107,6 +107,23 @@ export function HudLayersIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function HudPlusIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </IconBase>
+  );
+}
+
+export function HudMinusIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="M5 12h14" />
+    </IconBase>
+  );
+}
+
 export function HudRefreshIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <IconBase {...props}>

@@ -9,6 +9,8 @@ import type {
 import { getMapBasemap, type MapStyle } from "../../domain/map/mapBasemaps";
 import { isUsableMapBounds } from "../../domain/geometry/geometry";
 import { MapChromeListener } from "./MapChromeListener";
+import { MapStyleToggle } from "./MapStyleToggle";
+import { MapZoomControl, type MapZoomControlInset } from "./MapZoomControl";
 
 interface MapViewProps {
   center?: LatLngExpression;
@@ -30,6 +32,12 @@ interface MapViewProps {
   /** Increment to programmatically refit focusBounds (e.g. Recenter button). */
   recenterToken?: number;
   showZoomControl?: boolean;
+  zoomControlInset?: MapZoomControlInset;
+  /** User preference shown on the map style toggle; defaults to mapStyle. */
+  mapStylePreference?: MapStyle;
+  onMapStyleChange?: (style: MapStyle) => void;
+  showMapStyleToggle?: boolean;
+  mapStyleControlInset?: MapZoomControlInset;
   children?: React.ReactNode;
   mapKey?: string;
 }
@@ -84,20 +92,6 @@ function MapFocus({
 
     map.on("moveend", onMoveEnd);
   }, [focusBounds, fitBoundsMode, fitBoundsPadding, map, recenterToken, suppressChromeHideRef]);
-
-  return null;
-}
-
-function MapMobileControls({ enabled }: { enabled: boolean }) {
-  const map = useMap();
-
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    map.zoomControl.setPosition("bottomright");
-  }, [enabled, map]);
 
   return null;
 }
@@ -223,11 +217,21 @@ export function MapView({
   fitBoundsPadding,
   recenterToken = 0,
   showZoomControl,
+  zoomControlInset = "dock",
+  mapStylePreference,
+  onMapStyleChange,
+  showMapStyleToggle,
+  mapStyleControlInset,
   children,
   mapKey,
 }: MapViewProps) {
   const basemap = getMapBasemap(mapStyle);
   const zoomControlEnabled = showZoomControl ?? interactive;
+  const mapStyleToggleEnabled =
+    (showMapStyleToggle ?? Boolean(onMapStyleChange)) &&
+    Boolean(onMapStyleChange);
+  const styleControlInset = mapStyleControlInset ?? zoomControlInset;
+  const toggleMapStyle = mapStylePreference ?? mapStyle;
 
   return (
     <div className={className ?? "h-full w-full"}>
@@ -240,7 +244,7 @@ export function MapView({
         dragging={interactive}
         doubleClickZoom={interactive}
         touchZoom={interactive}
-        zoomControl={zoomControlEnabled}
+        zoomControl={false}
         className={
           interactive ? "h-full w-full" : "h-full w-full pointer-events-auto"
         }
@@ -270,7 +274,20 @@ export function MapView({
           suppressChromeHideRef={suppressChromeHideRef}
           fitBoundsPadding={fitBoundsPadding}
         />
-        <MapMobileControls enabled={zoomControlEnabled} />
+        <MapZoomControl
+          enabled={zoomControlEnabled}
+          inset={zoomControlInset}
+          suppressRef={suppressChromeHideRef}
+        />
+        {onMapStyleChange ? (
+          <MapStyleToggle
+            enabled={mapStyleToggleEnabled}
+            mapStyle={toggleMapStyle}
+            onMapStyleChange={onMapStyleChange}
+            inset={styleControlInset}
+            suppressRef={suppressChromeHideRef}
+          />
+        ) : null}
         <MapResize />
         {children}
       </MapContainer>

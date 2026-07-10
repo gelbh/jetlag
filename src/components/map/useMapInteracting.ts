@@ -1,35 +1,14 @@
-import { useEffect, useRef, type MutableRefObject } from "react";
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { useMap } from "react-leaflet";
 
-interface MapChromeListenerProps {
-  chromeHudRef: MutableRefObject<HTMLElement | null>;
-  suppressRef?: MutableRefObject<boolean>;
-}
-
-function setHudInteracting(hud: HTMLElement | null, interacting: boolean): void {
-  if (!hud) {
-    return;
-  }
-
-  if (interacting) {
-    hud.dataset.mapInteracting = "true";
-  } else {
-    delete hud.dataset.mapInteracting;
-  }
-}
-
-export function MapChromeListener({
-  chromeHudRef,
-  suppressRef,
-}: MapChromeListenerProps) {
+export function useMapInteracting(
+  suppressRef?: MutableRefObject<boolean>,
+): boolean {
   const map = useMap();
+  const [interacting, setInteracting] = useState(false);
   const countRef = useRef(0);
 
   useEffect(() => {
-    const setInteracting = (interacting: boolean) => {
-      setHudInteracting(chromeHudRef.current, interacting);
-    };
-
     const showIfIdle = () => {
       if (countRef.current === 0) {
         setInteracting(false);
@@ -52,7 +31,6 @@ export function MapChromeListener({
       showIfIdle();
     };
 
-    // Recovers missed dragend when touch gestures hand off to pinch-zoom.
     const onMoveEnd = () => {
       if (countRef.current === 0) {
         return;
@@ -70,10 +48,10 @@ export function MapChromeListener({
       map.off("dragstart", start);
       map.off("dragend", end);
       map.off("moveend", onMoveEnd);
-      setInteracting(false);
       countRef.current = 0;
+      setInteracting(false);
     };
-  }, [map, chromeHudRef, suppressRef]);
+  }, [map, suppressRef]);
 
-  return null;
+  return interacting;
 }

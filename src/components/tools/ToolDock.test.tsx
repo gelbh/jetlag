@@ -86,8 +86,6 @@ describe("ToolOverflowSheet", () => {
     onUndo: vi.fn(),
     onRedo: vi.fn(),
     onOpenSettings: vi.fn(),
-    mapStyle: "standard" as const,
-    onMapStyleChange: vi.fn(),
     onOpenChat: vi.fn(),
   };
 

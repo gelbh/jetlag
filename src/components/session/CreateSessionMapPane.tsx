@@ -14,6 +14,7 @@ import { type GameSize } from "../../domain/session/gameSize";
 
 interface CreateSessionMapPaneProps {
   mapStyle: MapStyle;
+  onMapStyleChange?: (style: MapStyle) => void;
   focusBounds: LatLngBoundsExpression | null;
   previewGameArea: GameArea | null;
   selectedGameSize: GameSize;
@@ -29,6 +30,7 @@ interface CreateSessionMapPaneProps {
 
 export function CreateSessionMapPane({
   mapStyle,
+  onMapStyleChange,
   focusBounds,
   previewGameArea,
   selectedGameSize,
@@ -46,6 +48,7 @@ export function CreateSessionMapPane({
       <div className="absolute inset-0">
         <MapView
           mapStyle={mapStyle}
+          onMapStyleChange={onMapStyleChange}
           onBoundsChange={onBoundsChange}
           onUserViewportFramed={onUserViewportFramed}
           onMapClick={onMapClick}
@@ -53,6 +56,7 @@ export function CreateSessionMapPane({
           focusBounds={focusBounds}
           fitBoundsMode="once"
           fitBoundsPadding={[48, 48]}
+          zoomControlInset="container"
           className="h-full w-full"
         >
           {manualFramingActive ? (

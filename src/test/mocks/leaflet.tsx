@@ -43,6 +43,14 @@ export function useMap() {
       getWest: () => -6.45,
       getEast: () => -6.08,
     }),
+    getContainer: () => document.createElement("div"),
+    getZoom: () => 12,
+    getMinZoom: () => 0,
+    getMaxZoom: () => 20,
+    zoomIn: () => undefined,
+    zoomOut: () => undefined,
+    on: () => undefined,
+    off: () => undefined,
     latLngToContainerPoint: () => ({ x: 0, y: 0 }),
   };
 }

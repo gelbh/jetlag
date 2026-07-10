@@ -41,6 +41,7 @@ export interface GameAreaFramingController {
 interface GameAreaFramingModalProps {
   open: boolean;
   mapStyle: MapStyle;
+  onMapStyleChange?: (style: MapStyle) => void;
   framing: GameAreaFramingController;
   /** Place search or saved area shown until the user draws on the map. */
   referenceGameArea?: GameArea | null;
@@ -52,6 +53,7 @@ interface GameAreaFramingModalProps {
 export function GameAreaFramingModal({
   open,
   mapStyle,
+  onMapStyleChange,
   framing,
   referenceGameArea = null,
   referenceFocusBounds = null,
@@ -101,10 +103,13 @@ export function GameAreaFramingModal({
       <div className="absolute inset-0">
         <MapView
           mapStyle={mapStyle}
+          onMapStyleChange={onMapStyleChange}
           zoom={10}
           focusBounds={effectiveFocusBounds}
           fitBoundsPadding={[56, 56]}
           showZoomControl
+          zoomControlInset="safe-area"
+          mapStyleControlInset="safe-area"
           onBoundsChange={framing.handleBoundsChange}
           onUserViewportFramed={framing.handleUserViewportFramed}
           onMapClick={framing.handleMapClick}

@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import type { MapStyle } from "../../domain/map/mapBasemaps";
 import {
   MAP_TOOL_DOCK_ENTRIES,
   isMarkupDockTool,
@@ -10,7 +9,6 @@ import type { MapTool } from "../../state/sessionStore";
 import { AnimatedOverlay } from "../ui/AnimatedOverlay";
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 import {
-  HudLayersIcon,
   HudPinIcon,
   HudRedoIcon,
   HudSettingsIcon,
@@ -31,8 +29,6 @@ interface ToolOverflowSheetProps {
   onOpenChat?: () => void;
   hasUnreadChat?: boolean;
   unreadCount?: number;
-  mapStyle?: MapStyle;
-  onMapStyleChange?: (style: MapStyle) => void;
   canStartEndGame?: boolean;
   onStartEndGame?: () => void;
 }
@@ -101,19 +97,9 @@ export function ToolOverflowSheet({
   onOpenChat,
   hasUnreadChat = false,
   unreadCount = 0,
-  mapStyle,
-  onMapStyleChange,
   canStartEndGame = false,
   onStartEndGame,
 }: ToolOverflowSheetProps) {
-  const nextMapStyle = mapStyle === "standard" ? "satellite" : "standard";
-  const mapStyleLabel =
-    mapStyle === "standard" ? "Satellite view" : "Map view";
-  const mapStyleHint =
-    mapStyle === "standard"
-      ? "Switch to satellite imagery"
-      : "Switch to standard map tiles";
-
   const closeAnd = (action: () => void) => {
     action();
     onClose();
@@ -182,17 +168,6 @@ export function ToolOverflowSheet({
             hint="Reveal hiding zone only. Hider must stay put"
             onClick={() => closeAnd(onStartEndGame)}
             ariaLabel="Start end game"
-          />
-        ) : null}
-
-        {mapStyle && onMapStyleChange ? (
-          <ToolOverflowRow
-            icon={<HudLayersIcon className="h-5 w-5" />}
-            title={mapStyleLabel}
-            hint={mapStyleHint}
-            active={mapStyle === "satellite"}
-            onClick={() => closeAnd(() => onMapStyleChange(nextMapStyle))}
-            ariaLabel={mapStyleLabel}
           />
         ) : null}
 

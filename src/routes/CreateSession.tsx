@@ -95,6 +95,7 @@ export function CreateSession() {
   const savePreset = useGamePresetStore((state) => state.savePreset);
   const setSession = useSessionStore((state) => state.setSession);
   const mapStyle = useMapStore((state) => state.mapStyle);
+  const setMapStyle = useMapStore((state) => state.setMapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const framing = useGameAreaFraming();
   const [framingModalOpen, setFramingModalOpen] = useState(false);
@@ -563,6 +564,7 @@ export function CreateSession() {
     <div className="flex h-full min-h-[100dvh] flex-col bg-surface-deep">
       <CreateSessionMapPane
         mapStyle={mapStyle}
+        onMapStyleChange={setMapStyle}
         focusBounds={mapFocusBounds}
         previewGameArea={mapPreviewGameArea ?? previewGameArea}
         selectedGameSize={gameSize}
@@ -585,6 +587,7 @@ export function CreateSession() {
       <GameAreaFramingModal
         open={framingModalOpen}
         mapStyle={mapStyle}
+        onMapStyleChange={setMapStyle}
         framing={framing}
         referenceGameArea={!manualFramingActive ? previewGameArea : null}
         referenceFocusBounds={!manualFramingActive ? mapFocusBounds : null}

@@ -36,6 +36,7 @@ export function GamePresetEditor() {
   const navigate = useNavigate();
   const { id } = useParams();
   const mapStyle = useMapStore((state) => state.mapStyle);
+  const setMapStyle = useMapStore((state) => state.setMapStyle);
   const presets = useGamePresetStore((state) => state.presets);
   const savePreset = useGamePresetStore((state) => state.savePreset);
   const deletePreset = useGamePresetStore((state) => state.deletePreset);
@@ -139,6 +140,7 @@ export function GamePresetEditor() {
       <GameAreaFramingModal
         open={framingModalOpen}
         mapStyle={mapStyle}
+        onMapStyleChange={setMapStyle}
         framing={framing}
         referenceGameArea={!framing.userFramed ? gameArea : null}
         referenceFocusBounds={

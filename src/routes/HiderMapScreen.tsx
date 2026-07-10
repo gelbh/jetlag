@@ -439,6 +439,9 @@ export function HiderMapScreen() {
           key={session.id}
           mapKey={session.id}
           mapStyle={effectiveBasemapStyle}
+          mapStylePreference={mapStyle}
+          onMapStyleChange={setMapStyle}
+          mapStyleControlInset="hider-actions"
           center={center}
           zoom={12}
           focusBounds={mapFocusBounds}

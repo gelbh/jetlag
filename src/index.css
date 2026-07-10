@@ -1852,26 +1852,155 @@ textarea {
   display: none !important;
 }
 
-.leaflet-control-zoom {
-  margin-bottom: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock) + 0.5rem
-  ) !important;
-  margin-right: max(0.75rem, env(safe-area-inset-right)) !important;
+.map-zoom-control {
+  position: absolute;
+  z-index: var(--z-dock);
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  right: max(0.75rem, env(safe-area-inset-right));
+  pointer-events: auto;
 }
 
-.map-chrome-hud[data-map-interacting="true"],
-.leaflet-control-zoom[data-map-interacting="true"] {
-  opacity: 0;
-  pointer-events: none;
-  transition: none;
+.map-style-control {
+  position: absolute;
+  z-index: var(--z-dock);
+  left: max(0.75rem, env(safe-area-inset-left));
+  pointer-events: auto;
+}
+
+.map-style-control__btn,
+.map-zoom-control__btn {
+  box-shadow: none;
+}
+
+.map-style-control__btn {
+  height: 2.75rem;
+  width: 2.75rem;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding: 0;
+  overflow: hidden;
+}
+
+.map-style-control__preview {
+  position: relative;
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.map-style-control__tiles {
+  display: grid;
+  height: 100%;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  background: var(--color-map-canvas);
+}
+
+.map-style-control__tile {
+  display: block;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.map-style-control__label {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: oklch(from var(--color-surface-deep) l c h / 0.78);
+  padding: 0.125rem 0.2rem;
+  text-align: center;
+  font-family: "Barlow Semi Condensed", "Source Sans 3", system-ui, sans-serif;
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.map-style-control__btn--active {
+  border-color: oklch(from var(--color-highlight) l c h / 0.55);
+  box-shadow:
+    0 0 0 1px oklch(from var(--color-highlight) l c h / 0.35),
+    var(--shadow-hud-float);
+}
+
+.map-zoom-control__btn {
+  height: 2.75rem;
+  width: 2.75rem;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+}
+
+.map-zoom-control--dock,
+.map-style-control--dock {
+  bottom: calc(
+    var(--dock-total-height) + var(--chrome-gap-above-dock) + 0.5rem
+  );
+}
+
+.map-zoom-control--safe-area,
+.map-style-control--safe-area {
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+.map-zoom-control--container,
+.map-style-control--container {
+  bottom: 4.25rem;
+}
+
+.map-zoom-control--hider-actions,
+.map-style-control--hider-actions {
+  bottom: calc(
+    var(--hider-action-bar-height) + var(--chrome-gap-above-dock) + 0.5rem
+  );
+}
+
+@media (min-width: 40rem) {
+  .map-style-control__btn {
+    height: 3rem;
+    width: 3rem;
+    min-height: 3rem;
+    min-width: 3rem;
+  }
+
+  .map-style-control__label {
+    font-size: 0.5625rem;
+  }
+
+  .map-zoom-control__btn {
+    height: 3rem;
+    width: 3rem;
+    min-height: 3rem;
+    min-width: 3rem;
+  }
 }
 
 @media (max-width: 28rem) {
-  .leaflet-bottom.leaflet-right {
-    margin-bottom: calc(
+  .map-zoom-control--dock,
+  .map-style-control--dock {
+    bottom: calc(
       var(--dock-total-height) + var(--chrome-gap-above-dock) + 2.5rem
-    ) !important;
+    );
   }
+}
+
+html:not([data-motion="reduced"]) .map-zoom-control,
+html:not([data-motion="reduced"]) .map-style-control {
+  transition: opacity var(--motion-base) var(--ease-out-quint);
+}
+
+.map-chrome-hud[data-map-interacting="true"],
+.map-zoom-control[data-map-interacting="true"],
+.map-style-control[data-map-interacting="true"] {
+  opacity: 0;
+  pointer-events: none;
+  transition: none;
 }
 
 .map-crosshair {
@@ -2131,6 +2260,14 @@ html[data-motion="reduced"] ::view-transition-new(*) {
     transition: none;
   }
 
+  .map-zoom-control {
+    transition: none;
+  }
+
+  .map-style-control {
+    transition: none;
+  }
+
   .jl-tool-dock-highlight,
   .jl-tool-dock,
   .jl-chat-keyboard-inset,
@@ -2169,6 +2306,8 @@ html[data-motion="reduced"] .route-loading-enter {
 }
 
 html[data-motion="reduced"] .map-chrome-hud,
+html[data-motion="reduced"] .map-zoom-control,
+html[data-motion="reduced"] .map-style-control,
 html[data-motion="reduced"] .jl-tool-dock-highlight,
 html[data-motion="reduced"] .jl-tool-dock,
 html[data-motion="reduced"] .jl-chat-keyboard-inset,

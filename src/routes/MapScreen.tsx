@@ -1016,6 +1016,8 @@ export function MapScreen() {
           key={session.id}
           mapKey={session.id}
           mapStyle={effectiveBasemapStyle}
+          mapStylePreference={mapStyle}
+          onMapStyleChange={setMapStyle}
           center={center}
           zoom={12}
           focusBounds={mapFocusBounds}
@@ -1153,8 +1155,6 @@ export function MapScreen() {
           onOpenChat={handleOpenChat}
           hasUnreadChat={hasUnreadChat}
           unreadCount={unreadCount}
-          mapStyle={mapStyle}
-          onMapStyleChange={setMapStyle}
           dismissOverflowMenus={overlay.sheet !== "none"}
           canSubmitQuestion={canSubmitQuestion}
           canStartEndGame={canStartEndGame}

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { MapStyle } from "../../domain/map/mapBasemaps";
 import type { GameSize } from "../../domain/session/gameSize";
 import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
@@ -16,7 +15,6 @@ import {
 import type { MapTool } from "../../state/sessionStore";
 import {
   HudDrawIcon,
-  HudLayersIcon,
   HudMoreIcon,
   HudPinIcon,
   HudRedoIcon,
@@ -42,8 +40,6 @@ interface ToolDockProps {
   onOpenChat?: () => void;
   hasUnreadChat?: boolean;
   unreadCount?: number;
-  mapStyle?: MapStyle;
-  onMapStyleChange?: (style: MapStyle) => void;
   dismissOverflowMenus?: boolean;
   canStartEndGame?: boolean;
   onStartEndGame?: () => void;
@@ -68,8 +64,6 @@ export function ToolDock({
   onOpenChat,
   hasUnreadChat = false,
   unreadCount = 0,
-  mapStyle,
-  onMapStyleChange,
   dismissOverflowMenus = false,
   canStartEndGame = false,
   onStartEndGame,
@@ -140,9 +134,6 @@ export function ToolDock({
   };
 
   const markupActive = MARKUP_DOCK_TOOL_IDS.some((toolId) => activeTool === toolId);
-  const nextMapStyle = mapStyle === "standard" ? "satellite" : "standard";
-  const mapStyleLabel =
-    mapStyle === "standard" ? "Switch to satellite view" : "Switch to map view";
 
   const rulesInput = sessionRules ?? { gameSize };
 
@@ -183,10 +174,7 @@ export function ToolDock({
     return () => window.removeEventListener("resize", updateDockHighlight);
   }, [updateDockHighlight, viewportBottomInset, visibleQuestionTools.length]);
 
-  const moreMenuActive =
-    moreMenuVisible ||
-    markupActive ||
-    (mapStyle === "satellite" && onMapStyleChange !== undefined);
+  const moreMenuActive = moreMenuVisible || markupActive;
 
   const renderQuestionTool = (
     toolId: (typeof QUESTION_DOCK_TOOL_IDS)[number],
@@ -296,8 +284,6 @@ export function ToolDock({
         onOpenChat={onOpenChat}
         hasUnreadChat={hasUnreadChat}
         unreadCount={unreadCount}
-        mapStyle={mapStyle}
-        onMapStyleChange={onMapStyleChange}
         canStartEndGame={canStartEndGame}
         onStartEndGame={onStartEndGame}
       />
@@ -381,23 +367,6 @@ export function ToolDock({
             <span className="jl-tool-slot-label">Draw</span>
           </button>
 
-          {mapStyle && onMapStyleChange ? (
-            <button
-              type="button"
-              onClick={() => onMapStyleChange(nextMapStyle)}
-              className="jl-tool-slot"
-              aria-label={mapStyleLabel}
-              title={mapStyleLabel}
-            >
-              <span className="jl-tool-slot-icon">
-                <HudLayersIcon className="h-5 w-5" />
-              </span>
-              <span className="jl-tool-slot-label">
-                {mapStyle === "standard" ? "Map" : "Sat"}
-              </span>
-            </button>
-          ) : null}
-
           {onOpenChat ? (
             <button
               type="button"
@@ -445,7 +414,7 @@ export function ToolDock({
             }
             aria-expanded={moreMenuOpen}
             aria-haspopup="dialog"
-            title="Draw, map style, chat, setup"
+            title="Draw, chat, setup"
           >
             <span className="jl-tool-slot-icon jl-unread-badge-host">
               <HudMoreIcon className="h-5 w-5" />
