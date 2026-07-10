@@ -73,9 +73,7 @@
     env(safe-area-inset-top) + var(--status-bar-height) + 1.25rem
   );
   --jl-sync-beacon-inset: max(0.625rem, env(safe-area-inset-right, 0px));
-  --jl-sync-beacon-top: calc(
-    env(safe-area-inset-top, 0px) + var(--status-bar-height) + var(--jl-sync-beacon-inset)
-  );
+  --jl-sync-beacon-inset-left: max(0.625rem, env(safe-area-inset-left, 0px));
 }
 
 @media (max-width: 639px) {
@@ -520,16 +518,25 @@ textarea {
     padding: 0.375rem 0.625rem;
   }
 
-  .jl-sync-map-indicator {
+  .jl-sync-map-indicator,
+  .jl-preload-map-indicator {
     pointer-events: none;
     position: absolute;
-    top: var(--jl-sync-beacon-top);
-    right: var(--jl-sync-beacon-inset);
+    top: calc(100% + var(--jl-sync-beacon-inset));
     z-index: calc(var(--z-banner) + 1);
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
     gap: 0.25rem;
+  }
+
+  .jl-sync-map-indicator {
+    right: var(--jl-sync-beacon-inset);
+    align-items: flex-end;
+  }
+
+  .jl-preload-map-indicator {
+    left: var(--jl-sync-beacon-inset-left);
+    align-items: flex-start;
   }
 
   .jl-sync-map-indicator__btn {
@@ -561,6 +568,11 @@ textarea {
     border: 1.5px solid var(--color-border);
     background: var(--color-surface-deep);
     box-shadow: var(--shadow-hud-float);
+  }
+
+  .jl-preload-beacon--sm {
+    width: 1.25rem;
+    height: 1.25rem;
   }
 
   .jl-preload-beacon--md {
@@ -669,6 +681,117 @@ textarea {
     min-height: 2.25rem;
     padding-inline: 0.625rem;
     font-size: 0.6875rem;
+  }
+
+  .jl-preload-detail-panel {
+    position: relative;
+    width: min(14rem, calc(100vw - 2rem));
+    padding: 0.5rem 0.625rem;
+    z-index: var(--z-panel);
+    transform-origin: top left;
+    border-radius: var(--radius-hud-md);
+    border: 2px solid var(--color-border);
+    background: var(--color-surface-panel);
+    box-shadow: var(--shadow-hud-float);
+  }
+
+  .jl-preload-detail-panel--loading {
+    border-color: oklch(from var(--color-status-info) l c h / 0.35);
+  }
+
+  .jl-preload-detail-panel--failed {
+    border-color: oklch(from var(--color-status-warning) l c h / 0.4);
+  }
+
+  .jl-preload-detail-panel__row {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .jl-preload-detail-panel__title {
+    min-width: 0;
+    flex: 1;
+    font-family:
+      "Barlow Semi Condensed",
+      "Source Sans 3",
+      system-ui,
+      sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+
+  .jl-preload-detail-panel--loading .jl-preload-detail-panel__title {
+    color: var(--color-status-info);
+  }
+
+  .jl-preload-detail-panel--failed .jl-preload-detail-panel__title {
+    color: var(--color-status-warning);
+  }
+
+  .jl-preload-detail-panel__progress {
+    margin-top: 0.375rem;
+    padding-left: 1.625rem;
+  }
+
+  .jl-preload-detail-panel__progress-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .jl-preload-detail-panel__progress-label {
+    font-family:
+      "Barlow Semi Condensed",
+      "Source Sans 3",
+      system-ui,
+      sans-serif;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-dim);
+  }
+
+  .jl-preload-detail-panel__progress-count {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--color-highlight);
+  }
+
+  .jl-preload-detail-panel__progress-track {
+    height: 0.25rem;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: var(--color-surface-raised);
+  }
+
+  .jl-preload-detail-panel__progress-fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-status-info);
+    transition: width var(--motion-base) var(--ease-out-quint);
+  }
+
+  html[data-motion="reduced"] .jl-preload-detail-panel__progress-fill {
+    transition: none;
+  }
+
+  .jl-preload-detail-panel__body {
+    margin-top: 0.375rem;
+    padding-left: 1.625rem;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--color-ink-secondary);
+    text-wrap: pretty;
   }
 
   .jl-sync-beacon {

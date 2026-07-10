@@ -1,12 +1,33 @@
-import { useId, useState } from "react";
+import { useId } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { HudRefreshIcon } from "../ui/HudIcons";
 import { selectPreloadBanner, usePreloadStore } from "../../state/preloadStore";
+import { GameAreaPreloadDetailPanel } from "./GameAreaPreloadDetailPanel";
 
-export function GameAreaPreloadBeacon() {
+interface GameAreaPreloadBeaconProps {
+  detailOpen: boolean;
+  onDetailOpenChange: (open: boolean) => void;
+}
+
+function preloadBeaconAriaLabel(
+  title: string,
+  loading: boolean,
+  completedJobs: number,
+  totalJobs: number,
+): string {
+  if (loading) {
+    return `${title}. ${completedJobs} of ${totalJobs} complete. Show details`;
+  }
+
+  return `${title}. Show details`;
+}
+
+export function GameAreaPreloadBeacon({
+  detailOpen,
+  onDetailOpenChange,
+}: GameAreaPreloadBeaconProps) {
   const banner = usePreloadStore(useShallow(selectPreloadBanner));
   const dismiss = usePreloadStore((state) => state.dismiss);
-  const [detailOpen, setDetailOpen] = useState(false);
   const detailId = useId();
 
   if (!banner.visible) {
@@ -14,14 +35,19 @@ export function GameAreaPreloadBeacon() {
   }
 
   return (
-    <div className="jl-preload-map-indicator pointer-events-none absolute left-[max(0.625rem,env(safe-area-inset-left))] top-[var(--jl-sync-beacon-top)] z-[var(--z-panel)] flex flex-col items-start gap-1">
+    <div className="jl-preload-map-indicator">
       <button
         type="button"
         className={`jl-sync-map-indicator__btn${detailOpen ? " jl-sync-map-indicator__btn--open" : ""}`}
-        aria-label={banner.label}
+        aria-label={preloadBeaconAriaLabel(
+          banner.title,
+          banner.loading,
+          banner.completedJobs,
+          banner.totalJobs,
+        )}
         aria-expanded={detailOpen}
         aria-controls={detailId}
-        onClick={() => setDetailOpen((open) => !open)}
+        onClick={() => onDetailOpenChange(!detailOpen)}
       >
         <span
           className={`jl-preload-beacon jl-preload-beacon--md ${
@@ -37,27 +63,24 @@ export function GameAreaPreloadBeacon() {
         </span>
       </button>
       {detailOpen ? (
-        <div
-          id={detailId}
-          className={`jl-sync-detail-panel pointer-events-auto max-w-[min(16rem,calc(100vw-2rem))] border px-3 py-2 text-xs ${
-            banner.failed
-              ? "border-status-warning/40 bg-status-warning-surface text-status-warning"
-              : "border-status-info/40 bg-status-info-surface text-status-info"
-          }`}
-          role="status"
-        >
-          <p>{banner.label}</p>
-          {!banner.loading ? (
-            <button
-              type="button"
-              onClick={dismiss}
-              className="mt-1 min-h-11 font-medium underline underline-offset-2"
-            >
-              Dismiss
-            </button>
-          ) : (
-            <p className="mt-1 text-ink-muted motion-reduce:animate-none">Loading…</p>
-          )}
+        <div id={detailId}>
+          <GameAreaPreloadDetailPanel
+            loading={banner.loading}
+            failed={banner.failed}
+            title={banner.title}
+            body={banner.body}
+            completedJobs={banner.completedJobs}
+            totalJobs={banner.totalJobs}
+            onClose={() => onDetailOpenChange(false)}
+            onDismiss={
+              banner.failed
+                ? () => {
+                    dismiss();
+                    onDetailOpenChange(false);
+                  }
+                : undefined
+            }
+          />
         </div>
       ) : null}
     </div>

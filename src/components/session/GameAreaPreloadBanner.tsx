@@ -1,6 +1,7 @@
 import { useShallow } from "zustand/react/shallow";
 import { selectPreloadBanner, usePreloadStore } from "../../state/preloadStore";
 
+/** @deprecated Use GameAreaPreloadBeacon on the map HUD instead. */
 export function GameAreaPreloadBanner() {
   const banner = usePreloadStore(useShallow(selectPreloadBanner));
   const dismiss = usePreloadStore((state) => state.dismiss);
@@ -19,7 +20,10 @@ export function GameAreaPreloadBanner() {
       role="status"
     >
       <div className="flex items-start justify-between gap-3">
-        <p>{banner.label}</p>
+        <div>
+          <p className="font-semibold">{banner.title}</p>
+          <p className="mt-0.5 text-xs">{banner.body}</p>
+        </div>
         {!banner.loading ? (
           <button
             type="button"

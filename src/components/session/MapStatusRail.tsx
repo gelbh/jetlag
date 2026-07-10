@@ -206,6 +206,7 @@ export function MapStatusRail({
 }: MapStatusRailProps) {
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
   const [syncMenuOpen, setSyncMenuOpen] = useState(false);
+  const [preloadMenuOpen, setPreloadMenuOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
   const placing = activeTool !== "none";
   const modeLabel = placing
@@ -228,6 +229,7 @@ export function MapStatusRail({
     syncStatus === "saving";
   const showTimerMenu = timerMenuOpen && !closeTimerMenu;
   const showSyncMenu = syncMenuOpen && !closeTimerMenu;
+  const showPreloadMenu = preloadMenuOpen && !closeTimerMenu;
   const syncActionLabel =
     syncErrorDisplay?.actionLabel ??
     (syncStatus === "offline" || syncStatus === "degraded" || syncStatus === "error"
@@ -235,7 +237,7 @@ export function MapStatusRail({
       : null);
 
   useEffect(() => {
-    if (!showTimerMenu && !showSyncMenu) {
+    if (!showTimerMenu && !showSyncMenu && !showPreloadMenu) {
       return;
     }
 
@@ -243,6 +245,7 @@ export function MapStatusRail({
       if (railRef.current && !railRef.current.contains(event.target as Node)) {
         setTimerMenuOpen(false);
         setSyncMenuOpen(false);
+        setPreloadMenuOpen(false);
       }
     };
 
@@ -250,6 +253,7 @@ export function MapStatusRail({
       if (event.key === "Escape") {
         setTimerMenuOpen(false);
         setSyncMenuOpen(false);
+        setPreloadMenuOpen(false);
       }
     };
 
@@ -259,7 +263,7 @@ export function MapStatusRail({
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [showSyncMenu, showTimerMenu]);
+  }, [showPreloadMenu, showSyncMenu, showTimerMenu]);
 
   return (
     <div
@@ -267,43 +271,6 @@ export function MapStatusRail({
       className="jl-status-rail pointer-events-none absolute inset-x-0 top-0 z-[var(--z-banner)] pt-[max(0px,env(safe-area-inset-top))]"
     >
       <div className="relative">
-        {showPreloadBanner ? <GameAreaPreloadBeacon /> : null}
-        {showSyncDot ? (
-          <div className="jl-sync-map-indicator">
-            <button
-              type="button"
-              className={`jl-sync-map-indicator__btn${showSyncMenu ? " jl-sync-map-indicator__btn--open" : ""}`}
-              onClick={() => {
-                setSyncMenuOpen((open) => !open);
-                setTimerMenuOpen(false);
-              }}
-              aria-expanded={showSyncMenu}
-              aria-haspopup="dialog"
-              aria-label={syncBeaconAriaLabel(syncStatus)}
-            >
-              <SyncStatusBeacon status={syncStatus} size="md" />
-            </button>
-
-            {showSyncMenu ? (
-              <SyncStatusDetailPanel
-                status={syncStatus}
-                title={syncDetail.title}
-                body={syncDetail.body}
-                actionLabel={syncActionLabel}
-                onAction={
-                  syncActionLabel && onSyncErrorAction
-                    ? () => {
-                        onSyncErrorAction();
-                        setSyncMenuOpen(false);
-                      }
-                    : undefined
-                }
-                onClose={() => setSyncMenuOpen(false)}
-              />
-            ) : null}
-          </div>
-        ) : null}
-
         {showTimerMenu ? (
           <div
             className="hud-panel pointer-events-auto absolute inset-x-3 top-[calc(100%+0.375rem)] z-[var(--z-panel)] mx-auto max-w-md space-y-2 p-3 pt-10"
@@ -331,6 +298,54 @@ export function MapStatusRail({
 
         <div className="jl-status-bar">
           <ScreenNav variant="home" />
+          {showPreloadBanner ? (
+            <GameAreaPreloadBeacon
+              detailOpen={showPreloadMenu}
+              onDetailOpenChange={(open) => {
+                setPreloadMenuOpen(open);
+                if (open) {
+                  setTimerMenuOpen(false);
+                  setSyncMenuOpen(false);
+                }
+              }}
+            />
+          ) : null}
+          {showSyncDot ? (
+            <div className="jl-sync-map-indicator">
+              <button
+                type="button"
+                className={`jl-sync-map-indicator__btn${showSyncMenu ? " jl-sync-map-indicator__btn--open" : ""}`}
+                onClick={() => {
+                  setSyncMenuOpen((open) => !open);
+                  setTimerMenuOpen(false);
+                  setPreloadMenuOpen(false);
+                }}
+                aria-expanded={showSyncMenu}
+                aria-haspopup="dialog"
+                aria-label={syncBeaconAriaLabel(syncStatus)}
+              >
+                <SyncStatusBeacon status={syncStatus} size="md" />
+              </button>
+
+              {showSyncMenu ? (
+                <SyncStatusDetailPanel
+                  status={syncStatus}
+                  title={syncDetail.title}
+                  body={syncDetail.body}
+                  actionLabel={syncActionLabel}
+                  onAction={
+                    syncActionLabel && onSyncErrorAction
+                      ? () => {
+                          onSyncErrorAction();
+                          setSyncMenuOpen(false);
+                        }
+                      : undefined
+                  }
+                  onClose={() => setSyncMenuOpen(false)}
+                />
+              ) : null}
+            </div>
+          ) : null}
           <div className="jl-status-bar-inner pl-[calc(2.75rem+max(0.625rem,env(safe-area-inset-left)))]">
             <div className="jl-stamp">
               <span className="jl-stamp-label">Session</span>
@@ -377,6 +392,7 @@ export function MapStatusRail({
                   onOpenTimerMenu={() => {
                     setTimerMenuOpen((open) => !open);
                     setSyncMenuOpen(false);
+                    setPreloadMenuOpen(false);
                   }}
                   timerMenuOpen={showTimerMenu}
                 />

@@ -23,6 +23,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Map: dock safe-area fix removes gap below the tool bar",
           "Map: tool dock sits flush on iPhone home-screen installs without a double bottom bar",
           "Home: safe-area background no longer shows a blue bar on notched devices",
+          "Map: sync and preload beacons sit flush below the status bar on notched iPhones and when two timers stack",
         ],
       },
       {
@@ -37,6 +38,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Advanced settings: collapsible sections with expansion and custom pack detail panels",
           "Create session: preset picker above game size; tentacle radius labels use your distance unit",
           "Map preload beacon: refresh icon matches HUD chrome and spins while map data loads",
+          "Map preload panel: progress bar, broadcast title, and dismiss action aligned with sync status popover",
           "Map HUD: borderless home button stays centered as the status bar grows; preload refresh beacon matches sync size with solid icon",
         ],
       }

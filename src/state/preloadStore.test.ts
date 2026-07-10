@@ -20,7 +20,10 @@ describe("preloadStore", () => {
       visible: true,
       loading: true,
       failed: false,
-      label: "Loading map data (1/3)…",
+      completedJobs: 1,
+      totalJobs: 3,
+      title: "Map preload",
+      body: "Caching coastlines, transit, and tool data for this play area.",
     });
   });
 
@@ -33,7 +36,10 @@ describe("preloadStore", () => {
       visible: true,
       loading: false,
       failed: true,
-      label: "Some map data failed. Tools may be slower until you retry.",
+      completedJobs: 2,
+      totalJobs: 2,
+      title: "Preload incomplete",
+      body: "Some caches failed. Tools may run slower until the next session.",
     });
   });
 

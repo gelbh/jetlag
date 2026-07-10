@@ -12,6 +12,10 @@ Presets: older saved presets migrate on load; unmigratable presets show a review
 
 Map: home nav in a fixed top-left slot; sync and preload status as compact beacons.
 
+Map: sync and preload beacons sit flush below the status bar on notched iPhones and when two timers stack.
+
+Map preload panel: progress bar, broadcast title, and dismiss action aligned with sync status popover.
+
 Map: dock safe-area fix; time trap panel no longer blocks map pan and zoom.
 
 Home: safe-area background no longer shows a blue bar on notched devices.

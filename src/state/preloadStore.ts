@@ -52,14 +52,25 @@ export function selectPreloadBanner(state: PreloadStoreState): {
   visible: boolean;
   loading: boolean;
   failed: boolean;
-  label: string;
+  completedJobs: number;
+  totalJobs: number;
+  title: string;
+  body: string;
 } {
   if (
     !state.activeGameAreaKey ||
     state.dismissed ||
     state.totalJobs === 0
   ) {
-    return { visible: false, loading: false, failed: false, label: "" };
+    return {
+      visible: false,
+      loading: false,
+      failed: false,
+      completedJobs: 0,
+      totalJobs: 0,
+      title: "",
+      body: "",
+    };
   }
 
   const finished = state.completedJobs >= state.totalJobs;
@@ -67,7 +78,15 @@ export function selectPreloadBanner(state: PreloadStoreState): {
   const failed = state.failedJobs > 0;
 
   if (!loading && !failed) {
-    return { visible: false, loading: false, failed: false, label: "" };
+    return {
+      visible: false,
+      loading: false,
+      failed: false,
+      completedJobs: 0,
+      totalJobs: 0,
+      title: "",
+      body: "",
+    };
   }
 
   if (loading) {
@@ -75,7 +94,10 @@ export function selectPreloadBanner(state: PreloadStoreState): {
       visible: true,
       loading: true,
       failed: false,
-      label: `Loading map data (${state.completedJobs}/${state.totalJobs})…`,
+      completedJobs: state.completedJobs,
+      totalJobs: state.totalJobs,
+      title: "Map preload",
+      body: "Caching coastlines, transit, and tool data for this play area.",
     };
   }
 
@@ -83,6 +105,9 @@ export function selectPreloadBanner(state: PreloadStoreState): {
     visible: true,
     loading: false,
     failed: true,
-    label: "Some map data failed. Tools may be slower until you retry.",
+    completedJobs: state.completedJobs,
+    totalJobs: state.totalJobs,
+    title: "Preload incomplete",
+    body: "Some caches failed. Tools may run slower until the next session.",
   };
 }
