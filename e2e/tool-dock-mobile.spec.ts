@@ -143,7 +143,7 @@ test.describe("iPhone 13 PWA safe area", () => {
     }, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 
-  test("dock sits flush at viewport bottom with safe area on wrapper only", async ({
+  test("dock sits flush at viewport bottom with safe area inside the bar", async ({
     page,
   }) => {
     const metrics = await page.evaluate(() => {
@@ -163,32 +163,33 @@ test.describe("iPhone 13 PWA safe area", () => {
         dockBottom: dockRect?.bottom ?? 0,
         barHeight: barRect?.height ?? 0,
         barBottom: barRect?.bottom ?? 0,
-        safeBandHeight: (dockRect?.bottom ?? 0) - (barRect?.bottom ?? 0),
+        wrapperBandHeight: (dockRect?.bottom ?? 0) - (barRect?.bottom ?? 0),
         dockPaddingBottom: dock
           ? Number.parseFloat(getComputedStyle(dock).paddingBottom)
           : 0,
-        safeAreaVar: getComputedStyle(document.documentElement).getPropertyValue(
-          "--safe-area-bottom",
-        ),
+        barPaddingBottom: bar
+          ? Number.parseFloat(getComputedStyle(bar).paddingBottom)
+          : 0,
         lowestSlotBottom,
         gapBelowDock: window.innerHeight - (dockRect?.bottom ?? 0),
       };
     });
 
-    expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(
+    expect(metrics.dockPaddingBottom).toBeLessThanOrEqual(1);
+    expect(metrics.barPaddingBottom).toBeGreaterThanOrEqual(
       SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
     );
     expect(metrics.gapBelowDock).toBeLessThanOrEqual(1);
     expect(Math.abs(metrics.dockBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
       1,
     );
-    expect(metrics.safeBandHeight).toBeGreaterThanOrEqual(
-      SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
+    expect(Math.abs(metrics.barBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
+      1,
     );
-    expect(metrics.safeBandHeight).toBeLessThanOrEqual(
-      SIMULATED_SAFE_AREA_BOTTOM_PX + 2,
-    );
+    expect(metrics.wrapperBandHeight).toBeLessThanOrEqual(1);
     expect(metrics.barHeight).toBeLessThan(90);
-    expect(metrics.lowestSlotBottom).toBeLessThanOrEqual(metrics.barBottom + 1);
+    expect(metrics.lowestSlotBottom).toBeLessThanOrEqual(
+      metrics.barBottom - SIMULATED_SAFE_AREA_BOTTOM_PX + 4,
+    );
   });
 });

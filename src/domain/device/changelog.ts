@@ -17,6 +17,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Fixes",
         items: [
+          "Map: tool dock no longer shows empty space below icons on iPhone home-screen installs",
           "Photo uploads: fix production Storage permissions so hiders can upload on mobile",
           "Photo uploads: accept gallery picks with missing file types; clearer unsupported format errors",
           "Photo uploads: remove orphaned files when saving the answer fails",
