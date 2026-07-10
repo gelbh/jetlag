@@ -26,6 +26,7 @@ import {
 import { loadCustomMeasureGeometryContext } from "../../services/geo/customMeasureGeometryFeatures";
 import { isCustomMeasureGeometryId } from "../../domain/session/customMeasureGeometry";
 import type { SessionCustomMeasureGeometry } from "../../domain/session/customMeasureGeometry";
+import type { CustomMatchingAreasByLevel } from "../../domain/session/sessionCustomContent";
 import { loadSeaLevelContext } from "../../services/geo/seaLevel";
 
 const SEA_LEVEL_LOWEST_MESSAGE =
@@ -97,6 +98,7 @@ export async function fetchMeasuringLinearContext(
   subject: MeasuringSubject,
   locationCategory: MeasuringLocationCategory,
   customMeasureGeometries: readonly SessionCustomMeasureGeometry[] = [],
+  customMatchingAreas?: CustomMatchingAreasByLevel,
 ) {
   const kind = measuringFromKind(subject, locationCategory);
   if (!isMeasuringLinearLocation(subject, locationCategory)) {
@@ -135,7 +137,12 @@ export async function fetchMeasuringLinearContext(
     };
   }
 
-  const result = await loadMeasuringLinearContext(seekerPoint, gameArea, kind);
+  const result = await loadMeasuringLinearContext(
+    seekerPoint,
+    gameArea,
+    kind,
+    customMatchingAreas,
+  );
   if (!result) {
     return {
       ok: false as const,

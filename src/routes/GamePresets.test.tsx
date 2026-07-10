@@ -1,9 +1,10 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { GamePresetEditor, GamePresetList } from "./GamePresets";
 import { renderWithRouter } from "../test/renderWithRouter";
 import { useGamePresetStore } from "../state/gamePresetStore";
 import { defaultAdvancedSessionSettings } from "../domain/session/advancedSessionSettings";
+import { mergeBundledPresets } from "../domain/regions/bundledGamePresets";
 
 const navigate = vi.fn();
 
@@ -40,8 +41,8 @@ vi.mock("../services/geo/geocoding", () => ({
 }));
 
 describe("GamePresetList", () => {
-  it("renders empty state and new preset action", () => {
-    useGamePresetStore.setState({ presets: [] });
+  it("renders bundled presets and new preset action", () => {
+    useGamePresetStore.setState({ presets: mergeBundledPresets([]) });
     renderWithRouter(<GamePresetList />, { resetStores: false });
 
     expect(screen.getByRole("heading", { name: "Custom games" })).toBeInTheDocument();
@@ -49,12 +50,19 @@ describe("GamePresetList", () => {
       "href",
       "/presets/new",
     );
-    expect(screen.getByText(/No presets saved on this device/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Europe/i })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    expect(screen.queryByText("County Dublin")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Europe/i }));
+    expect(screen.getByRole("button", { name: /Ireland/i })).toBeInTheDocument();
   });
 
   it("lists saved presets with host and edit links", () => {
     useGamePresetStore.setState({
-      presets: [
+      presets: mergeBundledPresets([
         {
           id: "preset-1",
           name: "Weekly game",
@@ -64,21 +72,22 @@ describe("GamePresetList", () => {
           gameSize: "medium",
           distanceUnit: "metric",
           advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+          migrationStatus: "ok",
         },
-      ],
+      ]),
     });
 
     renderWithRouter(<GamePresetList />, { resetStores: false });
 
     expect(screen.getByText("Weekly game")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Host" })).toHaveAttribute(
-      "href",
-      "/create?preset=preset-1",
-    );
-    expect(screen.getByRole("link", { name: "Edit" })).toHaveAttribute(
-      "href",
-      "/presets/preset-1/edit",
-    );
+    const weeklyCard = screen.getByText("Weekly game").closest("li");
+    expect(weeklyCard).not.toBeNull();
+    expect(
+      within(weeklyCard as HTMLElement).getByRole("link", { name: "Host" }),
+    ).toHaveAttribute("href", "/create?preset=preset-1");
+    expect(
+      within(weeklyCard as HTMLElement).getByRole("link", { name: "Edit" }),
+    ).toHaveAttribute("href", "/presets/preset-1/edit");
   });
 });
 
@@ -129,8 +138,12 @@ describe("GamePresetEditor", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Save preset" }));
 
-    expect(useGamePresetStore.getState().presets).toHaveLength(1);
-    expect(useGamePresetStore.getState().presets[0]?.name).toBe("Dublin medium");
+    expect(useGamePresetStore.getState().presets).toHaveLength(6);
+    expect(
+      useGamePresetStore
+        .getState()
+        .presets.find((preset) => preset.name === "Dublin medium")?.name,
+    ).toBe("Dublin medium");
     expect(navigate).toHaveBeenCalledWith("/presets");
   });
 });

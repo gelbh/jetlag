@@ -5,6 +5,7 @@ import {
   migrateGamePresets,
   type GamePreset,
 } from "../domain/session/gamePreset";
+import { mergeBundledPresets } from "../domain/regions/bundledGamePresets";
 
 interface GamePresetState {
   presets: GamePreset[];
@@ -16,13 +17,14 @@ interface GamePresetState {
 export const useGamePresetStore = create<GamePresetState>()(
   persist(
     (set, get) => ({
-      presets: [],
+      presets: mergeBundledPresets([]),
       savePreset: (preset) => {
         set((state) => {
           const migrated = migrateGamePreset({
             ...preset,
             migrationStatus: "ok",
             schemaVersion: preset.schemaVersion,
+            bundled: preset.bundled ?? false,
           });
           const existingIndex = state.presets.findIndex(
             (entry) => entry.id === migrated.id,
@@ -30,14 +32,18 @@ export const useGamePresetStore = create<GamePresetState>()(
           if (existingIndex >= 0) {
             const next = [...state.presets];
             next[existingIndex] = migrated;
-            return { presets: next };
+            return { presets: mergeBundledPresets(next) };
           }
-          return { presets: [...state.presets, migrated] };
+          return {
+            presets: mergeBundledPresets([...state.presets, migrated]),
+          };
         });
       },
       deletePreset: (id) => {
         set((state) => ({
-          presets: state.presets.filter((preset) => preset.id !== id),
+          presets: mergeBundledPresets(
+            state.presets.filter((preset) => preset.id !== id),
+          ),
         }));
       },
       getPreset: (id) => {
@@ -50,9 +56,11 @@ export const useGamePresetStore = create<GamePresetState>()(
       merge: (persistedState, currentState) => ({
         ...currentState,
         ...((persistedState as GamePresetState | undefined) ?? {}),
-        presets: migrateGamePresets(
-          (persistedState as GamePresetState | undefined)?.presets ??
-            currentState.presets,
+        presets: mergeBundledPresets(
+          migrateGamePresets(
+            (persistedState as GamePresetState | undefined)?.presets ??
+              currentState.presets,
+          ),
         ),
       }),
     },

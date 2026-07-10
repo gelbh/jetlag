@@ -9,6 +9,7 @@ describe("preloadStore", () => {
       completedJobs: 0,
       failedJobs: 0,
       dismissed: false,
+      adminDivisionCounts: null,
     });
   });
 

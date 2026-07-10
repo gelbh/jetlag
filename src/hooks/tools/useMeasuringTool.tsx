@@ -39,6 +39,9 @@ import { questionCostBreakdown } from "../../domain/questions/questionRules";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import { adminBorderKindAvailability } from "../../services/geo/adminDivisionAvailability";
+import { usePreloadStore } from "../../state/preloadStore";
+import { firstUnusedCatalogOption } from "../../domain/session/toolSessionOptions";
 import { manualPinAsMeasuringPlace } from "../../domain/session/sessionCustomCatalog";
 import {
   availableMeasuringCatalog,
@@ -188,12 +191,18 @@ export function useMeasuringTool({
   const [measuringPlaces, setMeasuringPlaces] = useState<MeasuringPlace[]>([]);
   const [measuringOptionChosen, setMeasuringOptionChosen] = useState(false);
   const customMeasureGeometries = sessionRules?.customMeasureGeometries ?? [];
+  const customMatchingAreas = sessionRules?.customMatchingAreas;
+  const adminDivisionCounts = usePreloadStore((state) => state.adminDivisionCounts);
   const measuringCatalog = useMemo(
-    () =>
-      sessionRules
+    () => {
+      const catalog = sessionRules
         ? availableMeasuringCatalog(sessionRules)
-        : availableMeasuringCatalog({ gameSize: "medium" }),
-    [sessionRules],
+        : availableMeasuringCatalog({ gameSize: "medium" });
+      return catalog.filter((option) =>
+        adminBorderKindAvailability(option.id, adminDivisionCounts),
+      );
+    },
+    [adminDivisionCounts, sessionRules],
   );
   const previewBeforeSend = isPreviewQuestionBeforeSendEnabled(
     sessionRules ?? { gameSize: "medium" },
@@ -518,6 +527,7 @@ export function useMeasuringTool({
         measuringSubject,
         measuringLocationCategory,
         customMeasureGeometries,
+        customMatchingAreas,
       );
 
       if (requestId !== linearRequestId.current) {
@@ -712,8 +722,14 @@ export function useMeasuringTool({
       measuringSubject,
       measuringLocationCategory,
     ),
-    isAvailable: () => isMeasuringFromKindAvailable(),
-    pickNext: firstAvailableMeasuringFromKind,
+    isAvailable: (_usedOptions, currentOption) =>
+      isMeasuringFromKindAvailable() &&
+      adminBorderKindAvailability(currentOption, adminDivisionCounts),
+    pickNext: (usedOptions) =>
+      firstUnusedCatalogOption<MeasuringFromKind>(
+        measuringCatalog,
+        usedOptions,
+      ),
     onUnavailable: handleUnavailableMeasuringOption,
   });
 
@@ -937,7 +953,8 @@ export function useMeasuringTool({
     }
 
     if (
-      !isMeasuringFromKindAvailable()
+      !isMeasuringFromKindAvailable() ||
+      !adminBorderKindAvailability(measureFromKind, adminDivisionCounts)
     ) {
       setMeasuringError("That measure category has already been added.");
       return;

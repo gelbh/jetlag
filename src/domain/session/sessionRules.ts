@@ -80,6 +80,7 @@ export type SessionRulesInput = Pick<
   | "customCategories"
   | "customLocationPins"
   | "customMeasureGeometries"
+  | "regionPackId"
   | "expansionPackEnabled"
   | "customQuestionPackEnabled"
   | "previewQuestionBeforeSend"
@@ -111,6 +112,7 @@ export function sessionRulesFromRecord(
     customCategories: session.customCategories,
     customLocationPins: session.customLocationPins,
     customMeasureGeometries: session.customMeasureGeometries,
+    regionPackId: session.regionPackId,
     expansionPackEnabled: session.expansionPackEnabled,
     customQuestionPackEnabled: session.customQuestionPackEnabled,
     previewQuestionBeforeSend: session.previewQuestionBeforeSend,

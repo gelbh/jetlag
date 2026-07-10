@@ -32,6 +32,8 @@ export type MeasuringFromKind =
   | "international_border"
   | "admin1_border"
   | "admin2_border"
+  | "admin3_border"
+  | "admin4_border"
   | "sea_level"
   | "body_of_water"
   | "coastline"
@@ -167,6 +169,32 @@ export const MEASURING_CATALOG = [
     targetKind: "linear",
     overpassSelectors: [],
     linearSelectors: ['["boundary"="administrative"]["admin_level"="6"]'],
+    supportsSearch: false,
+    supportsNearest: false,
+    supportsMapTarget: false,
+  },
+  {
+    id: "admin3_border",
+    groupId: "borders",
+    label: "3rd admin. div. border",
+    promptNoun: "a third-level administrative division border",
+    subject: "location",
+    targetKind: "linear",
+    overpassSelectors: [],
+    linearSelectors: ['["boundary"="administrative"]["admin_level"="8"]'],
+    supportsSearch: false,
+    supportsNearest: false,
+    supportsMapTarget: false,
+  },
+  {
+    id: "admin4_border",
+    groupId: "borders",
+    label: "4th admin. div. border",
+    promptNoun: "a fourth-level administrative division border",
+    subject: "location",
+    targetKind: "linear",
+    overpassSelectors: [],
+    linearSelectors: ['["boundary"="administrative"]["admin_level"="9"]'],
     supportsSearch: false,
     supportsNearest: false,
     supportsMapTarget: false,

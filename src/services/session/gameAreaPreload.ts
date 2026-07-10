@@ -1,6 +1,8 @@
 import type { GameArea } from "../../domain/map/annotations";
 import type { MeasuringLocationCategory } from "../../domain/questions/measuringQuestions";
+import type { CustomMatchingAreasByLevel } from "../../domain/session/sessionCustomContent";
 import { fetchAdminDivisionFeaturesInArea } from "../geo/adminDivisionBoundaries";
+import { probeAdminDivisionCounts } from "../geo/adminDivisionAvailability";
 import { fetchPreparedCoastlineSegments } from "../geo/coastline";
 import { fetchLandmassFeaturesInArea } from "../geo/landmassFeatures";
 import { fetchMeasuringPlacesInArea } from "../geo/measuringPlaces";
@@ -8,7 +10,7 @@ import { fetchPreparedMeasuringLinearSegments } from "../geo/measuringLinearFeat
 import { fetchStaticTransit } from "../transit/transitStatic";
 import { usePreloadStore } from "../../state/preloadStore";
 
-const PRELOAD_ADMIN_LEVELS = [4, 6, 8] as const;
+const PRELOAD_ADMIN_LEVELS = [4, 6, 8, 9] as const;
 const PRELOAD_JOB_GAP_MS = 400;
 
 const PRELOAD_MEASURING_CATEGORIES = [
@@ -19,7 +21,12 @@ const PRELOAD_MEASURING_CATEGORIES = [
   "museum",
 ] as const satisfies readonly MeasuringLocationCategory[];
 
-const PRELOAD_LINEAR_KINDS = ["international_border", "admin2_border"] as const;
+const PRELOAD_LINEAR_KINDS = [
+  "international_border",
+  "admin2_border",
+  "admin3_border",
+  "admin4_border",
+] as const;
 
 export function gameAreaPreloadKey(gameArea: GameArea): string {
   return JSON.stringify(gameArea.coordinates);
@@ -27,15 +34,29 @@ export function gameAreaPreloadKey(gameArea: GameArea): string {
 
 function buildPreloadJobs(
   gameArea: GameArea,
+  customMatchingAreas?: CustomMatchingAreasByLevel,
 ): Array<() => Promise<unknown>> {
   const jobs: Array<() => Promise<unknown>> = [
     () => fetchPreparedCoastlineSegments(gameArea),
     () => fetchLandmassFeaturesInArea(gameArea),
     () => fetchStaticTransit(gameArea),
+    () =>
+      probeAdminDivisionCounts(gameArea, customMatchingAreas).then((counts) => {
+        usePreloadStore
+          .getState()
+          .setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);
+        return counts;
+      }),
   ];
 
   for (const adminLevel of PRELOAD_ADMIN_LEVELS) {
-    jobs.push(() => fetchAdminDivisionFeaturesInArea(gameArea, adminLevel));
+    jobs.push(() =>
+      fetchAdminDivisionFeaturesInArea(
+        gameArea,
+        adminLevel,
+        customMatchingAreas?.[adminLevel],
+      ),
+    );
   }
 
   for (const category of PRELOAD_MEASURING_CATEGORIES) {
@@ -43,7 +64,9 @@ function buildPreloadJobs(
   }
 
   for (const kind of PRELOAD_LINEAR_KINDS) {
-    jobs.push(() => fetchPreparedMeasuringLinearSegments(gameArea, kind));
+    jobs.push(() =>
+      fetchPreparedMeasuringLinearSegments(gameArea, kind, customMatchingAreas),
+    );
   }
 
   return jobs;
@@ -105,9 +128,12 @@ if (typeof document !== "undefined") {
   document.addEventListener("visibilitychange", handleVisibilityForPreload);
 }
 
-export function preloadGameAreaCaches(gameArea: GameArea): void {
+export function preloadGameAreaCaches(
+  gameArea: GameArea,
+  customMatchingAreas?: CustomMatchingAreasByLevel,
+): void {
   const gameAreaKey = gameAreaPreloadKey(gameArea);
-  const jobs = buildPreloadJobs(gameArea);
+  const jobs = buildPreloadJobs(gameArea, customMatchingAreas);
   usePreloadStore.getState().reset(gameAreaKey, jobs.length);
 
   activePreloadAbort?.abort();
@@ -123,12 +149,22 @@ export function preloadGameAreaCaches(gameArea: GameArea): void {
 
 export async function preloadCriticalGameAreaCaches(
   gameArea: GameArea,
+  customMatchingAreas?: CustomMatchingAreasByLevel,
 ): Promise<void> {
+  const counts = await probeAdminDivisionCounts(gameArea, customMatchingAreas);
+  usePreloadStore
+    .getState()
+    .setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);
+
   await Promise.allSettled([
     fetchPreparedCoastlineSegments(gameArea),
     fetchLandmassFeaturesInArea(gameArea),
     ...PRELOAD_ADMIN_LEVELS.map((adminLevel) =>
-      fetchAdminDivisionFeaturesInArea(gameArea, adminLevel),
+      fetchAdminDivisionFeaturesInArea(
+        gameArea,
+        adminLevel,
+        customMatchingAreas?.[adminLevel],
+      ),
     ),
   ]);
 }

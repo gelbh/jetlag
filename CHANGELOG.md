@@ -10,6 +10,13 @@
 - Photo uploads: accept gallery picks with missing file types; clearer unsupported format errors
 - Photo uploads: remove orphaned files when saving the answer fails
 
+### Improvements
+
+- Dublin games: built-in presets with local authority and local electoral area matching
+- Dublin presets: play areas use exact council boundaries instead of rectangular boxes
+- Recommended games: browse bundled presets in a collapsible continent → country → region tree
+- Matching and Measuring: admin division levels appear only when the play area has at least two divisions
+
 ### Technical
 
 - Backend deploy: include Firebase Storage rules with Firestore and Functions

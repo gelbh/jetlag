@@ -62,6 +62,13 @@ import {
   gamePresetToCreateSessionDraft,
 } from "../domain/session/gamePreset";
 import { useGamePresetStore } from "../state/gamePresetStore";
+import type { RegionPackId } from "../domain/regions/regionPack";
+import { loadRegionPackSessionBoundaries } from "../services/geo/regionPackBoundaries";
+import {
+  BUNDLED_GAME_PRESET_DEFINITIONS,
+  isBundledPresetId,
+} from "../domain/regions/bundledGamePresets";
+import { buildBundledPresetSelectGroups } from "../domain/regions/bundledPresetHierarchy";
 
 const TIER_OPTIONS: Array<{
   value: SessionTier;
@@ -93,6 +100,14 @@ export function CreateSession() {
   const [searchParams] = useSearchParams();
   const presets = useGamePresetStore((state) => state.presets);
   const savePreset = useGamePresetStore((state) => state.savePreset);
+  const bundledPresetSelectGroups = useMemo(
+    () => buildBundledPresetSelectGroups(BUNDLED_GAME_PRESET_DEFINITIONS),
+    [],
+  );
+  const userPresets = useMemo(
+    () => presets.filter((preset) => !isBundledPresetId(preset.id)),
+    [presets],
+  );
   const setSession = useSessionStore((state) => state.setSession);
   const mapStyle = useMapStore((state) => state.mapStyle);
   const setMapStyle = useMapStore((state) => state.setMapStyle);
@@ -118,6 +133,7 @@ export function CreateSession() {
     defaultAdvancedSessionSettings("medium", "imperial"),
   );
   const [accessCode, setAccessCode] = useState("");
+  const [regionPackId, setRegionPackId] = useState<RegionPackId | undefined>();
   const [hostHasAccessClaim, setHostHasAccessClaim] = useState(false);
   const handleGameSizeChange = useCallback(
     (size: GameSize) => {
@@ -157,29 +173,54 @@ export function CreateSession() {
 
     appliedPresetRef.current = presetId;
     const draft = gamePresetToCreateSessionDraft(preset);
-    /* eslint-disable react-hooks/set-state-in-effect -- apply preset query param once when store hydrates */
-    setGameSize(draft.gameSize);
-    setDistanceUnit(draft.distanceUnit);
-    setAdvancedSettings({
-      ...draft.advancedSettings,
-      customMatchingAreas:
-        draft.customMatchingAreas ?? draft.advancedSettings.customMatchingAreas,
-      customCategories:
-        draft.customCategories ?? draft.advancedSettings.customCategories,
-      customLocationPins:
-        draft.customLocationPins ?? draft.advancedSettings.customLocationPins,
-    });
-    if (draft.sessionTier) {
-      setSessionTier(draft.sessionTier);
-    }
-    if (draft.gameArea) {
-      setImportedGameArea(draft.gameArea);
-      framing.applyFocusToGameArea(draft.gameArea);
-    }
-    if (draft.placeLabel) {
-      setLocationQuery(draft.placeLabel);
-    }
-    /* eslint-enable react-hooks/set-state-in-effect */
+    const applyPreset = async () => {
+      let customMatchingAreas =
+        draft.customMatchingAreas ?? draft.advancedSettings.customMatchingAreas;
+      let gameArea = draft.gameArea ?? null;
+
+      if (draft.regionPackId) {
+        setRegionPackId(draft.regionPackId);
+        try {
+          const boundaries = await loadRegionPackSessionBoundaries(
+            draft.regionPackId,
+            draft.councilFilter,
+          );
+          customMatchingAreas = boundaries.customMatchingAreas;
+          gameArea = boundaries.playArea;
+        } catch (loadError) {
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load Dublin boundary data.",
+          );
+        }
+      } else {
+        setRegionPackId(undefined);
+      }
+
+      setGameSize(draft.gameSize);
+      setDistanceUnit(draft.distanceUnit);
+      setAdvancedSettings({
+        ...draft.advancedSettings,
+        customMatchingAreas,
+        customCategories:
+          draft.customCategories ?? draft.advancedSettings.customCategories,
+        customLocationPins:
+          draft.customLocationPins ?? draft.advancedSettings.customLocationPins,
+      });
+      if (draft.sessionTier) {
+        setSessionTier(draft.sessionTier);
+      }
+      if (gameArea) {
+        setImportedGameArea(gameArea);
+        framing.applyFocusToGameArea(gameArea);
+      }
+      if (draft.placeLabel) {
+        setLocationQuery(draft.placeLabel);
+      }
+    };
+
+    void applyPreset();
   }, [framing.applyFocusToGameArea, presets, searchParams]);
 
   useEffect(() => {
@@ -492,11 +533,14 @@ export function CreateSession() {
         }
       }
 
-      const rulesPatch = sessionRulesPatchFromAdvancedSettings(
-        gameSize,
-        advancedSettings,
-        distanceUnit,
-      );
+      const rulesPatch = {
+        ...sessionRulesPatchFromAdvancedSettings(
+          gameSize,
+          advancedSettings,
+          distanceUnit,
+        ),
+        ...(regionPackId ? { regionPackId } : {}),
+      };
 
       if (isFirebaseConfigured()) {
         const user = await retryAsync(() => ensureAnonymousUser());
@@ -536,10 +580,13 @@ export function CreateSession() {
       }
 
       if (!lowPowerMode) {
-        preloadGameAreaCaches(gameArea);
+        preloadGameAreaCaches(gameArea, advancedSettings.customMatchingAreas);
         startSeaLevelBackgroundSampling(gameArea);
         if (navigator.onLine) {
-          void preloadCriticalGameAreaCaches(gameArea);
+          void preloadCriticalGameAreaCaches(
+            gameArea,
+            advancedSettings.customMatchingAreas,
+          );
         }
       }
       navigate("/map");
@@ -641,7 +688,16 @@ export function CreateSession() {
               }}
             >
               <option value="">Load preset…</option>
-              {presets.map((preset) => (
+              {bundledPresetSelectGroups.map((group) => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.options.map((option) => (
+                    <option key={option.presetId} value={option.presetId}>
+                      {option.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+              {userPresets.map((preset) => (
                 <option key={preset.id} value={preset.id}>
                   {preset.name}
                 </option>

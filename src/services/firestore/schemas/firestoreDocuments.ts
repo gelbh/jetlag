@@ -34,6 +34,7 @@ export const sessionDocumentSchema = z
     customCategories: z.array(z.unknown()).optional(),
     customLocationPins: z.array(z.unknown()).optional(),
     customMeasureGeometries: z.array(z.unknown()).optional(),
+    regionPackId: z.string().optional(),
     expansionPackEnabled: z.boolean().optional(),
     customQuestionPackEnabled: z.boolean().optional(),
     previewQuestionBeforeSend: z.boolean().optional(),

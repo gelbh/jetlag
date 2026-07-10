@@ -1,5 +1,9 @@
 import type { Feature, LineString } from "geojson";
 import type { GameArea } from "../../domain/map/annotations";
+import type {
+  CustomMatchingAreasByLevel,
+  MatchingAdminLevel,
+} from "../../domain/session/sessionCustomContent";
 import {
   gameAreaToBoundingBox,
   nearestPointToCoastlines,
@@ -17,6 +21,11 @@ import {
   linearSegmentsCacheKey,
 } from "./geographicFeatureCache";
 import { queryOverpass } from "../core/overpassClient";
+import {
+  adminLevelForMeasuringBorderKind,
+  isMeasuringAdminBorderKind,
+} from "./adminDivisionAvailability";
+import { fetchCustomAdminBorderLineSegments } from "./adminPolygonBoundaries";
 
 type OverpassWay = {
   type: string;
@@ -76,22 +85,65 @@ async function fetchMeasuringLinearSegmentsFromOverpass(
     .filter((segment): segment is Feature<LineString> => segment !== null);
 }
 
+async function fetchMeasuringLinearSegmentsForKind(
+  gameArea: GameArea,
+  kind: MeasuringFromKind,
+  customMatchingAreas?: CustomMatchingAreasByLevel,
+): Promise<Feature<LineString>[]> {
+  if (isMeasuringAdminBorderKind(kind)) {
+    const customSegments = await fetchCustomAdminBorderLineSegments(
+      gameArea,
+      kind,
+      customMatchingAreas,
+    );
+    if (customSegments.length > 0) {
+      return customSegments;
+    }
+  }
+
+  return fetchMeasuringLinearSegmentsFromOverpass(gameArea, kind);
+}
+
 export async function fetchMeasuringLinearSegments(
   gameArea: GameArea,
   kind: MeasuringFromKind,
+  customMatchingAreas?: CustomMatchingAreasByLevel,
 ): Promise<Feature<LineString>[]> {
-  const prepared = await fetchPreparedMeasuringLinearSegments(gameArea, kind);
+  const prepared = await fetchPreparedMeasuringLinearSegments(
+    gameArea,
+    kind,
+    customMatchingAreas,
+  );
   return prepared.segments;
+}
+
+function customBorderCacheSuffix(
+  kind: MeasuringFromKind,
+  customMatchingAreas?: CustomMatchingAreasByLevel,
+): string {
+  if (!isMeasuringAdminBorderKind(kind)) {
+    return "";
+  }
+
+  const level = adminLevelForMeasuringBorderKind(kind) as MatchingAdminLevel;
+  const custom = customMatchingAreas?.[level];
+  return custom ? `:custom-${level}-${custom.length}` : "";
 }
 
 export async function fetchPreparedMeasuringLinearSegments(
   gameArea: GameArea,
   kind: MeasuringFromKind,
+  customMatchingAreas?: CustomMatchingAreasByLevel,
 ): Promise<PreparedLinearSegments> {
-  return getOrFetchCached(linearSegmentsCacheKey(gameArea, kind), async () => {
-    const segments = await fetchMeasuringLinearSegmentsFromOverpass(
+  const cacheKey =
+    linearSegmentsCacheKey(gameArea, kind) +
+    customBorderCacheSuffix(kind, customMatchingAreas);
+
+  return getOrFetchCached(cacheKey, async () => {
+    const segments = await fetchMeasuringLinearSegmentsForKind(
       gameArea,
       kind,
+      customMatchingAreas,
     );
     return prepareMeasuringLineSegments(segments, gameArea);
   });
@@ -101,12 +153,17 @@ export async function loadMeasuringLinearContext(
   seeker: LatLngTuple,
   gameArea: GameArea,
   kind: MeasuringFromKind,
+  customMatchingAreas?: CustomMatchingAreasByLevel,
 ): Promise<{
   point: LatLngTuple;
   distanceMeters: number;
   segments: Feature<LineString>[];
 } | null> {
-  const prepared = await fetchPreparedMeasuringLinearSegments(gameArea, kind);
+  const prepared = await fetchPreparedMeasuringLinearSegments(
+    gameArea,
+    kind,
+    customMatchingAreas,
+  );
   const nearest = nearestPointToCoastlines(seeker, prepared.segments, prepared);
 
   if (!nearest) {

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { useGamePresetStore } from "./gamePresetStore";
 import { defaultAdvancedSessionSettings } from "../domain/session/advancedSessionSettings";
+import { mergeBundledPresets } from "../domain/regions/bundledGamePresets";
 import {
   createSessionDraftToGamePreset,
   gamePresetToCreateSessionDraft,
@@ -8,7 +9,7 @@ import {
 
 describe("gamePresetStore", () => {
   beforeEach(() => {
-    useGamePresetStore.setState({ presets: [] });
+    useGamePresetStore.setState({ presets: mergeBundledPresets([]) });
   });
 
   it("saves and retrieves presets", () => {
@@ -26,9 +27,10 @@ describe("gamePresetStore", () => {
     expect(useGamePresetStore.getState().getPreset(preset.id)?.name).toBe(
       "Regional metric",
     );
+    expect(useGamePresetStore.getState().presets).toHaveLength(6);
   });
 
-  it("deletes presets by id", () => {
+  it("deletes user presets but keeps bundled presets", () => {
     const preset = createSessionDraftToGamePreset(
       {
         gameSize: "small",
@@ -41,7 +43,10 @@ describe("gamePresetStore", () => {
     useGamePresetStore.getState().savePreset(preset);
     useGamePresetStore.getState().deletePreset(preset.id);
 
-    expect(useGamePresetStore.getState().presets).toHaveLength(0);
+    expect(useGamePresetStore.getState().presets).toHaveLength(5);
+    expect(
+      useGamePresetStore.getState().presets.every((entry) => entry.bundled),
+    ).toBe(true);
   });
 
   it("round-trips preset drafts", () => {

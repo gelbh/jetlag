@@ -29,6 +29,7 @@ import type {
   SessionCustomLocationPin,
 } from "../session/sessionCustomContent";
 import type { SessionCustomMeasureGeometry } from "../session/customMeasureGeometry";
+import type { RegionPackId } from "../regions/regionPack";
 
 export type { GameSize } from "../session/gameSize";
 export type { MemberRoles, PlayerRole } from "../session/playerRole";
@@ -151,6 +152,7 @@ export interface SessionRecord {
   customCategories?: readonly SessionCustomCategory[];
   customLocationPins?: readonly SessionCustomLocationPin[];
   customMeasureGeometries?: readonly SessionCustomMeasureGeometry[];
+  regionPackId?: RegionPackId;
   expansionPackEnabled?: boolean;
   customQuestionPackEnabled?: boolean;
   previewQuestionBeforeSend?: boolean;

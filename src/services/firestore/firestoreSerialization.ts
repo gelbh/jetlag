@@ -36,6 +36,7 @@ import {
   parseCustomLocationPins,
   parseCustomMatchingAreas,
 } from "../../domain/session/sessionCustomContent";
+import { parseRegionPackId } from "../../domain/regions/regionPack";
 import { parseCustomMeasureGeometries } from "../../domain/session/customMeasureGeometry";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
 import {
@@ -353,6 +354,9 @@ export function sessionRulesPatchToFirestore(
   if (typeof patch.previewQuestionBeforeSend === "boolean") {
     payload.previewQuestionBeforeSend = patch.previewQuestionBeforeSend;
   }
+  if (patch.regionPackId !== undefined) {
+    payload.regionPackId = patch.regionPackId;
+  }
 
   return payload;
 }
@@ -472,6 +476,7 @@ export function deserializeSessionFromFirestore(
     customMeasureGeometries: parseCustomMeasureGeometries(
       document.customMeasureGeometries,
     ),
+    regionPackId: parseRegionPackId(document.regionPackId),
     expansionPackEnabled:
       typeof document.expansionPackEnabled === "boolean"
         ? document.expansionPackEnabled

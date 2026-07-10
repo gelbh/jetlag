@@ -102,9 +102,23 @@ export function MatchingPanel({
     }
   };
 
-  const question = categoryId ? matchingQuestionFor(categoryId) : null;
+  const question = categoryId
+    ? (() => {
+        const resolved =
+          catalogCategories.find((item) => item.id === categoryId) ??
+          resolveMatchingCategory(categoryId);
+        return resolved
+          ? {
+              category: categoryId,
+              prompt: `Is your nearest ${resolved.promptNoun} the same as my nearest ${resolved.promptNoun}?`,
+              ruleSummary: resolved.ruleSummary,
+            }
+          : matchingQuestionFor(categoryId);
+      })()
+    : null;
   const category = categoryId
-    ? resolveMatchingCategory(categoryId)
+    ? catalogCategories.find((item) => item.id === categoryId) ??
+      resolveMatchingCategory(categoryId)
     : null;
   const usesLandmassMatching = category?.resolver === "landmass";
   const categoryAvailable =

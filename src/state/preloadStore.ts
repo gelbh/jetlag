@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { AdminDivisionCounts } from "../services/geo/adminDivisionAvailability";
 
 interface PreloadStoreState {
   activeGameAreaKey: string | null;
@@ -6,10 +7,15 @@ interface PreloadStoreState {
   completedJobs: number;
   failedJobs: number;
   dismissed: boolean;
+  adminDivisionCounts: AdminDivisionCounts | null;
   reset: (gameAreaKey: string, totalJobs: number) => void;
   recordSuccess: (gameAreaKey: string) => void;
   recordFailure: (gameAreaKey: string) => void;
   dismiss: () => void;
+  setAdminDivisionCounts: (
+    gameAreaKey: string,
+    counts: AdminDivisionCounts,
+  ) => void;
 }
 
 export const usePreloadStore = create<PreloadStoreState>((set, get) => ({
@@ -18,6 +24,7 @@ export const usePreloadStore = create<PreloadStoreState>((set, get) => ({
   completedJobs: 0,
   failedJobs: 0,
   dismissed: false,
+  adminDivisionCounts: null,
   reset: (gameAreaKey, totalJobs) =>
     set({
       activeGameAreaKey: gameAreaKey,
@@ -25,6 +32,7 @@ export const usePreloadStore = create<PreloadStoreState>((set, get) => ({
       completedJobs: 0,
       failedJobs: 0,
       dismissed: false,
+      adminDivisionCounts: null,
     }),
   recordSuccess: (gameAreaKey) => {
     if (get().activeGameAreaKey !== gameAreaKey) {
@@ -46,6 +54,13 @@ export const usePreloadStore = create<PreloadStoreState>((set, get) => ({
     }));
   },
   dismiss: () => set({ dismissed: true }),
+  setAdminDivisionCounts: (gameAreaKey, counts) => {
+    if (get().activeGameAreaKey !== gameAreaKey) {
+      return;
+    }
+
+    set({ adminDivisionCounts: counts });
+  },
 }));
 
 export function selectPreloadBanner(state: PreloadStoreState): {

@@ -13,6 +13,8 @@ import type {
 import type { GameArea, SessionTier } from "../map/annotations";
 import type { BoundingBox } from "../geometry/gameAreaBounds";
 import type { GameSize } from "./gameSize";
+import type { RegionPackId } from "../regions/regionPack";
+import type { DublinCouncilFilter } from "../regions/regionPack";
 
 export const GAME_PRESET_SCHEMA_VERSION = 1;
 
@@ -34,6 +36,9 @@ export interface GamePreset {
   customMatchingAreas?: CustomMatchingAreasByLevel;
   customCategories?: readonly SessionCustomCategory[];
   customLocationPins?: readonly SessionCustomLocationPin[];
+  regionPackId?: RegionPackId;
+  councilFilter?: DublinCouncilFilter;
+  bundled?: boolean;
   migrationStatus?: GamePresetMigrationStatus;
 }
 
@@ -48,6 +53,8 @@ export interface CreateSessionDraft {
   customMatchingAreas?: CustomMatchingAreasByLevel;
   customCategories?: readonly SessionCustomCategory[];
   customLocationPins?: readonly SessionCustomLocationPin[];
+  regionPackId?: RegionPackId;
+  councilFilter?: DublinCouncilFilter;
 }
 
 function isGameSize(value: unknown): value is GameSize {
@@ -172,6 +179,15 @@ export function migrateGamePreset(raw: unknown): GamePreset {
     customMatchingAreas: advancedSettings.customMatchingAreas,
     customCategories: advancedSettings.customCategories,
     customLocationPins: advancedSettings.customLocationPins,
+    regionPackId:
+      typeof input.regionPackId === "string"
+        ? (input.regionPackId as RegionPackId)
+        : undefined,
+    councilFilter:
+      typeof input.councilFilter === "string"
+        ? (input.councilFilter as DublinCouncilFilter)
+        : undefined,
+    bundled: input.bundled === true,
     migrationStatus: "ok",
   };
 }
@@ -227,6 +243,9 @@ export function createSessionDraftToGamePreset(
     customMatchingAreas: draft.advancedSettings.customMatchingAreas,
     customCategories: draft.advancedSettings.customCategories,
     customLocationPins: draft.advancedSettings.customLocationPins,
+    regionPackId: draft.regionPackId,
+    councilFilter: draft.councilFilter,
+    bundled: draft.regionPackId !== undefined,
     migrationStatus: "ok",
   };
 }
@@ -246,6 +265,8 @@ export function gamePresetToCreateSessionDraft(
     customMatchingAreas: migrated.customMatchingAreas,
     customCategories: migrated.customCategories,
     customLocationPins: migrated.customLocationPins,
+    regionPackId: migrated.regionPackId,
+    councilFilter: migrated.councilFilter,
   };
 }
 

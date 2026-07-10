@@ -14,10 +14,30 @@ import {
 } from "./sessionCustomCatalog";
 import type { SessionCustomMeasureGeometry } from "./customMeasureGeometry";
 import { customMeasureGeometryToMeasuringOption } from "./customMeasureGeometryCatalog";
+import { applyRegionPackMatchingLabels } from "../regions/regionPackLabels";
+import { applyRegionPackMeasuringLabels } from "../regions/regionPackLabels";
 import type { SessionRulesInput } from "./sessionRules";
 
+function withRegionPackMatchingLabels(
+  categories: MatchingCategoryDefinition[],
+  session: SessionRulesInput,
+): MatchingCategoryDefinition[] {
+  return categories.map((category) =>
+    applyRegionPackMatchingLabels(category, session.regionPackId),
+  );
+}
+
+function withRegionPackMeasuringLabels(
+  options: MeasuringCatalogOption[],
+  session: SessionRulesInput,
+): MeasuringCatalogOption[] {
+  return options.map((option) =>
+    applyRegionPackMeasuringLabels(option, session.regionPackId),
+  );
+}
+
 export const BASE_MATCHING_CATEGORY_COUNT = 20;
-export const BASE_MEASURING_CATALOG_COUNT = 21;
+export const BASE_MEASURING_CATALOG_COUNT = 23;
 
 export function isExpansionPackEnabled(
   session: SessionRulesInput,
@@ -56,7 +76,10 @@ export function availableMatchingCategories(
     customCategoryToMatchingDefinition,
   );
 
-  return [...base, ...pack, ...hostCustom];
+  return withRegionPackMatchingLabels(
+    [...base, ...pack, ...hostCustom],
+    session,
+  );
 }
 
 export function availableMeasuringCatalog(
@@ -73,7 +96,10 @@ export function availableMeasuringCatalog(
     customMeasureGeometryToMeasuringOption,
   );
 
-  return [...base, ...pack, ...hostCustom, ...customGeo];
+  return withRegionPackMeasuringLabels(
+    [...base, ...pack, ...hostCustom, ...customGeo],
+    session,
+  );
 }
 
 export function resolveAvailableMatchingCategory(

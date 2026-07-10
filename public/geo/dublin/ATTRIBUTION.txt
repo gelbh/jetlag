@@ -1,0 +1,6 @@
+Dublin boundary data (CC-BY 4.0)
+Source: Tailte Éireann / data.gov.ie
+- Local Authorities - National Statutory Boundaries
+- CSO Local Electoral Areas - National Statistical Boundaries (50m)
+
+https://data.gov.ie/

@@ -293,9 +293,15 @@ export function MapScreen() {
       return;
     }
 
-    preloadGameAreaCaches(session.gameArea);
+    preloadGameAreaCaches(session.gameArea, session.customMatchingAreas);
     startSeaLevelBackgroundSampling(session.gameArea);
-  }, [firebaseAuthReady, lowPowerMode, preloadGameAreaKey, session?.gameArea]);
+  }, [
+    firebaseAuthReady,
+    lowPowerMode,
+    preloadGameAreaKey,
+    session?.customMatchingAreas,
+    session?.gameArea,
+  ]);
 
   const overlay = useMapOverlayState();
   const [mapError, setMapError] = useState<string | null>(null);

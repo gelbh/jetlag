@@ -35,6 +35,8 @@ import {
   availableMatchingCategories,
   isPreviewQuestionBeforeSendEnabled,
 } from "../../domain/session/sessionCatalogAvailability";
+import { isAdminDivisionCategoryAvailable } from "../../services/geo/adminDivisionAvailability";
+import { usePreloadStore } from "../../state/preloadStore";
 import { QuestionPreviewSheet } from "../../components/tools/shared/QuestionPreviewSheet";
 import { questionCostBreakdown } from "../../domain/questions/questionRules";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
@@ -179,12 +181,18 @@ export function useMatchingTool({
     matchingCategory?.resolver === "letterZone" ||
     matchingCategory?.resolver === "landmass";
 
+  const adminDivisionCounts = usePreloadStore((state) => state.adminDivisionCounts);
+
   const matchingCatalog = useMemo(
-    () =>
-      sessionRules
+    () => {
+      const categories = sessionRules
         ? availableMatchingCategories(sessionRules)
-        : availableMatchingCategories({ gameSize: "medium" }),
-    [sessionRules],
+        : availableMatchingCategories({ gameSize: "medium" });
+      return categories.filter((category) =>
+        isAdminDivisionCategoryAvailable(category.id, adminDivisionCounts),
+      );
+    },
+    [adminDivisionCounts, sessionRules],
   );
 
   const previewBeforeSend = isPreviewQuestionBeforeSendEnabled(
@@ -197,7 +205,8 @@ export function useMatchingTool({
     usedOptions: usedMatchingCategories,
     currentOption: matchingCategoryId ?? defaultMatchingCategoryId(),
     isAvailable: (_usedOptions, currentOption) =>
-      isMatchingCategoryAvailable(currentOption),
+      isMatchingCategoryAvailable(currentOption) &&
+      isAdminDivisionCategoryAvailable(currentOption, adminDivisionCounts),
     pickNext: firstAvailableMatchingCategoryId,
     onUnavailable: useCallback((nextCategory: MatchingCategoryId) => {
       setMatchingCategoryId(nextCategory);
