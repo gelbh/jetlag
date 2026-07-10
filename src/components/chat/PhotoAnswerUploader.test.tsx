@@ -1,7 +1,9 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type { User } from "firebase/auth";
 import { describe, expect, it, vi } from "vitest";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import { ensureAnonymousUser } from "../../services/core/firebase";
 
 vi.mock("../../services/core/photoStorage", () => ({
   deletePhotoAnswer: vi.fn(),
@@ -17,6 +19,7 @@ vi.mock("../../state/sessionStore", () => ({
     selector({
       session: {
         id: "session-1",
+        code: "ABCD",
         memberUids: ["hider-1"],
         memberRoles: { "hider-1": "hider" },
       },
@@ -74,6 +77,35 @@ describe("PhotoAnswerUploader", () => {
     expect(uploadPhotoAnswer).not.toHaveBeenCalled();
   });
 
+  it("disables upload until auth uid resolves", async () => {
+    let resolveAuth: (user: User) => void = () => undefined;
+    vi.mocked(ensureAnonymousUser).mockReturnValue(
+      new Promise<User>((resolve) => {
+        resolveAuth = resolve;
+      }),
+    );
+
+    render(
+      <PhotoAnswerUploader
+        sessionId="session-1"
+        pendingQuestion={pendingQuestion}
+        messageId="msg-1"
+        onAnswerQuestion={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Upload photo" })).toBeDisabled();
+    expect(screen.getByText("Confirming hider access…")).toBeInTheDocument();
+
+    resolveAuth({ uid: "hider-1" } as User);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Upload photo" }),
+      ).not.toBeDisabled();
+    });
+  });
+
   it("uploads a photo before submitting the answer", async () => {
     const onAnswerQuestion = vi.fn().mockResolvedValue(undefined);
     vi.mocked(uploadPhotoAnswer).mockResolvedValue(
@@ -106,6 +138,7 @@ describe("PhotoAnswerUploader", () => {
         file,
         {
           id: "session-1",
+          code: "ABCD",
           memberUids: ["hider-1"],
           memberRoles: { "hider-1": "hider" },
         },

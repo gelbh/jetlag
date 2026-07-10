@@ -26,19 +26,22 @@ vi.mock("./sentry", () => ({
   capturePhotoUploadFailure: vi.fn(),
 }));
 
-const joinRemoteSessionByCode = vi.fn();
+const ensureHiderPhotoUploadAccess = vi.fn();
 
 vi.mock("../firestore/firestoreAnnotations", () => ({
-  getRemoteSessionById: vi.fn().mockResolvedValue({
-    id: "session-1",
-    code: "ABCD",
-    memberUids: ["hider-1"],
-    memberRoles: { "hider-1": "hider" },
-  }),
-  joinRemoteSessionByCode: (...args: unknown[]) => joinRemoteSessionByCode(...args),
+  ensureHiderPhotoUploadAccess: (...args: unknown[]) =>
+    ensureHiderPhotoUploadAccess(...args),
 }));
 
 import { deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
+import { addPhotoUploadBreadcrumb } from "./sentry";
+
+const hiderSession = {
+  id: "session-1",
+  code: "ABCD",
+  memberUids: ["hider-1"],
+  memberRoles: { "hider-1": "hider" as const },
+};
 
 function withMockImage(
   width: number,
@@ -64,15 +67,7 @@ function withMockImage(
 describe("photoStorage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    joinRemoteSessionByCode.mockResolvedValue({
-      status: "joined",
-      session: {
-        id: "session-1",
-        code: "ABCD",
-        memberUids: ["hider-1"],
-        memberRoles: { "hider-1": "hider" },
-      },
-    });
+    ensureHiderPhotoUploadAccess.mockResolvedValue(hiderSession);
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
       drawImage: vi.fn(),
     } as unknown as CanvasRenderingContext2D);
@@ -126,6 +121,36 @@ describe("photoStorage", () => {
     });
   });
 
+  it("confirms hider access from the server before upload", async () => {
+    vi.mocked(uploadBytes).mockResolvedValue({} as never);
+    vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
+
+    await withMockImage(800, 600, async () => {
+      await uploadPhotoAnswer(
+        "session-1",
+        "question-1",
+        new File(["image"], "photo.jpg", { type: "image/jpeg" }),
+        hiderSession,
+        "hider-1",
+      );
+    });
+
+    expect(ensureHiderPhotoUploadAccess).toHaveBeenCalledWith(
+      hiderSession,
+      "hider-1",
+    );
+    expect(uploadBytes).toHaveBeenCalledOnce();
+    expect(addPhotoUploadBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        authUid: "hider-1",
+        serverMemberRole: "hider",
+        authUidMatchesServerHider: true,
+      }),
+    );
+
+    vi.mocked(Date.now).mockRestore();
+  });
+
   it("uploads compressed photos and returns the storage path", async () => {
     vi.mocked(uploadBytes).mockResolvedValue({} as never);
     vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
@@ -135,12 +160,7 @@ describe("photoStorage", () => {
         "session-1",
         "question-1",
         new File(["image"], "photo.jpg", { type: "image/jpeg" }),
-        {
-          id: "session-1",
-          code: "ABCD",
-          memberUids: ["hider-1"],
-          memberRoles: { "hider-1": "hider" },
-        },
+        hiderSession,
         "hider-1",
       );
 
@@ -153,7 +173,7 @@ describe("photoStorage", () => {
     vi.mocked(Date.now).mockRestore();
   });
 
-  it("heals membership as hider and retries after storage/unauthorized", async () => {
+  it("re-ensures hider access and retries after storage/unauthorized", async () => {
     const unauthorized = new FirebaseError(
       "storage/unauthorized",
       "User does not have permission.",
@@ -168,23 +188,14 @@ describe("photoStorage", () => {
         "session-1",
         "question-1",
         new File(["image"], "photo.jpg", { type: "image/jpeg" }),
-        {
-          id: "session-1",
-          code: "ABCD",
-          memberUids: ["hider-1"],
-          memberRoles: { "hider-1": "hider" },
-        },
+        hiderSession,
         "hider-1",
       );
 
       expect(path).toBe(
         "sessions/session-1/photoAnswers/question-1/1700000000000.jpg",
       );
-      expect(joinRemoteSessionByCode).toHaveBeenCalledWith(
-        "ABCD",
-        "hider-1",
-        "hider",
-      );
+      expect(ensureHiderPhotoUploadAccess).toHaveBeenCalledTimes(2);
       expect(uploadBytes).toHaveBeenCalledTimes(2);
     });
 

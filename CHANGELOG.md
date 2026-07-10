@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.3 - 2026-07-10
+
+### Fixes
+
+- Photo uploads: confirm hider access against the server before upload
+- Photo uploads: clearer errors when sign-in and session membership diverge
+
 ## 0.2.2 - 2026-07-10
 
 ### Fixes

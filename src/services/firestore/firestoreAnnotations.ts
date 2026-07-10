@@ -4,6 +4,7 @@ import {
   deleteField,
   doc,
   getDoc,
+  getDocFromServer,
   onSnapshot,
   serverTimestamp,
   setDoc,
@@ -35,7 +36,11 @@ import {
   deserializeSessionFromFirestore,
   sessionRulesPatchToFirestore,
 } from "./firestoreSerialization";
+import { photoUploadAccessError } from "../../domain/questions/photoUploadAccess";
 import { generateSessionCode } from "../session/sessionCodes";
+
+const HIDER_ROLE_POLL_MS = 250;
+const HIDER_ROLE_POLL_MAX_MS = 3000;
 
 function sessionsCollection() {
   return collection(getFirestoreDb(), "sessions");
@@ -319,6 +324,90 @@ export async function getRemoteSessionById(
   const data = snapshot.data() as Record<string, unknown>;
 
   return deserializeSessionFromFirestore(snapshot.id, data);
+}
+
+export async function getRemoteSessionByIdFromServer(
+  sessionId: string,
+): Promise<SessionRecord | null> {
+  const sessionRef = doc(sessionsCollection(), sessionId);
+  const snapshot = await getDocFromServer(sessionRef);
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  const data = snapshot.data() as Record<string, unknown>;
+
+  return deserializeSessionFromFirestore(snapshot.id, data);
+}
+
+function serverSessionGrantsHiderUpload(
+  session: Pick<SessionRecord, "memberUids" | "memberRoles">,
+  uid: string,
+): boolean {
+  return (
+    session.memberUids.includes(uid) &&
+    session.memberRoles?.[uid] === "hider"
+  );
+}
+
+export async function waitForServerHiderRole(
+  sessionId: string,
+  uid: string,
+  maxMs: number = HIDER_ROLE_POLL_MAX_MS,
+): Promise<SessionRecord | null> {
+  const deadline = Date.now() + maxMs;
+
+  while (Date.now() < deadline) {
+    const session = await getRemoteSessionByIdFromServer(sessionId);
+    if (session && serverSessionGrantsHiderUpload(session, uid)) {
+      return session;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, HIDER_ROLE_POLL_MS));
+  }
+
+  return getRemoteSessionByIdFromServer(sessionId);
+}
+
+export async function ensureHiderPhotoUploadAccess(
+  session: Pick<SessionRecord, "id" | "code" | "memberUids" | "memberRoles">,
+  uid: string,
+): Promise<SessionRecord> {
+  let serverSession = await getRemoteSessionByIdFromServer(session.id);
+  if (!serverSession) {
+    throw new Error("Syncing session… Try again in a moment.");
+  }
+
+  if (!serverSessionGrantsHiderUpload(serverSession, uid)) {
+    const result = await joinRemoteSessionByCode(serverSession.code, uid, "hider");
+
+    if (result.status === "incompatible") {
+      throw new Error(
+        `Session requires a newer app version (v${result.hostVersion}). Update to continue.`,
+      );
+    }
+
+    if (result.status === "ended") {
+      throw new Error("That session has ended. Join or create a new one.");
+    }
+
+    if (result.status !== "joined") {
+      throw new Error(
+        "You are not a member of this session. Rejoin with the session code.",
+      );
+    }
+
+    serverSession =
+      (await waitForServerHiderRole(session.id, uid)) ?? result.session;
+  }
+
+  const accessError = photoUploadAccessError(serverSession, uid);
+  if (accessError) {
+    throw new Error(accessError);
+  }
+
+  return serverSession;
 }
 
 export async function endRemoteSession(sessionId: string): Promise<void> {

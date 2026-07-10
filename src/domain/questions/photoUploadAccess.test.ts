@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { formatDistance } from "../map/distance";
-import { photoUploadAccessError } from "./photoUploadAccess";
+import {
+  photoUploadAccessError,
+  photoUploadServerDiagnostics,
+} from "./photoUploadAccess";
 
 describe("formatDistance metric", () => {
   it("formats whole kilometers without decimals", () => {
@@ -48,5 +51,37 @@ describe("photoUploadAccessError", () => {
         "seeker-1",
       ),
     ).toMatch(/Only hiders/i);
+  });
+});
+
+describe("photoUploadServerDiagnostics", () => {
+  it("reports when auth uid matches server hider role", () => {
+    expect(
+      photoUploadServerDiagnostics(
+        {
+          memberUids: ["hider-1"],
+          memberRoles: { "hider-1": "hider" },
+        },
+        "hider-1",
+      ),
+    ).toEqual({
+      serverMemberRole: "hider",
+      authUidMatchesServerHider: true,
+    });
+  });
+
+  it("reports mismatch when auth uid is missing from server roles", () => {
+    expect(
+      photoUploadServerDiagnostics(
+        {
+          memberUids: ["hider-1"],
+          memberRoles: { "hider-1": "hider" },
+        },
+        "other-uid",
+      ),
+    ).toEqual({
+      serverMemberRole: null,
+      authUidMatchesServerHider: false,
+    });
   });
 });

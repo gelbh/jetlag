@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.2.2";
+export const APP_VERSION = "0.2.3";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.2.3",
+    date: "2026-07-10",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Photo uploads: confirm hider access against the server before upload",
+          "Photo uploads: clearer errors when sign-in and session membership diverge",
+        ],
+      }
+    ],
+  },
   {
     version: "0.2.2",
     date: "2026-07-10",

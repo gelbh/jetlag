@@ -41,8 +41,8 @@ export function PhotoAnswerUploader({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [authUid, setAuthUid] = useState<string | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   const session = useSessionStore((state) => state.session);
-  const storeUid = useSessionStore((state) => state.myUid);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,11 +50,13 @@ export function PhotoAnswerUploader({
       .then((user) => {
         if (!cancelled) {
           setAuthUid(user.uid);
+          setAuthReady(true);
         }
       })
       .catch(() => {
         if (!cancelled) {
           setAuthUid(null);
+          setAuthReady(true);
         }
       });
     return () => {
@@ -62,11 +64,13 @@ export function PhotoAnswerUploader({
     };
   }, []);
 
-  const accessUid = authUid ?? storeUid;
-  const accessError = photoUploadAccessError(session, accessUid);
+  const accessError = photoUploadAccessError(session, authUid);
   const syncPending =
     accessError !== null &&
     (accessError.startsWith("Syncing") || accessError.includes("still syncing"));
+  const authPending = !authReady;
+  const uploadBlocked =
+    uploading || authPending || accessError !== null;
 
   const categoryId = readPhotoCategoryId(pendingQuestion);
   const ruleSummary = categoryId
@@ -87,7 +91,7 @@ export function PhotoAnswerUploader({
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
-    if (!file) {
+    if (!file || !authUid) {
       return;
     }
 
@@ -100,7 +104,7 @@ export function PhotoAnswerUploader({
         pendingQuestion.id,
         file,
         session,
-        accessUid,
+        authUid,
       );
       await submitAnswer({ kind: "photo", storagePath });
     } catch (uploadError) {
@@ -140,6 +144,9 @@ export function PhotoAnswerUploader({
       {ruleSummary ? (
         <p className="text-xs leading-snug text-ink-dim">{ruleSummary}</p>
       ) : null}
+      {authPending ? (
+        <p className="text-sm text-ink-muted">Confirming hider access…</p>
+      ) : null}
       {accessError ? (
         <p
           className={
@@ -158,7 +165,7 @@ export function PhotoAnswerUploader({
       />
       <button
         type="button"
-        disabled={uploading || accessError !== null}
+        disabled={uploadBlocked}
         onClick={(event) => {
           event.stopPropagation();
           inputRef.current?.click();

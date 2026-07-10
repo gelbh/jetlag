@@ -11,11 +11,9 @@ import {
   formatPhotoStorageError,
   isStorageUnauthorized,
   photoUploadAccessError,
+  photoUploadServerDiagnostics,
 } from "../../domain/questions/photoUploadAccess";
-import {
-  getRemoteSessionById,
-  joinRemoteSessionByCode,
-} from "../firestore/firestoreAnnotations";
+import { ensureHiderPhotoUploadAccess } from "../firestore/firestoreAnnotations";
 import { ensureAnonymousUser, getFirebaseStorage } from "./firebase";
 import {
   addPhotoUploadBreadcrumb,
@@ -166,23 +164,36 @@ export function photoAnswerStoragePath(
   return `sessions/${sessionId}/photoAnswers/${questionId}/${fileName}`;
 }
 
-async function healSessionMembership(
-  session: Pick<SessionRecord, "id" | "code">,
-  authUid: string,
-): Promise<SessionRecord | null> {
-  const healed = await joinRemoteSessionByCode(session.code, authUid, "hider");
-  if (healed.status === "joined") {
-    return healed.session;
-  }
-  return getRemoteSessionById(session.id);
-}
-
 async function attemptUpload(
   storageRef: ReturnType<typeof ref>,
   blob: Blob,
   metadata: UploadMetadata,
 ): Promise<void> {
   await uploadBytes(storageRef, blob, metadata);
+}
+
+function uploadBreadcrumbData(
+  authUid: string,
+  session: Pick<SessionRecord, "memberUids" | "memberRoles">,
+  myUid: string | null | undefined,
+  sessionId: string,
+  questionId: string,
+  file: File,
+): Record<string, unknown> {
+  const diagnostics = photoUploadServerDiagnostics(session, authUid);
+
+  return {
+    authUid,
+    myUid: myUid ?? null,
+    memberUids: session.memberUids ?? [],
+    memberRole: session.memberRoles?.[authUid] ?? null,
+    serverMemberRole: diagnostics.serverMemberRole,
+    authUidMatchesServerHider: diagnostics.authUidMatchesServerHider,
+    sessionId,
+    questionId,
+    fileType: file.type || null,
+    fileSize: file.size,
+  };
 }
 
 export async function deletePhotoAnswer(storagePath: string): Promise<void> {
@@ -209,29 +220,22 @@ export async function uploadPhotoAnswer(
     );
   }
 
-  let activeSession = session ?? null;
-  if (session?.id) {
-    const remoteSession = await getRemoteSessionById(session.id);
-    if (remoteSession) {
-      activeSession = remoteSession;
-    }
+  if (!session?.id || !session.code) {
+    throw new Error("Syncing session… Try again in a moment.");
   }
 
-  const accessError = photoUploadAccessError(activeSession, authUid);
-  if (accessError) {
-    throw new Error(accessError);
-  }
+  let activeSession = await ensureHiderPhotoUploadAccess(session, authUid);
 
-  addPhotoUploadBreadcrumb({
-    authUid,
-    myUid: myUid ?? null,
-    memberUids: activeSession?.memberUids ?? [],
-    memberRole: activeSession?.memberRoles?.[authUid] ?? null,
-    sessionId,
-    questionId,
-    fileType: file.type || null,
-    fileSize: file.size,
-  });
+  addPhotoUploadBreadcrumb(
+    uploadBreadcrumbData(
+      authUid,
+      activeSession,
+      myUid,
+      sessionId,
+      questionId,
+      file,
+    ),
+  );
 
   let blob: Blob;
   try {
@@ -271,16 +275,13 @@ export async function uploadPhotoAnswer(
         break;
       }
 
-      if (activeSession?.code) {
-        const healed = await healSessionMembership(activeSession, authUid);
-        if (healed) {
-          activeSession = healed;
-        }
-      } else if (session?.id) {
-        const refreshed = await getRemoteSessionById(session.id);
-        if (refreshed) {
-          activeSession = refreshed;
-        }
+      try {
+        activeSession = await ensureHiderPhotoUploadAccess(
+          activeSession,
+          authUid,
+        );
+      } catch {
+        break;
       }
 
       const retryAccessError = photoUploadAccessError(activeSession, authUid);
@@ -294,10 +295,17 @@ export async function uploadPhotoAnswer(
     }
   }
 
+  const failureDiagnostics = photoUploadServerDiagnostics(
+    activeSession,
+    authUid,
+  );
+
   capturePhotoUploadFailure(lastError, "storage", {
     sessionId,
     questionId,
-    memberRole: activeSession?.memberRoles?.[authUid] ?? null,
+    memberRole: activeSession.memberRoles?.[authUid] ?? null,
+    serverMemberRole: failureDiagnostics.serverMemberRole,
+    authUidMatchesServerHider: failureDiagnostics.authUidMatchesServerHider,
     attempts: RETRY_DELAYS_MS.length + 1,
     code:
       lastError instanceof FirebaseError ? lastError.code : undefined,

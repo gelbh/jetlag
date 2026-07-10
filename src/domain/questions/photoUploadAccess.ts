@@ -1,5 +1,6 @@
 import { FirebaseError } from "firebase/app";
 import type { SessionRecord } from "../map/annotations";
+import type { PlayerRole } from "../session/playerRole";
 
 export function isStorageUnauthorized(error: unknown): boolean {
   if (error instanceof FirebaseError) {
@@ -39,6 +40,22 @@ export function photoUploadAccessError(
   }
 
   return null;
+}
+
+export function photoUploadServerDiagnostics(
+  session: Pick<SessionRecord, "memberUids" | "memberRoles">,
+  authUid: string,
+): {
+  serverMemberRole: PlayerRole | null;
+  authUidMatchesServerHider: boolean;
+} {
+  const serverMemberRole = session.memberRoles?.[authUid] ?? null;
+
+  return {
+    serverMemberRole,
+    authUidMatchesServerHider:
+      session.memberUids.includes(authUid) && serverMemberRole === "hider",
+  };
 }
 
 export function formatPhotoStorageError(
