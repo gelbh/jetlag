@@ -29,6 +29,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         title: "Improvements",
         items: [
           "Join: new players must match the session app version; existing members can continue after updating",
+          "Join: fix permission errors when joining a session as hider or seeker",
           "Presets: older saved presets migrate on load; unmigratable presets show a review banner",
           "Map nav: fixed top-left home and back links; sync and preload status as compact beacons",
           "Time trap panel: map pan and zoom work while the panel is open",

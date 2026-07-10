@@ -133,6 +133,37 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows a guest to join an active session as hider with memberAppVersions", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          hostAppVersion: "0.2.1",
+        }),
+      );
+    await host
+      .firestore()
+      .collection("sessionCodes")
+      .doc("ABCD")
+      .set({ sessionId: "session-1", hostUid: "host-1" });
+
+    const guest = testEnv.authenticatedContext("guest-1");
+    await assertSucceeds(
+      guest
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          memberUids: ["host-1", "guest-1"],
+          memberRoles: { "host-1": "seeker", "guest-1": "hider" },
+          memberAppVersions: { "guest-1": "0.2.1" },
+        }),
+    );
+  });
+
   it("denies premium session creation without host access claim", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await assertFails(

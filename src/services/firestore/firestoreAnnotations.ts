@@ -9,6 +9,7 @@ import {
   setDoc,
   updateDoc,
   writeBatch,
+  type DocumentReference,
   type Unsubscribe,
 } from "firebase/firestore";
 import type {
@@ -50,6 +51,34 @@ function annotationsCollection(sessionId: string) {
 
 export function isFirestorePermissionDenied(error: unknown): boolean {
   return error instanceof FirebaseError && error.code === "permission-denied";
+}
+
+type SessionMembershipPatch = {
+  memberUids?: string[];
+  memberRoles?: Record<string, PlayerRole>;
+  memberAppVersions?: Record<string, string>;
+};
+
+async function writeSessionMembershipPatch(
+  sessionRef: DocumentReference,
+  patch: SessionMembershipPatch,
+): Promise<void> {
+  try {
+    await updateDoc(sessionRef, patch);
+  } catch (error) {
+    if (!isFirestorePermissionDenied(error) || !patch.memberAppVersions) {
+      throw error;
+    }
+
+    const legacyPatch: Omit<SessionMembershipPatch, "memberAppVersions"> = {};
+    if (patch.memberUids !== undefined) {
+      legacyPatch.memberUids = patch.memberUids;
+    }
+    if (patch.memberRoles !== undefined) {
+      legacyPatch.memberRoles = patch.memberRoles;
+    }
+    await updateDoc(sessionRef, legacyPatch);
+  }
 }
 
 export async function ensureRemoteSessionWriteAccess(
@@ -252,11 +281,18 @@ export async function joinRemoteSessionByCode(
   };
 
   if (!existingMemberUids.includes(uid)) {
-    await updateDoc(sessionDoc.ref, { memberUids, memberRoles, memberAppVersions });
+    await writeSessionMembershipPatch(sessionDoc.ref, {
+      memberUids,
+      memberRoles,
+      memberAppVersions,
+    });
   } else if (!existingRoles[uid]) {
-    await updateDoc(sessionDoc.ref, { memberRoles, memberAppVersions });
+    await writeSessionMembershipPatch(sessionDoc.ref, {
+      memberRoles,
+      memberAppVersions,
+    });
   } else if (existingMemberAppVersions[uid] !== clientVersion) {
-    await updateDoc(sessionDoc.ref, { memberAppVersions });
+    await writeSessionMembershipPatch(sessionDoc.ref, { memberAppVersions });
   }
 
   return {
