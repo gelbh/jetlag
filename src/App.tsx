@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import { trackPageView } from "./services/core/analytics";
 import { MapErrorBoundary } from "./components/ui/MapErrorBoundary";
+import { AppUpdateBanner } from "./components/ui/AppUpdateBanner";
 import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
 import { useMotionProfile } from "./hooks/location/useMotionProfile";
 import { Home } from "./routes/Home";
@@ -66,6 +67,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AnalyticsPageViewTracker />
+      <AppUpdateBanner />
       <div className="h-full overflow-y-auto overscroll-y-none">
         <LowBatteryPrompt />
         <Routes>

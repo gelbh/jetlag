@@ -17,6 +17,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Fixes",
         items: [
+          "App: fix blank screen on load from update banner outside the router",
           "Time traps: hiders can place traps without permission errors",
           "Photo uploads: heal session membership on storage denial with stronger retry",
           "Map: dock safe-area fix removes gap below the tool bar",
