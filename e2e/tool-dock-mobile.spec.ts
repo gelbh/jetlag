@@ -143,7 +143,7 @@ test.describe("iPhone 13 PWA safe area", () => {
     }, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 
-  test("dock sits flush at viewport bottom with safe area inside the bar", async ({
+  test("dock wrapper extends to viewport bottom with transparent safe-area band below bar", async ({
     page,
   }) => {
     const metrics = await page.evaluate(() => {
@@ -181,23 +181,28 @@ test.describe("iPhone 13 PWA safe area", () => {
       };
     });
 
-    expect(metrics.dockPaddingBottom).toBeLessThanOrEqual(1);
-    expect(metrics.barPaddingBottom).toBeGreaterThanOrEqual(
+    expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(
       SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
     );
+    expect(metrics.barPaddingBottom).toBeLessThanOrEqual(6);
     expect(metrics.gapBelowDock).toBeLessThanOrEqual(1);
     expect(Math.abs(metrics.dockBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
       1,
     );
-    expect(Math.abs(metrics.barBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
-      1,
+    expect(
+      Math.abs(
+        metrics.barBottom -
+          (metrics.viewportHeight - SIMULATED_SAFE_AREA_BOTTOM_PX),
+      ),
+    ).toBeLessThanOrEqual(4);
+    expect(metrics.wrapperBandHeight).toBeGreaterThanOrEqual(
+      SIMULATED_SAFE_AREA_BOTTOM_PX - 4,
     );
-    expect(metrics.wrapperBandHeight).toBeLessThanOrEqual(1);
-    expect(metrics.barHeight).toBeLessThanOrEqual(90);
+    expect(metrics.wrapperBandHeight).toBeLessThanOrEqual(
+      SIMULATED_SAFE_AREA_BOTTOM_PX + 4,
+    );
+    expect(metrics.barHeight).toBeLessThanOrEqual(60);
     expect(metrics.deadSpaceBelowIcons).toBeLessThanOrEqual(8);
-    expect(metrics.lowestSlotBottom).toBeLessThanOrEqual(
-      metrics.barBottom - SIMULATED_SAFE_AREA_BOTTOM_PX + 4,
-    );
   });
 
   test("matches compact dock screenshot with safe area", async ({ page }) => {

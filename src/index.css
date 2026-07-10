@@ -1060,6 +1060,7 @@ textarea {
     right: max(0.375rem, env(safe-area-inset-right));
     bottom: 0;
     left: max(0.375rem, env(safe-area-inset-left));
+    padding-bottom: var(--safe-area-bottom);
   }
 
   .jl-tool-dock-bar {
@@ -1075,7 +1076,6 @@ textarea {
     border-bottom: none;
     background: oklch(from var(--color-surface-deep) l c h / 0.96);
     padding: 0.25rem 0.375rem;
-    padding-bottom: calc(0.25rem + var(--safe-area-bottom));
     box-shadow: var(--shadow-hud-menu);
   }
 

@@ -17,6 +17,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Fixes",
         items: [
+          "Map: tool dock safe-area band no longer adds a dark empty stripe below icons on iPhone",
           "Photo uploads: confirm hider access against the server before upload",
           "Photo uploads: clearer errors when sign-in and session membership diverge",
         ],
