@@ -20,6 +20,8 @@
 - Preset list: card-style rows with expansion badges and clearer actions
 - Advanced settings: collapsible sections with expansion and custom pack detail panels
 - Create session: preset picker above game size; tentacle radius labels use your distance unit
+- Map preload beacon: refresh icon matches HUD chrome and spins while map data loads
+- Map HUD: borderless home button stays centered as the status bar grows; preload refresh beacon matches sync size with solid icon
 
 ## 0.2.0 - 2026-07-09
 

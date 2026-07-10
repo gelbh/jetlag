@@ -267,7 +267,6 @@ export function MapStatusRail({
       className="jl-status-rail pointer-events-none absolute inset-x-0 top-0 z-[var(--z-banner)] pt-[max(0px,env(safe-area-inset-top))]"
     >
       <div className="relative">
-        <ScreenNav variant="home" />
         {showPreloadBanner ? <GameAreaPreloadBeacon /> : null}
         {showSyncDot ? (
           <div className="jl-sync-map-indicator">
@@ -331,6 +330,7 @@ export function MapStatusRail({
         ) : null}
 
         <div className="jl-status-bar">
+          <ScreenNav variant="home" />
           <div className="jl-status-bar-inner pl-[calc(2.75rem+max(0.625rem,env(safe-area-inset-left)))]">
             <div className="jl-stamp">
               <span className="jl-stamp-label">Session</span>

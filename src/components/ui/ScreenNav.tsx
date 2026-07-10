@@ -16,15 +16,21 @@ export function ScreenNav({
   homeTo = "/",
   className = "",
 }: ScreenNavProps) {
+  const isHome = variant === "home";
+
   return (
     <nav
-      className={`pointer-events-auto fixed left-0 top-0 z-[var(--z-banner)] px-[max(0.625rem,env(safe-area-inset-left))] pt-[max(0.625rem,env(safe-area-inset-top))] ${className}`}
+      className={
+        isHome
+          ? `pointer-events-auto absolute inset-y-0 left-0 z-[var(--z-banner)] flex items-center px-[max(0.625rem,env(safe-area-inset-left))] ${className}`
+          : `pointer-events-auto fixed left-0 top-0 z-[var(--z-banner)] px-[max(0.625rem,env(safe-area-inset-left))] pt-[max(0.625rem,env(safe-area-inset-top))] ${className}`
+      }
       aria-label="Screen navigation"
     >
-      {variant === "home" ? (
+      {isHome ? (
         <Link
           to={homeTo}
-          className="hud-chrome inline-flex min-h-11 min-w-11 items-center justify-center text-ink"
+          className="hud-chrome map-hud-home inline-flex h-full min-w-11 items-center justify-center text-ink"
           aria-label="Home"
         >
           <HudHomeIcon className="h-5 w-5" />

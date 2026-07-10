@@ -1,5 +1,6 @@
 import { useId, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { HudRefreshIcon } from "../ui/HudIcons";
 import { selectPreloadBanner, usePreloadStore } from "../../state/preloadStore";
 
 export function GameAreaPreloadBeacon() {
@@ -16,31 +17,23 @@ export function GameAreaPreloadBeacon() {
     <div className="jl-preload-map-indicator pointer-events-none absolute left-[max(0.625rem,env(safe-area-inset-left))] top-[var(--jl-sync-beacon-top)] z-[var(--z-panel)] flex flex-col items-start gap-1">
       <button
         type="button"
-        className="hud-chrome pointer-events-auto inline-flex min-h-11 min-w-11 items-center justify-center rounded-full"
+        className={`jl-sync-map-indicator__btn${detailOpen ? " jl-sync-map-indicator__btn--open" : ""}`}
         aria-label={banner.label}
         aria-expanded={detailOpen}
         aria-controls={detailId}
         onClick={() => setDetailOpen((open) => !open)}
       >
         <span
-          className={`inline-block h-4 w-4 ${
-            banner.loading
-              ? "motion-reduce:animate-none animate-spin rounded-full border-2 border-brand-blue border-t-transparent"
-              : ""
+          className={`jl-preload-beacon jl-preload-beacon--md ${
+            banner.failed ? "jl-preload-beacon--failed" : "jl-preload-beacon--loading"
           }`}
           aria-hidden="true"
         >
-          {!banner.loading ? (
-            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-brand-blue">
-              <path
-                d="M12 3v9m0 0l3.5-3.5M12 12L8.5 8.5M5 19h14"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          ) : null}
+          <HudRefreshIcon
+            className={`jl-preload-beacon__icon stroke-[2.5] ${
+              banner.loading ? "loading-spinner motion-reduce:animate-none" : ""
+            }`}
+          />
         </span>
       </button>
       {detailOpen ? (
