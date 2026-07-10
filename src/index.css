@@ -57,6 +57,9 @@
   --map-panel-bottom: calc(
     var(--dock-total-height) + var(--chrome-gap-above-dock)
   );
+  --map-panel-bottom-chrome-hidden: calc(
+    var(--chrome-gap-bottom) + var(--safe-area-bottom)
+  );
   --hider-panel-bottom: 0;
   --hider-wizard-bottom: var(--hider-action-bar-height);
   --z-dock: 1000;
@@ -1270,12 +1273,20 @@ textarea {
     bottom: var(--map-panel-bottom);
   }
 
+  .jl-panel-above-dock.jl-panel-chrome-hidden {
+    bottom: var(--map-panel-bottom-chrome-hidden);
+  }
+
   .jl-panel-above-dock.jl-panel-peeked {
     transform: translateY(calc(100% - 3rem));
   }
 
   .jl-panel-above-dock.jl-panel-minimized {
     transform: translateY(calc(100% - 2.75rem));
+  }
+
+  html:not([data-motion="reduced"]) .jl-panel-above-dock.jl-panel-chrome-hidden {
+    transition: none;
   }
 
   .jl-panel-drag-handle {

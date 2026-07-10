@@ -8,7 +8,7 @@ import { PopupCloseButton } from "../ui/PopupCloseButton";
 
 interface ToolFloatingPanelProps {
   toolId: DockableMapTool;
-  peeked: boolean;
+  mapPanning: boolean;
   minimized: boolean;
   onMinimizedChange: (minimized: boolean) => void;
   onClose: () => void;
@@ -17,7 +17,7 @@ interface ToolFloatingPanelProps {
 
 export function ToolFloatingPanel({
   toolId,
-  peeked,
+  mapPanning,
   minimized,
   onMinimizedChange,
   onClose,
@@ -30,7 +30,7 @@ export function ToolFloatingPanel({
 
   const panelClassName = [
     "pointer-events-auto absolute inset-x-0 jl-panel-above-dock z-[var(--z-panel)] px-3",
-    peeked && !minimized ? "jl-panel-peeked" : "",
+    mapPanning ? "jl-panel-chrome-hidden" : "",
     minimized ? "jl-panel-minimized" : "jl-panel-enter",
   ]
     .filter(Boolean)

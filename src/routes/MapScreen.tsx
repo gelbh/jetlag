@@ -775,7 +775,7 @@ export function MapScreen() {
   }, [cancelGeometryEdit, overlay.closeSheet, setSelectedAnnotationId]);
 
   const {
-    panelPeeked,
+    mapPanning,
     panelMinimized,
     setPanelMinimized,
     handleMapPanStart,
@@ -1259,7 +1259,7 @@ export function MapScreen() {
       {activeTool !== "none" && !selectedAnnotation ? (
         <ToolFloatingPanel
           toolId={activeTool}
-          peeked={panelPeeked}
+          mapPanning={mapPanning}
           minimized={panelMinimized}
           onMinimizedChange={setPanelMinimized}
           onClose={() => handleSelectTool("none")}
