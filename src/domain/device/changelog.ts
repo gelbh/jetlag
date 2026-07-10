@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.2.0";
+export const APP_VERSION = "0.2.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,33 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.2.1",
+    date: "2026-07-09",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Time traps: hiders can place traps without permission errors",
+          "Photo uploads: heal session membership on storage denial with stronger retry",
+          "Map: dock safe-area fix removes gap below the tool bar",
+          "Home: safe-area background no longer shows a blue bar on notched devices",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Join: new players must match the session app version; existing members can continue after updating",
+          "Presets: older saved presets migrate on load; unmigratable presets show a review banner",
+          "Map nav: fixed top-left home and back links; sync and preload status as compact beacons",
+          "Time trap panel: map pan and zoom work while the panel is open",
+          "Preset list: card-style rows with expansion badges and clearer actions",
+          "Advanced settings: collapsible sections with expansion and custom pack detail panels",
+          "Create session: preset picker above game size; tentacle radius labels use your distance unit",
+        ],
+      }
+    ],
+  },
   {
     version: "0.2.0",
     date: "2026-07-09",

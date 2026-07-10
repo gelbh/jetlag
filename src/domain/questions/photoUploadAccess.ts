@@ -1,4 +1,14 @@
+import { FirebaseError } from "firebase/app";
 import type { SessionRecord } from "../map/annotations";
+
+export function isStorageUnauthorized(error: unknown): boolean {
+  if (error instanceof FirebaseError) {
+    return error.code === "storage/unauthorized";
+  }
+
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes("storage/unauthorized");
+}
 
 export function photoUploadAccessError(
   session: Pick<SessionRecord, "memberUids" | "memberRoles"> | null | undefined,
@@ -39,7 +49,7 @@ export function formatPhotoStorageError(
   const message =
     error instanceof Error ? error.message : "Could not upload the photo.";
 
-  if (!message.includes("storage/unauthorized")) {
+  if (!isStorageUnauthorized(error)) {
     return message;
   }
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AppLogo } from "../components/ui/AppLogo";
+import { ScreenNav } from "../components/ui/ScreenNav";
 import { isPremiumSession } from "../domain/map/annotations";
 import {
   isValidSessionCode,
@@ -17,6 +18,7 @@ import {
   joinRemoteSessionByCode,
   lookupRemoteSessionByCode,
 } from "../services/firestore/firestoreAnnotations";
+import { sessionVersionMismatchMessage } from "../domain/session/sessionVersion";
 import { retryAsync } from "../services/core/retryAsync";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 
@@ -108,6 +110,11 @@ export function JoinSession() {
         return;
       }
 
+      if (result.status === "incompatible") {
+        setError(sessionVersionMismatchMessage(result.hostVersion));
+        return;
+      }
+
       setSession(result.session, user.uid);
       setPremiumApiContext(result.session);
       navigate("/map");
@@ -123,17 +130,10 @@ export function JoinSession() {
   };
 
   return (
-    <main className="home-poster home-terminal-accent flex min-h-[100dvh] flex-col justify-center gap-8 overflow-y-auto px-5 py-8 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div>
-        <Link
-          to="/"
-          className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-ink-dim"
-        >
-          ← Back
-        </Link>
-        <div className="mt-6">
-          <AppLogo variant="lockup" size="md" />
-        </div>
+    <main className="home-poster home-terminal-accent flex min-h-[100dvh] flex-col justify-center gap-8 overflow-y-auto px-5 py-8 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <ScreenNav backTo="/" backLabel="Back" />
+      <div className="pt-[max(3rem,env(safe-area-inset-top))]">
+        <AppLogo variant="lockup" size="md" />
         <p className="mt-3 font-display text-sm font-semibold uppercase tracking-[0.2em] text-brand-blue">
           Join game
         </p>

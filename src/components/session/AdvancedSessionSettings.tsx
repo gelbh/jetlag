@@ -5,7 +5,7 @@ import {
   toggleToolInSettings,
 } from "../../domain/session/advancedSessionSettings";
 import type { DistanceUnit } from "../../domain/map/distance";
-import { formatPresetDistance } from "../../domain/map/distance";
+import { formatPresetDistance, milesToMeters } from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/gameSize";
 import {
   clampHidingZoneRadiusMeters,
@@ -540,26 +540,38 @@ export function AdvancedSessionSettings({
         {value.customTentacleMediumRadiusEnabled ? (
           <div className="space-y-2">
             <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
-              Medium radius (meters)
+              Medium radius ({distanceUnit === "metric" ? "meters" : "miles"})
               <input
                 type="number"
-                min={200}
-                max={50000}
-                step={100}
-                value={value.tentacleMediumRadiusMeters}
+                min={distanceUnit === "metric" ? 200 : 0.1}
+                max={distanceUnit === "metric" ? 50000 : 30}
+                step={distanceUnit === "metric" ? 100 : 0.1}
+                value={
+                  distanceUnit === "metric"
+                    ? value.tentacleMediumRadiusMeters
+                    : Number(
+                        (
+                          value.tentacleMediumRadiusMeters / milesToMeters(1)
+                        ).toFixed(2),
+                      )
+                }
                 disabled={disabled}
                 onChange={(event) => {
-                  const parsed = Number.parseInt(event.target.value, 10);
+                  const parsed = Number.parseFloat(event.target.value);
                   if (!Number.isFinite(parsed)) {
                     return;
                   }
+                  const meters =
+                    distanceUnit === "metric"
+                      ? parsed
+                      : parsed * milesToMeters(1);
                   onChange({
                     ...value,
-                    tentacleMediumRadiusMeters: clampTentacleRadiusMeters(parsed),
+                    tentacleMediumRadiusMeters: clampTentacleRadiusMeters(meters),
                   });
                 }}
                 className="field-input mt-2"
-                inputMode="numeric"
+                inputMode="decimal"
               />
             </label>
             <div className="flex flex-wrap gap-2">
@@ -606,27 +618,39 @@ export function AdvancedSessionSettings({
             {value.customTentacleLargeRadiusEnabled ? (
               <div className="space-y-2">
                 <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
-                  Large radius (meters)
+                  Large radius ({distanceUnit === "metric" ? "meters" : "miles"})
                   <input
                     type="number"
-                    min={200}
-                    max={50000}
-                    step={100}
-                    value={value.tentacleLargeRadiusMeters}
+                    min={distanceUnit === "metric" ? 200 : 0.1}
+                    max={distanceUnit === "metric" ? 50000 : 30}
+                    step={distanceUnit === "metric" ? 100 : 0.1}
+                    value={
+                      distanceUnit === "metric"
+                        ? value.tentacleLargeRadiusMeters
+                        : Number(
+                            (
+                              value.tentacleLargeRadiusMeters / milesToMeters(1)
+                            ).toFixed(2),
+                          )
+                    }
                     disabled={disabled}
                     onChange={(event) => {
-                      const parsed = Number.parseInt(event.target.value, 10);
+                      const parsed = Number.parseFloat(event.target.value);
                       if (!Number.isFinite(parsed)) {
                         return;
                       }
+                      const meters =
+                        distanceUnit === "metric"
+                          ? parsed
+                          : parsed * milesToMeters(1);
                       onChange({
                         ...value,
                         tentacleLargeRadiusMeters:
-                          clampTentacleRadiusMeters(parsed),
+                          clampTentacleRadiusMeters(meters),
                       });
                     }}
                     className="field-input mt-2"
-                    inputMode="numeric"
+                    inputMode="decimal"
                   />
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -708,6 +732,28 @@ export function AdvancedSessionSettings({
             Preview question before send
           </span>
         </label>
+        {value.expansionPackEnabled ? (
+          <div className="rounded-[var(--radius-hud-md)] border border-border bg-surface-raised px-3 py-2 text-xs text-ink-muted">
+            <p className="font-semibold text-ink-secondary">
+              Expansion Pack Vol. 1
+            </p>
+            <p className="mt-1">
+              Time traps on transit stations and a searchable curse reference
+              (30 curses, rules text only).
+            </p>
+          </div>
+        ) : null}
+        {value.customQuestionPackEnabled ? (
+          <div className="rounded-[var(--radius-hud-md)] border border-border bg-surface-raised px-3 py-2 text-xs text-ink-muted">
+            <p className="font-semibold text-ink-secondary">
+              Custom question pack
+            </p>
+            <p className="mt-1">
+              Adds matching, measuring, and photo prompts such as 7-Eleven,
+              letter zone, and major city.
+            </p>
+          </div>
+        ) : null}
       </fieldset>
 
       <CustomMeasureGeometrySettings

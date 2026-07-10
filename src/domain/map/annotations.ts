@@ -164,6 +164,8 @@ export interface SessionRecord {
   endGameStartedByUid?: string;
   endGameRequestedAt?: string;
   endGameRequestedByUid?: string;
+  hostAppVersion?: string;
+  memberAppVersions?: Record<string, string>;
 }
 
 export function isEndGameActive(

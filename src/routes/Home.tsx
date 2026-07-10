@@ -86,7 +86,7 @@ export function Home() {
   };
 
   return (
-    <main className="home-poster home-terminal-accent flex min-h-[100dvh] flex-col justify-between px-5 py-8">
+    <main className="home-poster home-terminal-accent flex min-h-[100dvh] flex-col justify-between px-5 py-8 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="space-y-3 pt-[max(1.25rem,env(safe-area-inset-top))]">
         <div className="flex items-start justify-between gap-3">
           <AppLogo variant="lockup" size="lg" />

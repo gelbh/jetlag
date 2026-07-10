@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
 import { AppLogo } from "../components/ui/AppLogo";
+import { ScreenNav } from "../components/ui/ScreenNav";
 import {
   githubBugReportUrl,
   githubBugsBrowseUrl,
@@ -14,17 +14,10 @@ const externalLinkProps = {
 
 export function Feedback() {
   return (
-    <main className="home-poster home-terminal-accent flex min-h-[100dvh] flex-col justify-between px-5 py-8">
-      <div className="space-y-3 pt-[max(1.25rem,env(safe-area-inset-top))]">
-        <div className="flex items-start justify-between gap-3">
-          <AppLogo variant="lockup" size="lg" />
-          <Link
-            to="/"
-            className="hud-chrome shrink-0 px-2.5 py-1.5 text-xs font-semibold tracking-wide text-ink-muted"
-          >
-            Home
-          </Link>
-        </div>
+    <main className="home-poster home-terminal-accent flex min-h-[100dvh] flex-col justify-between px-5 py-8 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <ScreenNav backTo="/" backLabel="Back" />
+      <div className="space-y-3 pt-[max(3rem,env(safe-area-inset-top))]">
+        <AppLogo variant="lockup" size="lg" />
         <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
           Feedback
         </h1>

@@ -22,8 +22,10 @@ import { hidingZoneRadiusMeters, type GameSize } from "../domain/session/gameSiz
 import {
   createGamePresetId,
   createSessionDraftToGamePreset,
+  migrateGamePreset,
   type CreateSessionDraft,
 } from "../domain/session/gamePreset";
+import { ScreenNav } from "../components/ui/ScreenNav";
 import { useGameAreaFraming } from "../hooks/session/useGameAreaFraming";
 import { usePlaceAreaSearch } from "../hooks/session/usePlaceAreaSearch";
 import { useGamePresetStore } from "../state/gamePresetStore";
@@ -42,6 +44,12 @@ export function GamePresetEditor() {
     () => (id ? presets.find((preset) => preset.id === id) : undefined),
     [id, presets],
   );
+  const migratedExisting = useMemo(
+    () => (existing ? migrateGamePreset(existing) : undefined),
+    [existing],
+  );
+  const needsMigrationReview =
+    migratedExisting?.migrationStatus === "manual_required";
 
   const framing = useGameAreaFraming({
     initialGameArea: existing?.gameArea ?? null,
@@ -127,7 +135,7 @@ export function GamePresetEditor() {
   }, [focusBounds]);
 
   return (
-    <main className="flex min-h-[100dvh] flex-col px-5 py-8">
+    <main className="home-poster flex min-h-[100dvh] flex-col px-5 py-8">
       <GameAreaFramingModal
         open={framingModalOpen}
         mapStyle={mapStyle}
@@ -149,11 +157,22 @@ export function GamePresetEditor() {
         }}
       />
 
-      <div className="space-y-4 pt-[max(1rem,env(safe-area-inset-top))]">
+      <div className="space-y-4 pt-[max(3rem,env(safe-area-inset-top))]">
+        <ScreenNav backTo="/presets" backLabel="Back" />
         <AppLogo variant="mark" size="sm" />
         <h1 className="font-display text-2xl font-bold uppercase tracking-tight text-ink">
           {existing ? "Edit preset" : "New preset"}
         </h1>
+
+        {needsMigrationReview ? (
+          <div
+            className="rounded-[var(--radius-hud-md)] border border-status-warning/40 bg-status-warning-surface px-3 py-2 text-sm text-status-warning"
+            role="status"
+          >
+            This preset uses an older format. Review settings and save to
+            upgrade.
+          </div>
+        ) : null}
 
         <div className="jl-field-frame space-y-3">
           <div className="space-y-1">
@@ -274,7 +293,6 @@ export function GamePresetEditor() {
           distanceUnit={distanceUnit}
           value={advancedSettings}
           onChange={setAdvancedSettings}
-          collapsible={false}
         />
 
         {error ? <p className="text-error">{error}</p> : null}
@@ -283,6 +301,11 @@ export function GamePresetEditor() {
           <button type="button" onClick={handleSave} className="btn-primary">
             Save preset
           </button>
+          {existing && !needsMigrationReview ? (
+            <Link to={`/create?preset=${existing.id}`} className="btn-secondary">
+              Host
+            </Link>
+          ) : null}
           {existing ? (
             <button
               type="button"
@@ -307,10 +330,15 @@ export function GamePresetEditor() {
 export function GamePresetList() {
   const presets = useGamePresetStore((state) => state.presets);
   const deletePreset = useGamePresetStore((state) => state.deletePreset);
+  const migratedPresets = useMemo(
+    () => presets.map((preset) => migrateGamePreset(preset)),
+    [presets],
+  );
 
   return (
-    <main className="flex min-h-[100dvh] flex-col px-5 py-8">
-      <div className="space-y-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <main className="home-poster flex min-h-[100dvh] flex-col px-5 py-8">
+      <div className="space-y-4 pt-[max(3rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <ScreenNav backTo="/" backLabel="Back" />
         <AppLogo variant="mark" size="sm" />
         <h1 className="font-display text-2xl font-bold uppercase tracking-tight text-ink">
           Custom games
@@ -320,42 +348,73 @@ export function GamePresetList() {
           hosting.
         </p>
 
-        <Link to="/presets/new" className="btn-primary inline-flex w-fit">
-          New preset
+        <Link to="/presets/new" className="home-card-btn home-card-btn-primary">
+          <span>New preset</span>
         </Link>
 
-        {presets.length === 0 ? (
+        {migratedPresets.length === 0 ? (
           <p className="text-sm text-ink-dim">No presets saved on this device.</p>
         ) : (
-          <ul className="space-y-2">
-            {presets.map((preset) => (
+          <ul className="space-y-3">
+            {migratedPresets.map((preset) => (
               <li
                 key={preset.id}
-                className="flex items-center justify-between gap-3 border-2 border-border bg-surface-deep px-3 py-2"
+                className="home-card-btn home-card-btn-secondary flex-col items-stretch gap-3 !min-h-0 !h-auto py-3"
               >
-                <div>
-                  <p className="font-semibold text-ink">{preset.name}</p>
-                  <p className="text-xs text-ink-muted">
-                    {preset.gameSize} · {preset.distanceUnit}
-                  </p>
+                <div className="flex w-full items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-display text-base tracking-wide text-ink">
+                      {preset.name}
+                    </p>
+                    <p className="mt-1 text-xs text-ink-muted">
+                      {preset.gameSize} · {preset.distanceUnit}
+                      {preset.placeLabel ? ` · ${preset.placeLabel}` : ""}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {preset.advancedSettings.expansionPackEnabled ? (
+                        <span className="rounded-full border border-border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-brand-blue">
+                          Expansion
+                        </span>
+                      ) : null}
+                      {preset.advancedSettings.customQuestionPackEnabled ? (
+                        <span className="rounded-full border border-border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-brand-blue">
+                          Custom Q
+                        </span>
+                      ) : null}
+                      {preset.migrationStatus === "manual_required" ? (
+                        <span className="rounded-full border border-status-warning/40 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-status-warning">
+                          Review
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Link
-                    to={`/create?preset=${preset.id}`}
-                    className="text-sm font-semibold text-brand-blue"
-                  >
-                    Host
-                  </Link>
+                <div className="flex flex-wrap gap-2">
+                  {preset.migrationStatus === "manual_required" ? (
+                    <Link
+                      to={`/presets/${preset.id}/edit`}
+                      className="btn-primary min-h-10 px-3 text-xs"
+                    >
+                      Review
+                    </Link>
+                  ) : (
+                    <Link
+                      to={`/create?preset=${preset.id}`}
+                      className="btn-primary min-h-10 px-3 text-xs"
+                    >
+                      Host
+                    </Link>
+                  )}
                   <Link
                     to={`/presets/${preset.id}/edit`}
-                    className="text-sm font-semibold text-brand-blue"
+                    className="btn-secondary min-h-10 px-3 text-xs"
                   >
                     Edit
                   </Link>
                   <button
                     type="button"
                     onClick={() => deletePreset(preset.id)}
-                    className="text-sm text-error"
+                    className="btn-secondary min-h-10 px-3 text-xs text-error"
                   >
                     Delete
                   </button>
@@ -364,10 +423,6 @@ export function GamePresetList() {
             ))}
           </ul>
         )}
-
-        <Link to="/" className="btn-secondary inline-flex w-fit">
-          Home
-        </Link>
       </div>
     </main>
   );

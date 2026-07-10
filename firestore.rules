@@ -229,6 +229,10 @@ service cloud.firestore {
         && request.resource.data.memberRoles[request.auth.uid] is string
         && validPlayerRole(request.resource.data.memberRoles[request.auth.uid])
         && (
+          !('hostAppVersion' in request.resource.data)
+          || request.resource.data.hostAppVersion is string
+        )
+        && (
           request.resource.data.tier == 'free'
           || hasHostAccess()
         );
@@ -241,7 +245,7 @@ service cloud.firestore {
         && request.resource.data.tier == resource.data.tier
         && request.resource.data.gameSize == resource.data.gameSize
         && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'memberRoles'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'memberRoles', 'memberAppVersions'])
         && request.resource.data.memberUids is list
         && request.auth.uid in request.resource.data.memberUids
         && request.resource.data.memberRoles is map
@@ -492,6 +496,20 @@ service cloud.firestore {
           && request.resource.data.geometryJson is string
           && request.resource.data.status == 'confirmed'
           && request.resource.data.confirmedAt is string;
+        allow delete: if false;
+      }
+
+      match /timeTraps/{hiderUid} {
+        allow read: if isSessionMember(sessionId);
+        allow create, update: if isHiderMember(sessionId)
+          && request.auth.uid == hiderUid
+          && request.resource.data.stationId is string
+          && request.resource.data.stationName is string
+          && request.resource.data.center is map
+          && request.resource.data.center.lat is number
+          && request.resource.data.center.lng is number
+          && request.resource.data.bonusMinutes is number
+          && request.resource.data.placedAt is string;
         allow delete: if false;
       }
 

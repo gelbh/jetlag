@@ -368,6 +368,7 @@ export function buildSessionDocument(
   gameSize: GameSize = "medium",
   rulesPatch: SessionRulesPatch = {},
   distanceUnit?: SessionRecord["distanceUnit"],
+  hostAppVersion?: string,
 ): Record<string, unknown> {
   const unit = distanceUnit ?? "imperial";
   const radiusMeters =
@@ -392,6 +393,10 @@ export function buildSessionDocument(
 
   if (transitMetroId) {
     payload.transitMetroId = transitMetroId;
+  }
+
+  if (hostAppVersion) {
+    payload.hostAppVersion = hostAppVersion;
   }
 
   assertNoNestedArrays(payload);
@@ -514,6 +519,16 @@ export function deserializeSessionFromFirestore(
     endGameRequestedByUid:
       typeof document.endGameRequestedByUid === "string"
         ? document.endGameRequestedByUid
+        : undefined,
+    hostAppVersion:
+      typeof document.hostAppVersion === "string"
+        ? document.hostAppVersion
+        : undefined,
+    memberAppVersions:
+      document.memberAppVersions &&
+      typeof document.memberAppVersions === "object" &&
+      !Array.isArray(document.memberAppVersions)
+        ? (document.memberAppVersions as Record<string, string>)
         : undefined,
   };
 }

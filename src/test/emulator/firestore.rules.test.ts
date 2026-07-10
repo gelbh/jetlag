@@ -67,6 +67,16 @@ function hidingZonePayload() {
   };
 }
 
+function timeTrapPayload() {
+  return {
+    stationId: "station-1",
+    stationName: "Test Station",
+    center: { lat: 53.35, lng: -6.26 },
+    bonusMinutes: 5,
+    placedAt: "2026-01-01T00:00:00.000Z",
+  };
+}
+
 describe("firestore.rules", () => {
   let testEnv: RulesTestEnvironment;
 
@@ -276,6 +286,93 @@ describe("firestore.rules", () => {
         .collection("hidingZones")
         .doc("other-hider")
         .set(hidingZonePayload()),
+    );
+  });
+
+  it("allows hiders to write their own time trap", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .update({
+        memberUids: ["host-1", "hider-1"],
+        memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+      });
+
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("timeTraps")
+        .doc("hider-1")
+        .set(timeTrapPayload()),
+    );
+  });
+
+  it("denies seekers from writing time traps", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+
+    const seeker = testEnv.authenticatedContext("seeker-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .update({
+        memberUids: ["host-1", "seeker-1"],
+        memberRoles: { "host-1": "seeker", "seeker-1": "seeker" },
+      });
+
+    await assertFails(
+      seeker
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("timeTraps")
+        .doc("seeker-1")
+        .set(timeTrapPayload()),
+    );
+  });
+
+  it("denies hiders from writing another player's time trap doc", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .update({
+        memberUids: ["host-1", "hider-1"],
+        memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+      });
+
+    await assertFails(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("timeTraps")
+        .doc("other-hider")
+        .set(timeTrapPayload()),
     );
   });
 

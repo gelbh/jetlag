@@ -22,6 +22,10 @@ import { hidingZoneRadiusMeters } from "../../domain/session/gameSize";
 import type { SessionRulesPatch } from "../../domain/session/advancedSessionSettings";
 import type { PlayerRole } from "../../domain/session/playerRole";
 import { timerStateToRemote, type TimerState } from "../../domain/session/timer";
+import {
+  sessionVersionCompatible,
+} from "../../domain/session/sessionVersion";
+import { APP_VERSION } from "../../domain/device/changelog";
 import { getFirestoreDb } from "../core/firebase";
 import {
   buildAnnotationDocument,
@@ -62,6 +66,12 @@ export async function ensureRemoteSessionWriteAccess(
     return result.session;
   }
 
+  if (result.status === "incompatible") {
+    throw new Error(
+      `Session requires a newer app version (v${result.hostVersion}). Update to continue.`,
+    );
+  }
+
   if (result.status === "ended") {
     throw new Error("That session has ended. Join or create a new one.");
   }
@@ -78,6 +88,7 @@ export async function createRemoteSession(
   gameSize: GameSize = "medium",
   rulesPatch: SessionRulesPatch = {},
   distanceUnit: SessionRecord["distanceUnit"] = "imperial",
+  hostAppVersion: string = APP_VERSION,
 ): Promise<SessionRecord> {
   let code = generateSessionCode();
   let attempts = 0;
@@ -111,6 +122,7 @@ export async function createRemoteSession(
     hidingZoneRadiusMeters: radiusMeters,
     tier,
     transitMetroId,
+    hostAppVersion,
     ...rulesPatch,
   };
 
@@ -126,6 +138,7 @@ export async function createRemoteSession(
       gameSize,
       rulesPatch,
       distanceUnit ?? "imperial",
+      hostAppVersion,
     ),
     createdAtServer: serverTimestamp(),
   });
@@ -177,9 +190,11 @@ export async function joinRemoteSessionByCode(
   code: string,
   uid: string,
   role: PlayerRole = "seeker",
+  clientVersion: string = APP_VERSION,
 ): Promise<
   | { status: "missing" }
   | { status: "ended" }
+  | { status: "incompatible"; hostVersion: string }
   | { status: "joined"; session: SessionRecord }
 > {
   const codeDoc = await getDoc(sessionCodeDoc(code));
@@ -209,16 +224,39 @@ export async function joinRemoteSessionByCode(
   const existingMemberUids = Array.isArray(data.memberUids)
     ? data.memberUids.filter((memberUid): memberUid is string => typeof memberUid === "string")
     : [];
+
+  const sessionForVersionCheck = deserializeSessionFromFirestore(sessionDoc.id, data);
+  if (
+    !existingMemberUids.includes(uid) &&
+    !sessionVersionCompatible(sessionForVersionCheck, clientVersion, uid)
+  ) {
+    return {
+      status: "incompatible",
+      hostVersion: sessionForVersionCheck.hostAppVersion ?? clientVersion,
+    };
+  }
+
   const memberUids = Array.from(new Set([...existingMemberUids, uid]));
   const memberRoles = {
     ...existingRoles,
     [uid]: existingRoles[uid] ?? role,
   };
 
+  const existingMemberAppVersions =
+    data.memberAppVersions && typeof data.memberAppVersions === "object"
+      ? (data.memberAppVersions as Record<string, string>)
+      : {};
+  const memberAppVersions = {
+    ...existingMemberAppVersions,
+    [uid]: clientVersion,
+  };
+
   if (!existingMemberUids.includes(uid)) {
-    await updateDoc(sessionDoc.ref, { memberUids, memberRoles });
+    await updateDoc(sessionDoc.ref, { memberUids, memberRoles, memberAppVersions });
   } else if (!existingRoles[uid]) {
-    await updateDoc(sessionDoc.ref, { memberRoles });
+    await updateDoc(sessionDoc.ref, { memberRoles, memberAppVersions });
+  } else if (existingMemberAppVersions[uid] !== clientVersion) {
+    await updateDoc(sessionDoc.ref, { memberAppVersions });
   }
 
   return {
@@ -227,6 +265,7 @@ export async function joinRemoteSessionByCode(
       ...data,
       memberUids,
       memberRoles,
+      memberAppVersions,
     }),
   };
 }

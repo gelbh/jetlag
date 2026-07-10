@@ -1,8 +1,8 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import type { LatLngBoundsExpression } from "leaflet";
-import { Link } from "react-router-dom";
 import { AppLogo } from "../components/ui/AppLogo";
+import { ScreenNav } from "../components/ui/ScreenNav";
 import { CreateSessionMapPane } from "../components/session/CreateSessionMapPane";
 import { GameAreaFramingModal } from "../components/session/GameAreaFramingModal";
 import {
@@ -605,14 +605,9 @@ export function CreateSession() {
         maxHeightClassName="max-h-[min(58dvh,640px)]"
         className="flex min-h-0 flex-1 flex-col"
       >
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 px-4 pt-3">
-        <Link
-          to="/"
-          className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-ink-dim"
-        >
-          ← Back
-        </Link>
-        <div className="mt-6">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 px-4 pt-[max(3rem,env(safe-area-inset-top))]">
+        <ScreenNav backTo="/" backLabel="Back" />
+        <div className="mt-4">
         <AppLogo variant="lockup" size="md" />
         </div>
         <p className="mt-3 font-display text-xs font-semibold uppercase tracking-[0.14em] text-brand-blue">
@@ -624,6 +619,60 @@ export function CreateSession() {
         <p className="mt-2 text-pretty text-sm leading-relaxed text-ink-secondary">
           Search or import a boundary, or draw the play area on the map below.
         </p>
+
+        <div className="mt-4 space-y-2">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+            Game preset
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <select
+              disabled={loading || verifyingAccess}
+              className="field-input min-h-11 flex-1"
+              defaultValue=""
+              onChange={(event) => {
+                const presetId = event.target.value;
+                if (!presetId) {
+                  return;
+                }
+                navigate(`/create?preset=${presetId}`);
+              }}
+            >
+              <option value="">Load preset…</option>
+              {presets.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  {preset.name}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              disabled={loading || verifyingAccess}
+              onClick={() => {
+                const name = window.prompt("Preset name");
+                if (!name?.trim()) {
+                  return;
+                }
+
+                savePreset(
+                  createSessionDraftToGamePreset(
+                    {
+                      gameSize,
+                      distanceUnit,
+                      advancedSettings,
+                      gameArea: previewGameArea,
+                      placeLabel: selectedPlace?.displayName ?? locationQuery,
+                      sessionTier,
+                    },
+                    name.trim(),
+                  ),
+                );
+              }}
+              className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-brand-blue disabled:opacity-50"
+            >
+              Save as preset
+            </button>
+          </div>
+        </div>
 
         <div className="jl-field-frame mt-4 space-y-3">
           <div className="space-y-1">
@@ -828,60 +877,6 @@ export function CreateSession() {
           onChange={setPlayerRole}
           disabled={loading || verifyingAccess}
         />
-
-        <div className="space-y-2">
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
-            Game preset
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <select
-              disabled={loading || verifyingAccess}
-              className="field-input min-h-11 flex-1"
-              defaultValue=""
-              onChange={(event) => {
-                const presetId = event.target.value;
-                if (!presetId) {
-                  return;
-                }
-                navigate(`/create?preset=${presetId}`);
-              }}
-            >
-              <option value="">Load preset…</option>
-              {presets.map((preset) => (
-                <option key={preset.id} value={preset.id}>
-                  {preset.name}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              disabled={loading || verifyingAccess}
-              onClick={() => {
-                const name = window.prompt("Preset name");
-                if (!name?.trim()) {
-                  return;
-                }
-
-                savePreset(
-                  createSessionDraftToGamePreset(
-                    {
-                      gameSize,
-                      distanceUnit,
-                      advancedSettings,
-                      gameArea: previewGameArea,
-                      placeLabel: selectedPlace?.displayName ?? locationQuery,
-                      sessionTier,
-                    },
-                    name.trim(),
-                  ),
-                );
-              }}
-              className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-brand-blue disabled:opacity-50"
-            >
-              Save as preset
-            </button>
-          </div>
-        </div>
 
         <div className="space-y-2">
           <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">

@@ -42,7 +42,7 @@ export function CreateSessionMapPane({
   onMapClick,
 }: CreateSessionMapPaneProps) {
   return (
-    <div className="relative min-h-[34dvh] max-h-[46dvh] flex-[1_0_42dvh] shrink-0">
+    <div className="relative min-h-[34dvh] max-h-[46dvh] flex-[1_0_42dvh] shrink-0 touch-none">
       <div className="absolute inset-0">
         <MapView
           mapStyle={mapStyle}

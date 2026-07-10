@@ -30,7 +30,7 @@ describe("Feedback", () => {
   it("links back to home", () => {
     renderWithRouter(<Feedback />);
 
-    expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /Back/i })).toHaveAttribute(
       "href",
       "/",
     );

@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { mapToolPlacingLabel } from "../../domain/map/mapTools";
 import type { SyncStatus } from "../../domain/device/sync";
 import type { TimerState } from "../../domain/session/timer";
 import type { MapTool } from "../../state/sessionStore";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
-import { HudHomeIcon, HudPlayIcon } from "../ui/HudIcons";
+import { HudPlayIcon } from "../ui/HudIcons";
+import { ScreenNav } from "../ui/ScreenNav";
 import { PopupCloseButton } from "../ui/PopupCloseButton";
 import { TimerActions } from "../tools/TimerActions";
 import { SessionTimerLabel } from "./SessionTimerLabel";
 import { MapTimerCluster } from "./MapTimerCluster";
-import { GameAreaPreloadBanner } from "./GameAreaPreloadBanner";
+import { GameAreaPreloadBeacon } from "./GameAreaPreloadBeacon";
 import { SyncStatusBeacon } from "./SyncStatusDot";
 import { SyncStatusDetailPanel } from "./SyncStatusDetailPanel";
 import {
@@ -267,6 +267,8 @@ export function MapStatusRail({
       className="jl-status-rail pointer-events-none absolute inset-x-0 top-0 z-[var(--z-banner)] pt-[max(0px,env(safe-area-inset-top))]"
     >
       <div className="relative">
+        <ScreenNav variant="home" />
+        {showPreloadBanner ? <GameAreaPreloadBeacon /> : null}
         {showSyncDot ? (
           <div className="jl-sync-map-indicator">
             <button
@@ -329,15 +331,7 @@ export function MapStatusRail({
         ) : null}
 
         <div className="jl-status-bar">
-          <div className="jl-status-bar-inner">
-            <Link
-              to="/"
-              className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-transparent text-ink transition-colors hover:border-border hover:bg-surface-raised"
-              aria-label="Home"
-            >
-              <HudHomeIcon className="h-5 w-5" />
-            </Link>
-
+          <div className="jl-status-bar-inner pl-[calc(2.75rem+max(0.625rem,env(safe-area-inset-left)))]">
             <div className="jl-stamp">
               <span className="jl-stamp-label">Session</span>
               <span className="jl-stamp-code jl-view-transition-session-code">
@@ -497,8 +491,6 @@ export function MapStatusRail({
             </p>
           )
         ) : null}
-
-        {showPreloadBanner ? <GameAreaPreloadBanner /> : null}
       </div>
     </div>
   );

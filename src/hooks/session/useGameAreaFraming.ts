@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { LatLngBounds, LatLngBoundsExpression } from "leaflet";
+import { LatLngBounds as LeafletLatLngBounds } from "leaflet";
 import type { GameArea } from "../../domain/map/annotations";
 import type { BoundingBox } from "../../domain/geometry/gameAreaBounds";
 import {
@@ -24,6 +25,18 @@ export interface GameAreaFramingResult {
 }
 
 const MIN_CIRCLE_RADIUS_METERS = 200;
+const RECTANGLE_VIEWPORT_INSET_FRACTION = 0.12;
+
+function insetMapBounds(bounds: LatLngBounds, fraction: number): LatLngBounds {
+  const southWest = bounds.getSouthWest();
+  const northEast = bounds.getNorthEast();
+  const latSpan = northEast.lat - southWest.lat;
+  const lngSpan = northEast.lng - southWest.lng;
+  return new LeafletLatLngBounds(
+    [southWest.lat + latSpan * fraction, southWest.lng + lngSpan * fraction],
+    [northEast.lat - latSpan * fraction, northEast.lng - lngSpan * fraction],
+  );
+}
 
 interface UseGameAreaFramingOptions {
   initialMode?: FramingMode;
@@ -84,7 +97,9 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
       vertices: LatLngTuple[],
     ): GameArea | null => {
       if (mode === "rectangle" && nextBounds && isUsableMapBounds(nextBounds)) {
-        return boundsToGameArea(nextBounds);
+        return boundsToGameArea(
+          insetMapBounds(nextBounds, RECTANGLE_VIEWPORT_INSET_FRACTION),
+        );
       }
 
       if (

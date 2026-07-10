@@ -7,15 +7,20 @@ import {
 import type { SessionRecord } from "../../domain/map/annotations";
 import {
   formatPhotoStorageError,
+  isStorageUnauthorized,
   photoUploadAccessError,
 } from "../../domain/questions/photoUploadAccess";
-import { getRemoteSessionById } from "../firestore/firestoreAnnotations";
+import {
+  getRemoteSessionById,
+  joinRemoteSessionByCode,
+} from "../firestore/firestoreAnnotations";
 import { ensureAnonymousUser, getFirebaseStorage } from "./firebase";
 import { addPhotoUploadBreadcrumb } from "./sentry";
 
 const MAX_DIMENSION = 1920;
 const JPEG_QUALITY = 0.85;
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const RETRY_DELAYS_MS = [500, 1500] as const;
 
 function loadImageFromFile(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -99,11 +104,33 @@ export function photoAnswerStoragePath(
   return `sessions/${sessionId}/photoAnswers/${questionId}/${fileName}`;
 }
 
+async function healSessionMembership(
+  session: Pick<SessionRecord, "id" | "code">,
+  authUid: string,
+): Promise<SessionRecord | null> {
+  const healed = await joinRemoteSessionByCode(session.code, authUid);
+  if (healed.status === "joined") {
+    return healed.session;
+  }
+  return getRemoteSessionById(session.id);
+}
+
+async function attemptUpload(
+  storageRef: ReturnType<typeof ref>,
+  blob: Blob,
+  metadata: UploadMetadata,
+): Promise<void> {
+  await uploadBytes(storageRef, blob, metadata);
+}
+
 export async function uploadPhotoAnswer(
   sessionId: string,
   questionId: string,
   file: File,
-  session?: Pick<SessionRecord, "id" | "memberUids" | "memberRoles"> | null,
+  session?: Pick<
+    SessionRecord,
+    "id" | "code" | "memberUids" | "memberRoles"
+  > | null,
   myUid?: string | null,
 ): Promise<string> {
   const user = await ensureAnonymousUser();
@@ -151,40 +178,45 @@ export async function uploadPhotoAnswer(
     contentType: blob.type,
   };
 
-  try {
-    await uploadBytes(storageRef, blob, metadata);
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : String(error);
-    if (message.includes("storage/unauthorized")) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const refreshed = session?.id
-        ? await getRemoteSessionById(session.id)
-        : null;
-      if (refreshed) {
-        activeSession = refreshed;
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt += 1) {
+    try {
+      await attemptUpload(storageRef, blob, metadata);
+      return storagePath;
+    } catch (error) {
+      lastError = error;
+
+      if (!isStorageUnauthorized(error) || attempt >= RETRY_DELAYS_MS.length) {
+        break;
       }
-      const retryAccessError = photoUploadAccessError(activeSession, authUid);
-      if (!retryAccessError) {
-        try {
-          await uploadBytes(storageRef, blob, metadata);
-          return storagePath;
-        } catch (retryError) {
-          throw new Error(
-            formatPhotoStorageError(retryError, activeSession, authUid),
-            { cause: retryError },
-          );
+
+      if (activeSession?.code) {
+        const healed = await healSessionMembership(activeSession, authUid);
+        if (healed) {
+          activeSession = healed;
+        }
+      } else if (session?.id) {
+        const refreshed = await getRemoteSessionById(session.id);
+        if (refreshed) {
+          activeSession = refreshed;
         }
       }
-    }
 
-    throw new Error(
-      formatPhotoStorageError(error, activeSession, authUid),
-      { cause: error },
-    );
+      const retryAccessError = photoUploadAccessError(activeSession, authUid);
+      if (retryAccessError) {
+        break;
+      }
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, RETRY_DELAYS_MS[attempt]),
+      );
+    }
   }
 
-  return storagePath;
+  throw new Error(
+    formatPhotoStorageError(lastError, activeSession, authUid),
+    { cause: lastError },
+  );
 }
 
 export async function getPhotoDownloadUrl(storagePath: string): Promise<string> {

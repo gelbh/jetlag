@@ -53,12 +53,10 @@
   --chrome-gap-above-dock: 0.5rem;
   --chrome-gap-bottom: 0.75rem;
   --map-panel-bottom: calc(
-    var(--dock-height) + env(safe-area-inset-bottom) + var(--chrome-gap-above-dock)
+    var(--dock-height) + var(--chrome-gap-above-dock)
   );
   --hider-panel-bottom: 0;
-  --hider-wizard-bottom: calc(
-    var(--hider-action-bar-height) + env(safe-area-inset-bottom)
-  );
+  --hider-wizard-bottom: var(--hider-action-bar-height);
   --z-dock: 1000;
   --z-banner: 1001;
   --z-panel: 1002;
@@ -72,7 +70,7 @@
   --map-banner-top: calc(
     env(safe-area-inset-top) + var(--status-bar-height) + 1.25rem
   );
-  --jl-sync-beacon-inset: 0.625rem;
+  --jl-sync-beacon-inset: max(0.625rem, env(safe-area-inset-right, 0px));
   --jl-sync-beacon-top: calc(
     env(safe-area-inset-top, 0px) + var(--status-bar-height) + var(--jl-sync-beacon-inset)
   );
@@ -328,6 +326,7 @@ textarea {
     position: fixed;
     inset: 0;
     overflow: hidden;
+    background: var(--color-surface-deep);
   }
 
   .map-chrome-hud {
@@ -350,7 +349,7 @@ textarea {
   .home-terminal-accent::before {
     content: "";
     position: fixed;
-    top: 0;
+    top: env(safe-area-inset-top, 0px);
     left: 0;
     right: 0;
     height: 3px;
@@ -1432,6 +1431,8 @@ textarea {
 
   /* Home / join poster */
   .home-poster {
+    min-height: 100dvh;
+    min-height: 100svh;
     background-color: var(--color-surface-deep);
     background-image:
       radial-gradient(

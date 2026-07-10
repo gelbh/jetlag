@@ -20,14 +20,17 @@ import { CurseReferenceSheet } from "../components/expansion/CurseReferenceSheet
 import { timeTrapForHider } from "../domain/expansion/timeTraps";
 import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
 import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
-import { AnimatedOverlay } from "../components/ui/AnimatedOverlay";
 import { HiderZoneWizardShell } from "../components/hider/HiderZoneWizardShell";
+import { PopupCloseButton } from "../components/ui/PopupCloseButton";
 import { DEFAULT_SESSION_RULES } from "../domain/session/sessionRules";
 import {
   effectiveHidingZoneRadiusMeters,
   formatHidingZoneRadiusLabel,
 } from "../domain/session/gameSize";
-import { hidingZonePreviewPositions } from "../domain/session/hidingZone";
+import {
+  hidingZonePreviewPositions,
+  nearestStation,
+} from "../domain/session/hidingZone";
 import { MapStatusRail } from "../components/session/MapStatusRail";
 import {
   HiderTruthRevealBanner,
@@ -158,6 +161,7 @@ export function HiderMapScreen() {
   const expansionPackEnabled = session?.expansionPackEnabled === true;
   const [expansionMenuOpen, setExpansionMenuOpen] = useState(false);
   const [timeTrapSheetOpen, setTimeTrapSheetOpen] = useState(false);
+  const [timeTrapPeeked, setTimeTrapPeeked] = useState(false);
   const [curseSheetOpen, setCurseSheetOpen] = useState(false);
   const pendingQuestions = usePendingQuestionsSync(sessionId);
   const playerLocations = usePlayerLocationsSync(sessionId);
@@ -396,9 +400,23 @@ export function HiderMapScreen() {
 
   const handleMapClick = useCallback(
     (lat: number, lng: number) => {
+      if (timeTrapSheetOpen && !myTrap) {
+        const station = nearestStation([lat, lng], timeTrapTool.stations);
+        if (station) {
+          timeTrapTool.setSelectedStation(station);
+        }
+        return;
+      }
+
       zoneTool.handleMapClick([lat, lng]);
     },
-    [zoneTool.handleMapClick],
+    [
+      myTrap,
+      timeTrapSheetOpen,
+      timeTrapTool.setSelectedStation,
+      timeTrapTool.stations,
+      zoneTool,
+    ],
   );
 
   if (!session) {
@@ -409,7 +427,10 @@ export function HiderMapScreen() {
   const center = gameAreaCenter(session.gameArea);
   const previewRing = hidingZonePreviewPositions(zoneTool.previewCircle);
   const sheetBlocksWizard =
-    overlay.isChatOpen || overlay.isSettingsOpen || overlay.isLogOpen;
+    overlay.isChatOpen ||
+    overlay.isSettingsOpen ||
+    overlay.isLogOpen ||
+    timeTrapSheetOpen;
 
   return (
     <div className="map-screen-shell">
@@ -446,6 +467,13 @@ export function HiderMapScreen() {
               stations={zoneTool.stations}
               selectedStation={zoneTool.selectedStation}
               onSelectStation={zoneTool.setSelectedStation}
+            />
+          ) : null}
+          {timeTrapSheetOpen && !myTrap ? (
+            <HidingZoneStationsLayer
+              stations={timeTrapTool.stations}
+              selectedStation={timeTrapTool.selectedStation}
+              onSelectStation={timeTrapTool.setSelectedStation}
             />
           ) : null}
           {previewRing.length > 0 ? (
@@ -745,29 +773,39 @@ export function HiderMapScreen() {
         }}
       />
 
-      <AnimatedOverlay
+      <HiderZoneWizardShell
         open={timeTrapSheetOpen}
-        onClose={() => setTimeTrapSheetOpen(false)}
-        ariaLabel="Place time trap"
-        sheetClassName="mx-auto max-w-lg"
+        peeked={timeTrapPeeked}
+        onPeekedChange={setTimeTrapPeeked}
       >
-        <TimeTrapPanel
-          query={timeTrapTool.query}
-          onQueryChange={timeTrapTool.setQuery}
-          stations={timeTrapTool.stations}
-          stationsLoading={timeTrapTool.stationsLoading}
-          stationsError={timeTrapTool.stationsError}
-          selectedStation={timeTrapTool.selectedStation}
-          onSelectStation={timeTrapTool.setSelectedStation}
-          onSearchThisArea={handleTimeTrapSearchThisArea}
-          searchDisabled={timeTrapTool.stationsLoading}
-          existingTrapStationName={myTrap?.stationName ?? null}
-          onConfirm={() => void timeTrapTool.confirmTrap().then(() => setTimeTrapSheetOpen(false))}
-          saving={timeTrapTool.saving}
-          error={timeTrapTool.error}
-          bonusMinutes={myTrap?.bonusMinutes ?? 5}
-        />
-      </AnimatedOverlay>
+        <div className="relative space-y-2">
+          <PopupCloseButton
+            label="Close time trap"
+            onClick={() => setTimeTrapSheetOpen(false)}
+          />
+          <p className="font-display pr-10 text-xs font-semibold uppercase tracking-[0.12em] text-highlight">
+            Time trap
+          </p>
+          <TimeTrapPanel
+            query={timeTrapTool.query}
+            onQueryChange={timeTrapTool.setQuery}
+            stations={timeTrapTool.stations}
+            stationsLoading={timeTrapTool.stationsLoading}
+            stationsError={timeTrapTool.stationsError}
+            selectedStation={timeTrapTool.selectedStation}
+            onSelectStation={timeTrapTool.setSelectedStation}
+            onSearchThisArea={handleTimeTrapSearchThisArea}
+            searchDisabled={timeTrapTool.stationsLoading}
+            existingTrapStationName={myTrap?.stationName ?? null}
+            onConfirm={() =>
+              void timeTrapTool.confirmTrap().then(() => setTimeTrapSheetOpen(false))
+            }
+            saving={timeTrapTool.saving}
+            error={timeTrapTool.error}
+            bonusMinutes={myTrap?.bonusMinutes ?? 5}
+          />
+        </div>
+      </HiderZoneWizardShell>
 
       <CurseReferenceSheet
         open={curseSheetOpen}
