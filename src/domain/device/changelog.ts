@@ -21,6 +21,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Time traps: hiders can place traps without permission errors",
           "Photo uploads: heal session membership on storage denial with stronger retry",
           "Map: dock safe-area fix removes gap below the tool bar",
+          "Map: tool dock sits flush on iPhone home-screen installs without a double bottom bar",
           "Home: safe-area background no longer shows a blue bar on notched devices",
         ],
       },

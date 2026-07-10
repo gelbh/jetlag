@@ -128,3 +128,67 @@ test.describe("iPhone 14 Pro Max tool dock", () => {
     );
   });
 });
+
+const SIMULATED_SAFE_AREA_BOTTOM_PX = 34;
+
+test.describe("iPhone 13 PWA safe area", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openMapWithLocalSession(page);
+    await page.evaluate((safeBottomPx) => {
+      document.documentElement.style.setProperty(
+        "--safe-area-bottom",
+        `${safeBottomPx}px`,
+      );
+    }, SIMULATED_SAFE_AREA_BOTTOM_PX);
+  });
+
+  test("dock sits flush at viewport bottom with safe area on wrapper only", async ({
+    page,
+  }) => {
+    const metrics = await page.evaluate(() => {
+      const dock = document.querySelector(".jl-tool-dock");
+      const bar = document.querySelector(".jl-tool-dock-bar");
+      const dockRect = dock?.getBoundingClientRect();
+      const barRect = bar?.getBoundingClientRect();
+      const slots = [...document.querySelectorAll(".jl-tool-slot")].filter(
+        (el) => el.getBoundingClientRect().width > 0,
+      );
+      const lowestSlotBottom = Math.max(
+        ...slots.map((el) => el.getBoundingClientRect().bottom),
+        0,
+      );
+      return {
+        viewportHeight: window.innerHeight,
+        dockBottom: dockRect?.bottom ?? 0,
+        barHeight: barRect?.height ?? 0,
+        barBottom: barRect?.bottom ?? 0,
+        safeBandHeight: (dockRect?.bottom ?? 0) - (barRect?.bottom ?? 0),
+        dockPaddingBottom: dock
+          ? Number.parseFloat(getComputedStyle(dock).paddingBottom)
+          : 0,
+        safeAreaVar: getComputedStyle(document.documentElement).getPropertyValue(
+          "--safe-area-bottom",
+        ),
+        lowestSlotBottom,
+        gapBelowDock: window.innerHeight - (dockRect?.bottom ?? 0),
+      };
+    });
+
+    expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(
+      SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
+    );
+    expect(metrics.gapBelowDock).toBeLessThanOrEqual(1);
+    expect(Math.abs(metrics.dockBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
+      1,
+    );
+    expect(metrics.safeBandHeight).toBeGreaterThanOrEqual(
+      SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
+    );
+    expect(metrics.safeBandHeight).toBeLessThanOrEqual(
+      SIMULATED_SAFE_AREA_BOTTOM_PX + 2,
+    );
+    expect(metrics.barHeight).toBeLessThan(90);
+    expect(metrics.lowestSlotBottom).toBeLessThanOrEqual(metrics.barBottom + 1);
+  });
+});
