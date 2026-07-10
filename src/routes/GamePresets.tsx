@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useId, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import type { LatLngBoundsExpression } from "leaflet";
 import { AppLogo } from "../components/ui/AppLogo";
@@ -33,7 +33,9 @@ import {
   isBundledPresetId,
 } from "../domain/regions/bundledGamePresets";
 import { BundledPresetTree } from "../components/presets/BundledPresetTree";
+import { PresetSearchResults } from "../components/presets/PresetSearchResults";
 import { useGamePresetStore } from "../state/gamePresetStore";
+import { filterGamePresetsForSearch } from "../domain/session/gamePresetSearch";
 import { useMapStore } from "../state/sessionStore";
 import type { GeocodedPlace } from "../services/geo/geocoding";
 
@@ -427,6 +429,8 @@ function PresetListItems({
 export function GamePresetList() {
   const presets = useGamePresetStore((state) => state.presets);
   const deletePreset = useGamePresetStore((state) => state.deletePreset);
+  const searchId = useId();
+  const [query, setQuery] = useState("");
   const migratedPresets = useMemo(
     () => presets.map((preset) => migrateGamePreset(preset)),
     [presets],
@@ -438,6 +442,11 @@ export function GamePresetList() {
   const userPresets = useMemo(
     () => migratedPresets.filter((preset) => !isBundledPresetId(preset.id)),
     [migratedPresets],
+  );
+  const searching = query.trim().length > 0;
+  const searchResults = useMemo(
+    () => filterGamePresetsForSearch(migratedPresets, query),
+    [migratedPresets, query],
   );
 
   return (
@@ -453,35 +462,57 @@ export function GamePresetList() {
           hosting.
         </p>
 
+        <label htmlFor={searchId} className="field-label block">
+          Search presets
+          <input
+            id={searchId}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            className="field-input min-h-11 w-full"
+            placeholder="Name or place…"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            enterKeyHint="search"
+            inputMode="search"
+          />
+        </label>
+
         <Link to="/presets/new" className="home-card-btn home-card-btn-primary">
           <span>New preset</span>
         </Link>
 
-        {bundledPresets.length > 0 ? (
-          <section className="space-y-2">
-            <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
-              Recommended
-            </p>
-            <p className="text-xs leading-snug text-ink-muted">
-              Browse by continent, country, and region. More areas ship over time.
-            </p>
-            <BundledPresetTree presets={bundledPresets} />
-          </section>
-        ) : null}
-
-        {userPresets.length === 0 ? (
-          bundledPresets.length === 0 ? (
-            <p className="text-sm text-ink-dim">No presets saved on this device.</p>
-          ) : null
+        {searching ? (
+          <PresetSearchResults presets={searchResults} onDelete={deletePreset} />
         ) : (
-          <section className="space-y-2">
+          <>
             {bundledPresets.length > 0 ? (
-              <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
-                Your presets
-              </p>
+              <section className="space-y-2">
+                <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+                  Recommended
+                </p>
+                <p className="text-xs leading-snug text-ink-muted">
+                  Browse by continent, country, and region. More areas ship over time.
+                </p>
+                <BundledPresetTree presets={bundledPresets} />
+              </section>
             ) : null}
-            <PresetListItems presets={userPresets} onDelete={deletePreset} />
-          </section>
+
+            {userPresets.length === 0 ? (
+              bundledPresets.length === 0 ? (
+                <p className="text-sm text-ink-dim">No presets saved on this device.</p>
+              ) : null
+            ) : (
+              <section className="space-y-2">
+                {bundledPresets.length > 0 ? (
+                  <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+                    Your presets
+                  </p>
+                ) : null}
+                <PresetListItems presets={userPresets} onDelete={deletePreset} />
+              </section>
+            )}
+          </>
         )}
       </div>
     </main>

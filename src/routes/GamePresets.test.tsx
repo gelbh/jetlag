@@ -89,6 +89,77 @@ describe("GamePresetList", () => {
       within(weeklyCard as HTMLElement).getByRole("link", { name: "Edit" }),
     ).toHaveAttribute("href", "/presets/preset-1/edit");
   });
+
+  it("renders a search field with an accessible label", () => {
+    useGamePresetStore.setState({ presets: mergeBundledPresets([]) });
+    renderWithRouter(<GamePresetList />, { resetStores: false });
+
+    expect(screen.getByLabelText("Search presets")).toBeInTheDocument();
+  });
+
+  it("shows flat bundled results while searching and hides the tree", () => {
+    useGamePresetStore.setState({ presets: mergeBundledPresets([]) });
+    renderWithRouter(<GamePresetList />, { resetStores: false });
+
+    fireEvent.change(screen.getByLabelText("Search presets"), {
+      target: { value: "Fingal" },
+    });
+
+    expect(screen.getByText("Fingal County Council")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Host" }),
+    ).toHaveAttribute("href", "/create?preset=bundled:dublin-fingal");
+    expect(screen.queryByRole("button", { name: /Europe/i })).not.toBeInTheDocument();
+  });
+
+  it("filters user presets while searching", () => {
+    useGamePresetStore.setState({
+      presets: mergeBundledPresets([
+        {
+          id: "preset-1",
+          name: "Weekly game",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+          schemaVersion: 1,
+          gameSize: "medium",
+          distanceUnit: "metric",
+          advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+          migrationStatus: "ok",
+        },
+      ]),
+    });
+    renderWithRouter(<GamePresetList />, { resetStores: false });
+
+    fireEvent.change(screen.getByLabelText("Search presets"), {
+      target: { value: "Weekly" },
+    });
+
+    expect(screen.getByText("Weekly game")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Europe/i })).not.toBeInTheDocument();
+  });
+
+  it("restores the browse tree after clearing search", () => {
+    useGamePresetStore.setState({ presets: mergeBundledPresets([]) });
+    renderWithRouter(<GamePresetList />, { resetStores: false });
+
+    const searchInput = screen.getByLabelText("Search presets");
+    fireEvent.change(searchInput, { target: { value: "Fingal" } });
+    expect(screen.queryByRole("button", { name: /Europe/i })).not.toBeInTheDocument();
+
+    fireEvent.change(searchInput, { target: { value: "" } });
+    expect(screen.getByRole("button", { name: /Europe/i })).toBeInTheDocument();
+  });
+
+  it("shows an empty state when search has no matches", () => {
+    useGamePresetStore.setState({ presets: mergeBundledPresets([]) });
+    renderWithRouter(<GamePresetList />, { resetStores: false });
+
+    fireEvent.change(screen.getByLabelText("Search presets"), {
+      target: { value: "Tokyo" },
+    });
+
+    expect(screen.getByText("No presets match your search.")).toBeInTheDocument();
+  });
 });
 
 describe("GamePresetEditor", () => {

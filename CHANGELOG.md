@@ -7,6 +7,10 @@
 - Photo uploads: confirm hider access against the server before upload
 - Photo uploads: clearer errors when sign-in and session membership diverge
 
+### Improvements
+
+- Custom games: search presets by name or place; results show in a flat list while you type
+
 ## 0.2.2 - 2026-07-10
 
 ### Fixes

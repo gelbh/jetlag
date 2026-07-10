@@ -20,6 +20,12 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Photo uploads: confirm hider access against the server before upload",
           "Photo uploads: clearer errors when sign-in and session membership diverge",
         ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Custom games: search presets by name or place; results show in a flat list while you type",
+        ],
       }
     ],
   },
