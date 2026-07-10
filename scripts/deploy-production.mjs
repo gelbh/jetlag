@@ -201,8 +201,8 @@ async function main() {
   run("npm", ["run", "lint"]);
   run("npm", ["run", "test:ci"]);
 
-  const onlyFull = "firestore,functions";
-  const onlyLite = "firestore";
+  const onlyFull = "firestore,functions,storage";
+  const onlyLite = "firestore,storage";
 
   if (!shouldDeployFunctions(process.env)) {
     console.log(
@@ -212,7 +212,7 @@ async function main() {
     if (lite.code !== 0) {
       process.exit(lite.code);
     }
-    console.log("Backend deploy complete (Firestore).");
+    console.log("Backend deploy complete (Firestore + Storage).");
     return;
   }
 
@@ -220,7 +220,7 @@ async function main() {
 
   let result = await runFirebaseDeploy(onlyFull);
   if (result.code === 0) {
-    console.log("Backend deploy complete (Firestore + Functions).");
+    console.log("Backend deploy complete (Firestore + Functions + Storage).");
     printProxyEnvInstructions(resolveFunctionUrls(result.output));
     return;
   }
@@ -234,7 +234,7 @@ async function main() {
       process.exit(result.code);
     }
     console.warn(
-      "Deployed Firestore only. TfL vehicle proxy (Functions) was not updated.",
+      "Deployed Firestore + Storage only. TfL vehicle proxy (Functions) was not updated.",
     );
     console.warn(
       "Upgrade the Firebase project to Blaze to deploy Functions, or set DEPLOY_FIREBASE_FUNCTIONS=0 to skip the initial failed attempt.",
@@ -242,7 +242,7 @@ async function main() {
     console.warn(
       "Blaze is pay-as-you-go; at infrequent usage the Overpass proxy stays within the free tier.\n",
     );
-    console.log("Backend deploy complete (Firestore).");
+    console.log("Backend deploy complete (Firestore + Storage).");
     return;
   }
 

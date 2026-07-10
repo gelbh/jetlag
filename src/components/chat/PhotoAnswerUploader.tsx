@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   getPhotoCategory,
   PHOTO_CANNOT_ANSWER_LABEL,
@@ -8,7 +8,12 @@ import {
 } from "../../domain/questions/photoQuestions";
 import { photoUploadAccessError } from "../../domain/questions/photoUploadAccess";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
-import { uploadPhotoAnswer } from "../../services/core/photoStorage";
+import { ensureAnonymousUser } from "../../services/core/firebase";
+import {
+  deletePhotoAnswer,
+  uploadPhotoAnswer,
+} from "../../services/core/photoStorage";
+import { capturePhotoUploadFailure } from "../../services/core/sentry";
 import { useSessionStore } from "../../state/sessionStore";
 
 interface PhotoAnswerUploaderProps {
@@ -35,17 +40,38 @@ export function PhotoAnswerUploader({
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [authUid, setAuthUid] = useState<string | null>(null);
   const session = useSessionStore((state) => state.session);
-  const myUid = useSessionStore((state) => state.myUid);
+  const storeUid = useSessionStore((state) => state.myUid);
+
+  useEffect(() => {
+    let cancelled = false;
+    void ensureAnonymousUser()
+      .then((user) => {
+        if (!cancelled) {
+          setAuthUid(user.uid);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setAuthUid(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const accessUid = authUid ?? storeUid;
+  const accessError = photoUploadAccessError(session, accessUid);
+  const syncPending =
+    accessError !== null &&
+    (accessError.startsWith("Syncing") || accessError.includes("still syncing"));
 
   const categoryId = readPhotoCategoryId(pendingQuestion);
   const ruleSummary = categoryId
     ? getPhotoCategory(categoryId).ruleSummary
     : null;
-  const accessError = photoUploadAccessError(session, myUid);
-  const syncPending =
-    accessError !== null &&
-    (accessError.startsWith("Syncing") || accessError.includes("still syncing"));
 
   const submitAnswer = async (answer: PhotoAnswer) => {
     setError(null);
@@ -67,16 +93,38 @@ export function PhotoAnswerUploader({
 
     setUploading(true);
     setError(null);
+    let storagePath: string | null = null;
     try {
-      const storagePath = await uploadPhotoAnswer(
+      storagePath = await uploadPhotoAnswer(
         sessionId,
         pendingQuestion.id,
         file,
         session,
-        myUid,
+        accessUid,
       );
       await submitAnswer({ kind: "photo", storagePath });
     } catch (uploadError) {
+      if (storagePath) {
+        try {
+          await deletePhotoAnswer(storagePath);
+        } catch (cleanupError) {
+          capturePhotoUploadFailure(cleanupError, "storage", {
+            sessionId,
+            questionId: pendingQuestion.id,
+            storagePath,
+            phase: "orphan_cleanup",
+          });
+        }
+      }
+
+      if (storagePath) {
+        capturePhotoUploadFailure(uploadError, "firestore", {
+          sessionId,
+          questionId: pendingQuestion.id,
+          storagePath,
+        });
+      }
+
       setError(
         uploadError instanceof Error
           ? uploadError.message

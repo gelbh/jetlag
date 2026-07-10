@@ -1,4 +1,6 @@
+import { FirebaseError } from "firebase/app";
 import {
+  deleteObject,
   getDownloadURL,
   ref,
   uploadBytes,
@@ -15,12 +17,62 @@ import {
   joinRemoteSessionByCode,
 } from "../firestore/firestoreAnnotations";
 import { ensureAnonymousUser, getFirebaseStorage } from "./firebase";
-import { addPhotoUploadBreadcrumb } from "./sentry";
+import {
+  addPhotoUploadBreadcrumb,
+  capturePhotoUploadFailure,
+} from "./sentry";
 
 const MAX_DIMENSION = 1920;
 const JPEG_QUALITY = 0.85;
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const RETRY_DELAYS_MS = [500, 1500] as const;
+
+const EXTENSION_MIME: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  heic: "image/heic",
+  heif: "image/heif",
+  gif: "image/gif",
+};
+
+const UNSUPPORTED_FORMAT_MESSAGE =
+  "This photo format isn't supported. Try choosing a JPEG from your gallery.";
+
+function fileExtension(file: File): string | null {
+  const parts = file.name.split(".");
+  if (parts.length < 2) {
+    return null;
+  }
+  return parts.at(-1)?.toLowerCase() ?? null;
+}
+
+function isHeicLike(file: File): boolean {
+  const type = file.type.toLowerCase();
+  if (type === "image/heic" || type === "image/heif") {
+    return true;
+  }
+  const ext = fileExtension(file);
+  return ext === "heic" || ext === "heif";
+}
+
+export function resolveImageMimeType(file: File): string | null {
+  if (file.type.startsWith("image/")) {
+    return file.type;
+  }
+
+  const ext = fileExtension(file);
+  if (ext && EXTENSION_MIME[ext]) {
+    return EXTENSION_MIME[ext];
+  }
+
+  if (file.type === "") {
+    return "image/jpeg";
+  }
+
+  return null;
+}
 
 function loadImageFromFile(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -60,11 +112,21 @@ function canvasToBlob(
 }
 
 export async function compressPhotoForUpload(file: File): Promise<Blob> {
-  if (!file.type.startsWith("image/")) {
+  const resolvedType = resolveImageMimeType(file);
+  if (!resolvedType) {
     throw new Error("Please choose an image file.");
   }
 
-  const image = await loadImageFromFile(file);
+  let image: HTMLImageElement;
+  try {
+    image = await loadImageFromFile(file);
+  } catch (error) {
+    if (isHeicLike(file)) {
+      throw new Error(UNSUPPORTED_FORMAT_MESSAGE, { cause: error });
+    }
+    throw error;
+  }
+
   const scale = Math.min(
     1,
     MAX_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight),
@@ -84,8 +146,8 @@ export async function compressPhotoForUpload(file: File): Promise<Blob> {
   context.drawImage(image, 0, 0, width, height);
 
   const outputType =
-    file.type === "image/png" || file.type === "image/webp"
-      ? file.type
+    resolvedType === "image/png" || resolvedType === "image/webp"
+      ? resolvedType
       : "image/jpeg";
   const blob = await canvasToBlob(canvas, outputType, JPEG_QUALITY);
 
@@ -108,7 +170,7 @@ async function healSessionMembership(
   session: Pick<SessionRecord, "id" | "code">,
   authUid: string,
 ): Promise<SessionRecord | null> {
-  const healed = await joinRemoteSessionByCode(session.code, authUid);
+  const healed = await joinRemoteSessionByCode(session.code, authUid, "hider");
   if (healed.status === "joined") {
     return healed.session;
   }
@@ -121,6 +183,11 @@ async function attemptUpload(
   metadata: UploadMetadata,
 ): Promise<void> {
   await uploadBytes(storageRef, blob, metadata);
+}
+
+export async function deletePhotoAnswer(storagePath: string): Promise<void> {
+  const storageRef = ref(getFirebaseStorage(), storagePath);
+  await deleteObject(storageRef);
 }
 
 export async function uploadPhotoAnswer(
@@ -162,9 +229,23 @@ export async function uploadPhotoAnswer(
     memberRole: activeSession?.memberRoles?.[authUid] ?? null,
     sessionId,
     questionId,
+    fileType: file.type || null,
+    fileSize: file.size,
   });
 
-  const blob = await compressPhotoForUpload(file);
+  let blob: Blob;
+  try {
+    blob = await compressPhotoForUpload(file);
+  } catch (error) {
+    capturePhotoUploadFailure(error, "compress", {
+      fileType: file.type || null,
+      fileSize: file.size,
+      sessionId,
+      questionId,
+    });
+    throw error;
+  }
+
   const extension =
     blob.type === "image/png"
       ? "png"
@@ -212,6 +293,15 @@ export async function uploadPhotoAnswer(
       );
     }
   }
+
+  capturePhotoUploadFailure(lastError, "storage", {
+    sessionId,
+    questionId,
+    memberRole: activeSession?.memberRoles?.[authUid] ?? null,
+    attempts: RETRY_DELAYS_MS.length + 1,
+    code:
+      lastError instanceof FirebaseError ? lastError.code : undefined,
+  });
 
   throw new Error(
     formatPhotoStorageError(lastError, activeSession, authUid),

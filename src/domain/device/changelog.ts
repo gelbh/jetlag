@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.2.1";
+export const APP_VERSION = "0.2.2";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,26 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.2.2",
+    date: "2026-07-10",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Photo uploads: fix production Storage permissions so hiders can upload on mobile",
+          "Photo uploads: accept gallery picks with missing file types; clearer unsupported format errors",
+          "Photo uploads: remove orphaned files when saving the answer fails",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Backend deploy: include Firebase Storage rules with Firestore and Functions",
+        ],
+      }
+    ],
+  },
   {
     version: "0.2.1",
     date: "2026-07-09",

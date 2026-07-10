@@ -76,6 +76,26 @@ export function captureException(error: unknown): void {
   Sentry.captureException(error);
 }
 
+export function capturePhotoUploadFailure(
+  error: unknown,
+  stage: "compress" | "storage" | "firestore",
+  context?: Record<string, unknown>,
+): void {
+  if (import.meta.env.MODE === "test") {
+    return;
+  }
+
+  Sentry.withScope((scope) => {
+    scope.setTag("photo_upload", stage);
+    if (context) {
+      for (const [key, value] of Object.entries(context)) {
+        scope.setExtra(key, value);
+      }
+    }
+    Sentry.captureException(error);
+  });
+}
+
 export function addPhotoUploadBreadcrumb(details: Record<string, unknown>): void {
   if (import.meta.env.MODE === "test") {
     return;

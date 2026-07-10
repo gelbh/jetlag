@@ -148,6 +148,25 @@ describe("storage.rules", () => {
     );
   });
 
+  it("denies hider uploads when memberRoles omits the uid", async () => {
+    await seedSession(testEnv, "session-1", {
+      ...sessionPayload("host-1"),
+      memberUids: ["host-1", "hider-1"],
+      memberRoles: { "host-1": "seeker" },
+    });
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    const ref = hider
+      .storage()
+      .ref("sessions/session-1/photoAnswers/q1/1700000000000.jpg");
+
+    await assertFails(
+      ref.put(new Uint8Array([0xff, 0xd8, 0xff]), {
+        contentType: "image/jpeg",
+      }),
+    );
+  });
+
   it("allows session members to read photo answers", async () => {
     await seedSession(testEnv, "session-1", {
       ...sessionPayload("host-1"),

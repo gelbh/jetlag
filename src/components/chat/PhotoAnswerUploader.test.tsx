@@ -4,7 +4,12 @@ import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 
 vi.mock("../../services/core/photoStorage", () => ({
+  deletePhotoAnswer: vi.fn(),
   uploadPhotoAnswer: vi.fn(),
+}));
+
+vi.mock("../../services/core/firebase", () => ({
+  ensureAnonymousUser: vi.fn().mockResolvedValue({ uid: "hider-1" }),
 }));
 
 vi.mock("../../state/sessionStore", () => ({
@@ -19,7 +24,7 @@ vi.mock("../../state/sessionStore", () => ({
     }),
 }));
 
-import { uploadPhotoAnswer } from "../../services/core/photoStorage";
+import { deletePhotoAnswer, uploadPhotoAnswer } from "../../services/core/photoStorage";
 
 const pendingQuestion: PendingQuestionRecord = {
   id: "pq-photo",
@@ -84,6 +89,12 @@ describe("PhotoAnswerUploader", () => {
       />,
     );
 
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Upload photo" }),
+      ).not.toBeDisabled();
+    });
+
     const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     fireEvent.change(input, { target: { files: [file] } });
@@ -112,6 +123,46 @@ describe("PhotoAnswerUploader", () => {
       "photo",
       false,
     );
+    expect(deletePhotoAnswer).not.toHaveBeenCalled();
+  });
+
+  it("deletes uploaded photos when saving the answer fails", async () => {
+    const onAnswerQuestion = vi
+      .fn()
+      .mockRejectedValue(new Error("Could not save your answer."));
+    vi.mocked(uploadPhotoAnswer).mockResolvedValue(
+      "sessions/session-1/photoAnswers/pq-photo/photo.jpg",
+    );
+    vi.mocked(deletePhotoAnswer).mockResolvedValue(undefined);
+
+    render(
+      <PhotoAnswerUploader
+        sessionId="session-1"
+        pendingQuestion={pendingQuestion}
+        messageId="msg-1"
+        onAnswerQuestion={onAnswerQuestion}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Upload photo" }),
+      ).not.toBeDisabled();
+    });
+
+    const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(deletePhotoAnswer).toHaveBeenCalledWith(
+        "sessions/session-1/photoAnswers/pq-photo/photo.jpg",
+      );
+    });
+
+    expect(
+      screen.getByText("Could not save your answer."),
+    ).toBeInTheDocument();
   });
 
   it("does not use capture on the file input", () => {

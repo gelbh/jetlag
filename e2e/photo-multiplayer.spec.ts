@@ -47,6 +47,37 @@ test("@smoke photo question syncs cannot-answer replies through chat", async ({
   await cleanup();
 });
 
+test("photo question accepts an uploaded answer immediately after hider joins", async ({
+  browser,
+}) => {
+  const { hostPage, guestPage, cleanup } =
+    await createMultiplayerContexts(browser);
+
+  const { code } = await createHostSession(hostPage);
+  await joinAsRole(guestPage, code, "hider");
+
+  await sendPhotoToHiders(hostPage);
+
+  await expect(async () => {
+    await openChat(guestPage);
+    await expect(guestPage.getByText(/Upload photo/i)).toBeVisible();
+  }).toPass({ timeout: 30_000 });
+
+  const fileInput = guestPage.locator('input[type="file"]');
+  await fileInput.setInputFiles(MINIMAL_JPEG);
+
+  await expect(guestPage.getByText(/Answered with photo|Answered: photo/i)).toBeVisible({
+    timeout: 30_000,
+  });
+
+  await openChat(hostPage);
+  await expect(hostPage.getByText(/Answered with photo|Answered: photo/i)).toBeVisible({
+    timeout: 30_000,
+  });
+
+  await cleanup();
+});
+
 test("photo question accepts an uploaded answer", async ({ browser }) => {
   const { hostPage, guestPage, cleanup } =
     await createMultiplayerContexts(browser);

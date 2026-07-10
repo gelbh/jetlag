@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.2 - 2026-07-10
+
+### Fixes
+
+- Photo uploads: fix production Storage permissions so hiders can upload on mobile
+- Photo uploads: accept gallery picks with missing file types; clearer unsupported format errors
+- Photo uploads: remove orphaned files when saving the answer fails
+
+### Technical
+
+- Backend deploy: include Firebase Storage rules with Firestore and Functions
+
 ## 0.2.1 - 2026-07-09
 
 ### Fixes
