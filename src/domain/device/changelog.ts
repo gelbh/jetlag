@@ -15,6 +15,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-07-11",
     sections: [
       {
+        title: "Fixes",
+        items: [
+          "PWA: poster background fills the home-indicator zone on entry screens",
+          "Map: top safe-area uses solid app background instead of map tiles behind the status bar",
+          "Map: map extends to the bottom of the screen; tool dock floats above the home indicator",
+        ],
+      },
+      {
         title: "Improvements",
         items: [
           "Premium billing: Stripe checkout for session packs, monthly and yearly unlimited, lifetime access, and a 7-day subscription trial",
