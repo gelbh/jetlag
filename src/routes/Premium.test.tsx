@@ -1,5 +1,5 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Premium } from "./Premium";
 import { renderWithRouter } from "../test/renderWithRouter";
 
@@ -9,26 +9,78 @@ const {
   openPremiumBillingPortal,
   ensureAnonymousUser,
   isFirebaseConfigured,
-} = vi.hoisted(() => ({
-  fetchPremiumEntitlements: vi.fn(),
-  startPremiumCheckout: vi.fn(),
-  openPremiumBillingPortal: vi.fn(),
-  ensureAnonymousUser: vi.fn(async () => undefined),
-  isFirebaseConfigured: vi.fn(() => false),
-}));
+  isPermanentUser,
+  mockAuth,
+} = vi.hoisted(() => {
+  const auth = {
+    currentUser: null,
+    onAuthStateChanged: vi.fn((callback: (user: null) => void) => {
+      callback(null);
+      return () => {};
+    }),
+  };
+
+  return {
+    fetchPremiumEntitlements: vi.fn(),
+    startPremiumCheckout: vi.fn(),
+    openPremiumBillingPortal: vi.fn(),
+    ensureAnonymousUser: vi.fn(async () => undefined),
+    isFirebaseConfigured: vi.fn(() => false),
+    isPermanentUser: vi.fn(() => true),
+    mockAuth: auth,
+  };
+});
 
 vi.mock("../services/core/firebase", () => ({
   isFirebaseConfigured,
   ensureAnonymousUser,
+  getFirebaseAuth: () => mockAuth,
+}));
+
+vi.mock("../services/core/accountAuth", () => ({
+  APPLE_SIGN_IN_ENABLED: false,
+  isPermanentUser,
+  isAnonymousUser: vi.fn(() => false),
+  sendPremiumEmailSignInLink: vi.fn(),
+  completePremiumEmailSignInLink: vi.fn(async () => null),
+}));
+
+vi.mock("../components/billing/GoogleSignInButton", () => ({
+  GoogleSignInButton: ({
+    onSuccess,
+  }: {
+    onSuccess: () => void;
+  }) => (
+    <button type="button" onClick={() => void onSuccess()}>
+      Continue with Google
+    </button>
+  ),
+}));
+
+vi.mock("../components/billing/AppleSignInButton", () => ({
+  AppleSignInButton: ({
+    onSuccess,
+  }: {
+    onSuccess: () => void;
+  }) => (
+    <button type="button" onClick={() => void onSuccess()}>
+      Continue with Apple
+    </button>
+  ),
 }));
 
 vi.mock("../services/billing/premiumBilling", () => ({
   fetchPremiumEntitlements,
   startPremiumCheckout,
   openPremiumBillingPortal,
+  recoverPremiumEntitlements: vi.fn(async () => false),
 }));
 
 describe("Premium", () => {
+  beforeEach(() => {
+    isPermanentUser.mockReturnValue(true);
+  });
+
   it("shows offline billing message when Firebase is not configured", () => {
     renderWithRouter(<Premium />);
 
@@ -52,13 +104,36 @@ describe("Premium", () => {
     renderWithRouter(<Premium />);
 
     await waitFor(() => {
-      expect(screen.getByText("2 premium sessions left")).toBeInTheDocument();
+      expect(screen.getAllByText("2 premium sessions left").length).toBeGreaterThan(0);
     });
 
     expect(screen.getByRole("button", { name: /1 session/i })).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Create premium session" }),
-    ).toHaveAttribute("href", "/create");
+    ).toHaveAttribute("href", "/create?tier=premium");
+  });
+
+  it("shows sign-in gate before checkout when user is anonymous", async () => {
+    isFirebaseConfigured.mockReturnValue(true);
+    isPermanentUser.mockReturnValue(false);
+    fetchPremiumEntitlements.mockResolvedValueOnce({
+      premiumSessionCredits: 0,
+      lifetimePremium: false,
+      subscription: null,
+      trialUsedAt: null,
+      canCreatePremium: false,
+      hasUnlimitedPremium: false,
+    });
+
+    renderWithRouter(<Premium />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /Continue with Google/i }),
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.queryByRole("button", { name: /3 sessions/i })).not.toBeInTheDocument();
   });
 
   it("starts checkout when a pack is selected", async () => {

@@ -1775,6 +1775,36 @@ textarea {
     opacity: 0.75;
   }
 
+  .oauth-provider-button {
+    display: flex;
+    min-height: 3.75rem;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    border-radius: var(--radius-hud-md);
+    border: 2px solid oklch(0.99 0.002 250);
+    background: oklch(0.99 0.002 250);
+    color: oklch(0.18 0.02 250);
+    font-family:
+      "Source Sans 3",
+      system-ui,
+      sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-transform: none;
+  }
+
+  .oauth-provider-button:hover {
+    background: oklch(0.97 0.003 250);
+  }
+
+  .oauth-provider-button-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
   .home-feedback-link {
     display: block;
     margin-top: 0.25rem;

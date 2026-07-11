@@ -79,6 +79,58 @@ export const PREMIUM_PRODUCT_OFFERS: PremiumProductOffer[] = [
   },
 ];
 
+export function hasUnlimitedPremiumHosting(
+  entitlements: PremiumEntitlements | null,
+): boolean {
+  if (!entitlements) {
+    return false;
+  }
+
+  return entitlements.lifetimePremium || entitlements.hasUnlimitedPremium;
+}
+
+export function canSelectPremiumSessionTier(
+  entitlements: PremiumEntitlements | null,
+  hostHasAccessClaim: boolean,
+): boolean {
+  if (hostHasAccessClaim) {
+    return true;
+  }
+
+  return hasUnlimitedPremiumHosting(entitlements);
+}
+
+export function formatPremiumSessionCreditsLabel(
+  entitlements: PremiumEntitlements | null,
+): string | null {
+  if (!entitlements || entitlements.premiumSessionCredits <= 0) {
+    return null;
+  }
+
+  const count = entitlements.premiumSessionCredits;
+  return count === 1 ? "1 premium session left" : `${count} premium sessions left`;
+}
+
+export function formatPremiumSessionTierHint(
+  entitlements: PremiumEntitlements | null,
+): string | null {
+  if (!entitlements) {
+    return null;
+  }
+
+  if (hasUnlimitedPremiumHosting(entitlements)) {
+    if (entitlements.lifetimePremium) {
+      return "Lifetime · unlimited sessions";
+    }
+    if (entitlements.subscription?.status === "trialing") {
+      return "Trial · unlimited sessions";
+    }
+    return "Unlimited premium sessions";
+  }
+
+  return formatPremiumSessionCreditsLabel(entitlements);
+}
+
 export function formatEntitlementSummary(
   entitlements: PremiumEntitlements | null,
 ): string | null {

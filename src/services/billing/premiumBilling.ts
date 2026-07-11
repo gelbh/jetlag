@@ -104,6 +104,25 @@ export interface CreatePremiumSessionInput {
   hostAppVersion: string;
 }
 
+export async function recoverPremiumEntitlements(): Promise<boolean> {
+  if (!isFirebaseConfigured()) {
+    return false;
+  }
+
+  const functions = getFirebaseFunctions();
+  const callable = httpsCallable<void, { recovered: boolean }>(
+    functions,
+    "recoverPremiumByStripeEmail",
+  );
+
+  try {
+    const result = await callable();
+    return result.data.recovered === true;
+  } catch (error) {
+    throw mapCallableError(error, "Could not recover premium purchases.");
+  }
+}
+
 export async function createPremiumRemoteSession(
   input: CreatePremiumSessionInput,
 ): Promise<SessionRecord> {
