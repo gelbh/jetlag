@@ -3,6 +3,8 @@ import type { MapTool } from "../map/mapToolTypes";
 import type { DistanceUnit } from "../map/distance";
 import { milesToMeters } from "../map/distance";
 import {
+  IMPERIAL_RADAR_PRESET_MILES,
+  radarPresetsMetersForGameSizeAndUnit,
   resolveDistanceUnit,
   tentacleLargeRadiusMeters,
   tentacleMediumRadiusMeters,
@@ -55,6 +57,42 @@ export function hidingPeriodMinutes(gameSize: GameSize): number {
 
 export function hidingPeriodMs(gameSize: GameSize): number {
   return hidingPeriodMinutes(gameSize) * 60 * 1000;
+}
+
+export function radarPresetsMilesForGameSize(
+  gameSize: GameSize,
+): readonly (typeof IMPERIAL_RADAR_PRESET_MILES)[number][] {
+  const presets: (typeof IMPERIAL_RADAR_PRESET_MILES)[number][] = [
+    0.25, 0.5, 1, 3, 5,
+  ];
+  if (gameSize === "medium" || gameSize === "large") {
+    presets.push(10, 25);
+  }
+  if (gameSize === "large") {
+    presets.push(50, 100);
+  }
+  return presets;
+}
+
+export function radarPresetsMetersForGameSize(
+  gameSize: GameSize,
+  unit: DistanceUnit = "imperial",
+): number[] {
+  return radarPresetsMetersForGameSizeAndUnit(
+    gameSize,
+    resolveDistanceUnit(unit),
+  );
+}
+
+export function isRadarPresetAvailableForGameSize(
+  gameSize: GameSize,
+  distanceMeters: number,
+  unit: DistanceUnit = "imperial",
+): boolean {
+  const tolerance = 5;
+  return radarPresetsMetersForGameSize(gameSize, unit).some(
+    (preset) => Math.abs(preset - distanceMeters) < tolerance,
+  );
 }
 
 export function thermometerPresetsMilesForGameSize(

@@ -31,7 +31,7 @@ import {
   usedRadarDistanceOptions,
   type RadarAnswer,
 } from "../../domain/questions/radarQuestions";
-import { useAnnotationStore } from "../../state/sessionStore";
+import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import {
   buildMatchingEliminationRegion,
@@ -104,6 +104,7 @@ function AnnotationEditSheetForm({
   onEditOnMap,
 }: AnnotationEditSheetProps) {
   const distanceUnit = useSessionDistanceUnit();
+  const gameSize = useSessionStore((state) => state.session?.gameSize ?? "medium");
   const annotations = useAnnotationStore((state) => state.annotations);
   const usedRadarOptions = useMemo(
     () =>
@@ -356,6 +357,7 @@ function AnnotationEditSheetForm({
             chooseCustom={chooseCustom}
             customRadius={customRadius}
             distanceUnit={distanceUnit}
+            gameSize={gameSize}
             usedDistanceOptions={usedRadarOptions}
             onPresetSelect={(nextRadius) => {
               setChooseCustom(false);

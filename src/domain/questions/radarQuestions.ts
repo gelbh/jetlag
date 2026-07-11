@@ -1,9 +1,10 @@
 import type { AnnotationRecord } from "../map/annotations";
 import type { PendingQuestionRecord } from "../session/sessionChat";
+import type { GameSize } from "../session/gameSize";
+import { radarPresetsMetersForGameSize } from "../session/gameSizeRules";
 import { isCountablePendingQuestionStatus } from "./questionRules";
 import {
   collectUsedAnnotationOptions,
-  firstUnusedPreset,
   presetMetersForMiles,
 } from "../session/toolSessionOptions";
 import {
@@ -122,31 +123,42 @@ export function usedRadarDistanceOptions(
 export function firstAvailableRadarDistanceSelection(
   usedOptions: ReadonlySet<RadarDistanceOptionKey>,
   unit: DistanceUnit = "imperial",
+  gameSize: GameSize = "medium",
 ): { chooseCustom: boolean; radiusMeters: number } | null {
-  if (unit === "metric") {
-    for (const preset of METRIC_RADAR_PRESET_METERS) {
-      if (!usedOptions.has(preset)) {
-        return { chooseCustom: false, radiusMeters: preset };
-      }
-    }
-  } else {
-    const presetMiles = firstUnusedPreset(RADAR_DISTANCE_MILES, usedOptions);
-    if (presetMiles !== null) {
-      return {
-        chooseCustom: false,
-        radiusMeters: milesToMeters(Number(presetMiles)),
-      };
+  const presets = radarPresetsMetersForGameSize(gameSize, unit);
+  for (const preset of presets) {
+    const optionKey =
+      unit === "metric"
+        ? (preset as RadarDistanceOptionKey)
+        : (preset / milesToMeters(1) as RadarDistanceOptionKey);
+    if (!usedOptions.has(optionKey)) {
+      return { chooseCustom: false, radiusMeters: preset };
     }
   }
 
   if (!usedOptions.has("choose")) {
     return {
       chooseCustom: true,
-      radiusMeters: unit === "metric" ? 1000 : milesToMeters(1),
+      radiusMeters: presets[0] ?? (unit === "metric" ? 1000 : milesToMeters(1)),
     };
   }
 
   return null;
+}
+
+export function availableRadarDistancePresets(
+  gameSize: GameSize,
+  unit: DistanceUnit,
+  usedOptions: ReadonlySet<RadarDistanceOptionKey>,
+): number[] {
+  return radarPresetsMetersForGameSize(gameSize, unit).filter((preset) => {
+    if (unit === "metric") {
+      return !usedOptions.has(preset as RadarDistanceOptionKey);
+    }
+
+    const miles = preset / milesToMeters(1);
+    return !usedOptions.has(miles as RadarDistanceOptionKey);
+  });
 }
 
 export function isRadarDistanceOptionAvailable(): boolean {

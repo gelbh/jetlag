@@ -17,6 +17,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Fixes",
         items: [
+          "Map HUD: sync, preload, and timer popovers open again while chat or settings is up",
           "Join: honor the role you pick when joining, including a second hider in the same session",
           "Custom games: fix scrolling on the presets list when content exceeds the screen",
           "Premium recovery: require verified email before merging purchases from another account",
@@ -34,6 +35,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Tentacles: committed questions show the search radius circle on the map",
           "Tentacles: elimination shading matches the full search disk minus the answered location",
           "Tentacles: map preview circle waits until a category is chosen",
+          "Radar: distance picker shows only presets allowed for the session game size",
         ],
       },
       {
