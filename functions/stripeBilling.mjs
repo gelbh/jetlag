@@ -25,6 +25,53 @@ import {
 } from "./premiumSessionDocument.mjs";
 import { generateSessionCode } from "./sessionCodes.mjs";
 
+const CHECKOUT_BILLING_ERROR_MESSAGE = "Couldn't start checkout. Try again.";
+const PORTAL_BILLING_ERROR_MESSAGE = "Couldn't open billing portal. Try again.";
+
+/**
+ * @param {unknown} error
+ */
+export function isStaleStripeCustomerError(error) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const stripeError = /** @type {{ type?: string; code?: string; message?: string }} */ (
+    error
+  );
+
+  if (
+    stripeError.type === "StripeInvalidRequestError" &&
+    stripeError.code === "resource_missing"
+  ) {
+    return true;
+  }
+
+  const message = stripeError.message ?? "";
+  return (
+    message.includes("exists in test mode, but a live mode key") ||
+    message.includes("exists in live mode, but a test mode key")
+  );
+}
+
+/**
+ * @param {unknown} error
+ * @param {"checkout" | "portal"} context
+ */
+export function mapStripeBillingError(error, context) {
+  if (error instanceof HttpsError) {
+    return error;
+  }
+
+  const message =
+    context === "portal"
+      ? PORTAL_BILLING_ERROR_MESSAGE
+      : CHECKOUT_BILLING_ERROR_MESSAGE;
+
+  console.error(`Stripe billing error (${context}):`, error);
+  return new HttpsError("failed-precondition", message);
+}
+
 /**
  * @param {string} secret
  */
@@ -41,7 +88,7 @@ export function createStripeClient(secret) {
  * @param {string} uid
  * @param {string | null | undefined} email
  */
-async function ensureStripeCustomer(stripe, db, uid, email) {
+export async function ensureStripeCustomer(stripe, db, uid, email) {
   const userRef = userEntitlementsRef(db, uid);
   const snapshot = await userRef.get();
   const existingCustomerId =
@@ -50,13 +97,29 @@ async function ensureStripeCustomer(stripe, db, uid, email) {
       : null;
 
   if (existingCustomerId) {
-    return existingCustomerId;
+    try {
+      await stripe.customers.retrieve(existingCustomerId);
+      return existingCustomerId;
+    } catch (error) {
+      if (!isStaleStripeCustomerError(error)) {
+        throw mapStripeBillingError(error, "checkout");
+      }
+
+      console.warn(
+        `Replacing stale Stripe customer ${existingCustomerId} for uid ${uid}.`,
+      );
+    }
   }
 
-  const customer = await stripe.customers.create({
-    email: email ?? undefined,
-    metadata: { firebaseUid: uid },
-  });
+  let customer;
+  try {
+    customer = await stripe.customers.create({
+      email: email ?? undefined,
+      metadata: { firebaseUid: uid },
+    });
+  } catch (error) {
+    throw mapStripeBillingError(error, "checkout");
+  }
 
   await mergeUserEntitlements(db, uid, {
     stripeCustomerId: customer.id,
@@ -94,69 +157,75 @@ export async function createCheckoutSessionHandler(
 
   const product = PREMIUM_PRODUCTS[productKey];
 
-  const customerId = await ensureStripeCustomer(stripe, db, uid, email);
-  const priceId = resolveStripePriceId(productKey);
+  try {
+    const customerId = await ensureStripeCustomer(stripe, db, uid, email);
+    const priceId = resolveStripePriceId(productKey);
 
-  /** @type {Stripe.Checkout.SessionCreateParams} */
-  const params = {
-    mode: product.mode,
-    customer: customerId,
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${stripeCheckoutSuccessUrl.value()}&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: stripeCheckoutCancelUrl.value(),
-    client_reference_id: uid,
-    metadata: {
-      firebaseUid: uid,
-      productKey,
-    },
-  };
-
-  if (product.mode === "subscription") {
-    params.subscription_data = {
-      metadata: {
-        firebaseUid: uid,
-        productKey,
-        plan: product.plan ?? productKey,
-      },
-    };
-  } else {
-    params.payment_intent_data = {
+    /** @type {Stripe.Checkout.SessionCreateParams} */
+    const params = {
+      mode: product.mode,
+      customer: customerId,
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${stripeCheckoutSuccessUrl.value()}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: stripeCheckoutCancelUrl.value(),
+      client_reference_id: uid,
       metadata: {
         firebaseUid: uid,
         productKey,
       },
     };
-  }
 
-  const session = await stripe.checkout.sessions.create(params);
-  if (!session.url) {
-    throw new HttpsError("internal", "Stripe checkout URL missing.");
-  }
+    if (product.mode === "subscription") {
+      params.subscription_data = {
+        metadata: {
+          firebaseUid: uid,
+          productKey,
+          plan: product.plan ?? productKey,
+        },
+      };
+    } else {
+      params.payment_intent_data = {
+        metadata: {
+          firebaseUid: uid,
+          productKey,
+        },
+      };
+    }
 
-  return { url: session.url };
+    const session = await stripe.checkout.sessions.create(params);
+    if (!session.url) {
+      throw new HttpsError("internal", CHECKOUT_BILLING_ERROR_MESSAGE);
+    }
+
+    return { url: session.url };
+  } catch (error) {
+    throw mapStripeBillingError(error, "checkout");
+  }
 }
 
 /**
  * @param {Stripe} stripe
  * @param {import('firebase-admin/firestore').Firestore} db
  * @param {string} uid
+ * @param {string | null | undefined} email
  */
-export async function createBillingPortalSessionHandler(stripe, db, uid) {
-  const snapshot = await userEntitlementsRef(db, uid).get();
-  const customerId = snapshot.data()?.stripeCustomerId;
-  if (typeof customerId !== "string" || !customerId) {
-    throw new HttpsError(
-      "failed-precondition",
-      "No billing account found for this user.",
-    );
+export async function createBillingPortalSessionHandler(
+  stripe,
+  db,
+  uid,
+  email,
+) {
+  try {
+    const customerId = await ensureStripeCustomer(stripe, db, uid, email);
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: stripePortalReturnUrl.value(),
+    });
+
+    return { url: session.url };
+  } catch (error) {
+    throw mapStripeBillingError(error, "portal");
   }
-
-  const session = await stripe.billingPortal.sessions.create({
-    customer: customerId,
-    return_url: stripePortalReturnUrl.value(),
-  });
-
-  return { url: session.url };
 }
 
 /**

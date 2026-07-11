@@ -2,6 +2,10 @@
 
 ## 0.4.5 - 2026-07-11
 
+### Fixes
+
+- Premium checkout: fix billing error after switching to live Stripe; show a clear message when checkout fails
+
 ### Improvements
 
 - Recommended presets: add Prince Rupert, BC with neighbourhood boundaries, bundled POI, and BC Transit.

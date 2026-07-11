@@ -67,6 +67,16 @@ describe("premiumBilling", () => {
     );
   });
 
+  it("maps generic INTERNAL callable errors to fallback text", async () => {
+    callable.mockRejectedValueOnce(
+      new FirebaseError("functions/internal", "INTERNAL"),
+    );
+
+    await expect(startPremiumCheckout("pack_1")).rejects.toThrow(
+      "Could not start checkout.",
+    );
+  });
+
   it("starts checkout and returns the redirect URL", async () => {
     callable.mockResolvedValueOnce({ data: { url: "https://checkout.test" } });
 
