@@ -1,4 +1,5 @@
 import type { GameArea } from "../../domain/map/annotations";
+import type { RegionPackId } from "../../domain/regions/regionPack";
 import {
   distanceBetweenPoints,
   isPointInGameArea,
@@ -20,6 +21,10 @@ import {
   overpassQueryTemplate,
   overpassTaggedBboxClauses,
 } from "../overpass/query";
+import {
+  fetchBundledMeasuringPlaces,
+  mergeMeasuringPlaces,
+} from "./regionPackPoi";
 
 export interface MeasuringPlace {
   id: string;
@@ -127,6 +132,7 @@ export async function fetchMeasuringPlacesInArea(
   gameArea: GameArea,
   category: MeasuringLocationCategory,
   customCategories: readonly SessionCustomCategory[] = [],
+  regionPackId?: RegionPackId,
 ): Promise<MeasuringPlace[]> {
   const selectors = measuringOverpassSelectorsForKind(category, customCategories);
   if (selectors.length === 0) {
@@ -134,7 +140,9 @@ export async function fetchMeasuringPlacesInArea(
   }
 
   const cacheScope =
-    customCategories.length > 0 ? `${category}:custom` : category;
+    customCategories.length > 0
+      ? `${category}:custom:${regionPackId ?? "global"}`
+      : `${category}:${regionPackId ?? "global"}`;
 
   return getOrFetchCached(
     measuringPlacesCacheKey(gameArea, cacheScope),
@@ -143,7 +151,18 @@ export async function fetchMeasuringPlacesInArea(
         buildMeasuringPlacesQuery(gameArea, selectors),
       );
 
-      return parseMeasuringPlaces(payload.elements, gameArea, category);
+      const overpassPlaces = parseMeasuringPlaces(
+        payload.elements,
+        gameArea,
+        category,
+      );
+      const bundledPlaces = await fetchBundledMeasuringPlaces(
+        gameArea,
+        category,
+        regionPackId,
+      );
+
+      return mergeMeasuringPlaces(overpassPlaces, bundledPlaces);
     },
   );
 }

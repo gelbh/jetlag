@@ -1,5 +1,4 @@
 /** Cloud Functions entry (Node.js 24). */
-import { createHash } from "node:crypto";
 import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { defineSecret } from "firebase-functions/params";
@@ -16,7 +15,8 @@ import {
 } from "./sentry.mjs";
 import { fetchWithTimeout, fetchWithTimeoutAndRetry } from "./fetchWithTimeout.mjs";
 import { createMemoryCache } from "./memoryCache.mjs";
-import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "./overpassEndpoints.mjs";
+import { fetchCachedOverpassQuery } from "./overpassProxyCore.mjs";
+import { handleSessionWarmPreloadWrite } from "./warmOverpassPreload.mjs";
 import { normalizeTflPayload } from "./tflNormalize.mjs";
 import { fetchTransitlandVehicles } from "./transitlandProxy.mjs";
 import { fetchCtaVehicles } from "./ctaProxy.mjs";
@@ -79,10 +79,8 @@ const FEEDS = {
 };
 
 const TFL_FETCH_TIMEOUT_MS = 10_000;
-const OVERPASS_FETCH_TIMEOUT_MS = 25_000;
 const VEHICLE_FEED_CACHE_TTL_MS = 15_000;
 const VEHICLE_ROUTE_CACHE_TTL_MS = 60 * 60 * 1000;
-const OVERPASS_CACHE_TTL_MS = 60 * 60 * 1000;
 const GRANT_ACCESS_FAILURE_DELAY_MS = 300;
 const GRANT_ACCESS_MAX_FAILURES = 8;
 const GRANT_ACCESS_WINDOW_MS = 15 * 60 * 1000;
@@ -98,7 +96,6 @@ const PROXY_RATE_LIMITS = {
 
 const vehicleFeedCache = createMemoryCache(VEHICLE_FEED_CACHE_TTL_MS);
 const vehicleRouteCache = createMemoryCache(VEHICLE_ROUTE_CACHE_TTL_MS);
-const overpassResponseCache = createMemoryCache(OVERPASS_CACHE_TTL_MS);
 
 function adminAuth() {
   return getAuth();
@@ -106,51 +103,6 @@ function adminAuth() {
 
 function adminDb() {
   return getFirestore();
-}
-
-function overpassCacheKey(query) {
-  return createHash("sha256").update(query).digest("hex");
-}
-
-async function fetchOverpassWithFailover(query) {
-  let lastError = null;
-
-  for (const endpoint of OVERPASS_ENDPOINTS) {
-    try {
-      const response = await fetchWithTimeout(
-        endpoint,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-            "User-Agent": OVERPASS_USER_AGENT,
-          },
-          body: `data=${encodeURIComponent(query)}`,
-        },
-        OVERPASS_FETCH_TIMEOUT_MS,
-      );
-
-      if (response.ok) {
-        return response;
-      }
-
-      if (
-        response.status === 429 ||
-        response.status === 502 ||
-        response.status === 503 ||
-        response.status === 504
-      ) {
-        lastError = new Error("Overpass timed out.");
-        continue;
-      }
-
-      throw new Error("Overpass query failed.");
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  throw lastError ?? new Error("Overpass timed out.");
 }
 
 async function loadTflFeed(metro, feedUrl) {
@@ -419,33 +371,17 @@ export const overpass = onRequest(
 
   const query = queryResult.value;
 
-  const cacheKey = overpassCacheKey(query);
-  const cached = overpassResponseCache.get(cacheKey);
-  if (cached) {
-    res.status(200).type("application/json").send(cached);
-    return;
-  }
-
   try {
-    const response = await fetchOverpassWithFailover(query);
-
-    const text = await response.text();
-
-    if (!response.ok) {
-      if (response.status === 504) {
-        res.status(504).json({ error: "Overpass timed out." });
-        return;
-      }
-
-      res.status(502).json({ error: "Overpass query failed." });
-      return;
-    }
-
-    overpassResponseCache.set(cacheKey, text);
+    const text = await fetchCachedOverpassQuery(query, authResult.tier);
     res.status(200).type("application/json").send(text);
   } catch (error) {
     captureFunctionsException(error);
-    res.status(504).json({ error: "Overpass timed out." });
+    if (error instanceof Error && error.message === "Overpass timed out.") {
+      res.status(504).json({ error: "Overpass timed out." });
+      return;
+    }
+
+    res.status(502).json({ error: "Overpass query failed." });
   }
 }),
 );
@@ -508,6 +444,16 @@ export const notifySessionTimer = onDocumentWritten(
   },
   withSentryEventHandler(async (event) => {
     await handleSessionTimerWrite(adminDb(), event);
+  }),
+);
+
+export const warmPremiumOverpassPreload = onDocumentWritten(
+  {
+    document: "sessions/{sessionId}",
+    secrets: [sentryDsnSecret],
+  },
+  withSentryEventHandler(async (event) => {
+    await handleSessionWarmPreloadWrite(event);
   }),
 );
 

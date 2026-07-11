@@ -98,7 +98,101 @@ async function fetchText(url) {
   return response.text();
 }
 
-function buildNyc() {
+function sleep(ms) {
+  return new Promise((resolveSleep) => {
+    setTimeout(resolveSleep, ms);
+  });
+}
+
+const NYC_POI_BBOX = { south: 40.49, west: -74.26, north: 40.92, east: -73.7 };
+
+const NYC_POI_CATEGORIES = [
+  { id: "museum", wikidataTypes: ["Q33506"] },
+  { id: "park", wikidataTypes: ["Q22698"] },
+  { id: "hospital", wikidataTypes: ["Q16917"] },
+  { id: "mountain", wikidataTypes: ["Q8502"] },
+  { id: "commercial_airport", wikidataTypes: ["Q1248784"] },
+  { id: "rail_station", wikidataTypes: ["Q55488"] },
+];
+
+function buildWikidataPoiQuery(wikidataTypes, bbox) {
+  const typeClause = wikidataTypes.map((type) => `wd:${type}`).join(", ");
+
+  return `
+    SELECT ?item ?itemLabel ?lat ?lon WHERE {
+      ?item wdt:P31/wdt:P279* ?type .
+      VALUES ?type { ${typeClause} }
+      ?item p:P625 ?coordStatement .
+      ?coordStatement ps:P625 ?coord .
+      BIND(geof:latitude(?coord) AS ?lat)
+      BIND(geof:longitude(?coord) AS ?lon)
+      FILTER(?lat >= ${bbox.south} && ?lat <= ${bbox.north})
+      FILTER(?lon >= ${bbox.west} && ?lon <= ${bbox.east})
+      ?item rdfs:label ?itemLabel .
+      FILTER(LANG(?itemLabel) = "en")
+    }
+    LIMIT 2000
+  `;
+}
+
+async function fetchWikidataPois(wikidataTypes, bbox) {
+  const url = new URL("https://query.wikidata.org/sparql");
+  url.searchParams.set("format", "json");
+  url.searchParams.set("query", buildWikidataPoiQuery(wikidataTypes, bbox));
+
+  const response = await fetch(url, {
+    headers: {
+      Accept: "application/sparql-results+json",
+      "User-Agent": "JetLagMapCompanion/1.0 (build-region-pack-geo)",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Wikidata SPARQL failed (${response.status}).`);
+  }
+
+  const payload = await response.json();
+  const bindings = payload.results?.bindings ?? [];
+  const seen = new Set();
+  const places = [];
+
+  for (const row of bindings) {
+    const itemUri = row.item?.value;
+    const qid = itemUri?.split("/").pop();
+    const name = row.itemLabel?.value?.trim();
+    const lat = Number(row.lat?.value);
+    const lng = Number(row.lon?.value);
+
+    if (!qid || !name || !Number.isFinite(lat) || !Number.isFinite(lng)) {
+      continue;
+    }
+
+    if (seen.has(qid)) {
+      continue;
+    }
+
+    seen.add(qid);
+    places.push({ id: qid, name, lat, lng });
+  }
+
+  return places;
+}
+
+async function buildNycPoiBundles() {
+  for (const category of NYC_POI_CATEGORIES) {
+    const places = await fetchWikidataPois(category.wikidataTypes, NYC_POI_BBOX);
+    writeJson(resolve(GEO, `nyc/poi/${category.id}.json`), {
+      category: category.id,
+      source: "wikidata",
+      bbox: NYC_POI_BBOX,
+      places,
+    });
+    console.log("nyc poi:", category.id, places.length, "places");
+    await sleep(1500);
+  }
+}
+
+async function buildNyc() {
   const rawBoroughs = JSON.parse(
     readFileSync("/tmp/nyc-boroughs.json", "utf8"),
   );
@@ -150,10 +244,11 @@ function buildNyc() {
 
   writeFileSync(
     resolve(GEO, "nyc/ATTRIBUTION.txt"),
-    "NYC borough boundaries: NYC Open Data (CC0)\nNYC community districts: NYC Department of City Planning via ArcGIS\n",
+    "NYC borough boundaries: NYC Open Data (CC0)\nNYC community districts: NYC Department of City Planning via ArcGIS\nNYC POI bundles: Wikidata (CC0)\n",
     "utf8",
   );
   console.log("nyc:", boroughs.features.length, "boroughs,", districts.features.length, "districts");
+  await buildNycPoiBundles();
 }
 
 async function buildLondon() {
@@ -437,7 +532,7 @@ async function ensureDownloads() {
 
 async function main() {
   await ensureDownloads();
-  buildNyc();
+  await buildNyc();
   await buildLondon();
   await buildTokyo();
   await buildOsaka();

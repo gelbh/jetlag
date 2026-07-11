@@ -338,6 +338,7 @@ export function useMeasuringTool({
           gameArea,
           category,
           customCategories,
+          sessionRules?.regionPackId,
         );
         const pinPlaces = (sessionRules?.customLocationPins ?? []).map(
           manualPinAsMeasuringPlace,
