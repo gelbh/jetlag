@@ -310,15 +310,14 @@ export function MapScreen() {
       session.gameArea,
       session.customMatchingAreas,
       session.regionPackId,
+      isPremiumSession(session) ? "premium" : "free",
     );
     startSeaLevelBackgroundSampling(session.gameArea);
   }, [
     firebaseAuthReady,
     lowPowerMode,
     preloadGameAreaKey,
-    session?.customMatchingAreas,
-    session?.gameArea,
-    session?.regionPackId,
+    session,
   ]);
 
   const overlay = useMapOverlayState();

@@ -1,0 +1,44 @@
+{
+  "metros": [
+    {
+      "id": "london",
+      "bundlePath": "/geo/gtfs/fixtures/london-mini.json",
+      "feedOnestopId": "f-c23-~",
+      "builtAt": "2026-07-11T14:45:42.608Z",
+      "stopCount": 2,
+      "routeCount": 1
+    },
+    {
+      "id": "dublin",
+      "bundlePath": "/geo/gtfs/fixtures/dublin-mini.json",
+      "feedOnestopId": "f-dhs-~",
+      "builtAt": "2026-07-11T14:45:42.610Z",
+      "stopCount": 2,
+      "routeCount": 1
+    },
+    {
+      "id": "nyc",
+      "bundlePath": "/geo/gtfs/fixtures/nyc-mini.json",
+      "feedOnestopId": "f-dr5r-~",
+      "builtAt": "2026-07-11T14:45:42.610Z",
+      "stopCount": 5,
+      "routeCount": 3
+    },
+    {
+      "id": "sf",
+      "bundlePath": "/geo/gtfs/fixtures/sf-mini.json",
+      "feedOnestopId": "f-9q8y-~",
+      "builtAt": "2026-07-11T14:45:42.611Z",
+      "stopCount": 2,
+      "routeCount": 1
+    },
+    {
+      "id": "chicago",
+      "bundlePath": "/geo/gtfs/fixtures/chicago-mini.json",
+      "feedOnestopId": "f-dp3-~",
+      "builtAt": "2026-07-11T14:45:42.611Z",
+      "stopCount": 2,
+      "routeCount": 1
+    }
+  ]
+}

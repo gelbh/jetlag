@@ -84,7 +84,10 @@ const GRANT_ACCESS_MAX_FAILURES = 8;
 const GRANT_ACCESS_WINDOW_MS = 15 * 60 * 1000;
 
 const PROXY_RATE_LIMITS = {
-  overpass: { limit: 20, windowMs: 60_000 },
+  overpass: {
+    free: { limit: 20, windowMs: 60_000 },
+    premium: { limit: 60, windowMs: 60_000 },
+  },
   transitland: { limit: 30, windowMs: 60_000 },
   vehicles: { limit: 30, windowMs: 60_000 },
 };
@@ -174,8 +177,13 @@ function sendRateLimitFailure(res, retryAfterMs) {
   res.status(429).json({ error: "Too many requests. Try again later." });
 }
 
-async function enforceRateLimit(res, route, uid) {
-  const { limit, windowMs } = PROXY_RATE_LIMITS[route];
+async function enforceRateLimit(res, route, uid, tier = "free") {
+  const routeLimits = PROXY_RATE_LIMITS[route];
+  const limits =
+    route === "overpass"
+      ? routeLimits[tier] ?? routeLimits.free
+      : routeLimits;
+  const { limit, windowMs } = limits;
   const result = await consumeRateLimit(adminDb(), { route, uid, limit, windowMs });
   if (!result.allowed) {
     sendRateLimitFailure(res, result.retryAfterMs ?? 0);
@@ -366,7 +374,7 @@ export const overpass = onRequest(
     return;
   }
 
-  if (!(await enforceRateLimit(res, "overpass", authResult.uid))) {
+  if (!(await enforceRateLimit(res, "overpass", authResult.uid, authResult.tier))) {
     return;
   }
 

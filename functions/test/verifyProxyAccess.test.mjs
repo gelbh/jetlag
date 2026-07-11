@@ -62,6 +62,16 @@ describe("verifyProxyAccess helpers", () => {
           doc(sessionId) {
             return {
               async get() {
+                if (sessionId === "session-premium") {
+                  return {
+                    exists: true,
+                    data: () => ({
+                      memberUids: ["guest"],
+                      tier: "premium",
+                    }),
+                  };
+                }
+
                 return {
                   exists: sessionId === "session-1",
                   data: () => ({ memberUids: ["guest"] }),
@@ -87,5 +97,15 @@ describe("verifyProxyAccess helpers", () => {
     });
     assert.equal(member.ok, true);
     assert.equal(member.sessionId, "session-1");
+    assert.equal(member.tier, "free");
+
+    const premiumMember = await verifyOverpassProxyAccess(auth, db, {
+      headers: {
+        authorization: "Bearer token",
+        "x-session-id": "session-premium",
+      },
+    });
+    assert.equal(premiumMember.ok, true);
+    assert.equal(premiumMember.tier, "premium");
   });
 });

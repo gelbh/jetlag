@@ -1,11 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 import { selectPreloadBanner, usePreloadStore } from "../../state/preloadStore";
+import { OverpassUnavailableError } from "../core/overpassClient";
+import * as adminDivisionAvailability from "../geo/adminDivisionAvailability";
+import { fetchPreparedCoastlineSegments } from "../geo/coastline";
+import { fetchLandmassFeaturesInArea } from "../geo/landmassFeatures";
 import {
   gameAreaPreloadKey,
   preloadCriticalGameAreaCaches,
   preloadGameAreaCaches,
   preloadJobGapMsForTests,
+  preloadJobGapPremiumMsForTests,
+  preloadJobGapMsForTier,
 } from "./gameAreaPreload";
 
 vi.mock("../geo/adminDivisionBoundaries", () => ({
@@ -36,9 +42,20 @@ vi.mock("../transit/transitStatic", () => ({
   })),
 }));
 
+vi.mock("../geo/adminDivisionAvailability", async (importOriginal) => {
+  const actual = await importOriginal<
+    typeof import("../geo/adminDivisionAvailability")
+  >();
+  return {
+    ...actual,
+    probeAdminDivisionCounts: vi.fn(actual.probeAdminDivisionCounts),
+  };
+});
+
 describe("gameAreaPreload", () => {
   beforeEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
     usePreloadStore.setState({
       activeGameAreaKey: null,
       totalJobs: 0,
@@ -76,5 +93,29 @@ describe("gameAreaPreload", () => {
     await expect(
       preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA),
     ).resolves.toBeUndefined();
+  });
+
+  it("continues critical preload when admin division probe fails", async () => {
+    vi.spyOn(
+      adminDivisionAvailability,
+      "probeAdminDivisionCounts",
+    ).mockRejectedValue(new OverpassUnavailableError());
+
+    await expect(
+      preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA),
+    ).resolves.toBeUndefined();
+
+    expect(fetchPreparedCoastlineSegments).toHaveBeenCalled();
+    expect(fetchLandmassFeaturesInArea).toHaveBeenCalled();
+  });
+
+  it("uses a shorter preload gap for premium sessions", () => {
+    expect(preloadJobGapMsForTier("premium")).toBe(
+      preloadJobGapPremiumMsForTests(),
+    );
+    expect(preloadJobGapMsForTier("free")).toBe(preloadJobGapMsForTests());
+    expect(preloadJobGapPremiumMsForTests()).toBeLessThan(
+      preloadJobGapMsForTests(),
+    );
   });
 });

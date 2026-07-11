@@ -1,9 +1,9 @@
-import type { GameArea } from "../../domain/map/annotations";
+import type { GameArea, SessionTier } from "../../domain/map/annotations";
 import type { MeasuringLocationCategory } from "../../domain/questions/measuringQuestions";
 import type { CustomMatchingAreasByLevel } from "../../domain/session/sessionCustomContent";
 import type { RegionPackId } from "../../domain/regions/regionPack";
 import { fetchAdminDivisionFeaturesInArea } from "../geo/adminDivisionBoundaries";
-import { probeAdminDivisionCounts } from "../geo/adminDivisionAvailability";
+import { probeAdminDivisionCounts, emptyAdminDivisionCounts } from "../geo/adminDivisionAvailability";
 import { fetchPreparedCoastlineSegments } from "../geo/coastline";
 import { fetchLandmassFeaturesInArea } from "../geo/landmassFeatures";
 import { fetchMeasuringPlacesInArea } from "../geo/measuringPlaces";
@@ -13,6 +13,11 @@ import { usePreloadStore } from "../../state/preloadStore";
 
 const PRELOAD_ADMIN_LEVELS = [4, 6, 8, 9] as const;
 const PRELOAD_JOB_GAP_MS = 400;
+const PRELOAD_JOB_GAP_PREMIUM_MS = 100;
+
+export function preloadJobGapMsForTier(tier: "free" | "premium"): number {
+  return tier === "premium" ? PRELOAD_JOB_GAP_PREMIUM_MS : PRELOAD_JOB_GAP_MS;
+}
 
 const PRELOAD_MEASURING_CATEGORIES = [
   "commercial_airport",
@@ -99,6 +104,7 @@ async function runTrackedPreloadJob(
 async function runPreloadQueue(
   gameAreaKey: string,
   jobs: Array<() => Promise<unknown>>,
+  jobGapMs: number,
   signal?: AbortSignal,
 ): Promise<void> {
   for (let index = 0; index < jobs.length; index += 1) {
@@ -112,7 +118,7 @@ async function runPreloadQueue(
     }
 
     if (index < jobs.length - 1) {
-      await sleep(PRELOAD_JOB_GAP_MS);
+      await sleep(jobGapMs);
     }
   }
 }
@@ -138,6 +144,7 @@ export function preloadGameAreaCaches(
   gameArea: GameArea,
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
+  tier: SessionTier = "free",
 ): void {
   const gameAreaKey = gameAreaPreloadKey(gameArea);
   const jobs = buildPreloadJobs(gameArea, customMatchingAreas, regionPackId);
@@ -146,12 +153,13 @@ export function preloadGameAreaCaches(
   activePreloadAbort?.abort();
   activePreloadAbort = new AbortController();
   const { signal } = activePreloadAbort;
+  const jobGapMs = preloadJobGapMsForTier(tier);
 
   if (typeof document !== "undefined" && document.visibilityState === "hidden") {
     return;
   }
 
-  void runPreloadQueue(gameAreaKey, jobs, signal);
+  void runPreloadQueue(gameAreaKey, jobs, jobGapMs, signal);
 }
 
 export async function preloadCriticalGameAreaCaches(
@@ -159,11 +167,16 @@ export async function preloadCriticalGameAreaCaches(
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
 ): Promise<void> {
-  const counts = await probeAdminDivisionCounts(
-    gameArea,
-    customMatchingAreas,
-    regionPackId,
-  );
+  let counts = emptyAdminDivisionCounts();
+  try {
+    counts = await probeAdminDivisionCounts(
+      gameArea,
+      customMatchingAreas,
+      regionPackId,
+    );
+  } catch {
+    // probe failure is non-fatal; preload continues with empty counts
+  }
   usePreloadStore
     .getState()
     .setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);
@@ -183,4 +196,8 @@ export async function preloadCriticalGameAreaCaches(
 
 export function preloadJobGapMsForTests(): number {
   return PRELOAD_JOB_GAP_MS;
+}
+
+export function preloadJobGapPremiumMsForTests(): number {
+  return PRELOAD_JOB_GAP_PREMIUM_MS;
 }

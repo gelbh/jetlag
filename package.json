@@ -33,6 +33,8 @@
     "release:sync": "node scripts/sync-changelog-ts.mjs && node scripts/release-check.mjs",
     "release:check": "node scripts/release-check.mjs",
     "geo:build": "node scripts/build-region-pack-geo.mjs",
+    "geo:gtfs": "node scripts/build-gtfs-static-graph.mjs",
+    "geo:gtfs:fixtures": "node scripts/build-gtfs-static-graph.mjs --fixtures-only",
     "cap:sync": "npm run build && npx cap sync",
     "cap:android": "npm run cap:sync && npx cap open android",
     "cap:ios": "npm run cap:sync && npx cap open ios",

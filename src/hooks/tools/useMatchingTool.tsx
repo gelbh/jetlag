@@ -54,6 +54,7 @@ import {
   serializeMatchingFeatures,
   type MatchingFeature,
 } from "../../services/geo/matchingFeatures";
+import { inferTransitMetroId } from "../../services/transit/transitCatalog";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
@@ -171,6 +172,14 @@ export function useMatchingTool({
       customCategories: content.customCategories,
     };
   }, [sessionRules]);
+
+  const matchingTransitMetroId = useMemo(
+    () =>
+      matchingCategoryId === "transit_line"
+        ? inferTransitMetroId(gameArea)
+        : null,
+    [matchingCategoryId, gameArea],
+  );
 
   const customCategories = matchingFetchOptions.customCategories ?? [];
   const matchingCategory = matchingCategoryId
@@ -541,6 +550,9 @@ export function useMatchingTool({
               matchingFeatureCount: matchingFeatureCount ?? undefined,
               matchingNullAnswer,
               matchingFeaturesJson: serializeMatchingFeatures(matchingFeatures),
+              ...(matchingTransitMetroId
+                ? { transitMetroId: matchingTransitMetroId }
+                : {}),
             },
           },
           cardDraw,
@@ -622,6 +634,9 @@ export function useMatchingTool({
             ? JSON.stringify(boundaryRegion)
             : undefined,
           matchingFeaturesJson: serializeMatchingFeatures(matchingFeatures),
+          ...(matchingTransitMetroId
+            ? { transitMetroId: matchingTransitMetroId }
+            : {}),
           color: MAP_ANNOTATION_COLORS.elimination,
         },
       });

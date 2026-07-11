@@ -1,0 +1,1 @@
+{"metroId":"sf","feedOnestopId":"f-9q8y-~","builtAt":"2026-07-11T14:45:42.611Z","stops":[{"id":"sf:embarc","name":"Embarcadero","lat":37.7929,"lng":-122.3969},{"id":"sf:mont","name":"Montgomery St","lat":37.7894,"lng":-122.4012}],"routes":[{"id":"sf-j","shortName":"J","longName":"J Church","mode":"metro"}],"stopRouteIds":{"sf:embarc":["sf-j"],"sf:mont":["sf-j"]}}

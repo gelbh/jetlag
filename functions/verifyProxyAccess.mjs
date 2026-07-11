@@ -104,7 +104,10 @@ export async function verifyOverpassProxyAccess(auth, db, req) {
     return { ok: false, status: 403, error: "Session membership required." };
   }
 
-  return { ok: true, uid: decoded.uid, sessionId };
+  const sessionData = sessionDoc.data();
+  const tier = sessionData?.tier === "premium" ? "premium" : "free";
+
+  return { ok: true, uid: decoded.uid, sessionId, tier };
 }
 
 export function sendProxyAuthFailure(res, result) {
