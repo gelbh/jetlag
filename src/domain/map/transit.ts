@@ -25,6 +25,8 @@ export interface TransitMetro {
   transitlandFeed?: string;
   transitlandRtFeed?: string;
   gtfsRtVehicleUrl?: string;
+  /** Metro id for the shared vehicles Cloud Function proxy (London, Chicago). */
+  vehiclesProxyMetro?: string;
 }
 
 export interface TransitStop {

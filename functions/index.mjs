@@ -19,6 +19,7 @@ import { createMemoryCache } from "./memoryCache.mjs";
 import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "./overpassEndpoints.mjs";
 import { normalizeTflPayload } from "./tflNormalize.mjs";
 import { fetchTransitlandVehicles } from "./transitlandProxy.mjs";
+import { fetchCtaVehicles } from "./ctaProxy.mjs";
 import {
   sendProxyAuthFailure,
   verifyOverpassProxyAccess,
@@ -65,6 +66,8 @@ import { handleStripeWebhook } from "./stripeWebhook.mjs";
 
 const accessCodeSecret = defineSecret("ACCESS_CODE");
 const transitlandApiKeySecret = defineSecret("TRANSITLAND_API_KEY");
+const ctaBusTrackerApiKeySecret = defineSecret("CTA_BUS_TRACKER_API_KEY");
+const ctaTrainTrackerApiKeySecret = defineSecret("CTA_TRAIN_TRACKER_API_KEY");
 const sentryDsnSecret = getSentryDsnSecret();
 
 if (getApps().length === 0) {
@@ -78,6 +81,7 @@ const FEEDS = {
 const TFL_FETCH_TIMEOUT_MS = 10_000;
 const OVERPASS_FETCH_TIMEOUT_MS = 25_000;
 const VEHICLE_FEED_CACHE_TTL_MS = 15_000;
+const VEHICLE_ROUTE_CACHE_TTL_MS = 60 * 60 * 1000;
 const OVERPASS_CACHE_TTL_MS = 60 * 60 * 1000;
 const GRANT_ACCESS_FAILURE_DELAY_MS = 300;
 const GRANT_ACCESS_MAX_FAILURES = 8;
@@ -93,6 +97,7 @@ const PROXY_RATE_LIMITS = {
 };
 
 const vehicleFeedCache = createMemoryCache(VEHICLE_FEED_CACHE_TTL_MS);
+const vehicleRouteCache = createMemoryCache(VEHICLE_ROUTE_CACHE_TTL_MS);
 const overpassResponseCache = createMemoryCache(OVERPASS_CACHE_TTL_MS);
 
 function adminAuth() {
@@ -256,7 +261,13 @@ export const grantAccess = onCall(
 );
 
 export const vehicles = onRequest(
-  { secrets: [sentryDsnSecret] },
+  {
+    secrets: [
+      sentryDsnSecret,
+      ctaBusTrackerApiKeySecret,
+      ctaTrainTrackerApiKeySecret,
+    ],
+  },
   withSentryHttpHandler(async (req, res) => {
   setCors(res, req);
   logMissingAppCheckToken(req, "vehicles");
@@ -290,11 +301,33 @@ export const vehicles = onRequest(
   const metro = metroResult.value;
   const bounds = boundsResult.value;
 
-  const feedUrl = FEEDS[metro];
-
   try {
-    const payload = await loadTflFeed(metro, feedUrl);
-    res.status(200).json(normalizeTflPayload(payload, bounds));
+    if (metro === "london") {
+      const feedUrl = FEEDS[metro];
+      const payload = await loadTflFeed(metro, feedUrl);
+      res.status(200).json(normalizeTflPayload(payload, bounds));
+      return;
+    }
+
+    if (metro === "chicago") {
+      const busApiKey = ctaBusTrackerApiKeySecret.value()?.trim();
+      const trainApiKey = ctaTrainTrackerApiKeySecret.value()?.trim();
+      if (!busApiKey && !trainApiKey) {
+        res.status(503).json({ error: "CTA proxy is not configured." });
+        return;
+      }
+
+      const vehicles = await fetchCtaVehicles({
+        busApiKey: busApiKey || null,
+        trainApiKey: trainApiKey || null,
+        bounds,
+        routeCache: vehicleRouteCache,
+      });
+      res.status(200).json(vehicles);
+      return;
+    }
+
+    res.status(404).json({ error: "Unknown metro feed." });
   } catch (error) {
     captureFunctionsException(error);
     res.status(502).json({ error: "Transit proxy failed." });

@@ -16,7 +16,13 @@ describe("transitCatalog", () => {
     expect(metroSupportsLiveVehicles(nyc ?? null)).toBe(true);
     expect(metroSupportsLiveVehicles(dublin ?? null)).toBe(true);
     expect(metroSupportsLiveVehicles(sf ?? null)).toBe(true);
-    expect(metroSupportsLiveVehicles(chicago ?? null)).toBe(false);
+    expect(metroSupportsLiveVehicles(chicago ?? null)).toBe(true);
+  });
+
+  it("routes Chicago live vehicles through the vehicles proxy", () => {
+    const chicago = TRANSIT_METROS.find((metro) => metro.id === "chicago");
+    expect(chicago?.vehiclesProxyMetro).toBe("chicago");
+    expect(chicago?.transitlandRtFeed).toBeUndefined();
   });
 
   it("wires Transitland RT feed IDs for Dublin and SF", () => {

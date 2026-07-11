@@ -22,7 +22,7 @@ export function parseBoundingBoxQuery(query) {
   return { ok: true, value: result.data };
 }
 
-const vehiclesMetroSchema = z.enum(["london"]);
+const vehiclesMetroSchema = z.enum(["london", "chicago"]);
 
 export function parseVehiclesMetroQuery(query) {
   const metro = String(query.metro ?? "");
