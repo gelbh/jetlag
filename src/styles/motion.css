@@ -1,0 +1,367 @@
+/* motion.css — keyframes, view transitions, reduced motion */
+.loading-spinner {
+  animation: loading-spinner 0.75s linear infinite;
+}
+
+@keyframes loading-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.draft-seeker-pulse {
+  animation: draft-seeker-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes draft-seeker-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+
+  50% {
+    filter: brightness(1.45);
+  }
+}
+
+.annotation-pulse {
+  animation: annotation-pulse 1.2s ease-out 1;
+}
+
+@keyframes annotation-pulse {
+  0% {
+    filter: brightness(1.35);
+  }
+
+  100% {
+    filter: brightness(1);
+  }
+}
+
+@keyframes settings-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes hud-sheet-enter {
+  from {
+    opacity: 0.92;
+    transform: translateY(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hud-scrim-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes jl-panel-enter {
+  from {
+    opacity: 0.92;
+    transform: translateY(0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hud-sheet-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0.92;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes hud-scrim-exit {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes jl-panel-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0.92;
+    transform: translateY(0.5rem);
+  }
+}
+
+@keyframes jl-panel-crossfade-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes jl-step-enter {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes jl-banner-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes jl-banner-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+}
+
+@keyframes jl-chat-tab-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes jl-menu-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes route-loading-enter {
+  from {
+    opacity: 0.7;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes home-enter {
+  from {
+    opacity: 0.85;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes home-resume-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes jl-sync-beacon-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.55;
+    transform: scale(0.88);
+  }
+}
+
+@keyframes jl-ticker-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(from var(--color-highlight) l c h / 0.35);
+  }
+
+  50% {
+    box-shadow: 0 0 0 3px oklch(from var(--color-highlight) l c h / 0.35);
+  }
+}
+
+@keyframes jl-thermometer-live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.72;
+  }
+}
+
+@keyframes jl-unread-pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.35);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--motion-base);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
+  .annotation-pulse,
+  .draft-seeker-pulse,
+  .loading-spinner,
+  .home-enter-actions,
+  .home-resume-action[aria-busy="true"] .home-resume-cta,
+  .jl-ticker-active,
+  .jl-thermometer-live-marker,
+  .jl-unread-badge-pulse,
+  .jl-tool-overflow-sheet,
+  .hud-sheet-enter,
+  .hud-sheet-exit,
+  .hud-scrim-enter,
+  .hud-scrim-exit,
+  .jl-panel-enter,
+  .jl-panel-exit,
+  .jl-panel-crossfade-enter,
+  .jl-step-enter,
+  .jl-banner-enter,
+  .jl-banner-exit,
+  .jl-chat-tab-enter,
+  .jl-tool-menu,
+  .route-loading-enter {
+    animation: none;
+  }
+
+  .map-chrome-hud,
+  .map-zoom-control,
+  .map-style-control,
+  .jl-tool-dock-highlight,
+  .jl-tool-dock,
+  .jl-chat-keyboard-inset,
+  .home-card-btn,
+  .hud-chrome,
+  .btn-primary,
+  .btn-secondary,
+  .jl-tool-slot,
+  .jl-tool-overflow-row {
+    transition: none;
+  }
+}
+
+html[data-motion="reduced"] ::view-transition-group(*),
+html[data-motion="reduced"] ::view-transition-old(*),
+html[data-motion="reduced"] ::view-transition-new(*) {
+  animation: none !important;
+}
+
+html[data-motion="reduced"] .jl-sync-beacon--saving .jl-sync-beacon__lamp,
+html[data-motion="reduced"] .annotation-pulse,
+html[data-motion="reduced"] .draft-seeker-pulse,
+html[data-motion="reduced"] .loading-spinner,
+html[data-motion="reduced"] .home-enter-actions,
+html[data-motion="reduced"] .home-resume-action[aria-busy="true"] .home-resume-cta,
+html[data-motion="reduced"] .jl-ticker-active,
+html[data-motion="reduced"] .jl-thermometer-live-marker,
+html[data-motion="reduced"] .jl-unread-badge-pulse,
+html[data-motion="reduced"] .jl-tool-overflow-sheet,
+html[data-motion="reduced"] .hud-sheet-enter,
+html[data-motion="reduced"] .hud-sheet-exit,
+html[data-motion="reduced"] .hud-scrim-enter,
+html[data-motion="reduced"] .hud-scrim-exit,
+html[data-motion="reduced"] .jl-panel-enter,
+html[data-motion="reduced"] .jl-panel-exit,
+html[data-motion="reduced"] .jl-panel-crossfade-enter,
+html[data-motion="reduced"] .jl-step-enter,
+html[data-motion="reduced"] .jl-banner-enter,
+html[data-motion="reduced"] .jl-banner-exit,
+html[data-motion="reduced"] .jl-chat-tab-enter,
+html[data-motion="reduced"] .jl-tool-menu,
+html[data-motion="reduced"] .route-loading-enter {
+  animation: none;
+}
+
+html[data-motion="reduced"] .map-chrome-hud,
+html[data-motion="reduced"] .map-zoom-control,
+html[data-motion="reduced"] .map-style-control,
+html[data-motion="reduced"] .jl-tool-dock-highlight,
+html[data-motion="reduced"] .jl-tool-dock,
+html[data-motion="reduced"] .jl-chat-keyboard-inset,
+html[data-motion="reduced"] .home-card-btn,
+html[data-motion="reduced"] .hud-chrome,
+html[data-motion="reduced"] .btn-primary,
+html[data-motion="reduced"] .btn-secondary,
+html[data-motion="reduced"] .jl-tool-slot,
+html[data-motion="reduced"] .jl-tool-overflow-row {
+  transition: none;
+}
