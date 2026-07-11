@@ -44,6 +44,12 @@ import {
   parseOverpassTransitStops,
   type OverpassTransitStopElement,
 } from "../transit/transitStops";
+import { inferTransitMetroId } from "../transit/transitCatalog";
+import {
+  filterGtfsStopsForGameArea,
+  gtfsStopsToMatchingFeatures,
+  loadGtfsBundle,
+} from "../transit/gtfsRouteGraph";
 import {
   getOrFetchCached,
   geographicCacheKey,
@@ -405,6 +411,23 @@ async function fetchStationFeaturesInArea(
   return overpassStopsToMatchingFeatures(payload.elements, gameArea);
 }
 
+async function fetchTransitLineMatchingFeaturesInArea(
+  gameArea: GameArea,
+): Promise<MatchingFeature[]> {
+  const metroId = inferTransitMetroId(gameArea);
+  if (metroId) {
+    const bundle = await loadGtfsBundle(metroId);
+    if (bundle) {
+      const stops = filterGtfsStopsForGameArea(bundle, gameArea);
+      if (stops.length > 0) {
+        return gtfsStopsToMatchingFeatures(stops, gameArea);
+      }
+    }
+  }
+
+  return fetchStationFeaturesInArea(gameArea);
+}
+
 export async function fetchTransitStationsForHidingZone(
   gameArea: GameArea,
 ): Promise<TransitStation[]> {
@@ -634,7 +657,7 @@ export async function fetchMatchingFeaturesInArea(
         case "landmass":
           return fetchLandmassMatchingFeaturesInArea(gameArea);
         case "transitLine":
-          return fetchStationFeaturesInArea(gameArea);
+          return fetchTransitLineMatchingFeaturesInArea(gameArea);
         default: {
           const _exhaustive: never = category.resolver;
           return _exhaustive;

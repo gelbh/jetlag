@@ -634,6 +634,7 @@ export function CreateSession() {
           gameArea,
           advancedSettings.customMatchingAreas,
           regionPackId,
+          tier,
         );
         startSeaLevelBackgroundSampling(gameArea);
         if (navigator.onLine) {

@@ -96,6 +96,8 @@ export interface AnnotationMetadata {
   matchingNullAnswer?: boolean;
   matchingBoundaryJson?: string;
   matchingFeaturesJson?: string;
+  /** Metro used for GTFS-backed transit_line matching truth. */
+  transitMetroId?: string;
 }
 
 export interface TentaclePoi {

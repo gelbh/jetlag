@@ -38,6 +38,7 @@ export const TRANSIT_METROS: TransitMetro[] = [
     center: [53.3498, -6.2603],
     radiusKm: 35,
     transitlandFeed: "f-dhs-~",
+    transitlandRtFeed: "f-national~transport~authority~ie~rt",
   },
   {
     id: "nyc",
@@ -53,6 +54,7 @@ export const TRANSIT_METROS: TransitMetro[] = [
     center: [37.7749, -122.4194],
     radiusKm: 35,
     transitlandFeed: "f-9q8y-~",
+    transitlandRtFeed: "f-sf~bay~area~rg~rt",
   },
   {
     id: "chicago",
@@ -60,6 +62,7 @@ export const TRANSIT_METROS: TransitMetro[] = [
     center: [41.8781, -87.6298],
     radiusKm: 35,
     transitlandFeed: "f-dp3-~",
+    // No Transitland GTFS-RT feed; CTA Bus Tracker needs a separate API key.
   },
 ];
 

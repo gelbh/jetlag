@@ -1,39 +1,31 @@
 import { describe, expect, it } from "vitest";
-import type { GameArea } from "../../domain/map/annotations";
-import { inferTransitMetroId } from "./transitCatalog";
+import {
+  metroSupportsLiveVehicles,
+  TRANSIT_METROS,
+} from "./transitCatalog";
 
-const londonGameArea: GameArea = {
-  type: "Polygon",
-  coordinates: [
-    [
-      [-0.2, 51.4],
-      [-0.1, 51.4],
-      [-0.1, 51.5],
-      [-0.2, 51.5],
-      [-0.2, 51.4],
-    ],
-  ],
-};
+describe("transitCatalog", () => {
+  it("enables live vehicles for metros with RT feeds", () => {
+    const london = TRANSIT_METROS.find((metro) => metro.id === "london");
+    const nyc = TRANSIT_METROS.find((metro) => metro.id === "nyc");
+    const dublin = TRANSIT_METROS.find((metro) => metro.id === "dublin");
+    const sf = TRANSIT_METROS.find((metro) => metro.id === "sf");
+    const chicago = TRANSIT_METROS.find((metro) => metro.id === "chicago");
 
-describe("transit catalog", () => {
-  it("infers a metro from the game area center", () => {
-    expect(inferTransitMetroId(londonGameArea)).toBe("london");
+    expect(metroSupportsLiveVehicles(london ?? null)).toBe(true);
+    expect(metroSupportsLiveVehicles(nyc ?? null)).toBe(true);
+    expect(metroSupportsLiveVehicles(dublin ?? null)).toBe(true);
+    expect(metroSupportsLiveVehicles(sf ?? null)).toBe(true);
+    expect(metroSupportsLiveVehicles(chicago ?? null)).toBe(false);
   });
 
-  it("returns null when the play area is far from known metros", () => {
-    const remoteArea: GameArea = {
-      type: "Polygon",
-      coordinates: [
-        [
-          [20, -30],
-          [21, -30],
-          [21, -29],
-          [20, -29],
-          [20, -30],
-        ],
-      ],
-    };
+  it("wires Transitland RT feed IDs for Dublin and SF", () => {
+    const dublin = TRANSIT_METROS.find((metro) => metro.id === "dublin");
+    const sf = TRANSIT_METROS.find((metro) => metro.id === "sf");
 
-    expect(inferTransitMetroId(remoteArea)).toBeNull();
+    expect(dublin?.transitlandRtFeed).toBe(
+      "f-national~transport~authority~ie~rt",
+    );
+    expect(sf?.transitlandRtFeed).toBe("f-sf~bay~area~rg~rt");
   });
 });

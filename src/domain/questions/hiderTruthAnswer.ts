@@ -17,6 +17,11 @@ import {
   nearestMatchingFeatureIdForPoint,
 } from "../../services/geo/matchingFeatures";
 import {
+  gtfsStopsShareStationOrRoute,
+  loadGtfsBundle,
+  nearestGtfsStop,
+} from "../../services/transit/gtfsRouteGraph";
+import {
   classifyAdminDivisionAtPoint,
 } from "../../services/geo/adminDivisionBoundaries";
 import { classifyLandmassAtPoint } from "../../services/geo/landmassFeatures";
@@ -54,6 +59,27 @@ function resultFromReplyId(
     replyId,
     label: option?.label ?? replyId,
   };
+}
+
+function parseMatchingAnchor(
+  metadata: Record<string, unknown>,
+): LatLngTuple | null {
+  const anchor = metadata.matchingAnchor;
+  if (
+    typeof anchor !== "object" ||
+    anchor === null ||
+    !("lat" in anchor) ||
+    !("lng" in anchor)
+  ) {
+    return null;
+  }
+
+  const { lat, lng } = anchor as { lat: unknown; lng: unknown };
+  if (typeof lat !== "number" || typeof lng !== "number") {
+    return null;
+  }
+
+  return [lat, lng];
 }
 
 function parsePointGeometry(geometryJson: string): LatLngTuple | null {
@@ -192,6 +218,79 @@ function truthMatching(
 
   const replyId = stationFeatureId === seekerFeatureId ? "yes" : "no";
   return resultFromReplyId(pending, replyId);
+}
+
+async function truthMatchingTransitLineWithGtfs(
+  pending: PendingQuestionRecord,
+  stationCenter: LatLngTuple,
+  metroId: string,
+): Promise<HiderTruthResult | null> {
+  const metadata = pending.placement.metadata;
+  const seekerFeatureId = metadata.matchingNearestFeatureId;
+  const allowsNull = pending.replyOptions.some((option) => option.id === "null");
+  const seekerPoint = parseMatchingAnchor(metadata);
+
+  if (!seekerPoint) {
+    return null;
+  }
+
+  const bundle = await loadGtfsBundle(metroId);
+  if (!bundle || bundle.stops.length === 0) {
+    return null;
+  }
+
+  const seekerStop = nearestGtfsStop(seekerPoint, bundle.stops);
+  const hiderStop = nearestGtfsStop(stationCenter, bundle.stops);
+
+  if (!seekerStop || !hiderStop) {
+    if (allowsNull) {
+      return resultFromReplyId(pending, "null");
+    }
+    return resultFromReplyId(pending, "no");
+  }
+
+  if (typeof seekerFeatureId === "string") {
+    const legacyMatch = seekerFeatureId === hiderStop.id;
+    const graphMatch = gtfsStopsShareStationOrRoute(
+      seekerStop.id,
+      hiderStop.id,
+      bundle,
+    );
+    return resultFromReplyId(pending, legacyMatch || graphMatch ? "yes" : "no");
+  }
+
+  const graphMatch = gtfsStopsShareStationOrRoute(
+    seekerStop.id,
+    hiderStop.id,
+    bundle,
+  );
+  return resultFromReplyId(pending, graphMatch ? "yes" : "no");
+}
+
+async function truthMatchingAsync(
+  pending: PendingQuestionRecord,
+  stationCenter: LatLngTuple,
+): Promise<HiderTruthResult | null> {
+  const metadata = pending.placement.metadata;
+  const categoryId = metadata.matchingCategory;
+  const metroId = metadata.transitMetroId;
+
+  if (
+    categoryId === "transit_line" &&
+    typeof metroId === "string" &&
+    metroId.length > 0
+  ) {
+    const gtfsTruth = await truthMatchingTransitLineWithGtfs(
+      pending,
+      stationCenter,
+      metroId,
+    );
+    if (gtfsTruth) {
+      return gtfsTruth;
+    }
+  }
+
+  return truthMatching(pending, stationCenter);
 }
 
 function seekerAnchorFromMetadata(
@@ -428,6 +527,10 @@ export async function computeHiderTruthReplyAsync(
     if (metadata.measuringSubject === "sea_level") {
       return truthMeasuringSeaLevel(pending, stationCenter);
     }
+  }
+
+  if (pending.toolType === "matching") {
+    return truthMatchingAsync(pending, stationCenter);
   }
 
   return computeHiderTruthReply(pending, stationCenter);

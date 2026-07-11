@@ -1,0 +1,1 @@
+{"metroId":"chicago","feedOnestopId":"f-dp3-~","builtAt":"2026-07-11T14:45:42.611Z","stops":[{"id":"chi:clark","name":"Clark/Lake","lat":41.8857,"lng":-87.6308},{"id":"chi:state","name":"State/Lake","lat":41.8859,"lng":-87.6278}],"routes":[{"id":"chi-brn","shortName":"Brn","longName":"Brown Line","mode":"metro"}],"stopRouteIds":{"chi:clark":["chi-brn"],"chi:state":["chi-brn"]}}
