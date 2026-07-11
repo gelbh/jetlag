@@ -1,5 +1,6 @@
 {
   "name": "jetlag-functions",
+  "description": "Jet Lag Cloud Functions",
   "private": true,
   "type": "module",
   "main": "index.mjs",
