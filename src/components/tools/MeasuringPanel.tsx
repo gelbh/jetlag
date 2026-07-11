@@ -15,7 +15,7 @@ import {
   type MeasuringLocationCategory,
   type MeasuringSubject,
   type MeasuringTargetMode,
-} from "../../domain/questions/measuringQuestions";
+} from "../../domain/questions";
 import type { GeocodedPlace } from "../../services/geo/geocoding";
 import {
   formatAltitudeLabel,

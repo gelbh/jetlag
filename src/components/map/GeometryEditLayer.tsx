@@ -1,5 +1,5 @@
 import { memo, useMemo } from "react";
-import { Circle, CircleMarker, Polygon, Polyline } from "react-leaflet";
+import { Polygon, Polyline, CircleMarker } from "react-leaflet";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
 import type {
@@ -13,11 +13,15 @@ import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import { DEFAULT_RADIUS_METERS } from "../../domain/map/distance";
 import {
   gameAreaToPolygon,
-  polygonFeatureToLeafletPolygonGroups,
   safeDifference,
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
+import {
+  renderEditCircleWithMarker,
+  renderEditPointMarker,
+  renderGeoJsonPolygonGroups,
+} from "./renderHelpers";
 
 interface GeometryEditLayerProps {
   annotation: AnnotationRecord;
@@ -78,30 +82,17 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
     const center: LatLngTuple = [point.coordinates[1], point.coordinates[0]];
     const radius = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
 
-    return (
-      <>
-        <Circle
-          center={center}
-          radius={radius}
-          pathOptions={{
-            color: MAP_ANNOTATION_COLORS.radar,
-            weight: 2,
-            dashArray: "6 6",
-            fillOpacity: 0.08,
-          }}
-        />
-        <CircleMarker
-          center={center}
-          radius={8}
-          pathOptions={{
-            color: MAP_ANNOTATION_COLORS.strokeLight,
-            weight: 2,
-            fillColor: MAP_ANNOTATION_COLORS.radar,
-            fillOpacity: 1,
-          }}
-        />
-      </>
-    );
+    return renderEditCircleWithMarker({
+      center,
+      radiusMeters: radius,
+      markerFillColor: MAP_ANNOTATION_COLORS.radar,
+      circleOptions: {
+        color: MAP_ANNOTATION_COLORS.radar,
+        weight: 2,
+        dashArray: "6 6",
+        fillOpacity: 0.08,
+      },
+    });
   }
 
   if (annotation.type === "tentacle") {
@@ -114,40 +105,27 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
     if (annotation.metadata.tentacleOutOfReach) {
       return (
         <>
-          <Circle
-            center={center}
-            radius={searchRadius}
-            pathOptions={{
+          {renderEditCircleWithMarker({
+            center,
+            radiusMeters: searchRadius,
+            markerFillColor: tentacleColor,
+            circleOptions: {
               color: tentacleColor,
               weight: 2,
               fillOpacity: 0.05,
-            }}
-          />
-          <CircleMarker
-            center={center}
-            radius={8}
-            pathOptions={{
-              color: MAP_ANNOTATION_COLORS.strokeLight,
-              weight: 2,
-              fillColor: tentacleColor,
-              fillOpacity: 1,
-            }}
-          />
+            },
+          })}
           {tentacleNoRadarDisk
-            ? polygonFeatureToLeafletPolygonGroups(tentacleNoRadarDisk).map(
-                (rings, index) => (
-                  <Polygon
-                    key={`tentacle-edit-no-radar-${index}`}
-                    positions={rings}
-                    pathOptions={{
-                      color: tentacleColor,
-                      weight: 1,
-                      fillColor: tentacleColor,
-                      fillOpacity: 0.35,
-                    }}
-                  />
-                ),
-              )
+            ? renderGeoJsonPolygonGroups({
+                id: "tentacle-edit-no-radar",
+                feature: tentacleNoRadarDisk,
+                pathOptions: {
+                  color: tentacleColor,
+                  weight: 1,
+                  fillColor: tentacleColor,
+                  fillOpacity: 0.35,
+                },
+              })
             : null}
         </>
       );
@@ -155,42 +133,29 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
 
     return (
       <>
-        <Circle
-          center={center}
-          radius={searchRadius}
-          pathOptions={{
+        {renderEditCircleWithMarker({
+          center,
+          radiusMeters: searchRadius,
+          markerFillColor: tentacleColor,
+          circleOptions: {
             color: tentacleColor,
             weight: 2,
             dashArray: "6 6",
             fillOpacity: 0.05,
-          }}
-        />
+          },
+        })}
         {tentacleYesRadarOutside
-          ? polygonFeatureToLeafletPolygonGroups(tentacleYesRadarOutside).map(
-              (rings, index) => (
-                <Polygon
-                  key={`tentacle-edit-yes-radar-${index}`}
-                  positions={rings}
-                  pathOptions={{
-                    color: tentacleColor,
-                    weight: 1,
-                    fillColor: tentacleColor,
-                    fillOpacity: 0.35,
-                  }}
-                />
-              ),
-            )
+          ? renderGeoJsonPolygonGroups({
+              id: "tentacle-edit-yes-radar",
+              feature: tentacleYesRadarOutside,
+              pathOptions: {
+                color: tentacleColor,
+                weight: 1,
+                fillColor: tentacleColor,
+                fillOpacity: 0.35,
+              },
+            })
           : null}
-        <CircleMarker
-          center={center}
-          radius={8}
-          pathOptions={{
-            color: MAP_ANNOTATION_COLORS.strokeLight,
-            weight: 2,
-            fillColor: tentacleColor,
-            fillOpacity: 1,
-          }}
-        />
       </>
     );
   }
@@ -198,18 +163,10 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
   if (annotation.type === "pin") {
     const point = draftGeometry.geometry as Point;
 
-    return (
-      <CircleMarker
-        center={[point.coordinates[1], point.coordinates[0]]}
-        radius={8}
-        pathOptions={{
-          color: MAP_ANNOTATION_COLORS.strokeLight,
-          weight: 2,
-          fillColor: MAP_ANNOTATION_COLORS.pin,
-          fillOpacity: 1,
-        }}
-      />
-    );
+    return renderEditPointMarker({
+      center: [point.coordinates[1], point.coordinates[0]],
+      fillColor: MAP_ANNOTATION_COLORS.pin,
+    });
   }
 
   if (annotation.type === "thermometer") {
@@ -229,26 +186,16 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
           positions={[pointA, pointB]}
           pathOptions={{ color: MAP_ANNOTATION_COLORS.thermometerAxis, weight: 4, dashArray: "6 6" }}
         />
-        <CircleMarker
-          center={pointA}
-          radius={7}
-          pathOptions={{
-            color: MAP_ANNOTATION_COLORS.strokeLight,
-            weight: 2,
-            fillColor: MAP_ANNOTATION_COLORS.thermometerA,
-            fillOpacity: 1,
-          }}
-        />
-        <CircleMarker
-          center={pointB}
-          radius={7}
-          pathOptions={{
-            color: MAP_ANNOTATION_COLORS.strokeLight,
-            weight: 2,
-            fillColor: MAP_ANNOTATION_COLORS.thermometerB,
-            fillOpacity: 1,
-          }}
-        />
+        {renderEditPointMarker({
+          center: pointA,
+          radius: 7,
+          fillColor: MAP_ANNOTATION_COLORS.thermometerA,
+        })}
+        {renderEditPointMarker({
+          center: pointB,
+          radius: 7,
+          fillColor: MAP_ANNOTATION_COLORS.thermometerB,
+        })}
       </>
     );
   }

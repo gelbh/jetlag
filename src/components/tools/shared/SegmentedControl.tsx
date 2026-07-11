@@ -1,4 +1,4 @@
-import { SegmentControl } from "../../ui/SegmentControl";
+import { HudSegmentControl } from "../../ui/HudSegmentControl";
 
 interface SegmentedOption<Value extends string> {
   value: Value;
@@ -12,6 +12,8 @@ interface SegmentedControlProps<Value extends string> {
   "aria-label"?: string;
 }
 
-export function SegmentedControl<Value extends string>(props: SegmentedControlProps<Value>) {
-  return <SegmentControl variant="hud" tone="action" {...props} />;
+export function SegmentedControl<Value extends string>(
+  props: SegmentedControlProps<Value>,
+) {
+  return <HudSegmentControl tone="action" {...props} />;
 }

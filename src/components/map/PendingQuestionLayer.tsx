@@ -2,7 +2,7 @@ import { memo, useMemo } from "react";
 import type { GameArea } from "../../domain/map/annotations";
 import type { MapStyle } from "../../domain/map/mapBasemaps";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
-import { buildPendingQuestionOverlays } from "../../domain/questions/pendingQuestionOverlays";
+import { buildPendingQuestionOverlays } from "../../domain/questions/ui";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { MapDraftLayer } from "./MapDraftLayer";
 

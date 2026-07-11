@@ -2,10 +2,12 @@ import { describe, expect, it, vi } from "vitest";
 import type { GameArea } from "../../domain/map/annotations";
 import * as adminDivisionBoundaries from "./adminDivisionBoundaries";
 import {
+  deserializeMatchingFeatures,
+  serializeMatchingFeatures,
+} from "../../domain/geo/matchingAdapters";
+import {
   fetchMatchingFeaturesInArea,
   pickMatchingFeatureForAnchor,
-  serializeMatchingFeatures,
-  deserializeMatchingFeatures,
 } from "./matchingFeatures";
 
 const sampleGameArea: GameArea = {

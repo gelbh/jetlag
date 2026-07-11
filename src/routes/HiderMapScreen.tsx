@@ -51,7 +51,7 @@ import {
 } from "../domain/geometry/geometry";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
 import { effectiveMapStyle } from "../domain/device/powerProfile";
-import { computeHiderTruthReplyAsync } from "../domain/questions/hiderTruthAnswer";
+import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
 import { useHiderZoneTool } from "../hooks/session/useHiderZoneTool";

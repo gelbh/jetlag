@@ -1,5 +1,5 @@
 import type { GameArea, SessionTier } from "../../domain/map/annotations";
-import type { MeasuringLocationCategory } from "../../domain/questions/measuringQuestions";
+import type { MeasuringLocationCategory } from "../../domain/questions";
 import type { CustomMatchingAreasByLevel } from "../../domain/session/sessionCustomContent";
 import type { RegionPackId } from "../../domain/regions/regionPack";
 import { fetchAdminDivisionFeaturesInArea } from "../geo/adminDivisionBoundaries";

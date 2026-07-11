@@ -1,4 +1,4 @@
-import type { HiderTruthResult } from "../../domain/questions/hiderTruthAnswer";
+import type { HiderTruthResult } from "../../domain/questions/ui";
 import type { GameReplyOption } from "../../domain/session/sessionChat";
 import { LoadingReadout } from "../tools/shared/LoadingReadout";
 

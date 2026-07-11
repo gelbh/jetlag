@@ -6,7 +6,7 @@ import {
   buildAdminDivisionBoundaryPreview,
   buildAdminDivisionEliminationRegion,
 } from "./adminDivisionGeometry";
-import type { AdminDivisionFeature } from "../../services/geo/adminDivisionBoundaries";
+import type { AdminDivisionFeature } from "../../domain/geo/types";
 import { gameAreaToPolygon } from "./geometry";
 
 const sampleGameArea: GameArea = {

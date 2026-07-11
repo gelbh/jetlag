@@ -10,12 +10,11 @@ import { AnimatedOverlay } from "../ui/AnimatedOverlay";
 import { SheetHeader } from "../ui/SheetHeader";
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 import {
-  HudPinIcon,
   HudRedoIcon,
   HudSettingsIcon,
   HudUndoIcon,
-  HudZoneIcon,
 } from "../ui/HudIcons";
+import { HudPinIcon, HudZoneIcon } from "../map/ToolIcons";
 
 interface ToolOverflowSheetProps {
   open: boolean;

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
-import type { HiderTruthResult } from "../../domain/questions/hiderTruthAnswer";
+import type { HiderTruthResult } from "../../domain/questions/ui";
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,

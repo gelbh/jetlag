@@ -20,20 +20,10 @@ import type {
   SessionCustomLocationPin,
 } from "./sessionCustomContent";
 import { isSessionCustomCategoryId } from "./sessionCustomContent";
-import type { MeasuringPlace } from "../../services/geo/measuringPlaces";
+import type { MeasuringPlace } from "../geo/types";
 import type { TentaclePoi } from "../map/annotations";
 import type { LatLngTuple } from "../geometry/geometry";
-import turfDistance from "@turf/distance";
-import { point as turfPoint } from "@turf/helpers";
-
-function distanceBetweenLatLngPoints(
-  from: LatLngTuple,
-  to: LatLngTuple,
-): number {
-  return turfDistance(turfPoint([from[1], from[0]]), turfPoint([to[1], to[0]]), {
-    units: "meters",
-  });
-}
+import { distanceBetweenLatLngPoints } from "../geometry/distance";
 
 export function customCategoryToMeasuringOption(
   category: SessionCustomCategory,

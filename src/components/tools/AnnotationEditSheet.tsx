@@ -32,7 +32,7 @@ import {
   radarInsideFromAnswer,
   usedRadarDistanceOptions,
   type RadarAnswer,
-} from "../../domain/questions/radarQuestions";
+} from "../../domain/questions";
 import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import {
@@ -42,21 +42,21 @@ import {
 import {
   matchingQuestionFor,
   type MatchingAnswer,
-} from "../../domain/questions/matchingQuestions";
+} from "../../domain/questions";
 import {
   deserializeMatchingFeatures,
   serializeMatchingFeatures,
-} from "../../services/geo/matchingFeatures";
+} from "../../domain/geo/matchingAdapters";
 import {
   tentacleCategoryIdForAnnotation,
   tentacleQuestionPrompt,
   type TentacleExtendedCategoryId,
-} from "../../domain/questions/tentacleQuestions";
+} from "../../domain/questions";
 import { tentacleEliminationJsonForAnswer } from "../../domain/geometry/tentacleGeometry";
 import {
   measuringQuestionFor,
   type MeasuringAnswer,
-} from "../../domain/questions/measuringQuestions";
+} from "../../domain/questions";
 import {
   availableThermometerDistancePresets,
   DEFAULT_THERMOMETER_DISTANCE_METERS,
@@ -65,7 +65,7 @@ import {
   thermometerHotterTowards,
   usedThermometerDistanceOptions,
   type ThermometerAnswer,
-} from "../../domain/questions/thermometerQuestions";
+} from "../../domain/questions";
 
 interface AnnotationEditSheetProps {
   annotation: AnnotationRecord;

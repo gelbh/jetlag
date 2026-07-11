@@ -8,7 +8,7 @@ import {
   createPendingQuestionId,
   type PendingQuestionPlacement,
 } from "../../domain/session/sessionChat";
-import { buildThermometerLineGeometry } from "../../domain/questions/thermometerWalk";
+import { buildThermometerLineGeometry } from "../../domain/questions";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
   deletePendingQuestion,

@@ -16,7 +16,7 @@ import {
   type MeasuringSubject,
 } from "../questions/measuringQuestions";
 import { buildSeaLevelEliminationRegion } from "./seaLevel";
-import type { MeasuringPlace } from "../../services/geo/measuringPlaces";
+import type { MeasuringPlace } from "../geo/types";
 
 export interface MeasuringRegionInput {
   gameArea: GameArea;

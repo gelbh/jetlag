@@ -3,22 +3,22 @@ import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import {
   radarAnswerFromReplyId,
   resolveRadarPendingQuestion,
-} from "../../domain/questions/questionResolution/radar";
+} from "../../domain/questions/ui";
 import {
   resolveThermometerPendingQuestion,
   thermometerAnswerFromReplyId,
-} from "../../domain/questions/questionResolution/thermometer";
+} from "../../domain/questions/ui";
 import {
   resolveMeasuringPendingQuestion,
   measuringAnswerFromReplyId,
-} from "../../domain/questions/questionResolution/measuring";
+} from "../../domain/questions/ui";
 import {
   resolveMatchingPendingQuestion,
   matchingAnswerFromReplyId,
-} from "../../domain/questions/questionResolution/matching";
+} from "../../domain/questions/ui";
 import {
   resolveTentaclePendingQuestion,
-} from "../../domain/questions/questionResolution/tentacle";
+} from "../../domain/questions/ui";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { updatePendingQuestion } from "../../services/firestore/firestoreSessionExtras";
 

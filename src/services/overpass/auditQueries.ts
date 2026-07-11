@@ -6,7 +6,7 @@ import {
   measuringLocationOverpassSelectors,
   type MeasuringFromKind,
   type MeasuringLocationCategory,
-} from "../../domain/questions/measuringQuestions";
+} from "../../domain/questions";
 import {
   formatOverpassBboxFromGameArea,
   overpassQueryTemplate,

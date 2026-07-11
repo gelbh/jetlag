@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import type { HiderTruthResult } from "../../domain/questions/hiderTruthAnswer";
+import type { HiderTruthResult } from "../../domain/questions/ui";
 import { HudBanner } from "../ui/HudBanner";
 
 export interface HiderTruthRevealState {

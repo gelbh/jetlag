@@ -16,7 +16,7 @@ import {
   isRadarRadiusAllowedForGameSize,
   type RadarAnswer,
   type RadarDistanceOptionKey,
-} from "../../domain/questions/radarQuestions";
+} from "../../domain/questions";
 import type { GameSize } from "../../domain/session/gameSize";
 
 interface RadarPanelProps {

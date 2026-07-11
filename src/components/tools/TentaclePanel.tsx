@@ -7,7 +7,7 @@ import {
   tentacleCategoriesForGameSize,
   tentacleQuestionPrompt,
   type TentacleExtendedCategoryId,
-} from "../../domain/questions/tentacleQuestions";
+} from "../../domain/questions";
 import { AnchorControls } from "./shared/AnchorControls";
 import { ErrorWithRetry } from "./shared/ErrorWithRetry";
 import { LoadingReadout } from "./shared/LoadingReadout";

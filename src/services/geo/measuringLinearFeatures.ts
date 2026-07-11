@@ -15,7 +15,7 @@ import {
   measuringLinearOverpassSelectors,
   measuringLocationLabel,
   type MeasuringFromKind,
-} from "../../domain/questions/measuringQuestions";
+} from "../../domain/questions";
 import {
   getOrFetchCached,
   linearSegmentsCacheKey,
@@ -25,7 +25,7 @@ import {
   adminLevelForMeasuringBorderKind,
   isMeasuringAdminBorderKind,
 } from "./adminDivisionAvailability";
-import { fetchCustomAdminBorderLineSegments } from "./adminPolygonBoundaries";
+import { fetchCustomAdminBorderLineSegments } from "./adminDivisionLineStrings";
 
 type OverpassWay = {
   type: string;

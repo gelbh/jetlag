@@ -4,8 +4,8 @@ import {
   formatDrawPickSummary,
   formatExpiredAnswerCountdown,
   questionAnswerDeadlineMs,
-} from "../../domain/questions/questionRules";
-import type { HiderTruthResult } from "../../domain/questions/hiderTruthAnswer";
+} from "../../domain/questions";
+import type { HiderTruthResult } from "../../domain/questions/ui";
 import { mapToolDockShortLabel, isQuestionDockTool } from "../../domain/map/mapTools";
 import type { SessionMessageRecord } from "../../domain/session/sessionChat";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";

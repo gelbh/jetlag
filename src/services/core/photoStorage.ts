@@ -12,7 +12,7 @@ import {
   isStorageUnauthorized,
   photoUploadAccessError,
   photoUploadServerDiagnostics,
-} from "../../domain/questions/photoUploadAccess";
+} from "../../domain/questions";
 import { ensureHiderPhotoUploadAccess } from "../firestore/firestoreAnnotations";
 import { ensureAnonymousUser, getFirebaseStorage } from "./firebase";
 import {

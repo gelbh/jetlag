@@ -5,11 +5,12 @@ import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { lineString, point as turfPoint } from "@turf/helpers";
 import polygonize from "@turf/polygonize";
 import type { GameArea } from "../../domain/map/annotations";
+import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { AdminDivisionFeature } from "../../domain/geo/types";
 import {
   gameAreaToBoundingBox,
   gameAreaToPolygon,
   simplifyGameArea,
-  type LatLngTuple,
 } from "../../domain/geometry/geometry";
 import { queryOverpass } from "../core/overpassClient";
 import { parseMatchingAreaGeoJson } from "./matchingAreaGeoJson";
@@ -20,13 +21,7 @@ import {
 
 export const MAX_ADMIN_DIVISIONS = 50;
 
-export interface AdminDivisionFeature {
-  id: string;
-  name: string;
-  adminLevel: number;
-  boundary: GameArea;
-  representativePoint: LatLngTuple;
-}
+export type { AdminDivisionFeature } from "../../domain/geo/types";
 
 type OverpassMember = {
   type: "way" | "node" | "relation";
@@ -337,22 +332,4 @@ export function classifyAdminDivisionAtPoint(
   });
 
   return containing[0];
-}
-
-export function adminDivisionToMatchingFeature(
-  division: AdminDivisionFeature,
-): {
-  id: string;
-  name: string;
-  point: LatLngTuple;
-  adminLevel: number;
-  boundary: GameArea;
-} {
-  return {
-    id: division.id,
-    name: division.name,
-    point: division.representativePoint,
-    adminLevel: division.adminLevel,
-    boundary: division.boundary,
-  };
 }

@@ -17,8 +17,8 @@ import {
   radarQuestionPrompt,
   usedRadarDistanceOptions,
   type RadarAnswer,
-} from "../../domain/questions/radarQuestions";
-import { questionCostBreakdown } from "../../domain/questions/questionRules";
+} from "../../domain/questions";
+import { questionCostBreakdown } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { yesNoAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";

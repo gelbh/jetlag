@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { HudToolIcon } from "../ui/HudIcons";
+import { HudToolIcon } from "../map/ToolIcons";
 import { ToolStepper } from "../tools/shared/ToolStepper";
 import { buildSteps, deriveStepStates } from "../tools/shared/toolStepUtils";
 import type { TutorialStep } from "../../domain/tutorial/tutorialSections";

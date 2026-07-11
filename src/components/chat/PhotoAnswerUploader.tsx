@@ -5,8 +5,8 @@ import {
   photoAnswerSelectedReply,
   readPhotoCategoryId,
   type PhotoAnswer,
-} from "../../domain/questions/photoQuestions";
-import { photoUploadAccessError } from "../../domain/questions/photoUploadAccess";
+} from "../../domain/questions";
+import { photoUploadAccessError } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { ensureAnonymousUser } from "../../services/core/firebase";
 import {

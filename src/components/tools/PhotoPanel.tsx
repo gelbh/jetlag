@@ -3,7 +3,7 @@ import {
   photoCategoriesForGameSize,
   photoQuestionFor,
   type PhotoCategoryId,
-} from "../../domain/questions/photoQuestions";
+} from "../../domain/questions";
 import type { GameSize } from "../../domain/session/gameSize";
 import { CatalogExhaustedMessage } from "./shared/CatalogExhaustedMessage";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";

@@ -4,7 +4,7 @@ import {
   TENTACLE_NOT_WITHIN_REACH_LABEL,
   tentacleHiderAnswerClipboardText,
   type TentacleExtendedCategoryId,
-} from "../../../domain/questions/tentacleQuestions";
+} from "../../../domain/questions";
 import { useCopyFeedback } from "../../../hooks/useCopyFeedback";
 import { ListSelectRow } from "./ListSelectRow";
 import { ToolSection } from "./ToolSection";

@@ -8,7 +8,7 @@ import {
   type MatchingAnswer,
   type MatchingCategoryDefinition,
   type MatchingCategoryId,
-} from "../../domain/questions/matchingQuestions";
+} from "../../domain/questions";
 import { resolveMatchingCategory } from "../../domain/session/sessionCustomCatalog";
 import { matchingFeatureCountLabel, matchingNullAnswerMessage } from "../../services/geo/matchingFeatures";
 import { formatDistance, type DistanceUnit } from "../../domain/map/distance";

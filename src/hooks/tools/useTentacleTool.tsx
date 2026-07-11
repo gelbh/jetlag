@@ -26,8 +26,8 @@ import {
   tentacleQuestionPrompt,
   usedTentacleCategoryIds,
   type TentacleExtendedCategoryId,
-} from "../../domain/questions/tentacleQuestions";
-import { questionCostBreakdown } from "../../domain/questions/questionRules";
+} from "../../domain/questions";
+import { questionCostBreakdown } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { useSubmitLock } from "../useSubmitLock";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";

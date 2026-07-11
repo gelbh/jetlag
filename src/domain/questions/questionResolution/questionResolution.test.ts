@@ -3,7 +3,7 @@ import type { GameArea } from "../../map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import type { PendingQuestionRecord } from "../../session/sessionChat";
 import { milesToMeters } from "../../map/distance";
-import { serializeMatchingFeatures } from "../../../services/geo/matchingFeatures";
+import { serializeMatchingFeatures } from "../../../domain/geo/matchingAdapters";
 import {
   matchingAnswerFromReplyId,
   resolveMatchingPendingQuestion,

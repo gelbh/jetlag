@@ -3,6 +3,7 @@ import type { Feature, Polygon } from "geojson";
 import type { GameArea } from "../map/annotations";
 import type { LatLngTuple } from "../geometry/geometry";
 import { isPointInGameArea } from "../geometry/geometry";
+import { haversineMeters } from "../geometry/distance";
 
 export interface TransitStation {
   id: string;
@@ -119,18 +120,7 @@ export function searchStations(
 
 export const MANUAL_STATION_ID = "manual";
 
-export function haversineMeters(a: LatLngTuple, b: LatLngTuple): number {
-  const earthRadius = 6_371_000;
-  const latDelta = ((b[0] - a[0]) * Math.PI) / 180;
-  const lngDelta = ((b[1] - a[1]) * Math.PI) / 180;
-  const lat1 = (a[0] * Math.PI) / 180;
-  const lat2 = (b[0] * Math.PI) / 180;
-  const h =
-    Math.sin(latDelta / 2) ** 2 +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(lngDelta / 2) ** 2;
-
-  return 2 * earthRadius * Math.asin(Math.sqrt(h));
-}
+export { haversineMeters } from "../geometry/distance";
 
 export function shortPlayerLabel(uid: string): string {
   return uid.slice(0, 4).toUpperCase();

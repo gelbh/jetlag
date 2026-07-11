@@ -9,6 +9,10 @@ import {
   type LatLngTuple,
 } from "./geometry";
 import type { MeasuringAnswer } from "../questions/measuringQuestions";
+import {
+  MIN_GAME_AREA_LAT_SPAN,
+  MIN_GAME_AREA_LNG_SPAN,
+} from "./gameAreaConstants";
 
 export interface ElevationSampleCell {
   point: LatLngTuple;
@@ -25,8 +29,6 @@ export const COARSE_SEA_LEVEL_DIVISIONS = 8;
 const DEFAULT_SEA_LEVEL_DIVISIONS = 10;
 const MAX_SMALL_AREA_DIVISIONS = 45;
 const MIN_GAME_AREA_DIVISIONS = 8;
-const MIN_GAME_AREA_LAT_SPAN = 0.005;
-const MIN_GAME_AREA_LNG_SPAN = 0.005;
 
 type CellClass = "near" | "far" | "skip";
 

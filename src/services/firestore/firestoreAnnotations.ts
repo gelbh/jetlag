@@ -39,7 +39,7 @@ import {
   deserializeSessionFromFirestore,
   sessionRulesPatchToFirestore,
 } from "./firestoreSerialization";
-import { photoUploadAccessError } from "../../domain/questions/photoUploadAccess";
+import { photoUploadAccessError } from "../../domain/questions";
 import { generateSessionCode } from "../session/sessionCodes";
 
 const HIDER_ROLE_POLL_MS = 250;

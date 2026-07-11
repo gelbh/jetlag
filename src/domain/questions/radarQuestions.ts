@@ -1,11 +1,7 @@
 import type { AnnotationRecord } from "../map/annotations";
 import type { PendingQuestionRecord } from "../session/sessionChat";
 import type { GameSize } from "../session/gameSize";
-import { isCountablePendingQuestionStatus } from "./questionRules";
-import {
-  collectUsedAnnotationOptions,
-  presetMetersForMiles,
-} from "../session/toolSessionOptions";
+import { presetMetersForMiles } from "../session/toolSessionOptions";
 import {
   formatDistance,
   MILE_RADIUS_PRESETS,
@@ -21,6 +17,7 @@ import {
   radarPresetsMetersForGameSizeAndUnit,
   UI_PRESET_MATCH_TOLERANCE_METERS,
 } from "../map/distancePresets";
+import { buildPresetCatalogHelpers } from "./distancePresets";
 
 export const RADAR_DISTANCE_MILES = MILE_RADIUS_PRESETS;
 
@@ -122,14 +119,23 @@ export function radarDistanceOptionForPending(
   return preset ?? "choose";
 }
 
+function radarPresetHelpersForUnit(unit: DistanceUnit) {
+  return buildPresetCatalogHelpers<RadarDistanceOptionKey>({
+    toolType: "radar",
+    readOptionFromAnnotation: (annotation) =>
+      radarDistanceOptionForAnnotation(annotation, unit),
+    readOptionFromPending: (question) =>
+      radarDistanceOptionForPending(question, unit),
+  });
+}
+
 export function usedRadarDistanceOptions(
   annotations: AnnotationRecord[],
   unit: DistanceUnit = "imperial",
   exceptAnnotationId?: string,
 ): Set<RadarDistanceOptionKey> {
-  return collectUsedAnnotationOptions(
+  return radarPresetHelpersForUnit(unit).usedOptionsFromAnnotations(
     annotations,
-    (annotation) => radarDistanceOptionForAnnotation(annotation, unit),
     exceptAnnotationId,
   );
 }
@@ -213,23 +219,18 @@ export function radarDistanceUseCount(
   unit: DistanceUnit = "imperial",
   exceptAnnotationId?: string,
 ): number {
-  let count = 0;
-  for (const annotation of annotations) {
-    if (annotation.status !== "active" || annotation.type !== "radar") {
-      continue;
-    }
-    if (exceptAnnotationId && annotation.id === exceptAnnotationId) {
-      continue;
-    }
-    const optionKey = radarDistanceOptionForAnnotation(annotation, unit);
-    const targetKey = chooseCustom
-      ? "choose"
-      : radarPresetForRadius(radiusMeters, unit);
-    if (optionKey === targetKey) {
-      count += 1;
-    }
+  const targetKey = chooseCustom
+    ? "choose"
+    : radarPresetForRadius(radiusMeters, unit);
+  if (targetKey === null) {
+    return 0;
   }
-  return count;
+
+  return radarPresetHelpersForUnit(unit).optionUseCountFromAnnotations(
+    annotations,
+    targetKey,
+    exceptAnnotationId,
+  );
 }
 
 export function radarDistanceUseCountFromPending(
@@ -242,22 +243,15 @@ export function radarDistanceUseCountFromPending(
   const targetKey = chooseCustom
     ? "choose"
     : radarPresetForRadius(radiusMeters, unit);
-  let count = 0;
-  for (const question of pendingQuestions) {
-    if (question.toolType !== "radar") {
-      continue;
-    }
-    if (exceptQuestionId && question.id === exceptQuestionId) {
-      continue;
-    }
-    if (!isCountablePendingQuestionStatus(question.status)) {
-      continue;
-    }
-    if (radarDistanceOptionForPending(question, unit) === targetKey) {
-      count += 1;
-    }
+  if (targetKey === null) {
+    return 0;
   }
-  return count;
+
+  return radarPresetHelpersForUnit(unit).optionUseCountFromPending(
+    pendingQuestions,
+    targetKey,
+    exceptQuestionId,
+  );
 }
 
 export function radarDistanceOptionLabel(

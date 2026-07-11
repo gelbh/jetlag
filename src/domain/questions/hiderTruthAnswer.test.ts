@@ -3,7 +3,7 @@ import { milesToMeters } from "../map/distance";
 import {
   computeHiderTruthReply,
   computeHiderTruthReplyAsync,
-} from "./hiderTruthAnswer";
+} from "./hiderTruth";
 import type { PendingQuestionRecord } from "../session/sessionChat";
 
 vi.mock("../../services/geo/elevation", () => ({

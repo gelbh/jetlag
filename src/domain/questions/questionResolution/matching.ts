@@ -5,7 +5,7 @@ import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
 } from "../../geometry/matchingGeometry";
-import { deserializeMatchingFeatures } from "../../../services/geo/matchingFeatures";
+import { deserializeMatchingFeatures } from "../../../domain/geo/matchingAdapters";
 import type { PendingQuestionRecord } from "../../session/sessionChat";
 
 export function matchingAnswerFromReplyId(

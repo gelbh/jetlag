@@ -22,7 +22,7 @@ import {
   gameAreaToBoundingBox,
   placeToGameArea,
 } from "../domain/geometry/geometry";
-import { generateLocalCode } from "../domain/session/session";
+import { generateLocalCode } from "../domain/session/sessionCode";
 import type { DistanceUnit } from "../domain/map/distance";
 import {
   hidingZoneRadiusMeters,

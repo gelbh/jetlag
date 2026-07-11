@@ -3,7 +3,7 @@ import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import {
   selectPrimaryQuestionTimer,
   type ActiveQuestionTimer,
-} from "../../domain/questions/questionTimerDisplay";
+} from "../../domain/questions";
 import { HudBanner } from "../ui/HudBanner";
 
 interface QuestionAlertBannerProps {

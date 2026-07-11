@@ -3,11 +3,13 @@ import type { GameArea } from "../../domain/map/annotations";
 import * as overpassClient from "../core/overpassClient";
 import {
   deserializeMatchingFeatures,
+  pickNearestMatchingFeature,
+  serializeMatchingFeatures,
+} from "../../domain/geo/matchingAdapters";
+import {
   fetchMatchingFeaturesInArea,
   findNearestMatchingFeature,
   parseMatchingFeatures,
-  pickNearestMatchingFeature,
-  serializeMatchingFeatures,
   matchingNullAnswerMessage,
   matchingFeatureCountLabel,
 } from "./matchingFeatures";

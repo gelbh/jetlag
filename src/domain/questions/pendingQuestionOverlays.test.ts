@@ -6,7 +6,7 @@ import {
 } from "./pendingQuestionOverlays";
 import type { PendingQuestionRecord } from "../session/sessionChat";
 import { milesToMeters } from "../map/distance";
-import { serializeMatchingFeatures } from "../../services/geo/matchingFeatures";
+import { serializeMatchingFeatures } from "../../domain/geo/matchingAdapters";
 
 const gameArea: GameArea = {
   type: "Polygon",

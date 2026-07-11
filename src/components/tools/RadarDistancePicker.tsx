@@ -5,7 +5,7 @@ import {
   radarDistanceOptionLabel,
   radarQuestionPrompt,
   type RadarDistanceOptionKey,
-} from "../../domain/questions/radarQuestions";
+} from "../../domain/questions";
 import {
   distanceUnitLabel,
   formatDistance,
