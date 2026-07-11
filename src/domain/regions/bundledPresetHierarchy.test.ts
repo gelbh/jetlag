@@ -12,15 +12,18 @@ describe("bundledPresetHierarchy", () => {
   it("builds continent → country → county → local authority tree", () => {
     const tree = buildBundledPresetTree(BUNDLED_GAME_PRESET_DEFINITIONS);
 
-    expect(tree).toHaveLength(1);
-    expect(tree[0]).toMatchObject({
+    expect(tree.length).toBeGreaterThanOrEqual(2);
+    const europe = tree.find(
+      (node): node is Extract<(typeof tree)[number], { kind: "group" }> =>
+        node.kind === "group" && node.name === "Europe",
+    );
+    expect(europe).toMatchObject({
       kind: "group",
       name: "Europe",
       category: "Continent",
     });
 
-    const europe = tree[0] as Extract<(typeof tree)[number], { kind: "group" }>;
-    const ireland = europe.children.find(
+    const ireland = europe!.children.find(
       (node) => node.kind === "group" && node.name === "Ireland",
     );
     expect(ireland).toMatchObject({ category: "Country" });
@@ -46,11 +49,22 @@ describe("bundledPresetHierarchy", () => {
     ).toHaveLength(4);
   });
 
+  it("includes North America and Asia preset groups", () => {
+    const tree = buildBundledPresetTree(BUNDLED_GAME_PRESET_DEFINITIONS);
+    const names = tree
+      .filter((node): node is Extract<(typeof tree)[number], { kind: "group" }> => node.kind === "group")
+      .map((node) => node.name);
+    expect(names).toEqual(expect.arrayContaining(["North America", "Asia"]));
+  });
+
   it("starts with every group collapsed", () => {
     const tree = buildBundledPresetTree(BUNDLED_GAME_PRESET_DEFINITIONS);
-    const europe = tree[0] as Extract<(typeof tree)[number], { kind: "group" }>;
-    expect(europe.name).toBe("Europe");
-    expect(europe.children.length).toBeGreaterThan(0);
+    const europe = tree.find(
+      (node): node is Extract<(typeof tree)[number], { kind: "group" }> =>
+        node.kind === "group" && node.name === "Europe",
+    );
+    expect(europe?.name).toBe("Europe");
+    expect(europe?.children.length).toBeGreaterThan(0);
   });
 
   it("formats preset location breadcrumbs", () => {

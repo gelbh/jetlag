@@ -37,7 +37,11 @@ export interface GamePreset {
   customCategories?: readonly SessionCustomCategory[];
   customLocationPins?: readonly SessionCustomLocationPin[];
   regionPackId?: RegionPackId;
+  /** Preset-only subregion filter (e.g. borough, council). Not stored on session. */
+  subregionId?: string;
+  /** @deprecated Use subregionId. Migrated from stored presets. */
   councilFilter?: DublinCouncilFilter;
+  transitMetroId?: string;
   bundled?: boolean;
   migrationStatus?: GamePresetMigrationStatus;
 }
@@ -54,7 +58,10 @@ export interface CreateSessionDraft {
   customCategories?: readonly SessionCustomCategory[];
   customLocationPins?: readonly SessionCustomLocationPin[];
   regionPackId?: RegionPackId;
+  subregionId?: string;
+  /** @deprecated Use subregionId. */
   councilFilter?: DublinCouncilFilter;
+  transitMetroId?: string;
 }
 
 function isGameSize(value: unknown): value is GameSize {
@@ -183,10 +190,18 @@ export function migrateGamePreset(raw: unknown): GamePreset {
       typeof input.regionPackId === "string"
         ? (input.regionPackId as RegionPackId)
         : undefined,
+    subregionId:
+      typeof input.subregionId === "string"
+        ? input.subregionId
+        : typeof input.councilFilter === "string"
+          ? input.councilFilter
+          : undefined,
     councilFilter:
       typeof input.councilFilter === "string"
         ? (input.councilFilter as DublinCouncilFilter)
         : undefined,
+    transitMetroId:
+      typeof input.transitMetroId === "string" ? input.transitMetroId : undefined,
     bundled: input.bundled === true,
     migrationStatus: "ok",
   };
@@ -244,7 +259,9 @@ export function createSessionDraftToGamePreset(
     customCategories: draft.advancedSettings.customCategories,
     customLocationPins: draft.advancedSettings.customLocationPins,
     regionPackId: draft.regionPackId,
+    subregionId: draft.subregionId ?? draft.councilFilter,
     councilFilter: draft.councilFilter,
+    transitMetroId: draft.transitMetroId,
     bundled: draft.regionPackId !== undefined,
     migrationStatus: "ok",
   };
@@ -266,7 +283,9 @@ export function gamePresetToCreateSessionDraft(
     customCategories: migrated.customCategories,
     customLocationPins: migrated.customLocationPins,
     regionPackId: migrated.regionPackId,
+    subregionId: migrated.subregionId ?? migrated.councilFilter,
     councilFilter: migrated.councilFilter,
+    transitMetroId: migrated.transitMetroId,
   };
 }
 

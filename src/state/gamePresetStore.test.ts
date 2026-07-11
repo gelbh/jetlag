@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { useGamePresetStore } from "./gamePresetStore";
 import { defaultAdvancedSessionSettings } from "../domain/session/advancedSessionSettings";
-import { mergeBundledPresets } from "../domain/regions/bundledGamePresets";
+import { mergeBundledPresets, BUNDLED_GAME_PRESET_DEFINITIONS } from "../domain/regions/bundledGamePresets";
 import {
   createSessionDraftToGamePreset,
   gamePresetToCreateSessionDraft,
@@ -27,7 +27,9 @@ describe("gamePresetStore", () => {
     expect(useGamePresetStore.getState().getPreset(preset.id)?.name).toBe(
       "Regional metric",
     );
-    expect(useGamePresetStore.getState().presets).toHaveLength(6);
+    expect(useGamePresetStore.getState().presets).toHaveLength(
+      BUNDLED_GAME_PRESET_DEFINITIONS.length + 1,
+    );
   });
 
   it("deletes user presets but keeps bundled presets", () => {
@@ -43,7 +45,9 @@ describe("gamePresetStore", () => {
     useGamePresetStore.getState().savePreset(preset);
     useGamePresetStore.getState().deletePreset(preset.id);
 
-    expect(useGamePresetStore.getState().presets).toHaveLength(5);
+    expect(useGamePresetStore.getState().presets).toHaveLength(
+      BUNDLED_GAME_PRESET_DEFINITIONS.length,
+    );
     expect(
       useGamePresetStore.getState().presets.every((entry) => entry.bundled),
     ).toBe(true);

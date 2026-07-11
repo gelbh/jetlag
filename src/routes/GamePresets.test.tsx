@@ -4,7 +4,7 @@ import { GamePresetEditor, GamePresetList } from "./GamePresets";
 import { renderWithRouter } from "../test/renderWithRouter";
 import { useGamePresetStore } from "../state/gamePresetStore";
 import { defaultAdvancedSessionSettings } from "../domain/session/advancedSessionSettings";
-import { mergeBundledPresets } from "../domain/regions/bundledGamePresets";
+import { mergeBundledPresets, BUNDLED_GAME_PRESET_DEFINITIONS } from "../domain/regions/bundledGamePresets";
 
 const navigate = vi.fn();
 
@@ -155,7 +155,7 @@ describe("GamePresetList", () => {
     renderWithRouter(<GamePresetList />, { resetStores: false });
 
     fireEvent.change(screen.getByLabelText("Search presets"), {
-      target: { value: "Tokyo" },
+      target: { value: "Anchorage" },
     });
 
     expect(screen.getByText("No presets match your search.")).toBeInTheDocument();
@@ -209,7 +209,9 @@ describe("GamePresetEditor", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Save preset" }));
 
-    expect(useGamePresetStore.getState().presets).toHaveLength(6);
+    expect(useGamePresetStore.getState().presets).toHaveLength(
+      BUNDLED_GAME_PRESET_DEFINITIONS.length + 1,
+    );
     expect(
       useGamePresetStore
         .getState()

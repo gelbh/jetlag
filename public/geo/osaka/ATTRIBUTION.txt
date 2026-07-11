@@ -1,0 +1,2 @@
+Osaka ward boundaries: JapanCityGeoJson / MLIT National Land Numerical Information
+Local areas: quadrant splits of ward polygons for play

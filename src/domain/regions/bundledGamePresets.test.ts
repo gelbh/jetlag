@@ -8,15 +8,20 @@ import {
 } from "./bundledGamePresets";
 
 describe("bundledGamePresets", () => {
-  it("defines five Dublin presets", () => {
-    expect(BUNDLED_GAME_PRESET_DEFINITIONS).toHaveLength(5);
-    expect(BUNDLED_GAME_PRESET_DEFINITIONS.map((preset) => preset.id)).toEqual([
-      "bundled:dublin-county",
-      "bundled:dublin-city",
-      "bundled:dublin-fingal",
-      "bundled:dublin-south-dublin",
-      "bundled:dublin-dlr",
-    ]);
+  it("defines Dublin and Hide+Seek show metro presets", () => {
+    expect(BUNDLED_GAME_PRESET_DEFINITIONS.length).toBeGreaterThan(90);
+    expect(BUNDLED_GAME_PRESET_DEFINITIONS.map((preset) => preset.id)).toEqual(
+      expect.arrayContaining([
+        "bundled:dublin-county",
+        "bundled:nyc",
+        "bundled:nyc-manhattan",
+        "bundled:london",
+        "bundled:tokyo",
+        "bundled:osaka",
+        "bundled:zurich-city",
+        "bundled:lucerne-metro",
+      ]),
+    );
   });
 
   it("keeps bundled presets ahead of user presets", () => {
@@ -36,7 +41,16 @@ describe("bundledGamePresets", () => {
 
     expect(merged[0]?.bundled).toBe(true);
     expect(merged.at(-1)?.id).toBe("user-1");
-    expect(merged.filter((preset) => preset.bundled)).toHaveLength(5);
+    expect(merged.filter((preset) => preset.bundled).length).toBe(
+      BUNDLED_GAME_PRESET_DEFINITIONS.length,
+    );
+  });
+
+  it("applies preset tuning to bundled game presets", () => {
+    const nyc = buildBundledGamePresets().find((preset) => preset.id === "bundled:nyc");
+    expect(nyc?.distanceUnit).toBe("imperial");
+    expect(nyc?.transitMetroId).toBe("nyc");
+    expect(nyc?.advancedSettings.expansionPackEnabled).toBe(true);
   });
 });
 
@@ -57,5 +71,25 @@ describe("Dublin GeoJSON asset counts", () => {
 
     expect(councils.features).toHaveLength(4);
     expect(leas.features).toHaveLength(31);
+  });
+});
+
+describe("NYC GeoJSON asset counts", () => {
+  it("ships five boroughs and community districts", () => {
+    const boroughs = JSON.parse(
+      readFileSync(
+        resolve(import.meta.dirname, "../../../public/geo/nyc/boroughs.geojson"),
+        "utf8",
+      ),
+    );
+    const districts = JSON.parse(
+      readFileSync(
+        resolve(import.meta.dirname, "../../../public/geo/nyc/districts.geojson"),
+        "utf8",
+      ),
+    );
+
+    expect(boroughs.features).toHaveLength(5);
+    expect(districts.features.length).toBeGreaterThanOrEqual(59);
   });
 });

@@ -1,0 +1,2 @@
+NYC borough boundaries: NYC Open Data (CC0)
+NYC community districts: NYC Department of City Planning via ArcGIS

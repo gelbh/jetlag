@@ -7,10 +7,10 @@ import { unionGameAreas } from "../../domain/geometry/unionGameAreas";
 import type { CustomMatchingAreasByLevel } from "../../domain/session/sessionCustomContent";
 import type { MatchingAdminLevel } from "../../domain/session/sessionCustomContent";
 import {
-  DUBLIN_GEO_ASSETS,
-  DUBLIN_REGION_PACK_ID,
-} from "../../domain/regions/dublinRegionPack";
-import type { DublinCouncilFilter, RegionPackId } from "../../domain/regions/regionPack";
+  getRegionPackConfig,
+  isKnownRegionPack,
+} from "../../domain/regions/regionPackRegistry";
+import type { RegionPackId } from "../../domain/regions/regionPack";
 
 const regionPackGeoCache = new Map<string, string>();
 
@@ -42,75 +42,85 @@ function parseFeatureCollection(text: string): FeatureCollection {
   return parsed;
 }
 
-function councilIdFromFeature(
-  feature: Feature<Polygon | MultiPolygon>,
-): DublinCouncilFilter | null {
-  const councilId = feature.properties?.councilId;
-  if (
-    councilId === "dcc" ||
-    councilId === "fingal" ||
-    councilId === "sdcc" ||
-    councilId === "dlr"
-  ) {
-    return councilId;
-  }
-  return null;
+function polygonFeatures(
+  collection: FeatureCollection,
+): Feature<Polygon | MultiPolygon>[] {
+  return collection.features.filter(
+    (feature): feature is Feature<Polygon | MultiPolygon> =>
+      feature.geometry?.type === "Polygon" ||
+      feature.geometry?.type === "MultiPolygon",
+  );
 }
 
-function featureToCouncilGameArea(
+function subregionIdFromFeature(
+  feature: Feature<Polygon | MultiPolygon>,
+  propertyKey: string,
+): string | null {
+  const value = feature.properties?.[propertyKey];
+  return typeof value === "string" && value.length > 0 ? value : null;
+}
+
+function featureToRegionGameArea(
   feature: Feature<Polygon | MultiPolygon>,
 ): GameArea {
   if (
     feature.geometry.type !== "Polygon" &&
     feature.geometry.type !== "MultiPolygon"
   ) {
-    throw new Error("Council boundary must be a polygon.");
+    throw new Error("Region boundary must be a polygon.");
   }
 
   return featureToGameArea(feature);
 }
 
-function combineCouncilGameAreas(
+function combineRegionGameAreas(
   features: Feature<Polygon | MultiPolygon>[],
 ): GameArea {
   if (features.length === 0) {
-    throw new Error("No council boundaries found.");
+    throw new Error("No region boundaries found.");
   }
 
   if (features.length === 1) {
-    return featureToCouncilGameArea(features[0]!);
+    return featureToRegionGameArea(features[0]!);
   }
 
-  return unionGameAreas(features.map((feature) => featureToCouncilGameArea(feature)));
+  return unionGameAreas(
+    features.map((feature) => featureToRegionGameArea(feature)),
+  );
 }
 
 export async function loadRegionPackPlayArea(
   packId: RegionPackId,
-  councilFilter?: DublinCouncilFilter,
+  subregionId?: string,
 ): Promise<GameArea> {
-  if (packId !== DUBLIN_REGION_PACK_ID) {
+  const config = getRegionPackConfig(packId);
+  if (!config) {
     throw new Error(`Unknown region pack: ${packId}`);
   }
 
-  const councilsJson = await fetchGeoJsonText(DUBLIN_GEO_ASSETS.councils);
-  const collection = parseFeatureCollection(councilsJson);
-  const councilFeatures = collection.features.filter(
-    (feature): feature is Feature<Polygon | MultiPolygon> =>
-      feature.geometry?.type === "Polygon" ||
-      feature.geometry?.type === "MultiPolygon",
-  );
-
-  if (councilFilter) {
-    const council = councilFeatures.find(
-      (feature) => councilIdFromFeature(feature) === councilFilter,
-    );
-    if (!council) {
-      throw new Error(`Couldn't find council boundary for ${councilFilter}.`);
-    }
-    return featureToCouncilGameArea(council);
+  if (!subregionId && config.playAreaLevel === "secondary") {
+    const secondaryJson = await fetchGeoJsonText(config.geoAssets.secondary);
+    const collection = parseFeatureCollection(secondaryJson);
+    return combineRegionGameAreas(polygonFeatures(collection));
   }
 
-  return combineCouncilGameAreas(councilFeatures);
+  const primaryJson = await fetchGeoJsonText(config.geoAssets.primary);
+  const collection = parseFeatureCollection(primaryJson);
+  const primaryFeatures = polygonFeatures(collection);
+
+  if (subregionId) {
+    const subregion = primaryFeatures.find(
+      (feature) =>
+        subregionIdFromFeature(feature, config.subregionPropertyKey) ===
+        subregionId,
+    );
+    if (!subregion) {
+      throw new Error(`Couldn't find region boundary for ${subregionId}.`);
+    }
+    return featureToRegionGameArea(subregion);
+  }
+
+  return combineRegionGameAreas(primaryFeatures);
 }
 
 export interface RegionPackSessionBoundaries {
@@ -121,30 +131,35 @@ export interface RegionPackSessionBoundaries {
 
 export async function loadRegionPackSessionBoundaries(
   packId: RegionPackId,
-  councilFilter?: DublinCouncilFilter,
+  subregionId?: string,
 ): Promise<RegionPackSessionBoundaries> {
-  const councilsJson = await fetchGeoJsonText(DUBLIN_GEO_ASSETS.councils);
-  const leasPath = councilFilter
-    ? DUBLIN_GEO_ASSETS.leasByCouncil(councilFilter)
-    : DUBLIN_GEO_ASSETS.leas;
-  const leasJson = await fetchGeoJsonText(leasPath);
-  const playArea = await loadRegionPackPlayArea(packId, councilFilter);
+  const config = getRegionPackConfig(packId);
+  if (!config) {
+    throw new Error(`Unknown region pack: ${packId}`);
+  }
+
+  const primaryJson = await fetchGeoJsonText(config.geoAssets.primary);
+  const secondaryPath = subregionId && config.geoAssets.secondaryBySubregion
+    ? config.geoAssets.secondaryBySubregion(subregionId)
+    : config.geoAssets.secondary;
+  const secondaryJson = await fetchGeoJsonText(secondaryPath);
+  const playArea = await loadRegionPackPlayArea(packId, subregionId);
 
   return {
     playArea,
     focusBounds: gameAreaToBoundingBox(playArea),
     customMatchingAreas: {
-      8: councilsJson,
-      9: leasJson,
+      8: primaryJson,
+      9: secondaryJson,
     },
   };
 }
 
 export async function loadRegionPackMatchingAreas(
   packId: RegionPackId,
-  councilFilter?: DublinCouncilFilter,
+  subregionId?: string,
 ): Promise<CustomMatchingAreasByLevel> {
-  const boundaries = await loadRegionPackSessionBoundaries(packId, councilFilter);
+  const boundaries = await loadRegionPackSessionBoundaries(packId, subregionId);
   return boundaries.customMatchingAreas;
 }
 
@@ -155,4 +170,10 @@ export function adminLevelForRegionPackAsset(
     return level;
   }
   return null;
+}
+
+export function regionPackHasBundledBoundaries(
+  regionPackId: RegionPackId | undefined,
+): boolean {
+  return isKnownRegionPack(regionPackId);
 }

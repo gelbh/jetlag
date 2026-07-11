@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.2.4";
+export const APP_VERSION = "0.3.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,20 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.3.0",
+    date: "2026-07-11",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Recommended games: Hide + Seek show metros for NYC, London, Tokyo, Osaka, Zürich, and Lucerne",
+          "Bundled presets: borough and ward play areas with local admin matching for each metro",
+          "Create session: recommended presets set game size, distance unit, expansion pack, and transit metro where supported",
+        ],
+      }
+    ],
+  },
   {
     version: "0.2.4",
     date: "2026-07-11",

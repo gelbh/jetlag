@@ -1,7 +1,7 @@
 {
   "name": "jetlag",
   "private": true,
-  "version": "0.2.4",
+  "version": "0.3.0",
   "type": "module",
   "engines": {
     "node": ">=24.0.0"
@@ -32,6 +32,7 @@
     "version": "changeset version && node scripts/sync-changelog-ts.mjs",
     "release:sync": "node scripts/sync-changelog-ts.mjs && node scripts/release-check.mjs",
     "release:check": "node scripts/release-check.mjs",
+    "geo:build": "node scripts/build-region-pack-geo.mjs",
     "cap:sync": "npm run build && npx cap sync",
     "cap:android": "npm run cap:sync && npx cap open android",
     "cap:ios": "npm run cap:sync && npx cap open ios",

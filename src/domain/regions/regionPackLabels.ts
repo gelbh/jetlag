@@ -2,10 +2,9 @@ import type { MatchingCategoryDefinition } from "../questions/matchingQuestions"
 import type { MeasuringCatalogOption } from "../questions/measuringQuestions";
 import type { SessionRulesInput } from "../session/sessionRules";
 import {
-  DUBLIN_MATCHING_LABEL_OVERRIDES,
-  DUBLIN_MEASURING_LABEL_OVERRIDES,
-  isDublinRegionPack,
-} from "./dublinRegionPack";
+  getRegionPackConfig,
+  isKnownRegionPack,
+} from "./regionPackRegistry";
 import type { RegionPackId } from "./regionPack";
 
 export function sessionRegionPackId(
@@ -18,11 +17,12 @@ export function applyRegionPackMatchingLabels(
   category: MatchingCategoryDefinition,
   regionPackId: RegionPackId | undefined,
 ): MatchingCategoryDefinition {
-  if (!isDublinRegionPack(regionPackId)) {
+  if (!isKnownRegionPack(regionPackId)) {
     return category;
   }
 
-  const override = DUBLIN_MATCHING_LABEL_OVERRIDES[category.id];
+  const override =
+    getRegionPackConfig(regionPackId)?.matchingLabelOverrides[category.id];
   if (!override) {
     return category;
   }
@@ -49,11 +49,12 @@ export function applyRegionPackMeasuringLabels(
   option: MeasuringCatalogOption,
   regionPackId: RegionPackId | undefined,
 ): MeasuringCatalogOption {
-  if (!isDublinRegionPack(regionPackId)) {
+  if (!isKnownRegionPack(regionPackId)) {
     return option;
   }
 
-  const override = DUBLIN_MEASURING_LABEL_OVERRIDES[option.id];
+  const override =
+    getRegionPackConfig(regionPackId)?.measuringLabelOverrides[option.id];
   if (!override) {
     return option;
   }

@@ -10,36 +10,43 @@ import { gameAreaSquareMiles } from "../../domain/session/gameSize";
 const ROOT = resolve(import.meta.dirname, "../../..");
 
 function stubFetchForDublinAssets() {
-  const councils = readFileSync(
-    resolve(ROOT, "public/geo/dublin/councils.geojson"),
-    "utf8",
-  );
-  const leas = readFileSync(
-    resolve(ROOT, "public/geo/dublin/leas.geojson"),
-    "utf8",
-  );
-  const leasByCouncil = {
-    dcc: readFileSync(resolve(ROOT, "public/geo/dublin/leas/dcc.geojson"), "utf8"),
-    fingal: readFileSync(
-      resolve(ROOT, "public/geo/dublin/leas/fingal.geojson"),
-      "utf8",
-    ),
-    sdcc: readFileSync(resolve(ROOT, "public/geo/dublin/leas/sdcc.geojson"), "utf8"),
-    dlr: readFileSync(resolve(ROOT, "public/geo/dublin/leas/dlr.geojson"), "utf8"),
+  const read = (relativePath: string) =>
+    readFileSync(resolve(ROOT, "public/geo/dublin", relativePath), "utf8");
+
+  const paths: Record<string, string> = {
+    "/geo/dublin/councils.geojson": read("councils.geojson"),
+    "/geo/dublin/leas.geojson": read("leas.geojson"),
+    "/geo/dublin/leas/dcc.geojson": read("leas/dcc.geojson"),
+    "/geo/dublin/leas/fingal.geojson": read("leas/fingal.geojson"),
+    "/geo/dublin/leas/sdcc.geojson": read("leas/sdcc.geojson"),
+    "/geo/dublin/leas/dlr.geojson": read("leas/dlr.geojson"),
   };
 
   return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
     const url = String(input);
-    if (url.endsWith("/geo/dublin/councils.geojson")) {
-      return new Response(councils, { status: 200 });
+    const suffix = Object.keys(paths).find((path) => url.endsWith(path));
+    if (suffix) {
+      return new Response(paths[suffix], { status: 200 });
     }
-    if (url.endsWith("/geo/dublin/leas.geojson")) {
-      return new Response(leas, { status: 200 });
-    }
-    for (const [councilId, json] of Object.entries(leasByCouncil)) {
-      if (url.endsWith(`/geo/dublin/leas/${councilId}.geojson`)) {
-        return new Response(json, { status: 200 });
-      }
+    return new Response("missing", { status: 404 });
+  });
+}
+
+function stubFetchForNycAssets() {
+  const read = (relativePath: string) =>
+    readFileSync(resolve(ROOT, "public/geo/nyc", relativePath), "utf8");
+
+  const paths: Record<string, string> = {
+    "/geo/nyc/boroughs.geojson": read("boroughs.geojson"),
+    "/geo/nyc/districts.geojson": read("districts.geojson"),
+    "/geo/nyc/districts/manhattan.geojson": read("districts/manhattan.geojson"),
+  };
+
+  return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    const url = String(input);
+    const suffix = Object.keys(paths).find((path) => url.endsWith(path));
+    if (suffix) {
+      return new Response(paths[suffix], { status: 200 });
     }
     return new Response("missing", { status: 404 });
   });
@@ -69,7 +76,7 @@ function isAxisAlignedRectangle(gameArea: {
 }
 
 describe("loadRegionPackPlayArea", () => {
-  it("returns exact council polygons instead of bounding boxes", async () => {
+  it("returns exact Dublin council polygons instead of bounding boxes", async () => {
     clearRegionPackGeoCacheForTests();
     const fetchMock = stubFetchForDublinAssets();
 
@@ -81,6 +88,20 @@ describe("loadRegionPackPlayArea", () => {
     expect(ringPointCount(dcc)).toBeGreaterThan(20);
     expect(ringPointCount(county)).toBeGreaterThan(20);
     expect(gameAreaSquareMiles(county)).toBeGreaterThan(200);
+
+    fetchMock.mockRestore();
+  });
+
+  it("returns exact NYC borough polygons instead of bounding boxes", async () => {
+    clearRegionPackGeoCacheForTests();
+    const fetchMock = stubFetchForNycAssets();
+
+    const manhattan = await loadRegionPackPlayArea("nyc", "manhattan");
+    const city = await loadRegionPackPlayArea("nyc");
+
+    expect(isAxisAlignedRectangle(manhattan)).toBe(false);
+    expect(ringPointCount(manhattan)).toBeGreaterThan(10);
+    expect(gameAreaSquareMiles(city)).toBeGreaterThan(100);
 
     fetchMock.mockRestore();
   });

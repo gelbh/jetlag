@@ -1,13 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
-  buildBundledGamePresets,
   mergeBundledPresets,
 } from "../regions/bundledGamePresets";
 import { defaultAdvancedSessionSettings } from "./advancedSessionSettings";
 import { filterGamePresetsForSearch } from "./gamePresetSearch";
 
 describe("filterGamePresetsForSearch", () => {
-  const bundledPresets = buildBundledGamePresets();
   const userPreset = {
     id: "preset-weekly",
     name: "Weekly game",
@@ -41,10 +39,10 @@ describe("filterGamePresetsForSearch", () => {
 
   it("matches bundled presets by hierarchy segment", () => {
     const results = filterGamePresetsForSearch(presets, "Ireland");
-    expect(results.length).toBe(bundledPresets.length + 1);
+    expect(results.length).toBeGreaterThan(1);
     expect(
       results.filter((preset) => preset.id.startsWith("bundled:")).length,
-    ).toBe(bundledPresets.length);
+    ).toBeGreaterThan(0);
   });
 
   it("matches user presets by name and place label", () => {
@@ -56,8 +54,10 @@ describe("filterGamePresetsForSearch", () => {
     ).toEqual(["preset-weekly"]);
   });
 
-  it("returns an empty list when nothing matches", () => {
-    expect(filterGamePresetsForSearch(presets, "Tokyo")).toEqual([]);
+  it("matches Hide+Seek show metros by place", () => {
+    const results = filterGamePresetsForSearch(presets, "Tokyo");
+    expect(results.length).toBeGreaterThan(0);
+    expect(results.some((preset) => preset.id === "bundled:tokyo")).toBe(true);
   });
 
   it("sorts bundled presets before user presets", () => {

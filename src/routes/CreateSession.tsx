@@ -25,7 +25,11 @@ import {
 } from "../domain/geometry/geometry";
 import { generateLocalCode } from "../domain/session/session";
 import type { DistanceUnit } from "../domain/map/distance";
-import { hidingZoneRadiusMeters, type GameSize } from "../domain/session/gameSize";
+import {
+  hidingZoneRadiusMeters,
+  recommendGameSize,
+  type GameSize,
+} from "../domain/session/gameSize";
 import type { PlayerRole } from "../domain/session/playerRole";
 import { RolePicker } from "../components/session/RolePicker";
 import { GameSizePicker } from "../components/session/GameSizePicker";
@@ -155,6 +159,9 @@ export function CreateSession() {
   const importFileInputRef = useRef<HTMLInputElement>(null);
   const userLocationRef = useRef<LatLngTuple | null>(null);
   const appliedPresetRef = useRef<string | null>(null);
+  const [transitMetroOverride, setTransitMetroOverride] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     const presetId = searchParams.get("preset");
@@ -177,13 +184,15 @@ export function CreateSession() {
       let customMatchingAreas =
         draft.customMatchingAreas ?? draft.advancedSettings.customMatchingAreas;
       let gameArea = draft.gameArea ?? null;
+      const subregionId = draft.subregionId ?? draft.councilFilter;
+      const unit = draft.distanceUnit;
 
       if (draft.regionPackId) {
         setRegionPackId(draft.regionPackId);
         try {
           const boundaries = await loadRegionPackSessionBoundaries(
             draft.regionPackId,
-            draft.councilFilter,
+            subregionId,
           );
           customMatchingAreas = boundaries.customMatchingAreas;
           gameArea = boundaries.playArea;
@@ -191,23 +200,33 @@ export function CreateSession() {
           setError(
             loadError instanceof Error
               ? loadError.message
-              : "Couldn't load Dublin boundary data.",
+              : "Couldn't load region boundary data.",
           );
         }
       } else {
         setRegionPackId(undefined);
       }
 
-      setGameSize(draft.gameSize);
-      setDistanceUnit(draft.distanceUnit);
-      setAdvancedSettings({
+      const resolvedGameSize = gameArea
+        ? recommendGameSize(gameArea, unit)
+        : draft.gameSize;
+      const resolvedAdvanced = {
+        ...defaultAdvancedSessionSettings(resolvedGameSize, unit),
         ...draft.advancedSettings,
         customMatchingAreas,
         customCategories:
           draft.customCategories ?? draft.advancedSettings.customCategories,
         customLocationPins:
           draft.customLocationPins ?? draft.advancedSettings.customLocationPins,
-      });
+        hidingZoneRadiusMeters: hidingZoneRadiusMeters(resolvedGameSize, unit),
+      };
+
+      setGameSize(resolvedGameSize);
+      setDistanceUnit(unit);
+      setAdvancedSettings(resolvedAdvanced);
+      if (draft.transitMetroId) {
+        setTransitMetroOverride(draft.transitMetroId);
+      }
       if (draft.sessionTier) {
         setSessionTier(draft.sessionTier);
       }
@@ -274,9 +293,6 @@ export function CreateSession() {
 
     return inferTransitMetroId(gameArea) ?? "";
   }, [framing.manualGameArea, framing.userFramed, importedGameArea, selectedPlace]);
-  const [transitMetroOverride, setTransitMetroOverride] = useState<
-    string | null
-  >(null);
   const [transitMetroInferenceSeed, setTransitMetroInferenceSeed] = useState(
     inferredTransitMetroId,
   );

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 - 2026-07-11
+
+### Improvements
+
+- Recommended games: Hide + Seek show metros for NYC, London, Tokyo, Osaka, Zürich, and Lucerne
+- Bundled presets: borough and ward play areas with local admin matching for each metro
+- Create session: recommended presets set game size, distance unit, expansion pack, and transit metro where supported
+
 ## 0.2.4 - 2026-07-11
 
 ### Fixes

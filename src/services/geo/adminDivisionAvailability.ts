@@ -3,7 +3,8 @@ import type { CustomMatchingAreasByLevel, MatchingAdminLevel } from "../../domai
 import { adminLevelForMatchingCategory } from "../../domain/questions/matchingQuestions";
 import type { MatchingCategoryId } from "../../domain/questions/matchingQuestions";
 import type { MeasuringFromKind } from "../../domain/questions/measuringQuestions";
-import { isDublinRegionPack } from "../../domain/regions/dublinRegionPack";
+import { getRegionPackConfig } from "../../domain/regions/regionPackRegistry";
+import { regionPackHasBundledBoundaries } from "./regionPackBoundaries";
 import type { RegionPackId } from "../../domain/regions/regionPack";
 import { fetchAdminDivisionFeaturesInArea } from "./adminDivisionBoundaries";
 
@@ -29,17 +30,6 @@ const ADMIN_DIVISION_CATEGORIES: readonly AdminDivisionMatchingCategory[] = [
   "admin_division_4",
 ];
 
-const REGION_PACK_UNSUPPORTED_MATCHING: Partial<
-  Record<RegionPackId, ReadonlySet<AdminDivisionMatchingCategory>>
-> = {
-  dublin: new Set(["admin_division_1", "admin_division_2"]),
-};
-
-const REGION_PACK_UNSUPPORTED_BORDERS: Partial<
-  Record<RegionPackId, ReadonlySet<MeasuringFromKind>>
-> = {
-  dublin: new Set(["admin1_border", "admin2_border"]),
-};
 
 export function emptyAdminDivisionCounts(): AdminDivisionCounts {
   return {
@@ -111,7 +101,7 @@ export function adminBoundaryLevelsForSession(
   customMatchingAreas: CustomMatchingAreasByLevel | undefined,
   adminDivisionCounts: AdminDivisionCounts | null | undefined,
 ): readonly number[] {
-  if (isDublinRegionPack(regionPackId)) {
+  if (regionPackHasBundledBoundaries(regionPackId)) {
     return ADMIN_DIVISION_PROBE_LEVELS.filter((level) =>
       Boolean(customMatchingAreas?.[level as MatchingAdminLevel]),
     );
@@ -143,7 +133,7 @@ function isRegionPackMatchingCategorySupported(
     return true;
   }
 
-  const blocked = REGION_PACK_UNSUPPORTED_MATCHING[regionPackId];
+  const blocked = getRegionPackConfig(regionPackId)?.unsupportedMatching;
   return !blocked?.has(categoryId);
 }
 
@@ -155,7 +145,7 @@ function isRegionPackMeasuringBorderSupported(
     return true;
   }
 
-  const blocked = REGION_PACK_UNSUPPORTED_BORDERS[regionPackId];
+  const blocked = getRegionPackConfig(regionPackId)?.unsupportedBorders;
   return !blocked?.has(kind);
 }
 
@@ -277,8 +267,8 @@ export function matchingCategoryAdminLevel(
   return adminLevelForMatchingCategory(categoryId);
 }
 
-export function isDublinAdminRegionPack(
+export function isBundledAdminRegionPack(
   regionPackId: RegionPackId | undefined,
 ): boolean {
-  return isDublinRegionPack(regionPackId);
+  return regionPackHasBundledBoundaries(regionPackId);
 }
