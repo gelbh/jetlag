@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { FieldValue } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import {
   createBillingPortalSessionHandler,
@@ -40,7 +41,15 @@ function createMockDb(initialData = {}) {
             set(data, options) {
               writes.push({ path, data });
               if (options?.merge && documents[path]) {
-                documents[path] = { ...documents[path], ...data };
+                const merged = { ...documents[path] };
+                for (const [key, value] of Object.entries(data)) {
+                  if (value === FieldValue.delete()) {
+                    delete merged[key];
+                  } else {
+                    merged[key] = value;
+                  }
+                }
+                documents[path] = merged;
               } else {
                 documents[path] = data;
               }
@@ -92,7 +101,7 @@ describe("stripeBilling", () => {
         type: "StripeInvalidRequestError",
         code: "resource_missing",
       }),
-      true,
+      false,
     );
     assert.equal(isStaleStripeCustomerError(new Error("network down")), false);
   });
@@ -131,7 +140,10 @@ describe("stripeBilling", () => {
 
   it("replaces a stale Stripe customer and updates Firestore", async () => {
     const db = createMockDb({
-      "users/host-1": { stripeCustomerId: "cus_test_stale" },
+      "users/host-1": {
+        stripeCustomerId: "cus_test_stale",
+        subscription: { status: "active", plan: "monthly" },
+      },
     });
     const stripe = createMockStripe({
       retrieve: async () => {
@@ -149,6 +161,7 @@ describe("stripeBilling", () => {
 
     assert.equal(customerId, "cus_live_replacement");
     assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_live_replacement");
+    assert.equal(db.documents["users/host-1"]?.subscription, undefined);
   });
 
   it("starts checkout after replacing a stale customer", async () => {

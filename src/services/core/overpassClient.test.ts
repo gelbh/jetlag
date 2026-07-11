@@ -233,7 +233,7 @@ describe("overpassClient", () => {
   it("waits for Firebase auth before falling back to public Overpass", async () => {
     vi.stubEnv("VITE_OVERPASS_PROXY_URL", "https://proxy.example/overpass");
     const waitForAuth = vi
-      .spyOn(firebaseAuthReady, "waitForFirebaseAuth")
+      .spyOn(firebaseAuthReady, "waitForRestoredFirebaseAuth")
       .mockResolvedValue(true);
 
     let authAttempts = 0;
@@ -309,7 +309,7 @@ describe("overpassClient", () => {
   it("uses public Overpass when premium proxy auth is not ready", async () => {
     vi.stubEnv("VITE_OVERPASS_PROXY_URL", "https://proxy.example/overpass");
     setPremiumApiContext(premiumSession());
-    vi.spyOn(firebaseAuthReady, "waitForFirebaseAuth").mockResolvedValue(false);
+    vi.spyOn(firebaseAuthReady, "waitForRestoredFirebaseAuth").mockResolvedValue(false);
     vi.spyOn(accessControl, "buildPremiumProxyHeaders").mockResolvedValue({
       "X-Session-Id": "session-premium",
     });

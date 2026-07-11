@@ -16,6 +16,10 @@ import JSZip from "jszip";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = resolve(ROOT, "public/geo/gtfs");
 
+function stripUtf8Bom(text) {
+  return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+}
+
 const METROS = [
   {
     id: "london",
@@ -305,10 +309,18 @@ function buildStopRouteIdsFromText(stopTimesText, stopIds, tripRoute) {
 function buildBundleFromGtfsZip(zipBuffer, metro) {
   const zip = new JSZip();
   return zip.loadAsync(zipBuffer).then(async (archive) => {
-    const stopsText = await archive.file("stops.txt")?.async("string");
-    const routesText = await archive.file("routes.txt")?.async("string");
-    const tripsText = await archive.file("trips.txt")?.async("string");
-    const stopTimesText = await archive.file("stop_times.txt")?.async("string");
+    const stopsText = stripUtf8Bom(
+      (await archive.file("stops.txt")?.async("string")) ?? "",
+    );
+    const routesText = stripUtf8Bom(
+      (await archive.file("routes.txt")?.async("string")) ?? "",
+    );
+    const tripsText = stripUtf8Bom(
+      (await archive.file("trips.txt")?.async("string")) ?? "",
+    );
+    const stopTimesText = stripUtf8Bom(
+      (await archive.file("stop_times.txt")?.async("string")) ?? "",
+    );
 
     if (!stopsText || !routesText || !tripsText || !stopTimesText) {
       throw new Error(`GTFS zip for ${metro.id} is missing required tables.`);

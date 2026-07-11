@@ -220,8 +220,17 @@ export const overpass = onRequest(
         }
 
         const query = queryResult.value;
-        const text = await fetchCachedOverpassQuery(query, authResult.tier);
-        res.status(200).type("application/json").send(text);
+        try {
+          const text = await fetchCachedOverpassQuery(query, authResult.tier);
+          res.status(200).type("application/json").send(text);
+        } catch (error) {
+          if (error instanceof Error && error.message === "Overpass timed out.") {
+            res.status(504).json({ error: "Overpass timed out." });
+            return;
+          }
+
+          throw error;
+        }
       },
     }),
   ),

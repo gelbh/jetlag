@@ -48,4 +48,15 @@ describe("waitForFirebaseAuth", () => {
 
     expect(ensureAnonymousUser).not.toHaveBeenCalled();
   });
+
+  it("does not create anonymous users when auth restore times out", async () => {
+    waitForAuthStateReady.mockImplementation(
+      () => new Promise(() => undefined),
+    );
+    getFirebaseAuth.mockReturnValue({ currentUser: null });
+
+    await expect(waitForFirebaseAuth(20)).resolves.toBe(false);
+
+    expect(ensureAnonymousUser).not.toHaveBeenCalled();
+  });
 });

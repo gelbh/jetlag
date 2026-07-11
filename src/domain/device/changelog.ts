@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.4.5";
+export const APP_VERSION = "0.4.6";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,34 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.4.6",
+    date: "2026-07-12",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Session join: block version-gate bypass when returning member UID is not locally persisted; members-only session reads",
+          "Auth: premium and proxy paths wait for restored sign-in; game paths no longer mint anonymous users after auth timeout",
+          "Stripe billing: clear subscription fields when replacing a stale test-mode customer after live cutover",
+          "Session heal: one membership heal path removes ghost UIDs when auth drifts on resume",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Prince Rupert: ship real BC Transit GTFS bundle (109 stops, 8 routes)",
+          "Map, create session, and measuring tool: split large route and hook files for maintainability",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "GTFS builds: strip UTF-8 BOM from BC Transit CSV exports before parsing",
+        ],
+      }
+    ],
+  },
   {
     version: "0.4.5",
     date: "2026-07-11",

@@ -1,5 +1,7 @@
 import { FirebaseError } from "firebase/app";
 import {
+  arrayRemove,
+  arrayUnion,
   collection,
   deleteField,
   doc,
@@ -10,7 +12,9 @@ import {
   setDoc,
   updateDoc,
   writeBatch,
+  type DocumentData,
   type DocumentReference,
+  type DocumentSnapshot,
   type Unsubscribe,
 } from "firebase/firestore";
 import type {
@@ -41,6 +45,10 @@ import {
 } from "./firestoreSerialization";
 import { photoUploadAccessError } from "../../domain/questions";
 import { generateSessionCode } from "../session/sessionCodes";
+import {
+  buildMemberUidsAfterHeal,
+  sanitizeReturningMemberUid,
+} from "../../domain/session/returningMember";
 
 const HIDER_ROLE_POLL_MS = 250;
 const HIDER_ROLE_POLL_MAX_MS = 3000;
@@ -91,11 +99,82 @@ async function writeSessionMembershipPatch(
 
 export type EnsureRemoteSessionMembershipOptions = {
   returningMemberUid?: string | null;
+  persistedMyUid?: string | null;
 };
 
 type JoinRemoteSessionOptions = {
   returningMemberUid?: string;
+  persistedMyUid?: string | null;
 };
+
+type SessionCodeRecord = {
+  sessionId: string;
+  hostUid: string;
+  hostAppVersion?: string;
+  tier?: SessionTier;
+  status?: "active" | "ended";
+  createdAt?: string;
+};
+
+function sanitizeJoinReturningMemberUid(
+  options: JoinRemoteSessionOptions,
+): string | undefined {
+  return sanitizeReturningMemberUid(
+    options.persistedMyUid,
+    options.returningMemberUid,
+  );
+}
+
+const JOIN_PREVIEW_PLACEHOLDER_AREA: GameArea = {
+  type: "Polygon",
+  coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+};
+
+function buildJoinPreviewSession(
+  sessionId: string,
+  code: string,
+  codeRecord: SessionCodeRecord,
+): SessionRecord {
+  return {
+    id: sessionId,
+    code,
+    gameArea: JOIN_PREVIEW_PLACEHOLDER_AREA,
+    hostUid: codeRecord.hostUid,
+    createdAt: codeRecord.createdAt ?? new Date().toISOString(),
+    memberUids: [],
+    memberRoles: {},
+    gameSize: "medium",
+    distanceUnit: "imperial",
+    hidingZoneRadiusMeters: 402,
+    tier: codeRecord.tier ?? "free",
+    hostAppVersion: codeRecord.hostAppVersion,
+    status: codeRecord.status ?? "active",
+  };
+}
+
+async function readSessionCodeRecord(
+  code: string,
+): Promise<SessionCodeRecord | null> {
+  const codeDoc = await getDoc(sessionCodeDoc(code));
+  if (!codeDoc.exists()) {
+    return null;
+  }
+
+  const data = codeDoc.data();
+  if (typeof data.sessionId !== "string" || typeof data.hostUid !== "string") {
+    return null;
+  }
+
+  return {
+    sessionId: data.sessionId,
+    hostUid: data.hostUid,
+    hostAppVersion:
+      typeof data.hostAppVersion === "string" ? data.hostAppVersion : undefined,
+    tier: data.tier === "premium" ? "premium" : "free",
+    status: data.status === "ended" ? "ended" : "active",
+    createdAt: typeof data.createdAt === "string" ? data.createdAt : undefined,
+  };
+}
 
 function mapJoinFailureToError(
   result:
@@ -123,9 +202,24 @@ export async function ensureRemoteSessionMembership(
   role: PlayerRole,
   options?: EnsureRemoteSessionMembershipOptions,
 ): Promise<SessionRecord> {
-  const serverSession = await getRemoteSessionByIdFromServer(session.id);
+  let serverSession: SessionRecord | null = null;
+  try {
+    serverSession = await getRemoteSessionByIdFromServer(session.id);
+  } catch (error) {
+    if (!isFirestorePermissionDenied(error)) {
+      throw error;
+    }
+  }
+
   if (!serverSession) {
-    throw new Error("That session no longer exists.");
+    const lookup = await lookupRemoteSessionByCode(session.code);
+    if (lookup.status === "missing") {
+      throw new Error("That session no longer exists.");
+    }
+    if (lookup.status === "ended") {
+      throw new Error("That session has ended. Join or create a new one.");
+    }
+    serverSession = lookup.session;
   }
 
   if (serverSession.endedAt) {
@@ -138,6 +232,7 @@ export async function ensureRemoteSessionMembership(
 
   const result = await joinRemoteSessionByCode(serverSession.code, uid, role, APP_VERSION, {
     returningMemberUid: options?.returningMemberUid ?? undefined,
+    persistedMyUid: options?.persistedMyUid ?? options?.returningMemberUid ?? undefined,
   });
 
   if (result.status === "joined") {
@@ -237,6 +332,9 @@ export async function createRemoteSession(
   await setDoc(sessionCodeDoc(code), {
     sessionId: sessionRef.id,
     hostUid,
+    hostAppVersion,
+    tier,
+    status: "active",
     createdAt,
   });
 
@@ -250,65 +348,54 @@ export async function lookupRemoteSessionByCode(
   | { status: "ended" }
   | { status: "found"; session: SessionRecord }
 > {
-  const codeDoc = await getDoc(sessionCodeDoc(code));
-  if (!codeDoc.exists()) {
+  const codeRecord = await readSessionCodeRecord(code);
+  if (!codeRecord) {
     return { status: "missing" };
   }
 
-  const sessionId = codeDoc.data().sessionId;
-  if (typeof sessionId !== "string") {
-    return { status: "missing" };
-  }
-
-  const sessionDoc = await getDoc(doc(sessionsCollection(), sessionId));
-  if (!sessionDoc.exists()) {
-    return { status: "missing" };
-  }
-
-  const data = sessionDoc.data() as Record<string, unknown>;
-
-  if (typeof data.endedAt === "string") {
+  if (codeRecord.status === "ended") {
     return { status: "ended" };
+  }
+
+  try {
+    const sessionDoc = await getDoc(doc(sessionsCollection(), codeRecord.sessionId));
+    if (!sessionDoc.exists()) {
+      return { status: "missing" };
+    }
+
+    const data = sessionDoc.data() as Record<string, unknown>;
+
+    if (typeof data.endedAt === "string") {
+      return { status: "ended" };
+    }
+
+    return {
+      status: "found",
+      session: deserializeSessionFromFirestore(sessionDoc.id, data),
+    };
+  } catch (error) {
+    if (!isFirestorePermissionDenied(error)) {
+      throw error;
+    }
   }
 
   return {
     status: "found",
-    session: deserializeSessionFromFirestore(sessionDoc.id, data),
+    session: buildJoinPreviewSession(codeRecord.sessionId, code, codeRecord),
   };
 }
 
-export async function joinRemoteSessionByCode(
-  code: string,
+async function joinRemoteSessionWithRead(
+  sessionDoc: DocumentSnapshot<DocumentData>,
   uid: string,
-  role: PlayerRole = "seeker",
-  clientVersion: string = APP_VERSION,
-  options: JoinRemoteSessionOptions = {},
+  role: PlayerRole,
+  clientVersion: string,
+  returningMemberUid?: string,
 ): Promise<
-  | { status: "missing" }
-  | { status: "ended" }
   | { status: "incompatible"; hostVersion: string }
   | { status: "joined"; session: SessionRecord }
 > {
-  const codeDoc = await getDoc(sessionCodeDoc(code));
-  if (!codeDoc.exists()) {
-    return { status: "missing" };
-  }
-
-  const sessionId = codeDoc.data().sessionId;
-  if (typeof sessionId !== "string") {
-    return { status: "missing" };
-  }
-
-  const sessionDoc = await getDoc(doc(sessionsCollection(), sessionId));
-  if (!sessionDoc.exists()) {
-    return { status: "missing" };
-  }
-
   const data = sessionDoc.data() as Record<string, unknown>;
-  if (typeof data.endedAt === "string") {
-    return { status: "ended" };
-  }
-
   const existingRoles =
     data.memberRoles && typeof data.memberRoles === "object"
       ? (data.memberRoles as Record<string, PlayerRole>)
@@ -318,7 +405,6 @@ export async function joinRemoteSessionByCode(
     : [];
 
   const sessionForVersionCheck = deserializeSessionFromFirestore(sessionDoc.id, data);
-  const returningMemberUid = options.returningMemberUid;
   const isReturningMember =
     existingMemberUids.includes(uid) ||
     (returningMemberUid != null && existingMemberUids.includes(returningMemberUid));
@@ -337,11 +423,15 @@ export async function joinRemoteSessionByCode(
     };
   }
 
-  const memberUids = Array.from(new Set([...existingMemberUids, uid]));
-  const memberRoles = {
-    ...existingRoles,
-    [uid]: role,
-  };
+  const memberUids = buildMemberUidsAfterHeal(
+    existingMemberUids,
+    uid,
+    returningMemberUid,
+  );
+  const memberRoles = { ...existingRoles, [uid]: role };
+  if (returningMemberUid != null && returningMemberUid !== uid) {
+    delete memberRoles[returningMemberUid];
+  }
   const roleChanged = existingRoles[uid] !== role;
 
   const existingMemberAppVersions =
@@ -352,8 +442,11 @@ export async function joinRemoteSessionByCode(
     ...existingMemberAppVersions,
     [uid]: clientVersion,
   };
+  if (returningMemberUid != null && returningMemberUid !== uid) {
+    delete memberAppVersions[returningMemberUid];
+  }
 
-  if (!existingMemberUids.includes(uid)) {
+  if (!existingMemberUids.includes(uid) || returningMemberUid != null) {
     await writeSessionMembershipPatch(sessionDoc.ref, {
       memberUids,
       memberRoles,
@@ -377,6 +470,170 @@ export async function joinRemoteSessionByCode(
       memberAppVersions,
     }),
   };
+}
+
+async function joinRemoteSessionWithoutRead(
+  sessionId: string,
+  codeRecord: SessionCodeRecord,
+  uid: string,
+  role: PlayerRole,
+  clientVersion: string,
+  returningMemberUid?: string,
+): Promise<
+  | { status: "incompatible"; hostVersion: string }
+  | { status: "joined"; session: SessionRecord }
+> {
+  const previewSession = buildJoinPreviewSession(sessionId, "", codeRecord);
+  if (
+    !returningMemberUid &&
+    !sessionVersionCompatible(previewSession, clientVersion, uid)
+  ) {
+    return {
+      status: "incompatible",
+      hostVersion: previewSession.hostAppVersion ?? clientVersion,
+    };
+  }
+
+  const sessionRef = doc(sessionsCollection(), sessionId);
+  const updatePayload: Record<string, unknown> = {
+    memberUids: arrayUnion(uid),
+    [`memberRoles.${uid}`]: role,
+    [`memberAppVersions.${uid}`]: clientVersion,
+  };
+
+  if (returningMemberUid != null) {
+    updatePayload.memberUids = arrayUnion(uid);
+    await updateDoc(sessionRef, {
+      memberUids: arrayRemove(returningMemberUid),
+      ...updatePayload,
+    });
+    if (returningMemberUid !== uid) {
+      await updateDoc(sessionRef, {
+        [`memberRoles.${returningMemberUid}`]: deleteField(),
+        [`memberAppVersions.${returningMemberUid}`]: deleteField(),
+      });
+    }
+  } else {
+    await updateDoc(sessionRef, updatePayload);
+  }
+
+  const memberUids = returningMemberUid
+    ? buildMemberUidsAfterHeal([returningMemberUid], uid, returningMemberUid)
+    : [uid];
+
+  return {
+    status: "joined",
+    session: {
+      ...previewSession,
+      id: sessionId,
+      memberUids,
+      memberRoles: { [uid]: role },
+      memberAppVersions: { [uid]: clientVersion },
+    },
+  };
+}
+
+export async function joinRemoteSessionByCode(
+  code: string,
+  uid: string,
+  role: PlayerRole = "seeker",
+  clientVersion: string = APP_VERSION,
+  options: JoinRemoteSessionOptions = {},
+): Promise<
+  | { status: "missing" }
+  | { status: "ended" }
+  | { status: "incompatible"; hostVersion: string }
+  | { status: "joined"; session: SessionRecord }
+> {
+  const codeRecord = await readSessionCodeRecord(code);
+  if (!codeRecord) {
+    return { status: "missing" };
+  }
+
+  if (codeRecord.status === "ended") {
+    return { status: "ended" };
+  }
+
+  const returningMemberUid = sanitizeJoinReturningMemberUid(options);
+  let sessionDoc: Awaited<ReturnType<typeof getDoc>>;
+  try {
+    sessionDoc = await getDoc(doc(sessionsCollection(), codeRecord.sessionId));
+  } catch (error) {
+    if (!isFirestorePermissionDenied(error)) {
+      throw error;
+    }
+
+    const joinedWithoutRead = await joinRemoteSessionWithoutRead(
+      codeRecord.sessionId,
+      codeRecord,
+      uid,
+      role,
+      clientVersion,
+      returningMemberUid,
+    );
+    if (joinedWithoutRead.status === "joined") {
+      return {
+        status: "joined",
+        session: {
+          ...joinedWithoutRead.session,
+          code,
+        },
+      };
+    }
+    return joinedWithoutRead;
+  }
+
+  if (!sessionDoc.exists()) {
+    return { status: "missing" };
+  }
+
+  const data = sessionDoc.data() as Record<string, unknown>;
+  if (typeof data.endedAt === "string") {
+    return { status: "ended" };
+  }
+
+  try {
+    const joined = await joinRemoteSessionWithRead(
+      sessionDoc as DocumentSnapshot<DocumentData>,
+      uid,
+      role,
+      clientVersion,
+      returningMemberUid,
+    );
+    if (joined.status === "joined") {
+      return {
+        status: "joined",
+        session: {
+          ...joined.session,
+          code,
+        },
+      };
+    }
+    return joined;
+  } catch (error) {
+    if (!isFirestorePermissionDenied(error)) {
+      throw error;
+    }
+  }
+
+  const joinedWithoutRead = await joinRemoteSessionWithoutRead(
+    codeRecord.sessionId,
+    codeRecord,
+    uid,
+    role,
+    clientVersion,
+    returningMemberUid,
+  );
+  if (joinedWithoutRead.status === "joined") {
+    return {
+      status: "joined",
+      session: {
+        ...joinedWithoutRead.session,
+        code,
+      },
+    };
+  }
+  return joinedWithoutRead;
 }
 
 export async function getRemoteSessionById(
@@ -473,11 +730,18 @@ export async function ensureHiderPhotoUploadAccess(
 }
 
 export async function endRemoteSession(sessionId: string): Promise<void> {
+  const session = await getRemoteSessionById(sessionId);
   await updateDoc(doc(sessionsCollection(), sessionId), {
     endedAt: new Date().toISOString(),
     status: "ended",
     code: deleteField(),
   });
+
+  if (session?.code) {
+    await updateDoc(sessionCodeDoc(session.code), {
+      status: "ended",
+    });
+  }
 }
 
 export async function updateSessionTimer(

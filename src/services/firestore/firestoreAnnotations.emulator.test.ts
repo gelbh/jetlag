@@ -59,17 +59,23 @@ describe("firestoreAnnotations emulator", () => {
     await teardownEmulatorsForTests();
     const { uid: guestUid } = await connectEmulatorsForTests();
 
+    await joinRemoteSessionByCode(session.code, guestUid);
+
+    await teardownEmulatorsForTests();
+    const { uid: driftedGuestUid } = await connectEmulatorsForTests();
+
     const healed = await ensureRemoteSessionMembership(
       session,
-      guestUid,
+      driftedGuestUid,
       "seeker",
-      { returningMemberUid: hostUid },
+      { returningMemberUid: guestUid, persistedMyUid: guestUid },
     );
 
-    expect(healed.memberUids).toContain(guestUid);
+    expect(healed.memberUids).toContain(driftedGuestUid);
+    expect(healed.memberUids).not.toContain(guestUid);
   });
 
-  it("allows auth drift to bypass the join version gate for returning members", async () => {
+  it("rejects version bypass without a persisted returning uid", async () => {
     const { uid: hostUid } = await connectEmulatorsForTests();
     const session = await createRemoteSession(
       DUBLIN_CITY_GAME_AREA,
@@ -94,10 +100,7 @@ describe("firestoreAnnotations emulator", () => {
       { returningMemberUid: hostUid },
     );
 
-    expect(joinResult.status).toBe("joined");
-    if (joinResult.status === "joined") {
-      expect(joinResult.session.memberUids).toContain(guestUid);
-    }
+    expect(joinResult.status).toBe("incompatible");
 
     const incompatibleJoin = await joinRemoteSessionByCode(
       session.code,

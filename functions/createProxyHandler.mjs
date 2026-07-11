@@ -48,11 +48,6 @@ export function createProxyHandler({
       await handler(req, res, authResult);
     } catch (error) {
       captureFunctionsException(error);
-      if (error instanceof Error && error.message === "Overpass timed out.") {
-        res.status(504).json({ error: "Overpass timed out." });
-        return;
-      }
-
       res.status(502).json({
         error: defaultErrorMessage ?? `${routeName} proxy failed.`,
       });

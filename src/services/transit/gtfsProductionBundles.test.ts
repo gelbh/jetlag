@@ -127,15 +127,15 @@ describe("production GTFS bundles", () => {
     expect(elm).toBeDefined();
   });
 
-  it("Prince Rupert bundle loads BC Transit fixture stops", async () => {
+  it("Prince Rupert bundle loads BC Transit production stops", async () => {
     const bundle = loadProductionBundle("prince-rupert");
     expect(bundle).not.toBeNull();
-    expect(bundle!.stops.length).toBeGreaterThanOrEqual(2);
+    expect(bundle!.stops.length).toBeGreaterThanOrEqual(50);
 
     const stops = filterGtfsStopsForGameArea(bundle!, CENTRAL_PRINCE_RUPERT);
-    expect(stops.length).toBeGreaterThanOrEqual(2);
+    expect(stops.length).toBeGreaterThanOrEqual(5);
 
-    const cityHall = stops.find((stop) => stop.name === "City Hall");
-    expect(cityHall).toBeDefined();
+    const civicCentre = stops.find((stop) => stop.name === "Civic Centre Complex");
+    expect(civicCentre).toBeDefined();
   });
 });

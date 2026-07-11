@@ -40,18 +40,15 @@ export function isStaleStripeCustomerError(error) {
     error
   );
 
+  const message = stripeError.message ?? "";
   if (
-    stripeError.type === "StripeInvalidRequestError" &&
-    stripeError.code === "resource_missing"
+    message.includes("exists in test mode, but a live mode key") ||
+    message.includes("exists in live mode, but a test mode key")
   ) {
     return true;
   }
 
-  const message = stripeError.message ?? "";
-  return (
-    message.includes("exists in test mode, but a live mode key") ||
-    message.includes("exists in live mode, but a test mode key")
-  );
+  return false;
 }
 
 /**
@@ -123,6 +120,7 @@ export async function ensureStripeCustomer(stripe, db, uid, email) {
 
   await mergeUserEntitlements(db, uid, {
     stripeCustomerId: customer.id,
+    subscription: FieldValue.delete(),
   });
 
   return customer.id;

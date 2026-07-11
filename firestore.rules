@@ -196,8 +196,7 @@ service cloud.firestore {
     }
 
     match /sessions/{sessionId} {
-      allow get: if isSessionMember(sessionId)
-        || (isSignedIn() && resource.data.status == 'active');
+      allow get: if isSessionMember(sessionId);
 
       allow list: if false;
 
