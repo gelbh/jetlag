@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { isSignInWithEmailLink } from "firebase/auth";
 import { LegalInlineLinks } from "../legal/LegalInlineLinks";
 import { InlineError } from "../ui/InlineError";
 import { GoogleSignInButton } from "./GoogleSignInButton";
@@ -9,7 +10,11 @@ import {
   isPermanentUser,
   sendPremiumEmailSignInLink,
 } from "../../services/core/accountAuth";
-import { ensureAnonymousUser } from "../../services/core/firebase";
+import {
+  ensureAnonymousUser,
+  getFirebaseAuth,
+  isFirebaseConfigured,
+} from "../../services/core/firebase";
 import { recoverPremiumEntitlements } from "../../services/billing/premiumBilling";
 import { usePermanentAuthUser } from "../../hooks/billing/usePermanentAuthUser";
 
@@ -30,7 +35,7 @@ export function PremiumSignInGate({
   const [emailLinkSent, setEmailLinkSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recoveryNote, setRecoveryNote] = useState<string | null>(null);
-  const [completingEmailLink, setCompletingEmailLink] = useState(true);
+  const [completingEmailLink, setCompletingEmailLink] = useState(false);
 
   const handleSignedIn = useCallback(async () => {
     setError(null);
@@ -56,6 +61,12 @@ export function PremiumSignInGate({
     void (async () => {
       try {
         await ensureAnonymousUser();
+        const finishingEmailLink =
+          isFirebaseConfigured() &&
+          isSignInWithEmailLink(getFirebaseAuth(), window.location.href);
+        if (finishingEmailLink && !cancelled) {
+          setCompletingEmailLink(true);
+        }
         const completed = await completePremiumEmailSignInLink();
         if (!cancelled && completed && isPermanentUser(completed)) {
           await handleSignedIn();

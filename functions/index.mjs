@@ -63,6 +63,7 @@ import {
   getPremiumEntitlementsHandler,
 } from "./stripeBilling.mjs";
 import { rejectAnonymousBillingAuth } from "./billingAuth.mjs";
+import { startPremiumTrialHandler } from "./premiumEntitlements.mjs";
 import {
   RECOVER_PREMIUM_DAILY_LIMIT,
   RECOVER_PREMIUM_ROUTE,
@@ -499,7 +500,6 @@ export const createCheckoutSession = onCall(
       typeof request.data?.productKey === "string"
         ? request.data.productKey.trim()
         : "";
-    const startTrial = request.data?.startTrial === true;
 
     if (!productKey) {
       throw new HttpsError("invalid-argument", "Product key required.");
@@ -512,8 +512,19 @@ export const createCheckoutSession = onCall(
       request.auth.uid,
       request.auth.token.email,
       productKey,
-      startTrial,
     );
+  },
+);
+
+export const startPremiumTrial = onCall(
+  { enforceAppCheck: true },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+    rejectAnonymousBillingAuth(request);
+
+    return startPremiumTrialHandler(adminDb(), request.auth.uid);
   },
 );
 

@@ -5,6 +5,7 @@ import {
   fetchPremiumEntitlements,
   openPremiumBillingPortal,
   startPremiumCheckout,
+  startPremiumTrial,
 } from "./premiumBilling";
 import { createTestSession } from "../../test/fixtures/sessions";
 
@@ -43,6 +44,7 @@ describe("premiumBilling", () => {
         lifetimePremium: false,
         subscription: null,
         trialUsedAt: null,
+        trialEndsAt: null,
         canCreatePremium: true,
         hasUnlimitedPremium: false,
       },
@@ -73,16 +75,35 @@ describe("premiumBilling", () => {
     );
     expect(callable).toHaveBeenCalledWith({
       productKey: "pack_3",
-      startTrial: false,
     });
   });
 
   it("rejects checkout when the redirect URL is missing", async () => {
     callable.mockResolvedValueOnce({ data: {} });
 
-    await expect(startPremiumCheckout("monthly", { startTrial: true })).rejects.toThrow(
+    await expect(startPremiumCheckout("monthly")).rejects.toThrow(
       "Checkout URL missing.",
     );
+  });
+
+  it("starts the app-managed free trial", async () => {
+    callable.mockResolvedValueOnce({
+      data: {
+        premiumSessionCredits: 0,
+        lifetimePremium: false,
+        subscription: null,
+        trialUsedAt: Date.now(),
+        trialEndsAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
+        canCreatePremium: true,
+        hasUnlimitedPremium: true,
+      },
+    });
+
+    await expect(startPremiumTrial()).resolves.toMatchObject({
+      hasUnlimitedPremium: true,
+      canCreatePremium: true,
+    });
+    expect(httpsCallable).toHaveBeenCalledWith({}, "startPremiumTrial");
   });
 
   it("throws when checkout is requested offline", async () => {

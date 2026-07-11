@@ -1,3 +1,4 @@
+import { FirebaseError } from "firebase/app";
 import {
   EmailAuthProvider,
   GoogleAuthProvider,
@@ -9,6 +10,7 @@ import {
   signInWithCredential,
   signInWithEmailLink,
   signInWithPopup,
+  type AuthCredential,
   type AuthProvider,
   type User,
 } from "firebase/auth";
@@ -53,18 +55,70 @@ function mapAuthError(error: unknown, fallback: string): Error {
   return new Error(fallback);
 }
 
+function isCredentialAlreadyInUse(error: unknown): boolean {
+  return (
+    error instanceof FirebaseError &&
+    error.code === "auth/credential-already-in-use"
+  );
+}
+
+async function linkCredentialOrSignInExisting(
+  credential: AuthCredential,
+): Promise<User> {
+  const auth = getFirebaseAuth();
+
+  if (!auth.currentUser?.isAnonymous) {
+    const signedIn = await signInWithCredential(auth, credential);
+    return signedIn.user;
+  }
+
+  try {
+    const linked = await linkWithCredential(auth.currentUser, credential);
+    return linked.user;
+  } catch (error) {
+    if (!isCredentialAlreadyInUse(error)) {
+      throw error;
+    }
+
+    const signedIn = await signInWithCredential(auth, credential);
+    return signedIn.user;
+  }
+}
+
+async function linkWithPopupOrSignInExisting(
+  provider: AuthProvider,
+): Promise<User> {
+  const auth = getFirebaseAuth();
+
+  if (!auth.currentUser?.isAnonymous) {
+    const signedIn = await signInWithPopup(auth, provider);
+    return signedIn.user;
+  }
+
+  try {
+    const linked = await linkWithPopup(auth.currentUser, provider);
+    return linked.user;
+  } catch (error) {
+    if (!isCredentialAlreadyInUse(error)) {
+      throw error;
+    }
+
+    const credential = OAuthProvider.credentialFromError(
+      error as FirebaseError,
+    );
+    if (!credential) {
+      throw error;
+    }
+
+    const signedIn = await signInWithCredential(auth, credential);
+    return signedIn.user;
+  }
+}
+
 async function completeGoogleCredential(credential: ReturnType<
   typeof GoogleAuthProvider.credential
 >): Promise<User> {
-  const auth = getFirebaseAuth();
-
-  if (auth.currentUser?.isAnonymous) {
-    const linked = await linkWithCredential(auth.currentUser, credential);
-    return linked.user;
-  }
-
-  const signedIn = await signInWithCredential(auth, credential);
-  return signedIn.user;
+  return linkCredentialOrSignInExisting(credential);
 }
 
 export async function signInWithGoogleIdToken(idToken: string): Promise<User> {
@@ -94,16 +148,8 @@ async function signInWithOAuthPopup(
   provider: AuthProvider,
   fallbackMessage: string,
 ): Promise<User> {
-  const auth = getFirebaseAuth();
-
   try {
-    if (auth.currentUser?.isAnonymous) {
-      const credential = await linkWithPopup(auth.currentUser, provider);
-      return credential.user;
-    }
-
-    const credential = await signInWithPopup(auth, provider);
-    return credential.user;
+    return await linkWithPopupOrSignInExisting(provider);
   } catch (error) {
     throw mapAuthError(error, fallbackMessage);
   }
@@ -150,9 +196,9 @@ export async function completePremiumEmailSignInLink(
         storedEmail,
         linkUrl,
       );
-      const linked = await linkWithCredential(auth.currentUser, credential);
+      const user = await linkCredentialOrSignInExisting(credential);
       window.localStorage.removeItem(EMAIL_LINK_STORAGE_KEY);
-      return linked.user;
+      return user;
     }
 
     const credential = await signInWithEmailLink(auth, storedEmail, linkUrl);
