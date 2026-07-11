@@ -50,6 +50,7 @@ import {
   preloadCriticalGameAreaCaches,
   preloadGameAreaCaches,
 } from "../services/session/gameAreaPreload";
+import { resolveSessionMatchingAreas } from "../services/geo/resolveSessionMatchingAreas";
 import { startSeaLevelBackgroundSampling } from "../services/geo/seaLevelProgressive";
 import { retryAsync } from "../services/core/retryAsync";
 import {
@@ -152,6 +153,9 @@ export function CreateSession() {
   );
   const [accessCode, setAccessCode] = useState("");
   const [regionPackId, setRegionPackId] = useState<RegionPackId | undefined>();
+  const [regionPackSubregionId, setRegionPackSubregionId] = useState<
+    string | undefined
+  >();
   const [hostHasAccessClaim, setHostHasAccessClaim] = useState(false);
   const [premiumEntitlements, setPremiumEntitlements] =
     useState<PremiumEntitlements | null>(null);
@@ -206,6 +210,7 @@ export function CreateSession() {
 
       if (draft.regionPackId) {
         setRegionPackId(draft.regionPackId);
+        setRegionPackSubregionId(subregionId);
         try {
           const boundaries = await loadRegionPackSessionBoundaries(
             draft.regionPackId,
@@ -222,6 +227,7 @@ export function CreateSession() {
         }
       } else {
         setRegionPackId(undefined);
+        setRegionPackSubregionId(undefined);
       }
 
       const resolvedGameSize = gameArea
@@ -630,8 +636,18 @@ export function CreateSession() {
           advancedSettings,
           distanceUnit,
         ),
-        ...(regionPackId ? { regionPackId } : {}),
+        ...(regionPackId
+          ? {
+              regionPackId,
+              ...(regionPackSubregionId
+                ? { regionPackSubregionId }
+                : {}),
+            }
+          : {}),
       };
+      if (regionPackId) {
+        delete rulesPatch.customMatchingAreas;
+      }
 
       if (isFirebaseConfigured()) {
         const user = await retryAsync(() => ensureAnonymousUser());
@@ -698,9 +714,16 @@ export function CreateSession() {
       }
 
       if (!lowPowerMode) {
+        const matchingAreas = await resolveSessionMatchingAreas({
+          regionPackId,
+          regionPackSubregionId,
+          customMatchingAreas: regionPackId
+            ? undefined
+            : advancedSettings.customMatchingAreas,
+        });
         preloadGameAreaCaches(
           gameArea,
-          advancedSettings.customMatchingAreas,
+          matchingAreas,
           regionPackId,
           tier,
         );
@@ -708,7 +731,7 @@ export function CreateSession() {
         if (navigator.onLine) {
           void preloadCriticalGameAreaCaches(
             gameArea,
-            advancedSettings.customMatchingAreas,
+            matchingAreas,
             regionPackId,
           );
         }

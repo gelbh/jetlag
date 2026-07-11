@@ -83,13 +83,17 @@ export async function probeAdminDivisionCounts(
         return;
       }
 
-      const features = await fetchAdminDivisionFeaturesInArea(
-        gameArea,
-        level,
-        customMatchingAreas?.[level],
-      );
+      try {
+        const features = await fetchAdminDivisionFeaturesInArea(
+          gameArea,
+          level,
+          customMatchingAreas?.[level],
+        );
 
-      counts[category] = features.length;
+        counts[category] = features.length;
+      } catch {
+        counts[category] = 0;
+      }
     }),
   );
 

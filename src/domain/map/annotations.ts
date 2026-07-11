@@ -155,6 +155,7 @@ export interface SessionRecord {
   customLocationPins?: readonly SessionCustomLocationPin[];
   customMeasureGeometries?: readonly SessionCustomMeasureGeometry[];
   regionPackId?: RegionPackId;
+  regionPackSubregionId?: string;
   expansionPackEnabled?: boolean;
   customQuestionPackEnabled?: boolean;
   previewQuestionBeforeSend?: boolean;

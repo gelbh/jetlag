@@ -357,6 +357,9 @@ export function sessionRulesPatchToFirestore(
   if (patch.regionPackId !== undefined) {
     payload.regionPackId = patch.regionPackId;
   }
+  if (patch.regionPackSubregionId !== undefined) {
+    payload.regionPackSubregionId = patch.regionPackSubregionId;
+  }
 
   return payload;
 }
@@ -477,6 +480,10 @@ export function deserializeSessionFromFirestore(
       document.customMeasureGeometries,
     ),
     regionPackId: parseRegionPackId(document.regionPackId),
+    regionPackSubregionId:
+      typeof document.regionPackSubregionId === "string"
+        ? document.regionPackSubregionId
+        : undefined,
     expansionPackEnabled:
       typeof document.expansionPackEnabled === "boolean"
         ? document.expansionPackEnabled

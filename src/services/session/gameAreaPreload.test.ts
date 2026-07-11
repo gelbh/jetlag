@@ -8,7 +8,7 @@ import { fetchLandmassFeaturesInArea } from "../geo/landmassFeatures";
 import {
   gameAreaPreloadKey,
   preloadCriticalGameAreaCaches,
-  preloadGameAreaCaches,
+  preloadGameAreaCachesAsync,
   preloadJobGapMsForTests,
   preloadJobGapPremiumMsForTests,
   preloadJobGapMsForTier,
@@ -75,15 +75,14 @@ describe("gameAreaPreload", () => {
     vi.useFakeTimers();
     const key = gameAreaPreloadKey(DUBLIN_CITY_GAME_AREA);
 
-    preloadGameAreaCaches(DUBLIN_CITY_GAME_AREA);
+    const preloadPromise = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA);
 
     expect(usePreloadStore.getState().activeGameAreaKey).toBe(key);
     const jobCount = usePreloadStore.getState().totalJobs;
     expect(jobCount).toBeGreaterThan(0);
 
-    await vi.advanceTimersByTimeAsync(
-      jobCount * preloadJobGapMsForTests() + 100,
-    );
+    await vi.runAllTimersAsync();
+    await preloadPromise;
 
     expect(selectPreloadBanner(usePreloadStore.getState()).loading).toBe(false);
     expect(usePreloadStore.getState().completedJobs).toBe(jobCount);

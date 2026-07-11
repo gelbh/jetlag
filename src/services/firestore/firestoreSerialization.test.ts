@@ -110,6 +110,27 @@ describe("firestoreSerialization", () => {
     expect(session.tier).toBe("free");
   });
 
+  it("round-trips regionPackSubregionId on session documents", () => {
+    const session = deserializeSessionFromFirestore("session-pack", {
+      code: "NYC1",
+      gameArea: {
+        south: 40.5,
+        west: -74.1,
+        north: 40.9,
+        east: -73.7,
+      },
+      hostUid: "host-uid",
+      createdAt: "2026-05-14T00:00:00.000Z",
+      memberUids: ["host-uid"],
+      status: "active",
+      regionPackId: "nyc",
+      regionPackSubregionId: "manhattan",
+    });
+
+    expect(session.regionPackId).toBe("nyc");
+    expect(session.regionPackSubregionId).toBe("manhattan");
+  });
+
   it("deserializes ended sessions without a code field", () => {
     const session = deserializeSessionFromFirestore("session-ended", {
       gameArea: {
