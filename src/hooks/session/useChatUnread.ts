@@ -68,11 +68,9 @@ export function useChatUnread({
     if (storageKey !== prevStorageKeyRef.current) {
       prevStorageKeyRef.current = storageKey;
       baselinedRef.current = false;
-      /* eslint-disable react-hooks/set-state-in-effect -- reload acknowledged state for new session */
       setAcknowledged(
         storageKey ? loadAcknowledgedFingerprints(storageKey) : new Set(),
       );
-      /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, [storageKey]);
 

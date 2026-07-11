@@ -327,7 +327,6 @@ export function useHiderZoneTool({
     manualCenter,
     manualMode,
     moveMode,
-    postSystemMessage,
     radiusMeters,
     resetWizardDraft,
     resumeTimer,

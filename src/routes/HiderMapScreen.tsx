@@ -349,6 +349,7 @@ export function HiderMapScreen() {
 
   const handleSearchThisArea = useCallback(() => {
     void zoneTool.searchStationsInArea(searchViewportBounds());
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- searchStationsInArea is the only zoneTool method used
   }, [searchViewportBounds, zoneTool.searchStationsInArea]);
 
   const myTrap = uid ? timeTrapForHider(timeTraps, uid) : null;
@@ -371,17 +372,20 @@ export function HiderMapScreen() {
 
     void zoneTool.searchStationsInArea(searchViewportBounds());
     // Intentionally omit searchViewportBounds; pan/zoom must not re-fetch. Use "Search this area".
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- omit searchViewportBounds; pan/zoom must not re-fetch
   }, [zoneTool.wizardOpen, zoneTool.manualMode, zoneTool.searchStationsInArea]);
 
   const openWizardExclusive = useCallback(() => {
     overlay.closeSheet();
     zoneTool.openWizard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only closeSheet and openWizard methods used
   }, [overlay.closeSheet, zoneTool.openWizard]);
 
   const openChatExclusive = useCallback(() => {
     zoneTool.closeWizard();
     setChatAnswerError(null);
     overlay.openChat();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only openChat and closeWizard methods used
   }, [overlay.openChat, zoneTool.closeWizard]);
 
   const dismissTruthReveal = useCallback(() => {
@@ -391,6 +395,7 @@ export function HiderMapScreen() {
   const openSettingsExclusive = useCallback(() => {
     zoneTool.closeWizard();
     overlay.openSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only openSettings and closeWizard methods used
   }, [overlay.openSettings, zoneTool.closeWizard]);
 
   const [wizardPeeked, setWizardPeeked] = useState(false);
@@ -408,6 +413,7 @@ export function HiderMapScreen() {
   const openLogExclusive = useCallback(() => {
     zoneTool.closeWizard();
     overlay.openLog();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only openLog and closeWizard methods used
   }, [overlay.openLog, zoneTool.closeWizard]);
 
   const handleMapClick = useCallback(
@@ -422,6 +428,7 @@ export function HiderMapScreen() {
 
       zoneTool.handleMapClick([lat, lng]);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- timeTrapTool.stations/setSelectedStation listed; full object not needed
     [
       myTrap,
       timeTrapSheetOpen,

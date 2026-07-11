@@ -114,7 +114,7 @@ function AnnotationEditSheetForm({
         distanceUnit,
         annotation.type === "radar" ? annotation.id : undefined,
       ),
-    [annotations, annotation],
+    [annotations, annotation, distanceUnit],
   );
   const usedThermometerOptions = useMemo(
     () =>

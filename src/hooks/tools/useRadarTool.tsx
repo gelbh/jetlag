@@ -156,7 +156,7 @@ export function useRadarTool({
     setRadarChooseCustom(false);
     setRadarAnswer(null);
     setRadarCenter(null);
-  }, [distanceUnit]);
+  }, []);
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {

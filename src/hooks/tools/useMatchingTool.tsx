@@ -397,7 +397,7 @@ export function useMatchingTool({
     resolveForAnchor,
   ]);
 
-  const setMatchingSeekerAnchor = (point: LatLngTuple) => {
+  const setMatchingSeekerAnchor = useCallback((point: LatLngTuple) => {
     setMatchingSeekerPoint(point);
     setMatchingFeatures([]);
     setMatchingNearestFeatureId(null);
@@ -413,7 +413,7 @@ export function useMatchingTool({
     if (matchingCategoryChosen && matchingCategoryId) {
       setMatchingLoading(true);
     }
-  };
+  }, [matchingCategoryChosen, matchingCategoryId]);
 
   const resetDraft = useCallback(() => {
     cancelRequests();
@@ -448,7 +448,7 @@ export function useMatchingTool({
       setMatchingSeekerAnchor(point);
       return true;
     },
-    [active],
+    [active, setMatchingSeekerAnchor],
   );
 
   const handleGps = async () => {

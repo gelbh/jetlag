@@ -276,6 +276,7 @@ export function MapScreen() {
   const sessionRulesKey = sessionRulesSnapshot(session);
   const sessionRules = useMemo(
     () => sessionRulesFromRecord(session),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sessionRulesKey snapshots session rules
     [sessionRulesKey],
   );
   const preloadGameAreaKey = session?.gameArea
@@ -317,6 +318,7 @@ export function MapScreen() {
     preloadGameAreaKey,
     session?.customMatchingAreas,
     session?.gameArea,
+    session?.regionPackId,
   ]);
 
   const overlay = useMapOverlayState();
@@ -598,6 +600,7 @@ export function MapScreen() {
 
   useEffect(() => {
     setPremiumApiContext(session);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync premium context on session identity/tier only
   }, [session?.id, session?.tier]);
 
   useEffect(() => {
@@ -621,6 +624,7 @@ export function MapScreen() {
         );
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-auth on session id change only
   }, [session?.id, setLastSyncError]);
 
   useEffect(() => {
@@ -653,6 +657,7 @@ export function MapScreen() {
     setAwaitingPlacement(false);
     overlay.closeSheet();
     /* eslint-enable react-hooks/set-state-in-effect */
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only overlay.closeSheet invoked
   }, [overlay.closeSheet, selectedAnnotationId, setActiveTool]);
 
   const gameArea = session?.gameArea;
@@ -795,6 +800,7 @@ export function MapScreen() {
     setSelectedAnnotationId(null);
     cancelGeometryEdit();
     setAwaitingPlacement(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only overlay.closeSheet invoked
   }, [cancelGeometryEdit, overlay.closeSheet, setSelectedAnnotationId]);
 
   const {
@@ -909,7 +915,7 @@ export function MapScreen() {
       }
       setSession(merged, uid ?? undefined);
     },
-    [distanceUnit, gameRulesEditable, isRemote, session, setSession, uid],
+    [gameRulesEditable, isRemote, session, setSession, uid],
   );
 
   if (!session?.gameArea) {

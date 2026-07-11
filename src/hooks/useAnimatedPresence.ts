@@ -84,7 +84,6 @@ export function useAnimatedPresence({
       return;
     }
 
-    /* eslint-disable react-hooks/set-state-in-effect -- sync exit phase when open becomes false */
     setPhase((current) => {
       if (current === "closed" || current === "exiting") {
         return current;
@@ -95,7 +94,6 @@ export function useAnimatedPresence({
       }
       return "exiting";
     });
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [open, animate, finishClose]);
 
   useEffect(() => {

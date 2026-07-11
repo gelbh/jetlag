@@ -221,6 +221,7 @@ export function CreateSession() {
     };
 
     void applyPreset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- apply preset once per preset id; framing stable via hook
   }, [framing.applyFocusToGameArea, presets, searchParams]);
 
   useEffect(() => {
@@ -316,13 +317,7 @@ export function CreateSession() {
     }
 
     framing.handleUserViewportFramed();
-  }, [
-    framing,
-    framing.handleUserViewportFramed,
-    framing.userFramed,
-    importedGameArea,
-    selectedPlace,
-  ]);
+  }, [framing, importedGameArea, selectedPlace]);
 
   const mapFocusBounds = useMemo(() => {
     if (importedGameArea) {
