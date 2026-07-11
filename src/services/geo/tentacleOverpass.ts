@@ -14,6 +14,11 @@ import {
 } from "../../domain/questions/tentacleQuestions";
 import { queryOverpass } from "../core/overpassClient";
 import {
+  fetchBundledTentaclePois,
+  mergeTentaclePois,
+} from "./regionPackPoi";
+import type { RegionPackId } from "../../domain/regions/regionPack";
+import {
   getOrFetchCached,
   tentaclePoisCacheKey,
 } from "./geographicFeatureCache";
@@ -207,11 +212,15 @@ export async function fetchTentaclePois(
   options?: {
     customCategories?: readonly SessionCustomCategory[];
     customLocationPins?: readonly SessionCustomLocationPin[];
+    regionPackId?: RegionPackId;
   },
 ): Promise<TentaclePoi[]> {
   const customCategories = options?.customCategories ?? [];
+  const cacheScope = options?.regionPackId
+    ? `${categoryId}:${options.regionPackId}`
+    : categoryId;
   const overpassPois = await getOrFetchCached(
-    tentaclePoisCacheKey(center, radiusMeters, categoryId),
+    tentaclePoisCacheKey(center, radiusMeters, cacheScope),
     async () => {
       const payload = await queryOverpass<{ elements: OverpassElement[] }>(
         buildTentacleOverpassQuery(
@@ -233,6 +242,14 @@ export async function fetchTentaclePois(
     categoryId,
   );
 
-  const seen = new Set(overpassPois.map((poi) => poi.id));
-  return [...overpassPois, ...pinPois.filter((poi) => !seen.has(poi.id))];
+  const bundledPois = await fetchBundledTentaclePois(
+    center,
+    radiusMeters,
+    categoryId,
+    options?.regionPackId,
+  );
+
+  const mergedOverpass = mergeTentaclePois(overpassPois, bundledPois);
+  const seen = new Set(mergedOverpass.map((poi) => poi.id));
+  return [...mergedOverpass, ...pinPois.filter((poi) => !seen.has(poi.id))];
 }

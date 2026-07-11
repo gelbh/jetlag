@@ -1,10 +1,8 @@
 import type { GameArea } from "../../domain/map/annotations";
-import { isPointInGameArea, type LatLngTuple } from "../../domain/geometry/geometry";
+import { distanceBetweenPoints, isPointInGameArea, type LatLngTuple } from "../../domain/geometry/geometry";
 import type { MeasuringLocationCategory } from "../../domain/questions/measuringQuestions";
-import {
-  isNycRegionPack,
-  NYC_GEO_ASSETS,
-} from "../../domain/regions/nycRegionPack";
+import type { TentacleExtendedCategoryId } from "../../domain/questions/tentacleQuestions";
+import type { TentaclePoi } from "../../domain/map/annotations";
 import type { RegionPackId } from "../../domain/regions/regionPack";
 import type { MeasuringPlace } from "./measuringPlaces";
 
@@ -30,6 +28,11 @@ const BUNDLED_POI_CATEGORIES = new Set<MeasuringLocationCategory>([
   "hospital",
 ]);
 
+const TENTACLE_BUNDLED_CATEGORIES = new Set<TentacleExtendedCategoryId>([
+  "museum",
+  "hospital",
+]);
+
 const bundleCache = new Map<string, BundledPoiCategory | null>();
 
 function normalizePlaceName(name: string): string {
@@ -38,13 +41,9 @@ function normalizePlaceName(name: string): string {
 
 function poiBundleUrl(
   regionPackId: RegionPackId,
-  category: MeasuringLocationCategory,
-): string | null {
-  if (regionPackId === "nyc" && isNycRegionPack(regionPackId)) {
-    return NYC_GEO_ASSETS.poi(category);
-  }
-
-  return null;
+  category: string,
+): string {
+  return `/geo/${regionPackId}/poi/${category}.json`;
 }
 
 async function loadBundledPoiCategory(
@@ -57,10 +56,6 @@ async function loadBundledPoiCategory(
   }
 
   const url = poiBundleUrl(regionPackId, category);
-  if (!url) {
-    bundleCache.set(cacheKey, null);
-    return null;
-  }
 
   try {
     const response = await fetch(url);
@@ -81,6 +76,75 @@ async function loadBundledPoiCategory(
     bundleCache.set(cacheKey, null);
     return null;
   }
+}
+
+export function mergeTentaclePois(
+  overpassPois: TentaclePoi[],
+  bundledPois: TentaclePoi[],
+): TentaclePoi[] {
+  const seenNames = new Set(
+    overpassPois.map((poi) => normalizePlaceName(poi.name)),
+  );
+  const seenIds = new Set(overpassPois.map((poi) => poi.id));
+  const merged = [...overpassPois];
+
+  for (const poi of bundledPois) {
+    if (seenIds.has(poi.id)) {
+      continue;
+    }
+
+    const normalizedName = normalizePlaceName(poi.name);
+    if (seenNames.has(normalizedName)) {
+      continue;
+    }
+
+    seenNames.add(normalizedName);
+    seenIds.add(poi.id);
+    merged.push(poi);
+  }
+
+  return merged;
+}
+
+export async function fetchBundledTentaclePois(
+  center: LatLngTuple,
+  radiusMeters: number,
+  categoryId: TentacleExtendedCategoryId,
+  regionPackId?: RegionPackId,
+): Promise<TentaclePoi[]> {
+  if (
+    !regionPackId ||
+    !TENTACLE_BUNDLED_CATEGORIES.has(categoryId) ||
+    !BUNDLED_POI_CATEGORIES.has(categoryId as MeasuringLocationCategory)
+  ) {
+    return [];
+  }
+
+  const bundle = await loadBundledPoiCategory(
+    regionPackId,
+    categoryId as MeasuringLocationCategory,
+  );
+  if (!bundle) {
+    return [];
+  }
+
+  return bundle.places
+    .map((place) => {
+      const point: LatLngTuple = [place.lat, place.lng];
+      const distanceMeters = distanceBetweenPoints(center, point);
+      if (distanceMeters > radiusMeters) {
+        return null;
+      }
+
+      return {
+        id: place.id,
+        name: place.name,
+        lat: place.lat,
+        lng: place.lng,
+        category: categoryId,
+      } satisfies TentaclePoi;
+    })
+    .filter((poi): poi is TentaclePoi => poi !== null);
 }
 
 export function mergeMeasuringPlaces(

@@ -168,6 +168,7 @@ export function useTentacleTool({
           {
             customCategories: sessionRules.customCategories,
             customLocationPins: sessionRules.customLocationPins,
+            regionPackId: sessionRules.regionPackId,
           },
         );
 
