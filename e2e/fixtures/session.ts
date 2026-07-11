@@ -35,7 +35,6 @@ export async function seedLocalSession(
         JSON.stringify({ state: { annotations: [] }, version: 0 }),
       );
       localStorage.removeItem("jetlag-timer");
-      sessionStorage.removeItem("jetlag-timer");
     });
 
   await page.addInitScript(

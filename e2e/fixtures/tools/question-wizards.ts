@@ -179,11 +179,15 @@ async function selectTentacleCategory(page: Page, categoryId = "museum") {
   await page.locator("select.field-input").selectOption(categoryId);
 }
 
-export async function completeTentacleSolo(page: Page) {
+async function placeTentacleAnchor(page: Page) {
   await clickToolDockButton(page, "Tentacles");
   await waitForMapPlacementCrosshair(page);
-  await clickMapCenter(page);
+  await page.getByRole("button", { name: "Use my location" }).click();
   await waitForWizardNext(page);
+}
+
+export async function completeTentacleSolo(page: Page) {
+  await placeTentacleAnchor(page);
   await advanceWizard(page);
   await selectTentacleCategory(page);
   await waitForWizardNext(page);
@@ -198,10 +202,7 @@ export async function completeTentacleSolo(page: Page) {
 }
 
 export async function sendTentacleToHiders(page: Page) {
-  await clickToolDockButton(page, "Tentacles");
-  await waitForMapPlacementCrosshair(page);
-  await clickMapCenter(page);
-  await waitForWizardNext(page);
+  await placeTentacleAnchor(page);
   await advanceWizard(page);
   await selectTentacleCategory(page);
   await waitForWizardNext(page);
