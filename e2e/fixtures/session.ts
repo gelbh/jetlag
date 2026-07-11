@@ -1,5 +1,6 @@
 import { type Browser, type Page, expect } from "@playwright/test";
-import { LOCAL_GAME_AREA, dismissMapOnboarding, prepareE2EPage } from "./base";
+import { LOCAL_GAME_AREA } from "./map";
+import { dismissMapOnboarding, prepareE2EPage } from "./page-init";
 
 type PlayerRole = "seeker" | "hider";
 type GameSize = "small" | "medium" | "large";

@@ -1,6 +1,7 @@
-import { test, expect } from "../fixtures";
+import { test, expect, prepareE2EPage } from "../fixtures";
 
 test("@smoke join session screen matches visual baseline", async ({ page }) => {
+  await prepareE2EPage(page);
   await page.goto("/join");
   await expect(page.getByRole("heading", { name: "Session code" })).toBeVisible();
   await expect(page).toHaveScreenshot("join-session.png", {

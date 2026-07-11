@@ -10,6 +10,11 @@ const firebaseEnv = {
   VITE_FIREBASE_APP_ID: "1:1234567890:web:demo",
 };
 
+const mobileDevice = {
+  ...devices["iPhone 13"],
+  browserName: "chromium" as const,
+};
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
@@ -17,7 +22,8 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"], ["html", { open: "never" }]],
-  grep: process.env.E2E_SMOKE ? /@smoke/ : undefined,
+  snapshotPathTemplate:
+    "{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}-mobile-{platform}{ext}",
   expect: {
     toHaveScreenshot: {
       maxDiffPixelRatio: 0.02,
@@ -30,15 +36,25 @@ export default defineConfig({
     permissions: ["geolocation"],
     serviceWorkers: "block",
   },
-  projects: [
-    {
-      name: "mobile",
-      use: {
-        ...devices["iPhone 13"],
-        browserName: "chromium",
-      },
-    },
-  ],
+  projects: process.env.E2E_SMOKE
+    ? [{ name: "smoke", grep: /@smoke/, use: mobileDevice }]
+    : [
+        {
+          name: "features",
+          testMatch: /e2e\/features\/.+\.spec\.ts/,
+          use: mobileDevice,
+        },
+        {
+          name: "visual",
+          testMatch: /e2e\/visual\/.+\.spec\.ts/,
+          use: mobileDevice,
+        },
+        {
+          name: "smoke-folder",
+          testMatch: /e2e\/smoke\/.+\.spec\.ts/,
+          use: mobileDevice,
+        },
+      ],
   webServer: {
     command: process.env.CI
       ? "npm run build && npm run preview -- --host 127.0.0.1 --port 4173 --strictPort"
