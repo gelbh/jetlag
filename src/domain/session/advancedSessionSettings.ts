@@ -76,6 +76,7 @@ export type SessionRulesPatch = Pick<
   | "customMeasureGeometries"
   | "regionPackId"
   | "regionPackSubregionId"
+  | "bundledGeoRevision"
   | "expansionPackEnabled"
   | "customQuestionPackEnabled"
   | "previewQuestionBeforeSend"

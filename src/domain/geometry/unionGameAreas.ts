@@ -3,6 +3,7 @@ import { featureCollection } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { GameArea } from "../map/annotations";
 import { gameAreaToBoundingBox, normalizeBoundingBox } from "./gameAreaBounds";
+import { gameAreaWithoutInteriorRings } from "./geometryCore";
 
 function gameAreaToFeature(
   gameArea: GameArea,
@@ -68,5 +69,5 @@ export function unionGameAreas(areas: readonly GameArea[]): GameArea {
     };
   }
 
-  return geometry;
+  return gameAreaWithoutInteriorRings(geometry);
 }

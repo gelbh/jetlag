@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { BUNDLED_REGION_PACK_GEO_REVISION } from "../../domain/regions/regionPack";
 import {
   clearResolvedMatchingAreasCacheForTests,
   matchingAreasCacheKey,
@@ -25,7 +26,7 @@ describe("resolveSessionMatchingAreas", () => {
     vi.restoreAllMocks();
   });
 
-  it("returns session custom matching areas when levels 8 and 9 are present", async () => {
+  it("returns session custom matching areas when levels 8 and 9 are present and revision matches", async () => {
     const sessionAreas = {
       8: "session-primary",
       9: "session-secondary",
@@ -35,10 +36,36 @@ describe("resolveSessionMatchingAreas", () => {
       regionPackId: "dublin",
       regionPackSubregionId: "south-dublin",
       customMatchingAreas: sessionAreas,
+      bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
     });
 
     expect(areas).toEqual(sessionAreas);
     expect(regionPackBoundaries.loadRegionPackMatchingAreas).not.toHaveBeenCalled();
+  });
+
+  it("reloads bundled matching areas when session revision is stale", async () => {
+    vi.spyOn(
+      regionPackBoundaries,
+      "loadRegionPackMatchingAreas",
+    ).mockResolvedValue(bundledAreas);
+
+    const sessionAreas = {
+      8: "stale-primary",
+      9: "stale-secondary",
+    };
+
+    const areas = await resolveSessionMatchingAreas({
+      regionPackId: "dublin",
+      regionPackSubregionId: "south-dublin",
+      customMatchingAreas: sessionAreas,
+      bundledGeoRevision: 1,
+    });
+
+    expect(areas).toEqual(bundledAreas);
+    expect(regionPackBoundaries.loadRegionPackMatchingAreas).toHaveBeenCalledWith(
+      "dublin",
+      "south-dublin",
+    );
   });
 
   it("loads bundled matching areas from the region pack when session areas are missing", async () => {
@@ -76,6 +103,6 @@ describe("resolveSessionMatchingAreas", () => {
     expect(first).toBe(second);
     expect(
       matchingAreasCacheKey("london", "camden", false),
-    ).toBe("london:camden:");
+    ).toBe(`${BUNDLED_REGION_PACK_GEO_REVISION}:london:camden:`);
   });
 });

@@ -360,6 +360,9 @@ export function sessionRulesPatchToFirestore(
   if (patch.regionPackSubregionId !== undefined) {
     payload.regionPackSubregionId = patch.regionPackSubregionId;
   }
+  if (typeof patch.bundledGeoRevision === "number") {
+    payload.bundledGeoRevision = patch.bundledGeoRevision;
+  }
 
   return payload;
 }
@@ -483,6 +486,10 @@ export function deserializeSessionFromFirestore(
     regionPackSubregionId:
       typeof document.regionPackSubregionId === "string"
         ? document.regionPackSubregionId
+        : undefined,
+    bundledGeoRevision:
+      typeof document.bundledGeoRevision === "number"
+        ? document.bundledGeoRevision
         : undefined,
     expansionPackEnabled:
       typeof document.expansionPackEnabled === "boolean"

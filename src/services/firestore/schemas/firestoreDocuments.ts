@@ -36,6 +36,7 @@ export const sessionDocumentSchema = z
     customMeasureGeometries: z.array(z.unknown()).optional(),
     regionPackId: z.string().optional(),
     regionPackSubregionId: z.string().optional(),
+    bundledGeoRevision: z.number().int().positive().optional(),
     expansionPackEnabled: z.boolean().optional(),
     customQuestionPackEnabled: z.boolean().optional(),
     previewQuestionBeforeSend: z.boolean().optional(),

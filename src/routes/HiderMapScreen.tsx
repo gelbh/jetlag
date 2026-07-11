@@ -108,10 +108,10 @@ export function HiderMapScreen() {
   const setShowAdminBoundaries = useMapStore(
     (state) => state.setShowAdminBoundaries,
   );
-  const { sessionRules } = useResolvedSessionRules(session);
+  const { sessionRules, gameArea } = useResolvedSessionRules(session);
   const { features: adminBoundaryFeatures, loading: adminBoundaryLoading } =
     useAdminBoundaryFeatures(
-    session?.gameArea ?? null,
+    gameArea,
     sessionRules,
     showAdminBoundaries,
   );
@@ -340,7 +340,7 @@ export function HiderMapScreen() {
   const zoneTool = useHiderZoneTool({
     sessionId: sessionId ?? "",
     hiderUid: uid ?? "",
-    gameArea: session?.gameArea ?? fallbackGameArea(),
+    gameArea: gameArea ?? fallbackGameArea(),
     radiusMeters: hidingZoneRadius,
     existingZone: myZone,
     postSystemMessage: postGameSystem,
@@ -352,8 +352,8 @@ export function HiderMapScreen() {
   });
 
   const searchViewportBounds = useCallback((): MapViewportBounds => {
-    return mapViewport?.bounds ?? gameAreaToBoundingBox(session?.gameArea ?? fallbackGameArea());
-  }, [mapViewport?.bounds, session?.gameArea]);
+    return mapViewport?.bounds ?? gameAreaToBoundingBox(gameArea ?? fallbackGameArea());
+  }, [gameArea, mapViewport?.bounds]);
 
   const handleHidingZoneStepChange = useCallback((stepId: HidingZoneStepId) => {
     setHidingZoneStepId(stepId);
@@ -368,7 +368,7 @@ export function HiderMapScreen() {
   const timeTrapTool = useTimeTrapTool({
     sessionId: sessionId ?? "",
     hiderUid: uid ?? "",
-    gameArea: session?.gameArea ?? fallbackGameArea(),
+    gameArea: gameArea ?? fallbackGameArea(),
     existingTrap: myTrap,
     enabled: expansionPackEnabled && Boolean(myZone),
     postSystemMessage: postGameSystem,
@@ -462,12 +462,12 @@ export function HiderMapScreen() {
     ],
   );
 
-  if (!session) {
+  if (!session || !gameArea) {
     return <Navigate to="/" replace />;
   }
 
-  const mapFocusBounds = gameAreaToBoundsExpression(session.gameArea);
-  const center = gameAreaCenter(session.gameArea);
+  const mapFocusBounds = gameAreaToBoundsExpression(gameArea);
+  const center = gameAreaCenter(gameArea);
   const previewRing = hidingZonePreviewPositions(zoneTool.previewCircle);
   const sheetBlocksWizard =
     overlay.isChatOpen ||
@@ -500,10 +500,10 @@ export function HiderMapScreen() {
             onUserPanStart={handleMapPanStart}
             onUserPanEnd={handleMapPanEnd}
           />
-          <GameAreaMask gameArea={session.gameArea} />
+          <GameAreaMask gameArea={gameArea} />
           <AnnotationLayer
             annotations={annotations}
-            gameArea={session.gameArea}
+            gameArea={gameArea}
             layerVisibility={layerVisibility}
             session={session}
             hidingZones={confirmedHidingZones}
@@ -546,7 +546,7 @@ export function HiderMapScreen() {
           />
           <PendingQuestionLayer
             pendingQuestions={pendingQuestions}
-            gameArea={session.gameArea}
+            gameArea={gameArea}
             sessionRules={session}
             mapStyle={effectiveBasemapStyle}
           />
