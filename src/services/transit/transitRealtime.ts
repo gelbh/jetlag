@@ -108,9 +108,9 @@ async function fetchPremiumProxyJson(url: URL): Promise<Response> {
   );
 }
 
-async function fetchLondonVehicles(
+async function fetchVehiclesProxy(
   bounds: ReturnType<typeof gameAreaToBoundingBox>,
-  metroId: string | undefined,
+  metroId: string,
 ): Promise<TransitRealtimeSnapshot> {
   const proxyBase = transitProxyUrl();
   if (!proxyBase) {
@@ -118,7 +118,7 @@ async function fetchLondonVehicles(
       vehicles: [],
       fetchedAt: new Date().toISOString(),
       source: "none",
-      message: "London live vehicles need VITE_TRANSIT_PROXY_URL.",
+      message: "Live vehicles need VITE_TRANSIT_PROXY_URL for this metro.",
     };
   }
 
@@ -208,8 +208,8 @@ export async function fetchLiveTransitVehicles(
     };
   }
 
-  if (metro?.id === "london") {
-    return fetchLondonVehicles(bounds, metro.id);
+  if (metro?.vehiclesProxyMetro) {
+    return fetchVehiclesProxy(bounds, metro.vehiclesProxyMetro);
   }
 
   if (!metro?.transitlandRtFeed) {

@@ -36,6 +36,10 @@ describe("proxyValidation", () => {
       ok: true,
       value: "london",
     });
+    assert.deepEqual(parseVehiclesMetroQuery({ metro: "chicago" }), {
+      ok: true,
+      value: "chicago",
+    });
     assert.equal(parseVehiclesMetroQuery({ metro: "paris" }).ok, false);
   });
 

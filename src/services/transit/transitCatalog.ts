@@ -31,6 +31,7 @@ export const TRANSIT_METROS: TransitMetro[] = [
     transitlandRtFeed: "f-dpwh-londontransit~rt",
     gtfsRtVehicleUrl:
       "https://api.tfl.gov.uk/vehicle/vehiclepositions",
+    vehiclesProxyMetro: "london",
   },
   {
     id: "dublin",
@@ -62,7 +63,7 @@ export const TRANSIT_METROS: TransitMetro[] = [
     center: [41.8781, -87.6298],
     radiusKm: 35,
     transitlandFeed: "f-dp3-cta",
-    // No Transitland GTFS-RT feed; CTA Bus Tracker needs a separate API key.
+    vehiclesProxyMetro: "chicago",
   },
 ];
 
@@ -97,5 +98,9 @@ export function listTransitMetros(): TransitMetro[] {
 }
 
 export function metroSupportsLiveVehicles(metro: TransitMetro | null): boolean {
-  return Boolean(metro?.transitlandRtFeed || metro?.gtfsRtVehicleUrl);
+  return Boolean(
+    metro?.transitlandRtFeed ||
+      metro?.gtfsRtVehicleUrl ||
+      metro?.vehiclesProxyMetro,
+  );
 }
