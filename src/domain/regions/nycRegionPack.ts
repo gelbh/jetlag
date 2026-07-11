@@ -9,6 +9,7 @@ export const NYC_GEO_ASSETS = {
   districts: "/geo/nyc/districts.geojson",
   districtsByBorough: (boroughId: string) =>
     `/geo/nyc/districts/${boroughId}.geojson`,
+  poi: (category: string) => `/geo/nyc/poi/${category}.json`,
 } as const;
 
 export interface RegionPackLabelOverride {

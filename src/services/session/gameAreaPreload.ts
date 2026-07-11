@@ -71,7 +71,9 @@ function buildPreloadJobs(
   }
 
   for (const category of PRELOAD_MEASURING_CATEGORIES) {
-    jobs.push(() => fetchMeasuringPlacesInArea(gameArea, category));
+    jobs.push(() =>
+      fetchMeasuringPlacesInArea(gameArea, category, [], regionPackId),
+    );
   }
 
   for (const kind of PRELOAD_LINEAR_KINDS) {

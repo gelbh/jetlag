@@ -3,11 +3,13 @@ import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
   clearElevationCacheForTests,
   fetchElevations,
+  isUsElevationPoint,
   openElevationCircuitForTests,
   requestGapMsForBatchSize,
 } from "./elevation";
 
 const dublinPoint: LatLngTuple = [53.29602, -6.139977];
+const timesSquarePoint: LatLngTuple = [40.758, -73.9855];
 
 function mockElevationResponse(elevations: number[]) {
   return {
@@ -15,6 +17,15 @@ function mockElevationResponse(elevations: number[]) {
     status: 200,
     headers: new Headers(),
     json: async () => ({ elevation: elevations }),
+  };
+}
+
+function mockUsgsResponse(elevation: number) {
+  return {
+    ok: true,
+    status: 200,
+    headers: new Headers(),
+    json: async () => ({ value: elevation }),
   };
 }
 
@@ -39,6 +50,54 @@ describe("elevation", () => {
     clearElevationCacheForTests();
     vi.restoreAllMocks();
     vi.useRealTimers();
+  });
+
+  describe("isUsElevationPoint", () => {
+    it("matches continental US, Alaska, Hawaii, and Puerto Rico", () => {
+      expect(isUsElevationPoint(timesSquarePoint)).toBe(true);
+      expect(isUsElevationPoint([64.2, -149.5])).toBe(true);
+      expect(isUsElevationPoint([21.3, -157.8])).toBe(true);
+      expect(isUsElevationPoint([18.2, -66.5])).toBe(true);
+    });
+
+    it("excludes non-US coordinates", () => {
+      expect(isUsElevationPoint(dublinPoint)).toBe(false);
+      expect(isUsElevationPoint([51.5074, -0.1278])).toBe(false);
+    });
+  });
+
+  it("uses USGS EPQS for US coordinates", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("epqs.nationalmap.gov")) {
+        return mockUsgsResponse(14.8);
+      }
+
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(fetchSingleElevation(timesSquarePoint)).resolves.toBe(14.8);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("epqs.nationalmap.gov");
+  });
+
+  it("falls back to Open-Meteo when USGS lookup fails", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        headers: new Headers(),
+        json: async () => ({}),
+      })
+      .mockResolvedValue(mockElevationResponse([135]));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(fetchSingleElevation(timesSquarePoint)).resolves.toBe(135);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("epqs.nationalmap.gov");
+    expect(String(fetchMock.mock.calls[1]?.[0])).toContain("open-meteo.com");
   });
 
   it("reuses cached elevations for repeated coordinates", async () => {
