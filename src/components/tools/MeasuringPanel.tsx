@@ -39,6 +39,7 @@ import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
 import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
+import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
 import { MEASURING_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { useToolWizard } from "../../hooks/useToolWizard";
 
@@ -392,8 +393,22 @@ export function MeasuringPanel({
     );
   };
 
+  const canGoNext =
+    (step === "anchor" && canAdvanceFromAnchor) ||
+    (step === "source" && optionChosen && hasAvailableMeasureOptions) ||
+    (step === "target" && canAdvanceFromTarget);
+  const canSwipeNext = canGoNext && stepIndex < steps.length - 1;
+
   return (
     <ToolPanelShell toolId="measuring" stepper={stepper}>
+      <WizardSwipeSurface
+        stepId={step}
+        stepIndex={stepIndex}
+        canGoBack={stepIndex > 0}
+        canGoNext={canSwipeNext}
+        onBack={goBack}
+        onNext={goNext}
+      >
       {step === "source" ? (
         <ToolSection first compact status="active">
           <label className="field-label">
@@ -546,12 +561,9 @@ export function MeasuringPanel({
         stepCount={steps.length}
         onBack={goBack}
         onNext={goNext}
-        canGoNext={
-          (step === "anchor" && canAdvanceFromAnchor) ||
-          (step === "source" && optionChosen && hasAvailableMeasureOptions) ||
-          (step === "target" && canAdvanceFromTarget)
-        }
+        canGoNext={canGoNext}
       />
+      </WizardSwipeSurface>
 
       {error ? <InlineError>{error}</InlineError> : null}
     </ToolPanelShell>

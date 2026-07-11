@@ -94,7 +94,7 @@ export function TutorialHub({
   };
 
   return (
-    <div className="space-y-2.5">
+    <div className="tutorial-hub">
       {coreSection ? renderSectionButton(coreSection) : null}
 
       <button
@@ -127,7 +127,9 @@ export function TutorialHub({
         </span>
       </button>
 
-      {otherSections.map(renderSectionButton)}
+      <div className="tutorial-hub-sections">
+        {otherSections.map(renderSectionButton)}
+      </div>
 
       <Link to="/create" className="home-card-btn home-card-btn-primary">
         <span>Create session</span>

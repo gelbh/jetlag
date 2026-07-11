@@ -25,6 +25,7 @@ import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
 import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
+import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
 import { MATCHING_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { useToolWizard } from "../../hooks/useToolWizard";
 
@@ -177,8 +178,22 @@ export function MatchingPanel({
       }${nearestOutsidePlayArea ? " · outside play area" : ""}`
     : null;
 
+  const canGoNext =
+    (step === "anchor" && hasSeekerPoint && !loading) ||
+    (step === "category" && categoryAvailable && categoryChosen) ||
+    (step === "resolve" && resolveComplete && !loading);
+  const canSwipeNext = canGoNext && stepIndex < steps.length - 1;
+
   return (
     <ToolPanelShell toolId="matching" stepper={stepper}>
+      <WizardSwipeSurface
+        stepId={step}
+        stepIndex={stepIndex}
+        canGoBack={stepIndex > 0}
+        canGoNext={canSwipeNext}
+        onBack={goBack}
+        onNext={goNext}
+      >
       {step === "category" ? (
         <ToolSection first compact status="active">
           {availableCategories.length === 0 ? (
@@ -312,12 +327,9 @@ export function MatchingPanel({
         stepCount={steps.length}
         onBack={goBack}
         onNext={goNext}
-        canGoNext={
-          (step === "anchor" && hasSeekerPoint && !loading) ||
-          (step === "category" && categoryAvailable && categoryChosen) ||
-          (step === "resolve" && resolveComplete && !loading)
-        }
+        canGoNext={canGoNext}
       />
+      </WizardSwipeSurface>
 
       {error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null}
     </ToolPanelShell>

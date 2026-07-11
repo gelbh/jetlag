@@ -18,3 +18,9 @@ export const TOOL_PANEL_MINIMIZE_THRESHOLD_PX = 72;
 
 /** Shared velocity threshold for tool panel minimize (px/ms). */
 export const TOOL_PANEL_MINIMIZE_VELOCITY_PX_MS = 0.35;
+
+export {
+  WIZARD_SWIPE_AXIS_SLOP_PX,
+  WIZARD_SWIPE_COMMIT_FRACTION,
+  WIZARD_SWIPE_COMMIT_VELOCITY_PX_MS,
+} from "../../hooks/useWizardSwipe";

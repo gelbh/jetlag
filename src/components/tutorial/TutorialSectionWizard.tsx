@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { HudToolIcon } from "../map/ToolIcons";
 import { ToolStepper } from "../tools/shared/ToolStepper";
+import { WizardSwipeSurface } from "../tools/shared/WizardSwipeSurface";
 import { buildSteps, deriveStepStates } from "../tools/shared/toolStepUtils";
 import type { TutorialStep } from "../../domain/tutorial/tutorialSections";
 import {
@@ -59,7 +60,7 @@ export function TutorialSectionWizard({
       section.steps.map((item) => ({ id: item.id, label: item.title })),
       states,
     );
-    return <ToolStepper steps={steps} labelClassName="mt-4" />;
+    return <ToolStepper steps={steps} labelClassName="mt-2" />;
   }, [section.steps, stepIndex]);
 
   const handleNext = () => {
@@ -93,14 +94,93 @@ export function TutorialSectionWizard({
 
   const showCoreFirstFinish = isLastStep && section.id === "core" && !reviewing;
 
+  const navButtons = showCoreFirstFinish ? (
+    <div className="shrink-0 space-y-2">
+      <button
+        type="button"
+        onClick={() => onOpenQuestionsHub?.()}
+        className="btn-primary min-h-12 w-full"
+      >
+        Questions
+      </button>
+      {nextSection ? (
+        <button
+          type="button"
+          onClick={() => onOpenSection?.(nextSection.id)}
+          className="btn-secondary min-h-12 w-full"
+        >
+          {nextSection.title}
+        </button>
+      ) : null}
+      <Link to="/create" className="btn-secondary flex min-h-12 w-full items-center justify-center">
+        Create session
+      </Link>
+      <button type="button" onClick={onFinish} className="home-feedback-link w-full">
+        Back to tutorial hub
+      </button>
+    </div>
+  ) : isLastStep ? (
+    <div className="shrink-0 space-y-2">
+      <div className="flex gap-2 pt-1">
+        {stepIndex > 0 ? (
+          <button type="button" onClick={handleBack} className="btn-secondary flex-1">
+            Back
+          </button>
+        ) : null}
+        {nextQuestion ? (
+          <button
+            type="button"
+            onClick={() => onOpenQuestion?.(nextQuestion.id)}
+            className="btn-primary flex-1"
+          >
+            {nextQuestion.title}
+          </button>
+        ) : nextSection ? (
+          <button
+            type="button"
+            onClick={() => onOpenSection?.(nextSection.id)}
+            className="btn-primary flex-1"
+          >
+            {nextSection.title}
+          </button>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => {
+            onStepComplete(stepIndex);
+            onFinish();
+          }}
+          className={
+            nextQuestion || nextSection
+              ? "btn-secondary flex-1"
+              : "btn-primary min-h-12 flex-1"
+          }
+        >
+          {finishLabel}
+        </button>
+      </div>
+    </div>
+  ) : (
+    <div className="flex shrink-0 gap-2 pt-1">
+      {stepIndex > 0 ? (
+        <button type="button" onClick={handleBack} className="btn-secondary flex-1">
+          Back
+        </button>
+      ) : null}
+      <button type="button" onClick={handleNext} className="btn-primary flex-1">
+        Next
+      </button>
+    </div>
+  );
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4">
-      <div className="space-y-6">
-        <div className="space-y-1">
+    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
+      <div className="shrink-0 space-y-2">
+        <div className="space-y-0.5">
           <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
             {section.title}
           </p>
-          <h2 className="font-display text-balance text-2xl font-bold uppercase leading-tight tracking-tight text-ink">
+          <h2 className="font-display text-balance text-xl font-bold uppercase leading-tight tracking-tight text-ink">
             {step.title}
           </h2>
         </div>
@@ -108,121 +188,53 @@ export function TutorialSectionWizard({
         {stepper}
       </div>
 
-      <div
-        key={step.id}
-        className="jl-step-enter flex min-h-0 flex-1 flex-col gap-3 motion-reduce:animate-none"
+      <WizardSwipeSurface
+        stepId={step.id}
+        stepIndex={stepIndex}
+        canGoBack
+        canGoNext={!isLastStep}
+        onBack={handleBack}
+        onNext={handleNext}
+        className="flex min-h-0 flex-1 flex-col overflow-hidden"
       >
-        {step.toolId ? (
-          <div className="flex items-center gap-2">
-            <span className="inline-flex size-9 items-center justify-center rounded-md border-2 border-border bg-surface-panel text-highlight">
-              <HudToolIcon tool={step.toolId} className="size-5" />
-            </span>
-            {step.badge ? (
-              <span className="font-mono text-xs font-bold tracking-wide text-ink-muted">
-                {step.badge}
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
+          {step.toolId ? (
+            <div className="flex shrink-0 items-center gap-2">
+              <span className="inline-flex size-8 items-center justify-center rounded-md border-2 border-border bg-surface-panel text-highlight">
+                <HudToolIcon tool={step.toolId} className="size-4" />
               </span>
-            ) : null}
-          </div>
-        ) : null}
-
-        {step.splitCompare ? (
-          <TutorialSplitScreenshot compare={step.splitCompare} />
-        ) : null}
-
-        {step.imageSrc ? (
-          <TutorialScreenshot
-            src={step.imageSrc}
-            alt={step.imageAlt}
-            variant={step.id === "on-map" ? "map-focus" : "phone"}
-            className={
-              step.id === "on-map" ? "object-contain object-center" : undefined
-            }
-          />
-        ) : null}
-
-        <p className="text-pretty text-base leading-relaxed text-ink-muted">
-          {step.body}
-        </p>
-      </div>
-
-      {showCoreFirstFinish ? (
-        <div className="space-y-2">
-          <button
-            type="button"
-            onClick={() => onOpenQuestionsHub?.()}
-            className="btn-primary min-h-12 w-full"
-          >
-            Questions
-          </button>
-          {nextSection ? (
-            <button
-              type="button"
-              onClick={() => onOpenSection?.(nextSection.id)}
-              className="btn-secondary min-h-12 w-full"
-            >
-              {nextSection.title}
-            </button>
+              {step.badge ? (
+                <span className="font-mono text-xs font-bold tracking-wide text-ink-muted">
+                  {step.badge}
+                </span>
+              ) : null}
+            </div>
           ) : null}
-          <Link to="/create" className="btn-secondary flex min-h-12 w-full items-center justify-center">
-            Create session
-          </Link>
-          <button type="button" onClick={onFinish} className="home-feedback-link w-full">
-            Back to tutorial hub
-          </button>
-        </div>
-      ) : isLastStep ? (
-        <div className="space-y-2">
-          <div className="flex gap-2 pt-1">
-            {stepIndex > 0 ? (
-              <button type="button" onClick={handleBack} className="btn-secondary flex-1">
-                Back
-              </button>
-            ) : null}
-            {nextQuestion ? (
-              <button
-                type="button"
-                onClick={() => onOpenQuestion?.(nextQuestion.id)}
-                className="btn-primary flex-1"
-              >
-                {nextQuestion.title}
-              </button>
-            ) : nextSection ? (
-              <button
-                type="button"
-                onClick={() => onOpenSection?.(nextSection.id)}
-                className="btn-primary flex-1"
-              >
-                {nextSection.title}
-              </button>
-            ) : null}
-            <button
-              type="button"
-              onClick={() => {
-                onStepComplete(stepIndex);
-                onFinish();
-              }}
-              className={
-                nextQuestion || nextSection
-                  ? "btn-secondary flex-1"
-                  : "btn-primary min-h-12 flex-1"
-              }
-            >
-              {finishLabel}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="flex gap-2 pt-1">
-          {stepIndex > 0 ? (
-            <button type="button" onClick={handleBack} className="btn-secondary flex-1">
-              Back
-            </button>
+
+          {step.splitCompare ? (
+            <TutorialSplitScreenshot compare={step.splitCompare} />
           ) : null}
-          <button type="button" onClick={handleNext} className="btn-primary flex-1">
-            Next
-          </button>
+
+          {step.imageSrc ? (
+            <div className="flex min-h-0 flex-1 items-center justify-center">
+              <TutorialScreenshot
+                src={step.imageSrc}
+                alt={step.imageAlt}
+                className={
+                  step.id === "on-map" ? "object-contain object-center" : undefined
+                }
+                fill
+              />
+            </div>
+          ) : null}
+
+          <p className="line-clamp-4 shrink-0 text-pretty text-sm leading-snug text-ink-muted">
+            {step.body}
+          </p>
         </div>
-      )}
+
+        {navButtons}
+      </WizardSwipeSurface>
     </div>
   );
 }

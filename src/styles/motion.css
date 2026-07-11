@@ -138,6 +138,30 @@
   }
 }
 
+@keyframes jl-wizard-step-forward {
+  from {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes jl-wizard-step-back {
+  from {
+    opacity: 0;
+    transform: translateX(-1.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @keyframes jl-banner-enter {
   from {
     opacity: 0;
@@ -343,6 +367,8 @@ html[data-motion="reduced"] .jl-panel-enter,
 html[data-motion="reduced"] .jl-panel-exit,
 html[data-motion="reduced"] .jl-panel-crossfade-enter,
 html[data-motion="reduced"] .jl-step-enter,
+html[data-motion="reduced"] .jl-wizard-step-forward,
+html[data-motion="reduced"] .jl-wizard-step-back,
 html[data-motion="reduced"] .jl-banner-enter,
 html[data-motion="reduced"] .jl-banner-exit,
 html[data-motion="reduced"] .jl-chat-tab-enter,

@@ -16,6 +16,9 @@
 - Tool panels: show the question name (Matching, Radar, Measuring, and others) in the panel header
 - Radar: distance picker shows only presets allowed for the session game size
 - Recommended games: derive game size from each preset play area instead of defaulting to medium
+- Tutorial: hub and steps fit one screen without scrolling; screenshots fill the frame; tap to enlarge
+- Wizards: swipe left or right between steps in question tools, hider zone, and tutorial
+- App: pinch zoom no longer zooms menus and tutorial pages; map zoom unchanged
 
 ## 0.4.3 - 2026-07-11
 
