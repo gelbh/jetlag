@@ -105,17 +105,19 @@ function sleep(ms) {
 }
 
 const NYC_POI_BBOX = { south: 40.49, west: -74.26, north: 40.92, east: -73.7 };
+const LONDON_POI_BBOX = { south: 51.28, west: -0.51, north: 51.7, east: 0.33 };
+const DUBLIN_POI_BBOX = { south: 53.24, west: -6.45, north: 53.43, east: -6.07 };
 
-const NYC_POI_CATEGORIES = [
+const REGION_POI_CATEGORIES = [
   { id: "museum", wikidataTypes: ["Q33506"] },
   { id: "park", wikidataTypes: ["Q22698"] },
   { id: "hospital", wikidataTypes: ["Q16917"] },
   { id: "mountain", wikidataTypes: ["Q8502"] },
   { id: "commercial_airport", wikidataTypes: ["Q1248784"] },
-  { id: "rail_station", wikidataTypes: ["Q55488"] },
+  { id: "rail_station", wikidataTypes: ["Q55488"], limit: 800 },
 ];
 
-function buildWikidataPoiQuery(wikidataTypes, bbox) {
+function buildWikidataPoiQuery(wikidataTypes, bbox, limit = 2000) {
   const typeClause = wikidataTypes.map((type) => `wd:${type}`).join(", ");
 
   return `
@@ -131,14 +133,14 @@ function buildWikidataPoiQuery(wikidataTypes, bbox) {
       ?item rdfs:label ?itemLabel .
       FILTER(LANG(?itemLabel) = "en")
     }
-    LIMIT 2000
+    LIMIT ${limit}
   `;
 }
 
-async function fetchWikidataPois(wikidataTypes, bbox) {
+async function fetchWikidataPois(wikidataTypes, bbox, attempt = 1, limit = 2000) {
   const url = new URL("https://query.wikidata.org/sparql");
   url.searchParams.set("format", "json");
-  url.searchParams.set("query", buildWikidataPoiQuery(wikidataTypes, bbox));
+  url.searchParams.set("query", buildWikidataPoiQuery(wikidataTypes, bbox, limit));
 
   const response = await fetch(url, {
     headers: {
@@ -151,7 +153,21 @@ async function fetchWikidataPois(wikidataTypes, bbox) {
     throw new Error(`Wikidata SPARQL failed (${response.status}).`);
   }
 
-  const payload = await response.json();
+  const raw = await response.text();
+  let payload;
+  try {
+    payload = JSON.parse(raw);
+  } catch (error) {
+    if (attempt < 3) {
+      await sleep(2000 * attempt);
+      return fetchWikidataPois(wikidataTypes, bbox, attempt + 1, limit);
+    }
+
+    throw new Error(
+      `Wikidata SPARQL returned invalid JSON (${error instanceof Error ? error.message : "parse error"}).`,
+    );
+  }
+
   const bindings = payload.results?.bindings ?? [];
   const seen = new Set();
   const places = [];
@@ -159,7 +175,7 @@ async function fetchWikidataPois(wikidataTypes, bbox) {
   for (const row of bindings) {
     const itemUri = row.item?.value;
     const qid = itemUri?.split("/").pop();
-    const name = row.itemLabel?.value?.trim();
+    const name = row.itemLabel?.value?.trim().replace(/[\u0000-\u001F\u007F]/g, "");
     const lat = Number(row.lat?.value);
     const lng = Number(row.lon?.value);
 
@@ -178,18 +194,34 @@ async function fetchWikidataPois(wikidataTypes, bbox) {
   return places;
 }
 
-async function buildNycPoiBundles() {
-  for (const category of NYC_POI_CATEGORIES) {
-    const places = await fetchWikidataPois(category.wikidataTypes, NYC_POI_BBOX);
-    writeJson(resolve(GEO, `nyc/poi/${category.id}.json`), {
-      category: category.id,
-      source: "wikidata",
-      bbox: NYC_POI_BBOX,
-      places,
-    });
-    console.log("nyc poi:", category.id, places.length, "places");
+async function buildRegionPoiBundles(packId, bbox) {
+  for (const category of REGION_POI_CATEGORIES) {
+    try {
+      const places = await fetchWikidataPois(
+        category.wikidataTypes,
+        bbox,
+        1,
+        category.limit,
+      );
+      writeJson(resolve(GEO, `${packId}/poi/${category.id}.json`), {
+        category: category.id,
+        source: "wikidata",
+        bbox,
+        places,
+      });
+      console.log(`${packId} poi:`, category.id, places.length, "places");
+    } catch (error) {
+      console.error(
+        `${packId} poi ${category.id} failed:`,
+        error instanceof Error ? error.message : error,
+      );
+    }
     await sleep(1500);
   }
+}
+
+async function buildNycPoiBundles() {
+  await buildRegionPoiBundles("nyc", NYC_POI_BBOX);
 }
 
 async function buildNyc() {
@@ -304,10 +336,11 @@ async function buildLondon() {
 
   writeFileSync(
     resolve(GEO, "london/ATTRIBUTION.txt"),
-    "London borough boundaries: utisz/compound-cities (admin sources cited in repo)\nLocal areas: quadrant splits of borough polygons for play\n",
+    "London borough boundaries: utisz/compound-cities (admin sources cited in repo)\nLocal areas: quadrant splits of borough polygons for play\nLondon POI bundles: Wikidata (CC0)\n",
     "utf8",
   );
   console.log("london:", boroughs.features.length, "boroughs,", areas.features.length, "areas");
+  await buildRegionPoiBundles("london", LONDON_POI_BBOX);
 }
 
 async function buildTokyo() {
@@ -531,6 +564,12 @@ async function ensureDownloads() {
 }
 
 async function main() {
+  if (process.argv.includes("--poi-only")) {
+    await buildRegionPoiBundles("london", LONDON_POI_BBOX);
+    await buildRegionPoiBundles("dublin", DUBLIN_POI_BBOX);
+    return;
+  }
+
   await ensureDownloads();
   await buildNyc();
   await buildLondon();
@@ -546,6 +585,7 @@ async function main() {
     secondary: "municipalities",
     secondaryByDistrict: "municipalities",
   });
+  await buildRegionPoiBundles("dublin", DUBLIN_POI_BBOX);
 }
 
 main().catch((error) => {

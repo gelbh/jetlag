@@ -28,6 +28,8 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Live transit: Chicago premium sessions load CTA bus and L train positions through the vehicles proxy",
           "Sea level measuring: USGS EPQS elevation for US play areas with Open-Meteo fallback elsewhere",
           "NYC region pack: bundled Wikidata POI lists for museums, parks, hospitals, and other measuring categories",
+          "London and Dublin region packs: bundled Wikidata POI lists for measuring and tentacle categories",
+          "Tentacles: merge bundled museum and hospital POIs when a region pack is set",
           "Premium sessions: Overpass proxy uses a priority queue and server-side warm preload when the game area is set",
         ],
       },

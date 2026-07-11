@@ -1,2 +1,3 @@
 London borough boundaries: utisz/compound-cities (admin sources cited in repo)
 Local areas: quadrant splits of borough polygons for play
+London POI bundles: Wikidata (CC0)

@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import type { MeasuringPlace } from "./measuringPlaces";
-import { mergeMeasuringPlaces } from "./regionPackPoi";
+import type { TentaclePoi } from "../../domain/map/annotations";
+import {
+  fetchBundledTentaclePois,
+  mergeMeasuringPlaces,
+  mergeTentaclePois,
+} from "./regionPackPoi";
 
 const sampleGameArea = {
   type: "Polygon" as const,
@@ -78,6 +83,101 @@ describe("regionPackPoi", () => {
         id: "Q160236",
         name: "Metropolitan Museum of Art",
         point: [40.7794, -73.9632] satisfies LatLngTuple,
+      },
+    ]);
+
+    vi.stubGlobal("fetch", originalFetch);
+    clearBundledPoiCacheForTests();
+  });
+
+  it("merges bundled tentacle pois without duplicating overpass names", () => {
+    const overpass: TentaclePoi[] = [
+      {
+        id: "1",
+        name: "British Museum",
+        lat: 51.5194,
+        lng: -0.127,
+        category: "museum",
+      },
+    ];
+    const bundled: TentaclePoi[] = [
+      {
+        id: "Q6373",
+        name: "British Museum",
+        lat: 51.5194,
+        lng: -0.127,
+        category: "museum",
+      },
+      {
+        id: "Q180857",
+        name: "Wellcome Collection",
+        lat: 51.5258,
+        lng: -0.1339,
+        category: "museum",
+      },
+    ];
+
+    const merged = mergeTentaclePois(overpass, bundled);
+    expect(merged).toHaveLength(2);
+    expect(merged.map((poi) => poi.name)).toEqual([
+      "British Museum",
+      "Wellcome Collection",
+    ]);
+  });
+
+  it("loads bundled tentacle pois within search radius", async () => {
+    const { clearBundledPoiCacheForTests } = await import("./regionPackPoi");
+
+    clearBundledPoiCacheForTests();
+
+    const museumBundleUrl = "/geo/london/poi/museum.json";
+    const originalFetch = globalThis.fetch;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        if (String(input) === museumBundleUrl) {
+          return {
+            ok: true,
+            json: async () => ({
+              category: "museum",
+              source: "wikidata",
+              places: [
+                {
+                  id: "Q6373",
+                  name: "British Museum",
+                  lat: 51.5194,
+                  lng: -0.127,
+                },
+                {
+                  id: "Q152087",
+                  name: "Tate Modern",
+                  lat: 51.5076,
+                  lng: -0.0994,
+                },
+              ],
+            }),
+          };
+        }
+
+        throw new Error(`Unexpected fetch: ${String(input)}`);
+      }),
+    );
+
+    const center: LatLngTuple = [51.5194, -0.127];
+    const pois = await fetchBundledTentaclePois(
+      center,
+      500,
+      "museum",
+      "london",
+    );
+
+    expect(pois).toEqual([
+      {
+        id: "Q6373",
+        name: "British Museum",
+        lat: 51.5194,
+        lng: -0.127,
+        category: "museum",
       },
     ]);
 

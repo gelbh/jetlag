@@ -4,3 +4,4 @@ Source: Tailte Éireann / data.gov.ie
 - CSO Local Electoral Areas - National Statistical Boundaries (50m)
 
 https://data.gov.ie/
+Dublin POI bundles: Wikidata (CC0)
