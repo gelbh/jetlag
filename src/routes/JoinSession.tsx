@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AppLogo } from "../components/ui/AppLogo";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { InlineError } from "../components/ui/InlineError";
-import { ScreenNav } from "../components/ui/ScreenNav";
+import {
+  ScreenHeader,
+  screenHeaderOffsetClassName,
+} from "../components/ui/ScreenHeader";
 import { isPremiumSession } from "../domain/map/annotations";
 import {
   isValidSessionCode,
@@ -133,9 +135,8 @@ export function JoinSession() {
 
   return (
     <EntryScreenLayout justify="center">
-      <ScreenNav backTo="/" backLabel="Back" />
-      <div className="pt-[max(3rem,env(safe-area-inset-top))]">
-        <AppLogo variant="lockup" size="md" />
+      <ScreenHeader backTo="/" backLabel="Back" />
+      <div className={screenHeaderOffsetClassName}>
         <p className="mt-3 font-display text-sm font-semibold uppercase tracking-[0.2em] text-brand-blue">
           Join game
         </p>

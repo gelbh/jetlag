@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { AppLogo } from "../components/ui/AppLogo";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
-import { HudPlayIcon } from "../components/ui/HudIcons";
+import { HudGuideIcon, HudPlayIcon } from "../components/ui/HudIcons";
 import { InlineError } from "../components/ui/InlineError";
 import { VersionChangelogSheet } from "../components/ui/VersionChangelogSheet";
 import { APP_VERSION } from "../domain/device/changelog";
@@ -18,10 +18,11 @@ import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useViewTransitionNavigate } from "../hooks/useViewTransitionNavigate";
 import {
-  formatEntitlementSummary,
+  resolveHomePremiumButtonDisplay,
   type PremiumEntitlements,
 } from "../domain/billing/premiumProducts";
 import { fetchPremiumEntitlements } from "../services/billing/premiumBilling";
+import { LEGAL_APP_NAME } from "../domain/legal/legalContact";
 
 export function Home() {
   const navigate = useViewTransitionNavigate();
@@ -60,7 +61,7 @@ export function Home() {
     };
   }, []);
 
-  const premiumSummary = formatEntitlementSummary(premiumEntitlements);
+  const premiumButton = resolveHomePremiumButtonDisplay(premiumEntitlements);
 
   const handleContinue = async () => {
     if (!session) {
@@ -125,26 +126,39 @@ export function Home() {
   return (
     <>
       <EntryScreenLayout>
-        <div className="space-y-3 pt-[max(1.25rem,env(safe-area-inset-top))]">
+        <div className="space-y-4 pt-[max(1.25rem,env(safe-area-inset-top))]">
           <div className="flex items-start justify-between gap-3">
-            <AppLogo variant="lockup" size="lg" />
-            <button
-              type="button"
-              onClick={() => setChangelogOpen(true)}
-              className="hud-chrome shrink-0 px-2.5 py-1.5 font-mono text-xs font-bold tracking-wide text-ink-muted"
-              aria-label={`Version ${APP_VERSION}. Open changelog`}
-            >
-              v{APP_VERSION}
-            </button>
+            <AppLogo variant="mark" size="lg" className="shrink-0" />
+            <div className="flex shrink-0 items-center gap-2">
+              <Link
+                to="/tutorial"
+                className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"
+                aria-label="Open tutorial"
+              >
+                <HudGuideIcon className="size-5" />
+              </Link>
+              <button
+                type="button"
+                onClick={() => setChangelogOpen(true)}
+                className="hud-chrome shrink-0 px-2.5 py-1.5 font-mono text-xs font-bold tracking-wide text-ink-muted"
+                aria-label={`Version ${APP_VERSION}. Open changelog`}
+              >
+                v{APP_VERSION}
+              </button>
+            </div>
           </div>
-          <h1 className="font-display text-balance text-[clamp(2.25rem,12vw,4.25rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
-            Hide +
-            <br />
-            Seek
-          </h1>
-          <p className="max-w-sm pt-2 text-pretty text-base leading-relaxed text-ink-muted">
-            Seekers ask questions on the live map. Hiders answer, set hiding zones,
-            and watch the search unfold.
+          <div className="space-y-1">
+            <h1 className="font-display text-balance text-[clamp(1.75rem,7.5vw,3rem)] font-bold uppercase leading-[0.95] tracking-tight text-ink">
+              {LEGAL_APP_NAME}
+            </h1>
+            <p className="font-display text-pretty text-[clamp(1.5rem,6vw,2.25rem)] font-bold uppercase leading-none tracking-tight text-brand-blue">
+              Hide + Seek
+            </p>
+          </div>
+          <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
+            Unofficial fan companion for Jet Lag: The Game. Host or join synced map
+            sessions: seekers ask questions on the live map, hiders answer and set
+            hiding zones, and everyone stays on the same board.
           </p>
         </div>
 
@@ -210,13 +224,26 @@ export function Home() {
           {isFirebaseConfigured() ? (
             <Link
               to="/premium"
-              aria-label="Premium sessions and subscriptions"
-              className="home-card-btn home-card-btn-secondary"
+              aria-label={
+                premiumButton.planLabel
+                  ? `Premium, ${premiumButton.planLabel}. ${premiumButton.detailLabel}`
+                  : `Premium sessions and subscriptions. ${premiumButton.detailLabel}`
+              }
+              className={
+                premiumButton.variant === "unlimited"
+                  ? "home-card-btn home-card-btn-premium"
+                  : premiumButton.variant === "sessions"
+                    ? "home-card-btn home-card-btn-premium-sessions"
+                    : "home-card-btn home-card-btn-secondary"
+              }
             >
-              <span>Premium</span>
-              <span className="home-card-btn-hint">
-                {premiumSummary ?? "Live transit hosting"}
+              <span className="home-card-btn-text">
+                <span>{premiumButton.primaryLabel}</span>
+                {premiumButton.planLabel ? (
+                  <span className="home-card-btn-plan">{premiumButton.planLabel}</span>
+                ) : null}
               </span>
+              <span className="home-card-btn-hint">{premiumButton.detailLabel}</span>
             </Link>
           ) : null}
           <nav

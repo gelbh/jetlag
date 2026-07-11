@@ -15,6 +15,8 @@ interface AnimatedOverlayProps {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
+  /** Fixed header above the scroll body (e.g. sheet title and tabs). */
+  pinned?: ReactNode;
   dismissible?: boolean;
   ariaLabel?: string;
   sheetClassName?: string;
@@ -45,6 +47,7 @@ export function AnimatedOverlay({
   open,
   onClose,
   children,
+  pinned,
   dismissible = true,
   ariaLabel,
   sheetClassName = "",
@@ -123,7 +126,9 @@ export function AnimatedOverlay({
       >
         <MobileSheet
           className={`${animClass} ${sheetClassName}`.trim()}
+          layout={pinned ? "split" : "scroll"}
           maxHeightClassName={maxHeightClassName}
+          pinned={pinned}
           scrollRef={scrollRef}
           handleProps={dismissible ? gesture.handleProps : undefined}
         >

@@ -1,8 +1,7 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import type { LatLngBoundsExpression } from "leaflet";
-import { AppLogo } from "../components/ui/AppLogo";
-import { ScreenNav } from "../components/ui/ScreenNav";
+import { ScreenHeader } from "../components/ui/ScreenHeader";
 import { CreateSessionMapPane } from "../components/session/CreateSessionMapPane";
 import { GameAreaFramingModal } from "../components/session/GameAreaFramingModal";
 import {
@@ -320,7 +319,6 @@ export function CreateSession() {
     resolvedSessionTier,
     requiresPremiumSignIn,
     showPremiumUnlockPanel,
-    premiumEntitlementSummary,
     visibleTierOptions,
     resolveSubmitTier,
     validatePremiumHostSubmit,
@@ -694,6 +692,10 @@ export function CreateSession() {
 
   return (
     <div className="flex h-full min-h-[100dvh] flex-col bg-surface-deep">
+      <div className="shrink-0 border-b-2 border-border bg-surface-deep px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <ScreenHeader backTo="/" backLabel="Back" placement="inline" />
+      </div>
+
       <CreateSessionMapPane
         mapStyle={mapStyle}
         onMapStyleChange={setMapStyle}
@@ -740,12 +742,8 @@ export function CreateSession() {
         maxHeightClassName="max-h-[min(58dvh,640px)]"
         className="flex min-h-0 flex-1 flex-col"
       >
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 px-4 pt-[max(3rem,env(safe-area-inset-top))]">
-        <ScreenNav backTo="/" backLabel="Back" />
-        <div className="mt-4">
-        <AppLogo variant="lockup" size="md" />
-        </div>
-        <p className="mt-3 font-display text-xs font-semibold uppercase tracking-[0.14em] text-brand-blue">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 px-4">
+        <p className="mt-4 font-display text-xs font-semibold uppercase tracking-[0.14em] text-brand-blue">
           New game
         </p>
         <h1 className="mt-1 font-display text-2xl font-bold uppercase leading-tight tracking-tight text-ink">
@@ -1084,16 +1082,11 @@ export function CreateSession() {
 
         <div
           className={`overflow-hidden motion-safe:transition-[max-height,opacity] motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none ${
-            showPremiumUnlockPanel || paidPremiumHost || packPremiumFlow
+            showPremiumUnlockPanel || requiresPremiumSignIn
               ? "max-h-56 opacity-100"
               : "max-h-0 opacity-0"
           }`}
         >
-          {paidPremiumHost && premiumEntitlementSummary ? (
-            <p className="text-sm font-semibold text-highlight">
-              {premiumEntitlementSummary}
-            </p>
-          ) : null}
           {requiresPremiumSignIn ? (
             <PremiumSignInGate
               continuePath="/create"
