@@ -1,6 +1,5 @@
-import { ensureAnonymousUser, getFirebaseAuth, isFirebaseConfigured } from "./firebase";
+import { ensureAnonymousUser, getFirebaseAuth, isFirebaseConfigured, waitForAuthStateReady } from "./firebase";
 
-const AUTH_WAIT_POLL_MS = 50;
 const DEFAULT_AUTH_WAIT_MS = 10_000;
 
 function sleep(ms: number): Promise<void> {
@@ -16,27 +15,25 @@ export async function waitForFirebaseAuth(
     return true;
   }
 
-  if (getFirebaseAuth().currentUser) {
-    return true;
-  }
+  const authWork = (async () => {
+    await waitForAuthStateReady();
 
-  const signInPromise = ensureAnonymousUser()
-    .then(() => true)
-    .catch(() => false);
-
-  const deadline = Date.now() + maxWaitMs;
-  while (Date.now() < deadline) {
-    const signedIn = await Promise.race([
-      signInPromise,
-      sleep(Math.min(AUTH_WAIT_POLL_MS, deadline - Date.now())).then(
-        () => null,
-      ),
-    ]);
-
-    if (signedIn === true || getFirebaseAuth().currentUser) {
+    if (getFirebaseAuth().currentUser) {
       return true;
     }
+
+    await ensureAnonymousUser();
+    return getFirebaseAuth().currentUser !== null;
+  })();
+
+  const result = await Promise.race([
+    authWork,
+    sleep(maxWaitMs).then(() => null),
+  ]);
+
+  if (result === null) {
+    return getFirebaseAuth().currentUser !== null;
   }
 
-  return getFirebaseAuth().currentUser !== null;
+  return result;
 }

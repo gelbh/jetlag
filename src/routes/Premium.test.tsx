@@ -10,6 +10,7 @@ const {
   ensureAnonymousUser,
   isFirebaseConfigured,
   isPermanentUser,
+  waitForAuthStateReady,
   mockAuth,
 } = vi.hoisted(() => {
   const auth = {
@@ -25,6 +26,7 @@ const {
     startPremiumCheckout: vi.fn(),
     openPremiumBillingPortal: vi.fn(),
     ensureAnonymousUser: vi.fn(async () => undefined),
+    waitForAuthStateReady: vi.fn(async () => undefined),
     isFirebaseConfigured: vi.fn(() => false),
     isPermanentUser: vi.fn(() => true),
     mockAuth: auth,
@@ -34,6 +36,7 @@ const {
 vi.mock("../services/core/firebase", () => ({
   isFirebaseConfigured,
   ensureAnonymousUser,
+  waitForAuthStateReady,
   getFirebaseAuth: () => mockAuth,
 }));
 

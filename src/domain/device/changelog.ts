@@ -18,6 +18,8 @@ export const CHANGELOG: ChangelogEntry[] = [
         title: "Fixes",
         items: [
           "Premium checkout: fix billing error after switching to live Stripe; show a clear message when checkout fails",
+          "Premium checkout: stay signed in after Stripe redirects back to the app",
+          "App updates: keep Google and email sign-in after reload or PWA update",
         ],
       },
       {
