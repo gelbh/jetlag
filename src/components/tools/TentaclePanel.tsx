@@ -215,7 +215,7 @@ export function TentaclePanel({
         onBack={goBack}
         onNext={goNext}
         canGoNext={
-          (step === "anchor" && hasCenter && !loading && locationsReady) ||
+          (step === "anchor" && hasCenter && !loading) ||
           (step === "category" && categorySelectionAvailable) ||
           (step === "locations" && locationsReady && !loading)
         }
