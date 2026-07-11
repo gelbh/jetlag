@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type RefObject } from "react";
 import { useLatestRequest } from "../useLatestRequest";
 import type { GameArea } from "../../domain/map/annotations";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
@@ -30,6 +30,7 @@ interface UseHiderZoneToolParams {
   resumeTimer: () => void;
   ensureWriteAccess?: () => Promise<void>;
   writesEnabled?: boolean;
+  wizardStepRef?: RefObject<string>;
 }
 
 export function useHiderZoneTool({
@@ -43,6 +44,7 @@ export function useHiderZoneTool({
   resumeTimer,
   ensureWriteAccess,
   writesEnabled = true,
+  wizardStepRef,
 }: UseHiderZoneToolParams) {
   const [stations, setStations] = useState<TransitStation[]>([]);
   const [stationsLoading, setStationsLoading] = useState(false);
@@ -52,6 +54,7 @@ export function useHiderZoneTool({
     null,
   );
   const [manualMode, setManualMode] = useState(false);
+  const [methodChosen, setMethodChosen] = useState(false);
   const [manualCenter, setManualCenter] = useState<LatLngTuple | null>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [moveMode, setMoveMode] = useState(false);
@@ -62,6 +65,7 @@ export function useHiderZoneTool({
     setSelectedStation(null);
     setManualCenter(null);
     setManualMode(false);
+    setMethodChosen(false);
     setQuery("");
     setError(null);
     setStations([]);
@@ -195,6 +199,10 @@ export function useHiderZoneTool({
         return false;
       }
 
+      if (wizardStepRef?.current !== "location") {
+        return false;
+      }
+
       if (manualMode) {
         if (!isPointInGameArea(point, gameArea)) {
           setError("That point is outside the play area.");
@@ -218,7 +226,7 @@ export function useHiderZoneTool({
       setError(null);
       return true;
     },
-    [gameArea, manualMode, stations, wizardOpen],
+    [gameArea, manualMode, stations, wizardOpen, wizardStepRef],
   );
 
   const confirmZone = useCallback(async () => {
@@ -335,10 +343,23 @@ export function useHiderZoneTool({
     writesEnabled,
   ]);
 
+  const choosePlacementMethod = useCallback((manual: boolean) => {
+    setManualMode(manual);
+    setMethodChosen(true);
+    setSelectedStation(null);
+    setManualCenter(null);
+    setError(null);
+  }, []);
+
   const setManualModeEnabled = useCallback((enabled: boolean) => {
     setManualMode(enabled);
     setSelectedStation(null);
     setManualCenter(null);
+    setError(null);
+  }, []);
+
+  const clearStationSelection = useCallback(() => {
+    setSelectedStation(null);
     setError(null);
   }, []);
 
@@ -357,7 +378,10 @@ export function useHiderZoneTool({
       setError(null);
     },
     manualMode,
+    methodChosen,
+    choosePlacementMethod,
     setManualModeEnabled,
+    clearStationSelection,
     manualCenter,
     previewCircle,
     wizardOpen,

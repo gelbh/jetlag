@@ -1,5 +1,6 @@
 import { test, expect } from "./fixtures";
 import {
+  advanceHidingZoneWizardToLocation,
   confirmHidingZone,
   confirmInitialHidingZoneAtStation,
   createHostSession,
@@ -22,6 +23,7 @@ test.describe("hider flows", () => {
     await joinAsRole(guestPage, code, "hider");
 
     await openHidingZoneWizard(guestPage);
+    await advanceHidingZoneWizardToLocation(guestPage);
     await expect(
       guestPage.getByRole("button", { name: "Search this area" }),
     ).toBeVisible();
@@ -40,6 +42,7 @@ test.describe("hider flows", () => {
     await joinAsRole(guestPage, code, "hider");
 
     await openHidingZoneWizard(guestPage);
+    await advanceHidingZoneWizardToLocation(guestPage);
     await expect(guestPage.getByRole("button", { name: "51" })).toBeVisible();
 
     await cleanup();
@@ -69,11 +72,17 @@ test.describe("hider flows", () => {
     guestPage.once("dialog", (dialog) => dialog.accept());
     await guestPage.getByRole("button", { name: "Play move" }).click();
     await waitForHidingZoneWizard(guestPage);
+    await expect(guestPage.getByPlaceholder("Search stations…")).toBeVisible({
+      timeout: 15_000,
+    });
     await selectTransitStation(guestPage, "Dublin Central");
+    await guestPage.getByRole("button", { name: "Next" }).click();
     await confirmHidingZone(guestPage, true);
     await expect(guestPage.getByText(/different location/i)).toBeVisible();
 
+    await guestPage.getByRole("button", { name: "Back" }).click();
     await selectTransitStation(guestPage, "North Station");
+    await guestPage.getByRole("button", { name: "Next" }).click();
     await confirmHidingZone(guestPage, true);
 
     await openChat(hostPage);

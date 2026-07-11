@@ -8,6 +8,11 @@ interface HiderZoneWizardShellProps {
   peeked: boolean;
   onPeekedChange: (peeked: boolean) => void;
   children: ReactNode;
+  peekLabel?: string;
+  onClose?: () => void;
+  closeLabel?: string;
+  maxHeightClassName?: string;
+  contentKey?: string | number;
 }
 
 export function HiderZoneWizardShell({
@@ -15,6 +20,11 @@ export function HiderZoneWizardShell({
   peeked,
   onPeekedChange,
   children,
+  peekLabel,
+  onClose,
+  closeLabel,
+  maxHeightClassName = "max-h-[min(54dvh,480px)]",
+  contentKey,
 }: HiderZoneWizardShellProps) {
   const { mounted, animClass, setAnimNode } = useAnimatedPresence({
     open,
@@ -37,14 +47,18 @@ export function HiderZoneWizardShell({
     <MapFloatingPanel
       minimized={peeked}
       onMinimizedChange={onPeekedChange}
+      peekLabel={peekLabel}
       outerRef={setAnimNode}
       outerClassName={`pointer-events-auto absolute inset-x-0 jl-panel-hider-wizard z-[var(--z-panel)] px-3 ${animClass} ${
         peeked ? "jl-panel-peeked" : ""
       }`}
-      maxHeightClassName="max-h-[min(40dvh,360px)]"
+      maxHeightClassName={maxHeightClassName}
       preserveBodyWhenMinimized={false}
       panelStyle={panelStyle}
       dragHandleProps={handleProps}
+      onClose={onClose}
+      closeLabel={closeLabel}
+      contentKey={contentKey}
     >
       {children}
     </MapFloatingPanel>

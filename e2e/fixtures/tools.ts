@@ -373,7 +373,28 @@ export async function expectChatAnswer(page: Page, answer: string) {
 }
 
 export async function waitForHidingZoneWizard(page: Page) {
-  await expect(page.getByPlaceholder("Search stations…")).toBeVisible();
+  const methodStep = page
+    .getByRole("tablist", { name: "Hiding zone placement method" })
+    .or(page.getByRole("group", { name: "Hiding zone placement method" }));
+  const locationSearch = page.getByPlaceholder("Search stations…");
+  await expect(methodStep.or(locationSearch)).toBeVisible({ timeout: 15_000 });
+}
+
+export async function advanceHidingZoneWizardToLocation(page: Page) {
+  const methodTablist = page.getByRole("tablist", {
+    name: "Hiding zone placement method",
+  });
+  const methodGroup = page.getByRole("group", {
+    name: "Hiding zone placement method",
+  });
+  if (await methodTablist.isVisible()) {
+    await page.getByRole("tab", { name: "Station" }).click();
+  } else if (await methodGroup.isVisible()) {
+    await page.getByRole("button", { name: "Station" }).click();
+  }
+  await expect(page.getByPlaceholder("Search stations…")).toBeVisible({
+    timeout: 15_000,
+  });
   await expect(page.getByText(/Loading stations/i)).toBeHidden({
     timeout: 30_000,
   });
@@ -405,7 +426,9 @@ export async function confirmInitialHidingZoneAtStation(
   stationName: string | RegExp,
 ) {
   await openHidingZoneWizard(page);
+  await advanceHidingZoneWizardToLocation(page);
   await selectTransitStation(page, stationName);
+  await page.getByRole("button", { name: "Next" }).click();
   await confirmHidingZone(page);
   await expect(page.getByRole("button", { name: "Play move" })).toBeVisible({
     timeout: 15_000,
