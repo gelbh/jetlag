@@ -15,6 +15,12 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-07-11",
     sections: [
       {
+        title: "Fixes",
+        items: [
+          "Premium checkout: fix billing error after switching to live Stripe; show a clear message when checkout fails",
+        ],
+      },
+      {
         title: "Improvements",
         items: [
           "Recommended presets: add Prince Rupert, BC with neighbourhood boundaries, bundled POI, and BC Transit.",

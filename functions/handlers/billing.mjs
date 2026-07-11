@@ -96,6 +96,7 @@ export const createBillingPortalSession = onCall(
       stripe,
       adminDb(),
       request.auth.uid,
+      request.auth.token.email,
     );
   },
 );

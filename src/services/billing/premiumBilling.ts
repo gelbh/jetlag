@@ -17,7 +17,9 @@ function billingUnavailable(): never {
 
 function mapCallableError(error: unknown, fallback: string): Error {
   if (error instanceof FirebaseError) {
-    return new Error(error.message || fallback, { cause: error });
+    const raw = error.message?.trim();
+    const message = !raw || raw === "INTERNAL" ? fallback : raw;
+    return new Error(message, { cause: error });
   }
 
   return error instanceof Error ? error : new Error(fallback);
