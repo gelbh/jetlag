@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.1 - 2026-07-11
+
+### Improvements
+
+- Matching: transit_line uses full GTFS stop and route graphs for London, NYC, Dublin, SF, and Chicago
+- Live transit: Chicago premium sessions load CTA bus and L train positions through the vehicles proxy
+- Sea level measuring: USGS EPQS elevation for US play areas with Open-Meteo fallback elsewhere
+- NYC region pack: bundled Wikidata POI lists for museums, parks, hospitals, and other measuring categories
+- Premium sessions: Overpass proxy uses a priority queue and server-side warm preload when the game area is set
+
+### Technical
+
+- Cloud Functions: Sentry release tag reads version from functions package.json
+
 ## 0.4.0 - 2026-07-11
 
 ### Fixes
