@@ -17,27 +17,32 @@ const OUT_DIR = resolve(ROOT, "public/geo/gtfs");
 const METROS = [
   {
     id: "london",
-    feedOnestopId: "f-c23-~",
+    feedOnestopId: "f-transport~for~london",
+    feedOnestopIds: ["f-transport~for~london"],
     bbox: { south: 51.28, west: -0.51, north: 51.69, east: 0.33 },
   },
   {
     id: "dublin",
-    feedOnestopId: "f-dhs-~",
+    feedOnestopId: "f-small~operators~ie",
+    feedOnestopIds: ["f-small~operators~ie"],
     bbox: { south: 53.22, west: -6.45, north: 53.45, east: -6.05 },
   },
   {
     id: "nyc",
-    feedOnestopId: "f-dr5r-~",
+    feedOnestopId: "f-dr5r-nyctsubway",
+    feedOnestopIds: ["f-dr5r-nyctsubway", "f-dr5r-path~nj~us"],
     bbox: { south: 40.49, west: -74.26, north: 40.92, east: -73.7 },
   },
   {
     id: "sf",
-    feedOnestopId: "f-9q8y-~",
+    feedOnestopId: "f-9q8y-sfmta",
+    feedOnestopIds: ["f-9q8y-sfmta"],
     bbox: { south: 37.45, west: -122.52, north: 38.05, east: -122.05 },
   },
   {
     id: "chicago",
-    feedOnestopId: "f-dp3-~",
+    feedOnestopId: "f-dp3-cta",
+    feedOnestopIds: ["f-dp3-cta"],
     bbox: { south: 41.64, west: -87.94, north: 42.07, east: -87.52 },
   },
 ];
@@ -189,6 +194,80 @@ function stopInBbox(stop, bbox) {
   );
 }
 
+function csvColumnIndexes(headers) {
+  const indexes = {};
+  for (let index = 0; index < headers.length; index += 1) {
+    indexes[headers[index]] = index;
+  }
+  return indexes;
+}
+
+function forEachCsvDataRow(text, onRow) {
+  let lineStart = 0;
+  let columns = null;
+
+  for (let index = 0; index <= text.length; index += 1) {
+    if (index < text.length && text[index] !== "\n") {
+      continue;
+    }
+
+    let lineEnd = index;
+    if (lineEnd > lineStart && text[lineEnd - 1] === "\r") {
+      lineEnd -= 1;
+    }
+
+    if (lineEnd > lineStart) {
+      const line = text.slice(lineStart, lineEnd);
+      if (!columns) {
+        columns = csvColumnIndexes(splitCsvLine(line));
+      } else {
+        onRow(splitCsvLine(line), columns);
+      }
+    }
+
+    lineStart = index + 1;
+  }
+}
+
+function buildStopRouteIdsFromText(stopTimesText, stopIds, tripRoute) {
+  let tripIndex;
+  let stopIndex;
+  const routeSets = new Map();
+
+  forEachCsvDataRow(stopTimesText, (values, columns) => {
+    if (tripIndex === undefined) {
+      tripIndex = columns.trip_id;
+      stopIndex = columns.stop_id;
+      if (tripIndex === undefined || stopIndex === undefined) {
+        throw new Error("GTFS stop_times.txt is missing trip_id or stop_id columns.");
+      }
+    }
+
+    const stopId = values[stopIndex];
+    if (!stopIds.has(stopId)) {
+      return;
+    }
+
+    const routeId = tripRoute.get(values[tripIndex]);
+    if (!routeId) {
+      return;
+    }
+
+    let routeSet = routeSets.get(stopId);
+    if (!routeSet) {
+      routeSet = new Set();
+      routeSets.set(stopId, routeSet);
+    }
+    routeSet.add(routeId);
+  });
+
+  const stopRouteIds = {};
+  for (const [stopId, routeSet] of routeSets) {
+    stopRouteIds[stopId] = [...routeSet];
+  }
+  return stopRouteIds;
+}
+
 function buildBundleFromGtfsZip(zipBuffer, metro) {
   const zip = new JSZip();
   return zip.loadAsync(zipBuffer).then(async (archive) => {
@@ -202,32 +281,33 @@ function buildBundleFromGtfsZip(zipBuffer, metro) {
     }
 
     const stopsRows = parseCsv(stopsText).filter((row) => stopInBbox(row, metro.bbox));
-    const routesRows = parseCsv(routesText);
+    const referencedParentIds = new Set(
+      stopsRows
+        .map((row) => row.parent_station)
+        .filter((value) => value && value.length > 0),
+    );
     const tripsRows = parseCsv(tripsText);
-    const stopTimesRows = parseCsv(stopTimesText);
 
-    const stopIds = new Set(stopsRows.map((row) => row.stop_id));
+    const stopIds = new Set(
+      stopsRows
+        .filter((row) => !referencedParentIds.has(row.stop_id))
+        .map((row) => row.stop_id),
+    );
     const tripRoute = new Map(
       tripsRows.map((row) => [row.trip_id, row.route_id]),
     );
+    const stopRouteIds = buildStopRouteIdsFromText(
+      stopTimesText,
+      stopIds,
+      tripRoute,
+    );
 
-    const stopRouteIds = {};
-    for (const row of stopTimesRows) {
-      if (!stopIds.has(row.stop_id)) {
-        continue;
-      }
-
-      const routeId = tripRoute.get(row.trip_id);
-      if (!routeId) {
-        continue;
-      }
-
-      const existing = stopRouteIds[row.stop_id] ?? [];
-      if (!existing.includes(routeId)) {
-        existing.push(routeId);
-      }
-      stopRouteIds[row.stop_id] = existing;
-    }
+    const usedRouteIds = new Set(
+      Object.values(stopRouteIds).flatMap((routeIds) => routeIds),
+    );
+    const routesRows = parseCsv(routesText).filter((row) =>
+      usedRouteIds.has(row.route_id),
+    );
 
     const routes = routesRows.map((row) => ({
       id: row.route_id,
@@ -236,7 +316,9 @@ function buildBundleFromGtfsZip(zipBuffer, metro) {
       mode: routeMode(row.route_type),
     }));
 
-    const stops = stopsRows.map((row) => ({
+    const stops = stopsRows
+      .filter((row) => !referencedParentIds.has(row.stop_id))
+      .map((row) => ({
       id: row.stop_id,
       name: row.stop_name,
       lat: Number(row.stop_lat),
@@ -255,15 +337,91 @@ function buildBundleFromGtfsZip(zipBuffer, metro) {
   });
 }
 
-async function downloadGtfsBundle(metro, apiKey) {
-  const url = `https://transit.land/api/v2/rest/feeds/${encodeURIComponent(metro.feedOnestopId)}/download_latest?apikey=${encodeURIComponent(apiKey)}`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Transitland download failed for ${metro.id} (${response.status}).`);
+function feedSlug(feedId) {
+  return feedId.replace(/^f-/, "").replace(/~/g, "_");
+}
+
+function namespaceBundlePart(bundle, feedId) {
+  const slug = feedSlug(feedId);
+  const stopIdMap = new Map();
+  const routeIdMap = new Map();
+
+  for (const stop of bundle.stops) {
+    stopIdMap.set(stop.id, `${slug}:${stop.id}`);
+  }
+  for (const route of bundle.routes) {
+    routeIdMap.set(route.id, `${slug}:${route.id}`);
   }
 
-  const buffer = await response.arrayBuffer();
-  return buildBundleFromGtfsZip(buffer, metro);
+  const stops = bundle.stops.map((stop) => ({
+    ...stop,
+    id: stopIdMap.get(stop.id),
+    ...(stop.parentStationId
+      ? {
+          parentStationId:
+            stopIdMap.get(stop.parentStationId) ??
+            `${slug}:${stop.parentStationId}`,
+        }
+      : {}),
+  }));
+
+  const routes = bundle.routes.map((route) => ({
+    ...route,
+    id: routeIdMap.get(route.id),
+  }));
+
+  const stopRouteIds = {};
+  for (const [stopId, routeIds] of Object.entries(bundle.stopRouteIds)) {
+    stopRouteIds[stopIdMap.get(stopId)] = routeIds.map(
+      (routeId) => routeIdMap.get(routeId),
+    );
+  }
+
+  return { stops, routes, stopRouteIds };
+}
+
+function mergeBundleParts(parts) {
+  return {
+    stops: parts.flatMap((part) => part.stops),
+    routes: parts.flatMap((part) => part.routes),
+    stopRouteIds: Object.assign({}, ...parts.map((part) => part.stopRouteIds)),
+  };
+}
+
+async function downloadGtfsZip(feedId, apiKey) {
+  const url = `https://transit.land/api/v2/rest/feeds/${encodeURIComponent(feedId)}/download_latest_feed_version?apikey=${encodeURIComponent(apiKey)}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(
+      `Transitland download failed for ${feedId} (${response.status}).`,
+    );
+  }
+
+  return response.arrayBuffer();
+}
+
+async function downloadGtfsBundle(metro, apiKey) {
+  const feedIds = metro.feedOnestopIds ?? [metro.feedOnestopId];
+  const parts = [];
+
+  for (const feedId of feedIds) {
+    const buffer = await downloadGtfsZip(feedId, apiKey);
+    const bundle = await buildBundleFromGtfsZip(buffer, metro);
+    parts.push(
+      feedIds.length > 1 ? namespaceBundlePart(bundle, feedId) : bundle,
+    );
+    console.log(
+      `  ${feedId}: ${bundle.stops.length} stops, ${bundle.routes.length} routes.`,
+    );
+  }
+
+  const merged = mergeBundleParts(parts);
+  return {
+    metroId: metro.id,
+    feedOnestopId: metro.feedOnestopId,
+    builtAt: new Date().toISOString(),
+    ...merged,
+  };
 }
 
 function writeBundle(path, bundle) {
@@ -325,6 +483,7 @@ async function main() {
       continue;
     }
 
+    console.log(`Downloading ${metro.id}...`);
     bundle = await downloadGtfsBundle(metro, apiKey);
     writeBundle(outPath, bundle);
     manifestEntries.push({

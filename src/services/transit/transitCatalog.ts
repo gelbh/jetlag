@@ -27,7 +27,7 @@ export const TRANSIT_METROS: TransitMetro[] = [
     label: "London",
     center: [51.5074, -0.1278],
     radiusKm: 45,
-    transitlandFeed: "f-c23-~",
+    transitlandFeed: "f-transport~for~london",
     transitlandRtFeed: "f-dpwh-londontransit~rt",
     gtfsRtVehicleUrl:
       "https://api.tfl.gov.uk/vehicle/vehiclepositions",
@@ -37,7 +37,7 @@ export const TRANSIT_METROS: TransitMetro[] = [
     label: "Dublin",
     center: [53.3498, -6.2603],
     radiusKm: 35,
-    transitlandFeed: "f-dhs-~",
+    transitlandFeed: "f-small~operators~ie",
     transitlandRtFeed: "f-national~transport~authority~ie~rt",
   },
   {
@@ -45,7 +45,7 @@ export const TRANSIT_METROS: TransitMetro[] = [
     label: "New York City",
     center: [40.7128, -74.006],
     radiusKm: 40,
-    transitlandFeed: "f-dr5r-~",
+    transitlandFeed: "f-dr5r-nyctsubway",
     transitlandRtFeed: "f-mta~nyc~rt~bustime",
   },
   {
@@ -53,7 +53,7 @@ export const TRANSIT_METROS: TransitMetro[] = [
     label: "San Francisco",
     center: [37.7749, -122.4194],
     radiusKm: 35,
-    transitlandFeed: "f-9q8y-~",
+    transitlandFeed: "f-9q8y-sfmta",
     transitlandRtFeed: "f-sf~bay~area~rg~rt",
   },
   {
@@ -61,7 +61,7 @@ export const TRANSIT_METROS: TransitMetro[] = [
     label: "Chicago",
     center: [41.8781, -87.6298],
     radiusKm: 35,
-    transitlandFeed: "f-dp3-~",
+    transitlandFeed: "f-dp3-cta",
     // No Transitland GTFS-RT feed; CTA Bus Tracker needs a separate API key.
   },
 ];
