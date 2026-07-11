@@ -41,6 +41,14 @@
       "routeCount": 14
     },
     {
+      "id": "prince-rupert",
+      "bundlePath": "/geo/gtfs/prince-rupert.json",
+      "feedOnestopId": "f-bctransit~prince~rupert",
+      "builtAt": "2026-07-11T22:56:31.753Z",
+      "stopCount": 2,
+      "routeCount": 1
+    },
+    {
       "id": "sf",
       "bundlePath": "/geo/gtfs/sf.json",
       "feedOnestopId": "f-9q8y-sfmta",

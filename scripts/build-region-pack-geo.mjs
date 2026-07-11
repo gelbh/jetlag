@@ -113,6 +113,12 @@ const PORTLAND_MAINE_POI_BBOX = {
   north: 43.75,
   east: -70.1,
 };
+const PRINCE_RUPERT_POI_BBOX = {
+  south: 54.25,
+  west: -130.45,
+  north: 54.4,
+  east: -130.2,
+};
 
 const ENERGOV_PARKS_URL =
   "https://services1.arcgis.com/Z84SVYy1QoXoOXkk/arcgis/rest/services/Energov_Update_TestServer/FeatureServer/47/query";
@@ -364,6 +370,10 @@ async function buildPortlandMainePoiBundles() {
   await buildRegionPoiBundles("portland-maine", PORTLAND_MAINE_POI_BBOX);
   ensurePortlandMaineMountainBundle(PORTLAND_MAINE_POI_BBOX);
   await enrichPortlandMaineParkBundle(PORTLAND_MAINE_POI_BBOX);
+}
+
+async function buildPrinceRupertPoiBundles() {
+  await buildRegionPoiBundles("prince-rupert", PRINCE_RUPERT_POI_BBOX);
 }
 
 async function buildNycPoiBundles() {
@@ -723,6 +733,9 @@ async function main() {
     }
     if (!packFilter || packFilter === "portland-maine") {
       await buildPortlandMainePoiBundles();
+    }
+    if (!packFilter || packFilter === "prince-rupert") {
+      await buildPrinceRupertPoiBundles();
     }
     return;
   }

@@ -248,4 +248,68 @@ describe("regionPackPoi", () => {
     vi.stubGlobal("fetch", originalFetch);
     clearBundledPoiCacheForTests();
   });
+
+  it("loads prince-rupert museum bundle when present", async () => {
+    const { fetchBundledMeasuringPlaces, clearBundledPoiCacheForTests } =
+      await import("./regionPackPoi");
+
+    clearBundledPoiCacheForTests();
+
+    const museumBundleUrl = "/geo/prince-rupert/poi/museum.json";
+    const originalFetch = globalThis.fetch;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        if (String(input) === museumBundleUrl) {
+          return {
+            ok: true,
+            json: async () => ({
+              category: "museum",
+              source: "wikidata",
+              places: [
+                {
+                  id: "Q123",
+                  name: "Museum of Northern BC",
+                  lat: 54.315,
+                  lng: -130.32,
+                },
+              ],
+            }),
+          };
+        }
+
+        throw new Error(`Unexpected fetch: ${String(input)}`);
+      }),
+    );
+
+    const princeRupertGameArea = {
+      type: "Polygon" as const,
+      coordinates: [
+        [
+          [-130.45, 54.25],
+          [-130.2, 54.25],
+          [-130.2, 54.4],
+          [-130.45, 54.4],
+          [-130.45, 54.25],
+        ],
+      ],
+    };
+
+    const places = await fetchBundledMeasuringPlaces(
+      princeRupertGameArea,
+      "museum",
+      "prince-rupert",
+    );
+
+    expect(places).toEqual([
+      {
+        id: "Q123",
+        name: "Museum of Northern BC",
+        point: [54.315, -130.32] satisfies LatLngTuple,
+      },
+    ]);
+
+    vi.stubGlobal("fetch", originalFetch);
+    clearBundledPoiCacheForTests();
+  });
 });

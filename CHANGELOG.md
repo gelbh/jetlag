@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.5 - 2026-07-11
+
+### Improvements
+
+- Recommended presets: add Prince Rupert, BC with neighbourhood boundaries, bundled POI, and BC Transit.
+
 ## 0.4.4 - 2026-07-11
 
 ### Fixes

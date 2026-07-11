@@ -104,4 +104,5 @@ export const BUNDLED_PRESET_PLAY_AREA_SQ_MI: Record<string, number> = {
   "bundled:zurich-canton": 669.23,
   "bundled:zurich-city": 35.35,
   "bundled:lucerne-metro": 109.68,
+  "bundled:prince-rupert": 37.95,
 };
