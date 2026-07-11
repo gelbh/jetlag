@@ -87,6 +87,7 @@ vi.mock("../components/map/GameAreaMask", () => ({
 vi.mock("../services/core/firebase", () => ({
   isFirebaseConfigured: () => false,
   ensureAnonymousUser: vi.fn(),
+  getFirebaseAuth: () => ({ currentUser: null }),
 }));
 
 vi.mock("../services/session/gameAreaPreload", () => ({

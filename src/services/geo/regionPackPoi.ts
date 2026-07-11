@@ -33,6 +33,8 @@ const TENTACLE_BUNDLED_CATEGORIES = new Set<TentacleExtendedCategoryId>([
   "hospital",
 ]);
 
+const BUNDLED_POI_PACKS = new Set<RegionPackId>(["nyc", "london", "dublin"]);
+
 const bundleCache = new Map<string, BundledPoiCategory | null>();
 
 function normalizePlaceName(name: string): string {
@@ -50,6 +52,10 @@ async function loadBundledPoiCategory(
   regionPackId: RegionPackId,
   category: MeasuringLocationCategory,
 ): Promise<BundledPoiCategory | null> {
+  if (!BUNDLED_POI_PACKS.has(regionPackId)) {
+    return null;
+  }
+
   const cacheKey = `${regionPackId}:${category}`;
   if (bundleCache.has(cacheKey)) {
     return bundleCache.get(cacheKey) ?? null;

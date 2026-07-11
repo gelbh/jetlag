@@ -12,7 +12,6 @@ import {
   type AuthProvider,
   type User,
 } from "firebase/auth";
-import { getClientEnv } from "../../config/env";
 import { getFirebaseAuth } from "./firebase";
 
 export const EMAIL_LINK_STORAGE_KEY = "premiumEmailForSignIn";
@@ -52,11 +51,6 @@ function mapAuthError(error: unknown, fallback: string): Error {
   }
 
   return new Error(fallback);
-}
-
-export function getGoogleOAuthClientId(): string | null {
-  const clientId = getClientEnv().VITE_GOOGLE_OAUTH_CLIENT_ID;
-  return clientId && clientId.length > 0 ? clientId : null;
 }
 
 async function completeGoogleCredential(credential: ReturnType<

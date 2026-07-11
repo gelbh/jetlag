@@ -113,7 +113,7 @@ export default function App() {
       <BrowserRouter>
         <AnalyticsPageViewTracker />
         <AppUpdateBanner />
-        <div className="h-full overflow-y-auto overscroll-y-none">
+        <div className="h-[100dvh] overflow-y-auto overscroll-y-none">
           <LowBatteryPrompt />
           <Routes>
           <Route path="/" element={<Home />} />

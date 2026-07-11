@@ -1,42 +1,45 @@
-import type { ReactNode } from "react";
+import { useEffect, useMemo } from "react";
 import type { TransitStation } from "../../domain/session/hidingZone";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
-import type { HidingZoneStepId } from "./hidingZoneSteps";
+import {
+  stepsForHidingZoneMode,
+  type HidingZoneStepId,
+} from "./hidingZoneSteps";
 import { SegmentControl } from "../ui/SegmentControl";
 import { InlineError } from "../ui/InlineError";
 import { ToolPanelShell } from "../tools/shared/ToolPanelShell";
 import { ToolSection } from "../tools/shared/ToolSection";
 import { ToolWizardNav } from "../tools/shared/ToolWizardNav";
 import { TransitStationPicker } from "./TransitStationPicker";
+import { useToolWizard } from "../../hooks/useToolWizard";
 
-interface HidingZonePanelProps {
-  stepId: HidingZoneStepId;
-  stepIndex: number;
-  stepCount: number;
-  stepper: ReactNode;
-  onGoNext: () => void;
-  onGoBack: () => void;
-  radiusLabel: string;
+export interface HidingZoneToolPanelState {
   query: string;
-  onQueryChange: (value: string) => void;
+  setQuery: (value: string) => void;
   stations: readonly TransitStation[];
   stationsLoading: boolean;
   stationsError: string | null;
   selectedStation: TransitStation | null;
-  onSelectStation: (station: TransitStation) => void;
-  onClearStation: () => void;
-  onSearchThisArea: () => void;
-  searchDisabled: boolean;
+  setSelectedStation: (station: TransitStation) => void;
+  clearStationSelection: () => void;
   manualMode: boolean;
   methodChosen: boolean;
-  onMethodChange: (manual: boolean) => void;
+  choosePlacementMethod: (manual: boolean) => void;
   manualCenter: LatLngTuple | null;
   hasPlacement: boolean;
-  onConfirm: () => void;
+  confirmZone: () => void | Promise<void>;
   saving: boolean;
   error: string | null;
+}
+
+interface HidingZonePanelProps {
+  wizardOpen: boolean;
   moveMode: boolean;
+  radiusLabel: string;
   confirmDisabled?: boolean;
+  zoneTool: HidingZoneToolPanelState;
+  onStepChange: (stepId: HidingZoneStepId) => void;
+  onSearchThisArea: () => void;
 }
 
 function stepPrompt(
@@ -99,44 +102,64 @@ function placementSummary(
 }
 
 export function HidingZonePanel({
-  stepId,
-  stepIndex,
-  stepCount,
-  stepper,
-  onGoNext,
-  onGoBack,
-  radiusLabel,
-  query,
-  onQueryChange,
-  stations,
-  stationsLoading,
-  stationsError,
-  selectedStation,
-  onSelectStation,
-  onClearStation,
-  onSearchThisArea,
-  searchDisabled,
-  manualMode,
-  methodChosen,
-  onMethodChange,
-  manualCenter,
-  hasPlacement,
-  onConfirm,
-  saving,
-  error,
+  wizardOpen,
   moveMode,
+  radiusLabel,
   confirmDisabled = false,
+  zoneTool,
+  onStepChange,
+  onSearchThisArea,
 }: HidingZonePanelProps) {
-  const prompt = stepPrompt(stepId, moveMode, manualMode);
-  const methodSegmentValue = methodChosen
-    ? manualMode
+  const steps = useMemo(
+    () => stepsForHidingZoneMode(moveMode),
+    [moveMode],
+  );
+  const {
+    stepId,
+    stepIndex,
+    goNext,
+    goBack,
+    stepper,
+    resetStep,
+  } = useToolWizard(steps);
+
+  useEffect(() => {
+    if (wizardOpen) {
+      resetStep();
+    }
+  }, [wizardOpen, resetStep]);
+
+  useEffect(() => {
+    resetStep();
+  }, [moveMode, resetStep]);
+
+  useEffect(() => {
+    onStepChange(stepId as HidingZoneStepId);
+  }, [onStepChange, stepId]);
+
+  useEffect(() => {
+    if (!wizardOpen || zoneTool.manualMode || stepId !== "location") {
+      return;
+    }
+
+    onSearchThisArea();
+  }, [
+    onSearchThisArea,
+    stepId,
+    wizardOpen,
+    zoneTool.manualMode,
+  ]);
+
+  const prompt = stepPrompt(stepId as HidingZoneStepId, moveMode, zoneTool.manualMode);
+  const methodSegmentValue = zoneTool.methodChosen
+    ? zoneTool.manualMode
       ? "map"
       : "station"
     : "unset";
 
   const canGoNext =
-    (stepId === "method" && methodChosen) ||
-    (stepId === "location" && hasPlacement);
+    (stepId === "method" && zoneTool.methodChosen) ||
+    (stepId === "location" && zoneTool.hasPlacement);
 
   return (
     <ToolPanelShell toolId="zone" stepper={stepper}>
@@ -159,43 +182,43 @@ export function HidingZonePanel({
               { value: "map", label: "Map" },
             ]}
             onChange={(value) => {
-              onMethodChange(value === "map");
-              onGoNext();
+              zoneTool.choosePlacementMethod(value === "map");
+              goNext();
             }}
           />
         </ToolSection>
       ) : null}
 
-      {stepId === "location" && manualMode ? (
+      {stepId === "location" && zoneTool.manualMode ? (
         <ToolSection first compact status="active">
           <p className="text-sm text-ink-secondary">
-            {hasPlacement
+            {zoneTool.hasPlacement
               ? "Zone center set. Tap the map again to move it."
               : "Tap the map inside the play area to set your zone center."}
           </p>
-          {hasPlacement && manualCenter ? (
+          {zoneTool.hasPlacement && zoneTool.manualCenter ? (
             <p className="font-mono text-xs tabular-nums text-ink-dim">
-              {manualCenter[0].toFixed(5)}, {manualCenter[1].toFixed(5)}
+              {zoneTool.manualCenter[0].toFixed(5)}, {zoneTool.manualCenter[1].toFixed(5)}
             </p>
           ) : null}
         </ToolSection>
       ) : null}
 
-      {stepId === "location" && !manualMode ? (
+      {stepId === "location" && !zoneTool.manualMode ? (
         <ToolSection first compact status="active">
           <TransitStationPicker
             layout="flex"
             labeled
-            query={query}
-            onQueryChange={onQueryChange}
-            stations={stations}
-            stationsLoading={stationsLoading}
-            stationsError={stationsError}
-            selectedStation={selectedStation}
-            onSelectStation={onSelectStation}
-            onClearStation={onClearStation}
+            query={zoneTool.query}
+            onQueryChange={zoneTool.setQuery}
+            stations={zoneTool.stations}
+            stationsLoading={zoneTool.stationsLoading}
+            stationsError={zoneTool.stationsError}
+            selectedStation={zoneTool.selectedStation}
+            onSelectStation={zoneTool.setSelectedStation}
+            onClearStation={zoneTool.clearStationSelection}
             onSearchThisArea={onSearchThisArea}
-            searchDisabled={searchDisabled}
+            searchDisabled={zoneTool.stationsLoading}
           />
         </ToolSection>
       ) : null}
@@ -207,7 +230,11 @@ export function HidingZonePanel({
               Zone center
             </p>
             <p className="text-sm font-medium text-ink">
-              {placementSummary(manualMode, selectedStation, manualCenter)}
+              {placementSummary(
+                zoneTool.manualMode,
+                zoneTool.selectedStation,
+                zoneTool.manualCenter,
+              )}
             </p>
             <p className="text-xs text-ink-dim">Radius: {radiusLabel}</p>
             {moveMode ? (
@@ -218,12 +245,12 @@ export function HidingZonePanel({
           </div>
           <button
             type="button"
-            onClick={onConfirm}
-            disabled={!hasPlacement || saving || confirmDisabled}
-            aria-busy={saving}
+            onClick={() => void zoneTool.confirmZone()}
+            disabled={!zoneTool.hasPlacement || zoneTool.saving || confirmDisabled}
+            aria-busy={zoneTool.saving}
             className="btn-primary w-full disabled:opacity-50"
           >
-            {saving
+            {zoneTool.saving
               ? "Saving…"
               : moveMode
                 ? "Confirm new zone"
@@ -235,21 +262,21 @@ export function HidingZonePanel({
       {stepId !== "confirm" ? (
         <ToolWizardNav
           stepIndex={stepIndex}
-          stepCount={stepCount}
-          onBack={onGoBack}
-          onNext={onGoNext}
+          stepCount={steps.length}
+          onBack={goBack}
+          onNext={goNext}
           canGoNext={canGoNext}
         />
       ) : (
         <ToolWizardNav
           stepIndex={stepIndex}
-          stepCount={stepCount}
-          onBack={onGoBack}
-          onNext={onGoNext}
+          stepCount={steps.length}
+          onBack={goBack}
+          onNext={goNext}
         />
       )}
 
-      {error ? <InlineError>{error}</InlineError> : null}
+      {zoneTool.error ? <InlineError>{zoneTool.error}</InlineError> : null}
     </ToolPanelShell>
   );
 }

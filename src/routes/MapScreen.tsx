@@ -103,10 +103,6 @@ import {
 } from "../services/transit/transitCatalog";
 import { effectiveMapStyle } from "../domain/device/powerProfile";
 import { preloadGameAreaCachesAsync, gameAreaPreloadKey } from "../services/session/gameAreaPreload";
-import {
-  matchingAreasCacheKey,
-  resolveSessionMatchingAreas,
-} from "../services/geo/resolveSessionMatchingAreas";
 import { startSeaLevelBackgroundSampling } from "../services/geo/seaLevelProgressive";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useFirebaseAuthReady } from "../hooks/sync/useFirebaseAuthReady";
@@ -162,7 +158,8 @@ export function MapScreen() {
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
-  const sessionRules = useResolvedSessionRules(session);
+  const { sessionRules, matchingAreasReady, matchingAreasError } =
+    useResolvedSessionRules(session);
   const { features: adminBoundaryFeatures, loading: adminBoundaryLoading } =
     useAdminBoundaryFeatures(
     session?.gameArea ?? null,
@@ -280,20 +277,6 @@ export function MapScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset draft when switching sessions only
   }, [currentSessionId]);
 
-  const sessionMatchingAreasKey = useMemo(
-    () =>
-      session
-        ? matchingAreasCacheKey(
-            session.regionPackId,
-            session.regionPackSubregionId,
-            Boolean(
-              session.customMatchingAreas?.[8] &&
-                session.customMatchingAreas?.[9],
-            ),
-          )
-        : "",
-    [session],
-  );
   const preloadGameAreaKey = session?.gameArea
     ? gameAreaPreloadKey(session.gameArea)
     : null;
@@ -317,36 +300,30 @@ export function MapScreen() {
   });
 
   useEffect(() => {
-    if (!preloadGameAreaKey || !session?.gameArea || !firebaseAuthReady || lowPowerMode) {
+    if (
+      !preloadGameAreaKey ||
+      !session?.gameArea ||
+      !firebaseAuthReady ||
+      !matchingAreasReady ||
+      lowPowerMode
+    ) {
       return;
     }
 
-    let cancelled = false;
-
-    void (async () => {
-      const matchingAreas = await resolveSessionMatchingAreas(session);
-      if (cancelled) {
-        return;
-      }
-
-      void preloadGameAreaCachesAsync(
-        session.gameArea,
-        matchingAreas,
-        session.regionPackId,
-        isPremiumSession(session) ? "premium" : "free",
-      );
-      startSeaLevelBackgroundSampling(session.gameArea);
-    })();
-
-    return () => {
-      cancelled = true;
-    };
+    void preloadGameAreaCachesAsync(
+      session.gameArea,
+      sessionRules.customMatchingAreas,
+      session.regionPackId,
+      isPremiumSession(session) ? "premium" : "free",
+    );
+    startSeaLevelBackgroundSampling(session.gameArea);
   }, [
     firebaseAuthReady,
     lowPowerMode,
+    matchingAreasReady,
     preloadGameAreaKey,
     session,
-    sessionMatchingAreasKey,
+    sessionRules.customMatchingAreas,
   ]);
 
   const overlay = useMapOverlayState();
@@ -1173,7 +1150,9 @@ export function MapScreen() {
           syncStatus={syncStatus.status}
           queuedWrites={syncStatus.queuedWrites}
           message={
-            syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError
+            syncStatus.remoteUpdateNotice ??
+            syncStatus.lastSyncError ??
+            matchingAreasError
           }
           endGameActive={isEndGameActive(session)}
           endGamePending={isEndGamePending(session)}
