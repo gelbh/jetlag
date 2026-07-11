@@ -39,6 +39,12 @@ import {
   TOKYO_REGION_PACK_ID,
 } from "./tokyoRegionPack";
 import {
+  PORTLAND_MAINE_GEO_ASSETS,
+  PORTLAND_MAINE_MATCHING_LABEL_OVERRIDES,
+  PORTLAND_MAINE_MEASURING_LABEL_OVERRIDES,
+  PORTLAND_MAINE_REGION_PACK_ID,
+} from "./portlandMaineRegionPack";
+import {
   ZURICH_GEO_ASSETS,
   ZURICH_MATCHING_LABEL_OVERRIDES,
   ZURICH_MEASURING_LABEL_OVERRIDES,
@@ -49,6 +55,7 @@ export interface RegionPackGeoAssets {
   primary: string;
   secondary: string;
   secondaryBySubregion?: (subregionId: string) => string;
+  playArea?: string;
 }
 
 export interface RegionPackConfig {
@@ -177,6 +184,21 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     playAreaLevel: "secondary",
     matchingLabelOverrides: LUCERNE_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: LUCERNE_MEASURING_LABEL_OVERRIDES,
+    unsupportedMatching: HIDE_COUNTRY_PROVINCE_MATCHING,
+    unsupportedBorders: HIDE_COUNTRY_PROVINCE_BORDERS,
+  },
+  [PORTLAND_MAINE_REGION_PACK_ID]: {
+    id: PORTLAND_MAINE_REGION_PACK_ID,
+    geoAssets: {
+      primary: PORTLAND_MAINE_GEO_ASSETS.districts,
+      secondary: PORTLAND_MAINE_GEO_ASSETS.neighborhoods,
+      secondaryBySubregion: (subregionId) =>
+        PORTLAND_MAINE_GEO_ASSETS.neighborhoodsByDistrict(subregionId),
+      playArea: PORTLAND_MAINE_GEO_ASSETS.municipalities,
+    },
+    subregionPropertyKey: "districtId",
+    matchingLabelOverrides: PORTLAND_MAINE_MATCHING_LABEL_OVERRIDES,
+    measuringLabelOverrides: PORTLAND_MAINE_MEASURING_LABEL_OVERRIDES,
     unsupportedMatching: HIDE_COUNTRY_PROVINCE_MATCHING,
     unsupportedBorders: HIDE_COUNTRY_PROVINCE_BORDERS,
   },

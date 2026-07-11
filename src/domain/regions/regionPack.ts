@@ -5,7 +5,8 @@ export type RegionPackId =
   | "tokyo"
   | "osaka"
   | "zurich"
-  | "lucerne";
+  | "lucerne"
+  | "portland-maine";
 
 const REGION_PACK_IDS: readonly RegionPackId[] = [
   "dublin",
@@ -15,6 +16,7 @@ const REGION_PACK_IDS: readonly RegionPackId[] = [
   "osaka",
   "zurich",
   "lucerne",
+  "portland-maine",
 ] as const;
 
 /** @deprecated Use subregionId on presets. Dublin council ids remain valid subregion values. */

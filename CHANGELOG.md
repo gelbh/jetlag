@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.4 - 2026-07-11
+
+### Improvements
+
+- Recommended games: Portland, Maine with Greater Portland metro, five council districts, and GP Metro bus transit matching.
+
 ## 0.4.3 - 2026-07-11
 
 ### Fixes

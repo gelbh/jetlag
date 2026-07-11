@@ -52,6 +52,28 @@ function stubFetchForNycAssets() {
   });
 }
 
+function stubFetchForPortlandMaineAssets() {
+  const read = (relativePath: string) =>
+    readFileSync(resolve(ROOT, "public/geo/portland-maine", relativePath), "utf8");
+
+  const paths: Record<string, string> = {
+    "/geo/portland-maine/municipalities.geojson": read("municipalities.geojson"),
+    "/geo/portland-maine/districts.geojson": read("districts.geojson"),
+    "/geo/portland-maine/neighborhoods.geojson": read("neighborhoods.geojson"),
+    "/geo/portland-maine/neighborhoods/district-1.geojson":
+      read("neighborhoods/district-1.geojson"),
+  };
+
+  return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    const url = String(input);
+    const suffix = Object.keys(paths).find((path) => url.endsWith(path));
+    if (suffix) {
+      return new Response(paths[suffix], { status: 200 });
+    }
+    return new Response("missing", { status: 404 });
+  });
+}
+
 function ringPointCount(gameArea: {
   type: string;
   coordinates: unknown;
@@ -102,6 +124,21 @@ describe("loadRegionPackPlayArea", () => {
     expect(isAxisAlignedRectangle(manhattan)).toBe(false);
     expect(ringPointCount(manhattan)).toBeGreaterThan(10);
     expect(gameAreaSquareMiles(city)).toBeGreaterThan(100);
+
+    fetchMock.mockRestore();
+  });
+
+  it("returns exact Portland Maine district polygons and metro municipalities", async () => {
+    clearRegionPackGeoCacheForTests();
+    const fetchMock = stubFetchForPortlandMaineAssets();
+
+    const district1 = await loadRegionPackPlayArea("portland-maine", "district-1");
+    const metro = await loadRegionPackPlayArea("portland-maine");
+
+    expect(isAxisAlignedRectangle(district1)).toBe(false);
+    expect(ringPointCount(district1)).toBeGreaterThan(10);
+    expect(isAxisAlignedRectangle(metro)).toBe(false);
+    expect(gameAreaSquareMiles(metro)).toBeGreaterThan(80);
 
     fetchMock.mockRestore();
   });

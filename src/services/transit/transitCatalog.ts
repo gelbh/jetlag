@@ -65,6 +65,14 @@ export const TRANSIT_METROS: TransitMetro[] = [
     transitlandFeed: "f-dp3-cta",
     vehiclesProxyMetro: "chicago",
   },
+  {
+    id: "portland-maine",
+    label: "Portland, Maine",
+    center: [43.659, -70.257],
+    radiusKm: 25,
+    transitlandFeed: "f-dry0-maine~greaterportlandmetrobus",
+    transitlandRtFeed: "f-dry0-maine~greaterportlandmetrobus~rt",
+  },
 ];
 
 export function getTransitMetro(metroId: string | undefined): TransitMetro | null {

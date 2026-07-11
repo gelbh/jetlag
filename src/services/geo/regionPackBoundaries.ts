@@ -98,6 +98,12 @@ export async function loadRegionPackPlayArea(
     throw new Error(`Unknown region pack: ${packId}`);
   }
 
+  if (!subregionId && config.geoAssets.playArea) {
+    const playAreaJson = await fetchGeoJsonText(config.geoAssets.playArea);
+    const collection = parseFeatureCollection(playAreaJson);
+    return combineRegionGameAreas(polygonFeatures(collection));
+  }
+
   if (!subregionId && config.playAreaLevel === "secondary") {
     const secondaryJson = await fetchGeoJsonText(config.geoAssets.secondary);
     const collection = parseFeatureCollection(secondaryJson);

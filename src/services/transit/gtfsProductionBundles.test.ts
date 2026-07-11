@@ -45,6 +45,19 @@ const CENTRAL_LONDON = {
   ],
 };
 
+const CENTRAL_PORTLAND_MAINE = {
+  type: "Polygon" as const,
+  coordinates: [
+    [
+      [-70.28, 43.64],
+      [-70.24, 43.64],
+      [-70.24, 43.67],
+      [-70.28, 43.67],
+      [-70.28, 43.64],
+    ],
+  ],
+};
+
 describe("production GTFS bundles", () => {
   it("NYC midtown play area uses full subway stop inventory", async () => {
     const bundle = loadProductionBundle("nyc");
@@ -87,5 +100,17 @@ describe("production GTFS bundles", () => {
     );
     expect(kingsCross).toBeDefined();
     expect(euston).toBeDefined();
+  });
+
+  it("Portland Maine central play area uses full GP Metro stop inventory", async () => {
+    const bundle = loadProductionBundle("portland-maine");
+    expect(bundle).not.toBeNull();
+    expect(bundle!.stops.length).toBeGreaterThan(100);
+
+    const stops = filterGtfsStopsForGameArea(bundle!, CENTRAL_PORTLAND_MAINE);
+    expect(stops.length).toBeGreaterThan(5);
+
+    const elm = stops.find((stop) => stop.name.includes("ELM ST"));
+    expect(elm).toBeDefined();
   });
 });

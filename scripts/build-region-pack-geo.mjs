@@ -107,6 +107,12 @@ function sleep(ms) {
 const NYC_POI_BBOX = { south: 40.49, west: -74.26, north: 40.92, east: -73.7 };
 const LONDON_POI_BBOX = { south: 51.28, west: -0.51, north: 51.7, east: 0.33 };
 const DUBLIN_POI_BBOX = { south: 53.24, west: -6.45, north: 53.43, east: -6.07 };
+const PORTLAND_MAINE_POI_BBOX = {
+  south: 43.55,
+  west: -70.45,
+  north: 43.75,
+  east: -70.1,
+};
 
 const REGION_POI_CATEGORIES = [
   { id: "museum", wikidataTypes: ["Q33506"] },
@@ -565,8 +571,19 @@ async function ensureDownloads() {
 
 async function main() {
   if (process.argv.includes("--poi-only")) {
-    await buildRegionPoiBundles("london", LONDON_POI_BBOX);
-    await buildRegionPoiBundles("dublin", DUBLIN_POI_BBOX);
+    const packArgIndex = process.argv.indexOf("--pack");
+    const packFilter =
+      packArgIndex >= 0 ? process.argv[packArgIndex + 1] : null;
+
+    if (!packFilter || packFilter === "london") {
+      await buildRegionPoiBundles("london", LONDON_POI_BBOX);
+    }
+    if (!packFilter || packFilter === "dublin") {
+      await buildRegionPoiBundles("dublin", DUBLIN_POI_BBOX);
+    }
+    if (!packFilter || packFilter === "portland-maine") {
+      await buildRegionPoiBundles("portland-maine", PORTLAND_MAINE_POI_BBOX);
+    }
     return;
   }
 
