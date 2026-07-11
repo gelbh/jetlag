@@ -18,6 +18,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         title: "Fixes",
         items: [
           "Custom games: fix scrolling on the presets list when content exceeds the screen",
+          "Hider dock: match icon sizes across all dock buttons",
           "Hiding zone wizard: method step no longer preselects Station",
           "Premium recovery: require verified email before merging purchases from another account",
           "Preset games: show a map warning when bundled admin categories fail to load",

@@ -124,6 +124,14 @@ export function HudMinusIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function HudChatIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.2 0-2.3-.25-3.3-.7L5 21v-4.7A8.5 8.5 0 1 1 21 11.5Z" />
+    </IconBase>
+  );
+}
+
 export function HudRefreshIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <IconBase {...props}>
