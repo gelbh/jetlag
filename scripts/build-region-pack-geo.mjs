@@ -114,6 +114,19 @@ const PORTLAND_MAINE_POI_BBOX = {
   east: -70.1,
 };
 
+const ENERGOV_PARKS_URL =
+  "https://services1.arcgis.com/Z84SVYy1QoXoOXkk/arcgis/rest/services/Energov_Update_TestServer/FeatureServer/47/query";
+
+const ENERGOV_PARK_TYPES = new Set([
+  "OPENSPACE",
+  "PARK",
+  "PLAYGROUND",
+  "ROADSIDE",
+  "SPORTS",
+  "SQUARE",
+  "TRAIL",
+]);
+
 const REGION_POI_CATEGORIES = [
   { id: "museum", wikidataTypes: ["Q33506"] },
   { id: "park", wikidataTypes: ["Q22698"] },
@@ -224,6 +237,133 @@ async function buildRegionPoiBundles(packId, bbox) {
     }
     await sleep(1500);
   }
+}
+
+function normalizePoiPlaceName(name) {
+  return String(name ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
+function mergeBundledPoiPlaces(existingPlaces, additions) {
+  const seen = new Set(
+    existingPlaces.map((place) => normalizePoiPlaceName(place.name)),
+  );
+  const merged = [...existingPlaces];
+
+  for (const place of additions) {
+    const key = normalizePoiPlaceName(place.name);
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    merged.push(place);
+  }
+
+  return merged;
+}
+
+function openSpaceCentroid(feature) {
+  const [minX, minY, maxX, maxY] = bbox(feature);
+  return {
+    lat: (minY + maxY) / 2,
+    lng: (minX + maxX) / 2,
+  };
+}
+
+async function fetchPortlandMaineOpenSpaceParks() {
+  const url = new URL(ENERGOV_PARKS_URL);
+  url.searchParams.set("where", "1=1");
+  url.searchParams.set("outFields", "NAME,LARGE_NAME,TYPE,OBJECTID");
+  url.searchParams.set("f", "geojson");
+  url.searchParams.set("outSR", "4326");
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Portland parks fetch failed (${response.status}).`);
+  }
+
+  const collection = await response.json();
+  const places = [];
+
+  for (const feature of collection.features ?? []) {
+    const parkType = String(feature.properties?.TYPE ?? "").trim().toUpperCase();
+    if (!ENERGOV_PARK_TYPES.has(parkType)) {
+      continue;
+    }
+
+    const name = String(
+      feature.properties?.NAME ?? feature.properties?.LARGE_NAME ?? "",
+    )
+      .trim()
+      .replace(/\s+/g, " ");
+    if (!name) {
+      continue;
+    }
+
+    const objectId = feature.properties?.OBJECTID;
+    const { lat, lng } = openSpaceCentroid(feature);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      continue;
+    }
+
+    places.push({
+      id: `pme:openspace:${objectId ?? places.length + 1}`,
+      name,
+      lat,
+      lng,
+    });
+  }
+
+  return places;
+}
+
+function ensurePortlandMaineMountainBundle(bbox) {
+  const mountainPath = resolve(GEO, "portland-maine/poi/mountain.json");
+  try {
+    JSON.parse(readFileSync(mountainPath, "utf8"));
+  } catch {
+    writeJson(mountainPath, {
+      category: "mountain",
+      source: "none",
+      bbox,
+      places: [],
+    });
+    console.log("portland-maine poi: mountain 0 places (empty bundle)");
+  }
+}
+
+async function enrichPortlandMaineParkBundle(bbox) {
+  const parkPath = resolve(GEO, "portland-maine/poi/park.json");
+  let existingPlaces = [];
+
+  try {
+    const payload = JSON.parse(readFileSync(parkPath, "utf8"));
+    existingPlaces = Array.isArray(payload.places) ? payload.places : [];
+  } catch {
+    // Wikidata park bundle may not exist yet.
+  }
+
+  const openSpacePlaces = await fetchPortlandMaineOpenSpaceParks();
+  const mergedPlaces = mergeBundledPoiPlaces(existingPlaces, openSpacePlaces);
+  writeJson(parkPath, {
+    category: "park",
+    source: "wikidata+portland_gis",
+    bbox,
+    places: mergedPlaces,
+  });
+  console.log(
+    "portland-maine poi: park",
+    mergedPlaces.length,
+    "places (wikidata + Portland GIS)",
+  );
+}
+
+async function buildPortlandMainePoiBundles() {
+  await buildRegionPoiBundles("portland-maine", PORTLAND_MAINE_POI_BBOX);
+  ensurePortlandMaineMountainBundle(PORTLAND_MAINE_POI_BBOX);
+  await enrichPortlandMaineParkBundle(PORTLAND_MAINE_POI_BBOX);
 }
 
 async function buildNycPoiBundles() {
@@ -582,7 +722,7 @@ async function main() {
       await buildRegionPoiBundles("dublin", DUBLIN_POI_BBOX);
     }
     if (!packFilter || packFilter === "portland-maine") {
-      await buildRegionPoiBundles("portland-maine", PORTLAND_MAINE_POI_BBOX);
+      await buildPortlandMainePoiBundles();
     }
     return;
   }

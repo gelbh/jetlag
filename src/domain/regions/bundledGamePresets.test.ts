@@ -113,7 +113,7 @@ describe("Portland Maine GeoJSON asset counts", () => {
       ),
     );
 
-    expect(municipalities.features).toHaveLength(5);
+    expect(municipalities.features).toHaveLength(8);
     expect(districts.features).toHaveLength(5);
     expect(neighborhoods.features.length).toBeGreaterThanOrEqual(15);
   });

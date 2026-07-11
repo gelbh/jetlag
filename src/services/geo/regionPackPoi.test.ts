@@ -125,6 +125,70 @@ describe("regionPackPoi", () => {
     ]);
   });
 
+  it("loads portland-maine park bundle when present", async () => {
+    const { fetchBundledMeasuringPlaces, clearBundledPoiCacheForTests } =
+      await import("./regionPackPoi");
+
+    clearBundledPoiCacheForTests();
+
+    const parkBundleUrl = "/geo/portland-maine/poi/park.json";
+    const originalFetch = globalThis.fetch;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        if (String(input) === parkBundleUrl) {
+          return {
+            ok: true,
+            json: async () => ({
+              category: "park",
+              source: "wikidata+portland_gis",
+              places: [
+                {
+                  id: "pme:deering-oaks",
+                  name: "Deering Oaks",
+                  lat: 43.659,
+                  lng: -70.2708,
+                },
+              ],
+            }),
+          };
+        }
+
+        throw new Error(`Unexpected fetch: ${String(input)}`);
+      }),
+    );
+
+    const portlandGameArea = {
+      type: "Polygon" as const,
+      coordinates: [
+        [
+          [-70.45, 43.55],
+          [-70.1, 43.55],
+          [-70.1, 43.75],
+          [-70.45, 43.75],
+          [-70.45, 43.55],
+        ],
+      ],
+    };
+
+    const places = await fetchBundledMeasuringPlaces(
+      portlandGameArea,
+      "park",
+      "portland-maine",
+    );
+
+    expect(places).toEqual([
+      {
+        id: "pme:deering-oaks",
+        name: "Deering Oaks",
+        point: [43.659, -70.2708] satisfies LatLngTuple,
+      },
+    ]);
+
+    vi.stubGlobal("fetch", originalFetch);
+    clearBundledPoiCacheForTests();
+  });
+
   it("loads bundled tentacle pois within search radius", async () => {
     const { clearBundledPoiCacheForTests } = await import("./regionPackPoi");
 

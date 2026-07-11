@@ -18,6 +18,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         title: "Improvements",
         items: [
           "Recommended games: Portland, Maine with Greater Portland metro, five council districts, and GP Metro bus transit matching.",
+          "Recommended games: Portland, Maine metro adds Cape Elizabeth, Scarborough, and Yarmouth; measuring and tentacles merge bundled park POI from city GIS.",
         ],
       }
     ],
