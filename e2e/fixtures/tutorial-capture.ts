@@ -7,15 +7,6 @@ import {
   type LocalSessionSeedOptions,
 } from "./session";
 
-import fs from "node:fs";
-import path from "node:path";
-import { type Page, expect } from "@playwright/test";
-import { expectMapHasAnnotations, waitForMapTilesLoaded } from "./map";
-import {
-  openMapWithLocalSession,
-  type LocalSessionSeedOptions,
-} from "./session";
-
 export async function openTutorialMapSession(
   page: Page,
   options: Omit<LocalSessionSeedOptions, "sessionId"> = {},
