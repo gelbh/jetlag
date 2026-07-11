@@ -272,6 +272,27 @@
     cursor: grabbing;
   }
 
+  .jl-tool-panel-title-row {
+    display: flex;
+    align-items: center;
+    min-height: 1.75rem;
+    margin-bottom: 0.625rem;
+    padding: 0 0.25rem 0.5rem 2.75rem;
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  .jl-tool-panel-title {
+    min-width: 0;
+    flex: 1;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--color-highlight);
+  }
+
   .jl-panel-hider-actions {
     bottom: var(--hider-panel-bottom);
     padding-bottom: env(safe-area-inset-bottom);

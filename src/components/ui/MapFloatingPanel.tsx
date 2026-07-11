@@ -5,6 +5,7 @@ interface MapFloatingPanelProps {
   minimized: boolean;
   onMinimizedChange?: (minimized: boolean) => void;
   mapPanning?: boolean;
+  title?: ReactNode;
   peekLabel?: string;
   peekHint?: string;
   onClose?: () => void;
@@ -24,6 +25,7 @@ export function MapFloatingPanel({
   minimized,
   onMinimizedChange,
   mapPanning = false,
+  title,
   peekLabel,
   peekHint = "Tap to expand",
   onClose,
@@ -80,6 +82,11 @@ export function MapFloatingPanel({
         ) : null}
         {!minimized && onClose && closeLabel ? (
           <PopupCloseButton label={closeLabel} onClick={onClose} />
+        ) : null}
+        {!minimized && title ? (
+          <div className="jl-tool-panel-title-row">
+            <h2 className="jl-tool-panel-title">{title}</h2>
+          </div>
         ) : null}
         <div
           key={contentKey}
