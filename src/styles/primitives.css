@@ -1,0 +1,205 @@
+/* primitives.css — HUD chrome, buttons, fields */
+@layer components {
+  .btn-primary,
+  .btn-secondary {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .hud-chrome {
+    display: flex;
+    min-height: 3rem;
+    min-width: 3rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-hud-md);
+    border: 1px solid oklch(from var(--color-border) l c h / 0.85);
+    background: var(--color-surface-panel);
+    color: var(--color-ink);
+    box-shadow: var(--shadow-hud-float);
+  }
+
+  html:not([data-motion="reduced"]) .hud-chrome {
+    transition:
+      background var(--motion-instant) ease,
+      transform var(--motion-instant) var(--ease-out-quint);
+  }
+
+  html:not([data-motion="reduced"]) .hud-chrome:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  html[data-motion="reduced"] .hud-chrome {
+    transition: none;
+  }
+
+  .hud-chrome:hover:not(:disabled) {
+    background: var(--color-surface-raised);
+  }
+
+  .hud-chrome:disabled {
+    opacity: 0.4;
+  }
+
+  .hud-chrome:focus-visible {
+    outline: 2px solid var(--color-action);
+    outline-offset: 2px;
+  }
+
+  .map-hud-home {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .map-hud-home:hover:not(:disabled) {
+    background: oklch(from var(--color-surface-panel) l c h / 0.72);
+  }
+
+  .hud-chrome-active {
+    border-color: oklch(from var(--color-highlight) l c h / 0.55);
+    background: var(--color-highlight-soft);
+    color: var(--color-highlight);
+  }
+
+  .hud-panel {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-hud-lg);
+    border: 2px solid var(--color-border);
+    background: var(--color-surface-panel);
+    box-shadow: var(--shadow-hud-menu);
+  }
+
+  .hud-panel::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      var(--color-brand-blue),
+      var(--color-highlight) 50%,
+      var(--color-action)
+    );
+  }
+
+  .hud-sheet {
+    border-top: 3px solid var(--color-highlight);
+    background: var(--color-surface-panel);
+    box-shadow: 0 -12px 40px oklch(0.08 0.04 265 / 0.55);
+  }
+
+  .hud-scrim {
+    background: oklch(from var(--color-surface-deep) l c h / 0.88);
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-primary {
+    display: flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-hud-md);
+    border: 2px solid oklch(from var(--color-action) l c h / 0.85);
+    background: var(--color-action);
+    padding-inline: 1rem;
+    letter-spacing: 0.06em;
+    color: var(--color-action-ink);
+    transition:
+      filter var(--motion-fast) ease-out,
+      transform var(--motion-fast) ease-out;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    filter: brightness(1.06);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.45;
+  }
+
+  .btn-primary:focus-visible {
+    outline: 2px solid var(--color-action);
+    outline-offset: 2px;
+  }
+
+  .btn-secondary {
+    display: flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-hud-md);
+    border: 2px solid var(--color-border);
+    background: var(--color-surface-raised);
+    padding-inline: 1rem;
+    letter-spacing: 0.05em;
+    color: var(--color-ink-secondary);
+    transition: background var(--motion-fast) ease-out;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--color-border);
+  }
+
+  .btn-secondary:disabled {
+    opacity: 0.4;
+  }
+
+  .field-input {
+    margin-top: 0.25rem;
+    min-height: 3rem;
+    width: 100%;
+    border-radius: var(--radius-hud-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-base);
+    padding-inline: 0.75rem;
+    color: var(--color-ink);
+  }
+
+  .field-input:focus {
+    outline: 2px solid var(--color-action);
+    outline-offset: 0;
+    border-color: var(--color-action);
+  }
+
+  .field-label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--color-ink-muted);
+  }
+
+  .tool-panel-compact {
+    --tool-panel-control-height: 2.5rem;
+  }
+
+  .tool-panel-compact .btn-primary,
+  .tool-panel-compact .btn-secondary {
+    min-height: var(--tool-panel-control-height);
+  }
+
+  .tool-panel-compact .field-input {
+    min-height: var(--tool-panel-control-height);
+  }
+
+  .tool-panel-compact .min-h-12 {
+    min-height: var(--tool-panel-control-height);
+  }
+
+  .tool-panel-compact .max-h-40 {
+    max-height: 7rem;
+  }
+
+  .text-error {
+    font-size: 0.875rem;
+    color: var(--color-status-error);
+  }
+}
