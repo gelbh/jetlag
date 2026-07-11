@@ -13,21 +13,16 @@ import {
   waitForMapTilesLoaded,
 } from "../../fixtures";
 import {
-  captureMatchingQuestionHiders,
-  captureMatchingQuestionSolo,
-  captureMeasuringQuestionHiders,
-  captureMeasuringQuestionSolo,
   capturePhotoQuestionNoHiders,
   capturePhotoQuestionWithHiders,
-  captureRadarQuestionHiders,
-  captureRadarQuestionSolo,
-  captureTentacleQuestionHiders,
-  captureTentacleQuestionSolo,
-  captureThermometerQuestionHiders,
-  captureThermometerQuestionSolo,
+  QUESTION_HIDERS_CAPTURES,
+  QUESTION_SOLO_CAPTURES,
 } from "../../fixtures/tools/question-capture";
 import { assertTutorialCaptureReady } from "../../fixtures/tools/tutorial-capture-ready";
-import { openTutorialQuestionSession } from "../../fixtures/tutorial-capture";
+import {
+  openTutorialMapSession,
+  runQuestionCaptures,
+} from "../../fixtures/tutorial-capture";
 
 const TUTORIAL_NETWORK = { allowMapTiles: true } as const;
 const TMP_ROOT = path.join(os.tmpdir(), "jetlag-tutorial-verify");
@@ -40,57 +35,42 @@ test.describe("tutorial question capture preflight", () => {
     fs.mkdirSync(TMP_ROOT, { recursive: true });
   });
 
-  test("solo question flows reach map-context and map-result", async ({ page }) => {
+  test("@manual solo question flows reach map-context and map-result", async ({ page }) => {
     test.setTimeout(600_000);
-    const soloCaptures = [
-      ["matching", captureMatchingQuestionSolo],
-      ["measuring", captureMeasuringQuestionSolo],
-      ["thermometer", captureThermometerQuestionSolo],
-      ["radar", captureRadarQuestionSolo],
-      ["tentacle", captureTentacleQuestionSolo],
-    ] as const;
-
-    for (const [toolId, captureSolo] of soloCaptures) {
-      await openTutorialQuestionSession(page, toolId, "solo", {
-        network: TUTORIAL_NETWORK,
-      });
-      await waitForMapTilesLoaded(page);
-      await captureSolo(page, TMP_ROOT);
-    }
+    await runQuestionCaptures(
+      page,
+      TMP_ROOT,
+      QUESTION_SOLO_CAPTURES.map(([toolId, captureSolo]) => [
+        toolId,
+        captureSolo,
+        { network: TUTORIAL_NETWORK },
+      ]),
+    );
   });
 
-  test("hiders question flows reach send-ready split screenshots", async ({ page }) => {
+  test("@manual hiders question flows reach send-ready split screenshots", async ({ page }) => {
     test.setTimeout(600_000);
     const hiderSession = { memberRoles: { "hider-1": "hider" as const } };
-    const hiderCaptures = [
-      ["matching", captureMatchingQuestionHiders],
-      ["measuring", captureMeasuringQuestionHiders],
-      ["thermometer", captureThermometerQuestionHiders],
-      ["radar", captureRadarQuestionHiders],
-      ["tentacle", captureTentacleQuestionHiders],
-    ] as const;
-
-    for (const [toolId, captureHiders] of hiderCaptures) {
-      await openTutorialQuestionSession(page, toolId, "hiders", {
-        network: TUTORIAL_NETWORK,
-        ...hiderSession,
-      });
-      await waitForMapTilesLoaded(page);
-      await captureHiders(page, TMP_ROOT);
-    }
+    await runQuestionCaptures(
+      page,
+      TMP_ROOT,
+      QUESTION_HIDERS_CAPTURES.map(([toolId, captureHiders]) => [
+        toolId,
+        captureHiders,
+        { network: TUTORIAL_NETWORK, ...hiderSession },
+      ]),
+    );
   });
 
-  test("photo tutorial reaches unread chat then chat result", async ({ page, browser }) => {
+  test("@manual photo tutorial reaches unread chat then chat result", async ({ page, browser }) => {
     test.setTimeout(120_000);
     const hiderSession = { memberRoles: { "hider-1": "hider" as const } };
 
-    await openTutorialQuestionSession(page, "photo", "dock", {
-      network: TUTORIAL_NETWORK,
-    });
+    await openTutorialMapSession(page, { network: TUTORIAL_NETWORK });
     await waitForMapTilesLoaded(page);
     await capturePhotoQuestionNoHiders(page, TMP_ROOT);
 
-    await openTutorialQuestionSession(page, "photo", "hiders", {
+    await openTutorialMapSession(page, {
       network: TUTORIAL_NETWORK,
       ...hiderSession,
     });

@@ -164,6 +164,68 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows a second guest to join as hider when one hider is already in the session", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .update({
+        memberUids: ["host-1", "hider-1"],
+        memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+      });
+
+    const guest = testEnv.authenticatedContext("guest-2");
+    await assertSucceeds(
+      guest
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          memberUids: ["host-1", "hider-1", "guest-2"],
+          memberRoles: {
+            "host-1": "seeker",
+            "hider-1": "hider",
+            "guest-2": "hider",
+          },
+        }),
+    );
+  });
+
+  it("allows a returning member to change role on join", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .update({
+        memberUids: ["host-1", "guest-1"],
+        memberRoles: { "host-1": "seeker", "guest-1": "seeker" },
+      });
+
+    const guest = testEnv.authenticatedContext("guest-1");
+    await assertSucceeds(
+      guest
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          memberUids: ["host-1", "guest-1"],
+          memberRoles: { "host-1": "seeker", "guest-1": "hider" },
+        }),
+    );
+  });
+
   it("denies premium session creation without host access claim", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await assertFails(

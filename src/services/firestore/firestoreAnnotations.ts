@@ -22,7 +22,10 @@ import type {
 import type { GameSize } from "../../domain/session/gameSize";
 import { hidingZoneRadiusMeters } from "../../domain/session/gameSize";
 import type { SessionRulesPatch } from "../../domain/session/advancedSessionSettings";
-import type { PlayerRole } from "../../domain/session/playerRole";
+import {
+  resolvePlayerRole,
+  type PlayerRole,
+} from "../../domain/session/playerRole";
 import { timerStateToRemote, type TimerState } from "../../domain/session/timer";
 import {
   sessionVersionCompatible,
@@ -89,12 +92,13 @@ async function writeSessionMembershipPatch(
 export async function ensureRemoteSessionWriteAccess(
   session: SessionRecord,
   uid: string,
+  role: PlayerRole = resolvePlayerRole(session.memberRoles, uid),
 ): Promise<SessionRecord> {
   if (session.memberUids.includes(uid)) {
     return session;
   }
 
-  const result = await joinRemoteSessionByCode(session.code, uid);
+  const result = await joinRemoteSessionByCode(session.code, uid, role);
 
   if (result.status === "joined") {
     return result.session;
@@ -273,8 +277,9 @@ export async function joinRemoteSessionByCode(
   const memberUids = Array.from(new Set([...existingMemberUids, uid]));
   const memberRoles = {
     ...existingRoles,
-    [uid]: existingRoles[uid] ?? role,
+    [uid]: role,
   };
+  const roleChanged = existingRoles[uid] !== role;
 
   const existingMemberAppVersions =
     data.memberAppVersions && typeof data.memberAppVersions === "object"
@@ -291,7 +296,7 @@ export async function joinRemoteSessionByCode(
       memberRoles,
       memberAppVersions,
     });
-  } else if (!existingRoles[uid]) {
+  } else if (!existingRoles[uid] || roleChanged) {
     await writeSessionMembershipPatch(sessionDoc.ref, {
       memberRoles,
       memberAppVersions,

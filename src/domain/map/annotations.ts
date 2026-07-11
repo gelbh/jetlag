@@ -6,6 +6,7 @@ import type {
   MultiPolygon,
 } from "geojson";
 import type { DistanceUnit } from "./distance";
+import { DEFAULT_RADIUS_METERS } from "./distance";
 import type { MatchingAnswer, MatchingCategoryId } from "../questions/matchingQuestions";
 import { matchingQuestionLabel } from "../questions/matchingQuestions";
 import { radarAnnotationSummary } from "../questions/radarQuestions";
@@ -279,4 +280,28 @@ export function annotationSummary(
     default:
       return "Annotation";
   }
+}
+
+export function pointToolRadiusFromMetadata(
+  metadata: Pick<
+    AnnotationMetadata,
+    "radiusMeters" | "tentacleAnswerRadiusMeters"
+  >,
+  fallbackMeters: number = DEFAULT_RADIUS_METERS,
+): number {
+  const radius = metadata.radiusMeters;
+  if (typeof radius === "number" && Number.isFinite(radius) && radius > 0) {
+    return radius;
+  }
+
+  const answerRadius = metadata.tentacleAnswerRadiusMeters;
+  if (
+    typeof answerRadius === "number" &&
+    Number.isFinite(answerRadius) &&
+    answerRadius > 0
+  ) {
+    return answerRadius;
+  }
+
+  return fallbackMeters;
 }

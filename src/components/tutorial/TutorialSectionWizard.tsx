@@ -21,6 +21,7 @@ export interface TutorialWalkthrough {
   id: string;
   title: string;
   steps: TutorialStep[];
+  kind: "section" | "question";
 }
 
 interface TutorialSectionWizardProps {
@@ -78,10 +79,7 @@ export function TutorialSectionWizard({
     setStepIndex((current) => Math.max(current - 1, 0));
   };
 
-  const isQuestionTutorial = section.id !== "core" &&
-    section.id !== "tools" &&
-    section.id !== "hider" &&
-    section.id !== "extras";
+  const isQuestionTutorial = section.kind === "question";
 
   const nextSectionId = isQuestionTutorial
     ? null

@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.4.2";
+export const APP_VERSION = "0.4.3";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,40 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.4.3",
+    date: "2026-07-11",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Join: honor the role you pick when joining, including a second hider in the same session",
+          "Custom games: fix scrolling on the presets list when content exceeds the screen",
+          "Premium recovery: require verified email before merging purchases from another account",
+          "Preset games: show a map warning when bundled admin categories fail to load",
+          "Premium sign-in: show an error when purchase recovery fails; note when credits move from a previous device",
+          "Create session: disable Confirm while the premium sign-in gate is visible",
+          "Premium trial: block start when your Stripe subscription payment is past due",
+          "Map: radar and tentacle circles use stored answer radius when older questions lack radius metadata",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Tentacles: committed questions show the search radius circle on the map",
+          "Tentacles: elimination shading matches the full search disk minus the answered location",
+          "Tentacles: map preview circle waits until a category is chosen",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "CI: skip manual tutorial screenshot capture specs in default e2e runs",
+          "Deploy: billing client changes trigger a functions deploy before the frontend ships",
+        ],
+      }
+    ],
+  },
   {
     version: "0.4.2",
     date: "2026-07-11",

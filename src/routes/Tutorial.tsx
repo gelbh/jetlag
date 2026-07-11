@@ -169,7 +169,12 @@ export function Tutorial() {
         ) : activeSection ? (
           <TutorialSectionWizard
             key={`${activeSection.id}-${reviewingSection ? "review" : "progress"}`}
-            section={activeSection}
+            section={{
+              id: activeSection.id,
+              title: activeSection.title,
+              steps: activeSection.steps,
+              kind: "section",
+            }}
             initialStepIndex={sectionStepIndex}
             reviewing={reviewingSection}
             onStepComplete={(stepIndex) => {
@@ -192,7 +197,12 @@ export function Tutorial() {
         ) : activeQuestion ? (
           <TutorialSectionWizard
             key={`${activeQuestion.id}-${reviewingQuestion ? "review" : "progress"}`}
-            section={activeQuestion}
+            section={{
+              id: activeQuestion.id,
+              title: activeQuestion.title,
+              steps: activeQuestion.steps,
+              kind: "question",
+            }}
             initialStepIndex={questionStepIndex}
             reviewing={reviewingQuestion}
             finishLabel="All questions"

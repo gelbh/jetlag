@@ -155,35 +155,68 @@ export function buildMergedEntitlementPatch(source, target) {
 }
 
 /**
+ * @param {Record<string, unknown> | undefined} data
+ */
+export function canStartAppPremiumTrial(data) {
+  if (data?.trialUsedAt) {
+    return false;
+  }
+
+  if (hasUnlimitedPremiumEntitlement(data)) {
+    return false;
+  }
+
+  if (data?.subscription?.status === "past_due") {
+    return false;
+  }
+
+  return true;
+}
+
+/**
  * @param {import('firebase-admin/firestore').Firestore} db
  * @param {string} uid
  */
 export async function startPremiumTrialHandler(db, uid) {
   const userRef = userEntitlementsRef(db, uid);
-  const snapshot = await userRef.get();
-  const userData = snapshot.data();
-
-  if (userData?.trialUsedAt) {
-    throw new HttpsError(
-      "failed-precondition",
-      "Free trial already used on this account.",
-    );
-  }
-
-  if (hasUnlimitedPremiumEntitlement(userData)) {
-    throw new HttpsError(
-      "failed-precondition",
-      "You already have unlimited premium hosting.",
-    );
-  }
-
   const trialEndsAt = Timestamp.fromMillis(
     Date.now() + PREMIUM_TRIAL_DAYS * 24 * 60 * 60 * 1000,
   );
 
-  await mergeUserEntitlements(db, uid, {
-    trialUsedAt: FieldValue.serverTimestamp(),
-    trialEndsAt,
+  await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(userRef);
+    const userData = snapshot.data();
+
+    if (!canStartAppPremiumTrial(userData)) {
+      if (userData?.trialUsedAt) {
+        throw new HttpsError(
+          "failed-precondition",
+          "Free trial already used on this account.",
+        );
+      }
+
+      if (userData?.subscription?.status === "past_due") {
+        throw new HttpsError(
+          "failed-precondition",
+          "Update your subscription payment before starting a free trial.",
+        );
+      }
+
+      throw new HttpsError(
+        "failed-precondition",
+        "You already have unlimited premium hosting.",
+      );
+    }
+
+    transaction.set(
+      userRef,
+      {
+        trialUsedAt: FieldValue.serverTimestamp(),
+        trialEndsAt,
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true },
+    );
   });
 
   const updated = await userRef.get();
