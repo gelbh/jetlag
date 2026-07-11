@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { AnimatedOverlay } from "../ui/AnimatedOverlay";
 import { usePersistedDismiss } from "../../hooks/usePersistedDismiss";
 
@@ -59,6 +60,10 @@ export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
         >
           Close
         </button>
+
+        <Link to="/tutorial" className="home-feedback-link block text-center">
+          Full tutorial →
+        </Link>
       </div>
     </AnimatedOverlay>
   );

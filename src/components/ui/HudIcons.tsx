@@ -60,6 +60,15 @@ export function HudPlayIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function HudGuideIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H18v16.5H6.5A2.5 2.5 0 0 1 4 17V5.5Z" />
+      <path d="M8 7h8M8 11h8M8 15h5" />
+    </IconBase>
+  );
+}
+
 export function HudMoreIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <IconBase {...props}>

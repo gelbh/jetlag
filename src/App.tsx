@@ -19,6 +19,7 @@ import { Feedback } from "./routes/Feedback";
 import { Privacy } from "./routes/Privacy";
 import { Premium } from "./routes/Premium";
 import { Terms } from "./routes/Terms";
+import { Tutorial } from "./routes/Tutorial";
 import {
   CHUNK_RELOAD_CLEAR_MS,
   clearChunkReloadFlag,
@@ -119,6 +120,7 @@ export default function App() {
           <LowBatteryPrompt />
           <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/tutorial" element={<Tutorial />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
