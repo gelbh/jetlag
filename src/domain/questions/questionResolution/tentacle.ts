@@ -1,12 +1,10 @@
 import type { AnnotationRecord, GameArea, TentaclePoi } from "../../map/annotations";
 import type { LatLngTuple } from "../../geometry/geometry";
+import { DEFAULT_RADIUS_METERS } from "../../map/distance";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
-import {
-  TENTACLE_ANSWER_RADIUS_METERS,
-  TENTACLE_SEARCH_RADIUS_METERS,
-} from "../tentacleQuestions";
 import { tentacleEliminationJsonForAnswer } from "../../geometry/tentacleGeometry";
 import type { PendingQuestionRecord } from "../../session/sessionChat";
+import { tentacleRadiusFromMetadata } from "../tentacleQuestions";
 
 export function tentacleAnswerFromReplyId(replyId: string): string {
   return replyId;
@@ -35,9 +33,10 @@ export function resolveTentaclePendingQuestion(
   const answerPoi = outOfReach
     ? undefined
     : pois.find((poi) => poi.id === answerReplyId);
+  const radiusMeters = tentacleRadiusFromMetadata(metadata, DEFAULT_RADIUS_METERS);
   const eliminationJson = tentacleEliminationJsonForAnswer({
     anchor,
-    radiusMeters: TENTACLE_ANSWER_RADIUS_METERS,
+    radiusMeters,
     pois,
     answeredPoiId: answerPoi?.id,
     outOfReach,
@@ -47,10 +46,8 @@ export function resolveTentaclePendingQuestion(
   const resolvedMetadata: AnnotationRecord["metadata"] = {
     ...metadata,
     createdAt: new Date().toISOString(),
-    radiusMeters: TENTACLE_SEARCH_RADIUS_METERS,
-    tentacleAnswerRadiusMeters: outOfReach
-      ? undefined
-      : TENTACLE_ANSWER_RADIUS_METERS,
+    radiusMeters,
+    tentacleAnswerRadiusMeters: outOfReach ? undefined : radiusMeters,
     tentacleOutOfReach: outOfReach,
     highlightedPoiId: answerPoi?.id,
     tentacleAnswerPoiName: answerPoi?.name,

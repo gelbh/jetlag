@@ -12,10 +12,6 @@ import type {
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import { DEFAULT_RADIUS_METERS } from "../../domain/map/distance";
 import {
-  TENTACLE_ANSWER_RADIUS_METERS,
-  TENTACLE_SEARCH_RADIUS_METERS,
-} from "../../domain/questions/tentacleQuestions";
-import {
   gameAreaToPolygon,
   polygonFeatureToLeafletPolygonGroups,
   safeDifference,
@@ -48,7 +44,7 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
     }
 
     return turfCircle(turfPoint(tentaclePoint.coordinates), 
-      (annotation.metadata.radiusMeters ?? TENTACLE_SEARCH_RADIUS_METERS) / 1000,
+      (annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS) / 1000,
       { steps: 64, units: "kilometers" },
     ) as Feature<GeoPolygon>;
   }, [annotation.metadata.radiusMeters, annotation.metadata.tentacleOutOfReach, tentaclePoint]);
@@ -59,8 +55,7 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
     }
 
     const answerRadius =
-      annotation.metadata.tentacleAnswerRadiusMeters ??
-      TENTACLE_ANSWER_RADIUS_METERS;
+      annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
     const radarCircle = turfCircle(
       turfPoint(tentaclePoint.coordinates),
       answerRadius / 1000,
@@ -72,7 +67,7 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
       radarCircle as Feature<GeoPolygon>,
     );
   }, [
-    annotation.metadata.tentacleAnswerRadiusMeters,
+    annotation.metadata.radiusMeters,
     annotation.metadata.tentacleOutOfReach,
     gameArea,
     tentaclePoint,
@@ -113,10 +108,7 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
     const point = draftGeometry.geometry as Point;
     const center: LatLngTuple = [point.coordinates[1], point.coordinates[0]];
     const searchRadius =
-      annotation.metadata.radiusMeters ?? TENTACLE_SEARCH_RADIUS_METERS;
-    const answerRadius =
-      annotation.metadata.tentacleAnswerRadiusMeters ??
-      TENTACLE_ANSWER_RADIUS_METERS;
+      annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
     const tentacleColor = annotation.metadata.color ?? MAP_ANNOTATION_COLORS.tentacle;
 
     if (annotation.metadata.tentacleOutOfReach) {
@@ -165,10 +157,11 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
       <>
         <Circle
           center={center}
-          radius={answerRadius}
+          radius={searchRadius}
           pathOptions={{
             color: tentacleColor,
             weight: 2,
+            dashArray: "6 6",
             fillOpacity: 0.05,
           }}
         />

@@ -155,6 +155,18 @@ export const TENTACLE_SEARCH_RADIUS_METERS = milesToMeters(1);
 /** @deprecated Unified radius; search and answer use the same distance */
 export const TENTACLE_ANSWER_RADIUS_METERS = milesToMeters(1);
 
+export function tentacleRadiusFromMetadata(
+  metadata: Record<string, unknown>,
+  fallbackMeters: number,
+): number {
+  const radius = metadata.radiusMeters;
+  if (typeof radius === "number" && Number.isFinite(radius) && radius > 0) {
+    return radius;
+  }
+
+  return fallbackMeters;
+}
+
 export function tentacleCategoryOverpassSelectors(
   categoryId: TentacleExtendedCategoryId,
 ): readonly string[] {

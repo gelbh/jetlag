@@ -353,6 +353,49 @@ describe("resolveTentaclePendingQuestion", () => {
     expect(resolved?.metadata.highlightedPoiId).toBe("poi-west");
     expect(resolved?.metadata.tentacleAnswerPoiName).toBe("West Museum");
   });
+
+  it("stores radius from pending metadata", () => {
+    const largeRadius = milesToMeters(15);
+    const pending = basePending({
+      toolType: "tentacle",
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-0.15, 51.45] },
+        }),
+        metadata: {
+          radiusMeters: largeRadius,
+          poisJson: JSON.stringify([
+            {
+              id: "poi-west",
+              name: "West Museum",
+              lat: 51.45,
+              lng: -0.18,
+              category: "museum",
+            },
+            {
+              id: "poi-east",
+              name: "East Museum",
+              lat: 51.45,
+              lng: -0.12,
+              category: "museum",
+            },
+          ]),
+          centerJson: JSON.stringify({ lat: 51.45, lng: -0.15 }),
+        },
+      },
+    });
+
+    const resolved = resolveTentaclePendingQuestion(
+      pending,
+      "poi-west",
+      gameArea,
+    );
+
+    expect(resolved?.metadata.radiusMeters).toBe(largeRadius);
+    expect(resolved?.metadata.tentacleAnswerRadiusMeters).toBe(largeRadius);
+  });
 });
 
 describe("photo pending question helpers", () => {

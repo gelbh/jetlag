@@ -13,7 +13,7 @@ import {
   buildTentacleEliminationRegion,
   tentacleEliminationJsonForAnswer,
 } from "../../domain/geometry/tentacleGeometry";
-import type { DistanceUnit } from "../../domain/map/distance";
+import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import { sessionGameSize } from "../../domain/session/sessionRules";
 import {
@@ -179,7 +179,7 @@ export function useTentacleTool({
         setTentaclePois(pois);
         if (pois.length === 0) {
           setTentacleError(
-            `No named locations were found within ${searchRadiusMeters < 5000 ? "1 mile" : "15 miles"}.`,
+            `No named locations were found within ${formatDistance(searchRadiusMeters, distanceUnit)}.`,
           );
         }
       } catch (error) {
@@ -196,7 +196,7 @@ export function useTentacleTool({
         }
       }
     },
-    [beginRequest, isLatestRequest, searchRadiusMeters, sessionRules],
+    [beginRequest, distanceUnit, isLatestRequest, searchRadiusMeters, sessionRules],
   );
 
   const debouncedTentacleCenter = useDebouncedValue(tentacleCenter, 400);
@@ -351,6 +351,7 @@ export function useTentacleTool({
           geometryJson: JSON.stringify(geometry),
           metadata: {
             tentacleCategoryId,
+            radiusMeters: searchRadiusMeters,
             centerJson: JSON.stringify({
               lat: tentacleCenter[0],
               lng: tentacleCenter[1],

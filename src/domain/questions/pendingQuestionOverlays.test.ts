@@ -112,6 +112,7 @@ describe("buildPendingQuestionOverlay", () => {
   });
 
   it("builds tentacle search circle and poi markers", () => {
+    const largeRadius = milesToMeters(15);
     const result = buildPendingQuestionOverlay(
       basePendingQuestion({
         toolType: "tentacle",
@@ -125,6 +126,7 @@ describe("buildPendingQuestionOverlay", () => {
             },
           }),
           metadata: {
+            radiusMeters: largeRadius,
             poisJson: JSON.stringify([
               {
                 id: "west",
@@ -140,9 +142,9 @@ describe("buildPendingQuestionOverlay", () => {
       gameArea,
     );
 
-    expect(result?.overlays.some((overlay) => overlay.kind === "circle")).toBe(
-      true,
-    );
+    const circle = result?.overlays.find((overlay) => overlay.kind === "circle");
+    expect(circle).toBeDefined();
+    expect(circle?.kind === "circle" && circle.radiusMeters).toBe(largeRadius);
     expect(
       result?.overlays.some(
         (overlay) => overlay.kind === "marker" && overlay.popup === "West Museum",

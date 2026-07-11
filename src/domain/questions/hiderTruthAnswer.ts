@@ -25,9 +25,8 @@ import {
   classifyAdminDivisionAtPoint,
 } from "../../services/geo/adminDivisionBoundaries";
 import { classifyLandmassAtPoint } from "../../services/geo/landmassFeatures";
-import {
-  TENTACLE_ANSWER_RADIUS_METERS,
-} from "./tentacleQuestions";
+import { DEFAULT_RADIUS_METERS } from "../map/distance";
+import { tentacleRadiusFromMetadata } from "./tentacleQuestions";
 import { fetchElevations } from "../../services/geo/elevation";
 
 export interface HiderTruthResult {
@@ -459,8 +458,9 @@ function truthTentacle(
     return truthUnavailable();
   }
 
+  const radiusMeters = tentacleRadiusFromMetadata(metadata, DEFAULT_RADIUS_METERS);
   const distanceToAnchor = distanceBetweenPoints(stationCenter, anchor);
-  if (distanceToAnchor > TENTACLE_ANSWER_RADIUS_METERS) {
+  if (distanceToAnchor > radiusMeters) {
     return resultFromReplyId(pending, "out-of-reach");
   }
 

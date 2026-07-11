@@ -161,17 +161,19 @@ export function buildMapDraftOverlays(
       ? answerRadiusMeters
       : searchRadiusMeters;
 
-    overlays.push({
-      kind: "circle",
-      id: "tentacle-draft-range",
-      center,
-      radiusMeters: displayRadius,
-      style: {
-        color: c.tentacleAccent,
-        dashArray: outOfReach ? undefined : "6 6",
-        fillOpacity: outOfReach || selectedPoiId ? 0.05 : 0.06,
-      },
-    });
+    if (searchRadiusMeters > 0) {
+      overlays.push({
+        kind: "circle",
+        id: "tentacle-draft-range",
+        center,
+        radiusMeters: displayRadius,
+        style: {
+          color: c.tentacleAccent,
+          dashArray: outOfReach ? undefined : "6 6",
+          fillOpacity: outOfReach || selectedPoiId ? 0.05 : 0.06,
+        },
+      });
+    }
     overlays.push({
       kind: "marker",
       id: "tentacle-draft-center",

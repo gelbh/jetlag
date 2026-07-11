@@ -46,8 +46,6 @@ import {
   serializeMatchingFeatures,
 } from "../../services/geo/matchingFeatures";
 import {
-  TENTACLE_ANSWER_RADIUS_METERS,
-  TENTACLE_SEARCH_RADIUS_METERS,
   tentacleCategoryIdForAnnotation,
   tentacleQuestionPrompt,
   type TentacleExtendedCategoryId,
@@ -204,14 +202,14 @@ function AnnotationEditSheetForm({
         (poi) => poi.id === tentacleAnswerPoiId,
       );
 
+      const radiusMeters =
+        annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
       const metaRest = { ...annotation.metadata };
       delete metaRest.tentacleEliminationJson;
       const metadata = {
         ...metaRest,
-        radiusMeters: TENTACLE_SEARCH_RADIUS_METERS,
-        tentacleAnswerRadiusMeters: tentacleOutOfReach
-          ? undefined
-          : TENTACLE_ANSWER_RADIUS_METERS,
+        radiusMeters,
+        tentacleAnswerRadiusMeters: tentacleOutOfReach ? undefined : radiusMeters,
         tentacleChooseCustom: false,
         tentacleOutOfReach,
         highlightedPoiId: selectedPoi?.id,
@@ -222,7 +220,7 @@ function AnnotationEditSheetForm({
         const [lng, lat] = geom.coordinates;
         const eliminationJson = tentacleEliminationJsonForAnswer({
           anchor: [lat, lng],
-          radiusMeters: TENTACLE_ANSWER_RADIUS_METERS,
+          radiusMeters,
           pois: annotation.metadata.pois,
           answeredPoiId: selectedPoi?.id,
           outOfReach: tentacleOutOfReach,
