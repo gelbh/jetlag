@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
 import { EntryScreenLayout } from "../ui/EntryScreenLayout";
-import { ScreenNav } from "../ui/ScreenNav";
+import {
+  ScreenHeader,
+  screenHeaderOffsetClassName,
+} from "../ui/ScreenHeader";
 import {
   LEGAL_EFFECTIVE_DATE,
   LEGAL_FEEDBACK_URL,
@@ -31,8 +34,10 @@ export function LegalDocumentPage({
 
   return (
     <EntryScreenLayout justify="center">
-      <ScreenNav backTo="/" backLabel="Back" />
-      <article className="mx-auto w-full max-w-prose space-y-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(3rem,env(safe-area-inset-top))]">
+      <ScreenHeader backTo="/" backLabel="Back" />
+      <article
+        className={`mx-auto w-full max-w-prose space-y-6 pb-[max(1rem,env(safe-area-inset-bottom))] ${screenHeaderOffsetClassName}`}
+      >
         <header className="space-y-2">
           <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
             {title}
