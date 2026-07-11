@@ -21,12 +21,20 @@ export const EMAIL_LINK_STORAGE_KEY = "premiumEmailForSignIn";
 export const APPLE_SIGN_IN_ENABLED = false;
 
 export function isAnonymousUser(user?: User | null): boolean {
-  const current = user ?? getFirebaseAuth().currentUser;
+  if (user !== undefined) {
+    return user?.isAnonymous === true;
+  }
+
+  const current = getFirebaseAuth().currentUser;
   return current?.isAnonymous === true;
 }
 
 export function isPermanentUser(user?: User | null): boolean {
-  const current = user ?? getFirebaseAuth().currentUser;
+  if (user !== undefined) {
+    return user != null && !user.isAnonymous;
+  }
+
+  const current = getFirebaseAuth().currentUser;
   return current != null && !current.isAnonymous;
 }
 
