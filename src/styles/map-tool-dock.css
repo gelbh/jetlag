@@ -459,6 +459,14 @@
     animation: jl-step-enter var(--motion-fast) var(--ease-out-quint) both;
   }
 
+  .jl-wizard-step-forward {
+    animation: jl-wizard-step-forward var(--motion-base) var(--ease-out-quint) both;
+  }
+
+  .jl-wizard-step-back {
+    animation: jl-wizard-step-back var(--motion-base) var(--ease-out-quint) both;
+  }
+
   .jl-banner-enter {
     animation: jl-banner-enter var(--motion-base) var(--ease-out-quint) both;
   }

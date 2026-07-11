@@ -18,6 +18,7 @@ import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
 import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
+import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
 import { TENTACLE_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { useToolWizard } from "../../hooks/useToolWizard";
 
@@ -103,8 +104,22 @@ export function TentaclePanel({
     !isSubmitting;
   const availableCategories = tentacleCategoriesForGameSize(gameSize);
 
+  const canGoNext =
+    (step === "anchor" && hasCenter && !loading) ||
+    (step === "category" && categorySelectionAvailable) ||
+    (step === "locations" && locationsReady && !loading);
+  const canSwipeNext = canGoNext && stepIndex < steps.length - 1;
+
   return (
     <ToolPanelShell toolId="tentacle" stepper={stepper}>
+      <WizardSwipeSurface
+        stepId={step}
+        stepIndex={stepIndex}
+        canGoBack={stepIndex > 0}
+        canGoNext={canSwipeNext}
+        onBack={goBack}
+        onNext={goNext}
+      >
       {step === "category" ? (
         <ToolSection first compact status="active">
           <QuestionPromptBlock
@@ -214,12 +229,9 @@ export function TentaclePanel({
         stepCount={steps.length}
         onBack={goBack}
         onNext={goNext}
-        canGoNext={
-          (step === "anchor" && hasCenter && !loading) ||
-          (step === "category" && categorySelectionAvailable) ||
-          (step === "locations" && locationsReady && !loading)
-        }
+        canGoNext={canGoNext}
       />
+      </WizardSwipeSurface>
 
       {error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null}
     </ToolPanelShell>

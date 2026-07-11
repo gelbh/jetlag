@@ -139,16 +139,18 @@ export function Tutorial() {
         : "Back";
 
   return (
-    <EntryScreenLayout>
+    <EntryScreenLayout viewport>
       <ScreenHeader backTo="/" backLabel={headerBackLabel} />
-      <div className={`flex min-h-0 flex-1 flex-col gap-3 ${screenHeaderOffsetClassName}`}>
+      <div
+        className={`flex min-h-0 flex-1 flex-col gap-2 overflow-hidden ${screenHeaderOffsetClassName}`}
+      >
         {view.mode === "hub" ? (
           <>
-            <div className="space-y-2">
-              <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
+            <div className="shrink-0 space-y-1">
+              <h1 className="tutorial-hub-heading font-display text-balance font-bold uppercase leading-[0.92] tracking-tight text-ink">
                 Tutorial
               </h1>
-              <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
+              <p className="tutorial-hub-intro max-w-sm text-pretty text-ink-muted">
                 Learn the session flow, then walk through each question tool.
               </p>
             </div>

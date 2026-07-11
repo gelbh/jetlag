@@ -19,6 +19,7 @@ import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
 import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
+import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
 import { THERMOMETER_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { useToolWizard } from "../../hooks/useToolWizard";
 
@@ -119,8 +120,22 @@ export function ThermometerPanel({
     canSubmitQuestion &&
     !isSubmitting;
 
+  const canGoNext =
+    (step === "placement" &&
+      (walkingActive || pinsReady || placementMode === "gps")) ||
+    (step === "distance" && distanceAvailable);
+  const canSwipeNext = canGoNext && stepIndex < steps.length - 1;
+
   return (
     <ToolPanelShell toolId="thermometer" stepper={stepper}>
+      <WizardSwipeSurface
+        stepId={step}
+        stepIndex={stepIndex}
+        canGoBack={stepIndex > 0}
+        canGoNext={canSwipeNext}
+        onBack={goBack}
+        onNext={goNext}
+      >
       {step === "distance" ? (
         <ToolSection first compact status="active">
           <QuestionPromptBlock
@@ -254,12 +269,9 @@ export function ThermometerPanel({
         stepCount={steps.length}
         onBack={goBack}
         onNext={goNext}
-        canGoNext={
-          (step === "placement" &&
-            (walkingActive || pinsReady || placementMode === "gps")) ||
-          (step === "distance" && distanceAvailable)
-        }
+        canGoNext={canGoNext}
       />
+      </WizardSwipeSurface>
 
       {error ? (
         <ResolvedReadout variant="warning">{error}</ResolvedReadout>

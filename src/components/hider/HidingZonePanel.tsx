@@ -10,6 +10,7 @@ import { InlineError } from "../ui/InlineError";
 import { ToolPanelShell } from "../tools/shared/ToolPanelShell";
 import { ToolSection } from "../tools/shared/ToolSection";
 import { ToolWizardNav } from "../tools/shared/ToolWizardNav";
+import { WizardSwipeSurface } from "../tools/shared/WizardSwipeSurface";
 import { TransitStationPicker } from "./TransitStationPicker";
 import { useToolWizard } from "../../hooks/useToolWizard";
 
@@ -160,6 +161,7 @@ export function HidingZonePanel({
   const canGoNext =
     (stepId === "method" && zoneTool.methodChosen) ||
     (stepId === "location" && zoneTool.hasPlacement);
+  const canSwipeNext = canGoNext && stepIndex < steps.length - 1;
 
   return (
     <ToolPanelShell toolId="zone" stepper={stepper}>
@@ -170,6 +172,14 @@ export function HidingZonePanel({
         <p className="text-sm font-medium leading-snug text-ink">{prompt.body}</p>
         <p className="text-xs leading-snug text-ink-dim">Radius: {radiusLabel}</p>
       </div>
+      <WizardSwipeSurface
+        stepId={stepId}
+        stepIndex={stepIndex}
+        canGoBack={stepIndex > 0}
+        canGoNext={canSwipeNext}
+        onBack={goBack}
+        onNext={goNext}
+      >
       {stepId === "method" ? (
         <ToolSection first compact status="active">
           <SegmentControl
@@ -275,6 +285,7 @@ export function HidingZonePanel({
           onNext={goNext}
         />
       )}
+      </WizardSwipeSurface>
 
       {zoneTool.error ? <InlineError>{zoneTool.error}</InlineError> : null}
     </ToolPanelShell>

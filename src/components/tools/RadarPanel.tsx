@@ -9,6 +9,7 @@ import { ToolSection } from "./shared/ToolSection";
 import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { InlineError } from "../ui/InlineError";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
+import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
 import { RADAR_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { useToolWizard } from "../../hooks/useToolWizard";
 import { parseDistanceInput, type DistanceUnit } from "../../domain/map/distance";
@@ -100,8 +101,21 @@ export function RadarPanel({
     !isSubmitting;
   const canCommitActions = !viewOnly && canCommit;
 
+  const canGoNext =
+    (step === "anchor" && hasCenter) ||
+    (step === "distance" && distanceSelectionAvailable);
+  const canSwipeNext = canGoNext && stepIndex < steps.length - 1;
+
   return (
     <ToolPanelShell toolId="radar" stepper={stepper}>
+      <WizardSwipeSurface
+        stepId={step}
+        stepIndex={stepIndex}
+        canGoBack={stepIndex > 0}
+        canGoNext={canSwipeNext}
+        onBack={goBack}
+        onNext={goNext}
+      >
       {viewOnly ? <ViewOnlyQuestionBanner /> : null}
       {step === "distance" ? (
         <ToolSection first compact status="active">
@@ -174,11 +188,9 @@ export function RadarPanel({
         stepCount={steps.length}
         onBack={goBack}
         onNext={goNext}
-        canGoNext={
-          (step === "anchor" && hasCenter) ||
-          (step === "distance" && distanceSelectionAvailable)
-        }
+        canGoNext={canGoNext}
       />
+      </WizardSwipeSurface>
 
       {error ? <InlineError>{error}</InlineError> : null}
     </ToolPanelShell>
