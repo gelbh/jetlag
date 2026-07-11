@@ -143,14 +143,20 @@ test.describe("iPhone 13 PWA safe area", () => {
     }, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 
-  test("dock wrapper extends to viewport bottom with transparent safe-area band below bar", async ({
+  test("dock floats above home indicator with map full bleed", async ({
     page,
   }) => {
     const metrics = await page.evaluate(() => {
       const dock = document.querySelector(".jl-tool-dock");
       const bar = document.querySelector(".jl-tool-dock-bar");
+      const map = document.querySelector(".leaflet-container");
+      const topBand = document.querySelector(".map-screen-shell");
       const dockRect = dock?.getBoundingClientRect();
       const barRect = bar?.getBoundingClientRect();
+      const mapRect = map?.getBoundingClientRect();
+      const topBandStyle = topBand
+        ? getComputedStyle(topBand, "::before")
+        : null;
       const slots = [...document.querySelectorAll(".jl-tool-slot")].filter(
         (el) => el.getBoundingClientRect().width > 0,
       );
@@ -163,9 +169,15 @@ test.describe("iPhone 13 PWA safe area", () => {
         dockBottom: dockRect?.bottom ?? 0,
         barHeight: barRect?.height ?? 0,
         barBottom: barRect?.bottom ?? 0,
-        wrapperBandHeight: (dockRect?.bottom ?? 0) - (barRect?.bottom ?? 0),
+        mapBottom: mapRect?.bottom ?? 0,
+        topBandHeight: topBandStyle
+          ? Number.parseFloat(topBandStyle.height)
+          : 0,
         dockPaddingBottom: dock
           ? Number.parseFloat(getComputedStyle(dock).paddingBottom)
+          : 0,
+        dockBottomOffset: dock
+          ? Number.parseFloat(getComputedStyle(dock).bottom)
           : 0,
         barPaddingBottom: bar
           ? Number.parseFloat(getComputedStyle(bar).paddingBottom)
@@ -181,25 +193,22 @@ test.describe("iPhone 13 PWA safe area", () => {
       };
     });
 
-    expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(
+    expect(metrics.dockPaddingBottom).toBeLessThanOrEqual(1);
+    expect(metrics.dockBottomOffset).toBeGreaterThanOrEqual(
       SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
     );
     expect(metrics.barPaddingBottom).toBeLessThanOrEqual(6);
-    expect(metrics.gapBelowDock).toBeLessThanOrEqual(1);
-    expect(Math.abs(metrics.dockBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
-      1,
-    );
     expect(
       Math.abs(
-        metrics.barBottom -
+        metrics.dockBottom -
           (metrics.viewportHeight - SIMULATED_SAFE_AREA_BOTTOM_PX),
       ),
     ).toBeLessThanOrEqual(4);
-    expect(metrics.wrapperBandHeight).toBeGreaterThanOrEqual(
+    expect(metrics.gapBelowDock).toBeGreaterThanOrEqual(
       SIMULATED_SAFE_AREA_BOTTOM_PX - 4,
     );
-    expect(metrics.wrapperBandHeight).toBeLessThanOrEqual(
-      SIMULATED_SAFE_AREA_BOTTOM_PX + 4,
+    expect(Math.abs(metrics.mapBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
+      2,
     );
     expect(metrics.barHeight).toBeLessThanOrEqual(60);
     expect(metrics.deadSpaceBelowIcons).toBeLessThanOrEqual(8);
@@ -224,19 +233,28 @@ test.describe("iPhone 13 PWA home safe area", () => {
     }, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 
-  test("home poster fills viewport without gap below content", async ({ page }) => {
+  test("home poster gradient layer covers the viewport", async ({ page }) => {
     const metrics = await page.evaluate(() => {
       const poster = document.querySelector(".home-poster");
       const posterRect = poster?.getBoundingClientRect();
+      const posterBefore = poster
+        ? getComputedStyle(poster, "::before")
+        : null;
       const bodyBg = getComputedStyle(document.body).backgroundColor;
       return {
         viewportHeight: window.innerHeight,
         posterBottom: posterRect?.bottom ?? 0,
+        beforePosition: posterBefore?.position ?? "",
+        beforeTop: posterBefore?.top ?? "",
+        beforeBottom: posterBefore?.bottom ?? "",
         bodyBg,
       };
     });
 
     expect(metrics.posterBottom).toBeGreaterThanOrEqual(metrics.viewportHeight - 2);
+    expect(metrics.beforePosition).toBe("fixed");
+    expect(metrics.beforeTop).toBe("0px");
+    expect(metrics.beforeBottom).toBe("0px");
     expect(metrics.bodyBg).not.toBe("rgba(0, 0, 0, 0)");
   });
 });

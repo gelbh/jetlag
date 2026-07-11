@@ -49,23 +49,22 @@
   color: var(--color-ink-secondary);
   --dock-height: 4.25rem;
   --dock-content-height: 2.75rem;
+  --safe-area-top: env(safe-area-inset-top, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-  --dock-total-height: calc(
-    var(--dock-content-height) + 0.5rem + var(--safe-area-bottom)
-  );
+  --dock-total-height: calc(var(--dock-content-height) + 0.5rem);
   --status-bar-height: 3.25rem;
   --hider-action-bar-height: 3.75rem;
   --chrome-gap-above-dock: 0.5rem;
   --chrome-gap-bottom: 0.75rem;
   --map-panel-bottom: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock)
+    var(--dock-total-height) + var(--chrome-gap-above-dock) + var(--safe-area-bottom)
   );
   --map-panel-bottom-chrome-hidden: calc(
     var(--chrome-gap-bottom) + var(--safe-area-bottom)
   );
   --hider-panel-bottom: 0;
   --hider-wizard-bottom: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock)
+    var(--dock-total-height) + var(--chrome-gap-above-dock) + var(--safe-area-bottom)
   );
   --z-dock: 1000;
   --z-banner: 1001;
@@ -97,9 +96,9 @@
 }
 
 html {
-  height: 100%;
-  height: 100dvh;
-  height: 100svh;
+  min-height: 100%;
+  min-height: 100dvh;
+  min-height: 100svh;
   min-height: -webkit-fill-available;
   background: var(--color-surface-deep);
   -webkit-text-size-adjust: 100%;
@@ -108,9 +107,9 @@ html {
 
 body,
 #root {
-  height: 100%;
-  height: 100dvh;
-  height: 100svh;
+  min-height: 100%;
+  min-height: 100dvh;
+  min-height: 100svh;
   min-height: -webkit-fill-available;
   overflow: hidden;
   background: var(--color-surface-deep);
@@ -356,12 +355,23 @@ textarea {
   .map-screen-shell {
     position: fixed;
     inset: 0;
-    height: 100%;
-    height: 100dvh;
-    height: 100svh;
+    min-height: 100%;
+    min-height: 100dvh;
+    min-height: 100svh;
     min-height: -webkit-fill-available;
     overflow: hidden;
     background: var(--color-surface-deep);
+  }
+
+  .map-screen-shell::before {
+    content: "";
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    height: var(--safe-area-top);
+    background: var(--color-surface-deep);
+    z-index: var(--z-banner);
+    pointer-events: none;
   }
 
   .map-chrome-hud {
@@ -1062,9 +1072,9 @@ textarea {
     position: fixed;
     z-index: var(--z-dock);
     right: max(0.375rem, env(safe-area-inset-right));
-    bottom: 0;
+    bottom: max(0px, var(--safe-area-bottom));
     left: max(0.375rem, env(safe-area-inset-left));
-    padding-bottom: var(--safe-area-bottom);
+    padding-bottom: 0;
   }
 
   .jl-tool-dock-bar {
@@ -1678,8 +1688,20 @@ textarea {
 
   /* Home / join poster */
   .home-poster {
+    position: relative;
+    isolation: isolate;
     min-height: 100dvh;
     min-height: 100svh;
+    min-height: -webkit-fill-available;
+    background-color: var(--color-surface-deep);
+  }
+
+  .home-poster::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
     background-color: var(--color-surface-deep);
     background-image:
       radial-gradient(
@@ -1691,6 +1713,11 @@ textarea {
         ellipse 70% 50% at 0% 100%,
         oklch(from var(--color-brand-blue) l c h / 0.18),
         transparent 50%
+      ),
+      radial-gradient(
+        ellipse 85% 50% at 50% 100%,
+        oklch(from var(--color-brand-blue) l c h / 0.14),
+        transparent 58%
       );
   }
 
@@ -1974,7 +2001,8 @@ textarea {
 .map-zoom-control--dock,
 .map-style-control--dock {
   bottom: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock) + 0.5rem
+    var(--dock-total-height) + var(--chrome-gap-above-dock) +
+      var(--safe-area-bottom) + 0.5rem
   );
 }
 
@@ -2024,7 +2052,8 @@ textarea {
   .map-zoom-control--dock,
   .map-style-control--dock {
     bottom: calc(
-      var(--dock-total-height) + var(--chrome-gap-above-dock) + 2.5rem
+      var(--dock-total-height) + var(--chrome-gap-above-dock) +
+        var(--safe-area-bottom) + 2.5rem
     );
   }
 }

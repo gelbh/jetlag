@@ -2,6 +2,12 @@
 
 ## 0.4.0 - 2026-07-11
 
+### Fixes
+
+- PWA: poster background fills the home-indicator zone on entry screens
+- Map: top safe-area uses solid app background instead of map tiles behind the status bar
+- Map: map extends to the bottom of the screen; tool dock floats above the home indicator
+
 ### Improvements
 
 - Premium billing: Stripe checkout for session packs, monthly and yearly unlimited, lifetime access, and a 7-day subscription trial
