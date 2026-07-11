@@ -9,11 +9,15 @@ const sentryDsnSecret = defineSecret("SENTRY_DSN");
 let initialized = false;
 
 function readAppVersion() {
-  const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-  const packageJson = JSON.parse(
-    readFileSync(resolve(root, "package.json"), "utf8"),
-  );
-  return packageJson.version ?? "0.0.0";
+  const functionsDir = dirname(fileURLToPath(import.meta.url));
+  try {
+    const packageJson = JSON.parse(
+      readFileSync(resolve(functionsDir, "package.json"), "utf8"),
+    );
+    return packageJson.version ?? "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
 }
 
 export function getSentryDsnSecret() {
