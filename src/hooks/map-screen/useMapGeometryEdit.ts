@@ -9,10 +9,7 @@ import type {
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import { tentacleEliminationJsonForAnswer } from "../../domain/geometry/tentacleGeometry";
-import {
-  TENTACLE_ANSWER_RADIUS_METERS,
-  TENTACLE_SEARCH_RADIUS_METERS,
-} from "../../domain/questions/tentacleQuestions";
+import { DEFAULT_RADIUS_METERS } from "../../domain/map/distance";
 import { useAnnotationStore, useMapStore } from "../../state/sessionStore";
 
 interface UseMapGeometryEditParams {
@@ -96,20 +93,18 @@ export function useMapGeometryEdit({
       const meta = { ...record.metadata };
       if (geometryDraft.geometry.type === "Point") {
         const [lng, lat] = geometryDraft.geometry.coordinates;
+        const radiusMeters = meta.radiusMeters ?? DEFAULT_RADIUS_METERS;
         const eliminationJson = tentacleEliminationJsonForAnswer({
           anchor: [lat, lng],
-          radiusMeters:
-            meta.tentacleAnswerRadiusMeters ?? TENTACLE_ANSWER_RADIUS_METERS,
+          radiusMeters,
           pois: meta.pois,
           answeredPoiId: meta.highlightedPoiId,
           outOfReach: Boolean(meta.tentacleOutOfReach),
           gameArea,
         });
         if (!meta.tentacleOutOfReach && meta.highlightedPoiId) {
-          meta.tentacleAnswerRadiusMeters =
-            meta.tentacleAnswerRadiusMeters ?? TENTACLE_ANSWER_RADIUS_METERS;
-          meta.radiusMeters =
-            meta.radiusMeters ?? TENTACLE_SEARCH_RADIUS_METERS;
+          meta.tentacleAnswerRadiusMeters = radiusMeters;
+          meta.radiusMeters = radiusMeters;
         }
         if (eliminationJson !== undefined) {
           meta.tentacleEliminationJson = eliminationJson;

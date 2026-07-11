@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { milesToMeters } from "../map/distance";
 import {
   computeHiderTruthReply,
   computeHiderTruthReplyAsync,
@@ -219,6 +220,7 @@ describe("computeHiderTruthReply", () => {
           geometry: { type: "Point", coordinates: [-0.15, 51.45] },
         }),
         metadata: {
+          radiusMeters: milesToMeters(1),
           centerJson: JSON.stringify({ lat: 51.45, lng: -0.15 }),
           poisJson: JSON.stringify([
             { id: "poi-1", name: "Museum A", lat: 51.451, lng: -0.149 },
@@ -230,6 +232,37 @@ describe("computeHiderTruthReply", () => {
     const result = computeHiderTruthReply(
       pending,
       [51.5, -0.15],
+    );
+    expect(result?.replyId).toBe("out-of-reach");
+  });
+
+  it("tentacle uses metadata radius for out-of-reach threshold", () => {
+    const shortRadius = 500;
+    const pending = basePending({
+      toolType: "tentacle",
+      replyOptions: [
+        { id: "poi-1", label: "Museum A" },
+        { id: "out-of-reach", label: "Not within reach" },
+      ],
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-0.15, 51.45] },
+        }),
+        metadata: {
+          radiusMeters: shortRadius,
+          centerJson: JSON.stringify({ lat: 51.45, lng: -0.15 }),
+          poisJson: JSON.stringify([
+            { id: "poi-1", name: "Museum A", lat: 51.451, lng: -0.149 },
+          ]),
+        },
+      },
+    });
+
+    const result = computeHiderTruthReply(
+      pending,
+      [51.456, -0.15],
     );
     expect(result?.replyId).toBe("out-of-reach");
   });

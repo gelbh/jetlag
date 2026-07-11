@@ -12,7 +12,8 @@ import {
 } from "../geometry/measuringRegions";
 import type { PendingQuestionRecord } from "../session/sessionChat";
 import { deserializeMatchingFeatures } from "../../services/geo/matchingFeatures";
-import { TENTACLE_SEARCH_RADIUS_METERS } from "./tentacleQuestions";
+import { DEFAULT_RADIUS_METERS } from "../map/distance";
+import { tentacleRadiusFromMetadata } from "./tentacleQuestions";
 
 export interface PendingQuestionOverlayResult {
   questionId: string;
@@ -93,7 +94,7 @@ function buildRadarOverlays(
   const radiusMeters =
     typeof question.placement.metadata.radiusMeters === "number"
       ? question.placement.metadata.radiusMeters
-      : TENTACLE_SEARCH_RADIUS_METERS;
+      : DEFAULT_RADIUS_METERS;
 
   return {
     badgeAnchor: center,
@@ -279,12 +280,14 @@ function buildTentacleOverlays(
     return { overlays: [], badgeAnchor: null };
   }
 
+  const radiusMeters = tentacleRadiusFromMetadata(metadata, DEFAULT_RADIUS_METERS);
+
   const overlays: MapDraftOverlay[] = [
     {
       kind: "circle",
       id: `${prefix}-range`,
       center,
-      radiusMeters: TENTACLE_SEARCH_RADIUS_METERS,
+      radiusMeters,
       style: {
         color: MAP_ANNOTATION_COLORS.tentacleAccent,
         dashArray: "6 6",

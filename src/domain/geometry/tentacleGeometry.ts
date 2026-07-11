@@ -1,6 +1,7 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import turfCircle from "@turf/circle";
 import { featureCollection, point as turfPoint } from "@turf/helpers";
+import difference from "@turf/difference";
 import intersect from "@turf/intersect";
 import simplify from "@turf/simplify";
 import union from "@turf/union";
@@ -40,26 +41,20 @@ function clipToGameArea(
   return feature;
 }
 
-/**
- * Within the seeker's radius, where another loaded POI is the geodesic nearest
- * site (spatial Voronoi cell), clipped to the disk.
- */
-export function buildTentacleEliminationRegion(
+function buildSearchDisk(
   anchor: LatLngTuple,
   radiusMeters: number,
+): Feature<Polygon> {
+  return turfCircle(
+    turfPoint([anchor[1], anchor[0]]),
+    radiusMeters / 1000,
+    { steps: DISK_STEPS, units: "kilometers" },
+  ) as Feature<Polygon>;
+}
+
+function voronoiCellsForPois(
   pois: readonly TentaclePoi[],
-  answeredPoiId: string,
-  gameArea: GameArea,
-): Feature<Polygon | MultiPolygon> | null {
-  if (pois.length < 2) {
-    return null;
-  }
-
-  const answered = pois.some((poi) => poi.id === answeredPoiId);
-  if (!answered) {
-    return null;
-  }
-
+): Feature<Polygon | MultiPolygon>[] {
   const cells = geoSpatialVoronoiFromSites(
     pois.map((poi) => ({
       lng: poi.lng,
@@ -67,12 +62,86 @@ export function buildTentacleEliminationRegion(
       properties: { poiId: poi.id },
     })),
   );
-  const wrongCells = cells.features.filter(
+
+  return cells.features.filter(
     (feature) =>
-      voronoiCellSiteId(feature, ["poiId"]) !== answeredPoiId &&
-      (feature.geometry.type === "Polygon" ||
-        feature.geometry.type === "MultiPolygon"),
+      feature.geometry.type === "Polygon" ||
+      feature.geometry.type === "MultiPolygon",
   ) as Feature<Polygon | MultiPolygon>[];
+}
+
+function buildEliminationViaDiskDifference(
+  anchor: LatLngTuple,
+  radiusMeters: number,
+  pois: readonly TentaclePoi[],
+  answeredPoiId: string,
+  gameArea: GameArea,
+): Feature<Polygon | MultiPolygon> | null {
+  const cells = voronoiCellsForPois(pois);
+  const answeredCell = cells.find(
+    (feature) => voronoiCellSiteId(feature, ["poiId"]) === answeredPoiId,
+  );
+
+  if (!answeredCell) {
+    return null;
+  }
+
+  const disk = buildSearchDisk(anchor, radiusMeters);
+
+  let answeredInDisk: Feature<Polygon | MultiPolygon> | null = null;
+  try {
+    const clipped = intersect(
+      featureCollection([answeredCell, disk as Feature<Polygon>]),
+    );
+    if (
+      clipped &&
+      (clipped.geometry.type === "Polygon" ||
+        clipped.geometry.type === "MultiPolygon")
+    ) {
+      answeredInDisk = clipped as Feature<Polygon | MultiPolygon>;
+    }
+  } catch {
+    return null;
+  }
+
+  if (!answeredInDisk) {
+    return null;
+  }
+
+  try {
+    const eliminated = difference(
+      featureCollection([disk, answeredInDisk as Feature<Polygon>]),
+    );
+
+    if (
+      !eliminated ||
+      (eliminated.geometry.type !== "Polygon" &&
+        eliminated.geometry.type !== "MultiPolygon")
+    ) {
+      return null;
+    }
+
+    const smoothed = simplify(eliminated as Feature<Polygon | MultiPolygon>, {
+      tolerance: SIMPLIFY_TOLERANCE,
+      highQuality: true,
+    }) as Feature<Polygon | MultiPolygon>;
+
+    return clipToGameArea(smoothed, gameArea);
+  } catch {
+    return null;
+  }
+}
+
+function buildEliminationViaWrongCellUnion(
+  anchor: LatLngTuple,
+  radiusMeters: number,
+  pois: readonly TentaclePoi[],
+  answeredPoiId: string,
+  gameArea: GameArea,
+): Feature<Polygon | MultiPolygon> | null {
+  const wrongCells = voronoiCellsForPois(pois).filter(
+    (feature) => voronoiCellSiteId(feature, ["poiId"]) !== answeredPoiId,
+  );
 
   if (wrongCells.length === 0) {
     return null;
@@ -91,11 +160,7 @@ export function buildTentacleEliminationRegion(
     return null;
   }
 
-  const disk = turfCircle(
-    turfPoint([anchor[1], anchor[0]]),
-    radiusMeters / 1000,
-    { steps: DISK_STEPS, units: "kilometers" },
-  );
+  const disk = buildSearchDisk(anchor, radiusMeters);
 
   let inDisk: Feature<Polygon | MultiPolygon> | null = null;
   try {
@@ -123,6 +188,44 @@ export function buildTentacleEliminationRegion(
   }) as Feature<Polygon | MultiPolygon>;
 
   return clipToGameArea(smoothed, gameArea);
+}
+
+/**
+ * Within the seeker's radius, shade everywhere except the answered POI's
+ * nearest-neighbor cell (spatial Voronoi), clipped to the search disk.
+ */
+export function buildTentacleEliminationRegion(
+  anchor: LatLngTuple,
+  radiusMeters: number,
+  pois: readonly TentaclePoi[],
+  answeredPoiId: string,
+  gameArea: GameArea,
+): Feature<Polygon | MultiPolygon> | null {
+  if (pois.length < 2) {
+    return null;
+  }
+
+  const answered = pois.some((poi) => poi.id === answeredPoiId);
+  if (!answered) {
+    return null;
+  }
+
+  return (
+    buildEliminationViaWrongCellUnion(
+      anchor,
+      radiusMeters,
+      pois,
+      answeredPoiId,
+      gameArea,
+    ) ??
+    buildEliminationViaDiskDifference(
+      anchor,
+      radiusMeters,
+      pois,
+      answeredPoiId,
+      gameArea,
+    )
+  );
 }
 
 /** Serialized GeoJSON for metadata, or `undefined` when no shaded region applies. */

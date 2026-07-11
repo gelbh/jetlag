@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import type { GameArea, TentaclePoi } from "../map/annotations";
-import { TENTACLE_ANSWER_RADIUS_METERS } from "../questions/tentacleQuestions";
+import { milesToMeters } from "../map/distance";
 import {
   buildTentacleEliminationRegion,
   tentacleEliminationJsonForAnswer,
 } from "./tentacleGeometry";
+
+const oneMileMeters = milesToMeters(1);
 
 const sampleGameArea: GameArea = {
   type: "Polygon",
@@ -42,7 +44,7 @@ describe("tentacleGeometry", () => {
     expect(
       buildTentacleEliminationRegion(
         [51.45, -0.15],
-        TENTACLE_ANSWER_RADIUS_METERS,
+        oneMileMeters,
         [westMuseum],
         "west",
         sampleGameArea,
@@ -54,7 +56,7 @@ describe("tentacleGeometry", () => {
     const anchor: [number, number] = [51.45, -0.15];
     const region = buildTentacleEliminationRegion(
       anchor,
-      TENTACLE_ANSWER_RADIUS_METERS,
+      oneMileMeters,
       [westMuseum, eastMuseum],
       "east",
       sampleGameArea,
@@ -70,11 +72,28 @@ describe("tentacleGeometry", () => {
     );
   });
 
+  it("shades the search disk except near the answered poi", () => {
+    const anchor: [number, number] = [51.45, -0.15];
+    const region = buildTentacleEliminationRegion(
+      anchor,
+      oneMileMeters,
+      [westMuseum, eastMuseum],
+      "east",
+      sampleGameArea,
+    );
+
+    expect(region).not.toBeNull();
+    const nearAnsweredPoi = turfPoint([-0.125, 51.45]);
+    const farFromAnsweredPoi = turfPoint([-0.165, 51.45]);
+    expect(booleanPointInPolygon(nearAnsweredPoi, region!)).toBe(false);
+    expect(booleanPointInPolygon(farFromAnsweredPoi, region!)).toBe(true);
+  });
+
   it("tentacleEliminationJsonForAnswer is undefined when out of reach", () => {
     expect(
       tentacleEliminationJsonForAnswer({
         anchor: [51.45, -0.15],
-        radiusMeters: TENTACLE_ANSWER_RADIUS_METERS,
+        radiusMeters: oneMileMeters,
         pois: [westMuseum, eastMuseum],
         answeredPoiId: "east",
         outOfReach: true,
