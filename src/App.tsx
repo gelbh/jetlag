@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, type ReactNode } from "react";
+import { Suspense, useEffect, type ReactNode } from "react";
 import * as Sentry from "@sentry/react";
 import {
   BrowserRouter,
@@ -17,18 +17,23 @@ import { Home } from "./routes/Home";
 import { JoinSession } from "./routes/JoinSession";
 import { Feedback } from "./routes/Feedback";
 import { Premium } from "./routes/Premium";
+import {
+  CHUNK_RELOAD_CLEAR_MS,
+  clearChunkReloadFlag,
+} from "./domain/device/chunkLoadRecovery";
+import { lazyWithChunkRetry } from "./domain/device/lazyWithChunkRetry";
 import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";
 
-const MapScreen = lazy(() =>
+const MapScreen = lazyWithChunkRetry(() =>
   import("./routes/MapScreen").then((m) => ({ default: m.MapScreen })),
 );
-const CreateSession = lazy(() =>
+const CreateSession = lazyWithChunkRetry(() =>
   import("./routes/CreateSession").then((m) => ({ default: m.CreateSession })),
 );
-const GamePresetList = lazy(() =>
+const GamePresetList = lazyWithChunkRetry(() =>
   import("./routes/GamePresets").then((m) => ({ default: m.GamePresetList })),
 );
-const GamePresetEditor = lazy(() =>
+const GamePresetEditor = lazyWithChunkRetry(() =>
   import("./routes/GamePresets").then((m) => ({ default: m.GamePresetEditor })),
 );
 
@@ -91,6 +96,16 @@ export default function App() {
 
   useEffect(() => {
     pruneStaleTimerSessions();
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      clearChunkReloadFlag();
+    }, CHUNK_RELOAD_CLEAR_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, []);
 
   return (
