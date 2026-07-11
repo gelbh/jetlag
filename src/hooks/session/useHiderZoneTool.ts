@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type RefObject } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useLatestRequest } from "../useLatestRequest";
 import type { GameArea } from "../../domain/map/annotations";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
@@ -30,7 +30,7 @@ interface UseHiderZoneToolParams {
   resumeTimer: () => void;
   ensureWriteAccess?: () => Promise<void>;
   writesEnabled?: boolean;
-  wizardStepRef?: RefObject<string>;
+  mapPickEnabled?: boolean;
 }
 
 export function useHiderZoneTool({
@@ -44,7 +44,7 @@ export function useHiderZoneTool({
   resumeTimer,
   ensureWriteAccess,
   writesEnabled = true,
-  wizardStepRef,
+  mapPickEnabled = false,
 }: UseHiderZoneToolParams) {
   const [stations, setStations] = useState<TransitStation[]>([]);
   const [stationsLoading, setStationsLoading] = useState(false);
@@ -199,7 +199,7 @@ export function useHiderZoneTool({
         return false;
       }
 
-      if (wizardStepRef?.current !== "location") {
+      if (!mapPickEnabled) {
         return false;
       }
 
@@ -226,7 +226,7 @@ export function useHiderZoneTool({
       setError(null);
       return true;
     },
-    [gameArea, manualMode, stations, wizardOpen, wizardStepRef],
+    [gameArea, manualMode, mapPickEnabled, stations, wizardOpen],
   );
 
   const confirmZone = useCallback(async () => {
@@ -351,13 +351,6 @@ export function useHiderZoneTool({
     setError(null);
   }, []);
 
-  const setManualModeEnabled = useCallback((enabled: boolean) => {
-    setManualMode(enabled);
-    setSelectedStation(null);
-    setManualCenter(null);
-    setError(null);
-  }, []);
-
   const clearStationSelection = useCallback(() => {
     setSelectedStation(null);
     setError(null);
@@ -380,7 +373,6 @@ export function useHiderZoneTool({
     manualMode,
     methodChosen,
     choosePlacementMethod,
-    setManualModeEnabled,
     clearStationSelection,
     manualCenter,
     previewCircle,

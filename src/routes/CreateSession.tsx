@@ -43,8 +43,10 @@ import {
   isFirebaseConfigured,
   ensureAnonymousUser,
 } from "../services/core/firebase";
-import { isPermanentUser } from "../services/core/accountAuth";
 import { PremiumSignInGate } from "../components/billing/PremiumSignInGate";
+import {
+  usePremiumHostEligibility,
+} from "../hooks/billing/usePremiumHostEligibility";
 import { createRemoteSession } from "../services/firestore/firestoreAnnotations";
 import {
   preloadCriticalGameAreaCaches,
@@ -62,10 +64,7 @@ import { formatPlaceSearchSubtitle } from "../services/geo/geocodingRank";
 import { getCurrentPosition } from "../services/core/geolocation";
 import { APP_VERSION } from "../domain/device/changelog";
 import {
-  formatEntitlementSummary,
-  formatPremiumSessionCreditsLabel,
   formatPremiumSessionTierHint,
-  canSelectPremiumSessionTier,
   type PremiumEntitlements,
 } from "../domain/billing/premiumProducts";
 import { grantAccess, hasAccessClaim } from "../services/core/accessControl";
@@ -88,23 +87,6 @@ import {
   isBundledPresetId,
 } from "../domain/regions/bundledGamePresets";
 import { buildBundledPresetSelectGroups } from "../domain/regions/bundledPresetHierarchy";
-
-const TIER_OPTIONS: Array<{
-  value: SessionTier;
-  label: string;
-  summary: string;
-}> = [
-  {
-    value: "free",
-    label: "Free",
-    summary: "All tools, public map data.",
-  },
-  {
-    value: "premium",
-    label: "Premium",
-    summary: "Live transit and faster map loads.",
-  },
-];
 
 function placeToFocusBounds(place: GeocodedPlace): LatLngBoundsExpression {
   const { south, west, north, east } = place.bounds;
@@ -331,68 +313,26 @@ export function CreateSession() {
   }, [inferredTransitMetroId, transitMetroInferenceSeed]);
 
   const transitMetroId = transitMetroOverride ?? inferredTransitMetroId;
-  const canSelectPremiumTier = canSelectPremiumSessionTier(
+  const {
+    packCreditsLabel,
+    packPremiumFlow,
+    paidPremiumHost,
+    resolvedSessionTier,
+    requiresPremiumSignIn,
+    showPremiumUnlockPanel,
+    premiumEntitlementSummary,
+    visibleTierOptions,
+    resolveSubmitTier,
+    validatePremiumHostSubmit,
+  } = usePremiumHostEligibility({
+    searchParams,
+    setSearchParams,
+    sessionTier,
     premiumEntitlements,
     hostHasAccessClaim,
-  );
-  const packCreditsLabel = formatPremiumSessionCreditsLabel(premiumEntitlements);
-  const packPremiumFlow =
-    isFirebaseConfigured() &&
-    searchParams.get("tier") === "premium" &&
-    !canSelectPremiumTier &&
-    (premiumEntitlements?.premiumSessionCredits ?? 0) > 0;
-  const paidPremiumHost =
-    premiumEntitlements?.canCreatePremium === true;
-  const resolvedSessionTier = useMemo((): SessionTier => {
-    if (packPremiumFlow) {
-      return "premium";
-    }
-
-    if (
-      sessionTier === "premium" &&
-      !canSelectPremiumTier &&
-      !hostHasAccessClaim
-    ) {
-      return "free";
-    }
-
-    return sessionTier;
-  }, [
-    canSelectPremiumTier,
-    hostHasAccessClaim,
-    packPremiumFlow,
-    sessionTier,
-  ]);
-  const requiresPremiumSignIn =
-    isFirebaseConfigured() &&
-    resolvedSessionTier === "premium" &&
-    !hostHasAccessClaim &&
-    paidPremiumHost &&
-    !isPermanentUser();
-  const showPremiumUnlockPanel =
-    isFirebaseConfigured() &&
-    resolvedSessionTier === "premium" &&
-    !hostHasAccessClaim &&
-    !paidPremiumHost;
+  });
   const showAccessCodeField =
     showPremiumUnlockPanel && accessCodeExpanded;
-  const premiumEntitlementSummary = formatEntitlementSummary(premiumEntitlements);
-  const visibleTierOptions = useMemo(
-    () =>
-      TIER_OPTIONS.filter(
-        (option) => option.value === "free" || canSelectPremiumTier,
-      ),
-    [canSelectPremiumTier],
-  );
-
-  useEffect(() => {
-    if (
-      searchParams.get("tier") === "premium" &&
-      resolvedSessionTier === "free"
-    ) {
-      setSearchParams({}, { replace: true });
-    }
-  }, [resolvedSessionTier, searchParams, setSearchParams]);
 
   const previewGameArea = useMemo(() => {
     if (importedGameArea) {
@@ -600,10 +540,7 @@ export function CreateSession() {
       }
 
       const metroId = transitMetroId || undefined;
-      const tier =
-        isFirebaseConfigured() && resolvedSessionTier === "premium"
-          ? "premium"
-          : "free";
+      const tier = resolveSubmitTier();
       let useAccessClaimForPremium = hostHasAccessClaim;
 
       if (tier === "premium" && !useAccessClaimForPremium && !paidPremiumHost) {
@@ -651,13 +588,14 @@ export function CreateSession() {
 
       if (isFirebaseConfigured()) {
         const user = await retryAsync(() => ensureAnonymousUser());
-        if (tier === "premium" && !useAccessClaimForPremium && paidPremiumHost) {
-          if (!isPermanentUser(user)) {
-            setError(
-              "Sign in with email, Google, or Apple to host a paid premium session.",
-            );
-            return;
-          }
+        const premiumSubmitError = validatePremiumHostSubmit(
+          user,
+          tier,
+          useAccessClaimForPremium,
+        );
+        if (premiumSubmitError) {
+          setError(premiumSubmitError);
+          return;
         }
 
         const usePremiumCallable =
@@ -1231,7 +1169,7 @@ export function CreateSession() {
         <button
           type="button"
           onClick={() => void handleConfirm()}
-          disabled={loading || verifyingAccess}
+          disabled={loading || verifyingAccess || requiresPremiumSignIn}
           className="btn-primary w-full disabled:opacity-50"
         >
           {confirmLabel}

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { onAuthStateChanged, type User } from "firebase/auth";
 import { InlineError } from "../ui/InlineError";
 import { GoogleSignInButton } from "./GoogleSignInButton";
 import { AppleSignInButton } from "./AppleSignInButton";
@@ -9,8 +8,9 @@ import {
   isPermanentUser,
   sendPremiumEmailSignInLink,
 } from "../../services/core/accountAuth";
-import { ensureAnonymousUser, getFirebaseAuth } from "../../services/core/firebase";
+import { ensureAnonymousUser } from "../../services/core/firebase";
 import { recoverPremiumEntitlements } from "../../services/billing/premiumBilling";
+import { usePermanentAuthUser } from "../../hooks/billing/usePermanentAuthUser";
 
 interface PremiumSignInGateProps {
   children?: ReactNode;
@@ -23,21 +23,29 @@ export function PremiumSignInGate({
   continuePath = "/premium",
   onSignedIn,
 }: PremiumSignInGateProps) {
-  const [user, setUser] = useState<User | null>(() =>
-    getFirebaseAuth().currentUser,
-  );
+  const { user, isPermanent } = usePermanentAuthUser();
   const [email, setEmail] = useState("");
   const [busyAction, setBusyAction] = useState<"email" | null>(null);
   const [emailLinkSent, setEmailLinkSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [recoveryNote, setRecoveryNote] = useState<string | null>(null);
   const [completingEmailLink, setCompletingEmailLink] = useState(true);
 
   const handleSignedIn = useCallback(async () => {
+    setError(null);
+    setRecoveryNote(null);
+
     try {
-      await recoverPremiumEntitlements();
+      const recovered = await recoverPremiumEntitlements();
+      if (recovered) {
+        setRecoveryNote(
+          "Premium credits from a previous device or account were moved to this sign-in.",
+        );
+      }
     } catch {
-      // Recovery is best-effort for pre-migration anonymous purchases.
+      setError("Couldn't restore purchases. Try again from Premium.");
     }
+
     onSignedIn?.();
   }, [onSignedIn]);
 
@@ -66,23 +74,19 @@ export function PremiumSignInGate({
       }
     })();
 
-    const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (nextUser) => {
-      setUser(nextUser);
-    });
-
     return () => {
       cancelled = true;
-      unsubscribe();
     };
   }, [handleSignedIn]);
 
-  const handleGoogleSignedIn = useCallback(async () => {
+  const handleOAuthSignedIn = useCallback(async () => {
     await handleSignedIn();
   }, [handleSignedIn]);
 
   const handleEmailLink = async () => {
     setBusyAction("email");
     setError(null);
+    setRecoveryNote(null);
 
     try {
       await ensureAnonymousUser();
@@ -105,7 +109,7 @@ export function PremiumSignInGate({
     );
   }
 
-  if (isPermanentUser(user)) {
+  if (isPermanent) {
     return children ? <>{children}</> : null;
   }
 
@@ -120,13 +124,13 @@ export function PremiumSignInGate({
       <div className="oauth-sign-in-stack space-y-2">
         <GoogleSignInButton
           disabled={busyAction !== null}
-          onSuccess={handleGoogleSignedIn}
+          onSuccess={handleOAuthSignedIn}
           onError={setError}
         />
         {APPLE_SIGN_IN_ENABLED ? (
           <AppleSignInButton
             disabled={busyAction !== null}
-            onSuccess={handleGoogleSignedIn}
+            onSuccess={handleOAuthSignedIn}
             onError={setError}
           />
         ) : null}
@@ -169,6 +173,9 @@ export function PremiumSignInGate({
         ) : null}
       </div>
 
+      {recoveryNote ? (
+        <p className="text-sm text-ink-secondary">{recoveryNote}</p>
+      ) : null}
       {error ? <InlineError>{error}</InlineError> : null}
     </div>
   );

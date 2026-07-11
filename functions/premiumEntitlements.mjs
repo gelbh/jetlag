@@ -74,6 +74,47 @@ export function serializeEntitlementsForClient(data) {
 }
 
 /**
+ * @param {Record<string, unknown> | undefined} source
+ * @param {Record<string, unknown> | undefined} target
+ */
+export function buildMergedEntitlementPatch(source, target) {
+  const patch = {};
+
+  const sourceCredits = premiumSessionCredits(source);
+  const targetCredits = premiumSessionCredits(target);
+  if (sourceCredits > 0) {
+    patch.premiumSessionCredits = targetCredits + sourceCredits;
+  }
+
+  if (source?.lifetimePremium === true) {
+    patch.lifetimePremium = true;
+  }
+
+  const sourceSubscription = source?.subscription;
+  const targetHasUnlimited = hasUnlimitedPremiumEntitlement(target);
+  if (
+    sourceSubscription &&
+    typeof sourceSubscription === "object" &&
+    !targetHasUnlimited
+  ) {
+    patch.subscription = sourceSubscription;
+  }
+
+  if (
+    typeof source?.stripeCustomerId === "string" &&
+    typeof target?.stripeCustomerId !== "string"
+  ) {
+    patch.stripeCustomerId = source.stripeCustomerId;
+  }
+
+  if (source?.trialUsedAt && !target?.trialUsedAt) {
+    patch.trialUsedAt = source.trialUsedAt;
+  }
+
+  return patch;
+}
+
+/**
  * @param {import('firebase-admin/firestore').Firestore} db
  * @param {string} uid
  * @param {Record<string, unknown>} patch

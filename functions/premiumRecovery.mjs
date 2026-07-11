@@ -1,51 +1,24 @@
 import { HttpsError } from "firebase-functions/v2/https";
 import { FieldValue } from "firebase-admin/firestore";
 import {
-  hasUnlimitedPremiumEntitlement,
-  mergeUserEntitlements,
-  premiumSessionCredits,
+  buildMergedEntitlementPatch,
   userEntitlementsRef,
 } from "./premiumEntitlements.mjs";
 
+export const RECOVER_PREMIUM_ROUTE = "recoverPremium";
+export const RECOVER_PREMIUM_DAILY_LIMIT = 5;
+export const RECOVER_PREMIUM_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+const VERIFIED_EMAIL_MESSAGE =
+  "Verify your email address before recovering purchases.";
+
 /**
- * @param {Record<string, unknown> | undefined} source
- * @param {Record<string, unknown> | undefined} target
+ * @param {boolean | undefined} emailVerified
  */
-function buildMergedEntitlementPatch(source, target) {
-  const patch = {};
-
-  const sourceCredits = premiumSessionCredits(source);
-  const targetCredits = premiumSessionCredits(target);
-  if (sourceCredits > 0) {
-    patch.premiumSessionCredits = targetCredits + sourceCredits;
+export function requireVerifiedEmailForRecovery(emailVerified) {
+  if (emailVerified !== true) {
+    throw new HttpsError("failed-precondition", VERIFIED_EMAIL_MESSAGE);
   }
-
-  if (source?.lifetimePremium === true) {
-    patch.lifetimePremium = true;
-  }
-
-  const sourceSubscription = source?.subscription;
-  const targetHasUnlimited = hasUnlimitedPremiumEntitlement(target);
-  if (
-    sourceSubscription &&
-    typeof sourceSubscription === "object" &&
-    !targetHasUnlimited
-  ) {
-    patch.subscription = sourceSubscription;
-  }
-
-  if (
-    typeof source?.stripeCustomerId === "string" &&
-    typeof target?.stripeCustomerId !== "string"
-  ) {
-    patch.stripeCustomerId = source.stripeCustomerId;
-  }
-
-  if (source?.trialUsedAt && !target?.trialUsedAt) {
-    patch.trialUsedAt = source.trialUsedAt;
-  }
-
-  return patch;
 }
 
 /**
@@ -69,6 +42,10 @@ export async function mergeEntitlementsBetweenUsers(db, sourceUid, targetUid) {
 
     const sourceData = sourceSnapshot.data();
     if (!sourceData) {
+      return { merged: false };
+    }
+
+    if (typeof sourceData.migratedToUid === "string" && sourceData.migratedToUid) {
       return { merged: false };
     }
 
@@ -104,16 +81,47 @@ export async function mergeEntitlementsBetweenUsers(db, sourceUid, targetUid) {
 
 /**
  * @param {import("stripe").Stripe} stripe
+ * @param {string} email
+ */
+export async function listStripeCustomersByEmail(stripe, email) {
+  const customers = [];
+  let startingAfter;
+
+  do {
+    const page = await stripe.customers.list({
+      email,
+      limit: 100,
+      ...(startingAfter ? { starting_after: startingAfter } : {}),
+    });
+
+    customers.push(...page.data);
+
+    if (!page.has_more || page.data.length === 0) {
+      break;
+    }
+
+    startingAfter = page.data[page.data.length - 1]?.id;
+  } while (startingAfter);
+
+  return customers;
+}
+
+/**
+ * @param {import("stripe").Stripe} stripe
  * @param {import("firebase-admin/firestore").Firestore} db
  * @param {string} uid
  * @param {string | null | undefined} email
+ * @param {boolean | undefined} emailVerified
  */
 export async function recoverPremiumByStripeEmailHandler(
   stripe,
   db,
   uid,
   email,
+  emailVerified,
 ) {
+  requireVerifiedEmailForRecovery(emailVerified);
+
   const normalizedEmail = typeof email === "string" ? email.trim() : "";
   if (!normalizedEmail) {
     throw new HttpsError(
@@ -122,14 +130,11 @@ export async function recoverPremiumByStripeEmailHandler(
     );
   }
 
-  const customers = await stripe.customers.list({
-    email: normalizedEmail,
-    limit: 10,
-  });
+  const customers = await listStripeCustomersByEmail(stripe, normalizedEmail);
 
   let mergedAny = false;
 
-  for (const customer of customers.data) {
+  for (const customer of customers) {
     const sourceUid = customer.metadata?.firebaseUid;
     if (typeof sourceUid !== "string" || !sourceUid || sourceUid === uid) {
       continue;
@@ -143,3 +148,5 @@ export async function recoverPremiumByStripeEmailHandler(
 
   return { recovered: mergedAny };
 }
+
+export { VERIFIED_EMAIL_MESSAGE };

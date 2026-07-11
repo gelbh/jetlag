@@ -63,7 +63,12 @@ import {
   getPremiumEntitlementsHandler,
 } from "./stripeBilling.mjs";
 import { rejectAnonymousBillingAuth } from "./billingAuth.mjs";
-import { recoverPremiumByStripeEmailHandler } from "./premiumRecovery.mjs";
+import {
+  RECOVER_PREMIUM_DAILY_LIMIT,
+  RECOVER_PREMIUM_ROUTE,
+  RECOVER_PREMIUM_WINDOW_MS,
+  recoverPremiumByStripeEmailHandler,
+} from "./premiumRecovery.mjs";
 import { handleStripeWebhook } from "./stripeWebhook.mjs";
 
 const accessCodeSecret = defineSecret("ACCESS_CODE");
@@ -553,12 +558,26 @@ export const recoverPremiumByStripeEmail = onCall(
     }
     rejectAnonymousBillingAuth(request);
 
+    const rateLimit = await consumeRateLimit(adminDb(), {
+      route: RECOVER_PREMIUM_ROUTE,
+      uid: request.auth.uid,
+      limit: RECOVER_PREMIUM_DAILY_LIMIT,
+      windowMs: RECOVER_PREMIUM_WINDOW_MS,
+    });
+    if (!rateLimit.allowed) {
+      throw new HttpsError(
+        "resource-exhausted",
+        "Too many recovery attempts. Try again tomorrow.",
+      );
+    }
+
     const stripe = createStripeClient(stripeSecretKey.value());
     return recoverPremiumByStripeEmailHandler(
       stripe,
       adminDb(),
       request.auth.uid,
       request.auth.token.email,
+      request.auth.token.email_verified,
     );
   },
 );
