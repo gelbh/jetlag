@@ -30,6 +30,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Hiding zone wizard: step-by-step flow for station vs map placement, larger station list, peek label and close on the panel",
           "Premium sign-in: show an error when purchase recovery fails; note when credits move from a previous device",
           "Create session: disable Confirm while the premium sign-in gate is visible",
+          "Legal: Privacy Policy and Terms of Service pages with links from Home and Premium sign-in",
         ],
       },
       {
