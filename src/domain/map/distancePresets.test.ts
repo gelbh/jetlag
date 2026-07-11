@@ -3,6 +3,7 @@ import {
   defaultRadarPresetMeters,
   hidingZoneDefaultRadiusMeters,
   METRIC_RADAR_PRESET_METERS,
+  radarPresetsMetersForGameSizeAndUnit,
   radarPresetMetersForUnit,
   thermometerPresetsMetersForGameSizeAndUnit,
 } from "./distancePresets";
@@ -21,6 +22,18 @@ describe("distancePresets", () => {
   it("uses metric hiding zone radii", () => {
     expect(hidingZoneDefaultRadiusMeters("medium", "metric")).toBe(400);
     expect(hidingZoneDefaultRadiusMeters("large", "metric")).toBe(800);
+  });
+
+  it("gates radar presets by game size", () => {
+    expect(radarPresetsMetersForGameSizeAndUnit("small", "metric")).toEqual([
+      500, 1000, 2000, 5000, 10_000,
+    ]);
+    expect(radarPresetsMetersForGameSizeAndUnit("medium", "metric")).toEqual([
+      500, 1000, 2000, 5000, 10_000, 20_000, 50_000,
+    ]);
+    expect(radarPresetsMetersForGameSizeAndUnit("large", "metric")).toEqual(
+      METRIC_RADAR_PRESET_METERS,
+    );
   });
 
   it("gates thermometer presets by game size in metric edition", () => {

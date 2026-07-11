@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   gameSizeRulesSummary,
   hidingPeriodMinutes,
+  isRadarPresetAvailableForGameSize,
   isThermometerPresetAvailableForGameSize,
   isTentacleCategoryAvailableForGameSize,
+  radarPresetsMilesForGameSize,
   tentacleEnabledForGameSize,
   tentacleOptionsForGameSize,
   thermometerPresetsMilesForGameSize,
@@ -16,6 +18,16 @@ describe("gameSizeRules", () => {
     expect(hidingPeriodMinutes("small")).toBe(30);
     expect(hidingPeriodMinutes("medium")).toBe(60);
     expect(hidingPeriodMinutes("large")).toBe(180);
+  });
+
+  it("gates radar presets by game size", () => {
+    expect(radarPresetsMilesForGameSize("small")).toEqual([0.25, 0.5, 1, 3, 5]);
+    expect(radarPresetsMilesForGameSize("medium")).toEqual([
+      0.25, 0.5, 1, 3, 5, 10, 25,
+    ]);
+    expect(radarPresetsMilesForGameSize("large")).toEqual([
+      0.25, 0.5, 1, 3, 5, 10, 25, 50, 100,
+    ]);
   });
 
   it("gates thermometer presets by game size", () => {
@@ -51,6 +63,15 @@ describe("gameSizeRules", () => {
     expect(options).toHaveLength(8);
     const metro = options.find((o) => o.categoryId === "metro_line");
     expect(metro?.radiusMeters).toBe(milesToMeters(15));
+  });
+
+  it("checks radar preset availability", () => {
+    expect(
+      isRadarPresetAvailableForGameSize("small", milesToMeters(5)),
+    ).toBe(true);
+    expect(
+      isRadarPresetAvailableForGameSize("small", milesToMeters(50)),
+    ).toBe(false);
   });
 
   it("checks thermometer preset availability", () => {

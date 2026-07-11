@@ -24,10 +24,12 @@ import { yesNoAnswerOptions } from "../../components/tools/shared/binaryAnswerOp
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import { useSubmitLock } from "../useSubmitLock";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
+import type { GameSize } from "../../domain/session/gameSize";
 
 interface UseRadarToolParams {
   active: boolean;
   annotations: AnnotationRecord[];
+  gameSize: GameSize;
   pendingQuestions?: readonly PendingQuestionRecord[];
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
@@ -59,6 +61,7 @@ interface UseRadarToolParams {
 export function useRadarTool({
   active,
   annotations,
+  gameSize,
   pendingQuestions = [],
   createAnnotation,
   awaitHiderAnswer = false,
@@ -136,8 +139,11 @@ export function useRadarTool({
       return;
     }
 
-    const nextSelection =
-      firstAvailableRadarDistanceSelection(usedRadarOptions, distanceUnit);
+    const nextSelection = firstAvailableRadarDistanceSelection(
+      usedRadarOptions,
+      distanceUnit,
+      gameSize,
+    );
     if (!nextSelection) {
       setRadarChooseCustom(false);
       setRadarCustomRadius("");
@@ -148,7 +154,7 @@ export function useRadarTool({
     setRadarRadius(nextSelection.radiusMeters);
     setRadarCustomRadius("");
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [active, usedRadarOptions, radarChooseCustom, radarRadius, distanceUnit]);
+  }, [active, usedRadarOptions, radarChooseCustom, radarRadius, distanceUnit, gameSize]);
 
   const resetDraft = useCallback(() => {
     setRadarRadius(null);
@@ -285,6 +291,7 @@ export function useRadarTool({
       chooseCustom={radarChooseCustom}
       customRadius={radarCustomRadius}
       distanceUnit={distanceUnit}
+      gameSize={gameSize}
       usedDistanceOptions={usedRadarOptions}
       answer={radarAnswer}
       onPresetSelect={(radiusMeters) => {

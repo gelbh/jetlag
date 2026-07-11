@@ -1,5 +1,6 @@
 import {
   RADAR_CHOOSE_LABEL,
+  availableRadarDistancePresets,
   radarDistanceOptionLabel,
   radarQuestionPrompt,
   type RadarDistanceOptionKey,
@@ -11,7 +12,7 @@ import {
   parseDistanceInput,
   type DistanceUnit,
 } from "../../domain/map/distance";
-import { radarPresetMetersForUnit } from "../../domain/map/distancePresets";
+import type { GameSize } from "../../domain/session/gameSize";
 import { CatalogExhaustedMessage } from "./shared/CatalogExhaustedMessage";
 import { OptionChip, OptionChipRow } from "./shared/OptionChip";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
@@ -22,6 +23,7 @@ interface RadarDistancePickerProps {
   chooseCustom: boolean;
   customRadius: string;
   distanceUnit: DistanceUnit;
+  gameSize: GameSize;
   usedDistanceOptions: ReadonlySet<RadarDistanceOptionKey>;
   onPresetSelect: (radiusMeters: number) => void;
   onChooseSelect: () => void;
@@ -34,6 +36,7 @@ export function RadarDistancePicker({
   chooseCustom,
   customRadius,
   distanceUnit,
+  gameSize,
   usedDistanceOptions,
   onPresetSelect,
   onChooseSelect,
@@ -42,14 +45,11 @@ export function RadarDistancePicker({
 }: RadarDistancePickerProps) {
   const resolvedRadius =
     parseDistanceInput(customRadius, distanceUnit) ?? radiusMeters;
-  const presetMeters = radarPresetMetersForUnit(distanceUnit);
-  const availablePresets = presetMeters.filter((preset) => {
-    if (distanceUnit === "metric") {
-      return !usedDistanceOptions.has(preset as RadarDistanceOptionKey);
-    }
-    const miles = preset / milesToMeters(1);
-    return !usedDistanceOptions.has(miles as RadarDistanceOptionKey);
-  });
+  const availablePresets = availableRadarDistancePresets(
+    gameSize,
+    distanceUnit,
+    usedDistanceOptions,
+  );
   const chooseAvailable = !usedDistanceOptions.has("choose");
 
   return (

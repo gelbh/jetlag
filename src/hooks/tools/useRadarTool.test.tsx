@@ -10,6 +10,7 @@ describe("useRadarTool", () => {
       useRadarTool({
         active: true,
         annotations: mocks.annotations,
+        gameSize: "medium",
         createAnnotation: mocks.createAnnotation,
         distanceUnit: mocks.distanceUnit,
         finishPlacement: mocks.finishPlacement,
@@ -37,6 +38,7 @@ describe("useRadarTool", () => {
       useRadarTool({
         active: true,
         annotations: mocks.annotations,
+        gameSize: "medium",
         createAnnotation: mocks.createAnnotation,
         distanceUnit: mocks.distanceUnit,
         finishPlacement: mocks.finishPlacement,

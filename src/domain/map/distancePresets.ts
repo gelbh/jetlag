@@ -58,6 +58,20 @@ export function radarPresetMetersForUnit(unit: DistanceUnit): readonly number[] 
   return IMPERIAL_RADAR_PRESET_MILES.map(milesToMeters);
 }
 
+const RADAR_PRESET_COUNT_BY_GAME_SIZE: Record<GameSize, number> = {
+  small: 5,
+  medium: 7,
+  large: METRIC_RADAR_PRESET_METERS.length,
+};
+
+export function radarPresetsMetersForGameSizeAndUnit(
+  gameSize: GameSize,
+  unit: DistanceUnit,
+): number[] {
+  const count = RADAR_PRESET_COUNT_BY_GAME_SIZE[gameSize];
+  return radarPresetMetersForUnit(unit).slice(0, count);
+}
+
 export function defaultRadarPresetMeters(unit: DistanceUnit): number {
   const presets = radarPresetMetersForUnit(unit);
   if (unit === "metric") {

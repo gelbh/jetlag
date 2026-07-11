@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../map/annotations";
 import {
   RADAR_RADIUS_PRESET_METERS,
+  availableRadarDistancePresets,
   firstAvailableRadarDistanceSelection,
   isRadarDistanceOptionAvailable,
   radarAnnotationSummary,
@@ -85,6 +86,21 @@ describe("radarQuestions", () => {
     expect(RADAR_RADIUS_PRESET_METERS).toHaveLength(9);
     expect(RADAR_RADIUS_PRESET_METERS[0]).toBeCloseTo(milesToMeters(0.25));
     expect(RADAR_RADIUS_PRESET_METERS.at(-1)).toBeCloseTo(milesToMeters(100));
+  });
+
+  it("limits radar presets by game size", () => {
+    expect(
+      availableRadarDistancePresets("small", "imperial", new Set()),
+    ).toHaveLength(5);
+    expect(
+      availableRadarDistancePresets("large", "imperial", new Set()),
+    ).toHaveLength(9);
+    expect(
+      firstAvailableRadarDistanceSelection(new Set([3, "choose"]), "imperial", "small"),
+    ).toEqual({
+      chooseCustom: false,
+      radiusMeters: milesToMeters(0.25),
+    });
   });
 
   it("tracks used radar distance options, including choose once", () => {

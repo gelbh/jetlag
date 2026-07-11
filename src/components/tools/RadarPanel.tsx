@@ -17,6 +17,7 @@ import {
   type RadarDistanceOptionKey,
 } from "../../domain/questions/radarQuestions";
 import type { DistanceUnit } from "../../domain/map/distance";
+import type { GameSize } from "../../domain/session/gameSize";
 
 interface RadarPanelProps {
   radiusMeters: number | null;
@@ -25,6 +26,7 @@ interface RadarPanelProps {
   awaitingPlacement: boolean;
   hasCenter: boolean;
   distanceUnit: DistanceUnit;
+  gameSize: GameSize;
   usedDistanceOptions: ReadonlySet<RadarDistanceOptionKey>;
   answer: RadarAnswer | null;
   onPresetSelect: (radiusMeters: number) => void;
@@ -50,6 +52,7 @@ export function RadarPanel({
   awaitingPlacement,
   hasCenter,
   distanceUnit,
+  gameSize,
   usedDistanceOptions,
   answer,
   onPresetSelect,
@@ -101,6 +104,7 @@ export function RadarPanel({
             chooseCustom={chooseCustom}
             customRadius={customRadius}
             distanceUnit={distanceUnit}
+            gameSize={gameSize}
             usedDistanceOptions={usedDistanceOptions}
             onPresetSelect={onPresetSelect}
             onChooseSelect={onChooseSelect}

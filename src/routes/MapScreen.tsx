@@ -474,6 +474,7 @@ export function MapScreen() {
   const radarTool = useRadarTool({
     active: activeTool === "radar",
     annotations,
+    gameSize: session?.gameSize ?? "medium",
     pendingQuestions,
     createAnnotation,
     awaitHiderAnswer,
