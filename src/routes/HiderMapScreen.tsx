@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { Polygon } from "react-leaflet";
 import { AnnotationLayer } from "../components/map/AnnotationLayer";
@@ -13,6 +13,7 @@ import {
 } from "../components/map/MapViewportTracker";
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { HidingZonePanel } from "../components/hider/HidingZonePanel";
+import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
 import { TimeTrapPanel } from "../components/hider/TimeTrapPanel";
 import { ExpansionHiderMenu } from "../components/hider/ExpansionHiderMenu";
 import { CurseReferenceSheet } from "../components/expansion/CurseReferenceSheet";
@@ -54,6 +55,7 @@ import { computeHiderTruthReplyAsync } from "../domain/questions/hiderTruthAnswe
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
 import { useHiderZoneTool } from "../hooks/session/useHiderZoneTool";
+import { useHiderZoneWizard } from "../hooks/useHiderZoneWizard";
 import { useMapOverlayState } from "../hooks/map/useMapOverlayState";
 import { useChatUnread } from "../hooks/session/useChatUnread";
 import { usePendingQuestionActions } from "../hooks/sync/usePendingQuestionActions";
@@ -332,6 +334,8 @@ export function HiderMapScreen() {
     await resetEndGameSession(session.id);
   }, [session, setSession, uid]);
 
+  const hidingZoneWizardStepRef = useRef("method");
+
   const zoneTool = useHiderZoneTool({
     sessionId: sessionId ?? "",
     hiderUid: uid ?? "",
@@ -343,6 +347,13 @@ export function HiderMapScreen() {
     resumeTimer: timer.start,
     ensureWriteAccess: ensureHiderWriteAccess,
     writesEnabled: authReady && Boolean(uid),
+    wizardStepRef: hidingZoneWizardStepRef,
+  });
+
+  const zoneWizard = useHiderZoneWizard({
+    moveMode: zoneTool.moveMode,
+    wizardOpen: zoneTool.wizardOpen,
+    wizardStepRef: hidingZoneWizardStepRef,
   });
 
   const searchViewportBounds = useCallback((): MapViewportBounds => {
@@ -368,14 +379,23 @@ export function HiderMapScreen() {
   }, [searchViewportBounds, timeTrapTool]);
 
   useEffect(() => {
-    if (!zoneTool.wizardOpen || zoneTool.manualMode) {
+    if (
+      !zoneTool.wizardOpen ||
+      zoneTool.manualMode ||
+      zoneWizard.stepId !== "location"
+    ) {
       return;
     }
 
     void zoneTool.searchStationsInArea(searchViewportBounds());
     // Intentionally omit searchViewportBounds; pan/zoom must not re-fetch. Use "Search this area".
     // eslint-disable-next-line react-hooks/exhaustive-deps -- omit searchViewportBounds; pan/zoom must not re-fetch
-  }, [zoneTool.wizardOpen, zoneTool.manualMode, zoneTool.searchStationsInArea]);
+  }, [
+    zoneTool.wizardOpen,
+    zoneTool.manualMode,
+    zoneWizard.stepId,
+    zoneTool.searchStationsInArea,
+  ]);
 
   const openWizardExclusive = useCallback(() => {
     overlay.closeSheet();
@@ -487,7 +507,9 @@ export function HiderMapScreen() {
             hidingZones={confirmedHidingZones}
           />
           <HidingZonesLayer zones={hidingZones} myUid={uid} />
-          {zoneTool.wizardOpen && !zoneTool.manualMode ? (
+          {zoneTool.wizardOpen &&
+          zoneWizard.stepId === "location" &&
+          !zoneTool.manualMode ? (
             <HidingZoneStationsLayer
               stations={zoneTool.stations}
               selectedStation={zoneTool.selectedStation}
@@ -599,8 +621,24 @@ export function HiderMapScreen() {
         open={zoneTool.wizardOpen && !sheetBlocksWizard}
         peeked={wizardPeeked}
         onPeekedChange={setWizardPeeked}
+        peekLabel={
+          zoneTool.moveMode
+            ? "Move zone"
+            : zoneTool.hasZone
+              ? "Change zone"
+              : "Set zone"
+        }
+        onClose={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
+        closeLabel="Close hiding zone"
+        contentKey={zoneWizard.stepId}
       >
         <HidingZonePanel
+          stepId={zoneWizard.stepId as HidingZoneStepId}
+          stepIndex={zoneWizard.stepIndex}
+          stepCount={zoneWizard.stepCount}
+          stepper={zoneWizard.stepper}
+          onGoNext={zoneWizard.goNext}
+          onGoBack={zoneWizard.goBack}
           radiusLabel={hidingZoneRadiusLabel}
           query={zoneTool.query}
           onQueryChange={zoneTool.setQuery}
@@ -609,10 +647,13 @@ export function HiderMapScreen() {
           stationsError={zoneTool.stationsError}
           selectedStation={zoneTool.selectedStation}
           onSelectStation={zoneTool.setSelectedStation}
+          onClearStation={zoneTool.clearStationSelection}
           onSearchThisArea={handleSearchThisArea}
           searchDisabled={zoneTool.stationsLoading}
           manualMode={zoneTool.manualMode}
-          onManualModeChange={zoneTool.setManualModeEnabled}
+          methodChosen={zoneTool.methodChosen}
+          onMethodChange={zoneTool.choosePlacementMethod}
+          manualCenter={zoneTool.manualCenter}
           hasPlacement={zoneTool.hasPlacement}
           onConfirm={() => void zoneTool.confirmZone()}
           saving={zoneTool.saving}

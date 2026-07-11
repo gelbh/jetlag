@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.2 - 2026-07-11
+
+### Fixes
+
+- Custom games: fix scrolling on the presets list when content exceeds the screen
+- Hiding zone wizard: method step no longer preselects Station
+
+### Improvements
+
+- Hiding zone wizard: step-by-step flow for station vs map placement, larger station list, peek label and close on the panel
+
 ## 0.4.1 - 2026-07-11
 
 ### Fixes

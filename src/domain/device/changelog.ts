@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.4.1";
+export const APP_VERSION = "0.4.2";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,25 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.4.2",
+    date: "2026-07-11",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Custom games: fix scrolling on the presets list when content exceeds the screen",
+          "Hiding zone wizard: method step no longer preselects Station",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Hiding zone wizard: step-by-step flow for station vs map placement, larger station list, peek label and close on the panel",
+        ],
+      }
+    ],
+  },
   {
     version: "0.4.1",
     date: "2026-07-11",
