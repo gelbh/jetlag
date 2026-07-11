@@ -2,6 +2,10 @@
 
 ## 0.4.1 - 2026-07-11
 
+### Fixes
+
+- Map: auto-reload once when a lazy route chunk fails to load after deploy
+
 ### Improvements
 
 - Matching: transit_line uses full GTFS stop and route graphs for London, NYC, Dublin, SF, and Chicago

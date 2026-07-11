@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { Navigate } from "react-router-dom";
+import { lazyWithChunkRetry } from "../domain/device/lazyWithChunkRetry";
 import { sessionHasHiders } from "../domain/session/playerRole";
 import { HiderMapScreen } from "./HiderMapScreen";
 import { AnnotationLayer } from "../components/map/AnnotationLayer";
@@ -112,13 +113,13 @@ import {
   type MapTool,
 } from "../state/sessionStore";
 
-const HeavyMapToolsSlot = lazy(() =>
+const HeavyMapToolsSlot = lazyWithChunkRetry(() =>
   import("../components/tools/HeavyMapToolsSlot").then((module) => ({
     default: module.HeavyMapToolsSlot,
   })),
 );
 
-const TransitLayer = lazy(() =>
+const TransitLayer = lazyWithChunkRetry(() =>
   import("../components/map/TransitLayer").then((module) => ({
     default: module.TransitLayer,
   })),
