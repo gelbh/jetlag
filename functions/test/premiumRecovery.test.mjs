@@ -5,10 +5,19 @@ import { premiumSessionCredits } from "../premiumEntitlements.mjs";
 import {
   listStripeCustomersByEmail,
   mergeEntitlementsBetweenUsers,
+  RECOVER_PREMIUM_DAILY_LIMIT,
+  RECOVER_PREMIUM_ROUTE,
   recoverPremiumByStripeEmailHandler,
   requireVerifiedEmailForRecovery,
   VERIFIED_EMAIL_MESSAGE,
 } from "../premiumRecovery.mjs";
+
+describe("recovery rate limit config", () => {
+  it("uses stable route id and daily cap", () => {
+    assert.equal(RECOVER_PREMIUM_ROUTE, "recoverPremium");
+    assert.equal(RECOVER_PREMIUM_DAILY_LIMIT, 5);
+  });
+});
 
 function createMockDb(initialDocs) {
   const docs = new Map(Object.entries(initialDocs));
