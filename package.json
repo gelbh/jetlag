@@ -85,7 +85,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
-    "@commitlint/cli": "~21.2.0",
+    "@commitlint/cli": "~21.2.1",
     "@commitlint/config-conventional": "~21.2.0",
     "@eslint/js": "~10.0.1",
     "@firebase/rules-unit-testing": "^5.0.1",
@@ -106,7 +106,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "fake-indexeddb": "^6.2.5",
-    "firebase-tools": "^15.18.0",
+    "firebase-tools": "^15.23.0",
     "globals": "^17.6.0",
     "husky": "^9.1.7",
     "jsdom": "~29.1.1",
@@ -126,6 +126,18 @@
   "overrides": {
     "node-fetch": {
       "whatwg-url": "^14.0.0"
-    }
+    },
+    "uuid": "^11.1.1",
+    "@opentelemetry/core": "^2.8.0"
+  },
+  "allowScripts": {
+    "@firebase/util@1.15.1": true,
+    "@sentry/capacitor@4.2.0": true,
+    "@sentry/cli@2.58.6": true,
+    "esbuild@0.28.1": true,
+    "protobufjs@7.6.5": true,
+    "re2@1.25.1": true,
+    "sharp@0.34.5": true,
+    "workerd@1.20260708.1": true
   }
 }
