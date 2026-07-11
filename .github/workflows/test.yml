@@ -90,7 +90,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      secrets: write
     outputs:
       functions_deployed: ${{ steps.deploy.outputs.functions_deployed }}
     steps:
@@ -129,7 +128,8 @@ jobs:
         if: steps.changes.outputs.backend == 'true'
         run: npm run deploy
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: fine-grained or classic PAT with repo secrets write (GH_PAT).
+          GH_PAT: ${{ secrets.GH_PAT }}
 
   deploy-frontend:
     if: github.event_name == 'push'

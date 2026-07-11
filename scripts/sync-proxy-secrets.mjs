@@ -7,6 +7,15 @@ const PROXY_SECRET_NAMES = {
   transitland: "VITE_TRANSITLAND_PROXY_URL",
 };
 
+function ghEnv() {
+  const pat = process.env.GH_PAT?.trim();
+  if (!pat) {
+    return null;
+  }
+
+  return { ...process.env, GH_TOKEN: pat };
+}
+
 /**
  * @param {Record<string, string>} functionUrls
  * @returns {boolean} true when at least one secret was updated
@@ -16,9 +25,13 @@ export function syncProxySecrets(functionUrls) {
     return false;
   }
 
-  if (!process.env.GITHUB_TOKEN) {
+  const env = ghEnv();
+  if (!env) {
     console.warn(
-      "GITHUB_TOKEN is not set; skipping proxy URL sync to GitHub secrets.",
+      "GH_PAT is not set; skipping proxy URL sync to GitHub secrets.",
+    );
+    console.warn(
+      "Add a repo secret GH_PAT (PAT with repo scope) or update VITE_*_PROXY_URL manually.",
     );
     return false;
   }
@@ -34,7 +47,7 @@ export function syncProxySecrets(functionUrls) {
     const result = spawnSync(
       "gh",
       ["secret", "set", secretName, "--body", url],
-      { stdio: "inherit", env: process.env },
+      { stdio: "inherit", env },
     );
 
     if (result.status !== 0) {
