@@ -2,43 +2,43 @@
   "metros": [
     {
       "id": "london",
-      "bundlePath": "/geo/gtfs/fixtures/london-mini.json",
-      "feedOnestopId": "f-c23-~",
-      "builtAt": "2026-07-11T14:45:42.608Z",
-      "stopCount": 2,
-      "routeCount": 1
+      "bundlePath": "/geo/gtfs/london.json",
+      "feedOnestopId": "f-transport~for~london",
+      "builtAt": "2026-07-11T15:15:23.805Z",
+      "stopCount": 780,
+      "routeCount": 14
     },
     {
       "id": "dublin",
-      "bundlePath": "/geo/gtfs/fixtures/dublin-mini.json",
-      "feedOnestopId": "f-dhs-~",
-      "builtAt": "2026-07-11T14:45:42.610Z",
-      "stopCount": 2,
-      "routeCount": 1
+      "bundlePath": "/geo/gtfs/dublin.json",
+      "feedOnestopId": "f-small~operators~ie",
+      "builtAt": "2026-07-11T15:15:34.235Z",
+      "stopCount": 207,
+      "routeCount": 28
     },
     {
       "id": "nyc",
-      "bundlePath": "/geo/gtfs/fixtures/nyc-mini.json",
-      "feedOnestopId": "f-dr5r-~",
-      "builtAt": "2026-07-11T14:45:42.610Z",
-      "stopCount": 5,
-      "routeCount": 3
+      "bundlePath": "/geo/gtfs/nyc.json",
+      "feedOnestopId": "f-dr5r-nyctsubway",
+      "builtAt": "2026-07-11T15:15:40.795Z",
+      "stopCount": 1033,
+      "routeCount": 36
     },
     {
       "id": "sf",
-      "bundlePath": "/geo/gtfs/fixtures/sf-mini.json",
-      "feedOnestopId": "f-9q8y-~",
-      "builtAt": "2026-07-11T14:45:42.611Z",
-      "stopCount": 2,
-      "routeCount": 1
+      "bundlePath": "/geo/gtfs/sf.json",
+      "feedOnestopId": "f-9q8y-sfmta",
+      "builtAt": "2026-07-11T15:15:51.600Z",
+      "stopCount": 3238,
+      "routeCount": 69
     },
     {
       "id": "chicago",
-      "bundlePath": "/geo/gtfs/fixtures/chicago-mini.json",
-      "feedOnestopId": "f-dp3-~",
-      "builtAt": "2026-07-11T14:45:42.611Z",
-      "stopCount": 2,
-      "routeCount": 1
+      "bundlePath": "/geo/gtfs/chicago.json",
+      "feedOnestopId": "f-dp3-cta",
+      "builtAt": "2026-07-11T15:16:56.751Z",
+      "stopCount": 10980,
+      "routeCount": 133
     }
   ]
 }
