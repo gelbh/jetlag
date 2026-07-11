@@ -7,6 +7,13 @@ import { getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { setCors } from "./cors.mjs";
+import { logMissingAppCheckToken } from "./appCheck.mjs";
+import {
+  getSentryDsnSecret,
+  captureFunctionsException,
+  withSentryEventHandler,
+  withSentryHttpHandler,
+} from "./sentry.mjs";
 import { fetchWithTimeout, fetchWithTimeoutAndRetry } from "./fetchWithTimeout.mjs";
 import { createMemoryCache } from "./memoryCache.mjs";
 import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "./overpassEndpoints.mjs";
@@ -44,6 +51,7 @@ import { onDocumentWritten } from "firebase-functions/v2/firestore";
 
 const accessCodeSecret = defineSecret("ACCESS_CODE");
 const transitlandApiKeySecret = defineSecret("TRANSITLAND_API_KEY");
+const sentryDsnSecret = getSentryDsnSecret();
 
 if (getApps().length === 0) {
   initializeApp();
@@ -225,8 +233,11 @@ export const grantAccess = onCall(
   },
 );
 
-export const vehicles = onRequest(async (req, res) => {
-  setCors(res);
+export const vehicles = onRequest(
+  { secrets: [sentryDsnSecret] },
+  withSentryHttpHandler(async (req, res) => {
+  setCors(res, req);
+  logMissingAppCheckToken(req, "vehicles");
 
   if (req.method === "OPTIONS") {
     res.status(204).send("");
@@ -262,15 +273,18 @@ export const vehicles = onRequest(async (req, res) => {
   try {
     const payload = await loadTflFeed(metro, feedUrl);
     res.status(200).json(normalizeTflPayload(payload, bounds));
-  } catch {
+  } catch (error) {
+    captureFunctionsException(error);
     res.status(502).json({ error: "Transit proxy failed." });
   }
-});
+}),
+);
 
 export const transitland = onRequest(
-  { secrets: [transitlandApiKeySecret] },
-  async (req, res) => {
-    setCors(res);
+  { secrets: [transitlandApiKeySecret, sentryDsnSecret] },
+  withSentryHttpHandler(async (req, res) => {
+    setCors(res, req);
+    logMissingAppCheckToken(req, "transitland");
 
     if (req.method === "OPTIONS") {
       res.status(204).send("");
@@ -310,14 +324,18 @@ export const transitland = onRequest(
     try {
       const vehicles = await fetchTransitlandVehicles(feed, apiKey, bounds);
       res.status(200).json(vehicles);
-    } catch {
+    } catch (error) {
+      captureFunctionsException(error);
       res.status(502).json({ error: "Transitland proxy failed." });
     }
-  },
+  }),
 );
 
-export const overpass = onRequest(async (req, res) => {
-  setCors(res);
+export const overpass = onRequest(
+  { secrets: [sentryDsnSecret] },
+  withSentryHttpHandler(async (req, res) => {
+  setCors(res, req);
+  logMissingAppCheckToken(req, "overpass");
 
   if (req.method === "OPTIONS") {
     res.status(204).send("");
@@ -370,12 +388,16 @@ export const overpass = onRequest(async (req, res) => {
 
     overpassResponseCache.set(cacheKey, text);
     res.status(200).type("application/json").send(text);
-  } catch {
+  } catch (error) {
+    captureFunctionsException(error);
     res.status(504).json({ error: "Overpass timed out." });
   }
-});
+}),
+);
 
-export const purgeStaleSessions = onSchedule("0 4 * * *", async () => {
+export const purgeStaleSessions = onSchedule(
+  { schedule: "0 4 * * *", secrets: [sentryDsnSecret] },
+  withSentryEventHandler(async () => {
   const db = adminDb();
   const endedCutoffIso = computeEndedCutoffIso();
   const abandonedCutoffIso = computeAbandonedCutoffIso();
@@ -411,25 +433,35 @@ export const purgeStaleSessions = onSchedule("0 4 * * *", async () => {
   console.info(
     `purgeStaleSessions deleted ${deleted} session(s); endedCutoff=${endedCutoffIso}; abandonedCutoff=${abandonedCutoffIso}`,
   );
-});
+}),
+);
 
 export const notifyPendingQuestion = onDocumentWritten(
-  "sessions/{sessionId}/pendingQuestions/{questionId}",
-  async (event) => {
-    await handlePendingQuestionWrite(adminDb(), event);
+  {
+    document: "sessions/{sessionId}/pendingQuestions/{questionId}",
+    secrets: [sentryDsnSecret],
   },
+  withSentryEventHandler(async (event) => {
+    await handlePendingQuestionWrite(adminDb(), event);
+  }),
 );
 
 export const notifySessionTimer = onDocumentWritten(
-  "sessions/{sessionId}",
-  async (event) => {
-    await handleSessionTimerWrite(adminDb(), event);
+  {
+    document: "sessions/{sessionId}",
+    secrets: [sentryDsnSecret],
   },
+  withSentryEventHandler(async (event) => {
+    await handleSessionTimerWrite(adminDb(), event);
+  }),
 );
 
 export const notifySessionMessage = onDocumentWritten(
-  "sessions/{sessionId}/messages/{messageId}",
-  async (event) => {
-    await handleSessionMessageWrite(adminDb(), event);
+  {
+    document: "sessions/{sessionId}/messages/{messageId}",
+    secrets: [sentryDsnSecret],
   },
+  withSentryEventHandler(async (event) => {
+    await handleSessionMessageWrite(adminDb(), event);
+  }),
 );

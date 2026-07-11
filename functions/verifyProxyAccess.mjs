@@ -91,20 +91,20 @@ export async function verifyOverpassProxyAccess(auth, db, req) {
   }
 
   const sessionId = readSessionId(req);
-  if (sessionId) {
-    const sessionDoc = await db.collection("sessions").doc(sessionId).get();
-    if (!sessionDoc.exists) {
-      return { ok: false, status: 403, error: "Session not found." };
-    }
-
-    if (!isSessionMember(sessionDoc.data(), decoded.uid)) {
-      return { ok: false, status: 403, error: "Session membership required." };
-    }
-
-    return { ok: true, uid: decoded.uid, sessionId };
+  if (!sessionId) {
+    return { ok: false, status: 403, error: "Session membership required." };
   }
 
-  return { ok: true, uid: decoded.uid, sessionId: null };
+  const sessionDoc = await db.collection("sessions").doc(sessionId).get();
+  if (!sessionDoc.exists) {
+    return { ok: false, status: 403, error: "Session not found." };
+  }
+
+  if (!isSessionMember(sessionDoc.data(), decoded.uid)) {
+    return { ok: false, status: 403, error: "Session membership required." };
+  }
+
+  return { ok: true, uid: decoded.uid, sessionId };
 }
 
 export function sendProxyAuthFailure(res, result) {

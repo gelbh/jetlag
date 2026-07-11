@@ -4,6 +4,7 @@ import {
   hasPremiumAccessClaim,
   isPremiumSessionMember,
   isSessionMember,
+  verifyOverpassProxyAccess,
 } from "../verifyProxyAccess.mjs";
 
 describe("verifyProxyAccess helpers", () => {
@@ -46,5 +47,45 @@ describe("verifyProxyAccess helpers", () => {
       isSessionMember({ memberUids: ["host"] }, "guest"),
       false,
     );
+  });
+
+  it("requires session membership for overpass proxy access", async () => {
+    const auth = {
+      async verifyIdToken() {
+        return { uid: "guest" };
+      },
+    };
+
+    const db = {
+      collection() {
+        return {
+          doc(sessionId) {
+            return {
+              async get() {
+                return {
+                  exists: sessionId === "session-1",
+                  data: () => ({ memberUids: ["guest"] }),
+                };
+              },
+            };
+          },
+        };
+      },
+    };
+
+    const missingSession = await verifyOverpassProxyAccess(auth, db, {
+      headers: { authorization: "Bearer token" },
+    });
+    assert.equal(missingSession.ok, false);
+    assert.equal(missingSession.status, 403);
+
+    const member = await verifyOverpassProxyAccess(auth, db, {
+      headers: {
+        authorization: "Bearer token",
+        "x-session-id": "session-1",
+      },
+    });
+    assert.equal(member.ok, true);
+    assert.equal(member.sessionId, "session-1");
   });
 });

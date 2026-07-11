@@ -7,6 +7,41 @@ const SESSION_CODE_PATTERN = /\b[A-Z0-9]{4}\b/g;
 const FIRESTORE_PERMISSION_DENIED =
   /missing or insufficient permissions/i;
 const STORAGE_QUOTA_EXCEEDED = /quota has been exceeded/i;
+const SENSITIVE_EXTRA_KEYS = new Set([
+  "sessionId",
+  "authUid",
+  "memberUids",
+  "uid",
+]);
+
+function scrubString(value: string): string {
+  return value.replace(SESSION_CODE_PATTERN, "****");
+}
+
+function scrubUnknown(value: unknown): unknown {
+  if (typeof value === "string") {
+    return scrubString(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((entry) => scrubUnknown(entry));
+  }
+
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    const scrubbed: Record<string, unknown> = {};
+    for (const [key, entry] of Object.entries(record)) {
+      if (SENSITIVE_EXTRA_KEYS.has(key)) {
+        scrubbed[key] = "[redacted]";
+        continue;
+      }
+      scrubbed[key] = scrubUnknown(entry);
+    }
+    return scrubbed;
+  }
+
+  return value;
+}
 
 function isFirestorePermissionDeniedEvent(
   event: Parameters<
@@ -56,12 +91,33 @@ function scrubEvent(
   NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>
 >[0] | null {
   if (typeof event.message === "string") {
-    event.message = event.message.replace(SESSION_CODE_PATTERN, "****");
+    event.message = scrubString(event.message);
   }
 
   for (const exception of event.exception?.values ?? []) {
     if (typeof exception.value === "string") {
-      exception.value = exception.value.replace(SESSION_CODE_PATTERN, "****");
+      exception.value = scrubString(exception.value);
+    }
+  }
+
+  if (event.extra) {
+    for (const [key, value] of Object.entries(event.extra)) {
+      if (SENSITIVE_EXTRA_KEYS.has(key)) {
+        event.extra[key] = "[redacted]";
+        continue;
+      }
+      event.extra[key] = scrubUnknown(value);
+    }
+  }
+
+  if (event.breadcrumbs) {
+    for (const breadcrumb of event.breadcrumbs) {
+      if (typeof breadcrumb.message === "string") {
+        breadcrumb.message = scrubString(breadcrumb.message);
+      }
+      if (breadcrumb.data) {
+        breadcrumb.data = scrubUnknown(breadcrumb.data) as Record<string, unknown>;
+      }
     }
   }
 
@@ -88,6 +144,7 @@ export function initSentry(): void {
       dsn,
       environment: env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE,
       release: `jetlag@${APP_VERSION}`,
+      dist: env.VITE_SENTRY_RELEASE_DIST || undefined,
       tracesSampleRate: import.meta.env.PROD ? 0.1 : 0,
       beforeSend: scrubEvent,
     },

@@ -15,14 +15,14 @@ const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
 const sentryOrg = process.env.SENTRY_ORG;
 const sentryProject = process.env.SENTRY_PROJECT;
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   server: {
     // Avoid colliding with `vite preview` / Playwright (4173), which registers a SW.
     port: 5173,
     strictPort: false,
   },
   build: {
-    sourcemap: true,
+    sourcemap: mode === "production" ? "hidden" : true,
     rolldownOptions: {
       output: {
         codeSplitting: {
@@ -54,6 +54,9 @@ export default defineConfig({
             url: "https://de.sentry.io",
             release: {
               name: `jetlag@${appVersion}`,
+            },
+            sourcemaps: {
+              filesToDeleteAfterUpload: ["./dist/**/*.map"],
             },
           }),
         ]
@@ -130,4 +133,4 @@ export default defineConfig({
       },
     }),
   ],
-});
+}));

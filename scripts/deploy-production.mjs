@@ -1,6 +1,7 @@
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { syncProxySecrets } from "./sync-proxy-secrets.mjs";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 
@@ -20,6 +21,15 @@ function readFirebaseProjectId() {
 }
 
 const firebaseProjectId = readFirebaseProjectId();
+
+function setGithubOutput(name, value) {
+  const outputFile = process.env.GITHUB_OUTPUT;
+  if (!outputFile) {
+    return;
+  }
+
+  appendFileSync(outputFile, `${name}=${value}\n`);
+}
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
@@ -213,6 +223,7 @@ async function main() {
       process.exit(lite.code);
     }
     console.log("Backend deploy complete (Firestore + Storage).");
+    setGithubOutput("functions_deployed", "false");
     return;
   }
 
@@ -221,29 +232,24 @@ async function main() {
   let result = await runFirebaseDeploy(onlyFull);
   if (result.code === 0) {
     console.log("Backend deploy complete (Firestore + Functions + Storage).");
-    printProxyEnvInstructions(resolveFunctionUrls(result.output));
+    const functionUrls = resolveFunctionUrls(result.output);
+    printProxyEnvInstructions(functionUrls);
+    if (syncProxySecrets(functionUrls)) {
+      console.log("Proxy URLs synced to GitHub secrets.");
+    }
+    setGithubOutput("functions_deployed", "true");
     return;
   }
 
   if (isBlazeOrArtifactRegistryBlock(result.output)) {
-    console.warn(
-      "\nCloud Functions need the Blaze plan on this project. Retrying deploy without Functions...\n",
+    console.error(
+      "\nCloud Functions deploy failed: Blaze plan required on this project.",
     );
-    result = await runFirebaseDeploy(onlyLite);
-    if (result.code !== 0) {
-      process.exit(result.code);
-    }
-    console.warn(
-      "Deployed Firestore + Storage only. TfL vehicle proxy (Functions) was not updated.",
+    console.error(
+      "Firestore and Storage were not deployed. Fix billing or set DEPLOY_FIREBASE_FUNCTIONS=0 to deploy rules only.",
     );
-    console.warn(
-      "Upgrade the Firebase project to Blaze to deploy Functions, or set DEPLOY_FIREBASE_FUNCTIONS=0 to skip the initial failed attempt.",
-    );
-    console.warn(
-      "Blaze is pay-as-you-go; at infrequent usage the Overpass proxy stays within the free tier.\n",
-    );
-    console.log("Backend deploy complete (Firestore + Storage).");
-    return;
+    setGithubOutput("functions_deployed", "false");
+    process.exit(1);
   }
 
   process.exit(result.code);

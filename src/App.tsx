@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
+import * as Sentry from "@sentry/react";
 import {
   BrowserRouter,
+  Link,
   Navigate,
   Route,
   Routes,
@@ -57,6 +59,32 @@ function AnalyticsPageViewTracker() {
   return null;
 }
 
+function AppErrorFallback() {
+  return (
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 px-6 text-center">
+      <h1 className="text-xl font-semibold text-ink">Something went wrong</h1>
+      <p className="max-w-md text-sm text-ink-dim">
+        The app hit an unexpected error.
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <button
+          type="button"
+          className="btn-primary px-4 py-2 text-sm"
+          onClick={() => window.location.reload()}
+        >
+          Reload
+        </button>
+        <Link
+          to="/"
+          className="btn-secondary border border-border px-4 py-2 text-sm"
+        >
+          Back home
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   useMotionProfile();
 
@@ -65,12 +93,13 @@ export default function App() {
   }, []);
 
   return (
-    <BrowserRouter>
-      <AnalyticsPageViewTracker />
-      <AppUpdateBanner />
-      <div className="h-full overflow-y-auto overscroll-y-none">
-        <LowBatteryPrompt />
-        <Routes>
+    <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
+      <BrowserRouter>
+        <AnalyticsPageViewTracker />
+        <AppUpdateBanner />
+        <div className="h-full overflow-y-auto overscroll-y-none">
+          <LowBatteryPrompt />
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route
@@ -118,7 +147,8 @@ export default function App() {
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </div>
-    </BrowserRouter>
+        </div>
+      </BrowserRouter>
+    </Sentry.ErrorBoundary>
   );
 }

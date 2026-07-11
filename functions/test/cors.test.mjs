@@ -3,7 +3,30 @@ import assert from "node:assert/strict";
 import { setCors } from "../cors.mjs";
 
 describe("cors", () => {
-  it("sets permissive cors headers", () => {
+  it("reflects allowed browser origins", () => {
+    const headers = new Map();
+    const res = {
+      set(name, value) {
+        headers.set(name, value);
+      },
+    };
+
+    setCors(res, {
+      headers: { origin: "https://jetlag.gelbhart.dev" },
+    });
+
+    assert.equal(
+      headers.get("Access-Control-Allow-Origin"),
+      "https://jetlag.gelbhart.dev",
+    );
+    assert.equal(headers.get("Vary"), "Origin");
+    assert.match(
+      headers.get("Access-Control-Allow-Headers"),
+      /Authorization/,
+    );
+  });
+
+  it("defaults to production origin when Origin header is absent", () => {
     const headers = new Map();
     const res = {
       set(name, value) {
@@ -13,10 +36,9 @@ describe("cors", () => {
 
     setCors(res);
 
-    assert.equal(headers.get("Access-Control-Allow-Origin"), "*");
-    assert.match(
-      headers.get("Access-Control-Allow-Headers"),
-      /Authorization/,
+    assert.equal(
+      headers.get("Access-Control-Allow-Origin"),
+      "https://jetlag.gelbhart.dev",
     );
   });
 });
