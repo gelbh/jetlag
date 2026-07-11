@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { LegalInlineLinks } from "../legal/LegalInlineLinks";
 import { InlineError } from "../ui/InlineError";
 import { GoogleSignInButton } from "./GoogleSignInButton";
 import { AppleSignInButton } from "./AppleSignInButton";
@@ -135,6 +136,7 @@ export function PremiumSignInGate({
           />
         ) : null}
       </div>
+      <LegalInlineLinks />
 
       <div className="space-y-2">
         <label className="field-label font-display text-xs uppercase tracking-[0.1em]">

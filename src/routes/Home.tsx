@@ -219,13 +219,38 @@ export function Home() {
               </span>
             </Link>
           ) : null}
-          <Link
-            to="/feedback"
-            aria-label="Feedback and suggestions"
-            className="home-feedback-link"
+          <nav
+            aria-label="Legal and feedback"
+            className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1"
           >
-            Feedback
-          </Link>
+            <Link
+              to="/privacy"
+              aria-label="Privacy Policy"
+              className="home-feedback-link !mt-0 !inline !px-1"
+            >
+              Privacy
+            </Link>
+            <span className="text-ink-dim" aria-hidden="true">
+              ·
+            </span>
+            <Link
+              to="/terms"
+              aria-label="Terms of Service"
+              className="home-feedback-link !mt-0 !inline !px-1"
+            >
+              Terms
+            </Link>
+            <span className="text-ink-dim" aria-hidden="true">
+              ·
+            </span>
+            <Link
+              to="/feedback"
+              aria-label="Feedback and suggestions"
+              className="home-feedback-link !mt-0 !inline !px-1"
+            >
+              Feedback
+            </Link>
+          </nav>
           {continueError ? <InlineError>{continueError}</InlineError> : null}
         </div>
       </EntryScreenLayout>
