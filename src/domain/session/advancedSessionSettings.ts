@@ -75,6 +75,7 @@ export type SessionRulesPatch = Pick<
   | "customLocationPins"
   | "customMeasureGeometries"
   | "regionPackId"
+  | "regionPackSubregionId"
   | "expansionPackEnabled"
   | "customQuestionPackEnabled"
   | "previewQuestionBeforeSend"
@@ -351,6 +352,10 @@ export function mergeSessionRulesPatch(
       patch.regionPackId !== undefined
         ? patch.regionPackId
         : session.regionPackId,
+    regionPackSubregionId:
+      patch.regionPackSubregionId !== undefined
+        ? patch.regionPackSubregionId
+        : session.regionPackSubregionId,
     expansionPackEnabled:
       patch.expansionPackEnabled !== undefined
         ? patch.expansionPackEnabled

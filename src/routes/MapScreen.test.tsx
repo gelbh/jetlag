@@ -67,8 +67,14 @@ vi.mock("../hooks/sync/useLiveActivitySync", () => ({
   useLiveActivitySync: () => undefined,
 }));
 
+vi.mock("../services/geo/resolveSessionMatchingAreas", () => ({
+  resolveSessionMatchingAreas: vi.fn(async () => undefined),
+  matchingAreasCacheKey: () => "",
+}));
+
 vi.mock("../services/session/gameAreaPreload", () => ({
   preloadGameAreaCaches: vi.fn(),
+  preloadGameAreaCachesAsync: vi.fn(async () => undefined),
   gameAreaPreloadKey: () => "test-game-area",
 }));
 

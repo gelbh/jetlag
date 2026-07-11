@@ -21,7 +21,8 @@ import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
 import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
 import { HiderZoneWizardShell } from "../components/hider/HiderZoneWizardShell";
 import { PopupCloseButton } from "../components/ui/PopupCloseButton";
-import { DEFAULT_SESSION_RULES, sessionRulesFromRecord } from "../domain/session/sessionRules";
+import { DEFAULT_SESSION_RULES } from "../domain/session/sessionRules";
+import { useResolvedSessionRules } from "../hooks/session/useResolvedSessionRules";
 import {
   effectiveHidingZoneRadiusMeters,
   formatHidingZoneRadiusLabel,
@@ -106,10 +107,11 @@ export function HiderMapScreen() {
   const setShowAdminBoundaries = useMapStore(
     (state) => state.setShowAdminBoundaries,
   );
+  const sessionRules = useResolvedSessionRules(session);
   const { features: adminBoundaryFeatures, loading: adminBoundaryLoading } =
     useAdminBoundaryFeatures(
     session?.gameArea ?? null,
-    sessionRulesFromRecord(session),
+    sessionRules,
     showAdminBoundaries,
   );
   const distanceUnit = useSessionDistanceUnit();

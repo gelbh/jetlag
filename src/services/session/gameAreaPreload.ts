@@ -42,12 +42,16 @@ function buildPreloadJobs(
   gameArea: GameArea,
   customMatchingAreas?: CustomMatchingAreasByLevel,
   regionPackId?: RegionPackId,
+  options?: { includeAdminProbe?: boolean },
 ): Array<() => Promise<unknown>> {
   const jobs: Array<() => Promise<unknown>> = [
     () => fetchPreparedCoastlineSegments(gameArea),
     () => fetchLandmassFeaturesInArea(gameArea),
     () => fetchStaticTransit(gameArea),
-    () =>
+  ];
+
+  if (options?.includeAdminProbe !== false) {
+    jobs.push(() =>
       probeAdminDivisionCounts(
         gameArea,
         customMatchingAreas,
@@ -58,7 +62,8 @@ function buildPreloadJobs(
           .setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);
         return counts;
       }),
-  ];
+    );
+  }
 
   for (const adminLevel of PRELOAD_ADMIN_LEVELS) {
     jobs.push(() =>
@@ -148,9 +153,25 @@ export function preloadGameAreaCaches(
   regionPackId?: RegionPackId,
   tier: SessionTier = "free",
 ): void {
+  void preloadGameAreaCachesAsync(
+    gameArea,
+    customMatchingAreas,
+    regionPackId,
+    tier,
+  );
+}
+
+export async function preloadGameAreaCachesAsync(
+  gameArea: GameArea,
+  customMatchingAreas?: CustomMatchingAreasByLevel,
+  regionPackId?: RegionPackId,
+  tier: SessionTier = "free",
+): Promise<void> {
   const gameAreaKey = gameAreaPreloadKey(gameArea);
-  const jobs = buildPreloadJobs(gameArea, customMatchingAreas, regionPackId);
-  usePreloadStore.getState().reset(gameAreaKey, jobs.length);
+  const jobs = buildPreloadJobs(gameArea, customMatchingAreas, regionPackId, {
+    includeAdminProbe: false,
+  });
+  usePreloadStore.getState().reset(gameAreaKey, jobs.length + 1);
 
   activePreloadAbort?.abort();
   activePreloadAbort = new AbortController();
@@ -161,7 +182,20 @@ export function preloadGameAreaCaches(
     return;
   }
 
-  void runPreloadQueue(gameAreaKey, jobs, jobGapMs, signal);
+  let counts = emptyAdminDivisionCounts();
+  try {
+    counts = await probeAdminDivisionCounts(
+      gameArea,
+      customMatchingAreas,
+      regionPackId,
+    );
+  } catch {
+    // probe failure is non-fatal; background preload continues with empty counts
+  }
+  usePreloadStore.getState().setAdminDivisionCounts(gameAreaKey, counts);
+  usePreloadStore.getState().recordSuccess(gameAreaKey);
+
+  await runPreloadQueue(gameAreaKey, jobs, jobGapMs, signal);
 }
 
 export async function preloadCriticalGameAreaCaches(

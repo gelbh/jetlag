@@ -62,7 +62,8 @@ import {
   sessionRulesPatchFromAdvancedSettings,
   type AdvancedSessionSettingsValue,
 } from "../domain/session/advancedSessionSettings";
-import { resolveToolDockEnabled, sessionRulesFromRecord, sessionRulesSnapshot } from "../domain/session/sessionRules";
+import { resolveToolDockEnabled } from "../domain/session/sessionRules";
+import { useResolvedSessionRules } from "../hooks/session/useResolvedSessionRules";
 import {
   requestEndGameSession,
   resetEndGameSession,
@@ -101,7 +102,11 @@ import {
   metroSupportsLiveVehicles,
 } from "../services/transit/transitCatalog";
 import { effectiveMapStyle } from "../domain/device/powerProfile";
-import { preloadGameAreaCaches, gameAreaPreloadKey } from "../services/session/gameAreaPreload";
+import { preloadGameAreaCachesAsync, gameAreaPreloadKey } from "../services/session/gameAreaPreload";
+import {
+  matchingAreasCacheKey,
+  resolveSessionMatchingAreas,
+} from "../services/geo/resolveSessionMatchingAreas";
 import { startSeaLevelBackgroundSampling } from "../services/geo/seaLevelProgressive";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useFirebaseAuthReady } from "../hooks/sync/useFirebaseAuthReady";
@@ -157,10 +162,11 @@ export function MapScreen() {
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
+  const sessionRules = useResolvedSessionRules(session);
   const { features: adminBoundaryFeatures, loading: adminBoundaryLoading } =
     useAdminBoundaryFeatures(
     session?.gameArea ?? null,
-    sessionRulesFromRecord(session),
+    sessionRules,
     showAdminBoundaries,
   );
   const allAnnotations = useAnnotationStore((state) => state.annotations);
@@ -274,11 +280,19 @@ export function MapScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset draft when switching sessions only
   }, [currentSessionId]);
 
-  const sessionRulesKey = sessionRulesSnapshot(session);
-  const sessionRules = useMemo(
-    () => sessionRulesFromRecord(session),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sessionRulesKey snapshots session rules
-    [sessionRulesKey],
+  const sessionMatchingAreasKey = useMemo(
+    () =>
+      session
+        ? matchingAreasCacheKey(
+            session.regionPackId,
+            session.regionPackSubregionId,
+            Boolean(
+              session.customMatchingAreas?.[8] &&
+                session.customMatchingAreas?.[9],
+            ),
+          )
+        : "",
+    [session],
   );
   const preloadGameAreaKey = session?.gameArea
     ? gameAreaPreloadKey(session.gameArea)
@@ -307,18 +321,32 @@ export function MapScreen() {
       return;
     }
 
-    preloadGameAreaCaches(
-      session.gameArea,
-      session.customMatchingAreas,
-      session.regionPackId,
-      isPremiumSession(session) ? "premium" : "free",
-    );
-    startSeaLevelBackgroundSampling(session.gameArea);
+    let cancelled = false;
+
+    void (async () => {
+      const matchingAreas = await resolveSessionMatchingAreas(session);
+      if (cancelled) {
+        return;
+      }
+
+      void preloadGameAreaCachesAsync(
+        session.gameArea,
+        matchingAreas,
+        session.regionPackId,
+        isPremiumSession(session) ? "premium" : "free",
+      );
+      startSeaLevelBackgroundSampling(session.gameArea);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     firebaseAuthReady,
     lowPowerMode,
     preloadGameAreaKey,
     session,
+    sessionMatchingAreasKey,
   ]);
 
   const overlay = useMapOverlayState();
@@ -1017,7 +1045,7 @@ export function MapScreen() {
         <Suspense fallback={null}>
           <HeavyMapToolsSlot
             activeTool={activeTool}
-            sessionRules={session}
+            sessionRules={sessionRules}
             annotations={annotations}
             pendingQuestions={pendingQuestions}
             gameArea={toolGameArea}

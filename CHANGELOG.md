@@ -5,6 +5,7 @@
 ### Fixes
 
 - Map: auto-reload once when a lazy route chunk fails to load after deploy
+- Matching and Measuring: bundled preset games show local admin categories (borough, ward, LEA) again
 
 ### Improvements
 
