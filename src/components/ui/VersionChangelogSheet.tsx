@@ -1,5 +1,6 @@
 import { APP_VERSION, CHANGELOG, type ChangelogEntry } from "../../domain/device/changelog";
 import { AnimatedOverlay } from "./AnimatedOverlay";
+import { SheetHeader } from "./SheetHeader";
 
 function userFacingChangelog(entries: readonly ChangelogEntry[]): ChangelogEntry[] {
   return entries
@@ -29,18 +30,7 @@ export function VersionChangelogSheet({
       sheetClassName="mx-auto max-w-lg"
       maxHeightClassName="max-h-[min(70dvh,560px)]"
     >
-      <div className="mb-4 flex items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-bold uppercase tracking-tight text-ink">
-          Changelog
-        </h2>
-        <button
-          type="button"
-          onClick={onClose}
-          className="btn-secondary min-h-10 px-4 text-xs"
-        >
-          Close
-        </button>
-      </div>
+      <SheetHeader title="Changelog" onClose={onClose} />
 
       <p className="mb-4 text-sm text-ink-muted">
         Current version{" "}

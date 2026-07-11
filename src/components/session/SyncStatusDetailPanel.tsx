@@ -1,5 +1,6 @@
 import type { SyncStatus } from "../../domain/device/sync";
 import { SyncStatusBeacon } from "./SyncStatusDot";
+import { HudDetailPanel } from "../ui/HudDetailPanel";
 
 interface SyncStatusDetailPanelProps {
   status: SyncStatus;
@@ -27,48 +28,17 @@ export function SyncStatusDetailPanel({
   onClose,
 }: SyncStatusDetailPanelProps) {
   return (
-    <div
-      className="jl-sync-detail-panel jl-panel-enter pointer-events-auto"
-      role="dialog"
-      aria-label="Sync status"
-    >
-      <div className="jl-sync-detail-panel__row">
-        <SyncStatusBeacon status={status} size="sm" />
-        <p
-          className={`jl-sync-detail-panel__status ${STATUS_TEXT_CLASS[status]}`}
-        >
-          {title}
-        </p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="jl-sync-detail-panel__close"
-          aria-label="Close sync details"
-        >
-          <svg
-            aria-hidden="true"
-            className="h-3.5 w-3.5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path strokeLinecap="round" d="M6 6l12 12M18 6 6 18" />
-          </svg>
-        </button>
-      </div>
-
-      <p className="jl-sync-detail-panel__detail">{body}</p>
-
-      {actionLabel && onAction ? (
-        <button
-          type="button"
-          onClick={onAction}
-          className="btn-secondary jl-sync-detail-panel__action"
-        >
-          {actionLabel}
-        </button>
-      ) : null}
-    </div>
+    <HudDetailPanel
+      panelClassName="jl-sync-detail-panel"
+      ariaLabel="Sync status"
+      leading={<SyncStatusBeacon status={status} size="sm" />}
+      title={title}
+      titleClassName={`jl-sync-detail-panel__status ${STATUS_TEXT_CLASS[status]}`}
+      onClose={onClose}
+      closeLabel="Close sync details"
+      body={body}
+      actionLabel={actionLabel ?? undefined}
+      onAction={onAction}
+    />
   );
 }

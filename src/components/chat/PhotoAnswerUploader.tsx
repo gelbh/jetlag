@@ -15,6 +15,7 @@ import {
 } from "../../services/core/photoStorage";
 import { capturePhotoUploadFailure } from "../../services/core/sentry";
 import { useSessionStore } from "../../state/sessionStore";
+import { LoadingReadout } from "../tools/shared/LoadingReadout";
 
 interface PhotoAnswerUploaderProps {
   sessionId: string;
@@ -145,7 +146,9 @@ export function PhotoAnswerUploader({
         <p className="text-xs leading-snug text-ink-dim">{ruleSummary}</p>
       ) : null}
       {authPending ? (
-        <p className="text-sm text-ink-muted">Confirming hider access…</p>
+        <LoadingReadout variant="default">
+          Confirming hider access…
+        </LoadingReadout>
       ) : null}
       {accessError ? (
         <p

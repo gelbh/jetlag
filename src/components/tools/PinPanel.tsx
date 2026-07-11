@@ -1,3 +1,5 @@
+import { TextAreaField } from "../ui/TextAreaField";
+
 interface PinPanelProps {
   label: string;
   onLabelChange: (value: string) => void;
@@ -21,15 +23,14 @@ export function PinPanel({
           Location pinned on the map. Tap again to move it.
         </p>
       ) : null}
-      <label className="block text-sm text-ink-muted">
-        Label
-        <textarea
-          value={label}
-          onChange={(event) => onLabelChange(event.target.value)}
-          className="mt-1 min-h-20 w-full rounded-xl border border-border bg-surface-base px-3 py-2 text-sm"
-          placeholder="Closer to the train station than us"
-        />
-      </label>
+      <TextAreaField
+        label="Label"
+        labelClassName="block text-sm text-ink-muted"
+        inputClassName="mt-1 min-h-20 w-full rounded-xl border border-border bg-surface-base px-3 py-2 text-sm"
+        value={label}
+        onChange={(event) => onLabelChange(event.target.value)}
+        placeholder="Closer to the train station than us"
+      />
       <button
         type="button"
         onClick={onCommit}

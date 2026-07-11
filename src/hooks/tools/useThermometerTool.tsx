@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { Feature, LineString } from "geojson";
 import { ThermometerPanel } from "../../components/tools/ThermometerPanel";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
@@ -145,6 +145,7 @@ export function useThermometerTool({
   const [thermometerAnswer, setThermometerAnswer] =
     useState<ThermometerAnswer | null>(null);
   const [panelError, setPanelError] = useState<string | null>(null);
+  const wizardStepRef = useRef("distance");
 
   const walkingQuestionId =
     localWalkingQuestionId ?? syncedWalkDraft?.questionId ?? null;
@@ -501,6 +502,7 @@ export function useThermometerTool({
       isSubmitting={isSubmitting}
       gpsLoading={gpsLoading}
       error={panelError ?? gpsError ?? walkTracker.gpsError}
+      wizardStepRef={wizardStepRef}
     />
   );
 

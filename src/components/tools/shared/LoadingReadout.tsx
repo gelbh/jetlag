@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { LoadingSpinnerRing } from "../../ui/LoadingSpinner";
 
 type LoadingReadoutVariant = "default" | "dim";
 
@@ -36,10 +37,7 @@ export function LoadingReadout({
       className={`space-y-1 font-mono text-sm ${VARIANT_CLASS[variant]}`}
     >
       <div className="flex items-center gap-2">
-        <span
-          className="loading-spinner size-3.5 shrink-0 rounded-full border-2 border-current border-t-transparent motion-reduce:animate-none"
-          aria-hidden
-        />
+        <LoadingSpinnerRing />
         <span>{children}</span>
       </div>
       {stale ? (

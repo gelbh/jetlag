@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AnimatedOverlay } from "../ui/AnimatedOverlay";
+import { SheetHeader } from "../ui/SheetHeader";
 import { CurseReferenceSheet } from "../expansion/CurseReferenceSheet";
 import { ShareCode } from "./ShareCode";
 import { TransitControls } from "../map/TransitControls";
@@ -154,23 +155,14 @@ export function MapSettingsSheet({
       maxHeightClassName="max-h-[min(85dvh,760px)]"
     >
         <div className="sticky top-0 z-10 -mx-4 space-y-3 bg-surface-panel px-4 pb-3 pt-1">
-          <div className="jl-settings-header flex items-center justify-between gap-3">
-            <div>
-              <p className="font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-blue">
-                Setup
-              </p>
-              <h2 className="font-display text-xl font-bold uppercase tracking-tight text-ink">
-                Settings
-              </h2>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn-secondary min-h-10 px-4 text-xs"
-            >
-              Close
-            </button>
-          </div>
+          <SheetHeader
+            title="Settings"
+            eyebrow="Setup"
+            onClose={onClose}
+            titleSize="xl"
+            flush
+            className="jl-settings-header"
+          />
 
           {pendingWrites > 0 ? (
             <p className="border-2 border-status-warning/40 bg-status-warning-surface px-3 py-2 text-sm font-semibold text-status-warning">

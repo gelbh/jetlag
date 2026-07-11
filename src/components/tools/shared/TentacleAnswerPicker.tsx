@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { TentaclePoi } from "../../../domain/map/annotations";
 import type { DistanceUnit } from "../../../domain/map/distance";
 import {
@@ -6,7 +5,7 @@ import {
   tentacleHiderAnswerClipboardText,
   type TentacleExtendedCategoryId,
 } from "../../../domain/questions/tentacleQuestions";
-import { copyToClipboard } from "../../../platform/copyToClipboard";
+import { useCopyFeedback } from "../../../hooks/useCopyFeedback";
 import { ListSelectRow } from "./ListSelectRow";
 import { ToolSection } from "./ToolSection";
 
@@ -31,13 +30,21 @@ export function TentacleAnswerPicker({
   onSelectPoi,
   onOutOfReachChange,
 }: TentacleAnswerPickerProps) {
-  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">(
-    "idle",
-  );
+  const { status: copyStatus, copy } = useCopyFeedback();
 
   if (poiOptions.length === 0) {
     return null;
   }
+
+  const handleCopyForHider = async () => {
+    const text = tentacleHiderAnswerClipboardText(
+      categoryId,
+      distanceUnit,
+      poiOptions,
+      searchRadiusMeters,
+    );
+    await copy(text);
+  };
 
   return (
     <ToolSection title="Answer" status="active">
@@ -45,19 +52,7 @@ export function TentacleAnswerPicker({
         <p className="field-label m-0">Choose one</p>
         <button
           type="button"
-          onClick={() => {
-            void (async () => {
-              const text = tentacleHiderAnswerClipboardText(
-                categoryId,
-                distanceUnit,
-                poiOptions,
-                searchRadiusMeters,
-              );
-              const ok = await copyToClipboard(text);
-              setCopyStatus(ok ? "copied" : "failed");
-              setTimeout(() => setCopyStatus("idle"), ok ? 2000 : 3000);
-            })();
-          }}
+          onClick={() => void handleCopyForHider()}
           className="btn-secondary min-h-12 px-3 text-xs"
         >
           {copyStatus === "copied"

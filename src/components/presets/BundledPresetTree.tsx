@@ -9,6 +9,7 @@ import {
   type BundledPresetTreeNode,
 } from "../../domain/regions/bundledPresetHierarchy";
 import { migrateGamePreset } from "../../domain/session/gamePreset";
+import { PresetCard } from "./PresetCard";
 
 type MigratedPreset = ReturnType<typeof migrateGamePreset>;
 
@@ -16,26 +17,24 @@ function PresetLeafCard({ preset }: { preset: MigratedPreset }) {
   const description = bundledPresetDefinition(preset.id)?.description;
 
   return (
-    <article className="home-card-btn home-card-btn-secondary flex-col items-stretch gap-3 !min-h-0 !h-auto py-3">
-      <div className="min-w-0">
-        <p className="font-display text-base tracking-wide text-ink">{preset.name}</p>
-        <p className="mt-1 text-xs text-ink-muted">
+    <PresetCard
+      name={preset.name}
+      meta={
+        <>
           {preset.gameSize} · {preset.distanceUnit}
           {preset.placeLabel ? ` · ${preset.placeLabel}` : ""}
-        </p>
-        {description ? (
-          <p className="mt-2 text-xs text-ink-dim">{description}</p>
-        ) : null}
-      </div>
-      <div className="flex flex-wrap gap-2">
+        </>
+      }
+      description={description}
+      actions={
         <Link
           to={`/create?preset=${preset.id}`}
           className="btn-primary min-h-10 px-3 text-xs"
         >
           Host
         </Link>
-      </div>
-    </article>
+      }
+    />
   );
 }
 

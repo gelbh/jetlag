@@ -1,4 +1,5 @@
 import { AnimatedOverlay } from "../ui/AnimatedOverlay";
+import { SheetHeader } from "../ui/SheetHeader";
 
 interface ExpansionHiderMenuProps {
   open: boolean;
@@ -25,18 +26,7 @@ export function ExpansionHiderMenu({
       sheetClassName="mx-auto max-w-lg"
       maxHeightClassName="max-h-[min(40dvh,320px)]"
     >
-      <div className="mb-4 flex items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-bold uppercase tracking-tight text-ink">
-          Expansion Pack
-        </h2>
-        <button
-          type="button"
-          onClick={onClose}
-          className="btn-secondary min-h-10 px-4 text-xs"
-        >
-          Close
-        </button>
-      </div>
+      <SheetHeader title="Expansion Pack" onClose={onClose} />
 
       <div className="space-y-2">
         {canPlaceTimeTrap ? (

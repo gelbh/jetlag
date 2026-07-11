@@ -1,4 +1,4 @@
-import { useState, type RefObject } from "react";
+import { type RefObject } from "react";
 import {
   isMatchingCategoryEnabled,
   isMatchingCategoryAvailable,
@@ -18,19 +18,15 @@ import { AnchorControls } from "./shared/AnchorControls";
 import { CoordinateCopyButton } from "./shared/CoordinateCopyButton";
 import { ErrorWithRetry } from "./shared/ErrorWithRetry";
 import { LoadingReadout } from "./shared/LoadingReadout";
+import { CatalogExhaustedMessage } from "./shared/CatalogExhaustedMessage";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
 import { ResolvedReadout } from "./shared/ResolvedReadout";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
-import { ToolStepper } from "./shared/ToolStepper";
+import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
-import {
-  buildSteps,
-  deriveStepStates,
-  MATCHING_STEPS,
-  stepsForMode,
-} from "./shared/toolStepUtils";
-import { useSyncWizardStepRef } from "../../hooks/tools/useSyncWizardStepRef";
+import { MATCHING_STEPS, stepsForMode } from "./shared/toolStepUtils";
+import { useToolWizard } from "../../hooks/useToolWizard";
 
 interface MatchingPanelProps {
   distanceUnit: DistanceUnit;
@@ -94,9 +90,14 @@ export function MatchingPanel({
   wizardStepRef,
 }: MatchingPanelProps) {
   const steps = stepsForMode(MATCHING_STEPS, awaitHiderAnswer);
-  const [stepIndex, setStepIndex] = useState(0);
-  const step = steps[stepIndex]?.id ?? "anchor";
-  useSyncWizardStepRef(wizardStepRef, step);
+  const {
+    stepId: step,
+    stepIndex,
+    setStepIndex,
+    goNext,
+    goBack,
+    stepper,
+  } = useToolWizard(steps, { wizardStepRef });
   const categoryStepIndex = steps.findIndex((item) => item.id === "category");
 
   const handleCategoryChange = (nextCategoryId: MatchingCategoryId) => {
@@ -176,28 +177,12 @@ export function MatchingPanel({
       }${nearestOutsidePlayArea ? " · outside play area" : ""}`
     : null;
 
-  const goNext = () => {
-    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
-  };
-
-  const goBack = () => {
-    setStepIndex((current) => Math.max(current - 1, 0));
-  };
-
-  const stepper = (
-    <ToolStepper
-      steps={buildSteps(steps, deriveStepStates(steps.length, stepIndex))}
-    />
-  );
-
   return (
     <ToolPanelShell toolId="matching" stepper={stepper}>
       {step === "category" ? (
         <ToolSection first compact status="active">
           {availableCategories.length === 0 ? (
-            <p className="text-sm text-status-warning">
-              Every match category has already been used on this map.
-            </p>
+            <CatalogExhaustedMessage message="Every match category has already been used on this map." />
           ) : (
             <label className="field-label">
               Match category
@@ -281,20 +266,13 @@ export function MatchingPanel({
             </ResolvedReadout>
           ) : null}
           {awaitHiderAnswer ? (
-            <>
-              <p className="text-xs text-ink-dim">
-                Hiders answer yes or no in game chat once you send this question.
-              </p>
-              <button
-                type="button"
-                onClick={onCommit}
-                disabled={!canCommit}
-                aria-busy={isSubmitting}
-                className="btn-primary w-full disabled:opacity-40"
-              >
-                {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
-              </button>
-            </>
+            <SendToHidersButton
+              costLabel={costLabel}
+              isSubmitting={isSubmitting}
+              disabled={!canCommit}
+              onClick={onCommit}
+              instruction="Hiders answer yes or no in game chat once you send this question."
+            />
           ) : null}
         </ToolSection>
       ) : null}

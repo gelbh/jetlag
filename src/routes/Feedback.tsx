@@ -1,4 +1,5 @@
 import { AppLogo } from "../components/ui/AppLogo";
+import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { ScreenNav } from "../components/ui/ScreenNav";
 import {
   githubBugReportUrl,
@@ -14,7 +15,7 @@ const externalLinkProps = {
 
 export function Feedback() {
   return (
-    <main className="home-poster home-terminal-accent flex min-h-[100dvh] flex-col justify-between px-5 py-8 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <EntryScreenLayout>
       <ScreenNav backTo="/" backLabel="Back" />
       <div className="space-y-3 pt-[max(3rem,env(safe-area-inset-top))]">
         <AppLogo variant="lockup" size="lg" />
@@ -72,6 +73,6 @@ export function Feedback() {
           <span className="home-card-btn-hint">Bug report form</span>
         </a>
       </div>
-    </main>
+    </EntryScreenLayout>
   );
 }

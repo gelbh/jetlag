@@ -1,4 +1,6 @@
 import { HudRefreshIcon } from "../ui/HudIcons";
+import { HudDetailPanel } from "../ui/HudDetailPanel";
+import { loadingSpinnerClass } from "../ui/loadingSpinnerClass";
 
 interface GameAreaPreloadDetailPanelProps {
   loading: boolean;
@@ -28,12 +30,10 @@ export function GameAreaPreloadDetailPanel({
     : "jl-preload-detail-panel--loading";
 
   return (
-    <div
-      className={`jl-preload-detail-panel jl-panel-enter pointer-events-auto ${statusClass}`}
-      role="dialog"
-      aria-label={title}
-    >
-      <div className="jl-preload-detail-panel__row">
+    <HudDetailPanel
+      panelClassName={`jl-preload-detail-panel ${statusClass}`}
+      ariaLabel={title}
+      leading={
         <span
           className={`jl-preload-beacon jl-preload-beacon--sm ${
             failed ? "jl-preload-beacon--failed" : "jl-preload-beacon--loading"
@@ -41,31 +41,17 @@ export function GameAreaPreloadDetailPanel({
           aria-hidden="true"
         >
           <HudRefreshIcon
-            className={`jl-preload-beacon__icon stroke-[2.5] ${
-              loading ? "loading-spinner motion-reduce:animate-none" : ""
-            }`}
+            className={`jl-preload-beacon__icon stroke-[2.5] ${loadingSpinnerClass(loading)}`}
           />
         </span>
-        <p className="jl-preload-detail-panel__title">{title}</p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="jl-sync-detail-panel__close"
-          aria-label="Close map preload details"
-        >
-          <svg
-            aria-hidden="true"
-            className="h-3.5 w-3.5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path strokeLinecap="round" d="M6 6l12 12M18 6 6 18" />
-          </svg>
-        </button>
-      </div>
-
+      }
+      title={title}
+      titleClassName="jl-preload-detail-panel__title"
+      onClose={onClose}
+      closeLabel="Close map preload details"
+      actionLabel={failed && onDismiss ? "Dismiss" : undefined}
+      onAction={onDismiss}
+    >
       {loading ? (
         <div className="jl-preload-detail-panel__progress">
           <div className="jl-preload-detail-panel__progress-meta">
@@ -94,18 +80,7 @@ export function GameAreaPreloadDetailPanel({
           </div>
         </div>
       ) : null}
-
       <p className="jl-preload-detail-panel__body">{body}</p>
-
-      {failed && onDismiss ? (
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="btn-secondary jl-sync-detail-panel__action"
-        >
-          Dismiss
-        </button>
-      ) : null}
-    </div>
+    </HudDetailPanel>
   );
 }

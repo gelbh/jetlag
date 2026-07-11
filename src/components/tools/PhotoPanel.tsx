@@ -5,7 +5,9 @@ import {
   type PhotoCategoryId,
 } from "../../domain/questions/photoQuestions";
 import type { GameSize } from "../../domain/session/gameSize";
+import { CatalogExhaustedMessage } from "./shared/CatalogExhaustedMessage";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
+import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
 
@@ -57,9 +59,7 @@ export function PhotoPanel({
     <ToolPanelShell toolId="photo">
       <ToolSection first compact status="active">
         {availableCategories.length === 0 ? (
-          <p className="text-sm text-status-warning">
-            Every photo question has already been used this session.
-          </p>
+          <CatalogExhaustedMessage message="Every photo question has already been used this session." />
         ) : (
           <label className="field-label">
             Photo question
@@ -82,26 +82,19 @@ export function PhotoPanel({
           prompt={question.prompt}
           ruleSummary={question.ruleSummary}
         />
-        <p className="text-xs text-ink-dim">
-          Hiders upload a photo or reply that they cannot answer in game chat.
-        </p>
-        {hasOpenQuestion ? (
-          <p className="text-sm text-status-warning">
-            Finish the open question before starting another.
-          </p>
-        ) : null}
-        <button
-          type="button"
-          onClick={onCommit}
+        <SendToHidersButton
+          costLabel={costLabel}
+          isSubmitting={isSubmitting}
           disabled={!canCommit}
-          aria-busy={isSubmitting}
-          className="btn-primary min-h-12 w-full disabled:opacity-40"
-        >
-          {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
-        </button>
-        {displayError ? (
-          <p className="text-sm text-status-error">{displayError}</p>
-        ) : null}
+          onClick={onCommit}
+          instruction="Hiders upload a photo or reply that they cannot answer in game chat."
+          warning={
+            hasOpenQuestion
+              ? "Finish the open question before starting another."
+              : undefined
+          }
+          error={displayError}
+        />
       </ToolSection>
     </ToolPanelShell>
   );

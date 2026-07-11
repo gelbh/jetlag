@@ -1,4 +1,4 @@
-import { useState, type RefObject } from "react";
+import { type RefObject } from "react";
 import { RadarDistancePicker } from "./RadarDistancePicker";
 import { yesNoAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
@@ -6,15 +6,11 @@ import { PlacementActions } from "./shared/PlacementActions";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ViewOnlyQuestionBanner } from "./shared/ViewOnlyQuestionBanner";
 import { ToolSection } from "./shared/ToolSection";
-import { ToolStepper } from "./shared/ToolStepper";
+import { SendToHidersButton } from "./shared/SendToHidersButton";
+import { InlineError } from "../ui/InlineError";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
-import {
-  buildSteps,
-  deriveStepStates,
-  RADAR_STEPS,
-  stepsForMode,
-} from "./shared/toolStepUtils";
-import { useSyncWizardStepRef } from "../../hooks/tools/useSyncWizardStepRef";
+import { RADAR_STEPS, stepsForMode } from "./shared/toolStepUtils";
+import { useToolWizard } from "../../hooks/useToolWizard";
 import {
   isRadarDistanceOptionAvailable,
   type RadarAnswer,
@@ -72,9 +68,10 @@ export function RadarPanel({
   wizardStepRef,
 }: RadarPanelProps) {
   const steps = stepsForMode(RADAR_STEPS, awaitHiderAnswer);
-  const [stepIndex, setStepIndex] = useState(0);
-  const step = steps[stepIndex]?.id ?? "anchor";
-  useSyncWizardStepRef(wizardStepRef, step);
+  const { stepId: step, stepIndex, goNext, goBack, stepper } = useToolWizard(
+    steps,
+    { wizardStepRef },
+  );
 
   const distanceSelectionAvailable =
     radiusMeters !== null && isRadarDistanceOptionAvailable();
@@ -90,20 +87,6 @@ export function RadarPanel({
     distanceSelectionAvailable &&
     !isSubmitting;
   const canCommitActions = !viewOnly && canCommit;
-
-  const goNext = () => {
-    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
-  };
-
-  const goBack = () => {
-    setStepIndex((current) => Math.max(current - 1, 0));
-  };
-
-  const stepper = (
-    <ToolStepper
-      steps={buildSteps(steps, deriveStepStates(steps.length, stepIndex))}
-    />
-  );
 
   return (
     <ToolPanelShell toolId="radar" stepper={stepper}>
@@ -124,20 +107,13 @@ export function RadarPanel({
             onCustomRadiusChange={onCustomRadiusChange}
           />
           {awaitHiderAnswer ? (
-            <>
-              <p className="text-xs text-ink-dim">
-                Hiders answer yes or no in game chat once you send this question.
-              </p>
-              <button
-                type="button"
-                onClick={onCommit}
-                disabled={!canSendToHiders}
-                aria-busy={isSubmitting}
-                className="btn-primary w-full disabled:opacity-40"
-              >
-                {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
-              </button>
-            </>
+            <SendToHidersButton
+              costLabel={costLabel}
+              isSubmitting={isSubmitting}
+              disabled={!canSendToHiders}
+              onClick={onCommit}
+              instruction="Hiders answer yes or no in game chat once you send this question."
+            />
           ) : null}
         </ToolSection>
       ) : null}
@@ -191,7 +167,7 @@ export function RadarPanel({
         }
       />
 
-      {error ? <p className="text-error">{error}</p> : null}
+      {error ? <InlineError>{error}</InlineError> : null}
     </ToolPanelShell>
   );
 }

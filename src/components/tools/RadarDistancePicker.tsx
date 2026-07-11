@@ -12,6 +12,7 @@ import {
   type DistanceUnit,
 } from "../../domain/map/distance";
 import { radarPresetMetersForUnit } from "../../domain/map/distancePresets";
+import { CatalogExhaustedMessage } from "./shared/CatalogExhaustedMessage";
 import { OptionChip, OptionChipRow } from "./shared/OptionChip";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
 import { ToolSection } from "./shared/ToolSection";
@@ -59,9 +60,7 @@ export function RadarDistancePicker({
         />
       ) : null}
       {availablePresets.length === 0 && !chooseAvailable ? (
-        <p className="text-sm text-status-warning">
-          Every radar distance option has already been used this session.
-        </p>
+        <CatalogExhaustedMessage message="Every radar distance option has already been used this session." />
       ) : (
         <OptionChipRow>
           {availablePresets.map((preset) => {

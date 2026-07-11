@@ -6,6 +6,7 @@ import {
   gameSizeLabel,
   recommendGameSize,
 } from "../../domain/session/gameSize";
+import { SegmentControl } from "../ui/SegmentControl";
 import { FRAMING_MODE_OPTIONS } from "./gameAreaFramingUi";
 
 interface FramingModeSegmentControlProps {
@@ -22,31 +23,14 @@ export function FramingModeSegmentControl({
   "aria-label": ariaLabel = "Play area shape",
 }: FramingModeSegmentControlProps) {
   return (
-    <div
-      className="jl-segment-control"
-      role="tablist"
+    <SegmentControl
+      variant="hud"
+      value={value}
+      options={FRAMING_MODE_OPTIONS}
+      onChange={onChange}
+      disabled={disabled}
       aria-label={ariaLabel}
-    >
-      {FRAMING_MODE_OPTIONS.map((mode) => {
-        const selected = value === mode.value;
-
-        return (
-          <button
-            key={mode.value}
-            type="button"
-            role="tab"
-            aria-selected={selected}
-            disabled={disabled}
-            onClick={() => onChange(mode.value)}
-            className={`jl-segment-btn ${
-              selected ? "jl-segment-btn-selected" : ""
-            } disabled:opacity-50`}
-          >
-            {mode.label}
-          </button>
-        );
-      })}
-    </div>
+    />
   );
 }
 

@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { copyToClipboard } from "../../platform/copyToClipboard";
+import { useCopyFeedback } from "../../hooks/useCopyFeedback";
 
 interface ShareCodeProps {
   code: string;
@@ -12,14 +11,10 @@ export function ShareCode({
   remote = false,
   compact = false,
 }: ShareCodeProps) {
-  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">(
-    "idle",
-  );
+  const { status: copyStatus, copy } = useCopyFeedback();
 
   const handleCopy = async () => {
-    const ok = await copyToClipboard(code);
-    setCopyStatus(ok ? "copied" : "failed");
-    setTimeout(() => setCopyStatus("idle"), ok ? 2000 : 3000);
+    await copy(code);
   };
 
   if (compact) {

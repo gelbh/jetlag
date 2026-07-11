@@ -10,6 +10,7 @@ import type { PlayerRole } from "../../domain/session/playerRole";
 import { postSocialMessage } from "../../services/firestore/firestoreSessionExtras";
 import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
 import { useAnimatedPresence } from "../../hooks/useAnimatedPresence";
+import { SegmentControl } from "../ui/SegmentControl";
 import { GameChatTab } from "./GameChatTab";
 
 interface SocialChatTabProps {
@@ -167,30 +168,16 @@ export function ChatPanel({
     >
       <div className="tool-panel-compact hud-panel mx-auto flex min-h-0 max-h-[min(50dvh,420px)] max-w-xl flex-col overflow-hidden p-3">
         <div className="mb-3 flex shrink-0 items-center justify-between gap-2">
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => setTab("game")}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                tab === "game"
-                  ? "bg-highlight-soft text-highlight"
-                  : "text-ink-muted"
-              }`}
-            >
-              Game
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab("social")}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                tab === "social"
-                  ? "bg-highlight-soft text-highlight"
-                  : "text-ink-muted"
-              }`}
-            >
-              Social
-            </button>
-          </div>
+          <SegmentControl
+            variant="pill"
+            value={tab}
+            options={[
+              { value: "game", label: "Game" },
+              { value: "social", label: "Social" },
+            ]}
+            onChange={setTab}
+            aria-label="Chat tabs"
+          />
           <button
             type="button"
             onClick={onClose}

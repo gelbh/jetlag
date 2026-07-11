@@ -1,4 +1,4 @@
-import { useState, type RefObject } from "react";
+import { type RefObject } from "react";
 import type { TentaclePoi } from "../../domain/map/annotations";
 import { formatPresetDistance, type DistanceUnit } from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/gameSize";
@@ -16,15 +16,10 @@ import { ResolvedReadout } from "./shared/ResolvedReadout";
 import { TentacleAnswerPicker } from "./shared/TentacleAnswerPicker";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
-import { ToolStepper } from "./shared/ToolStepper";
+import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
-import {
-  buildSteps,
-  deriveStepStates,
-  TENTACLE_STEPS,
-  stepsForMode,
-} from "./shared/toolStepUtils";
-import { useSyncWizardStepRef } from "../../hooks/tools/useSyncWizardStepRef";
+import { TENTACLE_STEPS, stepsForMode } from "./shared/toolStepUtils";
+import { useToolWizard } from "../../hooks/useToolWizard";
 
 interface TentaclePanelProps {
   gameSize: GameSize;
@@ -81,9 +76,10 @@ export function TentaclePanel({
   wizardStepRef,
 }: TentaclePanelProps) {
   const steps = stepsForMode(TENTACLE_STEPS, awaitHiderAnswer);
-  const [stepIndex, setStepIndex] = useState(0);
-  const step = steps[stepIndex]?.id ?? "anchor";
-  useSyncWizardStepRef(wizardStepRef, step);
+  const { stepId: step, stepIndex, goNext, goBack, stepper } = useToolWizard(
+    steps,
+    { wizardStepRef },
+  );
 
   const prompt =
     categoryId !== null
@@ -106,20 +102,6 @@ export function TentaclePanel({
     categorySelectionAvailable &&
     !isSubmitting;
   const availableCategories = tentacleCategoriesForGameSize(gameSize);
-
-  const goNext = () => {
-    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
-  };
-
-  const goBack = () => {
-    setStepIndex((current) => Math.max(current - 1, 0));
-  };
-
-  const stepper = (
-    <ToolStepper
-      steps={buildSteps(steps, deriveStepStates(steps.length, stepIndex))}
-    />
-  );
 
   return (
     <ToolPanelShell toolId="tentacle" stepper={stepper}>
@@ -193,21 +175,13 @@ export function TentaclePanel({
             </ResolvedReadout>
           )}
           {awaitHiderAnswer && locationsReady && !loading && poiOptions.length > 0 ? (
-            <>
-              <p className="text-xs text-ink-dim">
-                Hiders pick a location or &quot;Not within reach&quot; in game
-                chat once you send this question.
-              </p>
-              <button
-                type="button"
-                onClick={onCommit}
-                disabled={!canCommit}
-                aria-busy={isSubmitting}
-                className="btn-primary w-full disabled:opacity-40"
-              >
-                {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
-              </button>
-            </>
+            <SendToHidersButton
+              costLabel={costLabel}
+              isSubmitting={isSubmitting}
+              disabled={!canCommit}
+              onClick={onCommit}
+              instruction='Hiders pick a location or "Not within reach" in game chat once you send this question.'
+            />
           ) : null}
         </ToolSection>
       ) : null}

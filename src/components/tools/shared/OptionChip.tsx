@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ChoiceButton } from "../../ui/ChoiceButton";
 
 interface OptionChipProps {
   selected: boolean;
@@ -14,19 +15,9 @@ export function OptionChip({
   disabled = false,
 }: OptionChipProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-pressed={selected}
-      className={`min-h-12 rounded-[var(--radius-hud-md)] px-3 text-sm font-medium disabled:opacity-40 ${
-        selected
-          ? "bg-action text-action-ink"
-          : "bg-surface-raised text-ink-secondary"
-      }`}
-    >
+    <ChoiceButton selected={selected} onClick={onClick} disabled={disabled}>
       {children}
-    </button>
+    </ChoiceButton>
   );
 }
 

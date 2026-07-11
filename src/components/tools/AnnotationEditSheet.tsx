@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import {
   annotationSummary,
   isActive,
@@ -10,6 +10,7 @@ import {
   formatPresetDistance,
   parseDistanceInput,
 } from "../../domain/map/distance";
+import { TextField } from "../ui/TextField";
 import { RadarDistancePicker } from "./RadarDistancePicker";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import {
@@ -22,6 +23,7 @@ import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
 import { ResolvedReadout } from "./shared/ResolvedReadout";
 import { TentacleAnswerPicker } from "./shared/TentacleAnswerPicker";
 import { ToolSection } from "./shared/ToolSection";
+import { EditSheetFrame } from "./shared/EditSheetFrame";
 import {
   isRadarPresetRadius,
   radarAnswerFromInside,
@@ -380,14 +382,13 @@ function AnnotationEditSheetForm({
       ) : null}
 
       {annotation.type === "pin" || annotation.type === "zone" ? (
-        <label className="block text-sm text-ink-muted">
-          Label
-          <input
-            value={label}
-            onChange={(event) => setLabel(event.target.value)}
-            className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-base px-3"
-          />
-        </label>
+        <TextField
+          label="Label"
+          labelClassName="block text-sm text-ink-muted"
+          inputClassName="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-base px-3"
+          value={label}
+          onChange={(event) => setLabel(event.target.value)}
+        />
       ) : null}
 
       {annotation.type === "tentacle" ? (
@@ -528,76 +529,5 @@ function AnnotationEditSheetForm({
         </button>
       ) : null}
     </EditSheetFrame>
-  );
-}
-
-function EditSheetFrame({
-  title,
-  onClose,
-  onSave,
-  onDelete,
-  children,
-}: {
-  title: string;
-  onClose: () => void;
-  onSave?: () => void;
-  onDelete: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock jl-panel-enter z-[var(--z-panel)] px-3">
-      <div className="hud-panel mx-auto flex max-h-[min(42dvh,420px)] max-w-xl flex-col overflow-hidden">
-        <div className="shrink-0 p-4 pb-0">
-          <EditSheetHeader title={title} onClose={onClose} />
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-3">
-          <div className="space-y-4">{children}</div>
-        </div>
-        <div className="grid shrink-0 grid-cols-2 gap-2 border-t border-border p-4">
-          {onSave ? (
-            <button
-              type="button"
-              onClick={onSave}
-              className="btn-primary w-full"
-            >
-              Save changes
-            </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={onDelete}
-            className={`min-h-12 rounded-xl bg-status-error-surface px-3 text-sm font-medium text-status-error ${
-              onSave ? "" : "col-span-2"
-            }`}
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function EditSheetHeader({
-  title,
-  onClose,
-}: {
-  title: string;
-  onClose: () => void;
-}) {
-  return (
-    <div className="mb-4 flex items-start justify-between gap-3">
-      <div>
-        <p className="text-xs uppercase tracking-wide text-ink-dim">Edit</p>
-        <h2 className="text-lg font-semibold">{title}</h2>
-      </div>
-      <button
-        type="button"
-        onClick={onClose}
-        className="min-h-12 rounded-xl bg-surface-raised px-4 text-sm font-medium"
-      >
-        Close
-      </button>
-    </div>
   );
 }

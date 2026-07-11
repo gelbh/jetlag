@@ -1,5 +1,6 @@
 import { useId, useState } from "react";
 import { AnimatedOverlay } from "../ui/AnimatedOverlay";
+import { SheetHeader } from "../ui/SheetHeader";
 import {
   EXPANSION_CURSE_COUNT,
   searchExpansionCurses,
@@ -24,18 +25,7 @@ export function CurseReferenceSheet({ open, onClose }: CurseReferenceSheetProps)
       sheetClassName="mx-auto max-w-lg"
       maxHeightClassName="max-h-[min(70dvh,560px)]"
     >
-      <div className="mb-4 flex items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-bold uppercase tracking-tight text-ink">
-          Expansion curses
-        </h2>
-        <button
-          type="button"
-          onClick={onClose}
-          className="btn-secondary min-h-10 px-4 text-xs"
-        >
-          Close
-        </button>
-      </div>
+      <SheetHeader title="Expansion curses" onClose={onClose} />
 
       <p className="mb-3 text-sm text-ink-muted">
         {EXPANSION_CURSE_COUNT} curses from Expansion Pack Vol. 1. Reference

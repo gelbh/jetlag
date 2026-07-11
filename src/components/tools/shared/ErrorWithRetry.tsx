@@ -1,3 +1,5 @@
+import { InlineError } from "../../ui/InlineError";
+
 interface ErrorWithRetryProps {
   error: string;
   onRetry?: () => void;
@@ -6,7 +8,7 @@ interface ErrorWithRetryProps {
 export function ErrorWithRetry({ error, onRetry }: ErrorWithRetryProps) {
   return (
     <div className="space-y-2">
-      <p className="text-error">{error}</p>
+      <InlineError>{error}</InlineError>
       {onRetry ? (
         <button type="button" onClick={onRetry} className="btn-secondary text-sm">
           Retry

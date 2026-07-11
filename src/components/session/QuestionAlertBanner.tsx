@@ -4,7 +4,7 @@ import {
   selectPrimaryQuestionTimer,
   type ActiveQuestionTimer,
 } from "../../domain/questions/questionTimerDisplay";
-import { AnimatedBanner } from "../ui/AnimatedBanner";
+import { HudBanner } from "../ui/HudBanner";
 
 interface QuestionAlertBannerProps {
   pendingQuestions: readonly import("../../domain/session/sessionChat").PendingQuestionRecord[];
@@ -33,7 +33,7 @@ export function QuestionAlertBanner({
   }, [sessionRules, pendingQuestions]);
 
   return (
-    <AnimatedBanner
+    <HudBanner
       visible={visible}
       onDismiss={() => setContent(null)}
       className="pointer-events-auto mx-3 mt-1.5"
@@ -47,6 +47,6 @@ export function QuestionAlertBanner({
           {content.toolLabel} · {content.countdownLabel}
         </p>
       ) : null}
-    </AnimatedBanner>
+    </HudBanner>
   );
 }

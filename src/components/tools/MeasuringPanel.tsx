@@ -1,4 +1,4 @@
-import { useState, type RefObject } from "react";
+import { type RefObject } from "react";
 import {
   MEASURING_CATALOG,
   MEASURING_GROUPS,
@@ -25,6 +25,7 @@ import {
 import type { SeaLevelEdgeCase } from "../../domain/geometry/seaLevel";
 import { closerFurtherAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
+import { CatalogExhaustedMessage } from "./shared/CatalogExhaustedMessage";
 import { CoordinateCopyButton } from "./shared/CoordinateCopyButton";
 import { AnchorControls } from "./shared/AnchorControls";
 import { LoadingReadout } from "./shared/LoadingReadout";
@@ -32,17 +33,14 @@ import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
 import { ResolvedReadout } from "./shared/ResolvedReadout";
 import { SearchResultsList } from "./shared/SearchResultsList";
 import { SegmentedControl } from "./shared/SegmentedControl";
+import { SearchField } from "../ui/SearchField";
+import { InlineError } from "../ui/InlineError";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
-import { ToolStepper } from "./shared/ToolStepper";
+import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
-import {
-  buildSteps,
-  deriveStepStates,
-  MEASURING_STEPS,
-  stepsForMode,
-} from "./shared/toolStepUtils";
-import { useSyncWizardStepRef } from "../../hooks/tools/useSyncWizardStepRef";
+import { MEASURING_STEPS, stepsForMode } from "./shared/toolStepUtils";
+import { useToolWizard } from "../../hooks/useToolWizard";
 
 type MeasuringSearchRole = "seeker" | "target";
 
@@ -171,9 +169,10 @@ export function MeasuringPanel({
   wizardStepRef,
 }: MeasuringPanelProps) {
   const steps = stepsForMode(MEASURING_STEPS, awaitHiderAnswer);
-  const [stepIndex, setStepIndex] = useState(0);
-  const step = steps[stepIndex]?.id ?? "anchor";
-  useSyncWizardStepRef(wizardStepRef, step);
+  const { stepId: step, stepIndex, goNext, goBack, stepper } = useToolWizard(
+    steps,
+    { wizardStepRef },
+  );
 
   const locationCategory =
     subject === "location"
@@ -225,20 +224,6 @@ export function MeasuringPanel({
     hasSeekerPoint &&
     hasTargetPoint &&
     distanceMeters !== null;
-
-  const goNext = () => {
-    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
-  };
-
-  const goBack = () => {
-    setStepIndex((current) => Math.max(current - 1, 0));
-  };
-
-  const stepper = (
-    <ToolStepper
-      steps={buildSteps(steps, deriveStepStates(steps.length, stepIndex))}
-    />
-  );
 
   const disabledSeaLevelAnswers =
     seaLevelEdgeCase === "highest"
@@ -376,36 +361,17 @@ export function MeasuringPanel({
           </ResolvedReadout>
         ) : null}
         {allowsSearch && targetMode === "search" ? (
-          <>
-            <label className="field-label">
-              Search target
-              <input
-                value={searchQuery}
-                onChange={(event) => onSearchQueryChange(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    onSearchSubmit("target");
-                  }
-                }}
-                className="field-input"
-                placeholder="Address, business, or landmark"
-                autoComplete="off"
-                autoCorrect="off"
-                spellCheck={false}
-                enterKeyHint="search"
-                inputMode="search"
-              />
-            </label>
-            <button
-              type="button"
-              onClick={() => onSearchSubmit("target")}
-              disabled={searchLoading || !hasSeekerPoint}
-              className="btn-secondary w-full disabled:opacity-40"
-            >
-              {searchLoading ? "Searching…" : "Find target"}
-            </button>
-          </>
+          <SearchField
+            label="Search target"
+            value={searchQuery}
+            onChange={onSearchQueryChange}
+            onSubmit={() => onSearchSubmit("target")}
+            submitLabel="Find target"
+            loading={searchLoading}
+            placeholder="Address, business, or landmark"
+            disabled={!hasSeekerPoint}
+            submitClassName="btn-secondary w-full disabled:opacity-40"
+          />
         ) : null}
         {targetMode === "nearest" && canFindNearest ? (
           <button
@@ -459,9 +425,7 @@ export function MeasuringPanel({
             </select>
           </label>
           {!hasAvailableMeasureOptions ? (
-            <p className="text-sm text-ink-dim">
-              Every measure category has already been added to this session.
-            </p>
+            <CatalogExhaustedMessage message="Every measure category has already been added to this session." />
           ) : null}
           {question ? (
             <QuestionPromptBlock
@@ -489,36 +453,16 @@ export function MeasuringPanel({
             <LoadingReadout>{anchorLoadingMessage}</LoadingReadout>
           ) : null}
           {allowsSearch ? (
-            <>
-              <label className="field-label">
-                Search anchor
-                <input
-                  value={searchQuery}
-                  onChange={(event) => onSearchQueryChange(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      onSearchSubmit("seeker");
-                    }
-                  }}
-                  className="field-input"
-                  placeholder="Address, business, or landmark"
-                  autoComplete="off"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  enterKeyHint="search"
-                  inputMode="search"
-                />
-              </label>
-              <button
-                type="button"
-                onClick={() => onSearchSubmit("seeker")}
-                disabled={searchLoading}
-                className="btn-secondary w-full disabled:opacity-40"
-              >
-                {searchLoading ? "Searching…" : "Find anchor"}
-              </button>
-            </>
+            <SearchField
+              label="Search anchor"
+              value={searchQuery}
+              onChange={onSearchQueryChange}
+              onSubmit={() => onSearchSubmit("seeker")}
+              submitLabel="Find anchor"
+              loading={searchLoading}
+              placeholder="Address, business, or landmark"
+              submitClassName="btn-secondary w-full disabled:opacity-40"
+            />
           ) : null}
         </ToolSection>
       ) : null}
@@ -543,26 +487,17 @@ export function MeasuringPanel({
           ) : null}
           {awaitHiderAnswer ? (
             step === "target" ? (
-              <>
-                <p className="text-xs text-ink-dim">
-                  Hiders answer closer or further in game chat once you send
-                  this question.
-                </p>
-                <button
-                  type="button"
-                  onClick={onCommit}
-                  disabled={
-                    !hasAvailableMeasureOptions ||
-                    !hasSeekerPoint ||
-                    !hasTargetPoint ||
-                    isSubmitting
-                  }
-                  aria-busy={isSubmitting}
-                  className="btn-primary w-full disabled:opacity-40"
-                >
-                  {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
-                </button>
-              </>
+              <SendToHidersButton
+                costLabel={costLabel}
+                isSubmitting={isSubmitting}
+                disabled={
+                  !hasAvailableMeasureOptions ||
+                  !hasSeekerPoint ||
+                  !hasTargetPoint
+                }
+                onClick={onCommit}
+                instruction="Hiders answer closer or further in game chat once you send this question."
+              />
             ) : null
           ) : (
             <>
@@ -618,7 +553,7 @@ export function MeasuringPanel({
         }
       />
 
-      {error ? <p className="text-error">{error}</p> : null}
+      {error ? <InlineError>{error}</InlineError> : null}
     </ToolPanelShell>
   );
 }

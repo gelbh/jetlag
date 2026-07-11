@@ -1,3 +1,5 @@
+import { SegmentControl } from "../ui/SegmentControl";
+
 export type SettingsSegment = "map" | "layers" | "rules" | "session";
 
 const SEGMENTS: ReadonlyArray<{ id: SettingsSegment; label: string }> = [
@@ -17,29 +19,15 @@ export function SettingsSegmentControl({
   onChange,
 }: SettingsSegmentControlProps) {
   return (
-    <div
-      className="jl-segment-control"
-      role="tablist"
+    <SegmentControl
+      variant="hud"
+      value={value}
+      options={SEGMENTS.map((segment) => ({
+        value: segment.id,
+        label: segment.label,
+      }))}
+      onChange={onChange}
       aria-label="Settings sections"
-    >
-      {SEGMENTS.map((segment) => {
-        const selected = value === segment.id;
-
-        return (
-          <button
-            key={segment.id}
-            type="button"
-            role="tab"
-            aria-selected={selected}
-            onClick={() => onChange(segment.id)}
-            className={`jl-segment-btn ${
-              selected ? "jl-segment-btn-selected" : ""
-            }`}
-          >
-            {segment.label}
-          </button>
-        );
-      })}
-    </div>
+    />
   );
 }

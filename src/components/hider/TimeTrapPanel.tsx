@@ -1,5 +1,5 @@
-import { useId } from "react";
 import type { TransitStation } from "../../domain/session/hidingZone";
+import { TransitStationPicker } from "./TransitStationPicker";
 
 interface TimeTrapPanelProps {
   query: string;
@@ -34,8 +34,6 @@ export function TimeTrapPanel({
   error,
   bonusMinutes,
 }: TimeTrapPanelProps) {
-  const searchId = useId();
-
   return (
     <div className="space-y-3">
       <p className="text-sm text-ink-muted">
@@ -51,60 +49,20 @@ export function TimeTrapPanel({
         </p>
       ) : (
         <>
-          <label htmlFor={searchId} className="field-label">
-            Search stations
-            <input
-              id={searchId}
-              value={query}
-              onChange={(event) => onQueryChange(event.target.value)}
-              className="field-input min-h-11 w-full"
-              placeholder="Station name…"
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck={false}
-              enterKeyHint="search"
-              inputMode="search"
-            />
-          </label>
-          <button
-            type="button"
-            onClick={onSearchThisArea}
-            disabled={searchDisabled}
-            className="btn-secondary min-h-11 w-full disabled:opacity-50"
-          >
-            Search this area
-          </button>
-          {stationsLoading ? (
-            <p className="text-sm text-ink-dim">Loading stations…</p>
-          ) : null}
-          {stationsError ? (
-            <p className="text-sm text-status-error">{stationsError}</p>
-          ) : null}
-          <div className="max-h-36 space-y-1 overflow-y-auto">
-            {stations.map((station) => (
-              <button
-                key={station.id}
-                type="button"
-                onClick={() => onSelectStation(station)}
-                className={`min-h-11 w-full px-3 py-2 text-left text-sm ${
-                  selectedStation?.id === station.id
-                    ? "bg-highlight-soft font-medium text-highlight"
-                    : "bg-surface-raised text-ink hover:bg-surface-base"
-                }`}
-              >
-                {station.name}
-              </button>
-            ))}
-          </div>
-          {stations.length === 0 && !stationsLoading && !stationsError ? (
-            <p className="text-sm text-ink-dim">
-              Pan the map, then search this area.
-            </p>
-          ) : (
-            <p className="text-sm text-ink-dim">
-              Or tap a station on the map to select it.
-            </p>
-          )}
+          <TransitStationPicker
+            query={query}
+            onQueryChange={onQueryChange}
+            stations={stations}
+            stationsLoading={stationsLoading}
+            stationsError={stationsError}
+            selectedStation={selectedStation}
+            onSelectStation={onSelectStation}
+            onSearchThisArea={onSearchThisArea}
+            searchDisabled={searchDisabled}
+            labeled
+            placeholder="Station name…"
+            rowMinHeight="11"
+          />
           <button
             type="button"
             onClick={onConfirm}

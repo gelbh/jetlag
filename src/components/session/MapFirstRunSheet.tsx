@@ -1,15 +1,7 @@
-import { useState } from "react";
 import { AnimatedOverlay } from "../ui/AnimatedOverlay";
+import { usePersistedDismiss } from "../../hooks/usePersistedDismiss";
 
 const STORAGE_KEY = "jetlag.mapFirstRunDismissed";
-
-function readDismissed(): boolean {
-  try {
-    return localStorage.getItem(STORAGE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
 
 interface MapFirstRunSheetProps {
   open: boolean;
@@ -17,18 +9,14 @@ interface MapFirstRunSheetProps {
 }
 
 export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
-  const [dismissed] = useState(readDismissed);
+  const { dismissed, dismiss: persistDismiss } = usePersistedDismiss(STORAGE_KEY);
 
   if (dismissed) {
     return null;
   }
 
   const dismiss = () => {
-    try {
-      localStorage.setItem(STORAGE_KEY, "1");
-    } catch {
-      // localStorage unavailable
-    }
+    persistDismiss();
     onDismiss();
   };
 

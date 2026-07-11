@@ -7,6 +7,7 @@ import {
 } from "../../domain/map/mapTools";
 import type { MapTool } from "../../state/sessionStore";
 import { AnimatedOverlay } from "../ui/AnimatedOverlay";
+import { SheetHeader } from "../ui/SheetHeader";
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 import {
   HudPinIcon,
@@ -118,18 +119,7 @@ export function ToolOverflowSheet({
       maxHeightClassName="max-h-[min(50dvh,420px)]"
     >
       <div className="space-y-0">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <h2 className="font-display text-lg font-bold uppercase tracking-tight text-ink">
-            More tools
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn-secondary min-h-10 px-4 text-xs"
-          >
-            Close
-          </button>
-        </div>
+        <SheetHeader title="More tools" onClose={onClose} flush className="mb-3" />
 
         {markupTools.map((tool) => {
           const hint = mapToolDockMenuHint(tool);

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { HiderTruthResult } from "../../domain/questions/hiderTruthAnswer";
-import { AnimatedBanner } from "../ui/AnimatedBanner";
+import { HudBanner } from "../ui/HudBanner";
 
 export interface HiderTruthRevealState {
   truth: HiderTruthResult;
@@ -29,7 +29,7 @@ export function HiderTruthRevealBanner({
   }, [reveal, onDismiss]);
 
   return (
-    <AnimatedBanner
+    <HudBanner
       visible={Boolean(reveal)}
       onDismiss={onDismiss}
       className="pointer-events-auto absolute inset-x-3 top-[calc(env(safe-area-inset-top)+var(--status-bar-height)+0.75rem)] z-[var(--z-banner)]"
@@ -52,6 +52,6 @@ export function HiderTruthRevealBanner({
           </p>
         </button>
       ) : null}
-    </AnimatedBanner>
+    </HudBanner>
   );
 }

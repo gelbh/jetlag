@@ -1,5 +1,6 @@
 import type { PlayerRole } from "../../domain/session/playerRole";
 import { playerRoleLabel } from "../../domain/session/playerRole";
+import { RadioCardGroup } from "../ui/RadioCardGroup";
 
 interface RolePickerProps {
   value: PlayerRole;
@@ -23,34 +24,17 @@ const ROLE_OPTIONS: Array<{
 
 export function RolePicker({ value, onChange, disabled }: RolePickerProps) {
   return (
-    <div className="space-y-2">
-      <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
-        Your side
-      </p>
-      <div role="radiogroup" aria-label="Player side" className="space-y-1.5">
-        {ROLE_OPTIONS.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            role="radio"
-            aria-checked={value === option.value}
-            disabled={disabled}
-            onClick={() => onChange(option.value)}
-            className={`min-h-12 w-full border-2 px-3 py-2 text-left disabled:opacity-50 ${
-              value === option.value
-                ? "border-highlight bg-highlight-soft text-highlight"
-                : "border-border bg-surface-deep text-ink hover:border-brand-blue"
-            }`}
-          >
-            <span className="font-display text-sm font-semibold uppercase tracking-wide">
-              {playerRoleLabel(option.value)}
-            </span>
-            <span className="mt-0.5 block text-xs text-ink-muted">
-              {option.summary}
-            </span>
-          </button>
-        ))}
-      </div>
-    </div>
+    <RadioCardGroup
+      value={value}
+      options={ROLE_OPTIONS.map((option) => ({
+        value: option.value,
+        title: playerRoleLabel(option.value),
+        description: option.summary,
+      }))}
+      onChange={onChange}
+      aria-label="Player side"
+      label="Your side"
+      disabled={disabled}
+    />
   );
 }

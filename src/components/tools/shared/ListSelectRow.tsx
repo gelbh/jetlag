@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ChoiceButton } from "../../ui/ChoiceButton";
 import { HUD_BINARY_YES } from "../../ui/hudTokens";
 
 interface ListSelectRowProps {
@@ -15,15 +16,14 @@ export function ListSelectRow({
   align = "left",
 }: ListSelectRowProps) {
   return (
-    <button
-      type="button"
+    <ChoiceButton
+      selected={selected}
+      activeClassName={HUD_BINARY_YES}
       onClick={onClick}
-      aria-pressed={selected}
-      className={`min-h-12 w-full rounded-[var(--radius-hud-md)] px-3 text-sm ${
-        align === "left" ? "text-left" : "text-center"
-      } ${selected ? HUD_BINARY_YES : "bg-surface-raised text-ink-secondary"}`}
+      fullWidth
+      align={align}
     >
       {children}
-    </button>
+    </ChoiceButton>
   );
 }

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLogo } from "../components/ui/AppLogo";
+import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
+import { InlineError } from "../components/ui/InlineError";
 import { ScreenNav } from "../components/ui/ScreenNav";
 import { isPremiumSession } from "../domain/map/annotations";
 import {
@@ -130,7 +132,7 @@ export function JoinSession() {
   };
 
   return (
-    <main className="home-poster home-terminal-accent flex min-h-[100dvh] flex-col justify-center gap-8 overflow-y-auto px-5 py-8 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <EntryScreenLayout justify="center">
       <ScreenNav backTo="/" backLabel="Back" />
       <div className="pt-[max(3rem,env(safe-area-inset-top))]">
         <AppLogo variant="lockup" size="md" />
@@ -187,8 +189,8 @@ export function JoinSession() {
           {loading ? "Joining…" : "Join session"}
         </button>
 
-        {error ? <p className="text-error">{error}</p> : null}
+        {error ? <InlineError>{error}</InlineError> : null}
       </div>
-    </main>
+    </EntryScreenLayout>
   );
 }

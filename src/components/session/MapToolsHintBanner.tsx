@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AnimatedBanner } from "../ui/AnimatedBanner";
+import { HudBanner } from "../ui/HudBanner";
 
 const STORAGE_KEY = "jetlag.mapToolsHintDismissed";
 
@@ -29,7 +29,7 @@ export function MapToolsHintBanner({ hidden = false }: MapToolsHintBannerProps) 
   };
 
   return (
-    <AnimatedBanner
+    <HudBanner
       visible={visible}
       onDismiss={dismiss}
       className="pointer-events-none fixed inset-x-0 bottom-[var(--map-panel-bottom)] z-[var(--z-banner)] px-3"
@@ -54,6 +54,6 @@ export function MapToolsHintBanner({ hidden = false }: MapToolsHintBannerProps) 
           Close
         </button>
       </div>
-    </AnimatedBanner>
+    </HudBanner>
   );
 }

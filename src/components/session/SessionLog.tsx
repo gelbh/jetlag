@@ -7,6 +7,7 @@ import {
 } from "../../domain/map/annotations";
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import { AnimatedOverlay } from "../ui/AnimatedOverlay";
+import { SheetHeader } from "../ui/SheetHeader";
 
 const FILTER_OPTIONS: Array<AnnotationType | "all"> = [
   "all",
@@ -53,16 +54,13 @@ export function SessionLog({
       ariaLabel="Session log"
       maxHeightClassName="max-h-[min(85dvh,720px)]"
     >
-      <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold">Session log</h2>
-        <button
-          type="button"
-          onClick={onClose}
-          className="min-h-12 rounded-xl bg-surface-raised px-4 text-sm font-medium"
-        >
-          Close
-        </button>
-      </div>
+      <SheetHeader
+        title="Session log"
+        onClose={onClose}
+        closeVariant="raised"
+        flush
+        className="shrink-0"
+      />
 
       <div className="mb-3 flex shrink-0 flex-wrap gap-2">
         {FILTER_OPTIONS.map((option) => (

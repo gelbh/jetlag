@@ -5,6 +5,7 @@ import {
 } from "../../domain/regions/bundledGamePresets";
 import { formatBundledPresetLocation } from "../../domain/regions/bundledPresetHierarchy";
 import { migrateGamePreset } from "../../domain/session/gamePreset";
+import { PresetCard } from "./PresetCard";
 
 type MigratedPreset = ReturnType<typeof migrateGamePreset>;
 
@@ -23,21 +24,19 @@ function PresetSearchResultCard({
     : undefined;
 
   return (
-    <li className="home-card-btn home-card-btn-secondary flex-col items-stretch gap-3 !min-h-0 !h-auto py-3">
-      <div className="min-w-0">
-        <p className="font-display text-base tracking-wide text-ink">{preset.name}</p>
-        <p className="mt-1 text-xs text-ink-muted">
+    <PresetCard
+      name={preset.name}
+      meta={
+        <>
           {preset.gameSize} · {preset.distanceUnit}
           {preset.placeLabel ? ` · ${preset.placeLabel}` : ""}
-        </p>
-        {location ? (
-          <p className="mt-1 text-xs text-ink-dim">{location}</p>
-        ) : null}
-        {description ? (
-          <p className="mt-2 text-xs text-ink-dim">{description}</p>
-        ) : null}
-        {!bundled ? (
-          <div className="mt-2 flex flex-wrap gap-1.5">
+        </>
+      }
+      location={location}
+      description={description}
+      badges={
+        !bundled ? (
+          <>
             {preset.advancedSettings.expansionPackEnabled ? (
               <span className="rounded-full border border-border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-brand-blue">
                 Expansion
@@ -53,44 +52,46 @@ function PresetSearchResultCard({
                 Review
               </span>
             ) : null}
-          </div>
-        ) : null}
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {preset.migrationStatus === "manual_required" ? (
-          <Link
-            to={`/presets/${preset.id}/edit`}
-            className="btn-primary min-h-10 px-3 text-xs"
-          >
-            Review
-          </Link>
-        ) : (
-          <Link
-            to={`/create?preset=${preset.id}`}
-            className="btn-primary min-h-10 px-3 text-xs"
-          >
-            Host
-          </Link>
-        )}
-        {!bundled ? (
-          <>
+          </>
+        ) : undefined
+      }
+      actions={
+        <>
+          {preset.migrationStatus === "manual_required" ? (
             <Link
               to={`/presets/${preset.id}/edit`}
-              className="btn-secondary min-h-10 px-3 text-xs"
+              className="btn-primary min-h-10 px-3 text-xs"
             >
-              Edit
+              Review
             </Link>
-            <button
-              type="button"
-              onClick={() => onDelete(preset.id)}
-              className="btn-secondary min-h-10 px-3 text-xs text-error"
+          ) : (
+            <Link
+              to={`/create?preset=${preset.id}`}
+              className="btn-primary min-h-10 px-3 text-xs"
             >
-              Delete
-            </button>
-          </>
-        ) : null}
-      </div>
-    </li>
+              Host
+            </Link>
+          )}
+          {!bundled ? (
+            <>
+              <Link
+                to={`/presets/${preset.id}/edit`}
+                className="btn-secondary min-h-10 px-3 text-xs"
+              >
+                Edit
+              </Link>
+              <button
+                type="button"
+                onClick={() => onDelete(preset.id)}
+                className="btn-secondary min-h-10 px-3 text-xs text-error"
+              >
+                Delete
+              </button>
+            </>
+          ) : null}
+        </>
+      }
+    />
   );
 }
 
@@ -110,11 +111,9 @@ export function PresetSearchResults({
   return (
     <ul className="space-y-3">
       {presets.map((preset) => (
-        <PresetSearchResultCard
-          key={preset.id}
-          preset={preset}
-          onDelete={onDelete}
-        />
+        <li key={preset.id}>
+          <PresetSearchResultCard preset={preset} onDelete={onDelete} />
+        </li>
       ))}
     </ul>
   );

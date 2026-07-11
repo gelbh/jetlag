@@ -20,6 +20,7 @@ import {
   GameAreaFramingStats,
 } from "./GameAreaFramingControls";
 import { framingModeHint } from "./gameAreaFramingUi";
+import { SheetHeader } from "../ui/SheetHeader";
 
 export interface GameAreaFramingController {
   framingMode: FramingMode;
@@ -131,33 +132,33 @@ export function GameAreaFramingModal({
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-[var(--z-panel)] px-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div className="pointer-events-auto hud-panel mx-auto max-w-xl space-y-3 p-3 pt-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="font-display text-xs font-semibold uppercase tracking-[0.12em] text-brand-blue">
-                Play boundary
-              </p>
-              <h2 className="font-display text-xl font-bold uppercase leading-tight tracking-tight text-ink">
-                Frame area
-              </h2>
-            </div>
-            <div className="flex shrink-0 gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="btn-secondary min-h-11 px-3 text-xs"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirm}
-                disabled={!hasValidDraft}
-                className="btn-primary min-h-11 px-4 text-xs disabled:opacity-50"
-              >
-                Done
-              </button>
-            </div>
-          </div>
+          <SheetHeader
+            eyebrow="Play boundary"
+            title="Frame area"
+            titleSize="xl"
+            onClose={onClose}
+            flush
+            className="items-start"
+            trailing={
+              <div className="flex shrink-0 gap-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="btn-secondary min-h-11 px-3 text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirm}
+                  disabled={!hasValidDraft}
+                  className="btn-primary min-h-11 px-4 text-xs disabled:opacity-50"
+                >
+                  Done
+                </button>
+              </div>
+            }
+          />
 
           <FramingModeSegmentControl
             value={framing.framingMode}

@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AppLogo } from "../components/ui/AppLogo";
+import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { HudPlayIcon } from "../components/ui/HudIcons";
+import { InlineError } from "../components/ui/InlineError";
 import { VersionChangelogSheet } from "../components/ui/VersionChangelogSheet";
 import { APP_VERSION } from "../domain/device/changelog";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
@@ -86,103 +88,105 @@ export function Home() {
   };
 
   return (
-    <main className="home-poster home-terminal-accent flex min-h-[100dvh] flex-col justify-between px-5 py-8 pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="space-y-3 pt-[max(1.25rem,env(safe-area-inset-top))]">
-        <div className="flex items-start justify-between gap-3">
-          <AppLogo variant="lockup" size="lg" />
-          <button
-            type="button"
-            onClick={() => setChangelogOpen(true)}
-            className="hud-chrome shrink-0 px-2.5 py-1.5 font-mono text-xs font-bold tracking-wide text-ink-muted"
-            aria-label={`Version ${APP_VERSION}. Open changelog`}
-          >
-            v{APP_VERSION}
-          </button>
+    <>
+      <EntryScreenLayout>
+        <div className="space-y-3 pt-[max(1.25rem,env(safe-area-inset-top))]">
+          <div className="flex items-start justify-between gap-3">
+            <AppLogo variant="lockup" size="lg" />
+            <button
+              type="button"
+              onClick={() => setChangelogOpen(true)}
+              className="hud-chrome shrink-0 px-2.5 py-1.5 font-mono text-xs font-bold tracking-wide text-ink-muted"
+              aria-label={`Version ${APP_VERSION}. Open changelog`}
+            >
+              v{APP_VERSION}
+            </button>
+          </div>
+          <h1 className="font-display text-balance text-[clamp(2.25rem,12vw,4.25rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
+            Hide +
+            <br />
+            Seek
+          </h1>
+          <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
+            Seekers ask questions on the live map. Hiders answer, set hiding zones,
+            and watch the search unfold.
+          </p>
         </div>
-        <h1 className="font-display text-balance text-[clamp(2.25rem,12vw,4.25rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
-          Hide +
-          <br />
-          Seek
-        </h1>
-        <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
-          Seekers ask questions on the live map. Hiders answer, set hiding zones,
-          and watch the search unfold.
-        </p>
-      </div>
 
-      <div className="home-enter-actions space-y-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        {session ? (
-          <button
-            type="button"
-            onClick={() => void handleContinue()}
-            disabled={continuing}
-            aria-busy={continuing}
-            aria-label={
-              continuing
-                ? `Verifying session ${session.code}`
-                : `Return to map for session ${session.code}`
+        <div className="home-enter-actions space-y-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          {session ? (
+            <button
+              type="button"
+              onClick={() => void handleContinue()}
+              disabled={continuing}
+              aria-busy={continuing}
+              aria-label={
+                continuing
+                  ? `Verifying session ${session.code}`
+                  : `Return to map for session ${session.code}`
+              }
+              className="home-card-btn home-card-btn-primary disabled:opacity-50"
+            >
+              <span>
+                <span className="home-card-btn-hint block">
+                  Active session
+                  {myRole ? ` · ${playerRoleLabel(myRole)}` : ""}
+                </span>
+                <span className="font-mono text-xl font-bold tracking-[0.22em] jl-view-transition-session-code">
+                  {session.code}
+                </span>
+              </span>
+              <span className="flex items-center gap-1.5 text-sm">
+                {continuing ? (
+                  "Verifying…"
+                ) : (
+                  <>
+                    <HudPlayIcon className="h-4 w-4" />
+                    Map
+                  </>
+                )}
+              </span>
+            </button>
+          ) : null}
+          <Link
+            to="/create"
+            aria-label="Create session"
+            className={
+              session
+                ? "home-card-btn home-card-btn-secondary"
+                : "home-card-btn home-card-btn-primary"
             }
-            className="home-card-btn home-card-btn-primary disabled:opacity-50"
           >
-            <span>
-              <span className="home-card-btn-hint block">
-                Active session
-                {myRole ? ` · ${playerRoleLabel(myRole)}` : ""}
-              </span>
-              <span className="font-mono text-xl font-bold tracking-[0.22em] jl-view-transition-session-code">
-                {session.code}
-              </span>
-            </span>
-            <span className="flex items-center gap-1.5 text-sm">
-              {continuing ? (
-                "Verifying…"
-              ) : (
-                <>
-                  <HudPlayIcon className="h-4 w-4" />
-                  Map
-                </>
-              )}
-            </span>
-          </button>
-        ) : null}
-        <Link
-          to="/create"
-          aria-label="Create session"
-          className={
-            session
-              ? "home-card-btn home-card-btn-secondary"
-              : "home-card-btn home-card-btn-primary"
-          }
-        >
-          <span>Create session</span>
-          <span className="home-card-btn-hint">Host a game</span>
-        </Link>
-        <Link to="/join" aria-label="Join session" className="home-card-btn home-card-btn-secondary">
-          <span>Join session</span>
-          <span className="home-card-btn-hint">Enter 4-letter code</span>
-        </Link>
-        <Link
-          to="/presets"
-          aria-label="Custom game presets"
-          className="home-card-btn home-card-btn-secondary"
-        >
-          <span>Custom game</span>
-          <span className="home-card-btn-hint">Saved templates</span>
-        </Link>
-        <Link
-          to="/feedback"
-          aria-label="Feedback and suggestions"
-          className="home-feedback-link"
-        >
-          Feedback
-        </Link>
-        {continueError ? <p className="text-error">{continueError}</p> : null}
-      </div>
+            <span>Create session</span>
+            <span className="home-card-btn-hint">Host a game</span>
+          </Link>
+          <Link to="/join" aria-label="Join session" className="home-card-btn home-card-btn-secondary">
+            <span>Join session</span>
+            <span className="home-card-btn-hint">Enter 4-letter code</span>
+          </Link>
+          <Link
+            to="/presets"
+            aria-label="Custom game presets"
+            className="home-card-btn home-card-btn-secondary"
+          >
+            <span>Custom game</span>
+            <span className="home-card-btn-hint">Saved templates</span>
+          </Link>
+          <Link
+            to="/feedback"
+            aria-label="Feedback and suggestions"
+            className="home-feedback-link"
+          >
+            Feedback
+          </Link>
+          {continueError ? <InlineError>{continueError}</InlineError> : null}
+        </div>
+      </EntryScreenLayout>
 
       <VersionChangelogSheet
         open={changelogOpen}
         onClose={() => setChangelogOpen(false)}
       />
-    </main>
+    </>
   );
 }

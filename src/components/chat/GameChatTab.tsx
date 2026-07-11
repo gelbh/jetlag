@@ -10,6 +10,7 @@ import { mapToolDockShortLabel, isQuestionDockTool } from "../../domain/map/mapT
 import type { SessionMessageRecord } from "../../domain/session/sessionChat";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { HiderAnswerPicker } from "./HiderAnswerPicker";
+import { InlineError } from "../ui/InlineError";
 import { PhotoAnswerPreview } from "./PhotoAnswerPreview";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 
@@ -72,9 +73,9 @@ export function GameChatTab({
   return (
     <div className="flex flex-col gap-2">
       {answerError ? (
-        <p className="rounded-lg border border-status-error/40 bg-status-error-surface px-3 py-2 text-sm text-status-error">
+        <InlineError className="rounded-lg border border-status-error/40 bg-status-error-surface px-3 py-2">
           {answerError}
-        </p>
+        </InlineError>
       ) : null}
       {gameMessages.length === 0 ? (
         <p className="text-sm text-ink-dim">No game messages yet.</p>

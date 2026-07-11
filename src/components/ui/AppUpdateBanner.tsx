@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { tryUpdateServiceWorker } from "../../domain/device/serviceWorkerUpdate";
 import { useSessionStore } from "../../state/sessionStore";
+import { HudBanner } from "./HudBanner";
 
 type ServiceWorkerReloader = (reloadPage?: boolean) => Promise<void>;
 
@@ -53,19 +54,20 @@ export function AppUpdateBanner() {
     };
   }, []);
 
-  if (!needsRefresh || deferReload) {
-    return null;
-  }
-
+  const visible = needsRefresh && !deferReload;
   const softBanner = Boolean(session) && location.pathname === "/map";
 
   return (
-    <div
+    <HudBanner
+      visible={visible}
+      animated={false}
       className="pointer-events-auto fixed inset-x-0 top-0 z-[var(--z-toast)] px-3 pt-[max(0.5rem,env(safe-area-inset-top))]"
-      role="status"
-      aria-live="polite"
     >
-      <div className="hud-panel mx-auto flex max-w-xl items-center justify-between gap-3 px-3 py-2.5 pt-3.5 shadow-hud-float">
+      <div
+        className="hud-panel mx-auto flex max-w-xl items-center justify-between gap-3 px-3 py-2.5 pt-3.5 shadow-hud-float"
+        role="status"
+        aria-live="polite"
+      >
         <p className="text-sm font-medium text-ink">
           {softBanner
             ? "Update ready — reload after this game"
@@ -92,6 +94,6 @@ export function AppUpdateBanner() {
           </button>
         </div>
       </div>
-    </div>
+    </HudBanner>
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type RefObject } from "react";
 import {
   formatPresetDistance,
   type DistanceUnit,
@@ -17,14 +17,10 @@ import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
 import { ResolvedReadout } from "./shared/ResolvedReadout";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
-import { ToolStepper } from "./shared/ToolStepper";
+import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
-import {
-  buildSteps,
-  deriveStepStates,
-  THERMOMETER_STEPS,
-  stepsForMode,
-} from "./shared/toolStepUtils";
+import { THERMOMETER_STEPS, stepsForMode } from "./shared/toolStepUtils";
+import { useToolWizard } from "../../hooks/useToolWizard";
 
 type PlacementMode = "gps" | "manual";
 
@@ -50,6 +46,7 @@ interface ThermometerPanelProps {
   isSubmitting?: boolean;
   gpsLoading?: boolean;
   error?: string | null;
+  wizardStepRef?: RefObject<string>;
 }
 
 function placementStatus(
@@ -96,10 +93,13 @@ export function ThermometerPanel({
   isSubmitting = false,
   gpsLoading = false,
   error = null,
+  wizardStepRef,
 }: ThermometerPanelProps) {
   const steps = stepsForMode(THERMOMETER_STEPS, awaitHiderAnswer);
-  const [stepIndex, setStepIndex] = useState(0);
-  const step = steps[stepIndex]?.id ?? "distance";
+  const { stepId: step, stepIndex, goNext, goBack, stepper } = useToolWizard(
+    steps,
+    { wizardStepRef },
+  );
 
   const travelTooShort =
     travelMeters !== null && travelMeters + 1 < distanceMeters;
@@ -118,20 +118,6 @@ export function ThermometerPanel({
     !travelTooShort &&
     canSubmitQuestion &&
     !isSubmitting;
-
-  const goNext = () => {
-    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
-  };
-
-  const goBack = () => {
-    setStepIndex((current) => Math.max(current - 1, 0));
-  };
-
-  const stepper = (
-    <ToolStepper
-      steps={buildSteps(steps, deriveStepStates(steps.length, stepIndex))}
-    />
-  );
 
   return (
     <ToolPanelShell toolId="thermometer" stepper={stepper}>
@@ -227,21 +213,13 @@ export function ThermometerPanel({
           distanceAvailable &&
           !travelTooShort &&
           canSubmitQuestion ? (
-            <>
-              <p className="text-xs text-ink-dim">
-                Hiders answer hotter or colder in game chat once you send this
-                question.
-              </p>
-              <button
-                type="button"
-                onClick={onCommit}
-                disabled={!canCommit}
-                aria-busy={isSubmitting}
-                className="btn-primary w-full disabled:opacity-40"
-              >
-                {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
-              </button>
-            </>
+            <SendToHidersButton
+              costLabel={costLabel}
+              isSubmitting={isSubmitting}
+              disabled={!canCommit}
+              onClick={onCommit}
+              instruction="Hiders answer hotter or colder in game chat once you send this question."
+            />
           ) : null}
           <button type="button" onClick={onReset} className="btn-secondary w-full">
             Reset

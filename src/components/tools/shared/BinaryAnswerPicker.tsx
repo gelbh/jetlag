@@ -1,3 +1,5 @@
+import { ChoiceButton } from "../../ui/ChoiceButton";
+
 interface BinaryAnswerOption<Value extends string> {
   value: Value;
   label: string;
@@ -27,20 +29,16 @@ export function BinaryAnswerPicker<Value extends string>({
           const disabled = disabledValues?.has(option.value) ?? false;
 
           return (
-            <button
+            <ChoiceButton
               key={option.value}
-              type="button"
+              selected={value === option.value}
+              activeClassName={option.activeClassName}
               onClick={() => onChange(option.value)}
               disabled={disabled}
-              aria-pressed={value === option.value}
-              className={`min-h-12 rounded-[var(--radius-hud-md)] px-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40 ${
-                value === option.value
-                  ? option.activeClassName
-                  : "bg-surface-raised text-ink-secondary"
-              }`}
+              className="disabled:cursor-not-allowed"
             >
               {option.label}
-            </button>
+            </ChoiceButton>
           );
         })}
       </div>

@@ -12,6 +12,7 @@ import {
   recommendGameSize,
 } from "../../domain/session/gameSize";
 import { gameSizeRulesSummary } from "../../domain/session/gameSizeRules";
+import { RadioCardGroup } from "../ui/RadioCardGroup";
 
 interface GameSizePickerProps {
   gameArea: GameArea | null;
@@ -66,6 +67,24 @@ export function GameSizePicker({
       : gameAreaSquareMiles(gameArea) < 10
     : false;
 
+  const options = GAME_SIZE_OPTIONS.map((size) => {
+    const meta = gameSizeLabel(size, distanceUnit);
+    const rules = gameSizeRulesSummary(size, distanceUnit);
+    const isRecommended = recommended === size && gameArea !== null;
+
+    return {
+      value: size,
+      title: meta.label,
+      description: `${meta.summary} · ${rules.hidingPeriodLabel} · ${rules.tentacleLabel}`,
+      footer: rules.thermometerMaxLabel,
+      badge: isRecommended ? (
+        <span className="rounded-full bg-brand-blue/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-blue">
+          Recommended
+        </span>
+      ) : undefined,
+    };
+  });
+
   return (
     <div className="space-y-2">
       <div className="flex items-baseline justify-between gap-2">
@@ -76,49 +95,16 @@ export function GameSizePicker({
           <p className="text-xs text-ink-muted">{playAreaSummary}</p>
         ) : null}
       </div>
-      <div role="radiogroup" aria-label="Game size" className="space-y-1.5">
-        {GAME_SIZE_OPTIONS.map((size) => {
-          const meta = gameSizeLabel(size, distanceUnit);
-          const rules = gameSizeRulesSummary(size, distanceUnit);
-          const isRecommended = recommended === size && gameArea !== null;
-
-          return (
-            <button
-              key={size}
-              type="button"
-              role="radio"
-              aria-checked={value === size}
-              disabled={disabled}
-              onClick={() => {
-                setUserOverrode(true);
-                onChange(size);
-              }}
-              className={`min-h-12 w-full border-2 px-3 py-2 text-left disabled:opacity-50 ${
-                value === size
-                  ? "border-highlight bg-highlight-soft text-highlight"
-                  : "border-border bg-surface-deep text-ink hover:border-brand-blue"
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <span className="font-display text-sm font-semibold uppercase tracking-wide">
-                  {meta.label}
-                </span>
-                {isRecommended ? (
-                  <span className="rounded-full bg-brand-blue/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-blue">
-                    Recommended
-                  </span>
-                ) : null}
-              </span>
-              <span className="mt-0.5 block text-xs text-ink-muted">
-                {meta.summary} · {rules.hidingPeriodLabel} · {rules.tentacleLabel}
-              </span>
-              <span className="mt-0.5 block text-xs text-ink-dim">
-                {rules.thermometerMaxLabel}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      <RadioCardGroup
+        value={value}
+        options={options}
+        onChange={(size) => {
+          setUserOverrode(true);
+          onChange(size);
+        }}
+        aria-label="Game size"
+        disabled={disabled}
+      />
       {compactArea ? (
         <p className="text-xs text-ink-dim">
           Compact area, good for a short local game.

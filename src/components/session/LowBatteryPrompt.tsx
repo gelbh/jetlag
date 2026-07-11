@@ -7,6 +7,7 @@ import {
 } from "../../domain/device/batteryPrompt";
 import { useBatteryStatus } from "../../hooks/location/useBatteryStatus";
 import { useMapStore } from "../../state/mapStore";
+import { HudBanner } from "../ui/HudBanner";
 
 export function LowBatteryPrompt() {
   const location = useLocation();
@@ -46,13 +47,17 @@ export function LowBatteryPrompt() {
   };
 
   return (
-    <div
+    <HudBanner
+      visible
+      animated={false}
       className="jl-map-banner-top pointer-events-auto fixed inset-x-3 z-[var(--z-panel)]"
-      role="dialog"
-      aria-labelledby="low-battery-prompt-title"
-      aria-describedby="low-battery-prompt-body"
     >
-      <div className="map-float-alert mx-auto max-w-xl border-2 border-status-warning/40 bg-status-warning-surface px-3 py-3">
+      <div
+        className="map-float-alert mx-auto max-w-xl border-2 border-status-warning/40 bg-status-warning-surface px-3 py-3"
+        role="dialog"
+        aria-labelledby="low-battery-prompt-title"
+        aria-describedby="low-battery-prompt-body"
+      >
         <p
           id="low-battery-prompt-title"
           className="font-display text-xs font-semibold uppercase tracking-wide text-status-warning"
@@ -83,6 +88,6 @@ export function LowBatteryPrompt() {
           </button>
         </div>
       </div>
-    </div>
+    </HudBanner>
   );
 }

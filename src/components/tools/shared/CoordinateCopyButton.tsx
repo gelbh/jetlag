@@ -1,13 +1,10 @@
-import { useEffect, useState } from "react";
-import { copyToClipboard } from "../../../platform/copyToClipboard";
+import { useCopyFeedback } from "../../../hooks/useCopyFeedback";
 
 interface CoordinateCopyButtonProps {
   lat: number;
   lng: number;
   className?: string;
 }
-
-type CopyStatus = "idle" | "copied" | "failed";
 
 function formatCoordinates(lat: number, lng: number): string {
   return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
@@ -18,21 +15,11 @@ export function CoordinateCopyButton({
   lng,
   className = "",
 }: CoordinateCopyButtonProps) {
-  const [status, setStatus] = useState<CopyStatus>("idle");
+  const { status, copy } = useCopyFeedback({ failureResetMs: 2000 });
   const coords = formatCoordinates(lat, lng);
 
-  useEffect(() => {
-    if (status === "idle") {
-      return;
-    }
-
-    const timer = window.setTimeout(() => setStatus("idle"), 2000);
-    return () => window.clearTimeout(timer);
-  }, [status]);
-
   const handleCopy = async () => {
-    const ok = await copyToClipboard(coords);
-    setStatus(ok ? "copied" : "failed");
+    await copy(coords);
   };
 
   const headline =

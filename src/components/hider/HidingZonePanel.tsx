@@ -1,4 +1,6 @@
 import type { TransitStation } from "../../domain/session/hidingZone";
+import { InlineError } from "../ui/InlineError";
+import { TransitStationPicker } from "./TransitStationPicker";
 
 interface HidingZonePanelProps {
   radiusLabel: string;
@@ -58,56 +60,17 @@ export function HidingZonePanel({
         </p>
       ) : (
         <>
-          <input
-            value={query}
-            onChange={(event) => onQueryChange(event.target.value)}
-            className="field-input min-h-11 w-full"
-            placeholder="Search stations…"
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-            enterKeyHint="search"
-            inputMode="search"
+          <TransitStationPicker
+            query={query}
+            onQueryChange={onQueryChange}
+            stations={stations}
+            stationsLoading={stationsLoading}
+            stationsError={stationsError}
+            selectedStation={selectedStation}
+            onSelectStation={onSelectStation}
+            onSearchThisArea={onSearchThisArea}
+            searchDisabled={searchDisabled}
           />
-          <button
-            type="button"
-            onClick={onSearchThisArea}
-            disabled={searchDisabled}
-            className="btn-secondary min-h-10 w-full disabled:opacity-50"
-          >
-            Search this area
-          </button>
-          {stationsLoading ? (
-            <p className="text-sm text-ink-dim">Loading stations…</p>
-          ) : null}
-          {stationsError ? (
-            <p className="text-error text-sm">{stationsError}</p>
-          ) : null}
-          <div className="max-h-36 space-y-1 overflow-y-auto">
-            {stations.map((station) => (
-              <button
-                key={station.id}
-                type="button"
-                onClick={() => onSelectStation(station)}
-                className={`min-h-10 w-full px-3 py-2 text-left text-sm ${
-                  selectedStation?.id === station.id
-                    ? "bg-highlight-soft font-medium text-highlight"
-                    : "bg-surface-raised text-ink hover:bg-surface-base"
-                }`}
-              >
-                {station.name}
-              </button>
-            ))}
-          </div>
-          {stations.length === 0 && !stationsLoading && !stationsError ? (
-            <p className="text-sm text-ink-dim">
-              Pan the map, then search this area.
-            </p>
-          ) : (
-            <p className="text-sm text-ink-dim">
-              Or tap a station on the map to select it.
-            </p>
-          )}
         </>
       )}
 
@@ -129,7 +92,7 @@ export function HidingZonePanel({
       >
         {saving ? "Saving…" : moveMode ? "Confirm new zone" : "Confirm hiding zone"}
       </button>
-      {error ? <p className="text-error text-sm">{error}</p> : null}
+      {error ? <InlineError>{error}</InlineError> : null}
     </div>
   );
 }

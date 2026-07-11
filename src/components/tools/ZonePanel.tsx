@@ -1,3 +1,5 @@
+import { TextField } from "../ui/TextField";
+
 interface ZonePanelProps {
   vertexCount: number;
   label: string;
@@ -20,15 +22,14 @@ export function ZonePanel({
         outlined.
       </p>
       <p className="text-sm text-ink-dim">Vertices: {vertexCount}</p>
-      <label className="block text-sm text-ink-muted">
-        Label
-        <input
-          value={label}
-          onChange={(event) => onLabelChange(event.target.value)}
-          className="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-base px-3"
-          placeholder="Optional zone label"
-        />
-      </label>
+      <TextField
+        label="Label"
+        labelClassName="block text-sm text-ink-muted"
+        inputClassName="mt-1 min-h-12 w-full rounded-xl border border-border bg-surface-base px-3"
+        value={label}
+        onChange={(event) => onLabelChange(event.target.value)}
+        placeholder="Optional zone label"
+      />
       <div className="grid grid-cols-2 gap-2">
         <button
           type="button"

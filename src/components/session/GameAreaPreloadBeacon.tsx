@@ -1,6 +1,7 @@
 import { useId } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { HudRefreshIcon } from "../ui/HudIcons";
+import { loadingSpinnerClass } from "../ui/loadingSpinnerClass";
 import { selectPreloadBanner, usePreloadStore } from "../../state/preloadStore";
 import { GameAreaPreloadDetailPanel } from "./GameAreaPreloadDetailPanel";
 
@@ -56,9 +57,7 @@ export function GameAreaPreloadBeacon({
           aria-hidden="true"
         >
           <HudRefreshIcon
-            className={`jl-preload-beacon__icon stroke-[2.5] ${
-              banner.loading ? "loading-spinner motion-reduce:animate-none" : ""
-            }`}
+            className={`jl-preload-beacon__icon stroke-[2.5] ${loadingSpinnerClass(banner.loading)}`}
           />
         </span>
       </button>

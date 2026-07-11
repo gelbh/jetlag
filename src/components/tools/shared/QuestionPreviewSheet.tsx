@@ -1,4 +1,5 @@
 import { AnimatedOverlay } from "../../ui/AnimatedOverlay";
+import { SheetHeader } from "../../ui/SheetHeader";
 import { QuestionPromptBlock } from "./QuestionPromptBlock";
 import { CoordinateCopyButton } from "./CoordinateCopyButton";
 
@@ -33,18 +34,7 @@ export function QuestionPreviewSheet({
       sheetClassName="mx-auto max-w-lg"
       maxHeightClassName="max-h-[min(60dvh,480px)]"
     >
-      <div className="mb-4 flex items-center justify-between gap-2">
-        <h2 className="font-display text-lg font-bold uppercase tracking-tight text-ink">
-          Preview question
-        </h2>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="btn-secondary min-h-10 px-4 text-xs"
-        >
-          Back
-        </button>
-      </div>
+      <SheetHeader title="Preview question" onClose={onCancel} closeLabel="Back" />
 
       <div className="space-y-4">
         <QuestionPromptBlock prompt={prompt} ruleSummary={ruleSummary} />
