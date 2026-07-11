@@ -15,12 +15,22 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-07-11",
     sections: [
       {
+        title: "Fixes",
+        items: [
+          "Map HUD: sync, preload, and timer popovers open again while chat or settings is up",
+          "Radar: block custom CHOOSE distances above the game-size preset cap at commit",
+        ],
+      },
+      {
         title: "Improvements",
         items: [
           "Recommended games: Portland, Maine with Greater Portland metro, five council districts, and GP Metro bus transit matching.",
           "Recommended games: Portland, Maine metro adds Cape Elizabeth, Scarborough, and Yarmouth; measuring and tentacles merge bundled park POI from city GIS.",
           "Play area outline: drop spurious interior rings after unioning bundled admin boundaries (Portland, Maine and other multi-municipality presets).",
           "Region-pack sessions: refresh bundled play area and matching categories when geo assets change instead of using stale Firestore copies.",
+          "Tool panels: show the question name (Matching, Radar, Measuring, and others) in the panel header",
+          "Radar: distance picker shows only presets allowed for the session game size",
+          "Recommended games: derive game size from each preset play area instead of defaulting to medium",
         ],
       }
     ],
@@ -32,7 +42,6 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Fixes",
         items: [
-          "Map HUD: sync, preload, and timer popovers open again while chat or settings is up",
           "Join: honor the role you pick when joining, including a second hider in the same session",
           "Custom games: fix scrolling on the presets list when content exceeds the screen",
           "Premium recovery: require verified email before merging purchases from another account",
@@ -46,11 +55,9 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Improvements",
         items: [
-          "Tool panels: show the question name (Matching, Radar, Measuring, and others) in the panel header",
           "Tentacles: committed questions show the search radius circle on the map",
           "Tentacles: elimination shading matches the full search disk minus the answered location",
           "Tentacles: map preview circle waits until a category is chosen",
-          "Radar: distance picker shows only presets allowed for the session game size",
         ],
       },
       {

@@ -2,6 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { useRadarTool } from "./useRadarTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
+import { milesToMeters } from "../../domain/map/distance";
 
 describe("useRadarTool", () => {
   it("stores radar center from map taps", () => {
@@ -57,7 +58,7 @@ describe("useRadarTool", () => {
       result.current.handleMapClick([53.35, -6.26]);
     });
     act(() => {
-      result.current.panel.props.onPresetSelect(500);
+      result.current.panel.props.onPresetSelect(milesToMeters(1));
       result.current.panel.props.onAnswerChange("yes");
     });
 

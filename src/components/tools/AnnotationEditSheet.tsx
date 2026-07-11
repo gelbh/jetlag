@@ -25,7 +25,9 @@ import { TentacleAnswerPicker } from "./shared/TentacleAnswerPicker";
 import { ToolSection } from "./shared/ToolSection";
 import { EditSheetFrame } from "./shared/EditSheetFrame";
 import {
+  isRadarDistanceOptionUsed,
   isRadarPresetRadius,
+  isRadarRadiusAllowedForGameSize,
   radarAnswerFromInside,
   radarInsideFromAnswer,
   usedRadarDistanceOptions,
@@ -172,6 +174,28 @@ function AnnotationEditSheetForm({
 
   const handleSave = () => {
     if (annotation.type === "radar") {
+      if (
+        !isRadarRadiusAllowedForGameSize(
+          gameSize,
+          resolvedRadius,
+          distanceUnit,
+          chooseCustom,
+        )
+      ) {
+        return;
+      }
+
+      if (
+        isRadarDistanceOptionUsed(
+          usedRadarOptions,
+          chooseCustom,
+          resolvedRadius,
+          distanceUnit,
+        )
+      ) {
+        return;
+      }
+
       onSave({
         ...annotation,
         metadata: {
@@ -326,6 +350,20 @@ function AnnotationEditSheetForm({
 
   const canSaveMeasuring =
     annotation.type === "measuring" && measuringAnswer !== null;
+  const canSaveRadar =
+    annotation.type === "radar" &&
+    isRadarRadiusAllowedForGameSize(
+      gameSize,
+      resolvedRadius,
+      distanceUnit,
+      chooseCustom,
+    ) &&
+    !isRadarDistanceOptionUsed(
+      usedRadarOptions,
+      chooseCustom,
+      resolvedRadius,
+      distanceUnit,
+    );
   const canSaveClassicThermometer =
     annotation.type === "thermometer" &&
     thermometerAnswer !== null &&
@@ -342,7 +380,9 @@ function AnnotationEditSheetForm({
       title={annotationSummary(annotation, distanceUnit)}
       onClose={onClose}
       onSave={
-        annotation.type === "thermometer" && !canSaveClassicThermometer
+        annotation.type === "radar" && !canSaveRadar
+          ? undefined
+          : annotation.type === "thermometer" && !canSaveClassicThermometer
           ? undefined
           : annotation.type === "measuring" && !canSaveMeasuring
             ? undefined

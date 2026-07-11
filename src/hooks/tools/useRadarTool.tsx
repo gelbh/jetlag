@@ -9,8 +9,8 @@ import {
 } from "../../domain/map/distance";
 import { defaultRadarPresetMeters } from "../../domain/map/distancePresets";
 import {
-  firstAvailableRadarDistanceSelection,
-  isRadarDistanceOptionAvailable,
+  isRadarDistanceOptionUsed,
+  isRadarRadiusAllowedForGameSize,
   radarDistanceUseCount,
   radarDistanceUseCountFromPending,
   radarInsideFromAnswer,
@@ -129,33 +129,6 @@ export function useRadarTool({
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [active]);
 
-  useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- keep draft distance in sync with session usage */
-    if (!active) {
-      return;
-    }
-
-    if (isRadarDistanceOptionAvailable()) {
-      return;
-    }
-
-    const nextSelection = firstAvailableRadarDistanceSelection(
-      usedRadarOptions,
-      distanceUnit,
-      gameSize,
-    );
-    if (!nextSelection) {
-      setRadarChooseCustom(false);
-      setRadarCustomRadius("");
-      return;
-    }
-
-    setRadarChooseCustom(nextSelection.chooseCustom);
-    setRadarRadius(nextSelection.radiusMeters);
-    setRadarCustomRadius("");
-    /* eslint-enable react-hooks/set-state-in-effect */
-  }, [active, usedRadarOptions, radarChooseCustom, radarRadius, distanceUnit, gameSize]);
-
   const resetDraft = useCallback(() => {
     setRadarRadius(null);
     setRadarCustomRadius("");
@@ -216,7 +189,26 @@ export function useRadarTool({
       return;
     }
 
-    if (!isRadarDistanceOptionAvailable()) {
+    if (
+      !isRadarRadiusAllowedForGameSize(
+        gameSize,
+        resolvedRadarRadius,
+        distanceUnit,
+        radarChooseCustom,
+      )
+    ) {
+      setMapError("That radar distance exceeds the limit for this game size.");
+      return;
+    }
+
+    if (
+      isRadarDistanceOptionUsed(
+        usedRadarOptions,
+        radarChooseCustom,
+        resolvedRadarRadius,
+        distanceUnit,
+      )
+    ) {
       setMapError("That radar distance was already used this session.");
       return;
     }

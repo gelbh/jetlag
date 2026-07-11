@@ -88,6 +88,32 @@ export function recommendGameSize(
   return "small";
 }
 
+export function recommendGameSizeFromPlayAreaSquareMiles(
+  squareMiles: number,
+  unit: DistanceUnit = "imperial",
+): GameSize {
+  const resolved = resolveDistanceUnit(unit);
+
+  if (resolved === "metric") {
+    const sqKm = (squareMiles * SQ_METERS_PER_SQ_MILE) / SQ_METERS_PER_SQ_KM;
+    if (sqKm >= GAME_SIZE_THRESHOLDS_SQ_KM.large) {
+      return "large";
+    }
+    if (sqKm >= GAME_SIZE_THRESHOLDS_SQ_KM.medium) {
+      return "medium";
+    }
+    return "small";
+  }
+
+  if (squareMiles >= GAME_SIZE_THRESHOLDS_SQ_MI.large) {
+    return "large";
+  }
+  if (squareMiles >= GAME_SIZE_THRESHOLDS_SQ_MI.medium) {
+    return "medium";
+  }
+  return "small";
+}
+
 export function hidingZoneRadiusMeters(
   gameSize: GameSize,
   unit: DistanceUnit = "imperial",

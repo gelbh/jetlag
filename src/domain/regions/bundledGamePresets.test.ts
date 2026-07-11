@@ -61,6 +61,17 @@ describe("bundledGamePresets", () => {
     expect(portlandMaine?.transitMetroId).toBe("portland-maine");
     expect(portlandMaine?.regionPackId).toBe("portland-maine");
   });
+
+  it("derives game size from play area for bundled presets", () => {
+    const presets = buildBundledGamePresets();
+    const portlandMaine = presets.find((preset) => preset.id === "bundled:portland-maine");
+    const nyc = presets.find((preset) => preset.id === "bundled:nyc");
+    const manhattan = presets.find((preset) => preset.id === "bundled:nyc-manhattan");
+
+    expect(portlandMaine?.gameSize).toBe("medium");
+    expect(nyc?.gameSize).toBe("medium");
+    expect(manhattan?.gameSize).toBe("small");
+  });
 });
 
 describe("Dublin GeoJSON asset counts", () => {

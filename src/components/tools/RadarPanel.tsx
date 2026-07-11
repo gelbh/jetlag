@@ -11,12 +11,12 @@ import { InlineError } from "../ui/InlineError";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
 import { RADAR_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { useToolWizard } from "../../hooks/useToolWizard";
+import { parseDistanceInput, type DistanceUnit } from "../../domain/map/distance";
 import {
-  isRadarDistanceOptionAvailable,
+  isRadarRadiusAllowedForGameSize,
   type RadarAnswer,
   type RadarDistanceOptionKey,
 } from "../../domain/questions/radarQuestions";
-import type { DistanceUnit } from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/gameSize";
 
 interface RadarPanelProps {
@@ -76,8 +76,17 @@ export function RadarPanel({
     { wizardStepRef },
   );
 
+  const resolvedRadius = chooseCustom
+    ? (parseDistanceInput(customRadius, distanceUnit) ?? radiusMeters)
+    : radiusMeters;
   const distanceSelectionAvailable =
-    radiusMeters !== null && isRadarDistanceOptionAvailable();
+    resolvedRadius !== null &&
+    isRadarRadiusAllowedForGameSize(
+      gameSize,
+      resolvedRadius,
+      distanceUnit,
+      chooseCustom,
+    );
   const canCommit =
     hasCenter &&
     distanceSelectionAvailable &&

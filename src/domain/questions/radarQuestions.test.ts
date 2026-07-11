@@ -4,7 +4,6 @@ import {
   RADAR_RADIUS_PRESET_METERS,
   availableRadarDistancePresets,
   firstAvailableRadarDistanceSelection,
-  isRadarDistanceOptionAvailable,
   radarAnnotationSummary,
   radarAnswerFromInside,
   radarDistanceOptionLabel,
@@ -13,6 +12,10 @@ import {
   usedRadarDistanceOptions,
 } from "./radarQuestions";
 import { milesToMeters } from "../map/distance";
+import {
+  isRadarCustomRadiusWithinGameSizeLimit,
+  isRadarPresetMetersForGameSize,
+} from "../map/distancePresets";
 
 describe("radarQuestions", () => {
   it("builds the live prompt from the resolved radius", () => {
@@ -147,7 +150,22 @@ describe("radarQuestions", () => {
       chooseCustom: false,
       radiusMeters: milesToMeters(0.25),
     });
-    expect(isRadarDistanceOptionAvailable()).toBe(true);
-    expect(isRadarDistanceOptionAvailable()).toBe(true);
+    expect(isRadarPresetMetersForGameSize("small", milesToMeters(5), "imperial")).toBe(
+      true,
+    );
+    expect(
+      isRadarCustomRadiusWithinGameSizeLimit(
+        "small",
+        milesToMeters(6),
+        "imperial",
+      ),
+    ).toBe(false);
+    expect(
+      isRadarCustomRadiusWithinGameSizeLimit(
+        "small",
+        milesToMeters(4),
+        "imperial",
+      ),
+    ).toBe(true);
   });
 });
