@@ -4,22 +4,22 @@ export const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
 export const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
 
 export const stripePricePack1 = defineString("STRIPE_PRICE_PACK_1", {
-  default: "",
+  default: "price_1Ts1cwLcgH869xqOJPcQumeR",
 });
 export const stripePricePack3 = defineString("STRIPE_PRICE_PACK_3", {
-  default: "",
+  default: "price_1Ts1cyLcgH869xqOEIvGEI6c",
 });
 export const stripePricePack5 = defineString("STRIPE_PRICE_PACK_5", {
-  default: "",
+  default: "price_1Ts1czLcgH869xqO8pMB0oOu",
 });
 export const stripePriceMonthly = defineString("STRIPE_PRICE_MONTHLY", {
-  default: "",
+  default: "price_1Ts1d2LcgH869xqOLDXeCAyx",
 });
 export const stripePriceYearly = defineString("STRIPE_PRICE_YEARLY", {
-  default: "",
+  default: "price_1Ts1d3LcgH869xqOqANglz5o",
 });
 export const stripePriceLifetime = defineString("STRIPE_PRICE_LIFETIME", {
-  default: "",
+  default: "price_1Ts1d0LcgH869xqOLySTFXkD",
 });
 
 export const stripeCheckoutSuccessUrl = defineString(
