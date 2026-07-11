@@ -15,10 +15,13 @@ import {
 import {
   ensureRemoteSessionWriteAccess,
   isFirestorePermissionDenied,
-  joinRemoteSessionByCode,
   writeRemoteAnnotation,
   writeRemoteAnnotationsBatch,
 } from "../../services/firestore/firestoreAnnotations";
+import {
+  healSessionMembership,
+  sessionMembershipChanged,
+} from "../../services/firestore/sessionMembershipHeal";
 import { registerAnnotationBackgroundSync } from "../../services/session/backgroundSync";
 import {
   countOfflineQueueForSession,
@@ -43,6 +46,7 @@ export function useAnnotations() {
   const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
   const setPendingWrites = useSessionStore((state) => state.setPendingWrites);
   const setSession = useSessionStore((state) => state.setSession);
+  const myUid = useSessionStore((state) => state.myUid);
 
   const queueAnnotationWrite = useCallback(
     async (sessionId: string, annotation: AnnotationRecord) => {
@@ -103,13 +107,12 @@ export function useAnnotations() {
         const activeSession = await ensureRemoteSessionWriteAccess(
           session,
           user.uid,
+          resolvePlayerRole(session.memberRoles, user.uid),
+          { returningMemberUid: myUid, persistedMyUid: myUid },
         );
 
-        if (
-          activeSession.id !== session.id ||
-          activeSession.memberUids.join(",") !== session.memberUids.join(",")
-        ) {
-          setSession(activeSession);
+        if (sessionMembershipChanged(session, activeSession, user.uid, myUid)) {
+          setSession(activeSession, user.uid);
         }
 
         const writeAnnotation = async () => {
@@ -123,21 +126,15 @@ export function useAnnotations() {
             throw error;
           }
 
-          const healedSession = await joinRemoteSessionByCode(
-            activeSession.code,
+          const healedSession = await healSessionMembership(
+            activeSession,
             user.uid,
             resolvePlayerRole(activeSession.memberRoles, user.uid),
+            { returningMemberUid: myUid, persistedMyUid: myUid },
           );
 
-          if (healedSession.status !== "joined") {
-            throw error;
-          }
-
-          setSession(healedSession.session);
-          await writeRemoteAnnotation(
-            healedSession.session.id,
-            stampedAnnotation,
-          );
+          setSession(healedSession, user.uid);
+          await writeRemoteAnnotation(healedSession.id, stampedAnnotation);
         }
       } catch (error) {
         if (isRetriableSyncError(error)) {
@@ -163,6 +160,7 @@ export function useAnnotations() {
       queueAnnotationWrite,
       setLastSyncError,
       setSession,
+      myUid,
     ],
   );
 

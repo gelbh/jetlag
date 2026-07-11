@@ -4,8 +4,8 @@ import { isPermanentUser } from "../../services/core/accountAuth";
 import {
   getFirebaseAuth,
   isFirebaseConfigured,
-  waitForAuthStateReady,
 } from "../../services/core/firebase";
+import { waitForPermanentAuthReady } from "../../services/core/firebaseAuthReady";
 
 export function usePermanentAuthUser(): {
   user: User | null;
@@ -24,7 +24,7 @@ export function usePermanentAuthUser(): {
 
     let cancelled = false;
 
-    void waitForAuthStateReady().then(() => {
+    void waitForPermanentAuthReady().then(() => {
       if (!cancelled) {
         setAuthReady(true);
         setUser(getFirebaseAuth().currentUser);

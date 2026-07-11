@@ -1,6 +1,12 @@
-import { ensureAnonymousUser, getFirebaseAuth, isFirebaseConfigured, waitForAuthStateReady } from "./firebase";
+import {
+  ensureAnonymousUser,
+  getFirebaseAuth,
+  isFirebaseConfigured,
+  waitForAuthStateReady,
+} from "./firebase";
 
-const DEFAULT_AUTH_WAIT_MS = 10_000;
+const DEFAULT_GAME_AUTH_WAIT_MS = 10_000;
+const PERMANENT_AUTH_READY_TIMEOUT_MS = 10_000;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
@@ -8,32 +14,51 @@ function sleep(ms: number): Promise<void> {
   });
 }
 
+/**
+ * Premium, billing, and proxy paths: wait for persisted sign-in without minting anonymous users.
+ */
+export async function waitForRestoredFirebaseAuth(): Promise<boolean> {
+  if (!isFirebaseConfigured()) {
+    return true;
+  }
+
+  await waitForAuthStateReady();
+  return getFirebaseAuth().currentUser !== null;
+}
+
+/**
+ * Game and map paths: wait for auth restore, then create anonymous only after restore settles.
+ */
 export async function waitForFirebaseAuth(
-  maxWaitMs = DEFAULT_AUTH_WAIT_MS,
+  maxWaitMs = DEFAULT_GAME_AUTH_WAIT_MS,
 ): Promise<boolean> {
   if (!isFirebaseConfigured()) {
     return true;
   }
 
-  const authWork = (async () => {
-    await waitForAuthStateReady();
-
-    if (getFirebaseAuth().currentUser) {
-      return true;
-    }
-
-    await ensureAnonymousUser();
-    return getFirebaseAuth().currentUser !== null;
-  })();
-
-  const result = await Promise.race([
-    authWork,
-    sleep(maxWaitMs).then(() => null),
+  const authStateReady = await Promise.race([
+    waitForAuthStateReady().then(() => true),
+    sleep(maxWaitMs).then(() => false),
   ]);
 
-  if (result === null) {
-    return getFirebaseAuth().currentUser !== null;
+  if (getFirebaseAuth().currentUser) {
+    return true;
   }
 
-  return result;
+  if (!authStateReady) {
+    return false;
+  }
+
+  await ensureAnonymousUser();
+  return getFirebaseAuth().currentUser !== null;
+}
+
+export async function waitForPermanentAuthReady(
+  maxWaitMs = PERMANENT_AUTH_READY_TIMEOUT_MS,
+): Promise<void> {
+  if (!isFirebaseConfigured()) {
+    return;
+  }
+
+  await Promise.race([waitForAuthStateReady(), sleep(maxWaitMs)]);
 }

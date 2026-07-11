@@ -21,9 +21,9 @@ vi.mock("../services/billing/premiumBilling", () => ({
   fetchPremiumEntitlements: vi.fn().mockResolvedValue(null),
 }));
 
-vi.mock("../services/firestore/firestoreAnnotations", () => ({
+vi.mock("../services/firestore/sessionMembershipHeal", () => ({
   getRemoteSessionById: (...args: unknown[]) => mockGetRemoteSessionById(...args),
-  ensureRemoteSessionMembership: (...args: unknown[]) =>
+  healSessionMembership: (...args: unknown[]) =>
     mockEnsureRemoteSessionMembership(...args),
 }));
 
@@ -95,7 +95,7 @@ describe("Home", () => {
         remoteSession,
         "user-new",
         "seeker",
-        { returningMemberUid: "user-old" },
+        { returningMemberUid: "user-old", persistedMyUid: "user-old" },
       );
     });
 

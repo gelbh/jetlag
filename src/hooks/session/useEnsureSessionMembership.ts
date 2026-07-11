@@ -5,7 +5,10 @@ import {
   ensureAnonymousUser,
   isFirebaseConfigured,
 } from "../../services/core/firebase";
-import { ensureRemoteSessionMembership } from "../../services/firestore/firestoreAnnotations";
+import {
+  healSessionMembership,
+  sessionMembershipChanged,
+} from "../../services/firestore/sessionMembershipHeal";
 import { useSessionStore } from "../../state/sessionStore";
 
 export function useEnsureSessionMembership(): void {
@@ -39,11 +42,11 @@ export function useEnsureSessionMembership(): void {
         const role =
           myRole ??
           resolvePlayerRole(session.memberRoles, myUid ?? user.uid);
-        const healedSession = await ensureRemoteSessionMembership(
+        const healedSession = await healSessionMembership(
           session,
           user.uid,
           role,
-          { returningMemberUid: myUid },
+          { returningMemberUid: myUid, persistedMyUid: myUid },
         );
 
         if (cancelled) {
@@ -53,10 +56,12 @@ export function useEnsureSessionMembership(): void {
         const latestSession = useSessionStore.getState().session;
         const latestMyUid = useSessionStore.getState().myUid;
         if (
-          healedSession.id !== latestSession?.id ||
-          healedSession.memberUids.join(",") !==
-            latestSession?.memberUids.join(",") ||
-          user.uid !== latestMyUid
+          sessionMembershipChanged(
+            latestSession ?? session,
+            healedSession,
+            user.uid,
+            latestMyUid,
+          )
         ) {
           setSession(healedSession, user.uid);
         }

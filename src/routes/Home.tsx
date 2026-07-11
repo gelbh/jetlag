@@ -13,7 +13,7 @@ import {
   ensureAnonymousUser,
   isFirebaseConfigured,
 } from "../services/core/firebase";
-import { getRemoteSessionById, ensureRemoteSessionMembership } from "../services/firestore/firestoreAnnotations";
+import { getRemoteSessionById, healSessionMembership } from "../services/firestore/sessionMembershipHeal";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useViewTransitionNavigate } from "../hooks/useViewTransitionNavigate";
@@ -96,11 +96,11 @@ export function Home() {
 
       const resumeRole =
         myRole ?? resolvePlayerRole(remoteSession.memberRoles, myUid ?? user.uid);
-      const activeSession = await ensureRemoteSessionMembership(
+      const activeSession = await healSessionMembership(
         remoteSession,
         user.uid,
         resumeRole,
-        { returningMemberUid: myUid },
+        { returningMemberUid: myUid, persistedMyUid: myUid },
       );
 
       const role = resolvePlayerRole(activeSession.memberRoles, user.uid);
