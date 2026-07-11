@@ -6,6 +6,10 @@ import "@fontsource/barlow-semi-condensed/700.css";
 import { unregisterDevServiceWorkers } from "./domain/device/unregisterDevServiceWorkers.ts";
 import { initAnalytics } from "./services/core/analytics.ts";
 import { initSentry } from "./services/core/sentry.ts";
+import {
+  isFirebaseConfigured,
+  waitForAuthStateReady,
+} from "./services/core/firebase.ts";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
@@ -24,10 +28,15 @@ function renderApp() {
   );
 }
 
-void unregisterDevServiceWorkers().then((cleared) => {
+void unregisterDevServiceWorkers().then(async (cleared) => {
   if (cleared) {
     window.location.reload();
     return;
   }
+
+  if (isFirebaseConfigured()) {
+    await waitForAuthStateReady();
+  }
+
   renderApp();
 });

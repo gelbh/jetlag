@@ -29,7 +29,7 @@ export function PremiumSignInGate({
   continuePath = "/premium",
   onSignedIn,
 }: PremiumSignInGateProps) {
-  const { user, isPermanent } = usePermanentAuthUser();
+  const { user, isPermanent, authReady } = usePermanentAuthUser();
   const [email, setEmail] = useState("");
   const [busyAction, setBusyAction] = useState<"email" | null>(null);
   const [emailLinkSent, setEmailLinkSent] = useState(false);
@@ -114,6 +114,12 @@ export function PremiumSignInGate({
       setBusyAction(null);
     }
   };
+
+  if (!authReady) {
+    return (
+      <p className="text-sm text-ink-muted">Checking sign-in…</p>
+    );
+  }
 
   if (completingEmailLink && !user) {
     return (

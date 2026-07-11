@@ -2,6 +2,8 @@ import { deleteApp, getApps, initializeApp, type FirebaseApp } from "firebase/ap
 import {
   connectAuthEmulator,
   getAuth,
+  setPersistence,
+  browserLocalPersistence,
   signInAnonymously,
   type Auth,
   type User,
@@ -201,9 +203,34 @@ export function getFirestoreDb(): Firestore {
 }
 
 let anonymousSignInPromise: Promise<User> | null = null;
+let authStateReadyPromise: Promise<void> | null = null;
+
+async function bootstrapAuthState(): Promise<void> {
+  const firebaseAuth = getFirebaseAuth();
+
+  if (!firebaseUsesEmulator()) {
+    try {
+      await setPersistence(firebaseAuth, browserLocalPersistence);
+    } catch {
+      // Persistence may already be configured for this auth instance.
+    }
+  }
+
+  await firebaseAuth.authStateReady();
+}
+
+export async function waitForAuthStateReady(): Promise<void> {
+  if (!isFirebaseConfigured()) {
+    return;
+  }
+
+  authStateReadyPromise ??= bootstrapAuthState();
+  await authStateReadyPromise;
+}
 
 export async function ensureAnonymousUser(): Promise<User> {
   const firebaseAuth = getFirebaseAuth();
+  await waitForAuthStateReady();
 
   if (firebaseAuth.currentUser) {
     return firebaseAuth.currentUser;
@@ -236,5 +263,6 @@ export async function resetFirebaseForTests(): Promise<void> {
   firestoreEmulatorConnected = false;
   storageEmulatorConnected = false;
   anonymousSignInPromise = null;
+  authStateReadyPromise = null;
 }
 
