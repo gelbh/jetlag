@@ -596,4 +596,3 @@
     background: oklch(from var(--color-border) l c h / 0.85);
   }
 }
-}
