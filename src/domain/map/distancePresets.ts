@@ -42,12 +42,36 @@ export const GAME_SIZE_THRESHOLDS_SQ_KM = {
   large: 2_600,
 } as const;
 
+/** Session availability and game-size preset checks. */
 export const PRESET_MATCH_TOLERANCE_METERS = 5;
+
+/** UI chip and annotation round-trip preset matching (tighter). */
+export const UI_PRESET_MATCH_TOLERANCE_METERS = 1;
+
+const RADAR_PRESET_COUNT_BY_GAME_SIZE: Record<GameSize, number> = {
+  small: 5,
+  medium: 7,
+  large: METRIC_RADAR_PRESET_METERS.length,
+};
+
+const THERMOMETER_PRESET_COUNT_BY_GAME_SIZE: Record<GameSize, number> = {
+  small: 2,
+  medium: 3,
+  large: METRIC_THERMOMETER_PRESET_METERS.length,
+};
 
 export function resolveDistanceUnit(
   unit: DistanceUnit | null | undefined,
 ): DistanceUnit {
   return unit === "metric" ? "metric" : "imperial";
+}
+
+export function radarPresetCountForGameSize(gameSize: GameSize): number {
+  return RADAR_PRESET_COUNT_BY_GAME_SIZE[gameSize];
+}
+
+export function thermometerPresetCountForGameSize(gameSize: GameSize): number {
+  return THERMOMETER_PRESET_COUNT_BY_GAME_SIZE[gameSize];
 }
 
 export function radarPresetMetersForUnit(unit: DistanceUnit): readonly number[] {
@@ -58,18 +82,50 @@ export function radarPresetMetersForUnit(unit: DistanceUnit): readonly number[] 
   return IMPERIAL_RADAR_PRESET_MILES.map(milesToMeters);
 }
 
-const RADAR_PRESET_COUNT_BY_GAME_SIZE: Record<GameSize, number> = {
-  small: 5,
-  medium: 7,
-  large: METRIC_RADAR_PRESET_METERS.length,
-};
+export function radarPresetsMilesForGameSize(
+  gameSize: GameSize,
+): readonly (typeof IMPERIAL_RADAR_PRESET_MILES)[number][] {
+  return IMPERIAL_RADAR_PRESET_MILES.slice(0, radarPresetCountForGameSize(gameSize));
+}
 
 export function radarPresetsMetersForGameSizeAndUnit(
   gameSize: GameSize,
   unit: DistanceUnit,
 ): number[] {
-  const count = RADAR_PRESET_COUNT_BY_GAME_SIZE[gameSize];
+  const count = radarPresetCountForGameSize(gameSize);
   return radarPresetMetersForUnit(unit).slice(0, count);
+}
+
+export function maxRadarPresetMetersForGameSize(
+  gameSize: GameSize,
+  unit: DistanceUnit,
+): number {
+  const presets = radarPresetsMetersForGameSizeAndUnit(gameSize, unit);
+  return presets[presets.length - 1] ?? 0;
+}
+
+export function isRadarPresetMetersForGameSize(
+  gameSize: GameSize,
+  distanceMeters: number,
+  unit: DistanceUnit,
+): boolean {
+  return radarPresetsMetersForGameSizeAndUnit(gameSize, unit).some(
+    (preset) =>
+      Math.abs(preset - distanceMeters) < PRESET_MATCH_TOLERANCE_METERS,
+  );
+}
+
+export function isRadarCustomRadiusWithinGameSizeLimit(
+  gameSize: GameSize,
+  distanceMeters: number,
+  unit: DistanceUnit,
+): boolean {
+  if (distanceMeters <= 0) {
+    return false;
+  }
+
+  const max = maxRadarPresetMetersForGameSize(gameSize, unit);
+  return distanceMeters <= max + PRESET_MATCH_TOLERANCE_METERS;
 }
 
 export function defaultRadarPresetMeters(unit: DistanceUnit): number {
@@ -91,30 +147,21 @@ export function thermometerAllPresetMeters(
   return IMPERIAL_THERMOMETER_PRESET_MILES.map(milesToMeters);
 }
 
+export function thermometerPresetsMilesForGameSize(
+  gameSize: GameSize,
+): readonly (typeof IMPERIAL_THERMOMETER_PRESET_MILES)[number][] {
+  return IMPERIAL_THERMOMETER_PRESET_MILES.slice(
+    0,
+    thermometerPresetCountForGameSize(gameSize),
+  );
+}
+
 export function thermometerPresetsMetersForGameSizeAndUnit(
   gameSize: GameSize,
   unit: DistanceUnit,
 ): number[] {
-  const all = thermometerAllPresetMeters(unit);
-  if (unit === "metric") {
-    const presets = [all[0]!, all[1]!];
-    if (gameSize === "medium" || gameSize === "large") {
-      presets.push(all[2]!);
-    }
-    if (gameSize === "large") {
-      presets.push(all[3]!);
-    }
-    return presets;
-  }
-
-  const miles = [0.5, 3] as number[];
-  if (gameSize === "medium" || gameSize === "large") {
-    miles.push(10);
-  }
-  if (gameSize === "large") {
-    miles.push(50);
-  }
-  return miles.map(milesToMeters);
+  const count = thermometerPresetCountForGameSize(gameSize);
+  return thermometerAllPresetMeters(unit).slice(0, count);
 }
 
 export function hidingZoneDefaultRadiusMeters(

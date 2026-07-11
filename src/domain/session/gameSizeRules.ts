@@ -3,7 +3,9 @@ import type { MapTool } from "../map/mapToolTypes";
 import type { DistanceUnit } from "../map/distance";
 import { milesToMeters } from "../map/distance";
 import {
-  IMPERIAL_RADAR_PRESET_MILES,
+  isRadarCustomRadiusWithinGameSizeLimit,
+  isRadarPresetMetersForGameSize,
+  PRESET_MATCH_TOLERANCE_METERS,
   radarPresetsMetersForGameSizeAndUnit,
   resolveDistanceUnit,
   tentacleLargeRadiusMeters,
@@ -11,8 +13,12 @@ import {
   thermometerPresetsMetersForGameSizeAndUnit,
 } from "../map/distancePresets";
 import type { GameSize } from "./gameSize";
-import type { ThermometerDistanceOptionMiles } from "../questions/thermometerQuestions";
 import type { TentacleLocationCategoryId } from "../questions/tentacleQuestions";
+
+export {
+  radarPresetsMilesForGameSize,
+  thermometerPresetsMilesForGameSize,
+} from "../map/distancePresets";
 
 const HIDING_PERIOD_MINUTES: Record<GameSize, number> = {
   small: 30,
@@ -59,21 +65,6 @@ export function hidingPeriodMs(gameSize: GameSize): number {
   return hidingPeriodMinutes(gameSize) * 60 * 1000;
 }
 
-export function radarPresetsMilesForGameSize(
-  gameSize: GameSize,
-): readonly (typeof IMPERIAL_RADAR_PRESET_MILES)[number][] {
-  const presets: (typeof IMPERIAL_RADAR_PRESET_MILES)[number][] = [
-    0.25, 0.5, 1, 3, 5,
-  ];
-  if (gameSize === "medium" || gameSize === "large") {
-    presets.push(10, 25);
-  }
-  if (gameSize === "large") {
-    presets.push(50, 100);
-  }
-  return presets;
-}
-
 export function radarPresetsMetersForGameSize(
   gameSize: GameSize,
   unit: DistanceUnit = "imperial",
@@ -89,23 +80,23 @@ export function isRadarPresetAvailableForGameSize(
   distanceMeters: number,
   unit: DistanceUnit = "imperial",
 ): boolean {
-  const tolerance = 5;
-  return radarPresetsMetersForGameSize(gameSize, unit).some(
-    (preset) => Math.abs(preset - distanceMeters) < tolerance,
+  return isRadarPresetMetersForGameSize(
+    gameSize,
+    distanceMeters,
+    resolveDistanceUnit(unit),
   );
 }
 
-export function thermometerPresetsMilesForGameSize(
+export function isRadarCustomRadiusAllowedForGameSize(
   gameSize: GameSize,
-): readonly ThermometerDistanceOptionMiles[] {
-  const presets: ThermometerDistanceOptionMiles[] = [0.5, 3];
-  if (gameSize === "medium" || gameSize === "large") {
-    presets.push(10);
-  }
-  if (gameSize === "large") {
-    presets.push(50);
-  }
-  return presets;
+  distanceMeters: number,
+  unit: DistanceUnit = "imperial",
+): boolean {
+  return isRadarCustomRadiusWithinGameSizeLimit(
+    gameSize,
+    distanceMeters,
+    resolveDistanceUnit(unit),
+  );
 }
 
 export function thermometerPresetsMetersForGameSize(
@@ -123,9 +114,9 @@ export function isThermometerPresetAvailableForGameSize(
   distanceMeters: number,
   unit: DistanceUnit = "imperial",
 ): boolean {
-  const tolerance = 5;
   return thermometerPresetsMetersForGameSize(gameSize, unit).some(
-    (preset) => Math.abs(preset - distanceMeters) < tolerance,
+    (preset) =>
+      Math.abs(preset - distanceMeters) < PRESET_MATCH_TOLERANCE_METERS,
   );
 }
 

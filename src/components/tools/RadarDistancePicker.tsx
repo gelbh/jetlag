@@ -1,6 +1,7 @@
 import {
   RADAR_CHOOSE_LABEL,
   availableRadarDistancePresets,
+  maxRadarCustomRadiusMeters,
   radarDistanceOptionLabel,
   radarQuestionPrompt,
   type RadarDistanceOptionKey,
@@ -51,6 +52,12 @@ export function RadarDistancePicker({
     usedDistanceOptions,
   );
   const chooseAvailable = !usedDistanceOptions.has("choose");
+  const maxCustomRadiusMeters = maxRadarCustomRadiusMeters(gameSize, distanceUnit);
+  const parsedCustomRadius = parseDistanceInput(customRadius, distanceUnit);
+  const customRadiusOverLimit =
+    chooseCustom &&
+    parsedCustomRadius !== null &&
+    parsedCustomRadius > maxCustomRadiusMeters;
 
   return (
     <ToolSection title="Distance" first status="active">
@@ -90,7 +97,8 @@ export function RadarDistancePicker({
       )}
       {chooseCustom && chooseAvailable ? (
         <label className="field-label">
-          Custom {distanceUnitLabel(distanceUnit)}
+          Custom {distanceUnitLabel(distanceUnit)} (max{" "}
+          {formatDistance(maxCustomRadiusMeters, distanceUnit)})
           <input
             value={customRadius}
             onChange={(event) => onCustomRadiusChange(event.target.value)}
@@ -98,7 +106,14 @@ export function RadarDistancePicker({
             autoCorrect="off"
             spellCheck={false}
             className="field-input"
+            aria-invalid={customRadiusOverLimit}
           />
+          {customRadiusOverLimit ? (
+            <span className="text-xs text-highlight">
+              Max {formatDistance(maxCustomRadiusMeters, distanceUnit)} for this
+              game size.
+            </span>
+          ) : null}
         </label>
       ) : null}
     </ToolSection>

@@ -7,6 +7,7 @@ import {
   radarPresetMetersForUnit,
   thermometerPresetsMetersForGameSizeAndUnit,
 } from "./distancePresets";
+import { milesToMeters } from "./distance";
 import {
   createSessionDraftToGamePreset,
   gamePresetToCreateSessionDraft,
@@ -40,9 +41,18 @@ describe("distancePresets", () => {
     expect(thermometerPresetsMetersForGameSizeAndUnit("small", "metric")).toEqual([
       1000, 10_000,
     ]);
+    expect(thermometerPresetsMetersForGameSizeAndUnit("medium", "metric")).toEqual([
+      1000, 10_000, 25_000,
+    ]);
     expect(thermometerPresetsMetersForGameSizeAndUnit("large", "metric")).toEqual([
       1000, 10_000, 25_000, 50_000,
     ]);
+  });
+
+  it("derives imperial thermometer presets from canonical list", () => {
+    expect(thermometerPresetsMetersForGameSizeAndUnit("small", "imperial")).toEqual(
+      [0.5, 3].map(milesToMeters),
+    );
   });
 });
 

@@ -474,6 +474,13 @@ async function main() {
     localZipIndex >= 0 ? args[localZipIndex + 1] : null;
   const apiKey = process.env.TRANSITLAND_API_KEY?.trim();
 
+  if (localZipPath && !metroFilter) {
+    console.error(
+      "Error: --local-zip requires --metro <id> so only one bundle is written.",
+    );
+    process.exit(1);
+  }
+
   const metros = METROS.filter((metro) =>
     metroFilter ? metro.id === metroFilter : true,
   );
