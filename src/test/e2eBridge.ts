@@ -1,6 +1,7 @@
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  signInAnonymously,
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
@@ -94,6 +95,16 @@ async function signInPermanentUserForCapture(): Promise<void> {
   await waitForPermanentAuthUser();
 }
 
+async function rotateAnonymousAuth(): Promise<string> {
+  const auth = getFirebaseAuth();
+  if (auth.currentUser) {
+    await signOut(auth);
+  }
+
+  const credential = await signInAnonymously(auth);
+  return credential.user.uid;
+}
+
 declare global {
   interface Window {
     __JETLAG_E2E__?: {
@@ -102,6 +113,7 @@ declare global {
       patchPendingQuestionAnswerableAt: typeof patchPendingQuestionAnswerableAt;
       patchSessionTimer: typeof patchSessionTimer;
       signInPermanentUserForCapture: typeof signInPermanentUserForCapture;
+      rotateAnonymousAuth: typeof rotateAnonymousAuth;
     };
   }
 }
@@ -117,5 +129,6 @@ export function installE2EBridgeIfConfigured(): void {
     patchPendingQuestionAnswerableAt,
     patchSessionTimer,
     signInPermanentUserForCapture,
+    rotateAnonymousAuth,
   };
 }

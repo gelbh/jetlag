@@ -13,7 +13,7 @@ import {
   ensureAnonymousUser,
   isFirebaseConfigured,
 } from "../services/core/firebase";
-import { getRemoteSessionById } from "../services/firestore/firestoreAnnotations";
+import { getRemoteSessionById, ensureRemoteSessionMembership } from "../services/firestore/firestoreAnnotations";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useViewTransitionNavigate } from "../hooks/useViewTransitionNavigate";
@@ -28,6 +28,7 @@ export function Home() {
   const navigate = useViewTransitionNavigate();
   const session = useSessionStore((state) => state.session);
   const myRole = useSessionStore((state) => state.myRole);
+  const myUid = useSessionStore((state) => state.myUid);
   const setSession = useSessionStore((state) => state.setSession);
   const [continueError, setContinueError] = useState<string | null>(null);
   const [continuing, setContinuing] = useState(false);
@@ -93,31 +94,42 @@ export function Home() {
         return;
       }
 
-      if (!remoteSession.memberUids?.includes(user.uid)) {
-        setContinueError("You are no longer a member of that session.");
-        return;
-      }
+      const resumeRole =
+        myRole ?? resolvePlayerRole(remoteSession.memberRoles, myUid ?? user.uid);
+      const activeSession = await ensureRemoteSessionMembership(
+        remoteSession,
+        user.uid,
+        resumeRole,
+        { returningMemberUid: myUid },
+      );
 
-      const role = resolvePlayerRole(remoteSession.memberRoles, user.uid);
+      const role = resolvePlayerRole(activeSession.memberRoles, user.uid);
       if (
         myRole &&
-        remoteSession.memberRoles &&
-        remoteSession.memberRoles[user.uid] &&
+        activeSession.memberRoles &&
+        activeSession.memberRoles[user.uid] &&
         myRole !== role
       ) {
         setContinueError("Your role changed for this session. Rejoin with a new code.");
         return;
       }
 
-      setSession(remoteSession, user.uid);
-      setPremiumApiContext(remoteSession);
+      setSession(activeSession, user.uid);
+      setPremiumApiContext(activeSession);
       navigate("/map");
     } catch (error) {
-      setContinueError(
+      const message =
         error instanceof Error
           ? error.message
-          : "Couldn't continue that session.",
-      );
+          : "Couldn't continue that session.";
+      if (
+        message === "That session no longer exists." ||
+        message === "That session has ended. Join or create a new one."
+      ) {
+        await clearSessionLocalArtifacts(session.id);
+        setSession(null);
+      }
+      setContinueError(message);
     } finally {
       setContinuing(false);
     }

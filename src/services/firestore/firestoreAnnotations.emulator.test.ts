@@ -8,6 +8,7 @@ import { createTestPinAnnotation } from "../../test/fixtures/sessions";
 import {
   createRemoteSession,
   endRemoteSession,
+  ensureRemoteSessionMembership,
   getRemoteSessionById,
   joinRemoteSessionByCode,
   lookupRemoteSessionByCode,
@@ -15,6 +16,7 @@ import {
   writeRemoteAnnotation,
 } from "./firestoreAnnotations";
 import { buildAnnotationDocument } from "./firestoreSerialization";
+import { APP_VERSION } from "../../domain/device/changelog";
 
 describe("firestoreAnnotations emulator", () => {
   beforeEach(async () => {
@@ -48,6 +50,62 @@ describe("firestoreAnnotations emulator", () => {
     if (joinResult.status === "joined") {
       expect(joinResult.session.memberUids).toContain(guestUid);
     }
+  });
+
+  it("heals membership when auth uid drifted from a returning member", async () => {
+    const { uid: hostUid } = await connectEmulatorsForTests();
+    const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, hostUid);
+
+    await teardownEmulatorsForTests();
+    const { uid: guestUid } = await connectEmulatorsForTests();
+
+    const healed = await ensureRemoteSessionMembership(
+      session,
+      guestUid,
+      "seeker",
+      { returningMemberUid: hostUid },
+    );
+
+    expect(healed.memberUids).toContain(guestUid);
+  });
+
+  it("allows auth drift to bypass the join version gate for returning members", async () => {
+    const { uid: hostUid } = await connectEmulatorsForTests();
+    const session = await createRemoteSession(
+      DUBLIN_CITY_GAME_AREA,
+      hostUid,
+      "free",
+      undefined,
+      "seeker",
+      "medium",
+      {},
+      "imperial",
+      "0.1.0",
+    );
+
+    await teardownEmulatorsForTests();
+    const { uid: guestUid } = await connectEmulatorsForTests();
+
+    const joinResult = await joinRemoteSessionByCode(
+      session.code,
+      guestUid,
+      "seeker",
+      APP_VERSION,
+      { returningMemberUid: hostUid },
+    );
+
+    expect(joinResult.status).toBe("joined");
+    if (joinResult.status === "joined") {
+      expect(joinResult.session.memberUids).toContain(guestUid);
+    }
+
+    const incompatibleJoin = await joinRemoteSessionByCode(
+      session.code,
+      "brand-new-uid",
+      "seeker",
+      APP_VERSION,
+    );
+    expect(incompatibleJoin.status).toBe("incompatible");
   });
 
   it("writes annotations and notifies subscribers", async () => {

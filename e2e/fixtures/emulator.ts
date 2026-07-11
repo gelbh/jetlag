@@ -95,6 +95,16 @@ export async function endSessionInEmulator(
   }, sessionId);
 }
 
+export async function rotateAnonymousAuth(page: Page): Promise<string> {
+  return page.evaluate(async () => {
+    const bridge = window.__JETLAG_E2E__;
+    if (!bridge?.rotateAnonymousAuth) {
+      throw new Error("E2E bridge is not installed.");
+    }
+    return bridge.rotateAnonymousAuth();
+  });
+}
+
 export async function advanceRemoteSessionTimerInEmulator(
   page: Page,
   sessionId: string,

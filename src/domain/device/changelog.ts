@@ -17,6 +17,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Fixes",
         items: [
+          "Home and map: resume rejoins automatically when sign-in changed but the session is still active",
           "Map HUD: sync, preload, and timer popovers open again while chat or settings is up",
           "Radar: block custom CHOOSE distances above the game-size preset cap at commit",
         ],
