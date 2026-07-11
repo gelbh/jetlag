@@ -1,12 +1,12 @@
 {
   "metros": [
     {
-      "id": "london",
-      "bundlePath": "/geo/gtfs/london.json",
-      "feedOnestopId": "f-transport~for~london",
-      "builtAt": "2026-07-11T15:15:23.805Z",
-      "stopCount": 780,
-      "routeCount": 14
+      "id": "chicago",
+      "bundlePath": "/geo/gtfs/chicago.json",
+      "feedOnestopId": "f-dp3-cta",
+      "builtAt": "2026-07-11T15:16:56.751Z",
+      "stopCount": 10980,
+      "routeCount": 133
     },
     {
       "id": "dublin",
@@ -17,6 +17,14 @@
       "routeCount": 28
     },
     {
+      "id": "london",
+      "bundlePath": "/geo/gtfs/london.json",
+      "feedOnestopId": "f-transport~for~london",
+      "builtAt": "2026-07-11T15:15:23.805Z",
+      "stopCount": 780,
+      "routeCount": 14
+    },
+    {
       "id": "nyc",
       "bundlePath": "/geo/gtfs/nyc.json",
       "feedOnestopId": "f-dr5r-nyctsubway",
@@ -25,20 +33,20 @@
       "routeCount": 36
     },
     {
+      "id": "portland-maine",
+      "bundlePath": "/geo/gtfs/portland-maine.json",
+      "feedOnestopId": "f-dry0-maine~greaterportlandmetrobus",
+      "builtAt": "2026-07-11T21:09:57.097Z",
+      "stopCount": 637,
+      "routeCount": 14
+    },
+    {
       "id": "sf",
       "bundlePath": "/geo/gtfs/sf.json",
       "feedOnestopId": "f-9q8y-sfmta",
       "builtAt": "2026-07-11T15:15:51.600Z",
       "stopCount": 3238,
       "routeCount": 69
-    },
-    {
-      "id": "chicago",
-      "bundlePath": "/geo/gtfs/chicago.json",
-      "feedOnestopId": "f-dp3-cta",
-      "builtAt": "2026-07-11T15:16:56.751Z",
-      "stopCount": 10980,
-      "routeCount": 133
     }
   ]
 }

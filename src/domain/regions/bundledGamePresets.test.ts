@@ -15,6 +15,8 @@ describe("bundledGamePresets", () => {
         "bundled:dublin-county",
         "bundled:nyc",
         "bundled:nyc-manhattan",
+        "bundled:portland-maine",
+        "bundled:portland-maine-district-1",
         "bundled:london",
         "bundled:tokyo",
         "bundled:osaka",
@@ -51,6 +53,13 @@ describe("bundledGamePresets", () => {
     expect(nyc?.distanceUnit).toBe("imperial");
     expect(nyc?.transitMetroId).toBe("nyc");
     expect(nyc?.advancedSettings.expansionPackEnabled).toBe(true);
+
+    const portlandMaine = buildBundledGamePresets().find(
+      (preset) => preset.id === "bundled:portland-maine",
+    );
+    expect(portlandMaine?.distanceUnit).toBe("imperial");
+    expect(portlandMaine?.transitMetroId).toBe("portland-maine");
+    expect(portlandMaine?.regionPackId).toBe("portland-maine");
   });
 });
 
@@ -71,6 +80,42 @@ describe("Dublin GeoJSON asset counts", () => {
 
     expect(councils.features).toHaveLength(4);
     expect(leas.features).toHaveLength(31);
+  });
+});
+
+describe("Portland Maine GeoJSON asset counts", () => {
+  it("ships five municipalities, districts, and neighborhoods", () => {
+    const municipalities = JSON.parse(
+      readFileSync(
+        resolve(
+          import.meta.dirname,
+          "../../../public/geo/portland-maine/municipalities.geojson",
+        ),
+        "utf8",
+      ),
+    );
+    const districts = JSON.parse(
+      readFileSync(
+        resolve(
+          import.meta.dirname,
+          "../../../public/geo/portland-maine/districts.geojson",
+        ),
+        "utf8",
+      ),
+    );
+    const neighborhoods = JSON.parse(
+      readFileSync(
+        resolve(
+          import.meta.dirname,
+          "../../../public/geo/portland-maine/neighborhoods.geojson",
+        ),
+        "utf8",
+      ),
+    );
+
+    expect(municipalities.features).toHaveLength(5);
+    expect(districts.features).toHaveLength(5);
+    expect(neighborhoods.features.length).toBeGreaterThanOrEqual(15);
   });
 });
 

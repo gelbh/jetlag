@@ -3,10 +3,12 @@
  * Builds compact GTFS route graphs for configured metros.
  * Requires TRANSITLAND_API_KEY for live downloads; --fixtures-only skips network.
  *
+ * Optional: --local-zip /path/to/gtfs.zip with --metro portland-maine when no API key.
+ *
  * Run: node scripts/build-gtfs-static-graph.mjs
  *      node scripts/build-gtfs-static-graph.mjs --metro nyc
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import JSZip from "jszip";
@@ -44,6 +46,12 @@ const METROS = [
     feedOnestopId: "f-dp3-cta",
     feedOnestopIds: ["f-dp3-cta"],
     bbox: { south: 41.64, west: -87.94, north: 42.07, east: -87.52 },
+  },
+  {
+    id: "portland-maine",
+    feedOnestopId: "f-dry0-maine~greaterportlandmetrobus",
+    feedOnestopIds: ["f-dry0-maine~greaterportlandmetrobus"],
+    bbox: { south: 43.55, west: -70.45, north: 43.75, east: -70.1 },
   },
 ];
 
@@ -114,6 +122,16 @@ const FIXTURES = {
       { id: "chi-brn", shortName: "Brn", longName: "Brown Line", mode: "metro" },
     ],
     stopRouteIds: { "chi:clark": ["chi-brn"], "chi:state": ["chi-brn"] },
+  },
+  "portland-maine": {
+    stops: [
+      { id: "pme:congress", name: "Congress St + Elm St", lat: 43.6538, lng: -70.2647 },
+      { id: "pme:forest", name: "Forest Ave + Woodfords St", lat: 43.6672, lng: -70.2789 },
+    ],
+    routes: [
+      { id: "pme-1", shortName: "1", longName: "Congress Street", mode: "bus" },
+    ],
+    stopRouteIds: { "pme:congress": ["pme-1"], "pme:forest": ["pme-1"] },
   },
 };
 
@@ -451,6 +469,9 @@ async function main() {
   const metroArgIndex = args.indexOf("--metro");
   const metroFilter =
     metroArgIndex >= 0 ? args[metroArgIndex + 1] : null;
+  const localZipIndex = args.indexOf("--local-zip");
+  const localZipPath =
+    localZipIndex >= 0 ? args[localZipIndex + 1] : null;
   const apiKey = process.env.TRANSITLAND_API_KEY?.trim();
 
   const metros = METROS.filter((metro) =>
@@ -462,6 +483,24 @@ async function main() {
   for (const metro of metros) {
     let bundle;
     const outPath = resolve(OUT_DIR, `${metro.id}.json`);
+
+    if (localZipPath) {
+      const zipBuffer = readFileSync(localZipPath);
+      bundle = await buildBundleFromGtfsZip(zipBuffer, metro);
+      writeBundle(outPath, bundle);
+      manifestEntries.push({
+        id: metro.id,
+        bundlePath: `/geo/gtfs/${metro.id}.json`,
+        feedOnestopId: metro.feedOnestopId,
+        builtAt: bundle.builtAt,
+        stopCount: bundle.stops.length,
+        routeCount: bundle.routes.length,
+      });
+      console.log(
+        `Wrote ${outPath} from ${localZipPath} (${bundle.stops.length} stops, ${bundle.routes.length} routes).`,
+      );
+      continue;
+    }
 
     if (fixturesOnly || !apiKey) {
       bundle = buildFixtureBundle(metro);

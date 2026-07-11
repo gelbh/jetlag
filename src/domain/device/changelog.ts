@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.4.3";
+export const APP_VERSION = "0.4.4";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.4.4",
+    date: "2026-07-11",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Recommended games: Portland, Maine with Greater Portland metro, five council districts, and GP Metro bus transit matching.",
+        ],
+      }
+    ],
+  },
   {
     version: "0.4.3",
     date: "2026-07-11",
