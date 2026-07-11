@@ -38,6 +38,7 @@ const BUNDLED_POI_PACKS = new Set<RegionPackId>([
   "london",
   "dublin",
   "portland-maine",
+  "prince-rupert",
 ]);
 
 const bundleCache = new Map<string, BundledPoiCategory | null>();

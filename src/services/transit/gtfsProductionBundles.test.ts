@@ -58,6 +58,19 @@ const CENTRAL_PORTLAND_MAINE = {
   ],
 };
 
+const CENTRAL_PRINCE_RUPERT = {
+  type: "Polygon" as const,
+  coordinates: [
+    [
+      [-130.34, 54.3],
+      [-130.3, 54.3],
+      [-130.3, 54.33],
+      [-130.34, 54.33],
+      [-130.34, 54.3],
+    ],
+  ],
+};
+
 describe("production GTFS bundles", () => {
   it("NYC midtown play area uses full subway stop inventory", async () => {
     const bundle = loadProductionBundle("nyc");
@@ -112,5 +125,17 @@ describe("production GTFS bundles", () => {
 
     const elm = stops.find((stop) => stop.name.includes("ELM ST"));
     expect(elm).toBeDefined();
+  });
+
+  it("Prince Rupert bundle loads BC Transit fixture stops", async () => {
+    const bundle = loadProductionBundle("prince-rupert");
+    expect(bundle).not.toBeNull();
+    expect(bundle!.stops.length).toBeGreaterThanOrEqual(2);
+
+    const stops = filterGtfsStopsForGameArea(bundle!, CENTRAL_PRINCE_RUPERT);
+    expect(stops.length).toBeGreaterThanOrEqual(2);
+
+    const cityHall = stops.find((stop) => stop.name === "City Hall");
+    expect(cityHall).toBeDefined();
   });
 });

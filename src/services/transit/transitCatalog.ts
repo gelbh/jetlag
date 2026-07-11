@@ -73,6 +73,14 @@ export const TRANSIT_METROS: TransitMetro[] = [
     transitlandFeed: "f-dry0-maine~greaterportlandmetrobus",
     transitlandRtFeed: "f-dry0-maine~greaterportlandmetrobus~rt",
   },
+  {
+    id: "prince-rupert",
+    label: "Prince Rupert",
+    center: [54.3158, -130.321],
+    radiusKm: 15,
+    transitlandFeed: "f-bctransit~prince~rupert",
+    transitlandRtFeed: "f-bctransit~prince~rupert~rt",
+  },
 ];
 
 export function getTransitMetro(metroId: string | undefined): TransitMetro | null {

@@ -22,6 +22,7 @@ describe("bundledGamePresets", () => {
         "bundled:osaka",
         "bundled:zurich-city",
         "bundled:lucerne-metro",
+        "bundled:prince-rupert",
       ]),
     );
   });
@@ -60,6 +61,14 @@ describe("bundledGamePresets", () => {
     expect(portlandMaine?.distanceUnit).toBe("imperial");
     expect(portlandMaine?.transitMetroId).toBe("portland-maine");
     expect(portlandMaine?.regionPackId).toBe("portland-maine");
+
+    const princeRupert = buildBundledGamePresets().find(
+      (preset) => preset.id === "bundled:prince-rupert",
+    );
+    expect(princeRupert?.distanceUnit).toBe("metric");
+    expect(princeRupert?.transitMetroId).toBe("prince-rupert");
+    expect(princeRupert?.regionPackId).toBe("prince-rupert");
+    expect(princeRupert?.gameSize).toBe("small");
   });
 
   it("derives game size from play area for bundled presets", () => {
@@ -147,5 +156,35 @@ describe("NYC GeoJSON asset counts", () => {
 
     expect(boroughs.features).toHaveLength(5);
     expect(districts.features.length).toBeGreaterThanOrEqual(59);
+  });
+});
+
+describe("Prince Rupert GeoJSON asset counts", () => {
+  it("ships city, neighbourhoods, and quadrant areas", () => {
+    const city = JSON.parse(
+      readFileSync(
+        resolve(import.meta.dirname, "../../../public/geo/prince-rupert/city.geojson"),
+        "utf8",
+      ),
+    );
+    const neighbourhoods = JSON.parse(
+      readFileSync(
+        resolve(
+          import.meta.dirname,
+          "../../../public/geo/prince-rupert/neighbourhoods.geojson",
+        ),
+        "utf8",
+      ),
+    );
+    const areas = JSON.parse(
+      readFileSync(
+        resolve(import.meta.dirname, "../../../public/geo/prince-rupert/areas.geojson"),
+        "utf8",
+      ),
+    );
+
+    expect(city.features).toHaveLength(1);
+    expect(neighbourhoods.features.length).toBeGreaterThanOrEqual(3);
+    expect(areas.features).toHaveLength(4);
   });
 });

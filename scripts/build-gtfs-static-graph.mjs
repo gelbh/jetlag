@@ -53,6 +53,12 @@ const METROS = [
     feedOnestopIds: ["f-dry0-maine~greaterportlandmetrobus"],
     bbox: { south: 43.55, west: -70.45, north: 43.75, east: -70.1 },
   },
+  {
+    id: "prince-rupert",
+    feedOnestopId: "f-bctransit~prince~rupert",
+    feedOnestopIds: ["f-bctransit~prince~rupert"],
+    bbox: { south: 54.25, west: -130.45, north: 54.4, east: -130.2 },
+  },
 ];
 
 const FIXTURES = {
@@ -132,6 +138,16 @@ const FIXTURES = {
       { id: "pme-1", shortName: "1", longName: "Congress Street", mode: "bus" },
     ],
     stopRouteIds: { "pme:congress": ["pme-1"], "pme:forest": ["pme-1"] },
+  },
+  "prince-rupert": {
+    stops: [
+      { id: "pru:city-hall", name: "City Hall", lat: 54.3158, lng: -130.3209 },
+      { id: "pru:cow-bay", name: "Cow Bay", lat: 54.3185, lng: -130.307 },
+    ],
+    routes: [
+      { id: "pru-1", shortName: "1", longName: "Downtown", mode: "bus" },
+    ],
+    stopRouteIds: { "pru:city-hall": ["pru-1"], "pru:cow-bay": ["pru-1"] },
   },
 };
 

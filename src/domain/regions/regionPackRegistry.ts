@@ -45,6 +45,12 @@ import {
   PORTLAND_MAINE_REGION_PACK_ID,
 } from "./portlandMaineRegionPack";
 import {
+  PRINCE_RUPERT_GEO_ASSETS,
+  PRINCE_RUPERT_MATCHING_LABEL_OVERRIDES,
+  PRINCE_RUPERT_MEASURING_LABEL_OVERRIDES,
+  PRINCE_RUPERT_REGION_PACK_ID,
+} from "./princeRupertRegionPack";
+import {
   ZURICH_GEO_ASSETS,
   ZURICH_MATCHING_LABEL_OVERRIDES,
   ZURICH_MEASURING_LABEL_OVERRIDES,
@@ -199,6 +205,19 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     subregionPropertyKey: "districtId",
     matchingLabelOverrides: PORTLAND_MAINE_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: PORTLAND_MAINE_MEASURING_LABEL_OVERRIDES,
+    unsupportedMatching: HIDE_COUNTRY_PROVINCE_MATCHING,
+    unsupportedBorders: HIDE_COUNTRY_PROVINCE_BORDERS,
+  },
+  [PRINCE_RUPERT_REGION_PACK_ID]: {
+    id: PRINCE_RUPERT_REGION_PACK_ID,
+    geoAssets: {
+      primary: PRINCE_RUPERT_GEO_ASSETS.neighbourhoods,
+      secondary: PRINCE_RUPERT_GEO_ASSETS.areas,
+      playArea: PRINCE_RUPERT_GEO_ASSETS.city,
+    },
+    subregionPropertyKey: "neighbourhoodId",
+    matchingLabelOverrides: PRINCE_RUPERT_MATCHING_LABEL_OVERRIDES,
+    measuringLabelOverrides: PRINCE_RUPERT_MEASURING_LABEL_OVERRIDES,
     unsupportedMatching: HIDE_COUNTRY_PROVINCE_MATCHING,
     unsupportedBorders: HIDE_COUNTRY_PROVINCE_BORDERS,
   },

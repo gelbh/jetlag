@@ -74,6 +74,26 @@ function stubFetchForPortlandMaineAssets() {
   });
 }
 
+function stubFetchForPrinceRupertAssets() {
+  const read = (relativePath: string) =>
+    readFileSync(resolve(ROOT, "public/geo/prince-rupert", relativePath), "utf8");
+
+  const paths: Record<string, string> = {
+    "/geo/prince-rupert/city.geojson": read("city.geojson"),
+    "/geo/prince-rupert/neighbourhoods.geojson": read("neighbourhoods.geojson"),
+    "/geo/prince-rupert/areas.geojson": read("areas.geojson"),
+  };
+
+  return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    const url = String(input);
+    const suffix = Object.keys(paths).find((path) => url.endsWith(path));
+    if (suffix) {
+      return new Response(paths[suffix], { status: 200 });
+    }
+    return new Response("missing", { status: 404 });
+  });
+}
+
 function ringPointCount(gameArea: {
   type: string;
   coordinates: unknown;
@@ -139,6 +159,20 @@ describe("loadRegionPackPlayArea", () => {
     expect(ringPointCount(district1)).toBeGreaterThan(10);
     expect(isAxisAlignedRectangle(metro)).toBe(false);
     expect(gameAreaSquareMiles(metro)).toBeGreaterThan(80);
+
+    fetchMock.mockRestore();
+  });
+
+  it("returns exact Prince Rupert city polygon from bundled assets", async () => {
+    clearRegionPackGeoCacheForTests();
+    const fetchMock = stubFetchForPrinceRupertAssets();
+
+    const city = await loadRegionPackPlayArea("prince-rupert");
+
+    expect(isAxisAlignedRectangle(city)).toBe(false);
+    expect(ringPointCount(city)).toBeGreaterThan(10);
+    expect(gameAreaSquareMiles(city)).toBeGreaterThan(20);
+    expect(gameAreaSquareMiles(city)).toBeLessThan(50);
 
     fetchMock.mockRestore();
   });

@@ -1,0 +1,4 @@
+City boundary: BC Geographic Data Warehouse (WHSE_ADMIN_BOUNDARIES.EBC_LOCAL_GOVERNMENTS_SP).
+Neighbourhoods: Voronoi cells from curated place seeds clipped to the city boundary; supplemental OSM place names where available (ODbL).
+Areas: quadrant splits of the city polygon for play.
+POI bundles: Wikidata (CC0).
