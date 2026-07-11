@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLogo } from "../components/ui/AppLogo";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { HudPlayIcon } from "../components/ui/HudIcons";
@@ -17,6 +17,11 @@ import { getRemoteSessionById } from "../services/firestore/firestoreAnnotations
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useViewTransitionNavigate } from "../hooks/useViewTransitionNavigate";
+import {
+  formatEntitlementSummary,
+  type PremiumEntitlements,
+} from "../domain/billing/premiumProducts";
+import { fetchPremiumEntitlements } from "../services/billing/premiumBilling";
 
 export function Home() {
   const navigate = useViewTransitionNavigate();
@@ -26,6 +31,36 @@ export function Home() {
   const [continueError, setContinueError] = useState<string | null>(null);
   const [continuing, setContinuing] = useState(false);
   const [changelogOpen, setChangelogOpen] = useState(false);
+  const [premiumEntitlements, setPremiumEntitlements] =
+    useState<PremiumEntitlements | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      if (!isFirebaseConfigured()) {
+        return;
+      }
+
+      try {
+        await ensureAnonymousUser();
+        const next = await fetchPremiumEntitlements();
+        if (!cancelled) {
+          setPremiumEntitlements(next);
+        }
+      } catch {
+        if (!cancelled) {
+          setPremiumEntitlements(null);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const premiumSummary = formatEntitlementSummary(premiumEntitlements);
 
   const handleContinue = async () => {
     if (!session) {
@@ -172,6 +207,18 @@ export function Home() {
             <span>Custom game</span>
             <span className="home-card-btn-hint">Saved templates</span>
           </Link>
+          {isFirebaseConfigured() ? (
+            <Link
+              to="/premium"
+              aria-label="Premium sessions and subscriptions"
+              className="home-card-btn home-card-btn-secondary"
+            >
+              <span>Premium</span>
+              <span className="home-card-btn-hint">
+                {premiumSummary ?? "Live transit hosting"}
+              </span>
+            </Link>
+          ) : null}
           <Link
             to="/feedback"
             aria-label="Feedback and suggestions"

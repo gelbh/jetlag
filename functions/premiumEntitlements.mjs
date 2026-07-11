@@ -1,0 +1,141 @@
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
+
+/** @typedef {'active' | 'trialing' | 'past_due' | 'canceled'} SubscriptionStatus */
+
+/**
+ * @param {import('firebase-admin/firestore').Firestore} db
+ * @param {string} uid
+ */
+export function userEntitlementsRef(db, uid) {
+  return db.collection("users").doc(uid);
+}
+
+/**
+ * @param {Record<string, unknown> | undefined} data
+ */
+export function hasUnlimitedPremiumEntitlement(data) {
+  if (!data) {
+    return false;
+  }
+
+  if (data.lifetimePremium === true) {
+    return true;
+  }
+
+  const status = data.subscription?.status;
+  return status === "active" || status === "trialing";
+}
+
+/**
+ * @param {Record<string, unknown> | undefined} data
+ */
+export function premiumSessionCredits(data) {
+  const credits = data?.premiumSessionCredits;
+  return typeof credits === "number" && Number.isFinite(credits) && credits > 0
+    ? Math.floor(credits)
+    : 0;
+}
+
+/**
+ * @param {Record<string, unknown> | undefined} data
+ */
+export function canCreatePaidPremiumSession(data) {
+  return (
+    hasUnlimitedPremiumEntitlement(data) || premiumSessionCredits(data) > 0
+  );
+}
+
+/**
+ * @param {Record<string, unknown> | undefined} data
+ */
+export function serializeEntitlementsForClient(data) {
+  const subscription = data?.subscription;
+  return {
+    premiumSessionCredits: premiumSessionCredits(data),
+    lifetimePremium: data?.lifetimePremium === true,
+    subscription:
+      subscription && typeof subscription === "object"
+        ? {
+            status: subscription.status ?? null,
+            plan: subscription.plan ?? null,
+            currentPeriodEnd:
+              subscription.currentPeriodEnd instanceof Timestamp
+                ? subscription.currentPeriodEnd.toMillis()
+                : null,
+          }
+        : null,
+    trialUsedAt:
+      data?.trialUsedAt instanceof Timestamp
+        ? data.trialUsedAt.toMillis()
+        : null,
+    canCreatePremium: canCreatePaidPremiumSession(data),
+    hasUnlimitedPremium: hasUnlimitedPremiumEntitlement(data),
+  };
+}
+
+/**
+ * @param {import('firebase-admin/firestore').Firestore} db
+ * @param {string} uid
+ * @param {Record<string, unknown>} patch
+ */
+export async function mergeUserEntitlements(db, uid, patch) {
+  await userEntitlementsRef(db, uid).set(
+    {
+      ...patch,
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true },
+  );
+}
+
+/**
+ * @param {import('firebase-admin/firestore').Transaction} transaction
+ * @param {import('firebase-admin/firestore').DocumentReference} userRef
+ * @param {Record<string, unknown> | undefined} data
+ */
+export function consumePremiumSessionCredit(transaction, userRef, data) {
+  if (hasUnlimitedPremiumEntitlement(data)) {
+    return;
+  }
+
+  const credits = premiumSessionCredits(data);
+  if (credits <= 0) {
+    throw new Error("No premium session credits remaining.");
+  }
+
+  transaction.set(
+    userRef,
+    {
+      premiumSessionCredits: credits - 1,
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true },
+  );
+}
+
+/**
+ * @param {import('firebase-admin/firestore').Firestore} db
+ * @param {string} eventId
+ */
+export async function markStripeEventProcessed(db, eventId) {
+  const ref = db.collection("stripeEvents").doc(eventId);
+  const existing = await ref.get();
+  if (existing.exists) {
+    return false;
+  }
+
+  await ref.set({
+    processedAt: FieldValue.serverTimestamp(),
+  });
+  return true;
+}
+
+/**
+ * @param {number | null | undefined} unixSeconds
+ */
+export function stripeTimestampToFirestore(unixSeconds) {
+  if (typeof unixSeconds !== "number" || !Number.isFinite(unixSeconds)) {
+    return null;
+  }
+  return Timestamp.fromMillis(unixSeconds * 1000);
+}

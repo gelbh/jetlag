@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import type { LatLngBoundsExpression } from "leaflet";
 import { AppLogo } from "../components/ui/AppLogo";
 import { ScreenNav } from "../components/ui/ScreenNav";
@@ -57,7 +57,16 @@ import {
 import { searchPlaces, type GeocodedPlace } from "../services/geo/geocoding";
 import { formatPlaceSearchSubtitle } from "../services/geo/geocodingRank";
 import { getCurrentPosition } from "../services/core/geolocation";
+import { APP_VERSION } from "../domain/device/changelog";
+import {
+  formatEntitlementSummary,
+  type PremiumEntitlements,
+} from "../domain/billing/premiumProducts";
 import { grantAccess, hasAccessClaim } from "../services/core/accessControl";
+import {
+  createPremiumRemoteSession,
+  fetchPremiumEntitlements,
+} from "../services/billing/premiumBilling";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { unionGameAreas } from "../domain/geometry/unionGameAreas";
 import { parseBoundaryFile } from "../services/core/kmzImport";
@@ -87,7 +96,7 @@ const TIER_OPTIONS: Array<{
   {
     value: "premium",
     label: "Premium",
-    summary: "Live transit, faster map loads. Host enters access code once.",
+    summary: "Live transit and faster map loads.",
   },
 ];
 
@@ -139,6 +148,9 @@ export function CreateSession() {
   const [accessCode, setAccessCode] = useState("");
   const [regionPackId, setRegionPackId] = useState<RegionPackId | undefined>();
   const [hostHasAccessClaim, setHostHasAccessClaim] = useState(false);
+  const [premiumEntitlements, setPremiumEntitlements] =
+    useState<PremiumEntitlements | null>(null);
+  const [accessCodeExpanded, setAccessCodeExpanded] = useState(false);
   const handleGameSizeChange = useCallback(
     (size: GameSize) => {
       setGameSize(size);
@@ -268,6 +280,7 @@ export function CreateSession() {
         }
 
         setHostHasAccessClaim(await hasAccessClaim(user));
+        setPremiumEntitlements(await fetchPremiumEntitlements());
       } catch {
         if (!cancelled) {
           setHostHasAccessClaim(false);
@@ -307,10 +320,16 @@ export function CreateSession() {
   }, [inferredTransitMetroId, transitMetroInferenceSeed]);
 
   const transitMetroId = transitMetroOverride ?? inferredTransitMetroId;
-  const showAccessCodeField =
+  const paidPremiumHost =
+    premiumEntitlements?.canCreatePremium === true;
+  const showPremiumUnlockPanel =
     isFirebaseConfigured() &&
     sessionTier === "premium" &&
-    !hostHasAccessClaim;
+    !hostHasAccessClaim &&
+    !paidPremiumHost;
+  const showAccessCodeField =
+    showPremiumUnlockPanel && accessCodeExpanded;
+  const premiumEntitlementSummary = formatEntitlementSummary(premiumEntitlements);
 
   const previewGameArea = useMemo(() => {
     if (importedGameArea) {
@@ -520,11 +539,12 @@ export function CreateSession() {
       const metroId = transitMetroId || undefined;
       const tier =
         isFirebaseConfigured() && sessionTier === "premium" ? "premium" : "free";
+      let useAccessClaimForPremium = hostHasAccessClaim;
 
-      if (tier === "premium" && !hostHasAccessClaim) {
+      if (tier === "premium" && !useAccessClaimForPremium && !paidPremiumHost) {
         const trimmedCode = accessCode.trim();
         if (!trimmedCode) {
-          setAccessCodeError("Enter the host access code.");
+          setAccessCodeError("Unlock premium or enter a host access code.");
           return;
         }
 
@@ -532,6 +552,7 @@ export function CreateSession() {
         try {
           await grantAccess(trimmedCode);
           setHostHasAccessClaim(true);
+          useAccessClaimForPremium = true;
         } catch (nextError) {
           setAccessCodeError(
             nextError instanceof Error
@@ -555,18 +576,36 @@ export function CreateSession() {
 
       if (isFirebaseConfigured()) {
         const user = await retryAsync(() => ensureAnonymousUser());
-        const session = await retryAsync(() =>
-          createRemoteSession(
-            gameArea,
-            user.uid,
-            tier,
-            metroId,
-            playerRole,
-            gameSize,
-            rulesPatch,
-            distanceUnit,
-          ),
-        );
+        const usePremiumCallable =
+          tier === "premium" &&
+          !useAccessClaimForPremium &&
+          paidPremiumHost;
+        const session = usePremiumCallable
+          ? await retryAsync(() =>
+              createPremiumRemoteSession({
+                gameArea,
+                hostUid: user.uid,
+                tier,
+                transitMetroId: metroId,
+                hostRole: playerRole,
+                gameSize,
+                rulesPatch,
+                distanceUnit,
+                hostAppVersion: APP_VERSION,
+              }),
+            )
+          : await retryAsync(() =>
+              createRemoteSession(
+                gameArea,
+                user.uid,
+                tier,
+                metroId,
+                playerRole,
+                gameSize,
+                rulesPatch,
+                distanceUnit,
+              ),
+            );
         setSession(session, user.uid);
         setPremiumApiContext(session);
       } else {
@@ -995,6 +1034,42 @@ export function CreateSession() {
           onChange={setAdvancedSettings}
           disabled={loading || verifyingAccess}
         />
+        </div>
+
+        <div
+          className={`overflow-hidden motion-safe:transition-[max-height,opacity] motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none ${
+            showPremiumUnlockPanel || paidPremiumHost
+              ? "max-h-56 opacity-100"
+              : "max-h-0 opacity-0"
+          }`}
+        >
+          {paidPremiumHost && premiumEntitlementSummary ? (
+            <p className="text-sm font-semibold text-highlight">
+              {premiumEntitlementSummary}
+            </p>
+          ) : null}
+          {showPremiumUnlockPanel ? (
+            <div className="space-y-2">
+              <p className="text-sm leading-relaxed text-ink-muted">
+                Buy a session pack or subscription to host premium games.
+              </p>
+              <Link
+                to="/premium"
+                className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-blue"
+              >
+                View premium options
+              </Link>
+              <button
+                type="button"
+                onClick={() => setAccessCodeExpanded((value) => !value)}
+                className="block text-sm font-semibold text-ink-dim"
+              >
+                {accessCodeExpanded
+                  ? "Hide access code"
+                  : "Have an access code?"}
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <div

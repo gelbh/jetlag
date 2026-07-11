@@ -1,7 +1,7 @@
 {
   "name": "jetlag",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
   "engines": {
     "node": ">=24.0.0"
@@ -22,7 +22,7 @@
     "test:e2e:smoke": "E2E_SMOKE=1 playwright test",
     "test:e2e:ui": "playwright test --ui",
     "audit:overpass": "RUN_OVERPASS_AUDIT=1 vitest run src/services/core/overpassAudit.integration.test.ts",
-    "test:functions": "npm ci --prefix functions && npm test --prefix functions",
+    "test:functions": "env -u npm_config_allow_scripts sh -c 'cd functions && npm ci && npm test'",
     "test:unit": "vitest run && npm test --prefix functions",
     "test:ci": "npm run test:coverage && npm run test:functions",
     "emulators:start": "firebase emulators:start --project demo-jetlag --only auth,firestore,storage",
@@ -135,6 +135,7 @@
     "@sentry/capacitor@4.2.0": true,
     "@sentry/cli@2.58.6": true,
     "esbuild@0.28.1": true,
+    "protobufjs@7.5.8": true,
     "protobufjs@7.6.5": true,
     "re2@1.25.1": true,
     "sharp@0.34.5": true,

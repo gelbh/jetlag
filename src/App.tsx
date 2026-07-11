@@ -16,6 +16,7 @@ import { useMotionProfile } from "./hooks/location/useMotionProfile";
 import { Home } from "./routes/Home";
 import { JoinSession } from "./routes/JoinSession";
 import { Feedback } from "./routes/Feedback";
+import { Premium } from "./routes/Premium";
 import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";
 
 const MapScreen = lazy(() =>
@@ -102,6 +103,7 @@ export default function App() {
           <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/feedback" element={<Feedback />} />
+          <Route path="/premium" element={<Premium />} />
           <Route
             path="/create"
             element={

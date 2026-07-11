@@ -100,3 +100,25 @@ export const pendingQuestionDocumentSchema = z
 export type SessionDocument = z.infer<typeof sessionDocumentSchema>;
 export type AnnotationDocument = z.infer<typeof annotationDocumentSchema>;
 export type PendingQuestionDocument = z.infer<typeof pendingQuestionDocumentSchema>;
+
+export const userEntitlementsDocumentSchema = z
+  .object({
+    stripeCustomerId: z.string().optional(),
+    premiumSessionCredits: z.number().finite().optional(),
+    lifetimePremium: z.boolean().optional(),
+    subscription: z
+      .object({
+        status: z.string().optional(),
+        plan: z.enum(["monthly", "yearly"]).optional(),
+        currentPeriodEnd: z.unknown().optional(),
+        stripeSubscriptionId: z.string().optional(),
+      })
+      .optional(),
+    trialUsedAt: z.unknown().optional(),
+    updatedAt: z.unknown().optional(),
+  })
+  .passthrough();
+
+export type UserEntitlementsDocument = z.infer<
+  typeof userEntitlementsDocumentSchema
+>;

@@ -48,6 +48,20 @@ import {
   recordGrantAccessFailure,
 } from "./firestoreRateLimit.mjs";
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
+import {
+  STRIPE_BILLING_PARAMS,
+  STRIPE_BILLING_SECRETS,
+  stripeSecretKey,
+  stripeWebhookSecret,
+} from "./stripeConfig.mjs";
+import {
+  createBillingPortalSessionHandler,
+  createCheckoutSessionHandler,
+  createPremiumSessionHandler,
+  createStripeClient,
+  getPremiumEntitlementsHandler,
+} from "./stripeBilling.mjs";
+import { handleStripeWebhook } from "./stripeWebhook.mjs";
 
 const accessCodeSecret = defineSecret("ACCESS_CODE");
 const transitlandApiKeySecret = defineSecret("TRANSITLAND_API_KEY");
@@ -463,5 +477,92 @@ export const notifySessionMessage = onDocumentWritten(
   },
   withSentryEventHandler(async (event) => {
     await handleSessionMessageWrite(adminDb(), event);
+  }),
+);
+
+const stripeBillingOptions = {
+  secrets: [...STRIPE_BILLING_SECRETS, sentryDsnSecret],
+  params: STRIPE_BILLING_PARAMS,
+};
+
+export const getPremiumEntitlements = onCall(stripeBillingOptions, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Sign in required.");
+  }
+
+  return getPremiumEntitlementsHandler(adminDb(), request.auth.uid);
+});
+
+export const createCheckoutSession = onCall(
+  { ...stripeBillingOptions, enforceAppCheck: true },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+
+    const productKey =
+      typeof request.data?.productKey === "string"
+        ? request.data.productKey.trim()
+        : "";
+    const startTrial = request.data?.startTrial === true;
+
+    if (!productKey) {
+      throw new HttpsError("invalid-argument", "Product key required.");
+    }
+
+    const stripe = createStripeClient(stripeSecretKey.value());
+    return createCheckoutSessionHandler(
+      stripe,
+      adminDb(),
+      request.auth.uid,
+      request.auth.token.email,
+      productKey,
+      startTrial,
+    );
+  },
+);
+
+export const createBillingPortalSession = onCall(
+  { ...stripeBillingOptions, enforceAppCheck: true },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+
+    const stripe = createStripeClient(stripeSecretKey.value());
+    return createBillingPortalSessionHandler(
+      stripe,
+      adminDb(),
+      request.auth.uid,
+    );
+  },
+);
+
+export const createPremiumSession = onCall(
+  { ...stripeBillingOptions, enforceAppCheck: true },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+
+    return createPremiumSessionHandler(
+      adminDb(),
+      request.auth.uid,
+      request.data,
+    );
+  },
+);
+
+export const stripeWebhook = onRequest(
+  {
+    secrets: [stripeWebhookSecret, sentryDsnSecret],
+  },
+  withSentryHttpHandler(async (req, res) => {
+    await handleStripeWebhook(
+      adminDb(),
+      stripeWebhookSecret.value(),
+      req,
+      res,
+    );
   }),
 );

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.0 - 2026-07-11
+
+### Improvements
+
+- Premium billing: Stripe checkout for session packs, monthly and yearly unlimited, lifetime access, and a 7-day subscription trial
+- Create session: paid hosts unlock premium without an access code; access codes still work for beta hosts
+- Home: Premium page lists plans and shows your remaining sessions or subscription status
+
+### Technical
+
+- Cloud Functions: Stripe webhooks, checkout, billing portal, and paid premium session creation
+
 ## 0.3.0 - 2026-07-11
 
 ### Improvements

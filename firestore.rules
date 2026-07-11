@@ -543,5 +543,14 @@ service cloud.firestore {
     match /_rateLimits/{docId} {
       allow read, write: if false;
     }
+
+    match /users/{uid} {
+      allow get: if isSignedIn() && request.auth.uid == uid;
+      allow list, create, update, delete: if false;
+    }
+
+    match /stripeEvents/{eventId} {
+      allow read, write: if false;
+    }
   }
 }

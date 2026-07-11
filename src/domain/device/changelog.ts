@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.3.0";
+export const APP_VERSION = "0.4.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,26 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.4.0",
+    date: "2026-07-11",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Premium billing: Stripe checkout for session packs, monthly and yearly unlimited, lifetime access, and a 7-day subscription trial",
+          "Create session: paid hosts unlock premium without an access code; access codes still work for beta hosts",
+          "Home: Premium page lists plans and shows your remaining sessions or subscription status",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Cloud Functions: Stripe webhooks, checkout, billing portal, and paid premium session creation",
+        ],
+      }
+    ],
+  },
   {
     version: "0.3.0",
     date: "2026-07-11",

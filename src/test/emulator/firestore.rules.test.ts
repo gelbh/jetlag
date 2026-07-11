@@ -175,6 +175,23 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows users to read their own entitlements doc only", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await assertSucceeds(
+      host.firestore().collection("users").doc("host-1").get(),
+    );
+
+    const guest = testEnv.authenticatedContext("guest-1");
+    await assertFails(
+      guest.firestore().collection("users").doc("host-1").get(),
+    );
+    await assertFails(
+      host.firestore().collection("users").doc("host-1").set({
+        premiumSessionCredits: 5,
+      }),
+    );
+  });
+
   it("allows seeker members to read and write annotations", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
