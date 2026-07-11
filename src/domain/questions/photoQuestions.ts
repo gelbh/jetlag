@@ -2,6 +2,7 @@ import type { GameSize } from "../session/gameSize";
 import { firstUnusedCatalogOption } from "../session/toolSessionOptions";
 import type { PendingQuestionRecord } from "../session/sessionChat";
 import type { GameReplyOption } from "../session/sessionChat";
+import { buildCatalogHelpers } from "./catalogHelpers";
 
 export type PhotoCategoryId =
   | "any_building_from_transit_station"
@@ -262,35 +263,32 @@ export function readPhotoCategoryId(
   return categoryId as PhotoCategoryId;
 }
 
+function isPhotoPendingQuestionCountable(
+  question: PendingQuestionRecord,
+): boolean {
+  return (
+    question.status === "resolved" ||
+    question.status === "answered" ||
+    question.status === "pending" ||
+    question.status === "walking"
+  );
+}
+
+const photoCatalogHelpers = buildCatalogHelpers<PhotoCategoryId>({
+  toolType: "photo",
+  readOptionFromAnnotation: () => null,
+  readOptionFromPending: readPhotoCategoryId,
+  isPendingQuestionCountable: isPhotoPendingQuestionCountable,
+});
+
 export function usedPhotoCategoryIds(
   pendingQuestions: readonly PendingQuestionRecord[],
   exceptQuestionId?: string,
 ): Set<PhotoCategoryId> {
-  const used = new Set<PhotoCategoryId>();
-
-  for (const question of pendingQuestions) {
-    if (question.toolType !== "photo") {
-      continue;
-    }
-    if (exceptQuestionId && question.id === exceptQuestionId) {
-      continue;
-    }
-    if (
-      question.status !== "resolved" &&
-      question.status !== "answered" &&
-      question.status !== "pending" &&
-      question.status !== "walking"
-    ) {
-      continue;
-    }
-
-    const categoryId = readPhotoCategoryId(question);
-    if (categoryId) {
-      used.add(categoryId);
-    }
-  }
-
-  return used;
+  return photoCatalogHelpers.usedOptionsFromPending(
+    pendingQuestions,
+    exceptQuestionId,
+  );
 }
 
 export function photoCategoryUseCount(

@@ -5,7 +5,7 @@ import type { MeasuringPlace } from "../../services/geo/measuringPlaces";
 import {
   TENTACLE_ANSWER_RADIUS_METERS,
   TENTACLE_SEARCH_RADIUS_METERS,
-} from "../../domain/questions/tentacleQuestions";
+} from "../../domain/questions";
 import type { TentaclePoi } from "../../domain/map/annotations";
 
 export interface MatchingToolApi {

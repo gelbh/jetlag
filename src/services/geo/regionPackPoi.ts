@@ -1,7 +1,7 @@
 import type { GameArea } from "../../domain/map/annotations";
 import { distanceBetweenPoints, isPointInGameArea, type LatLngTuple } from "../../domain/geometry/geometry";
-import type { MeasuringLocationCategory } from "../../domain/questions/measuringQuestions";
-import type { TentacleExtendedCategoryId } from "../../domain/questions/tentacleQuestions";
+import type { MeasuringLocationCategory } from "../../domain/questions";
+import type { TentacleExtendedCategoryId } from "../../domain/questions";
 import type { TentaclePoi } from "../../domain/map/annotations";
 import type { RegionPackId } from "../../domain/regions/regionPack";
 import type { MeasuringPlace } from "./measuringPlaces";

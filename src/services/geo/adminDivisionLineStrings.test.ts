@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../domain/map/annotations";
-import { lineStringsFromAdminDivisionBoundaries } from "./adminPolygonBoundaries";
+import { lineStringsFromAdminDivisionBoundaries } from "./adminDivisionLineStrings";
 
-describe("adminPolygonBoundaries", () => {
+describe("adminDivisionLineStrings", () => {
   it("extracts line strings from admin polygon rings", () => {
     const boundary: GameArea = {
       type: "Polygon",

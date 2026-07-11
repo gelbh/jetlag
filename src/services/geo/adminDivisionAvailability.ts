@@ -1,8 +1,8 @@
 import type { GameArea } from "../../domain/map/annotations";
 import type { CustomMatchingAreasByLevel, MatchingAdminLevel } from "../../domain/session/sessionCustomContent";
-import { adminLevelForMatchingCategory } from "../../domain/questions/matchingQuestions";
-import type { MatchingCategoryId } from "../../domain/questions/matchingQuestions";
-import type { MeasuringFromKind } from "../../domain/questions/measuringQuestions";
+import { adminLevelForMatchingCategory } from "../../domain/questions";
+import type { MatchingCategoryId } from "../../domain/questions";
+import type { MeasuringFromKind } from "../../domain/questions";
 import { getRegionPackConfig } from "../../domain/regions/regionPackRegistry";
 import { regionPackHasBundledBoundaries } from "./regionPackBoundaries";
 import type { RegionPackId } from "../../domain/regions/regionPack";

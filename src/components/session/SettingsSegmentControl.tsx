@@ -1,4 +1,4 @@
-import { SegmentControl } from "../ui/SegmentControl";
+import { HudSegmentControl } from "../ui/HudSegmentControl";
 
 export type SettingsSegment = "map" | "layers" | "rules" | "session";
 
@@ -19,8 +19,7 @@ export function SettingsSegmentControl({
   onChange,
 }: SettingsSegmentControlProps) {
   return (
-    <SegmentControl
-      variant="hud"
+    <HudSegmentControl
       value={value}
       options={SEGMENTS.map((segment) => ({
         value: segment.id,

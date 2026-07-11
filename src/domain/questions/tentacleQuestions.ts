@@ -12,11 +12,7 @@ import {
 } from "../session/sessionRules";
 import type { AnnotationRecord } from "../map/annotations";
 import type { PendingQuestionRecord } from "../session/sessionChat";
-import { isCountablePendingQuestionStatus } from "./questionRules";
-import {
-  collectUsedAnnotationOptions,
-  firstUnusedCatalogOption,
-} from "../session/toolSessionOptions";
+import { buildCatalogHelpers } from "./catalogHelpers";
 import {
   formatDistance,
   milesToMeters,
@@ -218,29 +214,45 @@ export function tentacleHiderAnswerClipboardText(
 
 export function tentacleCategoryIdForAnnotation(
   annotation: AnnotationRecord,
-): string | null {
+): TentacleExtendedCategoryId | null {
   if (annotation.type !== "tentacle") {
     return null;
   }
 
-  return (
+  const categoryId =
     annotation.metadata.tentacleCategoryId ??
     annotation.metadata.tentacleAnswerCategory ??
-    null
-  );
+    null;
+
+  return categoryId ? (categoryId as TentacleExtendedCategoryId) : null;
 }
+
+export function readTentacleCategoryFromPending(
+  question: PendingQuestionRecord,
+): TentacleExtendedCategoryId | null {
+  if (question.toolType !== "tentacle") {
+    return null;
+  }
+
+  const categoryId = question.placement.metadata.tentacleCategoryId;
+  return typeof categoryId === "string"
+    ? (categoryId as TentacleExtendedCategoryId)
+    : null;
+}
+
+const tentacleCatalogHelpers = buildCatalogHelpers<TentacleExtendedCategoryId>({
+  toolType: "tentacle",
+  readOptionFromAnnotation: tentacleCategoryIdForAnnotation,
+  readOptionFromPending: readTentacleCategoryFromPending,
+});
 
 export function usedTentacleCategoryIds(
   annotations: AnnotationRecord[],
   exceptAnnotationId?: string,
 ): Set<TentacleExtendedCategoryId> {
-  const raw = collectUsedAnnotationOptions(
+  return tentacleCatalogHelpers.usedOptionsFromAnnotations(
     annotations,
-    (annotation) => tentacleCategoryIdForAnnotation(annotation),
     exceptAnnotationId,
-  );
-  return new Set(
-    [...raw].filter((id): id is TentacleExtendedCategoryId => Boolean(id)),
   );
 }
 
@@ -249,7 +261,10 @@ export function firstAvailableTentacleCategoryId(
   usedCategories: ReadonlySet<TentacleExtendedCategoryId> = new Set(),
 ): TentacleExtendedCategoryId | null {
   const categories = tentacleCategoriesForGameSize(gameSize);
-  return firstUnusedCatalogOption(categories, usedCategories);
+  return tentacleCatalogHelpers.firstAvailableFromCatalog(
+    categories,
+    usedCategories,
+  );
 }
 
 export function firstAvailableTentacleCategoryIdForSession(
@@ -257,7 +272,10 @@ export function firstAvailableTentacleCategoryIdForSession(
   usedCategories: ReadonlySet<TentacleExtendedCategoryId> = new Set(),
 ): TentacleExtendedCategoryId | null {
   const categories = tentacleCategoriesForSession(session);
-  return firstUnusedCatalogOption(categories, usedCategories);
+  return tentacleCatalogHelpers.firstAvailableFromCatalog(
+    categories,
+    usedCategories,
+  );
 }
 
 export function isTentacleCategoryAvailable(
@@ -278,16 +296,21 @@ export function defaultTentacleCategoryId(
   gameSize: GameSize,
   usedCategories: ReadonlySet<TentacleExtendedCategoryId> = new Set(),
 ): TentacleExtendedCategoryId {
-  return firstAvailableTentacleCategoryId(gameSize, usedCategories) ?? "museum";
+  return tentacleCatalogHelpers.defaultFromCatalog(
+    tentacleCategoriesForGameSize(gameSize),
+    usedCategories,
+    "museum",
+  );
 }
 
 export function defaultTentacleCategoryIdForSession(
   session: SessionRulesInput,
   usedCategories: ReadonlySet<TentacleExtendedCategoryId> = new Set(),
 ): TentacleExtendedCategoryId {
-  return (
-    firstAvailableTentacleCategoryIdForSession(session, usedCategories) ??
-    "museum"
+  return tentacleCatalogHelpers.defaultFromCatalog(
+    tentacleCategoriesForSession(session),
+    usedCategories,
+    "museum",
   );
 }
 
@@ -296,32 +319,11 @@ export function tentacleCategoryUseCount(
   categoryId: TentacleExtendedCategoryId,
   exceptAnnotationId?: string,
 ): number {
-  let count = 0;
-  for (const annotation of annotations) {
-    if (annotation.status !== "active" || annotation.type !== "tentacle") {
-      continue;
-    }
-    if (exceptAnnotationId && annotation.id === exceptAnnotationId) {
-      continue;
-    }
-    if (tentacleCategoryIdForAnnotation(annotation) === categoryId) {
-      count += 1;
-    }
-  }
-  return count;
-}
-
-export function readTentacleCategoryFromPending(
-  question: PendingQuestionRecord,
-): TentacleExtendedCategoryId | null {
-  if (question.toolType !== "tentacle") {
-    return null;
-  }
-
-  const categoryId = question.placement.metadata.tentacleCategoryId;
-  return typeof categoryId === "string"
-    ? (categoryId as TentacleExtendedCategoryId)
-    : null;
+  return tentacleCatalogHelpers.optionUseCountFromAnnotations(
+    annotations,
+    categoryId,
+    exceptAnnotationId,
+  );
 }
 
 export function tentacleCategoryUseCountFromPending(
@@ -329,22 +331,11 @@ export function tentacleCategoryUseCountFromPending(
   categoryId: TentacleExtendedCategoryId,
   exceptQuestionId?: string,
 ): number {
-  let count = 0;
-  for (const question of pendingQuestions) {
-    if (question.toolType !== "tentacle") {
-      continue;
-    }
-    if (exceptQuestionId && question.id === exceptQuestionId) {
-      continue;
-    }
-    if (!isCountablePendingQuestionStatus(question.status)) {
-      continue;
-    }
-    if (readTentacleCategoryFromPending(question) === categoryId) {
-      count += 1;
-    }
-  }
-  return count;
+  return tentacleCatalogHelpers.optionUseCountFromPending(
+    pendingQuestions,
+    categoryId,
+    exceptQuestionId,
+  );
 }
 
 export function tentacleAnswerLabel(

@@ -5,26 +5,9 @@ import {
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
 } from "../../domain/geometry/geometry";
+import { polygonOuterRingToLineString } from "../../domain/geometry/ringToLineString";
 import type { SessionCustomMeasureGeometry } from "../../domain/session/customMeasureGeometry";
 import { parseCustomMeasureGeometryFeature } from "../../domain/session/customMeasureGeometry";
-
-function polygonOuterRingToLineString(
-  polygon: Feature<Polygon>,
-): Feature<LineString> | null {
-  const ring = polygon.geometry.coordinates[0];
-  if (!ring || ring.length < 2) {
-    return null;
-  }
-
-  return {
-    type: "Feature",
-    properties: {},
-    geometry: {
-      type: "LineString",
-      coordinates: ring,
-    },
-  };
-}
 
 function geometryToLineSegments(
   feature: Feature<LineString | Polygon>,

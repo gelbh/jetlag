@@ -4,7 +4,7 @@ import type { HidingZoneRecord } from "../../domain/session/hidingZone";
 import {
   isQuestionAnswerDeadlineExpired,
   questionAnswerDeadlineMs,
-} from "../../domain/questions/questionRules";
+} from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { updatePendingQuestion } from "../../services/firestore/firestoreSessionExtras";
 

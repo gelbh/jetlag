@@ -1,8 +1,8 @@
-import { Fragment, memo } from "react";
-import { Circle, CircleMarker, Polygon, Polyline, Popup } from "react-leaflet";
+import { memo } from "react";
+import { Circle, CircleMarker, Polyline, Popup } from "react-leaflet";
 import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
-import { polygonFeatureToLeafletPolygonGroups } from "../../domain/geometry/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
+import { renderGeoJsonPolygonGroups } from "./renderHelpers";
 
 interface MapDraftLayerProps {
   overlays: readonly MapDraftOverlay[];
@@ -52,25 +52,17 @@ export const MapDraftLayer = memo(function MapDraftLayer({
               />
             );
           case "polygon":
-            return (
-              <Fragment key={overlay.id}>
-                {polygonFeatureToLeafletPolygonGroups(overlay.feature).map(
-                  (rings, index) => (
-                    <Polygon
-                      key={`${overlay.id}-${index}`}
-                      positions={rings}
-                      pathOptions={{
-                        color: overlay.style?.color ?? c.boundary,
-                        weight: overlay.style?.weight ?? 1,
-                        dashArray: overlay.style?.dashArray,
-                        fillColor: overlay.style?.fillColor ?? c.boundary,
-                        fillOpacity: overlay.style?.fillOpacity ?? 0.2,
-                      }}
-                    />
-                  ),
-                )}
-              </Fragment>
-            );
+            return renderGeoJsonPolygonGroups({
+              id: overlay.id,
+              feature: overlay.feature,
+              pathOptions: {
+                color: overlay.style?.color ?? c.boundary,
+                weight: overlay.style?.weight ?? 1,
+                dashArray: overlay.style?.dashArray,
+                fillColor: overlay.style?.fillColor ?? c.boundary,
+                fillOpacity: overlay.style?.fillOpacity ?? 0.2,
+              },
+            });
           case "polyline":
             return (
               <Polyline

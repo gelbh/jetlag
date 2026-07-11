@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode, Ref } from "react";
-import { PopupCloseButton } from "./PopupCloseButton";
+import { PopupCloseButton } from "../ui/PopupCloseButton";
 
 interface MapFloatingPanelProps {
   minimized: boolean;

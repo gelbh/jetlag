@@ -1,11 +1,11 @@
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 import {
   HudChatIcon,
-  HudPinIcon,
   HudPlusIcon,
   HudRefreshIcon,
   HudSettingsIcon,
 } from "../ui/HudIcons";
+import { HudPinIcon } from "../map/ToolIcons";
 
 interface HiderToolDockProps {
   zoneLabel: string;

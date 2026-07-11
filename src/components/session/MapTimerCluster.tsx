@@ -14,7 +14,7 @@ import {
   seekPhaseElapsedMs,
 } from "../../domain/session/hidingPeriod";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
-import { selectPrimaryQuestionTimer } from "../../domain/questions/questionTimerDisplay";
+import { selectPrimaryQuestionTimer } from "../../domain/questions";
 import { useMapStore } from "../../state/mapStore";
 
 interface MapTimerClusterProps {

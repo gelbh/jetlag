@@ -6,7 +6,7 @@ import {
   gameSizeLabel,
   recommendGameSize,
 } from "../../domain/session/gameSize";
-import { SegmentControl } from "../ui/SegmentControl";
+import { HudSegmentControl } from "../ui/HudSegmentControl";
 import { FRAMING_MODE_OPTIONS } from "./gameAreaFramingUi";
 
 interface FramingModeSegmentControlProps {
@@ -23,8 +23,7 @@ export function FramingModeSegmentControl({
   "aria-label": ariaLabel = "Play area shape",
 }: FramingModeSegmentControlProps) {
   return (
-    <SegmentControl
-      variant="hud"
+    <HudSegmentControl
       value={value}
       options={FRAMING_MODE_OPTIONS}
       onChange={onChange}

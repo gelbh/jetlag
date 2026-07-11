@@ -35,7 +35,7 @@ import { useZoneTool } from "../hooks/tools/useZoneTool";
 import { ActiveThermometerWalkLayer } from "../components/map/ActiveThermometerWalkLayer";
 import { PendingQuestionLayer } from "../components/map/PendingQuestionLayer";
 import { useThermometerTool } from "../hooks/tools/useThermometerTool";
-import { hasOpenPendingQuestion } from "../domain/questions/questionRules";
+import { hasOpenPendingQuestion } from "../domain/questions";
 import {
   createIdleHeavyMapTools,
   type HeavyMapToolsApi,

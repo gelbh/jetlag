@@ -4,8 +4,8 @@ import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
 } from "./matchingGeometry";
-import type { MatchingFeature } from "../../services/geo/matchingFeatures";
-import { pickNearestMatchingFeature } from "../../services/geo/matchingFeatures";
+import type { MatchingFeature } from "../../domain/geo/types";
+import { pickNearestMatchingFeature } from "../../domain/geo/matchingAdapters";
 import type { LatLngTuple } from "./geometry";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";

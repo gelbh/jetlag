@@ -8,7 +8,7 @@ import {
   crowFliesDistanceMeters,
   isThermometerWalkActive,
   parseThermometerStartPoint,
-} from "../../domain/questions/thermometerWalk";
+} from "../../domain/questions";
 
 interface UseActiveThermometerWalkParams {
   pendingQuestions: readonly PendingQuestionRecord[];

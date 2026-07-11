@@ -8,7 +8,7 @@ import {
   isThermometerDistanceOptionAvailableForSession,
   thermometerQuestionPrompt,
   type ThermometerAnswer,
-} from "../../domain/questions/thermometerQuestions";
+} from "../../domain/questions";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import { hotterColderAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";

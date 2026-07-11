@@ -8,7 +8,7 @@ import {
   seekPhaseElapsedMs,
 } from "../../domain/session/hidingPeriod";
 import type { NotificationPreferences } from "../../domain/device/notifications";
-import { selectPrimaryQuestionTimer } from "../../domain/questions/questionTimerDisplay";
+import { selectPrimaryQuestionTimer } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import {
   computeElapsedMs,

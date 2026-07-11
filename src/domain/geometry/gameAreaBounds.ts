@@ -1,8 +1,9 @@
 import type { Position } from "geojson";
 import type { GameArea } from "../map/annotations";
-
-const MIN_GAME_AREA_LAT_SPAN = 0.005;
-const MIN_GAME_AREA_LNG_SPAN = 0.005;
+import {
+  MIN_GAME_AREA_LAT_SPAN,
+  MIN_GAME_AREA_LNG_SPAN,
+} from "./gameAreaConstants";
 
 export interface BoundingBox {
   south: number;

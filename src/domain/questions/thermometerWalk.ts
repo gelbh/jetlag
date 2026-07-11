@@ -1,6 +1,6 @@
 import type { Feature, LineString, Point } from "geojson";
 import type { LatLngTuple } from "../geometry/geometry";
-import { distanceBetweenPoints } from "../geometry/geometryMeasuring";
+import { haversineMeters } from "../geometry/distance";
 import type { PendingQuestionPlacement } from "../session/sessionChat";
 import type { PendingQuestionRecord } from "../session/sessionChat";
 
@@ -41,7 +41,7 @@ export function isLocalThermometerWalkId(
 }
 
 export function crowFliesDistanceMeters(a: LatLngTuple, b: LatLngTuple): number {
-  return distanceBetweenPoints(a, b);
+  return haversineMeters(a, b);
 }
 
 export function buildThermometerLineGeometry(

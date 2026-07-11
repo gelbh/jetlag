@@ -1,11 +1,11 @@
-import { Fragment } from "react";
-import { Circle, CircleMarker, Polyline, Popup } from "react-leaflet";
+import { CircleMarker, Polyline, Popup } from "react-leaflet";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import { pointToolRadiusFromMetadata } from "../../domain/map/annotations";
 import { polygonFeatureToLeafletRings } from "../../domain/geometry/geometry";
 import type { LayerVisibility } from "../../state/sessionStore";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
+import { renderPointRadiusAnnotation } from "./renderHelpers";
 
 interface RenderAnnotationLayerItemParams {
   annotation: AnnotationRecord;
@@ -14,74 +14,6 @@ interface RenderAnnotationLayerItemParams {
   selectedAnnotationId: string | null;
   selectionEnabled: boolean;
   selectAnnotation: () => void;
-}
-
-interface PointRadiusAnnotationStyle {
-  strokeColor: string;
-  fillColor: string;
-  fillOpacity: number;
-  dashArray?: string;
-}
-
-function renderPointRadiusAnnotation(params: {
-  annotationId: string;
-  center: [number, number];
-  radiusMeters: number;
-  selected: boolean;
-  selectionEnabled: boolean;
-  selectAnnotation: () => void;
-  markerFillColor: string;
-  style: PointRadiusAnnotationStyle;
-}) {
-  const {
-    annotationId,
-    center,
-    radiusMeters,
-    selected,
-    selectionEnabled,
-    selectAnnotation,
-    markerFillColor,
-    style,
-  } = params;
-
-  const clickHandler = selectionEnabled
-    ? {
-        click: (event: { originalEvent?: Event }) => {
-          event.originalEvent?.stopPropagation();
-          selectAnnotation();
-        },
-      }
-    : undefined;
-
-  return (
-    <Fragment key={annotationId}>
-      <Circle
-        center={center}
-        radius={radiusMeters}
-        interactive={selectionEnabled}
-        pathOptions={{
-          color: style.strokeColor,
-          weight: selected ? 3 : 2,
-          dashArray: style.dashArray,
-          fillColor: style.fillColor,
-          fillOpacity: style.fillOpacity,
-        }}
-        eventHandlers={clickHandler}
-      />
-      <CircleMarker
-        center={center}
-        radius={6}
-        interactive={selectionEnabled}
-        pathOptions={{
-          color: MAP_ANNOTATION_COLORS.strokeLight,
-          weight: 2,
-          fillColor: markerFillColor,
-          fillOpacity: 1,
-        }}
-        eventHandlers={clickHandler}
-      />
-    </Fragment>
-  );
 }
 
 export function renderAnnotationLayerItem({

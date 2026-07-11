@@ -5,7 +5,6 @@ import {
 } from "../map/distance";
 import type { AnnotationRecord } from "../map/annotations";
 import type { PendingQuestionRecord } from "../session/sessionChat";
-import { isCountablePendingQuestionStatus } from "./questionRules";
 import type { GameSize } from "../session/gameSize";
 import { thermometerPresetsMetersForGameSize } from "../session/gameSizeRules";
 import {
@@ -14,11 +13,9 @@ import {
   type SessionRulesInput,
 } from "../session/sessionRules";
 import {
-  collectUsedAnnotationOptions,
-  firstUnusedPreset,
-  isPresetOptionAvailable,
-  presetMetersForMiles,
-} from "../session/toolSessionOptions";
+  buildPresetCatalogHelpers,
+  presetMilesForDistanceMeters,
+} from "./distancePresets";
 
 export type ThermometerAnswer = "hotter" | "colder";
 
@@ -38,7 +35,7 @@ const THERMOMETER_PRESET_MATCH_TOLERANCE_METERS = 1;
 export function thermometerPresetMilesForMeters(
   distanceMeters: number,
 ): ThermometerDistanceOptionMiles | null {
-  return presetMetersForMiles(
+  return presetMilesForDistanceMeters(
     distanceMeters,
     THERMOMETER_DISTANCE_PRESETS_MILES,
     milesToMeters,
@@ -61,13 +58,34 @@ export function thermometerDistanceOptionForAnnotation(
   );
 }
 
+function thermometerDistanceOptionForPending(
+  question: PendingQuestionRecord,
+): ThermometerDistanceOptionMiles | null {
+  if (question.toolType !== "thermometer") {
+    return null;
+  }
+
+  const pendingDistance = question.placement.metadata.thermometerDistanceMeters;
+  if (typeof pendingDistance !== "number") {
+    return null;
+  }
+
+  return thermometerPresetMilesForMeters(pendingDistance);
+}
+
+const thermometerPresetHelpers =
+  buildPresetCatalogHelpers<ThermometerDistanceOptionMiles>({
+    toolType: "thermometer",
+    readOptionFromAnnotation: thermometerDistanceOptionForAnnotation,
+    readOptionFromPending: thermometerDistanceOptionForPending,
+  });
+
 export function usedThermometerDistanceOptions(
   annotations: AnnotationRecord[],
   exceptAnnotationId?: string,
 ): Set<ThermometerDistanceOptionMiles> {
-  return collectUsedAnnotationOptions(
+  return thermometerPresetHelpers.usedOptionsFromAnnotations(
     annotations,
-    (annotation) => thermometerDistanceOptionForAnnotation(annotation),
     exceptAnnotationId,
   );
 }
@@ -75,7 +93,7 @@ export function usedThermometerDistanceOptions(
 export function firstAvailableThermometerDistanceMeters(
   usedOptions: ReadonlySet<ThermometerDistanceOptionMiles>,
 ): number | null {
-  const miles = firstUnusedPreset(
+  const miles = thermometerPresetHelpers.firstUnusedFromPresets(
     THERMOMETER_DISTANCE_PRESETS_MILES,
     usedOptions,
   );
@@ -95,7 +113,10 @@ export function isThermometerDistanceOptionAvailable(
   }
 
   const presetMiles = thermometerPresetMilesForMeters(distanceMeters);
-  return isPresetOptionAvailable(presetMiles, gameSizeOrUsedOptions);
+  return thermometerPresetHelpers.isOptionAvailable(
+    presetMiles,
+    gameSizeOrUsedOptions,
+  );
 }
 
 export function availableThermometerDistancePresets(
@@ -156,26 +177,16 @@ export function thermometerUseCount(
   distanceMeters: number,
   exceptAnnotationId?: string,
 ): number {
-  let count = 0;
-  for (const annotation of annotations) {
-    if (annotation.status !== "active") {
-      continue;
-    }
-    if (exceptAnnotationId && annotation.id === exceptAnnotationId) {
-      continue;
-    }
-    if (annotation.type !== "thermometer") {
-      continue;
-    }
-    const preset = thermometerPresetMilesForMeters(
-      annotation.metadata.thermometerDistanceMeters ?? 0,
-    );
-    const target = thermometerPresetMilesForMeters(distanceMeters);
-    if (preset !== null && preset === target) {
-      count += 1;
-    }
+  const target = thermometerPresetMilesForMeters(distanceMeters);
+  if (target === null) {
+    return 0;
   }
-  return count;
+
+  return thermometerPresetHelpers.optionUseCountFromAnnotations(
+    annotations,
+    target,
+    exceptAnnotationId,
+  );
 }
 
 export function thermometerUseCountFromPending(
@@ -184,27 +195,15 @@ export function thermometerUseCountFromPending(
   exceptQuestionId?: string,
 ): number {
   const target = thermometerPresetMilesForMeters(distanceMeters);
-  let count = 0;
-  for (const question of pendingQuestions) {
-    if (question.toolType !== "thermometer") {
-      continue;
-    }
-    if (exceptQuestionId && question.id === exceptQuestionId) {
-      continue;
-    }
-    if (!isCountablePendingQuestionStatus(question.status)) {
-      continue;
-    }
-    const pendingDistance = question.placement.metadata.thermometerDistanceMeters;
-    if (typeof pendingDistance !== "number") {
-      continue;
-    }
-    const preset = thermometerPresetMilesForMeters(pendingDistance);
-    if (preset !== null && preset === target) {
-      count += 1;
-    }
+  if (target === null) {
+    return 0;
   }
-  return count;
+
+  return thermometerPresetHelpers.optionUseCountFromPending(
+    pendingQuestions,
+    target,
+    exceptQuestionId,
+  );
 }
 
 export function thermometerShadedSide(

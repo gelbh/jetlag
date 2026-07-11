@@ -10,17 +10,16 @@ import { measuringOverpassSelectorsForKind } from "../../domain/session/sessionC
 import {
   measuringLocationLabel,
   type MeasuringLocationCategory,
-} from "../../domain/questions/measuringQuestions";
+} from "../../domain/questions";
 import { queryOverpass } from "../core/overpassClient";
 import {
   getOrFetchCached,
   measuringPlacesCacheKey,
 } from "./geographicFeatureCache";
 import {
+  buildTaggedBboxOverpassQuery,
   formatOverpassBboxFromGameArea,
-  overpassQueryTemplate,
-  overpassTaggedBboxClauses,
-} from "../overpass/query";
+} from "./queryHelpers";
 import {
   fetchBundledMeasuringPlaces,
   mergeMeasuringPlaces,
@@ -46,15 +45,10 @@ export function buildMeasuringPlacesQuery(
   gameArea: GameArea,
   selectors: readonly string[],
 ): string {
-  const bbox = formatOverpassBboxFromGameArea(gameArea);
-  const clauses = overpassTaggedBboxClauses(bbox, selectors);
-
-  return overpassQueryTemplate(`
-  (
-    ${clauses.join("\n    ")}
+  return buildTaggedBboxOverpassQuery(
+    formatOverpassBboxFromGameArea(gameArea),
+    selectors,
   );
-  out center 200;
-  `);
 }
 
 function isSwimmingPool(tags: Record<string, string>): boolean {

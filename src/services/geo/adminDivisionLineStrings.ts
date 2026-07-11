@@ -1,54 +1,15 @@
-import type { Feature, LineString, Polygon, MultiPolygon } from "geojson";
+import type { Feature, LineString } from "geojson";
 import type { GameArea } from "../../domain/map/annotations";
 import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
 } from "../../domain/session/sessionCustomContent";
+import { polygonRingsToLineStrings } from "../../domain/geometry/ringToLineString";
 import { parseMatchingAreaGeoJson } from "./matchingAreaGeoJson";
 import {
   adminLevelForMeasuringBorderKind,
   type AdminDivisionCounts,
 } from "./adminDivisionAvailability";
-
-function ringToLineString(ring: number[][]): Feature<LineString> | null {
-  if (ring.length < 2) {
-    return null;
-  }
-
-  const closed =
-    ring[0]?.[0] === ring[ring.length - 1]?.[0] &&
-    ring[0]?.[1] === ring[ring.length - 1]?.[1];
-  const coordinates = closed ? ring : [...ring, ring[0]!];
-
-  return {
-    type: "Feature",
-    properties: {},
-    geometry: {
-      type: "LineString",
-      coordinates,
-    },
-  };
-}
-
-function polygonRingsToLineStrings(
-  geometry: Polygon | MultiPolygon,
-): Feature<LineString>[] {
-  const polygons =
-    geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
-
-  const segments: Feature<LineString>[] = [];
-  for (const polygonCoords of polygons) {
-    const outerRing = polygonCoords[0];
-    if (!outerRing) {
-      continue;
-    }
-    const segment = ringToLineString(outerRing);
-    if (segment) {
-      segments.push(segment);
-    }
-  }
-  return segments;
-}
 
 export function lineStringsFromAdminDivisionBoundaries(
   boundaries: Array<{ boundary: GameArea }>,

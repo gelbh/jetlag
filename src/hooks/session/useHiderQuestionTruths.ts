@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   computeHiderTruthReplyAsync,
   type HiderTruthResult,
-} from "../../domain/questions/hiderTruthAnswer";
+} from "../../domain/questions/ui";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { useLatestRequest } from "../useLatestRequest";

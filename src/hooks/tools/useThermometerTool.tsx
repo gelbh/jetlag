@@ -5,7 +5,7 @@ import type { LatLngTuple } from "../../domain/geometry/geometry";
 import { distanceBetweenPoints } from "../../domain/geometry/geometry";
 import { isActive, type AnnotationRecord } from "../../domain/map/annotations";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
-import { hasOpenPendingQuestion, questionCostBreakdown } from "../../domain/questions/questionRules";
+import { hasOpenPendingQuestion, questionCostBreakdown } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import {
   DEFAULT_THERMOMETER_DISTANCE_METERS,
@@ -16,7 +16,7 @@ import {
   thermometerUseCount,
   thermometerUseCountFromPending,
   type ThermometerAnswer,
-} from "../../domain/questions/thermometerQuestions";
+} from "../../domain/questions";
 import type { DistanceUnit } from "../../domain/map/distance";
 import { hotterColderAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
@@ -28,7 +28,7 @@ import {
   isThermometerWalkActive,
   LOCAL_THERMOMETER_WALK_ID,
   parseThermometerStartPoint,
-} from "../../domain/questions/thermometerWalk";
+} from "../../domain/questions";
 import {
   thermometerWalkStartPlacement,
   useThermometerWalk,

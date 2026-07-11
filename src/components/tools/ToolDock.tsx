@@ -16,13 +16,15 @@ import type { MapTool } from "../../state/sessionStore";
 import {
   HudDrawIcon,
   HudMoreIcon,
-  HudPinIcon,
   HudRedoIcon,
   HudSettingsIcon,
-  HudToolIcon,
   HudUndoIcon,
-  HudZoneIcon,
 } from "../ui/HudIcons";
+import {
+  HudPinIcon,
+  HudToolIcon,
+  HudZoneIcon,
+} from "../map/ToolIcons";
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 import { ToolOverflowSheet } from "./ToolOverflowSheet";
 

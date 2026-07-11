@@ -29,7 +29,7 @@ import {
   usedMatchingCategoryIds,
   type MatchingAnswer,
   type MatchingCategoryId,
-} from "../../domain/questions/matchingQuestions";
+} from "../../domain/questions";
 import { resolveMatchingCategory } from "../../domain/session/sessionCustomCatalog";
 import {
   availableMatchingCategories,
@@ -38,7 +38,7 @@ import {
 import { isAdminDivisionCategoryAvailable } from "../../services/geo/adminDivisionAvailability";
 import { usePreloadStore } from "../../state/preloadStore";
 import { QuestionPreviewSheet } from "../../components/tools/shared/QuestionPreviewSheet";
-import { questionCostBreakdown } from "../../domain/questions/questionRules";
+import { questionCostBreakdown } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import type { MatchingFetchOptions } from "../../services/geo/matchingFeatures";
@@ -51,9 +51,9 @@ import {
   countMatchingFeaturesInPlayArea,
   matchingResolveFailureMessage,
   pickMatchingFeatureForAnchor,
-  serializeMatchingFeatures,
   type MatchingFeature,
 } from "../../services/geo/matchingFeatures";
+import { serializeMatchingFeatures } from "../../domain/geo/matchingAdapters";
 import { inferTransitMetroId } from "../../services/transit/transitCatalog";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";

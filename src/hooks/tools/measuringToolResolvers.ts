@@ -12,7 +12,7 @@ import {
   measuringFromKind,
   type MeasuringLocationCategory,
   type MeasuringSubject,
-} from "../../domain/questions/measuringQuestions";
+} from "../../domain/questions";
 import { loadCoastlineContext } from "../../services/geo/coastline";
 import {
   findNearestMeasuringPlace,

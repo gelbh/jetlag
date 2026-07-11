@@ -9,8 +9,8 @@ import {
   gameAreaToPolygon,
   safeDifference,
 } from "./geometry";
-import type { MatchingFeature } from "../../services/geo/matchingFeatures";
-import { matchingFeaturesToAdminDivisions } from "../../services/geo/matchingFeatures";
+import type { MatchingFeature } from "../geo/types";
+import { matchingFeaturesToAdminDivisions } from "../geo/matchingAdapters";
 import {
   buildAdminDivisionBoundaryPreview,
   buildAdminDivisionEliminationRegion,

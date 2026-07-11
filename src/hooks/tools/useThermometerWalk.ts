@@ -3,7 +3,7 @@ import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
   buildThermometerStartPointGeometry,
   crowFliesDistanceMeters,
-} from "../../domain/questions/thermometerWalk";
+} from "../../domain/questions";
 import type { PendingQuestionPlacement } from "../../domain/session/sessionChat";
 import { useLiveLocation } from "../location/useLiveLocation";
 

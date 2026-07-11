@@ -20,7 +20,6 @@ import {
   applyMeasuringFromKind,
   DEFAULT_MEASURING_FROM_KIND,
   firstAvailableMeasuringFromKind,
-  isMeasuringFromKindAvailable,
   isMeasuringLinearLocation,
   measuringFromKind,
   measuringFromKindUseCount,
@@ -34,8 +33,8 @@ import {
   type MeasuringLocationCategory,
   type MeasuringSubject,
   type MeasuringTargetMode,
-} from "../../domain/questions/measuringQuestions";
-import { questionCostBreakdown } from "../../domain/questions/questionRules";
+} from "../../domain/questions";
+import { questionCostBreakdown } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
@@ -53,10 +52,10 @@ import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQues
 import { useSubmitLock } from "../useSubmitLock";
 import { measuringLinearNotFoundMessage } from "../../services/geo/measuringLinearFeatures";
 import { overpassErrorMessage } from "../../services/core/overpassClient";
+import type { MeasuringPlace } from "../../domain/geo/types";
 import {
   fetchMeasuringPlacesInArea,
   measuringPlaceNotFoundMessage,
-  type MeasuringPlace,
 } from "../../services/geo/measuringPlaces";
 import { searchPlaces, type GeocodedPlace } from "../../services/geo/geocoding";
 import { getCachedPreparedCoastlineSegments, resolveCoastlineContextFromCache } from "../../services/geo/coastline";
@@ -726,7 +725,6 @@ export function useMeasuringTool({
       measuringLocationCategory,
     ),
     isAvailable: (_usedOptions, currentOption) =>
-      isMeasuringFromKindAvailable() &&
       adminBorderKindAvailability(currentOption, adminDivisionCounts, regionPackId),
     pickNext: (usedOptions) =>
       firstUnusedCatalogOption<MeasuringFromKind>(
@@ -963,7 +961,6 @@ export function useMeasuringTool({
     }
 
     if (
-      !isMeasuringFromKindAvailable() ||
       !adminBorderKindAvailability(measureFromKind, adminDivisionCounts, regionPackId)
     ) {
       setMeasuringError("That measure category has already been added.");

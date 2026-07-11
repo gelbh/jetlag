@@ -3,7 +3,7 @@ import intersect from "@turf/intersect";
 import type { GameArea } from "../map/annotations";
 import type { MatchingAnswer } from "../questions/matchingQuestions";
 import { gameAreaToPolygon, safeDifference } from "./geometry";
-import type { AdminDivisionFeature } from "../../services/geo/adminDivisionBoundaries";
+import type { AdminDivisionFeature } from "../geo/types";
 
 function clipDivisionToGameArea(
   division: AdminDivisionFeature,

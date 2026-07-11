@@ -11,8 +11,9 @@ import {
 import {
   tentacleCategoryOverpassSelectors,
   type TentacleExtendedCategoryId,
-} from "../../domain/questions/tentacleQuestions";
+} from "../../domain/questions";
 import { queryOverpass } from "../core/overpassClient";
+import { buildAroundTaggedQuery, overpassQueryTemplate } from "./queryHelpers";
 import {
   fetchBundledTentaclePois,
   mergeTentaclePois,
@@ -43,36 +44,19 @@ export function buildTentacleOverpassQuery(
   customCategories: readonly SessionCustomCategory[] = [],
 ): string {
   if (categoryId === "metro_line") {
-    return `
-      [out:json][timeout:25];
+    return overpassQueryTemplate(`
       (
         relation(around:${radiusMeters},${center[0]},${center[1]})["route"~"subway|light_rail|tram|monorail"]["name"];
       );
       out center 40;
-    `;
+    `);
   }
 
-  const clauses = tentacleOverpassSelectorsForCategory(
-    categoryId,
-    customCategories,
-  ).flatMap(
-    (selector) => {
-      const filter = selectorToFilter(selector);
-
-      return [
-        `node(around:${radiusMeters},${center[0]},${center[1]})[${filter}];`,
-        `way(around:${radiusMeters},${center[0]},${center[1]})[${filter}];`,
-      ];
-    },
+  return buildAroundTaggedQuery(
+    center,
+    radiusMeters,
+    tentacleOverpassSelectorsForCategory(categoryId, customCategories),
   );
-
-  return `
-    [out:json][timeout:25];
-    (
-      ${clauses.join("\n      ")}
-    );
-    out center 40;
-  `;
 }
 
 function isActiveTentaclePoi(

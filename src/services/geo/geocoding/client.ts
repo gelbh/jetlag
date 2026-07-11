@@ -1,0 +1,259 @@
+import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import {
+  mergeRankedGeocodedPlaceCandidates,
+  placeBoundsFingerprint,
+  rankGeocodedPlaceCandidates,
+  type RankedGeocodedPlaceCandidate,
+} from "../geocodingRank";
+import { geographicCacheKey, getOrFetchCached } from "../cache";
+import { FetchTimeoutError, fetchWithTimeout } from "../../core/fetchWithTimeout";
+import { retryAsync } from "../../core/retryAsync";
+import {
+  adminLabelFromAddress,
+  locationBucketKey,
+  normalizeSearchQuery,
+  parseNominatimResult,
+  viewboxForPoint,
+  type GeocodedPlace,
+  type NominatimResult,
+} from "./normalize";
+
+const NOMINATIM_ENDPOINT = "https://nominatim.openstreetmap.org/search";
+const NOMINATIM_REVERSE_ENDPOINT =
+  "https://nominatim.openstreetmap.org/reverse";
+const USER_AGENT = "JetLagMapCompanion/1.0";
+const NOMINATIM_FETCH_TIMEOUT_MS = 15_000;
+const NOMINATIM_MAX_RETRIES = 2;
+const SEARCH_RESULT_LIMIT = 8;
+
+export interface SearchPlacesOptions {
+  near?: LatLngTuple;
+}
+
+function geocodeSearchCacheKey(query: string): string {
+  return geographicCacheKey(
+    {
+      type: "Polygon",
+      coordinates: [[[0, 0]]],
+    },
+    `geocode:search:v3:${normalizeSearchQuery(query)}`,
+  );
+}
+
+function geocodeSearchBiasCacheKey(query: string, near: LatLngTuple): string {
+  return geographicCacheKey(
+    {
+      type: "Polygon",
+      coordinates: [[[near[0], near[1]]]],
+    },
+    `geocode:search:bias:v2:${normalizeSearchQuery(query)}:${locationBucketKey(near)}`,
+  );
+}
+
+function geocodeReverseCacheKey(point: LatLngTuple, adminLevel: number): string {
+  return geographicCacheKey(
+    {
+      type: "Polygon",
+      coordinates: [[[point[0], point[1]]]],
+    },
+    `geocode:reverse:${adminLevel}`,
+  );
+}
+
+function isRetryableGeocodingError(error: unknown): boolean {
+  if (error instanceof FetchTimeoutError) {
+    return true;
+  }
+
+  if (error instanceof TypeError) {
+    return true;
+  }
+
+  if (error instanceof Error && error.message.includes("Failed to fetch")) {
+    return true;
+  }
+
+  return false;
+}
+
+function isRetryableGeocodingStatus(status: number): boolean {
+  return status === 429 || status === 502 || status === 503 || status === 504;
+}
+
+async function fetchNominatim(
+  url: URL,
+  failureMessage = "Place search failed.",
+): Promise<NominatimResult[] | NominatimResult> {
+  return retryAsync(
+    async () => {
+      const response = await fetchWithTimeout(
+        url.toString(),
+        {
+          headers: {
+            Accept: "application/json",
+            "User-Agent": USER_AGENT,
+          },
+        },
+        NOMINATIM_FETCH_TIMEOUT_MS,
+      );
+
+      if (!response.ok) {
+        if (isRetryableGeocodingStatus(response.status)) {
+          throw new TypeError(`Geocoding request failed with ${response.status}.`);
+        }
+
+        throw new Error(failureMessage);
+      }
+
+      return (await response.json()) as NominatimResult[] | NominatimResult;
+    },
+    {
+      maxRetries: NOMINATIM_MAX_RETRIES,
+      shouldRetry: isRetryableGeocodingError,
+    },
+  );
+}
+
+async function fetchNominatimSearch(
+  query: string,
+  options?: {
+    featureType?: "city";
+    viewbox?: { west: number; north: number; east: number; south: number };
+  },
+): Promise<NominatimResult[]> {
+  const url = new URL(NOMINATIM_ENDPOINT);
+  url.searchParams.set("q", query);
+  url.searchParams.set("format", "json");
+  url.searchParams.set("limit", "5");
+  url.searchParams.set("addressdetails", "1");
+  url.searchParams.set("polygon_geojson", "1");
+
+  if (options?.featureType) {
+    url.searchParams.set("featureType", options.featureType);
+  }
+
+  if (options?.viewbox) {
+    const { west, north, east, south } = options.viewbox;
+    url.searchParams.set("viewbox", `${west},${north},${east},${south}`);
+  }
+
+  return (await fetchNominatim(url)) as NominatimResult[];
+}
+
+async function candidatesFromResults(
+  results: NominatimResult[],
+  fromCityQuery: boolean,
+): Promise<RankedGeocodedPlaceCandidate[]> {
+  return Promise.all(
+    results.map(async (result) => ({
+      place: await parseNominatimResult(result),
+      importance: result.importance ?? 0,
+      fromCityQuery,
+    })),
+  );
+}
+
+function mergeSearchCandidates(
+  ...groups: RankedGeocodedPlaceCandidate[][]
+): RankedGeocodedPlaceCandidate[] {
+  const merged = new Map<string, RankedGeocodedPlaceCandidate>();
+
+  for (const candidate of groups.flat()) {
+    const key = placeBoundsFingerprint(candidate.place);
+    const existing = merged.get(key);
+    merged.set(
+      key,
+      existing
+        ? mergeRankedGeocodedPlaceCandidates(existing, candidate)
+        : candidate,
+    );
+  }
+
+  return [...merged.values()];
+}
+
+async function fetchSearchCandidates(
+  query: string,
+  options?: {
+    viewbox?: { west: number; north: number; east: number; south: number };
+  },
+): Promise<RankedGeocodedPlaceCandidate[]> {
+  const [defaultResults, cityResults] = await Promise.all([
+    fetchNominatimSearch(query, { viewbox: options?.viewbox }),
+    fetchNominatimSearch(query, { featureType: "city", viewbox: options?.viewbox }),
+  ]);
+
+  return mergeSearchCandidates(
+    await candidatesFromResults(defaultResults, false),
+    await candidatesFromResults(cityResults, true),
+  );
+}
+
+export async function searchPlaces(
+  query: string,
+  options?: SearchPlacesOptions,
+): Promise<GeocodedPlace[]> {
+  const trimmed = query.trim();
+  if (trimmed.length < 2) {
+    return [];
+  }
+
+  if (!options?.near) {
+    return getOrFetchCached(geocodeSearchCacheKey(trimmed), async () => {
+      const candidates = await fetchSearchCandidates(trimmed);
+      return rankGeocodedPlaceCandidates(candidates, trimmed).slice(
+        0,
+        SEARCH_RESULT_LIMIT,
+      );
+    });
+  }
+
+  const near = options.near;
+  const [unbiasedCandidates, biasedCandidates] = await Promise.all([
+    fetchSearchCandidates(trimmed),
+    getOrFetchCached(
+      geocodeSearchBiasCacheKey(trimmed, near),
+      () => fetchSearchCandidates(trimmed, { viewbox: viewboxForPoint(near) }),
+    ),
+  ]);
+
+  const merged = mergeSearchCandidates(unbiasedCandidates, biasedCandidates);
+  return rankGeocodedPlaceCandidates(merged, trimmed, near).slice(
+    0,
+    SEARCH_RESULT_LIMIT,
+  );
+}
+
+export async function reverseGeocodePoint(
+  point: LatLngTuple,
+  adminLevel: number,
+): Promise<GeocodedPlace | null> {
+  return getOrFetchCached(
+    geocodeReverseCacheKey(point, adminLevel),
+    async () => {
+      const url = new URL(NOMINATIM_REVERSE_ENDPOINT);
+      url.searchParams.set("lat", String(point[0]));
+      url.searchParams.set("lon", String(point[1]));
+      url.searchParams.set("format", "json");
+      url.searchParams.set("addressdetails", "1");
+      url.searchParams.set("zoom", String(adminLevel));
+
+      const payload = (await fetchNominatim(
+        url,
+        "Reverse geocoding failed.",
+      )) as NominatimResult;
+      const adminLabel = adminLabelFromAddress(payload.address, adminLevel);
+      if (!adminLabel) {
+        return null;
+      }
+
+      const place = await parseNominatimResult(payload);
+      return {
+        ...place,
+        displayName: adminLabel,
+        id: `${adminLevel}:${adminLabel}`,
+      };
+    },
+    { persistEmpty: false },
+  );
+}

@@ -1,4 +1,4 @@
-import { HudToolIcon } from "../ui/HudIcons";
+import { HudToolIcon } from "../map/ToolIcons";
 import {
   getQuestionTutorials,
   isQuestionTutorialComplete,

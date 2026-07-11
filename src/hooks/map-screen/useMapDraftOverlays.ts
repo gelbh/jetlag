@@ -13,11 +13,11 @@ import {
 import {
   radarInsideFromAnswer,
   type RadarAnswer,
-} from "../../domain/questions/radarQuestions";
+} from "../../domain/questions";
 import {
   thermometerShadedSide,
   type ThermometerAnswer,
-} from "../../domain/questions/thermometerQuestions";
+} from "../../domain/questions";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 import { getBoundaryPreviewStyle } from "../../domain/map/mapBoundaryOverlayStyle";
 import type { MapStyle } from "../../domain/map/mapBasemaps";
