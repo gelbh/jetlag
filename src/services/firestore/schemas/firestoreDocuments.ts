@@ -116,6 +116,7 @@ export const userEntitlementsDocumentSchema = z
       })
       .optional(),
     trialUsedAt: z.unknown().optional(),
+    trialEndsAt: z.unknown().optional(),
     updatedAt: z.unknown().optional(),
   })
   .passthrough();

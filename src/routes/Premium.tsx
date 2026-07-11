@@ -1,13 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { AppLogo } from "../components/ui/AppLogo";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { InlineError } from "../components/ui/InlineError";
-import { ScreenNav } from "../components/ui/ScreenNav";
+import { SegmentControl } from "../components/ui/SegmentControl";
+import {
+  ScreenHeader,
+  screenHeaderOffsetClassName,
+} from "../components/ui/ScreenHeader";
 import { PremiumSignInGate } from "../components/billing/PremiumSignInGate";
 import {
+  canStartPremiumTrial,
+  formatBankedPremiumSessionCreditsLabel,
   formatEntitlementSummary,
   formatPremiumSessionCreditsLabel,
+  hasUnlimitedPremiumHosting,
   PREMIUM_PRODUCT_OFFERS,
   type PremiumEntitlements,
   type PremiumProductKey,
@@ -20,7 +26,236 @@ import {
   fetchPremiumEntitlements,
   openPremiumBillingPortal,
   startPremiumCheckout,
+  startPremiumTrial,
 } from "../services/billing/premiumBilling";
+
+type PremiumCatalogTab = "packs" | "unlimited";
+
+const PREMIUM_CATALOG_TABS = [
+  { value: "packs" as const, label: "Session packs" },
+  { value: "unlimited" as const, label: "Unlimited" },
+] as const;
+
+function resolveDefaultCatalogTab(
+  entitlements: PremiumEntitlements | null,
+): PremiumCatalogTab {
+  if (
+    entitlements &&
+    entitlements.premiumSessionCredits > 0 &&
+    !hasUnlimitedPremiumHosting(entitlements)
+  ) {
+    return "packs";
+  }
+
+  return "unlimited";
+}
+
+function resolveCreatePremiumButtonClass(
+  entitlements: PremiumEntitlements | null,
+): string {
+  if (hasUnlimitedPremiumHosting(entitlements)) {
+    return "home-card-btn home-card-btn-premium";
+  }
+
+  if ((entitlements?.premiumSessionCredits ?? 0) > 0) {
+    return "home-card-btn home-card-btn-premium-sessions";
+  }
+
+  return "home-card-btn home-card-btn-primary";
+}
+
+function PremiumHero({
+  entitlementSummary,
+  checkoutNotice,
+}: {
+  entitlementSummary: string | null;
+  checkoutNotice: string | null;
+}) {
+  return (
+    <div className={`space-y-2 ${screenHeaderOffsetClassName}`}>
+      <h1 className="font-display text-2xl font-bold uppercase leading-none tracking-tight text-ink">
+        Premium
+      </h1>
+      <p className="max-w-sm text-sm leading-snug text-ink-muted">
+        Live transit and faster map loads for hosted sessions.
+      </p>
+      {entitlementSummary ? (
+        <p className="premium-entitlement-pill">{entitlementSummary}</p>
+      ) : null}
+      {checkoutNotice ? (
+        <p className="text-sm text-ink-secondary">{checkoutNotice}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function PremiumCatalog({
+  entitlements,
+  loading,
+  busyProduct,
+  portalLoading,
+  trialLoading,
+  error,
+  canStartTrial,
+  onCheckout,
+  onStartTrial,
+  onPortal,
+}: {
+  entitlements: PremiumEntitlements | null;
+  loading: boolean;
+  busyProduct: PremiumProductKey | null;
+  portalLoading: boolean;
+  trialLoading: boolean;
+  error: string | null;
+  canStartTrial: boolean;
+  onCheckout: (productKey: PremiumProductKey) => void;
+  onStartTrial: () => void;
+  onPortal: () => void;
+}) {
+  const packCreditsLabel = formatPremiumSessionCreditsLabel(entitlements);
+  const bankedCreditsLabel = formatBankedPremiumSessionCreditsLabel(entitlements);
+  const createSessionHint =
+    bankedCreditsLabel ?? packCreditsLabel ?? "Host a game";
+  const [catalogTab, setCatalogTab] = useState<PremiumCatalogTab>("unlimited");
+  const [tabTouched, setTabTouched] = useState(false);
+  const activeCatalogTab =
+    !tabTouched && entitlements !== null
+      ? resolveDefaultCatalogTab(entitlements)
+      : catalogTab;
+
+  const packOffers = PREMIUM_PRODUCT_OFFERS.filter((offer) => offer.kind === "pack");
+  const subscriptionOffers = PREMIUM_PRODUCT_OFFERS.filter(
+    (offer) => offer.kind === "subscription",
+  );
+  const lifetimeOffers = PREMIUM_PRODUCT_OFFERS.filter(
+    (offer) => offer.kind === "lifetime",
+  );
+
+  const actionsDisabled = loading || busyProduct !== null || trialLoading;
+  const showManageSubscription =
+    entitlements?.subscription?.status === "active" ||
+    entitlements?.subscription?.status === "trialing";
+
+  return (
+    <div className="home-enter-actions space-y-3">
+      <SegmentControl
+        value={activeCatalogTab}
+        options={PREMIUM_CATALOG_TABS}
+        onChange={(value) => {
+          setTabTouched(true);
+          setCatalogTab(value);
+        }}
+        aria-label="Premium purchase options"
+        disabled={loading}
+      />
+
+      {activeCatalogTab === "packs" ? (
+        <div
+          role="tabpanel"
+          aria-label="Session packs"
+          className="space-y-2"
+        >
+          <div className="premium-pack-grid">
+            {packOffers.map((offer) => (
+              <button
+                key={offer.key}
+                type="button"
+                disabled={actionsDisabled}
+                onClick={() => onCheckout(offer.key)}
+                aria-label={`${offer.label}, ${offer.priceLabel}`}
+                className="premium-pack-cell disabled:opacity-50"
+              >
+                <span className="premium-pack-cell-label">{offer.label}</span>
+                <span className="premium-pack-cell-price">
+                  {busyProduct === offer.key ? "Opening…" : offer.priceLabel}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div
+          role="tabpanel"
+          aria-label="Unlimited hosting"
+          className="space-y-2"
+        >
+          {canStartTrial ? (
+            <button
+              type="button"
+              disabled={actionsDisabled}
+              onClick={onStartTrial}
+              className="premium-offer-row disabled:opacity-50"
+            >
+              <span className="premium-offer-row-label">7-day free trial</span>
+              <span className="premium-offer-row-hint">
+                {trialLoading ? "Starting…" : "No auto-renew"}
+              </span>
+            </button>
+          ) : null}
+
+          {subscriptionOffers.map((offer) => (
+            <button
+              key={offer.key}
+              type="button"
+              disabled={actionsDisabled}
+              onClick={() => onCheckout(offer.key)}
+              className="premium-offer-row disabled:opacity-50"
+            >
+              <span className="premium-offer-row-label">{offer.label}</span>
+              <span className="premium-offer-row-hint">
+                {busyProduct === offer.key ? "Opening…" : offer.priceLabel}
+              </span>
+            </button>
+          ))}
+
+          {lifetimeOffers.map((offer) => (
+            <button
+              key={offer.key}
+              type="button"
+              disabled={actionsDisabled}
+              onClick={() => onCheckout(offer.key)}
+              className="premium-offer-row disabled:opacity-50"
+            >
+              <span className="premium-offer-row-label">{offer.label}</span>
+              <span className="premium-offer-row-hint">
+                {busyProduct === offer.key ? "Opening…" : offer.priceLabel}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="premium-account-actions">
+        {showManageSubscription ? (
+          <button
+            type="button"
+            disabled={portalLoading}
+            onClick={onPortal}
+            className="premium-offer-row disabled:opacity-50"
+          >
+            <span className="premium-offer-row-label">Manage subscription</span>
+            <span className="premium-offer-row-hint">
+              {portalLoading ? "Opening…" : "Billing portal"}
+            </span>
+          </button>
+        ) : null}
+
+        {entitlements?.canCreatePremium ? (
+          <Link
+            to="/create?tier=premium"
+            className={resolveCreatePremiumButtonClass(entitlements)}
+            aria-label="Create premium session"
+          >
+            <span>Create premium session</span>
+            <span className="home-card-btn-hint">{createSessionHint}</span>
+          </Link>
+        ) : null}
+      </div>
+
+      {error ? <InlineError>{error}</InlineError> : null}
+    </div>
+  );
+}
 
 export function Premium() {
   const navigate = useNavigate();
@@ -34,6 +269,7 @@ export function Premium() {
     null,
   );
   const [portalLoading, setPortalLoading] = useState(false);
+  const [trialLoading, setTrialLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const refreshEntitlements = useCallback(async () => {
@@ -128,21 +364,15 @@ export function Premium() {
     [entitlements],
   );
 
-  const canStartTrial = entitlements?.trialUsedAt == null;
-  const packCreditsLabel = formatPremiumSessionCreditsLabel(entitlements);
-  const showHeaderEntitlement =
-    entitlementSummary != null && entitlementSummary !== packCreditsLabel;
+  const canStartTrial = canStartPremiumTrial(entitlements);
 
-  const handleCheckout = async (
-    productKey: PremiumProductKey,
-    startTrial = false,
-  ) => {
+  const handleCheckout = async (productKey: PremiumProductKey) => {
     setBusyProduct(productKey);
     setError(null);
 
     try {
       await ensureAnonymousUser();
-      const url = await startPremiumCheckout(productKey, { startTrial });
+      const url = await startPremiumCheckout(productKey);
       window.location.assign(url);
     } catch (nextError) {
       setError(
@@ -151,6 +381,25 @@ export function Premium() {
           : "Could not start checkout.",
       );
       setBusyProduct(null);
+    }
+  };
+
+  const handleStartTrial = async () => {
+    setTrialLoading(true);
+    setError(null);
+
+    try {
+      await ensureAnonymousUser();
+      const next = await startPremiumTrial();
+      setEntitlements(next);
+    } catch (nextError) {
+      setError(
+        nextError instanceof Error
+          ? nextError.message
+          : "Could not start free trial.",
+      );
+    } finally {
+      setTrialLoading(false);
     }
   };
 
@@ -174,160 +423,53 @@ export function Premium() {
 
   if (!isFirebaseConfigured()) {
     return (
-      <EntryScreenLayout>
-        <ScreenNav backTo="/" backLabel="Back" />
-        <div className="space-y-3 pt-[max(3rem,env(safe-area-inset-top))]">
-          <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
-            Premium
-          </h1>
-          <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
-            Premium billing needs an online connection. Use a synced session to
-            unlock live transit.
-          </p>
-        </div>
+      <EntryScreenLayout justify="start">
+        <ScreenHeader backTo="/" backLabel="Back" />
+        <PremiumHero entitlementSummary={null} checkoutNotice={null} />
+        <p className="max-w-sm text-sm text-ink-muted">
+          Premium billing needs an online connection. Use a synced session to
+          unlock live transit.
+        </p>
       </EntryScreenLayout>
     );
   }
 
   return (
-    <EntryScreenLayout>
-      <ScreenNav backTo="/" backLabel="Back" />
-      <div className="space-y-3 pt-[max(3rem,env(safe-area-inset-top))]">
-        <AppLogo variant="lockup" size="lg" />
-        <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
-          Premium
-        </h1>
-        <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
-          Live transit vehicles and faster map loads for your hosted sessions.
-          Joiners use the regular game code.
-        </p>
-        {showHeaderEntitlement ? (
-          <p className="max-w-sm text-sm font-semibold text-highlight">
-            {entitlementSummary}
-          </p>
-        ) : null}
-        {checkoutNotice ? (
-          <p className="max-w-sm text-sm text-ink-secondary">{checkoutNotice}</p>
-        ) : null}
-      </div>
+    <EntryScreenLayout justify="start">
+      <ScreenHeader backTo="/" backLabel="Back" />
+      <PremiumHero
+        entitlementSummary={entitlementSummary}
+        checkoutNotice={checkoutNotice}
+      />
 
-      <div className="home-enter-actions space-y-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <PremiumSignInGate onSignedIn={() => void refreshEntitlements()}>
-          <>
-            <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
-              Session packs
-            </p>
-            {packCreditsLabel ? (
-              <p className="text-sm font-semibold text-highlight">{packCreditsLabel}</p>
-            ) : null}
-        {PREMIUM_PRODUCT_OFFERS.filter((offer) => offer.kind === "pack").map(
-          (offer) => (
-            <button
-              key={offer.key}
-              type="button"
-              disabled={loading || busyProduct !== null}
-              onClick={() => void handleCheckout(offer.key)}
-              className="home-card-btn home-card-btn-secondary disabled:opacity-50"
-            >
-              <span>{offer.label}</span>
-              <span className="home-card-btn-hint">
-                {busyProduct === offer.key ? "Opening checkout…" : offer.priceLabel}
-              </span>
-            </button>
-          ),
-        )}
+      <PremiumSignInGate onSignedIn={() => void refreshEntitlements()}>
+        <PremiumCatalog
+          entitlements={entitlements}
+          loading={loading}
+          busyProduct={busyProduct}
+          portalLoading={portalLoading}
+          trialLoading={trialLoading}
+          error={error}
+          canStartTrial={canStartTrial}
+          onCheckout={(productKey) => {
+            void handleCheckout(productKey);
+          }}
+          onStartTrial={() => {
+            void handleStartTrial();
+          }}
+          onPortal={() => {
+            void handlePortal();
+          }}
+        />
+      </PremiumSignInGate>
 
-        <p className="pt-2 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
-          Unlimited hosting
-        </p>
-        {PREMIUM_PRODUCT_OFFERS.filter(
-          (offer) => offer.kind === "subscription",
-        ).map((offer) => (
-          <div key={offer.key} className="space-y-1.5">
-            <button
-              type="button"
-              disabled={loading || busyProduct !== null}
-              onClick={() => void handleCheckout(offer.key)}
-              className="home-card-btn home-card-btn-primary w-full disabled:opacity-50"
-            >
-              <span>{offer.label}</span>
-              <span className="home-card-btn-hint">
-                {busyProduct === offer.key ? "Opening checkout…" : offer.priceLabel}
-              </span>
-            </button>
-            {offer.trialEligible && canStartTrial ? (
-              <button
-                type="button"
-                disabled={loading || busyProduct !== null}
-                onClick={() => void handleCheckout(offer.key, true)}
-                className="w-full py-2 text-sm font-semibold text-brand-blue disabled:opacity-50"
-              >
-                {busyProduct === offer.key
-                  ? "Opening checkout…"
-                  : "Start 7-day free trial"}
-              </button>
-            ) : null}
-            <p className="text-xs leading-relaxed text-ink-dim">{offer.detail}</p>
-          </div>
-        ))}
-
-        {PREMIUM_PRODUCT_OFFERS.filter((offer) => offer.kind === "lifetime").map(
-          (offer) => (
-            <button
-              key={offer.key}
-              type="button"
-              disabled={loading || busyProduct !== null}
-              onClick={() => void handleCheckout(offer.key)}
-              className="home-card-btn home-card-btn-secondary disabled:opacity-50"
-            >
-              <span>{offer.label}</span>
-              <span className="home-card-btn-hint">
-                {busyProduct === offer.key ? "Opening checkout…" : offer.priceLabel}
-              </span>
-            </button>
-          ),
-        )}
-
-        {entitlements?.subscription?.status === "active" ||
-        entitlements?.subscription?.status === "trialing" ? (
-          <button
-            type="button"
-            disabled={portalLoading}
-            onClick={() => void handlePortal()}
-            className="home-card-btn home-card-btn-secondary disabled:opacity-50"
-          >
-            <span>Manage subscription</span>
-            <span className="home-card-btn-hint">
-              {portalLoading ? "Opening…" : "Stripe billing portal"}
-            </span>
-          </button>
-        ) : null}
-
-        {entitlements?.canCreatePremium ? (
-          <Link
-            to="/create?tier=premium"
-            className="home-card-btn home-card-btn-primary"
-            aria-label="Create premium session"
-          >
-            <span>Create premium session</span>
-            <span className="home-card-btn-hint">
-              {packCreditsLabel ?? "Host a game"}
-            </span>
-          </Link>
-        ) : null}
-
-        {error ? <InlineError>{error}</InlineError> : null}
-          </>
-        </PremiumSignInGate>
-
-        <button
-          type="button"
-          onClick={() => navigate("/create")}
-          className="home-feedback-link"
-        >
-          Back to create session
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => navigate("/create")}
+        className="home-feedback-link"
+      >
+        Back to create session
+      </button>
     </EntryScreenLayout>
   );
 }

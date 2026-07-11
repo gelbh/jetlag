@@ -44,7 +44,6 @@ export async function fetchPremiumEntitlements(): Promise<PremiumEntitlements | 
 
 export async function startPremiumCheckout(
   productKey: PremiumProductKey,
-  options: { startTrial?: boolean } = {},
 ): Promise<string> {
   if (!isFirebaseConfigured()) {
     billingUnavailable();
@@ -52,14 +51,13 @@ export async function startPremiumCheckout(
 
   const functions = getFirebaseFunctions();
   const callable = httpsCallable<
-    { productKey: PremiumProductKey; startTrial?: boolean },
+    { productKey: PremiumProductKey },
     { url: string }
   >(functions, "createCheckoutSession");
 
   try {
     const result = await callable({
       productKey,
-      startTrial: options.startTrial === true,
     });
     if (!result.data.url) {
       throw new Error("Checkout URL missing.");
@@ -67,6 +65,25 @@ export async function startPremiumCheckout(
     return result.data.url;
   } catch (error) {
     throw mapCallableError(error, "Could not start checkout.");
+  }
+}
+
+export async function startPremiumTrial(): Promise<PremiumEntitlements> {
+  if (!isFirebaseConfigured()) {
+    billingUnavailable();
+  }
+
+  const functions = getFirebaseFunctions();
+  const callable = httpsCallable<void, PremiumEntitlements>(
+    functions,
+    "startPremiumTrial",
+  );
+
+  try {
+    const result = await callable();
+    return result.data;
+  } catch (error) {
+    throw mapCallableError(error, "Could not start free trial.");
   }
 }
 

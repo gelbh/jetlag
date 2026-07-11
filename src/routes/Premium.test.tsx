@@ -104,13 +104,66 @@ describe("Premium", () => {
     renderWithRouter(<Premium />);
 
     await waitFor(() => {
-      expect(screen.getAllByText("2 premium sessions left").length).toBeGreaterThan(0);
+      expect(
+        screen.getByText("2 premium sessions left", { selector: ".premium-entitlement-pill" }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /1 session/i })).toBeInTheDocument();
     });
 
-    expect(screen.getByRole("button", { name: /1 session/i })).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Create premium session" }),
     ).toHaveAttribute("href", "/create?tier=premium");
+  });
+
+  it("defaults to session packs tab when user has pack credits only", async () => {
+    isFirebaseConfigured.mockReturnValue(true);
+    fetchPremiumEntitlements.mockResolvedValueOnce({
+      premiumSessionCredits: 2,
+      lifetimePremium: false,
+      subscription: null,
+      trialUsedAt: null,
+      canCreatePremium: true,
+      hasUnlimitedPremium: false,
+    });
+
+    renderWithRouter(<Premium />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /1 session/i })).toBeVisible();
+    });
+
+    expect(screen.queryByRole("button", { name: /Monthly unlimited/i })).not.toBeInTheDocument();
+  });
+
+  it("shows unlimited offers on the unlimited tab", async () => {
+    isFirebaseConfigured.mockReturnValue(true);
+    fetchPremiumEntitlements.mockResolvedValueOnce({
+      premiumSessionCredits: 2,
+      lifetimePremium: false,
+      subscription: null,
+      trialUsedAt: null,
+      canCreatePremium: true,
+      hasUnlimitedPremium: false,
+    });
+
+    renderWithRouter(<Premium />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /1 session/i })).toBeEnabled();
+    });
+
+    fireEvent.click(screen.getByRole("tab", { name: "Unlimited" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("tab", { name: "Unlimited" })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+    });
+
+    expect(screen.getByRole("button", { name: /Monthly unlimited/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Yearly unlimited/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Lifetime/i })).toBeInTheDocument();
   });
 
   it("shows sign-in gate before checkout when user is anonymous", async () => {
@@ -156,15 +209,19 @@ describe("Premium", () => {
     renderWithRouter(<Premium />);
 
     await waitFor(() => {
+      expect(screen.getByRole("tab", { name: "Session packs" })).toBeEnabled();
+    });
+
+    fireEvent.click(screen.getByRole("tab", { name: "Session packs" }));
+
+    await waitFor(() => {
       expect(screen.getByRole("button", { name: /3 sessions/i })).toBeEnabled();
     });
 
     fireEvent.click(screen.getByRole("button", { name: /3 sessions/i }));
 
     await waitFor(() => {
-      expect(startPremiumCheckout).toHaveBeenCalledWith("pack_3", {
-        startTrial: false,
-      });
+      expect(startPremiumCheckout).toHaveBeenCalledWith("pack_3");
       expect(assignSpy).toHaveBeenCalledWith("https://checkout.test");
     });
   });

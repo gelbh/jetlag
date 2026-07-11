@@ -1,4 +1,7 @@
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
+import { HttpsError } from "firebase-functions/v2/https";
+
+export const PREMIUM_TRIAL_DAYS = 7;
 
 /** @typedef {'active' | 'trialing' | 'past_due' | 'canceled'} SubscriptionStatus */
 
@@ -13,12 +16,41 @@ export function userEntitlementsRef(db, uid) {
 /**
  * @param {Record<string, unknown> | undefined} data
  */
+export function isAppPremiumTrialActive(data) {
+  const trialEndsAt = data?.trialEndsAt;
+  if (!(trialEndsAt instanceof Timestamp)) {
+    return false;
+  }
+
+  if (trialEndsAt.toMillis() <= Date.now()) {
+    return false;
+  }
+
+  if (data?.lifetimePremium === true) {
+    return false;
+  }
+
+  const status = data?.subscription?.status;
+  if (status === "active" || status === "trialing") {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * @param {Record<string, unknown> | undefined} data
+ */
 export function hasUnlimitedPremiumEntitlement(data) {
   if (!data) {
     return false;
   }
 
   if (data.lifetimePremium === true) {
+    return true;
+  }
+
+  if (isAppPremiumTrialActive(data)) {
     return true;
   }
 
@@ -68,6 +100,10 @@ export function serializeEntitlementsForClient(data) {
       data?.trialUsedAt instanceof Timestamp
         ? data.trialUsedAt.toMillis()
         : null,
+    trialEndsAt:
+      data?.trialEndsAt instanceof Timestamp
+        ? data.trialEndsAt.toMillis()
+        : null,
     canCreatePremium: canCreatePaidPremiumSession(data),
     hasUnlimitedPremium: hasUnlimitedPremiumEntitlement(data),
   };
@@ -111,7 +147,47 @@ export function buildMergedEntitlementPatch(source, target) {
     patch.trialUsedAt = source.trialUsedAt;
   }
 
+  if (source?.trialEndsAt && !target?.trialEndsAt) {
+    patch.trialEndsAt = source.trialEndsAt;
+  }
+
   return patch;
+}
+
+/**
+ * @param {import('firebase-admin/firestore').Firestore} db
+ * @param {string} uid
+ */
+export async function startPremiumTrialHandler(db, uid) {
+  const userRef = userEntitlementsRef(db, uid);
+  const snapshot = await userRef.get();
+  const userData = snapshot.data();
+
+  if (userData?.trialUsedAt) {
+    throw new HttpsError(
+      "failed-precondition",
+      "Free trial already used on this account.",
+    );
+  }
+
+  if (hasUnlimitedPremiumEntitlement(userData)) {
+    throw new HttpsError(
+      "failed-precondition",
+      "You already have unlimited premium hosting.",
+    );
+  }
+
+  const trialEndsAt = Timestamp.fromMillis(
+    Date.now() + PREMIUM_TRIAL_DAYS * 24 * 60 * 60 * 1000,
+  );
+
+  await mergeUserEntitlements(db, uid, {
+    trialUsedAt: FieldValue.serverTimestamp(),
+    trialEndsAt,
+  });
+
+  const updated = await userRef.get();
+  return serializeEntitlementsForClient(updated.data());
 }
 
 /**

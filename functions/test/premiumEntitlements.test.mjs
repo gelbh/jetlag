@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { Timestamp } from "firebase-admin/firestore";
 import {
   canCreatePaidPremiumSession,
+  consumePremiumSessionCredit,
   hasUnlimitedPremiumEntitlement,
+  isAppPremiumTrialActive,
   premiumSessionCredits,
   serializeEntitlementsForClient,
 } from "../premiumEntitlements.mjs";
@@ -32,6 +35,57 @@ describe("premiumEntitlements", () => {
       }),
       false,
     );
+  });
+
+  it("detects app-managed free trials", () => {
+    const future = Timestamp.fromMillis(Date.now() + 86_400_000);
+    const past = Timestamp.fromMillis(Date.now() - 86_400_000);
+
+    assert.equal(
+      isAppPremiumTrialActive({
+        trialEndsAt: future,
+      }),
+      true,
+    );
+    assert.equal(
+      hasUnlimitedPremiumEntitlement({
+        trialEndsAt: future,
+      }),
+      true,
+    );
+    assert.equal(
+      isAppPremiumTrialActive({
+        trialEndsAt: past,
+      }),
+      false,
+    );
+    assert.equal(
+      canCreatePaidPremiumSession({
+        trialEndsAt: future,
+      }),
+      true,
+    );
+  });
+
+  it("keeps session pack credits while unlimited hosting is active", () => {
+    const future = Timestamp.fromMillis(Date.now() + 86_400_000);
+    const userData = {
+      premiumSessionCredits: 3,
+      trialEndsAt: future,
+    };
+
+    assert.equal(premiumSessionCredits(userData), 3);
+    assert.equal(hasUnlimitedPremiumEntitlement(userData), true);
+
+    const transaction = {
+      sets: [],
+      set(ref, patch, options) {
+        this.sets.push({ ref, patch, options });
+      },
+    };
+
+    consumePremiumSessionCredit(transaction, { id: "user-1" }, userData);
+    assert.equal(transaction.sets.length, 0);
   });
 
   it("counts session credits", () => {

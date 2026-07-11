@@ -50,8 +50,8 @@ export const PREMIUM_PRODUCTS = {
   pack_1: { mode: "payment", credits: 1 },
   pack_3: { mode: "payment", credits: 3 },
   pack_5: { mode: "payment", credits: 5 },
-  monthly: { mode: "subscription", plan: "monthly", trialDays: 7 },
-  yearly: { mode: "subscription", plan: "yearly", trialDays: 7 },
+  monthly: { mode: "subscription", plan: "monthly" },
+  yearly: { mode: "subscription", plan: "yearly" },
   lifetime: { mode: "payment", lifetime: true },
 };
 

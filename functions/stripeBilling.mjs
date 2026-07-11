@@ -80,7 +80,6 @@ export async function getPremiumEntitlementsHandler(db, uid) {
  * @param {string} uid
  * @param {string | null | undefined} email
  * @param {string} productKey
- * @param {boolean} startTrial
  */
 export async function createCheckoutSessionHandler(
   stripe,
@@ -88,27 +87,12 @@ export async function createCheckoutSessionHandler(
   uid,
   email,
   productKey,
-  startTrial,
 ) {
   if (!PREMIUM_PRODUCT_KEYS.includes(productKey)) {
     throw new HttpsError("invalid-argument", "Unknown premium product.");
   }
 
   const product = PREMIUM_PRODUCTS[productKey];
-  const userRef = userEntitlementsRef(db, uid);
-  const userSnapshot = await userRef.get();
-  const userData = userSnapshot.data();
-
-  if (
-    startTrial &&
-    product.mode === "subscription" &&
-    userData?.trialUsedAt
-  ) {
-    throw new HttpsError(
-      "failed-precondition",
-      "Free trial already used on this account.",
-    );
-  }
 
   const customerId = await ensureStripeCustomer(stripe, db, uid, email);
   const priceId = resolveStripePriceId(productKey);
@@ -135,10 +119,6 @@ export async function createCheckoutSessionHandler(
         plan: product.plan ?? productKey,
       },
     };
-
-    if (startTrial && product.trialDays) {
-      params.subscription_data.trial_period_days = product.trialDays;
-    }
   } else {
     params.payment_intent_data = {
       metadata: {
