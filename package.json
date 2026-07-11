@@ -9,7 +9,7 @@
   "packageManager": "npm@11.16.0",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/delete-dist-sourcemaps.mjs",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
     "preview": "vite preview",
