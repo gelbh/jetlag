@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type RefObject } from "react";
 import type { TentaclePoi } from "../../domain/map/annotations";
 import { formatPresetDistance, type DistanceUnit } from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/gameSize";
@@ -24,6 +24,7 @@ import {
   TENTACLE_STEPS,
   stepsForMode,
 } from "./shared/toolStepUtils";
+import { useSyncWizardStepRef } from "../../hooks/tools/useSyncWizardStepRef";
 
 interface TentaclePanelProps {
   gameSize: GameSize;
@@ -50,6 +51,7 @@ interface TentaclePanelProps {
   costLabel?: string;
   isSubmitting?: boolean;
   onRetry?: () => void;
+  wizardStepRef?: RefObject<string>;
 }
 
 export function TentaclePanel({
@@ -76,10 +78,12 @@ export function TentaclePanel({
   costLabel = "D4P2",
   isSubmitting = false,
   onRetry,
+  wizardStepRef,
 }: TentaclePanelProps) {
   const steps = stepsForMode(TENTACLE_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
   const step = steps[stepIndex]?.id ?? "anchor";
+  useSyncWizardStepRef(wizardStepRef, step);
 
   const prompt =
     categoryId !== null

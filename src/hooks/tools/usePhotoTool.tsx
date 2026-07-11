@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { PhotoPanel } from "../../components/tools/PhotoPanel";
 import type { GameSize } from "../../domain/session/gameSize";
 import {
@@ -10,7 +10,10 @@ import {
   usedPhotoCategoryIds,
   type PhotoCategoryId,
 } from "../../domain/questions/photoQuestions";
-import { questionCostBreakdown } from "../../domain/questions/questionRules";
+import {
+  hasOpenPendingQuestion,
+  questionCostBreakdown,
+} from "../../domain/questions/questionRules";
 import type { SubmitPendingQuestionInput } from "../sync/usePendingQuestionActions";
 import { useSubmitLock } from "../useSubmitLock";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
@@ -69,14 +72,25 @@ export function usePhotoTool({
   }, [gameSize, selectedCategoryId, usedCategories]);
 
   const useCount = photoCategoryUseCount(pendingQuestions, categoryId);
+  const hasOpenQuestion = hasOpenPendingQuestion(pendingQuestions);
   const { label: costLabel, draw: cardDraw, keep: cardKeep } = questionCostBreakdown(
     "D1P1",
     useCount,
   );
 
+  useEffect(() => {
+    if (!hasOpenQuestion && mapError === "Finish the open question before starting another.") {
+      setMapError(null);
+    }
+  }, [hasOpenQuestion, mapError, setMapError]);
+
   const commit = useCallback(async () => {
+    setMapError(null);
+
     if (!canSubmitQuestion) {
-      setMapError("Finish the open question before starting another.");
+      if (hasOpenQuestion) {
+        setMapError("Finish the open question before starting another.");
+      }
       return;
     }
 
@@ -120,6 +134,7 @@ export function usePhotoTool({
     submitPendingQuestion,
     usedCategories,
     canSubmitQuestion,
+    hasOpenQuestion,
   ]);
 
   const panel =
@@ -134,6 +149,7 @@ export function usePhotoTool({
         error={mapError}
         isSubmitting={isSubmitting}
         canSubmitQuestion={canSubmitQuestion}
+        hasOpenQuestion={hasOpenQuestion}
       />
     ) : null;
 

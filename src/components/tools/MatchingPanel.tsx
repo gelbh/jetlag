@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type RefObject } from "react";
 import {
   isMatchingCategoryEnabled,
   isMatchingCategoryAvailable,
@@ -30,6 +30,7 @@ import {
   MATCHING_STEPS,
   stepsForMode,
 } from "./shared/toolStepUtils";
+import { useSyncWizardStepRef } from "../../hooks/tools/useSyncWizardStepRef";
 
 interface MatchingPanelProps {
   distanceUnit: DistanceUnit;
@@ -59,6 +60,7 @@ interface MatchingPanelProps {
   costLabel?: string;
   isSubmitting?: boolean;
   onRetry?: () => void;
+  wizardStepRef?: RefObject<string>;
 }
 
 export function MatchingPanel({
@@ -89,10 +91,12 @@ export function MatchingPanel({
   costLabel = "D3P1",
   isSubmitting = false,
   onRetry,
+  wizardStepRef,
 }: MatchingPanelProps) {
   const steps = stepsForMode(MATCHING_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
   const step = steps[stepIndex]?.id ?? "anchor";
+  useSyncWizardStepRef(wizardStepRef, step);
   const categoryStepIndex = steps.findIndex((item) => item.id === "category");
 
   const handleCategoryChange = (nextCategoryId: MatchingCategoryId) => {

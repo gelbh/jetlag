@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, Point } from "geojson";
 import { RadarPanel } from "../../components/tools/RadarPanel";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
@@ -79,6 +79,7 @@ export function useRadarTool({
   canSubmitQuestion = true,
 }: UseRadarToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
+  const wizardStepRef = useRef("anchor");
   const usedRadarOptions = useMemo(
     () => usedRadarDistanceOptions(annotations.filter(isActive), distanceUnit),
     [annotations, distanceUnit],
@@ -160,6 +161,10 @@ export function useRadarTool({
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
       if (!active) {
+        return false;
+      }
+
+      if (wizardStepRef.current !== "anchor") {
         return false;
       }
 
@@ -301,6 +306,7 @@ export function useRadarTool({
       costLabel={costLabel}
       isSubmitting={isSubmitting}
       viewOnly={!canSubmitQuestion}
+      wizardStepRef={wizardStepRef}
     />
   );
 

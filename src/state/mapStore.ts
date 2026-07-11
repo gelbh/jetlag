@@ -27,6 +27,7 @@ export const useMapStore = create<{
   transitLiveEnabled: boolean;
   transitRouteFilter: TransitRouteFilter;
   showCurrentLocation: boolean;
+  showAdminBoundaries: boolean;
   keepScreenAwake: boolean;
   lowPowerMode: boolean;
   notificationPreferences: NotificationPreferences;
@@ -38,6 +39,7 @@ export const useMapStore = create<{
   setTransitLiveEnabled: (enabled: boolean) => void;
   setTransitRouteFilter: (filter: TransitRouteFilter) => void;
   setShowCurrentLocation: (enabled: boolean) => void;
+  setShowAdminBoundaries: (enabled: boolean) => void;
   setKeepScreenAwake: (enabled: boolean) => void;
   setLowPowerMode: (enabled: boolean) => void;
   setNotificationPreferences: (preferences: NotificationPreferences) => void;
@@ -52,6 +54,7 @@ export const useMapStore = create<{
       transitLiveEnabled: false,
       transitRouteFilter: "all",
       showCurrentLocation: true,
+      showAdminBoundaries: false,
       keepScreenAwake: false,
       lowPowerMode: false,
       notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
@@ -66,6 +69,8 @@ export const useMapStore = create<{
         set({ transitRouteFilter }),
       setShowCurrentLocation: (showCurrentLocation) =>
         set({ showCurrentLocation }),
+      setShowAdminBoundaries: (showAdminBoundaries) =>
+        set({ showAdminBoundaries }),
       setKeepScreenAwake: (keepScreenAwake) => set({ keepScreenAwake }),
       setLowPowerMode: (lowPowerMode) => set({ lowPowerMode }),
       setNotificationPreferences: (notificationPreferences) =>
@@ -86,6 +91,9 @@ export const useMapStore = create<{
         ...currentState,
         ...((persistedState as typeof currentState | undefined) ?? {}),
         showCurrentLocation: true,
+        showAdminBoundaries:
+          (persistedState as typeof currentState | undefined)
+            ?.showAdminBoundaries ?? false,
         layerVisibility: {
           ...DEFAULT_LAYER_VISIBILITY,
           ...((persistedState as typeof currentState | undefined)
@@ -98,6 +106,7 @@ export const useMapStore = create<{
         notificationPreferences: state.notificationPreferences,
         distanceUnit: state.distanceUnit,
         mapStyle: state.mapStyle,
+        showAdminBoundaries: state.showAdminBoundaries,
         layerVisibility: state.layerVisibility,
       }),
     },

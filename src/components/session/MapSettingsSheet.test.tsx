@@ -9,6 +9,8 @@ const baseProps = {
   pendingWrites: 0,
   showCurrentLocation: true,
   onShowCurrentLocationChange: vi.fn(),
+  showAdminBoundaries: false,
+  onShowAdminBoundariesChange: vi.fn(),
   keepScreenAwake: false,
   onKeepScreenAwakeChange: vi.fn(),
   lowPowerMode: false,

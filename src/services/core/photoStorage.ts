@@ -213,6 +213,7 @@ export async function uploadPhotoAnswer(
 ): Promise<string> {
   const user = await ensureAnonymousUser();
   const authUid = user.uid;
+  await user.getIdToken(true);
 
   if (myUid && myUid !== authUid) {
     throw new Error(
@@ -260,7 +261,7 @@ export async function uploadPhotoAnswer(
   const storagePath = photoAnswerStoragePath(sessionId, questionId, fileName);
   const storageRef = ref(getFirebaseStorage(), storagePath);
   const metadata: UploadMetadata = {
-    contentType: blob.type,
+    contentType: blob.type.startsWith("image/") ? blob.type : "image/jpeg",
   };
 
   let lastError: unknown;

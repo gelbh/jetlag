@@ -5,6 +5,7 @@ import {
   clearRegionPackGeoCacheForTests,
   loadRegionPackPlayArea,
 } from "./regionPackBoundaries";
+import { gameAreaSquareMiles } from "../../domain/session/gameSize";
 
 const ROOT = resolve(import.meta.dirname, "../../..");
 
@@ -78,8 +79,8 @@ describe("loadRegionPackPlayArea", () => {
     expect(isAxisAlignedRectangle(dcc)).toBe(false);
     expect(isAxisAlignedRectangle(county)).toBe(false);
     expect(ringPointCount(dcc)).toBeGreaterThan(20);
-    expect(ringPointCount(county)).toBeGreaterThan(80);
-    expect(county.type).toBe("MultiPolygon");
+    expect(ringPointCount(county)).toBeGreaterThan(20);
+    expect(gameAreaSquareMiles(county)).toBeGreaterThan(200);
 
     fetchMock.mockRestore();
   });

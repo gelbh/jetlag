@@ -3,30 +3,33 @@ import type { DockableMapTool } from "../domain/map/mapTools";
 
 export function useToolPanelChrome(activeTool: DockableMapTool | "none") {
   const [mapPanning, setMapPanning] = useState(false);
-  const [panelMinimized, setPanelMinimized] = useState(false);
+  const [userMinimized, setUserMinimized] = useState(false);
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- reset panel chrome when the active tool changes */
     setMapPanning(false);
-    setPanelMinimized(false);
+    setUserMinimized(false);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [activeTool]);
 
   const handleMapPanStart = useCallback(() => {
     if (activeTool !== "none") {
       setMapPanning(true);
-      setPanelMinimized(true);
     }
   }, [activeTool]);
 
   const handleMapPanEnd = useCallback(() => {
     setMapPanning(false);
-    setPanelMinimized(false);
+  }, []);
+
+  const setPanelMinimized = useCallback((minimized: boolean) => {
+    setUserMinimized(minimized);
   }, []);
 
   return {
     mapPanning,
-    panelMinimized,
+    panelMinimized: userMinimized || mapPanning,
+    userMinimized,
     setPanelMinimized,
     handleMapPanStart,
     handleMapPanEnd,

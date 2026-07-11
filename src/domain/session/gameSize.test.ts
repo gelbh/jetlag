@@ -34,6 +34,34 @@ describe("gameSize", () => {
     expect(recommendGameSize(DUBLIN_CITY_GAME_AREA)).toBe("medium");
   });
 
+  it("sums all polygons in a MultiPolygon play area", () => {
+    const splitCounty = {
+      type: "MultiPolygon" as const,
+      coordinates: [
+        [
+          [
+            [-6.45, 53.27],
+            [-6.25, 53.27],
+            [-6.25, 53.35],
+            [-6.45, 53.35],
+            [-6.45, 53.27],
+          ],
+        ],
+        [
+          [
+            [-6.24, 53.27],
+            [-6.08, 53.27],
+            [-6.08, 53.35],
+            [-6.24, 53.35],
+            [-6.24, 53.27],
+          ],
+        ],
+      ],
+    };
+
+    expect(gameAreaSquareMiles(splitCounty)).toBeGreaterThan(50);
+  });
+
   it("maps hiding zone radius by game size", () => {
     expect(hidingZoneRadiusMeters("small")).toBeCloseTo(milesToMeters(0.25));
     expect(hidingZoneRadiusMeters("medium")).toBeCloseTo(milesToMeters(0.25));

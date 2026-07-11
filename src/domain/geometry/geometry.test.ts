@@ -13,6 +13,7 @@ import {
   clearCoastlineNearRegionCacheForTests,
   distanceBetweenPoints,
   gameAreaOutsideMask,
+  gameAreaExteriorStrokeRings,
   isPointInGameArea,
   nearestPointToCoastlines,
   normalizeBoundingBox,
@@ -119,6 +120,31 @@ describe("geometry helpers", () => {
     const outsideMask = gameAreaOutsideMask(sampleGameArea);
     expect(outsideMask?.type).toBe("Polygon");
     expect(outsideMask?.coordinates.length).toBeGreaterThan(1);
+  });
+
+  it("returns only exterior rings for play-area stroke", () => {
+    const polygonWithHole = {
+      type: "Polygon" as const,
+      coordinates: [
+        [
+          [-6.3, 53.3],
+          [-6.1, 53.3],
+          [-6.1, 53.4],
+          [-6.3, 53.4],
+          [-6.3, 53.3],
+        ],
+        [
+          [-6.25, 53.33],
+          [-6.2, 53.33],
+          [-6.2, 53.37],
+          [-6.25, 53.37],
+          [-6.25, 53.33],
+        ],
+      ],
+    };
+
+    expect(gameAreaExteriorStrokeRings(polygonWithHole)).toHaveLength(1);
+    expect(gameAreaExteriorStrokeRings(polygonWithHole)[0]).toHaveLength(5);
   });
 
   it("checks whether a point is inside the play area", () => {

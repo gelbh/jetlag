@@ -36,9 +36,9 @@ export function ToolFloatingPanel({
     .filter(Boolean)
     .join(" ");
 
-  if (minimized) {
-    return (
-      <div className={panelClassName} style={panelStyle}>
+  return (
+    <div className={panelClassName} style={panelStyle}>
+      {minimized ? (
         <button
           type="button"
           onClick={() => onMinimizedChange(false)}
@@ -50,31 +50,31 @@ export function ToolFloatingPanel({
           </span>
           <span className="text-xs text-ink-muted">Tap to expand</span>
         </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className={panelClassName} style={panelStyle}>
+      ) : null}
       <div
         className={`tool-panel-compact hud-panel relative mx-auto max-w-xl overflow-y-auto overscroll-contain p-3 pt-9 ${
           isWizardDockTool(toolId)
             ? "max-h-[min(54dvh,480px)]"
             : "max-h-[min(34dvh,320px)]"
-        }`}
+        } ${minimized ? "jl-panel-body-preserver" : ""}`}
+        aria-hidden={minimized}
       >
-        <button
-          type="button"
-          aria-label="Drag panel down to minimize"
-          className="jl-panel-drag-handle absolute inset-x-0 top-0 flex justify-center py-2"
-          {...handleProps}
-        >
-          <span className="jl-sheet-handle" aria-hidden="true" />
-        </button>
-        <PopupCloseButton
-          label={`Close ${mapToolPlacingLabel(toolId)}`}
-          onClick={onClose}
-        />
+        {!minimized ? (
+          <>
+            <button
+              type="button"
+              aria-label="Drag panel down to minimize"
+              className="jl-panel-drag-handle absolute inset-x-0 top-0 flex justify-center py-2"
+              {...handleProps}
+            >
+              <span className="jl-sheet-handle" aria-hidden="true" />
+            </button>
+            <PopupCloseButton
+              label={`Close ${mapToolPlacingLabel(toolId)}`}
+              onClick={onClose}
+            />
+          </>
+        ) : null}
         <div key={toolId} className="jl-panel-crossfade-enter motion-reduce:animate-none">
           {children}
         </div>

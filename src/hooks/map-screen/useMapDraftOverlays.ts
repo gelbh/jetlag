@@ -19,10 +19,13 @@ import {
   type ThermometerAnswer,
 } from "../../domain/questions/thermometerQuestions";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
+import { getBoundaryPreviewStyle } from "../../domain/map/mapBoundaryOverlayStyle";
+import type { MapStyle } from "../../domain/map/mapBasemaps";
 
 export interface MapDraftOverlaySources {
   activeTool: MapTool;
   gameArea: GameArea;
+  mapStyle: MapStyle;
   radar: {
     center: LatLngTuple | null;
     radiusMeters: number;
@@ -72,8 +75,9 @@ export function buildMapDraftOverlays(
 ): MapDraftOverlayResult {
   const overlays: MapDraftOverlay[] = [];
   const eliminationFeatures: Feature<GeoPolygon | MultiPolygon>[] = [];
-  const { activeTool, gameArea } = sources;
+  const { activeTool, gameArea, mapStyle } = sources;
   const c = MAP_ANNOTATION_COLORS;
+  const boundaryPreviewStyle = getBoundaryPreviewStyle(mapStyle);
 
   const pushBoundary = (
     id: string,
@@ -88,12 +92,7 @@ export function buildMapDraftOverlays(
       id,
       feature,
       layer: "boundary",
-      style: {
-        color: c.boundary,
-        fillColor: c.boundary,
-        fillOpacity: 0.15,
-        weight: 0,
-      },
+      style: boundaryPreviewStyle,
     });
   };
 

@@ -136,6 +136,7 @@ export function useMeasuringTool({
   canSubmitQuestion = true,
 }: UseMeasuringToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
+  const wizardStepRef = useRef("anchor");
   const seaLevelRequestId = useRef(0);
   const coastlineRequestId = useRef(0);
   const linearRequestId = useRef(0);
@@ -193,16 +194,17 @@ export function useMeasuringTool({
   const customMeasureGeometries = sessionRules?.customMeasureGeometries ?? [];
   const customMatchingAreas = sessionRules?.customMatchingAreas;
   const adminDivisionCounts = usePreloadStore((state) => state.adminDivisionCounts);
+  const regionPackId = sessionRules?.regionPackId;
   const measuringCatalog = useMemo(
     () => {
       const catalog = sessionRules
         ? availableMeasuringCatalog(sessionRules)
         : availableMeasuringCatalog({ gameSize: "medium" });
       return catalog.filter((option) =>
-        adminBorderKindAvailability(option.id, adminDivisionCounts),
+        adminBorderKindAvailability(option.id, adminDivisionCounts, regionPackId),
       );
     },
-    [adminDivisionCounts, sessionRules],
+    [adminDivisionCounts, regionPackId, sessionRules],
   );
   const previewBeforeSend = isPreviewQuestionBeforeSendEnabled(
     sessionRules ?? { gameSize: "medium" },
@@ -724,7 +726,7 @@ export function useMeasuringTool({
     ),
     isAvailable: (_usedOptions, currentOption) =>
       isMeasuringFromKindAvailable() &&
-      adminBorderKindAvailability(currentOption, adminDivisionCounts),
+      adminBorderKindAvailability(currentOption, adminDivisionCounts, regionPackId),
     pickNext: (usedOptions) =>
       firstUnusedCatalogOption<MeasuringFromKind>(
         measuringCatalog,
@@ -888,15 +890,22 @@ export function useMeasuringTool({
       return false;
     }
 
+    const wizardStep = wizardStepRef.current;
+
     if (
       measuringSubject === "location" &&
       !usesAllPlacesInArea &&
       measuringTargetMode === "map" &&
       measuringSeekerPoint &&
-      !measuringTargetPoint
+      !measuringTargetPoint &&
+      wizardStep === "target"
     ) {
       void resolveMeasuringMapTarget(point);
       return true;
+    }
+
+    if (wizardStep !== "anchor") {
+      return false;
     }
 
     setMeasuringSeekerAnchorAndResolve(point);
@@ -954,7 +963,7 @@ export function useMeasuringTool({
 
     if (
       !isMeasuringFromKindAvailable() ||
-      !adminBorderKindAvailability(measureFromKind, adminDivisionCounts)
+      !adminBorderKindAvailability(measureFromKind, adminDivisionCounts, regionPackId)
     ) {
       setMeasuringError("That measure category has already been added.");
       return;
@@ -1348,6 +1357,7 @@ export function useMeasuringTool({
       awaitHiderAnswer={awaitHiderAnswer}
       costLabel={questionCost.label}
       isSubmitting={isSubmitting}
+      wizardStepRef={wizardStepRef}
     />
     <QuestionPreviewSheet
       open={previewOpen}

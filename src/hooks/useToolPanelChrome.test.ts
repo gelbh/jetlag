@@ -25,7 +25,7 @@ describe("useToolPanelChrome", () => {
     expect(result.current.panelMinimized).toBe(false);
   });
 
-  it("restores the panel when panning ends", () => {
+  it("restores expanded panel when panning ends without user minimize", () => {
     const { result } = renderHook(() => useToolPanelChrome("radar"));
 
     act(() => {
@@ -38,5 +38,27 @@ describe("useToolPanelChrome", () => {
 
     expect(result.current.mapPanning).toBe(false);
     expect(result.current.panelMinimized).toBe(false);
+  });
+
+  it("keeps user-minimized state after panning ends", () => {
+    const { result } = renderHook(() => useToolPanelChrome("matching"));
+
+    act(() => {
+      result.current.setPanelMinimized(true);
+    });
+
+    act(() => {
+      result.current.handleMapPanStart();
+    });
+
+    expect(result.current.panelMinimized).toBe(true);
+
+    act(() => {
+      result.current.handleMapPanEnd();
+    });
+
+    expect(result.current.mapPanning).toBe(false);
+    expect(result.current.userMinimized).toBe(true);
+    expect(result.current.panelMinimized).toBe(true);
   });
 });

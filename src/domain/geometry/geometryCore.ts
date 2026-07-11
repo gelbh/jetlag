@@ -272,6 +272,18 @@ const WORLD_OUTSIDE_MASK_BOUNDS: BoundingBox = {
   east: 180,
 };
 
+export function gameAreaExteriorStrokeRings(gameArea: GameArea): LatLngTuple[][] {
+  if (gameArea.type === "MultiPolygon") {
+    return gameArea.coordinates.map(
+      (polygon) =>
+        (polygon[0] ?? []).map(([lng, lat]) => [lat, lng] as LatLngTuple),
+    );
+  }
+
+  const exterior = gameArea.coordinates[0] ?? [];
+  return [exterior.map(([lng, lat]) => [lat, lng] as LatLngTuple)];
+}
+
 export function gameAreaOutsideMask(gameArea: GameArea): GameArea | null {
   const { south, west, north, east } = WORLD_OUTSIDE_MASK_BOUNDS;
   const outer = bboxPolygon([west, south, east, north]);

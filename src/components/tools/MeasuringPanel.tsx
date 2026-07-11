@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type RefObject } from "react";
 import {
   MEASURING_CATALOG,
   MEASURING_GROUPS,
@@ -42,6 +42,7 @@ import {
   MEASURING_STEPS,
   stepsForMode,
 } from "./shared/toolStepUtils";
+import { useSyncWizardStepRef } from "../../hooks/tools/useSyncWizardStepRef";
 
 type MeasuringSearchRole = "seeker" | "target";
 
@@ -122,6 +123,7 @@ interface MeasuringPanelProps {
   awaitHiderAnswer?: boolean;
   costLabel?: string;
   isSubmitting?: boolean;
+  wizardStepRef?: RefObject<string>;
 }
 
 export function MeasuringPanel({
@@ -166,10 +168,12 @@ export function MeasuringPanel({
   awaitHiderAnswer = false,
   costLabel = "D3P1",
   isSubmitting = false,
+  wizardStepRef,
 }: MeasuringPanelProps) {
   const steps = stepsForMode(MEASURING_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
   const step = steps[stepIndex]?.id ?? "anchor";
+  useSyncWizardStepRef(wizardStepRef, step);
 
   const locationCategory =
     subject === "location"
@@ -531,7 +535,7 @@ export function MeasuringPanel({
           first={step === "answer"}
           status={answer !== null ? "complete" : "active"}
         >
-          {hasTargetPoint && distanceMeters !== null && !isSeaLevel ? (
+          {hasTargetPoint && distanceMeters !== null && !isSeaLevel && !isCoastline ? (
             <ResolvedReadout>
               {targetPlaceName ?? targetLabel} is{" "}
               {formatDistance(distanceMeters, distanceUnit)} from you.

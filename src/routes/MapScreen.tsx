@@ -9,6 +9,8 @@ import { GeometryEditLayer } from "../components/map/GeometryEditLayer";
 import { GameAreaMask } from "../components/map/GameAreaMask";
 import { MapView } from "../components/map/MapView";
 import { MapDraftLayer } from "../components/map/MapDraftLayer";
+import { AdminBoundariesLayer } from "../components/map/AdminBoundariesLayer";
+import { useAdminBoundaryFeatures } from "../hooks/map-screen/useAdminBoundaryFeatures";
 import { LiveUserLocationLayer } from "../components/map/LiveUserLocationLayer";
 import {
   MapViewportTracker,
@@ -145,11 +147,21 @@ export function MapScreen() {
   const setShowCurrentLocation = useMapStore(
     (state) => state.setShowCurrentLocation,
   );
+  const showAdminBoundaries = useMapStore((state) => state.showAdminBoundaries);
+  const setShowAdminBoundaries = useMapStore(
+    (state) => state.setShowAdminBoundaries,
+  );
   const distanceUnit = useSessionDistanceUnit();
   const mapStyle = useMapStore((state) => state.mapStyle);
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
+  const { features: adminBoundaryFeatures, loading: adminBoundaryLoading } =
+    useAdminBoundaryFeatures(
+    session?.gameArea ?? null,
+    sessionRulesFromRecord(session),
+    showAdminBoundaries,
+  );
   const allAnnotations = useAnnotationStore((state) => state.annotations);
   const sessionId = session?.id;
   const annotations = useMemo(
@@ -293,7 +305,11 @@ export function MapScreen() {
       return;
     }
 
-    preloadGameAreaCaches(session.gameArea, session.customMatchingAreas);
+    preloadGameAreaCaches(
+      session.gameArea,
+      session.customMatchingAreas,
+      session.regionPackId,
+    );
     startSeaLevelBackgroundSampling(session.gameArea);
   }, [
     firebaseAuthReady,
@@ -714,6 +730,7 @@ export function MapScreen() {
       {
         activeTool,
         gameArea: toolGameArea,
+        mapStyle: effectiveBasemapStyle,
         radar: {
           center: radarTool.draft.radarCenter,
           radiusMeters: radarTool.draft.radarRadius,
@@ -787,6 +804,8 @@ export function MapScreen() {
     handleMapPanStart,
     handleMapPanEnd,
   } = useToolPanelChrome(activeTool);
+  const mapChromeControlInset =
+    panelMinimized || mapPanning ? "chrome-hidden" : "dock";
 
   const confirmedHidingZones = useMemo(
     () => hidingZones.filter((zone) => zone.status === "confirmed"),
@@ -1024,6 +1043,8 @@ export function MapScreen() {
           mapStyle={effectiveBasemapStyle}
           mapStylePreference={mapStyle}
           onMapStyleChange={setMapStyle}
+          zoomControlInset={mapChromeControlInset}
+          mapStyleControlInset={mapChromeControlInset}
           center={center}
           zoom={12}
           focusBounds={mapFocusBounds}
@@ -1051,12 +1072,6 @@ export function MapScreen() {
               />
             </Suspense>
           ) : null}
-          <LiveUserLocationLayer
-            enabled={showCurrentLocation}
-            highAccuracy={awaitingPlacement}
-            lowPowerMode={lowPowerMode}
-            onError={handleLiveLocationError}
-          />
           <AnnotationLayer
             annotations={annotations}
             gameArea={session.gameArea}
@@ -1066,15 +1081,18 @@ export function MapScreen() {
             session={session}
             hidingZones={confirmedHidingZones}
           />
-          <LiveSeekerLocationsLayer locations={playerLocations} />
+          <LiveSeekerLocationsLayer locations={playerLocations} myUid={uid} />
           <ActiveThermometerWalkLayer
             start={activeThermometerWalk.start}
             livePoint={activeThermometerWalk.livePoint}
+            mapStyle={effectiveBasemapStyle}
+            distanceUnit={distanceUnit}
           />
           <PendingQuestionLayer
             pendingQuestions={pendingQuestions}
             gameArea={session.gameArea}
             sessionRules={session}
+            mapStyle={effectiveBasemapStyle}
           />
           {geometryEditAnnotation && geometryDraft ? (
             <GeometryEditLayer
@@ -1084,6 +1102,18 @@ export function MapScreen() {
             />
           ) : null}
           <MapDraftLayer overlays={mapDraftOverlays} />
+          {showAdminBoundaries && !adminBoundaryLoading ? (
+            <AdminBoundariesLayer
+              features={adminBoundaryFeatures}
+              mapStyle={effectiveBasemapStyle}
+            />
+          ) : null}
+          <LiveUserLocationLayer
+            enabled={showCurrentLocation}
+            highAccuracy={awaitingPlacement}
+            lowPowerMode={lowPowerMode}
+            onError={handleLiveLocationError}
+          />
         </MapView>
         <div
           ref={exportLegendRef}
@@ -1208,6 +1238,8 @@ export function MapScreen() {
         pendingWrites={pendingWrites}
         showCurrentLocation={showCurrentLocation}
         onShowCurrentLocationChange={setShowCurrentLocation}
+        showAdminBoundaries={showAdminBoundaries}
+        onShowAdminBoundariesChange={setShowAdminBoundaries}
         keepScreenAwake={keepScreenAwake}
         onKeepScreenAwakeChange={setKeepScreenAwake}
         lowPowerMode={lowPowerMode}

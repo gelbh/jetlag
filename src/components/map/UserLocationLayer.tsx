@@ -34,6 +34,7 @@ export function UserLocationLayer({ reading }: UserLocationLayerProps) {
         position={position}
         icon={createUserLocationIcon(reading.heading)}
         interactive={false}
+        zIndexOffset={1000}
       />
     </>
   );

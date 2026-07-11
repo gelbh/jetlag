@@ -3,6 +3,7 @@ import type { GameArea } from "../../domain/map/annotations";
 import type { BoundingBox } from "../../domain/geometry/gameAreaBounds";
 import { gameAreaToBoundingBox } from "../../domain/geometry/gameAreaBounds";
 import { featureToGameArea } from "../../domain/geometry/geometry";
+import { unionGameAreas } from "../../domain/geometry/unionGameAreas";
 import type { CustomMatchingAreasByLevel } from "../../domain/session/sessionCustomContent";
 import type { MatchingAdminLevel } from "../../domain/session/sessionCustomContent";
 import {
@@ -72,28 +73,15 @@ function featureToCouncilGameArea(
 function combineCouncilGameAreas(
   features: Feature<Polygon | MultiPolygon>[],
 ): GameArea {
-  const polygonSets = features.flatMap((feature) => {
-    if (feature.geometry.type === "Polygon") {
-      return [feature.geometry.coordinates];
-    }
-    return feature.geometry.coordinates;
-  });
-
-  if (polygonSets.length === 0) {
+  if (features.length === 0) {
     throw new Error("No council boundaries found.");
   }
 
-  if (polygonSets.length === 1) {
-    return {
-      type: "Polygon",
-      coordinates: polygonSets[0]!,
-    };
+  if (features.length === 1) {
+    return featureToCouncilGameArea(features[0]!);
   }
 
-  return {
-    type: "MultiPolygon",
-    coordinates: polygonSets,
-  };
+  return unionGameAreas(features.map((feature) => featureToCouncilGameArea(feature)));
 }
 
 export async function loadRegionPackPlayArea(

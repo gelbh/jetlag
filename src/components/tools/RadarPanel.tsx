@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type RefObject } from "react";
 import { RadarDistancePicker } from "./RadarDistancePicker";
 import { yesNoAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
@@ -14,6 +14,7 @@ import {
   RADAR_STEPS,
   stepsForMode,
 } from "./shared/toolStepUtils";
+import { useSyncWizardStepRef } from "../../hooks/tools/useSyncWizardStepRef";
 import {
   isRadarDistanceOptionAvailable,
   type RadarAnswer,
@@ -43,6 +44,7 @@ interface RadarPanelProps {
   costLabel?: string;
   isSubmitting?: boolean;
   viewOnly?: boolean;
+  wizardStepRef?: RefObject<string>;
 }
 
 export function RadarPanel({
@@ -67,10 +69,12 @@ export function RadarPanel({
   costLabel = "D2P1",
   isSubmitting = false,
   viewOnly = false,
+  wizardStepRef,
 }: RadarPanelProps) {
   const steps = stepsForMode(RADAR_STEPS, awaitHiderAnswer);
   const [stepIndex, setStepIndex] = useState(0);
   const step = steps[stepIndex]?.id ?? "anchor";
+  useSyncWizardStepRef(wizardStepRef, step);
 
   const distanceSelectionAvailable =
     radiusMeters !== null && isRadarDistanceOptionAvailable();

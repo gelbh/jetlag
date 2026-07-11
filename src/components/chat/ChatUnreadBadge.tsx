@@ -29,7 +29,7 @@ export function ChatUnreadBadge({ count }: ChatUnreadBadgeProps) {
       className="jl-unread-badge"
       aria-label={`${count} unread chat messages`}
     >
-      {count > 1 ? label : null}
+      {label}
     </span>
   );
 }

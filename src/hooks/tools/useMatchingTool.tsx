@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLatestRequest } from "../useLatestRequest";
 import { useDebouncedValue } from "../useDebouncedValue";
 import { useSubmitLock } from "../useSubmitLock";
@@ -106,6 +106,7 @@ export function useMatchingTool({
   canSubmitQuestion = true,
 }: UseMatchingToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
+  const wizardStepRef = useRef("anchor");
   const usedMatchingCategories = useMemo(
     () => usedMatchingCategoryIds(annotations.filter(isActive)),
     [annotations],
@@ -182,6 +183,7 @@ export function useMatchingTool({
     matchingCategory?.resolver === "landmass";
 
   const adminDivisionCounts = usePreloadStore((state) => state.adminDivisionCounts);
+  const regionPackId = sessionRules?.regionPackId;
 
   const matchingCatalog = useMemo(
     () => {
@@ -189,10 +191,14 @@ export function useMatchingTool({
         ? availableMatchingCategories(sessionRules)
         : availableMatchingCategories({ gameSize: "medium" });
       return categories.filter((category) =>
-        isAdminDivisionCategoryAvailable(category.id, adminDivisionCounts),
+        isAdminDivisionCategoryAvailable(
+          category.id,
+          adminDivisionCounts,
+          regionPackId,
+        ),
       );
     },
-    [adminDivisionCounts, sessionRules],
+    [adminDivisionCounts, regionPackId, sessionRules],
   );
 
   const previewBeforeSend = isPreviewQuestionBeforeSendEnabled(
@@ -206,7 +212,11 @@ export function useMatchingTool({
     currentOption: matchingCategoryId ?? defaultMatchingCategoryId(),
     isAvailable: (_usedOptions, currentOption) =>
       isMatchingCategoryAvailable(currentOption) &&
-      isAdminDivisionCategoryAvailable(currentOption, adminDivisionCounts),
+      isAdminDivisionCategoryAvailable(
+        currentOption,
+        adminDivisionCounts,
+        regionPackId,
+      ),
     pickNext: firstAvailableMatchingCategoryId,
     onUnavailable: useCallback((nextCategory: MatchingCategoryId) => {
       setMatchingCategoryId(nextCategory);
@@ -428,6 +438,10 @@ export function useMatchingTool({
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
       if (!active) {
+        return false;
+      }
+
+      if (wizardStepRef.current !== "anchor") {
         return false;
       }
 
@@ -688,6 +702,7 @@ export function useMatchingTool({
               void resolveForAnchor(matchingSeekerPoint, matchingCategoryId)
           : undefined
       }
+      wizardStepRef={wizardStepRef}
     />
     <QuestionPreviewSheet
       open={previewOpen}

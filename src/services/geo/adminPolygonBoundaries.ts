@@ -69,7 +69,7 @@ export function lineStringsFromAdminDivisionBoundaries(
 
 export async function fetchCustomAdminBorderLineSegments(
   gameArea: GameArea,
-  kind: "admin3_border" | "admin4_border",
+  kind: "admin1_border" | "admin2_border" | "admin3_border" | "admin4_border",
   customMatchingAreas?: CustomMatchingAreasByLevel,
 ): Promise<Feature<LineString>[]> {
   const level = adminLevelForMeasuringBorderKind(kind) as MatchingAdminLevel;

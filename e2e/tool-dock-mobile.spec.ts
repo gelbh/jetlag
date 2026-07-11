@@ -211,3 +211,32 @@ test.describe("iPhone 13 PWA safe area", () => {
     );
   });
 });
+
+test.describe("iPhone 13 PWA home safe area", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await page.evaluate((safeBottomPx) => {
+      document.documentElement.style.setProperty(
+        "--safe-area-bottom",
+        `${safeBottomPx}px`,
+      );
+    }, SIMULATED_SAFE_AREA_BOTTOM_PX);
+  });
+
+  test("home poster fills viewport without gap below content", async ({ page }) => {
+    const metrics = await page.evaluate(() => {
+      const poster = document.querySelector(".home-poster");
+      const posterRect = poster?.getBoundingClientRect();
+      const bodyBg = getComputedStyle(document.body).backgroundColor;
+      return {
+        viewportHeight: window.innerHeight,
+        posterBottom: posterRect?.bottom ?? 0,
+        bodyBg,
+      };
+    });
+
+    expect(metrics.posterBottom).toBeGreaterThanOrEqual(metrics.viewportHeight - 2);
+    expect(metrics.bodyBg).not.toBe("rgba(0, 0, 0, 0)");
+  });
+});

@@ -27,6 +27,8 @@ interface MapSettingsSheetProps {
   pendingWrites: number;
   showCurrentLocation: boolean;
   onShowCurrentLocationChange: (enabled: boolean) => void;
+  showAdminBoundaries: boolean;
+  onShowAdminBoundariesChange: (enabled: boolean) => void;
   keepScreenAwake: boolean;
   onKeepScreenAwakeChange: (enabled: boolean) => void;
   lowPowerMode: boolean;
@@ -89,6 +91,8 @@ export function MapSettingsSheet({
   pendingWrites,
   showCurrentLocation,
   onShowCurrentLocationChange,
+  showAdminBoundaries,
+  onShowAdminBoundariesChange,
   keepScreenAwake,
   onKeepScreenAwakeChange,
   lowPowerMode,
@@ -186,6 +190,8 @@ export function MapSettingsSheet({
             <MapSegment
               showCurrentLocation={showCurrentLocation}
               onShowCurrentLocationChange={onShowCurrentLocationChange}
+              showAdminBoundaries={showAdminBoundaries}
+              onShowAdminBoundariesChange={onShowAdminBoundariesChange}
               keepScreenAwake={keepScreenAwake}
               onKeepScreenAwakeChange={onKeepScreenAwakeChange}
               lowPowerMode={lowPowerMode}
@@ -287,6 +293,8 @@ export function MapSettingsSheet({
 function MapSegment({
   showCurrentLocation,
   onShowCurrentLocationChange,
+  showAdminBoundaries,
+  onShowAdminBoundariesChange,
   keepScreenAwake,
   onKeepScreenAwakeChange,
   lowPowerMode,
@@ -321,6 +329,8 @@ function MapSegment({
 }: {
   showCurrentLocation: boolean;
   onShowCurrentLocationChange: (enabled: boolean) => void;
+  showAdminBoundaries: boolean;
+  onShowAdminBoundariesChange: (enabled: boolean) => void;
   keepScreenAwake: boolean;
   onKeepScreenAwakeChange: (enabled: boolean) => void;
   lowPowerMode: boolean;
@@ -361,6 +371,12 @@ function MapSegment({
         label="Show my location"
         checked={showCurrentLocation}
         onChange={onShowCurrentLocationChange}
+      />
+      <SettingsToggleRow
+        label="Administrative borders"
+        description="Reference outlines for admin divisions in the play area. Finer levels draw lighter."
+        checked={showAdminBoundaries}
+        onChange={onShowAdminBoundariesChange}
       />
       <SettingsToggleRow
         label="Keep screen awake"

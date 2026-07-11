@@ -24,6 +24,7 @@ export function resetAllStores(): void {
     transitLiveEnabled: false,
     transitRouteFilter: "all",
     showCurrentLocation: true,
+    showAdminBoundaries: false,
     keepScreenAwake: false,
     lowPowerMode: false,
     notificationPreferences: {

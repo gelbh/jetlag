@@ -3,6 +3,8 @@ import type { GameArea, TentaclePoi } from "../map/annotations";
 import type { LatLngTuple } from "../geometry/geometry";
 import type { MapDraftOverlay } from "../map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../map/mapAnnotationColors";
+import { getBoundaryPreviewStyle } from "../map/mapBoundaryOverlayStyle";
+import type { MapStyle } from "../map/mapBasemaps";
 import { buildSameNearestRegion } from "../geometry/matchingGeometry";
 import {
   buildMeasuringBoundaryPreview,
@@ -59,6 +61,7 @@ function pushBoundary(
   overlays: MapDraftOverlay[],
   id: string,
   feature: Feature<Polygon | MultiPolygon> | null,
+  mapStyle: MapStyle,
 ) {
   if (!feature) {
     return;
@@ -69,12 +72,7 @@ function pushBoundary(
     id,
     feature,
     layer: "boundary",
-    style: {
-      color: MAP_ANNOTATION_COLORS.boundary,
-      fillColor: MAP_ANNOTATION_COLORS.boundary,
-      fillOpacity: 0.15,
-      weight: 0,
-    },
+    style: getBoundaryPreviewStyle(mapStyle),
   });
 }
 
@@ -175,6 +173,7 @@ function buildMatchingOverlays(
   question: PendingQuestionRecord,
   gameArea: GameArea,
   prefix: string,
+  mapStyle: MapStyle,
 ): { overlays: MapDraftOverlay[]; badgeAnchor: LatLngTuple | null } {
   const metadata = question.placement.metadata;
   const geometry = parseGeometry(question.placement.geometryJson);
@@ -198,6 +197,7 @@ function buildMatchingOverlays(
       overlays,
       `${prefix}-boundary`,
       buildSameNearestRegion(features, seekerFeatureId, gameArea),
+      mapStyle,
     );
   }
 
@@ -220,6 +220,7 @@ function buildMeasuringOverlays(
   question: PendingQuestionRecord,
   gameArea: GameArea,
   prefix: string,
+  mapStyle: MapStyle,
 ): { overlays: MapDraftOverlay[]; badgeAnchor: LatLngTuple | null } {
   const metadata = question.placement.metadata;
   const regionInputJson = metadata.measuringRegionInputJson;
@@ -248,6 +249,7 @@ function buildMeasuringOverlays(
         ...regionInput,
         gameArea: regionInput.gameArea ?? gameArea,
       }),
+      mapStyle,
     );
   }
 
@@ -321,6 +323,7 @@ function buildTentacleOverlays(
 export function buildPendingQuestionOverlay(
   question: PendingQuestionRecord,
   gameArea: GameArea,
+  mapStyle: MapStyle = "standard",
 ): PendingQuestionOverlayResult | null {
   if (question.status !== "pending") {
     return null;
@@ -337,10 +340,10 @@ export function buildPendingQuestionOverlay(
       result = buildThermometerOverlays(question, prefix);
       break;
     case "matching":
-      result = buildMatchingOverlays(question, gameArea, prefix);
+      result = buildMatchingOverlays(question, gameArea, prefix, mapStyle);
       break;
     case "measuring":
-      result = buildMeasuringOverlays(question, gameArea, prefix);
+      result = buildMeasuringOverlays(question, gameArea, prefix, mapStyle);
       break;
     case "tentacle":
       result = buildTentacleOverlays(question, prefix);
@@ -363,8 +366,9 @@ export function buildPendingQuestionOverlay(
 export function buildPendingQuestionOverlays(
   questions: readonly PendingQuestionRecord[],
   gameArea: GameArea,
+  mapStyle: MapStyle = "standard",
 ): PendingQuestionOverlayResult[] {
   return questions
-    .map((question) => buildPendingQuestionOverlay(question, gameArea))
+    .map((question) => buildPendingQuestionOverlay(question, gameArea, mapStyle))
     .filter((result): result is PendingQuestionOverlayResult => result !== null);
 }

@@ -19,6 +19,7 @@ interface PhotoPanelProps {
   error?: string | null;
   isSubmitting?: boolean;
   canSubmitQuestion?: boolean;
+  hasOpenQuestion?: boolean;
 }
 
 export function PhotoPanel({
@@ -31,6 +32,7 @@ export function PhotoPanel({
   error,
   isSubmitting = false,
   canSubmitQuestion = true,
+  hasOpenQuestion = false,
 }: PhotoPanelProps) {
   const availableCategories = photoCategoriesForGameSize(gameSize).filter(
     (category) => !usedCategoryIds.has(category.id),
@@ -42,6 +44,14 @@ export function PhotoPanel({
     isPhotoCategoryAvailableForGameSize(gameSize, categoryId) &&
     !usedCategoryIds.has(categoryId) &&
     !isSubmitting;
+  const displayError =
+    error &&
+    !(
+      hasOpenQuestion === false &&
+      error === "Finish the open question before starting another."
+    )
+      ? error
+      : null;
 
   return (
     <ToolPanelShell toolId="photo">
@@ -75,7 +85,7 @@ export function PhotoPanel({
         <p className="text-xs text-ink-dim">
           Hiders upload a photo or reply that they cannot answer in game chat.
         </p>
-        {!canSubmitQuestion ? (
+        {hasOpenQuestion ? (
           <p className="text-sm text-status-warning">
             Finish the open question before starting another.
           </p>
@@ -89,8 +99,8 @@ export function PhotoPanel({
         >
           {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
         </button>
-        {error ? (
-          <p className="text-sm text-status-error">{error}</p>
+        {displayError ? (
+          <p className="text-sm text-status-error">{displayError}</p>
         ) : null}
       </ToolSection>
     </ToolPanelShell>

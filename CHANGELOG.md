@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.2.4 - 2026-07-11
+
+### Fixes
+
+- Matching wizard: step stays put when you pan the map
+- Tool panel: stays collapsed after pan if you minimized it first
+- Map clicks: wizard anchor step only; no accidental reset mid-flow
+- Dublin games: hide country and province admin borders in matching and measuring
+- Dublin county: play area size uses the full county boundary, not the first polygon slice
+- Dublin county: play area outline no longer draws internal council seams when admin borders are off
+- Play area mask: stroke only outer rings; no hole or tint edge lines on complex boundaries
+- Admin boundaries: Dublin games only load local authority and LEA reference lines
+- Admin divisions: hide border options until play-area counts finish loading
+- Photo tool: no stale finish-open-question warning when nothing is pending
+- Measuring: drop duplicate coastline distance line in the preview
+- Seeker map: your location dot renders above other markers with a You label
+- Photo uploads: refresh auth token before upload; default JPEG type when the file has none
+- PWA: fill safe-area band on Home and Join with the app background
+- Custom measure geometry: fix crash when advanced settings list is missing
+
+### Improvements
+
+- Map settings: optional admin boundary reference layer (off by default)
+- Admin boundaries: level-weighted strokes; readable on satellite basemap
+- Tool previews: admin border overlays match standard and satellite basemap
+- Chat badge: larger count pill with pulse on new messages
+- Hider map: bottom dock matches seeker tool dock layout and safe-area
+- Thermometer walk: start and live markers, distance label, satellite-aware line
+- Map controls: zoom and basemap sit higher when the tool panel is minimized
+
+### Technical
+
+- Error reporting: filter QuotaExceededError noise
+
 ## 0.2.3 - 2026-07-10
 
 ### Fixes

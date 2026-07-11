@@ -12,7 +12,6 @@ import {
   type MapViewportState,
 } from "../components/map/MapViewportTracker";
 import { ChatPanel } from "../components/chat/ChatPanel";
-import { ChatUnreadBadge } from "../components/chat/ChatUnreadBadge";
 import { HidingZonePanel } from "../components/hider/HidingZonePanel";
 import { TimeTrapPanel } from "../components/hider/TimeTrapPanel";
 import { ExpansionHiderMenu } from "../components/hider/ExpansionHiderMenu";
@@ -22,7 +21,7 @@ import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
 import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
 import { HiderZoneWizardShell } from "../components/hider/HiderZoneWizardShell";
 import { PopupCloseButton } from "../components/ui/PopupCloseButton";
-import { DEFAULT_SESSION_RULES } from "../domain/session/sessionRules";
+import { DEFAULT_SESSION_RULES, sessionRulesFromRecord } from "../domain/session/sessionRules";
 import {
   effectiveHidingZoneRadiusMeters,
   formatHidingZoneRadiusLabel,
@@ -32,11 +31,14 @@ import {
   nearestStation,
 } from "../domain/session/hidingZone";
 import { MapStatusRail } from "../components/session/MapStatusRail";
+import { MapSettingsSheet } from "../components/session/MapSettingsSheet";
 import {
   HiderTruthRevealBanner,
   type HiderTruthRevealState,
 } from "../components/session/HiderTruthRevealBanner";
-import { MapSettingsSheet } from "../components/session/MapSettingsSheet";
+import { HiderToolDock } from "../components/tools/HiderToolDock";
+import { AdminBoundariesLayer } from "../components/map/AdminBoundariesLayer";
+import { useAdminBoundaryFeatures } from "../hooks/map-screen/useAdminBoundaryFeatures";
 import { SessionLog } from "../components/session/SessionLog";
 import {
   fallbackGameArea,
@@ -99,6 +101,16 @@ export function HiderMapScreen() {
   const showCurrentLocation = useMapStore((state) => state.showCurrentLocation);
   const setShowCurrentLocation = useMapStore(
     (state) => state.setShowCurrentLocation,
+  );
+  const showAdminBoundaries = useMapStore((state) => state.showAdminBoundaries);
+  const setShowAdminBoundaries = useMapStore(
+    (state) => state.setShowAdminBoundaries,
+  );
+  const { features: adminBoundaryFeatures, loading: adminBoundaryLoading } =
+    useAdminBoundaryFeatures(
+    session?.gameArea ?? null,
+    sessionRulesFromRecord(session),
+    showAdminBoundaries,
   );
   const distanceUnit = useSessionDistanceUnit();
   const setMapStyle = useMapStore((state) => state.setMapStyle);
@@ -441,7 +453,8 @@ export function HiderMapScreen() {
           mapStyle={effectiveBasemapStyle}
           mapStylePreference={mapStyle}
           onMapStyleChange={setMapStyle}
-          mapStyleControlInset="hider-actions"
+          mapStyleControlInset="dock"
+          zoomControlInset="dock"
           center={center}
           zoom={12}
           focusBounds={mapFocusBounds}
@@ -491,17 +504,26 @@ export function HiderMapScreen() {
               }}
             />
           ) : null}
-          <LiveSeekerLocationsLayer locations={playerLocations} />
-          <LiveUserLocationLayer enabled={showCurrentLocation} lowPowerMode={lowPowerMode} />
+          <LiveSeekerLocationsLayer locations={playerLocations} myUid={uid} />
           <ActiveThermometerWalkLayer
             start={activeThermometerWalk.start}
             livePoint={activeThermometerWalk.livePoint}
+            mapStyle={effectiveBasemapStyle}
+            distanceUnit={distanceUnit}
           />
           <PendingQuestionLayer
             pendingQuestions={pendingQuestions}
             gameArea={session.gameArea}
             sessionRules={session}
+            mapStyle={effectiveBasemapStyle}
           />
+          {showAdminBoundaries && !adminBoundaryLoading ? (
+            <AdminBoundariesLayer
+              features={adminBoundaryFeatures}
+              mapStyle={effectiveBasemapStyle}
+            />
+          ) : null}
+          <LiveUserLocationLayer enabled={showCurrentLocation} lowPowerMode={lowPowerMode} />
         </MapView>
       </div>
 
@@ -540,67 +562,28 @@ export function HiderMapScreen() {
           onAcceptEndGame={() => void handleAcceptEndGame()}
           hiderOutsideZone={hiderOutsideZone}
         />
-      </div>
-
-      <div className="pointer-events-auto absolute inset-x-0 jl-panel-hider-actions z-[var(--z-panel)] flex flex-col justify-center gap-2 px-3 sm:flex-row sm:justify-center">
-        {!zoneTool.hasZone || zoneTool.wizardOpen ? (
-          <button
-            type="button"
-            onClick={openWizardExclusive}
-            disabled={!zoneTool.writesEnabled}
-            className="btn-primary min-h-12 w-full flex-1 sm:max-w-xs disabled:opacity-50"
-          >
-            {myZone ? "Change hiding zone" : "Set hiding zone"}
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => void zoneTool.startMove()}
-            disabled={!zoneTool.writesEnabled}
-            className="btn-secondary min-h-12 w-full flex-1 sm:max-w-xs disabled:opacity-50"
-          >
-            Play Move
-          </button>
-        )}
-        {expansionPackEnabled ? (
-          <button
-            type="button"
-            onClick={() => setExpansionMenuOpen(true)}
-            className="btn-secondary min-h-12 w-full flex-1 sm:max-w-xs"
-          >
-            Expansion
-          </button>
-        ) : null}
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setRecenterToken((value) => value + 1)}
-            className="btn-secondary min-h-12 flex-1 px-3 sm:flex-none"
-            aria-label="Recenter map on play area"
-          >
-            Recenter
-          </button>
-          <button
-            type="button"
-            onClick={openChatExclusive}
-            className="btn-secondary relative min-h-12 flex-1 px-4 sm:flex-none"
-            aria-label={
-              hasUnreadChat ? "Open chat, unread messages" : "Open chat"
-            }
-          >
-            <span className="jl-unread-badge-host">
-              Chat
-              {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={openSettingsExclusive}
-            className="btn-secondary min-h-12 flex-1 px-4 sm:flex-none"
-          >
-            Settings
-          </button>
-        </div>
+        <HiderToolDock
+          zoneLabel={
+            !zoneTool.hasZone || zoneTool.wizardOpen
+              ? myZone
+                ? "Change zone"
+                : "Set zone"
+              : "Play move"
+          }
+          onZoneAction={
+            !zoneTool.hasZone || zoneTool.wizardOpen
+              ? openWizardExclusive
+              : () => void zoneTool.startMove()
+          }
+          zoneDisabled={!zoneTool.writesEnabled}
+          showExpansion={expansionPackEnabled}
+          onExpansion={() => setExpansionMenuOpen(true)}
+          onRecenter={() => setRecenterToken((value) => value + 1)}
+          onOpenChat={openChatExclusive}
+          onOpenSettings={openSettingsExclusive}
+          hasUnreadChat={hasUnreadChat}
+          unreadCount={unreadCount}
+        />
       </div>
 
       <HiderZoneWizardShell
@@ -718,6 +701,8 @@ export function HiderMapScreen() {
         pendingWrites={0}
         showCurrentLocation={showCurrentLocation}
         onShowCurrentLocationChange={setShowCurrentLocation}
+        showAdminBoundaries={showAdminBoundaries}
+        onShowAdminBoundariesChange={setShowAdminBoundaries}
         keepScreenAwake={keepScreenAwake}
         onKeepScreenAwakeChange={setKeepScreenAwake}
         lowPowerMode={lowPowerMode}

@@ -1,6 +1,7 @@
 import type { GameArea } from "../../domain/map/annotations";
 import type { MeasuringLocationCategory } from "../../domain/questions/measuringQuestions";
 import type { CustomMatchingAreasByLevel } from "../../domain/session/sessionCustomContent";
+import type { RegionPackId } from "../../domain/regions/regionPack";
 import { fetchAdminDivisionFeaturesInArea } from "../geo/adminDivisionBoundaries";
 import { probeAdminDivisionCounts } from "../geo/adminDivisionAvailability";
 import { fetchPreparedCoastlineSegments } from "../geo/coastline";
@@ -35,13 +36,18 @@ export function gameAreaPreloadKey(gameArea: GameArea): string {
 function buildPreloadJobs(
   gameArea: GameArea,
   customMatchingAreas?: CustomMatchingAreasByLevel,
+  regionPackId?: RegionPackId,
 ): Array<() => Promise<unknown>> {
   const jobs: Array<() => Promise<unknown>> = [
     () => fetchPreparedCoastlineSegments(gameArea),
     () => fetchLandmassFeaturesInArea(gameArea),
     () => fetchStaticTransit(gameArea),
     () =>
-      probeAdminDivisionCounts(gameArea, customMatchingAreas).then((counts) => {
+      probeAdminDivisionCounts(
+        gameArea,
+        customMatchingAreas,
+        regionPackId,
+      ).then((counts) => {
         usePreloadStore
           .getState()
           .setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);
@@ -131,9 +137,10 @@ if (typeof document !== "undefined") {
 export function preloadGameAreaCaches(
   gameArea: GameArea,
   customMatchingAreas?: CustomMatchingAreasByLevel,
+  regionPackId?: RegionPackId,
 ): void {
   const gameAreaKey = gameAreaPreloadKey(gameArea);
-  const jobs = buildPreloadJobs(gameArea, customMatchingAreas);
+  const jobs = buildPreloadJobs(gameArea, customMatchingAreas, regionPackId);
   usePreloadStore.getState().reset(gameAreaKey, jobs.length);
 
   activePreloadAbort?.abort();
@@ -150,8 +157,13 @@ export function preloadGameAreaCaches(
 export async function preloadCriticalGameAreaCaches(
   gameArea: GameArea,
   customMatchingAreas?: CustomMatchingAreasByLevel,
+  regionPackId?: RegionPackId,
 ): Promise<void> {
-  const counts = await probeAdminDivisionCounts(gameArea, customMatchingAreas);
+  const counts = await probeAdminDivisionCounts(
+    gameArea,
+    customMatchingAreas,
+    regionPackId,
+  );
   usePreloadStore
     .getState()
     .setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);

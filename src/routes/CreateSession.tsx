@@ -580,12 +580,17 @@ export function CreateSession() {
       }
 
       if (!lowPowerMode) {
-        preloadGameAreaCaches(gameArea, advancedSettings.customMatchingAreas);
+        preloadGameAreaCaches(
+          gameArea,
+          advancedSettings.customMatchingAreas,
+          regionPackId,
+        );
         startSeaLevelBackgroundSampling(gameArea);
         if (navigator.onLine) {
           void preloadCriticalGameAreaCaches(
             gameArea,
             advancedSettings.customMatchingAreas,
+            regionPackId,
           );
         }
       }

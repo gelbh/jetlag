@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLatestRequest } from "../useLatestRequest";
 import { useDebouncedValue } from "../useDebouncedValue";
 import { TentaclePanel } from "../../components/tools/TentaclePanel";
@@ -93,6 +93,7 @@ export function useTentacleTool({
   canSubmitQuestion = true,
 }: UseTentacleToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
+  const wizardStepRef = useRef("anchor");
   const usedTentacleCategories = useMemo(
     () => usedTentacleCategoryIds(annotations.filter(isActive)),
     [annotations],
@@ -232,6 +233,10 @@ export function useTentacleTool({
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
       if (!active) {
+        return false;
+      }
+
+      if (wizardStepRef.current !== "anchor") {
         return false;
       }
 
@@ -464,6 +469,7 @@ export function useTentacleTool({
           ? () => void loadPoisForCenter(tentacleCenter, tentacleCategoryId)
           : undefined
       }
+      wizardStepRef={wizardStepRef}
     />
   );
 

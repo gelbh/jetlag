@@ -1,7 +1,8 @@
 import { Fragment, useMemo } from "react";
-import { Polygon } from "react-leaflet";
+import { Polygon, Polyline } from "react-leaflet";
 import type { GameArea } from "../../domain/map/annotations";
 import {
+  gameAreaExteriorStrokeRings,
   gameAreaOutsideMask,
   gameAreaToLeafletPositions,
   type LatLngTuple,
@@ -20,9 +21,10 @@ const FRAMING_OUTSIDE_TINT = {
   fillColor: MAP_ANNOTATION_COLORS.playAreaMask,
   fillOpacity: 0.58,
 } as const;
+
 const PLAY_OUTSIDE_TINT = {
-  color: MAP_ANNOTATION_COLORS.playArea,
-  weight: 1,
+  color: "transparent",
+  weight: 0,
   fillColor: MAP_ANNOTATION_COLORS.playArea,
   fillOpacity: 0.35,
 } as const;
@@ -62,18 +64,20 @@ function renderGameAreaPolygons(
 
 export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
   const outsideMask = useMemo(() => gameAreaOutsideMask(gameArea), [gameArea]);
+  const exteriorStrokeRings = useMemo(
+    () => gameAreaExteriorStrokeRings(gameArea),
+    [gameArea],
+  );
   const outsideTint = framing ? FRAMING_OUTSIDE_TINT : PLAY_OUTSIDE_TINT;
   const borderOptions = framing
     ? {
         color: MAP_ANNOTATION_COLORS.playArea,
         weight: 3,
         dashArray: "8 6",
-        fillOpacity: 0.08,
       }
     : {
         color: MAP_ANNOTATION_COLORS.playArea,
         weight: 2,
-        fillOpacity: 0,
       };
 
   return (
@@ -81,11 +85,14 @@ export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
       {outsideMask
         ? renderGameAreaPolygons(outsideMask, "outside-mask", outsideTint)
         : null}
-      <Polygon
-        positions={gameAreaToLeafletPositions(gameArea)}
-        interactive={false}
-        pathOptions={borderOptions}
-      />
+      {exteriorStrokeRings.map((ring, index) => (
+        <Polyline
+          key={`play-area-border-${index}`}
+          positions={ring}
+          interactive={false}
+          pathOptions={borderOptions}
+        />
+      ))}
     </Fragment>
   );
 }

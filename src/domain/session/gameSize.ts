@@ -1,5 +1,5 @@
 import area from "@turf/area";
-import { polygon as turfPolygon } from "@turf/helpers";
+import { multiPolygon as turfMultiPolygon, polygon as turfPolygon } from "@turf/helpers";
 import type { GameArea } from "../map/annotations";
 import type { DistanceUnit } from "../map/distance";
 import { milesToMeters } from "../map/distance";
@@ -46,13 +46,11 @@ function gameAreaSquareMeters(gameArea: GameArea): number {
     return latMeters * lngMeters;
   }
 
-  const feature = turfPolygon(
-    gameArea.type === "MultiPolygon"
-      ? gameArea.coordinates[0]!
-      : gameArea.coordinates,
-  );
+  if (gameArea.type === "MultiPolygon") {
+    return area(turfMultiPolygon(gameArea.coordinates));
+  }
 
-  return area(feature);
+  return area(turfPolygon(gameArea.coordinates));
 }
 
 export function gameAreaSquareMiles(gameArea: GameArea): number {

@@ -64,6 +64,7 @@ export function CustomMeasureGeometrySettings({
   const panelId = useId();
   const labelInputId = useId();
   const geoJsonId = useId();
+  const customMeasureGeometries = value.customMeasureGeometries ?? [];
 
   const addGeometry = () => {
     const trimmedLabel = label.trim();
@@ -76,7 +77,7 @@ export function CustomMeasureGeometrySettings({
       const geometry = parseMeasureGeometryGeoJson(geoJson.trim(), trimmedLabel);
       onChange({
         ...value,
-        customMeasureGeometries: [...value.customMeasureGeometries, geometry],
+        customMeasureGeometries: [...customMeasureGeometries, geometry],
       });
       setLabel("");
       setGeoJson("");
@@ -93,7 +94,7 @@ export function CustomMeasureGeometrySettings({
   const removeGeometry = (id: string) => {
     onChange({
       ...value,
-      customMeasureGeometries: value.customMeasureGeometries.filter(
+      customMeasureGeometries: customMeasureGeometries.filter(
         (geometry) => geometry.id !== id,
       ),
     });
@@ -111,9 +112,9 @@ export function CustomMeasureGeometrySettings({
         </p>
       </div>
 
-      {value.customMeasureGeometries.length > 0 ? (
+      {customMeasureGeometries.length > 0 ? (
         <ul className="space-y-1">
-          {value.customMeasureGeometries.map((geometry) => (
+          {customMeasureGeometries.map((geometry) => (
             <li
               key={geometry.id}
               className="flex items-center justify-between gap-2 rounded-[var(--radius-hud-md)] bg-surface-raised px-3 py-2 text-sm"
