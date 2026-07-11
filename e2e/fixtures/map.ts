@@ -48,6 +48,20 @@ export async function expectMapHasAnnotations(page: Page, minCount = 1) {
   }
 }
 
+export async function waitForMapTilesLoaded(page: Page) {
+  const map = page.locator(".leaflet-container");
+  if (!(await map.isVisible().catch(() => false))) {
+    return;
+  }
+
+  await expect
+    .poll(
+      async () => page.locator(".leaflet-tile-loaded").count(),
+      { timeout: 30_000 },
+    )
+    .toBeGreaterThan(0);
+}
+
 export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
   const drawButton = page.getByRole("button", { name: "Draw on map" });
   if (await drawButton.isVisible().catch(() => false)) {

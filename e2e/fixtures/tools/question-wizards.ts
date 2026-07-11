@@ -6,25 +6,25 @@ import {
   expectMapHasAnnotations,
 } from "../map";
 
-async function advanceWizard(page: Page) {
+export async function advanceWizard(page: Page) {
   const next = page.getByRole("button", { name: "Next" });
   await expect(next).toBeEnabled({ timeout: 15_000 });
   await next.click();
 }
 
-async function waitForMapPlacementCrosshair(page: Page) {
+export async function waitForMapPlacementCrosshair(page: Page) {
   await expect(page.locator(".map-crosshair")).toBeVisible({
     timeout: 15_000,
   });
 }
 
-async function waitForWizardNext(page: Page) {
+export async function waitForWizardNext(page: Page) {
   await expect(page.getByRole("button", { name: "Next" })).toBeEnabled({
     timeout: 60_000,
   });
 }
 
-async function waitForGeoLoadingIdle(page: Page) {
+export async function waitForGeoLoadingIdle(page: Page) {
   const loadingPattern =
     /Finding nearest feature|Finding division|Finding landmass|Loading locations within/;
   const loading = page.getByText(loadingPattern);
