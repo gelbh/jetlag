@@ -21,6 +21,7 @@
     "test:e2e": "playwright test",
     "test:e2e:smoke": "E2E_SMOKE=1 playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "capture:tutorial": "firebase emulators:exec --project demo-jetlag --only auth,firestore,storage \"playwright test e2e/visual/tutorial/capture.spec.ts --project=visual\"",
     "audit:overpass": "RUN_OVERPASS_AUDIT=1 vitest run src/services/core/overpassAudit.integration.test.ts",
     "test:functions": "env -u npm_config_allow_scripts sh -c 'cd functions && npm ci && npm test'",
     "test:unit": "vitest run && npm test --prefix functions",

@@ -1,6 +1,7 @@
 import { type Browser, type Page, expect } from "@playwright/test";
 import { LOCAL_GAME_AREA } from "./map";
 import { dismissMapOnboarding, prepareE2EPage } from "./page-init";
+import type { BlockExternalAssetsOptions } from "./network";
 
 type PlayerRole = "seeker" | "hider";
 type GameSize = "small" | "medium" | "large";
@@ -11,6 +12,8 @@ export interface LocalSessionSeedOptions {
   gameSize?: GameSize;
   sessionId?: string;
   hidingPeriodMinutes?: number;
+  memberRoles?: Record<string, PlayerRole>;
+  network?: BlockExternalAssetsOptions;
 }
 
 export async function seedLocalSession(
@@ -23,7 +26,17 @@ export async function seedLocalSession(
     gameSize = "medium",
     sessionId = "local",
     hidingPeriodMinutes,
+    memberRoles,
   } = options;
+
+  await page.addInitScript(() => {
+      localStorage.setItem(
+        "jetlag-annotations",
+        JSON.stringify({ state: { annotations: [] }, version: 0 }),
+      );
+      localStorage.removeItem("jetlag-timer");
+      sessionStorage.removeItem("jetlag-timer");
+    });
 
   await page.addInitScript(
     ({ sessionState, role }) => {
@@ -71,6 +84,7 @@ export async function seedLocalSession(
         tier: "free",
         gameSize,
         ...(hidingPeriodMinutes !== undefined ? { hidingPeriodMinutes } : {}),
+        ...(memberRoles ? { memberRoles } : {}),
       },
       role: myRole,
     },
@@ -81,8 +95,9 @@ export async function openMapWithLocalSession(
   page: Page,
   options: LocalSessionSeedOptions = {},
 ) {
-  await prepareE2EPage(page);
-  await seedLocalSession(page, options);
+  const { network, ...seedOptions } = options;
+  await prepareE2EPage(page, network);
+  await seedLocalSession(page, seedOptions);
   await page.goto("/map");
   await page.getByRole("button", { name: "Radar" }).waitFor();
   await dismissMapOnboarding(page);
@@ -154,14 +169,17 @@ export async function createHostSession(page: Page) {
   return { code, page };
 }
 
-export async function createMultiplayerContexts(browser: Browser) {
+export async function createMultiplayerContexts(
+  browser: Browser,
+  network: BlockExternalAssetsOptions = {},
+) {
   const hostContext = await browser.newContext();
   const guestContext = await browser.newContext();
   const hostPage = await hostContext.newPage();
   const guestPage = await guestContext.newPage();
 
-  await prepareE2EPage(hostPage);
-  await prepareE2EPage(guestPage);
+  await prepareE2EPage(hostPage, network);
+  await prepareE2EPage(guestPage, network);
 
   return {
     hostPage,

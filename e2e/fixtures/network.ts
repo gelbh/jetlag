@@ -17,6 +17,8 @@ const TILE_PNG = Buffer.from(
 
 export interface BlockExternalAssetsOptions {
   overpassProfile?: OverpassFixtureProfile;
+  /** Let basemap tile requests reach the network (tutorial screenshot capture). */
+  allowMapTiles?: boolean;
 }
 
 function extractOverpassQuery(postData: string): string {
@@ -46,11 +48,20 @@ function isLocalAppRequest(url: string): boolean {
   }
 }
 
+function isMapTileHost(hostname: string): boolean {
+  return (
+    hostname === "tile.openstreetmap.org" ||
+    hostname.endsWith(".basemaps.cartocdn.com") ||
+    hostname.includes("arcgisonline.com")
+  );
+}
+
 export async function blockExternalAssets(
   page: Page,
   options: BlockExternalAssetsOptions = {},
 ) {
   const overpassProfile = options.overpassProfile ?? "default";
+  const allowMapTiles = options.allowMapTiles === true;
 
   await page.route("**/*", async (route) => {
     const url = route.request().url();
@@ -90,11 +101,11 @@ export async function blockExternalAssets(
       return;
     }
 
-    if (
-      hostname === "tile.openstreetmap.org" ||
-      hostname.endsWith(".basemaps.cartocdn.com") ||
-      hostname.includes("arcgisonline.com")
-    ) {
+    if (isMapTileHost(hostname)) {
+      if (allowMapTiles) {
+        await route.continue();
+        return;
+      }
       await route.fulfill({
         status: 200,
         contentType: "image/png",
