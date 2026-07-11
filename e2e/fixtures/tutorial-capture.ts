@@ -7,16 +7,42 @@ import {
   type LocalSessionSeedOptions,
 } from "./session";
 
-export async function openTutorialQuestionSession(
+import fs from "node:fs";
+import path from "node:path";
+import { type Page, expect } from "@playwright/test";
+import { expectMapHasAnnotations, waitForMapTilesLoaded } from "./map";
+import {
+  openMapWithLocalSession,
+  type LocalSessionSeedOptions,
+} from "./session";
+
+export async function openTutorialMapSession(
   page: Page,
-  _toolId: string,
-  _mode: "solo" | "hiders" | "dock",
   options: Omit<LocalSessionSeedOptions, "sessionId"> = {},
 ) {
   await openMapWithLocalSession(page, {
     ...options,
     sessionId: "local",
   });
+}
+
+export type QuestionCaptureRunner = (
+  page: Page,
+  rootDir: string,
+) => Promise<void>;
+
+export async function runQuestionCaptures(
+  page: Page,
+  rootDir: string,
+  captures: ReadonlyArray<
+    readonly [string, QuestionCaptureRunner, Omit<LocalSessionSeedOptions, "sessionId">?]
+  >,
+) {
+  for (const [, captureFn, sessionOptions] of captures) {
+    await openTutorialMapSession(page, sessionOptions ?? {});
+    await waitForMapTilesLoaded(page);
+    await captureFn(page, rootDir);
+  }
 }
 
 export function tutorialQuestionAsset(

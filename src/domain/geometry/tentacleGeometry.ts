@@ -73,11 +73,10 @@ function voronoiCellsForPois(
 function buildEliminationViaDiskDifference(
   anchor: LatLngTuple,
   radiusMeters: number,
-  pois: readonly TentaclePoi[],
+  cells: readonly Feature<Polygon | MultiPolygon>[],
   answeredPoiId: string,
   gameArea: GameArea,
 ): Feature<Polygon | MultiPolygon> | null {
-  const cells = voronoiCellsForPois(pois);
   const answeredCell = cells.find(
     (feature) => voronoiCellSiteId(feature, ["poiId"]) === answeredPoiId,
   );
@@ -135,11 +134,11 @@ function buildEliminationViaDiskDifference(
 function buildEliminationViaWrongCellUnion(
   anchor: LatLngTuple,
   radiusMeters: number,
-  pois: readonly TentaclePoi[],
+  cells: readonly Feature<Polygon | MultiPolygon>[],
   answeredPoiId: string,
   gameArea: GameArea,
 ): Feature<Polygon | MultiPolygon> | null {
-  const wrongCells = voronoiCellsForPois(pois).filter(
+  const wrongCells = cells.filter(
     (feature) => voronoiCellSiteId(feature, ["poiId"]) !== answeredPoiId,
   );
 
@@ -210,18 +209,20 @@ export function buildTentacleEliminationRegion(
     return null;
   }
 
+  const cells = voronoiCellsForPois(pois);
+
   return (
     buildEliminationViaWrongCellUnion(
       anchor,
       radiusMeters,
-      pois,
+      cells,
       answeredPoiId,
       gameArea,
     ) ??
     buildEliminationViaDiskDifference(
       anchor,
       radiusMeters,
-      pois,
+      cells,
       answeredPoiId,
       gameArea,
     )

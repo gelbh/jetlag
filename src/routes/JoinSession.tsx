@@ -21,8 +21,10 @@ import {
 import {
   joinRemoteSessionByCode,
   lookupRemoteSessionByCode,
+  waitForServerHiderRole,
 } from "../services/firestore/firestoreAnnotations";
 import { sessionVersionMismatchMessage } from "../domain/session/sessionVersion";
+import { resolvePlayerRole } from "../domain/session/playerRole";
 import { retryAsync } from "../services/core/retryAsync";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 
@@ -55,6 +57,7 @@ export function JoinSession() {
 
     void (async () => {
       try {
+        const user = await ensureAnonymousUser();
         const result = await retryAsync(() =>
           lookupRemoteSessionByCode(normalized),
         );
@@ -65,6 +68,15 @@ export function JoinSession() {
         setPreviewPremium(
           result.status === "found" && isPremiumSession(result.session),
         );
+        if (result.status === "found") {
+          const existingRole = resolvePlayerRole(
+            result.session.memberRoles,
+            user.uid,
+          );
+          if (result.session.memberRoles?.[user.uid]) {
+            setPlayerRole(existingRole);
+          }
+        }
         if (result.status === "missing") {
           setError(null);
         }
@@ -119,7 +131,19 @@ export function JoinSession() {
         return;
       }
 
-      setSession(result.session, user.uid);
+      let joinedSession = result.session;
+      if (playerRole === "hider") {
+        const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
+        if (!confirmed || confirmed.memberRoles?.[user.uid] !== "hider") {
+          setError(
+            "Couldn't confirm your hider role. Wait a moment and try again.",
+          );
+          return;
+        }
+        joinedSession = confirmed;
+      }
+
+      setSession(joinedSession, user.uid);
       setPremiumApiContext(result.session);
       navigate("/map");
     } catch (nextError) {

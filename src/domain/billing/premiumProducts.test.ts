@@ -338,6 +338,16 @@ describe("premiumProducts", () => {
       expect(isAppPremiumTrialActive(activeTrial)).toBe(true);
       expect(canStartPremiumTrial(activeTrial)).toBe(false);
       expect(canStartPremiumTrial(baseEntitlements)).toBe(true);
+      expect(
+        canStartPremiumTrial({
+          ...baseEntitlements,
+          subscription: {
+            status: "past_due",
+            plan: "monthly",
+            currentPeriodEnd: null,
+          },
+        }),
+      ).toBe(false);
     });
   });
 });

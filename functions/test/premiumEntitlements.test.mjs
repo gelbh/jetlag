@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import { Timestamp } from "firebase-admin/firestore";
 import {
   canCreatePaidPremiumSession,
+  canStartAppPremiumTrial,
   consumePremiumSessionCredit,
   hasUnlimitedPremiumEntitlement,
   isAppPremiumTrialActive,
@@ -107,5 +108,26 @@ describe("premiumEntitlements", () => {
     assert.equal(payload.premiumSessionCredits, 3);
     assert.equal(payload.canCreatePremium, true);
     assert.equal(payload.hasUnlimitedPremium, true);
+  });
+
+  it("blocks app trial when subscription is past_due", () => {
+    assert.equal(
+      canStartAppPremiumTrial({
+        subscription: { status: "past_due", plan: "monthly" },
+      }),
+      false,
+    );
+    assert.equal(
+      canStartAppPremiumTrial({
+        subscription: { status: "canceled", plan: "monthly" },
+      }),
+      true,
+    );
+    assert.equal(
+      canStartAppPremiumTrial({
+        trialUsedAt: Timestamp.fromMillis(Date.now()),
+      }),
+      false,
+    );
   });
 });

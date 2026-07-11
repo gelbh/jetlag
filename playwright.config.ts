@@ -47,6 +47,7 @@ export default defineConfig({
         {
           name: "visual",
           testMatch: /e2e\/visual\/.+\.spec\.ts/,
+          grepInvert: /@manual/,
           use: mobileDevice,
         },
         {

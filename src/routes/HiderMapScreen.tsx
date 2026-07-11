@@ -283,7 +283,7 @@ export function HiderMapScreen() {
       throw new Error("Sign in and rejoin the session as Hider, then try again.");
     }
 
-    const updatedSession = await ensureRemoteSessionWriteAccess(session, uid);
+    const updatedSession = await ensureRemoteSessionWriteAccess(session, uid, "hider");
     if (updatedSession !== session) {
       setSession(updatedSession, uid);
     }

@@ -298,45 +298,10 @@ export function Premium() {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    void (async () => {
-      if (!isFirebaseConfigured()) {
-        if (!cancelled) {
-          setEntitlements(null);
-          setLoading(false);
-        }
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        await ensureAnonymousUser();
-        const next = await fetchPremiumEntitlements();
-        if (!cancelled) {
-          setEntitlements(next);
-        }
-      } catch (nextError) {
-        if (!cancelled) {
-          setError(
-            nextError instanceof Error
-              ? nextError.message
-              : "Could not load premium status.",
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    /* eslint-disable react-hooks/set-state-in-effect -- initial entitlement load */
+    void refreshEntitlements();
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [refreshEntitlements]);
 
   const checkoutNotice = useMemo(() => {
     if (checkoutState === "success") {

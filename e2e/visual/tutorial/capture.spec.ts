@@ -23,22 +23,15 @@ import {
   waitForMapTilesLoaded,
 } from "../../fixtures";
 import {
-  captureMatchingQuestionHiders,
-  captureMatchingQuestionSolo,
-  captureMeasuringQuestionHiders,
-  captureMeasuringQuestionSolo,
   capturePhotoQuestionNoHiders,
   capturePhotoQuestionWithHiders,
-  captureRadarQuestionHiders,
-  captureRadarQuestionSolo,
-  captureTentacleQuestionHiders,
-  captureTentacleQuestionSolo,
-  captureThermometerQuestionHiders,
-  captureThermometerQuestionSolo,
+  QUESTION_HIDERS_CAPTURES,
+  QUESTION_SOLO_CAPTURES,
 } from "../../fixtures/tools/question-capture";
 import {
   captureTutorialViewport,
-  openTutorialQuestionSession,
+  openTutorialMapSession,
+  runQuestionCaptures,
 } from "../../fixtures/tutorial-capture";
 import { assertTutorialCaptureReady } from "../../fixtures/tools/tutorial-capture-ready";
 
@@ -63,7 +56,7 @@ async function captureViewport(page: import("@playwright/test").Page, filePath: 
 test.describe.configure({ mode: "serial" });
 
 test.describe("tutorial asset capture", () => {
-  test("captures core screens", async ({ page }) => {
+  test("@manual captures core screens", async ({ page }) => {
     await prepareE2EPage(page, TUTORIAL_NETWORK);
     await page.goto("/");
     await expect(page.getByRole("link", { name: "Create session" })).toBeVisible();
@@ -99,53 +92,36 @@ test.describe("tutorial asset capture", () => {
     await page.keyboard.press("Escape");
   });
 
-  test("captures question tutorial assets", async ({ page, browser }) => {
+  test("@manual captures question tutorial assets", async ({ page, browser }) => {
     test.setTimeout(600_000);
     const hiderSession = { memberRoles: { "hider-1": "hider" as const } };
+    const tutorialNetwork = { network: TUTORIAL_NETWORK } as const;
 
-    const soloCaptures = [
-      ["matching", captureMatchingQuestionSolo],
-      ["measuring", captureMeasuringQuestionSolo],
-      ["thermometer", captureThermometerQuestionSolo],
-      ["radar", captureRadarQuestionSolo],
-      ["tentacle", captureTentacleQuestionSolo],
-    ] as const;
+    await runQuestionCaptures(
+      page,
+      TUTORIAL_DIR,
+      QUESTION_SOLO_CAPTURES.map(([toolId, captureSolo]) => [
+        toolId,
+        captureSolo,
+        tutorialNetwork,
+      ]),
+    );
 
-    for (const [toolId, captureSolo] of soloCaptures) {
-      await openTutorialQuestionSession(page, toolId, "solo", {
-        network: TUTORIAL_NETWORK,
-      });
-      await waitForMapTilesLoaded(page);
-      await captureSolo(page, TUTORIAL_DIR);
-    }
+    await runQuestionCaptures(
+      page,
+      TUTORIAL_DIR,
+      QUESTION_HIDERS_CAPTURES.map(([toolId, captureHiders]) => [
+        toolId,
+        captureHiders,
+        { ...tutorialNetwork, ...hiderSession },
+      ]),
+    );
 
-    const hiderCaptures = [
-      ["matching", captureMatchingQuestionHiders],
-      ["measuring", captureMeasuringQuestionHiders],
-      ["thermometer", captureThermometerQuestionHiders],
-      ["radar", captureRadarQuestionHiders],
-      ["tentacle", captureTentacleQuestionHiders],
-    ] as const;
-
-    for (const [toolId, captureHiders] of hiderCaptures) {
-      await openTutorialQuestionSession(page, toolId, "hiders", {
-        network: TUTORIAL_NETWORK,
-        ...hiderSession,
-      });
-      await waitForMapTilesLoaded(page);
-      await captureHiders(page, TUTORIAL_DIR);
-    }
-
-    await openTutorialQuestionSession(page, "photo", "dock", {
-      network: TUTORIAL_NETWORK,
-    });
+    await openTutorialMapSession(page, tutorialNetwork);
     await waitForMapTilesLoaded(page);
     await capturePhotoQuestionNoHiders(page, TUTORIAL_DIR);
 
-    await openTutorialQuestionSession(page, "photo", "hiders", {
-      network: TUTORIAL_NETWORK,
-      ...hiderSession,
-    });
+    await openTutorialMapSession(page, { ...tutorialNetwork, ...hiderSession });
     await waitForMapTilesLoaded(page);
     await capturePhotoQuestionWithHiders(page, TUTORIAL_DIR);
 
@@ -178,7 +154,7 @@ test.describe("tutorial asset capture", () => {
     }
   });
 
-  test("captures markup tool panels", async ({ page }) => {
+  test("@manual captures markup tool panels", async ({ page }) => {
     await openMapWithLocalSession(page, { network: TUTORIAL_NETWORK });
     await waitForMapTilesLoaded(page);
 
@@ -195,7 +171,7 @@ test.describe("tutorial asset capture", () => {
     await captureViewport(page, tutorialAsset("tools", "pin.png"));
   });
 
-  test("captures hider screens", async ({ browser }) => {
+  test("@manual captures hider screens", async ({ browser }) => {
     const { hostPage, guestPage, cleanup } = await createMultiplayerContexts(
       browser,
       TUTORIAL_NETWORK,
@@ -226,7 +202,7 @@ test.describe("tutorial asset capture", () => {
     }
   });
 
-  test("captures extras screens", async ({ page }) => {
+  test("@manual captures extras screens", async ({ page }) => {
     await prepareE2EPage(page, TUTORIAL_NETWORK);
     await page.goto("/presets");
     await expect(page.getByRole("heading", { name: "Custom games" })).toBeVisible({

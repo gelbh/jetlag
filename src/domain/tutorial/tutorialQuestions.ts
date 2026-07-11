@@ -37,7 +37,11 @@ interface WizardPanelStep {
 }
 
 function questionEntry(toolId: QuestionTutorialId) {
-  return MAP_TOOL_DOCK_ENTRIES.find((item) => item.id === toolId)!;
+  const entry = MAP_TOOL_DOCK_ENTRIES.find((item) => item.id === toolId);
+  if (!entry) {
+    throw new Error(`Missing map tool dock entry for tutorial question: ${toolId}`);
+  }
+  return entry;
 }
 
 function questionAsset(toolId: QuestionTutorialId, ...segments: string[]) {

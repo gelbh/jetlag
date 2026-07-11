@@ -111,6 +111,10 @@ export function canStartPremiumTrial(
     return false;
   }
 
+  if (entitlements.subscription?.status === "past_due") {
+    return false;
+  }
+
   return true;
 }
 
@@ -180,41 +184,19 @@ function joinEntitlementSummaryParts(
   return parts.filter((part): part is string => Boolean(part)).join(" · ");
 }
 
-export function formatPremiumSessionTierHint(
-  entitlements: PremiumEntitlements | null,
-): string | null {
-  if (!entitlements) {
-    return null;
-  }
+export type PremiumEntitlementDisplayKind =
+  | "none"
+  | "packCredits"
+  | "lifetime"
+  | "appTrial"
+  | "stripeTrialing"
+  | "stripeActive";
 
-  if (hasUnlimitedPremiumHosting(entitlements)) {
-    const unlimitedHint =
-      isAppPremiumTrialActive(entitlements) && entitlements.trialEndsAt != null
-        ? formatPremiumPeriodEndLabel(entitlements.trialEndsAt, {
-            trial: true,
-          })
-        : entitlements.lifetimePremium
-          ? "Lifetime · unlimited sessions"
-          : entitlements.subscription?.status === "trialing"
-            ? "Trial · unlimited sessions"
-            : "Unlimited premium sessions";
-
-    return joinEntitlementSummaryParts(
-      unlimitedHint,
-      formatBankedPremiumSessionCreditsLabel(entitlements),
-    );
-  }
-
-  return formatPremiumSessionCreditsLabel(entitlements);
-}
-
-export type HomePremiumButtonVariant = "default" | "sessions" | "unlimited";
-
-export interface HomePremiumButtonDisplay {
-  variant: HomePremiumButtonVariant;
-  primaryLabel: string;
-  planLabel: string | null;
-  detailLabel: string;
+export interface PremiumEntitlementDisplayState {
+  kind: PremiumEntitlementDisplayKind;
+  periodEnd: number | null;
+  subscriptionPlan: "monthly" | "yearly" | null;
+  packCredits: number;
 }
 
 function formatPremiumPeriodEndLabel(
@@ -234,6 +216,125 @@ function formatPremiumPeriodEndLabel(
   return `Renews ${formatted}`;
 }
 
+export function resolvePremiumEntitlementDisplayState(
+  entitlements: PremiumEntitlements | null,
+): PremiumEntitlementDisplayState {
+  if (!entitlements) {
+    return {
+      kind: "none",
+      periodEnd: null,
+      subscriptionPlan: null,
+      packCredits: 0,
+    };
+  }
+
+  if (entitlements.lifetimePremium) {
+    return {
+      kind: "lifetime",
+      periodEnd: null,
+      subscriptionPlan: null,
+      packCredits: entitlements.premiumSessionCredits,
+    };
+  }
+
+  if (isAppPremiumTrialActive(entitlements) && entitlements.trialEndsAt != null) {
+    return {
+      kind: "appTrial",
+      periodEnd: entitlements.trialEndsAt,
+      subscriptionPlan: null,
+      packCredits: entitlements.premiumSessionCredits,
+    };
+  }
+
+  const subscription = entitlements.subscription;
+  if (
+    entitlements.hasUnlimitedPremium &&
+    subscription &&
+    (subscription.status === "active" || subscription.status === "trialing")
+  ) {
+    return {
+      kind: subscription.status === "trialing" ? "stripeTrialing" : "stripeActive",
+      periodEnd: subscription.currentPeriodEnd,
+      subscriptionPlan: subscription.plan,
+      packCredits: entitlements.premiumSessionCredits,
+    };
+  }
+
+  if (entitlements.premiumSessionCredits > 0) {
+    return {
+      kind: "packCredits",
+      periodEnd: null,
+      subscriptionPlan: null,
+      packCredits: entitlements.premiumSessionCredits,
+    };
+  }
+
+  return {
+    kind: "none",
+    periodEnd: null,
+    subscriptionPlan: null,
+    packCredits: 0,
+  };
+}
+
+function bankedCreditsLabelForState(
+  entitlements: PremiumEntitlements | null,
+): string | null {
+  return formatBankedPremiumSessionCreditsLabel(entitlements);
+}
+
+export function formatPremiumSessionTierHint(
+  entitlements: PremiumEntitlements | null,
+): string | null {
+  if (!entitlements) {
+    return null;
+  }
+
+  const state = resolvePremiumEntitlementDisplayState(entitlements);
+
+  switch (state.kind) {
+    case "lifetime":
+      return joinEntitlementSummaryParts(
+        "Lifetime · unlimited sessions",
+        bankedCreditsLabelForState(entitlements),
+      );
+    case "appTrial":
+      return joinEntitlementSummaryParts(
+        state.periodEnd != null
+          ? formatPremiumPeriodEndLabel(state.periodEnd, { trial: true })
+          : "Trial · unlimited sessions",
+        bankedCreditsLabelForState(entitlements),
+      );
+    case "stripeTrialing":
+      return joinEntitlementSummaryParts(
+        "Trial · unlimited sessions",
+        bankedCreditsLabelForState(entitlements),
+      );
+    case "stripeActive":
+      return joinEntitlementSummaryParts(
+        "Unlimited premium sessions",
+        bankedCreditsLabelForState(entitlements),
+      );
+    case "packCredits":
+      return formatPremiumSessionCreditsLabel(entitlements);
+    case "none":
+      return null;
+    default: {
+      const _exhaustive: never = state.kind;
+      return _exhaustive;
+    }
+  }
+}
+
+export type HomePremiumButtonVariant = "default" | "sessions" | "unlimited";
+
+export interface HomePremiumButtonDisplay {
+  variant: HomePremiumButtonVariant;
+  primaryLabel: string;
+  planLabel: string | null;
+  detailLabel: string;
+}
+
 export function resolveHomePremiumButtonDisplay(
   entitlements: PremiumEntitlements | null,
 ): HomePremiumButtonDisplay {
@@ -248,75 +349,72 @@ export function resolveHomePremiumButtonDisplay(
     return defaultDisplay;
   }
 
-  if (entitlements.lifetimePremium) {
-    return {
-      variant: "unlimited",
-      primaryLabel: "Premium",
-      planLabel: "Lifetime",
-      detailLabel: joinEntitlementSummaryParts(
-        "Unlimited hosting",
-        formatBankedPremiumSessionCreditsLabel(entitlements),
-      ),
-    };
+  const state = resolvePremiumEntitlementDisplayState(entitlements);
+  const bankedLabel = bankedCreditsLabelForState(entitlements);
+
+  switch (state.kind) {
+    case "lifetime":
+      return {
+        variant: "unlimited",
+        primaryLabel: "Premium",
+        planLabel: "Lifetime",
+        detailLabel: joinEntitlementSummaryParts("Unlimited hosting", bankedLabel),
+      };
+    case "appTrial":
+      return {
+        variant: "unlimited",
+        primaryLabel: "Premium",
+        planLabel: "Free trial",
+        detailLabel: joinEntitlementSummaryParts(
+          state.periodEnd != null
+            ? formatPremiumPeriodEndLabel(state.periodEnd, { trial: true })
+            : "Trial active",
+          bankedLabel,
+        ),
+      };
+    case "stripeTrialing":
+    case "stripeActive": {
+      const isTrial = state.kind === "stripeTrialing";
+      const planLabel =
+        state.subscriptionPlan === "yearly"
+          ? isTrial
+            ? "Yearly trial"
+            : "Yearly"
+          : isTrial
+            ? "Monthly trial"
+            : "Monthly";
+      const detailLabel = joinEntitlementSummaryParts(
+        state.periodEnd != null
+          ? formatPremiumPeriodEndLabel(state.periodEnd, { trial: isTrial })
+          : isTrial
+            ? "Trial active"
+            : "Subscription active",
+        bankedLabel,
+      );
+
+      return {
+        variant: "unlimited",
+        primaryLabel: "Premium",
+        planLabel,
+        detailLabel,
+      };
+    }
+    case "packCredits": {
+      const packSummary = formatPremiumSessionCreditsLabel(entitlements);
+      return {
+        variant: "sessions",
+        primaryLabel: "Premium",
+        planLabel: "Session pack",
+        detailLabel: packSummary ?? "Session pack",
+      };
+    }
+    case "none":
+      return defaultDisplay;
+    default: {
+      const _exhaustive: never = state.kind;
+      return _exhaustive;
+    }
   }
-
-  if (isAppPremiumTrialActive(entitlements) && entitlements.trialEndsAt != null) {
-    return {
-      variant: "unlimited",
-      primaryLabel: "Premium",
-      planLabel: "Free trial",
-      detailLabel: joinEntitlementSummaryParts(
-        formatPremiumPeriodEndLabel(entitlements.trialEndsAt, { trial: true }),
-        formatBankedPremiumSessionCreditsLabel(entitlements),
-      ),
-    };
-  }
-
-  const subscription = entitlements.subscription;
-  if (
-    entitlements.hasUnlimitedPremium &&
-    subscription &&
-    (subscription.status === "active" || subscription.status === "trialing")
-  ) {
-    const isTrial = subscription.status === "trialing";
-    const planLabel =
-      subscription.plan === "yearly"
-        ? isTrial
-          ? "Yearly trial"
-          : "Yearly"
-        : isTrial
-          ? "Monthly trial"
-          : "Monthly";
-    const detailLabel = joinEntitlementSummaryParts(
-      subscription.currentPeriodEnd != null
-        ? formatPremiumPeriodEndLabel(subscription.currentPeriodEnd, {
-            trial: isTrial,
-          })
-        : isTrial
-          ? "Trial active"
-          : "Subscription active",
-      formatBankedPremiumSessionCreditsLabel(entitlements),
-    );
-
-    return {
-      variant: "unlimited",
-      primaryLabel: "Premium",
-      planLabel,
-      detailLabel,
-    };
-  }
-
-  const packSummary = formatPremiumSessionCreditsLabel(entitlements);
-  if (packSummary) {
-    return {
-      variant: "sessions",
-      primaryLabel: "Premium",
-      planLabel: "Session pack",
-      detailLabel: packSummary,
-    };
-  }
-
-  return defaultDisplay;
 }
 
 export function formatEntitlementSummary(
@@ -326,28 +424,32 @@ export function formatEntitlementSummary(
     return null;
   }
 
-  if (entitlements.lifetimePremium || entitlements.hasUnlimitedPremium) {
-    const primarySummary =
-      isAppPremiumTrialActive(entitlements) && entitlements.trialEndsAt != null
-        ? formatPremiumPeriodEndLabel(entitlements.trialEndsAt, {
-            trial: true,
-          })
-        : entitlements.subscription?.status === "trialing"
-          ? "Premium trial active"
-          : entitlements.lifetimePremium
-            ? "Lifetime premium"
-            : "Premium subscription active";
+  const state = resolvePremiumEntitlementDisplayState(entitlements);
+  const bankedLabel = bankedCreditsLabelForState(entitlements);
 
-    return joinEntitlementSummaryParts(
-      primarySummary,
-      formatBankedPremiumSessionCreditsLabel(entitlements),
-    );
+  switch (state.kind) {
+    case "lifetime":
+      return joinEntitlementSummaryParts("Lifetime premium", bankedLabel);
+    case "appTrial":
+      return joinEntitlementSummaryParts(
+        state.periodEnd != null
+          ? formatPremiumPeriodEndLabel(state.periodEnd, { trial: true })
+          : "Premium trial active",
+        bankedLabel,
+      );
+    case "stripeTrialing":
+      return joinEntitlementSummaryParts("Premium trial active", bankedLabel);
+    case "stripeActive":
+      return joinEntitlementSummaryParts("Premium subscription active", bankedLabel);
+    case "packCredits": {
+      const count = state.packCredits;
+      return count === 1 ? "1 premium session left" : `${count} premium sessions left`;
+    }
+    case "none":
+      return null;
+    default: {
+      const _exhaustive: never = state.kind;
+      return _exhaustive;
+    }
   }
-
-  if (entitlements.premiumSessionCredits > 0) {
-    const count = entitlements.premiumSessionCredits;
-    return count === 1 ? "1 premium session left" : `${count} premium sessions left`;
-  }
-
-  return null;
 }

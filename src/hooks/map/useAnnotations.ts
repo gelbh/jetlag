@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
+import { resolvePlayerRole } from "../../domain/session/playerRole";
 import {
   findLastRedoableAnnotation,
   findLastUndoableAnnotation,
@@ -125,6 +126,7 @@ export function useAnnotations() {
           const healedSession = await joinRemoteSessionByCode(
             activeSession.code,
             user.uid,
+            resolvePlayerRole(activeSession.memberRoles, user.uid),
           );
 
           if (healedSession.status !== "joined") {

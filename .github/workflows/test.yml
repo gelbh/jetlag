@@ -125,7 +125,7 @@ jobs:
             exit 0
           fi
           changed="$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}")"
-          if echo "$changed" | grep -qE '^(functions/|firestore\.(rules|indexes\.json)|storage\.rules|firebase\.json|scripts/(deploy-production|sync-proxy-secrets)\.mjs|\.firebaserc)'; then
+          if echo "$changed" | grep -qE '^(functions/|firestore\.(rules|indexes\.json)|storage\.rules|firebase\.json|scripts/(deploy-production|sync-proxy-secrets)\.mjs|\.firebaserc|src/services/billing/|src/routes/Premium\.tsx)'; then
             echo "backend=true" >> "$GITHUB_OUTPUT"
           else
             echo "backend=false" >> "$GITHUB_OUTPUT"
@@ -184,6 +184,19 @@ jobs:
           cache: npm
       - run: npm ci
         if: steps.changes.outputs.frontend == 'true'
+      - name: Require functions deploy when callables changed
+        if: steps.changes.outputs.frontend == 'true'
+        run: |
+          if [[ "${{ github.event.before }}" == 0000000* ]]; then
+            exit 0
+          fi
+          changed="$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}")"
+          if echo "$changed" | grep -qE '^functions/'; then
+            if [[ "${{ needs.deploy-backend.outputs.functions_deployed }}" != "true" ]]; then
+              echo "::error::Push includes functions/ changes but Cloud Functions were not deployed. Deploy backend first."
+              exit 1
+            fi
+          fi
       - name: Require App Check site key
         if: steps.changes.outputs.frontend == 'true'
         run: |
