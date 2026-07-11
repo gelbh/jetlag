@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   formatEntitlementSummary,
+  formatPremiumSessionCreditsLabel,
+  formatPremiumSessionTierHint,
+  canSelectPremiumSessionTier,
+  hasUnlimitedPremiumHosting,
   PREMIUM_PRODUCT_OFFERS,
   type PremiumEntitlements,
 } from "./premiumProducts";
@@ -92,6 +96,55 @@ describe("premiumProducts", () => {
 
     it("returns null when no premium access remains", () => {
       expect(formatEntitlementSummary(baseEntitlements)).toBeNull();
+    });
+  });
+
+  describe("premium session tier helpers", () => {
+    it("allows premium tier selection for unlimited hosting only", () => {
+      expect(canSelectPremiumSessionTier(null, false)).toBe(false);
+      expect(
+        canSelectPremiumSessionTier(
+          {
+            ...baseEntitlements,
+            premiumSessionCredits: 2,
+            canCreatePremium: true,
+          },
+          false,
+        ),
+      ).toBe(false);
+      expect(
+        canSelectPremiumSessionTier(
+          {
+            ...baseEntitlements,
+            hasUnlimitedPremium: true,
+            canCreatePremium: true,
+            subscription: {
+              status: "active",
+              plan: "monthly",
+              currentPeriodEnd: null,
+            },
+          },
+          false,
+        ),
+      ).toBe(true);
+      expect(canSelectPremiumSessionTier(null, true)).toBe(true);
+    });
+
+    it("formats pack credits and unlimited tier hints", () => {
+      expect(
+        formatPremiumSessionCreditsLabel({
+          ...baseEntitlements,
+          premiumSessionCredits: 2,
+        }),
+      ).toBe("2 premium sessions left");
+      expect(
+        formatPremiumSessionTierHint({
+          ...baseEntitlements,
+          lifetimePremium: true,
+          hasUnlimitedPremium: true,
+        }),
+      ).toBe("Lifetime · unlimited sessions");
+      expect(hasUnlimitedPremiumHosting(null)).toBe(false);
     });
   });
 });

@@ -8,6 +8,7 @@
 
 ### Improvements
 
+- Premium purchases: sign in with email, Google, or Apple before checkout so credits follow your account across devices.
 - Matching: transit_line uses full GTFS stop and route graphs for London, NYC, Dublin, SF, and Chicago
 - Live transit: Chicago premium sessions load CTA bus and L train positions through the vehicles proxy
 - Sea level measuring: USGS EPQS elevation for US play areas with Open-Meteo fallback elsewhere

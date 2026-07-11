@@ -43,6 +43,8 @@ import {
   isFirebaseConfigured,
   ensureAnonymousUser,
 } from "../services/core/firebase";
+import { isPermanentUser } from "../services/core/accountAuth";
+import { PremiumSignInGate } from "../components/billing/PremiumSignInGate";
 import { createRemoteSession } from "../services/firestore/firestoreAnnotations";
 import {
   preloadCriticalGameAreaCaches,
@@ -60,6 +62,9 @@ import { getCurrentPosition } from "../services/core/geolocation";
 import { APP_VERSION } from "../domain/device/changelog";
 import {
   formatEntitlementSummary,
+  formatPremiumSessionCreditsLabel,
+  formatPremiumSessionTierHint,
+  canSelectPremiumSessionTier,
   type PremiumEntitlements,
 } from "../domain/billing/premiumProducts";
 import { grantAccess, hasAccessClaim } from "../services/core/accessControl";
@@ -110,7 +115,7 @@ function placeToFocusBounds(place: GeocodedPlace): LatLngBoundsExpression {
 
 export function CreateSession() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const presets = useGamePresetStore((state) => state.presets);
   const savePreset = useGamePresetStore((state) => state.savePreset);
   const bundledPresetSelectGroups = useMemo(
@@ -320,16 +325,68 @@ export function CreateSession() {
   }, [inferredTransitMetroId, transitMetroInferenceSeed]);
 
   const transitMetroId = transitMetroOverride ?? inferredTransitMetroId;
+  const canSelectPremiumTier = canSelectPremiumSessionTier(
+    premiumEntitlements,
+    hostHasAccessClaim,
+  );
+  const packCreditsLabel = formatPremiumSessionCreditsLabel(premiumEntitlements);
+  const packPremiumFlow =
+    isFirebaseConfigured() &&
+    searchParams.get("tier") === "premium" &&
+    !canSelectPremiumTier &&
+    (premiumEntitlements?.premiumSessionCredits ?? 0) > 0;
   const paidPremiumHost =
     premiumEntitlements?.canCreatePremium === true;
+  const resolvedSessionTier = useMemo((): SessionTier => {
+    if (packPremiumFlow) {
+      return "premium";
+    }
+
+    if (
+      sessionTier === "premium" &&
+      !canSelectPremiumTier &&
+      !hostHasAccessClaim
+    ) {
+      return "free";
+    }
+
+    return sessionTier;
+  }, [
+    canSelectPremiumTier,
+    hostHasAccessClaim,
+    packPremiumFlow,
+    sessionTier,
+  ]);
+  const requiresPremiumSignIn =
+    isFirebaseConfigured() &&
+    resolvedSessionTier === "premium" &&
+    !hostHasAccessClaim &&
+    paidPremiumHost &&
+    !isPermanentUser();
   const showPremiumUnlockPanel =
     isFirebaseConfigured() &&
-    sessionTier === "premium" &&
+    resolvedSessionTier === "premium" &&
     !hostHasAccessClaim &&
     !paidPremiumHost;
   const showAccessCodeField =
     showPremiumUnlockPanel && accessCodeExpanded;
   const premiumEntitlementSummary = formatEntitlementSummary(premiumEntitlements);
+  const visibleTierOptions = useMemo(
+    () =>
+      TIER_OPTIONS.filter(
+        (option) => option.value === "free" || canSelectPremiumTier,
+      ),
+    [canSelectPremiumTier],
+  );
+
+  useEffect(() => {
+    if (
+      searchParams.get("tier") === "premium" &&
+      resolvedSessionTier === "free"
+    ) {
+      setSearchParams({}, { replace: true });
+    }
+  }, [resolvedSessionTier, searchParams, setSearchParams]);
 
   const previewGameArea = useMemo(() => {
     if (importedGameArea) {
@@ -538,7 +595,9 @@ export function CreateSession() {
 
       const metroId = transitMetroId || undefined;
       const tier =
-        isFirebaseConfigured() && sessionTier === "premium" ? "premium" : "free";
+        isFirebaseConfigured() && resolvedSessionTier === "premium"
+          ? "premium"
+          : "free";
       let useAccessClaimForPremium = hostHasAccessClaim;
 
       if (tier === "premium" && !useAccessClaimForPremium && !paidPremiumHost) {
@@ -576,6 +635,15 @@ export function CreateSession() {
 
       if (isFirebaseConfigured()) {
         const user = await retryAsync(() => ensureAnonymousUser());
+        if (tier === "premium" && !useAccessClaimForPremium && paidPremiumHost) {
+          if (!isPermanentUser(user)) {
+            setError(
+              "Sign in with email, Google, or Apple to host a paid premium session.",
+            );
+            return;
+          }
+        }
+
         const usePremiumCallable =
           tier === "premium" &&
           !useAccessClaimForPremium &&
@@ -776,7 +844,7 @@ export function CreateSession() {
                       advancedSettings,
                       gameArea: previewGameArea,
                       placeLabel: selectedPlace?.displayName ?? locationQuery,
-                      sessionTier,
+                      sessionTier: resolvedSessionTier,
                     },
                     name.trim(),
                   ),
@@ -958,19 +1026,25 @@ export function CreateSession() {
               aria-label="Session tier"
               className="space-y-1.5"
             >
-              {TIER_OPTIONS.map((option) => (
+              {visibleTierOptions.map((option) => {
+                const tierHint =
+                  option.value === "premium"
+                    ? formatPremiumSessionTierHint(premiumEntitlements)
+                    : null;
+
+                return (
                 <button
                   key={option.value}
                   type="button"
                   role="radio"
-                  aria-checked={sessionTier === option.value}
+                  aria-checked={resolvedSessionTier === option.value}
                   disabled={loading || verifyingAccess}
                   onClick={() => {
                     setSessionTier(option.value);
                     setAccessCodeError(null);
                   }}
                   className={`min-h-12 w-full border-2 px-3 py-2 text-left disabled:opacity-50 ${
-                    sessionTier === option.value
+                    resolvedSessionTier === option.value
                       ? "border-highlight bg-highlight-soft text-highlight"
                       : "border-border bg-surface-deep text-ink hover:border-brand-blue"
                   }`}
@@ -981,10 +1055,20 @@ export function CreateSession() {
                   <span className="mt-0.5 block text-xs text-ink-muted">
                     {option.summary}
                   </span>
+                  {tierHint ? (
+                    <span className="mt-1 block text-xs font-semibold text-highlight">
+                      {tierHint}
+                    </span>
+                  ) : null}
                 </button>
-              ))}
+                );
+              })}
             </div>
           </div>
+        ) : null}
+
+        {packPremiumFlow && packCreditsLabel ? (
+          <p className="text-sm font-semibold text-highlight">{packCreditsLabel}</p>
         ) : null}
 
         <RolePicker
@@ -1039,7 +1123,7 @@ export function CreateSession() {
 
         <div
           className={`overflow-hidden motion-safe:transition-[max-height,opacity] motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none ${
-            showPremiumUnlockPanel || paidPremiumHost
+            showPremiumUnlockPanel || paidPremiumHost || packPremiumFlow
               ? "max-h-56 opacity-100"
               : "max-h-0 opacity-0"
           }`}
@@ -1048,6 +1132,20 @@ export function CreateSession() {
             <p className="text-sm font-semibold text-highlight">
               {premiumEntitlementSummary}
             </p>
+          ) : null}
+          {requiresPremiumSignIn ? (
+            <PremiumSignInGate
+              continuePath="/create"
+              onSignedIn={() => {
+                void (async () => {
+                  try {
+                    setPremiumEntitlements(await fetchPremiumEntitlements());
+                  } catch {
+                    // Entitlements refresh is best-effort after sign-in.
+                  }
+                })();
+              }}
+            />
           ) : null}
           {showPremiumUnlockPanel ? (
             <div className="space-y-2">

@@ -4,8 +4,10 @@ import { AppLogo } from "../components/ui/AppLogo";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { InlineError } from "../components/ui/InlineError";
 import { ScreenNav } from "../components/ui/ScreenNav";
+import { PremiumSignInGate } from "../components/billing/PremiumSignInGate";
 import {
   formatEntitlementSummary,
+  formatPremiumSessionCreditsLabel,
   PREMIUM_PRODUCT_OFFERS,
   type PremiumEntitlements,
   type PremiumProductKey,
@@ -127,6 +129,9 @@ export function Premium() {
   );
 
   const canStartTrial = entitlements?.trialUsedAt == null;
+  const packCreditsLabel = formatPremiumSessionCreditsLabel(entitlements);
+  const showHeaderEntitlement =
+    entitlementSummary != null && entitlementSummary !== packCreditsLabel;
 
   const handleCheckout = async (
     productKey: PremiumProductKey,
@@ -196,7 +201,7 @@ export function Premium() {
           Live transit vehicles and faster map loads for your hosted sessions.
           Joiners use the regular game code.
         </p>
-        {entitlementSummary ? (
+        {showHeaderEntitlement ? (
           <p className="max-w-sm text-sm font-semibold text-highlight">
             {entitlementSummary}
           </p>
@@ -207,9 +212,14 @@ export function Premium() {
       </div>
 
       <div className="home-enter-actions space-y-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
-          Session packs
-        </p>
+        <PremiumSignInGate onSignedIn={() => void refreshEntitlements()}>
+          <>
+            <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
+              Session packs
+            </p>
+            {packCreditsLabel ? (
+              <p className="text-sm font-semibold text-highlight">{packCreditsLabel}</p>
+            ) : null}
         {PREMIUM_PRODUCT_OFFERS.filter((offer) => offer.kind === "pack").map(
           (offer) => (
             <button
@@ -295,16 +305,20 @@ export function Premium() {
 
         {entitlements?.canCreatePremium ? (
           <Link
-            to="/create"
+            to="/create?tier=premium"
             className="home-card-btn home-card-btn-primary"
             aria-label="Create premium session"
           >
             <span>Create premium session</span>
-            <span className="home-card-btn-hint">Host a game</span>
+            <span className="home-card-btn-hint">
+              {packCreditsLabel ?? "Host a game"}
+            </span>
           </Link>
         ) : null}
 
         {error ? <InlineError>{error}</InlineError> : null}
+          </>
+        </PremiumSignInGate>
 
         <button
           type="button"

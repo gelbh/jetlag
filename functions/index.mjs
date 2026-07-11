@@ -62,6 +62,8 @@ import {
   createStripeClient,
   getPremiumEntitlementsHandler,
 } from "./stripeBilling.mjs";
+import { rejectAnonymousBillingAuth } from "./billingAuth.mjs";
+import { recoverPremiumByStripeEmailHandler } from "./premiumRecovery.mjs";
 import { handleStripeWebhook } from "./stripeWebhook.mjs";
 
 const accessCodeSecret = defineSecret("ACCESS_CODE");
@@ -486,6 +488,7 @@ export const createCheckoutSession = onCall(
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
+    rejectAnonymousBillingAuth(request);
 
     const productKey =
       typeof request.data?.productKey === "string"
@@ -515,6 +518,7 @@ export const createBillingPortalSession = onCall(
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
+    rejectAnonymousBillingAuth(request);
 
     const stripe = createStripeClient(stripeSecretKey.value());
     return createBillingPortalSessionHandler(
@@ -531,11 +535,30 @@ export const createPremiumSession = onCall(
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
+    rejectAnonymousBillingAuth(request);
 
     return createPremiumSessionHandler(
       adminDb(),
       request.auth.uid,
       request.data,
+    );
+  },
+);
+
+export const recoverPremiumByStripeEmail = onCall(
+  { ...stripeBillingOptions, enforceAppCheck: true },
+  async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+    rejectAnonymousBillingAuth(request);
+
+    const stripe = createStripeClient(stripeSecretKey.value());
+    return recoverPremiumByStripeEmailHandler(
+      stripe,
+      adminDb(),
+      request.auth.uid,
+      request.auth.token.email,
     );
   },
 );
