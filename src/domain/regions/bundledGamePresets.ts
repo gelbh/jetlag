@@ -465,7 +465,7 @@ function portlandMainePresets(): BundledGamePresetDefinition[] {
       id: "bundled:portland-maine",
       name: "Portland",
       description:
-        "Greater Portland metro with five council districts and 18 neighborhoods. Municipal boundaries © U.S. Census TIGER/Line; council districts © City of Portland, Maine GIS.",
+        "Greater Portland metro with five council districts and 18 neighborhoods across eight GP Metro towns. Municipal boundaries © U.S. Census TIGER/Line; council districts © City of Portland, Maine GIS.",
       placeLabel: "Portland, Maine, USA",
       regionPackId: PORTLAND_MAINE_REGION_PACK_ID,
       hierarchy: baseHierarchy,

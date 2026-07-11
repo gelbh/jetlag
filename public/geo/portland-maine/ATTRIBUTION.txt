@@ -1,4 +1,4 @@
 Greater Portland municipalities: U.S. Census Bureau TIGER/Line (Places and County Subdivisions).
 Portland council districts: City of Portland, Maine GIS.
 Portland neighborhoods: derived from OpenStreetMap place nodes (ODbL) as Voronoi cells clipped to Portland city; official neighborhood polygons are not published by the city.
-Portland Maine POI bundles: Wikidata (CC0).
+Portland Maine POI bundles: Wikidata (CC0) plus Portland Parks & Open Space (City GIS via ArcGIS Online).

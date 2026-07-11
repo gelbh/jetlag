@@ -33,7 +33,12 @@ const TENTACLE_BUNDLED_CATEGORIES = new Set<TentacleExtendedCategoryId>([
   "hospital",
 ]);
 
-const BUNDLED_POI_PACKS = new Set<RegionPackId>(["nyc", "london", "dublin"]);
+const BUNDLED_POI_PACKS = new Set<RegionPackId>([
+  "nyc",
+  "london",
+  "dublin",
+  "portland-maine",
+]);
 
 const bundleCache = new Map<string, BundledPoiCategory | null>();
 
