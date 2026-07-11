@@ -137,7 +137,7 @@ export async function joinAsRole(
 
   if (role === "hider") {
     await expect(
-      guestPage.getByRole("button", { name: /Set hiding zone|Play Move/i }),
+      guestPage.getByRole("button", { name: /Set zone|Change zone|Play move/i }),
     ).toBeVisible({ timeout: 15_000 });
   } else {
     await expect(guestPage.getByRole("button", { name: "Radar" })).toBeVisible({

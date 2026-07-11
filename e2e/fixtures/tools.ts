@@ -3,6 +3,7 @@ import {
   clickMapAt,
   clickMapCenter,
   clickToolDockButton,
+  dismissMapOnboarding,
   expectMapHasAnnotations,
   selectDrawTool,
 } from "./base";
@@ -311,12 +312,13 @@ export async function openSettings(page: Page) {
 }
 
 export async function openChat(page: Page) {
-  const chatPanelClose = page.getByRole("button", { name: "Close", exact: true });
-  if (await chatPanelClose.isVisible().catch(() => false)) {
+  if (await page.getByLabel("Chat tabs").isVisible().catch(() => false)) {
     return;
   }
 
   await dismissActiveToolPanel(page);
+  await dismissMapOnboarding(page);
+
   const dockChat = page.getByRole("button", { name: "Open chat" });
   if (await dockChat.isVisible().catch(() => false)) {
     await dockChat.click();
@@ -378,7 +380,7 @@ export async function waitForHidingZoneWizard(page: Page) {
 }
 
 export async function openHidingZoneWizard(page: Page) {
-  await page.getByRole("button", { name: /Set hiding zone|Change hiding zone/i }).click();
+  await page.getByRole("button", { name: /Set zone|Change zone/i }).click();
   await waitForHidingZoneWizard(page);
 }
 
@@ -405,7 +407,7 @@ export async function confirmInitialHidingZoneAtStation(
   await openHidingZoneWizard(page);
   await selectTransitStation(page, stationName);
   await confirmHidingZone(page);
-  await expect(page.getByRole("button", { name: "Play Move" })).toBeVisible({
+  await expect(page.getByRole("button", { name: "Play move" })).toBeVisible({
     timeout: 15_000,
   });
 }

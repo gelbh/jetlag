@@ -22,7 +22,7 @@ test.describe("hider chat scroll", () => {
     await joinAsRole(guestPage, code, "hider");
 
     await expect(
-      guestPage.getByRole("button", { name: "Set hiding zone" }),
+      guestPage.getByRole("button", { name: "Set zone" }),
     ).toBeVisible({ timeout: 15_000 });
 
     await sendRadarToHiders(hostPage);

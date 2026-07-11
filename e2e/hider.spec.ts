@@ -67,7 +67,7 @@ test.describe("hider flows", () => {
     await confirmInitialHidingZoneAtStation(guestPage, "Dublin Central");
 
     guestPage.once("dialog", (dialog) => dialog.accept());
-    await guestPage.getByRole("button", { name: "Play Move" }).click();
+    await guestPage.getByRole("button", { name: "Play move" }).click();
     await waitForHidingZoneWizard(guestPage);
     await selectTransitStation(guestPage, "Dublin Central");
     await confirmHidingZone(guestPage, true);

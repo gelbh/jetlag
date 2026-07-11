@@ -26,7 +26,7 @@ test("@smoke photo question syncs cannot-answer replies through chat", async ({
   await joinAsRole(guestPage, code, "hider");
 
   await expect(
-    guestPage.getByRole("button", { name: "Set hiding zone" }),
+    guestPage.getByRole("button", { name: "Set zone" }),
   ).toBeVisible({ timeout: 15_000 });
 
   await sendPhotoToHiders(hostPage);

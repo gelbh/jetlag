@@ -29,7 +29,7 @@ async function runHiderAnswerFlow(
   await joinAsRole(guestPage, code, "hider");
 
   await expect(
-    guestPage.getByRole("button", { name: "Set hiding zone" }),
+    guestPage.getByRole("button", { name: "Set zone" }),
   ).toBeVisible({ timeout: 15_000 });
 
   await sendQuestion(hostPage);

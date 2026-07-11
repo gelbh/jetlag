@@ -35,6 +35,13 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Cache Firebase emulators
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulators-${{ runner.os }}-${{ hashFiles('firebase.json', 'package-lock.json') }}
+          restore-keys: |
+            firebase-emulators-${{ runner.os }}-
       - run: npm run test:emulator
 
   e2e-smoke:
@@ -53,6 +60,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: Cache Firebase emulators
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulators-${{ runner.os }}-${{ hashFiles('firebase.json', 'package-lock.json') }}
+          restore-keys: |
+            firebase-emulators-${{ runner.os }}-
       - run: npx firebase emulators:exec --project demo-jetlag --only auth,firestore,storage "npm run test:e2e:smoke"
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -76,6 +90,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: Cache Firebase emulators
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulators-${{ runner.os }}-${{ hashFiles('firebase.json', 'package-lock.json') }}
+          restore-keys: |
+            firebase-emulators-${{ runner.os }}-
       - run: npx firebase emulators:exec --project demo-jetlag --only auth,firestore,storage "npm run test:e2e"
       - uses: actions/upload-artifact@v4
         if: failure()
