@@ -1,6 +1,8 @@
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 import {
+  HudChatIcon,
   HudPinIcon,
+  HudPlusIcon,
   HudRefreshIcon,
   HudSettingsIcon,
 } from "../ui/HudIcons";
@@ -41,7 +43,7 @@ export function HiderToolDock({
           aria-label={zoneLabel}
         >
           <span className="jl-tool-slot-icon">
-            <HudPinIcon className="h-5 w-5" />
+            <HudPinIcon className="h-5 w-5 shrink-0" />
           </span>
           <span className="jl-tool-slot-label">{zoneLabel}</span>
         </button>
@@ -53,7 +55,9 @@ export function HiderToolDock({
             className="jl-tool-slot"
             aria-label="Expansion"
           >
-            <span className="jl-tool-slot-icon text-xs font-bold">+</span>
+            <span className="jl-tool-slot-icon">
+              <HudPlusIcon className="h-5 w-5 shrink-0" />
+            </span>
             <span className="jl-tool-slot-label">Expansion</span>
           </button>
         ) : null}
@@ -65,7 +69,7 @@ export function HiderToolDock({
           aria-label="Recenter map on play area"
         >
           <span className="jl-tool-slot-icon">
-            <HudRefreshIcon className="h-5 w-5" />
+            <HudRefreshIcon className="h-5 w-5 shrink-0" />
           </span>
           <span className="jl-tool-slot-label">Recenter</span>
         </button>
@@ -76,8 +80,8 @@ export function HiderToolDock({
           className="jl-tool-slot"
           aria-label={hasUnreadChat ? "Open chat, unread messages" : "Open chat"}
         >
-          <span className="jl-tool-slot-icon jl-unread-badge-host text-xs font-bold">
-            @
+          <span className="jl-tool-slot-icon jl-unread-badge-host">
+            <HudChatIcon className="h-5 w-5 shrink-0" />
             {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
           </span>
           <span className="jl-tool-slot-label">Chat</span>
@@ -90,7 +94,7 @@ export function HiderToolDock({
           aria-label="Open settings"
         >
           <span className="jl-tool-slot-icon">
-            <HudSettingsIcon className="h-5 w-5" />
+            <HudSettingsIcon className="h-5 w-5 shrink-0" />
           </span>
           <span className="jl-tool-slot-label">Setup</span>
         </button>
