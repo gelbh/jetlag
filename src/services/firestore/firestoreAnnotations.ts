@@ -89,32 +89,85 @@ async function writeSessionMembershipPatch(
   }
 }
 
-export async function ensureRemoteSessionWriteAccess(
-  session: SessionRecord,
-  uid: string,
-  role: PlayerRole = resolvePlayerRole(session.memberRoles, uid),
-): Promise<SessionRecord> {
-  if (session.memberUids.includes(uid)) {
-    return session;
-  }
+export type EnsureRemoteSessionMembershipOptions = {
+  returningMemberUid?: string | null;
+};
 
-  const result = await joinRemoteSessionByCode(session.code, uid, role);
+type JoinRemoteSessionOptions = {
+  returningMemberUid?: string;
+};
 
-  if (result.status === "joined") {
-    return result.session;
-  }
-
+function mapJoinFailureToError(
+  result:
+    | { status: "missing" }
+    | { status: "ended" }
+    | { status: "incompatible"; hostVersion: string },
+  missingMessage: string,
+): Error {
   if (result.status === "incompatible") {
-    throw new Error(
+    return new Error(
       `Session requires a newer app version (v${result.hostVersion}). Update to continue.`,
     );
   }
 
   if (result.status === "ended") {
+    return new Error("That session has ended. Join or create a new one.");
+  }
+
+  return new Error(missingMessage);
+}
+
+export async function ensureRemoteSessionMembership(
+  session: Pick<SessionRecord, "id" | "code" | "memberUids" | "memberRoles">,
+  uid: string,
+  role: PlayerRole,
+  options?: EnsureRemoteSessionMembershipOptions,
+): Promise<SessionRecord> {
+  const serverSession = await getRemoteSessionByIdFromServer(session.id);
+  if (!serverSession) {
+    throw new Error("That session no longer exists.");
+  }
+
+  if (serverSession.endedAt) {
     throw new Error("That session has ended. Join or create a new one.");
   }
 
-  throw new Error("No access to that session.");
+  if (serverSession.memberUids.includes(uid)) {
+    return serverSession;
+  }
+
+  const result = await joinRemoteSessionByCode(serverSession.code, uid, role, APP_VERSION, {
+    returningMemberUid: options?.returningMemberUid ?? undefined,
+  });
+
+  if (result.status === "joined") {
+    return result.session;
+  }
+
+  throw mapJoinFailureToError(
+    result,
+    "You are not a member of this session. Rejoin with the session code.",
+  );
+}
+
+export async function ensureRemoteSessionWriteAccess(
+  session: SessionRecord,
+  uid: string,
+  role: PlayerRole = resolvePlayerRole(session.memberRoles, uid),
+  options?: EnsureRemoteSessionMembershipOptions,
+): Promise<SessionRecord> {
+  try {
+    return await ensureRemoteSessionMembership(session, uid, role, options);
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === "That session no longer exists."
+    ) {
+      throw new Error("No access to that session.", { cause: error });
+    }
+
+    throw error;
+  }
 }
 
 export async function createRemoteSession(
@@ -229,6 +282,7 @@ export async function joinRemoteSessionByCode(
   uid: string,
   role: PlayerRole = "seeker",
   clientVersion: string = APP_VERSION,
+  options: JoinRemoteSessionOptions = {},
 ): Promise<
   | { status: "missing" }
   | { status: "ended" }
@@ -264,9 +318,18 @@ export async function joinRemoteSessionByCode(
     : [];
 
   const sessionForVersionCheck = deserializeSessionFromFirestore(sessionDoc.id, data);
+  const returningMemberUid = options.returningMemberUid;
+  const isReturningMember =
+    existingMemberUids.includes(uid) ||
+    (returningMemberUid != null && existingMemberUids.includes(returningMemberUid));
   if (
-    !existingMemberUids.includes(uid) &&
-    !sessionVersionCompatible(sessionForVersionCheck, clientVersion, uid)
+    !isReturningMember &&
+    !sessionVersionCompatible(
+      sessionForVersionCheck,
+      clientVersion,
+      uid,
+      returningMemberUid,
+    )
   ) {
     return {
       status: "incompatible",
@@ -378,33 +441,27 @@ export async function waitForServerHiderRole(
 export async function ensureHiderPhotoUploadAccess(
   session: Pick<SessionRecord, "id" | "code" | "memberUids" | "memberRoles">,
   uid: string,
+  returningMemberUid?: string | null,
 ): Promise<SessionRecord> {
-  let serverSession = await getRemoteSessionByIdFromServer(session.id);
-  if (!serverSession) {
-    throw new Error("Syncing session… Try again in a moment.");
+  let serverSession: SessionRecord;
+  try {
+    serverSession = await ensureRemoteSessionMembership(session, uid, "hider", {
+      returningMemberUid,
+    });
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === "That session no longer exists."
+    ) {
+      throw new Error("Syncing session… Try again in a moment.", { cause: error });
+    }
+
+    throw error;
   }
 
   if (!serverSessionGrantsHiderUpload(serverSession, uid)) {
-    const result = await joinRemoteSessionByCode(serverSession.code, uid, "hider");
-
-    if (result.status === "incompatible") {
-      throw new Error(
-        `Session requires a newer app version (v${result.hostVersion}). Update to continue.`,
-      );
-    }
-
-    if (result.status === "ended") {
-      throw new Error("That session has ended. Join or create a new one.");
-    }
-
-    if (result.status !== "joined") {
-      throw new Error(
-        "You are not a member of this session. Rejoin with the session code.",
-      );
-    }
-
     serverSession =
-      (await waitForServerHiderRole(session.id, uid)) ?? result.session;
+      (await waitForServerHiderRole(session.id, uid)) ?? serverSession;
   }
 
   const accessError = photoUploadAccessError(serverSession, uid);

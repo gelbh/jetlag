@@ -8,6 +8,7 @@ import {
   openSettings,
   prepareE2EPage,
   readPersistedSessionId,
+  rotateAnonymousAuth,
   seedPersistedLocalSessionOnHome,
 } from "../../fixtures";
 
@@ -26,6 +27,32 @@ test.describe("session lifecycle", () => {
     await hostPage.goto("/");
     await hostPage.getByRole("button", { name: /Return to map/i }).click();
     await expect(hostPage).toHaveURL(/\/map/, { timeout: 10_000 });
+
+    await cleanup();
+  });
+
+  test("continues from home after auth uid rotation", async ({ browser }) => {
+    const { hostPage, cleanup } = await createMultiplayerContexts(browser);
+    await createHostSession(hostPage);
+
+    const previousUid = await hostPage.evaluate(() => {
+      const raw = localStorage.getItem("jetlag-session");
+      if (!raw) {
+        return null;
+      }
+
+      const parsed = JSON.parse(raw) as { state?: { myUid?: string } };
+      return parsed.state?.myUid ?? null;
+    });
+    expect(previousUid).toBeTruthy();
+
+    const nextUid = await rotateAnonymousAuth(hostPage);
+    expect(nextUid).not.toBe(previousUid);
+
+    await hostPage.goto("/");
+    await hostPage.getByRole("button", { name: /Return to map/i }).click();
+    await expect(hostPage).toHaveURL(/\/map/, { timeout: 15_000 });
+    await expect(hostPage.getByText(/no longer a member/i)).toHaveCount(0);
 
     await cleanup();
   });

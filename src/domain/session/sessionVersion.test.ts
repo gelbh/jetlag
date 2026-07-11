@@ -32,6 +32,12 @@ describe("sessionVersionCompatible", () => {
       ),
     ).toBe(true);
   });
+
+  it("allows auth drift when the prior uid was already a member", () => {
+    expect(sessionVersionCompatible(session, "0.9.9", "new-uid", "member-1")).toBe(
+      true,
+    );
+  });
 });
 
 describe("sessionVersionMismatchMessage", () => {

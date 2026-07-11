@@ -141,6 +141,7 @@ describe("photoStorage", () => {
     expect(ensureHiderPhotoUploadAccess).toHaveBeenCalledWith(
       hiderSession,
       "hider-1",
+      "hider-1",
     );
     expect(uploadBytes).toHaveBeenCalledOnce();
     expect(addPhotoUploadBreadcrumb).toHaveBeenCalledWith(

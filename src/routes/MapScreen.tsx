@@ -75,6 +75,7 @@ import { useSessionTimer } from "../hooks/session/useSessionTimer";
 import { useRemoteSessionTimerSync } from "../hooks/session/useRemoteSessionTimerSync";
 import { useGeolocation } from "../hooks/location/useGeolocation";
 import { useSessionSync } from "../hooks/session/useSessionSync";
+import { useEnsureSessionMembership } from "../hooks/session/useEnsureSessionMembership";
 import { useSessionEndedRedirect } from "../hooks/session/useSessionEndedRedirect";
 import { usePendingQuestionActions } from "../hooks/sync/usePendingQuestionActions";
 import { useQuestionDeadlineEnforcement } from "../hooks/session/useQuestionDeadlineEnforcement";
@@ -605,6 +606,7 @@ export function MapScreen() {
     routeFilter: transitRouteFilter,
   });
 
+  useEnsureSessionMembership();
   useSessionSync();
   useSessionEndedRedirect(session?.id, isHost);
 

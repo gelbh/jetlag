@@ -215,17 +215,15 @@ export async function uploadPhotoAnswer(
   const authUid = user.uid;
   await user.getIdToken(true);
 
-  if (myUid && myUid !== authUid) {
-    throw new Error(
-      "Your sign-in changed. Rejoin the session and try uploading again.",
-    );
-  }
-
   if (!session?.id || !session.code) {
     throw new Error("Syncing session… Try again in a moment.");
   }
 
-  let activeSession = await ensureHiderPhotoUploadAccess(session, authUid);
+  let activeSession = await ensureHiderPhotoUploadAccess(
+    session,
+    authUid,
+    myUid,
+  );
 
   addPhotoUploadBreadcrumb(
     uploadBreadcrumbData(
@@ -280,6 +278,7 @@ export async function uploadPhotoAnswer(
         activeSession = await ensureHiderPhotoUploadAccess(
           activeSession,
           authUid,
+          myUid,
         );
       } catch {
         break;
