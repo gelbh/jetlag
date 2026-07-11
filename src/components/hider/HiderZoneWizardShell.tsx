@@ -47,6 +47,7 @@ export function HiderZoneWizardShell({
     <MapFloatingPanel
       minimized={peeked}
       onMinimizedChange={onPeekedChange}
+      title={peekLabel}
       peekLabel={peekLabel}
       outerRef={setAnimNode}
       outerClassName={`pointer-events-auto absolute inset-x-0 jl-panel-hider-wizard z-[var(--z-panel)] px-3 ${animClass} ${

@@ -33,6 +33,7 @@ export function ToolFloatingPanel({
       minimized={minimized}
       onMinimizedChange={onMinimizedChange}
       mapPanning={mapPanning}
+      title={mapToolPlacingLabel(toolId)}
       peekLabel={mapToolPlacingLabel(toolId)}
       onClose={onClose}
       closeLabel={`Close ${mapToolPlacingLabel(toolId)}`}
