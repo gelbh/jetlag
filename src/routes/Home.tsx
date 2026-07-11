@@ -142,13 +142,13 @@ export function Home() {
             <br />
             Seek
           </h1>
-          <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
+          <p className="max-w-sm pt-2 text-pretty text-base leading-relaxed text-ink-muted">
             Seekers ask questions on the live map. Hiders answer, set hiding zones,
             and watch the search unfold.
           </p>
         </div>
 
-        <div className="home-enter-actions space-y-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="home-enter-actions mt-8 space-y-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
           {session ? (
             <button
               type="button"
