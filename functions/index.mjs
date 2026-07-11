@@ -1,4 +1,4 @@
-/** Cloud Functions entry (runtime: nodejs24). */
+/** Cloud Functions entry (Node.js 24). */
 import { createHash } from "node:crypto";
 import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
