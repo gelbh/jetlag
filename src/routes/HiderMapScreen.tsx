@@ -632,7 +632,7 @@ export function HiderMapScreen() {
         }
         onClose={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
         closeLabel="Close hiding zone"
-        contentKey={hidingZoneStepId}
+        contentKey={zoneTool.moveMode ? "move" : "set"}
       >
         <HidingZonePanel
           wizardOpen={zoneTool.wizardOpen}
