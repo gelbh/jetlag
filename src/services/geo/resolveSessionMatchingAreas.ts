@@ -1,8 +1,14 @@
-import type { SessionRecord } from "../../domain/map/annotations";
+import type { GameArea, SessionRecord } from "../../domain/map/annotations";
 import type { CustomMatchingAreasByLevel } from "../../domain/session/sessionCustomContent";
-import type { RegionPackId } from "../../domain/regions/regionPack";
+import {
+  BUNDLED_REGION_PACK_GEO_REVISION,
+  type RegionPackId,
+} from "../../domain/regions/regionPack";
 import { isKnownRegionPack } from "../../domain/regions/regionPackRegistry";
-import { loadRegionPackMatchingAreas } from "./regionPackBoundaries";
+import {
+  loadRegionPackMatchingAreas,
+  loadRegionPackPlayArea,
+} from "./regionPackBoundaries";
 
 const MATCHING_ADMIN_LEVELS = [8, 9] as const;
 
@@ -16,7 +22,14 @@ function hasBundledMatchingLevels(
   return MATCHING_ADMIN_LEVELS.every((level) => Boolean(areas[level]));
 }
 
+function bundledGeoRevisionIsCurrent(
+  revision: number | undefined,
+): boolean {
+  return revision === BUNDLED_REGION_PACK_GEO_REVISION;
+}
+
 const resolvedMatchingAreasCache = new Map<string, CustomMatchingAreasByLevel>();
+const resolvedPlayAreaCache = new Map<string, GameArea>();
 
 export function matchingAreasCacheKey(
   regionPackId: RegionPackId | undefined,
@@ -24,25 +37,49 @@ export function matchingAreasCacheKey(
   hasSessionCustomAreas: boolean,
 ): string {
   return [
+    String(BUNDLED_REGION_PACK_GEO_REVISION),
     regionPackId ?? "",
     regionPackSubregionId ?? "",
     hasSessionCustomAreas ? "custom" : "",
   ].join(":");
 }
 
+export function playAreaCacheKey(
+  regionPackId: RegionPackId | undefined,
+  regionPackSubregionId: string | undefined,
+): string {
+  return [
+    String(BUNDLED_REGION_PACK_GEO_REVISION),
+    regionPackId ?? "",
+    regionPackSubregionId ?? "",
+  ].join(":");
+}
+
 export function clearResolvedMatchingAreasCacheForTests(): void {
   resolvedMatchingAreasCache.clear();
+  resolvedPlayAreaCache.clear();
 }
 
 export type SessionMatchingAreasInput = Pick<
   SessionRecord,
-  "regionPackId" | "regionPackSubregionId" | "customMatchingAreas"
+  | "regionPackId"
+  | "regionPackSubregionId"
+  | "customMatchingAreas"
+  | "bundledGeoRevision"
+>;
+
+export type SessionPlayAreaInput = Pick<
+  SessionRecord,
+  "gameArea" | "regionPackId" | "regionPackSubregionId"
 >;
 
 export async function resolveSessionMatchingAreas(
   session: SessionMatchingAreasInput,
 ): Promise<CustomMatchingAreasByLevel | undefined> {
-  if (hasBundledMatchingLevels(session.customMatchingAreas)) {
+  if (
+    hasBundledMatchingLevels(session.customMatchingAreas) &&
+    bundledGeoRevisionIsCurrent(session.bundledGeoRevision)
+  ) {
     return session.customMatchingAreas;
   }
 
@@ -67,4 +104,26 @@ export async function resolveSessionMatchingAreas(
   );
   resolvedMatchingAreasCache.set(cacheKey, areas);
   return areas;
+}
+
+export async function resolveSessionPlayArea(
+  session: SessionPlayAreaInput,
+): Promise<GameArea> {
+  const packId = session.regionPackId;
+  if (!isKnownRegionPack(packId)) {
+    return session.gameArea;
+  }
+
+  const cacheKey = playAreaCacheKey(packId, session.regionPackSubregionId);
+  const cached = resolvedPlayAreaCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const playArea = await loadRegionPackPlayArea(
+    packId,
+    session.regionPackSubregionId,
+  );
+  resolvedPlayAreaCache.set(cacheKey, playArea);
+  return playArea;
 }

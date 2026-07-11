@@ -3,6 +3,7 @@ import type { GameArea } from "../../domain/map/annotations";
 import type { BoundingBox } from "../../domain/geometry/gameAreaBounds";
 import { gameAreaToBoundingBox } from "../../domain/geometry/gameAreaBounds";
 import { featureToGameArea } from "../../domain/geometry/geometry";
+import { gameAreaWithoutInteriorRings } from "../../domain/geometry/geometryCore";
 import { unionGameAreas } from "../../domain/geometry/unionGameAreas";
 import type { CustomMatchingAreasByLevel } from "../../domain/session/sessionCustomContent";
 import type { MatchingAdminLevel } from "../../domain/session/sessionCustomContent";
@@ -81,7 +82,7 @@ function combineRegionGameAreas(
   }
 
   if (features.length === 1) {
-    return featureToRegionGameArea(features[0]!);
+    return gameAreaWithoutInteriorRings(featureToRegionGameArea(features[0]!));
   }
 
   return unionGameAreas(

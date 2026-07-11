@@ -79,7 +79,10 @@ import {
   gamePresetToCreateSessionDraft,
 } from "../domain/session/gamePreset";
 import { useGamePresetStore } from "../state/gamePresetStore";
-import type { RegionPackId } from "../domain/regions/regionPack";
+import {
+  BUNDLED_REGION_PACK_GEO_REVISION,
+  type RegionPackId,
+} from "../domain/regions/regionPack";
 import { loadRegionPackSessionBoundaries } from "../services/geo/regionPackBoundaries";
 import {
   BUNDLED_GAME_PRESET_DEFINITIONS,
@@ -574,6 +577,7 @@ export function CreateSession() {
         ...(regionPackId
           ? {
               regionPackId,
+              bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
               ...(regionPackSubregionId
                 ? { regionPackSubregionId }
                 : {}),

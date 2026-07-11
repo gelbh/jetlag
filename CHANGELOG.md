@@ -6,6 +6,8 @@
 
 - Recommended games: Portland, Maine with Greater Portland metro, five council districts, and GP Metro bus transit matching.
 - Recommended games: Portland, Maine metro adds Cape Elizabeth, Scarborough, and Yarmouth; measuring and tentacles merge bundled park POI from city GIS.
+- Play area outline: drop spurious interior rings after unioning bundled admin boundaries (Portland, Maine and other multi-municipality presets).
+- Region-pack sessions: refresh bundled play area and matching categories when geo assets change instead of using stale Firestore copies.
 
 ## 0.4.3 - 2026-07-11
 

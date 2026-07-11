@@ -272,6 +272,20 @@ const WORLD_OUTSIDE_MASK_BOUNDS: BoundingBox = {
   east: 180,
 };
 
+export function gameAreaWithoutInteriorRings(gameArea: GameArea): GameArea {
+  if (gameArea.type === "MultiPolygon") {
+    return {
+      type: "MultiPolygon",
+      coordinates: gameArea.coordinates.map((polygon) => [polygon[0]!]),
+    };
+  }
+
+  return {
+    type: "Polygon",
+    coordinates: [gameArea.coordinates[0]!],
+  };
+}
+
 export function gameAreaExteriorStrokeRings(gameArea: GameArea): LatLngTuple[][] {
   if (gameArea.type === "MultiPolygon") {
     return gameArea.coordinates.map(

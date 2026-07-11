@@ -157,6 +157,7 @@ export interface SessionRecord {
   customMeasureGeometries?: readonly SessionCustomMeasureGeometry[];
   regionPackId?: RegionPackId;
   regionPackSubregionId?: string;
+  bundledGeoRevision?: number;
   expansionPackEnabled?: boolean;
   customQuestionPackEnabled?: boolean;
   previewQuestionBeforeSend?: boolean;

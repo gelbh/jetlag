@@ -158,11 +158,11 @@ export function MapScreen() {
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
-  const { sessionRules, matchingAreasReady, matchingAreasError } =
+  const { sessionRules, gameArea, matchingAreasReady, matchingAreasError, playAreaReady } =
     useResolvedSessionRules(session);
   const { features: adminBoundaryFeatures, loading: adminBoundaryLoading } =
     useAdminBoundaryFeatures(
-    session?.gameArea ?? null,
+    gameArea,
     sessionRules,
     showAdminBoundaries,
   );
@@ -277,8 +277,8 @@ export function MapScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset draft when switching sessions only
   }, [currentSessionId]);
 
-  const preloadGameAreaKey = session?.gameArea
-    ? gameAreaPreloadKey(session.gameArea)
+  const preloadGameAreaKey = gameArea
+    ? gameAreaPreloadKey(gameArea)
     : null;
 
   const gameRulesEditable = isHost && !timer.hasStarted;
@@ -301,26 +301,30 @@ export function MapScreen() {
 
   useEffect(() => {
     if (
+      !session ||
       !preloadGameAreaKey ||
-      !session?.gameArea ||
+      !gameArea ||
       !firebaseAuthReady ||
       !matchingAreasReady ||
+      !playAreaReady ||
       lowPowerMode
     ) {
       return;
     }
 
     void preloadGameAreaCachesAsync(
-      session.gameArea,
+      gameArea,
       sessionRules.customMatchingAreas,
       session.regionPackId,
       isPremiumSession(session) ? "premium" : "free",
     );
-    startSeaLevelBackgroundSampling(session.gameArea);
+    startSeaLevelBackgroundSampling(gameArea);
   }, [
     firebaseAuthReady,
+    gameArea,
     lowPowerMode,
     matchingAreasReady,
+    playAreaReady,
     preloadGameAreaKey,
     session,
     sessionRules.customMatchingAreas,
@@ -385,14 +389,14 @@ export function MapScreen() {
 
   const ensurePointInGameArea = useCallback(
     (point: LatLngTuple) => {
-      if (!session?.gameArea || isPointInGameArea(point, session.gameArea)) {
+      if (!gameArea || isPointInGameArea(point, gameArea)) {
         return true;
       }
 
       setMapError("That point is outside the play area.");
       return false;
     },
-    [session],
+    [gameArea],
   );
 
   const armPlacement = useCallback(() => {
@@ -400,7 +404,7 @@ export function MapScreen() {
     setMapError(null);
   }, []);
 
-  const toolGameArea = fallbackGameArea(session?.gameArea);
+  const toolGameArea = fallbackGameArea(gameArea);
 
   const submitToolQuestion = useCallback(
     async (
@@ -594,9 +598,9 @@ export function MapScreen() {
     liveDataStale: transitLiveDataStale,
     error: transitError,
   } = useTransitLayer({
-    gameArea: fallbackGameArea(session?.gameArea),
+    gameArea: fallbackGameArea(gameArea),
     metroId: session?.transitMetroId,
-    enabled: transitEnabled && Boolean(session?.gameArea),
+    enabled: transitEnabled && Boolean(gameArea),
     liveEnabled: transitLiveEnabled && !lowPowerMode,
     routeFilter: transitRouteFilter,
   });
@@ -665,8 +669,6 @@ export function MapScreen() {
     /* eslint-enable react-hooks/set-state-in-effect */
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only overlay.closeSheet invoked
   }, [overlay.closeSheet, selectedAnnotationId, setActiveTool]);
-
-  const gameArea = session?.gameArea;
 
   const center = useMemo<LatLngTuple>(() => {
     if (!gameArea) {
@@ -924,7 +926,7 @@ export function MapScreen() {
     [gameRulesEditable, isRemote, session, setSession, uid],
   );
 
-  if (!session?.gameArea) {
+  if (!session || !gameArea) {
     return <Navigate to={session ? "/create" : "/"} replace />;
   }
 
@@ -1073,7 +1075,7 @@ export function MapScreen() {
             onUserPanStart={handleMapPanStart}
             onUserPanEnd={handleMapPanEnd}
           />
-          <GameAreaMask gameArea={session.gameArea} />
+          <GameAreaMask gameArea={gameArea} />
           {transitEnabled && layerVisibility.transit ? (
             <Suspense fallback={null}>
               <TransitLayer
@@ -1086,7 +1088,7 @@ export function MapScreen() {
           ) : null}
           <AnnotationLayer
             annotations={annotations}
-            gameArea={session.gameArea}
+            gameArea={gameArea}
             selectedAnnotationId={selectedAnnotationId}
             layerVisibility={layerVisibility}
             draftEliminationFeatures={draftEliminationFeatures}
@@ -1102,7 +1104,7 @@ export function MapScreen() {
           />
           <PendingQuestionLayer
             pendingQuestions={pendingQuestions}
-            gameArea={session.gameArea}
+            gameArea={gameArea}
             sessionRules={session}
             mapStyle={effectiveBasemapStyle}
           />
@@ -1323,7 +1325,7 @@ export function MapScreen() {
       {selectedAnnotation ? (
         <AnnotationEditSheet
           annotation={selectedAnnotation}
-          gameArea={session.gameArea}
+          gameArea={gameArea}
           onClose={() => setSelectedAnnotationId(null)}
           onSave={(annotation) => {
             void updateAnnotation(annotation);
