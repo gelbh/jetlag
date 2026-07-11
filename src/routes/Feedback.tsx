@@ -1,6 +1,8 @@
-import { AppLogo } from "../components/ui/AppLogo";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
-import { ScreenNav } from "../components/ui/ScreenNav";
+import {
+  ScreenHeader,
+  screenHeaderOffsetClassName,
+} from "../components/ui/ScreenHeader";
 import {
   githubBugReportUrl,
   githubBugsBrowseUrl,
@@ -16,9 +18,8 @@ const externalLinkProps = {
 export function Feedback() {
   return (
     <EntryScreenLayout>
-      <ScreenNav backTo="/" backLabel="Back" />
-      <div className="space-y-3 pt-[max(3rem,env(safe-area-inset-top))]">
-        <AppLogo variant="lockup" size="lg" />
+      <ScreenHeader backTo="/" backLabel="Back" />
+      <div className={`space-y-3 ${screenHeaderOffsetClassName}`}>
         <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
           Feedback
         </h1>

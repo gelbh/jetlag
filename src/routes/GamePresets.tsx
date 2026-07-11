@@ -1,7 +1,10 @@
 import { useCallback, useId, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import type { LatLngBoundsExpression } from "leaflet";
-import { AppLogo } from "../components/ui/AppLogo";
+import {
+  ScreenHeader,
+  screenHeaderOffsetClassName,
+} from "../components/ui/ScreenHeader";
 import { AdvancedSessionSettings } from "../components/session/AdvancedSessionSettings";
 import { GameAreaFramingModal } from "../components/session/GameAreaFramingModal";
 import { GameAreaFramingStats } from "../components/session/GameAreaFramingControls";
@@ -25,7 +28,6 @@ import {
   migrateGamePreset,
   type CreateSessionDraft,
 } from "../domain/session/gamePreset";
-import { ScreenNav } from "../components/ui/ScreenNav";
 import { useGameAreaFraming } from "../hooks/session/useGameAreaFraming";
 import { usePlaceAreaSearch } from "../hooks/session/usePlaceAreaSearch";
 import {
@@ -166,9 +168,9 @@ export function GamePresetEditor() {
         }}
       />
 
-      <div className="space-y-4 pt-[max(3rem,env(safe-area-inset-top))]">
-        <ScreenNav backTo="/presets" backLabel="Back" />
-        <AppLogo variant="mark" size="sm" />
+      <ScreenHeader backTo="/presets" backLabel="Back" />
+
+      <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
         <h1 className="font-display text-2xl font-bold uppercase tracking-tight text-ink">
           {existing ? "Edit preset" : "New preset"}
         </h1>
@@ -451,9 +453,8 @@ export function GamePresetList() {
 
   return (
     <main className="home-poster flex min-h-[100dvh] flex-col px-5 py-8">
-      <div className="space-y-4 pt-[max(3rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <ScreenNav backTo="/" backLabel="Back" />
-        <AppLogo variant="mark" size="sm" />
+      <ScreenHeader backTo="/" backLabel="Back" />
+      <div className={`space-y-4 ${screenHeaderOffsetClassName} pb-[max(1rem,env(safe-area-inset-bottom))]`}>
         <h1 className="font-display text-2xl font-bold uppercase tracking-tight text-ink">
           Custom games
         </h1>

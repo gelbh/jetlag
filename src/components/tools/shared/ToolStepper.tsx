@@ -8,9 +8,11 @@ export interface ToolStep {
 
 interface ToolStepperProps {
   steps: readonly ToolStep[];
+  /** Extra space between the dot row and the step label (e.g. tutorial wizard). */
+  labelClassName?: string;
 }
 
-export function ToolStepper({ steps }: ToolStepperProps) {
+export function ToolStepper({ steps, labelClassName = "" }: ToolStepperProps) {
   const currentIndex = Math.max(
     0,
     steps.findIndex((step) => step.state === "current"),
@@ -54,7 +56,7 @@ export function ToolStepper({ steps }: ToolStepperProps) {
       {currentStep ? (
         <p
           key={currentStep.id}
-          className="jl-step-enter text-center text-xs leading-snug text-ink-muted motion-reduce:animate-none"
+          className={`jl-step-enter text-center text-xs leading-snug text-ink-muted motion-reduce:animate-none ${labelClassName}`}
         >
           <span className="font-medium text-ink">{currentStep.label}</span>
           <span aria-hidden="true"> · </span>

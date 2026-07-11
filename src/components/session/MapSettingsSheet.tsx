@@ -153,8 +153,8 @@ export function MapSettingsSheet({
       onClose={onClose}
       ariaLabel="Settings"
       maxHeightClassName="max-h-[min(85dvh,760px)]"
-    >
-        <div className="sticky top-0 z-10 -mx-4 space-y-3 bg-surface-panel px-4 pb-3 pt-1">
+      pinned={
+        <div className="space-y-3 pb-3">
           <SheetHeader
             title="Settings"
             eyebrow="Setup"
@@ -172,7 +172,8 @@ export function MapSettingsSheet({
 
           <SettingsSegmentControl value={segment} onChange={setSegment} />
         </div>
-
+      }
+    >
         <div
           key={segment}
           role="tabpanel"
