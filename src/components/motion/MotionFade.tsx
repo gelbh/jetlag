@@ -6,7 +6,7 @@ interface MotionFadeProps {
   className?: string;
 }
 
-/** CSS fade-in wrapper; Framer path deferred until list surfaces migrate. */
+/** CSS fade-in wrapper that respects the motion profile. */
 export function MotionFade({ children, className = "" }: MotionFadeProps) {
   const { animate } = useMotionProfile();
 

@@ -1,5 +1,4 @@
-import { useContext, useEffect, useState } from "react";
-import { MotionCapabilityContext } from "../components/motion/motionCapabilityContext";
+import { useEffect, useState } from "react";
 import { useMapStore } from "../state/mapStore";
 
 function readPrefersReducedMotion(): boolean {
@@ -35,11 +34,7 @@ export function usePrefersReducedMotion(): boolean {
 export function useMotionProfile() {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const prefersReducedMotion = usePrefersReducedMotion();
-  const capability = useContext(MotionCapabilityContext);
-
-  const animate = capability
-    ? capability.tier !== "static"
-    : !lowPowerMode && !prefersReducedMotion;
+  const animate = !lowPowerMode && !prefersReducedMotion;
 
   return { animate, lowPowerMode, prefersReducedMotion };
 }

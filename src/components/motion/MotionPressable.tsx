@@ -1,8 +1,6 @@
-import { lazy, Suspense, useContext, type ComponentPropsWithoutRef, type ReactNode } from "react";
-import { impactLightForTier } from "../../services/device/hapticsService";
-import { MotionCapabilityContext } from "./motionCapabilityContext";
-
-const FramerPressable = lazy(() => import("./FramerPressable"));
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import { impactLight } from "../../services/device/hapticsService";
+import { useMotionProfile } from "../../hooks/useMotionProfile";
 
 type MotionPressableProps = ComponentPropsWithoutRef<"button"> & {
   as?: "button" | "div" | "a";
@@ -10,17 +8,28 @@ type MotionPressableProps = ComponentPropsWithoutRef<"button"> & {
   href?: string;
 };
 
-function CssPressable({
+export function MotionPressable({
   as = "button",
   className = "",
   children,
+  onClick,
   ...rest
 }: MotionPressableProps) {
+  const { animate } = useMotionProfile();
   const cssClass = `hud-pressable-css ${className}`;
+
+  const handleClick: MotionPressableProps["onClick"] = (event) => {
+    if (animate) {
+      void impactLight();
+    }
+    onClick?.(event);
+  };
+
+  const pressProps = onClick ? { ...rest, onClick: handleClick } : rest;
 
   if (as === "div") {
     return (
-      <div className={cssClass} {...(rest as ComponentPropsWithoutRef<"div">)}>
+      <div className={cssClass} {...(pressProps as ComponentPropsWithoutRef<"div">)}>
         {children}
       </div>
     );
@@ -28,42 +37,15 @@ function CssPressable({
 
   if (as === "a") {
     return (
-      <a className={cssClass} {...(rest as ComponentPropsWithoutRef<"a">)}>
+      <a className={cssClass} {...(pressProps as ComponentPropsWithoutRef<"a">)}>
         {children}
       </a>
     );
   }
 
   return (
-    <button className={cssClass} {...rest}>
+    <button className={cssClass} {...pressProps}>
       {children}
     </button>
   );
-}
-
-export function MotionPressable({
-  onClick,
-  ...props
-}: MotionPressableProps) {
-  const capability = useContext(MotionCapabilityContext);
-  const renderer = capability?.renderer ?? "css";
-  const framerReady = capability?.framerReady ?? false;
-  const tier = capability?.tier ?? "css";
-
-  const handleClick: MotionPressableProps["onClick"] = (event) => {
-    void impactLightForTier(tier);
-    onClick?.(event);
-  };
-
-  const pressProps = onClick ? { ...props, onClick: handleClick } : props;
-
-  if (renderer === "framer" && framerReady) {
-    return (
-      <Suspense fallback={<CssPressable {...pressProps} />}>
-        <FramerPressable {...pressProps} />
-      </Suspense>
-    );
-  }
-
-  return <CssPressable {...pressProps} />;
 }

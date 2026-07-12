@@ -8,6 +8,13 @@
     text-transform: uppercase;
   }
 
+  .screen-back-control {
+    border: 0;
+    background: transparent;
+    line-height: inherit;
+    cursor: pointer;
+  }
+
   .hud-chrome {
     display: flex;
     min-height: 3rem;
@@ -35,8 +42,6 @@
     transition: none;
   }
 
-  html[data-motion="framer-enhanced"] .hud-pressable-css:active,
-  html[data-motion="framer-standard"] .hud-pressable-css:active,
   html[data-motion="css"] .hud-pressable-css:active {
     transform: scale(0.97);
     transition: transform var(--motion-instant) var(--ease-out-quint);
