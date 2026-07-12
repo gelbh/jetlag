@@ -1,4 +1,6 @@
 node_modules
+.wrangler
+*.tsbuildinfo
 dist
 dist-ssr
 coverage
