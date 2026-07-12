@@ -27,6 +27,7 @@ import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
 import {
   HiderTruthRevealBanner,
 } from "../../components/session/HiderTruthRevealBanner";
+import { useSyncRetryAction } from "../../hooks/session/useSyncRetryAction";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
 import { SessionLog } from "../../components/session/SessionLog";
 import { isEndGameActive, isEndGamePending } from "../../domain/map/annotations";
@@ -223,6 +224,8 @@ export function HiderMapScreenChrome({
   mapSettings,
   chat,
 }: HiderMapScreenChromeProps) {
+  const onSyncErrorAction = useSyncRetryAction();
+
   return (
     <>
       <div className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible">
@@ -259,6 +262,7 @@ export function HiderMapScreenChrome({
           onResetEndGame={() => void onResetEndGame()}
           onAcceptEndGame={() => void onAcceptEndGame()}
           hiderOutsideZone={hiderOutsideZone}
+          onSyncErrorAction={onSyncErrorAction}
         />
         <AppUpdateMapChip />
         <HiderToolDock
