@@ -1,5 +1,6 @@
 (function () {
   var KEY = "jetlag:boot-reload";
+  var reloaded = false;
 
   function shouldRecover(message) {
     return (
@@ -13,10 +14,16 @@
   window.addEventListener(
     "error",
     function (event) {
+      if (reloaded) {
+        return;
+      }
+
       var message = String(event.message || "");
       if (!shouldRecover(message)) {
         return;
       }
+
+      reloaded = true;
 
       try {
         if (sessionStorage.getItem(KEY) === "1") {

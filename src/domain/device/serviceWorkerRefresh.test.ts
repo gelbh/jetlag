@@ -86,22 +86,18 @@ describe("serviceWorkerRefresh", () => {
     expect(registerApplyUpdate).toHaveBeenCalledWith(true);
   });
 
-  it("defers auto apply during an active map session", () => {
+  it("defers auto apply during an active session", () => {
     expect(
       shouldAutoApplyServiceWorkerUpdate({
-        pathname: "/map",
         hasActiveSession: true,
-        dismissed: false,
       }),
     ).toBe(false);
   });
 
-  it("allows auto apply on home without a session", () => {
+  it("allows auto apply without an active session", () => {
     expect(
       shouldAutoApplyServiceWorkerUpdate({
-        pathname: "/",
         hasActiveSession: false,
-        dismissed: false,
       }),
     ).toBe(true);
   });

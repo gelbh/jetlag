@@ -221,7 +221,6 @@ export function getFirestoreDb(): Firestore {
 let anonymousSignInPromise: Promise<User> | null = null;
 let authStateReadyPromise: Promise<void> | null = null;
 let authBootstrapReady = false;
-let authBootstrapStarted = false;
 const authBootstrapListeners = new Set<() => void>();
 
 const AUTH_BOOTSTRAP_TIMEOUT_MS = 10_000;
@@ -305,19 +304,24 @@ async function bootstrapAuthState(): Promise<void> {
   setBootstrapTag("auth_ready");
 }
 
-export function startAuthBootstrap(): void {
-  if (!isFirebaseConfigured() || authBootstrapStarted) {
-    return;
-  }
-
-  authBootstrapStarted = true;
-  void bootstrapAuthState()
+function getAuthBootstrapPromise(): Promise<void> {
+  authStateReadyPromise ??= bootstrapAuthState()
     .catch((error) => {
       captureAuthBootstrapFailure(error);
     })
     .finally(() => {
       markAuthBootstrapReady();
     });
+
+  return authStateReadyPromise;
+}
+
+export function startAuthBootstrap(): void {
+  if (!isFirebaseConfigured()) {
+    return;
+  }
+
+  void getAuthBootstrapPromise();
 }
 
 export async function waitForAuthStateReady(): Promise<void> {
@@ -325,8 +329,7 @@ export async function waitForAuthStateReady(): Promise<void> {
     return;
   }
 
-  authStateReadyPromise ??= bootstrapAuthState();
-  await authStateReadyPromise;
+  await getAuthBootstrapPromise();
 }
 
 export async function ensureAnonymousUser(): Promise<User> {
@@ -366,7 +369,6 @@ export async function resetFirebaseForTests(): Promise<void> {
   anonymousSignInPromise = null;
   authStateReadyPromise = null;
   authBootstrapReady = false;
-  authBootstrapStarted = false;
   authBootstrapListeners.clear();
 }
 

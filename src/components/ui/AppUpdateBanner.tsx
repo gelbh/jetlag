@@ -104,9 +104,7 @@ export function AppUpdateBanner() {
 
     if (
       !shouldAutoApplyServiceWorkerUpdate({
-        pathname: location.pathname,
         hasActiveSession: Boolean(session),
-        dismissed,
       })
     ) {
       return;

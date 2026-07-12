@@ -1,30 +1,18 @@
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import {
   isAuthBootstrapReady,
   isFirebaseConfigured,
   subscribeAuthBootstrapReady,
 } from "../services/core/firebase";
 
+function getAuthBootstrapReadySnapshot(): boolean {
+  return !isFirebaseConfigured() || isAuthBootstrapReady();
+}
+
 export function useAuthBootstrapReady(): boolean {
-  const [ready, setReady] = useState(
-    () => !isFirebaseConfigured() || isAuthBootstrapReady(),
+  return useSyncExternalStore(
+    subscribeAuthBootstrapReady,
+    getAuthBootstrapReadySnapshot,
+    () => true,
   );
-
-  useEffect(() => {
-    if (!isFirebaseConfigured()) {
-      setReady(true);
-      return;
-    }
-
-    if (isAuthBootstrapReady()) {
-      setReady(true);
-      return;
-    }
-
-    return subscribeAuthBootstrapReady(() => {
-      setReady(true);
-    });
-  }, []);
-
-  return ready;
 }
