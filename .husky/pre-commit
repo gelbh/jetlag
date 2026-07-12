@@ -1,1 +1,24 @@
-npm run test:staged
+#!/usr/bin/env sh
+set -e
+
+staged="$(git diff --cached --name-only --diff-filter=ACM)"
+
+if [ -z "$staged" ]; then
+  exit 0
+fi
+
+related=""
+for path in $staged; do
+  case "$path" in
+    src/*.ts|src/*.tsx)
+      related="$related $path"
+      ;;
+  esac
+done
+
+if [ -z "$related" ]; then
+  exit 0
+fi
+
+# shellcheck disable=SC2086
+npx vitest related --run --passWithNoTests $related
