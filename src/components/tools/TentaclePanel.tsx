@@ -133,6 +133,21 @@ export function TentaclePanel({
       </button>
     ) : null;
 
+  const tentacleLocationsSendActions =
+    step === "locations" &&
+    awaitHiderAnswer &&
+    locationsReady &&
+    !loading &&
+    poiOptions.length > 0 ? (
+      <SendToHidersButton
+        costLabel={costLabel}
+        isSubmitting={isSubmitting}
+        disabled={!canCommit}
+        onClick={onCommit}
+        instruction='Hiders pick a location or "Not within reach" in game chat once you send this question.'
+      />
+    ) : null;
+
   const panelBody = (
     <>
       {step === "category" ? (
@@ -204,15 +219,9 @@ export function TentaclePanel({
               No named locations were found within {searchRadiusLabel}.
             </ResolvedReadout>
           )}
-          {awaitHiderAnswer && locationsReady && !loading && poiOptions.length > 0 ? (
-            <SendToHidersButton
-              costLabel={costLabel}
-              isSubmitting={isSubmitting}
-              disabled={!canCommit}
-              onClick={onCommit}
-              instruction='Hiders pick a location or "Not within reach" in game chat once you send this question.'
-            />
-          ) : null}
+          {tentacleLocationsSendActions && !useStickyAnswerFooter
+            ? tentacleLocationsSendActions
+            : null}
         </ToolSection>
       ) : null}
 
@@ -250,10 +259,19 @@ export function TentaclePanel({
     </>
   );
 
-  const answerFooter =
-    step === "answer" && useStickyAnswerFooter && categoryId
+  const stickyFooterActions =
+    step === "answer"
       ? tentacleAnswerStepActions
-      : undefined;
+      : step === "locations"
+        ? tentacleLocationsSendActions
+        : null;
+
+  const answerFooter =
+    useStickyAnswerFooter && stickyFooterActions ? (
+      <ToolSection first compact status="active">
+        {stickyFooterActions}
+      </ToolSection>
+    ) : undefined;
 
   const wizardContent = readOnly ? (
     panelBody

@@ -143,6 +143,17 @@ export function RadarPanel({
       </>
     ) : null;
 
+  const radarDistanceSendActions =
+    step === "distance" && awaitHiderAnswer ? (
+      <SendToHidersButton
+        costLabel={costLabel}
+        isSubmitting={isSubmitting}
+        disabled={!canSendToHiders}
+        onClick={onCommit}
+        instruction="Hiders answer yes or no in game chat once you send this question."
+      />
+    ) : null;
+
   const panelBody = (
     <>
       {viewOnly ? <ViewOnlyQuestionBanner /> : null}
@@ -162,15 +173,7 @@ export function RadarPanel({
             onChooseSelect={onChooseSelect}
             onCustomRadiusChange={onCustomRadiusChange}
           />
-          {awaitHiderAnswer ? (
-            <SendToHidersButton
-              costLabel={costLabel}
-              isSubmitting={isSubmitting}
-              disabled={!canSendToHiders}
-              onClick={onCommit}
-              instruction="Hiders answer yes or no in game chat once you send this question."
-            />
-          ) : null}
+          {awaitHiderAnswer && !useStickyAnswerFooter ? radarDistanceSendActions : null}
         </ToolSection>
       ) : null}
 
@@ -195,10 +198,17 @@ export function RadarPanel({
     </>
   );
 
+  const stickyFooterActions =
+    step === "answer"
+      ? radarAnswerStepActions
+      : step === "distance"
+        ? radarDistanceSendActions
+        : null;
+
   const answerFooter =
-    step === "answer" && useStickyAnswerFooter && radarAnswerStepActions ? (
+    useStickyAnswerFooter && stickyFooterActions ? (
       <ToolSection first compact status="active">
-        {radarAnswerStepActions}
+        {stickyFooterActions}
       </ToolSection>
     ) : undefined;
 

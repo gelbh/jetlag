@@ -230,6 +230,17 @@ export function MatchingPanel({
       </>
     ) : null;
 
+  const matchingResolveSendActions =
+    step === "resolve" && awaitHiderAnswer ? (
+      <SendToHidersButton
+        costLabel={costLabel}
+        isSubmitting={isSubmitting}
+        disabled={!canCommit}
+        onClick={onCommit}
+        instruction="Hiders answer yes or no in game chat once you send this question."
+      />
+    ) : null;
+
   const panelBody = (
     <>
       {step === "category" ? (
@@ -294,15 +305,9 @@ export function MatchingPanel({
               Set your anchor to look up the nearest feature.
             </ResolvedReadout>
           ) : null}
-          {awaitHiderAnswer ? (
-            <SendToHidersButton
-              costLabel={costLabel}
-              isSubmitting={isSubmitting}
-              disabled={!canCommit}
-              onClick={onCommit}
-              instruction="Hiders answer yes or no in game chat once you send this question."
-            />
-          ) : null}
+          {matchingResolveSendActions && !useStickyAnswerFooter
+            ? matchingResolveSendActions
+            : null}
         </ToolSection>
       ) : null}
 
@@ -320,10 +325,17 @@ export function MatchingPanel({
     </>
   );
 
+  const stickyFooterActions =
+    step === "answer"
+      ? matchingAnswerStepActions
+      : step === "resolve"
+        ? matchingResolveSendActions
+        : null;
+
   const answerFooter =
-    step === "answer" && useStickyAnswerFooter && matchingAnswerStepActions ? (
+    useStickyAnswerFooter && stickyFooterActions ? (
       <ToolSection first compact status="active">
-        {matchingAnswerStepActions}
+        {stickyFooterActions}
       </ToolSection>
     ) : undefined;
 
