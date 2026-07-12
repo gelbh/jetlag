@@ -161,6 +161,23 @@ export function ThermometerPanel({
       </>
     ) : null;
 
+  const thermometerPlacementSendActions =
+    step === "placement" &&
+    awaitHiderAnswer &&
+    placementMode === "manual" &&
+    pinsReady &&
+    distanceAvailable &&
+    !travelTooShort &&
+    canSubmitQuestion ? (
+      <SendToHidersButton
+        costLabel={costLabel}
+        isSubmitting={isSubmitting}
+        disabled={!canCommit}
+        onClick={onCommit}
+        instruction="Hiders answer hotter or colder in game chat once you send this question."
+      />
+    ) : null;
+
   const panelBody = (
     <>
       {step === "distance" ? (
@@ -249,20 +266,9 @@ export function ThermometerPanel({
               {gpsLoading ? "Getting GPS…" : "Start track"}
             </button>
           ) : null}
-          {awaitHiderAnswer &&
-          placementMode === "manual" &&
-          pinsReady &&
-          distanceAvailable &&
-          !travelTooShort &&
-          canSubmitQuestion ? (
-            <SendToHidersButton
-              costLabel={costLabel}
-              isSubmitting={isSubmitting}
-              disabled={!canCommit}
-              onClick={onCommit}
-              instruction="Hiders answer hotter or colder in game chat once you send this question."
-            />
-          ) : null}
+          {thermometerPlacementSendActions && !useStickyAnswerFooter
+            ? thermometerPlacementSendActions
+            : null}
           <button type="button" onClick={onReset} className="btn-secondary w-full">
             Reset
           </button>
@@ -277,10 +283,17 @@ export function ThermometerPanel({
     </>
   );
 
+  const stickyFooterActions =
+    step === "answer"
+      ? thermometerAnswerStepActions
+      : step === "placement"
+        ? thermometerPlacementSendActions
+        : null;
+
   const answerFooter =
-    step === "answer" && useStickyAnswerFooter && thermometerAnswerStepActions ? (
+    useStickyAnswerFooter && stickyFooterActions ? (
       <ToolSection first compact status="active">
-        {thermometerAnswerStepActions}
+        {stickyFooterActions}
       </ToolSection>
     ) : undefined;
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.5 - 2026-07-12
+
+### Fixes
+
+- Radar: pin Send to hiders on the distance step so it stays visible in the wizard panel
+- Matching: pin Send to hiders on the resolve step so it stays visible in the wizard panel
+- Thermometer: pin Send to hiders on the placement step so it stays visible in the wizard panel
+- Tentacle: pin Send to hiders on the locations step so it stays visible in the wizard panel
+
 ## 0.5.4 - 2026-07-12
 
 ### Fixes
