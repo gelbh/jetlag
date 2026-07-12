@@ -15,14 +15,6 @@
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "endedAt", "order": "ASCENDING" }
       ]
-    },
-    {
-      "collectionGroup": "sessionCodes",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "__name__", "order": "ASCENDING" }
-      ]
     }
   ],
   "fieldOverrides": []
