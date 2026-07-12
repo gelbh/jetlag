@@ -3,6 +3,12 @@ import { tryUpdateServiceWorker } from "./serviceWorkerUpdate";
 const UPDATE_CHECK_INTERVAL_MS = 45 * 60 * 1000;
 const RELOAD_FALLBACK_MS = 1500;
 
+export function shouldAutoApplyServiceWorkerUpdate(options: {
+  hasActiveSession: boolean;
+}): boolean {
+  return !options.hasActiveSession;
+}
+
 export function hasWaitingServiceWorker(
   registration: ServiceWorkerRegistration | undefined,
 ): boolean {

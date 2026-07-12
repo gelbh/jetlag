@@ -4,6 +4,7 @@ import {
   hasWaitingServiceWorker,
   promptIfWaiting,
   scheduleServiceWorkerUpdateChecks,
+  shouldAutoApplyServiceWorkerUpdate,
 } from "./serviceWorkerRefresh";
 
 describe("serviceWorkerRefresh", () => {
@@ -83,5 +84,21 @@ describe("serviceWorkerRefresh", () => {
     const registerApplyUpdate = vi.fn().mockResolvedValue(undefined);
     await applyServiceWorkerUpdate(undefined, registerApplyUpdate);
     expect(registerApplyUpdate).toHaveBeenCalledWith(true);
+  });
+
+  it("defers auto apply during an active session", () => {
+    expect(
+      shouldAutoApplyServiceWorkerUpdate({
+        hasActiveSession: true,
+      }),
+    ).toBe(false);
+  });
+
+  it("allows auto apply without an active session", () => {
+    expect(
+      shouldAutoApplyServiceWorkerUpdate({
+        hasActiveSession: false,
+      }),
+    ).toBe(true);
   });
 });
