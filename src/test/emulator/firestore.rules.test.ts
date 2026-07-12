@@ -111,7 +111,7 @@ describe("firestore.rules", () => {
     );
   });
 
-  it("allows signed-in users to look up sessions by code", async () => {
+  it("allows signed-in users to look up session codes without reading session docs", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
       .firestore()
@@ -128,7 +128,7 @@ describe("firestore.rules", () => {
     await assertSucceeds(
       guest.firestore().collection("sessionCodes").doc("ABCD").get(),
     );
-    await assertSucceeds(
+    await assertFails(
       guest.firestore().collection("sessions").doc("session-1").get(),
     );
   });
