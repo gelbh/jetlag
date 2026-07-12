@@ -6,7 +6,6 @@ import {
   gameAreaToBoundsExpression,
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
-import type { MapViewportBounds } from "../../domain/map/transitViewport";
 import { effectiveMapStyle } from "../../domain/device/powerProfile";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useEnsureSessionMembership } from "../../hooks/session/useEnsureSessionMembership";
@@ -34,7 +33,7 @@ export function useObserverMapScreen() {
     () => gameAreaCenter(resolvedGameArea),
     [resolvedGameArea],
   );
-  const mapFocusBounds = useMemo<MapViewportBounds | undefined>(
+  const mapFocusBounds = useMemo(
     () => gameAreaToBoundsExpression(resolvedGameArea),
     [resolvedGameArea],
   );
