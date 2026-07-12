@@ -202,6 +202,66 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows session members to update lastActiveAt only", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+    await host
+      .firestore()
+      .collection("sessionCodes")
+      .doc("ABCD")
+      .set({ sessionId: "session-1", hostUid: "host-1" });
+
+    const guest = testEnv.authenticatedContext("guest-1");
+    await guest
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .update({
+        memberUids: ["host-1", "guest-1"],
+        memberRoles: { "host-1": "seeker", "guest-1": "hider" },
+      });
+
+    await assertSucceeds(
+      guest
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({ lastActiveAt: "2026-07-12T12:00:00.000Z" }),
+    );
+
+    await assertFails(
+      testEnv
+        .authenticatedContext("outsider-1")
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({ lastActiveAt: "2026-07-12T12:00:00.000Z" }),
+    );
+
+    await assertFails(
+      guest
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          lastActiveAt: "2026-07-12T12:00:00.000Z",
+          code: "WXYZ",
+        }),
+    );
+
+    await assertFails(
+      guest
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({ lastActiveAt: "2099-01-01T00:00:00.000Z" }),
+    );
+  });
+
   it("allows a second guest to join as hider when one hider is already in the session", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

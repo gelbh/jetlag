@@ -77,6 +77,7 @@ describe("firestoreSerialization", () => {
     expect(payload.gameArea).not.toHaveProperty("coordinates");
     expect(payload.memberUids).toEqual(["host-uid"]);
     expect(payload.status).toBe("active");
+    expect(payload.lastActiveAt).toBe("2026-05-14T00:00:00.000Z");
     expect(payload.tier).toBe("free");
   });
 
