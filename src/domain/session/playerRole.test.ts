@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  isAdminRole,
   isHiderRole,
   isObserverRole,
   isSeekerRole,
@@ -31,5 +32,13 @@ describe("playerRole", () => {
     expect(isSeekerRole(roles, "u1")).toBe(false);
     expect(sessionHasHiders(roles)).toBe(false);
     expect(playerRoleLabel("observer")).toBe("Observer");
+  });
+
+  it("resolves admin role", () => {
+    const roles = { u1: "admin" as const };
+    expect(resolvePlayerRole(roles, "u1")).toBe("admin");
+    expect(isAdminRole(roles, "u1")).toBe(true);
+    expect(isObserverRole(roles, "u1")).toBe(false);
+    expect(playerRoleLabel("admin")).toBe("Admin");
   });
 });

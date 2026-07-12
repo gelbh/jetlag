@@ -38,7 +38,7 @@ export function ObserverMapScreen() {
     return <Navigate to="/admin" replace />;
   }
 
-  if (controller.myRole !== "observer") {
+  if (controller.myRole !== "observer" && controller.myRole !== "admin") {
     return <Navigate to="/map" replace />;
   }
 
