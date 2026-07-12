@@ -31,6 +31,7 @@ import {
   ensureAnonymousUser,
 } from "../../services/core/firebase";
 import { usePremiumHostEligibility } from "../../hooks/billing/usePremiumHostEligibility";
+import { usePremiumEntitlements } from "../../hooks/billing/usePremiumEntitlements";
 import { createRemoteSession } from "../../services/firestore/firestoreAnnotations";
 import {
   preloadCriticalGameAreaCaches,
@@ -46,11 +47,9 @@ import {
 import { searchPlaces, type GeocodedPlace } from "../../services/geo/geocoding";
 import { getCurrentPosition } from "../../services/core/geolocation";
 import { APP_VERSION } from "../../domain/device/changelog";
-import type { PremiumEntitlements } from "../../domain/billing/premiumProducts";
 import { grantAccess, hasAccessClaim } from "../../services/core/accessControl";
 import {
   createPremiumRemoteSession,
-  fetchPremiumEntitlements,
 } from "../../services/billing/premiumBilling";
 import { setPremiumApiContext } from "../../services/core/premiumApiContext";
 import { unionGameAreas } from "../../domain/geometry/unionGameAreas";
@@ -111,8 +110,8 @@ export function useCreateSession() {
     string | undefined
   >();
   const [hostHasAccessClaim, setHostHasAccessClaim] = useState(false);
-  const [premiumEntitlements, setPremiumEntitlements] =
-    useState<PremiumEntitlements | null>(null);
+  const { entitlements: premiumEntitlements, refresh: refreshPremiumEntitlements } =
+    usePremiumEntitlements();
   const [accessCodeExpanded, setAccessCodeExpanded] = useState(false);
   const handleGameSizeChange = useCallback(
     (size: GameSize) => {
@@ -245,7 +244,6 @@ export function useCreateSession() {
         }
 
         setHostHasAccessClaim(await hasAccessClaim(user));
-        setPremiumEntitlements(await fetchPremiumEntitlements());
       } catch {
         if (!cancelled) {
           setHostHasAccessClaim(false);
@@ -701,13 +699,7 @@ export function useCreateSession() {
   };
 
   const handlePremiumSignedIn = () => {
-    void (async () => {
-      try {
-        setPremiumEntitlements(await fetchPremiumEntitlements());
-      } catch {
-        // Entitlements refresh is best-effort after sign-in.
-      }
-    })();
+    void refreshPremiumEntitlements();
   };
 
   return {

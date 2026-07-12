@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { useAppNavigate } from "../../hooks/useAppNavigate";
 import type { RefObject } from "react";
 import {
@@ -7,8 +7,16 @@ import {
   type SessionRecord,
 } from "../../domain/map/annotations";
 import type { AnnotationRecord } from "../../domain/map/annotations";
-import { endRemoteSession } from "../../services/firestore/firestoreAnnotations";
-import { clearSessionLocalArtifacts } from "../../services/session/sessionCleanup";
+import { resolvePlayerRole } from "../../domain/session/playerRole";
+import {
+  endRemoteSession,
+  resetRemoteSession,
+} from "../../services/firestore/firestoreAnnotations";
+import {
+  clearSessionLocalArtifacts,
+  teardownSessionUiState,
+} from "../../services/session/sessionCleanup";
+import { ensureAnonymousUser } from "../../services/core/firebase";
 import { useSessionStore } from "../../state/sessionStore";
 
 interface UseMapSessionChromeParams {
@@ -20,6 +28,7 @@ interface UseMapSessionChromeParams {
   clearAllAnnotations: () => Promise<void>;
   setSelectedAnnotationId: (id: string | null) => void;
   closeSettingsPanel: () => void;
+  resetTimer: () => void;
   endGameBlocked?: boolean;
 }
 
@@ -32,10 +41,12 @@ export function useMapSessionChrome({
   clearAllAnnotations,
   setSelectedAnnotationId,
   closeSettingsPanel,
+  resetTimer,
   endGameBlocked = false,
 }: UseMapSessionChromeParams) {
   const navigate = useAppNavigate();
   const setSession = useSessionStore((state) => state.setSession);
+  const resetInFlightRef = useRef(false);
 
   const handleClearMap = useCallback(() => {
     if (endGameBlocked) {
@@ -100,6 +111,61 @@ export function useMapSessionChrome({
     closeSettingsPanel,
   ]);
 
+  const handleResetSession = useCallback(async () => {
+    if (
+      !session ||
+      !isHost ||
+      session.id === LOCAL_SESSION_ID ||
+      resetInFlightRef.current
+    ) {
+      return;
+    }
+
+    if (
+      !window.confirm(
+        "Reset all session progress? Keeps the same code and players. Clears timer, map, questions, chat, zones, traps, and end-game state.",
+      )
+    ) {
+      return;
+    }
+
+    resetInFlightRef.current = true;
+    const sessionId = session.id;
+
+    try {
+      const user = await ensureAnonymousUser();
+      const hostRole = resolvePlayerRole(session.memberRoles, user.uid) ?? "seeker";
+      const resetAt = await resetRemoteSession(sessionId, user.uid, hostRole);
+
+      setSession({
+        ...session,
+        sessionResetAt: resetAt,
+        timerAccumulatedMs: 0,
+        timerRunningSince: null,
+        endGameStartedAt: undefined,
+        endGameStartedByUid: undefined,
+        endGameRequestedAt: undefined,
+        endGameRequestedByUid: undefined,
+      });
+      resetTimer();
+      teardownSessionUiState();
+      setSelectedAnnotationId(null);
+      await clearAllAnnotations();
+      await clearSessionLocalArtifacts(sessionId);
+      closeSettingsPanel();
+    } finally {
+      resetInFlightRef.current = false;
+    }
+  }, [
+    clearAllAnnotations,
+    closeSettingsPanel,
+    isHost,
+    resetTimer,
+    session,
+    setSelectedAnnotationId,
+    setSession,
+  ]);
+
   const handleEndSession = useCallback(async () => {
     if (!session || !isHost || session.id === LOCAL_SESSION_ID) {
       return;
@@ -112,9 +178,10 @@ export function useMapSessionChrome({
     const sessionId = session.id;
     await endRemoteSession(sessionId);
     closeSettingsPanel();
-    navigate("/", { replace: true });
+    teardownSessionUiState();
     await clearSessionLocalArtifacts(sessionId);
     setSession(null);
+    navigate("/", { replace: true });
   }, [isHost, navigate, session, setSession, closeSettingsPanel]);
 
   const handleLeaveSession = useCallback(async () => {
@@ -132,9 +199,10 @@ export function useMapSessionChrome({
 
     const sessionId = session.id;
     closeSettingsPanel();
-    navigate("/", { replace: true });
+    teardownSessionUiState();
     await clearSessionLocalArtifacts(sessionId);
     setSession(null);
+    navigate("/", { replace: true });
   }, [closeSettingsPanel, navigate, session, setSession]);
 
   const exportMap = useCallback(async () => {
@@ -165,6 +233,7 @@ export function useMapSessionChrome({
   return {
     handleClearMap,
     handleResetBoard,
+    handleResetSession,
     handleEndSession,
     handleLeaveSession,
     exportMap,

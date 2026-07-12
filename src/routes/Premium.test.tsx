@@ -2,6 +2,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Premium } from "./Premium";
 import { renderWithRouter } from "../test/renderWithRouter";
+import type { PremiumEntitlements } from "../domain/billing/premiumProducts";
 
 const {
   fetchPremiumEntitlements,
@@ -12,6 +13,7 @@ const {
   isPermanentUser,
   waitForAuthStateReady,
   mockAuth,
+  mockUsePremiumEntitlements,
 } = vi.hoisted(() => {
   const auth = {
     currentUser: null,
@@ -25,11 +27,18 @@ const {
     fetchPremiumEntitlements: vi.fn(),
     startPremiumCheckout: vi.fn(),
     openPremiumBillingPortal: vi.fn(),
-    ensureAnonymousUser: vi.fn(async () => undefined),
+    ensureAnonymousUser: vi.fn(async () => ({ uid: "user-premium" })),
     waitForAuthStateReady: vi.fn(async () => undefined),
     isFirebaseConfigured: vi.fn(() => false),
     isPermanentUser: vi.fn(() => true),
     mockAuth: auth,
+    mockUsePremiumEntitlements: vi.fn(() => ({
+      entitlements: null as PremiumEntitlements | null,
+      loading: false,
+      hydrated: true,
+      refresh: vi.fn(),
+      setEntitlements: vi.fn(),
+    })),
   };
 });
 
@@ -72,6 +81,10 @@ vi.mock("../components/billing/AppleSignInButton", () => ({
   ),
 }));
 
+vi.mock("../hooks/billing/usePremiumEntitlements", () => ({
+  usePremiumEntitlements: () => mockUsePremiumEntitlements(),
+}));
+
 vi.mock("../services/billing/premiumBilling", () => ({
   fetchPremiumEntitlements,
   startPremiumCheckout,
@@ -82,6 +95,13 @@ vi.mock("../services/billing/premiumBilling", () => ({
 describe("Premium", () => {
   beforeEach(() => {
     isPermanentUser.mockReturnValue(true);
+    mockUsePremiumEntitlements.mockReturnValue({
+      entitlements: null,
+      loading: false,
+      hydrated: true,
+      refresh: vi.fn(),
+      setEntitlements: vi.fn(),
+    });
   });
 
   it("shows offline billing message when Firebase is not configured", () => {
@@ -95,13 +115,20 @@ describe("Premium", () => {
 
   it("renders purchase options and entitlement summary when online", async () => {
     isFirebaseConfigured.mockReturnValue(true);
-    fetchPremiumEntitlements.mockResolvedValueOnce({
-      premiumSessionCredits: 2,
-      lifetimePremium: false,
-      subscription: null,
-      trialUsedAt: null,
-      canCreatePremium: true,
-      hasUnlimitedPremium: false,
+    mockUsePremiumEntitlements.mockReturnValue({
+      entitlements: {
+        premiumSessionCredits: 2,
+        lifetimePremium: false,
+        subscription: null,
+        trialUsedAt: null,
+        trialEndsAt: null,
+        canCreatePremium: true,
+        hasUnlimitedPremium: false,
+      },
+      loading: false,
+      hydrated: true,
+      refresh: vi.fn(),
+      setEntitlements: vi.fn(),
     });
 
     renderWithRouter(<Premium />);
@@ -120,13 +147,20 @@ describe("Premium", () => {
 
   it("defaults to session packs tab when user has pack credits only", async () => {
     isFirebaseConfigured.mockReturnValue(true);
-    fetchPremiumEntitlements.mockResolvedValueOnce({
-      premiumSessionCredits: 2,
-      lifetimePremium: false,
-      subscription: null,
-      trialUsedAt: null,
-      canCreatePremium: true,
-      hasUnlimitedPremium: false,
+    mockUsePremiumEntitlements.mockReturnValue({
+      entitlements: {
+        premiumSessionCredits: 2,
+        lifetimePremium: false,
+        subscription: null,
+        trialUsedAt: null,
+        trialEndsAt: null,
+        canCreatePremium: true,
+        hasUnlimitedPremium: false,
+      },
+      loading: false,
+      hydrated: true,
+      refresh: vi.fn(),
+      setEntitlements: vi.fn(),
     });
 
     renderWithRouter(<Premium />);
@@ -140,13 +174,20 @@ describe("Premium", () => {
 
   it("shows unlimited offers on the unlimited tab", async () => {
     isFirebaseConfigured.mockReturnValue(true);
-    fetchPremiumEntitlements.mockResolvedValueOnce({
-      premiumSessionCredits: 2,
-      lifetimePremium: false,
-      subscription: null,
-      trialUsedAt: null,
-      canCreatePremium: true,
-      hasUnlimitedPremium: false,
+    mockUsePremiumEntitlements.mockReturnValue({
+      entitlements: {
+        premiumSessionCredits: 2,
+        lifetimePremium: false,
+        subscription: null,
+        trialUsedAt: null,
+        trialEndsAt: null,
+        canCreatePremium: true,
+        hasUnlimitedPremium: false,
+      },
+      loading: false,
+      hydrated: true,
+      refresh: vi.fn(),
+      setEntitlements: vi.fn(),
     });
 
     renderWithRouter(<Premium />);
@@ -172,13 +213,20 @@ describe("Premium", () => {
   it("shows sign-in gate before checkout when user is anonymous", async () => {
     isFirebaseConfigured.mockReturnValue(true);
     isPermanentUser.mockReturnValue(false);
-    fetchPremiumEntitlements.mockResolvedValueOnce({
-      premiumSessionCredits: 0,
-      lifetimePremium: false,
-      subscription: null,
-      trialUsedAt: null,
-      canCreatePremium: false,
-      hasUnlimitedPremium: false,
+    mockUsePremiumEntitlements.mockReturnValue({
+      entitlements: {
+        premiumSessionCredits: 0,
+        lifetimePremium: false,
+        subscription: null,
+        trialUsedAt: null,
+        trialEndsAt: null,
+        canCreatePremium: false,
+        hasUnlimitedPremium: false,
+      },
+      loading: false,
+      hydrated: true,
+      refresh: vi.fn(),
+      setEntitlements: vi.fn(),
     });
 
     renderWithRouter(<Premium />);
@@ -194,13 +242,20 @@ describe("Premium", () => {
 
   it("starts checkout when a pack is selected", async () => {
     isFirebaseConfigured.mockReturnValue(true);
-    fetchPremiumEntitlements.mockResolvedValueOnce({
-      premiumSessionCredits: 0,
-      lifetimePremium: false,
-      subscription: null,
-      trialUsedAt: null,
-      canCreatePremium: false,
-      hasUnlimitedPremium: false,
+    mockUsePremiumEntitlements.mockReturnValue({
+      entitlements: {
+        premiumSessionCredits: 0,
+        lifetimePremium: false,
+        subscription: null,
+        trialUsedAt: null,
+        trialEndsAt: null,
+        canCreatePremium: false,
+        hasUnlimitedPremium: false,
+      },
+      loading: false,
+      hydrated: true,
+      refresh: vi.fn(),
+      setEntitlements: vi.fn(),
     });
     startPremiumCheckout.mockResolvedValueOnce("https://checkout.test");
     const assignSpy = vi.fn();

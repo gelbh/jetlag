@@ -34,7 +34,8 @@ export function usePrefersReducedMotion(): boolean {
 export function useMotionProfile() {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const prefersReducedMotion = usePrefersReducedMotion();
-  const animate = !lowPowerMode && !prefersReducedMotion;
+  const animate = !prefersReducedMotion;
+  const decorativeAnimate = !lowPowerMode && !prefersReducedMotion;
 
-  return { animate, lowPowerMode, prefersReducedMotion };
+  return { animate, decorativeAnimate, lowPowerMode, prefersReducedMotion };
 }

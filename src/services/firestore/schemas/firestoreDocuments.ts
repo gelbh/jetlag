@@ -46,6 +46,7 @@ export const sessionDocumentSchema = z
     status: z.enum(["active", "ended"]).optional(),
     timerAccumulatedMs: z.number().finite().optional(),
     timerRunningSince: z.union([z.string(), z.null()]).optional(),
+    sessionResetAt: z.string().optional(),
     endGameStartedAt: z.string().optional(),
     endGameStartedByUid: z.string().optional(),
     endGameRequestedAt: z.string().optional(),

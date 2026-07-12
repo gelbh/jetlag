@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AppLogo } from "../components/ui/AppLogo";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { HudGuideIcon, HudPlayIcon, HudAdminIcon } from "../components/ui/HudIcons";
@@ -23,11 +23,8 @@ import { isFirestorePermissionDenied } from "../services/firestore/firestoreAnno
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useAppNavigate } from "../hooks/useAppNavigate";
-import {
-  resolveHomePremiumButtonDisplay,
-  type PremiumEntitlements,
-} from "../domain/billing/premiumProducts";
-import { fetchPremiumEntitlements } from "../services/billing/premiumBilling";
+import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
+import { resolveHomePremiumButtonDisplay } from "../domain/billing/premiumProducts";
 import { LEGAL_APP_NAME } from "../domain/legal/legalContact";
 import { isAdminUser } from "../domain/admin/adminAccess";
 import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
@@ -41,36 +38,9 @@ export function Home() {
   const [continueError, setContinueError] = useState<string | null>(null);
   const [continuing, setContinuing] = useState(false);
   const [changelogOpen, setChangelogOpen] = useState(false);
-  const [premiumEntitlements, setPremiumEntitlements] =
-    useState<PremiumEntitlements | null>(null);
+  const { entitlements: premiumEntitlements } = usePremiumEntitlements();
   const { user: permanentUser } = usePermanentAuthUser();
   const showAdminEntry = isAdminUser(permanentUser);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    void (async () => {
-      if (!isFirebaseConfigured()) {
-        return;
-      }
-
-      try {
-        await ensureAnonymousUser();
-        const next = await fetchPremiumEntitlements();
-        if (!cancelled) {
-          setPremiumEntitlements(next);
-        }
-      } catch {
-        if (!cancelled) {
-          setPremiumEntitlements(null);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const premiumButton = resolveHomePremiumButtonDisplay(premiumEntitlements);
 
@@ -165,8 +135,8 @@ export function Home() {
 
   return (
     <>
-      <EntryScreenLayout>
-        <div className="space-y-4 pt-[max(1.25rem,env(safe-area-inset-top))]">
+      <EntryScreenLayout viewport viewportLayout="between">
+        <div className="shrink-0 space-y-4">
           <div className="flex items-start justify-between gap-3">
             <AppLogo variant="mark" size="lg" className="shrink-0" />
             <div className="flex shrink-0 items-center gap-2">
@@ -211,7 +181,7 @@ export function Home() {
           </p>
         </div>
 
-        <div className="home-enter-actions mt-8 space-y-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="home-enter-actions min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-y-contain">
           {session ? (
             <MotionPressable
               type="button"

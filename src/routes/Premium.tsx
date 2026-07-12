@@ -10,7 +10,6 @@ import { PremiumTierCards } from "../components/billing/PremiumTierCards";
 import {
   canStartPremiumTrial,
   formatEntitlementSummary,
-  type PremiumEntitlements,
   type PremiumProductKey,
 } from "../domain/billing/premiumProducts";
 import {
@@ -18,20 +17,22 @@ import {
   isFirebaseConfigured,
 } from "../services/core/firebase";
 import {
-  fetchPremiumEntitlements,
   openPremiumBillingPortal,
   startPremiumCheckout,
   startPremiumTrial,
 } from "../services/billing/premiumBilling";
+import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
 
 export function Premium() {
   const navigate = useAppNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const checkoutState = searchParams.get("checkout");
-  const [entitlements, setEntitlements] = useState<PremiumEntitlements | null>(
-    null,
-  );
-  const [loading, setLoading] = useState(true);
+  const {
+    entitlements,
+    loading,
+    refresh: refreshEntitlements,
+    setEntitlements,
+  } = usePremiumEntitlements();
   const [busyProduct, setBusyProduct] = useState<PremiumProductKey | null>(
     null,
   );
@@ -39,36 +40,34 @@ export function Premium() {
   const [trialLoading, setTrialLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const refreshEntitlements = useCallback(async () => {
+  const refreshEntitlementsWithError = useCallback(async () => {
     if (!isFirebaseConfigured()) {
-      setEntitlements(null);
-      setLoading(false);
       return;
     }
 
-    setLoading(true);
     setError(null);
 
     try {
-      await ensureAnonymousUser();
-      const next = await fetchPremiumEntitlements();
-      setEntitlements(next);
+      await refreshEntitlements();
     } catch (nextError) {
       setError(
         nextError instanceof Error
           ? nextError.message
           : "Could not load premium status.",
       );
-    } finally {
-      setLoading(false);
     }
-  }, []);
+  }, [refreshEntitlements]);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- initial entitlement load */
-    void refreshEntitlements();
+    /* eslint-disable react-hooks/set-state-in-effect -- refresh entitlements after Stripe redirect */
+    if (checkoutState === "success") {
+      void refreshEntitlementsWithError();
+    }
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [refreshEntitlements]);
+    if (checkoutState === "success" || checkoutState === "cancel") {
+      setSearchParams({}, { replace: true });
+    }
+  }, [checkoutState, refreshEntitlementsWithError, setSearchParams]);
 
   const checkoutNotice = useMemo(() => {
     if (checkoutState === "success") {
@@ -79,17 +78,6 @@ export function Premium() {
     }
     return null;
   }, [checkoutState]);
-
-  useEffect(() => {
-    if (checkoutState === "success") {
-      /* eslint-disable react-hooks/set-state-in-effect -- refresh entitlements after Stripe redirect */
-      void refreshEntitlements();
-      /* eslint-enable react-hooks/set-state-in-effect */
-    }
-    if (checkoutState === "success" || checkoutState === "cancel") {
-      setSearchParams({}, { replace: true });
-    }
-  }, [checkoutState, refreshEntitlements, setSearchParams]);
 
   const entitlementSummary = useMemo(
     () => formatEntitlementSummary(entitlements),
@@ -174,7 +162,7 @@ export function Premium() {
         checkoutNotice={checkoutNotice}
       />
 
-      <PremiumSignInGate onSignedIn={() => void refreshEntitlements()}>
+      <PremiumSignInGate onSignedIn={() => void refreshEntitlementsWithError()}>
         <div className="home-enter-actions space-y-3">
           <PremiumTierCards
             entitlements={entitlements}

@@ -23,13 +23,17 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Tutorial preview: committing a practice question locks the wizard and keeps map shading",
           "Tutorial walkthrough: back arrow on screenshot steps; progress counts three walkthrough steps, not the interactive try step",
           "Region presets: bundled park, hospital, museum, and airport lists drop clinics, squares, archives, and private strips",
+          "Map: leaving or ending a session clears active tools, annotation UI, and preload jobs",
+          "Measuring: bundled park lists for region packs no longer include duplicate or non-park entries (Portland GIS cleanup and dedup across presets)",
         ],
       },
       {
         title: "Improvements",
         items: [
-          "Admin panel: standard header with back navigation",
-          "Measuring: bundled park lists for region packs no longer include duplicate or non-park entries (Portland GIS cleanup and dedup across presets)",
+          "Session settings: host can reset all session progress while keeping the same code and roster",
+          "Home: entry screen locks to the viewport without phantom scroll under the top accent bar",
+          "Premium: home and create session reuse cached entitlement state across navigation",
+          "Motion: low power mode still shows sheet and panel enters; decorative motion stays off",
         ],
       }
     ],

@@ -13,7 +13,14 @@
 
 ### Improvements
 
-- Admin panel: standard header with back navigation
+- Session settings: host can reset all session progress while keeping the same code and roster
+- Home: entry screen locks to the viewport without phantom scroll under the top accent bar
+- Premium: home and create session reuse cached entitlement state across navigation
+- Motion: low power mode still shows sheet and panel enters; decorative motion stays off
+
+### Fixes
+
+- Map: leaving or ending a session clears active tools, annotation UI, and preload jobs
 - Measuring: bundled park lists for region packs no longer include duplicate or non-park entries (Portland GIS cleanup and dedup across presets)
 
 ## 0.5.0 - 2026-07-12

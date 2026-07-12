@@ -125,6 +125,11 @@ export type HiderMapScreenChromeProps = {
   onTimeTrapSearchThisArea: () => void;
   curseSheetOpen: boolean;
   onCurseSheetOpenChange: (open: boolean) => void;
+  onClearMap?: () => void;
+  onResetBoard?: () => void;
+  onResetSession?: () => void;
+  onEndSession?: () => void;
+  onLeaveSession?: () => void;
   mapSettings: {
     showCurrentLocation: boolean;
     setShowCurrentLocation: (enabled: boolean) => void;
@@ -209,6 +214,11 @@ export function HiderMapScreenChrome({
   onTimeTrapSearchThisArea,
   curseSheetOpen,
   onCurseSheetOpenChange,
+  onClearMap,
+  onResetBoard,
+  onResetSession,
+  onEndSession,
+  onLeaveSession,
   mapSettings,
   chat,
 }: HiderMapScreenChromeProps) {
@@ -365,13 +375,19 @@ export function HiderMapScreenChrome({
         session={{
           sessionCode: session.code,
           remoteSession: isRemote,
-          onClearMap: () => undefined,
+          onClearMap: onClearMap ?? (() => undefined),
           endGameBlocked:
             isEndGameActive(session) || isEndGamePending(session),
           onExport: overlay.closeSheet,
           isHost,
-          onResetBoard: () => undefined,
-          onEndSession: () => undefined,
+          onResetBoard,
+          onResetSession: onResetSession
+            ? () => void onResetSession()
+            : undefined,
+          onEndSession: onEndSession ? () => void onEndSession() : undefined,
+          onLeaveSession: onLeaveSession
+            ? () => void onLeaveSession()
+            : undefined,
           expansionPackEnabled,
         }}
       />

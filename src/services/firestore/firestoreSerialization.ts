@@ -539,6 +539,10 @@ export function deserializeSessionFromFirestore(
       typeof document.endGameRequestedByUid === "string"
         ? document.endGameRequestedByUid
         : undefined,
+    sessionResetAt:
+      typeof document.sessionResetAt === "string"
+        ? document.sessionResetAt
+        : undefined,
     hostAppVersion:
       typeof document.hostAppVersion === "string"
         ? document.hostAppVersion

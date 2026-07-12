@@ -125,6 +125,7 @@ export function SeekerChromeOverlays({
 
       {activeTool !== "none" && !selectedAnnotation ? (
         <ToolFloatingPanel
+          key={activeTool}
           toolId={activeTool}
           mapPanning={mapPanning}
           minimized={panelMinimized}

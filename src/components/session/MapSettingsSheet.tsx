@@ -83,6 +83,7 @@ export interface MapSettingsSessionProps {
   onExport?: () => void;
   isHost?: boolean;
   onResetBoard?: () => void;
+  onResetSession?: () => void;
   onEndSession?: () => void;
   onLeaveSession?: () => void;
   endGameBlocked?: boolean;
@@ -234,6 +235,7 @@ export function MapSettingsSheet({
             onExport={session.onExport}
             isHost={session.isHost ?? false}
             onResetBoard={session.onResetBoard}
+            onResetSession={session.onResetSession}
             onEndSession={session.onEndSession}
             onLeaveSession={session.onLeaveSession}
             endGameBlocked={session.endGameBlocked}
