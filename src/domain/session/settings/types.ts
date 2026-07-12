@@ -58,4 +58,5 @@ export type SessionRulesPatch = Pick<
   | "expansionPackEnabled"
   | "customQuestionPackEnabled"
   | "previewQuestionBeforeSend"
+  | "gameAreaLabel"
 >;

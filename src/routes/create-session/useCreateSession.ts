@@ -31,6 +31,7 @@ import {
   ensureAnonymousUser,
 } from "../../services/core/firebase";
 import { usePremiumHostEligibility } from "../../hooks/billing/usePremiumHostEligibility";
+import { shouldDefaultSessionTierToPremium } from "../../domain/billing/premiumProducts";
 import { usePremiumEntitlements } from "../../hooks/billing/usePremiumEntitlements";
 import { createRemoteSession } from "../../services/firestore/firestoreAnnotations";
 import {
@@ -133,6 +134,8 @@ export function useCreateSession() {
   const importFileInputRef = useRef<HTMLInputElement>(null);
   const userLocationRef = useRef<LatLngTuple | null>(null);
   const appliedPresetRef = useRef<string | null>(null);
+  const tierManuallySetRef = useRef(false);
+  const appliedPremiumDefaultRef = useRef(false);
   const [transitMetroOverride, setTransitMetroOverride] = useState<
     string | null
   >(null);
@@ -204,6 +207,7 @@ export function useCreateSession() {
         setTransitMetroOverride(draft.transitMetroId);
       }
       if (draft.sessionTier) {
+        tierManuallySetRef.current = true;
         setSessionTier(draft.sessionTier);
       }
       if (gameArea) {
@@ -284,6 +288,7 @@ export function useCreateSession() {
 
   const transitMetroId = transitMetroOverride ?? inferredTransitMetroId;
   const {
+    canSelectPremiumTier,
     packCreditsLabel,
     packPremiumFlow,
     paidPremiumHost,
@@ -302,6 +307,25 @@ export function useCreateSession() {
   });
   const showAccessCodeField =
     showPremiumUnlockPanel && accessCodeExpanded;
+
+  useEffect(() => {
+    if (searchParams.get("tier") === "premium" && canSelectPremiumTier) {
+      setSessionTier("premium");
+    }
+  }, [canSelectPremiumTier, searchParams]);
+
+  useEffect(() => {
+    if (tierManuallySetRef.current || appliedPremiumDefaultRef.current) {
+      return;
+    }
+
+    if (!shouldDefaultSessionTierToPremium(premiumEntitlements, hostHasAccessClaim)) {
+      return;
+    }
+
+    setSessionTier("premium");
+    appliedPremiumDefaultRef.current = true;
+  }, [hostHasAccessClaim, premiumEntitlements]);
 
   const previewGameArea = useMemo(() => {
     if (importedGameArea) {
@@ -551,6 +575,12 @@ export function useCreateSession() {
                 : {}),
             }
           : {}),
+        ...(selectedPlace?.displayName?.trim() || locationQuery.trim()
+          ? {
+              gameAreaLabel:
+                selectedPlace?.displayName.trim() || locationQuery.trim(),
+            }
+          : {}),
       };
       if (regionPackId) {
         delete rulesPatch.customMatchingAreas;
@@ -689,6 +719,7 @@ export function useCreateSession() {
   };
 
   const handleSessionTierChange = (tier: SessionTier) => {
+    tierManuallySetRef.current = true;
     setSessionTier(tier);
     setAccessCodeError(null);
   };
