@@ -2,13 +2,13 @@ import difference from "@turf/difference";
 import turfCircle from "@turf/circle";
 import { featureCollection, point as turfPoint } from "@turf/helpers";
 import type { AnnotationRecord, GameArea } from "../map/annotations";
-import { isActive } from "../map/annotations";
+import { isActive } from "../map/annotationActive";
 import type { HidingZoneRecord } from "../session/hidingZone";
+import type { LatLngTuple } from "./core/types";
 import {
   buildHalfPlanePolygon,
   buildRadarShadedRegion,
-  type LatLngTuple,
-} from "./geometry";
+} from "./core/radarHalfPlane";
 import { DEFAULT_RADIUS_METERS } from "../map/distance";
 import { MAP_ANNOTATION_COLORS } from "../map/mapAnnotationColors";
 import { thermometerShadedSide } from "../questions/thermometerQuestions";

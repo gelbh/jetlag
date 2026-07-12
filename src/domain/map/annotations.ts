@@ -210,9 +210,7 @@ export function createAnnotationId(): string {
   return `ann-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-export function isActive(annotation: AnnotationRecord): boolean {
-  return annotation.status === "active";
-}
+export { isActive } from "./annotationActive";
 
 export function migrateAnnotationRecord(
   annotation: AnnotationRecord,
