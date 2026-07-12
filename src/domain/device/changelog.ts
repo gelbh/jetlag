@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.5.9";
+export const APP_VERSION = "0.5.10";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,21 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.5.10",
+    date: "2026-07-12",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Presets: star favourites in browse and the create-session picker.",
+          "Map: centered question panel titles, smoother panel snap and tool dock selection, tentacle search preview before category pick.",
+          "PWA: clearer update notice on phone — waits until your game ends, refresh button only when safe.",
+          "Settings: trim duplicate rules summary when editing game rules in the map settings sheet.",
+        ],
+      }
+    ],
+  },
   {
     version: "0.5.9",
     date: "2026-07-12",
