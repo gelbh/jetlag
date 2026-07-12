@@ -14,6 +14,7 @@ export function PresetBrowseLayout({
   onQueryChange,
   searching,
   searchResults,
+  favouritePresets,
   bundledPresets,
   userPresets,
   onDelete,
@@ -23,6 +24,7 @@ export function PresetBrowseLayout({
   onQueryChange: (value: string) => void;
   searching: boolean;
   searchResults: ReturnType<typeof migrateGamePreset>[];
+  favouritePresets: ReturnType<typeof migrateGamePreset>[];
   bundledPresets: ReturnType<typeof migrateGamePreset>[];
   userPresets: ReturnType<typeof migrateGamePreset>[];
   onDelete: (id: string) => void;
@@ -65,6 +67,23 @@ export function PresetBrowseLayout({
           <PresetSearchResults presets={searchResults} onDelete={onDelete} />
         ) : (
           <>
+            {favouritePresets.length > 0 ? (
+              <section className="space-y-2">
+                <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+                  Favourites
+                </p>
+                <ul className="space-y-3">
+                  {favouritePresets.map((preset) => (
+                    <PresetDetailPanel
+                      key={preset.id}
+                      preset={preset}
+                      onDelete={onDelete}
+                    />
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
             {bundledPresets.length > 0 ? (
               <section className="space-y-2">
                 <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
