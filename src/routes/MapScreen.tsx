@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { HiderMapScreen } from "./HiderMapScreen";
 import { AdminMapScreen } from "./AdminMapScreen";
@@ -7,6 +7,14 @@ import { SeekerMapScreen } from "./SeekerMapScreen";
 import { useSessionHeartbeat } from "../hooks/session/useSessionHeartbeat";
 import { teardownSessionUiState } from "../services/session/sessionCleanup";
 import { useSessionStore } from "../state/sessionStore";
+
+function MapScreenShell({ children }: { children: ReactNode }) {
+  return (
+    <div data-edge-swipe="off" className="h-full min-h-0">
+      {children}
+    </div>
+  );
+}
 
 export function MapScreen() {
   const session = useSessionStore((state) => state.session);
@@ -21,16 +29,32 @@ export function MapScreen() {
   }
 
   if (myRole === "hider") {
-    return <HiderMapScreen />;
+    return (
+      <MapScreenShell>
+        <HiderMapScreen />
+      </MapScreenShell>
+    );
   }
 
   if (myRole === "admin") {
-    return <AdminMapScreen />;
+    return (
+      <MapScreenShell>
+        <AdminMapScreen />
+      </MapScreenShell>
+    );
   }
 
   if (myRole === "observer") {
-    return <ObserverMapScreen />;
+    return (
+      <MapScreenShell>
+        <ObserverMapScreen />
+      </MapScreenShell>
+    );
   }
 
-  return <SeekerMapScreen />;
+  return (
+    <MapScreenShell>
+      <SeekerMapScreen />
+    </MapScreenShell>
+  );
 }
