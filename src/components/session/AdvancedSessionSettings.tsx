@@ -37,6 +37,8 @@ export function AdvancedSessionSettings({
   const [open, setOpen] = useState(!collapsible);
   const panelId = useId();
 
+  const embedded = !collapsible;
+
   const sectionProps = {
     gameSize,
     distanceUnit,
@@ -73,24 +75,38 @@ export function AdvancedSessionSettings({
       : undefined,
   });
 
+  const panelClassName = embedded
+    ? "space-y-4"
+    : "space-y-4 border-2 border-border bg-surface-deep p-3";
+
   const panel = (
     <div
       id={panelId}
       hidden={collapsible ? !open : false}
-      className="space-y-4 border-2 border-border bg-surface-deep p-3"
+      className={panelClassName}
     >
-      <SectionSummary
-        text={`Effective: ${effectiveSummary.hidingPeriodLabel} · ${effectiveSummary.hidingZoneLabel} · ${effectiveSummary.tentacleLabel} · ${effectiveSummary.thermometerMaxLabel}`}
-      />
+      {!embedded ? (
+        <SectionSummary
+          text={`Effective: ${effectiveSummary.hidingPeriodLabel} · ${effectiveSummary.hidingZoneLabel} · ${effectiveSummary.tentacleLabel} · ${effectiveSummary.thermometerMaxLabel}`}
+        />
+      ) : null}
 
       <HidingZoneSection {...sectionProps} />
       <DeadlinesSection {...sectionProps} />
       <ToolsSection {...sectionProps} />
 
-      <div className="space-y-3 border-t border-border pt-3">
-        <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
-          Thermometer and tentacles
-        </p>
+      <div
+        className={
+          embedded
+            ? "space-y-3"
+            : "space-y-3 border-t border-border pt-3"
+        }
+      >
+        {!embedded ? (
+          <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
+            Thermometer and tentacles
+          </p>
+        ) : null}
         <ThermometerSection {...sectionProps} />
         <TentaclesSection {...sectionProps} />
       </div>
