@@ -20,7 +20,7 @@ import {
   lookupRemoteSessionByCode,
 } from "../services/firestore/sessionMembershipHeal";
 import { isFirestorePermissionDenied } from "../services/firestore/firestoreAnnotations";
-import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
+import { useSessionExit } from "../hooks/session/useSessionExit";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
@@ -32,6 +32,7 @@ import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
 
 export function Home() {
   const navigate = useAppNavigate();
+  const exitSession = useSessionExit();
   const session = useSessionStore((state) => state.session);
   const myRole = useSessionStore((state) => state.myRole);
   const myUid = useSessionStore((state) => state.myUid);
@@ -87,14 +88,20 @@ export function Home() {
       if (!remoteSession) {
         const lookup = await lookupRemoteSessionByCode(session.code);
         if (lookup.status === "missing") {
-          await clearSessionLocalArtifacts(session.id);
-          setSession(null);
+          await exitSession({
+            reason: "reset",
+            sessionId: session.id,
+            animate: false,
+          });
           setContinueError("That session no longer exists.");
           return;
         }
         if (lookup.status === "ended") {
-          await clearSessionLocalArtifacts(session.id);
-          setSession(null);
+          await exitSession({
+            reason: "reset",
+            sessionId: session.id,
+            animate: false,
+          });
           setContinueError("That session has ended. Join or create a new one.");
           return;
         }
@@ -102,8 +109,11 @@ export function Home() {
       }
 
       if (remoteSession.endedAt) {
-        await clearSessionLocalArtifacts(session.id);
-        setSession(null);
+        await exitSession({
+          reason: "reset",
+          sessionId: session.id,
+          animate: false,
+        });
         setContinueError("That session has ended. Join or create a new one.");
         return;
       }
@@ -140,8 +150,11 @@ export function Home() {
         message === "That session no longer exists." ||
         message === "That session has ended. Join or create a new one."
       ) {
-        await clearSessionLocalArtifacts(session.id);
-        setSession(null);
+        await exitSession({
+          reason: "reset",
+          sessionId: session.id,
+          animate: false,
+        });
       }
       setContinueError(message);
     } finally {

@@ -298,51 +298,51 @@
 
 @keyframes vt-slide-out-left {
   to {
-    opacity: 0.85;
-    transform: translateX(-12%);
+    opacity: 0.9;
+    transform: translateX(-28%) scale(0.96);
   }
 }
 
 @keyframes vt-slide-in-right {
   from {
-    opacity: 0.85;
-    transform: translateX(12%);
+    opacity: 0.9;
+    transform: translateX(28%) scale(0.96);
   }
 }
 
 @keyframes vt-slide-out-right {
   to {
-    opacity: 0.85;
-    transform: translateX(12%);
+    opacity: 0.9;
+    transform: translateX(28%) scale(0.96);
   }
 }
 
 @keyframes vt-slide-in-left {
   from {
-    opacity: 0.85;
-    transform: translateX(-12%);
+    opacity: 0.9;
+    transform: translateX(-28%) scale(0.96);
   }
 }
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: var(--motion-base);
+  animation-duration: var(--motion-nav);
 }
 
 html[data-nav-direction="forward"]::view-transition-old(root) {
-  animation: vt-slide-out-left var(--motion-base) var(--ease-out-quint) both;
+  animation: vt-slide-out-left var(--motion-nav) var(--ease-ios-standard) both;
 }
 
 html[data-nav-direction="forward"]::view-transition-new(root) {
-  animation: vt-slide-in-right var(--motion-base) var(--ease-out-quint) both;
+  animation: vt-slide-in-right var(--motion-nav) var(--ease-ios-standard) both;
 }
 
 html[data-nav-direction="back"]::view-transition-old(root) {
-  animation: vt-slide-out-right var(--motion-base) var(--ease-out-quint) both;
+  animation: vt-slide-out-right var(--motion-nav) var(--ease-ios-standard) both;
 }
 
 html[data-nav-direction="back"]::view-transition-new(root) {
-  animation: vt-slide-in-left var(--motion-base) var(--ease-out-quint) both;
+  animation: vt-slide-in-left var(--motion-nav) var(--ease-ios-standard) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

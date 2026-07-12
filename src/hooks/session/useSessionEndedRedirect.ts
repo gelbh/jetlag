@@ -1,8 +1,7 @@
 import { useEffect } from "react";
-import { useAppNavigate } from "../useAppNavigate";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { isFirebaseConfigured } from "../../services/core/firebase";
-import { clearSessionLocalArtifacts } from "../../services/session/sessionCleanup";
+import { useSessionExit } from "./useSessionExit";
 import { useSessionStore } from "../../state/sessionStore";
 
 export function useSessionEndedRedirect(
@@ -10,12 +9,8 @@ export function useSessionEndedRedirect(
   isHost: boolean,
   exitPath = "/",
 ) {
-  const navigate = useAppNavigate();
+  const exitSession = useSessionExit();
   const session = useSessionStore((state) => state.session);
-  const setSession = useSessionStore((state) => state.setSession);
-  const setRemoteUpdateNotice = useSessionStore(
-    (state) => state.setRemoteUpdateNotice,
-  );
 
   useEffect(() => {
     if (
@@ -31,19 +26,18 @@ export function useSessionEndedRedirect(
       return;
     }
 
-    void clearSessionLocalArtifacts(sessionId).then(() => {
-      setSession(null);
-      setRemoteUpdateNotice("The host ended this session.");
-      navigate(exitPath);
+    void exitSession({
+      reason: "remote-ended",
+      sessionId,
+      navigateTo: exitPath,
+      remoteNotice: "The host ended this session.",
     });
   }, [
     exitPath,
+    exitSession,
     isHost,
-    navigate,
     session?.endedAt,
     session?.id,
     sessionId,
-    setRemoteUpdateNotice,
-    setSession,
   ]);
 }

@@ -1,7 +1,7 @@
 import { renderHook, act } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useAppNavigate } from "./useAppNavigate";
+import { useAppNavigate, resetAppNavigationStackForTests, useAppNavigationStack } from "./useAppNavigate";
 
 const navigateMock = vi.fn();
 
@@ -18,6 +18,7 @@ vi.mock("react-router-dom", async () => {
 describe("useAppNavigate", () => {
   beforeEach(() => {
     navigateMock.mockReset();
+    resetAppNavigationStackForTests("/");
     delete document.documentElement.dataset.navDirection;
   });
 
@@ -66,5 +67,31 @@ describe("useAppNavigate", () => {
     expect(navigateMock).toHaveBeenLastCalledWith("/", {
       viewTransition: true,
     });
+  });
+
+  it("exposes stack helpers for edge swipe", () => {
+    const { result: navigateResult } = renderHook(() => useAppNavigate(), {
+      wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+    });
+    const { result: stackResult } = renderHook(() => useAppNavigationStack(), {
+      wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+    });
+
+    expect(stackResult.current.canGoBack()).toBe(false);
+
+    act(() => {
+      navigateResult.current("/create");
+    });
+
+    expect(stackResult.current.canGoBack()).toBe(true);
+
+    act(() => {
+      stackResult.current.goBack();
+    });
+
+    expect(navigateMock).toHaveBeenLastCalledWith("/", {
+      viewTransition: true,
+    });
+    expect(document.documentElement.dataset.navDirection).toBe("back");
   });
 });

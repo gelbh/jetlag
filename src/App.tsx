@@ -33,6 +33,7 @@ import {
   setChunkReloadContextGetter,
 } from "./domain/device/lazyWithChunkRetry";
 import { notifyAppNeedRefresh } from "./domain/device/serviceWorkerRefresh";
+import { useEdgeSwipeBack } from "./hooks/useEdgeSwipeBack";
 import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";
 import { useSessionStore } from "./state/sessionStore";
 
@@ -79,6 +80,11 @@ function AnalyticsPageViewTracker() {
     Sentry.getCurrentScope().setTransactionName(location.pathname);
   }, [location]);
 
+  return null;
+}
+
+function EdgeSwipeBackBinder() {
+  useEdgeSwipeBack();
   return null;
 }
 
@@ -156,6 +162,7 @@ export default function App() {
       <AppUpdateProvider>
       <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
         <MotionDatasetEffect />
+        <EdgeSwipeBackBinder />
         <AnalyticsPageViewTracker />
         <ChunkReloadContextBinder />
         <AppUpdateBanner />

@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react";
-import { useAppNavigate } from "../../hooks/useAppNavigate";
 import type { RefObject } from "react";
 import {
   isActive,
@@ -15,6 +14,7 @@ import {
   clearSessionLocalArtifacts,
   teardownSessionUiState,
 } from "../../services/session/sessionCleanup";
+import { useSessionExit } from "../session/useSessionExit";
 import { ensureAnonymousUser } from "../../services/core/firebase";
 import { useSessionStore } from "../../state/sessionStore";
 
@@ -43,7 +43,7 @@ export function useMapSessionChrome({
   resetTimer,
   endGameBlocked = false,
 }: UseMapSessionChromeParams) {
-  const navigate = useAppNavigate();
+  const exitSession = useSessionExit();
   const setSession = useSessionStore((state) => state.setSession);
   const resetInFlightRef = useRef(false);
 
@@ -183,12 +183,12 @@ export function useMapSessionChrome({
 
     const sessionId = session.id;
     await endRemoteSession(sessionId);
-    closeSettingsPanel();
-    teardownSessionUiState();
-    await clearSessionLocalArtifacts(sessionId);
-    setSession(null);
-    navigate("/", { replace: true });
-  }, [isHost, navigate, session, setSession, closeSettingsPanel]);
+    await exitSession({
+      reason: "end",
+      sessionId,
+      closeOverlays: closeSettingsPanel,
+    });
+  }, [closeSettingsPanel, exitSession, isHost, session]);
 
   const handleLeaveSession = useCallback(async () => {
     if (!session) {
@@ -203,13 +203,12 @@ export function useMapSessionChrome({
       return;
     }
 
-    const sessionId = session.id;
-    closeSettingsPanel();
-    teardownSessionUiState();
-    await clearSessionLocalArtifacts(sessionId);
-    setSession(null);
-    navigate("/", { replace: true });
-  }, [closeSettingsPanel, navigate, session, setSession]);
+    await exitSession({
+      reason: "leave",
+      sessionId: session.id,
+      closeOverlays: closeSettingsPanel,
+    });
+  }, [closeSettingsPanel, exitSession, session]);
 
   const exportMap = useCallback(async () => {
     if (!session || !mapShellRef.current) {
