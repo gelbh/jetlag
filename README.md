@@ -50,6 +50,13 @@ npm run env:pull  # writes .env.local from Doppler
 npm run dev
 ```
 
+## Deploy
+
+- **Frontend:** merges to `main` run CI, then the `deploy-frontend` job in `.github/workflows/deploy.yml` (`wrangler deploy` via Doppler `prd`).
+- **Frontend (manual):** `doppler run --config prd -- npm run deploy:worker`
+- **Local Worker preview:** `npm run preview:worker` (build + `wrangler dev`; validates `/assets/*` routing)
+- **Backend (Firebase):** `doppler run --config prd -- npm run deploy`
+
 ## About
 
 Unofficial fan companion for [Jet Lag: The Game](https://jetlagthegame.com/). Not affiliated with the show, board game, or Nebula.

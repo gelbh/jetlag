@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.8 - 2026-07-12
+
+### Technical
+
+- Worker typecheck via `tsconfig.worker.json`; CI validates bundles with `wrangler deploy --dry-run`
+- CSP header is enforcing (was Report-Only); disable public `workers.dev` URL; enable Worker observability
+
 ## 0.5.7 - 2026-07-12
 
 ### Fixes

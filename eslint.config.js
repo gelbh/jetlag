@@ -6,7 +6,7 @@ import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(["dist", "coverage"]),
+  globalIgnores(["dist", "coverage", "worker-configuration.d.ts"]),
   {
     files: ["scripts/**/*.mjs"],
     languageOptions: {
@@ -22,6 +22,7 @@ export default defineConfig([
   },
   {
     files: ["**/*.{ts,tsx}"],
+    ignores: ["worker/**/*.ts"],
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,
@@ -30,6 +31,14 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: globals.browser,
+    },
+  },
+  {
+    files: ["worker/**/*.ts"],
+    ignores: ["worker/**/*.test.ts"],
+    extends: [js.configs.recommended, tseslint.configs.recommended],
+    languageOptions: {
+      globals: globals.serviceworker,
     },
   },
 ]);

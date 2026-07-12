@@ -1,7 +1,3 @@
-export interface AssetWorkerEnv {
-  ASSETS: Fetcher;
-}
-
 export function isSpaFallbackForAssetRequest(
   request: Request,
   response: Response,
@@ -20,7 +16,7 @@ export function isSpaFallbackForAssetRequest(
 }
 
 export default {
-  async fetch(request: Request, env: AssetWorkerEnv): Promise<Response> {
+  async fetch(request: Request, env: Env): Promise<Response> {
     const assetResponse = await env.ASSETS.fetch(request);
     if (isSpaFallbackForAssetRequest(request, assetResponse)) {
       return new Response("Not Found", {
@@ -34,4 +30,4 @@ export default {
 
     return assetResponse;
   },
-} satisfies ExportedHandler<AssetWorkerEnv>;
+} satisfies ExportedHandler<Env>;
