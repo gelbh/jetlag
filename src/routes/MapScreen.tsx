@@ -1,183 +1,24 @@
-import { Suspense } from "react";
 import { Navigate } from "react-router-dom";
 import { HiderMapScreen } from "./HiderMapScreen";
 import { ObserverMapScreen } from "./ObserverMapScreen";
-import { HeavyToolHost } from "./map-screen/lazyImports";
-import { MapScreenChrome } from "./map-screen/MapScreenChrome";
-import { MapScreenMapLayers } from "./map-screen/MapScreenMapLayers";
-import { useMapScreenController } from "./map-screen/useMapScreenController";
+import { SeekerMapScreen } from "./SeekerMapScreen";
+import { useSessionStore } from "../state/sessionStore";
 
 export function MapScreen() {
-  const controller = useMapScreenController();
+  const session = useSessionStore((state) => state.session);
+  const myRole = useSessionStore((state) => state.myRole);
 
-  if (!controller.session || !controller.gameArea) {
-    return (
-      <Navigate to={controller.session ? "/create" : "/"} replace />
-    );
+  if (!session || !session.gameArea) {
+    return <Navigate to={session ? "/create" : "/"} replace />;
   }
 
-  if (controller.myRole === "hider") {
+  if (myRole === "hider") {
     return <HiderMapScreen />;
   }
 
-  if (controller.myRole === "observer") {
+  if (myRole === "observer") {
     return <ObserverMapScreen />;
   }
 
-  return (
-    <div className="map-screen-shell">
-      {controller.heavyToolActive ? (
-        <Suspense fallback={null}>
-          <HeavyToolHost {...controller.heavyMapToolsSlotProps} />
-        </Suspense>
-      ) : null}
-      <MapScreenMapLayers
-        session={controller.session}
-        gameArea={controller.gameArea}
-        toolGameArea={controller.toolGameArea}
-        effectiveBasemapStyle={controller.effectiveBasemapStyle}
-        mapStyle={controller.mapStyle}
-        setMapStyle={controller.setMapStyle}
-        mapChromeControlInset={controller.mapChromeControlInset}
-        center={controller.center}
-        mapFocusBounds={controller.mapFocusBounds}
-        handleMapClick={controller.handleMapClick}
-        chromeHudRef={controller.chromeHudRef}
-        suppressChromeHideRef={controller.suppressChromeHideRef}
-        mapShellRef={controller.mapShellRef}
-        exportLegendRef={controller.exportLegendRef}
-        placementCrosshair={controller.placementCrosshair}
-        handleMapViewportChange={controller.handleMapViewportChange}
-        handleMapPanStart={controller.handleMapPanStart}
-        handleMapPanEnd={controller.handleMapPanEnd}
-        transitEnabled={controller.transitEnabled}
-        layerVisibility={controller.layerVisibility}
-        transitStaticData={controller.transitStaticData}
-        transitLiveData={controller.transitLiveData}
-        mapViewport={controller.mapViewport}
-        annotations={controller.annotations}
-        selectedAnnotationId={controller.selectedAnnotationId}
-        draftEliminationFeatures={controller.draftEliminationFeatures}
-        confirmedHidingZones={controller.confirmedHidingZones}
-        playerLocations={controller.playerLocations}
-        uid={controller.uid}
-        activeThermometerWalk={controller.activeThermometerWalk}
-        pendingQuestions={controller.pendingQuestions}
-        geometryEditAnnotation={controller.geometryEditAnnotation}
-        geometryDraft={controller.geometryDraft}
-        mapDraftOverlays={controller.mapDraftOverlays}
-        showAdminBoundaries={controller.showAdminBoundaries}
-        adminBoundaryLoading={controller.adminBoundaryLoading}
-        adminBoundaryFeatures={controller.adminBoundaryFeatures}
-        showCurrentLocation={controller.showCurrentLocation}
-        awaitingPlacement={controller.awaitingPlacement}
-        lowPowerMode={controller.lowPowerMode}
-        distanceUnit={controller.distanceUnit}
-        handleLiveLocationError={controller.handleLiveLocationError}
-      />
-      <MapScreenChrome
-        session={controller.session}
-        gameArea={controller.gameArea}
-        uid={controller.uid}
-        isHost={controller.isHost}
-        activeTool={controller.activeTool}
-        annotations={controller.annotations}
-        pendingQuestions={controller.pendingQuestions}
-        pendingWrites={controller.pendingWrites}
-        distanceUnit={controller.distanceUnit}
-        mapStyle={controller.mapStyle}
-        setMapStyle={controller.setMapStyle}
-        lowPowerMode={controller.lowPowerMode}
-        layerVisibility={controller.layerVisibility}
-        showCurrentLocation={controller.showCurrentLocation}
-        setShowCurrentLocation={controller.setShowCurrentLocation}
-        showAdminBoundaries={controller.showAdminBoundaries}
-        setShowAdminBoundaries={controller.setShowAdminBoundaries}
-        keepScreenAwake={controller.keepScreenAwake}
-        setKeepScreenAwake={controller.setKeepScreenAwake}
-        setLowPowerMode={controller.setLowPowerMode}
-        setLayerVisibility={controller.setLayerVisibility}
-        notificationPreferences={controller.notificationPreferences}
-        transitEnabled={controller.transitEnabled}
-        transitLiveEnabled={controller.transitLiveEnabled}
-        transitLiveSupported={controller.transitLiveSupported}
-        sessionIsPremium={controller.sessionIsPremium}
-        transitRouteFilter={controller.transitRouteFilter}
-        setTransitEnabled={controller.setTransitEnabled}
-        setTransitLiveEnabled={controller.setTransitLiveEnabled}
-        setTransitRouteFilter={controller.setTransitRouteFilter}
-        transitMetro={controller.transitMetro}
-        transitStaticData={controller.transitStaticData}
-        transitLiveData={controller.transitLiveData}
-        transitLoadingStatic={controller.transitLoadingStatic}
-        transitLoadingLive={controller.transitLoadingLive}
-        transitLiveDataStale={controller.transitLiveDataStale}
-        transitError={controller.transitError}
-        chromeHudRef={controller.chromeHudRef}
-        overlay={controller.overlay}
-        syncStatus={controller.syncStatus}
-        matchingAreasError={controller.matchingAreasError}
-        timer={controller.timer}
-        timerSyncing={controller.timerSyncing}
-        canControlTimer={controller.canControlTimer}
-        canUndoLastTool={controller.canUndoLastTool}
-        canRedoLastTool={controller.canRedoLastTool}
-        awaitHiderAnswer={controller.awaitHiderAnswer}
-        canSubmitQuestion={controller.canSubmitQuestion}
-        canStartEndGame={controller.canStartEndGame}
-        endGameBlocked={controller.endGameBlocked}
-        firstRunDismissed={controller.firstRunDismissed}
-        setFirstRunDismissed={controller.setFirstRunDismissed}
-        mapPanning={controller.mapPanning}
-        panelMinimized={controller.panelMinimized}
-        setPanelMinimized={controller.setPanelMinimized}
-        selectedAnnotation={controller.selectedAnnotation}
-        selectedAnnotationId={controller.selectedAnnotationId}
-        setSelectedAnnotationId={controller.setSelectedAnnotationId}
-        geometryEditAnnotation={controller.geometryEditAnnotation}
-        geometryDraft={controller.geometryDraft}
-        radarTool={controller.radarTool}
-        photoTool={controller.photoTool}
-        thermometerTool={controller.thermometerTool}
-        matchingTool={controller.matchingTool}
-        measuringTool={controller.measuringTool}
-        pinTool={controller.pinTool}
-        zoneTool={controller.zoneTool}
-        tentacleTool={controller.tentacleTool}
-        chatMessages={controller.chatMessages}
-        hasUnreadChat={controller.hasUnreadChat}
-        unreadCount={controller.unreadCount}
-        liveLocationError={controller.liveLocationError}
-        isRemote={controller.isRemote}
-        gameRulesEditable={controller.gameRulesEditable}
-        draftAdvancedSettings={controller.draftAdvancedSettings}
-        setDraftAdvancedSettings={controller.setDraftAdvancedSettings}
-        updateNotificationPreferences={controller.updateNotificationPreferences}
-        enableNotifications={controller.enableNotifications}
-        deleteAnnotation={controller.deleteAnnotation}
-        updateAnnotation={controller.updateAnnotation}
-        startGeometryEdit={controller.startGeometryEdit}
-        cancelGeometryEdit={controller.cancelGeometryEdit}
-        saveGeometryEdit={controller.saveGeometryEdit}
-        handleSelectTool={controller.handleSelectTool}
-        handleOpenChat={controller.handleOpenChat}
-        handleOpenSettings={controller.handleOpenSettings}
-        handleOpenLog={controller.handleOpenLog}
-        handleUndoLastAnnotation={controller.handleUndoLastAnnotation}
-        handleRedoLastAnnotation={controller.handleRedoLastAnnotation}
-        handleResetEndGame={controller.handleResetEndGame}
-        handleStartEndGame={controller.handleStartEndGame}
-        handleClearMap={controller.handleClearMap}
-        handleResetBoard={controller.handleResetBoard}
-        handleEndSession={controller.handleEndSession}
-        handleLeaveSession={controller.handleLeaveSession}
-        handleSaveGameRules={controller.handleSaveGameRules}
-        handleDistanceUnitChange={controller.handleDistanceUnitChange}
-        exportMap={controller.exportMap}
-        answerPendingQuestion={controller.answerPendingQuestion}
-        setActiveTool={controller.setActiveTool}
-        setAwaitingPlacement={controller.setAwaitingPlacement}
-      />
-    </div>
-  );
+  return <SeekerMapScreen />;
 }

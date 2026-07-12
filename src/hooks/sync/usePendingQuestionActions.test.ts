@@ -28,7 +28,7 @@ describe("usePendingQuestionActions", () => {
           { id: "yes", label: "Yes" },
           { id: "no", label: "No" },
         ],
-        placement: { geometryJson: "{}" },
+        placement: { geometryJson: "{}", metadata: {} },
       });
     });
 

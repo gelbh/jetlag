@@ -90,23 +90,25 @@ describe("AdminPanel", () => {
       {
         sessionId: "session-1",
         code: "ABCD",
-        phase: "seeking",
+        phase: "seek",
         tier: "free",
         gameSize: "medium",
         roleCounts: { seeker: 1, hider: 1, observer: 0 },
-        timerRunning: true,
-        timerPaused: false,
-        timerStartedAt: "2026-01-01T00:00:00.000Z",
-        timerElapsedMs: 0,
-        endGameActive: false,
         hostUid: "host-1",
-        updatedAt: "2026-01-01T00:00:00.000Z",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        memberCount: 2,
+        timerAccumulatedMs: 0,
+        timerRunningSince: "2026-01-01T00:00:00.000Z",
+        endGameStartedAt: null,
+        endGameRequestedAt: null,
+        hostAppVersion: null,
+        hidingPeriodMinutes: null,
       },
     ];
 
     renderWithRouter(<AdminPanel />);
 
     expect(screen.getByText("ABCD")).toBeInTheDocument();
-    expect(screen.getByText("seeking")).toBeInTheDocument();
+    expect(screen.getByText("Seek")).toBeInTheDocument();
   });
 });

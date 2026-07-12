@@ -293,6 +293,7 @@ export async function createPremiumSessionHandler(db, uid, rawInput) {
       sessionId,
       hostUid: uid,
       createdAt,
+      status: "active",
     });
   });
 
