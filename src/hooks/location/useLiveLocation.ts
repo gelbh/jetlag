@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { haversineMeters } from "../../domain/geometry/distance";
 import {
   requestLocationAccess,
   unknownGeolocationErrorMessage,
@@ -10,22 +11,6 @@ interface UseLiveLocationOptions {
   highAccuracy?: boolean;
   minIntervalMs?: number;
   minDistanceMeters?: number;
-}
-
-function distanceMeters(
-  a: { lat: number; lng: number },
-  b: { lat: number; lng: number },
-): number {
-  const earthRadius = 6_371_000;
-  const latDelta = ((b.lat - a.lat) * Math.PI) / 180;
-  const lngDelta = ((b.lng - a.lng) * Math.PI) / 180;
-  const lat1 = (a.lat * Math.PI) / 180;
-  const lat2 = (b.lat * Math.PI) / 180;
-  const haversine =
-    Math.sin(latDelta / 2) ** 2 +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(lngDelta / 2) ** 2;
-
-  return 2 * earthRadius * Math.asin(Math.sqrt(haversine));
 }
 
 export function useLiveLocation(
@@ -57,7 +42,10 @@ export function useLiveLocation(
 
       if (!force && last) {
         const elapsed = now - last.at;
-        const moved = distanceMeters(last.reading, next);
+        const moved = haversineMeters(
+          [last.reading.lat, last.reading.lng],
+          [next.lat, next.lng],
+        );
 
         if (elapsed < minIntervalMs && moved < minDistanceMeters) {
           return;
