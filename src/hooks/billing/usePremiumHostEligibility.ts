@@ -101,11 +101,12 @@ export function usePremiumHostEligibility({
   useEffect(() => {
     if (
       searchParams.get("tier") === "premium" &&
-      resolvedSessionTier === "free"
+      resolvedSessionTier === "free" &&
+      !canSelectPremiumTier
     ) {
       setSearchParams({}, { replace: true });
     }
-  }, [resolvedSessionTier, searchParams, setSearchParams]);
+  }, [canSelectPremiumTier, resolvedSessionTier, searchParams, setSearchParams]);
 
   const resolveSubmitTier = (): SessionTier =>
     isFirebaseConfigured() && resolvedSessionTier === "premium"

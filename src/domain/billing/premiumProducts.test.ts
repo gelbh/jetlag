@@ -8,6 +8,7 @@ import {
   canSelectPremiumSessionTier,
   hasUnlimitedPremiumHosting,
   isAppPremiumTrialActive,
+  shouldDefaultSessionTierToPremium,
   PREMIUM_PRODUCT_OFFERS,
   resolveHomePremiumButtonDisplay,
   type PremiumEntitlements,
@@ -348,6 +349,40 @@ describe("premiumProducts", () => {
           },
         }),
       ).toBe(false);
+    });
+  });
+
+  describe("shouldDefaultSessionTierToPremium", () => {
+    it("defaults subscription, trial, and access hosts to premium", () => {
+      expect(shouldDefaultSessionTierToPremium(null, true)).toBe(true);
+      expect(
+        shouldDefaultSessionTierToPremium(
+          {
+            ...baseEntitlements,
+            hasUnlimitedPremium: true,
+            canCreatePremium: true,
+            subscription: {
+              status: "active",
+              plan: "monthly",
+              currentPeriodEnd: null,
+            },
+          },
+          false,
+        ),
+      ).toBe(true);
+      expect(
+        shouldDefaultSessionTierToPremium(
+          {
+            ...baseEntitlements,
+            trialUsedAt: Date.now(),
+            trialEndsAt: Date.now() + 86_400_000,
+          },
+          false,
+        ),
+      ).toBe(true);
+      expect(shouldDefaultSessionTierToPremium(baseEntitlements, false)).toBe(
+        false,
+      );
     });
   });
 });

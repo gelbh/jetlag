@@ -128,6 +128,24 @@ export function hasUnlimitedPremiumHosting(
   return entitlements.lifetimePremium || entitlements.hasUnlimitedPremium;
 }
 
+export function shouldDefaultSessionTierToPremium(
+  entitlements: PremiumEntitlements | null,
+  hostHasAccessClaim: boolean,
+): boolean {
+  if (hostHasAccessClaim) {
+    return true;
+  }
+
+  if (!entitlements) {
+    return false;
+  }
+
+  return (
+    hasUnlimitedPremiumHosting(entitlements) ||
+    isAppPremiumTrialActive(entitlements)
+  );
+}
+
 export function canSelectPremiumSessionTier(
   entitlements: PremiumEntitlements | null,
   hostHasAccessClaim: boolean,
