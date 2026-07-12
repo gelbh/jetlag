@@ -1,6 +1,6 @@
 import { lazy, Suspense, useContext, type ReactNode } from "react";
 import { useMotionGesturePath } from "../../hooks/useMotionGesturePath";
-import { MotionCapabilityContext } from "./MotionCapabilityProvider";
+import { MotionCapabilityContext } from "./motionCapabilityContext";
 
 const FramerWizardSwipe = lazy(() => import("./FramerWizardSwipe"));
 

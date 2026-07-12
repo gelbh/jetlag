@@ -1,6 +1,6 @@
 import { lazy, Suspense, useContext, type CSSProperties, type ReactNode } from "react";
 import { allowsSharedElements } from "../../domain/device/motionCapability";
-import { MotionCapabilityContext } from "./MotionCapabilityProvider";
+import { MotionCapabilityContext } from "./motionCapabilityContext";
 import type { MotionSharedElementId } from "./sharedElements";
 
 const FramerSharedElement = lazy(() => import("./FramerSharedElement"));

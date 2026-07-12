@@ -1,6 +1,6 @@
 import { lazy, Suspense, useContext } from "react";
 import { AnimatedOverlay, type AnimatedOverlayProps } from "../ui/AnimatedOverlay";
-import { MotionCapabilityContext } from "./MotionCapabilityProvider";
+import { MotionCapabilityContext } from "./motionCapabilityContext";
 
 const FramerSheet = lazy(() => import("./FramerSheet"));
 

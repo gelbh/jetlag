@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useContext, type ReactNode } from "react";
-import { MotionCapabilityContext } from "../../motion/MotionCapabilityProvider";
+import { MotionCapabilityContext } from "../../motion/motionCapabilityContext";
 import { useAdaptiveWizardSwipe } from "../../../hooks/useAdaptiveWizardSwipe";
 import { MotionWizardSwipe } from "../../motion/MotionWizardSwipe";
 
