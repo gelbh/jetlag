@@ -764,6 +764,8 @@ export function useCreateSession() {
     mapFocusBounds,
     mapPreviewGameArea,
     transitMetroId,
+    regionPackId,
+    regionPackSubregionId,
     metros,
     setTransitMetroOverride,
     playerRole,
