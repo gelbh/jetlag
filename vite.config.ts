@@ -132,8 +132,13 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,svg,woff2}"],
+        navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/assets\//],
         runtimeCaching: [
+          {
+            urlPattern: /^\/assets\//,
+            handler: "NetworkOnly",
+          },
           {
             urlPattern:
               /^https:\/\/([a-d]\.)?basemaps\.cartocdn\.com\/rastertiles\/voyager\/.*/i,
