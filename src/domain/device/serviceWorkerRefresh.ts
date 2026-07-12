@@ -12,15 +12,10 @@ export function isSafeToReloadApp(options: {
   return !options.session || options.pathname !== "/map";
 }
 
-export function shouldAutoApplyServiceWorkerUpdate(
-  options:
-    | { hasActiveSession: boolean }
-    | { session: unknown; pathname: string },
-): boolean {
-  if ("hasActiveSession" in options) {
-    return !options.hasActiveSession;
-  }
-
+export function shouldAutoApplyServiceWorkerUpdate(options: {
+  session: unknown;
+  pathname: string;
+}): boolean {
   return isSafeToReloadApp(options);
 }
 

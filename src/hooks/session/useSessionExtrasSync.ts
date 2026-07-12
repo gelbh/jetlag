@@ -44,10 +44,14 @@ export function useSeekerLocationsSync(
   enabled = true,
 ) {
   const sessionResetAt = useSessionResetAt();
+  const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
   const items = useFirestoreCollectionSync<PlayerLocationRecord>(
     sessionId,
     subscribeToSeekerPlayerLocations,
-    { enabled },
+    {
+      enabled,
+      onSyncError: () => setLastSyncError("Live location sync failed."),
+    },
   );
 
   return useMemo(
@@ -66,10 +70,14 @@ export function useHiderLocationsSync(
   enabled = true,
 ) {
   const sessionResetAt = useSessionResetAt();
+  const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
   const items = useFirestoreCollectionSync<PlayerLocationRecord>(
     sessionId,
     subscribeToHiderPlayerLocations,
-    { enabled },
+    {
+      enabled,
+      onSyncError: () => setLastSyncError("Live location sync failed."),
+    },
   );
 
   return useMemo(

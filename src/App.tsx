@@ -25,8 +25,13 @@ import {
   clearBootReloadFlag,
   clearChunkReloadFlag,
 } from "./domain/device/chunkLoadRecovery";
-import { lazyWithChunkRetry } from "./domain/device/lazyWithChunkRetry";
+import {
+  lazyWithChunkRetry,
+  setChunkReloadContextGetter,
+} from "./domain/device/lazyWithChunkRetry";
+import { notifyAppNeedRefresh } from "./domain/device/serviceWorkerRefresh";
 import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";
+import { useSessionStore } from "./state/sessionStore";
 
 const MapScreen = lazyWithChunkRetry(() =>
   import("./routes/MapScreen").then((m) => ({ default: m.MapScreen })),
@@ -68,6 +73,25 @@ function AnalyticsPageViewTracker() {
   useEffect(() => {
     trackPageView(`${location.pathname}${location.search}`);
   }, [location]);
+
+  return null;
+}
+
+function ChunkReloadContextBinder() {
+  const session = useSessionStore((state) => state.session);
+  const location = useLocation();
+
+  useEffect(() => {
+    setChunkReloadContextGetter(() => ({
+      session,
+      pathname: location.pathname,
+      onNeedRefresh: notifyAppNeedRefresh,
+    }));
+
+    return () => {
+      setChunkReloadContextGetter(undefined);
+    };
+  }, [location.pathname, session]);
 
   return null;
 }
@@ -119,6 +143,7 @@ export default function App() {
       <BrowserRouter>
         <MotionDatasetEffect />
         <AnalyticsPageViewTracker />
+        <ChunkReloadContextBinder />
         <AppUpdateBanner />
         <div className="h-[100dvh] overflow-y-auto overscroll-y-none">
           <LowBatteryPrompt />

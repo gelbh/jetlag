@@ -88,22 +88,6 @@ describe("serviceWorkerRefresh", () => {
     expect(registerApplyUpdate).toHaveBeenCalledWith(true);
   });
 
-  it("defers auto apply during an active session", () => {
-    expect(
-      shouldAutoApplyServiceWorkerUpdate({
-        hasActiveSession: true,
-      }),
-    ).toBe(false);
-  });
-
-  it("allows auto apply without an active session", () => {
-    expect(
-      shouldAutoApplyServiceWorkerUpdate({
-        hasActiveSession: false,
-      }),
-    ).toBe(true);
-  });
-
   it("defers auto apply on the map with an active session", () => {
     expect(
       shouldAutoApplyServiceWorkerUpdate({

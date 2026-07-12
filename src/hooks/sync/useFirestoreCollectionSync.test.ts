@@ -3,17 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { useFirestoreCollectionSync } from "./useFirestoreCollectionSync";
 
-const setLastSyncError = vi.fn();
-
 vi.mock("../../services/core/firebase", () => ({
   isFirebaseConfigured: vi.fn(() => true),
-}));
-
-vi.mock("../../state/sessionStore", () => ({
-  useSessionStore: vi.fn(
-    (selector: (state: { setLastSyncError: typeof setLastSyncError }) => unknown) =>
-      selector({ setLastSyncError }),
-  ),
 }));
 
 describe("useFirestoreCollectionSync", () => {
@@ -94,7 +85,8 @@ describe("useFirestoreCollectionSync", () => {
     expect(subscribe).toHaveBeenCalledTimes(1);
   });
 
-  it("calls setLastSyncError on subscription error", () => {
+  it("calls onSyncError on subscription error", () => {
+    const onSyncError = vi.fn();
     const subscribe = vi.fn(
       (
         _sessionId: string,
@@ -107,9 +99,30 @@ describe("useFirestoreCollectionSync", () => {
     );
 
     renderHook(() =>
+      useFirestoreCollectionSync("remote-session", subscribe, { onSyncError }),
+    );
+
+    expect(onSyncError).toHaveBeenCalledOnce();
+  });
+
+  it("clears items on subscription error when no handler is provided", () => {
+    const unsubscribe = vi.fn();
+    const subscribe = vi.fn(
+      (
+        _sessionId: string,
+        onData: (items: string[]) => void,
+        onError: () => void,
+      ) => {
+        onData(["alpha"]);
+        onError();
+        return unsubscribe;
+      },
+    );
+
+    const { result } = renderHook(() =>
       useFirestoreCollectionSync("remote-session", subscribe),
     );
 
-    expect(setLastSyncError).toHaveBeenCalledWith("Live location sync failed.");
+    expect(result.current).toEqual([]);
   });
 });

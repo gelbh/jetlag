@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { isFirebaseConfigured } from "../../services/core/firebase";
-import { useSessionStore } from "../../state/sessionStore";
 
 function isRemoteSession(sessionId: string | undefined): sessionId is string {
   return (
@@ -25,10 +24,12 @@ type CollectionSubscriber<T> = (
 export function useFirestoreCollectionSync<T>(
   sessionId: string | undefined,
   subscribe: CollectionSubscriber<T>,
-  { enabled = true }: { enabled?: boolean } = {},
+  {
+    enabled = true,
+    onSyncError,
+  }: { enabled?: boolean; onSyncError?: () => void } = {},
 ): T[] {
   const [items, setItems] = useState<T[]>([]);
-  const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
 
   useEffect(() => {
     if (!enabled || !isRemoteSession(sessionId)) {
@@ -38,14 +39,20 @@ export function useFirestoreCollectionSync<T>(
     const unsubscribe = subscribe(
       sessionId,
       setItems,
-      () => setLastSyncError("Live location sync failed."),
+      () => {
+        if (onSyncError) {
+          onSyncError();
+        } else {
+          setItems([]);
+        }
+      },
     );
 
     return () => {
       unsubscribe();
       setItems([]);
     };
-  }, [enabled, sessionId, setLastSyncError, subscribe]);
+  }, [enabled, onSyncError, sessionId, subscribe]);
 
   return items;
 }
