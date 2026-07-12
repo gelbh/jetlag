@@ -75,6 +75,12 @@ describe("sessionVersionCompatible", () => {
       sessionVersionCompatible(session, "0.2.0", "new-uid", undefined, "observer"),
     ).toBe(true);
   });
+
+  it("allows admins to join regardless of version mismatch", () => {
+    expect(
+      sessionVersionCompatible(session, "0.2.0", "new-uid", undefined, "admin"),
+    ).toBe(true);
+  });
 });
 
 describe("sessionVersionMismatchMessage", () => {

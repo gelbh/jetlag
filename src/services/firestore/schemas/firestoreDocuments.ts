@@ -17,7 +17,7 @@ export const sessionDocumentSchema = z
     hostUid: z.string().optional(),
     createdAt: z.unknown(),
     memberUids: z.array(z.string()).optional(),
-    memberRoles: z.record(z.string(), z.enum(["seeker", "hider", "observer"])).optional(),
+    memberRoles: z.record(z.string(), z.enum(["seeker", "hider", "observer", "admin"])).optional(),
     gameSize: z.enum(["small", "medium", "large"]).optional(),
     distanceUnit: z.enum(["imperial", "metric"]).optional(),
     hidingZoneRadiusMeters: z.number().finite().optional(),

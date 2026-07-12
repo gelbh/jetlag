@@ -7,6 +7,7 @@ import type { TransitRouteFilter } from "../domain/map/transit";
 import type { NotificationPreferences } from "../domain/device/notifications";
 import { DEFAULT_NOTIFICATION_PREFERENCES } from "../domain/device/notifications";
 import type { MapStyle } from "../domain/map/mapBasemaps";
+import type { ObserverPerspective } from "../domain/session/observerPerspective";
 
 export type LayerVisibility = Record<AnnotationType | "transit", boolean>;
 
@@ -34,6 +35,7 @@ export const useMapStore = create<{
   distanceUnit: DistanceUnit;
   mapStyle: MapStyle;
   layerVisibility: LayerVisibility;
+  observerPerspective: ObserverPerspective;
   setActiveTool: (tool: MapTool) => void;
   setTransitEnabled: (enabled: boolean) => void;
   setTransitLiveEnabled: (enabled: boolean) => void;
@@ -46,6 +48,8 @@ export const useMapStore = create<{
   setDistanceUnit: (unit: DistanceUnit) => void;
   setMapStyle: (style: MapStyle) => void;
   setLayerVisibility: (layer: keyof LayerVisibility, visible: boolean) => void;
+  setObserverPerspective: (perspective: ObserverPerspective) => void;
+  resetObserverPerspective: () => void;
 }>()(
   persist(
     (set) => ({
@@ -61,6 +65,7 @@ export const useMapStore = create<{
       distanceUnit: "imperial",
       mapStyle: "standard",
       layerVisibility: DEFAULT_LAYER_VISIBILITY,
+      observerPerspective: "both",
       setActiveTool: (activeTool) => set({ activeTool }),
       setTransitEnabled: (transitEnabled) => set({ transitEnabled }),
       setTransitLiveEnabled: (transitLiveEnabled) =>
@@ -84,6 +89,8 @@ export const useMapStore = create<{
             [layer]: visible,
           },
         })),
+      setObserverPerspective: (observerPerspective) => set({ observerPerspective }),
+      resetObserverPerspective: () => set({ observerPerspective: "both" }),
     }),
     {
       name: "jetlag-map",

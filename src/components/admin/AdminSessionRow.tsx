@@ -7,13 +7,13 @@ import type { AdminSessionSummary } from "../../services/admin/adminSessions";
 interface AdminSessionRowProps {
   summary: AdminSessionSummary;
   observingCode: string | null;
-  onObserve: (summary: AdminSessionSummary) => void;
+  onMonitor: (summary: AdminSessionSummary) => void;
 }
 
 export function AdminSessionRow({
   summary,
   observingCode,
-  onObserve,
+  onMonitor,
 }: AdminSessionRowProps) {
   const busy = observingCode === summary.code;
   const areaLabel = resolveAdminSessionAreaLabel(summary);
@@ -39,6 +39,9 @@ export function AdminSessionRow({
           hider{summary.roleCounts.hider === 1 ? "" : "s"}
           {summary.roleCounts.observer > 0
             ? ` · ${summary.roleCounts.observer} observer`
+            : ""}
+          {summary.roleCounts.admin > 0
+            ? ` · ${summary.roleCounts.admin} admin`
             : ""}{" "}
           · {summary.tier} · {summary.gameSize}
         </p>
@@ -48,9 +51,9 @@ export function AdminSessionRow({
         className="btn-primary min-h-11 shrink-0 px-4 disabled:opacity-50"
         disabled={busy}
         aria-busy={busy}
-        onClick={() => onObserve(summary)}
+        onClick={() => onMonitor(summary)}
       >
-        {busy ? "Joining…" : "Observe"}
+        {busy ? "Joining…" : "Monitor"}
       </MotionPressable>
     </div>
   );

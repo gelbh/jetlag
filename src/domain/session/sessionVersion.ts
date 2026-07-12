@@ -33,7 +33,7 @@ export function sessionVersionCompatible(
   returningMemberUid?: string | null,
   joinRole?: PlayerRole,
 ): boolean {
-  if (joinRole === "observer") {
+  if (joinRole === "observer" || joinRole === "admin") {
     return true;
   }
   if (session.memberUids.includes(uid)) {

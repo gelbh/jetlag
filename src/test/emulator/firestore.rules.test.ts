@@ -1568,7 +1568,7 @@ describe("firestore.rules", () => {
     );
   });
 
-  it("allows admin to join as observer and read session data", async () => {
+  it("allows admin to join as admin and read session data", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
       .firestore()
@@ -1584,7 +1584,7 @@ describe("firestore.rules", () => {
         .doc("session-1")
         .update({
           memberUids: ["host-1", "admin-1"],
-          memberRoles: { "host-1": "seeker", "admin-1": "observer" },
+          memberRoles: { "host-1": "seeker", "admin-1": "admin" },
         }),
     );
 
@@ -1603,7 +1603,28 @@ describe("firestore.rules", () => {
     );
   });
 
-  it("rejects non-admin observer join", async () => {
+  it("allows anyone to join as observer", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+
+    const guest = testEnv.authenticatedContext("guest-1");
+    await assertSucceeds(
+      guest
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          memberUids: ["host-1", "guest-1"],
+          memberRoles: { "host-1": "seeker", "guest-1": "observer" },
+        }),
+    );
+  });
+
+  it("rejects non-admin admin join", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
       .firestore()
@@ -1619,7 +1640,7 @@ describe("firestore.rules", () => {
         .doc("session-1")
         .update({
           memberUids: ["host-1", "guest-1"],
-          memberRoles: { "host-1": "seeker", "guest-1": "observer" },
+          memberRoles: { "host-1": "seeker", "guest-1": "admin" },
         }),
     );
   });

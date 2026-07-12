@@ -1,4 +1,5 @@
 import type { SyncStatus } from "../../../domain/device/sync";
+import type { PlayerRole } from "../../../domain/session/playerRole";
 import { syncToneForStatus } from "../syncStatusDetailContent";
 
 export type SyncTone = "error" | "warning" | "info";
@@ -93,11 +94,11 @@ export function syncRailDisplay(
   return { inline: null, banner: null };
 }
 
-export function idleModeLabel(playerRole: "seeker" | "hider" | "observer"): string {
+export function idleModeLabel(playerRole: PlayerRole): string {
   if (playerRole === "hider") {
     return "Set your zone";
   }
-  if (playerRole === "observer") {
+  if (playerRole === "observer" || playerRole === "admin") {
     return "Observing";
   }
   return "Ready to seek";

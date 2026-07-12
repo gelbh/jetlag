@@ -1,4 +1,4 @@
-export type PlayerRole = "seeker" | "hider" | "observer";
+export type PlayerRole = "seeker" | "hider" | "observer" | "admin";
 
 export type MemberRoles = Record<string, PlayerRole>;
 
@@ -38,6 +38,21 @@ export function isObserverRole(
   return resolvePlayerRole(memberRoles, uid) === "observer";
 }
 
+export function isAdminRole(
+  memberRoles: MemberRoles | undefined,
+  uid: string | undefined,
+): boolean {
+  return resolvePlayerRole(memberRoles, uid) === "admin";
+}
+
+export function isSpectatorRole(
+  memberRoles: MemberRoles | undefined,
+  uid: string | undefined,
+): boolean {
+  const role = resolvePlayerRole(memberRoles, uid);
+  return role === "observer" || role === "admin";
+}
+
 export function sessionHasHiders(memberRoles: MemberRoles | undefined): boolean {
   if (!memberRoles) {
     return false;
@@ -47,13 +62,18 @@ export function sessionHasHiders(memberRoles: MemberRoles | undefined): boolean 
 }
 
 export function playerRoleLabel(role: PlayerRole): string {
-  if (role === "seeker") {
-    return "Seeker";
+  switch (role) {
+    case "seeker":
+      return "Seeker";
+    case "hider":
+      return "Hider";
+    case "observer":
+      return "Observer";
+    case "admin":
+      return "Admin";
+    default: {
+      const _exhaustive: never = role;
+      return _exhaustive;
+    }
   }
-
-  if (role === "hider") {
-    return "Hider";
-  }
-
-  return "Observer";
 }

@@ -26,7 +26,7 @@ function sessionSummary(
     gameSize: "small",
     createdAt: overrides.createdAt,
     memberCount: 1,
-    roleCounts: { seeker: 1, hider: 0, observer: 0 },
+    roleCounts: { seeker: 1, hider: 0, observer: 0, admin: 0 },
     timerAccumulatedMs: 0,
     timerRunningSince: null,
     endGameStartedAt: null,

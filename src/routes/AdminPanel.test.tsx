@@ -93,7 +93,7 @@ describe("AdminPanel", () => {
         phase: "seek",
         tier: "free",
         gameSize: "medium",
-        roleCounts: { seeker: 1, hider: 1, observer: 0 },
+        roleCounts: { seeker: 1, hider: 1, observer: 0, admin: 0 },
         hostUid: "host-1",
         createdAt: "2026-01-01T00:00:00.000Z",
         memberCount: 2,

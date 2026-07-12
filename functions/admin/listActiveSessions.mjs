@@ -103,7 +103,7 @@ export function compareSessionsByLastActivity(left, right) {
 }
 
 function countRoles(memberRoles) {
-  const counts = { seeker: 0, hider: 0, observer: 0 };
+  const counts = { seeker: 0, hider: 0, observer: 0, admin: 0 };
   if (!memberRoles || typeof memberRoles !== "object") {
     return counts;
   }
@@ -115,6 +115,8 @@ function countRoles(memberRoles) {
       counts.hider += 1;
     } else if (role === "observer") {
       counts.observer += 1;
+    } else if (role === "admin") {
+      counts.admin += 1;
     }
   }
 

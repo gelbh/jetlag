@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { HiderMapScreen } from "./HiderMapScreen";
+import { AdminMapScreen } from "./AdminMapScreen";
 import { ObserverMapScreen } from "./ObserverMapScreen";
 import { SeekerMapScreen } from "./SeekerMapScreen";
 import { teardownSessionUiState } from "../services/session/sessionCleanup";
@@ -18,6 +19,10 @@ export function MapScreen() {
 
   if (myRole === "hider") {
     return <HiderMapScreen />;
+  }
+
+  if (myRole === "admin") {
+    return <AdminMapScreen />;
   }
 
   if (myRole === "observer") {

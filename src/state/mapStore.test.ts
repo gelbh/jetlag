@@ -37,4 +37,12 @@ describe("mapStore", () => {
     expect(useMapStore.getState().keepScreenAwake).toBe(true);
     expect(useMapStore.getState().lowPowerMode).toBe(true);
   });
+
+  it("updates spectator perspective for the current session view", () => {
+    useMapStore.getState().setObserverPerspective("seeker");
+    expect(useMapStore.getState().observerPerspective).toBe("seeker");
+
+    useMapStore.getState().resetObserverPerspective();
+    expect(useMapStore.getState().observerPerspective).toBe("both");
+  });
 });

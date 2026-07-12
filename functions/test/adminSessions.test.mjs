@@ -134,6 +134,7 @@ describe("listActiveSessions helpers", () => {
     assert.equal(summary.roleCounts.seeker, 1);
     assert.equal(summary.roleCounts.hider, 1);
     assert.equal(summary.roleCounts.observer, 1);
+    assert.equal(summary.roleCounts.admin, 0);
     assert.equal(summary.phase, "waiting");
     assert.equal(summary.tier, "premium");
     assert.equal(summary.regionPackId, null);

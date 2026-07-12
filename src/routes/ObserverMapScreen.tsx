@@ -1,14 +1,8 @@
 import { useCallback } from "react";
 import { Navigate } from "react-router-dom";
-import { AnnotationLayer } from "../components/map/AnnotationLayer";
-import { ActiveThermometerWalkLayer } from "../components/map/ActiveThermometerWalkLayer";
 import { GameAreaMask } from "../components/map/GameAreaMask";
-import { HidingZonesLayer } from "../components/map/HidingZonesLayer";
-import { LiveHiderLocationsLayer } from "../components/map/LiveHiderLocationsLayer";
-import { LiveSeekerLocationsLayer } from "../components/map/LiveSeekerLocationsLayer";
 import { MapView } from "../components/map/MapView";
 import { MapViewportTracker } from "../components/map/MapViewportTracker";
-import { PendingQuestionLayer } from "../components/map/PendingQuestionLayer";
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { SessionLog } from "../components/session/SessionLog";
 import { InlineError } from "../components/ui/InlineError";
@@ -16,13 +10,17 @@ import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { fallbackGameArea } from "../domain/geometry/geometry";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
-import { useSessionStore } from "../state/sessionStore";
+import { useMapStore, useSessionStore } from "../state/sessionStore";
 import { ObserverMapScreenChrome } from "./observer-map-screen/ObserverMapScreenChrome";
 import { useObserverMapScreen } from "./observer-map-screen/useObserverMapScreen";
+import { SpectatorMapLayers } from "./spectator-map/SpectatorMapLayers";
 
 export function ObserverMapScreen() {
   const navigate = useAppNavigate();
   const setSession = useSessionStore((state) => state.setSession);
+  const resetObserverPerspective = useMapStore(
+    (state) => state.resetObserverPerspective,
+  );
   const controller = useObserverMapScreen();
 
   const handleLeave = useCallback(async () => {
@@ -30,15 +28,24 @@ export function ObserverMapScreen() {
     if (sessionId && sessionId !== LOCAL_SESSION_ID) {
       await clearSessionLocalArtifacts(sessionId);
     }
+    resetObserverPerspective();
     setSession(null);
-    navigate("/admin");
-  }, [controller.session?.id, navigate, setSession]);
+    navigate(controller.exitPath);
+  }, [
+    controller.exitPath,
+    controller.session?.id,
+    navigate,
+    resetObserverPerspective,
+    setSession,
+  ]);
 
   if (!controller.session) {
-    return <Navigate to="/admin" replace />;
+    return (
+      <Navigate to={controller.myRole === "admin" ? "/admin" : "/"} replace />
+    );
   }
 
-  if (controller.myRole !== "observer") {
+  if (controller.myRole !== "observer" && controller.myRole !== "admin") {
     return <Navigate to="/map" replace />;
   }
 
@@ -56,6 +63,8 @@ export function ObserverMapScreen() {
   }
 
   const gameArea = fallbackGameArea(controller.gameArea);
+  const sessionRules = controller.sessionRules ?? controller.session;
+  const chatDisplayRole = controller.spectatorLayers.chatDisplayRole;
 
   return (
     <div className="map-screen-shell">
@@ -76,44 +85,32 @@ export function ObserverMapScreen() {
         >
           <MapViewportTracker onViewportChange={controller.setMapViewport} />
           <GameAreaMask gameArea={gameArea} />
-          <AnnotationLayer
-            annotations={controller.annotations}
+          <SpectatorMapLayers
+            session={controller.session}
             gameArea={gameArea}
             layerVisibility={controller.layerVisibility}
-            session={controller.session}
-            hidingZones={controller.hidingZones}
-          />
-          <HidingZonesLayer zones={controller.hidingZones} />
-          <LiveSeekerLocationsLayer
-            locations={controller.seekerLocations}
-            myUid={controller.uid}
-          />
-          <LiveHiderLocationsLayer
-            locations={controller.hiderLocations}
-            myUid={controller.uid}
-          />
-          <ActiveThermometerWalkLayer
-            start={controller.activeThermometerWalk.start}
-            livePoint={controller.activeThermometerWalk.livePoint}
-            targetDistanceMeters={
-              controller.activeThermometerWalk.targetDistanceMeters
-            }
-            mapStyle={controller.effectiveBasemapStyle}
+            effectiveBasemapStyle={controller.effectiveBasemapStyle}
             distanceUnit={controller.distanceUnit}
-          />
-          <PendingQuestionLayer
+            spectatorLayers={controller.spectatorLayers}
+            annotations={controller.annotations}
+            hidingZones={controller.hidingZones}
+            seekerLocations={controller.seekerLocations}
+            hiderLocations={controller.hiderLocations}
             pendingQuestions={controller.pendingQuestions}
-            gameArea={gameArea}
-            sessionRules={controller.sessionRules}
-            mapStyle={controller.effectiveBasemapStyle}
+            sessionRules={sessionRules}
+            uid={controller.uid}
+            activeThermometerWalk={controller.activeThermometerWalk}
           />
         </MapView>
       </div>
 
       <ObserverMapScreenChrome
         session={controller.session}
+        myRole={controller.myRole ?? "observer"}
         timer={controller.timer}
         overlay={controller.overlay}
+        perspective={controller.observerPerspective}
+        onPerspectiveChange={controller.setObserverPerspective}
         onLeave={() => void handleLeave()}
       />
 
@@ -140,12 +137,12 @@ export function ObserverMapScreen() {
           onClose={controller.overlay.closeSheet}
           messages={controller.chatMessages}
           pendingQuestions={controller.pendingQuestions}
-          sessionRules={controller.sessionRules}
+          sessionRules={sessionRules}
           sessionId={controller.sessionId}
           senderUid={controller.uid}
-          senderRole="observer"
-          isHider={false}
-          bottomClassName="bottom-[calc(4.75rem+env(safe-area-inset-bottom))]"
+          senderRole={chatDisplayRole}
+          isHider={chatDisplayRole === "hider"}
+          bottomClassName="bottom-[calc(7.75rem+env(safe-area-inset-bottom))]"
           onAnswerQuestion={async () => undefined}
           readOnly
         />

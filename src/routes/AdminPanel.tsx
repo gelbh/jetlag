@@ -17,13 +17,10 @@ import { InlineError } from "../components/ui/InlineError";
 import { isAdminUser } from "../domain/admin/adminAccess";
 import { resolveAdminSessionAreaLabel } from "../domain/admin/adminSessionAreaLabel";
 import { APP_VERSION } from "../domain/device/changelog";
+import { useAdminJoinSession } from "../hooks/admin/useAdminJoinSession";
 import { useAdminSessionList } from "../hooks/admin/useAdminSessionList";
 import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
-import { useAppNavigate } from "../hooks/useAppNavigate";
 import { getFirebaseAuth } from "../services/core/firebase";
-import { joinRemoteSessionByCode } from "../services/firestore/firestoreAnnotations";
-import { setPremiumApiContext } from "../services/core/premiumApiContext";
-import { useSessionStore } from "../state/sessionStore";
 import type { AdminSessionSummary } from "../services/admin/adminSessions";
 
 function formatLastFetched(at: Date | null): string {
@@ -52,15 +49,17 @@ function AdminSessionSkeletonRows() {
 }
 
 export function AdminPanel() {
-  const navigate = useAppNavigate();
-  const setSession = useSessionStore((state) => state.setSession);
   const { user, isPermanent, authReady } = usePermanentAuthUser();
   const isAdmin = isAdminUser(user);
   const enabled = authReady && isAdmin;
   const { sessions, loading, refreshing, error, lastFetchedAt, refresh } =
     useAdminSessionList(enabled);
-  const [observeError, setObserveError] = useState<string | null>(null);
-  const [observingCode, setObservingCode] = useState<string | null>(null);
+  const {
+    joinSession,
+    joiningCode: observingCode,
+    error: observeError,
+    setError: setObserveError,
+  } = useAdminJoinSession({ onRefresh: refresh });
   const [query, setQuery] = useState("");
   const [phaseFilter, setPhaseFilter] = useState<AdminSessionPhaseFilter>("all");
 
@@ -84,53 +83,12 @@ export function AdminPanel() {
     });
   }, [phaseFilter, query, sessions]);
 
-  const handleObserve = useCallback(
-    async (summary: AdminSessionSummary) => {
-      if (!user) {
-        return;
-      }
-
-      setObservingCode(summary.code);
+  const handleMonitor = useCallback(
+    (summary: AdminSessionSummary) => {
       setObserveError(null);
-
-      try {
-        const result = await joinRemoteSessionByCode(
-          summary.code,
-          user.uid,
-          "observer",
-        );
-
-        if (result.status === "missing") {
-          setObserveError("That session is no longer available.");
-          void refresh({ background: true });
-          return;
-        }
-
-        if (result.status === "ended") {
-          setObserveError("That session has ended.");
-          void refresh({ background: true });
-          return;
-        }
-
-        if (result.status === "incompatible") {
-          setObserveError("Your app version is older than the host's.");
-          return;
-        }
-
-        setSession(result.session, user.uid);
-        setPremiumApiContext(result.session);
-        navigate("/map");
-      } catch (joinError) {
-        setObserveError(
-          joinError instanceof Error
-            ? joinError.message
-            : "Couldn't join as observer.",
-        );
-      } finally {
-        setObservingCode(null);
-      }
+      void joinSession(summary);
     },
-    [navigate, refresh, setSession, user],
+    [joinSession, setObserveError],
   );
 
   const handleSignOut = async () => {
@@ -268,7 +226,7 @@ export function AdminPanel() {
                     key={summary.sessionId}
                     summary={summary}
                     observingCode={observingCode}
-                    onObserve={(nextSummary) => void handleObserve(nextSummary)}
+                    onMonitor={(nextSummary) => handleMonitor(nextSummary)}
                   />
                 ))}
               </div>
