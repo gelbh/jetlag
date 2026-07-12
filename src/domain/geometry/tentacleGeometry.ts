@@ -4,10 +4,13 @@ import { featureCollection, point as turfPoint } from "@turf/helpers";
 import difference from "@turf/difference";
 import intersect from "@turf/intersect";
 import simplify from "@turf/simplify";
-import union from "@turf/union";
 import type { GameArea, TentaclePoi } from "../map/annotations";
-import { geoSpatialVoronoiFromSites } from "./geoSpatialVoronoi";
 import { voronoiCellSiteId } from "./voronoiCellSiteId";
+import {
+  getCachedVoronoiCells,
+  tentacleSitesFingerprint,
+} from "./voronoiCellCache";
+import { unionPolygonFeatures } from "./unionPolygonFeatures";
 import {
   gameAreaToPolygon,
   type LatLngTuple,
@@ -55,7 +58,9 @@ function buildSearchDisk(
 function voronoiCellsForPois(
   pois: readonly TentaclePoi[],
 ): Feature<Polygon | MultiPolygon>[] {
-  const cells = geoSpatialVoronoiFromSites(
+  const fingerprint = tentacleSitesFingerprint(pois);
+  const cells = getCachedVoronoiCells(
+    fingerprint,
     pois.map((poi) => ({
       lng: poi.lng,
       lat: poi.lat,
@@ -149,7 +154,7 @@ function buildEliminationViaWrongCellUnion(
   const merged =
     wrongCells.length === 1
       ? wrongCells[0]
-      : union(featureCollection(wrongCells));
+      : unionPolygonFeatures(wrongCells);
 
   if (
     !merged ||

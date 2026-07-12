@@ -82,22 +82,38 @@ export function dedupeTransitStations(
   stations: readonly TransitStation[],
   proximityMeters = STATION_DEDUPE_PROXIMITY_METERS,
 ): TransitStation[] {
-  const result: TransitStation[] = [];
+  const buckets = new Map<string, TransitStation[]>();
 
   for (const station of stations) {
     const name = normalizedStationName(station.name);
-    const duplicate = result.find(
-      (existing) =>
-        normalizedStationName(existing.name) === name &&
-        haversineMeters(
-          [existing.lat, existing.lng],
-          [station.lat, station.lng],
-        ) <= proximityMeters,
-    );
-
-    if (!duplicate) {
-      result.push(station);
+    const bucket = buckets.get(name);
+    if (bucket) {
+      bucket.push(station);
+    } else {
+      buckets.set(name, [station]);
     }
+  }
+
+  const result: TransitStation[] = [];
+
+  for (const bucket of buckets.values()) {
+    const kept: TransitStation[] = [];
+
+    for (const station of bucket) {
+      const duplicate = kept.find(
+        (existing) =>
+          haversineMeters(
+            [existing.lat, existing.lng],
+            [station.lat, station.lng],
+          ) <= proximityMeters,
+      );
+
+      if (!duplicate) {
+        kept.push(station);
+      }
+    }
+
+    result.push(...kept);
   }
 
   return result;

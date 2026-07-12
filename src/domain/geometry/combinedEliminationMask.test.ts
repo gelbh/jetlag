@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
+import type { Feature, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../map/annotations";
 import type { HidingZoneRecord } from "../session/hidingZone";
 import {
   buildCombinedEliminationMask,
   buildEndGameEliminationMask,
+  clearCombinedEliminationMaskCacheForTests,
   eliminationFeatureForAnnotation,
 } from "./combinedEliminationMask";
+import { unionPolygonFeatures } from "./unionPolygonFeatures";
 
 const gameArea: GameArea = {
   type: "Polygon",
@@ -57,8 +60,43 @@ function matchingAnnotation(
   };
 }
 
+function squareFeature(west: number): Feature<GeoPolygon> {
+  return {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [west, 51.42],
+          [west + 0.03, 51.42],
+          [west + 0.03, 51.48],
+          [west, 51.48],
+          [west, 51.42],
+        ],
+      ],
+    },
+  };
+}
+
+describe("unionPolygonFeatures", () => {
+  it("matches sequential union for overlapping squares", () => {
+    const features = [squareFeature(-0.19), squareFeature(-0.16)];
+    const combined = unionPolygonFeatures(features);
+
+    expect(combined).not.toBeNull();
+    expect(
+      booleanPointInPolygon(turfPoint([-0.185, 51.45]), combined!),
+    ).toBe(true);
+    expect(
+      booleanPointInPolygon(turfPoint([-0.155, 51.45]), combined!),
+    ).toBe(true);
+  });
+});
+
 describe("combinedEliminationMask", () => {
   it("merges multiple elimination regions into one mask", () => {
+    clearCombinedEliminationMaskCacheForTests();
     const combined = buildCombinedEliminationMask(
       [matchingAnnotation("a", -0.19), matchingAnnotation("b", -0.16)],
       gameArea,
@@ -73,7 +111,35 @@ describe("combinedEliminationMask", () => {
     ).toBe(true);
   });
 
+  it("incrementally adds a new elimination region", () => {
+    clearCombinedEliminationMaskCacheForTests();
+    const first = buildCombinedEliminationMask(
+      [matchingAnnotation("a", -0.19)],
+      gameArea,
+    );
+    const incremental = buildCombinedEliminationMask(
+      [matchingAnnotation("a", -0.19), matchingAnnotation("b", -0.16)],
+      gameArea,
+    );
+    clearCombinedEliminationMaskCacheForTests();
+    const full = buildCombinedEliminationMask(
+      [matchingAnnotation("a", -0.19), matchingAnnotation("b", -0.16)],
+      gameArea,
+    );
+
+    expect(first).not.toBeNull();
+    expect(incremental).not.toBeNull();
+    expect(full).not.toBeNull();
+    expect(
+      booleanPointInPolygon(turfPoint([-0.155, 51.45]), incremental!),
+    ).toBe(true);
+    expect(
+      booleanPointInPolygon(turfPoint([-0.155, 51.45]), full!),
+    ).toBe(true);
+  });
+
   it("includes draft preview features with committed eliminations", () => {
+    clearCombinedEliminationMaskCacheForTests();
     const draft = eliminationFeatureForAnnotation(
       matchingAnnotation("draft", -0.12),
       gameArea,
@@ -120,6 +186,7 @@ describe("combinedEliminationMask", () => {
   });
 
   it("uses end-game mask when hiding zones are provided to buildCombinedEliminationMask", () => {
+    clearCombinedEliminationMaskCacheForTests();
     const hidingZone: HidingZoneRecord = {
       hiderUid: "hider-1",
       sessionId: "session",

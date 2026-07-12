@@ -1,3 +1,5 @@
+import KDBush from "kdbush";
+import * as geokdbush from "geokdbush";
 import type { GameArea } from "../../domain/map/annotations";
 import {
   distanceBetweenPoints,
@@ -10,7 +12,16 @@ import type { GtfsBundleStop, GtfsStaticBundle } from "./gtfsBundle";
 import { GTFS_BUNDLE_MANIFEST_PATH } from "./gtfsBundle";
 
 const bundleCache = new Map<string, GtfsStaticBundle>();
+const stopsByIdCache = new WeakMap<GtfsStaticBundle, Map<string, GtfsBundleStop>>();
+const stopSpatialIndexCache = new Map<string, GtfsStopSpatialIndex>();
 let manifestCache: Map<string, string> | null = null;
+
+const LINEAR_NEAREST_STOP_THRESHOLD = 100;
+
+interface GtfsStopSpatialIndex {
+  stops: GtfsBundleStop[];
+  index: KDBush;
+}
 
 function stopInBoundingBox(stop: GtfsBundleStop, bbox: BoundingBox): boolean {
   return (
@@ -21,8 +32,48 @@ function stopInBoundingBox(stop: GtfsBundleStop, bbox: BoundingBox): boolean {
   );
 }
 
+function getStopsById(bundle: GtfsStaticBundle): Map<string, GtfsBundleStop> {
+  let stopsById = stopsByIdCache.get(bundle);
+  if (!stopsById) {
+    stopsById = new Map(bundle.stops.map((stop) => [stop.id, stop]));
+    stopsByIdCache.set(bundle, stopsById);
+  }
+  return stopsById;
+}
+
+function gameAreaBboxCacheKey(bbox: BoundingBox): string {
+  return `${bbox.south.toFixed(5)}|${bbox.west.toFixed(5)}|${bbox.north.toFixed(5)}|${bbox.east.toFixed(5)}`;
+}
+
+function buildStopSpatialIndex(stops: GtfsBundleStop[]): GtfsStopSpatialIndex {
+  const index = new KDBush(stops.length);
+  for (const stop of stops) {
+    index.add(stop.lng, stop.lat);
+  }
+  index.finish();
+  return { stops, index };
+}
+
+function getStopSpatialIndex(
+  metroId: string,
+  bundle: GtfsStaticBundle,
+  gameArea: GameArea,
+): GtfsStopSpatialIndex {
+  const bbox = gameAreaToBoundingBox(gameArea);
+  const cacheKey = `${metroId}|${gameAreaBboxCacheKey(bbox)}`;
+  const cached = stopSpatialIndexCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const stops = filterGtfsStopsForGameArea(bundle, gameArea);
+  const spatialIndex = buildStopSpatialIndex(stops);
+  stopSpatialIndexCache.set(cacheKey, spatialIndex);
+  return spatialIndex;
+}
+
 export function stationIdentity(stopId: string, bundle: GtfsStaticBundle): string {
-  const stop = bundle.stops.find((entry) => entry.id === stopId);
+  const stop = getStopsById(bundle).get(stopId);
   return stop?.parentStationId ?? stopId;
 }
 
@@ -47,6 +98,46 @@ export function nearestGtfsStop(
   }
 
   return nearest;
+}
+
+function nearestGtfsStopFromSpatialIndex(
+  point: LatLngTuple,
+  spatialIndex: GtfsStopSpatialIndex,
+): (GtfsBundleStop & { distanceMeters: number }) | null {
+  const [lat, lng] = point;
+  const nearestIds = geokdbush.around(spatialIndex.index, lng, lat, 1);
+  const nearestId = nearestIds[0];
+  if (nearestId === undefined) {
+    return null;
+  }
+
+  const stop = spatialIndex.stops[nearestId];
+  if (!stop) {
+    return null;
+  }
+
+  return {
+    ...stop,
+    distanceMeters: distanceBetweenPoints(point, [stop.lat, stop.lng]),
+  };
+}
+
+export function nearestGtfsStopInGameArea(
+  point: LatLngTuple,
+  bundle: GtfsStaticBundle,
+  gameArea: GameArea,
+  metroId = bundle.metroId,
+): (GtfsBundleStop & { distanceMeters: number }) | null {
+  const spatialIndex = getStopSpatialIndex(metroId, bundle, gameArea);
+  if (spatialIndex.stops.length === 0) {
+    return null;
+  }
+
+  if (spatialIndex.stops.length <= LINEAR_NEAREST_STOP_THRESHOLD) {
+    return nearestGtfsStop(point, spatialIndex.stops);
+  }
+
+  return nearestGtfsStopFromSpatialIndex(point, spatialIndex);
 }
 
 export function gtfsStopsShareStationOrRoute(
@@ -134,11 +225,13 @@ export async function loadGtfsBundle(
 
   const bundle = (await response.json()) as GtfsStaticBundle;
   bundleCache.set(metroId, bundle);
+  getStopsById(bundle);
   return bundle;
 }
 
 export function clearGtfsBundleCacheForTests(): void {
   bundleCache.clear();
+  stopSpatialIndexCache.clear();
   manifestCache = null;
 }
 
@@ -148,9 +241,18 @@ export async function resolveTransitLineMatch(
   bundle: GtfsStaticBundle,
   gameArea: GameArea,
 ): Promise<boolean> {
-  const stops = filterGtfsStopsForGameArea(bundle, gameArea);
-  const seekerStop = nearestGtfsStop(seekerPoint, stops);
-  const hiderStop = nearestGtfsStop(hiderPoint, stops);
+  const seekerStop = nearestGtfsStopInGameArea(
+    seekerPoint,
+    bundle,
+    gameArea,
+    bundle.metroId,
+  );
+  const hiderStop = nearestGtfsStopInGameArea(
+    hiderPoint,
+    bundle,
+    gameArea,
+    bundle.metroId,
+  );
 
   if (!seekerStop || !hiderStop) {
     return false;

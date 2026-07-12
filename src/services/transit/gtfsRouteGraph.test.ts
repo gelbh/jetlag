@@ -3,7 +3,7 @@ import type { GtfsStaticBundle } from "./gtfsBundle";
 import {
   filterGtfsStopsForGameArea,
   gtfsStopsShareStationOrRoute,
-  nearestGtfsStop,
+  nearestGtfsStopInGameArea,
   resolveTransitLineMatch,
   stationIdentity,
 } from "./gtfsRouteGraph";
@@ -133,8 +133,25 @@ describe("gtfsRouteGraph", () => {
     expect(noMatch).toBe(false);
   });
 
-  it("picks the nearest GTFS stop to a point", () => {
-    const nearest = nearestGtfsStop([40.7354, -73.9901], NYC_BUNDLE.stops);
+  it("picks the nearest GTFS stop within the play area", () => {
+    const downtownGameArea = {
+      type: "Polygon" as const,
+      coordinates: [
+        [
+          [-74.01, 40.73],
+          [-73.97, 40.73],
+          [-73.97, 40.77],
+          [-74.01, 40.77],
+          [-74.01, 40.73],
+        ],
+      ],
+    };
+
+    const nearest = nearestGtfsStopInGameArea(
+      [40.7354, -73.9901],
+      NYC_BUNDLE,
+      downtownGameArea,
+    );
     expect(nearest?.id).toBe("nyc:union-n");
   });
 });

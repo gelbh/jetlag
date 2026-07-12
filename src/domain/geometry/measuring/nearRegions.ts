@@ -2,15 +2,18 @@ import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import booleanIntersects from "@turf/boolean-intersects";
 import turfCircle from "@turf/circle";
 import turfDistance from "@turf/distance";
-import { featureCollection, point as turfPoint } from "@turf/helpers";
+import { point as turfPoint } from "@turf/helpers";
 import intersect from "@turf/intersect";
 import turfLength from "@turf/length";
 import nearestPointOnLine from "@turf/nearest-point-on-line";
 import simplify from "@turf/simplify";
-import union from "@turf/union";
+import Flatbush from "flatbush";
+import { around as geoflatbushAround } from "geoflatbush";
+import { unionPolygonFeatures } from "../unionPolygonFeatures";
 import type { GameArea } from "../../map/annotations";
 import { geodesicLineBuffer } from "../geodesicLineBuffer";
 import {
+  gameAreaFingerprint,
   gameAreaToFeature,
   gameAreaToPolygon,
   type LatLngTuple,
@@ -26,6 +29,7 @@ type SegmentBoundingBox = {
 export interface PreparedLinearSegments {
   segments: Feature<LineString>[];
   boundingBoxes: SegmentBoundingBox[];
+  spatialIndex: Flatbush;
 }
 
 const MIN_MEASURING_SEGMENT_LENGTH_METERS = 5;
@@ -88,7 +92,38 @@ export function prepareMeasuringLineSegments(
   return {
     segments: preparedSegments,
     boundingBoxes: preparedSegments.map(segmentBoundingBox),
+    spatialIndex: buildSegmentSpatialIndex(
+      preparedSegments.map(segmentBoundingBox),
+    ),
   };
+}
+
+function buildSegmentSpatialIndex(boundingBoxes: SegmentBoundingBox[]): Flatbush {
+  const index = new Flatbush(boundingBoxes.length);
+  for (const box of boundingBoxes) {
+    index.add(box.west, box.south, box.east, box.north);
+  }
+  index.finish();
+  return index;
+}
+
+const COASTLINE_CANDIDATE_LIMIT = 32;
+
+function candidateSegmentIndices(
+  point: LatLngTuple,
+  prepared: PreparedLinearSegments,
+): number[] {
+  const { segments, spatialIndex } = prepared;
+  if (segments.length === 0) {
+    return [];
+  }
+
+  return geoflatbushAround(
+    spatialIndex,
+    point[1],
+    point[0],
+    Math.min(COASTLINE_CANDIDATE_LIMIT, segments.length),
+  );
 }
 
 export function nearestPointToCoastlines(
@@ -102,9 +137,18 @@ export function nearestPointToCoastlines(
   const seeker = turfPoint([point[1], point[0]]);
   let nearest: { point: LatLngTuple; distanceMeters: number } | null = null;
 
-  for (let index = 0; index < segments.length; index += 1) {
+  const indices = prepared
+    ? candidateSegmentIndices(point, prepared)
+    : segments.map((_, index) => index);
+
+  for (const index of indices) {
     const coastline = segments[index];
-    const lowerBound = bboxMinDistanceMeters(boundingBoxes[index], point);
+    const boundingBox = boundingBoxes[index];
+    if (!coastline || !boundingBox) {
+      continue;
+    }
+
+    const lowerBound = bboxMinDistanceMeters(boundingBox, point);
     if (nearest && lowerBound >= nearest.distanceMeters) {
       continue;
     }
@@ -137,7 +181,7 @@ function coastlineNearRegionCacheKey(
   distanceMeters: number,
   segmentCount: number,
 ): string {
-  return `${JSON.stringify(gameArea.coordinates)}:${distanceMeters}:${segmentCount}`;
+  return `${gameAreaFingerprint(gameArea)}:${distanceMeters}:${segmentCount}`;
 }
 
 export function clearCoastlineNearRegionCacheForTests(): void {
@@ -203,13 +247,9 @@ function unionBufferedFeatures(
   }
 
   try {
-    const united = union(featureCollection(features));
-    if (
-      united &&
-      (united.geometry.type === "Polygon" ||
-        united.geometry.type === "MultiPolygon")
-    ) {
-      return united as Feature<Polygon | MultiPolygon>;
+    const united = unionPolygonFeatures(features);
+    if (united) {
+      return united;
     }
   } catch {
     // Fall back to a MultiPolygon shell; point-in-region semantics match union.
@@ -427,7 +467,7 @@ export function buildMultiPlaceNearRegion(
   const nearRegion =
     bufferedFeatures.length === 1
       ? bufferedFeatures[0]
-      : union(featureCollection(bufferedFeatures));
+      : unionPolygonFeatures(bufferedFeatures);
 
   if (
     !nearRegion ||

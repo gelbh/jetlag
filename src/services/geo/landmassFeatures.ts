@@ -2,8 +2,8 @@ import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import area from "@turf/area";
 import difference from "@turf/difference";
 import { lineString } from "@turf/helpers";
-import union from "@turf/union";
 import { geodesicLineBuffer } from "../../domain/geometry/geodesicLineBuffer";
+import { unionPolygonFeatures } from "../../domain/geometry/unionPolygonFeatures";
 import type { GameArea } from "../../domain/map/annotations";
 import {
   featureToGameArea,
@@ -109,29 +109,7 @@ function representativePointForBoundary(boundary: GameArea): LatLngTuple {
 function unionObstacles(
   obstacles: Feature<Polygon | MultiPolygon>[],
 ): Feature<Polygon | MultiPolygon> | null {
-  let merged: Feature<Polygon | MultiPolygon> | null = null;
-
-  for (const obstacle of obstacles) {
-    if (!merged) {
-      merged = obstacle;
-      continue;
-    }
-
-    const next = union({
-      type: "FeatureCollection",
-      features: [merged, obstacle],
-    });
-
-    if (
-      next &&
-      (next.geometry.type === "Polygon" ||
-        next.geometry.type === "MultiPolygon")
-    ) {
-      merged = next as Feature<Polygon | MultiPolygon>;
-    }
-  }
-
-  return merged;
+  return unionPolygonFeatures(obstacles);
 }
 
 export function obstacleFeaturesFromElements(

@@ -91,6 +91,7 @@ import { usePhotoTool } from "../../hooks/tools/usePhotoTool";
 import { usePinTool } from "../../hooks/tools/usePinTool";
 import { useZoneTool } from "../../hooks/tools/useZoneTool";
 import { useThermometerTool } from "../../hooks/tools/useThermometerTool";
+import { useSessionAnnotations } from "../../hooks/map/useSessionAnnotations";
 import {
   useAnnotationStore,
   useMapStore,
@@ -140,11 +141,7 @@ export function useMapScreenController() {
   );
   const allAnnotations = useAnnotationStore((state) => state.annotations);
   const sessionId = session?.id;
-  const annotations = useMemo(
-    () =>
-      allAnnotations.filter((annotation) => annotation.sessionId === sessionId),
-    [allAnnotations, sessionId],
-  );
+  const annotations = useSessionAnnotations(sessionId);
   const undoTargetTool = activeTool !== "none" ? activeTool : undefined;
   const redoAnnotationIds = useAnnotationStore(
     (state) => state.redoAnnotationIds,

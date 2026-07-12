@@ -11,6 +11,7 @@ import {
   subscribeToRemoteAnnotations,
   subscribeToSession,
   writeRemoteAnnotation,
+  writeRemoteAnnotationsBatch,
 } from "../../services/firestore/firestoreAnnotations";
 import {
   readOfflineQueueForSession,
@@ -164,19 +165,33 @@ export function useSessionSync() {
       }
 
       let lastError: string | null = null;
+      const retryable = pendingForSession.filter((entry) =>
+        shouldRetryOfflineWrite(entry),
+      );
 
-      for (const entry of pendingForSession) {
-        if (!shouldRetryOfflineWrite(entry)) {
-          continue;
-        }
+      if (retryable.length === 0) {
+        return;
+      }
 
-        try {
-          await writeRemoteAnnotation(sessionId, entry.annotation);
+      try {
+        await writeRemoteAnnotationsBatch(
+          sessionId,
+          retryable.map((entry) => entry.annotation),
+        );
+
+        for (const entry of retryable) {
           await removeOfflineWrite(entry.id);
-        } catch (error) {
-          lastError =
-            error instanceof Error ? error.message : "Sync failed.";
-          await recordOfflineWriteFailure(entry.id);
+        }
+      } catch {
+        for (const entry of retryable) {
+          try {
+            await writeRemoteAnnotation(sessionId, entry.annotation);
+            await removeOfflineWrite(entry.id);
+          } catch (error) {
+            lastError =
+              error instanceof Error ? error.message : "Sync failed.";
+            await recordOfflineWriteFailure(entry.id);
+          }
         }
       }
 

@@ -48,6 +48,10 @@ export function useMeasuringTool({
   canSubmitQuestion = true,
 }: UseMeasuringToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
+  const activeAnnotations = useMemo(
+    () => annotations.filter(isActive),
+    [annotations],
+  );
   const draft = useMeasuringDraftState(annotations, sessionRules);
   const previews = useMeasuringPreviews(gameArea, draft);
 
@@ -113,17 +117,14 @@ export function useMeasuringTool({
 
   const questionCost = useMemo(() => {
     const useCount = Math.max(
-      measuringFromKindUseCount(
-        annotations.filter(isActive),
-        draft.measureFromKind,
-      ),
+      measuringFromKindUseCount(activeAnnotations, draft.measureFromKind),
       measuringFromKindUseCountFromPending(
         pendingQuestions,
         draft.measureFromKind,
       ),
     );
     return questionCostBreakdown("D3P1", useCount);
-  }, [annotations, draft.measureFromKind, pendingQuestions]);
+  }, [activeAnnotations, draft.measureFromKind, pendingQuestions]);
 
   const panel = (
     <MeasuringToolPanel

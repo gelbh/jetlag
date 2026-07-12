@@ -1,10 +1,11 @@
+import type { GameArea } from "../../map/annotations";
 import type { LatLngTuple } from "../../geometry/geometry";
 import { classifyAdminDivisionAtPoint } from "../../../services/geo/adminDivisionBoundaries";
 import { classifyLandmassAtPoint } from "../../../services/geo/landmassFeatures";
 import {
   gtfsStopsShareStationOrRoute,
   loadGtfsBundle,
-  nearestGtfsStop,
+  nearestGtfsStopInGameArea,
 } from "../../../services/transit/gtfsRouteGraph";
 import type { PendingQuestionRecord } from "../../session/sessionChat";
 import {
@@ -94,6 +95,7 @@ async function truthMatchingTransitLineWithGtfs(
   pending: PendingQuestionRecord,
   stationCenter: LatLngTuple,
   metroId: string,
+  gameArea: GameArea,
 ): Promise<HiderTruthResult | null> {
   const metadata = pending.placement.metadata;
   const seekerFeatureId = metadata.matchingNearestFeatureId;
@@ -109,8 +111,18 @@ async function truthMatchingTransitLineWithGtfs(
     return null;
   }
 
-  const seekerStop = nearestGtfsStop(seekerPoint, bundle.stops);
-  const hiderStop = nearestGtfsStop(stationCenter, bundle.stops);
+  const seekerStop = nearestGtfsStopInGameArea(
+    seekerPoint,
+    bundle,
+    gameArea,
+    metroId,
+  );
+  const hiderStop = nearestGtfsStopInGameArea(
+    stationCenter,
+    bundle,
+    gameArea,
+    metroId,
+  );
 
   if (!seekerStop || !hiderStop) {
     if (allowsNull) {
@@ -140,6 +152,7 @@ async function truthMatchingTransitLineWithGtfs(
 export async function truthMatchingAsync(
   pending: PendingQuestionRecord,
   stationCenter: LatLngTuple,
+  gameArea?: GameArea,
 ): Promise<HiderTruthResult | null> {
   const metadata = pending.placement.metadata;
   const categoryId = metadata.matchingCategory;
@@ -148,12 +161,14 @@ export async function truthMatchingAsync(
   if (
     categoryId === "transit_line" &&
     typeof metroId === "string" &&
-    metroId.length > 0
+    metroId.length > 0 &&
+    gameArea
   ) {
     const gtfsTruth = await truthMatchingTransitLineWithGtfs(
       pending,
       stationCenter,
       metroId,
+      gameArea,
     );
     if (gtfsTruth) {
       return gtfsTruth;

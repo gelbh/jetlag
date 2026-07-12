@@ -83,9 +83,13 @@ export function useRadarTool({
 }: UseRadarToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
   const wizardStepRef = useRef("anchor");
+  const activeAnnotations = useMemo(
+    () => annotations.filter(isActive),
+    [annotations],
+  );
   const usedRadarOptions = useMemo(
-    () => usedRadarDistanceOptions(annotations.filter(isActive), distanceUnit),
-    [annotations, distanceUnit],
+    () => usedRadarDistanceOptions(activeAnnotations, distanceUnit),
+    [activeAnnotations, distanceUnit],
   );
   const defaultRadius = defaultRadarPresetMeters(distanceUnit);
   const [radarRadius, setRadarRadius] = useState<number | null>(null);
@@ -100,7 +104,7 @@ export function useRadarTool({
 
   const radarUseCount = Math.max(
     radarDistanceUseCount(
-      annotations.filter(isActive),
+      activeAnnotations,
       radarChooseCustom,
       resolvedRadarRadius,
       distanceUnit,
