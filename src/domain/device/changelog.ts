@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.5.4";
+export const APP_VERSION = "0.5.5";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,21 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.5.5",
+    date: "2026-07-12",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Radar: pin Send to hiders on the distance step so it stays visible in the wizard panel",
+          "Matching: pin Send to hiders on the resolve step so it stays visible in the wizard panel",
+          "Thermometer: pin Send to hiders on the placement step so it stays visible in the wizard panel",
+          "Tentacle: pin Send to hiders on the locations step so it stays visible in the wizard panel",
+        ],
+      }
+    ],
+  },
   {
     version: "0.5.4",
     date: "2026-07-12",
