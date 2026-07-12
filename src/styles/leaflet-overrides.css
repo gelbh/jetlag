@@ -158,8 +158,8 @@
   }
 }
 
-html:not([data-motion="reduced"]) .map-zoom-control,
-html:not([data-motion="reduced"]) .map-style-control {
+html:not([data-motion="reduced"]):not([data-motion="static"]) .map-zoom-control,
+html:not([data-motion="reduced"]):not([data-motion="static"]) .map-style-control {
   transition: opacity var(--motion-base) var(--ease-out-quint);
 }
 

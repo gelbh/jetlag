@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.7 - 2026-07-12
+
+### Improvements
+
+- Motion: smoother transitions on capable devices; app falls back to lightweight CSS animations when CPU, memory, network, or frame rate is constrained.
+- Motion: sheet and panel drag gestures use Framer on capable devices; shared sheet titles and tool dock highlight animate on top-tier devices.
+- Join and feedback screens: press feedback on primary actions and GitHub links.
+
 ## 0.4.6 - 2026-07-12
 
 ### Fixes
@@ -8,6 +16,7 @@
 - Auth: premium and proxy paths wait for restored sign-in; game paths no longer mint anonymous users after auth timeout
 - Stripe billing: clear subscription fields when replacing a stale test-mode customer after live cutover
 - Session heal: one membership heal path removes ghost UIDs when auth drifts on resume
+- Create session: keep the back button and logo below the status bar clock and battery
 
 ### Improvements
 

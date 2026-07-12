@@ -61,14 +61,14 @@
     letter-spacing: 0.07em;
   }
 
-  html:not([data-motion="reduced"]) .home-card-btn {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .home-card-btn {
     transition:
       background var(--motion-fast) var(--ease-out-quint),
       border-color var(--motion-fast) var(--ease-out-quint),
       transform var(--motion-instant) var(--ease-out-quint);
   }
 
-  html[data-motion="reduced"] .home-card-btn {
+  html:is([data-motion="static"], [data-motion="reduced"]) .home-card-btn {
     transition: none;
   }
 
@@ -495,7 +495,7 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    html:not([data-motion="reduced"]) .home-resume-action[aria-busy="true"] .home-resume-cta {
+    html:not([data-motion="reduced"]):not([data-motion="static"]) .home-resume-action[aria-busy="true"] .home-resume-cta {
       animation: home-resume-pulse 1.2s ease-in-out infinite;
     }
   }
@@ -568,7 +568,7 @@
     background: oklch(from var(--color-surface-deep) l c h / 0.92);
   }
 
-  html:not([data-motion="reduced"]) .tutorial-screenshot-lightbox-animated {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .tutorial-screenshot-lightbox-animated {
     animation: hud-scrim-enter var(--motion-fast) var(--ease-out-quint) both;
   }
 

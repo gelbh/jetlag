@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { useWizardSwipe } from "../../../hooks/useWizardSwipe";
+import { useEffect, useRef, useState, useContext, type ReactNode } from "react";
+import { MotionCapabilityContext } from "../../motion/MotionCapabilityProvider";
+import { useAdaptiveWizardSwipe } from "../../../hooks/useAdaptiveWizardSwipe";
+import { MotionWizardSwipe } from "../../motion/MotionWizardSwipe";
 
 interface WizardSwipeSurfaceProps {
   stepId: string;
@@ -22,11 +24,14 @@ export function WizardSwipeSurface({
   children,
   className = "",
 }: WizardSwipeSurfaceProps) {
+  const capability = useContext(MotionCapabilityContext);
+  const skipStepMotion =
+    capability?.tier === "css" || capability?.tier === "static";
   const containerRef = useRef<HTMLDivElement>(null);
   const prevStepIndex = useRef(stepIndex);
   const [enterClass, setEnterClass] = useState("");
 
-  const { surfaceStyle, surfaceProps } = useWizardSwipe({
+  const { surfaceStyle, surfaceProps, useFramerSwipe } = useAdaptiveWizardSwipe({
     canGoBack,
     canGoNext,
     onBack,
@@ -35,7 +40,7 @@ export function WizardSwipeSurface({
   });
 
   useEffect(() => {
-    if (prevStepIndex.current === stepIndex) {
+    if (skipStepMotion || prevStepIndex.current === stepIndex) {
       return;
     }
 
@@ -56,7 +61,32 @@ export function WizardSwipeSurface({
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [stepIndex]);
+  }, [stepIndex, skipStepMotion]);
+
+  const stepContent = (
+    <div
+      key={stepId}
+      className={`${enterClass} motion-reduce:animate-none`.trim()}
+      style={useFramerSwipe ? undefined : surfaceStyle}
+    >
+      {children}
+    </div>
+  );
+
+  if (useFramerSwipe) {
+    return (
+      <MotionWizardSwipe
+        stepId={stepId}
+        canGoBack={canGoBack}
+        canGoNext={canGoNext}
+        onBack={onBack}
+        onNext={onNext}
+        className={className}
+      >
+        {stepContent}
+      </MotionWizardSwipe>
+    );
+  }
 
   return (
     <div
@@ -64,13 +94,7 @@ export function WizardSwipeSurface({
       className={`wizard-swipe-surface touch-pan-y ${className}`.trim()}
       {...surfaceProps}
     >
-      <div
-        key={stepId}
-        className={`${enterClass} motion-reduce:animate-none`.trim()}
-        style={surfaceStyle}
-      >
-        {children}
-      </div>
+      {stepContent}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { useAppNavigate } from "../../hooks/useAppNavigate";
 import { useGameAreaFraming } from "../../hooks/session/useGameAreaFraming";
 import {
   LOCAL_SESSION_ID,
@@ -69,7 +70,7 @@ import { buildBundledPresetSelectGroups } from "../../domain/regions/bundledPres
 import { placeToFocusBounds } from "./utils";
 
 export function useCreateSession() {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const presets = useGamePresetStore((state) => state.presets);
   const bundledPresetSelectGroups = useMemo(

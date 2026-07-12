@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { useMapStore } from "../../state/mapStore";
+import { useContext, useEffect, useState } from "react";
+import { MotionCapabilityContext } from "../components/motion/MotionCapabilityProvider";
+import { useMapStore } from "../state/mapStore";
 
 function readPrefersReducedMotion(): boolean {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -31,23 +32,14 @@ export function usePrefersReducedMotion(): boolean {
   return prefersReducedMotion;
 }
 
-let motionProfileSubscriberCount = 0;
-
 export function useMotionProfile() {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const prefersReducedMotion = usePrefersReducedMotion();
-  const animate = !lowPowerMode && !prefersReducedMotion;
+  const capability = useContext(MotionCapabilityContext);
 
-  useEffect(() => {
-    motionProfileSubscriberCount += 1;
-    document.documentElement.dataset.motion = animate ? "full" : "reduced";
-    return () => {
-      motionProfileSubscriberCount -= 1;
-      if (motionProfileSubscriberCount === 0) {
-        delete document.documentElement.dataset.motion;
-      }
-    };
-  }, [animate]);
+  const animate = capability
+    ? capability.tier !== "static"
+    : !lowPowerMode && !prefersReducedMotion;
 
   return { animate, lowPowerMode, prefersReducedMotion };
 }

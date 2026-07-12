@@ -154,7 +154,7 @@
     transition: width var(--motion-base) var(--ease-out-quint);
   }
 
-  html[data-motion="reduced"] .jl-preload-detail-panel__progress-fill {
+  html:is([data-motion="static"], [data-motion="reduced"]) .jl-preload-detail-panel__progress-fill {
     transition: none;
   }
 
@@ -249,11 +249,11 @@
     box-shadow: 0 0 8px oklch(from var(--color-status-error) l c h / 0.4);
   }
 
-  html:not([data-motion="reduced"]) .jl-sync-beacon--saving .jl-sync-beacon__lamp {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-sync-beacon--saving .jl-sync-beacon__lamp {
     animation: jl-sync-beacon-pulse 1.1s var(--ease-out-quint) infinite;
   }
 
-  html[data-motion="reduced"] .jl-sync-beacon--saving .jl-sync-beacon__lamp {
+  html:is([data-motion="static"], [data-motion="reduced"]) .jl-sync-beacon--saving .jl-sync-beacon__lamp {
     opacity: 0.85;
   }
 }

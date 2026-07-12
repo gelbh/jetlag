@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useMotionProfile } from "../../hooks/location/useMotionProfile";
+import { useMotionProfile } from "../../hooks/useMotionProfile";
 
 interface TutorialScreenshotLightboxProps {
   src: string;

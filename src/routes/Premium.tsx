@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { useAppNavigate } from "../hooks/useAppNavigate";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { InlineError } from "../components/ui/InlineError";
 import { SegmentControl } from "../components/ui/SegmentControl";
@@ -258,7 +259,7 @@ function PremiumCatalog({
 }
 
 export function Premium() {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const checkoutState = searchParams.get("checkout");
   const [entitlements, setEntitlements] = useState<PremiumEntitlements | null>(

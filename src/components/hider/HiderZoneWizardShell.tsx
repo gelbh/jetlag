@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useAnimatedPresence } from "../../hooks/useAnimatedPresence";
-import { usePanelDrag } from "../../hooks/usePanelDrag";
+import { useAdaptivePanelDrag } from "../../hooks/useAdaptivePanelDrag";
 import { MapFloatingPanel } from "../map/MapFloatingPanel";
 
 interface HiderZoneWizardShellProps {
@@ -34,7 +34,7 @@ export function HiderZoneWizardShell({
     durationMs: 200,
   });
 
-  const { panelStyle, handleProps } = usePanelDrag({
+  const { panelStyle, handleProps, useFramerDrag } = useAdaptivePanelDrag({
     minimized: peeked,
     onMinimizedChange: onPeekedChange,
   });
@@ -55,7 +55,7 @@ export function HiderZoneWizardShell({
       }`}
       maxHeightClassName={maxHeightClassName}
       preserveBodyWhenMinimized={false}
-      panelStyle={panelStyle}
+      panelStyle={useFramerDrag ? undefined : panelStyle}
       dragHandleProps={handleProps}
       onClose={onClose}
       closeLabel={closeLabel}

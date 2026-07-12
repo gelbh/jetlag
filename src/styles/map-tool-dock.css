@@ -35,7 +35,7 @@
     pointer-events: none;
   }
 
-  html:not([data-motion="reduced"]) .jl-tool-dock-highlight {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-dock-highlight {
     transition:
       transform var(--motion-fast) var(--ease-out-quint),
       width var(--motion-fast) var(--ease-out-quint),
@@ -51,7 +51,7 @@
     justify-content: space-evenly;
   }
 
-  html:not([data-motion="reduced"]) .jl-tool-menu {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-menu {
     animation: jl-menu-enter var(--motion-fast) var(--ease-out-quint) both;
     transform-origin: bottom center;
   }
@@ -161,7 +161,7 @@
     color: var(--color-ink-secondary);
   }
 
-  html:not([data-motion="reduced"]) .jl-tool-slot {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-slot {
     transition:
       background var(--motion-fast) var(--ease-out-quint),
       border-color var(--motion-fast) var(--ease-out-quint),
@@ -169,11 +169,11 @@
       transform var(--motion-instant) var(--ease-out-quint);
   }
 
-  html:not([data-motion="reduced"]) .jl-tool-slot:active:not(:disabled) {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-slot:active:not(:disabled) {
     transform: scale(0.97);
   }
 
-  html[data-motion="reduced"] .jl-tool-slot {
+  html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-slot {
     transition: none;
   }
 
@@ -259,7 +259,7 @@
     border: none;
   }
 
-  html:not([data-motion="reduced"]) .jl-panel-above-dock.jl-panel-chrome-hidden {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-panel-above-dock.jl-panel-chrome-hidden {
     transition: none;
   }
 
@@ -306,13 +306,13 @@
     transform: translateY(calc(100% - 3rem));
   }
 
-  html:not([data-motion="reduced"]) .jl-panel-above-dock,
-  html:not([data-motion="reduced"]) .jl-panel-hider-wizard {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-panel-above-dock,
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-panel-hider-wizard {
     transition: transform var(--motion-base) var(--ease-out-quint);
   }
 
-  html[data-motion="reduced"] .jl-panel-above-dock,
-  html[data-motion="reduced"] .jl-panel-hider-wizard {
+  html:is([data-motion="static"], [data-motion="reduced"]) .jl-panel-above-dock,
+  html:is([data-motion="static"], [data-motion="reduced"]) .jl-panel-hider-wizard {
     transition: none;
   }
 
@@ -349,11 +349,11 @@
     justify-content: center;
   }
 
-  html:not([data-motion="reduced"]) .jl-thermometer-live-marker {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-thermometer-live-marker {
     animation: jl-thermometer-live-pulse 1.8s var(--ease-out-quint) infinite;
   }
 
-  html:not([data-motion="reduced"]) .jl-unread-badge-pulse {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-unread-badge-pulse {
     animation: jl-unread-pulse 600ms var(--ease-out-quint) 1;
   }
 
@@ -424,66 +424,6 @@
     background: var(--color-surface-raised);
   }
 
-  .jl-tool-overflow-sheet,
-  .hud-sheet-enter {
-    animation: hud-sheet-enter var(--motion-sheet) var(--ease-out-quint) both;
-  }
-
-  .hud-sheet-exit {
-    animation: hud-sheet-exit calc(var(--motion-sheet) * 0.75) var(--ease-out-quint)
-      both;
-  }
-
-  .hud-scrim-enter {
-    animation: hud-scrim-enter var(--motion-base) var(--ease-out-quint) both;
-  }
-
-  .hud-scrim-exit {
-    animation: hud-scrim-exit calc(var(--motion-base) * 0.75) var(--ease-out-quint)
-      both;
-  }
-
-  .jl-panel-enter {
-    animation: jl-panel-enter var(--motion-base) var(--ease-out-quint) both;
-  }
-
-  .jl-panel-exit {
-    animation: jl-panel-exit calc(var(--motion-base) * 0.75) var(--ease-out-quint) both;
-  }
-
-  .jl-panel-crossfade-enter {
-    animation: jl-panel-crossfade-enter var(--motion-fast) var(--ease-out-quint) both;
-  }
-
-  .jl-step-enter {
-    animation: jl-step-enter var(--motion-fast) var(--ease-out-quint) both;
-  }
-
-  .jl-wizard-step-forward {
-    animation: jl-wizard-step-forward var(--motion-base) var(--ease-out-quint) both;
-  }
-
-  .jl-wizard-step-back {
-    animation: jl-wizard-step-back var(--motion-base) var(--ease-out-quint) both;
-  }
-
-  .jl-banner-enter {
-    animation: jl-banner-enter var(--motion-base) var(--ease-out-quint) both;
-  }
-
-  .jl-banner-exit {
-    animation: jl-banner-exit calc(var(--motion-base) * 0.75) var(--ease-out-quint)
-      both;
-  }
-
-  .jl-chat-tab-enter {
-    animation: jl-chat-tab-enter var(--motion-fast) var(--ease-out-quint) both;
-  }
-
-  .route-loading-enter {
-    animation: route-loading-enter var(--motion-base) var(--ease-out-quint) both;
-  }
-
   .jl-sheet-drag-handle {
     touch-action: none;
     cursor: grab;
@@ -496,25 +436,25 @@
     cursor: grabbing;
   }
 
-  html:not([data-motion="reduced"]) .jl-chat-keyboard-inset {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-chat-keyboard-inset {
     transition: transform var(--motion-base) var(--ease-out-quint);
   }
 
-  html:not([data-motion="reduced"]) .jl-tool-dock {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-dock {
     transition: bottom var(--motion-base) var(--ease-out-quint);
   }
 
-  html:not([data-motion="reduced"]) .btn-primary,
-  html:not([data-motion="reduced"]) .btn-secondary {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .btn-primary,
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .btn-secondary {
     transition: transform var(--motion-instant) var(--ease-out-quint);
   }
 
-  html:not([data-motion="reduced"]) .btn-primary:active:not(:disabled),
-  html:not([data-motion="reduced"]) .btn-secondary:active:not(:disabled) {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .btn-primary:active:not(:disabled),
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .btn-secondary:active:not(:disabled) {
     transform: scale(0.97);
   }
 
-  html:not([data-motion="reduced"]) .home-card-btn:active {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .home-card-btn:active {
     transform: scale(0.97);
   }
 
@@ -535,7 +475,7 @@
     color: var(--color-ink-secondary);
   }
 
-  html:not([data-motion="reduced"]) .jl-tool-overflow-row {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-overflow-row {
     transition:
       background var(--motion-fast) var(--ease-out-quint),
       border-color var(--motion-fast) var(--ease-out-quint),
@@ -543,11 +483,11 @@
       transform var(--motion-instant) var(--ease-out-quint);
   }
 
-  html:not([data-motion="reduced"]) .jl-tool-overflow-row:active:not(:disabled) {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-overflow-row:active:not(:disabled) {
     transform: scale(0.97);
   }
 
-  html[data-motion="reduced"] .jl-tool-overflow-row {
+  html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-overflow-row {
     transition: none;
   }
 

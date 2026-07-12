@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAppNavigate } from "../hooks/useAppNavigate";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { InlineError } from "../components/ui/InlineError";
 import {
@@ -26,10 +26,11 @@ import {
 import { sessionVersionMismatchMessage } from "../domain/session/sessionVersion";
 import { resolvePlayerRole } from "../domain/session/playerRole";
 import { retryAsync } from "../services/core/retryAsync";
+import { MotionPressable } from "../components/motion/MotionPressable";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 
 export function JoinSession() {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const setSession = useSessionStore((state) => state.setSession);
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -205,14 +206,14 @@ export function JoinSession() {
           disabled={loading}
         />
 
-        <button
+        <MotionPressable
           type="button"
           onClick={() => void handleJoin()}
           disabled={loading}
           className="btn-primary min-h-14 w-full disabled:opacity-50"
         >
           {loading ? "Joining…" : "Join session"}
-        </button>
+        </MotionPressable>
 
         {error ? <InlineError>{error}</InlineError> : null}
       </div>

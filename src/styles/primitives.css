@@ -21,18 +21,25 @@
     box-shadow: var(--shadow-hud-float);
   }
 
-  html:not([data-motion="reduced"]) .hud-chrome {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .hud-chrome {
     transition:
       background var(--motion-instant) ease,
       transform var(--motion-instant) var(--ease-out-quint);
   }
 
-  html:not([data-motion="reduced"]) .hud-chrome:active:not(:disabled) {
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .hud-chrome:active:not(:disabled) {
     transform: scale(0.97);
   }
 
-  html[data-motion="reduced"] .hud-chrome {
+  html:is([data-motion="static"], [data-motion="reduced"]) .hud-chrome {
     transition: none;
+  }
+
+  html[data-motion="framer-enhanced"] .hud-pressable-css:active,
+  html[data-motion="framer-standard"] .hud-pressable-css:active,
+  html[data-motion="css"] .hud-pressable-css:active {
+    transform: scale(0.97);
+    transition: transform var(--motion-instant) var(--ease-out-quint);
   }
 
   .hud-chrome:hover:not(:disabled) {

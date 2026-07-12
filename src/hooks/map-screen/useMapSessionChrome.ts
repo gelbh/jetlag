@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAppNavigate } from "../../hooks/useAppNavigate";
 import type { RefObject } from "react";
 import {
   isActive,
@@ -34,7 +34,7 @@ export function useMapSessionChrome({
   closeSettingsPanel,
   endGameBlocked = false,
 }: UseMapSessionChromeParams) {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const setSession = useSessionStore((state) => state.setSession);
 
   const handleClearMap = useCallback(() => {

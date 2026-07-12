@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAppNavigate } from "../hooks/useAppNavigate";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import {
   ScreenHeader,
@@ -35,7 +35,7 @@ function initialView(coreComplete: boolean): TutorialView {
 }
 
 export function Tutorial() {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const { progress, completeStep, completeQuestionStep } = useTutorialProgress();
   const [view, setView] = useState<TutorialView>(() =>
     initialView(progress.coreComplete),
@@ -121,7 +121,7 @@ export function Tutorial() {
 
   const handleBackFromStart = () => {
     if (view.mode === "section" && view.sectionId === "core" && !progress.coreComplete) {
-      navigate("/");
+      navigate("/", { direction: "back" });
       return;
     }
     if (view.mode === "question") {
