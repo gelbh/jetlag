@@ -350,19 +350,21 @@ export function MeasuringPanel({
       toolId="measuring"
       fillHeight={useStickyAnswerFooter}
       stepper={
-        <Stepper
-          nav={
-            readOnly
-              ? undefined
-              : {
-                  stepIndex,
-                  stepCount: steps.length,
-                  onBack: goBack,
-                  onNext: goNext,
-                  canGoNext,
-                }
-          }
-        />
+        sandbox?.hideStepper ? undefined : (
+          <Stepper
+            nav={
+              readOnly
+                ? undefined
+                : {
+                    stepIndex,
+                    stepCount: steps.length,
+                    onBack: goBack,
+                    onNext: goNext,
+                    canGoNext,
+                  }
+            }
+          />
+        )
       }
     >
       <div className={readOnly ? "pointer-events-none select-none" : undefined}>

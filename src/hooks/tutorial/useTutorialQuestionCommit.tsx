@@ -1,19 +1,22 @@
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useRef, useState } from "react";
 
 interface UseTutorialQuestionCommitOptions {
   enabled: boolean;
-  canCommit: boolean;
 }
 
 export function useTutorialQuestionCommit({
   enabled,
-  canCommit,
 }: UseTutorialQuestionCommitOptions) {
+  const canCommitRef = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [committed, setCommitted] = useState(false);
 
+  const syncCanCommit = useCallback((canCommit: boolean) => {
+    canCommitRef.current = canCommit;
+  }, []);
+
   const handleCommit = useCallback(() => {
-    if (!enabled || !canCommit || committed || isSubmitting) {
+    if (!enabled || !canCommitRef.current || committed || isSubmitting) {
       return;
     }
 
@@ -22,18 +25,11 @@ export function useTutorialQuestionCommit({
       setIsSubmitting(false);
       setCommitted(true);
     }, 350);
-  }, [canCommit, committed, enabled, isSubmitting]);
-
-  const committedNote: ReactNode =
-    enabled && committed ? (
-      <p className="text-center text-xs text-status-success">
-        Practice question added — no cards spent in the tutorial.
-      </p>
-    ) : null;
+  }, [committed, enabled, isSubmitting]);
 
   return {
     handleCommit,
-    committedNote,
+    syncCanCommit,
     isSubmitting,
     committed,
   };

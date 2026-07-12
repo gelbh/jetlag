@@ -18,6 +18,7 @@ function useTentacleSandboxBody({
   fixture,
   readOnly,
   interactive,
+  committed,
   session,
   registerMapDraft,
   gameArea,
@@ -70,6 +71,9 @@ function useTentacleSandboxBody({
     !loading;
 
   useEffect(() => {
+    if (committed) {
+      return;
+    }
     if (readOnly || !interactive || session === null || !session.hasCenter) {
       registerMapDraft(null);
       return;
@@ -107,6 +111,7 @@ function useTentacleSandboxBody({
       elimination ? [elimination] : [],
     );
   }, [
+    committed,
     gameArea,
     interactive,
     loading,

@@ -18,6 +18,7 @@ function useThermometerSandboxBody({
   fixture,
   readOnly,
   interactive,
+  committed,
   registerMapDraft,
   gameArea,
   costLabel,
@@ -52,7 +53,7 @@ function useThermometerSandboxBody({
 
   const placeOnMap = useCallback(
     (lat: number, lng: number) => {
-      if (readOnly) {
+      if (readOnly || committed) {
         return;
       }
 
@@ -71,10 +72,13 @@ function useThermometerSandboxBody({
         setMapStep("ready");
       }
     },
-    [mapStep, readOnly],
+    [mapStep, readOnly, committed],
   );
 
   useEffect(() => {
+    if (committed) {
+      return;
+    }
     if (readOnly || !interactive) {
       registerMapDraft(null);
       return;
@@ -91,6 +95,7 @@ function useThermometerSandboxBody({
     });
   }, [
     answer,
+    committed,
     gameArea,
     interactive,
     readOnly,

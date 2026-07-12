@@ -285,27 +285,76 @@ export function defaultQuestionProgress(): Record<QuestionTutorialId, number> {
   };
 }
 
+export function questionWalkthroughSteps(
+  steps: readonly TutorialStep[],
+): TutorialStep[] {
+  return steps.filter((step) => step.kind !== "interactive-panel");
+}
+
+export function questionWalkthroughStepCount(
+  steps: readonly TutorialStep[],
+): number {
+  return questionWalkthroughSteps(steps).length;
+}
+
+export function walkthroughIndexForFullStep(
+  steps: readonly TutorialStep[],
+  fullStepIndex: number,
+): number | null {
+  const step = steps[fullStepIndex];
+  if (!step || step.kind === "interactive-panel") {
+    return null;
+  }
+
+  return questionWalkthroughSteps(steps).findIndex(
+    (walkthroughStep) => walkthroughStep.id === step.id,
+  );
+}
+
+export function fullStepIndexForWalkthroughStep(
+  steps: readonly TutorialStep[],
+  walkthroughIndex: number,
+): number {
+  const walkthroughStep = questionWalkthroughSteps(steps)[walkthroughIndex];
+  if (!walkthroughStep) {
+    return 0;
+  }
+
+  return steps.findIndex((step) => step.id === walkthroughStep.id);
+}
+
 export function isQuestionTutorialComplete(
   id: QuestionTutorialId,
-  stepCount: number,
+  _stepCount: number,
   progress: TutorialProgress,
 ): boolean {
-  return progress.questions[id] >= stepCount - 1;
+  const tutorial = getQuestionTutorial(id);
+  const walkthroughCount = questionWalkthroughStepCount(tutorial.steps);
+  return progress.questions[id] >= walkthroughCount - 1;
 }
 
 export function questionTutorialStartIndex(
   id: QuestionTutorialId,
-  stepCount: number,
+  _stepCount: number,
   progress: TutorialProgress,
 ): number {
-  if (isQuestionTutorialComplete(id, stepCount, progress)) {
+  const tutorial = getQuestionTutorial(id);
+  const walkthroughSteps = questionWalkthroughSteps(tutorial.steps);
+
+  if (isQuestionTutorialComplete(id, walkthroughSteps.length, progress)) {
     return 0;
   }
+
   const last = progress.questions[id];
   if (last < 0) {
     return 0;
   }
-  return Math.min(last + 1, stepCount - 1);
+
+  const nextWalkthroughIndex = Math.min(last + 1, walkthroughSteps.length - 1);
+  return fullStepIndexForWalkthroughStep(
+    tutorial.steps,
+    nextWalkthroughIndex,
+  );
 }
 
 export function completedQuestionCount(progress: TutorialProgress): number {
@@ -332,10 +381,16 @@ export function questionsHubStatusLabel(progress: TutorialProgress): string {
 
 export function markQuestionTutorialComplete(
   id: QuestionTutorialId,
-  stepCount: number,
+  _stepCount: number,
   progress: TutorialProgress,
 ): TutorialProgress {
-  return markQuestionStepComplete(id, stepCount - 1, progress);
+  const tutorial = getQuestionTutorial(id);
+  const lastWalkthroughIndex = questionWalkthroughStepCount(tutorial.steps) - 1;
+  return markQuestionStepComplete(
+    id,
+    fullStepIndexForWalkthroughStep(tutorial.steps, lastWalkthroughIndex),
+    progress,
+  );
 }
 
 export function markQuestionStepComplete(
@@ -343,11 +398,17 @@ export function markQuestionStepComplete(
   stepIndex: number,
   progress: TutorialProgress,
 ): TutorialProgress {
+  const tutorial = getQuestionTutorial(id);
+  const walkthroughIndex = walkthroughIndexForFullStep(tutorial.steps, stepIndex);
+  if (walkthroughIndex === null) {
+    return progress;
+  }
+
   return {
     ...progress,
     questions: {
       ...progress.questions,
-      [id]: Math.max(progress.questions[id], stepIndex),
+      [id]: Math.max(progress.questions[id], walkthroughIndex),
     },
   };
 }

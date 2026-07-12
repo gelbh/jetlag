@@ -60,6 +60,19 @@ export function TutorialSectionWizard({
   const step = section.steps[stepIndex]!;
   const isLastStep = stepIndex >= section.steps.length - 1;
   const isInteractiveStep = step.kind === "interactive-panel";
+  const walkthroughSteps = useMemo(
+    () => section.steps.filter((item) => item.kind !== "interactive-panel"),
+    [section.steps],
+  );
+  const walkthroughStepIndex = useMemo(() => {
+    if (isInteractiveStep) {
+      return -1;
+    }
+
+    return walkthroughSteps.findIndex((item) => item.id === step.id);
+  }, [isInteractiveStep, step.id, walkthroughSteps]);
+  const isLastWalkthroughStep =
+    !isInteractiveStep && walkthroughStepIndex >= walkthroughSteps.length - 1;
 
   const handleNext = useCallback(() => {
     onStepComplete(stepIndex);
@@ -79,30 +92,37 @@ export function TutorialSectionWizard({
   }, [onBackFromStart, stepIndex]);
 
   const stepper = useMemo(() => {
-    const states = deriveStepStates(section.steps.length, stepIndex);
+    if (isInteractiveStep) {
+      return null;
+    }
+
+    const states = deriveStepStates(walkthroughSteps.length, walkthroughStepIndex);
     const steps = buildSteps(
-      section.steps.map((item) => ({ id: item.id, label: item.title })),
+      walkthroughSteps.map((item) => ({ id: item.id, label: item.title })),
       states,
     );
     return (
       <ToolStepper
         steps={steps}
         showLabel={false}
-        nav={
-          isInteractiveStep
-            ? undefined
-            : {
-                stepIndex,
-                stepCount: section.steps.length,
-                canGoBack: false,
-                canGoNext: !isLastStep,
-                onBack: handleBack,
-                onNext: handleNext,
-              }
-        }
+        nav={{
+          stepIndex: walkthroughStepIndex,
+          stepCount: walkthroughSteps.length,
+          canGoBack: walkthroughStepIndex > 0,
+          canGoNext: !isLastWalkthroughStep,
+          onBack: handleBack,
+          onNext: handleNext,
+        }}
       />
     );
-  }, [section.steps, stepIndex, isInteractiveStep, isLastStep, handleBack, handleNext]);
+  }, [
+    walkthroughSteps,
+    walkthroughStepIndex,
+    isInteractiveStep,
+    isLastWalkthroughStep,
+    handleBack,
+    handleNext,
+  ]);
 
   const isQuestionTutorial = section.kind === "question";
 

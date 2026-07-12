@@ -24,6 +24,37 @@ import {
   fetchBundledMeasuringPlaces,
   mergeMeasuringPlaces,
 } from "./regionPackPoi";
+import { isEligibleBundledPoi } from "./bundledPoiHygiene";
+
+const HYGIENE_MEASURING_CATEGORIES = new Set<MeasuringLocationCategory>([
+  "commercial_airport",
+  "rail_station",
+  "mountain",
+  "park",
+  "museum",
+  "hospital",
+]);
+
+function filterHygieneMeasuringPlaces(
+  places: MeasuringPlace[],
+  category: MeasuringLocationCategory,
+): MeasuringPlace[] {
+  if (!HYGIENE_MEASURING_CATEGORIES.has(category)) {
+    return places;
+  }
+
+  return places.filter((place) =>
+    isEligibleBundledPoi(
+      {
+        id: place.id,
+        name: place.name,
+        lat: place.point[0],
+        lng: place.point[1],
+      },
+      category,
+    ),
+  );
+}
 
 export interface MeasuringPlace {
   id: string;
@@ -145,9 +176,8 @@ export async function fetchMeasuringPlacesInArea(
         buildMeasuringPlacesQuery(gameArea, selectors),
       );
 
-      const overpassPlaces = parseMeasuringPlaces(
-        payload.elements,
-        gameArea,
+      const overpassPlaces = filterHygieneMeasuringPlaces(
+        parseMeasuringPlaces(payload.elements, gameArea, category),
         category,
       );
       const bundledPlaces = await fetchBundledMeasuringPlaces(

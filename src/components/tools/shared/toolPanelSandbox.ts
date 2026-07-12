@@ -9,4 +9,6 @@ export interface ToolPanelSandboxMode {
   initialWizardStepId?: string;
   /** Sync the wizard step with external tutorial state. Defaults to false. */
   syncWizardStep?: boolean;
+  /** Hide the embedded tool wizard stepper in read-only split previews. */
+  hideStepper?: boolean;
 }

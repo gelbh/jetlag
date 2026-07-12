@@ -18,6 +18,7 @@ function useRadarSandboxBody({
   fixture,
   readOnly,
   interactive,
+  committed,
   session,
   registerMapDraft,
   gameArea,
@@ -59,6 +60,9 @@ function useRadarSandboxBody({
     (awaitHiderAnswer || answer !== null);
 
   useEffect(() => {
+    if (committed) {
+      return;
+    }
     if (readOnly || !interactive || session === null || !session.hasCenter) {
       registerMapDraft(null);
       return;
@@ -82,6 +86,7 @@ function useRadarSandboxBody({
     });
   }, [
     answer,
+    committed,
     gameArea,
     interactive,
     readOnly,

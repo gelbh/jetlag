@@ -18,6 +18,7 @@ import {
   fetchBundledTentaclePois,
   mergeTentaclePois,
 } from "./regionPackPoi";
+import { isEligibleBundledPoi } from "./bundledPoiHygiene";
 import type { RegionPackId } from "../../domain/regions/regionPack";
 import {
   getOrFetchCached,
@@ -233,7 +234,15 @@ export async function fetchTentaclePois(
     options?.regionPackId,
   );
 
-  const mergedOverpass = mergeTentaclePois(overpassPois, bundledPois);
+  const mergedOverpass = mergeTentaclePois(
+    overpassPois.filter((poi) =>
+      isEligibleBundledPoi(
+        { id: poi.id, name: poi.name, lat: poi.lat, lng: poi.lng },
+        categoryId,
+      ),
+    ),
+    bundledPois,
+  );
   const seen = new Set(mergedOverpass.map((poi) => poi.id));
   return [...mergedOverpass, ...pinPois.filter((poi) => !seen.has(poi.id))];
 }

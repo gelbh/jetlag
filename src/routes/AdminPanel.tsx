@@ -4,6 +4,10 @@ import { signOut } from "firebase/auth";
 import { PremiumSignInGate } from "../components/billing/PremiumSignInGate";
 import { AdminSessionTimer } from "../components/admin/AdminSessionTimer";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
+import {
+  ScreenHeader,
+  screenHeaderOffsetClassName,
+} from "../components/ui/ScreenHeader";
 import { HudAdminIcon } from "../components/ui/HudIcons";
 import { InlineError } from "../components/ui/InlineError";
 import { MotionPressable } from "../components/motion/MotionPressable";
@@ -157,7 +161,10 @@ export function AdminPanel() {
   if (!authReady) {
     return (
       <EntryScreenLayout justify="start">
-        <AdminSessionSkeletonRows />
+        <ScreenHeader backTo="/" backLabel="Back" />
+        <div className={screenHeaderOffsetClassName}>
+          <AdminSessionSkeletonRows />
+        </div>
       </EntryScreenLayout>
     );
   }
@@ -165,7 +172,8 @@ export function AdminPanel() {
   if (!isPermanent || !user) {
     return (
       <EntryScreenLayout justify="start">
-        <div className="space-y-4 pt-[max(1.25rem,env(safe-area-inset-top))]">
+        <ScreenHeader backTo="/" backLabel="Back" />
+        <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
           <div className="space-y-2">
             <h1 className="font-display text-3xl font-bold uppercase tracking-tight text-ink">
               Live sessions
@@ -175,9 +183,6 @@ export function AdminPanel() {
             </p>
           </div>
           <PremiumSignInGate continuePath="/admin" />
-          <Link to="/" className="btn-secondary inline-flex min-h-11 items-center px-4">
-            Back home
-          </Link>
         </div>
       </EntryScreenLayout>
     );
@@ -186,7 +191,8 @@ export function AdminPanel() {
   if (!isAdmin) {
     return (
       <EntryScreenLayout justify="start">
-        <div className="space-y-4 pt-[max(1.25rem,env(safe-area-inset-top))]">
+        <ScreenHeader backTo="/" backLabel="Back" />
+        <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
           <h1 className="font-display text-3xl font-bold uppercase tracking-tight text-ink">
             Access denied
           </h1>
@@ -213,7 +219,8 @@ export function AdminPanel() {
 
   return (
     <EntryScreenLayout justify="start">
-      <div className="space-y-4 pt-[max(1.25rem,env(safe-area-inset-top))]">
+      <ScreenHeader backTo="/" backLabel="Back" />
+      <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-brand-blue">
@@ -271,10 +278,7 @@ export function AdminPanel() {
           </div>
         )}
 
-        <div className="flex flex-wrap items-center gap-3 pb-4 text-xs text-ink-dim">
-          <Link to="/" className="underline-offset-2 hover:underline">
-            Back home
-          </Link>
+        <div className="pb-4 text-xs text-ink-dim">
           <span>v{APP_VERSION}</span>
         </div>
       </div>

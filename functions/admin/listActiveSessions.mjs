@@ -1,6 +1,6 @@
 import { onCall } from "firebase-functions/v2/https";
 import { getFirestore } from "firebase-admin/firestore";
-import { getSentryDsnSecret } from "../lib/sentry.mjs";
+import { getSentryDsnSecret, withSentryEventHandler } from "../lib/sentry.mjs";
 import { requireAdminAuth } from "./adminAccess.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
@@ -131,7 +131,7 @@ export function summarizeSession(sessionId, code, session, nowMs = Date.now()) {
 
 export const listActiveSessions = onCall(
   { secrets: [sentryDsnSecret], enforceAppCheck: true },
-  async (request) => {
+  withSentryEventHandler(async (request) => {
     requireAdminAuth(request.auth);
 
     const db = getFirestore();
@@ -172,5 +172,5 @@ export const listActiveSessions = onCall(
     });
 
     return { sessions };
-  },
+  }),
 );

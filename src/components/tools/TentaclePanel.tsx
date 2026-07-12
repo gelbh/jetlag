@@ -18,6 +18,7 @@ import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
 import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
+import { WizardToolPanelLayout } from "./shared/WizardToolPanelLayout";
 import { TENTACLE_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
 import { useToolWizard } from "../../hooks/useToolWizard";
@@ -118,6 +119,19 @@ export function TentaclePanel({
     (step === "category" && categorySelectionAvailable) ||
     (step === "locations" && locationsReady && !loading);
   const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
+  const useStickyAnswerFooter = !readOnly && !embeddedWizard;
+
+  const tentacleAnswerStepActions =
+    step === "answer" && categoryId ? (
+      <button
+        type="button"
+        onClick={onCommit}
+        disabled={!canCommit}
+        className="btn-primary w-full disabled:opacity-40"
+      >
+        Add tentacle question
+      </button>
+    ) : null;
 
   const panelBody = (
     <>
@@ -202,7 +216,7 @@ export function TentaclePanel({
         </ToolSection>
       ) : null}
 
-      {step === "answer" && categoryId ? (
+      {step === "answer" && categoryId && !useStickyAnswerFooter ? (
         <>
           <TentacleAnswerPicker
             categoryId={categoryId}
@@ -214,54 +228,71 @@ export function TentaclePanel({
             onSelectPoi={onSelectPoi}
             onOutOfReachChange={onOutOfReachChange}
           />
-          <button
-            type="button"
-            onClick={onCommit}
-            disabled={!canCommit}
-            className="btn-primary w-full disabled:opacity-40"
-          >
-            Add tentacle question
-          </button>
+          {tentacleAnswerStepActions}
         </>
       ) : null}
     </>
   );
 
+  const answerFooter =
+    step === "answer" && useStickyAnswerFooter && categoryId ? (
+      <>
+        <TentacleAnswerPicker
+          categoryId={categoryId}
+          distanceUnit={distanceUnit}
+          searchRadiusMeters={searchRadiusMeters}
+          poiOptions={poiOptions}
+          selectedPoiId={selectedPoiId}
+          outOfReach={outOfReach}
+          onSelectPoi={onSelectPoi}
+          onOutOfReachChange={onOutOfReachChange}
+        />
+        {tentacleAnswerStepActions}
+      </>
+    ) : undefined;
+
+  const wizardContent = readOnly ? (
+    panelBody
+  ) : (
+    <WizardSwipeSurface
+      stepId={step}
+      stepIndex={stepIndex}
+      canGoBack={stepIndex > 0}
+      canGoNext={canSwipeNext}
+      onBack={goBack}
+      onNext={goNext}
+      embedded={embeddedWizard}
+    >
+      {panelBody}
+    </WizardSwipeSurface>
+  );
+
   return (
     <ToolPanelShell
       toolId="tentacle"
+      fillHeight={useStickyAnswerFooter}
       stepper={
-        <Stepper
-          nav={
-            readOnly
-              ? undefined
-              : {
-                  stepIndex,
-                  stepCount: steps.length,
-                  onBack: goBack,
-                  onNext: goNext,
-                  canGoNext,
-                }
-          }
-        />
+        sandbox?.hideStepper ? undefined : (
+          <Stepper
+            nav={
+              readOnly
+                ? undefined
+                : {
+                    stepIndex,
+                    stepCount: steps.length,
+                    onBack: goBack,
+                    onNext: goNext,
+                    canGoNext,
+                  }
+            }
+          />
+        )
       }
     >
       <div className={readOnly ? "pointer-events-none select-none" : undefined}>
-        {readOnly ? (
-          panelBody
-        ) : (
-          <WizardSwipeSurface
-            stepId={step}
-            stepIndex={stepIndex}
-            canGoBack={stepIndex > 0}
-            canGoNext={canSwipeNext}
-            onBack={goBack}
-            onNext={goNext}
-            embedded={embeddedWizard}
-          >
-            {panelBody}
-          </WizardSwipeSurface>
-        )}
+        <WizardToolPanelLayout stickyFooter={answerFooter}>
+          {wizardContent}
+        </WizardToolPanelLayout>
       </div>
 
       {error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null}

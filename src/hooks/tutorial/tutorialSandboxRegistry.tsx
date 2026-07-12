@@ -20,6 +20,7 @@ export interface TutorialSandboxHookOptions {
   fixtureRequest: TutorialSandboxFixtureRequest;
   initialWizardStepId?: string;
   syncWizardStep?: boolean;
+  hideStepper?: boolean;
 }
 
 export interface TutorialSandboxHookResult {
@@ -47,6 +48,7 @@ export const TUTORIAL_SANDBOX_HOOKS: Record<QuestionTutorialId, TutorialSandboxH
           : interactivePanelFixture("matching"),
       initialWizardStepId: options.initialWizardStepId,
       syncWizardStep: options.syncWizardStep,
+      hideStepper: options.hideStepper,
     });
   },
   measuring: function useMeasuringSandboxEntry(options) {
@@ -58,6 +60,7 @@ export const TUTORIAL_SANDBOX_HOOKS: Record<QuestionTutorialId, TutorialSandboxH
           : interactivePanelFixture("measuring"),
       initialWizardStepId: options.initialWizardStepId,
       syncWizardStep: options.syncWizardStep,
+      hideStepper: options.hideStepper,
     });
   },
   radar: function useRadarSandboxEntry(options) {
@@ -69,6 +72,7 @@ export const TUTORIAL_SANDBOX_HOOKS: Record<QuestionTutorialId, TutorialSandboxH
           : interactivePanelFixture("radar"),
       initialWizardStepId: options.initialWizardStepId,
       syncWizardStep: options.syncWizardStep,
+      hideStepper: options.hideStepper,
     });
   },
   tentacle: function useTentacleSandboxEntry(options) {
@@ -80,6 +84,7 @@ export const TUTORIAL_SANDBOX_HOOKS: Record<QuestionTutorialId, TutorialSandboxH
           : interactivePanelFixture("tentacle"),
       initialWizardStepId: options.initialWizardStepId,
       syncWizardStep: options.syncWizardStep,
+      hideStepper: options.hideStepper,
     });
   },
   thermometer: function useThermometerSandboxEntry(options) {
@@ -94,6 +99,7 @@ export const TUTORIAL_SANDBOX_HOOKS: Record<QuestionTutorialId, TutorialSandboxH
           : interactivePanelFixture("thermometer"),
       initialWizardStepId: options.initialWizardStepId,
       syncWizardStep: options.syncWizardStep,
+      hideStepper: options.hideStepper,
     });
   },
   photo: function usePhotoSandboxEntry(options) {
