@@ -34,8 +34,8 @@ export const usePremiumEntitlementsStore = create<PremiumEntitlementsState>(
 
       set({
         uid,
-        entitlements: uid ? get().entitlements : null,
-        hydrated: uid ? get().hydrated : false,
+        entitlements: null,
+        hydrated: false,
         generation: get().generation + 1,
       });
     },

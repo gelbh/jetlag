@@ -2,8 +2,12 @@ export function isStaleAfterReset(
   recordAt: string | undefined,
   sessionResetAt: string | undefined,
 ): boolean {
-  if (!sessionResetAt || !recordAt) {
+  if (!sessionResetAt) {
     return false;
+  }
+
+  if (!recordAt) {
+    return true;
   }
 
   return recordAt < sessionResetAt;

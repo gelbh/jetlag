@@ -11,6 +11,11 @@ describe("sessionReset", () => {
     ).toBe(false);
   });
 
+  it("treats missing timestamps as stale after reset", () => {
+    expect(isStaleAfterReset(undefined, "2026-01-02T00:00:00.000Z")).toBe(true);
+    expect(isStaleAfterReset("", "2026-01-02T00:00:00.000Z")).toBe(true);
+  });
+
   it("filters extras after reset", () => {
     const items = [
       { id: "old", createdAt: "2026-01-01T00:00:00.000Z" },

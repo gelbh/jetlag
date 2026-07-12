@@ -821,16 +821,6 @@ export async function resetRemoteSession(
 ): Promise<string> {
   const resetAt = new Date().toISOString();
 
-  await updateDoc(doc(sessionsCollection(), sessionId), {
-    sessionResetAt: resetAt,
-    timerAccumulatedMs: 0,
-    timerRunningSince: deleteField(),
-    endGameStartedAt: deleteField(),
-    endGameStartedByUid: deleteField(),
-    endGameRequestedAt: deleteField(),
-    endGameRequestedByUid: deleteField(),
-  });
-
   const snapshot = await getDocs(annotationsCollection(sessionId));
   const deleted = snapshot.docs
     .map((annotationDoc) =>
@@ -840,20 +830,33 @@ export async function resetRemoteSession(
         annotationDoc.data() as Record<string, unknown>,
       ),
     )
-    .filter((annotation) => annotation.status === "active")
-    .map(
-      (annotation): AnnotationRecord => ({
-        ...annotation,
+    .filter((annotation) => annotation.status === "active");
+
+  for (let index = 0; index < deleted.length; index += FIRESTORE_BATCH_LIMIT) {
+    const chunk = deleted.slice(index, index + FIRESTORE_BATCH_LIMIT);
+    const batch = writeBatch(getFirestoreDb());
+
+    for (const annotation of chunk) {
+      batch.update(doc(annotationsCollection(sessionId), annotation.id), {
         status: "deleted",
         updatedAt: resetAt,
-      }),
-    );
+      });
+    }
 
-  if (deleted.length > 0) {
-    await writeRemoteAnnotationsBatch(sessionId, deleted);
+    await batch.commit();
   }
 
   await cancelOpenPendingQuestions(sessionId);
+
+  await updateDoc(doc(sessionsCollection(), sessionId), {
+    sessionResetAt: resetAt,
+    timerAccumulatedMs: 0,
+    timerRunningSince: deleteField(),
+    endGameStartedAt: deleteField(),
+    endGameStartedByUid: deleteField(),
+    endGameRequestedAt: deleteField(),
+    endGameRequestedByUid: deleteField(),
+  });
 
   await postGameSystemMessage(
     sessionId,
