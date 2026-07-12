@@ -10,15 +10,9 @@ import {
 import {
   subscribeToRemoteAnnotations,
   subscribeToSession,
-  writeRemoteAnnotation,
-  writeRemoteAnnotationsBatch,
 } from "../../services/firestore/firestoreAnnotations";
-import {
-  readOfflineQueueForSession,
-  recordOfflineWriteFailure,
-  removeOfflineWrite,
-  shouldRetryOfflineWrite,
-} from "../../services/session/offlineQueue";
+import { readOfflineQueueForSession } from "../../services/session/offlineQueue";
+import { flushOfflineQueue } from "../../services/session/flushOfflineQueue";
 
 
 export function useSessionSync() {
@@ -164,45 +158,9 @@ export function useSessionSync() {
         return;
       }
 
-      let lastError: string | null = null;
-      const retryable = pendingForSession.filter((entry) =>
-        shouldRetryOfflineWrite(entry),
-      );
-
-      if (retryable.length === 0) {
-        return;
-      }
-
-      try {
-        await writeRemoteAnnotationsBatch(
-          sessionId,
-          retryable.map((entry) => entry.annotation),
-        );
-
-        for (const entry of retryable) {
-          await removeOfflineWrite(entry.id);
-        }
-      } catch {
-        for (const entry of retryable) {
-          try {
-            await writeRemoteAnnotation(sessionId, entry.annotation);
-            await removeOfflineWrite(entry.id);
-          } catch (error) {
-            lastError =
-              error instanceof Error ? error.message : "Sync failed.";
-            await recordOfflineWriteFailure(entry.id);
-          }
-        }
-      }
-
-      if (lastError) {
-        setLastSyncError(lastError);
-      } else {
-        setLastSyncError(null);
-      }
-
-      const remaining = await readOfflineQueueForSession(sessionId);
-      setPendingWrites(remaining.length);
+      const { remaining, lastError } = await flushOfflineQueue(sessionId);
+      setPendingWrites(remaining);
+      setLastSyncError(lastError);
     };
 
     const handleOnline = () => {

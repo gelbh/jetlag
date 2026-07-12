@@ -7,6 +7,7 @@ import { SessionLog } from "../../components/session/SessionLog";
 import { AnnotationEditSheet } from "../../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../../components/tools/ToolDock";
 import type { MapScreenController } from "./useMapScreenController";
+import { useSyncRetryAction } from "../../hooks/session/useSyncRetryAction";
 import { SeekerChromeOverlays } from "./SeekerChromeOverlays";
 
 type MapScreenChromeProps = Pick<
@@ -218,6 +219,8 @@ export function MapScreenChrome({
   setActiveTool,
   setAwaitingPlacement,
 }: MapScreenChromeProps) {
+  const onSyncErrorAction = useSyncRetryAction();
+
   return (
     <>
       <div
@@ -261,6 +264,7 @@ export function MapScreenChrome({
             Boolean(selectedAnnotation) ||
             Boolean(geometryEditAnnotation && geometryDraft)
           }
+          onSyncErrorAction={onSyncErrorAction}
         />
 
         <AppUpdateMapChip />
