@@ -125,6 +125,16 @@ export function summarizeSession(sessionId, code, session, nowMs = Date.now()) {
       typeof session.hidingPeriodMinutes === "number"
         ? session.hidingPeriodMinutes
         : null,
+    regionPackId:
+      typeof session.regionPackId === "string" ? session.regionPackId : null,
+    regionPackSubregionId:
+      typeof session.regionPackSubregionId === "string"
+        ? session.regionPackSubregionId
+        : null,
+    transitMetroId:
+      typeof session.transitMetroId === "string" ? session.transitMetroId : null,
+    gameAreaLabel:
+      typeof session.gameAreaLabel === "string" ? session.gameAreaLabel : null,
     phase: deriveSessionPhase(session, nowMs),
   };
 }

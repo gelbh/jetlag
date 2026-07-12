@@ -12,6 +12,7 @@ import { gameAreaToBoundingBox } from "../../../domain/geometry/gameAreaBounds";
 interface TutorialMapPreviewProps {
   toolId: QuestionTutorialId;
   variant: "context" | "closeUp";
+  compact?: boolean;
 }
 
 function pushCoord(coords: [number, number][], lng: number, lat: number) {
@@ -83,7 +84,11 @@ function boundsFromGameArea(gameArea: GameArea): LatLngBoundsExpression {
   ];
 }
 
-export function TutorialMapPreview({ toolId, variant }: TutorialMapPreviewProps) {
+export function TutorialMapPreview({
+  toolId,
+  variant,
+  compact = false,
+}: TutorialMapPreviewProps) {
   const { viewport } = useTutorialMapViewport();
   const fixture = useMemo(
     () => tutorialMapFixtureForArea(toolId, viewport.gameArea),
@@ -104,7 +109,13 @@ export function TutorialMapPreview({ toolId, variant }: TutorialMapPreviewProps)
     variant === "closeUp" ? [36, 36] : [24, 24];
 
   return (
-    <div className="tutorial-map-preview hud-panel h-[min(42dvh,16rem)] w-full shrink-0 overflow-hidden">
+    <div
+      className={
+        compact
+          ? "tutorial-map-preview tutorial-map-preview-compact hud-panel h-[min(28dvh,11rem)] w-full shrink-0 overflow-hidden"
+          : "tutorial-map-preview hud-panel h-[min(42dvh,16rem)] w-full shrink-0 overflow-hidden"
+      }
+    >
       <MapView
         className="h-full w-full"
         mapStyle="standard"

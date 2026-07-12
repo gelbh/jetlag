@@ -103,12 +103,17 @@ describe("AdminPanel", () => {
         endGameRequestedAt: null,
         hostAppVersion: null,
         hidingPeriodMinutes: null,
+        regionPackId: null,
+        regionPackSubregionId: null,
+        transitMetroId: null,
+        gameAreaLabel: "Dublin",
       },
     ];
 
     renderWithRouter(<AdminPanel />);
 
     expect(screen.getByText("ABCD")).toBeInTheDocument();
-    expect(screen.getByText("Seek")).toBeInTheDocument();
+    expect(screen.getByText("Dublin")).toBeInTheDocument();
+    expect(screen.getAllByText("Seek").length).toBeGreaterThan(0);
   });
 });

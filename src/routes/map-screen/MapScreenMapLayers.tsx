@@ -19,8 +19,7 @@ type MapScreenMapLayersProps = Pick<
   | "gameArea"
   | "toolGameArea"
   | "effectiveBasemapStyle"
-  | "mapStyle"
-  | "setMapStyle"
+  | "handleMapStyleChange"
   | "mapChromeControlInset"
   | "center"
   | "mapFocusBounds"
@@ -64,8 +63,7 @@ export function MapScreenMapLayers({
   gameArea,
   toolGameArea,
   effectiveBasemapStyle,
-  mapStyle,
-  setMapStyle,
+  handleMapStyleChange,
   mapChromeControlInset,
   center,
   mapFocusBounds,
@@ -109,8 +107,7 @@ export function MapScreenMapLayers({
         key={session!.id}
         mapKey={session!.id}
         mapStyle={effectiveBasemapStyle}
-        mapStylePreference={mapStyle}
-        onMapStyleChange={setMapStyle}
+        onMapStyleChange={handleMapStyleChange}
         zoomControlInset={mapChromeControlInset}
         mapStyleControlInset={mapChromeControlInset}
         center={center}

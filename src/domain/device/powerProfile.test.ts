@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { effectiveMapStyle, getPowerProfile } from "./powerProfile";
+import { describe, expect, it, vi } from "vitest";
+import { effectiveMapStyle, getPowerProfile, applyMapStylePreferenceChange } from "./powerProfile";
 
 describe("powerProfile", () => {
   it("returns throttled intervals in low power mode", () => {
@@ -16,5 +16,19 @@ describe("powerProfile", () => {
   it("forces standard map tiles in low power mode", () => {
     expect(effectiveMapStyle("satellite", true)).toBe("standard");
     expect(effectiveMapStyle("satellite", false)).toBe("satellite");
+  });
+
+  it("clears low power mode when satellite is selected", () => {
+    const setMapStyle = vi.fn();
+    const setLowPowerMode = vi.fn();
+
+    applyMapStylePreferenceChange("satellite", {
+      lowPowerMode: true,
+      setMapStyle,
+      setLowPowerMode,
+    });
+
+    expect(setLowPowerMode).toHaveBeenCalledWith(false);
+    expect(setMapStyle).toHaveBeenCalledWith("satellite");
   });
 });

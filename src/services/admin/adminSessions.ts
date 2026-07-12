@@ -30,6 +30,10 @@ export interface AdminSessionSummary {
   endGameRequestedAt: string | null;
   hostAppVersion: string | null;
   hidingPeriodMinutes: number | null;
+  regionPackId: string | null;
+  regionPackSubregionId: string | null;
+  transitMetroId: string | null;
+  gameAreaLabel: string | null;
   phase: AdminSessionPhase;
 }
 

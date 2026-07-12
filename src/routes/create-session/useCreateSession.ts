@@ -31,6 +31,7 @@ import {
   ensureAnonymousUser,
 } from "../../services/core/firebase";
 import { usePremiumHostEligibility } from "../../hooks/billing/usePremiumHostEligibility";
+import { shouldDefaultSessionTierToPremium, canSelectPremiumSessionTier } from "../../domain/billing/premiumProducts";
 import { usePremiumEntitlements } from "../../hooks/billing/usePremiumEntitlements";
 import { createRemoteSession } from "../../services/firestore/firestoreAnnotations";
 import {
@@ -98,6 +99,7 @@ export function useCreateSession() {
   const [loading, setLoading] = useState(false);
   const [verifyingAccess, setVerifyingAccess] = useState(false);
   const [sessionTier, setSessionTier] = useState<SessionTier>("free");
+  const [tierManuallySet, setTierManuallySet] = useState(false);
   const [playerRole, setPlayerRole] = useState<PlayerRole>("seeker");
   const [gameSize, setGameSize] = useState<GameSize>("medium");
   const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>("imperial");
@@ -204,6 +206,7 @@ export function useCreateSession() {
         setTransitMetroOverride(draft.transitMetroId);
       }
       if (draft.sessionTier) {
+        setTierManuallySet(true);
         setSessionTier(draft.sessionTier);
       }
       if (gameArea) {
@@ -283,6 +286,27 @@ export function useCreateSession() {
   }, [inferredTransitMetroId, transitMetroInferenceSeed]);
 
   const transitMetroId = transitMetroOverride ?? inferredTransitMetroId;
+  const canSelectPremiumTier = canSelectPremiumSessionTier(
+    premiumEntitlements,
+    hostHasAccessClaim,
+  );
+  const autoSessionTier = useMemo((): SessionTier => {
+    if (searchParams.get("tier") === "premium" && canSelectPremiumTier) {
+      return "premium";
+    }
+
+    if (shouldDefaultSessionTierToPremium(premiumEntitlements, hostHasAccessClaim)) {
+      return "premium";
+    }
+
+    return "free";
+  }, [
+    canSelectPremiumTier,
+    hostHasAccessClaim,
+    premiumEntitlements,
+    searchParams,
+  ]);
+  const activeSessionTier = tierManuallySet ? sessionTier : autoSessionTier;
   const {
     packCreditsLabel,
     packPremiumFlow,
@@ -296,7 +320,7 @@ export function useCreateSession() {
   } = usePremiumHostEligibility({
     searchParams,
     setSearchParams,
-    sessionTier,
+    sessionTier: activeSessionTier,
     premiumEntitlements,
     hostHasAccessClaim,
   });
@@ -551,6 +575,12 @@ export function useCreateSession() {
                 : {}),
             }
           : {}),
+        ...(selectedPlace?.displayName?.trim() || locationQuery.trim()
+          ? {
+              gameAreaLabel:
+                selectedPlace?.displayName.trim() || locationQuery.trim(),
+            }
+          : {}),
       };
       if (regionPackId) {
         delete rulesPatch.customMatchingAreas;
@@ -689,6 +719,7 @@ export function useCreateSession() {
   };
 
   const handleSessionTierChange = (tier: SessionTier) => {
+    setTierManuallySet(true);
     setSessionTier(tier);
     setAccessCodeError(null);
   };

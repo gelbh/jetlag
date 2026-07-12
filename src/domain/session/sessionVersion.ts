@@ -1,11 +1,16 @@
 import type { SessionRecord } from "../map/annotations";
+import type { PlayerRole } from "./playerRole";
 
 export function sessionVersionCompatible(
   session: Pick<SessionRecord, "hostAppVersion" | "memberUids">,
   clientVersion: string,
   uid: string,
   returningMemberUid?: string | null,
+  joinRole?: PlayerRole,
 ): boolean {
+  if (joinRole === "observer") {
+    return true;
+  }
   if (session.memberUids.includes(uid)) {
     return true;
   }

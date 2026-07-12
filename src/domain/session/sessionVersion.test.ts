@@ -38,6 +38,12 @@ describe("sessionVersionCompatible", () => {
       true,
     );
   });
+
+  it("allows observers to join regardless of version mismatch", () => {
+    expect(
+      sessionVersionCompatible(session, "0.2.0", "new-uid", undefined, "observer"),
+    ).toBe(true);
+  });
 });
 
 describe("sessionVersionMismatchMessage", () => {

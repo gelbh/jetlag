@@ -39,7 +39,7 @@ import {
   getTransitMetro,
   metroSupportsLiveVehicles,
 } from "../../services/transit/transitCatalog";
-import { effectiveMapStyle } from "../../domain/device/powerProfile";
+import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../domain/device/powerProfile";
 import {
   preloadGameAreaCachesAsync,
   gameAreaPreloadKey,
@@ -160,6 +160,16 @@ export function useMapScreenController() {
   const handleLiveLocationError = useCallback((error: string | null) => {
     setLiveLocationError(error);
   }, []);
+  const handleMapStyleChange = useCallback(
+    (style: typeof mapStyle) => {
+      applyMapStylePreferenceChange(style, {
+        lowPowerMode,
+        setMapStyle,
+        setLowPowerMode,
+      });
+    },
+    [lowPowerMode, setLowPowerMode, setMapStyle],
+  );
   const handleMapViewportChange = useCallback(
     (viewport: MapViewportState | null) => {
       setMapViewport(viewport);
@@ -576,6 +586,7 @@ export function useMapScreenController() {
     distanceUnit,
     mapStyle,
     setMapStyle,
+    handleMapStyleChange,
     effectiveBasemapStyle,
     lowPowerMode,
     layerVisibility,

@@ -1,6 +1,7 @@
 interface SegmentOption<Value extends string> {
   value: Value;
   label: string;
+  disabled?: boolean;
 }
 
 interface SegmentControlProps<Value extends string> {
@@ -33,7 +34,7 @@ export function SegmentControl<Value extends string>({
               key={option.value}
               type="button"
               onClick={() => onChange(option.value)}
-              disabled={disabled}
+              disabled={disabled || option.disabled}
               aria-pressed={selected}
               className={`rounded-lg px-3 py-1.5 text-sm font-medium disabled:opacity-50 ${
                 selected
@@ -65,7 +66,7 @@ export function SegmentControl<Value extends string>({
               key={option.value}
               type="button"
               onClick={() => onChange(option.value)}
-              disabled={disabled}
+              disabled={disabled || option.disabled}
               aria-pressed={selected}
               className={`min-h-12 rounded-[var(--radius-hud-md)] px-2 text-sm font-medium disabled:opacity-50 ${
                 selected

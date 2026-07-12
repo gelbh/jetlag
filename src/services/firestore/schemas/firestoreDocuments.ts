@@ -53,6 +53,7 @@ export const sessionDocumentSchema = z
     endGameRequestedByUid: z.string().optional(),
     hostAppVersion: z.string().optional(),
     memberAppVersions: z.record(z.string(), z.string()).optional(),
+    gameAreaLabel: z.string().optional(),
   })
   .passthrough()
   .refine((value) => value.gameArea !== undefined && value.gameArea !== null, {

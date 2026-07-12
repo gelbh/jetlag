@@ -54,3 +54,18 @@ export function effectiveMapStyle(
 ): "standard" | "satellite" {
   return lowPowerMode ? "standard" : mapStyle;
 }
+
+export function applyMapStylePreferenceChange(
+  style: "standard" | "satellite",
+  ctx: {
+    lowPowerMode: boolean;
+    setMapStyle: (style: "standard" | "satellite") => void;
+    setLowPowerMode: (enabled: boolean) => void;
+  },
+): void {
+  if (style === "satellite" && ctx.lowPowerMode) {
+    ctx.setLowPowerMode(false);
+  }
+
+  ctx.setMapStyle(style);
+}

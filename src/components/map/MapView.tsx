@@ -33,8 +33,6 @@ interface MapViewProps {
   recenterToken?: number;
   showZoomControl?: boolean;
   zoomControlInset?: MapZoomControlInset;
-  /** User preference shown on the map style toggle; defaults to mapStyle. */
-  mapStylePreference?: MapStyle;
   onMapStyleChange?: (style: MapStyle) => void;
   showMapStyleToggle?: boolean;
   mapStyleControlInset?: MapZoomControlInset;
@@ -218,7 +216,6 @@ export function MapView({
   recenterToken = 0,
   showZoomControl,
   zoomControlInset = "dock",
-  mapStylePreference,
   onMapStyleChange,
   showMapStyleToggle,
   mapStyleControlInset,
@@ -231,7 +228,6 @@ export function MapView({
     (showMapStyleToggle ?? Boolean(onMapStyleChange)) &&
     Boolean(onMapStyleChange);
   const styleControlInset = mapStyleControlInset ?? zoomControlInset;
-  const toggleMapStyle = mapStylePreference ?? mapStyle;
 
   return (
     <div className={className ?? "h-full w-full"}>
@@ -282,7 +278,7 @@ export function MapView({
         {onMapStyleChange ? (
           <MapStyleToggle
             enabled={mapStyleToggleEnabled}
-            mapStyle={toggleMapStyle}
+            mapStyle={mapStyle}
             onMapStyleChange={onMapStyleChange}
             inset={styleControlInset}
             suppressRef={suppressChromeHideRef}

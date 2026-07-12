@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { signOut } from "firebase/auth";
 import { PremiumSignInGate } from "../components/billing/PremiumSignInGate";
-import { AdminSessionTimer } from "../components/admin/AdminSessionTimer";
+import {
+  AdminSessionFilters,
+  type AdminSessionPhaseFilter,
+} from "../components/admin/AdminSessionFilters";
+import { AdminSessionRow } from "../components/admin/AdminSessionRow";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import {
   ScreenHeader,
@@ -10,9 +14,8 @@ import {
 } from "../components/ui/ScreenHeader";
 import { HudAdminIcon } from "../components/ui/HudIcons";
 import { InlineError } from "../components/ui/InlineError";
-import { MotionPressable } from "../components/motion/MotionPressable";
 import { isAdminUser } from "../domain/admin/adminAccess";
-import { adminSessionPhaseLabel } from "../domain/admin/sessionPhase";
+import { resolveAdminSessionAreaLabel } from "../domain/admin/adminSessionAreaLabel";
 import { APP_VERSION } from "../domain/device/changelog";
 import { useAdminSessionList } from "../hooks/admin/useAdminSessionList";
 import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
@@ -33,52 +36,6 @@ function formatLastFetched(at: Date | null): string {
     minute: "2-digit",
     second: "2-digit",
   })}`;
-}
-
-function AdminSessionRow({
-  summary,
-  observingCode,
-  onObserve,
-}: {
-  summary: AdminSessionSummary;
-  observingCode: string | null;
-  onObserve: (summary: AdminSessionSummary) => void;
-}) {
-  const busy = observingCode === summary.code;
-
-  return (
-    <div className="home-card-btn home-card-btn-secondary items-start gap-3 py-4">
-      <div className="min-w-0 flex-1 space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-xl font-bold tracking-[0.22em] text-ink">
-            {summary.code}
-          </span>
-          <span className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-brand-blue">
-            {adminSessionPhaseLabel(summary.phase)}
-          </span>
-        </div>
-        <AdminSessionTimer summary={summary} />
-        <p className="text-sm text-ink-muted">
-          {summary.roleCounts.seeker} seeker
-          {summary.roleCounts.seeker === 1 ? "" : "s"} · {summary.roleCounts.hider}{" "}
-          hider{summary.roleCounts.hider === 1 ? "" : "s"}
-          {summary.roleCounts.observer > 0
-            ? ` · ${summary.roleCounts.observer} observer`
-            : ""}{" "}
-          · {summary.tier} · {summary.gameSize}
-        </p>
-      </div>
-      <MotionPressable
-        type="button"
-        className="btn-primary min-h-11 shrink-0 px-4 disabled:opacity-50"
-        disabled={busy}
-        aria-busy={busy}
-        onClick={() => onObserve(summary)}
-      >
-        {busy ? "Joining…" : "Observe"}
-      </MotionPressable>
-    </div>
-  );
 }
 
 function AdminSessionSkeletonRows() {
@@ -104,6 +61,28 @@ export function AdminPanel() {
     useAdminSessionList(enabled);
   const [observeError, setObserveError] = useState<string | null>(null);
   const [observingCode, setObservingCode] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [phaseFilter, setPhaseFilter] = useState<AdminSessionPhaseFilter>("all");
+
+  const filteredSessions = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    return sessions.filter((summary) => {
+      if (phaseFilter !== "all" && summary.phase !== phaseFilter) {
+        return false;
+      }
+
+      if (!normalizedQuery) {
+        return true;
+      }
+
+      const areaLabel = resolveAdminSessionAreaLabel(summary)?.toLowerCase() ?? "";
+      return (
+        summary.code.toLowerCase().includes(normalizedQuery) ||
+        areaLabel.includes(normalizedQuery)
+      );
+    });
+  }, [phaseFilter, query, sessions]);
 
   const handleObserve = useCallback(
     async (summary: AdminSessionSummary) => {
@@ -266,15 +245,34 @@ export function AdminPanel() {
             </p>
           </div>
         ) : (
-          <div className="space-y-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
-            {sessions.map((summary) => (
-              <AdminSessionRow
-                key={summary.sessionId}
-                summary={summary}
-                observingCode={observingCode}
-                onObserve={(nextSummary) => void handleObserve(nextSummary)}
-              />
-            ))}
+          <div className="space-y-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <AdminSessionFilters
+              query={query}
+              phase={phaseFilter}
+              onQueryChange={setQuery}
+              onPhaseChange={setPhaseFilter}
+            />
+            {filteredSessions.length === 0 ? (
+              <div className="rounded-xl border border-border bg-surface-panel px-4 py-6">
+                <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
+                  No matching sessions
+                </p>
+                <p className="mt-2 text-sm text-ink-muted">
+                  Try another code, area name, or phase filter.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {filteredSessions.map((summary) => (
+                  <AdminSessionRow
+                    key={summary.sessionId}
+                    summary={summary}
+                    observingCode={observingCode}
+                    onObserve={(nextSummary) => void handleObserve(nextSummary)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
