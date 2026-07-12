@@ -1,4 +1,4 @@
-// Parallel implementation: functions/overpassEndpoints.mjs (Cloud Functions runtime).
+// Parallel implementation: functions/proxies/overpassEndpoints.mjs (Cloud Functions runtime).
 
 export const OVERPASS_USER_AGENT = "jetlag-map-companion/1.0";
 

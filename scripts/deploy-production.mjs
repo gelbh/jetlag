@@ -4,12 +4,22 @@ import { resolve } from "node:path";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 
-/** @type {Record<string, string>} */
+/** @type {Record<string, string>} Maps route id to Vite env var name. */
 const PROXY_SECRET_NAMES = {
   overpass: "VITE_OVERPASS_PROXY_URL",
   vehicles: "VITE_TRANSIT_PROXY_URL",
   transitland: "VITE_TRANSITLAND_PROXY_URL",
 };
+
+/** @param {string} baseUrl */
+function buildProxyRouteUrls(baseUrl) {
+  const base = baseUrl.replace(/\/+$/, "");
+  return {
+    overpass: `${base}/overpass`,
+    vehicles: `${base}/vehicles`,
+    transitland: `${base}/transitland`,
+  };
+}
 
 function syncProxySecrets(functionUrls) {
   if (!process.env.DOPPLER_TOKEN?.trim()) {
@@ -118,7 +128,7 @@ function parseFunctionUrls(deployOutput) {
   return urls;
 }
 
-const HTTP_FUNCTION_IDS = ["overpass", "vehicles", "transitland"];
+const HTTP_FUNCTION_IDS = ["proxy"];
 
 /** @returns {Record<string, string>} */
 function listFunctionUrlsFromCli(projectId) {
@@ -143,18 +153,17 @@ function listFunctionUrlsFromCli(projectId) {
       return {};
     }
 
-    const urls = {};
     for (const fn of functions) {
       if (
         typeof fn.id === "string" &&
         typeof fn.uri === "string" &&
         fn.uri.startsWith("https://") &&
-        HTTP_FUNCTION_IDS.includes(fn.id)
+        fn.id === "proxy"
       ) {
-        urls[fn.id] = fn.uri;
+        return buildProxyRouteUrls(fn.uri);
       }
     }
-    return urls;
+    return {};
   } catch (error) {
     console.warn(
       "Could not parse firebase functions:list output:",
@@ -164,10 +173,28 @@ function listFunctionUrlsFromCli(projectId) {
   }
 }
 
+/** @param {Record<string, string>} rawUrls */
+function normalizeProxyFunctionUrls(rawUrls) {
+  if (rawUrls.proxy) {
+    return buildProxyRouteUrls(rawUrls.proxy);
+  }
+
+  if (rawUrls.overpass && rawUrls.vehicles && rawUrls.transitland) {
+    return {
+      overpass: rawUrls.overpass,
+      vehicles: rawUrls.vehicles,
+      transitland: rawUrls.transitland,
+    };
+  }
+
+  return rawUrls;
+}
+
 /** @param {string} deployOutput */
 function resolveFunctionUrls(deployOutput) {
-  const fromDeploy = parseFunctionUrls(deployOutput);
-  const needsFallback = HTTP_FUNCTION_IDS.some((id) => !fromDeploy[id]);
+  const fromDeploy = normalizeProxyFunctionUrls(parseFunctionUrls(deployOutput));
+  const routeIds = ["overpass", "vehicles", "transitland"];
+  const needsFallback = routeIds.some((id) => !fromDeploy[id]);
   if (!needsFallback) {
     return fromDeploy;
   }
@@ -276,7 +303,9 @@ async function main() {
     return;
   }
 
-  run("npm", ["ci"], { cwd: resolve(projectRoot, "functions") });
+  run("env", ["-u", "npm_config_allow_scripts", "npm", "ci"], {
+    cwd: resolve(projectRoot, "functions"),
+  });
 
   let result = await runFirebaseDeploy(onlyFull);
   if (result.code === 0) {

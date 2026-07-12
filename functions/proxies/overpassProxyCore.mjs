@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { fetchWithTimeout } from "./fetchWithTimeout.mjs";
-import { createMemoryCache } from "./memoryCache.mjs";
+import { fetchWithTimeout } from "../lib/fetchWithTimeout.mjs";
+import { createMemoryCache } from "../lib/memoryCache.mjs";
 import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "./overpassEndpoints.mjs";
 import { enqueueOverpassFetch } from "./overpassQueue.mjs";
 

@@ -8,7 +8,7 @@ import {
   getGrantAccessFailureCount,
   rateLimitDocId,
   recordGrantAccessFailure,
-} from "../firestoreRateLimit.mjs";
+} from "../lib/firestoreRateLimit.mjs";
 
 function createInMemoryFirestore() {
   const documents = new Map();

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   normalizeCtaBusVehicles,
   normalizeCtaTrainVehicles,
-} from "../ctaProxy.mjs";
+} from "../proxies/ctaProxy.mjs";
 
 const BOUNDS = {
   south: 41.64,

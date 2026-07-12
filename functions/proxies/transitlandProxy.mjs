@@ -1,4 +1,4 @@
-import { fetchWithTimeoutAndRetry } from "./fetchWithTimeout.mjs";
+import { fetchWithTimeoutAndRetry } from "../lib/fetchWithTimeout.mjs";
 
 const TRANSITLAND_API_BASE = "https://transit.land/api/v2/rest";
 const TRANSIT_FETCH_TIMEOUT_MS = 30_000;

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   buildWarmPreloadQueries,
   handleSessionWarmPreloadWrite,
-} from "../warmOverpassPreload.mjs";
+} from "../session/warmOverpassPreload.mjs";
 
 describe("warmOverpassPreload", () => {
   it("builds coastline, landmass, and measuring warm queries", () => {

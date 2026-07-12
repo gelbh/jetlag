@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { setCors } from "../cors.mjs";
+import { setCors } from "../lib/cors.mjs";
 
 describe("cors", () => {
   it("reflects allowed browser origins", () => {

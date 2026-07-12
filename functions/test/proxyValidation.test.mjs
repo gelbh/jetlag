@@ -5,7 +5,7 @@ import {
   parseOverpassQueryBody,
   parseTransitlandFeedQuery,
   parseVehiclesMetroQuery,
-} from "../proxyValidation.mjs";
+} from "../proxies/proxyValidation.mjs";
 
 describe("proxyValidation", () => {
   it("parses bounding boxes", () => {

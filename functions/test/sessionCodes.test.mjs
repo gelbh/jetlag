@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { generateSessionCode } from "../sessionCodes.mjs";
+import { generateSessionCode } from "../session/sessionCodes.mjs";
 
 describe("sessionCodes", () => {
   it("generates a 4-letter code from the session alphabet", () => {

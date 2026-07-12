@@ -5,7 +5,7 @@ import {
   handleSessionMessageWrite,
   handleSessionTimerWrite,
   loadSessionDevices,
-} from "../sessionNotificationTriggers.mjs";
+} from "../session/sessionNotificationTriggers.mjs";
 
 function firestoreChange(before, after) {
   return {

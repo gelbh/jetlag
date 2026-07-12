@@ -4,8 +4,8 @@ import {
   sendProxyAuthFailure,
   verifyOverpassProxyAccess,
   verifyProxyAccess,
-} from "../verifyProxyAccess.mjs";
-import { consumeRateLimit } from "../firestoreRateLimit.mjs";
+} from "../proxies/verifyProxyAccess.mjs";
+import { consumeRateLimit } from "../lib/firestoreRateLimit.mjs";
 
 export const PROXY_RATE_LIMITS = {
   overpass: {

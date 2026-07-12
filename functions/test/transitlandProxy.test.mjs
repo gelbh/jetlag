@@ -32,7 +32,7 @@ async function loadTransitlandProxy() {
     });
   };
 
-  const module = await import(`../transitlandProxy.mjs?test=${Date.now()}`);
+  const module = await import(`../proxies/transitlandProxy.mjs?test=${Date.now()}`);
   return {
     module,
     restore() {

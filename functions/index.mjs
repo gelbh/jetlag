@@ -5,12 +5,7 @@ if (getApps().length === 0) {
   initializeApp();
 }
 
-export {
-  grantAccess,
-  overpass,
-  transitland,
-  vehicles,
-} from "./handlers/proxies.mjs";
+export { grantAccess, proxy } from "./handlers/proxies.mjs";
 
 export {
   createBillingPortalSession,

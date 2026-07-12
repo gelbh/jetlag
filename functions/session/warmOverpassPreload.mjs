@@ -1,4 +1,4 @@
-import { fetchCachedOverpassQuery } from "./overpassProxyCore.mjs";
+import { fetchCachedOverpassQuery } from "../proxies/overpassProxyCore.mjs";
 
 const WARM_PRELOAD_MEASURING_SELECTORS = [
   { category: "park", selectors: ['["leisure"="park"]', '["boundary"="national_park"]'] },

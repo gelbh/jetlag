@@ -1,4 +1,4 @@
-import { fetchWithTimeoutAndRetry } from "./fetchWithTimeout.mjs";
+import { fetchWithTimeoutAndRetry } from "../lib/fetchWithTimeout.mjs";
 
 const CTA_BUS_API_BASE = "https://www.ctabustracker.com/bustime/api/v3";
 const CTA_TRAIN_POSITIONS_URL =

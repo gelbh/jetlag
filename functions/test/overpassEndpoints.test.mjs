@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   OVERPASS_ENDPOINTS,
   OVERPASS_USER_AGENT,
-} from "../overpassEndpoints.mjs";
+} from "../proxies/overpassEndpoints.mjs";
 
 describe("overpassEndpoints", () => {
   it("exposes multiple fallback endpoints", () => {

@@ -160,6 +160,15 @@ export function getFirebaseFunctions(): Functions {
   return functions;
 }
 
+export function getFirebaseAppCheck(): AppCheck | null {
+  if (!isFirebaseConfigured()) {
+    return null;
+  }
+
+  getFirebaseApp();
+  return appCheck;
+}
+
 export function getFirebaseAuth(): Auth {
   if (!auth) {
     auth = getAuth(getFirebaseApp());

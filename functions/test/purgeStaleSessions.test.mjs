@@ -6,7 +6,7 @@ import {
   isAbandonedSessionPastRetention,
   isEndedSessionPastRetention,
   selectSessionsToPurge,
-} from "../purgeStaleSessions.mjs";
+} from "../session/purgeStaleSessions.mjs";
 
 function fakeSnapshot(id, data) {
   return {

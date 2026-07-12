@@ -4,7 +4,7 @@ import { HttpsError } from "firebase-functions/v2/https";
 import {
   ANONYMOUS_BILLING_MESSAGE,
   rejectAnonymousBillingAuth,
-} from "../billingAuth.mjs";
+} from "../billing/billingAuth.mjs";
 
 describe("billingAuth", () => {
   it("rejects anonymous billing auth", () => {
