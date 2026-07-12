@@ -1,111 +1,13 @@
-import { useMemo, useState } from "react";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import type { HiderTruthResult } from "../../domain/questions/ui";
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,
 } from "../../domain/session/sessionChat";
-import { createMessageId } from "../../domain/session/sessionChat";
 import type { PlayerRole } from "../../domain/session/playerRole";
-import { postSocialMessage } from "../../services/firestore/firestoreSessionExtras";
 import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
 import { useAnimatedPresence } from "../../hooks/useAnimatedPresence";
-import { SegmentControl } from "../ui/SegmentControl";
-import { GameChatTab } from "./GameChatTab";
-
-interface SocialChatTabProps {
-  messages: readonly SessionMessageRecord[];
-  sessionId: string;
-  senderUid: string;
-  senderRole: PlayerRole;
-  readOnly?: boolean;
-}
-
-export function SocialChatTab({
-  messages,
-  sessionId,
-  senderUid,
-  senderRole,
-  readOnly = false,
-}: SocialChatTabProps) {
-  const [draft, setDraft] = useState("");
-  const [sending, setSending] = useState(false);
-  const socialMessages = useMemo(
-    () => messages.filter((message) => message.channel === "social"),
-    [messages],
-  );
-
-  const send = async () => {
-    const text = draft.trim();
-    if (!text) {
-      return;
-    }
-
-    setSending(true);
-    try {
-      await postSocialMessage(
-        sessionId,
-        senderUid,
-        senderRole,
-        text,
-        createMessageId(),
-      );
-      setDraft("");
-    } finally {
-      setSending(false);
-    }
-  };
-
-  return (
-    <div className="flex h-full min-h-0 flex-col gap-3">
-      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain">
-        {socialMessages.length === 0 ? (
-          <p className="text-sm text-ink-dim">No messages yet.</p>
-        ) : (
-          socialMessages.map((message) => (
-            <div
-              key={message.id}
-              className={`rounded-xl px-3 py-2 text-sm ${
-                message.senderUid === senderUid
-                  ? "ml-8 bg-highlight-soft text-ink"
-                  : "mr-8 bg-surface-raised text-ink-secondary"
-              }`}
-            >
-              <p className="text-xs font-medium uppercase tracking-wide text-ink-dim">
-                {message.senderRole}
-              </p>
-              <p>{message.text}</p>
-            </div>
-          ))
-        )}
-      </div>
-      {readOnly ? null : (
-      <div className="flex gap-2">
-        <input
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              void send();
-            }
-          }}
-          className="field-input min-h-11 flex-1"
-          placeholder="Message seekers and hiders…"
-        />
-        <button
-          type="button"
-          onClick={() => void send()}
-          disabled={sending || draft.trim().length === 0}
-          className="btn-primary min-h-11 px-4 disabled:opacity-50"
-        >
-          Send
-        </button>
-      </div>
-      )}
-    </div>
-  );
-}
+import { ChatPanelBody } from "./ChatPanelBody";
 
 interface ChatPanelProps {
   open: boolean;
@@ -148,7 +50,6 @@ export function ChatPanel({
   onAnswerQuestion,
   readOnly = false,
 }: ChatPanelProps) {
-  const [tab, setTab] = useState<"social" | "game">("game");
   const keyboardInset = useVisualViewportBottomInset(open);
   const { mounted, animClass, setAnimNode } = useAnimatedPresence({
     open,
@@ -173,17 +74,7 @@ export function ChatPanel({
       }
     >
       <div className="tool-panel-compact hud-panel mx-auto flex min-h-0 max-h-[min(50dvh,420px)] max-w-xl flex-col overflow-hidden p-3">
-        <div className="mb-3 flex shrink-0 items-center justify-between gap-2">
-          <SegmentControl
-            variant="pill"
-            value={tab}
-            options={[
-              { value: "game", label: "Game" },
-              { value: "social", label: "Social" },
-            ]}
-            onChange={setTab}
-            aria-label="Chat tabs"
-          />
+        <div className="mb-3 flex shrink-0 items-center justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
@@ -192,34 +83,20 @@ export function ChatPanel({
             Close
           </button>
         </div>
-        <div
-          key={tab}
-          className="jl-game-chat-scroll jl-chat-tab-enter min-h-0 flex-1 overflow-y-auto overscroll-contain motion-reduce:animate-none"
-        >
-          {tab === "social" ? (
-            <SocialChatTab
-              messages={messages}
-              sessionId={sessionId}
-              senderUid={senderUid}
-              senderRole={senderRole}
-              readOnly={readOnly}
-            />
-          ) : (
-            <GameChatTab
-              messages={messages}
-              pendingQuestions={pendingQuestions}
-              sessionRules={sessionRules}
-              sessionId={sessionId}
-              isHider={isHider}
-              senderUid={senderUid}
-              questionTruths={questionTruths}
-              truthsLoading={truthsLoading}
-              answerError={answerError}
-              onAnswerQuestion={onAnswerQuestion}
-              readOnly={readOnly}
-            />
-          )}
-        </div>
+        <ChatPanelBody
+          messages={messages}
+          pendingQuestions={pendingQuestions}
+          sessionRules={sessionRules}
+          sessionId={sessionId}
+          senderUid={senderUid}
+          senderRole={senderRole}
+          isHider={isHider}
+          questionTruths={questionTruths}
+          truthsLoading={truthsLoading}
+          answerError={answerError}
+          onAnswerQuestion={onAnswerQuestion}
+          readOnly={readOnly}
+        />
       </div>
     </div>
   );
