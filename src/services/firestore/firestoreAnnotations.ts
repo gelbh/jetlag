@@ -580,6 +580,7 @@ export async function joinRemoteSessionByCode(
       returningMemberUid,
     );
     if (joinedWithoutRead.status === "joined") {
+      void touchSessionLastActive(codeRecord.sessionId);
       return {
         status: "joined",
         session: {
@@ -609,6 +610,7 @@ export async function joinRemoteSessionByCode(
       returningMemberUid,
     );
     if (joined.status === "joined") {
+      void touchSessionLastActive(sessionDoc.id);
       return {
         status: "joined",
         session: {
@@ -805,6 +807,12 @@ export async function startEndGameSession(
   startedByUid: string,
 ): Promise<void> {
   await requestEndGameSession(sessionId, startedByUid);
+}
+
+export async function touchSessionLastActive(sessionId: string): Promise<void> {
+  await updateDoc(doc(sessionsCollection(), sessionId), {
+    lastActiveAt: new Date().toISOString(),
+  });
 }
 
 export async function resetEndGameSession(sessionId: string): Promise<void> {

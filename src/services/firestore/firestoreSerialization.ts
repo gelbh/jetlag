@@ -401,6 +401,7 @@ export function buildSessionDocument(
     tier,
     status: "active",
     timerAccumulatedMs: 0,
+    lastActiveAt: createdAt,
     ...sessionRulesPatchToFirestore(rulesPatch),
   };
 
@@ -545,6 +546,10 @@ export function deserializeSessionFromFirestore(
     sessionResetAt:
       typeof document.sessionResetAt === "string"
         ? document.sessionResetAt
+        : undefined,
+    lastActiveAt:
+      typeof document.lastActiveAt === "string"
+        ? document.lastActiveAt
         : undefined,
     hostAppVersion:
       typeof document.hostAppVersion === "string"

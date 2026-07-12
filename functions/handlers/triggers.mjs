@@ -2,6 +2,11 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
 import { getSentryDsnSecret, withSentryEventHandler } from "../lib/sentry.mjs";
 import {
+  autoEndIdleSession,
+  computeIdleCutoffIso,
+  selectIdleActiveSessions,
+} from "../session/autoEndIdleSessions.mjs";
+import {
   computeAbandonedCutoffIso,
   computeEndedCutoffIso,
   PURGE_BATCH_LIMIT,
@@ -17,12 +22,52 @@ import { adminDb } from "./proxyShared.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
 
+async function deleteSessionCodeIfPresent(db, code) {
+  if (typeof code !== "string" || code.length === 0) {
+    return;
+  }
+
+  await db.collection("sessionCodes").doc(code).delete();
+}
+
+async function fetchIdleActiveSessionDocs(db, idleCutoffIso) {
+  try {
+    const [idleIndexedSnapshot, idleLegacySnapshot] = await Promise.all([
+      db
+        .collection("sessions")
+        .where("status", "==", "active")
+        .where("lastActiveAt", "<", idleCutoffIso)
+        .limit(PURGE_BATCH_LIMIT)
+        .get(),
+      db
+        .collection("sessions")
+        .where("status", "==", "active")
+        .where("createdAt", "<", idleCutoffIso)
+        .limit(PURGE_BATCH_LIMIT)
+        .get(),
+    ]);
+
+    return selectIdleActiveSessions(
+      idleIndexedSnapshot.docs,
+      idleLegacySnapshot.docs,
+      idleCutoffIso,
+      PURGE_BATCH_LIMIT,
+    );
+  } catch (error) {
+    console.error("purgeStaleSessions idle query failed", error);
+    return [];
+  }
+}
+
 export const purgeStaleSessions = onSchedule(
   { schedule: "0 4 * * *", secrets: [sentryDsnSecret] },
   withSentryEventHandler(async () => {
     const db = adminDb();
+    const idleCutoffIso = computeIdleCutoffIso();
     const endedCutoffIso = computeEndedCutoffIso();
     const abandonedCutoffIso = computeAbandonedCutoffIso();
+
+    const idleTargets = await fetchIdleActiveSessionDocs(db, idleCutoffIso);
 
     const [endedSnapshot, abandonedSnapshot] = await Promise.all([
       db
@@ -38,6 +83,12 @@ export const purgeStaleSessions = onSchedule(
         .get(),
     ]);
 
+    let autoEnded = 0;
+    for (const sessionDoc of idleTargets) {
+      await autoEndIdleSession(db, sessionDoc);
+      autoEnded += 1;
+    }
+
     const targets = selectSessionsToPurge(
       endedSnapshot.docs,
       abandonedSnapshot.docs,
@@ -48,12 +99,14 @@ export const purgeStaleSessions = onSchedule(
 
     let deleted = 0;
     for (const sessionDoc of targets) {
+      const code = sessionDoc.data().code;
       await db.recursiveDelete(sessionDoc.ref);
+      await deleteSessionCodeIfPresent(db, code);
       deleted += 1;
     }
 
     console.info(
-      `purgeStaleSessions deleted ${deleted} session(s); endedCutoff=${endedCutoffIso}; abandonedCutoff=${abandonedCutoffIso}`,
+      `purgeStaleSessions autoEnded=${autoEnded} deleted=${deleted}; idleCutoff=${idleCutoffIso}; endedCutoff=${endedCutoffIso}; abandonedCutoff=${abandonedCutoffIso}`,
     );
   }),
 );

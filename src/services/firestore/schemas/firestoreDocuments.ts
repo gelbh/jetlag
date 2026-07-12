@@ -47,6 +47,7 @@ export const sessionDocumentSchema = z
     timerAccumulatedMs: z.number().finite().optional(),
     timerRunningSince: z.union([z.string(), z.null()]).optional(),
     sessionResetAt: z.string().optional(),
+    lastActiveAt: z.string().optional(),
     endGameStartedAt: z.string().optional(),
     endGameStartedByUid: z.string().optional(),
     endGameRequestedAt: z.string().optional(),
