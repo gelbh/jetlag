@@ -375,7 +375,7 @@ export function HiderMapScreenChrome({
         session={{
           sessionCode: session.code,
           remoteSession: isRemote,
-          onClearMap: onClearMap ?? (() => undefined),
+          onClearMap,
           endGameBlocked:
             isEndGameActive(session) || isEndGamePending(session),
           onExport: overlay.closeSheet,

@@ -79,7 +79,7 @@ export interface MapSettingsRulesProps {
 export interface MapSettingsSessionProps {
   sessionCode: string;
   remoteSession: boolean;
-  onClearMap: () => void;
+  onClearMap?: () => void;
   onExport?: () => void;
   isHost?: boolean;
   onResetBoard?: () => void;

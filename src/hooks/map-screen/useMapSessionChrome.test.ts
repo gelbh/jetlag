@@ -190,4 +190,30 @@ describe("useMapSessionChrome", () => {
     expect(resetTimer).toHaveBeenCalled();
     expect(clearAllAnnotations).toHaveBeenCalled();
   });
+
+  it("alerts when resetRemoteSession fails", async () => {
+    mockResetRemoteSession.mockRejectedValueOnce(new Error("network"));
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => undefined);
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: remoteSession,
+        isHost: true,
+        annotations: [activePin],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleResetSession();
+    });
+
+    expect(alertSpy).toHaveBeenCalled();
+  });
 });

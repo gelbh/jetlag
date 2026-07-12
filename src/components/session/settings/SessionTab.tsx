@@ -4,7 +4,7 @@ import { ShareCode } from "../ShareCode";
 export interface MapSettingsSessionTabProps {
   sessionCode: string;
   remoteSession: boolean;
-  onClearMap: () => void;
+  onClearMap?: () => void;
   onExport?: () => void;
   isHost: boolean;
   onResetBoard?: () => void;
@@ -58,14 +58,16 @@ export function MapSettingsSessionTab({
             Clear map and reset board are unavailable during end game.
           </p>
         ) : null}
-        <button
-          type="button"
-          onClick={onClearMap}
-          disabled={endGameBlocked}
-          className="btn-secondary w-full border-status-error/50 bg-status-error-surface text-status-error disabled:opacity-50"
-        >
-          Clear map
-        </button>
+        {onClearMap ? (
+          <button
+            type="button"
+            onClick={onClearMap}
+            disabled={endGameBlocked}
+            className="btn-secondary w-full border-status-error/50 bg-status-error-surface text-status-error disabled:opacity-50"
+          >
+            Clear map
+          </button>
+        ) : null}
 
         {isHost ? (
           <>
@@ -90,20 +92,24 @@ export function MapSettingsSessionTab({
                 >
                   Reset board for everyone
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setResetMenuOpen(false);
-                    void onResetSession?.();
-                  }}
-                  className="btn-secondary w-full border-status-error/50 bg-status-error-surface text-status-error"
-                >
-                  Reset session progress
-                </button>
-                <p className="text-xs leading-relaxed text-ink-muted">
-                  Reset session keeps the code and roster. It clears timer, map,
-                  questions, chat, zones, traps, and end-game state.
-                </p>
+                {remoteSession && onResetSession ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setResetMenuOpen(false);
+                        void onResetSession();
+                      }}
+                      className="btn-secondary w-full border-status-error/50 bg-status-error-surface text-status-error"
+                    >
+                      Reset session progress
+                    </button>
+                    <p className="text-xs leading-relaxed text-ink-muted">
+                      Reset session keeps the code and roster. It clears timer,
+                      map, questions, chat, zones, traps, and end-game state.
+                    </p>
+                  </>
+                ) : null}
               </div>
             ) : null}
             <button

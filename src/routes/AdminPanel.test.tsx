@@ -107,6 +107,7 @@ describe("AdminPanel", () => {
         regionPackSubregionId: null,
         transitMetroId: null,
         gameAreaLabel: "Dublin",
+        lastActivityAt: "2026-01-02T00:00:00.000Z",
       },
     ];
 

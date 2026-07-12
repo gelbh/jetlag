@@ -55,7 +55,7 @@ export function AnimatedOverlay({
   scrimEnterClass = "hud-scrim-enter",
   scrimExitClass = "hud-scrim-exit",
 }: AnimatedOverlayProps) {
-  const { animate } = useMotionProfile();
+  const { decorativeAnimate } = useMotionProfile();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -74,7 +74,7 @@ export function AnimatedOverlay({
   const gesture = useSheetGesture({
     enabled:
       dismissible &&
-      animate &&
+      decorativeAnimate &&
       (phase === "open" || phase === "entering"),
     onDismiss: requestClose,
     scrollRef,

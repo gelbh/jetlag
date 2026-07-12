@@ -37,9 +37,9 @@ export function useAnimatedPresence({
   exitClass = "hud-sheet-exit",
   durationMs = 280,
 }: UseAnimatedPresenceOptions): UseAnimatedPresenceResult {
-  const { animate } = useMotionProfile();
+  const { decorativeAnimate } = useMotionProfile();
   const [phase, setPhase] = useState<PresencePhase>(() =>
-    open ? (animate ? "entering" : "open") : "closed",
+    open ? (decorativeAnimate ? "entering" : "open") : "closed",
   );
   const animNodeRef = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
@@ -58,7 +58,7 @@ export function useAnimatedPresence({
   }, []);
 
   const beginExit = useCallback(() => {
-    if (!animate) {
+    if (!decorativeAnimate) {
       setPhase("closed");
       finishClose();
       return;
@@ -69,14 +69,14 @@ export function useAnimatedPresence({
       }
       return "exiting";
     });
-  }, [animate, finishClose]);
+  }, [decorativeAnimate, finishClose]);
 
   useEffect(() => {
     if (open) {
       /* eslint-disable react-hooks/set-state-in-effect -- sync mount phase to open prop */
       setPhase((current) => {
         if (current === "closed") {
-          return animate ? "entering" : "open";
+          return decorativeAnimate ? "entering" : "open";
         }
         return current;
       });
@@ -88,20 +88,20 @@ export function useAnimatedPresence({
       if (current === "closed" || current === "exiting") {
         return current;
       }
-      if (!animate) {
+      if (!decorativeAnimate) {
         queueMicrotask(() => finishClose());
         return "closed";
       }
       return "exiting";
     });
-  }, [open, animate, finishClose]);
+  }, [open, decorativeAnimate, finishClose]);
 
   useEffect(() => {
     if (phase !== "entering") {
       return;
     }
 
-    if (!animate) {
+    if (!decorativeAnimate) {
       queueMicrotask(() => setPhase("open"));
       return;
     }
@@ -130,14 +130,14 @@ export function useAnimatedPresence({
       node?.removeEventListener("animationend", onEnd);
       window.clearTimeout(timeoutId);
     };
-  }, [phase, animate, durationMs]);
+  }, [phase, decorativeAnimate, durationMs]);
 
   useEffect(() => {
     if (phase !== "exiting") {
       return;
     }
 
-    if (!animate) {
+    if (!decorativeAnimate) {
       queueMicrotask(() => finishClose());
       return;
     }
@@ -167,7 +167,7 @@ export function useAnimatedPresence({
       node?.removeEventListener("animationend", onEnd);
       window.clearTimeout(timeoutId);
     };
-  }, [phase, animate, durationMs, finishClose]);
+  }, [phase, decorativeAnimate, durationMs, finishClose]);
 
   const requestClose = useCallback(() => {
     beginExit();

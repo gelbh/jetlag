@@ -105,6 +105,23 @@ describe("useFirestoreCollectionSync", () => {
     expect(onSyncError).toHaveBeenCalledOnce();
   });
 
+  it("does not resubscribe when onSyncError callback identity changes", () => {
+    const unsubscribe = vi.fn();
+    const subscribe = vi.fn(() => unsubscribe);
+
+    const { rerender } = renderHook(
+      ({ onSyncError }: { onSyncError: () => void }) =>
+        useFirestoreCollectionSync("remote-session", subscribe, { onSyncError }),
+      { initialProps: { onSyncError: () => undefined } },
+    );
+
+    expect(subscribe).toHaveBeenCalledTimes(1);
+
+    rerender({ onSyncError: () => undefined });
+
+    expect(subscribe).toHaveBeenCalledTimes(1);
+  });
+
   it("clears items on subscription error when no handler is provided", () => {
     const unsubscribe = vi.fn();
     const subscribe = vi.fn(

@@ -5,6 +5,7 @@ import { HttpsError } from "firebase-functions/v2/https";
 import {
   compareSessionsByLastActivity,
   deriveSessionPhase,
+  mapWithConcurrency,
   parseFirestoreTimestampMs,
   resolveSessionLastActivityMs,
   summarizeSession,
@@ -211,5 +212,16 @@ describe("listActiveSessions helpers", () => {
         "missing-activity",
       ],
     );
+  });
+
+  it("maps items with bounded concurrency", async () => {
+    const order = [];
+    const results = await mapWithConcurrency([1, 2, 3, 4, 5], 2, async (value) => {
+      order.push(value);
+      return value * 2;
+    });
+
+    assert.deepEqual(results, [2, 4, 6, 8, 10]);
+    assert.deepEqual(order, [1, 2, 3, 4, 5]);
   });
 });

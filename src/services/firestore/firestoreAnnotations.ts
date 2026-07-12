@@ -824,22 +824,16 @@ export async function resetRemoteSession(
   const resetAt = new Date().toISOString();
 
   const snapshot = await getDocs(annotationsCollection(sessionId));
-  const deleted = snapshot.docs
-    .map((annotationDoc) =>
-      deserializeAnnotationFromFirestore(
-        sessionId,
-        annotationDoc.id,
-        annotationDoc.data() as Record<string, unknown>,
-      ),
-    )
-    .filter((annotation) => annotation.status === "active");
+  const activeDocs = snapshot.docs.filter(
+    (annotationDoc) => annotationDoc.data().status === "active",
+  );
 
-  for (let index = 0; index < deleted.length; index += FIRESTORE_BATCH_LIMIT) {
-    const chunk = deleted.slice(index, index + FIRESTORE_BATCH_LIMIT);
+  for (let index = 0; index < activeDocs.length; index += FIRESTORE_BATCH_LIMIT) {
+    const chunk = activeDocs.slice(index, index + FIRESTORE_BATCH_LIMIT);
     const batch = writeBatch(getFirestoreDb());
 
-    for (const annotation of chunk) {
-      batch.update(doc(annotationsCollection(sessionId), annotation.id), {
+    for (const annotationDoc of chunk) {
+      batch.update(annotationDoc.ref, {
         status: "deleted",
         updatedAt: resetAt,
       });

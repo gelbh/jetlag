@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { MapViewportState } from "../../components/map/MapViewportTracker";
 import {
-  fallbackGameArea,
   gameAreaCenter,
   gameAreaToBoundsExpression,
+  fallbackGameArea,
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../domain/device/powerProfile";
@@ -14,6 +14,8 @@ import { useSharedSessionScreen } from "../../hooks/session/useSharedSessionScre
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import { useSessionAnnotations } from "../../hooks/map/useSessionAnnotations";
 import { useMapStore, useSessionStore } from "../../state/sessionStore";
+
+const DEFAULT_MAP_CENTER: LatLngTuple = [51.505, -0.09];
 
 export function useObserverMapScreen() {
   const session = useSessionStore((state) => state.session);
@@ -28,7 +30,9 @@ export function useObserverMapScreen() {
   const suppressChromeHideRef = useRef(false);
   const [mapViewport, setMapViewport] = useState<MapViewportState | null>(null);
 
-  const { gameArea, sessionRules } = useResolvedSessionRules(session);
+  const { gameArea, sessionRules, playAreaReady } = useResolvedSessionRules(session);
+  const resolvedGameArea = gameArea ?? session?.gameArea ?? null;
+  const displayGameArea = playAreaReady ? fallbackGameArea(resolvedGameArea) : null;
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
   const handleMapStyleChange = useCallback(
     (style: typeof mapStyle) => {
@@ -40,15 +44,20 @@ export function useObserverMapScreen() {
     },
     [lowPowerMode, setLowPowerMode, setMapStyle],
   );
-  const resolvedGameArea = gameArea ?? session?.gameArea ?? fallbackGameArea();
-  const center = useMemo<LatLngTuple>(
-    () => gameAreaCenter(resolvedGameArea),
-    [resolvedGameArea],
-  );
-  const mapFocusBounds = useMemo(
-    () => gameAreaToBoundsExpression(resolvedGameArea),
-    [resolvedGameArea],
-  );
+  const center = useMemo<LatLngTuple>(() => {
+    if (!displayGameArea) {
+      return DEFAULT_MAP_CENTER;
+    }
+
+    return gameAreaCenter(displayGameArea);
+  }, [displayGameArea]);
+  const mapFocusBounds = useMemo(() => {
+    if (!playAreaReady || !displayGameArea) {
+      return null;
+    }
+
+    return gameAreaToBoundsExpression(displayGameArea);
+  }, [playAreaReady, displayGameArea]);
 
   const {
     uid,
@@ -83,7 +92,8 @@ export function useObserverMapScreen() {
     uid,
     sessionId,
     sessionRules,
-    gameArea: resolvedGameArea,
+    gameArea: displayGameArea,
+    playAreaReady,
     center,
     mapFocusBounds,
     mapStyle,

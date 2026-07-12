@@ -8,9 +8,9 @@ interface MotionFadeProps {
 
 /** CSS fade-in wrapper that respects the motion profile. */
 export function MotionFade({ children, className = "" }: MotionFadeProps) {
-  const { animate } = useMotionProfile();
+  const { decorativeAnimate } = useMotionProfile();
 
-  if (!animate) {
+  if (!decorativeAnimate) {
     return <div className={className}>{children}</div>;
   }
 
