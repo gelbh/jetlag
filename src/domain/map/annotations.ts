@@ -171,6 +171,7 @@ export interface SessionRecord {
   endGameStartedByUid?: string;
   endGameRequestedAt?: string;
   endGameRequestedByUid?: string;
+  sessionResetAt?: string;
   hostAppVersion?: string;
   memberAppVersions?: Record<string, string>;
 }

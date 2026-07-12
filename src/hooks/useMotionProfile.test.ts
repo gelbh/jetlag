@@ -9,17 +9,19 @@ describe("useMotionProfile", () => {
     resetAllStores();
   });
 
-  it("returns animate false when low power mode is enabled", () => {
+  it("keeps animate true when low power mode is enabled", () => {
     useMapStore.getState().setLowPowerMode(true);
 
     const { result } = renderHook(() => useMotionProfile());
 
-    expect(result.current.animate).toBe(false);
+    expect(result.current.animate).toBe(true);
+    expect(result.current.decorativeAnimate).toBe(false);
   });
 
-  it("returns animate true when low power mode is disabled", () => {
+  it("returns decorative animate true when low power mode is disabled", () => {
     const { result } = renderHook(() => useMotionProfile());
 
     expect(result.current.animate).toBe(true);
+    expect(result.current.decorativeAnimate).toBe(true);
   });
 });

@@ -290,6 +290,33 @@ service cloud.firestore {
         && (request.resource.data.timerRunningSince == null
           || request.resource.data.timerRunningSince is string)
       ) || (
+        isSessionHost(sessionId)
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.memberRoles == resource.data.memberRoles
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'sessionResetAt',
+            'timerAccumulatedMs',
+            'timerRunningSince',
+            'endGameStartedAt',
+            'endGameStartedByUid',
+            'endGameRequestedAt',
+            'endGameRequestedByUid'
+          ])
+        && request.resource.data.sessionResetAt is string
+        && request.resource.data.timerAccumulatedMs == 0
+        && !('timerRunningSince' in request.resource.data)
+        && !('endGameStartedAt' in request.resource.data)
+        && !('endGameStartedByUid' in request.resource.data)
+        && !('endGameRequestedAt' in request.resource.data)
+        && !('endGameRequestedByUid' in request.resource.data)
+      ) || (
         isSeekerMember(sessionId)
         && (
           !('endGameStartedAt' in resource.data)
@@ -400,7 +427,14 @@ service cloud.firestore {
           && validAnnotationType(request.resource.data.type)
           && request.resource.data.status in ['active', 'deleted']
           && request.resource.data.geometryJson is string
-          && request.resource.data.metadata is map;
+          && request.resource.data.metadata is map
+        || (
+          isSessionHost(sessionId)
+          && resource.data.status == 'active'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+          && request.resource.data.status == 'deleted'
+          && request.resource.data.updatedAt is string
+        );
         allow delete: if false;
       }
 
@@ -483,6 +517,11 @@ service cloud.firestore {
           isSeekerMember(sessionId)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'resolvedAnnotationId'])
           && request.resource.data.status in ['resolved', 'cancelled']
+        ) || (
+          isSessionHost(sessionId)
+          && resource.data.status in ['pending', 'walking', 'answered']
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+          && request.resource.data.status == 'cancelled'
         ) || (
           isSessionMember(sessionId)
           && resource.data.status == 'pending'

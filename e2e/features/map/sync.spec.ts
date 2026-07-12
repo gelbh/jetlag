@@ -88,12 +88,54 @@ test.describe("cross-device sync", () => {
     hostPage.once("dialog", (dialog) => dialog.accept());
     await openSettings(hostPage);
     await hostPage.getByRole("tab", { name: "Session" }).click();
+    await hostPage.getByRole("button", { name: "Reset…" }).click();
     await hostPage
       .getByRole("button", { name: "Reset board for everyone" })
       .click();
 
     await expect(async () => {
       expect(await guestShapes.count()).toBeLessThan(afterPinCount);
+    }).toPass({ timeout: 45_000 });
+
+    await cleanup();
+  });
+
+  test("host full session reset clears guest progress", async ({ browser }) => {
+    const { hostPage, guestPage, cleanup } =
+      await createMultiplayerContexts(browser);
+
+    const { code } = await createHostSession(hostPage);
+    await joinAsRole(guestPage, code, "seeker");
+
+    await placePin(hostPage, "Before reset");
+    await hostPage.getByRole("button", { name: "Start" }).click();
+
+    await expect(guestPage.getByText(/\d{2}:\d{2}/).first()).toBeVisible({
+      timeout: 15_000,
+    });
+
+    const guestShapes = guestPage.locator(
+      ".leaflet-overlay-pane .leaflet-interactive",
+    );
+
+    await expect(async () => {
+      expect(await guestShapes.count()).toBeGreaterThan(0);
+    }).toPass({ timeout: 30_000 });
+
+    hostPage.once("dialog", (dialog) => dialog.accept());
+    await openSettings(hostPage);
+    await hostPage.getByRole("tab", { name: "Session" }).click();
+    await hostPage.getByRole("button", { name: "Reset…" }).click();
+    await hostPage
+      .getByRole("button", { name: "Reset session progress" })
+      .click();
+
+    await expect(guestPage.getByRole("button", { name: "Start" })).toBeVisible({
+      timeout: 45_000,
+    });
+
+    await expect(async () => {
+      expect(await guestShapes.count()).toBe(0);
     }).toPass({ timeout: 45_000 });
 
     await cleanup();

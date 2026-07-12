@@ -103,6 +103,7 @@ type MapScreenChromeProps = Pick<
   | "handleStartEndGame"
   | "handleClearMap"
   | "handleResetBoard"
+  | "handleResetSession"
   | "handleEndSession"
   | "handleLeaveSession"
   | "handleSaveGameRules"
@@ -206,6 +207,7 @@ export function MapScreenChrome({
   handleStartEndGame,
   handleClearMap,
   handleResetBoard,
+  handleResetSession,
   handleEndSession,
   handleLeaveSession,
   handleSaveGameRules,
@@ -378,6 +380,7 @@ export function MapScreenChrome({
           },
           isHost,
           onResetBoard: handleResetBoard,
+          onResetSession: () => void handleResetSession(),
           onEndSession: () => void handleEndSession(),
           onLeaveSession: () => void handleLeaveSession(),
           expansionPackEnabled: session!.expansionPackEnabled === true,

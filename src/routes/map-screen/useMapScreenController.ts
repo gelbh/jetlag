@@ -430,7 +430,7 @@ export function useMapScreenController() {
   const { confirmedHidingZones, endGameBlocked, canStartEndGame } =
     sessionActions;
 
-  const { handleClearMap, handleResetBoard, handleEndSession, handleLeaveSession, exportMap } =
+  const { handleClearMap, handleResetBoard, handleResetSession, handleEndSession, handleLeaveSession, exportMap } =
     useMapSessionChrome({
       session,
       isHost,
@@ -440,6 +440,7 @@ export function useMapScreenController() {
       clearAllAnnotations,
       setSelectedAnnotationId,
       closeSettingsPanel: overlay.closeSheet,
+      resetTimer: timer.reset,
       endGameBlocked,
     });
 
@@ -683,6 +684,7 @@ export function useMapScreenController() {
     handleStartEndGame: sessionActions.handleStartEndGame,
     handleClearMap,
     handleResetBoard,
+    handleResetSession,
     handleEndSession,
     handleLeaveSession,
     handleSaveGameRules: sessionActions.handleSaveGameRules,

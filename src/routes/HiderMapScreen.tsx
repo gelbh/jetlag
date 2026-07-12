@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { Polygon } from "react-leaflet";
 import { AnnotationLayer } from "../components/map/AnnotationLayer";
@@ -63,7 +63,10 @@ import {
 } from "../services/firestore/firestoreAnnotations";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase";
 import { useSessionAnnotations } from "../hooks/map/useSessionAnnotations";
+import { useAnnotations } from "../hooks/map/useAnnotations";
+import { useMapSessionChrome } from "../hooks/map-screen/useMapSessionChrome";
 import { useMapStore, useSessionStore } from "../state/sessionStore";
+import { useAnnotationStore } from "../state/annotationStore";
 
 export function HiderMapScreen() {
   const session = useSessionStore((state) => state.session);
@@ -145,6 +148,32 @@ export function HiderMapScreen() {
     distanceUnit === "metric" ? "metric" : "imperial",
   );
   const annotations = useSessionAnnotations(sessionId);
+  const { clearAllAnnotations } = useAnnotations();
+  const setSelectedAnnotationId = useAnnotationStore(
+    (state) => state.setSelectedAnnotationId,
+  );
+  const mapShellRef = useRef<HTMLDivElement>(null);
+  const exportLegendRef = useRef<HTMLDivElement>(null);
+  const endGameBlocked =
+    isEndGameActive(session) || isEndGamePending(session);
+  const {
+    handleClearMap,
+    handleResetBoard,
+    handleResetSession,
+    handleEndSession,
+    handleLeaveSession,
+  } = useMapSessionChrome({
+    session,
+    isHost,
+    annotations,
+    mapShellRef,
+    exportLegendRef,
+    clearAllAnnotations,
+    setSelectedAnnotationId,
+    closeSettingsPanel: overlay.closeSheet,
+    resetTimer: timer.reset,
+    endGameBlocked,
+  });
   const timeTraps = useTimeTrapsSync(sessionId);
   const expansionPackEnabled = session?.expansionPackEnabled === true;
   const [expansionMenuOpen, setExpansionMenuOpen] = useState(false);
@@ -552,6 +581,11 @@ export function HiderMapScreen() {
         onTimeTrapSearchThisArea={handleTimeTrapSearchThisArea}
         curseSheetOpen={curseSheetOpen}
         onCurseSheetOpenChange={setCurseSheetOpen}
+        onClearMap={isHost ? handleClearMap : undefined}
+        onResetBoard={isHost ? handleResetBoard : undefined}
+        onResetSession={isHost ? handleResetSession : undefined}
+        onEndSession={isHost ? handleEndSession : undefined}
+        onLeaveSession={handleLeaveSession}
         mapSettings={{
           showCurrentLocation,
           setShowCurrentLocation,

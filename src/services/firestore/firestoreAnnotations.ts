@@ -7,6 +7,7 @@ import {
   doc,
   getDoc,
   getDocFromServer,
+  getDocs,
   onSnapshot,
   serverTimestamp,
   setDoc,
@@ -45,6 +46,10 @@ import {
 } from "./firestoreSerialization";
 import { photoUploadAccessError } from "../../domain/questions";
 import { generateSessionCode } from "../session/sessionCodes";
+import {
+  cancelOpenPendingQuestions,
+  postGameSystemMessage,
+} from "./firestoreSessionExtras";
 import {
   buildMemberUidsAfterHeal,
   sanitizeReturningMemberUid,
@@ -807,6 +812,61 @@ export async function resetEndGameSession(sessionId: string): Promise<void> {
     endGameRequestedAt: deleteField(),
     endGameRequestedByUid: deleteField(),
   });
+}
+
+export async function resetRemoteSession(
+  sessionId: string,
+  hostUid: string,
+  hostRole: PlayerRole,
+): Promise<string> {
+  const resetAt = new Date().toISOString();
+
+  const snapshot = await getDocs(annotationsCollection(sessionId));
+  const deleted = snapshot.docs
+    .map((annotationDoc) =>
+      deserializeAnnotationFromFirestore(
+        sessionId,
+        annotationDoc.id,
+        annotationDoc.data() as Record<string, unknown>,
+      ),
+    )
+    .filter((annotation) => annotation.status === "active");
+
+  for (let index = 0; index < deleted.length; index += FIRESTORE_BATCH_LIMIT) {
+    const chunk = deleted.slice(index, index + FIRESTORE_BATCH_LIMIT);
+    const batch = writeBatch(getFirestoreDb());
+
+    for (const annotation of chunk) {
+      batch.update(doc(annotationsCollection(sessionId), annotation.id), {
+        status: "deleted",
+        updatedAt: resetAt,
+      });
+    }
+
+    await batch.commit();
+  }
+
+  await cancelOpenPendingQuestions(sessionId);
+
+  await updateDoc(doc(sessionsCollection(), sessionId), {
+    sessionResetAt: resetAt,
+    timerAccumulatedMs: 0,
+    timerRunningSince: deleteField(),
+    endGameStartedAt: deleteField(),
+    endGameStartedByUid: deleteField(),
+    endGameRequestedAt: deleteField(),
+    endGameRequestedByUid: deleteField(),
+  });
+
+  await postGameSystemMessage(
+    sessionId,
+    hostUid,
+    hostRole,
+    "Session reset by host",
+    `reset-${resetAt}`,
+  );
+
+  return resetAt;
 }
 
 export function subscribeToSession(

@@ -22,6 +22,16 @@ vi.mock("../services/core/firebaseAuthReady", () => ({
   waitForPermanentAuthReady: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock("../hooks/billing/usePremiumEntitlements", () => ({
+  usePremiumEntitlements: () => ({
+    entitlements: null,
+    loading: false,
+    hydrated: true,
+    refresh: vi.fn(),
+    setEntitlements: vi.fn(),
+  }),
+}));
+
 vi.mock("../services/billing/premiumBilling", () => ({
   fetchPremiumEntitlements: vi.fn().mockResolvedValue(null),
 }));
