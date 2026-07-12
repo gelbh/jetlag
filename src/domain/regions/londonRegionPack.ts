@@ -1,7 +1,7 @@
 import type { MatchingCategoryId } from "../questions/matchingQuestions";
 import type { MeasuringFromKind } from "../questions/measuringQuestions";
 import type { RegionPackId } from "./regionPack";
-import type { RegionPackLabelOverride } from "./dublinRegionPack";
+import type { RegionPackLabelOverride } from "./regionPack";
 
 export const LONDON_REGION_PACK_ID = "london" satisfies RegionPackId;
 

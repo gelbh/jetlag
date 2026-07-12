@@ -1,7 +1,10 @@
+import { Fragment } from "react";
 import { HudToolIcon } from "../map/ToolIcons";
 import {
+  getQuestionTutorial,
   getQuestionTutorials,
   isQuestionTutorialComplete,
+  QUESTION_TUTORIAL_ORDER,
   questionTutorialStartIndex,
   questionsHubStatusLabel,
   type QuestionTutorialId,
@@ -11,7 +14,6 @@ import type { TutorialProgress } from "../../domain/tutorial/tutorialProgress";
 interface TutorialQuestionsHubProps {
   progress: TutorialProgress;
   onSelectQuestion: (questionId: QuestionTutorialId) => void;
-  onBack: () => void;
 }
 
 function questionStatusLabel(
@@ -32,16 +34,15 @@ function questionStatusLabel(
 export function TutorialQuestionsHub({
   progress,
   onSelectQuestion,
-  onBack,
 }: TutorialQuestionsHubProps) {
   const questions = getQuestionTutorials();
+  const recommendedId = QUESTION_TUTORIAL_ORDER.find((id) => {
+    const tutorial = getQuestionTutorial(id);
+    return !isQuestionTutorialComplete(id, tutorial.steps.length, progress);
+  });
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
-      <button type="button" onClick={onBack} className={screenBackClassName}>
-        Tutorial
-      </button>
-
       <div className="shrink-0 space-y-1">
         <h1 className="tutorial-hub-heading font-display text-balance font-bold uppercase leading-[0.92] tracking-tight text-ink">
           Questions
@@ -51,46 +52,68 @@ export function TutorialQuestionsHub({
         </p>
       </div>
 
-      <div className="tutorial-questions-grid">
+      <div className="tutorial-questions-list">
         {questions.map((question) => {
           const complete = isQuestionTutorialComplete(
             question.id,
             question.steps.length,
             progress,
           );
+          const status = complete
+            ? "Review"
+            : questionStatusLabel(question.id, question.steps.length, progress);
+          const completedSteps = complete
+            ? question.steps.length
+            : Math.max(0, progress.questions[question.id] + 1);
+          const progressPercent = Math.round(
+            (completedSteps / question.steps.length) * 100,
+          );
+          const isRecommended = question.id === recommendedId && !complete;
 
           return (
-            <button
-              key={question.id}
-              type="button"
-              onClick={() => onSelectQuestion(question.id)}
-              className="home-card-btn home-card-btn-secondary"
-              aria-label={
-                complete
-                  ? `${question.title} — review`
-                  : `${question.title} — ${questionStatusLabel(question.id, question.steps.length, progress)}`
-              }
-            >
-              <span className="flex min-w-0 items-center gap-1.5">
-                <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-md border-2 border-border bg-surface-panel text-highlight">
-                  <HudToolIcon tool={question.id} className="size-3.5" />
-                </span>
-                {complete ? (
-                  <span
-                    className="font-mono text-xs text-status-success"
-                    aria-hidden="true"
-                  >
-                    ✓
+            <Fragment key={question.id}>
+              <button
+                type="button"
+                onClick={() => onSelectQuestion(question.id)}
+                className={`home-card-btn home-card-btn-secondary tutorial-question-row ${isRecommended ? "tutorial-question-row-recommended" : ""}`}
+                aria-label={
+                  complete
+                    ? `${question.title} — review`
+                    : `${question.title} — ${isRecommended ? "Continue" : status}`
+                }
+              >
+                <span className="flex min-w-0 flex-1 items-center gap-2.5">
+                  <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-md border-2 border-border bg-surface-panel text-highlight">
+                    <HudToolIcon tool={question.id} className="size-4" />
                   </span>
-                ) : null}
-                <span className="truncate">{question.title}</span>
-              </span>
-              <span className="home-card-btn-hint">
-                {complete
-                  ? "Review"
-                  : questionStatusLabel(question.id, question.steps.length, progress)}
-              </span>
-            </button>
+                  <span className="min-w-0 flex-1 text-left">
+                    <span className="flex items-center gap-1.5">
+                      {complete ? (
+                        <span
+                          className="font-mono text-sm text-status-success"
+                          aria-hidden="true"
+                        >
+                          ✓
+                        </span>
+                      ) : null}
+                      <span className="truncate">{question.title}</span>
+                    </span>
+                    <span className="tutorial-question-summary block truncate normal-case tracking-normal">
+                      {question.summary}
+                    </span>
+                  </span>
+                </span>
+                <span className="home-card-btn-hint shrink-0">
+                  {isRecommended ? "Continue" : status}
+                </span>
+              </button>
+              <div className="tutorial-question-progress" aria-hidden>
+                <div
+                  className="tutorial-question-progress-fill"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </Fragment>
           );
         })}
       </div>
@@ -101,6 +124,3 @@ export function TutorialQuestionsHub({
     </div>
   );
 }
-
-const screenBackClassName =
-  "inline-flex min-h-11 w-fit shrink-0 items-center gap-1 px-1 font-display text-xs font-semibold uppercase tracking-[0.14em] text-ink-secondary transition-colors hover:text-ink";

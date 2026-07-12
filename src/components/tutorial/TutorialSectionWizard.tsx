@@ -1,8 +1,7 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { HudToolIcon } from "../map/ToolIcons";
 import { ToolStepper } from "../tools/shared/ToolStepper";
-import { WizardStepFooter } from "../tools/shared/WizardStepFooter";
 import { WizardSwipeSurface } from "../tools/shared/WizardSwipeSurface";
 import { buildSteps, deriveStepStates } from "../tools/shared/toolStepUtils";
 import type { TutorialStep } from "../../domain/tutorial/tutorialSections";
@@ -18,6 +17,10 @@ import {
 } from "../../domain/tutorial/tutorialQuestions";
 import { TutorialScreenshot } from "./TutorialScreenshot";
 import { TutorialSplitScreenshot } from "./TutorialSplitScreenshot";
+import { TutorialInteractiveTool } from "./previews/TutorialInteractiveTool";
+import { TutorialWizardSplitPanelPreview } from "./previews/TutorialWizardSplitPanelPreview";
+import { TutorialMapPreview } from "./previews/TutorialMapPreview";
+import { TutorialMapViewportProvider } from "../../hooks/tutorial/TutorialMapViewportContext";
 
 export interface TutorialWalkthrough {
   id: string;
@@ -37,6 +40,7 @@ interface TutorialSectionWizardProps {
   onOpenSection?: (sectionId: TutorialSectionId) => void;
   onOpenQuestionsHub?: () => void;
   onOpenQuestion?: (questionId: QuestionTutorialId) => void;
+  onCompleteEntireQuestion?: () => void;
 }
 
 export function TutorialSectionWizard({
@@ -44,15 +48,35 @@ export function TutorialSectionWizard({
   initialStepIndex = 0,
   reviewing = false,
   onStepComplete,
+  onBackFromStart,
   onFinish,
   finishLabel = "Tutorial hub",
   onOpenSection,
   onOpenQuestionsHub,
   onOpenQuestion,
+  onCompleteEntireQuestion,
 }: TutorialSectionWizardProps) {
   const [stepIndex, setStepIndex] = useState(initialStepIndex);
   const step = section.steps[stepIndex]!;
   const isLastStep = stepIndex >= section.steps.length - 1;
+  const isInteractiveStep = step.kind === "interactive-panel";
+
+  const handleNext = useCallback(() => {
+    onStepComplete(stepIndex);
+    if (isLastStep) {
+      onFinish();
+      return;
+    }
+    setStepIndex((current) => Math.min(current + 1, section.steps.length - 1));
+  }, [isLastStep, onFinish, onStepComplete, section.steps.length, stepIndex]);
+
+  const handleBack = useCallback(() => {
+    if (stepIndex === 0) {
+      onBackFromStart();
+      return;
+    }
+    setStepIndex((current) => Math.max(current - 1, 0));
+  }, [onBackFromStart, stepIndex]);
 
   const stepper = useMemo(() => {
     const states = deriveStepStates(section.steps.length, stepIndex);
@@ -60,24 +84,25 @@ export function TutorialSectionWizard({
       section.steps.map((item) => ({ id: item.id, label: item.title })),
       states,
     );
-    return <ToolStepper steps={steps} labelClassName="mt-1" />;
-  }, [section.steps, stepIndex]);
-
-  const handleNext = () => {
-    onStepComplete(stepIndex);
-    if (isLastStep) {
-      onFinish();
-      return;
-    }
-    setStepIndex((current) => Math.min(current + 1, section.steps.length - 1));
-  };
-
-  const handleBack = () => {
-    if (stepIndex === 0) {
-      return;
-    }
-    setStepIndex((current) => Math.max(current - 1, 0));
-  };
+    return (
+      <ToolStepper
+        steps={steps}
+        showLabel={false}
+        nav={
+          isInteractiveStep
+            ? undefined
+            : {
+                stepIndex,
+                stepCount: section.steps.length,
+                canGoBack: false,
+                canGoNext: !isLastStep,
+                onBack: handleBack,
+                onNext: handleNext,
+              }
+        }
+      />
+    );
+  }, [section.steps, stepIndex, isInteractiveStep, isLastStep, handleBack, handleNext]);
 
   const isQuestionTutorial = section.kind === "question";
 
@@ -166,21 +191,91 @@ export function TutorialSectionWizard({
     </div>
   ) : null;
 
-  const footer = (
-    <WizardStepFooter
-      stepIndex={stepIndex}
-      stepCount={section.steps.length}
-      canGoBack={stepIndex > 0}
-      canGoNext={!isLastStep}
-      onBack={handleBack}
-      onNext={handleNext}
-      extra={lastStepExtra}
-    />
+  const handleSeeWalkthrough = () => {
+    onStepComplete(stepIndex);
+    setStepIndex((current) => Math.min(current + 1, section.steps.length - 1));
+  };
+
+  const handleGotIt = () => {
+    onCompleteEntireQuestion?.();
+    onFinish();
+  };
+
+  const stepMedia = (() => {
+    switch (step.kind) {
+      case "interactive-panel":
+        if (step.toolId && isQuestionTutorial) {
+          return (
+            <TutorialInteractiveTool
+              toolId={section.id as QuestionTutorialId}
+            />
+          );
+        }
+        return null;
+      case "split-panel-preview":
+        if (step.toolId && step.splitPanelPreview && isQuestionTutorial) {
+          return (
+            <TutorialWizardSplitPanelPreview
+              toolId={section.id as QuestionTutorialId}
+              compare={step.splitPanelPreview}
+            />
+          );
+        }
+        return null;
+      case "map-preview":
+        if (step.toolId && step.mapPreviewVariant && isQuestionTutorial) {
+          return (
+            <TutorialMapPreview
+              toolId={section.id as QuestionTutorialId}
+              variant={step.mapPreviewVariant}
+            />
+          );
+        }
+        return null;
+      default:
+        if (step.splitCompare) {
+          return <TutorialSplitScreenshot compare={step.splitCompare} />;
+        }
+        if (step.imageSrc) {
+          return (
+            <TutorialScreenshot
+              src={step.imageSrc}
+              alt={step.imageAlt}
+              className={
+                step.id === "on-map" ? "object-contain object-center" : undefined
+              }
+              fill
+            />
+          );
+        }
+        return null;
+    }
+  })();
+
+  const interactiveFooter = (
+    <div className="flex shrink-0 flex-col gap-2 pt-3">
+      <button type="button" onClick={handleGotIt} className="btn-primary min-h-12 w-full">
+        Got it
+      </button>
+      <button
+        type="button"
+        onClick={handleSeeWalkthrough}
+        className="btn-secondary min-h-12 w-full"
+      >
+        See walkthrough
+      </button>
+    </div>
   );
 
-  return (
+  const footer = isInteractiveStep ? (
+    interactiveFooter
+  ) : lastStepExtra ? (
+    <div className="wizard-step-footer-extra text-center">{lastStepExtra}</div>
+  ) : undefined;
+
+  const wizardBody = (
     <div className="tutorial-wizard flex min-h-0 flex-1 flex-col gap-1.5 overflow-hidden">
-      <div className="shrink-0 space-y-1">
+      <div className="shrink-0 space-y-1.5 text-center">
         <div className="space-y-0.5">
           <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
             {section.title}
@@ -195,13 +290,14 @@ export function TutorialSectionWizard({
       <WizardSwipeSurface
         stepId={step.id}
         stepIndex={stepIndex}
-        canGoBack={stepIndex > 0}
-        canGoNext={!isLastStep}
+        canGoBack={!isInteractiveStep && stepIndex > 0}
+        canGoNext={!isInteractiveStep && !isLastStep}
         onBack={handleBack}
         onNext={handleNext}
+        swipeEnabled={!isInteractiveStep}
         footer={footer}
       >
-        <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-hidden">
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
           {step.toolId ? (
             <div className="flex shrink-0 items-center gap-2">
               <span className="inline-flex size-7 items-center justify-center rounded-md border-2 border-border bg-surface-panel text-highlight">
@@ -215,30 +311,37 @@ export function TutorialSectionWizard({
             </div>
           ) : null}
 
-          {step.splitCompare ? (
-            <div className="tutorial-wizard-media shrink-0">
-              <TutorialSplitScreenshot compare={step.splitCompare} />
-            </div>
-          ) : null}
-
-          {step.imageSrc ? (
-            <div className="tutorial-wizard-media flex min-h-0 shrink items-center justify-center">
-              <TutorialScreenshot
-                src={step.imageSrc}
-                alt={step.imageAlt}
-                className={
-                  step.id === "on-map" ? "object-contain object-center" : undefined
-                }
-                fill
-              />
-            </div>
-          ) : null}
-
-          <p className="line-clamp-3 shrink-0 text-pretty text-sm leading-snug text-ink-muted">
-            {step.body}
-          </p>
+          {isInteractiveStep ? (
+            <>
+              <p className="shrink-0 text-pretty text-sm leading-snug text-ink-muted">
+                {step.body}
+              </p>
+              {stepMedia ? (
+                <div className="tutorial-wizard-media w-full min-h-[min(42dvh,16rem)] self-stretch items-start">
+                  {stepMedia}
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <>
+              {stepMedia ? (
+                <div className="tutorial-wizard-media w-full min-h-[min(42dvh,16rem)] self-stretch">
+                  {stepMedia}
+                </div>
+              ) : null}
+              <p className="shrink-0 pt-1 text-pretty text-sm leading-snug text-ink-muted">
+                {step.body}
+              </p>
+            </>
+          )}
         </div>
       </WizardSwipeSurface>
     </div>
+  );
+
+  return isQuestionTutorial ? (
+    <TutorialMapViewportProvider>{wizardBody}</TutorialMapViewportProvider>
+  ) : (
+    wizardBody
   );
 }
