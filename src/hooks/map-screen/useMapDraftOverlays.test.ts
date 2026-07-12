@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { buildMapDraftOverlays } from "./useMapDraftOverlays";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";

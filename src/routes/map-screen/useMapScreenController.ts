@@ -294,7 +294,7 @@ export function useMapScreenController() {
   useSeekerLocationSync({
     sessionId: session?.id,
     uid: uid,
-    enabled: myRole !== "hider",
+    enabled: myRole === "seeker",
   });
 
   usePendingQuestionResolver({

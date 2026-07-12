@@ -3,6 +3,8 @@ import { isPermanentUser } from "../../services/core/accountAuth";
 
 export const ADMIN_EMAIL = "gelbharttomer@gmail.com";
 
+/** Must stay in sync with `firestore.rules` isAdmin() and Functions ADMIN_EMAIL param. */
+
 export function normalizeAdminEmail(email: string): string {
   return email.trim().toLowerCase();
 }

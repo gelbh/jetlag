@@ -22,6 +22,7 @@ service cloud.firestore {
       return role in ['seeker', 'hider', 'observer'];
     }
 
+    // Keep in sync with src/domain/admin/adminAccess.ts and Functions ADMIN_EMAIL param.
     function isAdmin() {
       return isSignedIn()
         && request.auth.token.email_verified == true

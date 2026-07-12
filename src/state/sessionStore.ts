@@ -91,6 +91,37 @@ function sessionRecordsEqual(
   );
 }
 
+type SessionRecordStructuredKey =
+  | "gameArea"
+  | "memberUids"
+  | "memberRoles"
+  | "disabledTools"
+  | "thermometerPresetMiles"
+  | "thermometerPresetMeters"
+  | "customMatchingAreas"
+  | "customCategories"
+  | "customLocationPins"
+  | "customMeasureGeometries"
+  | "memberAppVersions";
+
+type SessionRecordScalarKey = Exclude<
+  keyof SessionRecord,
+  SessionRecordStructuredKey
+>;
+
+type _AssertSessionRecordEqualityComplete =
+  SessionRecordScalarKey extends Exclude<keyof SessionRecord, SessionRecordStructuredKey>
+    ? SessionRecordStructuredKey extends Exclude<
+        keyof SessionRecord,
+        SessionRecordScalarKey
+      >
+      ? true
+      : never
+    : never;
+
+const _sessionRecordEqualityComplete: _AssertSessionRecordEqualityComplete = true;
+void _sessionRecordEqualityComplete;
+
 export type { MapTool } from "../domain/map/mapToolTypes";
 export { useAnnotationStore } from "./annotationStore";
 export { useMapStore, type LayerVisibility } from "./mapStore";

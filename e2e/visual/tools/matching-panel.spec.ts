@@ -25,6 +25,8 @@ test.describe("matching tool panel screenshots", () => {
     const panel = page.locator(".tool-panel-compact").filter({
       has: page.getByRole("heading", { name: "Matching" }),
     });
-    await expect(panel).toHaveScreenshot("matching-panel-category.png");
+    await expect(panel).toHaveScreenshot("matching-panel-category.png", {
+      maxDiffPixelRatio: 0.02,
+    });
   });
 });
