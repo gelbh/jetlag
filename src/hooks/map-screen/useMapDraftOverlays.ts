@@ -21,6 +21,7 @@ import {
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 import { getBoundaryPreviewStyle } from "../../domain/map/mapBoundaryOverlayStyle";
 import type { MapStyle } from "../../domain/map/mapBasemaps";
+import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/emptyFeatures";
 
 export interface MapDraftOverlaySources {
   activeTool: MapTool;
@@ -374,7 +375,7 @@ export function buildMapDraftOverlays(
 
 export function useMapDraftOverlays(
   sources: MapDraftOverlaySources,
-  extraEliminationFeatures: readonly Feature<GeoPolygon | MultiPolygon>[] = [],
+  extraEliminationFeatures: readonly Feature<GeoPolygon | MultiPolygon>[] = EMPTY_GEOJSON_FEATURES,
 ): MapDraftOverlayResult {
   const {
     activeTool,
