@@ -29,6 +29,8 @@ import { resolvePlayerRole } from "../domain/session/playerRole";
 import { retryAsync } from "../services/core/retryAsync";
 import { MotionPressable } from "../components/motion/MotionPressable";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
+import { preloadCriticalGameAreaCaches } from "../services/session/gameAreaPreload";
+import { resolveSessionMatchingAreas } from "../services/geo/resolveSessionMatchingAreas";
 
 export function JoinSession() {
   const navigate = useAppNavigate();
@@ -161,6 +163,16 @@ export function JoinSession() {
 
       setSession(joinedSession, user.uid);
       setPremiumApiContext(result.session);
+      if (joinedSession.gameArea) {
+        void (async () => {
+          const matchingAreas = await resolveSessionMatchingAreas(joinedSession);
+          void preloadCriticalGameAreaCaches(
+            joinedSession.gameArea!,
+            matchingAreas,
+            joinedSession.regionPackId,
+          );
+        })();
+      }
       navigate("/map");
     } catch (nextError) {
       setError(

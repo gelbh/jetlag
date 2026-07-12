@@ -674,13 +674,11 @@ export function useCreateSession() {
           tier,
         );
         startSeaLevelBackgroundSampling(gameArea);
-        if (navigator.onLine) {
-          void preloadCriticalGameAreaCaches(
-            gameArea,
-            matchingAreas,
-            regionPackId,
-          );
-        }
+        void preloadCriticalGameAreaCaches(
+          gameArea,
+          matchingAreas,
+          regionPackId,
+        );
       }
       navigate("/map");
     } catch (nextError) {
