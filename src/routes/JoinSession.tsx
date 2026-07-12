@@ -219,6 +219,7 @@ export function JoinSession() {
           value={playerRole}
           onChange={setPlayerRole}
           disabled={loading}
+          includeObserver
         />
 
         <MotionPressable

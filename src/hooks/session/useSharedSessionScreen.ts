@@ -155,7 +155,9 @@ export function useSharedSessionScreen({
   const hidingZones = useHidingZonesSync(sessionId);
   const seekerLocations = useSeekerLocationsSync(sessionId, authReady);
   const showHiderLocations =
-    notificationRole === "hider" || notificationRole === "observer";
+    notificationRole === "hider" ||
+    notificationRole === "observer" ||
+    notificationRole === "admin";
   const hiderLocations = useHiderLocationsSync(
     sessionId,
     showHiderLocations && authReady,

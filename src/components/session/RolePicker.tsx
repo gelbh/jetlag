@@ -6,9 +6,10 @@ interface RolePickerProps {
   value: PlayerRole;
   onChange: (role: PlayerRole) => void;
   disabled?: boolean;
+  includeObserver?: boolean;
 }
 
-const ROLE_OPTIONS: Array<{
+const BASE_ROLE_OPTIONS: Array<{
   value: PlayerRole;
   summary: string;
 }> = [
@@ -22,11 +23,25 @@ const ROLE_OPTIONS: Array<{
   },
 ];
 
-export function RolePicker({ value, onChange, disabled }: RolePickerProps) {
+const OBSERVER_ROLE_OPTION = {
+  value: "observer" as const,
+  summary: "Watch the game read-only. Switch between seeker and hider views.",
+};
+
+export function RolePicker({
+  value,
+  onChange,
+  disabled,
+  includeObserver = false,
+}: RolePickerProps) {
+  const roleOptions = includeObserver
+    ? [...BASE_ROLE_OPTIONS, OBSERVER_ROLE_OPTION]
+    : BASE_ROLE_OPTIONS;
+
   return (
     <RadioCardGroup
       value={value}
-      options={ROLE_OPTIONS.map((option) => ({
+      options={roleOptions.map((option) => ({
         value: option.value,
         title: playerRoleLabel(option.value),
         description: option.summary,
