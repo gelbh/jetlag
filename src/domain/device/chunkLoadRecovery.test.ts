@@ -4,8 +4,24 @@ import {
   clearChunkReloadFlag,
   hasChunkReloadBeenAttempted,
   isChunkLoadError,
+  tryApplyDeferredChunkReload,
   wasChunkReloadDeferred,
 } from "./chunkLoadRecovery";
+import * as serviceWorkerRefresh from "./serviceWorkerRefresh";
+
+vi.mock("./serviceWorkerRefresh", async () => {
+  const actual = await vi.importActual<typeof serviceWorkerRefresh>(
+    "./serviceWorkerRefresh",
+  );
+  return {
+    ...actual,
+    applyServiceWorkerUpdate: vi.fn().mockResolvedValue(undefined),
+    getServiceWorkerApplyContext: vi.fn(() => ({
+      registration: undefined,
+      applyUpdate: undefined,
+    })),
+  };
+});
 
 describe("isChunkLoadError", () => {
   it("matches dynamic import fetch failures", () => {
@@ -47,6 +63,11 @@ describe("attemptChunkReload", () => {
     sessionStorage.clear();
     reload.mockReset();
     onNeedRefresh.mockReset();
+    vi.mocked(serviceWorkerRefresh.getServiceWorkerApplyContext).mockReturnValue({
+      registration: undefined,
+      applyUpdate: undefined,
+    });
+    vi.mocked(serviceWorkerRefresh.applyServiceWorkerUpdate).mockClear();
     Object.defineProperty(window, "location", {
       configurable: true,
       value: { ...window.location, reload },
@@ -93,6 +114,88 @@ describe("attemptChunkReload", () => {
     expect(reload).toHaveBeenCalledOnce();
     expect(onNeedRefresh).not.toHaveBeenCalled();
     expect(hasChunkReloadBeenAttempted()).toBe(true);
+  });
+
+  it("activates a waiting service worker before reload when available", () => {
+    const applyUpdate = vi.fn().mockResolvedValue(undefined);
+    const registration = {
+      waiting: { postMessage: vi.fn() },
+    } as unknown as ServiceWorkerRegistration;
+    vi.mocked(serviceWorkerRefresh.getServiceWorkerApplyContext).mockReturnValue({
+      registration,
+      applyUpdate,
+    });
+
+    expect(attemptChunkReload()).toBe(true);
+
+    expect(serviceWorkerRefresh.applyServiceWorkerUpdate).toHaveBeenCalledWith(
+      registration,
+      applyUpdate,
+    );
+    expect(reload).not.toHaveBeenCalled();
+    expect(hasChunkReloadBeenAttempted()).toBe(true);
+  });
+});
+
+describe("tryApplyDeferredChunkReload", () => {
+  const reload = vi.fn();
+  const onNeedRefresh = vi.fn();
+
+  beforeEach(() => {
+    sessionStorage.clear();
+    reload.mockReset();
+    onNeedRefresh.mockReset();
+    vi.mocked(serviceWorkerRefresh.getServiceWorkerApplyContext).mockReturnValue({
+      registration: undefined,
+      applyUpdate: undefined,
+    });
+    vi.mocked(serviceWorkerRefresh.applyServiceWorkerUpdate).mockClear();
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { ...window.location, reload },
+    });
+  });
+
+  it("reloads after leaving the map when a chunk reload was deferred", () => {
+    sessionStorage.setItem("jetlag:chunk-deferred", "1");
+
+    expect(
+      tryApplyDeferredChunkReload({
+        session: { id: "session-1" },
+        pathname: "/",
+        onNeedRefresh,
+      }),
+    ).toBe(true);
+
+    expect(reload).toHaveBeenCalledOnce();
+    expect(wasChunkReloadDeferred()).toBe(false);
+  });
+
+  it("does nothing while still on the map", () => {
+    sessionStorage.setItem("jetlag:chunk-deferred", "1");
+
+    expect(
+      tryApplyDeferredChunkReload({
+        session: { id: "session-1" },
+        pathname: "/map",
+        onNeedRefresh,
+      }),
+    ).toBe(false);
+
+    expect(reload).not.toHaveBeenCalled();
+    expect(wasChunkReloadDeferred()).toBe(true);
+  });
+
+  it("does nothing when no deferred reload is pending", () => {
+    expect(
+      tryApplyDeferredChunkReload({
+        session: { id: "session-1" },
+        pathname: "/",
+        onNeedRefresh,
+      }),
+    ).toBe(false);
+
+    expect(reload).not.toHaveBeenCalled();
   });
 });
 

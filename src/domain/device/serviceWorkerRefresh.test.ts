@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   applyServiceWorkerUpdate,
+  getServiceWorkerApplyContext,
   hasWaitingServiceWorker,
   isSafeToReloadApp,
   maybeApplyPendingUpdate,
   promptIfWaiting,
+  registerServiceWorkerApplyContext,
   scheduleServiceWorkerUpdateChecks,
   shouldAutoApplyServiceWorkerUpdate,
 } from "./serviceWorkerRefresh";
@@ -177,5 +179,29 @@ describe("serviceWorkerRefresh", () => {
     });
 
     expect(applyUpdate).not.toHaveBeenCalled();
+  });
+
+  it("exposes the registered service worker apply context", () => {
+    const applyUpdate = vi.fn().mockResolvedValue(undefined);
+    const registration = {
+      waiting: { postMessage: vi.fn() },
+    } as unknown as ServiceWorkerRegistration;
+
+    const unregister = registerServiceWorkerApplyContext(
+      registration,
+      applyUpdate,
+    );
+
+    expect(getServiceWorkerApplyContext()).toEqual({
+      registration,
+      applyUpdate,
+    });
+
+    unregister();
+
+    expect(getServiceWorkerApplyContext()).toEqual({
+      registration: undefined,
+      applyUpdate: undefined,
+    });
   });
 });
