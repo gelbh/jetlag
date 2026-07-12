@@ -4,12 +4,15 @@ import { HiderMapScreen } from "./HiderMapScreen";
 import { AdminMapScreen } from "./AdminMapScreen";
 import { ObserverMapScreen } from "./ObserverMapScreen";
 import { SeekerMapScreen } from "./SeekerMapScreen";
+import { useSessionHeartbeat } from "../hooks/session/useSessionHeartbeat";
 import { teardownSessionUiState } from "../services/session/sessionCleanup";
 import { useSessionStore } from "../state/sessionStore";
 
 export function MapScreen() {
   const session = useSessionStore((state) => state.session);
   const myRole = useSessionStore((state) => state.myRole);
+
+  useSessionHeartbeat(session);
 
   useEffect(() => () => teardownSessionUiState(), []);
 

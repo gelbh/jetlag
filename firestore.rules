@@ -273,6 +273,20 @@ service cloud.firestore {
         && request.resource.data.memberRoles[request.auth.uid] is string
         && validJoinRole(request.resource.data.memberRoles[request.auth.uid])
       ) || (
+        isSessionMember(sessionId)
+        && resource.data.status != 'ended'
+        && !('endedAt' in resource.data)
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.memberRoles == resource.data.memberRoles
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastActiveAt'])
+        && request.resource.data.lastActiveAt is string
+      ) || (
         isSessionHost(sessionId)
         && request.resource.data.gameArea == resource.data.gameArea
         && request.resource.data.hostUid == resource.data.hostUid
