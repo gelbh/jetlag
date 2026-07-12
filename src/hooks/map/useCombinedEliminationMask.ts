@@ -29,7 +29,6 @@ export function useCombinedEliminationMask({
   useEffect(() => {
     if (hidden) {
       generationRef.current += 1;
-      setMask(null);
       return;
     }
 
