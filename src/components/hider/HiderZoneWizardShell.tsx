@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useCallback, useRef } from "react";
 import { useAnimatedPresence } from "../../hooks/useAnimatedPresence";
 import { usePanelDrag } from "../../hooks/usePanelDrag";
 import { MapFloatingPanel } from "../map/MapFloatingPanel";
@@ -34,9 +35,20 @@ export function HiderZoneWizardShell({
     durationMs: 200,
   });
 
-  const { panelStyle, handleProps } = usePanelDrag({
+  const panelRef = useRef<HTMLDivElement>(null);
+  const setPanelRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      panelRef.current = node;
+      setAnimNode(node);
+    },
+    [setAnimNode],
+  );
+
+  const { panelStyle, handleProps, peekHandleProps } = usePanelDrag({
     minimized: peeked,
     onMinimizedChange: onPeekedChange,
+    panelRef,
+    peekHeightPx: 48,
   });
 
   if (!mounted) {
@@ -49,7 +61,7 @@ export function HiderZoneWizardShell({
       onMinimizedChange={onPeekedChange}
       title={peekLabel}
       peekLabel={peekLabel}
-      outerRef={setAnimNode}
+      outerRef={setPanelRef}
       outerClassName={`pointer-events-auto absolute inset-x-0 jl-panel-hider-wizard z-[var(--z-panel)] px-3 ${animClass} ${
         peeked ? "jl-panel-peeked" : ""
       }`}
@@ -58,6 +70,7 @@ export function HiderZoneWizardShell({
       preserveBodyWhenMinimized={false}
       panelStyle={panelStyle}
       dragHandleProps={handleProps}
+      peekHandleProps={peekHandleProps}
       onClose={onClose}
       closeLabel={closeLabel}
       contentKey={contentKey}

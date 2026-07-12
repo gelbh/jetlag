@@ -1,25 +1,56 @@
 import { describe, expect, it } from "vitest";
 import {
-  PANEL_MINIMIZE_DRAG_THRESHOLD_PX,
   PANEL_MINIMIZE_VELOCITY_PX_MS,
-  shouldMinimizePanelDrag,
+  PANEL_SNAP_FRACTION,
+  shouldExpandPanelSnap,
+  shouldMinimizePanelSnap,
 } from "./usePanelDrag";
 
 describe("usePanelDrag", () => {
-  it("minimizes when dragged past the threshold", () => {
-    expect(shouldMinimizePanelDrag(PANEL_MINIMIZE_DRAG_THRESHOLD_PX, 0)).toBe(
-      true,
-    );
+  const panelHeight = 320;
+
+  it("minimizes when dragged past the snap fraction", () => {
     expect(
-      shouldMinimizePanelDrag(PANEL_MINIMIZE_DRAG_THRESHOLD_PX - 1, 0),
+      shouldMinimizePanelSnap(panelHeight * PANEL_SNAP_FRACTION, panelHeight, 0),
+    ).toBe(true);
+    expect(
+      shouldMinimizePanelSnap(
+        panelHeight * PANEL_SNAP_FRACTION - 1,
+        panelHeight,
+        0,
+      ),
     ).toBe(false);
   });
 
   it("minimizes on a fast downward flick", () => {
     expect(
-      shouldMinimizePanelDrag(
+      shouldMinimizePanelSnap(
         0,
+        panelHeight,
         PANEL_MINIMIZE_VELOCITY_PX_MS + 0.05,
+      ),
+    ).toBe(true);
+  });
+
+  it("expands when dragged up past the snap fraction", () => {
+    expect(
+      shouldExpandPanelSnap(-panelHeight * PANEL_SNAP_FRACTION, panelHeight, 0),
+    ).toBe(true);
+    expect(
+      shouldExpandPanelSnap(
+        -(panelHeight * PANEL_SNAP_FRACTION - 1),
+        panelHeight,
+        0,
+      ),
+    ).toBe(false);
+  });
+
+  it("expands on a fast upward flick", () => {
+    expect(
+      shouldExpandPanelSnap(
+        0,
+        panelHeight,
+        -(PANEL_MINIMIZE_VELOCITY_PX_MS + 0.05),
       ),
     ).toBe(true);
   });
