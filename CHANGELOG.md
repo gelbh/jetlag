@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1 - 2026-07-12
+
+### Improvements
+
+- Measuring: bundled park lists for region packs no longer include duplicate or non-park entries (Portland GIS cleanup and dedup across presets)
+
 ## 0.5.0 - 2026-07-12
 
 ### Improvements
