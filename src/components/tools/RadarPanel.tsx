@@ -7,9 +7,8 @@ import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ViewOnlyQuestionBanner } from "./shared/ViewOnlyQuestionBanner";
 import { ToolSection } from "./shared/ToolSection";
 import { SendToHidersButton } from "./shared/SendToHidersButton";
-import { InlineError } from "../ui/InlineError";
+import { WizardPanelFrame } from "./shared/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
-import { WizardToolPanelLayout } from "./shared/WizardToolPanelLayout";
 import { RADAR_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
 import { useToolWizard } from "../../hooks/useToolWizard";
@@ -250,13 +249,14 @@ export function RadarPanel({
         )
       }
     >
-      <div className={readOnly ? "pointer-events-none select-none" : undefined}>
-        <WizardToolPanelLayout stickyFooter={answerFooter}>
-          {wizardContent}
-        </WizardToolPanelLayout>
-      </div>
-
-      {error ? <InlineError>{error}</InlineError> : null}
+      <WizardPanelFrame
+        readOnly={readOnly}
+        scrollable={useStickyAnswerFooter}
+        stickyFooter={answerFooter}
+        error={error}
+      >
+        {wizardContent}
+      </WizardPanelFrame>
     </ToolPanelShell>
   );
 }

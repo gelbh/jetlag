@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.5.5";
+export const APP_VERSION = "0.5.6";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.5.6",
+    date: "2026-07-12",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Question wizards: repair panel flex layout so Send to hiders and answer actions stay visible on live map",
+        ],
+      }
+    ],
+  },
   {
     version: "0.5.5",
     date: "2026-07-12",

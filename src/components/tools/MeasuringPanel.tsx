@@ -15,7 +15,6 @@ import {
 import type { GeocodedPlace } from "../../services/geo/geocoding";
 import type { SeaLevelEdgeCase } from "../../domain/geometry/seaLevel";
 import { type DistanceUnit } from "../../domain/map/distance";
-import { InlineError } from "../ui/InlineError";
 import { MeasuringAnchorStep } from "./shared/MeasuringAnchorStep";
 import {
   MeasuringAnswerSection,
@@ -30,8 +29,8 @@ import {
 import { SearchResultsList } from "./shared/SearchResultsList";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
+import { WizardPanelFrame } from "./shared/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
-import { WizardToolPanelLayout } from "./shared/WizardToolPanelLayout";
 import { MEASURING_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
 import { useToolWizard } from "../../hooks/useToolWizard";
@@ -367,13 +366,14 @@ export function MeasuringPanel({
         )
       }
     >
-      <div className={readOnly ? "pointer-events-none select-none" : undefined}>
-        <WizardToolPanelLayout stickyFooter={answerFooter}>
-          {wizardContent}
-        </WizardToolPanelLayout>
-      </div>
-
-      {error ? <InlineError>{error}</InlineError> : null}
+      <WizardPanelFrame
+        readOnly={readOnly}
+        scrollable={useStickyAnswerFooter}
+        stickyFooter={answerFooter}
+        error={error}
+      >
+        {wizardContent}
+      </WizardPanelFrame>
     </ToolPanelShell>
   );
 }

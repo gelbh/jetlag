@@ -12,11 +12,30 @@ import {
   sendRadarToHiders,
   sendTentacleToHiders,
   sendThermometerToHiders,
+  clickToolDockButton,
+  clickMapCenter,
+  advanceWizard,
+  waitForWizardNext,
+  expectSendToHidersInViewport,
+  selectFirstRadarDistance,
 } from "../../fixtures";
 
 test.setTimeout(120_000);
 
 test.describe("multiplayer question tools", () => {
+  test("radar send to hiders stays in viewport on distance step", async ({
+    hostHider,
+  }) => {
+    const { hostPage } = hostHider;
+
+    await clickToolDockButton(hostPage, "Radar");
+    await clickMapCenter(hostPage);
+    await waitForWizardNext(hostPage);
+    await advanceWizard(hostPage);
+    await selectFirstRadarDistance(hostPage);
+    await expectSendToHidersInViewport(hostPage);
+  });
+
   test("radar question syncs answers through chat", async ({ browser }) => {
     await runHiderAnswerFlow(browser, sendRadarToHiders, "Yes");
   });

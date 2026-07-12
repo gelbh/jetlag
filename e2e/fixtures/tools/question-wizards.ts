@@ -67,12 +67,16 @@ export async function waitForGeoLoadingIdle(page: Page) {
   }
 }
 
+export const SEND_TO_HIDERS_BUTTON = /^Send to hiders \(D\d+P\d+\)$/;
+
+export async function expectSendToHidersInViewport(page: Page) {
+  const sendButton = page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON });
+  await expect(sendButton).toBeEnabled({ timeout: 15_000 });
+  await expect(sendButton).toBeInViewport();
+}
+
 async function waitForSendToHiders(page: Page) {
-  await expect(
-    page.getByRole("button", { name: /^Send to hiders \(D\d+P\d+\)$/ }),
-  ).toBeEnabled({
-    timeout: 15_000,
-  });
+  await expectSendToHidersInViewport(page);
 }
 
 async function placeAnchorAndAdvance(page: Page) {
@@ -88,8 +92,6 @@ async function placeHeavyToolAnchorAndAdvance(page: Page) {
   await advanceWizard(page);
 }
 
-const SEND_TO_HIDERS_BUTTON = /^Send to hiders \(D\d+P\d+\)$/;
-
 export async function dismissActiveToolPanel(page: Page) {
   const closeTool = page.getByRole("button", { name: /^Close / });
   if (await closeTool.isVisible({ timeout: 500 }).catch(() => false)) {
@@ -100,7 +102,7 @@ export async function dismissActiveToolPanel(page: Page) {
 export const PENDING_QUESTION_TEXT =
   /Are you within|closer to or further|hotter or colder|nearest to|same as my nearest/i;
 
-async function selectFirstRadarDistance(page: Page) {
+export async function selectFirstRadarDistance(page: Page) {
   const preset = page.getByRole("button", { name: /Mile|km/i }).first();
   await expect(preset).toBeVisible({ timeout: 15_000 });
   await preset.click();

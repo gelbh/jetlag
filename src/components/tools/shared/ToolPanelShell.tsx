@@ -66,7 +66,7 @@ export function ToolPanelShell({
           ) : null}
         </div>
       ) : null}
-      {stepper}
+      {stepper ? <div className="shrink-0">{stepper}</div> : null}
       {fillHeight ? (
         <div className="flex min-h-0 flex-1 flex-col">{children}</div>
       ) : (
