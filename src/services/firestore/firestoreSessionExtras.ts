@@ -9,6 +9,7 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
   writeBatch,
   type Unsubscribe,
 } from "firebase/firestore";
@@ -86,6 +87,43 @@ export function subscribeToPlayerLocations(
       );
       onChange(locations);
     },
+    (error) => onError(error),
+  );
+}
+
+function mapPlayerLocationSnapshot(
+  sessionId: string,
+  snapshot: { docs: Array<{ id: string; data: () => Record<string, unknown> }> },
+): PlayerLocationRecord[] {
+  return snapshot.docs.map((locationDoc) =>
+    deserializePlayerLocationFromFirestore(
+      locationDoc.id,
+      sessionId,
+      locationDoc.data() as Record<string, unknown>,
+    ),
+  );
+}
+
+export function subscribeToSeekerPlayerLocations(
+  sessionId: string,
+  onChange: (locations: PlayerLocationRecord[]) => void,
+  onError: (error: Error) => void,
+): Unsubscribe {
+  return onSnapshot(
+    query(playerLocationsCollection(sessionId), where("role", "==", "seeker")),
+    (snapshot) => onChange(mapPlayerLocationSnapshot(sessionId, snapshot)),
+    (error) => onError(error),
+  );
+}
+
+export function subscribeToHiderPlayerLocations(
+  sessionId: string,
+  onChange: (locations: PlayerLocationRecord[]) => void,
+  onError: (error: Error) => void,
+): Unsubscribe {
+  return onSnapshot(
+    query(playerLocationsCollection(sessionId), where("role", "==", "hider")),
+    (snapshot) => onChange(mapPlayerLocationSnapshot(sessionId, snapshot)),
     (error) => onError(error),
   );
 }

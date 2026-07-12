@@ -28,6 +28,7 @@ export function useHiderQuestionTruths(
   pendingQuestions: readonly PendingQuestionRecord[],
   stationCenter: LatLngTuple | null,
   gameArea?: GameArea,
+  options?: { stationCenterReady?: boolean },
 ): {
   questionTruths: ReadonlyMap<string, HiderTruthResult>;
   loading: boolean;
@@ -54,11 +55,13 @@ export function useHiderQuestionTruths(
 
   const stationKey = stationCenterKey(stationCenter);
   const fetchKey = `${openQuestionKey}|${stationKey}`;
+  const stationCenterReady = options?.stationCenterReady ?? true;
   const loading =
-    openQuestions.length > 0 && resolvedFetchKey !== fetchKey;
+    openQuestions.length > 0 &&
+    (!stationCenterReady || resolvedFetchKey !== fetchKey);
 
   useEffect(() => {
-    if (openQuestions.length === 0) {
+    if (openQuestions.length === 0 || !stationCenterReady) {
       return;
     }
 
@@ -97,6 +100,7 @@ export function useHiderQuestionTruths(
     openQuestions,
     stationCenter,
     gameArea,
+    stationCenterReady,
   ]);
 
   return {

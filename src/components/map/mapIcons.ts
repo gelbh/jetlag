@@ -86,3 +86,41 @@ export function createCountdownBadgeIcon(label: string, expired: boolean) {
     iconAnchor: [0, 24],
   });
 }
+
+export function createThermometerWalkProgressIcon(
+  walkedLabel: string,
+  targetLabel: string | null,
+  mapStyle: "standard" | "satellite",
+) {
+  const variant =
+    mapStyle === "satellite"
+      ? "jl-thermometer-walk-progress--satellite"
+      : "jl-thermometer-walk-progress--standard";
+  const targetHtml = targetLabel
+    ? `<span class="jl-thermometer-walk-progress__target"> / ${targetLabel}</span>`
+    : "";
+
+  return L.divIcon({
+    className: `jl-thermometer-walk-progress ${variant}`,
+    html: `<span class="jl-thermometer-walk-progress__pill"><span class="jl-thermometer-walk-progress__walked">${walkedLabel}</span>${targetHtml}</span>`,
+    iconSize: [0, 0],
+    iconAnchor: [0, 14],
+  });
+}
+
+export function createThermometerWalkEndLabelIcon(
+  label: string,
+  mapStyle: "standard" | "satellite",
+) {
+  const variant =
+    mapStyle === "satellite"
+      ? "jl-thermometer-walk-end-label--satellite"
+      : "jl-thermometer-walk-end-label--standard";
+
+  return L.divIcon({
+    className: `jl-thermometer-walk-end-label ${variant}`,
+    html: `<span class="jl-thermometer-walk-end-label__text">${label}</span>`,
+    iconSize: [0, 0],
+    iconAnchor: [0, 28],
+  });
+}
