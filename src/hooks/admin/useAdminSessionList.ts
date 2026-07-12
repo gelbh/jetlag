@@ -44,15 +44,12 @@ export function useAdminSessionList(enabled: boolean) {
 
   useEffect(() => {
     if (!enabled) {
-      setSessions([]);
-      setLoading(false);
-      setRefreshing(false);
-      setError(null);
-      setLastFetchedAt(null);
       return;
     }
 
+    /* eslint-disable react-hooks/set-state-in-effect -- initial session list load */
     void refresh();
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     const intervalId = window.setInterval(() => {
       void refresh({ background: true });
@@ -64,11 +61,11 @@ export function useAdminSessionList(enabled: boolean) {
   }, [enabled, refresh]);
 
   return {
-    sessions,
-    loading,
-    refreshing,
-    error,
-    lastFetchedAt,
+    sessions: enabled ? sessions : [],
+    loading: enabled ? loading : false,
+    refreshing: enabled ? refreshing : false,
+    error: enabled ? error : null,
+    lastFetchedAt: enabled ? lastFetchedAt : null,
     refresh,
   };
 }

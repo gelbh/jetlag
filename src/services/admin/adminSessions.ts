@@ -60,6 +60,6 @@ export async function fetchActiveAdminSessions(): Promise<AdminSessionSummary[]>
       throw error;
     }
 
-    throw new Error("Couldn't load live sessions.");
+    throw new Error("Couldn't load live sessions.", { cause: error });
   }
 }

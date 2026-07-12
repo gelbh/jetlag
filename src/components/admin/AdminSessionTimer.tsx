@@ -30,7 +30,7 @@ export function AdminSessionTimer({ summary }: AdminSessionTimerProps) {
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [timerState.runningSince, timerState.accumulatedMs]);
+  }, [timerState]);
 
   void tick;
 
