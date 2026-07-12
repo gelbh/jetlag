@@ -20,7 +20,6 @@ import { Feedback } from "./routes/Feedback";
 import { Privacy } from "./routes/Privacy";
 import { Premium } from "./routes/Premium";
 import { Terms } from "./routes/Terms";
-import { Tutorial } from "./routes/Tutorial";
 import {
   CHUNK_RELOAD_CLEAR_MS,
   clearBootReloadFlag,
@@ -40,6 +39,9 @@ const GamePresetList = lazyWithChunkRetry(() =>
 );
 const GamePresetEditor = lazyWithChunkRetry(() =>
   import("./routes/GamePresets").then((m) => ({ default: m.GamePresetEditor })),
+);
+const Tutorial = lazyWithChunkRetry(() =>
+  import("./routes/Tutorial").then((m) => ({ default: m.Tutorial })),
 );
 
 function RouteFallback() {
@@ -122,7 +124,14 @@ export default function App() {
           <LowBatteryPrompt />
           <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/tutorial" element={<Tutorial />} />
+          <Route
+            path="/tutorial"
+            element={
+              <LazyRoute>
+                <Tutorial />
+              </LazyRoute>
+            }
+          />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
