@@ -142,6 +142,51 @@ export function shortPlayerLabel(uid: string): string {
   return uid.slice(0, 4).toUpperCase();
 }
 
+export function hiderStationCenter(
+  zone: HidingZoneRecord | null | undefined,
+): LatLngTuple | null {
+  if (!zone) {
+    return null;
+  }
+
+  return [zone.center.lat, zone.center.lng];
+}
+
+export function resolveMyHidingZone(
+  zones: readonly HidingZoneRecord[],
+  uid: string | null | undefined,
+  memberUids: readonly string[] | undefined,
+): HidingZoneRecord | null {
+  const confirmedZones = zones.filter((zone) => zone.status === "confirmed");
+
+  if (uid) {
+    const ownZone = confirmedZones.find((zone) => zone.hiderUid === uid);
+    if (ownZone) {
+      return ownZone;
+    }
+  }
+
+  const memberSet = new Set(memberUids ?? []);
+  const memberZones = confirmedZones.filter((zone) =>
+    memberSet.has(zone.hiderUid),
+  );
+
+  if (memberZones.length === 1) {
+    return memberZones[0] ?? null;
+  }
+
+  if (
+    confirmedZones.length === 1 &&
+    uid &&
+    memberSet.has(uid) &&
+    memberSet.size <= 2
+  ) {
+    return confirmedZones[0] ?? null;
+  }
+
+  return null;
+}
+
 export function hidingZonePreviewPositions(
   previewCircle: Feature<Polygon> | null,
 ): Array<[number, number]> {

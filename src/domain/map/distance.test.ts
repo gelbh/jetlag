@@ -5,6 +5,7 @@ import {
   formatAltitudeLabel,
   formatDistance,
   formatPresetDistance,
+  formatThermometerWalkProgress,
   milesToMeters,
   parseDistanceInput,
 } from "./distance";
@@ -43,5 +44,20 @@ describe("distance helpers", () => {
     expect(formatAltitudeLabel(-35, "metric")).toBe("35 m below sea level");
     expect(formatAltitudeLabel(0, "metric")).toBe("at sea level");
     expect(formatAltitude(304.8, "imperial")).toBe("1000 ft");
+  });
+
+  it("formats thermometer walk progress with and without target", () => {
+    expect(formatThermometerWalkProgress(650, 1000, "metric")).toEqual({
+      walked: "650 m",
+      target: "1 km",
+    });
+    expect(formatThermometerWalkProgress(804, 1609.344, "imperial")).toEqual({
+      walked: "0.50 mi",
+      target: "1.0 mi",
+    });
+    expect(formatThermometerWalkProgress(500, null, "metric")).toEqual({
+      walked: "500 m",
+      target: null,
+    });
   });
 });

@@ -1,5 +1,9 @@
 import { useMemo } from "react";
 import type { HidingZoneRecord } from "../../domain/session/hidingZone";
+import {
+  isHiderLocationRole,
+  isSeekerLocationRole,
+} from "../../domain/session/liveMapLocations";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
@@ -7,9 +11,10 @@ import type {
 } from "../../domain/session/sessionChat";
 import { filterExtrasAfterReset } from "../../domain/session/sessionReset";
 import {
+  subscribeToHiderPlayerLocations,
   subscribeToHidingZones,
   subscribeToPendingQuestions,
-  subscribeToPlayerLocations,
+  subscribeToSeekerPlayerLocations,
   subscribeToSessionMessages,
 } from "../../services/firestore/firestoreSessionExtras";
 import { useSessionStore } from "../../state/sessionStore";
@@ -23,12 +28,51 @@ export function usePlayerLocationsSync(sessionId: string | undefined) {
   const sessionResetAt = useSessionResetAt();
   const items = useFirestoreCollectionSync<PlayerLocationRecord>(
     sessionId,
-    subscribeToPlayerLocations,
+    subscribeToSeekerPlayerLocations,
   );
 
   return useMemo(
     () =>
       filterExtrasAfterReset(items, sessionResetAt, (location) => location.updatedAt),
+    [items, sessionResetAt],
+  );
+}
+
+export function useSeekerLocationsSync(sessionId: string | undefined) {
+  const sessionResetAt = useSessionResetAt();
+  const items = useFirestoreCollectionSync<PlayerLocationRecord>(
+    sessionId,
+    subscribeToSeekerPlayerLocations,
+  );
+
+  return useMemo(
+    () =>
+      filterExtrasAfterReset(
+        items.filter((location) => isSeekerLocationRole(location.role)),
+        sessionResetAt,
+        (location) => location.updatedAt,
+      ),
+    [items, sessionResetAt],
+  );
+}
+
+export function useHiderLocationsSync(
+  sessionId: string | undefined,
+  enabled = true,
+) {
+  const sessionResetAt = useSessionResetAt();
+  const items = useFirestoreCollectionSync<PlayerLocationRecord>(
+    enabled ? sessionId : undefined,
+    subscribeToHiderPlayerLocations,
+  );
+
+  return useMemo(
+    () =>
+      filterExtrasAfterReset(
+        items.filter((location) => isHiderLocationRole(location.role)),
+        sessionResetAt,
+        (location) => location.updatedAt,
+      ),
     [items, sessionResetAt],
   );
 }

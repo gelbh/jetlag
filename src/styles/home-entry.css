@@ -420,19 +420,26 @@
     );
   }
 
-  .home-terminal-accent::before {
+  .home-terminal-accent::after {
     content: "";
     position: fixed;
     top: env(safe-area-inset-top, 0px);
     left: 0;
     right: 0;
+    z-index: 0;
     height: 3px;
+    pointer-events: none;
     background: linear-gradient(
       90deg,
       var(--color-brand-blue),
       var(--color-highlight) 45%,
       var(--color-action)
     );
+  }
+
+  .home-terminal-accent > * {
+    position: relative;
+    z-index: 1;
   }
 
   .home-enter-actions {

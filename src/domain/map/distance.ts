@@ -49,6 +49,31 @@ export function formatDistance(
   return `${Math.round(meters)} m`;
 }
 
+export interface ThermometerWalkProgressLabel {
+  walked: string;
+  target: string | null;
+}
+
+export function formatThermometerWalkProgress(
+  walkedMeters: number,
+  targetMeters: number | null | undefined,
+  unit: DistanceUnit = "metric",
+): ThermometerWalkProgressLabel {
+  const walked = formatDistance(walkedMeters, unit);
+  if (
+    typeof targetMeters === "number" &&
+    Number.isFinite(targetMeters) &&
+    targetMeters > 0
+  ) {
+    return {
+      walked,
+      target: formatDistance(targetMeters, unit),
+    };
+  }
+
+  return { walked, target: null };
+}
+
 export function formatPresetDistance(
   meters: number,
   unit: DistanceUnit = "metric",

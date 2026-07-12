@@ -4,6 +4,7 @@ import { AnnotationLayer } from "../components/map/AnnotationLayer";
 import { ActiveThermometerWalkLayer } from "../components/map/ActiveThermometerWalkLayer";
 import { GameAreaMask } from "../components/map/GameAreaMask";
 import { HidingZonesLayer } from "../components/map/HidingZonesLayer";
+import { LiveHiderLocationsLayer } from "../components/map/LiveHiderLocationsLayer";
 import { LiveSeekerLocationsLayer } from "../components/map/LiveSeekerLocationsLayer";
 import { MapView } from "../components/map/MapView";
 import { MapViewportTracker } from "../components/map/MapViewportTracker";
@@ -68,14 +69,21 @@ export function ObserverMapScreen() {
           />
           <HidingZonesLayer zones={controller.hidingZones} />
           <LiveSeekerLocationsLayer
-            locations={controller.playerLocations}
+            locations={controller.seekerLocations}
+            myUid={controller.uid}
+          />
+          <LiveHiderLocationsLayer
+            locations={controller.hiderLocations}
             myUid={controller.uid}
           />
           <ActiveThermometerWalkLayer
             start={controller.activeThermometerWalk.start}
             livePoint={controller.activeThermometerWalk.livePoint}
+            targetDistanceMeters={
+              controller.activeThermometerWalk.targetDistanceMeters
+            }
             mapStyle={controller.effectiveBasemapStyle}
-            distanceUnit="metric"
+            distanceUnit={controller.distanceUnit}
           />
           <PendingQuestionLayer
             pendingQuestions={controller.pendingQuestions}

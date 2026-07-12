@@ -12,14 +12,14 @@ import {
 
 interface UseActiveThermometerWalkParams {
   pendingQuestions: readonly PendingQuestionRecord[];
-  playerLocations: readonly PlayerLocationRecord[];
+  seekerLocations: readonly PlayerLocationRecord[];
   myUid: string | null;
   localLivePoint: LatLngTuple | null;
 }
 
 export function useActiveThermometerWalk({
   pendingQuestions,
-  playerLocations,
+  seekerLocations,
   myUid,
   localLivePoint,
 }: UseActiveThermometerWalkParams) {
@@ -45,7 +45,7 @@ export function useActiveThermometerWalk({
       return localLivePoint;
     }
 
-    const seekerLocation = playerLocations.find(
+    const seekerLocation = seekerLocations.find(
       (location) => location.uid === walkingQuestion.createdByUid,
     );
 
@@ -54,7 +54,7 @@ export function useActiveThermometerWalk({
     }
 
     return [seekerLocation.lat, seekerLocation.lng];
-  }, [localLivePoint, myUid, playerLocations, walkingQuestion]);
+  }, [localLivePoint, myUid, seekerLocations, walkingQuestion]);
 
   const distanceTraveled = useMemo(() => {
     if (!start || !livePoint) {
@@ -64,10 +64,20 @@ export function useActiveThermometerWalk({
     return crowFliesDistanceMeters(start, livePoint);
   }, [livePoint, start]);
 
+  const targetDistanceMeters = useMemo(() => {
+    const raw = walkingQuestion?.placement?.metadata?.thermometerDistanceMeters;
+    if (typeof raw === "number" && Number.isFinite(raw) && raw > 0) {
+      return raw;
+    }
+
+    return null;
+  }, [walkingQuestion]);
+
   return {
     walkingQuestion,
     start,
     livePoint,
     distanceTraveled,
+    targetDistanceMeters,
   };
 }

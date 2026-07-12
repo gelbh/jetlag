@@ -202,3 +202,61 @@ html:not([data-motion="reduced"]):not([data-motion="static"]) .map-style-control
   background: transparent;
   border: 0;
 }
+
+.jl-thermometer-walk-progress,
+.jl-thermometer-walk-end-label {
+  background: transparent;
+  border: 0;
+}
+
+.jl-thermometer-walk-progress__pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.15rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  border: 2px solid var(--color-thermometer-axis, #c55b40);
+  background: var(--color-surface-deep, #1d2835);
+  box-shadow: var(--shadow-hud-float, 0 2px 8px rgba(15, 23, 42, 0.35));
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.jl-thermometer-walk-progress--satellite .jl-thermometer-walk-progress__pill {
+  border-color: var(--color-highlight, #e4b352);
+}
+
+.jl-thermometer-walk-progress__walked {
+  color: var(--color-ink-primary, #f8fafc);
+  font-weight: 600;
+}
+
+.jl-thermometer-walk-progress__target {
+  color: var(--color-ink-secondary, #a8b0b8);
+  font-weight: 500;
+}
+
+.jl-thermometer-walk-end-label__text {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  background: var(--color-surface-deep, #1d2835);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  color: var(--color-ink-primary, #f8fafc);
+  font-family: var(--font-display, "Barlow Condensed", sans-serif);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.35);
+}
+
+.jl-thermometer-walk-end-label--satellite .jl-thermometer-walk-end-label__text {
+  background: rgba(29, 40, 53, 0.88);
+  border-color: var(--color-highlight, #e4b352);
+}

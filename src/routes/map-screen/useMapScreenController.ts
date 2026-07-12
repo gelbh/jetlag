@@ -186,7 +186,7 @@ export function useMapScreenController() {
     timer,
     pendingQuestions,
     hidingZones,
-    playerLocations,
+    seekerLocations,
     chatMessages,
     syncStatus,
     hasUnreadChat,
@@ -317,7 +317,7 @@ export function useMapScreenController() {
 
   const activeThermometerWalk = useActiveThermometerWalk({
     pendingQuestions,
-    playerLocations,
+    seekerLocations,
     myUid: uid,
     localLivePoint: thermometerTool.walkCurrentPoint,
   });
@@ -631,7 +631,7 @@ export function useMapScreenController() {
     toolGameArea,
     draftEliminationFeatures,
     confirmedHidingZones,
-    playerLocations,
+    seekerLocations,
     activeThermometerWalk,
     geometryEditAnnotation,
     geometryDraft,

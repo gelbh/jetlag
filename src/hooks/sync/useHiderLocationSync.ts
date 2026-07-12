@@ -8,19 +8,19 @@ import { isFirebaseConfigured } from "../../services/core/firebase";
 import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
 import { writePlayerLocation } from "../../services/firestore/firestoreSessionExtras";
 
-interface UseSeekerLocationSyncParams {
+interface UseHiderLocationSyncParams {
   sessionId: string | undefined;
   uid: string | null;
   enabled: boolean;
 }
 
-export function useSeekerLocationSync({
+export function useHiderLocationSync({
   sessionId,
   uid,
   enabled,
-}: UseSeekerLocationSyncParams) {
+}: UseHiderLocationSyncParams) {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
-  const profile = getPowerProfile(lowPowerMode).seekerLocationSync;
+  const profile = getPowerProfile(lowPowerMode).hiderLocationSync;
   const { reading, error } = useLiveLocation(enabled, profile);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export function useSeekerLocationSync({
       lng: reading.lng,
       accuracyMeters: reading.accuracy ?? undefined,
       updatedAt: new Date().toISOString(),
-      role: "seeker",
+      role: "hider",
     };
 
     void writePlayerLocation(sessionId, location).catch((error: unknown) => {

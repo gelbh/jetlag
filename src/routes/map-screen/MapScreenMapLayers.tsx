@@ -41,7 +41,7 @@ type MapScreenMapLayersProps = Pick<
   | "selectedAnnotationId"
   | "draftEliminationFeatures"
   | "confirmedHidingZones"
-  | "playerLocations"
+  | "seekerLocations"
   | "uid"
   | "activeThermometerWalk"
   | "pendingQuestions"
@@ -85,7 +85,7 @@ export function MapScreenMapLayers({
   selectedAnnotationId,
   draftEliminationFeatures,
   confirmedHidingZones,
-  playerLocations,
+  seekerLocations,
   uid,
   activeThermometerWalk,
   pendingQuestions,
@@ -147,10 +147,11 @@ export function MapScreenMapLayers({
           session={session!}
           hidingZones={confirmedHidingZones}
         />
-        <LiveSeekerLocationsLayer locations={playerLocations} myUid={uid} />
+        <LiveSeekerLocationsLayer locations={seekerLocations} myUid={uid} />
         <ActiveThermometerWalkLayer
           start={activeThermometerWalk.start}
           livePoint={activeThermometerWalk.livePoint}
+          targetDistanceMeters={activeThermometerWalk.targetDistanceMeters}
           mapStyle={effectiveBasemapStyle}
           distanceUnit={distanceUnit}
         />

@@ -6,6 +6,7 @@ import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 interface HidingZonesLayerProps {
   zones: readonly HidingZoneRecord[];
   myUid?: string | null;
+  memberUids?: readonly string[];
 }
 
 function polygonPositions(geometryJson: string): LatLngTuple[] | null {
@@ -27,10 +28,19 @@ function polygonPositions(geometryJson: string): LatLngTuple[] | null {
   }
 }
 
-export function HidingZonesLayer({ zones, myUid }: HidingZonesLayerProps) {
+export function HidingZonesLayer({
+  zones,
+  myUid,
+  memberUids,
+}: HidingZonesLayerProps) {
+  const memberSet = memberUids ? new Set(memberUids) : null;
+  const visibleZones = memberSet
+    ? zones.filter((zone) => memberSet.has(zone.hiderUid))
+    : zones;
+
   return (
     <>
-      {zones.map((zone) => {
+      {visibleZones.map((zone) => {
         const ring = polygonPositions(zone.geometryJson);
         const center: LatLngTuple = [zone.center.lat, zone.center.lng];
         const isOwn = zone.hiderUid === myUid;

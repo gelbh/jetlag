@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.5.3";
+export const APP_VERSION = "0.5.4";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,28 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.5.4",
+    date: "2026-07-12",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Home: tutorial, admin, and version controls render above the top gradient accent",
+          "Observer map: thermometer walk distance uses session units",
+          "Hider chat: station truth works when hiding zone is already set, including after rejoin",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Live map: nearby seeker and hider GPS markers merge into one pin with a count tooltip",
+          "Live map: hiders and observers see live hider GPS; seekers still see seeker pins only",
+          "Thermometer walk map overlay: HUD-styled progress pill, markers, and axis line",
+        ],
+      }
+    ],
+  },
   {
     version: "0.5.3",
     date: "2026-07-12",
