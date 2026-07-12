@@ -1,26 +1,27 @@
 import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
-import { withSentryHttpHandler, getSentryDsnSecret } from "../sentry.mjs";
-import { fetchWithTimeoutAndRetry } from "../fetchWithTimeout.mjs";
-import { createMemoryCache } from "../memoryCache.mjs";
-import { fetchCachedOverpassQuery } from "../overpassProxyCore.mjs";
-import { normalizeTflPayload } from "../tflNormalize.mjs";
-import { fetchTransitlandVehicles } from "../transitlandProxy.mjs";
-import { fetchCtaVehicles } from "../ctaProxy.mjs";
+import { getFirestore } from "firebase-admin/firestore";
+import { withSentryHttpHandler, getSentryDsnSecret } from "../lib/sentry.mjs";
+import { fetchWithTimeoutAndRetry } from "../lib/fetchWithTimeout.mjs";
+import { createMemoryCache } from "../lib/memoryCache.mjs";
+import { fetchCachedOverpassQuery } from "../proxies/overpassProxyCore.mjs";
+import { normalizeTflPayload } from "../proxies/tflNormalize.mjs";
+import { fetchTransitlandVehicles } from "../proxies/transitlandProxy.mjs";
+import { fetchCtaVehicles } from "../proxies/ctaProxy.mjs";
 import {
   parseBoundingBoxQuery,
   parseOverpassQueryBody,
   parseTransitlandFeedQuery,
   parseVehiclesMetroQuery,
-} from "../proxyValidation.mjs";
+} from "../proxies/proxyValidation.mjs";
+import { createProxyHandler } from "../proxies/createProxyHandler.mjs";
+import { createProxyRouter } from "../proxies/proxyRouter.mjs";
 import { adminAuth, requireOverpassProxyAccess } from "./proxyShared.mjs";
 import {
   clearGrantAccessFailures,
   getGrantAccessFailureCount,
   recordGrantAccessFailure,
-} from "../firestoreRateLimit.mjs";
-import { getFirestore } from "firebase-admin/firestore";
-import { createProxyHandler } from "../createProxyHandler.mjs";
+} from "../lib/firestoreRateLimit.mjs";
 
 const accessCodeSecret = defineSecret("ACCESS_CODE");
 const transitlandApiKeySecret = defineSecret("TRANSITLAND_API_KEY");
@@ -110,128 +111,126 @@ export const grantAccess = onCall(
   },
 );
 
-export const vehicles = onRequest(
+const vehiclesHandler = createProxyHandler({
+  routeName: "vehicles",
+  defaultErrorMessage: "Transit proxy failed.",
+  handler: async (req, res) => {
+    const metroResult = parseVehiclesMetroQuery(req.query);
+    if (!metroResult.ok) {
+      res.status(404).json({ error: metroResult.error });
+      return;
+    }
+
+    const boundsResult = parseBoundingBoxQuery(req.query);
+    if (!boundsResult.ok) {
+      res.status(400).json({ error: boundsResult.error });
+      return;
+    }
+
+    const metro = metroResult.value;
+    const bounds = boundsResult.value;
+
+    if (metro === "london") {
+      const feedUrl = FEEDS[metro];
+      const payload = await loadTflFeed(metro, feedUrl);
+      res.status(200).json(normalizeTflPayload(payload, bounds));
+      return;
+    }
+
+    if (metro === "chicago") {
+      const busApiKey = ctaBusTrackerApiKeySecret.value()?.trim();
+      const trainApiKey = ctaTrainTrackerApiKeySecret.value()?.trim();
+      if (!busApiKey && !trainApiKey) {
+        res.status(503).json({ error: "CTA proxy is not configured." });
+        return;
+      }
+
+      const vehicleList = await fetchCtaVehicles({
+        busApiKey: busApiKey || null,
+        trainApiKey: trainApiKey || null,
+        bounds,
+        routeCache: vehicleRouteCache,
+      });
+      res.status(200).json(vehicleList);
+      return;
+    }
+
+    res.status(404).json({ error: "Unknown metro feed." });
+  },
+});
+
+const transitlandHandler = createProxyHandler({
+  routeName: "transitland",
+  defaultErrorMessage: "Transitland proxy failed.",
+  handler: async (req, res) => {
+    const feedResult = parseTransitlandFeedQuery(req.query);
+    if (!feedResult.ok) {
+      res.status(400).json({ error: feedResult.error });
+      return;
+    }
+
+    const boundsResult = parseBoundingBoxQuery(req.query);
+    if (!boundsResult.ok) {
+      res.status(400).json({ error: boundsResult.error });
+      return;
+    }
+
+    const feed = feedResult.value;
+    const bounds = boundsResult.value;
+
+    const apiKey = transitlandApiKeySecret.value();
+    if (!apiKey) {
+      res.status(503).json({ error: "Transitland proxy is not configured." });
+      return;
+    }
+
+    const vehicleList = await fetchTransitlandVehicles(feed, apiKey, bounds);
+    res.status(200).json(vehicleList);
+  },
+});
+
+const overpassHandler = createProxyHandler({
+  routeName: "overpass",
+  methods: ["POST"],
+  requireAccess: requireOverpassProxyAccess,
+  defaultErrorMessage: "Overpass query failed.",
+  handler: async (req, res, authResult) => {
+    const queryResult = parseOverpassQueryBody(req.body);
+    if (!queryResult.ok) {
+      res.status(400).json({ error: queryResult.error });
+      return;
+    }
+
+    const query = queryResult.value;
+    try {
+      const text = await fetchCachedOverpassQuery(query, authResult.tier);
+      res.status(200).type("application/json").send(text);
+    } catch (error) {
+      if (error instanceof Error && error.message === "Overpass timed out.") {
+        res.status(504).json({ error: "Overpass timed out." });
+        return;
+      }
+
+      throw error;
+    }
+  },
+});
+
+const proxyRouter = createProxyRouter({
+  overpass: overpassHandler,
+  transitland: transitlandHandler,
+  vehicles: vehiclesHandler,
+});
+
+export const proxy = onRequest(
   {
     secrets: [
       sentryDsnSecret,
+      transitlandApiKeySecret,
       ctaBusTrackerApiKeySecret,
       ctaTrainTrackerApiKeySecret,
     ],
+    enforceAppCheck: true,
   },
-  withSentryHttpHandler(
-    createProxyHandler({
-      routeName: "vehicles",
-      defaultErrorMessage: "Transit proxy failed.",
-      handler: async (req, res) => {
-        const metroResult = parseVehiclesMetroQuery(req.query);
-        if (!metroResult.ok) {
-          res.status(404).json({ error: metroResult.error });
-          return;
-        }
-
-        const boundsResult = parseBoundingBoxQuery(req.query);
-        if (!boundsResult.ok) {
-          res.status(400).json({ error: boundsResult.error });
-          return;
-        }
-
-        const metro = metroResult.value;
-        const bounds = boundsResult.value;
-
-        if (metro === "london") {
-          const feedUrl = FEEDS[metro];
-          const payload = await loadTflFeed(metro, feedUrl);
-          res.status(200).json(normalizeTflPayload(payload, bounds));
-          return;
-        }
-
-        if (metro === "chicago") {
-          const busApiKey = ctaBusTrackerApiKeySecret.value()?.trim();
-          const trainApiKey = ctaTrainTrackerApiKeySecret.value()?.trim();
-          if (!busApiKey && !trainApiKey) {
-            res.status(503).json({ error: "CTA proxy is not configured." });
-            return;
-          }
-
-          const vehicleList = await fetchCtaVehicles({
-            busApiKey: busApiKey || null,
-            trainApiKey: trainApiKey || null,
-            bounds,
-            routeCache: vehicleRouteCache,
-          });
-          res.status(200).json(vehicleList);
-          return;
-        }
-
-        res.status(404).json({ error: "Unknown metro feed." });
-      },
-    }),
-  ),
-);
-
-export const transitland = onRequest(
-  { secrets: [transitlandApiKeySecret, sentryDsnSecret] },
-  withSentryHttpHandler(
-    createProxyHandler({
-      routeName: "transitland",
-      defaultErrorMessage: "Transitland proxy failed.",
-      handler: async (req, res) => {
-        const feedResult = parseTransitlandFeedQuery(req.query);
-        if (!feedResult.ok) {
-          res.status(400).json({ error: feedResult.error });
-          return;
-        }
-
-        const boundsResult = parseBoundingBoxQuery(req.query);
-        if (!boundsResult.ok) {
-          res.status(400).json({ error: boundsResult.error });
-          return;
-        }
-
-        const feed = feedResult.value;
-        const bounds = boundsResult.value;
-
-        const apiKey = transitlandApiKeySecret.value();
-        if (!apiKey) {
-          res.status(503).json({ error: "Transitland proxy is not configured." });
-          return;
-        }
-
-        const vehicleList = await fetchTransitlandVehicles(feed, apiKey, bounds);
-        res.status(200).json(vehicleList);
-      },
-    }),
-  ),
-);
-
-export const overpass = onRequest(
-  { secrets: [sentryDsnSecret] },
-  withSentryHttpHandler(
-    createProxyHandler({
-      routeName: "overpass",
-      methods: ["POST"],
-      requireAccess: requireOverpassProxyAccess,
-      defaultErrorMessage: "Overpass query failed.",
-      handler: async (req, res, authResult) => {
-        const queryResult = parseOverpassQueryBody(req.body);
-        if (!queryResult.ok) {
-          res.status(400).json({ error: queryResult.error });
-          return;
-        }
-
-        const query = queryResult.value;
-        try {
-          const text = await fetchCachedOverpassQuery(query, authResult.tier);
-          res.status(200).type("application/json").send(text);
-        } catch (error) {
-          if (error instanceof Error && error.message === "Overpass timed out.") {
-            res.status(504).json({ error: "Overpass timed out." });
-            return;
-          }
-
-          throw error;
-        }
-      },
-    }),
-  ),
+  withSentryHttpHandler(proxyRouter),
 );

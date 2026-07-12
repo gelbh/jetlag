@@ -12,7 +12,7 @@ function readAppVersion() {
   const functionsDir = dirname(fileURLToPath(import.meta.url));
   try {
     const packageJson = JSON.parse(
-      readFileSync(resolve(functionsDir, "package.json"), "utf8"),
+      readFileSync(resolve(functionsDir, "../package.json"), "utf8"),
     );
     return packageJson.version ?? "0.0.0";
   } catch {

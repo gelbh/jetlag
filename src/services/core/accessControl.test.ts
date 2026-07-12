@@ -7,6 +7,11 @@ vi.mock("./firebase", () => ({
       getIdToken: vi.fn(async () => "token-123"),
     },
   }),
+  getFirebaseAppCheck: () => null,
+}));
+
+vi.mock("firebase/app-check", () => ({
+  getToken: vi.fn(),
 }));
 
 vi.mock("./premiumApiContext", () => ({

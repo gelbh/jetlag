@@ -1,7 +1,9 @@
 import { FirebaseError } from "firebase/app";
+import { getToken } from "firebase/app-check";
 import { httpsCallable } from "firebase/functions";
 import type { User } from "firebase/auth";
 import {
+  getFirebaseAppCheck,
   getFirebaseAuth,
   getFirebaseFunctions,
   isFirebaseConfigured,
@@ -60,6 +62,14 @@ export async function buildPremiumProxyHeaders(): Promise<HeadersInit> {
   const { sessionId } = getPremiumApiContext();
   if (sessionId) {
     headers["X-Session-Id"] = sessionId;
+  }
+
+  const appCheck = getFirebaseAppCheck();
+  if (appCheck) {
+    const appCheckToken = await getToken(appCheck, false);
+    if (appCheckToken.token) {
+      headers["X-Firebase-AppCheck"] = appCheckToken.token;
+    }
   }
 
   return headers;

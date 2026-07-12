@@ -1,14 +1,14 @@
-import { setCors } from "./cors.mjs";
-import { logMissingAppCheckToken } from "./appCheck.mjs";
-import { captureFunctionsException } from "./sentry.mjs";
+import { setCors } from "../lib/cors.mjs";
+import { captureFunctionsException } from "../lib/sentry.mjs";
 import {
   enforceRateLimit,
   requireOverpassProxyAccess,
   requireProxyAccess,
-} from "./handlers/proxyShared.mjs";
+} from "../handlers/proxyShared.mjs";
 
 /**
- * Shared HTTP proxy pipeline: CORS, App Check log, auth, rate limit, handler.
+ * Shared HTTP proxy pipeline: CORS, auth, rate limit, handler.
+ * App Check is enforced on the parent `proxy` onRequest function.
  */
 export function createProxyHandler({
   routeName,
@@ -21,7 +21,6 @@ export function createProxyHandler({
 }) {
   return async (req, res) => {
     setCors(res, req);
-    logMissingAppCheckToken(req, routeName);
 
     if (req.method === "OPTIONS") {
       res.status(204).send("");

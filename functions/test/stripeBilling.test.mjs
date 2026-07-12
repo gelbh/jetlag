@@ -8,7 +8,7 @@ import {
   ensureStripeCustomer,
   isStaleStripeCustomerError,
   mapStripeBillingError,
-} from "../stripeBilling.mjs";
+} from "../billing/stripeBilling.mjs";
 
 function staleCustomerError() {
   const error = new Error(

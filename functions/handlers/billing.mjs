@@ -2,30 +2,30 @@ import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import {
   getSentryDsnSecret,
   withSentryHttpHandler,
-} from "../sentry.mjs";
+} from "../lib/sentry.mjs";
 import {
   STRIPE_BILLING_PARAMS,
   STRIPE_BILLING_SECRETS,
   stripeSecretKey,
   stripeWebhookSecret,
-} from "../stripeConfig.mjs";
+} from "../billing/stripeConfig.mjs";
 import {
   createBillingPortalSessionHandler,
   createCheckoutSessionHandler,
   createPremiumSessionHandler,
   createStripeClient,
   getPremiumEntitlementsHandler,
-} from "../stripeBilling.mjs";
-import { rejectAnonymousBillingAuth } from "../billingAuth.mjs";
-import { startPremiumTrialHandler } from "../premiumEntitlements.mjs";
+} from "../billing/stripeBilling.mjs";
+import { rejectAnonymousBillingAuth } from "../billing/billingAuth.mjs";
+import { startPremiumTrialHandler } from "../billing/premiumEntitlements.mjs";
 import {
   RECOVER_PREMIUM_DAILY_LIMIT,
   RECOVER_PREMIUM_ROUTE,
   RECOVER_PREMIUM_WINDOW_MS,
   recoverPremiumByStripeEmailHandler,
-} from "../premiumRecovery.mjs";
-import { handleStripeWebhook } from "../stripeWebhook.mjs";
-import { consumeRateLimit } from "../firestoreRateLimit.mjs";
+} from "../billing/premiumRecovery.mjs";
+import { handleStripeWebhook } from "../billing/stripeWebhook.mjs";
+import { consumeRateLimit } from "../lib/firestoreRateLimit.mjs";
 import { adminDb } from "./proxyShared.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
@@ -149,6 +149,7 @@ export const recoverPremiumByStripeEmail = onCall(
   },
 );
 
+// Stripe webhooks authenticate via signature verification only — App Check is not applicable.
 export const stripeWebhook = onRequest(
   {
     secrets: [stripeWebhookSecret, sentryDsnSecret],

@@ -5,7 +5,7 @@ import {
   isPremiumSessionMember,
   isSessionMember,
   verifyOverpassProxyAccess,
-} from "../verifyProxyAccess.mjs";
+} from "../proxies/verifyProxyAccess.mjs";
 
 describe("verifyProxyAccess helpers", () => {
   it("detects premium access claims", () => {

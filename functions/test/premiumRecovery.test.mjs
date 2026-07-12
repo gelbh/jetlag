@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { HttpsError } from "firebase-functions/v2/https";
-import { premiumSessionCredits } from "../premiumEntitlements.mjs";
+import { premiumSessionCredits } from "../billing/premiumEntitlements.mjs";
 import {
   listStripeCustomersByEmail,
   mergeEntitlementsBetweenUsers,
@@ -10,7 +10,7 @@ import {
   recoverPremiumByStripeEmailHandler,
   requireVerifiedEmailForRecovery,
   VERIFIED_EMAIL_MESSAGE,
-} from "../premiumRecovery.mjs";
+} from "../billing/premiumRecovery.mjs";
 
 describe("recovery rate limit config", () => {
   it("uses stable route id and daily cap", () => {

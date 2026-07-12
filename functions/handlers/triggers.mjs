@@ -1,18 +1,18 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
-import { getSentryDsnSecret, withSentryEventHandler, withSentryHttpHandler } from "../sentry.mjs";
+import { getSentryDsnSecret, withSentryEventHandler } from "../lib/sentry.mjs";
 import {
   computeAbandonedCutoffIso,
   computeEndedCutoffIso,
   PURGE_BATCH_LIMIT,
   selectSessionsToPurge,
-} from "../purgeStaleSessions.mjs";
+} from "../session/purgeStaleSessions.mjs";
 import {
   handlePendingQuestionWrite,
   handleSessionMessageWrite,
   handleSessionTimerWrite,
-} from "../sessionNotificationTriggers.mjs";
-import { handleSessionWarmPreloadWrite } from "../warmOverpassPreload.mjs";
+} from "../session/sessionNotificationTriggers.mjs";
+import { handleSessionWarmPreloadWrite } from "../session/warmOverpassPreload.mjs";
 import { adminDb } from "./proxyShared.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();

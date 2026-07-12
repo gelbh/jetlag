@@ -5,7 +5,7 @@ import {
   selectDeviceTokens,
   shouldNotifyForPreference,
   toolLabel,
-} from "../notifySessionEvent.mjs";
+} from "../session/notifySessionEvent.mjs";
 
 describe("notifySessionEvent helpers", () => {
   it("maps tool labels", () => {

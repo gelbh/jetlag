@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   clearOverpassQueueForTests,
   enqueueOverpassFetch,
-} from "../overpassQueue.mjs";
+} from "../proxies/overpassQueue.mjs";
 
 describe("overpassQueue", () => {
   it("runs premium requests before free backlog", async () => {

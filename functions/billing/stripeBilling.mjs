@@ -23,7 +23,7 @@ import {
   buildPremiumSessionFirestoreDocument,
   parseCreatePremiumSessionInput,
 } from "./premiumSessionDocument.mjs";
-import { generateSessionCode } from "./sessionCodes.mjs";
+import { generateSessionCode } from "../session/sessionCodes.mjs";
 
 const CHECKOUT_BILLING_ERROR_MESSAGE = "Couldn't start checkout. Try again.";
 const PORTAL_BILLING_ERROR_MESSAGE = "Couldn't open billing portal. Try again.";

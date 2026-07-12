@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { fetchWithTimeout, fetchWithTimeoutAndRetry } from "../fetchWithTimeout.mjs";
+import { fetchWithTimeout, fetchWithTimeoutAndRetry } from "../lib/fetchWithTimeout.mjs";
 
 describe("fetchWithTimeout", () => {
   it("aborts slow requests", async () => {

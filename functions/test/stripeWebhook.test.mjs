@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { handleStripeWebhook } from "../stripeWebhook.mjs";
+import { handleStripeWebhook } from "../billing/stripeWebhook.mjs";
 
 function mockResponse() {
   const res = {

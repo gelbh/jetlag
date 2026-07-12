@@ -9,7 +9,7 @@ import {
   isAppPremiumTrialActive,
   premiumSessionCredits,
   serializeEntitlementsForClient,
-} from "../premiumEntitlements.mjs";
+} from "../billing/premiumEntitlements.mjs";
 
 describe("premiumEntitlements", () => {
   it("detects unlimited entitlement from lifetime flag", () => {

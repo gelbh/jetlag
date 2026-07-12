@@ -1,6 +1,6 @@
 import Stripe from "stripe";
-import { setCors } from "./cors.mjs";
-import { captureFunctionsException } from "./sentry.mjs";
+import { setCors } from "../lib/cors.mjs";
+import { captureFunctionsException } from "../lib/sentry.mjs";
 import {
   applyCheckoutSessionCompleted,
   syncSubscriptionEntitlements,

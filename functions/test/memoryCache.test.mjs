@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { createMemoryCache } from "../memoryCache.mjs";
+import { createMemoryCache } from "../lib/memoryCache.mjs";
 
 describe("memoryCache", () => {
   it("returns cached values before ttl expiry", () => {

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   hasPremiumAccessClaim,
   isPremiumSessionMember,
-} from "../verifyProxyAccess.mjs";
+} from "../proxies/verifyProxyAccess.mjs";
 
 describe("index proxy access smoke", () => {
   it("rejects non-premium members for premium-only proxy paths", () => {

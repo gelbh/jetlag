@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { normalizeTflPayload } from "../tflNormalize.mjs";
+import { normalizeTflPayload } from "../proxies/tflNormalize.mjs";
 
 test("normalizeTflPayload filters vehicles outside bounds", () => {
   const bounds = { south: 51.4, west: -0.2, north: 51.6, east: 0.1 };
