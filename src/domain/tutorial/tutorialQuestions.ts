@@ -323,9 +323,27 @@ export function fullStepIndexForWalkthroughStep(
   return steps.findIndex((step) => step.id === walkthroughStep.id);
 }
 
+export function migrateLegacyQuestionProgressIndex(
+  id: QuestionTutorialId,
+  stored: number,
+): number {
+  if (stored < 0) {
+    return stored;
+  }
+
+  const tutorial = getQuestionTutorial(id);
+  const walkthroughCount = questionWalkthroughStepCount(tutorial.steps);
+
+  // v0 stored full step indices (0 = interactive, 1…n = walkthrough).
+  if (stored === 0) {
+    return -1;
+  }
+
+  return Math.min(Math.max(stored - 1, 0), walkthroughCount - 1);
+}
+
 export function isQuestionTutorialComplete(
   id: QuestionTutorialId,
-  _stepCount: number,
   progress: TutorialProgress,
 ): boolean {
   const tutorial = getQuestionTutorial(id);
@@ -335,13 +353,12 @@ export function isQuestionTutorialComplete(
 
 export function questionTutorialStartIndex(
   id: QuestionTutorialId,
-  _stepCount: number,
   progress: TutorialProgress,
 ): number {
   const tutorial = getQuestionTutorial(id);
   const walkthroughSteps = questionWalkthroughSteps(tutorial.steps);
 
-  if (isQuestionTutorialComplete(id, walkthroughSteps.length, progress)) {
+  if (isQuestionTutorialComplete(id, progress)) {
     return 0;
   }
 
@@ -358,10 +375,9 @@ export function questionTutorialStartIndex(
 }
 
 export function completedQuestionCount(progress: TutorialProgress): number {
-  return QUESTION_TUTORIAL_ORDER.filter((id) => {
-    const tutorial = getQuestionTutorial(id);
-    return isQuestionTutorialComplete(id, tutorial.steps.length, progress);
-  }).length;
+  return QUESTION_TUTORIAL_ORDER.filter((id) =>
+    isQuestionTutorialComplete(id, progress),
+  ).length;
 }
 
 export function isQuestionsHubComplete(progress: TutorialProgress): boolean {
@@ -381,7 +397,6 @@ export function questionsHubStatusLabel(progress: TutorialProgress): string {
 
 export function markQuestionTutorialComplete(
   id: QuestionTutorialId,
-  _stepCount: number,
   progress: TutorialProgress,
 ): TutorialProgress {
   const tutorial = getQuestionTutorial(id);

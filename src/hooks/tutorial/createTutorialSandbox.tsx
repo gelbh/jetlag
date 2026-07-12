@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 import type { GameArea } from "../../domain/map/annotations";
 import { baseQuestionCostForTool } from "../../domain/map/mapTools";
 import { questionCostBreakdown } from "../../domain/questions";
@@ -100,7 +100,9 @@ export function createTutorialSandbox<F, Extras = Record<never, never>>({
       },
     });
 
-    commit.syncCanCommit(body.canCommit);
+    useEffect(() => {
+      commit.syncCanCommit(body.canCommit);
+    }, [body.canCommit, commit.syncCanCommit]);
 
     const panel = (
       <div
