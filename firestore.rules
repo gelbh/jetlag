@@ -150,6 +150,12 @@ service cloud.firestore {
       return !('role' in data) || data.role == 'seeker';
     }
 
+    function canReadPlayerLocationDoc(sessionId, data) {
+      return isSeekerLocationDoc(data)
+        || isHiderMember(sessionId)
+        || memberRole(sessionId) == 'observer';
+    }
+
     function validSessionRulesUpdate(sessionId) {
       return isSessionHost(sessionId)
         && timerNeverStarted(resource.data)
@@ -443,16 +449,17 @@ service cloud.firestore {
       }
 
       match /playerLocations/{uid} {
-        allow read: if isSessionMember(sessionId)
-          && (
-            isSeekerLocationDoc(resource.data)
-            || isHiderMember(sessionId)
-            || memberRole(sessionId) == 'observer'
-          );
+        allow get: if isSessionMember(sessionId)
+          && canReadPlayerLocationDoc(sessionId, resource.data);
+        allow list: if isSessionMember(sessionId)
+          && canReadPlayerLocationDoc(sessionId, resource.data);
         allow create, update: if (
           isSeekerMember(sessionId)
           && request.auth.uid == uid
-          && request.resource.data.role == 'seeker'
+          && (
+            !('role' in request.resource.data)
+            || request.resource.data.role == 'seeker'
+          )
           && request.resource.data.lat is number
           && request.resource.data.lng is number
           && request.resource.data.updatedAt is string

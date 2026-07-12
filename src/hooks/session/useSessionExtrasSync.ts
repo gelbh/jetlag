@@ -11,9 +11,10 @@ import type {
 } from "../../domain/session/sessionChat";
 import { filterExtrasAfterReset } from "../../domain/session/sessionReset";
 import {
+  subscribeToHiderPlayerLocations,
   subscribeToHidingZones,
   subscribeToPendingQuestions,
-  subscribeToPlayerLocations,
+  subscribeToSeekerPlayerLocations,
   subscribeToSessionMessages,
 } from "../../services/firestore/firestoreSessionExtras";
 import { useSessionStore } from "../../state/sessionStore";
@@ -27,7 +28,7 @@ export function usePlayerLocationsSync(sessionId: string | undefined) {
   const sessionResetAt = useSessionResetAt();
   const items = useFirestoreCollectionSync<PlayerLocationRecord>(
     sessionId,
-    subscribeToPlayerLocations,
+    subscribeToSeekerPlayerLocations,
   );
 
   return useMemo(
@@ -38,20 +39,41 @@ export function usePlayerLocationsSync(sessionId: string | undefined) {
 }
 
 export function useSeekerLocationsSync(sessionId: string | undefined) {
-  const locations = usePlayerLocationsSync(sessionId);
+  const sessionResetAt = useSessionResetAt();
+  const items = useFirestoreCollectionSync<PlayerLocationRecord>(
+    sessionId,
+    subscribeToSeekerPlayerLocations,
+  );
 
   return useMemo(
-    () => locations.filter((location) => isSeekerLocationRole(location.role)),
-    [locations],
+    () =>
+      filterExtrasAfterReset(
+        items.filter((location) => isSeekerLocationRole(location.role)),
+        sessionResetAt,
+        (location) => location.updatedAt,
+      ),
+    [items, sessionResetAt],
   );
 }
 
-export function useHiderLocationsSync(sessionId: string | undefined) {
-  const locations = usePlayerLocationsSync(sessionId);
+export function useHiderLocationsSync(
+  sessionId: string | undefined,
+  enabled = true,
+) {
+  const sessionResetAt = useSessionResetAt();
+  const items = useFirestoreCollectionSync<PlayerLocationRecord>(
+    enabled ? sessionId : undefined,
+    subscribeToHiderPlayerLocations,
+  );
 
   return useMemo(
-    () => locations.filter((location) => isHiderLocationRole(location.role)),
-    [locations],
+    () =>
+      filterExtrasAfterReset(
+        items.filter((location) => isHiderLocationRole(location.role)),
+        sessionResetAt,
+        (location) => location.updatedAt,
+      ),
+    [items, sessionResetAt],
   );
 }
 

@@ -63,6 +63,8 @@ describe("liveMapLocations", () => {
     expect(clusterTooltipLabel(2, "seeker")).toBe("2 seekers");
     expect(clusterTooltipLabel(1, "hider")).toBe("1 hider");
     expect(clusterTooltipLabel(3, "hider")).toBe("3 hiders");
+    expect(clusterTooltipLabel(1, "seeker", true)).toBe("You");
+    expect(clusterTooltipLabel(1, "hider", true)).toBe("You");
   });
 
   it("treats missing role as seeker for filtering helpers", () => {

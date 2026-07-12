@@ -41,7 +41,7 @@ export function LiveHiderLocationsLayer({
             }}
           >
             <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-              {clusterTooltipLabel(count, "hider")}
+              {clusterTooltipLabel(count, "hider", isSelf)}
             </Tooltip>
           </CircleMarker>
         );

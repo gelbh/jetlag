@@ -41,7 +41,7 @@ export function LiveSeekerLocationsLayer({
             }}
           >
             <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-              {clusterTooltipLabel(count, "seeker")}
+              {clusterTooltipLabel(count, "seeker", isSelf)}
             </Tooltip>
           </CircleMarker>
         );

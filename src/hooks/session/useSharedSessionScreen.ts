@@ -120,7 +120,9 @@ export function useSharedSessionScreen({
   const pendingQuestions = usePendingQuestionsSync(sessionId);
   const hidingZones = useHidingZonesSync(sessionId);
   const seekerLocations = useSeekerLocationsSync(sessionId);
-  const hiderLocations = useHiderLocationsSync(sessionId);
+  const showHiderLocations =
+    notificationRole === "hider" || notificationRole === "observer";
+  const hiderLocations = useHiderLocationsSync(sessionId, showHiderLocations);
   const chatMessages = useSessionMessagesSync(sessionId);
   const syncStatus = useSyncStatus();
 

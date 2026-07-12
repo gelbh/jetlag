@@ -56,7 +56,12 @@ export function clusterHiderLocations(
 export function clusterTooltipLabel(
   count: number,
   role: "seeker" | "hider",
+  isSelf = false,
 ): string {
+  if (isSelf && count === 1) {
+    return "You";
+  }
+
   if (role === "seeker") {
     return count === 1 ? "1 seeker" : `${count} seekers`;
   }
