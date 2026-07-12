@@ -57,6 +57,7 @@ describe("useSeekerLocationSync", () => {
         uid: "user-1",
         lat: 53.35,
         lng: -6.26,
+        role: "seeker",
       }),
     );
   });

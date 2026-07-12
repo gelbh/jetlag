@@ -660,6 +660,7 @@ export function buildPlayerLocationDocument(
     lng: location.lng,
     accuracyMeters: location.accuracyMeters,
     updatedAt: location.updatedAt,
+    role: location.role ?? "seeker",
   };
 }
 
@@ -668,6 +669,9 @@ export function deserializePlayerLocationFromFirestore(
   sessionId: string,
   data: Record<string, unknown>,
 ): PlayerLocationRecord {
+  const role =
+    data.role === "hider" || data.role === "seeker" ? data.role : "seeker";
+
   return {
     uid,
     sessionId,
@@ -676,6 +680,7 @@ export function deserializePlayerLocationFromFirestore(
     accuracyMeters:
       typeof data.accuracyMeters === "number" ? data.accuracyMeters : undefined,
     updatedAt: String(data.updatedAt ?? ""),
+    role,
   };
 }
 

@@ -1,12 +1,20 @@
-import { CircleMarker, Polyline, Tooltip } from "react-leaflet";
+import { CircleMarker, Marker, Polyline } from "react-leaflet";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
-import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
+import {
+  formatThermometerWalkProgress,
+  type DistanceUnit,
+} from "../../domain/map/distance";
 import { distanceBetweenPoints } from "../../domain/geometry/geometry";
+import {
+  createThermometerWalkEndLabelIcon,
+  createThermometerWalkProgressIcon,
+} from "./mapIcons";
 
 interface ActiveThermometerWalkLayerProps {
   start: LatLngTuple | null;
   livePoint: LatLngTuple | null;
+  targetDistanceMeters?: number | null;
   mapStyle?: "standard" | "satellite";
   distanceUnit?: DistanceUnit;
 }
@@ -14,6 +22,7 @@ interface ActiveThermometerWalkLayerProps {
 export function ActiveThermometerWalkLayer({
   start,
   livePoint,
+  targetDistanceMeters = null,
   mapStyle = "standard",
   distanceUnit = "imperial",
 }: ActiveThermometerWalkLayerProps) {
@@ -34,6 +43,11 @@ export function ActiveThermometerWalkLayer({
     mapStyle === "satellite"
       ? MAP_ANNOTATION_COLORS.highlight
       : MAP_ANNOTATION_COLORS.thermometerB;
+  const progressLabel = formatThermometerWalkProgress(
+    walkDistanceMeters,
+    targetDistanceMeters,
+    distanceUnit,
+  );
 
   return (
     <>
@@ -41,9 +55,9 @@ export function ActiveThermometerWalkLayer({
         positions={[start, livePoint]}
         pathOptions={{
           color: axisColor,
-          weight: 5,
-          dashArray: "10 8",
-          opacity: 0.95,
+          weight: 4,
+          dashArray: "12 8",
+          opacity: 0.92,
           lineCap: "round",
         }}
       />
@@ -52,7 +66,7 @@ export function ActiveThermometerWalkLayer({
         pathOptions={{
           color: liveColor,
           weight: 2,
-          opacity: 0.55,
+          opacity: 0.5,
           lineCap: "round",
         }}
       />
@@ -65,11 +79,12 @@ export function ActiveThermometerWalkLayer({
           fillColor: MAP_ANNOTATION_COLORS.thermometerA,
           fillOpacity: 1,
         }}
-      >
-        <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-          Walk start
-        </Tooltip>
-      </CircleMarker>
+      />
+      <Marker
+        position={start}
+        icon={createThermometerWalkEndLabelIcon("Start", mapStyle)}
+        zIndexOffset={400}
+      />
       <CircleMarker
         center={livePoint}
         radius={9}
@@ -80,20 +95,21 @@ export function ActiveThermometerWalkLayer({
           fillOpacity: 1,
           className: "jl-thermometer-live-marker",
         }}
-      >
-        <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-          Live position
-        </Tooltip>
-      </CircleMarker>
-      <CircleMarker
-        center={midpoint}
-        radius={0}
-        pathOptions={{ opacity: 0, fillOpacity: 0, weight: 0 }}
-      >
-        <Tooltip direction="center" permanent opacity={0.95}>
-          {formatDistance(walkDistanceMeters, distanceUnit)}
-        </Tooltip>
-      </CircleMarker>
+      />
+      <Marker
+        position={livePoint}
+        icon={createThermometerWalkEndLabelIcon("Live", mapStyle)}
+        zIndexOffset={401}
+      />
+      <Marker
+        position={midpoint}
+        icon={createThermometerWalkProgressIcon(
+          progressLabel.walked,
+          progressLabel.target,
+          mapStyle,
+        )}
+        zIndexOffset={402}
+      />
     </>
   );
 }

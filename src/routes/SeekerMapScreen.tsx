@@ -41,7 +41,7 @@ export function SeekerMapScreen() {
         selectedAnnotationId={controller.selectedAnnotationId}
         draftEliminationFeatures={controller.draftEliminationFeatures}
         confirmedHidingZones={controller.confirmedHidingZones}
-        playerLocations={controller.playerLocations}
+        seekerLocations={controller.seekerLocations}
         uid={controller.uid}
         activeThermometerWalk={controller.activeThermometerWalk}
         pendingQuestions={controller.pendingQuestions}
