@@ -309,7 +309,7 @@
   .jl-wizard-search-results {
     max-height: 7rem;
     overflow-y: auto;
-    overscroll-contain;
+    overscroll-behavior: contain;
   }
 
   .jl-panel-hider-wizard.jl-panel-peeked {
