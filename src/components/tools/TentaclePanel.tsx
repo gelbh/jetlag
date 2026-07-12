@@ -216,40 +216,44 @@ export function TentaclePanel({
         </ToolSection>
       ) : null}
 
-      {step === "answer" && categoryId && !useStickyAnswerFooter ? (
+      {step === "answer" && categoryId ? (
         <>
-          <TentacleAnswerPicker
-            categoryId={categoryId}
-            distanceUnit={distanceUnit}
-            searchRadiusMeters={searchRadiusMeters}
-            poiOptions={poiOptions}
-            selectedPoiId={selectedPoiId}
-            outOfReach={outOfReach}
-            onSelectPoi={onSelectPoi}
-            onOutOfReachChange={onOutOfReachChange}
-          />
-          {tentacleAnswerStepActions}
+          {useStickyAnswerFooter ? (
+            <TentacleAnswerPicker
+              categoryId={categoryId}
+              distanceUnit={distanceUnit}
+              searchRadiusMeters={searchRadiusMeters}
+              poiOptions={poiOptions}
+              selectedPoiId={selectedPoiId}
+              outOfReach={outOfReach}
+              onSelectPoi={onSelectPoi}
+              onOutOfReachChange={onOutOfReachChange}
+            />
+          ) : null}
+          {!useStickyAnswerFooter ? (
+            <>
+              <TentacleAnswerPicker
+                categoryId={categoryId}
+                distanceUnit={distanceUnit}
+                searchRadiusMeters={searchRadiusMeters}
+                poiOptions={poiOptions}
+                selectedPoiId={selectedPoiId}
+                outOfReach={outOfReach}
+                onSelectPoi={onSelectPoi}
+                onOutOfReachChange={onOutOfReachChange}
+              />
+              {tentacleAnswerStepActions}
+            </>
+          ) : null}
         </>
       ) : null}
     </>
   );
 
   const answerFooter =
-    step === "answer" && useStickyAnswerFooter && categoryId ? (
-      <>
-        <TentacleAnswerPicker
-          categoryId={categoryId}
-          distanceUnit={distanceUnit}
-          searchRadiusMeters={searchRadiusMeters}
-          poiOptions={poiOptions}
-          selectedPoiId={selectedPoiId}
-          outOfReach={outOfReach}
-          onSelectPoi={onSelectPoi}
-          onOutOfReachChange={onOutOfReachChange}
-        />
-        {tentacleAnswerStepActions}
-      </>
-    ) : undefined;
+    step === "answer" && useStickyAnswerFooter && categoryId
+      ? tentacleAnswerStepActions
+      : undefined;
 
   const wizardContent = readOnly ? (
     panelBody

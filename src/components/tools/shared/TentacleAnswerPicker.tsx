@@ -62,7 +62,7 @@ export function TentacleAnswerPicker({
               : "Copy for hider"}
         </button>
       </div>
-      <div className="space-y-1">
+      <div className="space-y-1" data-wizard-no-swipe>
         {poiOptions.map((poi) => (
           <ListSelectRow
             key={poi.id}
