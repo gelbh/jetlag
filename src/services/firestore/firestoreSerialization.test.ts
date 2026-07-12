@@ -338,4 +338,33 @@ describe("firestoreSerialization", () => {
       "admin-1": "observer",
     });
   });
+
+  it("preserves admin member roles when deserializing sessions", () => {
+    const restored = deserializeSessionFromFirestore("session-1", {
+      code: "ABCD",
+      gameArea: {
+        south: 53.3,
+        west: -6.3,
+        north: 53.4,
+        east: -6.2,
+      },
+      hostUid: "host-1",
+      createdAt: "2026-05-14T00:00:00.000Z",
+      memberUids: ["host-1", "admin-1"],
+      memberRoles: {
+        "host-1": "seeker",
+        "admin-1": "admin",
+      },
+      gameSize: "medium",
+      hidingZoneRadiusMeters: 402,
+      tier: "free",
+      status: "active",
+      timerAccumulatedMs: 0,
+    });
+
+    expect(restored.memberRoles).toEqual({
+      "host-1": "seeker",
+      "admin-1": "admin",
+    });
+  });
 });
