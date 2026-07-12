@@ -174,6 +174,7 @@ export interface SessionRecord {
   sessionResetAt?: string;
   hostAppVersion?: string;
   memberAppVersions?: Record<string, string>;
+  gameAreaLabel?: string;
 }
 
 export function isEndGameActive(

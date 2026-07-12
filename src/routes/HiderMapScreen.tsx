@@ -38,7 +38,7 @@ import {
   type LatLngTuple,
 } from "../domain/geometry/geometry";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
-import { effectiveMapStyle } from "../domain/device/powerProfile";
+import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/device/powerProfile";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
@@ -96,6 +96,16 @@ export function HiderMapScreen() {
   const keepScreenAwake = useMapStore((state) => state.keepScreenAwake);
   const setKeepScreenAwake = useMapStore((state) => state.setKeepScreenAwake);
   const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
+  const handleMapStyleChange = useCallback(
+    (style: typeof mapStyle) => {
+      applyMapStylePreferenceChange(style, {
+        lowPowerMode,
+        setMapStyle,
+        setLowPowerMode,
+      });
+    },
+    [lowPowerMode, setLowPowerMode, setMapStyle],
+  );
   const notificationPreferences = useMapStore(
     (state) => state.notificationPreferences,
   );
@@ -438,8 +448,7 @@ export function HiderMapScreen() {
           key={session.id}
           mapKey={session.id}
           mapStyle={effectiveBasemapStyle}
-          mapStylePreference={mapStyle}
-          onMapStyleChange={setMapStyle}
+          onMapStyleChange={handleMapStyleChange}
           mapStyleControlInset="dock"
           zoomControlInset="dock"
           center={center}
@@ -598,8 +607,8 @@ export function HiderMapScreen() {
           layerVisibility,
           setLayerVisibility,
           distanceUnit,
-          mapStyle,
-          setMapStyle,
+          mapStyle: effectiveBasemapStyle,
+          setMapStyle: handleMapStyleChange,
           notificationPreferences,
           updateNotificationPreferences,
           enableNotifications,

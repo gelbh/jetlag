@@ -15,6 +15,7 @@ import {
   nextQuestionTutorialId,
   type QuestionTutorialId,
 } from "../../domain/tutorial/tutorialQuestions";
+import { TutorialInteractiveFooter } from "./TutorialInteractiveFooter";
 import { TutorialScreenshot } from "./TutorialScreenshot";
 import { TutorialSplitScreenshot } from "./TutorialSplitScreenshot";
 import { TutorialInteractiveTool } from "./previews/TutorialInteractiveTool";
@@ -248,6 +249,7 @@ export function TutorialSectionWizard({
             <TutorialMapPreview
               toolId={section.id as QuestionTutorialId}
               variant={step.mapPreviewVariant}
+              compact={Boolean(step.splitPanelPreview)}
             />
           );
         }
@@ -273,18 +275,10 @@ export function TutorialSectionWizard({
   })();
 
   const interactiveFooter = (
-    <div className="flex shrink-0 flex-col gap-2 pt-3">
-      <button type="button" onClick={handleGotIt} className="btn-primary min-h-12 w-full">
-        Got it
-      </button>
-      <button
-        type="button"
-        onClick={handleSeeWalkthrough}
-        className="btn-secondary min-h-12 w-full"
-      >
-        See walkthrough
-      </button>
-    </div>
+    <TutorialInteractiveFooter
+      onGotIt={handleGotIt}
+      onSeeWalkthrough={handleSeeWalkthrough}
+    />
   );
 
   const footer = isInteractiveStep ? (
@@ -294,7 +288,13 @@ export function TutorialSectionWizard({
   ) : undefined;
 
   const wizardBody = (
-    <div className="tutorial-wizard flex min-h-0 flex-1 flex-col gap-1.5 overflow-hidden">
+    <div
+      className={
+        isInteractiveStep
+          ? "tutorial-wizard tutorial-wizard-interactive grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)_auto] gap-1.5 overflow-hidden"
+          : "tutorial-wizard flex min-h-0 flex-1 flex-col gap-1.5 overflow-hidden"
+      }
+    >
       <div className="shrink-0 space-y-1.5 text-center">
         <div className="space-y-0.5">
           <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
@@ -317,7 +317,13 @@ export function TutorialSectionWizard({
         swipeEnabled={!isInteractiveStep}
         footer={footer}
       >
-        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
+        <div
+          className={
+            isInteractiveStep
+              ? "tutorial-scroll flex min-h-0 flex-col gap-2 overflow-hidden"
+              : "flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto"
+          }
+        >
           {step.toolId ? (
             <div className="flex shrink-0 items-center gap-2">
               <span className="inline-flex size-7 items-center justify-center rounded-md border-2 border-border bg-surface-panel text-highlight">
@@ -337,7 +343,7 @@ export function TutorialSectionWizard({
                 {step.body}
               </p>
               {stepMedia ? (
-                <div className="tutorial-wizard-media w-full min-h-[min(42dvh,16rem)] self-stretch items-start">
+                <div className="tutorial-wizard-media tutorial-interactive-media min-h-0 w-full flex-1 self-stretch">
                   {stepMedia}
                 </div>
               ) : null}

@@ -19,8 +19,8 @@ type MapScreenChromeProps = Pick<
   | "pendingQuestions"
   | "pendingWrites"
   | "distanceUnit"
-  | "mapStyle"
-  | "setMapStyle"
+  | "handleMapStyleChange"
+  | "effectiveBasemapStyle"
   | "lowPowerMode"
   | "layerVisibility"
   | "showCurrentLocation"
@@ -124,8 +124,8 @@ export function MapScreenChrome({
   pendingQuestions,
   pendingWrites,
   distanceUnit,
-  mapStyle,
-  setMapStyle,
+  handleMapStyleChange,
+  effectiveBasemapStyle,
   lowPowerMode,
   layerVisibility,
   showCurrentLocation,
@@ -329,8 +329,8 @@ export function MapScreenChrome({
             void handleDistanceUnitChange(unit);
           },
           distanceUnitEditable: gameRulesEditable,
-          mapStyle,
-          onMapStyleChange: setMapStyle,
+          mapStyle: effectiveBasemapStyle,
+          onMapStyleChange: handleMapStyleChange,
           locationError: liveLocationError,
           transitEnabled,
           transitLiveEnabled,

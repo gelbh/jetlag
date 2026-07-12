@@ -2,6 +2,7 @@ import { TransitControls } from "../../map/TransitControls";
 import type { TransitRouteFilter } from "../../../domain/map/transit";
 import type { DistanceUnit } from "../../../domain/map/distance";
 import type { MapStyle } from "../../../domain/map/mapBasemaps";
+import { effectiveMapStyle } from "../../../domain/device/powerProfile";
 import type { NotificationPreferences } from "../../../domain/device/notifications";
 import { SegmentControl } from "../../ui/SegmentControl";
 import { SettingsToggleRow } from "../SettingsToggleRow";
@@ -84,6 +85,8 @@ export function MapSettingsGeneralTab({
   onNotificationPreferencesChange,
   onEnableNotifications,
 }: MapSettingsGeneralTabProps) {
+  const displayedMapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
+
   return (
     <div className="space-y-3">
       <SettingsToggleRow
@@ -138,17 +141,23 @@ export function MapSettingsGeneralTab({
 
       <SegmentControl
         variant="pill"
-        value={mapStyle}
+        value={displayedMapStyle}
         options={[
           { value: "standard", label: "Standard map" },
-          { value: "satellite", label: "Satellite" },
+          { value: "satellite", label: "Satellite", disabled: lowPowerMode },
         ]}
         onChange={onMapStyleChange}
         aria-label="Map style"
       />
-      <p className="text-xs text-ink-dim">
-        Quick toggle: Map / Sat on the bottom tool bar.
-      </p>
+      {lowPowerMode ? (
+        <p className="text-xs text-ink-dim">
+          Low power mode keeps the standard map. Turn it off to use satellite.
+        </p>
+      ) : (
+        <p className="text-xs text-ink-dim">
+          Quick toggle: Map / Sat on the bottom tool bar.
+        </p>
+      )}
 
       {locationError ? (
         <p className="text-sm text-status-error">{locationError}</p>

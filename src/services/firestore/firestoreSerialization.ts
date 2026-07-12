@@ -255,7 +255,7 @@ function parseMemberRoles(value: unknown): MemberRoles | undefined {
 
   const roles: MemberRoles = {};
   for (const [uid, role] of Object.entries(value as Record<string, unknown>)) {
-    if (role === "seeker" || role === "hider") {
+    if (role === "seeker" || role === "hider" || role === "observer") {
       roles[uid] = role;
     }
   }
@@ -362,6 +362,9 @@ export function sessionRulesPatchToFirestore(
   }
   if (typeof patch.bundledGeoRevision === "number") {
     payload.bundledGeoRevision = patch.bundledGeoRevision;
+  }
+  if (typeof patch.gameAreaLabel === "string" && patch.gameAreaLabel.trim()) {
+    payload.gameAreaLabel = patch.gameAreaLabel.trim();
   }
 
   return payload;
@@ -552,6 +555,10 @@ export function deserializeSessionFromFirestore(
       typeof document.memberAppVersions === "object" &&
       !Array.isArray(document.memberAppVersions)
         ? (document.memberAppVersions as Record<string, string>)
+        : undefined,
+    gameAreaLabel:
+      typeof document.gameAreaLabel === "string"
+        ? document.gameAreaLabel
         : undefined,
   };
 }

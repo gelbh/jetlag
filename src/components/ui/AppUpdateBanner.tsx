@@ -1,5 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+import {
+  applyServiceWorkerUpdate,
+  promptIfWaiting,
+  scheduleServiceWorkerUpdateChecks,
+} from "../../domain/device/serviceWorkerRefresh";
 import { tryUpdateServiceWorker } from "../../domain/device/serviceWorkerUpdate";
 import { useSessionStore } from "../../state/sessionStore";
 import { HudBanner } from "./HudBanner";
@@ -10,6 +15,7 @@ export function AppUpdateBanner() {
   const [needsRefresh, setNeedsRefresh] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [updateSW, setUpdateSW] = useState<ServiceWorkerReloader | null>(null);
+  const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
   const location = useLocation();
   const session = useSessionStore((state) => state.session);
 
@@ -23,7 +29,7 @@ export function AppUpdateBanner() {
       return;
     }
 
-    let registration: ServiceWorkerRegistration | undefined;
+    let stopScheduledChecks = () => {};
 
     void import("virtual:pwa-register").then(({ registerSW }) => {
       const applyUpdate = registerSW({
@@ -33,7 +39,18 @@ export function AppUpdateBanner() {
           setDismissed(false);
         },
         onRegistered(nextRegistration) {
-          registration = nextRegistration;
+          registrationRef.current = nextRegistration;
+          promptIfWaiting(nextRegistration, () => {
+            setNeedsRefresh(true);
+            setDismissed(false);
+          });
+          stopScheduledChecks = scheduleServiceWorkerUpdateChecks(
+            nextRegistration,
+            () => {
+              setNeedsRefresh(true);
+              setDismissed(false);
+            },
+          );
         },
         onRegisterError() {
           // Registration failures are handled by the browser.
@@ -44,15 +61,32 @@ export function AppUpdateBanner() {
 
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
-        tryUpdateServiceWorker(registration);
+        tryUpdateServiceWorker(registrationRef.current);
+        promptIfWaiting(registrationRef.current, () => {
+          setNeedsRefresh(true);
+          setDismissed(false);
+        });
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibility);
+      stopScheduledChecks();
     };
   }, []);
+
+  useEffect(() => {
+    if (import.meta.env.DEV || location.pathname !== "/") {
+      return;
+    }
+
+    tryUpdateServiceWorker(registrationRef.current);
+    promptIfWaiting(registrationRef.current, () => {
+      setNeedsRefresh(true);
+      setDismissed(false);
+    });
+  }, [location.pathname]);
 
   const visible = needsRefresh && !deferReload;
   const softBanner = Boolean(session) && location.pathname === "/map";
@@ -87,7 +121,10 @@ export function AppUpdateBanner() {
             type="button"
             className="btn-primary min-h-10 px-4 text-xs"
             onClick={() => {
-              void updateSW?.(true);
+              void applyServiceWorkerUpdate(
+                registrationRef.current,
+                updateSW ?? undefined,
+              );
             }}
           >
             Reload to update

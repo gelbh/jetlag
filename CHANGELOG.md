@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.5.2 - 2026-07-12
+
+### Fixes
+
+- Tentacle answer step scrolls with many POI options
+- PWA update banner on iOS; Reload without force-close
+- Satellite toggle matches basemap under low power mode
+- Tutorial split cards equal height; interactive step fits one screen
+
+### Improvements
+
+- Admin: filter live sessions by code, area, or phase; session cards show play area location
+- Admin observe: join live sessions regardless of app version mismatch
+- Create session: Premium tier pre-selected for subscription and trial hosts
+
 ## 0.5.1 - 2026-07-12
 
 ### Fixes
