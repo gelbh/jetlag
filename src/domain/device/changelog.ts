@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.4.7";
+export const APP_VERSION = "0.5.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,38 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.5.0",
+    date: "2026-07-12",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Motion: sheets, panels, and wizards use CSS animations only; low power mode and reduced motion still turn off decorative motion",
+          "Map: elimination shading recomputes faster after each answer",
+          "Tutorial: thermometer walkthrough uses live wizard, split panel, and map previews instead of PNGs",
+          "Tutorial: interactive intro lets you try the wizard, then choose Got it or See walkthrough",
+          "Tutorial: questions hub highlights the next question and shows a progress rail per type",
+        ],
+      }
+    ],
+  },
+  {
+    version: "0.4.8",
+    date: "2026-07-12",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Question wizards: panels stay open on launch; expand works after pan or drag minimize",
+          "Question wizards: taller scrollable panels so thermometer and chip steps are not clipped",
+          "Wizards: back and next controls sit beside the step dots instead of a full-width footer row",
+          "Tutorial: screenshot borders hug images; cards use full phone height with spaced body copy",
+          "Tutorial: questions hub is a single-column scrollable list with title, summary, and progress",
+        ],
+      }
+    ],
+  },
   {
     version: "0.4.7",
     date: "2026-07-12",

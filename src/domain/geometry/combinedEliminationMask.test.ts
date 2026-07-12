@@ -6,7 +6,6 @@ import type { HidingZoneRecord } from "../session/hidingZone";
 import {
   buildCombinedEliminationMask,
   buildEndGameEliminationMask,
-  clearCombinedEliminationMaskCacheForTests,
   eliminationFeatureForAnnotation,
 } from "./combinedEliminationMask";
 import { unionEliminationPartsLegacy } from "./unionPolygonFeatures";
@@ -61,7 +60,6 @@ function matchingAnnotation(
 
 describe("combinedEliminationMask parity", () => {
   it("matches legacy union for mixed committed annotations", () => {
-    clearCombinedEliminationMaskCacheForTests();
     const annotations = [
       matchingAnnotation("a", -0.19),
       matchingAnnotation("b", -0.16),
@@ -69,7 +67,6 @@ describe("combinedEliminationMask parity", () => {
     ];
 
     const candidate = buildCombinedEliminationMask(annotations, gameArea);
-    clearCombinedEliminationMaskCacheForTests();
     const baseline = unionEliminationPartsLegacy({
       polygons: annotations.map(
         (annotation) => eliminationFeatureForAnnotation(annotation, gameArea)!,
@@ -90,7 +87,6 @@ describe("combinedEliminationMask parity", () => {
 
 describe("combinedEliminationMask", () => {
   it("merges multiple elimination regions into one mask", () => {
-    clearCombinedEliminationMaskCacheForTests();
     const combined = buildCombinedEliminationMask(
       [matchingAnnotation("a", -0.19), matchingAnnotation("b", -0.16)],
       gameArea,
@@ -105,35 +101,24 @@ describe("combinedEliminationMask", () => {
     ).toBe(true);
   });
 
-  it("incrementally adds a new elimination region", () => {
-    clearCombinedEliminationMaskCacheForTests();
+  it("adds a new elimination region to an existing mask", () => {
     const first = buildCombinedEliminationMask(
       [matchingAnnotation("a", -0.19)],
       gameArea,
     );
-    const incremental = buildCombinedEliminationMask(
-      [matchingAnnotation("a", -0.19), matchingAnnotation("b", -0.16)],
-      gameArea,
-    );
-    clearCombinedEliminationMaskCacheForTests();
-    const full = buildCombinedEliminationMask(
+    const combined = buildCombinedEliminationMask(
       [matchingAnnotation("a", -0.19), matchingAnnotation("b", -0.16)],
       gameArea,
     );
 
     expect(first).not.toBeNull();
-    expect(incremental).not.toBeNull();
-    expect(full).not.toBeNull();
+    expect(combined).not.toBeNull();
     expect(
-      booleanPointInPolygon(turfPoint([-0.155, 51.45]), incremental!),
-    ).toBe(true);
-    expect(
-      booleanPointInPolygon(turfPoint([-0.155, 51.45]), full!),
+      booleanPointInPolygon(turfPoint([-0.155, 51.45]), combined!),
     ).toBe(true);
   });
 
   it("includes draft preview features with committed eliminations", () => {
-    clearCombinedEliminationMaskCacheForTests();
     const draft = eliminationFeatureForAnnotation(
       matchingAnnotation("draft", -0.12),
       gameArea,
@@ -180,7 +165,6 @@ describe("combinedEliminationMask", () => {
   });
 
   it("uses end-game mask when hiding zones are provided to buildCombinedEliminationMask", () => {
-    clearCombinedEliminationMaskCacheForTests();
     const hidingZone: HidingZoneRecord = {
       hiderUid: "hider-1",
       sessionId: "session",

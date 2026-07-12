@@ -9,7 +9,6 @@ import {
   buildRadarShadedRegion,
   type LatLngTuple,
 } from "./geometry";
-import { gameAreaFingerprint } from "./core/gameAreaConvert";
 import { DEFAULT_RADIUS_METERS } from "../map/distance";
 import { MAP_ANNOTATION_COLORS } from "../map/mapAnnotationColors";
 import { thermometerShadedSide } from "../questions/thermometerQuestions";
@@ -23,73 +22,8 @@ import {
 
 export const ELIMINATION_FILL_COLOR = MAP_ANNOTATION_COLORS.elimination;
 
-const eliminationFeatureCache = new Map<
-  string,
-  { gameAreaKey: string; fingerprint: string; feature: PolygonFeature | null }
->();
-
-interface EliminationMaskCache {
-  gameAreaKey: string;
-  committedKey: string;
-  draftKey: string;
-  endGameKey: string;
-  mask: PolygonFeature | null;
-}
-
-let eliminationMaskCache: EliminationMaskCache | null = null;
-
-export function gameAreaCacheKey(gameArea: GameArea): string {
-  return gameAreaFingerprint(gameArea);
-}
-
-function annotationEliminationFingerprint(
-  annotation: AnnotationRecord,
-): string {
-  return [
-    annotation.status,
-    annotation.updatedAt ?? "",
-    annotation.type,
-    JSON.stringify(annotation.metadata),
-    JSON.stringify(annotation.geometry),
-  ].join("|");
-}
-
-function draftFeaturesCacheKey(
-  draftFeatures: readonly PolygonFeature[],
-): string {
-  if (draftFeatures.length === 0) {
-    return "";
-  }
-
-  return draftFeatures
-    .map((feature) => JSON.stringify(feature.geometry))
-    .join("||");
-}
-
-function endGameZonesCacheKey(
-  hidingZones: readonly HidingZoneRecord[],
-): string {
-  if (hidingZones.length === 0) {
-    return "";
-  }
-
-  return hidingZones
-    .map(
-      (zone) =>
-        `${zone.stationId}:${zone.center.lat}:${zone.center.lng}:${zone.radiusMeters}`,
-    )
-    .sort()
-    .join("|");
-}
-
-export function clearCombinedEliminationMaskCacheForTests(): void {
-  eliminationFeatureCache.clear();
-  eliminationMaskCache = null;
-}
-
 export function eliminationDiskForAnnotation(
   annotation: AnnotationRecord,
-  _gameArea: GameArea,
 ): DiskSpec | null {
   if (!isActive(annotation)) {
     return null;
@@ -137,37 +71,11 @@ export function eliminationFeatureForAnnotation(
   annotation: AnnotationRecord,
   gameArea: GameArea,
 ): PolygonFeature | null {
-  const gameAreaKey = gameAreaCacheKey(gameArea);
-  const fingerprint = annotationEliminationFingerprint(annotation);
-  const cacheKey = annotation.id;
-  const cached = eliminationFeatureCache.get(cacheKey);
-
-  if (
-    cached &&
-    cached.gameAreaKey === gameAreaKey &&
-    cached.fingerprint === fingerprint
-  ) {
-    return cached.feature;
-  }
-
-  const feature = computeEliminationFeatureForAnnotation(annotation, gameArea);
-  eliminationFeatureCache.set(cacheKey, {
-    gameAreaKey,
-    fingerprint,
-    feature,
-  });
-  return feature;
-}
-
-function computeEliminationFeatureForAnnotation(
-  annotation: AnnotationRecord,
-  gameArea: GameArea,
-): PolygonFeature | null {
   if (!isActive(annotation)) {
     return null;
   }
 
-  const disk = eliminationDiskForAnnotation(annotation, gameArea);
+  const disk = eliminationDiskForAnnotation(annotation);
   if (disk) {
     return turfCircle(
       turfPoint([disk.center[1], disk.center[0]]),
@@ -259,12 +167,6 @@ function computeEliminationFeatureForAnnotation(
   return null;
 }
 
-export function unionEliminationFeatures(
-  features: readonly PolygonFeature[],
-): PolygonFeature | null {
-  return unionEliminationParts({ polygons: [...features], disks: [] });
-}
-
 export function computeEliminationUnionInput(
   annotations: readonly AnnotationRecord[],
   gameArea: GameArea,
@@ -274,7 +176,7 @@ export function computeEliminationUnionInput(
   const disks: DiskSpec[] = [];
 
   for (const annotation of annotations) {
-    const disk = eliminationDiskForAnnotation(annotation, gameArea);
+    const disk = eliminationDiskForAnnotation(annotation);
     if (disk) {
       disks.push(disk);
       continue;
@@ -289,159 +191,19 @@ export function computeEliminationUnionInput(
   return { polygons, disks };
 }
 
-function collectCommittedEliminationUnionInput(
-  annotations: readonly AnnotationRecord[],
-  gameArea: GameArea,
-): EliminationUnionInput {
-  return computeEliminationUnionInput(annotations, gameArea);
-}
-
-function committedAnnotationsKey(
-  annotations: readonly AnnotationRecord[],
-): string {
-  return annotations
-    .filter(isActive)
-    .map(
-      (annotation) =>
-        `${annotation.id}:${annotationEliminationFingerprint(annotation)}`,
-    )
-    .sort()
-    .join("|");
-}
-
-function tryIncrementalMaskAdd(
-  previous: EliminationMaskCache,
-  gameAreaKey: string,
-  committedKey: string,
-  draftKey: string,
-  gameArea: GameArea,
-  annotations: readonly AnnotationRecord[],
-): PolygonFeature | null {
-  if (
-    previous.gameAreaKey !== gameAreaKey ||
-    previous.draftKey !== draftKey ||
-    previous.endGameKey !== "" ||
-    !previous.mask
-  ) {
-    return null;
-  }
-
-  const previousIds = new Set(
-    previous.committedKey.split("|").map((entry) => entry.split(":")[0]),
-  );
-  const currentIds = committedKey
-    .split("|")
-    .filter(Boolean)
-    .map((entry) => entry.split(":")[0]);
-
-  if (currentIds.length !== previousIds.size + 1) {
-    return null;
-  }
-
-  const addedId = currentIds.find((id) => !previousIds.has(id));
-  if (!addedId) {
-    return null;
-  }
-
-  const addedAnnotation = annotations.find(
-    (annotation) => annotation.id === addedId,
-  );
-  if (!addedAnnotation) {
-    return null;
-  }
-
-  const disk = eliminationDiskForAnnotation(addedAnnotation, gameArea);
-  if (disk) {
-    return unionEliminationParts({
-      polygons: [previous.mask],
-      disks: [disk],
-    });
-  }
-
-  const newFeature = eliminationFeatureForAnnotation(addedAnnotation, gameArea);
-  if (!newFeature) {
-    return null;
-  }
-
-  return unionEliminationParts({
-    polygons: [previous.mask, newFeature],
-    disks: [],
-  });
-}
-
 export function buildCombinedEliminationMask(
   annotations: readonly AnnotationRecord[],
   gameArea: GameArea,
   draftFeatures: readonly PolygonFeature[] = [],
   endGameHidingZones: readonly HidingZoneRecord[] = [],
 ): PolygonFeature | null {
-  const gameAreaKey = gameAreaCacheKey(gameArea);
-  const endGameKey = endGameZonesCacheKey(endGameHidingZones);
-
   if (endGameHidingZones.length > 0) {
-    const mask = buildEndGameEliminationMask(gameArea, endGameHidingZones);
-    eliminationMaskCache = {
-      gameAreaKey,
-      committedKey: "",
-      draftKey: "",
-      endGameKey,
-      mask,
-    };
-    return mask;
+    return buildEndGameEliminationMask(gameArea, endGameHidingZones);
   }
 
-  const committedKey = committedAnnotationsKey(annotations);
-  const draftKey = draftFeaturesCacheKey(draftFeatures);
-
-  if (
-    eliminationMaskCache &&
-    eliminationMaskCache.gameAreaKey === gameAreaKey &&
-    eliminationMaskCache.committedKey === committedKey &&
-    eliminationMaskCache.draftKey === draftKey &&
-    eliminationMaskCache.endGameKey === endGameKey
-  ) {
-    return eliminationMaskCache.mask;
-  }
-
-  const unionInput = collectCommittedEliminationUnionInput(
-    annotations,
-    gameArea,
+  return unionEliminationParts(
+    computeEliminationUnionInput(annotations, gameArea, draftFeatures),
   );
-  const allInput: EliminationUnionInput = {
-    polygons: [...unionInput.polygons, ...draftFeatures],
-    disks: unionInput.disks,
-  };
-
-  let mask: PolygonFeature | null = null;
-
-  if (
-    eliminationMaskCache &&
-    draftFeatures.length === 0 &&
-    committedKey.split("|").filter(Boolean).length > 0
-  ) {
-    mask = tryIncrementalMaskAdd(
-      eliminationMaskCache,
-      gameAreaKey,
-      committedKey,
-      draftKey,
-      gameArea,
-      annotations,
-    );
-  }
-
-  if (!mask) {
-    mask = unionEliminationParts(allInput);
-  }
-
-  eliminationMaskCache = {
-    gameAreaKey,
-    committedKey,
-    draftKey,
-    endGameKey,
-    mask,
-  };
-
-  return mask;
 }
 
 export function buildEndGameEliminationMask(
@@ -487,6 +249,6 @@ export function annotationHasEliminationFeature(
 
   return (
     eliminationFeatureForAnnotation(annotation, gameArea) !== null ||
-    eliminationDiskForAnnotation(annotation, gameArea) !== null
+    eliminationDiskForAnnotation(annotation) !== null
   );
 }

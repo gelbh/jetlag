@@ -69,10 +69,6 @@ export default defineConfig(({ mode }) => ({
               name: "vendor-turf",
               test: /node_modules\/@turf\//,
             },
-            {
-              name: "vendor-motion",
-              test: /node_modules\/motion/,
-            },
           ],
         },
       },

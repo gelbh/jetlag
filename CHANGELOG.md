@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.5.0 - 2026-07-12
+
+### Improvements
+
+- Motion: sheets, panels, and wizards use CSS animations only; low power mode and reduced motion still turn off decorative motion
+- Map: elimination shading recomputes faster after each answer
+- Tutorial: thermometer walkthrough uses live wizard, split panel, and map previews instead of PNGs
+- Tutorial: interactive intro lets you try the wizard, then choose Got it or See walkthrough
+- Tutorial: questions hub highlights the next question and shows a progress rail per type
+
+## 0.4.8 - 2026-07-12
+
+### Fixes
+
+- Question wizards: panels stay open on launch; expand works after pan or drag minimize
+- Question wizards: taller scrollable panels so thermometer and chip steps are not clipped
+- Wizards: back and next controls sit beside the step dots instead of a full-width footer row
+- Tutorial: screenshot borders hug images; cards use full phone height with spaced body copy
+- Tutorial: questions hub is a single-column scrollable list with title, summary, and progress
+
 ## 0.4.7 - 2026-07-12
 
 ### Fixes

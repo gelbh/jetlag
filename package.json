@@ -1,7 +1,7 @@
 {
   "name": "jetlag",
   "private": true,
-  "version": "0.4.7",
+  "version": "0.5.0",
   "type": "module",
   "engines": {
     "node": ">=24.0.0"
@@ -75,7 +75,6 @@
     "@turf/simplify": "^7.3.5",
     "@turf/union": "^7.3.5",
     "circle-union": "^1.0.0",
-    "comlink": "^4.4.2",
     "d3-geo": "^3.1.1",
     "d3-geo-projection": "^4.0.0",
     "d3-geo-voronoi": "^2.1.0",
@@ -91,7 +90,6 @@
     "leaflet": "^1.9.4",
     "lru-cache": "^11.5.2",
     "martinez-polygon-clipping": "^0.8.1",
-    "motion": "^12.42.2",
     "rbush": "^4.0.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",

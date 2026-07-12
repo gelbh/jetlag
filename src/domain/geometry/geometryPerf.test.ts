@@ -4,7 +4,6 @@ import { point as turfPoint } from "@turf/helpers";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
 import {
   buildCombinedEliminationMask,
-  clearCombinedEliminationMaskCacheForTests,
 } from "./combinedEliminationMask";
 import {
   unionDiskSpecs,
@@ -140,17 +139,14 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
   });
 
   it("elimination_mask_8_annotations is faster than legacy union path", () => {
-    clearCombinedEliminationMaskCacheForTests();
     const annotations = Array.from({ length: 8 }, (_, index) =>
       matchingAnnotation(`a-${index}`, -0.19 + index * 0.01),
     );
 
     const martinezMs = measureMedianMs(() => {
-      clearCombinedEliminationMaskCacheForTests();
       buildCombinedEliminationMask(annotations, gameArea);
     });
     const legacyMs = measureMedianMs(() => {
-      clearCombinedEliminationMaskCacheForTests();
       const features = annotations.map((annotation) => annotation.geometry as PolygonFeature);
       unionPolygonFeaturesLegacy(features);
     });
