@@ -116,6 +116,16 @@ export function useMapSessionActions({
     }
 
     await resetEndGameSession(session.id);
+    setSession(
+      {
+        ...session,
+        endGameStartedAt: undefined,
+        endGameStartedByUid: undefined,
+        endGameRequestedAt: undefined,
+        endGameRequestedByUid: undefined,
+      },
+      uid,
+    );
   }, [session, setSession, uid]);
 
   const handleSaveGameRules = useCallback(async () => {

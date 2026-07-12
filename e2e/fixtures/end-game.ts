@@ -42,7 +42,10 @@ export async function expectEndGameRestrictions(hostPage: Page) {
 export async function cancelEndGame(hostPage: Page) {
   await expect(hostPage.getByRole("button", { name: "End end game" })).toBeVisible();
   await hostPage.getByRole("button", { name: "End end game" }).click();
+  await expect(hostPage.getByRole("button", { name: "End end game" })).toBeHidden({
+    timeout: 20_000,
+  });
   await expect(hostPage.getByText("End game started")).toBeHidden({
-    timeout: 15_000,
+    timeout: 5_000,
   });
 }
