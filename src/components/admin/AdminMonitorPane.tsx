@@ -1,12 +1,28 @@
 import { AdminMapScreen } from "../../routes/AdminMapScreen";
+import { InlineError } from "../ui/InlineError";
 
 export function AdminMonitorPane({
   active,
   sessionCode,
+  errorMessage,
 }: {
   active: boolean;
   sessionCode?: string | null;
+  errorMessage?: string | null;
 }) {
+  if (errorMessage) {
+    return (
+      <div className="admin-monitor-pane flex min-h-[36rem] items-center justify-center rounded-xl border border-dashed border-status-error/40 bg-status-error-surface/40 px-6 py-10 text-center">
+        <div className="max-w-sm space-y-3">
+          <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
+            Monitor unavailable
+          </p>
+          <InlineError>{errorMessage}</InlineError>
+        </div>
+      </div>
+    );
+  }
+
   if (!active) {
     return (
       <div className="admin-monitor-pane flex min-h-[36rem] items-center justify-center rounded-xl border border-dashed border-border bg-surface-panel/60 px-6 py-10 text-center">

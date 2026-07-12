@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { useAppNavigate } from "../useAppNavigate";
 import { usePermanentAuthUser } from "../billing/usePermanentAuthUser";
+import { resolvePlayerRole } from "../../domain/session/playerRole";
 import { joinRemoteSessionByCode } from "../../services/firestore/firestoreAnnotations";
 import { setPremiumApiContext } from "../../services/core/premiumApiContext";
 import { useSessionStore } from "../../state/sessionStore";
@@ -56,6 +57,12 @@ export function useAdminJoinSession(options: UseAdminJoinSessionOptions = {}) {
         }
 
         setSession(result.session, user.uid);
+        const joinedRole = resolvePlayerRole(result.session.memberRoles, user.uid);
+        if (joinedRole !== "admin") {
+          setError("Couldn't join as admin monitor.");
+          return false;
+        }
+
         setPremiumApiContext(result.session);
         if (navigateToMap) {
           navigate("/map");
