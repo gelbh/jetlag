@@ -9,7 +9,10 @@ import {
 
 describe("gamePresetStore", () => {
   beforeEach(() => {
-    useGamePresetStore.setState({ presets: mergeBundledPresets([]) });
+    useGamePresetStore.setState({
+      presets: mergeBundledPresets([]),
+      favouritePresetIds: [],
+    });
   });
 
   it("saves and retrieves presets", () => {
@@ -66,5 +69,30 @@ describe("gamePresetStore", () => {
     const draft = gamePresetToCreateSessionDraft(preset);
     expect(draft.distanceUnit).toBe("metric");
     expect(draft.gameSize).toBe("medium");
+  });
+
+  it("toggles favourites and clears them on delete", () => {
+    const preset = createSessionDraftToGamePreset(
+      {
+        gameSize: "small",
+        distanceUnit: "metric",
+        advancedSettings: defaultAdvancedSessionSettings("small", "metric"),
+      },
+      "Favourite me",
+    );
+
+    useGamePresetStore.getState().savePreset(preset);
+    expect(useGamePresetStore.getState().isFavourite(preset.id)).toBe(false);
+
+    useGamePresetStore.getState().toggleFavourite(preset.id);
+    expect(useGamePresetStore.getState().favouritePresetIds).toEqual([preset.id]);
+    expect(useGamePresetStore.getState().isFavourite(preset.id)).toBe(true);
+
+    useGamePresetStore.getState().toggleFavourite(preset.id);
+    expect(useGamePresetStore.getState().favouritePresetIds).toEqual([]);
+
+    useGamePresetStore.getState().toggleFavourite(preset.id);
+    useGamePresetStore.getState().deletePreset(preset.id);
+    expect(useGamePresetStore.getState().favouritePresetIds).toEqual([]);
   });
 });

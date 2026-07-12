@@ -153,3 +153,17 @@ export function HudAdminIcon(props: SVGProps<SVGSVGElement>) {
     </IconBase>
   );
 }
+
+export function HudStarIcon({
+  filled = false,
+  ...props
+}: SVGProps<SVGSVGElement> & { filled?: boolean }) {
+  return (
+    <IconBase {...props}>
+      <path
+        d="M12 3.5 14.6 9l6 .5-4.5 3.8 1.4 5.9L12 16.5 6.5 19.2 7.9 13.5 3.4 9.5l6-.5L12 3.5Z"
+        fill={filled ? "currentColor" : "none"}
+      />
+    </IconBase>
+  );
+}

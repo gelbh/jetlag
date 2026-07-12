@@ -6,18 +6,23 @@ import {
   type GamePreset,
 } from "../domain/session/gamePreset";
 import { mergeBundledPresets } from "../domain/regions/bundledGamePresets";
+import { withoutFavouritePresetId } from "../domain/session/presetFavourites";
 
 interface GamePresetState {
   presets: GamePreset[];
+  favouritePresetIds: string[];
   savePreset: (preset: GamePreset) => void;
   deletePreset: (id: string) => void;
   getPreset: (id: string) => GamePreset | undefined;
+  toggleFavourite: (id: string) => void;
+  isFavourite: (id: string) => boolean;
 }
 
 export const useGamePresetStore = create<GamePresetState>()(
   persist(
     (set, get) => ({
       presets: mergeBundledPresets([]),
+      favouritePresetIds: [],
       savePreset: (preset) => {
         set((state) => {
           const migrated = migrateGamePreset({
@@ -44,12 +49,27 @@ export const useGamePresetStore = create<GamePresetState>()(
           presets: mergeBundledPresets(
             state.presets.filter((preset) => preset.id !== id),
           ),
+          favouritePresetIds: withoutFavouritePresetId(
+            state.favouritePresetIds,
+            id,
+          ),
         }));
       },
       getPreset: (id) => {
         const preset = get().presets.find((entry) => entry.id === id);
         return preset ? migrateGamePreset(preset) : undefined;
       },
+      toggleFavourite: (id) => {
+        set((state) => {
+          const exists = state.favouritePresetIds.includes(id);
+          return {
+            favouritePresetIds: exists
+              ? withoutFavouritePresetId(state.favouritePresetIds, id)
+              : [...state.favouritePresetIds, id],
+          };
+        });
+      },
+      isFavourite: (id) => get().favouritePresetIds.includes(id),
     }),
     {
       name: "jetlag-game-presets",
@@ -62,6 +82,9 @@ export const useGamePresetStore = create<GamePresetState>()(
               currentState.presets,
           ),
         ),
+        favouritePresetIds:
+          (persistedState as GamePresetState | undefined)?.favouritePresetIds ??
+          currentState.favouritePresetIds,
       }),
     },
   ),

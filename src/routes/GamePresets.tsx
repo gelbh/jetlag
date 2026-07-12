@@ -33,6 +33,7 @@ import { useGameAreaFraming } from "../hooks/session/useGameAreaFraming";
 import { usePlaceAreaSearch } from "../hooks/session/usePlaceAreaSearch";
 import { useGamePresetStore } from "../state/gamePresetStore";
 import { filterGamePresetsForSearch } from "../domain/session/gamePresetSearch";
+import { resolveFavouritePresets } from "../domain/session/presetFavourites";
 import { isBundledPresetId } from "../domain/regions/bundledGamePresets";
 import { PresetBrowseLayout } from "../components/presets/PresetBrowseLayout";
 import { useMapStore } from "../state/sessionStore";
@@ -337,6 +338,9 @@ export function GamePresetEditor() {
 
 export function GamePresetList() {
   const presets = useGamePresetStore((state) => state.presets);
+  const favouritePresetIds = useGamePresetStore(
+    (state) => state.favouritePresetIds,
+  );
   const deletePreset = useGamePresetStore((state) => state.deletePreset);
   const searchId = useId();
   const [query, setQuery] = useState("");
@@ -357,6 +361,10 @@ export function GamePresetList() {
     () => filterGamePresetsForSearch(migratedPresets, query),
     [migratedPresets, query],
   );
+  const favouritePresets = useMemo(
+    () => resolveFavouritePresets(migratedPresets, favouritePresetIds),
+    [favouritePresetIds, migratedPresets],
+  );
 
   return (
     <PresetBrowseLayout
@@ -365,6 +373,7 @@ export function GamePresetList() {
       onQueryChange={setQuery}
       searching={searching}
       searchResults={searchResults}
+      favouritePresets={favouritePresets}
       bundledPresets={bundledPresets}
       userPresets={userPresets}
       onDelete={deletePreset}

@@ -67,15 +67,23 @@ import {
   isBundledPresetId,
 } from "../../domain/regions/bundledGamePresets";
 import { buildBundledPresetSelectGroups } from "../../domain/regions/bundledPresetHierarchy";
+import { buildFavouritePresetSelectOptions } from "../../domain/session/presetFavourites";
 import { placeToFocusBounds } from "./utils";
 
 export function useCreateSession() {
   const navigate = useAppNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const presets = useGamePresetStore((state) => state.presets);
+  const favouritePresetIds = useGamePresetStore(
+    (state) => state.favouritePresetIds,
+  );
   const bundledPresetSelectGroups = useMemo(
     () => buildBundledPresetSelectGroups(BUNDLED_GAME_PRESET_DEFINITIONS),
     [],
+  );
+  const favouritePresetSelectOptions = useMemo(
+    () => buildFavouritePresetSelectOptions(presets, favouritePresetIds),
+    [favouritePresetIds, presets],
   );
   const userPresets = useMemo(
     () => presets.filter((preset) => !isBundledPresetId(preset.id)),
@@ -741,6 +749,7 @@ export function useCreateSession() {
     framingModalOpen,
     setFramingModalOpen,
     bundledPresetSelectGroups,
+    favouritePresetSelectOptions,
     userPresets,
     loading,
     verifyingAccess,
