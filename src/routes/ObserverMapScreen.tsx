@@ -13,6 +13,7 @@ import { ChatPanel } from "../components/chat/ChatPanel";
 import { SessionLog } from "../components/session/SessionLog";
 import { InlineError } from "../components/ui/InlineError";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
+import { fallbackGameArea } from "../domain/geometry/geometry";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { useSessionStore } from "../state/sessionStore";
@@ -54,6 +55,8 @@ export function ObserverMapScreen() {
     );
   }
 
+  const gameArea = fallbackGameArea(controller.gameArea);
+
   return (
     <div className="map-screen-shell">
       <div className="absolute inset-0">
@@ -72,10 +75,10 @@ export function ObserverMapScreen() {
           className="h-full w-full"
         >
           <MapViewportTracker onViewportChange={controller.setMapViewport} />
-          <GameAreaMask gameArea={controller.gameArea} />
+          <GameAreaMask gameArea={gameArea} />
           <AnnotationLayer
             annotations={controller.annotations}
-            gameArea={controller.gameArea}
+            gameArea={gameArea}
             layerVisibility={controller.layerVisibility}
             session={controller.session}
             hidingZones={controller.hidingZones}
@@ -100,7 +103,7 @@ export function ObserverMapScreen() {
           />
           <PendingQuestionLayer
             pendingQuestions={controller.pendingQuestions}
-            gameArea={controller.gameArea}
+            gameArea={gameArea}
             sessionRules={controller.sessionRules}
             mapStyle={controller.effectiveBasemapStyle}
           />
