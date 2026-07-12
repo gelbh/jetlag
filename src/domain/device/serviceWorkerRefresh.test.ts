@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   applyServiceWorkerUpdate,
   hasWaitingServiceWorker,
+  isSafeToReloadApp,
+  maybeApplyPendingUpdate,
   promptIfWaiting,
   scheduleServiceWorkerUpdateChecks,
   shouldAutoApplyServiceWorkerUpdate,
@@ -86,19 +88,94 @@ describe("serviceWorkerRefresh", () => {
     expect(registerApplyUpdate).toHaveBeenCalledWith(true);
   });
 
-  it("defers auto apply during an active session", () => {
+  it("defers auto apply on the map with an active session", () => {
     expect(
       shouldAutoApplyServiceWorkerUpdate({
-        hasActiveSession: true,
+        session: { id: "session-1" },
+        pathname: "/map",
       }),
     ).toBe(false);
   });
 
-  it("allows auto apply without an active session", () => {
+  it("allows auto apply on the map without a session", () => {
     expect(
       shouldAutoApplyServiceWorkerUpdate({
-        hasActiveSession: false,
+        session: null,
+        pathname: "/map",
       }),
     ).toBe(true);
+  });
+
+  it("allows auto apply off the map with an active session", () => {
+    expect(
+      shouldAutoApplyServiceWorkerUpdate({
+        session: { id: "session-1" },
+        pathname: "/",
+      }),
+    ).toBe(true);
+  });
+
+  it("treats a safe window as reloadable", () => {
+    expect(
+      isSafeToReloadApp({
+        session: null,
+        pathname: "/map",
+      }),
+    ).toBe(true);
+
+    expect(
+      isSafeToReloadApp({
+        session: { id: "session-1" },
+        pathname: "/",
+      }),
+    ).toBe(true);
+  });
+
+  it("treats an active map session as unsafe to reload", () => {
+    expect(
+      isSafeToReloadApp({
+        session: { id: "session-1" },
+        pathname: "/map",
+      }),
+    ).toBe(false);
+  });
+
+  it("applies a pending update only in a safe window", async () => {
+    const applyUpdate = vi.fn().mockResolvedValue(undefined);
+    const registration = {
+      waiting: { postMessage: vi.fn() },
+    } as unknown as ServiceWorkerRegistration;
+
+    await maybeApplyPendingUpdate({
+      needsRefresh: true,
+      session: { id: "session-1" },
+      pathname: "/map",
+      registration,
+      applyUpdate,
+    });
+    expect(applyUpdate).not.toHaveBeenCalled();
+
+    await maybeApplyPendingUpdate({
+      needsRefresh: true,
+      session: null,
+      pathname: "/map",
+      registration,
+      applyUpdate,
+    });
+    expect(applyUpdate).toHaveBeenCalledWith(true);
+  });
+
+  it("skips pending update application when refresh is not needed", async () => {
+    const applyUpdate = vi.fn().mockResolvedValue(undefined);
+
+    await maybeApplyPendingUpdate({
+      needsRefresh: false,
+      session: null,
+      pathname: "/",
+      registration: undefined,
+      applyUpdate,
+    });
+
+    expect(applyUpdate).not.toHaveBeenCalled();
   });
 });

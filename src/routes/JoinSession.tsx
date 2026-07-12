@@ -23,6 +23,7 @@ import {
   lookupRemoteSessionByCode,
   waitForServerHiderRole,
 } from "../services/firestore/firestoreAnnotations";
+import { APP_VERSION } from "../domain/device/changelog";
 import { sessionVersionMismatchMessage } from "../domain/session/sessionVersion";
 import { resolvePlayerRole } from "../domain/session/playerRole";
 import { retryAsync } from "../services/core/retryAsync";
@@ -31,6 +32,8 @@ import { setPremiumApiContext } from "../services/core/premiumApiContext";
 
 export function JoinSession() {
   const navigate = useAppNavigate();
+  const session = useSessionStore((state) => state.session);
+  const myUid = useSessionStore((state) => state.myUid);
   const setSession = useSessionStore((state) => state.setSession);
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -114,8 +117,18 @@ export function JoinSession() {
       }
 
       const user = await retryAsync(() => ensureAnonymousUser());
+      const joinOptions =
+        session?.code === normalized && myUid
+          ? { returningMemberUid: myUid, persistedMyUid: myUid }
+          : {};
       const result = await retryAsync(() =>
-        joinRemoteSessionByCode(normalized, user.uid, playerRole),
+        joinRemoteSessionByCode(
+          normalized,
+          user.uid,
+          playerRole,
+          APP_VERSION,
+          joinOptions,
+        ),
       );
       if (result.status === "missing") {
         setError("No session found for that code.");
@@ -128,7 +141,9 @@ export function JoinSession() {
       }
 
       if (result.status === "incompatible") {
-        setError(sessionVersionMismatchMessage(result.hostVersion));
+        setError(
+          sessionVersionMismatchMessage(result.hostVersion, APP_VERSION),
+        );
         return;
       }
 

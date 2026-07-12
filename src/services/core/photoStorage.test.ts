@@ -21,7 +21,7 @@ vi.mock("./firebase", () => ({
     uid: "hider-1",
     getIdToken: vi.fn().mockResolvedValue("token"),
   }),
-  getFirebaseStorage: vi.fn(() => ({ bucket: "demo" })),
+  getFirebaseStorage: vi.fn(async () => ({ bucket: "demo" })),
 }));
 
 vi.mock("./sentry", () => ({

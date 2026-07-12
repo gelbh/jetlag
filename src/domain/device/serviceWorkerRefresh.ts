@@ -3,10 +3,56 @@ import { tryUpdateServiceWorker } from "./serviceWorkerUpdate";
 const UPDATE_CHECK_INTERVAL_MS = 45 * 60 * 1000;
 const RELOAD_FALLBACK_MS = 1500;
 
-export function shouldAutoApplyServiceWorkerUpdate(options: {
-  hasActiveSession: boolean;
+let appNeedRefreshHandler: (() => void) | undefined;
+
+export function isSafeToReloadApp(options: {
+  session: unknown;
+  pathname: string;
 }): boolean {
-  return !options.hasActiveSession;
+  return !options.session || options.pathname !== "/map";
+}
+
+export function shouldAutoApplyServiceWorkerUpdate(options: {
+  session: unknown;
+  pathname: string;
+}): boolean {
+  return isSafeToReloadApp(options);
+}
+
+export function registerAppNeedRefreshHandler(handler: () => void): () => void {
+  appNeedRefreshHandler = handler;
+  return () => {
+    if (appNeedRefreshHandler === handler) {
+      appNeedRefreshHandler = undefined;
+    }
+  };
+}
+
+export function notifyAppNeedRefresh(): void {
+  appNeedRefreshHandler?.();
+}
+
+export async function maybeApplyPendingUpdate(options: {
+  needsRefresh: boolean;
+  session: unknown;
+  pathname: string;
+  registration: ServiceWorkerRegistration | undefined;
+  applyUpdate: (reloadPage?: boolean) => Promise<void>;
+}): Promise<void> {
+  if (!options.needsRefresh) {
+    return;
+  }
+
+  if (
+    !shouldAutoApplyServiceWorkerUpdate({
+      session: options.session,
+      pathname: options.pathname,
+    })
+  ) {
+    return;
+  }
+
+  await applyServiceWorkerUpdate(options.registration, options.applyUpdate);
 }
 
 export function hasWaitingServiceWorker(

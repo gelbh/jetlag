@@ -197,7 +197,7 @@ function uploadBreadcrumbData(
 }
 
 export async function deletePhotoAnswer(storagePath: string): Promise<void> {
-  const storageRef = ref(getFirebaseStorage(), storagePath);
+  const storageRef = ref(await getFirebaseStorage(), storagePath);
   await deleteObject(storageRef);
 }
 
@@ -257,7 +257,7 @@ export async function uploadPhotoAnswer(
         : "jpg";
   const fileName = `${Date.now()}.${extension}`;
   const storagePath = photoAnswerStoragePath(sessionId, questionId, fileName);
-  const storageRef = ref(getFirebaseStorage(), storagePath);
+  const storageRef = ref(await getFirebaseStorage(), storagePath);
   const metadata: UploadMetadata = {
     contentType: blob.type.startsWith("image/") ? blob.type : "image/jpeg",
   };
@@ -318,6 +318,6 @@ export async function uploadPhotoAnswer(
 }
 
 export async function getPhotoDownloadUrl(storagePath: string): Promise<string> {
-  const storageRef = ref(getFirebaseStorage(), storagePath);
+  const storageRef = ref(await getFirebaseStorage(), storagePath);
   return getDownloadURL(storageRef);
 }

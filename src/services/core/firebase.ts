@@ -15,12 +15,6 @@ import {
   ReCaptchaV3Provider,
   type AppCheck,
 } from "firebase/app-check";
-import { getFunctions, type Functions } from "firebase/functions";
-import {
-  connectStorageEmulator,
-  getStorage,
-  type FirebaseStorage,
-} from "firebase/storage";
 import {
   connectFirestoreEmulator,
   initializeFirestore,
@@ -41,11 +35,23 @@ import {
   setBootstrapTag,
 } from "./sentry";
 
+export async function getFirebaseStorage(): Promise<
+  import("firebase/storage").FirebaseStorage
+> {
+  const { getFirebaseStorage: get } = await import("./firebaseStorage");
+  return get();
+}
+
+export async function getFirebaseFunctions(): Promise<
+  import("firebase/functions").Functions
+> {
+  const { getFirebaseFunctions: get } = await import("./firebaseFunctions");
+  return get();
+}
+
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
-let functions: Functions | null = null;
-let storage: FirebaseStorage | null = null;
 let appCheck: AppCheck | null = null;
 let persistenceUnavailable = false;
 
@@ -67,7 +73,6 @@ export function isFirebaseConfigured(): boolean {
 
 let authEmulatorConnected = false;
 let firestoreEmulatorConnected = false;
-let storageEmulatorConnected = false;
 
 function connectAuthEmulatorIfConfigured(firebaseAuth: Auth): void {
   if (!firebaseUsesEmulator() || authEmulatorConnected) {
@@ -89,7 +94,7 @@ function connectFirestoreEmulatorIfConfigured(firestore: Firestore): void {
   firestoreEmulatorConnected = true;
 }
 
-function getFirebaseApp(): FirebaseApp {
+export function getFirebaseApp(): FirebaseApp {
   if (!app) {
     const config = readConfig();
     if (!config) {
@@ -139,32 +144,6 @@ function initializeAppCheckIfConfigured(firebaseApp: FirebaseApp): void {
     provider: new ReCaptchaV3Provider(siteKey),
     isTokenAutoRefreshEnabled: true,
   });
-}
-
-function connectStorageEmulatorIfConfigured(firebaseStorage: FirebaseStorage): void {
-  if (!firebaseUsesEmulator() || storageEmulatorConnected) {
-    return;
-  }
-
-  connectStorageEmulator(firebaseStorage, "127.0.0.1", 9198);
-  storageEmulatorConnected = true;
-}
-
-export function getFirebaseStorage(): FirebaseStorage {
-  if (!storage) {
-    storage = getStorage(getFirebaseApp());
-    connectStorageEmulatorIfConfigured(storage);
-  }
-
-  return storage;
-}
-
-export function getFirebaseFunctions(): Functions {
-  if (!functions) {
-    functions = getFunctions(getFirebaseApp());
-  }
-
-  return functions;
 }
 
 export function getFirebaseAppCheck(): AppCheck | null {
@@ -359,13 +338,14 @@ export async function resetFirebaseForTests(): Promise<void> {
   app = null;
   auth = null;
   db = null;
-  functions = null;
-  storage = null;
   appCheck = null;
   persistenceUnavailable = false;
   authEmulatorConnected = false;
   firestoreEmulatorConnected = false;
-  storageEmulatorConnected = false;
+  const { resetFirebaseFunctionsForTests } = await import("./firebaseFunctions");
+  const { resetFirebaseStorageForTests } = await import("./firebaseStorage");
+  resetFirebaseFunctionsForTests();
+  resetFirebaseStorageForTests();
   anonymousSignInPromise = null;
   authStateReadyPromise = null;
   authBootstrapReady = false;

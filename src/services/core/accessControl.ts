@@ -8,6 +8,7 @@ import {
   getFirebaseFunctions,
   isFirebaseConfigured,
 } from "./firebase";
+import { captureAppCheckTokenFailure } from "./sentry";
 
 export async function hasAccessClaim(user: User): Promise<boolean> {
   const token = await user.getIdTokenResult();
@@ -19,7 +20,7 @@ export async function grantAccess(code: string): Promise<void> {
     throw new Error("Firebase is not configured.");
   }
 
-  const functions = getFirebaseFunctions();
+  const functions = await getFirebaseFunctions();
   const callable = httpsCallable<{ code: string }, { granted: boolean }>(
     functions,
     "grantAccess",
@@ -66,9 +67,13 @@ export async function buildPremiumProxyHeaders(): Promise<HeadersInit> {
 
   const appCheck = getFirebaseAppCheck();
   if (appCheck) {
-    const appCheckToken = await getToken(appCheck, false);
-    if (appCheckToken.token) {
-      headers["X-Firebase-AppCheck"] = appCheckToken.token;
+    try {
+      const appCheckToken = await getToken(appCheck, false);
+      if (appCheckToken.token) {
+        headers["X-Firebase-AppCheck"] = appCheckToken.token;
+      }
+    } catch (error) {
+      captureAppCheckTokenFailure(error, { source: "buildPremiumProxyHeaders" });
     }
   }
 
