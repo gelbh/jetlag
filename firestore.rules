@@ -529,7 +529,12 @@ service cloud.firestore {
         && request.resource.data.sessionId is string
         && request.resource.data.hostUid == request.auth.uid;
 
-      allow update, delete: if false;
+      allow update: if isSignedIn()
+        && resource.data.hostUid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status == 'ended';
+
+      allow delete: if false;
     }
 
     match /_rateLimits/{docId} {

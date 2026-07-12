@@ -502,13 +502,14 @@ async function joinRemoteSessionWithoutRead(
   };
 
   if (returningMemberUid != null) {
-    updatePayload.memberUids = arrayUnion(uid);
     await updateDoc(sessionRef, {
-      memberUids: arrayRemove(returningMemberUid),
-      ...updatePayload,
+      memberUids: arrayUnion(uid),
+      [`memberRoles.${uid}`]: role,
+      [`memberAppVersions.${uid}`]: clientVersion,
     });
     if (returningMemberUid !== uid) {
       await updateDoc(sessionRef, {
+        memberUids: arrayRemove(returningMemberUid),
         [`memberRoles.${returningMemberUid}`]: deleteField(),
         [`memberAppVersions.${returningMemberUid}`]: deleteField(),
       });
