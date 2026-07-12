@@ -323,6 +323,7 @@ export function HiderMapScreen() {
 
   const [hidingZoneStepId, setHidingZoneStepId] =
     useState<HidingZoneStepId>("method");
+  const [wizardPeeked, setWizardPeeked] = useState(false);
   const mapPickEnabled = hidingZoneStepId === "location";
 
   const zoneTool = useHiderZoneTool({
@@ -411,17 +412,15 @@ export function HiderMapScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only openSettings and closeWizard methods used
   }, [overlay.openSettings, zoneTool.closeWizard]);
 
-  const [wizardPeeked, setWizardPeeked] = useState(false);
-
   const handleMapPanStart = useCallback(() => {
     if (zoneTool.wizardOpen) {
       setWizardPeeked(true);
     }
-  }, [zoneTool.wizardOpen]);
+  }, [zoneTool.wizardOpen, setWizardPeeked]);
 
   const handleMapPanEnd = useCallback(() => {
     setWizardPeeked(false);
-  }, []);
+  }, [setWizardPeeked]);
 
   const openLogExclusive = useCallback(() => {
     zoneTool.closeWizard();
