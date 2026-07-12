@@ -63,7 +63,7 @@ export function MapFloatingPanel({
     preserveBodyWhenMinimized && minimized ? "jl-panel-body-preserver" : "";
   const isWizardLayout = panelLayout === "wizard";
   const shellScrollClass = isWizardLayout
-    ? "flex flex-col overflow-hidden"
+    ? "flex min-h-0 flex-col overflow-hidden"
     : bodyScrollable
       ? "overflow-y-auto"
       : "overflow-hidden";

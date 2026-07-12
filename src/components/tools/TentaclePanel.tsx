@@ -17,8 +17,8 @@ import { TentacleAnswerPicker } from "./shared/TentacleAnswerPicker";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
 import { SendToHidersButton } from "./shared/SendToHidersButton";
+import { WizardPanelFrame } from "./shared/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
-import { WizardToolPanelLayout } from "./shared/WizardToolPanelLayout";
 import { TENTACLE_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
 import { useToolWizard } from "../../hooks/useToolWizard";
@@ -311,13 +311,16 @@ export function TentaclePanel({
         )
       }
     >
-      <div className={readOnly ? "pointer-events-none select-none" : undefined}>
-        <WizardToolPanelLayout stickyFooter={answerFooter}>
-          {wizardContent}
-        </WizardToolPanelLayout>
-      </div>
-
-      {error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null}
+      <WizardPanelFrame
+        readOnly={readOnly}
+        scrollable={useStickyAnswerFooter}
+        stickyFooter={answerFooter}
+        trailing={
+          error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null
+        }
+      >
+        {wizardContent}
+      </WizardPanelFrame>
     </ToolPanelShell>
   );
 }
