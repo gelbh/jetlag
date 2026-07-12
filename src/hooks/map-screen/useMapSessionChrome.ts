@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react";
-import { useAppNavigate } from "../../hooks/useAppNavigate";
 import type { RefObject } from "react";
 import {
   isActive,

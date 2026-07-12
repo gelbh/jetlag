@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { useAppNavigate } from "../useAppNavigate";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { isFirebaseConfigured } from "../../services/core/firebase";
 import { useSessionExit } from "./useSessionExit";

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useAppNavigate } from "./useAppNavigate";
+import { useAppNavigationStack } from "./useAppNavigate";
 import { useMotionProfile } from "./useMotionProfile";
 
 const EDGE_ZONE_PX = 18;
@@ -32,7 +32,7 @@ function isDeniedTarget(target: EventTarget | null): boolean {
 
 /** Global left-edge swipe to navigate back when history allows. */
 export function useEdgeSwipeBack(): void {
-  const navigate = useAppNavigate();
+  const { canGoBack, goBack } = useAppNavigationStack();
   const { animate } = useMotionProfile();
   const activeRef = useRef(false);
   const startXRef = useRef(0);
@@ -64,7 +64,7 @@ export function useEdgeSwipeBack(): void {
         return;
       }
 
-      if (!navigate.canGoBack()) {
+      if (!canGoBack()) {
         return;
       }
 
@@ -106,8 +106,8 @@ export function useEdgeSwipeBack(): void {
 
       reset();
 
-      if (shouldCommit && navigate.canGoBack()) {
-        navigate.goBack();
+      if (shouldCommit && canGoBack()) {
+        goBack();
       }
     };
 
@@ -122,5 +122,5 @@ export function useEdgeSwipeBack(): void {
       document.removeEventListener("pointerup", onPointerUp);
       document.removeEventListener("pointercancel", onPointerUp);
     };
-  }, [animate, navigate]);
+  }, [animate, canGoBack, goBack]);
 }

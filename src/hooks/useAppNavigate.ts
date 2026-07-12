@@ -1,8 +1,12 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback } from "react";
 import { useNavigate, type NavigateOptions, type To } from "react-router-dom";
 import { useMotionProfile } from "./useMotionProfile";
 
 const RESET_PATHS = new Set(["/", "/map"]);
+
+let navigationStack: string[] = [
+  typeof window !== "undefined" ? window.location.pathname : "/",
+];
 
 function resolvePath(to: To): string {
   if (typeof to === "string") {
@@ -12,14 +16,16 @@ function resolvePath(to: To): string {
   return to.pathname ?? "";
 }
 
+/** @internal Test-only reset for navigation stack. */
+export function resetAppNavigationStackForTests(path = "/"): void {
+  navigationStack = [path];
+}
+
 export function useAppNavigate() {
   const navigate = useNavigate();
   const { animate } = useMotionProfile();
-  const stackRef = useRef<string[]>([
-    typeof window !== "undefined" ? window.location.pathname : "/",
-  ]);
 
-  const go = useCallback(
+  return useCallback(
     (
       to: To,
       options?: NavigateOptions & {
@@ -31,11 +37,11 @@ export function useAppNavigate() {
         options?.direction ?? (options?.replace ? "replace" : "forward");
 
       if (RESET_PATHS.has(path)) {
-        stackRef.current = [path];
+        navigationStack = [path];
       } else if (direction === "back") {
-        stackRef.current.pop();
+        navigationStack.pop();
       } else if (direction !== "replace") {
-        stackRef.current.push(path);
+        navigationStack.push(path);
       }
 
       const navDir =
@@ -52,22 +58,24 @@ export function useAppNavigate() {
     },
     [navigate, animate],
   );
+}
 
-  return useMemo(
-    () =>
-      Object.assign(go, {
-        canGoBack: () => stackRef.current.length > 1,
-        goBack: () => {
-          if (stackRef.current.length <= 1) {
-            return;
-          }
+export function useAppNavigationStack() {
+  const navigate = useNavigate();
+  const { animate } = useMotionProfile();
 
-          stackRef.current.pop();
-          const destination = stackRef.current[stackRef.current.length - 1] ?? "/";
-          document.documentElement.dataset.navDirection = "back";
-          navigate(destination, { viewTransition: animate });
-        },
-      }),
-    [go, navigate, animate],
-  );
+  const canGoBack = useCallback(() => navigationStack.length > 1, []);
+
+  const goBack = useCallback(() => {
+    if (navigationStack.length <= 1) {
+      return;
+    }
+
+    navigationStack.pop();
+    const destination = navigationStack[navigationStack.length - 1] ?? "/";
+    document.documentElement.dataset.navDirection = "back";
+    navigate(destination, { viewTransition: animate });
+  }, [navigate, animate]);
+
+  return { canGoBack, goBack };
 }
