@@ -149,6 +149,17 @@ export default defineConfig(({ mode }) => ({
               },
             },
           },
+          {
+            urlPattern: /\/geo\/.*\.geojson$/i,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "jetlag-geo-bundles",
+              expiration: {
+                maxEntries: 64,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+            },
+          },
         ],
       },
     }),
