@@ -125,7 +125,7 @@ jobs:
             exit 0
           fi
           changed="$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}")"
-          if echo "$changed" | grep -qE '^(functions/|firestore\.(rules|indexes\.json)|storage\.rules|firebase\.json|scripts/(deploy-production|sync-proxy-secrets)\.mjs|\.firebaserc|src/services/billing/|src/routes/Premium\.tsx)'; then
+          if echo "$changed" | grep -qE '^(functions/|firestore\.(rules|indexes\.json)|storage\.rules|firebase\.json|scripts/deploy-production\.mjs|\.firebaserc|src/services/billing/|src/routes/Premium\.tsx)'; then
             echo "backend=true" >> "$GITHUB_OUTPUT"
           else
             echo "backend=false" >> "$GITHUB_OUTPUT"
