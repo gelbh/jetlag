@@ -5,11 +5,13 @@ test.describe("mobile tool dock screenshots", () => {
     await openMapWithLocalSession(page);
   });
 
-  test("matches compact dock screenshots", async ({ page }) => {
+  test("@smoke matches compact closed dock", async ({ page }) => {
     await expect(page.locator(".jl-tool-dock-bar")).toHaveScreenshot(
       "tool-dock-compact-closed.png",
     );
+  });
 
+  test("matches overflow sheet open", async ({ page }) => {
     await page.getByRole("button", { name: "More tools" }).click();
     await expect(page.getByRole("dialog", { name: "More tools" })).toHaveScreenshot(
       "tool-overflow-sheet-open.png",

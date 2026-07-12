@@ -6,7 +6,7 @@ import {
 } from "../fixtures";
 
 test.describe("create session screenshots", () => {
-  test("matches play area HUD after place search", async ({ page }) => {
+  test("@smoke matches play area HUD after place search", async ({ page }) => {
     await prepareE2EPage(page);
     await page.goto("/create");
     await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");

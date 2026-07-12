@@ -6,7 +6,7 @@ import {
 } from "../fixtures";
 
 test.describe("map first-run screenshots", () => {
-  test("matches onboarding sheet baseline", async ({ page }) => {
+  test("@smoke matches onboarding sheet baseline", async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.removeItem("jetlag.mapFirstRunDismissed");
     });
