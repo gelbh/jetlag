@@ -315,6 +315,16 @@ export function HiderMapScreen() {
     }
 
     await resetEndGameSession(session.id);
+    setSession(
+      {
+        ...session,
+        endGameStartedAt: undefined,
+        endGameStartedByUid: undefined,
+        endGameRequestedAt: undefined,
+        endGameRequestedByUid: undefined,
+      },
+      uid,
+    );
   }, [session, setSession, uid]);
 
   const [hidingZoneStepId, setHidingZoneStepId] =
