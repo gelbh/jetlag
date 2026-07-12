@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.5.6";
+export const APP_VERSION = "0.5.7";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,32 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.5.7",
+    date: "2026-07-12",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Error screens: keep router context so Back home works after a crash",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "PWA: stale route chunks activate the latest app version before reload",
+          "PWA: deferred chunk reload runs when you leave the map after an update",
+          "PWA: asset requests no longer fall back to the app shell via the service worker",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Sentry: Web Vitals tracing, session replay, and Firestore permission breadcrumbs enabled in production",
+        ],
+      }
+    ],
+  },
   {
     version: "0.5.6",
     date: "2026-07-12",

@@ -66,10 +66,6 @@ function isIgnoredClientNoiseEvent(
     NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>
   >[0],
 ): boolean {
-  if (isFirestorePermissionDeniedEvent(event)) {
-    return true;
-  }
-
   for (const exception of event.exception?.values ?? []) {
     if (
       exception.type === "QuotaExceededError" &&
@@ -121,6 +117,15 @@ function scrubEvent(
     }
   }
 
+  if (isFirestorePermissionDeniedEvent(event)) {
+    Sentry.addBreadcrumb({
+      category: "firestore",
+      message: "permission-denied",
+      level: "warning",
+    });
+    return null;
+  }
+
   if (isIgnoredClientNoiseEvent(event)) {
     return null;
   }
@@ -146,9 +151,24 @@ export function initSentry(): void {
       release: `jetlag@${APP_VERSION}`,
       dist: env.VITE_SENTRY_RELEASE_DIST || undefined,
       tracesSampleRate: import.meta.env.PROD ? 0.1 : 0,
+      integrations: [
+        SentryReact.browserTracingIntegration({
+          enableInp: true,
+        }),
+        SentryReact.replayIntegration({
+          maskAllText: true,
+          blockAllMedia: true,
+        }),
+      ],
       beforeSend: scrubEvent,
     },
-    SentryReact.init,
+    (browserOptions) => {
+      SentryReact.init({
+        ...browserOptions,
+        replaysSessionSampleRate: import.meta.env.PROD ? 0.1 : 0,
+        replaysOnErrorSampleRate: 1.0,
+      });
+    },
   );
 }
 
