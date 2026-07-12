@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import { buildCombinedEliminationMask } from "../../domain/geometry/combinedEliminationMask";
 import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/emptyFeatures";
@@ -59,9 +59,22 @@ export function useCombinedEliminationMask({
       });
   }, [annotations, draftFeatures, endGameHidingZones, gameArea, hidden]);
 
+  const bootstrapMask = useMemo(() => {
+    if (hidden) {
+      return null;
+    }
+
+    return buildCombinedEliminationMask(
+      annotations,
+      gameArea,
+      draftFeatures,
+      endGameHidingZones,
+    );
+  }, [annotations, draftFeatures, endGameHidingZones, gameArea, hidden]);
+
   if (hidden) {
     return null;
   }
 
-  return mask;
+  return mask ?? bootstrapMask;
 }
