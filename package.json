@@ -1,7 +1,7 @@
 {
   "name": "jetlag",
   "private": true,
-  "version": "0.5.7",
+  "version": "0.5.8",
   "type": "module",
   "engines": {
     "node": ">=24.0.0"
@@ -36,6 +36,8 @@
     "emulators:start": "firebase emulators:start --project demo-jetlag --only auth,firestore,storage,functions",
     "deploy": "node scripts/deploy-production.mjs",
     "deploy:worker": "npm run build && wrangler deploy",
+    "preview:worker": "npm run build && wrangler dev",
+    "cf-typegen": "wrangler types",
     "changeset": "changeset",
     "version": "changeset version && node scripts/sync-changelog-ts.mjs",
     "release:sync": "node scripts/sync-changelog-ts.mjs && node scripts/release-check.mjs",
@@ -102,6 +104,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
+    "@cloudflare/workers-types": "^5.20260712.1",
     "@commitlint/cli": "~21.2.1",
     "@commitlint/config-conventional": "~21.2.0",
     "@eslint/js": "~10.0.1",

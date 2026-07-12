@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.5.7";
+export const APP_VERSION = "0.5.8";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.5.8",
+    date: "2026-07-12",
+    sections: [
+      {
+        title: "Technical",
+        items: [
+          "Worker typecheck via `tsconfig.worker.json`; CI validates bundles with `wrangler deploy --dry-run`",
+          "CSP header is enforcing (was Report-Only); disable public `workers.dev` URL; enable Worker observability",
+        ],
+      }
+    ],
+  },
   {
     version: "0.5.7",
     date: "2026-07-12",

@@ -1,12 +1,16 @@
+"$schema" = "node_modules/wrangler/config-schema.json"
 name = "jetlag"
-compatibility_date = "2025-01-01"
+compatibility_date = "2026-07-12"
 main = "worker/index.ts"
-workers_dev = true
+workers_dev = false
 
-# Zone uses proxied A records (not Worker-managed custom hostname).
+# Zone route until Custom Domain cutover (delete stale CNAME, then swap to custom_domain = true).
 [[routes]]
 pattern = "jetlag.gelbhart.dev/*"
 zone_name = "gelbhart.dev"
+
+[observability]
+enabled = true
 
 [assets]
 directory = "./dist"
