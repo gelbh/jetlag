@@ -2,18 +2,19 @@ import type { AnnotationRecord } from "../../domain/map/annotations";
 
 const DB_NAME = "jetlag-offline-queue";
 const STORE_NAME = "writes";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const MAX_FAILURE_COUNT = 5;
 const BASE_BACKOFF_MS = 1_000;
 
-export interface QueuedWrite {
+export type QueuedWrite = {
+  kind: "annotation";
   id: string;
   sessionId: string;
   annotation: AnnotationRecord;
   createdAt: string;
   failureCount?: number;
   lastFailedAt?: string;
-}
+};
 
 let databasePromise: Promise<IDBDatabase> | null = null;
 
@@ -34,6 +35,20 @@ function openDatabase(): Promise<IDBDatabase> {
 
       if (!store.indexNames.contains("sessionId")) {
         store.createIndex("sessionId", "sessionId", { unique: false });
+      }
+      if (!store.indexNames.contains("kind")) {
+        store.createIndex("kind", "kind", { unique: false });
+      }
+
+      if (event.oldVersion < 3) {
+        const migrateRequest = store.getAll();
+        migrateRequest.onsuccess = () => {
+          for (const entry of migrateRequest.result as QueuedWrite[]) {
+            if (entry.kind !== "annotation") {
+              store.put({ ...entry, kind: "annotation" });
+            }
+          }
+        };
       }
     };
 
@@ -77,6 +92,7 @@ export async function enqueueOfflineWrite(
   const transaction = database.transaction(STORE_NAME, "readwrite");
   const store = transaction.objectStore(STORE_NAME);
   const entry: QueuedWrite = {
+    kind: "annotation",
     id: annotation.id,
     sessionId,
     annotation,
