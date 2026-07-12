@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.6 - 2026-07-12
+
+### Fixes
+
+- Question wizards: repair panel flex layout so Send to hiders and answer actions stay visible on live map
+
 ## 0.5.5 - 2026-07-12
 
 ### Fixes

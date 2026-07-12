@@ -303,7 +303,7 @@
   }
 
   .jl-wizard-panel-max-h {
-    max-height: min(42dvh, 22rem);
+    max-height: min(48dvh, 26rem);
   }
 
   .wizard-tool-scroll-body {
