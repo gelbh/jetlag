@@ -4,13 +4,13 @@ import type { AnnotationRecord } from "../../domain/map/annotations";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { useMapSessionChrome } from "./useMapSessionChrome";
 
-const navigate = vi.fn();
+const exitSession = vi.hoisted(() => vi.fn(async () => undefined));
 const mockResetRemoteSession = vi.hoisted(() =>
   vi.fn(async () => "2026-01-02T00:00:00.000Z"),
 );
 
-vi.mock("../../hooks/useAppNavigate", () => ({
-  useAppNavigate: () => navigate,
+vi.mock("../session/useSessionExit", () => ({
+  useSessionExit: () => exitSession,
 }));
 
 vi.mock("../../services/core/firebase", () => ({
@@ -79,7 +79,7 @@ const remoteSession = {
 
 describe("useMapSessionChrome", () => {
   beforeEach(() => {
-    navigate.mockReset();
+    exitSession.mockClear();
     mockResetRemoteSession.mockClear();
   });
 
