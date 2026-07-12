@@ -20,12 +20,17 @@ import { useSyncStatus } from "../sync/useSyncStatus";
 import { useFirebaseAuthReady } from "../sync/useFirebaseAuthReady";
 import {
   ensureAnonymousUser,
+  getFirebaseAuth,
   isFirebaseConfigured,
 } from "../../services/core/firebase";
+import { waitForPermanentAuthReady } from "../../services/core/firebaseAuthReady";
 import { setPremiumApiContext } from "../../services/core/premiumApiContext";
 import { useSessionStore } from "../../state/sessionStore";
 
-export type SessionAuthMode = "seeker-remote" | "hider-anonymous";
+export type SessionAuthMode =
+  | "seeker-remote"
+  | "hider-anonymous"
+  | "admin-permanent";
 
 export interface UseSharedSessionScreenOptions {
   isChatOpen: boolean;
@@ -47,7 +52,10 @@ export function useSharedSessionScreen({
   const setMyUid = useSessionStore((state) => state.setMyUid);
   const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
   const sessionId = session?.id;
-  const authReady = useFirebaseAuthReady(session);
+  const anonymousAuthReady = useFirebaseAuthReady(
+    authMode === "admin-permanent" ? null : session,
+  );
+  const [permanentAuthReady, setPermanentAuthReady] = useState(false);
   const [authUid, setAuthUid] = useState<string | null>(null);
 
   useSessionSync();
@@ -57,6 +65,25 @@ export function useSharedSessionScreen({
   }, [session]);
 
   useEffect(() => {
+    if (authMode === "admin-permanent") {
+      if (
+        !session ||
+        session.id === LOCAL_SESSION_ID ||
+        !isFirebaseConfigured()
+      ) {
+        return;
+      }
+
+      void waitForPermanentAuthReady().then(() => {
+        const currentUser = getFirebaseAuth().currentUser;
+        if (myUid && currentUser && currentUser.uid !== myUid) {
+          setLastSyncError("No access to this session.");
+        }
+        setPermanentAuthReady(true);
+      });
+      return;
+    }
+
     if (authMode === "seeker-remote") {
       if (
         !session ||
@@ -85,16 +112,23 @@ export function useSharedSessionScreen({
       setAuthUid(user.uid);
       setMyUid(user.uid);
     });
-  }, [authMode, session, session?.id, setLastSyncError, setMyUid]);
+  }, [authMode, myUid, session, session?.id, setLastSyncError, setMyUid]);
+
+  const authReady =
+    authMode === "admin-permanent" ? permanentAuthReady : anonymousAuthReady;
 
   const uid =
-    authMode === "hider-anonymous"
+    authMode === "admin-permanent"
       ? authReady
-        ? authUid
+        ? myUid
         : null
-      : authReady
-        ? authUid ?? myUid
-        : null;
+      : authMode === "hider-anonymous"
+        ? authReady
+          ? authUid
+          : null
+        : authReady
+          ? authUid ?? myUid
+          : null;
 
   const isHost = Boolean(
     session?.hostUid && uid && session.hostUid === uid,
@@ -119,10 +153,13 @@ export function useSharedSessionScreen({
 
   const pendingQuestions = usePendingQuestionsSync(sessionId);
   const hidingZones = useHidingZonesSync(sessionId);
-  const seekerLocations = useSeekerLocationsSync(sessionId);
+  const seekerLocations = useSeekerLocationsSync(sessionId, authReady);
   const showHiderLocations =
     notificationRole === "hider" || notificationRole === "observer";
-  const hiderLocations = useHiderLocationsSync(sessionId, showHiderLocations);
+  const hiderLocations = useHiderLocationsSync(
+    sessionId,
+    showHiderLocations && authReady,
+  );
   const chatMessages = useSessionMessagesSync(sessionId);
   const syncStatus = useSyncStatus();
 

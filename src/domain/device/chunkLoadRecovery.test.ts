@@ -4,6 +4,7 @@ import {
   clearChunkReloadFlag,
   hasChunkReloadBeenAttempted,
   isChunkLoadError,
+  wasChunkReloadDeferred,
 } from "./chunkLoadRecovery";
 
 describe("isChunkLoadError", () => {
@@ -40,10 +41,12 @@ describe("isChunkLoadError", () => {
 
 describe("attemptChunkReload", () => {
   const reload = vi.fn();
+  const onNeedRefresh = vi.fn();
 
   beforeEach(() => {
     sessionStorage.clear();
     reload.mockReset();
+    onNeedRefresh.mockReset();
     Object.defineProperty(window, "location", {
       configurable: true,
       value: { ...window.location, reload },
@@ -62,6 +65,35 @@ describe("attemptChunkReload", () => {
     expect(attemptChunkReload()).toBe(false);
     expect(reload).not.toHaveBeenCalled();
   });
+
+  it("defers reload on the map during an active session", () => {
+    expect(
+      attemptChunkReload({
+        session: { id: "session-1" },
+        pathname: "/map",
+        onNeedRefresh,
+      }),
+    ).toBe(false);
+
+    expect(reload).not.toHaveBeenCalled();
+    expect(onNeedRefresh).toHaveBeenCalledOnce();
+    expect(hasChunkReloadBeenAttempted()).toBe(false);
+    expect(wasChunkReloadDeferred()).toBe(true);
+  });
+
+  it("reloads off the map even with an active session", () => {
+    expect(
+      attemptChunkReload({
+        session: { id: "session-1" },
+        pathname: "/",
+        onNeedRefresh,
+      }),
+    ).toBe(true);
+
+    expect(reload).toHaveBeenCalledOnce();
+    expect(onNeedRefresh).not.toHaveBeenCalled();
+    expect(hasChunkReloadBeenAttempted()).toBe(true);
+  });
 });
 
 describe("clearChunkReloadFlag", () => {
@@ -71,5 +103,13 @@ describe("clearChunkReloadFlag", () => {
     clearChunkReloadFlag();
 
     expect(hasChunkReloadBeenAttempted()).toBe(false);
+  });
+
+  it("clears the deferred flag", () => {
+    sessionStorage.setItem("jetlag:chunk-deferred", "1");
+
+    clearChunkReloadFlag();
+
+    expect(wasChunkReloadDeferred()).toBe(false);
   });
 });

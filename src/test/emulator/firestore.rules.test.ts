@@ -607,6 +607,28 @@ describe("firestore.rules", () => {
         .doc("hider-1")
         .get(),
     );
+
+    const seekerSnapshot = await assertSucceeds(
+      observer
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("playerLocations")
+        .where("role", "==", "seeker")
+        .get(),
+    );
+    expect(seekerSnapshot.docs.map((doc) => doc.id).sort()).toEqual(["host-1"]);
+
+    const hiderSnapshot = await assertSucceeds(
+      observer
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("playerLocations")
+        .where("role", "==", "hider")
+        .get(),
+    );
+    expect(hiderSnapshot.docs.map((doc) => doc.id).sort()).toEqual(["hider-1"]);
   });
 
   it("denies hiders from writing another player's hiding zone doc", async () => {

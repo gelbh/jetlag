@@ -24,25 +24,35 @@ type CollectionSubscriber<T> = (
 export function useFirestoreCollectionSync<T>(
   sessionId: string | undefined,
   subscribe: CollectionSubscriber<T>,
+  {
+    enabled = true,
+    onSyncError,
+  }: { enabled?: boolean; onSyncError?: () => void } = {},
 ): T[] {
   const [items, setItems] = useState<T[]>([]);
 
   useEffect(() => {
-    if (!isRemoteSession(sessionId)) {
+    if (!enabled || !isRemoteSession(sessionId)) {
       return;
     }
 
     const unsubscribe = subscribe(
       sessionId,
       setItems,
-      () => setItems([]),
+      () => {
+        if (onSyncError) {
+          onSyncError();
+        } else {
+          setItems([]);
+        }
+      },
     );
 
     return () => {
       unsubscribe();
       setItems([]);
     };
-  }, [sessionId, subscribe]);
+  }, [enabled, onSyncError, sessionId, subscribe]);
 
   return items;
 }

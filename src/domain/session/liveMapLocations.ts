@@ -53,6 +53,12 @@ export function clusterHiderLocations(
   return clusterNearbyPoints(locations);
 }
 
+export function locationClusterStableKey(
+  cluster: LocationCluster,
+): string {
+  return [...cluster.uids].sort().join("-");
+}
+
 export function clusterTooltipLabel(
   count: number,
   role: "seeker" | "hider",

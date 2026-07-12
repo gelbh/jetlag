@@ -42,7 +42,7 @@ export async function fetchActiveAdminSessions(): Promise<AdminSessionSummary[]>
     return [];
   }
 
-  const functions = getFirebaseFunctions();
+  const functions = await getFirebaseFunctions();
   const callable = httpsCallable<Record<string, never>, { sessions: AdminSessionSummary[] }>(
     functions,
     "listActiveSessions",

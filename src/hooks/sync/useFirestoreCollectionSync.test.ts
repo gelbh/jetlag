@@ -46,4 +46,83 @@ describe("useFirestoreCollectionSync", () => {
     unmount();
     expect(unsubscribe).toHaveBeenCalled();
   });
+
+  it("does not subscribe when enabled is false", () => {
+    const subscribe = vi.fn();
+    const { result } = renderHook(() =>
+      useFirestoreCollectionSync("remote-session", subscribe, { enabled: false }),
+    );
+
+    expect(result.current).toEqual([]);
+    expect(subscribe).not.toHaveBeenCalled();
+  });
+
+  it("re-subscribes when enabled flips to true", async () => {
+    const unsubscribe = vi.fn();
+    const subscribe = vi.fn(
+      (
+        _sessionId: string,
+        onData: (items: string[]) => void,
+      ) => {
+        onData(["alpha"]);
+        return unsubscribe;
+      },
+    );
+
+    const { result, rerender } = renderHook(
+      ({ enabled }: { enabled: boolean }) =>
+        useFirestoreCollectionSync("remote-session", subscribe, { enabled }),
+      { initialProps: { enabled: false } },
+    );
+
+    expect(subscribe).not.toHaveBeenCalled();
+
+    rerender({ enabled: true });
+
+    await waitFor(() => {
+      expect(result.current).toEqual(["alpha"]);
+    });
+    expect(subscribe).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls onSyncError on subscription error", () => {
+    const onSyncError = vi.fn();
+    const subscribe = vi.fn(
+      (
+        _sessionId: string,
+        _onData: (items: string[]) => void,
+        onError: () => void,
+      ) => {
+        onError();
+        return vi.fn();
+      },
+    );
+
+    renderHook(() =>
+      useFirestoreCollectionSync("remote-session", subscribe, { onSyncError }),
+    );
+
+    expect(onSyncError).toHaveBeenCalledOnce();
+  });
+
+  it("clears items on subscription error when no handler is provided", () => {
+    const unsubscribe = vi.fn();
+    const subscribe = vi.fn(
+      (
+        _sessionId: string,
+        onData: (items: string[]) => void,
+        onError: () => void,
+      ) => {
+        onData(["alpha"]);
+        onError();
+        return unsubscribe;
+      },
+    );
+
+    const { result } = renderHook(() =>
+      useFirestoreCollectionSync("remote-session", subscribe),
+    );
+
+    expect(result.current).toEqual([]);
+  });
 });

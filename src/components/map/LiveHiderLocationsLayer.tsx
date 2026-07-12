@@ -1,8 +1,10 @@
+import { useMemo } from "react";
 import { CircleMarker, Tooltip } from "react-leaflet";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
   clusterHiderLocations,
   clusterTooltipLabel,
+  locationClusterStableKey,
 } from "../../domain/session/liveMapLocations";
 import type { PlayerLocationRecord } from "../../domain/session/sessionChat";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
@@ -16,7 +18,10 @@ export function LiveHiderLocationsLayer({
   locations,
   myUid = null,
 }: LiveHiderLocationsLayerProps) {
-  const clusters = clusterHiderLocations(locations);
+  const clusters = useMemo(
+    () => clusterHiderLocations(locations),
+    [locations],
+  );
 
   return (
     <>
@@ -28,7 +33,7 @@ export function LiveHiderLocationsLayer({
 
         return (
           <CircleMarker
-            key={cluster.uids.join("-")}
+            key={locationClusterStableKey(cluster)}
             center={center}
             radius={isSelf ? 10 : 9}
             pathOptions={{

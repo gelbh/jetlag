@@ -192,6 +192,30 @@ export function captureAuthBootstrapFailure(error: unknown): void {
   });
 }
 
+export function captureAppCheckTokenFailure(
+  error: unknown,
+  context?: Record<string, unknown>,
+): void {
+  if (import.meta.env.MODE === "test") {
+    return;
+  }
+
+  withSentryScope((scope) => {
+    scope.setTag("app_check_token", "failed");
+    if (context) {
+      for (const [key, value] of Object.entries(context)) {
+        scope.setExtra(key, value);
+      }
+    }
+    Sentry.addBreadcrumb({
+      category: "app_check",
+      message: "App Check token fetch failed",
+      level: "warning",
+    });
+    Sentry.captureException(error);
+  });
+}
+
 export function captureException(error: unknown): void {
   Sentry.captureException(error);
 }

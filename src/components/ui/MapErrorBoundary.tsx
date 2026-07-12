@@ -4,6 +4,7 @@ import {
   clearChunkReloadFlag,
   hasChunkReloadBeenAttempted,
   isChunkLoadError,
+  wasChunkReloadDeferred,
 } from "../../domain/device/chunkLoadRecovery";
 import { captureException } from "../../services/core/sentry";
 
@@ -40,6 +41,10 @@ export class MapErrorBoundary extends Component<
     const { error } = this.state;
     if (!error) {
       return "The map crashed.";
+    }
+
+    if (isChunkLoadError(error) && wasChunkReloadDeferred()) {
+      return "Update ready — reload after this game.";
     }
 
     if (isChunkLoadError(error) && hasChunkReloadBeenAttempted()) {

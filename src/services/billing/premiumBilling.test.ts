@@ -22,7 +22,7 @@ vi.mock("firebase/functions", () => ({
 
 vi.mock("../core/firebase", () => ({
   isFirebaseConfigured,
-  getFirebaseFunctions: () => ({}),
+  getFirebaseFunctions: vi.fn(async () => ({})),
 }));
 
 describe("premiumBilling", () => {
