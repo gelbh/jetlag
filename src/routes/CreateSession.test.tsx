@@ -125,7 +125,7 @@ describe("CreateSession", () => {
     fireEvent.click(screen.getByRole("button", { name: "Confirm game area" }));
 
     await waitFor(() => {
-      expect(navigate).toHaveBeenCalledWith("/map");
+      expect(navigate).toHaveBeenCalledWith("/map", { viewTransition: true });
     });
   });
 
@@ -143,7 +143,7 @@ describe("CreateSession", () => {
     fireEvent.click(screen.getByRole("button", { name: "Confirm game area" }));
 
     await waitFor(() => {
-      expect(navigate).toHaveBeenCalledWith("/map");
+      expect(navigate).toHaveBeenCalledWith("/map", { viewTransition: true });
     });
   });
 
