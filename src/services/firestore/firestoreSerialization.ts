@@ -255,7 +255,12 @@ function parseMemberRoles(value: unknown): MemberRoles | undefined {
 
   const roles: MemberRoles = {};
   for (const [uid, role] of Object.entries(value as Record<string, unknown>)) {
-    if (role === "seeker" || role === "hider" || role === "observer") {
+    if (
+      role === "seeker" ||
+      role === "hider" ||
+      role === "observer" ||
+      role === "admin"
+    ) {
       roles[uid] = role;
     }
   }

@@ -82,6 +82,7 @@ export function AdminPanel() {
   const [phaseFilter, setPhaseFilter] = useState<AdminSessionPhaseFilter>("all");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [monitorSessionId, setMonitorSessionId] = useState<string | null>(null);
 
   const filteredSessions = useMemo(
     () =>
@@ -93,26 +94,40 @@ export function AdminPanel() {
     [multiplayerOnly, phaseFilter, query, sessions],
   );
 
+  const monitorRoleError =
+    monitorSessionId != null &&
+    activeSession?.id === monitorSessionId &&
+    activeRole !== "admin"
+      ? (observeError ??
+        "Couldn't confirm admin monitor role after joining. Try again.")
+      : null;
+
   const monitorActive =
     isDesktop &&
-    activeRole === "admin" &&
-    activeSession != null &&
-    selectedSessionId === activeSession.id;
+    monitorSessionId != null &&
+    activeSession?.id === monitorSessionId &&
+    activeRole === "admin";
 
   const handleMonitor = useCallback(
     async (summary: AdminSessionSummary) => {
       setObserveError(null);
       setSelectedSessionId(summary.sessionId);
+      setMonitorSessionId(null);
 
       if (isDesktop) {
         const joined = await joinSession(summary, { navigate: false });
         if (!joined) {
           setSelectedSessionId(null);
+          return;
         }
+        setMonitorSessionId(summary.sessionId);
         return;
       }
 
-      await joinSession(summary, { navigate: true });
+      const joined = await joinSession(summary, { navigate: true });
+      if (!joined) {
+        setSelectedSessionId(null);
+      }
     },
     [isDesktop, joinSession, setObserveError],
   );
@@ -287,6 +302,7 @@ export function AdminPanel() {
                 <AdminMonitorPane
                   active={monitorActive}
                   sessionCode={activeSession?.code ?? null}
+                  errorMessage={monitorRoleError}
                 />
               }
             />
