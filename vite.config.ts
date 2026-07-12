@@ -135,6 +135,10 @@ export default defineConfig(({ mode }) => ({
         navigateFallbackDenylist: [/^\/assets\//],
         runtimeCaching: [
           {
+            urlPattern: /^\/assets\//,
+            handler: "NetworkOnly",
+          },
+          {
             urlPattern:
               /^https:\/\/([a-d]\.)?basemaps\.cartocdn\.com\/rastertiles\/voyager\/.*/i,
             handler: "CacheFirst",

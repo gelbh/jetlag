@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.5.7 - 2026-07-12
+
+### Fixes
+
+- Error screens: keep router context so Back home works after a crash
+
+### Improvements
+
+- PWA: stale route chunks activate the latest app version before reload
+- PWA: deferred chunk reload runs when you leave the map after an update
+- PWA: asset requests no longer fall back to the app shell via the service worker
+
+### Technical
+
+- Sentry: Web Vitals tracing, session replay, and Firestore permission breadcrumbs enabled in production
+
 ## 0.5.6 - 2026-07-12
 
 ### Fixes

@@ -7,6 +7,7 @@ import {
   registerAppNeedRefreshHandler,
   scheduleServiceWorkerUpdateChecks,
 } from "../../domain/device/serviceWorkerRefresh";
+import { setServiceWorkerChunkReloadContext } from "../../domain/device/lazyWithChunkRetry";
 import { tryUpdateServiceWorker } from "../../domain/device/serviceWorkerUpdate";
 import { useSessionStore } from "../../state/sessionStore";
 import { HudBanner } from "./HudBanner";
@@ -99,6 +100,13 @@ export function AppUpdateBanner() {
       setDismissed(false);
     });
   }, []);
+
+  useEffect(() => {
+    setServiceWorkerChunkReloadContext({
+      registration: registrationRef.current,
+      applyUpdate: updateSW ?? undefined,
+    });
+  }, [updateSW]);
 
   useEffect(() => {
     if (import.meta.env.DEV || !updateSW) {
