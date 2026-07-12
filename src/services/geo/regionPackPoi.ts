@@ -5,6 +5,9 @@ import type { TentacleExtendedCategoryId } from "../../domain/questions";
 import type { TentaclePoi } from "../../domain/map/annotations";
 import type { RegionPackId } from "../../domain/regions/regionPack";
 import type { MeasuringPlace } from "./measuringPlaces";
+import {
+  sanitizeBundledPoiPlaces,
+} from "./bundledPoiHygiene";
 
 export interface BundledPoiPlace {
   id: string;
@@ -82,8 +85,13 @@ async function loadBundledPoiCategory(
       return null;
     }
 
-    bundleCache.set(cacheKey, payload);
-    return payload;
+    const sanitized: BundledPoiCategory = {
+      ...payload,
+      places: sanitizeBundledPoiPlaces(payload.places, category),
+    };
+
+    bundleCache.set(cacheKey, sanitized);
+    return sanitized;
   } catch {
     bundleCache.set(cacheKey, null);
     return null;

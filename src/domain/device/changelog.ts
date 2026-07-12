@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.5.0";
+export const APP_VERSION = "0.5.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.5.1",
+    date: "2026-07-12",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Measuring: bundled park lists for region packs no longer include duplicate or non-park entries (Portland GIS cleanup and dedup across presets)",
+        ],
+      }
+    ],
+  },
   {
     version: "0.5.0",
     date: "2026-07-12",
