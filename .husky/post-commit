@@ -1,1 +1,0 @@
-node scripts/test-coverage-log.mjs commit "$(git rev-parse HEAD)"

@@ -1,17 +1,11 @@
 npm run lint
 npm run typecheck
 
-push_input="$(cat)"
-
 if git rev-parse --verify origin/main >/dev/null 2>&1; then
-  if [ -n "$push_input" ]; then
-    printf '%s\n' "$push_input" | node scripts/test-prepush.mjs
-  else
-    node scripts/test-prepush.mjs
-  fi
-else
-  echo "pre-push: origin/main not found; skipping vitest"
+  npm run test:changed
 fi
+
+push_input="$(cat)"
 
 if [ -n "$push_input" ]; then
   printf '%s\n' "$push_input" | while read -r local_ref local_sha remote_ref remote_sha; do
@@ -29,5 +23,3 @@ if [ -n "$push_input" ]; then
     fi
   done
 fi
-
-npm run build
