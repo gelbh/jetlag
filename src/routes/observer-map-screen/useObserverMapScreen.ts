@@ -55,7 +55,8 @@ export function useObserverMapScreen() {
     timer,
     pendingQuestions,
     hidingZones,
-    playerLocations,
+    seekerLocations,
+    hiderLocations,
     chatMessages,
     syncStatus,
     authReady,
@@ -72,7 +73,7 @@ export function useObserverMapScreen() {
   const annotations = useSessionAnnotations(sessionId);
   const activeThermometerWalk = useActiveThermometerWalk({
     pendingQuestions,
-    playerLocations,
+    seekerLocations,
     myUid: uid,
     localLivePoint: null,
   });
@@ -93,7 +94,8 @@ export function useObserverMapScreen() {
     annotations,
     pendingQuestions,
     hidingZones,
-    playerLocations,
+    seekerLocations,
+    hiderLocations,
     chatMessages,
     syncStatus,
     authReady,

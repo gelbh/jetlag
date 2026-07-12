@@ -5,6 +5,7 @@ import { AnnotationLayer } from "../components/map/AnnotationLayer";
 import { GameAreaMask } from "../components/map/GameAreaMask";
 import { HidingZonesLayer } from "../components/map/HidingZonesLayer";
 import { HidingZoneStationsLayer } from "../components/map/HidingZoneStationsLayer";
+import { LiveHiderLocationsLayer } from "../components/map/LiveHiderLocationsLayer";
 import { LiveSeekerLocationsLayer } from "../components/map/LiveSeekerLocationsLayer";
 import { MapView } from "../components/map/MapView";
 import {
@@ -44,6 +45,7 @@ import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
 import { useHiderZoneTool } from "../hooks/session/useHiderZoneTool";
 import { useMapOverlayState } from "../hooks/map/useMapOverlayState";
+import { useHiderLocationSync } from "../hooks/sync/useHiderLocationSync";
 import { useSharedSessionScreen } from "../hooks/session/useSharedSessionScreen";
 import { usePendingQuestionActions } from "../hooks/sync/usePendingQuestionActions";
 import { ActiveThermometerWalkLayer } from "../components/map/ActiveThermometerWalkLayer";
@@ -120,7 +122,8 @@ export function HiderMapScreen() {
     canControlTimer,
     pendingQuestions,
     hidingZones,
-    playerLocations,
+    seekerLocations,
+    hiderLocations,
     chatMessages: messages,
     syncStatus,
     hasUnreadChat,
@@ -133,6 +136,11 @@ export function HiderMapScreen() {
     isChatOpen: overlay.isChatOpen,
     notificationRole: "hider",
     authMode: "hider-anonymous",
+  });
+  useHiderLocationSync({
+    sessionId,
+    uid,
+    enabled: true,
   });
   const [recenterToken, setRecenterToken] = useState(0);
   const [truthReveal, setTruthReveal] = useState<HiderTruthRevealState | null>(
@@ -192,7 +200,7 @@ export function HiderMapScreen() {
   const [curseSheetOpen, setCurseSheetOpen] = useState(false);
   const activeThermometerWalk = useActiveThermometerWalk({
     pendingQuestions,
-    playerLocations,
+    seekerLocations,
     myUid: uid,
     localLivePoint: null,
   });
@@ -502,7 +510,8 @@ export function HiderMapScreen() {
               }}
             />
           ) : null}
-          <LiveSeekerLocationsLayer locations={playerLocations} myUid={uid} />
+          <LiveSeekerLocationsLayer locations={seekerLocations} myUid={uid} />
+          <LiveHiderLocationsLayer locations={hiderLocations} myUid={uid} />
           <ActiveThermometerWalkLayer
             start={activeThermometerWalk.start}
             livePoint={activeThermometerWalk.livePoint}

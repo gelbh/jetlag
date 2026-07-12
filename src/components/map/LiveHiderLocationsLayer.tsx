@@ -1,22 +1,22 @@
 import { CircleMarker, Tooltip } from "react-leaflet";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
-  clusterSeekerLocations,
+  clusterHiderLocations,
   clusterTooltipLabel,
 } from "../../domain/session/liveMapLocations";
 import type { PlayerLocationRecord } from "../../domain/session/sessionChat";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
-interface LiveSeekerLocationsLayerProps {
+interface LiveHiderLocationsLayerProps {
   locations: readonly PlayerLocationRecord[];
   myUid?: string | null;
 }
 
-export function LiveSeekerLocationsLayer({
+export function LiveHiderLocationsLayer({
   locations,
   myUid = null,
-}: LiveSeekerLocationsLayerProps) {
-  const clusters = clusterSeekerLocations(locations);
+}: LiveHiderLocationsLayerProps) {
+  const clusters = clusterHiderLocations(locations);
 
   return (
     <>
@@ -35,13 +35,13 @@ export function LiveSeekerLocationsLayer({
               color: MAP_ANNOTATION_COLORS.strokeLight,
               weight: isSelf ? 3 : 2,
               fillColor: isSelf
-                ? MAP_ANNOTATION_COLORS.userLocation
-                : MAP_ANNOTATION_COLORS.seekerLive,
+                ? MAP_ANNOTATION_COLORS.hidingZoneOwn
+                : MAP_ANNOTATION_COLORS.hidingZone,
               fillOpacity: 1,
             }}
           >
             <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-              {clusterTooltipLabel(count, "seeker")}
+              {clusterTooltipLabel(count, "hider")}
             </Tooltip>
           </CircleMarker>
         );
