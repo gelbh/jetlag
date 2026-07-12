@@ -30,8 +30,7 @@ import {
   OSAKA_MEASURING_LABEL_OVERRIDES,
   OSAKA_REGION_PACK_ID,
 } from "./osakaRegionPack";
-import type { RegionPackLabelOverride } from "./dublinRegionPack";
-import type { RegionPackId } from "./regionPack";
+import type { RegionPackId, RegionPackLabelOverride } from "./regionPack";
 import {
   TOKYO_GEO_ASSETS,
   TOKYO_MATCHING_LABEL_OVERRIDES,
@@ -91,8 +90,21 @@ const HIDE_COUNTRY_PROVINCE_BORDERS = new Set<MeasuringFromKind>([
   "admin2_border",
 ]);
 
+type MetroRegionPackConfig = Omit<
+  RegionPackConfig,
+  "unsupportedMatching" | "unsupportedBorders"
+>;
+
+function metroRegionPack(config: MetroRegionPackConfig): RegionPackConfig {
+  return {
+    ...config,
+    unsupportedMatching: HIDE_COUNTRY_PROVINCE_MATCHING,
+    unsupportedBorders: HIDE_COUNTRY_PROVINCE_BORDERS,
+  };
+}
+
 export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
-  [DUBLIN_REGION_PACK_ID]: {
+  [DUBLIN_REGION_PACK_ID]: metroRegionPack({
     id: DUBLIN_REGION_PACK_ID,
     geoAssets: {
       primary: DUBLIN_GEO_ASSETS.councils,
@@ -105,10 +117,8 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     subregionPropertyKey: "councilId",
     matchingLabelOverrides: DUBLIN_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: DUBLIN_MEASURING_LABEL_OVERRIDES,
-    unsupportedMatching: HIDE_COUNTRY_PROVINCE_MATCHING,
-    unsupportedBorders: HIDE_COUNTRY_PROVINCE_BORDERS,
-  },
-  [NYC_REGION_PACK_ID]: {
+  }),
+  [NYC_REGION_PACK_ID]: metroRegionPack({
     id: NYC_REGION_PACK_ID,
     geoAssets: {
       primary: NYC_GEO_ASSETS.boroughs,
@@ -119,10 +129,8 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     subregionPropertyKey: "boroughId",
     matchingLabelOverrides: NYC_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: NYC_MEASURING_LABEL_OVERRIDES,
-    unsupportedMatching: HIDE_COUNTRY_PROVINCE_MATCHING,
-    unsupportedBorders: HIDE_COUNTRY_PROVINCE_BORDERS,
-  },
-  [LONDON_REGION_PACK_ID]: {
+  }),
+  [LONDON_REGION_PACK_ID]: metroRegionPack({
     id: LONDON_REGION_PACK_ID,
     geoAssets: {
       primary: LONDON_GEO_ASSETS.boroughs,
@@ -133,10 +141,8 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     subregionPropertyKey: "boroughId",
     matchingLabelOverrides: LONDON_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: LONDON_MEASURING_LABEL_OVERRIDES,
-    unsupportedMatching: HIDE_COUNTRY_PROVINCE_MATCHING,
-    unsupportedBorders: HIDE_COUNTRY_PROVINCE_BORDERS,
-  },
-  [TOKYO_REGION_PACK_ID]: {
+  }),
+  [TOKYO_REGION_PACK_ID]: metroRegionPack({
     id: TOKYO_REGION_PACK_ID,
     geoAssets: {
       primary: TOKYO_GEO_ASSETS.wards,
@@ -147,10 +153,8 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     subregionPropertyKey: "wardId",
     matchingLabelOverrides: TOKYO_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: TOKYO_MEASURING_LABEL_OVERRIDES,
-    unsupportedMatching: HIDE_COUNTRY_PROVINCE_MATCHING,
-    unsupportedBorders: HIDE_COUNTRY_PROVINCE_BORDERS,
-  },
-  [OSAKA_REGION_PACK_ID]: {
+  }),
+  [OSAKA_REGION_PACK_ID]: metroRegionPack({
     id: OSAKA_REGION_PACK_ID,
     geoAssets: {
       primary: OSAKA_GEO_ASSETS.wards,
@@ -161,10 +165,8 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     subregionPropertyKey: "wardId",
     matchingLabelOverrides: OSAKA_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: OSAKA_MEASURING_LABEL_OVERRIDES,
-    unsupportedMatching: HIDE_COUNTRY_PROVINCE_MATCHING,
-    unsupportedBorders: HIDE_COUNTRY_PROVINCE_BORDERS,
-  },
-  [ZURICH_REGION_PACK_ID]: {
+  }),
+  [ZURICH_REGION_PACK_ID]: metroRegionPack({
     id: ZURICH_REGION_PACK_ID,
     geoAssets: {
       primary: ZURICH_GEO_ASSETS.districts,
@@ -175,10 +177,8 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     subregionPropertyKey: "districtId",
     matchingLabelOverrides: ZURICH_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: ZURICH_MEASURING_LABEL_OVERRIDES,
-    unsupportedMatching: HIDE_COUNTRY_PROVINCE_MATCHING,
-    unsupportedBorders: HIDE_COUNTRY_PROVINCE_BORDERS,
-  },
-  [LUCERNE_REGION_PACK_ID]: {
+  }),
+  [LUCERNE_REGION_PACK_ID]: metroRegionPack({
     id: LUCERNE_REGION_PACK_ID,
     geoAssets: {
       primary: LUCERNE_GEO_ASSETS.districts,
@@ -190,10 +190,8 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     playAreaLevel: "secondary",
     matchingLabelOverrides: LUCERNE_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: LUCERNE_MEASURING_LABEL_OVERRIDES,
-    unsupportedMatching: HIDE_COUNTRY_PROVINCE_MATCHING,
-    unsupportedBorders: HIDE_COUNTRY_PROVINCE_BORDERS,
-  },
-  [PORTLAND_MAINE_REGION_PACK_ID]: {
+  }),
+  [PORTLAND_MAINE_REGION_PACK_ID]: metroRegionPack({
     id: PORTLAND_MAINE_REGION_PACK_ID,
     geoAssets: {
       primary: PORTLAND_MAINE_GEO_ASSETS.districts,
@@ -205,10 +203,8 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     subregionPropertyKey: "districtId",
     matchingLabelOverrides: PORTLAND_MAINE_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: PORTLAND_MAINE_MEASURING_LABEL_OVERRIDES,
-    unsupportedMatching: HIDE_COUNTRY_PROVINCE_MATCHING,
-    unsupportedBorders: HIDE_COUNTRY_PROVINCE_BORDERS,
-  },
-  [PRINCE_RUPERT_REGION_PACK_ID]: {
+  }),
+  [PRINCE_RUPERT_REGION_PACK_ID]: metroRegionPack({
     id: PRINCE_RUPERT_REGION_PACK_ID,
     geoAssets: {
       primary: PRINCE_RUPERT_GEO_ASSETS.neighbourhoods,
@@ -218,9 +214,7 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     subregionPropertyKey: "neighbourhoodId",
     matchingLabelOverrides: PRINCE_RUPERT_MATCHING_LABEL_OVERRIDES,
     measuringLabelOverrides: PRINCE_RUPERT_MEASURING_LABEL_OVERRIDES,
-    unsupportedMatching: HIDE_COUNTRY_PROVINCE_MATCHING,
-    unsupportedBorders: HIDE_COUNTRY_PROVINCE_BORDERS,
-  },
+  }),
 };
 
 export function getRegionPackConfig(

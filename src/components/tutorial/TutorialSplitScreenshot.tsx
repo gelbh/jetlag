@@ -12,7 +12,7 @@ export function TutorialSplitScreenshot({ compare }: TutorialSplitScreenshotProp
         <figcaption className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
           {compare.leftLabel}
         </figcaption>
-        <div className="flex min-h-0 flex-1">
+        <div className="flex min-h-0 flex-1 items-center justify-center">
           <TutorialScreenshot
             src={compare.leftSrc}
             alt={compare.leftAlt}
@@ -25,7 +25,7 @@ export function TutorialSplitScreenshot({ compare }: TutorialSplitScreenshotProp
         <figcaption className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
           {compare.rightLabel}
         </figcaption>
-        <div className="flex min-h-0 flex-1">
+        <div className="flex min-h-0 flex-1 items-center justify-center">
           <TutorialScreenshot
             src={compare.rightSrc}
             alt={compare.rightAlt}

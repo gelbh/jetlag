@@ -15,6 +15,7 @@ import {
 import {
   getQuestionTutorial,
   isQuestionTutorialComplete,
+  markQuestionTutorialComplete,
   questionTutorialStartIndex,
   type QuestionTutorialId,
 } from "../domain/tutorial/tutorialQuestions";
@@ -36,7 +37,8 @@ function initialView(coreComplete: boolean): TutorialView {
 
 export function Tutorial() {
   const navigate = useAppNavigate();
-  const { progress, completeStep, completeQuestionStep } = useTutorialProgress();
+  const { progress, completeStep, completeQuestionStep, setProgress } =
+    useTutorialProgress();
   const [view, setView] = useState<TutorialView>(() =>
     initialView(progress.coreComplete),
   );
@@ -119,8 +121,16 @@ export function Tutorial() {
     setView({ mode: "questions" });
   };
 
-  const handleBackFromStart = () => {
-    if (view.mode === "section" && view.sectionId === "core" && !progress.coreComplete) {
+  const handleHeaderBack = () => {
+    if (view.mode === "hub") {
+      navigate("/", { direction: "back" });
+      return;
+    }
+    if (
+      view.mode === "section" &&
+      view.sectionId === "core" &&
+      !progress.coreComplete
+    ) {
       navigate("/", { direction: "back" });
       return;
     }
@@ -131,16 +141,19 @@ export function Tutorial() {
     setView({ mode: "hub" });
   };
 
-  const headerBackLabel =
-    view.mode === "section" && !progress.coreComplete
-      ? "Home"
-      : view.mode === "question" || view.mode === "questions"
-        ? "Tutorial"
-        : "Back";
+  const headerUsesRouteBack =
+    view.mode === "hub" ||
+    (view.mode === "section" &&
+      view.sectionId === "core" &&
+      !progress.coreComplete);
 
   return (
     <EntryScreenLayout viewport>
-      <ScreenHeader backTo="/" backLabel={headerBackLabel} />
+      <ScreenHeader
+        backTo="/"
+        backLabel="Back"
+        onBack={headerUsesRouteBack ? undefined : handleHeaderBack}
+      />
       <div
         className={`flex min-h-0 flex-1 flex-col gap-2 overflow-hidden ${screenHeaderOffsetClassName}`}
       >
@@ -166,7 +179,6 @@ export function Tutorial() {
             onSelectQuestion={(questionId) =>
               setView({ mode: "question", questionId })
             }
-            onBack={() => setView({ mode: "hub" })}
           />
         ) : activeSection ? (
           <TutorialSectionWizard
@@ -182,7 +194,7 @@ export function Tutorial() {
             onStepComplete={(stepIndex) => {
               completeStep(activeSection.id, stepIndex, activeSection.steps.length);
             }}
-            onBackFromStart={handleBackFromStart}
+            onBackFromStart={handleHeaderBack}
             onFinish={handleFinishSection}
             onOpenSection={(sectionId) => {
               finishSection(activeSection.id);
@@ -211,8 +223,21 @@ export function Tutorial() {
             onStepComplete={(stepIndex) => {
               completeQuestionStep(activeQuestion.id, stepIndex);
             }}
-            onBackFromStart={handleBackFromStart}
+            onBackFromStart={handleHeaderBack}
             onFinish={handleFinishQuestion}
+            onCompleteEntireQuestion={() => {
+              if (view.mode !== "question") {
+                return;
+              }
+              const question = getQuestionTutorial(view.questionId);
+              setProgress(
+                markQuestionTutorialComplete(
+                  view.questionId,
+                  question.steps.length,
+                  progress,
+                ),
+              );
+            }}
             onOpenQuestion={(questionId) => {
               finishQuestion(activeQuestion.id);
               setView({ mode: "question", questionId });

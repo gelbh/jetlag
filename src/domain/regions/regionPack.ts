@@ -1,3 +1,9 @@
+export interface RegionPackLabelOverride {
+  label: string;
+  promptNoun: string;
+  ruleSummary?: string;
+}
+
 export type RegionPackId =
   | "dublin"
   | "nyc"

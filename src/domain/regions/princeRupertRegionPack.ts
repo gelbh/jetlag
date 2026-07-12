@@ -1,7 +1,7 @@
 import type { MatchingCategoryId } from "../questions/matchingQuestions";
 import type { MeasuringFromKind } from "../questions/measuringQuestions";
 import type { RegionPackId } from "./regionPack";
-import type { RegionPackLabelOverride } from "./dublinRegionPack";
+import type { RegionPackLabelOverride } from "./regionPack";
 
 export const PRINCE_RUPERT_REGION_PACK_ID =
   "prince-rupert" satisfies RegionPackId;

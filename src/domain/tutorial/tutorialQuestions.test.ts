@@ -9,31 +9,27 @@ import {
 import { readTutorialProgress } from "./tutorialProgress";
 
 describe("tutorialQuestions", () => {
-  it("gives each wizard panel its own tutorial step with one screenshot", () => {
-    const matching = getQuestionTutorial("matching");
-    const wizardSteps = matching.steps.filter((step) =>
-      step.id.startsWith("wizard-"),
-    );
-    expect(wizardSteps).toHaveLength(3);
-    for (const step of wizardSteps) {
-      expect(step.imageSrc).toContain("/tutorial/questions/matching/wizard/solo/");
-      expect(step.splitCompare).toBeUndefined();
+  it("uses live preview steps for every question tutorial", () => {
+    for (const tutorial of getQuestionTutorials()) {
+      expect(tutorial.steps[0]?.kind).toBe("interactive-panel");
+      expect(
+        tutorial.steps.find((step) => step.id === "session-mode")?.kind,
+      ).toBe("split-panel-preview");
+      expect(
+        tutorial.steps.filter((step) => step.id.startsWith("wizard-")),
+      ).toHaveLength(0);
     }
-    expect(matching.steps.every((step) => !("wizardShots" in step))).toBe(true);
   });
 
-  it("defines six question tutorials with split, map context, and close-up steps", () => {
-    const tutorials = getQuestionTutorials();
-    expect(tutorials).toHaveLength(6);
-    for (const tutorial of tutorials) {
-      expect(tutorial.steps.find((step) => step.id === "session-mode")?.splitCompare)
-        .toBeTruthy();
-      expect(
-        tutorial.steps.find((step) => step.id === "map-context")?.imageSrc,
-      ).toContain("/tutorial/questions/");
-      expect(tutorial.steps.find((step) => step.id === "on-map")?.imageSrc).toContain(
-        "/tutorial/questions/",
-      );
+  it("uses live map previews for map-based question tools", () => {
+    for (const tutorial of getQuestionTutorials()) {
+      if (tutorial.id === "photo") {
+        continue;
+      }
+      const mapContext = tutorial.steps.find((step) => step.id === "map-context");
+      const closeUp = tutorial.steps.find((step) => step.id === "on-map");
+      expect(mapContext?.kind).toBe("map-preview");
+      expect(closeUp?.kind).toBe("map-preview");
     }
   });
 
@@ -49,5 +45,12 @@ describe("tutorialQuestions", () => {
     }
     expect(completedQuestionCount(progress)).toBe(6);
     expect(isQuestionsHubComplete(progress)).toBe(true);
+  });
+
+  it("defines four steps for each live question walkthrough", () => {
+    for (const tutorial of getQuestionTutorials()) {
+      expect(tutorial.steps).toHaveLength(4);
+      expect(getQuestionTutorial(tutorial.id).steps.length).toBe(4);
+    }
   });
 });

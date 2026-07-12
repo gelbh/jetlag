@@ -17,22 +17,26 @@ export function TutorialScreenshot({
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const frameClass = fill
-    ? "tutorial-screenshot-frame tutorial-screenshot-frame-fill h-full min-h-0 w-full"
+    ? "tutorial-screenshot-frame tutorial-screenshot-frame-fill inline-flex max-h-full max-w-full"
     : "tutorial-screenshot-frame mx-auto w-full max-w-[min(100%,24.375rem)]";
 
   const imageClass = fill
-    ? `block max-h-full max-w-full ${className}`
+    ? `block h-auto w-auto max-h-full max-w-full ${className}`
     : `block w-full max-h-[min(56dvh,32rem)] ${className}`;
+
+  const panelClass = fill
+    ? "hud-panel inline-flex max-h-full max-w-full items-center justify-center overflow-hidden"
+    : "hud-panel flex items-center justify-center overflow-hidden";
 
   return (
     <>
       <button
         type="button"
         onClick={() => setLightboxOpen(true)}
-        className={`${frameClass} block cursor-zoom-in border-0 bg-transparent p-0 text-left`}
+        className={`${frameClass} cursor-zoom-in border-0 bg-transparent p-0 text-left`}
         aria-label={`View full screenshot: ${alt}`}
       >
-        <div className="hud-panel flex h-full min-h-0 items-center justify-center overflow-hidden">
+        <div className={panelClass}>
           <img
             src={src}
             alt={alt}

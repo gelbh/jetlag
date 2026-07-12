@@ -533,11 +533,25 @@
   }
 
   .tutorial-wizard-media {
-    max-height: min(38dvh, 18rem);
+    display: flex;
+    flex: 1 1 auto;
+    min-height: min(42dvh, 16rem);
+    align-items: center;
+    justify-content: center;
   }
 
-  .tutorial-wizard .tutorial-screenshot-frame-fill {
-    max-height: min(38dvh, 18rem);
+  .tutorial-split-panel-preview {
+    min-height: min(42dvh, 18rem);
+  }
+
+  @media (max-width: 30rem) {
+    .tutorial-split-panel-preview {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .tutorial-interactive-panel {
+    min-height: min(38dvh, 14rem);
   }
 
   .tutorial-hub-intro {
@@ -551,23 +565,80 @@
     gap: 0.375rem;
   }
 
-  .tutorial-questions-grid {
-    display: grid;
+  .tutorial-questions-list {
+    display: flex;
     min-height: 0;
     flex: 1;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-direction: column;
     gap: 0.375rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .tutorial-questions-list .home-card-btn {
+    min-height: 3rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.9375rem;
+  }
+
+  .tutorial-question-summary {
+    margin-top: 0.125rem;
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.35;
+    color: var(--color-ink-muted);
+  }
+
+  .tutorial-question-row {
+    align-items: center;
+  }
+
+  .tutorial-question-row-recommended {
+    border-color: var(--color-highlight);
+    box-shadow: inset 3px 0 0 var(--color-highlight);
+  }
+
+  .tutorial-question-progress {
+    height: 0.1875rem;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: oklch(from var(--color-border) l c h / 0.45);
+  }
+
+  .tutorial-question-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-highlight);
+  }
+
+  .tutorial-map-preview {
+    min-height: min(42dvh, 16rem);
+  }
+
+  .tutorial-map-context-preview {
+    min-height: min(32dvh, 12rem);
+  }
+
+  .tutorial-split-panel-stack {
+    min-height: min(42dvh, 18rem);
+  }
+
+  .tutorial-panel-preview.hud-panel,
+  .tutorial-interactive-panel .hud-panel {
+    overflow: visible;
+  }
+
+  .tutorial-map-preview.hud-panel {
     overflow: hidden;
   }
 
-  .tutorial-questions-grid .home-card-btn {
-    min-height: 2.75rem;
-    padding: 0.5rem 0.625rem;
-    font-size: 0.8125rem;
+  .tutorial-panel-preview .jl-tool-panel-title-row {
+    display: none;
   }
 
-  .tutorial-screenshot-frame-fill .hud-panel {
-    width: 100%;
+  .tutorial-interactive-panel .tool-panel-compact {
+    box-shadow: none;
   }
 
   .tutorial-screenshot-lightbox {
@@ -621,8 +692,15 @@
     touch-action: pan-y pinch-zoom;
   }
 
+  .wizard-swipe-surface-embedded {
+    touch-action: manipulation;
+  }
+
   .wizard-swipe-footer {
-    border-top: 1px solid oklch(from var(--color-border) l c h / 0.55);
     padding-top: 0.375rem;
+  }
+
+  .wizard-step-footer-extra {
+    padding-top: 0.125rem;
   }
 }

@@ -1,6 +1,6 @@
 import type { MatchingCategoryId } from "../questions/matchingQuestions";
 import type { MeasuringFromKind } from "../questions/measuringQuestions";
-import type { DublinCouncilFilter, RegionPackId } from "./regionPack";
+import type { DublinCouncilFilter, RegionPackId, RegionPackLabelOverride } from "./regionPack";
 
 export const DUBLIN_REGION_PACK_ID = "dublin" satisfies RegionPackId;
 
@@ -10,12 +10,6 @@ export const DUBLIN_GEO_ASSETS = {
   leasByCouncil: (councilId: DublinCouncilFilter) =>
     `/geo/dublin/leas/${councilId}.geojson`,
 } as const;
-
-export interface RegionPackLabelOverride {
-  label: string;
-  promptNoun: string;
-  ruleSummary?: string;
-}
 
 export const DUBLIN_MATCHING_LABEL_OVERRIDES: Partial<
   Record<MatchingCategoryId, RegionPackLabelOverride>

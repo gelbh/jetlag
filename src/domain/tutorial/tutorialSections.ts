@@ -16,6 +16,22 @@ export interface TutorialSplitCompare {
   rightAlt: string;
 }
 
+export type TutorialStepKind =
+  | "legacy"
+  | "interactive-panel"
+  | "split-panel-preview"
+  | "map-preview"
+  | "dock-preview";
+
+export interface TutorialSplitPanelPreview {
+  leftLabel: string;
+  rightLabel: string;
+  leftWizardStepId?: string;
+  rightWizardStepId?: string;
+  leftAwaitHiderAnswer?: boolean;
+  rightAwaitHiderAnswer?: boolean;
+}
+
 export interface TutorialStep {
   id: string;
   title: string;
@@ -25,6 +41,9 @@ export interface TutorialStep {
   badge?: string;
   toolId?: DockableMapTool;
   splitCompare?: TutorialSplitCompare;
+  kind?: TutorialStepKind;
+  mapPreviewVariant?: "context" | "closeUp";
+  splitPanelPreview?: TutorialSplitPanelPreview;
 }
 
 export interface TutorialSection {

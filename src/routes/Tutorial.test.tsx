@@ -52,4 +52,16 @@ describe("Tutorial", () => {
       "/",
     );
   });
+
+  it("returns to the tutorial hub from the questions hub header", () => {
+    renderWithRouter(<Tutorial />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Questions/i }));
+    fireEvent.click(screen.getByRole("link", { name: /← Back/i }));
+
+    expect(
+      screen.getByRole("heading", { name: "Tutorial" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Questions" })).not.toBeInTheDocument();
+  });
 });
