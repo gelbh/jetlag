@@ -117,16 +117,13 @@ export function buildMapDraftOverlays(
           fillOpacity: 0.08,
         },
       });
-    }
-
-    overlays.push({
-      kind: "marker",
-      id: "radar-draft-center",
-      point: center,
-      style: { fillColor: c.radar },
-    });
-
-    if (answer) {
+      overlays.push({
+        kind: "marker",
+        id: "radar-draft-center",
+        point: center,
+        style: { fillColor: c.radar },
+      });
+    } else {
       pushElimination(
         buildRadarShadedRegion(
           center,

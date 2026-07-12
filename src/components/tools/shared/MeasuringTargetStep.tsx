@@ -235,8 +235,11 @@ export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
   );
 }
 
+export type MeasuringAnswerSectionPart = "all" | "readout" | "actions";
+
 interface MeasuringAnswerSectionProps {
   step: string;
+  part?: MeasuringAnswerSectionPart;
   isSeaLevel: boolean;
   isCoastline: boolean;
   hasTargetPoint: boolean;
@@ -257,6 +260,7 @@ interface MeasuringAnswerSectionProps {
 
 export function MeasuringAnswerSection({
   step,
+  part = "all",
   isSeaLevel,
   isCoastline,
   hasTargetPoint,
@@ -279,62 +283,92 @@ export function MeasuringAnswerSection({
       ? new Set<MeasuringAnswer>(["further"])
       : undefined;
 
+  const readout =
+    hasTargetPoint && distanceMeters !== null && !isSeaLevel && !isCoastline ? (
+      <ResolvedReadout>
+        {targetPlaceName ?? targetLabel} is{" "}
+        {formatDistance(distanceMeters, distanceUnit)} from you.
+      </ResolvedReadout>
+    ) : null;
+
+  const actions =
+    awaitHiderAnswer ? (
+      step === "target" ? (
+        <SendToHidersButton
+          costLabel={costLabel}
+          isSubmitting={isSubmitting}
+          disabled={
+            !hasAvailableMeasureOptions || !hasSeekerPoint || !hasTargetPoint
+          }
+          onClick={onCommit}
+          instruction="Hiders answer closer or further in game chat once you send this question."
+        />
+      ) : null
+    ) : (
+      <>
+        <BinaryAnswerPicker
+          value={answer}
+          onChange={onAnswerChange}
+          options={closerFurtherAnswerOptions}
+          label=""
+          disabledValues={disabledSeaLevelAnswers}
+        />
+        {step === "target" ? (
+          <p className="text-xs text-ink-dim">
+            The map shows the shaded area for your choice. Tap Next when ready to add
+            the question.
+          </p>
+        ) : null}
+        {step === "answer" ? (
+          <button
+            type="button"
+            onClick={onCommit}
+            disabled={
+              !hasAvailableMeasureOptions ||
+              !hasSeekerPoint ||
+              !hasTargetPoint ||
+              answer === null
+            }
+            className="btn-primary w-full disabled:opacity-40"
+          >
+            Add measure question
+          </button>
+        ) : null}
+      </>
+    );
+
+  if (part === "readout") {
+    return readout ? (
+      <ToolSection
+        compact
+        first={step === "answer"}
+        status={answer !== null ? "complete" : "active"}
+      >
+        {readout}
+      </ToolSection>
+    ) : null;
+  }
+
+  if (part === "actions") {
+    return actions ? (
+      <ToolSection
+        compact
+        first={step === "answer"}
+        status={answer !== null ? "complete" : "active"}
+      >
+        {actions}
+      </ToolSection>
+    ) : null;
+  }
+
   return (
     <ToolSection
       compact
       first={step === "answer"}
       status={answer !== null ? "complete" : "active"}
     >
-      {hasTargetPoint && distanceMeters !== null && !isSeaLevel && !isCoastline ? (
-        <ResolvedReadout>
-          {targetPlaceName ?? targetLabel} is{" "}
-          {formatDistance(distanceMeters, distanceUnit)} from you.
-        </ResolvedReadout>
-      ) : null}
-      {awaitHiderAnswer ? (
-        step === "target" ? (
-          <SendToHidersButton
-            costLabel={costLabel}
-            isSubmitting={isSubmitting}
-            disabled={
-              !hasAvailableMeasureOptions || !hasSeekerPoint || !hasTargetPoint
-            }
-            onClick={onCommit}
-            instruction="Hiders answer closer or further in game chat once you send this question."
-          />
-        ) : null
-      ) : (
-        <>
-          <BinaryAnswerPicker
-            value={answer}
-            onChange={onAnswerChange}
-            options={closerFurtherAnswerOptions}
-            label=""
-            disabledValues={disabledSeaLevelAnswers}
-          />
-          {step === "target" ? (
-            <p className="text-xs text-ink-dim">
-              The map shows the shaded area for your choice. Tap Next when ready to add
-              the question.
-            </p>
-          ) : null}
-          {step === "answer" ? (
-            <button
-              type="button"
-              onClick={onCommit}
-              disabled={
-                !hasAvailableMeasureOptions ||
-                !hasSeekerPoint ||
-                !hasTargetPoint ||
-                answer === null
-              }
-              className="btn-primary w-full disabled:opacity-40"
-            >
-              Add measure question
-            </button>
-          ) : null}
-        </>
-      )}
+      {readout}
+      {actions}
     </ToolSection>
   );
 }

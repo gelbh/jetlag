@@ -10,6 +10,7 @@ export interface UseMapOverlayStateResult {
   openChat: () => void;
   openSettings: () => void;
   openLog: () => void;
+  openSheet: (sheet: MapSheetOverlay) => void;
   closeSheet: () => void;
 }
 
@@ -28,6 +29,10 @@ export function useMapOverlayState(): UseMapOverlayStateResult {
     setSheet("log");
   }, []);
 
+  const openSheet = useCallback((next: MapSheetOverlay) => {
+    setSheet(next);
+  }, []);
+
   const closeSheet = useCallback(() => {
     setSheet("none");
   }, []);
@@ -41,8 +46,9 @@ export function useMapOverlayState(): UseMapOverlayStateResult {
       openChat,
       openSettings,
       openLog,
+      openSheet,
       closeSheet,
     }),
-    [sheet, openChat, openSettings, openLog, closeSheet],
+    [sheet, openChat, openSettings, openLog, openSheet, closeSheet],
   );
 }

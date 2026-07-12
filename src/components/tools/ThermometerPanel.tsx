@@ -18,11 +18,12 @@ import { ResolvedReadout } from "./shared/ResolvedReadout";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
 import { SendToHidersButton } from "./shared/SendToHidersButton";
-import { ToolWizardNav } from "./shared/ToolWizardNav";
 import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
+import { WizardToolPanelLayout } from "./shared/WizardToolPanelLayout";
 import { THERMOMETER_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
 import { useToolWizard } from "../../hooks/useToolWizard";
+import type { ToolPanelSandboxMode } from "./shared/toolPanelSandbox";
 
 type PlacementMode = "gps" | "manual";
 
@@ -49,6 +50,7 @@ interface ThermometerPanelProps {
   gpsLoading?: boolean;
   error?: string | null;
   wizardStepRef?: RefObject<string>;
+  sandbox?: ToolPanelSandboxMode;
 }
 
 function placementStatus(
@@ -96,11 +98,18 @@ export function ThermometerPanel({
   gpsLoading = false,
   error = null,
   wizardStepRef,
+  sandbox,
 }: ThermometerPanelProps) {
+  const readOnly = sandbox?.readOnly ?? false;
+  const embeddedWizard = sandbox !== undefined;
   const steps = stepsForMode(THERMOMETER_STEPS, awaitHiderAnswer);
-  const { stepId: step, stepIndex, goNext, goBack, stepper } = useToolWizard(
+  const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
     steps,
-    { wizardStepRef },
+    {
+      wizardStepRef,
+      initialStepId: sandbox?.initialWizardStepId,
+      syncStep: sandbox ? (sandbox.syncWizardStep ?? false) : true,
+    },
   );
 
   const travelTooShort =
@@ -125,27 +134,35 @@ export function ThermometerPanel({
     (step === "placement" &&
       (walkingActive || pinsReady || placementMode === "gps")) ||
     (step === "distance" && distanceAvailable);
-  const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
+  const canSwipeNext =
+    !readOnly && toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
+  const useStickyAnswerFooter = !readOnly && !embeddedWizard;
 
-  return (
-    <ToolPanelShell toolId="thermometer" stepper={stepper}>
-      <WizardSwipeSurface
-        stepId={step}
-        stepIndex={stepIndex}
-        canGoBack={stepIndex > 0}
-        canGoNext={canSwipeNext}
-        onBack={goBack}
-        onNext={goNext}
-        footer={
-          <ToolWizardNav
-            stepIndex={stepIndex}
-            stepCount={steps.length}
-            onBack={goBack}
-            onNext={goNext}
-            canGoNext={canGoNext}
-          />
-        }
-      >
+  const thermometerAnswerStepActions =
+    step === "answer" ? (
+      <>
+        <BinaryAnswerPicker
+          value={answer}
+          onChange={onAnswerChange}
+          options={hotterColderAnswerOptions}
+          label=""
+        />
+        {placementMode === "manual" ? (
+          <button
+            type="button"
+            onClick={onCommit}
+            disabled={!canCommit}
+            aria-busy={isSubmitting}
+            className="btn-primary w-full disabled:opacity-40"
+          >
+            {isSubmitting ? "Sending…" : "Add thermometer"}
+          </button>
+        ) : null}
+      </>
+    ) : null;
+
+  const panelBody = (
+    <>
       {step === "distance" ? (
         <ToolSection first compact status="active">
           <QuestionPromptBlock
@@ -252,28 +269,62 @@ export function ThermometerPanel({
         </ToolSection>
       ) : null}
 
-      {step === "answer" ? (
+      {step === "answer" && !useStickyAnswerFooter ? (
         <ToolSection first compact status="active">
-          <BinaryAnswerPicker
-            value={answer}
-            onChange={onAnswerChange}
-            options={hotterColderAnswerOptions}
-            label=""
-          />
-          {placementMode === "manual" ? (
-            <button
-              type="button"
-              onClick={onCommit}
-              disabled={!canCommit}
-              aria-busy={isSubmitting}
-              className="btn-primary w-full disabled:opacity-40"
-            >
-              {isSubmitting ? "Sending…" : "Add thermometer"}
-            </button>
-          ) : null}
+          {thermometerAnswerStepActions}
         </ToolSection>
       ) : null}
-      </WizardSwipeSurface>
+    </>
+  );
+
+  const answerFooter =
+    step === "answer" && useStickyAnswerFooter && thermometerAnswerStepActions ? (
+      <ToolSection first compact status="active">
+        {thermometerAnswerStepActions}
+      </ToolSection>
+    ) : undefined;
+
+  const wizardContent = readOnly ? (
+    panelBody
+  ) : (
+    <WizardSwipeSurface
+      stepId={step}
+      stepIndex={stepIndex}
+      canGoBack={stepIndex > 0}
+      canGoNext={canSwipeNext}
+      onBack={goBack}
+      onNext={goNext}
+      embedded={embeddedWizard}
+    >
+      {panelBody}
+    </WizardSwipeSurface>
+  );
+
+  return (
+    <ToolPanelShell
+      toolId="thermometer"
+      fillHeight={useStickyAnswerFooter}
+      stepper={
+        <Stepper
+          nav={
+            readOnly
+              ? undefined
+              : {
+                  stepIndex,
+                  stepCount: steps.length,
+                  onBack: goBack,
+                  onNext: goNext,
+                  canGoNext,
+                }
+          }
+        />
+      }
+    >
+      <div className={readOnly ? "pointer-events-none select-none" : undefined}>
+        <WizardToolPanelLayout stickyFooter={answerFooter}>
+          {wizardContent}
+        </WizardToolPanelLayout>
+      </div>
 
       {error ? (
         <ResolvedReadout variant="warning">{error}</ResolvedReadout>

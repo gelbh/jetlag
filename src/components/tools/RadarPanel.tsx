@@ -8,8 +8,8 @@ import { ViewOnlyQuestionBanner } from "./shared/ViewOnlyQuestionBanner";
 import { ToolSection } from "./shared/ToolSection";
 import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { InlineError } from "../ui/InlineError";
-import { ToolWizardNav } from "./shared/ToolWizardNav";
 import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
+import { WizardToolPanelLayout } from "./shared/WizardToolPanelLayout";
 import { RADAR_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
 import { useToolWizard } from "../../hooks/useToolWizard";
@@ -20,6 +20,7 @@ import {
   type RadarDistanceOptionKey,
 } from "../../domain/questions";
 import type { GameSize } from "../../domain/session/gameSize";
+import type { ToolPanelSandboxMode } from "./shared/toolPanelSandbox";
 
 interface RadarPanelProps {
   radiusMeters: number | null;
@@ -45,6 +46,7 @@ interface RadarPanelProps {
   isSubmitting?: boolean;
   viewOnly?: boolean;
   wizardStepRef?: RefObject<string>;
+  sandbox?: ToolPanelSandboxMode;
 }
 
 export function RadarPanel({
@@ -71,11 +73,18 @@ export function RadarPanel({
   isSubmitting = false,
   viewOnly = false,
   wizardStepRef,
+  sandbox,
 }: RadarPanelProps) {
+  const readOnly = sandbox?.readOnly ?? false;
+  const embeddedWizard = sandbox !== undefined;
   const steps = stepsForMode(RADAR_STEPS, awaitHiderAnswer);
-  const { stepId: step, stepIndex, goNext, goBack, stepper } = useToolWizard(
+  const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
     steps,
-    { wizardStepRef },
+    {
+      wizardStepRef,
+      initialStepId: sandbox?.initialWizardStepId,
+      syncStep: sandbox ? (sandbox.syncWizardStep ?? false) : true,
+    },
   );
 
   const resolvedRadius = chooseCustom
@@ -106,26 +115,36 @@ export function RadarPanel({
     (step === "anchor" && hasCenter) ||
     (step === "distance" && distanceSelectionAvailable);
   const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
+  const useStickyAnswerFooter = !readOnly && !embeddedWizard;
 
-  return (
-    <ToolPanelShell toolId="radar" stepper={stepper}>
-      <WizardSwipeSurface
-        stepId={step}
-        stepIndex={stepIndex}
-        canGoBack={stepIndex > 0}
-        canGoNext={canSwipeNext}
-        onBack={goBack}
-        onNext={goNext}
-        footer={
-          <ToolWizardNav
-            stepIndex={stepIndex}
-            stepCount={steps.length}
-            onBack={goBack}
-            onNext={goNext}
-            canGoNext={canGoNext}
-          />
-        }
-      >
+  const radarAnswerStepActions =
+    step === "answer" ? (
+      <>
+        <BinaryAnswerPicker
+          value={answer}
+          onChange={onAnswerChange}
+          options={yesNoAnswerOptions}
+          label=""
+        />
+        {hasCenter && distanceSelectionAvailable ? (
+          <p className="text-xs text-ink-dim">
+            The map shows the shaded area for your choice.
+          </p>
+        ) : null}
+        <button
+          type="button"
+          onClick={onCommit}
+          disabled={!canCommitActions}
+          aria-busy={isSubmitting}
+          className="btn-primary w-full disabled:opacity-40"
+        >
+          {isSubmitting ? "Sending…" : "Add radar question"}
+        </button>
+      </>
+    ) : null;
+
+  const panelBody = (
+    <>
       {viewOnly ? <ViewOnlyQuestionBanner /> : null}
       {step === "distance" ? (
         <ToolSection first compact status="active">
@@ -168,31 +187,62 @@ export function RadarPanel({
         </ToolSection>
       ) : null}
 
-      {step === "answer" ? (
+      {step === "answer" && !useStickyAnswerFooter ? (
         <ToolSection first compact status="active">
-          <BinaryAnswerPicker
-            value={answer}
-            onChange={onAnswerChange}
-            options={yesNoAnswerOptions}
-            label=""
-          />
-          {hasCenter && distanceSelectionAvailable ? (
-            <p className="text-xs text-ink-dim">
-              The map shows the shaded area for your choice.
-            </p>
-          ) : null}
-          <button
-            type="button"
-            onClick={onCommit}
-            disabled={!canCommitActions}
-            aria-busy={isSubmitting}
-            className="btn-primary w-full disabled:opacity-40"
-          >
-            {isSubmitting ? "Sending…" : "Add radar question"}
-          </button>
+          {radarAnswerStepActions}
         </ToolSection>
       ) : null}
-      </WizardSwipeSurface>
+    </>
+  );
+
+  const answerFooter =
+    step === "answer" && useStickyAnswerFooter && radarAnswerStepActions ? (
+      <ToolSection first compact status="active">
+        {radarAnswerStepActions}
+      </ToolSection>
+    ) : undefined;
+
+  const wizardContent = readOnly ? (
+    panelBody
+  ) : (
+    <WizardSwipeSurface
+      stepId={step}
+      stepIndex={stepIndex}
+      canGoBack={stepIndex > 0}
+      canGoNext={canSwipeNext}
+      onBack={goBack}
+      onNext={goNext}
+      embedded={embeddedWizard}
+    >
+      {panelBody}
+    </WizardSwipeSurface>
+  );
+
+  return (
+    <ToolPanelShell
+      toolId="radar"
+      fillHeight={useStickyAnswerFooter}
+      stepper={
+        <Stepper
+          nav={
+            readOnly
+              ? undefined
+              : {
+                  stepIndex,
+                  stepCount: steps.length,
+                  onBack: goBack,
+                  onNext: goNext,
+                  canGoNext,
+                }
+          }
+        />
+      }
+    >
+      <div className={readOnly ? "pointer-events-none select-none" : undefined}>
+        <WizardToolPanelLayout stickyFooter={answerFooter}>
+          {wizardContent}
+        </WizardToolPanelLayout>
+      </div>
 
       {error ? <InlineError>{error}</InlineError> : null}
     </ToolPanelShell>

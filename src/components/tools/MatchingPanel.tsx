@@ -25,11 +25,12 @@ import { ResolvedReadout } from "./shared/ResolvedReadout";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
 import { SendToHidersButton } from "./shared/SendToHidersButton";
-import { ToolWizardNav } from "./shared/ToolWizardNav";
 import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
+import { WizardToolPanelLayout } from "./shared/WizardToolPanelLayout";
 import { MATCHING_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
 import { useToolWizard } from "../../hooks/useToolWizard";
+import type { ToolPanelSandboxMode } from "./shared/toolPanelSandbox";
 
 interface MatchingPanelProps {
   distanceUnit: DistanceUnit;
@@ -60,6 +61,7 @@ interface MatchingPanelProps {
   isSubmitting?: boolean;
   onRetry?: () => void;
   wizardStepRef?: RefObject<string>;
+  sandbox?: ToolPanelSandboxMode;
 }
 
 export function MatchingPanel({
@@ -91,7 +93,10 @@ export function MatchingPanel({
   isSubmitting = false,
   onRetry,
   wizardStepRef,
+  sandbox,
 }: MatchingPanelProps) {
+  const readOnly = sandbox?.readOnly ?? false;
+  const embeddedWizard = sandbox !== undefined;
   const steps = stepsForMode(MATCHING_STEPS, awaitHiderAnswer);
   const {
     stepId: step,
@@ -99,8 +104,12 @@ export function MatchingPanel({
     setStepIndex,
     goNext,
     goBack,
-    stepper,
-  } = useToolWizard(steps, { wizardStepRef });
+    Stepper,
+  } = useToolWizard(steps, {
+    wizardStepRef,
+    initialStepId: sandbox?.initialWizardStepId,
+    syncStep: sandbox ? (sandbox.syncWizardStep ?? false) : true,
+  });
   const categoryStepIndex = steps.findIndex((item) => item.id === "category");
 
   const handleCategoryChange = (nextCategoryId: MatchingCategoryId) => {
@@ -185,26 +194,44 @@ export function MatchingPanel({
     (step === "category" && categoryAvailable && categoryChosen) ||
     (step === "resolve" && resolveComplete && !loading);
   const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
+  const useStickyAnswerFooter = !readOnly && !embeddedWizard;
 
-  return (
-    <ToolPanelShell toolId="matching" stepper={stepper}>
-      <WizardSwipeSurface
-        stepId={step}
-        stepIndex={stepIndex}
-        canGoBack={stepIndex > 0}
-        canGoNext={canSwipeNext}
-        onBack={goBack}
-        onNext={goNext}
-        footer={
-          <ToolWizardNav
-            stepIndex={stepIndex}
-            stepCount={steps.length}
-            onBack={goBack}
-            onNext={goNext}
-            canGoNext={canGoNext}
-          />
-        }
-      >
+  const matchingAnswerStepReadout =
+    step === "answer" && !nullAnswer && nearestFeatureSummary ? (
+      <ResolvedReadout caption={featureCountLabel}>
+        {nearestFeatureSummary}
+      </ResolvedReadout>
+    ) : null;
+
+  const matchingAnswerStepActions =
+    step === "answer" ? (
+      <>
+        {!useStickyAnswerFooter && matchingAnswerStepReadout}
+        <BinaryAnswerPicker
+          value={answer}
+          onChange={onAnswerChange}
+          options={yesNoAnswerOptions}
+          label=""
+        />
+        {resolveComplete && !nullAnswer ? (
+          <p className="text-xs text-ink-dim">
+            The map shows the shaded area for your choice.
+          </p>
+        ) : null}
+        <button
+          type="button"
+          onClick={onCommit}
+          disabled={!canCommit}
+          aria-busy={isSubmitting}
+          className="btn-primary w-full disabled:opacity-40"
+        >
+          {isSubmitting ? "Sending…" : "Add match question"}
+        </button>
+      </>
+    ) : null;
+
+  const panelBody = (
+    <>
       {step === "category" ? (
         <ToolSection first compact status="active">
           {availableCategories.length === 0 ? (
@@ -279,36 +306,68 @@ export function MatchingPanel({
         </ToolSection>
       ) : null}
 
-      {step === "answer" ? (
+      {step === "answer" && !useStickyAnswerFooter ? (
         <ToolSection first compact status="active">
-          {!nullAnswer && nearestFeatureSummary ? (
-            <ResolvedReadout caption={featureCountLabel}>
-              {nearestFeatureSummary}
-            </ResolvedReadout>
-          ) : null}
-          <BinaryAnswerPicker
-            value={answer}
-            onChange={onAnswerChange}
-            options={yesNoAnswerOptions}
-            label=""
-          />
-          {resolveComplete && !nullAnswer ? (
-            <p className="text-xs text-ink-dim">
-              The map shows the shaded area for your choice.
-            </p>
-          ) : null}
-          <button
-            type="button"
-            onClick={onCommit}
-            disabled={!canCommit}
-            aria-busy={isSubmitting}
-            className="btn-primary w-full disabled:opacity-40"
-          >
-            {isSubmitting ? "Sending…" : "Add match question"}
-          </button>
+          {matchingAnswerStepActions}
         </ToolSection>
       ) : null}
-      </WizardSwipeSurface>
+
+      {step === "answer" && useStickyAnswerFooter && matchingAnswerStepReadout ? (
+        <ToolSection first compact status="active">
+          {matchingAnswerStepReadout}
+        </ToolSection>
+      ) : null}
+    </>
+  );
+
+  const answerFooter =
+    step === "answer" && useStickyAnswerFooter && matchingAnswerStepActions ? (
+      <ToolSection first compact status="active">
+        {matchingAnswerStepActions}
+      </ToolSection>
+    ) : undefined;
+
+  const wizardContent = readOnly ? (
+    panelBody
+  ) : (
+    <WizardSwipeSurface
+      stepId={step}
+      stepIndex={stepIndex}
+      canGoBack={stepIndex > 0}
+      canGoNext={canSwipeNext}
+      onBack={goBack}
+      onNext={goNext}
+      embedded={embeddedWizard}
+    >
+      {panelBody}
+    </WizardSwipeSurface>
+  );
+
+  return (
+    <ToolPanelShell
+      toolId="matching"
+      fillHeight={useStickyAnswerFooter}
+      stepper={
+        <Stepper
+          nav={
+            readOnly
+              ? undefined
+              : {
+                  stepIndex,
+                  stepCount: steps.length,
+                  onBack: goBack,
+                  onNext: goNext,
+                  canGoNext,
+                }
+          }
+        />
+      }
+    >
+      <div className={readOnly ? "pointer-events-none select-none" : undefined}>
+        <WizardToolPanelLayout stickyFooter={answerFooter}>
+          {wizardContent}
+        </WizardToolPanelLayout>
+      </div>
 
       {error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null}
     </ToolPanelShell>

@@ -13,6 +13,37 @@ const COMMIT_FRACTION = 0.35;
 const COMMIT_VELOCITY_PX_MS = 0.35;
 const RUBBER_BAND_FACTOR = 0.25;
 
+const INTERACTIVE_SWIPE_TARGET_SELECTOR =
+  'button, a, input, textarea, select, label, [role="button"], [role="radio"], [role="option"], [contenteditable="true"]';
+
+function resolvePointerTarget(target: EventTarget | null): Element | null {
+  if (target instanceof Element) {
+    return target;
+  }
+
+  if (target instanceof Text) {
+    return target.parentElement;
+  }
+
+  return null;
+}
+
+/** Exported for unit tests. */
+export function isInteractiveWizardSwipeTarget(
+  target: EventTarget | null,
+): boolean {
+  const element = resolvePointerTarget(target);
+  if (!element) {
+    return false;
+  }
+
+  if (element.closest("[data-wizard-no-swipe]")) {
+    return true;
+  }
+
+  return element.closest(INTERACTIVE_SWIPE_TARGET_SELECTOR) !== null;
+}
+
 export interface UseWizardSwipeOptions {
   canGoBack: boolean;
   canGoNext: boolean;
@@ -106,7 +137,11 @@ export function useWizardSwipe({
 
   const handlePointerDownCapture = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
-      if (!animate || event.button !== 0) {
+      if (
+        !animate ||
+        event.button !== 0 ||
+        isInteractiveWizardSwipeTarget(event.target)
+      ) {
         return;
       }
 

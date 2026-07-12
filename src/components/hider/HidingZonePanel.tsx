@@ -9,7 +9,6 @@ import { SegmentControl } from "../ui/SegmentControl";
 import { InlineError } from "../ui/InlineError";
 import { ToolPanelShell } from "../tools/shared/ToolPanelShell";
 import { ToolSection } from "../tools/shared/ToolSection";
-import { ToolWizardNav } from "../tools/shared/ToolWizardNav";
 import { WizardSwipeSurface } from "../tools/shared/WizardSwipeSurface";
 import { TransitStationPicker } from "./TransitStationPicker";
 import { useToolWizard } from "../../hooks/useToolWizard";
@@ -120,7 +119,7 @@ export function HidingZonePanel({
     stepIndex,
     goNext,
     goBack,
-    stepper,
+    Stepper,
     resetStep,
   } = useToolWizard(steps);
 
@@ -164,8 +163,21 @@ export function HidingZonePanel({
   const canSwipeNext = canGoNext && stepIndex < steps.length - 1;
 
   return (
-    <ToolPanelShell toolId="zone" stepper={stepper}>
-      <div className="space-y-0.5 border-b-2 border-border pb-2">
+    <ToolPanelShell
+      toolId="zone"
+      stepper={
+        <Stepper
+          nav={{
+            stepIndex,
+            stepCount: steps.length,
+            onBack: goBack,
+            onNext: goNext,
+            canGoNext: stepId !== "confirm" ? canGoNext : undefined,
+          }}
+        />
+      }
+    >
+      <div className="space-y-0.5 pb-2 text-center">
         <p className="font-display text-xs font-semibold uppercase tracking-[0.12em] text-highlight">
           {prompt.title}
         </p>
@@ -179,24 +191,6 @@ export function HidingZonePanel({
         canGoNext={canSwipeNext}
         onBack={goBack}
         onNext={goNext}
-        footer={
-          stepId !== "confirm" ? (
-            <ToolWizardNav
-              stepIndex={stepIndex}
-              stepCount={steps.length}
-              onBack={goBack}
-              onNext={goNext}
-              canGoNext={canGoNext}
-            />
-          ) : (
-            <ToolWizardNav
-              stepIndex={stepIndex}
-              stepCount={steps.length}
-              onBack={goBack}
-              onNext={goNext}
-            />
-          )
-        }
       >
       {stepId === "method" ? (
         <ToolSection first compact status="active">

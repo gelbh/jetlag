@@ -163,7 +163,16 @@ html:not([data-motion="reduced"]):not([data-motion="static"]) .map-style-control
   transition: opacity var(--motion-base) var(--ease-out-quint);
 }
 
-.map-chrome-hud[data-map-interacting="true"],
+.map-chrome-hud[data-map-interacting="true"] .jl-tool-dock {
+  opacity: 0;
+  pointer-events: none;
+  transition: none;
+}
+
+.map-chrome-hud[data-map-interacting="true"] .jl-status-bar {
+  pointer-events: auto;
+}
+
 .map-zoom-control[data-map-interacting="true"],
 .map-style-control[data-map-interacting="true"] {
   opacity: 0;

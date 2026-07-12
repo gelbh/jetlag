@@ -4,7 +4,7 @@ import { AppLogo } from "./AppLogo";
 type ScreenHeaderPlacement = "fixed" | "sticky" | "inline";
 
 export const screenBackLinkClassName =
-  "inline-flex min-h-11 items-center gap-1 px-1 font-display text-xs font-semibold uppercase tracking-[0.14em] text-ink-secondary transition-colors hover:text-ink";
+  "screen-back-control inline-flex min-h-11 items-center gap-1 px-1 font-display text-xs font-semibold uppercase tracking-[0.14em] text-ink-secondary no-underline transition-colors hover:text-ink";
 
 /** Clears the OS status bar on header shells (safe area + gap, with a 44px floor). */
 export const screenHeaderInsetTopClassName =
@@ -20,6 +20,8 @@ export const screenHeaderOffsetClassName =
 interface ScreenHeaderProps {
   backTo?: string;
   backLabel?: string;
+  /** In-screen back (e.g. tutorial sub-views) instead of routing away. */
+  onBack?: () => void;
   placement?: ScreenHeaderPlacement;
   className?: string;
 }
@@ -39,14 +41,30 @@ function shellClassName(placement: ScreenHeaderPlacement, className: string) {
 export function ScreenHeader({
   backTo = "/",
   backLabel = "Back",
+  onBack,
   placement = "fixed",
   className = "",
 }: ScreenHeaderProps) {
+  const backControl = (
+    <Link
+      to={backTo}
+      onClick={
+        onBack
+          ? (event) => {
+              event.preventDefault();
+              onBack();
+            }
+          : undefined
+      }
+      className={`${screenBackLinkClassName} justify-self-start`}
+    >
+      ← {backLabel}
+    </Link>
+  );
+
   const content = (
     <div className="grid min-h-11 grid-cols-[1fr_auto_1fr] items-center gap-3">
-      <Link to={backTo} className={`${screenBackLinkClassName} justify-self-start`}>
-        ← {backLabel}
-      </Link>
+      {backControl}
       <AppLogo variant="lockup" size="sm" className="justify-self-center" />
       <span className="min-w-11" aria-hidden="true" />
     </div>
