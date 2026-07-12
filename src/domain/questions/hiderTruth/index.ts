@@ -1,3 +1,4 @@
+import type { GameArea } from "../../map/annotations";
 import type { LatLngTuple } from "../../geometry/geometry";
 import type { PendingQuestionRecord } from "../../session/sessionChat";
 import { truthMatching, truthMatchingAsync } from "./matching";
@@ -41,6 +42,7 @@ export function computeHiderTruthReply(
 export async function computeHiderTruthReplyAsync(
   pending: PendingQuestionRecord,
   stationCenter: LatLngTuple | null,
+  gameArea?: GameArea,
 ): Promise<HiderTruthResult | null> {
   if (!stationCenter) {
     return truthUnavailable(UNAVAILABLE_NO_ZONE);
@@ -54,7 +56,7 @@ export async function computeHiderTruthReplyAsync(
   }
 
   if (pending.toolType === "matching") {
-    return truthMatchingAsync(pending, stationCenter);
+    return truthMatchingAsync(pending, stationCenter, gameArea);
   }
 
   return computeHiderTruthReply(pending, stationCenter);

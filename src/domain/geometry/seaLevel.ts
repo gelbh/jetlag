@@ -6,6 +6,7 @@ import {
   gameAreaToPolygon,
   isPointInGameArea,
   buildMeasuringEliminationRegion,
+  gameAreaFingerprint,
   type LatLngTuple,
 } from "./geometry";
 import type { MeasuringAnswer } from "../questions/measuringQuestions";
@@ -81,6 +82,56 @@ export function resolveGameAreaCellDivisions(gameArea: GameArea): number {
   );
 }
 
+const gameAreaCellMaskCache = new Map<string, boolean[]>();
+
+export function clearGameAreaCellMaskCacheForTests(): void {
+  gameAreaCellMaskCache.clear();
+}
+
+function gameAreaCellMaskKey(gameArea: GameArea, divisions: number): string {
+  return `${gameAreaFingerprint(gameArea)}:${divisions}`;
+}
+
+function buildInPlayAreaCellMask(
+  gameArea: GameArea,
+  divisions: number,
+): boolean[] {
+  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
+  const latStep = (north - south) / divisions;
+  const lngStep = (east - west) / divisions;
+  const mask = Array.from({ length: divisions * divisions }, () => false);
+
+  for (let row = 0; row < divisions; row += 1) {
+    for (let col = 0; col < divisions; col += 1) {
+      const point: LatLngTuple = [
+        south + (row + 0.5) * latStep,
+        west + (col + 0.5) * lngStep,
+      ];
+
+      if (isPointInGameArea(point, gameArea)) {
+        mask[row * divisions + col] = true;
+      }
+    }
+  }
+
+  return mask;
+}
+
+function inPlayAreaCellMask(
+  gameArea: GameArea,
+  divisions: number,
+): boolean[] {
+  const cacheKey = gameAreaCellMaskKey(gameArea, divisions);
+  const cached = gameAreaCellMaskCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const mask = buildInPlayAreaCellMask(gameArea, divisions);
+  gameAreaCellMaskCache.set(cacheKey, mask);
+  return mask;
+}
+
 export function sampleGameAreaCells(
   gameArea: GameArea,
   divisions = resolveGameAreaCellDivisions(gameArea),
@@ -89,9 +140,14 @@ export function sampleGameAreaCells(
   const latStep = (north - south) / divisions;
   const lngStep = (east - west) / divisions;
   const cells: ElevationSampleCell[] = [];
+  const mask = inPlayAreaCellMask(gameArea, divisions);
 
   for (let row = 0; row < divisions; row += 1) {
     for (let col = 0; col < divisions; col += 1) {
+      if (!mask[row * divisions + col]) {
+        continue;
+      }
+
       const cellSouth = south + row * latStep;
       const cellNorth = south + (row + 1) * latStep;
       const cellWest = west + col * lngStep;
@@ -100,10 +156,6 @@ export function sampleGameAreaCells(
         (cellSouth + cellNorth) / 2,
         (cellWest + cellEast) / 2,
       ];
-
-      if (!isPointInGameArea(point, gameArea)) {
-        continue;
-      }
 
       cells.push({
         point,

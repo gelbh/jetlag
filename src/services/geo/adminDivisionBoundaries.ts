@@ -312,24 +312,25 @@ export function classifyAdminDivisionAtPoint(
   point: LatLngTuple,
   divisions: AdminDivisionFeature[],
 ): AdminDivisionFeature | null {
-  const containing = divisions.filter((division) =>
-    pointInAdminDivision(point, division),
-  );
+  const containing = divisions
+    .filter((division) => pointInAdminDivision(point, division))
+    .map((division) => ({
+      division,
+      areaSquareMeters: adminDivisionAreaSquareMeters(division.boundary),
+    }));
 
   if (containing.length === 0) {
     return null;
   }
 
   containing.sort((left, right) => {
-    const areaDelta =
-      adminDivisionAreaSquareMeters(left.boundary) -
-      adminDivisionAreaSquareMeters(right.boundary);
+    const areaDelta = left.areaSquareMeters - right.areaSquareMeters;
     if (areaDelta !== 0) {
       return areaDelta;
     }
 
-    return left.id.localeCompare(right.id);
+    return left.division.id.localeCompare(right.division.id);
   });
 
-  return containing[0];
+  return containing[0]?.division ?? null;
 }

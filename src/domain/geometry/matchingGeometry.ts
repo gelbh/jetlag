@@ -3,7 +3,10 @@ import intersect from "@turf/intersect";
 import simplify from "@turf/simplify";
 import type { GameArea } from "../map/annotations";
 import type { MatchingAnswer } from "../questions/matchingQuestions";
-import { geoSpatialVoronoiFromSites } from "./geoSpatialVoronoi";
+import {
+  getCachedVoronoiCells,
+  matchingSitesFingerprint,
+} from "./voronoiCellCache";
 import { voronoiCellSiteId } from "./voronoiCellSiteId";
 import {
   gameAreaToPolygon,
@@ -49,7 +52,9 @@ function buildSameNearestRegionFromVoronoi(
   seekerFeatureId: string,
   gameArea: GameArea,
 ): Feature<Polygon | MultiPolygon> | null {
-  const cells = geoSpatialVoronoiFromSites(
+  const fingerprint = matchingSitesFingerprint(features);
+  const cells = getCachedVoronoiCells(
+    fingerprint,
     features.map((feature) => ({
       lng: feature.point[1],
       lat: feature.point[0],

@@ -94,9 +94,13 @@ export function useTentacleTool({
 }: UseTentacleToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
   const wizardStepRef = useRef("anchor");
-  const usedTentacleCategories = useMemo(
-    () => usedTentacleCategoryIds(annotations.filter(isActive)),
+  const activeAnnotations = useMemo(
+    () => annotations.filter(isActive),
     [annotations],
+  );
+  const usedTentacleCategories = useMemo(
+    () => usedTentacleCategoryIds(activeAnnotations),
+    [activeAnnotations],
   );
   const [tentacleCenter, setTentacleCenter] = useState<LatLngTuple | null>(
     null,
@@ -106,10 +110,7 @@ export function useTentacleTool({
   const [tentacleCategoryChosen, setTentacleCategoryChosen] = useState(false);
   const tentacleUseCount = tentacleCategoryId
     ? Math.max(
-        tentacleCategoryUseCount(
-          annotations.filter(isActive),
-          tentacleCategoryId,
-        ),
+        tentacleCategoryUseCount(activeAnnotations, tentacleCategoryId),
         tentacleCategoryUseCountFromPending(
           pendingQuestions,
           tentacleCategoryId,

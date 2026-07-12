@@ -137,6 +137,20 @@ function collectPositions(gameArea: GameArea): Position[] {
   return gameArea.coordinates.flatMap((ring) => ring);
 }
 
+export function gameAreaFingerprint(gameArea: GameArea): string {
+  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
+  const coordCount =
+    gameArea.type === "MultiPolygon"
+      ? gameArea.coordinates.reduce(
+          (sum, polygon) =>
+            sum + polygon.reduce((ringSum, ring) => ringSum + ring.length, 0),
+          0,
+        )
+      : gameArea.coordinates.reduce((sum, ring) => sum + ring.length, 0);
+
+  return `${gameArea.type}:${south.toFixed(5)}:${west.toFixed(5)}:${north.toFixed(5)}:${east.toFixed(5)}:${coordCount}`;
+}
+
 export function simplifyGameArea(gameArea: GameArea): GameArea {
   let tolerance = 0.0002;
   let simplified = featureToGameArea(
@@ -149,7 +163,7 @@ export function simplifyGameArea(gameArea: GameArea): GameArea {
   while (collectPositions(simplified).length > 1_500 && tolerance < 0.01) {
     tolerance *= 1.5;
     simplified = featureToGameArea(
-      simplify(gameAreaToFeature(gameArea), {
+      simplify(gameAreaToFeature(simplified), {
         tolerance,
         highQuality: false,
       }) as Feature<Polygon | MultiPolygon>,

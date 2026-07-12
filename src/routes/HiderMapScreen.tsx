@@ -77,13 +77,13 @@ import {
 } from "../services/firestore/firestoreAnnotations";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
-import { useAnnotationStore, useMapStore, useSessionStore } from "../state/sessionStore";
+import { useSessionAnnotations } from "../hooks/map/useSessionAnnotations";
+import { useMapStore, useSessionStore } from "../state/sessionStore";
 
 export function HiderMapScreen() {
   const session = useSessionStore((state) => state.session);
   const setSession = useSessionStore((state) => state.setSession);
   const setMyUid = useSessionStore((state) => state.setMyUid);
-  const allAnnotations = useAnnotationStore((state) => state.annotations);
   const layerVisibility = useMapStore((state) => state.layerVisibility);
   const mapStyle = useMapStore((state) => state.mapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
@@ -154,11 +154,7 @@ export function HiderMapScreen() {
     distanceUnit === "metric" ? "metric" : "imperial",
   );
   const sessionId = session?.id;
-  const annotations = useMemo(
-    () =>
-      allAnnotations.filter((annotation) => annotation.sessionId === sessionId),
-    [allAnnotations, sessionId],
-  );
+  const annotations = useSessionAnnotations(sessionId);
   const hidingZones = useHidingZonesSync(sessionId);
   const timeTraps = useTimeTrapsSync(sessionId);
   const expansionPackEnabled = session?.expansionPackEnabled === true;
@@ -193,6 +189,7 @@ export function HiderMapScreen() {
   const { questionTruths, loading: truthsLoading } = useHiderQuestionTruths(
     pendingQuestions,
     stationCenter,
+    gameArea ?? undefined,
   );
 
   const isHost = Boolean(
@@ -681,6 +678,7 @@ export function HiderMapScreen() {
               const truth = await computeHiderTruthReplyAsync(
                 pending,
                 stationCenterForAnswer,
+                gameArea,
               );
               if (
                 truth &&

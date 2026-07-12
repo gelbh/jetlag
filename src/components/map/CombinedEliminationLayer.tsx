@@ -10,7 +10,7 @@ import { isEndGameActive } from "../../domain/map/annotations";
 import type { HidingZoneRecord } from "../../domain/session/hidingZone";
 import {
   buildCombinedEliminationMask,
-  eliminationFeatureForAnnotation,
+  annotationHasEliminationFeature,
 } from "../../domain/geometry/combinedEliminationMask";
 import { polygonFeatureToLeafletPolygonGroups } from "../../domain/geometry/geometry";
 import { getEliminationOverlayLayers } from "../../domain/map/mapEliminationOverlayStyle";
@@ -60,14 +60,17 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
     );
   }, [annotations, draftFeatures, endGameZones, gameArea, hidden]);
 
+  const pulsingIds = useMemo(
+    () => new Set(pulsingAnnotationIds),
+    [pulsingAnnotationIds],
+  );
+
   const pulsing = useMemo(
     () =>
-      annotations.some(
-        (annotation) =>
-          pulsingAnnotationIds.includes(annotation.id) &&
-          eliminationFeatureForAnnotation(annotation, gameArea) !== null,
+      annotations.some((annotation) =>
+        annotationHasEliminationFeature(annotation, gameArea, pulsingIds),
       ),
-    [annotations, gameArea, pulsingAnnotationIds],
+    [annotations, gameArea, pulsingIds],
   );
 
   if (hidden || !combinedMask) {

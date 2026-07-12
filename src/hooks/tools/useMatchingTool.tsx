@@ -108,9 +108,13 @@ export function useMatchingTool({
 }: UseMatchingToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
   const wizardStepRef = useRef("anchor");
-  const usedMatchingCategories = useMemo(
-    () => usedMatchingCategoryIds(annotations.filter(isActive)),
+  const activeAnnotations = useMemo(
+    () => annotations.filter(isActive),
     [annotations],
+  );
+  const usedMatchingCategories = useMemo(
+    () => usedMatchingCategoryIds(activeAnnotations),
+    [activeAnnotations],
   );
   const [matchingSeekerPoint, setMatchingSeekerPoint] =
     useState<LatLngTuple | null>(null);
@@ -119,10 +123,7 @@ export function useMatchingTool({
   const [matchingCategoryChosen, setMatchingCategoryChosen] = useState(false);
   const matchingUseCount = matchingCategoryId
     ? Math.max(
-        matchingCategoryUseCount(
-          annotations.filter(isActive),
-          matchingCategoryId,
-        ),
+        matchingCategoryUseCount(activeAnnotations, matchingCategoryId),
         matchingCategoryUseCountFromPending(
           pendingQuestions,
           matchingCategoryId,

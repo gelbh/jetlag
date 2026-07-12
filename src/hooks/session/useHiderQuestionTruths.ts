@@ -3,6 +3,7 @@ import {
   computeHiderTruthReplyAsync,
   type HiderTruthResult,
 } from "../../domain/questions/ui";
+import type { GameArea } from "../../domain/map/annotations";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { useLatestRequest } from "../useLatestRequest";
@@ -26,6 +27,7 @@ function openPendingQuestions(
 export function useHiderQuestionTruths(
   pendingQuestions: readonly PendingQuestionRecord[],
   stationCenter: LatLngTuple | null,
+  gameArea?: GameArea,
 ): {
   questionTruths: ReadonlyMap<string, HiderTruthResult>;
   loading: boolean;
@@ -68,6 +70,7 @@ export function useHiderQuestionTruths(
           const truth = await computeHiderTruthReplyAsync(
             question,
             stationCenter,
+            gameArea,
           );
           return [question.id, truth] as const;
         }),
@@ -93,6 +96,7 @@ export function useHiderQuestionTruths(
     isLatestRequest,
     openQuestions,
     stationCenter,
+    gameArea,
   ]);
 
   return {

@@ -1,12 +1,6 @@
-import union from "@turf/union";
 import difference from "@turf/difference";
 import turfCircle from "@turf/circle";
 import { featureCollection, point as turfPoint } from "@turf/helpers";
-import type {
-  Feature,
-  MultiPolygon,
-  Polygon as GeoPolygon,
-} from "geojson";
 import type { AnnotationRecord, GameArea } from "../map/annotations";
 import { isActive } from "../map/annotations";
 import type { HidingZoneRecord } from "../session/hidingZone";
@@ -16,16 +10,112 @@ import {
   buildRadarShadedRegion,
   type LatLngTuple,
 } from "./geometry";
+import { gameAreaFingerprint } from "./core/gameAreaConvert";
 import { DEFAULT_RADIUS_METERS } from "../map/distance";
 import { MAP_ANNOTATION_COLORS } from "../map/mapAnnotationColors";
 import { thermometerShadedSide } from "../questions/thermometerQuestions";
+import {
+  unionPolygonFeatures,
+  type PolygonFeature,
+} from "./unionPolygonFeatures";
+import union from "@turf/union";
 
 export const ELIMINATION_FILL_COLOR = MAP_ANNOTATION_COLORS.elimination;
+
+const eliminationFeatureCache = new Map<
+  string,
+  { gameAreaKey: string; fingerprint: string; feature: PolygonFeature | null }
+>();
+
+interface EliminationMaskCache {
+  gameAreaKey: string;
+  committedKey: string;
+  draftKey: string;
+  endGameKey: string;
+  mask: PolygonFeature | null;
+}
+
+let eliminationMaskCache: EliminationMaskCache | null = null;
+
+export function gameAreaCacheKey(gameArea: GameArea): string {
+  return gameAreaFingerprint(gameArea);
+}
+
+function annotationEliminationFingerprint(
+  annotation: AnnotationRecord,
+): string {
+  return [
+    annotation.status,
+    annotation.updatedAt ?? "",
+    annotation.type,
+    JSON.stringify(annotation.metadata),
+    JSON.stringify(annotation.geometry),
+  ].join("|");
+}
+
+function draftFeaturesCacheKey(
+  draftFeatures: readonly PolygonFeature[],
+): string {
+  if (draftFeatures.length === 0) {
+    return "";
+  }
+
+  return draftFeatures
+    .map((feature) => JSON.stringify(feature.geometry))
+    .join("||");
+}
+
+function endGameZonesCacheKey(
+  hidingZones: readonly HidingZoneRecord[],
+): string {
+  if (hidingZones.length === 0) {
+    return "";
+  }
+
+  return hidingZones
+    .map(
+      (zone) =>
+        `${zone.stationId}:${zone.center.lat}:${zone.center.lng}:${zone.radiusMeters}`,
+    )
+    .sort()
+    .join("|");
+}
+
+export function clearCombinedEliminationMaskCacheForTests(): void {
+  eliminationFeatureCache.clear();
+  eliminationMaskCache = null;
+}
 
 export function eliminationFeatureForAnnotation(
   annotation: AnnotationRecord,
   gameArea: GameArea,
-): Feature<GeoPolygon | MultiPolygon> | null {
+): PolygonFeature | null {
+  const gameAreaKey = gameAreaCacheKey(gameArea);
+  const fingerprint = annotationEliminationFingerprint(annotation);
+  const cacheKey = annotation.id;
+  const cached = eliminationFeatureCache.get(cacheKey);
+
+  if (
+    cached &&
+    cached.gameAreaKey === gameAreaKey &&
+    cached.fingerprint === fingerprint
+  ) {
+    return cached.feature;
+  }
+
+  const feature = computeEliminationFeatureForAnnotation(annotation, gameArea);
+  eliminationFeatureCache.set(cacheKey, {
+    gameAreaKey,
+    fingerprint,
+    feature,
+  });
+  return feature;
+}
+
+function computeEliminationFeatureForAnnotation(
+  annotation: AnnotationRecord,
+  gameArea: GameArea,
+): PolygonFeature | null {
   if (!isActive(annotation)) {
     return null;
   }
@@ -33,7 +123,7 @@ export function eliminationFeatureForAnnotation(
   if (annotation.type === "matching") {
     const geometry = annotation.geometry.geometry;
     if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
-      return annotation.geometry as Feature<GeoPolygon | MultiPolygon>;
+      return annotation.geometry as PolygonFeature;
     }
     return null;
   }
@@ -41,7 +131,7 @@ export function eliminationFeatureForAnnotation(
   if (annotation.type === "measuring") {
     const geometry = annotation.geometry.geometry;
     if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
-      return annotation.geometry as Feature<GeoPolygon | MultiPolygon>;
+      return annotation.geometry as PolygonFeature;
     }
     return null;
   }
@@ -82,14 +172,14 @@ export function eliminationFeatureForAnnotation(
         turfPoint([center[1], center[0]]),
         searchRadiusMeters / 1000,
         { steps: 64, units: "kilometers" },
-      ) as Feature<GeoPolygon | MultiPolygon>;
+      ) as PolygonFeature;
     }
 
     if (annotation.metadata.tentacleEliminationJson) {
       try {
         return JSON.parse(
           annotation.metadata.tentacleEliminationJson,
-        ) as Feature<GeoPolygon | MultiPolygon>;
+        ) as PolygonFeature;
       } catch {
         return null;
       }
@@ -121,72 +211,169 @@ export function eliminationFeatureForAnnotation(
     (annotation.geometry.geometry.type === "Polygon" ||
       annotation.geometry.geometry.type === "MultiPolygon")
   ) {
-    return annotation.geometry as Feature<GeoPolygon | MultiPolygon>;
+    return annotation.geometry as PolygonFeature;
   }
 
   return null;
 }
 
 export function unionEliminationFeatures(
-  features: readonly Feature<GeoPolygon | MultiPolygon>[],
-): Feature<GeoPolygon | MultiPolygon> | null {
-  if (features.length === 0) {
-    return null;
-  }
+  features: readonly PolygonFeature[],
+): PolygonFeature | null {
+  return unionPolygonFeatures(features);
+}
 
-  if (features.length === 1) {
-    return features[0] ?? null;
-  }
+function collectCommittedEliminationFeatures(
+  annotations: readonly AnnotationRecord[],
+  gameArea: GameArea,
+): PolygonFeature[] {
+  const committed: PolygonFeature[] = [];
 
-  let combined = features[0] ?? null;
-  if (!combined) {
-    return null;
-  }
-
-  for (let index = 1; index < features.length; index += 1) {
-    const next = features[index];
-    if (!next) {
-      continue;
-    }
-
-    const merged = union(featureCollection([combined, next]));
-    if (
-      merged &&
-      (merged.geometry.type === "Polygon" ||
-        merged.geometry.type === "MultiPolygon")
-    ) {
-      combined = merged as Feature<GeoPolygon | MultiPolygon>;
+  for (const annotation of annotations) {
+    const feature = eliminationFeatureForAnnotation(annotation, gameArea);
+    if (feature) {
+      committed.push(feature);
     }
   }
 
-  return combined;
+  return committed;
+}
+
+function committedAnnotationsKey(
+  annotations: readonly AnnotationRecord[],
+): string {
+  return annotations
+    .filter(isActive)
+    .map(
+      (annotation) =>
+        `${annotation.id}:${annotationEliminationFingerprint(annotation)}`,
+    )
+    .sort()
+    .join("|");
+}
+
+function tryIncrementalMaskAdd(
+  previous: EliminationMaskCache,
+  gameAreaKey: string,
+  committedKey: string,
+  draftKey: string,
+  newFeature: PolygonFeature,
+): PolygonFeature | null {
+  if (
+    previous.gameAreaKey !== gameAreaKey ||
+    previous.draftKey !== draftKey ||
+    previous.endGameKey !== "" ||
+    !previous.mask
+  ) {
+    return null;
+  }
+
+  const previousIds = new Set(
+    previous.committedKey.split("|").map((entry) => entry.split(":")[0]),
+  );
+  const currentIds = committedKey
+    .split("|")
+    .filter(Boolean)
+    .map((entry) => entry.split(":")[0]);
+
+  if (currentIds.length !== previousIds.size + 1) {
+    return null;
+  }
+
+  const addedId = currentIds.find((id) => !previousIds.has(id));
+  if (!addedId) {
+    return null;
+  }
+
+  const merged = union(featureCollection([previous.mask, newFeature]));
+  if (
+    merged &&
+    (merged.geometry.type === "Polygon" ||
+      merged.geometry.type === "MultiPolygon")
+  ) {
+    return merged as PolygonFeature;
+  }
+
+  return null;
 }
 
 export function buildCombinedEliminationMask(
   annotations: readonly AnnotationRecord[],
   gameArea: GameArea,
-  draftFeatures: readonly Feature<GeoPolygon | MultiPolygon>[] = [],
+  draftFeatures: readonly PolygonFeature[] = [],
   endGameHidingZones: readonly HidingZoneRecord[] = [],
-): Feature<GeoPolygon | MultiPolygon> | null {
+): PolygonFeature | null {
+  const gameAreaKey = gameAreaCacheKey(gameArea);
+  const endGameKey = endGameZonesCacheKey(endGameHidingZones);
+
   if (endGameHidingZones.length > 0) {
-    return buildEndGameEliminationMask(gameArea, endGameHidingZones);
+    const mask = buildEndGameEliminationMask(gameArea, endGameHidingZones);
+    eliminationMaskCache = {
+      gameAreaKey,
+      committedKey: "",
+      draftKey: "",
+      endGameKey,
+      mask,
+    };
+    return mask;
   }
 
-  const committed = annotations
-    .map((annotation) => eliminationFeatureForAnnotation(annotation, gameArea))
-    .filter(
-      (feature): feature is Feature<GeoPolygon | MultiPolygon> =>
-        feature !== null,
-    );
+  const committedKey = committedAnnotationsKey(annotations);
+  const draftKey = draftFeaturesCacheKey(draftFeatures);
 
-  return unionEliminationFeatures([...committed, ...draftFeatures]);
+  if (
+    eliminationMaskCache &&
+    eliminationMaskCache.gameAreaKey === gameAreaKey &&
+    eliminationMaskCache.committedKey === committedKey &&
+    eliminationMaskCache.draftKey === draftKey &&
+    eliminationMaskCache.endGameKey === endGameKey
+  ) {
+    return eliminationMaskCache.mask;
+  }
+
+  const committed = collectCommittedEliminationFeatures(annotations, gameArea);
+  const allFeatures = [...committed, ...draftFeatures];
+
+  let mask: PolygonFeature | null = null;
+
+  if (
+    eliminationMaskCache &&
+    draftFeatures.length === 0 &&
+    committed.length > 0 &&
+    committed.length === committedKey.split("|").filter(Boolean).length
+  ) {
+    const lastCommitted = committed[committed.length - 1];
+    if (lastCommitted) {
+      mask = tryIncrementalMaskAdd(
+        eliminationMaskCache,
+        gameAreaKey,
+        committedKey,
+        draftKey,
+        lastCommitted,
+      );
+    }
+  }
+
+  if (!mask) {
+    mask = unionEliminationFeatures(allFeatures);
+  }
+
+  eliminationMaskCache = {
+    gameAreaKey,
+    committedKey,
+    draftKey,
+    endGameKey,
+    mask,
+  };
+
+  return mask;
 }
 
 export function buildEndGameEliminationMask(
   gameArea: GameArea,
   hidingZones: readonly HidingZoneRecord[],
-): Feature<GeoPolygon | MultiPolygon> | null {
-  const playArea: Feature<GeoPolygon | MultiPolygon> = {
+): PolygonFeature | null {
+  const playArea: PolygonFeature = {
     type: "Feature",
     properties: {},
     geometry: gameArea,
@@ -207,8 +394,19 @@ export function buildEndGameEliminationMask(
     (eliminated.geometry.type === "Polygon" ||
       eliminated.geometry.type === "MultiPolygon")
   ) {
-    return eliminated as Feature<GeoPolygon | MultiPolygon>;
+    return eliminated as PolygonFeature;
   }
 
   return playArea;
+}
+
+export function annotationHasEliminationFeature(
+  annotation: AnnotationRecord,
+  gameArea: GameArea,
+  pulsingIds: ReadonlySet<string>,
+): boolean {
+  return (
+    pulsingIds.has(annotation.id) &&
+    eliminationFeatureForAnnotation(annotation, gameArea) !== null
+  );
 }
