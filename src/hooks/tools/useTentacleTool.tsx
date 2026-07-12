@@ -125,9 +125,21 @@ export function useTentacleTool({
   const [tentacleLoading, setTentacleLoading] = useState(false);
   const [tentacleError, setTentacleError] = useState<string | null>(null);
 
-  const searchRadiusMeters = tentacleCategoryId
-    ? tentacleSearchRadiusMetersForSession(sessionRules, tentacleCategoryId)
-    : 0;
+  const previewTentacleCategoryId =
+    tentacleCategoryId ??
+    (tentacleCenter
+      ? firstAvailableTentacleCategoryIdForSession(
+          sessionRules,
+          usedTentacleCategories,
+        )
+      : null);
+  const searchRadiusMeters =
+    tentacleCenter && previewTentacleCategoryId
+      ? tentacleSearchRadiusMetersForSession(
+          sessionRules,
+          previewTentacleCategoryId,
+        )
+      : 0;
 
   useToolSessionOptions({
     active: active && tentacleCategoryChosen && tentacleCategoryId !== null,

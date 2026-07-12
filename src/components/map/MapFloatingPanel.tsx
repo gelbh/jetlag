@@ -3,6 +3,10 @@ import type { PanelHandleProps } from "../../hooks/usePanelDrag";
 import { useMotionProfile } from "../../hooks/useMotionProfile";
 import { PopupCloseButton } from "../ui/PopupCloseButton";
 
+type PeekHandleProps = PanelHandleProps & {
+  onClick: () => void;
+};
+
 interface MapFloatingPanelProps {
   minimized: boolean;
   onMinimizedChange?: (minimized: boolean) => void;
@@ -22,6 +26,7 @@ interface MapFloatingPanelProps {
   preserveBodyWhenMinimized?: boolean;
   dragHandle?: boolean;
   dragHandleProps?: PanelHandleProps;
+  peekHandleProps?: PeekHandleProps;
   contentKey?: string | number;
   children: React.ReactNode;
 }
@@ -44,6 +49,7 @@ export function MapFloatingPanel({
   preserveBodyWhenMinimized = true,
   dragHandle = true,
   dragHandleProps,
+  peekHandleProps,
   contentKey,
   children,
 }: MapFloatingPanelProps) {
@@ -73,8 +79,8 @@ export function MapFloatingPanel({
       {minimized && peekLabel && onMinimizedChange ? (
         <button
           type="button"
-          onClick={() => onMinimizedChange(false)}
-          className="tool-panel-compact hud-panel mx-auto flex max-w-xl min-h-11 w-full items-center justify-between gap-3 px-3 py-2"
+          {...(peekHandleProps ?? { onClick: () => onMinimizedChange(false) })}
+          className="tool-panel-compact hud-panel mx-auto flex max-w-xl min-h-11 w-full touch-none items-center justify-between gap-3 px-3 py-2"
           aria-label={`Expand ${peekLabel} panel`}
         >
           <span className="font-display text-xs font-semibold uppercase tracking-[0.12em] text-highlight">
