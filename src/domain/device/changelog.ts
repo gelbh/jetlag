@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.5.10";
+export const APP_VERSION = "0.5.11";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,37 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.5.11",
+    date: "2026-07-12",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Map: elimination shading worker runs again under enforced CSP.",
+          "Map: location and question tools load map data again (Overpass proxy + App Check under CSP).",
+          "Firebase: App Check reCAPTCHA loads under content security policy.",
+          "Map sync: Retry on the sync rail replays queued map pins after a failed upload.",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Map sync: queue map pins when the connection is unstable, not only when the browser says offline.",
+          "Map sync: clearer offline and unstable connection copy with working Retry guidance.",
+          "Map: warn when Firestore offline cache is unavailable on this device.",
+          "Create and join: preload game-area map data even when the connection flickers, using cached boundaries when live fetch fails.",
+          "Map: cache bundled geo JSON in the service worker after first load for flaky connections.",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Offline write queue schema now tags annotation entries for future write kinds.",
+        ],
+      }
+    ],
+  },
   {
     version: "0.5.10",
     date: "2026-07-12",
