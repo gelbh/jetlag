@@ -25,6 +25,12 @@ describe("isChunkLoadError", () => {
     ).toBe(true);
   });
 
+  it("matches root module import failures", () => {
+    expect(
+      isChunkLoadError(new TypeError("Importing a module script failed.")),
+    ).toBe(true);
+  });
+
   it("returns false for unrelated errors", () => {
     expect(isChunkLoadError(new Error("Map crashed"))).toBe(false);
     expect(isChunkLoadError("network down")).toBe(false);

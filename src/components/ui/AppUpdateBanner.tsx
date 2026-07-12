@@ -4,7 +4,9 @@ import {
   applyServiceWorkerUpdate,
   promptIfWaiting,
   scheduleServiceWorkerUpdateChecks,
+  shouldAutoApplyServiceWorkerUpdate,
 } from "../../domain/device/serviceWorkerRefresh";
+import { isIosStandalonePwa } from "../../domain/device/isIosStandalonePwa";
 import { tryUpdateServiceWorker } from "../../domain/device/serviceWorkerUpdate";
 import { useSessionStore } from "../../state/sessionStore";
 import { HudBanner } from "./HudBanner";
@@ -90,6 +92,28 @@ export function AppUpdateBanner() {
 
   const visible = needsRefresh && !deferReload;
   const softBanner = Boolean(session) && location.pathname === "/map";
+
+  useEffect(() => {
+    if (!needsRefresh || !updateSW) {
+      return;
+    }
+
+    if (!isIosStandalonePwa()) {
+      return;
+    }
+
+    if (
+      !shouldAutoApplyServiceWorkerUpdate({
+        pathname: location.pathname,
+        hasActiveSession: Boolean(session),
+        dismissed,
+      })
+    ) {
+      return;
+    }
+
+    void applyServiceWorkerUpdate(registrationRef.current, updateSW);
+  }, [needsRefresh, updateSW, location.pathname, session, dismissed]);
 
   return (
     <HudBanner

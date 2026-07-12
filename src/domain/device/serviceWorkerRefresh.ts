@@ -3,6 +3,22 @@ import { tryUpdateServiceWorker } from "./serviceWorkerUpdate";
 const UPDATE_CHECK_INTERVAL_MS = 45 * 60 * 1000;
 const RELOAD_FALLBACK_MS = 1500;
 
+export function shouldAutoApplyServiceWorkerUpdate(options: {
+  pathname: string;
+  hasActiveSession: boolean;
+  dismissed: boolean;
+}): boolean {
+  if (options.hasActiveSession && options.pathname === "/map" && options.dismissed) {
+    return false;
+  }
+
+  if (options.hasActiveSession && options.pathname === "/map") {
+    return false;
+  }
+
+  return true;
+}
+
 export function hasWaitingServiceWorker(
   registration: ServiceWorkerRegistration | undefined,
 ): boolean {

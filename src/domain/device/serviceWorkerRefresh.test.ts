@@ -4,6 +4,7 @@ import {
   hasWaitingServiceWorker,
   promptIfWaiting,
   scheduleServiceWorkerUpdateChecks,
+  shouldAutoApplyServiceWorkerUpdate,
 } from "./serviceWorkerRefresh";
 
 describe("serviceWorkerRefresh", () => {
@@ -83,5 +84,25 @@ describe("serviceWorkerRefresh", () => {
     const registerApplyUpdate = vi.fn().mockResolvedValue(undefined);
     await applyServiceWorkerUpdate(undefined, registerApplyUpdate);
     expect(registerApplyUpdate).toHaveBeenCalledWith(true);
+  });
+
+  it("defers auto apply during an active map session", () => {
+    expect(
+      shouldAutoApplyServiceWorkerUpdate({
+        pathname: "/map",
+        hasActiveSession: true,
+        dismissed: false,
+      }),
+    ).toBe(false);
+  });
+
+  it("allows auto apply on home without a session", () => {
+    expect(
+      shouldAutoApplyServiceWorkerUpdate({
+        pathname: "/",
+        hasActiveSession: false,
+        dismissed: false,
+      }),
+    ).toBe(true);
   });
 });
