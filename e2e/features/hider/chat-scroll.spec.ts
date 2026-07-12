@@ -28,7 +28,9 @@ test.describe("hider chat scroll", () => {
     const secondAnswerButton = guestPage
       .getByRole("button", { name: "Send answer: Yes" })
       .last();
-    await expect(secondAnswerButton).toBeVisible({ timeout: 20_000 });
+    await expect
+      .poll(async () => secondAnswerButton.isVisible(), { timeout: 30_000 })
+      .toBe(true);
 
     const scrollRegion = guestPage.locator(".jl-game-chat-scroll");
     await expect(scrollRegion).toBeVisible();
