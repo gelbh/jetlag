@@ -7,6 +7,9 @@ const SESSION_CODE_PATTERN = /\b[A-Z0-9]{4}\b/g;
 const FIRESTORE_PERMISSION_DENIED =
   /missing or insufficient permissions/i;
 const STORAGE_QUOTA_EXCEEDED = /quota has been exceeded/i;
+const AUTH_NETWORK_FAILED = /auth\/network-request-failed/i;
+const STORAGE_UNAUTHORIZED = /storage\/unauthorized/i;
+const LEAFLET_POS_ERROR = /_leaflet_pos/i;
 const SENSITIVE_EXTRA_KEYS = new Set([
   "sessionId",
   "authUid",
@@ -71,6 +74,39 @@ function isIgnoredClientNoiseEvent(
       exception.type === "QuotaExceededError" &&
       typeof exception.value === "string" &&
       STORAGE_QUOTA_EXCEEDED.test(exception.value)
+    ) {
+      return true;
+    }
+
+    if (
+      exception.type === "FirebaseError" &&
+      typeof exception.value === "string" &&
+      (AUTH_NETWORK_FAILED.test(exception.value) ||
+        STORAGE_UNAUTHORIZED.test(exception.value))
+    ) {
+      return true;
+    }
+
+    if (
+      exception.type === "AbortError" &&
+      typeof exception.value === "string" &&
+      /aborted/i.test(exception.value)
+    ) {
+      return true;
+    }
+
+    if (
+      exception.type === "ReferenceError" &&
+      typeof exception.value === "string" &&
+      /window is not defined/i.test(exception.value)
+    ) {
+      return true;
+    }
+
+    if (
+      exception.type === "TypeError" &&
+      typeof exception.value === "string" &&
+      LEAFLET_POS_ERROR.test(exception.value)
     ) {
       return true;
     }
