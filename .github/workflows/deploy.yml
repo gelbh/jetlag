@@ -88,7 +88,7 @@ jobs:
             exit 0
           fi
           changed="$(git diff --name-only "$before" "${{ github.event.workflow_run.head_sha }}")"
-          if echo "$changed" | grep -qE '^(src/|public/|index\.html|vite\.config\.ts|package(-lock)?\.json|tsconfig.*\.json|tailwind\.css|eslint\.config)'; then
+          if echo "$changed" | grep -qE '^(src/|public/|worker/|index\.html|vite\.config\.ts|wrangler\.toml|package(-lock)?\.json|tsconfig.*\.json|tailwind\.css|eslint\.config)'; then
             echo "frontend=true" >> "$GITHUB_OUTPUT"
           else
             echo "frontend=false" >> "$GITHUB_OUTPUT"
@@ -147,6 +147,10 @@ jobs:
             echo "::error::Source map files remain in dist after build."
             exit 1
           fi
+          if [ -f dist/_redirects ]; then
+            echo "::error::dist/_redirects conflicts with wrangler.toml SPA handling. Remove public/_redirects."
+            exit 1
+          fi
           if ! grep -qiE 'uploaded|source maps' build.log; then
             echo "::warning::Sentry source map upload was not confirmed in build output."
           fi
@@ -155,4 +159,4 @@ jobs:
         with:
           apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
-          command: wrangler deploy
+          command: deploy

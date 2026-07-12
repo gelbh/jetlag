@@ -5,16 +5,24 @@
 ### Fixes
 
 - Error screens: keep router context so Back home works after a crash
+- Session reset: reliable host progress reset and stale pending-question guard
+- Observer map: admin observe frames the session play area instead of 0,0
+- Map sync: subscription errors no longer thrash Firestore listeners
 
 ### Improvements
 
 - PWA: stale route chunks activate the latest app version before reload
 - PWA: deferred chunk reload runs when you leave the map after an update
 - PWA: asset requests no longer fall back to the app shell via the service worker
+- Hider settings: hide clear map when unavailable
+- Admin: live sessions list scales with bounded concurrency and pagination
 
 ### Technical
 
 - Sentry: Web Vitals tracing, session replay, and Firestore permission breadcrumbs enabled in production
+- Deploy: correct wrangler action command and rename worker deploy script
+- Firebase: connect Functions emulator in local dev
+- Motion: decorative animations respect low-power mode independently of essential motion
 
 ## 0.5.6 - 2026-07-12
 

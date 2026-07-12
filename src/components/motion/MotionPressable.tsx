@@ -15,11 +15,11 @@ export function MotionPressable({
   onClick,
   ...rest
 }: MotionPressableProps) {
-  const { animate } = useMotionProfile();
+  const { decorativeAnimate } = useMotionProfile();
   const cssClass = `hud-pressable-css ${className}`;
 
   const handleClick: MotionPressableProps["onClick"] = (event) => {
-    if (animate) {
+    if (decorativeAnimate) {
       void impactLight();
     }
     onClick?.(event);

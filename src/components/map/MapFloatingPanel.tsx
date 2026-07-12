@@ -47,8 +47,8 @@ export function MapFloatingPanel({
   contentKey,
   children,
 }: MapFloatingPanelProps) {
-  const { animate } = useMotionProfile();
-  const panelMotionClass = !minimized && animate ? "jl-panel-enter" : "";
+  const { decorativeAnimate } = useMotionProfile();
+  const panelMotionClass = !minimized && decorativeAnimate ? "jl-panel-enter" : "";
 
   const panelClassName = [
     outerClassName,

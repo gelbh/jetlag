@@ -1,9 +1,12 @@
-import { onCall } from "firebase-functions/v2/https";
-import { getFirestore } from "firebase-admin/firestore";
+import { FieldPath, getFirestore } from "firebase-admin/firestore";
+import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { getSentryDsnSecret, withSentryEventHandler } from "../lib/sentry.mjs";
 import { requireAdminAuth } from "./adminAccess.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
+const DEFAULT_PAGE_LIMIT = 50;
+const MAX_PAGE_LIMIT = 100;
+const SUMMARY_CONCURRENCY = 5;
 
 const SESSION_DOC_ACTIVITY_FIELDS = [
   "createdAt",
@@ -234,74 +237,112 @@ export function summarizeSession(sessionId, code, session, nowMs = Date.now()) {
   };
 }
 
+export async function mapActiveCodeToSummary(codeDoc, db, nowMs = Date.now()) {
+  const code = codeDoc.id;
+  const codeData = codeDoc.data();
+  const sessionId =
+    typeof codeData.sessionId === "string" ? codeData.sessionId : null;
+  if (!sessionId) {
+    return null;
+  }
+
+  const sessionRef = db.collection("sessions").doc(sessionId);
+  const sessionSnap = await sessionRef.get();
+  if (!sessionSnap.exists) {
+    return null;
+  }
+
+  const session = sessionSnap.data();
+  if (session.status === "ended" || typeof session.endedAt === "string") {
+    return null;
+  }
+
+  const [annotationsSnap, messagesSnap, questionsSnap] = await Promise.all([
+    sessionRef
+      .collection("annotations")
+      .orderBy("updatedAt", "desc")
+      .limit(1)
+      .get(),
+    sessionRef
+      .collection("messages")
+      .orderBy("createdAt", "desc")
+      .limit(1)
+      .get(),
+    sessionRef
+      .collection("pendingQuestions")
+      .orderBy("createdAt", "desc")
+      .limit(1)
+      .get(),
+  ]);
+
+  const lastActivityMs = resolveSessionLastActivityMs(session, {
+    annotationDoc: annotationsSnap.docs[0]?.data() ?? null,
+    messageDoc: messagesSnap.docs[0]?.data() ?? null,
+    questionDoc: questionsSnap.docs[0]?.data() ?? null,
+  });
+
+  const summary = summarizeSession(sessionId, code, session, nowMs);
+  summary.lastActivityAt =
+    lastActivityMs == null ? null : new Date(lastActivityMs).toISOString();
+  return summary;
+}
+
+export async function mapWithConcurrency(items, concurrency, mapper) {
+  const results = [];
+
+  for (let index = 0; index < items.length; index += concurrency) {
+    const chunk = items.slice(index, index + concurrency);
+    const chunkResults = await Promise.all(chunk.map(mapper));
+    results.push(...chunkResults);
+  }
+
+  return results;
+}
+
 export const listActiveSessions = onCall(
   { secrets: [sentryDsnSecret], enforceAppCheck: true },
   withSentryEventHandler(async (request) => {
     requireAdminAuth(request.auth);
 
     const db = getFirestore();
-    const codesSnap = await db
+    const requestedLimit = Number(request.data?.limit);
+    const limit = Number.isFinite(requestedLimit)
+      ? Math.min(Math.max(Math.trunc(requestedLimit), 1), MAX_PAGE_LIMIT)
+      : DEFAULT_PAGE_LIMIT;
+    const pageToken =
+      typeof request.data?.pageToken === "string" ? request.data.pageToken : null;
+
+    let codesQuery = db
       .collection("sessionCodes")
       .where("status", "==", "active")
-      .get();
+      .orderBy(FieldPath.documentId())
+      .limit(limit);
 
+    if (pageToken) {
+      const cursor = await db.collection("sessionCodes").doc(pageToken).get();
+      if (!cursor.exists) {
+        throw new HttpsError("invalid-argument", "Invalid page token.");
+      }
+      codesQuery = codesQuery.startAfter(cursor);
+    }
+
+    const codesSnap = await codesQuery.get();
     const nowMs = Date.now();
     const sessions = (
-      await Promise.all(
-        codesSnap.docs.map(async (codeDoc) => {
-          const code = codeDoc.id;
-          const codeData = codeDoc.data();
-          const sessionId =
-            typeof codeData.sessionId === "string" ? codeData.sessionId : null;
-          if (!sessionId) {
-            return null;
-          }
-
-          const sessionRef = db.collection("sessions").doc(sessionId);
-          const sessionSnap = await sessionRef.get();
-          if (!sessionSnap.exists) {
-            return null;
-          }
-
-          const session = sessionSnap.data();
-          if (session.status === "ended" || typeof session.endedAt === "string") {
-            return null;
-          }
-
-          const [annotationsSnap, messagesSnap, questionsSnap] = await Promise.all([
-            sessionRef
-              .collection("annotations")
-              .orderBy("updatedAt", "desc")
-              .limit(1)
-              .get(),
-            sessionRef
-              .collection("messages")
-              .orderBy("createdAt", "desc")
-              .limit(1)
-              .get(),
-            sessionRef
-              .collection("pendingQuestions")
-              .orderBy("createdAt", "desc")
-              .limit(1)
-              .get(),
-          ]);
-
-          const lastActivityMs = resolveSessionLastActivityMs(session, {
-            annotationDoc: annotationsSnap.docs[0]?.data() ?? null,
-            messageDoc: messagesSnap.docs[0]?.data() ?? null,
-            questionDoc: questionsSnap.docs[0]?.data() ?? null,
-          });
-
-          const summary = summarizeSession(sessionId, code, session, nowMs);
-          summary.lastActivityAt =
-            lastActivityMs == null ? null : new Date(lastActivityMs).toISOString();
-          return summary;
-        }),
+      await mapWithConcurrency(
+        codesSnap.docs,
+        SUMMARY_CONCURRENCY,
+        (codeDoc) => mapActiveCodeToSummary(codeDoc, db, nowMs),
       )
     ).filter((summary) => summary != null);
 
     sessions.sort(compareSessionsByLastActivity);
 
-    return { sessions };
+    const nextPageToken =
+      codesSnap.size === limit
+        ? codesSnap.docs[codesSnap.docs.length - 1]?.id ?? null
+        : null;
+
+    return { sessions, nextPageToken };
   }),
 );
