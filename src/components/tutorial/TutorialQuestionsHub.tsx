@@ -39,7 +39,7 @@ export function TutorialQuestionsHub({
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
       <button type="button" onClick={onBack} className={screenBackClassName}>
-        ← Tutorial
+        Tutorial
       </button>
 
       <div className="shrink-0 space-y-1">

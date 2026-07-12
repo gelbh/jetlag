@@ -2,8 +2,38 @@ import { readFileSync } from "node:fs";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+
+function injectGoogleAnalytics(mode: string): Plugin {
+  return {
+    name: "inject-google-analytics",
+    transformIndexHtml: {
+      order: "post",
+      handler(html) {
+        if (mode !== "production") {
+          return html;
+        }
+
+        const id = process.env.VITE_GA_MEASUREMENT_ID?.trim();
+        if (!id) {
+          return html;
+        }
+
+        const snippet = `<!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=${id}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '${id}', { send_page_view: false });
+    </script>`;
+
+        return html.replace("</head>", `    ${snippet}\n  </head>`);
+      },
+    },
+  };
+}
 
 const appVersion = (
   JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as {
@@ -65,6 +95,7 @@ export default defineConfig(({ mode }) => ({
           }),
         ]
       : []),
+    injectGoogleAnalytics(mode),
     react(),
     tailwindcss(),
     VitePWA({

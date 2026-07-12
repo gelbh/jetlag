@@ -1,3 +1,5 @@
+import { WizardStepFooter } from "./WizardStepFooter";
+
 interface ToolWizardNavProps {
   stepIndex: number;
   stepCount: number;
@@ -15,35 +17,17 @@ export function ToolWizardNav({
   canGoNext = true,
   onBack,
   onNext,
-  nextLabel = "Next",
+  nextLabel = "Next step",
 }: ToolWizardNavProps) {
-  const isLastStep = stepIndex >= stepCount - 1;
-
-  if (isLastStep) {
-    return canGoBack ? (
-      <div className="flex gap-2 pt-1">
-        <button type="button" onClick={onBack} className="btn-secondary flex-1">
-          Back
-        </button>
-      </div>
-    ) : null;
-  }
-
   return (
-    <div className="flex gap-2 pt-1">
-      {canGoBack ? (
-        <button type="button" onClick={onBack} className="btn-secondary flex-1">
-          Back
-        </button>
-      ) : null}
-      <button
-        type="button"
-        onClick={onNext}
-        disabled={!canGoNext}
-        className="btn-primary flex-1 disabled:opacity-40"
-      >
-        {nextLabel}
-      </button>
-    </div>
+    <WizardStepFooter
+      stepIndex={stepIndex}
+      stepCount={stepCount}
+      canGoBack={canGoBack}
+      canGoNext={canGoNext}
+      onBack={onBack}
+      onNext={onNext}
+      nextLabel={nextLabel}
+    />
   );
 }

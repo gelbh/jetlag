@@ -23,7 +23,7 @@ export function HiderZoneWizardShell({
   peekLabel,
   onClose,
   closeLabel,
-  maxHeightClassName = "max-h-[min(54dvh,480px)]",
+  maxHeightClassName = "jl-wizard-panel-max-h",
   contentKey,
 }: HiderZoneWizardShellProps) {
   const { mounted, animClass, setAnimNode } = useAnimatedPresence({
@@ -54,6 +54,7 @@ export function HiderZoneWizardShell({
         peeked ? "jl-panel-peeked" : ""
       }`}
       maxHeightClassName={maxHeightClassName}
+      bodyScrollable={false}
       preserveBodyWhenMinimized={false}
       panelStyle={useFramerDrag ? undefined : panelStyle}
       dragHandleProps={handleProps}

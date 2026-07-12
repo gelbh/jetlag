@@ -184,6 +184,15 @@ export function MeasuringPanel({
         canGoNext={canSwipeNext}
         onBack={goBack}
         onNext={goNext}
+        footer={
+          <ToolWizardNav
+            stepIndex={stepIndex}
+            stepCount={steps.length}
+            onBack={goBack}
+            onNext={goNext}
+            canGoNext={canGoNext}
+          />
+        }
       >
         {step === "source" ? (
           <MeasuringSourceStep
@@ -268,19 +277,13 @@ export function MeasuringPanel({
         ) : null}
 
         {allowsSearch && searchResults.length > 0 && step !== "answer" && step !== "target" ? (
-          <SearchResultsList
-            results={searchResults}
-            onSelect={(place) => onSearchResultSelect(place, searchRole)}
-          />
+          <div className="jl-wizard-search-results">
+            <SearchResultsList
+              results={searchResults}
+              onSelect={(place) => onSearchResultSelect(place, searchRole)}
+            />
+          </div>
         ) : null}
-
-        <ToolWizardNav
-          stepIndex={stepIndex}
-          stepCount={steps.length}
-          onBack={goBack}
-          onNext={goNext}
-          canGoNext={canGoNext}
-        />
       </WizardSwipeSurface>
 
       {error ? <InlineError>{error}</InlineError> : null}

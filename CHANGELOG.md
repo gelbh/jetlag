@@ -2,8 +2,15 @@
 
 ## 0.4.7 - 2026-07-12
 
+### Fixes
+
+- Wizards: swipe between steps works on buttons, screenshots, and inputs; step nav stays visible
+- Tutorial: back and next icon controls on every step; screenshots no longer push nav off screen
+
 ### Improvements
 
+- Wizards: full-width step slide on capable devices; slimmer map panels with auto-peek on placement steps
+- Tutorial: tighter hub and step layout that fits one screen without scrolling
 - Map settings: distance unit and map style pickers use the same pill segment control as other settings tabs.
 - Motion: smoother transitions on capable devices; app falls back to lightweight CSS animations when CPU, memory, network, or frame rate is constrained.
 - Motion: sheet and panel drag gestures use Framer on capable devices; shared sheet titles and tool dock highlight animate on top-tier devices.

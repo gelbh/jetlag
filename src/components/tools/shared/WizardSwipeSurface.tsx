@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useContext, type ReactNode } from "react";
 import { MotionCapabilityContext } from "../../motion/motionCapabilityContext";
 import { useAdaptiveWizardSwipe } from "../../../hooks/useAdaptiveWizardSwipe";
-import { MotionWizardSwipe } from "../../motion/MotionWizardSwipe";
 
 interface WizardSwipeSurfaceProps {
   stepId: string;
@@ -11,6 +10,7 @@ interface WizardSwipeSurfaceProps {
   onBack: () => void;
   onNext: () => void;
   children: ReactNode;
+  footer?: ReactNode;
   className?: string;
 }
 
@@ -22,6 +22,7 @@ export function WizardSwipeSurface({
   onBack,
   onNext,
   children,
+  footer,
   className = "",
 }: WizardSwipeSurfaceProps) {
   const capability = useContext(MotionCapabilityContext);
@@ -31,7 +32,7 @@ export function WizardSwipeSurface({
   const prevStepIndex = useRef(stepIndex);
   const [enterClass, setEnterClass] = useState("");
 
-  const { surfaceStyle, surfaceProps, useFramerSwipe } = useAdaptiveWizardSwipe({
+  const { surfaceStyle, surfaceProps } = useAdaptiveWizardSwipe({
     canGoBack,
     canGoNext,
     onBack,
@@ -56,45 +57,31 @@ export function WizardSwipeSurface({
 
     const timeoutId = window.setTimeout(() => {
       setEnterClass("");
-    }, 220);
+    }, 320);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
   }, [stepIndex, skipStepMotion]);
 
-  const stepContent = (
-    <div
-      key={stepId}
-      className={`${enterClass} motion-reduce:animate-none`.trim()}
-      style={useFramerSwipe ? undefined : surfaceStyle}
-    >
-      {children}
-    </div>
-  );
-
-  if (useFramerSwipe) {
-    return (
-      <MotionWizardSwipe
-        stepId={stepId}
-        canGoBack={canGoBack}
-        canGoNext={canGoNext}
-        onBack={onBack}
-        onNext={onNext}
-        className={className}
-      >
-        {stepContent}
-      </MotionWizardSwipe>
-    );
-  }
-
   return (
     <div
       ref={containerRef}
-      className={`wizard-swipe-surface touch-pan-y ${className}`.trim()}
+      className={`wizard-swipe-surface flex min-h-0 flex-1 flex-col overflow-hidden ${className}`.trim()}
       {...surfaceProps}
     >
-      {stepContent}
+      <div
+        key={stepId}
+        className={`flex min-h-0 flex-1 flex-col overflow-hidden ${enterClass} motion-reduce:animate-none`.trim()}
+        style={surfaceStyle}
+      >
+        <div className="wizard-swipe-body flex min-h-0 flex-1 flex-col overflow-hidden">
+          {children}
+        </div>
+        {footer ? (
+          <div className="wizard-swipe-footer shrink-0 pt-1">{footer}</div>
+        ) : null}
+      </div>
     </div>
   );
 }

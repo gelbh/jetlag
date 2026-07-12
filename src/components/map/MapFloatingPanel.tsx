@@ -17,6 +17,7 @@ interface MapFloatingPanelProps {
   onClose?: () => void;
   closeLabel?: string;
   maxHeightClassName?: string;
+  bodyScrollable?: boolean;
   outerClassName?: string;
   outerRef?: Ref<HTMLDivElement>;
   panelStyle?: CSSProperties;
@@ -36,6 +37,7 @@ function MapFloatingPanelBody({
   onClose,
   closeLabel,
   maxHeightClassName = "max-h-[min(34dvh,320px)]",
+  bodyScrollable = true,
   preserveBodyWhenMinimized = true,
   dragHandle = true,
   dragHandleProps,
@@ -61,7 +63,7 @@ function MapFloatingPanelBody({
         </button>
       ) : null}
       <div
-        className={`tool-panel-compact hud-panel relative mx-auto max-w-xl overflow-y-auto overscroll-contain p-3 pt-9 ${maxHeightClassName} ${bodyPreserverClass}`}
+        className={`tool-panel-compact hud-panel relative mx-auto max-w-xl overscroll-contain p-3 pt-9 ${maxHeightClassName} ${bodyScrollable ? "overflow-y-auto" : "overflow-hidden"} ${bodyPreserverClass}`}
         aria-hidden={minimized && preserveBodyWhenMinimized}
       >
         {!minimized && dragHandle && dragHandleProps ? (
@@ -103,6 +105,7 @@ export function MapFloatingPanel({
   onClose,
   closeLabel,
   maxHeightClassName = "max-h-[min(34dvh,320px)]",
+  bodyScrollable = true,
   outerClassName = "pointer-events-auto absolute inset-x-0 jl-panel-above-dock z-[var(--z-panel)] px-3",
   outerRef,
   panelStyle,
@@ -138,6 +141,7 @@ export function MapFloatingPanel({
       closeLabel={closeLabel}
       maxHeightClassName={maxHeightClassName}
       preserveBodyWhenMinimized={preserveBodyWhenMinimized}
+      bodyScrollable={bodyScrollable}
       dragHandle={dragHandle}
       dragHandleProps={dragHandleProps}
       contentKey={contentKey}
@@ -177,6 +181,7 @@ export function MapFloatingPanel({
               closeLabel={closeLabel}
               maxHeightClassName={maxHeightClassName}
               preserveBodyWhenMinimized={preserveBodyWhenMinimized}
+              bodyScrollable={bodyScrollable}
               dragHandle={dragHandle}
               dragHandleProps={framerHandleProps}
               contentKey={contentKey}

@@ -1,16 +1,45 @@
 import { useCallback, useEffect, useState } from "react";
 import type { DockableMapTool } from "../domain/map/mapTools";
+import { isWizardPlacementStep } from "../components/tools/shared/toolWizardPlacementSteps";
+import { WIZARD_STEP_CHANGE_EVENT } from "./tools/useSyncWizardStepRef";
 
 export function useToolPanelChrome(activeTool: DockableMapTool | "none") {
   const [mapPanning, setMapPanning] = useState(false);
   const [userMinimized, setUserMinimized] = useState(false);
+  const [wizardStepId, setWizardStepId] = useState<string | null>(null);
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- reset panel chrome when the active tool changes */
     setMapPanning(false);
     setUserMinimized(false);
+    setWizardStepId(null);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [activeTool]);
+
+  useEffect(() => {
+    const handleStepChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ stepId: string }>).detail;
+      setWizardStepId(detail.stepId);
+    };
+
+    window.addEventListener(WIZARD_STEP_CHANGE_EVENT, handleStepChange);
+    return () => {
+      window.removeEventListener(WIZARD_STEP_CHANGE_EVENT, handleStepChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (activeTool === "none" || !wizardStepId) {
+      return;
+    }
+
+    if (isWizardPlacementStep(wizardStepId)) {
+      setUserMinimized(true);
+      return;
+    }
+
+    setUserMinimized(false);
+  }, [activeTool, wizardStepId]);
 
   const handleMapPanStart = useCallback(() => {
     if (activeTool !== "none") {

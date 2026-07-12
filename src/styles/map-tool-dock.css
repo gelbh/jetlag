@@ -302,6 +302,16 @@
     bottom: var(--hider-wizard-bottom);
   }
 
+  .jl-wizard-panel-max-h {
+    max-height: min(28dvh, 16.25rem);
+  }
+
+  .jl-wizard-search-results {
+    max-height: 7rem;
+    overflow-y: auto;
+    overscroll-contain;
+  }
+
   .jl-panel-hider-wizard.jl-panel-peeked {
     transform: translateY(calc(100% - 3rem));
   }

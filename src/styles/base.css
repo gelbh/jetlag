@@ -33,6 +33,7 @@
   --motion-fast: 150ms;
   --motion-base: 200ms;
   --motion-sheet: 280ms;
+  --motion-wizard-step: 300ms;
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring-subtle: cubic-bezier(0.32, 1.28, 0.54, 1);
   --map-banner-top: calc(

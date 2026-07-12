@@ -18,6 +18,13 @@ function ensureGtagStub(): void {
     };
 }
 
+function loadGtagScript(id: string): void {
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
+  document.head.appendChild(script);
+}
+
 export function initAnalytics(): void {
   if (import.meta.env.MODE === "test" || !import.meta.env.PROD) {
     return;
@@ -29,14 +36,17 @@ export function initAnalytics(): void {
   }
 
   measurementId = id;
+
+  if (window.gtag) {
+    window.gtag("config", id, { send_page_view: false });
+    return;
+  }
+
+  // Fallback when the production build omitted the HTML snippet.
   ensureGtagStub();
   window.gtag!("js", new Date());
   window.gtag!("config", id, { send_page_view: false });
-
-  const script = document.createElement("script");
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
-  document.head.appendChild(script);
+  loadGtagScript(id);
 }
 
 export function trackPageView(path: string): void {

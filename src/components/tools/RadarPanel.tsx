@@ -116,6 +116,15 @@ export function RadarPanel({
         canGoNext={canSwipeNext}
         onBack={goBack}
         onNext={goNext}
+        footer={
+          <ToolWizardNav
+            stepIndex={stepIndex}
+            stepCount={steps.length}
+            onBack={goBack}
+            onNext={goNext}
+            canGoNext={canGoNext}
+          />
+        }
       >
       {viewOnly ? <ViewOnlyQuestionBanner /> : null}
       {step === "distance" ? (
@@ -183,14 +192,6 @@ export function RadarPanel({
           </button>
         </ToolSection>
       ) : null}
-
-      <ToolWizardNav
-        stepIndex={stepIndex}
-        stepCount={steps.length}
-        onBack={goBack}
-        onNext={goNext}
-        canGoNext={canGoNext}
-      />
       </WizardSwipeSurface>
 
       {error ? <InlineError>{error}</InlineError> : null}

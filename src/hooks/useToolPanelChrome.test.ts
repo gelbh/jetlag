@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { WIZARD_STEP_CHANGE_EVENT } from "./tools/useSyncWizardStepRef";
 import { useToolPanelChrome } from "./useToolPanelChrome";
 
 describe("useToolPanelChrome", () => {
@@ -38,6 +39,20 @@ describe("useToolPanelChrome", () => {
 
     expect(result.current.mapPanning).toBe(false);
     expect(result.current.panelMinimized).toBe(false);
+  });
+
+  it("auto-peeks on wizard placement steps", () => {
+    const { result } = renderHook(() => useToolPanelChrome("matching"));
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent(WIZARD_STEP_CHANGE_EVENT, {
+          detail: { stepId: "anchor" },
+        }),
+      );
+    });
+
+    expect(result.current.userMinimized).toBe(true);
   });
 
   it("keeps user-minimized state after panning ends", () => {
