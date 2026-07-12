@@ -55,7 +55,7 @@ test.describe("hider flows", () => {
     await confirmHidingZone(guestPage, true);
     await expect(guestPage.getByText(/different location/i)).toBeVisible();
 
-    await guestPage.getByRole("button", { name: "Back" }).click();
+    await guestPage.getByRole("button", { name: "Previous step" }).click();
     await selectTransitStation(guestPage, "North Station");
     await guestPage.getByRole("button", { name: "Next" }).click();
     await confirmHidingZone(guestPage, true);
