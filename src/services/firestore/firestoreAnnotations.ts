@@ -420,6 +420,7 @@ async function joinRemoteSessionWithRead(
       clientVersion,
       uid,
       returningMemberUid,
+      role,
     )
   ) {
     return {
@@ -491,7 +492,7 @@ async function joinRemoteSessionWithoutRead(
   const previewSession = buildJoinPreviewSession(sessionId, "", codeRecord);
   if (
     !returningMemberUid &&
-    !sessionVersionCompatible(previewSession, clientVersion, uid)
+    !sessionVersionCompatible(previewSession, clientVersion, uid, undefined, role)
   ) {
     return {
       status: "incompatible",
