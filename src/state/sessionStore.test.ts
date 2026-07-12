@@ -67,4 +67,29 @@ describe("sessionStore", () => {
     useSessionStore.getState().setSession(remote);
     expect(useSessionStore.getState().session?.hostUid).toBe("user-host");
   });
+
+  it("skips setSession when sync fields are unchanged", () => {
+    const session = createTestRemoteSession();
+    useSessionStore.getState().setSession(session);
+    const before = useSessionStore.getState();
+
+    useSessionStore.getState().setSession({ ...session });
+
+    expect(useSessionStore.getState()).toBe(before);
+  });
+
+  it("updates session when timer fields change", () => {
+    const session = createTestRemoteSession({
+      timerAccumulatedMs: 1000,
+      timerRunningSince: null,
+    });
+    useSessionStore.getState().setSession(session);
+
+    useSessionStore.getState().setSession({
+      ...session,
+      timerAccumulatedMs: 2000,
+    });
+
+    expect(useSessionStore.getState().session?.timerAccumulatedMs).toBe(2000);
+  });
 });
