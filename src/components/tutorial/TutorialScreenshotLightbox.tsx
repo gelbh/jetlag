@@ -15,7 +15,7 @@ export function TutorialScreenshotLightbox({
   onClose,
 }: TutorialScreenshotLightboxProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const { animate } = useMotionProfile();
+  const { decorativeAnimate } = useMotionProfile();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -36,7 +36,7 @@ export function TutorialScreenshotLightbox({
   return (
     <dialog
       ref={dialogRef}
-      className={`tutorial-screenshot-lightbox ${animate ? "tutorial-screenshot-lightbox-animated" : ""}`}
+      className={`tutorial-screenshot-lightbox ${decorativeAnimate ? "tutorial-screenshot-lightbox-animated" : ""}`}
       onCancel={(event) => {
         event.preventDefault();
         onClose();
