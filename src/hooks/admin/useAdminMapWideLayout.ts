@@ -9,11 +9,10 @@ function useContainerMinWidth(
   minWidthPx: number,
   ready = true,
 ): boolean {
-  const [matches, setMatches] = useState(false);
+  const [measuredWide, setMeasuredWide] = useState(false);
 
   useEffect(() => {
     if (!ready) {
-      setMatches(false);
       return;
     }
 
@@ -30,14 +29,14 @@ function useContainerMinWidth(
 
       const width =
         entry.contentBoxSize?.[0]?.inlineSize ?? entry.contentRect.width;
-      setMatches(width >= minWidthPx);
+      setMeasuredWide(width >= minWidthPx);
     });
 
     observer.observe(element);
     return () => observer.disconnect();
   }, [minWidthPx, ready, ref]);
 
-  return matches;
+  return ready ? measuredWide : false;
 }
 
 export function useAdminMapWideLayout(
