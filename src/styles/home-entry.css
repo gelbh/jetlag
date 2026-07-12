@@ -532,6 +532,31 @@
     justify-content: center;
   }
 
+  .tutorial-wizard-interactive {
+    min-height: 0;
+  }
+
+  .tutorial-scroll {
+    min-height: 0;
+  }
+
+  .tutorial-interactive-media {
+    min-height: 0;
+    align-items: stretch;
+  }
+
+  .tutorial-split-card {
+    min-height: 0;
+  }
+
+  .tutorial-split-card-body {
+    min-height: 0;
+  }
+
+  .tutorial-map-preview-compact {
+    min-height: min(28dvh, 11rem);
+  }
+
   .tutorial-split-panel-preview {
     min-height: min(42dvh, 18rem);
   }
