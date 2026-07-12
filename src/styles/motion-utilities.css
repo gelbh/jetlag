@@ -2,19 +2,19 @@
 
 .jl-tool-overflow-sheet,
 .hud-sheet-enter {
-  animation: hud-sheet-enter var(--motion-sheet) var(--ease-out-quint) both;
+  animation: hud-sheet-enter var(--motion-sheet-present) var(--ease-ios-standard) both;
 }
 
 .hud-sheet-exit {
-  animation: hud-sheet-exit calc(var(--motion-sheet) * 0.75) var(--ease-out-quint) both;
+  animation: hud-sheet-exit calc(var(--motion-sheet-present) * 0.75) var(--ease-ios-emphasized) both;
 }
 
 .hud-scrim-enter {
-  animation: hud-scrim-enter var(--motion-base) var(--ease-out-quint) both;
+  animation: hud-scrim-enter var(--motion-sheet-present) var(--ease-ios-standard) both;
 }
 
 .hud-scrim-exit {
-  animation: hud-scrim-exit calc(var(--motion-base) * 0.75) var(--ease-out-quint) both;
+  animation: hud-scrim-exit calc(var(--motion-sheet-present) * 0.75) var(--ease-ios-standard) both;
 }
 
 .jl-panel-enter {
@@ -34,11 +34,11 @@
 }
 
 .jl-wizard-step-forward {
-  animation: jl-wizard-step-forward var(--motion-wizard-step) var(--ease-out-quint) both;
+  animation: jl-wizard-step-forward var(--motion-nav) var(--ease-ios-standard) both;
 }
 
 .jl-wizard-step-back {
-  animation: jl-wizard-step-back var(--motion-wizard-step) var(--ease-out-quint) both;
+  animation: jl-wizard-step-back var(--motion-nav) var(--ease-ios-standard) both;
 }
 
 .jl-banner-enter {
