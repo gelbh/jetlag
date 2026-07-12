@@ -7,19 +7,25 @@ import type { AdminSessionSummary } from "../../services/admin/adminSessions";
 interface AdminSessionRowProps {
   summary: AdminSessionSummary;
   observingCode: string | null;
+  selected?: boolean;
   onMonitor: (summary: AdminSessionSummary) => void;
 }
 
 export function AdminSessionRow({
   summary,
   observingCode,
+  selected = false,
   onMonitor,
 }: AdminSessionRowProps) {
   const busy = observingCode === summary.code;
   const areaLabel = resolveAdminSessionAreaLabel(summary);
 
   return (
-    <div className="home-card-btn home-card-btn-secondary items-start gap-3 py-4">
+    <div
+      className={`home-card-btn home-card-btn-secondary items-start gap-3 py-4 ${
+        selected ? "ring-2 ring-brand-blue/50" : ""
+      }`}
+    >
       <div className="min-w-0 flex-1 space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-xl font-bold tracking-[0.22em] text-ink">

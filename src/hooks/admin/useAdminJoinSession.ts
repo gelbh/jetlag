@@ -19,9 +19,13 @@ export function useAdminJoinSession(options: UseAdminJoinSessionOptions = {}) {
   const [error, setError] = useState<string | null>(null);
 
   const joinSession = useCallback(
-    async (summary: AdminSessionSummary) => {
+    async (
+      summary: AdminSessionSummary,
+      options: { navigate?: boolean } = {},
+    ) => {
+      const navigateToMap = options.navigate !== false;
       if (!user) {
-        return;
+        return false;
       }
 
       setJoiningCode(summary.code);
@@ -37,29 +41,33 @@ export function useAdminJoinSession(options: UseAdminJoinSessionOptions = {}) {
         if (result.status === "missing") {
           setError("That session is no longer available.");
           onRefresh?.({ background: true });
-          return;
+          return false;
         }
 
         if (result.status === "ended") {
           setError("That session has ended.");
           onRefresh?.({ background: true });
-          return;
+          return false;
         }
 
         if (result.status === "incompatible") {
           setError("Your app version is older than the host's.");
-          return;
+          return false;
         }
 
         setSession(result.session, user.uid);
         setPremiumApiContext(result.session);
-        navigate("/map");
+        if (navigateToMap) {
+          navigate("/map");
+        }
+        return true;
       } catch (joinError) {
         setError(
           joinError instanceof Error
             ? joinError.message
             : "Couldn't join as admin.",
         );
+        return false;
       } finally {
         setJoiningCode(null);
       }

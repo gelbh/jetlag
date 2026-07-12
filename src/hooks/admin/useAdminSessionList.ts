@@ -3,10 +3,14 @@ import {
   fetchActiveAdminSessions,
   type AdminSessionSummary,
 } from "../../services/admin/adminSessions";
-
-const POLL_INTERVAL_MS = 15_000;
+import {
+  useAdminPanelPreferences,
+} from "../../domain/admin/adminPanelPreferences";
 
 export function useAdminSessionList(enabled: boolean) {
+  const pollIntervalMs = useAdminPanelPreferences(
+    (state) => state.pollIntervalMs,
+  );
   const [sessions, setSessions] = useState<AdminSessionSummary[]>([]);
   const [loading, setLoading] = useState(enabled);
   const [refreshing, setRefreshing] = useState(false);
@@ -53,12 +57,12 @@ export function useAdminSessionList(enabled: boolean) {
 
     const intervalId = window.setInterval(() => {
       void refresh({ background: true });
-    }, POLL_INTERVAL_MS);
+    }, pollIntervalMs);
 
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [enabled, refresh]);
+  }, [enabled, pollIntervalMs, refresh]);
 
   return {
     sessions: enabled ? sessions : [],

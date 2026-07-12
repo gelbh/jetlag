@@ -2,25 +2,32 @@ import { Link } from "react-router-dom";
 import { useCallback, useMemo, useState } from "react";
 import { signOut } from "firebase/auth";
 import { PremiumSignInGate } from "../components/billing/PremiumSignInGate";
+import { AdminDashboardLayout } from "../components/admin/AdminDashboardLayout";
+import { AdminMonitorPane } from "../components/admin/AdminMonitorPane";
 import {
   AdminSessionFilters,
-  type AdminSessionPhaseFilter,
 } from "../components/admin/AdminSessionFilters";
 import { AdminSessionRow } from "../components/admin/AdminSessionRow";
+import { AdminSettingsSheet } from "../components/admin/AdminSettingsSheet";
+import { AdminStatsHeader } from "../components/admin/AdminStatsHeader";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
 } from "../components/ui/ScreenHeader";
-import { HudAdminIcon } from "../components/ui/HudIcons";
+import { HudAdminIcon, HudSettingsIcon } from "../components/ui/HudIcons";
 import { InlineError } from "../components/ui/InlineError";
 import { isAdminUser } from "../domain/admin/adminAccess";
-import { resolveAdminSessionAreaLabel } from "../domain/admin/adminSessionAreaLabel";
+import { filterAdminSessions } from "../domain/admin/adminSessionFilters";
+import type { AdminSessionPhaseFilter } from "../domain/admin/adminSessionFilters";
+import { useAdminPanelPreferences } from "../domain/admin/adminPanelPreferences";
 import { APP_VERSION } from "../domain/device/changelog";
 import { useAdminJoinSession } from "../hooks/admin/useAdminJoinSession";
 import { useAdminSessionList } from "../hooks/admin/useAdminSessionList";
+import { useMinWidth } from "../hooks/useMinWidth";
 import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
 import { getFirebaseAuth } from "../services/core/firebase";
+import { useSessionStore } from "../state/sessionStore";
 import type { AdminSessionSummary } from "../services/admin/adminSessions";
 
 function formatLastFetched(at: Date | null): string {
@@ -52,6 +59,9 @@ export function AdminPanel() {
   const { user, isPermanent, authReady } = usePermanentAuthUser();
   const isAdmin = isAdminUser(user);
   const enabled = authReady && isAdmin;
+  const isDesktop = useMinWidth(1024);
+  const activeSession = useSessionStore((state) => state.session);
+  const activeRole = useSessionStore((state) => state.myRole);
   const { sessions, loading, refreshing, error, lastFetchedAt, refresh } =
     useAdminSessionList(enabled);
   const {
@@ -60,35 +70,51 @@ export function AdminPanel() {
     error: observeError,
     setError: setObserveError,
   } = useAdminJoinSession({ onRefresh: refresh });
+  const pollIntervalMs = useAdminPanelPreferences((state) => state.pollIntervalMs);
+  const multiplayerOnly = useAdminPanelPreferences((state) => state.multiplayerOnly);
+  const setPollIntervalMs = useAdminPanelPreferences(
+    (state) => state.setPollIntervalMs,
+  );
+  const setMultiplayerOnly = useAdminPanelPreferences(
+    (state) => state.setMultiplayerOnly,
+  );
   const [query, setQuery] = useState("");
   const [phaseFilter, setPhaseFilter] = useState<AdminSessionPhaseFilter>("all");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
 
-  const filteredSessions = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
+  const filteredSessions = useMemo(
+    () =>
+      filterAdminSessions(sessions, {
+        query,
+        phase: phaseFilter,
+        multiplayerOnly,
+      }),
+    [multiplayerOnly, phaseFilter, query, sessions],
+  );
 
-    return sessions.filter((summary) => {
-      if (phaseFilter !== "all" && summary.phase !== phaseFilter) {
-        return false;
-      }
-
-      if (!normalizedQuery) {
-        return true;
-      }
-
-      const areaLabel = resolveAdminSessionAreaLabel(summary)?.toLowerCase() ?? "";
-      return (
-        summary.code.toLowerCase().includes(normalizedQuery) ||
-        areaLabel.includes(normalizedQuery)
-      );
-    });
-  }, [phaseFilter, query, sessions]);
+  const monitorActive =
+    isDesktop &&
+    activeRole === "admin" &&
+    activeSession != null &&
+    selectedSessionId === activeSession.id;
 
   const handleMonitor = useCallback(
-    (summary: AdminSessionSummary) => {
+    async (summary: AdminSessionSummary) => {
       setObserveError(null);
-      void joinSession(summary);
+      setSelectedSessionId(summary.sessionId);
+
+      if (isDesktop) {
+        const joined = await joinSession(summary, { navigate: false });
+        if (!joined) {
+          setSelectedSessionId(null);
+        }
+        return;
+      }
+
+      await joinSession(summary, { navigate: true });
     },
-    [joinSession, setObserveError],
+    [isDesktop, joinSession, setObserveError],
   );
 
   const handleSignOut = async () => {
@@ -154,8 +180,51 @@ export function AdminPanel() {
     );
   }
 
+  const sessionList = (
+    <div className="space-y-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <AdminSessionFilters
+        query={query}
+        phase={phaseFilter}
+        multiplayerOnly={multiplayerOnly}
+        onQueryChange={setQuery}
+        onPhaseChange={setPhaseFilter}
+        onMultiplayerOnlyChange={setMultiplayerOnly}
+      />
+      {filteredSessions.length === 0 ? (
+        <div className="rounded-xl border border-border bg-surface-panel px-4 py-6">
+          <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
+            No matching sessions
+          </p>
+          <p className="mt-2 text-sm text-ink-muted">
+            Try another code, area name, or phase filter.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2.5">
+          {filteredSessions.map((summary) => (
+            <AdminSessionRow
+              key={summary.sessionId}
+              summary={summary}
+              observingCode={observingCode}
+              selected={selectedSessionId === summary.sessionId}
+              onMonitor={(nextSummary) => void handleMonitor(nextSummary)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <EntryScreenLayout justify="start">
+      <AdminSettingsSheet
+        open={settingsOpen}
+        pollIntervalMs={pollIntervalMs}
+        multiplayerOnly={multiplayerOnly}
+        onPollIntervalChange={setPollIntervalMs}
+        onMultiplayerOnlyChange={setMultiplayerOnly}
+        onClose={() => setSettingsOpen(false)}
+      />
       <ScreenHeader backTo="/" backLabel="Back" />
       <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
         <div className="flex items-start justify-between gap-3">
@@ -174,22 +243,28 @@ export function AdminPanel() {
               {refreshing ? " · Refreshing…" : ""}
             </p>
           </div>
-          <button
-            type="button"
-            className="hud-chrome inline-flex min-h-11 min-w-11 items-center justify-center px-3 text-sm font-semibold uppercase tracking-wide text-ink"
-            onClick={() => void refresh()}
-            aria-label="Refresh live sessions"
-          >
-            Refresh
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="hud-chrome inline-flex min-h-11 min-w-11 items-center justify-center"
+              aria-label="Panel settings"
+              onClick={() => setSettingsOpen(true)}
+            >
+              <HudSettingsIcon className="size-5" />
+            </button>
+            <button
+              type="button"
+              className="hud-chrome inline-flex min-h-11 items-center justify-center px-3 text-sm font-semibold uppercase tracking-wide text-ink"
+              onClick={() => void refresh()}
+              aria-label="Refresh live sessions"
+            >
+              Refresh
+            </button>
+          </div>
         </div>
 
-        {error ? (
-          <InlineError>{error}</InlineError>
-        ) : null}
-        {observeError ? (
-          <InlineError>{observeError}</InlineError>
-        ) : null}
+        {error ? <InlineError>{error}</InlineError> : null}
+        {observeError ? <InlineError>{observeError}</InlineError> : null}
 
         {loading ? (
           <AdminSessionSkeletonRows />
@@ -203,35 +278,19 @@ export function AdminPanel() {
             </p>
           </div>
         ) : (
-          <div className="space-y-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
-            <AdminSessionFilters
-              query={query}
-              phase={phaseFilter}
-              onQueryChange={setQuery}
-              onPhaseChange={setPhaseFilter}
+          <>
+            <AdminStatsHeader sessions={sessions} />
+            <AdminDashboardLayout
+              showMonitor={isDesktop}
+              list={sessionList}
+              monitor={
+                <AdminMonitorPane
+                  active={monitorActive}
+                  sessionCode={activeSession?.code ?? null}
+                />
+              }
             />
-            {filteredSessions.length === 0 ? (
-              <div className="rounded-xl border border-border bg-surface-panel px-4 py-6">
-                <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
-                  No matching sessions
-                </p>
-                <p className="mt-2 text-sm text-ink-muted">
-                  Try another code, area name, or phase filter.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                {filteredSessions.map((summary) => (
-                  <AdminSessionRow
-                    key={summary.sessionId}
-                    summary={summary}
-                    observingCode={observingCode}
-                    onMonitor={(nextSummary) => handleMonitor(nextSummary)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          </>
         )}
 
         <div className="pb-4 text-xs text-ink-dim">
