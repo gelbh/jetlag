@@ -100,6 +100,7 @@ export function CreateSession() {
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 px-4">
           <GameAreaSection
             bundledPresetSelectGroups={session.bundledPresetSelectGroups}
+            favouritePresetSelectOptions={session.favouritePresetSelectOptions}
             userPresets={session.userPresets}
             loading={session.loading}
             verifyingAccess={session.verifyingAccess}

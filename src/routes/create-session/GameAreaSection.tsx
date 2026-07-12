@@ -16,6 +16,7 @@ type GameAreaFraming = ReturnType<typeof useGameAreaFraming>;
 
 export interface GameAreaSectionProps {
   bundledPresetSelectGroups: BundledPresetSelectGroup[];
+  favouritePresetSelectOptions: { presetId: string; name: string }[];
   userPresets: GamePreset[];
   loading: boolean;
   verifyingAccess: boolean;
@@ -48,6 +49,7 @@ export interface GameAreaSectionProps {
 
 export function GameAreaSection({
   bundledPresetSelectGroups,
+  favouritePresetSelectOptions,
   userPresets,
   loading,
   verifyingAccess,
@@ -107,6 +109,15 @@ export function GameAreaSection({
             }}
           >
             <option value="">Load preset…</option>
+            {favouritePresetSelectOptions.length > 0 ? (
+              <optgroup label="Favourites">
+                {favouritePresetSelectOptions.map((option) => (
+                  <option key={option.presetId} value={option.presetId}>
+                    {option.name}
+                  </option>
+                ))}
+              </optgroup>
+            ) : null}
             {bundledPresetSelectGroups.map((group) => (
               <optgroup key={group.label} label={group.label}>
                 {group.options.map((option) => (

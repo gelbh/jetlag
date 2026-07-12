@@ -4,6 +4,7 @@ import {
   isBundledPresetId,
 } from "../../domain/regions/bundledGamePresets";
 import { migrateGamePreset } from "../../domain/session/gamePreset";
+import { PresetFavouriteButton } from "./PresetFavouriteButton";
 
 export function PresetDetailPanel({
   preset,
@@ -47,6 +48,7 @@ export function PresetDetailPanel({
             ) : null}
           </div>
         </div>
+        <PresetFavouriteButton presetId={preset.id} />
       </div>
       <div className="flex flex-wrap gap-2">
         {preset.migrationStatus === "manual_required" ? (

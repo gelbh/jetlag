@@ -10,6 +10,7 @@ import {
 } from "../../domain/regions/bundledPresetHierarchy";
 import { migrateGamePreset } from "../../domain/session/gamePreset";
 import { PresetCard } from "./PresetCard";
+import { PresetFavouriteButton } from "./PresetFavouriteButton";
 
 type MigratedPreset = ReturnType<typeof migrateGamePreset>;
 
@@ -26,6 +27,7 @@ function PresetLeafCard({ preset }: { preset: MigratedPreset }) {
         </>
       }
       description={description}
+      headerAction={<PresetFavouriteButton presetId={preset.id} />}
       actions={
         <Link
           to={`/create?preset=${preset.id}`}
