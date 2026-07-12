@@ -9,6 +9,7 @@ vi.mock("firebase/storage", () => ({
 }));
 
 vi.mock("firebase/functions", () => ({
+  connectFunctionsEmulator: vi.fn(),
   getFunctions,
 }));
 

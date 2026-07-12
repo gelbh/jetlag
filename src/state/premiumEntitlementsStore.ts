@@ -48,13 +48,13 @@ export const usePremiumEntitlementsStore = create<PremiumEntitlementsState>(
         return null;
       }
 
-      const generation = get().generation;
       const user = await ensureAnonymousUser();
       if (!user?.uid) {
         set({ entitlements: null, loading: false, hydrated: true });
         return null;
       }
       get().setUid(user.uid);
+      const generation = get().generation;
 
       if (inflightRefresh && inflightUid === user.uid) {
         return inflightRefresh;
