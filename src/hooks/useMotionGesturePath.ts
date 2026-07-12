@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { MotionCapabilityContext } from "../components/motion/MotionCapabilityProvider";
+import { MotionCapabilityContext } from "../components/motion/motionCapabilityContext";
 
 /** True when Framer is loaded and should drive drag gestures instead of pointer hooks. */
 export function useMotionGesturePath(): boolean {

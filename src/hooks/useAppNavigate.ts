@@ -1,6 +1,6 @@
 import { useCallback, useContext, useRef } from "react";
 import { useNavigate, type NavigateOptions, type To } from "react-router-dom";
-import { MotionCapabilityContext } from "../components/motion/MotionCapabilityProvider";
+import { MotionCapabilityContext } from "../components/motion/motionCapabilityContext";
 import { useMotionProfile } from "./useMotionProfile";
 
 const RESET_PATHS = new Set(["/", "/map"]);
@@ -45,10 +45,11 @@ export function useAppNavigate() {
         direction === "back" ? "back" : direction === "replace" ? "neutral" : "forward";
       document.documentElement.dataset.navDirection = navDir;
 
-      const { direction: _direction, ...navigateOptions } = options ?? {};
-
       navigate(to, {
-        ...navigateOptions,
+        replace: options?.replace,
+        state: options?.state,
+        preventScrollReset: options?.preventScrollReset,
+        relative: options?.relative,
         viewTransition: allowsViewTransitions,
       });
     },

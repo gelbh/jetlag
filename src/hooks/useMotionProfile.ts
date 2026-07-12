@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { MotionCapabilityContext } from "../components/motion/MotionCapabilityProvider";
+import { MotionCapabilityContext } from "../components/motion/motionCapabilityContext";
 import { useMapStore } from "../state/mapStore";
 
 function readPrefersReducedMotion(): boolean {

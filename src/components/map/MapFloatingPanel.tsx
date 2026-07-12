@@ -2,7 +2,7 @@ import { lazy, Suspense, type CSSProperties, type ReactNode, type Ref } from "re
 import { useContext } from "react";
 import { useMotionGesturePath } from "../../hooks/useMotionGesturePath";
 import type { PanelHandleProps } from "../../hooks/usePanelDrag";
-import { MotionCapabilityContext } from "../motion/MotionCapabilityProvider";
+import { MotionCapabilityContext } from "../motion/motionCapabilityContext";
 import { PopupCloseButton } from "../ui/PopupCloseButton";
 
 const FramerPanelDrag = lazy(() => import("../motion/FramerPanelDrag"));

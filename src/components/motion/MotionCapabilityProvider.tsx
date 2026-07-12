@@ -1,5 +1,4 @@
 import {
-  createContext,
   useCallback,
   useEffect,
   useMemo,
@@ -21,16 +20,10 @@ import { useFrameBudget } from "../../hooks/useFrameBudget";
 import { usePrefersReducedMotion } from "../../hooks/useMotionProfile";
 import { useMapStore } from "../../state/mapStore";
 import { loadMotionModule } from "./lazyMotion";
-
-export interface MotionCapabilityContextValue {
-  tier: MotionTier;
-  renderer: ReturnType<typeof rendererFromTier>;
-  framerReady: boolean;
-  allowsViewTransitions: boolean;
-}
-
-export const MotionCapabilityContext =
-  createContext<MotionCapabilityContextValue | null>(null);
+import {
+  MotionCapabilityContext,
+  type MotionCapabilityContextValue,
+} from "./motionCapabilityContext";
 
 function readNetworkSignals(): Pick<DeviceSignals, "saveData" | "effectiveType"> {
   const conn = (

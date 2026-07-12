@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { MotionCapabilityContext } from "../components/motion/MotionCapabilityProvider";
+import { MotionCapabilityContext } from "../components/motion/motionCapabilityContext";
 
 export function useMotionCapability() {
   const ctx = useContext(MotionCapabilityContext);

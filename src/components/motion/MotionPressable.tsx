@@ -1,6 +1,6 @@
 import { lazy, Suspense, useContext, type ComponentPropsWithoutRef, type ReactNode } from "react";
 import { impactLightForTier } from "../../services/device/hapticsService";
-import { MotionCapabilityContext } from "./MotionCapabilityProvider";
+import { MotionCapabilityContext } from "./motionCapabilityContext";
 
 const FramerPressable = lazy(() => import("./FramerPressable"));
 

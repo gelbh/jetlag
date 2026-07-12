@@ -61,12 +61,12 @@ export default function FramerSheet({
 
   useEffect(() => {
     if (open) {
-      setIsPresent(true);
+      queueMicrotask(() => setIsPresent(true));
       return;
     }
 
     if (isPresent) {
-      setIsPresent(false);
+      queueMicrotask(() => setIsPresent(false));
     }
   }, [open, isPresent]);
 
