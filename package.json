@@ -31,6 +31,7 @@
     "test:unit": "vitest run && npm test --prefix functions",
     "test:ci": "npm run test:coverage && npm run test:functions",
     "test:staged": "node scripts/test-staged.mjs",
+    "test:prepush": "node scripts/test-prepush.mjs",
     "test:changed": "vitest run --changed origin/main --passWithNoTests",
     "emulators:start": "firebase emulators:start --project demo-jetlag --only auth,firestore,storage",
     "deploy": "node scripts/deploy-production.mjs",

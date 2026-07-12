@@ -1,32 +1,13 @@
 import { execSync, spawnSync } from "node:child_process";
 import { resolve } from "node:path";
+import { writePending } from "./test-coverage-log.mjs";
+import {
+  classifyTestRelevant,
+  filterTestRelevant,
+} from "./test-file-rules.mjs";
+import { runVitest } from "./test-vitest-run.mjs";
 
 const projectRoot = resolve(import.meta.dirname, "..");
-
-const FORCE_FULL = new Set([
-  "vitest.config.ts",
-  "vitest.emulator.config.ts",
-  "vite.config.ts",
-  "package.json",
-  "package-lock.json",
-  "tsconfig.json",
-  "tsconfig.app.json",
-  "tsconfig.node.json",
-  "src/test/setup.ts",
-]);
-
-const FORCE_FULL_EXACT = new Set([
-  "src/App.tsx",
-  "src/components/motion/lazyMotion.ts",
-  "src/routes/map-screen/lazyImports.ts",
-]);
-
-const TEST_RELEVANT =
-  /^src\/.*\.(ts|tsx)$|^functions\/|^vitest|^vite\.config|^tsconfig|^package(-lock)?\.json$/;
-
-function isForceFull(file) {
-  return FORCE_FULL.has(file) || FORCE_FULL_EXACT.has(file);
-}
 
 function getStagedFiles() {
   const out = execSync("git diff --cached --name-only --diff-filter=ACM", {
@@ -53,53 +34,56 @@ if (staged.length === 0) {
   process.exit(0);
 }
 
-const relevant = staged.filter((file) => TEST_RELEVANT.test(file));
+const relevant = filterTestRelevant(staged);
+
 if (relevant.length === 0) {
+  writePending({
+    mode: "none",
+    vitestFiles: [],
+    functionsTested: false,
+    stagedFiles: staged,
+  });
   process.exit(0);
 }
 
-const testFiles = [];
-const sourceFiles = [];
-let runFunctions = false;
+const { testFiles, sourceFiles, runFunctions, forceFull } =
+  classifyTestRelevant(relevant);
 
-for (const file of relevant) {
-  if (file.startsWith("functions/")) {
-    runFunctions = true;
-    continue;
-  }
-  if (/\.test\.(ts|tsx)$/.test(file)) {
-    testFiles.push(file);
-  } else if (/^src\/.*\.(ts|tsx)$/.test(file)) {
-    sourceFiles.push(file);
-  }
-}
+const vitestFiles = [];
+let mode = "none";
 
-if (relevant.some((file) => isForceFull(file))) {
+if (forceFull) {
   console.info(
     "test:staged — infra or lazy-entry file staged; running full vitest suite",
   );
-  run("npx", ["vitest", "run"]);
+  vitestFiles.push(...runVitest(["run"]));
+  mode = "full";
 } else {
   if (sourceFiles.length > 0) {
     console.info(
       `test:staged — vitest related (${sourceFiles.length} source file(s))`,
     );
-    run("npx", [
-      "vitest",
-      "related",
-      "--run",
-      "--passWithNoTests",
-      ...sourceFiles,
-    ]);
+    vitestFiles.push(
+      ...runVitest([
+        "related",
+        "--run",
+        "--passWithNoTests",
+        ...sourceFiles,
+      ]),
+    );
+    mode = "related";
   }
 
   if (testFiles.length > 0) {
     console.info(
       `test:staged — vitest run (${testFiles.length} test file(s))`,
     );
-    run("npx", ["vitest", "run", ...testFiles]);
+    vitestFiles.push(...runVitest(["run", ...testFiles]));
+    mode = mode === "related" ? "related" : "explicit";
   }
 }
+
+let functionsTested = false;
 
 if (runFunctions) {
   console.info("test:staged — functions/** staged; running functions tests");
@@ -107,4 +91,12 @@ if (runFunctions) {
     run("npm", ["ci"], { cwd: resolve(projectRoot, "functions") });
   }
   run("npm", ["test", "--prefix", "functions"]);
+  functionsTested = true;
 }
+
+writePending({
+  mode,
+  vitestFiles: [...new Set(vitestFiles)],
+  functionsTested,
+  stagedFiles: relevant,
+});
