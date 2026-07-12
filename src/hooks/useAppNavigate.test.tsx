@@ -67,4 +67,27 @@ describe("useAppNavigate", () => {
       viewTransition: true,
     });
   });
+
+  it("exposes stack helpers for edge swipe", () => {
+    const { result } = renderHook(() => useAppNavigate(), {
+      wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
+    });
+
+    expect(result.current.canGoBack()).toBe(false);
+
+    act(() => {
+      result.current("/create");
+    });
+
+    expect(result.current.canGoBack()).toBe(true);
+
+    act(() => {
+      result.current.goBack();
+    });
+
+    expect(navigateMock).toHaveBeenLastCalledWith("/", {
+      viewTransition: true,
+    });
+    expect(document.documentElement.dataset.navDirection).toBe("back");
+  });
 });

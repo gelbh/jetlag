@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { useNavigate, type NavigateOptions, type To } from "react-router-dom";
 import { useMotionProfile } from "./useMotionProfile";
 
@@ -19,7 +19,7 @@ export function useAppNavigate() {
     typeof window !== "undefined" ? window.location.pathname : "/",
   ]);
 
-  return useCallback(
+  const go = useCallback(
     (
       to: To,
       options?: NavigateOptions & {
@@ -51,5 +51,23 @@ export function useAppNavigate() {
       });
     },
     [navigate, animate],
+  );
+
+  return useMemo(
+    () =>
+      Object.assign(go, {
+        canGoBack: () => stackRef.current.length > 1,
+        goBack: () => {
+          if (stackRef.current.length <= 1) {
+            return;
+          }
+
+          stackRef.current.pop();
+          const destination = stackRef.current[stackRef.current.length - 1] ?? "/";
+          document.documentElement.dataset.navDirection = "back";
+          navigate(destination, { viewTransition: animate });
+        },
+      }),
+    [go, navigate, animate],
   );
 }
