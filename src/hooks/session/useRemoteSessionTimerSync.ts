@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { timerStateFromRemote, type TimerState } from "../../domain/session/timer";
 import { isFirebaseConfigured } from "../../services/core/firebase";
@@ -33,13 +33,17 @@ export function useRemoteSessionTimerSync(
     [isHost, isRemote, sessionId],
   );
 
-  const remoteSnapshot =
-    isRemote && sessionMatches && session
-      ? timerStateFromRemote(
-          session.timerAccumulatedMs,
-          session.timerRunningSince,
-        )
-      : undefined;
+  const timerAccumulatedMs = session?.timerAccumulatedMs;
+  const timerRunningSince = session?.timerRunningSince;
+  // Memoized so consumers can use it as an effect dependency; a fresh object
+  // per render loops useSessionTimer's reconcile effect (setState -> render).
+  const remoteSnapshot = useMemo(
+    () =>
+      isRemote && sessionMatches
+        ? timerStateFromRemote(timerAccumulatedMs, timerRunningSince)
+        : undefined,
+    [isRemote, sessionMatches, timerAccumulatedMs, timerRunningSince],
+  );
 
   const remoteState =
     isRemote && !isHost ? remoteSnapshot : null;
