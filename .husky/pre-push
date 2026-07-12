@@ -1,3 +1,12 @@
+npm run lint
+npm run typecheck
+
+if git rev-parse --verify origin/main >/dev/null 2>&1; then
+  npm run test:changed
+else
+  echo "pre-push: origin/main not found; skipping test:changed"
+fi
+
 while read -r local_ref local_sha remote_ref remote_sha; do
   if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
     continue
