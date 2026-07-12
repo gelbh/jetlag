@@ -26,6 +26,8 @@
     "test:functions": "env -u npm_config_allow_scripts sh -c 'cd functions && npm ci && npm test'",
     "test:unit": "vitest run && npm test --prefix functions",
     "test:ci": "npm run test:coverage && npm run test:functions",
+    "test:staged": "node scripts/test-staged.mjs",
+    "test:changed": "vitest run --changed origin/main --passWithNoTests",
     "emulators:start": "firebase emulators:start --project demo-jetlag --only auth,firestore,storage",
     "deploy": "node scripts/deploy-production.mjs",
     "deploy:preview": "npm run build && wrangler pages deploy dist --project-name=jetlag",
