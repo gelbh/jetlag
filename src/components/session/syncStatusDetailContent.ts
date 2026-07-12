@@ -59,17 +59,20 @@ export function syncDetailContent(
       };
     case "degraded":
       return {
-        title: "Unstable",
+        title: "Unstable connection",
         body:
           queuedWrites > 0
-            ? `${queuedWrites} change${queuedWrites === 1 ? "" : "s"} queued.`
-            : "Sync may lag until connection improves.",
+            ? `${queuedWrites} change${queuedWrites === 1 ? "" : "s"} queued. Tap Retry when signal returns.`
+            : "Connection is flaky. Changes may queue until signal improves.",
         tone: "warning",
       };
     case "error":
       return {
         title: "Sync failed",
-        body: "Could not reach the session.",
+        body:
+          queuedWrites > 0
+            ? `${queuedWrites} change${queuedWrites === 1 ? "" : "s"} queued. Tap Retry to upload.`
+            : "Could not reach the session. Tap Retry to try again.",
         tone: "error",
       };
     default: {

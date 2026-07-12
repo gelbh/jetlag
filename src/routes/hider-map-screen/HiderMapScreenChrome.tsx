@@ -22,6 +22,7 @@ import { CurseReferenceSheet } from "../../components/expansion/CurseReferenceSh
 import { HiderZoneWizardShell } from "../../components/hider/HiderZoneWizardShell";
 import { PopupCloseButton } from "../../components/ui/PopupCloseButton";
 import { AppUpdateMapChip } from "../../components/ui/AppUpdateMapChip";
+import { FirestorePersistenceBanner } from "../../components/session/FirestorePersistenceBanner";
 import { MapStatusRail } from "../../components/session/MapStatusRail";
 import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
 import {
@@ -264,6 +265,7 @@ export function HiderMapScreenChrome({
           hiderOutsideZone={hiderOutsideZone}
           onSyncErrorAction={onSyncErrorAction}
         />
+        <FirestorePersistenceBanner />
         <AppUpdateMapChip />
         <HiderToolDock
           zoneLabel={
