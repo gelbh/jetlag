@@ -33,7 +33,6 @@ export function useInteractiveDragY({
   bindings: PointerDragBindings;
   isDragging: boolean;
   offsetY: number;
-  velocityY: number;
   reset: () => void;
 } {
   const [offsetY, setOffsetY] = useState(0);
@@ -124,7 +123,6 @@ export function useInteractiveDragY({
     },
     isDragging,
     offsetY,
-    velocityY: velocityY.current,
     reset,
   };
 }
