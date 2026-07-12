@@ -7,10 +7,7 @@ import { point as turfPoint } from "@turf/helpers";
 import { polygon as turfPolygon } from "@turf/helpers";
 import type { GameArea } from "../../map/annotations";
 import { gameAreaToBoundingBox } from "../gameAreaBounds";
-import {
-  gameAreaToFeature,
-  gameAreaToPolygon,
-} from "./gameAreaConvert";
+import { gameAreaToFeature } from "./featureConvert";
 import {
   bearingDegrees,
   destinationPoint,
@@ -26,7 +23,7 @@ export function buildHalfPlanePolygon(
   shadedSide: "hot" | "cold" = "cold",
   divisionAnchor: "midpoint" | "start" = "midpoint",
 ): Feature<Polygon | MultiPolygon> | null {
-  const gameFeature = gameAreaToPolygon(gameArea);
+  const gameFeature = gameAreaToFeature(gameArea);
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
   const gameBbox = bboxPolygon([west, south, east, north]);
 
@@ -96,5 +93,5 @@ export function buildRadarShadedRegion(
     return radarCircle as Feature<Polygon>;
   }
 
-  return safeDifference(gameAreaToPolygon(gameArea), radarCircle as Feature<Polygon>);
+  return safeDifference(gameAreaToFeature(gameArea), radarCircle as Feature<Polygon>);
 }
