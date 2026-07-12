@@ -137,20 +137,30 @@ jobs:
           cache: npm
       - run: npm ci
         if: steps.changes.outputs.backend == 'true'
+      - name: Install Doppler CLI
+        if: steps.changes.outputs.backend == 'true'
+        uses: DopplerHQ/cli-action@v3
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          verify-doppler-config: false
+      - name: Load Doppler secrets
+        if: steps.changes.outputs.backend == 'true'
+        run: doppler secrets download --no-file --format docker >> "$GITHUB_ENV"
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
       - uses: google-github-actions/auth@v2
         if: steps.changes.outputs.backend == 'true'
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
       - uses: google-github-actions/setup-gcloud@v2
         if: steps.changes.outputs.backend == 'true'
       - name: Deploy Firestore and Functions
         id: deploy
         if: steps.changes.outputs.backend == 'true'
-        run: npm run deploy
+        run: doppler run --config prd -- npm run deploy
         env:
-          # Optional: fine-grained or classic PAT with repo secrets write (GH_PAT).
-          GH_PAT: ${{ secrets.GH_PAT }}
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
 
   deploy-frontend:
     if: github.event_name == 'push'
@@ -184,6 +194,20 @@ jobs:
           cache: npm
       - run: npm ci
         if: steps.changes.outputs.frontend == 'true'
+      - name: Install Doppler CLI
+        if: steps.changes.outputs.frontend == 'true'
+        uses: DopplerHQ/cli-action@v3
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          verify-doppler-config: false
+      - name: Load Doppler secrets
+        if: steps.changes.outputs.frontend == 'true'
+        run: doppler secrets download --no-file --format docker >> "$GITHUB_ENV"
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+      - name: Set CI-only env
+        if: steps.changes.outputs.frontend == 'true'
+        run: echo "VITE_SENTRY_RELEASE_DIST=${{ github.sha }}" >> "$GITHUB_ENV"
       - name: Require functions deploy when callables changed
         if: steps.changes.outputs.frontend == 'true'
         run: |
@@ -200,30 +224,15 @@ jobs:
       - name: Require App Check site key
         if: steps.changes.outputs.frontend == 'true'
         run: |
-          if [ -z "${{ secrets.VITE_FIREBASE_APP_CHECK_SITE_KEY }}" ]; then
+          if [ -z "${VITE_FIREBASE_APP_CHECK_SITE_KEY}" ]; then
             echo "::error::VITE_FIREBASE_APP_CHECK_SITE_KEY is required for production builds."
             exit 1
           fi
       - name: Build production bundle
         if: steps.changes.outputs.frontend == 'true'
-        run: npm run build 2>&1 | tee build.log
+        run: doppler run --config prd -- npm run build 2>&1 | tee build.log
         env:
-          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
-          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
-          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
-          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
-          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
-          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
-          VITE_FIREBASE_APP_CHECK_SITE_KEY: ${{ secrets.VITE_FIREBASE_APP_CHECK_SITE_KEY }}
-          VITE_OVERPASS_PROXY_URL: ${{ secrets.VITE_OVERPASS_PROXY_URL }}
-          VITE_TRANSIT_PROXY_URL: ${{ secrets.VITE_TRANSIT_PROXY_URL }}
-          VITE_TRANSITLAND_PROXY_URL: ${{ secrets.VITE_TRANSITLAND_PROXY_URL }}
-          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
-          VITE_SENTRY_ENVIRONMENT: production
-          VITE_SENTRY_RELEASE_DIST: ${{ github.sha }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
       - name: Verify source maps are not shipped
         if: steps.changes.outputs.frontend == 'true'
         run: |
@@ -237,6 +246,6 @@ jobs:
       - uses: cloudflare/wrangler-action@v3
         if: steps.changes.outputs.frontend == 'true'
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy dist --project-name=jetlag --branch=main

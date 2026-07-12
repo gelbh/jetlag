@@ -11,31 +11,10 @@ const PROXY_SECRET_NAMES = {
   transitland: "VITE_TRANSITLAND_PROXY_URL",
 };
 
-function ghEnv() {
-  const pat = process.env.GH_PAT?.trim();
-  if (!pat) {
-    return null;
-  }
-
-  return { ...process.env, GH_TOKEN: pat };
-}
-
-/**
- * @param {Record<string, string>} functionUrls
- * @returns {boolean} true when at least one secret was updated
- */
 function syncProxySecrets(functionUrls) {
-  if (!process.env.GITHUB_ACTIONS) {
-    return false;
-  }
-
-  const env = ghEnv();
-  if (!env) {
+  if (!process.env.DOPPLER_TOKEN?.trim()) {
     console.warn(
-      "GH_PAT is not set; skipping proxy URL sync to GitHub secrets.",
-    );
-    console.warn(
-      "Add a repo secret GH_PAT (PAT with repo scope) or update VITE_*_PROXY_URL manually.",
+      "DOPPLER_TOKEN is not set; skipping proxy URL sync to Doppler.",
     );
     return false;
   }
@@ -49,17 +28,26 @@ function syncProxySecrets(functionUrls) {
     }
 
     const result = spawnSync(
-      "gh",
-      ["secret", "set", secretName, "--body", url],
-      { stdio: "inherit", env },
+      "doppler",
+      [
+        "secrets",
+        "set",
+        secretName,
+        url,
+        "--project",
+        "jetlag",
+        "--config",
+        "prd",
+      ],
+      { stdio: "inherit", env: process.env },
     );
 
     if (result.status !== 0) {
-      console.error(`Failed to set GitHub secret ${secretName}.`);
+      console.error(`Failed to set Doppler secret ${secretName}.`);
       process.exit(1);
     }
 
-    console.log(`Updated GitHub secret ${secretName}.`);
+    console.log(`Updated Doppler secret ${secretName}.`);
     synced = true;
   }
 
@@ -189,7 +177,7 @@ function resolveFunctionUrls(deployOutput) {
 }
 
 function printProxyEnvInstructions(functionUrls) {
-  const lines = ["\nSet these in Cloudflare Pages:"];
+  const lines = ["\nVerify these in Doppler config prd:"];
 
   lines.push(
     "  VITE_FIREBASE_APP_CHECK_SITE_KEY=<reCAPTCHA v3 site key from Firebase App Check>",
@@ -296,7 +284,7 @@ async function main() {
     const functionUrls = resolveFunctionUrls(result.output);
     printProxyEnvInstructions(functionUrls);
     if (syncProxySecrets(functionUrls)) {
-      console.log("Proxy URLs synced to GitHub secrets.");
+      console.log("Proxy URLs synced to Doppler prd config.");
     }
     setGithubOutput("functions_deployed", "true");
     return;

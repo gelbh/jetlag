@@ -7,7 +7,6 @@ test-results
 *.local
 .env
 .env.*
-!.env.example
 !functions/.env.jet-lag-map-companion
 functions/.secret.local
 .firebase
