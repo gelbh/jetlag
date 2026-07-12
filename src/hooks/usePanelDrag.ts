@@ -6,14 +6,16 @@ import {
   type PointerEvent as ReactPointerEvent,
   type RefObject,
 } from "react";
+import {
+  DEFAULT_PANEL_HEIGHT_PX,
+  MOTION_TRANSITION_BASE,
+  PANEL_EXPAND_VELOCITY_PX_MS,
+  PANEL_MINIMIZE_VELOCITY_PX_MS,
+  PANEL_PEEK_HEIGHT_PX,
+  PANEL_SNAP_FRACTION,
+} from "../domain/device/motionTokens";
+import { useInteractiveDragY } from "./useInteractiveDragY";
 import { useMotionProfile } from "./useMotionProfile";
-
-const SNAP_FRACTION = 0.28;
-const MINIMIZE_VELOCITY_PX_MS = 0.35;
-const EXPAND_VELOCITY_PX_MS = 0.35;
-const MIN_DRAG_START_PX = 6;
-const PANEL_PEEK_HEIGHT_PX = 44;
-const DEFAULT_PANEL_HEIGHT_PX = 320;
 
 export interface UsePanelDragOptions {
   minimized: boolean;
@@ -46,15 +48,8 @@ export function usePanelDrag({
   peekHeightPx = PANEL_PEEK_HEIGHT_PX,
 }: UsePanelDragOptions): UsePanelDragResult {
   const { animate } = useMotionProfile();
-  const dragActive = useRef(false);
   const suppressPeekClick = useRef(false);
-  const startY = useRef(0);
-  const lastY = useRef(0);
-  const lastTime = useRef(0);
-  const velocityY = useRef(0);
-  const [offsetY, setOffsetY] = useState(0);
   const [panelHeight, setPanelHeight] = useState(DEFAULT_PANEL_HEIGHT_PX);
-  const [isDragging, setIsDragging] = useState(false);
 
   const measurePanelHeight = useCallback(() => {
     const height = panelRef?.current?.offsetHeight;
@@ -63,94 +58,46 @@ export function usePanelDrag({
     }
   }, [panelRef]);
 
-  const resetDrag = useCallback(() => {
-    dragActive.current = false;
-    setIsDragging(false);
-    setOffsetY(0);
-    velocityY.current = 0;
-  }, []);
-
-  const handlePointerDown = useCallback(
-    (event: ReactPointerEvent<HTMLButtonElement>) => {
-      if (!animate) {
-        return;
-      }
-
+  const { bindings, isDragging, offsetY, reset } = useInteractiveDragY({
+    enabled: animate,
+    canStart: () => {
       measurePanelHeight();
-      dragActive.current = true;
       suppressPeekClick.current = false;
-      setIsDragging(true);
-      startY.current = event.clientY;
-      lastY.current = event.clientY;
-      lastTime.current = event.timeStamp;
-      velocityY.current = 0;
-      event.currentTarget.setPointerCapture(event.pointerId);
+      return true;
     },
-    [animate, measurePanelHeight],
-  );
-
-  const handlePointerMove = useCallback(
-    (event: ReactPointerEvent<HTMLButtonElement>) => {
-      if (!dragActive.current) {
-        return;
-      }
-
-      const delta = event.clientY - startY.current;
-      if (Math.abs(delta) >= MIN_DRAG_START_PX) {
+    mapDelta: (delta) => (minimized ? Math.min(0, delta) : Math.max(0, delta)),
+    onDragEnd: ({ offsetY: currentOffset, velocityY }) => {
+      const height = panelRef?.current?.offsetHeight ?? panelHeight;
+      const moved =
+        currentOffset !== 0 || Math.abs(velocityY) > 0.01;
+      if (moved) {
         suppressPeekClick.current = true;
       }
-
-      const nextOffset = minimized
-        ? Math.min(0, delta)
-        : Math.max(0, delta);
-      const dt = Math.max(1, event.timeStamp - lastTime.current);
-      velocityY.current = (event.clientY - lastY.current) / dt;
-      lastY.current = event.clientY;
-      lastTime.current = event.timeStamp;
-      setOffsetY(nextOffset);
-    },
-    [minimized],
-  );
-
-  const finishDrag = useCallback(
-    (event: ReactPointerEvent<HTMLButtonElement>) => {
-      if (!dragActive.current) {
-        return;
-      }
-
-      event.currentTarget.releasePointerCapture(event.pointerId);
-
-      const height = panelRef?.current?.offsetHeight ?? panelHeight;
-      const moved = suppressPeekClick.current;
-      const currentOffset = offsetY;
-      const currentVelocity = velocityY.current;
-
-      resetDrag();
+      reset();
 
       if (!moved) {
         return;
       }
 
       if (minimized) {
-        if (shouldExpandPanelSnap(currentOffset, height, currentVelocity)) {
+        if (shouldExpandPanelSnap(currentOffset, height, velocityY)) {
           onMinimizedChange(false);
         }
         return;
       }
 
-      if (shouldMinimizePanelSnap(currentOffset, height, currentVelocity)) {
+      if (shouldMinimizePanelSnap(currentOffset, height, velocityY)) {
         onMinimizedChange(true);
       }
     },
-    [
-      minimized,
-      offsetY,
-      onMinimizedChange,
-      panelHeight,
-      panelRef,
-      resetDrag,
-    ],
-  );
+  });
+
+  const wrappedBindings: PanelHandleProps = {
+    onPointerDown: bindings.onPointerDown,
+    onPointerMove: bindings.onPointerMove,
+    onPointerUp: bindings.onPointerUp,
+    onPointerCancel: bindings.onPointerCancel,
+  };
 
   const handlePeekClick = useCallback(() => {
     if (suppressPeekClick.current) {
@@ -160,9 +107,7 @@ export function usePanelDrag({
     onMinimizedChange(false);
   }, [onMinimizedChange]);
 
-  const transition = isDragging
-    ? "none"
-    : "transform var(--motion-base) var(--ease-spring-subtle)";
+  const transition = isDragging ? "none" : MOTION_TRANSITION_BASE;
 
   let panelStyle: CSSProperties = {};
   if (!minimized && offsetY > 0) {
@@ -177,20 +122,13 @@ export function usePanelDrag({
     };
   }
 
-  const handleProps: PanelHandleProps = {
-    onPointerDown: handlePointerDown,
-    onPointerMove: handlePointerMove,
-    onPointerUp: finishDrag,
-    onPointerCancel: finishDrag,
-  };
-
   return {
     offsetY,
     isDragging,
     panelStyle,
-    handleProps,
+    handleProps: wrappedBindings,
     peekHandleProps: {
-      ...handleProps,
+      ...wrappedBindings,
       onClick: handlePeekClick,
     },
   };
@@ -203,8 +141,8 @@ export function shouldMinimizePanelSnap(
   velocityY: number,
 ): boolean {
   return (
-    offsetY >= panelHeight * SNAP_FRACTION ||
-    velocityY > MINIMIZE_VELOCITY_PX_MS
+    offsetY >= panelHeight * PANEL_SNAP_FRACTION ||
+    velocityY > PANEL_MINIMIZE_VELOCITY_PX_MS
   );
 }
 
@@ -215,8 +153,8 @@ export function shouldExpandPanelSnap(
   velocityY: number,
 ): boolean {
   return (
-    -offsetY >= panelHeight * SNAP_FRACTION ||
-    velocityY < -EXPAND_VELOCITY_PX_MS
+    -offsetY >= panelHeight * PANEL_SNAP_FRACTION ||
+    velocityY < -PANEL_EXPAND_VELOCITY_PX_MS
   );
 }
 
@@ -228,9 +166,14 @@ export function shouldMinimizePanelDrag(
   return shouldMinimizePanelSnap(offsetY, DEFAULT_PANEL_HEIGHT_PX, velocityY);
 }
 
-export const PANEL_SNAP_FRACTION = SNAP_FRACTION;
-export const PANEL_MINIMIZE_VELOCITY_PX_MS = MINIMIZE_VELOCITY_PX_MS;
-export const PANEL_EXPAND_VELOCITY_PX_MS = EXPAND_VELOCITY_PX_MS;
+export {
+  PANEL_EXPAND_VELOCITY_PX_MS,
+  PANEL_MINIMIZE_VELOCITY_PX_MS,
+  PANEL_PEEK_HEIGHT_PX,
+  PANEL_SNAP_FRACTION,
+} from "../domain/device/motionTokens";
+
+/** @deprecated Use PANEL_PEEK_HEIGHT_PX */
 export const PANEL_PEEK_HEIGHT_PX_EXPORT = PANEL_PEEK_HEIGHT_PX;
 
 /** @deprecated Use PANEL_SNAP_FRACTION with measured height */
