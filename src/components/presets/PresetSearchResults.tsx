@@ -6,6 +6,7 @@ import {
 import { formatBundledPresetLocation } from "../../domain/regions/bundledPresetHierarchy";
 import { migrateGamePreset } from "../../domain/session/gamePreset";
 import { PresetCard } from "./PresetCard";
+import { PresetFavouriteButton } from "./PresetFavouriteButton";
 
 type MigratedPreset = ReturnType<typeof migrateGamePreset>;
 
@@ -55,6 +56,7 @@ function PresetSearchResultCard({
           </>
         ) : undefined
       }
+      headerAction={<PresetFavouriteButton presetId={preset.id} />}
       actions={
         <>
           {preset.migrationStatus === "manual_required" ? (
