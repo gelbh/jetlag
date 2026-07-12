@@ -133,6 +133,27 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("lets only the host mark a session code as ended", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    const codeDoc = () =>
+      host.firestore().collection("sessionCodes").doc("ABCD");
+    await codeDoc().set({ sessionId: "session-1", hostUid: "host-1" });
+
+    const guest = testEnv.authenticatedContext("guest-1");
+    await assertFails(
+      guest
+        .firestore()
+        .collection("sessionCodes")
+        .doc("ABCD")
+        .update({ status: "ended" }),
+    );
+    await assertFails(codeDoc().update({ status: "archived" }));
+    await assertFails(
+      codeDoc().update({ status: "ended", sessionId: "session-2" }),
+    );
+    await assertSucceeds(codeDoc().update({ status: "ended" }));
+  });
+
   it("allows a guest to join an active session as hider with memberAppVersions", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

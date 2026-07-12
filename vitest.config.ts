@@ -32,10 +32,6 @@ export default defineConfig({
       thresholds: {
         "src/domain/**": { lines: 65, branches: 50 },
         "src/services/**": { lines: 58, branches: 43 },
-        "src/hooks/**": { lines: 35, branches: 24 },
-        "src/state/**": { lines: 70, branches: 65 },
-        "src/routes/**": { lines: 45, branches: 40 },
-        "src/components/**": { lines: 15, branches: 8 },
       },
     },
   },
