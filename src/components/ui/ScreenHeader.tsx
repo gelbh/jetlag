@@ -6,9 +6,16 @@ type ScreenHeaderPlacement = "fixed" | "sticky" | "inline";
 export const screenBackLinkClassName =
   "inline-flex min-h-11 items-center gap-1 px-1 font-display text-xs font-semibold uppercase tracking-[0.14em] text-ink-secondary transition-colors hover:text-ink";
 
+/** Clears the OS status bar on header shells (safe area + gap, with a 44px floor). */
+export const screenHeaderInsetTopClassName =
+  "pt-[max(2.75rem,calc(env(safe-area-inset-top,0px)+0.625rem))]";
+
+/** Shared chrome for inline header wrappers (border, bg, bottom padding). */
+export const screenHeaderShellClassName = `shrink-0 border-b-2 border-border bg-surface-deep pb-2 ${screenHeaderInsetTopClassName}`;
+
 /** Top padding for page content below a fixed ScreenHeader. */
 export const screenHeaderOffsetClassName =
-  "pt-[max(3.75rem,calc(env(safe-area-inset-top)+3rem))]";
+  "pt-[max(6rem,calc(env(safe-area-inset-top,0px)+3.875rem))]";
 
 interface ScreenHeaderProps {
   backTo?: string;
@@ -22,10 +29,10 @@ function shellClassName(placement: ScreenHeaderPlacement, className: string) {
     case "inline":
       return className;
     case "sticky":
-      return `pointer-events-auto sticky top-0 z-[var(--z-banner)] -mx-5 mb-2 border-b-2 border-border bg-surface-deep px-5 pb-2 pt-[max(0.625rem,env(safe-area-inset-top))] ${className}`;
+      return `pointer-events-auto sticky top-0 z-[var(--z-banner)] -mx-5 mb-2 border-b-2 border-border bg-surface-deep px-5 pb-2 ${screenHeaderInsetTopClassName} ${className}`;
     case "fixed":
     default:
-      return `pointer-events-auto fixed inset-x-0 top-0 z-[var(--z-banner)] border-b-2 border-border bg-surface-deep px-[max(1.25rem,env(safe-area-inset-left))] pb-2 pt-[max(0.625rem,env(safe-area-inset-top))] ${className}`;
+      return `pointer-events-auto fixed inset-x-0 top-0 z-[var(--z-banner)] border-b-2 border-border bg-surface-deep px-[max(1.25rem,env(safe-area-inset-left))] pb-2 ${screenHeaderInsetTopClassName} ${className}`;
   }
 }
 

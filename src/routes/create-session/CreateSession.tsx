@@ -1,5 +1,8 @@
 import { useCallback } from "react";
-import { ScreenHeader } from "../../components/ui/ScreenHeader";
+import {
+  ScreenHeader,
+  screenHeaderShellClassName,
+} from "../../components/ui/ScreenHeader";
 import { CreateSessionMapPane } from "../../components/session/CreateSessionMapPane";
 import { GameAreaFramingModal } from "../../components/session/GameAreaFramingModal";
 import { MobileSheet } from "../../components/ui/MobileSheet";
@@ -47,7 +50,7 @@ export function CreateSession() {
 
   return (
     <div className="flex h-full min-h-[100dvh] flex-col bg-surface-deep">
-      <div className="shrink-0 border-b-2 border-border bg-surface-deep px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))]">
+      <div className={`${screenHeaderShellClassName} px-4`}>
         <ScreenHeader backTo="/" backLabel="Back" placement="inline" />
       </div>
 
