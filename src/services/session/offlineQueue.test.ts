@@ -54,9 +54,10 @@ describe("offlineQueue", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
 
-    expect(shouldRetryOfflineWrite({ id: "a", sessionId: "s", annotation, createdAt: "" })).toBe(true);
+    expect(shouldRetryOfflineWrite({ kind: "annotation", id: "a", sessionId: "s", annotation, createdAt: "" })).toBe(true);
 
     const failed = {
+      kind: "annotation" as const,
       id: "a",
       sessionId: "s",
       annotation,
