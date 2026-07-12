@@ -79,8 +79,11 @@ export function ObserverMapScreen() {
           <ActiveThermometerWalkLayer
             start={controller.activeThermometerWalk.start}
             livePoint={controller.activeThermometerWalk.livePoint}
+            targetDistanceMeters={
+              controller.activeThermometerWalk.targetDistanceMeters
+            }
             mapStyle={controller.effectiveBasemapStyle}
-            distanceUnit="metric"
+            distanceUnit={controller.distanceUnit}
           />
           <PendingQuestionLayer
             pendingQuestions={controller.pendingQuestions}

@@ -151,6 +151,7 @@ export function MapScreenMapLayers({
         <ActiveThermometerWalkLayer
           start={activeThermometerWalk.start}
           livePoint={activeThermometerWalk.livePoint}
+          targetDistanceMeters={activeThermometerWalk.targetDistanceMeters}
           mapStyle={effectiveBasemapStyle}
           distanceUnit={distanceUnit}
         />

@@ -12,6 +12,7 @@ import { useEnsureSessionMembership } from "../../hooks/session/useEnsureSession
 import { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
 import { useResolvedSessionRules } from "../../hooks/session/useResolvedSessionRules";
 import { useSharedSessionScreen } from "../../hooks/session/useSharedSessionScreen";
+import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import { useSessionAnnotations } from "../../hooks/map/useSessionAnnotations";
 import { useMapStore, useSessionStore } from "../../state/sessionStore";
 
@@ -24,6 +25,7 @@ export function useObserverMapScreen() {
   const layerVisibility = useMapStore((state) => state.layerVisibility);
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const overlay = useMapOverlayState();
+  const distanceUnit = useSessionDistanceUnit();
   const suppressChromeHideRef = useRef(false);
   const [mapViewport, setMapViewport] = useState<MapViewportState | null>(null);
 
@@ -106,6 +108,7 @@ export function useObserverMapScreen() {
     setMapViewport,
     activeThermometerWalk,
     lowPowerMode,
+    distanceUnit,
   };
 }
 

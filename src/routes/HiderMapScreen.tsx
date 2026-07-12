@@ -26,7 +26,9 @@ import {
 } from "../domain/session/gameSize";
 import {
   hidingZonePreviewPositions,
+  hiderStationCenter,
   nearestStation,
+  resolveMyHidingZone,
 } from "../domain/session/hidingZone";
 import { DEFAULT_SESSION_RULES } from "../domain/session/sessionRules";
 import { AdminBoundariesLayer } from "../components/map/AdminBoundariesLayer";
@@ -43,6 +45,7 @@ import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/devi
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
+import { useHidingZoneUidHeal } from "../hooks/session/useHidingZoneUidHeal";
 import { useHiderZoneTool } from "../hooks/session/useHiderZoneTool";
 import { useMapOverlayState } from "../hooks/map/useMapOverlayState";
 import { useHiderLocationSync } from "../hooks/sync/useHiderLocationSync";
@@ -73,6 +76,7 @@ import { useAnnotationStore } from "../state/annotationStore";
 export function HiderMapScreen() {
   const session = useSessionStore((state) => state.session);
   const setSession = useSessionStore((state) => state.setSession);
+  const persistedMyUid = useSessionStore((state) => state.myUid);
   const layerVisibility = useMapStore((state) => state.layerVisibility);
   const mapStyle = useMapStore((state) => state.mapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
@@ -208,15 +212,21 @@ export function HiderMapScreen() {
     () => hidingZones.filter((zone) => zone.status === "confirmed"),
     [hidingZones],
   );
-  const myZone = hidingZones.find((zone) => zone.hiderUid === uid) ?? null;
-  const stationCenter = useMemo<LatLngTuple | null>(
-    () => (myZone ? [myZone.center.lat, myZone.center.lng] : null),
+  const myZone = useMemo(
+    () => resolveMyHidingZone(hidingZones, uid, session?.memberUids),
+    [hidingZones, session?.memberUids, uid],
+  );
+  const stationCenter = useMemo(
+    () => hiderStationCenter(myZone),
     [myZone],
   );
+  useHidingZoneUidHeal(sessionId, uid, hidingZones, persistedMyUid);
+  const stationCenterReady = authReady && uid !== null;
   const { questionTruths, loading: truthsLoading } = useHiderQuestionTruths(
     pendingQuestions,
     stationCenter,
     gameArea ?? undefined,
+    { stationCenterReady },
   );
 
   const liveLocationProfile = getPowerProfile(lowPowerMode).liveLocation;
@@ -481,7 +491,11 @@ export function HiderMapScreen() {
             session={session}
             hidingZones={confirmedHidingZones}
           />
-          <HidingZonesLayer zones={hidingZones} myUid={uid} />
+          <HidingZonesLayer
+            zones={hidingZones}
+            myUid={uid}
+            memberUids={session?.memberUids}
+          />
           {zoneTool.wizardOpen &&
           hidingZoneStepId === "location" &&
           !zoneTool.manualMode ? (
@@ -515,6 +529,7 @@ export function HiderMapScreen() {
           <ActiveThermometerWalkLayer
             start={activeThermometerWalk.start}
             livePoint={activeThermometerWalk.livePoint}
+            targetDistanceMeters={activeThermometerWalk.targetDistanceMeters}
             mapStyle={effectiveBasemapStyle}
             distanceUnit={distanceUnit}
           />
