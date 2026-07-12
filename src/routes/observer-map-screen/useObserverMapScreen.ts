@@ -3,6 +3,7 @@ import type { MapViewportState } from "../../components/map/MapViewportTracker";
 import {
   gameAreaCenter,
   gameAreaToBoundsExpression,
+  fallbackGameArea,
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../domain/device/powerProfile";
@@ -31,6 +32,7 @@ export function useObserverMapScreen() {
 
   const { gameArea, sessionRules, playAreaReady } = useResolvedSessionRules(session);
   const resolvedGameArea = gameArea ?? session?.gameArea ?? null;
+  const displayGameArea = playAreaReady ? fallbackGameArea(resolvedGameArea) : null;
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
   const handleMapStyleChange = useCallback(
     (style: typeof mapStyle) => {
@@ -43,19 +45,19 @@ export function useObserverMapScreen() {
     [lowPowerMode, setLowPowerMode, setMapStyle],
   );
   const center = useMemo<LatLngTuple>(() => {
-    if (!resolvedGameArea) {
+    if (!displayGameArea) {
       return DEFAULT_MAP_CENTER;
     }
 
-    return gameAreaCenter(resolvedGameArea);
-  }, [resolvedGameArea]);
+    return gameAreaCenter(displayGameArea);
+  }, [displayGameArea]);
   const mapFocusBounds = useMemo(() => {
-    if (!playAreaReady || !resolvedGameArea) {
+    if (!playAreaReady || !displayGameArea) {
       return null;
     }
 
-    return gameAreaToBoundsExpression(resolvedGameArea);
-  }, [playAreaReady, resolvedGameArea]);
+    return gameAreaToBoundsExpression(displayGameArea);
+  }, [playAreaReady, displayGameArea]);
 
   const {
     uid,
@@ -90,7 +92,7 @@ export function useObserverMapScreen() {
     uid,
     sessionId,
     sessionRules,
-    gameArea: resolvedGameArea,
+    gameArea: displayGameArea,
     playAreaReady,
     center,
     mapFocusBounds,

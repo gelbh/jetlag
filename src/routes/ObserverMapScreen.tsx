@@ -41,7 +41,7 @@ export function ObserverMapScreen() {
     return <Navigate to="/map" replace />;
   }
 
-  if (!controller.playAreaReady || !controller.gameArea) {
+  if (!controller.playAreaReady) {
     return (
       <div
         className="route-fallback-skeleton route-loading-enter flex min-h-[100dvh] flex-col"
