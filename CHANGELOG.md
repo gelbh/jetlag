@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.3 - 2026-07-12
+
+### Fixes
+
+- Boot: home screen loads before Firebase auth finishes instead of a blank navy screen
+- Boot: Firebase auth falls back when IndexedDB is unavailable on iOS Safari
+- PWA: stale JavaScript chunks reload once instead of serving HTML for asset requests
+- PWA: iOS home-screen installs auto-reload for waiting updates outside an active map session
+
 ## 0.5.2 - 2026-07-12
 
 ### Fixes

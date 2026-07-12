@@ -25,6 +25,7 @@ import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
 import { resolveHomePremiumButtonDisplay } from "../domain/billing/premiumProducts";
+import { useAuthBootstrapReady } from "../hooks/useAuthBootstrapReady";
 import { LEGAL_APP_NAME } from "../domain/legal/legalContact";
 import { isAdminUser } from "../domain/admin/adminAccess";
 import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
@@ -41,8 +42,23 @@ export function Home() {
   const { entitlements: premiumEntitlements } = usePremiumEntitlements();
   const { user: permanentUser } = usePermanentAuthUser();
   const showAdminEntry = isAdminUser(permanentUser);
+  const authBootstrapReady = useAuthBootstrapReady();
 
   const premiumButton = resolveHomePremiumButtonDisplay(premiumEntitlements);
+
+  if (isFirebaseConfigured() && !authBootstrapReady) {
+    return (
+      <EntryScreenLayout viewport viewportLayout="between">
+        <div
+          className="route-fallback-skeleton route-loading-enter min-h-[40dvh]"
+          aria-busy="true"
+          aria-label="Loading app"
+        >
+          <div className="route-fallback-status" />
+        </div>
+      </EntryScreenLayout>
+    );
+  }
 
   const handleContinue = async () => {
     if (!session) {

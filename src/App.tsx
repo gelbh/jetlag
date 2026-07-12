@@ -23,6 +23,7 @@ import { Terms } from "./routes/Terms";
 import { Tutorial } from "./routes/Tutorial";
 import {
   CHUNK_RELOAD_CLEAR_MS,
+  clearBootReloadFlag,
   clearChunkReloadFlag,
 } from "./domain/device/chunkLoadRecovery";
 import { lazyWithChunkRetry } from "./domain/device/lazyWithChunkRetry";
@@ -103,6 +104,7 @@ export default function App() {
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       clearChunkReloadFlag();
+      clearBootReloadFlag();
     }, CHUNK_RELOAD_CLEAR_MS);
 
     return () => {

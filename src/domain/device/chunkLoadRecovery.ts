@@ -1,4 +1,5 @@
 const CHUNK_RELOAD_KEY = "jetlag:chunk-reload";
+export const BOOT_RELOAD_KEY = "jetlag:boot-reload";
 
 export const CHUNK_RELOAD_CLEAR_MS = 10_000;
 
@@ -40,6 +41,7 @@ export function isChunkLoadError(error: unknown): boolean {
 
   return (
     message.includes("Failed to fetch dynamically imported module") ||
+    message.includes("Importing a module script failed") ||
     message.includes("text/html") ||
     message.includes("MIME type")
   );
@@ -61,4 +63,12 @@ export function attemptChunkReload(): boolean {
 
 export function clearChunkReloadFlag(): void {
   removeSessionFlag();
+}
+
+export function clearBootReloadFlag(): void {
+  try {
+    sessionStorage.removeItem(BOOT_RELOAD_KEY);
+  } catch {
+    // sessionStorage may be unavailable in private browsing.
+  }
 }

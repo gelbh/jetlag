@@ -152,6 +152,46 @@ export function initSentry(): void {
   );
 }
 
+function withSentryScope(run: (scope: Sentry.Scope) => void): void {
+  if (import.meta.env.MODE === "test") {
+    return;
+  }
+
+  Sentry.withScope(run);
+}
+
+export function setBootstrapTag(phase: string): void {
+  withSentryScope((scope) => {
+    scope.setTag("bootstrap_phase", phase);
+    Sentry.addBreadcrumb({
+      category: "bootstrap",
+      message: phase,
+      level: "info",
+    });
+  });
+}
+
+export function captureAuthPersistenceFallback(
+  mode: "session" | "memory",
+  error?: unknown,
+): void {
+  withSentryScope((scope) => {
+    scope.setTag("auth_persistence", mode);
+    if (error) {
+      Sentry.captureException(error);
+      return;
+    }
+    Sentry.captureMessage(`Auth persistence fell back to ${mode}`, "warning");
+  });
+}
+
+export function captureAuthBootstrapFailure(error: unknown): void {
+  withSentryScope((scope) => {
+    scope.setTag("bootstrap_phase", "auth_failed");
+    Sentry.captureException(error);
+  });
+}
+
 export function captureException(error: unknown): void {
   Sentry.captureException(error);
 }

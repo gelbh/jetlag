@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.5.2";
+export const APP_VERSION = "0.5.3";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,21 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.5.3",
+    date: "2026-07-12",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Boot: home screen loads before Firebase auth finishes instead of a blank navy screen",
+          "Boot: Firebase auth falls back when IndexedDB is unavailable on iOS Safari",
+          "PWA: stale JavaScript chunks reload once instead of serving HTML for asset requests",
+          "PWA: iOS home-screen installs auto-reload for waiting updates outside an active map session",
+        ],
+      }
+    ],
+  },
   {
     version: "0.5.2",
     date: "2026-07-12",
