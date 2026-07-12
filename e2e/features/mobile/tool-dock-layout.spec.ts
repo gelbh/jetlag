@@ -3,6 +3,7 @@ import {
   expect,
   openMapWithLocalSession,
   placePin,
+  prepareE2EPage,
   readToolDockOverflowMetrics,
   injectSimulatedSafeAreaBottom,
   SIMULATED_SAFE_AREA_BOTTOM_PX,
@@ -172,8 +173,10 @@ test.describe("iPhone 13 PWA safe area", () => {
 
 test.describe("iPhone 13 PWA home safe area", () => {
   test.beforeEach(async ({ page }) => {
+    await prepareE2EPage(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
+    await expect(page.getByRole("link", { name: "Create session" })).toBeVisible();
     await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 

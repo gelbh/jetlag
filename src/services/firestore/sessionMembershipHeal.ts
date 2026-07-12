@@ -5,6 +5,7 @@ import {
   ensureRemoteSessionWriteAccess,
   getRemoteSessionById,
   getRemoteSessionByIdFromServer,
+  lookupRemoteSessionByCode,
   type EnsureRemoteSessionMembershipOptions,
 } from "./firestoreAnnotations";
 import {
@@ -56,4 +57,5 @@ export {
   ensureRemoteSessionWriteAccess,
   getRemoteSessionById,
   getRemoteSessionByIdFromServer,
+  lookupRemoteSessionByCode,
 };

@@ -13,7 +13,12 @@ import {
   ensureAnonymousUser,
   isFirebaseConfigured,
 } from "../services/core/firebase";
-import { getRemoteSessionById, healSessionMembership } from "../services/firestore/sessionMembershipHeal";
+import {
+  getRemoteSessionById,
+  healSessionMembership,
+  lookupRemoteSessionByCode,
+} from "../services/firestore/sessionMembershipHeal";
+import { isFirestorePermissionDenied } from "../services/firestore/firestoreAnnotations";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useViewTransitionNavigate } from "../hooks/useViewTransitionNavigate";
@@ -79,12 +84,30 @@ export function Home() {
       }
 
       const user = await ensureAnonymousUser();
-      const remoteSession = await getRemoteSessionById(session.id);
+      let remoteSession = null;
+      try {
+        remoteSession = await getRemoteSessionById(session.id);
+      } catch (error) {
+        if (!isFirestorePermissionDenied(error)) {
+          throw error;
+        }
+      }
+
       if (!remoteSession) {
-        await clearSessionLocalArtifacts(session.id);
-        setSession(null);
-        setContinueError("That session no longer exists.");
-        return;
+        const lookup = await lookupRemoteSessionByCode(session.code);
+        if (lookup.status === "missing") {
+          await clearSessionLocalArtifacts(session.id);
+          setSession(null);
+          setContinueError("That session no longer exists.");
+          return;
+        }
+        if (lookup.status === "ended") {
+          await clearSessionLocalArtifacts(session.id);
+          setSession(null);
+          setContinueError("That session has ended. Join or create a new one.");
+          return;
+        }
+        remoteSession = lookup.session;
       }
 
       if (remoteSession.endedAt) {
