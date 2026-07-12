@@ -7,7 +7,6 @@ import {
   type SessionRecord,
 } from "../../domain/map/annotations";
 import type { AnnotationRecord } from "../../domain/map/annotations";
-import { resolvePlayerRole } from "../../domain/session/playerRole";
 import {
   endRemoteSession,
   resetRemoteSession,
@@ -134,7 +133,7 @@ export function useMapSessionChrome({
 
     try {
       const user = await ensureAnonymousUser();
-      const hostRole = resolvePlayerRole(session.memberRoles, user.uid);
+      const hostRole = session.memberRoles?.[user.uid];
       if (!hostRole) {
         window.alert("Could not reset session: your role in this session is unknown.");
         return;
