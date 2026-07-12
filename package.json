@@ -35,7 +35,7 @@
     "test:changed": "vitest run --changed origin/main --passWithNoTests",
     "emulators:start": "firebase emulators:start --project demo-jetlag --only auth,firestore,storage",
     "deploy": "node scripts/deploy-production.mjs",
-    "deploy:preview": "npm run build && wrangler deploy",
+    "deploy:worker": "npm run build && wrangler deploy",
     "changeset": "changeset",
     "version": "changeset version && node scripts/sync-changelog-ts.mjs",
     "release:sync": "node scripts/sync-changelog-ts.mjs && node scripts/release-check.mjs",
