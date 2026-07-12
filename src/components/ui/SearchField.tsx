@@ -1,3 +1,5 @@
+import { TextField } from "./TextField";
+
 interface SearchFieldProps {
   label: string;
   value: string;
@@ -29,27 +31,25 @@ export function SearchField({
 
   return (
     <>
-      <label className={labelClassName}>
-        {label}
-        <input
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              onSubmit();
-            }
-          }}
-          className="field-input"
-          placeholder={placeholder}
-          autoComplete="off"
-          autoCorrect="off"
-          spellCheck={false}
-          enterKeyHint="search"
-          inputMode="search"
-          disabled={busy}
-        />
-      </label>
+      <TextField
+        label={label}
+        labelClassName={labelClassName}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            onSubmit();
+          }
+        }}
+        placeholder={placeholder}
+        autoComplete="off"
+        autoCorrect="off"
+        spellCheck={false}
+        enterKeyHint="search"
+        inputMode="search"
+        disabled={busy}
+      />
       <button
         type="button"
         onClick={onSubmit}

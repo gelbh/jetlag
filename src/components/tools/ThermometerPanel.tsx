@@ -21,6 +21,7 @@ import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
 import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
 import { THERMOMETER_STEPS, stepsForMode } from "./shared/toolStepUtils";
+import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
 import { useToolWizard } from "../../hooks/useToolWizard";
 
 type PlacementMode = "gps" | "manual";
@@ -124,7 +125,7 @@ export function ThermometerPanel({
     (step === "placement" &&
       (walkingActive || pinsReady || placementMode === "gps")) ||
     (step === "distance" && distanceAvailable);
-  const canSwipeNext = canGoNext && stepIndex < steps.length - 1;
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
 
   return (
     <ToolPanelShell toolId="thermometer" stepper={stepper}>

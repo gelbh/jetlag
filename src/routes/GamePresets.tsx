@@ -31,14 +31,10 @@ import {
 } from "../domain/session/gamePreset";
 import { useGameAreaFraming } from "../hooks/session/useGameAreaFraming";
 import { usePlaceAreaSearch } from "../hooks/session/usePlaceAreaSearch";
-import {
-  bundledPresetDefinition,
-  isBundledPresetId,
-} from "../domain/regions/bundledGamePresets";
-import { BundledPresetTree } from "../components/presets/BundledPresetTree";
-import { PresetSearchResults } from "../components/presets/PresetSearchResults";
 import { useGamePresetStore } from "../state/gamePresetStore";
 import { filterGamePresetsForSearch } from "../domain/session/gamePresetSearch";
+import { isBundledPresetId } from "../domain/regions/bundledGamePresets";
+import { PresetBrowseLayout } from "../components/presets/PresetBrowseLayout";
 import { useMapStore } from "../state/sessionStore";
 import type { GeocodedPlace } from "../services/geo/geocoding";
 
@@ -339,96 +335,6 @@ export function GamePresetEditor() {
   );
 }
 
-function PresetListItems({
-  presets,
-  onDelete,
-}: {
-  presets: ReturnType<typeof migrateGamePreset>[];
-  onDelete: (id: string) => void;
-}) {
-  return (
-    <ul className="space-y-3">
-      {presets.map((preset) => {
-        const bundled = isBundledPresetId(preset.id);
-        const description = bundledPresetDefinition(preset.id)?.description;
-
-        return (
-          <li
-            key={preset.id}
-            className="home-card-btn home-card-btn-secondary flex-col items-stretch gap-3 !min-h-0 !h-auto py-3"
-          >
-            <div className="flex w-full items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="font-display text-base tracking-wide text-ink">
-                  {preset.name}
-                </p>
-                <p className="mt-1 text-xs text-ink-muted">
-                  {preset.gameSize} · {preset.distanceUnit}
-                  {preset.placeLabel ? ` · ${preset.placeLabel}` : ""}
-                </p>
-                {description ? (
-                  <p className="mt-2 text-xs text-ink-dim">{description}</p>
-                ) : null}
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {preset.advancedSettings.expansionPackEnabled ? (
-                    <span className="rounded-full border border-border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-brand-blue">
-                      Expansion
-                    </span>
-                  ) : null}
-                  {preset.advancedSettings.customQuestionPackEnabled ? (
-                    <span className="rounded-full border border-border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-brand-blue">
-                      Custom Q
-                    </span>
-                  ) : null}
-                  {preset.migrationStatus === "manual_required" ? (
-                    <span className="rounded-full border border-status-warning/40 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-status-warning">
-                      Review
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {preset.migrationStatus === "manual_required" ? (
-                <Link
-                  to={`/presets/${preset.id}/edit`}
-                  className="btn-primary min-h-10 px-3 text-xs"
-                >
-                  Review
-                </Link>
-              ) : (
-                <Link
-                  to={`/create?preset=${preset.id}`}
-                  className="btn-primary min-h-10 px-3 text-xs"
-                >
-                  Host
-                </Link>
-              )}
-              {!bundled ? (
-                <>
-                  <Link
-                    to={`/presets/${preset.id}/edit`}
-                    className="btn-secondary min-h-10 px-3 text-xs"
-                  >
-                    Edit
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => onDelete(preset.id)}
-                    className="btn-secondary min-h-10 px-3 text-xs text-error"
-                  >
-                    Delete
-                  </button>
-                </>
-              ) : null}
-            </div>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
 export function GamePresetList() {
   const presets = useGamePresetStore((state) => state.presets);
   const deletePreset = useGamePresetStore((state) => state.deletePreset);
@@ -453,70 +359,15 @@ export function GamePresetList() {
   );
 
   return (
-    <main className="home-poster flex min-h-[100dvh] flex-col px-5 py-8">
-      <ScreenHeader backTo="/" backLabel="Back" />
-      <div className={`space-y-4 ${screenHeaderOffsetClassName} pb-[max(1rem,env(safe-area-inset-bottom))]`}>
-        <h1 className="font-display text-2xl font-bold uppercase tracking-tight text-ink">
-          Custom games
-        </h1>
-        <p className="text-sm text-ink-muted">
-          Saved templates pre-fill create session. Game area can be added when
-          hosting.
-        </p>
-
-        <label htmlFor={searchId} className="field-label block">
-          Search presets
-          <input
-            id={searchId}
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            className="field-input min-h-11 w-full"
-            placeholder="Name or place…"
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-            enterKeyHint="search"
-            inputMode="search"
-          />
-        </label>
-
-        <Link to="/presets/new" className="home-card-btn home-card-btn-primary">
-          <span>New preset</span>
-        </Link>
-
-        {searching ? (
-          <PresetSearchResults presets={searchResults} onDelete={deletePreset} />
-        ) : (
-          <>
-            {bundledPresets.length > 0 ? (
-              <section className="space-y-2">
-                <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
-                  Recommended
-                </p>
-                <p className="text-xs leading-snug text-ink-muted">
-                  Browse by continent, country, and region. More areas ship over time.
-                </p>
-                <BundledPresetTree presets={bundledPresets} />
-              </section>
-            ) : null}
-
-            {userPresets.length === 0 ? (
-              bundledPresets.length === 0 ? (
-                <p className="text-sm text-ink-dim">No presets saved on this device.</p>
-              ) : null
-            ) : (
-              <section className="space-y-2">
-                {bundledPresets.length > 0 ? (
-                  <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
-                    Your presets
-                  </p>
-                ) : null}
-                <PresetListItems presets={userPresets} onDelete={deletePreset} />
-              </section>
-            )}
-          </>
-        )}
-      </div>
-    </main>
+    <PresetBrowseLayout
+      searchId={searchId}
+      query={query}
+      onQueryChange={setQuery}
+      searching={searching}
+      searchResults={searchResults}
+      bundledPresets={bundledPresets}
+      userPresets={userPresets}
+      onDelete={deletePreset}
+    />
   );
 }

@@ -1,14 +1,12 @@
 import { isEndGameActive, isEndGamePending } from "../../domain/map/annotations";
 import { ChatPanel } from "../../components/chat/ChatPanel";
-import { MapFirstRunSheet } from "../../components/session/MapFirstRunSheet";
 import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
 import { MapStatusRail } from "../../components/session/MapStatusRail";
-import { MapToolsHintBanner } from "../../components/session/MapToolsHintBanner";
 import { SessionLog } from "../../components/session/SessionLog";
 import { AnnotationEditSheet } from "../../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../../components/tools/ToolDock";
-import { ToolFloatingPanel } from "../../components/tools/ToolFloatingPanel";
 import type { MapScreenController } from "./useMapScreenController";
+import { SeekerChromeOverlays } from "./SeekerChromeOverlays";
 
 type MapScreenChromeProps = Pick<
   MapScreenController,
@@ -114,46 +112,6 @@ type MapScreenChromeProps = Pick<
   | "setActiveTool"
   | "setAwaitingPlacement"
 >;
-
-function renderToolPanel(
-  activeTool: MapScreenController["activeTool"],
-  tools: Pick<
-    MapScreenController,
-    | "radarTool"
-    | "photoTool"
-    | "thermometerTool"
-    | "matchingTool"
-    | "measuringTool"
-    | "pinTool"
-    | "zoneTool"
-    | "tentacleTool"
-  >,
-) {
-  switch (activeTool) {
-    case "radar":
-      return tools.radarTool.panel;
-    case "zone":
-      return tools.zoneTool.panel;
-    case "thermometer":
-      return tools.thermometerTool.panel;
-    case "matching":
-      return tools.matchingTool.panel;
-    case "measuring":
-      return tools.measuringTool.panel;
-    case "pin":
-      return tools.pinTool.panel;
-    case "tentacle":
-      return tools.tentacleTool.panel;
-    case "photo":
-      return tools.photoTool.panel;
-    case "none":
-      return null;
-    default: {
-      const _exhaustive: never = activeTool;
-      return _exhaustive;
-    }
-  }
-}
 
 export function MapScreenChrome({
   session,
@@ -302,16 +260,6 @@ export function MapScreenChrome({
           }
         />
 
-        <MapToolsHintBanner
-          hidden={
-            !timer.hasStarted ||
-            activeTool !== "none" ||
-            overlay.isSettingsOpen ||
-            Boolean(selectedAnnotation) ||
-            Boolean(geometryEditAnnotation && geometryDraft)
-          }
-        />
-
         <ToolDock
           activeTool={activeTool}
           sessionRules={session!}
@@ -333,37 +281,31 @@ export function MapScreenChrome({
         />
       </div>
 
-      {geometryEditAnnotation && geometryDraft ? (
-        <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock jl-panel-enter z-[var(--z-panel)] px-3">
-          <div className="hud-panel mx-auto flex max-w-xl gap-2 p-3">
-            <button
-              type="button"
-              onClick={() => void saveGeometryEdit()}
-              className="btn-primary min-h-12 flex-1"
-            >
-              Save shape
-            </button>
-            <button
-              type="button"
-              onClick={cancelGeometryEdit}
-              className="btn-secondary min-h-12 flex-1"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      ) : null}
-
-      <MapFirstRunSheet
-        open={
-          !timer.hasStarted &&
-          !firstRunDismissed &&
-          overlay.sheet === "none" &&
-          activeTool === "none" &&
-          !selectedAnnotation &&
-          !geometryEditAnnotation
-        }
-        onDismiss={() => setFirstRunDismissed(true)}
+      <SeekerChromeOverlays
+        timer={timer}
+        activeTool={activeTool}
+        overlay={overlay}
+        firstRunDismissed={firstRunDismissed}
+        setFirstRunDismissed={setFirstRunDismissed}
+        selectedAnnotation={selectedAnnotation}
+        geometryEditAnnotation={geometryEditAnnotation}
+        geometryDraft={geometryDraft}
+        mapPanning={mapPanning}
+        panelMinimized={panelMinimized}
+        setPanelMinimized={setPanelMinimized}
+        handleSelectTool={handleSelectTool}
+        cancelGeometryEdit={cancelGeometryEdit}
+        saveGeometryEdit={saveGeometryEdit}
+        tools={{
+          radarTool,
+          photoTool,
+          thermometerTool,
+          matchingTool,
+          measuringTool,
+          pinTool,
+          zoneTool,
+          tentacleTool,
+        }}
       />
 
       <MapSettingsSheet
@@ -371,84 +313,76 @@ export function MapScreenChrome({
         open={overlay.isSettingsOpen}
         onClose={overlay.closeSheet}
         pendingWrites={pendingWrites}
-        showCurrentLocation={showCurrentLocation}
-        onShowCurrentLocationChange={setShowCurrentLocation}
-        showAdminBoundaries={showAdminBoundaries}
-        onShowAdminBoundariesChange={setShowAdminBoundaries}
-        keepScreenAwake={keepScreenAwake}
-        onKeepScreenAwakeChange={setKeepScreenAwake}
-        lowPowerMode={lowPowerMode}
-        onLowPowerModeChange={setLowPowerMode}
-        layerVisibility={layerVisibility}
-        onLayerVisibilityChange={setLayerVisibility}
-        distanceUnit={distanceUnit}
-        onDistanceUnitChange={(unit) => {
-          void handleDistanceUnitChange(unit);
+        general={{
+          showCurrentLocation,
+          onShowCurrentLocationChange: setShowCurrentLocation,
+          showAdminBoundaries,
+          onShowAdminBoundariesChange: setShowAdminBoundaries,
+          keepScreenAwake,
+          onKeepScreenAwakeChange: setKeepScreenAwake,
+          lowPowerMode,
+          onLowPowerModeChange: setLowPowerMode,
+          distanceUnit,
+          onDistanceUnitChange: (unit) => {
+            void handleDistanceUnitChange(unit);
+          },
+          distanceUnitEditable: gameRulesEditable,
+          mapStyle,
+          onMapStyleChange: setMapStyle,
+          locationError: liveLocationError,
+          transitEnabled,
+          transitLiveEnabled,
+          transitLiveSupported,
+          sessionIsPremium,
+          transitRouteFilter,
+          metroLabel: transitMetro?.label ?? null,
+          loadingStatic: transitLoadingStatic,
+          loadingLive: transitLoadingLive,
+          liveDataStale: transitLiveDataStale,
+          stopCount: transitStaticData?.stops.length ?? 0,
+          routeCount: transitStaticData?.routes.length ?? 0,
+          vehicleCount: transitLiveData?.vehicles.length ?? 0,
+          lastUpdated:
+            transitLiveData?.fetchedAt ?? transitStaticData?.fetchedAt,
+          transitError,
+          onToggleTransit: () => setTransitEnabled(!transitEnabled),
+          onToggleLiveTransit: () => setTransitLiveEnabled(!transitLiveEnabled),
+          onTransitRouteFilterChange: setTransitRouteFilter,
+          notificationPreferences,
+          onNotificationPreferencesChange: updateNotificationPreferences,
+          onEnableNotifications: enableNotifications,
         }}
-        distanceUnitEditable={gameRulesEditable}
-        mapStyle={mapStyle}
-        onMapStyleChange={setMapStyle}
-        locationError={liveLocationError}
-        transitEnabled={transitEnabled}
-        transitLiveEnabled={transitLiveEnabled}
-        transitLiveSupported={transitLiveSupported}
-        sessionIsPremium={sessionIsPremium}
-        transitRouteFilter={transitRouteFilter}
-        metroLabel={transitMetro?.label ?? null}
-        loadingStatic={transitLoadingStatic}
-        loadingLive={transitLoadingLive}
-        liveDataStale={transitLiveDataStale}
-        stopCount={transitStaticData?.stops.length ?? 0}
-        routeCount={transitStaticData?.routes.length ?? 0}
-        vehicleCount={transitLiveData?.vehicles.length ?? 0}
-        lastUpdated={transitLiveData?.fetchedAt ?? transitStaticData?.fetchedAt}
-        transitError={transitError}
-        onToggleTransit={() => setTransitEnabled(!transitEnabled)}
-        onToggleLiveTransit={() => setTransitLiveEnabled(!transitLiveEnabled)}
-        onTransitRouteFilterChange={setTransitRouteFilter}
-        onClearMap={handleClearMap}
-        endGameBlocked={endGameBlocked}
-        onExport={() => {
-          overlay.closeSheet();
-          void exportMap();
+        layers={{
+          layerVisibility,
+          onLayerVisibilityChange: setLayerVisibility,
         }}
-        isHost={isHost}
-        onResetBoard={handleResetBoard}
-        onEndSession={() => void handleEndSession()}
-        onLeaveSession={() => void handleLeaveSession()}
-        sessionCode={session!.code}
-        remoteSession={isRemote}
-        notificationPreferences={notificationPreferences}
-        onNotificationPreferencesChange={updateNotificationPreferences}
-        onEnableNotifications={enableNotifications}
-        gameRulesEditable={gameRulesEditable && isHost}
-        gameSize={session!.gameSize ?? "medium"}
-        advancedSettings={draftAdvancedSettings ?? undefined}
-        onAdvancedSettingsChange={setDraftAdvancedSettings}
-        onSaveGameRules={handleSaveGameRules}
-        expansionPackEnabled={session!.expansionPackEnabled === true}
+        rules={
+          draftAdvancedSettings
+            ? {
+                gameRulesEditable: gameRulesEditable && isHost,
+                gameSize: session!.gameSize ?? "medium",
+                advancedSettings: draftAdvancedSettings,
+                onAdvancedSettingsChange: setDraftAdvancedSettings,
+                onSaveGameRules: handleSaveGameRules,
+              }
+            : undefined
+        }
+        session={{
+          sessionCode: session!.code,
+          remoteSession: isRemote,
+          onClearMap: handleClearMap,
+          endGameBlocked,
+          onExport: () => {
+            overlay.closeSheet();
+            void exportMap();
+          },
+          isHost,
+          onResetBoard: handleResetBoard,
+          onEndSession: () => void handleEndSession(),
+          onLeaveSession: () => void handleLeaveSession(),
+          expansionPackEnabled: session!.expansionPackEnabled === true,
+        }}
       />
-
-      {activeTool !== "none" && !selectedAnnotation ? (
-        <ToolFloatingPanel
-          toolId={activeTool}
-          mapPanning={mapPanning}
-          minimized={panelMinimized}
-          onMinimizedChange={setPanelMinimized}
-          onClose={() => handleSelectTool("none")}
-        >
-          {renderToolPanel(activeTool, {
-            radarTool,
-            photoTool,
-            thermometerTool,
-            matchingTool,
-            measuringTool,
-            pinTool,
-            zoneTool,
-            tentacleTool,
-          })}
-        </ToolFloatingPanel>
-      ) : null}
 
       {selectedAnnotation ? (
         <AnnotationEditSheet

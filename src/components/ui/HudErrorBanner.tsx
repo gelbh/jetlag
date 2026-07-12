@@ -1,8 +1,8 @@
-import type { UserErrorDisplay } from "../../domain/device/userErrors";
 import { HudBanner } from "./HudBanner";
+import { MapFloatAlertPanel } from "./MapFloatAlert";
 
 interface HudErrorBannerProps {
-  error: UserErrorDisplay;
+  error: import("../../domain/device/userErrors").UserErrorDisplay;
   onAction?: () => void;
 }
 
@@ -13,10 +13,7 @@ export function HudErrorBanner({ error, onAction }: HudErrorBannerProps) {
       animated={false}
       className="pointer-events-auto mx-3 mt-1.5"
     >
-      <div
-        className="map-float-alert flex items-center justify-between gap-3 border-2 border-status-error/40 bg-status-error-surface px-3 py-2"
-        role="alert"
-      >
+      <MapFloatAlertPanel>
         <div className="min-w-0 text-left">
           <p className="text-sm font-semibold text-status-error">{error.title}</p>
           <p className="text-xs text-ink">{error.message}</p>
@@ -30,7 +27,7 @@ export function HudErrorBanner({ error, onAction }: HudErrorBannerProps) {
             {error.actionLabel}
           </button>
         ) : null}
-      </div>
+      </MapFloatAlertPanel>
     </HudBanner>
   );
 }

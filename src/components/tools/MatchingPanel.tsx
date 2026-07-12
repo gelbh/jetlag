@@ -12,6 +12,7 @@ import {
 import { resolveMatchingCategory } from "../../domain/session/sessionCustomCatalog";
 import { matchingFeatureCountLabel, matchingNullAnswerMessage } from "../../services/geo/matchingFeatures";
 import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
+import { GroupedSelectField } from "../ui/GroupedSelectField";
 import { yesNoAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { AnchorControls } from "./shared/AnchorControls";
@@ -27,6 +28,7 @@ import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
 import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
 import { MATCHING_STEPS, stepsForMode } from "./shared/toolStepUtils";
+import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
 import { useToolWizard } from "../../hooks/useToolWizard";
 
 interface MatchingPanelProps {
@@ -182,7 +184,7 @@ export function MatchingPanel({
     (step === "anchor" && hasSeekerPoint && !loading) ||
     (step === "category" && categoryAvailable && categoryChosen) ||
     (step === "resolve" && resolveComplete && !loading);
-  const canSwipeNext = canGoNext && stepIndex < steps.length - 1;
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
 
   return (
     <ToolPanelShell toolId="matching" stepper={stepper}>
@@ -199,45 +201,21 @@ export function MatchingPanel({
           {availableCategories.length === 0 ? (
             <CatalogExhaustedMessage message="Every match category has already been used on this map." />
           ) : (
-            <label className="field-label">
-              Match category
-              <select
-                value={categoryChosen && categoryId ? categoryId : ""}
-                onChange={(event) => {
-                  if (!event.target.value) {
-                    return;
-                  }
-
-                  handleCategoryChange(
-                    event.target.value as MatchingCategoryId,
-                  );
-                }}
-                className="field-input"
-              >
-                <option value="" disabled>
-                  Choose a category
-                </option>
-                {MATCHING_CATEGORY_GROUPS.map((group) => {
-                  const categories = selectableCategories.filter(
-                    (cat) => cat.groupId === group.id,
-                  );
-
-                  if (categories.length === 0) {
-                    return null;
-                  }
-
-                  return (
-                    <optgroup key={group.id} label={group.label}>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.label}
-                        </option>
-                      ))}
-                    </optgroup>
-                  );
-                })}
-              </select>
-            </label>
+            <GroupedSelectField
+              label="Match category"
+              value={categoryChosen && categoryId ? categoryId : ""}
+              placeholder="Choose a category"
+              groups={MATCHING_CATEGORY_GROUPS.map((group) => ({
+                id: group.id,
+                label: group.label,
+                options: selectableCategories
+                  .filter((cat) => cat.groupId === group.id)
+                  .map((cat) => ({ value: cat.id, label: cat.label })),
+              })).filter((group) => group.options.length > 0)}
+              onChange={(value) =>
+                handleCategoryChange(value as MatchingCategoryId)
+              }
+            />
           )}
           {question ? (
             <QuestionPromptBlock

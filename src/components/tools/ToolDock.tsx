@@ -1,35 +1,29 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import type { GameSize } from "../../domain/session/gameSize";
 import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import { resolveToolDockEnabled } from "../../domain/session/sessionRules";
 import {
-  MAP_TOOL_DOCK_ENTRIES,
   MARKUP_DOCK_TOOL_IDS,
   QUESTION_DOCK_TOOL_IDS,
-  isMarkupDockTool,
-  mapToolDockMenuHint,
-  mapToolDockMenuLabel,
-  mapToolDockShortLabel,
 } from "../../domain/map/mapTools";
 import type { MapTool } from "../../state/sessionStore";
-import {
-  HudDrawIcon,
-  HudMoreIcon,
-  HudRedoIcon,
-  HudSettingsIcon,
-  HudUndoIcon,
-} from "../ui/HudIcons";
-import {
-  HudPinIcon,
-  HudToolIcon,
-  HudZoneIcon,
-} from "../map/ToolIcons";
-import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
-import { ToolOverflowSheet } from "./ToolOverflowSheet";
-import { MotionPressable } from "../motion/MotionPressable";
 import { MotionSharedElement } from "../motion/MotionSharedElement";
 import { MOTION_SHARED_ELEMENTS } from "../motion/sharedElements";
+import {
+  ToolDockCompactMoreButton,
+  ToolDockHistorySlots,
+  ToolDockQuestionSlot,
+  ToolDockWideActions,
+} from "./ToolDockSlot";
+import {
+  ToolDockDrawMenu,
+  ToolDockOverflowMenu,
+} from "./ToolDockOverflowMenu";
+import {
+  useToolDockHighlight,
+  useToolDockMenus,
+} from "./useToolDockState";
 
 interface ToolDockProps {
   activeTool: MapTool;
@@ -51,10 +45,6 @@ interface ToolDockProps {
   canSubmitQuestion?: boolean;
 }
 
-const markupTools = MAP_TOOL_DOCK_ENTRIES.filter((tool) =>
-  isMarkupDockTool(tool.id),
-);
-
 export function ToolDock({
   activeTool,
   sessionRules,
@@ -74,187 +64,37 @@ export function ToolDock({
   onStartEndGame,
   canSubmitQuestion = true,
 }: ToolDockProps) {
-  const [drawMenuOpen, setDrawMenuOpen] = useState(false);
-  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const dockRef = useRef<HTMLDivElement>(null);
   const mainGroupRef = useRef<HTMLDivElement>(null);
-  const [dockHighlight, setDockHighlight] = useState<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
   const viewportBottomInset = useVisualViewportBottomInset(true);
+  const {
+    drawMenuOpen,
+    setDrawMenuOpen,
+    moreMenuOpen,
+    setMoreMenuOpen,
+    closeMenus,
+  } = useToolDockMenus(dockRef);
 
   const drawMenuVisible = drawMenuOpen && !dismissOverflowMenus;
   const moreMenuVisible = moreMenuOpen && !dismissOverflowMenus;
-
-  useEffect(() => {
-    if (!drawMenuOpen) {
-      return;
-    }
-
-    const handlePointerDown = (event: PointerEvent) => {
-      if (dockRef.current && !dockRef.current.contains(event.target as Node)) {
-        setDrawMenuOpen(false);
-      }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setDrawMenuOpen(false);
-        setMoreMenuOpen(false);
-      }
-    };
-
-    window.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [drawMenuOpen]);
-
-  useEffect(() => {
-    if (!moreMenuOpen) {
-      return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setMoreMenuOpen(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [moreMenuOpen]);
-
-  const selectTool = (tool: MapTool) => {
-    onSelect(activeTool === tool ? "none" : tool);
-    setDrawMenuOpen(false);
-    setMoreMenuOpen(false);
-  };
-
   const markupActive = MARKUP_DOCK_TOOL_IDS.some((toolId) => activeTool === toolId);
-
   const rulesInput = sessionRules ?? { gameSize };
-
   const visibleQuestionTools = QUESTION_DOCK_TOOL_IDS.filter((toolId) =>
     resolveToolDockEnabled(rulesInput, toolId, { hasHiders }),
   );
+  const dockHighlight = useToolDockHighlight(
+    mainGroupRef,
+    activeTool,
+    viewportBottomInset,
+    visibleQuestionTools.length,
+  );
 
-  const updateDockHighlight = useCallback(() => {
-    const group = mainGroupRef.current;
-    const isQuestionTool = QUESTION_DOCK_TOOL_IDS.includes(
-      activeTool as (typeof QUESTION_DOCK_TOOL_IDS)[number],
-    );
-
-    if (!group || activeTool === "none" || !isQuestionTool) {
-      setDockHighlight(null);
-      return;
-    }
-
-    const slot = group.querySelector<HTMLButtonElement>('[aria-pressed="true"]');
-    if (!slot) {
-      setDockHighlight(null);
-      return;
-    }
-
-    const groupRect = group.getBoundingClientRect();
-    const slotRect = slot.getBoundingClientRect();
-    setDockHighlight({
-      x: slotRect.left - groupRect.left,
-      y: slotRect.top - groupRect.top,
-      width: slotRect.width,
-      height: slotRect.height,
-    });
-  }, [activeTool]);
-
-  useEffect(() => {
-    updateDockHighlight();
-    window.addEventListener("resize", updateDockHighlight);
-    return () => window.removeEventListener("resize", updateDockHighlight);
-  }, [updateDockHighlight, viewportBottomInset, visibleQuestionTools.length]);
+  const selectTool = (tool: MapTool) => {
+    onSelect(activeTool === tool ? "none" : tool);
+    closeMenus();
+  };
 
   const moreMenuActive = moreMenuVisible || markupActive;
-
-  const renderQuestionTool = (
-    toolId: (typeof QUESTION_DOCK_TOOL_IDS)[number],
-  ) => {
-    const entry = MAP_TOOL_DOCK_ENTRIES.find((item) => item.id === toolId);
-    if (!entry) {
-      return null;
-    }
-
-    const active = activeTool === toolId;
-    const blockedByOpenQuestion =
-      !canSubmitQuestion && QUESTION_DOCK_TOOL_IDS.includes(toolId);
-
-    return (
-      <MotionPressable
-        key={toolId}
-        type="button"
-        disabled={!entry.enabled}
-        onClick={() => selectTool(toolId)}
-        className={`jl-tool-slot ${active ? "jl-tool-slot-active" : ""}`}
-        aria-label={entry.name}
-        aria-pressed={active}
-        title={
-          blockedByOpenQuestion
-            ? "Preview only — finish the open question before sending"
-            : (mapToolDockMenuHint(entry) ?? entry.name)
-        }
-      >
-        <span className="jl-tool-slot-icon">
-          <HudToolIcon tool={toolId} className="h-5 w-5 shrink-0" />
-        </span>
-        <span className="jl-tool-slot-label">{mapToolDockShortLabel(toolId)}</span>
-      </MotionPressable>
-    );
-  };
-
-  const renderMarkupItem = (tool: (typeof MAP_TOOL_DOCK_ENTRIES)[number]) => {
-    const hint = mapToolDockMenuHint(tool);
-    const active = activeTool === tool.id;
-    const icon =
-      tool.id === "zone" ? (
-        <HudZoneIcon className="h-5 w-5" />
-      ) : (
-        <HudPinIcon className="h-5 w-5" />
-      );
-
-    return (
-      <button
-        key={tool.id}
-        type="button"
-        role="menuitem"
-        disabled={!tool.enabled}
-        onClick={() => selectTool(tool.id)}
-        className={`jl-tool-menu-item disabled:opacity-40 ${
-          active ? "jl-tool-menu-item-active" : "jl-tool-menu-item-default"
-        }`}
-      >
-        <span className="jl-tool-menu-item-icon">{icon}</span>
-        <span className="jl-tool-menu-item-body">
-          <span className="font-display text-sm font-semibold uppercase tracking-wide">
-            {mapToolDockMenuLabel(tool)}
-          </span>
-          {hint ? (
-            <span
-              className={`text-xs leading-snug ${
-                active ? "text-action-ink/80" : "text-ink-muted"
-              }`}
-            >
-              {hint}
-            </span>
-          ) : null}
-        </span>
-      </button>
-    );
-  };
 
   return (
     <div
@@ -266,21 +106,18 @@ export function ToolDock({
           : undefined
       }
     >
-      {drawMenuVisible ? (
-        <div
-          className="jl-tool-menu jl-tool-menu-dock jl-tool-dock-wide-only hud-panel"
-          role="menu"
-          aria-label="Draw on map"
-        >
-          {markupTools.map(renderMarkupItem)}
-        </div>
-      ) : null}
+      <ToolDockDrawMenu
+        open={drawMenuVisible}
+        activeTool={activeTool}
+        onSelect={selectTool}
+      />
 
-      <ToolOverflowSheet
-        open={moreMenuVisible}
-        onClose={() => setMoreMenuOpen(false)}
+      <ToolDockOverflowMenu
+        moreMenuOpen={moreMenuOpen}
+        dismissOverflowMenus={dismissOverflowMenus}
         activeTool={activeTool}
         onSelect={onSelect}
+        onCloseMoreMenu={() => setMoreMenuOpen(false)}
         canUndo={canUndo}
         canRedo={canRedo}
         onUndo={onUndo}
@@ -306,35 +143,12 @@ export function ToolDock({
           />
         ) : null}
 
-        <div
-          className="jl-tool-dock-group jl-tool-dock-group-history"
-          aria-label="History"
-        >
-          <MotionPressable
-            type="button"
-            onClick={onUndo}
-            disabled={!canUndo}
-            className="jl-tool-slot"
-            aria-label="Undo last annotation"
-          >
-            <span className="jl-tool-slot-icon">
-              <HudUndoIcon className="h-5 w-5" />
-            </span>
-            <span className="jl-tool-slot-label">Undo</span>
-          </MotionPressable>
-          <MotionPressable
-            type="button"
-            onClick={onRedo}
-            disabled={!canRedo}
-            className="jl-tool-slot"
-            aria-label="Redo last annotation"
-          >
-            <span className="jl-tool-slot-icon">
-              <HudRedoIcon className="h-5 w-5" />
-            </span>
-            <span className="jl-tool-slot-label">Redo</span>
-          </MotionPressable>
-        </div>
+        <ToolDockHistorySlots
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onUndo={onUndo}
+          onRedo={onRedo}
+        />
 
         <div
           className="jl-tool-dock-divider jl-tool-dock-divider-history"
@@ -346,88 +160,46 @@ export function ToolDock({
           className="jl-tool-dock-group jl-tool-dock-group-main"
           aria-label="Question tools"
         >
-          {visibleQuestionTools.map((toolId) => renderQuestionTool(toolId))}
+          {visibleQuestionTools.map((toolId) => (
+            <ToolDockQuestionSlot
+              key={toolId}
+              toolId={toolId}
+              activeTool={activeTool}
+              canSubmitQuestion={canSubmitQuestion}
+              onSelect={selectTool}
+            />
+          ))}
         </div>
 
         <div className="jl-tool-dock-divider" aria-hidden="true" />
 
-        <div className="jl-tool-dock-group jl-tool-dock-group-end jl-tool-dock-wide-only">
-          <MotionPressable
-            type="button"
-            onClick={() => {
-              setMoreMenuOpen(false);
-              setDrawMenuOpen((open) => !open);
-            }}
-            className={`jl-tool-slot ${
-              drawMenuOpen || markupActive ? "jl-tool-slot-active" : ""
-            }`}
-            aria-label="Draw on map"
-            aria-expanded={drawMenuOpen}
-            aria-haspopup="menu"
-            title="Zone and pin"
-          >
-            <span className="jl-tool-slot-icon">
-              <HudDrawIcon className="h-5 w-5" />
-            </span>
-            <span className="jl-tool-slot-label">Draw</span>
-          </MotionPressable>
+        <ToolDockWideActions
+          drawMenuOpen={drawMenuOpen}
+          markupActive={markupActive}
+          onToggleDrawMenu={() => {
+            setMoreMenuOpen(false);
+            setDrawMenuOpen((open) => !open);
+          }}
+          onOpenChat={onOpenChat}
+          hasUnreadChat={hasUnreadChat}
+          unreadCount={unreadCount}
+          onOpenSettings={onOpenSettings}
+        />
 
-          {onOpenChat ? (
-            <MotionPressable
-              type="button"
-              onClick={onOpenChat}
-              className="jl-tool-slot"
-              aria-label={
-                hasUnreadChat ? "Open chat, unread messages" : "Open chat"
-              }
-            >
-              <span className="jl-tool-slot-icon jl-unread-badge-host text-xs font-bold">
-                @
-                {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
-              </span>
-              <span className="jl-tool-slot-label">Chat</span>
-            </MotionPressable>
-          ) : null}
-
-          <MotionPressable
-            type="button"
-            onClick={onOpenSettings}
-            className="jl-tool-slot"
-            aria-label="Open settings"
-          >
-            <span className="jl-tool-slot-icon">
-              <HudSettingsIcon className="h-5 w-5" />
-            </span>
-            <span className="jl-tool-slot-label">Setup</span>
-          </MotionPressable>
-        </div>
-
-        <div className="jl-tool-dock-group jl-tool-dock-group-end jl-tool-dock-compact-only">
-          <MotionPressable
-            type="button"
-            onClick={() => {
-              setDrawMenuOpen(false);
-              const opening = !moreMenuOpen;
-              setMoreMenuOpen(opening);
-              if (opening && activeTool !== "none") {
-                onSelect("none");
-              }
-            }}
-            className={`jl-tool-slot ${moreMenuActive ? "jl-tool-slot-active" : ""}`}
-            aria-label={
-              hasUnreadChat ? "More tools, unread chat" : "More tools"
+        <ToolDockCompactMoreButton
+          moreMenuActive={moreMenuActive}
+          moreMenuOpen={moreMenuOpen}
+          hasUnreadChat={hasUnreadChat}
+          unreadCount={unreadCount}
+          onToggleMoreMenu={() => {
+            setDrawMenuOpen(false);
+            const opening = !moreMenuOpen;
+            setMoreMenuOpen(opening);
+            if (opening && activeTool !== "none") {
+              onSelect("none");
             }
-            aria-expanded={moreMenuOpen}
-            aria-haspopup="dialog"
-            title="Draw, chat, setup"
-          >
-            <span className="jl-tool-slot-icon jl-unread-badge-host">
-              <HudMoreIcon className="h-5 w-5" />
-              {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
-            </span>
-            <span className="jl-tool-slot-label">More</span>
-          </MotionPressable>
-        </div>
+          }}
+        />
       </div>
     </div>
   );

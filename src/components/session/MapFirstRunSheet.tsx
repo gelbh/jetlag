@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { AnimatedOverlay } from "../ui/AnimatedOverlay";
+import { MotionSheet } from "../motion/MotionSheet";
 import { usePersistedDismiss } from "../../hooks/usePersistedDismiss";
 
 const STORAGE_KEY = "jetlag.mapFirstRunDismissed";
@@ -22,7 +22,7 @@ export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
   };
 
   return (
-    <AnimatedOverlay
+    <MotionSheet
       open={open}
       onClose={dismiss}
       ariaLabel="Map tools guide"
@@ -65,6 +65,6 @@ export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
           Full tutorial →
         </Link>
       </div>
-    </AnimatedOverlay>
+    </MotionSheet>
   );
 }

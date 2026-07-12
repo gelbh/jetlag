@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { signInWithGoogle } from "../../services/core/accountAuth";
-import { ensureAnonymousUser } from "../../services/core/firebase";
+import { OAuthSignInButton } from "./OAuthSignInButton";
 
 interface GoogleSignInButtonProps {
   disabled?: boolean;
@@ -13,31 +12,15 @@ export function GoogleSignInButton({
   onSuccess,
   onError,
 }: GoogleSignInButtonProps) {
-  const [busy, setBusy] = useState(false);
-
-  const handleClick = async () => {
-    setBusy(true);
-    try {
-      await ensureAnonymousUser();
-      await signInWithGoogle();
-      await onSuccess();
-    } catch (error) {
-      onError(
-        error instanceof Error ? error.message : "Google sign-in failed.",
-      );
-    } finally {
-      setBusy(false);
-    }
-  };
-
   return (
-    <button
-      type="button"
-      disabled={disabled || busy}
-      onClick={() => void handleClick()}
-      className="oauth-provider-button oauth-provider-button-google disabled:opacity-50"
-    >
-      <span className="oauth-provider-button-icon" aria-hidden="true">
+    <OAuthSignInButton
+      provider="google"
+      disabled={disabled}
+      onSignIn={signInWithGoogle}
+      onSuccess={onSuccess}
+      onError={onError}
+      label="Continue with Google"
+      icon={
         <svg viewBox="0 0 24 24" width="20" height="20">
           <path
             fill="#4285F4"
@@ -56,8 +39,7 @@ export function GoogleSignInButton({
             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
           />
         </svg>
-      </span>
-      <span>{busy ? "Opening…" : "Continue with Google"}</span>
-    </button>
+      }
+    />
   );
 }

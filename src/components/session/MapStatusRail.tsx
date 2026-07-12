@@ -9,6 +9,8 @@ import { HudErrorBanner } from "../ui/HudErrorBanner";
 import { userErrorFromSyncMessage } from "../../domain/device/userErrors";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import type { PlayerRole } from "../../domain/session/playerRole";
+import { EndGameAlert } from "./status/EndGameAlert";
+import { HiderOutsideZoneAlert } from "./status/HiderOutsideZoneAlert";
 import { SyncBlock } from "./status/SyncBlock";
 import { TimerBlock } from "./status/TimerBlock";
 import { ToolStatusBlock } from "./status/ToolStatusBlock";
@@ -205,95 +207,18 @@ export function MapStatusRail({
           )
         ) : null}
 
-        {hiderOutsideZone ? (
-          <p
-            className="map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 border-status-warning/40 bg-status-warning-surface px-3 py-2 text-center text-sm font-semibold text-status-warning"
-            role="status"
-          >
-            You&apos;re outside your hiding zone. Use a move card to relocate.
-          </p>
-        ) : null}
+        {hiderOutsideZone ? <HiderOutsideZoneAlert /> : null}
 
-        {endGamePending && playerRole === "hider" && onAcceptEndGame ? (
-          <div className="map-float-alert pointer-events-auto mx-3 mt-1.5 flex items-center justify-between gap-3 border-2 border-highlight bg-surface-deep px-3 py-2">
-            <p className="text-sm font-semibold text-ink">
-              Seekers requested end game
-            </p>
-            <div className="flex shrink-0 gap-2">
-              {onResetEndGame ? (
-                <button
-                  type="button"
-                  onClick={onResetEndGame}
-                  className="btn-secondary min-h-10 px-3 text-xs"
-                >
-                  Decline
-                </button>
-              ) : null}
-              <button
-                type="button"
-                onClick={onAcceptEndGame}
-                className="btn-primary min-h-10 shrink-0 px-3 text-xs"
-              >
-                Accept
-              </button>
-            </div>
-          </div>
-        ) : endGamePending && myUid && endGameRequestedByUid === myUid && onResetEndGame ? (
-          <div className="map-float-alert pointer-events-auto mx-3 mt-1.5 flex items-center justify-between gap-3 border-2 border-highlight bg-surface-deep px-3 py-2">
-            <p className="text-sm font-semibold text-ink">
-              Waiting for hider to accept end game
-            </p>
-            <button
-              type="button"
-              onClick={onResetEndGame}
-              className="btn-secondary min-h-10 shrink-0 px-3 text-xs"
-            >
-              Cancel request
-            </button>
-          </div>
-        ) : endGamePending && isHost && onResetEndGame ? (
-          <div className="map-float-alert pointer-events-auto mx-3 mt-1.5 flex items-center justify-between gap-3 border-2 border-highlight bg-surface-deep px-3 py-2">
-            <p className="text-sm font-semibold text-ink">
-              End game pending hider acceptance
-            </p>
-            <button
-              type="button"
-              onClick={onResetEndGame}
-              className="btn-secondary min-h-10 shrink-0 px-3 text-xs"
-            >
-              Cancel end game
-            </button>
-          </div>
-        ) : endGamePending ? (
-          <p
-            className="map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 border-highlight bg-surface-deep px-3 py-2 text-center text-sm font-semibold text-ink"
-            role="status"
-          >
-            Waiting for hider to accept end game
-          </p>
-        ) : null}
-
-        {endGameActive ? (
-          isHost && onResetEndGame ? (
-            <div className="map-float-alert pointer-events-auto mx-3 mt-1.5 flex items-center justify-between gap-3 border-2 border-highlight bg-surface-deep px-3 py-2">
-              <p className="text-sm font-semibold text-ink">End game started</p>
-              <button
-                type="button"
-                onClick={onResetEndGame}
-                className="btn-secondary min-h-10 shrink-0 px-3 text-xs"
-              >
-                End end game
-              </button>
-            </div>
-          ) : (
-            <p
-              className="map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 border-highlight bg-surface-deep px-3 py-2 text-center text-sm font-semibold text-ink"
-              role="status"
-            >
-              End game started
-            </p>
-          )
-        ) : null}
+        <EndGameAlert
+          endGamePending={endGamePending}
+          endGameActive={endGameActive}
+          playerRole={playerRole}
+          endGameRequestedByUid={endGameRequestedByUid}
+          myUid={myUid}
+          isHost={isHost}
+          onAcceptEndGame={onAcceptEndGame}
+          onResetEndGame={onResetEndGame}
+        />
       </div>
     </div>
   );

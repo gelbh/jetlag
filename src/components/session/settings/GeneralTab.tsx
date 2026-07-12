@@ -3,8 +3,8 @@ import type { TransitRouteFilter } from "../../../domain/map/transit";
 import type { DistanceUnit } from "../../../domain/map/distance";
 import type { MapStyle } from "../../../domain/map/mapBasemaps";
 import type { NotificationPreferences } from "../../../domain/device/notifications";
+import { SegmentControl } from "../../ui/SegmentControl";
 import { SettingsToggleRow } from "../SettingsToggleRow";
-import { ChoicePair } from "./mapSettingsShared";
 import { NotificationPreferencesSection } from "./NotificationPreferencesSection";
 
 export interface MapSettingsGeneralTabProps {
@@ -119,11 +119,16 @@ export function MapSettingsGeneralTab({
         />
       ) : null}
 
-      <ChoicePair
-        left={{ value: "metric", label: "Metric (km)" }}
-        right={{ value: "imperial", label: "Imperial (mi)" }}
-        selected={distanceUnit}
-        onSelect={distanceUnitEditable ? onDistanceUnitChange : () => {}}
+      <SegmentControl
+        variant="pill"
+        value={distanceUnit}
+        options={[
+          { value: "metric", label: "Metric (km)" },
+          { value: "imperial", label: "Imperial (mi)" },
+        ]}
+        onChange={distanceUnitEditable ? onDistanceUnitChange : () => {}}
+        disabled={!distanceUnitEditable}
+        aria-label="Distance unit"
       />
       {!distanceUnitEditable ? (
         <p className="text-xs text-ink-dim">
@@ -131,11 +136,15 @@ export function MapSettingsGeneralTab({
         </p>
       ) : null}
 
-      <ChoicePair
-        left={{ value: "standard", label: "Standard map" }}
-        right={{ value: "satellite", label: "Satellite" }}
-        selected={mapStyle}
-        onSelect={onMapStyleChange}
+      <SegmentControl
+        variant="pill"
+        value={mapStyle}
+        options={[
+          { value: "standard", label: "Standard map" },
+          { value: "satellite", label: "Satellite" },
+        ]}
+        onChange={onMapStyleChange}
+        aria-label="Map style"
       />
       <p className="text-xs text-ink-dim">
         Quick toggle: Map / Sat on the bottom tool bar.

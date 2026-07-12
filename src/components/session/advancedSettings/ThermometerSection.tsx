@@ -1,6 +1,7 @@
 import { formatPresetDistance } from "../../../domain/map/distance";
 import { toggleThermometerPresetInSettings } from "../../../domain/session/advancedSessionSettings";
 import { thermometerPresetsMetersForGameSize } from "../../../domain/session/gameSizeRules";
+import { AdvancedSettingsToggle } from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
 
 export function ThermometerSection({
@@ -17,26 +18,20 @@ export function ThermometerSection({
 
   return (
     <>
-      <label className="flex items-start gap-3 text-sm text-ink">
-        <input
-          type="checkbox"
-          checked={value.customThermometerPresetsEnabled}
-          disabled={disabled}
-          onChange={(event) =>
-            onChange({
-              ...value,
-              customThermometerPresetsEnabled: event.target.checked,
-              thermometerPresetMeters: event.target.checked
-                ? value.thermometerPresetMeters
-                : thermometerPresetsMetersForGameSize(gameSize, distanceUnit),
-            })
-          }
-          className="mt-1"
-        />
-        <span>
-          <span className="block font-medium">Custom thermometer distances</span>
-        </span>
-      </label>
+      <AdvancedSettingsToggle
+        checked={value.customThermometerPresetsEnabled}
+        onChange={(customThermometerPresetsEnabled) =>
+          onChange({
+            ...value,
+            customThermometerPresetsEnabled,
+            thermometerPresetMeters: customThermometerPresetsEnabled
+              ? value.thermometerPresetMeters
+              : thermometerPresetsMetersForGameSize(gameSize, distanceUnit),
+          })
+        }
+        disabled={disabled}
+        label="Custom thermometer distances"
+      />
 
       {value.customThermometerPresetsEnabled ? (
         <div className="flex flex-wrap gap-2">

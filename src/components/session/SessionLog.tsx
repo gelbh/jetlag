@@ -6,7 +6,7 @@ import {
   type AnnotationType,
 } from "../../domain/map/annotations";
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
-import { AnimatedOverlay } from "../ui/AnimatedOverlay";
+import { MotionSheet } from "../motion/MotionSheet";
 import { SheetHeader } from "../ui/SheetHeader";
 
 const FILTER_OPTIONS: Array<AnnotationType | "all"> = [
@@ -48,7 +48,7 @@ export function SessionLog({
   }, [annotations, filter]);
 
   return (
-    <AnimatedOverlay
+    <MotionSheet
       open={open}
       onClose={onClose}
       ariaLabel="Session log"
@@ -122,6 +122,6 @@ export function SessionLog({
           ))
         )}
       </div>
-    </AnimatedOverlay>
+    </MotionSheet>
   );
 }
