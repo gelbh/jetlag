@@ -8,6 +8,9 @@ test.describe("settings", () => {
     await openSettings(page);
 
     const settingsPanel = page.getByRole("tabpanel");
+    const lowPowerToggle = settingsPanel.getByLabel("Low power mode");
+    await expect(lowPowerToggle).toBeChecked();
+    await lowPowerToggle.click();
     await settingsPanel.getByRole("button", { name: "Satellite" }).click();
     await page.getByRole("tab", { name: "Layers" }).click();
     await settingsPanel.getByLabel("Transit").click();
