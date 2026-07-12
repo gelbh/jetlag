@@ -5,14 +5,33 @@ export type ChunkReloadContext = {
   session: unknown;
   pathname: string;
   onNeedRefresh?: () => void;
+  registration?: ServiceWorkerRegistration;
+  applyUpdate?: (reloadPage?: boolean) => Promise<void>;
 };
 
 let chunkReloadContextGetter: (() => ChunkReloadContext) | undefined;
+let serviceWorkerChunkReloadContext: Pick<
+  ChunkReloadContext,
+  "registration" | "applyUpdate"
+> = {};
 
 export function setChunkReloadContextGetter(
   getter: (() => ChunkReloadContext) | undefined,
 ): void {
   chunkReloadContextGetter = getter;
+}
+
+export function setServiceWorkerChunkReloadContext(
+  context: Pick<ChunkReloadContext, "registration" | "applyUpdate">,
+): void {
+  serviceWorkerChunkReloadContext = context;
+}
+
+export function getServiceWorkerChunkReloadContext(): Pick<
+  ChunkReloadContext,
+  "registration" | "applyUpdate"
+> {
+  return serviceWorkerChunkReloadContext;
 }
 
 export function lazyWithChunkRetry(
@@ -32,6 +51,8 @@ export function lazyWithChunkRetry(
                   session: context.session,
                   pathname: context.pathname,
                   onNeedRefresh: context.onNeedRefresh,
+                  registration: context.registration,
+                  applyUpdate: context.applyUpdate,
                 }
               : undefined,
           )

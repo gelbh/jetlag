@@ -16,10 +16,6 @@ vi.mock("./serviceWorkerRefresh", async () => {
   return {
     ...actual,
     applyServiceWorkerUpdate: vi.fn().mockResolvedValue(undefined),
-    getServiceWorkerApplyContext: vi.fn(() => ({
-      registration: undefined,
-      applyUpdate: undefined,
-    })),
   };
 });
 
@@ -63,10 +59,6 @@ describe("attemptChunkReload", () => {
     sessionStorage.clear();
     reload.mockReset();
     onNeedRefresh.mockReset();
-    vi.mocked(serviceWorkerRefresh.getServiceWorkerApplyContext).mockReturnValue({
-      registration: undefined,
-      applyUpdate: undefined,
-    });
     vi.mocked(serviceWorkerRefresh.applyServiceWorkerUpdate).mockClear();
     Object.defineProperty(window, "location", {
       configurable: true,
@@ -121,12 +113,13 @@ describe("attemptChunkReload", () => {
     const registration = {
       waiting: { postMessage: vi.fn() },
     } as unknown as ServiceWorkerRegistration;
-    vi.mocked(serviceWorkerRefresh.getServiceWorkerApplyContext).mockReturnValue({
-      registration,
-      applyUpdate,
-    });
 
-    expect(attemptChunkReload()).toBe(true);
+    expect(
+      attemptChunkReload({
+        registration,
+        applyUpdate,
+      }),
+    ).toBe(true);
 
     expect(serviceWorkerRefresh.applyServiceWorkerUpdate).toHaveBeenCalledWith(
       registration,
@@ -145,10 +138,6 @@ describe("tryApplyDeferredChunkReload", () => {
     sessionStorage.clear();
     reload.mockReset();
     onNeedRefresh.mockReset();
-    vi.mocked(serviceWorkerRefresh.getServiceWorkerApplyContext).mockReturnValue({
-      registration: undefined,
-      applyUpdate: undefined,
-    });
     vi.mocked(serviceWorkerRefresh.applyServiceWorkerUpdate).mockClear();
     Object.defineProperty(window, "location", {
       configurable: true,

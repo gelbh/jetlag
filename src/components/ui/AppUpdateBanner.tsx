@@ -5,21 +5,14 @@ import {
   maybeApplyPendingUpdate,
   promptIfWaiting,
   registerAppNeedRefreshHandler,
-  registerServiceWorkerApplyContext,
   scheduleServiceWorkerUpdateChecks,
 } from "../../domain/device/serviceWorkerRefresh";
+import { setServiceWorkerChunkReloadContext } from "../../domain/device/lazyWithChunkRetry";
 import { tryUpdateServiceWorker } from "../../domain/device/serviceWorkerUpdate";
 import { useSessionStore } from "../../state/sessionStore";
 import { HudBanner } from "./HudBanner";
 
 type ServiceWorkerReloader = (reloadPage?: boolean) => Promise<void>;
-
-function syncServiceWorkerApplyContext(
-  registration: ServiceWorkerRegistration | undefined,
-  applyUpdate: ServiceWorkerReloader | null,
-): void {
-  registerServiceWorkerApplyContext(registration, applyUpdate ?? undefined);
-}
 
 export function AppUpdateBanner() {
   const [needsRefresh, setNeedsRefresh] = useState(false);
@@ -50,7 +43,6 @@ export function AppUpdateBanner() {
         },
         onRegistered(nextRegistration) {
           registrationRef.current = nextRegistration;
-          syncServiceWorkerApplyContext(nextRegistration, updateSW);
           promptIfWaiting(nextRegistration, () => {
             setNeedsRefresh(true);
             setDismissed(false);
@@ -68,7 +60,6 @@ export function AppUpdateBanner() {
         },
       });
       setUpdateSW(() => applyUpdate);
-      syncServiceWorkerApplyContext(registrationRef.current, applyUpdate);
     });
 
     const handleVisibility = () => {
@@ -111,7 +102,10 @@ export function AppUpdateBanner() {
   }, []);
 
   useEffect(() => {
-    syncServiceWorkerApplyContext(registrationRef.current, updateSW);
+    setServiceWorkerChunkReloadContext({
+      registration: registrationRef.current,
+      applyUpdate: updateSW ?? undefined,
+    });
   }, [updateSW]);
 
   useEffect(() => {

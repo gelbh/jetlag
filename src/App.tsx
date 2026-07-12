@@ -27,6 +27,7 @@ import {
   tryApplyDeferredChunkReload,
 } from "./domain/device/chunkLoadRecovery";
 import {
+  getServiceWorkerChunkReloadContext,
   lazyWithChunkRetry,
   setChunkReloadContextGetter,
 } from "./domain/device/lazyWithChunkRetry";
@@ -89,19 +90,19 @@ function ChunkReloadContextBinder() {
       session,
       pathname: location.pathname,
       onNeedRefresh: notifyAppNeedRefresh,
+      ...getServiceWorkerChunkReloadContext(),
     }));
 
-    return () => {
-      setChunkReloadContextGetter(undefined);
-    };
-  }, [location.pathname, session]);
-
-  useEffect(() => {
     tryApplyDeferredChunkReload({
       session,
       pathname: location.pathname,
       onNeedRefresh: notifyAppNeedRefresh,
+      ...getServiceWorkerChunkReloadContext(),
     });
+
+    return () => {
+      setChunkReloadContextGetter(undefined);
+    };
   }, [location.pathname, session]);
 
   return null;

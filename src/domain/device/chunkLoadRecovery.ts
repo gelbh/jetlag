@@ -1,6 +1,6 @@
 import {
   applyServiceWorkerUpdate,
-  getServiceWorkerApplyContext,
+  hasWaitingServiceWorker,
   isSafeToReloadApp,
 } from "./serviceWorkerRefresh";
 
@@ -90,6 +90,8 @@ export function attemptChunkReload(options?: {
   session?: unknown;
   pathname?: string;
   onNeedRefresh?: () => void;
+  registration?: ServiceWorkerRegistration;
+  applyUpdate?: (reloadPage?: boolean) => Promise<void>;
 }): boolean {
   if (readSessionFlag()) {
     return false;
@@ -110,9 +112,8 @@ export function attemptChunkReload(options?: {
   removeDeferredFlag();
   writeSessionFlag();
 
-  const { registration, applyUpdate } = getServiceWorkerApplyContext();
-  if (registration?.waiting || applyUpdate) {
-    void applyServiceWorkerUpdate(registration, applyUpdate);
+  if (hasWaitingServiceWorker(options?.registration)) {
+    void applyServiceWorkerUpdate(options?.registration, options?.applyUpdate);
     return true;
   }
 
@@ -124,12 +125,10 @@ export function tryApplyDeferredChunkReload(options: {
   session: unknown;
   pathname: string;
   onNeedRefresh?: () => void;
+  registration?: ServiceWorkerRegistration;
+  applyUpdate?: (reloadPage?: boolean) => Promise<void>;
 }): boolean {
   if (!wasChunkReloadDeferred()) {
-    return false;
-  }
-
-  if (options.pathname === "/map") {
     return false;
   }
 
@@ -142,11 +141,7 @@ export function tryApplyDeferredChunkReload(options: {
     return false;
   }
 
-  return attemptChunkReload({
-    session: options.session,
-    pathname: options.pathname,
-    onNeedRefresh: options.onNeedRefresh,
-  });
+  return attemptChunkReload(options);
 }
 
 export function clearChunkReloadFlag(): void {

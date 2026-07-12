@@ -4,32 +4,6 @@ const UPDATE_CHECK_INTERVAL_MS = 45 * 60 * 1000;
 const RELOAD_FALLBACK_MS = 1500;
 
 let appNeedRefreshHandler: (() => void) | undefined;
-let serviceWorkerRegistration: ServiceWorkerRegistration | undefined;
-let serviceWorkerApplyUpdate:
-  | ((reloadPage?: boolean) => Promise<void>)
-  | undefined;
-
-export function registerServiceWorkerApplyContext(
-  registration: ServiceWorkerRegistration | undefined,
-  applyUpdate: ((reloadPage?: boolean) => Promise<void>) | undefined,
-): () => void {
-  serviceWorkerRegistration = registration;
-  serviceWorkerApplyUpdate = applyUpdate;
-  return () => {
-    serviceWorkerRegistration = undefined;
-    serviceWorkerApplyUpdate = undefined;
-  };
-}
-
-export function getServiceWorkerApplyContext(): {
-  registration: ServiceWorkerRegistration | undefined;
-  applyUpdate: ((reloadPage?: boolean) => Promise<void>) | undefined;
-} {
-  return {
-    registration: serviceWorkerRegistration,
-    applyUpdate: serviceWorkerApplyUpdate,
-  };
-}
 
 export function isSafeToReloadApp(options: {
   session: unknown;

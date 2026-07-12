@@ -123,10 +123,6 @@ function scrubEvent(
       message: "permission-denied",
       level: "warning",
     });
-    Sentry.captureMessage("Firestore permission denied", {
-      level: "warning",
-      tags: { firestore_permission_denied: "true" },
-    });
     return null;
   }
 
