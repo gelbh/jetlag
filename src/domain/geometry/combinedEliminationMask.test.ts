@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
-import type { Feature, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../map/annotations";
 import type { HidingZoneRecord } from "../session/hidingZone";
 import {
@@ -10,7 +9,7 @@ import {
   clearCombinedEliminationMaskCacheForTests,
   eliminationFeatureForAnnotation,
 } from "./combinedEliminationMask";
-import { unionPolygonFeatures } from "./unionPolygonFeatures";
+import { unionEliminationPartsLegacy } from "./unionPolygonFeatures";
 
 const gameArea: GameArea = {
   type: "Polygon",
@@ -60,37 +59,32 @@ function matchingAnnotation(
   };
 }
 
-function squareFeature(west: number): Feature<GeoPolygon> {
-  return {
-    type: "Feature",
-    properties: {},
-    geometry: {
-      type: "Polygon",
-      coordinates: [
-        [
-          [west, 51.42],
-          [west + 0.03, 51.42],
-          [west + 0.03, 51.48],
-          [west, 51.48],
-          [west, 51.42],
-        ],
-      ],
-    },
-  };
-}
+describe("combinedEliminationMask parity", () => {
+  it("matches legacy union for mixed committed annotations", () => {
+    clearCombinedEliminationMaskCacheForTests();
+    const annotations = [
+      matchingAnnotation("a", -0.19),
+      matchingAnnotation("b", -0.16),
+      matchingAnnotation("c", -0.13),
+    ];
 
-describe("unionPolygonFeatures", () => {
-  it("matches sequential union for overlapping squares", () => {
-    const features = [squareFeature(-0.19), squareFeature(-0.16)];
-    const combined = unionPolygonFeatures(features);
+    const candidate = buildCombinedEliminationMask(annotations, gameArea);
+    clearCombinedEliminationMaskCacheForTests();
+    const baseline = unionEliminationPartsLegacy({
+      polygons: annotations.map(
+        (annotation) => eliminationFeatureForAnnotation(annotation, gameArea)!,
+      ),
+      disks: [],
+    });
 
-    expect(combined).not.toBeNull();
+    expect(candidate).not.toBeNull();
+    expect(baseline).not.toBeNull();
     expect(
-      booleanPointInPolygon(turfPoint([-0.185, 51.45]), combined!),
-    ).toBe(true);
+      booleanPointInPolygon(turfPoint([-0.185, 51.45]), candidate!),
+    ).toBe(booleanPointInPolygon(turfPoint([-0.185, 51.45]), baseline!));
     expect(
-      booleanPointInPolygon(turfPoint([-0.155, 51.45]), combined!),
-    ).toBe(true);
+      booleanPointInPolygon(turfPoint([-0.155, 51.45]), candidate!),
+    ).toBe(booleanPointInPolygon(turfPoint([-0.155, 51.45]), baseline!));
   });
 });
 

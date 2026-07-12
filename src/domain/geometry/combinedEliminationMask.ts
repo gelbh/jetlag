@@ -4,7 +4,6 @@ import { featureCollection, point as turfPoint } from "@turf/helpers";
 import type { AnnotationRecord, GameArea } from "../map/annotations";
 import { isActive } from "../map/annotations";
 import type { HidingZoneRecord } from "../session/hidingZone";
-import { buildHidingZoneCircle } from "../session/hidingZone";
 import {
   buildHalfPlanePolygon,
   buildRadarShadedRegion,
@@ -15,10 +14,12 @@ import { DEFAULT_RADIUS_METERS } from "../map/distance";
 import { MAP_ANNOTATION_COLORS } from "../map/mapAnnotationColors";
 import { thermometerShadedSide } from "../questions/thermometerQuestions";
 import {
-  unionPolygonFeatures,
+  unionDiskSpecs,
+  unionEliminationParts,
+  type DiskSpec,
+  type EliminationUnionInput,
   type PolygonFeature,
 } from "./unionPolygonFeatures";
-import union from "@turf/union";
 
 export const ELIMINATION_FILL_COLOR = MAP_ANNOTATION_COLORS.elimination;
 
@@ -86,6 +87,52 @@ export function clearCombinedEliminationMaskCacheForTests(): void {
   eliminationMaskCache = null;
 }
 
+export function eliminationDiskForAnnotation(
+  annotation: AnnotationRecord,
+  _gameArea: GameArea,
+): DiskSpec | null {
+  if (!isActive(annotation)) {
+    return null;
+  }
+
+  if (annotation.type === "tentacle") {
+    if (
+      annotation.metadata.tentacleOutOfReach === true &&
+      annotation.geometry.geometry.type === "Point"
+    ) {
+      const coordinates = annotation.geometry.geometry.coordinates;
+      const center: LatLngTuple = [coordinates[1], coordinates[0]];
+      const searchRadiusMeters =
+        annotation.metadata.tentacleAnswerRadiusMeters ??
+        annotation.metadata.radiusMeters ??
+        DEFAULT_RADIUS_METERS;
+
+      return { center, radiusMeters: searchRadiusMeters };
+    }
+
+    return null;
+  }
+
+  if (annotation.type === "radar") {
+    const geometry = annotation.geometry.geometry;
+    if (geometry.type !== "Point") {
+      return null;
+    }
+
+    if (annotation.metadata.inside !== true) {
+      return null;
+    }
+
+    const center: LatLngTuple = [geometry.coordinates[1], geometry.coordinates[0]];
+    const radiusMeters =
+      annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
+
+    return { center, radiusMeters };
+  }
+
+  return null;
+}
+
 export function eliminationFeatureForAnnotation(
   annotation: AnnotationRecord,
   gameArea: GameArea,
@@ -118,6 +165,15 @@ function computeEliminationFeatureForAnnotation(
 ): PolygonFeature | null {
   if (!isActive(annotation)) {
     return null;
+  }
+
+  const disk = eliminationDiskForAnnotation(annotation, gameArea);
+  if (disk) {
+    return turfCircle(
+      turfPoint([disk.center[1], disk.center[0]]),
+      disk.radiusMeters / 1000,
+      { steps: 64, units: "kilometers" },
+    ) as PolygonFeature;
   }
 
   if (annotation.type === "matching") {
@@ -157,24 +213,6 @@ function computeEliminationFeatureForAnnotation(
   }
 
   if (annotation.type === "tentacle") {
-    if (
-      annotation.metadata.tentacleOutOfReach === true &&
-      annotation.geometry.geometry.type === "Point"
-    ) {
-      const coordinates = annotation.geometry.geometry.coordinates;
-      const center: LatLngTuple = [coordinates[1], coordinates[0]];
-      const searchRadiusMeters =
-        annotation.metadata.tentacleAnswerRadiusMeters ??
-        annotation.metadata.radiusMeters ??
-        DEFAULT_RADIUS_METERS;
-
-      return turfCircle(
-        turfPoint([center[1], center[0]]),
-        searchRadiusMeters / 1000,
-        { steps: 64, units: "kilometers" },
-      ) as PolygonFeature;
-    }
-
     if (annotation.metadata.tentacleEliminationJson) {
       try {
         return JSON.parse(
@@ -198,6 +236,10 @@ function computeEliminationFeatureForAnnotation(
     const radiusMeters = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
     const shadedInside = annotation.metadata.inside === true;
 
+    if (shadedInside) {
+      return null;
+    }
+
     return buildRadarShadedRegion(
       center,
       radiusMeters,
@@ -220,23 +262,38 @@ function computeEliminationFeatureForAnnotation(
 export function unionEliminationFeatures(
   features: readonly PolygonFeature[],
 ): PolygonFeature | null {
-  return unionPolygonFeatures(features);
+  return unionEliminationParts({ polygons: [...features], disks: [] });
 }
 
-function collectCommittedEliminationFeatures(
+export function computeEliminationUnionInput(
   annotations: readonly AnnotationRecord[],
   gameArea: GameArea,
-): PolygonFeature[] {
-  const committed: PolygonFeature[] = [];
+  draftFeatures: readonly PolygonFeature[] = [],
+): EliminationUnionInput {
+  const polygons: PolygonFeature[] = [...draftFeatures];
+  const disks: DiskSpec[] = [];
 
   for (const annotation of annotations) {
+    const disk = eliminationDiskForAnnotation(annotation, gameArea);
+    if (disk) {
+      disks.push(disk);
+      continue;
+    }
+
     const feature = eliminationFeatureForAnnotation(annotation, gameArea);
     if (feature) {
-      committed.push(feature);
+      polygons.push(feature);
     }
   }
 
-  return committed;
+  return { polygons, disks };
+}
+
+function collectCommittedEliminationUnionInput(
+  annotations: readonly AnnotationRecord[],
+  gameArea: GameArea,
+): EliminationUnionInput {
+  return computeEliminationUnionInput(annotations, gameArea);
 }
 
 function committedAnnotationsKey(
@@ -257,7 +314,8 @@ function tryIncrementalMaskAdd(
   gameAreaKey: string,
   committedKey: string,
   draftKey: string,
-  newFeature: PolygonFeature,
+  gameArea: GameArea,
+  annotations: readonly AnnotationRecord[],
 ): PolygonFeature | null {
   if (
     previous.gameAreaKey !== gameAreaKey ||
@@ -285,16 +343,30 @@ function tryIncrementalMaskAdd(
     return null;
   }
 
-  const merged = union(featureCollection([previous.mask, newFeature]));
-  if (
-    merged &&
-    (merged.geometry.type === "Polygon" ||
-      merged.geometry.type === "MultiPolygon")
-  ) {
-    return merged as PolygonFeature;
+  const addedAnnotation = annotations.find(
+    (annotation) => annotation.id === addedId,
+  );
+  if (!addedAnnotation) {
+    return null;
   }
 
-  return null;
+  const disk = eliminationDiskForAnnotation(addedAnnotation, gameArea);
+  if (disk) {
+    return unionEliminationParts({
+      polygons: [previous.mask],
+      disks: [disk],
+    });
+  }
+
+  const newFeature = eliminationFeatureForAnnotation(addedAnnotation, gameArea);
+  if (!newFeature) {
+    return null;
+  }
+
+  return unionEliminationParts({
+    polygons: [previous.mask, newFeature],
+    disks: [],
+  });
 }
 
 export function buildCombinedEliminationMask(
@@ -331,31 +403,34 @@ export function buildCombinedEliminationMask(
     return eliminationMaskCache.mask;
   }
 
-  const committed = collectCommittedEliminationFeatures(annotations, gameArea);
-  const allFeatures = [...committed, ...draftFeatures];
+  const unionInput = collectCommittedEliminationUnionInput(
+    annotations,
+    gameArea,
+  );
+  const allInput: EliminationUnionInput = {
+    polygons: [...unionInput.polygons, ...draftFeatures],
+    disks: unionInput.disks,
+  };
 
   let mask: PolygonFeature | null = null;
 
   if (
     eliminationMaskCache &&
     draftFeatures.length === 0 &&
-    committed.length > 0 &&
-    committed.length === committedKey.split("|").filter(Boolean).length
+    committedKey.split("|").filter(Boolean).length > 0
   ) {
-    const lastCommitted = committed[committed.length - 1];
-    if (lastCommitted) {
-      mask = tryIncrementalMaskAdd(
-        eliminationMaskCache,
-        gameAreaKey,
-        committedKey,
-        draftKey,
-        lastCommitted,
-      );
-    }
+    mask = tryIncrementalMaskAdd(
+      eliminationMaskCache,
+      gameAreaKey,
+      committedKey,
+      draftKey,
+      gameArea,
+      annotations,
+    );
   }
 
   if (!mask) {
-    mask = unionEliminationFeatures(allFeatures);
+    mask = unionEliminationParts(allInput);
   }
 
   eliminationMaskCache = {
@@ -379,11 +454,12 @@ export function buildEndGameEliminationMask(
     geometry: gameArea,
   };
 
-  const zoneFeatures = hidingZones.map((zone) =>
-    buildHidingZoneCircle([zone.center.lat, zone.center.lng], zone.radiusMeters),
-  );
+  const zoneDisks: DiskSpec[] = hidingZones.map((zone) => ({
+    center: [zone.center.lat, zone.center.lng] as LatLngTuple,
+    radiusMeters: zone.radiusMeters,
+  }));
 
-  const revealedZones = unionEliminationFeatures(zoneFeatures);
+  const revealedZones = unionDiskSpecs(zoneDisks);
   if (!revealedZones) {
     return playArea;
   }
@@ -405,8 +481,12 @@ export function annotationHasEliminationFeature(
   gameArea: GameArea,
   pulsingIds: ReadonlySet<string>,
 ): boolean {
+  if (!pulsingIds.has(annotation.id)) {
+    return false;
+  }
+
   return (
-    pulsingIds.has(annotation.id) &&
-    eliminationFeatureForAnnotation(annotation, gameArea) !== null
+    eliminationFeatureForAnnotation(annotation, gameArea) !== null ||
+    eliminationDiskForAnnotation(annotation, gameArea) !== null
   );
 }
