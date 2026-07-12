@@ -38,6 +38,18 @@ Markup tools live under **Draw**:
 - **Zone.** Draw a play boundary.
 - **Pin.** Mark a point on the map.
 
+## Development
+
+Secrets live in [Doppler](https://www.doppler.com/); there is no `.env.example`.
+
+```bash
+npm ci
+doppler login     # once per machine
+doppler setup     # reads doppler.yaml (project jetlag, config dev)
+npm run env:pull  # writes .env.local from Doppler
+npm run dev
+```
+
 ## About
 
 Unofficial fan companion for [Jet Lag: The Game](https://jetlagthegame.com/). Not affiliated with the show, board game, or Nebula.
