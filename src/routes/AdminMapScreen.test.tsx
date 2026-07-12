@@ -31,12 +31,15 @@ vi.mock("./spectator-map/SpectatorMapLayers", () => ({
 }));
 
 import { useAdminMapWideLayout } from "../hooks/admin/useAdminMapWideLayout";
-import { useObserverMapScreen } from "./observer-map-screen/useObserverMapScreen";
+import {
+  useObserverMapScreen,
+  type ObserverMapScreenController,
+} from "./observer-map-screen/useObserverMapScreen";
 
 const mockedUseAdminMapWideLayout = vi.mocked(useAdminMapWideLayout);
 const mockedUseObserverMapScreen = vi.mocked(useObserverMapScreen);
 
-function mockController() {
+function mockController(): ObserverMapScreenController {
   const session = createTestSession();
   return {
     session,
@@ -61,7 +64,7 @@ function mockController() {
       tentacle: true,
       transit: true,
     },
-    observerPerspective: "all" as const,
+    observerPerspective: "both" as const,
     setObserverPerspective: vi.fn(),
     spectatorLayers: {
       chatDisplayRole: "admin" as const,
@@ -109,7 +112,7 @@ function mockController() {
     lowPowerMode: false,
     distanceUnit: "metric" as const,
     exitPath: "/admin",
-  };
+  } as ObserverMapScreenController;
 }
 
 describe("AdminMapScreen", () => {

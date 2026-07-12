@@ -30,7 +30,7 @@ function createController(): ObserverMapScreenController {
       tentacle: true,
       transit: true,
     },
-    observerPerspective: "all",
+    observerPerspective: "both",
     setObserverPerspective: vi.fn(),
     spectatorLayers: {
       chatDisplayRole: "admin",
@@ -78,7 +78,7 @@ function createController(): ObserverMapScreenController {
     lowPowerMode: false,
     distanceUnit: "metric",
     exitPath: "/admin",
-  };
+  } as ObserverMapScreenController;
 }
 
 describe("AdminMonitorRail", () => {
