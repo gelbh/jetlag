@@ -11,6 +11,7 @@ import {
 import { trackPageView } from "./services/core/analytics";
 import { MapErrorBoundary } from "./components/ui/MapErrorBoundary";
 import { AppUpdateBanner } from "./components/ui/AppUpdateBanner";
+import { AppUpdateProvider } from "./components/ui/AppUpdateProvider";
 import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { Home } from "./routes/Home";
@@ -152,6 +153,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <AppUpdateProvider>
       <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
         <MotionDatasetEffect />
         <AnalyticsPageViewTracker />
@@ -221,6 +223,7 @@ export default function App() {
         </Routes>
         </div>
       </Sentry.ErrorBoundary>
+      </AppUpdateProvider>
     </BrowserRouter>
   );
 }
