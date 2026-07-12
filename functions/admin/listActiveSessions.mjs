@@ -1,5 +1,5 @@
 import { FieldPath, getFirestore } from "firebase-admin/firestore";
-import { onCall } from "firebase-functions/v2/https";
+import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { getSentryDsnSecret, withSentryEventHandler } from "../lib/sentry.mjs";
 import { requireAdminAuth } from "./adminAccess.mjs";
 
@@ -320,9 +320,10 @@ export const listActiveSessions = onCall(
 
     if (pageToken) {
       const cursor = await db.collection("sessionCodes").doc(pageToken).get();
-      if (cursor.exists) {
-        codesQuery = codesQuery.startAfter(cursor);
+      if (!cursor.exists) {
+        throw new HttpsError("invalid-argument", "Invalid page token.");
       }
+      codesQuery = codesQuery.startAfter(cursor);
     }
 
     const codesSnap = await codesQuery.get();

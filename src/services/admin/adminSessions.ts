@@ -2,6 +2,21 @@ import { FirebaseError } from "firebase/app";
 import { httpsCallable, type HttpsCallableResult } from "firebase/functions";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
 
+function compareSessionsByLastActivity(
+  left: AdminSessionSummary,
+  right: AdminSessionSummary,
+): number {
+  const leftActivity = left.lastActivityAt ? Date.parse(left.lastActivityAt) : 0;
+  const rightActivity = right.lastActivityAt ? Date.parse(right.lastActivityAt) : 0;
+  if (rightActivity !== leftActivity) {
+    return rightActivity - leftActivity;
+  }
+
+  const leftCreated = left.createdAt ? Date.parse(left.createdAt) : 0;
+  const rightCreated = right.createdAt ? Date.parse(right.createdAt) : 0;
+  return rightCreated - leftCreated;
+}
+
 export type AdminSessionPhase =
   | "waiting"
   | "hiding"
@@ -77,6 +92,7 @@ export async function fetchActiveAdminSessions(): Promise<AdminSessionSummary[]>
       }
     }
 
+    sessions.sort(compareSessionsByLastActivity);
     return sessions;
   } catch (error) {
     if (error instanceof FirebaseError && error.code === "functions/permission-denied") {
