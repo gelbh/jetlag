@@ -7,6 +7,7 @@ export interface LiveLocationProfile {
 export interface PowerProfile {
   liveLocation: LiveLocationProfile;
   seekerLocationSync: LiveLocationProfile;
+  hiderLocationSync: LiveLocationProfile;
   timerTickMs: number;
   reachabilityProbeMs: number;
   queueFlushMs: number;
@@ -23,6 +24,11 @@ const NORMAL_PROFILE: PowerProfile = {
     minIntervalMs: 2000,
     minDistanceMeters: 8,
   },
+  hiderLocationSync: {
+    highAccuracy: false,
+    minIntervalMs: 4000,
+    minDistanceMeters: 15,
+  },
   timerTickMs: 250,
   reachabilityProbeMs: 15_000,
   queueFlushMs: 45_000,
@@ -38,6 +44,11 @@ const LOW_POWER_PROFILE: PowerProfile = {
     highAccuracy: false,
     minIntervalMs: 8000,
     minDistanceMeters: 25,
+  },
+  hiderLocationSync: {
+    highAccuracy: false,
+    minIntervalMs: 12_000,
+    minDistanceMeters: 35,
   },
   timerTickMs: 1000,
   reachabilityProbeMs: 60_000,

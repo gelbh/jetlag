@@ -5,8 +5,9 @@ import { DEFAULT_SESSION_RULES } from "../../domain/session/sessionRules";
 import { useChatUnread } from "./useChatUnread";
 import {
   useHidingZonesSync,
+  useHiderLocationsSync,
   usePendingQuestionsSync,
-  usePlayerLocationsSync,
+  useSeekerLocationsSync,
   useSessionMessagesSync,
 } from "./useSessionExtrasSync";
 import { useRemoteSessionTimerSync } from "./useRemoteSessionTimerSync";
@@ -118,7 +119,8 @@ export function useSharedSessionScreen({
 
   const pendingQuestions = usePendingQuestionsSync(sessionId);
   const hidingZones = useHidingZonesSync(sessionId);
-  const playerLocations = usePlayerLocationsSync(sessionId);
+  const seekerLocations = useSeekerLocationsSync(sessionId);
+  const hiderLocations = useHiderLocationsSync(sessionId);
   const chatMessages = useSessionMessagesSync(sessionId);
   const syncStatus = useSyncStatus();
 
@@ -164,7 +166,8 @@ export function useSharedSessionScreen({
     timer,
     pendingQuestions,
     hidingZones,
-    playerLocations,
+    seekerLocations,
+    hiderLocations,
     chatMessages,
     syncStatus,
     hasUnreadChat,

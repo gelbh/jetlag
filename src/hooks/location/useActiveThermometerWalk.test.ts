@@ -27,7 +27,7 @@ describe("useActiveThermometerWalk", () => {
     const { result } = renderHook(() =>
       useActiveThermometerWalk({
         pendingQuestions: [walkingQuestion],
-        playerLocations: [
+        seekerLocations: [
           {
             uid: "seeker-1",
             sessionId: "session-1",
@@ -50,7 +50,7 @@ describe("useActiveThermometerWalk", () => {
     const { result } = renderHook(() =>
       useActiveThermometerWalk({
         pendingQuestions: [walkingQuestion],
-        playerLocations: [],
+        seekerLocations: [],
         myUid: "seeker-1",
         localLivePoint: [53.351, -6.259],
       }),
