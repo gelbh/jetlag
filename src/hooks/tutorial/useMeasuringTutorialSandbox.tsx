@@ -19,6 +19,7 @@ function useMeasuringSandboxBody({
   fixture,
   readOnly,
   interactive,
+  committed,
   session,
   registerMapDraft,
   gameArea,
@@ -62,6 +63,9 @@ function useMeasuringSandboxBody({
     !loading;
 
   useEffect(() => {
+    if (committed) {
+      return;
+    }
     if (readOnly || !interactive || session === null || !session.hasAnchor) {
       registerMapDraft(null);
       return;
@@ -116,6 +120,7 @@ function useMeasuringSandboxBody({
     });
   }, [
     answer,
+    committed,
     gameArea,
     interactive,
     measureFrom,

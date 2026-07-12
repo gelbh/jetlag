@@ -54,4 +54,22 @@ describe("TutorialSectionWizard live previews", () => {
     expect(screen.getByText("Solo — you answer")).toBeInTheDocument();
     expect(screen.getByText("Hiders — send to chat")).toBeInTheDocument();
   });
+
+  it("shows walkthrough back navigation and a 3-step counter", () => {
+    const matching = getQuestionTutorial("matching");
+    renderWithRouter(
+      <TutorialSectionWizard
+        section={{ ...matching, kind: "question" }}
+        initialStepIndex={2}
+        onStepComplete={vi.fn()}
+        onBackFromStart={vi.fn()}
+        onFinish={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Previous step" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(3);
+  });
 });

@@ -29,7 +29,7 @@ jobs:
             exit 0
           fi
           changed="$(git diff --name-only "$before" "${{ github.event.workflow_run.head_sha }}")"
-          if echo "$changed" | grep -qE '^(functions/|firestore\.(rules|indexes\.json)|storage\.rules|firebase\.json|scripts/deploy-production\.mjs|\.firebaserc|src/services/billing/|src/routes/Premium\.tsx)'; then
+          if echo "$changed" | grep -qE '^(functions/|firestore\.(rules|indexes\.json)|storage\.rules|firebase\.json|scripts/deploy-production\.mjs|\.firebaserc|src/services/billing/|src/routes/Premium\.tsx|src/services/admin/|src/hooks/admin/|src/routes/AdminPanel\.tsx)'; then
             echo "backend=true" >> "$GITHUB_OUTPUT"
           else
             echo "backend=false" >> "$GITHUB_OUTPUT"

@@ -24,6 +24,7 @@ function SandboxPanelPreview({
     fixtureRequest: { kind: "split", awaitHiderAnswer },
     initialWizardStepId: splitPanelWizardStepId(toolId, compare, side),
     syncWizardStep: false,
+    hideStepper: true,
   });
 
   return (

@@ -19,7 +19,6 @@ const PARK_NOISE_SUFFIX = /\s+(park|playground|square|plaza|playfield)$/;
 const STREET_SUFFIX =
   /\b(st|rd|dr|ave|blvd|boulevard|road|street|avenue|drive)\.?$/;
 
-/** Non-park facilities the official park rules exclude. */
 const PARK_EXCLUSIONS: readonly RegExp[] = [
   /school/,
   /\b(stadium|arena|ballfield)\b/,
@@ -27,6 +26,36 @@ const PARK_EXCLUSIONS: readonly RegExp[] = [
   /snow storage/,
   /open ?space/,
   /\bpaths\b/,
+  /\bpromenade\b/,
+  /\bplayfield\b/,
+  /\bshoreway\b/,
+  /\bpreserve\b/,
+  /\bsanctuary\b/,
+  /\boutdoor gym\b/,
+  /\b(industrial|business|office|retail|science)\s+park\b/,
+  /\bgolf\b/,
+  /\bcountry club\b/,
+  /\bcemetery\b/,
+  /\bbeach\b/,
+];
+
+const HOSPITAL_EXCLUSIONS: readonly RegExp[] = [
+  /\bclinic\b/,
+  /\bdental\b/,
+  /\bveterinar/,
+];
+
+const MUSEUM_EXCLUSIONS: readonly RegExp[] = [
+  /\boutdoor gym\b/,
+  /\bcar park\b/,
+  /\bindustrial estate\b/,
+  /\bwarehouse\b/,
+];
+
+const AIRPORT_EXCLUSIONS: readonly RegExp[] = [
+  /\baerodrome\b/,
+  /\bheliport\b/,
+  /\bairfield\b/,
 ];
 
 function collapseName(name: string): string {
@@ -45,20 +74,73 @@ export function normalizeBundledPoiName(name: string, category: string): string 
   return collapsed;
 }
 
-/** Category-specific exclusions; only park has known junk sources today. */
+function isBareSquareOrPlaza(name: string): boolean {
+  if (/\bsquare park\b/.test(name) || /\bplaza park\b/.test(name)) {
+    return false;
+  }
+  if (/\bstate park\b/.test(name)) {
+    return false;
+  }
+  return /\b(square|plaza)\b/.test(name) && !/\bpark\b/.test(name);
+}
+
+function isBareMemorial(name: string): boolean {
+  return /\bmemorial\b/.test(name) && !/\bpark\b/.test(name);
+}
+
+function isNonStateParkBeach(name: string): boolean {
+  return /\bbeach\b/.test(name) && !/\bstate park\b/.test(name);
+}
+
+function matchesExclusions(name: string, patterns: readonly RegExp[]): boolean {
+  return patterns.some((pattern) => pattern.test(name));
+}
+
+function isEligiblePark(name: string): boolean {
+  if (!name || STREET_SUFFIX.test(name)) {
+    return false;
+  }
+  if (isBareSquareOrPlaza(name) || isBareMemorial(name)) {
+    return false;
+  }
+  if (isNonStateParkBeach(name)) {
+    return false;
+  }
+  return !matchesExclusions(name, PARK_EXCLUSIONS);
+}
+
+function isEligibleMuseum(name: string): boolean {
+  if (matchesExclusions(name, MUSEUM_EXCLUSIONS) && !/\bmuseum\b/.test(name)) {
+    return false;
+  }
+  if (/\barchive\b/.test(name) && !/\bmuseum\b/.test(name)) {
+    return false;
+  }
+  if (/\bgallery\b/.test(name) && !/\bmuseum\b/.test(name)) {
+    return false;
+  }
+  return true;
+}
+
+/** Category-specific exclusions for bundled POI hygiene. */
 export function isEligibleBundledPoi(
   place: BundledPoiPlaceLike,
   category: string,
 ): boolean {
-  if (category !== "park") {
-    return true;
-  }
-
   const name = collapseName(place.name);
-  if (!name || STREET_SUFFIX.test(name)) {
-    return false;
+
+  switch (category) {
+    case "park":
+      return isEligiblePark(name);
+    case "hospital":
+      return !matchesExclusions(name, HOSPITAL_EXCLUSIONS);
+    case "museum":
+      return isEligibleMuseum(name);
+    case "commercial_airport":
+      return !matchesExclusions(name, AIRPORT_EXCLUSIONS);
+    default:
+      return true;
   }
-  return !PARK_EXCLUSIONS.some((pattern) => pattern.test(name));
 }
 
 /** Wikidata entries win over regional supplements (pme:openspace:*, etc.). */

@@ -48,9 +48,9 @@ describe("tutorialProgress", () => {
 });
 
 describe("tutorialQuestions progress", () => {
-  it("tracks per-question steps", () => {
+  it("tracks per-question walkthrough steps", () => {
     const start = readTutorialProgress();
-    const next = markQuestionStepComplete("matching", 2, start);
+    const next = markQuestionStepComplete("matching", 3, start);
     expect(next.questions.matching).toBe(2);
     expect(isQuestionTutorialComplete("matching", 3, next)).toBe(true);
   });

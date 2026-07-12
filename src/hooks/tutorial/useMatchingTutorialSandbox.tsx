@@ -22,6 +22,7 @@ function useMatchingSandboxBody({
   fixture,
   readOnly,
   interactive,
+  committed,
   session,
   registerMapDraft,
   gameArea,
@@ -63,6 +64,9 @@ function useMatchingSandboxBody({
     !loading;
 
   useEffect(() => {
+    if (committed) {
+      return;
+    }
     if (readOnly || !interactive || session === null || !session.hasAnchor) {
       registerMapDraft(null);
       return;
@@ -115,6 +119,7 @@ function useMatchingSandboxBody({
     });
   }, [
     answer,
+    committed,
     gameArea,
     interactive,
     readOnly,

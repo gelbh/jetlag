@@ -15,8 +15,20 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-07-12",
     sections: [
       {
+        title: "Fixes",
+        items: [
+          "Admin: live sessions show a clear message when the backend is unavailable instead of INTERNAL",
+          "Tentacle wizard: answer step scrolls with the commit button pinned at the bottom",
+          "Tutorial hub: Markup, Hider, and Extras cards stack in one column",
+          "Tutorial preview: committing a practice question locks the wizard and keeps map shading",
+          "Tutorial walkthrough: back arrow on screenshot steps; progress counts three walkthrough steps, not the interactive try step",
+          "Region presets: bundled park, hospital, museum, and airport lists drop clinics, squares, archives, and private strips",
+        ],
+      },
+      {
         title: "Improvements",
         items: [
+          "Admin panel: standard header with back navigation",
           "Measuring: bundled park lists for region packs no longer include duplicate or non-park entries (Portland GIS cleanup and dedup across presets)",
         ],
       }

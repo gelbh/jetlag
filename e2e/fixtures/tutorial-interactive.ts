@@ -13,9 +13,6 @@ const TOOL_TITLES: Record<QuestionTutorialId, string> = {
   photo: "Photo",
 };
 
-export const TUTORIAL_COMMIT_NOTE =
-  "Practice question added — no cards spent in the tutorial.";
-
 export async function seedTutorialHubProgress(page: Page) {
   const questions = defaultQuestionProgress();
   await page.addInitScript((seedQuestions) => {
@@ -82,14 +79,14 @@ export async function clickTutorialPreviewMap(
   });
 }
 
-export async function assertTutorialCommitNote(page: Page) {
-  await expect(page.getByText(TUTORIAL_COMMIT_NOTE)).toBeVisible({
-    timeout: 15_000,
-  });
+export async function assertTutorialCommittedLock(page: Page) {
+  await expect(
+    page.locator('[data-tutorial-committed="true"]'),
+  ).toBeVisible({ timeout: 15_000 });
 }
 
 export async function completeTutorialInteractiveStep(page: Page) {
-  await assertTutorialCommitNote(page);
+  await assertTutorialCommittedLock(page);
   await page.getByRole("button", { name: "Got it" }).click();
 }
 

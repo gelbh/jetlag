@@ -17,6 +17,7 @@ export interface TutorialSandboxOptions<F> {
   fixture?: F;
   initialWizardStepId?: string;
   syncWizardStep?: boolean;
+  hideStepper?: boolean;
 }
 
 /** Wizard-related props shared by every tool panel rendered in a sandbox. */
@@ -33,6 +34,7 @@ export interface TutorialSandboxContext<F> {
   fixture: F | undefined;
   readOnly: boolean;
   interactive: boolean;
+  committed: boolean;
   session: TutorialInteractiveSessionValue | null;
   registerMapDraft: ReturnType<typeof useRegisterTutorialMapDraft>;
   gameArea: GameArea;
@@ -76,36 +78,40 @@ export function createTutorialSandbox<F, Extras = Record<never, never>>({
       [],
     );
 
+    const commit = useTutorialQuestionCommit({ enabled: interactive });
+    const locked = readOnly || commit.committed;
+
     const body = useSandboxBody({
       fixture,
-      readOnly,
+      readOnly: locked,
       interactive,
+      committed: commit.committed,
       session,
       registerMapDraft,
       gameArea: viewport.gameArea,
       costLabel,
       wizardProps: {
         sandbox: {
-          readOnly,
+          readOnly: locked,
           initialWizardStepId: options.initialWizardStepId,
           syncWizardStep: options.syncWizardStep ?? false,
+          hideStepper: options.hideStepper,
         },
       },
     });
 
-    const commit = useTutorialQuestionCommit({
-      enabled: interactive,
-      canCommit: body.canCommit,
-    });
+    commit.syncCanCommit(body.canCommit);
 
     const panel = (
-      <>
+      <div
+        data-tutorial-committed={commit.committed ? "true" : undefined}
+        className={commit.committed ? "pointer-events-none select-none" : undefined}
+      >
         {body.renderPanel({
           handleCommit: commit.handleCommit,
           isSubmitting: commit.isSubmitting,
         })}
-        {commit.committedNote}
-      </>
+      </div>
     );
 
     return { panel, ...(body.extras as Extras) };

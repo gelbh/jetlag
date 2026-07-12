@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   completedQuestionCount,
+  fullStepIndexForWalkthroughStep,
   getQuestionTutorial,
   getQuestionTutorials,
+  isQuestionTutorialComplete,
   isQuestionsHubComplete,
   markQuestionStepComplete,
 } from "./tutorialQuestions";
@@ -33,13 +35,28 @@ describe("tutorialQuestions", () => {
     }
   });
 
+  it("marks question tutorials complete on walkthrough steps only", () => {
+    const tutorial = getQuestionTutorial("matching");
+    let progress = readTutorialProgress();
+    progress = markQuestionStepComplete(
+      tutorial.id,
+      fullStepIndexForWalkthroughStep(tutorial.steps, 2),
+      progress,
+    );
+    expect(isQuestionTutorialComplete(tutorial.id, 3, progress)).toBe(true);
+    expect(progress.questions.matching).toBe(2);
+  });
+
   it("reports questions hub completion", () => {
     let progress = readTutorialProgress();
     expect(isQuestionsHubComplete(progress)).toBe(false);
     for (const tutorial of getQuestionTutorials()) {
+      const lastWalkthroughIndex =
+        tutorial.steps.filter((step) => step.kind !== "interactive-panel").length -
+        1;
       progress = markQuestionStepComplete(
         tutorial.id,
-        tutorial.steps.length - 1,
+        fullStepIndexForWalkthroughStep(tutorial.steps, lastWalkthroughIndex),
         progress,
       );
     }

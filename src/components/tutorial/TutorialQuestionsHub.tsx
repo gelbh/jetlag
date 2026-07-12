@@ -6,7 +6,9 @@ import {
   isQuestionTutorialComplete,
   QUESTION_TUTORIAL_ORDER,
   questionTutorialStartIndex,
+  questionWalkthroughSteps,
   questionsHubStatusLabel,
+  walkthroughIndexForFullStep,
   type QuestionTutorialId,
 } from "../../domain/tutorial/tutorialQuestions";
 import type { TutorialProgress } from "../../domain/tutorial/tutorialProgress";
@@ -18,17 +20,21 @@ interface TutorialQuestionsHubProps {
 
 function questionStatusLabel(
   questionId: QuestionTutorialId,
-  stepCount: number,
+  walkthroughCount: number,
   progress: TutorialProgress,
 ): string {
-  if (isQuestionTutorialComplete(questionId, stepCount, progress)) {
+  if (isQuestionTutorialComplete(questionId, walkthroughCount, progress)) {
     return "Complete";
   }
-  const resume = questionTutorialStartIndex(questionId, stepCount, progress);
-  if (resume > 0) {
-    return `${resume}/${stepCount}`;
+  const resume = questionTutorialStartIndex(questionId, walkthroughCount, progress);
+  const walkthroughIndex = walkthroughIndexForFullStep(
+    getQuestionTutorial(questionId).steps,
+    resume,
+  );
+  if (walkthroughIndex !== null && walkthroughIndex > 0) {
+    return `${walkthroughIndex + 1}/${walkthroughCount}`;
   }
-  return `${stepCount} steps`;
+  return `${walkthroughCount} steps`;
 }
 
 export function TutorialQuestionsHub({
@@ -38,7 +44,8 @@ export function TutorialQuestionsHub({
   const questions = getQuestionTutorials();
   const recommendedId = QUESTION_TUTORIAL_ORDER.find((id) => {
     const tutorial = getQuestionTutorial(id);
-    return !isQuestionTutorialComplete(id, tutorial.steps.length, progress);
+    const walkthroughCount = questionWalkthroughSteps(tutorial.steps).length;
+    return !isQuestionTutorialComplete(id, walkthroughCount, progress);
   });
 
   return (
@@ -54,19 +61,20 @@ export function TutorialQuestionsHub({
 
       <div className="tutorial-questions-list">
         {questions.map((question) => {
+          const walkthroughCount = questionWalkthroughSteps(question.steps).length;
           const complete = isQuestionTutorialComplete(
             question.id,
-            question.steps.length,
+            walkthroughCount,
             progress,
           );
           const status = complete
             ? "Review"
-            : questionStatusLabel(question.id, question.steps.length, progress);
+            : questionStatusLabel(question.id, walkthroughCount, progress);
           const completedSteps = complete
-            ? question.steps.length
+            ? walkthroughCount
             : Math.max(0, progress.questions[question.id] + 1);
           const progressPercent = Math.round(
-            (completedSteps / question.steps.length) * 100,
+            (completedSteps / walkthroughCount) * 100,
           );
           const isRecommended = question.id === recommendedId && !complete;
 

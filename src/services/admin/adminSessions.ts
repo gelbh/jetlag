@@ -56,6 +56,20 @@ export async function fetchActiveAdminSessions(): Promise<AdminSessionSummary[]>
       throw new Error("Sign in required.", { cause: error });
     }
 
+    if (
+      error instanceof FirebaseError &&
+      (error.code === "functions/internal" || error.message?.trim() === "INTERNAL")
+    ) {
+      throw new Error("Couldn't load live sessions.", { cause: error });
+    }
+
+    if (error instanceof FirebaseError && error.code === "functions/not-found") {
+      throw new Error(
+        "Admin session service isn't available yet. Try again after deploy.",
+        { cause: error },
+      );
+    }
+
     if (error instanceof Error) {
       throw error;
     }
