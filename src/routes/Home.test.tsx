@@ -27,8 +27,8 @@ vi.mock("../services/firestore/sessionMembershipHeal", () => ({
     mockEnsureRemoteSessionMembership(...args),
 }));
 
-vi.mock("../hooks/useViewTransitionNavigate", () => ({
-  useViewTransitionNavigate: () => navigate,
+vi.mock("../hooks/useAppNavigate", () => ({
+  useAppNavigate: () => navigate,
 }));
 
 describe("Home", () => {

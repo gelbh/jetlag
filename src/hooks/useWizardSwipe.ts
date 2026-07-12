@@ -6,7 +6,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type RefObject,
 } from "react";
-import { useMotionProfile } from "./location/useMotionProfile";
+import { useMotionProfile } from "./useMotionProfile";
 
 const AXIS_SLOP_PX = 8;
 const COMMIT_FRACTION = 0.35;

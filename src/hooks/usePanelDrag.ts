@@ -5,7 +5,7 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { useMotionProfile } from "./location/useMotionProfile";
+import { useMotionProfile } from "./useMotionProfile";
 
 const MINIMIZE_DRAG_THRESHOLD_PX = 72;
 const MINIMIZE_VELOCITY_PX_MS = 0.35;

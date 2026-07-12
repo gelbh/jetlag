@@ -217,6 +217,6 @@ describe("GamePresetEditor", () => {
         .getState()
         .presets.find((preset) => preset.name === "Dublin medium")?.name,
     ).toBe("Dublin medium");
-    expect(navigate).toHaveBeenCalledWith("/presets");
+    expect(navigate).toHaveBeenCalledWith("/presets", { viewTransition: true });
   });
 });

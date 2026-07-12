@@ -5,6 +5,7 @@ import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { HudGuideIcon, HudPlayIcon } from "../components/ui/HudIcons";
 import { InlineError } from "../components/ui/InlineError";
 import { VersionChangelogSheet } from "../components/ui/VersionChangelogSheet";
+import { MotionPressable } from "../components/motion/MotionPressable";
 import { APP_VERSION } from "../domain/device/changelog";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { playerRoleLabel, resolvePlayerRole } from "../domain/session/playerRole";
@@ -21,7 +22,7 @@ import {
 import { isFirestorePermissionDenied } from "../services/firestore/firestoreAnnotations";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
-import { useViewTransitionNavigate } from "../hooks/useViewTransitionNavigate";
+import { useAppNavigate } from "../hooks/useAppNavigate";
 import {
   resolveHomePremiumButtonDisplay,
   type PremiumEntitlements,
@@ -30,7 +31,7 @@ import { fetchPremiumEntitlements } from "../services/billing/premiumBilling";
 import { LEGAL_APP_NAME } from "../domain/legal/legalContact";
 
 export function Home() {
-  const navigate = useViewTransitionNavigate();
+  const navigate = useAppNavigate();
   const session = useSessionStore((state) => state.session);
   const myRole = useSessionStore((state) => state.myRole);
   const myUid = useSessionStore((state) => state.myUid);
@@ -172,14 +173,14 @@ export function Home() {
               >
                 <HudGuideIcon className="size-5" />
               </Link>
-              <button
+              <MotionPressable
                 type="button"
                 onClick={() => setChangelogOpen(true)}
                 className="hud-chrome shrink-0 px-2.5 py-1.5 font-mono text-xs font-bold tracking-wide text-ink-muted"
                 aria-label={`Version ${APP_VERSION}. Open changelog`}
               >
                 v{APP_VERSION}
-              </button>
+              </MotionPressable>
             </div>
           </div>
           <div className="space-y-1">
@@ -199,7 +200,7 @@ export function Home() {
 
         <div className="home-enter-actions mt-8 space-y-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
           {session ? (
-            <button
+            <MotionPressable
               type="button"
               onClick={() => void handleContinue()}
               disabled={continuing}
@@ -230,7 +231,7 @@ export function Home() {
                   </>
                 )}
               </span>
-            </button>
+            </MotionPressable>
           ) : null}
           <Link
             to="/create"

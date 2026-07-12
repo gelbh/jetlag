@@ -5,7 +5,7 @@ import {
   useState,
   type RefCallback,
 } from "react";
-import { useMotionProfile } from "./location/useMotionProfile";
+import { useMotionProfile } from "./useMotionProfile";
 
 export type PresencePhase = "closed" | "entering" | "open" | "exiting";
 

@@ -7,11 +7,11 @@ import {
 } from "react";
 import { useAnimatedPresence } from "../../hooks/useAnimatedPresence";
 import { useScrollLock } from "../../hooks/useScrollLock";
-import { useSheetGesture } from "../../hooks/useSheetGesture";
-import { useMotionProfile } from "../../hooks/location/useMotionProfile";
+import { useAdaptiveSheetGesture } from "../../hooks/useAdaptiveSheetGesture";
+import { useMotionProfile } from "../../hooks/useMotionProfile";
 import { MobileSheet } from "./MobileSheet";
 
-interface AnimatedOverlayProps {
+export interface AnimatedOverlayProps {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
@@ -71,7 +71,7 @@ export function AnimatedOverlay({
     exitClass: "hud-sheet-exit",
   });
 
-  const gesture = useSheetGesture({
+  const gesture = useAdaptiveSheetGesture({
     enabled:
       dismissible &&
       animate &&
@@ -130,6 +130,7 @@ export function AnimatedOverlay({
           maxHeightClassName={maxHeightClassName}
           pinned={pinned}
           scrollRef={scrollRef}
+          scrollIdle={phase === "exiting"}
           handleProps={dismissible ? gesture.handleProps : undefined}
         >
           <div

@@ -1,4 +1,4 @@
-import { usePanelDrag } from "../../hooks/usePanelDrag";
+import { useAdaptivePanelDrag } from "../../hooks/useAdaptivePanelDrag";
 import {
   isWizardDockTool,
   mapToolPlacingLabel,
@@ -23,7 +23,7 @@ export function ToolFloatingPanel({
   onClose,
   children,
 }: ToolFloatingPanelProps) {
-  const { panelStyle, handleProps } = usePanelDrag({
+  const { panelStyle, handleProps, useFramerDrag } = useAdaptivePanelDrag({
     minimized,
     onMinimizedChange,
   });
@@ -42,7 +42,7 @@ export function ToolFloatingPanel({
           ? "max-h-[min(54dvh,480px)]"
           : "max-h-[min(34dvh,320px)]"
       }
-      panelStyle={panelStyle}
+      panelStyle={useFramerDrag ? undefined : panelStyle}
       dragHandleProps={handleProps}
       contentKey={toolId}
     >

@@ -1,4 +1,5 @@
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
+import { MotionPressable } from "../components/motion/MotionPressable";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
@@ -33,7 +34,8 @@ export function Feedback() {
         <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
           Improvement ideas
         </p>
-        <a
+        <MotionPressable
+          as="a"
           href={githubIdeasBrowseUrl()}
           {...externalLinkProps}
           aria-label="Browse improvement ideas on GitHub"
@@ -41,8 +43,9 @@ export function Feedback() {
         >
           <span>Browse ideas</span>
           <span className="home-card-btn-hint">GitHub Issues</span>
-        </a>
-        <a
+        </MotionPressable>
+        <MotionPressable
+          as="a"
           href={githubIdeaSubmitUrl()}
           {...externalLinkProps}
           aria-label="Suggest an improvement on GitHub"
@@ -50,12 +53,13 @@ export function Feedback() {
         >
           <span>Suggest improvement</span>
           <span className="home-card-btn-hint">New idea issue</span>
-        </a>
+        </MotionPressable>
 
         <p className="pt-2 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
           Bug reports
         </p>
-        <a
+        <MotionPressable
+          as="a"
           href={githubBugsBrowseUrl()}
           {...externalLinkProps}
           aria-label="Browse bug reports on GitHub"
@@ -63,8 +67,9 @@ export function Feedback() {
         >
           <span>Browse bugs</span>
           <span className="home-card-btn-hint">GitHub Issues</span>
-        </a>
-        <a
+        </MotionPressable>
+        <MotionPressable
+          as="a"
           href={githubBugReportUrl()}
           {...externalLinkProps}
           aria-label="Report a bug on GitHub"
@@ -72,7 +77,7 @@ export function Feedback() {
         >
           <span>Report a bug</span>
           <span className="home-card-btn-hint">Bug report form</span>
-        </a>
+        </MotionPressable>
       </div>
     </EntryScreenLayout>
   );

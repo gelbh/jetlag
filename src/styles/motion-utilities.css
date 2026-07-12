@@ -1,0 +1,63 @@
+/* motion-utilities.css — reusable enter/exit animation classes (extracted from map chrome) */
+
+.jl-tool-overflow-sheet,
+.hud-sheet-enter {
+  animation: hud-sheet-enter var(--motion-sheet) var(--ease-out-quint) both;
+}
+
+.hud-sheet-exit {
+  animation: hud-sheet-exit calc(var(--motion-sheet) * 0.75) var(--ease-out-quint) both;
+}
+
+.hud-scrim-enter {
+  animation: hud-scrim-enter var(--motion-base) var(--ease-out-quint) both;
+}
+
+.hud-scrim-exit {
+  animation: hud-scrim-exit calc(var(--motion-base) * 0.75) var(--ease-out-quint) both;
+}
+
+.jl-panel-enter {
+  animation: jl-panel-enter var(--motion-base) var(--ease-out-quint) both;
+}
+
+.jl-panel-exit {
+  animation: jl-panel-exit calc(var(--motion-base) * 0.75) var(--ease-out-quint) both;
+}
+
+.jl-panel-crossfade-enter {
+  animation: jl-panel-crossfade-enter var(--motion-fast) var(--ease-out-quint) both;
+}
+
+.jl-step-enter {
+  animation: jl-step-enter var(--motion-fast) var(--ease-out-quint) both;
+}
+
+.jl-wizard-step-forward {
+  animation: jl-wizard-step-forward var(--motion-base) var(--ease-out-quint) both;
+}
+
+.jl-wizard-step-back {
+  animation: jl-wizard-step-back var(--motion-base) var(--ease-out-quint) both;
+}
+
+.jl-banner-enter {
+  animation: jl-banner-enter var(--motion-base) var(--ease-out-quint) both;
+}
+
+.jl-banner-exit {
+  animation: jl-banner-exit calc(var(--motion-base) * 0.75) var(--ease-out-quint) both;
+}
+
+.jl-chat-tab-enter {
+  animation: jl-chat-tab-enter var(--motion-fast) var(--ease-out-quint) both;
+}
+
+.route-loading-enter {
+  animation: route-loading-enter var(--motion-base) var(--ease-out-quint) both;
+}
+
+.hud-sheet-scroll--idle {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}

@@ -27,6 +27,9 @@ import {
 } from "../map/ToolIcons";
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 import { ToolOverflowSheet } from "./ToolOverflowSheet";
+import { MotionPressable } from "../motion/MotionPressable";
+import { MotionSharedElement } from "../motion/MotionSharedElement";
+import { MOTION_SHARED_ELEMENTS } from "../motion/sharedElements";
 
 interface ToolDockProps {
   activeTool: MapTool;
@@ -191,7 +194,7 @@ export function ToolDock({
       !canSubmitQuestion && QUESTION_DOCK_TOOL_IDS.includes(toolId);
 
     return (
-      <button
+      <MotionPressable
         key={toolId}
         type="button"
         disabled={!entry.enabled}
@@ -209,7 +212,7 @@ export function ToolDock({
           <HudToolIcon tool={toolId} className="h-5 w-5 shrink-0" />
         </span>
         <span className="jl-tool-slot-label">{mapToolDockShortLabel(toolId)}</span>
-      </button>
+      </MotionPressable>
     );
   };
 
@@ -292,9 +295,9 @@ export function ToolDock({
 
       <div className="jl-tool-dock-bar">
         {dockHighlight ? (
-          <span
+          <MotionSharedElement
+            id={MOTION_SHARED_ELEMENTS.toolDockSlot}
             className="jl-tool-dock-highlight"
-            aria-hidden="true"
             style={{
               transform: `translate(${dockHighlight.x}px, ${dockHighlight.y}px)`,
               width: dockHighlight.width,
@@ -307,7 +310,7 @@ export function ToolDock({
           className="jl-tool-dock-group jl-tool-dock-group-history"
           aria-label="History"
         >
-          <button
+          <MotionPressable
             type="button"
             onClick={onUndo}
             disabled={!canUndo}
@@ -318,8 +321,8 @@ export function ToolDock({
               <HudUndoIcon className="h-5 w-5" />
             </span>
             <span className="jl-tool-slot-label">Undo</span>
-          </button>
-          <button
+          </MotionPressable>
+          <MotionPressable
             type="button"
             onClick={onRedo}
             disabled={!canRedo}
@@ -330,7 +333,7 @@ export function ToolDock({
               <HudRedoIcon className="h-5 w-5" />
             </span>
             <span className="jl-tool-slot-label">Redo</span>
-          </button>
+          </MotionPressable>
         </div>
 
         <div
@@ -349,7 +352,7 @@ export function ToolDock({
         <div className="jl-tool-dock-divider" aria-hidden="true" />
 
         <div className="jl-tool-dock-group jl-tool-dock-group-end jl-tool-dock-wide-only">
-          <button
+          <MotionPressable
             type="button"
             onClick={() => {
               setMoreMenuOpen(false);
@@ -367,10 +370,10 @@ export function ToolDock({
               <HudDrawIcon className="h-5 w-5" />
             </span>
             <span className="jl-tool-slot-label">Draw</span>
-          </button>
+          </MotionPressable>
 
           {onOpenChat ? (
-            <button
+            <MotionPressable
               type="button"
               onClick={onOpenChat}
               className="jl-tool-slot"
@@ -383,10 +386,10 @@ export function ToolDock({
                 {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
               </span>
               <span className="jl-tool-slot-label">Chat</span>
-            </button>
+            </MotionPressable>
           ) : null}
 
-          <button
+          <MotionPressable
             type="button"
             onClick={onOpenSettings}
             className="jl-tool-slot"
@@ -396,11 +399,11 @@ export function ToolDock({
               <HudSettingsIcon className="h-5 w-5" />
             </span>
             <span className="jl-tool-slot-label">Setup</span>
-          </button>
+          </MotionPressable>
         </div>
 
         <div className="jl-tool-dock-group jl-tool-dock-group-end jl-tool-dock-compact-only">
-          <button
+          <MotionPressable
             type="button"
             onClick={() => {
               setDrawMenuOpen(false);
@@ -423,7 +426,7 @@ export function ToolDock({
               {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
             </span>
             <span className="jl-tool-slot-label">More</span>
-          </button>
+          </MotionPressable>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AnimatedOverlay } from "../ui/AnimatedOverlay";
+import { MotionSheet } from "../motion/MotionSheet";
 import { SheetHeader } from "../ui/SheetHeader";
 import { CurseReferenceSheet } from "../expansion/CurseReferenceSheet";
 import {
@@ -145,7 +145,7 @@ export function MapSettingsSheet({
   const [curseSheetOpen, setCurseSheetOpen] = useState(false);
 
   return (
-    <AnimatedOverlay
+    <MotionSheet
       open={open}
       onClose={onClose}
       ariaLabel="Settings"
@@ -276,6 +276,6 @@ export function MapSettingsSheet({
         open={curseSheetOpen}
         onClose={() => setCurseSheetOpen(false)}
       />
-    </AnimatedOverlay>
+    </MotionSheet>
   );
 }

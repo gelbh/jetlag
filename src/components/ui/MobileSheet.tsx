@@ -13,6 +13,8 @@ interface MobileSheetProps {
   pinned?: ReactNode;
   scrollRef?: RefObject<HTMLDivElement | null>;
   handleProps?: SheetHandleProps;
+  /** Skip paint of scroll body while sheet is exiting (perf). */
+  scrollIdle?: boolean;
 }
 
 export function MobileSheet({
@@ -24,6 +26,7 @@ export function MobileSheet({
   pinned,
   scrollRef: externalScrollRef,
   handleProps,
+  scrollIdle = false,
 }: MobileSheetProps) {
   const internalScrollRef = useRef<HTMLDivElement>(null);
   const scrollRef = externalScrollRef ?? internalScrollRef;
@@ -45,6 +48,8 @@ export function MobileSheet({
   ) : variant === "overlay" ? (
     <div className="jl-sheet-handle" aria-hidden="true" />
   ) : null;
+
+  const scrollClassName = scrollIdle ? "hud-sheet-scroll--idle" : "";
 
   if (variant === "nested" && layout === "split") {
     return (
@@ -70,7 +75,7 @@ export function MobileSheet({
           </div>
           <div
             ref={scrollRef}
-            className="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 bg-surface-panel px-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+            className={`min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 bg-surface-panel px-4 pb-[max(1rem,env(safe-area-inset-bottom))] ${scrollClassName}`.trim()}
           >
             {children}
           </div>
@@ -84,7 +89,7 @@ export function MobileSheet({
       <div className="mx-auto w-full max-w-xl">
         <div
           ref={scrollRef}
-          className={`${maxHeightClassName} overflow-y-auto overscroll-contain scroll-pb-4 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3`}
+          className={`${maxHeightClassName} overflow-y-auto overscroll-contain scroll-pb-4 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 ${scrollClassName}`.trim()}
         >
           {handle}
           {children}

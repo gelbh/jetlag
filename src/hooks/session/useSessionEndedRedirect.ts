@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAppNavigate } from "../useAppNavigate";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { isFirebaseConfigured } from "../../services/core/firebase";
 import { subscribeToSession } from "../../services/firestore/firestoreAnnotations";
@@ -10,7 +10,7 @@ export function useSessionEndedRedirect(
   sessionId: string | undefined,
   isHost: boolean,
 ) {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const setSession = useSessionStore((state) => state.setSession);
   const setRemoteUpdateNotice = useSessionStore(
     (state) => state.setRemoteUpdateNotice,

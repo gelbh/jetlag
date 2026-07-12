@@ -1,5 +1,6 @@
 import { useCallback, useId, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { useAppNavigate } from "../hooks/useAppNavigate";
 import type { LatLngBoundsExpression } from "leaflet";
 import {
   ScreenHeader,
@@ -42,7 +43,7 @@ import { useMapStore } from "../state/sessionStore";
 import type { GeocodedPlace } from "../services/geo/geocoding";
 
 export function GamePresetEditor() {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const { id } = useParams();
   const mapStyle = useMapStore((state) => state.mapStyle);
   const setMapStyle = useMapStore((state) => state.setMapStyle);

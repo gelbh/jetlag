@@ -6,7 +6,7 @@ import {
   mapToolDockMenuLabel,
 } from "../../domain/map/mapTools";
 import type { MapTool } from "../../state/sessionStore";
-import { AnimatedOverlay } from "../ui/AnimatedOverlay";
+import { MotionSheet } from "../motion/MotionSheet";
 import { SheetHeader } from "../ui/SheetHeader";
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 import {
@@ -111,7 +111,7 @@ export function ToolOverflowSheet({
   };
 
   return (
-    <AnimatedOverlay
+    <MotionSheet
       open={open}
       onClose={onClose}
       ariaLabel="More tools"
@@ -206,6 +206,6 @@ export function ToolOverflowSheet({
           ariaLabel="Redo last annotation"
         />
       </div>
-    </AnimatedOverlay>
+    </MotionSheet>
   );
 }

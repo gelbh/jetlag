@@ -16,11 +16,13 @@
 @keyframes draft-seeker-pulse {
   0%,
   100% {
-    filter: brightness(1);
+    opacity: 1;
+    transform: scale(1);
   }
 
   50% {
-    filter: brightness(1.45);
+    opacity: 0.72;
+    transform: scale(1.12);
   }
 }
 
@@ -28,13 +30,19 @@
   animation: annotation-pulse 1.2s ease-out 1;
 }
 
+html:not([data-motion="framer-enhanced"]) .annotation-pulse {
+  animation: none;
+}
+
 @keyframes annotation-pulse {
   0% {
-    filter: brightness(1.35);
+    opacity: 0.55;
+    transform: scale(1.08);
   }
 
   100% {
-    filter: brightness(1);
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
@@ -257,11 +265,13 @@
 @keyframes jl-ticker-glow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 oklch(from var(--color-highlight) l c h / 0.35);
+    opacity: 1;
+    transform: scale(1);
   }
 
   50% {
-    box-shadow: 0 0 0 3px oklch(from var(--color-highlight) l c h / 0.35);
+    opacity: 0.88;
+    transform: scale(1.02);
   }
 }
 
@@ -290,9 +300,53 @@
   }
 }
 
+@keyframes vt-slide-out-left {
+  to {
+    opacity: 0.85;
+    transform: translateX(-12%);
+  }
+}
+
+@keyframes vt-slide-in-right {
+  from {
+    opacity: 0.85;
+    transform: translateX(12%);
+  }
+}
+
+@keyframes vt-slide-out-right {
+  to {
+    opacity: 0.85;
+    transform: translateX(12%);
+  }
+}
+
+@keyframes vt-slide-in-left {
+  from {
+    opacity: 0.85;
+    transform: translateX(-12%);
+  }
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: var(--motion-base);
+}
+
+html[data-nav-direction="forward"]::view-transition-old(root) {
+  animation: vt-slide-out-left var(--motion-base) var(--ease-out-quint) both;
+}
+
+html[data-nav-direction="forward"]::view-transition-new(root) {
+  animation: vt-slide-in-right var(--motion-base) var(--ease-out-quint) both;
+}
+
+html[data-nav-direction="back"]::view-transition-old(root) {
+  animation: vt-slide-out-right var(--motion-base) var(--ease-out-quint) both;
+}
+
+html[data-nav-direction="back"]::view-transition-new(root) {
+  animation: vt-slide-in-left var(--motion-base) var(--ease-out-quint) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -343,51 +397,51 @@
   }
 }
 
-html[data-motion="reduced"] ::view-transition-group(*),
-html[data-motion="reduced"] ::view-transition-old(*),
-html[data-motion="reduced"] ::view-transition-new(*) {
+html:is([data-motion="static"], [data-motion="reduced"]) ::view-transition-group(*),
+html:is([data-motion="static"], [data-motion="reduced"]) ::view-transition-old(*),
+html:is([data-motion="static"], [data-motion="reduced"]) ::view-transition-new(*) {
   animation: none !important;
 }
 
-html[data-motion="reduced"] .jl-sync-beacon--saving .jl-sync-beacon__lamp,
-html[data-motion="reduced"] .annotation-pulse,
-html[data-motion="reduced"] .draft-seeker-pulse,
-html[data-motion="reduced"] .loading-spinner,
-html[data-motion="reduced"] .home-enter-actions,
-html[data-motion="reduced"] .home-resume-action[aria-busy="true"] .home-resume-cta,
-html[data-motion="reduced"] .jl-ticker-active,
-html[data-motion="reduced"] .jl-thermometer-live-marker,
-html[data-motion="reduced"] .jl-unread-badge-pulse,
-html[data-motion="reduced"] .jl-tool-overflow-sheet,
-html[data-motion="reduced"] .hud-sheet-enter,
-html[data-motion="reduced"] .hud-sheet-exit,
-html[data-motion="reduced"] .hud-scrim-enter,
-html[data-motion="reduced"] .hud-scrim-exit,
-html[data-motion="reduced"] .jl-panel-enter,
-html[data-motion="reduced"] .jl-panel-exit,
-html[data-motion="reduced"] .jl-panel-crossfade-enter,
-html[data-motion="reduced"] .jl-step-enter,
-html[data-motion="reduced"] .jl-wizard-step-forward,
-html[data-motion="reduced"] .jl-wizard-step-back,
-html[data-motion="reduced"] .jl-banner-enter,
-html[data-motion="reduced"] .jl-banner-exit,
-html[data-motion="reduced"] .jl-chat-tab-enter,
-html[data-motion="reduced"] .jl-tool-menu,
-html[data-motion="reduced"] .route-loading-enter {
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-sync-beacon--saving .jl-sync-beacon__lamp,
+html:is([data-motion="static"], [data-motion="reduced"]) .annotation-pulse,
+html:is([data-motion="static"], [data-motion="reduced"]) .draft-seeker-pulse,
+html:is([data-motion="static"], [data-motion="reduced"]) .loading-spinner,
+html:is([data-motion="static"], [data-motion="reduced"]) .home-enter-actions,
+html:is([data-motion="static"], [data-motion="reduced"]) .home-resume-action[aria-busy="true"] .home-resume-cta,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-ticker-active,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-thermometer-live-marker,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-unread-badge-pulse,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-overflow-sheet,
+html:is([data-motion="static"], [data-motion="reduced"]) .hud-sheet-enter,
+html:is([data-motion="static"], [data-motion="reduced"]) .hud-sheet-exit,
+html:is([data-motion="static"], [data-motion="reduced"]) .hud-scrim-enter,
+html:is([data-motion="static"], [data-motion="reduced"]) .hud-scrim-exit,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-panel-enter,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-panel-exit,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-panel-crossfade-enter,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-step-enter,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-wizard-step-forward,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-wizard-step-back,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-banner-enter,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-banner-exit,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-chat-tab-enter,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-menu,
+html:is([data-motion="static"], [data-motion="reduced"]) .route-loading-enter {
   animation: none;
 }
 
-html[data-motion="reduced"] .map-chrome-hud,
-html[data-motion="reduced"] .map-zoom-control,
-html[data-motion="reduced"] .map-style-control,
-html[data-motion="reduced"] .jl-tool-dock-highlight,
-html[data-motion="reduced"] .jl-tool-dock,
-html[data-motion="reduced"] .jl-chat-keyboard-inset,
-html[data-motion="reduced"] .home-card-btn,
-html[data-motion="reduced"] .hud-chrome,
-html[data-motion="reduced"] .btn-primary,
-html[data-motion="reduced"] .btn-secondary,
-html[data-motion="reduced"] .jl-tool-slot,
-html[data-motion="reduced"] .jl-tool-overflow-row {
+html:is([data-motion="static"], [data-motion="reduced"]) .map-chrome-hud,
+html:is([data-motion="static"], [data-motion="reduced"]) .map-zoom-control,
+html:is([data-motion="static"], [data-motion="reduced"]) .map-style-control,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-dock-highlight,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-dock,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-chat-keyboard-inset,
+html:is([data-motion="static"], [data-motion="reduced"]) .home-card-btn,
+html:is([data-motion="static"], [data-motion="reduced"]) .hud-chrome,
+html:is([data-motion="static"], [data-motion="reduced"]) .btn-primary,
+html:is([data-motion="static"], [data-motion="reduced"]) .btn-secondary,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-slot,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-overflow-row {
   transition: none;
 }
