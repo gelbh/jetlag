@@ -19,10 +19,7 @@ import type { TransitRouteFilter } from "../../domain/map/transit";
 import { MapSettingsGeneralTab } from "./settings/GeneralTab";
 import { MapSettingsSessionTab } from "./settings/SessionTab";
 
-interface MapSettingsSheetProps {
-  open: boolean;
-  onClose: () => void;
-  pendingWrites: number;
+export interface MapSettingsGeneralProps {
   showCurrentLocation: boolean;
   onShowCurrentLocationChange: (enabled: boolean) => void;
   showAdminBoundaries: boolean;
@@ -31,11 +28,6 @@ interface MapSettingsSheetProps {
   onKeepScreenAwakeChange: (enabled: boolean) => void;
   lowPowerMode: boolean;
   onLowPowerModeChange: (enabled: boolean) => void;
-  layerVisibility: LayerVisibility;
-  onLayerVisibilityChange: (
-    layer: keyof LayerVisibility,
-    visible: boolean,
-  ) => void;
   distanceUnit: DistanceUnit;
   onDistanceUnitChange: (unit: DistanceUnit) => void;
   distanceUnitEditable?: boolean;
@@ -59,90 +51,71 @@ interface MapSettingsSheetProps {
   onToggleTransit: () => void;
   onToggleLiveTransit: () => void;
   onTransitRouteFilterChange: (value: TransitRouteFilter) => void;
-  onClearMap: () => void;
-  onExport?: () => void;
-  isHost?: boolean;
-  onResetBoard?: () => void;
-  onEndSession?: () => void;
-  onLeaveSession?: () => void;
-  sessionCode: string;
-  remoteSession: boolean;
   notificationPreferences?: NotificationPreferences;
   nativeNotificationsSupported?: boolean;
   onNotificationPreferencesChange?: (
     patch: Partial<NotificationPreferences>,
   ) => void;
   onEnableNotifications?: () => Promise<boolean>;
+}
+
+export interface MapSettingsLayersProps {
+  layerVisibility: LayerVisibility;
+  onLayerVisibilityChange: (
+    layer: keyof LayerVisibility,
+    visible: boolean,
+  ) => void;
+}
+
+export interface MapSettingsRulesProps {
   gameRulesEditable?: boolean;
   gameSize?: GameSize;
-  advancedSettings?: AdvancedSessionSettingsValue;
-  onAdvancedSettingsChange?: (value: AdvancedSessionSettingsValue) => void;
+  advancedSettings: AdvancedSessionSettingsValue;
+  onAdvancedSettingsChange: (value: AdvancedSessionSettingsValue) => void;
   onSaveGameRules?: () => void | Promise<void>;
   gameRulesSaveLabel?: string;
+}
+
+export interface MapSettingsSessionProps {
+  sessionCode: string;
+  remoteSession: boolean;
+  onClearMap: () => void;
+  onExport?: () => void;
+  isHost?: boolean;
+  onResetBoard?: () => void;
+  onEndSession?: () => void;
+  onLeaveSession?: () => void;
   endGameBlocked?: boolean;
   expansionPackEnabled?: boolean;
+}
+
+interface MapSettingsSheetProps {
+  open: boolean;
+  onClose: () => void;
+  pendingWrites: number;
+  general: MapSettingsGeneralProps;
+  layers: MapSettingsLayersProps;
+  rules?: MapSettingsRulesProps;
+  session: MapSettingsSessionProps;
 }
 
 export function MapSettingsSheet({
   open,
   onClose,
   pendingWrites,
-  showCurrentLocation,
-  onShowCurrentLocationChange,
-  showAdminBoundaries,
-  onShowAdminBoundariesChange,
-  keepScreenAwake,
-  onKeepScreenAwakeChange,
-  lowPowerMode,
-  onLowPowerModeChange,
-  layerVisibility,
-  onLayerVisibilityChange,
-  distanceUnit,
-  onDistanceUnitChange,
-  distanceUnitEditable = false,
-  mapStyle,
-  onMapStyleChange,
-  locationError,
-  transitEnabled,
-  transitLiveEnabled,
-  transitLiveSupported,
-  sessionIsPremium = false,
-  transitRouteFilter,
-  metroLabel,
-  loadingStatic,
-  loadingLive,
-  liveDataStale = false,
-  stopCount,
-  routeCount,
-  vehicleCount,
-  lastUpdated,
-  transitError,
-  onToggleTransit,
-  onToggleLiveTransit,
-  onTransitRouteFilterChange,
-  onClearMap,
-  onExport,
-  isHost = false,
-  onResetBoard,
-  onEndSession,
-  onLeaveSession,
-  sessionCode,
-  remoteSession,
-  notificationPreferences,
-  nativeNotificationsSupported = isNativeNotificationsSupported(),
-  onNotificationPreferencesChange,
-  onEnableNotifications,
-  gameRulesEditable = false,
-  gameSize = "medium",
-  advancedSettings,
-  onAdvancedSettingsChange,
-  onSaveGameRules,
-  gameRulesSaveLabel = "Save game rules",
-  endGameBlocked = false,
-  expansionPackEnabled = false,
+  general,
+  layers,
+  rules,
+  session,
 }: MapSettingsSheetProps) {
   const [segment, setSegment] = useState<SettingsSegment>("map");
   const [curseSheetOpen, setCurseSheetOpen] = useState(false);
+
+  const nativeNotificationsSupported =
+    general.nativeNotificationsSupported ?? isNativeNotificationsSupported();
+  const gameRulesEditable = rules?.gameRulesEditable ?? false;
+  const gameSize = rules?.gameSize ?? "medium";
+  const gameRulesSaveLabel = rules?.gameRulesSaveLabel ?? "Save game rules";
 
   return (
     <MotionSheet
@@ -178,52 +151,54 @@ export function MapSettingsSheet({
       >
         {segment === "map" ? (
           <MapSettingsGeneralTab
-            showCurrentLocation={showCurrentLocation}
-            onShowCurrentLocationChange={onShowCurrentLocationChange}
-            showAdminBoundaries={showAdminBoundaries}
-            onShowAdminBoundariesChange={onShowAdminBoundariesChange}
-            keepScreenAwake={keepScreenAwake}
-            onKeepScreenAwakeChange={onKeepScreenAwakeChange}
-            lowPowerMode={lowPowerMode}
-            onLowPowerModeChange={onLowPowerModeChange}
-            distanceUnit={distanceUnit}
-            onDistanceUnitChange={onDistanceUnitChange}
-            distanceUnitEditable={distanceUnitEditable}
-            mapStyle={mapStyle}
-            onMapStyleChange={onMapStyleChange}
-            locationError={locationError}
-            transitEnabled={transitEnabled}
-            transitLiveEnabled={transitLiveEnabled}
-            transitLiveSupported={transitLiveSupported}
-            sessionIsPremium={sessionIsPremium}
-            transitRouteFilter={transitRouteFilter}
-            metroLabel={metroLabel}
-            loadingStatic={loadingStatic}
-            loadingLive={loadingLive}
-            liveDataStale={liveDataStale}
-            stopCount={stopCount}
-            routeCount={routeCount}
-            vehicleCount={vehicleCount}
-            lastUpdated={lastUpdated}
-            transitError={transitError}
-            onToggleTransit={onToggleTransit}
-            onToggleLiveTransit={onToggleLiveTransit}
-            onTransitRouteFilterChange={onTransitRouteFilterChange}
-            notificationPreferences={notificationPreferences}
+            showCurrentLocation={general.showCurrentLocation}
+            onShowCurrentLocationChange={general.onShowCurrentLocationChange}
+            showAdminBoundaries={general.showAdminBoundaries}
+            onShowAdminBoundariesChange={general.onShowAdminBoundariesChange}
+            keepScreenAwake={general.keepScreenAwake}
+            onKeepScreenAwakeChange={general.onKeepScreenAwakeChange}
+            lowPowerMode={general.lowPowerMode}
+            onLowPowerModeChange={general.onLowPowerModeChange}
+            distanceUnit={general.distanceUnit}
+            onDistanceUnitChange={general.onDistanceUnitChange}
+            distanceUnitEditable={general.distanceUnitEditable}
+            mapStyle={general.mapStyle}
+            onMapStyleChange={general.onMapStyleChange}
+            locationError={general.locationError}
+            transitEnabled={general.transitEnabled}
+            transitLiveEnabled={general.transitLiveEnabled}
+            transitLiveSupported={general.transitLiveSupported}
+            sessionIsPremium={general.sessionIsPremium}
+            transitRouteFilter={general.transitRouteFilter}
+            metroLabel={general.metroLabel}
+            loadingStatic={general.loadingStatic}
+            loadingLive={general.loadingLive}
+            liveDataStale={general.liveDataStale}
+            stopCount={general.stopCount}
+            routeCount={general.routeCount}
+            vehicleCount={general.vehicleCount}
+            lastUpdated={general.lastUpdated}
+            transitError={general.transitError}
+            onToggleTransit={general.onToggleTransit}
+            onToggleLiveTransit={general.onToggleLiveTransit}
+            onTransitRouteFilterChange={general.onTransitRouteFilterChange}
+            notificationPreferences={general.notificationPreferences}
             nativeNotificationsSupported={nativeNotificationsSupported}
-            onNotificationPreferencesChange={onNotificationPreferencesChange}
-            onEnableNotifications={onEnableNotifications}
+            onNotificationPreferencesChange={
+              general.onNotificationPreferencesChange
+            }
+            onEnableNotifications={general.onEnableNotifications}
           />
         ) : null}
 
         {segment === "layers" ? (
           <LayerVisibilityGrid
-            layerVisibility={layerVisibility}
-            onLayerVisibilityChange={onLayerVisibilityChange}
+            layerVisibility={layers.layerVisibility}
+            onLayerVisibilityChange={layers.onLayerVisibilityChange}
           />
         ) : null}
 
-        {segment === "rules" && advancedSettings && onAdvancedSettingsChange ? (
+        {segment === "rules" && rules ? (
           <div className="space-y-3">
             {!gameRulesEditable ? (
               <p className="border-2 border-border bg-surface-deep px-3 py-2 text-sm text-ink-muted">
@@ -233,16 +208,16 @@ export function MapSettingsSheet({
             ) : null}
             <AdvancedSessionSettings
               gameSize={gameSize}
-              distanceUnit={distanceUnit}
-              value={advancedSettings}
-              onChange={onAdvancedSettingsChange}
+              distanceUnit={general.distanceUnit}
+              value={rules.advancedSettings}
+              onChange={rules.onAdvancedSettingsChange}
               disabled={!gameRulesEditable}
               collapsible={false}
             />
-            {gameRulesEditable && onSaveGameRules ? (
+            {gameRulesEditable && rules.onSaveGameRules ? (
               <button
                 type="button"
-                onClick={() => void onSaveGameRules()}
+                onClick={() => void rules.onSaveGameRules?.()}
                 className="btn-primary min-h-11 w-full"
               >
                 {gameRulesSaveLabel}
@@ -253,16 +228,16 @@ export function MapSettingsSheet({
 
         {segment === "session" ? (
           <MapSettingsSessionTab
-            sessionCode={sessionCode}
-            remoteSession={remoteSession}
-            onClearMap={onClearMap}
-            onExport={onExport}
-            isHost={isHost}
-            onResetBoard={onResetBoard}
-            onEndSession={onEndSession}
-            onLeaveSession={onLeaveSession}
-            endGameBlocked={endGameBlocked}
-            expansionPackEnabled={expansionPackEnabled}
+            sessionCode={session.sessionCode}
+            remoteSession={session.remoteSession}
+            onClearMap={session.onClearMap}
+            onExport={session.onExport}
+            isHost={session.isHost ?? false}
+            onResetBoard={session.onResetBoard}
+            onEndSession={session.onEndSession}
+            onLeaveSession={session.onLeaveSession}
+            endGameBlocked={session.endGameBlocked}
+            expansionPackEnabled={session.expansionPackEnabled}
             onOpenCurseReference={() => setCurseSheetOpen(true)}
           />
         ) : null}

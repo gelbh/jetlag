@@ -17,9 +17,16 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Improvements",
         items: [
+          "Map settings: distance unit and map style pickers use the same pill segment control as other settings tabs.",
           "Motion: smoother transitions on capable devices; app falls back to lightweight CSS animations when CPU, memory, network, or frame rate is constrained.",
           "Motion: sheet and panel drag gestures use Framer on capable devices; shared sheet titles and tool dock highlight animate on top-tier devices.",
           "Join and feedback screens: press feedback on primary actions and GitHub links.",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Components: shared primitives for advanced settings, map alerts, OAuth sign-in, and tool wizards; split large tool panels, edit sheet, map chrome, and route screens.",
         ],
       }
     ],

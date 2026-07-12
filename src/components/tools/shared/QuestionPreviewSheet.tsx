@@ -1,4 +1,4 @@
-import { AnimatedOverlay } from "../../ui/AnimatedOverlay";
+import { MotionSheet } from "../../motion/MotionSheet";
 import { SheetHeader } from "../../ui/SheetHeader";
 import { QuestionPromptBlock } from "./QuestionPromptBlock";
 import { CoordinateCopyButton } from "./CoordinateCopyButton";
@@ -27,7 +27,7 @@ export function QuestionPreviewSheet({
   isSubmitting = false,
 }: QuestionPreviewSheetProps) {
   return (
-    <AnimatedOverlay
+    <MotionSheet
       open={open}
       onClose={onCancel}
       ariaLabel="Preview question before send"
@@ -53,6 +53,6 @@ export function QuestionPreviewSheet({
           {isSubmitting ? "Sending…" : "Send question"}
         </button>
       </div>
-    </AnimatedOverlay>
+    </MotionSheet>
   );
 }

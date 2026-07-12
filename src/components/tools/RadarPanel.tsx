@@ -11,6 +11,7 @@ import { InlineError } from "../ui/InlineError";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
 import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
 import { RADAR_STEPS, stepsForMode } from "./shared/toolStepUtils";
+import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
 import { useToolWizard } from "../../hooks/useToolWizard";
 import { parseDistanceInput, type DistanceUnit } from "../../domain/map/distance";
 import {
@@ -104,7 +105,7 @@ export function RadarPanel({
   const canGoNext =
     (step === "anchor" && hasCenter) ||
     (step === "distance" && distanceSelectionAvailable);
-  const canSwipeNext = canGoNext && stepIndex < steps.length - 1;
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
 
   return (
     <ToolPanelShell toolId="radar" stepper={stepper}>

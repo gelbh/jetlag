@@ -4,6 +4,10 @@ import {
   ALL_CONFIGURABLE_TOOLS,
   type ConfigurableMapTool,
 } from "../../../domain/session/sessionRules";
+import {
+  AdvancedSettingsSectionHeader,
+  AdvancedSettingsToggle,
+} from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
 
 export function ToolsSection({
@@ -14,28 +18,17 @@ export function ToolsSection({
 }: AdvancedSettingsSectionProps) {
   return (
     <div className="space-y-3 border-t border-border pt-3">
-      <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
-        Tools
-      </p>
+      <AdvancedSettingsSectionHeader title="Tools" />
 
       {gameSize === "small" ? (
-        <label className="flex items-start gap-3 text-sm text-ink">
-          <input
-            type="checkbox"
-            checked={value.tentaclesEnabledOverride}
-            disabled={disabled}
-            onChange={(event) =>
-              onChange({
-                ...value,
-                tentaclesEnabledOverride: event.target.checked,
-              })
-            }
-            className="mt-1"
-          />
-          <span>
-            <span className="block font-medium">Enable tentacles on small games</span>
-          </span>
-        </label>
+        <AdvancedSettingsToggle
+          checked={value.tentaclesEnabledOverride}
+          onChange={(tentaclesEnabledOverride) =>
+            onChange({ ...value, tentaclesEnabledOverride })
+          }
+          disabled={disabled}
+          label="Enable tentacles on small games"
+        />
       ) : null}
 
       <div className="grid gap-2 sm:grid-cols-2">

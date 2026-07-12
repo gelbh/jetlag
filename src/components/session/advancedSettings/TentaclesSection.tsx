@@ -2,7 +2,7 @@ import { formatHidingZoneRadiusLabel } from "../../../domain/session/gameSize";
 import { milesToMeters } from "../../../domain/map/distance";
 import { tentacleRadiusPresetMeters } from "../../../domain/map/distancePresets";
 import { clampTentacleRadiusMeters } from "../../../domain/session/sessionRules";
-import { PresetButton } from "./shared";
+import { PresetButton, AdvancedSettingsToggle } from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
 
 export function TentaclesSection({
@@ -16,26 +16,15 @@ export function TentaclesSection({
 
   return (
     <>
-      <label className="flex items-start gap-3 text-sm text-ink">
-        <input
-          type="checkbox"
-          checked={value.customTentacleMediumRadiusEnabled}
-          disabled={disabled}
-          onChange={(event) =>
-            onChange({
-              ...value,
-              customTentacleMediumRadiusEnabled: event.target.checked,
-            })
-          }
-          className="mt-1"
-        />
-        <span>
-          <span className="block font-medium">Custom medium tentacle radius</span>
-          <span className="mt-0.5 block text-xs text-ink-muted">
-            Museums, libraries, hospitals, etc.
-          </span>
-        </span>
-      </label>
+      <AdvancedSettingsToggle
+        checked={value.customTentacleMediumRadiusEnabled}
+        onChange={(customTentacleMediumRadiusEnabled) =>
+          onChange({ ...value, customTentacleMediumRadiusEnabled })
+        }
+        disabled={disabled}
+        label="Custom medium tentacle radius"
+        description="Museums, libraries, hospitals, etc."
+      />
 
       {value.customTentacleMediumRadiusEnabled ? (
         <div className="space-y-2">
@@ -94,26 +83,15 @@ export function TentaclesSection({
 
       {gameSize === "large" ? (
         <>
-          <label className="flex items-start gap-3 text-sm text-ink">
-            <input
-              type="checkbox"
-              checked={value.customTentacleLargeRadiusEnabled}
-              disabled={disabled}
-              onChange={(event) =>
-                onChange({
-                  ...value,
-                  customTentacleLargeRadiusEnabled: event.target.checked,
-                })
-              }
-              className="mt-1"
-            />
-            <span>
-              <span className="block font-medium">Custom large tentacle radius</span>
-              <span className="mt-0.5 block text-xs text-ink-muted">
-                Metro lines, zoos, amusement parks, etc.
-              </span>
-            </span>
-          </label>
+          <AdvancedSettingsToggle
+            checked={value.customTentacleLargeRadiusEnabled}
+            onChange={(customTentacleLargeRadiusEnabled) =>
+              onChange({ ...value, customTentacleLargeRadiusEnabled })
+            }
+            disabled={disabled}
+            label="Custom large tentacle radius"
+            description="Metro lines, zoos, amusement parks, etc."
+          />
 
           {value.customTentacleLargeRadiusEnabled ? (
             <div className="space-y-2">

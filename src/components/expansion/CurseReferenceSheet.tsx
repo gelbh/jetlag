@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { AnimatedOverlay } from "../ui/AnimatedOverlay";
+import { MotionSheet } from "../motion/MotionSheet";
 import { SheetHeader } from "../ui/SheetHeader";
 import {
   EXPANSION_CURSE_COUNT,
@@ -18,7 +18,7 @@ export function CurseReferenceSheet({ open, onClose }: CurseReferenceSheetProps)
   const visibleCurses = searchExpansionCurses(query);
 
   return (
-    <AnimatedOverlay
+    <MotionSheet
       open={open}
       onClose={onClose}
       ariaLabel="Expansion Pack curses"
@@ -61,6 +61,6 @@ export function CurseReferenceSheet({ open, onClose }: CurseReferenceSheetProps)
           <p className="text-sm text-ink-muted">No curses match your search.</p>
         ) : null}
       </div>
-    </AnimatedOverlay>
+    </MotionSheet>
   );
 }

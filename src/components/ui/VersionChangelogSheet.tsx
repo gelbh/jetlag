@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import { CHANGELOG, type ChangelogEntry } from "../../domain/device/changelog";
-import { AnimatedOverlay } from "./AnimatedOverlay";
+import { MotionSheet } from "../motion/MotionSheet";
 import { SheetHeader } from "./SheetHeader";
 
 function userFacingChangelog(entries: readonly ChangelogEntry[]): ChangelogEntry[] {
@@ -108,7 +108,7 @@ export function VersionChangelogSheet({
   const visibleChangelog = userFacingChangelog(CHANGELOG);
 
   return (
-    <AnimatedOverlay
+    <MotionSheet
       open={open}
       onClose={onClose}
       ariaLabel="Changelog"
@@ -126,6 +126,6 @@ export function VersionChangelogSheet({
           />
         ))}
       </div>
-    </AnimatedOverlay>
+    </MotionSheet>
   );
 }

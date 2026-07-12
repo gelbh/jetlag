@@ -11,18 +11,12 @@ import {
   MapViewportTracker,
   type MapViewportState,
 } from "../components/map/MapViewportTracker";
-import { ChatPanel } from "../components/chat/ChatPanel";
-import { HidingZonePanel } from "../components/hider/HidingZonePanel";
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
-import { TimeTrapPanel } from "../components/hider/TimeTrapPanel";
-import { ExpansionHiderMenu } from "../components/hider/ExpansionHiderMenu";
-import { CurseReferenceSheet } from "../components/expansion/CurseReferenceSheet";
 import { timeTrapForHider } from "../domain/expansion/timeTraps";
 import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
 import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
-import { HiderZoneWizardShell } from "../components/hider/HiderZoneWizardShell";
-import { PopupCloseButton } from "../components/ui/PopupCloseButton";
-import { DEFAULT_SESSION_RULES } from "../domain/session/sessionRules";
+import type { HiderTruthRevealState } from "../components/session/HiderTruthRevealBanner";
+import { HiderMapScreenChrome } from "./hider-map-screen/HiderMapScreenChrome";
 import { useResolvedSessionRules } from "../hooks/session/useResolvedSessionRules";
 import {
   effectiveHidingZoneRadiusMeters,
@@ -32,16 +26,9 @@ import {
   hidingZonePreviewPositions,
   nearestStation,
 } from "../domain/session/hidingZone";
-import { MapStatusRail } from "../components/session/MapStatusRail";
-import { MapSettingsSheet } from "../components/session/MapSettingsSheet";
-import {
-  HiderTruthRevealBanner,
-  type HiderTruthRevealState,
-} from "../components/session/HiderTruthRevealBanner";
-import { HiderToolDock } from "../components/tools/HiderToolDock";
+import { DEFAULT_SESSION_RULES } from "../domain/session/sessionRules";
 import { AdminBoundariesLayer } from "../components/map/AdminBoundariesLayer";
 import { useAdminBoundaryFeatures } from "../hooks/map-screen/useAdminBoundaryFeatures";
-import { SessionLog } from "../components/session/SessionLog";
 import {
   fallbackGameArea,
   gameAreaCenter,
@@ -560,284 +547,160 @@ export function HiderMapScreen() {
         </MapView>
       </div>
 
-      <div className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible">
-        <HiderTruthRevealBanner
-          reveal={truthReveal}
-          onDismiss={dismissTruthReveal}
-        />
-        <MapStatusRail
-          sessionCode={session.code}
-          sessionRules={session}
-          playerRole="hider"
-          activeTool="none"
-          syncStatus={syncStatus.status}
-          queuedWrites={syncStatus.queuedWrites}
-          message={syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError}
-          timerState={timer.timerState}
-          timerRunning={timer.running}
-          timerHasStarted={timer.hasStarted}
-          timerSyncing={timerSyncing}
-          canStartGame={canControlTimer}
-          onStartGame={timer.start}
-          onTimerStart={timer.start}
-          onTimerPause={timer.pause}
-          onTimerReset={timer.reset}
-          timerControlsDisabled={!canControlTimer}
-          onOpenLog={openLogExclusive}
-          pendingQuestions={pendingQuestions}
-          closeTimerMenu={overlay.sheet !== "none" || zoneTool.wizardOpen}
-          endGameActive={isEndGameActive(session)}
-          endGamePending={isEndGamePending(session)}
-          endGameRequestedByUid={session.endGameRequestedByUid}
-          myUid={uid ?? undefined}
-          isHost={isHost}
-          onResetEndGame={() => void handleResetEndGame()}
-          onAcceptEndGame={() => void handleAcceptEndGame()}
-          hiderOutsideZone={hiderOutsideZone}
-        />
-        <HiderToolDock
-          zoneLabel={
-            !zoneTool.hasZone || zoneTool.wizardOpen
-              ? myZone
-                ? "Change zone"
-                : "Set zone"
-              : "Play move"
-          }
-          onZoneAction={
-            !zoneTool.hasZone || zoneTool.wizardOpen
-              ? openWizardExclusive
-              : () => void zoneTool.startMove()
-          }
-          zoneDisabled={!zoneTool.writesEnabled}
-          showExpansion={expansionPackEnabled}
-          onExpansion={() => setExpansionMenuOpen(true)}
-          onRecenter={() => setRecenterToken((value) => value + 1)}
-          onOpenChat={openChatExclusive}
-          onOpenSettings={openSettingsExclusive}
-          hasUnreadChat={hasUnreadChat}
-          unreadCount={unreadCount}
-        />
-      </div>
-
-      <HiderZoneWizardShell
-        open={zoneTool.wizardOpen && !sheetBlocksWizard}
-        peeked={wizardPeeked}
-        onPeekedChange={setWizardPeeked}
-        peekLabel={
-          zoneTool.moveMode
-            ? "Move zone"
-            : zoneTool.hasZone
-              ? "Change zone"
-              : "Set zone"
-        }
-        onClose={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
-        closeLabel="Close hiding zone"
-        contentKey={zoneTool.moveMode ? "move" : "set"}
-      >
-        <HidingZonePanel
-          wizardOpen={zoneTool.wizardOpen}
-          moveMode={zoneTool.moveMode}
-          radiusLabel={hidingZoneRadiusLabel}
-          confirmDisabled={!zoneTool.writesEnabled}
-          zoneTool={hidingZonePanelTool}
-          onStepChange={handleHidingZoneStepChange}
-          onSearchThisArea={handleSearchThisArea}
-        />
-      </HiderZoneWizardShell>
-
-      <ChatPanel
-        open={overlay.isChatOpen}
-        onClose={overlay.closeSheet}
-        bottomClassName="jl-panel-hider-wizard"
-        messages={messages}
-        pendingQuestions={pendingQuestions}
-        sessionRules={session}
-        sessionId={session.id}
-        senderUid={uid ?? ""}
-        senderRole="hider"
-        isHider
-        questionTruths={questionTruths}
-        truthsLoading={truthsLoading}
-        answerError={chatAnswerError}
-        onAnswerQuestion={async (
-          pendingQuestionId,
-          messageId,
-          answer,
-          selectedReply,
-          deadlineExpired,
-        ) => {
-          if (!sessionId) {
-            return;
-          }
-
-          setChatAnswerError(null);
-
-          const pending = pendingQuestions.find(
-            (question) => question.id === pendingQuestionId,
-          );
-          if (!pending) {
-            setChatAnswerError("Could not find that question. Try again.");
-            return;
-          }
-
-          const stationCenterForAnswer: LatLngTuple | null = myZone
-            ? [myZone.center.lat, myZone.center.lng]
-            : null;
-
-          try {
-            const user = await ensureAnonymousUser();
-            await answerPendingQuestion(
-              sessionId,
-              pendingQuestionId,
-              messageId,
-              answer,
-              selectedReply,
-              deadlineExpired
-                ? {
-                    deadlineExpired: true,
-                    senderUid: user.uid,
-                    senderRole: "hider",
-                  }
-                : undefined,
-            );
-
-            const truth = await computeHiderTruthReplyAsync(
-              pending,
-              stationCenterForAnswer,
-            );
-            if (
-              truth &&
-              !truth.unavailable &&
-              truth.replyId.length > 0 &&
-              selectedReply !== truth.replyId
-            ) {
-              const selectedLabel =
-                pending.replyOptions.find((option) => option.id === selectedReply)
-                  ?.label ?? selectedReply;
-              setTruthReveal({ truth, selectedReply, selectedLabel });
-            }
-          } catch (error) {
-            setChatAnswerError(
-              error instanceof Error
-                ? error.message
-                : "Could not save your answer. Try again.",
-            );
-          }
-        }}
-      />
-
-      <MapSettingsSheet
-        key={overlay.isSettingsOpen ? "open" : "closed"}
-        open={overlay.isSettingsOpen}
-        onClose={overlay.closeSheet}
-        pendingWrites={0}
-        showCurrentLocation={showCurrentLocation}
-        onShowCurrentLocationChange={setShowCurrentLocation}
-        showAdminBoundaries={showAdminBoundaries}
-        onShowAdminBoundariesChange={setShowAdminBoundaries}
-        keepScreenAwake={keepScreenAwake}
-        onKeepScreenAwakeChange={setKeepScreenAwake}
-        lowPowerMode={lowPowerMode}
-        onLowPowerModeChange={setLowPowerMode}
-        layerVisibility={layerVisibility}
-        onLayerVisibilityChange={setLayerVisibility}
-        distanceUnit={distanceUnit}
-        onDistanceUnitChange={() => {}}
-        distanceUnitEditable={false}
-        mapStyle={mapStyle}
-        onMapStyleChange={setMapStyle}
-        locationError={null}
-        transitEnabled={false}
-        transitLiveEnabled={false}
-        transitLiveSupported={false}
-        sessionIsPremium={session.tier === "premium"}
-        transitRouteFilter="all"
-        metroLabel={null}
-        loadingStatic={false}
-        loadingLive={false}
-        liveDataStale={false}
-        stopCount={0}
-        routeCount={0}
-        vehicleCount={0}
-        lastUpdated={undefined}
-        transitError={null}
-        onToggleTransit={() => undefined}
-        onToggleLiveTransit={() => undefined}
-        onTransitRouteFilterChange={() => undefined}
-        onClearMap={() => undefined}
-        endGameBlocked={isEndGameActive(session) || isEndGamePending(session)}
-        onExport={overlay.closeSheet}
+      <HiderMapScreenChrome
+        session={session}
+        hasMyZone={Boolean(myZone)}
+        uid={uid}
         isHost={isHost}
-        onResetBoard={() => undefined}
-        onEndSession={() => undefined}
-        sessionCode={session.code}
-        remoteSession={isRemote}
-        notificationPreferences={notificationPreferences}
-        onNotificationPreferencesChange={updateNotificationPreferences}
-        onEnableNotifications={enableNotifications}
-        expansionPackEnabled={expansionPackEnabled}
-      />
-
-      <ExpansionHiderMenu
-        open={expansionMenuOpen}
-        onClose={() => setExpansionMenuOpen(false)}
-        canPlaceTimeTrap={Boolean(myZone && !myTrap)}
-        trapPlaced={Boolean(myTrap)}
-        onPlaceTimeTrap={() => {
-          setExpansionMenuOpen(false);
-          setTimeTrapSheetOpen(true);
-        }}
-        onOpenCurseReference={() => {
-          setExpansionMenuOpen(false);
-          setCurseSheetOpen(true);
-        }}
-      />
-
-      <HiderZoneWizardShell
-        open={timeTrapSheetOpen}
-        peeked={timeTrapPeeked}
-        onPeekedChange={setTimeTrapPeeked}
-      >
-        <div className="relative space-y-2">
-          <PopupCloseButton
-            label="Close time trap"
-            onClick={() => setTimeTrapSheetOpen(false)}
-          />
-          <p className="font-display pr-10 text-xs font-semibold uppercase tracking-[0.12em] text-highlight">
-            Time trap
-          </p>
-          <TimeTrapPanel
-            query={timeTrapTool.query}
-            onQueryChange={timeTrapTool.setQuery}
-            stations={timeTrapTool.stations}
-            stationsLoading={timeTrapTool.stationsLoading}
-            stationsError={timeTrapTool.stationsError}
-            selectedStation={timeTrapTool.selectedStation}
-            onSelectStation={timeTrapTool.setSelectedStation}
-            onSearchThisArea={handleTimeTrapSearchThisArea}
-            searchDisabled={timeTrapTool.stationsLoading}
-            existingTrapStationName={myTrap?.stationName ?? null}
-            onConfirm={() =>
-              void timeTrapTool.confirmTrap().then(() => setTimeTrapSheetOpen(false))
-            }
-            saving={timeTrapTool.saving}
-            error={timeTrapTool.error}
-            bonusMinutes={myTrap?.bonusMinutes ?? 5}
-          />
-        </div>
-      </HiderZoneWizardShell>
-
-      <CurseReferenceSheet
-        open={curseSheetOpen}
-        onClose={() => setCurseSheetOpen(false)}
-      />
-
-      <SessionLog
-        open={overlay.isLogOpen}
         annotations={annotations}
-        onClose={overlay.closeSheet}
-        onDelete={() => undefined}
-        onEdit={overlay.closeSheet}
+        pendingQuestions={pendingQuestions}
+        messages={messages}
+        overlay={overlay}
+        syncStatus={syncStatus}
+        timer={timer}
+        timerSyncing={timerSyncing}
+        canControlTimer={canControlTimer}
+        isRemote={isRemote}
+        hasUnreadChat={hasUnreadChat}
+        unreadCount={unreadCount}
+        hiderOutsideZone={hiderOutsideZone}
+        truthReveal={truthReveal}
+        onDismissTruthReveal={dismissTruthReveal}
+        onResetEndGame={handleResetEndGame}
+        onAcceptEndGame={handleAcceptEndGame}
+        onOpenLog={openLogExclusive}
+        zoneTool={{
+          wizardOpen: zoneTool.wizardOpen,
+          hasZone: zoneTool.hasZone,
+          moveMode: zoneTool.moveMode,
+          writesEnabled: zoneTool.writesEnabled,
+          openWizard: zoneTool.openWizard,
+          closeWizard: zoneTool.closeWizard,
+          startMove: zoneTool.startMove,
+        }}
+        hidingZonePanelTool={hidingZonePanelTool}
+        hidingZoneRadiusLabel={hidingZoneRadiusLabel}
+        onHidingZoneStepChange={handleHidingZoneStepChange}
+        onSearchThisArea={handleSearchThisArea}
+        sheetBlocksWizard={sheetBlocksWizard}
+        wizardPeeked={wizardPeeked}
+        onWizardPeekedChange={setWizardPeeked}
+        onOpenWizard={openWizardExclusive}
+        onOpenChat={openChatExclusive}
+        onOpenSettings={openSettingsExclusive}
+        onRecenter={() => setRecenterToken((value) => value + 1)}
+        expansionPackEnabled={expansionPackEnabled}
+        expansionMenuOpen={expansionMenuOpen}
+        onExpansionMenuOpenChange={setExpansionMenuOpen}
+        timeTrapSheetOpen={timeTrapSheetOpen}
+        onTimeTrapSheetOpenChange={setTimeTrapSheetOpen}
+        timeTrapPeeked={timeTrapPeeked}
+        onTimeTrapPeekedChange={setTimeTrapPeeked}
+        timeTrapTool={{
+          query: timeTrapTool.query,
+          setQuery: timeTrapTool.setQuery,
+          stations: timeTrapTool.stations,
+          stationsLoading: timeTrapTool.stationsLoading,
+          stationsError: timeTrapTool.stationsError,
+          selectedStation: timeTrapTool.selectedStation,
+          setSelectedStation: timeTrapTool.setSelectedStation,
+          confirmTrap: timeTrapTool.confirmTrap,
+          saving: timeTrapTool.saving,
+          error: timeTrapTool.error,
+        }}
+        myTrap={myTrap}
+        onTimeTrapSearchThisArea={handleTimeTrapSearchThisArea}
+        curseSheetOpen={curseSheetOpen}
+        onCurseSheetOpenChange={setCurseSheetOpen}
+        mapSettings={{
+          showCurrentLocation,
+          setShowCurrentLocation,
+          showAdminBoundaries,
+          setShowAdminBoundaries,
+          keepScreenAwake,
+          setKeepScreenAwake,
+          lowPowerMode,
+          setLowPowerMode,
+          layerVisibility,
+          setLayerVisibility,
+          distanceUnit,
+          mapStyle,
+          setMapStyle,
+          notificationPreferences,
+          updateNotificationPreferences,
+          enableNotifications,
+        }}
+        chat={{
+          sessionId: sessionId ?? "",
+          questionTruths,
+          truthsLoading,
+          answerError: chatAnswerError,
+          onAnswerQuestion: async (
+            pendingQuestionId,
+            messageId,
+            answer,
+            selectedReply,
+            deadlineExpired,
+          ) => {
+            if (!sessionId) {
+              return;
+            }
+
+            setChatAnswerError(null);
+
+            const pending = pendingQuestions.find(
+              (question) => question.id === pendingQuestionId,
+            );
+            if (!pending) {
+              setChatAnswerError("Could not find that question. Try again.");
+              return;
+            }
+
+            const stationCenterForAnswer: LatLngTuple | null = myZone
+              ? [myZone.center.lat, myZone.center.lng]
+              : null;
+
+            try {
+              const user = await ensureAnonymousUser();
+              await answerPendingQuestion(
+                sessionId,
+                pendingQuestionId,
+                messageId,
+                answer,
+                selectedReply,
+                deadlineExpired
+                  ? {
+                      deadlineExpired: true,
+                      senderUid: user.uid,
+                      senderRole: "hider",
+                    }
+                  : undefined,
+              );
+
+              const truth = await computeHiderTruthReplyAsync(
+                pending,
+                stationCenterForAnswer,
+              );
+              if (
+                truth &&
+                !truth.unavailable &&
+                truth.replyId.length > 0 &&
+                selectedReply !== truth.replyId
+              ) {
+                const selectedLabel =
+                  pending.replyOptions.find((option) => option.id === selectedReply)
+                    ?.label ?? selectedReply;
+                setTruthReveal({ truth, selectedReply, selectedLabel });
+              }
+            } catch (error) {
+              setChatAnswerError(
+                error instanceof Error
+                  ? error.message
+                  : "Could not save your answer. Try again.",
+              );
+            }
+          },
+        }}
       />
     </div>
   );

@@ -5,6 +5,7 @@ import {
   type ActiveQuestionTimer,
 } from "../../domain/questions";
 import { HudBanner } from "../ui/HudBanner";
+import { MapFloatAlert } from "../ui/MapFloatAlert";
 
 interface QuestionAlertBannerProps {
   pendingQuestions: readonly import("../../domain/session/sessionChat").PendingQuestionRecord[];
@@ -39,13 +40,9 @@ export function QuestionAlertBanner({
       className="pointer-events-auto mx-3 mt-1.5"
     >
       {content ? (
-        <p
-          className="map-float-alert border-2 border-highlight bg-surface-deep px-3 py-2 text-center text-sm font-semibold uppercase tracking-wide text-pretty text-ink"
-          role="status"
-          aria-live="polite"
-        >
+        <MapFloatAlert>
           {content.toolLabel} · {content.countdownLabel}
-        </p>
+        </MapFloatAlert>
       ) : null}
     </HudBanner>
   );

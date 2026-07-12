@@ -20,6 +20,7 @@ import { SendToHidersButton } from "./shared/SendToHidersButton";
 import { ToolWizardNav } from "./shared/ToolWizardNav";
 import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
 import { TENTACLE_STEPS, stepsForMode } from "./shared/toolStepUtils";
+import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
 import { useToolWizard } from "../../hooks/useToolWizard";
 
 interface TentaclePanelProps {
@@ -108,7 +109,7 @@ export function TentaclePanel({
     (step === "anchor" && hasCenter && !loading) ||
     (step === "category" && categorySelectionAvailable) ||
     (step === "locations" && locationsReady && !loading);
-  const canSwipeNext = canGoNext && stepIndex < steps.length - 1;
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
 
   return (
     <ToolPanelShell toolId="tentacle" stepper={stepper}>
