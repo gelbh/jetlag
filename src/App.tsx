@@ -24,6 +24,7 @@ import {
   CHUNK_RELOAD_CLEAR_MS,
   clearBootReloadFlag,
   clearChunkReloadFlag,
+  tryApplyDeferredChunkReload,
 } from "./domain/device/chunkLoadRecovery";
 import {
   lazyWithChunkRetry,
@@ -71,7 +72,9 @@ function AnalyticsPageViewTracker() {
   const location = useLocation();
 
   useEffect(() => {
-    trackPageView(`${location.pathname}${location.search}`);
+    const path = `${location.pathname}${location.search}`;
+    trackPageView(path);
+    Sentry.getCurrentScope().setTransactionName(location.pathname);
   }, [location]);
 
   return null;
@@ -91,6 +94,14 @@ function ChunkReloadContextBinder() {
     return () => {
       setChunkReloadContextGetter(undefined);
     };
+  }, [location.pathname, session]);
+
+  useEffect(() => {
+    tryApplyDeferredChunkReload({
+      session,
+      pathname: location.pathname,
+      onNeedRefresh: notifyAppNeedRefresh,
+    });
   }, [location.pathname, session]);
 
   return null;
@@ -139,8 +150,8 @@ export default function App() {
   }, []);
 
   return (
-    <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
-      <BrowserRouter>
+    <BrowserRouter>
+      <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
         <MotionDatasetEffect />
         <AnalyticsPageViewTracker />
         <ChunkReloadContextBinder />
@@ -208,7 +219,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         </div>
-      </BrowserRouter>
-    </Sentry.ErrorBoundary>
+      </Sentry.ErrorBoundary>
+    </BrowserRouter>
   );
 }

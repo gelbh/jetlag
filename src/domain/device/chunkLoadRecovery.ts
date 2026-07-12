@@ -1,4 +1,8 @@
-import { isSafeToReloadApp } from "./serviceWorkerRefresh";
+import {
+  applyServiceWorkerUpdate,
+  getServiceWorkerApplyContext,
+  isSafeToReloadApp,
+} from "./serviceWorkerRefresh";
 
 const CHUNK_RELOAD_KEY = "jetlag:chunk-reload";
 const CHUNK_DEFERRED_KEY = "jetlag:chunk-deferred";
@@ -105,8 +109,44 @@ export function attemptChunkReload(options?: {
 
   removeDeferredFlag();
   writeSessionFlag();
+
+  const { registration, applyUpdate } = getServiceWorkerApplyContext();
+  if (registration?.waiting || applyUpdate) {
+    void applyServiceWorkerUpdate(registration, applyUpdate);
+    return true;
+  }
+
   window.location.reload();
   return true;
+}
+
+export function tryApplyDeferredChunkReload(options: {
+  session: unknown;
+  pathname: string;
+  onNeedRefresh?: () => void;
+}): boolean {
+  if (!wasChunkReloadDeferred()) {
+    return false;
+  }
+
+  if (options.pathname === "/map") {
+    return false;
+  }
+
+  if (
+    !isSafeToReloadApp({
+      session: options.session,
+      pathname: options.pathname,
+    })
+  ) {
+    return false;
+  }
+
+  return attemptChunkReload({
+    session: options.session,
+    pathname: options.pathname,
+    onNeedRefresh: options.onNeedRefresh,
+  });
 }
 
 export function clearChunkReloadFlag(): void {
