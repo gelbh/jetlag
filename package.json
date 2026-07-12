@@ -9,6 +9,10 @@
   "packageManager": "npm@11.16.0",
   "scripts": {
     "dev": "vite",
+    "env:pull": "doppler secrets download --no-file --format env > .env.local",
+    "dev:secrets": "doppler run --config dev -- npm run dev",
+    "dev:emulator": "doppler run --config dev_emulator -- npm run dev",
+    "build:secrets": "doppler run --config prd -- npm run build",
     "build": "tsc -b && vite build && node scripts/delete-dist-sourcemaps.mjs",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
