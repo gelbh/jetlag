@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.5.8";
+export const APP_VERSION = "0.5.9";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.5.9",
+    date: "2026-07-12",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Sessions: inactive games auto-end after 24 hours with no map activity; session codes become reusable sooner.",
+        ],
+      }
+    ],
+  },
   {
     version: "0.5.8",
     date: "2026-07-12",
