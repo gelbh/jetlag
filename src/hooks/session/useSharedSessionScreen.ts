@@ -31,6 +31,7 @@ export interface UseSharedSessionScreenOptions {
   notificationRole: PlayerRole;
   authMode: SessionAuthMode;
   liveActivityEnabled?: boolean;
+  exitPath?: string;
 }
 
 export function useSharedSessionScreen({
@@ -38,6 +39,7 @@ export function useSharedSessionScreen({
   notificationRole,
   authMode,
   liveActivityEnabled = true,
+  exitPath = "/",
 }: UseSharedSessionScreenOptions) {
   const session = useSessionStore((state) => state.session);
   const myUid = useSessionStore((state) => state.myUid);
@@ -97,7 +99,7 @@ export function useSharedSessionScreen({
     session?.hostUid && uid && session.hostUid === uid,
   );
 
-  useSessionEndedRedirect(sessionId, isHost);
+  useSessionEndedRedirect(sessionId, isHost, exitPath);
   const {
     canControlTimer,
     remoteState,

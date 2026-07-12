@@ -13,6 +13,14 @@ import { serializeGameAreaForFirestore } from "../../services/firestore/firestor
 import { DUBLIN_CITY_GAME_AREA } from "../fixtures/dublinGameArea";
 
 const PROJECT_ID = "demo-jetlag-rules";
+const ADMIN_EMAIL = "gelbharttomer@gmail.com";
+
+function adminContext(testEnv: RulesTestEnvironment, uid = "admin-1") {
+  return testEnv.authenticatedContext(uid, {
+    email: ADMIN_EMAIL,
+    email_verified: true,
+  });
+}
 
 function sessionPayload(hostUid: string, overrides: Record<string, unknown> = {}) {
   return {
@@ -1282,6 +1290,87 @@ describe("firestore.rules", () => {
           hidingPeriodMinutes: 45,
           hidingZoneRadiusMeters: milesToMeters(0.25),
         }),
+    );
+  });
+
+  it("allows admin to join as observer and read session data", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+
+    const admin = adminContext(testEnv);
+    await assertSucceeds(
+      admin
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          memberUids: ["host-1", "admin-1"],
+          memberRoles: { "host-1": "seeker", "admin-1": "observer" },
+        }),
+    );
+
+    await assertSucceeds(
+      admin.firestore().collection("sessions").doc("session-1").get(),
+    );
+
+    await assertSucceeds(
+      admin
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("annotations")
+        .doc("ann-1")
+        .get(),
+    );
+  });
+
+  it("rejects non-admin observer join", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+
+    const guest = testEnv.authenticatedContext("guest-1");
+    await assertFails(
+      guest
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          memberUids: ["host-1", "guest-1"],
+          memberRoles: { "host-1": "seeker", "guest-1": "observer" },
+        }),
+    );
+  });
+
+  it("rejects observer annotation writes", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "admin-1"],
+          memberRoles: { "host-1": "seeker", "admin-1": "observer" },
+        }),
+      );
+
+    const observer = adminContext(testEnv);
+    await assertFails(
+      observer
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("annotations")
+        .doc("ann-1")
+        .set(annotationPayload()),
     );
   });
 });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isHiderRole,
+  isObserverRole,
   isSeekerRole,
   playerRoleLabel,
   resolvePlayerRole,
@@ -21,5 +22,14 @@ describe("playerRole", () => {
     expect(isSeekerRole(roles, "u2")).toBe(true);
     expect(sessionHasHiders(roles)).toBe(true);
     expect(playerRoleLabel("hider")).toBe("Hider");
+  });
+
+  it("resolves observer role", () => {
+    const roles = { u1: "observer" as const };
+    expect(resolvePlayerRole(roles, "u1")).toBe("observer");
+    expect(isObserverRole(roles, "u1")).toBe(true);
+    expect(isSeekerRole(roles, "u1")).toBe(false);
+    expect(sessionHasHiders(roles)).toBe(false);
+    expect(playerRoleLabel("observer")).toBe("Observer");
   });
 });
