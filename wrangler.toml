@@ -1,5 +1,6 @@
 name = "jetlag"
 compatibility_date = "2025-01-01"
+main = "worker/index.ts"
 workers_dev = true
 
 # Zone uses proxied A records (not Worker-managed custom hostname).
@@ -10,3 +11,5 @@ zone_name = "gelbhart.dev"
 [assets]
 directory = "./dist"
 not_found_handling = "single-page-application"
+binding = "ASSETS"
+run_worker_first = ["/assets/*"]
