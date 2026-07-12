@@ -1,167 +1,38 @@
-import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import {
-  applyServiceWorkerUpdate,
-  maybeApplyPendingUpdate,
-  promptIfWaiting,
-  registerAppNeedRefreshHandler,
-  scheduleServiceWorkerUpdateChecks,
-} from "../../domain/device/serviceWorkerRefresh";
-import { setServiceWorkerChunkReloadContext } from "../../domain/device/lazyWithChunkRetry";
-import { tryUpdateServiceWorker } from "../../domain/device/serviceWorkerUpdate";
-import { useSessionStore } from "../../state/sessionStore";
+import { appUpdateCopy } from "../../domain/device/appUpdateCopy";
+import { isStandalonePwa } from "../../domain/device/isStandalonePwa";
+import { useAppUpdateState } from "../../hooks/useAppUpdateState";
 import { HudBanner } from "./HudBanner";
-
-type ServiceWorkerReloader = (reloadPage?: boolean) => Promise<void>;
+import { MapFloatAlertPanel } from "./MapFloatAlert";
 
 export function AppUpdateBanner() {
-  const [needsRefresh, setNeedsRefresh] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
-  const [updateSW, setUpdateSW] = useState<ServiceWorkerReloader | null>(null);
-  const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
   const location = useLocation();
-  const session = useSessionStore((state) => state.session);
+  const { showGlobalBanner, applyUpdate } = useAppUpdateState();
 
-  const deferReload =
-    Boolean(session) &&
-    location.pathname === "/map" &&
-    dismissed;
-
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      return;
-    }
-
-    let stopScheduledChecks = () => {};
-
-    void import("virtual:pwa-register").then(({ registerSW }) => {
-      const applyUpdate = registerSW({
-        immediate: true,
-        onNeedRefresh() {
-          setNeedsRefresh(true);
-          setDismissed(false);
-        },
-        onRegistered(nextRegistration) {
-          registrationRef.current = nextRegistration;
-          promptIfWaiting(nextRegistration, () => {
-            setNeedsRefresh(true);
-            setDismissed(false);
-          });
-          stopScheduledChecks = scheduleServiceWorkerUpdateChecks(
-            nextRegistration,
-            () => {
-              setNeedsRefresh(true);
-              setDismissed(false);
-            },
-          );
-        },
-        onRegisterError() {
-          // Registration failures are handled by the browser.
-        },
-      });
-      setUpdateSW(() => applyUpdate);
-    });
-
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") {
-        tryUpdateServiceWorker(registrationRef.current);
-        promptIfWaiting(registrationRef.current, () => {
-          setNeedsRefresh(true);
-          setDismissed(false);
-        });
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibility);
-      stopScheduledChecks();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (import.meta.env.DEV || location.pathname !== "/") {
-      return;
-    }
-
-    tryUpdateServiceWorker(registrationRef.current);
-    promptIfWaiting(registrationRef.current, () => {
-      setNeedsRefresh(true);
-      setDismissed(false);
-    });
-  }, [location.pathname]);
-
-  const visible = needsRefresh && !deferReload;
-  const softBanner = Boolean(session) && location.pathname === "/map";
-
-  useEffect(() => {
-    return registerAppNeedRefreshHandler(() => {
-      setNeedsRefresh(true);
-      setDismissed(false);
-    });
-  }, []);
-
-  useEffect(() => {
-    setServiceWorkerChunkReloadContext({
-      registration: registrationRef.current,
-      applyUpdate: updateSW ?? undefined,
-    });
-  }, [updateSW]);
-
-  useEffect(() => {
-    if (import.meta.env.DEV || !updateSW) {
-      return;
-    }
-
-    void maybeApplyPendingUpdate({
-      needsRefresh,
-      session,
-      pathname: location.pathname,
-      registration: registrationRef.current,
-      applyUpdate: updateSW,
-    });
-  }, [needsRefresh, updateSW, location.pathname, session]);
+  const preferBottom =
+    isStandalonePwa() || location.pathname === "/map";
 
   return (
     <HudBanner
-      visible={visible}
-      animated={false}
-      className="pointer-events-auto fixed inset-x-0 top-0 z-[var(--z-toast)] px-3 pt-[max(0.5rem,env(safe-area-inset-top))]"
+      visible={showGlobalBanner}
+      className={
+        preferBottom
+          ? "jl-app-update-chip pointer-events-auto fixed inset-x-0 z-[var(--z-toast)] px-3"
+          : "pointer-events-auto fixed inset-x-0 top-0 z-[var(--z-toast)] px-3 pt-[max(0.5rem,env(safe-area-inset-top))]"
+      }
     >
-      <div
-        className="hud-panel mx-auto flex max-w-xl items-center justify-between gap-3 px-3 py-2.5 pt-3.5 shadow-hud-float"
-        role="status"
-        aria-live="polite"
-      >
-        <p className="text-sm font-medium text-ink">
-          {softBanner
-            ? "Update ready — reload after this game"
-            : "New version ready"}
+      <MapFloatAlertPanel className="mx-auto max-w-[min(calc(100%-1.5rem),24rem)] border-highlight/55 bg-surface-deep normal-case tracking-normal">
+        <p className="min-w-0 font-display text-xs font-semibold uppercase tracking-[0.08em] text-highlight">
+          {appUpdateCopy.readyTitle}
         </p>
-        <div className="flex shrink-0 items-center gap-2">
-          {softBanner ? (
-            <button
-              type="button"
-              className="btn-secondary min-h-10 px-3 text-xs"
-              onClick={() => setDismissed(true)}
-            >
-              Dismiss
-            </button>
-          ) : null}
-          <button
-            type="button"
-            className="btn-primary min-h-10 px-4 text-xs"
-            onClick={() => {
-              void applyServiceWorkerUpdate(
-                registrationRef.current,
-                updateSW ?? undefined,
-              );
-            }}
-          >
-            Reload to update
-          </button>
-        </div>
-      </div>
+        <button
+          type="button"
+          className="btn-primary min-h-11 shrink-0 px-4 text-xs"
+          onClick={applyUpdate}
+        >
+          {appUpdateCopy.readyAction}
+        </button>
+      </MapFloatAlertPanel>
     </HudBanner>
   );
 }

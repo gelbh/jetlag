@@ -21,6 +21,7 @@ import { ExpansionHiderMenu } from "../../components/hider/ExpansionHiderMenu";
 import { CurseReferenceSheet } from "../../components/expansion/CurseReferenceSheet";
 import { HiderZoneWizardShell } from "../../components/hider/HiderZoneWizardShell";
 import { PopupCloseButton } from "../../components/ui/PopupCloseButton";
+import { AppUpdateMapChip } from "../../components/ui/AppUpdateMapChip";
 import { MapStatusRail } from "../../components/session/MapStatusRail";
 import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
 import {
@@ -259,6 +260,7 @@ export function HiderMapScreenChrome({
           onAcceptEndGame={() => void onAcceptEndGame()}
           hiderOutsideZone={hiderOutsideZone}
         />
+        <AppUpdateMapChip />
         <HiderToolDock
           zoneLabel={
             !zoneTool.hasZone || zoneTool.wizardOpen

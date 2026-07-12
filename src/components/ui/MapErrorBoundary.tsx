@@ -6,7 +6,9 @@ import {
   isChunkLoadError,
   wasChunkReloadDeferred,
 } from "../../domain/device/chunkLoadRecovery";
+import { appUpdateCopy } from "../../domain/device/appUpdateCopy";
 import { captureException } from "../../services/core/sentry";
+import { MapFloatAlertPanel } from "./MapFloatAlert";
 
 interface MapErrorBoundaryProps {
   children: ReactNode;
@@ -44,39 +46,60 @@ export class MapErrorBoundary extends Component<
     }
 
     if (isChunkLoadError(error) && wasChunkReloadDeferred()) {
-      return "Update ready — reload after this game.";
+      return appUpdateCopy.chunkDeferredBody;
     }
 
     if (isChunkLoadError(error) && hasChunkReloadBeenAttempted()) {
-      return "App update required. Reload to continue.";
+      return appUpdateCopy.chunkReadyBody;
     }
 
     return error.message || "The map crashed.";
   }
 
+  private showReloadAction(): boolean {
+    const { error } = this.state;
+    if (!error) {
+      return true;
+    }
+
+    return !isChunkLoadError(error) || !wasChunkReloadDeferred();
+  }
+
   render(): ReactNode {
     if (this.state.error) {
+      const deferredChunk = isChunkLoadError(this.state.error) && wasChunkReloadDeferred();
+
       return (
         <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 px-6 text-center">
-          <h1 className="text-xl font-semibold text-ink">Map failed to load</h1>
-          <p className="max-w-md text-sm text-ink-dim">
-            {this.errorMessage()}
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
-              className="btn-primary px-4 py-2 text-sm"
-              onClick={this.handleReload}
-            >
-              Reload map
-            </button>
-            <Link
-              to="/"
-              className="btn-secondary border border-border px-4 py-2 text-sm"
-            >
-              Back home
-            </Link>
-          </div>
+          <h1 className="text-xl font-semibold text-ink">
+            {appUpdateCopy.mapErrorTitle}
+          </h1>
+          {deferredChunk ? (
+            <p className="max-w-md text-sm text-ink-dim">
+              {appUpdateCopy.deferredTitle} — {appUpdateCopy.chunkDeferredBody}
+            </p>
+          ) : (
+            <MapFloatAlertPanel className="mx-auto max-w-md border-highlight/55 bg-surface-deep normal-case tracking-normal">
+              <p className="min-w-0 text-left text-sm text-ink">
+                {this.errorMessage()}
+              </p>
+              {this.showReloadAction() ? (
+                <button
+                  type="button"
+                  className="btn-primary min-h-11 shrink-0 px-4 text-xs"
+                  onClick={this.handleReload}
+                >
+                  {appUpdateCopy.mapErrorReload}
+                </button>
+              ) : null}
+            </MapFloatAlertPanel>
+          )}
+          <Link
+            to="/"
+            className="btn-secondary border border-border px-4 py-2 text-sm"
+          >
+            {appUpdateCopy.mapErrorBackHome}
+          </Link>
         </div>
       );
     }
