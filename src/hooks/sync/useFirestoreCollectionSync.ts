@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { isFirebaseConfigured } from "../../services/core/firebase";
 
@@ -30,6 +30,9 @@ export function useFirestoreCollectionSync<T>(
   }: { enabled?: boolean; onSyncError?: () => void } = {},
 ): T[] {
   const [items, setItems] = useState<T[]>([]);
+  const onSyncErrorRef = useRef(onSyncError);
+
+  onSyncErrorRef.current = onSyncError;
 
   useEffect(() => {
     if (!enabled || !isRemoteSession(sessionId)) {
@@ -40,8 +43,9 @@ export function useFirestoreCollectionSync<T>(
       sessionId,
       setItems,
       () => {
-        if (onSyncError) {
-          onSyncError();
+        const handler = onSyncErrorRef.current;
+        if (handler) {
+          handler();
         } else {
           setItems([]);
         }
@@ -52,7 +56,7 @@ export function useFirestoreCollectionSync<T>(
       unsubscribe();
       setItems([]);
     };
-  }, [enabled, onSyncError, sessionId, subscribe]);
+  }, [enabled, sessionId, subscribe]);
 
   return items;
 }
