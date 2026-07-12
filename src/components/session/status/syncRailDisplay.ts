@@ -93,8 +93,14 @@ export function syncRailDisplay(
   return { inline: null, banner: null };
 }
 
-export function idleModeLabel(playerRole: "seeker" | "hider"): string {
-  return playerRole === "hider" ? "Set your zone" : "Ready to seek";
+export function idleModeLabel(playerRole: "seeker" | "hider" | "observer"): string {
+  if (playerRole === "hider") {
+    return "Set your zone";
+  }
+  if (playerRole === "observer") {
+    return "Observing";
+  }
+  return "Ready to seek";
 }
 
 export function syncBeaconAriaLabel(status: SyncStatus): string {
