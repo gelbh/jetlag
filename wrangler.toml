@@ -1,5 +1,11 @@
 name = "jetlag"
 compatibility_date = "2025-01-01"
+workers_dev = true
+
+# Zone uses proxied A records (not Worker-managed custom hostname).
+[[routes]]
+pattern = "jetlag.gelbhart.dev/*"
+zone_name = "gelbhart.dev"
 
 [assets]
 directory = "./dist"
