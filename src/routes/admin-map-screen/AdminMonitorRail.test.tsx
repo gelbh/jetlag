@@ -78,7 +78,7 @@ function createController(): ObserverMapScreenController {
     lowPowerMode: false,
     distanceUnit: "metric",
     exitPath: "/admin",
-  } as ObserverMapScreenController;
+  } as unknown as ObserverMapScreenController;
 }
 
 describe("AdminMonitorRail", () => {

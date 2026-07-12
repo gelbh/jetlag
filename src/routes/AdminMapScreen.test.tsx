@@ -112,7 +112,7 @@ function mockController(): ObserverMapScreenController {
     lowPowerMode: false,
     distanceUnit: "metric" as const,
     exitPath: "/admin",
-  } as ObserverMapScreenController;
+  } as unknown as ObserverMapScreenController;
 }
 
 describe("AdminMapScreen", () => {
