@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { MapViewportState } from "../../components/map/MapViewportTracker";
 import {
   fallbackGameArea,
@@ -6,7 +6,7 @@ import {
   gameAreaToBoundsExpression,
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
-import { effectiveMapStyle } from "../../domain/device/powerProfile";
+import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../domain/device/powerProfile";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useEnsureSessionMembership } from "../../hooks/session/useEnsureSessionMembership";
 import { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
@@ -20,6 +20,7 @@ export function useObserverMapScreen() {
   const myRole = useSessionStore((state) => state.myRole);
   const mapStyle = useMapStore((state) => state.mapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
+  const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
   const layerVisibility = useMapStore((state) => state.layerVisibility);
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const overlay = useMapOverlayState();
@@ -28,6 +29,16 @@ export function useObserverMapScreen() {
 
   const { gameArea, sessionRules } = useResolvedSessionRules(session);
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
+  const handleMapStyleChange = useCallback(
+    (style: typeof mapStyle) => {
+      applyMapStylePreferenceChange(style, {
+        lowPowerMode,
+        setMapStyle,
+        setLowPowerMode,
+      });
+    },
+    [lowPowerMode, setLowPowerMode, setMapStyle],
+  );
   const resolvedGameArea = gameArea ?? session?.gameArea ?? fallbackGameArea();
   const center = useMemo<LatLngTuple>(
     () => gameAreaCenter(resolvedGameArea),
@@ -76,7 +87,7 @@ export function useObserverMapScreen() {
     center,
     mapFocusBounds,
     mapStyle,
-    setMapStyle,
+    handleMapStyleChange,
     effectiveBasemapStyle,
     layerVisibility,
     annotations,
