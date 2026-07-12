@@ -28,6 +28,7 @@ import {
   enqueueOfflineWrite,
 } from "../../services/session/offlineQueue";
 import { isRetriableSyncError } from "../../domain/device/syncRetry";
+import { shouldQueueAnnotationOffline } from "./shouldQueueAnnotationOffline";
 
 export function useAnnotations() {
   const session = useSessionStore((state) => state.session);
@@ -99,7 +100,7 @@ export function useAnnotations() {
       try {
         const user = await ensureAnonymousUser();
 
-        if (!navigator.onLine) {
+        if (shouldQueueAnnotationOffline()) {
           await queueAnnotationWrite(session.id, stampedAnnotation);
           return;
         }
@@ -334,7 +335,7 @@ export function useAnnotations() {
         }),
       );
 
-      if (!navigator.onLine) {
+      if (shouldQueueAnnotationOffline()) {
         for (const annotation of deleted) {
           await queueAnnotationWrite(session.id, annotation);
         }

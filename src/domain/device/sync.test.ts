@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveSyncStatus } from "./sync";
+import { resolveSyncStatus, isEffectivelyOffline } from "./sync";
 
 describe("resolveSyncStatus", () => {
   it("reports errors before other sync states", () => {
@@ -70,5 +70,28 @@ describe("resolveSyncStatus", () => {
         lastSyncError: null,
       }),
     ).toBe("synced");
+  });
+});
+
+describe("isEffectivelyOffline", () => {
+  it("is offline when the browser reports disconnected", () => {
+    expect(isEffectivelyOffline({ online: false, reachable: true })).toBe(
+      true,
+    );
+  });
+
+  it("is offline when online but reachability probe failed", () => {
+    expect(isEffectivelyOffline({ online: true, reachable: false })).toBe(
+      true,
+    );
+  });
+
+  it("is not offline when online and reachability is unknown or ok", () => {
+    expect(isEffectivelyOffline({ online: true, reachable: null })).toBe(
+      false,
+    );
+    expect(isEffectivelyOffline({ online: true, reachable: true })).toBe(
+      false,
+    );
   });
 });
