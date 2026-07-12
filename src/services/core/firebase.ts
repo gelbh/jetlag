@@ -4,6 +4,8 @@ import {
   getAuth,
   setPersistence,
   browserLocalPersistence,
+  browserSessionPersistence,
+  inMemoryPersistence,
   signInAnonymously,
   type Auth,
   type User,
@@ -33,6 +35,11 @@ import {
   isFirebaseConfiguredFromEnv,
   readFirebaseConfigFromEnv,
 } from "../../config/env";
+import {
+  captureAuthBootstrapFailure,
+  captureAuthPersistenceFallback,
+  setBootstrapTag,
+} from "./sentry";
 
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
@@ -213,19 +220,104 @@ export function getFirestoreDb(): Firestore {
 
 let anonymousSignInPromise: Promise<User> | null = null;
 let authStateReadyPromise: Promise<void> | null = null;
+let authBootstrapReady = false;
+let authBootstrapStarted = false;
+const authBootstrapListeners = new Set<() => void>();
 
-async function bootstrapAuthState(): Promise<void> {
-  const firebaseAuth = getFirebaseAuth();
+const AUTH_BOOTSTRAP_TIMEOUT_MS = 10_000;
 
-  if (!firebaseUsesEmulator()) {
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function markAuthBootstrapReady(): void {
+  if (authBootstrapReady) {
+    return;
+  }
+
+  authBootstrapReady = true;
+  for (const listener of authBootstrapListeners) {
+    listener();
+  }
+}
+
+export function isAuthBootstrapReady(): boolean {
+  if (!isFirebaseConfigured()) {
+    return true;
+  }
+
+  return authBootstrapReady;
+}
+
+export function subscribeAuthBootstrapReady(listener: () => void): () => void {
+  authBootstrapListeners.add(listener);
+  return () => {
+    authBootstrapListeners.delete(listener);
+  };
+}
+
+async function configureAuthPersistence(
+  firebaseAuth: Auth,
+): Promise<"local" | "session" | "memory"> {
+  if (firebaseUsesEmulator()) {
+    return "local";
+  }
+
+  const attempts = [
+    { mode: "local" as const, persistence: browserLocalPersistence },
+    { mode: "session" as const, persistence: browserSessionPersistence },
+    { mode: "memory" as const, persistence: inMemoryPersistence },
+  ];
+
+  for (let index = 0; index < attempts.length; index += 1) {
+    const attempt = attempts[index];
     try {
-      await setPersistence(firebaseAuth, browserLocalPersistence);
-    } catch {
-      // Persistence may already be configured for this auth instance.
+      await setPersistence(firebaseAuth, attempt.persistence);
+      if (index > 0 && attempt.mode !== "local") {
+        captureAuthPersistenceFallback(attempt.mode);
+      }
+      return attempt.mode;
+    } catch (error) {
+      if (index === attempts.length - 1) {
+        captureAuthPersistenceFallback("memory", error);
+        throw error;
+      }
     }
   }
 
-  await firebaseAuth.authStateReady();
+  return "memory";
+}
+
+async function bootstrapAuthState(): Promise<void> {
+  const firebaseAuth = getFirebaseAuth();
+  setBootstrapTag("auth_start");
+
+  const persistenceMode = await configureAuthPersistence(firebaseAuth);
+  setBootstrapTag(`auth_persistence_${persistenceMode}`);
+
+  await Promise.race([
+    firebaseAuth.authStateReady(),
+    sleep(AUTH_BOOTSTRAP_TIMEOUT_MS),
+  ]);
+
+  setBootstrapTag("auth_ready");
+}
+
+export function startAuthBootstrap(): void {
+  if (!isFirebaseConfigured() || authBootstrapStarted) {
+    return;
+  }
+
+  authBootstrapStarted = true;
+  void bootstrapAuthState()
+    .catch((error) => {
+      captureAuthBootstrapFailure(error);
+    })
+    .finally(() => {
+      markAuthBootstrapReady();
+    });
 }
 
 export async function waitForAuthStateReady(): Promise<void> {
@@ -273,5 +365,8 @@ export async function resetFirebaseForTests(): Promise<void> {
   storageEmulatorConnected = false;
   anonymousSignInPromise = null;
   authStateReadyPromise = null;
+  authBootstrapReady = false;
+  authBootstrapStarted = false;
+  authBootstrapListeners.clear();
 }
 
