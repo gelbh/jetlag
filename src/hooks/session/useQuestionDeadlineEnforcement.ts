@@ -46,6 +46,12 @@ export function useQuestionDeadlineEnforcement({
   const timerRunningRef = useRef(timerRunning);
 
   useEffect(() => {
+    expiryHandledRef.current = new Set();
+    autoPausedQuestionRef.current = null;
+    resumeHandledRef.current = new Set();
+  }, [sessionId]);
+
+  useEffect(() => {
     timerRunningRef.current = timerRunning;
   }, [timerRunning]);
 

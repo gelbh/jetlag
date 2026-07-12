@@ -1,14 +1,42 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { useMapSessionChrome } from "./useMapSessionChrome";
 
 const navigate = vi.fn();
+const mockResetRemoteSession = vi.hoisted(() =>
+  vi.fn(async () => "2026-01-02T00:00:00.000Z"),
+);
 
 vi.mock("../../hooks/useAppNavigate", () => ({
   useAppNavigate: () => navigate,
 }));
+
+vi.mock("../../services/core/firebase", () => ({
+  ensureAnonymousUser: vi.fn(async () => ({ uid: "host-1" })),
+}));
+
+vi.mock("../../services/firestore/firestoreAnnotations", async () => {
+  const actual = await vi.importActual<
+    typeof import("../../services/firestore/firestoreAnnotations")
+  >("../../services/firestore/firestoreAnnotations");
+  return {
+    ...actual,
+    resetRemoteSession: mockResetRemoteSession,
+  };
+});
+
+vi.mock("../../services/session/sessionCleanup", async () => {
+  const actual = await vi.importActual<
+    typeof import("../../services/session/sessionCleanup")
+  >("../../services/session/sessionCleanup");
+  return {
+    ...actual,
+    clearSessionLocalArtifacts: vi.fn(async () => undefined),
+    teardownSessionUiState: vi.fn(),
+  };
+});
 
 vi.mock("../../state/sessionStore", () => ({
   useSessionStore: vi.fn((selector: (state: { setSession: ReturnType<typeof vi.fn> }) => unknown) =>
@@ -29,9 +57,30 @@ const activePin: AnnotationRecord = {
   metadata: { createdAt: "2026-01-01T00:00:00.000Z" },
 };
 
+const remoteSession = {
+  id: "session-remote",
+  code: "ABCD",
+  gameArea: {
+    type: "Polygon" as const,
+    coordinates: [
+      [
+        [0, 0],
+        [1, 0],
+        [1, 1],
+        [0, 0],
+      ],
+    ],
+  },
+  createdAt: "2026-01-01T00:00:00.000Z",
+  memberUids: ["host-1"],
+  hostUid: "host-1",
+  memberRoles: { "host-1": "seeker" as const },
+};
+
 describe("useMapSessionChrome", () => {
   beforeEach(() => {
     navigate.mockReset();
+    mockResetRemoteSession.mockClear();
   });
 
   it("does not clear the map while end game is active", () => {
@@ -54,6 +103,7 @@ describe("useMapSessionChrome", () => {
         clearAllAnnotations,
         setSelectedAnnotationId: vi.fn(),
         closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
         endGameBlocked: true,
       }),
     );
@@ -96,6 +146,7 @@ describe("useMapSessionChrome", () => {
         clearAllAnnotations,
         setSelectedAnnotationId: vi.fn(),
         closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
       }),
     );
 
@@ -103,6 +154,40 @@ describe("useMapSessionChrome", () => {
       result.current.handleClearMap();
     });
 
+    expect(clearAllAnnotations).toHaveBeenCalled();
+  });
+
+  it("resets the remote session after confirmation", async () => {
+    const clearAllAnnotations = vi.fn(async () => undefined);
+    const resetTimer = vi.fn();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: remoteSession,
+        isHost: true,
+        annotations: [activePin],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations,
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer,
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleResetSession();
+    });
+
+    await waitFor(() => {
+      expect(mockResetRemoteSession).toHaveBeenCalledWith(
+        "session-remote",
+        "host-1",
+        "seeker",
+      );
+    });
+    expect(resetTimer).toHaveBeenCalled();
     expect(clearAllAnnotations).toHaveBeenCalled();
   });
 });

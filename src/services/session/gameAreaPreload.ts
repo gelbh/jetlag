@@ -132,14 +132,18 @@ async function runPreloadQueue(
 
 let activePreloadAbort: AbortController | null = null;
 
+export function abortActiveGameAreaPreload(): void {
+  activePreloadAbort?.abort();
+  activePreloadAbort = null;
+}
+
 function handleVisibilityForPreload(): void {
   if (typeof document === "undefined") {
     return;
   }
 
   if (document.visibilityState === "hidden") {
-    activePreloadAbort?.abort();
-    activePreloadAbort = null;
+    abortActiveGameAreaPreload();
   }
 }
 

@@ -82,6 +82,7 @@ vi.mock("../services/session/gameAreaPreload", () => ({
   preloadGameAreaCaches: vi.fn(),
   preloadGameAreaCachesAsync: vi.fn(async () => undefined),
   gameAreaPreloadKey: () => "test-game-area",
+  abortActiveGameAreaPreload: vi.fn(),
 }));
 
 vi.mock("../services/geo/seaLevelProgressive", () => ({

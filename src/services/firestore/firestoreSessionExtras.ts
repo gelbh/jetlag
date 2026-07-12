@@ -2,12 +2,14 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDocs,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   setDoc,
   updateDoc,
+  writeBatch,
   type Unsubscribe,
 } from "firebase/firestore";
 import type { PlayerRole } from "../../domain/session/playerRole";
@@ -160,6 +162,35 @@ export async function updatePendingQuestion(
     doc(pendingQuestionsCollection(sessionId), questionId),
     stripUndefinedValues(patch) as Record<string, unknown>,
   );
+}
+
+const OPEN_PENDING_QUESTION_STATUSES = new Set([
+  "pending",
+  "walking",
+  "answered",
+]);
+
+export async function cancelOpenPendingQuestions(
+  sessionId: string,
+): Promise<void> {
+  const snapshot = await getDocs(pendingQuestionsCollection(sessionId));
+  const toCancel = snapshot.docs.filter((questionDoc) => {
+    const status = questionDoc.data().status;
+    return (
+      typeof status === "string" && OPEN_PENDING_QUESTION_STATUSES.has(status)
+    );
+  });
+
+  for (let index = 0; index < toCancel.length; index += 500) {
+    const chunk = toCancel.slice(index, index + 500);
+    const batch = writeBatch(getFirestoreDb());
+
+    for (const questionDoc of chunk) {
+      batch.update(questionDoc.ref, { status: "cancelled" });
+    }
+
+    await batch.commit();
+  }
 }
 
 export async function updateGameMessageAnswer(

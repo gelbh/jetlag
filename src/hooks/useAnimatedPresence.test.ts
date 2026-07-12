@@ -2,17 +2,27 @@ import { renderHook, act } from "@testing-library/react";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { useAnimatedPresence } from "./useAnimatedPresence";
 import { resetAllStores } from "../test/helpers/storeReset";
-import { useMapStore } from "../state/mapStore";
 
 describe("useAnimatedPresence", () => {
   beforeEach(() => {
     resetAllStores();
     document.documentElement.dataset.motion = "full";
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    );
     vi.useFakeTimers();
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllGlobals();
   });
 
   it("mounts immediately when open with full motion", () => {
@@ -27,7 +37,16 @@ describe("useAnimatedPresence", () => {
   });
 
   it("skips enter animation when motion is reduced", () => {
-    useMapStore.getState().setLowPowerMode(true);
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn().mockImplementation((query: string) => ({
+        matches: query.includes("prefers-reduced-motion"),
+        media: query,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    );
     const onClose = vi.fn();
     const { result } = renderHook(() =>
       useAnimatedPresence({ open: true, onClose }),

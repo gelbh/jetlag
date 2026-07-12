@@ -105,6 +105,10 @@ export function usePendingQuestionResolver({
   const resolvingRef = useRef(new Set<string>());
 
   useEffect(() => {
+    resolvingRef.current = new Set();
+  }, [sessionId]);
+
+  useEffect(() => {
     if (!enabled || !sessionId) {
       return;
     }

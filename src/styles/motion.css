@@ -76,8 +76,8 @@
 
 @keyframes jl-panel-enter {
   from {
-    opacity: 0.92;
-    transform: translateY(0.5rem);
+    opacity: 0.8;
+    transform: translateY(0.75rem);
   }
 
   to {
@@ -399,6 +399,31 @@ html:is([data-motion="static"], [data-motion="reduced"]) ::view-transition-new(*
   animation: none !important;
 }
 
+html[data-motion-decorative="off"] ::view-transition-group(*),
+html[data-motion-decorative="off"] ::view-transition-old(*),
+html[data-motion-decorative="off"] ::view-transition-new(*) {
+  animation: none !important;
+}
+
+html[data-motion-decorative="off"] .jl-sync-beacon--saving .jl-sync-beacon__lamp,
+html[data-motion-decorative="off"] .annotation-pulse,
+html[data-motion-decorative="off"] .draft-seeker-pulse,
+html[data-motion-decorative="off"] .loading-spinner,
+html[data-motion-decorative="off"] .home-enter-actions,
+html[data-motion-decorative="off"] .home-resume-action[aria-busy="true"] .home-resume-cta,
+html[data-motion-decorative="off"] .jl-ticker-active,
+html[data-motion-decorative="off"] .jl-thermometer-live-marker,
+html[data-motion-decorative="off"] .jl-unread-badge-pulse,
+html[data-motion-decorative="off"] .jl-ticker-active,
+html[data-motion="reduced"] .jl-sync-beacon--saving .jl-sync-beacon__lamp,
+html[data-motion="reduced"] .annotation-pulse,
+html[data-motion="reduced"] .draft-seeker-pulse,
+html[data-motion="reduced"] .loading-spinner,
+html[data-motion="reduced"] .home-enter-actions,
+html[data-motion="reduced"] .home-resume-action[aria-busy="true"] .home-resume-cta,
+html[data-motion="reduced"] .jl-ticker-active,
+html[data-motion="reduced"] .jl-thermometer-live-marker,
+html[data-motion="reduced"] .jl-unread-badge-pulse,
 html:is([data-motion="static"], [data-motion="reduced"]) .jl-sync-beacon--saving .jl-sync-beacon__lamp,
 html:is([data-motion="static"], [data-motion="reduced"]) .annotation-pulse,
 html:is([data-motion="static"], [data-motion="reduced"]) .draft-seeker-pulse,
@@ -427,6 +452,45 @@ html:is([data-motion="static"], [data-motion="reduced"]) .route-loading-enter {
   animation: none;
 }
 
+html[data-motion-decorative="off"] .jl-tool-overflow-sheet,
+html[data-motion-decorative="off"] .jl-wizard-step-forward,
+html[data-motion-decorative="off"] .jl-wizard-step-back,
+html[data-motion-decorative="off"] .jl-ticker-active,
+html[data-motion-decorative="off"] .jl-thermometer-live-marker,
+html[data-motion-decorative="off"] .jl-unread-badge-pulse,
+html[data-motion-decorative="off"] .jl-tool-menu,
+html[data-motion-decorative="off"] .route-loading-enter,
+html[data-motion="reduced"] .jl-tool-overflow-sheet,
+html[data-motion="reduced"] .hud-sheet-enter,
+html[data-motion="reduced"] .hud-sheet-exit,
+html[data-motion="reduced"] .hud-scrim-enter,
+html[data-motion="reduced"] .hud-scrim-exit,
+html[data-motion="reduced"] .jl-panel-enter,
+html[data-motion="reduced"] .jl-panel-exit,
+html[data-motion="reduced"] .jl-panel-crossfade-enter,
+html[data-motion="reduced"] .jl-step-enter,
+html[data-motion="reduced"] .jl-wizard-step-forward,
+html[data-motion="reduced"] .jl-wizard-step-back,
+html[data-motion="reduced"] .jl-banner-enter,
+html[data-motion="reduced"] .jl-banner-exit,
+html[data-motion="reduced"] .jl-chat-tab-enter,
+html[data-motion="reduced"] .jl-tool-menu,
+html[data-motion="reduced"] .route-loading-enter {
+  animation: none;
+}
+
+html[data-motion-decorative="off"] .map-chrome-hud,
+html[data-motion-decorative="off"] .map-zoom-control,
+html[data-motion-decorative="off"] .map-style-control,
+html[data-motion-decorative="off"] .jl-tool-dock-highlight,
+html[data-motion-decorative="off"] .jl-tool-dock,
+html[data-motion-decorative="off"] .jl-chat-keyboard-inset,
+html[data-motion-decorative="off"] .home-card-btn,
+html[data-motion-decorative="off"] .hud-chrome,
+html[data-motion-decorative="off"] .btn-primary,
+html[data-motion-decorative="off"] .btn-secondary,
+html[data-motion-decorative="off"] .jl-tool-slot,
+html[data-motion-decorative="off"] .jl-tool-overflow-row,
 html:is([data-motion="static"], [data-motion="reduced"]) .map-chrome-hud,
 html:is([data-motion="static"], [data-motion="reduced"]) .map-zoom-control,
 html:is([data-motion="static"], [data-motion="reduced"]) .map-style-control,

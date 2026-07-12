@@ -604,6 +604,49 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows the host to reset session progress", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1"),
+        timerAccumulatedMs: 120_000,
+        timerRunningSince: "2026-01-01T00:01:00.000Z",
+      });
+
+    await assertSucceeds(
+      host.firestore().collection("sessions").doc("session-1").update({
+        sessionResetAt: "2026-01-02T00:00:00.000Z",
+        timerAccumulatedMs: 0,
+        timerRunningSince: deleteField(),
+        endGameStartedAt: deleteField(),
+        endGameStartedByUid: deleteField(),
+        endGameRequestedAt: deleteField(),
+        endGameRequestedByUid: deleteField(),
+      }),
+    );
+  });
+
+  it("rejects session reset from non-host members", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+
+    const seeker = testEnv.authenticatedContext("seeker-1");
+    await assertFails(
+      seeker.firestore().collection("sessions").doc("session-1").update({
+        sessionResetAt: "2026-01-02T00:00:00.000Z",
+        timerAccumulatedMs: 0,
+        timerRunningSince: deleteField(),
+      }),
+    );
+  });
+
   it("rejects invalid annotation types", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

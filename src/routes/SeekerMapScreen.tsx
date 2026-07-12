@@ -152,6 +152,7 @@ export function SeekerMapScreen() {
         handleStartEndGame={controller.handleStartEndGame}
         handleClearMap={controller.handleClearMap}
         handleResetBoard={controller.handleResetBoard}
+        handleResetSession={controller.handleResetSession}
         handleEndSession={controller.handleEndSession}
         handleLeaveSession={controller.handleLeaveSession}
         handleSaveGameRules={controller.handleSaveGameRules}

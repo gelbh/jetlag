@@ -1,12 +1,16 @@
+import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { HiderMapScreen } from "./HiderMapScreen";
 import { ObserverMapScreen } from "./ObserverMapScreen";
 import { SeekerMapScreen } from "./SeekerMapScreen";
+import { teardownSessionUiState } from "../services/session/sessionCleanup";
 import { useSessionStore } from "../state/sessionStore";
 
 export function MapScreen() {
   const session = useSessionStore((state) => state.session);
   const myRole = useSessionStore((state) => state.myRole);
+
+  useEffect(() => () => teardownSessionUiState(), []);
 
   if (!session || !session.gameArea) {
     return <Navigate to={session ? "/create" : "/"} replace />;
