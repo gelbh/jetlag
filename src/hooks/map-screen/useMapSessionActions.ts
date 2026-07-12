@@ -115,7 +115,6 @@ export function useMapSessionActions({
       return;
     }
 
-    await resetEndGameSession(session.id);
     setSession(
       {
         ...session,
@@ -126,6 +125,7 @@ export function useMapSessionActions({
       },
       uid,
     );
+    await resetEndGameSession(session.id);
   }, [session, setSession, uid]);
 
   const handleSaveGameRules = useCallback(async () => {
