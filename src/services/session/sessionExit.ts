@@ -42,14 +42,7 @@ async function waitForExitTransition(animate: boolean): Promise<void> {
   }
 
   await new Promise<void>((resolve) => {
-    const timeoutId = window.setTimeout(resolve, EXIT_TRANSITION_MS);
-
-    const finish = () => {
-      window.clearTimeout(timeoutId);
-      resolve();
-    };
-
-    document.addEventListener("transitionend", finish, { once: true });
+    window.setTimeout(resolve, EXIT_TRANSITION_MS);
   });
 }
 
