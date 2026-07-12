@@ -241,6 +241,25 @@ describe("firestore.rules", () => {
         .doc("session-1")
         .update({ lastActiveAt: "2026-07-12T12:00:00.000Z" }),
     );
+
+    await assertFails(
+      guest
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          lastActiveAt: "2026-07-12T12:00:00.000Z",
+          code: "WXYZ",
+        }),
+    );
+
+    await assertFails(
+      guest
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({ lastActiveAt: "2099-01-01T00:00:00.000Z" }),
+    );
   });
 
   it("allows a second guest to join as hider when one hider is already in the session", async () => {

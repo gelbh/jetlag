@@ -10,18 +10,21 @@ const CLIENT_TOUCH_THROTTLE_MS = 4 * 60 * 1000;
 
 export function useSessionHeartbeat(session: SessionRecord | null) {
   const lastTouchAtRef = useRef<number>(0);
+  const initialTouchSessionIdRef = useRef<string | null>(null);
+
+  const sessionId = session?.id;
+  const sessionStatus = session?.status;
+  const sessionEndedAt = session?.endedAt;
 
   useEffect(() => {
     if (
-      !session ||
-      session.id === LOCAL_SESSION_ID ||
-      session.status === "ended" ||
-      typeof session.endedAt === "string"
+      !sessionId ||
+      sessionId === LOCAL_SESSION_ID ||
+      sessionStatus === "ended" ||
+      typeof sessionEndedAt === "string"
     ) {
       return;
     }
-
-    const sessionId = session.id;
 
     const maybeTouch = async (force = false) => {
       const now = Date.now();
@@ -40,7 +43,12 @@ export function useSessionHeartbeat(session: SessionRecord | null) {
       }
     };
 
-    void maybeTouch(true);
+    const forceInitial = initialTouchSessionIdRef.current !== sessionId;
+    if (forceInitial) {
+      initialTouchSessionIdRef.current = sessionId;
+    }
+
+    void maybeTouch(forceInitial);
     const intervalId = window.setInterval(() => {
       void maybeTouch(false);
     }, HEARTBEAT_INTERVAL_MS);
@@ -48,5 +56,5 @@ export function useSessionHeartbeat(session: SessionRecord | null) {
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [session]);
+  }, [sessionId, sessionStatus, sessionEndedAt]);
 }

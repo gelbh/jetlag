@@ -35,6 +35,19 @@ service cloud.firestore {
         || (role == 'admin' && isAdmin());
     }
 
+    function lastActiveAtFromIso(iso) {
+      return timestamp.date(int(iso[0:4]), int(iso[5:7]), int(iso[8:10]))
+        + duration.value(int(iso[11:13]), 'h')
+        + duration.value(int(iso[14:16]), 'm')
+        + duration.value(int(iso[17:19]), 's');
+    }
+
+    function lastActiveAtWithinGrace(iso) {
+      return iso is string
+        && iso.matches('^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$')
+        && lastActiveAtFromIso(iso) <= request.time + duration.value(10, 'm');
+    }
+
     function validHostPlayerRole(role) {
       return role in ['seeker', 'hider'];
     }
@@ -285,7 +298,7 @@ service cloud.firestore {
         && request.resource.data.gameSize == resource.data.gameSize
         && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastActiveAt'])
-        && request.resource.data.lastActiveAt is string
+        && lastActiveAtWithinGrace(request.resource.data.lastActiveAt)
       ) || (
         isSessionHost(sessionId)
         && request.resource.data.gameArea == resource.data.gameArea

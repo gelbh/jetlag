@@ -30,6 +30,35 @@ async function deleteSessionCodeIfPresent(db, code) {
   await db.collection("sessionCodes").doc(code).delete();
 }
 
+async function fetchIdleActiveSessionDocs(db, idleCutoffIso) {
+  try {
+    const [idleIndexedSnapshot, idleLegacySnapshot] = await Promise.all([
+      db
+        .collection("sessions")
+        .where("status", "==", "active")
+        .where("lastActiveAt", "<", idleCutoffIso)
+        .limit(PURGE_BATCH_LIMIT)
+        .get(),
+      db
+        .collection("sessions")
+        .where("status", "==", "active")
+        .where("createdAt", "<", idleCutoffIso)
+        .limit(PURGE_BATCH_LIMIT)
+        .get(),
+    ]);
+
+    return selectIdleActiveSessions(
+      idleIndexedSnapshot.docs,
+      idleLegacySnapshot.docs,
+      idleCutoffIso,
+      PURGE_BATCH_LIMIT,
+    );
+  } catch (error) {
+    console.error("purgeStaleSessions idle query failed", error);
+    return [];
+  }
+}
+
 export const purgeStaleSessions = onSchedule(
   { schedule: "0 4 * * *", secrets: [sentryDsnSecret] },
   withSentryEventHandler(async () => {
@@ -38,39 +67,21 @@ export const purgeStaleSessions = onSchedule(
     const endedCutoffIso = computeEndedCutoffIso();
     const abandonedCutoffIso = computeAbandonedCutoffIso();
 
-    const [idleIndexedSnapshot, idleLegacySnapshot, endedSnapshot, abandonedSnapshot] =
-      await Promise.all([
-        db
-          .collection("sessions")
-          .where("status", "==", "active")
-          .where("lastActiveAt", "<", idleCutoffIso)
-          .limit(PURGE_BATCH_LIMIT)
-          .get(),
-        db
-          .collection("sessions")
-          .where("status", "==", "active")
-          .where("createdAt", "<", idleCutoffIso)
-          .limit(PURGE_BATCH_LIMIT)
-          .get(),
-        db
-          .collection("sessions")
-          .where("status", "==", "ended")
-          .where("endedAt", "<", endedCutoffIso)
-          .limit(PURGE_BATCH_LIMIT)
-          .get(),
-        db
-          .collection("sessions")
-          .where("createdAt", "<", abandonedCutoffIso)
-          .limit(PURGE_BATCH_LIMIT)
-          .get(),
-      ]);
+    const idleTargets = await fetchIdleActiveSessionDocs(db, idleCutoffIso);
 
-    const idleTargets = selectIdleActiveSessions(
-      idleIndexedSnapshot.docs,
-      idleLegacySnapshot.docs,
-      idleCutoffIso,
-      PURGE_BATCH_LIMIT,
-    );
+    const [endedSnapshot, abandonedSnapshot] = await Promise.all([
+      db
+        .collection("sessions")
+        .where("status", "==", "ended")
+        .where("endedAt", "<", endedCutoffIso)
+        .limit(PURGE_BATCH_LIMIT)
+        .get(),
+      db
+        .collection("sessions")
+        .where("createdAt", "<", abandonedCutoffIso)
+        .limit(PURGE_BATCH_LIMIT)
+        .get(),
+    ]);
 
     let autoEnded = 0;
     for (const sessionDoc of idleTargets) {

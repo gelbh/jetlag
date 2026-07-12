@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  autoEndIdleSession,
   computeIdleCutoffIso,
   getEffectiveLastActiveAt,
   isIdleActiveSession,
@@ -85,4 +86,33 @@ test("selectIdleActiveSessions deduplicates indexed and legacy candidates", () =
     selected.map((snapshot) => snapshot.id),
     ["idle-1", "idle-2"],
   );
+});
+
+test("autoEndIdleSession ends session and deletes session code", async () => {
+  const updates = [];
+  const deletedCodes = [];
+  const sessionDoc = {
+    data: () => ({ code: "ABCD", status: "active" }),
+    ref: {
+      update: async (payload) => {
+        updates.push(payload);
+      },
+    },
+  };
+  const db = {
+    collection: (name) => ({
+      doc: (id) => ({
+        delete: async () => {
+          deletedCodes.push({ name, id });
+        },
+      }),
+    }),
+  };
+
+  await autoEndIdleSession(db, sessionDoc);
+
+  assert.equal(updates.length, 1);
+  assert.equal(updates[0].status, "ended");
+  assert.equal(typeof updates[0].endedAt, "string");
+  assert.deepEqual(deletedCodes, [{ name: "sessionCodes", id: "ABCD" }]);
 });
