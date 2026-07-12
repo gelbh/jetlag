@@ -2,10 +2,6 @@
 
 ## 0.5.4 - 2026-07-12
 
-### Fixes
-
-- Home: tutorial, admin, and version controls render above the top gradient accent
-
 ### Improvements
 
 - Live map: nearby seeker and hider GPS markers merge into one pin with a count tooltip
