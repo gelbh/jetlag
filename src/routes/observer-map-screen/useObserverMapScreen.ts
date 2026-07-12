@@ -7,6 +7,7 @@ import {
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../domain/device/powerProfile";
+import { resolveSpectatorLayers } from "../../domain/session/observerPerspective";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
 import { useResolvedSessionRules } from "../../hooks/session/useResolvedSessionRules";
@@ -24,11 +25,19 @@ export function useObserverMapScreen() {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
   const layerVisibility = useMapStore((state) => state.layerVisibility);
+  const observerPerspective = useMapStore((state) => state.observerPerspective);
+  const setObserverPerspective = useMapStore(
+    (state) => state.setObserverPerspective,
+  );
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const overlay = useMapOverlayState();
   const distanceUnit = useSessionDistanceUnit();
   const suppressChromeHideRef = useRef(false);
   const [mapViewport, setMapViewport] = useState<MapViewportState | null>(null);
+
+  const spectatorRole = myRole === "admin" || myRole === "observer" ? myRole : "observer";
+  const authMode = myRole === "admin" ? "admin-permanent" : "hider-anonymous";
+  const exitPath = myRole === "admin" ? "/admin" : "/";
 
   const { gameArea, sessionRules, playAreaReady } = useResolvedSessionRules(session);
   const resolvedGameArea = gameArea ?? session?.gameArea ?? null;
@@ -72,10 +81,10 @@ export function useObserverMapScreen() {
     authReady,
   } = useSharedSessionScreen({
     isChatOpen: overlay.isChatOpen,
-    notificationRole: "observer",
-    authMode: "admin-permanent",
+    notificationRole: spectatorRole,
+    authMode,
     liveActivityEnabled: false,
-    exitPath: "/admin",
+    exitPath,
   });
 
   const annotations = useSessionAnnotations(sessionId);
@@ -85,6 +94,11 @@ export function useObserverMapScreen() {
     myUid: uid,
     localLivePoint: null,
   });
+
+  const spectatorLayers = useMemo(
+    () => resolveSpectatorLayers(observerPerspective, spectatorRole),
+    [observerPerspective, spectatorRole],
+  );
 
   return {
     session,
@@ -100,6 +114,9 @@ export function useObserverMapScreen() {
     handleMapStyleChange,
     effectiveBasemapStyle,
     layerVisibility,
+    observerPerspective,
+    setObserverPerspective,
+    spectatorLayers,
     annotations,
     pendingQuestions,
     hidingZones,
@@ -116,6 +133,7 @@ export function useObserverMapScreen() {
     activeThermometerWalk,
     lowPowerMode,
     distanceUnit,
+    exitPath,
   };
 }
 

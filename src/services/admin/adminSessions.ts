@@ -28,6 +28,7 @@ export interface AdminSessionRoleCounts {
   seeker: number;
   hider: number;
   observer: number;
+  admin: number;
 }
 
 export interface AdminSessionSummary {

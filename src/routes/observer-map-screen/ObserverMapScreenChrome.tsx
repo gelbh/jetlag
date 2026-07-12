@@ -1,23 +1,40 @@
 import { Link } from "react-router-dom";
 import { SessionTimerLabel } from "../../components/session/SessionTimerLabel";
+import { SegmentControl } from "../../components/ui/SegmentControl";
 import { HudHomeIcon } from "../../components/ui/HudIcons";
+import {
+  OBSERVER_PERSPECTIVE_OPTIONS,
+  type ObserverPerspective,
+} from "../../domain/session/observerPerspective";
+import { playerRoleLabel } from "../../domain/session/playerRole";
+import type { PlayerRole } from "../../domain/session/playerRole";
 import type { SessionRecord } from "../../domain/map/annotations";
 import type { UseMapOverlayStateResult } from "../../hooks/map/useMapOverlayState";
 import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
 
 interface ObserverMapScreenChromeProps {
   session: SessionRecord;
+  myRole: PlayerRole;
   timer: ReturnType<typeof useSessionTimer>;
   overlay: UseMapOverlayStateResult;
+  perspective: ObserverPerspective;
+  onPerspectiveChange: (perspective: ObserverPerspective) => void;
   onLeave: () => void;
 }
 
 export function ObserverMapScreenChrome({
   session,
+  myRole,
   timer,
   overlay,
+  perspective,
+  onPerspectiveChange,
   onLeave,
 }: ObserverMapScreenChromeProps) {
+  const roleLabel = playerRoleLabel(myRole);
+  const leaveLabel =
+    myRole === "admin" ? "Leave admin monitor" : "Leave observation";
+
   return (
     <>
       <div className="pointer-events-none absolute inset-x-0 top-0 z-[var(--z-dock)] px-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
@@ -31,12 +48,12 @@ export function ObserverMapScreenChrome({
             </p>
           </div>
           <span className="shrink-0 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-brand-blue">
-            Observer
+            {roleLabel}
           </span>
           <button
             type="button"
             className="hud-chrome inline-flex min-h-11 min-w-11 items-center justify-center"
-            aria-label="Leave observation"
+            aria-label={leaveLabel}
             onClick={onLeave}
           >
             <HudHomeIcon className="size-5" />
@@ -45,39 +62,52 @@ export function ObserverMapScreenChrome({
       </div>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-dock)] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <div className="pointer-events-auto mx-auto flex max-w-xl items-center justify-between gap-2 rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
-          <button
-            type="button"
-            className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-semibold uppercase tracking-wide ${
-              overlay.isLogOpen
-                ? "bg-action text-action-ink"
-                : "bg-surface-raised text-ink"
-            }`}
-            onClick={() =>
-              overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
-            }
-          >
-            Log
-          </button>
-          <button
-            type="button"
-            className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-semibold uppercase tracking-wide ${
-              overlay.isChatOpen
-                ? "bg-action text-action-ink"
-                : "bg-surface-raised text-ink"
-            }`}
-            onClick={() =>
-              overlay.isChatOpen ? overlay.closeSheet() : overlay.openChat()
-            }
-          >
-            Chat
-          </button>
-          <Link
-            to="/admin"
-            className="btn-secondary inline-flex min-h-11 items-center px-3 text-sm"
-          >
-            Admin
-          </Link>
+        <div className="pointer-events-auto mx-auto flex max-w-xl flex-col gap-2">
+          <div className="rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
+            <SegmentControl
+              value={perspective}
+              options={OBSERVER_PERSPECTIVE_OPTIONS}
+              onChange={onPerspectiveChange}
+              aria-label="Spectator perspective"
+              variant="pill"
+            />
+          </div>
+          <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
+            <button
+              type="button"
+              className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-semibold uppercase tracking-wide ${
+                overlay.isLogOpen
+                  ? "bg-action text-action-ink"
+                  : "bg-surface-raised text-ink"
+              }`}
+              onClick={() =>
+                overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
+              }
+            >
+              Log
+            </button>
+            <button
+              type="button"
+              className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-semibold uppercase tracking-wide ${
+                overlay.isChatOpen
+                  ? "bg-action text-action-ink"
+                  : "bg-surface-raised text-ink"
+              }`}
+              onClick={() =>
+                overlay.isChatOpen ? overlay.closeSheet() : overlay.openChat()
+              }
+            >
+              Chat
+            </button>
+            {myRole === "admin" ? (
+              <Link
+                to="/admin"
+                className="btn-secondary inline-flex min-h-11 items-center px-3 text-sm"
+              >
+                Admin
+              </Link>
+            ) : null}
+          </div>
         </div>
       </div>
     </>
