@@ -44,4 +44,12 @@ describe("JoinSession", () => {
       expect(screen.getByText("Enter a 4-letter session code.")).toBeInTheDocument();
     });
   });
+
+  it("offers observer as a join role", () => {
+    renderWithRouter(<JoinSession />);
+
+    expect(
+      screen.getByRole("radio", { name: /observer/i }),
+    ).toBeInTheDocument();
+  });
 });
