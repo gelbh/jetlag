@@ -1,8 +1,8 @@
 import { lazyWithChunkRetry } from "../../domain/device/lazyWithChunkRetry";
 
-export const HeavyMapToolsSlot = lazyWithChunkRetry(() =>
-  import("../../components/tools/HeavyMapToolsSlot").then((module) => ({
-    default: module.HeavyMapToolsSlot,
+export const HeavyToolHost = lazyWithChunkRetry(() =>
+  import("../../components/tools/HeavyToolHost").then((module) => ({
+    default: module.HeavyToolHost,
   })),
 );
 

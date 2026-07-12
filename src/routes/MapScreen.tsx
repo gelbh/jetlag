@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Navigate } from "react-router-dom";
 import { HiderMapScreen } from "./HiderMapScreen";
-import { HeavyMapToolsSlot } from "./map-screen/lazyImports";
+import { HeavyToolHost } from "./map-screen/lazyImports";
 import { MapScreenChrome } from "./map-screen/MapScreenChrome";
 import { MapScreenMapLayers } from "./map-screen/MapScreenMapLayers";
 import { useMapScreenController } from "./map-screen/useMapScreenController";
@@ -23,7 +23,7 @@ export function MapScreen() {
     <div className="map-screen-shell">
       {controller.heavyToolActive ? (
         <Suspense fallback={null}>
-          <HeavyMapToolsSlot {...controller.heavyMapToolsSlotProps} />
+          <HeavyToolHost {...controller.heavyMapToolsSlotProps} />
         </Suspense>
       ) : null}
       <MapScreenMapLayers

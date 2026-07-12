@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, type MutableRefObject } from "react";
 import { useMap, useMapEvents } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
 import {
@@ -15,29 +15,45 @@ interface MapViewportTrackerProps {
   onViewportChange: (viewport: MapViewportState | null) => void;
   onUserPanStart?: () => void;
   onUserPanEnd?: () => void;
+  suppressPanRef?: MutableRefObject<boolean>;
 }
 
 export function MapViewportTracker({
   onViewportChange,
   onUserPanStart,
   onUserPanEnd,
+  suppressPanRef,
 }: MapViewportTrackerProps) {
   const map = useMap();
+  const panActiveRef = useRef(false);
+
+  const notifyPanStart = () => {
+    if (suppressPanRef?.current || panActiveRef.current) {
+      return;
+    }
+
+    panActiveRef.current = true;
+    onUserPanStart?.();
+  };
+
+  const notifyPanEnd = () => {
+    if (!panActiveRef.current) {
+      return;
+    }
+
+    panActiveRef.current = false;
+    onUserPanEnd?.();
+  };
 
   useMapEvents({
     dragstart: () => {
-      onUserPanStart?.();
+      notifyPanStart();
     },
     dragend: () => {
-      onUserPanEnd?.();
-    },
-    movestart: (event) => {
-      if ("originalEvent" in event && event.originalEvent) {
-        onUserPanStart?.();
-      }
+      notifyPanEnd();
     },
     moveend: () => {
-      onUserPanEnd?.();
+      notifyPanEnd();
       publishViewport(map, onViewportChange);
     },
     zoomend: () => {

@@ -11,6 +11,8 @@ interface ToolPanelShellProps {
   helper?: ReactNode;
   stepper?: ReactNode;
   children?: ReactNode;
+  /** Live map wizards: fill the floating panel height for internal scroll. */
+  fillHeight?: boolean;
 }
 
 export function ToolPanelShell({
@@ -20,13 +22,20 @@ export function ToolPanelShell({
   helper,
   stepper,
   children,
+  fillHeight = false,
 }: ToolPanelShellProps) {
   const showHeader = !stepper && (prompt || helper);
 
   return (
-    <div className="space-y-2.5">
+    <div
+      className={
+        fillHeight
+          ? "flex min-h-0 flex-1 flex-col gap-2.5"
+          : "space-y-2.5"
+      }
+    >
       {showHeader ? (
-        <div className="space-y-1 border-b-2 border-border pb-2">
+        <div className="space-y-1 pb-2 text-center">
           {!prompt ? (
             <p className="font-display text-xs font-semibold uppercase tracking-[0.12em] text-highlight">
               {mapToolPlacingLabel(toolId)}
@@ -34,7 +43,7 @@ export function ToolPanelShell({
           ) : null}
           {prompt ? (
             typeof prompt === "string" ? (
-              <div className="space-y-0.5">
+              <div className="space-y-0.5 text-center">
                 <p className="text-sm font-medium leading-snug text-ink">
                   {prompt}
                 </p>

@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, useContext, type ReactNode } from "react";
-import { MotionCapabilityContext } from "../../motion/motionCapabilityContext";
-import { useAdaptiveWizardSwipe } from "../../../hooks/useAdaptiveWizardSwipe";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useMotionProfile } from "../../../hooks/useMotionProfile";
+import { useWizardSwipe } from "../../../hooks/useWizardSwipe";
 
 interface WizardSwipeSurfaceProps {
   stepId: string;
@@ -12,6 +12,10 @@ interface WizardSwipeSurfaceProps {
   children: ReactNode;
   footer?: ReactNode;
   className?: string;
+  /** Tutorial / read-only previews: natural height, no flex collapse. */
+  embedded?: boolean;
+  /** When false, children stay clickable without horizontal swipe handling. */
+  swipeEnabled?: boolean;
 }
 
 export function WizardSwipeSurface({
@@ -24,15 +28,15 @@ export function WizardSwipeSurface({
   children,
   footer,
   className = "",
+  embedded = false,
+  swipeEnabled = true,
 }: WizardSwipeSurfaceProps) {
-  const capability = useContext(MotionCapabilityContext);
-  const skipStepMotion =
-    capability?.tier === "css" || capability?.tier === "static";
+  const { animate } = useMotionProfile();
   const containerRef = useRef<HTMLDivElement>(null);
   const prevStepIndex = useRef(stepIndex);
   const [enterClass, setEnterClass] = useState("");
 
-  const { surfaceStyle, surfaceProps } = useAdaptiveWizardSwipe({
+  const { surfaceStyle, surfaceProps } = useWizardSwipe({
     canGoBack,
     canGoNext,
     onBack,
@@ -41,7 +45,7 @@ export function WizardSwipeSurface({
   });
 
   useEffect(() => {
-    if (skipStepMotion || prevStepIndex.current === stepIndex) {
+    if (!animate || prevStepIndex.current === stepIndex) {
       return;
     }
 
@@ -62,20 +66,30 @@ export function WizardSwipeSurface({
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [stepIndex, skipStepMotion]);
+  }, [stepIndex, animate]);
+
+  const surfaceLayout = embedded
+    ? "wizard-swipe-surface-embedded flex flex-col"
+    : "flex min-h-0 flex-1 flex-col overflow-hidden";
+  const stepLayout = embedded
+    ? "flex flex-col"
+    : "flex min-h-0 flex-1 flex-col overflow-hidden";
+  const bodyLayout = embedded
+    ? "wizard-swipe-body flex flex-col"
+    : "wizard-swipe-body flex min-h-0 flex-1 flex-col overflow-hidden";
 
   return (
     <div
       ref={containerRef}
-      className={`wizard-swipe-surface flex min-h-0 flex-1 flex-col overflow-hidden ${className}`.trim()}
-      {...surfaceProps}
+      className={`wizard-swipe-surface ${surfaceLayout} ${className}`.trim()}
+      {...(swipeEnabled && !embedded ? surfaceProps : undefined)}
     >
       <div
         key={stepId}
-        className={`flex min-h-0 flex-1 flex-col overflow-hidden ${enterClass} motion-reduce:animate-none`.trim()}
+        className={`${stepLayout} ${enterClass} motion-reduce:animate-none`.trim()}
         style={surfaceStyle}
       >
-        <div className="wizard-swipe-body flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className={bodyLayout}>
           {children}
         </div>
         {footer ? (

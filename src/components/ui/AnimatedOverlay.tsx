@@ -7,7 +7,7 @@ import {
 } from "react";
 import { useAnimatedPresence } from "../../hooks/useAnimatedPresence";
 import { useScrollLock } from "../../hooks/useScrollLock";
-import { useAdaptiveSheetGesture } from "../../hooks/useAdaptiveSheetGesture";
+import { useSheetGesture } from "../../hooks/useSheetGesture";
 import { useMotionProfile } from "../../hooks/useMotionProfile";
 import { MobileSheet } from "./MobileSheet";
 
@@ -71,7 +71,7 @@ export function AnimatedOverlay({
     exitClass: "hud-sheet-exit",
   });
 
-  const gesture = useAdaptiveSheetGesture({
+  const gesture = useSheetGesture({
     enabled:
       dismissible &&
       animate &&

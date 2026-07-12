@@ -1,23 +1,21 @@
-import { lazy, Suspense, type CSSProperties, type ReactNode, type Ref } from "react";
-import { useContext } from "react";
-import { useMotionGesturePath } from "../../hooks/useMotionGesturePath";
+import type { CSSProperties, Ref } from "react";
 import type { PanelHandleProps } from "../../hooks/usePanelDrag";
-import { MotionCapabilityContext } from "../motion/motionCapabilityContext";
+import { useMotionProfile } from "../../hooks/useMotionProfile";
 import { PopupCloseButton } from "../ui/PopupCloseButton";
-
-const FramerPanelDrag = lazy(() => import("../motion/FramerPanelDrag"));
 
 interface MapFloatingPanelProps {
   minimized: boolean;
   onMinimizedChange?: (minimized: boolean) => void;
   mapPanning?: boolean;
-  title?: ReactNode;
+  title?: React.ReactNode;
   peekLabel?: string;
   peekHint?: string;
   onClose?: () => void;
   closeLabel?: string;
   maxHeightClassName?: string;
   bodyScrollable?: boolean;
+  /** Live question wizards: scroll lives inside the panel body, not the shell. */
+  panelLayout?: "default" | "wizard";
   outerClassName?: string;
   outerRef?: Ref<HTMLDivElement>;
   panelStyle?: CSSProperties;
@@ -25,12 +23,13 @@ interface MapFloatingPanelProps {
   dragHandle?: boolean;
   dragHandleProps?: PanelHandleProps;
   contentKey?: string | number;
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
-function MapFloatingPanelBody({
+export function MapFloatingPanel({
   minimized,
   onMinimizedChange,
+  mapPanning = false,
   title,
   peekLabel,
   peekHint = "Tap to expand",
@@ -38,17 +37,39 @@ function MapFloatingPanelBody({
   closeLabel,
   maxHeightClassName = "max-h-[min(34dvh,320px)]",
   bodyScrollable = true,
+  panelLayout = "default",
+  outerClassName = "pointer-events-auto absolute inset-x-0 jl-panel-above-dock z-[var(--z-panel)] px-3",
+  outerRef,
+  panelStyle,
   preserveBodyWhenMinimized = true,
   dragHandle = true,
   dragHandleProps,
   contentKey,
   children,
-}: Omit<MapFloatingPanelProps, "outerClassName" | "outerRef" | "panelStyle">) {
+}: MapFloatingPanelProps) {
+  const { animate } = useMotionProfile();
+  const panelMotionClass = !minimized && animate ? "jl-panel-enter" : "";
+
+  const panelClassName = [
+    outerClassName,
+    mapPanning ? "jl-panel-chrome-hidden" : "",
+    panelMotionClass,
+    minimized ? "jl-panel-minimized" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   const bodyPreserverClass =
     preserveBodyWhenMinimized && minimized ? "jl-panel-body-preserver" : "";
+  const isWizardLayout = panelLayout === "wizard";
+  const shellScrollClass = isWizardLayout
+    ? "flex flex-col overflow-hidden"
+    : bodyScrollable
+      ? "overflow-y-auto"
+      : "overflow-hidden";
 
   return (
-    <>
+    <div ref={outerRef} className={panelClassName} style={panelStyle}>
       {minimized && peekLabel && onMinimizedChange ? (
         <button
           type="button"
@@ -63,7 +84,7 @@ function MapFloatingPanelBody({
         </button>
       ) : null}
       <div
-        className={`tool-panel-compact hud-panel relative mx-auto max-w-xl overscroll-contain p-3 pt-9 ${maxHeightClassName} ${bodyScrollable ? "overflow-y-auto" : "overflow-hidden"} ${bodyPreserverClass}`}
+        className={`tool-panel-compact hud-panel relative mx-auto max-w-xl overscroll-contain p-3 pt-9 ${maxHeightClassName} ${shellScrollClass} ${bodyPreserverClass}`}
         aria-hidden={minimized && preserveBodyWhenMinimized}
       >
         {!minimized && dragHandle && dragHandleProps ? (
@@ -86,117 +107,13 @@ function MapFloatingPanelBody({
         ) : null}
         <div
           key={contentKey}
-          className="jl-panel-crossfade-enter motion-reduce:animate-none"
+          className={`jl-panel-crossfade-enter motion-reduce:animate-none ${
+            isWizardLayout ? "flex min-h-0 flex-1 flex-col" : ""
+          }`.trim()}
         >
           {children}
         </div>
       </div>
-    </>
-  );
-}
-
-export function MapFloatingPanel({
-  minimized,
-  onMinimizedChange,
-  mapPanning = false,
-  title,
-  peekLabel,
-  peekHint = "Tap to expand",
-  onClose,
-  closeLabel,
-  maxHeightClassName = "max-h-[min(34dvh,320px)]",
-  bodyScrollable = true,
-  outerClassName = "pointer-events-auto absolute inset-x-0 jl-panel-above-dock z-[var(--z-panel)] px-3",
-  outerRef,
-  panelStyle,
-  preserveBodyWhenMinimized = true,
-  dragHandle = true,
-  dragHandleProps,
-  contentKey,
-  children,
-}: MapFloatingPanelProps) {
-  const capability = useContext(MotionCapabilityContext);
-  const tier = capability?.tier ?? "css";
-  const useFramerDrag = useMotionGesturePath();
-  const panelMotionClass =
-    !minimized && tier !== "css" && tier !== "static" ? "jl-panel-enter" : "";
-
-  const panelClassName = [
-    outerClassName,
-    mapPanning ? "jl-panel-chrome-hidden" : "",
-    panelMotionClass,
-    minimized ? "jl-panel-minimized" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  const body = (
-    <MapFloatingPanelBody
-      minimized={minimized}
-      onMinimizedChange={onMinimizedChange}
-      title={title}
-      peekLabel={peekLabel}
-      peekHint={peekHint}
-      onClose={onClose}
-      closeLabel={closeLabel}
-      maxHeightClassName={maxHeightClassName}
-      preserveBodyWhenMinimized={preserveBodyWhenMinimized}
-      bodyScrollable={bodyScrollable}
-      dragHandle={dragHandle}
-      dragHandleProps={dragHandleProps}
-      contentKey={contentKey}
-    >
-      {children}
-    </MapFloatingPanelBody>
-  );
-
-  if (
-    useFramerDrag &&
-    !minimized &&
-    onMinimizedChange &&
-    dragHandle &&
-    dragHandleProps
-  ) {
-    return (
-      <Suspense
-        fallback={
-          <div ref={outerRef} className={panelClassName} style={panelStyle}>
-            {body}
-          </div>
-        }
-      >
-        <FramerPanelDrag
-          outerClassName={panelClassName}
-          outerRef={outerRef}
-          onMinimizedChange={onMinimizedChange}
-        >
-          {(framerHandleProps) => (
-            <MapFloatingPanelBody
-              minimized={minimized}
-              onMinimizedChange={onMinimizedChange}
-              title={title}
-              peekLabel={peekLabel}
-              peekHint={peekHint}
-              onClose={onClose}
-              closeLabel={closeLabel}
-              maxHeightClassName={maxHeightClassName}
-              preserveBodyWhenMinimized={preserveBodyWhenMinimized}
-              bodyScrollable={bodyScrollable}
-              dragHandle={dragHandle}
-              dragHandleProps={framerHandleProps}
-              contentKey={contentKey}
-            >
-              {children}
-            </MapFloatingPanelBody>
-          )}
-        </FramerPanelDrag>
-      </Suspense>
-    );
-  }
-
-  return (
-    <div ref={outerRef} className={panelClassName} style={panelStyle}>
-      {body}
     </div>
   );
 }

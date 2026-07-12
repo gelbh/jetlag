@@ -41,7 +41,7 @@ describe("useToolPanelChrome", () => {
     expect(result.current.panelMinimized).toBe(false);
   });
 
-  it("auto-peeks on wizard placement steps", () => {
+  it("stays expanded on wizard placement steps", () => {
     const { result } = renderHook(() => useToolPanelChrome("matching"));
 
     act(() => {
@@ -52,7 +52,8 @@ describe("useToolPanelChrome", () => {
       );
     });
 
-    expect(result.current.userMinimized).toBe(true);
+    expect(result.current.userMinimized).toBe(false);
+    expect(result.current.panelMinimized).toBe(false);
   });
 
   it("keeps user-minimized state after panning ends", () => {

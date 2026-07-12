@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
 import { SheetCloseButton } from "./SheetCloseButton";
-import { MotionSharedElement } from "../motion/MotionSharedElement";
-import { MOTION_SHARED_ELEMENTS } from "../motion/sharedElements";
 
 interface SheetHeaderProps {
   title: string;
@@ -44,14 +42,10 @@ export function SheetHeader({
               {eyebrow}
             </p>
           ) : null}
-          <MotionSharedElement id={MOTION_SHARED_ELEMENTS.sheetHeader}>
-            <h2 className={titleClassName}>{title}</h2>
-          </MotionSharedElement>
+          <h2 className={titleClassName}>{title}</h2>
         </div>
       ) : (
-        <MotionSharedElement id={MOTION_SHARED_ELEMENTS.sheetHeader}>
-          <h2 className={titleClassName}>{title}</h2>
-        </MotionSharedElement>
+        <h2 className={titleClassName}>{title}</h2>
       )}
       {trailing ?? (
         <SheetCloseButton

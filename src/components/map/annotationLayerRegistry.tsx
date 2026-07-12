@@ -34,6 +34,15 @@ export function renderAnnotationLayerItem({
       : MAP_ANNOTATION_COLORS.elimination);
   const selected = annotation.id === selectedAnnotationId;
 
+  // Committed answered radar: elimination fill only (CombinedEliminationLayer).
+  if (
+    annotation.type === "radar" &&
+    annotation.geometry.geometry.type === "Point" &&
+    annotation.metadata.inside !== undefined
+  ) {
+    return null;
+  }
+
   if (
     annotation.type === "radar" &&
     annotation.geometry.geometry.type === "Point"

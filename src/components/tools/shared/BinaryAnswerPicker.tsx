@@ -22,7 +22,7 @@ export function BinaryAnswerPicker<Value extends string>({
   disabledValues,
 }: BinaryAnswerPickerProps<Value>) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" data-wizard-no-swipe>
       {label ? <p className="field-label m-0">{label}</p> : null}
       <div className="grid grid-cols-2 gap-2">
         {options.map((option) => {

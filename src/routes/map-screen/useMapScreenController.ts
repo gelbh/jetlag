@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MapViewportState } from "../../components/map/MapViewportTracker";
 import type { MapChromeControlInset } from "../../components/map/mapChromeControlInset";
-import {
-  createIdleHeavyMapTools,
-  type HeavyMapToolsApi,
-} from "../../hooks/map-screen/heavyMapTools";
+import { useMapScreenTools } from "../../hooks/map-screen/useMapScreenTools";
+import { useMapSessionActions } from "../../hooks/map-screen/useMapSessionActions";
+import { useMapOverlayActions } from "../../hooks/map-screen/useMapOverlayActions";
 import { useMapGeometryEdit } from "../../hooks/map-screen/useMapGeometryEdit";
 import { useMapSessionChrome } from "../../hooks/map-screen/useMapSessionChrome";
 import { useMapDraftOverlays } from "../../hooks/map-screen/useMapDraftOverlays";
@@ -18,60 +17,24 @@ import {
   fallbackGameArea,
   gameAreaCenter,
   gameAreaToBoundsExpression,
-  isPointInGameArea,
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
 import {
   LOCAL_SESSION_ID,
-  isEndGameActive,
-  isEndGamePending,
   isPremiumSession,
 } from "../../domain/map/annotations";
-import {
-  advancedSettingsFromSession,
-  mergeSessionRulesPatch,
-  sessionRulesPatchFromAdvancedSettings,
-  type AdvancedSessionSettingsValue,
-} from "../../domain/session/advancedSessionSettings";
 import { resolveToolDockEnabled } from "../../domain/session/sessionRules";
-import { sessionHasHiders } from "../../domain/session/playerRole";
-import type { PendingQuestionToolType } from "../../domain/session/sessionChat";
-import { hasOpenPendingQuestion } from "../../domain/questions";
 import { useResolvedSessionRules } from "../../hooks/session/useResolvedSessionRules";
-import {
-  requestEndGameSession,
-  resetEndGameSession,
-  updateSessionRules,
-} from "../../services/firestore/firestoreAnnotations";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useAnnotations } from "../../hooks/map/useAnnotations";
-import { useSessionTimer } from "../../hooks/session/useSessionTimer";
-import { useRemoteSessionTimerSync } from "../../hooks/session/useRemoteSessionTimerSync";
-import { useGeolocation } from "../../hooks/location/useGeolocation";
-import { useSessionSync } from "../../hooks/session/useSessionSync";
+import { useSharedSessionScreen } from "../../hooks/session/useSharedSessionScreen";
 import { useEnsureSessionMembership } from "../../hooks/session/useEnsureSessionMembership";
-import { useSessionEndedRedirect } from "../../hooks/session/useSessionEndedRedirect";
-import { usePendingQuestionActions } from "../../hooks/sync/usePendingQuestionActions";
 import { useQuestionDeadlineEnforcement } from "../../hooks/session/useQuestionDeadlineEnforcement";
 import { usePendingQuestionResolver } from "../../hooks/sync/usePendingQuestionResolver";
 import { useSeekerLocationSync } from "../../hooks/sync/useSeekerLocationSync";
-import {
-  useHidingZonesSync,
-  usePendingQuestionsSync,
-  usePlayerLocationsSync,
-  useSessionMessagesSync,
-} from "../../hooks/session/useSessionExtrasSync";
-import { useSyncStatus } from "../../hooks/sync/useSyncStatus";
 import { useTransitLayer } from "../../hooks/map/useTransitLayer";
 import { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
-import { useChatUnread } from "../../hooks/session/useChatUnread";
 import { useWakeLock } from "../../hooks/location/useWakeLock";
-import { useSessionNotifications } from "../../hooks/session/useSessionNotifications";
-import { useLiveActivitySync } from "../../hooks/sync/useLiveActivitySync";
-import {
-  ensureAnonymousUser,
-  isFirebaseConfigured,
-} from "../../services/core/firebase";
 import {
   getTransitMetro,
   metroSupportsLiveVehicles,
@@ -82,15 +45,8 @@ import {
   gameAreaPreloadKey,
 } from "../../services/session/gameAreaPreload";
 import { startSeaLevelBackgroundSampling } from "../../services/geo/seaLevelProgressive";
-import { setPremiumApiContext } from "../../services/core/premiumApiContext";
-import { useFirebaseAuthReady } from "../../hooks/sync/useFirebaseAuthReady";
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import { useToolPanelChrome } from "../../hooks/useToolPanelChrome";
-import { useRadarTool } from "../../hooks/tools/useRadarTool";
-import { usePhotoTool } from "../../hooks/tools/usePhotoTool";
-import { usePinTool } from "../../hooks/tools/usePinTool";
-import { useZoneTool } from "../../hooks/tools/useZoneTool";
-import { useThermometerTool } from "../../hooks/tools/useThermometerTool";
 import { useSessionAnnotations } from "../../hooks/map/useSessionAnnotations";
 import {
   useAnnotationStore,
@@ -103,8 +59,6 @@ export function useMapScreenController() {
   const session = useSessionStore((state) => state.session);
   const setSession = useSessionStore((state) => state.setSession);
   const myRole = useSessionStore((state) => state.myRole);
-  const myUid = useSessionStore((state) => state.myUid);
-  const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
   const pendingWrites = useSessionStore((state) => state.pendingWrites);
   const activeTool = useMapStore((state) => state.activeTool);
   const setActiveTool = useMapStore((state) => state.setActiveTool);
@@ -197,7 +151,6 @@ export function useMapScreenController() {
     redoLastAnnotation,
     clearAllAnnotations,
   } = useAnnotations();
-  const { refresh, loading: gpsLoading, error: gpsError } = useGeolocation();
   const [liveLocationError, setLiveLocationError] = useState<string | null>(
     null,
   );
@@ -213,38 +166,29 @@ export function useMapScreenController() {
     },
     [],
   );
-  const [currentUid, setCurrentUid] = useState<string | null>(null);
-  const uid = currentUid ?? myUid;
-  const isHost = Boolean(
-    session?.hostUid && uid && session.hostUid === uid,
-  );
+  const overlay = useMapOverlayState();
   const {
+    uid,
+    isHost,
     isRemote,
     canControlTimer,
-    remoteState,
-    remoteSnapshot,
     timerSyncing,
-    onControl: onTimerControl,
-  } = useRemoteSessionTimerSync(session?.id, isHost);
-  const timer = useSessionTimer(session?.id, {
-    canControl: canControlTimer,
-    onControl: onTimerControl,
-    remoteState,
-    remoteSnapshot,
+    timer,
+    pendingQuestions,
+    hidingZones,
+    playerLocations,
+    chatMessages,
+    syncStatus,
+    hasUnreadChat,
+    unreadCount,
+    enableNotifications,
+    updateNotificationPreferences,
+    authReady: firebaseAuthReady,
+  } = useSharedSessionScreen({
+    isChatOpen: overlay.isChatOpen,
+    notificationRole: myRole ?? "seeker",
+    authMode: "seeker-remote",
   });
-  const [draftAdvancedSettings, setDraftAdvancedSettings] =
-    useState<AdvancedSessionSettingsValue | null>(() =>
-      session ? advancedSettingsFromSession(session) : null,
-    );
-  const currentSessionId = session?.id ?? null;
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset draft when switching sessions only
-    setDraftAdvancedSettings(
-      session ? advancedSettingsFromSession(session) : null,
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset draft when switching sessions only
-  }, [currentSessionId]);
 
   const preloadGameAreaKey = gameArea
     ? gameAreaPreloadKey(gameArea)
@@ -256,19 +200,7 @@ export function useMapScreenController() {
   const chromeHudRef = useRef<HTMLDivElement>(null);
   const exportLegendRef = useRef<HTMLDivElement>(null);
   const suppressChromeHideRef = useRef(false);
-  const syncStatus = useSyncStatus();
   useWakeLock(keepScreenAwake || (timer.running && !lowPowerMode));
-  const firebaseAuthReady = useFirebaseAuthReady(session);
-  const {
-    notificationPreferences: liveNotificationPreferences,
-    enableNotifications,
-    updateNotificationPreferences,
-  } = useSessionNotifications({
-    sessionId: session?.id,
-    uid: uid ?? undefined,
-    role: myRole ?? undefined,
-  });
-
   useEffect(() => {
     if (
       !session ||
@@ -300,34 +232,41 @@ export function useMapScreenController() {
     sessionRules.customMatchingAreas,
   ]);
 
-  const overlay = useMapOverlayState();
-  const [mapError, setMapError] = useState<string | null>(null);
-  const [awaitingPlacement, setAwaitingPlacement] = useState(false);
   const [firstRunDismissed, setFirstRunDismissed] = useState(false);
-  const awaitHiderAnswer = sessionHasHiders(session?.memberRoles);
-  const { submitPendingQuestion, answerPendingQuestion, completeThermometerWalk, postSystemMessage } =
-    usePendingQuestionActions();
-  const pendingQuestions = usePendingQuestionsSync(session?.id);
-  const canSubmitQuestion = !hasOpenPendingQuestion(pendingQuestions);
-  const hidingZones = useHidingZonesSync(session?.id);
-  const playerLocations = usePlayerLocationsSync(session?.id);
-  const chatMessages = useSessionMessagesSync(session?.id);
-  const { hasUnreadChat, unreadCount } = useChatUnread({
-    sessionId: session?.id,
-    viewerUid: uid ?? undefined,
-    messages: chatMessages,
-    isChatOpen: overlay.isChatOpen,
-  });
+  const toolGameArea = fallbackGameArea(gameArea);
 
-  useLiveActivitySync({
-    enabled: Boolean(session?.id),
-    sessionId: session?.id,
+  const tools = useMapScreenTools({
+    session,
+    uid,
+    activeTool,
+    setActiveTool,
+    annotations,
     sessionRules,
-    timerState: timer.timerState,
-    timerHasStarted: timer.hasStarted,
+    gameArea,
+    toolGameArea,
     pendingQuestions,
-    preferences: liveNotificationPreferences,
+    distanceUnit,
+    createAnnotation,
   });
+  const {
+    radarTool,
+    photoTool,
+    thermometerTool,
+    pinTool,
+    zoneTool,
+    matchingTool,
+    measuringTool,
+    tentacleTool,
+    awaitHiderAnswer,
+    canSubmitQuestion,
+    mapError,
+    setMapError,
+    awaitingPlacement,
+    setAwaitingPlacement,
+    resetToolDrafts,
+    ensurePointInGameArea,
+    postSystemMessage,
+  } = tools;
 
   const postDeadlineSystemMessage = useCallback(
     async (text: string) => {
@@ -352,53 +291,6 @@ export function useMapScreenController() {
     postSystemMessage: postDeadlineSystemMessage,
   });
 
-  const finishPlacement = useCallback(() => {
-    setActiveTool("none");
-    setAwaitingPlacement(false);
-  }, [setActiveTool]);
-
-  const ensurePointInGameArea = useCallback(
-    (point: LatLngTuple) => {
-      if (!gameArea || isPointInGameArea(point, gameArea)) {
-        return true;
-      }
-
-      setMapError("That point is outside the play area.");
-      return false;
-    },
-    [gameArea],
-  );
-
-  const armPlacement = useCallback(() => {
-    setAwaitingPlacement(true);
-    setMapError(null);
-  }, []);
-
-  const toolGameArea = fallbackGameArea(gameArea);
-
-  const submitToolQuestion = useCallback(
-    async (
-      toolType: PendingQuestionToolType,
-      input: Omit<
-        Parameters<typeof submitPendingQuestion>[0],
-        "sessionId" | "senderUid" | "senderRole" | "toolType"
-      >,
-    ) => {
-      if (!session?.id || !uid) {
-        return;
-      }
-
-      return submitPendingQuestion({
-        ...input,
-        sessionId: session.id,
-        senderUid: uid,
-        senderRole: "seeker",
-        toolType,
-      });
-    },
-    [session, submitPendingQuestion, uid],
-  );
-
   useSeekerLocationSync({
     sessionId: session?.id,
     uid: uid,
@@ -413,132 +305,11 @@ export function useMapScreenController() {
     gameArea: toolGameArea,
   });
 
-  const completeThermometerWalkForSession = useCallback(
-    async (input: {
-      pendingQuestionId: string;
-      startPoint: LatLngTuple;
-      endPoint: LatLngTuple;
-      distanceMeters: number;
-      promptText: string;
-      replyOptions: { id: string; label: string }[];
-      cardDraw?: number;
-      cardKeep?: number;
-    }) => {
-      if (!session?.id || !uid) {
-        return;
-      }
-
-      await completeThermometerWalk({
-        sessionId: session.id,
-        pendingQuestionId: input.pendingQuestionId,
-        senderUid: uid,
-        senderRole: "seeker",
-        startPoint: input.startPoint,
-        endPoint: input.endPoint,
-        distanceMeters: input.distanceMeters,
-        promptText: input.promptText,
-        replyOptions: input.replyOptions,
-        cardDraw: input.cardDraw,
-        cardKeep: input.cardKeep,
-      });
-    },
-    [completeThermometerWalk, session, uid],
-  );
-
-  const radarTool = useRadarTool({
-    active: activeTool === "radar",
-    annotations,
-    gameSize: session?.gameSize ?? "medium",
-    pendingQuestions,
-    createAnnotation,
-    awaitHiderAnswer,
-    submitPendingQuestion: awaitHiderAnswer
-      ? (input) => submitToolQuestion("radar", input).then(() => undefined)
-      : undefined,
-    sessionId: session?.id,
-    senderUid: uid,
-    senderRole: "seeker",
-    distanceUnit,
-    finishPlacement,
-    setMapError,
-    mapError,
-    gpsLoading,
-    gpsError,
-    awaitingPlacement,
-    setAwaitingPlacement,
-    refreshGps: refresh,
-    ensurePointInGameArea,
-    armPlacement,
-    canSubmitQuestion,
-  });
-  const photoTool = usePhotoTool({
-    active: activeTool === "photo",
-    gameSize: session?.gameSize ?? "medium",
-    pendingQuestions,
-    awaitHiderAnswer,
-    submitPendingQuestion: awaitHiderAnswer
-      ? (input) => submitToolQuestion("photo", input).then(() => undefined)
-      : undefined,
-    sessionId: session?.id,
-    senderUid: uid,
-    finishPlacement,
-    setMapError,
-    mapError,
-    canSubmitQuestion,
-  });
-  const thermometerTool = useThermometerTool({
-    active: activeTool === "thermometer",
-    annotations,
-    sessionRules,
-    pendingQuestions,
-    canSubmitQuestion,
-    createAnnotation,
-    awaitHiderAnswer,
-    submitPendingQuestion: awaitHiderAnswer
-      ? (input) => submitToolQuestion("thermometer", input)
-      : undefined,
-    completeThermometerWalk: awaitHiderAnswer
-      ? completeThermometerWalkForSession
-      : undefined,
-    sessionId: session?.id,
-    senderUid: uid,
-    distanceUnit,
-    finishPlacement,
-    setMapError,
-    gpsLoading,
-    gpsError,
-    refreshGps: refresh,
-    ensurePointInGameArea,
-  });
   const activeThermometerWalk = useActiveThermometerWalk({
     pendingQuestions,
     playerLocations,
     myUid: uid,
     localLivePoint: thermometerTool.walkCurrentPoint,
-  });
-  const idleHeavyMapTools = useMemo(() => createIdleHeavyMapTools(), []);
-  const [heavyMapTools, setHeavyMapTools] =
-    useState<HeavyMapToolsApi>(idleHeavyMapTools);
-  const heavyToolActive =
-    activeTool === "matching" ||
-    activeTool === "measuring" ||
-    activeTool === "tentacle";
-  const handleHeavyToolsChange = useCallback((tools: HeavyMapToolsApi) => {
-    setHeavyMapTools(tools);
-  }, []);
-
-  const { matchingTool, measuringTool, tentacleTool } = heavyToolActive
-    ? heavyMapTools
-    : idleHeavyMapTools;
-  const pinTool = usePinTool({
-    active: activeTool === "pin",
-    createAnnotation,
-    finishPlacement,
-  });
-  const zoneTool = useZoneTool({
-    active: activeTool === "zone",
-    createAnnotation,
-    finishPlacement,
   });
 
   const {
@@ -576,38 +347,6 @@ export function useMapScreenController() {
   });
 
   useEnsureSessionMembership();
-  useSessionSync();
-  useSessionEndedRedirect(session?.id, isHost);
-
-  useEffect(() => {
-    setPremiumApiContext(session);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync premium context on session identity/tier only
-  }, [session?.id, session?.tier]);
-
-  useEffect(() => {
-    if (
-      !session ||
-      session.id === LOCAL_SESSION_ID ||
-      !isFirebaseConfigured()
-    ) {
-      return;
-    }
-
-    void (async () => {
-      try {
-        const user = await ensureAnonymousUser();
-        setCurrentUid(user.uid);
-      } catch (error) {
-        setLastSyncError(
-          error instanceof Error
-            ? error.message
-            : "No access to this session.",
-        );
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-auth on session id change only
-  }, [session?.id, setLastSyncError]);
-
   useEffect(() => {
     if (!transitLiveSupported && transitLiveEnabled) {
       setTransitLiveEnabled(false);
@@ -633,13 +372,11 @@ export function useMapScreenController() {
       return;
     }
 
-    /* eslint-disable react-hooks/set-state-in-effect -- clear placement when an annotation is selected */
     setActiveTool("none");
     setAwaitingPlacement(false);
     overlay.closeSheet();
-    /* eslint-enable react-hooks/set-state-in-effect */
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only overlay.closeSheet invoked
-  }, [overlay.closeSheet, selectedAnnotationId, setActiveTool]);
+  }, [overlay.closeSheet, selectedAnnotationId, setActiveTool, setAwaitingPlacement]);
 
   const center = useMemo<LatLngTuple>(() => {
     if (!gameArea) {
@@ -680,8 +417,18 @@ export function useMapScreenController() {
     zoneTool,
   });
 
-  const endGameBlocked =
-    isEndGameActive(session) || isEndGamePending(session);
+  const sessionActions = useMapSessionActions({
+    session,
+    setSession,
+    uid,
+    myRole,
+    isRemote,
+    gameRulesEditable,
+    timerHasStarted: timer.hasStarted,
+    hidingZones,
+  });
+  const { confirmedHidingZones, endGameBlocked, canStartEndGame } =
+    sessionActions;
 
   const { handleClearMap, handleResetBoard, handleEndSession, handleLeaveSession, exportMap } =
     useMapSessionChrome({
@@ -695,11 +442,6 @@ export function useMapScreenController() {
       closeSettingsPanel: overlay.closeSheet,
       endGameBlocked,
     });
-
-  const measuringPlacePoints = useMemo(
-    () => measuringTool.draft.measuringPlaces.map((place) => place.point),
-    [measuringTool.draft.measuringPlaces],
-  );
 
   const tentacleEliminationPreviewExtra = useMemo(
     () =>
@@ -738,7 +480,7 @@ export function useMapScreenController() {
         measuring: {
           seekerPoint: measuringTool.draft.measuringSeekerPoint,
           targetPoint: measuringTool.draft.measuringTargetPoint,
-          placePoints: measuringPlacePoints,
+          placePoints: tools.measuringPlacePoints,
           siteRadiusMeters: measuringTool.draft.measuringDistanceMeters,
           boundaryPreview: measuringTool.draft.measuringBoundaryPreview,
           eliminationPreview: measuringTool.draft.measuringEliminationPreview,
@@ -756,31 +498,13 @@ export function useMapScreenController() {
       tentacleEliminationPreviewExtra,
     );
 
-  const resetToolDrafts = useCallback(() => {
-    measuringTool.resetDraft();
-    matchingTool.resetDraft();
-    thermometerTool.resetDraft();
-    radarTool.resetDraft();
-    tentacleTool.resetDraft();
-    pinTool.resetDraft();
-    zoneTool.resetDraft();
-  }, [
-    matchingTool,
-    measuringTool,
-    pinTool,
-    radarTool,
-    tentacleTool,
-    thermometerTool,
-    zoneTool,
-  ]);
-
   const dismissTransientUi = useCallback(() => {
     overlay.closeSheet();
     setSelectedAnnotationId(null);
     cancelGeometryEdit();
     setAwaitingPlacement(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only overlay.closeSheet invoked
-  }, [cancelGeometryEdit, overlay.closeSheet, setSelectedAnnotationId]);
+  }, [cancelGeometryEdit, overlay.closeSheet, setSelectedAnnotationId, setAwaitingPlacement]);
 
   const {
     mapPanning,
@@ -791,121 +515,6 @@ export function useMapScreenController() {
   } = useToolPanelChrome(activeTool);
   const mapChromeControlInset: MapChromeControlInset =
     panelMinimized || mapPanning ? "chrome-hidden" : "dock";
-
-  const confirmedHidingZones = useMemo(
-    () => hidingZones.filter((zone) => zone.status === "confirmed"),
-    [hidingZones],
-  );
-  const canStartEndGame =
-    myRole !== "hider" &&
-    timer.hasStarted &&
-    !isEndGameActive(session) &&
-    !isEndGamePending(session) &&
-    confirmedHidingZones.length > 0;
-
-  const handleStartEndGame = useCallback(async () => {
-    if (!session?.id || !uid || !canStartEndGame) {
-      return;
-    }
-
-    const confirmed = window.confirm(
-      "Start end game?\n\nConfirm seekers have entered the hiding zone and left transit. Map will show only the hiding zone circle; hider must stay at one spot until found.",
-    );
-    if (!confirmed) {
-      return;
-    }
-
-    if (session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
-      setSession(
-        {
-          ...session,
-          endGameRequestedAt: new Date().toISOString(),
-          endGameRequestedByUid: uid,
-        },
-        uid,
-      );
-      return;
-    }
-
-    await requestEndGameSession(session.id, uid);
-  }, [canStartEndGame, session, setSession, uid]);
-
-  const handleResetEndGame = useCallback(async () => {
-    if (!session?.id || !uid) {
-      return;
-    }
-
-    if (session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
-      setSession(
-        {
-          ...session,
-          endGameStartedAt: undefined,
-          endGameStartedByUid: undefined,
-          endGameRequestedAt: undefined,
-          endGameRequestedByUid: undefined,
-        },
-        uid,
-      );
-      return;
-    }
-
-    await resetEndGameSession(session.id);
-  }, [session, setSession, uid]);
-
-  const handleSaveGameRules = useCallback(async () => {
-    if (!session || !draftAdvancedSettings || !gameRulesEditable) {
-      return;
-    }
-
-    const gameSize = session.gameSize ?? "medium";
-    const patch = sessionRulesPatchFromAdvancedSettings(
-      gameSize,
-      draftAdvancedSettings,
-      session.distanceUnit ?? "imperial",
-    );
-    const merged = mergeSessionRulesPatch(session, patch);
-
-    if (session.id !== LOCAL_SESSION_ID && isRemote) {
-      await updateSessionRules(session.id, {
-        ...patch,
-        hidingZoneRadiusMeters: merged.hidingZoneRadiusMeters,
-      });
-    }
-
-    setSession(merged, uid ?? undefined);
-  }, [
-    draftAdvancedSettings,
-    gameRulesEditable,
-    isRemote,
-    session,
-    setSession,
-    uid,
-  ]);
-
-  const handleDistanceUnitChange = useCallback(
-    async (unit: typeof distanceUnit) => {
-      if (!session || !gameRulesEditable) {
-        return;
-      }
-
-      const merged = { ...session, distanceUnit: unit };
-      if (session.id !== LOCAL_SESSION_ID && isRemote) {
-        await updateSessionRules(session.id, { distanceUnit: unit });
-      }
-      setSession(merged, uid ?? undefined);
-    },
-    [gameRulesEditable, isRemote, session, setSession, uid],
-  );
-
-  const placementCrosshair =
-    zoneTool.placementCrosshair ||
-    awaitingPlacement ||
-    pinTool.placementCrosshair ||
-    radarTool.placementCrosshair ||
-    thermometerTool.placementCrosshair ||
-    matchingTool.placementCrosshair ||
-    measuringTool.placementCrosshair ||
-    tentacleTool.placementCrosshair;
 
   const handleSelectTool = useCallback(
     (tool: MapTool) => {
@@ -928,53 +537,19 @@ export function useMapScreenController() {
       resetToolDrafts,
       session,
       setActiveTool,
+      setMapError,
     ],
   );
 
-  const handleOpenChat = useCallback(() => {
-    resetToolDrafts();
-    setActiveTool("none");
-    setAwaitingPlacement(false);
-    setSelectedAnnotationId(null);
-    cancelGeometryEdit();
-    overlay.openChat();
-  }, [
-    cancelGeometryEdit,
-    overlay,
-    resetToolDrafts,
-    setActiveTool,
-    setSelectedAnnotationId,
-  ]);
-
-  const handleOpenSettings = useCallback(() => {
-    resetToolDrafts();
-    setActiveTool("none");
-    setAwaitingPlacement(false);
-    setSelectedAnnotationId(null);
-    cancelGeometryEdit();
-    overlay.openSettings();
-  }, [
-    cancelGeometryEdit,
-    overlay,
-    resetToolDrafts,
-    setActiveTool,
-    setSelectedAnnotationId,
-  ]);
-
-  const handleOpenLog = useCallback(() => {
-    resetToolDrafts();
-    setActiveTool("none");
-    setAwaitingPlacement(false);
-    setSelectedAnnotationId(null);
-    cancelGeometryEdit();
-    overlay.openLog();
-  }, [
-    cancelGeometryEdit,
-    overlay,
-    resetToolDrafts,
-    setActiveTool,
-    setSelectedAnnotationId,
-  ]);
+  const { handleOpenChat, handleOpenSettings, handleOpenLog } =
+    useMapOverlayActions({
+      overlay,
+      resetToolDrafts,
+      setActiveTool,
+      setAwaitingPlacement,
+      setSelectedAnnotationId,
+      cancelGeometryEdit,
+    });
 
   const handleUndoLastAnnotation = useCallback(() => {
     setSelectedAnnotationId(null);
@@ -1035,7 +610,7 @@ export function useMapScreenController() {
     center,
     mapFocusBounds,
     mapChromeControlInset,
-    placementCrosshair,
+    placementCrosshair: tools.placementCrosshair,
     handleMapClick,
     handleMapViewportChange,
     handleMapPanStart,
@@ -1073,32 +648,8 @@ export function useMapScreenController() {
     panelMinimized,
     setPanelMinimized,
     mapError,
-    heavyToolActive,
-    heavyMapToolsSlotProps: {
-      activeTool,
-      sessionRules,
-      annotations,
-      pendingQuestions,
-      gameArea: toolGameArea,
-      createAnnotation,
-      distanceUnit,
-      finishPlacement,
-      gpsLoading,
-      gpsError,
-      mapError,
-      setMapError,
-      refreshGps: refresh,
-      ensurePointInGameArea,
-      awaitingPlacement,
-      setAwaitingPlacement,
-      armPlacement,
-      awaitHiderAnswer,
-      submitToolQuestion,
-      sessionId: session?.id,
-      senderUid: uid,
-      canSubmitQuestion,
-      onToolsChange: handleHeavyToolsChange,
-    },
+    heavyToolActive: tools.heavyToolActive,
+    heavyMapToolsSlotProps: tools.heavyMapToolsSlotProps,
     radarTool,
     photoTool,
     thermometerTool,
@@ -1113,8 +664,8 @@ export function useMapScreenController() {
     liveLocationError,
     isRemote,
     gameRulesEditable,
-    draftAdvancedSettings,
-    setDraftAdvancedSettings,
+    draftAdvancedSettings: sessionActions.draftAdvancedSettings,
+    setDraftAdvancedSettings: sessionActions.setDraftAdvancedSettings,
     updateNotificationPreferences,
     enableNotifications,
     deleteAnnotation,
@@ -1128,16 +679,16 @@ export function useMapScreenController() {
     handleOpenLog,
     handleUndoLastAnnotation,
     handleRedoLastAnnotation,
-    handleResetEndGame,
-    handleStartEndGame,
+    handleResetEndGame: sessionActions.handleResetEndGame,
+    handleStartEndGame: sessionActions.handleStartEndGame,
     handleClearMap,
     handleResetBoard,
     handleEndSession,
     handleLeaveSession,
-    handleSaveGameRules,
-    handleDistanceUnitChange,
+    handleSaveGameRules: sessionActions.handleSaveGameRules,
+    handleDistanceUnitChange: sessionActions.handleDistanceUnitChange,
     exportMap,
-    answerPendingQuestion,
+    answerPendingQuestion: tools.answerPendingQuestion,
     setActiveTool,
     setAwaitingPlacement,
   };

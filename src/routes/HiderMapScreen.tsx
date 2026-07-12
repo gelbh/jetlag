@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { Polygon } from "react-leaflet";
 import { AnnotationLayer } from "../components/map/AnnotationLayer";
@@ -44,30 +44,16 @@ import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
 import { useHiderZoneTool } from "../hooks/session/useHiderZoneTool";
 import { useMapOverlayState } from "../hooks/map/useMapOverlayState";
-import { useChatUnread } from "../hooks/session/useChatUnread";
+import { useSharedSessionScreen } from "../hooks/session/useSharedSessionScreen";
 import { usePendingQuestionActions } from "../hooks/sync/usePendingQuestionActions";
-import { useRemoteSessionTimerSync } from "../hooks/session/useRemoteSessionTimerSync";
-import { useSessionEndedRedirect } from "../hooks/session/useSessionEndedRedirect";
-import { useSessionTimer } from "../hooks/session/useSessionTimer";
 import { ActiveThermometerWalkLayer } from "../components/map/ActiveThermometerWalkLayer";
 import { LiveUserLocationLayer } from "../components/map/LiveUserLocationLayer";
 import { PendingQuestionLayer } from "../components/map/PendingQuestionLayer";
 import { useActiveThermometerWalk } from "../hooks/location/useActiveThermometerWalk";
-import {
-  useHidingZonesSync,
-  usePendingQuestionsSync,
-  usePlayerLocationsSync,
-  useSessionMessagesSync,
-} from "../hooks/session/useSessionExtrasSync";
-import { useSyncStatus } from "../hooks/sync/useSyncStatus";
 import { useHiderZoneAdvisory } from "../hooks/location/useHiderZoneAdvisory";
 import { useLiveLocation } from "../hooks/location/useLiveLocation";
 import { useWakeLock } from "../hooks/location/useWakeLock";
 import { getPowerProfile } from "../domain/device/powerProfile";
-import { useSessionNotifications } from "../hooks/session/useSessionNotifications";
-import { useLiveActivitySync } from "../hooks/sync/useLiveActivitySync";
-import { useSessionSync } from "../hooks/session/useSessionSync";
-import { useFirebaseAuthReady } from "../hooks/sync/useFirebaseAuthReady";
 import { useSessionDistanceUnit } from "../hooks/session/useSessionDistanceUnit";
 import { isEndGameActive, isEndGamePending, LOCAL_SESSION_ID } from "../domain/map/annotations";
 import {
@@ -76,14 +62,12 @@ import {
   ensureRemoteSessionWriteAccess,
 } from "../services/firestore/firestoreAnnotations";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase";
-import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useSessionAnnotations } from "../hooks/map/useSessionAnnotations";
 import { useMapStore, useSessionStore } from "../state/sessionStore";
 
 export function HiderMapScreen() {
   const session = useSessionStore((state) => state.session);
   const setSession = useSessionStore((state) => state.setSession);
-  const setMyUid = useSessionStore((state) => state.setMyUid);
   const layerVisibility = useMapStore((state) => state.layerVisibility);
   const mapStyle = useMapStore((state) => state.mapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
@@ -114,8 +98,29 @@ export function HiderMapScreen() {
   );
 
   const overlay = useMapOverlayState();
-  const authReady = useFirebaseAuthReady(session);
-  const [authUid, setAuthUid] = useState<string | null>(null);
+  const {
+    uid,
+    isHost,
+    sessionId,
+    timer,
+    timerSyncing,
+    canControlTimer,
+    pendingQuestions,
+    hidingZones,
+    playerLocations,
+    chatMessages: messages,
+    syncStatus,
+    hasUnreadChat,
+    unreadCount,
+    authReady,
+    isRemote,
+    enableNotifications,
+    updateNotificationPreferences,
+  } = useSharedSessionScreen({
+    isChatOpen: overlay.isChatOpen,
+    notificationRole: "hider",
+    authMode: "hider-anonymous",
+  });
   const [recenterToken, setRecenterToken] = useState(0);
   const [truthReveal, setTruthReveal] = useState<HiderTruthRevealState | null>(
     null,
@@ -132,20 +137,6 @@ export function HiderMapScreen() {
     [],
   );
 
-  useSessionSync();
-
-  useEffect(() => {
-    setPremiumApiContext(session);
-  }, [session]);
-
-  useEffect(() => {
-    void ensureAnonymousUser().then((user) => {
-      setAuthUid(user.uid);
-      setMyUid(user.uid);
-    });
-  }, [setMyUid]);
-
-  const uid = authReady ? authUid : null;
   const hidingZoneRadius = session
     ? effectiveHidingZoneRadiusMeters(session)
     : effectiveHidingZoneRadiusMeters({ gameSize: "medium" });
@@ -153,17 +144,13 @@ export function HiderMapScreen() {
     hidingZoneRadius,
     distanceUnit === "metric" ? "metric" : "imperial",
   );
-  const sessionId = session?.id;
   const annotations = useSessionAnnotations(sessionId);
-  const hidingZones = useHidingZonesSync(sessionId);
   const timeTraps = useTimeTrapsSync(sessionId);
   const expansionPackEnabled = session?.expansionPackEnabled === true;
   const [expansionMenuOpen, setExpansionMenuOpen] = useState(false);
   const [timeTrapSheetOpen, setTimeTrapSheetOpen] = useState(false);
   const [timeTrapPeeked, setTimeTrapPeeked] = useState(false);
   const [curseSheetOpen, setCurseSheetOpen] = useState(false);
-  const pendingQuestions = usePendingQuestionsSync(sessionId);
-  const playerLocations = usePlayerLocationsSync(sessionId);
   const activeThermometerWalk = useActiveThermometerWalk({
     pendingQuestions,
     playerLocations,
@@ -174,13 +161,6 @@ export function HiderMapScreen() {
     () => hidingZones.filter((zone) => zone.status === "confirmed"),
     [hidingZones],
   );
-  const messages = useSessionMessagesSync(sessionId);
-  const { hasUnreadChat, unreadCount } = useChatUnread({
-    sessionId,
-    viewerUid: uid ?? undefined,
-    messages,
-    isChatOpen: overlay.isChatOpen,
-  });
   const myZone = hidingZones.find((zone) => zone.hiderUid === uid) ?? null;
   const stationCenter = useMemo<LatLngTuple | null>(
     () => (myZone ? [myZone.center.lat, myZone.center.lng] : null),
@@ -192,25 +172,6 @@ export function HiderMapScreen() {
     gameArea ?? undefined,
   );
 
-  const isHost = Boolean(
-    session?.hostUid && uid && session.hostUid === uid,
-  );
-  useSessionEndedRedirect(sessionId, isHost);
-  const {
-    canControlTimer,
-    remoteState,
-    remoteSnapshot,
-    timerSyncing,
-    onControl: onTimerControl,
-    isRemote,
-  } = useRemoteSessionTimerSync(sessionId, isHost);
-  const timer = useSessionTimer(sessionId, {
-    canControl: canControlTimer,
-    onControl: onTimerControl,
-    remoteState,
-    remoteSnapshot,
-  });
-  const syncStatus = useSyncStatus();
   const liveLocationProfile = getPowerProfile(lowPowerMode).liveLocation;
   const { reading: liveLocationReading } = useLiveLocation(showCurrentLocation, {
     highAccuracy: liveLocationProfile.highAccuracy,
@@ -231,25 +192,6 @@ export function HiderMapScreen() {
     timerState: timer.timerState,
   });
   useWakeLock(keepScreenAwake || (timer.running && !lowPowerMode));
-  const {
-    notificationPreferences: liveNotificationPreferences,
-    enableNotifications,
-    updateNotificationPreferences,
-  } = useSessionNotifications({
-    sessionId,
-    uid: uid ?? undefined,
-    role: "hider",
-  });
-
-  useLiveActivitySync({
-    enabled: Boolean(sessionId),
-    sessionId,
-    sessionRules: session ?? DEFAULT_SESSION_RULES,
-    timerState: timer.timerState,
-    timerHasStarted: timer.hasStarted,
-    pendingQuestions,
-    preferences: liveNotificationPreferences,
-  });
   const { answerPendingQuestion, postSystemMessage } = usePendingQuestionActions();
 
   const postGameSystem = useCallback(

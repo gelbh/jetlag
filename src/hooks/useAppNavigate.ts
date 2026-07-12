@@ -1,6 +1,5 @@
-import { useCallback, useContext, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { useNavigate, type NavigateOptions, type To } from "react-router-dom";
-import { MotionCapabilityContext } from "../components/motion/motionCapabilityContext";
 import { useMotionProfile } from "./useMotionProfile";
 
 const RESET_PATHS = new Set(["/", "/map"]);
@@ -15,9 +14,7 @@ function resolvePath(to: To): string {
 
 export function useAppNavigate() {
   const navigate = useNavigate();
-  const capability = useContext(MotionCapabilityContext);
   const { animate } = useMotionProfile();
-  const allowsViewTransitions = capability?.allowsViewTransitions ?? animate;
   const stackRef = useRef<string[]>([
     typeof window !== "undefined" ? window.location.pathname : "/",
   ]);
@@ -50,9 +47,9 @@ export function useAppNavigate() {
         state: options?.state,
         preventScrollReset: options?.preventScrollReset,
         relative: options?.relative,
-        viewTransition: allowsViewTransitions,
+        viewTransition: animate,
       });
     },
-    [navigate, allowsViewTransitions],
+    [navigate, animate],
   );
 }

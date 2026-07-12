@@ -1,12 +1,8 @@
 import type { GameArea } from "../../map/annotations";
 import type { MapStyle } from "../../map/mapBasemaps";
 import type { PendingQuestionRecord } from "../../session/sessionChat";
-import { buildMatchingOverlays } from "./matching";
-import { buildMeasuringOverlays } from "./measuring";
-import { buildRadarOverlays } from "./radar";
+import { pendingQuestionOverlayBuilders } from "../questionToolRegistry";
 import type { PendingQuestionOverlayResult } from "./shared";
-import { buildTentacleOverlays } from "./tentacle";
-import { buildThermometerOverlays } from "./thermometer";
 
 export type { PendingQuestionOverlayResult } from "./shared";
 
@@ -19,28 +15,13 @@ export function buildPendingQuestionOverlay(
     return null;
   }
 
-  const prefix = `pending-${question.id}`;
-  let result: { overlays: PendingQuestionOverlayResult["overlays"]; badgeAnchor: PendingQuestionOverlayResult["badgeAnchor"] };
-
-  switch (question.toolType) {
-    case "radar":
-      result = buildRadarOverlays(question, prefix);
-      break;
-    case "thermometer":
-      result = buildThermometerOverlays(question, prefix);
-      break;
-    case "matching":
-      result = buildMatchingOverlays(question, gameArea, prefix, mapStyle);
-      break;
-    case "measuring":
-      result = buildMeasuringOverlays(question, gameArea, prefix, mapStyle);
-      break;
-    case "tentacle":
-      result = buildTentacleOverlays(question, prefix);
-      break;
-    default:
-      return null;
+  const builder = pendingQuestionOverlayBuilders[question.toolType];
+  if (!builder) {
+    return null;
   }
+
+  const prefix = `pending-${question.id}`;
+  const result = builder(question, gameArea, prefix, mapStyle);
 
   if (result.overlays.length === 0) {
     return null;

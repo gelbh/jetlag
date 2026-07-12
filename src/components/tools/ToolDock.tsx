@@ -8,8 +8,6 @@ import {
   QUESTION_DOCK_TOOL_IDS,
 } from "../../domain/map/mapTools";
 import type { MapTool } from "../../state/sessionStore";
-import { MotionSharedElement } from "../motion/MotionSharedElement";
-import { MOTION_SHARED_ELEMENTS } from "../motion/sharedElements";
 import {
   ToolDockCompactMoreButton,
   ToolDockHistorySlots,
@@ -132,8 +130,8 @@ export function ToolDock({
 
       <div className="jl-tool-dock-bar">
         {dockHighlight ? (
-          <MotionSharedElement
-            id={MOTION_SHARED_ELEMENTS.toolDockSlot}
+          <div
+            aria-hidden={true}
             className="jl-tool-dock-highlight"
             style={{
               transform: `translate(${dockHighlight.x}px, ${dockHighlight.y}px)`,

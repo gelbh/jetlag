@@ -9,6 +9,7 @@ import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQues
 import { useMatchingTool } from "../../hooks/tools/useMatchingTool";
 import { useMeasuringTool } from "../../hooks/tools/useMeasuringTool";
 import { useTentacleTool } from "../../hooks/tools/useTentacleTool";
+import type { MapTool } from "../../state/sessionStore";
 import {
   createIdleHeavyMapTools,
   type HeavyMapToolsApi,
@@ -17,7 +18,8 @@ import {
   type TentacleToolApi,
 } from "../../hooks/map-screen/heavyMapTools";
 
-export interface HeavyMapToolRunnerProps {
+export interface HeavyToolHostProps {
+  activeTool: MapTool;
   sessionRules: SessionRulesInput;
   annotations: AnnotationRecord[];
   pendingQuestions?: readonly PendingQuestionRecord[];
@@ -101,93 +103,89 @@ function usePublishHeavyTool(
   }, [onToolsChange, tool, toolName]);
 }
 
-export function MatchingToolRunner({
+type HeavyToolName = "matching" | "measuring" | "tentacle";
+
+interface HeavyToolHookParams {
+  active: boolean;
+  annotations: AnnotationRecord[];
+  pendingQuestions?: readonly PendingQuestionRecord[];
+  gameArea: GameArea;
+  sessionRules: SessionRulesInput;
+  createAnnotation: (
+    annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
+  ) => Promise<AnnotationRecord>;
+  awaitHiderAnswer?: boolean;
+  submitPendingQuestion?: (
+    input: Omit<
+      SubmitPendingQuestionInput,
+      "sessionId" | "senderUid" | "senderRole" | "toolType"
+    >,
+  ) => Promise<void>;
+  sessionId?: string;
+  senderUid?: string | null;
+  distanceUnit: DistanceUnit;
+  finishPlacement: () => void;
+  setMapError: (message: string | null) => void;
+  mapError: string | null;
+  gpsLoading: boolean;
+  gpsError?: string | null;
+  awaitingPlacement: boolean;
+  setAwaitingPlacement: (awaiting: boolean) => void;
+  refreshGps: () => Promise<{ lat: number; lng: number }>;
+  ensurePointInGameArea: (point: LatLngTuple) => boolean;
+  armPlacement: () => void;
+  canSubmitQuestion?: boolean;
+}
+
+const HEAVY_TOOL_HOOKS: {
+  [K in HeavyToolName]: (
+    params: HeavyToolHookParams,
+  ) => MatchingToolApi | MeasuringToolApi | TentacleToolApi;
+} = {
+  matching: useMatchingTool,
+  measuring: useMeasuringTool,
+  tentacle: useTentacleTool,
+};
+
+interface HeavyToolRunnerProps extends Omit<HeavyToolHostProps, "activeTool"> {
+  toolName: HeavyToolName;
+}
+
+/** Must remount (via key) when toolName changes so the underlying hook stays stable. */
+function HeavyToolRunner({
+  toolName,
   onToolsChange,
   awaitHiderAnswer,
   submitToolQuestion,
-  sessionRules,
-  sessionId,
-  senderUid,
-  canSubmitQuestion,
   ...sharedProps
-}: HeavyMapToolRunnerProps) {
-  const matchingTool = useMatchingTool({
-    active: true,
-    pendingQuestions: sharedProps.pendingQuestions,
-    sessionRules,
+}: HeavyToolRunnerProps) {
+  const useHeavyTool = HEAVY_TOOL_HOOKS[toolName];
+  const tool = useHeavyTool({
     ...sharedProps,
+    active: true,
     awaitHiderAnswer,
-    sessionId,
-    senderUid,
-    canSubmitQuestion,
     submitPendingQuestion:
       awaitHiderAnswer && submitToolQuestion
-        ? (input) =>
-            submitToolQuestion("matching", input).then(() => undefined)
+        ? (input) => submitToolQuestion(toolName, input).then(() => undefined)
         : undefined,
   });
 
-  usePublishHeavyTool("matching", matchingTool, onToolsChange);
+  usePublishHeavyTool(toolName, tool, onToolsChange);
 
   return null;
 }
 
-export function MeasuringToolRunner({
-  onToolsChange,
-  awaitHiderAnswer,
-  submitToolQuestion,
-  sessionRules,
-  sessionId,
-  senderUid,
-  canSubmitQuestion,
-  ...sharedProps
-}: HeavyMapToolRunnerProps) {
-  const measuringTool = useMeasuringTool({
-    active: true,
-    pendingQuestions: sharedProps.pendingQuestions,
-    sessionRules,
-    ...sharedProps,
-    awaitHiderAnswer,
-    sessionId,
-    senderUid,
-    canSubmitQuestion,
-    submitPendingQuestion:
-      awaitHiderAnswer && submitToolQuestion
-        ? (input) =>
-            submitToolQuestion("measuring", input).then(() => undefined)
-        : undefined,
-  });
+/** Mounts one heavy seeker tool at a time and publishes its API to the map controller. */
+export function HeavyToolHost({ activeTool, ...sharedProps }: HeavyToolHostProps) {
+  if (
+    activeTool !== "matching" &&
+    activeTool !== "measuring" &&
+    activeTool !== "tentacle"
+  ) {
+    return null;
+  }
 
-  usePublishHeavyTool("measuring", measuringTool, onToolsChange);
-
-  return null;
-}
-
-export function TentacleToolRunner({
-  onToolsChange,
-  awaitHiderAnswer,
-  submitToolQuestion,
-  sessionId,
-  senderUid,
-  canSubmitQuestion,
-  ...sharedProps
-}: HeavyMapToolRunnerProps) {
-  const tentacleTool = useTentacleTool({
-    active: true,
-    pendingQuestions: sharedProps.pendingQuestions,
-    ...sharedProps,
-    awaitHiderAnswer,
-    sessionId,
-    senderUid,
-    canSubmitQuestion,
-    submitPendingQuestion:
-      awaitHiderAnswer && submitToolQuestion
-        ? (input) =>
-            submitToolQuestion("tentacle", input).then(() => undefined)
-        : undefined,
-  });
-
-  usePublishHeavyTool("tentacle", tentacleTool, onToolsChange);
-
-  return null;
+  return (
+    <HeavyToolRunner key={activeTool} toolName={activeTool} {...sharedProps} />
+  );
 }

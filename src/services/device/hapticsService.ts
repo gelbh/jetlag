@@ -1,9 +1,8 @@
 import { Capacitor } from "@capacitor/core";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
-import { allowsHaptics, type MotionTier } from "../../domain/device/motionCapability";
 
-export async function impactLightForTier(tier: MotionTier): Promise<void> {
-  if (!allowsHaptics(tier) || !Capacitor.isNativePlatform()) {
+export async function impactLight(): Promise<void> {
+  if (!Capacitor.isNativePlatform()) {
     return;
   }
 

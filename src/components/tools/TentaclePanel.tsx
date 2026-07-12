@@ -17,11 +17,11 @@ import { TentacleAnswerPicker } from "./shared/TentacleAnswerPicker";
 import { ToolPanelShell } from "./shared/ToolPanelShell";
 import { ToolSection } from "./shared/ToolSection";
 import { SendToHidersButton } from "./shared/SendToHidersButton";
-import { ToolWizardNav } from "./shared/ToolWizardNav";
 import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
 import { TENTACLE_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
 import { useToolWizard } from "../../hooks/useToolWizard";
+import type { ToolPanelSandboxMode } from "./shared/toolPanelSandbox";
 
 interface TentaclePanelProps {
   gameSize: GameSize;
@@ -49,6 +49,7 @@ interface TentaclePanelProps {
   isSubmitting?: boolean;
   onRetry?: () => void;
   wizardStepRef?: RefObject<string>;
+  sandbox?: ToolPanelSandboxMode;
 }
 
 export function TentaclePanel({
@@ -76,11 +77,18 @@ export function TentaclePanel({
   isSubmitting = false,
   onRetry,
   wizardStepRef,
+  sandbox,
 }: TentaclePanelProps) {
+  const readOnly = sandbox?.readOnly ?? false;
+  const embeddedWizard = sandbox !== undefined;
   const steps = stepsForMode(TENTACLE_STEPS, awaitHiderAnswer);
-  const { stepId: step, stepIndex, goNext, goBack, stepper } = useToolWizard(
+  const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
     steps,
-    { wizardStepRef },
+    {
+      wizardStepRef,
+      initialStepId: sandbox?.initialWizardStepId,
+      syncStep: sandbox ? (sandbox.syncWizardStep ?? false) : true,
+    },
   );
 
   const prompt =
@@ -111,25 +119,8 @@ export function TentaclePanel({
     (step === "locations" && locationsReady && !loading);
   const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
 
-  return (
-    <ToolPanelShell toolId="tentacle" stepper={stepper}>
-      <WizardSwipeSurface
-        stepId={step}
-        stepIndex={stepIndex}
-        canGoBack={stepIndex > 0}
-        canGoNext={canSwipeNext}
-        onBack={goBack}
-        onNext={goNext}
-        footer={
-          <ToolWizardNav
-            stepIndex={stepIndex}
-            stepCount={steps.length}
-            onBack={goBack}
-            onNext={goNext}
-            canGoNext={canGoNext}
-          />
-        }
-      >
+  const panelBody = (
+    <>
       {step === "category" ? (
         <ToolSection first compact status="active">
           <QuestionPromptBlock
@@ -233,7 +224,45 @@ export function TentaclePanel({
           </button>
         </>
       ) : null}
-      </WizardSwipeSurface>
+    </>
+  );
+
+  return (
+    <ToolPanelShell
+      toolId="tentacle"
+      stepper={
+        <Stepper
+          nav={
+            readOnly
+              ? undefined
+              : {
+                  stepIndex,
+                  stepCount: steps.length,
+                  onBack: goBack,
+                  onNext: goNext,
+                  canGoNext,
+                }
+          }
+        />
+      }
+    >
+      <div className={readOnly ? "pointer-events-none select-none" : undefined}>
+        {readOnly ? (
+          panelBody
+        ) : (
+          <WizardSwipeSurface
+            stepId={step}
+            stepIndex={stepIndex}
+            canGoBack={stepIndex > 0}
+            canGoNext={canSwipeNext}
+            onBack={goBack}
+            onNext={goNext}
+            embedded={embeddedWizard}
+          >
+            {panelBody}
+          </WizardSwipeSurface>
+        )}
+      </div>
 
       {error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null}
     </ToolPanelShell>
