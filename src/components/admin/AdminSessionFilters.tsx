@@ -1,7 +1,7 @@
-import type { AdminSessionPhase } from "../../services/admin/adminSessions";
 import { adminSessionPhaseLabel } from "../../domain/admin/sessionPhase";
+import type { AdminSessionPhaseFilter } from "../../domain/admin/adminSessionFilters";
 
-export type AdminSessionPhaseFilter = AdminSessionPhase | "all";
+export type { AdminSessionPhaseFilter };
 
 const PHASE_FILTERS: AdminSessionPhaseFilter[] = [
   "all",
@@ -15,15 +15,19 @@ const PHASE_FILTERS: AdminSessionPhaseFilter[] = [
 interface AdminSessionFiltersProps {
   query: string;
   phase: AdminSessionPhaseFilter;
+  multiplayerOnly: boolean;
   onQueryChange: (query: string) => void;
   onPhaseChange: (phase: AdminSessionPhaseFilter) => void;
+  onMultiplayerOnlyChange: (value: boolean) => void;
 }
 
 export function AdminSessionFilters({
   query,
   phase,
+  multiplayerOnly,
   onQueryChange,
   onPhaseChange,
+  onMultiplayerOnlyChange,
 }: AdminSessionFiltersProps) {
   return (
     <div className="space-y-3">
@@ -62,6 +66,15 @@ export function AdminSessionFilters({
           );
         })}
       </div>
+      <label className="flex min-h-11 items-center gap-3 text-sm text-ink">
+        <input
+          type="checkbox"
+          checked={multiplayerOnly}
+          onChange={(event) => onMultiplayerOnlyChange(event.target.checked)}
+          className="size-4"
+        />
+        Multiplayer only
+      </label>
     </div>
   );
 }

@@ -5,6 +5,8 @@
 ### Improvements
 
 - Sessions: inactive games auto-end after 24 hours with no map activity; session codes become reusable sooner.
+- Admin: desktop monitor pane shows the live map beside the session list on wide screens.
+- Admin: monitor map includes force end, reset board, cleanup code, and session diagnostics.
 
 ## 0.5.8 - 2026-07-12
 

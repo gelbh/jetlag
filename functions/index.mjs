@@ -26,3 +26,4 @@ export {
 } from "./handlers/triggers.mjs";
 
 export { listActiveSessions } from "./admin/listActiveSessions.mjs";
+export { adminModerateSession } from "./admin/moderateSession.mjs";
