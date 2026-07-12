@@ -1,4 +1,5 @@
 import { type Page, expect } from "@playwright/test";
+import { dismissMapOnboarding } from "./page-init";
 
 export function parseClockToSeconds(text: string): number {
   const parts = text.trim().split(":").map((part) => Number.parseInt(part, 10));
@@ -32,13 +33,18 @@ export async function startSessionTimer(page: Page) {
 }
 
 export async function goHomeFromMap(page: Page) {
-  await page.getByRole("link", { name: "Home" }).click();
-  await expect(page).toHaveURL("/", { timeout: 10_000 });
+  // Full navigation matches session lifecycle e2e and avoids races with
+  // deferred chunk-reload recovery after leaving an active map session.
+  await page.goto("/");
+  await expect(
+    page.getByRole("button", { name: /Return to map/i }),
+  ).toBeVisible({ timeout: 30_000 });
 }
 
 export async function returnToMapFromHome(page: Page) {
   await page.getByRole("button", { name: /Return to map/i }).click();
   await expect(page).toHaveURL(/\/map/, { timeout: 15_000 });
+  await dismissMapOnboarding(page);
 }
 
 export async function openTimerSettings(page: Page) {

@@ -3,6 +3,7 @@ import {
   openQuestionTutorial,
   openSplitPanelStep,
 } from "../../fixtures/tutorial-interactive";
+import { waitForMapTilesLoaded } from "../../fixtures/map";
 
 const SPLIT_TOOLS = [
   {
@@ -43,6 +44,9 @@ test.describe("tutorial sandbox split-panel screenshots", () => {
       await openQuestionTutorial(page, toolId);
       await openSplitPanelStep(page);
       await expect(page.getByRole("heading", { name: heading })).toBeVisible();
+      if (toolId === "thermometer") {
+        await waitForMapTilesLoaded(page);
+      }
       await expect(page).toHaveScreenshot(snapshot, {
         maxDiffPixelRatio: 0.02,
       });
