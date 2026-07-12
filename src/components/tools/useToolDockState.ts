@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type RefObject } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState, type RefObject } from "react";
 import { QUESTION_DOCK_TOOL_IDS } from "../../domain/map/mapTools";
 import type { MapTool } from "../../state/sessionStore";
 
@@ -101,8 +101,11 @@ export function useToolDockHighlight(
     });
   }, [activeTool, mainGroupRef]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     updateDockHighlight();
+  }, [updateDockHighlight, activeTool, viewportBottomInset, visibleQuestionToolCount]);
+
+  useEffect(() => {
     window.addEventListener("resize", updateDockHighlight);
     return () => window.removeEventListener("resize", updateDockHighlight);
   }, [updateDockHighlight, viewportBottomInset, visibleQuestionToolCount]);

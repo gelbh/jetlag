@@ -33,13 +33,14 @@
     border: 2px solid oklch(from var(--color-highlight) l c h / 0.55);
     background: var(--color-highlight-soft);
     pointer-events: none;
+    will-change: transform, width, height;
   }
 
   html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-dock-highlight {
     transition:
-      transform var(--motion-fast) var(--ease-out-quint),
-      width var(--motion-fast) var(--ease-out-quint),
-      height var(--motion-fast) var(--ease-out-quint),
+      transform var(--motion-base) var(--ease-spring-subtle),
+      width var(--motion-base) var(--ease-spring-subtle),
+      height var(--motion-base) var(--ease-spring-subtle),
       opacity var(--motion-fast) var(--ease-out-quint);
   }
 
@@ -163,14 +164,17 @@
 
   html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-slot {
     transition:
-      background var(--motion-fast) var(--ease-out-quint),
-      border-color var(--motion-fast) var(--ease-out-quint),
       color var(--motion-fast) var(--ease-out-quint),
-      transform var(--motion-instant) var(--ease-out-quint);
+      opacity var(--motion-fast) var(--ease-out-quint);
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-slot:active:not(:disabled) {
-    transform: scale(0.97);
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-dock-group-main .jl-tool-slot-active {
+    border-color: transparent;
+    background: transparent;
+  }
+
+  html[data-motion="css"] .jl-tool-dock-group-main .jl-tool-slot.hud-pressable-css:active:not(:disabled) {
+    transform: scale(0.94);
   }
 
   html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-slot {
@@ -273,17 +277,19 @@
   }
 
   .jl-tool-panel-title-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
     align-items: center;
     min-height: 1.75rem;
     margin-bottom: 0.625rem;
-    padding: 0 0.25rem 0.5rem 2.75rem;
+    padding: 0 0.25rem 0.5rem;
     border-bottom: 2px solid var(--color-border);
   }
 
   .jl-tool-panel-title {
+    grid-column: 2;
     min-width: 0;
-    flex: 1;
+    text-align: center;
     font-family: var(--font-display);
     font-size: 0.75rem;
     font-weight: 600;
