@@ -33,7 +33,7 @@
     "test:ci": "npm run test:coverage && npm run test:functions",
     "test:perf": "GEOMETRY_PERF=1 vitest run src/domain/geometry/geometryPerf.test.ts --pool=forks --maxWorkers=1",
     "test:changed": "vitest run --changed origin/main --passWithNoTests",
-    "emulators:start": "firebase emulators:start --project demo-jetlag --only auth,firestore,storage",
+    "emulators:start": "firebase emulators:start --project demo-jetlag --only auth,firestore,storage,functions",
     "deploy": "node scripts/deploy-production.mjs",
     "deploy:worker": "npm run build && wrangler deploy",
     "changeset": "changeset",
