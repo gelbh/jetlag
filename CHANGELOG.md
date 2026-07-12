@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.5.11 - 2026-07-12
+
+### Fixes
+
+- Map: elimination shading worker runs again under enforced CSP.
+- Map: location and question tools load map data again (Overpass proxy + App Check under CSP).
+- Firebase: App Check reCAPTCHA loads under content security policy.
+- Map sync: Retry on the sync rail replays queued map pins after a failed upload.
+
+### Improvements
+
+- Map sync: queue map pins when the connection is unstable, not only when the browser says offline.
+- Map sync: clearer offline and unstable connection copy with working Retry guidance.
+- Map: warn when Firestore offline cache is unavailable on this device.
+- Create and join: preload game-area map data even when the connection flickers, using cached boundaries when live fetch fails.
+- Map: cache bundled geo JSON in the service worker after first load for flaky connections.
+
+### Technical
+
+- Offline write queue schema now tags annotation entries for future write kinds.
+
 ## 0.5.10 - 2026-07-12
 
 ### Improvements
