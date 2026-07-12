@@ -19,6 +19,22 @@ service cloud.firestore {
     }
 
     function validPlayerRole(role) {
+      return role in ['seeker', 'hider', 'observer'];
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email is string
+        && request.auth.token.email.lower() == 'gelbharttomer@gmail.com';
+    }
+
+    function validJoinRole(role) {
+      return role in ['seeker', 'hider']
+        || (role == 'observer' && isAdmin());
+    }
+
+    function validHostPlayerRole(role) {
       return role in ['seeker', 'hider'];
     }
 
@@ -220,7 +236,7 @@ service cloud.firestore {
         && request.resource.data.hidingZoneRadiusMeters is number
         && request.resource.data.memberRoles is map
         && request.resource.data.memberRoles[request.auth.uid] is string
-        && validPlayerRole(request.resource.data.memberRoles[request.auth.uid])
+        && validHostPlayerRole(request.resource.data.memberRoles[request.auth.uid])
         && (
           !('hostAppVersion' in request.resource.data)
           || request.resource.data.hostAppVersion is string
@@ -243,7 +259,7 @@ service cloud.firestore {
         && request.auth.uid in request.resource.data.memberUids
         && request.resource.data.memberRoles is map
         && request.resource.data.memberRoles[request.auth.uid] is string
-        && validPlayerRole(request.resource.data.memberRoles[request.auth.uid])
+        && validJoinRole(request.resource.data.memberRoles[request.auth.uid])
       ) || (
         isSessionHost(sessionId)
         && request.resource.data.gameArea == resource.data.gameArea
@@ -402,7 +418,7 @@ service cloud.firestore {
         allow create: if isSessionMember(sessionId)
           && request.resource.data.channel in ['social', 'game']
           && request.resource.data.senderUid == request.auth.uid
-          && validPlayerRole(request.resource.data.senderRole)
+          && validHostPlayerRole(request.resource.data.senderRole)
           && request.resource.data.createdAt is string
           && (
             (

@@ -15,6 +15,11 @@ const mockEnsureRemoteSessionMembership = vi.fn();
 vi.mock("../services/core/firebase", () => ({
   isFirebaseConfigured: () => mockIsFirebaseConfigured(),
   ensureAnonymousUser: (...args: unknown[]) => mockEnsureAnonymousUser(...args),
+  getFirebaseAuth: () => ({ currentUser: null, onAuthStateChanged: () => () => undefined }),
+}));
+
+vi.mock("../services/core/firebaseAuthReady", () => ({
+  waitForPermanentAuthReady: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("../services/billing/premiumBilling", () => ({

@@ -14,6 +14,7 @@ import { AppUpdateBanner } from "./components/ui/AppUpdateBanner";
 import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { Home } from "./routes/Home";
+import { AdminPanel } from "./routes/AdminPanel";
 import { JoinSession } from "./routes/JoinSession";
 import { Feedback } from "./routes/Feedback";
 import { Privacy } from "./routes/Privacy";
@@ -133,6 +134,7 @@ export default function App() {
             }
           />
           <Route path="/join" element={<JoinSession />} />
+          <Route path="/admin" element={<AdminPanel />} />
           <Route
             path="/presets"
             element={

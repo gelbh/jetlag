@@ -1,4 +1,4 @@
-export type PlayerRole = "seeker" | "hider";
+export type PlayerRole = "seeker" | "hider" | "observer";
 
 export type MemberRoles = Record<string, PlayerRole>;
 
@@ -31,6 +31,13 @@ export function isHiderRole(
   return resolvePlayerRole(memberRoles, uid) === "hider";
 }
 
+export function isObserverRole(
+  memberRoles: MemberRoles | undefined,
+  uid: string | undefined,
+): boolean {
+  return resolvePlayerRole(memberRoles, uid) === "observer";
+}
+
 export function sessionHasHiders(memberRoles: MemberRoles | undefined): boolean {
   if (!memberRoles) {
     return false;
@@ -40,5 +47,13 @@ export function sessionHasHiders(memberRoles: MemberRoles | undefined): boolean 
 }
 
 export function playerRoleLabel(role: PlayerRole): string {
-  return role === "seeker" ? "Seeker" : "Hider";
+  if (role === "seeker") {
+    return "Seeker";
+  }
+
+  if (role === "hider") {
+    return "Hider";
+  }
+
+  return "Observer";
 }

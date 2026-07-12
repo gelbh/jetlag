@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Navigate } from "react-router-dom";
 import { HiderMapScreen } from "./HiderMapScreen";
+import { ObserverMapScreen } from "./ObserverMapScreen";
 import { HeavyToolHost } from "./map-screen/lazyImports";
 import { MapScreenChrome } from "./map-screen/MapScreenChrome";
 import { MapScreenMapLayers } from "./map-screen/MapScreenMapLayers";
@@ -17,6 +18,10 @@ export function MapScreen() {
 
   if (controller.myRole === "hider") {
     return <HiderMapScreen />;
+  }
+
+  if (controller.myRole === "observer") {
+    return <ObserverMapScreen />;
   }
 
   return (

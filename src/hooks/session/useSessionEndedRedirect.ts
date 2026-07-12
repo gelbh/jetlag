@@ -8,6 +8,7 @@ import { useSessionStore } from "../../state/sessionStore";
 export function useSessionEndedRedirect(
   sessionId: string | undefined,
   isHost: boolean,
+  exitPath = "/",
 ) {
   const navigate = useAppNavigate();
   const session = useSessionStore((state) => state.session);
@@ -33,9 +34,10 @@ export function useSessionEndedRedirect(
     void clearSessionLocalArtifacts(sessionId).then(() => {
       setSession(null);
       setRemoteUpdateNotice("The host ended this session.");
-      navigate("/");
+      navigate(exitPath);
     });
   }, [
+    exitPath,
     isHost,
     navigate,
     session?.endedAt,

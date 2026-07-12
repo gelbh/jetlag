@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { AppLogo } from "../components/ui/AppLogo";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
-import { HudGuideIcon, HudPlayIcon } from "../components/ui/HudIcons";
+import { HudGuideIcon, HudPlayIcon, HudAdminIcon } from "../components/ui/HudIcons";
 import { InlineError } from "../components/ui/InlineError";
 import { VersionChangelogSheet } from "../components/ui/VersionChangelogSheet";
 import { MotionPressable } from "../components/motion/MotionPressable";
@@ -29,6 +29,8 @@ import {
 } from "../domain/billing/premiumProducts";
 import { fetchPremiumEntitlements } from "../services/billing/premiumBilling";
 import { LEGAL_APP_NAME } from "../domain/legal/legalContact";
+import { isAdminUser } from "../domain/admin/adminAccess";
+import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
 
 export function Home() {
   const navigate = useAppNavigate();
@@ -41,6 +43,8 @@ export function Home() {
   const [changelogOpen, setChangelogOpen] = useState(false);
   const [premiumEntitlements, setPremiumEntitlements] =
     useState<PremiumEntitlements | null>(null);
+  const { user: permanentUser } = usePermanentAuthUser();
+  const showAdminEntry = isAdminUser(permanentUser);
 
   useEffect(() => {
     let cancelled = false;
@@ -166,6 +170,15 @@ export function Home() {
           <div className="flex items-start justify-between gap-3">
             <AppLogo variant="mark" size="lg" className="shrink-0" />
             <div className="flex shrink-0 items-center gap-2">
+              {showAdminEntry ? (
+                <Link
+                  to="/admin"
+                  className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"
+                  aria-label="Admin — live sessions"
+                >
+                  <HudAdminIcon className="size-5" />
+                </Link>
+              ) : null}
               <Link
                 to="/tutorial"
                 className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"

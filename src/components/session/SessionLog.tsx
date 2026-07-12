@@ -26,6 +26,7 @@ interface SessionLogProps {
   onClose: () => void;
   onDelete: (id: string) => void;
   onEdit: (id: string) => void;
+  readOnly?: boolean;
 }
 
 export function SessionLog({
@@ -34,6 +35,7 @@ export function SessionLog({
   onClose,
   onDelete,
   onEdit,
+  readOnly = false,
 }: SessionLogProps) {
   const distanceUnit = useSessionDistanceUnit();
   const [filter, setFilter] = useState<AnnotationType | "all">("all");
@@ -92,6 +94,7 @@ export function SessionLog({
                 type="button"
                 onClick={() => onEdit(annotation.id)}
                 className="min-w-0 flex-1 text-left"
+                disabled={readOnly}
               >
                 <p className="text-sm font-medium">
                   {annotationSummary(annotation, distanceUnit)}
@@ -102,6 +105,7 @@ export function SessionLog({
                   ).toLocaleTimeString()}
                 </p>
               </button>
+              {readOnly ? null : (
               <div className="flex shrink-0 gap-2">
                 <button
                   type="button"
@@ -118,6 +122,7 @@ export function SessionLog({
                   Delete
                 </button>
               </div>
+              )}
             </div>
           ))
         )}

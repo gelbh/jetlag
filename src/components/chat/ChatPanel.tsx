@@ -18,6 +18,7 @@ interface SocialChatTabProps {
   sessionId: string;
   senderUid: string;
   senderRole: PlayerRole;
+  readOnly?: boolean;
 }
 
 export function SocialChatTab({
@@ -25,6 +26,7 @@ export function SocialChatTab({
   sessionId,
   senderUid,
   senderRole,
+  readOnly = false,
 }: SocialChatTabProps) {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
@@ -77,6 +79,7 @@ export function SocialChatTab({
           ))
         )}
       </div>
+      {readOnly ? null : (
       <div className="flex gap-2">
         <input
           value={draft}
@@ -99,6 +102,7 @@ export function SocialChatTab({
           Send
         </button>
       </div>
+      )}
     </div>
   );
 }
@@ -124,6 +128,7 @@ interface ChatPanelProps {
     selectedReply: string,
     deadlineExpired?: boolean,
   ) => Promise<void>;
+  readOnly?: boolean;
 }
 
 export function ChatPanel({
@@ -141,6 +146,7 @@ export function ChatPanel({
   truthsLoading = false,
   answerError = null,
   onAnswerQuestion,
+  readOnly = false,
 }: ChatPanelProps) {
   const [tab, setTab] = useState<"social" | "game">("game");
   const keyboardInset = useVisualViewportBottomInset(open);
@@ -196,6 +202,7 @@ export function ChatPanel({
               sessionId={sessionId}
               senderUid={senderUid}
               senderRole={senderRole}
+              readOnly={readOnly}
             />
           ) : (
             <GameChatTab
@@ -209,6 +216,7 @@ export function ChatPanel({
               truthsLoading={truthsLoading}
               answerError={answerError}
               onAnswerQuestion={onAnswerQuestion}
+              readOnly={readOnly}
             />
           )}
         </div>

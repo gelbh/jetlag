@@ -142,3 +142,14 @@ export function HudCheckIcon(props: SVGProps<SVGSVGElement>) {
     </IconBase>
   );
 }
+
+export function HudAdminIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <rect x="3" y="4" width="18" height="12" rx="1.5" />
+      <path d="M8 20h8" />
+      <path d="M12 16v4" />
+      <path d="M7 9h2M7 12h6" />
+    </IconBase>
+  );
+}

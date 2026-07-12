@@ -31,6 +31,7 @@ interface GameChatTabProps {
     selectedReply: string,
     deadlineExpired?: boolean,
   ) => Promise<void>;
+  readOnly?: boolean;
 }
 
 function pendingQuestionForMessage(
@@ -55,6 +56,7 @@ export function GameChatTab({
   truthsLoading = false,
   answerError = null,
   onAnswerQuestion,
+  readOnly = false,
 }: GameChatTabProps) {
   const [nowMs, setNowMs] = useState(0);
   const gameMessages = messages.filter((message) => message.channel === "game");
@@ -158,7 +160,7 @@ export function GameChatTab({
                   Answered late. Card draw forfeited.
                 </p>
               ) : null}
-              {isHider && !answered && !walking && isPhotoQuestion && pending ? (
+              {isHider && !readOnly && !answered && !walking && isPhotoQuestion && pending ? (
                 <PhotoAnswerUploader
                   sessionId={sessionId}
                   pendingQuestion={pending}
@@ -168,6 +170,7 @@ export function GameChatTab({
                 />
               ) : null}
               {isHider &&
+              !readOnly &&
               !answered &&
               !walking &&
               !isPhotoQuestion &&
