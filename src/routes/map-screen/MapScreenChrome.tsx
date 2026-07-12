@@ -1,6 +1,7 @@
 import { isEndGameActive, isEndGamePending } from "../../domain/map/annotations";
 import { ChatPanel } from "../../components/chat/ChatPanel";
 import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
+import { AppUpdateMapChip } from "../../components/ui/AppUpdateMapChip";
 import { MapStatusRail } from "../../components/session/MapStatusRail";
 import { SessionLog } from "../../components/session/SessionLog";
 import { AnnotationEditSheet } from "../../components/tools/AnnotationEditSheet";
@@ -261,6 +262,8 @@ export function MapScreenChrome({
             Boolean(geometryEditAnnotation && geometryDraft)
           }
         />
+
+        <AppUpdateMapChip />
 
         <ToolDock
           activeTool={activeTool}

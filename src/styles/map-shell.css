@@ -519,4 +519,15 @@
     }
   }
 
+  .jl-app-update-chip {
+    bottom: calc(var(--dock-height) + max(0.5rem, env(safe-area-inset-bottom)));
+  }
+
+  @media (max-width: 380px) {
+    .jl-app-update-chip .map-float-alert {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
 }
