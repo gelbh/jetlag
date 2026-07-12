@@ -32,7 +32,9 @@ export function useFirestoreCollectionSync<T>(
   const [items, setItems] = useState<T[]>([]);
   const onSyncErrorRef = useRef(onSyncError);
 
-  onSyncErrorRef.current = onSyncError;
+  useEffect(() => {
+    onSyncErrorRef.current = onSyncError;
+  }, [onSyncError]);
 
   useEffect(() => {
     if (!enabled || !isRemoteSession(sessionId)) {
