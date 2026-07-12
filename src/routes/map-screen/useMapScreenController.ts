@@ -253,7 +253,8 @@ export function useMapScreenController() {
     ? gameAreaPreloadKey(gameArea)
     : null;
 
-  const gameRulesEditable = isHost && !timer.hasStarted;
+  const gameRulesEditable =
+    (isHost || session?.id === LOCAL_SESSION_ID) && !timer.hasStarted;
   const mapShellRef = useRef<HTMLDivElement>(null);
   const chromeHudRef = useRef<HTMLDivElement>(null);
   const exportLegendRef = useRef<HTMLDivElement>(null);
