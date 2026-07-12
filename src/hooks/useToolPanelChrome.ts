@@ -28,18 +28,11 @@ export function useToolPanelChrome(activeTool: DockableMapTool | "none") {
     };
   }, []);
 
-  useEffect(() => {
-    if (activeTool === "none" || !wizardStepId) {
-      return;
-    }
-
-    if (isWizardPlacementStep(wizardStepId)) {
-      setUserMinimized(true);
-      return;
-    }
-
-    setUserMinimized(false);
-  }, [activeTool, wizardStepId]);
+  const placementStepMinimized =
+    activeTool !== "none" &&
+    wizardStepId !== null &&
+    isWizardPlacementStep(wizardStepId);
+  const effectiveUserMinimized = userMinimized || placementStepMinimized;
 
   const handleMapPanStart = useCallback(() => {
     if (activeTool !== "none") {
@@ -57,8 +50,8 @@ export function useToolPanelChrome(activeTool: DockableMapTool | "none") {
 
   return {
     mapPanning,
-    panelMinimized: userMinimized || mapPanning,
-    userMinimized,
+    panelMinimized: effectiveUserMinimized || mapPanning,
+    userMinimized: effectiveUserMinimized,
     setPanelMinimized,
     handleMapPanStart,
     handleMapPanEnd,
