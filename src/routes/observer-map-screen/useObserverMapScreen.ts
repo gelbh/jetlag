@@ -8,7 +8,6 @@ import {
 } from "../../domain/geometry/geometry";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../domain/device/powerProfile";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
-import { useEnsureSessionMembership } from "../../hooks/session/useEnsureSessionMembership";
 import { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
 import { useResolvedSessionRules } from "../../hooks/session/useResolvedSessionRules";
 import { useSharedSessionScreen } from "../../hooks/session/useSharedSessionScreen";
@@ -65,12 +64,10 @@ export function useObserverMapScreen() {
   } = useSharedSessionScreen({
     isChatOpen: overlay.isChatOpen,
     notificationRole: "observer",
-    authMode: "seeker-remote",
+    authMode: "admin-permanent",
     liveActivityEnabled: false,
     exitPath: "/admin",
   });
-
-  useEnsureSessionMembership();
 
   const annotations = useSessionAnnotations(sessionId);
   const activeThermometerWalk = useActiveThermometerWalk({

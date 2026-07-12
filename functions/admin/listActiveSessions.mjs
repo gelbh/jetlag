@@ -5,6 +5,100 @@ import { requireAdminAuth } from "./adminAccess.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
 
+const SESSION_DOC_ACTIVITY_FIELDS = [
+  "createdAt",
+  "timerRunningSince",
+  "endGameRequestedAt",
+  "endGameStartedAt",
+  "sessionResetAt",
+];
+
+export function parseFirestoreTimestampMs(value) {
+  if (value == null) {
+    return null;
+  }
+
+  if (typeof value === "string") {
+    const ms = Date.parse(value);
+    return Number.isNaN(ms) ? null : ms;
+  }
+
+  if (typeof value === "object") {
+    if (typeof value.toMillis === "function") {
+      return value.toMillis();
+    }
+
+    const seconds = value.seconds ?? value._seconds;
+    const nanoseconds = value.nanoseconds ?? value._nanoseconds ?? 0;
+    if (typeof seconds === "number") {
+      return seconds * 1000 + Math.floor(nanoseconds / 1_000_000);
+    }
+  }
+
+  return null;
+}
+
+export function resolveSessionDocActivityMs(session) {
+  let maxMs = null;
+
+  for (const field of SESSION_DOC_ACTIVITY_FIELDS) {
+    const ms = parseFirestoreTimestampMs(session[field]);
+    if (ms != null && (maxMs == null || ms > maxMs)) {
+      maxMs = ms;
+    }
+  }
+
+  return maxMs;
+}
+
+export function resolveLatestSubcollectionActivityMs(
+  annotationDoc,
+  messageDoc,
+  questionDoc,
+) {
+  const candidates = [
+    parseFirestoreTimestampMs(annotationDoc?.updatedAt),
+    parseFirestoreTimestampMs(messageDoc?.createdAt),
+    parseFirestoreTimestampMs(questionDoc?.createdAt),
+  ].filter((ms) => ms != null);
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  return Math.max(...candidates);
+}
+
+export function resolveSessionLastActivityMs(session, latestEvents = {}) {
+  const {
+    annotationDoc = null,
+    messageDoc = null,
+    questionDoc = null,
+  } = latestEvents;
+  const candidates = [
+    resolveSessionDocActivityMs(session),
+    resolveLatestSubcollectionActivityMs(annotationDoc, messageDoc, questionDoc),
+  ].filter((ms) => ms != null);
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  return Math.max(...candidates);
+}
+
+export function compareSessionsByLastActivity(left, right) {
+  const leftActivity = left.lastActivityAt ? Date.parse(left.lastActivityAt) : 0;
+  const rightActivity = right.lastActivityAt ? Date.parse(right.lastActivityAt) : 0;
+  if (rightActivity !== leftActivity) {
+    return rightActivity - leftActivity;
+  }
+
+  const leftCreated = left.createdAt ? Date.parse(left.createdAt) : 0;
+  const rightCreated = right.createdAt ? Date.parse(right.createdAt) : 0;
+  return rightCreated - leftCreated;
+}
+
 function countRoles(memberRoles) {
   const counts = { seeker: 0, hider: 0, observer: 0 };
   if (!memberRoles || typeof memberRoles !== "object") {
@@ -136,6 +230,7 @@ export function summarizeSession(sessionId, code, session, nowMs = Date.now()) {
     gameAreaLabel:
       typeof session.gameAreaLabel === "string" ? session.gameAreaLabel : null,
     phase: deriveSessionPhase(session, nowMs),
+    lastActivityAt: null,
   };
 }
 
@@ -151,35 +246,61 @@ export const listActiveSessions = onCall(
       .get();
 
     const nowMs = Date.now();
-    const sessions = [];
+    const sessions = (
+      await Promise.all(
+        codesSnap.docs.map(async (codeDoc) => {
+          const code = codeDoc.id;
+          const codeData = codeDoc.data();
+          const sessionId =
+            typeof codeData.sessionId === "string" ? codeData.sessionId : null;
+          if (!sessionId) {
+            return null;
+          }
 
-    for (const codeDoc of codesSnap.docs) {
-      const code = codeDoc.id;
-      const codeData = codeDoc.data();
-      const sessionId =
-        typeof codeData.sessionId === "string" ? codeData.sessionId : null;
-      if (!sessionId) {
-        continue;
-      }
+          const sessionRef = db.collection("sessions").doc(sessionId);
+          const sessionSnap = await sessionRef.get();
+          if (!sessionSnap.exists) {
+            return null;
+          }
 
-      const sessionSnap = await db.collection("sessions").doc(sessionId).get();
-      if (!sessionSnap.exists) {
-        continue;
-      }
+          const session = sessionSnap.data();
+          if (session.status === "ended" || typeof session.endedAt === "string") {
+            return null;
+          }
 
-      const session = sessionSnap.data();
-      if (session.status === "ended" || typeof session.endedAt === "string") {
-        continue;
-      }
+          const [annotationsSnap, messagesSnap, questionsSnap] = await Promise.all([
+            sessionRef
+              .collection("annotations")
+              .orderBy("updatedAt", "desc")
+              .limit(1)
+              .get(),
+            sessionRef
+              .collection("messages")
+              .orderBy("createdAt", "desc")
+              .limit(1)
+              .get(),
+            sessionRef
+              .collection("pendingQuestions")
+              .orderBy("createdAt", "desc")
+              .limit(1)
+              .get(),
+          ]);
 
-      sessions.push(summarizeSession(sessionId, code, session, nowMs));
-    }
+          const lastActivityMs = resolveSessionLastActivityMs(session, {
+            annotationDoc: annotationsSnap.docs[0]?.data() ?? null,
+            messageDoc: messagesSnap.docs[0]?.data() ?? null,
+            questionDoc: questionsSnap.docs[0]?.data() ?? null,
+          });
 
-    sessions.sort((left, right) => {
-      const leftTime = left.createdAt ? Date.parse(left.createdAt) : 0;
-      const rightTime = right.createdAt ? Date.parse(right.createdAt) : 0;
-      return rightTime - leftTime;
-    });
+          const summary = summarizeSession(sessionId, code, session, nowMs);
+          summary.lastActivityAt =
+            lastActivityMs == null ? null : new Date(lastActivityMs).toISOString();
+          return summary;
+        }),
+      )
+    ).filter((summary) => summary != null);
+
+    sessions.sort(compareSessionsByLastActivity);
 
     return { sessions };
   }),

@@ -34,6 +34,7 @@ import {
 import { timerStateToRemote, type TimerState } from "../../domain/session/timer";
 import {
   sessionVersionCompatible,
+  sessionVersionMismatchMessage,
 } from "../../domain/session/sessionVersion";
 import { APP_VERSION } from "../../domain/device/changelog";
 import { getFirestoreDb } from "../core/firebase";
@@ -190,7 +191,7 @@ function mapJoinFailureToError(
 ): Error {
   if (result.status === "incompatible") {
     return new Error(
-      `Session requires a newer app version (v${result.hostVersion}). Update to continue.`,
+      sessionVersionMismatchMessage(result.hostVersion, APP_VERSION),
     );
   }
 

@@ -20,14 +20,18 @@ import { Feedback } from "./routes/Feedback";
 import { Privacy } from "./routes/Privacy";
 import { Premium } from "./routes/Premium";
 import { Terms } from "./routes/Terms";
-import { Tutorial } from "./routes/Tutorial";
 import {
   CHUNK_RELOAD_CLEAR_MS,
   clearBootReloadFlag,
   clearChunkReloadFlag,
 } from "./domain/device/chunkLoadRecovery";
-import { lazyWithChunkRetry } from "./domain/device/lazyWithChunkRetry";
+import {
+  lazyWithChunkRetry,
+  setChunkReloadContextGetter,
+} from "./domain/device/lazyWithChunkRetry";
+import { notifyAppNeedRefresh } from "./domain/device/serviceWorkerRefresh";
 import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";
+import { useSessionStore } from "./state/sessionStore";
 
 const MapScreen = lazyWithChunkRetry(() =>
   import("./routes/MapScreen").then((m) => ({ default: m.MapScreen })),
@@ -40,6 +44,9 @@ const GamePresetList = lazyWithChunkRetry(() =>
 );
 const GamePresetEditor = lazyWithChunkRetry(() =>
   import("./routes/GamePresets").then((m) => ({ default: m.GamePresetEditor })),
+);
+const Tutorial = lazyWithChunkRetry(() =>
+  import("./routes/Tutorial").then((m) => ({ default: m.Tutorial })),
 );
 
 function RouteFallback() {
@@ -66,6 +73,25 @@ function AnalyticsPageViewTracker() {
   useEffect(() => {
     trackPageView(`${location.pathname}${location.search}`);
   }, [location]);
+
+  return null;
+}
+
+function ChunkReloadContextBinder() {
+  const session = useSessionStore((state) => state.session);
+  const location = useLocation();
+
+  useEffect(() => {
+    setChunkReloadContextGetter(() => ({
+      session,
+      pathname: location.pathname,
+      onNeedRefresh: notifyAppNeedRefresh,
+    }));
+
+    return () => {
+      setChunkReloadContextGetter(undefined);
+    };
+  }, [location.pathname, session]);
 
   return null;
 }
@@ -117,12 +143,20 @@ export default function App() {
       <BrowserRouter>
         <MotionDatasetEffect />
         <AnalyticsPageViewTracker />
+        <ChunkReloadContextBinder />
         <AppUpdateBanner />
         <div className="h-[100dvh] overflow-y-auto overscroll-y-none">
           <LowBatteryPrompt />
           <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/tutorial" element={<Tutorial />} />
+          <Route
+            path="/tutorial"
+            element={
+              <LazyRoute>
+                <Tutorial />
+              </LazyRoute>
+            }
+          />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />

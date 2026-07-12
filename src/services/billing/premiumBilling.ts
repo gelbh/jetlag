@@ -30,7 +30,7 @@ export async function fetchPremiumEntitlements(): Promise<PremiumEntitlements | 
     return null;
   }
 
-  const functions = getFirebaseFunctions();
+  const functions = await getFirebaseFunctions();
   const callable = httpsCallable<void, PremiumEntitlements>(
     functions,
     "getPremiumEntitlements",
@@ -51,7 +51,7 @@ export async function startPremiumCheckout(
     billingUnavailable();
   }
 
-  const functions = getFirebaseFunctions();
+  const functions = await getFirebaseFunctions();
   const callable = httpsCallable<
     { productKey: PremiumProductKey },
     { url: string }
@@ -75,7 +75,7 @@ export async function startPremiumTrial(): Promise<PremiumEntitlements> {
     billingUnavailable();
   }
 
-  const functions = getFirebaseFunctions();
+  const functions = await getFirebaseFunctions();
   const callable = httpsCallable<void, PremiumEntitlements>(
     functions,
     "startPremiumTrial",
@@ -94,7 +94,7 @@ export async function openPremiumBillingPortal(): Promise<string> {
     billingUnavailable();
   }
 
-  const functions = getFirebaseFunctions();
+  const functions = await getFirebaseFunctions();
   const callable = httpsCallable<void, { url: string }>(
     functions,
     "createBillingPortalSession",
@@ -128,7 +128,7 @@ export async function recoverPremiumEntitlements(): Promise<boolean> {
     return false;
   }
 
-  const functions = getFirebaseFunctions();
+  const functions = await getFirebaseFunctions();
   const callable = httpsCallable<void, { recovered: boolean }>(
     functions,
     "recoverPremiumByStripeEmail",
@@ -150,7 +150,7 @@ export async function createPremiumRemoteSession(
   }
 
   const serializedArea = serializeGameAreaForFirestore(input.gameArea);
-  const functions = getFirebaseFunctions();
+  const functions = await getFirebaseFunctions();
   const callable = httpsCallable<
     {
       gameArea: typeof serializedArea;

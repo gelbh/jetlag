@@ -5,6 +5,7 @@ import {
   isHiderLocationRole,
   isSeekerLocationRole,
   LIVE_LOCATION_DEDUPE_METERS,
+  locationClusterStableKey,
 } from "./liveMapLocations";
 import type { PlayerLocationRecord } from "./sessionChat";
 
@@ -73,5 +74,43 @@ describe("liveMapLocations", () => {
     expect(isSeekerLocationRole("hider")).toBe(false);
     expect(isHiderLocationRole(undefined)).toBe(false);
     expect(isHiderLocationRole("hider")).toBe(true);
+  });
+
+  it("builds stable cluster keys independent of uid order", () => {
+    const clusterA = {
+      lat: 53.35,
+      lng: -6.26,
+      uids: ["seeker-b", "seeker-a"],
+      members: [location("seeker-b", 53.35, -6.26), location("seeker-a", 53.35, -6.26)],
+    };
+    const clusterB = {
+      lat: 53.35,
+      lng: -6.26,
+      uids: ["seeker-a", "seeker-b"],
+      members: [location("seeker-a", 53.35, -6.26), location("seeker-b", 53.35, -6.26)],
+    };
+
+    expect(locationClusterStableKey(clusterA)).toBe("seeker-a-seeker-b");
+    expect(locationClusterStableKey(clusterB)).toBe("seeker-a-seeker-b");
+    expect(locationClusterStableKey(clusterA)).toBe(locationClusterStableKey(clusterB));
+  });
+
+  it("uses different stable keys for different uid sets", () => {
+    const clusterA = {
+      lat: 53.35,
+      lng: -6.26,
+      uids: ["seeker-a"],
+      members: [location("seeker-a", 53.35, -6.26)],
+    };
+    const clusterB = {
+      lat: 53.35,
+      lng: -6.26,
+      uids: ["seeker-b"],
+      members: [location("seeker-b", 53.35, -6.26)],
+    };
+
+    expect(locationClusterStableKey(clusterA)).not.toBe(
+      locationClusterStableKey(clusterB),
+    );
   });
 });

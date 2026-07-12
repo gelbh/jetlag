@@ -11,6 +11,7 @@ import type { HidingZoneRecord } from "../../domain/session/hidingZone";
 import {
   annotationHasEliminationFeature,
 } from "../../domain/geometry/combinedEliminationMask";
+import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/emptyFeatures";
 import { polygonFeatureToLeafletPolygonGroups } from "../../domain/geometry/geometry";
 import { getEliminationOverlayLayers } from "../../domain/map/mapEliminationOverlayStyle";
 import { useCombinedEliminationMask } from "../../hooks/map/useCombinedEliminationMask";
@@ -29,7 +30,7 @@ interface CombinedEliminationLayerProps {
 export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
   annotations,
   gameArea,
-  draftFeatures = [],
+  draftFeatures = EMPTY_GEOJSON_FEATURES,
   pulsingAnnotationIds = [],
   hidden = false,
   session = null,

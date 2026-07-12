@@ -14,6 +14,7 @@ import {
   subscribeToHiderPlayerLocations,
   subscribeToHidingZones,
   subscribeToPendingQuestions,
+  subscribeToPlayerLocations,
   subscribeToSeekerPlayerLocations,
   subscribeToSessionMessages,
 } from "../../services/firestore/firestoreSessionExtras";
@@ -28,7 +29,7 @@ export function usePlayerLocationsSync(sessionId: string | undefined) {
   const sessionResetAt = useSessionResetAt();
   const items = useFirestoreCollectionSync<PlayerLocationRecord>(
     sessionId,
-    subscribeToSeekerPlayerLocations,
+    subscribeToPlayerLocations,
   );
 
   return useMemo(
@@ -38,11 +39,19 @@ export function usePlayerLocationsSync(sessionId: string | undefined) {
   );
 }
 
-export function useSeekerLocationsSync(sessionId: string | undefined) {
+export function useSeekerLocationsSync(
+  sessionId: string | undefined,
+  enabled = true,
+) {
   const sessionResetAt = useSessionResetAt();
+  const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
   const items = useFirestoreCollectionSync<PlayerLocationRecord>(
     sessionId,
     subscribeToSeekerPlayerLocations,
+    {
+      enabled,
+      onSyncError: () => setLastSyncError("Live location sync failed."),
+    },
   );
 
   return useMemo(
@@ -61,9 +70,14 @@ export function useHiderLocationsSync(
   enabled = true,
 ) {
   const sessionResetAt = useSessionResetAt();
+  const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
   const items = useFirestoreCollectionSync<PlayerLocationRecord>(
-    enabled ? sessionId : undefined,
+    sessionId,
     subscribeToHiderPlayerLocations,
+    {
+      enabled,
+      onSyncError: () => setLastSyncError("Live location sync failed."),
+    },
   );
 
   return useMemo(
