@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import {
   LOCAL_SESSION_ID,
-  isEndGameActive,
   type SessionRecord,
 } from "../../domain/map/annotations";
 import { touchSessionLastActive } from "../../services/firestore/firestoreAnnotations";
@@ -17,8 +16,7 @@ export function useSessionHeartbeat(session: SessionRecord | null) {
       !session ||
       session.id === LOCAL_SESSION_ID ||
       session.status === "ended" ||
-      typeof session.endedAt === "string" ||
-      isEndGameActive(session)
+      typeof session.endedAt === "string"
     ) {
       return;
     }
