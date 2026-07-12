@@ -18,6 +18,8 @@ export const CHANGELOG: ChangelogEntry[] = [
         title: "Fixes",
         items: [
           "Home: tutorial, admin, and version controls render above the top gradient accent",
+          "Observer map: thermometer walk distance uses session units",
+          "Hider chat: station truth works when hiding zone is already set, including after rejoin",
         ],
       },
       {
@@ -25,6 +27,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Live map: nearby seeker and hider GPS markers merge into one pin with a count tooltip",
           "Live map: hiders and observers see live hider GPS; seekers still see seeker pins only",
+          "Thermometer walk map overlay: HUD-styled progress pill, markers, and axis line",
         ],
       }
     ],
