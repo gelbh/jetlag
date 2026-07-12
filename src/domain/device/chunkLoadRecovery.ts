@@ -1,4 +1,7 @@
+import { isSafeToReloadApp } from "./serviceWorkerRefresh";
+
 const CHUNK_RELOAD_KEY = "jetlag:chunk-reload";
+const CHUNK_DEFERRED_KEY = "jetlag:chunk-deferred";
 export const BOOT_RELOAD_KEY = "jetlag:boot-reload";
 
 export const CHUNK_RELOAD_CLEAR_MS = 10_000;
@@ -51,11 +54,56 @@ export function hasChunkReloadBeenAttempted(): boolean {
   return readSessionFlag();
 }
 
-export function attemptChunkReload(): boolean {
+function readDeferredFlag(): boolean {
+  try {
+    return sessionStorage.getItem(CHUNK_DEFERRED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writeDeferredFlag(): void {
+  try {
+    sessionStorage.setItem(CHUNK_DEFERRED_KEY, "1");
+  } catch {
+    // sessionStorage may be unavailable in private browsing.
+  }
+}
+
+function removeDeferredFlag(): void {
+  try {
+    sessionStorage.removeItem(CHUNK_DEFERRED_KEY);
+  } catch {
+    // sessionStorage may be unavailable in private browsing.
+  }
+}
+
+export function wasChunkReloadDeferred(): boolean {
+  return readDeferredFlag();
+}
+
+export function attemptChunkReload(options?: {
+  session?: unknown;
+  pathname?: string;
+  onNeedRefresh?: () => void;
+}): boolean {
   if (readSessionFlag()) {
     return false;
   }
 
+  if (
+    options &&
+    !isSafeToReloadApp({
+      session: options.session,
+      pathname: options.pathname ?? "/",
+    })
+  ) {
+    writeDeferredFlag();
+    options.onNeedRefresh?.();
+    return false;
+  }
+
+  removeDeferredFlag();
   writeSessionFlag();
   window.location.reload();
   return true;
@@ -63,6 +111,7 @@ export function attemptChunkReload(): boolean {
 
 export function clearChunkReloadFlag(): void {
   removeSessionFlag();
+  removeDeferredFlag();
 }
 
 export function clearBootReloadFlag(): void {

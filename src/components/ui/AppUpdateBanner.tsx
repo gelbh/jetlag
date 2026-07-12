@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   applyServiceWorkerUpdate,
+  maybeApplyPendingUpdate,
   promptIfWaiting,
+  registerAppNeedRefreshHandler,
   scheduleServiceWorkerUpdateChecks,
-  shouldAutoApplyServiceWorkerUpdate,
 } from "../../domain/device/serviceWorkerRefresh";
-import { isIosStandalonePwa } from "../../domain/device/isIosStandalonePwa";
 import { tryUpdateServiceWorker } from "../../domain/device/serviceWorkerUpdate";
 import { useSessionStore } from "../../state/sessionStore";
 import { HudBanner } from "./HudBanner";
@@ -94,24 +94,25 @@ export function AppUpdateBanner() {
   const softBanner = Boolean(session) && location.pathname === "/map";
 
   useEffect(() => {
-    if (!needsRefresh || !updateSW) {
+    return registerAppNeedRefreshHandler(() => {
+      setNeedsRefresh(true);
+      setDismissed(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (import.meta.env.DEV || !updateSW) {
       return;
     }
 
-    if (!isIosStandalonePwa()) {
-      return;
-    }
-
-    if (
-      !shouldAutoApplyServiceWorkerUpdate({
-        hasActiveSession: Boolean(session),
-      })
-    ) {
-      return;
-    }
-
-    void applyServiceWorkerUpdate(registrationRef.current, updateSW);
-  }, [needsRefresh, updateSW, location.pathname, session, dismissed]);
+    void maybeApplyPendingUpdate({
+      needsRefresh,
+      session,
+      pathname: location.pathname,
+      registration: registrationRef.current,
+      applyUpdate: updateSW,
+    });
+  }, [needsRefresh, updateSW, location.pathname, session]);
 
   return (
     <HudBanner
