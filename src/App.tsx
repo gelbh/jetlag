@@ -12,7 +12,7 @@ import { trackPageView } from "./services/core/analytics";
 import { MapErrorBoundary } from "./components/ui/MapErrorBoundary";
 import { AppUpdateBanner } from "./components/ui/AppUpdateBanner";
 import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
-import { MotionCapabilityProvider } from "./components/motion/MotionCapabilityProvider";
+import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { Home } from "./routes/Home";
 import { JoinSession } from "./routes/JoinSession";
 import { Feedback } from "./routes/Feedback";
@@ -112,7 +112,7 @@ export default function App() {
   return (
     <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
       <BrowserRouter>
-        <MotionCapabilityProvider>
+        <MotionDatasetEffect />
         <AnalyticsPageViewTracker />
         <AppUpdateBanner />
         <div className="h-[100dvh] overflow-y-auto overscroll-y-none">
@@ -170,7 +170,6 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         </div>
-        </MotionCapabilityProvider>
       </BrowserRouter>
     </Sentry.ErrorBoundary>
   );
