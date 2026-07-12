@@ -530,4 +530,212 @@
     }
   }
 
+  /* Admin map — mission-control layout (tablet/desktop) */
+  .admin-monitor-pane {
+    container-type: inline-size;
+    container-name: admin-monitor;
+  }
+
+  @container admin-monitor (min-width: 40rem) {
+    .admin-monitor-code-badge {
+      display: none;
+    }
+  }
+
+  .admin-map-shell {
+    --admin-rail-width: 22rem;
+    --admin-rail-collapsed-width: 2.75rem;
+    --admin-status-height: 2.5rem;
+    --admin-map-control-inset-right: 0px;
+  }
+
+  .admin-map-shell--wide {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--admin-rail-width));
+    grid-template-rows: auto minmax(0, 1fr);
+    --admin-map-control-inset-right: var(--admin-rail-width);
+  }
+
+  .admin-map-shell--wide.admin-map-shell--rail-collapsed {
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--admin-rail-collapsed-width));
+    --admin-map-control-inset-right: var(--admin-rail-collapsed-width);
+  }
+
+  .admin-map-shell__top {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    z-index: var(--z-dock);
+  }
+
+  .admin-map-shell__map {
+    grid-column: 1;
+    grid-row: 2;
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .admin-map-shell__rail {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    min-width: 0;
+    min-height: 0;
+    z-index: var(--z-panel);
+  }
+
+  .admin-map-shell--compact .admin-map-shell__map {
+    position: absolute;
+    inset: 0;
+  }
+
+  .admin-status-bar {
+    display: flex;
+    min-height: var(--admin-status-height);
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--color-highlight);
+    background: var(--color-surface-deep);
+    padding: 0.25rem 0.625rem;
+    box-shadow: 0 4px 24px oklch(0.06 0.04 265 / 0.65);
+  }
+
+  .admin-monitor-rail {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    border-inline-start: 2px solid var(--color-border);
+    background: var(--color-surface-panel);
+    font-size: 0.8125rem;
+  }
+
+  .admin-monitor-rail--collapsed .admin-monitor-rail__tabs,
+  .admin-monitor-rail--collapsed .admin-monitor-rail__panel {
+    display: none;
+  }
+
+  .admin-monitor-rail__header {
+    display: flex;
+    min-height: var(--admin-status-height);
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+    padding: 0.25rem 0.5rem;
+  }
+
+  .admin-monitor-rail__tabs {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.125rem;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--color-border);
+    padding: 0.375rem 0.5rem;
+    scrollbar-width: thin;
+  }
+
+  .admin-monitor-rail__tab {
+    min-height: 2rem;
+    shrink: 0;
+    border-radius: var(--radius-hud-md);
+    padding: 0 0.625rem;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+
+  html[data-motion="reduced"] .admin-monitor-rail__tab,
+  html[data-motion="static"] .admin-monitor-rail__tab {
+    transition: none;
+  }
+
+  .admin-monitor-rail__tab--active {
+    background: var(--color-action);
+    color: var(--color-action-ink);
+  }
+
+  .admin-monitor-rail__panel {
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.75rem;
+  }
+
+  .admin-monitor-rail__icon-tab {
+    display: flex;
+    min-height: 2.25rem;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-hud-md);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  .admin-monitor-rail__icon-tab--active {
+    background: var(--color-surface-raised);
+    color: var(--color-ink);
+  }
+
+  .admin-diag-row {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .admin-diag-row dt {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-ink-dim);
+  }
+
+  .admin-diag-row dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-family: ui-monospace, monospace;
+    color: var(--color-ink);
+  }
+
+  .admin-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .admin-stat-cell {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-hud-md);
+    background: var(--color-surface-raised);
+    padding: 0.5rem 0.625rem;
+  }
+
+  .admin-stat-cell dt {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-ink-dim);
+  }
+
+  .admin-stat-cell dd {
+    margin: 0.125rem 0 0;
+    font-family: ui-monospace, monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
 }

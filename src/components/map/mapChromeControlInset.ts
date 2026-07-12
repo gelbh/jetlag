@@ -3,4 +3,5 @@ export type MapChromeControlInset =
   | "chrome-hidden"
   | "safe-area"
   | "container"
-  | "hider-actions";
+  | "hider-actions"
+  | "admin-rail";

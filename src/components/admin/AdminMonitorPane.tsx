@@ -41,10 +41,10 @@ export function AdminMonitorPane({
   return (
     <div className="admin-monitor-pane relative min-h-[36rem] overflow-hidden rounded-xl border border-border bg-surface-deep">
       <div className="absolute inset-0">
-        <AdminMapScreen />
+        <AdminMapScreen embeddedMonitor />
       </div>
       {sessionCode ? (
-        <p className="pointer-events-none absolute bottom-3 left-3 z-[var(--z-panel)] rounded-md border border-border bg-surface-panel/90 px-2 py-1 font-mono text-xs tracking-[0.18em] text-ink">
+        <p className="admin-monitor-code-badge pointer-events-none absolute bottom-3 left-3 z-[var(--z-panel)] rounded-md border border-border bg-surface-panel/90 px-2 py-1 font-mono text-xs tracking-[0.18em] text-ink">
           {sessionCode}
         </p>
       ) : null}

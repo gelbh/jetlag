@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { GameAreaMask } from "../components/map/GameAreaMask";
 import { MapView } from "../components/map/MapView";
@@ -9,26 +9,42 @@ import { InlineError } from "../components/ui/InlineError";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { fallbackGameArea } from "../domain/geometry/geometry";
 import { useAppNavigate } from "../hooks/useAppNavigate";
+import { useAdminMapWideLayout } from "../hooks/admin/useAdminMapWideLayout";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { adminModerateSession } from "../services/admin/adminModeration";
 import { useMapStore, useSessionStore } from "../state/sessionStore";
 import { useObserverMapScreen } from "./observer-map-screen/useObserverMapScreen";
 import { SpectatorMapLayers } from "./spectator-map/SpectatorMapLayers";
+import { AdminDiagnosticsOverlay } from "./admin-map-screen/AdminDiagnosticsOverlay";
+import { AdminMapScreenChrome } from "./admin-map-screen/AdminMapScreenChrome";
 import {
-  AdminDiagnosticsPanel,
-  AdminMapScreenChrome,
-} from "./admin-map-screen/AdminMapScreenChrome";
+  AdminMonitorRail,
+  type AdminMonitorRailTab,
+} from "./admin-map-screen/AdminMonitorRail";
 
-export function AdminMapScreen() {
+export function AdminMapScreen({
+  embeddedMonitor = false,
+}: {
+  embeddedMonitor?: boolean;
+}) {
   const navigate = useAppNavigate();
   const setSession = useSessionStore((state) => state.setSession);
   const resetObserverPerspective = useMapStore(
     (state) => state.resetObserverPerspective,
   );
+  const setLayerVisibility = useMapStore((state) => state.setLayerVisibility);
+  const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
   const controller = useObserverMapScreen();
+  const shellRef = useRef<HTMLDivElement>(null);
+  const isWide = useAdminMapWideLayout(shellRef, {
+    embedded: embeddedMonitor,
+    ready: controller.playAreaReady,
+  });
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [moderationBusy, setModerationBusy] = useState(false);
   const [moderationError, setModerationError] = useState<string | null>(null);
+  const [railCollapsed, setRailCollapsed] = useState(false);
+  const [railTab, setRailTab] = useState<AdminMonitorRailTab>("overview");
 
   const handleLeave = useCallback(async () => {
     const sessionId = controller.session?.id;
@@ -81,6 +97,17 @@ export function AdminMapScreen() {
     [controller.session?.id, handleLeave],
   );
 
+  useEffect(() => {
+    if (!isWide) {
+      return;
+    }
+
+    const map = shellRef.current?.querySelector(".leaflet-container");
+    if (map && "dispatchEvent" in map) {
+      window.dispatchEvent(new Event("resize"));
+    }
+  }, [isWide, railCollapsed]);
+
   if (!controller.session) {
     return <Navigate to="/admin" replace />;
   }
@@ -107,48 +134,52 @@ export function AdminMapScreen() {
   const chatDisplayRole = controller.spectatorLayers.chatDisplayRole;
   const syncStatusLabel = controller.syncStatus.lastSyncError
     ? `Error: ${controller.syncStatus.lastSyncError}`
-    : controller.syncStatus.status === "saving"
-      ? "Saving"
-      : controller.syncStatus.status;
+    : controller.syncStatus.status;
+  const mapControlInset = isWide ? "admin-rail" : "dock";
+
+  const mapLayers = (
+    <MapView
+      key={controller.session.id}
+      mapKey={controller.session.id}
+      mapStyle={controller.effectiveBasemapStyle}
+      onMapStyleChange={controller.handleMapStyleChange}
+      mapStyleControlInset={mapControlInset}
+      zoomControlInset={mapControlInset}
+      center={controller.center}
+      zoom={12}
+      focusBounds={controller.mapFocusBounds}
+      fitBoundsMode="once"
+      showZoomControl={false}
+      className="h-full w-full"
+    >
+      <MapViewportTracker onViewportChange={controller.setMapViewport} />
+      <GameAreaMask gameArea={gameArea} />
+      <SpectatorMapLayers
+        session={controller.session}
+        gameArea={gameArea}
+        layerVisibility={controller.layerVisibility}
+        effectiveBasemapStyle={controller.effectiveBasemapStyle}
+        distanceUnit={controller.distanceUnit}
+        spectatorLayers={controller.spectatorLayers}
+        annotations={controller.annotations}
+        hidingZones={controller.hidingZones}
+        seekerLocations={controller.seekerLocations}
+        hiderLocations={controller.hiderLocations}
+        pendingQuestions={controller.pendingQuestions}
+        sessionRules={sessionRules}
+        uid={controller.uid}
+        activeThermometerWalk={controller.activeThermometerWalk}
+      />
+    </MapView>
+  );
 
   return (
-    <div className="map-screen-shell">
-      <div className="absolute inset-0">
-        <MapView
-          key={controller.session.id}
-          mapKey={controller.session.id}
-          mapStyle={controller.effectiveBasemapStyle}
-          onMapStyleChange={controller.handleMapStyleChange}
-          mapStyleControlInset="dock"
-          zoomControlInset="dock"
-          center={controller.center}
-          zoom={12}
-          focusBounds={controller.mapFocusBounds}
-          fitBoundsMode="once"
-          showZoomControl={false}
-          className="h-full w-full"
-        >
-          <MapViewportTracker onViewportChange={controller.setMapViewport} />
-          <GameAreaMask gameArea={gameArea} />
-          <SpectatorMapLayers
-            session={controller.session}
-            gameArea={gameArea}
-            layerVisibility={controller.layerVisibility}
-            effectiveBasemapStyle={controller.effectiveBasemapStyle}
-            distanceUnit={controller.distanceUnit}
-            spectatorLayers={controller.spectatorLayers}
-            annotations={controller.annotations}
-            hidingZones={controller.hidingZones}
-            seekerLocations={controller.seekerLocations}
-            hiderLocations={controller.hiderLocations}
-            pendingQuestions={controller.pendingQuestions}
-            sessionRules={sessionRules}
-            uid={controller.uid}
-            activeThermometerWalk={controller.activeThermometerWalk}
-          />
-        </MapView>
-      </div>
-
+    <div
+      ref={shellRef}
+      className={`map-screen-shell admin-map-shell ${
+        isWide ? "admin-map-shell--wide" : "admin-map-shell--compact"
+      } ${isWide && railCollapsed ? "admin-map-shell--rail-collapsed" : ""}`}
+    >
       <AdminMapScreenChrome
         session={controller.session}
         myRole="admin"
@@ -157,52 +188,90 @@ export function AdminMapScreen() {
         perspective={controller.observerPerspective}
         onPerspectiveChange={controller.setObserverPerspective}
         onLeave={() => void handleLeave()}
-        diagnosticsOpen={diagnosticsOpen}
-        onToggleDiagnostics={() => setDiagnosticsOpen((open) => !open)}
+        isWide={isWide}
+        syncStatus={controller.syncStatus.status}
         moderationBusy={moderationBusy}
         moderationError={moderationError}
         onModerationAction={(action) => void handleModerationAction(action)}
+        diagnosticsOpen={diagnosticsOpen}
+        onToggleDiagnostics={
+          isWide ? undefined : () => setDiagnosticsOpen((open) => !open)
+        }
       />
 
-      <AdminDiagnosticsPanel
-        open={diagnosticsOpen}
-        onClose={() => setDiagnosticsOpen(false)}
-        session={controller.session}
-        syncStatusLabel={syncStatusLabel}
-      />
+      <div className={isWide ? "admin-map-shell__map" : "absolute inset-0"}>
+        {mapLayers}
+      </div>
 
-      {controller.syncStatus.lastSyncError ? (
-        <div className="pointer-events-none absolute inset-x-0 top-20 z-[var(--z-panel)] px-3">
+      {isWide ? (
+        <AdminMonitorRail
+          collapsed={railCollapsed}
+          onCollapsedChange={setRailCollapsed}
+          activeTab={railTab}
+          onActiveTabChange={setRailTab}
+          session={controller.session}
+          sessionRules={sessionRules}
+          syncStatusLabel={syncStatusLabel}
+          controller={controller}
+          chatDisplayRole={chatDisplayRole}
+          moderationBusy={moderationBusy}
+          moderationError={moderationError}
+          onModerationAction={(action) => void handleModerationAction(action)}
+          mapViewport={controller.mapViewport}
+          onLayerVisibilityChange={setLayerVisibility}
+          onLowPowerModeChange={setLowPowerMode}
+        />
+      ) : null}
+
+      {!isWide ? (
+        <>
+          <AdminDiagnosticsOverlay
+            open={diagnosticsOpen}
+            onClose={() => setDiagnosticsOpen(false)}
+            session={controller.session}
+            syncStatusLabel={syncStatusLabel}
+          />
+
+          {controller.syncStatus.lastSyncError ? (
+            <div className="pointer-events-none absolute inset-x-0 top-20 z-[var(--z-panel)] px-3">
+              <InlineError className="pointer-events-auto mx-auto max-w-xl">
+                {controller.syncStatus.lastSyncError}
+              </InlineError>
+            </div>
+          ) : null}
+
+          <SessionLog
+            open={controller.overlay.isLogOpen}
+            annotations={controller.annotations}
+            onClose={controller.overlay.closeSheet}
+            onDelete={() => undefined}
+            onEdit={() => undefined}
+            readOnly
+          />
+
+          {controller.sessionId && controller.uid ? (
+            <ChatPanel
+              open={controller.overlay.isChatOpen}
+              onClose={controller.overlay.closeSheet}
+              messages={controller.chatMessages}
+              pendingQuestions={controller.pendingQuestions}
+              sessionRules={sessionRules}
+              sessionId={controller.sessionId}
+              senderUid={controller.uid}
+              senderRole={chatDisplayRole}
+              isHider={chatDisplayRole === "hider"}
+              bottomClassName="bottom-[calc(7.75rem+env(safe-area-inset-bottom))]"
+              onAnswerQuestion={async () => undefined}
+              readOnly
+            />
+          ) : null}
+        </>
+      ) : controller.syncStatus.lastSyncError ? (
+        <div className="pointer-events-none absolute inset-x-0 top-[var(--admin-status-height)] z-[var(--z-panel)] px-3">
           <InlineError className="pointer-events-auto mx-auto max-w-xl">
             {controller.syncStatus.lastSyncError}
           </InlineError>
         </div>
-      ) : null}
-
-      <SessionLog
-        open={controller.overlay.isLogOpen}
-        annotations={controller.annotations}
-        onClose={controller.overlay.closeSheet}
-        onDelete={() => undefined}
-        onEdit={() => undefined}
-        readOnly
-      />
-
-      {controller.sessionId && controller.uid ? (
-        <ChatPanel
-          open={controller.overlay.isChatOpen}
-          onClose={controller.overlay.closeSheet}
-          messages={controller.chatMessages}
-          pendingQuestions={controller.pendingQuestions}
-          sessionRules={sessionRules}
-          sessionId={controller.sessionId}
-          senderUid={controller.uid}
-          senderRole={chatDisplayRole}
-          isHider={chatDisplayRole === "hider"}
-          bottomClassName="bottom-[calc(7.75rem+env(safe-area-inset-bottom))]"
-          onAnswerQuestion={async () => undefined}
-          readOnly
-        />
       ) : null}
     </div>
   );

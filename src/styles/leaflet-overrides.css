@@ -128,6 +128,15 @@
   );
 }
 
+.map-zoom-control--admin-rail,
+.map-style-control--admin-rail {
+  bottom: calc(var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem);
+  right: calc(
+    max(0.75rem, env(safe-area-inset-right)) +
+      var(--admin-map-control-inset-right, 0px)
+  );
+}
+
 @media (min-width: 40rem) {
   .map-style-control__btn {
     height: 3rem;
