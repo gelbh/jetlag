@@ -15,6 +15,12 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: "2026-07-12",
     sections: [
       {
+        title: "Fixes",
+        items: [
+          "Home: tutorial, admin, and version controls render above the top gradient accent",
+        ],
+      },
+      {
         title: "Improvements",
         items: [
           "Live map: nearby seeker and hider GPS markers merge into one pin with a count tooltip",
