@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.10 - 2026-07-12
+
+### Improvements
+
+- Presets: star favourites in browse and the create-session picker.
+- Map: centered question panel titles, smoother panel snap and tool dock selection, tentacle search preview before category pick.
+- PWA: clearer update notice on phone — waits until your game ends, refresh button only when safe.
+- Settings: trim duplicate rules summary when editing game rules in the map settings sheet.
+
 ## 0.5.9 - 2026-07-12
 
 ### Improvements
