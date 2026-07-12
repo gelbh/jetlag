@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { MapViewportState } from "../../components/map/MapViewportTracker";
 import {
-  fallbackGameArea,
   gameAreaCenter,
   gameAreaToBoundsExpression,
   type LatLngTuple,
@@ -14,6 +13,8 @@ import { useSharedSessionScreen } from "../../hooks/session/useSharedSessionScre
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import { useSessionAnnotations } from "../../hooks/map/useSessionAnnotations";
 import { useMapStore, useSessionStore } from "../../state/sessionStore";
+
+const DEFAULT_MAP_CENTER: LatLngTuple = [51.505, -0.09];
 
 export function useObserverMapScreen() {
   const session = useSessionStore((state) => state.session);
@@ -28,7 +29,8 @@ export function useObserverMapScreen() {
   const suppressChromeHideRef = useRef(false);
   const [mapViewport, setMapViewport] = useState<MapViewportState | null>(null);
 
-  const { gameArea, sessionRules } = useResolvedSessionRules(session);
+  const { gameArea, sessionRules, playAreaReady } = useResolvedSessionRules(session);
+  const resolvedGameArea = gameArea ?? session?.gameArea ?? null;
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
   const handleMapStyleChange = useCallback(
     (style: typeof mapStyle) => {
@@ -40,15 +42,20 @@ export function useObserverMapScreen() {
     },
     [lowPowerMode, setLowPowerMode, setMapStyle],
   );
-  const resolvedGameArea = gameArea ?? session?.gameArea ?? fallbackGameArea();
-  const center = useMemo<LatLngTuple>(
-    () => gameAreaCenter(resolvedGameArea),
-    [resolvedGameArea],
-  );
-  const mapFocusBounds = useMemo(
-    () => gameAreaToBoundsExpression(resolvedGameArea),
-    [resolvedGameArea],
-  );
+  const center = useMemo<LatLngTuple>(() => {
+    if (!resolvedGameArea) {
+      return DEFAULT_MAP_CENTER;
+    }
+
+    return gameAreaCenter(resolvedGameArea);
+  }, [resolvedGameArea]);
+  const mapFocusBounds = useMemo(() => {
+    if (!playAreaReady || !resolvedGameArea) {
+      return null;
+    }
+
+    return gameAreaToBoundsExpression(resolvedGameArea);
+  }, [playAreaReady, resolvedGameArea]);
 
   const {
     uid,
@@ -84,6 +91,7 @@ export function useObserverMapScreen() {
     sessionId,
     sessionRules,
     gameArea: resolvedGameArea,
+    playAreaReady,
     center,
     mapFocusBounds,
     mapStyle,

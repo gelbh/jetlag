@@ -33,12 +33,25 @@ export function ObserverMapScreen() {
     navigate("/admin");
   }, [controller.session?.id, navigate, setSession]);
 
-  if (!controller.session || !controller.gameArea) {
+  if (!controller.session) {
     return <Navigate to="/admin" replace />;
   }
 
   if (controller.myRole !== "observer") {
     return <Navigate to="/map" replace />;
+  }
+
+  if (!controller.playAreaReady || !controller.gameArea) {
+    return (
+      <div
+        className="route-fallback-skeleton route-loading-enter flex min-h-[100dvh] flex-col"
+        aria-busy="true"
+        aria-label="Loading observer map"
+      >
+        <div className="route-fallback-status" />
+        <div className="route-fallback-map flex-1" />
+      </div>
+    );
   }
 
   return (

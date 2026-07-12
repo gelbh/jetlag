@@ -1,5 +1,5 @@
 import { FirebaseError } from "firebase/app";
-import { httpsCallable } from "firebase/functions";
+import { httpsCallable, type HttpsCallableResult } from "firebase/functions";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
 
 export type AdminSessionPhase =
@@ -35,7 +35,18 @@ export interface AdminSessionSummary {
   transitMetroId: string | null;
   gameAreaLabel: string | null;
   phase: AdminSessionPhase;
+  lastActivityAt: string | null;
 }
+
+type ListActiveSessionsRequest = {
+  limit?: number;
+  pageToken?: string | null;
+};
+
+type ListActiveSessionsResponse = {
+  sessions: AdminSessionSummary[];
+  nextPageToken: string | null;
+};
 
 export async function fetchActiveAdminSessions(): Promise<AdminSessionSummary[]> {
   if (!isFirebaseConfigured()) {
@@ -43,14 +54,30 @@ export async function fetchActiveAdminSessions(): Promise<AdminSessionSummary[]>
   }
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<Record<string, never>, { sessions: AdminSessionSummary[] }>(
-    functions,
-    "listActiveSessions",
-  );
+  const callable = httpsCallable<
+    ListActiveSessionsRequest,
+    ListActiveSessionsResponse
+  >(functions, "listActiveSessions");
+
+  const sessions: AdminSessionSummary[] = [];
+  let pageToken: string | null = null;
 
   try {
-    const result = await callable({});
-    return result.data.sessions ?? [];
+    for (;;) {
+      const result: HttpsCallableResult<ListActiveSessionsResponse> =
+        await callable({
+          limit: 50,
+          pageToken,
+        });
+      const data: ListActiveSessionsResponse = result.data;
+      sessions.push(...(data.sessions ?? []));
+      pageToken = data.nextPageToken ?? null;
+      if (!pageToken) {
+        break;
+      }
+    }
+
+    return sessions;
   } catch (error) {
     if (error instanceof FirebaseError && error.code === "functions/permission-denied") {
       throw new Error("Admin access required.", { cause: error });
