@@ -134,7 +134,12 @@ export function useMapSessionChrome({
 
     try {
       const user = await ensureAnonymousUser();
-      const hostRole = resolvePlayerRole(session.memberRoles, user.uid) ?? "seeker";
+      const hostRole = resolvePlayerRole(session.memberRoles, user.uid);
+      if (!hostRole) {
+        window.alert("Could not reset session: your role in this session is unknown.");
+        return;
+      }
+
       const resetAt = await resetRemoteSession(sessionId, user.uid, hostRole);
 
       setSession({
@@ -153,6 +158,8 @@ export function useMapSessionChrome({
       await clearAllAnnotations();
       await clearSessionLocalArtifacts(sessionId);
       closeSettingsPanel();
+    } catch {
+      window.alert("Could not reset session. Check your connection and try again.");
     } finally {
       resetInFlightRef.current = false;
     }

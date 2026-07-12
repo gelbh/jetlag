@@ -313,6 +313,7 @@ export function useMapScreenController() {
     pendingQuestions,
     createAnnotation,
     gameArea: toolGameArea,
+    sessionResetAt: session?.sessionResetAt,
   });
 
   const activeThermometerWalk = useActiveThermometerWalk({
