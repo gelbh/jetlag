@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.5.1";
+export const APP_VERSION = "0.5.2";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,29 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.5.2",
+    date: "2026-07-12",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Tentacle answer step scrolls with many POI options",
+          "PWA update banner on iOS; Reload without force-close",
+          "Satellite toggle matches basemap under low power mode",
+          "Tutorial split cards equal height; interactive step fits one screen",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Admin: filter live sessions by code, area, or phase; session cards show play area location",
+          "Admin observe: join live sessions regardless of app version mismatch",
+          "Create session: Premium tier pre-selected for subscription and trial hosts",
+        ],
+      }
+    ],
+  },
   {
     version: "0.5.1",
     date: "2026-07-12",
