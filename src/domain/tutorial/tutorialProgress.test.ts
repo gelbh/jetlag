@@ -10,6 +10,7 @@ import {
   markStepComplete,
   readTutorialProgress,
   sectionStartIndex,
+  TUTORIAL_PROGRESS_KEY,
 } from "./tutorialProgress";
 
 describe("tutorialProgress", () => {
@@ -52,7 +53,7 @@ describe("tutorialQuestions progress", () => {
     const start = readTutorialProgress();
     const next = markQuestionStepComplete("matching", 3, start);
     expect(next.questions.matching).toBe(2);
-    expect(isQuestionTutorialComplete("matching", 3, next)).toBe(true);
+    expect(isQuestionTutorialComplete("matching", next)).toBe(true);
   });
 
   it("starts completed question tutorials at step zero for review", () => {
@@ -64,7 +65,28 @@ describe("tutorialQuestions progress", () => {
       coreComplete: true,
       questions: { ...defaultQuestionProgress(), matching: 2 },
     };
-    expect(questionTutorialStartIndex("matching", 3, progress)).toBe(0);
-    expect(questionTutorialStartIndex("radar", 3, progress)).toBe(0);
+    expect(questionTutorialStartIndex("matching", progress)).toBe(0);
+    expect(questionTutorialStartIndex("radar", progress)).toBe(0);
+  });
+
+  it("migrates legacy full-step question progress to walkthrough indices", () => {
+    const legacy = {
+      version: 1 as const,
+      core: -1,
+      tools: -1,
+      hider: -1,
+      extras: -1,
+      coreComplete: false,
+      questions: {
+        ...defaultQuestionProgress(),
+        matching: 3,
+        radar: 0,
+      },
+    };
+    localStorage.setItem(TUTORIAL_PROGRESS_KEY, JSON.stringify(legacy));
+    const migrated = readTutorialProgress();
+    localStorage.removeItem(TUTORIAL_PROGRESS_KEY);
+    expect(migrated.questions.matching).toBe(2);
+    expect(migrated.questions.radar).toBe(-1);
   });
 });

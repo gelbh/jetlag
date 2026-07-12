@@ -23,10 +23,10 @@ function questionStatusLabel(
   walkthroughCount: number,
   progress: TutorialProgress,
 ): string {
-  if (isQuestionTutorialComplete(questionId, walkthroughCount, progress)) {
+  if (isQuestionTutorialComplete(questionId, progress)) {
     return "Complete";
   }
-  const resume = questionTutorialStartIndex(questionId, walkthroughCount, progress);
+  const resume = questionTutorialStartIndex(questionId, progress);
   const walkthroughIndex = walkthroughIndexForFullStep(
     getQuestionTutorial(questionId).steps,
     resume,
@@ -42,11 +42,9 @@ export function TutorialQuestionsHub({
   onSelectQuestion,
 }: TutorialQuestionsHubProps) {
   const questions = getQuestionTutorials();
-  const recommendedId = QUESTION_TUTORIAL_ORDER.find((id) => {
-    const tutorial = getQuestionTutorial(id);
-    const walkthroughCount = questionWalkthroughSteps(tutorial.steps).length;
-    return !isQuestionTutorialComplete(id, walkthroughCount, progress);
-  });
+  const recommendedId = QUESTION_TUTORIAL_ORDER.find(
+    (id) => !isQuestionTutorialComplete(id, progress),
+  );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
@@ -64,7 +62,6 @@ export function TutorialQuestionsHub({
           const walkthroughCount = questionWalkthroughSteps(question.steps).length;
           const complete = isQuestionTutorialComplete(
             question.id,
-            walkthroughCount,
             progress,
           );
           const status = complete

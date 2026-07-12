@@ -68,11 +68,7 @@ export function Tutorial() {
 
   const questionStepIndex =
     activeQuestion && view.mode === "question"
-      ? questionTutorialStartIndex(
-          view.questionId,
-          activeQuestion.steps.length,
-          progress,
-        )
+      ? questionTutorialStartIndex(view.questionId, progress)
       : 0;
 
   const reviewingSection =
@@ -86,11 +82,7 @@ export function Tutorial() {
 
   const reviewingQuestion =
     activeQuestion && view.mode === "question"
-      ? isQuestionTutorialComplete(
-          view.questionId,
-          activeQuestion.steps.length,
-          progress,
-        )
+      ? isQuestionTutorialComplete(view.questionId, progress)
       : false;
 
   const finishSection = (sectionId: TutorialSectionId) => {
@@ -229,13 +221,8 @@ export function Tutorial() {
               if (view.mode !== "question") {
                 return;
               }
-              const question = getQuestionTutorial(view.questionId);
               setProgress(
-                markQuestionTutorialComplete(
-                  view.questionId,
-                  question.steps.length,
-                  progress,
-                ),
+                markQuestionTutorialComplete(view.questionId, progress),
               );
             }}
             onOpenQuestion={(questionId) => {

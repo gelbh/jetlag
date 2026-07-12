@@ -43,7 +43,7 @@ describe("tutorialQuestions", () => {
       fullStepIndexForWalkthroughStep(tutorial.steps, 2),
       progress,
     );
-    expect(isQuestionTutorialComplete(tutorial.id, 3, progress)).toBe(true);
+    expect(isQuestionTutorialComplete(tutorial.id, progress)).toBe(true);
     expect(progress.questions.matching).toBe(2);
   });
 

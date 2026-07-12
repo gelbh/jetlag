@@ -1,6 +1,7 @@
 import type { TutorialSectionId } from "./tutorialSections";
 import {
   defaultQuestionProgress,
+  migrateLegacyQuestionProgressIndex,
   type QuestionTutorialId,
 } from "./tutorialQuestions";
 
@@ -34,7 +35,7 @@ function normalizeQuestions(
   const record = value as Partial<Record<QuestionTutorialId, number>>;
   for (const id of Object.keys(base) as QuestionTutorialId[]) {
     if (typeof record[id] === "number") {
-      base[id] = record[id]!;
+      base[id] = migrateLegacyQuestionProgressIndex(id, record[id]!);
     }
   }
   return base;
