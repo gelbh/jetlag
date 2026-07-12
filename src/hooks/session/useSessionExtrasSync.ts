@@ -1,5 +1,9 @@
 import { useMemo } from "react";
 import type { HidingZoneRecord } from "../../domain/session/hidingZone";
+import {
+  isHiderLocationRole,
+  isSeekerLocationRole,
+} from "../../domain/session/liveMapLocations";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
@@ -30,6 +34,24 @@ export function usePlayerLocationsSync(sessionId: string | undefined) {
     () =>
       filterExtrasAfterReset(items, sessionResetAt, (location) => location.updatedAt),
     [items, sessionResetAt],
+  );
+}
+
+export function useSeekerLocationsSync(sessionId: string | undefined) {
+  const locations = usePlayerLocationsSync(sessionId);
+
+  return useMemo(
+    () => locations.filter((location) => isSeekerLocationRole(location.role)),
+    [locations],
+  );
+}
+
+export function useHiderLocationsSync(sessionId: string | undefined) {
+  const locations = usePlayerLocationsSync(sessionId);
+
+  return useMemo(
+    () => locations.filter((location) => isHiderLocationRole(location.role)),
+    [locations],
   );
 }
 

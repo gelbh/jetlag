@@ -60,6 +60,8 @@ export interface PendingQuestionRecord {
   cardKeep?: number;
 }
 
+export type PlayerLocationRole = "seeker" | "hider";
+
 export interface PlayerLocationRecord {
   uid: string;
   sessionId: string;
@@ -67,6 +69,7 @@ export interface PlayerLocationRecord {
   lng: number;
   accuracyMeters?: number;
   updatedAt: string;
+  role?: PlayerLocationRole;
 }
 
 export function createMessageId(): string {
