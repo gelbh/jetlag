@@ -136,6 +136,7 @@ interface SessionState {
   syncInFlight: number;
   lastSyncError: string | null;
   remoteUpdateNotice: string | null;
+  networkReachable: boolean | null;
   setSession: (session: SessionRecord | null, myUid?: string | null) => void;
   setMyUid: (uid: string | null) => void;
   setGameArea: (gameArea: GameArea) => void;
@@ -146,6 +147,7 @@ interface SessionState {
   decrementSyncInFlight: () => void;
   setLastSyncError: (message: string | null) => void;
   setRemoteUpdateNotice: (message: string | null) => void;
+  setNetworkReachable: (reachable: boolean | null) => void;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -158,6 +160,7 @@ export const useSessionStore = create<SessionState>()(
       syncInFlight: 0,
       lastSyncError: null,
       remoteUpdateNotice: null,
+      networkReachable: null,
       setSession: (session, myUid) =>
         set((state) => {
           const uid = myUid === undefined ? state.myUid : myUid;
@@ -219,6 +222,7 @@ export const useSessionStore = create<SessionState>()(
       setLastSyncError: (lastSyncError) => set({ lastSyncError }),
       setRemoteUpdateNotice: (remoteUpdateNotice) =>
         set({ remoteUpdateNotice }),
+      setNetworkReachable: (networkReachable) => set({ networkReachable }),
     }),
     {
       name: "jetlag-session",

@@ -26,8 +26,15 @@ export function useSyncStatus(): {
     Boolean(session) &&
     session?.id !== LOCAL_SESSION_ID;
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
+  const setNetworkReachable = useSessionStore(
+    (state) => state.setNetworkReachable,
+  );
   const reachabilityProbeMs = getPowerProfile(lowPowerMode).reachabilityProbeMs;
   const { reachable } = useReachability(reachabilityEnabled, reachabilityProbeMs);
+
+  useEffect(() => {
+    setNetworkReachable(reachabilityEnabled ? reachable : null);
+  }, [reachabilityEnabled, reachable, setNetworkReachable]);
 
   useEffect(() => {
     const handleOnline = () => setOnline(true);

@@ -1,5 +1,16 @@
 export type SyncStatus = "synced" | "saving" | "offline" | "degraded" | "error";
 
+export function isEffectivelyOffline(input: {
+  online: boolean;
+  reachable: boolean | null;
+}): boolean {
+  if (!input.online) {
+    return true;
+  }
+
+  return input.reachable === false;
+}
+
 export function resolveSyncStatus(input: {
   online: boolean;
   reachable: boolean | null;
