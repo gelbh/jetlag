@@ -39,6 +39,18 @@ export async function clickMapAt(
   });
 }
 
+/** Fill color of the combined elimination mask (mapAnnotationColors.elimination). */
+const ELIMINATION_FILL = "#1D2835";
+
+/** Committed, answered questions shade the map via the combined elimination mask. */
+export async function expectEliminationMaskVisible(page: Page) {
+  await expect(
+    page
+      .locator(`.leaflet-overlay-pane path[fill="${ELIMINATION_FILL}"]`)
+      .first(),
+  ).toBeVisible({ timeout: 15_000 });
+}
+
 export async function expectMapHasAnnotations(page: Page, minCount = 1) {
   const shapes = page.locator(".leaflet-overlay-pane .leaflet-interactive");
   await shapes.first().waitFor({ state: "attached", timeout: 15_000 });
