@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useMotionProfile } from "../../hooks/useMotionProfile";
+import { bindDelegatedTapFeedback } from "../../services/device/feedbackService";
 
 /** Keeps html[data-motion] in sync with reduced motion and low-power decorative mode. */
 export function MotionDatasetEffect() {
@@ -16,6 +17,14 @@ export function MotionDatasetEffect() {
       ? "on"
       : "off";
   }, [decorativeAnimate, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!decorativeAnimate) {
+      return;
+    }
+
+    return bindDelegatedTapFeedback(document);
+  }, [decorativeAnimate]);
 
   return null;
 }

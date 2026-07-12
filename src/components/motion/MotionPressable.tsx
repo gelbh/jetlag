@@ -1,5 +1,5 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
-import { impactLight } from "../../services/device/hapticsService";
+import { feedback } from "../../services/device/feedbackService";
 import { useMotionProfile } from "../../hooks/useMotionProfile";
 
 type MotionPressableProps = ComponentPropsWithoutRef<"button"> & {
@@ -20,7 +20,7 @@ export function MotionPressable({
 
   const handleClick: MotionPressableProps["onClick"] = (event) => {
     if (decorativeAnimate) {
-      void impactLight();
+      void feedback("tap");
     }
     onClick?.(event);
   };
