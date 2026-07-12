@@ -179,6 +179,24 @@ export function HidingZonePanel({
         canGoNext={canSwipeNext}
         onBack={goBack}
         onNext={goNext}
+        footer={
+          stepId !== "confirm" ? (
+            <ToolWizardNav
+              stepIndex={stepIndex}
+              stepCount={steps.length}
+              onBack={goBack}
+              onNext={goNext}
+              canGoNext={canGoNext}
+            />
+          ) : (
+            <ToolWizardNav
+              stepIndex={stepIndex}
+              stepCount={steps.length}
+              onBack={goBack}
+              onNext={goNext}
+            />
+          )
+        }
       >
       {stepId === "method" ? (
         <ToolSection first compact status="active">
@@ -216,7 +234,8 @@ export function HidingZonePanel({
 
       {stepId === "location" && !zoneTool.manualMode ? (
         <ToolSection first compact status="active">
-          <TransitStationPicker
+          <div className="jl-wizard-search-results">
+            <TransitStationPicker
             layout="flex"
             labeled
             query={zoneTool.query}
@@ -230,6 +249,7 @@ export function HidingZonePanel({
             onSearchThisArea={onSearchThisArea}
             searchDisabled={zoneTool.stationsLoading}
           />
+          </div>
         </ToolSection>
       ) : null}
 
@@ -268,23 +288,6 @@ export function HidingZonePanel({
           </button>
         </ToolSection>
       ) : null}
-
-      {stepId !== "confirm" ? (
-        <ToolWizardNav
-          stepIndex={stepIndex}
-          stepCount={steps.length}
-          onBack={goBack}
-          onNext={goNext}
-          canGoNext={canGoNext}
-        />
-      ) : (
-        <ToolWizardNav
-          stepIndex={stepIndex}
-          stepCount={steps.length}
-          onBack={goBack}
-          onNext={goNext}
-        />
-      )}
       </WizardSwipeSurface>
 
       {zoneTool.error ? <InlineError>{zoneTool.error}</InlineError> : null}

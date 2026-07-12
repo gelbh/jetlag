@@ -120,6 +120,15 @@ export function TentaclePanel({
         canGoNext={canSwipeNext}
         onBack={goBack}
         onNext={goNext}
+        footer={
+          <ToolWizardNav
+            stepIndex={stepIndex}
+            stepCount={steps.length}
+            onBack={goBack}
+            onNext={goNext}
+            canGoNext={canGoNext}
+          />
+        }
       >
       {step === "category" ? (
         <ToolSection first compact status="active">
@@ -224,14 +233,6 @@ export function TentaclePanel({
           </button>
         </>
       ) : null}
-
-      <ToolWizardNav
-        stepIndex={stepIndex}
-        stepCount={steps.length}
-        onBack={goBack}
-        onNext={goNext}
-        canGoNext={canGoNext}
-      />
       </WizardSwipeSurface>
 
       {error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null}

@@ -1,34 +1,13 @@
-import { useMotionGesturePath } from "./useMotionGesturePath";
 import {
   useWizardSwipe,
   type UseWizardSwipeOptions,
   type UseWizardSwipeResult,
 } from "./useWizardSwipe";
 
-const EMPTY_SURFACE_PROPS = {
-  onPointerDown: () => {},
-  onPointerMove: () => {},
-  onPointerUp: () => {},
-  onPointerCancel: () => {},
-} as UseWizardSwipeResult["surfaceProps"];
-
+/** Wizard step swipes always use pointer capture so gestures work over buttons and inputs. */
 export function useAdaptiveWizardSwipe(
   options: UseWizardSwipeOptions,
 ): UseWizardSwipeResult & { useFramerSwipe: boolean } {
-  const useFramerSwipe = useMotionGesturePath();
-  const cssSwipe = useWizardSwipe({
-    ...options,
-  });
-
-  if (useFramerSwipe) {
-    return {
-      dragOffsetX: 0,
-      isDragging: false,
-      surfaceStyle: {},
-      surfaceProps: EMPTY_SURFACE_PROPS,
-      useFramerSwipe: true,
-    };
-  }
-
+  const cssSwipe = useWizardSwipe(options);
   return { ...cssSwipe, useFramerSwipe: false };
 }

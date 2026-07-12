@@ -136,6 +136,15 @@ export function ThermometerPanel({
         canGoNext={canSwipeNext}
         onBack={goBack}
         onNext={goNext}
+        footer={
+          <ToolWizardNav
+            stepIndex={stepIndex}
+            stepCount={steps.length}
+            onBack={goBack}
+            onNext={goNext}
+            canGoNext={canGoNext}
+          />
+        }
       >
       {step === "distance" ? (
         <ToolSection first compact status="active">
@@ -264,14 +273,6 @@ export function ThermometerPanel({
           ) : null}
         </ToolSection>
       ) : null}
-
-      <ToolWizardNav
-        stepIndex={stepIndex}
-        stepCount={steps.length}
-        onBack={goBack}
-        onNext={goNext}
-        canGoNext={canGoNext}
-      />
       </WizardSwipeSurface>
 
       {error ? (

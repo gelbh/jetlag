@@ -1,6 +1,6 @@
 import { useAdaptivePanelDrag } from "../../hooks/useAdaptivePanelDrag";
 import {
-  isWizardDockTool,
+  isQuestionDockTool,
   mapToolPlacingLabel,
   type DockableMapTool,
 } from "../../domain/map/mapTools";
@@ -28,6 +28,8 @@ export function ToolFloatingPanel({
     onMinimizedChange,
   });
 
+  const isWizardTool = isQuestionDockTool(toolId);
+
   return (
     <MapFloatingPanel
       minimized={minimized}
@@ -38,10 +40,9 @@ export function ToolFloatingPanel({
       onClose={onClose}
       closeLabel={`Close ${mapToolPlacingLabel(toolId)}`}
       maxHeightClassName={
-        isWizardDockTool(toolId)
-          ? "max-h-[min(54dvh,480px)]"
-          : "max-h-[min(34dvh,320px)]"
+        isWizardTool ? "jl-wizard-panel-max-h" : "max-h-[min(34dvh,320px)]"
       }
+      bodyScrollable={!isWizardTool}
       panelStyle={useFramerDrag ? undefined : panelStyle}
       dragHandleProps={handleProps}
       contentKey={toolId}

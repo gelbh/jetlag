@@ -148,8 +148,8 @@ html:not([data-motion="framer-enhanced"]) .annotation-pulse {
 
 @keyframes jl-wizard-step-forward {
   from {
-    opacity: 0;
-    transform: translateX(1.5rem);
+    opacity: 0.35;
+    transform: translateX(100%);
   }
 
   to {
@@ -160,8 +160,8 @@ html:not([data-motion="framer-enhanced"]) .annotation-pulse {
 
 @keyframes jl-wizard-step-back {
   from {
-    opacity: 0;
-    transform: translateX(-1.5rem);
+    opacity: 0.35;
+    transform: translateX(-100%);
   }
 
   to {

@@ -22,10 +22,10 @@ export interface UseWizardSwipeOptions {
 }
 
 export interface WizardSwipeSurfaceProps {
-  onPointerDown: (event: ReactPointerEvent<HTMLElement>) => void;
-  onPointerMove: (event: ReactPointerEvent<HTMLElement>) => void;
-  onPointerUp: (event: ReactPointerEvent<HTMLElement>) => void;
-  onPointerCancel: (event: ReactPointerEvent<HTMLElement>) => void;
+  onPointerDownCapture: (event: ReactPointerEvent<HTMLElement>) => void;
+  onPointerMoveCapture: (event: ReactPointerEvent<HTMLElement>) => void;
+  onPointerUpCapture: (event: ReactPointerEvent<HTMLElement>) => void;
+  onPointerCancelCapture: (event: ReactPointerEvent<HTMLElement>) => void;
 }
 
 export interface UseWizardSwipeResult {
@@ -50,12 +50,14 @@ export function useWizardSwipe({
   const lastX = useRef(0);
   const lastTime = useRef(0);
   const velocityX = useRef(0);
+  const activePointerId = useRef<number | null>(null);
   const [dragOffsetX, setDragOffsetX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
   const resetDrag = useCallback(() => {
     dragActive.current = false;
     axisClaimed.current = false;
+    activePointerId.current = null;
     setIsDragging(false);
     setDragOffsetX(0);
     velocityX.current = 0;
@@ -90,9 +92,21 @@ export function useWizardSwipe({
     [applyRubberBand, canGoBack, canGoNext, containerRef],
   );
 
-  const handlePointerDown = useCallback(
+  const releaseCapture = useCallback((event: ReactPointerEvent<HTMLElement>) => {
+    if (activePointerId.current === null) {
+      return;
+    }
+
+    if (event.currentTarget.hasPointerCapture(activePointerId.current)) {
+      event.currentTarget.releasePointerCapture(activePointerId.current);
+    }
+
+    activePointerId.current = null;
+  }, []);
+
+  const handlePointerDownCapture = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
-      if (!animate) {
+      if (!animate || event.button !== 0) {
         return;
       }
 
@@ -104,14 +118,14 @@ export function useWizardSwipe({
       lastX.current = event.clientX;
       lastTime.current = event.timeStamp;
       velocityX.current = 0;
-      event.currentTarget.setPointerCapture(event.pointerId);
+      activePointerId.current = event.pointerId;
     },
     [animate],
   );
 
-  const handlePointerMove = useCallback(
+  const handlePointerMoveCapture = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
-      if (!dragActive.current) {
+      if (!dragActive.current || activePointerId.current !== event.pointerId) {
         return;
       }
 
@@ -119,20 +133,17 @@ export function useWizardSwipe({
       const dy = event.clientY - startY.current;
 
       if (!axisClaimed.current) {
-        if (
-          Math.abs(dx) < AXIS_SLOP_PX &&
-          Math.abs(dy) < AXIS_SLOP_PX
-        ) {
+        if (Math.abs(dx) < AXIS_SLOP_PX && Math.abs(dy) < AXIS_SLOP_PX) {
           return;
         }
 
         if (Math.abs(dy) > Math.abs(dx)) {
           resetDrag();
-          event.currentTarget.releasePointerCapture(event.pointerId);
           return;
         }
 
         axisClaimed.current = true;
+        event.currentTarget.setPointerCapture(event.pointerId);
       }
 
       const dt = Math.max(1, event.timeStamp - lastTime.current);
@@ -146,20 +157,22 @@ export function useWizardSwipe({
 
   const finishDrag = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
-      if (!dragActive.current) {
+      if (!dragActive.current || activePointerId.current !== event.pointerId) {
         return;
       }
 
-      event.currentTarget.releasePointerCapture(event.pointerId);
+      releaseCapture(event);
 
       const width = containerRef.current?.offsetWidth ?? 320;
       const threshold = width * COMMIT_FRACTION;
       const shouldNext =
         canGoNext &&
+        axisClaimed.current &&
         (dragOffsetX <= -threshold ||
           velocityX.current < -COMMIT_VELOCITY_PX_MS);
       const shouldBack =
         canGoBack &&
+        axisClaimed.current &&
         (dragOffsetX >= threshold ||
           velocityX.current > COMMIT_VELOCITY_PX_MS);
 
@@ -181,6 +194,7 @@ export function useWizardSwipe({
       dragOffsetX,
       onBack,
       onNext,
+      releaseCapture,
       resetDrag,
     ],
   );
@@ -191,7 +205,7 @@ export function useWizardSwipe({
           transform: `translateX(${dragOffsetX}px)`,
           transition: isDragging
             ? "none"
-            : "transform var(--motion-base) var(--ease-out-quint)",
+            : "transform var(--motion-wizard-step) var(--ease-out-quint)",
         }
       : {};
 
@@ -200,10 +214,10 @@ export function useWizardSwipe({
     isDragging,
     surfaceStyle,
     surfaceProps: {
-      onPointerDown: handlePointerDown,
-      onPointerMove: handlePointerMove,
-      onPointerUp: finishDrag,
-      onPointerCancel: finishDrag,
+      onPointerDownCapture: handlePointerDownCapture,
+      onPointerMoveCapture: handlePointerMoveCapture,
+      onPointerUpCapture: finishDrag,
+      onPointerCancelCapture: finishDrag,
     },
   };
 }

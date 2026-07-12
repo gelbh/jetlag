@@ -118,3 +118,27 @@ export function HudDrawIcon(props: SVGProps<SVGSVGElement>) {
     </IconBase>
   );
 }
+
+export function HudChevronLeftIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="m14 6-6 6 6 6" />
+    </IconBase>
+  );
+}
+
+export function HudChevronRightIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="m10 6 6 6-6 6" />
+    </IconBase>
+  );
+}
+
+export function HudCheckIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="m5 12 4 4 10-10" />
+    </IconBase>
+  );
+}
