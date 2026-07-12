@@ -1,5 +1,14 @@
-import { readdir, unlink } from "node:fs/promises";
+import { readdir, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+
+const ASSETS_IGNORE = `node_modules
+.git
+.DS_Store
+`;
+
+async function writeAssetsIgnore(dir) {
+  await writeFile(join(dir, ".assetsignore"), ASSETS_IGNORE, "utf8");
+}
 
 async function deleteMapsInDir(dir) {
   let entries;
@@ -26,3 +35,4 @@ async function deleteMapsInDir(dir) {
 }
 
 await deleteMapsInDir("dist");
+await writeAssetsIgnore("dist");
