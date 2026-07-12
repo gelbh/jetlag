@@ -61,6 +61,14 @@ export const MEASURING_STEPS = [
   { id: "answer", label: "Answer" },
 ] as const;
 
+// Cached so callers get a stable array identity across renders; a fresh array
+// each render remounts the wizard Stepper (useToolWizard memoizes on it) and
+// makes nav buttons unclickable while the panel re-renders.
+const stepsWithoutAnswer = new WeakMap<
+  readonly ToolStepDefinition[],
+  readonly ToolStepDefinition[]
+>();
+
 /** Multiplayer drops the Answer step; hiders respond in game chat. */
 export function stepsForMode<T extends readonly ToolStepDefinition[]>(
   allSteps: T,
@@ -70,5 +78,10 @@ export function stepsForMode<T extends readonly ToolStepDefinition[]>(
     return allSteps;
   }
 
-  return allSteps.filter((step) => step.id !== "answer");
+  let filtered = stepsWithoutAnswer.get(allSteps);
+  if (!filtered) {
+    filtered = allSteps.filter((step) => step.id !== "answer");
+    stepsWithoutAnswer.set(allSteps, filtered);
+  }
+  return filtered;
 }
