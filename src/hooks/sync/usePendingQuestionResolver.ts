@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
+import { isStaleAfterReset } from "../../domain/session/sessionReset";
 import {
   radarAnswerFromReplyId,
   resolveRadarPendingQuestion,
@@ -30,6 +31,7 @@ interface UsePendingQuestionResolverParams {
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
   ) => Promise<AnnotationRecord>;
   gameArea: GameArea;
+  sessionResetAt?: string;
 }
 
 async function resolvePendingQuestion(
@@ -101,6 +103,7 @@ export function usePendingQuestionResolver({
   pendingQuestions,
   createAnnotation,
   gameArea,
+  sessionResetAt,
 }: UsePendingQuestionResolverParams) {
   const resolvingRef = useRef(new Set<string>());
 
@@ -126,6 +129,10 @@ export function usePendingQuestionResolver({
 
       void (async () => {
         try {
+          if (isStaleAfterReset(pending.createdAt, sessionResetAt)) {
+            return;
+          }
+
           const annotation = await resolvePendingQuestion(pending, gameArea);
           if (!annotation) {
             if (pending.toolType === "photo") {
@@ -152,5 +159,5 @@ export function usePendingQuestionResolver({
         }
       })();
     }
-  }, [createAnnotation, enabled, gameArea, pendingQuestions, sessionId]);
+  }, [createAnnotation, enabled, gameArea, pendingQuestions, sessionId, sessionResetAt]);
 }

@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { usePendingQuestionResolver } from "./usePendingQuestionResolver";
@@ -44,6 +44,11 @@ const photoPending: PendingQuestionRecord = {
 };
 
 describe("usePendingQuestionResolver", () => {
+  beforeEach(() => {
+    updatePendingQuestion.mockReset();
+    createAnnotation.mockReset();
+  });
+
   it("resolves photo questions without creating annotations", async () => {
     updatePendingQuestion.mockResolvedValue(undefined);
     createAnnotation.mockResolvedValue({ id: "ann-1" } as AnnotationRecord);
@@ -67,5 +72,27 @@ describe("usePendingQuestionResolver", () => {
     });
 
     expect(createAnnotation).not.toHaveBeenCalled();
+  });
+
+  it("skips answered questions created before session reset", async () => {
+    updatePendingQuestion.mockResolvedValue(undefined);
+    createAnnotation.mockResolvedValue({ id: "ann-1" } as AnnotationRecord);
+
+    renderHook(() =>
+      usePendingQuestionResolver({
+        sessionId: "session-1",
+        enabled: true,
+        pendingQuestions: [photoPending],
+        createAnnotation,
+        gameArea,
+        sessionResetAt: "2026-01-02T00:00:00.000Z",
+      }),
+    );
+
+    await waitFor(() => {
+      expect(createAnnotation).not.toHaveBeenCalled();
+    });
+
+    expect(updatePendingQuestion).not.toHaveBeenCalled();
   });
 });

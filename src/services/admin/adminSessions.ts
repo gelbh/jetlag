@@ -1,6 +1,21 @@
 import { FirebaseError } from "firebase/app";
-import { httpsCallable } from "firebase/functions";
+import { httpsCallable, type HttpsCallableResult } from "firebase/functions";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
+
+function compareSessionsByLastActivity(
+  left: AdminSessionSummary,
+  right: AdminSessionSummary,
+): number {
+  const leftActivity = left.lastActivityAt ? Date.parse(left.lastActivityAt) : 0;
+  const rightActivity = right.lastActivityAt ? Date.parse(right.lastActivityAt) : 0;
+  if (rightActivity !== leftActivity) {
+    return rightActivity - leftActivity;
+  }
+
+  const leftCreated = left.createdAt ? Date.parse(left.createdAt) : 0;
+  const rightCreated = right.createdAt ? Date.parse(right.createdAt) : 0;
+  return rightCreated - leftCreated;
+}
 
 export type AdminSessionPhase =
   | "waiting"
@@ -35,7 +50,18 @@ export interface AdminSessionSummary {
   transitMetroId: string | null;
   gameAreaLabel: string | null;
   phase: AdminSessionPhase;
+  lastActivityAt: string | null;
 }
+
+type ListActiveSessionsRequest = {
+  limit?: number;
+  pageToken?: string | null;
+};
+
+type ListActiveSessionsResponse = {
+  sessions: AdminSessionSummary[];
+  nextPageToken: string | null;
+};
 
 export async function fetchActiveAdminSessions(): Promise<AdminSessionSummary[]> {
   if (!isFirebaseConfigured()) {
@@ -43,14 +69,31 @@ export async function fetchActiveAdminSessions(): Promise<AdminSessionSummary[]>
   }
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<Record<string, never>, { sessions: AdminSessionSummary[] }>(
-    functions,
-    "listActiveSessions",
-  );
+  const callable = httpsCallable<
+    ListActiveSessionsRequest,
+    ListActiveSessionsResponse
+  >(functions, "listActiveSessions");
+
+  const sessions: AdminSessionSummary[] = [];
+  let pageToken: string | null = null;
 
   try {
-    const result = await callable({});
-    return result.data.sessions ?? [];
+    for (;;) {
+      const result: HttpsCallableResult<ListActiveSessionsResponse> =
+        await callable({
+          limit: 50,
+          pageToken,
+        });
+      const data: ListActiveSessionsResponse = result.data;
+      sessions.push(...(data.sessions ?? []));
+      pageToken = data.nextPageToken ?? null;
+      if (!pageToken) {
+        break;
+      }
+    }
+
+    sessions.sort(compareSessionsByLastActivity);
+    return sessions;
   } catch (error) {
     if (error instanceof FirebaseError && error.code === "functions/permission-denied") {
       throw new Error("Admin access required.", { cause: error });

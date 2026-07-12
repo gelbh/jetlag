@@ -31,7 +31,7 @@ export function WizardSwipeSurface({
   embedded = false,
   swipeEnabled = true,
 }: WizardSwipeSurfaceProps) {
-  const { animate } = useMotionProfile();
+  const { decorativeAnimate } = useMotionProfile();
   const containerRef = useRef<HTMLDivElement>(null);
   const prevStepIndex = useRef(stepIndex);
   const [enterClass, setEnterClass] = useState("");
@@ -45,7 +45,7 @@ export function WizardSwipeSurface({
   });
 
   useEffect(() => {
-    if (!animate || prevStepIndex.current === stepIndex) {
+    if (!decorativeAnimate || prevStepIndex.current === stepIndex) {
       return;
     }
 
@@ -66,7 +66,7 @@ export function WizardSwipeSurface({
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [stepIndex, animate]);
+  }, [stepIndex, decorativeAnimate]);
 
   const surfaceLayout = embedded
     ? "wizard-swipe-surface-embedded flex flex-col"
