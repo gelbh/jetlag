@@ -3,13 +3,47 @@ import {
   clickMapAt,
   clickMapCenter,
   clickToolDockButton,
+  expectEliminationMaskVisible,
   expectMapHasAnnotations,
 } from "../map";
 
+/** Reads "N of M" from the wizard stepper; throws while no counter is rendered. */
+export async function currentWizardStep(page: Page): Promise<number> {
+  const stepper = page.getByRole("list", { name: "Progress" }).first();
+  const text = await stepper.innerText();
+  const match = text.match(/(\d+) of \d+/);
+  if (!match) {
+    throw new Error(`Wizard stepper has no step counter: "${text}"`);
+  }
+  return Number(match[1]);
+}
+
+/** Clicks Next and verifies the click registered by watching the step counter. */
 export async function advanceWizard(page: Page) {
+  const before = await currentWizardStep(page);
   const next = page.getByRole("button", { name: "Next" });
   await expect(next).toBeEnabled({ timeout: 15_000 });
   await next.click();
+  await expect
+    .poll(() => currentWizardStep(page), { timeout: 15_000 })
+    .toBe(before + 1);
+}
+
+/** Clicks Previous step and verifies the step counter decremented. */
+export async function retreatWizard(page: Page) {
+  const before = await currentWizardStep(page);
+  await page.getByRole("button", { name: "Previous step" }).click();
+  await expect
+    .poll(() => currentWizardStep(page), { timeout: 15_000 })
+    .toBe(before - 1);
+}
+
+/** Clicks an answer option and verifies the tap registered (aria-pressed). */
+export async function chooseAnswer(page: Page, name: string) {
+  const option = page.getByRole("button", { name, exact: true });
+  await expect(option).toBeEnabled({ timeout: 15_000 });
+  await option.click();
+  await expect(option).toHaveAttribute("aria-pressed", "true");
 }
 
 export async function waitForMapPlacementCrosshair(page: Page) {
@@ -78,9 +112,10 @@ export async function completeRadarSolo(page: Page) {
   await selectFirstRadarDistance(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
-  await page.getByRole("button", { name: "Yes" }).click();
+  await chooseAnswer(page, "Yes");
   await page.getByRole("button", { name: "Add radar question" }).click();
   await expectMapHasAnnotations(page);
+  await expectEliminationMaskVisible(page);
 }
 
 export async function sendRadarToHiders(page: Page) {
@@ -103,10 +138,11 @@ export async function completeMatchingSolo(page: Page) {
   await waitForGeoLoadingIdle(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
-  await page.getByRole("button", { name: "Yes" }).click();
+  await chooseAnswer(page, "Yes");
   await page.getByRole("button", { name: "Add match question" }).click();
   await dismissActiveToolPanel(page);
   await expectMapHasAnnotations(page);
+  await expectEliminationMaskVisible(page);
 }
 
 export async function sendMatchingToHiders(page: Page) {
@@ -131,9 +167,10 @@ export async function completeMeasuringSolo(page: Page) {
   await clickMapAt(page, 0.6, 0.4);
   await waitForWizardNext(page);
   await advanceWizard(page);
-  await page.getByRole("button", { name: "Closer" }).click();
+  await chooseAnswer(page, "Closer");
   await page.getByRole("button", { name: "Add measure question" }).click();
   await expectMapHasAnnotations(page);
+  await expectEliminationMaskVisible(page);
 }
 
 export async function sendMeasuringToHiders(page: Page) {
@@ -158,9 +195,10 @@ export async function completeThermometerSolo(page: Page) {
   await clickMapAt(page, 0.65, 0.5);
   await waitForWizardNext(page);
   await advanceWizard(page);
-  await page.getByRole("button", { name: "Hotter" }).click();
+  await chooseAnswer(page, "Hotter");
   await page.getByRole("button", { name: "Add thermometer" }).click();
   await expectMapHasAnnotations(page);
+  await expectEliminationMaskVisible(page);
 }
 
 export async function sendThermometerToHiders(page: Page) {
@@ -195,10 +233,11 @@ export async function completeTentacleSolo(page: Page) {
   await waitForGeoLoadingIdle(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
-  await page.getByText("City Museum").click();
+  await chooseAnswer(page, "City Museum");
   await page.getByRole("button", { name: "Add tentacle question" }).click();
   await dismissActiveToolPanel(page);
   await expectMapHasAnnotations(page);
+  await expectEliminationMaskVisible(page);
 }
 
 export async function sendTentacleToHiders(page: Page) {
