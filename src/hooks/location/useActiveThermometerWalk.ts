@@ -64,10 +64,20 @@ export function useActiveThermometerWalk({
     return crowFliesDistanceMeters(start, livePoint);
   }, [livePoint, start]);
 
+  const targetDistanceMeters = useMemo(() => {
+    const raw = walkingQuestion?.placement?.metadata?.thermometerDistanceMeters;
+    if (typeof raw === "number" && Number.isFinite(raw) && raw > 0) {
+      return raw;
+    }
+
+    return null;
+  }, [walkingQuestion]);
+
   return {
     walkingQuestion,
     start,
     livePoint,
     distanceTraveled,
+    targetDistanceMeters,
   };
 }

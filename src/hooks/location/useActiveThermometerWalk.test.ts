@@ -58,4 +58,17 @@ describe("useActiveThermometerWalk", () => {
 
     expect(result.current.livePoint).toEqual([53.351, -6.259]);
   });
+
+  it("exposes the target distance from walking question metadata", () => {
+    const { result } = renderHook(() =>
+      useActiveThermometerWalk({
+        pendingQuestions: [walkingQuestion],
+        seekerLocations: [],
+        myUid: "seeker-1",
+        localLivePoint: [53.351, -6.259],
+      }),
+    );
+
+    expect(result.current.targetDistanceMeters).toBe(804);
+  });
 });
