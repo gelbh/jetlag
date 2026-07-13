@@ -69,9 +69,6 @@ export function AppLink({
         ) {
           return;
         }
-        if (target === "_blank") {
-          return;
-        }
 
         event.preventDefault();
         void beginTransition(to, transitionOptions).catch(() => {

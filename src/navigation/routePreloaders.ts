@@ -62,6 +62,31 @@ export function resolveNavigatePath(to: To): string {
   return normalizeRoutePath(to.pathname ?? "/");
 }
 
+export function resolveNavigateDestinationKey(to: To): string {
+  if (typeof to === "string") {
+    const hashIndex = to.indexOf("#");
+    const queryIndex = to.indexOf("?");
+    const pathEnd = Math.min(
+      hashIndex === -1 ? to.length : hashIndex,
+      queryIndex === -1 ? to.length : queryIndex,
+    );
+    const pathPart = to.slice(0, pathEnd) || "/";
+    const queryPart =
+      queryIndex === -1
+        ? ""
+        : to.slice(queryIndex, hashIndex === -1 ? undefined : hashIndex);
+    const hashPart = hashIndex === -1 ? "" : to.slice(hashIndex);
+
+    return `${normalizeRoutePath(pathPart)}${queryPart}${hashPart}`;
+  }
+
+  const pathname = normalizeRoutePath(to.pathname ?? "/");
+  const search = to.search ?? "";
+  const hash = to.hash ?? "";
+
+  return `${pathname}${search}${hash}`;
+}
+
 export function isLazyRoute(path: string): boolean {
   return normalizeRoutePath(path) in LAZY_ROUTE_LOADERS;
 }

@@ -9,18 +9,15 @@ export function RouteTransitionOverlay() {
   }
 
   return (
-    <div
+    <output
       className="route-transition-overlay"
-      role="status"
       aria-busy="true"
-      aria-live="polite"
-      aria-atomic="true"
       aria-label="Loading page"
     >
       <div className="route-transition-overlay-content">
         <LoadingSpinnerRing size="md" className="text-brand-blue" />
         <span className="route-transition-overlay-label">Loading…</span>
       </div>
-    </div>
+    </output>
   );
 }
