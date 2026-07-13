@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import area from "@turf/area";
 import { lineString } from "@turf/helpers";
 import { geoSpatialVoronoiFromSites } from "./geoSpatialVoronoi";
+import { voronoiCellSiteId } from "./voronoiCellSiteId";
 import { geodesicLineBuffer } from "./geodesicLineBuffer";
 
 describe("geoSpatialVoronoiFromSites", () => {
@@ -16,6 +17,20 @@ describe("geoSpatialVoronoiFromSites", () => {
     expect(cells.features.every((cell) => cell.geometry.type === "Polygon")).toBe(
       true,
     );
+  });
+
+  it("preserves poiId on projected voronoi cells", () => {
+    const cells = geoSpatialVoronoiFromSites([
+      { lng: -0.18, lat: 51.45, properties: { poiId: "west" } },
+      { lng: -0.12, lat: 51.45, properties: { poiId: "east" } },
+    ]);
+
+    const siteIds = cells.features
+      .map((cell) => voronoiCellSiteId(cell, ["poiId"]))
+      .filter(Boolean);
+
+    expect(siteIds).toContain("west");
+    expect(siteIds).toContain("east");
   });
 });
 
