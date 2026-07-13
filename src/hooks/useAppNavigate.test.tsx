@@ -1,28 +1,29 @@
 import { renderHook, act } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useAppNavigate, resetAppNavigationStackForTests, useAppNavigationStack } from "./useAppNavigate";
+import {
+  useAppNavigate,
+  resetAppNavigationStackForTests,
+  useAppNavigationStack,
+} from "./useAppNavigate";
 
-const navigateMock = vi.fn();
+const beginTransitionMock = vi.fn(async () => undefined);
 
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>(
-    "react-router-dom",
-  );
-  return {
-    ...actual,
-    useNavigate: () => navigateMock,
-  };
-});
+vi.mock("../navigation/useRouteTransition", () => ({
+  useRouteTransition: () => ({
+    phase: "idle" as const,
+    beginTransition: beginTransitionMock,
+    reportScreenReady: vi.fn(),
+  }),
+}));
 
 describe("useAppNavigate", () => {
   beforeEach(() => {
-    navigateMock.mockReset();
+    beginTransitionMock.mockReset();
     resetAppNavigationStackForTests("/");
-    delete document.documentElement.dataset.navDirection;
   });
 
-  it("sets forward nav direction and enables view transitions by default", () => {
+  it("delegates forward navigation to the transition coordinator", () => {
     const { result } = renderHook(() => useAppNavigate(), {
       wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
     });
@@ -31,13 +32,16 @@ describe("useAppNavigate", () => {
       result.current("/create");
     });
 
-    expect(document.documentElement.dataset.navDirection).toBe("forward");
-    expect(navigateMock).toHaveBeenCalledWith("/create", {
-      viewTransition: true,
+    expect(beginTransitionMock).toHaveBeenCalledWith("/create", {
+      direction: "forward",
+      replace: undefined,
+      state: undefined,
+      preventScrollReset: undefined,
+      relative: undefined,
     });
   });
 
-  it("uses neutral direction for replace navigations", () => {
+  it("uses replace direction for replace navigations", () => {
     const { result } = renderHook(() => useAppNavigate(), {
       wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
     });
@@ -46,14 +50,16 @@ describe("useAppNavigate", () => {
       result.current("/", { replace: true });
     });
 
-    expect(document.documentElement.dataset.navDirection).toBe("neutral");
-    expect(navigateMock).toHaveBeenCalledWith("/", {
+    expect(beginTransitionMock).toHaveBeenCalledWith("/", {
+      direction: "replace",
       replace: true,
-      viewTransition: true,
+      state: undefined,
+      preventScrollReset: undefined,
+      relative: undefined,
     });
   });
 
-  it("uses back nav direction when requested", () => {
+  it("uses back direction when requested", () => {
     const { result } = renderHook(() => useAppNavigate(), {
       wrapper: ({ children }) => <MemoryRouter>{children}</MemoryRouter>,
     });
@@ -63,9 +69,12 @@ describe("useAppNavigate", () => {
       result.current("/", { direction: "back" });
     });
 
-    expect(document.documentElement.dataset.navDirection).toBe("back");
-    expect(navigateMock).toHaveBeenLastCalledWith("/", {
-      viewTransition: true,
+    expect(beginTransitionMock).toHaveBeenLastCalledWith("/", {
+      direction: "back",
+      replace: undefined,
+      state: undefined,
+      preventScrollReset: undefined,
+      relative: undefined,
     });
   });
 
@@ -89,9 +98,8 @@ describe("useAppNavigate", () => {
       stackResult.current.goBack();
     });
 
-    expect(navigateMock).toHaveBeenLastCalledWith("/", {
-      viewTransition: true,
+    expect(beginTransitionMock).toHaveBeenLastCalledWith("/", {
+      direction: "back",
     });
-    expect(document.documentElement.dataset.navDirection).toBe("back");
   });
 });

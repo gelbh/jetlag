@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { AppLink } from "../navigation/AppLink";
 import { HudToolIcon } from "../map/ToolIcons";
 import { ToolStepper } from "../tools/shared/ToolStepper";
 import { WizardSwipeSurface } from "../tools/shared/WizardSwipeSurface";
@@ -165,9 +165,9 @@ export function TutorialSectionWizard({
       <span className="text-ink-dim" aria-hidden>
         ·
       </span>
-      <Link to="/create" className="home-feedback-link text-xs">
+      <AppLink to="/create" className="home-feedback-link text-xs">
         Create session
-      </Link>
+      </AppLink>
       <span className="text-ink-dim" aria-hidden>
         ·
       </span>

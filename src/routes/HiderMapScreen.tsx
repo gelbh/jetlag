@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { AppNavigate } from "../navigation/AppNavigate";
 import { Polygon } from "react-leaflet";
 import { AnnotationLayer } from "../components/map/AnnotationLayer";
 import { GameAreaMask } from "../components/map/GameAreaMask";
@@ -457,7 +457,7 @@ export function HiderMapScreen() {
   );
 
   if (!session || !gameArea) {
-    return <Navigate to="/" replace />;
+    return <AppNavigate to="/" replace />;
   }
 
   const mapFocusBounds = gameAreaToBoundsExpression(gameArea);

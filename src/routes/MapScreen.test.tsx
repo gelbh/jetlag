@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Route, Routes } from "react-router-dom";
 import { MapScreen } from "./MapScreen";
@@ -100,7 +100,7 @@ vi.mock("../services/core/firebase", () => ({
 }));
 
 describe("MapScreen", () => {
-  it("redirects to create when no session game area exists", () => {
+  it("redirects to create when no session game area exists", async () => {
     useSessionStore.getState().setSession(
       createTestSession({ gameArea: undefined }),
     );
@@ -113,7 +113,9 @@ describe("MapScreen", () => {
       { route: "/map", resetStores: false },
     );
 
-    expect(screen.getByText("Create session landing")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Create session landing")).toBeInTheDocument();
+    });
   });
 
   it("renders the tool dock for an active session", () => {

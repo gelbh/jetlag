@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { AppLink } from "../components/navigation/AppLink";
 import { useCallback, useMemo, useState } from "react";
 import { signOut } from "firebase/auth";
 import { PremiumSignInGate } from "../components/billing/PremiumSignInGate";
@@ -186,9 +186,9 @@ export function AdminPanel() {
             >
               Sign out
             </button>
-            <Link to="/" className="btn-secondary inline-flex min-h-11 items-center px-4">
+            <AppLink to="/" className="btn-secondary inline-flex min-h-11 items-center px-4">
               Back home
-            </Link>
+            </AppLink>
           </div>
         </div>
       </EntryScreenLayout>

@@ -2,8 +2,6 @@ import { Suspense, useEffect, type ReactNode } from "react";
 import * as Sentry from "@sentry/react";
 import {
   BrowserRouter,
-  Link,
-  Navigate,
   Route,
   Routes,
   useLocation,
@@ -14,6 +12,7 @@ import { AppUpdateBanner } from "./components/ui/AppUpdateBanner";
 import { AppUpdateProvider } from "./components/ui/AppUpdateProvider";
 import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
+import { AppLink } from "./components/navigation/AppLink";
 import { Home } from "./routes/Home";
 import { AdminPanel } from "./routes/AdminPanel";
 import { JoinSession } from "./routes/JoinSession";
@@ -29,29 +28,23 @@ import {
 } from "./domain/device/chunkLoadRecovery";
 import {
   getServiceWorkerChunkReloadContext,
-  lazyWithChunkRetry,
   setChunkReloadContextGetter,
 } from "./domain/device/lazyWithChunkRetry";
 import { notifyAppNeedRefresh } from "./domain/device/serviceWorkerRefresh";
 import { useEdgeSwipeBack } from "./hooks/useEdgeSwipeBack";
 import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";
 import { useSessionStore } from "./state/sessionStore";
-
-const MapScreen = lazyWithChunkRetry(() =>
-  import("./routes/MapScreen").then((m) => ({ default: m.MapScreen })),
-);
-const CreateSession = lazyWithChunkRetry(() =>
-  import("./routes/CreateSession").then((m) => ({ default: m.CreateSession })),
-);
-const GamePresetList = lazyWithChunkRetry(() =>
-  import("./routes/GamePresets").then((m) => ({ default: m.GamePresetList })),
-);
-const GamePresetEditor = lazyWithChunkRetry(() =>
-  import("./routes/GamePresets").then((m) => ({ default: m.GamePresetEditor })),
-);
-const Tutorial = lazyWithChunkRetry(() =>
-  import("./routes/Tutorial").then((m) => ({ default: m.Tutorial })),
-);
+import { AppNavigate } from "./navigation/AppNavigate";
+import { RouteReadinessSensor } from "./navigation/RouteReadinessSensor";
+import { RouteTransitionOverlay } from "./navigation/RouteTransitionOverlay";
+import { RouteTransitionProvider } from "./navigation/RouteTransitionContext";
+import {
+  CreateSessionLazy,
+  GamePresetEditorLazy,
+  GamePresetListLazy,
+  MapScreenLazy,
+  TutorialLazy,
+} from "./navigation/routePreloaders";
 
 function RouteFallback() {
   return (
@@ -130,12 +123,12 @@ function AppErrorFallback() {
         >
           Reload
         </button>
-        <Link
+        <AppLink
           to="/"
           className="btn-secondary border border-border px-4 py-2 text-sm"
         >
           Back home
-        </Link>
+        </AppLink>
       </div>
     </div>
   );
@@ -159,78 +152,82 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <AppUpdateProvider>
-      <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
-        <MotionDatasetEffect />
-        <EdgeSwipeBackBinder />
-        <AnalyticsPageViewTracker />
-        <ChunkReloadContextBinder />
-        <AppUpdateBanner />
-        <div className="h-[100dvh] overflow-y-auto overscroll-y-none">
-          <LowBatteryPrompt />
-          <Routes>
-          <Route path="/" element={<Home />} />
-          <Route
-            path="/tutorial"
-            element={
-              <LazyRoute>
-                <Tutorial />
-              </LazyRoute>
-            }
-          />
-          <Route path="/feedback" element={<Feedback />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/premium" element={<Premium />} />
-          <Route
-            path="/create"
-            element={
-              <LazyRoute>
-                <CreateSession />
-              </LazyRoute>
-            }
-          />
-          <Route path="/join" element={<JoinSession />} />
-          <Route path="/admin" element={<AdminPanel />} />
-          <Route
-            path="/presets"
-            element={
-              <LazyRoute>
-                <GamePresetList />
-              </LazyRoute>
-            }
-          />
-          <Route
-            path="/presets/new"
-            element={
-              <LazyRoute>
-                <GamePresetEditor />
-              </LazyRoute>
-            }
-          />
-          <Route
-            path="/presets/:id/edit"
-            element={
-              <LazyRoute>
-                <GamePresetEditor />
-              </LazyRoute>
-            }
-          />
-          <Route
-            path="/map"
-            element={
-              <LazyRoute>
-                <MapErrorBoundary>
-                  <MapScreen />
-                </MapErrorBoundary>
-              </LazyRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        </div>
-      </Sentry.ErrorBoundary>
-      </AppUpdateProvider>
+      <RouteTransitionProvider>
+        <AppUpdateProvider>
+          <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
+            <MotionDatasetEffect />
+            <RouteTransitionOverlay />
+            <RouteReadinessSensor />
+            <EdgeSwipeBackBinder />
+            <AnalyticsPageViewTracker />
+            <ChunkReloadContextBinder />
+            <AppUpdateBanner />
+            <div className="h-[100dvh] overflow-y-auto overscroll-y-none">
+              <LowBatteryPrompt />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route
+                  path="/tutorial"
+                  element={
+                    <LazyRoute>
+                      <TutorialLazy />
+                    </LazyRoute>
+                  }
+                />
+                <Route path="/feedback" element={<Feedback />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/premium" element={<Premium />} />
+                <Route
+                  path="/create"
+                  element={
+                    <LazyRoute>
+                      <CreateSessionLazy />
+                    </LazyRoute>
+                  }
+                />
+                <Route path="/join" element={<JoinSession />} />
+                <Route path="/admin" element={<AdminPanel />} />
+                <Route
+                  path="/presets"
+                  element={
+                    <LazyRoute>
+                      <GamePresetListLazy />
+                    </LazyRoute>
+                  }
+                />
+                <Route
+                  path="/presets/new"
+                  element={
+                    <LazyRoute>
+                      <GamePresetEditorLazy />
+                    </LazyRoute>
+                  }
+                />
+                <Route
+                  path="/presets/:id/edit"
+                  element={
+                    <LazyRoute>
+                      <GamePresetEditorLazy />
+                    </LazyRoute>
+                  }
+                />
+                <Route
+                  path="/map"
+                  element={
+                    <LazyRoute>
+                      <MapErrorBoundary>
+                        <MapScreenLazy />
+                      </MapErrorBoundary>
+                    </LazyRoute>
+                  }
+                />
+                <Route path="*" element={<AppNavigate to="/" replace />} />
+              </Routes>
+            </div>
+          </Sentry.ErrorBoundary>
+        </AppUpdateProvider>
+      </RouteTransitionProvider>
     </BrowserRouter>
   );
 }

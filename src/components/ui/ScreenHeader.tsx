@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { AppLink } from "../navigation/AppLink";
 import { AppLogo } from "./AppLogo";
 
 type ScreenHeaderPlacement = "fixed" | "sticky" | "inline";
@@ -46,7 +46,7 @@ export function ScreenHeader({
   className = "",
 }: ScreenHeaderProps) {
   const backControl = (
-    <Link
+    <AppLink
       to={backTo}
       onClick={
         onBack
@@ -59,7 +59,7 @@ export function ScreenHeader({
       className={`${screenBackLinkClassName} justify-self-start`}
     >
       ← {backLabel}
-    </Link>
+    </AppLink>
   );
 
   const content = (

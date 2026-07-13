@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { AppLink } from "../navigation/AppLink";
 import {
   bundledPresetDefinition,
   isBundledPresetId,
@@ -60,28 +60,28 @@ function PresetSearchResultCard({
       actions={
         <>
           {preset.migrationStatus === "manual_required" ? (
-            <Link
+            <AppLink
               to={`/presets/${preset.id}/edit`}
               className="btn-primary min-h-10 px-3 text-xs"
             >
               Review
-            </Link>
+            </AppLink>
           ) : (
-            <Link
+            <AppLink
               to={`/create?preset=${preset.id}`}
               className="btn-primary min-h-10 px-3 text-xs"
             >
               Host
-            </Link>
+            </AppLink>
           )}
           {!bundled ? (
             <>
-              <Link
+              <AppLink
                 to={`/presets/${preset.id}/edit`}
                 className="btn-secondary min-h-10 px-3 text-xs"
               >
                 Edit
-              </Link>
+              </AppLink>
               <button
                 type="button"
                 onClick={() => onDelete(preset.id)}

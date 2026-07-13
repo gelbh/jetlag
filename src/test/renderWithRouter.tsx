@@ -1,6 +1,7 @@
 import { render, type RenderOptions } from "@testing-library/react";
 import { type ReactElement, type ReactNode } from "react";
 import { MemoryRouter, type MemoryRouterProps } from "react-router-dom";
+import { RouteTransitionTestProvider } from "./RouteTransitionTestProvider";
 import { resetAllStores } from "./helpers/storeReset";
 
 interface RenderWithRouterOptions extends Omit<RenderOptions, "wrapper"> {
@@ -27,7 +28,7 @@ export function renderWithRouter(
   function Wrapper({ children }: { children: ReactNode }) {
     return (
       <MemoryRouter initialEntries={[route]} {...routerProps}>
-        {children}
+        <RouteTransitionTestProvider>{children}</RouteTransitionTestProvider>
       </MemoryRouter>
     );
   }

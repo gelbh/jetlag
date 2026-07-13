@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { AppLink } from "../navigation/AppLink";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
@@ -59,9 +59,9 @@ export function PresetBrowseLayout({
           />
         </label>
 
-        <Link to="/presets/new" className="home-card-btn home-card-btn-primary">
+        <AppLink to="/presets/new" className="home-card-btn home-card-btn-primary">
           <span>New preset</span>
-        </Link>
+        </AppLink>
 
         {searching ? (
           <PresetSearchResults presets={searchResults} onDelete={onDelete} />

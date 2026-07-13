@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { AppLink } from "../navigation/AppLink";
 import { MotionSheet } from "../motion/MotionSheet";
 import { usePersistedDismiss } from "../../hooks/usePersistedDismiss";
 
@@ -61,9 +61,9 @@ export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
           Close
         </button>
 
-        <Link to="/tutorial" className="home-feedback-link block text-center">
+        <AppLink to="/tutorial" className="home-feedback-link block text-center">
           Full tutorial →
-        </Link>
+        </AppLink>
       </div>
     </MotionSheet>
   );

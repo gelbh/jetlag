@@ -1,5 +1,5 @@
 import { useId, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { AppLink } from "../navigation/AppLink";
 import {
   BUNDLED_GAME_PRESET_DEFINITIONS,
   bundledPresetDefinition,
@@ -29,12 +29,12 @@ function PresetLeafCard({ preset }: { preset: MigratedPreset }) {
       description={description}
       headerAction={<PresetFavouriteButton presetId={preset.id} />}
       actions={
-        <Link
+        <AppLink
           to={`/create?preset=${preset.id}`}
           className="btn-primary min-h-10 px-3 text-xs"
         >
           Host
-        </Link>
+        </AppLink>
       }
     />
   );
