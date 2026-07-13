@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1 - 2026-07-14
+
+### Improvements
+
+- Map settings: optional tilted map view with a settings toggle and HUD control; low power mode keeps the map flat.
+
 ## 0.6.0 - 2026-07-13
 
 ### Improvements
