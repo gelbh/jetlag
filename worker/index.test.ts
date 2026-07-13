@@ -79,6 +79,80 @@ describe("document CSP nonce", () => {
         }),
       ),
     ).toBe(false);
+    expect(
+      shouldApplyDocumentCsp(
+        new Response(null, {
+          status: 205,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it("uses HTMLRewriter when the runtime provides it", async () => {
+    class MockHTMLRewriter {
+      #onScript?: (element: {
+        hasAttribute: (name: string) => boolean;
+        setAttribute: (name: string, value: string) => void;
+      }) => void;
+
+      on(
+        selector: string,
+        handlers: {
+          element: (element: {
+            hasAttribute: (name: string) => boolean;
+            setAttribute: (name: string, value: string) => void;
+          }) => void;
+        },
+      ) {
+        if (selector === "script") {
+          this.#onScript = handlers.element;
+        }
+        return this;
+      }
+
+      transform(response: Response) {
+        return {
+          text: () =>
+            response.text().then((html) => {
+              return html.replace(
+                /<script\b([^>]*)>/gi,
+                (_match, rawAttributes: string) => {
+                  let attributes = rawAttributes.trim();
+                  const element = {
+                    hasAttribute(name: string) {
+                      return new RegExp(`\\b${name}\\s*=`).test(attributes);
+                    },
+                    setAttribute(name: string, value: string) {
+                      attributes = attributes
+                        ? `${attributes} ${name}="${value}"`
+                        : `${name}="${value}"`;
+                    },
+                  };
+
+                  this.#onScript?.(element);
+                  return attributes ? `<script ${attributes}>` : "<script>";
+                },
+              );
+            }),
+        };
+      }
+    }
+
+    vi.stubGlobal("HTMLRewriter", MockHTMLRewriter);
+
+    try {
+      expect(
+        await injectScriptNonces(
+          '<script src="/a.js"></script><script nonce="existing" src="/b.js"></script>',
+          "rewriter-nonce",
+        ),
+      ).toBe(
+        '<script src="/a.js" nonce="rewriter-nonce"></script><script nonce="existing" src="/b.js"></script>',
+      );
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("scopes script-src nonce updates without touching other directives", () => {

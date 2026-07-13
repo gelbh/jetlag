@@ -1,4 +1,6 @@
 const SCRIPT_SRC_PATTERN = /script-src ([^;]+)/;
+const EXISTING_NONCE_TOKEN_PATTERN = /'nonce-[^']+'/g;
+const WHITESPACE_PATTERN = /\s+/g;
 
 export function generateCspNonce(): string {
   const bytes = new Uint8Array(16);
@@ -20,7 +22,7 @@ export function shouldApplyDocumentCsp(response: Response): boolean {
     return false;
   }
 
-  if (response.status === 204 || response.status === 304) {
+  if (response.status === 204 || response.status === 205 || response.status === 304) {
     return false;
   }
 
@@ -57,7 +59,10 @@ export function addScriptNonceToCsp(csp: string, nonce: string): string {
       return match;
     }
 
-    const withoutScriptNonce = sources.replace(/'nonce-[^']+'/g, " ").replace(/\s+/g, " ").trim();
+    const withoutScriptNonce = sources
+      .replace(EXISTING_NONCE_TOKEN_PATTERN, " ")
+      .replace(WHITESPACE_PATTERN, " ")
+      .trim();
     return `script-src ${withoutScriptNonce} ${nonceToken}`;
   });
 }
