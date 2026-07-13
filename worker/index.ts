@@ -7,6 +7,20 @@ import {
   shouldApplyDocumentCsp,
 } from "./documentCsp";
 
+export const CSP_REPORT_PATH = "/api/csp-report";
+
+async function handleCspReportRequest(request: Request): Promise<Response> {
+  if (request.method !== "POST") {
+    return new Response("Method not allowed", { status: 405 });
+  }
+
+  const body = await request.text();
+  // Intentionally coarse: we just need the payload in Workers logs to identify the culprit.
+  console.log("[csp-report]", body.slice(0, 8_000));
+
+  return new Response(null, { status: 204 });
+}
+
 export function isSpaFallbackForAssetRequest(
   request: Request,
   response: Response,
@@ -29,6 +43,9 @@ export default {
     const pathname = new URL(request.url).pathname;
     if (pathname === SENTRY_TUNNEL_PATH) {
       return handleSentryTunnelRequest(request);
+    }
+    if (pathname === CSP_REPORT_PATH) {
+      return handleCspReportRequest(request);
     }
 
     const assetResponse = await env.ASSETS.fetch(request);
