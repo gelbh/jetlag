@@ -7,6 +7,7 @@ import { useMapOverlayActions } from "../../hooks/map-screen/useMapOverlayAction
 import { useMapGeometryEdit } from "../../hooks/map-screen/useMapGeometryEdit";
 import { useMapSessionChrome } from "../../hooks/map-screen/useMapSessionChrome";
 import { useMapDraftOverlays } from "../../hooks/map-screen/useMapDraftOverlays";
+import { usePlacementMapFocus } from "../../hooks/map-screen/usePlacementMapFocus";
 import { useMapToolInteraction } from "../../hooks/map-screen/useMapToolInteraction";
 import { useAdminBoundaryFeatures } from "../../hooks/map-screen/useAdminBoundaryFeatures";
 import {
@@ -488,6 +489,9 @@ export function useMapScreenController() {
           thermoA: thermometerTool.draft.thermoA,
           thermoB: thermometerTool.draft.thermoB,
           answer: thermometerTool.draft.thermometerAnswer,
+          targetDistanceMeters: thermometerTool.draft.thermometerDistanceMeters,
+          walkCurrentPoint: thermometerTool.walkCurrentPoint,
+          walkActive: thermometerTool.draft.walkingQuestionId !== null,
         },
         measuring: {
           seekerPoint: measuringTool.draft.measuringSeekerPoint,
@@ -509,6 +513,18 @@ export function useMapScreenController() {
       },
       tentacleEliminationPreviewExtra,
     );
+
+  const {
+    effectiveFocusBounds: effectiveMapFocusBounds,
+    placementRecenterToken,
+    focusPaddingBias: placementFocusPaddingBias,
+  } = usePlacementMapFocus({
+    activeTool,
+    overlays: mapDraftOverlays,
+    defaultFocusBounds: mapFocusBounds,
+    enabled: true,
+    walkActive: thermometerTool.draft.walkingQuestionId !== null,
+  });
 
   const dismissTransientUi = useCallback(() => {
     overlay.closeSheet();
@@ -622,6 +638,9 @@ export function useMapScreenController() {
     suppressChromeHideRef,
     center,
     mapFocusBounds,
+    effectiveMapFocusBounds,
+    placementRecenterToken,
+    placementFocusPaddingBias,
     mapChromeControlInset,
     placementCrosshair: tools.placementCrosshair,
     handleMapClick,

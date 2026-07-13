@@ -24,3 +24,9 @@ export const MOTION_TRANSITION_BASE =
   "transform var(--motion-base) var(--ease-spring-subtle)";
 export const MOTION_TRANSITION_SCRIM =
   "opacity var(--motion-fast) var(--ease-out-quint)";
+
+/** Leaflet fitBounds duration; mirrors `--motion-base` in base.css. */
+export const MOTION_MAP_CAMERA_MS = 200;
+
+/** Extra bottom padding when framing tool placement (panel peek + dock). */
+export const MAP_PLACEMENT_FOCUS_BOTTOM_BIAS_PX = 120;
