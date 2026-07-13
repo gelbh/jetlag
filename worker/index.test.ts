@@ -1,4 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
+import {
+  addScriptNonceToCsp,
+  applyDocumentCspNonce,
+  injectScriptNonces,
+  isHtmlDocumentResponse,
+} from "./documentCsp";
 import { isSpaFallbackForAssetRequest } from "./index";
 import {
   handleSentryTunnelRequest,
@@ -34,6 +40,58 @@ describe("isSpaFallbackForAssetRequest", () => {
     });
 
     expect(isSpaFallbackForAssetRequest(request, response)).toBe(false);
+  });
+});
+
+describe("document CSP nonce", () => {
+  it("detects html document responses", () => {
+    expect(
+      isHtmlDocumentResponse(
+        new Response("<!doctype html>", {
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      isHtmlDocumentResponse(
+        new Response("export {}", {
+          headers: { "Content-Type": "text/javascript" },
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it("adds a per-request script nonce to CSP and script tags", async () => {
+    const csp =
+      "default-src 'self'; script-src 'self' https://www.google.com 'sha256-abc='; style-src 'self'";
+
+    expect(addScriptNonceToCsp(csp, "test-nonce")).toBe(
+      "default-src 'self'; script-src 'self' https://www.google.com 'sha256-abc=' 'nonce-test-nonce'; style-src 'self'",
+    );
+
+    expect(
+      injectScriptNonces(
+        '<script src="/boot-recovery.js"></script><script type="module" src="/assets/index.js"></script>',
+        "test-nonce",
+      ),
+    ).toBe(
+      '<script nonce="test-nonce" src="/boot-recovery.js"></script><script nonce="test-nonce" type="module" src="/assets/index.js"></script>',
+    );
+
+    const response = await applyDocumentCspNonce(
+      new Response("<!doctype html><script src=\"/boot-recovery.js\"></script>", {
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Content-Security-Policy": csp,
+        },
+      }),
+    );
+
+    const body = await response.text();
+    expect(body).toContain('nonce="');
+    expect(response.headers.get("Content-Security-Policy")).toMatch(
+      /'nonce-[^']+'/,
+    );
   });
 });
 
