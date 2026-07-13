@@ -13,15 +13,14 @@ import {
   signInWithEmailLink,
   signInWithPopup,
   signInWithRedirect,
+  signOut,
   type AuthCredential,
   type AuthProvider,
   type User,
 } from "firebase/auth";
-import { getFirebaseAuth } from "./firebase";
+import { getFirebaseAuth, ensureAnonymousUser } from "./firebase";
 
 export const EMAIL_LINK_STORAGE_KEY = "premiumEmailForSignIn";
-
-/** Thrown when OAuth continues via full-page redirect (popup blocked). */
 export class OAuthRedirectInProgressError extends Error {
   constructor() {
     super("OAuth redirect in progress");
@@ -31,6 +30,12 @@ export class OAuthRedirectInProgressError extends Error {
 
 export function isOAuthRedirectInProgress(error: unknown): boolean {
   return error instanceof OAuthRedirectInProgressError;
+}
+
+export async function signOutToAnonymous(): Promise<void> {
+  const auth = getFirebaseAuth();
+  await signOut(auth);
+  await ensureAnonymousUser();
 }
 
 /** Flip when Apple Sign-In is configured in Firebase + Apple Developer. */
