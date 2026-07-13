@@ -66,8 +66,8 @@ type MapScreenChromeProps = Pick<
   | "firstRunDismissed"
   | "setFirstRunDismissed"
   | "mapPanning"
-  | "panelMinimized"
-  | "setPanelMinimized"
+  | "userMinimized"
+  | "setUserMinimized"
   | "selectedAnnotation"
   | "selectedAnnotationId"
   | "setSelectedAnnotationId"
@@ -171,8 +171,8 @@ export function MapScreenChrome({
   firstRunDismissed,
   setFirstRunDismissed,
   mapPanning,
-  panelMinimized,
-  setPanelMinimized,
+  userMinimized,
+  setUserMinimized,
   selectedAnnotation,
   setSelectedAnnotationId,
   geometryEditAnnotation,
@@ -303,8 +303,8 @@ export function MapScreenChrome({
         geometryEditAnnotation={geometryEditAnnotation}
         geometryDraft={geometryDraft}
         mapPanning={mapPanning}
-        panelMinimized={panelMinimized}
-        setPanelMinimized={setPanelMinimized}
+        userMinimized={userMinimized}
+        setUserMinimized={setUserMinimized}
         handleSelectTool={handleSelectTool}
         cancelGeometryEdit={cancelGeometryEdit}
         saveGeometryEdit={saveGeometryEdit}

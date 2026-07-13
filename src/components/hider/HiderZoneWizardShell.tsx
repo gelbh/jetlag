@@ -44,12 +44,13 @@ export function HiderZoneWizardShell({
     [setAnimNode],
   );
 
-  const { panelStyle, handleProps, peekHandleProps } = usePanelDrag({
-    minimized: peeked,
-    onMinimizedChange: onPeekedChange,
-    panelRef,
-    peekHeightPx: 48,
-  });
+  const { panelStyle, handleProps, peekHandleProps, displayMinimized, isDragging } =
+    usePanelDrag({
+      userMinimized: peeked,
+      onMinimizedChange: onPeekedChange,
+      panelRef,
+      peekHeightPx: 48,
+    });
 
   if (!mounted) {
     return null;
@@ -57,8 +58,9 @@ export function HiderZoneWizardShell({
 
   return (
     <MapFloatingPanel
-      minimized={peeked}
+      displayMinimized={displayMinimized}
       onMinimizedChange={onPeekedChange}
+      isDragging={isDragging}
       title={peekLabel}
       peekLabel={peekLabel}
       outerRef={setPanelRef}
