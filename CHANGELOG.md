@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.14 - 2026-07-13
+
+### Improvements
+
+- Startup: branded boot splash paints before the app loads, including offline return visits; shows a retry prompt if the bundle never loads.
+
 ## 0.5.13 - 2026-07-13
 
 ### Improvements
