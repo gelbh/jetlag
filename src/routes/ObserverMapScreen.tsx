@@ -74,8 +74,9 @@ export function ObserverMapScreen() {
           mapKey={controller.session.id}
           mapStyle={controller.effectiveBasemapStyle}
           mapTilt={controller.effectiveMapTilt}
+          lowPowerMode={controller.lowPowerMode}
           onMapStyleChange={controller.handleMapStyleChange}
-          onMapTiltChange={controller.setMapTilt}
+          onMapTiltChange={controller.handleMapTiltChange}
           mapStyleControlInset="dock"
           zoomControlInset="dock"
           center={controller.center}

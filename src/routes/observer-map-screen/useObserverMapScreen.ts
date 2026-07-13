@@ -6,7 +6,7 @@ import {
   fallbackGameArea,
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
-import { effectiveMapStyle, effectiveMapTilt, applyMapStylePreferenceChange } from "../../domain/device/powerProfile";
+import { effectiveMapStyle, effectiveMapTilt, applyMapStylePreferenceChange, applyMapTiltPreferenceChange } from "../../domain/device/powerProfile";
 import { resolveSpectatorLayers } from "../../domain/session/observerPerspective";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
@@ -55,6 +55,16 @@ export function useObserverMapScreen() {
       });
     },
     [lowPowerMode, setLowPowerMode, setMapStyle],
+  );
+  const handleMapTiltChange = useCallback(
+    (tilt: typeof mapTilt) => {
+      applyMapTiltPreferenceChange(tilt, {
+        lowPowerMode,
+        setMapTilt,
+        setLowPowerMode,
+      });
+    },
+    [lowPowerMode, setLowPowerMode, setMapTilt],
   );
   const center = useMemo<LatLngTuple>(() => {
     if (!displayGameArea) {
@@ -117,6 +127,7 @@ export function useObserverMapScreen() {
     mapTilt,
     setMapTilt,
     handleMapStyleChange,
+    handleMapTiltChange,
     effectiveBasemapStyle,
     effectiveMapTilt: effectiveMapTiltValue,
     layerVisibility,

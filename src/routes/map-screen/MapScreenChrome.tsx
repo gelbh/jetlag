@@ -25,7 +25,7 @@ type MapScreenChromeProps = Pick<
   | "handleMapStyleChange"
   | "effectiveBasemapStyle"
   | "mapTilt"
-  | "setMapTilt"
+  | "handleMapTiltChange"
   | "lowPowerMode"
   | "layerVisibility"
   | "showCurrentLocation"
@@ -132,7 +132,7 @@ export function MapScreenChrome({
   handleMapStyleChange,
   effectiveBasemapStyle,
   mapTilt,
-  setMapTilt,
+  handleMapTiltChange,
   lowPowerMode,
   layerVisibility,
   showCurrentLocation,
@@ -346,7 +346,7 @@ export function MapScreenChrome({
           mapStyle: effectiveBasemapStyle,
           onMapStyleChange: handleMapStyleChange,
           mapTilt,
-          onMapTiltChange: setMapTilt,
+          onMapTiltChange: handleMapTiltChange,
           locationError: liveLocationError,
           transitEnabled,
           transitLiveEnabled,

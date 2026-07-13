@@ -20,7 +20,7 @@ export function SeekerMapScreen() {
         toolGameArea={controller.toolGameArea}
         effectiveBasemapStyle={controller.effectiveBasemapStyle}
         effectiveMapTilt={controller.effectiveMapTilt}
-        setMapTilt={controller.setMapTilt}
+        handleMapTiltChange={controller.handleMapTiltChange}
         handleMapStyleChange={controller.handleMapStyleChange}
         mapChromeControlInset={controller.mapChromeControlInset}
         center={controller.center}
@@ -74,7 +74,7 @@ export function SeekerMapScreen() {
         handleMapStyleChange={controller.handleMapStyleChange}
         effectiveBasemapStyle={controller.effectiveBasemapStyle}
         mapTilt={controller.mapTilt}
-        setMapTilt={controller.setMapTilt}
+        handleMapTiltChange={controller.handleMapTiltChange}
         lowPowerMode={controller.lowPowerMode}
         layerVisibility={controller.layerVisibility}
         showCurrentLocation={controller.showCurrentLocation}

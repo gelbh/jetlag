@@ -18,8 +18,7 @@ import { isUsableMapBounds } from "../../domain/geometry/geometry";
 import { MOTION_MAP_CAMERA_S } from "../../domain/device/motionTokens";
 import { useMotionProfile } from "../../hooks/useMotionProfile";
 import { MapChromeListener } from "./MapChromeListener";
-import { MapStyleToggle } from "./MapStyleToggle";
-import { MapTiltToggle } from "./MapTiltToggle";
+import { MapLeftChromeControls } from "./MapLeftChromeControls";
 import { MapZoomControl, type MapZoomControlInset } from "./MapZoomControl";
 
 interface MapViewProps {
@@ -28,6 +27,7 @@ interface MapViewProps {
   className?: string;
   mapStyle?: MapStyle;
   mapTilt?: MapTilt;
+  lowPowerMode?: boolean;
   onBoundsChange?: (bounds: LatLngBounds) => void;
   /** Fired when the user pans or zooms the map (not programmatic fit/resize). */
   onUserViewportFramed?: () => void;
@@ -76,6 +76,7 @@ function MapFocus({
   const { prefersReducedMotion, lowPowerMode } = useMotionProfile();
   const hasFittedRef = useRef(false);
   const lastRecenterRef = useRef(recenterToken);
+  const lastMapTiltRef = useRef(mapTilt);
   const animate = !prefersReducedMotion && !lowPowerMode;
 
   useEffect(() => {
@@ -84,10 +85,14 @@ function MapFocus({
     }
 
     const recenterRequested = recenterToken !== lastRecenterRef.current;
+    const tiltChanged = mapTilt !== lastMapTiltRef.current;
+    lastMapTiltRef.current = mapTilt;
+
     if (
       fitBoundsMode === "once" &&
       hasFittedRef.current &&
-      !recenterRequested
+      !recenterRequested &&
+      !tiltChanged
     ) {
       return;
     }
@@ -252,6 +257,7 @@ export function MapView({
   className,
   mapStyle = "standard",
   mapTilt = "flat",
+  lowPowerMode = false,
   onBoundsChange,
   onUserViewportFramed,
   onMapClick,
@@ -339,18 +345,12 @@ export function MapView({
           inset={zoomControlInset}
           suppressRef={suppressChromeHideRef}
         />
-        {onMapStyleChange ? (
-          <MapStyleToggle
-            enabled={mapStyleToggleEnabled}
+        {onMapStyleChange || onMapTiltChange ? (
+          <MapLeftChromeControls
+            styleToggleEnabled={mapStyleToggleEnabled}
             mapStyle={mapStyle}
             onMapStyleChange={onMapStyleChange}
-            inset={styleControlInset}
-            suppressRef={suppressChromeHideRef}
-          />
-        ) : null}
-        {onMapTiltChange ? (
-          <MapTiltToggle
-            enabled={mapTiltToggleEnabled}
+            tiltToggleEnabled={mapTiltToggleEnabled && !lowPowerMode}
             mapTilt={mapTilt}
             onMapTiltChange={onMapTiltChange}
             inset={styleControlInset}

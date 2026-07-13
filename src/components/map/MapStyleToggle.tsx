@@ -7,6 +7,7 @@ import {
 } from "../../domain/map/mapBasemaps";
 import { previewTileUrlsFromOrigin } from "../../domain/map/mapTilePreview";
 import type { MapChromeControlInset } from "./mapChromeControlInset";
+import { getMapChromePortalTarget } from "./mapChromePortalTarget";
 import { useMapInteracting } from "./useMapInteracting";
 import { useMapPreviewTileOrigin } from "./useMapPreviewTileOrigin";
 
@@ -26,7 +27,7 @@ export function MapStyleToggle({
   suppressRef,
 }: MapStyleToggleProps) {
   const map = useMap();
-  const portalTarget = useMemo(() => map.getContainer(), [map]);
+  const portalTarget = useMemo(() => getMapChromePortalTarget(map), [map]);
   const interacting = useMapInteracting(suppressRef);
   const tileOrigin = useMapPreviewTileOrigin();
 

@@ -1,10 +1,10 @@
+import type { MapTilt } from "../map/mapTilt";
+
 export interface LiveLocationProfile {
   highAccuracy: boolean;
   minIntervalMs: number;
   minDistanceMeters: number;
 }
-
-import type { MapTilt } from "../map/mapTilt";
 
 export interface PowerProfile {
   liveLocation: LiveLocationProfile;
@@ -88,4 +88,19 @@ export function applyMapStylePreferenceChange(
   }
 
   ctx.setMapStyle(style);
+}
+
+export function applyMapTiltPreferenceChange(
+  tilt: MapTilt,
+  ctx: {
+    lowPowerMode: boolean;
+    setMapTilt: (tilt: MapTilt) => void;
+    setLowPowerMode: (enabled: boolean) => void;
+  },
+): void {
+  if (tilt === "tilted" && ctx.lowPowerMode) {
+    ctx.setLowPowerMode(false);
+  }
+
+  ctx.setMapTilt(tilt);
 }

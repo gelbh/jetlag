@@ -41,7 +41,7 @@ import {
   type LatLngTuple,
 } from "../domain/geometry/geometry";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
-import { effectiveMapStyle, effectiveMapTilt, applyMapStylePreferenceChange } from "../domain/device/powerProfile";
+import { effectiveMapStyle, effectiveMapTilt, applyMapStylePreferenceChange, applyMapTiltPreferenceChange } from "../domain/device/powerProfile";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
@@ -114,6 +114,16 @@ export function HiderMapScreen() {
       });
     },
     [lowPowerMode, setLowPowerMode, setMapStyle],
+  );
+  const handleMapTiltChange = useCallback(
+    (tilt: typeof mapTilt) => {
+      applyMapTiltPreferenceChange(tilt, {
+        lowPowerMode,
+        setMapTilt,
+        setLowPowerMode,
+      });
+    },
+    [lowPowerMode, setLowPowerMode, setMapTilt],
   );
   const notificationPreferences = useMapStore(
     (state) => state.notificationPreferences,
@@ -480,8 +490,9 @@ export function HiderMapScreen() {
           mapKey={session.id}
           mapStyle={effectiveBasemapStyle}
           mapTilt={effectiveMapTiltValue}
+          lowPowerMode={lowPowerMode}
           onMapStyleChange={handleMapStyleChange}
-          onMapTiltChange={setMapTilt}
+          onMapTiltChange={handleMapTiltChange}
           mapStyleControlInset="dock"
           zoomControlInset="dock"
           center={center}
@@ -649,7 +660,7 @@ export function HiderMapScreen() {
           mapStyle: effectiveBasemapStyle,
           setMapStyle: handleMapStyleChange,
           mapTilt,
-          setMapTilt,
+          setMapTilt: handleMapTiltChange,
           notificationPreferences,
           updateNotificationPreferences,
           enableNotifications,

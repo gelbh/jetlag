@@ -40,7 +40,7 @@ import {
   getTransitMetro,
   metroSupportsLiveVehicles,
 } from "../../services/transit/transitCatalog";
-import { effectiveMapStyle, effectiveMapTilt, applyMapStylePreferenceChange } from "../../domain/device/powerProfile";
+import { effectiveMapStyle, effectiveMapTilt, applyMapStylePreferenceChange, applyMapTiltPreferenceChange } from "../../domain/device/powerProfile";
 import {
   preloadGameAreaCachesAsync,
   gameAreaPreloadKey,
@@ -173,6 +173,16 @@ export function useMapScreenController() {
       });
     },
     [lowPowerMode, setLowPowerMode, setMapStyle],
+  );
+  const handleMapTiltChange = useCallback(
+    (tilt: typeof mapTilt) => {
+      applyMapTiltPreferenceChange(tilt, {
+        lowPowerMode,
+        setMapTilt,
+        setLowPowerMode,
+      });
+    },
+    [lowPowerMode, setLowPowerMode, setMapTilt],
   );
   const handleMapViewportChange = useCallback(
     (viewport: MapViewportState | null) => {
@@ -603,6 +613,7 @@ export function useMapScreenController() {
     mapTilt,
     setMapTilt,
     handleMapStyleChange,
+    handleMapTiltChange,
     effectiveBasemapStyle,
     effectiveMapTilt: effectiveMapTiltValue,
     lowPowerMode,

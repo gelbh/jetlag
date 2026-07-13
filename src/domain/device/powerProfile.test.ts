@@ -4,6 +4,7 @@ import {
   effectiveMapTilt,
   getPowerProfile,
   applyMapStylePreferenceChange,
+  applyMapTiltPreferenceChange,
 } from "./powerProfile";
 
 describe("powerProfile", () => {
@@ -40,5 +41,19 @@ describe("powerProfile", () => {
 
     expect(setLowPowerMode).toHaveBeenCalledWith(false);
     expect(setMapStyle).toHaveBeenCalledWith("satellite");
+  });
+
+  it("clears low power mode when tilted map is selected", () => {
+    const setMapTilt = vi.fn();
+    const setLowPowerMode = vi.fn();
+
+    applyMapTiltPreferenceChange("tilted", {
+      lowPowerMode: true,
+      setMapTilt,
+      setLowPowerMode,
+    });
+
+    expect(setLowPowerMode).toHaveBeenCalledWith(false);
+    expect(setMapTilt).toHaveBeenCalledWith("tilted");
   });
 });
