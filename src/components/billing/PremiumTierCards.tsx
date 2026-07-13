@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { AppLink } from "../navigation/AppLink";
 import { SegmentControl } from "../ui/SegmentControl";
 import {
   formatBankedPremiumSessionCreditsLabel,
@@ -191,14 +191,14 @@ export function PremiumTierCards({
         ) : null}
 
         {entitlements?.canCreatePremium ? (
-          <Link
+          <AppLink
             to="/create?tier=premium"
             className={resolveCreatePremiumButtonClass(entitlements)}
             aria-label="Create premium session"
           >
             <span>Create premium session</span>
             <span className="home-card-btn-hint">{createSessionHint}</span>
-          </Link>
+          </AppLink>
         ) : null}
       </div>
     </>

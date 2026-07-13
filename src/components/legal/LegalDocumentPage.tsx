@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { AppLink } from "../navigation/AppLink";
 import { EntryScreenLayout } from "../ui/EntryScreenLayout";
 import {
   ScreenHeader,
@@ -77,12 +77,12 @@ export function LegalDocumentPage({
           </p>
           <p className="text-sm text-ink-muted">
             See also{" "}
-            <Link
+            <AppLink
               to={otherPath}
               className="text-highlight underline-offset-2 hover:underline"
             >
               {otherLabel}
-            </Link>
+            </AppLink>
             .
           </p>
         </footer>
