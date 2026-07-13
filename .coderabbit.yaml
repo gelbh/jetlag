@@ -1,0 +1,142 @@
+language: en-US
+
+reviews:
+  profile: followup
+  request_changes_workflow: true
+  high_level_summary: true
+  high_level_summary_placeholder: "@coderabbitai summary"
+  auto_title_placeholder: "@coderabbitai"
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  sequence_diagrams: true
+  changed_files_summary: true
+  path_filters:
+    - "!**/*.lock"
+    - "!**/*.generated.*"
+    - "!**/dist/**"
+    - "!**/node_modules/**"
+    - "!**/*.min.js"
+    - "!**/coverage/**"
+    - "!**/__snapshots__/**"
+    - "!**/playwright-report/**"
+    - "!**/*.sourcemap"
+    - "!**/worker/dist/**"
+    - "!/.cursor/**"
+  instructions: |
+    Jet Lag Hide+Seek map companion — React 19, Vite, TypeScript, Firebase
+    (Auth/Firestore/Storage/Functions), Cloudflare Worker, Capacitor, Vitest,
+    Playwright.
+
+    Conventions:
+    - Conventional Commits for PR titles
+    - Exhaustive switch on discriminated unions (never check in default)
+    - Imports at top of module (no inline imports)
+
+    Focus on bugs, security, regressions, offline/sync edge cases, and Firestore
+    rules drift. De-prioritize style-only nits when behavior is correct. Do not
+    suggest unrelated refactors.
+  path_instructions:
+    - path: "src/domain/geometry/**"
+      instructions: |
+        Review geometry code for:
+        - Numerical stability and floating-point edge cases
+        - Performance (CI runs test:perf when geometry paths change)
+        - Worker offload correctness and mask union edge cases
+        - Consistency with combined elimination mask logic
+    - path: "src/domain/**"
+      instructions: |
+        Review domain code for:
+        - Game-rule fidelity (src/domain/ is source of truth for app behavior)
+        - ruleSummary strings are canonical user-facing rule text
+        - Catalog sync with reference docs when catalogs change
+        - Read .cursor/skills/game/SKILL.md conventions when mechanics change
+    - path: "src/services/firestore/**"
+      instructions: |
+        Review Firestore services for:
+        - Serialization round-trips and schema validation
+        - Offline write queuing and idempotency
+        - Parity with firestore.rules validation helpers
+    - path: "firestore.rules"
+      instructions: |
+        Review security rules for:
+        - Parity with TypeScript validation (validDisabledTools, validGameSize,
+          validPlayerRole, admin email in isAdmin())
+        - Auth checks on all writes
+        - Keep in sync with src/domain/admin/adminAccess.ts and Functions
+    - path: "src/hooks/sync/**"
+      instructions: |
+        Review sync hooks for:
+        - Offline/online transition handling
+        - Retry and flush ordering
+        - Race conditions on reconnect
+    - path: "src/services/session/offlineQueue.ts"
+      instructions: |
+        Review offline queue for:
+        - Operation ordering and deduplication
+        - Schema migration compatibility
+        - Flush failure recovery
+    - path: "functions/**"
+      instructions: |
+        Review Firebase Functions for:
+        - Authentication and authorization on callable/HTTP endpoints
+        - Firestore write safety and error handling
+        - Sentry error reporting
+        - Schema parity with client firestoreDocuments
+    - path: "src/components/**"
+      instructions: |
+        Review UI components for:
+        - Broadcast HUD design system (DESIGN.md): dark navy surfaces, Barlow
+          Semi Condensed headings, Source Sans 3 body
+        - Reuse existing components before new markup
+        - Accessibility on interactive controls
+    - path: "src/routes/**"
+      instructions: |
+        Review routes for:
+        - Session lifecycle and role-based access
+        - Error boundaries and loading states
+        - Design system consistency with DESIGN.md
+    - path: "src/styles/**"
+      instructions: |
+        Review styles for:
+        - Token usage from DESIGN.md (colors, typography, spacing)
+        - Motion and reduced-motion preferences
+        - Avoid hardcoded colors outside design tokens
+    - path: "e2e/**"
+      instructions: |
+        Review e2e tests for:
+        - Smoke vs full split (E2E_SMOKE=1 for PR CI)
+        - Firebase emulator requirement
+        - Stable waitFor patterns instead of fixed timeouts
+        - Visual snapshot updates only when intentional
+    - path: "CHANGELOG.md"
+      instructions: |
+        Review changelog for:
+        - Player-facing, present-tense bullet copy
+        - Sync with src/domain/device/changelog.ts via npm run release:sync
+        - Never hand-edit changelog.ts (generated from CHANGELOG.md)
+    - path: ".changeset/**"
+      instructions: |
+        Review changesets for:
+        - Player-visible impact described accurately
+        - Wording matches eventual CHANGELOG.md bullets
+    - path: "**/*.test.{ts,tsx}"
+      instructions: |
+        Review tests for:
+        - Behavior-focused assertions on changed code paths
+        - Edge cases for new logic
+        - Prefer vitest related scope over full suite locally
+    - path: ".github/workflows/**"
+      instructions: |
+        Review CI workflows for:
+        - PR smoke e2e vs push full e2e conditions
+        - Geometry path filter triggering test:perf
+        - Node 24 and emulator cache keys
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  opt_out: false
+  learnings:
+    scope: auto
