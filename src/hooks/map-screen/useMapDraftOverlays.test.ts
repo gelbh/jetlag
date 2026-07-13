@@ -68,6 +68,39 @@ describe("buildMapDraftOverlays", () => {
       true,
     );
   });
+
+  it("shades tentacle POI answer elimination inline with the draft overlays", () => {
+    const result = buildMapDraftOverlays({
+      ...emptySources,
+      activeTool: "tentacle",
+      tentacle: {
+        center: [53.35, -6.26],
+        searchRadiusMeters: 1609,
+        answerRadiusMeters: 1609,
+        pois: [
+          {
+            id: "west",
+            name: "West Museum",
+            lat: 53.351,
+            lng: -6.28,
+            category: "museum",
+          },
+          {
+            id: "east",
+            name: "East Museum",
+            lat: 53.351,
+            lng: -6.24,
+            category: "museum",
+          },
+        ],
+        selectedPoiId: "east",
+        outOfReach: false,
+        seekerResolving: false,
+      },
+    });
+
+    expect(result.eliminationFeatures.length).toBeGreaterThan(0);
+  });
 });
 
 describe("useMapDraftOverlays", () => {

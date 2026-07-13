@@ -456,17 +456,8 @@ export function useMapScreenController() {
       endGameBlocked,
     });
 
-  const tentacleEliminationPreviewExtra = useMemo(
-    () =>
-      tentacleTool.draft.tentacleEliminationPreview
-        ? [tentacleTool.draft.tentacleEliminationPreview]
-        : [],
-    [tentacleTool.draft.tentacleEliminationPreview],
-  );
-
   const { overlays: mapDraftOverlays, eliminationFeatures: draftEliminationFeatures } =
-    useMapDraftOverlays(
-      {
+    useMapDraftOverlays({
         activeTool,
         gameArea: toolGameArea,
         mapStyle: effectiveBasemapStyle,
@@ -510,9 +501,7 @@ export function useMapScreenController() {
           seekerResolving: matchingTool.draft.seekerResolving,
         },
         zone: { vertices: zoneTool.draft.zoneVertices },
-      },
-      tentacleEliminationPreviewExtra,
-    );
+      });
 
   const {
     effectiveFocusBounds: effectiveMapFocusBounds,

@@ -4,7 +4,14 @@ import { point as turfPoint } from "@turf/helpers";
 import type { GameArea, TentaclePoi } from "../map/annotations";
 import { milesToMeters } from "../map/distance";
 import {
+  clearVoronoiCellCacheForTests,
+  getCachedVoronoiCells,
+  tentacleSitesFingerprint,
+} from "./voronoiCellCache";
+import { voronoiCellSiteId } from "./voronoiCellSiteId";
+import {
   buildTentacleEliminationRegion,
+  buildTentaclePoiAnswerEliminationRegion,
   tentacleEliminationJsonForAnswer,
 } from "./tentacleGeometry";
 
@@ -40,6 +47,27 @@ const eastMuseum: TentaclePoi = {
 };
 
 describe("tentacleGeometry", () => {
+  it("resolves poiId from cached voronoi cells used in elimination", () => {
+    clearVoronoiCellCacheForTests();
+    const pois = [westMuseum, eastMuseum];
+    const cells = getCachedVoronoiCells(
+      tentacleSitesFingerprint(pois),
+      pois.map((poi) => ({
+        lng: poi.lng,
+        lat: poi.lat,
+        properties: { poiId: poi.id },
+      })),
+    );
+
+    const siteIds = cells.features.map((cell) =>
+      voronoiCellSiteId(cell, ["poiId"]),
+    );
+
+    expect(siteIds).toContain("west");
+    expect(siteIds).toContain("east");
+    expect(new Set(siteIds.filter(Boolean)).size).toBe(2);
+  });
+
   it("returns null when fewer than two POIs", () => {
     expect(
       buildTentacleEliminationRegion(
@@ -50,6 +78,42 @@ describe("tentacleGeometry", () => {
         sampleGameArea,
       ),
     ).toBeNull();
+  });
+
+
+  it("single POI answer shades only the exterior of the search disk", () => {
+    const anchor: [number, number] = [51.45, -0.15];
+    const region = buildTentaclePoiAnswerEliminationRegion(
+      anchor,
+      oneMileMeters,
+      [westMuseum],
+      "west",
+      sampleGameArea,
+    );
+
+    expect(region).not.toBeNull();
+
+    const outsideDisk = turfPoint([-0.19, 51.45]);
+    const insideDisk = turfPoint([-0.151, 51.45]);
+
+    expect(booleanPointInPolygon(outsideDisk, region!)).toBe(true);
+    expect(booleanPointInPolygon(insideDisk, region!)).toBe(false);
+  });
+
+  it("tentacleEliminationJsonForAnswer serializes single-POI exterior shading", () => {
+    const json = tentacleEliminationJsonForAnswer({
+      anchor: [51.45, -0.15],
+      radiusMeters: oneMileMeters,
+      pois: [westMuseum],
+      answeredPoiId: "west",
+      outOfReach: false,
+      gameArea: sampleGameArea,
+    });
+
+    expect(json).toBeDefined();
+    expect(JSON.parse(json!)).toMatchObject({
+      geometry: { type: expect.stringMatching(/Polygon|MultiPolygon/) },
+    });
   });
 
   it("Voronoi cells inside the answer radius nearer to another POI than the answer", () => {

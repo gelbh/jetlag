@@ -10,7 +10,7 @@ import {
   type TentaclePoi,
 } from "../../domain/map/annotations";
 import {
-  buildTentacleEliminationRegion,
+  buildTentaclePoiAnswerEliminationRegion,
   tentacleEliminationJsonForAnswer,
 } from "../../domain/geometry/tentacleGeometry";
 import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
@@ -287,12 +287,12 @@ export function useTentacleTool({
       !tentacleCenter ||
       tentacleOutOfReach ||
       !selectedPoiId ||
-      tentaclePois.length < 2
+      tentaclePois.length === 0
     ) {
       return null;
     }
 
-    return buildTentacleEliminationRegion(
+    return buildTentaclePoiAnswerEliminationRegion(
       tentacleCenter,
       searchRadiusMeters,
       tentaclePois,
