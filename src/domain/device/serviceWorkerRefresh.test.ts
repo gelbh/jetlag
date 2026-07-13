@@ -106,6 +106,31 @@ describe("serviceWorkerRefresh", () => {
     }
   });
 
+  it("still schedules reload fallback when the PWA register callback rejects", async () => {
+    const reload = vi.fn();
+    const originalLocation = window.location;
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { ...originalLocation, reload },
+    });
+
+    try {
+      const registerApplyUpdate = vi.fn().mockRejectedValue(new Error("nope"));
+      await expect(
+        applyServiceWorkerUpdate(undefined, registerApplyUpdate),
+      ).rejects.toThrow("nope");
+
+      expect(reload).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(1500);
+      expect(reload).toHaveBeenCalledOnce();
+    } finally {
+      Object.defineProperty(window, "location", {
+        configurable: true,
+        value: originalLocation,
+      });
+    }
+  });
+
   it("defers auto apply on the map with an active session", () => {
     expect(
       shouldAutoApplyServiceWorkerUpdate({
