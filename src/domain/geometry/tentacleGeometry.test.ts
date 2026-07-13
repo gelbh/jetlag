@@ -16,6 +16,7 @@ import {
 } from "./tentacleGeometry";
 
 const oneMileMeters = milesToMeters(1);
+const POLYGON_OR_MULTIPOLYGON = /Polygon|MultiPolygon/;
 
 const sampleGameArea: GameArea = {
   type: "Polygon",
@@ -112,8 +113,30 @@ describe("tentacleGeometry", () => {
 
     expect(json).toBeDefined();
     expect(JSON.parse(json!)).toMatchObject({
-      geometry: { type: expect.stringMatching(/Polygon|MultiPolygon/) },
+      geometry: { type: expect.stringMatching(POLYGON_OR_MULTIPOLYGON) },
     });
+  });
+
+  it("multi-POI answer combines exterior and inner Voronoi shading", () => {
+    const anchor: [number, number] = [51.45, -0.15];
+    const region = buildTentaclePoiAnswerEliminationRegion(
+      anchor,
+      oneMileMeters,
+      [westMuseum, eastMuseum],
+      "east",
+      sampleGameArea,
+    );
+
+    expect(region).not.toBeNull();
+    expect(region?.geometry.type).toMatch(POLYGON_OR_MULTIPOLYGON);
+
+    const outsideDisk = turfPoint([-0.19, 51.45]);
+    const wrongCellInsideDisk = turfPoint([-0.165, 51.45]);
+    const nearAnsweredPoi = turfPoint([-0.135, 51.45]);
+
+    expect(booleanPointInPolygon(outsideDisk, region!)).toBe(true);
+    expect(booleanPointInPolygon(wrongCellInsideDisk, region!)).toBe(true);
+    expect(booleanPointInPolygon(nearAnsweredPoi, region!)).toBe(false);
   });
 
   it("Voronoi cells inside the answer radius nearer to another POI than the answer", () => {

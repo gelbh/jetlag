@@ -247,7 +247,21 @@ function buildTentacleExteriorElimination(
   gameArea: GameArea,
 ): Feature<Polygon | MultiPolygon> | null {
   const disk = buildSearchDisk(anchor, radiusMeters);
-  return safeDifference(gameAreaToPolygon(gameArea), disk);
+  const exterior = safeDifference(gameAreaToPolygon(gameArea), disk);
+  if (
+    !exterior ||
+    (exterior.geometry.type !== "Polygon" &&
+      exterior.geometry.type !== "MultiPolygon")
+  ) {
+    return null;
+  }
+
+  const smoothed = simplify(exterior, {
+    tolerance: SIMPLIFY_TOLERANCE,
+    highQuality: true,
+  }) as Feature<Polygon | MultiPolygon>;
+
+  return clipToGameArea(smoothed, gameArea);
 }
 
 /**
