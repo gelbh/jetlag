@@ -4,6 +4,7 @@ import { resetAllStores } from "../test/helpers/storeReset";
 
 describe("mapStore", () => {
   beforeEach(() => {
+    localStorage.clear();
     resetAllStores();
   });
 
@@ -46,5 +47,33 @@ describe("mapStore", () => {
 
     useMapStore.getState().resetObserverPerspective();
     expect(useMapStore.getState().observerPerspective).toBe("both");
+  });
+
+  it("persists map tilt preference to storage", () => {
+    localStorage.clear();
+    useMapStore.getState().setMapTilt("tilted");
+
+    const stored = JSON.parse(localStorage.getItem("jetlag-map") ?? "{}");
+    expect(stored.state?.mapTilt).toBe("tilted");
+  });
+
+  it("rehydrates map tilt from storage and defaults to flat when absent", async () => {
+    localStorage.setItem(
+      "jetlag-map",
+      JSON.stringify({
+        state: { mapStyle: "standard", mapTilt: "tilted" },
+        version: 0,
+      }),
+    );
+    await useMapStore.persist.rehydrate();
+    expect(useMapStore.getState().mapTilt).toBe("tilted");
+
+    localStorage.setItem(
+      "jetlag-map",
+      JSON.stringify({ state: { mapStyle: "standard" }, version: 0 }),
+    );
+    resetAllStores();
+    await useMapStore.persist.rehydrate();
+    expect(useMapStore.getState().mapTilt).toBe("flat");
   });
 });

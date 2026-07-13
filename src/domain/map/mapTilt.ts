@@ -43,6 +43,7 @@ export function mapTiltFitBoundsPadding(
     return basePadding;
   }
 
-  const [padY, padX] = basePadding;
-  return [padY + MAP_TILT_FIT_BOUNDS_TOP_BIAS_PX, padX];
+  // Matches MapFocus: [left, top] passed to paddingTopLeft.
+  const [padLeft, padTop] = basePadding;
+  return [padLeft, padTop + MAP_TILT_FIT_BOUNDS_TOP_BIAS_PX];
 }

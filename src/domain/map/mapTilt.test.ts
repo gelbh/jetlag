@@ -15,10 +15,10 @@ describe("mapTilt", () => {
   });
 
   it("adds top fitBounds padding only when tilt is active", () => {
-    expect(mapTiltFitBoundsPadding([32, 32], "flat")).toEqual([32, 32]);
-    expect(mapTiltFitBoundsPadding([32, 32], "tilted")).toEqual([
-      32 + MAP_TILT_FIT_BOUNDS_TOP_BIAS_PX,
-      32,
+    expect(mapTiltFitBoundsPadding([10, 20], "flat")).toEqual([10, 20]);
+    expect(mapTiltFitBoundsPadding([10, 20], "tilted")).toEqual([
+      10,
+      20 + MAP_TILT_FIT_BOUNDS_TOP_BIAS_PX,
     ]);
   });
 });

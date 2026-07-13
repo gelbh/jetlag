@@ -25,6 +25,8 @@ describe("powerProfile", () => {
   });
 
   it("forces flat map tilt in low power mode", () => {
+    expect(effectiveMapTilt("flat", true)).toBe("flat");
+    expect(effectiveMapTilt("flat", false)).toBe("flat");
     expect(effectiveMapTilt("tilted", true)).toBe("flat");
     expect(effectiveMapTilt("tilted", false)).toBe("tilted");
   });

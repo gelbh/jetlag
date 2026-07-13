@@ -4,7 +4,7 @@
 
 ### Improvements
 
-- Map settings: optional tilted map view with a settings toggle and HUD control; low power mode keeps the map flat.
+- Map settings: optional tilted map view with a settings toggle and HUD control; low-power mode keeps the map flat.
 
 ## 0.6.0 - 2026-07-13
 
