@@ -186,6 +186,7 @@ export function useMapSessionChrome({
     await exitSession({
       reason: "end",
       sessionId,
+      replace: true,
       closeOverlays: closeSettingsPanel,
     });
   }, [closeSettingsPanel, exitSession, isHost, session]);
@@ -206,6 +207,7 @@ export function useMapSessionChrome({
     await exitSession({
       reason: "leave",
       sessionId: session.id,
+      replace: true,
       closeOverlays: closeSettingsPanel,
     });
   }, [closeSettingsPanel, exitSession, session]);
