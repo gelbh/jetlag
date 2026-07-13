@@ -2,9 +2,21 @@
 language: en-US
 
 reviews:
-  # assertive + request_changes_workflow approximates followup intent (schema: quiet|chill|assertive)
+  # assertive + request_changes_workflow: CodeRabbit submits APPROVED or
+  # CHANGES_REQUESTED reviews (not comment-only). Required for ship merge gate.
   profile: assertive
   request_changes_workflow: true
+  # Pre-merge checks are on by default; disable checks that add status noise
+  # without review value (title/commit-msg hooks cover conventions locally).
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+    title:
+      mode: "off"
+    description:
+      mode: "off"
+    issue_assessment:
+      mode: "off"
   high_level_summary: true
   high_level_summary_placeholder: "@coderabbitai summary"
   auto_title_placeholder: "@coderabbitai"
