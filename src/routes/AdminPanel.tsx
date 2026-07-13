@@ -220,15 +220,29 @@ export function AdminPanel() {
     />
   );
 
+  const loadMoreButton = hasMore ? (
+      <button
+        type="button"
+        className="btn-secondary min-h-10 w-full"
+        disabled={loadingMore}
+        onClick={() => void loadMore()}
+      >
+        {loadingMore ? "Loading…" : "Load more sessions"}
+      </button>
+    ) : null;
+
   const listRows =
     filteredSessions.length === 0 ? (
-      <div className="rounded-xl border border-border bg-surface-panel px-4 py-6">
-        <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
-          No matching sessions
-        </p>
-        <p className="mt-2 text-sm text-ink-muted">
-          Try another code, area name, or phase filter.
-        </p>
+      <div className="space-y-2.5">
+        <div className="rounded-xl border border-border bg-surface-panel px-4 py-6">
+          <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
+            No matching sessions
+          </p>
+          <p className="mt-2 text-sm text-ink-muted">
+            Try another code, area name, or phase filter.
+          </p>
+        </div>
+        {loadMoreButton}
       </div>
     ) : (
       <div
@@ -247,16 +261,7 @@ export function AdminPanel() {
             onMonitor={(nextSummary) => void handleMonitor(nextSummary)}
           />
         ))}
-        {hasMore ? (
-          <button
-            type="button"
-            className="btn-secondary min-h-10 w-full"
-            disabled={loadingMore}
-            onClick={() => void loadMore()}
-          >
-            {loadingMore ? "Loading…" : "Load more sessions"}
-          </button>
-        ) : null}
+        {loadMoreButton}
       </div>
     );
 

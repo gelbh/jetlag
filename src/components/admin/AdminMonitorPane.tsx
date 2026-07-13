@@ -3,6 +3,8 @@ import { AdminPlayerRoster } from "./AdminPlayerRoster";
 import { usePlayerLocationsSync } from "../../hooks/session/useSessionExtrasSync";
 import { useSessionStore } from "../../state/sessionStore";
 import { InlineError } from "../ui/InlineError";
+import { useAdminMonitorFocus } from "../../domain/admin/adminMonitorFocus";
+import { useEffect } from "react";
 
 export function AdminMonitorPane({
   active,
@@ -15,6 +17,15 @@ export function AdminMonitorPane({
 }) {
   const session = useSessionStore((state) => state.session);
   const locations = usePlayerLocationsSync(active ? session?.id : undefined);
+  const setFocusedPlayerUid = useAdminMonitorFocus(
+    (state) => state.setFocusedPlayerUid,
+  );
+
+  useEffect(() => {
+    if (!active) {
+      setFocusedPlayerUid(null);
+    }
+  }, [active, setFocusedPlayerUid]);
 
   if (errorMessage) {
     return (
@@ -56,7 +67,7 @@ export function AdminMonitorPane({
           </p>
         ) : null}
       </div>
-      <div className="shrink-0 px-2 pb-2">
+      <div className="max-h-48 shrink-0 overflow-hidden px-2 pb-2">
         <p className="mb-1 px-1 text-[10px] font-semibold uppercase tracking-wide text-ink-muted">
           Player roster
         </p>

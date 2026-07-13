@@ -101,7 +101,7 @@ export function filterAdminSessions(
     );
   });
 
-  return [...filtered].sort((left, right) =>
+  return filtered.toSorted((left, right) =>
     compareBySort(left, right, input.sort),
   );
 }

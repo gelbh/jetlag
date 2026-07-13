@@ -1,32 +1,28 @@
 import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
+import { resolvePlayerRole, playerRoleLabel } from "../../domain/session/playerRole";
 import type { PlayerLocationRecord } from "../../domain/session/sessionChat";
 import type { SessionRecord } from "../../domain/map/annotations";
-import type { PlayerRole } from "../../domain/session/playerRole";
+import { useFreshnessClock } from "../../hooks/admin/useFreshnessClock";
+import { useAdminMonitorFocus } from "../../domain/admin/adminMonitorFocus";
 
 interface AdminPlayerRosterProps {
   session: SessionRecord | null;
   locations: readonly PlayerLocationRecord[];
-  onFocusPlayer?: (uid: string) => void;
 }
 
-function resolveRoleLabel(
-  uid: string,
-  session: SessionRecord,
-  location?: PlayerLocationRecord,
-): string {
-  const memberRole = session.memberRoles?.[uid] as PlayerRole | undefined;
-  if (memberRole) {
-    return memberRole;
-  }
-
-  return location?.role ?? "player";
+function resolveRoleLabel(uid: string, session: SessionRecord): string {
+  return playerRoleLabel(resolvePlayerRole(session.memberRoles, uid));
 }
 
 export function AdminPlayerRoster({
   session,
   locations,
-  onFocusPlayer,
 }: AdminPlayerRosterProps) {
+  const nowMs = useFreshnessClock();
+  const setFocusedPlayerUid = useAdminMonitorFocus(
+    (state) => state.setFocusedPlayerUid,
+  );
+
   if (!session) {
     return null;
   }
@@ -44,9 +40,9 @@ export function AdminPlayerRoster({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-surface-panel/90">
+    <div className="max-h-40 overflow-y-auto rounded-lg border border-border bg-surface-panel/90">
       <table className="w-full text-left text-xs">
-        <thead className="border-b border-border bg-surface-raised/70 text-ink-muted">
+        <thead className="sticky top-0 border-b border-border bg-surface-raised/70 text-ink-muted">
           <tr>
             <th className="px-2 py-1.5 font-semibold uppercase tracking-wide">Role</th>
             <th className="px-2 py-1.5 font-semibold uppercase tracking-wide">Player</th>
@@ -56,20 +52,22 @@ export function AdminPlayerRoster({
         <tbody>
           {rosterUids.map((uid) => {
             const location = locationByUid.get(uid);
-            const role = resolveRoleLabel(uid, session, location);
+            const role = resolveRoleLabel(uid, session);
             const shortUid = uid.length > 10 ? `${uid.slice(0, 8)}…` : uid;
+            const freshness = formatFreshnessAge(location?.updatedAt ?? null, nowMs);
 
             return (
               <tr key={uid} className="border-b border-border/60 last:border-b-0">
-                <td className="px-2 py-1.5 capitalize text-ink">{role}</td>
+                <td className="px-2 py-1.5 text-ink">{role}</td>
                 <td className="px-2 py-1.5 font-mono text-ink">{shortUid}</td>
                 <td className="px-2 py-1.5">
                   <button
                     type="button"
                     className="text-brand-blue underline-offset-2 hover:underline"
-                    onClick={() => onFocusPlayer?.(uid)}
+                    aria-label={`Focus ${shortUid} on map (${freshness})`}
+                    onClick={() => setFocusedPlayerUid(uid)}
                   >
-                    {formatFreshnessAge(location?.updatedAt ?? null)}
+                    {freshness}
                   </button>
                 </td>
               </tr>

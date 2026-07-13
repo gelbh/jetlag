@@ -35,6 +35,8 @@ export function useAdminSessionList(enabled: boolean) {
     const requestGeneration = ++requestGenerationRef.current;
     const background = options?.background === true;
 
+    setLoadingMore(false);
+
     if (background) {
       setRefreshing(true);
     } else {
@@ -76,6 +78,8 @@ export function useAdminSessionList(enabled: boolean) {
 
     const requestGeneration = ++requestGenerationRef.current;
     const pageToken = nextPageToken;
+    setLoading(false);
+    setRefreshing(false);
     setLoadingMore(true);
     setError(null);
 

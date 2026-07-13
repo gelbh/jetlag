@@ -1,6 +1,7 @@
 import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
 import { resolveAdminSessionAreaLabel } from "../../domain/admin/adminSessionAreaLabel";
 import { adminSessionPhaseLabel } from "../../domain/admin/sessionPhase";
+import { useFreshnessClock } from "../../hooks/admin/useFreshnessClock";
 import type { AdminSessionSummary } from "../../services/admin/adminSessions";
 
 interface AdminSessionRowProps {
@@ -20,7 +21,9 @@ export function AdminSessionRow({
   selected = false,
   onMonitor,
 }: AdminSessionRowProps) {
-  const busy = observingCode === summary.code;
+  const nowMs = useFreshnessClock();
+  const joiningThisSession = observingCode === summary.code;
+  const monitorJoinPending = observingCode !== null;
   const areaLabel = resolveAdminSessionAreaLabel(summary);
 
   return (
@@ -29,8 +32,8 @@ export function AdminSessionRow({
       className={`admin-session-row admin-session-row-dense home-card-btn home-card-btn-secondary w-full items-start gap-2 px-3 py-2 text-left ${
         selected ? "ring-2 ring-brand-blue/50" : ""
       }`}
+      disabled={monitorJoinPending}
       onClick={() => onMonitor(summary)}
-      disabled={busy}
     >
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-1.5">
@@ -55,8 +58,8 @@ export function AdminSessionRow({
           </span>
         </div>
         <p className="text-xs text-ink-muted">
-          Activity {formatFreshnessAge(summary.lastActivityAt)} · Location{" "}
-          {formatFreshnessAge(summary.lastLocationAt)} · {summary.roleCounts.seeker}
+          Activity {formatFreshnessAge(summary.lastActivityAt, nowMs)} · Location{" "}
+          {formatFreshnessAge(summary.lastLocationAt, nowMs)} · {summary.roleCounts.seeker}
           S / {summary.roleCounts.hider}H
           {summary.roleCounts.observer > 0
             ? ` · ${summary.roleCounts.observer} observer${summary.roleCounts.observer === 1 ? "" : "s"}`
@@ -64,7 +67,7 @@ export function AdminSessionRow({
         </p>
       </div>
       <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-brand-blue">
-        {busy ? "Joining…" : "Monitor"}
+        {joiningThisSession ? "Joining…" : "Monitor"}
       </span>
     </button>
   );

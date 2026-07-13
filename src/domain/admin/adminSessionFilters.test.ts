@@ -82,12 +82,12 @@ describe("adminSessionFilters", () => {
       summary({
         sessionId: "older-location",
         lastLocationAt: "2026-01-01T00:00:00.000Z",
-        createdAt: "2026-01-01T00:00:00.000Z",
+        createdAt: "2026-01-03T00:00:00.000Z",
       }),
       summary({
         sessionId: "newer-location",
         lastLocationAt: "2026-01-03T00:00:00.000Z",
-        createdAt: "2026-01-02T00:00:00.000Z",
+        createdAt: "2026-01-01T00:00:00.000Z",
       }),
     ];
 
@@ -109,7 +109,7 @@ describe("adminSessionFilters", () => {
         state: null,
         sort: "created",
       }).map((entry) => entry.sessionId),
-    ).toEqual(["newer-location", "older-location"]);
+    ).toEqual(["older-location", "newer-location"]);
   });
 
   it("filters end-game state chips across pending and active phases", () => {
