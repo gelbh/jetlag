@@ -308,7 +308,7 @@ export function AdminPanel() {
             <button
               type="button"
               className="hud-chrome inline-flex min-h-11 items-center justify-center px-3 text-sm font-semibold uppercase tracking-wide text-ink"
-              onClick={() => void refresh()}
+              onClick={() => void refresh({ background: true })}
               aria-label="Refresh live sessions"
             >
               Refresh

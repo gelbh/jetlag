@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   fetchAdminSessionsPage,
   type AdminSessionSummary,
@@ -25,13 +25,16 @@ export function useAdminSessionList(enabled: boolean) {
   const [error, setError] = useState<string | null>(null);
   const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+  const requestGenerationRef = useRef(0);
 
   const refresh = useCallback(async (options?: { background?: boolean }) => {
     if (!enabled) {
       return;
     }
 
+    const requestGeneration = ++requestGenerationRef.current;
     const background = options?.background === true;
+
     if (background) {
       setRefreshing(true);
     } else {
@@ -41,18 +44,28 @@ export function useAdminSessionList(enabled: boolean) {
 
     try {
       const page = await fetchAdminSessionsPage(null);
+      if (requestGeneration !== requestGenerationRef.current) {
+        return;
+      }
+
       setSessions(page.sessions);
       setNextPageToken(page.nextPageToken);
       setLastFetchedAt(new Date());
     } catch (refreshError) {
+      if (requestGeneration !== requestGenerationRef.current) {
+        return;
+      }
+
       setError(
         refreshError instanceof Error
           ? refreshError.message
           : "Couldn't load live sessions.",
       );
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (requestGeneration === requestGenerationRef.current) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, [enabled]);
 
@@ -61,21 +74,33 @@ export function useAdminSessionList(enabled: boolean) {
       return;
     }
 
+    const requestGeneration = ++requestGenerationRef.current;
+    const pageToken = nextPageToken;
     setLoadingMore(true);
     setError(null);
 
     try {
-      const page = await fetchAdminSessionsPage(nextPageToken);
+      const page = await fetchAdminSessionsPage(pageToken);
+      if (requestGeneration !== requestGenerationRef.current) {
+        return;
+      }
+
       setSessions((current) => mergeSessionsById(current, page.sessions));
       setNextPageToken(page.nextPageToken);
     } catch (loadMoreError) {
+      if (requestGeneration !== requestGenerationRef.current) {
+        return;
+      }
+
       setError(
         loadMoreError instanceof Error
           ? loadMoreError.message
           : "Couldn't load more sessions.",
       );
     } finally {
-      setLoadingMore(false);
+      if (requestGeneration === requestGenerationRef.current) {
+        setLoadingMore(false);
+      }
     }
   }, [enabled, loadingMore, nextPageToken]);
 

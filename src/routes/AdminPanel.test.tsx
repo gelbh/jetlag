@@ -4,6 +4,8 @@ import { AdminPanel } from "./AdminPanel";
 import { renderWithRouter } from "../test/renderWithRouter";
 import type { AdminSessionSummary } from "../services/admin/adminSessions";
 
+const SEEKER_HIDER_META = /1S \/ 1H/i;
+
 const authState = vi.hoisted(() => ({
   user: null as { email: string; emailVerified: boolean } | null,
   isPermanent: false,
@@ -132,7 +134,7 @@ describe("AdminPanel", () => {
     expect(screen.getByText("ABCD")).toBeInTheDocument();
     expect(screen.getByText("Dublin")).toBeInTheDocument();
     expect(screen.getAllByText("Seek").length).toBeGreaterThan(0);
-    expect(screen.getByText(/1S \/ 1H/i)).toBeInTheDocument();
+    expect(screen.getByText(SEEKER_HIDER_META)).toBeInTheDocument();
   });
 
   it("uses a scrollable session list column on desktop", () => {

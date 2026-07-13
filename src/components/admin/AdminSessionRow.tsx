@@ -29,8 +29,8 @@ export function AdminSessionRow({
       className={`admin-session-row admin-session-row-dense home-card-btn home-card-btn-secondary w-full items-start gap-2 px-3 py-2 text-left ${
         selected ? "ring-2 ring-brand-blue/50" : ""
       }`}
-      aria-busy={busy}
       onClick={() => onMonitor(summary)}
+      disabled={busy}
     >
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-1.5">
