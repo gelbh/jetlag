@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import * as routePreloaders from "./routePreloaders";
 import {
   isLazyRoute,
   normalizeRoutePath,
@@ -49,6 +50,19 @@ describe("preloadRoute", () => {
 
   it("loads lazy route modules without throwing", async () => {
     await expect(preloadRoute("/tutorial")).resolves.toBeUndefined();
+  });
+
+  it("invokes the lazy loader for /map and query-bearing paths", async () => {
+    const mapLoader = vi.spyOn(routePreloaders.routeImporter, "importMapScreen");
+
+    await preloadRoute("/map");
+    expect(mapLoader).toHaveBeenCalledTimes(1);
+
+    mapLoader.mockClear();
+    await preloadRoute("/map?session=abc");
+    expect(mapLoader).toHaveBeenCalledTimes(1);
+
+    mapLoader.mockRestore();
   });
 });
 

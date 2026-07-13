@@ -55,7 +55,7 @@ export function Home() {
     routeTransitionPhase === "idle"
   ) {
     return (
-      <EntryScreenLayout viewport viewportLayout="between">
+      <EntryScreenLayout viewport viewportLayout="center">
         <div
           className="route-fallback-skeleton route-loading-enter min-h-[40dvh]"
           aria-busy="true"
@@ -170,53 +170,54 @@ export function Home() {
 
   return (
     <>
-      <EntryScreenLayout viewport viewportLayout="between">
-        <div className="shrink-0 space-y-4">
-          <div className="flex items-start justify-between gap-3">
-            <AppLogo variant="mark" size="lg" className="shrink-0" />
-            <div className="flex shrink-0 items-center gap-2">
-              {showAdminEntry ? (
+      <EntryScreenLayout viewport viewportLayout="center">
+        <div className="flex w-full flex-col gap-6">
+          <div className="shrink-0 space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <AppLogo variant="mark" size="lg" className="shrink-0" />
+              <div className="flex shrink-0 items-center gap-2">
+                {showAdminEntry ? (
+                  <AppLink
+                    to="/admin"
+                    className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"
+                    aria-label="Admin — live sessions"
+                  >
+                    <HudAdminIcon className="size-5" />
+                  </AppLink>
+                ) : null}
                 <AppLink
-                  to="/admin"
+                  to="/tutorial"
                   className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"
-                  aria-label="Admin — live sessions"
+                  aria-label="Open tutorial"
                 >
-                  <HudAdminIcon className="size-5" />
+                  <HudGuideIcon className="size-5" />
                 </AppLink>
-              ) : null}
-              <AppLink
-                to="/tutorial"
-                className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"
-                aria-label="Open tutorial"
-              >
-                <HudGuideIcon className="size-5" />
-              </AppLink>
-              <MotionPressable
-                type="button"
-                onClick={() => setChangelogOpen(true)}
-                className="hud-chrome shrink-0 px-2.5 py-1.5 font-mono text-xs font-bold tracking-wide text-ink-muted"
-                aria-label={`Version ${APP_VERSION}. Open changelog`}
-              >
-                v{APP_VERSION}
-              </MotionPressable>
+                <MotionPressable
+                  type="button"
+                  onClick={() => setChangelogOpen(true)}
+                  className="hud-chrome shrink-0 px-2.5 py-1.5 font-mono text-xs font-bold tracking-wide text-ink-muted"
+                  aria-label={`Version ${APP_VERSION}. Open changelog`}
+                >
+                  v{APP_VERSION}
+                </MotionPressable>
+              </div>
             </div>
-          </div>
-          <div className="space-y-1">
-            <h1 className="font-display text-balance text-[clamp(1.75rem,7.5vw,3rem)] font-bold uppercase leading-[0.95] tracking-tight text-ink">
-              {LEGAL_APP_NAME}
-            </h1>
-            <p className="font-display text-pretty text-[clamp(1.5rem,6vw,2.25rem)] font-bold uppercase leading-none tracking-tight text-brand-blue">
-              Hide + Seek
+            <div className="space-y-1">
+              <h1 className="font-display text-balance text-[clamp(1.75rem,7.5vw,3rem)] font-bold uppercase leading-[0.95] tracking-tight text-ink">
+                {LEGAL_APP_NAME}
+              </h1>
+              <p className="font-display text-pretty text-[clamp(1.5rem,6vw,2.25rem)] font-bold uppercase leading-none tracking-tight text-brand-blue">
+                Hide + Seek
+              </p>
+            </div>
+            <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
+              Unofficial fan companion for Jet Lag: The Game. Host or join synced map
+              sessions: seekers ask questions on the live map, hiders answer and set
+              hiding zones, and everyone stays on the same board.
             </p>
           </div>
-          <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
-            Unofficial fan companion for Jet Lag: The Game. Host or join synced map
-            sessions: seekers ask questions on the live map, hiders answer and set
-            hiding zones, and everyone stays on the same board.
-          </p>
-        </div>
 
-        <div className="home-enter-actions min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-y-contain">
+          <div className="home-enter-actions space-y-2.5">
           {session ? (
             <MotionPressable
               type="button"
@@ -333,6 +334,7 @@ export function Home() {
             </AppLink>
           </nav>
           {continueError ? <InlineError>{continueError}</InlineError> : null}
+          </div>
         </div>
       </EntryScreenLayout>
 

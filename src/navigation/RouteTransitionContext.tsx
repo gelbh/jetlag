@@ -92,49 +92,61 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
   const beginTransition = useCallback(
     async (to: To, options?: BeginTransitionOptions) => {
       const targetPath = resolveNavigatePath(to);
+      const navigateOptions = {
+        replace: options?.replace,
+        state: options?.state,
+        preventScrollReset: options?.preventScrollReset,
+        relative: options?.relative,
+        viewTransition: false as const,
+      };
 
       if (
-        phaseRef.current === "loading" &&
+        phaseRef.current !== "idle" &&
         loadingTargetRef.current === targetPath
       ) {
         return;
       }
 
-      if (phaseRef.current === "loading") {
-        navigate(to, {
-          replace: options?.replace,
-          state: options?.state,
-          preventScrollReset: options?.preventScrollReset,
-          relative: options?.relative,
-          viewTransition: false,
-        });
+      if (phaseRef.current !== "idle") {
+        try {
+          await preloadRoute(targetPath);
+        } catch {
+          // Warm-up only; the rendered lazy route retries chunk failures itself.
+        }
+
+        navigate(to, navigateOptions);
         return;
       }
 
       loadingTargetRef.current = targetPath;
       screenReadyRef.current = false;
+      phaseRef.current = "loading";
       setPhase("loading");
 
       try {
-        await preloadRoute(targetPath);
+        try {
+          await preloadRoute(targetPath);
+        } catch {
+          // Warm-up only; the rendered lazy route retries chunk failures itself.
+        }
 
-        navigate(to, {
-          replace: options?.replace,
-          state: options?.state,
-          preventScrollReset: options?.preventScrollReset,
-          relative: options?.relative,
-          viewTransition: false,
-        });
+        navigate(to, navigateOptions);
 
         await waitForScreenReady();
 
+        phaseRef.current = "revealing";
         setPhase("revealing");
-        await revealRouteTransition(
-          toRevealDirection(options?.direction),
-          animate,
-        );
+        try {
+          await revealRouteTransition(
+            toRevealDirection(options?.direction),
+            animate,
+          );
+        } catch {
+          // Navigation succeeded; a failed reveal should not block the route.
+        }
       } finally {
         loadingTargetRef.current = null;
+        phaseRef.current = "idle";
         setPhase("idle");
       }
     },

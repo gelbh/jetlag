@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-surface-deep, rgb(12 14 18 / 0.92));
+  background: var(--color-surface-deep);
   animation: route-transition-overlay-enter var(--motion-fast, 200ms)
     var(--ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1)) both;
 }

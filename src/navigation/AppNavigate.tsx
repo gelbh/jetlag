@@ -1,12 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, type NavigateProps } from "react-router-dom";
 import { useRouteTransition } from "./useRouteTransition";
 
 export function AppNavigate({ to, replace, state }: NavigateProps) {
   const { phase, beginTransition } = useRouteTransition();
   const navigate = useNavigate();
+  const ranRef = useRef(false);
 
   useEffect(() => {
+    if (ranRef.current) {
+      return;
+    }
+    ranRef.current = true;
+
     if (phase === "idle") {
       void beginTransition(to, {
         replace,

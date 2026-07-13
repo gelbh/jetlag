@@ -16,25 +16,38 @@ export const importGamePresetEditor = () =>
 export const importTutorial = () =>
   import("../routes/Tutorial").then((m) => ({ default: m.Tutorial }));
 
+export const routeImporter = {
+  importMapScreen,
+  importCreateSession,
+  importGamePresetList,
+  importGamePresetEditor,
+  importTutorial,
+};
+
 export const MapScreenLazy = lazyWithChunkRetry(importMapScreen);
 export const CreateSessionLazy = lazyWithChunkRetry(importCreateSession);
 export const GamePresetListLazy = lazyWithChunkRetry(importGamePresetList);
 export const GamePresetEditorLazy = lazyWithChunkRetry(importGamePresetEditor);
 export const TutorialLazy = lazyWithChunkRetry(importTutorial);
 
-const LAZY_ROUTE_LOADERS: Record<string, () => Promise<unknown>> = {
-  "/map": importMapScreen,
-  "/create": importCreateSession,
-  "/tutorial": importTutorial,
-  "/presets": importGamePresetList,
-  "/presets/new": importGamePresetEditor,
-  "/presets/:id/edit": importGamePresetEditor,
+const PRESET_EDIT_PATH_RE = /^\/presets\/[^/]+\/edit$/;
+
+const LAZY_ROUTE_LOADERS: Record<
+  string,
+  keyof typeof routeImporter
+> = {
+  "/map": "importMapScreen",
+  "/create": "importCreateSession",
+  "/tutorial": "importTutorial",
+  "/presets": "importGamePresetList",
+  "/presets/new": "importGamePresetEditor",
+  "/presets/:id/edit": "importGamePresetEditor",
 };
 
 export function normalizeRoutePath(path: string): string {
   const base = path.split("?")[0]?.split("#")[0] ?? "/";
 
-  if (/^\/presets\/[^/]+\/edit$/.test(base)) {
+  if (PRESET_EDIT_PATH_RE.test(base)) {
     return "/presets/:id/edit";
   }
 
@@ -54,8 +67,8 @@ export function isLazyRoute(path: string): boolean {
 }
 
 export async function preloadRoute(path: string): Promise<void> {
-  const loader = LAZY_ROUTE_LOADERS[normalizeRoutePath(path)];
-  if (loader) {
-    await loader();
+  const loaderKey = LAZY_ROUTE_LOADERS[normalizeRoutePath(path)];
+  if (loaderKey) {
+    await routeImporter[loaderKey]();
   }
 }

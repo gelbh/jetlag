@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { useEffect, useRef } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CreateSession } from "./CreateSession";
 import { renderWithRouter } from "../test/renderWithRouter";
 import type { GeocodedPlace } from "../services/geo/geocoding";
@@ -100,6 +100,9 @@ vi.mock("../services/geo/seaLevelProgressive", () => ({
 }));
 
 const navigate = vi.fn();
+beforeEach(() => {
+  navigate.mockReset();
+});
 vi.mock("../hooks/useAppNavigate", () => ({
   useAppNavigate: () => navigate,
 }));

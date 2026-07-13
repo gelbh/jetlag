@@ -11,8 +11,10 @@ export function RouteTransitionOverlay() {
   return (
     <div
       className="route-transition-overlay"
+      role="status"
       aria-busy="true"
       aria-live="polite"
+      aria-atomic="true"
       aria-label="Loading page"
     >
       <div className="route-transition-overlay-content">
