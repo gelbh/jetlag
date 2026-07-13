@@ -156,6 +156,48 @@ describe("buildMapDraftOverlays", () => {
       pointInAnyElimination([-6.261, 53.35], eliminationFeatures),
     ).toBe(false);
   });
+
+  it("4+ POI tentacle draft shades distinct cells per selection", () => {
+    const pois = Array.from({ length: 5 }, (_, index) => ({
+      id: `poi-${index}`,
+      name: `Museum ${index}`,
+      lat: 53.35 + (index - 2) * 0.002,
+      lng: -6.26 + (index - 2) * 0.003,
+      category: "museum" as const,
+    }));
+
+    const forAnswer = (answeredId: string) =>
+      buildMapDraftOverlays({
+        ...emptySources,
+        activeTool: "tentacle",
+        tentacle: {
+          center: [53.35, -6.26],
+          searchRadiusMeters: 1609,
+          answerRadiusMeters: 1609,
+          pois,
+          selectedPoiId: answeredId,
+          outOfReach: false,
+          seekerResolving: false,
+        },
+      }).eliminationFeatures;
+
+    const eastAnswer = forAnswer("poi-4");
+    const westAnswer = forAnswer("poi-0");
+
+    expect(pointInAnyElimination([pois[4]!.lng, pois[4]!.lat], eastAnswer)).toBe(
+      false,
+    );
+    expect(pointInAnyElimination([pois[0]!.lng, pois[0]!.lat], eastAnswer)).toBe(
+      true,
+    );
+
+    expect(pointInAnyElimination([pois[0]!.lng, pois[0]!.lat], westAnswer)).toBe(
+      false,
+    );
+    expect(pointInAnyElimination([pois[4]!.lng, pois[4]!.lat], westAnswer)).toBe(
+      true,
+    );
+  });
 });
 
 describe("useMapDraftOverlays", () => {

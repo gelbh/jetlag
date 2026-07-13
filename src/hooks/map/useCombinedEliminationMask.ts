@@ -26,6 +26,19 @@ export function useCombinedEliminationMask({
   > | null>(null);
   const generationRef = useRef(0);
 
+  const committedBootstrap = useMemo(() => {
+    if (hidden) {
+      return null;
+    }
+
+    return buildCombinedEliminationMask(
+      annotations,
+      gameArea,
+      EMPTY_GEOJSON_FEATURES,
+      endGameHidingZones,
+    );
+  }, [annotations, endGameHidingZones, gameArea, hidden]);
+
   useEffect(() => {
     if (hidden) {
       generationRef.current += 1;
@@ -59,22 +72,9 @@ export function useCombinedEliminationMask({
       });
   }, [annotations, draftFeatures, endGameHidingZones, gameArea, hidden]);
 
-  const bootstrapMask = useMemo(() => {
-    if (hidden) {
-      return null;
-    }
-
-    return buildCombinedEliminationMask(
-      annotations,
-      gameArea,
-      draftFeatures,
-      endGameHidingZones,
-    );
-  }, [annotations, draftFeatures, endGameHidingZones, gameArea, hidden]);
-
   if (hidden) {
     return null;
   }
 
-  return mask ?? bootstrapMask;
+  return mask ?? committedBootstrap;
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { MapViewportState } from "../../components/map/MapViewportTracker";
 import type { MapChromeControlInset } from "../../components/map/mapChromeControlInset";
 import { useMapScreenTools } from "../../hooks/map-screen/useMapScreenTools";
@@ -456,6 +456,10 @@ export function useMapScreenController() {
       endGameBlocked,
     });
 
+  const deferredTentacleSelectedPoiId = useDeferredValue(
+    tentacleTool.draft.tentacleSelectedPoiId,
+  );
+
   const { overlays: mapDraftOverlays, eliminationFeatures: draftEliminationFeatures } =
     useMapDraftOverlays({
         activeTool,
@@ -472,7 +476,7 @@ export function useMapScreenController() {
           searchRadiusMeters: tentacleTool.draft.tentacleSearchRadiusMeters,
           answerRadiusMeters: tentacleTool.draft.tentacleAnswerRadiusMeters,
           pois: tentacleTool.draft.tentaclePois,
-          selectedPoiId: tentacleTool.draft.tentacleSelectedPoiId,
+          selectedPoiId: deferredTentacleSelectedPoiId,
           outOfReach: tentacleTool.draft.tentacleOutOfReach,
           seekerResolving: tentacleTool.draft.seekerResolving,
         },
