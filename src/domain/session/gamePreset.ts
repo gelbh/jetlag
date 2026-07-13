@@ -12,6 +12,7 @@ import type {
 } from "./sessionCustomContent";
 import type { GameArea, SessionTier } from "../map/annotations";
 import type { BoundingBox } from "../geometry/gameAreaBounds";
+import { gameAreaToBoundingBox } from "../geometry/gameAreaBounds";
 import type { GameSize } from "./gameSize";
 import type { RegionPackId } from "../regions/regionPack";
 import type { DublinCouncilFilter } from "../regions/regionPack";
@@ -62,6 +63,33 @@ export interface CreateSessionDraft {
   /** @deprecated Use subregionId. */
   councilFilter?: DublinCouncilFilter;
   transitMetroId?: string;
+}
+
+export function buildCreateSessionPresetDraft(params: {
+  gameSize: GameSize;
+  distanceUnit: DistanceUnit;
+  advancedSettings: AdvancedSessionSettingsValue;
+  gameArea?: GameArea | null;
+  placeLabel?: string;
+  sessionTier?: SessionTier;
+  regionPackId?: RegionPackId;
+  subregionId?: string;
+  transitMetroId?: string;
+}): CreateSessionDraft {
+  const gameArea = params.gameArea ?? null;
+
+  return {
+    gameSize: params.gameSize,
+    distanceUnit: params.distanceUnit,
+    advancedSettings: params.advancedSettings,
+    gameArea,
+    placeLabel: params.placeLabel,
+    sessionTier: params.sessionTier,
+    regionPackId: params.regionPackId,
+    subregionId: params.subregionId,
+    transitMetroId: params.transitMetroId,
+    focusBounds: gameArea ? gameAreaToBoundingBox(gameArea) : null,
+  };
 }
 
 function isGameSize(value: unknown): value is GameSize {
