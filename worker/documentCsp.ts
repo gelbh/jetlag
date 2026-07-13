@@ -1,6 +1,10 @@
+const SCRIPT_SRC_ELEM_PATTERN = /script-src-elem ([^;]+)/;
 const SCRIPT_SRC_PATTERN = /script-src ([^;]+)/;
 const EXISTING_NONCE_TOKEN_PATTERN = /'nonce-[^']+'/g;
 const WHITESPACE_PATTERN = /\s+/g;
+const BASE64_PLUS_PATTERN = /\+/g;
+const BASE64_SLASH_PATTERN = /\//g;
+const BASE64_PADDING_PATTERN = /=+$/;
 
 export function generateCspNonce(): string {
   const bytes = new Uint8Array(16);
@@ -9,12 +13,16 @@ export function generateCspNonce(): string {
   for (const byte of bytes) {
     binary += String.fromCharCode(byte);
   }
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return btoa(binary)
+    .replace(BASE64_PLUS_PATTERN, "-")
+    .replace(BASE64_SLASH_PATTERN, "_")
+    .replace(BASE64_PADDING_PATTERN, "");
 }
 
 export function isHtmlDocumentResponse(response: Response): boolean {
   const contentType = response.headers.get("content-type") ?? "";
-  return contentType.includes("text/html");
+  const mediaType = contentType.split(";")[0]?.trim().toLowerCase() ?? "";
+  return mediaType === "text/html";
 }
 
 export function shouldApplyDocumentCsp(response: Response): boolean {
@@ -54,17 +62,27 @@ export async function injectScriptNonces(
 export function addScriptNonceToCsp(csp: string, nonce: string): string {
   const nonceToken = `'nonce-${nonce}'`;
 
-  return csp.replace(SCRIPT_SRC_PATTERN, (match, sources: string) => {
+  const appendNonceToDirective = (directive: string, sources: string) => {
     if (sources.includes(nonceToken)) {
-      return match;
+      return `${directive} ${sources}`;
     }
 
     const withoutScriptNonce = sources
       .replace(EXISTING_NONCE_TOKEN_PATTERN, " ")
       .replace(WHITESPACE_PATTERN, " ")
       .trim();
-    return `script-src ${withoutScriptNonce} ${nonceToken}`;
-  });
+    return `${directive} ${withoutScriptNonce} ${nonceToken}`;
+  };
+
+  if (SCRIPT_SRC_ELEM_PATTERN.test(csp)) {
+    return csp.replace(SCRIPT_SRC_ELEM_PATTERN, (_match, sources: string) =>
+      appendNonceToDirective("script-src-elem", sources),
+    );
+  }
+
+  return csp.replace(SCRIPT_SRC_PATTERN, (_match, sources: string) =>
+    appendNonceToDirective("script-src", sources),
+  );
 }
 
 export async function applyDocumentCspNonce(

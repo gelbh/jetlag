@@ -55,8 +55,22 @@ describe("document CSP nonce", () => {
     ).toBe(true);
     expect(
       isHtmlDocumentResponse(
-        new Response("export {}", {
-          headers: { "Content-Type": "text/javascript" },
+        new Response("", {
+          headers: { "Content-Type": "TEXT/HTML; charset=utf-8" },
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      isHtmlDocumentResponse(
+        new Response("{}", {
+          headers: { "Content-Type": "application/json" },
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      isHtmlDocumentResponse(
+        new Response("", {
+          headers: { "Content-Type": "application/text-html" },
         }),
       ),
     ).toBe(false);
@@ -161,6 +175,14 @@ describe("document CSP nonce", () => {
 
     expect(addScriptNonceToCsp(csp, "test-nonce")).toBe(
       "default-src 'self'; style-src 'self' 'nonce-style'; script-src 'self' https://www.google.com 'sha256-abc=' 'nonce-test-nonce'; img-src 'self'",
+    );
+    expect(
+      addScriptNonceToCsp(
+        "default-src 'self'; script-src-elem 'self' https://example.com; script-src 'self'",
+        "elem-nonce",
+      ),
+    ).toBe(
+      "default-src 'self'; script-src-elem 'self' https://example.com 'nonce-elem-nonce'; script-src 'self'",
     );
   });
 
