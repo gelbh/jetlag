@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -79,6 +80,7 @@ export function usePanelDrag({
   const suppressPeekClick = useRef(false);
   const dragFromCollapsed = useRef(false);
   const pendingMinimizedRef = useRef<boolean | null>(null);
+  const settleShouldPersistRef = useRef(true);
   const prevMapPanningRef = useRef(mapPanning);
   const [panelHeight, setPanelHeight] = useState(DEFAULT_PANEL_HEIGHT_PX);
   const [offsetPx, setOffsetPx] = useState(0);
@@ -95,7 +97,7 @@ export function usePanelDrag({
     }
   }, [panelRef]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const height = panelRef?.current?.offsetHeight;
     if (!height || height <= 0) {
       return;
@@ -110,8 +112,13 @@ export function usePanelDrag({
   }, []);
 
   const beginSettle = useCallback(
-    (targetPx: number, targetMinimized: boolean) => {
+    (
+      targetPx: number,
+      targetMinimized: boolean,
+      options?: { persistMinimized?: boolean },
+    ) => {
       pendingMinimizedRef.current = targetMinimized;
+      settleShouldPersistRef.current = options?.persistMinimized ?? true;
       setIsSettling(true);
       setOffsetPx(targetPx);
     },
@@ -120,13 +127,15 @@ export function usePanelDrag({
 
   const finishSettle = useCallback(() => {
     const targetMinimized = pendingMinimizedRef.current;
+    const shouldPersist = settleShouldPersistRef.current;
     pendingMinimizedRef.current = null;
+    settleShouldPersistRef.current = true;
     setIsSettling(false);
     if (targetMinimized === null) {
       return;
     }
     setDisplayMinimized(resolveDisplayMinimizedAfterSettle(targetMinimized));
-    if (targetMinimized !== userMinimized) {
+    if (shouldPersist && targetMinimized !== userMinimized) {
       onMinimizedChange(targetMinimized);
     }
   }, [onMinimizedChange, userMinimized]);
@@ -216,7 +225,7 @@ export function usePanelDrag({
         setOffsetPx(collapsedPx);
       } else {
         setDisplayMinimized(false);
-        beginSettle(collapsedPx, true);
+        beginSettle(collapsedPx, true, { persistMinimized: false });
       }
       /* eslint-enable react-hooks/set-state-in-effect */
     } else if (panEnded && !userMinimized) {

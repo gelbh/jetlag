@@ -100,6 +100,7 @@ export function MapFloatingPanel({
       <div
         className={`tool-panel-compact hud-panel relative mx-auto max-w-xl overscroll-contain p-3 pt-9 ${maxHeightClassName} ${shellScrollClass} ${bodyPreserverClass}`}
         aria-hidden={displayMinimized && preserveBodyWhenMinimized}
+        hidden={displayMinimized && preserveBodyWhenMinimized}
       >
         {!displayMinimized && dragHandle && dragHandleProps ? (
           <button
