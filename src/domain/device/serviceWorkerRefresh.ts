@@ -92,12 +92,15 @@ export async function applyServiceWorkerUpdate(
 ): Promise<void> {
   registration?.waiting?.postMessage({ type: "SKIP_WAITING" });
 
-  if (registerApplyUpdate) {
-    await registerApplyUpdate(true);
-    return;
+  try {
+    if (registerApplyUpdate) {
+      await registerApplyUpdate(true);
+    }
+  } finally {
+    // Manual "Refresh now" must always reload. vite-plugin-pwa's registerSW(true)
+    // can no-op when no worker is waiting, so keep a reload fallback either way.
+    window.setTimeout(() => {
+      window.location.reload();
+    }, RELOAD_FALLBACK_MS);
   }
-
-  window.setTimeout(() => {
-    window.location.reload();
-  }, RELOAD_FALLBACK_MS);
 }
