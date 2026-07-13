@@ -10,6 +10,9 @@ const STORAGE_QUOTA_EXCEEDED = /quota has been exceeded/i;
 const AUTH_NETWORK_FAILED = /auth\/network-request-failed/i;
 const STORAGE_UNAUTHORIZED = /storage\/unauthorized/i;
 const LEAFLET_POS_ERROR = /_leaflet_pos/i;
+const LEAFLET_CLASSLIST_ERROR = /evaluating 'e\.classList'/i;
+const REACT_REFRESH_FRAME = /@react-refresh/i;
+const APP_CHECK_INVALID_SESSION = /Invalid session .*: Invalid input/i;
 const SENSITIVE_EXTRA_KEYS = new Set([
   "sessionId",
   "authUid",
@@ -64,6 +67,24 @@ function isFirestorePermissionDeniedEvent(
   return false;
 }
 
+function isReactRefreshNoiseEvent(
+  event: Parameters<
+    NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>
+  >[0],
+): boolean {
+  if (event.environment === "development") {
+    for (const exception of event.exception?.values ?? []) {
+      for (const frame of exception.stacktrace?.frames ?? []) {
+        if (frame.filename && REACT_REFRESH_FRAME.test(frame.filename)) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
 function isIgnoredClientNoiseEvent(
   event: Parameters<
     NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>
@@ -106,7 +127,16 @@ function isIgnoredClientNoiseEvent(
     if (
       exception.type === "TypeError" &&
       typeof exception.value === "string" &&
-      LEAFLET_POS_ERROR.test(exception.value)
+      (LEAFLET_POS_ERROR.test(exception.value) ||
+        LEAFLET_CLASSLIST_ERROR.test(exception.value))
+    ) {
+      return true;
+    }
+
+    if (
+      exception.type === "Error" &&
+      typeof exception.value === "string" &&
+      APP_CHECK_INVALID_SESSION.test(exception.value)
     ) {
       return true;
     }
@@ -163,6 +193,10 @@ function scrubEvent(
   }
 
   if (isIgnoredClientNoiseEvent(event)) {
+    return null;
+  }
+
+  if (isReactRefreshNoiseEvent(event)) {
     return null;
   }
 
