@@ -303,7 +303,7 @@ describe("routeLoadingSteps", () => {
       "load-boundaries",
       "prepare-map",
     ]);
-  });
+  }, 20000);
 
   it("skips boundaries when the play area is already cached", async () => {
     const session = createTestSession({

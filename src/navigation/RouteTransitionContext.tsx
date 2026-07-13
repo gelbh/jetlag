@@ -126,8 +126,12 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
     const deadline = startedAt + READY_TIMEOUT_MS;
     let lastPathname = pathnameRef.current;
     const targetPath = loadingTargetPathRef.current;
+    const myGeneration = transitionGenerationRef.current;
 
     while (Date.now() < deadline) {
+      if (transitionGenerationRef.current !== myGeneration) {
+        return Date.now() - startedAt;
+      }
       const currentPathname = pathnameRef.current;
 
       if (currentPathname !== lastPathname) {

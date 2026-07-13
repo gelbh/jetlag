@@ -35,10 +35,7 @@ export function RouteTransitionOverlay() {
               <span className="jl-preload-detail-panel__progress-label">
                 Progress
               </span>
-              <span
-                className="jl-preload-detail-panel__progress-count tabular-nums"
-                aria-live="polite"
-              >
+              <span className="jl-preload-detail-panel__progress-count tabular-nums">
                 {currentStep}/{totalSteps}
               </span>
             </div>
@@ -57,9 +54,7 @@ export function RouteTransitionOverlay() {
             </div>
           </div>
         ) : null}
-        <span className="route-transition-overlay-label" aria-live="polite">
-          {stepLabel}
-        </span>
+        <span className="route-transition-overlay-label">{stepLabel}</span>
       </div>
     </output>
   );
