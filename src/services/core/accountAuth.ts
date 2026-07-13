@@ -3,13 +3,16 @@ import {
   EmailAuthProvider,
   GoogleAuthProvider,
   OAuthProvider,
+  getRedirectResult,
   isSignInWithEmailLink,
   linkWithCredential,
   linkWithPopup,
+  linkWithRedirect,
   sendSignInLinkToEmail,
   signInWithCredential,
   signInWithEmailLink,
   signInWithPopup,
+  signInWithRedirect,
   type AuthCredential,
   type AuthProvider,
   type User,
@@ -17,6 +20,18 @@ import {
 import { getFirebaseAuth } from "./firebase";
 
 export const EMAIL_LINK_STORAGE_KEY = "premiumEmailForSignIn";
+
+/** Thrown when OAuth continues via full-page redirect (popup blocked). */
+export class OAuthRedirectInProgressError extends Error {
+  constructor() {
+    super("OAuth redirect in progress");
+    this.name = "OAuthRedirectInProgressError";
+  }
+}
+
+export function isOAuthRedirectInProgress(error: unknown): boolean {
+  return error instanceof OAuthRedirectInProgressError;
+}
 
 /** Flip when Apple Sign-In is configured in Firebase + Apple Developer. */
 export const APPLE_SIGN_IN_ENABLED = false;
@@ -91,14 +106,25 @@ async function linkWithPopupOrSignInExisting(
   const auth = getFirebaseAuth();
 
   if (!auth.currentUser?.isAnonymous) {
-    const signedIn = await signInWithPopup(auth, provider);
-    return signedIn.user;
+    try {
+      const signedIn = await signInWithPopup(auth, provider);
+      return signedIn.user;
+    } catch (error) {
+      if (isPopupBlockedError(error)) {
+        return beginOAuthRedirect(provider);
+      }
+      throw error;
+    }
   }
 
   try {
     const linked = await linkWithPopup(auth.currentUser, provider);
     return linked.user;
   } catch (error) {
+    if (isPopupBlockedError(error)) {
+      return beginOAuthRedirect(provider);
+    }
+
     if (!isCredentialAlreadyInUse(error)) {
       throw error;
     }
@@ -113,6 +139,26 @@ async function linkWithPopupOrSignInExisting(
     const signedIn = await signInWithCredential(auth, credential);
     return signedIn.user;
   }
+}
+
+function isPopupBlockedError(error: unknown): boolean {
+  return (
+    error instanceof FirebaseError &&
+    (error.code === "auth/popup-blocked" ||
+      error.code === "auth/cancelled-popup-request")
+  );
+}
+
+async function beginOAuthRedirect(provider: AuthProvider): Promise<never> {
+  const auth = getFirebaseAuth();
+
+  if (auth.currentUser?.isAnonymous) {
+    await linkWithRedirect(auth.currentUser, provider);
+  } else {
+    await signInWithRedirect(auth, provider);
+  }
+
+  throw new OAuthRedirectInProgressError();
 }
 
 async function completeGoogleCredential(credential: ReturnType<
@@ -151,7 +197,30 @@ async function signInWithOAuthPopup(
   try {
     return await linkWithPopupOrSignInExisting(provider);
   } catch (error) {
+    if (isOAuthRedirectInProgress(error)) {
+      throw error;
+    }
     throw mapAuthError(error, fallbackMessage);
+  }
+}
+
+export async function completeOAuthRedirectIfPending(): Promise<User | null> {
+  const auth = getFirebaseAuth();
+
+  try {
+    const result = await getRedirectResult(auth);
+    return result?.user ?? null;
+  } catch (error) {
+    if (!isCredentialAlreadyInUse(error)) {
+      throw mapAuthError(error, "Google sign-in failed.");
+    }
+
+    const credential = OAuthProvider.credentialFromError(error as FirebaseError);
+    if (!credential) {
+      throw mapAuthError(error, "Google sign-in failed.");
+    }
+
+    return linkCredentialOrSignInExisting(credential);
   }
 }
 
