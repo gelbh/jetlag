@@ -4,6 +4,8 @@ import { Timestamp } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import {
   compareSessionsByLastActivity,
+  computeIsLive,
+  deriveSessionMode,
   deriveSessionPhase,
   mapWithConcurrency,
   parseFirestoreTimestampMs,
@@ -140,6 +142,26 @@ describe("listActiveSessions helpers", () => {
     assert.equal(summary.regionPackId, null);
     assert.equal(summary.gameAreaLabel, "Dublin");
     assert.equal(summary.lastActivityAt, null);
+    assert.equal(summary.mode, "multiplayer");
+    assert.equal(summary.isLive, false);
+  });
+
+  it("derives live semantics from activity and location timestamps", () => {
+    const nowMs = Date.parse("2026-01-01T01:00:00.000Z");
+    const recentMs = Date.parse("2026-01-01T00:58:00.000Z");
+    const staleMs = Date.parse("2026-01-01T00:50:00.000Z");
+
+    assert.equal(computeIsLive(recentMs, null, nowMs), true);
+    assert.equal(computeIsLive(null, recentMs, nowMs), true);
+    assert.equal(computeIsLive(staleMs, staleMs, nowMs), false);
+    assert.equal(
+      deriveSessionMode(2, { seeker: 1, hider: 1, observer: 0, admin: 0 }),
+      "multiplayer",
+    );
+    assert.equal(
+      deriveSessionMode(1, { seeker: 1, hider: 0, observer: 0, admin: 0 }),
+      "singleplayer",
+    );
   });
 
   it("parses ISO strings and Firestore timestamp shapes", () => {

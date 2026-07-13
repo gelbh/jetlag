@@ -1,22 +1,9 @@
-import { ADMIN_PANEL_POLL_INTERVAL_MS } from "../../domain/admin/adminPanelPreferences";
-
 interface AdminSettingsSheetProps {
   open: boolean;
-  pollIntervalMs: number;
-  multiplayerOnly: boolean;
-  onPollIntervalChange: (value: number) => void;
-  onMultiplayerOnlyChange: (value: boolean) => void;
   onClose: () => void;
 }
 
-export function AdminSettingsSheet({
-  open,
-  pollIntervalMs,
-  multiplayerOnly,
-  onPollIntervalChange,
-  onMultiplayerOnlyChange,
-  onClose,
-}: AdminSettingsSheetProps) {
+export function AdminSettingsSheet({ open, onClose }: AdminSettingsSheetProps) {
   if (!open) {
     return null;
   }
@@ -40,33 +27,11 @@ export function AdminSettingsSheet({
           </button>
         </div>
 
-        <label className="field-label block">
-          Refresh interval (seconds)
-          <input
-            type="number"
-            min={5}
-            max={120}
-            step={5}
-            value={Math.round(pollIntervalMs / 1000)}
-            onChange={(event) =>
-              onPollIntervalChange(Number(event.target.value) * 1000)
-            }
-            className="field-input mt-2"
-          />
-        </label>
-        <p className="mt-1 text-xs text-ink-dim">
-          Default {ADMIN_PANEL_POLL_INTERVAL_MS / 1000}s between background refreshes.
+        <p className="text-sm text-ink-muted">
+          The session list refreshes manually. Use the Refresh button or load more
+          at the bottom of the list. Monitoring uses realtime listeners while a
+          session is selected.
         </p>
-
-        <label className="mt-4 flex min-h-11 items-center gap-3 text-sm text-ink">
-          <input
-            type="checkbox"
-            checked={multiplayerOnly}
-            onChange={(event) => onMultiplayerOnlyChange(event.target.checked)}
-            className="size-4"
-          />
-          Show multiplayer sessions only
-        </label>
       </div>
     </div>
   );
