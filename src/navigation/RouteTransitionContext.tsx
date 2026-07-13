@@ -33,6 +33,7 @@ import {
 import {
   getSyncRouteReady,
   isRouteImportWarm,
+  isWarmFastPathEligible,
 } from "./routeWarmState";
 import { routeReadinessKind } from "./useRouteScreenReady";
 
@@ -172,6 +173,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
       const readinessKind = routeReadinessKind(targetPath);
       const warmChunk = !isLazyRoute(targetPath) || isRouteImportWarm(targetPath);
       const warmReady = getSyncRouteReady(targetPath);
+      const warmFastPath = isWarmFastPathEligible(targetPath);
       const navigateOptions: RouteNavigateOptions = {
         replace: options?.replace,
         state: options?.state,
@@ -209,7 +211,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      if (warmChunk && warmReady) {
+      if (warmFastPath) {
         loadingTargetRef.current = destinationKey;
         await runWarmTransition(to, targetPath, navigateOptions, myGeneration);
 
