@@ -6,7 +6,7 @@ import {
   isHtmlDocumentResponse,
   shouldApplyDocumentCsp,
 } from "./documentCsp";
-import { isSpaFallbackForAssetRequest } from "./index";
+import worker, { isSpaFallbackForAssetRequest } from "./index";
 import {
   handleSentryTunnelRequest,
   parseSentryEnvelopeTarget,
@@ -120,6 +120,72 @@ describe("document CSP nonce", () => {
     expect(headerNonce).toBeTruthy();
     expect(bodyNonce).toBe(headerNonce);
     expect(body).toContain(`nonce="${headerNonce}"`);
+  });
+
+  it("preserves existing script nonces", async () => {
+    expect(
+      await injectScriptNonces(
+        '<script nonce="existing" src="/a.js"></script><script src="/b.js"></script>',
+        "new-nonce",
+      ),
+    ).toBe(
+      '<script nonce="existing" src="/a.js"></script><script nonce="new-nonce" src="/b.js"></script>',
+    );
+  });
+});
+
+describe("worker fetch", () => {
+  it("applies document CSP nonce to html asset responses", async () => {
+    const html = '<!doctype html><script src="/boot-recovery.js"></script>';
+    const csp = "default-src 'self'; script-src 'self' https://www.google.com";
+    const assetResponse = new Response(html, {
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Security-Policy": csp,
+      },
+    });
+
+    const env = {
+      ASSETS: {
+        fetch: vi.fn().mockResolvedValue(assetResponse),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/"),
+      env,
+    );
+
+    const body = await response.text();
+    const headerCsp = response.headers.get("Content-Security-Policy") ?? "";
+    const headerNonce = headerCsp.match(/'nonce-([^']+)'/)?.[1];
+    const bodyNonce = body.match(/nonce="([^"]+)"/)?.[1];
+
+    expect(headerNonce).toBeTruthy();
+    expect(bodyNonce).toBe(headerNonce);
+    expect(body).toContain(`nonce="${headerNonce}"`);
+  });
+
+  it("returns non-html asset responses unchanged", async () => {
+    const javascript = "export const version = 1;";
+    const assetResponse = new Response(javascript, {
+      status: 200,
+      headers: { "Content-Type": "application/javascript" },
+    });
+
+    const env = {
+      ASSETS: {
+        fetch: vi.fn().mockResolvedValue(assetResponse),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/assets/index.js"),
+      env,
+    );
+
+    expect(await response.text()).toBe(javascript);
+    expect(response.headers.get("Content-Security-Policy")).toBeNull();
   });
 });
 
