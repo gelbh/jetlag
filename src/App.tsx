@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import { trackPageView } from "./services/core/analytics";
 import { MapErrorBoundary } from "./components/ui/MapErrorBoundary";
+import { AppEntryBackdrop } from "./components/ui/AppEntryBackdrop";
 import { AppUpdateBanner } from "./components/ui/AppUpdateBanner";
 import { AppUpdateProvider } from "./components/ui/AppUpdateProvider";
 import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
@@ -162,7 +163,8 @@ export default function App() {
             <AnalyticsPageViewTracker />
             <ChunkReloadContextBinder />
             <AppUpdateBanner />
-            <div className="h-[100dvh] overflow-y-auto overscroll-y-none">
+            <AppEntryBackdrop />
+            <div className="app-scroll-root">
               <LowBatteryPrompt />
               <Routes>
                 <Route path="/" element={<Home />} />
