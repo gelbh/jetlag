@@ -217,6 +217,7 @@ export function initSentry(): void {
   Sentry.init(
     {
       dsn,
+      tunnel: "/api/sentry-tunnel",
       environment: env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE,
       release: `jetlag@${APP_VERSION}`,
       dist: env.VITE_SENTRY_RELEASE_DIST || undefined,
