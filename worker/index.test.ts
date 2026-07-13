@@ -231,6 +231,50 @@ describe("document CSP nonce", () => {
 });
 
 describe("worker fetch", () => {
+  it("accepts CSP violation reports without hitting assets", async () => {
+    const env = {
+      ASSETS: {
+        fetch: vi.fn(),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/api/csp-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/csp-report" },
+        body: JSON.stringify({
+          "csp-report": {
+            "document-uri": "https://jetlag.gelbhart.dev/",
+            "violated-directive": "script-src",
+            "blocked-uri": "inline",
+          },
+        }),
+      }),
+      env,
+    );
+
+    expect(env.ASSETS.fetch).not.toHaveBeenCalled();
+    expect(response.status).toBe(204);
+  });
+
+  it("rejects non-POST CSP report requests without hitting assets", async () => {
+    const env = {
+      ASSETS: {
+        fetch: vi.fn(),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/api/csp-report", {
+        method: "GET",
+      }),
+      env,
+    );
+
+    expect(env.ASSETS.fetch).not.toHaveBeenCalled();
+    expect(response.status).toBe(405);
+  });
+
   it("applies document CSP nonce to html asset responses", async () => {
     const html = '<!doctype html><script src="/boot-recovery.js"></script>';
     const csp = "default-src 'self'; script-src 'self' https://www.google.com";
