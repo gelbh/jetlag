@@ -24,6 +24,8 @@ export type AdminSessionPhase =
   | "end-game-pending"
   | "end-game-active";
 
+export type AdminSessionMode = "singleplayer" | "multiplayer";
+
 export interface AdminSessionRoleCounts {
   seeker: number;
   hider: number;
@@ -52,6 +54,10 @@ export interface AdminSessionSummary {
   gameAreaLabel: string | null;
   phase: AdminSessionPhase;
   lastActivityAt: string | null;
+  lastLocationAt: string | null;
+  mode: AdminSessionMode;
+  isLive: boolean;
+  liveMultiplayer: boolean;
 }
 
 type ListActiveSessionsRequest = {
@@ -59,14 +65,17 @@ type ListActiveSessionsRequest = {
   pageToken?: string | null;
 };
 
-type ListActiveSessionsResponse = {
+export type ListActiveSessionsResponse = {
   sessions: AdminSessionSummary[];
   nextPageToken: string | null;
 };
 
-export async function fetchActiveAdminSessions(): Promise<AdminSessionSummary[]> {
+export async function fetchAdminSessionsPage(
+  pageToken: string | null = null,
+  limit = 50,
+): Promise<ListActiveSessionsResponse> {
   if (!isFirebaseConfigured()) {
-    return [];
+    return { sessions: [], nextPageToken: null };
   }
 
   const functions = await getFirebaseFunctions();
@@ -75,26 +84,17 @@ export async function fetchActiveAdminSessions(): Promise<AdminSessionSummary[]>
     ListActiveSessionsResponse
   >(functions, "listActiveSessions");
 
-  const sessions: AdminSessionSummary[] = [];
-  let pageToken: string | null = null;
-
   try {
-    for (;;) {
-      const result: HttpsCallableResult<ListActiveSessionsResponse> =
-        await callable({
-          limit: 50,
-          pageToken,
-        });
-      const data: ListActiveSessionsResponse = result.data;
-      sessions.push(...(data.sessions ?? []));
-      pageToken = data.nextPageToken ?? null;
-      if (!pageToken) {
-        break;
-      }
-    }
+    const result: HttpsCallableResult<ListActiveSessionsResponse> =
+      await callable({
+        limit,
+        pageToken,
+      });
 
-    sessions.sort(compareSessionsByLastActivity);
-    return sessions;
+    return {
+      sessions: result.data.sessions ?? [],
+      nextPageToken: result.data.nextPageToken ?? null,
+    };
   } catch (error) {
     if (error instanceof FirebaseError && error.code === "functions/permission-denied") {
       throw new Error("Admin access required.", { cause: error });
@@ -118,6 +118,35 @@ export async function fetchActiveAdminSessions(): Promise<AdminSessionSummary[]>
       );
     }
 
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error("Couldn't load live sessions.", { cause: error });
+  }
+}
+
+export async function fetchActiveAdminSessions(): Promise<AdminSessionSummary[]> {
+  if (!isFirebaseConfigured()) {
+    return [];
+  }
+
+  const sessions: AdminSessionSummary[] = [];
+  let pageToken: string | null = null;
+
+  try {
+    for (;;) {
+      const data = await fetchAdminSessionsPage(pageToken);
+      sessions.push(...data.sessions);
+      pageToken = data.nextPageToken;
+      if (!pageToken) {
+        break;
+      }
+    }
+
+    sessions.sort(compareSessionsByLastActivity);
+    return sessions;
+  } catch (error) {
     if (error instanceof Error) {
       throw error;
     }

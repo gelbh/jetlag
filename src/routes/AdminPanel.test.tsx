@@ -14,9 +14,12 @@ const sessionListState = vi.hoisted(() => ({
   sessions: [] as AdminSessionSummary[],
   loading: false,
   refreshing: false,
+  loadingMore: false,
+  hasMore: false,
   error: null as string | null,
   lastFetchedAt: null as Date | null,
   refresh: vi.fn(),
+  loadMore: vi.fn(),
 }));
 
 vi.mock("../hooks/billing/usePermanentAuthUser", () => ({
@@ -117,6 +120,10 @@ describe("AdminPanel", () => {
         transitMetroId: null,
         gameAreaLabel: "Dublin",
         lastActivityAt: "2026-01-02T00:00:00.000Z",
+        lastLocationAt: "2026-01-02T00:00:00.000Z",
+        mode: "multiplayer",
+        isLive: true,
+        liveMultiplayer: true,
       },
     ];
 
@@ -125,10 +132,7 @@ describe("AdminPanel", () => {
     expect(screen.getByText("ABCD")).toBeInTheDocument();
     expect(screen.getByText("Dublin")).toBeInTheDocument();
     expect(screen.getAllByText("Seek").length).toBeGreaterThan(0);
-    expect(screen.queryByText(/\d+\s+seeker/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/\d+\s+hider/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/\d+\s+admin/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/free · medium/i)).toBeInTheDocument();
+    expect(screen.getByText(/1S \/ 1H/i)).toBeInTheDocument();
   });
 
   it("uses a scrollable session list column on desktop", () => {
@@ -157,6 +161,10 @@ describe("AdminPanel", () => {
         transitMetroId: null,
         gameAreaLabel: "Dublin",
         lastActivityAt: "2026-01-02T00:00:00.000Z",
+        lastLocationAt: null,
+        mode: "multiplayer",
+        isLive: true,
+        liveMultiplayer: true,
       },
     ];
 

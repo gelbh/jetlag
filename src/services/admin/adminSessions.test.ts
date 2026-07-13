@@ -39,6 +39,10 @@ function sessionSummary(
     gameAreaLabel: null,
     phase: "waiting",
     lastActivityAt: overrides.lastActivityAt,
+    lastLocationAt: null,
+    mode: "singleplayer",
+    isLive: false,
+    liveMultiplayer: false,
   };
 }
 

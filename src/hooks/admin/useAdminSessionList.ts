@@ -1,21 +1,30 @@
 import { useCallback, useEffect, useState } from "react";
 import {
-  fetchActiveAdminSessions,
+  fetchAdminSessionsPage,
   type AdminSessionSummary,
 } from "../../services/admin/adminSessions";
-import {
-  useAdminPanelPreferences,
-} from "../../domain/admin/adminPanelPreferences";
+
+function mergeSessionsById(
+  existing: readonly AdminSessionSummary[],
+  incoming: readonly AdminSessionSummary[],
+): AdminSessionSummary[] {
+  const byId = new Map(existing.map((session) => [session.sessionId, session]));
+
+  for (const session of incoming) {
+    byId.set(session.sessionId, session);
+  }
+
+  return [...byId.values()];
+}
 
 export function useAdminSessionList(enabled: boolean) {
-  const pollIntervalMs = useAdminPanelPreferences(
-    (state) => state.pollIntervalMs,
-  );
   const [sessions, setSessions] = useState<AdminSessionSummary[]>([]);
   const [loading, setLoading] = useState(enabled);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
+  const [nextPageToken, setNextPageToken] = useState<string | null>(null);
 
   const refresh = useCallback(async (options?: { background?: boolean }) => {
     if (!enabled) {
@@ -31,8 +40,9 @@ export function useAdminSessionList(enabled: boolean) {
     setError(null);
 
     try {
-      const nextSessions = await fetchActiveAdminSessions();
-      setSessions(nextSessions);
+      const page = await fetchAdminSessionsPage(null);
+      setSessions(page.sessions);
+      setNextPageToken(page.nextPageToken);
       setLastFetchedAt(new Date());
     } catch (refreshError) {
       setError(
@@ -46,6 +56,29 @@ export function useAdminSessionList(enabled: boolean) {
     }
   }, [enabled]);
 
+  const loadMore = useCallback(async () => {
+    if (!enabled || !nextPageToken || loadingMore) {
+      return;
+    }
+
+    setLoadingMore(true);
+    setError(null);
+
+    try {
+      const page = await fetchAdminSessionsPage(nextPageToken);
+      setSessions((current) => mergeSessionsById(current, page.sessions));
+      setNextPageToken(page.nextPageToken);
+    } catch (loadMoreError) {
+      setError(
+        loadMoreError instanceof Error
+          ? loadMoreError.message
+          : "Couldn't load more sessions.",
+      );
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [enabled, loadingMore, nextPageToken]);
+
   useEffect(() => {
     if (!enabled) {
       return;
@@ -54,22 +87,17 @@ export function useAdminSessionList(enabled: boolean) {
     /* eslint-disable react-hooks/set-state-in-effect -- initial session list load */
     void refresh();
     /* eslint-enable react-hooks/set-state-in-effect */
-
-    const intervalId = window.setInterval(() => {
-      void refresh({ background: true });
-    }, pollIntervalMs);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [enabled, pollIntervalMs, refresh]);
+  }, [enabled, refresh]);
 
   return {
     sessions: enabled ? sessions : [],
     loading: enabled ? loading : false,
     refreshing: enabled ? refreshing : false,
+    loadingMore: enabled ? loadingMore : false,
+    hasMore: enabled ? nextPageToken != null : false,
     error: enabled ? error : null,
     lastFetchedAt: enabled ? lastFetchedAt : null,
     refresh,
+    loadMore,
   };
 }

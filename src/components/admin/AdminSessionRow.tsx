@@ -1,7 +1,6 @@
-import { AdminSessionTimer } from "./AdminSessionTimer";
+import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
 import { resolveAdminSessionAreaLabel } from "../../domain/admin/adminSessionAreaLabel";
 import { adminSessionPhaseLabel } from "../../domain/admin/sessionPhase";
-import { MotionPressable } from "../motion/MotionPressable";
 import type { AdminSessionSummary } from "../../services/admin/adminSessions";
 
 interface AdminSessionRowProps {
@@ -9,6 +8,10 @@ interface AdminSessionRowProps {
   observingCode: string | null;
   selected?: boolean;
   onMonitor: (summary: AdminSessionSummary) => void;
+}
+
+function modeLabel(mode: AdminSessionSummary["mode"]): string {
+  return mode === "multiplayer" ? "MP" : "SP";
 }
 
 export function AdminSessionRow({
@@ -21,40 +24,48 @@ export function AdminSessionRow({
   const areaLabel = resolveAdminSessionAreaLabel(summary);
 
   return (
-    <div
-      className={`admin-session-row home-card-btn home-card-btn-secondary items-start gap-2 py-3 ${
+    <button
+      type="button"
+      className={`admin-session-row admin-session-row-dense home-card-btn home-card-btn-secondary w-full items-start gap-2 px-3 py-2 text-left ${
         selected ? "ring-2 ring-brand-blue/50" : ""
       }`}
+      aria-busy={busy}
+      onClick={() => onMonitor(summary)}
     >
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-xl font-bold tracking-[0.22em] text-ink">
+      <div className="min-w-0 flex-1 space-y-1">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="font-mono text-lg font-bold tracking-[0.18em] text-ink">
             {summary.code}
           </span>
-          <span className="rounded-full border border-brand-blue/40 bg-brand-blue/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-brand-blue">
+          {areaLabel ? (
+            <span className="truncate text-sm text-ink">{areaLabel}</span>
+          ) : null}
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {summary.isLive ? (
+            <span className="rounded-full border border-status-success/40 bg-status-success-surface px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-status-success">
+              Live
+            </span>
+          ) : null}
+          <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-ink-muted">
+            {modeLabel(summary.mode)}
+          </span>
+          <span className="rounded-full border border-brand-blue/30 bg-brand-blue/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-blue">
             {adminSessionPhaseLabel(summary.phase)}
           </span>
         </div>
-        <AdminSessionTimer summary={summary} />
-        {areaLabel ? (
-          <p className="text-sm text-ink">{areaLabel}</p>
-        ) : null}
-        <p className="text-sm text-ink-muted">
+        <p className="text-xs text-ink-muted">
+          Activity {formatFreshnessAge(summary.lastActivityAt)} · Location{" "}
+          {formatFreshnessAge(summary.lastLocationAt)} · {summary.roleCounts.seeker}
+          S / {summary.roleCounts.hider}H
           {summary.roleCounts.observer > 0
-            ? `${summary.roleCounts.observer} observer${summary.roleCounts.observer === 1 ? "" : "s"} · `
+            ? ` · ${summary.roleCounts.observer} observer${summary.roleCounts.observer === 1 ? "" : "s"}`
             : ""}
-          {summary.tier} · {summary.gameSize}
         </p>
       </div>
-      <MotionPressable
-        type="button"
-        className="btn-primary min-h-11 shrink-0 px-4 disabled:opacity-50"
-        disabled={busy}
-        aria-busy={busy}
-        onClick={() => onMonitor(summary)}
-      >
+      <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-brand-blue">
         {busy ? "Joining…" : "Monitor"}
-      </MotionPressable>
-    </div>
+      </span>
+    </button>
   );
 }
