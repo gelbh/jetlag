@@ -174,7 +174,7 @@ export async function createMultiplayerContexts(
 ) {
   const contextOptions = {
     geolocation: E2E_GEOLOCATION,
-    permissions: ["geolocation"] as const,
+    permissions: ["geolocation"],
   };
   const hostContext = await browser.newContext(contextOptions);
   const guestContext = await browser.newContext(contextOptions);
