@@ -8,13 +8,9 @@ import { mergeBundledPresets, BUNDLED_GAME_PRESET_DEFINITIONS } from "../domain/
 
 const navigate = vi.fn();
 
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: () => navigate,
-  };
-});
+vi.mock("../hooks/useAppNavigate", () => ({
+  useAppNavigate: () => navigate,
+}));
 
 vi.mock("../components/map/MapView", () => ({
   MapView: () => <div data-testid="framing-map" />,
@@ -217,6 +213,6 @@ describe("GamePresetEditor", () => {
         .getState()
         .presets.find((preset) => preset.name === "Dublin medium")?.name,
     ).toBe("Dublin medium");
-    expect(navigate).toHaveBeenCalledWith("/presets", { viewTransition: true });
+    expect(navigate).toHaveBeenCalledWith("/presets");
   });
 });

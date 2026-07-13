@@ -33,7 +33,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Improvements",
         items: [
-          "Admin map: mission-control layout on tablet and desktop with a collapsible side rail for diagnostics, sync, stats, map debug, log, chat, and moderation.",
+          "Motion: route changes show a loading overlay until the destination screen is ready, then play the existing slide transition.",
           "Motion: unified sheet and panel drag physics, iOS-calibrated motion tokens, and expanded tap feedback with Vibration API fallback on web.",
           "Motion: iOS-style route push/pop transitions, global edge-swipe back, and unified session exit so map teardown runs after the home transition.",
           "Motion: retuned mobile sheets, wizard steps, and map panel snap to iOS-calibrated timing on the critical path.",

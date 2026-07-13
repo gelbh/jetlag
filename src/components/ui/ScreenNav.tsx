@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { AppLink } from "../navigation/AppLink";
 import { HudHomeIcon } from "./HudIcons";
 import {
   screenBackLinkClassName,
@@ -46,17 +46,17 @@ export function ScreenNav({
   return (
     <nav className={shellClassName} aria-label="Screen navigation">
       {isHome ? (
-        <Link
+        <AppLink
           to={homeTo}
           className="hud-chrome map-hud-home inline-flex h-full min-w-11 items-center justify-center text-ink"
           aria-label="Home"
         >
           <HudHomeIcon className="h-5 w-5" />
-        </Link>
+        </AppLink>
       ) : (
-        <Link to={backTo} className={screenBackLinkClassName}>
+        <AppLink to={backTo} className={screenBackLinkClassName}>
           ← {backLabel}
-        </Link>
+        </AppLink>
       )}
     </nav>
   );

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { AppLink } from "../components/navigation/AppLink";
 import { useState } from "react";
 import { AppLogo } from "../components/ui/AppLogo";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
@@ -23,6 +23,7 @@ import { isFirestorePermissionDenied } from "../services/firestore/firestoreAnno
 import { useSessionExit } from "../hooks/session/useSessionExit";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { useAppNavigate } from "../hooks/useAppNavigate";
+import { useRouteTransition } from "../navigation/useRouteTransition";
 import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
 import { resolveHomePremiumButtonDisplay } from "../domain/billing/premiumProducts";
 import { useAuthBootstrapReady } from "../hooks/useAuthBootstrapReady";
@@ -44,10 +45,15 @@ export function Home() {
   const { user: permanentUser } = usePermanentAuthUser();
   const showAdminEntry = isAdminUser(permanentUser);
   const authBootstrapReady = useAuthBootstrapReady();
+  const { phase: routeTransitionPhase } = useRouteTransition();
 
   const premiumButton = resolveHomePremiumButtonDisplay(premiumEntitlements);
 
-  if (isFirebaseConfigured() && !authBootstrapReady) {
+  if (
+    isFirebaseConfigured() &&
+    !authBootstrapReady &&
+    routeTransitionPhase === "idle"
+  ) {
     return (
       <EntryScreenLayout viewport viewportLayout="between">
         <div
@@ -170,21 +176,21 @@ export function Home() {
             <AppLogo variant="mark" size="lg" className="shrink-0" />
             <div className="flex shrink-0 items-center gap-2">
               {showAdminEntry ? (
-                <Link
+                <AppLink
                   to="/admin"
                   className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"
                   aria-label="Admin — live sessions"
                 >
                   <HudAdminIcon className="size-5" />
-                </Link>
+                </AppLink>
               ) : null}
-              <Link
+              <AppLink
                 to="/tutorial"
                 className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"
                 aria-label="Open tutorial"
               >
                 <HudGuideIcon className="size-5" />
-              </Link>
+              </AppLink>
               <MotionPressable
                 type="button"
                 onClick={() => setChangelogOpen(true)}
@@ -245,7 +251,7 @@ export function Home() {
               </span>
             </MotionPressable>
           ) : null}
-          <Link
+          <AppLink
             to="/create"
             aria-label="Create session"
             className={
@@ -256,21 +262,21 @@ export function Home() {
           >
             <span>Create session</span>
             <span className="home-card-btn-hint">Host a game</span>
-          </Link>
-          <Link to="/join" aria-label="Join session" className="home-card-btn home-card-btn-secondary">
+          </AppLink>
+          <AppLink to="/join" aria-label="Join session" className="home-card-btn home-card-btn-secondary">
             <span>Join session</span>
             <span className="home-card-btn-hint">Enter 4-letter code</span>
-          </Link>
-          <Link
+          </AppLink>
+          <AppLink
             to="/presets"
             aria-label="Custom game presets"
             className="home-card-btn home-card-btn-secondary"
           >
             <span>Custom game</span>
             <span className="home-card-btn-hint">Saved templates</span>
-          </Link>
+          </AppLink>
           {isFirebaseConfigured() ? (
-            <Link
+            <AppLink
               to="/premium"
               aria-label={
                 premiumButton.planLabel
@@ -292,39 +298,39 @@ export function Home() {
                 ) : null}
               </span>
               <span className="home-card-btn-hint">{premiumButton.detailLabel}</span>
-            </Link>
+            </AppLink>
           ) : null}
           <nav
             aria-label="Legal and feedback"
             className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1"
           >
-            <Link
+            <AppLink
               to="/privacy"
               aria-label="Privacy Policy"
               className="home-feedback-link !mt-0 !inline !px-1"
             >
               Privacy
-            </Link>
+            </AppLink>
             <span className="text-ink-dim" aria-hidden="true">
               ·
             </span>
-            <Link
+            <AppLink
               to="/terms"
               aria-label="Terms of Service"
               className="home-feedback-link !mt-0 !inline !px-1"
             >
               Terms
-            </Link>
+            </AppLink>
             <span className="text-ink-dim" aria-hidden="true">
               ·
             </span>
-            <Link
+            <AppLink
               to="/feedback"
               aria-label="Feedback and suggestions"
               className="home-feedback-link !mt-0 !inline !px-1"
             >
               Feedback
-            </Link>
+            </AppLink>
           </nav>
           {continueError ? <InlineError>{continueError}</InlineError> : null}
         </div>

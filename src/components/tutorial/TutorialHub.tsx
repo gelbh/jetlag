@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { AppLink } from "../navigation/AppLink";
 import {
   getTutorialSections,
   type TutorialSection,
@@ -131,10 +131,10 @@ export function TutorialHub({
         {otherSections.map(renderSectionButton)}
       </div>
 
-      <Link to="/create" className="home-card-btn home-card-btn-primary">
+      <AppLink to="/create" className="home-card-btn home-card-btn-primary">
         <span>Create session</span>
         <span className="home-card-btn-hint">Start hosting</span>
-      </Link>
+      </AppLink>
     </div>
   );
 }
