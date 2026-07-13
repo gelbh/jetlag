@@ -23,6 +23,9 @@ export function SeekerMapScreen() {
         mapChromeControlInset={controller.mapChromeControlInset}
         center={controller.center}
         mapFocusBounds={controller.mapFocusBounds}
+        effectiveMapFocusBounds={controller.effectiveMapFocusBounds}
+        placementRecenterToken={controller.placementRecenterToken}
+        placementFocusPaddingBias={controller.placementFocusPaddingBias}
         handleMapClick={controller.handleMapClick}
         chromeHudRef={controller.chromeHudRef}
         suppressChromeHideRef={controller.suppressChromeHideRef}
