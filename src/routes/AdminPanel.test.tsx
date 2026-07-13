@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { AdminPanel } from "./AdminPanel";
 import { renderWithRouter } from "../test/renderWithRouter";
 import type { AdminSessionSummary } from "../services/admin/adminSessions";
@@ -39,6 +39,15 @@ vi.mock("../components/billing/PremiumSignInGate", () => ({
 }));
 
 describe("AdminPanel", () => {
+  const originalMatchMedia = window.matchMedia;
+
+  afterEach(() => {
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: originalMatchMedia,
+    });
+  });
+
   it("shows skeleton rows while auth is loading", () => {
     authState.authReady = false;
     renderWithRouter(<AdminPanel />);

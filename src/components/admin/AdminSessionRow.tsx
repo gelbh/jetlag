@@ -41,7 +41,7 @@ export function AdminSessionRow({
         ) : null}
         <p className="text-sm text-ink-muted">
           {summary.roleCounts.observer > 0
-            ? `${summary.roleCounts.observer} observer · `
+            ? `${summary.roleCounts.observer} observer${summary.roleCounts.observer === 1 ? "" : "s"} · `
             : ""}
           {summary.tier} · {summary.gameSize}
         </p>
