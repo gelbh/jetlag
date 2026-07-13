@@ -30,6 +30,7 @@ import {
   type RouteLoadingReason,
   type RouteTransitionPhase,
 } from "./routeTransitionContextInstance";
+import { computeLoadingProgress, type RouteLoadingProgress } from "./routeLoadingSteps";
 import {
   getSyncRouteReady,
   isRouteImportWarm,
@@ -42,6 +43,7 @@ export type { BeginTransitionOptions, RouteTransitionPhase };
 const READY_POLL_MS = 16;
 const READY_TIMEOUT_MS = 15_000;
 const OVERLAY_DEFER_MS = 150;
+const ROUTE_OVERLAY_EXIT_MS = 200;
 
 type RouteNavigateOptions = NavigateOptions & {
   viewTransition: false;
@@ -88,10 +90,14 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
   const [loadingReason, setLoadingReason] = useState<RouteLoadingReason | null>(
     null,
   );
+  const [loadingProgress, setLoadingProgress] = useState<RouteLoadingProgress | null>(
+    null,
+  );
 
   const phaseRef = useRef(phase);
   const screenReadyRef = useRef(true);
   const loadingTargetRef = useRef<string | null>(null);
+  const loadingTargetPathRef = useRef<string | null>(null);
   const pathnameRef = useRef(location.pathname);
   const transitionGenerationRef = useRef(0);
   const revealDirectionRef = useRef<NavRevealDirection>("forward");
@@ -106,14 +112,26 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
 
   const reportScreenReady = useCallback((ready: boolean) => {
     screenReadyRef.current = ready;
+    const targetPath = loadingTargetPathRef.current;
+    if (
+      targetPath &&
+      (phaseRef.current === "loading" || phaseRef.current === "revealing")
+    ) {
+      setLoadingProgress(computeLoadingProgress(targetPath, ready));
+    }
   }, []);
 
   const waitForScreenReady = useCallback(async (): Promise<number> => {
     const startedAt = Date.now();
     const deadline = startedAt + READY_TIMEOUT_MS;
     let lastPathname = pathnameRef.current;
+    const targetPath = loadingTargetPathRef.current;
+    const myGeneration = transitionGenerationRef.current;
 
     while (Date.now() < deadline) {
+      if (transitionGenerationRef.current !== myGeneration) {
+        return Date.now() - startedAt;
+      }
       const currentPathname = pathnameRef.current;
 
       if (currentPathname !== lastPathname) {
@@ -121,6 +139,12 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
         if (!getSyncRouteReady(currentPathname)) {
           screenReadyRef.current = false;
         }
+      }
+
+      if (targetPath) {
+        setLoadingProgress(
+          computeLoadingProgress(targetPath, screenReadyRef.current),
+        );
       }
 
       if (screenReadyRef.current) {
@@ -208,6 +232,8 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
         phaseRef.current = "idle";
         setPhase("idle");
         setLoadingReason(null);
+        setLoadingProgress(null);
+        loadingTargetPathRef.current = null;
         return;
       }
 
@@ -223,8 +249,12 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
       }
 
       loadingTargetRef.current = destinationKey;
+      loadingTargetPathRef.current = targetPath;
       screenReadyRef.current = getSyncRouteReady(targetPath);
       setLoadingReason(loadingReasonForPath(targetPath));
+      setLoadingProgress(
+        computeLoadingProgress(targetPath, screenReadyRef.current),
+      );
 
       let overlayTimer: number | undefined;
       let overlayShown = false;
@@ -254,6 +284,10 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
           return;
         }
 
+        setLoadingProgress(
+          computeLoadingProgress(targetPath, screenReadyRef.current),
+        );
+
         navigate(to, navigateOptions);
 
         const readyWaitMs = await waitForScreenReady();
@@ -261,6 +295,10 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
         if (transitionGenerationRef.current !== myGeneration) {
           return;
         }
+
+        setLoadingProgress(
+          computeLoadingProgress(targetPath, screenReadyRef.current),
+        );
 
         if (overlayTimer !== undefined) {
           window.clearTimeout(overlayTimer);
@@ -272,10 +310,15 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
           setPhase("revealing");
         }
 
-        try {
-          await revealRouteTransition(revealDirectionRef.current, animate);
-        } catch {
-          // Navigation succeeded; a failed reveal should not block the route.
+        const revealPromise = revealRouteTransition(
+          revealDirectionRef.current,
+          animate,
+        ).catch(() => undefined);
+
+        if (overlayShown) {
+          await Promise.all([revealPromise, delay(ROUTE_OVERLAY_EXIT_MS)]);
+        } else {
+          await revealPromise;
         }
 
         reportSlowRouteTransition({
@@ -295,9 +338,11 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
 
         if (transitionGenerationRef.current === myGeneration) {
           loadingTargetRef.current = null;
+          loadingTargetPathRef.current = null;
           phaseRef.current = "idle";
           setPhase("idle");
           setLoadingReason(null);
+          setLoadingProgress(null);
         }
       }
     },
@@ -308,10 +353,11 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
     () => ({
       phase,
       loadingReason,
+      loadingProgress,
       beginTransition,
       reportScreenReady,
     }),
-    [phase, loadingReason, beginTransition, reportScreenReady],
+    [phase, loadingReason, loadingProgress, beginTransition, reportScreenReady],
   );
 
   return (

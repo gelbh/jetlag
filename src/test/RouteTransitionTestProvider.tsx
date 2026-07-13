@@ -36,6 +36,7 @@ export function RouteTransitionTestProvider({ children }: { children: ReactNode 
     () => ({
       phase: "idle" as RouteTransitionPhase,
       loadingReason: null,
+      loadingProgress: null,
       beginTransition,
       reportScreenReady: (ready: boolean) => {
         screenReadyRef.current = ready;
