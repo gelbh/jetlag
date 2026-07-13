@@ -1,5 +1,6 @@
 import type { To } from "react-router-dom";
 import { lazyWithChunkRetry } from "../domain/device/lazyWithChunkRetry";
+import { markRouteImportWarm } from "./routeWarmState";
 
 export const importMapScreen = () =>
   import("../routes/MapScreen").then((m) => ({ default: m.MapScreen }));
@@ -92,8 +93,10 @@ export function isLazyRoute(path: string): boolean {
 }
 
 export async function preloadRoute(path: string): Promise<void> {
-  const loaderKey = LAZY_ROUTE_LOADERS[normalizeRoutePath(path)];
+  const normalizedPath = normalizeRoutePath(path);
+  const loaderKey = LAZY_ROUTE_LOADERS[normalizedPath];
   if (loaderKey) {
     await routeImporter[loaderKey]();
+    markRouteImportWarm(normalizedPath);
   }
 }
