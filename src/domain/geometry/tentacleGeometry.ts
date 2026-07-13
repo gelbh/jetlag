@@ -4,8 +4,9 @@ import { featureCollection, point as turfPoint } from "@turf/helpers";
 import difference from "@turf/difference";
 import intersect from "@turf/intersect";
 import simplify from "@turf/simplify";
+import { LRUCache } from "lru-cache";
 import type { GameArea, TentaclePoi } from "../map/annotations";
-import { voronoiCellSiteId } from "./voronoiCellSiteId";
+import { resolveVoronoiCellPoiId } from "./voronoiCellSiteId";
 import {
   getCachedVoronoiCells,
   tentacleSitesFingerprint,
@@ -19,6 +20,33 @@ import {
 
 const SIMPLIFY_TOLERANCE = 0.000012;
 const DISK_STEPS = 64;
+const POI_ANSWER_ELIMINATION_CACHE_MAX = 16;
+
+const poiAnswerEliminationCache = new LRUCache<
+  string,
+  Feature<Polygon | MultiPolygon>
+>({ max: POI_ANSWER_ELIMINATION_CACHE_MAX });
+
+function cellPoiId(
+  cell: Feature,
+  pois: readonly TentaclePoi[],
+): string | undefined {
+  return resolveVoronoiCellPoiId(cell, pois, ["poiId"]);
+}
+
+function everyPoiHasResolvableCell(
+  cells: readonly Feature[],
+  pois: readonly TentaclePoi[],
+): boolean {
+  const resolved = new Set<string>();
+  for (const cell of cells) {
+    const poiId = cellPoiId(cell, pois);
+    if (poiId) {
+      resolved.add(poiId);
+    }
+  }
+  return pois.every((poi) => resolved.has(poi.id));
+}
 
 function clipToGameArea(
   feature: Feature<Polygon | MultiPolygon>,
@@ -58,7 +86,10 @@ function buildSearchDisk(
 
 function voronoiCellsForPois(
   pois: readonly TentaclePoi[],
-): Feature<Polygon | MultiPolygon>[] {
+): {
+  polygonCells: Feature<Polygon | MultiPolygon>[];
+  allFeatures: Feature[];
+} {
   const fingerprint = tentacleSitesFingerprint(pois);
   const cells = getCachedVoronoiCells(
     fingerprint,
@@ -69,11 +100,69 @@ function voronoiCellsForPois(
     })),
   );
 
-  return cells.features.filter(
+  const polygonCells = cells.features.filter(
     (feature) =>
       feature.geometry.type === "Polygon" ||
       feature.geometry.type === "MultiPolygon",
   ) as Feature<Polygon | MultiPolygon>[];
+
+  return { polygonCells, allFeatures: cells.features };
+}
+
+function answeredCellInDisk(
+  cells: readonly Feature<Polygon | MultiPolygon>[],
+  answeredPoiId: string,
+  pois: readonly TentaclePoi[],
+  disk: Feature<Polygon>,
+): Feature<Polygon | MultiPolygon> | null {
+  const answeredCell = cells.find(
+    (feature) => cellPoiId(feature, pois) === answeredPoiId,
+  );
+
+  if (answeredCell) {
+    try {
+      const clipped = intersect(
+        featureCollection([answeredCell, disk as Feature<Polygon>]),
+      );
+      if (
+        clipped &&
+        (clipped.geometry.type === "Polygon" ||
+          clipped.geometry.type === "MultiPolygon")
+      ) {
+        return clipped as Feature<Polygon | MultiPolygon>;
+      }
+    } catch {
+      /* intersect can throw on complex polygons */
+    }
+  }
+
+  const answeredPoi = pois.find((poi) => poi.id === answeredPoiId);
+  if (!answeredPoi) {
+    return null;
+  }
+
+  const poiHole = turfCircle(
+    turfPoint([answeredPoi.lng, answeredPoi.lat]),
+    0.025,
+    { steps: 24, units: "kilometers" },
+  ) as Feature<Polygon>;
+
+  try {
+    const clipped = intersect(
+      featureCollection([poiHole, disk as Feature<Polygon>]),
+    );
+    if (
+      clipped &&
+      (clipped.geometry.type === "Polygon" ||
+        clipped.geometry.type === "MultiPolygon")
+    ) {
+      return clipped as Feature<Polygon | MultiPolygon>;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
 }
 
 function buildEliminationViaDiskDifference(
@@ -81,33 +170,16 @@ function buildEliminationViaDiskDifference(
   radiusMeters: number,
   cells: readonly Feature<Polygon | MultiPolygon>[],
   answeredPoiId: string,
+  pois: readonly TentaclePoi[],
   gameArea: GameArea,
 ): Feature<Polygon | MultiPolygon> | null {
-  const answeredCell = cells.find(
-    (feature) => voronoiCellSiteId(feature, ["poiId"]) === answeredPoiId,
-  );
-
-  if (!answeredCell) {
-    return null;
-  }
-
   const disk = buildSearchDisk(anchor, radiusMeters);
-
-  let answeredInDisk: Feature<Polygon | MultiPolygon> | null = null;
-  try {
-    const clipped = intersect(
-      featureCollection([answeredCell, disk as Feature<Polygon>]),
-    );
-    if (
-      clipped &&
-      (clipped.geometry.type === "Polygon" ||
-        clipped.geometry.type === "MultiPolygon")
-    ) {
-      answeredInDisk = clipped as Feature<Polygon | MultiPolygon>;
-    }
-  } catch {
-    return null;
-  }
+  const answeredInDisk = answeredCellInDisk(
+    cells,
+    answeredPoiId,
+    pois,
+    disk,
+  );
 
   if (!answeredInDisk) {
     return null;
@@ -142,10 +214,11 @@ function buildEliminationViaWrongCellUnion(
   radiusMeters: number,
   cells: readonly Feature<Polygon | MultiPolygon>[],
   answeredPoiId: string,
+  pois: readonly TentaclePoi[],
   gameArea: GameArea,
 ): Feature<Polygon | MultiPolygon> | null {
   const wrongCells = cells.filter((feature) => {
-    const siteId = voronoiCellSiteId(feature, ["poiId"]);
+    const siteId = cellPoiId(feature, pois);
     return siteId != null && siteId !== answeredPoiId;
   });
 
@@ -216,26 +289,29 @@ export function buildTentacleEliminationRegion(
     return null;
   }
 
-  const cells = voronoiCellsForPois(pois);
-  const hasResolvableSiteIds = cells.some(
-    (cell) => voronoiCellSiteId(cell, ["poiId"]) != null,
-  );
+  const { polygonCells, allFeatures } = voronoiCellsForPois(pois);
+  const allCellsResolvable = everyPoiHasResolvableCell(allFeatures, pois);
+  const useWrongCellUnion = pois.length === 2 && allCellsResolvable;
+
+  const wrongUnion = useWrongCellUnion
+    ? buildEliminationViaWrongCellUnion(
+        anchor,
+        radiusMeters,
+        polygonCells,
+        answeredPoiId,
+        pois,
+        gameArea,
+      )
+    : null;
 
   return (
-    (hasResolvableSiteIds
-      ? buildEliminationViaWrongCellUnion(
-          anchor,
-          radiusMeters,
-          cells,
-          answeredPoiId,
-          gameArea,
-        )
-      : null) ??
+    wrongUnion ??
     buildEliminationViaDiskDifference(
       anchor,
       radiusMeters,
-      cells,
+      polygonCells,
       answeredPoiId,
+      pois,
       gameArea,
     )
   );
@@ -279,6 +355,32 @@ export function buildTentaclePoiAnswerEliminationRegion(
     return null;
   }
 
+  const cacheKey = `${tentacleSitesFingerprint(pois)}|${answeredPoiId}|${anchor[0].toFixed(6)}|${anchor[1].toFixed(6)}|${radiusMeters.toFixed(0)}`;
+  const cached = poiAnswerEliminationCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const region = buildTentaclePoiAnswerEliminationRegionUncached(
+    anchor,
+    radiusMeters,
+    pois,
+    answeredPoiId,
+    gameArea,
+  );
+  if (region) {
+    poiAnswerEliminationCache.set(cacheKey, region);
+  }
+  return region;
+}
+
+function buildTentaclePoiAnswerEliminationRegionUncached(
+  anchor: LatLngTuple,
+  radiusMeters: number,
+  pois: readonly TentaclePoi[],
+  answeredPoiId: string,
+  gameArea: GameArea,
+): Feature<Polygon | MultiPolygon> | null {
   const exterior = buildTentacleExteriorElimination(
     anchor,
     radiusMeters,
@@ -319,6 +421,10 @@ export function buildTentaclePoiAnswerEliminationRegion(
   }
 
   return clipToGameArea(merged, gameArea);
+}
+
+export function clearTentacleEliminationCacheForTests(): void {
+  poiAnswerEliminationCache.clear();
 }
 
 /** Serialized GeoJSON for metadata, or `undefined` when no shaded region applies. */

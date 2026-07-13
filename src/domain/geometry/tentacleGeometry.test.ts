@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
+import type { Feature, MultiPolygon, Polygon } from "geojson";
 import type { GameArea, TentaclePoi } from "../map/annotations";
 import { milesToMeters } from "../map/distance";
 import {
@@ -12,8 +13,10 @@ import { voronoiCellSiteId } from "./voronoiCellSiteId";
 import {
   buildTentacleEliminationRegion,
   buildTentaclePoiAnswerEliminationRegion,
+  clearTentacleEliminationCacheForTests,
   tentacleEliminationJsonForAnswer,
 } from "./tentacleGeometry";
+import { resolveVoronoiCellPoiId } from "./voronoiCellSiteId";
 
 const oneMileMeters = milesToMeters(1);
 const POLYGON_OR_MULTIPOLYGON = /Polygon|MultiPolygon/;
@@ -50,6 +53,7 @@ const eastMuseum: TentaclePoi = {
 describe("tentacleGeometry", () => {
   it("resolves poiId from cached voronoi cells used in elimination", () => {
     clearVoronoiCellCacheForTests();
+    clearTentacleEliminationCacheForTests();
     const pois = [westMuseum, eastMuseum];
     const cells = getCachedVoronoiCells(
       tentacleSitesFingerprint(pois),
@@ -187,5 +191,59 @@ describe("tentacleGeometry", () => {
         gameArea: sampleGameArea,
       }),
     ).toBeUndefined();
+  });
+
+  it("7+ POI answers produce distinct inner-disk shading per selection", () => {
+    clearVoronoiCellCacheForTests();
+    clearTentacleEliminationCacheForTests();
+
+    const anchor: [number, number] = [51.45, -0.15];
+    const sevenPois: TentaclePoi[] = Array.from({ length: 7 }, (_, index) => ({
+      id: `poi-${index}`,
+      name: `Museum ${index}`,
+      lat: 51.45 + (index - 3) * 0.002,
+      lng: -0.15 + (index - 3) * 0.003,
+      category: "museum",
+    }));
+
+    const fingerprint = tentacleSitesFingerprint(sevenPois);
+    const cells = getCachedVoronoiCells(
+      fingerprint,
+      sevenPois.map((poi) => ({
+        lng: poi.lng,
+        lat: poi.lat,
+        properties: { poiId: poi.id },
+      })),
+    );
+
+    const resolvedIds = cells.features.map((cell) =>
+      resolveVoronoiCellPoiId(cell, sevenPois, ["poiId"]),
+    );
+    expect(new Set(resolvedIds.filter(Boolean)).size).toBe(7);
+
+    const regionsByAnswer = new Map<string, Feature<Polygon | MultiPolygon>>();
+    for (const poi of sevenPois) {
+      const region = buildTentacleEliminationRegion(
+        anchor,
+        oneMileMeters,
+        sevenPois,
+        poi.id,
+        sampleGameArea,
+      );
+      expect(region).not.toBeNull();
+      regionsByAnswer.set(poi.id, region!);
+    }
+
+    for (const answered of sevenPois) {
+      const region = regionsByAnswer.get(answered.id)!;
+      const nearAnswered = turfPoint([answered.lng, answered.lat]);
+      expect(booleanPointInPolygon(nearAnswered, region)).toBe(false);
+
+      for (const other of sevenPois) {
+        if (other.id === answered.id) continue;
+        const nearOther = turfPoint([other.lng, other.lat]);
+        expect(booleanPointInPolygon(nearOther, region)).toBe(true);
+      }
+    }
   });
 });

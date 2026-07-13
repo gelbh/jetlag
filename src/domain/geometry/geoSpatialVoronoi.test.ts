@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import area from "@turf/area";
 import { lineString } from "@turf/helpers";
 import { geoSpatialVoronoiFromSites } from "./geoSpatialVoronoi";
-import { voronoiCellSiteId } from "./voronoiCellSiteId";
+import { resolveVoronoiCellPoiId, voronoiCellSiteId } from "./voronoiCellSiteId";
 import { geodesicLineBuffer } from "./geodesicLineBuffer";
 
 describe("geoSpatialVoronoiFromSites", () => {
@@ -31,6 +31,25 @@ describe("geoSpatialVoronoiFromSites", () => {
 
     expect(siteIds).toContain("west");
     expect(siteIds).toContain("east");
+  });
+
+  it("resolves poiId for all 7 spread sites", () => {
+    const sites = Array.from({ length: 7 }, (_, index) => ({
+      lng: -0.15 + (index - 3) * 0.003,
+      lat: 51.45 + (index - 3) * 0.002,
+      properties: { poiId: `poi-${index}` },
+    }));
+
+    const cells = geoSpatialVoronoiFromSites(sites);
+    const resolved = cells.features.map((cell) =>
+      resolveVoronoiCellPoiId(cell, sites.map((s) => ({
+        id: s.properties.poiId,
+        lat: s.lat,
+        lng: s.lng,
+      })), ["poiId"]),
+    );
+
+    expect(new Set(resolved.filter(Boolean)).size).toBe(7);
   });
 });
 
