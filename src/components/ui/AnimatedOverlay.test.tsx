@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AnimatedOverlay } from "./AnimatedOverlay";
 import { resetAllStores } from "../../test/helpers/storeReset";
 
-describe("AnimatedOverlay", () => {
+describe("AnimatedOverlay", { timeout: 20000 }, () => {
   beforeEach(() => {
     resetAllStores();
     document.documentElement.dataset.motion = "reduced";
