@@ -106,6 +106,22 @@ export async function resolveSessionMatchingAreas(
   return areas;
 }
 
+export function isPlayAreaReadySync(
+  session: SessionPlayAreaInput | null | undefined,
+): boolean {
+  if (!session) {
+    return true;
+  }
+
+  const packId = session.regionPackId;
+  if (!isKnownRegionPack(packId)) {
+    return true;
+  }
+
+  const cacheKey = playAreaCacheKey(packId, session.regionPackSubregionId);
+  return resolvedPlayAreaCache.has(cacheKey);
+}
+
 export async function resolveSessionPlayArea(
   session: SessionPlayAreaInput,
 ): Promise<GameArea> {
