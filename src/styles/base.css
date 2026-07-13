@@ -36,6 +36,8 @@
   --motion-sheet: 280ms;
   --motion-wizard-step: 300ms;
   --motion-nav: 320ms;
+  --motion-route-reveal: 260ms;
+  --motion-route-overlay-exit: 200ms;
   --motion-sheet-present: 380ms;
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring-subtle: cubic-bezier(0.32, 1.28, 0.54, 1);

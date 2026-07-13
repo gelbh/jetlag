@@ -1,33 +1,60 @@
 import { LoadingSpinnerRing } from "../components/ui/LoadingSpinner";
-import type { RouteLoadingReason } from "./routeTransitionContextInstance";
 import { useRouteTransition } from "./useRouteTransition";
 
-const LOADING_LABELS: Record<RouteLoadingReason, string> = {
-  page: "Loading…",
-  map: "Loading map…",
-  "sign-in": "Signing in…",
-  premium: "Loading premium…",
-  admin: "Loading admin…",
-};
-
 export function RouteTransitionOverlay() {
-  const { phase, loadingReason } = useRouteTransition();
+  const { phase, loadingProgress } = useRouteTransition();
 
-  if (phase !== "loading") {
+  if (phase !== "loading" && phase !== "revealing") {
     return null;
   }
 
-  const label = LOADING_LABELS[loadingReason ?? "page"];
+  const exiting = phase === "revealing";
+  const progress = loadingProgress;
+  const destinationTitle = progress?.destinationTitle ?? "Loading";
+  const stepLabel = progress?.currentStepLabel ?? "Loading…";
+  const totalSteps = progress?.steps.length ?? 1;
+  const currentStep = progress ? progress.currentStepIndex + 1 : 1;
+  const progressPercent =
+    totalSteps > 0 ? Math.min(100, (currentStep / totalSteps) * 100) : 0;
+  const ariaLabel = `${destinationTitle}: ${stepLabel}`;
 
   return (
     <output
-      className="route-transition-overlay"
-      aria-busy="true"
-      aria-label={label}
+      className={`route-transition-overlay${
+        exiting ? " route-transition-overlay--exiting" : ""
+      }`}
+      aria-busy={!exiting}
+      aria-label={ariaLabel}
     >
       <div className="route-transition-overlay-content">
         <LoadingSpinnerRing size="md" className="text-brand-blue" />
-        <span className="route-transition-overlay-label">{label}</span>
+        <h2 className="route-transition-overlay-title">{destinationTitle}</h2>
+        {totalSteps > 1 ? (
+          <div className="jl-preload-detail-panel__progress route-transition-overlay-progress">
+            <div className="jl-preload-detail-panel__progress-meta">
+              <span className="jl-preload-detail-panel__progress-label">
+                Progress
+              </span>
+              <span className="jl-preload-detail-panel__progress-count tabular-nums">
+                {currentStep}/{totalSteps}
+              </span>
+            </div>
+            <div
+              className="jl-preload-detail-panel__progress-track"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={totalSteps}
+              aria-valuenow={currentStep}
+              aria-label={`${destinationTitle} loading progress, ${currentStep} of ${totalSteps}`}
+            >
+              <span
+                className="jl-preload-detail-panel__progress-fill"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+        ) : null}
+        <span className="route-transition-overlay-label">{stepLabel}</span>
       </div>
     </output>
   );

@@ -296,53 +296,90 @@
   }
 }
 
-@keyframes vt-slide-out-left {
+@keyframes vt-crossfade-out {
   to {
-    opacity: 0.9;
-    transform: translateX(-28%) scale(0.96);
+    opacity: 0;
   }
 }
 
-@keyframes vt-slide-in-right {
+@keyframes vt-crossfade-in {
   from {
-    opacity: 0.9;
-    transform: translateX(28%) scale(0.96);
+    opacity: 0;
   }
 }
 
-@keyframes vt-slide-out-right {
+@keyframes vt-crossfade-out-forward {
   to {
-    opacity: 0.9;
-    transform: translateX(28%) scale(0.96);
+    opacity: 0;
+    transform: translateX(-10%);
   }
 }
 
-@keyframes vt-slide-in-left {
+@keyframes vt-crossfade-in-forward {
   from {
-    opacity: 0.9;
-    transform: translateX(-28%) scale(0.96);
+    opacity: 0;
+    transform: translateX(10%);
+  }
+}
+
+@keyframes vt-crossfade-out-back {
+  to {
+    opacity: 0;
+    transform: translateX(10%);
+  }
+}
+
+@keyframes vt-crossfade-in-back {
+  from {
+    opacity: 0;
+    transform: translateX(-10%);
   }
 }
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: var(--motion-nav);
+  animation-duration: var(--motion-route-reveal);
 }
 
 html[data-nav-direction="forward"]::view-transition-old(root) {
-  animation: vt-slide-out-left var(--motion-nav) var(--ease-ios-standard) both;
+  animation: vt-crossfade-out-forward var(--motion-route-reveal)
+    var(--ease-ios-emphasized) both;
 }
 
 html[data-nav-direction="forward"]::view-transition-new(root) {
-  animation: vt-slide-in-right var(--motion-nav) var(--ease-ios-standard) both;
+  animation: vt-crossfade-in-forward var(--motion-route-reveal)
+    var(--ease-ios-emphasized) both;
 }
 
 html[data-nav-direction="back"]::view-transition-old(root) {
-  animation: vt-slide-out-right var(--motion-nav) var(--ease-ios-standard) both;
+  animation: vt-crossfade-out-back var(--motion-route-reveal)
+    var(--ease-ios-emphasized) both;
 }
 
 html[data-nav-direction="back"]::view-transition-new(root) {
-  animation: vt-slide-in-left var(--motion-nav) var(--ease-ios-standard) both;
+  animation: vt-crossfade-in-back var(--motion-route-reveal)
+    var(--ease-ios-emphasized) both;
+}
+
+html[data-nav-direction="neutral"]::view-transition-old(root) {
+  animation: vt-crossfade-out var(--motion-route-reveal) var(--ease-ios-emphasized)
+    both;
+}
+
+html[data-nav-direction="neutral"]::view-transition-new(root) {
+  animation: vt-crossfade-in var(--motion-route-reveal) var(--ease-ios-emphasized)
+    both;
+}
+
+::view-transition-group(jl-session-code) {
+  animation-duration: var(--motion-route-reveal);
+  z-index: 1;
+}
+
+::view-transition-old(jl-session-code),
+::view-transition-new(jl-session-code) {
+  height: auto;
+  mix-blend-mode: normal;
 }
 
 @media (prefers-reduced-motion: reduce) {
