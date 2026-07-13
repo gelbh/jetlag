@@ -146,9 +146,11 @@ test.describe("iPhone 13 PWA safe area", () => {
           (bar
             ? Number.parseFloat(getComputedStyle(bar).paddingBottom)
             : 0),
+        backdropOnMap: document.querySelector(".app-entry-backdrop"),
       };
     });
 
+    expect(metrics.backdropOnMap).toBeNull();
     expect(metrics.dockPaddingBottom).toBeLessThanOrEqual(1);
     expect(metrics.dockBottomOffset).toBeGreaterThanOrEqual(
       SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
@@ -180,28 +182,59 @@ test.describe("iPhone 13 PWA home safe area", () => {
     await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 
-  test("home poster gradient layer covers the viewport", async ({ page }) => {
+  test("global entry backdrop covers the viewport", async ({ page }) => {
     const metrics = await page.evaluate(() => {
       const poster = document.querySelector(".home-poster");
       const posterRect = poster?.getBoundingClientRect();
-      const posterBefore = poster
-        ? getComputedStyle(poster, "::before")
-        : null;
+      const backdrop = document.querySelector(".app-entry-backdrop");
+      const backdropStyle = backdrop ? getComputedStyle(backdrop) : null;
       const bodyBg = getComputedStyle(document.body).backgroundColor;
       return {
         viewportHeight: window.innerHeight,
         posterBottom: posterRect?.bottom ?? 0,
-        beforePosition: posterBefore?.position ?? "",
-        beforeTop: posterBefore?.top ?? "",
-        beforeBottom: posterBefore?.bottom ?? "",
+        backdropPosition: backdropStyle?.position ?? "",
+        backdropTop: backdropStyle?.top ?? "",
+        backdropBottom: backdropStyle?.bottom ?? "",
+        backdropBackgroundImage: backdropStyle?.backgroundImage ?? "",
         bodyBg,
       };
     });
 
     expect(metrics.posterBottom).toBeGreaterThanOrEqual(metrics.viewportHeight - 2);
-    expect(metrics.beforePosition).toBe("fixed");
-    expect(metrics.beforeTop).toBe("0px");
-    expect(metrics.beforeBottom).toBe("0px");
+    expect(metrics.backdropPosition).toBe("fixed");
+    expect(metrics.backdropTop).toBe("0px");
+    expect(metrics.backdropBottom).toBe("0px");
+    expect(metrics.backdropBackgroundImage).not.toBe("none");
     expect(metrics.bodyBg).not.toBe("rgba(0, 0, 0, 0)");
+  });
+});
+
+test.describe("iPhone 13 PWA join safe area", () => {
+  test.beforeEach(async ({ page }) => {
+    await prepareE2EPage(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/join");
+    await expect(page.getByRole("heading", { name: "Session code" })).toBeVisible();
+    await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
+  });
+
+  test("join screen keeps gradient backdrop in safe area band", async ({ page }) => {
+    const metrics = await page.evaluate(() => {
+      const backdrop = document.querySelector(".app-entry-backdrop");
+      const backdropStyle = backdrop ? getComputedStyle(backdrop) : null;
+      return {
+        backdropExists: !!backdrop,
+        backdropPosition: backdropStyle?.position ?? "",
+        backdropTop: backdropStyle?.top ?? "",
+        backdropBottom: backdropStyle?.bottom ?? "",
+        backdropBackgroundImage: backdropStyle?.backgroundImage ?? "",
+      };
+    });
+
+    expect(metrics.backdropExists).toBe(true);
+    expect(metrics.backdropPosition).toBe("fixed");
+    expect(metrics.backdropTop).toBe("0px");
+    expect(metrics.backdropBottom).toBe("0px");
+    expect(metrics.backdropBackgroundImage).not.toBe("none");
   });
 });
