@@ -4,6 +4,7 @@ import {
   isLazyRoute,
   normalizeRoutePath,
   preloadRoute,
+  resolveNavigateDestinationKey,
 } from "./routePreloaders";
 import { routeReadinessKind } from "./useRouteScreenReady";
 
@@ -22,6 +23,30 @@ describe("normalizeRoutePath", () => {
 
   it("defaults empty paths to root", () => {
     expect(normalizeRoutePath("")).toBe("/");
+  });
+});
+
+describe("resolveNavigateDestinationKey", () => {
+  it("preserves query strings and hashes for deduplication", () => {
+    expect(resolveNavigateDestinationKey("/map?session=abc")).toBe(
+      "/map?session=abc",
+    );
+    expect(resolveNavigateDestinationKey("/create#step-2")).toBe(
+      "/create#step-2",
+    );
+    expect(resolveNavigateDestinationKey("/map?session=abc#panel")).toBe(
+      "/map?session=abc#panel",
+    );
+  });
+
+  it("preserves object search and hash", () => {
+    expect(
+      resolveNavigateDestinationKey({
+        pathname: "/map",
+        search: "?session=abc",
+        hash: "#panel",
+      }),
+    ).toBe("/map?session=abc#panel");
   });
 });
 
@@ -55,14 +80,16 @@ describe("preloadRoute", () => {
   it("invokes the lazy loader for /map and query-bearing paths", async () => {
     const mapLoader = vi.spyOn(routePreloaders.routeImporter, "importMapScreen");
 
-    await preloadRoute("/map");
-    expect(mapLoader).toHaveBeenCalledTimes(1);
+    try {
+      await preloadRoute("/map");
+      expect(mapLoader).toHaveBeenCalledTimes(1);
 
-    mapLoader.mockClear();
-    await preloadRoute("/map?session=abc");
-    expect(mapLoader).toHaveBeenCalledTimes(1);
-
-    mapLoader.mockRestore();
+      mapLoader.mockClear();
+      await preloadRoute("/map?session=abc");
+      expect(mapLoader).toHaveBeenCalledTimes(1);
+    } finally {
+      mapLoader.mockRestore();
+    }
   });
 });
 

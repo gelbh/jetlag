@@ -12,7 +12,11 @@ import {
   type To,
 } from "react-router-dom";
 import { useMotionProfile } from "../hooks/useMotionProfile";
-import { preloadRoute, resolveNavigatePath } from "./routePreloaders";
+import {
+  preloadRoute,
+  resolveNavigateDestinationKey,
+  resolveNavigatePath,
+} from "./routePreloaders";
 import {
   revealRouteTransition,
   type NavRevealDirection,
@@ -56,6 +60,8 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
   const screenReadyRef = useRef(true);
   const loadingTargetRef = useRef<string | null>(null);
   const pathnameRef = useRef(location.pathname);
+  const transitionGenerationRef = useRef(0);
+  const revealDirectionRef = useRef<NavRevealDirection>("forward");
 
   useEffect(() => {
     phaseRef.current = phase;
@@ -92,6 +98,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
   const beginTransition = useCallback(
     async (to: To, options?: BeginTransitionOptions) => {
       const targetPath = resolveNavigatePath(to);
+      const destinationKey = resolveNavigateDestinationKey(to);
       const navigateOptions = {
         replace: options?.replace,
         state: options?.state,
@@ -102,12 +109,16 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
 
       if (
         phaseRef.current !== "idle" &&
-        loadingTargetRef.current === targetPath
+        loadingTargetRef.current === destinationKey
       ) {
         return;
       }
 
+      const myGeneration = ++transitionGenerationRef.current;
+      revealDirectionRef.current = toRevealDirection(options?.direction);
+
       if (phaseRef.current !== "idle") {
+        loadingTargetRef.current = destinationKey;
         try {
           await preloadRoute(targetPath);
         } catch {
@@ -115,10 +126,12 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
         }
 
         navigate(to, navigateOptions);
+        phaseRef.current = "idle";
+        setPhase("idle");
         return;
       }
 
-      loadingTargetRef.current = targetPath;
+      loadingTargetRef.current = destinationKey;
       screenReadyRef.current = false;
       phaseRef.current = "loading";
       setPhase("loading");
@@ -134,20 +147,23 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
 
         await waitForScreenReady();
 
+        if (transitionGenerationRef.current !== myGeneration) {
+          return;
+        }
+
         phaseRef.current = "revealing";
         setPhase("revealing");
         try {
-          await revealRouteTransition(
-            toRevealDirection(options?.direction),
-            animate,
-          );
+          await revealRouteTransition(revealDirectionRef.current, animate);
         } catch {
           // Navigation succeeded; a failed reveal should not block the route.
         }
       } finally {
-        loadingTargetRef.current = null;
-        phaseRef.current = "idle";
-        setPhase("idle");
+        if (transitionGenerationRef.current === myGeneration) {
+          loadingTargetRef.current = null;
+          phaseRef.current = "idle";
+          setPhase("idle");
+        }
       }
     },
     [animate, navigate, waitForScreenReady],
