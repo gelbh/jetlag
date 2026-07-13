@@ -91,6 +91,9 @@ function useThermometerSandboxBody({
         thermoA,
         thermoB,
         answer,
+        targetDistanceMeters: distanceMeters,
+        walkCurrentPoint: null,
+        walkActive: walkingActive,
       },
     });
   }, [
