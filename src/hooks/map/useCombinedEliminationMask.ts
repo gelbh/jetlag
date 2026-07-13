@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import { buildCombinedEliminationMask } from "../../domain/geometry/combinedEliminationMask";
 import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/emptyFeatures";
@@ -25,32 +25,28 @@ export function useCombinedEliminationMask({
     typeof buildCombinedEliminationMask
   > | null>(null);
   const generationRef = useRef(0);
-  const bootstrappedRef = useRef(false);
+
+  const committedBootstrap = useMemo(() => {
+    if (hidden) {
+      return null;
+    }
+
+    return buildCombinedEliminationMask(
+      annotations,
+      gameArea,
+      EMPTY_GEOJSON_FEATURES,
+      endGameHidingZones,
+    );
+  }, [annotations, endGameHidingZones, gameArea, hidden]);
 
   useEffect(() => {
     if (hidden) {
       generationRef.current += 1;
-      bootstrappedRef.current = false;
       return;
     }
 
     const generation = generationRef.current + 1;
     generationRef.current = generation;
-
-    if (!bootstrappedRef.current) {
-      bootstrappedRef.current = true;
-      const initial = buildCombinedEliminationMask(
-        annotations,
-        gameArea,
-        draftFeatures,
-        endGameHidingZones,
-      );
-      queueMicrotask(() => {
-        if (generation === generationRef.current) {
-          setMask(initial);
-        }
-      });
-    }
 
     void requestCombinedEliminationMask(
       annotations,
@@ -80,5 +76,5 @@ export function useCombinedEliminationMask({
     return null;
   }
 
-  return mask;
+  return mask ?? committedBootstrap;
 }

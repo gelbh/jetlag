@@ -63,15 +63,27 @@ export function voronoiCellPoiIdByCoordinates(
 
   let nearestId: string | undefined;
   let minDistSq = Infinity;
+  let runnerUpDistSq = Infinity;
 
   for (const poi of pois) {
     const dLng = poi.lng - lng;
     const dLat = poi.lat - lat;
     const distSq = dLng * dLng + dLat * dLat;
     if (distSq < minDistSq) {
+      runnerUpDistSq = minDistSq;
       minDistSq = distSq;
       nearestId = poi.id;
+    } else if (distSq < runnerUpDistSq) {
+      runnerUpDistSq = distSq;
     }
+  }
+
+  if (
+    nearestId == null ||
+    !Number.isFinite(minDistSq) ||
+    runnerUpDistSq - minDistSq < 1e-12
+  ) {
+    return undefined;
   }
 
   return nearestId;

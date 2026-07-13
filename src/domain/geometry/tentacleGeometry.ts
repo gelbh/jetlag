@@ -17,9 +17,12 @@ import {
   safeDifference,
   type LatLngTuple,
 } from "./geometry";
+import { gameAreaFingerprint } from "./core/gameAreaConvert";
 
 const SIMPLIFY_TOLERANCE = 0.000012;
 const DISK_STEPS = 64;
+/** Fallback hole when a Voronoi cell polygon is missing (~25 m). */
+const POI_CELL_FALLBACK_RADIUS_KM = 0.025;
 const POI_ANSWER_ELIMINATION_CACHE_MAX = 16;
 
 const poiAnswerEliminationCache = new LRUCache<
@@ -143,7 +146,7 @@ function answeredCellInDisk(
 
   const poiHole = turfCircle(
     turfPoint([answeredPoi.lng, answeredPoi.lat]),
-    0.025,
+    POI_CELL_FALLBACK_RADIUS_KM,
     { steps: 24, units: "kilometers" },
   ) as Feature<Polygon>;
 
@@ -355,7 +358,7 @@ export function buildTentaclePoiAnswerEliminationRegion(
     return null;
   }
 
-  const cacheKey = `${tentacleSitesFingerprint(pois)}|${answeredPoiId}|${anchor[0].toFixed(6)}|${anchor[1].toFixed(6)}|${radiusMeters.toFixed(0)}`;
+  const cacheKey = `${tentacleSitesFingerprint(pois)}|${answeredPoiId}|${anchor[0].toFixed(6)}|${anchor[1].toFixed(6)}|${radiusMeters.toFixed(0)}|${gameAreaFingerprint(gameArea)}`;
   const cached = poiAnswerEliminationCache.get(cacheKey);
   if (cached) {
     return cached;
