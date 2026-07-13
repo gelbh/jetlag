@@ -204,7 +204,7 @@ function scrubEvent(
 }
 
 export function initSentry(): void {
-  if (import.meta.env.MODE === "test") {
+  if (import.meta.env.MODE === "test" || import.meta.env.DEV) {
     return;
   }
 
