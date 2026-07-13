@@ -272,7 +272,7 @@ describe("worker fetch", () => {
     );
 
     expect(env.ASSETS.fetch).not.toHaveBeenCalled();
-    expect(response.status).toBe(405);
+    expect(response.status).toBe(204);
   });
 
   it("applies document CSP nonce to html asset responses", async () => {
