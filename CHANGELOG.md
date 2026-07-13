@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.6.0 - 2026-07-13
+
+### Improvements
+
+- Admin panel: desktop mission-control layout with live session indicators sorted by recent activity, chip filters, manual refresh, load-more pagination, dense rows, and a player roster in the monitor pane.
+- Seeker tool panels: drag-to-minimize tracks your finger smoothly and settles with iOS-style motion instead of snapping.
+- PWA: entry gradient fills the bottom safe-area band on non-map screens.
+- Motion: smoother route transitions with crossfade reveal and cleaner loading handoff.
+- Navigation: loading screen shows what you're waiting for with step progress.
+- Tentacle Answer preview: distinct inner shading for 7+ POI lists and snappier map picks.
+
+### Fixes
+
+- App update: "Refresh now" always reloads, even when no update is waiting.
+- Map shading: keep answered-question elimination masks inside the play area boundary.
+- Map: keep elimination-mask worker from loading Leaflet in the background thread.
+- Low battery prompt: tolerate Battery API objects that omit event listeners.
+
+### Technical
+
+- Sentry: drop chunk-load, battery, Overpass payload, and invalid Stripe webhook probe noise.
+
 ## 0.5.14 - 2026-07-13
 
 ### Improvements
