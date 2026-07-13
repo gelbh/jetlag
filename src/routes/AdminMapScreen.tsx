@@ -21,6 +21,7 @@ import {
   AdminMonitorRail,
   type AdminMonitorRailTab,
 } from "./admin-map-screen/AdminMonitorRail";
+import { AdminMonitorPlayerFocus } from "../components/admin/AdminMonitorPlayerFocus";
 
 export function AdminMapScreen({
   embeddedMonitor = false,
@@ -153,6 +154,7 @@ export function AdminMapScreen({
       className="h-full w-full"
     >
       <MapViewportTracker onViewportChange={controller.setMapViewport} />
+      {embeddedMonitor ? <AdminMonitorPlayerFocus /> : null}
       <GameAreaMask gameArea={gameArea} />
       <SpectatorMapLayers
         session={controller.session}

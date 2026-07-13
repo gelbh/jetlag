@@ -20,7 +20,7 @@ import {
   type EliminationUnionInput,
   type PolygonFeature,
 } from "./unionPolygonFeatures";
-import { gameAreaToPolygon } from "./geometry";
+import { gameAreaToFeature } from "./core/featureConvert";
 
 export const ELIMINATION_FILL_COLOR = MAP_ANNOTATION_COLORS.elimination;
 
@@ -28,7 +28,7 @@ function clipMaskToGameArea(
   mask: PolygonFeature,
   gameArea: GameArea,
 ): PolygonFeature | null {
-  const gameFeature = gameAreaToPolygon(gameArea);
+  const gameFeature = gameAreaToFeature(gameArea) as PolygonFeature;
 
   try {
     const clipped = intersect({
