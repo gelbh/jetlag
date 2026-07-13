@@ -4,6 +4,7 @@ import {
   applyDocumentCspNonce,
   injectScriptNonces,
   isHtmlDocumentResponse,
+  shouldApplyDocumentCsp,
 } from "./documentCsp";
 import { isSpaFallbackForAssetRequest } from "./index";
 import {
@@ -61,16 +62,40 @@ describe("document CSP nonce", () => {
     ).toBe(false);
   });
 
-  it("adds a per-request script nonce to CSP and script tags", async () => {
+  it("skips empty-body and cache responses", () => {
+    expect(
+      shouldApplyDocumentCsp(
+        new Response(null, {
+          status: 204,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      shouldApplyDocumentCsp(
+        new Response(null, {
+          status: 304,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it("scopes script-src nonce updates without touching other directives", () => {
+    const csp =
+      "default-src 'self'; style-src 'self' 'nonce-style'; script-src 'self' https://www.google.com 'sha256-abc='; img-src 'self'";
+
+    expect(addScriptNonceToCsp(csp, "test-nonce")).toBe(
+      "default-src 'self'; style-src 'self' 'nonce-style'; script-src 'self' https://www.google.com 'sha256-abc=' 'nonce-test-nonce'; img-src 'self'",
+    );
+  });
+
+  it("adds matching nonces to CSP and script tags", async () => {
     const csp =
       "default-src 'self'; script-src 'self' https://www.google.com 'sha256-abc='; style-src 'self'";
 
-    expect(addScriptNonceToCsp(csp, "test-nonce")).toBe(
-      "default-src 'self'; script-src 'self' https://www.google.com 'sha256-abc=' 'nonce-test-nonce'; style-src 'self'",
-    );
-
     expect(
-      injectScriptNonces(
+      await injectScriptNonces(
         '<script src="/boot-recovery.js"></script><script type="module" src="/assets/index.js"></script>',
         "test-nonce",
       ),
@@ -88,10 +113,13 @@ describe("document CSP nonce", () => {
     );
 
     const body = await response.text();
-    expect(body).toContain('nonce="');
-    expect(response.headers.get("Content-Security-Policy")).toMatch(
-      /'nonce-[^']+'/,
-    );
+    const headerCsp = response.headers.get("Content-Security-Policy") ?? "";
+    const headerNonce = headerCsp.match(/'nonce-([^']+)'/)?.[1];
+    const bodyNonce = body.match(/nonce="([^"]+)"/)?.[1];
+
+    expect(headerNonce).toBeTruthy();
+    expect(bodyNonce).toBe(headerNonce);
+    expect(body).toContain(`nonce="${headerNonce}"`);
   });
 });
 

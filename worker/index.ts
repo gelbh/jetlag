@@ -4,7 +4,7 @@ import {
 } from "./sentryTunnel";
 import {
   applyDocumentCspNonce,
-  isHtmlDocumentResponse,
+  shouldApplyDocumentCsp,
 } from "./documentCsp";
 
 export function isSpaFallbackForAssetRequest(
@@ -42,7 +42,7 @@ export default {
       });
     }
 
-    if (isHtmlDocumentResponse(assetResponse)) {
+    if (shouldApplyDocumentCsp(assetResponse)) {
       return applyDocumentCspNonce(assetResponse);
     }
 
@@ -61,4 +61,5 @@ export {
   generateCspNonce,
   injectScriptNonces,
   isHtmlDocumentResponse,
+  shouldApplyDocumentCsp,
 } from "./documentCsp";

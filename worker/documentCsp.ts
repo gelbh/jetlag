@@ -1,4 +1,4 @@
-const SCRIPT_NONCE_PATTERN = /'nonce-[^']+'/;
+const SCRIPT_SRC_PATTERN = /script-src ([^;]+)/;
 
 export function generateCspNonce(): string {
   const bytes = new Uint8Array(16);
@@ -15,24 +15,51 @@ export function isHtmlDocumentResponse(response: Response): boolean {
   return contentType.includes("text/html");
 }
 
-export function injectScriptNonces(html: string, nonce: string): string {
-  return html.replace(
-    /<script(?![^>]*\snonce=)/gi,
-    `<script nonce="${nonce}"`,
-  );
+export function shouldApplyDocumentCsp(response: Response): boolean {
+  if (!isHtmlDocumentResponse(response)) {
+    return false;
+  }
+
+  if (response.status === 204 || response.status === 304) {
+    return false;
+  }
+
+  return response.body !== null;
+}
+
+export async function injectScriptNonces(
+  html: string,
+  nonce: string,
+): Promise<string> {
+  if (typeof HTMLRewriter === "undefined") {
+    return html.replace(
+      /<script(?![^>]*\snonce=)/gi,
+      `<script nonce="${nonce}"`,
+    );
+  }
+
+  const rewriter = new HTMLRewriter().on("script", {
+    element(element) {
+      if (!element.hasAttribute("nonce")) {
+        element.setAttribute("nonce", nonce);
+      }
+    },
+  });
+
+  return rewriter.transform(new Response(html)).text();
 }
 
 export function addScriptNonceToCsp(csp: string, nonce: string): string {
   const nonceToken = `'nonce-${nonce}'`;
-  if (csp.includes(nonceToken)) {
-    return csp;
-  }
 
-  if (SCRIPT_NONCE_PATTERN.test(csp)) {
-    return csp.replace(SCRIPT_NONCE_PATTERN, nonceToken);
-  }
+  return csp.replace(SCRIPT_SRC_PATTERN, (match, sources: string) => {
+    if (sources.includes(nonceToken)) {
+      return match;
+    }
 
-  return csp.replace(/(script-src [^;]+)/, `$1 ${nonceToken}`);
+    const withoutScriptNonce = sources.replace(/'nonce-[^']+'/g, " ").replace(/\s+/g, " ").trim();
+    return `script-src ${withoutScriptNonce} ${nonceToken}`;
+  });
 }
 
 export async function applyDocumentCspNonce(
@@ -50,7 +77,7 @@ export async function applyDocumentCspNonce(
     );
   }
 
-  return new Response(injectScriptNonces(html, nonce), {
+  return new Response(await injectScriptNonces(html, nonce), {
     status: response.status,
     statusText: response.statusText,
     headers,
