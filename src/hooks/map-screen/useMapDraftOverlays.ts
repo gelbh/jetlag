@@ -10,6 +10,7 @@ import {
   buildRadarShadedRegion,
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
+import { buildTentaclePoiAnswerEliminationRegion } from "../../domain/geometry/tentacleGeometry";
 import {
   radarInsideFromAnswer,
   type RadarAnswer,
@@ -214,6 +215,18 @@ export function buildMapDraftOverlays(
             markerRadius: selected ? 7 : 6,
           },
         });
+      }
+
+      if (hasPoiAnswer && selectedPoiId) {
+        pushElimination(
+          buildTentaclePoiAnswerEliminationRegion(
+            center,
+            searchRadiusMeters,
+            pois,
+            selectedPoiId,
+            gameArea,
+          ),
+        );
       }
     }
   }

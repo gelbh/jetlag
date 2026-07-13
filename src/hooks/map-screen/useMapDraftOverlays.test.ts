@@ -1,7 +1,18 @@
 import { renderHook } from "@testing-library/react";
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import { point as turfPoint } from "@turf/helpers";
+import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { describe, expect, it } from "vitest";
 import { buildMapDraftOverlays } from "./useMapDraftOverlays";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
+
+function pointInAnyElimination(
+  lngLat: [number, number],
+  features: Feature<Polygon | MultiPolygon>[],
+): boolean {
+  const probe = turfPoint(lngLat);
+  return features.some((feature) => booleanPointInPolygon(probe, feature));
+}
 
 const emptySources = {
   activeTool: "none" as const,
@@ -67,6 +78,83 @@ describe("buildMapDraftOverlays", () => {
     expect(result.overlays.some((overlay) => overlay.id === "radar-draft-range")).toBe(
       true,
     );
+  });
+
+  it("shades tentacle POI answer elimination inline with the draft overlays", () => {
+    const result = buildMapDraftOverlays({
+      ...emptySources,
+      activeTool: "tentacle",
+      tentacle: {
+        center: [53.35, -6.26],
+        searchRadiusMeters: 1609,
+        answerRadiusMeters: 1609,
+        pois: [
+          {
+            id: "west",
+            name: "West Museum",
+            lat: 53.351,
+            lng: -6.28,
+            category: "museum",
+          },
+          {
+            id: "east",
+            name: "East Museum",
+            lat: 53.351,
+            lng: -6.24,
+            category: "museum",
+          },
+        ],
+        selectedPoiId: "east",
+        outOfReach: false,
+        seekerResolving: false,
+      },
+    });
+
+    const { eliminationFeatures } = result;
+    expect(eliminationFeatures.length).toBeGreaterThan(0);
+
+    expect(
+      pointInAnyElimination([-6.24, 53.351], eliminationFeatures),
+    ).toBe(false);
+    expect(
+      pointInAnyElimination([-6.28, 53.351], eliminationFeatures),
+    ).toBe(true);
+    expect(
+      pointInAnyElimination([-6.35, 53.35], eliminationFeatures),
+    ).toBe(true);
+  });
+
+  it("shades only the exterior for a single tentacle POI answer draft", () => {
+    const result = buildMapDraftOverlays({
+      ...emptySources,
+      activeTool: "tentacle",
+      tentacle: {
+        center: [53.35, -6.26],
+        searchRadiusMeters: 1609,
+        answerRadiusMeters: 1609,
+        pois: [
+          {
+            id: "west",
+            name: "West Museum",
+            lat: 53.351,
+            lng: -6.28,
+            category: "museum",
+          },
+        ],
+        selectedPoiId: "west",
+        outOfReach: false,
+        seekerResolving: false,
+      },
+    });
+
+    const { eliminationFeatures } = result;
+    expect(eliminationFeatures.length).toBeGreaterThan(0);
+    expect(
+      pointInAnyElimination([-6.35, 53.35], eliminationFeatures),
+    ).toBe(true);
+    expect(
+      pointInAnyElimination([-6.261, 53.35], eliminationFeatures),
+    ).toBe(false);
   });
 });
 
