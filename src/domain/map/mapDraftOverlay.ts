@@ -7,6 +7,7 @@ export interface MapDraftOverlayStyle {
   dashArray?: string;
   fillColor?: string;
   fillOpacity?: number;
+  opacity?: number;
   markerRadius?: number;
   pulsing?: boolean;
 }

@@ -21,6 +21,8 @@ export const MAP_ANNOTATION_COLORS = {
   thermometerA: "#C55B40",
   thermometerB: "#E4B352",
   thermometerAxis: "#C55B40",
+  thermometerQuietRadar: "#588CBC",
+  thermometerWalkRemaining: "#4378B1",
   boundary: "#4378B1",
   strokeLight: "#ffffff",
   userLocation: "#26599B",
