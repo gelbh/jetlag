@@ -541,9 +541,25 @@
   }
 
   /* Admin map — mission-control layout (tablet/desktop) */
+  .admin-dashboard-list-scroll {
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  .admin-session-row {
+    min-height: 0;
+  }
+
   .admin-monitor-pane {
     container-type: inline-size;
     container-name: admin-monitor;
+  }
+
+  @media (min-width: 1024px) {
+    .admin-monitor-pane {
+      height: 100%;
+      min-height: 0;
+    }
   }
 
   @container admin-monitor (min-width: 40rem) {

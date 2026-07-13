@@ -195,43 +195,51 @@ export function AdminPanel() {
     );
   }
 
-  const sessionList = (
-    <div className="space-y-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <AdminSessionFilters
-        query={query}
-        phase={phaseFilter}
-        multiplayerOnly={multiplayerOnly}
-        onQueryChange={setQuery}
-        onPhaseChange={setPhaseFilter}
-        onMultiplayerOnlyChange={setMultiplayerOnly}
-      />
-      {filteredSessions.length === 0 ? (
-        <div className="rounded-xl border border-border bg-surface-panel px-4 py-6">
-          <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
-            No matching sessions
-          </p>
-          <p className="mt-2 text-sm text-ink-muted">
-            Try another code, area name, or phase filter.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-2.5">
-          {filteredSessions.map((summary) => (
-            <AdminSessionRow
-              key={summary.sessionId}
-              summary={summary}
-              observingCode={observingCode}
-              selected={selectedSessionId === summary.sessionId}
-              onMonitor={(nextSummary) => void handleMonitor(nextSummary)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+  const useDesktopViewport = isDesktop && sessions.length > 0;
+
+  const listFilters = (
+    <AdminSessionFilters
+      query={query}
+      phase={phaseFilter}
+      multiplayerOnly={multiplayerOnly}
+      onQueryChange={setQuery}
+      onPhaseChange={setPhaseFilter}
+      onMultiplayerOnlyChange={setMultiplayerOnly}
+    />
   );
 
+  const listRows =
+    filteredSessions.length === 0 ? (
+      <div className="rounded-xl border border-border bg-surface-panel px-4 py-6">
+        <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
+          No matching sessions
+        </p>
+        <p className="mt-2 text-sm text-ink-muted">
+          Try another code, area name, or phase filter.
+        </p>
+      </div>
+    ) : (
+      <div
+        className={
+          useDesktopViewport
+            ? "space-y-2.5"
+            : "space-y-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]"
+        }
+      >
+        {filteredSessions.map((summary) => (
+          <AdminSessionRow
+            key={summary.sessionId}
+            summary={summary}
+            observingCode={observingCode}
+            selected={selectedSessionId === summary.sessionId}
+            onMonitor={(nextSummary) => void handleMonitor(nextSummary)}
+          />
+        ))}
+      </div>
+    );
+
   return (
-    <EntryScreenLayout justify="start">
+    <EntryScreenLayout justify="start" viewport={useDesktopViewport}>
       <AdminSettingsSheet
         open={settingsOpen}
         pollIntervalMs={pollIntervalMs}
@@ -241,8 +249,20 @@ export function AdminPanel() {
         onClose={() => setSettingsOpen(false)}
       />
       <ScreenHeader backTo="/" backLabel="Back" />
-      <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
-        <div className="flex items-start justify-between gap-3">
+      <div
+        className={
+          useDesktopViewport
+            ? `flex min-h-0 flex-1 flex-col gap-2 overflow-hidden ${screenHeaderOffsetClassName}`
+            : `space-y-4 ${screenHeaderOffsetClassName}`
+        }
+      >
+        <div
+          className={
+            useDesktopViewport
+              ? "flex shrink-0 items-start justify-between gap-3"
+              : "flex items-start justify-between gap-3"
+          }
+        >
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-brand-blue">
               <HudAdminIcon className="size-5" aria-hidden="true" />
@@ -293,11 +313,16 @@ export function AdminPanel() {
             </p>
           </div>
         ) : (
-          <>
+          <div
+            className={
+              useDesktopViewport ? "flex min-h-0 flex-1 flex-col gap-3" : "contents"
+            }
+          >
             <AdminStatsHeader sessions={sessions} />
             <AdminDashboardLayout
               showMonitor={isDesktop}
-              list={sessionList}
+              listFilters={listFilters}
+              listRows={listRows}
               monitor={
                 <AdminMonitorPane
                   active={monitorActive}
@@ -306,12 +331,14 @@ export function AdminPanel() {
                 />
               }
             />
-          </>
+          </div>
         )}
 
-        <div className="pb-4 text-xs text-ink-dim">
-          <span>v{APP_VERSION}</span>
-        </div>
+        {!isDesktop ? (
+          <div className="pb-4 text-xs text-ink-dim">
+            <span>v{APP_VERSION}</span>
+          </div>
+        ) : null}
       </div>
     </EntryScreenLayout>
   );

@@ -22,11 +22,11 @@ export function AdminSessionRow({
 
   return (
     <div
-      className={`home-card-btn home-card-btn-secondary items-start gap-3 py-4 ${
+      className={`admin-session-row home-card-btn home-card-btn-secondary items-start gap-2 py-3 ${
         selected ? "ring-2 ring-brand-blue/50" : ""
       }`}
     >
-      <div className="min-w-0 flex-1 space-y-2">
+      <div className="min-w-0 flex-1 space-y-1.5">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-xl font-bold tracking-[0.22em] text-ink">
             {summary.code}
@@ -40,16 +40,10 @@ export function AdminSessionRow({
           <p className="text-sm text-ink">{areaLabel}</p>
         ) : null}
         <p className="text-sm text-ink-muted">
-          {summary.roleCounts.seeker} seeker
-          {summary.roleCounts.seeker === 1 ? "" : "s"} · {summary.roleCounts.hider}{" "}
-          hider{summary.roleCounts.hider === 1 ? "" : "s"}
           {summary.roleCounts.observer > 0
-            ? ` · ${summary.roleCounts.observer} observer`
+            ? `${summary.roleCounts.observer} observer${summary.roleCounts.observer === 1 ? "" : "s"} · `
             : ""}
-          {summary.roleCounts.admin > 0
-            ? ` · ${summary.roleCounts.admin} admin`
-            : ""}{" "}
-          · {summary.tier} · {summary.gameSize}
+          {summary.tier} · {summary.gameSize}
         </p>
       </div>
       <MotionPressable

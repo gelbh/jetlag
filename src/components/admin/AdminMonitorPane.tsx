@@ -12,7 +12,7 @@ export function AdminMonitorPane({
 }) {
   if (errorMessage) {
     return (
-      <div className="admin-monitor-pane flex min-h-[36rem] items-center justify-center rounded-xl border border-dashed border-status-error/40 bg-status-error-surface/40 px-6 py-10 text-center">
+      <div className="admin-monitor-pane flex h-full min-h-0 items-center justify-center rounded-xl border border-dashed border-status-error/40 bg-status-error-surface/40 px-6 py-10 text-center">
         <div className="max-w-sm space-y-3">
           <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
             Monitor unavailable
@@ -25,7 +25,7 @@ export function AdminMonitorPane({
 
   if (!active) {
     return (
-      <div className="admin-monitor-pane flex min-h-[36rem] items-center justify-center rounded-xl border border-dashed border-border bg-surface-panel/60 px-6 py-10 text-center">
+      <div className="admin-monitor-pane flex h-full min-h-0 items-center justify-center rounded-xl border border-dashed border-border bg-surface-panel/60 px-6 py-10 text-center">
         <div className="space-y-2">
           <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
             Monitor pane
@@ -39,7 +39,7 @@ export function AdminMonitorPane({
   }
 
   return (
-    <div className="admin-monitor-pane relative min-h-[36rem] overflow-hidden rounded-xl border border-border bg-surface-deep">
+    <div className="admin-monitor-pane relative h-full min-h-0 overflow-hidden rounded-xl border border-border bg-surface-deep">
       <div className="absolute inset-0">
         <AdminMapScreen embeddedMonitor />
       </div>
