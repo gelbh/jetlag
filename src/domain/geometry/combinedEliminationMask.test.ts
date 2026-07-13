@@ -254,4 +254,28 @@ describe("combinedEliminationMask", () => {
       booleanPointInPolygon(turfPoint([-0.185, 51.45]), combined!),
     ).toBe(true);
   });
+
+  it("returns null when elimination geometry is entirely outside the play area", () => {
+    const outsideEast: AnnotationRecord = {
+      ...matchingAnnotation("outside-east", -0.19),
+      geometry: {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Polygon",
+          coordinates: [
+            [
+              [0.05, 51.42],
+              [0.15, 51.42],
+              [0.15, 51.48],
+              [0.05, 51.48],
+              [0.05, 51.42],
+            ],
+          ],
+        },
+      },
+    };
+
+    expect(buildCombinedEliminationMask([outsideEast], gameArea)).toBeNull();
+  });
 });
