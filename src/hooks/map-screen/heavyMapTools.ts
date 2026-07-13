@@ -47,7 +47,6 @@ export interface TentacleToolApi {
     tentaclePois: TentaclePoi[];
     tentacleSelectedPoiId: string | null;
     tentacleOutOfReach: boolean;
-    tentacleEliminationPreview: Feature<Polygon | MultiPolygon> | null;
     seekerResolving: boolean;
   };
   placementCrosshair: boolean;
@@ -104,7 +103,6 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
       tentaclePois: [],
       tentacleSelectedPoiId: null,
       tentacleOutOfReach: false,
-      tentacleEliminationPreview: null,
       seekerResolving: false,
     },
     placementCrosshair: false,
