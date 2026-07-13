@@ -3,12 +3,15 @@ import type { NavigateOptions, To } from "react-router-dom";
 
 export type RouteTransitionPhase = "idle" | "loading" | "revealing";
 
+export type RouteLoadingReason = "page" | "map" | "sign-in" | "premium" | "admin";
+
 export type BeginTransitionOptions = NavigateOptions & {
   direction?: "forward" | "back" | "replace";
 };
 
 export interface RouteTransitionContextValue {
   phase: RouteTransitionPhase;
+  loadingReason: RouteLoadingReason | null;
   beginTransition: (to: To, options?: BeginTransitionOptions) => Promise<void>;
   reportScreenReady: (ready: boolean) => void;
 }

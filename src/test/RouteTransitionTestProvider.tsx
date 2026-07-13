@@ -35,6 +35,7 @@ export function RouteTransitionTestProvider({ children }: { children: ReactNode 
   const value = useMemo(
     () => ({
       phase: "idle" as RouteTransitionPhase,
+      loadingReason: null,
       beginTransition,
       reportScreenReady: (ready: boolean) => {
         screenReadyRef.current = ready;

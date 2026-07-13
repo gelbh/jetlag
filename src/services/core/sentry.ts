@@ -343,3 +343,38 @@ export function addPhotoUploadBreadcrumb(details: Record<string, unknown>): void
     data: details,
   });
 }
+
+export interface SlowRouteTransitionDetails {
+  preload_ms: number;
+  ready_wait_ms: number;
+  total_ms: number;
+  target_path: string;
+  final_path: string;
+  readiness_kind: string;
+  warm_chunk: boolean;
+  warm_ready: boolean;
+}
+
+export function reportSlowRouteTransition(
+  details: SlowRouteTransitionDetails,
+): void {
+  if (import.meta.env.MODE === "test" || details.total_ms <= 2000) {
+    return;
+  }
+
+  withSentryScope((scope) => {
+    scope.setTag("route_transition", "slow");
+    scope.setTag("readiness_kind", details.readiness_kind);
+    scope.setTag("warm_chunk", String(details.warm_chunk));
+    scope.setTag("warm_ready", String(details.warm_ready));
+    for (const [key, value] of Object.entries(details)) {
+      scope.setExtra(key, value);
+    }
+    Sentry.addBreadcrumb({
+      category: "route_transition",
+      message: "Slow route transition",
+      level: "warning",
+      data: details,
+    });
+  });
+}

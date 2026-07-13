@@ -12,6 +12,7 @@ const beginTransitionMock = vi.fn(async () => undefined);
 vi.mock("../navigation/useRouteTransition", () => ({
   useRouteTransition: () => ({
     phase: "idle" as const,
+    loadingReason: null,
     beginTransition: beginTransitionMock,
     reportScreenReady: vi.fn(),
   }),

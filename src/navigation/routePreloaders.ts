@@ -1,5 +1,7 @@
 import type { To } from "react-router-dom";
 import { lazyWithChunkRetry } from "../domain/device/lazyWithChunkRetry";
+import { lazyRouteLoaderKey, normalizeRoutePath } from "./routeMetadata";
+import { markRouteImportWarm } from "./routeWarmState";
 
 export const importMapScreen = () =>
   import("../routes/MapScreen").then((m) => ({ default: m.MapScreen }));
@@ -30,29 +32,7 @@ export const GamePresetListLazy = lazyWithChunkRetry(importGamePresetList);
 export const GamePresetEditorLazy = lazyWithChunkRetry(importGamePresetEditor);
 export const TutorialLazy = lazyWithChunkRetry(importTutorial);
 
-const PRESET_EDIT_PATH_RE = /^\/presets\/[^/]+\/edit$/;
-
-const LAZY_ROUTE_LOADERS: Record<
-  string,
-  keyof typeof routeImporter
-> = {
-  "/map": "importMapScreen",
-  "/create": "importCreateSession",
-  "/tutorial": "importTutorial",
-  "/presets": "importGamePresetList",
-  "/presets/new": "importGamePresetEditor",
-  "/presets/:id/edit": "importGamePresetEditor",
-};
-
-export function normalizeRoutePath(path: string): string {
-  const base = path.split("?")[0]?.split("#")[0] ?? "/";
-
-  if (PRESET_EDIT_PATH_RE.test(base)) {
-    return "/presets/:id/edit";
-  }
-
-  return base || "/";
-}
+export { isLazyRoute, normalizeRoutePath } from "./routeMetadata";
 
 export function resolveNavigatePath(to: To): string {
   if (typeof to === "string") {
@@ -87,13 +67,11 @@ export function resolveNavigateDestinationKey(to: To): string {
   return `${pathname}${search}${hash}`;
 }
 
-export function isLazyRoute(path: string): boolean {
-  return normalizeRoutePath(path) in LAZY_ROUTE_LOADERS;
-}
-
 export async function preloadRoute(path: string): Promise<void> {
-  const loaderKey = LAZY_ROUTE_LOADERS[normalizeRoutePath(path)];
+  const normalizedPath = normalizeRoutePath(path);
+  const loaderKey = lazyRouteLoaderKey(path);
   if (loaderKey) {
     await routeImporter[loaderKey]();
+    markRouteImportWarm(normalizedPath);
   }
 }
