@@ -7,6 +7,9 @@ import {
 } from "./stripeBilling.mjs";
 import { markStripeEventProcessed } from "./premiumEntitlements.mjs";
 
+const STRIPE_SIGNATURE_MISMATCH =
+  /No signatures found matching the expected signature/i;
+
 /**
  * @param {import('firebase-admin/firestore').Firestore} db
  * @param {string} webhookSecret
@@ -45,6 +48,15 @@ export async function handleStripeWebhook(db, webhookSecret, req, res) {
       webhookSecret,
     );
   } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.type === "StripeSignatureVerificationError" ||
+        STRIPE_SIGNATURE_MISMATCH.test(error.message))
+    ) {
+      res.status(400).send("Webhook signature verification failed");
+      return;
+    }
+
     captureFunctionsException(error);
     res.status(400).send("Webhook signature verification failed");
     return;

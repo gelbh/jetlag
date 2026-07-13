@@ -4,6 +4,15 @@ import {
   clearLowBatteryPromptDismissal,
 } from "../../domain/device/batteryPrompt";
 
+function supportsBatteryEvents(
+  battery: BatteryManagerLike,
+): battery is BatteryManagerLike {
+  return (
+    typeof battery.addEventListener === "function" &&
+    typeof battery.removeEventListener === "function"
+  );
+}
+
 interface BatteryManagerLike {
   level: number;
   charging: boolean;
@@ -67,21 +76,30 @@ export function useBatteryStatus(): BatteryStatus {
       }
     };
 
-    void navigatorWithBattery.getBattery().then((nextBattery) => {
-      if (cancelled) {
+    void navigatorWithBattery.getBattery()?.then((nextBattery) => {
+      if (cancelled || !nextBattery) {
         return;
       }
 
       battery = nextBattery;
       publish(nextBattery);
+
+      if (!supportsBatteryEvents(nextBattery)) {
+        return;
+      }
+
       nextBattery.addEventListener("levelchange", handleChange);
       nextBattery.addEventListener("chargingchange", handleChange);
+    }).catch(() => {
+      /* Battery API unavailable or rejected */
     });
 
     return () => {
       cancelled = true;
-      battery?.removeEventListener("levelchange", handleChange);
-      battery?.removeEventListener("chargingchange", handleChange);
+      if (battery && supportsBatteryEvents(battery)) {
+        battery.removeEventListener("levelchange", handleChange);
+        battery.removeEventListener("chargingchange", handleChange);
+      }
     };
   }, []);
 
