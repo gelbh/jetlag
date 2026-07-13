@@ -90,6 +90,15 @@ function isIgnoredClientNoiseEvent(
     NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>
   >[0],
 ): boolean {
+  if (event.type === "transaction") {
+    const hasOverpassSpan = event.spans?.some((span) =>
+      span.description?.includes("proxy/overpass"),
+    );
+    if (hasOverpassSpan) {
+      return true;
+    }
+  }
+
   for (const exception of event.exception?.values ?? []) {
     if (
       exception.type === "QuotaExceededError" &&
@@ -128,7 +137,9 @@ function isIgnoredClientNoiseEvent(
       exception.type === "TypeError" &&
       typeof exception.value === "string" &&
       (LEAFLET_POS_ERROR.test(exception.value) ||
-        LEAFLET_CLASSLIST_ERROR.test(exception.value))
+        LEAFLET_CLASSLIST_ERROR.test(exception.value) ||
+        /Importing a module script failed/i.test(exception.value) ||
+        /addEventListener is not a function/i.test(exception.value))
     ) {
       return true;
     }

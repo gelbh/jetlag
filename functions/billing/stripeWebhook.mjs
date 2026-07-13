@@ -45,6 +45,15 @@ export async function handleStripeWebhook(db, webhookSecret, req, res) {
       webhookSecret,
     );
   } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.type === "StripeSignatureVerificationError" ||
+        /No signatures found matching the expected signature/i.test(error.message))
+    ) {
+      res.status(400).send("Webhook signature verification failed");
+      return;
+    }
+
     captureFunctionsException(error);
     res.status(400).send("Webhook signature verification failed");
     return;
