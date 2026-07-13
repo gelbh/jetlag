@@ -201,9 +201,13 @@ export function buildCombinedEliminationMask(
     return buildEndGameEliminationMask(gameArea, endGameHidingZones);
   }
 
-  return unionEliminationParts(
-    computeEliminationUnionInput(annotations, gameArea, draftFeatures),
-  );
+  try {
+    return unionEliminationParts(
+      computeEliminationUnionInput(annotations, gameArea, draftFeatures),
+    );
+  } catch {
+    return null;
+  }
 }
 
 export function buildEndGameEliminationMask(

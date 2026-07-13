@@ -141,6 +141,39 @@ describe("combinedEliminationMask", () => {
     ).toBe(true);
   });
 
+  it("does not throw when union receives an invalid draft polygon", () => {
+    const invalidDraft = eliminationFeatureForAnnotation(
+      matchingAnnotation("draft", -0.12),
+      gameArea,
+    );
+    expect(invalidDraft).not.toBeNull();
+
+    const invalidGeometry = {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [-0.15, 51.45],
+            [-0.12, 51.48],
+            [-0.18, 51.48],
+            [-0.12, 51.42],
+            [-0.15, 51.45],
+          ],
+        ],
+      },
+    } as unknown as NonNullable<Parameters<typeof buildCombinedEliminationMask>[2]>[number];
+
+    expect(() =>
+      buildCombinedEliminationMask(
+        [matchingAnnotation("a", -0.19)],
+        gameArea,
+        [invalidGeometry],
+      ),
+    ).not.toThrow();
+  });
+
   it("replaces elimination with end-game zone reveal mask", () => {
     const hidingZone: HidingZoneRecord = {
       hiderUid: "hider-1",
