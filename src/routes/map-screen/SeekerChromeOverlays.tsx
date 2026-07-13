@@ -14,7 +14,7 @@ type SeekerChromeOverlaysProps = {
   geometryDraft: MapScreenController["geometryDraft"];
   mapPanning: MapScreenController["mapPanning"];
   userMinimized: MapScreenController["userMinimized"];
-  setPanelMinimized: MapScreenController["setPanelMinimized"];
+  setUserMinimized: MapScreenController["setUserMinimized"];
   handleSelectTool: MapScreenController["handleSelectTool"];
   cancelGeometryEdit: MapScreenController["cancelGeometryEdit"];
   saveGeometryEdit: MapScreenController["saveGeometryEdit"];
@@ -72,7 +72,7 @@ export function SeekerChromeOverlays({
   geometryDraft,
   mapPanning,
   userMinimized,
-  setPanelMinimized,
+  setUserMinimized,
   handleSelectTool,
   cancelGeometryEdit,
   saveGeometryEdit,
@@ -129,7 +129,7 @@ export function SeekerChromeOverlays({
           toolId={activeTool}
           mapPanning={mapPanning}
           userMinimized={userMinimized}
-          onMinimizedChange={setPanelMinimized}
+          onMinimizedChange={setUserMinimized}
           onClose={() => handleSelectTool("none")}
         >
           {renderToolPanel(activeTool, tools)}

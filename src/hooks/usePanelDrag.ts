@@ -95,6 +95,20 @@ export function usePanelDrag({
     }
   }, [panelRef]);
 
+  useEffect(() => {
+    const height = panelRef?.current?.offsetHeight;
+    if (!height || height <= 0) {
+      return;
+    }
+
+    const collapsed = collapsedRestOffsetPx(height, peekHeightPx);
+    setPanelHeight(height);
+    if (userMinimized) {
+      setOffsetPx(collapsed);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- align state with initial minimized prop on mount only
+  }, []);
+
   const beginSettle = useCallback(
     (targetPx: number, targetMinimized: boolean) => {
       pendingMinimizedRef.current = targetMinimized;
@@ -120,6 +134,9 @@ export function usePanelDrag({
   const { bindings, isDragging, offsetY, reset } = useInteractiveDragY({
     enabled: animate,
     canStart: () => {
+      if (isSettling) {
+        return false;
+      }
       measurePanelHeight();
       suppressPeekClick.current = false;
       dragFromCollapsed.current = displayMinimized;
@@ -171,7 +188,7 @@ export function usePanelDrag({
     }
 
     const handleTransitionEnd = (event: TransitionEvent) => {
-      if (event.propertyName !== "transform") {
+      if (event.target !== el || event.propertyName !== "transform") {
         return;
       }
       finishSettle();
@@ -182,12 +199,15 @@ export function usePanelDrag({
   }, [finishSettle, isSettling, panelRef]);
 
   useEffect(() => {
+    const wasPanning = prevMapPanningRef.current;
+    prevMapPanningRef.current = mapPanning;
+
     if (!animate || isDragging || isSettling) {
       return;
     }
 
-    const panStarted = mapPanning && !prevMapPanningRef.current;
-    const panEnded = !mapPanning && prevMapPanningRef.current;
+    const panStarted = mapPanning && !wasPanning;
+    const panEnded = !mapPanning && wasPanning;
 
     if (panStarted) {
       /* eslint-disable react-hooks/set-state-in-effect -- map-pan collapse is driven by external map gesture */
@@ -203,7 +223,6 @@ export function usePanelDrag({
       beginSettle(0, false);
     }
 
-    prevMapPanningRef.current = mapPanning;
   }, [
     animate,
     beginSettle,

@@ -82,7 +82,7 @@ export function MapFloatingPanel({
       ref={outerRef}
       className={panelClassName}
       style={panelStyle}
-      data-panel-dragging={isDragging ? "" : undefined}
+      data-panel-dragging={isDragging ? "true" : undefined}
     >
       {displayMinimized && peekLabel && onMinimizedChange ? (
         <button

@@ -114,7 +114,7 @@ export function SeekerMapScreen() {
         setFirstRunDismissed={controller.setFirstRunDismissed}
         mapPanning={controller.mapPanning}
         userMinimized={controller.userMinimized}
-        setPanelMinimized={controller.setPanelMinimized}
+        setUserMinimized={controller.setUserMinimized}
         selectedAnnotation={controller.selectedAnnotation}
         selectedAnnotationId={controller.selectedAnnotationId}
         setSelectedAnnotationId={controller.setSelectedAnnotationId}
