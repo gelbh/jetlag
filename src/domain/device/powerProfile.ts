@@ -4,6 +4,8 @@ export interface LiveLocationProfile {
   minDistanceMeters: number;
 }
 
+import type { MapTilt } from "../map/mapTilt";
+
 export interface PowerProfile {
   liveLocation: LiveLocationProfile;
   seekerLocationSync: LiveLocationProfile;
@@ -64,6 +66,13 @@ export function effectiveMapStyle(
   lowPowerMode: boolean,
 ): "standard" | "satellite" {
   return lowPowerMode ? "standard" : mapStyle;
+}
+
+export function effectiveMapTilt(
+  mapTilt: MapTilt,
+  lowPowerMode: boolean,
+): MapTilt {
+  return lowPowerMode ? "flat" : mapTilt;
 }
 
 export function applyMapStylePreferenceChange(

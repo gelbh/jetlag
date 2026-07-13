@@ -41,7 +41,7 @@ import {
   type LatLngTuple,
 } from "../domain/geometry/geometry";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
-import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/device/powerProfile";
+import { effectiveMapStyle, effectiveMapTilt, applyMapStylePreferenceChange } from "../domain/device/powerProfile";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
@@ -79,8 +79,11 @@ export function HiderMapScreen() {
   const persistedMyUid = useSessionStore((state) => state.myUid);
   const layerVisibility = useMapStore((state) => state.layerVisibility);
   const mapStyle = useMapStore((state) => state.mapStyle);
+  const mapTilt = useMapStore((state) => state.mapTilt);
+  const setMapTilt = useMapStore((state) => state.setMapTilt);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
+  const effectiveMapTiltValue = effectiveMapTilt(mapTilt, lowPowerMode);
   const showCurrentLocation = useMapStore((state) => state.showCurrentLocation);
   const setShowCurrentLocation = useMapStore(
     (state) => state.setShowCurrentLocation,
@@ -476,7 +479,9 @@ export function HiderMapScreen() {
           key={session.id}
           mapKey={session.id}
           mapStyle={effectiveBasemapStyle}
+          mapTilt={effectiveMapTiltValue}
           onMapStyleChange={handleMapStyleChange}
+          onMapTiltChange={setMapTilt}
           mapStyleControlInset="dock"
           zoomControlInset="dock"
           center={center}
@@ -643,6 +648,8 @@ export function HiderMapScreen() {
           distanceUnit,
           mapStyle: effectiveBasemapStyle,
           setMapStyle: handleMapStyleChange,
+          mapTilt,
+          setMapTilt,
           notificationPreferences,
           updateNotificationPreferences,
           enableNotifications,

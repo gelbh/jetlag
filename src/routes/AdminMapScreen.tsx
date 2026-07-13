@@ -143,7 +143,9 @@ export function AdminMapScreen({
       key={controller.session.id}
       mapKey={controller.session.id}
       mapStyle={controller.effectiveBasemapStyle}
+      mapTilt={controller.effectiveMapTilt}
       onMapStyleChange={controller.handleMapStyleChange}
+      onMapTiltChange={controller.setMapTilt}
       mapStyleControlInset={mapControlInset}
       zoomControlInset={mapControlInset}
       center={controller.center}

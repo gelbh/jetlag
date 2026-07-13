@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { effectiveMapStyle, getPowerProfile, applyMapStylePreferenceChange } from "./powerProfile";
+import {
+  effectiveMapStyle,
+  effectiveMapTilt,
+  getPowerProfile,
+  applyMapStylePreferenceChange,
+} from "./powerProfile";
 
 describe("powerProfile", () => {
   it("returns throttled intervals in low power mode", () => {
@@ -16,6 +21,11 @@ describe("powerProfile", () => {
   it("forces standard map tiles in low power mode", () => {
     expect(effectiveMapStyle("satellite", true)).toBe("standard");
     expect(effectiveMapStyle("satellite", false)).toBe("satellite");
+  });
+
+  it("forces flat map tilt in low power mode", () => {
+    expect(effectiveMapTilt("tilted", true)).toBe("flat");
+    expect(effectiveMapTilt("tilted", false)).toBe("tilted");
   });
 
   it("clears low power mode when satellite is selected", () => {

@@ -16,10 +16,12 @@ describe("mapStore", () => {
     useMapStore.getState().setTransitEnabled(true);
     useMapStore.getState().setTransitLiveEnabled(true);
     useMapStore.getState().setMapStyle("satellite");
+    useMapStore.getState().setMapTilt("tilted");
 
     expect(useMapStore.getState().transitEnabled).toBe(true);
     expect(useMapStore.getState().transitLiveEnabled).toBe(true);
     expect(useMapStore.getState().mapStyle).toBe("satellite");
+    expect(useMapStore.getState().mapTilt).toBe("tilted");
   });
 
   it("updates individual layer visibility flags", () => {

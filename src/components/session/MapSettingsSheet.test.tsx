@@ -20,6 +20,8 @@ const baseProps = {
     onDistanceUnitChange: vi.fn(),
     mapStyle: "standard" as const,
     onMapStyleChange: vi.fn(),
+    mapTilt: "flat" as const,
+    onMapTiltChange: vi.fn(),
     transitEnabled: false,
     transitLiveEnabled: false,
     transitLiveSupported: false,
