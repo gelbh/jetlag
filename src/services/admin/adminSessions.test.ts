@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   fetchActiveAdminSessions,
+  fetchAdminSessionsPage,
   type AdminSessionSummary,
 } from "./adminSessions";
 
@@ -39,6 +40,10 @@ function sessionSummary(
     gameAreaLabel: null,
     phase: "waiting",
     lastActivityAt: overrides.lastActivityAt,
+    lastLocationAt: null,
+    mode: "singleplayer",
+    isLive: false,
+    liveMultiplayer: false,
   };
 }
 
@@ -76,5 +81,48 @@ describe("fetchActiveAdminSessions", () => {
       "newer-page",
       "older-page",
     ]);
+  });
+});
+
+describe("fetchAdminSessionsPage", () => {
+  it("forwards page token and limit to the callable", async () => {
+    mockCallable.mockResolvedValueOnce({
+      data: {
+        sessions: [
+          sessionSummary({
+            sessionId: "page-1",
+            lastActivityAt: "2026-01-02T00:00:00.000Z",
+            createdAt: "2026-01-01T00:00:00.000Z",
+          }),
+        ],
+        nextPageToken: "page-2",
+      },
+    });
+
+    const page = await fetchAdminSessionsPage(null, 25);
+
+    expect(mockCallable).toHaveBeenCalledWith({
+      limit: 25,
+      pageToken: null,
+    });
+    expect(page.sessions).toHaveLength(1);
+    expect(page.nextPageToken).toBe("page-2");
+  });
+
+  it("returns a terminal page when nextPageToken is null", async () => {
+    mockCallable.mockResolvedValueOnce({
+      data: {
+        sessions: [],
+        nextPageToken: null,
+      },
+    });
+
+    const page = await fetchAdminSessionsPage("page-2");
+
+    expect(mockCallable).toHaveBeenCalledWith({
+      limit: 50,
+      pageToken: "page-2",
+    });
+    expect(page.nextPageToken).toBeNull();
   });
 });

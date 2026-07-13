@@ -1,8 +1,10 @@
-import { screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AdminPanel } from "./AdminPanel";
 import { renderWithRouter } from "../test/renderWithRouter";
 import type { AdminSessionSummary } from "../services/admin/adminSessions";
+
+const SEEKER_HIDER_META = /1S \/ 1H/i;
 
 const authState = vi.hoisted(() => ({
   user: null as { email: string; emailVerified: boolean } | null,
@@ -14,9 +16,12 @@ const sessionListState = vi.hoisted(() => ({
   sessions: [] as AdminSessionSummary[],
   loading: false,
   refreshing: false,
+  loadingMore: false,
+  hasMore: false,
   error: null as string | null,
   lastFetchedAt: null as Date | null,
   refresh: vi.fn(),
+  loadMore: vi.fn(),
 }));
 
 vi.mock("../hooks/billing/usePermanentAuthUser", () => ({
@@ -117,6 +122,10 @@ describe("AdminPanel", () => {
         transitMetroId: null,
         gameAreaLabel: "Dublin",
         lastActivityAt: "2026-01-02T00:00:00.000Z",
+        lastLocationAt: "2026-01-02T00:00:00.000Z",
+        mode: "multiplayer",
+        isLive: true,
+        liveMultiplayer: true,
       },
     ];
 
@@ -125,10 +134,7 @@ describe("AdminPanel", () => {
     expect(screen.getByText("ABCD")).toBeInTheDocument();
     expect(screen.getByText("Dublin")).toBeInTheDocument();
     expect(screen.getAllByText("Seek").length).toBeGreaterThan(0);
-    expect(screen.queryByText(/\d+\s+seeker/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/\d+\s+hider/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/\d+\s+admin/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/free · medium/i)).toBeInTheDocument();
+    expect(screen.getByText(SEEKER_HIDER_META)).toBeInTheDocument();
   });
 
   it("uses a scrollable session list column on desktop", () => {
@@ -157,6 +163,10 @@ describe("AdminPanel", () => {
         transitMetroId: null,
         gameAreaLabel: "Dublin",
         lastActivityAt: "2026-01-02T00:00:00.000Z",
+        lastLocationAt: null,
+        mode: "multiplayer",
+        isLive: true,
+        liveMultiplayer: true,
       },
     ];
 
@@ -178,5 +188,91 @@ describe("AdminPanel", () => {
 
     expect(document.querySelector(".admin-dashboard-list-scroll")).toBeInTheDocument();
     expect(document.querySelector(".home-poster-viewport")).toBeInTheDocument();
+  });
+
+  it("loads more sessions from the list footer", () => {
+    authState.authReady = true;
+    authState.isPermanent = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.loading = false;
+    sessionListState.hasMore = true;
+    sessionListState.loadingMore = false;
+    sessionListState.loadMore.mockClear();
+    sessionListState.sessions = [
+      {
+        sessionId: "session-1",
+        code: "ABCD",
+        phase: "seek",
+        tier: "free",
+        gameSize: "medium",
+        roleCounts: { seeker: 1, hider: 1, observer: 0, admin: 0 },
+        hostUid: "host-1",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        memberCount: 2,
+        timerAccumulatedMs: 0,
+        timerRunningSince: "2026-01-01T00:00:00.000Z",
+        endGameStartedAt: null,
+        endGameRequestedAt: null,
+        hostAppVersion: null,
+        hidingPeriodMinutes: null,
+        regionPackId: null,
+        regionPackSubregionId: null,
+        transitMetroId: null,
+        gameAreaLabel: "Dublin",
+        lastActivityAt: "2026-01-02T00:00:00.000Z",
+        lastLocationAt: "2026-01-02T00:00:00.000Z",
+        mode: "multiplayer",
+        isLive: true,
+        liveMultiplayer: true,
+      },
+    ];
+
+    renderWithRouter(<AdminPanel />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Load more sessions" }));
+    expect(sessionListState.loadMore).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows load more when filters hide every loaded session", () => {
+    authState.authReady = true;
+    authState.isPermanent = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.loading = false;
+    sessionListState.hasMore = true;
+    sessionListState.sessions = [
+      {
+        sessionId: "session-1",
+        code: "ABCD",
+        phase: "seek",
+        tier: "free",
+        gameSize: "medium",
+        roleCounts: { seeker: 1, hider: 1, observer: 0, admin: 0 },
+        hostUid: "host-1",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        memberCount: 2,
+        timerAccumulatedMs: 0,
+        timerRunningSince: "2026-01-01T00:00:00.000Z",
+        endGameStartedAt: null,
+        endGameRequestedAt: null,
+        hostAppVersion: null,
+        hidingPeriodMinutes: null,
+        regionPackId: null,
+        regionPackSubregionId: null,
+        transitMetroId: null,
+        gameAreaLabel: "Dublin",
+        lastActivityAt: "2026-01-02T00:00:00.000Z",
+        lastLocationAt: "2026-01-02T00:00:00.000Z",
+        mode: "multiplayer",
+        isLive: false,
+        liveMultiplayer: false,
+      },
+    ];
+
+    renderWithRouter(<AdminPanel />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Live" }));
+
+    expect(screen.getByText("No matching sessions")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Load more sessions" })).toBeInTheDocument();
   });
 });

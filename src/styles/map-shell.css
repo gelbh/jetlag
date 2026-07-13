@@ -550,6 +550,10 @@
     min-height: 0;
   }
 
+  .admin-session-row-dense {
+    min-height: 3.25rem;
+  }
+
   .admin-monitor-pane {
     container-type: inline-size;
     container-name: admin-monitor;

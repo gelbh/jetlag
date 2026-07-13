@@ -7,6 +7,7 @@ const sentryDsnSecret = getSentryDsnSecret();
 const DEFAULT_PAGE_LIMIT = 50;
 const MAX_PAGE_LIMIT = 100;
 const SUMMARY_CONCURRENCY = 5;
+export const LIVE_THRESHOLD_MS = 5 * 60 * 1000;
 
 const SESSION_DOC_ACTIVITY_FIELDS = [
   "createdAt",
@@ -123,6 +124,25 @@ function countRoles(memberRoles) {
   return counts;
 }
 
+export function deriveSessionMode(memberCount, roleCounts) {
+  if (
+    memberCount >= 2 ||
+    (roleCounts.seeker >= 1 && roleCounts.hider >= 1)
+  ) {
+    return "multiplayer";
+  }
+
+  return "singleplayer";
+}
+
+export function computeIsLive(lastActivityMs, lastLocationMs, nowMs = Date.now()) {
+  const threshold = nowMs - LIVE_THRESHOLD_MS;
+  return (
+    (lastActivityMs != null && lastActivityMs >= threshold) ||
+    (lastLocationMs != null && lastLocationMs >= threshold)
+  );
+}
+
 function resolveHidingPeriodMs(session) {
   if (typeof session.hidingPeriodMinutes === "number") {
     return session.hidingPeriodMinutes * 60_000;
@@ -236,6 +256,10 @@ export function summarizeSession(sessionId, code, session, nowMs = Date.now()) {
       typeof session.gameAreaLabel === "string" ? session.gameAreaLabel : null,
     phase: deriveSessionPhase(session, nowMs),
     lastActivityAt: null,
+    lastLocationAt: null,
+    mode: deriveSessionMode(memberUids.length, roleCounts),
+    isLive: false,
+    liveMultiplayer: false,
   };
 }
 
@@ -259,7 +283,8 @@ export async function mapActiveCodeToSummary(codeDoc, db, nowMs = Date.now()) {
     return null;
   }
 
-  const [annotationsSnap, messagesSnap, questionsSnap] = await Promise.all([
+  const [annotationsSnap, messagesSnap, questionsSnap, locationsSnap] =
+    await Promise.all([
     sessionRef
       .collection("annotations")
       .orderBy("updatedAt", "desc")
@@ -275,6 +300,11 @@ export async function mapActiveCodeToSummary(codeDoc, db, nowMs = Date.now()) {
       .orderBy("createdAt", "desc")
       .limit(1)
       .get(),
+    sessionRef
+      .collection("playerLocations")
+      .orderBy("updatedAt", "desc")
+      .limit(1)
+      .get(),
   ]);
 
   const lastActivityMs = resolveSessionLastActivityMs(session, {
@@ -282,10 +312,20 @@ export async function mapActiveCodeToSummary(codeDoc, db, nowMs = Date.now()) {
     messageDoc: messagesSnap.docs[0]?.data() ?? null,
     questionDoc: questionsSnap.docs[0]?.data() ?? null,
   });
+  const lastLocationMs = parseFirestoreTimestampMs(
+    locationsSnap.docs[0]?.data()?.updatedAt,
+  );
 
   const summary = summarizeSession(sessionId, code, session, nowMs);
   summary.lastActivityAt =
     lastActivityMs == null ? null : new Date(lastActivityMs).toISOString();
+  summary.lastLocationAt =
+    lastLocationMs == null ? null : new Date(lastLocationMs).toISOString();
+  summary.isLive = computeIsLive(lastActivityMs, lastLocationMs, nowMs);
+  summary.liveMultiplayer =
+    summary.isLive &&
+    summary.roleCounts.seeker >= 1 &&
+    summary.roleCounts.hider >= 1;
   return summary;
 }
 

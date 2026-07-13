@@ -9,7 +9,6 @@ import {
 } from "../components/admin/AdminSessionFilters";
 import { AdminSessionRow } from "../components/admin/AdminSessionRow";
 import { AdminSettingsSheet } from "../components/admin/AdminSettingsSheet";
-import { AdminStatsHeader } from "../components/admin/AdminStatsHeader";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import {
   ScreenHeader,
@@ -19,8 +18,11 @@ import { HudAdminIcon, HudSettingsIcon } from "../components/ui/HudIcons";
 import { InlineError } from "../components/ui/InlineError";
 import { isAdminUser } from "../domain/admin/adminAccess";
 import { filterAdminSessions } from "../domain/admin/adminSessionFilters";
-import type { AdminSessionPhaseFilter } from "../domain/admin/adminSessionFilters";
-import { useAdminPanelPreferences } from "../domain/admin/adminPanelPreferences";
+import type {
+  AdminSessionModeFilter,
+  AdminSessionSort,
+  AdminSessionStateChip,
+} from "../domain/admin/adminSessionFilters";
 import { APP_VERSION } from "../domain/device/changelog";
 import { useAdminJoinSession } from "../hooks/admin/useAdminJoinSession";
 import { useAdminSessionList } from "../hooks/admin/useAdminSessionList";
@@ -62,24 +64,28 @@ export function AdminPanel() {
   const isDesktop = useMinWidth(1024);
   const activeSession = useSessionStore((state) => state.session);
   const activeRole = useSessionStore((state) => state.myRole);
-  const { sessions, loading, refreshing, error, lastFetchedAt, refresh } =
-    useAdminSessionList(enabled);
+  const {
+    sessions,
+    loading,
+    refreshing,
+    loadingMore,
+    hasMore,
+    error,
+    lastFetchedAt,
+    refresh,
+    loadMore,
+  } = useAdminSessionList(enabled);
   const {
     joinSession,
     joiningCode: observingCode,
     error: observeError,
     setError: setObserveError,
   } = useAdminJoinSession({ onRefresh: refresh });
-  const pollIntervalMs = useAdminPanelPreferences((state) => state.pollIntervalMs);
-  const multiplayerOnly = useAdminPanelPreferences((state) => state.multiplayerOnly);
-  const setPollIntervalMs = useAdminPanelPreferences(
-    (state) => state.setPollIntervalMs,
-  );
-  const setMultiplayerOnly = useAdminPanelPreferences(
-    (state) => state.setMultiplayerOnly,
-  );
   const [query, setQuery] = useState("");
-  const [phaseFilter, setPhaseFilter] = useState<AdminSessionPhaseFilter>("all");
+  const [liveOnly, setLiveOnly] = useState(false);
+  const [modeFilter, setModeFilter] = useState<AdminSessionModeFilter>("all");
+  const [stateFilter, setStateFilter] = useState<AdminSessionStateChip>(null);
+  const [sort, setSort] = useState<AdminSessionSort>("lastActivity");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [monitorSessionId, setMonitorSessionId] = useState<string | null>(null);
@@ -88,10 +94,12 @@ export function AdminPanel() {
     () =>
       filterAdminSessions(sessions, {
         query,
-        phase: phaseFilter,
-        multiplayerOnly,
+        liveOnly,
+        mode: modeFilter,
+        state: stateFilter,
+        sort,
       }),
-    [multiplayerOnly, phaseFilter, query, sessions],
+    [liveOnly, modeFilter, query, sessions, sort, stateFilter],
   );
 
   const monitorRoleError =
@@ -195,28 +203,46 @@ export function AdminPanel() {
     );
   }
 
-  const useDesktopViewport = isDesktop && sessions.length > 0;
+  const useDesktopViewport = isDesktop;
 
   const listFilters = (
     <AdminSessionFilters
       query={query}
-      phase={phaseFilter}
-      multiplayerOnly={multiplayerOnly}
+      liveOnly={liveOnly}
+      mode={modeFilter}
+      state={stateFilter}
+      sort={sort}
       onQueryChange={setQuery}
-      onPhaseChange={setPhaseFilter}
-      onMultiplayerOnlyChange={setMultiplayerOnly}
+      onLiveOnlyChange={setLiveOnly}
+      onModeChange={setModeFilter}
+      onStateChange={setStateFilter}
+      onSortChange={setSort}
     />
   );
 
+  const loadMoreButton = hasMore ? (
+      <button
+        type="button"
+        className="btn-secondary min-h-10 w-full"
+        disabled={loadingMore}
+        onClick={() => void loadMore()}
+      >
+        {loadingMore ? "Loading…" : "Load more sessions"}
+      </button>
+    ) : null;
+
   const listRows =
     filteredSessions.length === 0 ? (
-      <div className="rounded-xl border border-border bg-surface-panel px-4 py-6">
-        <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
-          No matching sessions
-        </p>
-        <p className="mt-2 text-sm text-ink-muted">
-          Try another code, area name, or phase filter.
-        </p>
+      <div className="space-y-2.5">
+        <div className="rounded-xl border border-border bg-surface-panel px-4 py-6">
+          <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
+            No matching sessions
+          </p>
+          <p className="mt-2 text-sm text-ink-muted">
+            Try another code, area name, or phase filter.
+          </p>
+        </div>
+        {loadMoreButton}
       </div>
     ) : (
       <div
@@ -235,6 +261,7 @@ export function AdminPanel() {
             onMonitor={(nextSummary) => void handleMonitor(nextSummary)}
           />
         ))}
+        {loadMoreButton}
       </div>
     );
 
@@ -242,10 +269,6 @@ export function AdminPanel() {
     <EntryScreenLayout justify="start" viewport={useDesktopViewport}>
       <AdminSettingsSheet
         open={settingsOpen}
-        pollIntervalMs={pollIntervalMs}
-        multiplayerOnly={multiplayerOnly}
-        onPollIntervalChange={setPollIntervalMs}
-        onMultiplayerOnlyChange={setMultiplayerOnly}
         onClose={() => setSettingsOpen(false)}
       />
       <ScreenHeader backTo="/" backLabel="Back" />
@@ -270,7 +293,7 @@ export function AdminPanel() {
                 Admin
               </p>
             </div>
-            <h1 className="font-display text-3xl font-bold uppercase tracking-tight text-ink">
+            <h1 className="font-display text-xl font-bold uppercase tracking-tight text-ink">
               Live sessions
             </h1>
             <p className="text-sm text-ink-muted">
@@ -290,7 +313,7 @@ export function AdminPanel() {
             <button
               type="button"
               className="hud-chrome inline-flex min-h-11 items-center justify-center px-3 text-sm font-semibold uppercase tracking-wide text-ink"
-              onClick={() => void refresh()}
+              onClick={() => void refresh({ background: true })}
               aria-label="Refresh live sessions"
             >
               Refresh
@@ -303,35 +326,32 @@ export function AdminPanel() {
 
         {loading ? (
           <AdminSessionSkeletonRows />
-        ) : sessions.length === 0 ? (
-          <div className="rounded-xl border border-border bg-surface-panel px-4 py-6">
-            <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
-              No live sessions
-            </p>
-            <p className="mt-2 text-sm text-ink-muted">
-              Games appear here while a host session is active.
-            </p>
-          </div>
         ) : (
-          <div
-            className={
-              useDesktopViewport ? "flex min-h-0 flex-1 flex-col gap-3" : "contents"
+          <AdminDashboardLayout
+            showMonitor={isDesktop}
+            listFilters={listFilters}
+            listRows={
+              sessions.length === 0 ? (
+                <div className="rounded-xl border border-border bg-surface-panel px-4 py-6">
+                  <p className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
+                    No live sessions
+                  </p>
+                  <p className="mt-2 text-sm text-ink-muted">
+                    Games appear here while a host session is active.
+                  </p>
+                </div>
+              ) : (
+                listRows
+              )
             }
-          >
-            <AdminStatsHeader sessions={sessions} />
-            <AdminDashboardLayout
-              showMonitor={isDesktop}
-              listFilters={listFilters}
-              listRows={listRows}
-              monitor={
-                <AdminMonitorPane
-                  active={monitorActive}
-                  sessionCode={activeSession?.code ?? null}
-                  errorMessage={monitorRoleError}
-                />
-              }
-            />
-          </div>
+            monitor={
+              <AdminMonitorPane
+                active={monitorActive}
+                sessionCode={activeSession?.code ?? null}
+                errorMessage={monitorRoleError}
+              />
+            }
+          />
         )}
 
         {!isDesktop ? (
