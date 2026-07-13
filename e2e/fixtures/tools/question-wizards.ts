@@ -222,7 +222,7 @@ async function selectTentacleCategory(page: Page, categoryId = "museum") {
 async function placeTentacleAnchor(page: Page) {
   await clickToolDockButton(page, "Tentacles");
   await waitForMapPlacementCrosshair(page);
-  await page.getByRole("button", { name: "Use my location" }).click();
+  await clickMapCenter(page);
   await waitForWizardNext(page);
 }
 
