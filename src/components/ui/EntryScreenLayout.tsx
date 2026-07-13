@@ -5,8 +5,8 @@ interface EntryScreenLayoutProps {
   justify?: "between" | "center" | "start";
   /** Locks content to one viewport with no page scroll (tutorial). */
   viewport?: boolean;
-  /** Viewport layout: tutorial hub uses start; home uses between. */
-  viewportLayout?: "start" | "between";
+  /** Viewport layout: tutorial hub uses start; home uses between or center. */
+  viewportLayout?: "start" | "between" | "center";
 }
 
 export function EntryScreenLayout({
@@ -27,7 +27,9 @@ export function EntryScreenLayout({
   const viewportClass = viewport
     ? viewportLayout === "between"
       ? "home-poster-viewport h-[100dvh] max-h-[100dvh] min-h-0 overflow-hidden justify-between gap-2"
-      : "home-poster-viewport h-[100dvh] max-h-[100dvh] min-h-0 overflow-hidden justify-start gap-2"
+      : viewportLayout === "center"
+        ? "home-poster-viewport h-[100dvh] max-h-[100dvh] min-h-0 overflow-y-auto overscroll-y-contain justify-center gap-6"
+        : "home-poster-viewport h-[100dvh] max-h-[100dvh] min-h-0 overflow-hidden justify-start gap-2"
     : "";
 
   const minHeightClass = viewport ? "min-h-0" : "min-h-[100dvh]";

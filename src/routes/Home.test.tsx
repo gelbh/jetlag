@@ -140,4 +140,12 @@ describe("Home", () => {
       }),
     ).toHaveAttribute("href", "/feedback");
   });
+
+  it("centers the home entry stack in the viewport layout", () => {
+    renderWithRouter(<Home />);
+
+    const main = screen.getByRole("main");
+    expect(main.className).toContain("justify-center");
+    expect(main.className).toContain("overflow-y-auto");
+  });
 });

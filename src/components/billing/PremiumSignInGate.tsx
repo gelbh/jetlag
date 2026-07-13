@@ -10,6 +10,7 @@ import {
   completePremiumEmailSignInLink,
   isPermanentUser,
   sendPremiumEmailSignInLink,
+  signOutToAnonymous,
 } from "../../services/core/accountAuth";
 import {
   ensureAnonymousUser,
@@ -37,6 +38,7 @@ export function PremiumSignInGate({
   const [error, setError] = useState<string | null>(null);
   const [recoveryNote, setRecoveryNote] = useState<string | null>(null);
   const [completingEmailLink, setCompletingEmailLink] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   const handleSignedIn = useCallback(async () => {
     setError(null);
@@ -102,6 +104,24 @@ export function PremiumSignInGate({
     await handleSignedIn();
   }, [handleSignedIn]);
 
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    setError(null);
+    setRecoveryNote(null);
+
+    try {
+      await signOutToAnonymous();
+    } catch (nextError) {
+      setError(
+        nextError instanceof Error
+          ? nextError.message
+          : "Could not sign out.",
+      );
+    } finally {
+      setSigningOut(false);
+    }
+  };
+
   const handleEmailLink = async () => {
     setBusyAction("email");
     setError(null);
@@ -135,7 +155,28 @@ export function PremiumSignInGate({
   }
 
   if (isPermanent) {
-    return children ? <>{children}</> : null;
+    const accountLabel =
+      user?.email ?? user?.displayName ?? "your account";
+
+    return (
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm text-ink-muted">
+            Signed in as {accountLabel}
+          </p>
+          <button
+            type="button"
+            disabled={signingOut}
+            onClick={() => void handleSignOut()}
+            className="home-feedback-link min-h-11 px-2 disabled:opacity-50"
+          >
+            {signingOut ? "Signing out…" : "Sign out"}
+          </button>
+        </div>
+        {error ? <InlineError>{error}</InlineError> : null}
+        {children ?? null}
+      </div>
+    );
   }
 
   return (
