@@ -2,6 +2,7 @@ import { isAuthBootstrapReady, isFirebaseConfigured } from "../services/core/fir
 import { isPlayAreaReadySync } from "../services/geo/resolveSessionMatchingAreas";
 import { usePremiumEntitlementsStore } from "../state/premiumEntitlementsStore";
 import { useSessionStore } from "../state/sessionStore";
+import { isLazyRoute } from "./routePreloaders";
 import { routeReadinessKind } from "./useRouteScreenReady";
 
 const warmImports = new Set<string>();
@@ -31,4 +32,11 @@ export function getSyncRouteReady(pathname: string): boolean {
     case "layout":
       return true;
   }
+}
+
+export function isWarmFastPathEligible(pathname: string): boolean {
+  return (
+    (!isLazyRoute(pathname) || isRouteImportWarm(pathname)) &&
+    getSyncRouteReady(pathname)
+  );
 }

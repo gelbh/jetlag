@@ -11,6 +11,7 @@ import {
   clearRouteWarmStateForTests,
   getSyncRouteReady,
   isRouteImportWarm,
+  isWarmFastPathEligible,
 } from "./routeWarmState";
 import * as firebase from "../services/core/firebase";
 import {
@@ -22,13 +23,6 @@ import * as regionPackBoundaries from "../services/geo/regionPackBoundaries";
 import { usePremiumEntitlementsStore } from "../state/premiumEntitlementsStore";
 import { useSessionStore } from "../state/sessionStore";
 import { createTestSession } from "../test/fixtures/sessions";
-
-function isWarmFastPathEligible(pathname: string): boolean {
-  return (
-    (!isLazyRoute(pathname) || isRouteImportWarm(pathname)) &&
-    getSyncRouteReady(pathname)
-  );
-}
 
 describe("normalizeRoutePath", () => {
   it("strips query strings and hashes", () => {
@@ -177,6 +171,19 @@ describe("routeWarmState", () => {
     await preloadRoute("/map");
 
     expect(isWarmFastPathEligible("/map")).toBe(true);
+  });
+
+  it("stays ineligible when chunk is warm but sync readiness is false", async () => {
+    const session = createTestSession({
+      regionPackId: "london",
+      regionPackSubregionId: "camden",
+    });
+    useSessionStore.getState().setSession(session);
+
+    await preloadRoute("/map");
+    expect(isRouteImportWarm("/map")).toBe(true);
+    expect(getSyncRouteReady("/map")).toBe(false);
+    expect(isWarmFastPathEligible("/map")).toBe(false);
   });
 });
 
