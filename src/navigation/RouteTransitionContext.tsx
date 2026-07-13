@@ -248,6 +248,10 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
         }
         const preloadMs = Date.now() - preloadStartedAt;
 
+        if (transitionGenerationRef.current !== myGeneration) {
+          return;
+        }
+
         navigate(to, navigateOptions);
 
         const readyWaitMs = await waitForScreenReady();

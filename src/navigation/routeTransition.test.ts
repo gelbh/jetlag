@@ -185,6 +185,15 @@ describe("routeWarmState", () => {
     expect(getSyncRouteReady("/map")).toBe(false);
     expect(isWarmFastPathEligible("/map")).toBe(false);
   });
+
+  it("treats query-bearing map paths as warm after preload", async () => {
+    vi.spyOn(firebase, "isFirebaseConfigured").mockReturnValue(false);
+    useSessionStore.getState().setSession(null);
+
+    await preloadRoute("/map?session=abc");
+    expect(isRouteImportWarm("/map?session=abc")).toBe(true);
+    expect(isWarmFastPathEligible("/map?session=abc")).toBe(true);
+  });
 });
 
 describe("getSyncRouteReady", () => {

@@ -2,7 +2,7 @@ import { isAuthBootstrapReady, isFirebaseConfigured } from "../services/core/fir
 import { isPlayAreaReadySync } from "../services/geo/resolveSessionMatchingAreas";
 import { usePremiumEntitlementsStore } from "../state/premiumEntitlementsStore";
 import { useSessionStore } from "../state/sessionStore";
-import { isLazyRoute } from "./routePreloaders";
+import { isLazyRoute, normalizeRoutePath } from "./routeMetadata";
 import { routeReadinessKind } from "./useRouteScreenReady";
 
 const warmImports = new Set<string>();
@@ -11,8 +11,8 @@ export function markRouteImportWarm(normalizedPath: string): void {
   warmImports.add(normalizedPath);
 }
 
-export function isRouteImportWarm(normalizedPath: string): boolean {
-  return warmImports.has(normalizedPath);
+export function isRouteImportWarm(path: string): boolean {
+  return warmImports.has(normalizeRoutePath(path));
 }
 
 export function clearRouteWarmStateForTests(): void {
@@ -35,8 +35,9 @@ export function getSyncRouteReady(pathname: string): boolean {
 }
 
 export function isWarmFastPathEligible(pathname: string): boolean {
+  const normalizedPath = normalizeRoutePath(pathname);
   return (
-    (!isLazyRoute(pathname) || isRouteImportWarm(pathname)) &&
-    getSyncRouteReady(pathname)
+    (!isLazyRoute(normalizedPath) || isRouteImportWarm(normalizedPath)) &&
+    getSyncRouteReady(normalizedPath)
   );
 }
