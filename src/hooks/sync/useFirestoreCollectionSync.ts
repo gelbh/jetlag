@@ -56,7 +56,9 @@ export function useFirestoreCollectionSync<T>(
 
     return () => {
       unsubscribe();
-      setItems([]);
+      queueMicrotask(() => {
+        setItems([]);
+      });
     };
   }, [enabled, sessionId, subscribe]);
 
