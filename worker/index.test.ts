@@ -261,6 +261,30 @@ describe("worker fetch", () => {
     expect(await response.text()).toBe(javascript);
     expect(response.headers.get("Content-Security-Policy")).toBeNull();
   });
+
+  it("adds script nonces without inventing a CSP header", async () => {
+    const html = '<!doctype html><script src="/boot-recovery.js"></script>';
+    const assetResponse = new Response(html, {
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+      },
+    });
+
+    const env = {
+      ASSETS: {
+        fetch: vi.fn().mockResolvedValue(assetResponse),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/"),
+      env,
+    );
+
+    const body = await response.text();
+    expect(body).toMatch(/<script nonce="[^"]+" src="\/boot-recovery\.js"><\/script>/);
+    expect(response.headers.get("Content-Security-Policy")).toBeNull();
+  });
 });
 
 describe("parseSentryEnvelopeTarget", () => {
