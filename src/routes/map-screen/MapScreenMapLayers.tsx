@@ -22,7 +22,9 @@ type MapScreenMapLayersProps = Pick<
   | "handleMapStyleChange"
   | "mapChromeControlInset"
   | "center"
-  | "mapFocusBounds"
+  | "effectiveMapFocusBounds"
+  | "placementRecenterToken"
+  | "placementFocusPaddingBias"
   | "handleMapClick"
   | "chromeHudRef"
   | "suppressChromeHideRef"
@@ -66,7 +68,9 @@ export function MapScreenMapLayers({
   handleMapStyleChange,
   mapChromeControlInset,
   center,
-  mapFocusBounds,
+  effectiveMapFocusBounds,
+  placementRecenterToken,
+  placementFocusPaddingBias,
   handleMapClick,
   chromeHudRef,
   suppressChromeHideRef,
@@ -112,8 +116,10 @@ export function MapScreenMapLayers({
         mapStyleControlInset={mapChromeControlInset}
         center={center}
         zoom={12}
-        focusBounds={mapFocusBounds}
+        focusBounds={effectiveMapFocusBounds}
         fitBoundsMode="once"
+        recenterToken={placementRecenterToken}
+        focusPaddingBias={placementFocusPaddingBias}
         onMapClick={handleMapClick}
         chromeHudRef={chromeHudRef}
         suppressChromeHideRef={suppressChromeHideRef}
