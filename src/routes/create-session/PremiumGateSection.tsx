@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { AppLink } from "../../components/navigation/AppLink";
 import { PremiumSignInGate } from "../../components/billing/PremiumSignInGate";
 
 export interface PremiumGateSectionProps {
@@ -44,12 +44,12 @@ export function PremiumGateSection({
             <p className="text-sm leading-relaxed text-ink-muted">
               Buy a session pack or subscription to host premium games.
             </p>
-            <Link
+            <AppLink
               to="/premium"
               className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-blue"
             >
               View premium options
-            </Link>
+            </AppLink>
             <button
               type="button"
               onClick={() => onAccessCodeExpandedChange(!accessCodeExpanded)}

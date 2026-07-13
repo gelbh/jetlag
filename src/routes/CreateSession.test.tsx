@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { useEffect, useRef } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CreateSession } from "./CreateSession";
 import { renderWithRouter } from "../test/renderWithRouter";
 import type { GeocodedPlace } from "../services/geo/geocoding";
@@ -100,13 +100,12 @@ vi.mock("../services/geo/seaLevelProgressive", () => ({
 }));
 
 const navigate = vi.fn();
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: () => navigate,
-  };
+beforeEach(() => {
+  navigate.mockReset();
 });
+vi.mock("../hooks/useAppNavigate", () => ({
+  useAppNavigate: () => navigate,
+}));
 
 describe("CreateSession", () => {
   it("renders shape picker and fullscreen framing entry point", () => {
@@ -125,7 +124,7 @@ describe("CreateSession", () => {
     fireEvent.click(screen.getByRole("button", { name: "Confirm game area" }));
 
     await waitFor(() => {
-      expect(navigate).toHaveBeenCalledWith("/map", { viewTransition: true });
+      expect(navigate).toHaveBeenCalledWith("/map");
     });
   });
 
@@ -143,7 +142,7 @@ describe("CreateSession", () => {
     fireEvent.click(screen.getByRole("button", { name: "Confirm game area" }));
 
     await waitFor(() => {
-      expect(navigate).toHaveBeenCalledWith("/map", { viewTransition: true });
+      expect(navigate).toHaveBeenCalledWith("/map");
     });
   });
 
