@@ -125,6 +125,10 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
           // Warm-up only; the rendered lazy route retries chunk failures itself.
         }
 
+        if (transitionGenerationRef.current !== myGeneration) {
+          return;
+        }
+
         navigate(to, navigateOptions);
         phaseRef.current = "idle";
         setPhase("idle");

@@ -48,6 +48,16 @@ describe("resolveNavigateDestinationKey", () => {
       }),
     ).toBe("/map?session=abc#panel");
   });
+
+  it("defaults omitted object search and hash to empty", () => {
+    expect(resolveNavigateDestinationKey({ pathname: "/join" })).toBe("/join");
+  });
+
+  it("normalizes preset edit paths while preserving query and hash", () => {
+    expect(
+      resolveNavigateDestinationKey("/presets/abc123/edit?tab=rules#top"),
+    ).toBe("/presets/:id/edit?tab=rules#top");
+  });
 });
 
 describe("isLazyRoute", () => {
