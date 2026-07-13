@@ -1,5 +1,15 @@
 /* map-shell.css — map shell and status chrome */
 @layer components {
+  .jl-stamp-code,
+  .admin-diag-row,
+  .admin-monitor-code-badge,
+  .jl-game-chat-scroll,
+  .jl-sync-detail-panel__detail {
+    user-select: text;
+    -webkit-user-select: text;
+    -webkit-touch-callout: default;
+  }
+
   .map-screen-shell {
     position: fixed;
     inset: 0;
