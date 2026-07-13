@@ -28,5 +28,8 @@ export const MOTION_TRANSITION_SCRIM =
 /** Leaflet fitBounds duration; mirrors `--motion-base` in base.css. */
 export const MOTION_MAP_CAMERA_MS = 200;
 
+/** Leaflet fitBounds duration in seconds; mirrors `--motion-base` in base.css. */
+export const MOTION_MAP_CAMERA_S = MOTION_MAP_CAMERA_MS / 1000;
+
 /** Extra bottom padding when framing tool placement (panel peek + dock). */
 export const MAP_PLACEMENT_FOCUS_BOTTOM_BIAS_PX = 120;
