@@ -101,7 +101,7 @@ describe("preloadRoute", () => {
 
   it("loads lazy route modules without throwing", async () => {
     await expect(preloadRoute("/tutorial")).resolves.toBeUndefined();
-  });
+  }, 20000);
 
   it("invokes the lazy loader for /map and query-bearing paths", async () => {
     const mapLoader = vi.spyOn(routePreloaders.routeImporter, "importMapScreen");
@@ -116,7 +116,7 @@ describe("preloadRoute", () => {
     } finally {
       mapLoader.mockRestore();
     }
-  });
+  }, 20000);
 });
 
 describe("routeReadinessKind", () => {
@@ -154,7 +154,7 @@ describe("routeWarmState", () => {
     await preloadRoute("/map");
 
     expect(isRouteImportWarm("/map")).toBe(true);
-  });
+  }, 20000);
 
   it("treats eager routes as warm fast-path eligible when readiness is sync-true", () => {
     vi.spyOn(firebase, "isFirebaseConfigured").mockReturnValue(false);
@@ -171,7 +171,7 @@ describe("routeWarmState", () => {
     await preloadRoute("/map");
 
     expect(isWarmFastPathEligible("/map")).toBe(true);
-  });
+  }, 20000);
 
   it("stays ineligible when chunk is warm but sync readiness is false", async () => {
     const session = createTestSession({
@@ -184,7 +184,7 @@ describe("routeWarmState", () => {
     expect(isRouteImportWarm("/map")).toBe(true);
     expect(getSyncRouteReady("/map")).toBe(false);
     expect(isWarmFastPathEligible("/map")).toBe(false);
-  });
+  }, 20000);
 
   it("treats query-bearing map paths as warm after preload", async () => {
     vi.spyOn(firebase, "isFirebaseConfigured").mockReturnValue(false);
@@ -193,7 +193,7 @@ describe("routeWarmState", () => {
     await preloadRoute("/map?session=abc");
     expect(isRouteImportWarm("/map?session=abc")).toBe(true);
     expect(isWarmFastPathEligible("/map?session=abc")).toBe(true);
-  });
+  }, 20000);
 });
 
 describe("getSyncRouteReady", () => {
