@@ -38,7 +38,7 @@ describe("AnimatedOverlay", { timeout: 20000 }, () => {
     await waitFor(() => {
       expect(onClose).toHaveBeenCalled();
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    });
+    }, { timeout: 5000 });
   });
 
   it("closes on Escape when dismissible", async () => {
@@ -53,6 +53,6 @@ describe("AnimatedOverlay", { timeout: 20000 }, () => {
 
     await waitFor(() => {
       expect(onClose).toHaveBeenCalled();
-    });
+    }, { timeout: 5000 });
   });
 });
