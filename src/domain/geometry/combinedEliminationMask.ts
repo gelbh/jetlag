@@ -1,4 +1,5 @@
 import difference from "@turf/difference";
+import intersect from "@turf/intersect";
 import turfCircle from "@turf/circle";
 import { featureCollection, point as turfPoint } from "@turf/helpers";
 import type { AnnotationRecord, GameArea } from "../map/annotations";
@@ -19,8 +20,35 @@ import {
   type EliminationUnionInput,
   type PolygonFeature,
 } from "./unionPolygonFeatures";
+import { gameAreaToPolygon } from "./geometry";
 
 export const ELIMINATION_FILL_COLOR = MAP_ANNOTATION_COLORS.elimination;
+
+function clipMaskToGameArea(
+  mask: PolygonFeature,
+  gameArea: GameArea,
+): PolygonFeature | null {
+  const gameFeature = gameAreaToPolygon(gameArea);
+
+  try {
+    const clipped = intersect({
+      type: "FeatureCollection",
+      features: [gameFeature, mask],
+    });
+
+    if (
+      clipped &&
+      (clipped.geometry.type === "Polygon" ||
+        clipped.geometry.type === "MultiPolygon")
+    ) {
+      return clipped as PolygonFeature;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
 
 export function eliminationDiskForAnnotation(
   annotation: AnnotationRecord,
@@ -202,9 +230,15 @@ export function buildCombinedEliminationMask(
   }
 
   try {
-    return unionEliminationParts(
+    const unioned = unionEliminationParts(
       computeEliminationUnionInput(annotations, gameArea, draftFeatures),
     );
+
+    if (!unioned) {
+      return null;
+    }
+
+    return clipMaskToGameArea(unioned, gameArea);
   } catch {
     return null;
   }
