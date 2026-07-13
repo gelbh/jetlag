@@ -14,17 +14,7 @@
     text-transform: uppercase;
   }
 
-  .home-poster {
-    position: relative;
-    isolation: isolate;
-    min-height: 100dvh;
-    min-height: 100svh;
-    min-height: -webkit-fill-available;
-    background-color: var(--color-surface-deep);
-  }
-
-  .home-poster::before {
-    content: "";
+  .app-entry-backdrop {
     position: fixed;
     inset: 0;
     z-index: -1;
@@ -37,15 +27,24 @@
         transparent 55%
       ),
       radial-gradient(
-        ellipse 70% 50% at 0% 100%,
-        oklch(from var(--color-brand-blue) l c h / 0.18),
-        transparent 50%
+        ellipse 80% 65% at 0% 100%,
+        oklch(from var(--color-brand-blue) l c h / 0.22),
+        transparent 62%
       ),
       radial-gradient(
-        ellipse 85% 50% at 50% 100%,
-        oklch(from var(--color-brand-blue) l c h / 0.14),
-        transparent 58%
+        ellipse 110% 75% at 50% 100%,
+        oklch(from var(--color-brand-blue) l c h / 0.2),
+        transparent 70%
       );
+  }
+
+  .home-poster {
+    position: relative;
+    isolation: isolate;
+    min-height: 100dvh;
+    min-height: 100svh;
+    min-height: -webkit-fill-available;
+    background-color: transparent;
   }
 
   .home-card-btn {
