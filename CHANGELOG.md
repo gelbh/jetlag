@@ -8,6 +8,8 @@
 - Map: location and question tools load map data again (Overpass proxy + App Check under CSP).
 - Firebase: App Check reCAPTCHA loads under content security policy.
 - Premium: Google sign-in works again under enforced content security policy.
+- Premium: Google sign-in falls back to full-page redirect when the popup is blocked.
+- Sentry: error reports use a first-party tunnel so browser blockers are less likely to drop them.
 - Map sync: Retry on the sync rail replays queued map pins after a failed upload.
 - Map sync: avoid update-depth loop when leaving a session.
 - Motion: leaving or ending a session from the map no longer leaves the map in back history.

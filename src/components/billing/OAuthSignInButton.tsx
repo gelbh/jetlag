@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { isOAuthRedirectInProgress } from "../../services/core/accountAuth";
 import { ensureAnonymousUser } from "../../services/core/firebase";
 
 interface OAuthSignInButtonProps {
@@ -31,6 +32,9 @@ export function OAuthSignInButton({
       await onSignIn();
       await onSuccess();
     } catch (error) {
+      if (isOAuthRedirectInProgress(error)) {
+        return;
+      }
       onError(
         error instanceof Error
           ? error.message
