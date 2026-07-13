@@ -91,17 +91,22 @@ function useThermometerSandboxBody({
         thermoA,
         thermoB,
         answer,
+        targetDistanceMeters: distanceMeters,
+        walkCurrentPoint: null,
+        walkActive: walkingActive,
       },
     });
   }, [
     answer,
     committed,
+    distanceMeters,
     gameArea,
     interactive,
     readOnly,
     registerMapDraft,
     thermoA,
     thermoB,
+    walkingActive,
   ]);
 
   return {

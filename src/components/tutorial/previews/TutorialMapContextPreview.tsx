@@ -5,6 +5,7 @@ import { CombinedEliminationLayer } from "../../map/CombinedEliminationLayer";
 import { MapDraftLayer } from "../../map/MapDraftLayer";
 import { useTutorialMapViewport } from "../../../hooks/tutorial/TutorialMapViewportContext";
 import { useTutorialInteractiveMapDraft } from "../../../hooks/tutorial/TutorialInteractiveMapDraftContext";
+import { usePlacementMapFocus } from "../../../hooks/map-screen/usePlacementMapFocus";
 
 interface TutorialMapContextPreviewProps {
   anchorLat?: number | null;
@@ -23,7 +24,18 @@ export function TutorialMapContextPreview({
   showAnchorMarker = true,
 }: TutorialMapContextPreviewProps) {
   const { viewport, focusBounds, loading } = useTutorialMapViewport();
-  const { overlays, eliminationFeatures } = useTutorialInteractiveMapDraft();
+  const { activeTool, overlays, eliminationFeatures } =
+    useTutorialInteractiveMapDraft();
+  const {
+    effectiveFocusBounds,
+    placementRecenterToken,
+    focusPaddingBias,
+  } = usePlacementMapFocus({
+    activeTool,
+    overlays,
+    defaultFocusBounds: focusBounds,
+    enabled: Boolean(onMapClick),
+  });
   const hasDraftMarkers = overlays.length > 0;
 
   return (
@@ -33,9 +45,11 @@ export function TutorialMapContextPreview({
         mapStyle="standard"
         interactive={Boolean(onMapClick)}
         showZoomControl={false}
-        focusBounds={focusBounds}
+        focusBounds={effectiveFocusBounds}
         fitBoundsMode="once"
         fitBoundsPadding={[20, 20]}
+        recenterToken={placementRecenterToken}
+        focusPaddingBias={focusPaddingBias}
         onMapClick={onMapClick}
         mapKey={`${mapKey}-${viewport.source}-${viewport.label}`}
       >

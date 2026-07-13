@@ -8,6 +8,8 @@ import type {
 } from "leaflet";
 import { getMapBasemap, type MapStyle } from "../../domain/map/mapBasemaps";
 import { isUsableMapBounds } from "../../domain/geometry/geometry";
+import { MOTION_MAP_CAMERA_MS } from "../../domain/device/motionTokens";
+import { useMotionProfile } from "../../hooks/useMotionProfile";
 import { MapChromeListener } from "./MapChromeListener";
 import { MapStyleToggle } from "./MapStyleToggle";
 import { MapZoomControl, type MapZoomControlInset } from "./MapZoomControl";
@@ -29,6 +31,8 @@ interface MapViewProps {
   fitBoundsMode?: "once" | "always";
   /** Leaflet fitBounds padding in pixels. */
   fitBoundsPadding?: [number, number];
+  /** Extra bottom padding (px) when framing placement overlays. */
+  focusPaddingBias?: number;
   /** Increment to programmatically refit focusBounds (e.g. Recenter button). */
   recenterToken?: number;
   showZoomControl?: boolean;
@@ -46,16 +50,20 @@ function MapFocus({
   recenterToken = 0,
   suppressChromeHideRef,
   fitBoundsPadding = [32, 32],
+  focusPaddingBias,
 }: {
   focusBounds: LatLngBoundsExpression | null;
   fitBoundsMode: "once" | "always";
   recenterToken: number;
   suppressChromeHideRef?: MutableRefObject<boolean>;
   fitBoundsPadding?: [number, number];
+  focusPaddingBias?: number;
 }) {
   const map = useMap();
+  const { prefersReducedMotion, lowPowerMode } = useMotionProfile();
   const hasFittedRef = useRef(false);
   const lastRecenterRef = useRef(recenterToken);
+  const animate = !prefersReducedMotion && !lowPowerMode;
 
   useEffect(() => {
     if (!focusBounds) {
@@ -78,7 +86,22 @@ function MapFocus({
     }
 
     map.invalidateSize();
-    map.fitBounds(focusBounds, { padding: fitBoundsPadding });
+
+    const [padY, padX] = fitBoundsPadding;
+    const fitOptions =
+      focusPaddingBias !== undefined
+        ? {
+            animate,
+            duration: MOTION_MAP_CAMERA_MS,
+            paddingTopLeft: [padY, padX] as [number, number],
+            paddingBottomRight: [padY, padX + focusPaddingBias] as [
+              number,
+              number,
+            ],
+          }
+        : { padding: fitBoundsPadding };
+
+    map.fitBounds(focusBounds, fitOptions);
     hasFittedRef.current = true;
 
     const onMoveEnd = () => {
@@ -89,7 +112,16 @@ function MapFocus({
     };
 
     map.on("moveend", onMoveEnd);
-  }, [focusBounds, fitBoundsMode, fitBoundsPadding, map, recenterToken, suppressChromeHideRef]);
+  }, [
+    animate,
+    focusBounds,
+    fitBoundsMode,
+    fitBoundsPadding,
+    focusPaddingBias,
+    map,
+    recenterToken,
+    suppressChromeHideRef,
+  ]);
 
   return null;
 }
@@ -213,6 +245,7 @@ export function MapView({
   focusBounds = null,
   fitBoundsMode = "always",
   fitBoundsPadding,
+  focusPaddingBias,
   recenterToken = 0,
   showZoomControl,
   zoomControlInset = "dock",
@@ -269,6 +302,7 @@ export function MapView({
           recenterToken={recenterToken}
           suppressChromeHideRef={suppressChromeHideRef}
           fitBoundsPadding={fitBoundsPadding}
+          focusPaddingBias={focusPaddingBias}
         />
         <MapZoomControl
           enabled={zoomControlEnabled}

@@ -18,7 +18,14 @@ export function tutorialMapDraftBase(
       outOfReach: false,
       seekerResolving: false,
     },
-    thermometer: { thermoA: null, thermoB: null, answer: null },
+    thermometer: {
+      thermoA: null,
+      thermoB: null,
+      answer: null,
+      targetDistanceMeters: 804,
+      walkCurrentPoint: null,
+      walkActive: false,
+    },
     measuring: {
       seekerPoint: null,
       targetPoint: null,

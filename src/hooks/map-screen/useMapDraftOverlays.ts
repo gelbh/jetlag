@@ -18,6 +18,7 @@ import {
   thermometerShadedSide,
   type ThermometerAnswer,
 } from "../../domain/questions";
+import { buildThermometerDraftOverlays } from "../../domain/questions/overlays/thermometer";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 import { getBoundaryPreviewStyle } from "../../domain/map/mapBoundaryOverlayStyle";
 import type { MapStyle } from "../../domain/map/mapBasemaps";
@@ -46,6 +47,9 @@ export interface MapDraftOverlaySources {
     thermoA: LatLngTuple | null;
     thermoB: LatLngTuple | null;
     answer: ThermometerAnswer | null;
+    targetDistanceMeters: number;
+    walkCurrentPoint: LatLngTuple | null;
+    walkActive: boolean;
   };
   measuring: {
     seekerPoint: LatLngTuple | null;
@@ -216,38 +220,17 @@ export function buildMapDraftOverlays(
 
   if (activeTool === "thermometer") {
     const { thermoA, thermoB, answer } = sources.thermometer;
-    if (thermoA) {
-      overlays.push({
-        kind: "marker",
-        id: "thermo-draft-a",
-        point: thermoA,
-        style: {
-          fillColor: c.thermometerA,
-          color: c.thermometerA,
-          weight: 0,
-        },
-      });
-    }
-    if (thermoB) {
-      overlays.push({
-        kind: "marker",
-        id: "thermo-draft-b",
-        point: thermoB,
-        style: {
-          fillColor: c.thermometerB,
-          color: c.thermometerB,
-          weight: 0,
-        },
-      });
-    }
-    if (thermoA && thermoB) {
-      overlays.push({
-        kind: "polyline",
-        id: "thermo-draft-axis",
-        positions: [thermoA, thermoB],
-        style: { color: c.thermometerAxis, weight: 4 },
-      });
-    }
+    overlays.push(
+      ...buildThermometerDraftOverlays({
+        thermoA,
+        thermoB,
+        answer,
+        targetDistanceMeters: sources.thermometer.targetDistanceMeters,
+        walkCurrentPoint: sources.thermometer.walkCurrentPoint,
+        walkActive: sources.thermometer.walkActive,
+      }),
+    );
+
     if (thermoA && thermoB && answer) {
       pushElimination(
         buildHalfPlanePolygon(
@@ -427,6 +410,9 @@ export function useMapDraftOverlays(
     tentacle.seekerResolving,
     tentacle.selectedPoiId,
     thermometer.answer,
+    thermometer.targetDistanceMeters,
+    thermometer.walkActive,
+    thermometer.walkCurrentPoint,
     thermometer.thermoA,
     thermometer.thermoB,
     zone.vertices,

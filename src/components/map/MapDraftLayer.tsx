@@ -28,6 +28,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                   weight: overlay.style?.weight ?? 2,
                   fillColor: overlay.style?.fillColor ?? c.pin,
                   fillOpacity: overlay.style?.fillOpacity ?? 1,
+                  opacity: overlay.style?.opacity,
                   className: overlay.style?.pulsing
                     ? "draft-seeker-pulse"
                     : undefined,
@@ -48,6 +49,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                   dashArray: overlay.style?.dashArray,
                   fillColor: overlay.style?.fillColor,
                   fillOpacity: overlay.style?.fillOpacity ?? 0.08,
+                  opacity: overlay.style?.opacity,
                 }}
               />
             );
@@ -72,6 +74,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                   color: overlay.style?.color ?? c.thermometerAxis,
                   weight: overlay.style?.weight ?? 4,
                   dashArray: overlay.style?.dashArray,
+                  opacity: overlay.style?.opacity,
                 }}
               />
             );
