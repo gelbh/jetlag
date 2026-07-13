@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   GAME_PRESET_SCHEMA_VERSION,
+  buildCreateSessionPresetDraft,
+  createSessionDraftToGamePreset,
+  gamePresetToCreateSessionDraft,
   migrateGamePreset,
   migrateGamePresets,
 } from "./gamePreset";
+import { defaultAdvancedSessionSettings } from "./advancedSessionSettings";
 
 describe("migrateGamePreset", () => {
   it("deep-merges partial advancedSettings with defaults", () => {
@@ -59,6 +63,58 @@ describe("migrateGamePreset", () => {
 
     expect(migrated.schemaVersion).toBe(GAME_PRESET_SCHEMA_VERSION);
     expect(migrated.advancedSettings.disabledTools).toEqual([]);
+  });
+});
+
+describe("buildCreateSessionPresetDraft", () => {
+  const dublinGameArea = {
+    type: "Polygon" as const,
+    coordinates: [
+      [
+        [-6.3, 53.3],
+        [-6.2, 53.3],
+        [-6.2, 53.4],
+        [-6.3, 53.3],
+      ],
+    ],
+  };
+
+  it("round-trips region pack and transit metro through preset conversion", () => {
+    const draft = buildCreateSessionPresetDraft({
+      gameSize: "medium",
+      distanceUnit: "metric",
+      advancedSettings: defaultAdvancedSessionSettings("medium", "metric"),
+      gameArea: dublinGameArea,
+      placeLabel: "Dublin",
+      sessionTier: "free",
+      regionPackId: "dublin",
+      subregionId: "dcc",
+      transitMetroId: "dublin",
+    });
+
+    const preset = createSessionDraftToGamePreset(draft, "My Dublin");
+    const restored = gamePresetToCreateSessionDraft(preset);
+
+    expect(preset.regionPackId).toBe("dublin");
+    expect(preset.subregionId).toBe("dcc");
+    expect(preset.transitMetroId).toBe("dublin");
+    expect(preset.bundled).toBe(true);
+    expect(restored.regionPackId).toBe("dublin");
+    expect(restored.subregionId).toBe("dcc");
+    expect(restored.transitMetroId).toBe("dublin");
+    expect(restored.focusBounds).toEqual(draft.focusBounds);
+  });
+
+  it("omits focusBounds when game area is missing", () => {
+    const draft = buildCreateSessionPresetDraft({
+      gameSize: "small",
+      distanceUnit: "imperial",
+      advancedSettings: defaultAdvancedSessionSettings("small", "imperial"),
+      transitMetroId: "nyc",
+    });
+
+    expect(draft.focusBounds).toBeNull();
+    expect(draft.transitMetroId).toBe("nyc");
   });
 });
 

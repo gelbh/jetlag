@@ -7,6 +7,7 @@ import { CreateSessionMapPane } from "../../components/session/CreateSessionMapP
 import { GameAreaFramingModal } from "../../components/session/GameAreaFramingModal";
 import { MobileSheet } from "../../components/ui/MobileSheet";
 import {
+  buildCreateSessionPresetDraft,
   createSessionDraftToGamePreset,
 } from "../../domain/session/gamePreset";
 import { useGamePresetStore } from "../../state/gamePresetStore";
@@ -35,14 +36,18 @@ export function CreateSession() {
 
     savePreset(
       createSessionDraftToGamePreset(
-        {
+        buildCreateSessionPresetDraft({
           gameSize: session.gameSize,
           distanceUnit: session.distanceUnit,
           advancedSettings: session.advancedSettings,
           gameArea: session.previewGameArea,
-          placeLabel: session.selectedPlace?.displayName ?? session.locationQuery,
+          placeLabel:
+            session.selectedPlace?.displayName ?? session.locationQuery,
           sessionTier: session.resolvedSessionTier,
-        },
+          regionPackId: session.regionPackId,
+          subregionId: session.regionPackSubregionId,
+          transitMetroId: session.transitMetroId || undefined,
+        }),
         name.trim(),
       ),
     );
