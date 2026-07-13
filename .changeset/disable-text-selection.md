@@ -2,4 +2,4 @@
 "jetlag": patch
 ---
 
-UI: reduced accidental text selection on buttons and HUD chrome.
+UI: disable accidental text selection across the app shell; chat, legal pages, session codes, and form fields stay selectable.
