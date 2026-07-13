@@ -1,6 +1,7 @@
 import { AppLink } from "../components/navigation/AppLink";
 import { useState } from "react";
 import { AppLogo } from "../components/ui/AppLogo";
+import { BootSplash } from "../components/ui/BootSplash";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { HudGuideIcon, HudPlayIcon, HudAdminIcon } from "../components/ui/HudIcons";
 import { InlineError } from "../components/ui/InlineError";
@@ -54,17 +55,7 @@ export function Home() {
     !authBootstrapReady &&
     routeTransitionPhase === "idle"
   ) {
-    return (
-      <EntryScreenLayout viewport viewportLayout="center">
-        <div
-          className="route-fallback-skeleton route-loading-enter min-h-[40dvh]"
-          aria-busy="true"
-          aria-label="Loading app"
-        >
-          <div className="route-fallback-status" />
-        </div>
-      </EntryScreenLayout>
-    );
+    return <BootSplash label="Starting…" />;
   }
 
   const handleContinue = async () => {

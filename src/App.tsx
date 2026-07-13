@@ -1,4 +1,4 @@
-import { Suspense, useEffect, type ReactNode } from "react";
+import { Suspense, useEffect, useLayoutEffect, type ReactNode } from "react";
 import * as Sentry from "@sentry/react";
 import {
   BrowserRouter,
@@ -31,6 +31,7 @@ import {
   getServiceWorkerChunkReloadContext,
   setChunkReloadContextGetter,
 } from "./domain/device/lazyWithChunkRetry";
+import { removeBootSplash } from "./domain/device/bootSplash";
 import { notifyAppNeedRefresh } from "./domain/device/serviceWorkerRefresh";
 import { useEdgeSwipeBack } from "./hooks/useEdgeSwipeBack";
 import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";
@@ -136,6 +137,10 @@ function AppErrorFallback() {
 }
 
 export default function App() {
+  useLayoutEffect(() => {
+    removeBootSplash();
+  }, []);
+
   useEffect(() => {
     pruneStaleTimerSessions();
   }, []);

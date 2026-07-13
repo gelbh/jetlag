@@ -21,6 +21,7 @@
       content="Jet Lag Map Companion is an unofficial fan app for Jet Lag Hide + Seek. Host or join synced map sessions with live questions, zones, and tools."
     />
     <title>Jet Lag Map Companion</title>
+    <link rel="stylesheet" href="/boot-splash.css" />
   </head>
   <body>
     <noscript>
@@ -30,7 +31,63 @@
         sessions with live questions, hiding zones, and shared map tools.
       </p>
     </noscript>
+    <div
+      id="boot-splash"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      aria-label="Loading Jet Lag Map Companion"
+    >
+      <div id="boot-splash-lockup">
+        <svg
+          id="boot-splash-mark"
+          viewBox="0 0 64 64"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <rect width="64" height="64" rx="12" fill="#0E132C" />
+          <circle
+            cx="32"
+            cy="32"
+            r="18"
+            stroke="#C55B40"
+            stroke-width="4"
+            fill="none"
+          />
+          <circle
+            cx="32"
+            cy="32"
+            r="12"
+            stroke="#4378B1"
+            stroke-width="2.5"
+            fill="none"
+          />
+          <path
+            d="M32 32 L44.7 19.3 A18 18 0 0 1 44.7 44.7 Z"
+            fill="#E4B352"
+            fill-opacity="0.35"
+          />
+          <path
+            d="M32 16v32M16 32h32"
+            stroke="#4378B1"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <circle cx="32" cy="32" r="2.5" fill="#F3F4F5" />
+        </svg>
+        <p id="boot-splash-wordmark">Jet Lag</p>
+      </div>
+      <p id="boot-splash-status">Starting…</p>
+      <div id="boot-splash-error" hidden>
+        <p id="boot-splash-error-message">
+          Can't connect. Check your network and try again.
+        </p>
+        <button type="button" id="boot-splash-retry">Retry</button>
+      </div>
+    </div>
     <div id="root"></div>
+    <script src="/boot-splash.js"></script>
     <script src="/boot-recovery.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
