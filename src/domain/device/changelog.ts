@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.5.11";
+export const APP_VERSION = "0.5.12";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,46 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.5.12",
+    date: "2026-07-13",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Map: elimination shading worker runs again under enforced CSP.",
+          "Map: location and question tools load map data again (Overpass proxy + App Check under CSP).",
+          "Firebase: App Check reCAPTCHA loads under content security policy.",
+          "Map sync: Retry on the sync rail replays queued map pins after a failed upload.",
+          "Map sync: avoid update-depth loop when leaving a session.",
+          "Motion: leaving or ending a session from the map no longer leaves the map in back history.",
+          "Motion: edge swipe back works with Reduce Motion enabled (instant navigation, no transition).",
+          "Presets: saving from Create session keeps region-pack boundaries and transit metro when reloaded.",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Admin map: mission-control layout on tablet and desktop with a collapsible side rail for diagnostics, sync, stats, map debug, log, chat, and moderation.",
+          "Motion: unified sheet and panel drag physics, iOS-calibrated motion tokens, and expanded tap feedback with Vibration API fallback on web.",
+          "Motion: iOS-style route push/pop transitions, global edge-swipe back, and unified session exit so map teardown runs after the home transition.",
+          "Motion: retuned mobile sheets, wizard steps, and map panel snap to iOS-calibrated timing on the critical path.",
+          "Map sync: queue map pins when the connection is unstable, not only when the browser says offline.",
+          "Map sync: clearer offline and unstable connection copy with working Retry guidance.",
+          "Map: warn when Firestore offline cache is unavailable on this device.",
+          "Create and join: preload game-area map data even when the connection flickers, using cached boundaries when live fetch fails.",
+          "Map: cache bundled geo JSON in the service worker after first load for flaky connections.",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Offline write queue schema now tags annotation entries for future write kinds.",
+          "Sentry: filter Leaflet teardown, App Check invalid-session, and dev HMR refresh noise.",
+        ],
+      }
+    ],
+  },
   {
     version: "0.5.11",
     date: "2026-07-12",
