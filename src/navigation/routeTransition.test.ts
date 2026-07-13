@@ -13,6 +13,12 @@ import {
   isRouteImportWarm,
   isWarmFastPathEligible,
 } from "./routeWarmState";
+import {
+  computeLoadingProgress,
+  destinationTitleForPath,
+  labelForStep,
+  resolveLoadingSteps,
+} from "./routeLoadingSteps";
 import * as firebase from "../services/core/firebase";
 import {
   clearResolvedMatchingAreasCacheForTests,
@@ -250,5 +256,82 @@ describe("getSyncRouteReady", () => {
 
     expect(isPlayAreaReadySync(session)).toBe(true);
     expect(getSyncRouteReady("/map")).toBe(true);
+  });
+});
+
+describe("routeLoadingSteps", () => {
+  beforeEach(() => {
+    clearRouteWarmStateForTests();
+    clearResolvedMatchingAreasCacheForTests();
+    useSessionStore.getState().setSession(null);
+  });
+
+  it("maps destination titles for primary routes", () => {
+    expect(destinationTitleForPath("/map")).toBe("Map");
+    expect(destinationTitleForPath("/create")).toBe("Create session");
+    expect(destinationTitleForPath("/join")).toBe("Join session");
+  });
+
+  it("labels loading steps for player-facing copy", () => {
+    expect(labelForStep("download-screen", "Map")).toBe("Downloading screen…");
+    expect(labelForStep("open-screen", "Tutorial")).toBe("Opening Tutorial…");
+  });
+
+  it("lists cold map steps in order", () => {
+    const session = createTestSession({
+      regionPackId: "london",
+      regionPackSubregionId: "camden",
+    });
+    useSessionStore.getState().setSession(session);
+
+    expect(resolveLoadingSteps("/map")).toEqual([
+      "download-screen",
+      "load-boundaries",
+      "prepare-map",
+    ]);
+  });
+
+  it("skips download when the route chunk is warm", async () => {
+    const session = createTestSession({
+      regionPackId: "london",
+      regionPackSubregionId: "camden",
+    });
+    useSessionStore.getState().setSession(session);
+    await preloadRoute("/map");
+
+    expect(resolveLoadingSteps("/map")).toEqual([
+      "load-boundaries",
+      "prepare-map",
+    ]);
+  });
+
+  it("skips boundaries when the play area is already cached", async () => {
+    const session = createTestSession({
+      regionPackId: "london",
+      regionPackSubregionId: "camden",
+    });
+    useSessionStore.getState().setSession(session);
+
+    vi.spyOn(regionPackBoundaries, "loadRegionPackPlayArea").mockResolvedValue(
+      session.gameArea,
+    );
+    await resolveSessionPlayArea(session);
+
+    expect(resolveLoadingSteps("/map")).toEqual([
+      "download-screen",
+      "prepare-map",
+    ]);
+  });
+
+  it("uses a single open step for eager join", () => {
+    expect(resolveLoadingSteps("/join")).toEqual(["open-screen"]);
+  });
+
+  it("computes progress from the first incomplete step", () => {
+    const progress = computeLoadingProgress("/map", false);
+
+    expect(progress.destinationTitle).toBe("Map");
+    expect(progress.currentStepIndex).toBe(0);
+    expect(progress.currentStepLabel).toBe("Downloading screen…");
   });
 });
