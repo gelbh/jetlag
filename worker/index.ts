@@ -2,6 +2,10 @@ import {
   handleSentryTunnelRequest,
   SENTRY_TUNNEL_PATH,
 } from "./sentryTunnel";
+import {
+  applyDocumentCspNonce,
+  shouldApplyDocumentCsp,
+} from "./documentCsp";
 
 export function isSpaFallbackForAssetRequest(
   request: Request,
@@ -38,6 +42,10 @@ export default {
       });
     }
 
+    if (shouldApplyDocumentCsp(assetResponse)) {
+      return applyDocumentCspNonce(assetResponse);
+    }
+
     return assetResponse;
   },
 } satisfies ExportedHandler<Env>;
@@ -47,3 +55,11 @@ export {
   parseSentryEnvelopeTarget,
   SENTRY_TUNNEL_PATH,
 } from "./sentryTunnel";
+export {
+  addScriptNonceToCsp,
+  applyDocumentCspNonce,
+  generateCspNonce,
+  injectScriptNonces,
+  isHtmlDocumentResponse,
+  shouldApplyDocumentCsp,
+} from "./documentCsp";
