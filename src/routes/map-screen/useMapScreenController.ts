@@ -524,7 +524,6 @@ export function useMapScreenController() {
     defaultFocusBounds: mapFocusBounds,
     enabled: true,
     walkActive: thermometerTool.draft.walkingQuestionId !== null,
-    walkLivePoint: thermometerTool.walkCurrentPoint,
   });
 
   const dismissTransientUi = useCallback(() => {

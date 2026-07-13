@@ -22,7 +22,6 @@ export function SeekerMapScreen() {
         handleMapStyleChange={controller.handleMapStyleChange}
         mapChromeControlInset={controller.mapChromeControlInset}
         center={controller.center}
-        mapFocusBounds={controller.mapFocusBounds}
         effectiveMapFocusBounds={controller.effectiveMapFocusBounds}
         placementRecenterToken={controller.placementRecenterToken}
         placementFocusPaddingBias={controller.placementFocusPaddingBias}

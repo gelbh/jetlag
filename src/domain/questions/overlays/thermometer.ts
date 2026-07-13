@@ -8,7 +8,10 @@ import {
   lineEndpointsFromFeature,
   parseGeometryJson,
 } from "../../geometry/geometryParsing";
-import { quietRadarAnnotationStyle } from "../../map/distanceScaledAnnotationStyle";
+import {
+  quietRadarAnnotationStyle,
+  walkRemainingAnnotationStyle,
+} from "../../map/distanceScaledAnnotationStyle";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import type { PendingQuestionRecord } from "../../session/sessionChat";
@@ -77,14 +80,16 @@ export interface ThermometerDraftOverlayInputs {
   walkActive: boolean;
 }
 
-export function buildThermometerDraftOverlays({
-  thermoA,
-  thermoB,
-  answer: _answer,
-  targetDistanceMeters,
-  walkCurrentPoint,
-  walkActive,
-}: ThermometerDraftOverlayInputs): MapDraftOverlay[] {
+export function buildThermometerDraftOverlays(
+  inputs: ThermometerDraftOverlayInputs,
+): MapDraftOverlay[] {
+  const {
+    thermoA,
+    thermoB,
+    targetDistanceMeters,
+    walkCurrentPoint,
+    walkActive,
+  } = inputs;
   const c = MAP_ANNOTATION_COLORS;
   const overlays: MapDraftOverlay[] = [];
 
@@ -167,7 +172,7 @@ export function buildThermometerDraftOverlays({
           color: c.thermometerWalkRemaining,
           weight: 3,
           dashArray: "10 8",
-          opacity: 0.45,
+          opacity: walkRemainingAnnotationStyle().strokeOpacity,
         },
       });
     }

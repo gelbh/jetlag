@@ -99,7 +99,7 @@ function MapFocus({
               number,
             ],
           }
-        : { animate, duration: MOTION_MAP_CAMERA_MS, padding: fitBoundsPadding };
+        : { padding: fitBoundsPadding };
 
     map.fitBounds(focusBounds, fitOptions);
     hasFittedRef.current = true;

@@ -27,7 +27,7 @@ describe("usePlacementMapFocus", () => {
 
     expect(result.current.effectiveFocusBounds).toEqual(defaultBounds);
     expect(result.current.placementRecenterToken).toBe(0);
-    expect(result.current.focusPaddingBias).toBe(120);
+    expect(result.current.focusPaddingBias).toBeUndefined();
   });
 
   it("bumps recenter token when structural overlays change", () => {
@@ -45,6 +45,7 @@ describe("usePlacementMapFocus", () => {
     rerender({ overlays: [markerOverlay("pin-draft", [53.35, -6.26])] });
 
     expect(result.current.placementRecenterToken).toBe(1);
+    expect(result.current.focusPaddingBias).toBe(120);
     expect(result.current.effectiveFocusBounds).not.toEqual(defaultBounds);
   });
 

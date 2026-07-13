@@ -99,12 +99,14 @@ function useThermometerSandboxBody({
   }, [
     answer,
     committed,
+    distanceMeters,
     gameArea,
     interactive,
     readOnly,
     registerMapDraft,
     thermoA,
     thermoB,
+    walkingActive,
   ]);
 
   return {
