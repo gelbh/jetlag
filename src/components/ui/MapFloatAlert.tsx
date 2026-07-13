@@ -15,7 +15,7 @@ export function MapFloatAlert({
 }: MapFloatAlertProps) {
   return (
     <p
-      className={`map-float-alert border-2 border-highlight bg-surface-deep px-3 py-2 text-center text-sm font-semibold uppercase tracking-wide text-pretty text-ink ${className}`.trim()}
+      className={`jl-selectable map-float-alert border-2 border-highlight bg-surface-deep px-3 py-2 text-center text-sm font-semibold uppercase tracking-wide text-pretty text-ink ${className}`.trim()}
       role={role}
       aria-live={ariaLive}
     >
@@ -37,7 +37,7 @@ export function MapFloatAlertPanel({
 }: MapFloatAlertPanelProps) {
   return (
     <div
-      className={`map-float-alert flex items-center justify-between gap-3 border-2 border-status-error/40 bg-status-error-surface px-3 py-2 ${className}`.trim()}
+      className={`jl-selectable map-float-alert flex items-center justify-between gap-3 border-2 border-status-error/40 bg-status-error-surface px-3 py-2 ${className}`.trim()}
       role={role}
     >
       {children}

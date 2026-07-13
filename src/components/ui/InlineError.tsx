@@ -7,6 +7,8 @@ interface InlineErrorProps {
 
 export function InlineError({ children, className = "" }: InlineErrorProps) {
   return (
-    <p className={`text-sm text-status-error ${className}`.trim()}>{children}</p>
+    <p className={`jl-selectable text-sm text-status-error ${className}`.trim()}>
+      {children}
+    </p>
   );
 }

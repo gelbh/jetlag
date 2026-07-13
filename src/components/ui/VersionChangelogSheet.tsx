@@ -117,7 +117,7 @@ export function VersionChangelogSheet({
     >
       <SheetHeader title="Changelog" onClose={onClose} />
 
-      <div className="space-y-5 overflow-y-auto pr-1">
+      <div className="jl-selectable space-y-5 overflow-y-auto pr-1">
         {visibleChangelog.map((entry, index) => (
           <CollapsibleChangelogEntry
             key={entry.version}

@@ -24,7 +24,7 @@ export function Feedback() {
         <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
           Feedback
         </h1>
-        <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
+        <p className="jl-selectable max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
           Search existing threads before posting so bugs and ideas stay in one
           place.
         </p>
