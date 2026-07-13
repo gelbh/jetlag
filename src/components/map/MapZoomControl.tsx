@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useMap } from "react-leaflet";
 import { HudMinusIcon, HudPlusIcon } from "../ui/HudIcons";
 import type { MapChromeControlInset } from "./mapChromeControlInset";
+import { getMapChromePortalTarget } from "./mapChromePortalTarget";
 import { useMapInteracting } from "./useMapInteracting";
 
 export type MapZoomControlInset = MapChromeControlInset;
@@ -19,7 +20,7 @@ export function MapZoomControl({
   suppressRef,
 }: MapZoomControlProps) {
   const map = useMap();
-  const portalTarget = useMemo(() => map.getContainer(), [map]);
+  const portalTarget = useMemo(() => getMapChromePortalTarget(map), [map]);
   const [zoom, setZoom] = useState(() => map.getZoom());
   const interacting = useMapInteracting(suppressRef);
 

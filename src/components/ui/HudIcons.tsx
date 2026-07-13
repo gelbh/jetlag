@@ -167,3 +167,13 @@ export function HudStarIcon({
     </IconBase>
   );
 }
+
+export function HudTiltIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="M4 16 12 8l8 8" />
+      <path d="M7 16h10" />
+      <path d="M12 8v8" />
+    </IconBase>
+  );
+}

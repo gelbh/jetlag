@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { effectiveMapStyle, getPowerProfile, applyMapStylePreferenceChange } from "./powerProfile";
+import {
+  effectiveMapStyle,
+  effectiveMapTilt,
+  getPowerProfile,
+  applyMapStylePreferenceChange,
+  applyMapTiltPreferenceChange,
+} from "./powerProfile";
 
 describe("powerProfile", () => {
   it("returns throttled intervals in low power mode", () => {
@@ -18,6 +24,13 @@ describe("powerProfile", () => {
     expect(effectiveMapStyle("satellite", false)).toBe("satellite");
   });
 
+  it("forces flat map tilt in low power mode", () => {
+    expect(effectiveMapTilt("flat", true)).toBe("flat");
+    expect(effectiveMapTilt("flat", false)).toBe("flat");
+    expect(effectiveMapTilt("tilted", true)).toBe("flat");
+    expect(effectiveMapTilt("tilted", false)).toBe("tilted");
+  });
+
   it("clears low power mode when satellite is selected", () => {
     const setMapStyle = vi.fn();
     const setLowPowerMode = vi.fn();
@@ -30,5 +43,19 @@ describe("powerProfile", () => {
 
     expect(setLowPowerMode).toHaveBeenCalledWith(false);
     expect(setMapStyle).toHaveBeenCalledWith("satellite");
+  });
+
+  it("clears low power mode when tilted map is selected", () => {
+    const setMapTilt = vi.fn();
+    const setLowPowerMode = vi.fn();
+
+    applyMapTiltPreferenceChange("tilted", {
+      lowPowerMode: true,
+      setMapTilt,
+      setLowPowerMode,
+    });
+
+    expect(setLowPowerMode).toHaveBeenCalledWith(false);
+    expect(setMapTilt).toHaveBeenCalledWith("tilted");
   });
 });

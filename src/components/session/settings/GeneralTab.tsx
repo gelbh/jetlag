@@ -2,7 +2,9 @@ import { TransitControls } from "../../map/TransitControls";
 import type { TransitRouteFilter } from "../../../domain/map/transit";
 import type { DistanceUnit } from "../../../domain/map/distance";
 import type { MapStyle } from "../../../domain/map/mapBasemaps";
-import { effectiveMapStyle } from "../../../domain/device/powerProfile";
+import type { MapTilt } from "../../../domain/map/mapTilt";
+import { MAP_TILT_OPTIONS } from "../../../domain/map/mapTilt";
+import { effectiveMapStyle, effectiveMapTilt } from "../../../domain/device/powerProfile";
 import type { NotificationPreferences } from "../../../domain/device/notifications";
 import { SegmentControl } from "../../ui/SegmentControl";
 import { SettingsToggleRow } from "../SettingsToggleRow";
@@ -22,6 +24,8 @@ export interface MapSettingsGeneralTabProps {
   distanceUnitEditable?: boolean;
   mapStyle: MapStyle;
   onMapStyleChange: (style: MapStyle) => void;
+  mapTilt: MapTilt;
+  onMapTiltChange: (tilt: MapTilt) => void;
   locationError?: string | null;
   transitEnabled: boolean;
   transitLiveEnabled: boolean;
@@ -62,6 +66,8 @@ export function MapSettingsGeneralTab({
   distanceUnitEditable = false,
   mapStyle,
   onMapStyleChange,
+  mapTilt,
+  onMapTiltChange,
   locationError,
   transitEnabled,
   transitLiveEnabled,
@@ -86,6 +92,7 @@ export function MapSettingsGeneralTab({
   onEnableNotifications,
 }: MapSettingsGeneralTabProps) {
   const displayedMapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
+  const displayedMapTilt = effectiveMapTilt(mapTilt, lowPowerMode);
 
   return (
     <div className="space-y-3">
@@ -156,6 +163,26 @@ export function MapSettingsGeneralTab({
       ) : (
         <p className="text-xs text-ink-dim">
           Quick toggle: Map / Sat on the bottom tool bar.
+        </p>
+      )}
+
+      <SegmentControl
+        variant="pill"
+        value={displayedMapTilt}
+        options={MAP_TILT_OPTIONS.map((option) => ({
+          ...option,
+          disabled: option.value === "tilted" ? lowPowerMode : false,
+        }))}
+        onChange={onMapTiltChange}
+        aria-label="Map tilt"
+      />
+      {lowPowerMode ? (
+        <p className="text-xs text-ink-dim">
+          Low power mode keeps the map flat. Turn it off to use tilted view.
+        </p>
+      ) : (
+        <p className="text-xs text-ink-dim">
+          Subtle 3D perspective. Precise placement recenters the map automatically.
         </p>
       )}
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, type MutableRefObject } from "react";
+import { useEffect, useRef, type CSSProperties, type MutableRefObject } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import type {
   LatLngBounds,
@@ -7,11 +7,18 @@ import type {
   LeafletEvent,
 } from "leaflet";
 import { getMapBasemap, type MapStyle } from "../../domain/map/mapBasemaps";
+import {
+  isMapTiltActive,
+  mapTiltCssVariables,
+  mapTiltFitBoundsPadding,
+  MAP_TILT_TILE_KEEP_BUFFER,
+  type MapTilt,
+} from "../../domain/map/mapTilt";
 import { isUsableMapBounds } from "../../domain/geometry/geometry";
 import { MOTION_MAP_CAMERA_S } from "../../domain/device/motionTokens";
 import { useMotionProfile } from "../../hooks/useMotionProfile";
 import { MapChromeListener } from "./MapChromeListener";
-import { MapStyleToggle } from "./MapStyleToggle";
+import { MapLeftChromeControls } from "./MapLeftChromeControls";
 import { MapZoomControl, type MapZoomControlInset } from "./MapZoomControl";
 
 interface MapViewProps {
@@ -19,6 +26,8 @@ interface MapViewProps {
   zoom?: number;
   className?: string;
   mapStyle?: MapStyle;
+  mapTilt?: MapTilt;
+  lowPowerMode?: boolean;
   onBoundsChange?: (bounds: LatLngBounds) => void;
   /** Fired when the user pans or zooms the map (not programmatic fit/resize). */
   onUserViewportFramed?: () => void;
@@ -39,6 +48,8 @@ interface MapViewProps {
   zoomControlInset?: MapZoomControlInset;
   onMapStyleChange?: (style: MapStyle) => void;
   showMapStyleToggle?: boolean;
+  onMapTiltChange?: (tilt: MapTilt) => void;
+  showMapTiltToggle?: boolean;
   mapStyleControlInset?: MapZoomControlInset;
   children?: React.ReactNode;
   mapKey?: string;
@@ -51,6 +62,7 @@ function MapFocus({
   suppressChromeHideRef,
   fitBoundsPadding = [32, 32],
   focusPaddingBias,
+  mapTilt = "flat",
 }: {
   focusBounds: LatLngBoundsExpression | null;
   fitBoundsMode: "once" | "always";
@@ -58,11 +70,13 @@ function MapFocus({
   suppressChromeHideRef?: MutableRefObject<boolean>;
   fitBoundsPadding?: [number, number];
   focusPaddingBias?: number;
+  mapTilt?: MapTilt;
 }) {
   const map = useMap();
   const { prefersReducedMotion, lowPowerMode } = useMotionProfile();
   const hasFittedRef = useRef(false);
   const lastRecenterRef = useRef(recenterToken);
+  const lastMapTiltRef = useRef(mapTilt);
   const animate = !prefersReducedMotion && !lowPowerMode;
 
   useEffect(() => {
@@ -71,10 +85,14 @@ function MapFocus({
     }
 
     const recenterRequested = recenterToken !== lastRecenterRef.current;
+    const tiltChanged = mapTilt !== lastMapTiltRef.current;
+    lastMapTiltRef.current = mapTilt;
+
     if (
       fitBoundsMode === "once" &&
       hasFittedRef.current &&
-      !recenterRequested
+      !recenterRequested &&
+      !tiltChanged
     ) {
       return;
     }
@@ -87,7 +105,8 @@ function MapFocus({
 
     map.invalidateSize();
 
-    const [padY, padX] = fitBoundsPadding;
+    const resolvedPadding = mapTiltFitBoundsPadding(fitBoundsPadding, mapTilt);
+    const [padY, padX] = resolvedPadding;
     const fitOptions =
       focusPaddingBias !== undefined
         ? {
@@ -99,7 +118,7 @@ function MapFocus({
               number,
             ],
           }
-        : { padding: fitBoundsPadding };
+        : { padding: resolvedPadding };
 
     map.fitBounds(focusBounds, fitOptions);
     hasFittedRef.current = true;
@@ -119,6 +138,7 @@ function MapFocus({
     fitBoundsPadding,
     focusPaddingBias,
     map,
+    mapTilt,
     recenterToken,
     suppressChromeHideRef,
   ]);
@@ -236,6 +256,8 @@ export function MapView({
   zoom = 13,
   className,
   mapStyle = "standard",
+  mapTilt = "flat",
+  lowPowerMode = false,
   onBoundsChange,
   onUserViewportFramed,
   onMapClick,
@@ -251,19 +273,31 @@ export function MapView({
   zoomControlInset = "dock",
   onMapStyleChange,
   showMapStyleToggle,
+  onMapTiltChange,
+  showMapTiltToggle,
   mapStyleControlInset,
   children,
   mapKey,
 }: MapViewProps) {
   const basemap = getMapBasemap(mapStyle);
+  const tiltActive = isMapTiltActive(mapTilt);
   const zoomControlEnabled = showZoomControl ?? interactive;
   const mapStyleToggleEnabled =
     (showMapStyleToggle ?? Boolean(onMapStyleChange)) &&
     Boolean(onMapStyleChange);
+  const mapTiltToggleEnabled =
+    (showMapTiltToggle ?? Boolean(onMapTiltChange)) && Boolean(onMapTiltChange);
   const styleControlInset = mapStyleControlInset ?? zoomControlInset;
+  const tiltShellStyle = tiltActive
+    ? (mapTiltCssVariables() as CSSProperties)
+    : undefined;
 
   return (
-    <div className={className ?? "h-full w-full"}>
+    <div
+      className={className ?? "h-full w-full"}
+      {...(tiltActive ? { "data-map-tilt": "tilted" as const } : {})}
+      style={tiltShellStyle}
+    >
       <MapContainer
         key={mapKey}
         center={center}
@@ -283,6 +317,7 @@ export function MapView({
           attribution=""
           url={basemap.url}
           maxZoom={basemap.maxZoom}
+          {...(tiltActive ? { keepBuffer: MAP_TILT_TILE_KEEP_BUFFER } : {})}
           {...(basemap.subdomains ? { subdomains: basemap.subdomains } : {})}
         />
         <MapEvents
@@ -303,17 +338,21 @@ export function MapView({
           suppressChromeHideRef={suppressChromeHideRef}
           fitBoundsPadding={fitBoundsPadding}
           focusPaddingBias={focusPaddingBias}
+          mapTilt={mapTilt}
         />
         <MapZoomControl
           enabled={zoomControlEnabled}
           inset={zoomControlInset}
           suppressRef={suppressChromeHideRef}
         />
-        {onMapStyleChange ? (
-          <MapStyleToggle
-            enabled={mapStyleToggleEnabled}
+        {onMapStyleChange || onMapTiltChange ? (
+          <MapLeftChromeControls
+            styleToggleEnabled={mapStyleToggleEnabled}
             mapStyle={mapStyle}
             onMapStyleChange={onMapStyleChange}
+            tiltToggleEnabled={mapTiltToggleEnabled && !lowPowerMode}
+            mapTilt={mapTilt}
+            onMapTiltChange={onMapTiltChange}
             inset={styleControlInset}
             suppressRef={suppressChromeHideRef}
           />

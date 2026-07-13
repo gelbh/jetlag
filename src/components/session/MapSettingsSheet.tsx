@@ -12,6 +12,7 @@ import type { GameSize } from "../../domain/session/gameSize";
 import { type AdvancedSessionSettingsValue } from "../../domain/session/advancedSessionSettings";
 import { AdvancedSessionSettings } from "./AdvancedSessionSettings";
 import type { MapStyle } from "../../domain/map/mapBasemaps";
+import type { MapTilt } from "../../domain/map/mapTilt";
 import type { LayerVisibility } from "../../state/sessionStore";
 import type { NotificationPreferences } from "../../domain/device/notifications";
 import { isNativeNotificationsSupported } from "../../services/core/notifications";
@@ -33,6 +34,8 @@ export interface MapSettingsGeneralProps {
   distanceUnitEditable?: boolean;
   mapStyle: MapStyle;
   onMapStyleChange: (style: MapStyle) => void;
+  mapTilt: MapTilt;
+  onMapTiltChange: (tilt: MapTilt) => void;
   locationError?: string | null;
   transitEnabled: boolean;
   transitLiveEnabled: boolean;
@@ -165,6 +168,8 @@ export function MapSettingsSheet({
             distanceUnitEditable={general.distanceUnitEditable}
             mapStyle={general.mapStyle}
             onMapStyleChange={general.onMapStyleChange}
+            mapTilt={general.mapTilt}
+            onMapTiltChange={general.onMapTiltChange}
             locationError={general.locationError}
             transitEnabled={general.transitEnabled}
             transitLiveEnabled={general.transitLiveEnabled}

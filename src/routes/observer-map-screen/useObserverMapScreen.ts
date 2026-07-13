@@ -6,7 +6,7 @@ import {
   fallbackGameArea,
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
-import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../domain/device/powerProfile";
+import { effectiveMapStyle, effectiveMapTilt, applyMapStylePreferenceChange, applyMapTiltPreferenceChange } from "../../domain/device/powerProfile";
 import { resolveSpectatorLayers } from "../../domain/session/observerPerspective";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
@@ -22,6 +22,8 @@ export function useObserverMapScreen() {
   const session = useSessionStore((state) => state.session);
   const myRole = useSessionStore((state) => state.myRole);
   const mapStyle = useMapStore((state) => state.mapStyle);
+  const mapTilt = useMapStore((state) => state.mapTilt);
+  const setMapTilt = useMapStore((state) => state.setMapTilt);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
   const layerVisibility = useMapStore((state) => state.layerVisibility);
@@ -43,6 +45,7 @@ export function useObserverMapScreen() {
   const resolvedGameArea = gameArea ?? session?.gameArea ?? null;
   const displayGameArea = playAreaReady ? fallbackGameArea(resolvedGameArea) : null;
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
+  const effectiveMapTiltValue = effectiveMapTilt(mapTilt, lowPowerMode);
   const handleMapStyleChange = useCallback(
     (style: typeof mapStyle) => {
       applyMapStylePreferenceChange(style, {
@@ -52,6 +55,16 @@ export function useObserverMapScreen() {
       });
     },
     [lowPowerMode, setLowPowerMode, setMapStyle],
+  );
+  const handleMapTiltChange = useCallback(
+    (tilt: typeof mapTilt) => {
+      applyMapTiltPreferenceChange(tilt, {
+        lowPowerMode,
+        setMapTilt,
+        setLowPowerMode,
+      });
+    },
+    [lowPowerMode, setLowPowerMode, setMapTilt],
   );
   const center = useMemo<LatLngTuple>(() => {
     if (!displayGameArea) {
@@ -111,8 +124,12 @@ export function useObserverMapScreen() {
     center,
     mapFocusBounds,
     mapStyle,
+    mapTilt,
+    setMapTilt,
     handleMapStyleChange,
+    handleMapTiltChange,
     effectiveBasemapStyle,
+    effectiveMapTilt: effectiveMapTiltValue,
     layerVisibility,
     observerPerspective,
     setObserverPerspective,

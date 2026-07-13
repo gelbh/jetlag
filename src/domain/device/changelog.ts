@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.6.0";
+export const APP_VERSION = "0.6.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.6.1",
+    date: "2026-07-14",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Map settings: optional tilted map view with a settings toggle and HUD control; low-power mode keeps the map flat.",
+        ],
+      }
+    ],
+  },
   {
     version: "0.6.0",
     date: "2026-07-13",
