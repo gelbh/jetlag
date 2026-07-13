@@ -1,5 +1,15 @@
 /* map-shell.css — map shell and status chrome */
 @layer components {
+  .jl-stamp-code,
+  .admin-diag-row,
+  .admin-monitor-code-badge,
+  .jl-game-chat-scroll,
+  .jl-sync-detail-panel__detail {
+    user-select: text;
+    -webkit-user-select: text;
+    -webkit-touch-callout: default;
+  }
+
   .map-screen-shell {
     position: fixed;
     inset: 0;
@@ -531,9 +541,25 @@
   }
 
   /* Admin map — mission-control layout (tablet/desktop) */
+  .admin-dashboard-list-scroll {
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  .admin-session-row {
+    min-height: 0;
+  }
+
   .admin-monitor-pane {
     container-type: inline-size;
     container-name: admin-monitor;
+  }
+
+  @media (min-width: 1024px) {
+    .admin-monitor-pane {
+      height: 100%;
+      min-height: 0;
+    }
   }
 
   @container admin-monitor (min-width: 40rem) {

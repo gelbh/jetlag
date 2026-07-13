@@ -1,5 +1,5 @@
 import { type Browser, type Page, expect } from "@playwright/test";
-import { LOCAL_GAME_AREA } from "./map";
+import { E2E_GEOLOCATION, LOCAL_GAME_AREA } from "./map";
 import { dismissMapOnboarding, prepareE2EPage } from "./page-init";
 import type { BlockExternalAssetsOptions } from "./network";
 
@@ -172,8 +172,12 @@ export async function createMultiplayerContexts(
   browser: Browser,
   network: BlockExternalAssetsOptions = {},
 ) {
-  const hostContext = await browser.newContext();
-  const guestContext = await browser.newContext();
+  const contextOptions = {
+    geolocation: E2E_GEOLOCATION,
+    permissions: ["geolocation"],
+  };
+  const hostContext = await browser.newContext(contextOptions);
+  const guestContext = await browser.newContext(contextOptions);
   const hostPage = await hostContext.newPage();
   const guestPage = await guestContext.newPage();
 

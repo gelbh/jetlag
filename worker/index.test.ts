@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { isSpaFallbackForAssetRequest } from "./index";
+import {
+  addScriptNonceToCsp,
+  applyDocumentCspNonce,
+  injectScriptNonces,
+  isHtmlDocumentResponse,
+  shouldApplyDocumentCsp,
+} from "./documentCsp";
+import worker, { isSpaFallbackForAssetRequest } from "./index";
 import {
   handleSentryTunnelRequest,
   parseSentryEnvelopeTarget,
@@ -34,6 +41,271 @@ describe("isSpaFallbackForAssetRequest", () => {
     });
 
     expect(isSpaFallbackForAssetRequest(request, response)).toBe(false);
+  });
+});
+
+describe("document CSP nonce", () => {
+  it("detects html document responses", () => {
+    expect(
+      isHtmlDocumentResponse(
+        new Response("<!doctype html>", {
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      isHtmlDocumentResponse(
+        new Response("", {
+          headers: { "Content-Type": "TEXT/HTML; charset=utf-8" },
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      isHtmlDocumentResponse(
+        new Response("{}", {
+          headers: { "Content-Type": "application/json" },
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      isHtmlDocumentResponse(
+        new Response("", {
+          headers: { "Content-Type": "application/text-html" },
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it("skips empty-body and cache responses", () => {
+    expect(
+      shouldApplyDocumentCsp(
+        new Response(null, {
+          status: 204,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      shouldApplyDocumentCsp(
+        new Response(null, {
+          status: 304,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      shouldApplyDocumentCsp(
+        new Response(null, {
+          status: 205,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it("uses HTMLRewriter when the runtime provides it", async () => {
+    class MockHTMLRewriter {
+      #onScript?: (element: {
+        hasAttribute: (name: string) => boolean;
+        setAttribute: (name: string, value: string) => void;
+      }) => void;
+
+      on(
+        selector: string,
+        handlers: {
+          element: (element: {
+            hasAttribute: (name: string) => boolean;
+            setAttribute: (name: string, value: string) => void;
+          }) => void;
+        },
+      ) {
+        if (selector === "script") {
+          this.#onScript = handlers.element;
+        }
+        return this;
+      }
+
+      transform(response: Response) {
+        return {
+          text: () =>
+            response.text().then((html) => {
+              return html.replace(
+                /<script\b([^>]*)>/gi,
+                (_match, rawAttributes: string) => {
+                  let attributes = rawAttributes.trim();
+                  const element = {
+                    hasAttribute(name: string) {
+                      return new RegExp(`\\b${name}\\s*=`).test(attributes);
+                    },
+                    setAttribute(name: string, value: string) {
+                      attributes = attributes
+                        ? `${attributes} ${name}="${value}"`
+                        : `${name}="${value}"`;
+                    },
+                  };
+
+                  this.#onScript?.(element);
+                  return attributes ? `<script ${attributes}>` : "<script>";
+                },
+              );
+            }),
+        };
+      }
+    }
+
+    vi.stubGlobal("HTMLRewriter", MockHTMLRewriter);
+
+    try {
+      expect(
+        await injectScriptNonces(
+          '<script src="/a.js"></script><script nonce="existing" src="/b.js"></script>',
+          "rewriter-nonce",
+        ),
+      ).toBe(
+        '<script src="/a.js" nonce="rewriter-nonce"></script><script nonce="existing" src="/b.js"></script>',
+      );
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("scopes script-src nonce updates without touching other directives", () => {
+    const csp =
+      "default-src 'self'; style-src 'self' 'nonce-style'; script-src 'self' https://www.google.com 'sha256-abc='; img-src 'self'";
+
+    expect(addScriptNonceToCsp(csp, "test-nonce")).toBe(
+      "default-src 'self'; style-src 'self' 'nonce-style'; script-src 'self' https://www.google.com 'sha256-abc=' 'nonce-test-nonce'; img-src 'self'",
+    );
+    expect(
+      addScriptNonceToCsp(
+        "default-src 'self'; script-src-elem 'self' https://example.com; script-src 'self'",
+        "elem-nonce",
+      ),
+    ).toBe(
+      "default-src 'self'; script-src-elem 'self' https://example.com 'nonce-elem-nonce'; script-src 'self'",
+    );
+  });
+
+  it("adds matching nonces to CSP and script tags", async () => {
+    const csp =
+      "default-src 'self'; script-src 'self' https://www.google.com 'sha256-abc='; style-src 'self'";
+
+    expect(
+      await injectScriptNonces(
+        '<script src="/boot-recovery.js"></script><script type="module" src="/assets/index.js"></script>',
+        "test-nonce",
+      ),
+    ).toBe(
+      '<script nonce="test-nonce" src="/boot-recovery.js"></script><script nonce="test-nonce" type="module" src="/assets/index.js"></script>',
+    );
+
+    const response = await applyDocumentCspNonce(
+      new Response("<!doctype html><script src=\"/boot-recovery.js\"></script>", {
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Content-Security-Policy": csp,
+        },
+      }),
+    );
+
+    const body = await response.text();
+    const headerCsp = response.headers.get("Content-Security-Policy") ?? "";
+    const headerNonce = headerCsp.match(/'nonce-([^']+)'/)?.[1];
+    const bodyNonce = body.match(/nonce="([^"]+)"/)?.[1];
+
+    expect(headerNonce).toBeTruthy();
+    expect(bodyNonce).toBe(headerNonce);
+    expect(body).toContain(`nonce="${headerNonce}"`);
+  });
+
+  it("preserves existing script nonces", async () => {
+    expect(
+      await injectScriptNonces(
+        '<script nonce="existing" src="/a.js"></script><script src="/b.js"></script>',
+        "new-nonce",
+      ),
+    ).toBe(
+      '<script nonce="existing" src="/a.js"></script><script nonce="new-nonce" src="/b.js"></script>',
+    );
+  });
+});
+
+describe("worker fetch", () => {
+  it("applies document CSP nonce to html asset responses", async () => {
+    const html = '<!doctype html><script src="/boot-recovery.js"></script>';
+    const csp = "default-src 'self'; script-src 'self' https://www.google.com";
+    const assetResponse = new Response(html, {
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Security-Policy": csp,
+      },
+    });
+
+    const env = {
+      ASSETS: {
+        fetch: vi.fn().mockResolvedValue(assetResponse),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/"),
+      env,
+    );
+
+    const body = await response.text();
+    const headerCsp = response.headers.get("Content-Security-Policy") ?? "";
+    const headerNonce = headerCsp.match(/'nonce-([^']+)'/)?.[1];
+    const bodyNonce = body.match(/nonce="([^"]+)"/)?.[1];
+
+    expect(headerNonce).toBeTruthy();
+    expect(bodyNonce).toBe(headerNonce);
+    expect(body).toContain(`nonce="${headerNonce}"`);
+  });
+
+  it("returns non-html asset responses unchanged", async () => {
+    const javascript = "export const version = 1;";
+    const assetResponse = new Response(javascript, {
+      status: 200,
+      headers: { "Content-Type": "application/javascript" },
+    });
+
+    const env = {
+      ASSETS: {
+        fetch: vi.fn().mockResolvedValue(assetResponse),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/assets/index.js"),
+      env,
+    );
+
+    expect(await response.text()).toBe(javascript);
+    expect(response.headers.get("Content-Security-Policy")).toBeNull();
+  });
+
+  it("adds script nonces without inventing a CSP header", async () => {
+    const html = '<!doctype html><script src="/boot-recovery.js"></script>';
+    const assetResponse = new Response(html, {
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+      },
+    });
+
+    const env = {
+      ASSETS: {
+        fetch: vi.fn().mockResolvedValue(assetResponse),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/"),
+      env,
+    );
+
+    const body = await response.text();
+    expect(body).toMatch(/<script nonce="[^"]+" src="\/boot-recovery\.js"><\/script>/);
+    expect(response.headers.get("Content-Security-Policy")).toBeNull();
   });
 });
 

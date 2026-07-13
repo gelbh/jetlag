@@ -1,26 +1,34 @@
 import { LoadingSpinnerRing } from "../components/ui/LoadingSpinner";
+import type { RouteLoadingReason } from "./routeTransitionContextInstance";
 import { useRouteTransition } from "./useRouteTransition";
 
+const LOADING_LABELS: Record<RouteLoadingReason, string> = {
+  page: "Loading…",
+  map: "Loading map…",
+  "sign-in": "Signing in…",
+  premium: "Loading premium…",
+  admin: "Loading admin…",
+};
+
 export function RouteTransitionOverlay() {
-  const { phase } = useRouteTransition();
+  const { phase, loadingReason } = useRouteTransition();
 
   if (phase !== "loading") {
     return null;
   }
 
+  const label = LOADING_LABELS[loadingReason ?? "page"];
+
   return (
-    <div
+    <output
       className="route-transition-overlay"
-      role="status"
       aria-busy="true"
-      aria-live="polite"
-      aria-atomic="true"
-      aria-label="Loading page"
+      aria-label={label}
     >
       <div className="route-transition-overlay-content">
         <LoadingSpinnerRing size="md" className="text-brand-blue" />
-        <span className="route-transition-overlay-label">Loading…</span>
+        <span className="route-transition-overlay-label">{label}</span>
       </div>
-    </div>
+    </output>
   );
 }

@@ -1,5 +1,7 @@
 import type { To } from "react-router-dom";
 import { lazyWithChunkRetry } from "../domain/device/lazyWithChunkRetry";
+import { lazyRouteLoaderKey, normalizeRoutePath } from "./routeMetadata";
+import { markRouteImportWarm } from "./routeWarmState";
 
 export const importMapScreen = () =>
   import("../routes/MapScreen").then((m) => ({ default: m.MapScreen }));
@@ -30,29 +32,7 @@ export const GamePresetListLazy = lazyWithChunkRetry(importGamePresetList);
 export const GamePresetEditorLazy = lazyWithChunkRetry(importGamePresetEditor);
 export const TutorialLazy = lazyWithChunkRetry(importTutorial);
 
-const PRESET_EDIT_PATH_RE = /^\/presets\/[^/]+\/edit$/;
-
-const LAZY_ROUTE_LOADERS: Record<
-  string,
-  keyof typeof routeImporter
-> = {
-  "/map": "importMapScreen",
-  "/create": "importCreateSession",
-  "/tutorial": "importTutorial",
-  "/presets": "importGamePresetList",
-  "/presets/new": "importGamePresetEditor",
-  "/presets/:id/edit": "importGamePresetEditor",
-};
-
-export function normalizeRoutePath(path: string): string {
-  const base = path.split("?")[0]?.split("#")[0] ?? "/";
-
-  if (PRESET_EDIT_PATH_RE.test(base)) {
-    return "/presets/:id/edit";
-  }
-
-  return base || "/";
-}
+export { isLazyRoute, normalizeRoutePath } from "./routeMetadata";
 
 export function resolveNavigatePath(to: To): string {
   if (typeof to === "string") {
@@ -62,13 +42,36 @@ export function resolveNavigatePath(to: To): string {
   return normalizeRoutePath(to.pathname ?? "/");
 }
 
-export function isLazyRoute(path: string): boolean {
-  return normalizeRoutePath(path) in LAZY_ROUTE_LOADERS;
+export function resolveNavigateDestinationKey(to: To): string {
+  if (typeof to === "string") {
+    const hashIndex = to.indexOf("#");
+    const queryIndex = to.indexOf("?");
+    const pathEnd = Math.min(
+      hashIndex === -1 ? to.length : hashIndex,
+      queryIndex === -1 ? to.length : queryIndex,
+    );
+    const pathPart = to.slice(0, pathEnd) || "/";
+    const queryPart =
+      queryIndex === -1
+        ? ""
+        : to.slice(queryIndex, hashIndex === -1 ? undefined : hashIndex);
+    const hashPart = hashIndex === -1 ? "" : to.slice(hashIndex);
+
+    return `${normalizeRoutePath(pathPart)}${queryPart}${hashPart}`;
+  }
+
+  const pathname = normalizeRoutePath(to.pathname ?? "/");
+  const search = to.search ?? "";
+  const hash = to.hash ?? "";
+
+  return `${pathname}${search}${hash}`;
 }
 
 export async function preloadRoute(path: string): Promise<void> {
-  const loaderKey = LAZY_ROUTE_LOADERS[normalizeRoutePath(path)];
+  const normalizedPath = normalizeRoutePath(path);
+  const loaderKey = lazyRouteLoaderKey(path);
   if (loaderKey) {
     await routeImporter[loaderKey]();
+    markRouteImportWarm(normalizedPath);
   }
 }

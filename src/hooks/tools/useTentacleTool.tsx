@@ -10,7 +10,6 @@ import {
   type TentaclePoi,
 } from "../../domain/map/annotations";
 import {
-  buildTentacleEliminationRegion,
   tentacleEliminationJsonForAnswer,
 } from "../../domain/geometry/tentacleGeometry";
 import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
@@ -282,32 +281,6 @@ export function useTentacleTool({
     }
   };
 
-  const tentacleEliminationPreview = useMemo(() => {
-    if (
-      !tentacleCenter ||
-      tentacleOutOfReach ||
-      !selectedPoiId ||
-      tentaclePois.length < 2
-    ) {
-      return null;
-    }
-
-    return buildTentacleEliminationRegion(
-      tentacleCenter,
-      searchRadiusMeters,
-      tentaclePois,
-      selectedPoiId,
-      gameArea,
-    );
-  }, [
-    gameArea,
-    selectedPoiId,
-    tentacleCenter,
-    searchRadiusMeters,
-    tentacleOutOfReach,
-    tentaclePois,
-  ]);
-
   const commit = async () => {
     if (!canSubmitQuestion) {
       setMapError("Finish the open question before starting another.");
@@ -496,7 +469,6 @@ export function useTentacleTool({
       tentaclePois,
       tentacleSelectedPoiId: selectedPoiId,
       tentacleOutOfReach,
-      tentacleEliminationPreview,
       seekerResolving: tentacleLoading && tentacleCenter !== null,
     },
     placementCrosshair,
