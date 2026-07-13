@@ -8,7 +8,7 @@ import type {
 } from "leaflet";
 import { getMapBasemap, type MapStyle } from "../../domain/map/mapBasemaps";
 import { isUsableMapBounds } from "../../domain/geometry/geometry";
-import { MOTION_MAP_CAMERA_MS } from "../../domain/device/motionTokens";
+import { MOTION_MAP_CAMERA_S } from "../../domain/device/motionTokens";
 import { useMotionProfile } from "../../hooks/useMotionProfile";
 import { MapChromeListener } from "./MapChromeListener";
 import { MapStyleToggle } from "./MapStyleToggle";
@@ -92,7 +92,7 @@ function MapFocus({
       focusPaddingBias !== undefined
         ? {
             animate,
-            duration: MOTION_MAP_CAMERA_MS,
+            duration: MOTION_MAP_CAMERA_S,
             paddingTopLeft: [padY, padX] as [number, number],
             paddingBottomRight: [padY, padX + focusPaddingBias] as [
               number,
