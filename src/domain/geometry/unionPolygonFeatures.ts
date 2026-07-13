@@ -83,8 +83,12 @@ function unionPairTurf(
   left: PolygonFeature,
   right: PolygonFeature,
 ): PolygonFeature | null {
-  const merged = union(featureCollection([left, right]));
-  return isPolygonFeature(merged) ? merged : null;
+  try {
+    const merged = union(featureCollection([left, right]));
+    return isPolygonFeature(merged) ? merged : null;
+  } catch {
+    return null;
+  }
 }
 
 function unionPairMartinez(
