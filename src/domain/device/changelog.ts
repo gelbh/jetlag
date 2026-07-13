@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.5.13";
+export const APP_VERSION = "0.5.14";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.5.14",
+    date: "2026-07-13",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Startup: branded boot splash paints before the app loads, including offline return visits; shows a retry prompt if the bundle never loads.",
+        ],
+      }
+    ],
+  },
   {
     version: "0.5.13",
     date: "2026-07-13",

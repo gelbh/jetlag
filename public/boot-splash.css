@@ -1,0 +1,125 @@
+#boot-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: max(1.25rem, env(safe-area-inset-top, 0px))
+    max(1.25rem, env(safe-area-inset-right, 0px))
+    max(1rem, env(safe-area-inset-bottom, 0px))
+    max(1.25rem, env(safe-area-inset-left, 0px));
+  background: #0e132c;
+  color: #f3f4f5;
+}
+
+#boot-splash-lockup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+#boot-splash-mark {
+  width: 4rem;
+  height: 4rem;
+}
+
+#boot-splash-wordmark {
+  margin: 0;
+  font-family: "Barlow", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: #4378b1;
+}
+
+#boot-splash-status {
+  margin: 0;
+  font-family: "Barlow", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: rgba(243, 244, 245, 0.72);
+}
+
+#boot-splash-error {
+  display: none;
+  max-width: 18rem;
+  text-align: center;
+}
+
+#boot-splash-error[hidden] {
+  display: none !important;
+}
+
+#boot-splash.is-error #boot-splash-lockup,
+#boot-splash.is-error #boot-splash-status {
+  display: none;
+}
+
+#boot-splash.is-error #boot-splash-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+#boot-splash-error-message {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: rgba(243, 244, 245, 0.88);
+}
+
+#boot-splash-retry {
+  appearance: none;
+  border: 1px solid rgba(243, 244, 245, 0.24);
+  border-radius: 0.5rem;
+  background: rgba(243, 244, 245, 0.08);
+  color: #f3f4f5;
+  cursor: pointer;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.625rem 1rem;
+}
+
+#boot-splash-retry:focus-visible {
+  outline: 2px solid #4378b1;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #boot-splash-mark {
+    animation: boot-splash-mark-pulse 1.2s ease-in-out infinite;
+  }
+}
+
+@keyframes boot-splash-mark-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.88;
+    transform: scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #boot-splash-mark {
+    animation: none;
+  }
+}
