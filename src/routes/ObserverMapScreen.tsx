@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Navigate } from "react-router-dom";
+import { AppNavigate } from "../navigation/AppNavigate";
 import { GameAreaMask } from "../components/map/GameAreaMask";
 import { MapView } from "../components/map/MapView";
 import { MapViewportTracker } from "../components/map/MapViewportTracker";
@@ -41,12 +41,12 @@ export function ObserverMapScreen() {
 
   if (!controller.session) {
     return (
-      <Navigate to={controller.myRole === "admin" ? "/admin" : "/"} replace />
+      <AppNavigate to={controller.myRole === "admin" ? "/admin" : "/"} replace />
     );
   }
 
   if (controller.myRole !== "observer" && controller.myRole !== "admin") {
-    return <Navigate to="/map" replace />;
+    return <AppNavigate to="/map" replace />;
   }
 
   if (!controller.playAreaReady) {

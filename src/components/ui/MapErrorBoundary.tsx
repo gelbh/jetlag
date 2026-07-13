@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { AppLink } from "../navigation/AppLink";
 import {
   clearChunkReloadFlag,
   hasChunkReloadBeenAttempted,
@@ -94,12 +94,12 @@ export class MapErrorBoundary extends Component<
               ) : null}
             </MapFloatAlertPanel>
           )}
-          <Link
+          <AppLink
             to="/"
             className="btn-secondary border border-border px-4 py-2 text-sm"
           >
             {appUpdateCopy.mapErrorBackHome}
-          </Link>
+          </AppLink>
         </div>
       );
     }

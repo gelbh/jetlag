@@ -1,5 +1,6 @@
 import { useCallback, useId, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { AppLink } from "../components/navigation/AppLink";
+import { useParams } from "react-router-dom";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import type { LatLngBoundsExpression } from "leaflet";
 import {
@@ -311,9 +312,9 @@ export function GamePresetEditor() {
             Save preset
           </button>
           {existing && !needsMigrationReview ? (
-            <Link to={`/create?preset=${existing.id}`} className="btn-secondary">
+            <AppLink to={`/create?preset=${existing.id}`} className="btn-secondary">
               Host
-            </Link>
+            </AppLink>
           ) : null}
           {existing ? (
             <button
@@ -327,9 +328,9 @@ export function GamePresetEditor() {
               Delete
             </button>
           ) : null}
-          <Link to="/presets" className="btn-secondary">
+          <AppLink to="/presets" className="btn-secondary">
             Cancel
-          </Link>
+          </AppLink>
         </div>
       </div>
     </main>

@@ -1,0 +1,78 @@
+.route-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-deep);
+  animation: route-transition-overlay-enter var(--motion-fast, 200ms)
+    var(--ease-out-quint, cubic-bezier(0.22, 1, 0.36, 1)) both;
+}
+
+.route-transition-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.route-transition-overlay-label {
+  font-family: var(--font-display, inherit);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-secondary, currentColor);
+}
+
+@keyframes route-transition-overlay-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes route-transition-overlay-exit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-transition-overlay {
+    animation: route-transition-overlay-fade-in var(--motion-fast, 200ms) ease
+      both;
+  }
+
+  .route-transition-overlay .loading-spinner {
+    animation: none !important;
+  }
+}
+
+html[data-motion="reduce"] .route-transition-overlay {
+  animation: route-transition-overlay-fade-in var(--motion-fast, 200ms) ease
+    both;
+}
+
+html[data-motion="reduce"] .route-transition-overlay .loading-spinner {
+  animation: none !important;
+}
+
+@keyframes route-transition-overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

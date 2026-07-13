@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { AppLink } from "../../components/navigation/AppLink";
 import { SessionTimerLabel } from "../../components/session/SessionTimerLabel";
 import { SegmentControl } from "../../components/ui/SegmentControl";
 import { HudHomeIcon } from "../../components/ui/HudIcons";
@@ -100,12 +100,12 @@ export function ObserverMapScreenChrome({
               Chat
             </button>
             {myRole === "admin" ? (
-              <Link
+              <AppLink
                 to="/admin"
                 className="btn-secondary inline-flex min-h-11 items-center px-3 text-sm"
               >
                 Admin
-              </Link>
+              </AppLink>
             ) : null}
           </div>
         </div>

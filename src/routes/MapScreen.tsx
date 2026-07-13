@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { AppNavigate } from "../navigation/AppNavigate";
 import { HiderMapScreen } from "./HiderMapScreen";
 import { AdminMapScreen } from "./AdminMapScreen";
 import { ObserverMapScreen } from "./ObserverMapScreen";
@@ -25,7 +25,7 @@ export function MapScreen() {
   useEffect(() => () => teardownSessionUiState(), []);
 
   if (!session || !session.gameArea) {
-    return <Navigate to={session ? "/create" : "/"} replace />;
+    return <AppNavigate to={session ? "/create" : "/"} replace />;
   }
 
   if (myRole === "hider") {
