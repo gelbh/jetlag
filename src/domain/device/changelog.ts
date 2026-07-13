@@ -26,7 +26,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Map: reframes when placing tools on the seeker map and in interactive tutorials. Thermometer GPS walks show a distance radar circle and a muted remaining path on the map.",
           "Map: tentacle POI answers shade the play area outside the search disk and non-answered regions inside it; picking a different location updates the elimination preview.",
           "Navigation: repeat in-app route changes skip the loading overlay when the destination is already warm.",
-          "UI: disable accidental text selection across the app shell; chat, legal pages, session codes, and form fields stay selectable.",
+          "UI: prevents accidental text selection across the app shell; chat, legal pages, session codes, and form fields stay selectable.",
         ],
       }
     ],
