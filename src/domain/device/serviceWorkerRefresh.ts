@@ -94,9 +94,10 @@ export async function applyServiceWorkerUpdate(
 
   if (registerApplyUpdate) {
     await registerApplyUpdate(true);
-    return;
   }
 
+  // Manual "Refresh now" must always reload. vite-plugin-pwa's registerSW(true)
+  // no-ops when no worker is waiting, so keep a reload fallback either way.
   window.setTimeout(() => {
     window.location.reload();
   }, RELOAD_FALLBACK_MS);

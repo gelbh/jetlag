@@ -82,10 +82,28 @@ describe("serviceWorkerRefresh", () => {
     }
   });
 
-  it("delegates reload to the PWA register callback when provided", async () => {
-    const registerApplyUpdate = vi.fn().mockResolvedValue(undefined);
-    await applyServiceWorkerUpdate(undefined, registerApplyUpdate);
-    expect(registerApplyUpdate).toHaveBeenCalledWith(true);
+  it("delegates skip-waiting to the PWA register callback and still schedules reload fallback", async () => {
+    const reload = vi.fn();
+    const originalLocation = window.location;
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { ...originalLocation, reload },
+    });
+
+    try {
+      const registerApplyUpdate = vi.fn().mockResolvedValue(undefined);
+      await applyServiceWorkerUpdate(undefined, registerApplyUpdate);
+      expect(registerApplyUpdate).toHaveBeenCalledWith(true);
+      expect(reload).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(1500);
+      expect(reload).toHaveBeenCalledOnce();
+    } finally {
+      Object.defineProperty(window, "location", {
+        configurable: true,
+        value: originalLocation,
+      });
+    }
   });
 
   it("defers auto apply on the map with an active session", () => {
