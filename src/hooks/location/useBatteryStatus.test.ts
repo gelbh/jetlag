@@ -1,10 +1,14 @@
 // @vitest-environment jsdom
 import { renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { useBatteryStatus } from "./useBatteryStatus";
 
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
 describe("useBatteryStatus", () => {
-  it("publishes battery level without listeners when addEventListener is missing", async () => {
+  it("publishes battery level without touching addEventListener when missing", async () => {
     const battery = {
       level: 0.42,
       charging: false,

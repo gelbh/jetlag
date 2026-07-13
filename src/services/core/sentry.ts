@@ -11,6 +11,8 @@ const AUTH_NETWORK_FAILED = /auth\/network-request-failed/i;
 const STORAGE_UNAUTHORIZED = /storage\/unauthorized/i;
 const LEAFLET_POS_ERROR = /_leaflet_pos/i;
 const LEAFLET_CLASSLIST_ERROR = /evaluating 'e\.classList'/i;
+const MODULE_SCRIPT_IMPORT_FAILED = /Importing a module script failed/i;
+const BATTERY_ADD_EVENT_LISTENER = /addEventListener is not a function/i;
 const REACT_REFRESH_FRAME = /@react-refresh/i;
 const APP_CHECK_INVALID_SESSION = /Invalid session .*: Invalid input/i;
 const SENSITIVE_EXTRA_KEYS = new Set([
@@ -138,8 +140,8 @@ function isIgnoredClientNoiseEvent(
       typeof exception.value === "string" &&
       (LEAFLET_POS_ERROR.test(exception.value) ||
         LEAFLET_CLASSLIST_ERROR.test(exception.value) ||
-        /Importing a module script failed/i.test(exception.value) ||
-        /addEventListener is not a function/i.test(exception.value))
+        MODULE_SCRIPT_IMPORT_FAILED.test(exception.value) ||
+        BATTERY_ADD_EVENT_LISTENER.test(exception.value))
     ) {
       return true;
     }
