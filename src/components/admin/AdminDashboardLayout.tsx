@@ -1,24 +1,34 @@
 import type { ReactNode } from "react";
 
 export function AdminDashboardLayout({
-  list,
+  listFilters,
+  listRows,
   monitor,
   showMonitor,
 }: {
-  list: ReactNode;
+  listFilters: ReactNode;
+  listRows: ReactNode;
   monitor: ReactNode;
   showMonitor: boolean;
 }) {
+  if (!showMonitor) {
+    return (
+      <div className="space-y-3">
+        {listFilters}
+        {listRows}
+      </div>
+    );
+  }
+
   return (
-    <div
-      className={
-        showMonitor
-          ? "grid gap-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-start"
-          : "space-y-3"
-      }
-    >
-      <div className="min-w-0">{list}</div>
-      {showMonitor ? <div className="hidden min-w-0 lg:block">{monitor}</div> : null}
+    <div className="grid min-h-0 flex-1 gap-4 lg:h-full lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-stretch">
+      <div className="flex min-h-0 min-w-0 flex-col">
+        <div className="shrink-0">{listFilters}</div>
+        <div className="admin-dashboard-list-scroll min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+          {listRows}
+        </div>
+      </div>
+      <div className="hidden min-h-0 min-w-0 lg:block">{monitor}</div>
     </div>
   );
 }

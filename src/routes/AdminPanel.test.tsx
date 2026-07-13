@@ -116,5 +116,58 @@ describe("AdminPanel", () => {
     expect(screen.getByText("ABCD")).toBeInTheDocument();
     expect(screen.getByText("Dublin")).toBeInTheDocument();
     expect(screen.getAllByText("Seek").length).toBeGreaterThan(0);
+    expect(screen.queryByText(/\d+\s+seeker/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/\d+\s+hider/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/\d+\s+admin/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/free · medium/i)).toBeInTheDocument();
+  });
+
+  it("uses a scrollable session list column on desktop", () => {
+    authState.authReady = true;
+    authState.isPermanent = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.sessions = [
+      {
+        sessionId: "session-1",
+        code: "ABCD",
+        phase: "seek",
+        tier: "free",
+        gameSize: "medium",
+        roleCounts: { seeker: 1, hider: 1, observer: 0, admin: 0 },
+        hostUid: "host-1",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        memberCount: 2,
+        timerAccumulatedMs: 0,
+        timerRunningSince: "2026-01-01T00:00:00.000Z",
+        endGameStartedAt: null,
+        endGameRequestedAt: null,
+        hostAppVersion: null,
+        hidingPeriodMinutes: null,
+        regionPackId: null,
+        regionPackSubregionId: null,
+        transitMetroId: null,
+        gameAreaLabel: "Dublin",
+        lastActivityAt: "2026-01-02T00:00:00.000Z",
+      },
+    ];
+
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: query === "(min-width: 1024px)",
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+
+    renderWithRouter(<AdminPanel />);
+
+    expect(document.querySelector(".admin-dashboard-list-scroll")).toBeInTheDocument();
+    expect(document.querySelector(".home-poster-viewport")).toBeInTheDocument();
   });
 });
