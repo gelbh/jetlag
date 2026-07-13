@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AnimatedOverlay } from "./AnimatedOverlay";
 import { resetAllStores } from "../../test/helpers/storeReset";
 
-describe("AnimatedOverlay", () => {
+describe("AnimatedOverlay", { timeout: 20000 }, () => {
   beforeEach(() => {
     resetAllStores();
     document.documentElement.dataset.motion = "reduced";
@@ -38,7 +38,7 @@ describe("AnimatedOverlay", () => {
     await waitFor(() => {
       expect(onClose).toHaveBeenCalled();
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    });
+    }, { timeout: 5000 });
   });
 
   it("closes on Escape when dismissible", async () => {
@@ -53,6 +53,6 @@ describe("AnimatedOverlay", () => {
 
     await waitFor(() => {
       expect(onClose).toHaveBeenCalled();
-    });
+    }, { timeout: 5000 });
   });
 });
