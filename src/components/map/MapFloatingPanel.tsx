@@ -8,9 +8,10 @@ type PeekHandleProps = PanelHandleProps & {
 };
 
 interface MapFloatingPanelProps {
-  minimized: boolean;
+  displayMinimized: boolean;
   onMinimizedChange?: (minimized: boolean) => void;
   mapPanning?: boolean;
+  isDragging?: boolean;
   title?: React.ReactNode;
   peekLabel?: string;
   peekHint?: string;
@@ -32,9 +33,10 @@ interface MapFloatingPanelProps {
 }
 
 export function MapFloatingPanel({
-  minimized,
+  displayMinimized,
   onMinimizedChange,
   mapPanning = false,
+  isDragging = false,
   title,
   peekLabel,
   peekHint = "Tap to expand",
@@ -54,19 +56,20 @@ export function MapFloatingPanel({
   children,
 }: MapFloatingPanelProps) {
   const { decorativeAnimate } = useMotionProfile();
-  const panelMotionClass = !minimized && decorativeAnimate ? "jl-panel-enter" : "";
+  const panelMotionClass =
+    !displayMinimized && decorativeAnimate ? "jl-panel-enter" : "";
 
   const panelClassName = [
     outerClassName,
     mapPanning ? "jl-panel-chrome-hidden" : "",
     panelMotionClass,
-    minimized ? "jl-panel-minimized" : "",
+    displayMinimized ? "jl-panel-minimized" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
   const bodyPreserverClass =
-    preserveBodyWhenMinimized && minimized ? "jl-panel-body-preserver" : "";
+    preserveBodyWhenMinimized && displayMinimized ? "jl-panel-body-preserver" : "";
   const isWizardLayout = panelLayout === "wizard";
   const shellScrollClass = isWizardLayout
     ? "flex min-h-0 flex-col overflow-hidden"
@@ -75,8 +78,13 @@ export function MapFloatingPanel({
       : "overflow-hidden";
 
   return (
-    <div ref={outerRef} className={panelClassName} style={panelStyle}>
-      {minimized && peekLabel && onMinimizedChange ? (
+    <div
+      ref={outerRef}
+      className={panelClassName}
+      style={panelStyle}
+      data-panel-dragging={isDragging ? "" : undefined}
+    >
+      {displayMinimized && peekLabel && onMinimizedChange ? (
         <button
           type="button"
           {...(peekHandleProps ?? { onClick: () => onMinimizedChange(false) })}
@@ -91,9 +99,9 @@ export function MapFloatingPanel({
       ) : null}
       <div
         className={`tool-panel-compact hud-panel relative mx-auto max-w-xl overscroll-contain p-3 pt-9 ${maxHeightClassName} ${shellScrollClass} ${bodyPreserverClass}`}
-        aria-hidden={minimized && preserveBodyWhenMinimized}
+        aria-hidden={displayMinimized && preserveBodyWhenMinimized}
       >
-        {!minimized && dragHandle && dragHandleProps ? (
+        {!displayMinimized && dragHandle && dragHandleProps ? (
           <button
             type="button"
             aria-label="Drag panel down to minimize"
@@ -103,10 +111,10 @@ export function MapFloatingPanel({
             <span className="jl-sheet-handle" aria-hidden="true" />
           </button>
         ) : null}
-        {!minimized && onClose && closeLabel ? (
+        {!displayMinimized && onClose && closeLabel ? (
           <PopupCloseButton label={closeLabel} onClick={onClose} />
         ) : null}
-        {!minimized && title ? (
+        {!displayMinimized && title ? (
           <div className="jl-tool-panel-title-row">
             <h2 className="jl-tool-panel-title">{title}</h2>
           </div>

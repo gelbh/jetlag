@@ -530,6 +530,7 @@ export function useMapScreenController() {
   const {
     mapPanning,
     panelMinimized,
+    userMinimized,
     setPanelMinimized,
     handleMapPanStart,
     handleMapPanEnd,
@@ -671,6 +672,7 @@ export function useMapScreenController() {
     setFirstRunDismissed,
     mapPanning,
     panelMinimized,
+    userMinimized,
     setPanelMinimized,
     mapError,
     heavyToolActive: tools.heavyToolActive,
