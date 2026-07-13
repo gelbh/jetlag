@@ -241,14 +241,6 @@
     bottom: var(--map-panel-bottom-chrome-hidden);
   }
 
-  .jl-panel-above-dock.jl-panel-peeked {
-    transform: translateY(calc(100% - 3rem));
-  }
-
-  .jl-panel-above-dock.jl-panel-minimized {
-    transform: translateY(calc(100% - 2.75rem));
-  }
-
   .jl-panel-body-preserver {
     position: absolute;
     width: 1px;
@@ -377,20 +369,6 @@
     max-height: 7rem;
     overflow-y: auto;
     overscroll-behavior: contain;
-  }
-
-  .jl-panel-hider-wizard.jl-panel-peeked {
-    transform: translateY(calc(100% - 3rem));
-  }
-
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-panel-above-dock,
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-panel-hider-wizard {
-    transition: transform var(--motion-base) var(--ease-out-quint);
-  }
-
-  html:is([data-motion="static"], [data-motion="reduced"]) .jl-panel-above-dock,
-  html:is([data-motion="static"], [data-motion="reduced"]) .jl-panel-hider-wizard {
-    transition: none;
   }
 
   .jl-tool-slot-icon {

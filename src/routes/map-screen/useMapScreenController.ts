@@ -530,7 +530,8 @@ export function useMapScreenController() {
   const {
     mapPanning,
     panelMinimized,
-    setPanelMinimized,
+    userMinimized,
+    setPanelMinimized: setUserMinimized,
     handleMapPanStart,
     handleMapPanEnd,
   } = useToolPanelChrome(activeTool);
@@ -671,7 +672,8 @@ export function useMapScreenController() {
     setFirstRunDismissed,
     mapPanning,
     panelMinimized,
-    setPanelMinimized,
+    userMinimized,
+    setUserMinimized,
     mapError,
     heavyToolActive: tools.heavyToolActive,
     heavyMapToolsSlotProps: tools.heavyMapToolsSlotProps,

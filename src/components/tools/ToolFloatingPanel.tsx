@@ -10,7 +10,7 @@ import { MapFloatingPanel } from "../map/MapFloatingPanel";
 interface ToolFloatingPanelProps {
   toolId: DockableMapTool;
   mapPanning: boolean;
-  minimized: boolean;
+  userMinimized: boolean;
   onMinimizedChange: (minimized: boolean) => void;
   onClose: () => void;
   children: React.ReactNode;
@@ -19,25 +19,28 @@ interface ToolFloatingPanelProps {
 export function ToolFloatingPanel({
   toolId,
   mapPanning,
-  minimized,
+  userMinimized,
   onMinimizedChange,
   onClose,
   children,
 }: ToolFloatingPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const { panelStyle, handleProps, peekHandleProps } = usePanelDrag({
-    minimized,
-    onMinimizedChange,
-    panelRef,
-  });
+  const { panelStyle, handleProps, peekHandleProps, displayMinimized, isDragging } =
+    usePanelDrag({
+      userMinimized,
+      mapPanning,
+      onMinimizedChange,
+      panelRef,
+    });
 
   const isWizardTool = isQuestionDockTool(toolId);
 
   return (
     <MapFloatingPanel
-      minimized={minimized}
+      displayMinimized={displayMinimized}
       onMinimizedChange={onMinimizedChange}
       mapPanning={mapPanning}
+      isDragging={isDragging}
       title={mapToolPlacingLabel(toolId)}
       peekLabel={mapToolPlacingLabel(toolId)}
       onClose={onClose}

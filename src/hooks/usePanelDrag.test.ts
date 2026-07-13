@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   PANEL_MINIMIZE_VELOCITY_PX_MS,
+  PANEL_PEEK_HEIGHT_PX,
   PANEL_SNAP_FRACTION,
+  collapsedRestOffsetPx,
+  panelTransformPx,
+  resolveDisplayMinimizedAfterSettle,
   shouldExpandPanelSnap,
   shouldMinimizePanelSnap,
 } from "./usePanelDrag";
@@ -53,5 +57,22 @@ describe("usePanelDrag", () => {
         -(PANEL_MINIMIZE_VELOCITY_PX_MS + 0.05),
       ),
     ).toBe(true);
+  });
+
+  it("computes collapsed rest offset from measured height", () => {
+    expect(collapsedRestOffsetPx(320, PANEL_PEEK_HEIGHT_PX)).toBe(
+      320 - PANEL_PEEK_HEIGHT_PX,
+    );
+    expect(collapsedRestOffsetPx(48, 48)).toBe(0);
+  });
+
+  it("builds pixel transform strings", () => {
+    expect(panelTransformPx(0)).toBe("translateY(0px)");
+    expect(panelTransformPx(120)).toBe("translateY(120px)");
+  });
+
+  it("mirrors target minimized state into displayMinimized after settle", () => {
+    expect(resolveDisplayMinimizedAfterSettle(true)).toBe(true);
+    expect(resolveDisplayMinimizedAfterSettle(false)).toBe(false);
   });
 });

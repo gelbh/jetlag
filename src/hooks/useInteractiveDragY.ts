@@ -22,6 +22,23 @@ export interface UseInteractiveDragYOptions {
   minDragStartPx?: number;
 }
 
+/** Maps pointer delta to drag offset (1:1; slop does not gate visual offset). */
+export function computeDragOffset(
+  delta: number,
+  _minDragStartPx: number,
+  mapDelta: (delta: number, startOffset: number) => number,
+  startOffset = 0,
+): number {
+  return mapDelta(delta, startOffset);
+}
+
+export function hasExceededDragSlop(
+  delta: number,
+  minDragStartPx: number,
+): boolean {
+  return Math.abs(delta) >= minDragStartPx;
+}
+
 export function useInteractiveDragY({
   enabled,
   canStart,
@@ -43,14 +60,32 @@ export function useInteractiveDragY({
   const lastY = useRef(0);
   const lastTime = useRef(0);
   const velocityY = useRef(0);
+  const offsetYRef = useRef(0);
+  const rafId = useRef<number | null>(null);
 
   const reset = useCallback(() => {
     dragActive.current = false;
     setIsDragging(false);
     setOffsetY(0);
+    offsetYRef.current = 0;
     startY.current = 0;
     dragStartOffset.current = 0;
     velocityY.current = 0;
+    if (rafId.current !== null) {
+      cancelAnimationFrame(rafId.current);
+      rafId.current = null;
+    }
+  }, []);
+
+  const scheduleOffsetUpdate = useCallback((nextOffset: number) => {
+    offsetYRef.current = nextOffset;
+    if (rafId.current !== null) {
+      return;
+    }
+    rafId.current = requestAnimationFrame(() => {
+      rafId.current = null;
+      setOffsetY(offsetYRef.current);
+    });
   }, []);
 
   const handlePointerDown = useCallback(
@@ -70,6 +105,8 @@ export function useInteractiveDragY({
       lastY.current = event.clientY;
       lastTime.current = event.timeStamp;
       velocityY.current = 0;
+      offsetYRef.current = 0;
+      setOffsetY(0);
       event.currentTarget.setPointerCapture(event.pointerId);
     },
     [canStart, enabled, startOffset],
@@ -82,18 +119,19 @@ export function useInteractiveDragY({
       }
 
       const delta = event.clientY - startY.current;
-      if (Math.abs(delta) < minDragStartPx) {
-        return;
-      }
-
-      const nextOffset = mapDelta(delta, dragStartOffset.current);
+      const nextOffset = computeDragOffset(
+        delta,
+        minDragStartPx,
+        mapDelta,
+        dragStartOffset.current,
+      );
       const dt = Math.max(1, event.timeStamp - lastTime.current);
       velocityY.current = (event.clientY - lastY.current) / dt;
       lastY.current = event.clientY;
       lastTime.current = event.timeStamp;
-      setOffsetY(nextOffset);
+      scheduleOffsetUpdate(nextOffset);
     },
-    [mapDelta, minDragStartPx],
+    [mapDelta, minDragStartPx, scheduleOffsetUpdate],
   );
 
   const finishDrag = useCallback(
@@ -104,14 +142,19 @@ export function useInteractiveDragY({
 
       event.currentTarget.releasePointerCapture(event.pointerId);
 
-      const currentOffset = offsetY;
+      const currentOffset = offsetYRef.current;
       const currentVelocity = velocityY.current;
       dragActive.current = false;
       setIsDragging(false);
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
+        setOffsetY(currentOffset);
+      }
 
       onDragEnd({ offsetY: currentOffset, velocityY: currentVelocity });
     },
-    [offsetY, onDragEnd],
+    [onDragEnd],
   );
 
   return {
