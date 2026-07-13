@@ -1,9 +1,12 @@
 import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  completeOAuthRedirectIfPending,
   completePremiumEmailSignInLink,
   isAnonymousUser,
+  isOAuthRedirectInProgress,
   isPermanentUser,
+  OAuthRedirectInProgressError,
   signInWithGoogle,
   signInWithGoogleIdToken,
 } from "./accountAuth";
@@ -12,8 +15,11 @@ const {
   mockAuth,
   linkWithCredential,
   linkWithPopup,
+  linkWithRedirect,
   signInWithCredential,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   credentialFromError,
   isSignInWithEmailLink,
   credentialWithLink,
@@ -23,8 +29,11 @@ const {
   },
   linkWithCredential: vi.fn(),
   linkWithPopup: vi.fn(),
+  linkWithRedirect: vi.fn(),
   signInWithCredential: vi.fn(),
   signInWithPopup: vi.fn(),
+  signInWithRedirect: vi.fn(),
+  getRedirectResult: vi.fn(),
   credentialFromError: vi.fn(),
   isSignInWithEmailLink: vi.fn(),
   credentialWithLink: vi.fn(),
@@ -44,13 +53,16 @@ vi.mock("firebase/auth", () => ({
     static credentialFromError = (...args: unknown[]) =>
       credentialFromError(...args);
   },
+  getRedirectResult: (...args: unknown[]) => getRedirectResult(...args),
   isSignInWithEmailLink: (...args: unknown[]) => isSignInWithEmailLink(...args),
   linkWithCredential: (...args: unknown[]) => linkWithCredential(...args),
   linkWithPopup: (...args: unknown[]) => linkWithPopup(...args),
+  linkWithRedirect: (...args: unknown[]) => linkWithRedirect(...args),
   sendSignInLinkToEmail: vi.fn(),
   signInWithCredential: (...args: unknown[]) => signInWithCredential(...args),
   signInWithEmailLink: vi.fn(),
   signInWithPopup: (...args: unknown[]) => signInWithPopup(...args),
+  signInWithRedirect: (...args: unknown[]) => signInWithRedirect(...args),
 }));
 
 vi.mock("./firebase", () => ({
@@ -142,6 +154,59 @@ describe("accountAuth", () => {
     expect(user.uid).toBe("signed-in");
     expect(signInWithPopup).toHaveBeenCalled();
     expect(linkWithPopup).not.toHaveBeenCalled();
+  });
+
+  it("falls back to redirect when popup is blocked for an anonymous user", async () => {
+    mockAuth.currentUser = { isAnonymous: true, uid: "anon-5" };
+    linkWithPopup.mockRejectedValueOnce(
+      new FirebaseError("auth/popup-blocked", "Popup blocked."),
+    );
+    linkWithRedirect.mockResolvedValueOnce(undefined);
+
+    await expect(signInWithGoogle()).rejects.toBeInstanceOf(
+      OAuthRedirectInProgressError,
+    );
+    expect(linkWithRedirect).toHaveBeenCalledWith(
+      mockAuth.currentUser,
+      expect.anything(),
+    );
+    expect(isOAuthRedirectInProgress(new OAuthRedirectInProgressError())).toBe(
+      true,
+    );
+  });
+
+  it("falls back to redirect when popup is blocked for a signed-in user", async () => {
+    mockAuth.currentUser = { isAnonymous: false, uid: "signed-in" };
+    signInWithPopup.mockRejectedValueOnce(
+      new FirebaseError("auth/popup-blocked", "Popup blocked."),
+    );
+    signInWithRedirect.mockResolvedValueOnce(undefined);
+
+    await expect(signInWithGoogle()).rejects.toBeInstanceOf(
+      OAuthRedirectInProgressError,
+    );
+    expect(signInWithRedirect).toHaveBeenCalledWith(
+      mockAuth,
+      expect.anything(),
+    );
+  });
+
+  it("completes OAuth redirect when getRedirectResult returns a user", async () => {
+    getRedirectResult.mockResolvedValueOnce({
+      user: { uid: "redirect-user", isAnonymous: false },
+    });
+
+    const user = await completeOAuthRedirectIfPending();
+
+    expect(user?.uid).toBe("redirect-user");
+  });
+
+  it("returns null when no OAuth redirect is pending", async () => {
+    getRedirectResult.mockResolvedValueOnce(null);
+
+    const user = await completeOAuthRedirectIfPending();
+
+    expect(user).toBeNull();
   });
 
   it("signs in with email link when the credential is already in use", async () => {

@@ -1,3 +1,8 @@
+import {
+  handleSentryTunnelRequest,
+  SENTRY_TUNNEL_PATH,
+} from "./sentryTunnel";
+
 export function isSpaFallbackForAssetRequest(
   request: Request,
   response: Response,
@@ -17,6 +22,11 @@ export function isSpaFallbackForAssetRequest(
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    const pathname = new URL(request.url).pathname;
+    if (pathname === SENTRY_TUNNEL_PATH) {
+      return handleSentryTunnelRequest(request);
+    }
+
     const assetResponse = await env.ASSETS.fetch(request);
     if (isSpaFallbackForAssetRequest(request, assetResponse)) {
       return new Response("Not Found", {
@@ -31,3 +41,9 @@ export default {
     return assetResponse;
   },
 } satisfies ExportedHandler<Env>;
+
+export {
+  handleSentryTunnelRequest,
+  parseSentryEnvelopeTarget,
+  SENTRY_TUNNEL_PATH,
+} from "./sentryTunnel";

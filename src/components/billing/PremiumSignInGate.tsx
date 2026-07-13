@@ -6,6 +6,7 @@ import { GoogleSignInButton } from "./GoogleSignInButton";
 import { AppleSignInButton } from "./AppleSignInButton";
 import {
   APPLE_SIGN_IN_ENABLED,
+  completeOAuthRedirectIfPending,
   completePremiumEmailSignInLink,
   isPermanentUser,
   sendPremiumEmailSignInLink,
@@ -69,6 +70,12 @@ export function PremiumSignInGate({
         }
         const completed = await completePremiumEmailSignInLink();
         if (!cancelled && completed && isPermanentUser(completed)) {
+          await handleSignedIn();
+          return;
+        }
+
+        const oauthCompleted = await completeOAuthRedirectIfPending();
+        if (!cancelled && oauthCompleted && isPermanentUser(oauthCompleted)) {
           await handleSignedIn();
         }
       } catch (nextError) {
