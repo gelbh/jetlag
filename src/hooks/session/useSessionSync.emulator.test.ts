@@ -90,6 +90,36 @@ describe("useSessionSync emulator", () => {
     });
   });
 
+  it("waits for syncEnabled before subscribing to annotations", async () => {
+    const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, testUid);
+    const annotation = createTestPinAnnotation({
+      id: "ann-sync-gated",
+      sessionId: session.id,
+    });
+
+    useSessionStore.getState().setSession(session, testUid);
+
+    const { rerender } = renderHook(
+      ({ enabled }: { enabled: boolean }) =>
+        useSessionSync({ syncEnabled: enabled }),
+      { initialProps: { enabled: false } },
+    );
+
+    await writeRemoteAnnotation(session.id, annotation);
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(useAnnotationStore.getState().annotations).toHaveLength(0);
+
+    rerender({ enabled: true });
+
+    await waitFor(() => {
+      expect(
+        useAnnotationStore
+          .getState()
+          .annotations.find((item) => item.id === annotation.id),
+      ).toBeDefined();
+    });
+  });
+
   it("does not subscribe for local-only sessions", async () => {
     const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, testUid);
     const remoteAnnotation = createTestPinAnnotation({

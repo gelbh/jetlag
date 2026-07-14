@@ -58,8 +58,6 @@ export function useSharedSessionScreen({
   const [permanentAuthReady, setPermanentAuthReady] = useState(false);
   const [authUid, setAuthUid] = useState<string | null>(null);
 
-  useSessionSync();
-
   useEffect(() => {
     setPremiumApiContext(session);
   }, [session]);
@@ -116,6 +114,8 @@ export function useSharedSessionScreen({
 
   const authReady =
     authMode === "admin-permanent" ? permanentAuthReady : anonymousAuthReady;
+
+  useSessionSync({ syncEnabled: authReady });
 
   const uid =
     authMode === "admin-permanent"

@@ -15,7 +15,11 @@ import { readOfflineQueueForSession } from "../../services/session/offlineQueue"
 import { flushOfflineQueue } from "../../services/session/flushOfflineQueue";
 
 
-export function useSessionSync() {
+export interface UseSessionSyncOptions {
+  syncEnabled?: boolean;
+}
+
+export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {}) {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const queueFlushMs = getPowerProfile(lowPowerMode).queueFlushMs;
   const session = useSessionStore((state) => state.session);
@@ -35,6 +39,7 @@ export function useSessionSync() {
 
   useEffect(() => {
     if (
+      !syncEnabled ||
       !session ||
       session.id === LOCAL_SESSION_ID ||
       !isFirebaseConfigured()
@@ -56,10 +61,11 @@ export function useSessionSync() {
 
     return unsubscribe;
     // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
-  }, [myUid, session?.id, setLastSyncError, setSession]);
+  }, [myUid, session?.id, setLastSyncError, setSession, syncEnabled]);
 
   useEffect(() => {
     if (
+      !syncEnabled ||
       !session ||
       session.id === LOCAL_SESSION_ID ||
       !isFirebaseConfigured()
@@ -69,6 +75,8 @@ export function useSessionSync() {
 
     const sessionId = session.id;
     let hasBaseline = false;
+
+    replaceAnnotations([]);
 
     getFirestoreDb();
     if (isFirestorePersistenceUnavailable()) {
@@ -137,10 +145,12 @@ export function useSessionSync() {
     session?.id,
     setLastSyncError,
     setRemoteUpdateNotice,
+    syncEnabled,
   ]);
 
   useEffect(() => {
     if (
+      !syncEnabled ||
       !session ||
       session.id === LOCAL_SESSION_ID ||
       !isFirebaseConfigured()
@@ -179,7 +189,7 @@ export function useSessionSync() {
       window.clearInterval(intervalId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
-  }, [queueFlushMs, session?.id, setLastSyncError, setPendingWrites]);
+  }, [queueFlushMs, session?.id, setLastSyncError, setPendingWrites, syncEnabled]);
 
   useEffect(() => {
     const handleOffline = () => {
