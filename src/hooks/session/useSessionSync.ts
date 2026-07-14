@@ -159,9 +159,17 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
     }
 
     const sessionId = session.id;
+    let disposed = false;
 
     const flushQueue = async () => {
+      if (disposed) {
+        return;
+      }
+
       const pendingForSession = await readOfflineQueueForSession(sessionId);
+      if (disposed) {
+        return;
+      }
       setPendingWrites(pendingForSession.length);
 
       if (pendingForSession.length === 0) {
@@ -169,6 +177,9 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
       }
 
       const { remaining, lastError } = await flushOfflineQueue(sessionId);
+      if (disposed) {
+        return;
+      }
       setPendingWrites(remaining);
       setLastSyncError(lastError);
     };
@@ -185,6 +196,7 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
     }, queueFlushMs);
 
     return () => {
+      disposed = true;
       window.removeEventListener("online", handleOnline);
       window.clearInterval(intervalId);
     };
