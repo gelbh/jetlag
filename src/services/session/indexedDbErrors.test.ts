@@ -14,6 +14,16 @@ describe("isDatabaseDeletedError", () => {
   });
 
   it("ignores unrelated errors", () => {
+    expect(
+      isDatabaseDeletedError(
+        new Error("Database deleted by request of the user"),
+      ),
+    ).toBe(true);
+    expect(
+      isDatabaseDeletedError(
+        new DOMException("QuotaExceededError", "QuotaExceededError"),
+      ),
+    ).toBe(false);
     expect(isDatabaseDeletedError(new Error("Queue read failed"))).toBe(false);
     expect(isDatabaseDeletedError(null)).toBe(false);
   });
