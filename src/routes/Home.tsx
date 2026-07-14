@@ -3,10 +3,17 @@ import { useState } from "react";
 import { AppLogo } from "../components/ui/AppLogo";
 import { BootSplash } from "../components/ui/BootSplash";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
-import { HudGuideIcon, HudPlayIcon, HudAdminIcon } from "../components/ui/HudIcons";
+import {
+  HudGuideIcon,
+  HudPlayIcon,
+  HudAdminIcon,
+  HudFriendsIcon,
+  HudLeaderboardIcon,
+} from "../components/ui/HudIcons";
 import { InlineError } from "../components/ui/InlineError";
 import { VersionChangelogSheet } from "../components/ui/VersionChangelogSheet";
 import { MotionPressable } from "../components/motion/MotionPressable";
+import { PlayHubSheet } from "../components/home/PlayHubSheet";
 import { APP_VERSION } from "../domain/device/changelog";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { playerRoleLabel, resolvePlayerRole } from "../domain/session/playerRole";
@@ -42,6 +49,7 @@ export function Home() {
   const [continueError, setContinueError] = useState<string | null>(null);
   const [continuing, setContinuing] = useState(false);
   const [changelogOpen, setChangelogOpen] = useState(false);
+  const [playHubOpen, setPlayHubOpen] = useState(false);
   const { entitlements: premiumEntitlements } = usePremiumEntitlements();
   const { user: permanentUser } = usePermanentAuthUser();
   const showAdminEntry = isAdminUser(permanentUser);
@@ -183,6 +191,20 @@ export function Home() {
                 >
                   <HudGuideIcon className="size-5" />
                 </AppLink>
+                <AppLink
+                  to="/friends"
+                  className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"
+                  aria-label="Friends"
+                >
+                  <HudFriendsIcon className="size-5" />
+                </AppLink>
+                <AppLink
+                  to="/leaderboard"
+                  className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"
+                  aria-label="Leaderboard"
+                >
+                  <HudLeaderboardIcon className="size-5" />
+                </AppLink>
                 <MotionPressable
                   type="button"
                   onClick={() => setChangelogOpen(true)}
@@ -243,30 +265,21 @@ export function Home() {
               </span>
             </MotionPressable>
           ) : null}
-          <AppLink
-            to="/create"
-            aria-label="Create session"
+          <MotionPressable
+            type="button"
+            onClick={() => setPlayHubOpen(true)}
+            aria-label="Play — create, join, or custom game"
+            aria-haspopup="dialog"
+            aria-expanded={playHubOpen}
             className={
               session
                 ? "home-card-btn home-card-btn-secondary"
                 : "home-card-btn home-card-btn-primary"
             }
           >
-            <span>Create session</span>
-            <span className="home-card-btn-hint">Host a game</span>
-          </AppLink>
-          <AppLink to="/join" aria-label="Join session" className="home-card-btn home-card-btn-secondary">
-            <span>Join session</span>
-            <span className="home-card-btn-hint">Enter 4-letter code</span>
-          </AppLink>
-          <AppLink
-            to="/presets"
-            aria-label="Custom game presets"
-            className="home-card-btn home-card-btn-secondary"
-          >
-            <span>Custom game</span>
-            <span className="home-card-btn-hint">Saved templates</span>
-          </AppLink>
+            <span>Play</span>
+            <span className="home-card-btn-hint">Create, join, or custom</span>
+          </MotionPressable>
           {isFirebaseConfigured() ? (
             <AppLink
               to="/premium"
@@ -332,6 +345,10 @@ export function Home() {
       <VersionChangelogSheet
         open={changelogOpen}
         onClose={() => setChangelogOpen(false)}
+      />
+      <PlayHubSheet
+        open={playHubOpen}
+        onClose={() => setPlayHubOpen(false)}
       />
     </>
   );

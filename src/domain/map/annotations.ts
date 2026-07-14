@@ -31,6 +31,7 @@ import type {
 } from "../session/sessionCustomContent";
 import type { SessionCustomMeasureGeometry } from "../session/customMeasureGeometry";
 import type { RegionPackId } from "../regions/regionPack";
+import type { GameOutcome } from "../game/foundHider";
 
 export type { GameSize } from "../session/gameSize";
 export type { MemberRoles, PlayerRole } from "../session/playerRole";
@@ -171,6 +172,13 @@ export interface SessionRecord {
   endGameStartedByUid?: string;
   endGameRequestedAt?: string;
   endGameRequestedByUid?: string;
+  foundRequestedAt?: string;
+  foundRequestedByUid?: string;
+  foundConfirmedAt?: string;
+  foundConfirmedByUid?: string;
+  gameOutcome?: GameOutcome;
+  gameResultId?: string;
+  roundNumber?: number;
   sessionResetAt?: string;
   lastActiveAt?: string;
   hostAppVersion?: string;
@@ -211,6 +219,12 @@ export function createAnnotationId(): string {
 }
 
 export { isActive } from "./annotationActive";
+export {
+  foundHiderBlocked,
+  isFoundHiderPending,
+  isRoundComplete,
+} from "../game/foundHider";
+export type { GameOutcome } from "../game/foundHider";
 
 export function migrateAnnotationRecord(
   annotation: AnnotationRecord,

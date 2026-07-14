@@ -40,6 +40,8 @@ interface ToolDockProps {
   dismissOverflowMenus?: boolean;
   canStartEndGame?: boolean;
   onStartEndGame?: () => void;
+  canRequestFoundHider?: boolean;
+  onRequestFoundHider?: () => void;
   canSubmitQuestion?: boolean;
 }
 
@@ -60,6 +62,8 @@ export function ToolDock({
   dismissOverflowMenus = false,
   canStartEndGame = false,
   onStartEndGame,
+  canRequestFoundHider = false,
+  onRequestFoundHider,
   canSubmitQuestion = true,
 }: ToolDockProps) {
   const dockRef = useRef<HTMLDivElement>(null);
@@ -126,6 +130,8 @@ export function ToolDock({
         unreadCount={unreadCount}
         canStartEndGame={canStartEndGame}
         onStartEndGame={onStartEndGame}
+        canRequestFoundHider={canRequestFoundHider}
+        onRequestFoundHider={onRequestFoundHider}
       />
 
       <div className="jl-tool-dock-bar">

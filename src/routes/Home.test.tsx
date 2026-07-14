@@ -56,8 +56,20 @@ describe("Home", () => {
     useSessionStore.getState().setSession(null);
   });
 
-  it("renders create and join actions", () => {
+  it("opens play hub with create, join, and custom actions", async () => {
     renderWithRouter(<Home />);
+
+    expect(screen.queryByRole("link", { name: "Create session" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Join session" })).not.toBeInTheDocument();
+
+    const playButton = screen.getByRole("button", {
+      name: "Play — create, join, or custom game",
+    });
+    expect(playButton).toHaveAttribute("aria-haspopup", "dialog");
+    expect(playButton).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(playButton);
+    expect(playButton).toHaveAttribute("aria-expanded", "true");
 
     expect(screen.getByRole("link", { name: "Create session" })).toHaveAttribute(
       "href",
@@ -70,6 +82,24 @@ describe("Home", () => {
     expect(screen.getByRole("link", { name: "Custom game presets" })).toHaveAttribute(
       "href",
       "/presets",
+    );
+
+    fireEvent.click(screen.getByRole("link", { name: "Create session" }));
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "Play" })).not.toBeInTheDocument();
+    });
+  });
+
+  it("links to friends and leaderboard in the header", () => {
+    renderWithRouter(<Home />);
+
+    expect(screen.getByRole("link", { name: "Friends" })).toHaveAttribute(
+      "href",
+      "/friends",
+    );
+    expect(screen.getByRole("link", { name: "Leaderboard" })).toHaveAttribute(
+      "href",
+      "/leaderboard",
     );
   });
 

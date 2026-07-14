@@ -457,7 +457,123 @@ service cloud.firestore {
         && request.resource.data.gameSize == resource.data.gameSize
         && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
         && request.resource.data.memberRoles == resource.data.memberRoles
+      ) || (
+        isSeekerMember(sessionId)
+        && (
+          !('foundConfirmedAt' in resource.data)
+          || resource.data.foundConfirmedAt == null
+        )
+        && (
+          !('foundRequestedAt' in resource.data)
+          || resource.data.foundRequestedAt == null
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['foundRequestedAt', 'foundRequestedByUid'])
+        && request.resource.data.foundRequestedAt is string
+        && request.resource.data.foundRequestedByUid == request.auth.uid
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.memberRoles == resource.data.memberRoles
+      ) || (
+        isHiderMember(sessionId)
+        && resource.data.foundRequestedAt is string
+        && (
+          !('foundConfirmedAt' in resource.data)
+          || resource.data.foundConfirmedAt == null
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['foundConfirmedAt', 'foundConfirmedByUid', 'gameOutcome', 'foundRequestedAt', 'foundRequestedByUid', 'endGameStartedAt', 'endGameStartedByUid', 'endGameRequestedAt', 'endGameRequestedByUid'])
+        && request.resource.data.foundConfirmedAt is string
+        && request.resource.data.foundConfirmedByUid == request.auth.uid
+        && request.resource.data.gameOutcome == 'found'
+        && !('foundRequestedAt' in request.resource.data)
+        && !('foundRequestedByUid' in request.resource.data)
+        && !('endGameStartedAt' in request.resource.data)
+        && !('endGameStartedByUid' in request.resource.data)
+        && !('endGameRequestedAt' in request.resource.data)
+        && !('endGameRequestedByUid' in request.resource.data)
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.memberRoles == resource.data.memberRoles
+      ) || (
+        isHiderMember(sessionId)
+        && resource.data.foundRequestedAt is string
+        && (
+          !('foundConfirmedAt' in resource.data)
+          || resource.data.foundConfirmedAt == null
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['foundRequestedAt', 'foundRequestedByUid'])
+        && !('foundRequestedAt' in request.resource.data)
+        && !('foundRequestedByUid' in request.resource.data)
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.memberRoles == resource.data.memberRoles
+      ) || (
+        isSeekerMember(sessionId)
+        && resource.data.foundRequestedAt is string
+        && resource.data.foundRequestedByUid == request.auth.uid
+        && (
+          !('foundConfirmedAt' in resource.data)
+          || resource.data.foundConfirmedAt == null
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['foundRequestedAt', 'foundRequestedByUid'])
+        && !('foundRequestedAt' in request.resource.data)
+        && !('foundRequestedByUid' in request.resource.data)
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.memberRoles == resource.data.memberRoles
       );
+
+      match /startingLocations/{uid} {
+        allow read: if isSessionMember(sessionId);
+        allow write: if false;
+      }
+
+      match /playerTrailPoints/{uid}/points/{pointId} {
+        allow read: if isSessionMember(sessionId);
+        allow create: if isSessionMember(sessionId)
+          && request.auth.uid == uid
+          && request.resource.data.lat is number
+          && request.resource.data.lng is number
+          && request.resource.data.recordedAt is string
+          && (
+            !('role' in request.resource.data)
+            || validHostPlayerRole(request.resource.data.role)
+          );
+        allow update, delete: if false;
+      }
+
+      match /gameResult/{resultId} {
+        allow read: if isSessionMember(sessionId);
+        allow write: if false;
+      }
+
+      match /rounds/{roundId} {
+        allow read: if isSessionMember(sessionId);
+        allow write: if false;
+      }
 
       match /annotations/{annotationId} {
         allow read: if isSessionMember(sessionId);

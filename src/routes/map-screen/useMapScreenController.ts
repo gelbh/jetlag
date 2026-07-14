@@ -439,7 +439,7 @@ export function useMapScreenController() {
     timerHasStarted: timer.hasStarted,
     hidingZones,
   });
-  const { confirmedHidingZones, endGameBlocked, canStartEndGame } =
+  const { confirmedHidingZones, endGameBlocked, canStartEndGame, canRequestFoundHider } =
     sessionActions;
 
   const { handleClearMap, handleResetBoard, handleResetSession, handleEndSession, handleLeaveSession, exportMap } =
@@ -668,6 +668,7 @@ export function useMapScreenController() {
     canSubmitQuestion,
     canStartEndGame,
     endGameBlocked,
+    canRequestFoundHider,
     firstRunDismissed,
     setFirstRunDismissed,
     mapPanning,
@@ -708,6 +709,8 @@ export function useMapScreenController() {
     handleRedoLastAnnotation,
     handleResetEndGame: sessionActions.handleResetEndGame,
     handleStartEndGame: sessionActions.handleStartEndGame,
+    handleRequestFoundHider: sessionActions.handleRequestFoundHider,
+    handleDeclineFoundHider: sessionActions.handleDeclineFoundHider,
     handleClearMap,
     handleResetBoard,
     handleResetSession,

@@ -1,10 +1,11 @@
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { useSeekerLocationSync } from "./useSeekerLocationSync";
 
-const { writePlayerLocation, isFirebaseConfigured } = vi.hoisted(() => ({
+const { writePlayerLocation, appendPlayerTrailPoint, isFirebaseConfigured } = vi.hoisted(() => ({
   writePlayerLocation: vi.fn(async () => undefined),
+  appendPlayerTrailPoint: vi.fn(async () => undefined),
   isFirebaseConfigured: vi.fn(() => true),
 }));
 
@@ -14,6 +15,7 @@ vi.mock("../../services/core/firebase", () => ({
 
 vi.mock("../../services/firestore/firestoreSessionExtras", () => ({
   writePlayerLocation,
+  appendPlayerTrailPoint,
 }));
 
 vi.mock("../location/useLiveLocation", () => ({
@@ -42,7 +44,7 @@ describe("useSeekerLocationSync", () => {
     expect(writePlayerLocation).not.toHaveBeenCalled();
   });
 
-  it("writes seeker location for remote sessions", () => {
+  it("writes seeker location for remote sessions", async () => {
     renderHook(() =>
       useSeekerLocationSync({
         sessionId: "remote-session",
@@ -51,14 +53,28 @@ describe("useSeekerLocationSync", () => {
       }),
     );
 
-    expect(writePlayerLocation).toHaveBeenCalledWith(
-      "remote-session",
-      expect.objectContaining({
-        uid: "user-1",
-        lat: 53.35,
-        lng: -6.26,
-        role: "seeker",
-      }),
-    );
+    await waitFor(() => {
+      expect(writePlayerLocation).toHaveBeenCalledWith(
+        "remote-session",
+        expect.objectContaining({
+          uid: "user-1",
+          lat: 53.35,
+          lng: -6.26,
+          role: "seeker",
+        }),
+      );
+    });
+
+    await waitFor(() => {
+      expect(appendPlayerTrailPoint).toHaveBeenCalledWith(
+        "remote-session",
+        expect.objectContaining({
+          uid: "user-1",
+          lat: 53.35,
+          lng: -6.26,
+          role: "seeker",
+        }),
+      );
+    });
   });
 });
