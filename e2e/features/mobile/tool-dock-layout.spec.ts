@@ -178,7 +178,9 @@ test.describe("iPhone 13 PWA home safe area", () => {
     await prepareE2EPage(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
-    await expect(page.getByRole("link", { name: "Create session" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Play — create, join, or custom game/i }),
+    ).toBeVisible();
     await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 
