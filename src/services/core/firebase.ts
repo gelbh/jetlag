@@ -53,6 +53,7 @@ let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
 let appCheck: AppCheck | null = null;
+let appCheckInitializing = false;
 let persistenceUnavailable = false;
 
 function firebaseUsesEmulator(): boolean {
@@ -101,7 +102,8 @@ export function getFirebaseApp(): FirebaseApp {
       throw new Error("Firebase environment variables are not configured.");
     }
 
-    app = initializeApp(config);
+    const existingApps = getApps();
+    app = existingApps.length > 0 ? existingApps[0]! : initializeApp(config);
     if (!firebaseUsesEmulator()) {
       initializeAppCheckIfConfigured(app);
     }
@@ -128,22 +130,38 @@ function enableAppCheckDebugProviderIfDev(): void {
   globalScope.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 }
 
+function isRecaptchaAlreadyRenderedError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    /reCAPTCHA has already been rendered/i.test(error.message)
+  );
+}
+
 function initializeAppCheckIfConfigured(firebaseApp: FirebaseApp): void {
   const siteKey = getClientEnv().VITE_FIREBASE_APP_CHECK_SITE_KEY;
   if (!siteKey || siteKey.length === 0) {
     return;
   }
 
-  if (appCheck) {
+  if (appCheck || appCheckInitializing) {
     return;
   }
 
   enableAppCheckDebugProviderIfDev();
 
-  appCheck = initializeAppCheck(firebaseApp, {
-    provider: new ReCaptchaV3Provider(siteKey),
-    isTokenAutoRefreshEnabled: true,
-  });
+  appCheckInitializing = true;
+  try {
+    appCheck = initializeAppCheck(firebaseApp, {
+      provider: new ReCaptchaV3Provider(siteKey),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } catch (error) {
+    if (!isRecaptchaAlreadyRenderedError(error)) {
+      throw error;
+    }
+  } finally {
+    appCheckInitializing = false;
+  }
 }
 
 export function getFirebaseAppCheck(): AppCheck | null {
@@ -339,6 +357,7 @@ export async function resetFirebaseForTests(): Promise<void> {
   auth = null;
   db = null;
   appCheck = null;
+  appCheckInitializing = false;
   persistenceUnavailable = false;
   authEmulatorConnected = false;
   firestoreEmulatorConnected = false;
