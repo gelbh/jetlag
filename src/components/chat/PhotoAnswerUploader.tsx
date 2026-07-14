@@ -31,6 +31,7 @@ export function PhotoAnswerUploader({
   onAnswerQuestion,
 }: PhotoAnswerUploaderProps) {
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const categoryId = readPhotoCategoryId(pendingQuestion);
   const ruleSummary = categoryId
     ? getPhotoCategory(categoryId).ruleSummary
@@ -41,6 +42,7 @@ export function PhotoAnswerUploader({
       return;
     }
     setSubmitting(true);
+    setError(null);
     try {
       await onAnswerQuestion(
         pendingQuestion.id,
@@ -48,6 +50,12 @@ export function PhotoAnswerUploader({
         answer,
         photoAnswerSelectedReply(answer),
         deadlineExpired,
+      );
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Could not save your answer.",
       );
     } finally {
       setSubmitting(false);
@@ -78,6 +86,7 @@ export function PhotoAnswerUploader({
       >
         {PHOTO_CANNOT_ANSWER_LABEL}
       </button>
+      {error ? <p className="text-sm text-status-error">{error}</p> : null}
     </div>
   );
 }

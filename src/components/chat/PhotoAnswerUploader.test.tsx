@@ -91,4 +91,27 @@ describe("PhotoAnswerUploader", () => {
       );
     });
   });
+
+  it("shows an error when saving the answer fails", async () => {
+    const onAnswerQuestion = vi
+      .fn()
+      .mockRejectedValue(new Error("Could not save your answer."));
+
+    render(
+      <PhotoAnswerUploader
+        sessionId="session-1"
+        pendingQuestion={pendingQuestion}
+        messageId="msg-1"
+        onAnswerQuestion={onAnswerQuestion}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Mark sent" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Could not save your answer."),
+      ).toBeInTheDocument();
+    });
+  });
 });
