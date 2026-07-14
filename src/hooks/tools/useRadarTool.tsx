@@ -226,22 +226,49 @@ export function useRadarTool({
       },
     };
 
-    if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
-      await submitPendingQuestion({
-        promptText: radarQuestionPrompt(resolvedRadarRadius, distanceUnit),
-        replyOptions: yesNoAnswerOptions.map((option) => ({
-          id: option.value,
-          label: option.label,
-        })),
-        placement: {
-          geometryJson: JSON.stringify(geometry),
-          metadata: {
-            radiusMeters: resolvedRadarRadius,
-            radarChooseCustom,
+    try {
+      if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
+        await submitPendingQuestion({
+          promptText: radarQuestionPrompt(resolvedRadarRadius, distanceUnit),
+          replyOptions: yesNoAnswerOptions.map((option) => ({
+            id: option.value,
+            label: option.label,
+          })),
+          placement: {
+            geometryJson: JSON.stringify(geometry),
+            metadata: {
+              radiusMeters: resolvedRadarRadius,
+              radarChooseCustom,
+            },
           },
+          cardDraw,
+          cardKeep,
+        });
+
+        setRadarCenter(null);
+        setRadarAnswer(null);
+        setRadarChooseCustom(false);
+        setRadarCustomRadius("");
+        setMapError(null);
+        finishPlacement();
+        return;
+      }
+
+      if (!radarAnswer) {
+        setMapError("Record the answer before adding the radar question.");
+        return;
+      }
+
+      await createAnnotation({
+        type: "radar",
+        geometry,
+        metadata: {
+          createdAt: new Date().toISOString(),
+          radiusMeters: resolvedRadarRadius,
+          radarChooseCustom,
+          inside: radarInsideFromAnswer(radarAnswer),
+          color: MAP_ANNOTATION_COLORS.radar,
         },
-        cardDraw,
-        cardKeep,
       });
 
       setRadarCenter(null);
@@ -250,32 +277,13 @@ export function useRadarTool({
       setRadarCustomRadius("");
       setMapError(null);
       finishPlacement();
-      return;
+    } catch (error) {
+      setMapError(
+        error instanceof Error && error.message.trim()
+          ? error.message
+          : "Could not save the radar question.",
+      );
     }
-
-    if (!radarAnswer) {
-      setMapError("Record the answer before adding the radar question.");
-      return;
-    }
-
-    await createAnnotation({
-      type: "radar",
-      geometry,
-      metadata: {
-        createdAt: new Date().toISOString(),
-        radiusMeters: resolvedRadarRadius,
-        radarChooseCustom,
-        inside: radarInsideFromAnswer(radarAnswer),
-        color: MAP_ANNOTATION_COLORS.radar,
-      },
-    });
-
-    setRadarCenter(null);
-    setRadarAnswer(null);
-    setRadarChooseCustom(false);
-    setRadarCustomRadius("");
-    setMapError(null);
-    finishPlacement();
   };
 
   const placementCrosshair =
