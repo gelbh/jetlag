@@ -140,6 +140,7 @@ service cloud.firestore {
           && answer.kind is string
           && (
             answer.kind == 'cannot_answer'
+            || answer.kind == 'sent_externally'
             || (
               answer.kind == 'photo'
               && answer.storagePath is string
