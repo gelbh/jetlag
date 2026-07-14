@@ -17,6 +17,36 @@ export type QueuedWrite = {
 };
 
 let databasePromise: Promise<IDBDatabase> | null = null;
+let openDatabaseHandle: IDBDatabase | null = null;
+
+const IDB_DATABASE_DELETED = /Database deleted by request of the user/i;
+
+function isDatabaseDeletedError(error: unknown): boolean {
+  if (!(error instanceof DOMException) && !(error instanceof Error)) {
+    return false;
+  }
+
+  return IDB_DATABASE_DELETED.test(error.message);
+}
+
+function resetDatabaseConnection(): void {
+  openDatabaseHandle?.close();
+  openDatabaseHandle = null;
+  databasePromise = null;
+}
+
+async function withDatabaseRetry<T>(operation: () => Promise<T>): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (!isDatabaseDeletedError(error)) {
+      throw error;
+    }
+
+    resetDatabaseConnection();
+    return await operation();
+  }
+}
 
 function openDatabase(): Promise<IDBDatabase> {
   if (databasePromise) {
@@ -52,7 +82,10 @@ function openDatabase(): Promise<IDBDatabase> {
       }
     };
 
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      openDatabaseHandle = request.result;
+      resolve(request.result);
+    };
     request.onerror = () => {
       databasePromise = null;
       reject(request.error ?? new Error("IndexedDB open failed"));
@@ -88,100 +121,110 @@ export async function enqueueOfflineWrite(
   sessionId: string,
   annotation: AnnotationRecord,
 ): Promise<void> {
-  const database = await openDatabase();
-  const transaction = database.transaction(STORE_NAME, "readwrite");
-  const store = transaction.objectStore(STORE_NAME);
-  const entry: QueuedWrite = {
-    kind: "annotation",
-    id: annotation.id,
-    sessionId,
-    annotation,
-    createdAt: new Date().toISOString(),
-    failureCount: 0,
-  };
+  await withDatabaseRetry(async () => {
+    const database = await openDatabase();
+    const transaction = database.transaction(STORE_NAME, "readwrite");
+    const store = transaction.objectStore(STORE_NAME);
+    const entry: QueuedWrite = {
+      kind: "annotation",
+      id: annotation.id,
+      sessionId,
+      annotation,
+      createdAt: new Date().toISOString(),
+      failureCount: 0,
+    };
 
-  store.put(entry);
+    store.put(entry);
 
-  await new Promise<void>((resolve, reject) => {
-    transaction.oncomplete = () => resolve();
-    transaction.onerror = () =>
-      reject(transaction.error ?? new Error("Queue write failed"));
+    await new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () =>
+        reject(transaction.error ?? new Error("Queue write failed"));
+    });
   });
 }
 
 export async function readOfflineQueue(): Promise<QueuedWrite[]> {
-  const database = await openDatabase();
-  const transaction = database.transaction(STORE_NAME, "readonly");
-  const store = transaction.objectStore(STORE_NAME);
-  const request = store.getAll();
+  return withDatabaseRetry(async () => {
+    const database = await openDatabase();
+    const transaction = database.transaction(STORE_NAME, "readonly");
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.getAll();
 
-  return new Promise<QueuedWrite[]>((resolve, reject) => {
-    request.onsuccess = () => resolve((request.result as QueuedWrite[]) ?? []);
-    request.onerror = () =>
-      reject(request.error ?? new Error("Queue read failed"));
+    return new Promise<QueuedWrite[]>((resolve, reject) => {
+      request.onsuccess = () => resolve((request.result as QueuedWrite[]) ?? []);
+      request.onerror = () =>
+        reject(request.error ?? new Error("Queue read failed"));
+    });
   });
 }
 
 export async function readOfflineQueueForSession(
   sessionId: string,
 ): Promise<QueuedWrite[]> {
-  const database = await openDatabase();
-  const transaction = database.transaction(STORE_NAME, "readonly");
-  const store = transaction.objectStore(STORE_NAME);
-  const index = store.index("sessionId");
-  const request = index.getAll(sessionId);
+  return withDatabaseRetry(async () => {
+    const database = await openDatabase();
+    const transaction = database.transaction(STORE_NAME, "readonly");
+    const store = transaction.objectStore(STORE_NAME);
+    const index = store.index("sessionId");
+    const request = index.getAll(sessionId);
 
-  return new Promise<QueuedWrite[]>((resolve, reject) => {
-    request.onsuccess = () => resolve((request.result as QueuedWrite[]) ?? []);
-    request.onerror = () =>
-      reject(request.error ?? new Error("Queue read failed"));
+    return new Promise<QueuedWrite[]>((resolve, reject) => {
+      request.onsuccess = () => resolve((request.result as QueuedWrite[]) ?? []);
+      request.onerror = () =>
+        reject(request.error ?? new Error("Queue read failed"));
+    });
   });
 }
 
 export async function recordOfflineWriteFailure(
   id: string,
 ): Promise<QueuedWrite | null> {
-  const database = await openDatabase();
-  const transaction = database.transaction(STORE_NAME, "readwrite");
-  const store = transaction.objectStore(STORE_NAME);
-  const request = store.get(id);
+  return withDatabaseRetry(async () => {
+    const database = await openDatabase();
+    const transaction = database.transaction(STORE_NAME, "readwrite");
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get(id);
 
-  const entry = await new Promise<QueuedWrite | undefined>((resolve, reject) => {
-    request.onsuccess = () => resolve(request.result as QueuedWrite | undefined);
-    request.onerror = () =>
-      reject(request.error ?? new Error("Queue read failed"));
+    const entry = await new Promise<QueuedWrite | undefined>((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result as QueuedWrite | undefined);
+      request.onerror = () =>
+        reject(request.error ?? new Error("Queue read failed"));
+    });
+
+    if (!entry) {
+      return null;
+    }
+
+    const updated: QueuedWrite = {
+      ...entry,
+      failureCount: (entry.failureCount ?? 0) + 1,
+      lastFailedAt: new Date().toISOString(),
+    };
+
+    store.put(updated);
+
+    await new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () =>
+        reject(transaction.error ?? new Error("Queue update failed"));
+    });
+
+    return updated;
   });
-
-  if (!entry) {
-    return null;
-  }
-
-  const updated: QueuedWrite = {
-    ...entry,
-    failureCount: (entry.failureCount ?? 0) + 1,
-    lastFailedAt: new Date().toISOString(),
-  };
-
-  store.put(updated);
-
-  await new Promise<void>((resolve, reject) => {
-    transaction.oncomplete = () => resolve();
-    transaction.onerror = () =>
-      reject(transaction.error ?? new Error("Queue update failed"));
-  });
-
-  return updated;
 }
 
 export async function removeOfflineWrite(id: string): Promise<void> {
-  const database = await openDatabase();
-  const transaction = database.transaction(STORE_NAME, "readwrite");
-  transaction.objectStore(STORE_NAME).delete(id);
+  await withDatabaseRetry(async () => {
+    const database = await openDatabase();
+    const transaction = database.transaction(STORE_NAME, "readwrite");
+    transaction.objectStore(STORE_NAME).delete(id);
 
-  await new Promise<void>((resolve, reject) => {
-    transaction.oncomplete = () => resolve();
-    transaction.onerror = () =>
-      reject(transaction.error ?? new Error("Queue delete failed"));
+    await new Promise<void>((resolve, reject) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () =>
+        reject(transaction.error ?? new Error("Queue delete failed"));
+    });
   });
 }
 
