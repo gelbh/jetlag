@@ -4,7 +4,6 @@ import {
   completeOAuthRedirectIfPending,
   completePremiumEmailSignInLink,
   isAnonymousUser,
-  isOAuthRedirectInProgress,
   isPermanentUser,
   OAuthRedirectInProgressError,
   signInWithGoogle,
