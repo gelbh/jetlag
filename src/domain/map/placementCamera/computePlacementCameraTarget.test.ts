@@ -161,4 +161,24 @@ describe("computePlacementCameraTarget", () => {
   it("returns null when tool is idle", () => {
     expect(computePlacementCameraTarget(buildContext(emptySources))).toBeNull();
   });
+
+  it("frames thermometer axis between both pins", () => {
+    const sources = {
+      ...emptySources,
+      activeTool: "thermometer" as const,
+      thermometer: {
+        thermoA: [53.35, -6.27] as [number, number],
+        thermoB: [53.35, -6.25] as [number, number],
+        answer: null,
+        targetDistanceMeters: 804,
+        walkCurrentPoint: null,
+        walkActive: false,
+      },
+    };
+    const target = computePlacementCameraTarget(buildContext(sources));
+
+    expect(target).not.toBeNull();
+    expect(boundsSpanMeters(target)).toBeGreaterThan(500);
+    expect(boundsSpanMeters(target)).toBeLessThan(5_000);
+  });
 });

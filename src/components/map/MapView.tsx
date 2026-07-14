@@ -7,7 +7,6 @@ import type {
   LeafletEvent,
 } from "leaflet";
 import { point } from "leaflet";
-import { toLeafletBounds } from "../../domain/map/placementCamera/leafletBounds";
 import { getMapBasemap, type MapStyle } from "../../domain/map/mapBasemaps";
 import { isUsableMapBounds } from "../../domain/geometry/geometry";
 import { MOTION_MAP_CAMERA_S } from "../../domain/device/motionTokens";
@@ -106,22 +105,22 @@ function MapFocus({
             paddingBottomRight: point(padX, padY + focusPaddingBias),
           }
         : { padding: fitBoundsPadding };
-    const zoomPaddingPoint =
-      focusPaddingBias !== undefined
-        ? point(padX, padY + focusPaddingBias)
-        : point(padX, padY);
 
-    const bounds = toLeafletBounds(focusBounds);
     const useZoomClamp =
       focusMinZoom !== undefined || focusMaxZoom !== undefined;
 
     if (useZoomClamp) {
-      const rawZoom = map.getBoundsZoom(bounds, false, zoomPaddingPoint);
+      map.fitBounds(focusBounds, {
+        ...padding,
+        animate: false,
+      });
+      const fittedCenter = map.getCenter();
+      const fittedZoom = map.getZoom();
       const minZoom = focusMinZoom ?? map.getMinZoom();
       const maxZoom = focusMaxZoom ?? map.getMaxZoom();
-      const zoom = Math.min(maxZoom, Math.max(minZoom, rawZoom));
+      const zoom = Math.min(maxZoom, Math.max(minZoom, fittedZoom));
 
-      map.setView(bounds.getCenter(), zoom, {
+      map.setView(fittedCenter, zoom, {
         animate,
         duration: MOTION_MAP_CAMERA_S,
       });
