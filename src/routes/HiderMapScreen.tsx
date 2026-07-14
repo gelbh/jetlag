@@ -341,7 +341,6 @@ export function HiderMapScreen() {
       return;
     }
 
-    await resetFoundHiderSession(session.id);
     setSession(
       {
         ...session,
@@ -350,6 +349,7 @@ export function HiderMapScreen() {
       },
       uid,
     );
+    await resetFoundHiderSession(session.id);
   }, [session, setSession, uid]);
 
   const handleResetEndGame = useCallback(async () => {

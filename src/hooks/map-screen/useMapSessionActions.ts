@@ -4,6 +4,7 @@ import {
   foundHiderBlocked,
   isEndGameActive,
   isEndGamePending,
+  isFoundHiderPending,
   type SessionRecord,
 } from "../../domain/map/annotations";
 import type { DistanceUnit } from "../../domain/map/distance";
@@ -135,7 +136,7 @@ export function useMapSessionActions({
   }, [canRequestFoundHider, session, setSession, uid]);
 
   const handleConfirmFoundHider = useCallback(async () => {
-    if (!session?.id || !uid) {
+    if (!session?.id || !uid || !isFoundHiderPending(session)) {
       return;
     }
 

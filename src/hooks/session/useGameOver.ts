@@ -43,11 +43,22 @@ export function useGameOver(session: SessionRecord | null | undefined) {
   const [remoteResult, setRemoteResult] = useState<GameResultRecord | null>(
     null,
   );
+  const [failedSubscriptionKey, setFailedSubscriptionKey] = useState<
+    string | null
+  >(null);
+  const subscriptionKey =
+    subscribed && sessionId && gameResultId
+      ? `${sessionId}:${gameResultId}`
+      : null;
+  const subscriptionFailed =
+    subscriptionKey != null && failedSubscriptionKey === subscriptionKey;
 
   useEffect(() => {
     if (!subscribed || !sessionId || !gameResultId) {
       return;
     }
+
+    const activeKey = `${sessionId}:${gameResultId}`;
 
     return subscribeToGameResult(
       sessionId,
@@ -55,6 +66,7 @@ export function useGameOver(session: SessionRecord | null | undefined) {
       setRemoteResult,
       () => {
         setRemoteResult(null);
+        setFailedSubscriptionKey(activeKey);
       },
     );
   }, [gameResultId, sessionId, subscribed]);
@@ -68,16 +80,28 @@ export function useGameOver(session: SessionRecord | null | undefined) {
       return remoteResult;
     }
 
-    if (sessionId === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
+    if (
+      sessionId === LOCAL_SESSION_ID ||
+      !isFirebaseConfigured() ||
+      subscriptionFailed
+    ) {
       return buildLocalGameResult(session);
     }
 
     return null;
-  }, [remoteResult, roundComplete, session, sessionId, subscribed]);
+  }, [
+    remoteResult,
+    roundComplete,
+    session,
+    sessionId,
+    subscribed,
+    subscriptionFailed,
+  ]);
 
   const loading =
     roundComplete &&
     !result &&
+    !subscriptionFailed &&
     Boolean(sessionId && sessionId !== LOCAL_SESSION_ID && isFirebaseConfigured());
 
   return {

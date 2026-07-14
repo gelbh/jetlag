@@ -67,12 +67,13 @@ export async function maybeAppendPlayerTrailPoint(params: {
     recordedAt,
   };
 
-  await appendPlayerTrailPoint(sessionId, point);
   lastTrailSampleByKey.set(trailKey(sessionId, uid), {
     lat: reading.lat,
     lng: reading.lng,
     recordedAtMs: nowMs,
   });
+
+  await appendPlayerTrailPoint(sessionId, point);
 }
 
 export function resetTrailPointCacheForTests(): void {
