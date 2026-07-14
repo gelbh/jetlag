@@ -21,6 +21,9 @@ import { Feedback } from "./routes/Feedback";
 import { Privacy } from "./routes/Privacy";
 import { Premium } from "./routes/Premium";
 import { Terms } from "./routes/Terms";
+import { Stats } from "./routes/Stats";
+import { Friends } from "./routes/Friends";
+import { Leaderboard } from "./routes/Leaderboard";
 import {
   CHUNK_RELOAD_CLEAR_MS,
   clearBootReloadFlag,
@@ -182,6 +185,9 @@ export default function App() {
                   }
                 />
                 <Route path="/feedback" element={<Feedback />} />
+                <Route path="/stats" element={<Stats />} />
+                <Route path="/friends" element={<Friends />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/premium" element={<Premium />} />

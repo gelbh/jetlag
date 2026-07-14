@@ -59,6 +59,8 @@ interface ToolDockOverflowMenuProps {
   unreadCount: number;
   canStartEndGame: boolean;
   onStartEndGame?: () => void;
+  canRequestFoundHider: boolean;
+  onRequestFoundHider?: () => void;
 }
 
 export function ToolDockOverflowMenu({
@@ -77,6 +79,8 @@ export function ToolDockOverflowMenu({
   unreadCount,
   canStartEndGame,
   onStartEndGame,
+  canRequestFoundHider,
+  onRequestFoundHider,
 }: ToolDockOverflowMenuProps) {
   const moreMenuVisible = moreMenuOpen && !dismissOverflowMenus;
 
@@ -96,6 +100,8 @@ export function ToolDockOverflowMenu({
       unreadCount={unreadCount}
       canStartEndGame={canStartEndGame}
       onStartEndGame={onStartEndGame}
+      canRequestFoundHider={canRequestFoundHider}
+      onRequestFoundHider={onRequestFoundHider}
     />
   );
 }

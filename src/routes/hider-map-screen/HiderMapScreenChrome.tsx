@@ -1,3 +1,4 @@
+import { useCallback, useState } from "react";
 import type { AnnotationRecord, SessionRecord } from "../../domain/map/annotations";
 import type {
   PendingQuestionRecord,
@@ -31,7 +32,11 @@ import {
 import { useSyncRetryAction } from "../../hooks/session/useSyncRetryAction";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
 import { SessionLog } from "../../components/session/SessionLog";
-import { isEndGameActive, isEndGamePending } from "../../domain/map/annotations";
+import { isEndGameActive, isEndGamePending, isFoundHiderPending, LOCAL_SESSION_ID } from "../../domain/map/annotations";
+import { GameOverSheet } from "../../components/session/game-over/GameOverSheet";
+import { useGameOver } from "../../hooks/session/useGameOver";
+import { useSessionExit } from "../../hooks/session/useSessionExit";
+import { resetSessionForRematch } from "../../services/session/sessionRematch";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
 import type { HiderTruthResult } from "../../domain/questions/ui";
@@ -82,6 +87,8 @@ export type HiderMapScreenChromeProps = {
   onDismissTruthReveal: () => void;
   onResetEndGame: () => void;
   onAcceptEndGame: () => void;
+  onAcceptFoundHider: () => void;
+  onDeclineFoundHider: () => void;
   onOpenLog: () => void;
   zoneTool: Pick<
     HiderZoneToolState,
@@ -192,6 +199,8 @@ export function HiderMapScreenChrome({
   onDismissTruthReveal,
   onResetEndGame,
   onAcceptEndGame,
+  onAcceptFoundHider,
+  onDeclineFoundHider,
   onOpenLog,
   zoneTool,
   hidingZonePanelTool,
@@ -226,6 +235,31 @@ export function HiderMapScreenChrome({
   chat,
 }: HiderMapScreenChromeProps) {
   const onSyncErrorAction = useSyncRetryAction();
+  const exitSession = useSessionExit();
+  const gameOver = useGameOver(session);
+  const [rematchPending, setRematchPending] = useState(false);
+
+  const handleRematch = useCallback(async () => {
+    if (session.id === LOCAL_SESSION_ID) {
+      return;
+    }
+
+    setRematchPending(true);
+    try {
+      await resetSessionForRematch(session.id);
+    } finally {
+      setRematchPending(false);
+    }
+  }, [session.id]);
+
+  const handleGameOverHome = useCallback(() => {
+    void exitSession({
+      reason: "leave",
+      sessionId: session.id,
+      replace: true,
+      closeOverlays: overlay.closeSheet,
+    });
+  }, [exitSession, overlay.closeSheet, session.id]);
 
   return (
     <>
@@ -258,10 +292,14 @@ export function HiderMapScreenChrome({
           endGameActive={isEndGameActive(session)}
           endGamePending={isEndGamePending(session)}
           endGameRequestedByUid={session.endGameRequestedByUid}
+          foundHiderPending={isFoundHiderPending(session)}
+          foundRequestedByUid={session.foundRequestedByUid}
           myUid={uid ?? undefined}
           isHost={isHost}
           onResetEndGame={() => void onResetEndGame()}
           onAcceptEndGame={() => void onAcceptEndGame()}
+          onAcceptFoundHider={() => void onAcceptFoundHider()}
+          onDeclineFoundHider={() => void onDeclineFoundHider()}
           hiderOutsideZone={hiderOutsideZone}
           onSyncErrorAction={onSyncErrorAction}
         />
@@ -290,6 +328,19 @@ export function HiderMapScreenChrome({
           unreadCount={unreadCount}
         />
       </div>
+
+      {gameOver.result ? (
+        <GameOverSheet
+          open
+          gameResult={gameOver.result}
+          playerRole="hider"
+          myUid={uid ?? undefined}
+          sessionId={session.id}
+          rematchPending={rematchPending}
+          onRematch={handleRematch}
+          onHome={handleGameOverHome}
+        />
+      ) : null}
 
       <HiderZoneWizardShell
         open={zoneTool.wizardOpen && !sheetBlocksWizard}

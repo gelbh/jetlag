@@ -3,8 +3,9 @@ import { describe, expect, it, vi } from "vitest";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { useSeekerLocationSync } from "./useSeekerLocationSync";
 
-const { writePlayerLocation, isFirebaseConfigured } = vi.hoisted(() => ({
+const { writePlayerLocation, appendPlayerTrailPoint, isFirebaseConfigured } = vi.hoisted(() => ({
   writePlayerLocation: vi.fn(async () => undefined),
+  appendPlayerTrailPoint: vi.fn(async () => undefined),
   isFirebaseConfigured: vi.fn(() => true),
 }));
 
@@ -14,6 +15,7 @@ vi.mock("../../services/core/firebase", () => ({
 
 vi.mock("../../services/firestore/firestoreSessionExtras", () => ({
   writePlayerLocation,
+  appendPlayerTrailPoint,
 }));
 
 vi.mock("../location/useLiveLocation", () => ({

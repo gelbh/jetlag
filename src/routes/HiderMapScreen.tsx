@@ -60,10 +60,12 @@ import { useLiveLocation } from "../hooks/location/useLiveLocation";
 import { useWakeLock } from "../hooks/location/useWakeLock";
 import { getPowerProfile } from "../domain/device/powerProfile";
 import { useSessionDistanceUnit } from "../hooks/session/useSessionDistanceUnit";
-import { isEndGameActive, isEndGamePending, LOCAL_SESSION_ID } from "../domain/map/annotations";
+import { isEndGameActive, isEndGamePending, isFoundHiderPending, LOCAL_SESSION_ID } from "../domain/map/annotations";
 import {
   acceptEndGameSession,
+  confirmFoundHiderSession,
   resetEndGameSession,
+  resetFoundHiderSession,
   ensureRemoteSessionWriteAccess,
 } from "../services/firestore/firestoreAnnotations";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase";
@@ -293,6 +295,61 @@ export function HiderMapScreen() {
     }
 
     await acceptEndGameSession(session.id, uid);
+  }, [session, setSession, uid]);
+
+  const handleAcceptFoundHider = useCallback(async () => {
+    if (!session?.id || !uid || !isFoundHiderPending(session)) {
+      return;
+    }
+
+    if (session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
+      setSession(
+        {
+          ...session,
+          foundConfirmedAt: new Date().toISOString(),
+          foundConfirmedByUid: uid,
+          gameOutcome: "found",
+          foundRequestedAt: undefined,
+          foundRequestedByUid: undefined,
+          endGameStartedAt: undefined,
+          endGameStartedByUid: undefined,
+          endGameRequestedAt: undefined,
+          endGameRequestedByUid: undefined,
+        },
+        uid,
+      );
+      return;
+    }
+
+    await confirmFoundHiderSession(session.id, uid);
+  }, [session, setSession, uid]);
+
+  const handleDeclineFoundHider = useCallback(async () => {
+    if (!session?.id || !uid) {
+      return;
+    }
+
+    if (session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
+      setSession(
+        {
+          ...session,
+          foundRequestedAt: undefined,
+          foundRequestedByUid: undefined,
+        },
+        uid,
+      );
+      return;
+    }
+
+    await resetFoundHiderSession(session.id);
+    setSession(
+      {
+        ...session,
+        foundRequestedAt: undefined,
+        foundRequestedByUid: undefined,
+      },
+      uid,
+    );
   }, [session, setSession, uid]);
 
   const handleResetEndGame = useCallback(async () => {
@@ -580,6 +637,8 @@ export function HiderMapScreen() {
         onDismissTruthReveal={dismissTruthReveal}
         onResetEndGame={handleResetEndGame}
         onAcceptEndGame={handleAcceptEndGame}
+        onAcceptFoundHider={handleAcceptFoundHider}
+        onDeclineFoundHider={handleDeclineFoundHider}
         onOpenLog={openLogExclusive}
         zoneTool={{
           wizardOpen: zoneTool.wizardOpen,

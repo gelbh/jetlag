@@ -1,5 +1,7 @@
-import { isEndGameActive, isEndGamePending } from "../../domain/map/annotations";
+import { useCallback, useState } from "react";
+import { isEndGameActive, isEndGamePending, isFoundHiderPending, LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { ChatPanel } from "../../components/chat/ChatPanel";
+import { GameOverSheet } from "../../components/session/game-over/GameOverSheet";
 import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
 import { AppUpdateMapChip } from "../../components/ui/AppUpdateMapChip";
 import { FirestorePersistenceBanner } from "../../components/session/FirestorePersistenceBanner";
@@ -9,6 +11,9 @@ import { AnnotationEditSheet } from "../../components/tools/AnnotationEditSheet"
 import { ToolDock } from "../../components/tools/ToolDock";
 import type { MapScreenController } from "./useMapScreenController";
 import { useSyncRetryAction } from "../../hooks/session/useSyncRetryAction";
+import { useGameOver } from "../../hooks/session/useGameOver";
+import { useSessionExit } from "../../hooks/session/useSessionExit";
+import { resetSessionForRematch } from "../../services/session/sessionRematch";
 import { SeekerChromeOverlays } from "./SeekerChromeOverlays";
 
 type MapScreenChromeProps = Pick<
@@ -63,6 +68,7 @@ type MapScreenChromeProps = Pick<
   | "canSubmitQuestion"
   | "canStartEndGame"
   | "endGameBlocked"
+  | "canRequestFoundHider"
   | "firstRunDismissed"
   | "setFirstRunDismissed"
   | "mapPanning"
@@ -104,6 +110,8 @@ type MapScreenChromeProps = Pick<
   | "handleRedoLastAnnotation"
   | "handleResetEndGame"
   | "handleStartEndGame"
+  | "handleRequestFoundHider"
+  | "handleDeclineFoundHider"
   | "handleClearMap"
   | "handleResetBoard"
   | "handleResetSession"
@@ -168,6 +176,7 @@ export function MapScreenChrome({
   canSubmitQuestion,
   canStartEndGame,
   endGameBlocked,
+  canRequestFoundHider,
   firstRunDismissed,
   setFirstRunDismissed,
   mapPanning,
@@ -208,6 +217,8 @@ export function MapScreenChrome({
   handleRedoLastAnnotation,
   handleResetEndGame,
   handleStartEndGame,
+  handleRequestFoundHider,
+  handleDeclineFoundHider,
   handleClearMap,
   handleResetBoard,
   handleResetSession,
@@ -221,6 +232,37 @@ export function MapScreenChrome({
   setAwaitingPlacement,
 }: MapScreenChromeProps) {
   const onSyncErrorAction = useSyncRetryAction();
+  const exitSession = useSessionExit();
+  const gameOver = useGameOver(session);
+  const [rematchPending, setRematchPending] = useState(false);
+
+  const rematchSessionId = session?.id;
+
+  const handleRematch = useCallback(async () => {
+    if (!rematchSessionId || rematchSessionId === LOCAL_SESSION_ID) {
+      return;
+    }
+
+    setRematchPending(true);
+    try {
+      await resetSessionForRematch(rematchSessionId);
+    } finally {
+      setRematchPending(false);
+    }
+  }, [rematchSessionId]);
+
+  const handleGameOverHome = useCallback(() => {
+    if (!session) {
+      return;
+    }
+
+    void exitSession({
+      reason: "leave",
+      sessionId: session.id,
+      replace: true,
+      closeOverlays: overlay.closeSheet,
+    });
+  }, [exitSession, overlay.closeSheet, session]);
 
   return (
     <>
@@ -244,6 +286,9 @@ export function MapScreenChrome({
           endGameActive={isEndGameActive(session)}
           endGamePending={isEndGamePending(session)}
           endGameRequestedByUid={session!.endGameRequestedByUid}
+          foundHiderPending={isFoundHiderPending(session)}
+          foundRequestedByUid={session!.foundRequestedByUid}
+          onDeclineFoundHider={() => void handleDeclineFoundHider()}
           myUid={uid ?? undefined}
           isHost={isHost}
           onResetEndGame={() => void handleResetEndGame()}
@@ -290,6 +335,8 @@ export function MapScreenChrome({
           canSubmitQuestion={canSubmitQuestion}
           canStartEndGame={canStartEndGame}
           onStartEndGame={() => void handleStartEndGame()}
+          canRequestFoundHider={canRequestFoundHider}
+          onRequestFoundHider={() => void handleRequestFoundHider()}
         />
       </div>
 
@@ -319,6 +366,19 @@ export function MapScreenChrome({
           tentacleTool,
         }}
       />
+
+      {gameOver.result ? (
+        <GameOverSheet
+          open
+          gameResult={gameOver.result}
+          playerRole="seeker"
+          myUid={uid ?? undefined}
+          sessionId={session!.id}
+          rematchPending={rematchPending}
+          onRematch={handleRematch}
+          onHome={handleGameOverHome}
+        />
+      ) : null}
 
       <MapSettingsSheet
         key={overlay.isSettingsOpen ? "open" : "closed"}

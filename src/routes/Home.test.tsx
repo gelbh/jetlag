@@ -56,8 +56,12 @@ describe("Home", () => {
     useSessionStore.getState().setSession(null);
   });
 
-  it("renders create and join actions", () => {
+  it("opens play hub with create, join, and custom actions", () => {
     renderWithRouter(<Home />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Play — create, join, or custom game" }),
+    );
 
     expect(screen.getByRole("link", { name: "Create session" })).toHaveAttribute(
       "href",
@@ -70,6 +74,19 @@ describe("Home", () => {
     expect(screen.getByRole("link", { name: "Custom game presets" })).toHaveAttribute(
       "href",
       "/presets",
+    );
+  });
+
+  it("links to friends and leaderboard in the header", () => {
+    renderWithRouter(<Home />);
+
+    expect(screen.getByRole("link", { name: "Friends" })).toHaveAttribute(
+      "href",
+      "/friends",
+    );
+    expect(screen.getByRole("link", { name: "Leaderboard" })).toHaveAttribute(
+      "href",
+      "/leaderboard",
     );
   });
 
