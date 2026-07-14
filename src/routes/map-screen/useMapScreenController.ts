@@ -40,7 +40,7 @@ import {
   getTransitMetro,
   metroSupportsLiveVehicles,
 } from "../../services/transit/transitCatalog";
-import { effectiveMapStyle, effectiveMapTilt, applyMapStylePreferenceChange, applyMapTiltPreferenceChange } from "../../domain/device/powerProfile";
+import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../domain/device/powerProfile";
 import {
   preloadGameAreaCachesAsync,
   gameAreaPreloadKey,
@@ -84,11 +84,8 @@ export function useMapScreenController() {
   const distanceUnit = useSessionDistanceUnit();
   const mapStyle = useMapStore((state) => state.mapStyle);
   const setMapStyle = useMapStore((state) => state.setMapStyle);
-  const mapTilt = useMapStore((state) => state.mapTilt);
-  const setMapTilt = useMapStore((state) => state.setMapTilt);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
-  const effectiveMapTiltValue = effectiveMapTilt(mapTilt, lowPowerMode);
   const { sessionRules, gameArea, matchingAreasReady, matchingAreasError, playAreaReady } =
     useResolvedSessionRules(session);
   const { features: adminBoundaryFeatures, loading: adminBoundaryLoading } =
@@ -173,16 +170,6 @@ export function useMapScreenController() {
       });
     },
     [lowPowerMode, setLowPowerMode, setMapStyle],
-  );
-  const handleMapTiltChange = useCallback(
-    (tilt: typeof mapTilt) => {
-      applyMapTiltPreferenceChange(tilt, {
-        lowPowerMode,
-        setMapTilt,
-        setLowPowerMode,
-      });
-    },
-    [lowPowerMode, setLowPowerMode, setMapTilt],
   );
   const handleMapViewportChange = useCallback(
     (viewport: MapViewportState | null) => {
@@ -610,12 +597,8 @@ export function useMapScreenController() {
     distanceUnit,
     mapStyle,
     setMapStyle,
-    mapTilt,
-    setMapTilt,
     handleMapStyleChange,
-    handleMapTiltChange,
     effectiveBasemapStyle,
-    effectiveMapTilt: effectiveMapTiltValue,
     lowPowerMode,
     layerVisibility,
     showCurrentLocation,
