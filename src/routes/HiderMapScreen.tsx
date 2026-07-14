@@ -41,7 +41,7 @@ import {
   type LatLngTuple,
 } from "../domain/geometry/geometry";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
-import { effectiveMapStyle, effectiveMapTilt, applyMapStylePreferenceChange, applyMapTiltPreferenceChange } from "../domain/device/powerProfile";
+import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/device/powerProfile";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
@@ -79,11 +79,8 @@ export function HiderMapScreen() {
   const persistedMyUid = useSessionStore((state) => state.myUid);
   const layerVisibility = useMapStore((state) => state.layerVisibility);
   const mapStyle = useMapStore((state) => state.mapStyle);
-  const mapTilt = useMapStore((state) => state.mapTilt);
-  const setMapTilt = useMapStore((state) => state.setMapTilt);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
-  const effectiveMapTiltValue = effectiveMapTilt(mapTilt, lowPowerMode);
   const showCurrentLocation = useMapStore((state) => state.showCurrentLocation);
   const setShowCurrentLocation = useMapStore(
     (state) => state.setShowCurrentLocation,
@@ -114,16 +111,6 @@ export function HiderMapScreen() {
       });
     },
     [lowPowerMode, setLowPowerMode, setMapStyle],
-  );
-  const handleMapTiltChange = useCallback(
-    (tilt: typeof mapTilt) => {
-      applyMapTiltPreferenceChange(tilt, {
-        lowPowerMode,
-        setMapTilt,
-        setLowPowerMode,
-      });
-    },
-    [lowPowerMode, setLowPowerMode, setMapTilt],
   );
   const notificationPreferences = useMapStore(
     (state) => state.notificationPreferences,
@@ -489,10 +476,7 @@ export function HiderMapScreen() {
           key={session.id}
           mapKey={session.id}
           mapStyle={effectiveBasemapStyle}
-          mapTilt={effectiveMapTiltValue}
-          lowPowerMode={lowPowerMode}
           onMapStyleChange={handleMapStyleChange}
-          onMapTiltChange={handleMapTiltChange}
           mapStyleControlInset="dock"
           zoomControlInset="dock"
           center={center}
@@ -659,8 +643,6 @@ export function HiderMapScreen() {
           distanceUnit,
           mapStyle: effectiveBasemapStyle,
           setMapStyle: handleMapStyleChange,
-          mapTilt,
-          setMapTilt: handleMapTiltChange,
           notificationPreferences,
           updateNotificationPreferences,
           enableNotifications,

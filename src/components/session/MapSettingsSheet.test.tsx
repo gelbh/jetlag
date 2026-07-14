@@ -20,8 +20,6 @@ const baseProps = {
     onDistanceUnitChange: vi.fn(),
     mapStyle: "standard" as const,
     onMapStyleChange: vi.fn(),
-    mapTilt: "flat" as const,
-    onMapTiltChange: vi.fn(),
     transitEnabled: false,
     transitLiveEnabled: false,
     transitLiveSupported: false,
@@ -73,35 +71,5 @@ describe("MapSettingsSheet", () => {
     fireEvent.click(screen.getByRole("button", { name: "Satellite" }));
 
     expect(onMapStyleChange).toHaveBeenCalledWith("satellite");
-  });
-
-  it("toggles map tilt and disables tilted option in low power mode", () => {
-    const onMapTiltChange = vi.fn();
-
-    const { rerender } = renderWithRouter(
-      <MapSettingsSheet
-        {...baseProps}
-        general={{
-          ...baseProps.general,
-          onMapTiltChange,
-        }}
-      />,
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "Tilted" }));
-    expect(onMapTiltChange).toHaveBeenCalledWith("tilted");
-
-    rerender(
-      <MapSettingsSheet
-        {...baseProps}
-        general={{
-          ...baseProps.general,
-          lowPowerMode: true,
-          onMapTiltChange,
-        }}
-      />,
-    );
-
-    expect(screen.getByRole("button", { name: "Tilted" })).toBeDisabled();
   });
 });

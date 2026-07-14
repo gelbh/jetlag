@@ -7,7 +7,6 @@ import type { TransitRouteFilter } from "../domain/map/transit";
 import type { NotificationPreferences } from "../domain/device/notifications";
 import { DEFAULT_NOTIFICATION_PREFERENCES } from "../domain/device/notifications";
 import type { MapStyle } from "../domain/map/mapBasemaps";
-import type { MapTilt } from "../domain/map/mapTilt";
 import type { ObserverPerspective } from "../domain/session/observerPerspective";
 
 export type LayerVisibility = Record<AnnotationType | "transit", boolean>;
@@ -35,7 +34,6 @@ export const useMapStore = create<{
   notificationPreferences: NotificationPreferences;
   distanceUnit: DistanceUnit;
   mapStyle: MapStyle;
-  mapTilt: MapTilt;
   layerVisibility: LayerVisibility;
   observerPerspective: ObserverPerspective;
   setActiveTool: (tool: MapTool) => void;
@@ -49,7 +47,6 @@ export const useMapStore = create<{
   setNotificationPreferences: (preferences: NotificationPreferences) => void;
   setDistanceUnit: (unit: DistanceUnit) => void;
   setMapStyle: (style: MapStyle) => void;
-  setMapTilt: (tilt: MapTilt) => void;
   setLayerVisibility: (layer: keyof LayerVisibility, visible: boolean) => void;
   setObserverPerspective: (perspective: ObserverPerspective) => void;
   resetObserverPerspective: () => void;
@@ -67,7 +64,6 @@ export const useMapStore = create<{
       notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
       distanceUnit: "imperial",
       mapStyle: "standard",
-      mapTilt: "flat",
       layerVisibility: DEFAULT_LAYER_VISIBILITY,
       observerPerspective: "both",
       setActiveTool: (activeTool) => set({ activeTool }),
@@ -86,7 +82,6 @@ export const useMapStore = create<{
         set({ notificationPreferences }),
       setDistanceUnit: (distanceUnit) => set({ distanceUnit }),
       setMapStyle: (mapStyle) => set({ mapStyle }),
-      setMapTilt: (mapTilt) => set({ mapTilt }),
       setLayerVisibility: (layer, visible) =>
         set((state) => ({
           layerVisibility: {
@@ -118,7 +113,6 @@ export const useMapStore = create<{
         notificationPreferences: state.notificationPreferences,
         distanceUnit: state.distanceUnit,
         mapStyle: state.mapStyle,
-        mapTilt: state.mapTilt,
         showAdminBoundaries: state.showAdminBoundaries,
         layerVisibility: state.layerVisibility,
       }),
