@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.6.2";
+export const APP_VERSION = "0.6.3";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,26 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.6.3",
+    date: "2026-07-14",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Admin: Google and Apple sign-in use redirect flow (more reliable under strict CSP)",
+          "Sign-in: CSP violations on admin and premium pages resolved",
+          "Admin monitor: map annotations now live-refresh when players place tools",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Photo answers: when in-app upload is unavailable, hiders can send the photo in your group chat and mark it sent in game chat",
+        ],
+      }
+    ],
+  },
   {
     version: "0.6.2",
     date: "2026-07-14",
