@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0 - 2026-07-14
+
+### Improvements
+
+- Game over: seekers can declare "Found hider" with hider confirmation; post-game sheet shows stats, map replay stub, and same-session rematch with role swap
+- Stats & social: personal stats dashboard, friends list, and opt-in leaderboards from new Home header icons and Play hub
+- Home: Create, Join, and Custom game actions move into a Play hub sheet
+
 ## 0.6.3 - 2026-07-14
 
 ### Fixes
