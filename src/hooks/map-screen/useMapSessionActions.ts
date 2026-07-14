@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   LOCAL_SESSION_ID,
+  foundHiderBlocked,
   isEndGameActive,
   isEndGamePending,
+  isFoundHiderPending,
   type SessionRecord,
 } from "../../domain/map/annotations";
 import type { DistanceUnit } from "../../domain/map/distance";
@@ -16,8 +18,11 @@ import type { HidingZoneRecord } from "../../domain/session/hidingZone";
 import type { PlayerRole } from "../../domain/session/playerRole";
 import { isFirebaseConfigured } from "../../services/core/firebase";
 import {
+  confirmFoundHiderSession,
   requestEndGameSession,
+  requestFoundHiderSession,
   resetEndGameSession,
+  resetFoundHiderSession,
   updateSessionRules,
 } from "../../services/firestore/firestoreAnnotations";
 
@@ -67,6 +72,13 @@ export function useMapSessionActions({
     timerHasStarted &&
     !isEndGameActive(session) &&
     !isEndGamePending(session) &&
+    !foundHiderBlocked(session) &&
+    confirmedHidingZones.length > 0;
+  const canRequestFoundHider =
+    myRole !== "hider" &&
+    timerHasStarted &&
+    !foundHiderBlocked(session) &&
+    !isEndGamePending(session) &&
     confirmedHidingZones.length > 0;
 
   const handleStartEndGame = useCallback(async () => {
@@ -95,6 +107,88 @@ export function useMapSessionActions({
 
     await requestEndGameSession(session.id, uid);
   }, [canStartEndGame, session, setSession, uid]);
+
+  const handleRequestFoundHider = useCallback(async () => {
+    if (!session?.id || !uid || !canRequestFoundHider) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Declare found hider?\n\nThe hider must confirm before the round ends.",
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    if (session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
+      setSession(
+        {
+          ...session,
+          foundRequestedAt: new Date().toISOString(),
+          foundRequestedByUid: uid,
+        },
+        uid,
+      );
+      return;
+    }
+
+    await requestFoundHiderSession(session.id, uid);
+  }, [canRequestFoundHider, session, setSession, uid]);
+
+  const handleConfirmFoundHider = useCallback(async () => {
+    if (!session?.id || !uid || !isFoundHiderPending(session)) {
+      return;
+    }
+
+    if (session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
+      setSession(
+        {
+          ...session,
+          foundConfirmedAt: new Date().toISOString(),
+          foundConfirmedByUid: uid,
+          gameOutcome: "found",
+          foundRequestedAt: undefined,
+          foundRequestedByUid: undefined,
+          endGameStartedAt: undefined,
+          endGameStartedByUid: undefined,
+          endGameRequestedAt: undefined,
+          endGameRequestedByUid: undefined,
+        },
+        uid,
+      );
+      return;
+    }
+
+    await confirmFoundHiderSession(session.id, uid);
+  }, [session, setSession, uid]);
+
+  const handleDeclineFoundHider = useCallback(async () => {
+    if (!session?.id || !uid) {
+      return;
+    }
+
+    if (session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
+      setSession(
+        {
+          ...session,
+          foundRequestedAt: undefined,
+          foundRequestedByUid: undefined,
+        },
+        uid,
+      );
+      return;
+    }
+
+    setSession(
+      {
+        ...session,
+        foundRequestedAt: undefined,
+        foundRequestedByUid: undefined,
+      },
+      uid,
+    );
+    await resetFoundHiderSession(session.id);
+  }, [session, setSession, uid]);
 
   const handleResetEndGame = useCallback(async () => {
     if (!session?.id || !uid) {
@@ -179,7 +273,11 @@ export function useMapSessionActions({
     confirmedHidingZones,
     endGameBlocked,
     canStartEndGame,
+    canRequestFoundHider,
     handleStartEndGame,
+    handleRequestFoundHider,
+    handleConfirmFoundHider,
+    handleDeclineFoundHider,
     handleResetEndGame,
     handleSaveGameRules,
     handleDistanceUnitChange,

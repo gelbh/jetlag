@@ -10,6 +10,7 @@ import { userErrorFromSyncMessage } from "../../domain/device/userErrors";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import type { PlayerRole } from "../../domain/session/playerRole";
 import { EndGameAlert } from "./status/EndGameAlert";
+import { FoundHiderAlert } from "./status/FoundHiderAlert";
 import { HiderOutsideZoneAlert } from "./status/HiderOutsideZoneAlert";
 import { SyncBlock } from "./status/SyncBlock";
 import { TimerBlock } from "./status/TimerBlock";
@@ -45,6 +46,10 @@ interface MapStatusRailProps {
   isHost?: boolean;
   onAcceptEndGame?: () => void;
   onResetEndGame?: () => void;
+  foundHiderPending?: boolean;
+  foundRequestedByUid?: string;
+  onAcceptFoundHider?: () => void;
+  onDeclineFoundHider?: () => void;
   hiderOutsideZone?: boolean;
   onSyncErrorAction?: () => void;
 }
@@ -78,6 +83,10 @@ export function MapStatusRail({
   isHost = false,
   onAcceptEndGame,
   onResetEndGame,
+  foundHiderPending = false,
+  foundRequestedByUid,
+  onAcceptFoundHider,
+  onDeclineFoundHider,
   hiderOutsideZone = false,
   onSyncErrorAction,
 }: MapStatusRailProps) {
@@ -218,6 +227,16 @@ export function MapStatusRail({
           isHost={isHost}
           onAcceptEndGame={onAcceptEndGame}
           onResetEndGame={onResetEndGame}
+        />
+
+        <FoundHiderAlert
+          foundHiderPending={foundHiderPending}
+          playerRole={playerRole}
+          foundRequestedByUid={foundRequestedByUid}
+          myUid={myUid}
+          isHost={isHost}
+          onAcceptFoundHider={onAcceptFoundHider}
+          onDeclineFoundHider={onDeclineFoundHider}
         />
       </div>
     </div>

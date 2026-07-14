@@ -110,6 +110,7 @@ export function SeekerMapScreen() {
         canSubmitQuestion={controller.canSubmitQuestion}
         canStartEndGame={controller.canStartEndGame}
         endGameBlocked={controller.endGameBlocked}
+        canRequestFoundHider={controller.canRequestFoundHider}
         firstRunDismissed={controller.firstRunDismissed}
         setFirstRunDismissed={controller.setFirstRunDismissed}
         mapPanning={controller.mapPanning}
@@ -151,6 +152,8 @@ export function SeekerMapScreen() {
         handleRedoLastAnnotation={controller.handleRedoLastAnnotation}
         handleResetEndGame={controller.handleResetEndGame}
         handleStartEndGame={controller.handleStartEndGame}
+        handleRequestFoundHider={controller.handleRequestFoundHider}
+        handleDeclineFoundHider={controller.handleDeclineFoundHider}
         handleClearMap={controller.handleClearMap}
         handleResetBoard={controller.handleResetBoard}
         handleResetSession={controller.handleResetSession}

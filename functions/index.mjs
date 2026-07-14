@@ -18,12 +18,16 @@ export {
 } from "./handlers/billing.mjs";
 
 export {
+  captureStartingLocations,
+  finalizeGameResult,
   notifyPendingQuestion,
   notifySessionMessage,
   notifySessionTimer,
   purgeStaleSessions,
   warmPremiumOverpassPreload,
 } from "./handlers/triggers.mjs";
+
+export { resetSessionForRematch } from "./handlers/session.mjs";
 
 export { listActiveSessions } from "./admin/listActiveSessions.mjs";
 export { adminModerateSession } from "./admin/moderateSession.mjs";
