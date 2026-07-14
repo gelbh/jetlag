@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.1 - 2026-07-14
+
+### Fixes
+
+- Map: harden elimination-mask worker failures and radar submit errors so map rejoin no longer white-screens on stale worker crashes or bad polygon data
+
+### Improvements
+
+- Map: use smarter per-tool camera framing during question placement, fit post-answer shades, and add a Recenter button while placing questions
+
 ## 0.7.0 - 2026-07-14
 
 ### Improvements

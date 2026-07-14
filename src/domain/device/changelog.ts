@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.7.0";
+export const APP_VERSION = "0.7.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,24 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.7.1",
+    date: "2026-07-14",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Map: harden elimination-mask worker failures and radar submit errors so map rejoin no longer white-screens on stale worker crashes or bad polygon data",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Map: use smarter per-tool camera framing during question placement, fit post-answer shades, and add a Recenter button while placing questions",
+        ],
+      }
+    ],
+  },
   {
     version: "0.7.0",
     date: "2026-07-14",
