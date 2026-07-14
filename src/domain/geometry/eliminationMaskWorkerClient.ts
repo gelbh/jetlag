@@ -12,12 +12,24 @@ type EliminationMaskWorkerApi = {
 let worker: Worker | null = null;
 let workerApi: Remote<EliminationMaskWorkerApi> | null = null;
 
+function disposeWorker(): void {
+  worker?.terminate();
+  worker = null;
+  workerApi = null;
+}
+
 function getWorkerApi(): Remote<EliminationMaskWorkerApi> {
   if (!workerApi) {
     worker = new Worker(
       new URL("./eliminationMask.worker.ts", import.meta.url),
       { type: "module" },
     );
+    worker.onerror = () => {
+      disposeWorker();
+    };
+    worker.onmessageerror = () => {
+      disposeWorker();
+    };
     workerApi = wrap<EliminationMaskWorkerApi>(worker);
   }
 
@@ -31,16 +43,19 @@ export async function requestCombinedEliminationMask(
   endGameHidingZones: readonly HidingZoneRecord[],
 ): Promise<ReturnType<typeof buildCombinedEliminationMask>> {
   const api = getWorkerApi();
-  return api.buildCombinedEliminationMask(
-    annotations,
-    gameArea,
-    draftFeatures,
-    endGameHidingZones,
-  );
+  try {
+    return await api.buildCombinedEliminationMask(
+      annotations,
+      gameArea,
+      draftFeatures,
+      endGameHidingZones,
+    );
+  } catch (error) {
+    disposeWorker();
+    throw error;
+  }
 }
 
 export function resetEliminationMaskWorkerForTests(): void {
-  worker?.terminate();
-  worker = null;
-  workerApi = null;
+  disposeWorker();
 }
