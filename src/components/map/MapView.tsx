@@ -106,17 +106,17 @@ function MapFocus({
             paddingBottomRight: point(padX, padY + focusPaddingBias),
           }
         : { padding: fitBoundsPadding };
-
-    const bounds = toLeafletBounds(focusBounds);
-    const useZoomClamp =
-      focusMinZoom !== undefined || focusMaxZoom !== undefined;
-    const paddingPoint =
+    const zoomPaddingPoint =
       focusPaddingBias !== undefined
         ? point(padX, padY + focusPaddingBias)
         : point(padX, padY);
 
+    const bounds = toLeafletBounds(focusBounds);
+    const useZoomClamp =
+      focusMinZoom !== undefined || focusMaxZoom !== undefined;
+
     if (useZoomClamp) {
-      const rawZoom = map.getBoundsZoom(bounds, false, paddingPoint);
+      const rawZoom = map.getBoundsZoom(bounds, false, zoomPaddingPoint);
       const minZoom = focusMinZoom ?? map.getMinZoom();
       const maxZoom = focusMaxZoom ?? map.getMaxZoom();
       const zoom = Math.min(maxZoom, Math.max(minZoom, rawZoom));

@@ -181,9 +181,18 @@ export function approximatePlayAreaContextMinZoom(
     return undefined;
   }
 
-  const latSpan = Math.max(playBox.north - playBox.south, 0.001);
-  const zoom = Math.log2(360 / latSpan) - 1;
-  return Math.max(1, Math.floor(zoom));
+  const latRad = (((playBox.north + playBox.south) / 2) * Math.PI) / 180;
+  const latMeters = Math.max((playBox.north - playBox.south) * 111_320, 1);
+  const lngMeters = Math.max(
+    (playBox.east - playBox.west) * 111_320 * Math.cos(latRad),
+    1,
+  );
+  const zoomFromLat = Math.log2(40_075_017 / latMeters);
+  const zoomFromLng = Math.log2(
+    (40_075_017 * Math.cos(latRad)) / lngMeters,
+  );
+
+  return Math.max(1, Math.floor(Math.min(zoomFromLat, zoomFromLng) - 1));
 }
 
 export function boundsForVertexPolygon(vertices: readonly LatLngTuple[]): BoundingBox | null {

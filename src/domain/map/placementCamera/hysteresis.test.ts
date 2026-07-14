@@ -121,3 +121,24 @@ describe("hysteresis", () => {
     ).toBe(true);
   });
 });
+
+describe("isTargetInsideSafeRect", () => {
+  it("returns false when viewport frame is missing or zero-sized", () => {
+    const target = {
+      south: 53.34,
+      west: -6.27,
+      north: 53.35,
+      east: -6.26,
+    };
+
+    expect(isTargetInsideSafeRect(target, null)).toBe(false);
+    expect(
+      isTargetInsideSafeRect(target, {
+        bounds: viewportFrame.bounds,
+        widthPx: 0,
+        heightPx: 400,
+        bottomPaddingPx: 120,
+      }),
+    ).toBe(false);
+  });
+});

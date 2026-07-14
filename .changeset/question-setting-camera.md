@@ -2,4 +2,4 @@
 "jetlag": patch
 ---
 
-Question-setting map: smarter per-tool camera framing, post-answer shade fit, and a Recenter button while placing questions.
+Map: use smarter per-tool camera framing during question placement, fit post-answer shades, and add a Recenter button while placing questions.

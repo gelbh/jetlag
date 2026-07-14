@@ -227,10 +227,13 @@ export function useMapScreenController() {
 
     const updateSize = () => {
       const rect = shell.getBoundingClientRect();
-      setMapShellSize({
-        width: Math.round(rect.width),
-        height: Math.round(rect.height),
-      });
+      const width = Math.round(rect.width);
+      const height = Math.round(rect.height);
+      setMapShellSize((previous) =>
+        previous.width === width && previous.height === height
+          ? previous
+          : { width, height },
+      );
     };
 
     updateSize();

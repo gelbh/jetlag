@@ -6,6 +6,7 @@ import {
   placementCameraFingerprint,
   resolvePlacementPhase,
   shouldReframeWithHysteresis,
+  toLeafletBounds,
   WALK_REFRAME_INTERVAL_MS,
   type PlacementCameraDraftState,
   type PlacementViewportFrame,
@@ -53,27 +54,22 @@ function targetBoundsBox(
     return null;
   }
 
-  if (Array.isArray(bounds) && bounds.length === 2) {
-    const first = bounds[0];
-    const second = bounds[1];
+  const leafletBounds = toLeafletBounds(bounds);
+  const southWest = leafletBounds.getSouthWest();
+  const northEast = leafletBounds.getNorthEast();
 
-    if (Array.isArray(first) && Array.isArray(second)) {
-      return gameAreaToBoundingBox({
-        type: "Polygon",
-        coordinates: [
-          [
-            [first[1], first[0]],
-            [second[1], first[0]],
-            [second[1], second[0]],
-            [first[1], second[0]],
-            [first[1], first[0]],
-          ],
-        ],
-      });
-    }
-  }
-
-  return null;
+  return gameAreaToBoundingBox({
+    type: "Polygon",
+    coordinates: [
+      [
+        [southWest.lng, southWest.lat],
+        [northEast.lng, southWest.lat],
+        [northEast.lng, northEast.lat],
+        [southWest.lng, northEast.lat],
+        [southWest.lng, southWest.lat],
+      ],
+    ],
+  });
 }
 
 export function usePlacementMapFocus({

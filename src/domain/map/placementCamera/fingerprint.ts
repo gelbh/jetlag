@@ -6,7 +6,7 @@ import type { MapTool } from "../mapToolTypes";
 import type { PlacementPhase } from "./types";
 
 function isVolatileWalkOverlay(overlay: MapDraftOverlay): boolean {
-  return overlay.id.includes("walk-");
+  return overlay.id.startsWith("thermo-draft-walk-");
 }
 
 function polygonFingerprint(

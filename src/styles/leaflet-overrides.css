@@ -118,8 +118,8 @@
 .map-style-control--dock,
 .map-recenter-control--dock {
   bottom: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock)
-      + var(--safe-area-bottom) + 0.5rem
+    var(--dock-total-height) + var(--chrome-gap-above-dock) +
+      var(--safe-area-bottom) + 0.5rem
   );
 }
 
