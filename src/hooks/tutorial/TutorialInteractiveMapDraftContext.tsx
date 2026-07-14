@@ -22,6 +22,7 @@ interface TutorialInteractiveMapDraftContextValue {
     extraEliminationFeatures?: Feature<GeoPolygon | MultiPolygon>[],
   ) => void;
   activeTool: MapDraftOverlaySources["activeTool"];
+  sources: MapDraftOverlaySources | null;
   overlays: ReturnType<typeof buildMapDraftOverlays>["overlays"];
   eliminationFeatures: Feature<GeoPolygon | MultiPolygon>[];
 }
@@ -68,10 +69,11 @@ export function TutorialInteractiveMapDraftProvider({
     (): TutorialInteractiveMapDraftContextValue => ({
       registerMapDraft,
       activeTool: draft.sources?.activeTool ?? "none",
+      sources: draft.sources,
       overlays,
       eliminationFeatures,
     }),
-    [draft.sources?.activeTool, eliminationFeatures, overlays, registerMapDraft],
+    [draft.sources, eliminationFeatures, overlays, registerMapDraft],
   );
 
   return (
@@ -95,6 +97,7 @@ export function useTutorialInteractiveMapDraft() {
   const context = useContext(TutorialInteractiveMapDraftContext);
   return {
     activeTool: context?.activeTool ?? "none",
+    sources: context?.sources ?? null,
     overlays: context?.overlays ?? [],
     eliminationFeatures: context?.eliminationFeatures ?? [],
   };
