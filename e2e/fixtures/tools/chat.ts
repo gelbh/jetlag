@@ -46,6 +46,15 @@ export async function answerPhotoCannotInChat(page: Page) {
   await answerButton.click();
 }
 
+export async function answerPhotoSentExternallyInChat(page: Page) {
+  const answerButton = page.getByRole("button", { name: "Mark sent" });
+  if (!(await answerButton.isVisible().catch(() => false))) {
+    await openChat(page);
+  }
+  await expect(answerButton).toBeVisible({ timeout: 20_000 });
+  await answerButton.click();
+}
+
 export async function answerYesInChat(page: Page) {
   await answerInChat(page, "Yes");
 }
