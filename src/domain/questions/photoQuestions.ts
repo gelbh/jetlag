@@ -36,13 +36,19 @@ export interface PhotoCategoryDefinition {
 
 export type PhotoAnswer =
   | { kind: "photo"; storagePath: string }
-  | { kind: "cannot_answer" };
+  | { kind: "cannot_answer" }
+  | { kind: "sent_externally" };
 
 export const PHOTO_CANNOT_ANSWER_ID = "cannot_answer";
 export const PHOTO_CANNOT_ANSWER_LABEL = "I cannot answer the question";
+export const PHOTO_SENT_EXTERNALLY_ID = "sent_externally";
+export const PHOTO_SENT_EXTERNALLY_LABEL = "Mark sent";
+export const PHOTO_SENT_EXTERNALLY_SEEKER_LABEL = "Photo sent outside the app";
+export const PHOTO_UPLOAD_OUTAGE_NOTICE =
+  "In-app photo upload is temporarily unavailable. Send the photo in your group chat (iMessage, WhatsApp, SMS, etc.), then tap Mark sent when done.";
 
 export const PHOTO_REPLY_OPTIONS: readonly GameReplyOption[] = [
-  { id: "photo", label: "Upload photo" },
+  { id: PHOTO_SENT_EXTERNALLY_ID, label: PHOTO_SENT_EXTERNALLY_LABEL },
   { id: PHOTO_CANNOT_ANSWER_ID, label: PHOTO_CANNOT_ANSWER_LABEL },
 ];
 
@@ -349,6 +355,10 @@ export function parsePhotoAnswer(answer: unknown): PhotoAnswer | null {
     return { kind: "cannot_answer" };
   }
 
+  if (record.kind === "sent_externally") {
+    return { kind: "sent_externally" };
+  }
+
   if (record.kind === "photo" && typeof record.storagePath === "string") {
     return { kind: "photo", storagePath: record.storagePath };
   }
@@ -357,7 +367,11 @@ export function parsePhotoAnswer(answer: unknown): PhotoAnswer | null {
 }
 
 export function photoAnswerSelectedReply(answer: PhotoAnswer): string {
-  return answer.kind === "cannot_answer"
-    ? PHOTO_CANNOT_ANSWER_ID
-    : "photo";
+  if (answer.kind === "cannot_answer") {
+    return PHOTO_CANNOT_ANSWER_ID;
+  }
+  if (answer.kind === "sent_externally") {
+    return PHOTO_SENT_EXTERNALLY_ID;
+  }
+  return "photo";
 }

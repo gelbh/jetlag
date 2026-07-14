@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   parsePhotoAnswer,
   PHOTO_CANNOT_ANSWER_LABEL,
+  PHOTO_SENT_EXTERNALLY_SEEKER_LABEL,
 } from "../../domain/questions";
 import { getPhotoDownloadUrl } from "../../services/core/photoStorage";
 
@@ -49,6 +50,14 @@ export function PhotoAnswerPreview({ answer }: PhotoAnswerPreviewProps) {
     return (
       <p className="mt-2 text-xs text-ink-dim">
         Answered: {PHOTO_CANNOT_ANSWER_LABEL}
+      </p>
+    );
+  }
+
+  if (parsed.kind === "sent_externally") {
+    return (
+      <p className="mt-2 text-xs text-ink-dim">
+        {PHOTO_SENT_EXTERNALLY_SEEKER_LABEL}
       </p>
     );
   }

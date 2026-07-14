@@ -1,16 +1,12 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import {
   test,
   expect,
   answerPhotoCannotInChat,
+  answerPhotoSentExternallyInChat,
   expectChatAnswer,
   openChat,
   sendPhotoToHiders,
 } from "../../fixtures";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const MINIMAL_JPEG = path.join(__dirname, "../../fixtures/minimal.jpg");
 
 test.setTimeout(120_000);
 
@@ -39,25 +35,23 @@ test("@smoke photo question syncs cannot-answer replies through chat", async ({
   await expectChatAnswer(hostPage, "I cannot answer the question");
 });
 
-test("photo question accepts an uploaded answer", async ({ hostHider }) => {
+test("photo question accepts mark-sent external answer", async ({ hostHider }) => {
   const { hostPage, guestPage } = hostHider;
 
   await sendPhotoToHiders(hostPage);
 
   await expect(async () => {
     await openChat(guestPage);
-    await expect(guestPage.getByText(/Upload photo/i)).toBeVisible();
+    await expect(guestPage.getByRole("button", { name: "Mark sent" })).toBeVisible();
   }).toPass({ timeout: 30_000 });
 
-  const fileInput = guestPage.locator('input[type="file"]');
-  await fileInput.setInputFiles(MINIMAL_JPEG);
-
-  await expect(guestPage.getByText(/Answered with photo|Answered: photo/i)).toBeVisible({
-    timeout: 30_000,
-  });
+  await answerPhotoSentExternallyInChat(guestPage);
+  await expect(
+    guestPage.getByText(/Photo sent outside the app/i),
+  ).toBeVisible({ timeout: 30_000 });
 
   await openChat(hostPage);
-  await expect(hostPage.getByText(/Answered with photo|Answered: photo/i)).toBeVisible({
-    timeout: 30_000,
-  });
+  await expect(
+    hostPage.getByText(/Photo sent outside the app/i),
+  ).toBeVisible({ timeout: 30_000 });
 });

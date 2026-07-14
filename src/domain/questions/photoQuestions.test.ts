@@ -77,6 +77,9 @@ describe("photoQuestions", () => {
     expect(parsePhotoAnswer({ kind: "cannot_answer" })).toEqual({
       kind: "cannot_answer",
     });
+    expect(parsePhotoAnswer({ kind: "sent_externally" })).toEqual({
+      kind: "sent_externally",
+    });
     expect(
       parsePhotoAnswer({
         kind: "photo",
@@ -88,6 +91,9 @@ describe("photoQuestions", () => {
     });
     expect(photoAnswerSelectedReply({ kind: "cannot_answer" })).toBe(
       "cannot_answer",
+    );
+    expect(photoAnswerSelectedReply({ kind: "sent_externally" })).toBe(
+      "sent_externally",
     );
     expect(
       photoAnswerSelectedReply({
