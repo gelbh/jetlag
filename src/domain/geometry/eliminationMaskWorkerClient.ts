@@ -9,10 +9,21 @@ type EliminationMaskWorkerApi = {
   buildCombinedEliminationMask: typeof buildCombinedEliminationMask;
 };
 
+const WORKER_FAILURE_MESSAGE = "Elimination mask worker failed";
+
 let worker: Worker | null = null;
 let workerApi: Remote<EliminationMaskWorkerApi> | null = null;
+const pendingRejects = new Set<(error: Error) => void>();
 
-function disposeWorker(): void {
+function rejectPendingRequests(error: Error): void {
+  for (const reject of pendingRejects) {
+    reject(error);
+  }
+  pendingRejects.clear();
+}
+
+function disposeWorker(error?: Error): void {
+  rejectPendingRequests(error ?? new Error(WORKER_FAILURE_MESSAGE));
   worker?.terminate();
   worker = null;
   workerApi = null;
@@ -43,16 +54,35 @@ export async function requestCombinedEliminationMask(
   endGameHidingZones: readonly HidingZoneRecord[],
 ): Promise<ReturnType<typeof buildCombinedEliminationMask>> {
   const api = getWorkerApi();
+  let releasePending: (() => void) | undefined;
+
+  const pendingFailure = new Promise<never>((_, reject) => {
+    const rejectPending = (error: Error) => {
+      reject(error);
+    };
+    pendingRejects.add(rejectPending);
+    releasePending = () => {
+      pendingRejects.delete(rejectPending);
+    };
+  });
+
   try {
-    return await api.buildCombinedEliminationMask(
-      annotations,
-      gameArea,
-      draftFeatures,
-      endGameHidingZones,
-    );
+    return await Promise.race([
+      api.buildCombinedEliminationMask(
+        annotations,
+        gameArea,
+        draftFeatures,
+        endGameHidingZones,
+      ),
+      pendingFailure,
+    ]);
   } catch (error) {
-    disposeWorker();
+    disposeWorker(
+      error instanceof Error ? error : new Error(WORKER_FAILURE_MESSAGE),
+    );
     throw error;
+  } finally {
+    releasePending?.();
   }
 }
 

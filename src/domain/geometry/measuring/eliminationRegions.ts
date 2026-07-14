@@ -98,24 +98,35 @@ function sanitizeRing(ring: number[][]): LatLngTuple[] {
   return positions;
 }
 
+function sanitizePolygonRings(rings: number[][][]): LatLngTuple[][] | null {
+  if (rings.length === 0) {
+    return null;
+  }
+
+  const exterior = sanitizeRing(rings[0]);
+  if (exterior.length < 3) {
+    return null;
+  }
+
+  const holes = rings
+    .slice(1)
+    .map((ring) => sanitizeRing(ring))
+    .filter((ring) => ring.length >= 3);
+
+  return [exterior, ...holes];
+}
+
 export function polygonFeatureToLeafletPolygonGroups(
   feature: Feature<Polygon | MultiPolygon>,
 ): LatLngTuple[][][] {
   if (feature.geometry.type === "MultiPolygon") {
     return feature.geometry.coordinates
-      .map((polygon) =>
-        polygon
-          .map((ring) => sanitizeRing(ring))
-          .filter((ring) => ring.length >= 3),
-      )
-      .filter((polygon) => polygon.length > 0);
+      .map((polygon) => sanitizePolygonRings(polygon))
+      .filter((polygon): polygon is LatLngTuple[][] => polygon !== null);
   }
 
-  const polygon = feature.geometry.coordinates
-    .map((ring) => sanitizeRing(ring))
-    .filter((ring) => ring.length >= 3);
-
-  return polygon.length > 0 ? [polygon] : [];
+  const polygon = sanitizePolygonRings(feature.geometry.coordinates);
+  return polygon ? [polygon] : [];
 }
 
 export function polygonFeatureToLeafletRings(

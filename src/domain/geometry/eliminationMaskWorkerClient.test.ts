@@ -27,10 +27,12 @@ import * as workerClient from "./eliminationMaskWorkerClient";
 describe("eliminationMaskWorkerClient", () => {
   let terminateSpy: ReturnType<typeof vi.fn>;
   let onErrorHandler: (() => void) | null = null;
+  let onMessageErrorHandler: (() => void) | null = null;
 
   beforeEach(() => {
     terminateSpy = vi.fn();
     onErrorHandler = null;
+    onMessageErrorHandler = null;
     buildCombinedEliminationMask.mockClear();
 
     class MockWorker {
@@ -41,6 +43,7 @@ describe("eliminationMaskWorkerClient", () => {
       constructor() {
         queueMicrotask(() => {
           onErrorHandler = this.onerror;
+          onMessageErrorHandler = this.onmessageerror;
         });
       }
     }
@@ -115,6 +118,26 @@ describe("eliminationMaskWorkerClient", () => {
     await workerClient.requestCombinedEliminationMask([], gameArea, [], []);
 
     onErrorHandler?.();
+
+    expect(terminateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("disposes the worker when onmessageerror fires", async () => {
+    const gameArea = {
+      type: "Polygon" as const,
+      coordinates: [
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+          [0, 0],
+        ],
+      ],
+    };
+
+    await workerClient.requestCombinedEliminationMask([], gameArea, [], []);
+
+    onMessageErrorHandler?.();
 
     expect(terminateSpy).toHaveBeenCalledTimes(1);
   });

@@ -279,7 +279,7 @@ export function useRadarTool({
       finishPlacement();
     } catch (error) {
       setMapError(
-        error instanceof Error
+        error instanceof Error && error.message.trim()
           ? error.message
           : "Could not save the radar question.",
       );
