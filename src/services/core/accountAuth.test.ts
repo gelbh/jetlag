@@ -4,7 +4,6 @@ import {
   completeOAuthRedirectIfPending,
   completePremiumEmailSignInLink,
   isAnonymousUser,
-  isOAuthRedirectInProgress,
   isPermanentUser,
   OAuthRedirectInProgressError,
   signInWithGoogle,
@@ -121,8 +120,71 @@ describe("accountAuth", () => {
     });
   });
 
-  it("signs in with Google popup when the credential is already in use", async () => {
+  it("redirects anonymous Google sign-in before trying popup", async () => {
     mockAuth.currentUser = { isAnonymous: true, uid: "anon-3" };
+    linkWithRedirect.mockResolvedValueOnce(undefined);
+
+    await expect(signInWithGoogle()).rejects.toBeInstanceOf(
+      OAuthRedirectInProgressError,
+    );
+    expect(linkWithRedirect).toHaveBeenCalledWith(
+      mockAuth.currentUser,
+      expect.anything(),
+    );
+    expect(linkWithPopup).not.toHaveBeenCalled();
+  });
+
+  it("redirects signed-in Google sign-in before trying popup", async () => {
+    mockAuth.currentUser = { isAnonymous: false, uid: "signed-in" };
+    signInWithRedirect.mockResolvedValueOnce(undefined);
+
+    await expect(signInWithGoogle()).rejects.toBeInstanceOf(
+      OAuthRedirectInProgressError,
+    );
+    expect(signInWithRedirect).toHaveBeenCalledWith(
+      mockAuth,
+      expect.anything(),
+    );
+    expect(signInWithPopup).not.toHaveBeenCalled();
+  });
+
+  it("falls back to popup when redirect fails before navigation", async () => {
+    mockAuth.currentUser = { isAnonymous: true, uid: "anon-popup" };
+    linkWithRedirect.mockRejectedValueOnce(
+      new FirebaseError("auth/network-request-failed", "Network error."),
+    );
+    linkWithPopup.mockResolvedValueOnce({
+      user: { uid: "anon-popup", isAnonymous: false },
+    });
+
+    const user = await signInWithGoogle();
+
+    expect(user.uid).toBe("anon-popup");
+    expect(linkWithRedirect).toHaveBeenCalled();
+    expect(linkWithPopup).toHaveBeenCalled();
+  });
+
+  it("falls back to popup when signed-in redirect fails before navigation", async () => {
+    mockAuth.currentUser = { isAnonymous: false, uid: "signed-in" };
+    signInWithRedirect.mockRejectedValueOnce(
+      new FirebaseError("auth/network-request-failed", "Network error."),
+    );
+    signInWithPopup.mockResolvedValueOnce({
+      user: { uid: "signed-in", isAnonymous: false },
+    });
+
+    const user = await signInWithGoogle();
+
+    expect(user.uid).toBe("signed-in");
+    expect(signInWithRedirect).toHaveBeenCalled();
+    expect(signInWithPopup).toHaveBeenCalled();
+  });
+
+  it("signs in with Google popup when redirect fails and credential is already in use", async () => {
+    mockAuth.currentUser = { isAnonymous: true, uid: "anon-3" };
+    linkWithRedirect.mockRejectedValueOnce(
+      new FirebaseError("auth/network-request-failed", "Network error."),
+    );
     linkWithPopup.mockRejectedValueOnce(
       new FirebaseError("auth/credential-already-in-use", "Already linked."),
     );
@@ -143,52 +205,20 @@ describe("accountAuth", () => {
     });
   });
 
-  it("signs in with popup when the current user is not anonymous", async () => {
-    mockAuth.currentUser = { isAnonymous: false, uid: "signed-in" };
-    signInWithPopup.mockResolvedValueOnce({
-      user: { uid: "signed-in", isAnonymous: false },
-    });
-
-    const user = await signInWithGoogle();
-
-    expect(user.uid).toBe("signed-in");
-    expect(signInWithPopup).toHaveBeenCalled();
-    expect(linkWithPopup).not.toHaveBeenCalled();
-  });
-
-  it("falls back to redirect when popup is blocked for an anonymous user", async () => {
+  it("surfaces popup-blocked errors on the popup fallback path", async () => {
     mockAuth.currentUser = { isAnonymous: true, uid: "anon-5" };
+    linkWithRedirect.mockRejectedValueOnce(
+      new FirebaseError("auth/network-request-failed", "Network error."),
+    );
     linkWithPopup.mockRejectedValueOnce(
       new FirebaseError("auth/popup-blocked", "Popup blocked."),
     );
-    linkWithRedirect.mockResolvedValueOnce(undefined);
 
-    await expect(signInWithGoogle()).rejects.toBeInstanceOf(
-      OAuthRedirectInProgressError,
-    );
-    expect(linkWithRedirect).toHaveBeenCalledWith(
-      mockAuth.currentUser,
-      expect.anything(),
-    );
-    expect(isOAuthRedirectInProgress(new OAuthRedirectInProgressError())).toBe(
-      true,
-    );
-  });
-
-  it("falls back to redirect when popup is blocked for a signed-in user", async () => {
-    mockAuth.currentUser = { isAnonymous: false, uid: "signed-in" };
-    signInWithPopup.mockRejectedValueOnce(
-      new FirebaseError("auth/popup-blocked", "Popup blocked."),
-    );
-    signInWithRedirect.mockResolvedValueOnce(undefined);
-
-    await expect(signInWithGoogle()).rejects.toBeInstanceOf(
-      OAuthRedirectInProgressError,
-    );
-    expect(signInWithRedirect).toHaveBeenCalledWith(
-      mockAuth,
-      expect.anything(),
-    );
+    await expect(signInWithGoogle()).rejects.toMatchObject({
+      code: "auth/popup-blocked",
+    });
+    expect(linkWithRedirect).toHaveBeenCalledTimes(1);
+    expect(linkWithPopup).toHaveBeenCalledTimes(1);
   });
 
   it("completes OAuth redirect when getRedirectResult returns a user", async () => {
