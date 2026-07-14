@@ -17,7 +17,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Fixes",
         items: [
-          "Map: removed tilted view setting and HUD control.",
+          "Map: remove tilted view setting and HUD control.",
         ],
       }
     ],

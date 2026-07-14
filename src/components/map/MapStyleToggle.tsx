@@ -1,4 +1,4 @@
-import { useMemo, type MutableRefObject } from "react";
+import { useMemo, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { useMap } from "react-leaflet";
 import {
@@ -15,7 +15,7 @@ interface MapStyleToggleProps {
   mapStyle: MapStyle;
   onMapStyleChange: (style: MapStyle) => void;
   inset?: MapChromeControlInset;
-  suppressRef?: MutableRefObject<boolean>;
+  suppressRef?: RefObject<boolean>;
 }
 
 export function MapStyleToggle({

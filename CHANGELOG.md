@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Map: removed tilted view setting and HUD control.
+- Map: remove tilted view setting and HUD control.
 
 ## 0.6.1 - 2026-07-14
 

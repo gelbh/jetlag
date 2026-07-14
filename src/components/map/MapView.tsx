@@ -1,4 +1,4 @@
-import { useEffect, useRef, type MutableRefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import type {
   LatLngBounds,
@@ -23,8 +23,8 @@ interface MapViewProps {
   /** Fired when the user pans or zooms the map (not programmatic fit/resize). */
   onUserViewportFramed?: () => void;
   onMapClick?: (lat: number, lng: number) => void;
-  chromeHudRef?: MutableRefObject<HTMLElement | null>;
-  suppressChromeHideRef?: MutableRefObject<boolean>;
+  chromeHudRef?: RefObject<HTMLElement | null>;
+  suppressChromeHideRef?: RefObject<boolean>;
   interactive?: boolean;
   focusBounds?: LatLngBoundsExpression | null;
   /** When "once", fitBounds runs on mount and on recenterToken changes only. */
@@ -55,7 +55,7 @@ function MapFocus({
   focusBounds: LatLngBoundsExpression | null;
   fitBoundsMode: "once" | "always";
   recenterToken: number;
-  suppressChromeHideRef?: MutableRefObject<boolean>;
+  suppressChromeHideRef?: RefObject<boolean>;
   fitBoundsPadding?: [number, number];
   focusPaddingBias?: number;
 }) {
