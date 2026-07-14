@@ -34,6 +34,7 @@ import {
   captureAuthPersistenceFallback,
   setBootstrapTag,
 } from "./sentry";
+import { isRecaptchaAlreadyRenderedError } from "./appCheckErrors";
 
 export async function getFirebaseStorage(): Promise<
   import("firebase/storage").FirebaseStorage
@@ -53,6 +54,7 @@ let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let db: Firestore | null = null;
 let appCheck: AppCheck | null = null;
+let appCheckInitializing = false;
 let persistenceUnavailable = false;
 
 function firebaseUsesEmulator(): boolean {
@@ -101,7 +103,8 @@ export function getFirebaseApp(): FirebaseApp {
       throw new Error("Firebase environment variables are not configured.");
     }
 
-    app = initializeApp(config);
+    const existingApps = getApps();
+    app = existingApps.length > 0 ? existingApps[0]! : initializeApp(config);
     if (!firebaseUsesEmulator()) {
       initializeAppCheckIfConfigured(app);
     }
@@ -134,16 +137,25 @@ function initializeAppCheckIfConfigured(firebaseApp: FirebaseApp): void {
     return;
   }
 
-  if (appCheck) {
+  if (appCheck || appCheckInitializing) {
     return;
   }
 
   enableAppCheckDebugProviderIfDev();
 
-  appCheck = initializeAppCheck(firebaseApp, {
-    provider: new ReCaptchaV3Provider(siteKey),
-    isTokenAutoRefreshEnabled: true,
-  });
+  appCheckInitializing = true;
+  try {
+    appCheck = initializeAppCheck(firebaseApp, {
+      provider: new ReCaptchaV3Provider(siteKey),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } catch (error) {
+    if (!isRecaptchaAlreadyRenderedError(error)) {
+      throw error;
+    }
+  } finally {
+    appCheckInitializing = false;
+  }
 }
 
 export function getFirebaseAppCheck(): AppCheck | null {
@@ -339,6 +351,7 @@ export async function resetFirebaseForTests(): Promise<void> {
   auth = null;
   db = null;
   appCheck = null;
+  appCheckInitializing = false;
   persistenceUnavailable = false;
   authEmulatorConnected = false;
   firestoreEmulatorConnected = false;
