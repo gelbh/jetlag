@@ -70,9 +70,23 @@ describe("storage.rules", () => {
     await testEnv.cleanup();
   });
 
+  async function clearEmulatorData() {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        await testEnv.clearFirestore();
+        await testEnv.clearStorage();
+        return;
+      } catch (error) {
+        if (attempt === 2) {
+          throw error;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 100 * (attempt + 1)));
+      }
+    }
+  }
+
   beforeEach(async () => {
-    await testEnv.clearFirestore();
-    await testEnv.clearStorage();
+    await clearEmulatorData();
   });
 
   it("allows hider members to upload photo answers", async () => {
