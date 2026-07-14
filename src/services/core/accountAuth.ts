@@ -111,25 +111,14 @@ async function linkWithPopupOrSignInExisting(
   const auth = getFirebaseAuth();
 
   if (!auth.currentUser?.isAnonymous) {
-    try {
-      const signedIn = await signInWithPopup(auth, provider);
-      return signedIn.user;
-    } catch (error) {
-      if (isPopupBlockedError(error)) {
-        return beginOAuthRedirect(provider);
-      }
-      throw error;
-    }
+    const signedIn = await signInWithPopup(auth, provider);
+    return signedIn.user;
   }
 
   try {
     const linked = await linkWithPopup(auth.currentUser, provider);
     return linked.user;
   } catch (error) {
-    if (isPopupBlockedError(error)) {
-      return beginOAuthRedirect(provider);
-    }
-
     if (!isCredentialAlreadyInUse(error)) {
       throw error;
     }
@@ -144,14 +133,6 @@ async function linkWithPopupOrSignInExisting(
     const signedIn = await signInWithCredential(auth, credential);
     return signedIn.user;
   }
-}
-
-function isPopupBlockedError(error: unknown): boolean {
-  return (
-    error instanceof FirebaseError &&
-    (error.code === "auth/popup-blocked" ||
-      error.code === "auth/cancelled-popup-request")
-  );
 }
 
 async function beginOAuthRedirect(provider: AuthProvider): Promise<never> {

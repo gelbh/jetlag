@@ -31,6 +31,7 @@ export function OAuthSignInButton({
       await ensureAnonymousUser();
       await onSignIn();
       await onSuccess();
+      setBusy(false);
     } catch (error) {
       if (isOAuthRedirectInProgress(error)) {
         return;
@@ -40,7 +41,6 @@ export function OAuthSignInButton({
           ? error.message
           : `${provider === "apple" ? "Apple" : "Google"} sign-in failed.`,
       );
-    } finally {
       setBusy(false);
     }
   };
