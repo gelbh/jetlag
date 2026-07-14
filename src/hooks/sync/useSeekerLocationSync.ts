@@ -7,6 +7,7 @@ import { useLiveLocation } from "../location/useLiveLocation";
 import { isFirebaseConfigured } from "../../services/core/firebase";
 import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
 import { writePlayerLocation } from "../../services/firestore/firestoreSessionExtras";
+import { maybeAppendPlayerTrailPoint } from "./appendPlayerTrailPoint";
 
 interface UseSeekerLocationSyncParams {
   sessionId: string | undefined;
@@ -45,7 +46,20 @@ export function useSeekerLocationSync({
       role: "seeker",
     };
 
-    void writePlayerLocation(sessionId, location).catch((error: unknown) => {
+    void writePlayerLocation(sessionId, location)
+      .then(() =>
+        maybeAppendPlayerTrailPoint({
+          sessionId,
+          uid,
+          role: "seeker",
+          reading: {
+            lat: reading.lat,
+            lng: reading.lng,
+            accuracyMeters: reading.accuracy ?? undefined,
+          },
+        }),
+      )
+      .catch((error: unknown) => {
       if (!isFirestorePermissionDenied(error)) {
         throw error;
       }

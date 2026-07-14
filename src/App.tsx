@@ -42,9 +42,12 @@ import { RouteTransitionOverlay } from "./navigation/RouteTransitionOverlay";
 import { RouteTransitionProvider } from "./navigation/RouteTransitionContext";
 import {
   CreateSessionLazy,
+  FriendsLazy,
   GamePresetEditorLazy,
   GamePresetListLazy,
+  LeaderboardLazy,
   MapScreenLazy,
+  StatsLazy,
   TutorialLazy,
 } from "./navigation/routePreloaders";
 
@@ -182,6 +185,30 @@ export default function App() {
                   }
                 />
                 <Route path="/feedback" element={<Feedback />} />
+                <Route
+                  path="/stats"
+                  element={
+                    <LazyRoute>
+                      <StatsLazy />
+                    </LazyRoute>
+                  }
+                />
+                <Route
+                  path="/friends"
+                  element={
+                    <LazyRoute>
+                      <FriendsLazy />
+                    </LazyRoute>
+                  }
+                />
+                <Route
+                  path="/leaderboard"
+                  element={
+                    <LazyRoute>
+                      <LeaderboardLazy />
+                    </LazyRoute>
+                  }
+                />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/premium" element={<Premium />} />

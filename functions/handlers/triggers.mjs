@@ -12,6 +12,8 @@ import {
   PURGE_BATCH_LIMIT,
   selectSessionsToPurge,
 } from "../session/purgeStaleSessions.mjs";
+import { handleCaptureStartingLocationsWrite } from "../session/captureStartingLocations.mjs";
+import { handleFinalizeGameResultWrite } from "../session/finalizeGameResult.mjs";
 import {
   handlePendingQuestionWrite,
   handleSessionMessageWrite,
@@ -148,5 +150,25 @@ export const notifySessionMessage = onDocumentWritten(
   },
   withSentryEventHandler(async (event) => {
     await handleSessionMessageWrite(adminDb(), event);
+  }),
+);
+
+export const captureStartingLocations = onDocumentWritten(
+  {
+    document: "sessions/{sessionId}",
+    secrets: [sentryDsnSecret],
+  },
+  withSentryEventHandler(async (event) => {
+    await handleCaptureStartingLocationsWrite(adminDb(), event);
+  }),
+);
+
+export const finalizeGameResult = onDocumentWritten(
+  {
+    document: "sessions/{sessionId}",
+    secrets: [sentryDsnSecret],
+  },
+  withSentryEventHandler(async (event) => {
+    await handleFinalizeGameResultWrite(adminDb(), event);
   }),
 );

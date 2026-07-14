@@ -7,6 +7,7 @@ import { useLiveLocation } from "../location/useLiveLocation";
 import { isFirebaseConfigured } from "../../services/core/firebase";
 import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
 import { writePlayerLocation } from "../../services/firestore/firestoreSessionExtras";
+import { maybeAppendPlayerTrailPoint } from "./appendPlayerTrailPoint";
 
 interface UseHiderLocationSyncParams {
   sessionId: string | undefined;
@@ -45,11 +46,24 @@ export function useHiderLocationSync({
       role: "hider",
     };
 
-    void writePlayerLocation(sessionId, location).catch((error: unknown) => {
-      if (!isFirestorePermissionDenied(error)) {
-        throw error;
-      }
-    });
+    void writePlayerLocation(sessionId, location)
+      .then(() =>
+        maybeAppendPlayerTrailPoint({
+          sessionId,
+          uid,
+          role: "hider",
+          reading: {
+            lat: reading.lat,
+            lng: reading.lng,
+            accuracyMeters: reading.accuracy ?? undefined,
+          },
+        }),
+      )
+      .catch((error: unknown) => {
+        if (!isFirestorePermissionDenied(error)) {
+          throw error;
+        }
+      });
   }, [enabled, reading, sessionId, uid]);
 
   return { error };
