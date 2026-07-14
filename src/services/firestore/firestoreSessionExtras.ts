@@ -11,6 +11,7 @@ import {
   updateDoc,
   where,
   writeBatch,
+  addDoc,
   type Unsubscribe,
 } from "firebase/firestore";
 import type { PlayerRole } from "../../domain/session/playerRole";
@@ -21,6 +22,8 @@ import type {
   PlayerLocationRecord,
   SessionMessageRecord,
 } from "../../domain/session/sessionChat";
+import type { PlayerTrailPointRecord } from "../../domain/game/playerTrail";
+import type { StartingLocationRecord } from "../../domain/game/startingLocation";
 import { getFirestoreDb } from "../core/firebase";
 import {
   buildHidingZoneDocument,
@@ -60,6 +63,21 @@ function timeTrapsCollection(sessionId: string) {
   return collection(getFirestoreDb(), "sessions", sessionId, "timeTraps");
 }
 
+function playerTrailPointsCollection(sessionId: string, uid: string) {
+  return collection(
+    getFirestoreDb(),
+    "sessions",
+    sessionId,
+    "playerTrailPoints",
+    uid,
+    "points",
+  );
+}
+
+function startingLocationsCollection(sessionId: string) {
+  return collection(getFirestoreDb(), "sessions", sessionId, "startingLocations");
+}
+
 export async function writePlayerLocation(
   sessionId: string,
   location: PlayerLocationRecord,
@@ -67,6 +85,48 @@ export async function writePlayerLocation(
   await setDoc(
     doc(playerLocationsCollection(sessionId), location.uid),
     buildPlayerLocationDocument(location),
+  );
+}
+
+export async function appendPlayerTrailPoint(
+  sessionId: string,
+  point: PlayerTrailPointRecord,
+): Promise<void> {
+  await addDoc(playerTrailPointsCollection(sessionId, point.uid), {
+    lat: point.lat,
+    lng: point.lng,
+    accuracyMeters: point.accuracyMeters ?? null,
+    role: point.role,
+    recordedAt: point.recordedAt,
+  });
+}
+
+export function subscribeToStartingLocations(
+  sessionId: string,
+  onChange: (locations: StartingLocationRecord[]) => void,
+  onError: (error: Error) => void,
+): Unsubscribe {
+  return onSnapshot(
+    startingLocationsCollection(sessionId),
+    (snapshot) => {
+      const locations = snapshot.docs.map((locationDoc) => {
+        const data = locationDoc.data();
+        return {
+          uid: locationDoc.id,
+          sessionId,
+          lat: Number(data.lat),
+          lng: Number(data.lng),
+          accuracyMeters:
+            typeof data.accuracyMeters === "number"
+              ? data.accuracyMeters
+              : undefined,
+          role: (data.role as PlayerRole) ?? "seeker",
+          capturedAt: String(data.capturedAt),
+        } satisfies StartingLocationRecord;
+      });
+      onChange(locations);
+    },
+    (error) => onError(error),
   );
 }
 

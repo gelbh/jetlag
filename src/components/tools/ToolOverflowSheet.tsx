@@ -31,6 +31,8 @@ interface ToolOverflowSheetProps {
   unreadCount?: number;
   canStartEndGame?: boolean;
   onStartEndGame?: () => void;
+  canRequestFoundHider?: boolean;
+  onRequestFoundHider?: () => void;
 }
 
 const markupTools = MAP_TOOL_DOCK_ENTRIES.filter((tool) =>
@@ -99,6 +101,8 @@ export function ToolOverflowSheet({
   unreadCount = 0,
   canStartEndGame = false,
   onStartEndGame,
+  canRequestFoundHider = false,
+  onRequestFoundHider,
 }: ToolOverflowSheetProps) {
   const closeAnd = (action: () => void) => {
     action();
@@ -145,6 +149,20 @@ export function ToolOverflowSheet({
         })}
 
         <div className="jl-tool-overflow-divider" aria-hidden="true" />
+
+        {canRequestFoundHider && onRequestFoundHider ? (
+          <ToolOverflowRow
+            icon={
+              <span className="text-sm font-bold text-status-success" aria-hidden="true">
+                ✓
+              </span>
+            }
+            title="Found hider"
+            hint="End the round when seekers caught the hider"
+            onClick={() => closeAnd(onRequestFoundHider)}
+            ariaLabel="Found hider"
+          />
+        ) : null}
 
         {canStartEndGame && onStartEndGame ? (
           <ToolOverflowRow

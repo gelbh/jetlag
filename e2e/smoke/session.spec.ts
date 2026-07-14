@@ -5,6 +5,7 @@ import {
   dismissMapOnboarding,
   expectCreatePageMapPreviewLoaded,
   joinAsRole,
+  openPlayHub,
   prepareE2EPage,
 } from "../fixtures";
 
@@ -13,6 +14,7 @@ test("@smoke creates a session from home and reaches the map", async ({
 }) => {
   await prepareE2EPage(page);
   await page.goto("/");
+  await openPlayHub(page);
   await page.getByRole("link", { name: "Create session" }).click();
   await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
   await page.getByRole("button", { name: "Find place" }).click();

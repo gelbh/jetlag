@@ -1,4 +1,6 @@
 import type { Feature, LineString, Point, Polygon } from "geojson";
+import type { GameOutcome } from "../../domain/game/foundHider";
+import type { GameResultPlayer, GameResultRecord } from "../../domain/game/gameResult";
 import type {
   AnnotationRecord,
   GameArea,
@@ -548,6 +550,36 @@ export function deserializeSessionFromFirestore(
       typeof document.endGameRequestedByUid === "string"
         ? document.endGameRequestedByUid
         : undefined,
+    foundRequestedAt:
+      typeof document.foundRequestedAt === "string"
+        ? document.foundRequestedAt
+        : undefined,
+    foundRequestedByUid:
+      typeof document.foundRequestedByUid === "string"
+        ? document.foundRequestedByUid
+        : undefined,
+    foundConfirmedAt:
+      typeof document.foundConfirmedAt === "string"
+        ? document.foundConfirmedAt
+        : undefined,
+    foundConfirmedByUid:
+      typeof document.foundConfirmedByUid === "string"
+        ? document.foundConfirmedByUid
+        : undefined,
+    gameOutcome:
+      document.gameOutcome === "found" ||
+      document.gameOutcome === "ended_early" ||
+      document.gameOutcome === "abandoned"
+        ? document.gameOutcome
+        : undefined,
+    gameResultId:
+      typeof document.gameResultId === "string"
+        ? document.gameResultId
+        : undefined,
+    roundNumber:
+      typeof document.roundNumber === "number"
+        ? document.roundNumber
+        : undefined,
     sessionResetAt:
       typeof document.sessionResetAt === "string"
         ? document.sessionResetAt
@@ -826,5 +858,109 @@ export function deserializePendingQuestionFromFirestore(
         : undefined,
     cardDraw: typeof document.cardDraw === "number" ? document.cardDraw : undefined,
     cardKeep: typeof document.cardKeep === "number" ? document.cardKeep : undefined,
+  };
+}
+
+function deserializeGameResultPlayer(
+  value: unknown,
+): GameResultPlayer | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  const player = value as Record<string, unknown>;
+  const role = player.role;
+  if (role !== "seeker" && role !== "hider") {
+    return null;
+  }
+
+  return {
+    uid: typeof player.uid === "string" ? player.uid : "",
+    role,
+    displayName:
+      typeof player.displayName === "string" ? player.displayName : undefined,
+    distanceMeters:
+      typeof player.distanceMeters === "number" ? player.distanceMeters : 0,
+    maxDistanceFromStartMeters:
+      typeof player.maxDistanceFromStartMeters === "number"
+        ? player.maxDistanceFromStartMeters
+        : 0,
+    questionsAsked:
+      typeof player.questionsAsked === "number"
+        ? player.questionsAsked
+        : undefined,
+    questionsReceived:
+      typeof player.questionsReceived === "number"
+        ? player.questionsReceived
+        : undefined,
+    questionsByTool:
+      player.questionsByTool &&
+      typeof player.questionsByTool === "object" &&
+      !Array.isArray(player.questionsByTool)
+        ? Object.fromEntries(
+            Object.entries(player.questionsByTool).filter(
+              ([, count]) => typeof count === "number",
+            ),
+          )
+        : undefined,
+    avgAnswerTimeMs:
+      typeof player.avgAnswerTimeMs === "number"
+        ? player.avgAnswerTimeMs
+        : undefined,
+    won: player.won === true,
+  };
+}
+
+export function deserializeGameResultFromFirestore(
+  _id: string,
+  sessionId: string,
+  document: Record<string, unknown>,
+): GameResultRecord {
+  const outcomeRaw = document.outcome;
+  const outcome: GameOutcome =
+    outcomeRaw === "found" ||
+    outcomeRaw === "ended_early" ||
+    outcomeRaw === "abandoned"
+      ? outcomeRaw
+      : "found";
+
+  const gameSizeRaw = document.gameSize;
+  const gameSize =
+    gameSizeRaw === "small" ||
+    gameSizeRaw === "medium" ||
+    gameSizeRaw === "large"
+      ? gameSizeRaw
+      : "medium";
+
+  const players = Array.isArray(document.players)
+    ? document.players
+        .map(deserializeGameResultPlayer)
+        .filter((player): player is GameResultPlayer => player !== null)
+    : [];
+
+  return {
+    sessionId:
+      typeof document.sessionId === "string" ? document.sessionId : sessionId,
+    roundNumber:
+      typeof document.roundNumber === "number" ? document.roundNumber : 0,
+    gameSize,
+    outcome,
+    endedAt:
+      typeof document.endedAt === "string"
+        ? document.endedAt
+        : new Date().toISOString(),
+    durationMs:
+      typeof document.durationMs === "number" ? document.durationMs : 0,
+    hidingPhaseMs:
+      typeof document.hidingPhaseMs === "number" ? document.hidingPhaseMs : 0,
+    seekPhaseMs:
+      typeof document.seekPhaseMs === "number" ? document.seekPhaseMs : 0,
+    seekTimeMs:
+      typeof document.seekTimeMs === "number"
+        ? document.seekTimeMs
+        : typeof document.durationMs === "number"
+          ? document.durationMs
+          : 0,
+    players,
   };
 }

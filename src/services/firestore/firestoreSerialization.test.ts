@@ -6,6 +6,7 @@ import {
   buildSessionDocument,
   deserializeAnnotationFromFirestore,
   deserializeGameAreaFromFirestore,
+  deserializeGameResultFromFirestore,
   deserializeSessionFromFirestore,
   serializeAnnotationForFirestore,
   serializeGameAreaForFirestore,
@@ -366,5 +367,67 @@ describe("firestoreSerialization", () => {
       "host-1": "seeker",
       "admin-1": "admin",
     });
+  });
+
+  it("deserializes found-hider session fields", () => {
+    const restored = deserializeSessionFromFirestore("session-1", {
+      code: "ABCD",
+      gameArea: {
+        south: 53.3,
+        west: -6.3,
+        north: 53.4,
+        east: -6.2,
+      },
+      hostUid: "host-1",
+      createdAt: "2026-05-14T00:00:00.000Z",
+      memberUids: ["host-1"],
+      gameSize: "medium",
+      hidingZoneRadiusMeters: 402,
+      tier: "free",
+      status: "active",
+      timerAccumulatedMs: 0,
+      foundRequestedAt: "2026-05-14T01:00:00.000Z",
+      foundRequestedByUid: "seeker-1",
+      foundConfirmedAt: "2026-05-14T01:05:00.000Z",
+      foundConfirmedByUid: "hider-1",
+      gameOutcome: "found",
+      gameResultId: "result-1",
+      roundNumber: 2,
+    });
+
+    expect(restored.foundRequestedByUid).toBe("seeker-1");
+    expect(restored.foundConfirmedByUid).toBe("hider-1");
+    expect(restored.gameOutcome).toBe("found");
+    expect(restored.gameResultId).toBe("result-1");
+    expect(restored.roundNumber).toBe(2);
+  });
+
+  it("deserializes game results from Firestore documents", () => {
+    const result = deserializeGameResultFromFirestore("result-1", "session-1", {
+      roundNumber: 1,
+      gameSize: "large",
+      outcome: "found",
+      endedAt: "2026-05-14T02:00:00.000Z",
+      durationMs: 3_600_000,
+      hidingPhaseMs: 600_000,
+      seekPhaseMs: 3_000_000,
+      seekTimeMs: 2_400_000,
+      players: [
+        {
+          uid: "seeker-1",
+          role: "seeker",
+          distanceMeters: 1200,
+          maxDistanceFromStartMeters: 400,
+          questionsAsked: 5,
+          won: true,
+        },
+      ],
+    });
+
+    expect(result.sessionId).toBe("session-1");
+    expect(result.gameSize).toBe("large");
+    expect(result.players).toHaveLength(1);
+    expect(result.players[0]?.won).toBe(true);
+    expect(result.seekTimeMs).toBe(2_400_000);
   });
 });
