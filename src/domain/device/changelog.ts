@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.6.3";
+export const APP_VERSION = "0.7.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,20 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.7.0",
+    date: "2026-07-14",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Game over: seekers can declare \"Found hider\" with hider confirmation; post-game sheet shows stats, map replay stub, and same-session rematch with role swap",
+          "Stats & social: personal stats dashboard, friends list, and opt-in leaderboards from new Home header icons and Play hub",
+          "Home: Create, Join, and Custom game actions move into a Play hub sheet",
+        ],
+      }
+    ],
+  },
   {
     version: "0.6.3",
     date: "2026-07-14",
