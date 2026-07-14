@@ -1323,6 +1323,61 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows hider to answer a photo question with sent externally", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+        }),
+      );
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-photo-ext")
+        .set({
+          toolType: "photo",
+          createdByUid: "host-1",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          status: "pending",
+          placement: {
+            geometryJson: JSON.stringify({
+              type: "FeatureCollection",
+              features: [],
+            }),
+            metadata: { photoCategoryId: "tree" },
+          },
+          replyOptions: [
+            { id: "sent_externally", label: "Mark sent" },
+            { id: "cannot_answer", label: "Cannot answer" },
+          ],
+          promptText: "Send a photo of a tree.",
+        }),
+    );
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-photo-ext")
+        .update({
+          answer: { kind: "sent_externally" },
+          status: "answered",
+        }),
+    );
+  });
+
   it("allows hider to answer a photo question late with answeredLate", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
