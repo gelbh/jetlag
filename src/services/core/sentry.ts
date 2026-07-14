@@ -13,6 +13,7 @@ const LEAFLET_POS_ERROR = /_leaflet_pos/i;
 const LEAFLET_CLASSLIST_ERROR = /evaluating 'e\.classList'/i;
 const MODULE_SCRIPT_IMPORT_FAILED = /Importing a module script failed/i;
 const BATTERY_ADD_EVENT_LISTENER = /addEventListener is not a function/i;
+const IDB_DATABASE_DELETED = /Database deleted by request of the user/i;
 const REACT_REFRESH_FRAME = /@react-refresh/i;
 const APP_CHECK_INVALID_SESSION = /Invalid session .*: Invalid input/i;
 const SENSITIVE_EXTRA_KEYS = new Set([
@@ -153,6 +154,17 @@ function isIgnoredClientNoiseEvent(
     ) {
       return true;
     }
+
+    if (
+      typeof exception.value === "string" &&
+      IDB_DATABASE_DELETED.test(exception.value)
+    ) {
+      return true;
+    }
+  }
+
+  if (typeof event.message === "string" && IDB_DATABASE_DELETED.test(event.message)) {
+    return true;
   }
 
   return false;
