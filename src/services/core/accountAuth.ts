@@ -111,25 +111,14 @@ async function linkWithPopupOrSignInExisting(
   const auth = getFirebaseAuth();
 
   if (!auth.currentUser?.isAnonymous) {
-    try {
-      const signedIn = await signInWithPopup(auth, provider);
-      return signedIn.user;
-    } catch (error) {
-      if (isPopupBlockedError(error)) {
-        return beginOAuthRedirect(provider);
-      }
-      throw error;
-    }
+    const signedIn = await signInWithPopup(auth, provider);
+    return signedIn.user;
   }
 
   try {
     const linked = await linkWithPopup(auth.currentUser, provider);
     return linked.user;
   } catch (error) {
-    if (isPopupBlockedError(error)) {
-      return beginOAuthRedirect(provider);
-    }
-
     if (!isCredentialAlreadyInUse(error)) {
       throw error;
     }
@@ -144,14 +133,6 @@ async function linkWithPopupOrSignInExisting(
     const signedIn = await signInWithCredential(auth, credential);
     return signedIn.user;
   }
-}
-
-function isPopupBlockedError(error: unknown): boolean {
-  return (
-    error instanceof FirebaseError &&
-    (error.code === "auth/popup-blocked" ||
-      error.code === "auth/cancelled-popup-request")
-  );
 }
 
 async function beginOAuthRedirect(provider: AuthProvider): Promise<never> {
@@ -181,7 +162,10 @@ export async function signInWithGoogleIdToken(idToken: string): Promise<User> {
 }
 
 export async function signInWithGoogle(): Promise<User> {
-  return signInWithOAuthPopup(new GoogleAuthProvider(), "Google sign-in failed.");
+  return signInWithOAuthRedirectFirst(
+    new GoogleAuthProvider(),
+    "Google sign-in failed.",
+  );
 }
 
 function createAppleProvider(): OAuthProvider {
@@ -192,7 +176,25 @@ function createAppleProvider(): OAuthProvider {
 }
 
 export async function signInWithApple(): Promise<User> {
-  return signInWithOAuthPopup(createAppleProvider(), "Apple sign-in failed.");
+  return signInWithOAuthRedirectFirst(
+    createAppleProvider(),
+    "Apple sign-in failed.",
+  );
+}
+
+async function signInWithOAuthRedirectFirst(
+  provider: AuthProvider,
+  fallbackMessage: string,
+): Promise<User> {
+  try {
+    return await beginOAuthRedirect(provider);
+  } catch (error) {
+    if (isOAuthRedirectInProgress(error)) {
+      throw error;
+    }
+
+    return signInWithOAuthPopup(provider, fallbackMessage);
+  }
 }
 
 async function signInWithOAuthPopup(
