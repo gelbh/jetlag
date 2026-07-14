@@ -20,6 +20,7 @@ export function GoogleSignInButton({
       onSuccess={onSuccess}
       onError={onError}
       label="Continue with Google"
+      busyLabel="Redirecting…"
       icon={
         <svg viewBox="0 0 24 24" width="20" height="20">
           <path
