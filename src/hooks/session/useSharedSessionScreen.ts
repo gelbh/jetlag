@@ -55,10 +55,10 @@ export function useSharedSessionScreen({
   const anonymousAuthReady = useFirebaseAuthReady(
     authMode === "admin-permanent" ? null : session,
   );
-  const [permanentAuthReady, setPermanentAuthReady] = useState(false);
+  const [permanentAuthSessionId, setPermanentAuthSessionId] = useState<
+    string | null
+  >(null);
   const [authUid, setAuthUid] = useState<string | null>(null);
-
-  useSessionSync();
 
   useEffect(() => {
     setPremiumApiContext(session);
@@ -79,7 +79,7 @@ export function useSharedSessionScreen({
         if (myUid && currentUser && currentUser.uid !== myUid) {
           setLastSyncError("No access to this session.");
         }
-        setPermanentAuthReady(true);
+        setPermanentAuthSessionId(session.id);
       });
       return;
     }
@@ -115,7 +115,11 @@ export function useSharedSessionScreen({
   }, [authMode, myUid, session, session?.id, setLastSyncError, setMyUid]);
 
   const authReady =
-    authMode === "admin-permanent" ? permanentAuthReady : anonymousAuthReady;
+    authMode === "admin-permanent"
+      ? permanentAuthSessionId === session?.id
+      : anonymousAuthReady;
+
+  useSessionSync({ syncEnabled: authReady });
 
   const uid =
     authMode === "admin-permanent"
