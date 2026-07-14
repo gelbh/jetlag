@@ -1,135 +1,217 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LatLngBoundsExpression } from "leaflet";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
-import { MAP_PLACEMENT_FOCUS_BOTTOM_BIAS_PX } from "../../domain/device/motionTokens";
-import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
+import type { Feature, MultiPolygon, Polygon } from "geojson";
 import {
-  boundingBoxFromPositions,
-  draftOverlayBoundsToLeafletBounds,
-} from "../../domain/questions/overlays/draftOverlayBounds";
+  computePlacementCameraTarget,
+  placementCameraFingerprint,
+  resolvePlacementPhase,
+  shouldReframeWithHysteresis,
+  WALK_REFRAME_INTERVAL_MS,
+  type PlacementCameraDraftState,
+  type PlacementViewportFrame,
+} from "../../domain/map/placementCamera";
+import { gameAreaToBoundingBox } from "../../domain/geometry/gameAreaBounds";
+import type { GameArea } from "../../domain/map/annotations";
+import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
 import type { MapTool } from "../../state/sessionStore";
-
-const WALK_REFRAME_INTERVAL_MS = 2000;
-
-function isVolatileWalkOverlay(overlay: MapDraftOverlay): boolean {
-  return overlay.id.includes("walk-");
-}
-
-function polygonFingerprint(
-  overlay: Extract<MapDraftOverlay, { kind: "polygon" }>,
-): Record<string, unknown> {
-  const positions: LatLngTuple[] = [];
-
-  if (overlay.feature.geometry.type === "Polygon") {
-    for (const ring of overlay.feature.geometry.coordinates) {
-      for (const [lng, lat] of ring) {
-        positions.push([lat, lng]);
-      }
-    }
-  } else {
-    for (const polygon of overlay.feature.geometry.coordinates) {
-      for (const ring of polygon) {
-        for (const [lng, lat] of ring) {
-          positions.push([lat, lng]);
-        }
-      }
-    }
-  }
-
-  const box = boundingBoxFromPositions(positions);
-
-  return {
-    kind: overlay.kind,
-    id: overlay.id,
-    south: box?.south,
-    west: box?.west,
-    north: box?.north,
-    east: box?.east,
-  };
-}
-
-function overlayFingerprintEntry(overlay: MapDraftOverlay): Record<string, unknown> {
-  switch (overlay.kind) {
-    case "marker":
-      return { kind: overlay.kind, id: overlay.id, point: overlay.point };
-    case "circle":
-      return {
-        kind: overlay.kind,
-        id: overlay.id,
-        radiusMeters: overlay.radiusMeters,
-        point: overlay.center,
-      };
-    case "polyline":
-      return { kind: overlay.kind, id: overlay.id, positions: overlay.positions };
-    case "polygon":
-      return polygonFingerprint(overlay);
-    default: {
-      const unreachable: never = overlay;
-      return unreachable;
-    }
-  }
-}
-
-function overlayFingerprint(overlays: readonly MapDraftOverlay[]): string {
-  const structural = overlays.filter((overlay) => !isVolatileWalkOverlay(overlay));
-  return JSON.stringify(structural.map(overlayFingerprintEntry));
-}
+import {
+  DEFAULT_PANEL_HEIGHT_PX,
+  PANEL_PEEK_HEIGHT_PX,
+} from "../../domain/device/motionTokens";
 
 export interface UsePlacementMapFocusOptions {
   activeTool: MapTool;
+  draft: PlacementCameraDraftState;
   overlays: readonly MapDraftOverlay[];
+  eliminationFeatures: Feature<Polygon | MultiPolygon>[];
+  gameArea: GameArea;
   defaultFocusBounds: LatLngBoundsExpression | null;
   enabled: boolean;
+  panelMinimized: boolean;
+  selectedPoiId?: string | null;
   walkActive?: boolean;
+  viewportFrame?: PlacementViewportFrame | null;
 }
 
 export interface UsePlacementMapFocusResult {
   effectiveFocusBounds: LatLngBoundsExpression | null;
+  focusMinZoom?: number;
+  focusMaxZoom?: number;
   placementRecenterToken: number;
   focusPaddingBias?: number;
+  requestPlacementRecenter: () => void;
+}
+
+function resolvePanelPeekHeightPx(panelMinimized: boolean): number {
+  return panelMinimized ? PANEL_PEEK_HEIGHT_PX : DEFAULT_PANEL_HEIGHT_PX;
+}
+
+function targetBoundsBox(
+  bounds: LatLngBoundsExpression | null | undefined,
+): ReturnType<typeof gameAreaToBoundingBox> | null {
+  if (!bounds) {
+    return null;
+  }
+
+  if (Array.isArray(bounds) && bounds.length === 2) {
+    const first = bounds[0];
+    const second = bounds[1];
+
+    if (Array.isArray(first) && Array.isArray(second)) {
+      return gameAreaToBoundingBox({
+        type: "Polygon",
+        coordinates: [
+          [
+            [first[1], first[0]],
+            [second[1], first[0]],
+            [second[1], second[0]],
+            [first[1], second[0]],
+            [first[1], first[0]],
+          ],
+        ],
+      });
+    }
+  }
+
+  return null;
 }
 
 export function usePlacementMapFocus({
   activeTool,
+  draft,
   overlays,
+  eliminationFeatures,
+  gameArea,
   defaultFocusBounds,
   enabled,
+  panelMinimized,
+  selectedPoiId = null,
   walkActive = false,
+  viewportFrame = null,
 }: UsePlacementMapFocusOptions): UsePlacementMapFocusResult {
   const [placementRecenterToken, setPlacementRecenterToken] = useState(0);
   const fingerprintRef = useRef<string | null>(null);
   const lastWalkReframeAtRef = useRef(0);
+  const previousPoiIdRef = useRef<string | null>(selectedPoiId);
 
-  const placementActive =
-    enabled && activeTool !== "none" && overlays.length > 0;
+  const panelPeekHeightPx = resolvePanelPeekHeightPx(panelMinimized);
+  const phase = resolvePlacementPhase(activeTool, draft);
+  const placementActive = enabled && activeTool !== "none";
 
-  const placementFocusBounds = useMemo(() => {
+  const cameraContext = useMemo(
+    () => ({
+      tool: activeTool,
+      phase,
+      draft,
+      gameArea,
+      overlays,
+      eliminationFeatures,
+      panelPeekHeightPx,
+      selectedPoiId,
+      walkActive,
+      viewportFrame,
+    }),
+    [
+      activeTool,
+      draft,
+      eliminationFeatures,
+      gameArea,
+      overlays,
+      panelPeekHeightPx,
+      phase,
+      selectedPoiId,
+      viewportFrame,
+      walkActive,
+    ],
+  );
+
+  const cameraTarget = useMemo(() => {
     if (!placementActive) {
       return null;
     }
 
-    return draftOverlayBoundsToLeafletBounds(overlays);
-  }, [overlays, placementActive]);
+    return computePlacementCameraTarget(cameraContext);
+  }, [cameraContext, placementActive]);
+
+  const fingerprint = useMemo(
+    () =>
+      placementCameraFingerprint({
+        tool: activeTool,
+        phase,
+        overlays,
+        eliminationFeatures,
+        selectedPoiId,
+        seekerResolving:
+          draft.measuring.seekerResolving || draft.matching.seekerResolving,
+        eliminationPreview:
+          draft.measuring.eliminationPreview || draft.matching.eliminationPreview,
+        walkActive,
+        walkCurrentPoint: draft.thermometer.walkCurrentPoint,
+      }),
+    [
+      activeTool,
+      draft.matching.eliminationPreview,
+      draft.matching.seekerResolving,
+      draft.measuring.eliminationPreview,
+      draft.measuring.seekerResolving,
+      draft.thermometer.walkCurrentPoint,
+      eliminationFeatures,
+      overlays,
+      phase,
+      selectedPoiId,
+      walkActive,
+    ],
+  );
+
+  const requestPlacementRecenter = useCallback(() => {
+    setPlacementRecenterToken((token) => token + 1);
+  }, []);
 
   useEffect(() => {
-    const fingerprint = overlayFingerprint(overlays);
-
     if (!placementActive) {
       fingerprintRef.current = fingerprint;
+      previousPoiIdRef.current = selectedPoiId;
       return;
     }
 
-    if (fingerprintRef.current === fingerprint) {
+    const fingerprintChanged = fingerprintRef.current !== fingerprint;
+    const poiSelectionChange =
+      previousPoiIdRef.current !== selectedPoiId &&
+      phase === "pick_poi";
+
+    if (!fingerprintChanged) {
+      return;
+    }
+
+    if (!cameraTarget) {
+      fingerprintRef.current = fingerprint;
+      previousPoiIdRef.current = selectedPoiId;
       return;
     }
 
     fingerprintRef.current = fingerprint;
+    previousPoiIdRef.current = selectedPoiId;
 
     const now = Date.now();
     if (
       walkActive &&
+      fingerprintChanged &&
       now - lastWalkReframeAtRef.current < WALK_REFRAME_INTERVAL_MS
     ) {
+      return;
+    }
+
+    const targetBox = targetBoundsBox(cameraTarget.bounds ?? null);
+    const shouldReframe = shouldReframeWithHysteresis({
+      phase,
+      walkActive,
+      poiSelectionChange,
+      forceReframe: cameraTarget.forceReframe ?? false,
+      targetBounds: targetBox,
+      viewportFrame,
+    });
+
+    if (!shouldReframe) {
       return;
     }
 
@@ -138,14 +220,22 @@ export function usePlacementMapFocus({
     }
 
     setPlacementRecenterToken((token) => token + 1);
-  }, [overlays, placementActive, walkActive]);
+  }, [
+    cameraTarget,
+    fingerprint,
+    phase,
+    placementActive,
+    selectedPoiId,
+    viewportFrame,
+    walkActive,
+  ]);
 
   return {
-    effectiveFocusBounds: placementFocusBounds ?? defaultFocusBounds,
+    effectiveFocusBounds: cameraTarget?.bounds ?? defaultFocusBounds,
+    focusMinZoom: cameraTarget?.minZoom,
+    focusMaxZoom: cameraTarget?.maxZoom,
     placementRecenterToken,
-    focusPaddingBias:
-      placementFocusBounds !== null
-        ? MAP_PLACEMENT_FOCUS_BOTTOM_BIAS_PX
-        : undefined,
+    focusPaddingBias: cameraTarget?.paddingBiasPx,
+    requestPlacementRecenter,
   };
 }

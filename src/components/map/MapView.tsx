@@ -6,12 +6,15 @@ import type {
   LatLngExpression,
   LeafletEvent,
 } from "leaflet";
+import { point } from "leaflet";
+import { toLeafletBounds } from "../../domain/map/placementCamera/leafletBounds";
 import { getMapBasemap, type MapStyle } from "../../domain/map/mapBasemaps";
 import { isUsableMapBounds } from "../../domain/geometry/geometry";
 import { MOTION_MAP_CAMERA_S } from "../../domain/device/motionTokens";
 import { useMotionProfile } from "../../hooks/useMotionProfile";
 import { MapChromeListener } from "./MapChromeListener";
 import { MapStyleToggle } from "./MapStyleToggle";
+import { MapRecenterControl } from "./MapRecenterControl";
 import { MapZoomControl, type MapZoomControlInset } from "./MapZoomControl";
 
 interface MapViewProps {
@@ -27,6 +30,8 @@ interface MapViewProps {
   suppressChromeHideRef?: RefObject<boolean>;
   interactive?: boolean;
   focusBounds?: LatLngBoundsExpression | null;
+  focusMinZoom?: number;
+  focusMaxZoom?: number;
   /** When "once", fitBounds runs on mount and on recenterToken changes only. */
   fitBoundsMode?: "once" | "always";
   /** Leaflet fitBounds padding in pixels. */
@@ -40,12 +45,16 @@ interface MapViewProps {
   onMapStyleChange?: (style: MapStyle) => void;
   showMapStyleToggle?: boolean;
   mapStyleControlInset?: MapZoomControlInset;
+  showRecenterControl?: boolean;
+  onRecenter?: () => void;
   children?: React.ReactNode;
   mapKey?: string;
 }
 
 function MapFocus({
   focusBounds,
+  focusMinZoom,
+  focusMaxZoom,
   fitBoundsMode,
   recenterToken = 0,
   suppressChromeHideRef,
@@ -53,6 +62,8 @@ function MapFocus({
   focusPaddingBias,
 }: {
   focusBounds: LatLngBoundsExpression | null;
+  focusMinZoom?: number;
+  focusMaxZoom?: number;
   fitBoundsMode: "once" | "always";
   recenterToken: number;
   suppressChromeHideRef?: RefObject<boolean>;
@@ -88,20 +99,39 @@ function MapFocus({
     map.invalidateSize();
 
     const [padY, padX] = fitBoundsPadding;
-    const fitOptions =
+    const padding =
       focusPaddingBias !== undefined
         ? {
-            animate,
-            duration: MOTION_MAP_CAMERA_S,
-            paddingTopLeft: [padY, padX] as [number, number],
-            paddingBottomRight: [padY, padX + focusPaddingBias] as [
-              number,
-              number,
-            ],
+            paddingTopLeft: point(padX, padY),
+            paddingBottomRight: point(padX, padY + focusPaddingBias),
           }
         : { padding: fitBoundsPadding };
 
-    map.fitBounds(focusBounds, fitOptions);
+    const bounds = toLeafletBounds(focusBounds);
+    const useZoomClamp =
+      focusMinZoom !== undefined || focusMaxZoom !== undefined;
+    const paddingPoint =
+      focusPaddingBias !== undefined
+        ? point(padX, padY + focusPaddingBias)
+        : point(padX, padY);
+
+    if (useZoomClamp) {
+      const rawZoom = map.getBoundsZoom(bounds, false, paddingPoint);
+      const minZoom = focusMinZoom ?? map.getMinZoom();
+      const maxZoom = focusMaxZoom ?? map.getMaxZoom();
+      const zoom = Math.min(maxZoom, Math.max(minZoom, rawZoom));
+
+      map.setView(bounds.getCenter(), zoom, {
+        animate,
+        duration: MOTION_MAP_CAMERA_S,
+      });
+    } else {
+      map.fitBounds(focusBounds, {
+        ...padding,
+        animate,
+        duration: MOTION_MAP_CAMERA_S,
+      });
+    }
     hasFittedRef.current = true;
 
     const onMoveEnd = () => {
@@ -115,6 +145,8 @@ function MapFocus({
   }, [
     animate,
     focusBounds,
+    focusMaxZoom,
+    focusMinZoom,
     fitBoundsMode,
     fitBoundsPadding,
     focusPaddingBias,
@@ -243,6 +275,8 @@ export function MapView({
   suppressChromeHideRef,
   interactive = true,
   focusBounds = null,
+  focusMinZoom,
+  focusMaxZoom,
   fitBoundsMode = "always",
   fitBoundsPadding,
   focusPaddingBias,
@@ -252,6 +286,8 @@ export function MapView({
   onMapStyleChange,
   showMapStyleToggle,
   mapStyleControlInset,
+  showRecenterControl,
+  onRecenter,
   children,
   mapKey,
 }: MapViewProps) {
@@ -298,11 +334,19 @@ export function MapView({
         ) : null}
         <MapFocus
           focusBounds={focusBounds}
+          focusMinZoom={focusMinZoom}
+          focusMaxZoom={focusMaxZoom}
           fitBoundsMode={fitBoundsMode}
           recenterToken={recenterToken}
           suppressChromeHideRef={suppressChromeHideRef}
           fitBoundsPadding={fitBoundsPadding}
           focusPaddingBias={focusPaddingBias}
+        />
+        <MapRecenterControl
+          enabled={showRecenterControl ?? false}
+          inset={zoomControlInset}
+          suppressRef={suppressChromeHideRef}
+          onRecenter={onRecenter}
         />
         <MapZoomControl
           enabled={zoomControlEnabled}

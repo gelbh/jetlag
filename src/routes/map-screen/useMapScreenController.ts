@@ -8,6 +8,15 @@ import { useMapGeometryEdit } from "../../hooks/map-screen/useMapGeometryEdit";
 import { useMapSessionChrome } from "../../hooks/map-screen/useMapSessionChrome";
 import { useMapDraftOverlays } from "../../hooks/map-screen/useMapDraftOverlays";
 import { usePlacementMapFocus } from "../../hooks/map-screen/usePlacementMapFocus";
+import {
+  PANEL_PADDING_EXTRA_PX,
+  type PlacementCameraDraftState,
+  type PlacementViewportFrame,
+} from "../../domain/map/placementCamera";
+import {
+  DEFAULT_PANEL_HEIGHT_PX,
+  PANEL_PEEK_HEIGHT_PX,
+} from "../../domain/device/motionTokens";
 import { useMapToolInteraction } from "../../hooks/map-screen/useMapToolInteraction";
 import { useAdminBoundaryFeatures } from "../../hooks/map-screen/useAdminBoundaryFeatures";
 import {
@@ -158,6 +167,7 @@ export function useMapScreenController() {
   const [mapViewport, setMapViewport] = useState<MapViewportState | null>(
     null,
   );
+  const [mapShellSize, setMapShellSize] = useState({ width: 0, height: 0 });
   const handleLiveLocationError = useCallback((error: string | null) => {
     setLiveLocationError(error);
   }, []);
@@ -208,6 +218,37 @@ export function useMapScreenController() {
   const gameRulesEditable =
     (isHost || session?.id === LOCAL_SESSION_ID) && !timer.hasStarted;
   const mapShellRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const shell = mapShellRef.current;
+    if (!shell) {
+      return;
+    }
+
+    const updateSize = () => {
+      const rect = shell.getBoundingClientRect();
+      setMapShellSize({
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+      });
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+
+    const observer =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(updateSize)
+        : null;
+    if (observer) {
+      observer.observe(shell);
+    }
+
+    return () => {
+      window.removeEventListener("resize", updateSize);
+      observer?.disconnect();
+    };
+  }, []);
   const chromeHudRef = useRef<HTMLDivElement>(null);
   const exportLegendRef = useRef<HTMLDivElement>(null);
   const suppressChromeHideRef = useRef(false);
@@ -508,26 +549,6 @@ export function useMapScreenController() {
       });
 
   const {
-    effectiveFocusBounds: effectiveMapFocusBounds,
-    placementRecenterToken,
-    focusPaddingBias: placementFocusPaddingBias,
-  } = usePlacementMapFocus({
-    activeTool,
-    overlays: mapDraftOverlays,
-    defaultFocusBounds: mapFocusBounds,
-    enabled: true,
-    walkActive: thermometerTool.draft.walkingQuestionId !== null,
-  });
-
-  const dismissTransientUi = useCallback(() => {
-    overlay.closeSheet();
-    setSelectedAnnotationId(null);
-    cancelGeometryEdit();
-    setAwaitingPlacement(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only overlay.closeSheet invoked
-  }, [cancelGeometryEdit, overlay.closeSheet, setSelectedAnnotationId, setAwaitingPlacement]);
-
-  const {
     mapPanning,
     panelMinimized,
     userMinimized,
@@ -537,6 +558,103 @@ export function useMapScreenController() {
   } = useToolPanelChrome(activeTool);
   const mapChromeControlInset: MapChromeControlInset =
     panelMinimized || mapPanning ? "chrome-hidden" : "dock";
+
+  const placementCameraDraft = useMemo(
+    (): PlacementCameraDraftState => ({
+      radar: {
+        center: radarTool.draft.radarCenter,
+        radiusMeters: radarTool.draft.radarRadius ?? 0,
+        answer: radarTool.draft.radarAnswer,
+      },
+      pin: { point: pinTool.draft.pinPoint },
+      tentacle: {
+        center: tentacleTool.draft.tentacleCenter,
+        searchRadiusMeters: tentacleTool.draft.tentacleSearchRadiusMeters ?? 0,
+        answerRadiusMeters: tentacleTool.draft.tentacleAnswerRadiusMeters ?? 0,
+        selectedPoiId: deferredTentacleSelectedPoiId,
+        outOfReach: tentacleTool.draft.tentacleOutOfReach,
+        pois: tentacleTool.draft.tentaclePois,
+      },
+      thermometer: {
+        thermoA: thermometerTool.draft.thermoA,
+        thermoB: thermometerTool.draft.thermoB,
+        answer: thermometerTool.draft.thermometerAnswer,
+        targetDistanceMeters: thermometerTool.draft.thermometerDistanceMeters,
+        walkCurrentPoint: thermometerTool.walkCurrentPoint,
+        walkActive: thermometerTool.draft.walkingQuestionId !== null,
+      },
+      measuring: {
+        seekerPoint: measuringTool.draft.measuringSeekerPoint,
+        targetPoint: measuringTool.draft.measuringTargetPoint,
+        eliminationPreview: measuringTool.draft.measuringEliminationPreview !== null,
+        seekerResolving: measuringTool.draft.seekerResolving,
+      },
+      matching: {
+        seekerPoint: matchingTool.draft.matchingSeekerPoint,
+        nearestFeaturePoint: matchingTool.draft.matchingNearestFeaturePoint,
+        eliminationPreview: matchingTool.draft.matchingEliminationPreview !== null,
+        seekerResolving: matchingTool.draft.seekerResolving,
+      },
+      zone: { vertices: zoneTool.draft.zoneVertices },
+    }),
+    [
+      deferredTentacleSelectedPoiId,
+      matchingTool.draft,
+      measuringTool.draft,
+      pinTool.draft.pinPoint,
+      radarTool.draft,
+      tentacleTool.draft,
+      thermometerTool.draft,
+      thermometerTool.walkCurrentPoint,
+      zoneTool.draft.zoneVertices,
+    ],
+  );
+
+  const panelPeekHeightPx = panelMinimized
+    ? PANEL_PEEK_HEIGHT_PX
+    : DEFAULT_PANEL_HEIGHT_PX;
+
+  const placementViewportFrame = useMemo((): PlacementViewportFrame | null => {
+    if (!mapViewport || mapShellSize.width <= 0 || mapShellSize.height <= 0) {
+      return null;
+    }
+
+    return {
+      bounds: mapViewport.bounds,
+      widthPx: mapShellSize.width,
+      heightPx: mapShellSize.height,
+      bottomPaddingPx: panelPeekHeightPx + PANEL_PADDING_EXTRA_PX,
+    };
+  }, [mapShellSize.height, mapShellSize.width, mapViewport, panelPeekHeightPx]);
+
+  const {
+    effectiveFocusBounds: effectiveMapFocusBounds,
+    placementRecenterToken,
+    focusPaddingBias: placementFocusPaddingBias,
+    focusMinZoom: placementFocusMinZoom,
+    focusMaxZoom: placementFocusMaxZoom,
+    requestPlacementRecenter,
+  } = usePlacementMapFocus({
+    activeTool,
+    draft: placementCameraDraft,
+    overlays: mapDraftOverlays,
+    eliminationFeatures: draftEliminationFeatures,
+    gameArea: toolGameArea,
+    defaultFocusBounds: mapFocusBounds,
+    enabled: true,
+    panelMinimized,
+    selectedPoiId: deferredTentacleSelectedPoiId,
+    walkActive: thermometerTool.draft.walkingQuestionId !== null,
+    viewportFrame: placementViewportFrame,
+  });
+
+  const dismissTransientUi = useCallback(() => {
+    overlay.closeSheet();
+    setSelectedAnnotationId(null);
+    cancelGeometryEdit();
+    setAwaitingPlacement(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only overlay.closeSheet invoked
+  }, [cancelGeometryEdit, overlay.closeSheet, setSelectedAnnotationId, setAwaitingPlacement]);
 
   const handleSelectTool = useCallback(
     (tool: MapTool) => {
@@ -635,6 +753,10 @@ export function useMapScreenController() {
     effectiveMapFocusBounds,
     placementRecenterToken,
     placementFocusPaddingBias,
+    placementFocusMinZoom,
+    placementFocusMaxZoom,
+    requestPlacementRecenter,
+    showPlacementRecenter: activeTool !== "none",
     mapChromeControlInset,
     placementCrosshair: tools.placementCrosshair,
     handleMapClick,
