@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.3 - 2026-07-14
+
+### Fixes
+
+- Admin: Google and Apple sign-in use redirect flow (more reliable under strict CSP)
+- Sign-in: CSP violations on admin and premium pages resolved
+- Admin monitor: map annotations now live-refresh when players place tools
+
+### Improvements
+
+- Photo answers: when in-app upload is unavailable, hiders can send the photo in your group chat and mark it sent in game chat
+
 ## 0.6.2 - 2026-07-14
 
 ### Fixes
