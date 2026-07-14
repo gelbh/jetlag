@@ -493,6 +493,10 @@ service cloud.firestore {
         && request.resource.data.gameOutcome == 'found'
         && !('foundRequestedAt' in request.resource.data)
         && !('foundRequestedByUid' in request.resource.data)
+        && !('endGameStartedAt' in request.resource.data)
+        && !('endGameStartedByUid' in request.resource.data)
+        && !('endGameRequestedAt' in request.resource.data)
+        && !('endGameRequestedByUid' in request.resource.data)
         && request.resource.data.code == resource.data.code
         && request.resource.data.gameArea == resource.data.gameArea
         && request.resource.data.hostUid == resource.data.hostUid

@@ -269,6 +269,8 @@ export function Home() {
             type="button"
             onClick={() => setPlayHubOpen(true)}
             aria-label="Play — create, join, or custom game"
+            aria-haspopup="dialog"
+            aria-expanded={playHubOpen}
             className={
               session
                 ? "home-card-btn home-card-btn-secondary"

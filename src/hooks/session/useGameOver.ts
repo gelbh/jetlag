@@ -25,8 +25,6 @@ function buildLocalGameResult(session: SessionRecord): GameResultRecord {
     outcome: session.gameOutcome ?? "found",
     endedAt,
     durationMs,
-    hidingPhaseMs: 0,
-    seekPhaseMs: 0,
     seekTimeMs: durationMs,
     players: [],
   };

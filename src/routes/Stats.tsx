@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AccountSignInGate } from "../components/auth/AccountSignInGate";
+import { BootSplash } from "../components/ui/BootSplash";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { SegmentControl } from "../components/ui/SegmentControl";
 import {
@@ -22,6 +23,15 @@ export function Stats() {
 
   const showSignIn =
     isFirebaseConfigured() && authReady && !isPermanent;
+
+  if (isFirebaseConfigured() && !authReady) {
+    return (
+      <EntryScreenLayout justify="start">
+        <ScreenHeader backTo="/" backLabel="Home" />
+        <BootSplash label="Starting…" />
+      </EntryScreenLayout>
+    );
+  }
 
   return (
     <EntryScreenLayout justify="start">

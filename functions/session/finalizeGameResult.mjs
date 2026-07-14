@@ -122,8 +122,6 @@ export function buildGameResultDocument(sessionId, session) {
     outcome,
     endedAt,
     durationMs,
-    hidingPhaseMs: 0,
-    seekPhaseMs: 0,
     seekTimeMs: durationMs,
     players: buildGameResultPlayers(session.memberRoles, outcome),
   };
@@ -134,8 +132,11 @@ export async function finalizeGameResultForSession(db, sessionId, session) {
   const gameResult = buildGameResultDocument(sessionId, session);
   const sessionRef = db.collection("sessions").doc(sessionId);
 
-  await sessionRef.collection("gameResult").doc(gameResultId).set(gameResult);
-  await sessionRef.update({ gameResultId });
+  await db.runTransaction(async (transaction) => {
+    const gameResultRef = sessionRef.collection("gameResult").doc(gameResultId);
+    transaction.set(gameResultRef, gameResult);
+    transaction.update(sessionRef, { gameResultId });
+  });
 
   return { gameResultId, gameResult };
 }

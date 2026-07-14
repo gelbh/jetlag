@@ -1,4 +1,3 @@
-import { useCallback, useState } from "react";
 import type { AnnotationRecord, SessionRecord } from "../../domain/map/annotations";
 import type {
   PendingQuestionRecord,
@@ -32,11 +31,9 @@ import {
 import { useSyncRetryAction } from "../../hooks/session/useSyncRetryAction";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
 import { SessionLog } from "../../components/session/SessionLog";
-import { isEndGameActive, isEndGamePending, isFoundHiderPending, LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import { GameOverSheet } from "../../components/session/game-over/GameOverSheet";
-import { useGameOver } from "../../hooks/session/useGameOver";
-import { useSessionExit } from "../../hooks/session/useSessionExit";
-import { resetSessionForRematch } from "../../services/session/sessionRematch";
+import { isEndGameActive, isEndGamePending, isFoundHiderPending } from "../../domain/map/annotations";
+import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
+import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
 import type { HiderTruthResult } from "../../domain/questions/ui";
@@ -235,31 +232,7 @@ export function HiderMapScreenChrome({
   chat,
 }: HiderMapScreenChromeProps) {
   const onSyncErrorAction = useSyncRetryAction();
-  const exitSession = useSessionExit();
-  const gameOver = useGameOver(session);
-  const [rematchPending, setRematchPending] = useState(false);
-
-  const handleRematch = useCallback(async () => {
-    if (session.id === LOCAL_SESSION_ID) {
-      return;
-    }
-
-    setRematchPending(true);
-    try {
-      await resetSessionForRematch(session.id);
-    } finally {
-      setRematchPending(false);
-    }
-  }, [session.id]);
-
-  const handleGameOverHome = useCallback(() => {
-    void exitSession({
-      reason: "leave",
-      sessionId: session.id,
-      replace: true,
-      closeOverlays: overlay.closeSheet,
-    });
-  }, [exitSession, overlay.closeSheet, session.id]);
+  const gameOverActions = useGameOverActions(session, overlay);
 
   return (
     <>
@@ -329,18 +302,12 @@ export function HiderMapScreenChrome({
         />
       </div>
 
-      {gameOver.result ? (
-        <GameOverSheet
-          open
-          gameResult={gameOver.result}
-          playerRole="hider"
-          myUid={uid ?? undefined}
-          sessionId={session.id}
-          rematchPending={rematchPending}
-          onRematch={handleRematch}
-          onHome={handleGameOverHome}
-        />
-      ) : null}
+      <GameOverChrome
+        sessionId={session.id}
+        playerRole="hider"
+        myUid={uid ?? undefined}
+        actions={gameOverActions}
+      />
 
       <HiderZoneWizardShell
         open={zoneTool.wizardOpen && !sheetBlocksWizard}

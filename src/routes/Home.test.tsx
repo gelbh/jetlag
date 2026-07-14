@@ -56,8 +56,11 @@ describe("Home", () => {
     useSessionStore.getState().setSession(null);
   });
 
-  it("opens play hub with create, join, and custom actions", () => {
+  it("opens play hub with create, join, and custom actions", async () => {
     renderWithRouter(<Home />);
+
+    expect(screen.queryByRole("link", { name: "Create session" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Join session" })).not.toBeInTheDocument();
 
     fireEvent.click(
       screen.getByRole("button", { name: "Play — create, join, or custom game" }),
@@ -75,6 +78,11 @@ describe("Home", () => {
       "href",
       "/presets",
     );
+
+    fireEvent.click(screen.getByRole("link", { name: "Create session" }));
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "Play" })).not.toBeInTheDocument();
+    });
   });
 
   it("links to friends and leaderboard in the header", () => {

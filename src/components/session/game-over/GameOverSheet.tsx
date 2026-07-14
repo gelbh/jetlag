@@ -13,6 +13,7 @@ interface GameOverSheetProps {
   myUid?: string;
   sessionId: string;
   rematchPending?: boolean;
+  rematchError?: string | null;
   onRematch: () => void | Promise<void>;
   onHome: () => void;
 }
@@ -75,6 +76,7 @@ export function GameOverSheet({
   myUid,
   sessionId,
   rematchPending = false,
+  rematchError = null,
   onRematch,
   onHome,
 }: GameOverSheetProps) {
@@ -89,11 +91,18 @@ export function GameOverSheet({
     playerRole === "hider" ? gameResult.hidingPhaseMs || gameResult.durationMs : gameResult.seekTimeMs;
 
   const handleRematch = useCallback(() => {
-    void onRematch();
+    void Promise.resolve(onRematch()).catch(() => {
+      // Parent surfaces rematchError; swallow to avoid unhandled rejection.
+    });
   }, [onRematch]);
 
   const footer = (
     <div className="space-y-2 border-t border-border bg-surface-panel px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
+      {rematchError ? (
+        <p className="text-center text-sm text-status-danger" role="alert">
+          {rematchError}
+        </p>
+      ) : null}
       <button
         type="button"
         onClick={handleRematch}
@@ -142,14 +151,18 @@ export function GameOverSheet({
               label="Total round"
               value={formatClockDurationFromMs(gameResult.durationMs)}
             />
-            <StatRow
-              label="Hiding phase"
-              value={formatClockDurationFromMs(gameResult.hidingPhaseMs)}
-            />
-            <StatRow
-              label="Seek phase"
-              value={formatClockDurationFromMs(gameResult.seekPhaseMs)}
-            />
+            {typeof gameResult.hidingPhaseMs === "number" ? (
+              <StatRow
+                label="Hiding phase"
+                value={formatClockDurationFromMs(gameResult.hidingPhaseMs)}
+              />
+            ) : null}
+            {typeof gameResult.seekPhaseMs === "number" ? (
+              <StatRow
+                label="Seek phase"
+                value={formatClockDurationFromMs(gameResult.seekPhaseMs)}
+              />
+            ) : null}
           </div>
 
           <button

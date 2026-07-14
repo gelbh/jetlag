@@ -1,8 +1,12 @@
 import { FieldValue } from "firebase-admin/firestore";
+import { isSessionMember } from "../proxies/verifyProxyAccess.mjs";
+
+export const REMATCH_SESSION_NOT_FOUND = "REMATCH_SESSION_NOT_FOUND";
+export const REMATCH_NOT_MEMBER = "REMATCH_NOT_MEMBER";
 
 function swapSeekerHiderRoles(memberRoles) {
   if (!memberRoles || typeof memberRoles !== "object") {
-    return memberRoles;
+    return {};
   }
 
   const swapped = { ...memberRoles };
@@ -24,10 +28,13 @@ export async function resetSessionForRematchHandler(db, uid, sessionId) {
   await db.runTransaction(async (transaction) => {
     const sessionSnap = await transaction.get(sessionRef);
     if (!sessionSnap.exists) {
-      throw new Error("Session not found.");
+      throw new Error(REMATCH_SESSION_NOT_FOUND);
     }
 
     const session = sessionSnap.data() ?? {};
+    if (!isSessionMember(session, uid)) {
+      throw new Error(REMATCH_NOT_MEMBER);
+    }
     const roundNumber =
       typeof session.roundNumber === "number" ? session.roundNumber : 0;
     const gameResultId =
@@ -48,7 +55,7 @@ export async function resetSessionForRematchHandler(db, uid, sessionId) {
     }
 
     transaction.update(sessionRef, {
-      memberRoles: swapSeekerHiderRoles(session.memberRoles),
+      memberRoles: swapSeekerHiderRoles(session.memberRoles ?? {}),
       roundNumber: roundNumber + 1,
       sessionResetAt: new Date().toISOString(),
       timerAccumulatedMs: 0,

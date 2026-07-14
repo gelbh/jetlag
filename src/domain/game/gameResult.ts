@@ -21,8 +21,8 @@ export interface GameResultRecord {
   outcome: GameOutcome;
   endedAt: string;
   durationMs: number;
-  hidingPhaseMs: number;
-  seekPhaseMs: number;
+  hidingPhaseMs?: number;
+  seekPhaseMs?: number;
   seekTimeMs: number;
   players: GameResultPlayer[];
 }

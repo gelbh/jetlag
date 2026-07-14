@@ -22,6 +22,19 @@ function createFinalizeMockDb() {
     sessionUpdate: null,
   };
 
+  function createSessionRef() {
+    return {
+      collection(subName) {
+        assert.equal(subName, "gameResult");
+        return {
+          doc(gameResultId) {
+            return { gameResultId };
+          },
+        };
+      },
+    };
+  }
+
   return {
     get gameResults() {
       return state.gameResults;
@@ -32,26 +45,21 @@ function createFinalizeMockDb() {
     collection(name) {
       assert.equal(name, "sessions");
       return {
-        doc(sessionId) {
-          return {
-            collection(subName) {
-              assert.equal(subName, "gameResult");
-              return {
-                doc(gameResultId) {
-                  return {
-                    async set(payload) {
-                      state.gameResults.set(gameResultId, payload);
-                    },
-                  };
-                },
-              };
-            },
-            async update(payload) {
-              state.sessionUpdate = payload;
-            },
-          };
+        doc() {
+          return createSessionRef();
         },
       };
+    },
+    async runTransaction(callback) {
+      const sessionRef = createSessionRef();
+      await callback({
+        set(ref, payload) {
+          state.gameResults.set(ref.gameResultId, payload);
+        },
+        update(_ref, payload) {
+          state.sessionUpdate = payload;
+        },
+      });
     },
   };
 }
