@@ -181,7 +181,10 @@ export async function signInWithGoogleIdToken(idToken: string): Promise<User> {
 }
 
 export async function signInWithGoogle(): Promise<User> {
-  return signInWithOAuthPopup(new GoogleAuthProvider(), "Google sign-in failed.");
+  return signInWithOAuthRedirectFirst(
+    new GoogleAuthProvider(),
+    "Google sign-in failed.",
+  );
 }
 
 function createAppleProvider(): OAuthProvider {
@@ -192,7 +195,25 @@ function createAppleProvider(): OAuthProvider {
 }
 
 export async function signInWithApple(): Promise<User> {
-  return signInWithOAuthPopup(createAppleProvider(), "Apple sign-in failed.");
+  return signInWithOAuthRedirectFirst(
+    createAppleProvider(),
+    "Apple sign-in failed.",
+  );
+}
+
+async function signInWithOAuthRedirectFirst(
+  provider: AuthProvider,
+  fallbackMessage: string,
+): Promise<User> {
+  try {
+    return await beginOAuthRedirect(provider);
+  } catch (error) {
+    if (isOAuthRedirectInProgress(error)) {
+      throw error;
+    }
+
+    return signInWithOAuthPopup(provider, fallbackMessage);
+  }
 }
 
 async function signInWithOAuthPopup(
