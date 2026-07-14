@@ -59,12 +59,7 @@ export function Leaderboard() {
     isPermanent && activeProfile != null && !activeProfile.leaderboardOptIn;
 
   if (isFirebaseConfigured() && !authReady) {
-    return (
-      <EntryScreenLayout justify="start">
-        <ScreenHeader backTo="/" backLabel="Home" />
-        <BootSplash label="Starting…" />
-      </EntryScreenLayout>
-    );
+    return <BootSplash label="Starting…" />;
   }
 
   return (

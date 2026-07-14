@@ -62,9 +62,14 @@ describe("Home", () => {
     expect(screen.queryByRole("link", { name: "Create session" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Join session" })).not.toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Play — create, join, or custom game" }),
-    );
+    const playButton = screen.getByRole("button", {
+      name: "Play — create, join, or custom game",
+    });
+    expect(playButton).toHaveAttribute("aria-haspopup", "dialog");
+    expect(playButton).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(playButton);
+    expect(playButton).toHaveAttribute("aria-expanded", "true");
 
     expect(screen.getByRole("link", { name: "Create session" })).toHaveAttribute(
       "href",

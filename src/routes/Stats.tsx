@@ -25,12 +25,7 @@ export function Stats() {
     isFirebaseConfigured() && authReady && !isPermanent;
 
   if (isFirebaseConfigured() && !authReady) {
-    return (
-      <EntryScreenLayout justify="start">
-        <ScreenHeader backTo="/" backLabel="Home" />
-        <BootSplash label="Starting…" />
-      </EntryScreenLayout>
-    );
+    return <BootSplash label="Starting…" />;
   }
 
   return (
