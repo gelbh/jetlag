@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   getPhotoCategory,
   PHOTO_CANNOT_ANSWER_LABEL,
@@ -29,19 +30,28 @@ export function PhotoAnswerUploader({
   deadlineExpired = false,
   onAnswerQuestion,
 }: PhotoAnswerUploaderProps) {
+  const [submitting, setSubmitting] = useState(false);
   const categoryId = readPhotoCategoryId(pendingQuestion);
   const ruleSummary = categoryId
     ? getPhotoCategory(categoryId).ruleSummary
     : null;
 
   const submitAnswer = async (answer: PhotoAnswer) => {
-    await onAnswerQuestion(
-      pendingQuestion.id,
-      messageId,
-      answer,
-      photoAnswerSelectedReply(answer),
-      deadlineExpired,
-    );
+    if (submitting) {
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await onAnswerQuestion(
+        pendingQuestion.id,
+        messageId,
+        answer,
+        photoAnswerSelectedReply(answer),
+        deadlineExpired,
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -54,15 +64,17 @@ export function PhotoAnswerUploader({
       ) : null}
       <button
         type="button"
+        disabled={submitting}
         onClick={() => void submitAnswer({ kind: "sent_externally" })}
-        className="btn-primary min-h-11 w-full"
+        className="btn-primary min-h-11 w-full disabled:opacity-50"
       >
         {PHOTO_SENT_EXTERNALLY_LABEL}
       </button>
       <button
         type="button"
+        disabled={submitting}
         onClick={() => void submitAnswer({ kind: "cannot_answer" })}
-        className="btn-secondary min-h-11 w-full"
+        className="btn-secondary min-h-11 w-full disabled:opacity-50"
       >
         {PHOTO_CANNOT_ANSWER_LABEL}
       </button>
