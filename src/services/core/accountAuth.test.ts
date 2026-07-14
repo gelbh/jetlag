@@ -164,6 +164,22 @@ describe("accountAuth", () => {
     expect(linkWithPopup).toHaveBeenCalled();
   });
 
+  it("falls back to popup when signed-in redirect fails before navigation", async () => {
+    mockAuth.currentUser = { isAnonymous: false, uid: "signed-in" };
+    signInWithRedirect.mockRejectedValueOnce(
+      new FirebaseError("auth/network-request-failed", "Network error."),
+    );
+    signInWithPopup.mockResolvedValueOnce({
+      user: { uid: "signed-in", isAnonymous: false },
+    });
+
+    const user = await signInWithGoogle();
+
+    expect(user.uid).toBe("signed-in");
+    expect(signInWithRedirect).toHaveBeenCalled();
+    expect(signInWithPopup).toHaveBeenCalled();
+  });
+
   it("signs in with Google popup when redirect fails and credential is already in use", async () => {
     mockAuth.currentUser = { isAnonymous: true, uid: "anon-3" };
     linkWithRedirect.mockRejectedValueOnce(
