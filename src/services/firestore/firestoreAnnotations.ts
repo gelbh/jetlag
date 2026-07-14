@@ -824,6 +824,40 @@ export async function resetEndGameSession(sessionId: string): Promise<void> {
   });
 }
 
+export async function requestFoundHiderSession(
+  sessionId: string,
+  requestedByUid: string,
+): Promise<void> {
+  await updateDoc(doc(sessionsCollection(), sessionId), {
+    foundRequestedAt: new Date().toISOString(),
+    foundRequestedByUid: requestedByUid,
+  });
+}
+
+export async function confirmFoundHiderSession(
+  sessionId: string,
+  confirmedByUid: string,
+): Promise<void> {
+  await updateDoc(doc(sessionsCollection(), sessionId), {
+    foundConfirmedAt: new Date().toISOString(),
+    foundConfirmedByUid: confirmedByUid,
+    gameOutcome: "found",
+    foundRequestedAt: deleteField(),
+    foundRequestedByUid: deleteField(),
+    endGameStartedAt: deleteField(),
+    endGameStartedByUid: deleteField(),
+    endGameRequestedAt: deleteField(),
+    endGameRequestedByUid: deleteField(),
+  });
+}
+
+export async function resetFoundHiderSession(sessionId: string): Promise<void> {
+  await updateDoc(doc(sessionsCollection(), sessionId), {
+    foundRequestedAt: deleteField(),
+    foundRequestedByUid: deleteField(),
+  });
+}
+
 export async function resetRemoteSession(
   sessionId: string,
   hostUid: string,

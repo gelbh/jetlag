@@ -83,4 +83,62 @@ describe("useMapSessionActions", () => {
       "host-1",
     );
   });
+
+  it("blocks found hider until a hiding zone is confirmed", () => {
+    const { result } = renderHook(() =>
+      useMapSessionActions({
+        session: baseSession,
+        setSession: vi.fn(),
+        uid: "host-1",
+        myRole: "seeker",
+        isRemote: false,
+        gameRulesEditable: true,
+        timerHasStarted: true,
+        hidingZones: [],
+      }),
+    );
+
+    expect(result.current.canRequestFoundHider).toBe(false);
+  });
+
+  it("requests found hider locally for host sessions", async () => {
+    const setSession = vi.fn();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      useMapSessionActions({
+        session: baseSession,
+        setSession,
+        uid: "host-1",
+        myRole: "seeker",
+        isRemote: false,
+        gameRulesEditable: true,
+        timerHasStarted: true,
+        hidingZones: [
+          {
+            hiderUid: "hider-1",
+            sessionId: LOCAL_SESSION_ID,
+            stationId: "dublin-central",
+            stationName: "Dublin Central",
+            center: { lat: 53.35, lng: -6.26 },
+            radiusMeters: 500,
+            geometryJson: "{}",
+            status: "confirmed",
+            confirmedAt: "2026-01-01T00:00:00.000Z",
+          },
+        ],
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleRequestFoundHider();
+    });
+
+    expect(setSession).toHaveBeenCalledWith(
+      expect.objectContaining({
+        foundRequestedByUid: "host-1",
+      }),
+      "host-1",
+    );
+  });
 });

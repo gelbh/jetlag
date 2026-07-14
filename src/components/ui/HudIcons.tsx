@@ -167,3 +167,25 @@ export function HudStarIcon({
     </IconBase>
   );
 }
+
+export function HudFriendsIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5H7.5A3.5 3.5 0 0 0 4 17.5V19" />
+      <circle cx="10" cy="8.5" r="2.5" />
+      <path d="M20 19v-1.2a3 3 0 0 0-2.2-2.9" />
+      <path d="M16.5 5.8a2.2 2.2 0 0 1 0 4" />
+    </IconBase>
+  );
+}
+
+export function HudLeaderboardIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <IconBase {...props}>
+      <path d="M5 20V10" />
+      <path d="M12 20V5" />
+      <path d="M19 20v-7" />
+      <path d="M3 20h18" />
+    </IconBase>
+  );
+}
