@@ -9,6 +9,7 @@ const firestoreMocks = vi.hoisted(() => ({
   setDoc: vi.fn(async () => undefined),
   updateDoc: vi.fn(async () => undefined),
   deleteDoc: vi.fn(async () => undefined),
+  addDoc: vi.fn(async () => undefined),
   doc: vi.fn((...segments: string[]) => ({ path: segments.join("/") })),
   collection: vi.fn((...segments: string[]) => ({
     path: segments.join("/"),
@@ -16,6 +17,7 @@ const firestoreMocks = vi.hoisted(() => ({
 }));
 
 vi.mock("firebase/firestore", () => ({
+  addDoc: firestoreMocks.addDoc,
   collection: firestoreMocks.collection,
   deleteDoc: firestoreMocks.deleteDoc,
   doc: firestoreMocks.doc,
@@ -32,9 +34,11 @@ vi.mock("../core/firebase", () => ({
 }));
 
 import {
+  appendPlayerTrailPoint,
   deletePendingQuestion,
   updatePendingQuestion,
   writePendingQuestion,
+  writePlayerLocation,
 } from "./firestoreSessionExtras";
 
 function samplePendingQuestion(
@@ -123,5 +127,47 @@ describe("firestoreSessionExtras writes", () => {
     expect(restored.promptText).toBe(question.promptText);
     expect(restored.cardDraw).toBe(2);
     expect(restored.deadlineExpiredAt).toBe("2026-01-01T00:10:00.000Z");
+  });
+
+  it("appends player trail points under the session subcollection", async () => {
+    await appendPlayerTrailPoint("session-1", {
+      uid: "seeker-1",
+      sessionId: "session-1",
+      lat: 53.35,
+      lng: -6.26,
+      role: "seeker",
+      recordedAt: "2026-01-01T00:00:00.000Z",
+    });
+
+    expect(firestoreMocks.addDoc).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: expect.stringContaining("playerTrailPoints/seeker-1/points"),
+      }),
+      expect.objectContaining({
+        lat: 53.35,
+        lng: -6.26,
+        role: "seeker",
+      }),
+    );
+  });
+
+  it("writes player locations by uid", async () => {
+    await writePlayerLocation("session-1", {
+      uid: "hider-1",
+      sessionId: "session-1",
+      lat: 53.34,
+      lng: -6.25,
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      role: "hider",
+    });
+
+    expect(firestoreMocks.setDoc).toHaveBeenCalledWith(
+      expect.objectContaining({ path: expect.stringContaining("hider-1") }),
+      expect.objectContaining({
+        lat: 53.34,
+        lng: -6.25,
+        role: "hider",
+      }),
+    );
   });
 });
