@@ -5,6 +5,7 @@ import { useSharedSessionScreen } from "./useSharedSessionScreen";
 const ensureAnonymousUser = vi.fn();
 const waitForPermanentAuthReady = vi.fn();
 const getFirebaseAuth = vi.fn();
+const useSessionSyncMock = vi.fn();
 
 vi.mock("../../services/core/firebase", () => ({
   ensureAnonymousUser: (...args: unknown[]) => ensureAnonymousUser(...args),
@@ -17,6 +18,8 @@ vi.mock("../../services/core/firebaseAuthReady", () => ({
     waitForPermanentAuthReady(...args),
 }));
 
+let mockSession = { id: "session-1", code: "ABCD" };
+
 vi.mock("../../state/sessionStore", () => ({
   useSessionStore: vi.fn(
     (
@@ -28,7 +31,7 @@ vi.mock("../../state/sessionStore", () => ({
       }) => unknown,
     ) =>
       selector({
-        session: { id: "session-1", code: "ABCD" },
+        session: mockSession,
         myUid: "admin-uid",
         setMyUid: vi.fn(),
         setLastSyncError: vi.fn(),
@@ -36,7 +39,11 @@ vi.mock("../../state/sessionStore", () => ({
   ),
 }));
 
-vi.mock("./useSessionSync", () => ({ useSessionSync: vi.fn() }));
+vi.mock("./useSessionSync", () => ({
+  useSessionSync: (options: { syncEnabled?: boolean }) => {
+    useSessionSyncMock(options);
+  },
+}));
 vi.mock("./useChatUnread", () => ({
   useChatUnread: vi.fn(() => ({ hasUnreadChat: false, unreadCount: 0 })),
 }));
@@ -104,5 +111,33 @@ describe("useSharedSessionScreen", () => {
       expect(waitForPermanentAuthReady).toHaveBeenCalled();
     });
     expect(ensureAnonymousUser).not.toHaveBeenCalled();
+  });
+
+  it("resets admin sync gating when monitored session changes", async () => {
+    waitForPermanentAuthReady.mockResolvedValue(undefined);
+    getFirebaseAuth.mockReturnValue({
+      currentUser: { uid: "admin-uid" },
+    });
+    mockSession = { id: "session-1", code: "ABCD" };
+    useSessionSyncMock.mockClear();
+
+    const { rerender } = renderHook(() =>
+      useSharedSessionScreen({
+        isChatOpen: false,
+        notificationRole: "observer",
+        authMode: "admin-permanent",
+        liveActivityEnabled: false,
+        exitPath: "/admin",
+      }),
+    );
+
+    await waitFor(() => {
+      expect(useSessionSyncMock).toHaveBeenLastCalledWith({ syncEnabled: true });
+    });
+
+    mockSession = { id: "session-2", code: "EFGH" };
+    rerender();
+
+    expect(useSessionSyncMock).toHaveBeenLastCalledWith({ syncEnabled: false });
   });
 });
