@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { cleanup, renderHook, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   connectEmulatorsForTests,
   teardownEmulatorsForTests,
@@ -17,6 +17,10 @@ import { useSessionSync } from "./useSessionSync";
 
 describe("useSessionSync emulator", () => {
   let testUid: string;
+
+  afterEach(() => {
+    cleanup();
+  });
 
   beforeEach(async () => {
     localStorage.clear();
