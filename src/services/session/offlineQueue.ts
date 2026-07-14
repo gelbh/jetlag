@@ -1,4 +1,5 @@
 import type { AnnotationRecord } from "../../domain/map/annotations";
+import { isDatabaseDeletedError } from "./indexedDbErrors";
 
 const DB_NAME = "jetlag-offline-queue";
 const STORE_NAME = "writes";
@@ -18,16 +19,6 @@ export type QueuedWrite = {
 
 let databasePromise: Promise<IDBDatabase> | null = null;
 let openDatabaseHandle: IDBDatabase | null = null;
-
-const IDB_DATABASE_DELETED = /Database deleted by request of the user/i;
-
-function isDatabaseDeletedError(error: unknown): boolean {
-  if (!(error instanceof DOMException) && !(error instanceof Error)) {
-    return false;
-  }
-
-  return IDB_DATABASE_DELETED.test(error.message);
-}
 
 function resetDatabaseConnection(failedHandle?: IDBDatabase): void {
   if (failedHandle && openDatabaseHandle !== failedHandle) {

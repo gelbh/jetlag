@@ -34,6 +34,7 @@ import {
   captureAuthPersistenceFallback,
   setBootstrapTag,
 } from "./sentry";
+import { isRecaptchaAlreadyRenderedError } from "./appCheckErrors";
 
 export async function getFirebaseStorage(): Promise<
   import("firebase/storage").FirebaseStorage
@@ -128,13 +129,6 @@ function enableAppCheckDebugProviderIfDev(): void {
   }
 
   globalScope.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
-}
-
-function isRecaptchaAlreadyRenderedError(error: unknown): boolean {
-  return (
-    error instanceof Error &&
-    /reCAPTCHA has already been rendered/i.test(error.message)
-  );
 }
 
 function initializeAppCheckIfConfigured(firebaseApp: FirebaseApp): void {
