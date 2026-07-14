@@ -72,22 +72,61 @@ export function buildMeasuringEliminationRegion(
   return safeDifference(gameAreaToPolygon(gameArea), nearRegion);
 }
 
+function isFiniteCoordPair(
+  coord: number[] | null | undefined,
+): coord is [number, number] {
+  return (
+    Array.isArray(coord) &&
+    coord.length >= 2 &&
+    Number.isFinite(coord[0]) &&
+    Number.isFinite(coord[1])
+  );
+}
+
+function sanitizeRing(ring: number[][]): LatLngTuple[] {
+  const positions: LatLngTuple[] = [];
+
+  for (const coord of ring) {
+    if (!isFiniteCoordPair(coord)) {
+      continue;
+    }
+
+    const [lng, lat] = coord;
+    positions.push([lat, lng]);
+  }
+
+  return positions;
+}
+
+function sanitizePolygonRings(rings: number[][][]): LatLngTuple[][] | null {
+  if (rings.length === 0) {
+    return null;
+  }
+
+  const exterior = sanitizeRing(rings[0]);
+  if (exterior.length < 3) {
+    return null;
+  }
+
+  const holes = rings
+    .slice(1)
+    .map((ring) => sanitizeRing(ring))
+    .filter((ring) => ring.length >= 3);
+
+  return [exterior, ...holes];
+}
+
 export function polygonFeatureToLeafletPolygonGroups(
   feature: Feature<Polygon | MultiPolygon>,
 ): LatLngTuple[][][] {
   if (feature.geometry.type === "MultiPolygon") {
-    return feature.geometry.coordinates.map((polygon) =>
-      polygon.map((ring) =>
-        ring.map(([lng, lat]) => [lat, lng] as LatLngTuple),
-      ),
-    );
+    return feature.geometry.coordinates
+      .map((polygon) => sanitizePolygonRings(polygon))
+      .filter((polygon): polygon is LatLngTuple[][] => polygon !== null);
   }
 
-  return [
-    feature.geometry.coordinates.map((ring) =>
-      ring.map(([lng, lat]) => [lat, lng] as LatLngTuple),
-    ),
-  ];
+  const polygon = sanitizePolygonRings(feature.geometry.coordinates);
+  return polygon ? [polygon] : [];
 }
 
 export function polygonFeatureToLeafletRings(
