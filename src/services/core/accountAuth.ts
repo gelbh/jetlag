@@ -82,6 +82,21 @@ function isCredentialAlreadyInUse(error: unknown): boolean {
   );
 }
 
+function isPopupBlockedError(error: unknown): boolean {
+  return (
+    error instanceof FirebaseError &&
+    (error.code === "auth/popup-blocked" ||
+      error.code === "auth/cancelled-popup-request")
+  );
+}
+
+function isFirebasePendingPromiseAssertion(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes("Pending promise was never set")
+  );
+}
+
 async function linkCredentialOrSignInExisting(
   credential: AuthCredential,
 ): Promise<User> {
@@ -111,14 +126,25 @@ async function linkWithPopupOrSignInExisting(
   const auth = getFirebaseAuth();
 
   if (!auth.currentUser?.isAnonymous) {
-    const signedIn = await signInWithPopup(auth, provider);
-    return signedIn.user;
+    try {
+      const signedIn = await signInWithPopup(auth, provider);
+      return signedIn.user;
+    } catch (error) {
+      if (isPopupBlockedError(error)) {
+        return beginOAuthRedirect(provider);
+      }
+      throw error;
+    }
   }
 
   try {
     const linked = await linkWithPopup(auth.currentUser, provider);
     return linked.user;
   } catch (error) {
+    if (isPopupBlockedError(error)) {
+      return beginOAuthRedirect(provider);
+    }
+
     if (!isCredentialAlreadyInUse(error)) {
       throw error;
     }
@@ -162,10 +188,7 @@ export async function signInWithGoogleIdToken(idToken: string): Promise<User> {
 }
 
 export async function signInWithGoogle(): Promise<User> {
-  return signInWithOAuthRedirectFirst(
-    new GoogleAuthProvider(),
-    "Google sign-in failed.",
-  );
+  return signInWithOAuthPopup(new GoogleAuthProvider(), "Google sign-in failed.");
 }
 
 function createAppleProvider(): OAuthProvider {
@@ -176,25 +199,7 @@ function createAppleProvider(): OAuthProvider {
 }
 
 export async function signInWithApple(): Promise<User> {
-  return signInWithOAuthRedirectFirst(
-    createAppleProvider(),
-    "Apple sign-in failed.",
-  );
-}
-
-async function signInWithOAuthRedirectFirst(
-  provider: AuthProvider,
-  fallbackMessage: string,
-): Promise<User> {
-  try {
-    return await beginOAuthRedirect(provider);
-  } catch (error) {
-    if (isOAuthRedirectInProgress(error)) {
-      throw error;
-    }
-
-    return signInWithOAuthPopup(provider, fallbackMessage);
-  }
+  return signInWithOAuthPopup(createAppleProvider(), "Apple sign-in failed.");
 }
 
 async function signInWithOAuthPopup(
@@ -211,13 +216,20 @@ async function signInWithOAuthPopup(
   }
 }
 
-export async function completeOAuthRedirectIfPending(): Promise<User | null> {
+let redirectResultPromise: Promise<User | null> | null = null;
+
+async function completeOAuthRedirectOnce(): Promise<User | null> {
   const auth = getFirebaseAuth();
 
   try {
     const result = await getRedirectResult(auth);
     return result?.user ?? null;
   } catch (error) {
+    if (isFirebasePendingPromiseAssertion(error)) {
+      const current = auth.currentUser;
+      return current && !current.isAnonymous ? current : null;
+    }
+
     if (!isCredentialAlreadyInUse(error)) {
       throw mapAuthError(error, "Google sign-in failed.");
     }
@@ -229,6 +241,15 @@ export async function completeOAuthRedirectIfPending(): Promise<User | null> {
 
     return linkCredentialOrSignInExisting(credential);
   }
+}
+
+export async function completeOAuthRedirectIfPending(): Promise<User | null> {
+  redirectResultPromise ??= completeOAuthRedirectOnce();
+  return redirectResultPromise;
+}
+
+export function resetOAuthRedirectRecoveryForTests(): void {
+  redirectResultPromise = null;
 }
 
 export async function sendPremiumEmailSignInLink(

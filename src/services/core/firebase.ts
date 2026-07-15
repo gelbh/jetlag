@@ -287,6 +287,9 @@ async function bootstrapAuthState(): Promise<void> {
   const persistenceMode = await configureAuthPersistence(firebaseAuth);
   setBootstrapTag(`auth_persistence_${persistenceMode}`);
 
+  const { completeOAuthRedirectIfPending } = await import("./accountAuth");
+  await completeOAuthRedirectIfPending();
+
   await Promise.race([
     firebaseAuth.authStateReady(),
     sleep(AUTH_BOOTSTRAP_TIMEOUT_MS),
