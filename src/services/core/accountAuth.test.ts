@@ -208,7 +208,20 @@ describe("accountAuth", () => {
     });
   });
 
-  it("surfaces popup-blocked errors when redirect is unavailable", async () => {
+  it("does not redirect when a concurrent popup request is cancelled", async () => {
+    mockAuth.currentUser = { isAnonymous: true, uid: "anon-cancelled" };
+    linkWithPopup.mockRejectedValueOnce(
+      new FirebaseError("auth/cancelled-popup-request", "Cancelled."),
+    );
+
+    await expect(signInWithGoogle()).rejects.toMatchObject({
+      code: "auth/cancelled-popup-request",
+    });
+    expect(linkWithRedirect).not.toHaveBeenCalled();
+    expect(signInWithRedirect).not.toHaveBeenCalled();
+  });
+
+  it("surfaces the redirect's own error when the fallback redirect fails to start", async () => {
     mockAuth.currentUser = { isAnonymous: true, uid: "anon-5" };
     linkWithPopup.mockRejectedValueOnce(
       new FirebaseError("auth/popup-blocked", "Popup blocked."),

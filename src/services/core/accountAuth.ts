@@ -84,9 +84,7 @@ function isCredentialAlreadyInUse(error: unknown): boolean {
 
 function isPopupBlockedError(error: unknown): boolean {
   return (
-    error instanceof FirebaseError &&
-    (error.code === "auth/popup-blocked" ||
-      error.code === "auth/cancelled-popup-request")
+    error instanceof FirebaseError && error.code === "auth/popup-blocked"
   );
 }
 
