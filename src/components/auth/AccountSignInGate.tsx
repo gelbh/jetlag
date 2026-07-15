@@ -52,21 +52,22 @@ export function AccountSignInGate({
 
     void (async () => {
       try {
-        await ensureAnonymousUser();
         const finishingEmailLink =
           isFirebaseConfigured() &&
           isSignInWithEmailLink(getFirebaseAuth(), window.location.href);
         if (finishingEmailLink && !cancelled) {
           setCompletingEmailLink(true);
         }
-        const completed = await completePremiumEmailSignInLink();
-        if (!cancelled && completed && isPermanentUser(completed)) {
+
+        const oauthCompleted = await completeOAuthRedirectIfPending();
+        if (!cancelled && oauthCompleted && isPermanentUser(oauthCompleted)) {
           await handleSignedIn();
           return;
         }
 
-        const oauthCompleted = await completeOAuthRedirectIfPending();
-        if (!cancelled && oauthCompleted && isPermanentUser(oauthCompleted)) {
+        await ensureAnonymousUser();
+        const completed = await completePremiumEmailSignInLink();
+        if (!cancelled && completed && isPermanentUser(completed)) {
           await handleSignedIn();
         }
       } catch (nextError) {
