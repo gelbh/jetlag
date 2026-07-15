@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.2 - 2026-07-15
+
+### Fixes
+
+- Premium: Google sign-in works again under enforced content security policy, using a popup on mobile with a full-page redirect fallback only when the popup is blocked.
+
 ## 0.7.1 - 2026-07-14
 
 ### Fixes
