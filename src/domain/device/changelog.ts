@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.7.1";
+export const APP_VERSION = "0.7.2";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.7.2",
+    date: "2026-07-15",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Premium: Google sign-in works again under enforced content security policy, using a popup on mobile with a full-page redirect fallback only when the popup is blocked.",
+        ],
+      }
+    ],
+  },
   {
     version: "0.7.1",
     date: "2026-07-14",
