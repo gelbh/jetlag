@@ -27,6 +27,7 @@ type MapScreenMapLayersProps = Pick<
   | "placementFocusPaddingBias"
   | "placementFocusMinZoom"
   | "placementFocusMaxZoom"
+  | "placementFocusPreferFly"
   | "showPlacementRecenter"
   | "requestPlacementRecenter"
   | "activeTool"
@@ -78,6 +79,7 @@ export function MapScreenMapLayers({
   placementFocusPaddingBias,
   placementFocusMinZoom,
   placementFocusMaxZoom,
+  placementFocusPreferFly,
   showPlacementRecenter,
   requestPlacementRecenter,
   activeTool,
@@ -132,6 +134,7 @@ export function MapScreenMapLayers({
         fitBoundsMode="once"
         recenterToken={placementRecenterToken}
         focusPaddingBias={placementFocusPaddingBias}
+        focusPreferFly={placementFocusPreferFly}
         showRecenterControl={showPlacementRecenter && activeTool !== "none"}
         onRecenter={requestPlacementRecenter}
         onMapClick={handleMapClick}
