@@ -10,7 +10,7 @@ import {
 } from "./profileFriends";
 
 const callable = vi.hoisted(() =>
-  vi.fn(async () => ({
+  vi.fn(async (): Promise<{ data: unknown }> => ({
     data: { results: [{ uid: "u2", username: "bob" }] },
   })),
 );
