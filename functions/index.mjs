@@ -29,5 +29,9 @@ export {
 
 export { resetSessionForRematch } from "./handlers/session.mjs";
 
+export { claimUsername } from "./handlers/profile.mjs";
+
+export { claimUsername } from "./handlers/profile.mjs";
+
 export { listActiveSessions } from "./admin/listActiveSessions.mjs";
 export { adminModerateSession } from "./admin/moderateSession.mjs";

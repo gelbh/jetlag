@@ -1,0 +1,90 @@
+import { useState } from "react";
+import {
+  USERNAME_MAX_LENGTH,
+  validateUsername,
+} from "../../domain/game/playerProfile";
+import { claimUsername } from "../../services/profile/claimUsername";
+import { InlineError } from "../ui/InlineError";
+import { TextField } from "../ui/TextField";
+
+interface UsernameSetupGateProps {
+  onClaimed?: (username: string) => void;
+  description?: string;
+}
+
+export function UsernameSetupGate({
+  onClaimed,
+  description = "Pick a unique username to appear on friends lists and leaderboards.",
+}: UsernameSetupGateProps) {
+  const [value, setValue] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleClaim = async () => {
+    const validated = validateUsername(value);
+    if (!validated.ok) {
+      setError(validated.error);
+      return;
+    }
+
+    setBusy(true);
+    setError(null);
+    try {
+      const result = await claimUsername(validated.username);
+      onClaimed?.(result.username);
+    } catch (nextError) {
+      setError(
+        nextError instanceof Error
+          ? nextError.message
+          : "Could not claim username.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3 border-t-2 border-border pt-4">
+      <div className="space-y-1">
+        <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
+          Choose a username
+        </p>
+        <p className="text-sm leading-relaxed text-ink-muted">{description}</p>
+        <p className="text-xs leading-relaxed text-ink-dim">
+          Letters, numbers, underscore. Unique. 3–{USERNAME_MAX_LENGTH}{" "}
+          characters.
+        </p>
+      </div>
+
+      <TextField
+        id="username-claim"
+        label="Username"
+        labelClassName="field-label font-display text-xs uppercase tracking-[0.1em]"
+        value={value}
+        onChange={(event) => {
+          setValue(event.target.value);
+          setError(null);
+        }}
+        autoComplete="username"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        maxLength={USERNAME_MAX_LENGTH}
+        disabled={busy}
+        placeholder="seeker_one"
+      />
+
+      <button
+        type="button"
+        disabled={busy || value.trim().length === 0}
+        onClick={() => void handleClaim()}
+        className="home-card-btn w-full disabled:opacity-50"
+      >
+        <span>{busy ? "Claiming…" : "Claim username"}</span>
+        <span className="home-card-btn-hint">Unique · permanent</span>
+      </button>
+
+      {error ? <InlineError>{error}</InlineError> : null}
+    </div>
+  );
+}

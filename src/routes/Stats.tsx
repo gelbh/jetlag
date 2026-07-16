@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { AccountSignInGate } from "../components/auth/AccountSignInGate";
-import { BootSplash } from "../components/ui/BootSplash";
+import { RequireUsername } from "../components/auth/RequireUsername";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { SegmentControl } from "../components/ui/SegmentControl";
 import {
@@ -9,8 +8,6 @@ import {
 } from "../components/ui/ScreenHeader";
 import type { LeaderboardRole } from "../domain/game/leaderboard";
 import { playerRoleLabel } from "../domain/session/playerRole";
-import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
-import { isFirebaseConfigured } from "../services/core/firebase";
 
 const ROLE_TABS: Array<{ value: LeaderboardRole; label: string }> = [
   { value: "hider", label: playerRoleLabel("hider") },
@@ -18,15 +15,7 @@ const ROLE_TABS: Array<{ value: LeaderboardRole; label: string }> = [
 ];
 
 export function Stats() {
-  const { isPermanent, authReady } = usePermanentAuthUser();
   const [roleTab, setRoleTab] = useState<LeaderboardRole>("hider");
-
-  const showSignIn =
-    isFirebaseConfigured() && authReady && !isPermanent;
-
-  if (isFirebaseConfigured() && !authReady) {
-    return <BootSplash label="Starting…" />;
-  }
 
   return (
     <EntryScreenLayout justify="start">
@@ -41,9 +30,7 @@ export function Stats() {
           </p>
         </div>
 
-        {showSignIn ? (
-          <AccountSignInGate continuePath="/stats" />
-        ) : (
+        <RequireUsername continuePath="/stats">
           <>
             <SegmentControl
               value={roleTab}
@@ -67,7 +54,7 @@ export function Stats() {
               </p>
             </div>
           </>
-        )}
+        </RequireUsername>
       </div>
     </EntryScreenLayout>
   );

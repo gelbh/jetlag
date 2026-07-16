@@ -38,6 +38,7 @@ import { useAuthBootstrapReady } from "../hooks/useAuthBootstrapReady";
 import { LEGAL_APP_NAME } from "../domain/legal/legalContact";
 import { isAdminUser } from "../domain/admin/adminAccess";
 import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
+import { useUserProfile } from "../hooks/profile/useUserProfile";
 
 export function Home() {
   const navigate = useAppNavigate();
@@ -51,11 +52,16 @@ export function Home() {
   const [changelogOpen, setChangelogOpen] = useState(false);
   const [playHubOpen, setPlayHubOpen] = useState(false);
   const { entitlements: premiumEntitlements } = usePremiumEntitlements();
-  const { user: permanentUser } = usePermanentAuthUser();
+  const { user: permanentUser, isPermanent } = usePermanentAuthUser();
   const showAdminEntry = isAdminUser(permanentUser);
   const authBootstrapReady = useAuthBootstrapReady();
   const { phase: routeTransitionPhase } = useRouteTransition();
-
+  const { profile, ready: profileReady } = useUserProfile(
+    permanentUser?.uid,
+    isFirebaseConfigured() && isPermanent && permanentUser != null,
+  );
+  const showUsernamePrompt =
+    isPermanent && profileReady && profile == null;
   const premiumButton = resolveHomePremiumButtonDisplay(premiumEntitlements);
 
   if (
@@ -228,6 +234,19 @@ export function Home() {
               sessions: seekers ask questions on the live map, hiders answer and set
               hiding zones, and everyone stays on the same board.
             </p>
+            {showUsernamePrompt ? (
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t-2 border-border pt-3">
+                <p className="text-sm text-ink-muted">
+                  Choose a username for friends and leaderboards.
+                </p>
+                <AppLink
+                  to="/friends"
+                  className="home-feedback-link min-h-11 px-2 font-display text-xs font-semibold uppercase tracking-[0.08em]"
+                >
+                  Set username
+                </AppLink>
+              </div>
+            ) : null}
           </div>
 
           <div className="home-enter-actions space-y-2.5">
