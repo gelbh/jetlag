@@ -44,15 +44,13 @@ function LeaderboardBoard() {
   const needsOptIn = profile != null && !profile.leaderboardOptIn;
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- sync board loading when filters change or Firebase is off */
     if (!isFirebaseConfigured()) {
-      /* eslint-disable react-hooks/set-state-in-effect -- Firebase off: clear board */
       setEntries([]);
       setBoardLoading(false);
-      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
 
-    /* eslint-disable react-hooks/set-state-in-effect -- reset loading for filter change */
     setBoardLoading(true);
     setBoardError(null);
     /* eslint-enable react-hooks/set-state-in-effect */
