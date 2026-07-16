@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RequireUsername } from "../components/auth/RequireUsername";
+import { LeaderboardRankList } from "../components/leaderboard/LeaderboardRankList";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
+import { InlineError } from "../components/ui/InlineError";
 import { SegmentControl } from "../components/ui/SegmentControl";
 import {
   ScreenHeader,
@@ -13,6 +15,7 @@ import {
   LEADERBOARD_SCOPES,
   leaderboardMetricLabel,
   leaderboardScopeLabel,
+  type LeaderboardEntry,
   type LeaderboardMetric,
   type LeaderboardRole,
   type LeaderboardScope,
@@ -23,18 +26,49 @@ import { playerRoleLabel } from "../domain/session/playerRole";
 import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
 import { useUserProfile } from "../hooks/profile/useUserProfile";
 import { isFirebaseConfigured } from "../services/core/firebase";
+import { subscribeLeaderboardBoard } from "../services/firestore/firestoreLeaderboard";
 
 function LeaderboardBoard() {
+  const { user, isPermanent } = usePermanentAuthUser();
   const [scope, setScope] = useState<LeaderboardScope>("global");
   const [gameSize, setGameSize] = useState<GameSize>("medium");
   const [role, setRole] = useState<LeaderboardRole>("seeker");
   const [metric, setMetric] = useState<LeaderboardMetric>("distance_traveled");
-  const { user, isPermanent } = usePermanentAuthUser();
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [boardLoading, setBoardLoading] = useState(true);
+  const [boardError, setBoardError] = useState<string | null>(null);
   const { profile, ready: profileReady, error: profileError } = useUserProfile(
     user?.uid,
     isFirebaseConfigured() && isPermanent,
   );
   const needsOptIn = profile != null && !profile.leaderboardOptIn;
+
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- sync board loading when filters change or Firebase is off */
+    if (!isFirebaseConfigured()) {
+      setEntries([]);
+      setBoardLoading(false);
+      return;
+    }
+
+    setBoardLoading(true);
+    setBoardError(null);
+    /* eslint-enable react-hooks/set-state-in-effect */
+    return subscribeLeaderboardBoard(
+      scope,
+      gameSize,
+      role,
+      metric,
+      (next) => {
+        setEntries(next);
+        setBoardLoading(false);
+      },
+      (error) => {
+        setBoardLoading(false);
+        setBoardError(error.message);
+      },
+    );
+  }, [scope, gameSize, role, metric]);
 
   return (
     <>
@@ -83,9 +117,9 @@ function LeaderboardBoard() {
         {!profileReady ? (
           <p className="text-sm text-ink-muted">Loading profile…</p>
         ) : profileError ? (
-          <p className="text-sm text-status-error" role="alert">
+          <InlineError>
             Could not load profile for leaderboard opt-in status.
-          </p>
+          </InlineError>
         ) : needsOptIn ? (
           <p className="text-sm leading-relaxed text-ink-muted">
             Leaderboard opt-in is off for your username. You can browse boards;
@@ -98,10 +132,17 @@ function LeaderboardBoard() {
           {playerRoleLabel(role)} · {leaderboardMetricLabel(metric, role)}
         </p>
 
-        <p className="text-sm leading-relaxed text-ink-muted">
-          No ranked entries yet. Finish synced rounds with leaderboard opt-in to
-          populate this board.
-        </p>
+        {boardError ? <InlineError>{boardError}</InlineError> : null}
+
+        {boardError ? null : (
+          <LeaderboardRankList
+            entries={entries}
+            metric={metric}
+            viewerUid={user?.uid}
+            loading={boardLoading}
+            emptyMessage="No ranked entries yet. Finish synced rounds with leaderboard opt-in to populate this board."
+          />
+        )}
       </div>
     </>
   );
