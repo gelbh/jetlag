@@ -18,7 +18,7 @@ import { getFirestoreDb, isFirebaseConfigured } from "../core/firebase";
 
 const BOARD_LIMIT = 50;
 
-function parseEntry(
+export function parseLeaderboardEntry(
   id: string,
   data: Record<string, unknown>,
   index: number,
@@ -81,7 +81,7 @@ export function subscribeLeaderboardBoard(
     (snapshot) => {
       const entries: LeaderboardEntry[] = [];
       snapshot.docs.forEach((docSnap, index) => {
-        const parsed = parseEntry(
+        const parsed = parseLeaderboardEntry(
           docSnap.id,
           docSnap.data() as Record<string, unknown>,
           index,
