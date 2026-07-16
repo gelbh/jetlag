@@ -776,6 +776,21 @@ service cloud.firestore {
         allow get: if isSignedIn() && request.auth.uid == uid;
         allow list, create, update, delete: if false;
       }
+
+      match /friends/{friendUid} {
+        allow get, list: if isSignedIn() && request.auth.uid == uid;
+        allow create, update, delete: if false;
+      }
+
+      match /friendRequests/{fromUid} {
+        allow get, list: if isSignedIn() && request.auth.uid == uid;
+        allow create, update, delete: if false;
+      }
+
+      match /outgoingFriendRequests/{toUid} {
+        allow get, list: if isSignedIn() && request.auth.uid == uid;
+        allow create, update, delete: if false;
+      }
     }
 
     match /usernames/{usernameId} {
