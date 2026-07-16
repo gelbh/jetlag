@@ -1,19 +1,16 @@
 import { useEffect, useRef, type RefObject } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import type {
-  LatLng,
   LatLngBoundsExpression,
   LatLngExpression,
   LeafletEvent,
-  Map as LeafletMap,
 } from "leaflet";
 import { LatLngBounds, latLngBounds, point } from "leaflet";
 import { computeFramedCenterZoom } from "../../domain/map/computeFramedCenterZoom";
+import { isLargeCameraJump } from "../../domain/map/isLargeCameraJump";
 import { getMapBasemap, type MapStyle } from "../../domain/map/mapBasemaps";
 import { isUsableMapBounds } from "../../domain/geometry/geometry";
 import {
-  MAP_CAMERA_LARGE_JUMP_CENTER_FRACTION,
-  MAP_CAMERA_LARGE_JUMP_ZOOM_DELTA,
   MOTION_MAP_CAMERA_FLY_S,
   MOTION_MAP_CAMERA_S,
 } from "../../domain/device/motionTokens";
@@ -62,35 +59,6 @@ interface MapViewProps {
 
 function normalizeFocusBounds(bounds: LatLngBoundsExpression): LatLngBounds {
   return bounds instanceof LatLngBounds ? bounds : latLngBounds(bounds);
-}
-
-/** Large reframes (phase changes, answers, Recenter) read better as a cinematic
- * `flyTo`; small edits stay a short `setView` so walk/POI updates don't lag. */
-function isLargeCameraJump(
-  map: LeafletMap,
-  targetCenter: LatLng,
-  targetZoom: number,
-  preferFly: boolean,
-): boolean {
-  if (preferFly) {
-    return true;
-  }
-
-  if (Math.abs(targetZoom - map.getZoom()) >= MAP_CAMERA_LARGE_JUMP_ZOOM_DELTA) {
-    return true;
-  }
-
-  const size = map.getSize();
-  const viewportSpanPx = Math.max(size.x, size.y);
-  if (viewportSpanPx <= 0) {
-    return false;
-  }
-
-  const centerDeltaPx = map
-    .latLngToContainerPoint(map.getCenter())
-    .distanceTo(map.latLngToContainerPoint(targetCenter));
-
-  return centerDeltaPx / viewportSpanPx >= MAP_CAMERA_LARGE_JUMP_CENTER_FRACTION;
 }
 
 function MapFocus({
