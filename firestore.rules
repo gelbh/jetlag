@@ -771,6 +771,16 @@ service cloud.firestore {
     match /users/{uid} {
       allow get: if isSignedIn() && request.auth.uid == uid;
       allow list, create, update, delete: if false;
+
+      match /profile/{docId} {
+        allow get: if isSignedIn() && request.auth.uid == uid;
+        allow list, create, update, delete: if false;
+      }
+    }
+
+    match /usernames/{usernameId} {
+      allow get: if isSignedIn();
+      allow list, create, update, delete: if false;
     }
 
     match /stripeEvents/{eventId} {
