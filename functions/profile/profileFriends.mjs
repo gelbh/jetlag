@@ -27,9 +27,7 @@ async function requireOwnUsername(db, uid) {
   const username =
     typeof snap.data()?.username === "string"
       ? snap.data().username.trim()
-      : typeof snap.data()?.displayName === "string"
-        ? snap.data().displayName.trim()
-        : "";
+      : "";
   if (!username) {
     const err = new Error("Set a username first.");
     err.code = FRIENDS_INVALID;
@@ -147,14 +145,42 @@ async function sendFriendRequest(db, uid, toUidRaw) {
     .doc(toUid);
 
   await db.runTransaction(async (tx) => {
-    const [friendSnap, incomingSnap] = await Promise.all([
+    const reverseIncomingRef = db
+      .collection("users")
+      .doc(uid)
+      .collection("friendRequests")
+      .doc(toUid);
+    const reverseOutgoingRef = db
+      .collection("users")
+      .doc(toUid)
+      .collection("outgoingFriendRequests")
+      .doc(uid);
+
+    const [friendSnap, incomingSnap, reverseIncomingSnap] = await Promise.all([
       tx.get(friendRef),
       tx.get(incomingRef),
+      tx.get(reverseIncomingRef),
     ]);
     if (friendSnap.exists) {
       const err = new Error("Already friends.");
       err.code = FRIENDS_ALREADY;
       throw err;
+    }
+    // They already requested us — complete the friendship instead of a second edge.
+    if (reverseIncomingSnap.exists) {
+      const now = new Date().toISOString();
+      const fromUsername =
+        typeof reverseIncomingSnap.data()?.fromUsername === "string"
+          ? reverseIncomingSnap.data().fromUsername
+          : theirUsername;
+      tx.set(friendRef, { uid: toUid, username: theirUsername, since: now });
+      tx.set(
+        db.collection("users").doc(toUid).collection("friends").doc(uid),
+        { uid, username: myUsername, since: now },
+      );
+      tx.delete(reverseIncomingRef);
+      tx.delete(reverseOutgoingRef);
+      return;
     }
     if (incomingSnap.exists) {
       return;
@@ -217,6 +243,13 @@ async function acceptFriendRequest(db, uid, fromUidRaw) {
     tx.set(theirFriendRef, { uid, username: myUsername, since: now });
     tx.delete(requestRef);
     tx.delete(theirOutgoingRef);
+    // Clear reverse pending edge if both sides had requested each other.
+    tx.delete(
+      db.collection("users").doc(uid).collection("outgoingFriendRequests").doc(fromUid),
+    );
+    tx.delete(
+      db.collection("users").doc(fromUid).collection("friendRequests").doc(uid),
+    );
   });
 
   return { ok: true };
