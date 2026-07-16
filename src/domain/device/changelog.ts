@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.7.2";
+export const APP_VERSION = "0.8.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,27 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.8.0",
+    date: "2026-07-16",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Navigation: fix missing page transitions on Safari and the installed PWA when moving between screens like Home and Create",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Accounts: choose a unique username after sign-in; Friends, Leaderboard, and Stats prompt if you have not set one yet",
+          "Friends list: search usernames and manage incoming and outgoing friend requests from the Friends page",
+          "Leaderboard: ranked list with loading skeletons, empty state, and highlight for your row",
+          "Map: smoother camera moves when placing questions, with no more zoom jump on radius or answer changes and no fighting the animation if you pan mid-move",
+        ],
+      }
+    ],
+  },
   {
     version: "0.7.2",
     date: "2026-07-15",
