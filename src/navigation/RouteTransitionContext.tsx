@@ -22,6 +22,7 @@ import {
 } from "./routePreloaders";
 import {
   revealRouteTransition,
+  setNavDirection,
   type NavRevealDirection,
 } from "./revealRouteTransition";
 import {
@@ -85,7 +86,7 @@ function delay(ms: number): Promise<void> {
 export function RouteTransitionProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { animate } = useMotionProfile();
+  const { decorativeAnimate } = useMotionProfile();
   const [phase, setPhase] = useState<RouteTransitionPhase>("idle");
   const [loadingReason, setLoadingReason] = useState<RouteLoadingReason | null>(
     null,
@@ -174,19 +175,17 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      navigate(to, navigateOptions);
-
-      if (transitionGenerationRef.current !== myGeneration) {
-        return;
-      }
-
       try {
-        await revealRouteTransition(revealDirectionRef.current, animate);
+        await revealRouteTransition(
+          revealDirectionRef.current,
+          decorativeAnimate,
+          () => navigate(to, navigateOptions),
+        );
       } catch {
         // Navigation succeeded; a failed reveal should not block the route.
       }
     },
-    [animate, navigate],
+    [decorativeAnimate, navigate],
   );
 
   const beginTransition = useCallback(
@@ -251,6 +250,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
       loadingTargetRef.current = destinationKey;
       loadingTargetPathRef.current = targetPath;
       screenReadyRef.current = getSyncRouteReady(targetPath);
+      const syncReadyBeforeMount = screenReadyRef.current;
       setLoadingReason(loadingReasonForPath(targetPath));
       setLoadingProgress(
         computeLoadingProgress(targetPath, screenReadyRef.current),
@@ -288,37 +288,58 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
           computeLoadingProgress(targetPath, screenReadyRef.current),
         );
 
-        navigate(to, navigateOptions);
+        let readyWaitMs = 0;
 
-        const readyWaitMs = await waitForScreenReady();
+        if (syncReadyBeforeMount) {
+          // Destination is already ready to commit: wrap navigate in the VT
+          // so WebKit captures distinct before/after snapshots. The overlay
+          // (if shown) may appear in the VT's root snapshot; it exits in
+          // parallel with the transition rather than gating on it.
+          if (overlayTimer !== undefined) {
+            window.clearTimeout(overlayTimer);
+            overlayTimer = undefined;
+          }
 
-        if (transitionGenerationRef.current !== myGeneration) {
-          return;
-        }
+          const revealPromise = revealRouteTransition(
+            revealDirectionRef.current,
+            decorativeAnimate,
+            () => navigate(to, navigateOptions),
+          ).catch(() => undefined);
 
-        setLoadingProgress(
-          computeLoadingProgress(targetPath, screenReadyRef.current),
-        );
-
-        if (overlayTimer !== undefined) {
-          window.clearTimeout(overlayTimer);
-          overlayTimer = undefined;
-        }
-
-        if (overlayShown) {
-          phaseRef.current = "revealing";
-          setPhase("revealing");
-        }
-
-        const revealPromise = revealRouteTransition(
-          revealDirectionRef.current,
-          animate,
-        ).catch(() => undefined);
-
-        if (overlayShown) {
-          await Promise.all([revealPromise, delay(ROUTE_OVERLAY_EXIT_MS)]);
+          if (overlayShown) {
+            phaseRef.current = "revealing";
+            setPhase("revealing");
+            await Promise.all([revealPromise, delay(ROUTE_OVERLAY_EXIT_MS)]);
+          } else {
+            await revealPromise;
+          }
         } else {
-          await revealPromise;
+          // Destination needs to mount before it can report ready (map/geo).
+          // Navigate instantly under the overlay and reveal via the overlay's
+          // own directional exit instead of an empty VT.
+          setNavDirection(revealDirectionRef.current);
+          navigate(to, navigateOptions);
+
+          readyWaitMs = await waitForScreenReady();
+
+          if (transitionGenerationRef.current !== myGeneration) {
+            return;
+          }
+
+          setLoadingProgress(
+            computeLoadingProgress(targetPath, screenReadyRef.current),
+          );
+
+          if (overlayTimer !== undefined) {
+            window.clearTimeout(overlayTimer);
+            overlayTimer = undefined;
+          }
+
+          if (overlayShown) {
+            phaseRef.current = "revealing";
+            setPhase("revealing");
+            await delay(ROUTE_OVERLAY_EXIT_MS);
+          }
         }
 
         reportSlowRouteTransition({
@@ -346,7 +367,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
         }
       }
     },
-    [animate, navigate, runWarmTransition, waitForScreenReady],
+    [decorativeAnimate, navigate, runWarmTransition, waitForScreenReady],
   );
 
   const value = useMemo(

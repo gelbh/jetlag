@@ -73,6 +73,36 @@
   }
 }
 
+@keyframes route-transition-overlay-exit-forward {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-6%);
+  }
+}
+
+@keyframes route-transition-overlay-exit-back {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(6%);
+  }
+}
+
+html[data-nav-direction="forward"] .route-transition-overlay--exiting {
+  animation-name: route-transition-overlay-exit-forward;
+}
+
+html[data-nav-direction="back"] .route-transition-overlay--exiting {
+  animation-name: route-transition-overlay-exit-back;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .route-transition-overlay {
     animation: route-transition-overlay-fade-in var(--motion-route-overlay-exit, 200ms)
@@ -89,17 +119,17 @@
   }
 }
 
-html[data-motion="reduce"] .route-transition-overlay {
+html[data-motion="reduced"] .route-transition-overlay {
   animation: route-transition-overlay-fade-in var(--motion-route-overlay-exit, 200ms)
     ease both;
 }
 
-html[data-motion="reduce"] .route-transition-overlay--exiting {
+html[data-motion="reduced"] .route-transition-overlay--exiting {
   animation: route-transition-overlay-fade-out var(--motion-route-overlay-exit, 200ms)
     ease both;
 }
 
-html[data-motion="reduce"] .route-transition-overlay .loading-spinner {
+html[data-motion="reduced"] .route-transition-overlay .loading-spinner {
   animation: none !important;
 }
 
