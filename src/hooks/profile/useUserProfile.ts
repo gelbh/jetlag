@@ -14,14 +14,18 @@ export function useUserProfile(
 
   useEffect(() => {
     if (!enabled || !uid) {
+      /* eslint-disable react-hooks/set-state-in-effect -- clear subscription state when disabled */
       setProfile(null);
       setError(null);
       setReady(true);
+      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
 
+    /* eslint-disable react-hooks/set-state-in-effect -- reset before Firestore subscribe */
     setReady(false);
     setError(null);
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     return subscribeUserProfile(
       uid,
