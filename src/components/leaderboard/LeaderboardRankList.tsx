@@ -15,9 +15,9 @@ interface LeaderboardRankListProps {
 function RankSkeleton() {
   return (
     <li className="flex items-center gap-3 border-b border-border/60 py-3 last:border-b-0">
-      <span className="h-5 w-8 animate-pulse rounded-sm bg-surface-raised" />
-      <span className="h-5 flex-1 animate-pulse rounded-sm bg-surface-raised" />
-      <span className="h-5 w-14 animate-pulse rounded-sm bg-surface-raised" />
+      <span className="h-5 w-8 animate-pulse rounded-sm bg-surface-raised motion-reduce:animate-none" />
+      <span className="h-5 flex-1 animate-pulse rounded-sm bg-surface-raised motion-reduce:animate-none" />
+      <span className="h-5 w-14 animate-pulse rounded-sm bg-surface-raised motion-reduce:animate-none" />
     </li>
   );
 }
