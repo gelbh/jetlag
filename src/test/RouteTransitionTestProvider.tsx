@@ -14,20 +14,21 @@ export function RouteTransitionTestProvider({ children }: { children: ReactNode 
     async (to: To, options?: BeginTransitionOptions) => {
       screenReadyRef.current = true;
       await preloadRoute(resolveNavigatePath(to));
-      navigate(to, {
-        replace: options?.replace,
-        state: options?.state,
-        preventScrollReset: options?.preventScrollReset,
-        relative: options?.relative,
-        viewTransition: false,
-      });
       const direction =
         options?.direction === "back"
           ? "back"
           : options?.direction === "replace"
             ? "neutral"
             : "forward";
-      await revealRouteTransition(direction, false);
+      await revealRouteTransition(direction, false, () =>
+        navigate(to, {
+          replace: options?.replace,
+          state: options?.state,
+          preventScrollReset: options?.preventScrollReset,
+          relative: options?.relative,
+          viewTransition: false,
+        }),
+      );
     },
     [navigate],
   );
