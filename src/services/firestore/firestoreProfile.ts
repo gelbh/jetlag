@@ -14,23 +14,19 @@ function profileDoc(uid: string) {
 
 function parseProfile(data: Record<string, unknown> | undefined): UserProfile | null {
   const username = typeof data?.username === "string" ? data.username.trim() : "";
-  const legacyDisplayName =
-    typeof data?.displayName === "string" ? data.displayName.trim() : "";
-  const effectiveUsername = username || legacyDisplayName;
-
-  if (!effectiveUsername) {
+  if (!username) {
     return null;
   }
 
   const usernameNormalized =
     typeof data?.usernameNormalized === "string" && data.usernameNormalized.length > 0
       ? data.usernameNormalized
-      : effectiveUsername.toLowerCase();
+      : username.toLowerCase();
 
   return {
-    username: effectiveUsername,
+    username,
     usernameNormalized,
-    displayName: effectiveUsername,
+    displayName: username,
     leaderboardOptIn: data?.leaderboardOptIn === true,
   };
 }

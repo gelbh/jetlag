@@ -30,7 +30,7 @@ function LeaderboardBoard() {
   const [role, setRole] = useState<LeaderboardRole>("seeker");
   const [metric, setMetric] = useState<LeaderboardMetric>("distance_traveled");
   const { user, isPermanent } = usePermanentAuthUser();
-  const { profile } = useUserProfile(
+  const { profile, ready: profileReady, error: profileError } = useUserProfile(
     user?.uid,
     isFirebaseConfigured() && isPermanent,
   );
@@ -80,10 +80,16 @@ function LeaderboardBoard() {
       </div>
 
       <div className="space-y-3 pt-4">
-        {needsOptIn ? (
+        {!profileReady ? (
+          <p className="text-sm text-ink-muted">Loading profile…</p>
+        ) : profileError ? (
+          <p className="text-sm text-status-error" role="alert">
+            Could not load profile for leaderboard opt-in status.
+          </p>
+        ) : needsOptIn ? (
           <p className="text-sm leading-relaxed text-ink-muted">
-            Leaderboard opt-in is off for your username. Turn it on to appear
-            on global boards.
+            Leaderboard opt-in is off for your username. You can browse boards;
+            turn opt-in on to appear on global ranks.
           </p>
         ) : null}
 
