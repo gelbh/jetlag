@@ -40,6 +40,9 @@ export interface UsePlacementMapFocusResult {
   focusMaxZoom?: number;
   placementRecenterToken: number;
   focusPaddingBias?: number;
+  /** True on forced reframes (phase transitions, Recenter) — tells `MapView`
+   * to prefer the cinematic `flyTo` path even if the geometry delta is modest. */
+  focusPreferFly: boolean;
   requestPlacementRecenter: () => void;
 }
 
@@ -86,6 +89,7 @@ export function usePlacementMapFocus({
   viewportFrame = null,
 }: UsePlacementMapFocusOptions): UsePlacementMapFocusResult {
   const [placementRecenterToken, setPlacementRecenterToken] = useState(0);
+  const [focusPreferFly, setFocusPreferFly] = useState(false);
   const fingerprintRef = useRef<string | null>(null);
   const lastWalkReframeAtRef = useRef(0);
   const previousPoiIdRef = useRef<string | null>(selectedPoiId);
@@ -160,6 +164,7 @@ export function usePlacementMapFocus({
   );
 
   const requestPlacementRecenter = useCallback(() => {
+    setFocusPreferFly(true);
     setPlacementRecenterToken((token) => token + 1);
   }, []);
 
@@ -167,6 +172,8 @@ export function usePlacementMapFocus({
     if (!placementActive) {
       fingerprintRef.current = fingerprint;
       previousPoiIdRef.current = selectedPoiId;
+      /* eslint-disable-next-line react-hooks/set-state-in-effect -- clear stale fly preference so reactivation starts fresh */
+      setFocusPreferFly(false);
       return;
     }
 
@@ -215,6 +222,7 @@ export function usePlacementMapFocus({
       lastWalkReframeAtRef.current = now;
     }
 
+    setFocusPreferFly(cameraTarget.forceReframe ?? false);
     setPlacementRecenterToken((token) => token + 1);
   }, [
     cameraTarget,
@@ -226,12 +234,23 @@ export function usePlacementMapFocus({
     walkActive,
   ]);
 
+  // `focusPreferFly` is a one-shot signal for the reframe that just fired
+  // (`placementRecenterToken` bump above). `MapView` only re-fits on token
+  // changes (`fitBoundsMode="once"`), so clearing the flag here on the next
+  // commit doesn't trigger a second reframe — it just stops the flag from
+  // lingering into later ordinary reframes.
+  useEffect(() => {
+    /* eslint-disable-next-line react-hooks/set-state-in-effect -- consume the one-shot fly preference after MapView reads it for this token */
+    setFocusPreferFly(false);
+  }, [placementRecenterToken]);
+
   return {
     effectiveFocusBounds: cameraTarget?.bounds ?? defaultFocusBounds,
     focusMinZoom: cameraTarget?.minZoom,
     focusMaxZoom: cameraTarget?.maxZoom,
     placementRecenterToken,
     focusPaddingBias: cameraTarget?.paddingBiasPx,
+    focusPreferFly,
     requestPlacementRecenter,
   };
 }
