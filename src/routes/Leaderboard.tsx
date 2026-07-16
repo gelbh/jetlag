@@ -20,12 +20,21 @@ import {
 import { GAME_SIZE_OPTIONS, gameSizeLabel } from "../domain/session/gameSize";
 import type { GameSize } from "../domain/session/gameSize";
 import { playerRoleLabel } from "../domain/session/playerRole";
+import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
+import { useUserProfile } from "../hooks/profile/useUserProfile";
+import { isFirebaseConfigured } from "../services/core/firebase";
 
 function LeaderboardBoard() {
   const [scope, setScope] = useState<LeaderboardScope>("global");
   const [gameSize, setGameSize] = useState<GameSize>("medium");
   const [role, setRole] = useState<LeaderboardRole>("seeker");
   const [metric, setMetric] = useState<LeaderboardMetric>("distance_traveled");
+  const { user, isPermanent } = usePermanentAuthUser();
+  const { profile } = useUserProfile(
+    user?.uid,
+    isFirebaseConfigured() && isPermanent,
+  );
+  const needsOptIn = profile != null && !profile.leaderboardOptIn;
 
   return (
     <>
@@ -71,6 +80,13 @@ function LeaderboardBoard() {
       </div>
 
       <div className="space-y-3 pt-4">
+        {needsOptIn ? (
+          <p className="text-sm leading-relaxed text-ink-muted">
+            Leaderboard opt-in is off for your username. Turn it on to appear
+            on global boards.
+          </p>
+        ) : null}
+
         <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
           {leaderboardScopeLabel(scope)} · {gameSizeLabel(gameSize).label} ·{" "}
           {playerRoleLabel(role)} · {leaderboardMetricLabel(metric, role)}

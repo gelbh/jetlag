@@ -50,7 +50,7 @@ function createMockDb({ usernameDoc = null, profileDoc = null } = {}) {
       throw new Error(`unexpected collection ${name}`);
     },
     async runTransaction(callback) {
-      await callback({
+      return callback({
         async get(ref) {
           if (ref.kind === "username") {
             return {
@@ -63,10 +63,12 @@ function createMockDb({ usernameDoc = null, profileDoc = null } = {}) {
             data: () => state.profileDoc,
           };
         },
-        set(ref, payload) {
-          writes.push({ ref, payload });
+        set(ref, payload, options) {
+          writes.push({ ref, payload, options });
           if (ref.kind === "username") {
             state.usernameDoc = payload;
+          } else if (options?.merge) {
+            state.profileDoc = { ...(state.profileDoc ?? {}), ...payload };
           } else {
             state.profileDoc = payload;
           }
@@ -111,6 +113,20 @@ test("claimUsernameHandler rejects when already set", async () => {
     () => claimUsernameHandler(db, "uid-1", "newname"),
     (error) => error.message === CLAIM_USERNAME_ALREADY_SET,
   );
+});
+
+test("claimUsernameHandler is idempotent for the same username", async () => {
+  const db = createMockDb({
+    usernameDoc: { uid: "uid-1", username: "Seeker_1" },
+    profileDoc: {
+      username: "Seeker_1",
+      usernameNormalized: "seeker_1",
+      keepMe: true,
+    },
+  });
+  const result = await claimUsernameHandler(db, "uid-1", "Seeker_1");
+  assert.deepEqual(result, { username: "Seeker_1" });
+  assert.equal(db.writes.length, 0);
 });
 
 test("claimUsernameHandler rejects invalid", async () => {

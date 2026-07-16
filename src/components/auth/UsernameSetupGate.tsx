@@ -50,7 +50,13 @@ export function UsernameSetupGate({
   };
 
   return (
-    <div className="space-y-3 border-t-2 border-border pt-4">
+    <form
+      className="space-y-3 border-t-2 border-border pt-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void handleClaim();
+      }}
+    >
       <div className="space-y-1">
         <h2 className="font-display text-sm font-semibold uppercase tracking-[0.08em] text-ink">
           Choose a username
@@ -85,14 +91,13 @@ export function UsernameSetupGate({
       />
 
       <button
-        type="button"
+        type="submit"
         disabled={busy || value.trim().length === 0}
-        onClick={() => void handleClaim()}
         className="home-card-btn w-full disabled:opacity-50"
       >
         <span>{busy ? "Claiming…" : "Claim username"}</span>
         <span className="home-card-btn-hint">Unique · permanent</span>
       </button>
-    </div>
+    </form>
   );
 }

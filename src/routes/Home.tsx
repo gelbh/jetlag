@@ -56,12 +56,12 @@ export function Home() {
   const showAdminEntry = isAdminUser(permanentUser);
   const authBootstrapReady = useAuthBootstrapReady();
   const { phase: routeTransitionPhase } = useRouteTransition();
-  const { profile, ready: profileReady } = useUserProfile(
+  const { profile, ready: profileReady, error: profileError } = useUserProfile(
     permanentUser?.uid,
     isFirebaseConfigured() && isPermanent && permanentUser != null,
   );
   const showUsernamePrompt =
-    isPermanent && profileReady && profile == null;
+    isPermanent && profileReady && profileError == null && profile == null;
   const premiumButton = resolveHomePremiumButtonDisplay(premiumEntitlements);
 
   if (

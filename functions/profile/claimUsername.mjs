@@ -75,7 +75,7 @@ export async function claimUsernameHandler(db, uid, rawUsername) {
     .collection("profile")
     .doc("main");
 
-  await db.runTransaction(async (transaction) => {
+  const claimed = await db.runTransaction(async (transaction) => {
     const [usernameSnap, profileSnap] = await Promise.all([
       transaction.get(usernameRef),
       transaction.get(profileRef),
@@ -86,8 +86,18 @@ export async function claimUsernameHandler(db, uid, rawUsername) {
     }
 
     const existingProfile = profileSnap.exists ? profileSnap.data() : null;
-    // v1: usernames are immutable once claimed.
+    // v1: usernames are immutable once claimed — same claim is idempotent.
     if (existingProfile?.username) {
+      const existingNormalized =
+        typeof existingProfile.usernameNormalized === "string"
+          ? existingProfile.usernameNormalized
+          : String(existingProfile.username).trim().toLowerCase();
+      if (
+        existingNormalized === normalized &&
+        (!usernameSnap.exists || usernameSnap.data()?.uid === uid)
+      ) {
+        return { username: String(existingProfile.username) };
+      }
       throw new Error(CLAIM_USERNAME_ALREADY_SET);
     }
 
@@ -109,7 +119,9 @@ export async function claimUsernameHandler(db, uid, rawUsername) {
       },
       { merge: true },
     );
+
+    return { username };
   });
 
-  return { username };
+  return claimed;
 }
