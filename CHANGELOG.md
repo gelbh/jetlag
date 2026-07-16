@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.8.0 - 2026-07-16
+
+### Improvements
+
+- Accounts: choose a unique username after sign-in; Friends, Leaderboard, and Stats prompt if you have not set one yet
+- Friends list: search usernames and manage incoming and outgoing friend requests from the Friends page
+- Leaderboard: ranked list with loading skeletons, empty state, and highlight for your row
+- Map: smoother camera moves when placing questions, with no more zoom jump on radius or answer changes and no fighting the animation if you pan mid-move
+
+### Fixes
+
+- Navigation: fix missing page transitions on Safari and the installed PWA when moving between screens like Home and Create
+
 ## 0.7.2 - 2026-07-15
 
 ### Fixes
