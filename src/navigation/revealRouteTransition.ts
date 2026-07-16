@@ -34,11 +34,17 @@ function runFallbackAnimation(direction: NavRevealDirection): Promise<void> {
       }
       settled = true;
       shell.classList.remove(className);
-      shell.removeEventListener("animationend", finish);
+      shell.removeEventListener("animationend", onAnimationEnd);
       window.clearTimeout(timeoutId);
       resolve();
     };
-    shell.addEventListener("animationend", finish, { once: true });
+    const onAnimationEnd = (event: AnimationEvent) => {
+      if (event.target !== shell) {
+        return;
+      }
+      finish();
+    };
+    shell.addEventListener("animationend", onAnimationEnd);
     const timeoutId = window.setTimeout(finish, FALLBACK_TIMEOUT_MS);
   });
 }

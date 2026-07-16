@@ -106,6 +106,31 @@ describe("revealRouteTransition", () => {
     }
   });
 
+  it("ignores bubbled child animationend events during fallback reveal", async () => {
+    // @ts-expect-error simulating an environment without View Transitions support
+    document.startViewTransition = undefined;
+
+    const commit = vi.fn();
+    const root = document.createElement("div");
+    root.id = "root";
+    const child = document.createElement("div");
+    root.appendChild(child);
+    document.body.appendChild(root);
+
+    const pending = revealRouteTransition("forward", true, commit);
+
+    expect(commit).toHaveBeenCalledTimes(1);
+    expect(root.classList.contains("jl-route-fallback-enter-forward")).toBe(true);
+
+    child.dispatchEvent(new Event("animationend", { bubbles: true }));
+    expect(root.classList.contains("jl-route-fallback-enter-forward")).toBe(true);
+
+    root.dispatchEvent(new Event("animationend", { bubbles: true }));
+    await pending;
+
+    expect(root.classList.contains("jl-route-fallback-enter-forward")).toBe(false);
+  });
+
   it("navigates immediately without VT when animate is false", async () => {
     const startViewTransition = vi.fn();
     document.startViewTransition = startViewTransition;

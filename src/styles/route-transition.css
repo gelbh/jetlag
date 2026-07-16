@@ -124,6 +124,7 @@ html[data-motion="reduced"] .route-transition-overlay {
     ease both;
 }
 
+html[data-motion-decorative="off"] .route-transition-overlay--exiting,
 html[data-motion="reduced"] .route-transition-overlay--exiting {
   animation: route-transition-overlay-fade-out var(--motion-route-overlay-exit, 200ms)
     ease both;
