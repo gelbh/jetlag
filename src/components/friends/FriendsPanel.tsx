@@ -40,7 +40,9 @@ export function FriendsPanel() {
   }, []);
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- initial friends list load */
     void refresh();
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [refresh]);
 
   const handleSearch = async () => {

@@ -32,7 +32,7 @@ async function callProfileFriends<T>(
     const result = await callable(data);
     return result.data;
   } catch (error) {
-    throw new Error(mapFriendsError(error));
+    throw new Error(mapFriendsError(error), { cause: error });
   }
 }
 
