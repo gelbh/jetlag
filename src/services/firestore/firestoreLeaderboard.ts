@@ -80,16 +80,16 @@ export function subscribeLeaderboardBoard(
     boardQuery,
     (snapshot) => {
       const entries: LeaderboardEntry[] = [];
-      snapshot.docs.forEach((docSnap, index) => {
+      for (const docSnap of snapshot.docs) {
         const parsed = parseLeaderboardEntry(
           docSnap.id,
           docSnap.data() as Record<string, unknown>,
-          index,
+          entries.length,
         );
         if (parsed) {
           entries.push(parsed);
         }
-      });
+      }
       onChange(entries);
     },
     (error) => onError(error),
