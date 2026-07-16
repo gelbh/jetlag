@@ -172,6 +172,8 @@ export function usePlacementMapFocus({
     if (!placementActive) {
       fingerprintRef.current = fingerprint;
       previousPoiIdRef.current = selectedPoiId;
+      /* eslint-disable-next-line react-hooks/set-state-in-effect -- clear stale fly preference so reactivation starts fresh */
+      setFocusPreferFly(false);
       return;
     }
 
@@ -231,6 +233,16 @@ export function usePlacementMapFocus({
     viewportFrame,
     walkActive,
   ]);
+
+  // `focusPreferFly` is a one-shot signal for the reframe that just fired
+  // (`placementRecenterToken` bump above). `MapView` only re-fits on token
+  // changes (`fitBoundsMode="once"`), so clearing the flag here on the next
+  // commit doesn't trigger a second reframe — it just stops the flag from
+  // lingering into later ordinary reframes.
+  useEffect(() => {
+    /* eslint-disable-next-line react-hooks/set-state-in-effect -- consume the one-shot fly preference after MapView reads it for this token */
+    setFocusPreferFly(false);
+  }, [placementRecenterToken]);
 
   return {
     effectiveFocusBounds: cameraTarget?.bounds ?? defaultFocusBounds,
