@@ -336,6 +336,55 @@
   }
 }
 
+@keyframes jl-route-fallback-enter-forward {
+  from {
+    opacity: 0.4;
+    transform: translateX(10%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes jl-route-fallback-enter-back {
+  from {
+    opacity: 0.4;
+    transform: translateX(-10%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes jl-route-fallback-enter-neutral {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.jl-route-fallback-enter-forward {
+  animation: jl-route-fallback-enter-forward var(--motion-route-reveal)
+    var(--ease-ios-emphasized) both;
+}
+
+.jl-route-fallback-enter-back {
+  animation: jl-route-fallback-enter-back var(--motion-route-reveal)
+    var(--ease-ios-emphasized) both;
+}
+
+.jl-route-fallback-enter-neutral {
+  animation: jl-route-fallback-enter-neutral var(--motion-route-reveal)
+    var(--ease-ios-emphasized) both;
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: var(--motion-route-reveal);
@@ -410,7 +459,10 @@ html[data-nav-direction="neutral"]::view-transition-new(root) {
   .jl-banner-exit,
   .jl-chat-tab-enter,
   .jl-tool-menu,
-  .route-loading-enter {
+  .route-loading-enter,
+  .jl-route-fallback-enter-forward,
+  .jl-route-fallback-enter-back,
+  .jl-route-fallback-enter-neutral {
     animation: none;
   }
 
@@ -485,7 +537,10 @@ html:is([data-motion="static"], [data-motion="reduced"]) .jl-banner-enter,
 html:is([data-motion="static"], [data-motion="reduced"]) .jl-banner-exit,
 html:is([data-motion="static"], [data-motion="reduced"]) .jl-chat-tab-enter,
 html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-menu,
-html:is([data-motion="static"], [data-motion="reduced"]) .route-loading-enter {
+html:is([data-motion="static"], [data-motion="reduced"]) .route-loading-enter,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-route-fallback-enter-forward,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-route-fallback-enter-back,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-route-fallback-enter-neutral {
   animation: none;
 }
 
@@ -497,6 +552,9 @@ html[data-motion-decorative="off"] .jl-thermometer-live-marker,
 html[data-motion-decorative="off"] .jl-unread-badge-pulse,
 html[data-motion-decorative="off"] .jl-tool-menu,
 html[data-motion-decorative="off"] .route-loading-enter,
+html[data-motion-decorative="off"] .jl-route-fallback-enter-forward,
+html[data-motion-decorative="off"] .jl-route-fallback-enter-back,
+html[data-motion-decorative="off"] .jl-route-fallback-enter-neutral,
 html[data-motion="reduced"] .jl-tool-overflow-sheet,
 html[data-motion="reduced"] .hud-sheet-enter,
 html[data-motion="reduced"] .hud-sheet-exit,
@@ -512,7 +570,10 @@ html[data-motion="reduced"] .jl-banner-enter,
 html[data-motion="reduced"] .jl-banner-exit,
 html[data-motion="reduced"] .jl-chat-tab-enter,
 html[data-motion="reduced"] .jl-tool-menu,
-html[data-motion="reduced"] .route-loading-enter {
+html[data-motion="reduced"] .route-loading-enter,
+html[data-motion="reduced"] .jl-route-fallback-enter-forward,
+html[data-motion="reduced"] .jl-route-fallback-enter-back,
+html[data-motion="reduced"] .jl-route-fallback-enter-neutral {
   animation: none;
 }
 
