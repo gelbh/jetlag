@@ -13,16 +13,14 @@ export function useUserProfile(
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- clear subscription state when disabled */
     if (!enabled || !uid) {
-      /* eslint-disable react-hooks/set-state-in-effect -- clear subscription state when disabled */
       setProfile(null);
       setError(null);
       setReady(true);
-      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
 
-    /* eslint-disable react-hooks/set-state-in-effect -- reset before Firestore subscribe */
     setReady(false);
     setError(null);
     /* eslint-enable react-hooks/set-state-in-effect */
