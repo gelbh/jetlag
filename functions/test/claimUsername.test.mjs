@@ -1,9 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  USERNAME_ALREADY_SET,
-  USERNAME_INVALID,
-  USERNAME_TAKEN,
+  CLAIM_USERNAME_ALREADY_SET,
+  CLAIM_USERNAME_INVALID,
+  CLAIM_USERNAME_TAKEN,
   claimUsernameHandler,
   validateUsername,
 } from "../profile/claimUsername.mjs";
@@ -63,15 +63,12 @@ function createMockDb({ usernameDoc = null, profileDoc = null } = {}) {
             data: () => state.profileDoc,
           };
         },
-        set(ref, payload, options) {
-          writes.push({ ref, payload, options });
+        set(ref, payload) {
+          writes.push({ ref, payload });
           if (ref.kind === "username") {
             state.usernameDoc = payload;
           } else {
-            state.profileDoc = {
-              ...(options?.merge ? state.profileDoc ?? {} : {}),
-              ...payload,
-            };
+            state.profileDoc = payload;
           }
         },
       });
@@ -102,7 +99,7 @@ test("claimUsernameHandler rejects taken username", async () => {
   });
   await assert.rejects(
     () => claimUsernameHandler(db, "uid-1", "taken"),
-    (error) => error.code === USERNAME_TAKEN,
+    (error) => error.message === CLAIM_USERNAME_TAKEN,
   );
 });
 
@@ -112,7 +109,7 @@ test("claimUsernameHandler rejects when already set", async () => {
   });
   await assert.rejects(
     () => claimUsernameHandler(db, "uid-1", "newname"),
-    (error) => error.code === USERNAME_ALREADY_SET,
+    (error) => error.message === CLAIM_USERNAME_ALREADY_SET,
   );
 });
 
@@ -120,6 +117,6 @@ test("claimUsernameHandler rejects invalid", async () => {
   const db = createMockDb();
   await assert.rejects(
     () => claimUsernameHandler(db, "uid-1", "no spaces"),
-    (error) => error.code === USERNAME_INVALID,
+    (error) => error.message === CLAIM_USERNAME_INVALID,
   );
 });
