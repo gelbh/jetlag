@@ -99,12 +99,16 @@ export async function claimUsernameHandler(db, uid, rawUsername) {
       claimedAt: new Date().toISOString(),
     });
 
-    transaction.set(profileRef, {
-      username,
-      usernameNormalized: normalized,
-      displayName: username,
-      leaderboardOptIn,
-    });
+    transaction.set(
+      profileRef,
+      {
+        username,
+        usernameNormalized: normalized,
+        displayName: username,
+        leaderboardOptIn,
+      },
+      { merge: true },
+    );
   });
 
   return { username };

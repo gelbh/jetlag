@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
 import {
   USERNAME_MAX_LENGTH,
   validateUsername,
@@ -19,6 +19,12 @@ export function UsernameSetupGate({
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const errorId = useId();
+  const inputId = "username-claim";
+
+  useEffect(() => {
+    document.getElementById(inputId)?.focus();
+  }, []);
 
   const handleClaim = async () => {
     const validated = validateUsername(value);
@@ -46,18 +52,20 @@ export function UsernameSetupGate({
   return (
     <div className="space-y-3 border-t-2 border-border pt-4">
       <div className="space-y-1">
-        <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
+        <h2 className="font-display text-sm font-semibold uppercase tracking-[0.08em] text-ink">
           Choose a username
-        </p>
+        </h2>
         <p className="text-sm leading-relaxed text-ink-muted">{description}</p>
-        <p className="text-xs leading-relaxed text-ink-dim">
+        <p className="text-xs leading-relaxed text-ink-muted">
           Letters, numbers, underscore. Unique. 3–{USERNAME_MAX_LENGTH}{" "}
-          characters.
+          characters. This cannot be changed later.
         </p>
       </div>
 
+      {error ? <InlineError id={errorId}>{error}</InlineError> : null}
+
       <TextField
-        id="username-claim"
+        id={inputId}
         label="Username"
         labelClassName="field-label font-display text-xs uppercase tracking-[0.1em]"
         value={value}
@@ -72,6 +80,8 @@ export function UsernameSetupGate({
         maxLength={USERNAME_MAX_LENGTH}
         disabled={busy}
         placeholder="seeker_one"
+        aria-invalid={error != null}
+        aria-describedby={error ? errorId : undefined}
       />
 
       <button
@@ -83,8 +93,6 @@ export function UsernameSetupGate({
         <span>{busy ? "Claiming…" : "Claim username"}</span>
         <span className="home-card-btn-hint">Unique · permanent</span>
       </button>
-
-      {error ? <InlineError>{error}</InlineError> : null}
     </div>
   );
 }
