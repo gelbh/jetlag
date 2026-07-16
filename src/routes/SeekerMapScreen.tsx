@@ -27,6 +27,7 @@ export function SeekerMapScreen() {
         placementFocusPaddingBias={controller.placementFocusPaddingBias}
         placementFocusMinZoom={controller.placementFocusMinZoom}
         placementFocusMaxZoom={controller.placementFocusMaxZoom}
+        placementFocusPreferFly={controller.placementFocusPreferFly}
         showPlacementRecenter={controller.showPlacementRecenter}
         requestPlacementRecenter={controller.requestPlacementRecenter}
         activeTool={controller.activeTool}
