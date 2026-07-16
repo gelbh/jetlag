@@ -2,4 +2,4 @@
 "jetlag": minor
 ---
 
-Friends: search by username, send requests, and accept or decline from the Friends page
+Friends list: search usernames and manage incoming and outgoing friend requests from the Friends page

@@ -1,8 +1,24 @@
+import { consumeRateLimit } from "../lib/firestoreRateLimit.mjs";
+
 export const FRIENDS_INVALID = "FRIENDS_INVALID";
 export const FRIENDS_NOT_FOUND = "FRIENDS_NOT_FOUND";
 export const FRIENDS_SELF = "FRIENDS_SELF";
 export const FRIENDS_ALREADY = "FRIENDS_ALREADY";
 export const FRIENDS_NO_REQUEST = "FRIENDS_NO_REQUEST";
+export const FRIENDS_RATE_LIMITED = "FRIENDS_RATE_LIMITED";
+export const FRIENDS_LIMIT = "FRIENDS_LIMIT";
+
+export const MAX_FRIENDS = 100;
+export const MAX_PENDING_REQUESTS = 50;
+
+const RATE_LIMITS = {
+  search: { limit: 30, windowMs: 60_000 },
+  request: { limit: 20, windowMs: 60 * 60_000 },
+  accept: { limit: 60, windowMs: 60_000 },
+  decline: { limit: 60, windowMs: 60_000 },
+  cancel: { limit: 60, windowMs: 60_000 },
+  list: { limit: 60, windowMs: 60_000 },
+};
 
 function assertPermanent(auth) {
   if (!auth) {
@@ -36,6 +52,22 @@ async function requireOwnUsername(db, uid) {
   return username;
 }
 
+async function enforceFriendsRateLimit(db, uid, action) {
+  const config = RATE_LIMITS[action];
+  if (!config) return;
+  const result = await consumeRateLimit(db, {
+    route: `friends:${action}`,
+    uid,
+    limit: config.limit,
+    windowMs: config.windowMs,
+  });
+  if (!result.allowed) {
+    const err = new Error("Too many friends actions. Try again later.");
+    err.code = FRIENDS_RATE_LIMITED;
+    throw err;
+  }
+}
+
 /**
  * @param {FirebaseFirestore.Firestore} db
  * @param {import('firebase-functions/v2/https').CallableRequest['auth']} auth
@@ -45,6 +77,12 @@ export async function profileFriendsHandler(db, auth, data) {
   assertPermanent(auth);
   const uid = auth.uid;
   const action = typeof data?.action === "string" ? data.action : "";
+
+  if (!RATE_LIMITS[action] && action) {
+    // unknown still falls through to switch for consistent error
+  } else if (RATE_LIMITS[action]) {
+    await enforceFriendsRateLimit(db, uid, action);
+  }
 
   switch (action) {
     case "search":
@@ -156,10 +194,34 @@ async function sendFriendRequest(db, uid, toUidRaw) {
       .collection("outgoingFriendRequests")
       .doc(uid);
 
-    const [friendSnap, incomingSnap, reverseIncomingSnap] = await Promise.all([
+    const [
+      friendSnap,
+      incomingSnap,
+      reverseIncomingSnap,
+      myFriendsSnap,
+      myOutgoingSnap,
+      theirIncomingSnap,
+    ] = await Promise.all([
       tx.get(friendRef),
       tx.get(incomingRef),
       tx.get(reverseIncomingRef),
+      tx.get(
+        db.collection("users").doc(uid).collection("friends").limit(MAX_FRIENDS),
+      ),
+      tx.get(
+        db
+          .collection("users")
+          .doc(uid)
+          .collection("outgoingFriendRequests")
+          .limit(MAX_PENDING_REQUESTS),
+      ),
+      tx.get(
+        db
+          .collection("users")
+          .doc(toUid)
+          .collection("friendRequests")
+          .limit(MAX_PENDING_REQUESTS),
+      ),
     ]);
     if (friendSnap.exists) {
       const err = new Error("Already friends.");
@@ -168,6 +230,11 @@ async function sendFriendRequest(db, uid, toUidRaw) {
     }
     // They already requested us — complete the friendship instead of a second edge.
     if (reverseIncomingSnap.exists) {
+      if (myFriendsSnap.size >= MAX_FRIENDS) {
+        const err = new Error("Friend list is full.");
+        err.code = FRIENDS_LIMIT;
+        throw err;
+      }
       const now = new Date().toISOString();
       const fromUsername =
         typeof reverseIncomingSnap.data()?.fromUsername === "string"
@@ -184,6 +251,19 @@ async function sendFriendRequest(db, uid, toUidRaw) {
     }
     if (incomingSnap.exists) {
       return;
+    }
+    if (myOutgoingSnap.size >= MAX_PENDING_REQUESTS) {
+      const err = new Error("Too many outgoing friend requests.");
+      err.code = FRIENDS_LIMIT;
+      throw err;
+    }
+    if (
+      theirIncomingSnap.size >= MAX_PENDING_REQUESTS &&
+      !theirIncomingSnap.docs.some((doc) => doc.id === uid)
+    ) {
+      const err = new Error("That player’s request inbox is full.");
+      err.code = FRIENDS_LIMIT;
+      throw err;
     }
     const now = new Date().toISOString();
     tx.set(incomingRef, {
@@ -228,10 +308,20 @@ async function acceptFriendRequest(db, uid, fromUidRaw) {
     .doc(uid);
 
   await db.runTransaction(async (tx) => {
-    const requestSnap = await tx.get(requestRef);
+    const [requestSnap, myFriendsSnap] = await Promise.all([
+      tx.get(requestRef),
+      tx.get(
+        db.collection("users").doc(uid).collection("friends").limit(MAX_FRIENDS),
+      ),
+    ]);
     if (!requestSnap.exists) {
       const err = new Error("No pending request.");
       err.code = FRIENDS_NO_REQUEST;
+      throw err;
+    }
+    if (myFriendsSnap.size >= MAX_FRIENDS) {
+      const err = new Error("Friend list is full.");
+      err.code = FRIENDS_LIMIT;
       throw err;
     }
     const fromUsername =
@@ -314,13 +404,18 @@ async function cancelFriendRequest(db, uid, toUidRaw) {
 async function listFriends(db, uid) {
   await requireOwnUsername(db, uid);
   const [friendsSnap, incomingSnap, outgoingSnap] = await Promise.all([
-    db.collection("users").doc(uid).collection("friends").limit(100).get(),
-    db.collection("users").doc(uid).collection("friendRequests").limit(50).get(),
+    db.collection("users").doc(uid).collection("friends").limit(MAX_FRIENDS).get(),
+    db
+      .collection("users")
+      .doc(uid)
+      .collection("friendRequests")
+      .limit(MAX_PENDING_REQUESTS)
+      .get(),
     db
       .collection("users")
       .doc(uid)
       .collection("outgoingFriendRequests")
-      .limit(50)
+      .limit(MAX_PENDING_REQUESTS)
       .get(),
   ]);
 

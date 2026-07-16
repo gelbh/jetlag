@@ -77,6 +77,13 @@ export function FriendsPanel() {
     }
   };
 
+  const relationshipUids = new Set(
+    [...friends, ...incoming, ...outgoing].map((entry) => entry.uid),
+  );
+  const requestableResults = loadingList
+    ? []
+    : searchResults.filter((entry) => !relationshipUids.has(entry.uid));
+
   return (
     <div className="space-y-5 border-t-2 border-border pt-4">
       <div className="space-y-2">
@@ -89,12 +96,12 @@ export function FriendsPanel() {
           onChange={setQuery}
           onSubmit={() => void handleSearch()}
           submitLabel="Search"
-          loading={searching}
+          loading={searching || loadingList}
           placeholder="seeker_one"
         />
-        {searchResults.length > 0 ? (
+        {requestableResults.length > 0 ? (
           <ul className="m-0 list-none space-y-2 p-0">
-            {searchResults.map((entry) => (
+            {requestableResults.map((entry) => (
               <li
                 key={entry.uid}
                 className="flex items-center justify-between gap-2 border-b border-border/60 py-2"

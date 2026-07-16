@@ -10,8 +10,10 @@ import {
 import {
   FRIENDS_ALREADY,
   FRIENDS_INVALID,
+  FRIENDS_LIMIT,
   FRIENDS_NOT_FOUND,
   FRIENDS_NO_REQUEST,
+  FRIENDS_RATE_LIMITED,
   FRIENDS_SELF,
   profileFriendsHandler,
 } from "../profile/profileFriends.mjs";
@@ -88,6 +90,14 @@ export const profileFriends = onCall(
       }
       if (code === FRIENDS_ALREADY) {
         throw new HttpsError("already-exists", message);
+      }
+      if (code === FRIENDS_RATE_LIMITED || code === FRIENDS_LIMIT) {
+        throw new HttpsError(
+          code === FRIENDS_RATE_LIMITED
+            ? "resource-exhausted"
+            : "failed-precondition",
+          message,
+        );
       }
       if (code === "failed-precondition") {
         throw new HttpsError("failed-precondition", message);
