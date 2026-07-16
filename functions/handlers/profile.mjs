@@ -7,6 +7,14 @@ import {
   CLAIM_USERNAME_TAKEN,
   claimUsernameHandler,
 } from "../profile/claimUsername.mjs";
+import {
+  FRIENDS_ALREADY,
+  FRIENDS_INVALID,
+  FRIENDS_NOT_FOUND,
+  FRIENDS_NO_REQUEST,
+  FRIENDS_SELF,
+  profileFriendsHandler,
+} from "../profile/profileFriends.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
 
@@ -46,6 +54,43 @@ export const claimUsername = onCall(
           "failed-precondition",
           "Your username is already set.",
         );
+      }
+      throw error;
+    }
+  }),
+);
+
+export const profileFriends = onCall(
+  { secrets: [sentryDsnSecret], enforceAppCheck: true },
+  withSentryEventHandler(async (request) => {
+    try {
+      return await profileFriendsHandler(
+        getFirestore(),
+        request.auth,
+        request.data ?? {},
+      );
+    } catch (error) {
+      const code = error instanceof Error ? error.code : undefined;
+      const message =
+        error instanceof Error ? error.message : "Friends action failed.";
+      if (code === "unauthenticated") {
+        throw new HttpsError("unauthenticated", message);
+      }
+      if (
+        code === FRIENDS_INVALID ||
+        code === FRIENDS_SELF ||
+        code === FRIENDS_NO_REQUEST
+      ) {
+        throw new HttpsError("invalid-argument", message);
+      }
+      if (code === FRIENDS_NOT_FOUND) {
+        throw new HttpsError("not-found", message);
+      }
+      if (code === FRIENDS_ALREADY) {
+        throw new HttpsError("already-exists", message);
+      }
+      if (code === "failed-precondition") {
+        throw new HttpsError("failed-precondition", message);
       }
       throw error;
     }
