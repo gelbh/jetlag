@@ -1,4 +1,5 @@
 import { RequireUsername } from "../components/auth/RequireUsername";
+import { FriendsPanel } from "../components/friends/FriendsPanel";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import {
   ScreenHeader,
@@ -15,8 +16,7 @@ export function Friends() {
             Friends
           </h1>
           <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
-            Search by username, send requests, and invite friends to your
-            session.
+            Search by username, send requests, and keep your crew together.
           </p>
         </div>
 
@@ -24,15 +24,7 @@ export function Friends() {
           continuePath="/friends"
           signInDescription="Sign in to add friends and see their stats on friends leaderboards."
         >
-          <div className="space-y-3 border-t-2 border-border pt-4">
-            <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
-              Your friends
-            </p>
-            <p className="text-sm leading-relaxed text-ink-muted">
-              No friends yet. Search for a username to send a request once
-              friend profiles are live.
-            </p>
-          </div>
+          <FriendsPanel />
         </RequireUsername>
       </div>
     </EntryScreenLayout>
