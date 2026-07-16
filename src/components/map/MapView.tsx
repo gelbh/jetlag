@@ -1,15 +1,22 @@
 import { useEffect, useRef, type RefObject } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import type {
-  LatLngBounds,
+  LatLng,
   LatLngBoundsExpression,
   LatLngExpression,
   LeafletEvent,
+  Map as LeafletMap,
+  Point,
 } from "leaflet";
-import { point } from "leaflet";
+import { LatLngBounds, latLngBounds, point } from "leaflet";
 import { getMapBasemap, type MapStyle } from "../../domain/map/mapBasemaps";
 import { isUsableMapBounds } from "../../domain/geometry/geometry";
-import { MOTION_MAP_CAMERA_S } from "../../domain/device/motionTokens";
+import {
+  MAP_CAMERA_LARGE_JUMP_CENTER_FRACTION,
+  MAP_CAMERA_LARGE_JUMP_ZOOM_DELTA,
+  MOTION_MAP_CAMERA_FLY_S,
+  MOTION_MAP_CAMERA_S,
+} from "../../domain/device/motionTokens";
 import { useMotionProfile } from "../../hooks/useMotionProfile";
 import { MapChromeListener } from "./MapChromeListener";
 import { MapStyleToggle } from "./MapStyleToggle";
@@ -37,6 +44,9 @@ interface MapViewProps {
   fitBoundsPadding?: [number, number];
   /** Extra bottom padding (px) when framing placement overlays. */
   focusPaddingBias?: number;
+  /** Force the cinematic `flyTo` path on the next reframe even if the geometry
+   * delta looks small (e.g. a placement phase transition). */
+  focusPreferFly?: boolean;
   /** Increment to programmatically refit focusBounds (e.g. Recenter button). */
   recenterToken?: number;
   showZoomControl?: boolean;
@@ -50,6 +60,81 @@ interface MapViewProps {
   mapKey?: string;
 }
 
+function normalizeFocusBounds(bounds: LatLngBoundsExpression): LatLngBounds {
+  return bounds instanceof LatLngBounds ? bounds : latLngBounds(bounds);
+}
+
+/**
+ * Mirrors Leaflet's private `Map._getBoundsCenterZoom` using only public APIs.
+ * Needed so we can clamp zoom to a placement-specific min/max *before* deriving
+ * the center — asymmetric padding shifts the center, not just the zoom, so
+ * recomputing at the final clamped zoom keeps geometry framed above the panel
+ * instead of the two-step fit-then-clamp jump this replaces.
+ */
+function computeFramedCenterZoom(
+  map: LeafletMap,
+  bounds: LatLngBounds,
+  paddingTopLeft: Point,
+  paddingBottomRight: Point,
+  minZoom?: number,
+  maxZoom?: number,
+): { center: LatLng; zoom: number } {
+  let zoom = map.getBoundsZoom(
+    bounds,
+    false,
+    paddingTopLeft.add(paddingBottomRight),
+  );
+  if (typeof maxZoom === "number") {
+    zoom = Math.min(maxZoom, zoom);
+  }
+  if (typeof minZoom === "number") {
+    zoom = Math.max(minZoom, zoom);
+  }
+
+  if (zoom === Infinity) {
+    return { center: bounds.getCenter(), zoom };
+  }
+
+  const paddingOffset = paddingBottomRight.subtract(paddingTopLeft).divideBy(2);
+  const swPoint = map.project(bounds.getSouthWest(), zoom);
+  const nePoint = map.project(bounds.getNorthEast(), zoom);
+  const center = map.unproject(
+    swPoint.add(nePoint).divideBy(2).add(paddingOffset),
+    zoom,
+  );
+
+  return { center, zoom };
+}
+
+/** Large reframes (phase changes, answers, Recenter) read better as a cinematic
+ * `flyTo`; small edits stay a short `setView` so walk/POI updates don't lag. */
+function isLargeCameraJump(
+  map: LeafletMap,
+  targetCenter: LatLng,
+  targetZoom: number,
+  preferFly: boolean,
+): boolean {
+  if (preferFly) {
+    return true;
+  }
+
+  if (Math.abs(targetZoom - map.getZoom()) >= MAP_CAMERA_LARGE_JUMP_ZOOM_DELTA) {
+    return true;
+  }
+
+  const size = map.getSize();
+  const viewportSpanPx = Math.max(size.x, size.y);
+  if (viewportSpanPx <= 0) {
+    return false;
+  }
+
+  const centerDeltaPx = map
+    .latLngToContainerPoint(map.getCenter())
+    .distanceTo(map.latLngToContainerPoint(targetCenter));
+
+  return centerDeltaPx / viewportSpanPx >= MAP_CAMERA_LARGE_JUMP_CENTER_FRACTION;
+}
+
 function MapFocus({
   focusBounds,
   focusMinZoom,
@@ -59,6 +144,7 @@ function MapFocus({
   suppressChromeHideRef,
   fitBoundsPadding = [32, 32],
   focusPaddingBias,
+  preferFly = false,
 }: {
   focusBounds: LatLngBoundsExpression | null;
   focusMinZoom?: number;
@@ -68,12 +154,29 @@ function MapFocus({
   suppressChromeHideRef?: RefObject<boolean>;
   fitBoundsPadding?: [number, number];
   focusPaddingBias?: number;
+  /** Force the cinematic `flyTo` path even when the geometry delta is modest
+   * (e.g. a phase transition where the new target happens to sit nearby). */
+  preferFly?: boolean;
 }) {
   const map = useMap();
   const { prefersReducedMotion, lowPowerMode } = useMotionProfile();
   const hasFittedRef = useRef(false);
   const lastRecenterRef = useRef(recenterToken);
   const animate = !prefersReducedMotion && !lowPowerMode;
+
+  useEffect(() => {
+    const handleDragStart = () => {
+      map.stop();
+      if (suppressChromeHideRef) {
+        suppressChromeHideRef.current = false;
+      }
+    };
+
+    map.on("dragstart", handleDragStart);
+    return () => {
+      map.off("dragstart", handleDragStart);
+    };
+  }, [map, suppressChromeHideRef]);
 
   useEffect(() => {
     if (!focusBounds) {
@@ -98,39 +201,22 @@ function MapFocus({
     map.invalidateSize();
 
     const [padY, padX] = fitBoundsPadding;
-    const padding =
+    const paddingTopLeft = point(padX, padY);
+    const paddingBottomRight =
       focusPaddingBias !== undefined
-        ? {
-            paddingTopLeft: point(padX, padY),
-            paddingBottomRight: point(padX, padY + focusPaddingBias),
-          }
-        : { padding: fitBoundsPadding };
+        ? point(padX, padY + focusPaddingBias)
+        : point(padX, padY);
 
-    const useZoomClamp =
-      focusMinZoom !== undefined || focusMaxZoom !== undefined;
+    const bounds = normalizeFocusBounds(focusBounds);
+    const { center, zoom } = computeFramedCenterZoom(
+      map,
+      bounds,
+      paddingTopLeft,
+      paddingBottomRight,
+      focusMinZoom,
+      focusMaxZoom,
+    );
 
-    if (useZoomClamp) {
-      map.fitBounds(focusBounds, {
-        ...padding,
-        animate: false,
-      });
-      const fittedCenter = map.getCenter();
-      const fittedZoom = map.getZoom();
-      const minZoom = focusMinZoom ?? map.getMinZoom();
-      const maxZoom = focusMaxZoom ?? map.getMaxZoom();
-      const zoom = Math.min(maxZoom, Math.max(minZoom, fittedZoom));
-
-      map.setView(fittedCenter, zoom, {
-        animate,
-        duration: MOTION_MAP_CAMERA_S,
-      });
-    } else {
-      map.fitBounds(focusBounds, {
-        ...padding,
-        animate,
-        duration: MOTION_MAP_CAMERA_S,
-      });
-    }
     hasFittedRef.current = true;
 
     const onMoveEnd = () => {
@@ -141,6 +227,17 @@ function MapFocus({
     };
 
     map.on("moveend", onMoveEnd);
+
+    if (!animate) {
+      map.setView(center, zoom, { animate: false });
+      return;
+    }
+
+    if (isLargeCameraJump(map, center, zoom, preferFly)) {
+      map.flyTo(center, zoom, { duration: MOTION_MAP_CAMERA_FLY_S });
+    } else {
+      map.setView(center, zoom, { animate: true, duration: MOTION_MAP_CAMERA_S });
+    }
   }, [
     animate,
     focusBounds,
@@ -150,6 +247,7 @@ function MapFocus({
     fitBoundsPadding,
     focusPaddingBias,
     map,
+    preferFly,
     recenterToken,
     suppressChromeHideRef,
   ]);
@@ -279,6 +377,7 @@ export function MapView({
   fitBoundsMode = "always",
   fitBoundsPadding,
   focusPaddingBias,
+  focusPreferFly,
   recenterToken = 0,
   showZoomControl,
   zoomControlInset = "dock",
@@ -340,6 +439,7 @@ export function MapView({
           suppressChromeHideRef={suppressChromeHideRef}
           fitBoundsPadding={fitBoundsPadding}
           focusPaddingBias={focusPaddingBias}
+          preferFly={focusPreferFly}
         />
         <MapRecenterControl
           enabled={showRecenterControl ?? false}

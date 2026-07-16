@@ -40,6 +40,9 @@ export interface UsePlacementMapFocusResult {
   focusMaxZoom?: number;
   placementRecenterToken: number;
   focusPaddingBias?: number;
+  /** True on forced reframes (phase transitions, Recenter) — tells `MapView`
+   * to prefer the cinematic `flyTo` path even if the geometry delta is modest. */
+  focusPreferFly: boolean;
   requestPlacementRecenter: () => void;
 }
 
@@ -86,6 +89,7 @@ export function usePlacementMapFocus({
   viewportFrame = null,
 }: UsePlacementMapFocusOptions): UsePlacementMapFocusResult {
   const [placementRecenterToken, setPlacementRecenterToken] = useState(0);
+  const [focusPreferFly, setFocusPreferFly] = useState(false);
   const fingerprintRef = useRef<string | null>(null);
   const lastWalkReframeAtRef = useRef(0);
   const previousPoiIdRef = useRef<string | null>(selectedPoiId);
@@ -160,6 +164,7 @@ export function usePlacementMapFocus({
   );
 
   const requestPlacementRecenter = useCallback(() => {
+    setFocusPreferFly(true);
     setPlacementRecenterToken((token) => token + 1);
   }, []);
 
@@ -215,6 +220,7 @@ export function usePlacementMapFocus({
       lastWalkReframeAtRef.current = now;
     }
 
+    setFocusPreferFly(cameraTarget.forceReframe ?? false);
     setPlacementRecenterToken((token) => token + 1);
   }, [
     cameraTarget,
@@ -232,6 +238,7 @@ export function usePlacementMapFocus({
     focusMaxZoom: cameraTarget?.maxZoom,
     placementRecenterToken,
     focusPaddingBias: cameraTarget?.paddingBiasPx,
+    focusPreferFly,
     requestPlacementRecenter,
   };
 }
