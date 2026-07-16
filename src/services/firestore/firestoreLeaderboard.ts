@@ -30,7 +30,7 @@ function parseEntry(
       : typeof data.displayName === "string"
         ? data.displayName.trim()
         : "";
-  const value = typeof data.value === "number" ? data.value : Number(data.value);
+  const value = typeof data.value === "number" ? data.value : NaN;
   if (!uid || !Number.isFinite(value)) {
     return null;
   }

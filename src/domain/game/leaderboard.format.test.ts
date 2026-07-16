@@ -16,6 +16,11 @@ describe("formatLeaderboardValue", () => {
     expect(formatLeaderboardValue("wins", 3)).toBe("3");
     expect(formatLeaderboardValue("questions", 12)).toBe("12");
   });
+
+  it("uses a placeholder for non-finite values", () => {
+    expect(formatLeaderboardValue("wins", Number.NaN)).toBe("—");
+    expect(formatLeaderboardValue("wins", Number.POSITIVE_INFINITY)).toBe("—");
+  });
 });
 
 describe("leaderboardEntryLabel", () => {

@@ -45,13 +45,17 @@ function LeaderboardBoard() {
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
+      /* eslint-disable react-hooks/set-state-in-effect -- Firebase off: clear board */
       setEntries([]);
       setBoardLoading(false);
+      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
 
+    /* eslint-disable react-hooks/set-state-in-effect -- reset loading for filter change */
     setBoardLoading(true);
     setBoardError(null);
+    /* eslint-enable react-hooks/set-state-in-effect */
     return subscribeLeaderboardBoard(
       scope,
       gameSize,
@@ -62,7 +66,6 @@ function LeaderboardBoard() {
         setBoardLoading(false);
       },
       (error) => {
-        setEntries([]);
         setBoardLoading(false);
         setBoardError(error.message);
       },
@@ -133,13 +136,15 @@ function LeaderboardBoard() {
 
         {boardError ? <InlineError>{boardError}</InlineError> : null}
 
-        <LeaderboardRankList
-          entries={entries}
-          metric={metric}
-          viewerUid={user?.uid}
-          loading={boardLoading}
-          emptyMessage="No ranked entries yet. Finish synced rounds with leaderboard opt-in to populate this board."
-        />
+        {boardError ? null : (
+          <LeaderboardRankList
+            entries={entries}
+            metric={metric}
+            viewerUid={user?.uid}
+            loading={boardLoading}
+            emptyMessage="No ranked entries yet. Finish synced rounds with leaderboard opt-in to populate this board."
+          />
+        )}
       </div>
     </>
   );
