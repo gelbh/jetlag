@@ -636,6 +636,7 @@ export function useMapScreenController() {
     focusPaddingBias: placementFocusPaddingBias,
     focusMinZoom: placementFocusMinZoom,
     focusMaxZoom: placementFocusMaxZoom,
+    focusPreferFly: placementFocusPreferFly,
     requestPlacementRecenter,
   } = usePlacementMapFocus({
     activeTool,
@@ -758,6 +759,7 @@ export function useMapScreenController() {
     placementFocusPaddingBias,
     placementFocusMinZoom,
     placementFocusMaxZoom,
+    placementFocusPreferFly,
     requestPlacementRecenter,
     showPlacementRecenter: activeTool !== "none",
     mapChromeControlInset,

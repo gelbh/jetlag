@@ -83,6 +83,7 @@ export function TutorialMapContextPreview({
     focusPaddingBias,
     focusMinZoom,
     focusMaxZoom,
+    focusPreferFly,
   } = usePlacementMapFocus({
     activeTool,
     draft: placementDraft,
@@ -111,6 +112,7 @@ export function TutorialMapContextPreview({
         fitBoundsPadding={[20, 20]}
         recenterToken={placementRecenterToken}
         focusPaddingBias={focusPaddingBias}
+        focusPreferFly={focusPreferFly}
         onMapClick={onMapClick}
         mapKey={`${mapKey}-${viewport.source}-${viewport.label}`}
       >

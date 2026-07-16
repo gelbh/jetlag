@@ -285,4 +285,75 @@ describe("usePlacementMapFocus", () => {
 
     expect(result.current.placementRecenterToken).toBe(initialToken + 1);
   });
+
+  it("clears focusPreferFly once the recenter reframe is consumed, before the next ordinary update", () => {
+    const { result, rerender } = renderHook(
+      ({ overlays, draft }: { overlays: MapDraftOverlay[]; draft: typeof pinDraft }) =>
+        usePlacementMapFocus({
+          activeTool: "pin",
+          draft,
+          overlays,
+          eliminationFeatures: [],
+          gameArea: DUBLIN_CITY_GAME_AREA,
+          defaultFocusBounds: defaultBounds,
+          enabled: true,
+          panelMinimized: false,
+        }),
+      { initialProps: { overlays: pinOverlays, draft: pinDraft } },
+    );
+
+    act(() => {
+      result.current.requestPlacementRecenter();
+    });
+
+    // The one-shot flag is consumed by the reframe it triggered; it must not
+    // survive to bias a later, unrelated update (e.g. a panel resize) toward
+    // the cinematic flyTo path.
+    expect(result.current.focusPreferFly).toBe(false);
+
+    rerender({ overlays: pinOverlays, draft: pinDraft });
+    expect(result.current.focusPreferFly).toBe(false);
+  });
+
+  it("clears focusPreferFly on deactivate so it cannot survive a reactivate", () => {
+    const { result, rerender } = renderHook(
+      ({
+        activeTool,
+        draft,
+        overlays,
+      }: {
+        activeTool: "pin" | "none";
+        draft: typeof pinDraft;
+        overlays: MapDraftOverlay[];
+      }) =>
+        usePlacementMapFocus({
+          activeTool,
+          draft,
+          overlays,
+          eliminationFeatures: [],
+          gameArea: DUBLIN_CITY_GAME_AREA,
+          defaultFocusBounds: defaultBounds,
+          enabled: true,
+          panelMinimized: false,
+        }),
+      {
+        initialProps: {
+          activeTool: "pin" as "pin" | "none",
+          draft: pinDraft,
+          overlays: pinOverlays,
+        },
+      },
+    );
+
+    act(() => {
+      result.current.requestPlacementRecenter();
+    });
+    expect(result.current.focusPreferFly).toBe(false);
+
+    rerender({ activeTool: "none", draft: emptyDraft, overlays: [] });
+    expect(result.current.focusPreferFly).toBe(false);
+
+    rerender({ activeTool: "pin", draft: pinDraft, overlays: pinOverlays });
+    expect(result.current.focusPreferFly).toBe(false);
+  });
 });

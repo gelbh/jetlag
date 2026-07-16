@@ -26,11 +26,26 @@ export const MOTION_TRANSITION_BASE =
 export const MOTION_TRANSITION_SCRIM =
   "opacity var(--motion-fast) var(--ease-out-quint)";
 
-/** Leaflet fitBounds duration; mirrors `--motion-base` in base.css. */
-export const MOTION_MAP_CAMERA_MS = 200;
+/** Small placement reframe duration (walk/POI updates, radius edits); sits
+ * just above `--motion-base` in base.css. */
+export const MOTION_MAP_CAMERA_MS = 250;
 
-/** Leaflet fitBounds duration in seconds; mirrors `--motion-base` in base.css. */
+/** Small placement reframe duration in seconds. */
 export const MOTION_MAP_CAMERA_S = MOTION_MAP_CAMERA_MS / 1000;
+
+/** Large placement reframe duration (phase transitions, answers, Recenter) —
+ * cinematic `flyTo`, must stay well under 600ms to feel responsive outdoors. */
+export const MOTION_MAP_CAMERA_FLY_MS = 450;
+
+/** Large placement reframe duration in seconds. */
+export const MOTION_MAP_CAMERA_FLY_S = MOTION_MAP_CAMERA_FLY_MS / 1000;
+
+/** Minimum zoom-level change that classifies a reframe as a large jump (fly). */
+export const MAP_CAMERA_LARGE_JUMP_ZOOM_DELTA = 1.5;
+
+/** Minimum center movement, as a fraction of viewport span, that classifies a
+ * reframe as a large jump (fly). */
+export const MAP_CAMERA_LARGE_JUMP_CENTER_FRACTION = 0.3;
 
 /** Extra bottom padding when framing tool placement (panel peek + dock). */
 export const MAP_PLACEMENT_FOCUS_BOTTOM_BIAS_PX = 120;
