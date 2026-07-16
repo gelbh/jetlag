@@ -798,6 +798,12 @@ service cloud.firestore {
       allow list, create, update, delete: if false;
     }
 
+    // Opt-in boards written by Cloud Functions only.
+    match /leaderboard/{scope}/boards/{boardId}/entries/{entryId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if false;
+    }
+
     match /stripeEvents/{eventId} {
       allow read, write: if false;
     }
