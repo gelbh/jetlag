@@ -5,7 +5,7 @@ import {
 } from "./firestoreLeaderboard";
 
 const onSnapshot = vi.hoisted(() =>
-  vi.fn((_query, onNext, _onError) => {
+  vi.fn((_query, onNext) => {
     onNext({
       docs: [
         {
