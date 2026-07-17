@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.8.0";
+export const APP_VERSION = "0.8.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.8.1",
+    date: "2026-07-17",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Map: exporting a session map no longer fails when the page uses modern color styles; you get a short alert if export still cannot finish",
+          "Reliability: fewer noisy crash reports from Safari network blips and temporary sign-in storage hiccups",
+        ],
+      }
+    ],
+  },
   {
     version: "0.8.0",
     date: "2026-07-16",
