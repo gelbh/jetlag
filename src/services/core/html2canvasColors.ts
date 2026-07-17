@@ -23,20 +23,32 @@ export function forceRgbCssColorsInClone(root: HTMLElement): void {
     return String(probe.fillStyle);
   };
 
+  const paint = (node: HTMLElement): void => {
+    const computed = getComputedStyle(node);
+    for (const key of COLOR_STYLE_KEYS) {
+      node.style[key] = toRgb(computed[key]);
+    }
+  };
+
   const visit = (node: Element): void => {
     if (!(node instanceof HTMLElement)) {
       return;
     }
 
-    const computed = getComputedStyle(node);
-    for (const key of COLOR_STYLE_KEYS) {
-      node.style[key] = toRgb(computed[key]);
-    }
+    paint(node);
 
     for (const child of node.children) {
       visit(child);
     }
   };
 
-  visit(root.ownerDocument.documentElement);
+  // html2canvas reads documentElement/body backgrounds; paint those two nodes only.
+  const doc = root.ownerDocument;
+  if (doc.documentElement instanceof HTMLElement) {
+    paint(doc.documentElement);
+  }
+  if (doc.body instanceof HTMLElement) {
+    paint(doc.body);
+  }
+  visit(root);
 }
