@@ -16,7 +16,12 @@ import {
 } from "../../services/session/sessionCleanup";
 import { useSessionExit } from "../session/useSessionExit";
 import { ensureAnonymousUser } from "../../services/core/firebase";
+import { captureException } from "../../services/core/sentry";
+import { forceRgbCssColorsInClone } from "../../services/core/html2canvasColors";
+import { isHtml2CanvasUnsupportedColorMessage } from "../../services/core/html2canvasErrors";
 import { useSessionStore } from "../../state/sessionStore";
+
+const MAP_EXPORT_BACKGROUND = "#0f172a";
 
 interface UseMapSessionChromeParams {
   session: SessionRecord | null;
@@ -221,20 +226,37 @@ export function useMapSessionChrome({
       exportLegendRef.current.style.display = "block";
     }
 
-    const { default: html2canvas } = await import("html2canvas");
-    const canvas = await html2canvas(mapShellRef.current, {
-      useCORS: true,
-      backgroundColor: "#0f172a",
-    });
+    try {
+      const { default: html2canvas } = await import("html2canvas");
+      const canvas = await html2canvas(mapShellRef.current, {
+        useCORS: true,
+        backgroundColor: MAP_EXPORT_BACKGROUND,
+        onclone: (_clonedDocument, element) => {
+          forceRgbCssColorsInClone(element);
+        },
+      });
 
-    if (exportLegendRef.current) {
-      exportLegendRef.current.style.display = "none";
+      const link = document.createElement("a");
+      link.download = `jetlag-map-${session.code}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (isHtml2CanvasUnsupportedColorMessage(message)) {
+        window.alert(
+          "Could not export the map. Try again, or take a screenshot instead.",
+        );
+        return;
+      }
+      captureException(error);
+      window.alert(
+        "Could not export the map. Try again, or take a screenshot instead.",
+      );
+    } finally {
+      if (exportLegendRef.current) {
+        exportLegendRef.current.style.display = "none";
+      }
     }
-
-    const link = document.createElement("a");
-    link.download = `jetlag-map-${session.code}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
   }, [exportLegendRef, mapShellRef, session]);
 
   return {
