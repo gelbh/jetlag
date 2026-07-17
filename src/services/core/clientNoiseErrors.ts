@@ -1,5 +1,5 @@
 const IDB_CONNECTION_CLOSING = /database connection is closing/i;
-const WEBKIT_LOAD_FAILED = /^Load failed\b/i;
+const WEBKIT_LOAD_FAILED = /^Load failed(?:\s*\([^)]*\))?$/i;
 
 export function isIdbConnectionClosingMessage(message: string): boolean {
   return IDB_CONNECTION_CLOSING.test(message);

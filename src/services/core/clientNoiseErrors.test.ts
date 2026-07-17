@@ -34,5 +34,6 @@ describe("isWebkitLoadFailedMessage", () => {
 
   it("ignores other messages", () => {
     expect(isWebkitLoadFailedMessage("Failed to fetch")).toBe(false);
+    expect(isWebkitLoadFailedMessage("Load failed to fetch")).toBe(false);
   });
 });
