@@ -16,7 +16,11 @@ import {
 } from "../../services/session/sessionCleanup";
 import { useSessionExit } from "../session/useSessionExit";
 import { ensureAnonymousUser } from "../../services/core/firebase";
+import { captureException } from "../../services/core/sentry";
+import { isHtml2CanvasUnsupportedColorMessage } from "../../services/core/html2canvasErrors";
 import { useSessionStore } from "../../state/sessionStore";
+
+const MAP_EXPORT_BACKGROUND = "#0f172a";
 
 interface UseMapSessionChromeParams {
   session: SessionRecord | null;
@@ -225,20 +229,25 @@ export function useMapSessionChrome({
       const { default: html2canvas } = await import("html2canvas");
       const canvas = await html2canvas(mapShellRef.current, {
         useCORS: true,
-        backgroundColor: "#0f172a",
-        onclone: (_document, element) => {
-          const root = element.ownerDocument.documentElement;
-          root.style.backgroundColor = "#0f172a";
-          element.ownerDocument.body.style.backgroundColor = "#0f172a";
-        },
+        backgroundColor: MAP_EXPORT_BACKGROUND,
       });
 
       const link = document.createElement("a");
       link.download = `jetlag-map-${session.code}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
-    } catch {
-      window.alert("Could not export the map. Try again, or take a screenshot instead.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (isHtml2CanvasUnsupportedColorMessage(message)) {
+        window.alert(
+          "Could not export the map. Try again, or take a screenshot instead.",
+        );
+        return;
+      }
+      captureException(error);
+      window.alert(
+        "Could not export the map. Try again, or take a screenshot instead.",
+      );
     } finally {
       if (exportLegendRef.current) {
         exportLegendRef.current.style.display = "none";
