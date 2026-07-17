@@ -17,6 +17,7 @@ import {
 import { useSessionExit } from "../session/useSessionExit";
 import { ensureAnonymousUser } from "../../services/core/firebase";
 import { captureException } from "../../services/core/sentry";
+import { forceRgbCssColorsInClone } from "../../services/core/html2canvasColors";
 import { isHtml2CanvasUnsupportedColorMessage } from "../../services/core/html2canvasErrors";
 import { useSessionStore } from "../../state/sessionStore";
 
@@ -230,6 +231,9 @@ export function useMapSessionChrome({
       const canvas = await html2canvas(mapShellRef.current, {
         useCORS: true,
         backgroundColor: MAP_EXPORT_BACKGROUND,
+        onclone: (_clonedDocument, element) => {
+          forceRgbCssColorsInClone(element);
+        },
       });
 
       const link = document.createElement("a");
