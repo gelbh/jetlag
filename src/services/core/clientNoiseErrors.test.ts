@@ -21,8 +21,11 @@ describe("isIdbConnectionClosingMessage", () => {
 });
 
 describe("isWebkitLoadFailedMessage", () => {
-  it("matches Safari Load failed", () => {
+  it("matches Safari Load failed with optional host suffix", () => {
     expect(isWebkitLoadFailedMessage("Load failed")).toBe(true);
+    expect(isWebkitLoadFailedMessage("Load failed (jetlag.gelbhart.dev)")).toBe(
+      true,
+    );
   });
 
   it("trims whitespace before matching", () => {
@@ -31,5 +34,6 @@ describe("isWebkitLoadFailedMessage", () => {
 
   it("ignores other messages", () => {
     expect(isWebkitLoadFailedMessage("Failed to fetch")).toBe(false);
+    expect(isWebkitLoadFailedMessage("Load failed to fetch")).toBe(false);
   });
 });
