@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.1 - 2026-07-17
+
+### Fixes
+
+- Map: exporting a session map no longer fails when the page uses modern color styles; you get a short alert if export still cannot finish
+- Reliability: fewer noisy crash reports from Safari network blips and temporary sign-in storage hiccups
+
 ## 0.8.0 - 2026-07-16
 
 ### Improvements
