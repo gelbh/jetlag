@@ -6,6 +6,7 @@ import {
   isIdbConnectionClosingMessage,
   isWebkitLoadFailedMessage,
 } from "./clientNoiseErrors";
+import { isHtml2CanvasUnsupportedColorMessage } from "./html2canvasErrors";
 
 const SESSION_CODE_PATTERN = /\b[A-Z0-9]{4}\b/g;
 const FIRESTORE_PERMISSION_DENIED =
@@ -166,6 +167,7 @@ function isIgnoredClientNoiseEvent(
       typeof exception.value === "string" &&
       (IDB_DATABASE_DELETED.test(exception.value) ||
         isIdbConnectionClosingMessage(exception.value) ||
+        isHtml2CanvasUnsupportedColorMessage(exception.value) ||
         RECAPTCHA_ALREADY_RENDERED.test(exception.value) ||
         VIEW_TRANSITION_ABORTED.test(exception.value))
     ) {
@@ -176,16 +178,11 @@ function isIgnoredClientNoiseEvent(
   if (
     typeof event.message === "string" &&
     (IDB_DATABASE_DELETED.test(event.message) ||
-      isIdbConnectionClosingMessage(event.message))
+      isIdbConnectionClosingMessage(event.message) ||
+      isHtml2CanvasUnsupportedColorMessage(event.message) ||
+      RECAPTCHA_ALREADY_RENDERED.test(event.message) ||
+      VIEW_TRANSITION_ABORTED.test(event.message))
   ) {
-    return true;
-  }
-
-  if (typeof event.message === "string" && RECAPTCHA_ALREADY_RENDERED.test(event.message)) {
-    return true;
-  }
-
-  if (typeof event.message === "string" && VIEW_TRANSITION_ABORTED.test(event.message)) {
     return true;
   }
 

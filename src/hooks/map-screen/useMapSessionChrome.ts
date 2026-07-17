@@ -221,20 +221,29 @@ export function useMapSessionChrome({
       exportLegendRef.current.style.display = "block";
     }
 
-    const { default: html2canvas } = await import("html2canvas");
-    const canvas = await html2canvas(mapShellRef.current, {
-      useCORS: true,
-      backgroundColor: "#0f172a",
-    });
+    try {
+      const { default: html2canvas } = await import("html2canvas");
+      const canvas = await html2canvas(mapShellRef.current, {
+        useCORS: true,
+        backgroundColor: "#0f172a",
+        onclone: (_document, element) => {
+          const root = element.ownerDocument.documentElement;
+          root.style.backgroundColor = "#0f172a";
+          element.ownerDocument.body.style.backgroundColor = "#0f172a";
+        },
+      });
 
-    if (exportLegendRef.current) {
-      exportLegendRef.current.style.display = "none";
+      const link = document.createElement("a");
+      link.download = `jetlag-map-${session.code}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch {
+      window.alert("Could not export the map. Try again, or take a screenshot instead.");
+    } finally {
+      if (exportLegendRef.current) {
+        exportLegendRef.current.style.display = "none";
+      }
     }
-
-    const link = document.createElement("a");
-    link.download = `jetlag-map-${session.code}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
   }, [exportLegendRef, mapShellRef, session]);
 
   return {
