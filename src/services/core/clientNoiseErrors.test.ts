@@ -1,16 +1,31 @@
 import { describe, expect, it } from "vitest";
-import { isWebkitLoadFailedMessage } from "./clientNoiseErrors";
+import {
+  isIdbConnectionClosingMessage,
+  isWebkitLoadFailedMessage,
+} from "./clientNoiseErrors";
 
-describe("isWebkitLoadFailedMessage", () => {
-  it("matches Safari TypeError Load failed", () => {
-    expect(isWebkitLoadFailedMessage("TypeError", "Load failed")).toBe(true);
+describe("isIdbConnectionClosingMessage", () => {
+  it("matches Firebase Auth closing-connection InvalidStateError text", () => {
+    expect(
+      isIdbConnectionClosingMessage(
+        "Failed to execute 'transaction' on 'IDBDatabase': The database connection is closing.",
+      ),
+    ).toBe(true);
   });
 
-  it("ignores other TypeErrors and non-TypeError Load failed", () => {
-    expect(isWebkitLoadFailedMessage("TypeError", "Failed to fetch")).toBe(
-      false,
-    );
-    expect(isWebkitLoadFailedMessage("Error", "Load failed")).toBe(false);
-    expect(isWebkitLoadFailedMessage(undefined, "Load failed")).toBe(false);
+  it("ignores unrelated messages", () => {
+    expect(
+      isIdbConnectionClosingMessage("Database deleted by request of the user"),
+    ).toBe(false);
+  });
+});
+
+describe("isWebkitLoadFailedMessage", () => {
+  it("matches Safari Load failed", () => {
+    expect(isWebkitLoadFailedMessage("Load failed")).toBe(true);
+  });
+
+  it("ignores other messages", () => {
+    expect(isWebkitLoadFailedMessage("Failed to fetch")).toBe(false);
   });
 });

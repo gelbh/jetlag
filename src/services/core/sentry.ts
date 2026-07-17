@@ -2,8 +2,10 @@ import * as Sentry from "@sentry/capacitor";
 import * as SentryReact from "@sentry/react";
 import { getClientEnv } from "../../config/env";
 import { APP_VERSION } from "../../domain/device/changelog";
-import { isWebkitLoadFailedMessage } from "./clientNoiseErrors";
-import { isIdbConnectionClosingMessage } from "../session/indexedDbErrors";
+import {
+  isIdbConnectionClosingMessage,
+  isWebkitLoadFailedMessage,
+} from "./clientNoiseErrors";
 
 const SESSION_CODE_PATTERN = /\b[A-Z0-9]{4}\b/g;
 const FIRESTORE_PERMISSION_DENIED =
@@ -147,7 +149,7 @@ function isIgnoredClientNoiseEvent(
         LEAFLET_CLASSLIST_ERROR.test(exception.value) ||
         MODULE_SCRIPT_IMPORT_FAILED.test(exception.value) ||
         BATTERY_ADD_EVENT_LISTENER.test(exception.value) ||
-        isWebkitLoadFailedMessage(exception.type, exception.value))
+        isWebkitLoadFailedMessage(exception.value))
     ) {
       return true;
     }
@@ -174,8 +176,7 @@ function isIgnoredClientNoiseEvent(
   if (
     typeof event.message === "string" &&
     (IDB_DATABASE_DELETED.test(event.message) ||
-      isIdbConnectionClosingMessage(event.message) ||
-      isWebkitLoadFailedMessage("TypeError", event.message))
+      isIdbConnectionClosingMessage(event.message))
   ) {
     return true;
   }
