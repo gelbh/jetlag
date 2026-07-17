@@ -25,6 +25,10 @@ describe("isWebkitLoadFailedMessage", () => {
     expect(isWebkitLoadFailedMessage("Load failed")).toBe(true);
   });
 
+  it("trims whitespace before matching", () => {
+    expect(isWebkitLoadFailedMessage("  Load failed  ")).toBe(true);
+  });
+
   it("ignores other messages", () => {
     expect(isWebkitLoadFailedMessage("Failed to fetch")).toBe(false);
   });
