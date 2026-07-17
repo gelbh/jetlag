@@ -17,8 +17,8 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Fixes",
         items: [
-          "Map export: handle html2canvas color parse failures without crashing; show a short alert when export cannot complete",
-          "Sentry: drop Firebase Auth IndexedDB \"connection is closing\" and Safari bare `Load failed` noise",
+          "Map: exporting a session map no longer fails when the page uses modern color styles; you get a short alert if export still cannot finish",
+          "Reliability: fewer noisy crash reports from Safari network blips and temporary sign-in storage hiccups",
         ],
       }
     ],
