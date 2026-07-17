@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.1 - 2026-07-17
+
+### Fixes
+
+- Map export: handle html2canvas color parse failures without crashing; show a short alert when export cannot complete
+- Sentry: drop Firebase Auth IndexedDB "connection is closing" and Safari bare `Load failed` noise
+
 ## 0.8.0 - 2026-07-16
 
 ### Improvements

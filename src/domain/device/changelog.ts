@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.8.0";
+export const APP_VERSION = "0.8.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.8.1",
+    date: "2026-07-17",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Map export: handle html2canvas color parse failures without crashing; show a short alert when export cannot complete",
+          "Sentry: drop Firebase Auth IndexedDB \"connection is closing\" and Safari bare `Load failed` noise",
+        ],
+      }
+    ],
+  },
   {
     version: "0.8.0",
     date: "2026-07-16",
