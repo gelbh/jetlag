@@ -2,6 +2,10 @@ import * as Sentry from "@sentry/capacitor";
 import * as SentryReact from "@sentry/react";
 import { getClientEnv } from "../../config/env";
 import { APP_VERSION } from "../../domain/device/changelog";
+import {
+  isIdbConnectionClosingMessage,
+  isWebkitLoadFailedMessage,
+} from "./clientNoiseErrors";
 
 const SESSION_CODE_PATTERN = /\b[A-Z0-9]{4}\b/g;
 const FIRESTORE_PERMISSION_DENIED =
@@ -144,7 +148,8 @@ function isIgnoredClientNoiseEvent(
       (LEAFLET_POS_ERROR.test(exception.value) ||
         LEAFLET_CLASSLIST_ERROR.test(exception.value) ||
         MODULE_SCRIPT_IMPORT_FAILED.test(exception.value) ||
-        BATTERY_ADD_EVENT_LISTENER.test(exception.value))
+        BATTERY_ADD_EVENT_LISTENER.test(exception.value) ||
+        isWebkitLoadFailedMessage(exception.value))
     ) {
       return true;
     }
@@ -160,6 +165,7 @@ function isIgnoredClientNoiseEvent(
     if (
       typeof exception.value === "string" &&
       (IDB_DATABASE_DELETED.test(exception.value) ||
+        isIdbConnectionClosingMessage(exception.value) ||
         RECAPTCHA_ALREADY_RENDERED.test(exception.value) ||
         VIEW_TRANSITION_ABORTED.test(exception.value))
     ) {
@@ -167,7 +173,11 @@ function isIgnoredClientNoiseEvent(
     }
   }
 
-  if (typeof event.message === "string" && IDB_DATABASE_DELETED.test(event.message)) {
+  if (
+    typeof event.message === "string" &&
+    (IDB_DATABASE_DELETED.test(event.message) ||
+      isIdbConnectionClosingMessage(event.message))
+  ) {
     return true;
   }
 
