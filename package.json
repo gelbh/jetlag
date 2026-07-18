@@ -47,7 +47,8 @@
     "cap:android": "npm run cap:sync && npx cap open android",
     "cap:ios": "npm run cap:sync && npx cap open ios",
     "prepare": "husky",
-    "lint:css": "stylelint \"src/**/*.css\" \"public/**/*.css\""
+    "lint:css": "stylelint \"src/**/*.css\" \"public/**/*.css\"",
+    "test:lighthouse": "lhci autorun"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
@@ -113,6 +114,7 @@
     "@dreamsicle.io/stylelint-config-tailwindcss": "^1.2.2",
     "@eslint/js": "~10.0.1",
     "@firebase/rules-unit-testing": "^5.0.1",
+    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.61.1",
     "@sentry/vite-plugin": "^5.3.0",
     "@tailwindcss/vite": "~4.3.0",
