@@ -5,9 +5,9 @@ module.exports = {
       startServerCommand:
         "npm run preview -- --host 127.0.0.1 --port 4173 --strictPort",
       startServerReadyPattern: "Local:",
-      numberOfRuns: 1,
+      // Median of 3 runs stabilizes CLS before error assertions
+      numberOfRuns: 3,
       settings: {
-        preset: "desktop",
         formFactor: "mobile",
         screenEmulation: {
           mobile: true,
