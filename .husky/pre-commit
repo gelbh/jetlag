@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Husky invokes hooks with `sh`; re-exec under bash for pipefail / local.
+if [ -z "${BASH_VERSION:-}" ]; then
+  exec bash "$0" "$@"
+fi
 set -euo pipefail
 
 css="$(mktemp)"
