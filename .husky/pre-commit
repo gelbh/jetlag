@@ -25,12 +25,28 @@ while IFS= read -r -d '' path; do
   esac
 done <"$staged"
 
+# Reject partial staging: tools read the working tree, so unstaged
+# edits on selected paths would mask or falsely fail the commit snapshot.
+reject_partial() {
+  local list="$1"
+  [ -s "$list" ] || return 0
+  while IFS= read -r -d '' path; do
+    if [ -n "$(git diff --name-only -- "$path")" ]; then
+      echo "pre-commit: '$path' has unstaged changes; stage or stash them before commit" >&2
+      exit 1
+    fi
+  done <"$list"
+}
+
+reject_partial "$css"
+reject_partial "$related"
+
 if [ -s "$css" ]; then
-  xargs -0 npx stylelint <"$css"
+  xargs -0 npx stylelint -- <"$css"
 fi
 
 if [ ! -s "$related" ]; then
   exit 0
 fi
 
-xargs -0 npx vitest related --run --passWithNoTests <"$related"
+xargs -0 npx vitest related --run --passWithNoTests -- <"$related"
