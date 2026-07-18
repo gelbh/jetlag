@@ -46,7 +46,8 @@
     "cap:sync": "npm run build && npx cap sync",
     "cap:android": "npm run cap:sync && npx cap open android",
     "cap:ios": "npm run cap:sync && npx cap open ios",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lint:css": "stylelint \"src/**/*.css\" \"public/**/*.css\""
   },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
@@ -109,6 +110,7 @@
     "@cloudflare/workers-types": "^5.20260712.1",
     "@commitlint/cli": "~21.2.1",
     "@commitlint/config-conventional": "~21.2.0",
+    "@dreamsicle.io/stylelint-config-tailwindcss": "^1.2.2",
     "@eslint/js": "~10.0.1",
     "@firebase/rules-unit-testing": "^5.0.1",
     "@playwright/test": "^1.61.1",
@@ -133,6 +135,8 @@
     "globals": "^17.6.0",
     "husky": "^9.1.7",
     "jsdom": "~29.1.1",
+    "stylelint": "^17.14.0",
+    "stylelint-config-standard": "^40.0.0",
     "tailwindcss": "~4.3.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "~8.59.2",

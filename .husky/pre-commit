@@ -7,14 +7,23 @@ if [ -z "$staged" ]; then
   exit 0
 fi
 
+css=""
 related=""
 for path in $staged; do
   case "$path" in
+    *.css)
+      css="$css $path"
+      ;;
     src/*.ts|src/*.tsx)
       related="$related $path"
       ;;
   esac
 done
+
+if [ -n "$css" ]; then
+  # shellcheck disable=SC2086
+  npx stylelint $css
+fi
 
 if [ -z "$related" ]; then
   exit 0
