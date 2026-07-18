@@ -1,7 +1,7 @@
 import { test, expect, prepareE2EPage } from "../fixtures";
 
 test.describe("tutorial hub screenshots", () => {
-  test("matches hub baseline", async ({ page }) => {
+  test("@smoke matches hub baseline", async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem(
         "jetlag.tutorialProgress",
