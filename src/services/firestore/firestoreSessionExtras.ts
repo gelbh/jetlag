@@ -14,6 +14,7 @@ import {
   addDoc,
   type Unsubscribe,
 } from "firebase/firestore";
+import { FirebaseError } from "firebase/app";
 import type { PlayerRole } from "../../domain/session/playerRole";
 import type { HidingZoneRecord } from "../../domain/session/hidingZone";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
@@ -92,13 +93,32 @@ export async function appendPlayerTrailPoint(
   sessionId: string,
   point: PlayerTrailPointRecord,
 ): Promise<void> {
-  await addDoc(playerTrailPointsCollection(sessionId, point.uid), {
-    lat: point.lat,
-    lng: point.lng,
-    accuracyMeters: point.accuracyMeters ?? null,
-    role: point.role,
-    recordedAt: point.recordedAt,
-  });
+  try {
+    await addDoc(playerTrailPointsCollection(sessionId, point.uid), {
+      lat: point.lat,
+      lng: point.lng,
+      accuracyMeters: point.accuracyMeters ?? null,
+      role: point.role,
+      recordedAt: point.recordedAt,
+    });
+  } catch (error) {
+    // Offline persistence can replay an already-committed create (JETLAG-1Z).
+    if (isFirestoreAlreadyExistsError(error)) {
+      return;
+    }
+    throw error;
+  }
+}
+
+function isFirestoreAlreadyExistsError(error: unknown): boolean {
+  if (!(error instanceof FirebaseError)) {
+    return false;
+  }
+  return (
+    error.code === "already-exists" ||
+    error.code === "firestore/already-exists" ||
+    /document already exists/i.test(error.message)
+  );
 }
 
 export function subscribeToStartingLocations(

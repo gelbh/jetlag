@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { FirebaseError } from "firebase/app";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import {
   buildPendingQuestionDocument,
@@ -108,6 +109,26 @@ describe("firestoreSessionExtras writes", () => {
     expect(firestoreMocks.deleteDoc).toHaveBeenCalledWith(
       expect.objectContaining({ path: expect.stringContaining("pq-1") }),
     );
+  });
+
+  it("ignores already-exists when appending trail points", async () => {
+    firestoreMocks.addDoc.mockRejectedValueOnce(
+      new FirebaseError(
+        "already-exists",
+        "Document already exists: sessions/s/playerTrailPoints/u/points/p1",
+      ),
+    );
+
+    await expect(
+      appendPlayerTrailPoint("session-1", {
+        uid: "seeker-1",
+        sessionId: "session-1",
+        lat: 51.5,
+        lng: -0.12,
+        role: "seeker",
+        recordedAt: "2026-01-01T00:00:00.000Z",
+      }),
+    ).resolves.toBeUndefined();
   });
 
   it("round-trips pending question documents through serialization", () => {
