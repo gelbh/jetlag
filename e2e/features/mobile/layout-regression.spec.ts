@@ -64,6 +64,18 @@ test.describe("layout regression @ default mobile", () => {
     const more = page.getByRole("button", { name: "More tools" });
     await expect(more).toBeVisible();
     await assertMinTapTargets(more);
+    const [box, viewport] = await Promise.all([
+      more.boundingBox(),
+      page.evaluate(() => ({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })),
+    ]);
+    expect(box).not.toBeNull();
+    expect(box!.x).toBeGreaterThanOrEqual(0);
+    expect(box!.y).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+    expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
     // Leaflet markers trip aria-command-name; layout smoke is chrome-only
     await assertLayoutSmoke(page, { exclude: [".leaflet-container"] });
   });
