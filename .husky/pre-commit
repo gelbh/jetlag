@@ -1,29 +1,36 @@
-#!/usr/bin/env sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-# NUL-delimited paths stay filename-safe (spaces / glob chars).
 css="$(mktemp)"
 related="$(mktemp)"
-trap 'rm -f "$css" "$related"' EXIT
+staged="$(mktemp)"
+trap 'rm -f "$css" "$related" "$staged"' EXIT
 
-git diff --cached --name-only -z --diff-filter=ACM |
-  while IFS= read -r -d '' path; do
-    case "$path" in
-      *.css)
-        printf '%s\0' "$path" >>"$css"
-        ;;
-      src/*.ts | src/*.tsx)
-        printf '%s\0' "$path" >>"$related"
-        ;;
-    esac
-  done
+if ! git diff --cached --name-only -z --diff-filter=ACMR >"$staged"; then
+  exit 1
+fi
+
+if [ ! -s "$staged" ]; then
+  exit 0
+fi
+
+while IFS= read -r -d '' path; do
+  case "$path" in
+    *.css)
+      printf '%s\0' "$path" >>"$css"
+      ;;
+    src/*.ts | src/*.tsx)
+      printf '%s\0' "$path" >>"$related"
+      ;;
+  esac
+done <"$staged"
 
 if [ -s "$css" ]; then
-  xargs -0 -r npx stylelint <"$css"
+  xargs -0 npx stylelint <"$css"
 fi
 
 if [ ! -s "$related" ]; then
   exit 0
 fi
 
-xargs -0 -r npx vitest related --run --passWithNoTests <"$related"
+xargs -0 npx vitest related --run --passWithNoTests <"$related"
