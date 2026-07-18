@@ -17,6 +17,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - run: npm run lint:css
       - run: npm run typecheck
       - run: npm run release:check
       - run: npm run test:coverage

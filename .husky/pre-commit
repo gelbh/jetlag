@@ -1,24 +1,57 @@
-#!/usr/bin/env sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-staged="$(git diff --cached --name-only --diff-filter=ACM)"
+css="$(mktemp)"
+related="$(mktemp)"
+staged="$(mktemp)"
+trap 'rm -f "$css" "$related" "$staged"' EXIT
 
-if [ -z "$staged" ]; then
+if ! git diff --cached --name-only -z --diff-filter=ACMR >"$staged"; then
+  exit 1
+fi
+
+if [ ! -s "$staged" ]; then
   exit 0
 fi
 
-related=""
-for path in $staged; do
+while IFS= read -r -d '' path; do
   case "$path" in
-    src/*.ts|src/*.tsx)
-      related="$related $path"
+    *.css)
+      printf '%s\0' "$path" >>"$css"
+      ;;
+    src/*.ts | src/*.tsx)
+      printf '%s\0' "$path" >>"$related"
       ;;
   esac
-done
+done <"$staged"
 
-if [ -z "$related" ]; then
+# Reject partial staging: tools read the working tree, so unstaged
+# edits on selected paths would mask or falsely fail the commit snapshot.
+reject_partial() {
+  local list="$1"
+  [ -s "$list" ] || return 0
+  while IFS= read -r -d '' path; do
+    local unstaged
+    if ! unstaged="$(git diff --name-only -- "$path")"; then
+      echo "pre-commit: failed to inspect unstaged changes for '$path'" >&2
+      exit 1
+    fi
+    if [ -n "$unstaged" ]; then
+      echo "pre-commit: '$path' has unstaged changes; stage or stash them before commit" >&2
+      exit 1
+    fi
+  done <"$list"
+}
+
+reject_partial "$css"
+reject_partial "$related"
+
+if [ -s "$css" ]; then
+  xargs -0 npx stylelint -- <"$css"
+fi
+
+if [ ! -s "$related" ]; then
   exit 0
 fi
 
-# shellcheck disable=SC2086
-npx vitest related --run --passWithNoTests $related
+xargs -0 npx vitest related --run --passWithNoTests -- <"$related"

@@ -117,12 +117,12 @@ select,
 
 .app-scroll-root {
   min-height: 100vh;
-  height: 100dvh;
-  height: 100svh;
-  height: -webkit-fill-available;
   min-height: 100dvh;
   min-height: 100svh;
   min-height: -webkit-fill-available;
+  height: 100dvh;
+  height: 100svh;
+  height: -webkit-fill-available;
   overflow-y: auto;
   overscroll-behavior: none;
   background: transparent;
