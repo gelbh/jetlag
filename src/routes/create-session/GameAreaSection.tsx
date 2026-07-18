@@ -100,6 +100,7 @@ export function GameAreaSection({
             disabled={loading || verifyingAccess}
             className="field-input min-h-11 flex-1"
             defaultValue=""
+            aria-label="Game preset"
             onChange={(event) => {
               const presetId = event.target.value;
               if (!presetId) {
