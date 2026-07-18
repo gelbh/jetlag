@@ -31,7 +31,12 @@ reject_partial() {
   local list="$1"
   [ -s "$list" ] || return 0
   while IFS= read -r -d '' path; do
-    if [ -n "$(git diff --name-only -- "$path")" ]; then
+    local unstaged
+    if ! unstaged="$(git diff --name-only -- "$path")"; then
+      echo "pre-commit: failed to inspect unstaged changes for '$path'" >&2
+      exit 1
+    fi
+    if [ -n "$unstaged" ]; then
       echo "pre-commit: '$path' has unstaged changes; stage or stash them before commit" >&2
       exit 1
     fi
