@@ -21,7 +21,7 @@ module.exports = {
     assert: {
       assertions: {
         viewport: "error",
-        "tap-targets": ["error", { minScore: 0.8 }],
+        "target-size": ["error", { minScore: 0.8 }],
         // Floors slightly loose vs typical home/join mobile baseline; tighten after first CI artifacts
         "cumulative-layout-shift": ["error", { maxNumericValue: 0.15 }],
       },
