@@ -116,7 +116,7 @@
 
   .jl-tool-dock-group {
     display: flex;
-    shrink: 0;
+    flex-shrink: 0;
     gap: 0.125rem;
   }
 
@@ -246,7 +246,6 @@
     width: 1px;
     height: 1px;
     overflow: hidden;
-    clip: rect(0, 0, 0, 0);
     clip-path: inset(50%);
     white-space: nowrap;
     pointer-events: none;
@@ -456,7 +455,7 @@
     display: flex;
     height: 1.75rem;
     width: 1.75rem;
-    shrink: 0;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
     color: var(--color-ink-secondary);
@@ -592,7 +591,7 @@
     display: flex;
     height: 2.25rem;
     width: 2.25rem;
-    shrink: 0;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-hud-md);
