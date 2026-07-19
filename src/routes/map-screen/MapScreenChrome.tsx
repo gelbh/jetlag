@@ -1,6 +1,14 @@
 import type { ReactNode } from "react";
+import { useMemo } from "react";
 import { isEndGameActive, isEndGamePending, isFoundHiderPending } from "../../domain/map/annotations";
+import { QUESTION_DOCK_TOOL_IDS } from "../../domain/map/mapTools";
+import { resolveToolDockEnabled } from "../../domain/session/sessionRules";
 import { ChatPanel } from "../../components/chat/ChatPanel";
+import { ContextualRail } from "../../components/map/ContextualRail";
+import {
+  ContextualRailPanelProvider,
+  type ContextualRailTab,
+} from "../../components/map/ContextualRailContext";
 import { DesktopOpsShell } from "../../components/map/DesktopOpsShell";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
@@ -11,6 +19,7 @@ import { SessionLog } from "../../components/session/SessionLog";
 import { AnnotationEditSheet } from "../../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../../components/tools/ToolDock";
 import { useDesktopLayout } from "../../hooks/useDesktopLayout";
+import { useToolRailShortcuts } from "../../hooks/map/useToolRailShortcuts";
 import type { MapScreenController } from "./useMapScreenController";
 import { useSyncRetryAction } from "../../hooks/session/useSyncRetryAction";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
@@ -244,6 +253,53 @@ export function MapScreenChrome({
   const isDesktop = useDesktopLayout();
   const toolLayout = isDesktop ? "rail" : "dock";
 
+  const visibleQuestionTools = useMemo(
+    () =>
+      QUESTION_DOCK_TOOL_IDS.filter((toolId) =>
+        resolveToolDockEnabled(session!, toolId, {
+          hasHiders: awaitHiderAnswer,
+        }),
+      ),
+    [session, awaitHiderAnswer],
+  );
+
+  useToolRailShortcuts({
+    enabled: isDesktop,
+    activeTool,
+    onSelect: handleSelectTool,
+    toolOrder: visibleQuestionTools,
+  });
+
+  const railActiveTab: ContextualRailTab | null =
+    overlay.sheet === "none" ? null : overlay.sheet;
+
+  const handleSelectRailTab = (tab: ContextualRailTab) => {
+    switch (tab) {
+      case "settings":
+        handleOpenSettings();
+        return;
+      case "chat":
+        handleOpenChat();
+        return;
+      case "log":
+        handleOpenLog();
+        return;
+      default: {
+        const _exhaustive: never = tab;
+        return _exhaustive;
+      }
+    }
+  };
+
+  const contextualRail = isDesktop ? (
+    <ContextualRail
+      open={overlay.sheet !== "none"}
+      activeTab={railActiveTab}
+      onClose={overlay.closeSheet}
+      onSelectTab={handleSelectRailTab}
+    />
+  ) : null;
+
   const statusRail = (
     <MapStatusRail
       sessionCode={session!.code}
@@ -321,7 +377,7 @@ export function MapScreenChrome({
   );
 
   return (
-    <>
+    <ContextualRailPanelProvider>
       {isDesktop && mapSlot ? (
         <DesktopOpsShell
           chromeHudRef={chromeHudRef}
@@ -334,6 +390,7 @@ export function MapScreenChrome({
           }
           tools={toolDock}
           map={mapSlot}
+          contextual={contextualRail}
         />
       ) : (
         <div
@@ -521,6 +578,6 @@ export function MapScreenChrome({
           );
         }}
       />
-    </>
+    </ContextualRailPanelProvider>
   );
 }

@@ -197,4 +197,114 @@
   .desktop-ops-observer-status {
     pointer-events: auto;
   }
+
+  /* Right contextual rail (settings / chat / log) */
+  .contextual-rail {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    width: var(--ops-rail-collapsed-width);
+    border-inline-start: 2px solid var(--color-border);
+    background: var(--color-surface-panel);
+    pointer-events: auto;
+    transition: width 180ms ease;
+  }
+
+  .contextual-rail--open {
+    width: var(--ops-rail-width);
+  }
+
+  html[data-motion="reduced"] .contextual-rail,
+  html[data-motion="static"] .contextual-rail {
+    transition: none;
+  }
+
+  .contextual-rail__header {
+    display: flex;
+    min-height: 2.75rem;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+    padding: 0.25rem 0.5rem;
+  }
+
+  .contextual-rail__icon-tabs {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.375rem 0.25rem;
+  }
+
+  .contextual-rail__icon-tab {
+    display: flex;
+    min-height: 2.25rem;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-hud-md);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  .contextual-rail__icon-tab--active {
+    background: var(--color-surface-raised);
+    color: var(--color-ink);
+  }
+
+  .contextual-rail__tabs {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.125rem;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--color-border);
+    padding: 0.375rem 0.5rem;
+    scrollbar-width: thin;
+  }
+
+  .contextual-rail__tab {
+    min-height: 2rem;
+    flex-shrink: 0;
+    border-radius: var(--radius-hud-md);
+    padding: 0 0.625rem;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+
+  html[data-motion="reduced"] .contextual-rail__tab,
+  html[data-motion="static"] .contextual-rail__tab {
+    transition: none;
+  }
+
+  .contextual-rail__tab--active {
+    background: var(--color-action);
+    color: var(--color-action-ink);
+  }
+
+  .contextual-rail__panel {
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.75rem;
+  }
+
+  .contextual-rail__dialog {
+    outline: none;
+  }
+
+  @media (pointer: coarse) {
+    .contextual-rail__icon-tab {
+      min-height: 2.75rem;
+    }
+  }
 }

@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { AppLink } from "../../components/navigation/AppLink";
+import { ContextualRail } from "../../components/map/ContextualRail";
+import type { ContextualRailTab } from "../../components/map/ContextualRailContext";
 import { DesktopOpsShell } from "../../components/map/DesktopOpsShell";
 import { SessionTimerLabel } from "../../components/session/SessionTimerLabel";
 import { SegmentControl } from "../../components/ui/SegmentControl";
@@ -160,8 +162,44 @@ export function ObserverMapScreenChrome({
   );
 
   if (isDesktop && mapSlot) {
+    const railActiveTab: ContextualRailTab | null =
+      overlay.sheet === "log" || overlay.sheet === "chat"
+        ? overlay.sheet
+        : null;
+
+    const handleSelectRailTab = (tab: ContextualRailTab) => {
+      switch (tab) {
+        case "log":
+          overlay.openLog();
+          return;
+        case "chat":
+          overlay.openChat();
+          return;
+        case "settings":
+          overlay.openLog();
+          return;
+        default: {
+          const _exhaustive: never = tab;
+          return _exhaustive;
+        }
+      }
+    };
+
     return (
-      <DesktopOpsShell status={statusBar} tools={toolRail} map={mapSlot} />
+      <DesktopOpsShell
+        status={statusBar}
+        tools={toolRail}
+        map={mapSlot}
+        contextual={
+          <ContextualRail
+            open={overlay.sheet === "log" || overlay.sheet === "chat"}
+            activeTab={railActiveTab}
+            onClose={overlay.closeSheet}
+            onSelectTab={handleSelectRailTab}
+            tabs={["log", "chat"]}
+          />
+        }
+      />
     );
   }
 

@@ -4,6 +4,7 @@ import {
   prepareE2EPage,
   openPlayHub,
   openMapWithLocalSession,
+  openSettings,
 } from "../../fixtures";
 
 test.describe("desktop layout @ 1280", () => {
@@ -45,6 +46,18 @@ test.describe("desktop layout @ 1280", () => {
     expect(box!.x).toBeLessThan(120);
     expect(box!.width).toBeLessThanOrEqual(120);
     expect(box!.height).toBeGreaterThan(box!.width);
+  });
+
+  test("@smoke settings opens in contextual rail not bottom sheet", async ({
+    page,
+  }) => {
+    await openMapWithLocalSession(page);
+    await openSettings(page);
+    await expect(
+      page.getByRole("complementary", { name: /Map panels/i }),
+    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
+    await expect(page.locator(".hud-sheet.fixed")).toHaveCount(0);
   });
 });
 
