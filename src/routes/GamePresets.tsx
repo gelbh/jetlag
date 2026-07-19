@@ -3,6 +3,7 @@ import { AppLink } from "../components/navigation/AppLink";
 import { useParams } from "react-router-dom";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import type { LatLngBoundsExpression } from "leaflet";
+import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
@@ -169,6 +170,7 @@ export function GamePresetEditor() {
 
       <ScreenHeader backTo="/presets" backLabel="Back" />
 
+      <DesktopContentColumn maxWidth="social">
       <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
         <h1 className="font-display text-2xl font-bold uppercase tracking-tight text-ink">
           {existing ? "Edit preset" : "New preset"}
@@ -333,6 +335,7 @@ export function GamePresetEditor() {
           </AppLink>
         </div>
       </div>
+      </DesktopContentColumn>
     </main>
   );
 }
