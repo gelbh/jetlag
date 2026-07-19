@@ -22,7 +22,10 @@ export function DesktopContentColumn({
 }: DesktopContentColumnProps) {
   const isDesktop = useDesktopLayout();
   if (!isDesktop) {
-    return <>{children}</>;
+    if (!className) {
+      return <>{children}</>;
+    }
+    return <div className={className}>{children}</div>;
   }
 
   return (

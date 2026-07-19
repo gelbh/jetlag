@@ -23,6 +23,19 @@ describe("DesktopContentColumn", () => {
     expect(screen.getByText("body")).toBeInTheDocument();
   });
 
+  it("preserves className under 1024 without max-width", () => {
+    useDesktopLayout.mockReturnValue(false);
+    const { container } = render(
+      <DesktopContentColumn className="flex flex-1">
+        <p>body</p>
+      </DesktopContentColumn>,
+    );
+    const root = container.firstElementChild;
+    expect(root?.className).toMatch(/flex/);
+    expect(root?.className).toMatch(/flex-1/);
+    expect(root?.className ?? "").not.toMatch(/max-w-/);
+  });
+
   it("applies 28rem entry max-width on desktop", () => {
     useDesktopLayout.mockReturnValue(true);
     const { container } = render(

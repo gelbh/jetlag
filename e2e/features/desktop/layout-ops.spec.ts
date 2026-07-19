@@ -11,7 +11,7 @@ test.describe("desktop layout @ 1280", () => {
     await expect(join).toBeVisible();
     const box = await join.boundingBox();
     expect(box).not.toBeNull();
-    // 20rem ≈ 320px at default root; allow small padding slack
-    expect(box!.width).toBeLessThanOrEqual(336);
+    // 20rem = 320px at default root font-size
+    expect(box!.width).toBeLessThanOrEqual(320);
   });
 });
