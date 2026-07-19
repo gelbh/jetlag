@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.9.0 - 2026-07-19
+
+### Improvements
+
+- Desktop entry and social: wide screens constrain home, join, premium, auth, feedback, tutorial, presets, stats, and leaderboard columns; Friends uses a list plus detail split
+- Desktop map: ops-desk shell with a left tool rail and expanded status bar; bottom dock hidden at 1024px and up
+- Desktop map panels: settings, chat, and session log open in a right contextual rail instead of bottom sheets; digit keys select question tools on fine pointer
+- Leaderboard: compact board filters, lead pack for top ranks, and sticky self rank when you scroll away
+
+### Fixes
+
+- Observer map: admin observe frames the session play area instead of 0,0 on first monitor join
+- Thermometer: cancel GPS walks when the seeker leaves or is no longer in the session
+- Thermometer: hosts and walk creators can cancel a stuck walk from the timer
+
 ## 0.8.2 - 2026-07-19
 
 ### Fixes
