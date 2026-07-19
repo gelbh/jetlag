@@ -45,6 +45,7 @@ import {
   deserializeSessionFromFirestore,
   sessionRulesPatchToFirestore,
 } from "./firestoreSerialization";
+import { ZERO_GAME_AREA } from "../../domain/geometry/geometry";
 import { photoUploadAccessError } from "../../domain/questions";
 import { generateSessionCode } from "../session/sessionCodes";
 import {
@@ -131,10 +132,25 @@ function sanitizeJoinReturningMemberUid(
   );
 }
 
-const JOIN_PREVIEW_PLACEHOLDER_AREA: GameArea = {
+export const JOIN_PREVIEW_PLACEHOLDER_AREA: GameArea = {
   type: "Polygon",
   coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
 };
+
+function gameAreaCoordinatesEqual(a: GameArea, b: GameArea): boolean {
+  return (
+    a.type === b.type &&
+    JSON.stringify(a.coordinates) === JSON.stringify(b.coordinates)
+  );
+}
+
+/** True for join-preview Null Island (0–1°) or the zero fallback polygon. */
+export function isPlaceholderGameArea(gameArea: GameArea): boolean {
+  return (
+    gameAreaCoordinatesEqual(gameArea, JOIN_PREVIEW_PLACEHOLDER_AREA) ||
+    gameAreaCoordinatesEqual(gameArea, ZERO_GAME_AREA)
+  );
+}
 
 function buildJoinPreviewSession(
   sessionId: string,
@@ -523,6 +539,20 @@ async function joinRemoteSessionWithoutRead(
     }
   } else {
     await updateDoc(sessionRef, updatePayload);
+  }
+
+  // Membership write succeeded — re-read is now allowed by rules.
+  try {
+    const sessionDoc = await getDoc(sessionRef);
+    if (sessionDoc.exists()) {
+      const data = sessionDoc.data() as Record<string, unknown>;
+      return {
+        status: "joined",
+        session: deserializeSessionFromFirestore(sessionDoc.id, data),
+      };
+    }
+  } catch {
+    // Fall through to preview only as last resort.
   }
 
   const memberUids = returningMemberUid

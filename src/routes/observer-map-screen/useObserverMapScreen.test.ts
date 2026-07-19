@@ -1,5 +1,9 @@
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import {
+  JOIN_PREVIEW_PLACEHOLDER_AREA,
+} from "../../services/firestore/firestoreAnnotations";
+import { ZERO_GAME_AREA } from "../../domain/geometry/geometry";
 import { useObserverMapScreen } from "./useObserverMapScreen";
 
 const mockUseResolvedSessionRules = vi.fn();
@@ -68,6 +72,19 @@ vi.mock("../../state/sessionStore", () => ({
     }),
 }));
 
+const REAL_GAME_AREA = {
+  type: "Polygon" as const,
+  coordinates: [
+    [
+      [-6.3, 53.3],
+      [-6.2, 53.3],
+      [-6.2, 53.4],
+      [-6.3, 53.4],
+      [-6.3, 53.3],
+    ],
+  ],
+};
+
 describe("useObserverMapScreen", () => {
   it("keeps map focus bounds null until play area is ready", () => {
     mockUseResolvedSessionRules.mockReturnValue({
@@ -79,15 +96,40 @@ describe("useObserverMapScreen", () => {
     const { result } = renderHook(() => useObserverMapScreen());
 
     expect(result.current.mapFocusBounds).toBeNull();
+    expect(result.current.playAreaReady).toBe(false);
     expect(result.current.center).toEqual([51.505, -0.09]);
   });
 
-  it("frames the map when play area resolves", () => {
+  it("keeps map focus bounds null for join-preview placeholder gameArea", () => {
     mockUseResolvedSessionRules.mockReturnValue({
-      gameArea: {
-        type: "polygon",
-        coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
-      },
+      gameArea: JOIN_PREVIEW_PLACEHOLDER_AREA,
+      sessionRules: null,
+      playAreaReady: true,
+    });
+
+    const { result } = renderHook(() => useObserverMapScreen());
+
+    expect(result.current.mapFocusBounds).toBeNull();
+    expect(result.current.playAreaReady).toBe(false);
+    expect(result.current.gameArea).toBeNull();
+  });
+
+  it("keeps map focus bounds null for zero fallback gameArea", () => {
+    mockUseResolvedSessionRules.mockReturnValue({
+      gameArea: ZERO_GAME_AREA,
+      sessionRules: null,
+      playAreaReady: true,
+    });
+
+    const { result } = renderHook(() => useObserverMapScreen());
+
+    expect(result.current.mapFocusBounds).toBeNull();
+    expect(result.current.playAreaReady).toBe(false);
+  });
+
+  it("frames the map when a real play area resolves", () => {
+    mockUseResolvedSessionRules.mockReturnValue({
+      gameArea: REAL_GAME_AREA,
       sessionRules: null,
       playAreaReady: true,
     });
@@ -95,6 +137,11 @@ describe("useObserverMapScreen", () => {
     const { result } = renderHook(() => useObserverMapScreen());
 
     expect(result.current.mapFocusBounds).not.toBeNull();
-    expect(result.current.gameArea).not.toBeNull();
+    expect(result.current.playAreaReady).toBe(true);
+    expect(result.current.gameArea).toEqual(REAL_GAME_AREA);
+    expect(result.current.mapFocusBounds).toEqual([
+      [53.3, -6.3],
+      [53.4, -6.2],
+    ]);
   });
 });
