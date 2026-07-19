@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
+  THERMOMETER_WALK_MAX_DURATION_MS,
   buildThermometerStartPointGeometry,
   crowFliesDistanceMeters,
 } from "../../domain/questions";
 import type { PendingQuestionPlacement } from "../../domain/session/sessionChat";
 import { useLiveLocation } from "../location/useLiveLocation";
-
-const DEFAULT_MAX_WALK_DURATION_MS = 30 * 60 * 1000;
 
 interface UseThermometerWalkParams {
   active: boolean;
@@ -24,7 +23,7 @@ export function useThermometerWalk({
   targetDistanceMeters,
   onAutoStop,
   onError,
-  maxDurationMs = DEFAULT_MAX_WALK_DURATION_MS,
+  maxDurationMs = THERMOMETER_WALK_MAX_DURATION_MS,
 }: UseThermometerWalkParams) {
   const onAutoStopRef = useRef(onAutoStop);
   const onErrorRef = useRef(onError);

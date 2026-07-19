@@ -1073,6 +1073,154 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows walk creator to cancel own walking thermometer", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "seeker-2"],
+          memberRoles: { "host-1": "seeker", "seeker-2": "seeker" },
+        }),
+      );
+
+    const seeker = testEnv.authenticatedContext("seeker-2");
+    const questionRef = seeker
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .collection("pendingQuestions")
+      .doc("pq-own-walk");
+
+    await assertSucceeds(
+      questionRef.set({
+        toolType: "thermometer",
+        createdByUid: "seeker-2",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        status: "walking",
+        placement: {
+          geometryJson: JSON.stringify({
+            type: "Feature",
+            properties: {},
+            geometry: { type: "Point", coordinates: [-6.26, 53.35] },
+          }),
+          metadata: {},
+        },
+        replyOptions: [],
+        promptText: "Thermometer walk started",
+      }),
+    );
+
+    await assertSucceeds(questionRef.update({ status: "cancelled" }));
+  });
+
+  it("allows seeker to cancel orphan walking thermometer", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "seeker-2"],
+          memberRoles: { "host-1": "seeker", "seeker-2": "seeker" },
+        }),
+      );
+
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-orphan-walk")
+        .set({
+          toolType: "thermometer",
+          createdByUid: "gone-1",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          status: "walking",
+          placement: {
+            geometryJson: JSON.stringify({
+              type: "Feature",
+              properties: {},
+              geometry: { type: "Point", coordinates: [-6.26, 53.35] },
+            }),
+            metadata: {},
+          },
+          replyOptions: [],
+          promptText: "Thermometer walk started",
+        });
+    });
+
+    const seeker = testEnv.authenticatedContext("seeker-2");
+    await assertSucceeds(
+      seeker
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-orphan-walk")
+        .update({ status: "cancelled" }),
+    );
+  });
+
+  it("denies non-host seeker cancelling another member's active walking thermometer", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "seeker-2", "seeker-3"],
+          memberRoles: {
+            "host-1": "seeker",
+            "seeker-2": "seeker",
+            "seeker-3": "seeker",
+          },
+        }),
+      );
+
+    const walker = testEnv.authenticatedContext("seeker-2");
+    await assertSucceeds(
+      walker
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-member-walk")
+        .set({
+          toolType: "thermometer",
+          createdByUid: "seeker-2",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          status: "walking",
+          placement: {
+            geometryJson: JSON.stringify({
+              type: "Feature",
+              properties: {},
+              geometry: { type: "Point", coordinates: [-6.26, 53.35] },
+            }),
+            metadata: {},
+          },
+          replyOptions: [],
+          promptText: "Thermometer walk started",
+        }),
+    );
+
+    const otherSeeker = testEnv.authenticatedContext("seeker-3");
+    await assertFails(
+      otherSeeker
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-member-walk")
+        .update({ status: "cancelled" }),
+    );
+  });
+
   it("allows hider to answer a radar question in game chat", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
