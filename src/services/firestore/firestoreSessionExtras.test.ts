@@ -18,7 +18,11 @@ const firestoreMocks = vi.hoisted(() => {
       exists: () => true,
       data: () => ({ status: "walking" }),
     })),
-    getDocs: vi.fn(async () => ({ docs: [] })),
+    getDocs: vi.fn(
+      async (): Promise<{
+        docs: Array<{ id: string; data: () => Record<string, unknown> }>;
+      }> => ({ docs: [] }),
+    ),
     writeBatch: vi.fn(() => ({
       update: batchUpdate,
       commit: batchCommit,
