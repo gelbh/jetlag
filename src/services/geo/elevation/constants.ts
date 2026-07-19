@@ -3,6 +3,7 @@ export const OPEN_METEO_ELEVATION_ENDPOINT =
 export const USGS_EPQS_ENDPOINT = "https://epqs.nationalmap.gov/v1/json";
 export const ELEVATION_BATCH_SIZE = 100;
 export const USGS_MIN_REQUEST_GAP_MS = 250;
+/** In-memory rate-limit map TTL (legacy). Durable elevation uses geo cache 24h via `elevation:` keys. */
 export const ELEVATION_CACHE_TTL_MS = 15 * 60 * 1000;
 export const ELEVATION_MAX_RETRIES_FOREGROUND = 6;
 export const ELEVATION_MAX_RETRIES_BACKGROUND = 2;

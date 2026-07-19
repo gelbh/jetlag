@@ -327,6 +327,30 @@ describe("worker fetch", () => {
 
     expect(await response.text()).toBe(javascript);
     expect(response.headers.get("Content-Security-Policy")).toBeNull();
+    expect(response.headers.get("Cache-Control")).toBe(
+      "public, max-age=31536000, immutable",
+    );
+  });
+
+  it("keeps SPA-fallback asset misses as no-store", async () => {
+    const assetResponse = new Response("<!doctype html>", {
+      status: 200,
+      headers: { "Content-Type": "text/html" },
+    });
+
+    const env = {
+      ASSETS: {
+        fetch: vi.fn().mockResolvedValue(assetResponse),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/assets/index-old.js"),
+      env,
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
   });
 
   it("adds script nonces without inventing a CSP header", async () => {

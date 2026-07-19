@@ -211,7 +211,7 @@ export async function fetchElevationBatchAndWrite(
     for (let batchIndex = 0; batchIndex < batch.length; batchIndex += 1) {
       const elevation = batchElevations[batchIndex];
       const key = elevationCacheKey(batch[batchIndex].point);
-      writeCachedElevation(key, elevation);
+      void writeCachedElevation(key, elevation);
       for (const resultIndex of batch[batchIndex].indices) {
         elevations[resultIndex] = elevation;
       }
