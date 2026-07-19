@@ -25,7 +25,7 @@ describe("DesktopOpsShell", () => {
     expect(document.querySelector(".desktop-ops-shell")).not.toBeNull();
   });
 
-  it("renders complementary contextual slot when provided", () => {
+  it("renders contextual slot when provided", () => {
     render(
       <DesktopOpsShell
         status={<span>s</span>}
@@ -35,13 +35,11 @@ describe("DesktopOpsShell", () => {
       />,
     );
 
-    expect(
-      screen.getByRole("complementary", { name: "Map panels" }),
-    ).toBeInTheDocument();
+    expect(document.querySelector(".desktop-ops-shell__contextual")).not.toBeNull();
     expect(screen.getByText("panel")).toBeInTheDocument();
   });
 
-  it("omits complementary landmark when contextual is absent", () => {
+  it("omits contextual slot when contextual is absent", () => {
     render(
       <DesktopOpsShell
         status={<span>s</span>}
@@ -50,6 +48,6 @@ describe("DesktopOpsShell", () => {
       />,
     );
 
-    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+    expect(document.querySelector(".desktop-ops-shell__contextual")).toBeNull();
   });
 });

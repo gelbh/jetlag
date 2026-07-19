@@ -39,13 +39,7 @@ export function DesktopOpsShell({
       </nav>
       <div className="desktop-ops-shell__map">{mapSlot}</div>
       {contextual != null ? (
-        <aside
-          className="desktop-ops-shell__contextual"
-          role="complementary"
-          aria-label="Map panels"
-        >
-          {contextual}
-        </aside>
+        <div className="desktop-ops-shell__contextual">{contextual}</div>
       ) : null}
     </div>
   );
