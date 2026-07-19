@@ -124,7 +124,9 @@ export function FriendsPanel() {
       return;
     }
     if (!selectableEntries.some((entry) => entry.uid === selectedUid)) {
+      /* eslint-disable react-hooks/set-state-in-effect -- clear selection when the uid leaves the list */
       setSelectedUid(null);
+      /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, [selectableEntries, selectedUid]);
 
