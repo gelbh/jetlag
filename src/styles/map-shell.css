@@ -573,8 +573,8 @@
   }
 
   .admin-map-shell {
-    --admin-rail-width: 22rem;
-    --admin-rail-collapsed-width: 2.75rem;
+    --admin-rail-width: var(--ops-rail-width);
+    --admin-rail-collapsed-width: var(--ops-rail-collapsed-width);
     --admin-status-height: 2.5rem;
     --admin-map-control-inset-right: 0px;
   }

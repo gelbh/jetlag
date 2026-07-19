@@ -51,7 +51,7 @@ export function UsernameSetupGate({
 
   return (
     <form
-      className="space-y-3 border-t-2 border-border pt-4"
+      className="desktop-entry-actions space-y-3 border-t-2 border-border pt-4"
       onSubmit={(event) => {
         event.preventDefault();
         void handleClaim();
