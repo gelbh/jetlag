@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAppNavigate } from "../hooks/useAppNavigate";
+import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { InlineError } from "../components/ui/InlineError";
 import { ScreenHeader } from "../components/ui/ScreenHeader";
@@ -145,11 +146,13 @@ export function Premium() {
     return (
       <EntryScreenLayout justify="start">
         <ScreenHeader backTo="/" backLabel="Back" />
-        <PremiumFeatureList entitlementSummary={null} checkoutNotice={null} />
-        <p className="max-w-sm text-sm text-ink-muted">
-          Premium billing needs an online connection. Use a synced session to
-          unlock live transit.
-        </p>
+        <DesktopContentColumn maxWidth="entry">
+          <PremiumFeatureList entitlementSummary={null} checkoutNotice={null} />
+          <p className="max-w-sm text-sm text-ink-muted">
+            Premium billing needs an online connection. Use a synced session to
+            unlock live transit.
+          </p>
+        </DesktopContentColumn>
       </EntryScreenLayout>
     );
   }
@@ -157,41 +160,43 @@ export function Premium() {
   return (
     <EntryScreenLayout justify="start">
       <ScreenHeader backTo="/" backLabel="Back" />
-      <PremiumFeatureList
-        entitlementSummary={entitlementSummary}
-        checkoutNotice={checkoutNotice}
-      />
+      <DesktopContentColumn maxWidth="entry">
+        <PremiumFeatureList
+          entitlementSummary={entitlementSummary}
+          checkoutNotice={checkoutNotice}
+        />
 
-      <PremiumSignInGate onSignedIn={() => void refreshEntitlementsWithError()}>
-        <div className="home-enter-actions space-y-3">
-          <PremiumTierCards
-            entitlements={entitlements}
-            loading={loading}
-            busyProduct={busyProduct}
-            portalLoading={portalLoading}
-            trialLoading={trialLoading}
-            canStartTrial={canStartTrial}
-            onCheckout={(productKey) => {
-              void handleCheckout(productKey);
-            }}
-            onStartTrial={() => {
-              void handleStartTrial();
-            }}
-            onPortal={() => {
-              void handlePortal();
-            }}
-          />
-          {error ? <InlineError>{error}</InlineError> : null}
-        </div>
-      </PremiumSignInGate>
+        <PremiumSignInGate onSignedIn={() => void refreshEntitlementsWithError()}>
+          <div className="home-enter-actions space-y-3">
+            <PremiumTierCards
+              entitlements={entitlements}
+              loading={loading}
+              busyProduct={busyProduct}
+              portalLoading={portalLoading}
+              trialLoading={trialLoading}
+              canStartTrial={canStartTrial}
+              onCheckout={(productKey) => {
+                void handleCheckout(productKey);
+              }}
+              onStartTrial={() => {
+                void handleStartTrial();
+              }}
+              onPortal={() => {
+                void handlePortal();
+              }}
+            />
+            {error ? <InlineError>{error}</InlineError> : null}
+          </div>
+        </PremiumSignInGate>
 
-      <button
-        type="button"
-        onClick={() => navigate("/create")}
-        className="home-feedback-link"
-      >
-        Back to create session
-      </button>
+        <button
+          type="button"
+          onClick={() => navigate("/create")}
+          className="home-feedback-link"
+        >
+          Back to create session
+        </button>
+      </DesktopContentColumn>
     </EntryScreenLayout>
   );
 }

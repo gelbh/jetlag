@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAppNavigate } from "../hooks/useAppNavigate";
+import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { InlineError } from "../components/ui/InlineError";
 import {
@@ -188,63 +189,65 @@ export function JoinSession() {
   return (
     <EntryScreenLayout justify="center">
       <ScreenHeader backTo="/" backLabel="Back" />
-      <div className={screenHeaderOffsetClassName}>
-        <p className="mt-3 font-display text-sm font-semibold uppercase tracking-[0.2em] text-brand-blue">
-          Join game
-        </p>
-        <h1 className="mt-2 font-display text-4xl font-bold uppercase leading-none tracking-tight text-ink">
-          Session code
-        </h1>
-        <p className="mt-3 max-w-sm text-sm leading-relaxed text-ink-muted">
-          Enter the four letters your host shared. Everyone in the session sees
-          the same live map.
-        </p>
-      </div>
-
-      <div className="jl-field-frame space-y-4">
-        <label className="field-label font-display text-xs uppercase tracking-[0.12em]">
-          Code
-          <input
-            value={code}
-            onChange={(event) =>
-              setCode(normalizeSessionCode(event.target.value))
-            }
-            maxLength={4}
-            className="field-input mt-2 min-h-16 border-0 bg-transparent p-0 text-center font-mono text-4xl font-bold tracking-[0.45em] focus:outline-none"
-            placeholder="ABCD"
-            autoCapitalize="characters"
-            autoCorrect="off"
-            spellCheck={false}
-          />
-        </label>
-
-        {previewPremium ? (
-          <p className="font-display text-xs font-semibold uppercase tracking-wide text-status-info">
-            Premium · live transit
+      <DesktopContentColumn maxWidth="entry">
+        <div className={screenHeaderOffsetClassName}>
+          <p className="mt-3 font-display text-sm font-semibold uppercase tracking-[0.2em] text-brand-blue">
+            Join game
           </p>
-        ) : null}
-        {lookupLoading ? (
-          <p className="text-sm text-ink-dim">Checking session…</p>
-        ) : null}
+          <h1 className="mt-2 font-display text-4xl font-bold uppercase leading-none tracking-tight text-ink">
+            Session code
+          </h1>
+          <p className="mt-3 max-w-sm text-sm leading-relaxed text-ink-muted">
+            Enter the four letters your host shared. Everyone in the session sees
+            the same live map.
+          </p>
+        </div>
 
-        <RolePicker
-          value={playerRole}
-          onChange={setPlayerRole}
-          disabled={loading}
-          includeObserver
-        />
+        <div className="desktop-entry-actions jl-field-frame space-y-4">
+          <label className="field-label font-display text-xs uppercase tracking-[0.12em]">
+            Code
+            <input
+              value={code}
+              onChange={(event) =>
+                setCode(normalizeSessionCode(event.target.value))
+              }
+              maxLength={4}
+              className="field-input mt-2 min-h-16 border-0 bg-transparent p-0 text-center font-mono text-4xl font-bold tracking-[0.45em] focus:outline-none"
+              placeholder="ABCD"
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck={false}
+            />
+          </label>
 
-        <MotionPressable
-          type="button"
-          onClick={() => void handleJoin()}
-          disabled={loading}
-          className="btn-primary min-h-14 w-full disabled:opacity-50"
-        >
-          {loading ? "Joining…" : "Join session"}
-        </MotionPressable>
+          {previewPremium ? (
+            <p className="font-display text-xs font-semibold uppercase tracking-wide text-status-info">
+              Premium · live transit
+            </p>
+          ) : null}
+          {lookupLoading ? (
+            <p className="text-sm text-ink-dim">Checking session…</p>
+          ) : null}
 
-        {error ? <InlineError>{error}</InlineError> : null}
-      </div>
+          <RolePicker
+            value={playerRole}
+            onChange={setPlayerRole}
+            disabled={loading}
+            includeObserver
+          />
+
+          <MotionPressable
+            type="button"
+            onClick={() => void handleJoin()}
+            disabled={loading}
+            className="btn-primary home-entry-action min-h-14 w-full disabled:opacity-50"
+          >
+            {loading ? "Joining…" : "Join session"}
+          </MotionPressable>
+
+          {error ? <InlineError>{error}</InlineError> : null}
+        </div>
+      </DesktopContentColumn>
     </EntryScreenLayout>
   );
 }

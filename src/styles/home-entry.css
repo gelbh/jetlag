@@ -748,4 +748,22 @@
   .wizard-step-footer-extra {
     padding-top: 0.125rem;
   }
+
+  @media (min-width: 1024px) {
+    .home-card-btn,
+    .btn-primary.home-entry-action,
+    .jl-field-frame {
+      max-width: 20rem;
+      margin-inline: auto;
+    }
+
+    /* Join / form actions that use btn-primary without home-card-btn */
+    .desktop-entry-actions > .btn-primary,
+    .desktop-entry-actions > .btn-secondary,
+    .desktop-entry-actions > .home-card-btn {
+      max-width: 20rem;
+      width: 100%;
+      margin-inline: auto;
+    }
+  }
 }
