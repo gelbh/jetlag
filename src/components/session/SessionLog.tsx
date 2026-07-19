@@ -1,8 +1,8 @@
 import {
   type AnnotationRecord,
 } from "../../domain/map/annotations";
-import { MotionSheet } from "../motion/MotionSheet";
 import { SheetHeader } from "../ui/SheetHeader";
+import { SheetHost } from "../ui/SheetHost";
 import { SessionLogBody } from "./SessionLogBody";
 
 interface SessionLogProps {
@@ -23,10 +23,11 @@ export function SessionLog({
   readOnly = false,
 }: SessionLogProps) {
   return (
-    <MotionSheet
+    <SheetHost
       open={open}
       onClose={onClose}
       ariaLabel="Session log"
+      railTab="log"
       maxHeightClassName="max-h-[min(85dvh,720px)]"
     >
       <SheetHeader
@@ -43,6 +44,6 @@ export function SessionLog({
         onEdit={onEdit}
         readOnly={readOnly}
       />
-    </MotionSheet>
+    </SheetHost>
   );
 }

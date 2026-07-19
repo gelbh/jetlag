@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { MotionSheet } from "../motion/MotionSheet";
 import { SheetHeader } from "../ui/SheetHeader";
+import { SheetHost } from "../ui/SheetHost";
 import { CurseReferenceSheet } from "../expansion/CurseReferenceSheet";
 import {
   SettingsSegmentControl,
@@ -119,10 +119,11 @@ export function MapSettingsSheet({
   const gameRulesSaveLabel = rules?.gameRulesSaveLabel ?? "Save game rules";
 
   return (
-    <MotionSheet
+    <SheetHost
       open={open}
       onClose={onClose}
       ariaLabel="Settings"
+      railTab="settings"
       maxHeightClassName="max-h-[min(85dvh,760px)]"
       pinned={
         <div className="space-y-3 pb-3">
@@ -253,6 +254,6 @@ export function MapSettingsSheet({
         open={curseSheetOpen}
         onClose={() => setCurseSheetOpen(false)}
       />
-    </MotionSheet>
+    </SheetHost>
   );
 }
