@@ -6,7 +6,12 @@ import {
   openPlayHub,
   openMapWithLocalSession,
   openTutorialHub,
+  openSocialRoute,
+  socialRouteViewportLocator,
+  SOCIAL_LAYOUT_PATHS,
+  type SocialLayoutPath,
   assertNoHorizontalOverflow,
+  assertInViewport,
   assertMinTapTargets,
   assertNoSeriousAxeViolations,
   expectCreatePageMapPreviewLoaded,
@@ -25,6 +30,29 @@ async function assertLayoutSmoke(
 ) {
   await assertNoHorizontalOverflow(page);
   await assertNoSeriousAxeViolations(page, options);
+}
+
+async function assertSocialLayoutSmoke(page: Page, path: SocialLayoutPath) {
+  await openSocialRoute(page, path);
+  await assertNoHorizontalOverflow(page);
+  const viewportTarget = socialRouteViewportLocator(page, path);
+  await assertInViewport(viewportTarget);
+  if (path === "/friends") {
+    await assertMinTapTargets(viewportTarget);
+  } else if (path === "/stats") {
+    await assertMinTapTargets(viewportTarget.getByRole("tab"));
+  } else {
+    // Metric chips are height-gated (2.75rem); width follows label length.
+    const tabs = viewportTarget.getByRole("tab");
+    const count = await tabs.count();
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < count; i++) {
+      const box = await tabs.nth(i).boundingBox();
+      expect(box, `missing box for metric chip ${i}`).not.toBeNull();
+      expect(box!.height, `height ${i}`).toBeGreaterThanOrEqual(44);
+    }
+  }
+  await assertNoSeriousAxeViolations(page);
 }
 
 test.describe("layout regression @ default mobile", () => {
@@ -64,18 +92,7 @@ test.describe("layout regression @ default mobile", () => {
     const more = page.getByRole("button", { name: "More tools" });
     await expect(more).toBeVisible();
     await assertMinTapTargets(more);
-    const [box, viewport] = await Promise.all([
-      more.boundingBox(),
-      page.evaluate(() => ({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      })),
-    ]);
-    expect(box).not.toBeNull();
-    expect(box!.x).toBeGreaterThanOrEqual(0);
-    expect(box!.y).toBeGreaterThanOrEqual(0);
-    expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
-    expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+    await assertInViewport(more);
     // Leaflet markers trip aria-command-name; layout smoke is chrome-only
     await assertLayoutSmoke(page, { exclude: [".leaflet-container"] });
   });
@@ -84,6 +101,14 @@ test.describe("layout regression @ default mobile", () => {
     await openTutorialHub(page);
     await assertLayoutSmoke(page);
   });
+
+  for (const path of SOCIAL_LAYOUT_PATHS) {
+    test(`@smoke ${path.slice(1)} has no overflow and chrome stays in viewport`, async ({
+      page,
+    }) => {
+      await assertSocialLayoutSmoke(page, path);
+    });
+  }
 });
 
 test.describe("layout regression @ 320px", () => {
@@ -102,4 +127,16 @@ test.describe("layout regression @ 320px", () => {
     ).toBeVisible();
     await assertLayoutSmoke(page);
   });
+});
+
+test.describe("layout regression social @ 320px", () => {
+  test.use({ viewport: { width: 320, height: 568 } });
+
+  for (const path of SOCIAL_LAYOUT_PATHS) {
+    test(`@layout-deep ${path.slice(1)} reflows at 320 without overflow`, async ({
+      page,
+    }) => {
+      await assertSocialLayoutSmoke(page, path);
+    });
+  }
 });
