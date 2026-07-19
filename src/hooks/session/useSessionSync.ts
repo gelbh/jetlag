@@ -11,6 +11,7 @@ import {
   subscribeToRemoteAnnotations,
   subscribeToSession,
 } from "../../services/firestore/firestoreAnnotations";
+import { ANNOTATION_SYNC_MESSAGE_TYPE } from "../../services/session/backgroundSync";
 import { readOfflineQueueForSession } from "../../services/session/offlineQueue";
 import { flushOfflineQueue } from "../../services/session/flushOfflineQueue";
 
@@ -188,7 +189,20 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
       void flushQueue();
     };
 
+    const handleServiceWorkerMessage = (event: MessageEvent) => {
+      if (event.data?.type !== ANNOTATION_SYNC_MESSAGE_TYPE) {
+        return;
+      }
+      void flushQueue();
+    };
+
     window.addEventListener("online", handleOnline);
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener(
+        "message",
+        handleServiceWorkerMessage,
+      );
+    }
     void flushQueue();
 
     const intervalId = window.setInterval(() => {
@@ -198,6 +212,12 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
     return () => {
       disposed = true;
       window.removeEventListener("online", handleOnline);
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.removeEventListener(
+          "message",
+          handleServiceWorkerMessage,
+        );
+      }
       window.clearInterval(intervalId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only

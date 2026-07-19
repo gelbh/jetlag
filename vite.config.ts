@@ -79,6 +79,9 @@ export default defineConfig(({ mode }) => ({
     react(),
     tailwindcss(),
     VitePWA({
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.ts",
       injectRegister: false,
       registerType: "prompt",
       includeAssets: ["favicon.svg", "icons/*.svg"],
@@ -106,61 +109,8 @@ export default defineConfig(({ mode }) => ({
           },
         ],
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ["**/*.{js,css,html,ico,svg,woff2}"],
-        navigateFallbackDenylist: [/^\/assets\//],
-        runtimeCaching: [
-          {
-            urlPattern: /^\/assets\//,
-            handler: "NetworkOnly",
-          },
-          {
-            urlPattern:
-              /^https:\/\/([a-d]\.)?basemaps\.cartocdn\.com\/rastertiles\/voyager\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "carto-voyager-tiles",
-              expiration: {
-                maxEntries: 500,
-                maxAgeSeconds: 60 * 60 * 24 * 7,
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/tile\.openstreetmap\.org\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "osm-tiles",
-              expiration: {
-                maxEntries: 500,
-                maxAgeSeconds: 60 * 60 * 24 * 7,
-              },
-            },
-          },
-          {
-            urlPattern:
-              /^https:\/\/server\.arcgisonline\.com\/ArcGIS\/rest\/services\/World_Imagery\/MapServer\/tile\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "esri-satellite-tiles",
-              expiration: {
-                maxEntries: 500,
-                maxAgeSeconds: 60 * 60 * 24 * 7,
-              },
-            },
-          },
-          {
-            urlPattern: /\/geo\/.*\.geojson$/i,
-            handler: "StaleWhileRevalidate",
-            options: {
-              cacheName: "jetlag-geo-bundles",
-              expiration: {
-                maxEntries: 64,
-                maxAgeSeconds: 60 * 60 * 24 * 30,
-              },
-            },
-          },
-        ],
       },
     }),
   ],
