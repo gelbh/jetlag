@@ -100,4 +100,31 @@ describe("useCancelOrphanThermometerWalks", () => {
       expect(cancelThermometerWalk).not.toHaveBeenCalled();
     });
   });
+
+  it("retries after a failed cancellation attempt", async () => {
+    cancelThermometerWalk.mockRejectedValueOnce(new Error("permission-denied"));
+
+    const { rerender } = renderHook(
+      ({ pendingQuestions }) =>
+        useCancelOrphanThermometerWalks({
+          sessionId: "session-1",
+          myUid: "seeker-2",
+          myRole: "seeker",
+          memberUids: ["host-1", "seeker-2"],
+          pendingQuestions,
+          cancelThermometerWalk,
+        }),
+      { initialProps: { pendingQuestions: [walkingQuestion()] } },
+    );
+
+    await waitFor(() => {
+      expect(cancelThermometerWalk).toHaveBeenCalledTimes(1);
+    });
+
+    rerender({ pendingQuestions: [walkingQuestion()] });
+
+    await waitFor(() => {
+      expect(cancelThermometerWalk).toHaveBeenCalledTimes(2);
+    });
+  });
 });

@@ -391,9 +391,10 @@ export function useMapScreenController() {
         });
       } catch (error) {
         captureException(error);
+        setMapError("Couldn't cancel the walk. Please try again.");
       }
     },
-    [cancelThermometerWalk, myRole, session, uid],
+    [cancelThermometerWalk, myRole, session, setMapError, uid],
   );
 
   const activeThermometerWalk = useActiveThermometerWalk({

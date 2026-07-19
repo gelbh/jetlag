@@ -2,6 +2,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   onSnapshot,
   orderBy,
@@ -43,10 +44,14 @@ import {
   stripUndefinedValues,
 } from "./firestoreSerialization";
 
-const THERMOMETER_WALK_CANCEL_TEXT = {
+export const THERMOMETER_WALK_CANCEL_TEXT = {
   left: "Thermometer walk cancelled — seeker left.",
   orphan: "Thermometer walk cancelled — seeker left the session.",
+  manual: "Thermometer walk cancelled.",
 } as const;
+
+export type ThermometerWalkCancelReason =
+  keyof typeof THERMOMETER_WALK_CANCEL_TEXT;
 
 function sessionDoc(sessionId: string) {
   return doc(getFirestoreDb(), "sessions", sessionId);
@@ -62,6 +67,21 @@ function messagesCollection(sessionId: string) {
 
 function pendingQuestionsCollection(sessionId: string) {
   return collection(getFirestoreDb(), "sessions", sessionId, "pendingQuestions");
+}
+
+/** Returns status string when the pending question exists; otherwise null. */
+export async function getPendingQuestionStatus(
+  sessionId: string,
+  questionId: string,
+): Promise<string | null> {
+  const snapshot = await getDoc(
+    doc(pendingQuestionsCollection(sessionId), questionId),
+  );
+  if (!snapshot.exists()) {
+    return null;
+  }
+  const status = snapshot.data()?.status;
+  return typeof status === "string" ? status : null;
 }
 
 function hidingZonesCollection(sessionId: string) {
@@ -346,13 +366,24 @@ export async function cancelWalkingThermometersAndAnnounce(
   questionIds: readonly string[],
   senderUid: string,
   senderRole: PlayerRole,
-  reason: "left" | "orphan",
+  reason: Exclude<ThermometerWalkCancelReason, "manual">,
 ): Promise<void> {
   if (questionIds.length === 0) {
     return;
   }
 
-  await cancelWalkingThermometerQuestions(sessionId, questionIds);
+  const stillWalking: string[] = [];
+  for (const questionId of questionIds) {
+    const status = await getPendingQuestionStatus(sessionId, questionId);
+    if (status === "walking") {
+      stillWalking.push(questionId);
+    }
+  }
+  if (stillWalking.length === 0) {
+    return;
+  }
+
+  await cancelWalkingThermometerQuestions(sessionId, stillWalking);
   await postGameSystemMessage(
     sessionId,
     senderUid,

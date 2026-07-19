@@ -11,6 +11,7 @@ const mockResetRemoteSession = vi.hoisted(() =>
 const mockCancelWalkingThermometersAndAnnounce = vi.hoisted(() =>
   vi.fn(async () => undefined),
 );
+const mockCaptureException = vi.hoisted(() => vi.fn());
 
 vi.mock("../session/useSessionExit", () => ({
   useSessionExit: () => exitSession,
@@ -18,6 +19,10 @@ vi.mock("../session/useSessionExit", () => ({
 
 vi.mock("../../services/core/firebase", () => ({
   ensureAnonymousUser: vi.fn(async () => ({ uid: "host-1" })),
+}));
+
+vi.mock("../../services/core/sentry", () => ({
+  captureException: mockCaptureException,
 }));
 
 vi.mock("../../services/firestore/firestoreAnnotations", async () => {
@@ -96,6 +101,7 @@ describe("useMapSessionChrome", () => {
     exitSession.mockClear();
     mockResetRemoteSession.mockClear();
     mockCancelWalkingThermometersAndAnnounce.mockClear();
+    mockCaptureException.mockClear();
   });
 
   it("does not clear the map while end game is active", () => {
@@ -273,6 +279,48 @@ describe("useMapSessionChrome", () => {
       "seeker",
       "left",
     );
+    expect(exitSession).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
+    );
+  });
+
+  it("still exits when thermometer cancel rejects on leave", async () => {
+    const cancelError = new Error("network");
+    mockCancelWalkingThermometersAndAnnounce.mockRejectedValueOnce(cancelError);
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: remoteSession,
+        isHost: true,
+        annotations: [],
+        pendingQuestions: [
+          {
+            id: "pq-walk",
+            sessionId: "session-remote",
+            toolType: "thermometer",
+            createdByUid: "host-1",
+            createdAt: "2026-01-01T00:00:00.000Z",
+            status: "walking",
+            placement: { geometryJson: "{}", metadata: {} },
+            replyOptions: [],
+            promptText: "Thermometer walk started",
+          },
+        ],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleLeaveSession();
+    });
+
+    expect(mockCaptureException).toHaveBeenCalledWith(cancelError);
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
     );

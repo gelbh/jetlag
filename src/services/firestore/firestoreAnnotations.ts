@@ -428,7 +428,7 @@ async function joinRemoteSessionWithRead(
       memberAppVersions,
     });
     if (returningMemberUid != null && returningMemberUid !== uid) {
-      await cancelWalkingThermometersAfterIdentityHeal(
+      void cancelWalkingThermometersAfterIdentityHeal(
         sessionDoc.id,
         returningMemberUid,
         uid,
@@ -496,7 +496,7 @@ async function joinRemoteSessionWithoutRead(
         [`memberRoles.${returningMemberUid}`]: deleteField(),
         [`memberAppVersions.${returningMemberUid}`]: deleteField(),
       });
-      await cancelWalkingThermometersAfterIdentityHeal(
+      void cancelWalkingThermometersAfterIdentityHeal(
         sessionId,
         returningMemberUid,
         uid,

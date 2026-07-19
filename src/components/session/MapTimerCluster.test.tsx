@@ -71,6 +71,27 @@ describe("MapTimerCluster thermometer cancel", () => {
     expect(screen.getByText("STUCK?")).toBeTruthy();
   });
 
+  it("shows Cancel for the walk creator even when not host", () => {
+    const onCancel = vi.fn();
+
+    render(
+      <MapTimerCluster
+        sessionRules={{ gameSize: "medium" }}
+        timerState={timerState}
+        timerRunning
+        timerHasStarted
+        pendingQuestions={[walkingQuestion]}
+        myUid="seeker-1"
+        hostUid="host-1"
+        onCancelWalkingQuestion={onCancel}
+        onOpenTimerMenu={vi.fn()}
+        timerMenuOpen={false}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Cancel thermometer walk" })).toBeTruthy();
+  });
+
   it("hides Cancel for non-host non-creator seekers", () => {
     render(
       <MapTimerCluster

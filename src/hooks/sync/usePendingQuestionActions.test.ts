@@ -9,6 +9,12 @@ const firestoreMocks = vi.hoisted(() => ({
   deletePendingQuestion: vi.fn(async () => undefined),
   postGameSystemMessage: vi.fn(async () => undefined),
   updateGameMessageAnswer: vi.fn(async () => undefined),
+  getPendingQuestionStatus: vi.fn(async () => "walking"),
+  THERMOMETER_WALK_CANCEL_TEXT: {
+    left: "Thermometer walk cancelled — seeker left.",
+    orphan: "Thermometer walk cancelled — seeker left the session.",
+    manual: "Thermometer walk cancelled.",
+  },
 }));
 
 vi.mock("../../services/firestore/firestoreSessionExtras", () => firestoreMocks);
@@ -66,6 +72,55 @@ describe("usePendingQuestionActions", () => {
       "Thermometer walk cancelled.",
       expect.any(String),
     );
+  });
+
+  it.each([
+    {
+      reason: "left" as const,
+      text: "Thermometer walk cancelled — seeker left.",
+    },
+    {
+      reason: "orphan" as const,
+      text: "Thermometer walk cancelled — seeker left the session.",
+    },
+  ])("posts $reason cancel announcement text", async ({ reason, text }) => {
+    const { result } = renderHook(() => usePendingQuestionActions());
+
+    await act(async () => {
+      await result.current.cancelThermometerWalk({
+        sessionId: "session-1",
+        pendingQuestionId: "pq-1",
+        senderUid: "host-1",
+        senderRole: "seeker",
+        reason,
+      });
+    });
+
+    expect(firestoreMocks.postGameSystemMessage).toHaveBeenCalledWith(
+      "session-1",
+      "host-1",
+      "seeker",
+      text,
+      expect.any(String),
+    );
+  });
+
+  it("skips cancel and announce when the walk is already cancelled", async () => {
+    firestoreMocks.getPendingQuestionStatus.mockResolvedValueOnce("cancelled");
+    const { result } = renderHook(() => usePendingQuestionActions());
+
+    await act(async () => {
+      await result.current.cancelThermometerWalk({
+        sessionId: "session-1",
+        pendingQuestionId: "pq-1",
+        senderUid: "host-1",
+        senderRole: "seeker",
+        reason: "manual",
+      });
+    });
+
+    expect(firestoreMocks.updatePendingQuestion).not.toHaveBeenCalled();
+    expect(firestoreMocks.postGameSystemMessage).not.toHaveBeenCalled();
   });
 
   it("does not post a system message when cancel update fails", async () => {

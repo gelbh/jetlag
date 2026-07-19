@@ -12,11 +12,14 @@ import { buildThermometerLineGeometry } from "../../domain/questions";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
   deletePendingQuestion,
+  getPendingQuestionStatus,
   postGameSystemMessage,
+  THERMOMETER_WALK_CANCEL_TEXT,
   updateGameMessageAnswer,
   updatePendingQuestion,
   writePendingQuestion,
   writeSessionMessage,
+  type ThermometerWalkCancelReason,
 } from "../../services/firestore/firestoreSessionExtras";
 
 export interface SubmitPendingQuestionInput {
@@ -248,24 +251,25 @@ export function usePendingQuestionActions() {
       pendingQuestionId: string;
       senderUid: string;
       senderRole: PlayerRole;
-      reason: "left" | "orphan" | "manual";
+      reason: ThermometerWalkCancelReason;
     }) => {
+      const status = await getPendingQuestionStatus(
+        sessionId,
+        pendingQuestionId,
+      );
+      if (status !== "walking") {
+        return;
+      }
+
       await updatePendingQuestion(sessionId, pendingQuestionId, {
         status: "cancelled",
       });
-
-      const text =
-        reason === "left"
-          ? "Thermometer walk cancelled — seeker left."
-          : reason === "orphan"
-            ? "Thermometer walk cancelled — seeker left the session."
-            : "Thermometer walk cancelled.";
 
       await postGameSystemMessage(
         sessionId,
         senderUid,
         senderRole,
-        text,
+        THERMOMETER_WALK_CANCEL_TEXT[reason],
         createMessageId(),
       );
     },
