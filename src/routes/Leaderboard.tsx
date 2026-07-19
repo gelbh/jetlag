@@ -1,6 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RequireUsername } from "../components/auth/RequireUsername";
+import { LeaderboardBoardChip } from "../components/leaderboard/LeaderboardBoardChip";
+import { LeaderboardBoardSheet } from "../components/leaderboard/LeaderboardBoardSheet";
+import { LeaderboardLeadPack } from "../components/leaderboard/LeaderboardLeadPack";
 import { LeaderboardRankList } from "../components/leaderboard/LeaderboardRankList";
+import { LeaderboardSelfFooter } from "../components/leaderboard/LeaderboardSelfFooter";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { InlineError } from "../components/ui/InlineError";
 import { SegmentControl } from "../components/ui/SegmentControl";
@@ -10,38 +14,56 @@ import {
   screenHeaderOffsetClassName,
 } from "../components/ui/ScreenHeader";
 import {
-  LEADERBOARD_METRICS,
-  LEADERBOARD_ROLES,
   LEADERBOARD_SCOPES,
-  leaderboardMetricLabel,
   leaderboardScopeLabel,
   type LeaderboardEntry,
-  type LeaderboardMetric,
-  type LeaderboardRole,
-  type LeaderboardScope,
 } from "../domain/game/leaderboard";
-import { GAME_SIZE_OPTIONS, gameSizeLabel } from "../domain/session/gameSize";
-import type { GameSize } from "../domain/session/gameSize";
-import { playerRoleLabel } from "../domain/session/playerRole";
+import {
+  loadLeaderboardBoardPrefs,
+  saveLeaderboardBoardPrefs,
+  type LeaderboardBoardSelection,
+} from "../domain/game/leaderboardBoardPrefs";
+import {
+  leaderboardBoardSummaryLabel,
+  resolveSelfFooterMode,
+  splitLeadPack,
+} from "../domain/game/leaderboardView";
 import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
+import { useLeaderboardSelfEntry } from "../hooks/leaderboard/useLeaderboardSelfEntry";
+import { useRowInView } from "../hooks/leaderboard/useRowInView";
 import { useUserProfile } from "../hooks/profile/useUserProfile";
 import { isFirebaseConfigured } from "../services/core/firebase";
 import { subscribeLeaderboardBoard } from "../services/firestore/firestoreLeaderboard";
 
+const EMPTY_BOARD_MESSAGE =
+  "No ranked entries yet. Finish synced rounds with leaderboard opt-in to populate this board.";
+
 function LeaderboardBoard() {
   const { user, isPermanent } = usePermanentAuthUser();
-  const [scope, setScope] = useState<LeaderboardScope>("global");
-  const [gameSize, setGameSize] = useState<GameSize>("medium");
-  const [role, setRole] = useState<LeaderboardRole>("seeker");
-  const [metric, setMetric] = useState<LeaderboardMetric>("distance_traveled");
+  const [selection, setSelection] = useState(loadLeaderboardBoardPrefs);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [boardLoading, setBoardLoading] = useState(true);
   const [boardError, setBoardError] = useState<string | null>(null);
+  const viewerRowRef = useRef<HTMLLIElement | null>(null);
+  const {
+    entry: selfEntry,
+    error: selfError,
+  } = useLeaderboardSelfEntry(selection, user?.uid);
   const { profile, ready: profileReady, error: profileError } = useUserProfile(
     user?.uid,
     isFirebaseConfigured() && isPermanent,
   );
+  const listEntry =
+    user?.uid != null
+      ? (entries.find((entry) => entry.uid === user.uid) ?? null)
+      : null;
+  const rowInView = useRowInView(viewerRowRef, listEntry?.uid ?? null);
   const needsOptIn = profile != null && !profile.leaderboardOptIn;
+
+  useEffect(() => {
+    saveLeaderboardBoardPrefs(selection);
+  }, [selection]);
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- sync board loading when filters change or Firebase is off */
@@ -55,10 +77,10 @@ function LeaderboardBoard() {
     setBoardError(null);
     /* eslint-enable react-hooks/set-state-in-effect */
     return subscribeLeaderboardBoard(
-      scope,
-      gameSize,
-      role,
-      metric,
+      selection.scope,
+      selection.gameSize,
+      selection.role,
+      selection.metric,
       (next) => {
         setEntries(next);
         setBoardLoading(false);
@@ -68,54 +90,54 @@ function LeaderboardBoard() {
         setBoardError(error.message);
       },
     );
-  }, [scope, gameSize, role, metric]);
+  }, [selection.scope, selection.gameSize, selection.role, selection.metric]);
+  const footerMode = resolveSelfFooterMode({
+    viewerUid: user?.uid,
+    listEntry,
+    selfEntry,
+    selfError,
+    rowInView,
+  });
+  const footerEntry = listEntry ?? selfEntry;
+  const footerVisible = footerMode !== "hidden";
+  const { lead, rest } = splitLeadPack(entries);
+
+  function updateSelection(next: LeaderboardBoardSelection) {
+    setSelection(next);
+  }
 
   return (
     <>
       <div
-        className={`sticky top-0 z-[var(--z-banner)] -mx-5 space-y-3 border-b-2 border-border bg-surface-deep px-5 pb-3 ${screenHeaderInsetTopClassName}`}
+        className={`sticky top-0 z-[var(--z-banner)] -mx-5 flex items-center gap-2 border-b-2 border-border bg-surface-deep px-5 pb-3 ${screenHeaderInsetTopClassName}`}
         data-testid="leaderboard-filters"
       >
-        <SegmentControl
-          value={scope}
-          options={LEADERBOARD_SCOPES.map((value) => ({
-            value,
-            label: leaderboardScopeLabel(value),
-          }))}
-          onChange={setScope}
-          aria-label="Leaderboard scope"
-        />
-        <SegmentControl
-          value={gameSize}
-          options={GAME_SIZE_OPTIONS.map((value) => ({
-            value,
-            label: gameSizeLabel(value).label,
-          }))}
-          onChange={setGameSize}
-          aria-label="Game size"
-        />
-        <SegmentControl
-          value={role}
-          options={LEADERBOARD_ROLES.map((value) => ({
-            value,
-            label: playerRoleLabel(value),
-          }))}
-          onChange={setRole}
-          aria-label="Player role"
-        />
-        <SegmentControl
-          value={metric}
-          options={LEADERBOARD_METRICS.map((value) => ({
-            value,
-            label: leaderboardMetricLabel(value, role),
-          }))}
-          onChange={setMetric}
-          variant="chips"
-          aria-label="Leaderboard metric"
+        <div className="shrink-0">
+          <SegmentControl
+            value={selection.scope}
+            options={LEADERBOARD_SCOPES.map((value) => ({
+              value,
+              label: leaderboardScopeLabel(value),
+            }))}
+            onChange={(scope) => updateSelection({ ...selection, scope })}
+            aria-label="Leaderboard scope"
+          />
+        </div>
+        <LeaderboardBoardChip
+          label={leaderboardBoardSummaryLabel(selection)}
+          onClick={() => setSheetOpen(true)}
+          expanded={sheetOpen}
         />
       </div>
 
-      <div className="space-y-3 pt-4">
+      <LeaderboardBoardSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        selection={selection}
+        onChange={updateSelection}
+      />
+
+      <div className={`space-y-3 pt-4 ${footerVisible ? "pb-16" : ""}`}>
         {!profileReady ? (
           <p className="text-sm text-ink-muted">Loading profile…</p>
         ) : profileError ? (
@@ -129,23 +151,42 @@ function LeaderboardBoard() {
           </p>
         ) : null}
 
-        <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
-          {leaderboardScopeLabel(scope)} · {gameSizeLabel(gameSize).label} ·{" "}
-          {playerRoleLabel(role)} · {leaderboardMetricLabel(metric, role)}
-        </p>
-
         {boardError ? <InlineError>{boardError}</InlineError> : null}
 
         {boardError ? null : (
-          <LeaderboardRankList
-            entries={entries}
-            metric={metric}
-            viewerUid={user?.uid}
-            loading={boardLoading}
-            emptyMessage="No ranked entries yet. Finish synced rounds with leaderboard opt-in to populate this board."
-          />
+          <>
+            <LeaderboardLeadPack
+              entries={lead}
+              metric={selection.metric}
+              viewerUid={user?.uid}
+              loading={boardLoading}
+              viewerRowRef={viewerRowRef}
+            />
+
+            {!boardLoading && (rest.length > 0 || lead.length === 0) ? (
+              <LeaderboardRankList
+                entries={rest}
+                metric={selection.metric}
+                viewerUid={user?.uid}
+                emptyMessage={EMPTY_BOARD_MESSAGE}
+                viewerRowRef={viewerRowRef}
+              />
+            ) : null}
+          </>
         )}
       </div>
+
+      <LeaderboardSelfFooter
+        mode={footerMode}
+        entry={footerEntry}
+        metric={selection.metric}
+        onJump={() => {
+          viewerRowRef.current?.scrollIntoView({
+            block: "center",
+            behavior: "smooth",
+          });
+        }}
+      />
     </>
   );
 }
@@ -156,7 +197,7 @@ export function Leaderboard() {
       <ScreenHeader backTo="/" backLabel="Home" />
       <div className={screenHeaderOffsetClassName}>
         <div className="space-y-1 pb-4">
-          <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
+          <h1 className="font-display text-balance text-3xl font-bold uppercase leading-[0.92] tracking-tight text-ink sm:text-[2rem]">
             Leaderboard
           </h1>
           <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">

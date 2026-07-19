@@ -1,4 +1,8 @@
-import { formatLeaderboardValue, leaderboardEntryLabel } from "../../domain/game/leaderboard";
+import type { Ref } from "react";
+import {
+  formatLeaderboardValue,
+  leaderboardEntryLabel,
+} from "../../domain/game/leaderboard";
 import type {
   LeaderboardEntry,
   LeaderboardMetric,
@@ -10,6 +14,20 @@ interface LeaderboardRankListProps {
   viewerUid?: string | null;
   loading?: boolean;
   emptyMessage: string;
+  viewerRowRef?: Ref<HTMLLIElement | null>;
+}
+
+function medalClass(rank: number): string {
+  switch (rank) {
+    case 1:
+      return "text-highlight";
+    case 2:
+      return "text-ink-secondary";
+    case 3:
+      return "text-action";
+    default:
+      return "text-ink-dim";
+  }
 }
 
 function RankSkeleton() {
@@ -28,6 +46,7 @@ export function LeaderboardRankList({
   viewerUid,
   loading = false,
   emptyMessage,
+  viewerRowRef,
 }: LeaderboardRankListProps) {
   if (loading) {
     return (
@@ -52,11 +71,15 @@ export function LeaderboardRankList({
         return (
           <li
             key={entry.uid}
+            ref={isYou ? viewerRowRef : undefined}
+            data-testid={`leaderboard-row-${entry.uid}`}
             className={`flex items-baseline gap-3 border-b border-border/60 py-3 last:border-b-0 ${
               isYou ? "bg-brand-blue/10 px-2 -mx-2 rounded-md" : ""
             }`}
           >
-            <span className="w-8 shrink-0 font-mono text-sm tabular-nums text-ink-dim">
+            <span
+              className={`w-8 shrink-0 font-mono text-sm tabular-nums ${medalClass(entry.rank)}`}
+            >
               {entry.rank}
             </span>
             <span
