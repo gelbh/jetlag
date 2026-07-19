@@ -6,10 +6,9 @@ export const E2E_LAYOUT_USERNAME = "e2e_layout_user";
 
 export const SOCIAL_LAYOUT_ROUTES = {
   "/leaderboard": {
-    ready: (page: Page) =>
-      page.getByRole("tablist", { name: "Leaderboard metric" }),
-    viewportTarget: (page: Page) =>
-      page.getByRole("tablist", { name: "Leaderboard metric" }),
+    // Metric tablist lives in the closed board sheet — use sticky filter chrome.
+    ready: (page: Page) => page.getByTestId("leaderboard-filters"),
+    viewportTarget: (page: Page) => page.getByTestId("leaderboard-filters"),
   },
   "/friends": {
     ready: (page: Page) =>
