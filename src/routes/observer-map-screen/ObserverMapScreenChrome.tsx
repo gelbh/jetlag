@@ -176,7 +176,6 @@ export function ObserverMapScreenChrome({
           overlay.openChat();
           return;
         case "settings":
-          overlay.openLog();
           return;
         default: {
           const _exhaustive: never = tab;

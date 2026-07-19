@@ -264,7 +264,7 @@ export function MapScreenChrome({
   );
 
   useToolRailShortcuts({
-    enabled: isDesktop,
+    enabled: isDesktop && overlay.sheet === "none",
     activeTool,
     onSelect: handleSelectTool,
     toolOrder: visibleQuestionTools,

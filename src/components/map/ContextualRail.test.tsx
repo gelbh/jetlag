@@ -53,6 +53,16 @@ describe("ContextualRail", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it("ignores Escape when an aria-modal dialog is open", () => {
+    const modal = document.createElement("div");
+    modal.setAttribute("aria-modal", "true");
+    document.body.appendChild(modal);
+    const { onClose } = renderRail({ open: true, activeTab: "settings" });
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(onClose).not.toHaveBeenCalled();
+    modal.remove();
+  });
+
   it("moves focus into the panel when opened", () => {
     renderRail({ open: true, activeTab: "log" });
     const panel = screen.getByRole("tabpanel", { name: "Log" });

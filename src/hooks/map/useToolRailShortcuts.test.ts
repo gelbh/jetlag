@@ -90,4 +90,22 @@ describe("useToolRailShortcuts", () => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "1" }));
     expect(onSelect).not.toHaveBeenCalled();
   });
+
+  it("does nothing when gated off (e.g. overlay sheet open)", () => {
+    const onSelect = vi.fn();
+    const { rerender } = renderHook(
+      ({ enabled }: { enabled: boolean }) =>
+        useToolRailShortcuts({
+          enabled,
+          activeTool: "none",
+          onSelect,
+          toolOrder: TOOL_ORDER,
+        }),
+      { initialProps: { enabled: true } },
+    );
+
+    rerender({ enabled: false });
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "1" }));
+    expect(onSelect).not.toHaveBeenCalled();
+  });
 });

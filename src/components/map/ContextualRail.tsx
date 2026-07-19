@@ -43,10 +43,15 @@ export function ContextualRail({
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
+      if (event.key !== "Escape") {
+        return;
       }
+      // Nested modals (e.g. curse reference) own Escape first.
+      if (document.querySelector('[aria-modal="true"]')) {
+        return;
+      }
+      event.preventDefault();
+      onClose();
     };
 
     window.addEventListener("keydown", handleKeyDown);
