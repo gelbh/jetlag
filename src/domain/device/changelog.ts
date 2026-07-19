@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.8.1";
+export const APP_VERSION = "0.8.2";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.8.2",
+    date: "2026-07-19",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Leaderboard metric filters: scroll within the chip strip without sideways page scroll.",
+        ],
+      }
+    ],
+  },
   {
     version: "0.8.1",
     date: "2026-07-17",
