@@ -750,17 +750,16 @@
   }
 
   @media (min-width: 1024px) {
-    .home-card-btn,
-    .btn-primary.home-entry-action,
-    .jl-field-frame {
-      max-width: 20rem;
-      margin-inline: auto;
-    }
-
-    /* Join / form actions that use btn-primary without home-card-btn */
-    .desktop-entry-actions > .btn-primary,
-    .desktop-entry-actions > .btn-secondary,
-    .desktop-entry-actions > .home-card-btn {
+    /* Entry hosts only — do not bare-select .home-card-btn / .jl-field-frame
+       (create-session, tutorial, admin share those classes). */
+    .home-enter-actions .home-card-btn,
+    .desktop-entry-actions .home-card-btn,
+    .desktop-entry-actions .btn-primary,
+    .desktop-entry-actions .btn-secondary,
+    .desktop-entry-actions .btn-primary.home-entry-action,
+    .desktop-entry-actions .oauth-provider-button,
+    .desktop-entry-actions.jl-field-frame,
+    .desktop-entry-actions .jl-field-frame {
       max-width: 20rem;
       width: 100%;
       margin-inline: auto;
