@@ -1,7 +1,15 @@
 import { fetchWithTimeoutAndRetry } from "../lib/fetchWithTimeout.mjs";
+import { createMemoryCache } from "../lib/memoryCache.mjs";
 
 const TRANSITLAND_API_BASE = "https://transit.land/api/v2/rest";
 const TRANSIT_FETCH_TIMEOUT_MS = 30_000;
+const TRANSITLAND_CACHE_TTL_MS = 5 * 60 * 1000;
+
+const transitlandResponseCache = createMemoryCache(TRANSITLAND_CACHE_TTL_MS);
+
+function transitlandCacheKey(feed, bounds) {
+  return `${feed}:${bounds.south},${bounds.west},${bounds.north},${bounds.east}`;
+}
 
 function isInsideBounds(lat, lng, bounds) {
   return (
@@ -94,24 +102,38 @@ async function fetchTransitlandJson(url, apiKey) {
 }
 
 export async function fetchTransitlandVehicles(feed, apiKey, bounds) {
+  const cacheKey = transitlandCacheKey(feed, bounds);
+  const cached = transitlandResponseCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  let vehicles;
   if (feed.includes("~rt")) {
     const url = new URL(
       `${TRANSITLAND_API_BASE}/feeds/${encodeURIComponent(feed)}/download_latest_rt/vehicle_positions.json`,
     );
     url.searchParams.set("apikey", apiKey);
     const payload = await fetchTransitlandJson(url, apiKey);
-    return normalizeGtfsRtVehicleEntities(payload, bounds);
+    vehicles = normalizeGtfsRtVehicleEntities(payload, bounds);
+  } else {
+    const url = new URL(`${TRANSITLAND_API_BASE}/vehicle_positions`);
+    url.searchParams.set("apikey", apiKey);
+    url.searchParams.set("feed", feed);
+    url.searchParams.set(
+      "search",
+      `${bounds.south},${bounds.west},${bounds.north},${bounds.east}`,
+    );
+    url.searchParams.set("limit", "200");
+
+    const payload = await fetchTransitlandJson(url, apiKey);
+    vehicles = normalizeTransitlandVehicles(payload, bounds);
   }
 
-  const url = new URL(`${TRANSITLAND_API_BASE}/vehicle_positions`);
-  url.searchParams.set("apikey", apiKey);
-  url.searchParams.set("feed", feed);
-  url.searchParams.set(
-    "search",
-    `${bounds.south},${bounds.west},${bounds.north},${bounds.east}`,
-  );
-  url.searchParams.set("limit", "200");
+  transitlandResponseCache.set(cacheKey, vehicles);
+  return vehicles;
+}
 
-  const payload = await fetchTransitlandJson(url, apiKey);
-  return normalizeTransitlandVehicles(payload, bounds);
+export function clearTransitlandCacheForTests() {
+  transitlandResponseCache.clear();
 }
