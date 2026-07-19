@@ -16,8 +16,6 @@ import {
 } from "../../domain/device/serviceWorkerRefresh";
 import { setServiceWorkerChunkReloadContext } from "../../domain/device/lazyWithChunkRetry";
 import { tryUpdateServiceWorker } from "../../domain/device/serviceWorkerUpdate";
-import { ANNOTATION_SYNC_MESSAGE_TYPE } from "../../services/session/backgroundSync";
-import { flushOfflineQueue } from "../../services/session/flushOfflineQueue";
 import { useSessionStore } from "../../state/sessionStore";
 import {
   AppUpdateContext,
@@ -110,28 +108,6 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
       setNeedsRefresh(true);
       setDismissed(false);
     });
-  }, []);
-
-  useEffect(() => {
-    if (!("serviceWorker" in navigator)) {
-      return;
-    }
-
-    const onMessage = (event: MessageEvent) => {
-      if (event.data?.type !== ANNOTATION_SYNC_MESSAGE_TYPE) {
-        return;
-      }
-      const sessionId = useSessionStore.getState().session?.id;
-      if (!sessionId) {
-        return;
-      }
-      void flushOfflineQueue(sessionId);
-    };
-
-    navigator.serviceWorker.addEventListener("message", onMessage);
-    return () => {
-      navigator.serviceWorker.removeEventListener("message", onMessage);
-    };
   }, []);
 
   useEffect(() => {

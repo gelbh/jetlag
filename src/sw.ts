@@ -12,6 +12,10 @@ import {
   NetworkOnly,
   StaleWhileRevalidate,
 } from "workbox-strategies";
+import {
+  ANNOTATION_SYNC_MESSAGE_TYPE,
+  ANNOTATION_SYNC_TAG,
+} from "./services/session/backgroundSync";
 
 declare let self: ServiceWorkerGlobalScope;
 
@@ -88,18 +92,29 @@ registerRoute(
   }),
 );
 
+self.addEventListener("message", (event: ExtendableMessageEvent) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    void self.skipWaiting();
+  }
+});
+
 self.addEventListener("sync", (event: Event) => {
   const syncEvent = event as ExtendableEvent & { tag: string };
-  if (syncEvent.tag !== "sync-annotations") {
+  if (syncEvent.tag !== ANNOTATION_SYNC_TAG) {
     return;
   }
 
+  // Reject when no window client is awake so the browser retries Background Sync.
+  // Clients that receive the message flush via useSessionSync.
   syncEvent.waitUntil(
     self.clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((windowClients) => {
+        if (windowClients.length === 0) {
+          throw new Error("No window clients available for annotation sync");
+        }
         for (const client of windowClients) {
-          client.postMessage({ type: "jetlag-sync-annotations" });
+          client.postMessage({ type: ANNOTATION_SYNC_MESSAGE_TYPE });
         }
       }),
   );
