@@ -35,7 +35,13 @@ async function assertLayoutSmoke(
 async function assertSocialLayoutSmoke(page: Page, path: SocialLayoutPath) {
   await openSocialRoute(page, path);
   await assertNoHorizontalOverflow(page);
-  await assertInViewport(socialRouteViewportLocator(page, path));
+  const viewportTarget = socialRouteViewportLocator(page, path);
+  await assertInViewport(viewportTarget);
+  if (path === "/friends") {
+    await assertMinTapTargets(viewportTarget);
+  } else {
+    await assertMinTapTargets(viewportTarget.getByRole("tab"));
+  }
   await assertNoSeriousAxeViolations(page);
 }
 

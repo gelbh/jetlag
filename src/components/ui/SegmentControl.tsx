@@ -35,7 +35,7 @@ export function SegmentControl<Value extends string>({
               type="button"
               role="tab"
               aria-selected={selected}
-              disabled={disabled}
+              disabled={disabled || option.disabled}
               onClick={() => onChange(option.value)}
               className={`jl-segment-btn ${
                 selected ? "jl-segment-btn-selected" : ""
