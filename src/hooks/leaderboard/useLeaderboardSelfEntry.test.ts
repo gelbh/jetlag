@@ -115,7 +115,7 @@ describe("useLeaderboardSelfEntry", () => {
     );
 
     rerender({
-      sel: { ...selection, metric: "rounds_won" as const },
+      sel: { ...selection, metric: "wins" as const },
     });
 
     expect(result.current.loading).toBe(true);
