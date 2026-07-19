@@ -391,7 +391,25 @@
     padding: 0.25rem;
   }
 
+  .jl-segment-chips {
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    border: 2px solid var(--color-border);
+    background: var(--color-surface-base);
+    padding: 0.25rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .jl-segment-chips .jl-segment-btn {
+    flex: 0 0 auto;
+    min-height: 2.75rem;
+    white-space: nowrap;
+  }
+
   .jl-segment-btn {
+    min-width: 0;
     min-height: 2.75rem;
     border-radius: var(--radius-hud-sm);
     border: 2px solid transparent;
