@@ -50,6 +50,7 @@ import { photoUploadAccessError } from "../../domain/questions";
 import { generateSessionCode } from "../session/sessionCodes";
 import {
   cancelOpenPendingQuestions,
+  cancelWalkingThermometersAfterIdentityHeal,
   postGameSystemMessage,
 } from "./firestoreSessionExtras";
 import {
@@ -433,6 +434,14 @@ async function joinRemoteSessionWithRead(
       memberRoles,
       memberAppVersions,
     });
+    if (returningMemberUid != null && returningMemberUid !== uid) {
+      await cancelWalkingThermometersAfterIdentityHeal(
+        sessionDoc.id,
+        returningMemberUid,
+        uid,
+        role,
+      );
+    }
   } else if (!existingRoles[uid] || roleChanged) {
     await writeSessionMembershipPatch(sessionDoc.ref, {
       memberRoles,
@@ -494,6 +503,12 @@ async function joinRemoteSessionWithoutRead(
         [`memberRoles.${returningMemberUid}`]: deleteField(),
         [`memberAppVersions.${returningMemberUid}`]: deleteField(),
       });
+      await cancelWalkingThermometersAfterIdentityHeal(
+        sessionId,
+        returningMemberUid,
+        uid,
+        role,
+      );
     }
   } else {
     await updateDoc(sessionRef, updatePayload);

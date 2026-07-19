@@ -6,28 +6,42 @@ import {
   deserializePendingQuestionFromFirestore,
 } from "./firestoreSerialization";
 
-const firestoreMocks = vi.hoisted(() => ({
-  setDoc: vi.fn(async () => undefined),
-  updateDoc: vi.fn(async () => undefined),
-  deleteDoc: vi.fn(async () => undefined),
-  addDoc: vi.fn(async () => undefined),
-  doc: vi.fn((...segments: string[]) => ({ path: segments.join("/") })),
-  collection: vi.fn((...segments: string[]) => ({
-    path: segments.join("/"),
-  })),
-}));
+const firestoreMocks = vi.hoisted(() => {
+  const batchUpdate = vi.fn();
+  const batchCommit = vi.fn(async () => undefined);
+  return {
+    setDoc: vi.fn(async () => undefined),
+    updateDoc: vi.fn(async () => undefined),
+    deleteDoc: vi.fn(async () => undefined),
+    addDoc: vi.fn(async () => undefined),
+    getDocs: vi.fn(async () => ({ docs: [] })),
+    writeBatch: vi.fn(() => ({
+      update: batchUpdate,
+      commit: batchCommit,
+    })),
+    batchUpdate,
+    batchCommit,
+    doc: vi.fn((...segments: string[]) => ({ path: segments.join("/") })),
+    collection: vi.fn((...segments: string[]) => ({
+      path: segments.join("/"),
+    })),
+  };
+});
 
 vi.mock("firebase/firestore", () => ({
   addDoc: firestoreMocks.addDoc,
   collection: firestoreMocks.collection,
   deleteDoc: firestoreMocks.deleteDoc,
   doc: firestoreMocks.doc,
+  getDocs: firestoreMocks.getDocs,
   onSnapshot: vi.fn(),
   orderBy: vi.fn(),
   query: vi.fn(),
   serverTimestamp: vi.fn(),
   setDoc: firestoreMocks.setDoc,
   updateDoc: firestoreMocks.updateDoc,
+  writeBatch: firestoreMocks.writeBatch,
+  where: vi.fn(),
 }));
 
 vi.mock("../core/firebase", () => ({
@@ -36,6 +50,7 @@ vi.mock("../core/firebase", () => ({
 
 import {
   appendPlayerTrailPoint,
+  cancelWalkingThermometerQuestions,
   deletePendingQuestion,
   updatePendingQuestion,
   writePendingQuestion,
@@ -263,5 +278,26 @@ describe("firestoreSessionExtras writes", () => {
         role: "hider",
       }),
     );
+  });
+
+  it("cancels walking thermometer questions by id with a status-only batch", async () => {
+    await cancelWalkingThermometerQuestions("session-1", ["pq-walk-1", "pq-walk-2"]);
+
+    expect(firestoreMocks.writeBatch).toHaveBeenCalled();
+    expect(firestoreMocks.batchUpdate).toHaveBeenCalledTimes(2);
+    expect(firestoreMocks.batchUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ path: expect.stringContaining("pq-walk-1") }),
+      { status: "cancelled" },
+    );
+    expect(firestoreMocks.batchUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ path: expect.stringContaining("pq-walk-2") }),
+      { status: "cancelled" },
+    );
+    expect(firestoreMocks.batchCommit).toHaveBeenCalled();
+  });
+
+  it("no-ops cancelWalkingThermometerQuestions for an empty id list", async () => {
+    await cancelWalkingThermometerQuestions("session-1", []);
+    expect(firestoreMocks.writeBatch).not.toHaveBeenCalled();
   });
 });

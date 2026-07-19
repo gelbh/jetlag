@@ -8,6 +8,12 @@ const exitSession = vi.hoisted(() => vi.fn(async () => undefined));
 const mockResetRemoteSession = vi.hoisted(() =>
   vi.fn(async () => "2026-01-02T00:00:00.000Z"),
 );
+const mockCancelWalkingThermometerQuestions = vi.hoisted(() =>
+  vi.fn(async () => undefined),
+);
+const mockPostGameSystemMessage = vi.hoisted(() =>
+  vi.fn(async () => undefined),
+);
 
 vi.mock("../session/useSessionExit", () => ({
   useSessionExit: () => exitSession,
@@ -24,6 +30,17 @@ vi.mock("../../services/firestore/firestoreAnnotations", async () => {
   return {
     ...actual,
     resetRemoteSession: mockResetRemoteSession,
+  };
+});
+
+vi.mock("../../services/firestore/firestoreSessionExtras", async () => {
+  const actual = await vi.importActual<
+    typeof import("../../services/firestore/firestoreSessionExtras")
+  >("../../services/firestore/firestoreSessionExtras");
+  return {
+    ...actual,
+    cancelWalkingThermometerQuestions: mockCancelWalkingThermometerQuestions,
+    postGameSystemMessage: mockPostGameSystemMessage,
   };
 });
 
@@ -81,6 +98,8 @@ describe("useMapSessionChrome", () => {
   beforeEach(() => {
     exitSession.mockClear();
     mockResetRemoteSession.mockClear();
+    mockCancelWalkingThermometerQuestions.mockClear();
+    mockPostGameSystemMessage.mockClear();
   });
 
   it("does not clear the map while end game is active", () => {
@@ -215,5 +234,49 @@ describe("useMapSessionChrome", () => {
     });
 
     expect(alertSpy).toHaveBeenCalled();
+  });
+
+  it("cancels walking thermometer questions before exitSession on leave", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: remoteSession,
+        isHost: true,
+        annotations: [],
+        pendingQuestions: [
+          {
+            id: "pq-walk",
+            sessionId: "session-remote",
+            toolType: "thermometer",
+            createdByUid: "host-1",
+            createdAt: "2026-01-01T00:00:00.000Z",
+            status: "walking",
+            placement: { geometryJson: "{}", metadata: {} },
+            replyOptions: [],
+            promptText: "Thermometer walk started",
+          },
+        ],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleLeaveSession();
+    });
+
+    expect(mockCancelWalkingThermometerQuestions).toHaveBeenCalledWith(
+      "session-remote",
+      ["pq-walk"],
+    );
+    expect(mockPostGameSystemMessage).toHaveBeenCalled();
+    expect(exitSession).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
+    );
   });
 });

@@ -13,8 +13,14 @@ import {
   isHidingPeriodActive,
   seekPhaseElapsedMs,
 } from "../../domain/session/hidingPeriod";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
-import { selectPrimaryQuestionTimer } from "../../domain/questions";
+import type {
+  PendingQuestionRecord,
+  PlayerLocationRecord,
+} from "../../domain/session/sessionChat";
+import {
+  isStaleThermometerWalk,
+  selectPrimaryQuestionTimer,
+} from "../../domain/questions";
 import { useMapStore } from "../../state/mapStore";
 
 interface MapTimerClusterProps {
@@ -23,6 +29,10 @@ interface MapTimerClusterProps {
   timerRunning: boolean;
   timerHasStarted: boolean;
   pendingQuestions?: readonly PendingQuestionRecord[];
+  myUid?: string | null;
+  hostUid?: string | null;
+  seekerLocations?: readonly PlayerLocationRecord[];
+  onCancelWalkingQuestion?: (pendingQuestionId: string) => void;
   onOpenTimerMenu: () => void;
   timerMenuOpen: boolean;
 }
@@ -45,6 +55,10 @@ export function MapTimerCluster({
   timerRunning,
   timerHasStarted,
   pendingQuestions = [],
+  myUid = null,
+  hostUid = null,
+  seekerLocations = [],
+  onCancelWalkingQuestion,
   onOpenTimerMenu,
   timerMenuOpen,
 }: MapTimerClusterProps) {
@@ -81,6 +95,36 @@ export function MapTimerCluster({
     : "jl-ticker-idle";
 
   if (questionTimer) {
+    const primaryQuestion = pendingQuestions.find(
+      (question) => question.id === questionTimer.pendingQuestionId,
+    );
+    const isWalkingThermometer =
+      primaryQuestion?.toolType === "thermometer" &&
+      primaryQuestion.status === "walking";
+    const canCancelWalk =
+      isWalkingThermometer &&
+      Boolean(onCancelWalkingQuestion) &&
+      myUid != null &&
+      (myUid === hostUid || myUid === primaryQuestion.createdByUid);
+    const walkerLocationUpdatedAt =
+      primaryQuestion == null
+        ? null
+        : (seekerLocations.find(
+            (location) => location.uid === primaryQuestion.createdByUid,
+          )?.updatedAt ?? null);
+    const showStuckCue =
+      isWalkingThermometer &&
+      primaryQuestion != null &&
+      myUid === hostUid &&
+      isStaleThermometerWalk(
+        primaryQuestion,
+        walkerLocationUpdatedAt,
+        Date.now(),
+      );
+    const countdownLabel = showStuckCue
+      ? "STUCK?"
+      : questionTimer.countdownLabel;
+
     return (
       <div className="flex shrink-0 flex-col items-end gap-0.5">
         <p
@@ -89,9 +133,19 @@ export function MapTimerCluster({
         >
           <span className="jl-ticker-phase">{questionTimer.toolLabel}</span>
           <span className="jl-ticker-value tabular-nums">
-            {questionTimer.countdownLabel}
+            {countdownLabel}
           </span>
         </p>
+        {canCancelWalk ? (
+          <button
+            type="button"
+            onClick={() => onCancelWalkingQuestion?.(primaryQuestion.id)}
+            className="jl-ticker jl-ticker-secondary text-highlight"
+            aria-label="Cancel thermometer walk"
+          >
+            Cancel
+          </button>
+        ) : null}
         {hidingActive && hidingLabel ? (
           <p className="jl-ticker-secondary tabular-nums">{hidingLabel}</p>
         ) : (

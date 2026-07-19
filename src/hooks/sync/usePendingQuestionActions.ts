@@ -236,10 +236,47 @@ export function usePendingQuestionActions() {
     [],
   );
 
+  const cancelThermometerWalk = useCallback(
+    async ({
+      sessionId,
+      pendingQuestionId,
+      senderUid,
+      senderRole,
+      reason,
+    }: {
+      sessionId: string;
+      pendingQuestionId: string;
+      senderUid: string;
+      senderRole: PlayerRole;
+      reason: "left" | "orphan" | "manual";
+    }) => {
+      await updatePendingQuestion(sessionId, pendingQuestionId, {
+        status: "cancelled",
+      });
+
+      const text =
+        reason === "left"
+          ? "Thermometer walk cancelled — seeker left."
+          : reason === "orphan"
+            ? "Thermometer walk cancelled — seeker left the session."
+            : "Thermometer walk cancelled.";
+
+      await postGameSystemMessage(
+        sessionId,
+        senderUid,
+        senderRole,
+        text,
+        createMessageId(),
+      );
+    },
+    [],
+  );
+
   return {
     submitPendingQuestion,
     completeThermometerWalk,
     answerPendingQuestion,
     postSystemMessage,
+    cancelThermometerWalk,
   };
 }

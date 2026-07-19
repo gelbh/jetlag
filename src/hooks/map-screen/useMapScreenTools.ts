@@ -64,6 +64,7 @@ export function useMapScreenTools({
     answerPendingQuestion,
     completeThermometerWalk,
     postSystemMessage,
+    cancelThermometerWalk,
   } = usePendingQuestionActions();
 
   const finishPlacement = useCallback(() => {
@@ -301,6 +302,7 @@ export function useMapScreenTools({
     submitToolQuestion,
     answerPendingQuestion,
     postSystemMessage,
+    cancelThermometerWalk,
     radarTool,
     photoTool,
     thermometerTool,

@@ -41,6 +41,7 @@ import { useSharedSessionScreen } from "../../hooks/session/useSharedSessionScre
 import { useEnsureSessionMembership } from "../../hooks/session/useEnsureSessionMembership";
 import { useQuestionDeadlineEnforcement } from "../../hooks/session/useQuestionDeadlineEnforcement";
 import { usePendingQuestionResolver } from "../../hooks/sync/usePendingQuestionResolver";
+import { useCancelOrphanThermometerWalks } from "../../hooks/sync/useCancelOrphanThermometerWalks";
 import { useSeekerLocationSync } from "../../hooks/sync/useSeekerLocationSync";
 import { useTransitLayer } from "../../hooks/map/useTransitLayer";
 import { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
@@ -55,6 +56,7 @@ import {
   gameAreaPreloadKey,
 } from "../../services/session/gameAreaPreload";
 import { startSeaLevelBackgroundSampling } from "../../services/geo/seaLevelProgressive";
+import { captureException } from "../../services/core/sentry";
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import { useToolPanelChrome } from "../../hooks/useToolPanelChrome";
 import { useSessionAnnotations } from "../../hooks/map/useSessionAnnotations";
@@ -321,6 +323,7 @@ export function useMapScreenController() {
     resetToolDrafts,
     ensurePointInGameArea,
     postSystemMessage,
+    cancelThermometerWalk,
   } = tools;
 
   const postDeadlineSystemMessage = useCallback(
@@ -360,6 +363,38 @@ export function useMapScreenController() {
     gameArea: toolGameArea,
     sessionResetAt: session?.sessionResetAt,
   });
+
+  useCancelOrphanThermometerWalks({
+    sessionId: session?.id ?? null,
+    myUid: uid,
+    myRole,
+    memberUids: session?.memberUids ?? [],
+    pendingQuestions,
+    cancelThermometerWalk,
+  });
+
+  const handleCancelWalkingQuestion = useCallback(
+    async (pendingQuestionId: string) => {
+      if (!session?.id || !uid || !myRole) {
+        return;
+      }
+      if (!window.confirm("Cancel this thermometer walk?")) {
+        return;
+      }
+      try {
+        await cancelThermometerWalk({
+          sessionId: session.id,
+          pendingQuestionId,
+          senderUid: uid,
+          senderRole: myRole,
+          reason: "manual",
+        });
+      } catch (error) {
+        captureException(error);
+      }
+    },
+    [cancelThermometerWalk, myRole, session?.id, uid],
+  );
 
   const activeThermometerWalk = useActiveThermometerWalk({
     pendingQuestions,
@@ -491,6 +526,7 @@ export function useMapScreenController() {
       session,
       isHost,
       annotations,
+      pendingQuestions,
       mapShellRef,
       exportLegendRef,
       clearAllAnnotations,
@@ -847,6 +883,7 @@ export function useMapScreenController() {
     handleDistanceUnitChange: sessionActions.handleDistanceUnitChange,
     exportMap,
     answerPendingQuestion: tools.answerPendingQuestion,
+    handleCancelWalkingQuestion,
     setActiveTool,
     setAwaitingPlacement,
   };
