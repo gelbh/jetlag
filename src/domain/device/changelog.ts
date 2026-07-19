@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.9.0";
+export const APP_VERSION = "0.9.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.9.1",
+    date: "2026-07-19",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Join code preview feels snappier (debounced lookup + short cache). Premium status survives a brief reload from the last good snapshot",
+          "Offline annotation sync is honored when the browser wakes the app via Background Sync (interval flush still covers other cases)",
+        ],
+      }
+    ],
+  },
   {
     version: "0.9.0",
     date: "2026-07-19",
