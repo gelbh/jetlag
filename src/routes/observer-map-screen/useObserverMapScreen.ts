@@ -3,7 +3,6 @@ import type { MapViewportState } from "../../components/map/MapViewportTracker";
 import {
   gameAreaCenter,
   gameAreaToBoundsExpression,
-  fallbackGameArea,
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../domain/device/powerProfile";
@@ -14,6 +13,7 @@ import { useResolvedSessionRules } from "../../hooks/session/useResolvedSessionR
 import { useSharedSessionScreen } from "../../hooks/session/useSharedSessionScreen";
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import { useSessionAnnotations } from "../../hooks/map/useSessionAnnotations";
+import { isPlaceholderGameArea } from "../../domain/session/joinPreviewGameArea";
 import { useMapStore, useSessionStore } from "../../state/sessionStore";
 
 const DEFAULT_MAP_CENTER: LatLngTuple = [51.505, -0.09];
@@ -39,9 +39,17 @@ export function useObserverMapScreen() {
   const authMode = myRole === "admin" ? "admin-permanent" : "hider-anonymous";
   const exitPath = myRole === "admin" ? "/admin" : "/";
 
-  const { gameArea, sessionRules, playAreaReady } = useResolvedSessionRules(session);
+  const { gameArea, sessionRules, playAreaReady: resolvedPlayAreaReady } =
+    useResolvedSessionRules(session);
   const resolvedGameArea = gameArea ?? session?.gameArea ?? null;
-  const displayGameArea = playAreaReady ? fallbackGameArea(resolvedGameArea) : null;
+  // Join-preview / zero areas must not frame the camera (fitBoundsMode="once").
+  const displayGameArea =
+    resolvedPlayAreaReady &&
+    resolvedGameArea != null &&
+    !isPlaceholderGameArea(resolvedGameArea)
+      ? resolvedGameArea
+      : null;
+  const playAreaReady = displayGameArea != null;
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
   const handleMapStyleChange = useCallback(
     (style: typeof mapStyle) => {
@@ -61,12 +69,12 @@ export function useObserverMapScreen() {
     return gameAreaCenter(displayGameArea);
   }, [displayGameArea]);
   const mapFocusBounds = useMemo(() => {
-    if (!playAreaReady || !displayGameArea) {
+    if (!displayGameArea) {
       return null;
     }
 
     return gameAreaToBoundsExpression(displayGameArea);
-  }, [playAreaReady, displayGameArea]);
+  }, [displayGameArea]);
 
   const {
     uid,

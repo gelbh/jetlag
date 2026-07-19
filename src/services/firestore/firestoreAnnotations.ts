@@ -45,6 +45,7 @@ import {
   deserializeSessionFromFirestore,
   sessionRulesPatchToFirestore,
 } from "./firestoreSerialization";
+import { buildJoinPreviewSession } from "../../domain/session/joinPreviewSession";
 import { photoUploadAccessError } from "../../domain/questions";
 import { generateSessionCode } from "../session/sessionCodes";
 import {
@@ -129,33 +130,6 @@ function sanitizeJoinReturningMemberUid(
     options.persistedMyUid,
     options.returningMemberUid,
   );
-}
-
-const JOIN_PREVIEW_PLACEHOLDER_AREA: GameArea = {
-  type: "Polygon",
-  coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
-};
-
-function buildJoinPreviewSession(
-  sessionId: string,
-  code: string,
-  codeRecord: SessionCodeRecord,
-): SessionRecord {
-  return {
-    id: sessionId,
-    code,
-    gameArea: JOIN_PREVIEW_PLACEHOLDER_AREA,
-    hostUid: codeRecord.hostUid,
-    createdAt: codeRecord.createdAt ?? new Date().toISOString(),
-    memberUids: [],
-    memberRoles: {},
-    gameSize: "medium",
-    distanceUnit: "imperial",
-    hidingZoneRadiusMeters: 402,
-    tier: codeRecord.tier ?? "free",
-    hostAppVersion: codeRecord.hostAppVersion,
-    status: codeRecord.status ?? "active",
-  };
 }
 
 async function readSessionCodeRecord(
@@ -523,6 +497,20 @@ async function joinRemoteSessionWithoutRead(
     }
   } else {
     await updateDoc(sessionRef, updatePayload);
+  }
+
+  // Membership write succeeded — re-read is now allowed by rules.
+  try {
+    const sessionDoc = await getDocFromServer(sessionRef);
+    if (sessionDoc.exists()) {
+      const data = sessionDoc.data() as Record<string, unknown>;
+      return {
+        status: "joined",
+        session: deserializeSessionFromFirestore(sessionDoc.id, data),
+      };
+    }
+  } catch {
+    // Fall through to preview only as last resort.
   }
 
   const memberUids = returningMemberUid
