@@ -1,8 +1,21 @@
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { ZERO_GAME_AREA } from "../../domain/geometry/geometry";
 import { JOIN_PREVIEW_PLACEHOLDER_AREA } from "../../domain/session/joinPreviewGameArea";
+import type { GameArea } from "../../domain/map/annotations";
 import { useObserverMapScreen } from "./useObserverMapScreen";
+
+const ZERO_GAME_AREA: GameArea = {
+  type: "Polygon",
+  coordinates: [
+    [
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 0],
+    ],
+  ],
+};
 
 const mockUseResolvedSessionRules = vi.fn();
 

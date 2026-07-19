@@ -1,11 +1,24 @@
 import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ZERO_GAME_AREA } from "../../domain/geometry/geometry";
 import {
   isPlaceholderGameArea,
   JOIN_PREVIEW_PLACEHOLDER_AREA,
 } from "../../domain/session/joinPreviewGameArea";
+import type { GameArea } from "../../domain/map/annotations";
 import { joinRemoteSessionByCode } from "./firestoreAnnotations";
+
+const zeroFallback: GameArea = {
+  type: "Polygon",
+  coordinates: [
+    [
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 0],
+    ],
+  ],
+};
 
 const getDoc = vi.hoisted(() => vi.fn());
 const getDocFromServer = vi.hoisted(() => vi.fn());
@@ -47,7 +60,7 @@ vi.mock("firebase/firestore", () => ({
 describe("isPlaceholderGameArea", () => {
   it("detects join-preview and zero fallback areas", () => {
     expect(isPlaceholderGameArea(JOIN_PREVIEW_PLACEHOLDER_AREA)).toBe(true);
-    expect(isPlaceholderGameArea(ZERO_GAME_AREA)).toBe(true);
+    expect(isPlaceholderGameArea(zeroFallback)).toBe(true);
     expect(
       isPlaceholderGameArea({
         type: "Polygon",
