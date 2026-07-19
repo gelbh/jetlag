@@ -6,9 +6,11 @@ function isTypingTarget(target: EventTarget | null): boolean {
     return false;
   }
 
-  return Boolean(
-    target.closest("input, textarea, select, [contenteditable=true]"),
-  );
+  if (target.isContentEditable) {
+    return true;
+  }
+
+  return Boolean(target.closest("input, textarea, select, [contenteditable]"));
 }
 
 export function useToolRailShortcuts(options: {
@@ -33,7 +35,7 @@ export function useToolRailShortcuts(options: {
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey) {
+      if (event.metaKey || event.ctrlKey || event.altKey || event.repeat) {
         return;
       }
 

@@ -3,9 +3,9 @@ import type { ReactNode } from "react";
 import { MotionSheet } from "../motion/MotionSheet";
 import { useDesktopLayout } from "../../hooks/useDesktopLayout";
 import {
-  useContextualRailPanel,
   type ContextualRailTab,
 } from "../map/ContextualRailContext";
+import { useContextualRailPanel } from "../map/useContextualRailPanel";
 
 export interface SheetHostProps {
   open: boolean;

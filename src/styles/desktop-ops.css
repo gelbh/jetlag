@@ -239,7 +239,7 @@
 
   .contextual-rail__icon-tab {
     display: flex;
-    min-height: 2.25rem;
+    min-height: 2.75rem;
     width: 100%;
     align-items: center;
     justify-content: center;
@@ -267,7 +267,7 @@
   }
 
   .contextual-rail__tab {
-    min-height: 2rem;
+    min-height: 2.75rem;
     flex-shrink: 0;
     border-radius: var(--radius-hud-md);
     padding: 0 0.625rem;

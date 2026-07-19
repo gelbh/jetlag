@@ -4,9 +4,9 @@ import {
   HudChevronRightIcon,
 } from "../ui/HudIcons";
 import {
-  useContextualRailPanel,
   type ContextualRailTab,
 } from "./ContextualRailContext";
+import { useContextualRailPanel } from "./useContextualRailPanel";
 
 const TAB_META: Record<ContextualRailTab, { label: string; short: string }> = {
   settings: { label: "Settings", short: "Set" },
@@ -84,7 +84,7 @@ export function ContextualRail({
       <div className="contextual-rail__header">
         <button
           type="button"
-          className="hud-chrome inline-flex min-h-9 min-w-9 items-center justify-center"
+          className="hud-chrome inline-flex min-h-11 min-w-11 items-center justify-center"
           aria-label={open ? "Collapse map panels" : "Expand map panels"}
           aria-expanded={open}
           onClick={() => {

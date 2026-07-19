@@ -1,20 +1,10 @@
+import { useMemo, useState, type ReactNode } from "react";
 import {
-  createContext,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+  ContextualRailPanelContext,
+  type ContextualRailTab,
+} from "./contextualRailPanelContext";
 
-export type ContextualRailTab = "settings" | "chat" | "log";
-
-interface ContextualRailPanelContextValue {
-  panelEl: HTMLElement | null;
-  setPanelEl: (el: HTMLElement | null) => void;
-}
-
-const ContextualRailPanelContext =
-  createContext<ContextualRailPanelContextValue | null>(null);
+export type { ContextualRailTab } from "./contextualRailPanelContext";
 
 export function ContextualRailPanelProvider({
   children,
@@ -32,8 +22,4 @@ export function ContextualRailPanelProvider({
       {children}
     </ContextualRailPanelContext.Provider>
   );
-}
-
-export function useContextualRailPanel(): ContextualRailPanelContextValue | null {
-  return useContext(ContextualRailPanelContext);
 }
