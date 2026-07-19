@@ -39,8 +39,18 @@ async function assertSocialLayoutSmoke(page: Page, path: SocialLayoutPath) {
   await assertInViewport(viewportTarget);
   if (path === "/friends") {
     await assertMinTapTargets(viewportTarget);
-  } else {
+  } else if (path === "/stats") {
     await assertMinTapTargets(viewportTarget.getByRole("tab"));
+  } else {
+    // Metric chips are height-gated (2.75rem); width follows label length.
+    const tabs = viewportTarget.getByRole("tab");
+    const count = await tabs.count();
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < count; i++) {
+      const box = await tabs.nth(i).boundingBox();
+      expect(box, `missing box for metric chip ${i}`).not.toBeNull();
+      expect(box!.height, `height ${i}`).toBeGreaterThanOrEqual(44);
+    }
   }
   await assertNoSeriousAxeViolations(page);
 }
