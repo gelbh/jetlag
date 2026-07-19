@@ -25,4 +25,10 @@ describe("joinSessionPreviewCache", () => {
     vi.advanceTimersByTime(JOIN_PREVIEW_TTL_MS + 1);
     expect(getCachedJoinPreview("ABCD")).toBeUndefined();
   });
+
+  it("expires at the exact TTL boundary", () => {
+    setCachedJoinPreview("ABCD", { status: "found" });
+    vi.advanceTimersByTime(JOIN_PREVIEW_TTL_MS);
+    expect(getCachedJoinPreview("ABCD")).toBeUndefined();
+  });
 });
