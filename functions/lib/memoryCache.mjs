@@ -21,5 +21,8 @@ export function createMemoryCache(ttlMs) {
         expiresAt: Date.now() + ttlMs,
       });
     },
+    clear() {
+      entries.clear();
+    },
   };
 }
