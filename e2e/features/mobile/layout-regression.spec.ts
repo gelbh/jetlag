@@ -7,6 +7,9 @@ import {
   openMapWithLocalSession,
   openTutorialHub,
   openSocialRoute,
+  socialRouteViewportLocator,
+  SOCIAL_LAYOUT_PATHS,
+  type SocialLayoutPath,
   assertNoHorizontalOverflow,
   assertInViewport,
   assertMinTapTargets,
@@ -29,21 +32,10 @@ async function assertLayoutSmoke(
   await assertNoSeriousAxeViolations(page, options);
 }
 
-async function assertSocialLayoutSmoke(
-  page: Page,
-  path: "/leaderboard" | "/friends" | "/stats",
-) {
+async function assertSocialLayoutSmoke(page: Page, path: SocialLayoutPath) {
   await openSocialRoute(page, path);
   await assertNoHorizontalOverflow(page);
-  if (path === "/leaderboard") {
-    await assertInViewport(page.getByTestId("leaderboard-filters"));
-  } else if (path === "/friends") {
-    await assertInViewport(
-      page.getByRole("textbox", { name: "Search username" }),
-    );
-  } else {
-    await assertInViewport(page.getByRole("tablist", { name: "Stats role" }));
-  }
+  await assertInViewport(socialRouteViewportLocator(page, path));
   await assertNoSeriousAxeViolations(page);
 }
 
@@ -84,18 +76,7 @@ test.describe("layout regression @ default mobile", () => {
     const more = page.getByRole("button", { name: "More tools" });
     await expect(more).toBeVisible();
     await assertMinTapTargets(more);
-    const [box, viewport] = await Promise.all([
-      more.boundingBox(),
-      page.evaluate(() => ({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      })),
-    ]);
-    expect(box).not.toBeNull();
-    expect(box!.x).toBeGreaterThanOrEqual(0);
-    expect(box!.y).toBeGreaterThanOrEqual(0);
-    expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
-    expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+    await assertInViewport(more);
     // Leaflet markers trip aria-command-name; layout smoke is chrome-only
     await assertLayoutSmoke(page, { exclude: [".leaflet-container"] });
   });
@@ -105,23 +86,13 @@ test.describe("layout regression @ default mobile", () => {
     await assertLayoutSmoke(page);
   });
 
-  test("@smoke leaderboard has no overflow and filters stay in viewport", async ({
-    page,
-  }) => {
-    await assertSocialLayoutSmoke(page, "/leaderboard");
-  });
-
-  test("@smoke friends has no overflow and search stays in viewport", async ({
-    page,
-  }) => {
-    await assertSocialLayoutSmoke(page, "/friends");
-  });
-
-  test("@smoke stats has no overflow and role tabs stay in viewport", async ({
-    page,
-  }) => {
-    await assertSocialLayoutSmoke(page, "/stats");
-  });
+  for (const path of SOCIAL_LAYOUT_PATHS) {
+    test(`@smoke ${path.slice(1)} has no overflow and chrome stays in viewport`, async ({
+      page,
+    }) => {
+      await assertSocialLayoutSmoke(page, path);
+    });
+  }
 });
 
 test.describe("layout regression @ 320px", () => {
@@ -145,21 +116,11 @@ test.describe("layout regression @ 320px", () => {
 test.describe("layout regression social @ 320px", () => {
   test.use({ viewport: { width: 320, height: 568 } });
 
-  test("@layout-deep leaderboard reflows at 320 without overflow", async ({
-    page,
-  }) => {
-    await assertSocialLayoutSmoke(page, "/leaderboard");
-  });
-
-  test("@layout-deep friends reflows at 320 without overflow", async ({
-    page,
-  }) => {
-    await assertSocialLayoutSmoke(page, "/friends");
-  });
-
-  test("@layout-deep stats reflows at 320 without overflow", async ({
-    page,
-  }) => {
-    await assertSocialLayoutSmoke(page, "/stats");
-  });
+  for (const path of SOCIAL_LAYOUT_PATHS) {
+    test(`@layout-deep ${path.slice(1)} reflows at 320 without overflow`, async ({
+      page,
+    }) => {
+      await assertSocialLayoutSmoke(page, path);
+    });
+  }
 });

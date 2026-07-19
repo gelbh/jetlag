@@ -6,6 +6,7 @@ import { normalizeUsername } from "../../src/domain/game/playerProfile";
 
 const PROJECT_ID = "demo-jetlag";
 
+/** Singleton — Playwright is workers:1; do not parallelize seeds across workers. */
 let testEnvPromise: Promise<RulesTestEnvironment> | null = null;
 
 function firestoreEmulatorTarget(): { host: string; port: number } {
