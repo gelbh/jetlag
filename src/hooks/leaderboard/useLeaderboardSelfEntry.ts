@@ -23,11 +23,9 @@ export function useLeaderboardSelfEntry(
       return;
     }
     let cancelled = false;
-    /* eslint-disable react-hooks/set-state-in-effect -- reset loading/entry before async self fetch */
     setLoading(true);
     setError(false);
     setEntry(null);
-    /* eslint-enable react-hooks/set-state-in-effect */
     getLeaderboardSelfEntry(
       selection.scope,
       selection.gameSize,
