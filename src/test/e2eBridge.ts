@@ -60,10 +60,10 @@ async function waitForPermanentAuthUser(): Promise<void> {
   });
 }
 
-async function signInPermanentUserForCapture(): Promise<void> {
+async function signInPermanentUserForCapture(): Promise<string> {
   const auth = getFirebaseAuth();
   if (auth.currentUser && !auth.currentUser.isAnonymous) {
-    return;
+    return auth.currentUser.uid;
   }
 
   if (auth.currentUser) {
@@ -93,6 +93,11 @@ async function signInPermanentUserForCapture(): Promise<void> {
   }
 
   await waitForPermanentAuthUser();
+  const uid = getFirebaseAuth().currentUser?.uid;
+  if (!uid) {
+    throw new Error("Signed in but no current user uid.");
+  }
+  return uid;
 }
 
 async function rotateAnonymousAuth(): Promise<string> {
