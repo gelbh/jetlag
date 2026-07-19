@@ -1,16 +1,13 @@
 import { useId, useState } from "react";
 import { CHANGELOG, type ChangelogEntry } from "../../domain/device/changelog";
+import {
+  groupChangelogEntries,
+  type ChangelogNode,
+  type MajorGroupNode,
+  type MinorGroupNode,
+} from "../../domain/device/groupChangelog";
 import { MotionSheet } from "../motion/MotionSheet";
 import { SheetHeader } from "./SheetHeader";
-
-function userFacingChangelog(entries: readonly ChangelogEntry[]): ChangelogEntry[] {
-  return entries
-    .map((entry) => ({
-      ...entry,
-      sections: entry.sections.filter((section) => section.title !== "Technical"),
-    }))
-    .filter((entry) => entry.sections.length > 0);
-}
 
 function ChangelogEntrySections({ entry }: { entry: ChangelogEntry }) {
   return (
@@ -32,19 +29,19 @@ function ChangelogEntrySections({ entry }: { entry: ChangelogEntry }) {
 }
 
 function ChangelogVersionHeader({
-  entry,
+  label,
+  date,
   highlight,
 }: {
-  entry: ChangelogEntry;
+  label: string;
+  date: string;
   highlight: boolean;
 }) {
   return (
     <>
-      <span className={highlight ? "text-highlight" : "text-ink"}>
-        v{entry.version}
-      </span>
+      <span className={highlight ? "text-highlight" : "text-ink"}>v{label}</span>
       <span className="ml-2 font-normal normal-case tracking-normal text-ink-dim">
-        {entry.date}
+        {date}
       </span>
     </>
   );
@@ -53,9 +50,11 @@ function ChangelogVersionHeader({
 function CollapsibleChangelogEntry({
   entry,
   defaultOpen,
+  highlight,
 }: {
   entry: ChangelogEntry;
   defaultOpen: boolean;
+  highlight: boolean;
 }) {
   const panelId = useId();
   const [open, setOpen] = useState(defaultOpen);
@@ -64,7 +63,11 @@ function CollapsibleChangelogEntry({
     return (
       <section className="space-y-2">
         <h3 className="font-display text-sm font-semibold uppercase tracking-wide">
-          <ChangelogVersionHeader entry={entry} highlight />
+          <ChangelogVersionHeader
+            label={entry.version}
+            date={entry.date}
+            highlight={highlight}
+          />
         </h3>
         <ChangelogEntrySections entry={entry} />
       </section>
@@ -81,7 +84,11 @@ function CollapsibleChangelogEntry({
         className="flex min-h-11 w-full items-center justify-between gap-3 border-2 border-border bg-surface-deep px-3 py-2 text-left"
       >
         <span className="font-display text-sm font-semibold uppercase tracking-wide">
-          <ChangelogVersionHeader entry={entry} highlight={false} />
+          <ChangelogVersionHeader
+            label={entry.version}
+            date={entry.date}
+            highlight={false}
+          />
         </span>
         <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-muted">
           {open ? "Hide" : "Show"}
@@ -96,6 +103,138 @@ function CollapsibleChangelogEntry({
   );
 }
 
+function ChangelogGroupSummary({ summary }: { summary: readonly string[] }) {
+  if (summary.length === 0) {
+    return null;
+  }
+
+  return (
+    <ul className="list-disc space-y-1 pl-5 text-sm text-ink-secondary">
+      {summary.map((item) => (
+        <li key={item}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+
+function CollapsibleMinorGroup({
+  group,
+  defaultOpen,
+}: {
+  group: MinorGroupNode;
+  defaultOpen: boolean;
+}) {
+  const panelId = useId();
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <section className="space-y-2">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((current) => !current)}
+        className="flex min-h-11 w-full items-center justify-between gap-3 border-2 border-border bg-surface-deep px-3 py-2 text-left"
+      >
+        <span className="font-display text-sm font-semibold uppercase tracking-wide">
+          <ChangelogVersionHeader
+            label={group.label}
+            date={group.date}
+            highlight={false}
+          />
+        </span>
+        <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-muted">
+          {open ? "Hide" : "Show"}
+        </span>
+      </button>
+      {open ? (
+        <div id={panelId} className="space-y-2 pl-1">
+          <ChangelogGroupSummary summary={group.summary} />
+          <div className="space-y-2">
+            {group.children.map((entry, index) => (
+              <CollapsibleChangelogEntry
+                key={entry.version}
+                entry={entry}
+                defaultOpen={index === 0}
+                highlight={false}
+              />
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function CollapsibleMajorGroup({ group }: { group: MajorGroupNode }) {
+  const panelId = useId();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <section className="space-y-2">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((current) => !current)}
+        className="flex min-h-11 w-full items-center justify-between gap-3 border-2 border-border bg-surface-deep px-3 py-2 text-left"
+      >
+        <span className="font-display text-sm font-semibold uppercase tracking-wide">
+          <ChangelogVersionHeader
+            label={group.label}
+            date={group.date}
+            highlight={false}
+          />
+        </span>
+        <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-muted">
+          {open ? "Hide" : "Show"}
+        </span>
+      </button>
+      {open ? (
+        <div id={panelId} className="space-y-2 pl-1">
+          <ChangelogGroupSummary summary={group.summary} />
+          <div className="space-y-2">
+            {group.children.map((minorGroup) => (
+              <CollapsibleMinorGroup
+                key={minorGroup.label}
+                group={minorGroup}
+                defaultOpen={false}
+              />
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function ChangelogNodeView({
+  node,
+  isLatestVersion,
+}: {
+  node: ChangelogNode;
+  isLatestVersion: boolean;
+}) {
+  switch (node.kind) {
+    case "version":
+      return (
+        <CollapsibleChangelogEntry
+          entry={node.entry}
+          defaultOpen={isLatestVersion}
+          highlight={isLatestVersion}
+        />
+      );
+    case "minorGroup":
+      return <CollapsibleMinorGroup group={node} defaultOpen={false} />;
+    case "majorGroup":
+      return <CollapsibleMajorGroup group={node} />;
+    default: {
+      const unreachable: never = node;
+      return unreachable;
+    }
+  }
+}
+
 interface VersionChangelogSheetProps {
   open: boolean;
   onClose: () => void;
@@ -105,7 +244,8 @@ export function VersionChangelogSheet({
   open,
   onClose,
 }: VersionChangelogSheetProps) {
-  const visibleChangelog = userFacingChangelog(CHANGELOG);
+  const changelogNodes = groupChangelogEntries(CHANGELOG);
+  let latestVersionRendered = false;
 
   return (
     <MotionSheet
@@ -118,13 +258,25 @@ export function VersionChangelogSheet({
       <SheetHeader title="Changelog" onClose={onClose} />
 
       <div className="jl-selectable space-y-5 overflow-y-auto pr-1">
-        {visibleChangelog.map((entry, index) => (
-          <CollapsibleChangelogEntry
-            key={entry.version}
-            entry={entry}
-            defaultOpen={index === 0}
-          />
-        ))}
+        {changelogNodes.map((node) => {
+          const isLatestVersion =
+            !latestVersionRendered && node.kind === "version";
+          if (isLatestVersion) {
+            latestVersionRendered = true;
+          }
+
+          return (
+            <ChangelogNodeView
+              key={
+                node.kind === "version"
+                  ? node.entry.version
+                  : `${node.kind}-${node.label}`
+              }
+              node={node}
+              isLatestVersion={isLatestVersion}
+            />
+          );
+        })}
       </div>
     </MotionSheet>
   );
