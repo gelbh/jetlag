@@ -7,9 +7,14 @@ import {
 } from "../../domain/map/annotations";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import {
+  listWalkingThermometerQuestionIds,
+} from "../../domain/questions";
+import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import {
   endRemoteSession,
   resetRemoteSession,
 } from "../../services/firestore/firestoreAnnotations";
+import { cancelWalkingThermometersAndAnnounce } from "../../services/firestore/firestoreSessionExtras";
 import {
   clearSessionLocalArtifacts,
   teardownSessionUiState,
@@ -27,6 +32,7 @@ interface UseMapSessionChromeParams {
   session: SessionRecord | null;
   isHost: boolean;
   annotations: AnnotationRecord[];
+  pendingQuestions?: readonly PendingQuestionRecord[];
   mapShellRef: RefObject<HTMLDivElement | null>;
   exportLegendRef: RefObject<HTMLDivElement | null>;
   clearAllAnnotations: () => Promise<void>;
@@ -40,6 +46,7 @@ export function useMapSessionChrome({
   session,
   isHost,
   annotations,
+  pendingQuestions = [],
   mapShellRef,
   exportLegendRef,
   clearAllAnnotations,
@@ -209,13 +216,32 @@ export function useMapSessionChrome({
       return;
     }
 
+    if (session.id !== LOCAL_SESSION_ID) {
+      try {
+        const user = await ensureAnonymousUser();
+        const walkIds = listWalkingThermometerQuestionIds(
+          pendingQuestions,
+          user.uid,
+        );
+        await cancelWalkingThermometersAndAnnounce(
+          session.id,
+          walkIds,
+          user.uid,
+          session.memberRoles?.[user.uid] ?? "seeker",
+          "left",
+        );
+      } catch (error) {
+        captureException(error);
+      }
+    }
+
     await exitSession({
       reason: "leave",
       sessionId: session.id,
       replace: true,
       closeOverlays: closeSettingsPanel,
     });
-  }, [closeSettingsPanel, exitSession, session]);
+  }, [closeSettingsPanel, exitSession, pendingQuestions, session]);
 
   const exportMap = useCallback(async () => {
     if (!session || !mapShellRef.current) {

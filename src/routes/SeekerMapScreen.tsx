@@ -169,6 +169,8 @@ export function SeekerMapScreen() {
         handleDistanceUnitChange={controller.handleDistanceUnitChange}
         exportMap={controller.exportMap}
         answerPendingQuestion={controller.answerPendingQuestion}
+        handleCancelWalkingQuestion={controller.handleCancelWalkingQuestion}
+        seekerLocations={controller.seekerLocations}
         setActiveTool={controller.setActiveTool}
         setAwaitingPlacement={controller.setAwaitingPlacement}
       />

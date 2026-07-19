@@ -2,6 +2,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   onSnapshot,
   orderBy,
@@ -18,14 +19,17 @@ import { FirebaseError } from "firebase/app";
 import type { PlayerRole } from "../../domain/session/playerRole";
 import type { HidingZoneRecord } from "../../domain/session/hidingZone";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
-import type {
-  PendingQuestionRecord,
-  PlayerLocationRecord,
-  SessionMessageRecord,
+import {
+  createMessageId,
+  type PendingQuestionRecord,
+  type PlayerLocationRecord,
+  type SessionMessageRecord,
 } from "../../domain/session/sessionChat";
 import type { PlayerTrailPointRecord } from "../../domain/game/playerTrail";
 import type { StartingLocationRecord } from "../../domain/game/startingLocation";
+import { listWalkingThermometerQuestionIds } from "../../domain/questions";
 import { getFirestoreDb } from "../core/firebase";
+import { captureException } from "../core/sentry";
 import {
   buildHidingZoneDocument,
   buildPendingQuestionDocument,
@@ -39,6 +43,15 @@ import {
   deserializeTimeTrapFromFirestore,
   stripUndefinedValues,
 } from "./firestoreSerialization";
+
+export const THERMOMETER_WALK_CANCEL_TEXT = {
+  left: "Thermometer walk cancelled — seeker left.",
+  orphan: "Thermometer walk cancelled — seeker left the session.",
+  manual: "Thermometer walk cancelled.",
+} as const;
+
+export type ThermometerWalkCancelReason =
+  keyof typeof THERMOMETER_WALK_CANCEL_TEXT;
 
 function sessionDoc(sessionId: string) {
   return doc(getFirestoreDb(), "sessions", sessionId);
@@ -54,6 +67,21 @@ function messagesCollection(sessionId: string) {
 
 function pendingQuestionsCollection(sessionId: string) {
   return collection(getFirestoreDb(), "sessions", sessionId, "pendingQuestions");
+}
+
+/** Returns status string when the pending question exists; otherwise null. */
+export async function getPendingQuestionStatus(
+  sessionId: string,
+  questionId: string,
+): Promise<string | null> {
+  const snapshot = await getDoc(
+    doc(pendingQuestionsCollection(sessionId), questionId),
+  );
+  if (!snapshot.exists()) {
+    return null;
+  }
+  const status = snapshot.data()?.status;
+  return typeof status === "string" ? status : null;
 }
 
 function hidingZonesCollection(sessionId: string) {
@@ -308,6 +336,88 @@ export async function cancelOpenPendingQuestions(
     }
 
     await batch.commit();
+  }
+}
+
+export async function cancelWalkingThermometerQuestions(
+  sessionId: string,
+  questionIds: readonly string[],
+): Promise<void> {
+  if (questionIds.length === 0) {
+    return;
+  }
+
+  const collectionRef = pendingQuestionsCollection(sessionId);
+
+  for (let index = 0; index < questionIds.length; index += 500) {
+    const chunk = questionIds.slice(index, index + 500);
+    const batch = writeBatch(getFirestoreDb());
+
+    for (const questionId of chunk) {
+      batch.update(doc(collectionRef, questionId), { status: "cancelled" });
+    }
+
+    await batch.commit();
+  }
+}
+
+export async function cancelWalkingThermometersAndAnnounce(
+  sessionId: string,
+  questionIds: readonly string[],
+  senderUid: string,
+  senderRole: PlayerRole,
+  reason: Exclude<ThermometerWalkCancelReason, "manual">,
+): Promise<void> {
+  if (questionIds.length === 0) {
+    return;
+  }
+
+  const stillWalking: string[] = [];
+  for (const questionId of questionIds) {
+    const status = await getPendingQuestionStatus(sessionId, questionId);
+    if (status === "walking") {
+      stillWalking.push(questionId);
+    }
+  }
+  if (stillWalking.length === 0) {
+    return;
+  }
+
+  await cancelWalkingThermometerQuestions(sessionId, stillWalking);
+  await postGameSystemMessage(
+    sessionId,
+    senderUid,
+    senderRole,
+    THERMOMETER_WALK_CANCEL_TEXT[reason],
+    createMessageId(),
+  );
+}
+
+export async function cancelWalkingThermometersAfterIdentityHeal(
+  sessionId: string,
+  oldUid: string,
+  senderUid: string,
+  senderRole: PlayerRole,
+): Promise<void> {
+  try {
+    const snapshot = await getDocs(pendingQuestionsCollection(sessionId));
+    const questions = snapshot.docs.map((questionDoc) =>
+      deserializePendingQuestionFromFirestore(
+        questionDoc.id,
+        sessionId,
+        questionDoc.data() as Record<string, unknown>,
+      ),
+    );
+    const walkIds = listWalkingThermometerQuestionIds(questions, oldUid);
+    await cancelWalkingThermometersAndAnnounce(
+      sessionId,
+      walkIds,
+      senderUid,
+      senderRole,
+      "orphan",
+    );
+  } catch (error) {
+    captureException(error);
   }
 }
 
