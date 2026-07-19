@@ -58,6 +58,8 @@ interface MapStatusRailProps {
   onDeclineFoundHider?: () => void;
   hiderOutsideZone?: boolean;
   onSyncErrorAction?: () => void;
+  /** In-flow status for DesktopOpsShell (vs absolute overlay on mobile). */
+  expanded?: boolean;
 }
 
 export function MapStatusRail({
@@ -98,6 +100,7 @@ export function MapStatusRail({
   onDeclineFoundHider,
   hiderOutsideZone = false,
   onSyncErrorAction,
+  expanded = false,
 }: MapStatusRailProps) {
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
   const [syncMenuOpen, setSyncMenuOpen] = useState(false);
@@ -143,7 +146,11 @@ export function MapStatusRail({
   return (
     <div
       ref={railRef}
-      className="jl-status-rail pointer-events-none absolute inset-x-0 top-0 z-[var(--z-banner)] pt-[max(0px,env(safe-area-inset-top))]"
+      className={`jl-status-rail pointer-events-none z-[var(--z-banner)] pt-[max(0px,env(safe-area-inset-top))]${
+        expanded
+          ? " jl-status-rail--expanded"
+          : " absolute inset-x-0 top-0"
+      }`}
     >
       <div className="relative">
         <TimerBlock
@@ -204,6 +211,7 @@ export function MapStatusRail({
             seekerLocations={seekerLocations}
             onCancelWalkingQuestion={onCancelWalkingQuestion}
             timerMenuOpen={showTimerMenu}
+            expanded={expanded}
             onOpenTimerMenu={() => {
               setTimerMenuOpen((open) => !open);
               setSyncMenuOpen(false);

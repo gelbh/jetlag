@@ -1,8 +1,200 @@
-/* desktop-ops.css — shared ops desk tokens (shell/grid in later PRs) */
+/* desktop-ops.css — ops desk tokens + shell/tool rail (contextual rail in later PR) */
 @layer components {
   :root {
     --ops-rail-width: 22rem;
     --ops-rail-collapsed-width: 2.75rem;
     --ops-tool-rail-width: 5rem;
+  }
+
+  .desktop-ops-shell {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: var(--ops-tool-rail-width) minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
+    height: 100%;
+  }
+
+  .desktop-ops-shell__status {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    position: relative;
+    z-index: var(--z-banner);
+    pointer-events: none;
+  }
+
+  .desktop-ops-shell__tools {
+    grid-column: 1;
+    grid-row: 2;
+    position: relative;
+    z-index: var(--z-dock);
+    min-height: 0;
+    pointer-events: none;
+  }
+
+  .desktop-ops-shell__map {
+    grid-column: 2;
+    grid-row: 2;
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .desktop-ops-shell__contextual {
+    grid-column: 3;
+    grid-row: 2;
+    position: relative;
+    z-index: var(--z-dock);
+    min-height: 0;
+  }
+
+  /* Vertical tool rail — remount of dock slots */
+  .jl-tool-dock--rail {
+    position: relative;
+    inset: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    z-index: auto;
+    height: 100%;
+    width: 100%;
+    pointer-events: auto;
+  }
+
+  .jl-tool-dock--rail .jl-tool-dock-bar {
+    container-type: normal;
+    flex-direction: column;
+    align-items: stretch;
+    height: 100%;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-top: none;
+    border-right: 2px solid var(--color-border);
+    border-bottom: none;
+    border-left: 3px solid var(--color-highlight);
+    padding: 0.375rem 0.25rem;
+  }
+
+  .jl-tool-dock--rail .jl-tool-dock-bar .jl-tool-slot-label {
+    display: block;
+  }
+
+  .jl-tool-dock--rail .jl-tool-dock-wide-only {
+    display: flex;
+  }
+
+  .jl-tool-dock--rail .jl-tool-dock-compact-only {
+    display: none !important;
+    pointer-events: none;
+  }
+
+  .jl-tool-dock--rail .jl-tool-dock-group,
+  .jl-tool-dock--rail .jl-tool-dock-group-main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .jl-tool-dock--rail .jl-tool-dock-group-main {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    gap: 0.125rem;
+  }
+
+  .jl-tool-dock--rail .jl-tool-dock-group-history,
+  .jl-tool-dock--rail .jl-tool-dock-divider-history {
+    display: flex;
+  }
+
+  .jl-tool-dock--rail .jl-tool-dock-group-end {
+    margin-left: 0;
+    margin-top: auto;
+    flex-direction: column;
+  }
+
+  .jl-tool-dock--rail .jl-tool-dock-divider {
+    width: auto;
+    height: 2px;
+    align-self: stretch;
+    margin-block: 0.125rem;
+    margin-inline: 0.25rem;
+  }
+
+  .jl-tool-dock--rail .jl-tool-slot {
+    flex: 0 0 auto;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .jl-tool-dock--rail .jl-tool-menu-dock {
+    left: calc(100% + 0.375rem);
+    right: auto;
+    bottom: auto;
+    top: 0;
+  }
+
+  html:not([data-motion="reduced"]):not([data-motion="static"])
+    .jl-tool-dock--rail
+    .jl-tool-menu {
+    transform-origin: left center;
+  }
+
+  @media (pointer: coarse) {
+    .jl-tool-dock--rail .jl-tool-slot {
+      min-height: 2.75rem;
+      min-width: 2.75rem;
+    }
+  }
+
+  /* Expanded status sits in-flow in the shell status row */
+  .jl-status-rail--expanded {
+    position: relative;
+    inset: auto;
+    top: auto;
+    right: auto;
+    left: auto;
+  }
+
+  .desktop-ops-observer-rail {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.375rem 0.25rem;
+    border-right: 2px solid var(--color-border);
+    border-left: 3px solid var(--color-highlight);
+    background: oklch(from var(--color-surface-deep) l c h / 0.96);
+    box-shadow: var(--shadow-hud-menu);
+    pointer-events: auto;
+  }
+
+  .desktop-ops-observer-rail__btn {
+    display: flex;
+    min-height: 2.75rem;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    border-radius: var(--radius-hud-md);
+    border: 2px solid transparent;
+    background: transparent;
+    padding: 0.25rem 0.125rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-ink-secondary);
+  }
+
+  .desktop-ops-observer-rail__btn--active {
+    background: var(--color-action);
+    color: var(--color-action-ink);
+  }
+
+  .desktop-ops-observer-status {
+    pointer-events: auto;
   }
 }
