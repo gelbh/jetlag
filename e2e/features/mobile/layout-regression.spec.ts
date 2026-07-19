@@ -6,7 +6,9 @@ import {
   openPlayHub,
   openMapWithLocalSession,
   openTutorialHub,
+  openSocialRoute,
   assertNoHorizontalOverflow,
+  assertInViewport,
   assertMinTapTargets,
   assertNoSeriousAxeViolations,
   expectCreatePageMapPreviewLoaded,
@@ -25,6 +27,24 @@ async function assertLayoutSmoke(
 ) {
   await assertNoHorizontalOverflow(page);
   await assertNoSeriousAxeViolations(page, options);
+}
+
+async function assertSocialLayoutSmoke(
+  page: Page,
+  path: "/leaderboard" | "/friends" | "/stats",
+) {
+  await openSocialRoute(page, path);
+  await assertNoHorizontalOverflow(page);
+  if (path === "/leaderboard") {
+    await assertInViewport(page.getByTestId("leaderboard-filters"));
+  } else if (path === "/friends") {
+    await assertInViewport(
+      page.getByRole("textbox", { name: "Search username" }),
+    );
+  } else {
+    await assertInViewport(page.getByRole("tablist", { name: "Stats role" }));
+  }
+  await assertNoSeriousAxeViolations(page);
 }
 
 test.describe("layout regression @ default mobile", () => {
@@ -84,6 +104,24 @@ test.describe("layout regression @ default mobile", () => {
     await openTutorialHub(page);
     await assertLayoutSmoke(page);
   });
+
+  test("@smoke leaderboard has no overflow and filters stay in viewport", async ({
+    page,
+  }) => {
+    await assertSocialLayoutSmoke(page, "/leaderboard");
+  });
+
+  test("@smoke friends has no overflow and search stays in viewport", async ({
+    page,
+  }) => {
+    await assertSocialLayoutSmoke(page, "/friends");
+  });
+
+  test("@smoke stats has no overflow and role tabs stay in viewport", async ({
+    page,
+  }) => {
+    await assertSocialLayoutSmoke(page, "/stats");
+  });
 });
 
 test.describe("layout regression @ 320px", () => {
@@ -101,5 +139,27 @@ test.describe("layout regression @ 320px", () => {
       page.getByRole("heading", { name: "Session code" }),
     ).toBeVisible();
     await assertLayoutSmoke(page);
+  });
+});
+
+test.describe("layout regression social @ 320px", () => {
+  test.use({ viewport: { width: 320, height: 568 } });
+
+  test("@layout-deep leaderboard reflows at 320 without overflow", async ({
+    page,
+  }) => {
+    await assertSocialLayoutSmoke(page, "/leaderboard");
+  });
+
+  test("@layout-deep friends reflows at 320 without overflow", async ({
+    page,
+  }) => {
+    await assertSocialLayoutSmoke(page, "/friends");
+  });
+
+  test("@layout-deep stats reflows at 320 without overflow", async ({
+    page,
+  }) => {
+    await assertSocialLayoutSmoke(page, "/stats");
   });
 });
