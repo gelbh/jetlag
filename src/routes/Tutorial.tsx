@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useAppNavigate } from "../hooks/useAppNavigate";
+import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import {
   ScreenHeader,
@@ -146,92 +147,101 @@ export function Tutorial() {
         backLabel="Back"
         onBack={headerUsesRouteBack ? undefined : handleHeaderBack}
       />
-      <div
-        className={`flex min-h-0 flex-1 flex-col gap-2 overflow-hidden ${screenHeaderOffsetClassName}`}
+      <DesktopContentColumn
+        maxWidth="social"
+        className="flex min-h-0 flex-1 flex-col"
       >
-        {view.mode === "hub" ? (
-          <>
-            <div className="shrink-0 space-y-1">
-              <h1 className="tutorial-hub-heading font-display text-balance font-bold uppercase leading-[0.92] tracking-tight text-ink">
-                Tutorial
-              </h1>
-              <p className="tutorial-hub-intro max-w-sm text-pretty text-ink-muted">
-                Learn the session flow, then walk through each question tool.
-              </p>
-            </div>
-            <TutorialHub
+        <div
+          className={`flex min-h-0 flex-1 flex-col gap-2 overflow-hidden ${screenHeaderOffsetClassName}`}
+        >
+          {view.mode === "hub" ? (
+            <>
+              <div className="shrink-0 space-y-1">
+                <h1 className="tutorial-hub-heading font-display text-balance font-bold uppercase leading-[0.92] tracking-tight text-ink">
+                  Tutorial
+                </h1>
+                <p className="tutorial-hub-intro max-w-sm text-pretty text-ink-muted">
+                  Learn the session flow, then walk through each question tool.
+                </p>
+              </div>
+              <TutorialHub
+                progress={progress}
+                onSelectSection={handleSelectSection}
+                onOpenQuestions={() => setView({ mode: "questions" })}
+              />
+            </>
+          ) : view.mode === "questions" ? (
+            <TutorialQuestionsHub
               progress={progress}
-              onSelectSection={handleSelectSection}
-              onOpenQuestions={() => setView({ mode: "questions" })}
-            />
-          </>
-        ) : view.mode === "questions" ? (
-          <TutorialQuestionsHub
-            progress={progress}
-            onSelectQuestion={(questionId) =>
-              setView({ mode: "question", questionId })
-            }
-          />
-        ) : activeSection ? (
-          <TutorialSectionWizard
-            key={`${activeSection.id}-${reviewingSection ? "review" : "progress"}`}
-            section={{
-              id: activeSection.id,
-              title: activeSection.title,
-              steps: activeSection.steps,
-              kind: "section",
-            }}
-            initialStepIndex={sectionStepIndex}
-            reviewing={reviewingSection}
-            onStepComplete={(stepIndex) => {
-              completeStep(activeSection.id, stepIndex, activeSection.steps.length);
-            }}
-            onBackFromStart={handleHeaderBack}
-            onFinish={handleFinishSection}
-            onOpenSection={(sectionId) => {
-              finishSection(activeSection.id);
-              setView({
-                mode: "section",
-                sectionId: sectionId as TutorialSectionId,
-              });
-            }}
-            onOpenQuestionsHub={() => {
-              finishSection("core");
-              setView({ mode: "questions" });
-            }}
-          />
-        ) : activeQuestion ? (
-          <TutorialSectionWizard
-            key={`${activeQuestion.id}-${reviewingQuestion ? "review" : "progress"}`}
-            section={{
-              id: activeQuestion.id,
-              title: activeQuestion.title,
-              steps: activeQuestion.steps,
-              kind: "question",
-            }}
-            initialStepIndex={questionStepIndex}
-            reviewing={reviewingQuestion}
-            finishLabel="All questions"
-            onStepComplete={(stepIndex) => {
-              completeQuestionStep(activeQuestion.id, stepIndex);
-            }}
-            onBackFromStart={handleHeaderBack}
-            onFinish={handleFinishQuestion}
-            onCompleteEntireQuestion={() => {
-              if (view.mode !== "question") {
-                return;
+              onSelectQuestion={(questionId) =>
+                setView({ mode: "question", questionId })
               }
-              setProgress(
-                markQuestionTutorialComplete(view.questionId, progress),
-              );
-            }}
-            onOpenQuestion={(questionId) => {
-              finishQuestion(activeQuestion.id);
-              setView({ mode: "question", questionId });
-            }}
-          />
-        ) : null}
-      </div>
+            />
+          ) : activeSection ? (
+            <TutorialSectionWizard
+              key={`${activeSection.id}-${reviewingSection ? "review" : "progress"}`}
+              section={{
+                id: activeSection.id,
+                title: activeSection.title,
+                steps: activeSection.steps,
+                kind: "section",
+              }}
+              initialStepIndex={sectionStepIndex}
+              reviewing={reviewingSection}
+              onStepComplete={(stepIndex) => {
+                completeStep(
+                  activeSection.id,
+                  stepIndex,
+                  activeSection.steps.length,
+                );
+              }}
+              onBackFromStart={handleHeaderBack}
+              onFinish={handleFinishSection}
+              onOpenSection={(sectionId) => {
+                finishSection(activeSection.id);
+                setView({
+                  mode: "section",
+                  sectionId: sectionId as TutorialSectionId,
+                });
+              }}
+              onOpenQuestionsHub={() => {
+                finishSection("core");
+                setView({ mode: "questions" });
+              }}
+            />
+          ) : activeQuestion ? (
+            <TutorialSectionWizard
+              key={`${activeQuestion.id}-${reviewingQuestion ? "review" : "progress"}`}
+              section={{
+                id: activeQuestion.id,
+                title: activeQuestion.title,
+                steps: activeQuestion.steps,
+                kind: "question",
+              }}
+              initialStepIndex={questionStepIndex}
+              reviewing={reviewingQuestion}
+              finishLabel="All questions"
+              onStepComplete={(stepIndex) => {
+                completeQuestionStep(activeQuestion.id, stepIndex);
+              }}
+              onBackFromStart={handleHeaderBack}
+              onFinish={handleFinishQuestion}
+              onCompleteEntireQuestion={() => {
+                if (view.mode !== "question") {
+                  return;
+                }
+                setProgress(
+                  markQuestionTutorialComplete(view.questionId, progress),
+                );
+              }}
+              onOpenQuestion={(questionId) => {
+                finishQuestion(activeQuestion.id);
+                setView({ mode: "question", questionId });
+              }}
+            />
+          ) : null}
+        </div>
+      </DesktopContentColumn>
     </EntryScreenLayout>
   );
 }
