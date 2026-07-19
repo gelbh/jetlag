@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.1 - 2026-07-19
+
+### Improvements
+
+- Join code preview feels snappier (debounced lookup + short cache). Premium status survives a brief reload from the last good snapshot
+- Offline annotation sync is honored when the browser wakes the app via Background Sync (interval flush still covers other cases)
+
 ## 0.9.0 - 2026-07-19
 
 ### Improvements
