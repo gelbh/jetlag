@@ -1,4 +1,5 @@
-const ANNOTATION_SYNC_TAG = "sync-annotations";
+export const ANNOTATION_SYNC_TAG = "sync-annotations";
+export const ANNOTATION_SYNC_MESSAGE_TYPE = "jetlag-sync-annotations";
 
 export async function registerAnnotationBackgroundSync(): Promise<void> {
   if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
