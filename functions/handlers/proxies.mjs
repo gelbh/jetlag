@@ -1,6 +1,5 @@
 import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
-import { OVERPASS_L2_SECRETS } from "../proxies/overpassL2Secrets.mjs";
 import { getFirestore } from "firebase-admin/firestore";
 import { withSentryHttpHandler, getSentryDsnSecret } from "../lib/sentry.mjs";
 import { fetchWithTimeoutAndRetry } from "../lib/fetchWithTimeout.mjs";
@@ -230,7 +229,6 @@ export const proxy = onRequest(
       transitlandApiKeySecret,
       ctaBusTrackerApiKeySecret,
       ctaTrainTrackerApiKeySecret,
-      ...OVERPASS_L2_SECRETS,
     ],
     enforceAppCheck: true,
   },
