@@ -1,0 +1,8 @@
+/* desktop-ops.css — shared ops desk tokens (shell/grid in later PRs) */
+@layer components {
+  :root {
+    --ops-rail-width: 22rem;
+    --ops-rail-collapsed-width: 2.75rem;
+    --ops-tool-rail-width: 5rem;
+  }
+}
