@@ -21,7 +21,10 @@ export function Feedback() {
   return (
     <EntryScreenLayout>
       <ScreenHeader backTo="/" backLabel="Back" />
-      <DesktopContentColumn maxWidth="entry">
+      <DesktopContentColumn
+        maxWidth="entry"
+        className="flex min-h-0 flex-1 flex-col"
+      >
         <div className="flex min-h-0 flex-1 flex-col justify-between">
           <div className={`space-y-3 ${screenHeaderOffsetClassName}`}>
             <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
