@@ -80,14 +80,18 @@ function createCloudflareL2Backend() {
       return response.text();
     },
     async kvPut(key, value) {
-      const response = await fetch(kvUrl(key), {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "text/plain",
+      const ttlSeconds = Math.max(60, Math.floor(OVERPASS_L2_TTL_MS / 1000));
+      const response = await fetch(
+        `${kvUrl(key)}?expiration_ttl=${ttlSeconds}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "text/plain",
+          },
+          body: value,
         },
-        body: value,
-      });
+      );
       if (!response.ok) {
         throw new Error(`KV put failed: ${response.status}`);
       }
@@ -139,15 +143,25 @@ async function signR2Request(method, objectKey, body = "", contentType = "applic
   const region = "auto";
   const service = "s3";
   const payloadHash = sha256Hex(body);
-  const canonicalHeaders =
-    `host:${url.host}\n` +
-    `x-amz-content-sha256:${payloadHash}\n` +
-    `x-amz-date:${amzDate}\n` +
-    (method === "PUT" ? `content-type:${contentType}\n` : "");
-  const signedHeaders =
+  // SigV4 requires CanonicalHeaders sorted alphabetically by header name.
+  const headerMap =
     method === "PUT"
-      ? "content-type;host;x-amz-content-sha256;x-amz-date"
-      : "host;x-amz-content-sha256;x-amz-date";
+      ? {
+          "content-type": contentType,
+          host: url.host,
+          "x-amz-content-sha256": payloadHash,
+          "x-amz-date": amzDate,
+        }
+      : {
+          host: url.host,
+          "x-amz-content-sha256": payloadHash,
+          "x-amz-date": amzDate,
+        };
+  const signedHeaderNames = Object.keys(headerMap).sort();
+  const canonicalHeaders = `${signedHeaderNames
+    .map((name) => `${name}:${headerMap[name]}`)
+    .join("\n")}\n`;
+  const signedHeaders = signedHeaderNames.join(";");
   const canonicalRequest = [
     method,
     url.pathname,

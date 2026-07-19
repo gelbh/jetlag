@@ -3,7 +3,11 @@ import { fetchWithTimeout } from "../lib/fetchWithTimeout.mjs";
 import { createMemoryCache } from "../lib/memoryCache.mjs";
 import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "./overpassEndpoints.mjs";
 import { enqueueOverpassFetch } from "./overpassQueue.mjs";
-import { readOverpassL2, writeOverpassL2 } from "./overpassSharedCache.mjs";
+import {
+  overpassL2CacheKey,
+  readOverpassL2,
+  writeOverpassL2,
+} from "./overpassSharedCache.mjs";
 
 export const OVERPASS_FETCH_TIMEOUT_MS = 25_000;
 export const OVERPASS_CACHE_TTL_MS = 60 * 60 * 1000;
@@ -61,22 +65,18 @@ export async function fetchOverpassWithFailover(query) {
 
 export async function fetchCachedOverpassQuery(query, tier = "free") {
   const l1Key = overpassCacheKey(query);
-  const l2Key = `${tier}:${l1Key}`;
+  const l2Key = overpassL2CacheKey(query, tier);
   const cached = overpassResponseCache.get(l1Key);
   if (cached) {
     logCache("l1_hit", tier);
     return cached;
   }
 
-  try {
-    const l2 = await readOverpassL2(l2Key);
-    if (l2 && !l2.stale) {
-      overpassResponseCache.set(l1Key, l2.text);
-      logCache("l2_hit", tier);
-      return l2.text;
-    }
-  } catch (error) {
-    console.warn("overpass L2 read failed", error);
+  const l2 = await readOverpassL2(l2Key);
+  if (l2) {
+    overpassResponseCache.set(l1Key, l2.text);
+    logCache("l2_hit", tier);
+    return l2.text;
   }
 
   try {
@@ -85,29 +85,21 @@ export async function fetchCachedOverpassQuery(query, tier = "free") {
     );
     const text = await response.text();
     if (!response.ok) {
-      logCache("upstream_error", tier);
-      const stale = await readOverpassL2(l2Key, { allowExpired: true });
-      if (stale?.text) {
-        logCache("stale", tier);
-        overpassResponseCache.set(l1Key, stale.text);
-        return stale.text;
-      }
-      if (response.status === 504) {
-        throw new Error("Overpass timed out.");
-      }
-      throw new Error("Overpass query failed.");
+      throw new Error(
+        response.status === 504
+          ? "Overpass timed out."
+          : "Overpass query failed.",
+      );
     }
     overpassResponseCache.set(l1Key, text);
-    void writeOverpassL2(l2Key, text, "application/json").catch(() => {});
+    await writeOverpassL2(l2Key, text, "application/json");
     logCache("miss", tier);
     return text;
   } catch (error) {
-    const stale = await readOverpassL2(l2Key, { allowExpired: true }).catch(
-      () => null,
-    );
+    const stale = await readOverpassL2(l2Key, { allowExpired: true });
     if (stale?.text) {
-      logCache("stale", tier);
       overpassResponseCache.set(l1Key, stale.text);
+      logCache("stale", tier);
       return stale.text;
     }
     logCache("upstream_error", tier);
