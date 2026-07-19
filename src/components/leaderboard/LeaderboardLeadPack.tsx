@@ -5,6 +5,7 @@ import {
   type LeaderboardEntry,
   type LeaderboardMetric,
 } from "../../domain/game/leaderboard";
+import { leaderboardRankColorClass } from "./leaderboardRankStyle";
 
 interface LeaderboardLeadPackProps {
   entries: LeaderboardEntry[];
@@ -12,19 +13,6 @@ interface LeaderboardLeadPackProps {
   viewerUid?: string | null;
   loading?: boolean;
   viewerRowRef?: Ref<HTMLLIElement | null>;
-}
-
-function medalClass(rank: number): string {
-  switch (rank) {
-    case 1:
-      return "text-highlight";
-    case 2:
-      return "text-ink-secondary";
-    case 3:
-      return "text-action";
-    default:
-      return "text-ink-dim";
-  }
 }
 
 function LeadSkeleton() {
@@ -48,6 +36,7 @@ export function LeaderboardLeadPack({
     return (
       <div
         className="hud-panel px-3 py-2"
+        role="status"
         aria-busy="true"
         aria-label="Loading top ranks"
         data-testid="leaderboard-lead-pack"
@@ -66,12 +55,8 @@ export function LeaderboardLeadPack({
   }
 
   return (
-    <div
-      className="hud-panel px-3 py-2"
-      data-testid="leaderboard-lead-pack"
-      aria-label="Top ranks"
-    >
-      <ol className="m-0 list-none p-0">
+    <div className="hud-panel px-3 py-2" data-testid="leaderboard-lead-pack">
+      <ol className="m-0 list-none p-0" aria-label="Top ranks">
         {entries.map((entry) => {
           const isYou = viewerUid != null && entry.uid === viewerUid;
           return (
@@ -84,7 +69,7 @@ export function LeaderboardLeadPack({
               }`}
             >
               <span
-                className={`w-8 shrink-0 font-mono text-base font-bold tabular-nums ${medalClass(entry.rank)}`}
+                className={`w-8 shrink-0 font-mono text-base font-bold tabular-nums ${leaderboardRankColorClass(entry.rank)}`}
               >
                 {entry.rank}
               </span>

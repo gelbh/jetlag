@@ -7,6 +7,7 @@ import type {
   LeaderboardEntry,
   LeaderboardMetric,
 } from "../../domain/game/leaderboard";
+import { leaderboardRankColorClass } from "./leaderboardRankStyle";
 
 interface LeaderboardRankListProps {
   entries: LeaderboardEntry[];
@@ -15,19 +16,6 @@ interface LeaderboardRankListProps {
   loading?: boolean;
   emptyMessage: string;
   viewerRowRef?: Ref<HTMLLIElement | null>;
-}
-
-function medalClass(rank: number): string {
-  switch (rank) {
-    case 1:
-      return "text-highlight";
-    case 2:
-      return "text-ink-secondary";
-    case 3:
-      return "text-action";
-    default:
-      return "text-ink-dim";
-  }
 }
 
 function RankSkeleton() {
@@ -78,7 +66,7 @@ export function LeaderboardRankList({
             }`}
           >
             <span
-              className={`w-8 shrink-0 font-mono text-sm tabular-nums ${medalClass(entry.rank)}`}
+                className={`w-8 shrink-0 font-mono text-sm tabular-nums ${leaderboardRankColorClass(entry.rank)}`}
             >
               {entry.rank}
             </span>
