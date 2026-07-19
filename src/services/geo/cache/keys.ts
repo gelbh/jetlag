@@ -8,6 +8,10 @@ export function geographicCacheKey(gameArea: GameArea, scope: string): string {
   return `${scope}:${stableGameAreaKey(gameArea)}`;
 }
 
+export function elevationPointCacheKey(lat: number, lng: number): string {
+  return `elevation:${lat.toFixed(5)},${lng.toFixed(5)}`;
+}
+
 export function isStableCacheKey(key: string): boolean {
   return (
     key.startsWith("admin:") ||

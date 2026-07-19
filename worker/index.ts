@@ -6,6 +6,7 @@ import {
   applyDocumentCspNonce,
   shouldApplyDocumentCsp,
 } from "./documentCsp";
+import { applyCacheControlHeader } from "./assetCacheHeaders";
 
 export const CSP_REPORT_PATH = "/api/csp-report";
 
@@ -97,10 +98,13 @@ export default {
     }
 
     if (shouldApplyDocumentCsp(assetResponse)) {
-      return applyDocumentCspNonce(assetResponse);
+      return applyCacheControlHeader(
+        await applyDocumentCspNonce(assetResponse),
+        pathname,
+      );
     }
 
-    return assetResponse;
+    return applyCacheControlHeader(assetResponse, pathname);
   },
 } satisfies ExportedHandler<Env>;
 
