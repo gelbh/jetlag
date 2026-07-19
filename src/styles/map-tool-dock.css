@@ -618,4 +618,17 @@
     margin-block: 0.375rem;
     background: oklch(from var(--color-border) l c h / 0.85);
   }
+
+  /* Desktop ops left rail — must win over .jl-tool-dock { position: fixed } */
+  .jl-tool-dock.jl-tool-dock--rail {
+    position: relative;
+    inset: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    z-index: auto;
+    height: 100%;
+    width: 100%;
+    pointer-events: auto;
+  }
 }

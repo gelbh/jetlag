@@ -7,6 +7,8 @@ import {
 } from "../ui/HudIcons";
 import { HudPinIcon } from "../map/ToolIcons";
 
+import type { ToolDockLayout } from "./ToolDock";
+
 interface HiderToolDockProps {
   zoneLabel: string;
   onZoneAction: () => void;
@@ -18,6 +20,8 @@ interface HiderToolDockProps {
   onOpenSettings: () => void;
   hasUnreadChat?: boolean;
   unreadCount?: number;
+  /** Bottom dock (default) or vertical left rail inside DesktopOpsShell. */
+  layout?: ToolDockLayout;
 }
 
 export function HiderToolDock({
@@ -31,9 +35,14 @@ export function HiderToolDock({
   onOpenSettings,
   hasUnreadChat = false,
   unreadCount = 0,
+  layout = "dock",
 }: HiderToolDockProps) {
+  const isRail = layout === "rail";
+
   return (
-    <div className="jl-tool-dock pointer-events-auto">
+    <div
+      className={`jl-tool-dock pointer-events-auto${isRail ? " jl-tool-dock--rail" : ""}`}
+    >
       <div className="jl-tool-dock-bar jl-tool-dock-group-main">
         <button
           type="button"

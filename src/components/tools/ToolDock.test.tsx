@@ -73,6 +73,24 @@ describe("ToolDock", () => {
     expect(screen.getByRole("button", { name: "More tools" })).toBeInTheDocument();
     expect(document.querySelector(".jl-unread-badge")).toBeNull();
   });
+
+  it("applies rail layout class when layout is rail", () => {
+    const { container } = renderWithRouter(
+      <ToolDock
+        layout="rail"
+        activeTool="none"
+        onSelect={vi.fn()}
+        canUndo={false}
+        canRedo={false}
+        onUndo={vi.fn()}
+        onRedo={vi.fn()}
+        onOpenSettings={vi.fn()}
+      />,
+    );
+
+    expect(container.querySelector(".jl-tool-dock--rail")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Radar" })).toBeInTheDocument();
+  });
 });
 
 describe("ToolOverflowSheet", () => {
