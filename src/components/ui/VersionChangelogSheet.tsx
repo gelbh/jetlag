@@ -240,12 +240,21 @@ interface VersionChangelogSheetProps {
   onClose: () => void;
 }
 
+function firstVersionLabel(nodes: readonly ChangelogNode[]): string | null {
+  for (const node of nodes) {
+    if (node.kind === "version") {
+      return node.entry.version;
+    }
+  }
+  return null;
+}
+
 export function VersionChangelogSheet({
   open,
   onClose,
 }: VersionChangelogSheetProps) {
   const changelogNodes = groupChangelogEntries(CHANGELOG);
-  let latestVersionRendered = false;
+  const latestVersion = firstVersionLabel(changelogNodes);
 
   return (
     <MotionSheet
@@ -260,10 +269,7 @@ export function VersionChangelogSheet({
       <div className="jl-selectable space-y-5 overflow-y-auto pr-1">
         {changelogNodes.map((node) => {
           const isLatestVersion =
-            !latestVersionRendered && node.kind === "version";
-          if (isLatestVersion) {
-            latestVersionRendered = true;
-          }
+            node.kind === "version" && node.entry.version === latestVersion;
 
           return (
             <ChangelogNodeView
