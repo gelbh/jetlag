@@ -16,6 +16,11 @@ import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
 import type { useHiderZoneTool } from "../../hooks/session/useHiderZoneTool";
 import type { useTimeTrapTool } from "../../hooks/session/useTimeTrapTool";
 import { ChatPanel } from "../../components/chat/ChatPanel";
+import { ContextualRail } from "../../components/map/ContextualRail";
+import {
+  ContextualRailPanelProvider,
+  type ContextualRailTab,
+} from "../../components/map/ContextualRailContext";
 import { DesktopOpsShell } from "../../components/map/DesktopOpsShell";
 import { HidingZonePanel } from "../../components/hider/HidingZonePanel";
 import { TimeTrapPanel } from "../../components/hider/TimeTrapPanel";
@@ -242,6 +247,36 @@ export function HiderMapScreenChrome({
   const isDesktop = useDesktopLayout();
   const toolLayout = isDesktop ? "rail" : "dock";
 
+  const railActiveTab: ContextualRailTab | null =
+    overlay.sheet === "none" ? null : overlay.sheet;
+
+  const handleSelectRailTab = (tab: ContextualRailTab) => {
+    switch (tab) {
+      case "settings":
+        onOpenSettings();
+        return;
+      case "chat":
+        onOpenChat();
+        return;
+      case "log":
+        onOpenLog();
+        return;
+      default: {
+        const _exhaustive: never = tab;
+        return _exhaustive;
+      }
+    }
+  };
+
+  const contextualRail = isDesktop ? (
+    <ContextualRail
+      open={overlay.sheet !== "none"}
+      activeTab={railActiveTab}
+      onClose={overlay.closeSheet}
+      onSelectTab={handleSelectRailTab}
+    />
+  ) : null;
+
   const statusRail = (
     <>
       <HiderTruthRevealBanner
@@ -316,12 +351,13 @@ export function HiderMapScreenChrome({
   );
 
   return (
-    <>
+    <ContextualRailPanelProvider>
       {isDesktop && mapSlot ? (
         <DesktopOpsShell
           status={statusRail}
           tools={toolDock}
           map={mapSlot}
+          contextual={contextualRail}
         />
       ) : (
         <div className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible">
@@ -507,6 +543,6 @@ export function HiderMapScreenChrome({
         onDelete={() => undefined}
         onEdit={overlay.closeSheet}
       />
-    </>
+    </ContextualRailPanelProvider>
   );
 }

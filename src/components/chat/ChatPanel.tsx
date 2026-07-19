@@ -5,8 +5,10 @@ import type {
   SessionMessageRecord,
 } from "../../domain/session/sessionChat";
 import type { PlayerRole } from "../../domain/session/playerRole";
+import { useDesktopLayout } from "../../hooks/useDesktopLayout";
 import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
 import { useAnimatedPresence } from "../../hooks/useAnimatedPresence";
+import { SheetHost } from "../ui/SheetHost";
 import { ChatPanelBody } from "./ChatPanelBody";
 
 interface ChatPanelProps {
@@ -50,14 +52,49 @@ export function ChatPanel({
   onAnswerQuestion,
   readOnly = false,
 }: ChatPanelProps) {
-  const keyboardInset = useVisualViewportBottomInset(open);
+  const isDesktop = useDesktopLayout();
+  const keyboardInset = useVisualViewportBottomInset(open && !isDesktop);
   const { mounted, animClass, setAnimNode } = useAnimatedPresence({
-    open,
+    open: open && !isDesktop,
     onClose,
     enterClass: "jl-panel-enter",
     exitClass: "jl-panel-exit",
     durationMs: 200,
   });
+
+  const body = (
+    <ChatPanelBody
+      messages={messages}
+      pendingQuestions={pendingQuestions}
+      sessionRules={sessionRules}
+      sessionId={sessionId}
+      senderUid={senderUid}
+      senderRole={senderRole}
+      isHider={isHider}
+      questionTruths={questionTruths}
+      truthsLoading={truthsLoading}
+      answerError={answerError}
+      onAnswerQuestion={onAnswerQuestion}
+      readOnly={readOnly}
+    />
+  );
+
+  if (isDesktop) {
+    return (
+      <SheetHost open={open} onClose={onClose} ariaLabel="Chat" railTab="chat">
+        <div className="mb-3 flex shrink-0 items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn-secondary flex min-h-11 min-w-11 items-center justify-center px-3"
+          >
+            Close
+          </button>
+        </div>
+        {body}
+      </SheetHost>
+    );
+  }
 
   if (!mounted) {
     return null;
@@ -83,20 +120,7 @@ export function ChatPanel({
             Close
           </button>
         </div>
-        <ChatPanelBody
-          messages={messages}
-          pendingQuestions={pendingQuestions}
-          sessionRules={sessionRules}
-          sessionId={sessionId}
-          senderUid={senderUid}
-          senderRole={senderRole}
-          isHider={isHider}
-          questionTruths={questionTruths}
-          truthsLoading={truthsLoading}
-          answerError={answerError}
-          onAnswerQuestion={onAnswerQuestion}
-          readOnly={readOnly}
-        />
+        {body}
       </div>
     </div>
   );

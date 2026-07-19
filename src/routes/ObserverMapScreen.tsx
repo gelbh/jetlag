@@ -4,6 +4,7 @@ import { GameAreaMask } from "../components/map/GameAreaMask";
 import { MapView } from "../components/map/MapView";
 import { MapViewportTracker } from "../components/map/MapViewportTracker";
 import { ChatPanel } from "../components/chat/ChatPanel";
+import { ContextualRailPanelProvider } from "../components/map/ContextualRailContext";
 import { SessionLog } from "../components/session/SessionLog";
 import { InlineError } from "../components/ui/InlineError";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
@@ -108,53 +109,55 @@ export function ObserverMapScreen() {
   );
 
   return (
-    <div className="map-screen-shell">
-      {isDesktop ? null : mapLayers}
+    <ContextualRailPanelProvider>
+      <div className="map-screen-shell">
+        {isDesktop ? null : mapLayers}
 
-      <ObserverMapScreenChrome
-        session={controller.session}
-        myRole={controller.myRole ?? "observer"}
-        timer={controller.timer}
-        overlay={controller.overlay}
-        perspective={controller.observerPerspective}
-        onPerspectiveChange={controller.setObserverPerspective}
-        onLeave={() => void handleLeave()}
-        mapSlot={isDesktop ? mapLayers : undefined}
-      />
+        <ObserverMapScreenChrome
+          session={controller.session}
+          myRole={controller.myRole ?? "observer"}
+          timer={controller.timer}
+          overlay={controller.overlay}
+          perspective={controller.observerPerspective}
+          onPerspectiveChange={controller.setObserverPerspective}
+          onLeave={() => void handleLeave()}
+          mapSlot={isDesktop ? mapLayers : undefined}
+        />
 
-      {controller.syncStatus.lastSyncError ? (
-        <div className="pointer-events-none absolute inset-x-0 top-20 z-[var(--z-panel)] px-3">
-          <InlineError className="pointer-events-auto mx-auto max-w-xl">
-            {controller.syncStatus.lastSyncError}
-          </InlineError>
-        </div>
-      ) : null}
+        {controller.syncStatus.lastSyncError ? (
+          <div className="pointer-events-none absolute inset-x-0 top-20 z-[var(--z-panel)] px-3">
+            <InlineError className="pointer-events-auto mx-auto max-w-xl">
+              {controller.syncStatus.lastSyncError}
+            </InlineError>
+          </div>
+        ) : null}
 
-      <SessionLog
-        open={controller.overlay.isLogOpen}
-        annotations={controller.annotations}
-        onClose={controller.overlay.closeSheet}
-        onDelete={() => undefined}
-        onEdit={() => undefined}
-        readOnly
-      />
-
-      {controller.sessionId && controller.uid ? (
-        <ChatPanel
-          open={controller.overlay.isChatOpen}
+        <SessionLog
+          open={controller.overlay.isLogOpen}
+          annotations={controller.annotations}
           onClose={controller.overlay.closeSheet}
-          messages={controller.chatMessages}
-          pendingQuestions={controller.pendingQuestions}
-          sessionRules={sessionRules}
-          sessionId={controller.sessionId}
-          senderUid={controller.uid}
-          senderRole={chatDisplayRole}
-          isHider={chatDisplayRole === "hider"}
-          bottomClassName="bottom-[calc(7.75rem+env(safe-area-inset-bottom))]"
-          onAnswerQuestion={async () => undefined}
+          onDelete={() => undefined}
+          onEdit={() => undefined}
           readOnly
         />
-      ) : null}
-    </div>
+
+        {controller.sessionId && controller.uid ? (
+          <ChatPanel
+            open={controller.overlay.isChatOpen}
+            onClose={controller.overlay.closeSheet}
+            messages={controller.chatMessages}
+            pendingQuestions={controller.pendingQuestions}
+            sessionRules={sessionRules}
+            sessionId={controller.sessionId}
+            senderUid={controller.uid}
+            senderRole={chatDisplayRole}
+            isHider={chatDisplayRole === "hider"}
+            bottomClassName="bottom-[calc(7.75rem+env(safe-area-inset-bottom))]"
+            onAnswerQuestion={async () => undefined}
+            readOnly
+          />
+        ) : null}
+      </div>
+    </ContextualRailPanelProvider>
   );
 }
