@@ -8,6 +8,7 @@ import {
 import { joinRemoteSessionByCode } from "./firestoreAnnotations";
 
 const getDoc = vi.hoisted(() => vi.fn());
+const getDocFromServer = vi.hoisted(() => vi.fn());
 const updateDoc = vi.hoisted(() => vi.fn(async () => undefined));
 
 vi.mock("../core/firebase", () => ({
@@ -34,7 +35,7 @@ vi.mock("firebase/firestore", () => ({
     return { path: rest.join("/") };
   }),
   getDoc,
-  getDocFromServer: vi.fn(),
+  getDocFromServer,
   getDocs: vi.fn(),
   onSnapshot: vi.fn(),
   serverTimestamp: vi.fn(() => ({})),
@@ -67,6 +68,7 @@ describe("isPlaceholderGameArea", () => {
 describe("joinRemoteSessionByCode without initial read", () => {
   beforeEach(() => {
     getDoc.mockReset();
+    getDocFromServer.mockReset();
     updateDoc.mockClear();
   });
 
@@ -92,20 +94,20 @@ describe("joinRemoteSessionByCode without initial read", () => {
       })
       .mockRejectedValueOnce(
         new FirebaseError("permission-denied", "Missing or insufficient permissions."),
-      )
-      .mockResolvedValueOnce({
-        exists: () => true,
-        id: "session-1",
-        data: () => ({
-          code: "ABCD",
-          gameArea: realGameArea,
-          hostUid: "host-1",
-          createdAt: "2026-05-14T00:00:00.000Z",
-          memberUids: ["host-1", "admin-1"],
-          memberRoles: { "host-1": "hider", "admin-1": "admin" },
-          status: "active",
-        }),
-      });
+      );
+    getDocFromServer.mockResolvedValueOnce({
+      exists: () => true,
+      id: "session-1",
+      data: () => ({
+        code: "ABCD",
+        gameArea: realGameArea,
+        hostUid: "host-1",
+        createdAt: "2026-05-14T00:00:00.000Z",
+        memberUids: ["host-1", "admin-1"],
+        memberRoles: { "host-1": "hider", "admin-1": "admin" },
+        status: "active",
+      }),
+    });
 
     const result = await joinRemoteSessionByCode(
       "ABCD",
@@ -120,7 +122,8 @@ describe("joinRemoteSessionByCode without initial read", () => {
     }
 
     expect(updateDoc).toHaveBeenCalled();
-    expect(getDoc).toHaveBeenCalledTimes(3);
+    expect(getDoc).toHaveBeenCalledTimes(2);
+    expect(getDocFromServer).toHaveBeenCalledTimes(1);
     expect(isPlaceholderGameArea(result.session.gameArea)).toBe(false);
     expect(result.session.gameArea).toMatchObject({
       type: "Polygon",
@@ -149,8 +152,8 @@ describe("joinRemoteSessionByCode without initial read", () => {
       })
       .mockRejectedValueOnce(
         new FirebaseError("permission-denied", "Missing or insufficient permissions."),
-      )
-      .mockRejectedValueOnce(new Error("re-read failed"));
+      );
+    getDocFromServer.mockRejectedValueOnce(new Error("re-read failed"));
 
     const result = await joinRemoteSessionByCode(
       "ABCD",
