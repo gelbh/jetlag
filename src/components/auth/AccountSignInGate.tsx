@@ -167,7 +167,7 @@ export function AccountSignInGate({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="desktop-entry-actions space-y-3">
       <p className="text-sm leading-relaxed text-ink-muted">{description}</p>
 
       <div className="oauth-sign-in-stack space-y-2">
