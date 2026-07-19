@@ -42,15 +42,11 @@ async function assertSocialLayoutSmoke(page: Page, path: SocialLayoutPath) {
   } else if (path === "/stats") {
     await assertMinTapTargets(viewportTarget.getByRole("tab"));
   } else {
-    // Metric chips are height-gated (2.75rem); width follows label length.
-    const tabs = viewportTarget.getByRole("tab");
-    const count = await tabs.count();
-    expect(count).toBeGreaterThan(0);
-    for (let i = 0; i < count; i++) {
-      const box = await tabs.nth(i).boundingBox();
-      expect(box, `missing box for metric chip ${i}`).not.toBeNull();
-      expect(box!.height, `height ${i}`).toBeGreaterThanOrEqual(44);
-    }
+    // Scope tabs + Choose board chip (metric controls live in the board sheet).
+    await assertMinTapTargets(viewportTarget.getByRole("tab"));
+    await assertMinTapTargets(
+      viewportTarget.getByRole("button", { name: /Choose board/i }),
+    );
   }
   await assertNoSeriousAxeViolations(page);
 }
