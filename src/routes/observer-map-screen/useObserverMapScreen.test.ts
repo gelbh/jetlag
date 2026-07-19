@@ -1,9 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import {
-  JOIN_PREVIEW_PLACEHOLDER_AREA,
-} from "../../services/firestore/firestoreAnnotations";
 import { ZERO_GAME_AREA } from "../../domain/geometry/geometry";
+import { JOIN_PREVIEW_PLACEHOLDER_AREA } from "../../domain/session/joinPreviewGameArea";
 import { useObserverMapScreen } from "./useObserverMapScreen";
 
 const mockUseResolvedSessionRules = vi.fn();

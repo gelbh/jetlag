@@ -45,7 +45,7 @@ import {
   deserializeSessionFromFirestore,
   sessionRulesPatchToFirestore,
 } from "./firestoreSerialization";
-import { ZERO_GAME_AREA } from "../../domain/geometry/geometry";
+import { buildJoinPreviewSession } from "../../domain/session/joinPreviewSession";
 import { photoUploadAccessError } from "../../domain/questions";
 import { generateSessionCode } from "../session/sessionCodes";
 import {
@@ -130,48 +130,6 @@ function sanitizeJoinReturningMemberUid(
     options.persistedMyUid,
     options.returningMemberUid,
   );
-}
-
-export const JOIN_PREVIEW_PLACEHOLDER_AREA: GameArea = {
-  type: "Polygon",
-  coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
-};
-
-function gameAreaCoordinatesEqual(a: GameArea, b: GameArea): boolean {
-  return (
-    a.type === b.type &&
-    JSON.stringify(a.coordinates) === JSON.stringify(b.coordinates)
-  );
-}
-
-/** True for join-preview Null Island (0–1°) or the zero fallback polygon. */
-export function isPlaceholderGameArea(gameArea: GameArea): boolean {
-  return (
-    gameAreaCoordinatesEqual(gameArea, JOIN_PREVIEW_PLACEHOLDER_AREA) ||
-    gameAreaCoordinatesEqual(gameArea, ZERO_GAME_AREA)
-  );
-}
-
-function buildJoinPreviewSession(
-  sessionId: string,
-  code: string,
-  codeRecord: SessionCodeRecord,
-): SessionRecord {
-  return {
-    id: sessionId,
-    code,
-    gameArea: JOIN_PREVIEW_PLACEHOLDER_AREA,
-    hostUid: codeRecord.hostUid,
-    createdAt: codeRecord.createdAt ?? new Date().toISOString(),
-    memberUids: [],
-    memberRoles: {},
-    gameSize: "medium",
-    distanceUnit: "imperial",
-    hidingZoneRadiusMeters: 402,
-    tier: codeRecord.tier ?? "free",
-    hostAppVersion: codeRecord.hostAppVersion,
-    status: codeRecord.status ?? "active",
-  };
 }
 
 async function readSessionCodeRecord(

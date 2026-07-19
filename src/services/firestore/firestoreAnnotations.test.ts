@@ -1,11 +1,11 @@
 import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ZERO_GAME_AREA } from "../../domain/geometry/geometry";
 import {
   isPlaceholderGameArea,
   JOIN_PREVIEW_PLACEHOLDER_AREA,
-  joinRemoteSessionByCode,
-} from "./firestoreAnnotations";
-import { ZERO_GAME_AREA } from "../../domain/geometry/geometry";
+} from "../../domain/session/joinPreviewGameArea";
+import { joinRemoteSessionByCode } from "./firestoreAnnotations";
 
 const getDoc = vi.hoisted(() => vi.fn());
 const updateDoc = vi.hoisted(() => vi.fn(async () => undefined));

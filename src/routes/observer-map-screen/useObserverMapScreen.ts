@@ -13,7 +13,7 @@ import { useResolvedSessionRules } from "../../hooks/session/useResolvedSessionR
 import { useSharedSessionScreen } from "../../hooks/session/useSharedSessionScreen";
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import { useSessionAnnotations } from "../../hooks/map/useSessionAnnotations";
-import { isPlaceholderGameArea } from "../../services/firestore/firestoreAnnotations";
+import { isPlaceholderGameArea } from "../../domain/session/joinPreviewGameArea";
 import { useMapStore, useSessionStore } from "../../state/sessionStore";
 
 const DEFAULT_MAP_CENTER: LatLngTuple = [51.505, -0.09];
