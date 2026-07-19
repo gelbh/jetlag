@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { useDesktopLayout } from "../hooks/useDesktopLayout";
 import { HeavyToolHost } from "./map-screen/lazyImports";
 import { MapScreenChrome } from "./map-screen/MapScreenChrome";
 import { MapScreenMapLayers } from "./map-screen/MapScreenMapLayers";
@@ -6,6 +7,61 @@ import { useMapScreenController } from "./map-screen/useMapScreenController";
 
 export function SeekerMapScreen() {
   const controller = useMapScreenController();
+  const isDesktop = useDesktopLayout();
+
+  const mapLayers = (
+    <MapScreenMapLayers
+      session={controller.session!}
+      gameArea={controller.gameArea!}
+      toolGameArea={controller.toolGameArea}
+      effectiveBasemapStyle={controller.effectiveBasemapStyle}
+      handleMapStyleChange={controller.handleMapStyleChange}
+      mapChromeControlInset={controller.mapChromeControlInset}
+      center={controller.center}
+      effectiveMapFocusBounds={controller.effectiveMapFocusBounds}
+      placementRecenterToken={controller.placementRecenterToken}
+      placementFocusPaddingBias={controller.placementFocusPaddingBias}
+      placementFocusMinZoom={controller.placementFocusMinZoom}
+      placementFocusMaxZoom={controller.placementFocusMaxZoom}
+      placementFocusPreferFly={controller.placementFocusPreferFly}
+      showPlacementRecenter={controller.showPlacementRecenter}
+      requestPlacementRecenter={controller.requestPlacementRecenter}
+      activeTool={controller.activeTool}
+      handleMapClick={controller.handleMapClick}
+      chromeHudRef={controller.chromeHudRef}
+      suppressChromeHideRef={controller.suppressChromeHideRef}
+      mapShellRef={controller.mapShellRef}
+      exportLegendRef={controller.exportLegendRef}
+      placementCrosshair={controller.placementCrosshair}
+      handleMapViewportChange={controller.handleMapViewportChange}
+      handleMapPanStart={controller.handleMapPanStart}
+      handleMapPanEnd={controller.handleMapPanEnd}
+      transitEnabled={controller.transitEnabled}
+      layerVisibility={controller.layerVisibility}
+      transitStaticData={controller.transitStaticData}
+      transitLiveData={controller.transitLiveData}
+      mapViewport={controller.mapViewport}
+      annotations={controller.annotations}
+      selectedAnnotationId={controller.selectedAnnotationId}
+      draftEliminationFeatures={controller.draftEliminationFeatures}
+      confirmedHidingZones={controller.confirmedHidingZones}
+      seekerLocations={controller.seekerLocations}
+      uid={controller.uid}
+      activeThermometerWalk={controller.activeThermometerWalk}
+      pendingQuestions={controller.pendingQuestions}
+      geometryEditAnnotation={controller.geometryEditAnnotation}
+      geometryDraft={controller.geometryDraft}
+      mapDraftOverlays={controller.mapDraftOverlays}
+      showAdminBoundaries={controller.showAdminBoundaries}
+      adminBoundaryLoading={controller.adminBoundaryLoading}
+      adminBoundaryFeatures={controller.adminBoundaryFeatures}
+      showCurrentLocation={controller.showCurrentLocation}
+      awaitingPlacement={controller.awaitingPlacement}
+      lowPowerMode={controller.lowPowerMode}
+      distanceUnit={controller.distanceUnit}
+      handleLiveLocationError={controller.handleLiveLocationError}
+    />
+  );
 
   return (
     <div className="map-screen-shell">
@@ -14,57 +70,7 @@ export function SeekerMapScreen() {
           <HeavyToolHost {...controller.heavyMapToolsSlotProps} />
         </Suspense>
       ) : null}
-      <MapScreenMapLayers
-        session={controller.session!}
-        gameArea={controller.gameArea!}
-        toolGameArea={controller.toolGameArea}
-        effectiveBasemapStyle={controller.effectiveBasemapStyle}
-        handleMapStyleChange={controller.handleMapStyleChange}
-        mapChromeControlInset={controller.mapChromeControlInset}
-        center={controller.center}
-        effectiveMapFocusBounds={controller.effectiveMapFocusBounds}
-        placementRecenterToken={controller.placementRecenterToken}
-        placementFocusPaddingBias={controller.placementFocusPaddingBias}
-        placementFocusMinZoom={controller.placementFocusMinZoom}
-        placementFocusMaxZoom={controller.placementFocusMaxZoom}
-        placementFocusPreferFly={controller.placementFocusPreferFly}
-        showPlacementRecenter={controller.showPlacementRecenter}
-        requestPlacementRecenter={controller.requestPlacementRecenter}
-        activeTool={controller.activeTool}
-        handleMapClick={controller.handleMapClick}
-        chromeHudRef={controller.chromeHudRef}
-        suppressChromeHideRef={controller.suppressChromeHideRef}
-        mapShellRef={controller.mapShellRef}
-        exportLegendRef={controller.exportLegendRef}
-        placementCrosshair={controller.placementCrosshair}
-        handleMapViewportChange={controller.handleMapViewportChange}
-        handleMapPanStart={controller.handleMapPanStart}
-        handleMapPanEnd={controller.handleMapPanEnd}
-        transitEnabled={controller.transitEnabled}
-        layerVisibility={controller.layerVisibility}
-        transitStaticData={controller.transitStaticData}
-        transitLiveData={controller.transitLiveData}
-        mapViewport={controller.mapViewport}
-        annotations={controller.annotations}
-        selectedAnnotationId={controller.selectedAnnotationId}
-        draftEliminationFeatures={controller.draftEliminationFeatures}
-        confirmedHidingZones={controller.confirmedHidingZones}
-        seekerLocations={controller.seekerLocations}
-        uid={controller.uid}
-        activeThermometerWalk={controller.activeThermometerWalk}
-        pendingQuestions={controller.pendingQuestions}
-        geometryEditAnnotation={controller.geometryEditAnnotation}
-        geometryDraft={controller.geometryDraft}
-        mapDraftOverlays={controller.mapDraftOverlays}
-        showAdminBoundaries={controller.showAdminBoundaries}
-        adminBoundaryLoading={controller.adminBoundaryLoading}
-        adminBoundaryFeatures={controller.adminBoundaryFeatures}
-        showCurrentLocation={controller.showCurrentLocation}
-        awaitingPlacement={controller.awaitingPlacement}
-        lowPowerMode={controller.lowPowerMode}
-        distanceUnit={controller.distanceUnit}
-        handleLiveLocationError={controller.handleLiveLocationError}
-      />
+      {isDesktop ? null : mapLayers}
       <MapScreenChrome
         session={controller.session!}
         gameArea={controller.gameArea!}
@@ -173,6 +179,7 @@ export function SeekerMapScreen() {
         seekerLocations={controller.seekerLocations}
         setActiveTool={controller.setActiveTool}
         setAwaitingPlacement={controller.setAwaitingPlacement}
+        mapSlot={isDesktop ? mapLayers : undefined}
       />
     </div>
   );

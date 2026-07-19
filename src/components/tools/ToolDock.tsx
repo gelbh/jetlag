@@ -23,6 +23,8 @@ import {
   useToolDockMenus,
 } from "./useToolDockState";
 
+export type ToolDockLayout = "dock" | "rail";
+
 interface ToolDockProps {
   activeTool: MapTool;
   sessionRules?: SessionRulesInput;
@@ -43,6 +45,8 @@ interface ToolDockProps {
   canRequestFoundHider?: boolean;
   onRequestFoundHider?: () => void;
   canSubmitQuestion?: boolean;
+  /** Bottom dock (default) or vertical left rail inside DesktopOpsShell. */
+  layout?: ToolDockLayout;
 }
 
 export function ToolDock({
@@ -65,10 +69,12 @@ export function ToolDock({
   canRequestFoundHider = false,
   onRequestFoundHider,
   canSubmitQuestion = true,
+  layout = "dock",
 }: ToolDockProps) {
   const dockRef = useRef<HTMLDivElement>(null);
   const mainGroupRef = useRef<HTMLDivElement>(null);
-  const viewportBottomInset = useVisualViewportBottomInset(true);
+  const isRail = layout === "rail";
+  const viewportBottomInset = useVisualViewportBottomInset(!isRail);
   const {
     drawMenuOpen,
     setDrawMenuOpen,
@@ -101,9 +107,9 @@ export function ToolDock({
   return (
     <div
       ref={dockRef}
-      className="jl-tool-dock pointer-events-auto"
+      className={`jl-tool-dock pointer-events-auto${isRail ? " jl-tool-dock--rail" : ""}`}
       style={
-        viewportBottomInset > 0
+        !isRail && viewportBottomInset > 0
           ? { bottom: `${viewportBottomInset}px` }
           : undefined
       }

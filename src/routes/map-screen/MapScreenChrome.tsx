@@ -1,5 +1,7 @@
+import type { ReactNode } from "react";
 import { isEndGameActive, isEndGamePending, isFoundHiderPending } from "../../domain/map/annotations";
 import { ChatPanel } from "../../components/chat/ChatPanel";
+import { DesktopOpsShell } from "../../components/map/DesktopOpsShell";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
 import { AppUpdateMapChip } from "../../components/ui/AppUpdateMapChip";
@@ -8,6 +10,7 @@ import { MapStatusRail } from "../../components/session/MapStatusRail";
 import { SessionLog } from "../../components/session/SessionLog";
 import { AnnotationEditSheet } from "../../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../../components/tools/ToolDock";
+import { useDesktopLayout } from "../../hooks/useDesktopLayout";
 import type { MapScreenController } from "./useMapScreenController";
 import { useSyncRetryAction } from "../../hooks/session/useSyncRetryAction";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
@@ -122,7 +125,10 @@ type MapScreenChromeProps = Pick<
   | "seekerLocations"
   | "setActiveTool"
   | "setAwaitingPlacement"
->;
+> & {
+  /** When set with desktop layout, map fills the ops shell center slot. */
+  mapSlot?: ReactNode;
+};
 
 export function MapScreenChrome({
   session,
@@ -231,90 +237,115 @@ export function MapScreenChrome({
   seekerLocations,
   setActiveTool,
   setAwaitingPlacement,
+  mapSlot,
 }: MapScreenChromeProps) {
   const onSyncErrorAction = useSyncRetryAction();
   const gameOverActions = useGameOverActions(session, overlay);
+  const isDesktop = useDesktopLayout();
+  const toolLayout = isDesktop ? "rail" : "dock";
+
+  const statusRail = (
+    <MapStatusRail
+      sessionCode={session!.code}
+      sessionRules={session!}
+      playerRole="seeker"
+      showPreloadBanner
+      expanded={isDesktop}
+      activeTool={activeTool}
+      syncStatus={syncStatus.status}
+      queuedWrites={syncStatus.queuedWrites}
+      message={
+        syncStatus.remoteUpdateNotice ??
+        syncStatus.lastSyncError ??
+        matchingAreasError
+      }
+      endGameActive={isEndGameActive(session)}
+      endGamePending={isEndGamePending(session)}
+      endGameRequestedByUid={session!.endGameRequestedByUid}
+      foundHiderPending={isFoundHiderPending(session)}
+      foundRequestedByUid={session!.foundRequestedByUid}
+      onDeclineFoundHider={() => void handleDeclineFoundHider()}
+      myUid={uid ?? undefined}
+      hostUid={session!.hostUid}
+      seekerLocations={seekerLocations}
+      onCancelWalkingQuestion={(pendingQuestionId) => {
+        void handleCancelWalkingQuestion(pendingQuestionId);
+      }}
+      isHost={isHost}
+      onResetEndGame={() => void handleResetEndGame()}
+      timerState={timer.timerState}
+      timerRunning={timer.running}
+      timerHasStarted={timer.hasStarted}
+      timerSyncing={timerSyncing}
+      canStartGame={canControlTimer}
+      onStartGame={timer.start}
+      onTimerStart={timer.start}
+      onTimerPause={timer.pause}
+      onTimerReset={timer.reset}
+      timerControlsDisabled={!canControlTimer}
+      onOpenLog={handleOpenLog}
+      pendingQuestions={pendingQuestions}
+      closeTimerMenu={
+        overlay.sheet !== "none" ||
+        activeTool !== "none" ||
+        Boolean(selectedAnnotation) ||
+        Boolean(geometryEditAnnotation && geometryDraft)
+      }
+      onSyncErrorAction={onSyncErrorAction}
+    />
+  );
+
+  const toolDock = (
+    <ToolDock
+      layout={toolLayout}
+      activeTool={activeTool}
+      sessionRules={session!}
+      gameSize={session!.gameSize ?? "medium"}
+      hasHiders={awaitHiderAnswer}
+      onSelect={handleSelectTool}
+      canUndo={canUndoLastTool}
+      canRedo={canRedoLastTool}
+      onUndo={handleUndoLastAnnotation}
+      onRedo={handleRedoLastAnnotation}
+      onOpenSettings={handleOpenSettings}
+      onOpenChat={handleOpenChat}
+      hasUnreadChat={hasUnreadChat}
+      unreadCount={unreadCount}
+      dismissOverflowMenus={overlay.sheet !== "none"}
+      canSubmitQuestion={canSubmitQuestion}
+      canStartEndGame={canStartEndGame}
+      onStartEndGame={() => void handleStartEndGame()}
+      canRequestFoundHider={canRequestFoundHider}
+      onRequestFoundHider={() => void handleRequestFoundHider()}
+    />
+  );
 
   return (
     <>
-      <div
-        ref={chromeHudRef}
-        className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
-      >
-        <MapStatusRail
-          sessionCode={session!.code}
-          sessionRules={session!}
-          playerRole="seeker"
-          showPreloadBanner
-          activeTool={activeTool}
-          syncStatus={syncStatus.status}
-          queuedWrites={syncStatus.queuedWrites}
-          message={
-            syncStatus.remoteUpdateNotice ??
-            syncStatus.lastSyncError ??
-            matchingAreasError
+      {isDesktop && mapSlot ? (
+        <DesktopOpsShell
+          chromeHudRef={chromeHudRef}
+          status={
+            <>
+              {statusRail}
+              <FirestorePersistenceBanner />
+              <AppUpdateMapChip />
+            </>
           }
-          endGameActive={isEndGameActive(session)}
-          endGamePending={isEndGamePending(session)}
-          endGameRequestedByUid={session!.endGameRequestedByUid}
-          foundHiderPending={isFoundHiderPending(session)}
-          foundRequestedByUid={session!.foundRequestedByUid}
-          onDeclineFoundHider={() => void handleDeclineFoundHider()}
-          myUid={uid ?? undefined}
-          hostUid={session!.hostUid}
-          seekerLocations={seekerLocations}
-          onCancelWalkingQuestion={(pendingQuestionId) => {
-            void handleCancelWalkingQuestion(pendingQuestionId);
-          }}
-          isHost={isHost}
-          onResetEndGame={() => void handleResetEndGame()}
-          timerState={timer.timerState}
-          timerRunning={timer.running}
-          timerHasStarted={timer.hasStarted}
-          timerSyncing={timerSyncing}
-          canStartGame={canControlTimer}
-          onStartGame={timer.start}
-          onTimerStart={timer.start}
-          onTimerPause={timer.pause}
-          onTimerReset={timer.reset}
-          timerControlsDisabled={!canControlTimer}
-          onOpenLog={handleOpenLog}
-          pendingQuestions={pendingQuestions}
-          closeTimerMenu={
-            overlay.sheet !== "none" ||
-            activeTool !== "none" ||
-            Boolean(selectedAnnotation) ||
-            Boolean(geometryEditAnnotation && geometryDraft)
-          }
-          onSyncErrorAction={onSyncErrorAction}
+          tools={toolDock}
+          map={mapSlot}
         />
-
-        <FirestorePersistenceBanner />
-
-        <AppUpdateMapChip />
-
-        <ToolDock
-          activeTool={activeTool}
-          sessionRules={session!}
-          gameSize={session!.gameSize ?? "medium"}
-          hasHiders={awaitHiderAnswer}
-          onSelect={handleSelectTool}
-          canUndo={canUndoLastTool}
-          canRedo={canRedoLastTool}
-          onUndo={handleUndoLastAnnotation}
-          onRedo={handleRedoLastAnnotation}
-          onOpenSettings={handleOpenSettings}
-          onOpenChat={handleOpenChat}
-          hasUnreadChat={hasUnreadChat}
-          unreadCount={unreadCount}
-          dismissOverflowMenus={overlay.sheet !== "none"}
-          canSubmitQuestion={canSubmitQuestion}
-          canStartEndGame={canStartEndGame}
-          onStartEndGame={() => void handleStartEndGame()}
-          canRequestFoundHider={canRequestFoundHider}
-          onRequestFoundHider={() => void handleRequestFoundHider()}
-        />
-      </div>
+      ) : (
+        <div
+          ref={chromeHudRef}
+          className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
+        >
+          {statusRail}
+          <FirestorePersistenceBanner />
+          <AppUpdateMapChip />
+          {toolDock}
+        </div>
+      )}
 
       <SeekerChromeOverlays
         timer={timer}
