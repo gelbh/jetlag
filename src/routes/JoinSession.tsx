@@ -32,6 +32,13 @@ import { MotionPressable } from "../components/motion/MotionPressable";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { preloadCriticalGameAreaCaches } from "../services/session/gameAreaPreload";
 import { resolveSessionMatchingAreas } from "../services/geo/resolveSessionMatchingAreas";
+import {
+  getCachedJoinPreview,
+  JOIN_PREVIEW_DEBOUNCE_MS,
+  setCachedJoinPreview,
+} from "../services/session/joinSessionPreviewCache";
+
+type JoinPreviewResult = Awaited<ReturnType<typeof lookupRemoteSessionByCode>>;
 
 export function JoinSession() {
   const navigate = useAppNavigate();
@@ -60,46 +67,69 @@ export function JoinSession() {
     }
 
     let cancelled = false;
-    setLookupLoading(true);
 
-    void (async () => {
-      try {
-        const user = await ensureAnonymousUser();
-        const result = await retryAsync(() =>
-          lookupRemoteSessionByCode(normalized),
+    const applyPreview = (result: JoinPreviewResult, uid: string) => {
+      setPreviewPremium(
+        result.status === "found" && isPremiumSession(result.session),
+      );
+      if (result.status === "found") {
+        const existingRole = resolvePlayerRole(
+          result.session.memberRoles,
+          uid,
         );
-        if (cancelled) {
-          return;
-        }
-
-        setPreviewPremium(
-          result.status === "found" && isPremiumSession(result.session),
-        );
-        if (result.status === "found") {
-          const existingRole = resolvePlayerRole(
-            result.session.memberRoles,
-            user.uid,
-          );
-          if (result.session.memberRoles?.[user.uid]) {
-            setPlayerRole(existingRole);
-          }
-        }
-        if (result.status === "missing") {
-          setError(null);
-        }
-      } catch {
-        if (!cancelled) {
-          setPreviewPremium(false);
-        }
-      } finally {
-        if (!cancelled) {
-          setLookupLoading(false);
+        if (result.session.memberRoles?.[uid]) {
+          setPlayerRole(existingRole);
         }
       }
-    })();
+      if (result.status === "missing") {
+        setError(null);
+      }
+    };
+
+    const cached = getCachedJoinPreview<{
+      result: JoinPreviewResult;
+      uid: string;
+    }>(normalized);
+    if (cached) {
+      /* eslint-disable react-hooks/set-state-in-effect -- cache hit skips network */
+      applyPreview(cached.result, cached.uid);
+      setLookupLoading(false);
+      /* eslint-enable react-hooks/set-state-in-effect */
+      return;
+    }
+
+    setLookupLoading(true);
+    const debounceTimer = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const user = await ensureAnonymousUser();
+          const result = await retryAsync(() =>
+            lookupRemoteSessionByCode(normalized),
+          );
+          if (cancelled) {
+            return;
+          }
+
+          setCachedJoinPreview(normalized, {
+            result,
+            uid: user.uid,
+          });
+          applyPreview(result, user.uid);
+        } catch {
+          if (!cancelled) {
+            setPreviewPremium(false);
+          }
+        } finally {
+          if (!cancelled) {
+            setLookupLoading(false);
+          }
+        }
+      })();
+    }, JOIN_PREVIEW_DEBOUNCE_MS);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(debounceTimer);
     };
   }, [code]);
 
