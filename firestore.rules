@@ -686,11 +686,25 @@ service cloud.firestore {
           && request.resource.data.answerableAt is string
         ) || (
           isSeekerMember(sessionId)
+          && resource.data.status == 'answered'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'resolvedAnnotationId'])
           && request.resource.data.status in ['resolved', 'cancelled']
         ) || (
           isSessionHost(sessionId)
           && resource.data.status in ['pending', 'walking', 'answered']
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+          && request.resource.data.status == 'cancelled'
+        ) || (
+          isSeekerMember(sessionId)
+          && resource.data.status == 'walking'
+          && resource.data.createdByUid == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+          && request.resource.data.status == 'cancelled'
+        ) || (
+          isSeekerMember(sessionId)
+          && resource.data.status == 'walking'
+          && resource.data.createdByUid is string
+          && !(resource.data.createdByUid in sessionData(sessionId).memberUids)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
           && request.resource.data.status == 'cancelled'
         ) || (

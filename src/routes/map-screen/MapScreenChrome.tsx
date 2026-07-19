@@ -118,6 +118,8 @@ type MapScreenChromeProps = Pick<
   | "handleDistanceUnitChange"
   | "exportMap"
   | "answerPendingQuestion"
+  | "handleCancelWalkingQuestion"
+  | "seekerLocations"
   | "setActiveTool"
   | "setAwaitingPlacement"
 >;
@@ -225,6 +227,8 @@ export function MapScreenChrome({
   handleDistanceUnitChange,
   exportMap,
   answerPendingQuestion,
+  handleCancelWalkingQuestion,
+  seekerLocations,
   setActiveTool,
   setAwaitingPlacement,
 }: MapScreenChromeProps) {
@@ -257,6 +261,11 @@ export function MapScreenChrome({
           foundRequestedByUid={session!.foundRequestedByUid}
           onDeclineFoundHider={() => void handleDeclineFoundHider()}
           myUid={uid ?? undefined}
+          hostUid={session!.hostUid}
+          seekerLocations={seekerLocations}
+          onCancelWalkingQuestion={(pendingQuestionId) => {
+            void handleCancelWalkingQuestion(pendingQuestionId);
+          }}
           isHost={isHost}
           onResetEndGame={() => void handleResetEndGame()}
           timerState={timer.timerState}

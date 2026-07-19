@@ -6,36 +6,68 @@ import {
   deserializePendingQuestionFromFirestore,
 } from "./firestoreSerialization";
 
-const firestoreMocks = vi.hoisted(() => ({
-  setDoc: vi.fn(async () => undefined),
-  updateDoc: vi.fn(async () => undefined),
-  deleteDoc: vi.fn(async () => undefined),
-  addDoc: vi.fn(async () => undefined),
-  doc: vi.fn((...segments: string[]) => ({ path: segments.join("/") })),
-  collection: vi.fn((...segments: string[]) => ({
-    path: segments.join("/"),
-  })),
-}));
+const firestoreMocks = vi.hoisted(() => {
+  const batchUpdate = vi.fn();
+  const batchCommit = vi.fn(async () => undefined);
+  return {
+    setDoc: vi.fn(async () => undefined),
+    updateDoc: vi.fn(async () => undefined),
+    deleteDoc: vi.fn(async () => undefined),
+    addDoc: vi.fn(async () => undefined),
+    getDoc: vi.fn(async () => ({
+      exists: () => true,
+      data: () => ({ status: "walking" }),
+    })),
+    getDocs: vi.fn(
+      async (): Promise<{
+        docs: Array<{ id: string; data: () => Record<string, unknown> }>;
+      }> => ({ docs: [] }),
+    ),
+    writeBatch: vi.fn(() => ({
+      update: batchUpdate,
+      commit: batchCommit,
+    })),
+    batchUpdate,
+    batchCommit,
+    doc: vi.fn((...segments: string[]) => ({ path: segments.join("/") })),
+    collection: vi.fn((...segments: string[]) => ({
+      path: segments.join("/"),
+    })),
+  };
+});
+
+const mockCaptureException = vi.hoisted(() => vi.fn());
 
 vi.mock("firebase/firestore", () => ({
   addDoc: firestoreMocks.addDoc,
   collection: firestoreMocks.collection,
   deleteDoc: firestoreMocks.deleteDoc,
   doc: firestoreMocks.doc,
+  getDoc: firestoreMocks.getDoc,
+  getDocs: firestoreMocks.getDocs,
   onSnapshot: vi.fn(),
   orderBy: vi.fn(),
   query: vi.fn(),
   serverTimestamp: vi.fn(),
   setDoc: firestoreMocks.setDoc,
   updateDoc: firestoreMocks.updateDoc,
+  writeBatch: firestoreMocks.writeBatch,
+  where: vi.fn(),
 }));
 
 vi.mock("../core/firebase", () => ({
   getFirestoreDb: () => ({}),
 }));
 
+vi.mock("../core/sentry", () => ({
+  captureException: mockCaptureException,
+}));
+
 import {
   appendPlayerTrailPoint,
+  cancelWalkingThermometerQuestions,
+  cancelWalkingThermometersAndAnnounce,
+  cancelWalkingThermometersAfterIdentityHeal,
   deletePendingQuestion,
   updatePendingQuestion,
   writePendingQuestion,
@@ -263,5 +295,116 @@ describe("firestoreSessionExtras writes", () => {
         role: "hider",
       }),
     );
+  });
+
+  it("cancels walking thermometer questions by id with a status-only batch", async () => {
+    await cancelWalkingThermometerQuestions("session-1", ["pq-walk-1", "pq-walk-2"]);
+
+    expect(firestoreMocks.writeBatch).toHaveBeenCalled();
+    expect(firestoreMocks.batchUpdate).toHaveBeenCalledTimes(2);
+    expect(firestoreMocks.batchUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ path: expect.stringContaining("pq-walk-1") }),
+      { status: "cancelled" },
+    );
+    expect(firestoreMocks.batchUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ path: expect.stringContaining("pq-walk-2") }),
+      { status: "cancelled" },
+    );
+    expect(firestoreMocks.batchCommit).toHaveBeenCalled();
+  });
+
+  it("no-ops cancelWalkingThermometerQuestions for an empty id list", async () => {
+    await cancelWalkingThermometerQuestions("session-1", []);
+    expect(firestoreMocks.writeBatch).not.toHaveBeenCalled();
+  });
+
+  it("cancels walking thermometers and announces once for still-walking ids", async () => {
+    await cancelWalkingThermometersAndAnnounce(
+      "session-1",
+      ["pq-walk-1"],
+      "seeker-1",
+      "seeker",
+      "left",
+    );
+
+    expect(firestoreMocks.batchUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ path: expect.stringContaining("pq-walk-1") }),
+      { status: "cancelled" },
+    );
+    expect(firestoreMocks.setDoc).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        kind: "system",
+        text: "Thermometer walk cancelled — seeker left.",
+      }),
+    );
+  });
+
+  it("skips cancelWalkingThermometersAndAnnounce when already cancelled", async () => {
+    firestoreMocks.getDoc.mockResolvedValueOnce({
+      exists: () => true,
+      data: () => ({ status: "cancelled" }),
+    });
+
+    await cancelWalkingThermometersAndAnnounce(
+      "session-1",
+      ["pq-walk-1"],
+      "seeker-1",
+      "seeker",
+      "left",
+    );
+
+    expect(firestoreMocks.writeBatch).not.toHaveBeenCalled();
+    expect(firestoreMocks.setDoc).not.toHaveBeenCalled();
+  });
+
+  it("cancels walking thermometers after identity heal", async () => {
+    const walk = samplePendingQuestion({
+      id: "pq-walk",
+      toolType: "thermometer",
+      createdByUid: "old-uid",
+      status: "walking",
+      promptText: "Thermometer walk started",
+    });
+    firestoreMocks.getDocs.mockResolvedValueOnce({
+      docs: [
+        {
+          id: walk.id,
+          data: () => buildPendingQuestionDocument(walk),
+        },
+      ],
+    });
+
+    await cancelWalkingThermometersAfterIdentityHeal(
+      "session-1",
+      "old-uid",
+      "new-uid",
+      "seeker",
+    );
+
+    expect(firestoreMocks.batchUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ path: expect.stringContaining("pq-walk") }),
+      { status: "cancelled" },
+    );
+    expect(firestoreMocks.setDoc).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        kind: "system",
+        text: "Thermometer walk cancelled — seeker left the session.",
+      }),
+    );
+  });
+
+  it("captures exceptions from identity-heal cancel", async () => {
+    firestoreMocks.getDocs.mockRejectedValueOnce(new Error("boom"));
+
+    await cancelWalkingThermometersAfterIdentityHeal(
+      "session-1",
+      "old-uid",
+      "new-uid",
+      "seeker",
+    );
+
+    expect(mockCaptureException).toHaveBeenCalledWith(expect.any(Error));
   });
 });
