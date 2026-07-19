@@ -5,6 +5,7 @@ import { LeaderboardBoardSheet } from "../components/leaderboard/LeaderboardBoar
 import { LeaderboardLeadPack } from "../components/leaderboard/LeaderboardLeadPack";
 import { LeaderboardRankList } from "../components/leaderboard/LeaderboardRankList";
 import { LeaderboardSelfFooter } from "../components/leaderboard/LeaderboardSelfFooter";
+import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { InlineError } from "../components/ui/InlineError";
 import { SegmentControl } from "../components/ui/SegmentControl";
@@ -202,24 +203,26 @@ export function Leaderboard() {
   return (
     <EntryScreenLayout justify="start">
       <ScreenHeader backTo="/" backLabel="Home" />
-      <div className={screenHeaderOffsetClassName}>
-        <div className="space-y-1 pb-4">
-          <h1 className="font-display text-balance text-3xl font-bold uppercase leading-[0.92] tracking-tight text-ink sm:text-[2rem]">
-            Leaderboard
-          </h1>
-          <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
-            Opt-in ranked boards by game size and role. Username only — no
-            account details.
-          </p>
-        </div>
+      <DesktopContentColumn maxWidth="social">
+        <div className={screenHeaderOffsetClassName}>
+          <div className="space-y-1 pb-4">
+            <h1 className="font-display text-balance text-3xl font-bold uppercase leading-[0.92] tracking-tight text-ink sm:text-[2rem]">
+              Leaderboard
+            </h1>
+            <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
+              Opt-in ranked boards by game size and role. Username only — no
+              account details.
+            </p>
+          </div>
 
-        <RequireUsername
-          continuePath="/leaderboard"
-          signInDescription="Sign in with a username to opt into leaderboards and view rankings."
-        >
-          <LeaderboardBoard />
-        </RequireUsername>
-      </div>
+          <RequireUsername
+            continuePath="/leaderboard"
+            signInDescription="Sign in with a username to opt into leaderboards and view rankings."
+          >
+            <LeaderboardBoard />
+          </RequireUsername>
+        </div>
+      </DesktopContentColumn>
     </EntryScreenLayout>
   );
 }
