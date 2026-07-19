@@ -18,6 +18,7 @@ import { timeTrapForHider } from "../domain/expansion/timeTraps";
 import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
 import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
 import type { HiderTruthRevealState } from "../components/session/HiderTruthRevealBanner";
+import { useDesktopLayout } from "../hooks/useDesktopLayout";
 import { HiderMapScreenChrome } from "./hider-map-screen/HiderMapScreenChrome";
 import { useResolvedSessionRules } from "../hooks/session/useResolvedSessionRules";
 import {
@@ -513,6 +514,9 @@ export function HiderMapScreen() {
     ],
   );
 
+  const isDesktop = useDesktopLayout();
+  const mapControlInset = isDesktop ? "safe-area" : "dock";
+
   if (!session || !gameArea) {
     return <AppNavigate to="/" replace />;
   }
@@ -526,16 +530,15 @@ export function HiderMapScreen() {
     overlay.isLogOpen ||
     timeTrapSheetOpen;
 
-  return (
-    <div className="map-screen-shell">
+  const mapLayers = (
       <div className="absolute inset-0">
         <MapView
           key={session.id}
           mapKey={session.id}
           mapStyle={effectiveBasemapStyle}
           onMapStyleChange={handleMapStyleChange}
-          mapStyleControlInset="dock"
-          zoomControlInset="dock"
+          mapStyleControlInset={mapControlInset}
+          zoomControlInset={mapControlInset}
           center={center}
           zoom={12}
           focusBounds={mapFocusBounds}
@@ -615,12 +618,17 @@ export function HiderMapScreen() {
           <LiveUserLocationLayer enabled={showCurrentLocation} lowPowerMode={lowPowerMode} />
         </MapView>
       </div>
+  );
 
+  return (
+    <div className="map-screen-shell">
+      {isDesktop ? null : mapLayers}
       <HiderMapScreenChrome
         session={session}
         hasMyZone={Boolean(myZone)}
         uid={uid}
         isHost={isHost}
+        mapSlot={isDesktop ? mapLayers : undefined}
         annotations={annotations}
         pendingQuestions={pendingQuestions}
         messages={messages}
