@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { AnnotationRecord, SessionRecord } from "../../domain/map/annotations";
 import type {
   PendingQuestionRecord,
@@ -15,6 +16,7 @@ import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
 import type { useHiderZoneTool } from "../../hooks/session/useHiderZoneTool";
 import type { useTimeTrapTool } from "../../hooks/session/useTimeTrapTool";
 import { ChatPanel } from "../../components/chat/ChatPanel";
+import { DesktopOpsShell } from "../../components/map/DesktopOpsShell";
 import { HidingZonePanel } from "../../components/hider/HidingZonePanel";
 import { TimeTrapPanel } from "../../components/hider/TimeTrapPanel";
 import { ExpansionHiderMenu } from "../../components/hider/ExpansionHiderMenu";
@@ -28,6 +30,7 @@ import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
 import {
   HiderTruthRevealBanner,
 } from "../../components/session/HiderTruthRevealBanner";
+import { useDesktopLayout } from "../../hooks/useDesktopLayout";
 import { useSyncRetryAction } from "../../hooks/session/useSyncRetryAction";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
 import { SessionLog } from "../../components/session/SessionLog";
@@ -173,6 +176,8 @@ export type HiderMapScreenChromeProps = {
       deadlineExpired?: boolean,
     ) => Promise<void>;
   };
+  /** When set with desktop layout, map fills the ops shell center slot. */
+  mapSlot?: ReactNode;
 };
 
 export function HiderMapScreenChrome({
@@ -230,77 +235,100 @@ export function HiderMapScreenChrome({
   onLeaveSession,
   mapSettings,
   chat,
+  mapSlot,
 }: HiderMapScreenChromeProps) {
   const onSyncErrorAction = useSyncRetryAction();
   const gameOverActions = useGameOverActions(session, overlay);
+  const isDesktop = useDesktopLayout();
+  const toolLayout = isDesktop ? "rail" : "dock";
+
+  const statusRail = (
+    <>
+      <HiderTruthRevealBanner
+        reveal={truthReveal}
+        onDismiss={onDismissTruthReveal}
+      />
+      <MapStatusRail
+        sessionCode={session.code}
+        sessionRules={session}
+        playerRole="hider"
+        expanded={isDesktop}
+        activeTool="none"
+        syncStatus={syncStatus.status}
+        queuedWrites={syncStatus.queuedWrites}
+        message={syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError}
+        timerState={timer.timerState}
+        timerRunning={timer.running}
+        timerHasStarted={timer.hasStarted}
+        timerSyncing={timerSyncing}
+        canStartGame={canControlTimer}
+        onStartGame={timer.start}
+        onTimerStart={timer.start}
+        onTimerPause={timer.pause}
+        onTimerReset={timer.reset}
+        timerControlsDisabled={!canControlTimer}
+        onOpenLog={onOpenLog}
+        pendingQuestions={pendingQuestions}
+        closeTimerMenu={overlay.sheet !== "none" || zoneTool.wizardOpen}
+        endGameActive={isEndGameActive(session)}
+        endGamePending={isEndGamePending(session)}
+        endGameRequestedByUid={session.endGameRequestedByUid}
+        foundHiderPending={isFoundHiderPending(session)}
+        foundRequestedByUid={session.foundRequestedByUid}
+        myUid={uid ?? undefined}
+        isHost={isHost}
+        onResetEndGame={() => void onResetEndGame()}
+        onAcceptEndGame={() => void onAcceptEndGame()}
+        onAcceptFoundHider={() => void onAcceptFoundHider()}
+        onDeclineFoundHider={() => void onDeclineFoundHider()}
+        hiderOutsideZone={hiderOutsideZone}
+        onSyncErrorAction={onSyncErrorAction}
+      />
+      <FirestorePersistenceBanner />
+      <AppUpdateMapChip />
+    </>
+  );
+
+  const toolDock = (
+    <HiderToolDock
+      layout={toolLayout}
+      zoneLabel={
+        !zoneTool.hasZone || zoneTool.wizardOpen
+          ? hasMyZone
+            ? "Change zone"
+            : "Set zone"
+          : "Play move"
+      }
+      onZoneAction={
+        !zoneTool.hasZone || zoneTool.wizardOpen
+          ? onOpenWizard
+          : () => void zoneTool.startMove()
+      }
+      zoneDisabled={!zoneTool.writesEnabled}
+      showExpansion={expansionPackEnabled}
+      onExpansion={() => onExpansionMenuOpenChange(true)}
+      onRecenter={onRecenter}
+      onOpenChat={onOpenChat}
+      onOpenSettings={onOpenSettings}
+      hasUnreadChat={hasUnreadChat}
+      unreadCount={unreadCount}
+    />
+  );
 
   return (
     <>
-      <div className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible">
-        <HiderTruthRevealBanner
-          reveal={truthReveal}
-          onDismiss={onDismissTruthReveal}
+      {isDesktop && mapSlot ? (
+        <DesktopOpsShell
+          status={statusRail}
+          tools={toolDock}
+          map={mapSlot}
         />
-        <MapStatusRail
-          sessionCode={session.code}
-          sessionRules={session}
-          playerRole="hider"
-          activeTool="none"
-          syncStatus={syncStatus.status}
-          queuedWrites={syncStatus.queuedWrites}
-          message={syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError}
-          timerState={timer.timerState}
-          timerRunning={timer.running}
-          timerHasStarted={timer.hasStarted}
-          timerSyncing={timerSyncing}
-          canStartGame={canControlTimer}
-          onStartGame={timer.start}
-          onTimerStart={timer.start}
-          onTimerPause={timer.pause}
-          onTimerReset={timer.reset}
-          timerControlsDisabled={!canControlTimer}
-          onOpenLog={onOpenLog}
-          pendingQuestions={pendingQuestions}
-          closeTimerMenu={overlay.sheet !== "none" || zoneTool.wizardOpen}
-          endGameActive={isEndGameActive(session)}
-          endGamePending={isEndGamePending(session)}
-          endGameRequestedByUid={session.endGameRequestedByUid}
-          foundHiderPending={isFoundHiderPending(session)}
-          foundRequestedByUid={session.foundRequestedByUid}
-          myUid={uid ?? undefined}
-          isHost={isHost}
-          onResetEndGame={() => void onResetEndGame()}
-          onAcceptEndGame={() => void onAcceptEndGame()}
-          onAcceptFoundHider={() => void onAcceptFoundHider()}
-          onDeclineFoundHider={() => void onDeclineFoundHider()}
-          hiderOutsideZone={hiderOutsideZone}
-          onSyncErrorAction={onSyncErrorAction}
-        />
-        <FirestorePersistenceBanner />
-        <AppUpdateMapChip />
-        <HiderToolDock
-          zoneLabel={
-            !zoneTool.hasZone || zoneTool.wizardOpen
-              ? hasMyZone
-                ? "Change zone"
-                : "Set zone"
-              : "Play move"
-          }
-          onZoneAction={
-            !zoneTool.hasZone || zoneTool.wizardOpen
-              ? onOpenWizard
-              : () => void zoneTool.startMove()
-          }
-          zoneDisabled={!zoneTool.writesEnabled}
-          showExpansion={expansionPackEnabled}
-          onExpansion={() => onExpansionMenuOpenChange(true)}
-          onRecenter={onRecenter}
-          onOpenChat={onOpenChat}
-          onOpenSettings={onOpenSettings}
-          hasUnreadChat={hasUnreadChat}
-          unreadCount={unreadCount}
-        />
-      </div>
+      ) : (
+        <div className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible">
+          {statusRail}
+          {toolDock}
+        </div>
+      )}
 
       <GameOverChrome
         sessionId={session.id}

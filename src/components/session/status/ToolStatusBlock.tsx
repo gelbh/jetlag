@@ -5,7 +5,10 @@ import type {
 } from "../../../domain/session/sessionChat";
 import type { SessionRulesInput } from "../../../domain/session/sessionRules";
 import type { TimerState } from "../../../domain/session/timer";
-import type { PlayerRole } from "../../../domain/session/playerRole";
+import {
+  playerRoleLabel,
+  type PlayerRole,
+} from "../../../domain/session/playerRole";
 import { mapToolPlacingLabel } from "../../../domain/map/mapTools";
 import { HudPlayIcon } from "../../ui/HudIcons";
 import { MapTimerCluster } from "../MapTimerCluster";
@@ -29,6 +32,8 @@ interface ToolStatusBlockProps {
   onCancelWalkingQuestion?: (pendingQuestionId: string) => void;
   timerMenuOpen: boolean;
   onOpenTimerMenu: () => void;
+  /** Show role + mode inline (desktop ops status). */
+  expanded?: boolean;
 }
 
 export function ToolStatusBlock({
@@ -49,6 +54,7 @@ export function ToolStatusBlock({
   onCancelWalkingQuestion,
   timerMenuOpen,
   onOpenTimerMenu,
+  expanded = false,
 }: ToolStatusBlockProps) {
   const placing = activeTool !== "none";
   const modeLabel = placing
@@ -64,10 +70,17 @@ export function ToolStatusBlock({
         </span>
       </div>
 
+      {expanded ? (
+        <div className="jl-stamp">
+          <span className="jl-stamp-label">Role</span>
+          <span className="jl-stamp-code">{playerRoleLabel(playerRole)}</span>
+        </div>
+      ) : null}
+
       <p
         className={`jl-mode-ticker min-w-0 flex-1 ${
           placing ? "text-highlight" : "text-ink-muted"
-        } ${timerHasStarted ? "sr-only" : ""}`}
+        } ${timerHasStarted && !expanded ? "sr-only" : ""}`}
       >
         {modeLabel}
       </p>

@@ -9,6 +9,7 @@ import { InlineError } from "../components/ui/InlineError";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { fallbackGameArea } from "../domain/geometry/geometry";
 import { useAppNavigate } from "../hooks/useAppNavigate";
+import { useDesktopLayout } from "../hooks/useDesktopLayout";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { useMapStore, useSessionStore } from "../state/sessionStore";
 import { ObserverMapScreenChrome } from "./observer-map-screen/ObserverMapScreenChrome";
@@ -17,6 +18,7 @@ import { SpectatorMapLayers } from "./spectator-map/SpectatorMapLayers";
 
 export function ObserverMapScreen() {
   const navigate = useAppNavigate();
+  const isDesktop = useDesktopLayout();
   const setSession = useSessionStore((state) => state.setSession);
   const resetObserverPerspective = useMapStore(
     (state) => state.resetObserverPerspective,
@@ -65,44 +67,49 @@ export function ObserverMapScreen() {
   const gameArea = fallbackGameArea(controller.gameArea);
   const sessionRules = controller.sessionRules ?? controller.session;
   const chatDisplayRole = controller.spectatorLayers.chatDisplayRole;
+  const mapControlInset = isDesktop ? "safe-area" : "dock";
+
+  const mapLayers = (
+    <div className="absolute inset-0">
+      <MapView
+        key={controller.session.id}
+        mapKey={controller.session.id}
+        mapStyle={controller.effectiveBasemapStyle}
+        onMapStyleChange={controller.handleMapStyleChange}
+        mapStyleControlInset={mapControlInset}
+        zoomControlInset={mapControlInset}
+        center={controller.center}
+        zoom={12}
+        focusBounds={controller.mapFocusBounds}
+        fitBoundsMode="once"
+        showZoomControl={false}
+        className="h-full w-full"
+      >
+        <MapViewportTracker onViewportChange={controller.setMapViewport} />
+        <GameAreaMask gameArea={gameArea} />
+        <SpectatorMapLayers
+          session={controller.session}
+          gameArea={gameArea}
+          layerVisibility={controller.layerVisibility}
+          effectiveBasemapStyle={controller.effectiveBasemapStyle}
+          distanceUnit={controller.distanceUnit}
+          spectatorLayers={controller.spectatorLayers}
+          annotations={controller.annotations}
+          hidingZones={controller.hidingZones}
+          seekerLocations={controller.seekerLocations}
+          hiderLocations={controller.hiderLocations}
+          pendingQuestions={controller.pendingQuestions}
+          sessionRules={sessionRules}
+          uid={controller.uid}
+          activeThermometerWalk={controller.activeThermometerWalk}
+        />
+      </MapView>
+    </div>
+  );
 
   return (
     <div className="map-screen-shell">
-      <div className="absolute inset-0">
-        <MapView
-          key={controller.session.id}
-          mapKey={controller.session.id}
-          mapStyle={controller.effectiveBasemapStyle}
-          onMapStyleChange={controller.handleMapStyleChange}
-          mapStyleControlInset="dock"
-          zoomControlInset="dock"
-          center={controller.center}
-          zoom={12}
-          focusBounds={controller.mapFocusBounds}
-          fitBoundsMode="once"
-          showZoomControl={false}
-          className="h-full w-full"
-        >
-          <MapViewportTracker onViewportChange={controller.setMapViewport} />
-          <GameAreaMask gameArea={gameArea} />
-          <SpectatorMapLayers
-            session={controller.session}
-            gameArea={gameArea}
-            layerVisibility={controller.layerVisibility}
-            effectiveBasemapStyle={controller.effectiveBasemapStyle}
-            distanceUnit={controller.distanceUnit}
-            spectatorLayers={controller.spectatorLayers}
-            annotations={controller.annotations}
-            hidingZones={controller.hidingZones}
-            seekerLocations={controller.seekerLocations}
-            hiderLocations={controller.hiderLocations}
-            pendingQuestions={controller.pendingQuestions}
-            sessionRules={sessionRules}
-            uid={controller.uid}
-            activeThermometerWalk={controller.activeThermometerWalk}
-          />
-        </MapView>
-      </div>
+      {isDesktop ? null : mapLayers}
 
       <ObserverMapScreenChrome
         session={controller.session}
@@ -112,6 +119,7 @@ export function ObserverMapScreen() {
         perspective={controller.observerPerspective}
         onPerspectiveChange={controller.setObserverPerspective}
         onLeave={() => void handleLeave()}
+        mapSlot={isDesktop ? mapLayers : undefined}
       />
 
       {controller.syncStatus.lastSyncError ? (
