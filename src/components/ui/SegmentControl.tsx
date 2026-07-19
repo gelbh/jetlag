@@ -8,7 +8,7 @@ interface SegmentControlProps<Value extends string> {
   value: Value;
   options: readonly SegmentOption<Value>[];
   onChange: (value: Value) => void;
-  variant?: "hud" | "pill";
+  variant?: "hud" | "pill" | "chips";
   tone?: "highlight" | "action";
   "aria-label"?: string;
   disabled?: boolean;
@@ -23,6 +23,32 @@ export function SegmentControl<Value extends string>({
   "aria-label": ariaLabel,
   disabled = false,
 }: SegmentControlProps<Value>) {
+  if (variant === "chips") {
+    return (
+      <div className="jl-segment-chips" role="tablist" aria-label={ariaLabel}>
+        {options.map((option) => {
+          const selected = value === option.value;
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              disabled={disabled || option.disabled}
+              onClick={() => onChange(option.value)}
+              className={`jl-segment-btn ${
+                selected ? "jl-segment-btn-selected" : ""
+              } disabled:opacity-50`}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
   if (variant === "pill") {
     return (
       <div className="flex gap-2" role="group" aria-label={ariaLabel}>

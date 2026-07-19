@@ -74,6 +74,7 @@ function LeaderboardBoard() {
     <>
       <div
         className={`sticky top-0 z-[var(--z-banner)] -mx-5 space-y-3 border-b-2 border-border bg-surface-deep px-5 pb-3 ${screenHeaderInsetTopClassName}`}
+        data-testid="leaderboard-filters"
       >
         <SegmentControl
           value={scope}
@@ -109,6 +110,7 @@ function LeaderboardBoard() {
             label: leaderboardMetricLabel(value, role),
           }))}
           onChange={setMetric}
+          variant="chips"
           aria-label="Leaderboard metric"
         />
       </div>
