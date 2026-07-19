@@ -39,11 +39,14 @@ describe("DesktopContentColumn", () => {
   it("applies 28rem entry max-width on desktop", () => {
     useDesktopLayout.mockReturnValue(true);
     const { container } = render(
-      <DesktopContentColumn maxWidth="entry">
+      <DesktopContentColumn maxWidth="entry" className="flex flex-1">
         <p>body</p>
       </DesktopContentColumn>,
     );
-    expect(container.firstElementChild?.className).toMatch(/max-w-\[28rem\]/);
+    const root = container.firstElementChild;
+    expect(root?.className).toMatch(/max-w-\[28rem\]/);
+    expect(root?.className).toMatch(/flex/);
+    expect(root?.className).toMatch(/flex-1/);
   });
 
   it("applies 36rem social max-width on desktop", () => {

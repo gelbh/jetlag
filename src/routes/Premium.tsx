@@ -146,7 +146,7 @@ export function Premium() {
     return (
       <EntryScreenLayout justify="start">
         <ScreenHeader backTo="/" backLabel="Back" />
-        <DesktopContentColumn maxWidth="entry">
+        <DesktopContentColumn maxWidth="entry" className="flex flex-col gap-4">
           <PremiumFeatureList entitlementSummary={null} checkoutNotice={null} />
           <p className="max-w-sm text-sm text-ink-muted">
             Premium billing needs an online connection. Use a synced session to
@@ -160,7 +160,7 @@ export function Premium() {
   return (
     <EntryScreenLayout justify="start">
       <ScreenHeader backTo="/" backLabel="Back" />
-      <DesktopContentColumn maxWidth="entry">
+      <DesktopContentColumn maxWidth="entry" className="flex flex-col gap-4">
         <PremiumFeatureList
           entitlementSummary={entitlementSummary}
           checkoutNotice={checkoutNotice}

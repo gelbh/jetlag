@@ -189,7 +189,7 @@ export function JoinSession() {
   return (
     <EntryScreenLayout justify="center">
       <ScreenHeader backTo="/" backLabel="Back" />
-      <DesktopContentColumn maxWidth="entry">
+      <DesktopContentColumn maxWidth="entry" className="flex flex-col gap-8">
         <div className={screenHeaderOffsetClassName}>
           <p className="mt-3 font-display text-sm font-semibold uppercase tracking-[0.2em] text-brand-blue">
             Join game
