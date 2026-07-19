@@ -1,8 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
-import {
-  ContextualRailPanelContext,
-  type ContextualRailTab,
-} from "./contextualRailPanelContext";
+import { ContextualRailPanelContext } from "./contextualRailPanelContext";
 
 export type { ContextualRailTab } from "./contextualRailPanelContext";
 
