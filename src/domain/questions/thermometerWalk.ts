@@ -31,6 +31,71 @@ export function isThermometerWalkActive(
   return question.toolType === "thermometer" && question.status === "walking";
 }
 
+/** Max in-tab GPS walk duration before the walk tracker auto-stops. */
+export const THERMOMETER_WALK_MAX_DURATION_MS = 30 * 60 * 1000;
+
+/** Walker location older than this (or missing) counts as stale for the host cue. */
+export const THERMOMETER_WALK_LOCATION_STALE_MS = 2 * 60 * 1000;
+
+export function listWalkingThermometerQuestionIds(
+  questions: readonly PendingQuestionRecord[],
+  createdByUid?: string,
+): string[] {
+  return questions
+    .filter((question) => {
+      if (!isThermometerWalkActive(question)) {
+        return false;
+      }
+      if (createdByUid == null) {
+        return true;
+      }
+      return question.createdByUid === createdByUid;
+    })
+    .map((question) => question.id);
+}
+
+export function listOrphanWalkingThermometerQuestionIds(
+  questions: readonly PendingQuestionRecord[],
+  memberUids: readonly string[],
+): string[] {
+  const members = new Set(memberUids);
+  return questions
+    .filter(
+      (question) =>
+        isThermometerWalkActive(question) &&
+        !members.has(question.createdByUid),
+    )
+    .map((question) => question.id);
+}
+
+export function isStaleThermometerWalk(
+  question: PendingQuestionRecord,
+  walkerLocationUpdatedAt: string | null,
+  nowMs: number,
+  maxWalkMs: number = THERMOMETER_WALK_MAX_DURATION_MS,
+  locationStaleMs: number = THERMOMETER_WALK_LOCATION_STALE_MS,
+): boolean {
+  if (!isThermometerWalkActive(question)) {
+    return false;
+  }
+
+  const createdAtMs = Date.parse(question.createdAt);
+  if (!Number.isFinite(createdAtMs) || nowMs - createdAtMs < maxWalkMs) {
+    return false;
+  }
+
+  if (walkerLocationUpdatedAt == null) {
+    return true;
+  }
+
+  const locationUpdatedAtMs = Date.parse(walkerLocationUpdatedAt);
+  if (!Number.isFinite(locationUpdatedAtMs)) {
+    return true;
+  }
+
+  return nowMs - locationUpdatedAtMs >= locationStaleMs;
+}
+
 /** Client-only walk id when tracking a solo GPS walk without Firestore. */
 export const LOCAL_THERMOMETER_WALK_ID = "__local_thermometer_walk__";
 
