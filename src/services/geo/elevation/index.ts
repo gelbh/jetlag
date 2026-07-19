@@ -3,6 +3,7 @@ import { ELEVATION_BATCH_SIZE, type FetchElevationsOptions } from "./constants";
 import { fetchElevationBatchAndWrite } from "./providers";
 import {
   elevationCacheKey,
+  hydrateElevationCacheFromIdb,
   isElevationCircuitOpen,
   readCachedElevation,
   runLimitedElevationRequest,
@@ -14,6 +15,7 @@ export type {
 } from "./constants";
 export {
   clearElevationCacheForTests,
+  hydrateElevationCacheFromIdb,
   isElevationCircuitOpen,
   openElevationCircuitForTests,
   requestGapMsForBatchSize,
@@ -57,6 +59,20 @@ export async function fetchElevations(
     }
 
     pendingByKey.set(key, { point, indices: [index] });
+  }
+
+  if (pendingByKey.size > 0) {
+    await hydrateElevationCacheFromIdb([...pendingByKey.keys()]);
+    for (const [key, pending] of pendingByKey) {
+      const cached = readCachedElevation(key);
+      if (cached === undefined) {
+        continue;
+      }
+      for (const index of pending.indices) {
+        elevations[index] = cached;
+      }
+      pendingByKey.delete(key);
+    }
   }
 
   const pendingPoints = [...pendingByKey.values()];

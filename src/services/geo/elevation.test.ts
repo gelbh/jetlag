@@ -8,6 +8,15 @@ import {
   requestGapMsForBatchSize,
 } from "./elevation";
 
+// IndexedDB callbacks do not settle under Vitest fake timers; this suite only
+// needs the in-memory elevation path.
+vi.mock("./cache/indexedDb", () => ({
+  readPersistedEntry: vi.fn(async () => undefined),
+  writePersistedEntry: vi.fn(async () => undefined),
+  clearPersistedCacheForTests: vi.fn(async () => undefined),
+  readPersistedEntryIgnoringExpiry: vi.fn(async () => undefined),
+}));
+
 const dublinPoint: LatLngTuple = [53.29602, -6.139977];
 const timesSquarePoint: LatLngTuple = [40.758, -73.9855];
 
@@ -46,6 +55,10 @@ async function fetchSingleElevation(point: LatLngTuple): Promise<number> {
 }
 
 describe("elevation", () => {
+  beforeEach(() => {
+    clearElevationCacheForTests();
+  });
+
   afterEach(() => {
     clearElevationCacheForTests();
     vi.restoreAllMocks();

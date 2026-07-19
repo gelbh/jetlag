@@ -1,7 +1,16 @@
 import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import { elevationPointCacheKey } from "../cache/keys";
+import {
+  memoryCache,
+  readCachedMemoryEntry,
+  writeMemoryEntry,
+} from "../cache/memory";
+import {
+  readPersistedEntry,
+  writePersistedEntry,
+} from "../cache/indexedDb";
 import {
   ELEVATION_BASE_BACKOFF_MS,
-  ELEVATION_CACHE_TTL_MS,
   ELEVATION_CIRCUIT_BREAKER_COOLDOWN_MS,
   ELEVATION_CIRCUIT_BREAKER_THRESHOLD,
   ELEVATION_MAX_BACKOFF_MS,
@@ -10,11 +19,9 @@ import {
   ELEVATION_MAX_RETRIES_FOREGROUND,
   ELEVATION_MIN_REQUEST_GAP_MS,
   ELEVATION_WEIGHTED_CALLS_PER_MINUTE,
-  type CachedElevation,
   type ElevationFetchProfile,
 } from "./constants";
 
-const elevationCache = new Map<string, CachedElevation>();
 let activeElevationRequests = 0;
 let lastElevationRequestAt = 0;
 let lastElevationBatchSize = 0;
@@ -51,28 +58,34 @@ export function recordSuccessfulElevationResponse(): void {
 }
 
 export function elevationCacheKey(point: LatLngTuple): string {
-  return `${point[0].toFixed(5)},${point[1].toFixed(5)}`;
+  return elevationPointCacheKey(point[0], point[1]);
 }
 
 export function readCachedElevation(key: string): number | undefined {
-  const cached = elevationCache.get(key);
-  if (!cached) {
-    return undefined;
-  }
-
-  if (cached.expiresAt <= Date.now()) {
-    elevationCache.delete(key);
-    return undefined;
-  }
-
-  return cached.value;
+  return readCachedMemoryEntry<number>(key);
 }
 
 export function writeCachedElevation(key: string, value: number): void {
-  elevationCache.set(key, {
-    value,
-    expiresAt: Date.now() + ELEVATION_CACHE_TTL_MS,
-  });
+  writeMemoryEntry(key, value);
+  void writePersistedEntry(key, value);
+}
+
+/** Test/helper: await IDB write so hydrate can observe the sample. */
+export async function writeCachedElevationDurable(
+  key: string,
+  value: number,
+): Promise<void> {
+  writeMemoryEntry(key, value);
+  await writePersistedEntry(key, value);
+}
+
+export async function hydrateElevationCacheFromIdb(
+  keys: string[],
+): Promise<void> {
+  if (keys.length === 0) {
+    return;
+  }
+  await Promise.all(keys.map((key) => readPersistedEntry<number>(key)));
 }
 
 export function sleep(ms: number): Promise<void> {
@@ -153,7 +166,11 @@ export async function runLimitedElevationRequest<T>(
 }
 
 export function clearElevationCacheForTests(): void {
-  elevationCache.clear();
+  for (const key of memoryCache.keys()) {
+    if (key.startsWith("elevation:")) {
+      memoryCache.delete(key);
+    }
+  }
   activeElevationRequests = 0;
   lastElevationRequestAt = 0;
   lastElevationBatchSize = 0;

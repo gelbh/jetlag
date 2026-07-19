@@ -13,6 +13,10 @@ export const inFlight = new Map<string, Promise<unknown>>();
 export const staleServedKeys = new Set<string>();
 
 export function cacheTtlMsForKey(key: string): number {
+  // Elevation samples are durable but shorter-lived than admin/coastline packs.
+  if (key.startsWith("elevation:")) {
+    return DEFAULT_CACHE_TTL_MS;
+  }
   if (isStableCacheKey(key)) {
     return STABLE_CACHE_TTL_MS;
   }
