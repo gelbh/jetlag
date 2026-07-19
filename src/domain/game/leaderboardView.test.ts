@@ -88,6 +88,19 @@ describe("resolveSelfFooterMode", () => {
       }),
     ).toBe("error");
   });
+
+  it("hides while self entry is loading and not in list", () => {
+    expect(
+      resolveSelfFooterMode({
+        viewerUid: "me",
+        listEntry: null,
+        selfEntry: null,
+        selfError: false,
+        selfLoading: true,
+        rowInView: false,
+      }),
+    ).toBe("hidden");
+  });
 });
 
 describe("leaderboardBoardSummaryLabel", () => {

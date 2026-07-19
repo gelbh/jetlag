@@ -3,16 +3,18 @@ import type { LeaderboardEntry } from "../../domain/game/leaderboard";
 import type { LeaderboardBoardSelection } from "../../domain/game/leaderboardBoardPrefs";
 import { getLeaderboardSelfEntry } from "../../services/firestore/firestoreLeaderboard";
 
+/** When `skip` is true (e.g. viewer already in the board list), no self fetch runs. */
 export function useLeaderboardSelfEntry(
   selection: LeaderboardBoardSelection,
   uid: string | null | undefined,
+  skip = false,
 ) {
   const [entry, setEntry] = useState<LeaderboardEntry | null>(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!uid) {
+    if (!uid || skip) {
       setEntry(null);
       setError(false);
       setLoading(false);
@@ -21,6 +23,7 @@ export function useLeaderboardSelfEntry(
     let cancelled = false;
     setLoading(true);
     setError(false);
+    setEntry(null);
     getLeaderboardSelfEntry(
       selection.scope,
       selection.gameSize,
@@ -42,7 +45,14 @@ export function useLeaderboardSelfEntry(
     return () => {
       cancelled = true;
     };
-  }, [selection.scope, selection.gameSize, selection.role, selection.metric, uid]);
+  }, [
+    selection.scope,
+    selection.gameSize,
+    selection.role,
+    selection.metric,
+    uid,
+    skip,
+  ]);
 
   return { entry, error, loading };
 }

@@ -37,12 +37,14 @@ export function resolveSelfFooterMode(input: {
   listEntry: LeaderboardEntry | null;
   selfEntry: LeaderboardEntry | null;
   selfError: boolean;
+  selfLoading?: boolean;
   rowInView: boolean;
 }): SelfFooterMode {
   if (!input.viewerUid) return "hidden";
   if (input.listEntry) {
     return input.rowInView ? "hidden" : "pinned";
   }
+  if (input.selfLoading) return "hidden";
   if (input.selfError) return "error";
   if (input.selfEntry) return "off_list";
   return "unranked";

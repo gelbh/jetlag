@@ -46,10 +46,6 @@ function LeaderboardBoard() {
   const [boardLoading, setBoardLoading] = useState(true);
   const [boardError, setBoardError] = useState<string | null>(null);
   const viewerRowRef = useRef<HTMLLIElement | null>(null);
-  const {
-    entry: selfEntry,
-    error: selfError,
-  } = useLeaderboardSelfEntry(selection, user?.uid);
   const { profile, ready: profileReady, error: profileError } = useUserProfile(
     user?.uid,
     isFirebaseConfigured() && isPermanent,
@@ -58,6 +54,15 @@ function LeaderboardBoard() {
     user?.uid != null
       ? (entries.find((entry) => entry.uid === user.uid) ?? null)
       : null;
+  const {
+    entry: selfEntry,
+    error: selfError,
+    loading: selfLoading,
+  } = useLeaderboardSelfEntry(
+    selection,
+    user?.uid,
+    !boardLoading && listEntry != null,
+  );
   const rowInView = useRowInView(viewerRowRef, listEntry?.uid ?? null);
   const needsOptIn = profile != null && !profile.leaderboardOptIn;
 
@@ -75,6 +80,7 @@ function LeaderboardBoard() {
 
     setBoardLoading(true);
     setBoardError(null);
+    setEntries([]);
     /* eslint-enable react-hooks/set-state-in-effect */
     return subscribeLeaderboardBoard(
       selection.scope,
@@ -96,6 +102,7 @@ function LeaderboardBoard() {
     listEntry,
     selfEntry,
     selfError,
+    selfLoading,
     rowInView,
   });
   const footerEntry = listEntry ?? selfEntry;
