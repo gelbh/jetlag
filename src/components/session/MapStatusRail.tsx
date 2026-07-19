@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import type { SyncStatus } from "../../domain/device/sync";
 import type { TimerState } from "../../domain/session/timer";
 import type { MapTool } from "../../state/sessionStore";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type {
+  PendingQuestionRecord,
+  PlayerLocationRecord,
+} from "../../domain/session/sessionChat";
 import { ScreenNav } from "../ui/ScreenNav";
 import { GameAreaPreloadBeacon } from "./GameAreaPreloadBeacon";
 import { HudErrorBanner } from "../ui/HudErrorBanner";
@@ -43,6 +46,9 @@ interface MapStatusRailProps {
   endGameActive?: boolean;
   endGameRequestedByUid?: string;
   myUid?: string;
+  hostUid?: string | null;
+  seekerLocations?: readonly PlayerLocationRecord[];
+  onCancelWalkingQuestion?: (pendingQuestionId: string) => void;
   isHost?: boolean;
   onAcceptEndGame?: () => void;
   onResetEndGame?: () => void;
@@ -80,6 +86,9 @@ export function MapStatusRail({
   endGamePending = false,
   endGameRequestedByUid,
   myUid,
+  hostUid = null,
+  seekerLocations = [],
+  onCancelWalkingQuestion,
   isHost = false,
   onAcceptEndGame,
   onResetEndGame,
@@ -190,6 +199,10 @@ export function MapStatusRail({
             onStartGame={onStartGame}
             sessionRules={sessionRules}
             pendingQuestions={pendingQuestions}
+            myUid={myUid}
+            hostUid={hostUid}
+            seekerLocations={seekerLocations}
+            onCancelWalkingQuestion={onCancelWalkingQuestion}
             timerMenuOpen={showTimerMenu}
             onOpenTimerMenu={() => {
               setTimerMenuOpen((open) => !open);

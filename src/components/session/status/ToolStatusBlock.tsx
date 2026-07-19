@@ -1,5 +1,8 @@
 import type { MapTool } from "../../../state/sessionStore";
-import type { PendingQuestionRecord } from "../../../domain/session/sessionChat";
+import type {
+  PendingQuestionRecord,
+  PlayerLocationRecord,
+} from "../../../domain/session/sessionChat";
 import type { SessionRulesInput } from "../../../domain/session/sessionRules";
 import type { TimerState } from "../../../domain/session/timer";
 import type { PlayerRole } from "../../../domain/session/playerRole";
@@ -20,6 +23,10 @@ interface ToolStatusBlockProps {
   onStartGame: () => void;
   sessionRules: SessionRulesInput;
   pendingQuestions: readonly PendingQuestionRecord[];
+  myUid?: string | null;
+  hostUid?: string | null;
+  seekerLocations?: readonly PlayerLocationRecord[];
+  onCancelWalkingQuestion?: (pendingQuestionId: string) => void;
   timerMenuOpen: boolean;
   onOpenTimerMenu: () => void;
 }
@@ -36,6 +43,10 @@ export function ToolStatusBlock({
   onStartGame,
   sessionRules,
   pendingQuestions,
+  myUid = null,
+  hostUid = null,
+  seekerLocations = [],
+  onCancelWalkingQuestion,
   timerMenuOpen,
   onOpenTimerMenu,
 }: ToolStatusBlockProps) {
@@ -88,6 +99,10 @@ export function ToolStatusBlock({
             timerRunning={timerRunning}
             timerHasStarted={timerHasStarted}
             pendingQuestions={pendingQuestions}
+            myUid={myUid}
+            hostUid={hostUid}
+            seekerLocations={seekerLocations}
+            onCancelWalkingQuestion={onCancelWalkingQuestion}
             onOpenTimerMenu={onOpenTimerMenu}
             timerMenuOpen={timerMenuOpen}
           />
