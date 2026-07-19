@@ -143,4 +143,36 @@ describe("groupChangelogEntries", () => {
       { kind: "version", entry: expect.objectContaining({ version: "0.8.1" }) },
     ]);
   });
+
+  it("returns an empty array for empty input", () => {
+    expect(groupChangelogEntries([])).toEqual([]);
+  });
+
+  it("throws for a malformed version string", () => {
+    expect(() =>
+      groupChangelogEntries([
+        entry("0.8", "2026-07-17", [{ title: "Fixes", items: ["a"] }]),
+      ]),
+    ).toThrow(/Invalid changelog version/);
+  });
+
+  it("sorts out-of-order input before grouping majors", () => {
+    const nodes = groupChangelogEntries([
+      entry("1.0.0", "2026-06-01", [{ title: "Fixes", items: ["old major"] }]),
+      entry("2.0.0", "2026-07-01", [{ title: "Fixes", items: ["newest"] }]),
+      entry("1.1.0", "2026-06-15", [{ title: "Improvements", items: ["newer minor"] }]),
+    ]);
+
+    expect(nodes.map((node) => node.kind)).toEqual(["version", "majorGroup"]);
+    expect(nodes[1]).toEqual(
+      expect.objectContaining({
+        kind: "majorGroup",
+        label: "1",
+        children: [
+          expect.objectContaining({ kind: "minorGroup", label: "1.1" }),
+          expect.objectContaining({ kind: "minorGroup", label: "1.0" }),
+        ],
+      }),
+    );
+  });
 });

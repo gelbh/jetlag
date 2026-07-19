@@ -44,6 +44,18 @@ function minorKey(parts: Pick<VersionParts, "major" | "minor">): string {
   return `${parts.major}.${parts.minor}`;
 }
 
+function compareVersionsDescending(a: string, b: string): number {
+  const left = parseVersionParts(a);
+  const right = parseVersionParts(b);
+  if (left.major !== right.major) {
+    return right.major - left.major;
+  }
+  if (left.minor !== right.minor) {
+    return right.minor - left.minor;
+  }
+  return right.patch - left.patch;
+}
+
 export function filterUserFacingChangelog(
   entries: readonly ChangelogEntry[],
 ): ChangelogEntry[] {
@@ -103,7 +115,9 @@ function createMajorGroup(
 export function groupChangelogEntries(
   entries: readonly ChangelogEntry[],
 ): ChangelogNode[] {
-  const filtered = filterUserFacingChangelog(entries);
+  const filtered = filterUserFacingChangelog(entries).toSorted((a, b) =>
+    compareVersionsDescending(a.version, b.version),
+  );
   if (filtered.length === 0) {
     return [];
   }
