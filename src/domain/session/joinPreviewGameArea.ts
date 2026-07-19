@@ -1,4 +1,5 @@
-import { ZERO_GAME_AREA, type GameArea } from "../geometry/geometry";
+import type { GameArea } from "../map/annotations";
+import { ZERO_GAME_AREA } from "../geometry/geometry";
 
 /** Polygon at [0,0]–[1,1] used when join cannot read the session doc yet. */
 export const JOIN_PREVIEW_PLACEHOLDER_AREA: GameArea = {

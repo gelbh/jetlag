@@ -501,7 +501,7 @@ async function joinRemoteSessionWithoutRead(
 
   // Membership write succeeded — re-read is now allowed by rules.
   try {
-    const sessionDoc = await getDoc(sessionRef);
+    const sessionDoc = await getDocFromServer(sessionRef);
     if (sessionDoc.exists()) {
       const data = sessionDoc.data() as Record<string, unknown>;
       return {
