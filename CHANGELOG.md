@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.2 - 2026-07-19
+
+### Fixes
+
+- Leaderboard metric filters: scroll within the chip strip without sideways page scroll.
+
 ## 0.8.1 - 2026-07-17
 
 ### Fixes
