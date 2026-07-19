@@ -3,6 +3,7 @@ import { ELEVATION_BATCH_SIZE, type FetchElevationsOptions } from "./constants";
 import { fetchElevationBatchAndWrite } from "./providers";
 import {
   elevationCacheKey,
+  hydrateElevationCacheFromIdb,
   isElevationCircuitOpen,
   readCachedElevation,
   runLimitedElevationRequest,
@@ -14,6 +15,7 @@ export type {
 } from "./constants";
 export {
   clearElevationCacheForTests,
+  hydrateElevationCacheFromIdb,
   isElevationCircuitOpen,
   openElevationCircuitForTests,
   requestGapMsForBatchSize,
@@ -45,11 +47,6 @@ export async function fetchElevations(
       continue;
     }
 
-    if (isElevationCircuitOpen()) {
-      elevations[index] = Number.NaN;
-      continue;
-    }
-
     const pending = pendingByKey.get(key);
     if (pending) {
       pending.indices.push(index);
@@ -59,11 +56,34 @@ export async function fetchElevations(
     pendingByKey.set(key, { point, indices: [index] });
   }
 
-  const pendingPoints = [...pendingByKey.values()];
+  if (pendingByKey.size > 0) {
+    await hydrateElevationCacheFromIdb([...pendingByKey.keys()]);
+    for (const [key, pending] of pendingByKey) {
+      const cached = readCachedElevation(key);
+      if (cached === undefined) {
+        continue;
+      }
+      for (const index of pending.indices) {
+        elevations[index] = cached;
+      }
+      pendingByKey.delete(key);
+    }
+  }
 
-  if (pendingPoints.length === 0 || isElevationCircuitOpen()) {
+  if (pendingByKey.size === 0) {
     return elevations;
   }
+
+  if (isElevationCircuitOpen()) {
+    for (const pending of pendingByKey.values()) {
+      for (const index of pending.indices) {
+        elevations[index] = Number.NaN;
+      }
+    }
+    return elevations;
+  }
+
+  const pendingPoints = [...pendingByKey.values()];
 
   for (
     let index = 0;
