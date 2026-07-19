@@ -14,4 +14,14 @@ test.describe("desktop layout @ 1280", () => {
     // 20rem = 320px at default root font-size
     expect(box!.width).toBeLessThanOrEqual(320);
   });
+
+  test("@smoke social column ≤36rem on /stats", async ({ page }) => {
+    await prepareE2EPage(page);
+    await page.goto("/stats");
+    const main = page.locator("main .mx-auto").first();
+    await expect(main).toBeVisible();
+    const box = await main.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.width).toBeLessThanOrEqual(576 + 8); // 36rem
+  });
 });
