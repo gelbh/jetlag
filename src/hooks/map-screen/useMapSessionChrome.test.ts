@@ -8,10 +8,7 @@ const exitSession = vi.hoisted(() => vi.fn(async () => undefined));
 const mockResetRemoteSession = vi.hoisted(() =>
   vi.fn(async () => "2026-01-02T00:00:00.000Z"),
 );
-const mockCancelWalkingThermometerQuestions = vi.hoisted(() =>
-  vi.fn(async () => undefined),
-);
-const mockPostGameSystemMessage = vi.hoisted(() =>
+const mockCancelWalkingThermometersAndAnnounce = vi.hoisted(() =>
   vi.fn(async () => undefined),
 );
 
@@ -39,8 +36,8 @@ vi.mock("../../services/firestore/firestoreSessionExtras", async () => {
   >("../../services/firestore/firestoreSessionExtras");
   return {
     ...actual,
-    cancelWalkingThermometerQuestions: mockCancelWalkingThermometerQuestions,
-    postGameSystemMessage: mockPostGameSystemMessage,
+    cancelWalkingThermometersAndAnnounce:
+      mockCancelWalkingThermometersAndAnnounce,
   };
 });
 
@@ -98,8 +95,7 @@ describe("useMapSessionChrome", () => {
   beforeEach(() => {
     exitSession.mockClear();
     mockResetRemoteSession.mockClear();
-    mockCancelWalkingThermometerQuestions.mockClear();
-    mockPostGameSystemMessage.mockClear();
+    mockCancelWalkingThermometersAndAnnounce.mockClear();
   });
 
   it("does not clear the map while end game is active", () => {
@@ -270,11 +266,13 @@ describe("useMapSessionChrome", () => {
       await result.current.handleLeaveSession();
     });
 
-    expect(mockCancelWalkingThermometerQuestions).toHaveBeenCalledWith(
+    expect(mockCancelWalkingThermometersAndAnnounce).toHaveBeenCalledWith(
       "session-remote",
       ["pq-walk"],
+      "host-1",
+      "seeker",
+      "left",
     );
-    expect(mockPostGameSystemMessage).toHaveBeenCalled();
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
     );

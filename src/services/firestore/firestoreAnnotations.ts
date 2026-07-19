@@ -24,8 +24,7 @@ import type {
   SessionRecord,
   SessionTier,
 } from "../../domain/map/annotations";
-import type { GameSize } from "../../domain/session/gameSize";
-import { hidingZoneRadiusMeters } from "../../domain/session/gameSize";
+import { hidingZoneRadiusMeters, type GameSize } from "../../domain/session/gameSize";
 import type { SessionRulesPatch } from "../../domain/session/advancedSessionSettings";
 import {
   resolvePlayerRole,
@@ -64,15 +63,12 @@ const HIDER_ROLE_POLL_MAX_MS = 3000;
 function sessionsCollection() {
   return collection(getFirestoreDb(), "sessions");
 }
-
 function sessionCodeDoc(code: string) {
   return doc(getFirestoreDb(), "sessionCodes", code);
 }
-
 function annotationsCollection(sessionId: string) {
   return collection(getFirestoreDb(), "sessions", sessionId, "annotations");
 }
-
 export function isFirestorePermissionDenied(error: unknown): boolean {
   return error instanceof FirebaseError && error.code === "permission-denied";
 }
@@ -82,7 +78,6 @@ type SessionMembershipPatch = {
   memberRoles?: Record<string, PlayerRole>;
   memberAppVersions?: Record<string, string>;
 };
-
 async function writeSessionMembershipPatch(
   sessionRef: DocumentReference,
   patch: SessionMembershipPatch,
@@ -109,12 +104,10 @@ export type EnsureRemoteSessionMembershipOptions = {
   returningMemberUid?: string | null;
   persistedMyUid?: string | null;
 };
-
 type JoinRemoteSessionOptions = {
   returningMemberUid?: string;
   persistedMyUid?: string | null;
 };
-
 type SessionCodeRecord = {
   sessionId: string;
   hostUid: string;

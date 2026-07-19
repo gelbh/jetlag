@@ -14,11 +14,7 @@ import {
   endRemoteSession,
   resetRemoteSession,
 } from "../../services/firestore/firestoreAnnotations";
-import {
-  cancelWalkingThermometerQuestions,
-  postGameSystemMessage,
-} from "../../services/firestore/firestoreSessionExtras";
-import { createMessageId } from "../../domain/session/sessionChat";
+import { cancelWalkingThermometersAndAnnounce } from "../../services/firestore/firestoreSessionExtras";
 import {
   clearSessionLocalArtifacts,
   teardownSessionUiState,
@@ -227,19 +223,13 @@ export function useMapSessionChrome({
           pendingQuestions,
           user.uid,
         );
-        if (walkIds.length > 0) {
-          await cancelWalkingThermometerQuestions(session.id, walkIds);
-          const role = session.memberRoles?.[user.uid] ?? "seeker";
-          for (const _walkId of walkIds) {
-            await postGameSystemMessage(
-              session.id,
-              user.uid,
-              role,
-              "Thermometer walk cancelled — seeker left.",
-              createMessageId(),
-            );
-          }
-        }
+        await cancelWalkingThermometersAndAnnounce(
+          session.id,
+          walkIds,
+          user.uid,
+          session.memberRoles?.[user.uid] ?? "seeker",
+          "left",
+        );
       } catch (error) {
         captureException(error);
       }
