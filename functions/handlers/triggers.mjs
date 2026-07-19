@@ -20,6 +20,7 @@ import {
   handleSessionTimerWrite,
 } from "../session/sessionNotificationTriggers.mjs";
 import { handleSessionWarmPreloadWrite } from "../session/warmOverpassPreload.mjs";
+import { OVERPASS_L2_SECRETS } from "../proxies/overpassL2Secrets.mjs";
 import { adminDb } from "./proxyShared.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
@@ -136,7 +137,7 @@ export const notifySessionTimer = onDocumentWritten(
 export const warmPremiumOverpassPreload = onDocumentWritten(
   {
     document: "sessions/{sessionId}",
-    secrets: [sentryDsnSecret],
+    secrets: [sentryDsnSecret, ...OVERPASS_L2_SECRETS],
   },
   withSentryEventHandler(async (event) => {
     await handleSessionWarmPreloadWrite(event);
