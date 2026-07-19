@@ -353,16 +353,13 @@ export async function cancelWalkingThermometersAndAnnounce(
   }
 
   await cancelWalkingThermometerQuestions(sessionId, questionIds);
-  const text = THERMOMETER_WALK_CANCEL_TEXT[reason];
-  for (const _walkId of questionIds) {
-    await postGameSystemMessage(
-      sessionId,
-      senderUid,
-      senderRole,
-      text,
-      createMessageId(),
-    );
-  }
+  await postGameSystemMessage(
+    sessionId,
+    senderUid,
+    senderRole,
+    THERMOMETER_WALK_CANCEL_TEXT[reason],
+    createMessageId(),
+  );
 }
 
 export async function cancelWalkingThermometersAfterIdentityHeal(

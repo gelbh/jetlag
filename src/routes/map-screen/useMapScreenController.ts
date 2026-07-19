@@ -393,7 +393,7 @@ export function useMapScreenController() {
         captureException(error);
       }
     },
-    [cancelThermometerWalk, myRole, session?.id, uid],
+    [cancelThermometerWalk, myRole, session, uid],
   );
 
   const activeThermometerWalk = useActiveThermometerWalk({
