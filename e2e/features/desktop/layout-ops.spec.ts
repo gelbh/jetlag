@@ -37,13 +37,14 @@ test.describe("desktop layout @ 1280", () => {
       page.getByRole("navigation", { name: /Map tools/i }),
     ).toBeVisible();
     await expect(page.locator(".desktop-ops-shell")).toBeVisible();
-    const dock = page.locator(".jl-tool-dock");
+    const dock = page.locator(".jl-tool-dock.jl-tool-dock--rail");
     await expect(dock).toBeVisible();
     const box = await dock.boundingBox();
     expect(box).not.toBeNull();
-    const vh = page.viewportSize()!.height;
-    // Rail sits on the left; bottom edge must not hug the viewport bottom.
-    expect(box!.y + box!.height).toBeLessThan(vh - 80);
+    // Left rail: narrow column on the left edge (not a full-width bottom dock).
     expect(box!.x).toBeLessThan(120);
+    expect(box!.width).toBeLessThanOrEqual(120);
+    expect(box!.height).toBeGreaterThan(box!.width);
   });
 });
+
