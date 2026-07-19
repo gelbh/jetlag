@@ -1,6 +1,7 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { MapViewportState } from "../../components/map/MapViewportTracker";
 import type { MapChromeControlInset } from "../../components/map/mapChromeControlInset";
+import { useDesktopLayout } from "../../hooks/useDesktopLayout";
 import { useMapScreenTools } from "../../hooks/map-screen/useMapScreenTools";
 import { useMapSessionActions } from "../../hooks/map-screen/useMapSessionActions";
 import { useMapOverlayActions } from "../../hooks/map-screen/useMapOverlayActions";
@@ -596,8 +597,13 @@ export function useMapScreenController() {
     handleMapPanStart,
     handleMapPanEnd,
   } = useToolPanelChrome(activeTool);
+  const isDesktopLayout = useDesktopLayout();
   const mapChromeControlInset: MapChromeControlInset =
-    panelMinimized || mapPanning ? "chrome-hidden" : "dock";
+    panelMinimized || mapPanning
+      ? "chrome-hidden"
+      : isDesktopLayout
+        ? "safe-area"
+        : "dock";
 
   const placementCameraDraft = useMemo(
     (): PlacementCameraDraftState => ({

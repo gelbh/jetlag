@@ -1,4 +1,10 @@
-import { test, expect, prepareE2EPage, openPlayHub } from "../../fixtures";
+import {
+  test,
+  expect,
+  prepareE2EPage,
+  openPlayHub,
+  openMapWithLocalSession,
+} from "../../fixtures";
 
 test.describe("desktop layout @ 1280", () => {
   test.use({ viewport: { width: 1280, height: 800 } });
@@ -24,4 +30,21 @@ test.describe("desktop layout @ 1280", () => {
     expect(box).not.toBeNull();
     expect(box!.width).toBeLessThanOrEqual(576 + 8); // 36rem
   });
+
+  test("@smoke ops shell has tool nav and no bottom dock", async ({ page }) => {
+    await openMapWithLocalSession(page);
+    await expect(
+      page.getByRole("navigation", { name: /Map tools/i }),
+    ).toBeVisible();
+    await expect(page.locator(".desktop-ops-shell")).toBeVisible();
+    const dock = page.locator(".jl-tool-dock.jl-tool-dock--rail");
+    await expect(dock).toBeVisible();
+    const box = await dock.boundingBox();
+    expect(box).not.toBeNull();
+    // Left rail: narrow column on the left edge (not a full-width bottom dock).
+    expect(box!.x).toBeLessThan(120);
+    expect(box!.width).toBeLessThanOrEqual(120);
+    expect(box!.height).toBeGreaterThan(box!.width);
+  });
 });
+
