@@ -103,6 +103,7 @@ export const usePremiumEntitlementsStore = create<PremiumEntitlementsState>(
       }
       set({
         entitlements: snapshot.entitlements,
+        hydrated: true,
         softStale: Date.now() - snapshot.fetchedAt > SOFT_STALE_MS,
       });
     },
@@ -148,7 +149,10 @@ export const usePremiumEntitlementsStore = create<PremiumEntitlementsState>(
           return next;
         } catch {
           if (get().uid === user.uid && get().generation === generation) {
-            const existing = get().entitlements ?? readPersistedSnapshot()?.entitlements ?? null;
+            const snapshot = readPersistedSnapshot();
+            const fromStorage =
+              snapshot?.uid === user.uid ? snapshot.entitlements : null;
+            const existing = get().entitlements ?? fromStorage;
             set({
               entitlements: existing,
               loading: false,

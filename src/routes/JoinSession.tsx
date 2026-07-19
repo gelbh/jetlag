@@ -86,16 +86,29 @@ export function JoinSession() {
       }
     };
 
-    const cached = getCachedJoinPreview<{
-      result: JoinPreviewResult;
-      uid: string;
-    }>(normalized);
+    const cached = getCachedJoinPreview<JoinPreviewResult>(normalized);
     if (cached) {
-      /* eslint-disable react-hooks/set-state-in-effect -- cache hit skips network */
-      applyPreview(cached.result, cached.uid);
-      setLookupLoading(false);
-      /* eslint-enable react-hooks/set-state-in-effect */
-      return;
+      setLookupLoading(true);
+      void (async () => {
+        try {
+          const user = await ensureAnonymousUser();
+          if (cancelled) {
+            return;
+          }
+          applyPreview(cached, user.uid);
+        } catch {
+          if (!cancelled) {
+            setPreviewPremium(false);
+          }
+        } finally {
+          if (!cancelled) {
+            setLookupLoading(false);
+          }
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
     }
 
     setLookupLoading(true);
@@ -110,10 +123,7 @@ export function JoinSession() {
             return;
           }
 
-          setCachedJoinPreview(normalized, {
-            result,
-            uid: user.uid,
-          });
+          setCachedJoinPreview(normalized, result);
           applyPreview(result, user.uid);
         } catch {
           if (!cancelled) {

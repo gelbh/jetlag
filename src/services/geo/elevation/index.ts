@@ -47,11 +47,6 @@ export async function fetchElevations(
       continue;
     }
 
-    if (isElevationCircuitOpen()) {
-      elevations[index] = Number.NaN;
-      continue;
-    }
-
     const pending = pendingByKey.get(key);
     if (pending) {
       pending.indices.push(index);
@@ -75,11 +70,20 @@ export async function fetchElevations(
     }
   }
 
-  const pendingPoints = [...pendingByKey.values()];
-
-  if (pendingPoints.length === 0 || isElevationCircuitOpen()) {
+  if (pendingByKey.size === 0) {
     return elevations;
   }
+
+  if (isElevationCircuitOpen()) {
+    for (const pending of pendingByKey.values()) {
+      for (const index of pending.indices) {
+        elevations[index] = Number.NaN;
+      }
+    }
+    return elevations;
+  }
+
+  const pendingPoints = [...pendingByKey.values()];
 
   for (
     let index = 0;

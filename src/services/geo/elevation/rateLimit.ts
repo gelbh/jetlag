@@ -65,13 +65,7 @@ export function readCachedElevation(key: string): number | undefined {
   return readCachedMemoryEntry<number>(key);
 }
 
-export function writeCachedElevation(key: string, value: number): void {
-  writeMemoryEntry(key, value);
-  void writePersistedEntry(key, value);
-}
-
-/** Test/helper: await IDB write so hydrate can observe the sample. */
-export async function writeCachedElevationDurable(
+export async function writeCachedElevation(
   key: string,
   value: number,
 ): Promise<void> {

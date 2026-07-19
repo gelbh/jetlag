@@ -83,6 +83,41 @@ describe("usePremiumEntitlementsStore", () => {
     );
   });
 
+  it("does not leak another uid snapshot when refresh fails", async () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        uid: "user-A",
+        entitlements: {
+          ...sampleEntitlements,
+          hasUnlimitedPremium: true,
+          premiumSessionCredits: 99,
+        },
+        fetchedAt: Date.now(),
+      }),
+    );
+    const { usePremiumEntitlementsStore } = await import(
+      "./premiumEntitlementsStore"
+    );
+    usePremiumEntitlementsStore.setState({
+      uid: null,
+      entitlements: null,
+      loading: false,
+      hydrated: false,
+      softStale: false,
+      generation: 0,
+    });
+
+    mockEnsureAnonymousUser.mockResolvedValue({ uid: "user-B" });
+    mockFetchPremiumEntitlements.mockRejectedValue(new Error("network"));
+
+    const result = await usePremiumEntitlementsStore.getState().refresh();
+
+    expect(result).toBeNull();
+    expect(usePremiumEntitlementsStore.getState().uid).toBe("user-B");
+    expect(usePremiumEntitlementsStore.getState().entitlements).toBeNull();
+  });
+
   it("keeps snapshot when refresh fails", async () => {
     localStorage.setItem(
       STORAGE_KEY,
