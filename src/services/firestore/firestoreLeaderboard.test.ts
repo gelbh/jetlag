@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  getLeaderboardSelfEntry,
   parseLeaderboardEntry,
   subscribeLeaderboardBoard,
 } from "./firestoreLeaderboard";
 
 const onSnapshot = vi.hoisted(() => vi.fn());
 const orderBy = vi.hoisted(() => vi.fn(() => ({})));
+const getDoc = vi.hoisted(() => vi.fn());
+const doc = vi.hoisted(() => vi.fn(() => ({ path: "entry" })));
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => true));
 
 vi.mock("../core/firebase", () => ({
@@ -15,6 +18,8 @@ vi.mock("../core/firebase", () => ({
 
 vi.mock("firebase/firestore", () => ({
   collection: vi.fn(() => ({})),
+  doc,
+  getDoc,
   limit: vi.fn((n: number) => n),
   onSnapshot,
   orderBy,
@@ -56,6 +61,58 @@ describe("parseLeaderboardEntry", () => {
       value: 1,
       rank: 5,
     });
+  });
+});
+
+describe("getLeaderboardSelfEntry", () => {
+  beforeEach(() => {
+    getDoc.mockReset();
+    doc.mockClear();
+    isFirebaseConfigured.mockReturnValue(true);
+  });
+
+  it("returns null when Firebase is not configured", async () => {
+    isFirebaseConfigured.mockReturnValue(false);
+    await expect(
+      getLeaderboardSelfEntry("global", "medium", "seeker", "wins", "me"),
+    ).resolves.toBeNull();
+    expect(getDoc).not.toHaveBeenCalled();
+  });
+
+  it("returns null when doc missing", async () => {
+    getDoc.mockResolvedValue({ exists: () => false });
+    await expect(
+      getLeaderboardSelfEntry("global", "medium", "seeker", "wins", "me"),
+    ).resolves.toBeNull();
+  });
+
+  it("parses existing self entry", async () => {
+    getDoc.mockResolvedValue({
+      exists: () => true,
+      id: "me",
+      data: () => ({ uid: "me", username: "Nova", value: 18.2, rank: 12 }),
+    });
+    await expect(
+      getLeaderboardSelfEntry(
+        "global",
+        "medium",
+        "seeker",
+        "distance_traveled",
+        "me",
+      ),
+    ).resolves.toEqual({
+      uid: "me",
+      displayName: "Nova",
+      value: 18.2,
+      rank: 12,
+    });
+  });
+
+  it("rethrows getDoc failures", async () => {
+    getDoc.mockRejectedValue(new Error("unavailable"));
+    await expect(
+      getLeaderboardSelfEntry("global", "medium", "seeker", "wins", "me"),
+    ).rejects.toThrow("unavailable");
   });
 });
 
