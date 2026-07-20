@@ -2,8 +2,7 @@
 language: en-US
 
 reviews:
-  # Soft PR App: comment/summary trail only. Agent merge gate is CodeRabbit CLI
-  # Soft PR App; agent merge gate is CodeRabbit CLI (cr_gate).
+  # Soft PR App: comment/summary trail only. Agent merge gate is CodeRabbit CLI (cr_gate).
   profile: assertive
   request_changes_workflow: false
   # Pre-merge checks are on by default; disable checks that add status noise
@@ -38,7 +37,6 @@ reviews:
     - "!**/playwright-report/**"
     - "!**/*.sourcemap"
     - "!**/worker/dist/**"
-
   instructions: |
     Jet Lag Hide+Seek map companion — React 19, Vite, TypeScript, Firebase
     (Auth/Firestore/Storage/Functions), Cloudflare Worker, Capacitor, Vitest,
