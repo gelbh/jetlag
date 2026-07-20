@@ -18,5 +18,3 @@ ui-debug.log
 .DS_Store
 docs/
 .lighthouseci
-# Agent-local IDE dir — never track (character class avoids banned path substring in this file)
-.curs[o]r/
