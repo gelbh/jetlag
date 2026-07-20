@@ -1,40 +1,61 @@
 name: Deploy
 
 on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
+  push:
     branches: [main]
 
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
 jobs:
-  deploy-backend:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+  build:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx wrangler deploy --dry-run
+
+  deploy-backend:
+    runs-on: ubuntu-latest
+    needs: [build]
+    environment: production
     permissions:
       contents: read
       id-token: write
     outputs:
-      functions_deployed: ${{ steps.deploy.outputs.functions_deployed }}
+      functions_deployed: ${{ steps.deploy.outputs.functions_deployed || steps.deploy_skip.outputs.functions_deployed }}
+      backend: ${{ steps.changes.outputs.backend }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
-      - name: Detect backend changes
+      - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
         id: changes
-        run: |
-          before="${{ github.event.workflow_run.head_sha }}^"
-          if ! git rev-parse --verify "$before" >/dev/null 2>&1; then
-            echo "backend=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          changed="$(git diff --name-only "$before" "${{ github.event.workflow_run.head_sha }}")"
-          if echo "$changed" | grep -qE '^(functions/|firestore\.(rules|indexes\.json)|storage\.rules|firebase\.json|scripts/deploy-production\.mjs|\.firebaserc|src/services/billing/|src/routes/Premium\.tsx|src/services/admin/|src/hooks/admin/|src/routes/AdminPanel\.tsx)'; then
-            echo "backend=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "backend=false" >> "$GITHUB_OUTPUT"
-          fi
-      - uses: actions/setup-node@v4
+        with:
+          filters: |
+            backend:
+              - 'functions/**'
+              - 'firestore.rules'
+              - 'firestore.indexes.json'
+              - 'storage.rules'
+              - 'firebase.json'
+              - 'scripts/deploy-production.mjs'
+              - '.firebaserc'
+              - 'src/services/billing/**'
+              - 'src/routes/Premium.tsx'
+              - 'src/services/admin/**'
+              - 'src/hooks/admin/**'
+              - 'src/routes/AdminPanel.tsx'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         if: steps.changes.outputs.backend == 'true'
         with:
           node-version: 24
@@ -43,7 +64,7 @@ jobs:
         if: steps.changes.outputs.backend == 'true'
       - name: Install Doppler CLI
         if: steps.changes.outputs.backend == 'true'
-        uses: DopplerHQ/cli-action@v3
+        uses: DopplerHQ/cli-action@014df23b1329b615816a38eb5f473bb9000700b1 # v3
         with:
           doppler-token: ${{ secrets.DOPPLER_TOKEN }}
           verify-doppler-config: false
@@ -52,12 +73,12 @@ jobs:
         run: doppler secrets download --no-file --format docker >> "$GITHUB_ENV"
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
-      - uses: google-github-actions/auth@v2
+      - uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2
         if: steps.changes.outputs.backend == 'true'
         with:
           workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
-      - uses: google-github-actions/setup-gcloud@v2
+      - uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2
         if: steps.changes.outputs.backend == 'true'
       - name: Deploy Firestore and Functions
         id: deploy
@@ -65,35 +86,52 @@ jobs:
         run: doppler run --config prd -- npm run deploy
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+      - name: Default functions_deployed when skipped
+        if: steps.changes.outputs.backend != 'true'
+        run: echo "functions_deployed=false" >> "$GITHUB_OUTPUT"
+        id: deploy_skip
 
   deploy-frontend:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     needs: [deploy-backend]
+    environment: production
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
-      - name: Detect frontend changes
+      - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'src/**'
+              - 'public/**'
+              - 'worker/**'
+              - 'index.html'
+              - 'vite.config.ts'
+              - 'wrangler.toml'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'tsconfig.json'
+              - 'tsconfig.app.json'
+              - 'tsconfig.node.json'
+              - 'tailwind.css'
+              - 'eslint.config.js'
+            functions:
+              - 'functions/**'
+      - name: Decide frontend deploy
         id: changes
         run: |
-          before="${{ github.event.workflow_run.head_sha }}^"
-          if ! git rev-parse --verify "$before" >/dev/null 2>&1; then
-            echo "frontend=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
           if [[ "${{ needs.deploy-backend.outputs.functions_deployed }}" == "true" ]]; then
             echo "frontend=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          changed="$(git diff --name-only "$before" "${{ github.event.workflow_run.head_sha }}")"
-          if echo "$changed" | grep -qE '^(src/|public/|worker/|index\.html|vite\.config\.ts|wrangler\.toml|package(-lock)?\.json|tsconfig.*\.json|tailwind\.css|eslint\.config\.js)'; then
+          elif [[ "${{ steps.filter.outputs.frontend }}" == "true" ]]; then
             echo "frontend=true" >> "$GITHUB_OUTPUT"
           else
             echo "frontend=false" >> "$GITHUB_OUTPUT"
           fi
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         if: steps.changes.outputs.frontend == 'true'
         with:
           node-version: 24
@@ -102,7 +140,7 @@ jobs:
         if: steps.changes.outputs.frontend == 'true'
       - name: Install Doppler CLI
         if: steps.changes.outputs.frontend == 'true'
-        uses: DopplerHQ/cli-action@v3
+        uses: DopplerHQ/cli-action@014df23b1329b615816a38eb5f473bb9000700b1 # v3
         with:
           doppler-token: ${{ secrets.DOPPLER_TOKEN }}
           verify-doppler-config: false
@@ -113,16 +151,11 @@ jobs:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
       - name: Set CI-only env
         if: steps.changes.outputs.frontend == 'true'
-        run: echo "VITE_SENTRY_RELEASE_DIST=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_ENV"
+        run: echo "VITE_SENTRY_RELEASE_DIST=${{ github.sha }}" >> "$GITHUB_ENV"
       - name: Require functions deploy when callables changed
         if: steps.changes.outputs.frontend == 'true'
         run: |
-          before="${{ github.event.workflow_run.head_sha }}^"
-          if ! git rev-parse --verify "$before" >/dev/null 2>&1; then
-            exit 0
-          fi
-          changed="$(git diff --name-only "$before" "${{ github.event.workflow_run.head_sha }}")"
-          if echo "$changed" | grep -qE '^functions/'; then
+          if [[ "${{ steps.filter.outputs.functions }}" == "true" ]]; then
             if [[ "${{ needs.deploy-backend.outputs.functions_deployed }}" != "true" ]]; then
               echo "::error::Push includes functions/ changes but Cloud Functions were not deployed. Deploy backend first."
               exit 1
@@ -154,7 +187,7 @@ jobs:
           if ! grep -qiE 'uploaded|source maps' build.log; then
             echo "::warning::Sentry source map upload was not confirmed in build output."
           fi
-      - uses: cloudflare/wrangler-action@v3
+      - uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
         if: steps.changes.outputs.frontend == 'true'
         with:
           apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
