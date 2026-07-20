@@ -18,6 +18,20 @@ if [ ! -s "$staged" ]; then
   exit 0
 fi
 
+# Ban agent-local project-dir path strings in tracked blobs (see agent-local-only skill).
+# Pattern built at runtime so this hook file does not contain the banned substring.
+agent_dir_slash="$(printf '.%s/' 'cursor')"
+while IFS= read -r -d '' path; do
+  case "$path" in
+    .husky/*) continue ;;
+  esac
+  if git show ":$path" 2>/dev/null | grep -F -n -- "$agent_dir_slash" >/dev/null; then
+    echo "pre-commit: '$path' mentions ${agent_dir_slash} — agent-local only; remove before commit" >&2
+    git show ":$path" 2>/dev/null | grep -F -n -- "$agent_dir_slash" >&2 || true
+    exit 1
+  fi
+done <"$staged"
+
 while IFS= read -r -d '' path; do
   case "$path" in
     *.css)
