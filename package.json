@@ -62,7 +62,7 @@
     "@fontsource/barlow-semi-condensed": "^5.2.7",
     "@fontsource/source-sans-3": "^5.2.9",
     "@sentry/capacitor": "^4.2.0",
-    "@sentry/react": "10.60.0",
+    "@sentry/react": "10.67.0",
     "@tmcw/togeojson": "^7.1.2",
     "@turf/area": "^7.3.5",
     "@turf/bbox": "^7.3.5",
