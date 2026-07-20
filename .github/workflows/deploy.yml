@@ -196,7 +196,7 @@ jobs:
           if ! grep -qiE 'uploaded|source maps' build.log; then
             echo "::warning::Sentry source map upload was not confirmed in build output."
           fi
-      - uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
+      - uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
         if: steps.changes.outputs.frontend == 'true'
         with:
           apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
