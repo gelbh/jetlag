@@ -2,10 +2,10 @@
 language: en-US
 
 reviews:
-  # assertive + request_changes_workflow: CodeRabbit submits APPROVED or
-  # CHANGES_REQUESTED reviews (not comment-only). Required for ship merge gate.
+  # Soft PR App: comment/summary trail only. Agent merge gate is CodeRabbit CLI
+  # Soft PR App; agent merge gate is CodeRabbit CLI (cr_gate).
   profile: assertive
-  request_changes_workflow: true
+  request_changes_workflow: false
   # Pre-merge checks are on by default; disable checks that add status noise
   # without review value (title/commit-msg hooks cover conventions locally).
   pre_merge_checks:
