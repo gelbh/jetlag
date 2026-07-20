@@ -151,7 +151,7 @@
   "optionalDependencies": {
     "@rolldown/binding-darwin-arm64": "1.0.3",
     "@rolldown/binding-darwin-x64": "1.0.3",
-    "@rolldown/binding-linux-x64-gnu": "1.0.3"
+    "@rolldown/binding-linux-x64-gnu": "1.2.0"
   },
   "overrides": {
     "node-fetch": {
