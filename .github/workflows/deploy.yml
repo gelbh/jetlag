@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
@@ -36,6 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          persist-credentials: false
           fetch-depth: 0
       - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
         id: changes
@@ -88,7 +91,9 @@ jobs:
       - name: Normalize functions_deployed output
         id: deploy_meta
         if: always()
-        run: echo "functions_deployed=${{ steps.deploy.outputs.functions_deployed || 'false' }}" >> "$GITHUB_OUTPUT"
+        env:
+          FUNCTIONS_DEPLOYED: ${{ steps.deploy.outputs.functions_deployed }}
+        run: echo "functions_deployed=${FUNCTIONS_DEPLOYED:-false}" >> "$GITHUB_OUTPUT"
 
   deploy-frontend:
     runs-on: ubuntu-latest
@@ -99,6 +104,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
+          persist-credentials: false
           fetch-depth: 0
       - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
         id: filter
@@ -120,8 +126,11 @@ jobs:
               - 'functions/**'
       - name: Decide frontend deploy
         id: changes
+        env:
+          BACKEND_FUNCTIONS_DEPLOYED: ${{ needs.deploy-backend.outputs.functions_deployed }}
+          FRONTEND_CHANGED: ${{ steps.filter.outputs.frontend }}
         run: |
-          if [[ "${{ needs.deploy-backend.outputs.functions_deployed }}" == "true" || "${{ steps.filter.outputs.frontend }}" == "true" ]]; then
+          if [[ "$BACKEND_FUNCTIONS_DEPLOYED" == "true" || "$FRONTEND_CHANGED" == "true" ]]; then
             echo "frontend=true" >> "$GITHUB_OUTPUT"
           else
             echo "frontend=false" >> "$GITHUB_OUTPUT"
@@ -146,12 +155,17 @@ jobs:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
       - name: Set CI-only env
         if: steps.changes.outputs.frontend == 'true'
-        run: echo "VITE_SENTRY_RELEASE_DIST=${{ github.sha }}" >> "$GITHUB_ENV"
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+        run: echo "VITE_SENTRY_RELEASE_DIST=$COMMIT_SHA" >> "$GITHUB_ENV"
       - name: Require functions deploy when callables changed
         if: steps.changes.outputs.frontend == 'true'
+        env:
+          FUNCTIONS_CHANGED: ${{ steps.filter.outputs.functions }}
+          BACKEND_FUNCTIONS_DEPLOYED: ${{ needs.deploy-backend.outputs.functions_deployed }}
         run: |
-          if [[ "${{ steps.filter.outputs.functions }}" == "true" ]]; then
-            if [[ "${{ needs.deploy-backend.outputs.functions_deployed }}" != "true" ]]; then
+          if [[ "$FUNCTIONS_CHANGED" == "true" ]]; then
+            if [[ "$BACKEND_FUNCTIONS_DEPLOYED" != "true" ]]; then
               echo "::error::Push includes functions/ changes but Cloud Functions were not deployed. Deploy backend first."
               exit 1
             fi
