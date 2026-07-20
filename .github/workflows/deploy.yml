@@ -32,8 +32,7 @@ jobs:
       contents: read
       id-token: write
     outputs:
-      functions_deployed: ${{ steps.deploy.outputs.functions_deployed || steps.deploy_skip.outputs.functions_deployed }}
-      backend: ${{ steps.changes.outputs.backend }}
+      functions_deployed: ${{ steps.deploy_meta.outputs.functions_deployed }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -86,10 +85,10 @@ jobs:
         run: doppler run --config prd -- npm run deploy
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
-      - name: Default functions_deployed when skipped
-        if: steps.changes.outputs.backend != 'true'
-        run: echo "functions_deployed=false" >> "$GITHUB_OUTPUT"
-        id: deploy_skip
+      - name: Normalize functions_deployed output
+        id: deploy_meta
+        if: always()
+        run: echo "functions_deployed=${{ steps.deploy.outputs.functions_deployed || 'false' }}" >> "$GITHUB_OUTPUT"
 
   deploy-frontend:
     runs-on: ubuntu-latest
@@ -114,9 +113,7 @@ jobs:
               - 'wrangler.toml'
               - 'package.json'
               - 'package-lock.json'
-              - 'tsconfig.json'
-              - 'tsconfig.app.json'
-              - 'tsconfig.node.json'
+              - 'tsconfig*.json'
               - 'tailwind.css'
               - 'eslint.config.js'
             functions:
@@ -124,9 +121,7 @@ jobs:
       - name: Decide frontend deploy
         id: changes
         run: |
-          if [[ "${{ needs.deploy-backend.outputs.functions_deployed }}" == "true" ]]; then
-            echo "frontend=true" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ steps.filter.outputs.frontend }}" == "true" ]]; then
+          if [[ "${{ needs.deploy-backend.outputs.functions_deployed }}" == "true" || "${{ steps.filter.outputs.frontend }}" == "true" ]]; then
             echo "frontend=true" >> "$GITHUB_OUTPUT"
           else
             echo "frontend=false" >> "$GITHUB_OUTPUT"
