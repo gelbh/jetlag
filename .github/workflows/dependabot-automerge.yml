@@ -2,10 +2,12 @@ name: Dependabot auto-merge
 
 on:
   pull_request:
+    branches: [main]
 
 concurrency:
   group: dependabot-automerge-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  # Do not cancel: job only enables auto-merge; cancel mid-gh can race with synchronize.
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -20,6 +22,9 @@ jobs:
         id: metadata
         uses: dependabot/fetch-metadata@08eff52bf64351f401fb50d4972fa95b9f2c2d1b # v2.4.0
 
+      # Enables squash auto-merge only; GitHub still waits on main ruleset required checks
+      # before merging. Use a Dependabot secret (not GITHUB_TOKEN) so the eventual merge
+      # can trigger push workflows (Deploy).
       - name: Enable squash auto-merge for npm patch/minor
         if: >-
           steps.metadata.outputs.package-ecosystem == 'npm' &&
@@ -28,6 +33,6 @@ jobs:
             steps.metadata.outputs.update-type == 'version-update:semver-minor'
           )
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
         run: gh pr merge --auto --squash "$PR_URL"

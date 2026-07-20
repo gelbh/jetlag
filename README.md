@@ -53,7 +53,7 @@ npm run dev
 ## Deploy
 
 - **Path:** open a PR → required CI (`unit`, `build`, `emulator`, `e2e`, `lighthouse`) → merge to `main` → Deploy workflow builds, then path-aware Firebase backend + Cloudflare Worker frontend (Doppler `prd`).
-- **Dependabot:** weekly grouped npm (production / development, patch+minor); those PRs auto-merge when required CI is green. GitHub Actions bumps and major version PRs stay manual.
+- **Dependabot:** weekly grouped npm (production / development, patch+minor); those PRs enable squash auto-merge when Allow auto-merge is on and required CI is green (merge uses a Dependabot secret so Deploy still runs). GitHub Actions bumps and major version PRs stay manual.
 - **Frontend (manual):** `doppler run --config prd -- npm run deploy:worker`
 - **Local Worker preview:** `npm run preview:worker` (build + `wrangler dev`; validates `/assets/*` routing)
 - **Backend (Firebase, manual):** `doppler run --config prd -- npm run deploy`

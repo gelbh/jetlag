@@ -6,7 +6,7 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
-    groups:
+    groups: &npm-patch-minor-by-type
       production-dependencies:
         dependency-type: production
         update-types:
@@ -24,17 +24,7 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 3
-    groups:
-      production-dependencies:
-        dependency-type: production
-        update-types:
-          - minor
-          - patch
-      development-dependencies:
-        dependency-type: development
-        update-types:
-          - minor
-          - patch
+    groups: *npm-patch-minor-by-type
 
   - package-ecosystem: github-actions
     directory: "/"
