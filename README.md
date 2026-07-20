@@ -52,10 +52,10 @@ npm run dev
 
 ## Deploy
 
-- **Frontend:** merges to `main` run CI, then the `deploy-frontend` job in `.github/workflows/deploy.yml` (`wrangler deploy` via Doppler `prd`).
+- **Path:** open a PR → required CI (`unit`, `build`, `emulator`, `e2e`, `lighthouse`) → merge to `main` → Deploy workflow builds, then path-aware Firebase backend + Cloudflare Worker frontend (Doppler `prd`).
 - **Frontend (manual):** `doppler run --config prd -- npm run deploy:worker`
 - **Local Worker preview:** `npm run preview:worker` (build + `wrangler dev`; validates `/assets/*` routing)
-- **Backend (Firebase):** `doppler run --config prd -- npm run deploy`
+- **Backend (Firebase, manual):** `doppler run --config prd -- npm run deploy`
 
 ## About
 
