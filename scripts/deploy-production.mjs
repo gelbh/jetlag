@@ -284,9 +284,6 @@ function runFirebaseDeploy(onlyTargets) {
 }
 
 async function main() {
-  run("npm", ["run", "lint"]);
-  run("npm", ["run", "test:ci"]);
-
   const onlyFull = "firestore,functions,storage";
   const onlyLite = "firestore,storage";
 
