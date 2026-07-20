@@ -66,7 +66,7 @@ jobs:
         if: steps.changes.outputs.backend == 'true'
       - name: Install Doppler CLI
         if: steps.changes.outputs.backend == 'true'
-        uses: DopplerHQ/cli-action@014df23b1329b615816a38eb5f473bb9000700b1 # v3
+        uses: DopplerHQ/cli-action@4819d808ab99e5cde19a0637a16536a4038fad73 # v4.0.1
         with:
           doppler-token: ${{ secrets.DOPPLER_TOKEN }}
           verify-doppler-config: false
@@ -144,7 +144,7 @@ jobs:
         if: steps.changes.outputs.frontend == 'true'
       - name: Install Doppler CLI
         if: steps.changes.outputs.frontend == 'true'
-        uses: DopplerHQ/cli-action@014df23b1329b615816a38eb5f473bb9000700b1 # v3
+        uses: DopplerHQ/cli-action@4819d808ab99e5cde19a0637a16536a4038fad73 # v4.0.1
         with:
           doppler-token: ${{ secrets.DOPPLER_TOKEN }}
           verify-doppler-config: false
