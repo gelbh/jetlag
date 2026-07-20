@@ -2,7 +2,9 @@ npm run lint
 npm run lint:css
 npm run typecheck
 
-if git rev-parse --verify origin/main >/dev/null 2>&1; then
+# Skip when origin/main is missing or not an ancestor (e.g. after history rewrite).
+if git rev-parse --verify origin/main >/dev/null 2>&1 \
+  && git merge-base --is-ancestor origin/main HEAD 2>/dev/null; then
   npm run test:changed
 fi
 
