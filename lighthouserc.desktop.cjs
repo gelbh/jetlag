@@ -9,17 +9,9 @@ module.exports = {
       startServerCommand:
         "npm run preview -- --host 127.0.0.1 --port 4173 --strictPort",
       startServerReadyPattern: "Local:",
-      // Median of 3 runs stabilizes CLS before error assertions
       numberOfRuns: 3,
       settings: {
-        formFactor: "mobile",
-        screenEmulation: {
-          mobile: true,
-          width: 390,
-          height: 844,
-          deviceScaleFactor: 3,
-          disabled: false,
-        },
+        preset: "desktop",
       },
     },
     assert: {
@@ -27,7 +19,7 @@ module.exports = {
         {
           matchingUrlPattern: "http://127\\.0\\.0\\.1:4173(/join)?/?$",
           assertions: {
-            "categories:performance": ["error", { minScore: 0.7 }],
+            "categories:performance": ["error", { minScore: 0.9 }],
             "categories:accessibility": ["error", { minScore: 0.9 }],
             viewport: "error",
             "target-size": ["error", { minScore: 0.8 }],
@@ -37,7 +29,7 @@ module.exports = {
         {
           matchingUrlPattern: "http://127\\.0\\.0\\.1:4173/create/?$",
           assertions: {
-            "categories:performance": ["error", { minScore: 0.6 }],
+            "categories:performance": ["error", { minScore: 0.8 }],
             "categories:accessibility": ["error", { minScore: 0.9 }],
             viewport: "error",
             "target-size": ["error", { minScore: 0.8 }],
@@ -48,7 +40,7 @@ module.exports = {
     },
     upload: {
       target: "filesystem",
-      outputDir: ".lighthouseci/mobile",
+      outputDir: ".lighthouseci/desktop",
     },
   },
 };
