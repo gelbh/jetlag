@@ -101,9 +101,11 @@ describe("firebase App Check lazy init", () => {
     expect(initializeAppCheck).not.toHaveBeenCalled();
 
     const check = getFirebaseAppCheck();
+    const repeated = getFirebaseAppCheck();
 
     expect(initializeAppCheck).toHaveBeenCalledOnce();
     expect(check).toEqual({ name: "app-check" });
+    expect(repeated).toBe(check);
   });
 
   it("skips App Check when using the Firebase emulator", async () => {
@@ -119,6 +121,7 @@ describe("firebase App Check lazy init", () => {
     const { resetFirebaseFunctionsForTests } = await import("./firebaseFunctions");
     resetFirebaseFunctionsForTests();
 
+    await getFirebaseFunctions();
     await getFirebaseFunctions();
 
     expect(initializeAppCheck).toHaveBeenCalledOnce();
