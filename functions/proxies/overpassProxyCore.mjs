@@ -77,7 +77,10 @@ export async function fetchOverpassWithFailover(query) {
 
       logFailover({ endpoint, status: response.status });
       try {
-        response.body?.cancel();
+        const canceled = response.body?.cancel();
+        if (canceled != null && typeof canceled.then === "function") {
+          canceled.catch(() => {});
+        }
       } catch {
         // Best-effort: avoid holding unused upstream bodies across failover.
       }
