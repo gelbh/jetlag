@@ -84,6 +84,7 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
     title: "Your choices",
     paragraphs: [
       "You do not need an account to play free sessions. Location sharing is optional. You can use the app without signing in to Premium.",
+      "Optional anonymous product analytics (PostHog) load only if you Accept on the in-app prompt. Decline keeps analytics off. Clearing site data resets this choice.",
       "Clearing site data or uninstalling the app removes local preferences. Remote session data may remain until it expires or you request removal.",
     ],
   },
