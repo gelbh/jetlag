@@ -1,14 +1,20 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
-import { getSentryDsnSecret, withSentryEventHandler } from "../lib/sentry.mjs";
+import {
+  captureFunctionsException,
+  getSentryDsnSecret,
+  withSentryEventHandler,
+} from "../lib/sentry.mjs";
 import {
   autoEndIdleSession,
   computeIdleCutoffIso,
   selectIdleActiveSessions,
 } from "../session/autoEndIdleSessions.mjs";
+import { sweepOrphanSessionCodes, ORPHAN_CODE_SWEEP_LIMIT } from "../session/orphanSessionCodes.mjs";
 import {
   computeAbandonedCutoffIso,
   computeEndedCutoffIso,
+  IDLE_PURGE_BATCH_LIMIT,
   PURGE_BATCH_LIMIT,
   selectSessionsToPurge,
 } from "../session/purgeStaleSessions.mjs";
@@ -39,13 +45,13 @@ async function fetchIdleActiveSessionDocs(db, idleCutoffIso) {
         .collection("sessions")
         .where("status", "==", "active")
         .where("lastActiveAt", "<", idleCutoffIso)
-        .limit(PURGE_BATCH_LIMIT)
+        .limit(IDLE_PURGE_BATCH_LIMIT)
         .get(),
       db
         .collection("sessions")
         .where("status", "==", "active")
         .where("createdAt", "<", idleCutoffIso)
-        .limit(PURGE_BATCH_LIMIT)
+        .limit(IDLE_PURGE_BATCH_LIMIT)
         .get(),
     ]);
 
@@ -53,7 +59,7 @@ async function fetchIdleActiveSessionDocs(db, idleCutoffIso) {
       idleIndexedSnapshot.docs,
       idleLegacySnapshot.docs,
       idleCutoffIso,
-      PURGE_BATCH_LIMIT,
+      IDLE_PURGE_BATCH_LIMIT,
     );
   } catch (error) {
     console.error("purgeStaleSessions idle query failed", error);
@@ -91,6 +97,16 @@ export const purgeStaleSessions = onSchedule(
       autoEnded += 1;
     }
 
+    let orphansDeleted = 0;
+    try {
+      orphansDeleted = await sweepOrphanSessionCodes(db, {
+        limit: ORPHAN_CODE_SWEEP_LIMIT,
+      });
+    } catch (error) {
+      console.error("purgeStaleSessions orphan sweep failed", error);
+      captureFunctionsException(error);
+    }
+
     const targets = selectSessionsToPurge(
       endedSnapshot.docs,
       abandonedSnapshot.docs,
@@ -108,7 +124,7 @@ export const purgeStaleSessions = onSchedule(
     }
 
     console.info(
-      `purgeStaleSessions autoEnded=${autoEnded} deleted=${deleted}; idleCutoff=${idleCutoffIso}; endedCutoff=${endedCutoffIso}; abandonedCutoff=${abandonedCutoffIso}`,
+      `purgeStaleSessions autoEnded=${autoEnded} orphansDeleted=${orphansDeleted} deleted=${deleted}; idleCutoff=${idleCutoffIso}; endedCutoff=${endedCutoffIso}; abandonedCutoff=${abandonedCutoffIso}`,
     );
   }),
 );
