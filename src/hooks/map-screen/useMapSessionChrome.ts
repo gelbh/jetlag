@@ -11,7 +11,6 @@ import {
 } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import {
-  endRemoteSession,
   resetRemoteSession,
 } from "../../services/firestore/firestoreAnnotations";
 import { cancelWalkingThermometersAndAnnounce } from "../../services/firestore/firestoreSessionExtras";
@@ -19,6 +18,11 @@ import {
   clearSessionLocalArtifacts,
   teardownSessionUiState,
 } from "../../services/session/sessionCleanup";
+import {
+  endSession,
+  leaveHostSession,
+} from "../../services/session/sessionLifecycle";
+import { pickHostPromotee } from "../../domain/session/pickHostPromotee";
 import { useSessionExit } from "../session/useSessionExit";
 import { ensureAnonymousUser } from "../../services/core/firebase";
 import { captureException } from "../../services/core/sentry";
@@ -194,7 +198,13 @@ export function useMapSessionChrome({
     }
 
     const sessionId = session.id;
-    await endRemoteSession(sessionId);
+    try {
+      await endSession(sessionId);
+    } catch (error) {
+      captureException(error);
+      window.alert("Couldn't end the session. Try again.");
+      return;
+    }
     await exitSession({
       reason: "end",
       sessionId,
@@ -208,7 +218,31 @@ export function useMapSessionChrome({
       return;
     }
 
-    if (
+    const isRemoteHost =
+      isHost && session.id !== LOCAL_SESSION_ID;
+
+    if (isRemoteHost) {
+      const promotee = pickHostPromotee(
+        session.memberUids,
+        session.memberRoles,
+        session.hostUid,
+      );
+      const confirmMessage =
+        promotee == null
+          ? "You're the only player. Leaving will end this session."
+          : "Another player will become host so others can keep playing. Leave anyway?";
+      if (!window.confirm(confirmMessage)) {
+        return;
+      }
+
+      try {
+        await leaveHostSession(session.id);
+      } catch (error) {
+        captureException(error);
+        window.alert("Couldn't leave the session. Try again.");
+        return;
+      }
+    } else if (
       !window.confirm(
         "Leave this session on this device? Other players can keep playing.",
       )
@@ -241,7 +275,7 @@ export function useMapSessionChrome({
       replace: true,
       closeOverlays: closeSettingsPanel,
     });
-  }, [closeSettingsPanel, exitSession, pendingQuestions, session]);
+  }, [closeSettingsPanel, exitSession, isHost, pendingQuestions, session]);
 
   const exportMap = useCallback(async () => {
     if (!session || !mapShellRef.current) {
