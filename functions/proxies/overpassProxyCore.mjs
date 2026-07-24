@@ -22,6 +22,37 @@ function logCache(result, tier) {
   console.log(JSON.stringify({ type: "overpass_cache", result, tier }));
 }
 
+function isAbortOrTimeoutError(error) {
+  return (
+    (error instanceof Error && error.name === "AbortError") ||
+    (typeof DOMException !== "undefined" &&
+      error instanceof DOMException &&
+      error.name === "AbortError")
+  );
+}
+
+export function toOverpassUpstreamError(error) {
+  if (isAbortOrTimeoutError(error)) {
+    return new Error("Overpass timed out.");
+  }
+  return error instanceof Error ? error : new Error(String(error));
+}
+
+export function isTimeoutLikeOverpassStatus(status) {
+  return (
+    status === 408 ||
+    status === 429 ||
+    status === 500 ||
+    status === 502 ||
+    status === 503 ||
+    status === 504
+  );
+}
+
+function logFailover(fields) {
+  console.log(JSON.stringify({ type: "overpass_failover", ...fields }));
+}
+
 export async function fetchOverpassWithFailover(query) {
   let lastError = null;
 
@@ -44,19 +75,29 @@ export async function fetchOverpassWithFailover(query) {
         return response;
       }
 
-      if (
-        response.status === 429 ||
-        response.status === 502 ||
-        response.status === 503 ||
-        response.status === 504
-      ) {
-        lastError = new Error("Overpass timed out.");
-        continue;
+      logFailover({ endpoint, status: response.status });
+      try {
+        const canceled = response.body?.cancel();
+        if (canceled != null && typeof canceled.then === "function") {
+          canceled.catch(() => {});
+        }
+      } catch {
+        // Best-effort: avoid holding unused upstream bodies across failover.
       }
-
-      throw new Error("Overpass query failed.");
+      lastError = new Error(
+        isTimeoutLikeOverpassStatus(response.status)
+          ? "Overpass timed out."
+          : "Overpass query failed.",
+      );
+      continue;
     } catch (error) {
-      lastError = error;
+      logFailover({
+        endpoint,
+        error: isAbortOrTimeoutError(error)
+          ? "abort"
+          : String(error?.name ?? error),
+      });
+      lastError = toOverpassUpstreamError(error);
     }
   }
 
