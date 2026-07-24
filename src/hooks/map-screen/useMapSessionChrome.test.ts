@@ -13,7 +13,9 @@ const mockCancelWalkingThermometersAndAnnounce = vi.hoisted(() =>
 );
 const mockCaptureException = vi.hoisted(() => vi.fn());
 const mockLeaveHostSession = vi.hoisted(() =>
-  vi.fn(async () => ({ action: "ended" as const })),
+  vi.fn(async (): Promise<
+    { action: "ended" } | { action: "promoted"; newHostUid: string }
+  > => ({ action: "ended" })),
 );
 const mockEndSession = vi.hoisted(() => vi.fn(async () => undefined));
 

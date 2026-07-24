@@ -1,4 +1,4 @@
-import { endSessionCanonical } from "./endSessionCanonical.mjs";
+import { applyEndSessionInTx, endSessionCanonical } from "./endSessionCanonical.mjs";
 import { pickHostPromotee } from "./pickHostPromotee.mjs";
 
 export { pickHostPromotee };
@@ -38,6 +38,7 @@ export async function leaveHostSessionHandler(db, uid, sessionId) {
     );
 
     if (promotee == null) {
+      applyEndSessionInTx(tx, db, sessionRef, data, "ended_early");
       outcome = { action: "ended" };
       return;
     }
@@ -45,11 +46,6 @@ export async function leaveHostSessionHandler(db, uid, sessionId) {
     tx.update(sessionRef, { hostUid: promotee });
     outcome = { action: "promoted", newHostUid: promotee };
   });
-
-  if (outcome?.action === "ended") {
-    const sessionDoc = await sessionRef.get();
-    await endSessionCanonical(db, sessionDoc, { gameOutcome: "ended_early" });
-  }
 
   return outcome;
 }

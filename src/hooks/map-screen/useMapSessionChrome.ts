@@ -22,7 +22,6 @@ import {
   endSession,
   leaveHostSession,
 } from "../../services/session/sessionLifecycle";
-import { pickHostPromotee } from "../../domain/session/pickHostPromotee";
 import { useSessionExit } from "../session/useSessionExit";
 import { ensureAnonymousUser } from "../../services/core/firebase";
 import { captureException } from "../../services/core/sentry";
@@ -222,15 +221,11 @@ export function useMapSessionChrome({
       isHost && session.id !== LOCAL_SESSION_ID;
 
     if (isRemoteHost) {
-      const promotee = pickHostPromotee(
-        session.memberUids,
-        session.memberRoles,
-        session.hostUid,
-      );
-      const confirmMessage =
-        promotee == null
-          ? "You're the only player. Leaving will end this session."
-          : "Another player will become host so others can keep playing. Leave anyway?";
+      const hostUid = session.hostUid ?? "";
+      const alone = !(session.memberUids ?? []).some((uid) => uid !== hostUid);
+      const confirmMessage = alone
+        ? "You're the only player. Leaving will end this session."
+        : "Another player will become host so others can keep playing. Leave anyway?";
       if (!window.confirm(confirmMessage)) {
         return;
       }

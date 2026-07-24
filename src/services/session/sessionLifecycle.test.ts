@@ -26,7 +26,7 @@ describe("sessionLifecycle", () => {
   });
 
   it("calls endSession with the session id", async () => {
-    callable.mockResolvedValueOnce({ data: { ok: true } });
+    callable.mockResolvedValueOnce({ data: { ok: true } } as never);
     await endSession("session-42");
 
     expect(httpsCallable).toHaveBeenCalledWith({}, "endSession");
