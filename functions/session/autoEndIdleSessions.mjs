@@ -1,4 +1,4 @@
-import { FieldValue } from "firebase-admin/firestore";
+import { endSessionCanonical } from "./endSessionCanonical.mjs";
 
 export const IDLE_SESSION_HOURS = 24;
 
@@ -63,16 +63,5 @@ export function selectIdleActiveSessions(
 }
 
 export async function autoEndIdleSession(db, sessionDoc) {
-  const data = sessionDoc.data();
-  const code = typeof data.code === "string" ? data.code : null;
-
-  await sessionDoc.ref.update({
-    endedAt: new Date().toISOString(),
-    status: "ended",
-    code: FieldValue.delete(),
-  });
-
-  if (code) {
-    await db.collection("sessionCodes").doc(code).delete();
-  }
+  await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" });
 }

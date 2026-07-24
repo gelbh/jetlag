@@ -113,6 +113,7 @@ test("autoEndIdleSession ends session and deletes session code", async () => {
 
   assert.equal(updates.length, 1);
   assert.equal(updates[0].status, "ended");
+  assert.equal(updates[0].gameOutcome, "abandoned");
   assert.equal(typeof updates[0].endedAt, "string");
   assert.deepEqual(deletedCodes, [{ name: "sessionCodes", id: "ABCD" }]);
 });
