@@ -30,7 +30,10 @@ const envMocks = vi.hoisted(() => ({
 vi.mock("firebase/app-check", () => ({
   initializeAppCheck,
   ReCaptchaV3Provider: class ReCaptchaV3Provider {
-    constructor(public siteKey: string) {}
+    siteKey: string;
+    constructor(siteKey: string) {
+      this.siteKey = siteKey;
+    }
   },
 }));
 
