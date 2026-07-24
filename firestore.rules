@@ -775,7 +775,16 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
         && request.resource.data.status == 'ended';
 
-      allow delete: if false;
+      // Host end path, or reclaim when the linked session is missing / ended.
+      allow delete: if isSignedIn()
+        && code.size() == 4
+        && resource.data.sessionId is string
+        && (
+          resource.data.hostUid == request.auth.uid
+          || !exists(/databases/$(database)/documents/sessions/$(resource.data.sessionId))
+          || get(/databases/$(database)/documents/sessions/$(resource.data.sessionId)).data.status == 'ended'
+          || get(/databases/$(database)/documents/sessions/$(resource.data.sessionId)).data.endedAt is string
+        );
     }
 
     match /_rateLimits/{docId} {
