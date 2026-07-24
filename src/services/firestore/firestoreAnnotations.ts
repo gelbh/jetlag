@@ -3,6 +3,7 @@ import {
   arrayRemove,
   arrayUnion,
   collection,
+  deleteDoc,
   deleteField,
   doc,
   getDoc,
@@ -65,6 +66,19 @@ function sessionsCollection() {
 }
 function sessionCodeDoc(code: string) {
   return doc(getFirestoreDb(), "sessionCodes", code);
+}
+
+/** True when a sessionCodes doc may be deleted and the code reused. */
+export function isReclaimableSessionForCode(
+  sessionData: Record<string, unknown> | null | undefined,
+): boolean {
+  if (sessionData == null) {
+    return true;
+  }
+
+  return (
+    sessionData.status === "ended" || typeof sessionData.endedAt === "string"
+  );
 }
 function annotationsCollection(sessionId: string) {
   return collection(getFirestoreDb(), "sessions", sessionId, "annotations");
@@ -256,6 +270,29 @@ export async function createRemoteSession(
   while (attempts < 8) {
     const existing = await getDoc(sessionCodeDoc(code));
     if (!existing.exists()) {
+      break;
+    }
+
+    const codeData = existing.data() as Record<string, unknown>;
+    const existingSessionId =
+      typeof codeData.sessionId === "string" ? codeData.sessionId : null;
+
+    if (existingSessionId) {
+      const sessionSnap = await getDoc(
+        doc(sessionsCollection(), existingSessionId),
+      );
+      if (
+        isReclaimableSessionForCode(
+          sessionSnap.exists()
+            ? (sessionSnap.data() as Record<string, unknown>)
+            : null,
+        )
+      ) {
+        await deleteDoc(sessionCodeDoc(code));
+        break;
+      }
+    } else {
+      await deleteDoc(sessionCodeDoc(code));
       break;
     }
 
@@ -744,9 +781,7 @@ export async function endRemoteSession(sessionId: string): Promise<void> {
   });
 
   if (session?.code) {
-    await updateDoc(sessionCodeDoc(session.code), {
-      status: "ended",
-    });
+    await deleteDoc(sessionCodeDoc(session.code));
   }
 }
 
