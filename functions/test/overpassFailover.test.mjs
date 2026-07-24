@@ -43,9 +43,9 @@ describe("fetchOverpassWithFailover", () => {
   });
 
   it("all endpoints AbortError → throws Overpass timed out.", async () => {
-    let calls = 0;
-    globalThis.fetch = async () => {
-      calls += 1;
+    const targets = [];
+    globalThis.fetch = async (url) => {
+      targets.push(String(url));
       throw abortError();
     };
 
@@ -57,7 +57,7 @@ describe("fetchOverpassWithFailover", () => {
         return true;
       },
     );
-    assert.equal(calls, OVERPASS_ENDPOINTS.length);
+    assert.deepEqual(targets, [...OVERPASS_ENDPOINTS]);
   });
 
   it("504 then 200 → success", async () => {
