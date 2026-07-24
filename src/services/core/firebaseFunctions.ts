@@ -1,6 +1,6 @@
 import type { Functions } from "firebase/functions";
 import { clientEnvUsesFirebaseEmulator } from "../../config/env";
-import { getFirebaseApp } from "./firebase";
+import { getFirebaseApp, getFirebaseAppCheck } from "./firebase";
 
 let functions: Functions | null = null;
 let functionsEmulatorConnected = false;
@@ -20,7 +20,10 @@ export async function getFirebaseFunctions(): Promise<Functions> {
       const { connectFunctionsEmulator, getFunctions } = await import(
         "firebase/functions"
       );
-      const instance = getFunctions(getFirebaseApp());
+      const app = getFirebaseApp();
+      // Arm App Check before callables (enforceAppCheck) — not on bare getFirebaseApp (LCP).
+      getFirebaseAppCheck();
+      const instance = getFunctions(app);
       functions = instance;
 
       if (firebaseUsesEmulator() && !functionsEmulatorConnected) {

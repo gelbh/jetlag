@@ -43,6 +43,11 @@ vi.mock("firebase/app", () => ({
   deleteApp: firebaseAppMocks.deleteApp,
 }));
 
+vi.mock("firebase/functions", () => ({
+  getFunctions: vi.fn(() => ({ name: "functions" })),
+  connectFunctionsEmulator: vi.fn(),
+}));
+
 vi.mock("firebase/auth", () => ({
   connectAuthEmulator: vi.fn(),
   getAuth: vi.fn(),
@@ -107,5 +112,15 @@ describe("firebase App Check lazy init", () => {
 
     expect(getFirebaseAppCheck()).toBeNull();
     expect(initializeAppCheck).not.toHaveBeenCalled();
+  });
+
+  it("initializes App Check on first getFirebaseFunctions", async () => {
+    const { getFirebaseFunctions } = await import("./firebaseFunctions");
+    const { resetFirebaseFunctionsForTests } = await import("./firebaseFunctions");
+    resetFirebaseFunctionsForTests();
+
+    await getFirebaseFunctions();
+
+    expect(initializeAppCheck).toHaveBeenCalledOnce();
   });
 });
