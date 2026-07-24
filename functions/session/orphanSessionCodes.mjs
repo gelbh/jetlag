@@ -1,4 +1,7 @@
-export function isOrphanSessionCode(codeData, sessionData) {
+export const ORPHAN_CODE_SWEEP_LIMIT = 100;
+
+/** Orphan ⇔ no live session document (missing or already ended). */
+export function isOrphanSession(sessionData) {
   if (sessionData == null) {
     return true;
   }
@@ -18,7 +21,7 @@ export function selectOrphanCodeDocs(codeDocsWithSessions, limit) {
       break;
     }
 
-    if (isOrphanSessionCode(entry.codeData, entry.sessionData)) {
+    if (isOrphanSession(entry.sessionData)) {
       selected.push(entry);
     }
   }
@@ -30,28 +33,33 @@ export function selectOrphanCodeDocs(codeDocsWithSessions, limit) {
  * Scan a page of sessionCodes and delete orphan / ended-session codes.
  * Returns number deleted.
  */
-export async function sweepOrphanSessionCodes(db, { limit = 100 } = {}) {
-  const codesSnap = await db.collection("sessionCodes").limit(limit).get();
-  let orphansDeleted = 0;
+export async function sweepOrphanSessionCodes(
+  db,
+  { limit = ORPHAN_CODE_SWEEP_LIMIT } = {},
+) {
+  const codesSnap = await db
+    .collection("sessionCodes")
+    .orderBy("__name__")
+    .limit(limit)
+    .get();
 
-  for (const codeDoc of codesSnap.docs) {
-    const codeData = codeDoc.data() ?? {};
-    const sessionId =
-      typeof codeData.sessionId === "string" ? codeData.sessionId : null;
+  const withSessions = await Promise.all(
+    codesSnap.docs.map(async (codeDoc) => {
+      const codeData = codeDoc.data() ?? {};
+      const sessionId =
+        typeof codeData.sessionId === "string" ? codeData.sessionId : null;
 
-    let sessionData = null;
-    if (sessionId) {
-      const sessionSnap = await db.collection("sessions").doc(sessionId).get();
-      sessionData = sessionSnap.exists ? sessionSnap.data() : null;
-    }
+      let sessionData = null;
+      if (sessionId) {
+        const sessionSnap = await db.collection("sessions").doc(sessionId).get();
+        sessionData = sessionSnap.exists ? sessionSnap.data() : null;
+      }
 
-    if (!isOrphanSessionCode(codeData, sessionData)) {
-      continue;
-    }
+      return { codeDoc, codeData, sessionData };
+    }),
+  );
 
-    await codeDoc.ref.delete();
-    orphansDeleted += 1;
-  }
-
-  return orphansDeleted;
+  const orphans = selectOrphanCodeDocs(withSessions, limit);
+  await Promise.all(orphans.map((entry) => entry.codeDoc.ref.delete()));
+  return orphans.length;
 }

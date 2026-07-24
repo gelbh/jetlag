@@ -1,27 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  isOrphanSessionCode,
+  isOrphanSession,
   selectOrphanCodeDocs,
   sweepOrphanSessionCodes,
 } from "../session/orphanSessionCodes.mjs";
 
-test("isOrphanSessionCode true when session missing", () => {
-  assert.equal(isOrphanSessionCode({ sessionId: "x" }, null), true);
+test("isOrphanSession true when session missing", () => {
+  assert.equal(isOrphanSession(null), true);
 });
 
-test("isOrphanSessionCode true when session ended", () => {
-  assert.equal(
-    isOrphanSessionCode({ sessionId: "x" }, { status: "ended" }),
-    true,
-  );
+test("isOrphanSession true when session ended", () => {
+  assert.equal(isOrphanSession({ status: "ended" }), true);
 });
 
-test("isOrphanSessionCode false for live active session", () => {
-  assert.equal(
-    isOrphanSessionCode({ sessionId: "x" }, { status: "active" }),
-    false,
-  );
+test("isOrphanSession false for live active session", () => {
+  assert.equal(isOrphanSession({ status: "active" }), false);
 });
 
 test("selectOrphanCodeDocs respects limit", () => {
@@ -65,8 +59,10 @@ test("sweepOrphanSessionCodes deletes orphans only", async () => {
     collection: (name) => {
       if (name === "sessionCodes") {
         return {
-          limit: () => ({
-            get: async () => ({ docs: codes }),
+          orderBy: () => ({
+            limit: () => ({
+              get: async () => ({ docs: codes }),
+            }),
           }),
         };
       }
@@ -86,5 +82,5 @@ test("sweepOrphanSessionCodes deletes orphans only", async () => {
 
   const orphansDeleted = await sweepOrphanSessionCodes(db, { limit: 100 });
   assert.equal(orphansDeleted, 2);
-  assert.deepEqual(deleted, ["ORPH", "DEAD"]);
+  assert.deepEqual(deleted.sort(), ["DEAD", "ORPH"]);
 });

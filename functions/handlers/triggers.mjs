@@ -6,7 +6,7 @@ import {
   computeIdleCutoffIso,
   selectIdleActiveSessions,
 } from "../session/autoEndIdleSessions.mjs";
-import { sweepOrphanSessionCodes } from "../session/orphanSessionCodes.mjs";
+import { sweepOrphanSessionCodes, ORPHAN_CODE_SWEEP_LIMIT } from "../session/orphanSessionCodes.mjs";
 import {
   computeAbandonedCutoffIso,
   computeEndedCutoffIso,
@@ -93,7 +93,9 @@ export const purgeStaleSessions = onSchedule(
       autoEnded += 1;
     }
 
-    const orphansDeleted = await sweepOrphanSessionCodes(db, { limit: 100 });
+    const orphansDeleted = await sweepOrphanSessionCodes(db, {
+      limit: ORPHAN_CODE_SWEEP_LIMIT,
+    });
 
     const targets = selectSessionsToPurge(
       endedSnapshot.docs,

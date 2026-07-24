@@ -91,15 +91,18 @@ test("selectIdleActiveSessions deduplicates indexed and legacy candidates", () =
 test("autoEndIdleSession ends session and deletes session code", async () => {
   const updates = [];
   const deletedCodes = [];
-  const sessionDoc = {
-    data: () => ({ code: "ABCD", status: "active" }),
-    ref: {
-      update: async (payload) => {
-        updates.push(payload);
-      },
-    },
-  };
+  const sessionData = { code: "ABCD", status: "active" };
+  const sessionRef = {};
   const db = {
+    runTransaction: async (fn) => {
+      const tx = {
+        get: async () => ({ data: () => sessionData }),
+        update: async (_ref, payload) => {
+          updates.push(payload);
+        },
+      };
+      await fn(tx);
+    },
     collection: (name) => ({
       doc: (id) => ({
         delete: async () => {
@@ -107,6 +110,10 @@ test("autoEndIdleSession ends session and deletes session code", async () => {
         },
       }),
     }),
+  };
+  const sessionDoc = {
+    data: () => sessionData,
+    ref: sessionRef,
   };
 
   await autoEndIdleSession(db, sessionDoc);
