@@ -76,6 +76,11 @@ export async function fetchOverpassWithFailover(query) {
       }
 
       logFailover({ endpoint, status: response.status });
+      try {
+        response.body?.cancel();
+      } catch {
+        // Best-effort: avoid holding unused upstream bodies across failover.
+      }
       lastError = new Error(
         isTimeoutLikeOverpassStatus(response.status)
           ? "Overpass timed out."
