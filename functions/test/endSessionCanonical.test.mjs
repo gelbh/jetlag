@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { endSessionCanonical } from "../session/endSessionCanonical.mjs";
 
-function mockDb({ sessionData, updates, deleted }) {
+function mockDb({ sessionData, sessionExists = true, updates, deleted }) {
   const sessionRef = {
     update: async () => {
       throw new Error("update should go through transaction");
@@ -13,6 +13,7 @@ function mockDb({ sessionData, updates, deleted }) {
     runTransaction: async (fn) => {
       const tx = {
         get: async () => ({
+          exists: sessionExists,
           data: () => sessionData,
         }),
         update: async (_ref, payload) => {
@@ -81,4 +82,20 @@ test("endSessionCanonical no-ops session update when already ended", async () =>
   await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" });
   assert.equal(updates.length, 0);
   assert.deepEqual(deleted, [{ name: "sessionCodes", id: "ABCD" }]);
+});
+
+test("endSessionCanonical is idempotent when session document is missing", async () => {
+  const updates = [];
+  const deleted = [];
+  const db = mockDb({
+    sessionData: undefined,
+    sessionExists: false,
+    updates,
+    deleted,
+  });
+  const sessionDoc = { ref: db._sessionRef, data: () => ({ code: "ABCD" }) };
+
+  await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" });
+  assert.equal(updates.length, 0);
+  assert.equal(deleted.length, 0);
 });

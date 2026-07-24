@@ -12,6 +12,10 @@ export async function endSessionCanonical(db, sessionDoc, { gameOutcome }) {
 
   await db.runTransaction(async (tx) => {
     const fresh = await tx.get(sessionRef);
+    if (!fresh.exists) {
+      return;
+    }
+
     const data = fresh.data() ?? {};
 
     if (data.status === "ended" || typeof data.endedAt === "string") {

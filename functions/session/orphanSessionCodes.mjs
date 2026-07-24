@@ -1,4 +1,8 @@
 export const ORPHAN_CODE_SWEEP_LIMIT = 100;
+export const ORPHAN_CODE_SWEEP_CURSOR_DOC = {
+  collection: "systemConfig",
+  id: "orphanCodeSweep",
+};
 
 /** Orphan ⇔ no live session document (missing or already ended). */
 export function isOrphanSession(sessionData) {
@@ -29,19 +33,57 @@ export function selectOrphanCodeDocs(codeDocsWithSessions, limit) {
   return selected;
 }
 
+function sessionCodesQuery(db, { limit, startAfterId }) {
+  let query = db.collection("sessionCodes").orderBy("__name__").limit(limit);
+  if (typeof startAfterId === "string" && startAfterId.length > 0) {
+    query = query.startAfter(startAfterId);
+  }
+  return query;
+}
+
+async function readSweepCursor(db) {
+  const snap = await db
+    .collection(ORPHAN_CODE_SWEEP_CURSOR_DOC.collection)
+    .doc(ORPHAN_CODE_SWEEP_CURSOR_DOC.id)
+    .get();
+  if (!snap.exists) {
+    return null;
+  }
+  const lastCodeId = snap.data()?.lastCodeId;
+  return typeof lastCodeId === "string" && lastCodeId.length > 0
+    ? lastCodeId
+    : null;
+}
+
+async function writeSweepCursor(db, lastCodeId) {
+  await db
+    .collection(ORPHAN_CODE_SWEEP_CURSOR_DOC.collection)
+    .doc(ORPHAN_CODE_SWEEP_CURSOR_DOC.id)
+    .set(
+      {
+        lastCodeId,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true },
+    );
+}
+
 /**
  * Scan a page of sessionCodes and delete orphan / ended-session codes.
+ * Advances a persisted cursor so repeated cron runs eventually cover the collection.
  * Returns number deleted.
  */
 export async function sweepOrphanSessionCodes(
   db,
   { limit = ORPHAN_CODE_SWEEP_LIMIT } = {},
 ) {
-  const codesSnap = await db
-    .collection("sessionCodes")
-    .orderBy("__name__")
-    .limit(limit)
-    .get();
+  const startAfterId = await readSweepCursor(db);
+  let codesSnap = await sessionCodesQuery(db, { limit, startAfterId }).get();
+
+  // Past end of collection — wrap to the first page.
+  if (codesSnap.empty && startAfterId) {
+    codesSnap = await sessionCodesQuery(db, { limit, startAfterId: null }).get();
+  }
 
   const withSessions = await Promise.all(
     codesSnap.docs.map(async (codeDoc) => {
@@ -61,5 +103,11 @@ export async function sweepOrphanSessionCodes(
 
   const orphans = selectOrphanCodeDocs(withSessions, limit);
   await Promise.all(orphans.map((entry) => entry.codeDoc.ref.delete()));
+
+  const lastDoc = codesSnap.docs[codesSnap.docs.length - 1];
+  const nextCursor =
+    codesSnap.docs.length < limit || lastDoc == null ? null : lastDoc.id;
+  await writeSweepCursor(db, nextCursor);
+
   return orphans.length;
 }

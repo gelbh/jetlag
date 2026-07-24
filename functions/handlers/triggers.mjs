@@ -1,6 +1,10 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
-import { getSentryDsnSecret, withSentryEventHandler } from "../lib/sentry.mjs";
+import {
+  captureFunctionsException,
+  getSentryDsnSecret,
+  withSentryEventHandler,
+} from "../lib/sentry.mjs";
 import {
   autoEndIdleSession,
   computeIdleCutoffIso,
@@ -93,9 +97,15 @@ export const purgeStaleSessions = onSchedule(
       autoEnded += 1;
     }
 
-    const orphansDeleted = await sweepOrphanSessionCodes(db, {
-      limit: ORPHAN_CODE_SWEEP_LIMIT,
-    });
+    let orphansDeleted = 0;
+    try {
+      orphansDeleted = await sweepOrphanSessionCodes(db, {
+        limit: ORPHAN_CODE_SWEEP_LIMIT,
+      });
+    } catch (error) {
+      console.error("purgeStaleSessions orphan sweep failed", error);
+      captureFunctionsException(error);
+    }
 
     const targets = selectSessionsToPurge(
       endedSnapshot.docs,
