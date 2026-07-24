@@ -27,7 +27,11 @@ export {
   warmPremiumOverpassPreload,
 } from "./handlers/triggers.mjs";
 
-export { resetSessionForRematch } from "./handlers/session.mjs";
+export {
+  endSession,
+  leaveHostSession,
+  resetSessionForRematch,
+} from "./handlers/session.mjs";
 
 export { claimUsername, profileFriends } from "./handlers/profile.mjs";
 
