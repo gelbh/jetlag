@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  ANALYTICS_CONSENT_KEY,
+  writeAnalyticsConsent,
+} from "../../domain/device/analyticsConsent";
+import {
   ANALYTICS_EVENTS,
+  denyAnalyticsConsent,
+  grantAnalyticsConsent,
   initAnalytics,
   resetAnalyticsForTests,
   scrubAnalyticsProperties,
@@ -75,13 +81,13 @@ describe("scrubAnalyticsProperties", () => {
       }),
     ).toEqual({ metadata: [{ tool: "pin" }] });
   });
-
 });
 
 describe("analytics facade", () => {
   beforeEach(() => {
     resetAnalyticsForTests();
     resetClientEnvForTests();
+    localStorage.clear();
     posthogInit.mockReset();
     posthogCapture.mockReset();
     posthogRegister.mockReset();
@@ -94,6 +100,7 @@ describe("analytics facade", () => {
   });
 
   it("does not init PostHog outside production", () => {
+    writeAnalyticsConsent("granted");
     initAnalytics();
     trackPageView("/home");
     track(ANALYTICS_EVENTS.session_ended, {});
@@ -102,11 +109,37 @@ describe("analytics facade", () => {
     expect(posthogCapture).not.toHaveBeenCalled();
   });
 
-  it("disables GeoIP and external PostHog features on init", () => {
+  it("does not init PostHog when consent is unset", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
 
     initAnalytics();
+    trackPageView("/home");
+    track(ANALYTICS_EVENTS.session_ended, {});
+
+    expect(posthogInit).not.toHaveBeenCalled();
+    expect(posthogCapture).not.toHaveBeenCalled();
+  });
+
+  it("does not init PostHog when consent is denied", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("denied");
+
+    initAnalytics();
+    trackPageView("/home");
+
+    expect(posthogInit).not.toHaveBeenCalled();
+    expect(posthogCapture).not.toHaveBeenCalled();
+  });
+
+  it("inits PostHog when consent is granted in production", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+
+    initAnalytics();
+
     expect(posthogInit).toHaveBeenCalledOnce();
     expect(posthogInit.mock.calls[0]?.[1]).toMatchObject({
       disable_session_recording: true,
@@ -114,6 +147,13 @@ describe("analytics facade", () => {
       disable_surveys: true,
     });
     expect(posthogRegister).toHaveBeenCalledWith({ $geoip_disable: true });
+  });
+
+  it("strips query from pageview path", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+    initAnalytics();
     trackPageView("/create?preset=abc");
     expect(posthogCapture).toHaveBeenCalledWith("$pageview", {
       path: "/create",
@@ -121,7 +161,29 @@ describe("analytics facade", () => {
     });
   });
 
+  it("grantAnalyticsConsent writes granted and inits in production", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+
+    grantAnalyticsConsent();
+
+    expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe("granted");
+    expect(posthogInit).toHaveBeenCalledOnce();
+  });
+
+  it("denyAnalyticsConsent writes denied without init", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+
+    denyAnalyticsConsent();
+    initAnalytics();
+
+    expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe("denied");
+    expect(posthogInit).not.toHaveBeenCalled();
+  });
+
   it("scrubs forbidden props before capture when initialized", () => {
+    writeAnalyticsConsent("granted");
     resetAnalyticsForTests({ initialized: true });
 
     track(
@@ -136,5 +198,15 @@ describe("analytics facade", () => {
     expect(posthogCapture).toHaveBeenCalledWith("map_tool_used", {
       tool: "radar",
     });
+  });
+
+  it("does not capture when consent is denied even if initialized", () => {
+    writeAnalyticsConsent("denied");
+    resetAnalyticsForTests({ initialized: true });
+
+    trackPageView("/home");
+    track(ANALYTICS_EVENTS.session_ended, {});
+
+    expect(posthogCapture).not.toHaveBeenCalled();
   });
 });

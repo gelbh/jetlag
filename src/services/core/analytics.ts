@@ -1,6 +1,10 @@
 import posthog from "posthog-js";
 import { getClientEnv } from "../../config/env";
 import {
+  readAnalyticsConsent,
+  writeAnalyticsConsent,
+} from "../../domain/device/analyticsConsent";
+import {
   ANALYTICS_EVENTS,
   type AnalyticsEventName,
   type AnalyticsEventProps,
@@ -88,6 +92,9 @@ export function initAnalytics(): void {
   if (!runtimeEnabled() || initialized) {
     return;
   }
+  if (readAnalyticsConsent() !== "granted") {
+    return;
+  }
 
   const key = getClientEnv().VITE_POSTHOG_KEY?.trim();
   if (!key) {
@@ -117,8 +124,17 @@ export function initAnalytics(): void {
   }
 }
 
+export function grantAnalyticsConsent(): void {
+  writeAnalyticsConsent("granted");
+  initAnalytics();
+}
+
+export function denyAnalyticsConsent(): void {
+  writeAnalyticsConsent("denied");
+}
+
 export function trackPageView(path: string): void {
-  if (!initialized) {
+  if (readAnalyticsConsent() !== "granted" || !initialized) {
     return;
   }
 
@@ -130,7 +146,7 @@ export function track<E extends AnalyticsEventName>(
   event: E,
   props?: AnalyticsEventProps[E],
 ): void {
-  if (!initialized) {
+  if (readAnalyticsConsent() !== "granted" || !initialized) {
     return;
   }
 
