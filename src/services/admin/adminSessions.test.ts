@@ -41,6 +41,8 @@ function sessionSummary(
     phase: "waiting",
     lastActivityAt: overrides.lastActivityAt,
     lastLocationAt: null,
+    lastAnnotationAt: null,
+    activeAnnotationCount: 0,
     mode: "singleplayer",
     isLive: false,
     liveMultiplayer: false,
