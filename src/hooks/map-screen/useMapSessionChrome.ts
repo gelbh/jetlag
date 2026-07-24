@@ -19,6 +19,10 @@ import {
   clearSessionLocalArtifacts,
   teardownSessionUiState,
 } from "../../services/session/sessionCleanup";
+import {
+  endSession,
+  leaveHostSession,
+} from "../../services/session/sessionLifecycle";
 import { useSessionExit } from "../session/useSessionExit";
 import { ensureAnonymousUser } from "../../services/core/firebase";
 import { captureException } from "../../services/core/sentry";
@@ -194,7 +198,19 @@ export function useMapSessionChrome({
     }
 
     const sessionId = session.id;
-    await endRemoteSession(sessionId);
+    try {
+      await endSession(sessionId);
+    } catch (error) {
+      captureException(error);
+      // Emulator / no Functions: fall back to client end write.
+      try {
+        await endRemoteSession(sessionId);
+      } catch (fallbackError) {
+        captureException(fallbackError);
+        window.alert("Couldn't end the session. Try again.");
+        return;
+      }
+    }
     await exitSession({
       reason: "end",
       sessionId,
@@ -208,7 +224,37 @@ export function useMapSessionChrome({
       return;
     }
 
-    if (
+    const isRemoteHost =
+      isHost && session.id !== LOCAL_SESSION_ID;
+
+    if (isRemoteHost) {
+      const hostUid = session.hostUid ?? "";
+      const alone = !(session.memberUids ?? []).some((uid) => uid !== hostUid);
+      const confirmMessage = alone
+        ? "You're the only player. Leaving will end this session."
+        : "Another player will become host so others can keep playing. Leave anyway?";
+      if (!window.confirm(confirmMessage)) {
+        return;
+      }
+
+      try {
+        await leaveHostSession(session.id);
+      } catch (error) {
+        captureException(error);
+        if (alone) {
+          try {
+            await endRemoteSession(session.id);
+          } catch (fallbackError) {
+            captureException(fallbackError);
+            window.alert("Couldn't leave the session. Try again.");
+            return;
+          }
+        } else {
+          window.alert("Couldn't leave the session. Try again.");
+          return;
+        }
+      }
+    } else if (
       !window.confirm(
         "Leave this session on this device? Other players can keep playing.",
       )
@@ -241,7 +287,7 @@ export function useMapSessionChrome({
       replace: true,
       closeOverlays: closeSettingsPanel,
     });
-  }, [closeSettingsPanel, exitSession, pendingQuestions, session]);
+  }, [closeSettingsPanel, exitSession, isHost, pendingQuestions, session]);
 
   const exportMap = useCallback(async () => {
     if (!session || !mapShellRef.current) {
