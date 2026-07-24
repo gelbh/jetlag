@@ -64,7 +64,7 @@ function createFinalizeMockDb() {
   };
 }
 
-test("shouldFinalizeGameResult triggers on found confirm or ended_early", () => {
+test("shouldFinalizeGameResult triggers on found confirm, ended_early, or abandoned", () => {
   assert.equal(
     shouldFinalizeGameResult(
       { foundConfirmedAt: undefined },
@@ -76,6 +76,13 @@ test("shouldFinalizeGameResult triggers on found confirm or ended_early", () => 
     shouldFinalizeGameResult(
       { gameOutcome: undefined },
       { gameOutcome: "ended_early" },
+    ),
+    true,
+  );
+  assert.equal(
+    shouldFinalizeGameResult(
+      { gameOutcome: undefined },
+      { gameOutcome: "abandoned" },
     ),
     true,
   );
