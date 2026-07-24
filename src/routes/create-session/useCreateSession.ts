@@ -642,8 +642,6 @@ export function useCreateSession() {
             );
         setSession(session, user.uid);
         setPremiumApiContext(session);
-        track(ANALYTICS_EVENTS.session_created, { tier, gameSize });
-        track(ANALYTICS_EVENTS.role_selected, { role: playerRole });
       } else {
         const localSession = {
           id: LOCAL_SESSION_ID,
@@ -663,12 +661,13 @@ export function useCreateSession() {
         };
         setSession(localSession, "local");
         setPremiumApiContext(localSession);
-        track(ANALYTICS_EVENTS.session_created, {
-          tier: "free",
-          gameSize,
-        });
-        track(ANALYTICS_EVENTS.role_selected, { role: playerRole });
       }
+
+      track(ANALYTICS_EVENTS.session_created, {
+        tier: isFirebaseConfigured() ? tier : "free",
+        gameSize,
+        role: playerRole,
+      });
 
       if (!lowPowerMode) {
         const matchingAreas = await resolveSessionMatchingAreas({

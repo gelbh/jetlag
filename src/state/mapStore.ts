@@ -8,7 +8,6 @@ import type { NotificationPreferences } from "../domain/device/notifications";
 import { DEFAULT_NOTIFICATION_PREFERENCES } from "../domain/device/notifications";
 import type { MapStyle } from "../domain/map/mapBasemaps";
 import type { ObserverPerspective } from "../domain/session/observerPerspective";
-import { ANALYTICS_EVENTS, track } from "../services/core/analytics";
 
 export type LayerVisibility = Record<AnnotationType | "transit", boolean>;
 
@@ -67,12 +66,7 @@ export const useMapStore = create<{
       mapStyle: "standard",
       layerVisibility: DEFAULT_LAYER_VISIBILITY,
       observerPerspective: "both",
-      setActiveTool: (activeTool) => {
-        set({ activeTool });
-        if (activeTool !== "none") {
-          track(ANALYTICS_EVENTS.map_tool_used, { tool: activeTool });
-        }
-      },
+      setActiveTool: (activeTool) => set({ activeTool }),
       setTransitEnabled: (transitEnabled) => set({ transitEnabled }),
       setTransitLiveEnabled: (transitLiveEnabled) =>
         set({ transitLiveEnabled }),

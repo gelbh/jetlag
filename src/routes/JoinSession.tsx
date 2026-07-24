@@ -209,7 +209,6 @@ export function JoinSession() {
       setSession(joinedSession, user.uid);
       setPremiumApiContext(result.session);
       track(ANALYTICS_EVENTS.session_joined, { role: playerRole });
-      track(ANALYTICS_EVENTS.role_selected, { role: playerRole });
       if (joinedSession.gameArea) {
         void (async () => {
           const matchingAreas = await resolveSessionMatchingAreas(joinedSession);
