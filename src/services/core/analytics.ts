@@ -105,8 +105,12 @@ export function initAnalytics(): void {
       capture_pageview: false,
       capture_pageleave: false,
       disable_session_recording: true,
+      disable_external_dependency_loading: true,
+      disable_surveys: true,
       person_profiles: "identified_only",
     });
+    // IP is personal data; PostHog's `ip: false` is a no-op — disable GeoIP enrichment.
+    posthog.register({ $geoip_disable: true });
     initialized = true;
   } catch {
     // Soft-fail: analytics must never break app boot.
@@ -118,7 +122,8 @@ export function trackPageView(path: string): void {
     return;
   }
 
-  posthog.capture("$pageview", { path });
+  const pathname = path.split("?", 1)[0] ?? path;
+  posthog.capture("$pageview", { path: pathname, $pathname: pathname });
 }
 
 export function track<E extends AnalyticsEventName>(

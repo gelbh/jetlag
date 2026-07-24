@@ -10,15 +10,17 @@ import {
 } from "./analytics";
 import { resetClientEnvForTests } from "../../config/env";
 
-const { posthogInit, posthogCapture } = vi.hoisted(() => ({
+const { posthogInit, posthogCapture, posthogRegister } = vi.hoisted(() => ({
   posthogInit: vi.fn(),
   posthogCapture: vi.fn(),
+  posthogRegister: vi.fn(),
 }));
 
 vi.mock("posthog-js", () => ({
   default: {
     init: posthogInit,
     capture: posthogCapture,
+    register: posthogRegister,
   },
 }));
 
@@ -82,6 +84,7 @@ describe("analytics facade", () => {
     resetClientEnvForTests();
     posthogInit.mockReset();
     posthogCapture.mockReset();
+    posthogRegister.mockReset();
   });
 
   afterEach(() => {
@@ -96,6 +99,35 @@ describe("analytics facade", () => {
 
     expect(posthogInit).not.toHaveBeenCalled();
     expect(posthogCapture).not.toHaveBeenCalled();
+  });
+
+  it("disables GeoIP and external PostHog features on init", () => {
+    const prevProd = import.meta.env.PROD;
+    const prevMode = import.meta.env.MODE;
+    // @ts-expect-error test override
+    import.meta.env.PROD = true;
+    // @ts-expect-error test override
+    import.meta.env.MODE = "production";
+    try {
+      initAnalytics();
+      expect(posthogInit).toHaveBeenCalledOnce();
+      expect(posthogInit.mock.calls[0]?.[1]).toMatchObject({
+        disable_session_recording: true,
+        disable_external_dependency_loading: true,
+        disable_surveys: true,
+      });
+      expect(posthogRegister).toHaveBeenCalledWith({ $geoip_disable: true });
+      trackPageView("/create?preset=abc");
+      expect(posthogCapture).toHaveBeenCalledWith("$pageview", {
+        path: "/create",
+        $pathname: "/create",
+      });
+    } finally {
+      // @ts-expect-error test override
+      import.meta.env.PROD = prevProd;
+      // @ts-expect-error test override
+      import.meta.env.MODE = prevMode;
+    }
   });
 
   it("scrubs forbidden props before capture when initialized", () => {
