@@ -13,10 +13,12 @@ export function shouldFinalizeGameResult(before, after) {
     typeof before?.foundConfirmedAt !== "string" &&
     typeof after.foundConfirmedAt === "string";
 
-  const endedEarlyNewlySet =
-    before?.gameOutcome !== "ended_early" && after.gameOutcome === "ended_early";
+  const terminalNewlySet =
+    (after.gameOutcome === "ended_early" ||
+      after.gameOutcome === "abandoned") &&
+    before?.gameOutcome !== after.gameOutcome;
 
-  return foundConfirmedNewlySet || endedEarlyNewlySet;
+  return foundConfirmedNewlySet || terminalNewlySet;
 }
 
 export function computeDurationMs(session, endedAtIso) {
@@ -39,6 +41,10 @@ export function computeDurationMs(session, endedAtIso) {
 }
 
 function resolveEndedAt(session) {
+  if (typeof session.endedAt === "string") {
+    return session.endedAt;
+  }
+
   if (typeof session.foundConfirmedAt === "string") {
     return session.foundConfirmedAt;
   }
