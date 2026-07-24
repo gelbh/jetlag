@@ -42,7 +42,7 @@ export function buildLandmassWarmQuery(bounds) {
   const { south, west, north, east } = bounds;
 
   return `
-    [out:json][timeout:45][bbox:${south},${west},${north},${east}];
+    [out:json][timeout:25][bbox:${south},${west},${north},${east}];
     area.searchArea;
     (
       way(area.searchArea)["natural"="water"];
