@@ -234,7 +234,7 @@ export function useCreateSession() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- apply preset once per preset id; framing stable via hook
   }, [framing.applyFocusToGameArea, presets, searchParams]);
 
-  useEffect(() => {
+  const requestLocationBias = useCallback(() => {
     void getCurrentPosition({ highAccuracy: false })
       .then((reading) => {
         userLocationRef.current = [reading.lat, reading.lng];
@@ -814,5 +814,6 @@ export function useCreateSession() {
     handleSessionTierChange,
     handleDistanceUnitChange,
     handlePremiumSignedIn,
+    requestLocationBias,
   };
 }
