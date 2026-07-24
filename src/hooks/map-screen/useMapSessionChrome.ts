@@ -11,6 +11,7 @@ import {
 } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import {
+  endRemoteSession,
   resetRemoteSession,
 } from "../../services/firestore/firestoreAnnotations";
 import { cancelWalkingThermometersAndAnnounce } from "../../services/firestore/firestoreSessionExtras";
@@ -201,8 +202,14 @@ export function useMapSessionChrome({
       await endSession(sessionId);
     } catch (error) {
       captureException(error);
-      window.alert("Couldn't end the session. Try again.");
-      return;
+      // Emulator / no Functions: fall back to client end write.
+      try {
+        await endRemoteSession(sessionId);
+      } catch (fallbackError) {
+        captureException(fallbackError);
+        window.alert("Couldn't end the session. Try again.");
+        return;
+      }
     }
     await exitSession({
       reason: "end",
@@ -234,8 +241,18 @@ export function useMapSessionChrome({
         await leaveHostSession(session.id);
       } catch (error) {
         captureException(error);
-        window.alert("Couldn't leave the session. Try again.");
-        return;
+        if (alone) {
+          try {
+            await endRemoteSession(session.id);
+          } catch (fallbackError) {
+            captureException(fallbackError);
+            window.alert("Couldn't leave the session. Try again.");
+            return;
+          }
+        } else {
+          window.alert("Couldn't leave the session. Try again.");
+          return;
+        }
       }
     } else if (
       !window.confirm(

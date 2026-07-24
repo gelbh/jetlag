@@ -18,6 +18,7 @@ const mockLeaveHostSession = vi.hoisted(() =>
   > => ({ action: "ended" })),
 );
 const mockEndSession = vi.hoisted(() => vi.fn(async () => undefined));
+const mockEndRemoteSession = vi.hoisted(() => vi.fn(async () => undefined));
 
 vi.mock("../session/useSessionExit", () => ({
   useSessionExit: () => exitSession,
@@ -43,6 +44,7 @@ vi.mock("../../services/firestore/firestoreAnnotations", async () => {
   return {
     ...actual,
     resetRemoteSession: mockResetRemoteSession,
+    endRemoteSession: mockEndRemoteSession,
   };
 });
 
@@ -115,6 +117,7 @@ describe("useMapSessionChrome", () => {
     mockCaptureException.mockClear();
     mockLeaveHostSession.mockClear();
     mockEndSession.mockClear();
+    mockEndRemoteSession.mockClear();
   });
 
   it("does not clear the map while end game is active", () => {
