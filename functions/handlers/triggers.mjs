@@ -6,9 +6,11 @@ import {
   computeIdleCutoffIso,
   selectIdleActiveSessions,
 } from "../session/autoEndIdleSessions.mjs";
+import { sweepOrphanSessionCodes } from "../session/orphanSessionCodes.mjs";
 import {
   computeAbandonedCutoffIso,
   computeEndedCutoffIso,
+  IDLE_PURGE_BATCH_LIMIT,
   PURGE_BATCH_LIMIT,
   selectSessionsToPurge,
 } from "../session/purgeStaleSessions.mjs";
@@ -39,13 +41,13 @@ async function fetchIdleActiveSessionDocs(db, idleCutoffIso) {
         .collection("sessions")
         .where("status", "==", "active")
         .where("lastActiveAt", "<", idleCutoffIso)
-        .limit(PURGE_BATCH_LIMIT)
+        .limit(IDLE_PURGE_BATCH_LIMIT)
         .get(),
       db
         .collection("sessions")
         .where("status", "==", "active")
         .where("createdAt", "<", idleCutoffIso)
-        .limit(PURGE_BATCH_LIMIT)
+        .limit(IDLE_PURGE_BATCH_LIMIT)
         .get(),
     ]);
 
@@ -53,7 +55,7 @@ async function fetchIdleActiveSessionDocs(db, idleCutoffIso) {
       idleIndexedSnapshot.docs,
       idleLegacySnapshot.docs,
       idleCutoffIso,
-      PURGE_BATCH_LIMIT,
+      IDLE_PURGE_BATCH_LIMIT,
     );
   } catch (error) {
     console.error("purgeStaleSessions idle query failed", error);
@@ -91,6 +93,8 @@ export const purgeStaleSessions = onSchedule(
       autoEnded += 1;
     }
 
+    const orphansDeleted = await sweepOrphanSessionCodes(db, { limit: 100 });
+
     const targets = selectSessionsToPurge(
       endedSnapshot.docs,
       abandonedSnapshot.docs,
@@ -108,7 +112,7 @@ export const purgeStaleSessions = onSchedule(
     }
 
     console.info(
-      `purgeStaleSessions autoEnded=${autoEnded} deleted=${deleted}; idleCutoff=${idleCutoffIso}; endedCutoff=${endedCutoffIso}; abandonedCutoff=${abandonedCutoffIso}`,
+      `purgeStaleSessions autoEnded=${autoEnded} orphansDeleted=${orphansDeleted} deleted=${deleted}; idleCutoff=${idleCutoffIso}; endedCutoff=${endedCutoffIso}; abandonedCutoff=${abandonedCutoffIso}`,
     );
   }),
 );
