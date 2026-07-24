@@ -19,13 +19,14 @@ function mockDb({ sessionData, sessionExists = true, updates, deleted }) {
         update: async (_ref, payload) => {
           updates.push(payload);
         },
+        delete: async (ref) => {
+          deleted.push(ref);
+        },
       };
       await fn(tx);
     },
     collection: (name) => ({
-      doc: (id) => ({
-        delete: async () => deleted.push({ name, id }),
-      }),
+      doc: (id) => ({ name, id }),
     }),
     _sessionRef: sessionRef,
   };

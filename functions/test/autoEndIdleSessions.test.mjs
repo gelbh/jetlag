@@ -96,19 +96,18 @@ test("autoEndIdleSession ends session and deletes session code", async () => {
   const db = {
     runTransaction: async (fn) => {
       const tx = {
-        get: async () => ({ data: () => sessionData }),
+        get: async () => ({ exists: true, data: () => sessionData }),
         update: async (_ref, payload) => {
           updates.push(payload);
+        },
+        delete: async (ref) => {
+          deletedCodes.push(ref);
         },
       };
       await fn(tx);
     },
     collection: (name) => ({
-      doc: (id) => ({
-        delete: async () => {
-          deletedCodes.push({ name, id });
-        },
-      }),
+      doc: (id) => ({ name, id }),
     }),
   };
   const sessionDoc = {
