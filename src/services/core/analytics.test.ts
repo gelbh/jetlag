@@ -161,14 +161,22 @@ describe("analytics facade", () => {
     });
   });
 
-  it("grantAnalyticsConsent writes granted and inits in production", () => {
+  it("grantAnalyticsConsent writes granted, inits, and captures current page", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
+    vi.stubGlobal("location", {
+      pathname: "/join",
+      search: "",
+    });
 
     grantAnalyticsConsent();
 
     expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe("granted");
     expect(posthogInit).toHaveBeenCalledOnce();
+    expect(posthogCapture).toHaveBeenCalledWith("$pageview", {
+      path: "/join",
+      $pathname: "/join",
+    });
   });
 
   it("denyAnalyticsConsent writes denied without init", () => {

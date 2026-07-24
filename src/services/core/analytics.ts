@@ -127,6 +127,9 @@ export function initAnalytics(): void {
 export function grantAnalyticsConsent(): void {
   writeAnalyticsConsent("granted");
   initAnalytics();
+  if (typeof window !== "undefined") {
+    trackPageView(window.location.pathname + window.location.search);
+  }
 }
 
 export function denyAnalyticsConsent(): void {

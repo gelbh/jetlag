@@ -53,7 +53,7 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
     title: "Error reporting and analytics",
     paragraphs: [
       "In production, the app may send crash and error reports to Sentry. Session codes and certain identifiers are scrubbed before reports leave your device.",
-      "If configured, the app sends anonymous product analytics to PostHog in the EU. Events cover page views and high-level actions such as creating a session or starting Premium checkout. IP/GeoIP enrichment is disabled. Session codes, map content, Overpass payloads, and precise hide locations are not included. Analytics use in-memory storage in this version (no analytics cookies).",
+      "If configured and you Accept the in-app analytics prompt, the app sends anonymous product analytics to PostHog in the EU. Events cover page views and high-level actions such as creating a session or starting Premium checkout. IP/GeoIP enrichment is disabled. Session codes, map content, Overpass payloads, and precise hide locations are not included. Analytics use in-memory storage in this version (no analytics cookies). Decline keeps analytics off.",
     ],
   },
   {
