@@ -273,31 +273,14 @@ export async function createRemoteSession(
       break;
     }
 
-    const codeData = existing.data() as Record<string, unknown>;
-    const existingSessionId =
-      typeof codeData.sessionId === "string" ? codeData.sessionId : null;
-
-    if (existingSessionId) {
-      const sessionSnap = await getDoc(
-        doc(sessionsCollection(), existingSessionId),
-      );
-      if (
-        isReclaimableSessionForCode(
-          sessionSnap.exists()
-            ? (sessionSnap.data() as Record<string, unknown>)
-            : null,
-        )
-      ) {
-        await deleteDoc(sessionCodeDoc(code));
-        break;
-      }
-    } else {
+    try {
+      // Rules allow delete only for host, missing session, or ended session.
       await deleteDoc(sessionCodeDoc(code));
       break;
+    } catch {
+      code = generateSessionCode();
+      attempts += 1;
     }
-
-    code = generateSessionCode();
-    attempts += 1;
   }
 
   const sessionRef = doc(sessionsCollection());
