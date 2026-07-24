@@ -55,6 +55,8 @@ export interface AdminSessionSummary {
   phase: AdminSessionPhase;
   lastActivityAt: string | null;
   lastLocationAt: string | null;
+  lastAnnotationAt: string | null;
+  activeAnnotationCount: number;
   mode: AdminSessionMode;
   isLive: boolean;
   liveMultiplayer: boolean;

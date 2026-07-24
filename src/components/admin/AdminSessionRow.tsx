@@ -64,6 +64,9 @@ export function AdminSessionRow({
           {summary.roleCounts.observer > 0
             ? ` · ${summary.roleCounts.observer} observer${summary.roleCounts.observer === 1 ? "" : "s"}`
             : ""}
+          {summary.activeAnnotationCount > 0
+            ? ` · ${summary.activeAnnotationCount} ann`
+            : ""}
         </p>
       </div>
       <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-brand-blue">

@@ -7,11 +7,13 @@ import type {
 interface AdminSessionFiltersProps {
   query: string;
   liveOnly: boolean;
+  annotatedOnly: boolean;
   mode: AdminSessionModeFilter;
   state: AdminSessionStateChip;
   sort: AdminSessionSort;
   onQueryChange: (query: string) => void;
   onLiveOnlyChange: (value: boolean) => void;
+  onAnnotatedOnlyChange: (value: boolean) => void;
   onModeChange: (mode: AdminSessionModeFilter) => void;
   onStateChange: (state: AdminSessionStateChip) => void;
   onSortChange: (sort: AdminSessionSort) => void;
@@ -26,11 +28,13 @@ function chipClassName(selected: boolean): string {
 export function AdminSessionFilters({
   query,
   liveOnly,
+  annotatedOnly,
   mode,
   state,
   sort,
   onQueryChange,
   onLiveOnlyChange,
+  onAnnotatedOnlyChange,
   onModeChange,
   onStateChange,
   onSortChange,
@@ -45,6 +49,14 @@ export function AdminSessionFilters({
           className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${chipClassName(liveOnly)}`}
         >
           Live
+        </button>
+        <button
+          type="button"
+          aria-pressed={annotatedOnly}
+          onClick={() => onAnnotatedOnlyChange(!annotatedOnly)}
+          className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${chipClassName(annotatedOnly)}`}
+        >
+          Annotated
         </button>
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="Session mode">
           {(["singleplayer", "multiplayer"] as const).map((option) => {
@@ -110,6 +122,8 @@ export function AdminSessionFilters({
           >
             <option value="lastActivity">Last activity</option>
             <option value="lastLocation">Last location</option>
+            <option value="lastAnnotation">Last annotation</option>
+            <option value="annotationCount">Annotation count</option>
             <option value="created">Created</option>
           </select>
         </label>

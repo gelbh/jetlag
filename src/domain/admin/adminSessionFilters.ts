@@ -8,11 +8,17 @@ import { resolveAdminSessionAreaLabel } from "./adminSessionAreaLabel";
 export type AdminSessionPhaseFilter = AdminSessionPhase | "all";
 export type AdminSessionModeFilter = AdminSessionMode | "all";
 export type AdminSessionStateChip = "hiding" | "seek" | "end-game" | null;
-export type AdminSessionSort = "lastActivity" | "lastLocation" | "created";
+export type AdminSessionSort =
+  | "lastActivity"
+  | "lastLocation"
+  | "lastAnnotation"
+  | "annotationCount"
+  | "created";
 
 export interface AdminSessionFilterInput {
   query: string;
   liveOnly: boolean;
+  annotatedOnly: boolean;
   mode: AdminSessionModeFilter;
   state: AdminSessionStateChip;
   sort: AdminSessionSort;
@@ -48,6 +54,25 @@ function compareBySort(
     return rightCreated - leftCreated;
   }
 
+  if (sort === "annotationCount") {
+    const countDelta = right.activeAnnotationCount - left.activeAnnotationCount;
+    if (countDelta !== 0) {
+      return countDelta;
+    }
+  }
+
+  if (sort === "lastAnnotation") {
+    const leftAnnotation = left.lastAnnotationAt
+      ? Date.parse(left.lastAnnotationAt)
+      : 0;
+    const rightAnnotation = right.lastAnnotationAt
+      ? Date.parse(right.lastAnnotationAt)
+      : 0;
+    if (rightAnnotation !== leftAnnotation) {
+      return rightAnnotation - leftAnnotation;
+    }
+  }
+
   if (sort === "lastLocation") {
     const leftLocation = left.lastLocationAt ? Date.parse(left.lastLocationAt) : 0;
     const rightLocation = right.lastLocationAt
@@ -77,6 +102,10 @@ export function filterAdminSessions(
 
   const filtered = sessions.filter((summary) => {
     if (input.liveOnly && !summary.isLive) {
+      return false;
+    }
+
+    if (input.annotatedOnly && summary.activeAnnotationCount <= 0) {
       return false;
     }
 
