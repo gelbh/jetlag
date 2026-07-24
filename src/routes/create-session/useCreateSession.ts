@@ -52,6 +52,10 @@ import { grantAccess, hasAccessClaim } from "../../services/core/accessControl";
 import {
   createPremiumRemoteSession,
 } from "../../services/billing/premiumBilling";
+import {
+  ANALYTICS_EVENTS,
+  track,
+} from "../../services/core/analytics";
 import { setPremiumApiContext } from "../../services/core/premiumApiContext";
 import { unionGameAreas } from "../../domain/geometry/unionGameAreas";
 import { parseBoundaryFile } from "../../services/core/kmzImport";
@@ -638,6 +642,8 @@ export function useCreateSession() {
             );
         setSession(session, user.uid);
         setPremiumApiContext(session);
+        track(ANALYTICS_EVENTS.session_created, { tier, gameSize });
+        track(ANALYTICS_EVENTS.role_selected, { role: playerRole });
       } else {
         const localSession = {
           id: LOCAL_SESSION_ID,
@@ -657,6 +663,11 @@ export function useCreateSession() {
         };
         setSession(localSession, "local");
         setPremiumApiContext(localSession);
+        track(ANALYTICS_EVENTS.session_created, {
+          tier: "free",
+          gameSize,
+        });
+        track(ANALYTICS_EVENTS.role_selected, { role: playerRole });
       }
 
       if (!lowPowerMode) {

@@ -29,6 +29,10 @@ import { sessionVersionMismatchMessage } from "../domain/session/sessionVersion"
 import { resolvePlayerRole } from "../domain/session/playerRole";
 import { retryAsync } from "../services/core/retryAsync";
 import { MotionPressable } from "../components/motion/MotionPressable";
+import {
+  ANALYTICS_EVENTS,
+  track,
+} from "../services/core/analytics";
 import { setPremiumApiContext } from "../services/core/premiumApiContext";
 import { preloadCriticalGameAreaCaches } from "../services/session/gameAreaPreload";
 import { resolveSessionMatchingAreas } from "../services/geo/resolveSessionMatchingAreas";
@@ -204,6 +208,8 @@ export function JoinSession() {
 
       setSession(joinedSession, user.uid);
       setPremiumApiContext(result.session);
+      track(ANALYTICS_EVENTS.session_joined, { role: playerRole });
+      track(ANALYTICS_EVENTS.role_selected, { role: playerRole });
       if (joinedSession.gameArea) {
         void (async () => {
           const matchingAreas = await resolveSessionMatchingAreas(joinedSession);
