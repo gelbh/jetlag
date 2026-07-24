@@ -91,28 +91,35 @@ test("selectIdleActiveSessions deduplicates indexed and legacy candidates", () =
 test("autoEndIdleSession ends session and deletes session code", async () => {
   const updates = [];
   const deletedCodes = [];
-  const sessionDoc = {
-    data: () => ({ code: "ABCD", status: "active" }),
-    ref: {
-      update: async (payload) => {
-        updates.push(payload);
-      },
-    },
-  };
+  const sessionData = { code: "ABCD", status: "active" };
+  const sessionRef = {};
   const db = {
-    collection: (name) => ({
-      doc: (id) => ({
-        delete: async () => {
-          deletedCodes.push({ name, id });
+    runTransaction: async (fn) => {
+      const tx = {
+        get: async () => ({ exists: true, data: () => sessionData }),
+        update: async (_ref, payload) => {
+          updates.push(payload);
         },
-      }),
+        delete: async (ref) => {
+          deletedCodes.push(ref);
+        },
+      };
+      await fn(tx);
+    },
+    collection: (name) => ({
+      doc: (id) => ({ name, id }),
     }),
+  };
+  const sessionDoc = {
+    data: () => sessionData,
+    ref: sessionRef,
   };
 
   await autoEndIdleSession(db, sessionDoc);
 
   assert.equal(updates.length, 1);
   assert.equal(updates[0].status, "ended");
+  assert.equal(updates[0].gameOutcome, "abandoned");
   assert.equal(typeof updates[0].endedAt, "string");
   assert.deepEqual(deletedCodes, [{ name: "sessionCodes", id: "ABCD" }]);
 });

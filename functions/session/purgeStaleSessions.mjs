@@ -1,6 +1,8 @@
 export const ENDED_RETENTION_DAYS = 7;
 export const ABANDONED_RETENTION_DAYS = 30;
 export const PURGE_BATCH_LIMIT = 50;
+/** Idle auto-end throughput (indexed + legacy fill) — higher than delete purge. */
+export const IDLE_PURGE_BATCH_LIMIT = 200;
 
 export function computeEndedCutoffIso(
   now = Date.now(),
