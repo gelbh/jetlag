@@ -30,6 +30,8 @@ function summary(
     phase: "seek",
     lastActivityAt: "2026-01-02T00:00:00.000Z",
     lastLocationAt: "2026-01-02T00:00:00.000Z",
+    lastAnnotationAt: null,
+    activeAnnotationCount: 0,
     mode: "multiplayer",
     isLive: true,
     liveMultiplayer: true,
@@ -56,6 +58,7 @@ describe("adminSessionFilters", () => {
       filterAdminSessions(sessions, {
         query: "dub",
         liveOnly: true,
+        annotatedOnly: false,
         mode: "multiplayer",
         state: "seek",
         sort: "lastActivity",
@@ -70,11 +73,54 @@ describe("adminSessionFilters", () => {
       filterAdminSessions(sessions, {
         query: "0.5.14",
         liveOnly: false,
+        annotatedOnly: false,
         mode: "all",
         state: null,
         sort: "lastActivity",
       }),
     ).toEqual(sessions);
+  });
+
+  it("filters annotated-only and sorts by annotation fields", () => {
+    const sessions = [
+      summary({
+        sessionId: "none",
+        activeAnnotationCount: 0,
+        lastAnnotationAt: null,
+      }),
+      summary({
+        sessionId: "few",
+        activeAnnotationCount: 2,
+        lastAnnotationAt: "2026-01-01T00:00:00.000Z",
+      }),
+      summary({
+        sessionId: "many",
+        activeAnnotationCount: 5,
+        lastAnnotationAt: "2026-01-03T00:00:00.000Z",
+      }),
+    ];
+
+    expect(
+      filterAdminSessions(sessions, {
+        query: "",
+        liveOnly: false,
+        annotatedOnly: true,
+        mode: "all",
+        state: null,
+        sort: "annotationCount",
+      }).map((entry) => entry.sessionId),
+    ).toEqual(["many", "few"]);
+
+    expect(
+      filterAdminSessions(sessions, {
+        query: "",
+        liveOnly: false,
+        annotatedOnly: true,
+        mode: "all",
+        state: null,
+        sort: "lastAnnotation",
+      }).map((entry) => entry.sessionId),
+    ).toEqual(["many", "few"]);
   });
 
   it("sorts by last location and created timestamps", () => {
@@ -95,6 +141,7 @@ describe("adminSessionFilters", () => {
       filterAdminSessions(sessions, {
         query: "",
         liveOnly: false,
+        annotatedOnly: false,
         mode: "all",
         state: null,
         sort: "lastLocation",
@@ -105,6 +152,7 @@ describe("adminSessionFilters", () => {
       filterAdminSessions(sessions, {
         query: "",
         liveOnly: false,
+        annotatedOnly: false,
         mode: "all",
         state: null,
         sort: "created",
@@ -123,6 +171,7 @@ describe("adminSessionFilters", () => {
       filterAdminSessions(sessions, {
         query: "",
         liveOnly: false,
+        annotatedOnly: false,
         mode: "all",
         state: "end-game",
         sort: "lastActivity",
