@@ -257,6 +257,8 @@ export function summarizeSession(sessionId, code, session, nowMs = Date.now()) {
     phase: deriveSessionPhase(session, nowMs),
     lastActivityAt: null,
     lastLocationAt: null,
+    lastAnnotationAt: null,
+    activeAnnotationCount: 0,
     mode: deriveSessionMode(memberUids.length, roleCounts),
     isLive: false,
     liveMultiplayer: false,
@@ -283,12 +285,17 @@ export async function mapActiveCodeToSummary(codeDoc, db, nowMs = Date.now()) {
     return null;
   }
 
-  const [annotationsSnap, messagesSnap, questionsSnap, locationsSnap] =
+  const [annotationsSnap, annotationCountSnap, messagesSnap, questionsSnap, locationsSnap] =
     await Promise.all([
     sessionRef
       .collection("annotations")
       .orderBy("updatedAt", "desc")
       .limit(1)
+      .get(),
+    sessionRef
+      .collection("annotations")
+      .where("status", "==", "active")
+      .count()
       .get(),
     sessionRef
       .collection("messages")
@@ -315,12 +322,18 @@ export async function mapActiveCodeToSummary(codeDoc, db, nowMs = Date.now()) {
   const lastLocationMs = parseFirestoreTimestampMs(
     locationsSnap.docs[0]?.data()?.updatedAt,
   );
+  const lastAnnotationMs = parseFirestoreTimestampMs(
+    annotationsSnap.docs[0]?.data()?.updatedAt,
+  );
 
   const summary = summarizeSession(sessionId, code, session, nowMs);
   summary.lastActivityAt =
     lastActivityMs == null ? null : new Date(lastActivityMs).toISOString();
   summary.lastLocationAt =
     lastLocationMs == null ? null : new Date(lastLocationMs).toISOString();
+  summary.lastAnnotationAt =
+    lastAnnotationMs == null ? null : new Date(lastAnnotationMs).toISOString();
+  summary.activeAnnotationCount = annotationCountSnap.data().count ?? 0;
   summary.isLive = computeIsLive(lastActivityMs, lastLocationMs, nowMs);
   summary.liveMultiplayer =
     summary.isLive &&

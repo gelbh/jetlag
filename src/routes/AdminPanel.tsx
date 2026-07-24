@@ -83,6 +83,7 @@ export function AdminPanel() {
   } = useAdminJoinSession({ onRefresh: refresh });
   const [query, setQuery] = useState("");
   const [liveOnly, setLiveOnly] = useState(false);
+  const [annotatedOnly, setAnnotatedOnly] = useState(false);
   const [modeFilter, setModeFilter] = useState<AdminSessionModeFilter>("all");
   const [stateFilter, setStateFilter] = useState<AdminSessionStateChip>(null);
   const [sort, setSort] = useState<AdminSessionSort>("lastActivity");
@@ -95,11 +96,12 @@ export function AdminPanel() {
       filterAdminSessions(sessions, {
         query,
         liveOnly,
+        annotatedOnly,
         mode: modeFilter,
         state: stateFilter,
         sort,
       }),
-    [liveOnly, modeFilter, query, sessions, sort, stateFilter],
+    [annotatedOnly, liveOnly, modeFilter, query, sessions, sort, stateFilter],
   );
 
   const monitorRoleError =
@@ -209,11 +211,13 @@ export function AdminPanel() {
     <AdminSessionFilters
       query={query}
       liveOnly={liveOnly}
+      annotatedOnly={annotatedOnly}
       mode={modeFilter}
       state={stateFilter}
       sort={sort}
       onQueryChange={setQuery}
       onLiveOnlyChange={setLiveOnly}
+      onAnnotatedOnlyChange={setAnnotatedOnly}
       onModeChange={setModeFilter}
       onStateChange={setStateFilter}
       onSortChange={setSort}
