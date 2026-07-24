@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.2 - 2026-07-24
+
+### Improvements
+
+- Sessions: host Leave transfers host to another player, or ends the session when you are alone
+- Sessions: End session uses the server end path so join codes are freed
+
 ## 0.9.1 - 2026-07-19
 
 ### Improvements
