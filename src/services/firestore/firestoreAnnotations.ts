@@ -3,6 +3,7 @@ import {
   arrayRemove,
   arrayUnion,
   collection,
+  deleteDoc,
   deleteField,
   doc,
   getDoc,
@@ -65,6 +66,19 @@ function sessionsCollection() {
 }
 function sessionCodeDoc(code: string) {
   return doc(getFirestoreDb(), "sessionCodes", code);
+}
+
+/** True when a sessionCodes doc may be deleted and the code reused. */
+export function isReclaimableSessionForCode(
+  sessionData: Record<string, unknown> | null | undefined,
+): boolean {
+  if (sessionData == null) {
+    return true;
+  }
+
+  return (
+    sessionData.status === "ended" || typeof sessionData.endedAt === "string"
+  );
 }
 function annotationsCollection(sessionId: string) {
   return collection(getFirestoreDb(), "sessions", sessionId, "annotations");
@@ -259,8 +273,14 @@ export async function createRemoteSession(
       break;
     }
 
-    code = generateSessionCode();
-    attempts += 1;
+    try {
+      // Rules allow delete only for host, missing session, or ended session.
+      await deleteDoc(sessionCodeDoc(code));
+      break;
+    } catch {
+      code = generateSessionCode();
+      attempts += 1;
+    }
   }
 
   const sessionRef = doc(sessionsCollection());
@@ -744,9 +764,7 @@ export async function endRemoteSession(sessionId: string): Promise<void> {
   });
 
   if (session?.code) {
-    await updateDoc(sessionCodeDoc(session.code), {
-      status: "ended",
-    });
+    await deleteDoc(sessionCodeDoc(session.code));
   }
 }
 

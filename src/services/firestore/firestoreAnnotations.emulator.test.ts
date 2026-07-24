@@ -135,14 +135,14 @@ describe("firestoreAnnotations emulator", () => {
     unsubscribe();
   });
 
-  it("marks ended sessions as ended on lookup", async () => {
+  it("deletes join code when ending a session", async () => {
     const { uid } = await connectEmulatorsForTests();
     const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, uid);
     const sessionCode = session.code;
     await endRemoteSession(session.id);
 
     const lookup = await lookupRemoteSessionByCode(sessionCode);
-    expect(lookup.status).toBe("ended");
+    expect(lookup.status).toBe("missing");
 
     const fetched = await getRemoteSessionById(session.id);
     expect(fetched?.endedAt).toBeTruthy();
