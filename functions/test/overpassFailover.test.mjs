@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { afterEach, describe, it, mock } from "node:test";
 import {
   fetchOverpassWithFailover,
-  isRetryableOverpassStatus,
+  isTimeoutLikeOverpassStatus,
   toOverpassUpstreamError,
 } from "../proxies/overpassProxyCore.mjs";
 import { OVERPASS_ENDPOINTS } from "../proxies/overpassEndpoints.mjs";
@@ -27,10 +27,10 @@ describe("overpassFailover helpers", () => {
     assert.notEqual(mapped.name, "AbortError");
   });
 
-  it("treats 500 as retryable alongside 429/502/503/504", () => {
-    assert.equal(isRetryableOverpassStatus(500), true);
-    assert.equal(isRetryableOverpassStatus(429), true);
-    assert.equal(isRetryableOverpassStatus(400), false);
+  it("treats 500 as timeout-like alongside 429/502/503/504", () => {
+    assert.equal(isTimeoutLikeOverpassStatus(500), true);
+    assert.equal(isTimeoutLikeOverpassStatus(429), true);
+    assert.equal(isTimeoutLikeOverpassStatus(400), false);
   });
 });
 
@@ -43,7 +43,9 @@ describe("fetchOverpassWithFailover", () => {
   });
 
   it("all endpoints AbortError → throws Overpass timed out.", async () => {
+    let calls = 0;
     globalThis.fetch = async () => {
+      calls += 1;
       throw abortError();
     };
 
@@ -55,6 +57,7 @@ describe("fetchOverpassWithFailover", () => {
         return true;
       },
     );
+    assert.equal(calls, OVERPASS_ENDPOINTS.length);
   });
 
   it("504 then 200 → success", async () => {
@@ -88,7 +91,11 @@ describe("fetchOverpassWithFailover", () => {
   });
 
   it("400 on all endpoints → Overpass query failed.", async () => {
-    globalThis.fetch = async () => jsonResponse(400);
+    let calls = 0;
+    globalThis.fetch = async () => {
+      calls += 1;
+      return jsonResponse(400);
+    };
 
     await assert.rejects(
       () => fetchOverpassWithFailover("[out:json];out;"),
@@ -97,7 +104,6 @@ describe("fetchOverpassWithFailover", () => {
         return true;
       },
     );
-    // Exhausted every mirror before failing hard
-    assert.equal(OVERPASS_ENDPOINTS.length >= 1, true);
+    assert.equal(calls, OVERPASS_ENDPOINTS.length);
   });
 });

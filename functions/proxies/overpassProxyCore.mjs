@@ -22,7 +22,7 @@ function logCache(result, tier) {
   console.log(JSON.stringify({ type: "overpass_cache", result, tier }));
 }
 
-export function isAbortOrTimeoutError(error) {
+function isAbortOrTimeoutError(error) {
   return (
     (error instanceof Error && error.name === "AbortError") ||
     (typeof DOMException !== "undefined" &&
@@ -38,7 +38,7 @@ export function toOverpassUpstreamError(error) {
   return error instanceof Error ? error : new Error(String(error));
 }
 
-export function isRetryableOverpassStatus(status) {
+export function isTimeoutLikeOverpassStatus(status) {
   return (
     status === 408 ||
     status === 429 ||
@@ -76,14 +76,11 @@ export async function fetchOverpassWithFailover(query) {
       }
 
       logFailover({ endpoint, status: response.status });
-
-      if (isRetryableOverpassStatus(response.status)) {
-        lastError = new Error("Overpass timed out.");
-        continue;
-      }
-
-      lastError = new Error("Overpass query failed.");
-      // Non-retryable (e.g. 400) — try remaining mirrors; final throw keeps this message.
+      lastError = new Error(
+        isTimeoutLikeOverpassStatus(response.status)
+          ? "Overpass timed out."
+          : "Overpass query failed.",
+      );
       continue;
     } catch (error) {
       logFailover({
@@ -96,7 +93,7 @@ export async function fetchOverpassWithFailover(query) {
     }
   }
 
-  throw toOverpassUpstreamError(lastError ?? new Error("Overpass timed out."));
+  throw lastError ?? new Error("Overpass timed out.");
 }
 
 export async function fetchCachedOverpassQuery(query, tier = "free") {
