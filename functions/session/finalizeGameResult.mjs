@@ -16,7 +16,10 @@ export function shouldFinalizeGameResult(before, after) {
   const endedEarlyNewlySet =
     before?.gameOutcome !== "ended_early" && after.gameOutcome === "ended_early";
 
-  return foundConfirmedNewlySet || endedEarlyNewlySet;
+  const abandonedNewlySet =
+    before?.gameOutcome !== "abandoned" && after.gameOutcome === "abandoned";
+
+  return foundConfirmedNewlySet || endedEarlyNewlySet || abandonedNewlySet;
 }
 
 export function computeDurationMs(session, endedAtIso) {
