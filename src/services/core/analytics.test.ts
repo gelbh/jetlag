@@ -65,6 +65,15 @@ describe("scrubAnalyticsProperties", () => {
       }),
     ).toEqual({ tier: "free", tool: "radar" });
   });
+
+  it("scrubs forbidden keys inside arrays", () => {
+    expect(
+      scrubAnalyticsProperties({
+        metadata: [{ sessionCode: "ABCD", tool: "pin" }],
+      }),
+    ).toEqual({ metadata: [{ tool: "pin" }] });
+  });
+
 });
 
 describe("analytics facade", () => {

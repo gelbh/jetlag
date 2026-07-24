@@ -12,6 +12,34 @@ const optionalUrl = z
   .pipe(z.union([z.url(), z.literal("")]))
   .optional();
 
+/** CSP in public/_headers only allows PostHog EU origins. */
+const optionalPosthogHost = z
+  .union([z.string(), z.undefined()])
+  .transform((value) => (value ?? "").trim())
+  .pipe(
+    z.union([
+      z.literal(""),
+      z
+        .url()
+        .refine(
+          (value) => {
+            try {
+              const host = new URL(value).hostname;
+              return (
+                host === "eu.i.posthog.com" ||
+                host === "eu-assets.i.posthog.com" ||
+                (host.endsWith(".i.posthog.com") && host.startsWith("eu"))
+              );
+            } catch {
+              return false;
+            }
+          },
+          { message: "VITE_POSTHOG_HOST must be a PostHog EU origin" },
+        ),
+    ]),
+  )
+  .optional();
+
 const firebaseEnvSchema = z.object({
   VITE_FIREBASE_API_KEY: optionalNonEmptyString,
   VITE_FIREBASE_AUTH_DOMAIN: optionalNonEmptyString,
@@ -33,7 +61,7 @@ const clientEnvSchema = firebaseEnvSchema
     VITE_SENTRY_ENVIRONMENT: optionalNonEmptyString,
     VITE_SENTRY_RELEASE_DIST: optionalNonEmptyString,
     VITE_POSTHOG_KEY: optionalNonEmptyString,
-    VITE_POSTHOG_HOST: optionalUrl,
+    VITE_POSTHOG_HOST: optionalPosthogHost,
   })
   .superRefine((env, ctx) => {
     const firebaseFields = [

@@ -63,6 +63,16 @@ describe("parseClientEnv", () => {
     expect(env.VITE_POSTHOG_HOST).toBe("https://eu.i.posthog.com");
   });
 
+  it("rejects non-EU PostHog host", () => {
+    expect(() =>
+      parseClientEnv({
+        VITE_POSTHOG_KEY: "phc_test",
+        VITE_POSTHOG_HOST: "https://us.i.posthog.com",
+      }),
+    ).toThrow();
+  });
+
+
   it("rejects invalid proxy URLs", () => {
     expect(() =>
       parseClientEnv({

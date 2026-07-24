@@ -56,7 +56,16 @@ export function scrubAnalyticsProperties(
     if (FORBIDDEN_PROP_KEYS.has(key.toLowerCase())) {
       continue;
     }
-    if (value && typeof value === "object" && !Array.isArray(value)) {
+    if (Array.isArray(value)) {
+      scrubbed[key] = value.map((item) => {
+        if (item && typeof item === "object" && !Array.isArray(item)) {
+          return scrubAnalyticsProperties(item as Record<string, unknown>) ?? {};
+        }
+        return item;
+      });
+      continue;
+    }
+    if (value && typeof value === "object") {
       const nested = scrubAnalyticsProperties(value as Record<string, unknown>);
       if (nested && Object.keys(nested).length > 0) {
         scrubbed[key] = nested;
