@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ScreenHeader,
   screenHeaderShellClassName,
@@ -17,9 +17,47 @@ import { PremiumGateSection } from "./PremiumGateSection";
 import { SessionSettingsSection } from "./SessionSettingsSection";
 import { useCreateSession } from "./useCreateSession";
 
+const CREATE_MAP_PANE_CLASS =
+  "relative h-[33dvh] max-h-[36dvh] min-h-[28dvh] shrink-0";
+
 export function CreateSession() {
   const savePreset = useGamePresetStore((state) => state.savePreset);
   const session = useCreateSession();
+  const [mapReady, setMapReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const outerRaf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (cancelled) {
+          return;
+        }
+        const markReady = () => {
+          if (!cancelled) {
+            setMapReady(true);
+          }
+        };
+        if (typeof requestIdleCallback === "function") {
+          idleId = requestIdleCallback(markReady, { timeout: 500 });
+          return;
+        }
+        timeoutId = setTimeout(markReady, 0);
+      });
+    });
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(outerRaf);
+      if (idleId !== undefined && typeof cancelIdleCallback === "function") {
+        cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, []);
 
   const handlePresetSelect = useCallback(
     (presetId: string) => {
@@ -59,27 +97,34 @@ export function CreateSession() {
         <ScreenHeader backTo="/" backLabel="Back" placement="inline" />
       </div>
 
-      <CreateSessionMapPane
-        mapStyle={session.mapStyle}
-        onMapStyleChange={session.setMapStyle}
-        focusBounds={session.mapFocusBounds}
-        previewGameArea={session.mapPreviewGameArea ?? session.previewGameArea}
-        selectedGameSize={session.gameSize}
-        manualFramingActive={session.manualFramingActive}
-        framingMode={session.framing.framingMode}
-        circleCenter={session.framing.circleCenter}
-        circleRadiusMeters={session.framing.circleRadiusMeters}
-        polygonVertices={session.framing.polygonVertices}
-        onBoundsChange={session.framing.handleBoundsChange}
-        onUserViewportFramed={session.handleUserViewportFramed}
-        onMapClick={
-          session.manualFramingActive &&
-          (session.framing.framingMode === "circle" ||
-            session.framing.framingMode === "polygon")
-            ? session.framing.handleMapClick
-            : undefined
-        }
-      />
+      {mapReady ? (
+        <CreateSessionMapPane
+          mapStyle={session.mapStyle}
+          onMapStyleChange={session.setMapStyle}
+          focusBounds={session.mapFocusBounds}
+          previewGameArea={session.mapPreviewGameArea ?? session.previewGameArea}
+          selectedGameSize={session.gameSize}
+          manualFramingActive={session.manualFramingActive}
+          framingMode={session.framing.framingMode}
+          circleCenter={session.framing.circleCenter}
+          circleRadiusMeters={session.framing.circleRadiusMeters}
+          polygonVertices={session.framing.polygonVertices}
+          onBoundsChange={session.framing.handleBoundsChange}
+          onUserViewportFramed={session.handleUserViewportFramed}
+          onMapClick={
+            session.manualFramingActive &&
+            (session.framing.framingMode === "circle" ||
+              session.framing.framingMode === "polygon")
+              ? session.framing.handleMapClick
+              : undefined
+          }
+        />
+      ) : (
+        <div
+          className={`${CREATE_MAP_PANE_CLASS} bg-surface-raised`}
+          aria-hidden
+        />
+      )}
 
       <GameAreaFramingModal
         open={session.framingModalOpen}
@@ -132,6 +177,7 @@ export function CreateSession() {
             onAddCurrentArea={session.addCurrentArea}
             onBoundaryImport={(event) => void session.handleBoundaryImport(event)}
             onApplyPlace={session.applyPlace}
+            onRequestLocationBias={session.requestLocationBias}
             onTransitMetroChange={session.setTransitMetroOverride}
             settingsSlot={
               <SessionSettingsSection
