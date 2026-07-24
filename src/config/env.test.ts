@@ -47,18 +47,20 @@ describe("parseClientEnv", () => {
     ).toThrow(/Firebase environment variables must all be set or all omitted/);
   });
 
-  it("accepts optional proxy, Sentry, and GA4 vars", () => {
+  it("accepts optional proxy, Sentry, and PostHog vars", () => {
     const env = parseClientEnv({
       ...validFirebaseEnv,
       VITE_OVERPASS_PROXY_URL: "https://proxy.example/overpass",
       VITE_SENTRY_DSN: "https://examplePublicKey@o0.ingest.sentry.io/0",
       VITE_SENTRY_ENVIRONMENT: "production",
-      VITE_GA_MEASUREMENT_ID: "G-SLV9KPQEPD",
+      VITE_POSTHOG_KEY: "phc_test_key",
+      VITE_POSTHOG_HOST: "https://eu.i.posthog.com",
     });
 
     expect(env.VITE_OVERPASS_PROXY_URL).toBe("https://proxy.example/overpass");
     expect(env.VITE_SENTRY_ENVIRONMENT).toBe("production");
-    expect(env.VITE_GA_MEASUREMENT_ID).toBe("G-SLV9KPQEPD");
+    expect(env.VITE_POSTHOG_KEY).toBe("phc_test_key");
+    expect(env.VITE_POSTHOG_HOST).toBe("https://eu.i.posthog.com");
   });
 
   it("rejects invalid proxy URLs", () => {
