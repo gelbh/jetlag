@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.9.1";
+export const APP_VERSION = "0.9.2";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.9.2",
+    date: "2026-07-24",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Sessions: host Leave transfers host to another player, or ends the session when you are alone",
+          "Sessions: End session uses the server end path so join codes are freed",
+        ],
+      }
+    ],
+  },
   {
     version: "0.9.1",
     date: "2026-07-19",
