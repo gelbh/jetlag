@@ -37,6 +37,7 @@ describe("AnalyticsConsentBanner", () => {
     localStorage.clear();
     resetAnalyticsForTests();
     vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
   });
 
   afterEach(() => {

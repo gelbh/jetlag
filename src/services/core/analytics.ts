@@ -131,10 +131,11 @@ export function grantAnalyticsConsent(): void {
 
 export function denyAnalyticsConsent(): void {
   writeAnalyticsConsent("denied");
+  initialized = false;
 }
 
 export function trackPageView(path: string): void {
-  if (readAnalyticsConsent() !== "granted" || !initialized) {
+  if (!initialized) {
     return;
   }
 
@@ -146,7 +147,7 @@ export function track<E extends AnalyticsEventName>(
   event: E,
   props?: AnalyticsEventProps[E],
 ): void {
-  if (readAnalyticsConsent() !== "granted" || !initialized) {
+  if (!initialized) {
     return;
   }
 

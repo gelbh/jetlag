@@ -200,10 +200,14 @@ describe("analytics facade", () => {
     });
   });
 
-  it("does not capture when consent is denied even if initialized", () => {
-    writeAnalyticsConsent("denied");
-    resetAnalyticsForTests({ initialized: true });
+  it("deny clears initialized so capture stops", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+    initAnalytics();
+    expect(posthogInit).toHaveBeenCalledOnce();
 
+    denyAnalyticsConsent();
     trackPageView("/home");
     track(ANALYTICS_EVENTS.session_ended, {});
 

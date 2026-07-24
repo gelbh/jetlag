@@ -3,6 +3,7 @@ import { readAnalyticsConsent } from "../../domain/device/analyticsConsent";
 import {
   denyAnalyticsConsent,
   grantAnalyticsConsent,
+  shouldEnableAnalytics,
 } from "../../services/core/analytics";
 import { AppLink } from "../navigation/AppLink";
 import { HudBanner } from "./HudBanner";
@@ -10,7 +11,11 @@ import { HudBanner } from "./HudBanner";
 export function AnalyticsConsentBanner() {
   const [consent, setConsent] = useState(readAnalyticsConsent);
 
-  if (!import.meta.env.PROD || consent !== "unset") {
+  const analyticsUiEnabled = shouldEnableAnalytics({
+    prod: import.meta.env.PROD,
+    mode: import.meta.env.MODE,
+  });
+  if (!analyticsUiEnabled || consent !== "unset") {
     return null;
   }
 

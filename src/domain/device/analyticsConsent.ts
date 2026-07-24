@@ -1,13 +1,16 @@
 export type AnalyticsConsent = "unset" | "granted" | "denied";
 
+export type WritableAnalyticsConsent = Exclude<AnalyticsConsent, "unset">;
+
 export const ANALYTICS_CONSENT_KEY = "jl.analytics.consent";
 
-const VALUES = new Set<AnalyticsConsent>(["unset", "granted", "denied"]);
+const READ_VALUES = new Set<AnalyticsConsent>(["unset", "granted", "denied"]);
+const WRITE_VALUES = new Set<WritableAnalyticsConsent>(["granted", "denied"]);
 
 export function readAnalyticsConsent(): AnalyticsConsent {
   try {
     const raw = localStorage.getItem(ANALYTICS_CONSENT_KEY);
-    if (raw && VALUES.has(raw as AnalyticsConsent)) {
+    if (raw && READ_VALUES.has(raw as AnalyticsConsent)) {
       return raw as AnalyticsConsent;
     }
   } catch {
@@ -16,7 +19,10 @@ export function readAnalyticsConsent(): AnalyticsConsent {
   return "unset";
 }
 
-export function writeAnalyticsConsent(value: AnalyticsConsent): void {
+export function writeAnalyticsConsent(value: WritableAnalyticsConsent): void {
+  if (!WRITE_VALUES.has(value)) {
+    return;
+  }
   try {
     localStorage.setItem(ANALYTICS_CONSENT_KEY, value);
   } catch {
