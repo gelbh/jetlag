@@ -12,6 +12,13 @@ const mockCancelWalkingThermometersAndAnnounce = vi.hoisted(() =>
   vi.fn(async () => undefined),
 );
 const mockCaptureException = vi.hoisted(() => vi.fn());
+const mockLeaveHostSession = vi.hoisted(() =>
+  vi.fn(async (): Promise<
+    { action: "ended" } | { action: "promoted"; newHostUid: string }
+  > => ({ action: "ended" })),
+);
+const mockEndSession = vi.hoisted(() => vi.fn(async () => undefined));
+const mockEndRemoteSession = vi.hoisted(() => vi.fn(async () => undefined));
 
 vi.mock("../session/useSessionExit", () => ({
   useSessionExit: () => exitSession,
@@ -25,6 +32,11 @@ vi.mock("../../services/core/sentry", () => ({
   captureException: mockCaptureException,
 }));
 
+vi.mock("../../services/session/sessionLifecycle", () => ({
+  leaveHostSession: mockLeaveHostSession,
+  endSession: mockEndSession,
+}));
+
 vi.mock("../../services/firestore/firestoreAnnotations", async () => {
   const actual = await vi.importActual<
     typeof import("../../services/firestore/firestoreAnnotations")
@@ -32,6 +44,7 @@ vi.mock("../../services/firestore/firestoreAnnotations", async () => {
   return {
     ...actual,
     resetRemoteSession: mockResetRemoteSession,
+    endRemoteSession: mockEndRemoteSession,
   };
 });
 
@@ -102,6 +115,9 @@ describe("useMapSessionChrome", () => {
     mockResetRemoteSession.mockClear();
     mockCancelWalkingThermometersAndAnnounce.mockClear();
     mockCaptureException.mockClear();
+    mockLeaveHostSession.mockClear();
+    mockEndSession.mockClear();
+    mockEndRemoteSession.mockClear();
   });
 
   it("does not clear the map while end game is active", () => {
@@ -272,6 +288,10 @@ describe("useMapSessionChrome", () => {
       await result.current.handleLeaveSession();
     });
 
+    expect(window.confirm).toHaveBeenCalledWith(
+      "You're the only player. Leaving will end this session.",
+    );
+    expect(mockLeaveHostSession).toHaveBeenCalledWith("session-remote");
     expect(mockCancelWalkingThermometersAndAnnounce).toHaveBeenCalledWith(
       "session-remote",
       ["pq-walk"],
@@ -320,9 +340,75 @@ describe("useMapSessionChrome", () => {
       await result.current.handleLeaveSession();
     });
 
+    expect(mockLeaveHostSession).toHaveBeenCalledWith("session-remote");
     expect(mockCaptureException).toHaveBeenCalledWith(cancelError);
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
     );
+  });
+
+  it("calls endSession callable when host ends the session", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: remoteSession,
+        isHost: true,
+        annotations: [],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleEndSession();
+    });
+
+    expect(mockEndSession).toHaveBeenCalledWith("session-remote");
+    expect(exitSession).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: "end", sessionId: "session-remote" }),
+    );
+  });
+
+  it("confirms promote copy when host leave has another player", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    mockLeaveHostSession.mockResolvedValueOnce({
+      action: "promoted",
+      newHostUid: "seeker-2",
+    });
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: {
+          ...remoteSession,
+          memberUids: ["host-1", "seeker-2"],
+          memberRoles: {
+            "host-1": "seeker",
+            "seeker-2": "seeker",
+          },
+        },
+        isHost: true,
+        annotations: [],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleLeaveSession();
+    });
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      "Another player will become host so others can keep playing. Leave anyway?",
+    );
+    expect(mockLeaveHostSession).toHaveBeenCalledWith("session-remote");
   });
 });
