@@ -17,6 +17,13 @@ export function toolLabel(toolType) {
   return TOOL_LABELS[toolType] ?? "Question";
 }
 
+function opsToolLabel(tool) {
+  if (typeof tool !== "string" || tool.length === 0) {
+    return "session change";
+  }
+  return tool.replaceAll("_", " ");
+}
+
 export function shouldNotifyForPreference(preferences, eventType) {
   if (!preferences?.enabled) {
     return false;
@@ -31,6 +38,8 @@ export function shouldNotifyForPreference(preferences, eventType) {
       return preferences.timerChanges !== false;
     case "chat_message":
       return preferences.chatMessages === true;
+    case "incident_host_confirm":
+      return preferences.incidentHostConfirm !== false;
     default:
       return false;
   }
@@ -47,6 +56,9 @@ export function targetRolesForEvent(eventType) {
       return ["seeker", "hider"];
     case "chat_message":
       return ["seeker", "hider"];
+    case "incident_host_confirm":
+      // Host-targeted via `targetUid` — not role-based.
+      return [];
     default:
       return [];
   }
@@ -102,6 +114,18 @@ export function buildNotificationPayload(eventType, context) {
           sessionId: context.sessionId,
         },
       };
+    case "incident_host_confirm":
+      return {
+        title: "Host confirmation needed",
+        body: `Approve ${opsToolLabel(context.tool)}? Open Jet Lag to confirm.`,
+        data: {
+          event: eventType,
+          sessionId: context.sessionId,
+          incidentId: context.incidentId,
+          confirmId: context.confirmId,
+          tool: typeof context.tool === "string" ? context.tool : "",
+        },
+      };
     default:
       return null;
   }
@@ -109,6 +133,10 @@ export function buildNotificationPayload(eventType, context) {
 
 export function selectDeviceTokens(devices, input) {
   const roles = new Set(targetRolesForEvent(input.eventType));
+  const targetUid =
+    typeof input.targetUid === "string" && input.targetUid.length > 0
+      ? input.targetUid
+      : null;
   const tokens = [];
 
   for (const [uid, device] of Object.entries(devices)) {
@@ -116,7 +144,11 @@ export function selectDeviceTokens(devices, input) {
       continue;
     }
 
-    if (!roles.has(device.role)) {
+    if (targetUid) {
+      if (uid !== targetUid) {
+        continue;
+      }
+    } else if (!roles.has(device.role)) {
       continue;
     }
 

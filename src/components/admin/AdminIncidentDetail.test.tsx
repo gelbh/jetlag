@@ -126,6 +126,32 @@ vi.mock("../../hooks/incident/useIncidentThread", () => ({
   }),
 }));
 
+vi.mock("../../hooks/incident/useSupportThread", () => ({
+  useSupportThread: () => ({
+    incident: null,
+    messages: [],
+    error: null,
+    sending: false,
+    summonId: null,
+    sendTurn: vi.fn(),
+  }),
+}));
+
+vi.mock("../../hooks/incident/useHotfixThread", () => ({
+  useHotfixThread: () => ({
+    messages: [],
+    error: null,
+  }),
+}));
+
+vi.mock("../../hooks/incident/usePendingHostConfirm", () => ({
+  usePendingHostConfirm: () => ({
+    pending: null,
+    confirms: [],
+    error: null,
+  }),
+}));
+
 function stubMatchMedia(matches: boolean) {
   Object.defineProperty(window, "matchMedia", {
     writable: true,
@@ -200,7 +226,7 @@ describe("AdminIncidentDetail", () => {
     ).toBeInTheDocument();
   });
 
-  it("switches to diagnostics and timeline tabs", () => {
+  it("switches to support, hotfix, diagnostics, and timeline tabs", () => {
     renderWithRouter(
       <AdminIncidentDetail
         incidentId="inc-abc12345"
@@ -217,6 +243,12 @@ describe("AdminIncidentDetail", () => {
         messagesOverride={[]}
       />,
     );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Support" }));
+    expect(screen.getByTestId("support-agent-chat")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Hotfix" }));
+    expect(screen.getByTestId("admin-hotfix-thread")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("tab", { name: "Diagnostics" }));
     expect(screen.getByText("App version")).toBeInTheDocument();

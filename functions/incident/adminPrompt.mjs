@@ -1,7 +1,7 @@
 /**
  * Server mirror of src/domain/incident/adminPrompt.ts. Builds the frozen
- * markdown block pinned for the admin desk (problem + diagnostics). No triage /
- * coding-agent launch in v1 — that is a follow-up concern.
+ * markdown block pinned for the admin desk (problem + diagnostics). Clear-bug
+ * Cursor launch uses this as structured summary input (never raw chat).
  */
 
 const EMPTY = "—";

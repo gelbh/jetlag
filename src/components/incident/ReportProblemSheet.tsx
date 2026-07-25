@@ -17,7 +17,10 @@ import { useSessionStore } from "../../state/sessionStore";
 import { MotionSheet } from "../motion/MotionSheet";
 import { SheetHeader } from "../ui/SheetHeader";
 import { IncidentChatPanel } from "./IncidentChatPanel";
+import { SupportAgentChat } from "./SupportAgentChat";
 import "./ReportProblemSheet.css";
+
+type PostReportTab = "agent" | "chat";
 
 export interface ReportProblemSheetProps {
   open: boolean;
@@ -131,6 +134,7 @@ function ReportProblemSheetContent({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [incidentId, setIncidentId] = useState<string | null>(null);
+  const [postReportTab, setPostReportTab] = useState<PostReportTab>("agent");
 
   const diagnosticsPreview = useMemo(() => {
     const uid =
@@ -193,7 +197,40 @@ function ReportProblemSheetContent({
   };
 
   if (incidentId) {
-    return <IncidentChatPanel incidentId={incidentId} onClose={handleClose} />;
+    return (
+      <div className="jl-report-sheet jl-report-post" data-testid="report-post">
+        <div
+          className="jl-report-post-tabs"
+          role="tablist"
+          aria-label="After report"
+        >
+          {(
+            [
+              ["agent", "Fix agent"],
+              ["chat", "Support chat"],
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={postReportTab === id}
+              className={`jl-report-post-tab${
+                postReportTab === id ? " jl-report-post-tab--active" : ""
+              }`}
+              onClick={() => setPostReportTab(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {postReportTab === "agent" ? (
+          <SupportAgentChat incidentId={incidentId} onClose={handleClose} />
+        ) : (
+          <IncidentChatPanel incidentId={incidentId} onClose={handleClose} />
+        )}
+      </div>
+    );
   }
 
   return (

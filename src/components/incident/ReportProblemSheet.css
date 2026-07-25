@@ -189,3 +189,35 @@
   font-size: 0.8125rem;
   color: var(--color-ink-dim);
 }
+
+.jl-report-post {
+  min-height: 0;
+  flex: 1;
+}
+
+.jl-report-post-tabs {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.125rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.375rem;
+}
+
+.jl-report-post-tab {
+  min-height: 2.75rem;
+  flex: 1;
+  border-radius: var(--radius-hud-md);
+  padding: 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.jl-report-post-tab--active {
+  background: var(--color-action);
+  color: var(--color-action-ink);
+}

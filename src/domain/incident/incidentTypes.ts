@@ -110,6 +110,10 @@ export interface IncidentRecord {
   email?: IncidentEmailState;
   mitigations?: IncidentMitigationRecord[];
   hotfix?: IncidentHotfixState;
+  /** Active session-ops summon id when a fix agent is running. */
+  activeSessionOpsSummonId?: string | null;
+  /** Summons consumed on this incident (free/premium capped). */
+  sessionOpsSummonCount?: number;
 }
 
 export interface IncidentMessageRecord {
@@ -120,6 +124,31 @@ export interface IncidentMessageRecord {
   createdAt: string;
   text: string;
   kind: IncidentMessageKind;
+}
+
+export type HostConfirmStatus =
+  | "pending"
+  | "approved"
+  | "denied"
+  | "expired";
+
+export interface HostConfirmRecord {
+  id: string;
+  incidentId: string;
+  sessionId: string;
+  tool: string;
+  args: Record<string, unknown>;
+  argsHash: string;
+  status: HostConfirmStatus;
+  hostUid: string;
+  requestedByUid: string | null;
+  createdAt: string;
+  expiresAt: string;
+  approvedAt?: string;
+  approvedByUid?: string;
+  deniedAt?: string;
+  deniedByUid?: string;
+  executedAt?: string;
 }
 
 export function isIncidentStatus(value: unknown): value is IncidentStatus {

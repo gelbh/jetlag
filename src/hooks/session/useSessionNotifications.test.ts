@@ -43,6 +43,7 @@ describe("useSessionNotifications", () => {
       newQuestions: true,
       timerChanges: true,
       chatMessages: false,
+      incidentHostConfirm: true,
       liveActivities: true,
     });
 
@@ -86,6 +87,7 @@ describe("useSessionNotifications", () => {
       newQuestions: true,
       timerChanges: true,
       chatMessages: false,
+      incidentHostConfirm: true,
       liveActivities: true,
     });
 

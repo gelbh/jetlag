@@ -9,8 +9,15 @@ import {
   incidentStatusChipTone,
 } from "../../services/admin/adminIncidents";
 import { useIncidentThread } from "../../hooks/incident/useIncidentThread";
+import { SupportAgentChat } from "../incident/SupportAgentChat";
+import { AdminHotfixThread } from "./AdminHotfixThread";
 
-export type AdminIncidentDetailTab = "chat" | "diagnostics" | "timeline";
+export type AdminIncidentDetailTab =
+  | "chat"
+  | "support"
+  | "hotfix"
+  | "diagnostics"
+  | "timeline";
 
 export interface AdminIncidentDetailProps {
   incidentId: string | null;
@@ -224,6 +231,8 @@ function AdminIncidentDetailBody({
         {(
           [
             ["chat", "Chat"],
+            ["support", "Support"],
+            ["hotfix", "Hotfix"],
             ["diagnostics", "Diagnostics"],
             ["timeline", "Timeline"],
           ] as const
@@ -315,6 +324,14 @@ function AdminIncidentDetailBody({
               </div>
             </div>
           </>
+        ) : null}
+
+        {tab === "support" ? (
+          <SupportAgentChat incidentId={incidentId} variant="admin" />
+        ) : null}
+
+        {tab === "hotfix" ? (
+          <AdminHotfixThread incidentId={incidentId} />
         ) : null}
 
         {tab === "diagnostics" ? (

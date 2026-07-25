@@ -7,6 +7,8 @@ export interface NotificationPreferences {
   newQuestions: boolean;
   timerChanges: boolean;
   chatMessages: boolean;
+  /** Host-only: destructive session-ops agent actions awaiting confirm. */
+  incidentHostConfirm: boolean;
   liveActivities: boolean;
 }
 
@@ -15,6 +17,7 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   newQuestions: true,
   timerChanges: true,
   chatMessages: false,
+  incidentHostConfirm: true,
   liveActivities: true,
 };
 
@@ -32,4 +35,5 @@ export type SessionNotificationEvent =
   | "question_answered"
   | "question_deadline_expired"
   | "timer_changed"
-  | "chat_message";
+  | "chat_message"
+  | "incident_host_confirm";

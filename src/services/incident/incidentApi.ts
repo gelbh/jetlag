@@ -146,3 +146,91 @@ export async function publishIncidentHotfix(
     throw mapCallableError(error, "Could not publish the hotfix.");
   }
 }
+
+export interface ApproveHostConfirmResult {
+  confirmId: string;
+  status: "approved";
+  tool: string;
+  result: unknown;
+}
+
+export async function approveHostConfirm(
+  incidentId: string,
+  confirmId: string,
+): Promise<ApproveHostConfirmResult> {
+  requireFirebase();
+
+  const functions = await getFirebaseFunctions();
+  const callable = httpsCallable<
+    { incidentId: string; confirmId: string },
+    ApproveHostConfirmResult
+  >(functions, "approveHostConfirm");
+
+  try {
+    const result = await callable({ incidentId, confirmId });
+    return result.data;
+  } catch (error) {
+    throw mapCallableError(error, "Could not approve the session change.");
+  }
+}
+
+export interface DenyHostConfirmResult {
+  confirmId: string;
+  status: "denied";
+}
+
+export async function denyHostConfirm(
+  incidentId: string,
+  confirmId: string,
+): Promise<DenyHostConfirmResult> {
+  requireFirebase();
+
+  const functions = await getFirebaseFunctions();
+  const callable = httpsCallable<
+    { incidentId: string; confirmId: string },
+    DenyHostConfirmResult
+  >(functions, "denyHostConfirm");
+
+  try {
+    const result = await callable({ incidentId, confirmId });
+    return result.data;
+  } catch (error) {
+    throw mapCallableError(error, "Could not deny the confirmation.");
+  }
+}
+
+export interface PostSupportAgentTurnResult {
+  summonId: string;
+  assistantMessageId: string | null;
+  content: string;
+  toolOutcomes: unknown[];
+}
+
+/**
+ * Player/host/admin turn against the session-ops support agent.
+ * First call without an active summon consumes a summon cap.
+ */
+export async function postSupportAgentTurn(
+  incidentId: string,
+  text: string,
+  summonId?: string | null,
+): Promise<PostSupportAgentTurnResult> {
+  requireFirebase();
+
+  const functions = await getFirebaseFunctions();
+  const callable = httpsCallable<
+    { incidentId: string; text: string; summonId?: string | null },
+    PostSupportAgentTurnResult
+  >(functions, "postSupportAgentTurn");
+
+  try {
+    const result = await callable({
+      incidentId,
+      text,
+      ...(summonId ? { summonId } : {}),
+    });
+    return result.data;
+  } catch (error) {
+    throw mapCallableError(error, "Could not reach the fix agent.");
+  }
+}

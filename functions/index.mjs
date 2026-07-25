@@ -37,8 +37,11 @@ export { claimUsername, profileFriends } from "./handlers/profile.mjs";
 
 export {
   applyIncidentMitigation,
+  approveHostConfirm,
   createIncident,
+  denyHostConfirm,
   postIncidentMessage,
+  postSupportAgentTurn,
   publishIncidentHotfix,
 } from "./handlers/incident.mjs";
 
