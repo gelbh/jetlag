@@ -96,7 +96,7 @@ describe("handleIncidentEmailRequest", () => {
     expect(sent.subject).toBe("Incident");
   });
 
-  it("defaults the recipient to the request `to` when provided", async () => {
+  it("ignores request `to` and always uses env admin email", async () => {
     const fetchImpl = vi.fn(async () =>
       new Response(JSON.stringify({ id: "email-9" }), { status: 200 }),
     );
@@ -108,7 +108,7 @@ describe("handleIncidentEmailRequest", () => {
     const sent = JSON.parse(
       (fetchImpl.mock.calls[0][1] as RequestInit).body as string,
     );
-    expect(sent.to).toEqual(["other@example.com"]);
+    expect(sent.to).toEqual(["admin@example.com"]);
   });
 
   it("returns 502 when Resend rejects the request", async () => {

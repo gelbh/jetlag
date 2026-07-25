@@ -131,7 +131,7 @@ test("createIncidentHandler still creates the incident when email fails", async 
     baseInput(),
     baseDeps({
       sendEmail: async () => {
-        throw new Error("INCIDENT_EMAIL_FAILED:502");
+        throw new Error("INCIDENT_EMAIL_MISCONFIGURED:secret");
       },
     }),
   );
@@ -139,7 +139,31 @@ test("createIncidentHandler still creates the incident when email fails", async 
   assert.equal(result.incidentId, "id-1");
   const incident = db._incidents.get("id-1");
   assert.equal(incident.status, "open");
-  assert.equal(incident.email.error, "INCIDENT_EMAIL_FAILED:502");
+  // Client-visible field stays generic; secrets must not leak.
+  assert.equal(incident.email.error, "email_failed");
+});
+
+test("createIncidentHandler strips unknown top-level diagnostics keys", async () => {
+  const db = mockDb();
+  await createIncidentHandler(
+    db,
+    baseInput({
+      diagnostics: {
+        appVersion: "0.9.5",
+        route: "/map",
+        sessionId: "sess-1",
+        sessionCode: "ABCD",
+        evilPayload: { token: "secret" },
+        nestedLeak: "nope",
+      },
+    }),
+    baseDeps(),
+  );
+
+  const incident = db._incidents.get("id-1");
+  assert.equal(incident.diagnostics.appVersion, "0.9.5");
+  assert.equal(incident.diagnostics.evilPayload, undefined);
+  assert.equal(incident.diagnostics.nestedLeak, undefined);
 });
 
 test("createIncidentHandler enforces the rate limit", async () => {

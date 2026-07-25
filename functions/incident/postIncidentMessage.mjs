@@ -1,4 +1,9 @@
 import { randomUUID } from "node:crypto";
+import { INCIDENT_RATE_LIMITED } from "./createIncident.mjs";
+
+export const POST_INCIDENT_MESSAGE_ROUTE = "postIncidentMessage";
+export const POST_INCIDENT_MESSAGE_RATE_LIMIT = 30;
+export const POST_INCIDENT_MESSAGE_RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 
 export const INCIDENT_MESSAGE_MAX_LENGTH = 2000;
 
@@ -12,7 +17,7 @@ export const INCIDENT_INVALID_MESSAGE = "INCIDENT_INVALID_MESSAGE";
  *
  * @param db Firestore instance (admin SDK or compatible mock).
  * @param input { incidentId, uid, isAdmin, text }
- * @param deps { now, generateId }
+ * @param deps { now, generateId, rateLimit }
  */
 export async function postIncidentMessageHandler(db, input, deps = {}) {
   const { incidentId, uid, isAdmin } = input;
@@ -26,6 +31,18 @@ export async function postIncidentMessageHandler(db, input, deps = {}) {
   const text = typeof input.text === "string" ? input.text.trim() : "";
   if (text.length === 0 || text.length > INCIDENT_MESSAGE_MAX_LENGTH) {
     throw new Error(INCIDENT_INVALID_MESSAGE);
+  }
+
+  if (typeof deps.rateLimit === "function") {
+    const rl = await deps.rateLimit({
+      route: POST_INCIDENT_MESSAGE_ROUTE,
+      uid,
+      limit: POST_INCIDENT_MESSAGE_RATE_LIMIT,
+      windowMs: POST_INCIDENT_MESSAGE_RATE_LIMIT_WINDOW_MS,
+    });
+    if (!rl?.allowed) {
+      throw new Error(INCIDENT_RATE_LIMITED);
+    }
   }
 
   const now = deps.now ?? (() => new Date());

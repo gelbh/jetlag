@@ -57,6 +57,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     null,
   );
   const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
+  const lastSoftReloadMitigationIdRef = useRef<string | null>(null);
   const location = useLocation();
   const session = useSessionStore((state) => state.session);
 
@@ -66,9 +67,6 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     session,
     pathname: location.pathname,
   });
-
-  // TODO(Task 8 UI): Honor session.opsMitigation.type === "soft_reload" with a
-  // one-shot soft-reload chip/prompt (no board wipe). No client pattern yet.
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
@@ -104,6 +102,22 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     graceSeconds,
     reload: applyHotfixReload,
   });
+
+  // Honor admin soft_reload mitigations once per mitigation id.
+  useEffect(() => {
+    const mitigation = session?.opsMitigation;
+    if (!mitigation || mitigation.type !== "soft_reload") {
+      return;
+    }
+    if (lastSoftReloadMitigationIdRef.current === mitigation.id) {
+      return;
+    }
+    lastSoftReloadMitigationIdRef.current = mitigation.id;
+    void applyServiceWorkerUpdate(
+      registrationRef.current,
+      updateSW ?? undefined,
+    );
+  }, [session?.opsMitigation, updateSW]);
 
   useEffect(() => {
     if (import.meta.env.DEV) {

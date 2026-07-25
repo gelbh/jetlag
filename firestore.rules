@@ -267,6 +267,11 @@ service cloud.firestore {
           !('hostAppVersion' in request.resource.data)
           || request.resource.data.hostAppVersion is string
         )
+        // Server-only ops/hotfix fields — clients must not seed these on create.
+        && !('requiredMinAppVersion' in request.resource.data)
+        && !('requiredMinAppVersionSetAt' in request.resource.data)
+        && !('requiredMinAppVersionGraceSeconds' in request.resource.data)
+        && !('opsMitigation' in request.resource.data)
         && (
           request.resource.data.tier == 'free'
           || hasHostAccess()

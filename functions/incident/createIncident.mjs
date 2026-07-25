@@ -12,6 +12,27 @@ export const INCIDENT_PAYLOAD_TOO_LARGE = "INCIDENT_PAYLOAD_TOO_LARGE";
 export const INCIDENT_RATE_LIMITED = "INCIDENT_RATE_LIMITED";
 export const INCIDENT_UNAUTHENTICATED = "INCIDENT_UNAUTHENTICATED";
 
+/** Client-visible email failure code (details stay server-side in logs). */
+export const INCIDENT_EMAIL_FAILED_CODE = "email_failed";
+
+/** Top-level IncidentDiagnostics keys allowed into Firestore. */
+const DIAGNOSTICS_ALLOWED_KEYS = [
+  "appVersion",
+  "route",
+  "sessionId",
+  "sessionCode",
+  "playerRole",
+  "uid",
+  "userAgent",
+  "platform",
+  "online",
+  "visibilityState",
+  "lastClientErrors",
+  "recentOps",
+  "mapViewport",
+  "reportedAt",
+];
+
 function clampNote(note) {
   if (typeof note !== "string") {
     return null;
@@ -40,6 +61,17 @@ function assertValidDiagnostics(diagnostics) {
   }
 }
 
+/** Strip unknown top-level diagnostics keys before persistence. */
+function sanitizeDiagnostics(diagnostics) {
+  const out = {};
+  for (const key of DIAGNOSTICS_ALLOWED_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(diagnostics, key)) {
+      out[key] = diagnostics[key];
+    }
+  }
+  return out;
+}
+
 function nullableString(value) {
   return typeof value === "string" && value.length > 0 ? value : null;
 }
@@ -62,6 +94,7 @@ export async function createIncidentHandler(db, input, deps) {
 
   const { diagnostics } = input;
   assertValidDiagnostics(diagnostics);
+  const safeDiagnostics = sanitizeDiagnostics(diagnostics);
 
   const rateLimit = deps.rateLimit;
   const now = deps.now ?? (() => new Date());
@@ -82,15 +115,15 @@ export async function createIncidentHandler(db, input, deps) {
   const nowIso = now().toISOString();
   const status = "open";
   const playerNote = clampNote(input.playerNote);
-  const sessionId = nullableString(diagnostics.sessionId);
-  const sessionCode = nullableString(diagnostics.sessionCode);
+  const sessionId = nullableString(safeDiagnostics.sessionId);
+  const sessionCode = nullableString(safeDiagnostics.sessionCode);
   const reporterRole = nullableString(input.reporterRole);
 
   const adminPrompt = buildAdminPrompt({
     incidentId,
     status,
     playerNote,
-    diagnostics,
+    diagnostics: safeDiagnostics,
   });
 
   const incidentRef = db.collection("incidents").doc(incidentId);
@@ -103,7 +136,7 @@ export async function createIncidentHandler(db, input, deps) {
     reporterUid: uid,
     reporterRole,
     playerNote,
-    diagnostics,
+    diagnostics: safeDiagnostics,
     adminPrompt,
     email: {},
   });
@@ -132,9 +165,9 @@ export async function createIncidentHandler(db, input, deps) {
         messageId: result?.messageId ?? null,
       };
     } catch (error) {
-      email = {
-        error: error instanceof Error ? error.message : "email_failed",
-      };
+      const detail = error instanceof Error ? error.message : String(error);
+      console.warn("[createIncident] email failed:", detail);
+      email = { error: INCIDENT_EMAIL_FAILED_CODE };
     }
     await incidentRef.update({ email, updatedAt: now().toISOString() });
   }

@@ -30,6 +30,7 @@ import {
   applyIncidentMitigationHandler,
   INCIDENT_INVALID_MITIGATION,
   INCIDENT_NO_SESSION,
+  INCIDENT_REPORTER_NOT_MEMBER,
 } from "../incident/applyIncidentMitigation.mjs";
 import {
   INCIDENT_HOTFIX_VERSION_TOO_LOW,
@@ -74,6 +75,11 @@ function mapIncidentError(error) {
       throw new HttpsError(
         "failed-precondition",
         "Incident has no linked session.",
+      );
+    case INCIDENT_REPORTER_NOT_MEMBER:
+      throw new HttpsError(
+        "failed-precondition",
+        "Incident reporter is not a member of the linked session.",
       );
     case INCIDENT_INVALID_HOTFIX_VERSION:
       throw new HttpsError(
@@ -140,12 +146,18 @@ export const postIncidentMessage = onCall(
 
     const db = getFirestore();
     try {
-      return await postIncidentMessageHandler(db, {
-        incidentId: request.data?.incidentId,
-        uid: request.auth.uid,
-        isAdmin: isAdminAuth(request.auth),
-        text: request.data?.text,
-      });
+      return await postIncidentMessageHandler(
+        db,
+        {
+          incidentId: request.data?.incidentId,
+          uid: request.auth.uid,
+          isAdmin: isAdminAuth(request.auth),
+          text: request.data?.text,
+        },
+        {
+          rateLimit: (options) => consumeRateLimit(db, options),
+        },
+      );
     } catch (error) {
       mapIncidentError(error);
     }

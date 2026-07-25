@@ -128,6 +128,60 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("denies client-supplied server-only ops fields on session create", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await assertFails(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-ops-version")
+        .set(
+          sessionPayload("host-1", {
+            requiredMinAppVersion: "9.9.9.9",
+          }),
+        ),
+    );
+    await assertFails(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-ops-set-at")
+        .set(
+          sessionPayload("host-1", {
+            requiredMinAppVersionSetAt: "2026-01-01T00:00:00.000Z",
+          }),
+        ),
+    );
+    await assertFails(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-ops-grace")
+        .set(
+          sessionPayload("host-1", {
+            requiredMinAppVersionGraceSeconds: 30,
+          }),
+        ),
+    );
+    await assertFails(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-ops-mitigation")
+        .set(
+          sessionPayload("host-1", {
+            opsMitigation: {
+              id: "m1",
+              type: "soft_reload",
+              appliedAt: "2026-01-01T00:00:00.000Z",
+              appliedByUid: "admin-1",
+              incidentId: "inc-1",
+            },
+          }),
+        ),
+    );
+  });
+
   it("allows signed-in users to look up session codes without reading session docs", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

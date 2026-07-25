@@ -11,6 +11,7 @@ export const INCIDENT_MITIGATION_TYPES = new Set([
 
 export const INCIDENT_INVALID_MITIGATION = "INCIDENT_INVALID_MITIGATION";
 export const INCIDENT_NO_SESSION = "INCIDENT_NO_SESSION";
+export const INCIDENT_REPORTER_NOT_MEMBER = "INCIDENT_REPORTER_NOT_MEMBER";
 
 const MITIGATION_LABELS = {
   soft_reload: "Requested a soft reload",
@@ -59,6 +60,22 @@ export async function applyIncidentMitigationHandler(db, input, deps = {}) {
     throw new Error(INCIDENT_NO_SESSION);
   }
 
+  const sessionSnap = await db.collection("sessions").doc(sessionId).get();
+  if (!sessionSnap.exists) {
+    throw new Error(INCIDENT_NO_SESSION);
+  }
+
+  const session = sessionSnap.data() ?? {};
+  const reporterUid = incident.reporterUid;
+  if (typeof reporterUid === "string" && reporterUid.length > 0) {
+    const memberUids = Array.isArray(session.memberUids)
+      ? session.memberUids
+      : [];
+    if (!memberUids.includes(reporterUid)) {
+      throw new Error(INCIDENT_REPORTER_NOT_MEMBER);
+    }
+  }
+
   const nowIso = now().toISOString();
   const mitigationId = generateId();
   const note = typeof input.note === "string" ? input.note.trim() : "";
@@ -83,10 +100,7 @@ export async function applyIncidentMitigationHandler(db, input, deps = {}) {
   if (note) {
     opsMitigation.note = note;
   }
-  await db
-    .collection("sessions")
-    .doc(sessionId)
-    .update({ opsMitigation });
+  await db.collection("sessions").doc(sessionId).update({ opsMitigation });
 
   await incidentRef.collection("messages").doc(generateId()).set({
     sender: "system",

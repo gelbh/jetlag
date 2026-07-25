@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { HttpsError } from "firebase-functions/v2/https";
 import { requireAdminAuth } from "../admin/adminAccess.mjs";
+import { INCIDENT_RATE_LIMITED } from "../incident/createIncident.mjs";
 import {
   INCIDENT_FORBIDDEN,
   postIncidentMessageHandler,
@@ -9,6 +10,8 @@ import {
 import {
   applyIncidentMitigationHandler,
   INCIDENT_INVALID_MITIGATION,
+  INCIDENT_NO_SESSION,
+  INCIDENT_REPORTER_NOT_MEMBER,
 } from "../incident/applyIncidentMitigation.mjs";
 import {
   compareAppVersions,
@@ -38,7 +41,10 @@ function mockOpsDb({
     sessionId: "sess-1",
     diagnostics: { appVersion: "0.9.5" },
   },
-  sessions = { "sess-1": { status: "active" }, "sess-2": { status: "active" } },
+  sessions = {
+    "sess-1": { status: "active", memberUids: ["reporter-1"] },
+    "sess-2": { status: "active", memberUids: ["reporter-1"] },
+  },
   activeCodes = {
     ABCD: { status: "active", sessionId: "sess-1" },
     EFGH: { status: "active", sessionId: "sess-2" },
@@ -242,6 +248,26 @@ test("postIncidentMessageHandler forbids non-reporter non-admin", async () => {
   );
 });
 
+test("postIncidentMessageHandler enforces the rate limit", async () => {
+  const db = mockOpsDb();
+  await assert.rejects(
+    postIncidentMessageHandler(
+      db,
+      {
+        incidentId: "inc-1",
+        uid: "reporter-1",
+        isAdmin: false,
+        text: "still broken",
+      },
+      baseDeps({
+        rateLimit: async () => ({ allowed: false, retryAfterMs: 1000 }),
+      }),
+    ),
+    (error) => error.message === INCIDENT_RATE_LIMITED,
+  );
+  assert.equal(db._messages.length, 0);
+});
+
 test("applyIncidentMitigationHandler soft_reload writes session opsMitigation", async () => {
   const db = mockOpsDb();
   const result = await applyIncidentMitigationHandler(
@@ -296,6 +322,45 @@ test("applyIncidentMitigationHandler rejects unknown type", async () => {
       baseDeps(),
     ),
     (error) => error.message === INCIDENT_INVALID_MITIGATION,
+  );
+});
+
+test("applyIncidentMitigationHandler rejects missing session doc", async () => {
+  const db = mockOpsDb({
+    incident: {
+      status: "open",
+      reporterUid: "reporter-1",
+      sessionId: "missing-sess",
+    },
+    sessions: {},
+  });
+  await assert.rejects(
+    applyIncidentMitigationHandler(
+      db,
+      { incidentId: "inc-1", type: "soft_reload", uid: "admin-1" },
+      baseDeps(),
+    ),
+    (error) => error.message === INCIDENT_NO_SESSION,
+  );
+});
+
+test("applyIncidentMitigationHandler rejects reporter not in session members", async () => {
+  const db = mockOpsDb({
+    sessions: {
+      "sess-1": { status: "active", memberUids: ["other-player"] },
+    },
+  });
+  await assert.rejects(
+    applyIncidentMitigationHandler(
+      db,
+      { incidentId: "inc-1", type: "reset_board", uid: "admin-1" },
+      baseDeps({
+        moderate: async () => {
+          throw new Error("should not moderate");
+        },
+      }),
+    ),
+    (error) => error.message === INCIDENT_REPORTER_NOT_MEMBER,
   );
 });
 

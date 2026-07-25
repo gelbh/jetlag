@@ -54,9 +54,7 @@ function parseBody(value: unknown): IncidentEmailRequestBody | null {
     return null;
   }
   const parsed: IncidentEmailRequestBody = { subject, text };
-  if (typeof record.to === "string" && record.to.length > 0) {
-    parsed.to = record.to;
-  }
+  // Ignore client-supplied `to` — recipient is always env/default (see below).
   if (typeof record.html === "string" && record.html.length > 0) {
     parsed.html = record.html;
   }
@@ -99,7 +97,8 @@ export async function handleIncidentEmailRequest(
     return jsonResponse(400, { error: "subject and text are required" });
   }
 
-  const to = body.to ?? env.INCIDENT_ADMIN_EMAIL ?? DEFAULT_INCIDENT_ADMIN_EMAIL;
+  // Never honor body.to — forged/misconfigured callers must not redirect mail.
+  const to = env.INCIDENT_ADMIN_EMAIL ?? DEFAULT_INCIDENT_ADMIN_EMAIL;
   const from = env.INCIDENT_EMAIL_FROM ?? DEFAULT_INCIDENT_EMAIL_FROM;
 
   const payload: Record<string, unknown> = {
