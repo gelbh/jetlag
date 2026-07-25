@@ -11,6 +11,10 @@ import {
   handleSentryTunnelRequest,
   parseSentryEnvelopeTarget,
 } from "./sentryTunnel";
+import {
+  handlePosthogProxyRequest,
+  shouldHandlePosthogProxy,
+} from "./posthogProxy";
 
 describe("isSpaFallbackForAssetRequest", () => {
   it("detects SPA index.html served for a missing asset", () => {
@@ -473,5 +477,58 @@ describe("handleSentryTunnelRequest", () => {
         body,
       }),
     );
+  });
+});
+
+describe("posthogProxy", () => {
+  it("shouldHandlePosthogProxy matches /ingest prefix", () => {
+    expect(shouldHandlePosthogProxy("/ingest")).toBe(true);
+    expect(shouldHandlePosthogProxy("/ingest/e/")).toBe(true);
+    expect(shouldHandlePosthogProxy("/ingest/static/foo.js")).toBe(true);
+    expect(shouldHandlePosthogProxy("/api/sentry-tunnel")).toBe(false);
+  });
+
+  it("forwards API paths to eu.i.posthog.com with Host set and cookies stripped", async () => {
+    const fetchImpl = vi.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const req = new Request(input, init);
+        expect(req.url).toBe("https://eu.i.posthog.com/e/?ip=0");
+        expect(req.headers.get("Host")).toBe("eu.i.posthog.com");
+        expect(req.headers.get("Cookie")).toBeNull();
+        return new Response("ok", { status: 200 });
+      },
+    );
+
+    const response = await handlePosthogProxyRequest(
+      new Request("https://jetlag.gelbhart.dev/ingest/e/?ip=0", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: "session=abc",
+        },
+        body: "{}",
+      }),
+      fetchImpl,
+    );
+    expect(response.status).toBe(200);
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
+
+  it("forwards /static and /array to eu-assets.i.posthog.com", async () => {
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      expect(url.startsWith("https://eu-assets.i.posthog.com/static/")).toBe(
+        true,
+      );
+      return new Response("asset", { status: 200 });
+    });
+
+    await handlePosthogProxyRequest(
+      new Request("https://jetlag.gelbhart.dev/ingest/static/banana.js", {
+        method: "GET",
+      }),
+      fetchImpl,
+    );
+    expect(fetchImpl).toHaveBeenCalledOnce();
   });
 });
