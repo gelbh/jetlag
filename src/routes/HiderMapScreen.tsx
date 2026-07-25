@@ -175,6 +175,9 @@ export function HiderMapScreen() {
   );
   const annotations = useSessionAnnotations(sessionId);
   const { clearAllAnnotations } = useAnnotations();
+  const selectedAnnotationId = useAnnotationStore(
+    (state) => state.selectedAnnotationId,
+  );
   const setSelectedAnnotationId = useAnnotationStore(
     (state) => state.setSelectedAnnotationId,
   );
@@ -563,6 +566,7 @@ export function HiderMapScreen() {
           <AnnotationLayer
             annotations={annotations}
             gameArea={gameArea}
+            selectedAnnotationId={selectedAnnotationId}
             layerVisibility={layerVisibility}
             session={session}
             hidingZones={confirmedHidingZones}
