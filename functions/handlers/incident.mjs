@@ -64,11 +64,14 @@ import {
   SESSION_OPS_TURN_CAP,
   supportAgentTurnHandler,
 } from "../incident/supportAgentTurn.mjs";
+import { launchCursorHotfixForIncident } from "../incident/launchCursorHotfix.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
 const incidentEmailSecret = defineSecret("INCIDENT_EMAIL_SECRET");
 /** OpenAI-compatible API key for session-ops support agent (never client-side). */
 const sessionOpsLlmApiKey = defineSecret("SESSION_OPS_LLM_API_KEY");
+/** Cursor Cloud Agents API key for clear-bug hotfix launches (never client-side). */
+const cursorApiKey = defineSecret("CURSOR_API_KEY");
 const incidentWorkerBaseUrl = defineString("INCIDENT_WORKER_BASE_URL", {
   default: "https://jetlag.gelbhart.dev",
 });
@@ -77,6 +80,12 @@ const sessionOpsLlmBaseUrl = defineString("SESSION_OPS_LLM_BASE_URL", {
 });
 const sessionOpsLlmModel = defineString("SESSION_OPS_LLM_MODEL", {
   default: "gpt-4o-mini",
+});
+const cursorHotfixRepoUrl = defineString("CURSOR_HOTFIX_REPO_URL", {
+  default: "https://github.com/gelbh/jetlag",
+});
+const cursorHotfixStartingRef = defineString("CURSOR_HOTFIX_STARTING_REF", {
+  default: "main",
 });
 
 function mapIncidentError(error) {
@@ -188,7 +197,10 @@ function mapIncidentError(error) {
 }
 
 export const createIncident = onCall(
-  { secrets: [sentryDsnSecret, incidentEmailSecret], enforceAppCheck: true },
+  {
+    secrets: [sentryDsnSecret, incidentEmailSecret, cursorApiKey],
+    enforceAppCheck: true,
+  },
   withSentryEventHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
@@ -220,6 +232,12 @@ export const createIncident = onCall(
               incidentUrl,
             }),
           incidentUrlBase: workerBaseUrl,
+          launchCursorHotfix: (payload) =>
+            launchCursorHotfixForIncident(db, payload, {
+              apiKey: cursorApiKey.value(),
+              repositoryUrl: cursorHotfixRepoUrl.value(),
+              startingRef: cursorHotfixStartingRef.value(),
+            }),
         },
       );
     } catch (error) {

@@ -78,7 +78,9 @@ test("createIncidentHandler writes incident + prompt message and returns id", as
   const db = mockDb();
   const result = await createIncidentHandler(db, baseInput(), baseDeps());
 
-  assert.deepEqual(result, { incidentId: "id-1", status: "open" });
+  assert.equal(result.incidentId, "id-1");
+  assert.equal(result.status, "open");
+  assert.equal(result.triage.outcome, "human");
 
   const incident = db._incidents.get("id-1");
   assert.equal(incident.status, "open");
@@ -219,4 +221,81 @@ test("createIncidentHandler clamps the player note to 140 characters", async () 
   );
   const incident = db._incidents.get("id-1");
   assert.equal(incident.playerNote.length, 140);
+});
+
+test("createIncidentHandler launches cursor hotfix only on clear-bug triage", async () => {
+  const launches = [];
+  const db = mockDb();
+  const result = await createIncidentHandler(
+    db,
+    baseInput({
+      diagnostics: {
+        appVersion: "0.9.5",
+        route: "/map",
+        sessionId: "sess-1",
+        sessionCode: "ABCD",
+        lastClientErrors: [
+          {
+            name: "TypeError",
+            message: "x is not a function",
+            at: "2026-07-25T12:00:00.000Z",
+          },
+        ],
+        recentOps: ["open-map"],
+      },
+    }),
+    baseDeps({
+      launchCursorHotfix: async (payload) => {
+        launches.push(payload);
+        return { launched: true };
+      },
+    }),
+  );
+
+  assert.equal(result.triage.outcome, "agent");
+  assert.equal(launches.length, 1);
+  assert.equal(launches[0].incidentId, "id-1");
+  assert.equal(launches[0].triage.outcome, "agent");
+  assert.ok(typeof launches[0].adminPrompt === "string");
+  assert.equal(db._incidents.get("id-1").triage.outcome, "agent");
+});
+
+test("createIncidentHandler does not launch cursor when triage is human", async () => {
+  const launches = [];
+  await createIncidentHandler(
+    mockDb(),
+    baseInput(),
+    baseDeps({
+      launchCursorHotfix: async (payload) => {
+        launches.push(payload);
+      },
+    }),
+  );
+  assert.equal(launches.length, 0);
+});
+
+test("createIncidentHandler still succeeds when cursor launch throws", async () => {
+  const result = await createIncidentHandler(
+    mockDb(),
+    baseInput({
+      diagnostics: {
+        appVersion: "0.9.5",
+        route: "/map",
+        lastClientErrors: [
+          {
+            name: "ReferenceError",
+            message: "foo is not defined",
+            at: "2026-07-25T12:00:00.000Z",
+          },
+        ],
+      },
+    }),
+    baseDeps({
+      launchCursorHotfix: async () => {
+        throw new Error("CURSOR_HOTFIX_FAILED");
+      },
+    }),
+  );
+  assert.equal(result.incidentId, "id-1");
+  assert.equal(result.triage.outcome, "agent");
 });

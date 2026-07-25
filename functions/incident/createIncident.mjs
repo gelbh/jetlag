@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { buildAdminPrompt, INCIDENT_NOTE_MAX_LENGTH } from "./adminPrompt.mjs";
+import { triageIncidentDiagnostics } from "./incidentTriage.mjs";
 
 export const CREATE_INCIDENT_ROUTE = "createIncident";
 export const INCIDENT_RATE_LIMIT = 3;
@@ -79,12 +80,14 @@ function nullableString(value) {
 /**
  * Validate + create an incident: writes `incidents/{id}` and the pinned admin
  * prompt message, then attempts the (best-effort) email hop. Email failures are
- * recorded on the incident but never fail creation. No Cursor / session-ops LLM
- * launch in v1.
+ * recorded on the incident but never fail creation.
+ *
+ * Clear-bug triage may call `deps.launchCursorHotfix` (session-ops follow-up).
+ * Desk v1 had no Cursor launch here — keep a single launch path via that dep.
  *
  * @param db Firestore instance (admin SDK or a compatible mock).
  * @param input { uid, reporterRole, playerNote, diagnostics }
- * @param deps { rateLimit, sendEmail, now, generateId, incidentUrlBase }
+ * @param deps { rateLimit, sendEmail, now, generateId, incidentUrlBase, launchCursorHotfix?, triage? }
  */
 export async function createIncidentHandler(db, input, deps) {
   const { uid } = input;
@@ -126,6 +129,9 @@ export async function createIncidentHandler(db, input, deps) {
     diagnostics: safeDiagnostics,
   });
 
+  const triageFn = deps.triage ?? triageIncidentDiagnostics;
+  const triage = triageFn(safeDiagnostics);
+
   const incidentRef = db.collection("incidents").doc(incidentId);
   await incidentRef.set({
     status,
@@ -138,6 +144,7 @@ export async function createIncidentHandler(db, input, deps) {
     playerNote,
     diagnostics: safeDiagnostics,
     adminPrompt,
+    triage,
     email: {},
   });
 
@@ -172,5 +179,23 @@ export async function createIncidentHandler(db, input, deps) {
     await incidentRef.update({ email, updatedAt: now().toISOString() });
   }
 
-  return { incidentId, status };
+  // Clear-bug → private hotfix coding agent (best-effort; never fail create).
+  if (
+    triage.outcome === "agent" &&
+    typeof deps.launchCursorHotfix === "function"
+  ) {
+    try {
+      await deps.launchCursorHotfix({
+        incidentId,
+        diagnostics: safeDiagnostics,
+        adminPrompt,
+        triage,
+      });
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      console.warn("[createIncident] cursor hotfix launch failed:", detail);
+    }
+  }
+
+  return { incidentId, status, triage };
 }
