@@ -136,7 +136,7 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--color-ink);
-  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .jl-report-diagnostics-sub {
