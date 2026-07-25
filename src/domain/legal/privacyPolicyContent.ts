@@ -53,7 +53,7 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
     title: "Error reporting and analytics",
     paragraphs: [
       "In production, the app may send crash and error reports to Sentry. Session codes and certain identifiers are scrubbed before reports leave your device.",
-      "If configured, the app sends anonymous product analytics to PostHog in the EU. Events cover page views and high-level actions such as creating a session or starting Premium checkout. IP/GeoIP enrichment is disabled. Session codes, map content, Overpass payloads, and precise hide locations are not included. Analytics use in-memory storage in this version (no analytics cookies).",
+      "If configured and you Accept the in-app analytics prompt, the app sends anonymous product analytics to PostHog in the EU. Events cover page views and high-level actions such as creating a session or starting Premium checkout. IP/GeoIP enrichment is disabled. Session codes, map content, Overpass payloads, and precise hide locations are not included. Analytics use in-memory storage in this version (no analytics cookies). Decline keeps analytics off.",
     ],
   },
   {
@@ -84,6 +84,7 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
     title: "Your choices",
     paragraphs: [
       "You do not need an account to play free sessions. Location sharing is optional. You can use the app without signing in to Premium.",
+      "Optional anonymous product analytics (PostHog) load only if you Accept on the in-app prompt. Decline keeps analytics off. Clearing site data resets this choice.",
       "Clearing site data or uninstalling the app removes local preferences. Remote session data may remain until it expires or you request removal.",
     ],
   },

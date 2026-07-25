@@ -9,6 +9,7 @@ import {
 import { trackPageView } from "./services/core/analytics";
 import { MapErrorBoundary } from "./components/ui/MapErrorBoundary";
 import { AppEntryBackdrop } from "./components/ui/AppEntryBackdrop";
+import { AnalyticsConsentBanner } from "./components/ui/AnalyticsConsentBanner";
 import { AppUpdateBanner } from "./components/ui/AppUpdateBanner";
 import { AppUpdateProvider } from "./components/ui/AppUpdateProvider";
 import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
@@ -171,6 +172,7 @@ export default function App() {
             <AnalyticsPageViewTracker />
             <ChunkReloadContextBinder />
             <AppUpdateBanner />
+            <AnalyticsConsentBanner />
             <AppEntryBackdrop />
             <div className="app-scroll-root">
               <LowBatteryPrompt />

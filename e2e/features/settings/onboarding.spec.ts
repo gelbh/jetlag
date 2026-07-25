@@ -4,6 +4,7 @@ test.describe("onboarding", () => {
   test("map first-run sheet can be dismissed", async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.removeItem("jetlag.mapFirstRunDismissed");
+      localStorage.setItem("jl.analytics.consent", "denied");
     });
     await blockExternalAssets(page);
     await seedLocalSession(page);

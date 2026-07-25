@@ -9,6 +9,7 @@ test.describe("map first-run screenshots", () => {
   test("@smoke matches onboarding sheet baseline", async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.removeItem("jetlag.mapFirstRunDismissed");
+      localStorage.setItem("jl.analytics.consent", "denied");
     });
     await blockExternalAssets(page);
     await seedLocalSession(page);
