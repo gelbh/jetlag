@@ -85,6 +85,7 @@ describe("eliminationMaskWorkerClient", () => {
         disks: expect.any(Array),
       }),
       gameArea,
+      "ts",
     );
     expect(buildEndGameMaskFromDisks).not.toHaveBeenCalled();
   });
@@ -112,9 +113,11 @@ describe("eliminationMaskWorkerClient", () => {
     );
 
     expect(result?.geometry.type).toBe("Polygon");
-    expect(buildEndGameMaskFromDisks).toHaveBeenCalledWith(gameArea, [
-      { center: [51.5, -0.1], radiusMeters: 500 },
-    ]);
+    expect(buildEndGameMaskFromDisks).toHaveBeenCalledWith(
+      gameArea,
+      [{ center: [51.5, -0.1], radiusMeters: 500 }],
+      "ts",
+    );
     expect(buildMaskFromUnionInput).not.toHaveBeenCalled();
   });
 

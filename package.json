@@ -93,6 +93,7 @@
     "geoflatbush": "^2.2.1",
     "geokdbush": "^2.1.0",
     "html2canvas": "^1.4.1",
+    "jetlag-geometry-mask": "file:crates/jetlag-geometry-mask/pkg",
     "jetlag-live-activity": "file:plugins/jetlag-live-activity",
     "jszip": "^3.10.1",
     "kdbush": "^4.1.0",
