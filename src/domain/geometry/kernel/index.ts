@@ -21,3 +21,9 @@ export {
   unionPolygonFeatures,
   unionPolygonFeaturesLegacy,
 } from "./unionPolygonFeatures";
+export {
+  buildHalfPlanePolygon,
+  buildRadarShadedRegion,
+  isPointInGameArea,
+} from "./radarHalfPlane";
+export { geodesicLineBuffer } from "./geodesicLineBuffer";
