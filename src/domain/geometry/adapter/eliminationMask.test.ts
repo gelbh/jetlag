@@ -57,4 +57,29 @@ describe("adapter/eliminationMask", () => {
     expect(input.polygons).toHaveLength(1);
     expect(input.disks).toHaveLength(0);
   });
+
+  it("snapshots kernel union input ABI for matching annotations", () => {
+    const input = computeEliminationUnionInput(
+      [matchingAnnotation("a", -0.18)],
+      gameArea,
+      [],
+    );
+    const ring = input.polygons[0]?.geometry;
+    expect(ring?.type).toBe("Polygon");
+    if (ring?.type !== "Polygon") {
+      throw new Error("expected Polygon geometry");
+    }
+    expect(
+      ring.coordinates[0]?.map((coord) =>
+        coord.map((n) => Number(n.toFixed(5))),
+      ),
+    ).toEqual([
+      [-0.18, 51.42],
+      [-0.15, 51.42],
+      [-0.15, 51.48],
+      [-0.18, 51.48],
+      [-0.18, 51.42],
+    ]);
+    expect(input.disks).toEqual([]);
+  });
 });
