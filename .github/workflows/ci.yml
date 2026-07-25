@@ -20,11 +20,14 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+      - uses: ./.github/actions/setup-rust-wasm
+      - run: cargo test --locked -p jetlag-geometry-mask
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npm run wasm:build
       - run: npm run lint
       - run: npm run lint:css
       - run: npm run typecheck
@@ -37,8 +40,17 @@ jobs:
             geometry:
               - 'src/domain/geometry/**'
               - 'src/hooks/map/useCombinedEliminationMask.ts'
+              - 'crates/jetlag-geometry-mask/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'package.json'
+              - 'vite.optional-mask-wasm-pkg.ts'
+              - 'vite.config.ts'
+              - 'vitest.config.ts'
+              - '.github/actions/setup-rust-wasm/action.yml'
       - name: Geometry perf gates
         if: steps.geometry.outputs.geometry == 'true'
+        # Reuses pkg/ from wasm:build above (test:perf does not rebuild)
         run: npm run test:perf
       - run: npm run test:functions
 
@@ -48,6 +60,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+      - uses: ./.github/actions/setup-rust-wasm
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
@@ -88,6 +101,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+      - uses: ./.github/actions/setup-rust-wasm
       - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
         with:
           distribution: temurin
@@ -118,6 +132,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+      - uses: ./.github/actions/setup-rust-wasm
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24

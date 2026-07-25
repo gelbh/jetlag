@@ -3,7 +3,14 @@ import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
 import { computeEliminationUnionInput } from "./adapter/eliminationMask";
-import { buildMaskFromUnionInput } from "./kernel/buildMask";
+import {
+  buildEndGameMaskFromDisks,
+  buildMaskFromUnionInput,
+} from "./kernel/buildMask";
+import {
+  wasmBuildEndGameMaskFromDisks,
+  wasmBuildMaskFromUnionInput,
+} from "./kernel/maskWasm";
 import {
   unionDiskSpecs,
   unionEliminationParts,
@@ -72,6 +79,26 @@ function measureMedianMs(fn: () => void, iterations = 5): number {
   for (let index = 0; index <= iterations; index += 1) {
     const start = performance.now();
     fn();
+    const elapsed = performance.now() - start;
+
+    if (index > 0) {
+      samples.push(elapsed);
+    }
+  }
+
+  samples.sort((left, right) => left - right);
+  return samples[Math.floor(samples.length / 2)] ?? 0;
+}
+
+async function measureMedianMsAsync(
+  fn: () => Promise<void>,
+  iterations = 5,
+): Promise<number> {
+  const samples: number[] = [];
+
+  for (let index = 0; index <= iterations; index += 1) {
+    const start = performance.now();
+    await fn();
     const elapsed = performance.now() - start;
 
     if (index > 0) {
@@ -170,6 +197,42 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     });
 
     expect(circleUnionMs / legacyMs).toBeLessThan(0.1);
+  });
+
+  it("wasm_mask_8_polys median within 1.1x ts", async () => {
+    const input: EliminationUnionInput = {
+      polygons: Array.from({ length: 8 }, (_, index) =>
+        squareFeature(-0.19 + index * 0.01),
+      ),
+      disks: [],
+    };
+
+    // Warm WASM once so init cost is outside the median window.
+    await wasmBuildMaskFromUnionInput(input, gameArea);
+
+    const tsMs = measureMedianMs(() => {
+      buildMaskFromUnionInput(input, gameArea);
+    });
+    const wasmMs = await measureMedianMsAsync(async () => {
+      await wasmBuildMaskFromUnionInput(input, gameArea);
+    });
+
+    expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
+  });
+
+  it("wasm_end_game_10_disks median within 1.1x ts", async () => {
+    const disks = circleDisks(10);
+
+    await wasmBuildEndGameMaskFromDisks(gameArea, disks);
+
+    const tsMs = measureMedianMs(() => {
+      buildEndGameMaskFromDisks(gameArea, disks);
+    });
+    const wasmMs = await measureMedianMsAsync(async () => {
+      await wasmBuildEndGameMaskFromDisks(gameArea, disks);
+    });
+
+    expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
   });
 });
 

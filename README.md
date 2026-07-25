@@ -50,6 +50,20 @@ npm run env:pull  # writes .env.local from Doppler
 npm run dev
 ```
 
+### Geometry mask WASM (Rust)
+
+`npm run build` always runs `npm run wasm:build` first (wasm-pack → `crates/jetlag-geometry-mask/pkg/`, gitignored), even when the default mask kernel mode is `ts`. Local `vite` / `ts` mode can stub a missing `pkg/` via Vite’s optional plugin, but production and worker builds still need a real package.
+
+**Toolchain (once per machine):** Rust stable with `wasm32-unknown-unknown`, plus [wasm-pack](https://rustwasm.github.io/wasm-pack/) (CI pins **0.13.1**).
+
+```bash
+rustup target add wasm32-unknown-unknown
+cargo install wasm-pack --version 0.13.1   # or match CI
+npm run wasm:build
+```
+
+**Kernel mode** (default `ts`): `VITE_GEOMETRY_MASK_KERNEL` (`ts` | `dual` | `wasm`; empty/invalid ignored) or localStorage `jl.geometry.maskKernel` (overrides env). Disk CircleUnion is not a WASM parity goal — `wasm` mode falls back to the TypeScript path when any disk is present.
+
 ## Deploy
 
 - **Path:** open a PR → required CI (`unit`, `build`, `emulator`, `e2e`, `lighthouse`) → merge to `main` → Deploy workflow builds, then path-aware Firebase backend + Cloudflare Worker frontend (Doppler `prd`).

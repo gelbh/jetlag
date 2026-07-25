@@ -4,6 +4,8 @@ import react from "@vitejs/plugin-react";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import wasm from "vite-plugin-wasm";
+import { optionalMaskWasmPkg } from "./vite.optional-mask-wasm-pkg";
 
 const appVersion = (
   JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as {
@@ -15,21 +17,18 @@ const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
 const sentryOrg = process.env.SENTRY_ORG;
 const sentryProject = process.env.SENTRY_PROJECT;
 
+
 export default defineConfig(({ mode }) => ({
   server: {
     // Avoid colliding with `vite preview` / Playwright (4173), which registers a SW.
     port: 5173,
     strictPort: false,
   },
+  // esnext: native top-level await for wasm-pack modules (Vite 8 / rolldown).
+  // vite-plugin-top-level-await is incompatible with this stack.
   build: {
+    target: "esnext",
     sourcemap: mode === "production" ? "hidden" : true,
-    worker: {
-      rollupOptions: {
-        output: {
-          inlineDynamicImports: true,
-        },
-      },
-    },
     rolldownOptions: {
       output: {
         codeSplitting: {
@@ -59,7 +58,18 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
+  worker: {
+    plugins: () => [optionalMaskWasmPkg(), wasm()],
+    format: "es",
+    rolldownOptions: {
+      output: {
+        codeSplitting: false,
+      },
+    },
+  },
   plugins: [
+    optionalMaskWasmPkg(),
+    wasm(),
     ...(sentryAuthToken && sentryOrg && sentryProject
       ? [
           sentryVitePlugin({

@@ -1,0 +1,3 @@
+[workspace]
+members = ["crates/jetlag-geometry-mask"]
+resolver = "2"
