@@ -98,6 +98,7 @@ describe("analytics facade", () => {
     resetClientEnvForTests();
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
+    Reflect.deleteProperty(document, "referrer");
   });
 
   it("does not init PostHog outside production", () => {
@@ -159,6 +160,34 @@ describe("analytics facade", () => {
     expect(posthogCapture).toHaveBeenCalledWith("$pageview", {
       path: "/create",
       $pathname: "/create",
+    });
+  });
+
+  it("enriches pageviews with referrer and utm params", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+    initAnalytics();
+
+    Object.defineProperty(document, "referrer", {
+      configurable: true,
+      get: () => "https://www.google.com/search?q=jetlag",
+    });
+    vi.stubGlobal("location", {
+      pathname: "/",
+      search: "?utm_source=newsletter&utm_medium=email&utm_campaign=launch",
+    });
+
+    trackPageView("/");
+
+    expect(posthogCapture).toHaveBeenCalledWith("$pageview", {
+      path: "/",
+      $pathname: "/",
+      referrer: "https://www.google.com/search?q=jetlag",
+      $referring_domain: "www.google.com",
+      utm_source: "newsletter",
+      utm_medium: "email",
+      utm_campaign: "launch",
     });
   });
 

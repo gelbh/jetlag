@@ -137,13 +137,44 @@ export function denyAnalyticsConsent(): void {
   initialized = false;
 }
 
+function pageViewProperties(
+  pathWithSearch: string,
+): Record<string, string | boolean> {
+  const pathname = pathWithSearch.split("?", 1)[0] ?? pathWithSearch;
+  const props: Record<string, string | boolean> = {
+    path: pathname,
+    $pathname: pathname,
+  };
+  if (typeof document !== "undefined" && document.referrer) {
+    props.referrer = document.referrer;
+    try {
+      props.$referring_domain = new URL(document.referrer).hostname;
+    } catch {
+      // ignore invalid referrer
+    }
+  }
+  if (typeof window !== "undefined") {
+    const params = new URLSearchParams(window.location.search);
+    for (const key of [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_content",
+      "utm_term",
+    ]) {
+      const value = params.get(key);
+      if (value) props[key] = value;
+    }
+  }
+  return props;
+}
+
 export function trackPageView(path: string): void {
   if (!initialized) {
     return;
   }
 
-  const pathname = path.split("?", 1)[0] ?? path;
-  posthog.capture("$pageview", { path: pathname, $pathname: pathname });
+  posthog.capture("$pageview", pageViewProperties(path));
 }
 
 export function track<E extends AnalyticsEventName>(
