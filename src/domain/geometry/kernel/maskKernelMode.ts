@@ -13,7 +13,19 @@ function parseMaskKernelMode(value: string | undefined | null): MaskKernelMode |
   return null;
 }
 
-/** Resolve mask kernel mode: localStorage overrides env; invalid/missing → "ts". */
+/** True when a non-empty string was provided but is not a known mode. */
+function isInvalidMaskKernelMode(value: string | undefined | null): boolean {
+  if (value == null) {
+    return false;
+  }
+  const trimmed = value.trim();
+  if (trimmed === "") {
+    return false;
+  }
+  return parseMaskKernelMode(trimmed) === null;
+}
+
+/** Resolve mask kernel mode: localStorage overrides env; missing → "wasm"; invalid → "ts". */
 export function resolveMaskKernelMode(options?: {
   envValue?: string | undefined;
   localStorageValue?: string | null;
@@ -26,5 +38,11 @@ export function resolveMaskKernelMode(options?: {
   if (fromEnv) {
     return fromEnv;
   }
-  return "ts";
+  if (
+    isInvalidMaskKernelMode(options?.localStorageValue) ||
+    isInvalidMaskKernelMode(options?.envValue)
+  ) {
+    return "ts";
+  }
+  return "wasm";
 }

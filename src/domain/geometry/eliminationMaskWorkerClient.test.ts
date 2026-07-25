@@ -100,7 +100,7 @@ describe("eliminationMaskWorkerClient", () => {
         disks: expect.any(Array),
       }),
       gameArea,
-      "ts",
+      "wasm",
     );
     expect(buildEndGameMaskFromDisks).not.toHaveBeenCalled();
   });
@@ -192,7 +192,7 @@ describe("eliminationMaskWorkerClient", () => {
     expect(buildEndGameMaskFromDisks).toHaveBeenCalledWith(
       gameArea,
       [{ center: [51.5, -0.1], radiusMeters: 500 }],
-      "ts",
+      "wasm",
     );
     expect(buildMaskFromUnionInput).not.toHaveBeenCalled();
   });

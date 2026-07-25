@@ -33,7 +33,7 @@ const clientEnvSchema = firebaseEnvSchema
     VITE_SENTRY_ENVIRONMENT: optionalNonEmptyString,
     VITE_SENTRY_RELEASE_DIST: optionalNonEmptyString,
     VITE_POSTHOG_KEY: optionalNonEmptyString,
-    // Empty/invalid → omit (resolveMaskKernelMode defaults to "ts").
+    // Empty/invalid → omit (unset → resolveMaskKernelMode defaults to "wasm").
     VITE_GEOMETRY_MASK_KERNEL: z.preprocess((value) => {
       if (typeof value !== "string") {
         return undefined;
