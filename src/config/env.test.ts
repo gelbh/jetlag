@@ -74,6 +74,23 @@ describe("parseClientEnv", () => {
     },
   );
 
+  it("trims whitespace around geometry mask kernel mode", () => {
+    const env = parseClientEnv({
+      ...validFirebaseEnv,
+      VITE_GEOMETRY_MASK_KERNEL: " wasm ",
+    });
+    expect(env.VITE_GEOMETRY_MASK_KERNEL).toBe("wasm");
+  });
+
+  it("omits null geometry mask kernel mode", () => {
+    expect(
+      parseClientEnv({
+        ...validFirebaseEnv,
+        VITE_GEOMETRY_MASK_KERNEL: null,
+      }).VITE_GEOMETRY_MASK_KERNEL,
+    ).toBeUndefined();
+  });
+
   it("omits empty or invalid geometry mask kernel mode", () => {
     expect(
       parseClientEnv({

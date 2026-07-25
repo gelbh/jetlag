@@ -61,7 +61,7 @@ export default defineConfig(({ mode }) => ({
   worker: {
     plugins: () => [optionalMaskWasmPkg(), wasm()],
     format: "es",
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         codeSplitting: false,
       },
