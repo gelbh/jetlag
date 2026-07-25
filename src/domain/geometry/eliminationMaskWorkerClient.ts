@@ -1,6 +1,7 @@
 import { wrap } from "comlink";
 import type { Remote } from "comlink";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
+import { getClientEnv } from "../../config/env";
 import type { AnnotationRecord, GameArea } from "../map/annotations";
 import type { HidingZoneRecord } from "../session/hidingZone";
 import {
@@ -8,17 +9,28 @@ import {
   computeEliminationUnionInput,
 } from "./adapter/eliminationMask";
 import type {
-  buildEndGameMaskFromDisks,
-  buildMaskFromUnionInput,
-} from "./kernel/buildMask";
-import type { PolygonFeature } from "./kernel/types";
+  DiskSpec,
+  EliminationUnionInput,
+  PolygonFeature,
+} from "./kernel/types";
+import type { MaskKernelMode } from "./kernel/maskKernelMode";
+import { resolveMaskKernelMode } from "./kernel/maskKernelMode";
 
 type EliminationMaskWorkerApi = {
-  buildMaskFromUnionInput: typeof buildMaskFromUnionInput;
-  buildEndGameMaskFromDisks: typeof buildEndGameMaskFromDisks;
+  buildMaskFromUnionInput: (
+    input: EliminationUnionInput,
+    gameArea: GameArea,
+    mode?: MaskKernelMode,
+  ) => Promise<PolygonFeature | null>;
+  buildEndGameMaskFromDisks: (
+    gameArea: GameArea,
+    disks: readonly DiskSpec[],
+    mode?: MaskKernelMode,
+  ) => Promise<PolygonFeature | null>;
 };
 
 const WORKER_FAILURE_MESSAGE = "Elimination mask worker failed";
+const MASK_KERNEL_STORAGE_KEY = "jl.geometry.maskKernel";
 
 let worker: Worker | null = null;
 let workerApi: Remote<EliminationMaskWorkerApi> | null = null;
@@ -56,6 +68,21 @@ function getWorkerApi(): Remote<EliminationMaskWorkerApi> {
   return workerApi;
 }
 
+function readMaskKernelLocalStorage(): string | null {
+  try {
+    return localStorage.getItem(MASK_KERNEL_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function resolveClientMaskKernelMode(): MaskKernelMode {
+  return resolveMaskKernelMode({
+    envValue: getClientEnv().VITE_GEOMETRY_MASK_KERNEL,
+    localStorageValue: readMaskKernelLocalStorage(),
+  });
+}
+
 export async function requestCombinedEliminationMask(
   annotations: readonly AnnotationRecord[],
   gameArea: GameArea,
@@ -63,6 +90,7 @@ export async function requestCombinedEliminationMask(
   endGameHidingZones: readonly HidingZoneRecord[],
 ): Promise<PolygonFeature | null> {
   const api = getWorkerApi();
+  const mode = resolveClientMaskKernelMode();
   let releasePending: (() => void) | undefined;
 
   const pendingFailure = new Promise<never>((_, reject) => {
@@ -81,6 +109,7 @@ export async function requestCombinedEliminationMask(
         api.buildEndGameMaskFromDisks(
           gameArea,
           annotationsToEndGameDisks(endGameHidingZones),
+          mode,
         ),
         pendingFailure,
       ]);
@@ -92,7 +121,7 @@ export async function requestCombinedEliminationMask(
       draftFeatures,
     );
     return await Promise.race([
-      api.buildMaskFromUnionInput(input, gameArea),
+      api.buildMaskFromUnionInput(input, gameArea, mode),
       pendingFailure,
     ]);
   } catch (error) {

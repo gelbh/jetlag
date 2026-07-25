@@ -62,6 +62,51 @@ describe("parseClientEnv", () => {
   });
 
 
+  it.each(["ts", "wasm", "dual"] as const)(
+    "accepts optional geometry mask kernel mode %s",
+    (mode) => {
+      const env = parseClientEnv({
+        ...validFirebaseEnv,
+        VITE_GEOMETRY_MASK_KERNEL: mode,
+      });
+
+      expect(env.VITE_GEOMETRY_MASK_KERNEL).toBe(mode);
+    },
+  );
+
+  it("trims whitespace around geometry mask kernel mode", () => {
+    const env = parseClientEnv({
+      ...validFirebaseEnv,
+      VITE_GEOMETRY_MASK_KERNEL: " wasm ",
+    });
+    expect(env.VITE_GEOMETRY_MASK_KERNEL).toBe("wasm");
+  });
+
+  it("omits null geometry mask kernel mode", () => {
+    expect(
+      parseClientEnv({
+        ...validFirebaseEnv,
+        VITE_GEOMETRY_MASK_KERNEL: null,
+      }).VITE_GEOMETRY_MASK_KERNEL,
+    ).toBeUndefined();
+  });
+
+  it("omits empty or invalid geometry mask kernel mode", () => {
+    expect(
+      parseClientEnv({
+        ...validFirebaseEnv,
+        VITE_GEOMETRY_MASK_KERNEL: "",
+      }).VITE_GEOMETRY_MASK_KERNEL,
+    ).toBeUndefined();
+
+    expect(
+      parseClientEnv({
+        ...validFirebaseEnv,
+        VITE_GEOMETRY_MASK_KERNEL: "nope",
+      }).VITE_GEOMETRY_MASK_KERNEL,
+    ).toBeUndefined();
+  });
+
   it("rejects invalid proxy URLs", () => {
     expect(() =>
       parseClientEnv({
