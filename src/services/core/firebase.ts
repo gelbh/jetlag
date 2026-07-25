@@ -305,6 +305,8 @@ async function bootstrapAuthState(): Promise<void> {
   setBootstrapTag("auth_ready");
 }
 
+let authAnalyticsUnsubscribe: (() => void) | null = null;
+
 function getAuthBootstrapPromise(): Promise<void> {
   authStateReadyPromise ??= bootstrapAuthState()
     .catch((error) => {
@@ -322,7 +324,7 @@ export function startAuthBootstrap(): void {
     return;
   }
 
-  onAuthStateChanged(getFirebaseAuth(), (user) => {
+  authAnalyticsUnsubscribe ??= onAuthStateChanged(getFirebaseAuth(), (user) => {
     syncAnalyticsIdentity(
       user ? { uid: user.uid, isAnonymous: user.isAnonymous } : null,
     );

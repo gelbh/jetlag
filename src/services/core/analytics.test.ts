@@ -269,7 +269,7 @@ describe("analytics facade", () => {
     denyAnalyticsConsent();
     trackPageView("/home");
     expect(posthogOptOut).toHaveBeenCalledOnce();
-    expect(posthogReset).toHaveBeenCalled();
+    expect(posthogReset).toHaveBeenCalledWith(true);
     expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe("denied");
     expect(posthogCapture).not.toHaveBeenCalled();
   });
@@ -340,7 +340,7 @@ describe("analytics facade", () => {
     expect(posthogIdentify).toHaveBeenCalledWith("user-1");
 
     syncAnalyticsIdentity({ uid: "anon-9", isAnonymous: true });
-    expect(posthogReset).toHaveBeenCalled();
+    expect(posthogReset).toHaveBeenCalledWith(true);
   });
 
   it("resets when sync receives null after identify", () => {

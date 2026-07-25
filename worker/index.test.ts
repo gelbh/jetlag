@@ -409,6 +409,49 @@ describe("worker fetch", () => {
     expect(body).toMatch(/<script nonce="[^"]+" src="\/boot-recovery\.js"><\/script>/);
     expect(response.headers.get("Content-Security-Policy")).toBeNull();
   });
+  it("routes /ingest/e/ through PostHog proxy without hitting assets", async () => {
+    const fetchMock = vi.fn(async () => new Response("ok", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      const env = {
+        ASSETS: {
+          fetch: vi.fn(),
+        },
+      } as Env;
+
+      const response = await worker.fetch(
+        new Request("https://jetlag.gelbhart.dev/ingest/e/", {
+          method: "POST",
+          body: "{}",
+        }),
+        env,
+      );
+
+      expect(env.ASSETS.fetch).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalledOnce();
+      expect(response.status).toBe(200);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("does not proxy /ingest-anything prefix boundary paths", async () => {
+    const assetResponse = new Response("missing", { status: 404 });
+    const env = {
+      ASSETS: {
+        fetch: vi.fn().mockResolvedValue(assetResponse),
+      },
+    } as Env;
+
+    await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/ingest-anything"),
+      env,
+    );
+
+    expect(env.ASSETS.fetch).toHaveBeenCalledOnce();
+  });
+
+
 });
 
 describe("parseSentryEnvelopeTarget", () => {
@@ -518,9 +561,10 @@ describe("posthogProxy", () => {
   it("forwards /static and /array to eu-assets.i.posthog.com", async () => {
     const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
-      expect(url.startsWith("https://eu-assets.i.posthog.com/static/")).toBe(
-        true,
-      );
+      expect(
+        url.startsWith("https://eu-assets.i.posthog.com/static/") ||
+          url.startsWith("https://eu-assets.i.posthog.com/array/"),
+      ).toBe(true);
       return new Response("asset", { status: 200 });
     });
 
@@ -530,6 +574,12 @@ describe("posthogProxy", () => {
       }),
       fetchImpl,
     );
-    expect(fetchImpl).toHaveBeenCalledOnce();
+    await handlePosthogProxyRequest(
+      new Request("https://jetlag.gelbhart.dev/ingest/array/config.json", {
+        method: "GET",
+      }),
+      fetchImpl,
+    );
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 });
