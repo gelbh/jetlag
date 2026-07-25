@@ -3,6 +3,10 @@ import {
   SENTRY_TUNNEL_PATH,
 } from "./sentryTunnel";
 import {
+  handlePosthogProxyRequest,
+  shouldHandlePosthogProxy,
+} from "./posthogProxy";
+import {
   applyDocumentCspNonce,
   shouldApplyDocumentCsp,
 } from "./documentCsp";
@@ -81,6 +85,9 @@ export default {
     const pathname = new URL(request.url).pathname;
     if (pathname === SENTRY_TUNNEL_PATH) {
       return handleSentryTunnelRequest(request);
+    }
+    if (shouldHandlePosthogProxy(pathname)) {
+      return handlePosthogProxyRequest(request);
     }
     if (pathname === CSP_REPORT_PATH) {
       return handleCspReportRequest(request);

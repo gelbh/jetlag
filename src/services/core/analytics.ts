@@ -12,7 +12,26 @@ import {
 
 export { ANALYTICS_EVENTS, type AnalyticsEventName, type AnalyticsEventProps };
 
-const DEFAULT_POSTHOG_HOST = "https://eu.i.posthog.com";
+/**
+ * First-party Worker reverse proxy path.
+ * Must stay in sync with `POSTHOG_PROXY_PATH` in `worker/posthogProxy.ts`.
+ */
+export const POSTHOG_API_HOST = "/ingest";
+export const POSTHOG_UI_HOST = "https://eu.posthog.com";
+
+function resolvePosthogApiHost(): string {
+  try {
+    const cap = (globalThis as { Capacitor?: { isNativePlatform?: () => boolean } })
+      .Capacitor;
+    if (cap?.isNativePlatform?.()) {
+      return "https://eu.i.posthog.com";
+    }
+  } catch {
+    // ignore
+  }
+  return POSTHOG_API_HOST;
+}
+
 
 /** Keys that must never leave the device via product analytics. */
 const FORBIDDEN_PROP_KEYS = new Set([
@@ -40,6 +59,14 @@ const FORBIDDEN_PROP_KEYS = new Set([
 ]);
 
 let initialized = false;
+let identifiedUid: string | null = null;
+/** Last auth identity seen — applied on init so Accept-after-sign-in still identifies. */
+let lastSeenIdentity: AnalyticsIdentity | null = null;
+
+export type AnalyticsIdentity = {
+  uid: string;
+  isAnonymous: boolean;
+};
 
 export function shouldEnableAnalytics(env: {
   prod: boolean;
@@ -88,6 +115,27 @@ function runtimeEnabled(): boolean {
   });
 }
 
+function applyIdentity(user: AnalyticsIdentity | null): void {
+  if (!initialized) {
+    return;
+  }
+  try {
+    if (user && !user.isAnonymous) {
+      if (identifiedUid !== user.uid) {
+        posthog.identify(user.uid);
+        identifiedUid = user.uid;
+      }
+      return;
+    }
+    if (identifiedUid !== null) {
+      posthog.reset(true);
+      identifiedUid = null;
+    }
+  } catch {
+    // Soft-fail: identity must never break app boot.
+  }
+}
+
 export function initAnalytics(): void {
   if (!runtimeEnabled() || initialized) {
     return;
@@ -101,24 +149,26 @@ export function initAnalytics(): void {
     return;
   }
 
-  const host =
-    getClientEnv().VITE_POSTHOG_HOST?.trim() || DEFAULT_POSTHOG_HOST;
-
   try {
+    // Sticky persistence can retain opt-out across deny → Accept; clear before init.
+    posthog.opt_in_capturing();
     posthog.init(key, {
-      api_host: host,
-      persistence: "memory",
+      api_host: resolvePosthogApiHost(),
+      ui_host: POSTHOG_UI_HOST,
+      persistence: "localStorage",
       autocapture: false,
       capture_pageview: false,
-      capture_pageleave: false,
+      capture_pageleave: true,
+      capture_performance: true,
       disable_session_recording: true,
-      disable_external_dependency_loading: true,
+      disable_external_dependency_loading: false,
       disable_surveys: true,
       person_profiles: "identified_only",
     });
     // IP is personal data; PostHog's `ip: false` is a no-op — disable GeoIP enrichment.
     posthog.register({ $geoip_disable: true });
     initialized = true;
+    applyIdentity(lastSeenIdentity);
   } catch {
     // Soft-fail: analytics must never break app boot.
   }
@@ -134,7 +184,19 @@ export function grantAnalyticsConsent(): void {
 
 export function denyAnalyticsConsent(): void {
   writeAnalyticsConsent("denied");
+  try {
+    posthog.opt_out_capturing();
+    posthog.reset(true);
+  } catch {
+    // Soft-fail: consent must still clear locally.
+  }
+  identifiedUid = null;
   initialized = false;
+}
+
+export function syncAnalyticsIdentity(user: AnalyticsIdentity | null): void {
+  lastSeenIdentity = user;
+  applyIdentity(user);
 }
 
 function pageViewProperties(
@@ -196,4 +258,6 @@ export function resetAnalyticsForTests(options?: {
   initialized?: boolean;
 }): void {
   initialized = options?.initialized ?? false;
+  identifiedUid = null;
+  lastSeenIdentity = null;
 }
