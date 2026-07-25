@@ -4,43 +4,43 @@ import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)));
-const maskWasmPkgJs = resolve(
+const kernelWasmPkgJs = resolve(
   repoRoot,
   "crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js",
 );
-const maskWasmPkgStubId = "\0jetlag-geometry-kernel-wasm-stub";
+const kernelWasmPkgStubId = "\0jetlag-geometry-kernel-wasm-stub";
 
-function isMaskWasmPkgSpecifier(
+function isKernelWasmPkgSpecifier(
   id: string,
   importer: string | undefined,
 ): boolean {
-  if (id === maskWasmPkgStubId || id.includes("jetlag_geometry_kernel.js")) {
+  if (id === kernelWasmPkgStubId || id.includes("jetlag_geometry_kernel.js")) {
     return true;
   }
   if (importer && id.startsWith(".")) {
-    return resolve(dirname(importer), id) === maskWasmPkgJs;
+    return resolve(dirname(importer), id) === kernelWasmPkgJs;
   }
   if (isAbsolute(id)) {
-    return id === maskWasmPkgJs;
+    return id === kernelWasmPkgJs;
   }
   return false;
 }
 
 /** Stub gitignored pkg/ so Vite/Vitest can load the graph without wasm:build. */
-export function optionalMaskWasmPkg(): Plugin {
+export function optionalKernelWasmPkg(): Plugin {
   return {
-    name: "optional-mask-wasm-pkg",
+    name: "optional-kernel-wasm-pkg",
     resolveId(id, importer) {
-      if (!isMaskWasmPkgSpecifier(id, importer)) {
+      if (!isKernelWasmPkgSpecifier(id, importer)) {
         return null;
       }
-      if (existsSync(maskWasmPkgJs)) {
+      if (existsSync(kernelWasmPkgJs)) {
         return null;
       }
-      return maskWasmPkgStubId;
+      return kernelWasmPkgStubId;
     },
     load(id) {
-      if (id !== maskWasmPkgStubId) {
+      if (id !== kernelWasmPkgStubId) {
         return null;
       }
       return `

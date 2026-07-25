@@ -19,7 +19,7 @@ let maskWasmModulePromise: Promise<MaskWasmApi> | null = null;
 function loadMaskWasmModule(): Promise<MaskWasmApi> {
   if (!maskWasmModulePromise) {
     // Lazy chunk: ts mode never executes this; Vite still emits an async chunk,
-    // with optionalMaskWasmPkg stubbing when gitignored pkg/ is missing.
+    // with optionalKernelWasmPkg stubbing when gitignored pkg/ is missing.
     maskWasmModulePromise = import("./maskWasm").catch((error) => {
       maskWasmModulePromise = null;
       throw error;

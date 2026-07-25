@@ -50,7 +50,7 @@ npm run env:pull  # writes .env.local from Doppler
 npm run dev
 ```
 
-### Geometry mask WASM (Rust)
+### Geometry kernel WASM (Rust)
 
 `npm run build` always runs `npm run wasm:build` first (wasm-pack → `crates/jetlag-geometry-kernel/pkg/`, gitignored). Local `vite` / opt-out `ts` mode can stub a missing `pkg/` via Vite’s optional plugin, but production and worker builds still need a real package.
 
