@@ -24,10 +24,16 @@ const html = `<!doctype html>
   <p>Unofficial fan companion for Jet Lag Hide + Seek</p>
 </div></body></html>`;
 
-const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });
-await page.setContent(html, { waitUntil: "load" });
-const buf = await page.screenshot({ type: "png" });
-writeFileSync(out, buf);
-await browser.close();
-console.log(`Wrote ${out}`);
+let browser;
+try {
+  browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });
+  await page.setContent(html, { waitUntil: "load" });
+  const buf = await page.screenshot({ type: "png" });
+  writeFileSync(out, buf);
+  console.log(`Wrote ${out}`);
+} finally {
+  if (browser) {
+    await browser.close();
+  }
+}

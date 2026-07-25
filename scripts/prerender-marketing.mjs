@@ -74,16 +74,16 @@ preview.stderr.on("data", (c) => {
   previewLog += c.toString();
 });
 
+let browser;
 let exitCode = 0;
 try {
   await waitForServer(BASE);
-  const browser = await chromium.launch();
+  browser = await chromium.launch();
   const page = await browser.newPage();
 
   for (const urlPath of policy.indexablePaths) {
     const target = `${BASE}${urlPath === "/" ? "/" : urlPath}`;
     await page.goto(target, { waitUntil: "networkidle", timeout: 120_000 });
-    // Marketing shells show LEGAL_APP_NAME / legal headings; wait for #root text.
     await page.waitForFunction(
       () => {
         const rootEl = document.querySelector("#root");
@@ -93,7 +93,6 @@ try {
       },
       { timeout: 120_000 },
     );
-    // Ensure client meta ran (title non-empty).
     await page.waitForFunction(() => document.title.trim().length > 0, {
       timeout: 30_000,
     });
@@ -103,23 +102,26 @@ try {
     writeFileSync(out, html);
     console.log(`Prerendered ${urlPath} → ${out}`);
   }
-
-  await browser.close();
 } catch (error) {
   console.error(previewLog);
+  console.error(error);
   exitCode = 1;
-  throw error;
 } finally {
+  if (browser) {
+    try {
+      await browser.close();
+    } catch {
+      // ignore
+    }
+  }
   if (preview.pid) {
     try {
       process.kill(-preview.pid, "SIGTERM");
     } catch {
-      // fall through to stopPreview
+      // fall through
     }
   }
   await stopPreview(preview);
 }
 
-if (exitCode !== 0) {
-  process.exit(exitCode);
-}
+process.exit(exitCode);

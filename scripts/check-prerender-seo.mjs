@@ -14,8 +14,8 @@ function distHtmlPath(urlPath) {
 }
 
 function expectedCanonical(path) {
-  if (path === "/") return "https://jetlag.gelbhart.dev/";
-  return `https://jetlag.gelbhart.dev${path}`;
+  if (path === "/") return `${policy.siteOrigin}/`;
+  return `${policy.siteOrigin}${path}`;
 }
 
 let failed = false;
