@@ -52,6 +52,10 @@ import { grantAccess, hasAccessClaim } from "../../services/core/accessControl";
 import {
   createPremiumRemoteSession,
 } from "../../services/billing/premiumBilling";
+import {
+  ANALYTICS_EVENTS,
+  track,
+} from "../../services/core/analytics";
 import { setPremiumApiContext } from "../../services/core/premiumApiContext";
 import { unionGameAreas } from "../../domain/geometry/unionGameAreas";
 import { parseBoundaryFile } from "../../services/core/kmzImport";
@@ -658,6 +662,12 @@ export function useCreateSession() {
         setSession(localSession, "local");
         setPremiumApiContext(localSession);
       }
+
+      track(ANALYTICS_EVENTS.session_created, {
+        tier: isFirebaseConfigured() ? tier : "free",
+        gameSize,
+        role: playerRole,
+      });
 
       if (!lowPowerMode) {
         const matchingAreas = await resolveSessionMatchingAreas({
