@@ -19,6 +19,20 @@ export { ANALYTICS_EVENTS, type AnalyticsEventName, type AnalyticsEventProps };
 export const POSTHOG_API_HOST = "/ingest";
 export const POSTHOG_UI_HOST = "https://eu.posthog.com";
 
+function resolvePosthogApiHost(): string {
+  try {
+    const cap = (globalThis as { Capacitor?: { isNativePlatform?: () => boolean } })
+      .Capacitor;
+    if (cap?.isNativePlatform?.()) {
+      return "https://eu.i.posthog.com";
+    }
+  } catch {
+    // ignore
+  }
+  return POSTHOG_API_HOST;
+}
+
+
 /** Keys that must never leave the device via product analytics. */
 const FORBIDDEN_PROP_KEYS = new Set([
   "sessioncode",
@@ -139,7 +153,7 @@ export function initAnalytics(): void {
     // Sticky persistence can retain opt-out across deny → Accept; clear before init.
     posthog.opt_in_capturing();
     posthog.init(key, {
-      api_host: POSTHOG_API_HOST,
+      api_host: resolvePosthogApiHost(),
       ui_host: POSTHOG_UI_HOST,
       persistence: "localStorage",
       autocapture: false,

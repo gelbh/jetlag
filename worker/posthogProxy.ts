@@ -36,7 +36,19 @@ export async function handlePosthogProxyRequest(
     pathWithSearch.startsWith("/array/");
   const host = isAsset ? ASSET_HOST : API_HOST;
 
-  const headers = new Headers(request.headers);
+  const headers = new Headers();
+  for (const name of [
+    "content-type",
+    "content-encoding",
+    "accept",
+    "accept-language",
+    "user-agent",
+  ] as const) {
+    const value = request.headers.get(name);
+    if (value) {
+      headers.set(name, value);
+    }
+  }
   headers.delete("cookie");
   headers.set("Host", host);
   // Do not forward CF-Connecting-IP / X-Forwarded-For: product disables GeoIP
