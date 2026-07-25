@@ -1,15 +1,25 @@
-//! Elimination-mask geometry kernel (Rust / WASM pilot).
+//! Geometry kernel (Rust / WASM) — mask + half-plane + geodesic.
 
+pub mod geodesic;
+pub mod geodesic_buffer;
+pub mod half_plane;
 pub mod mask;
 pub mod types;
 
+pub use geodesic_buffer::geodesic_line_buffer;
+pub use half_plane::{
+    build_half_plane_polygon, build_radar_shaded_region, DivisionAnchor, ShadedSide,
+};
 pub use mask::{
     build_end_game_mask_from_disks, build_mask_from_union_input, feature_contains_lng_lat,
     DiskSpec, GameArea, UnionInput,
 };
 pub use types::{GameAreaGeometry, PolygonFeature};
 
-use mask::{build_end_game_mask_from_disks as build_end_game_native, build_mask_from_union_input as build_mask_native};
+use mask::{
+    build_end_game_mask_from_disks as build_end_game_native,
+    build_mask_from_union_input as build_mask_native,
+};
 use types::{DiskSpecJson, EliminationUnionInputJson};
 use wasm_bindgen::prelude::*;
 
