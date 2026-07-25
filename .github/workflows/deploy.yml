@@ -23,6 +23,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npx playwright install --with-deps chromium
       - run: npm run build
       - run: npx wrangler deploy --dry-run
 
@@ -177,6 +178,9 @@ jobs:
             echo "::error::VITE_FIREBASE_APP_CHECK_SITE_KEY is required for production builds."
             exit 1
           fi
+      - name: Install Playwright Chromium
+        if: steps.changes.outputs.frontend == 'true'
+        run: npx playwright install --with-deps chromium
       - name: Build production bundle
         if: steps.changes.outputs.frontend == 'true'
         run: doppler run --config prd -- npm run build 2>&1 | tee build.log

@@ -35,6 +35,7 @@ import {
 import { removeBootSplash } from "./domain/device/bootSplash";
 import { notifyAppNeedRefresh } from "./domain/device/serviceWorkerRefresh";
 import { useEdgeSwipeBack } from "./hooks/useEdgeSwipeBack";
+import { useRouteSeo } from "./hooks/useRouteSeo";
 import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";
 import { useSessionStore } from "./state/sessionStore";
 import { AppNavigate } from "./navigation/AppNavigate";
@@ -79,6 +80,11 @@ function AnalyticsPageViewTracker() {
     Sentry.getCurrentScope().setTransactionName(location.pathname);
   }, [location]);
 
+  return null;
+}
+
+function RouteSeoTracker() {
+  useRouteSeo();
   return null;
 }
 
@@ -170,6 +176,7 @@ export default function App() {
             <RouteReadinessSensor />
             <EdgeSwipeBackBinder />
             <AnalyticsPageViewTracker />
+            <RouteSeoTracker />
             <ChunkReloadContextBinder />
             <AppUpdateBanner />
             <AnalyticsConsentBanner />
