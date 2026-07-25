@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { buildMapDraftOverlays } from "./useMapDraftOverlays";
 import { usePlacementMapFocus } from "./usePlacementMapFocus";
 import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
@@ -99,9 +99,13 @@ const pinDraft = placementCameraDraftFromOverlaySources({
   ...pinSources,
 });
 
-const pinOverlays = buildMapDraftOverlays(pinSources).overlays;
+let pinOverlays: MapDraftOverlay[] = [];
 
 describe("usePlacementMapFocus", () => {
+  beforeAll(async () => {
+    pinOverlays = (await buildMapDraftOverlays(pinSources)).overlays;
+  });
+
   it("uses default focus bounds until overlays change", () => {
     const { result } = renderHook(() =>
       usePlacementMapFocus({
@@ -176,7 +180,7 @@ describe("usePlacementMapFocus", () => {
     expect(result.current.placementRecenterToken).toBe(1);
   });
 
-  it("throttles walk reframes to at most once every 2 seconds", () => {
+  it("throttles walk reframes to at most once every 2 seconds", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-13T10:00:00Z"));
 
@@ -195,7 +199,7 @@ describe("usePlacementMapFocus", () => {
 
     const walkDraft = placementCameraDraftFromOverlaySources(walkSourcesBase);
 
-    const walkOverlaysA = buildMapDraftOverlays(walkSourcesBase).overlays;
+    const walkOverlaysA = (await buildMapDraftOverlays(walkSourcesBase)).overlays;
 
     const { result, rerender } = renderHook(
       ({
@@ -228,13 +232,13 @@ describe("usePlacementMapFocus", () => {
         walkCurrentPoint: [53.351, -6.261],
       },
     });
-    const walkOverlaysB = buildMapDraftOverlays({
+    const walkOverlaysB = (await buildMapDraftOverlays({
       ...walkSourcesBase,
       thermometer: {
         ...walkSourcesBase.thermometer,
         walkCurrentPoint: [53.351, -6.261],
       },
-    }).overlays;
+    })).overlays;
 
     rerender({ overlays: walkOverlaysB, draft: walkDraftB });
     expect(result.current.placementRecenterToken).toBe(1);
@@ -250,13 +254,13 @@ describe("usePlacementMapFocus", () => {
         walkCurrentPoint: [53.352, -6.262],
       },
     });
-    const walkOverlaysC = buildMapDraftOverlays({
+    const walkOverlaysC = (await buildMapDraftOverlays({
       ...walkSourcesBase,
       thermometer: {
         ...walkSourcesBase.thermometer,
         walkCurrentPoint: [53.352, -6.262],
       },
-    }).overlays;
+    })).overlays;
 
     rerender({ overlays: walkOverlaysC, draft: walkDraftC });
     expect(result.current.placementRecenterToken).toBe(2);

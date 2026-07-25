@@ -6,7 +6,7 @@ import type { HidingZoneRecord } from "../session/hidingZone";
 import {
   buildCombinedEliminationMask,
   buildEndGameEliminationMask,
-  eliminationFeatureForAnnotation,
+  eliminationFeatureForAnnotationTs,
 } from "./combinedEliminationMask";
 import { unionEliminationPartsLegacy } from "./unionPolygonFeatures";
 
@@ -69,7 +69,7 @@ describe("combinedEliminationMask parity", () => {
     const candidate = buildCombinedEliminationMask(annotations, gameArea);
     const baseline = unionEliminationPartsLegacy({
       polygons: annotations.map(
-        (annotation) => eliminationFeatureForAnnotation(annotation, gameArea)!,
+        (annotation) => eliminationFeatureForAnnotationTs(annotation, gameArea)!,
       ),
       disks: [],
     });
@@ -119,7 +119,7 @@ describe("combinedEliminationMask", () => {
   });
 
   it("includes draft preview features with committed eliminations", () => {
-    const draft = eliminationFeatureForAnnotation(
+    const draft = eliminationFeatureForAnnotationTs(
       matchingAnnotation("draft", -0.12),
       gameArea,
     );
@@ -142,7 +142,7 @@ describe("combinedEliminationMask", () => {
   });
 
   it("does not throw when union receives an invalid draft polygon", () => {
-    const invalidDraft = eliminationFeatureForAnnotation(
+    const invalidDraft = eliminationFeatureForAnnotationTs(
       matchingAnnotation("draft", -0.12),
       gameArea,
     );

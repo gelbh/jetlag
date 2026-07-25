@@ -12,15 +12,16 @@ import {
   buildMultiPlaceNearRegion,
 } from "./nearRegions";
 
-export function buildCoastlineEliminationRegion(
+export async function buildCoastlineEliminationRegion(
   segments: Feature<LineString>[],
   distanceMeters: number,
   gameArea: GameArea,
   answer: MeasuringAnswer,
   nearRegion?: Feature<Polygon | MultiPolygon> | null,
-): Feature<Polygon | MultiPolygon> | null {
+): Promise<Feature<Polygon | MultiPolygon> | null> {
   const nearCoast =
-    nearRegion ?? buildCoastlineNearRegion(segments, distanceMeters, gameArea);
+    nearRegion ??
+    (await buildCoastlineNearRegion(segments, distanceMeters, gameArea));
   if (!nearCoast) {
     return null;
   }
