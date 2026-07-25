@@ -45,6 +45,7 @@ import {
   boundingBoxToGameArea,
   gameAreaToBoundingBox,
 } from "../../domain/geometry/gameAreaBounds";
+import { parseSessionOpsMitigation } from "./firestoreSessionOps";
 import { parseFirestoreDocument } from "./zodConverter";
 import {
   annotationDocumentSchema,
@@ -601,6 +602,20 @@ export function deserializeSessionFromFirestore(
     gameAreaLabel:
       typeof document.gameAreaLabel === "string"
         ? document.gameAreaLabel
+        : undefined,
+    opsMitigation: parseSessionOpsMitigation(document.opsMitigation),
+    requiredMinAppVersion:
+      typeof document.requiredMinAppVersion === "string"
+        ? document.requiredMinAppVersion
+        : undefined,
+    requiredMinAppVersionSetAt:
+      typeof document.requiredMinAppVersionSetAt === "string"
+        ? document.requiredMinAppVersionSetAt
+        : undefined,
+    requiredMinAppVersionGraceSeconds:
+      typeof document.requiredMinAppVersionGraceSeconds === "number" &&
+      Number.isFinite(document.requiredMinAppVersionGraceSeconds)
+        ? document.requiredMinAppVersionGraceSeconds
         : undefined,
   };
 }
