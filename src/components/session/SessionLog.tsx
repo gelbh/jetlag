@@ -1,27 +1,32 @@
-import {
-  type AnnotationRecord,
-} from "../../domain/map/annotations";
+import { type AnnotationRecord } from "../../domain/map/annotations";
+import { useSessionActivityLog } from "../../hooks/session/useSessionActivityLog";
 import { SheetHeader } from "../ui/SheetHeader";
 import { SheetHost } from "../ui/SheetHost";
 import { SessionLogBody } from "./SessionLogBody";
 
 interface SessionLogProps {
   open: boolean;
+  sessionId: string;
   annotations: AnnotationRecord[];
   onClose: () => void;
   onDelete: (id: string) => void;
   onEdit: (id: string) => void;
+  onSelect?: (id: string) => void;
   readOnly?: boolean;
 }
 
 export function SessionLog({
   open,
+  sessionId,
   annotations,
   onClose,
   onDelete,
   onEdit,
+  onSelect,
   readOnly = false,
 }: SessionLogProps) {
+  const events = useSessionActivityLog(sessionId);
+
   return (
     <SheetHost
       open={open}
@@ -39,9 +44,11 @@ export function SessionLog({
       />
 
       <SessionLogBody
+        events={events}
         annotations={annotations}
         onDelete={onDelete}
         onEdit={onEdit}
+        onSelect={onSelect}
         readOnly={readOnly}
       />
     </SheetHost>

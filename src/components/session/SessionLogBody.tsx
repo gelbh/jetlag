@@ -1,117 +1,146 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { isActive, type AnnotationRecord } from "../../domain/map/annotations";
 import {
-  annotationSummary,
-  isActive,
-  type AnnotationRecord,
-  type AnnotationType,
-} from "../../domain/map/annotations";
-import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
-
-const FILTER_OPTIONS: Array<AnnotationType | "all"> = [
-  "all",
-  "radar",
-  "thermometer",
-  "measuring",
-  "matching",
-  "zone",
-  "pin",
-  "tentacle",
-];
+  activityAnnotationId,
+  sessionActivitySummary,
+  sessionActivityTypeLabel,
+  sortActivityEventsDesc,
+  type SessionActivityEvent,
+  type SessionActivityType,
+} from "../../domain/session/sessionActivityLog";
 
 interface SessionLogBodyProps {
+  events: readonly SessionActivityEvent[];
   annotations: AnnotationRecord[];
-  onDelete: (id: string) => void;
-  onEdit: (id: string) => void;
+  onDelete: (annotationId: string) => void;
+  onEdit: (annotationId: string) => void;
+  onSelect?: (annotationId: string) => void;
   readOnly?: boolean;
   compact?: boolean;
 }
 
+function typeLabelClass(type: SessionActivityType): string {
+  switch (type) {
+    case "session_started":
+    case "hiding_timer_started":
+    case "seeking_started":
+      return "text-brand-blue";
+    case "question_asked":
+    case "thermometer_walk_started":
+    case "photo_asked":
+      return "text-highlight";
+    case "question_answered":
+    case "thermometer_walk_separated":
+    case "photo_answered":
+      return "text-status-success";
+    case "question_cancelled":
+    case "game_ended":
+      return "text-ink-muted";
+    default: {
+      const _exhaustive: never = type;
+      return _exhaustive;
+    }
+  }
+}
+
+function answeredLate(event: SessionActivityEvent): boolean {
+  return event.type === "question_answered" && event.payload.answeredLate === true;
+}
+
 export function SessionLogBody({
+  events,
   annotations,
   onDelete,
   onEdit,
+  onSelect,
   readOnly = false,
   compact = false,
 }: SessionLogBodyProps) {
-  const distanceUnit = useSessionDistanceUnit();
-  const [filter, setFilter] = useState<AnnotationType | "all">("all");
-
-  const active = useMemo(() => {
-    const items = annotations.filter(isActive).slice().reverse();
-    if (filter === "all") {
-      return items;
+  const activeById = useMemo(() => {
+    const map = new Map<string, AnnotationRecord>();
+    for (const annotation of annotations) {
+      if (isActive(annotation)) {
+        map.set(annotation.id, annotation);
+      }
     }
+    return map;
+  }, [annotations]);
 
-    return items.filter((annotation) => annotation.type === filter);
-  }, [annotations, filter]);
+  const sorted = useMemo(() => sortActivityEventsDesc(events), [events]);
 
-  const filterButtonClass = compact ? "min-h-9 px-2.5 text-xs" : "min-h-10 px-3 text-sm";
+  const rowPad = compact ? "px-2.5 py-2" : "px-3 py-2.5";
+  const actionPad = compact ? "min-h-9 px-2.5 text-xs" : "min-h-10 px-3 text-sm";
 
   return (
-    <>
-      <div className="mb-3 flex shrink-0 flex-wrap gap-1.5">
-        {FILTER_OPTIONS.map((option) => (
-          <button
-            key={option}
-            type="button"
-            onClick={() => setFilter(option)}
-            className={`rounded-full capitalize ${filterButtonClass} ${
-              filter === option
-                ? "bg-action text-action-ink"
-                : "bg-surface-raised text-ink"
-            }`}
-          >
-            {option}
-          </button>
-        ))}
-      </div>
+    <div className="min-h-0 space-y-1.5">
+      {sorted.length === 0 ? (
+        <p className="text-sm text-ink-dim">No activity yet.</p>
+      ) : (
+        sorted.map((event) => {
+          const linkedId = activityAnnotationId(event);
+          const liveId =
+            linkedId && activeById.has(linkedId) ? linkedId : undefined;
+          const summary = sessionActivitySummary(event);
+          const showActions = Boolean(liveId) && !readOnly;
+          const selectable = Boolean(liveId && onSelect);
+          const late = answeredLate(event);
 
-      <div className="min-h-0 space-y-2">
-        {active.length === 0 ? (
-          <p className="text-sm text-ink-dim">No annotations yet.</p>
-        ) : (
-          active.map((annotation) => (
+          return (
             <div
-              key={annotation.id}
-              className="flex items-center justify-between gap-3 rounded-xl bg-surface-raised/80 px-3 py-2.5"
+              key={event.id}
+              className={`flex items-start justify-between gap-2 rounded-md bg-surface-raised/80 ${rowPad}`}
             >
               <button
                 type="button"
-                onClick={() => onEdit(annotation.id)}
-                className="min-w-0 flex-1 text-left"
-                disabled={readOnly}
+                className="min-w-0 flex-1 text-left disabled:cursor-default"
+                disabled={!selectable}
+                onClick={() => {
+                  if (liveId && onSelect) {
+                    onSelect(liveId);
+                  }
+                }}
               >
-                <p className="text-sm font-medium">
-                  {annotationSummary(annotation, distanceUnit)}
+                <p
+                  className={`font-display text-[10px] font-semibold uppercase tracking-[0.12em] ${typeLabelClass(event.type)}`}
+                >
+                  {sessionActivityTypeLabel(event.type)}
                 </p>
-                <p className="text-xs text-ink-dim">
-                  {new Date(
-                    annotation.metadata.createdAt,
-                  ).toLocaleTimeString()}
+                <p className="truncate text-sm font-medium text-ink" title={summary}>
+                  {summary}
+                </p>
+                <p className="flex flex-wrap items-center gap-x-2 text-xs text-ink-dim">
+                  <span>
+                    {new Date(event.createdAt).toLocaleTimeString()}
+                  </span>
+                  {late ? (
+                    <span className="font-display text-[10px] font-semibold uppercase tracking-[0.1em] text-status-error">
+                      Late
+                    </span>
+                  ) : null}
                 </p>
               </button>
-              {readOnly ? null : (
-                <div className="flex shrink-0 gap-2">
+              {showActions && liveId ? (
+                <div className="flex shrink-0 gap-1.5 pt-0.5">
                   <button
                     type="button"
-                    onClick={() => onEdit(annotation.id)}
-                    className="min-h-10 rounded-xl bg-border px-3 text-sm text-ink"
+                    onClick={() => onEdit(liveId)}
+                    className={`rounded-md bg-border text-ink ${actionPad}`}
                   >
                     Edit
                   </button>
                   <button
                     type="button"
-                    onClick={() => onDelete(annotation.id)}
-                    className="min-h-10 rounded-xl bg-status-error-surface px-3 text-sm text-status-error"
+                    onClick={() => onDelete(liveId)}
+                    className={`rounded-md bg-status-error-surface text-status-error ${actionPad}`}
                   >
                     Delete
                   </button>
                 </div>
-              )}
+              ) : null}
             </div>
-          ))
-        )}
-      </div>
-    </>
+          );
+        })
+      )}
+    </div>
   );
 }

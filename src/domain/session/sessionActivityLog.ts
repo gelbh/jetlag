@@ -92,6 +92,62 @@ export function sortActivityEventsDesc(
   );
 }
 
+/** Annotation id for map focus / edit when the event links to a live answer. */
+export function activityAnnotationId(
+  event: SessionActivityEvent,
+): string | undefined {
+  switch (event.type) {
+    case "question_asked":
+    case "question_answered":
+    case "question_cancelled":
+      return event.payload.annotationId;
+    case "session_started":
+    case "hiding_timer_started":
+    case "seeking_started":
+    case "thermometer_walk_started":
+    case "thermometer_walk_separated":
+    case "photo_asked":
+    case "photo_answered":
+    case "game_ended":
+      return undefined;
+    default: {
+      const _exhaustive: never = event;
+      return _exhaustive;
+    }
+  }
+}
+
+/** Short Barlow label for timeline rows. */
+export function sessionActivityTypeLabel(type: SessionActivityType): string {
+  switch (type) {
+    case "session_started":
+      return "Session";
+    case "hiding_timer_started":
+      return "Hiding";
+    case "seeking_started":
+      return "Seeking";
+    case "question_asked":
+      return "Asked";
+    case "thermometer_walk_started":
+      return "Walk";
+    case "thermometer_walk_separated":
+      return "Ready";
+    case "question_answered":
+      return "Answered";
+    case "question_cancelled":
+      return "Cancelled";
+    case "photo_asked":
+    case "photo_answered":
+      return "Photo";
+    case "game_ended":
+      return "Ended";
+    default: {
+      const _exhaustive: never = type;
+      return _exhaustive;
+    }
+  }
+}
+
 function activityToolLabel(toolType: AnnotationType): string {
   const entry = MAP_TOOL_DOCK_ENTRIES.find((item) => item.id === toolType);
   return entry?.name ?? toolType;

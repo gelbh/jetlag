@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   FIXED_ACTIVITY_EVENT_IDS,
+  activityAnnotationId,
   createActivityEventId,
   phaseActivityEventId,
   sessionActivitySummary,
+  sessionActivityTypeLabel,
   sortActivityEventsDesc,
   type SessionActivityEvent,
 } from "./sessionActivityLog";
@@ -125,5 +127,37 @@ describe("sessionActivityLog", () => {
         payload: {},
       } as SessionActivityEvent),
     ).toThrow(/Unhandled session activity type/);
+  });
+
+  it("returns annotationId only for question events that carry one", () => {
+    expect(
+      activityAnnotationId(
+        baseEvent({
+          id: "answered",
+          type: "question_answered",
+          createdAt: "2026-07-25T12:00:00.000Z",
+          payload: {
+            toolType: "radar",
+            promptText: "Near?",
+            annotationId: "ann-9",
+          },
+        }),
+      ),
+    ).toBe("ann-9");
+    expect(
+      activityAnnotationId(
+        baseEvent({
+          id: "session_started",
+          type: "session_started",
+          createdAt: "2026-07-25T12:00:00.000Z",
+          payload: {},
+        }),
+      ),
+    ).toBeUndefined();
+  });
+
+  it("labels activity types for the timeline", () => {
+    expect(sessionActivityTypeLabel("thermometer_walk_started")).toBe("Walk");
+    expect(sessionActivityTypeLabel("question_answered")).toBe("Answered");
   });
 });
