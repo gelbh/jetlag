@@ -18,6 +18,21 @@ type MaskWasmModule = {
 
 let wasmModulePromise: Promise<MaskWasmModule> | null = null;
 
+function isPolygonFeature(value: unknown): value is PolygonFeature {
+  if (value == null || typeof value !== "object") {
+    return false;
+  }
+  const feature = value as { type?: unknown; geometry?: unknown };
+  if (feature.type !== "Feature") {
+    return false;
+  }
+  if (feature.geometry == null || typeof feature.geometry !== "object") {
+    return false;
+  }
+  const geometryType = (feature.geometry as { type?: unknown }).type;
+  return geometryType === "Polygon" || geometryType === "MultiPolygon";
+}
+
 function parseWasmFeature(result: unknown): PolygonFeature | null {
   if (result == null) {
     return null;
@@ -26,12 +41,10 @@ function parseWasmFeature(result: unknown): PolygonFeature | null {
     if (result.length === 0) {
       return null;
     }
-    return JSON.parse(result) as PolygonFeature;
+    const parsed: unknown = JSON.parse(result);
+    return isPolygonFeature(parsed) ? parsed : null;
   }
-  if (typeof result === "object") {
-    return result as PolygonFeature;
-  }
-  return null;
+  return isPolygonFeature(result) ? result : null;
 }
 
 async function loadMaskWasm(): Promise<MaskWasmModule> {
