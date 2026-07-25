@@ -1,7 +1,11 @@
 import { useEffect, useRef } from "react";
-import { listOrphanWalkingThermometerQuestionIds } from "../../domain/questions";
+import {
+  listOrphanWalkingThermometerQuestionIds,
+  listStaleWalkingThermometerQuestionIds,
+} from "../../domain/questions";
 import type { PlayerRole } from "../../domain/session/playerRole";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { ThermometerWalkCancelReason } from "../../services/firestore/firestoreSessionExtras";
 
 export function useCancelOrphanThermometerWalks(args: {
   sessionId: string | null;
@@ -9,13 +13,15 @@ export function useCancelOrphanThermometerWalks(args: {
   myRole: PlayerRole | null;
   memberUids: readonly string[];
   pendingQuestions: readonly PendingQuestionRecord[];
+  seekerLocations: readonly { uid: string; updatedAt: string }[];
   cancelThermometerWalk: (input: {
     sessionId: string;
     pendingQuestionId: string;
     senderUid: string;
     senderRole: PlayerRole;
-    reason: "orphan";
+    reason: Extract<ThermometerWalkCancelReason, "orphan" | "stale">;
   }) => Promise<void>;
+  nowMs?: () => number;
 }): void {
   const {
     sessionId,
@@ -23,7 +29,9 @@ export function useCancelOrphanThermometerWalks(args: {
     myRole,
     memberUids,
     pendingQuestions,
+    seekerLocations,
     cancelThermometerWalk,
+    nowMs = Date.now,
   } = args;
   const handledIdsRef = useRef(new Set<string>());
 
@@ -40,8 +48,36 @@ export function useCancelOrphanThermometerWalks(args: {
       pendingQuestions,
       memberUids,
     );
+    const orphanIdSet = new Set(orphanIds);
 
-    for (const pendingQuestionId of orphanIds) {
+    const walkerLocationUpdatedAtByUid = new Map<string, string | null>();
+    for (const location of seekerLocations) {
+      walkerLocationUpdatedAtByUid.set(location.uid, location.updatedAt);
+    }
+
+    const staleIds = listStaleWalkingThermometerQuestionIds(
+      pendingQuestions,
+      walkerLocationUpdatedAtByUid,
+      nowMs(),
+    );
+
+    const toCancel: Array<{
+      pendingQuestionId: string;
+      reason: "orphan" | "stale";
+    }> = [
+      ...orphanIds.map((pendingQuestionId) => ({
+        pendingQuestionId,
+        reason: "orphan" as const,
+      })),
+      ...staleIds
+        .filter((id) => !orphanIdSet.has(id))
+        .map((pendingQuestionId) => ({
+          pendingQuestionId,
+          reason: "stale" as const,
+        })),
+    ];
+
+    for (const { pendingQuestionId, reason } of toCancel) {
       if (handledIdsRef.current.has(pendingQuestionId)) {
         continue;
       }
@@ -52,7 +88,7 @@ export function useCancelOrphanThermometerWalks(args: {
         pendingQuestionId,
         senderUid: myUid,
         senderRole: myRole,
-        reason: "orphan",
+        reason,
       }).catch(() => {
         handledIdsRef.current.delete(pendingQuestionId);
       });
@@ -62,7 +98,9 @@ export function useCancelOrphanThermometerWalks(args: {
     memberUids,
     myRole,
     myUid,
+    nowMs,
     pendingQuestions,
+    seekerLocations,
     sessionId,
   ]);
 }

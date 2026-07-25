@@ -47,6 +47,7 @@ import {
 export const THERMOMETER_WALK_CANCEL_TEXT = {
   left: "Thermometer walk cancelled — seeker left.",
   orphan: "Thermometer walk cancelled — seeker left the session.",
+  stale: "Thermometer walk cancelled — walk went stale.",
   manual: "Thermometer walk cancelled.",
 } as const;
 

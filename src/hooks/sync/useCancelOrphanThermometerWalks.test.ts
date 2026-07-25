@@ -1,5 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { THERMOMETER_WALK_MAX_DURATION_MS } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { useCancelOrphanThermometerWalks } from "./useCancelOrphanThermometerWalks";
 
@@ -36,6 +37,7 @@ describe("useCancelOrphanThermometerWalks", () => {
           myRole: "seeker",
           memberUids,
           pendingQuestions,
+          seekerLocations: [],
           cancelThermometerWalk,
         }),
       {
@@ -75,6 +77,7 @@ describe("useCancelOrphanThermometerWalks", () => {
         myRole: "hider",
         memberUids: ["host-1", "hider-1"],
         pendingQuestions: [walkingQuestion()],
+        seekerLocations: [],
         cancelThermometerWalk,
       }),
     );
@@ -85,13 +88,15 @@ describe("useCancelOrphanThermometerWalks", () => {
   });
 
   it("does not cancel walks whose creator is still a member", async () => {
+    const createdAt = new Date().toISOString();
     renderHook(() =>
       useCancelOrphanThermometerWalks({
         sessionId: "session-1",
         myUid: "seeker-2",
         myRole: "seeker",
         memberUids: ["host-1", "seeker-2", "gone-1"],
-        pendingQuestions: [walkingQuestion()],
+        pendingQuestions: [walkingQuestion({ createdByUid: "gone-1", createdAt })],
+        seekerLocations: [],
         cancelThermometerWalk,
       }),
     );
@@ -99,6 +104,116 @@ describe("useCancelOrphanThermometerWalks", () => {
     await waitFor(() => {
       expect(cancelThermometerWalk).not.toHaveBeenCalled();
     });
+  });
+
+  it("cancels stale walks once when creator is still a member", async () => {
+    const createdAt = "2026-01-01T00:00:00.000Z";
+    const nowMs = Date.parse(createdAt) + THERMOMETER_WALK_MAX_DURATION_MS + 1;
+    const staleWalk = walkingQuestion({
+      id: "pq-stale",
+      createdByUid: "seeker-1",
+      createdAt,
+    });
+
+    const { rerender } = renderHook(
+      ({ pendingQuestions }) =>
+        useCancelOrphanThermometerWalks({
+          sessionId: "session-1",
+          myUid: "seeker-2",
+          myRole: "seeker",
+          memberUids: ["host-1", "seeker-1", "seeker-2"],
+          pendingQuestions,
+          seekerLocations: [
+            { uid: "seeker-1", updatedAt: "2026-01-01T00:00:00.000Z" },
+          ],
+          cancelThermometerWalk,
+          nowMs: () => nowMs,
+        }),
+      {
+        initialProps: {
+          pendingQuestions: [staleWalk] as PendingQuestionRecord[],
+        },
+      },
+    );
+
+    await waitFor(() => {
+      expect(cancelThermometerWalk).toHaveBeenCalledTimes(1);
+    });
+    expect(cancelThermometerWalk).toHaveBeenCalledWith({
+      sessionId: "session-1",
+      pendingQuestionId: "pq-stale",
+      senderUid: "seeker-2",
+      senderRole: "seeker",
+      reason: "stale",
+    });
+
+    rerender({ pendingQuestions: [staleWalk] });
+
+    await waitFor(() => {
+      expect(cancelThermometerWalk).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("does not cancel walks younger than max duration", async () => {
+    const createdAt = "2026-01-01T00:00:00.000Z";
+    const nowMs = Date.parse(createdAt) + THERMOMETER_WALK_MAX_DURATION_MS - 1;
+
+    renderHook(() =>
+      useCancelOrphanThermometerWalks({
+        sessionId: "session-1",
+        myUid: "seeker-2",
+        myRole: "seeker",
+        memberUids: ["host-1", "seeker-1", "seeker-2"],
+        pendingQuestions: [
+          walkingQuestion({
+            id: "pq-fresh",
+            createdByUid: "seeker-1",
+            createdAt,
+          }),
+        ],
+        seekerLocations: [],
+        cancelThermometerWalk,
+        nowMs: () => nowMs,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(cancelThermometerWalk).not.toHaveBeenCalled();
+    });
+  });
+
+  it("prefers orphan reason when walk is both orphan and stale", async () => {
+    const createdAt = "2026-01-01T00:00:00.000Z";
+    const nowMs = Date.parse(createdAt) + THERMOMETER_WALK_MAX_DURATION_MS + 1;
+
+    renderHook(() =>
+      useCancelOrphanThermometerWalks({
+        sessionId: "session-1",
+        myUid: "seeker-2",
+        myRole: "seeker",
+        memberUids: ["host-1", "seeker-2"],
+        pendingQuestions: [
+          walkingQuestion({
+            id: "pq-both",
+            createdByUid: "gone-1",
+            createdAt,
+          }),
+        ],
+        seekerLocations: [],
+        cancelThermometerWalk,
+        nowMs: () => nowMs,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(cancelThermometerWalk).toHaveBeenCalledTimes(1);
+    });
+    expect(cancelThermometerWalk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pendingQuestionId: "pq-both",
+        reason: "orphan",
+      }),
+    );
   });
 
   it("retries after a failed cancellation attempt", async () => {
@@ -112,6 +227,7 @@ describe("useCancelOrphanThermometerWalks", () => {
           myRole: "seeker",
           memberUids: ["host-1", "seeker-2"],
           pendingQuestions,
+          seekerLocations: [],
           cancelThermometerWalk,
         }),
       { initialProps: { pendingQuestions: [walkingQuestion()] } },
@@ -126,5 +242,44 @@ describe("useCancelOrphanThermometerWalks", () => {
     await waitFor(() => {
       expect(cancelThermometerWalk).toHaveBeenCalledTimes(2);
     });
+  });
+
+  it("retries after a failed stale cancellation attempt", async () => {
+    cancelThermometerWalk.mockRejectedValueOnce(new Error("unavailable"));
+    const createdAt = "2026-01-01T00:00:00.000Z";
+    const nowMs = Date.parse(createdAt) + THERMOMETER_WALK_MAX_DURATION_MS + 1;
+    const staleWalk = walkingQuestion({
+      id: "pq-stale-retry",
+      createdByUid: "seeker-1",
+      createdAt,
+    });
+
+    const { rerender } = renderHook(
+      ({ pendingQuestions }) =>
+        useCancelOrphanThermometerWalks({
+          sessionId: "session-1",
+          myUid: "seeker-2",
+          myRole: "seeker",
+          memberUids: ["host-1", "seeker-1", "seeker-2"],
+          pendingQuestions,
+          seekerLocations: [],
+          cancelThermometerWalk,
+          nowMs: () => nowMs,
+        }),
+      { initialProps: { pendingQuestions: [staleWalk] } },
+    );
+
+    await waitFor(() => {
+      expect(cancelThermometerWalk).toHaveBeenCalledTimes(1);
+    });
+
+    rerender({ pendingQuestions: [staleWalk] });
+
+    await waitFor(() => {
+      expect(cancelThermometerWalk).toHaveBeenCalledTimes(2);
+    });
+    expect(cancelThermometerWalk).toHaveBeenLastCalledWith(
+      expect.objectContaining({ reason: "stale" }),
+    );
   });
 });

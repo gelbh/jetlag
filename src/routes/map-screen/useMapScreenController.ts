@@ -373,6 +373,7 @@ export function useMapScreenController() {
     myRole,
     memberUids: session?.memberUids ?? [],
     pendingQuestions,
+    seekerLocations,
     cancelThermometerWalk,
   });
 
