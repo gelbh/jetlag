@@ -110,6 +110,10 @@ export interface IncidentRecord {
   email?: IncidentEmailState;
   mitigations?: IncidentMitigationRecord[];
   hotfix?: IncidentHotfixState;
+  /** Active session-ops summon id when a fix agent is running. */
+  activeSessionOpsSummonId?: string | null;
+  /** Summons consumed on this incident (free/premium capped). */
+  sessionOpsSummonCount?: number;
 }
 
 export interface IncidentMessageRecord {

@@ -179,7 +179,7 @@ export function deserializeIncidentFromFirestore(
     ? data.status
     : "open";
 
-  return {
+  const record: IncidentRecord = {
     id,
     status,
     createdAt: typeof data.createdAt === "string" ? data.createdAt : "",
@@ -195,6 +195,21 @@ export function deserializeIncidentFromFirestore(
     mitigations: parseMitigations(data.mitigations),
     hotfix: parseHotfix(data.hotfix),
   };
+  if ("activeSessionOpsSummonId" in data) {
+    record.activeSessionOpsSummonId = asNullableString(
+      data.activeSessionOpsSummonId,
+    );
+  }
+  if (
+    typeof data.sessionOpsSummonCount === "number" &&
+    Number.isFinite(data.sessionOpsSummonCount)
+  ) {
+    record.sessionOpsSummonCount = Math.max(
+      0,
+      Math.floor(data.sessionOpsSummonCount),
+    );
+  }
+  return record;
 }
 
 const MESSAGE_SENDERS = new Set<IncidentMessageSender>([
