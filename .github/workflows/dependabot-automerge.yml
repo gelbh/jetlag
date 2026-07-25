@@ -22,6 +22,10 @@ jobs:
       - name: Dependabot metadata
         id: metadata
         uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          # Dependabot commits are often unsigned in this repo; without this,
+          # fetch-metadata refuses and never enables auto-merge.
+          skip-commit-verification: true
 
       # Enables squash auto-merge only; GitHub still waits on main ruleset required checks
       # before merging. Use a Dependabot secret (not GITHUB_TOKEN) so the eventual merge
