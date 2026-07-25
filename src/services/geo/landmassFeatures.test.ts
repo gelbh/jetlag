@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../domain/map/annotations";
 import {
+  buildLandmassQuery,
   classifyLandmassAtPoint,
   computeLandmassFeatures,
   obstacleFeaturesFromElements,
@@ -20,6 +21,19 @@ const sampleGameArea: GameArea = {
 };
 
 describe("landmass features", () => {
+  it("builds a bbox landmass query that keeps way geometry", () => {
+    const query = buildLandmassQuery(sampleGameArea);
+
+    expect(query).not.toContain("area.searchArea");
+    expect(query).toContain('way["natural"="water"](51.4,-0.2,51.5,-0.1)');
+    expect(query).toContain(
+      'way["waterway"~"^(river|canal|dock)$"](51.4,-0.2,51.5,-0.1)',
+    );
+    expect(query).toContain('relation["natural"="water"](51.4,-0.2,51.5,-0.1)');
+    expect(query).toContain("out geom;");
+    expect(query).not.toContain("out center;");
+  });
+
   it("buffers waterways and treats water polygons as obstacles", async () => {
     const obstacles = await obstacleFeaturesFromElements([
       {

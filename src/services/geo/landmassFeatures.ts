@@ -39,6 +39,12 @@ type OverpassElement = {
   lat?: number;
   lon?: number;
   center?: { lat: number; lon: number };
+  bounds?: {
+    minlat: number;
+    minlon: number;
+    maxlat: number;
+    maxlon: number;
+  };
 };
 
 export type LandmassFeature = AdminDivisionFeature;
@@ -190,8 +196,18 @@ function namedIslandLabels(elements: OverpassElement[]): Map<string, string> {
       continue;
     }
 
-    const lat = element.lat ?? element.center?.lat;
-    const lng = element.lon ?? element.center?.lon;
+    const lat =
+      element.lat ??
+      element.center?.lat ??
+      (element.bounds
+        ? (element.bounds.minlat + element.bounds.maxlat) / 2
+        : undefined);
+    const lng =
+      element.lon ??
+      element.center?.lon ??
+      (element.bounds
+        ? (element.bounds.minlon + element.bounds.maxlon) / 2
+        : undefined);
     if (lat === undefined || lng === undefined) {
       continue;
     }
@@ -282,18 +298,21 @@ export async function computeLandmassFeatures(
 
 export function buildLandmassQuery(gameArea: GameArea): string {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
+  const bbox = `${south},${west},${north},${east}`;
 
+  // Use explicit bbox filters + `out geom` so tagged ways keep coordinates.
+  // `area.searchArea` was never populated (empty result). `out center` then
+  // `>; out geom` emitted tagged ways without geometry, so obstacles were empty
+  // and every play area collapsed to a single "Mainland".
   return `
-    [out:json][timeout:25][bbox:${south},${west},${north},${east}];
-    area.searchArea;
+    [out:json][timeout:25];
     (
-      way(area.searchArea)["natural"="water"];
-      way(area.searchArea)["waterway"~"^(river|canal|stream|ditch|dock)$"];
-      relation(area.searchArea)["place"~"^(island|islet)$"]["name"];
+      way["natural"="water"](${bbox});
+      way["waterway"~"^(river|canal|dock)$"](${bbox});
+      relation["natural"="water"](${bbox});
+      relation["place"~"^(island|islet)$"]["name"](${bbox});
     );
-    out center;
-    >;
-    out geom qt;
+    out geom;
   `;
 }
 
