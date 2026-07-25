@@ -1,7 +1,10 @@
 import { expose } from "comlink";
 import {
-  buildEndGameMaskFromDisks,
-  buildMaskFromUnionInput,
-} from "./kernel/buildMask";
+  runEndGameMaskFromDisks,
+  runMaskFromUnionInput,
+} from "./kernel/maskKernelRunner";
 
-expose({ buildMaskFromUnionInput, buildEndGameMaskFromDisks });
+expose({
+  buildMaskFromUnionInput: runMaskFromUnionInput,
+  buildEndGameMaskFromDisks: runEndGameMaskFromDisks,
+});
