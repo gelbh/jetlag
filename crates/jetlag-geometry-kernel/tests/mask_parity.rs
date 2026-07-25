@@ -38,6 +38,8 @@ fn unions_polygons_and_clips_to_game_area() {
     // Inside clipped square / union and game area
     assert!(feature_contains_lng_lat(&mask, -0.195, 51.45));
     assert!(feature_contains_lng_lat(&mask, -0.165, 51.45));
+    // Gap between the two squares (not in either polygon)
+    assert!(!feature_contains_lng_lat(&mask, -0.185, 51.45));
     // In the polygon west of the game-area boundary → clipped out
     assert!(!feature_contains_lng_lat(&mask, -0.21, 51.45));
     // Outside game area entirely

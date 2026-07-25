@@ -30,18 +30,15 @@ fn cold_half_plane_contains_colder_side_of_thermo() {
     )
     .expect("hot half-plane");
 
-    // Opposite halves should disagree on a probe near the west edge vs east edge.
-    let west_probe = feature_contains_lng_lat(&cold, -0.19, 51.45);
-    let east_probe = feature_contains_lng_lat(&cold, -0.11, 51.45);
-    assert_ne!(
-        west_probe, east_probe,
-        "cold half-plane should split west/east of the divider"
-    );
-    assert_ne!(
-        feature_contains_lng_lat(&hot, -0.19, 51.45),
-        feature_contains_lng_lat(&cold, -0.19, 51.45),
-        "hot and cold disagree at west probe"
-    );
+    // A west of B → hotter wedge points east; cold owns west, hot owns east.
+    let west_in_cold = feature_contains_lng_lat(&cold, -0.19, 51.45);
+    let east_in_cold = feature_contains_lng_lat(&cold, -0.11, 51.45);
+    let west_in_hot = feature_contains_lng_lat(&hot, -0.19, 51.45);
+    let east_in_hot = feature_contains_lng_lat(&hot, -0.11, 51.45);
+    assert!(west_in_cold, "cold half-plane should contain west probe");
+    assert!(!east_in_cold, "cold half-plane should exclude east probe");
+    assert!(!west_in_hot, "hot half-plane should exclude west probe");
+    assert!(east_in_hot, "hot half-plane should contain east probe");
 }
 
 #[test]

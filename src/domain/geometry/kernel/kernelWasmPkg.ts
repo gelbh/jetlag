@@ -56,18 +56,29 @@ export function parseWasmFeature(result: unknown): PolygonFeature | null {
       return null;
     }
     const parsed: unknown = JSON.parse(result);
-    return isPolygonFeature(parsed) ? parsed : null;
+    if (isPolygonFeature(parsed)) {
+      return parsed;
+    }
+    throw new Error("Geometry kernel returned an invalid feature");
   }
-  return isPolygonFeature(result) ? result : null;
+  if (isPolygonFeature(result)) {
+    return result;
+  }
+  throw new Error("Geometry kernel returned an invalid feature");
 }
 
 /** Single shared pkg promise for mask / half-plane / geodesic wrappers. */
 export async function loadKernelWasm(): Promise<KernelWasmModule> {
   if (!wasmModulePromise) {
     // Relative path: pkg/ is gitignored; avoid file: dep so npm ci works before wasm:build.
-    wasmModulePromise = import(
-      "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
-    ) as Promise<KernelWasmModule>;
+    wasmModulePromise = (
+      import(
+        "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
+      ) as Promise<KernelWasmModule>
+    ).catch((error) => {
+      wasmModulePromise = null;
+      throw error;
+    });
   }
   return wasmModulePromise;
 }

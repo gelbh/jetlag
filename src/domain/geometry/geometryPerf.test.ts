@@ -282,7 +282,11 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
       );
     });
 
-    expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
+    if (tsMs === 0) {
+      expect(wasmMs).toBe(0);
+    } else {
+      expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
+    }
   });
 
   it("wasm_geodesic_10_vertex median within 1.1x ts", async () => {
@@ -300,7 +304,11 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
       wasmPkg.geodesic_line_buffer_json(coordinatesJson, 200, null);
     });
 
-    expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
+    if (tsMs === 0) {
+      expect(wasmMs).toBe(0);
+    } else {
+      expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
+    }
   });
 });
 

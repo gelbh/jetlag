@@ -46,6 +46,18 @@ describe.skipIf(!wasmPkgReady)("geodesic wasm parity", () => {
     const wasm = await wasmGeodesicLineBuffer(shortLine, 200);
     assertPolygonTopologyParity(wasm, ts, topologyBbox);
   });
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
+    "rejects invalid sampleSpacingMeters (%s) with RangeError",
+    async (spacing) => {
+      expect(() => geodesicLineBuffer(shortLine, 200, spacing)).toThrow(
+        RangeError,
+      );
+      await expect(
+        wasmGeodesicLineBuffer(shortLine, 200, spacing),
+      ).rejects.toThrow(RangeError);
+    },
+  );
 });
 
 describe("geodesic wasm fallback", () => {

@@ -76,6 +76,31 @@ describe.skipIf(!wasmPkgReady)("half-plane wasm parity", () => {
     const wasm = await wasmBuildRadarShadedRegion(center, 400, gameArea, false);
     assertPolygonTopologyParity(wasm, ts, topologyBbox);
   });
+
+  it("matches TS topology on cold half-plane with start divisionAnchor", async () => {
+    const ts = buildHalfPlanePolygon(
+      thermoA,
+      thermoB,
+      gameArea,
+      "cold",
+      "start",
+    );
+    const wasm = await wasmBuildHalfPlanePolygon(
+      thermoA,
+      thermoB,
+      gameArea,
+      "cold",
+      "start",
+    );
+    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+  });
+
+  it("matches TS topology on radar inside shaded region", async () => {
+    const center: LatLngTuple = [51.45, -0.15];
+    const ts = buildRadarShadedRegion(center, 400, gameArea, true);
+    const wasm = await wasmBuildRadarShadedRegion(center, 400, gameArea, true);
+    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+  });
 });
 
 describe("half-plane wasm fallback", () => {
