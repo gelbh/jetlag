@@ -20,11 +20,18 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - run: cargo test -p jetlag-geometry-mask
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npm run wasm:build
       - run: npm run lint
       - run: npm run lint:css
       - run: npm run typecheck
@@ -37,6 +44,9 @@ jobs:
             geometry:
               - 'src/domain/geometry/**'
               - 'src/hooks/map/useCombinedEliminationMask.ts'
+              - 'crates/jetlag-geometry-mask/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
       - name: Geometry perf gates
         if: steps.geometry.outputs.geometry == 'true'
         run: npm run test:perf
@@ -48,6 +58,11 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
