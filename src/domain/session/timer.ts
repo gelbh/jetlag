@@ -106,7 +106,9 @@ export function reconcileTimerState(
 
   if (Math.abs(elapsedDiff) <= 2_000) {
     if (isTimerRunning(local) !== isTimerRunning(remote)) {
-      return remote;
+      // Prefer paused: resume is always an explicit start() write; do not
+      // resurrect a still-running remote over a host pause in flight.
+      return isTimerRunning(local) ? remote : local;
     }
     return local;
   }

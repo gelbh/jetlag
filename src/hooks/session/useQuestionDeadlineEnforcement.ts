@@ -18,6 +18,7 @@ interface UseQuestionDeadlineEnforcementParams {
   pendingQuestions: readonly PendingQuestionRecord[];
   hidingZones: readonly HidingZoneRecord[];
   timerRunning: boolean;
+  remoteTimerRunning: boolean;
   pauseTimer: () => void;
   resumeTimer: () => void;
   postSystemMessage: (text: string) => Promise<void>;
@@ -36,6 +37,7 @@ export function useQuestionDeadlineEnforcement({
   pendingQuestions,
   hidingZones,
   timerRunning,
+  remoteTimerRunning,
   pauseTimer,
   resumeTimer,
   postSystemMessage,
@@ -44,6 +46,7 @@ export function useQuestionDeadlineEnforcement({
   const autoPausedQuestionRef = useRef<string | null>(null);
   const resumeHandledRef = useRef<Set<string>>(new Set());
   const timerRunningRef = useRef(timerRunning);
+  const remoteTimerRunningRef = useRef(remoteTimerRunning);
 
   useEffect(() => {
     expiryHandledRef.current = new Set();
@@ -54,6 +57,10 @@ export function useQuestionDeadlineEnforcement({
   useEffect(() => {
     timerRunningRef.current = timerRunning;
   }, [timerRunning]);
+
+  useEffect(() => {
+    remoteTimerRunningRef.current = remoteTimerRunning;
+  }, [remoteTimerRunning]);
 
   useEffect(() => {
     if (!sessionId || !enabled) {
@@ -94,7 +101,7 @@ export function useQuestionDeadlineEnforcement({
 
           await postSystemMessage(DEADLINE_EXPIRED_MESSAGE);
 
-          if (timerRunningRef.current) {
+          if (timerRunningRef.current || remoteTimerRunningRef.current) {
             autoPausedQuestionRef.current = question.id;
             pauseTimer();
           }

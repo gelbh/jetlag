@@ -346,6 +346,7 @@ export function useMapScreenController() {
     pendingQuestions,
     hidingZones,
     timerRunning: timer.running,
+    remoteTimerRunning: Boolean(session?.timerRunningSince),
     pauseTimer: timer.pause,
     resumeTimer: timer.start,
     postSystemMessage: postDeadlineSystemMessage,
