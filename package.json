@@ -97,6 +97,7 @@
     "leaflet": "^1.9.4",
     "lru-cache": "^11.5.2",
     "martinez-polygon-clipping": "^0.8.1",
+    "posthog-js": "^1.407.2",
     "rbush": "^4.0.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
