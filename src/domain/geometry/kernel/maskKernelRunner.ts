@@ -3,7 +3,7 @@ import {
   buildMaskFromUnionInput as buildMaskFromUnionInputTs,
 } from "./buildMask";
 import type { MaskKernelMode } from "./maskKernelMode";
-import { bboxFromGameArea, maskTopologyMatches } from "./parity";
+import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
 import type {
   DiskSpec,
   EliminationUnionInput,
