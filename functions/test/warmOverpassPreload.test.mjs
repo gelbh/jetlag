@@ -17,6 +17,8 @@ describe("warmOverpassPreload", () => {
     assert.equal(queries.length, 5);
     assert.match(queries[0], /natural"="coastline"/);
     assert.match(queries[1], /natural"="water"/);
+    assert.doesNotMatch(queries[1], /area\.searchArea/);
+    assert.match(queries[1], /out geom;/);
     assert.match(queries[2], /leisure"="park"/);
   });
 

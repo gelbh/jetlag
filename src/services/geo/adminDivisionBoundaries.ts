@@ -261,11 +261,14 @@ export function buildAdminDivisionQuery(
 ): string {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
 
+  const bbox = `${south},${west},${north},${east}`;
+
+  // Explicit bbox — `area.searchArea` was never populated, so admin queries
+  // returned zero relations in production.
   return `
-    [out:json][timeout:25][bbox:${south},${west},${north},${east}];
-    area.searchArea;
+    [out:json][timeout:25];
     (
-      relation(area.searchArea)["boundary"="administrative"]["admin_level"="${adminLevel}"]["name"];
+      relation["boundary"="administrative"]["admin_level"="${adminLevel}"]["name"](${bbox});
     );
     out center;
     >;
