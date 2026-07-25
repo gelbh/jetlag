@@ -33,11 +33,14 @@ function mockHostConfirmDb({
   const incidents = new Map([["inc-1", { ...incident }]]);
   const sessions = new Map([["sess-1", { ...session }]]);
   const hostConfirms = new Map();
+  /** Serialize transactions so concurrent claims see committed state. */
+  let txChain = Promise.resolve();
 
   function confirmRef(incidentId, confirmId) {
     const key = `${incidentId}/${confirmId}`;
     return {
       id: confirmId,
+      path: `incidents/${incidentId}/hostConfirms/${confirmId}`,
       get: async () => ({
         exists: hostConfirms.has(key),
         data: () => hostConfirms.get(key),
@@ -88,6 +91,30 @@ function mockHostConfirmDb({
         };
       }
       throw new Error(`unexpected collection ${name}`);
+    },
+    async runTransaction(callback) {
+      const run = async () => {
+        const pendingUpdates = [];
+        const transaction = {
+          async get(ref) {
+            return ref.get();
+          },
+          update(ref, data) {
+            pendingUpdates.push({ ref, data });
+          },
+        };
+        const result = await callback(transaction);
+        for (const { ref, data } of pendingUpdates) {
+          await ref.update(data);
+        }
+        return result;
+      };
+      const next = txChain.then(run, run);
+      txChain = next.then(
+        () => undefined,
+        () => undefined,
+      );
+      return next;
     },
   };
 }
@@ -292,6 +319,53 @@ test("approveHostConfirmHandler host executes once then rejects reuse", async ()
     (error) => error.message === HOST_CONFIRM_NOT_PENDING,
   );
   assert.equal(executed.length, 1);
+});
+
+test("approveHostConfirmHandler concurrent claims execute once", async () => {
+  const db = mockHostConfirmDb();
+  await requestHostConfirm(
+    db,
+    {
+      incidentId: "inc-1",
+      sessionId: "sess-1",
+      tool: "reset_board",
+      args: {},
+      requestedByUid: "agent-1",
+    },
+    {
+      now: () => new Date("2026-07-25T12:00:00.000Z"),
+      generateId: () => "confirm-1",
+      notify: async () => {},
+    },
+  );
+
+  const executed = [];
+  const approve = () =>
+    approveHostConfirmHandler(
+      db,
+      {
+        incidentId: "inc-1",
+        confirmId: "confirm-1",
+        uid: "host-1",
+      },
+      {
+        now: () => new Date("2026-07-25T12:01:00.000Z"),
+        execute: async (_db, input) => {
+          executed.push(input.tool);
+          return { status: "ok", auditId: `audit-${executed.length}` };
+        },
+      },
+    );
+
+  const results = await Promise.allSettled([approve(), approve()]);
+  const fulfilled = results.filter((r) => r.status === "fulfilled");
+  const rejected = results.filter((r) => r.status === "rejected");
+
+  assert.equal(fulfilled.length, 1);
+  assert.equal(rejected.length, 1);
+  assert.equal(rejected[0].reason.message, HOST_CONFIRM_NOT_PENDING);
+  assert.equal(executed.length, 1);
+  assert.equal(db._hostConfirms.get("inc-1/confirm-1").status, "approved");
 });
 
 test("denyHostConfirmHandler only host may deny pending", async () => {

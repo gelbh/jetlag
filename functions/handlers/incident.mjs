@@ -338,6 +338,7 @@ export const approveHostConfirm = onCall(
           uid: request.auth.uid,
         },
         {
+          runTransaction: (fn) => db.runTransaction(fn),
           executeDeps: {
             moderate: (sessionId, action, adminUid) =>
               moderateSession(db, sessionId, action, adminUid),

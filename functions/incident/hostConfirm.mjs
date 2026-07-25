@@ -161,9 +161,12 @@ export async function requestHostConfirm(db, input, deps = {}) {
  * Host-only approve: claim the pending confirm, then execute once with
  * hostConfirmed. Caps are not reset (confirm is orthogonal to summon/turn caps).
  *
- * @param db Firestore admin (or compatible mock)
+ * Claim is always transactional (`db.runTransaction`, overridable via deps)
+ * so concurrent approves cannot double-execute destructive tools.
+ *
+ * @param db Firestore admin (or compatible mock with runTransaction)
  * @param input { incidentId, confirmId, uid }
- * @param deps { now, execute, runTransaction? }
+ * @param deps { now, execute, runTransaction?, executeDeps? }
  */
 export async function approveHostConfirmHandler(db, input, deps = {}) {
   const incidentId =
@@ -281,8 +284,15 @@ export async function denyHostConfirmHandler(db, input, deps = {}) {
 }
 
 async function claimPendingHostConfirm(db, confirmRef, { uid, now, runTransaction }) {
-  const claim = async (getSnap, update) => {
-    const snap = await getSnap();
+  const runTx =
+    typeof runTransaction === "function"
+      ? runTransaction
+      : (fn) => db.runTransaction(fn);
+
+  // Return codes (don't throw) when a write must commit — Firestore aborts
+  // the transaction if the callback throws, which would drop status updates.
+  const claimed = await runTx(async (tx) => {
+    const snap = await tx.get(confirmRef);
     if (!snap.exists) {
       throw new Error(HOST_CONFIRM_NOT_FOUND);
     }
@@ -290,8 +300,8 @@ async function claimPendingHostConfirm(db, confirmRef, { uid, now, runTransactio
     await assertCallerIsHost(db, confirm, uid);
 
     if (isHostConfirmExpired(confirm.expiresAt, now)) {
-      await update({ status: "expired" });
-      throw new Error(HOST_CONFIRM_EXPIRED);
+      tx.update(confirmRef, { status: "expired" });
+      return { error: HOST_CONFIRM_EXPIRED };
     }
     if (confirm.status !== "pending") {
       throw new Error(HOST_CONFIRM_NOT_PENDING);
@@ -304,7 +314,7 @@ async function claimPendingHostConfirm(db, confirmRef, { uid, now, runTransactio
       throw new Error(HOST_CONFIRM_NOT_FOUND);
     }
 
-    await update({
+    tx.update(confirmRef, {
       status: "approved",
       approvedAt: now().toISOString(),
       approvedByUid: uid,
@@ -315,22 +325,12 @@ async function claimPendingHostConfirm(db, confirmRef, { uid, now, runTransactio
       tool,
       args: confirm.args ?? {},
     };
-  };
+  });
 
-  if (typeof runTransaction === "function") {
-    return runTransaction(async (tx) =>
-      claim(
-        () => tx.get(confirmRef),
-        (data) => tx.update(confirmRef, data),
-      ),
-    );
+  if (claimed?.error) {
+    throw new Error(claimed.error);
   }
-
-  // Mock / unit path: read-modify-write without a real transaction.
-  return claim(
-    () => confirmRef.get(),
-    (data) => confirmRef.update(data),
-  );
+  return claimed;
 }
 
 async function assertCallerIsHost(db, confirm, uid) {
