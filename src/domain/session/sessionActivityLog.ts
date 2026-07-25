@@ -2,18 +2,21 @@ import type { GameOutcome } from "../game/foundHider";
 import type { AnnotationType } from "../map/annotations";
 import { MAP_TOOL_DOCK_ENTRIES } from "../map/mapTools";
 
-export type SessionActivityType =
-  | "session_started"
-  | "hiding_timer_started"
-  | "seeking_started"
-  | "question_asked"
-  | "thermometer_walk_started"
-  | "thermometer_walk_separated"
-  | "question_answered"
-  | "question_cancelled"
-  | "photo_asked"
-  | "photo_answered"
-  | "game_ended";
+export const SESSION_ACTIVITY_TYPES = [
+  "session_started",
+  "hiding_timer_started",
+  "seeking_started",
+  "question_asked",
+  "thermometer_walk_started",
+  "thermometer_walk_separated",
+  "question_answered",
+  "question_cancelled",
+  "photo_asked",
+  "photo_answered",
+  "game_ended",
+] as const;
+
+export type SessionActivityType = (typeof SESSION_ACTIVITY_TYPES)[number];
 
 export const FIXED_ACTIVITY_EVENT_IDS = [
   "session_started",

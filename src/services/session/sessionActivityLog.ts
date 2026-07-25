@@ -2,17 +2,18 @@ import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import type { SessionActivityEvent } from "../../domain/session/sessionActivityLog";
 import { useActivityLogStore } from "../../state/activityLogStore";
 import { isFirebaseConfigured } from "../core/firebase";
+import { createActivityLogEventIfAbsent } from "../firestore/firestoreActivityLog";
 
 export type AppendSessionActivityResult = { wrote: boolean };
 
 /**
- * Remote Firestore append — Task 3 replaces this stub.
+ * Remote Firestore append — create-if-absent for fixed / race-safe ids.
  * Exported so unit tests can mock the remote branch.
  */
 export async function appendRemoteSessionActivityEvent(
-  _event: SessionActivityEvent,
+  event: SessionActivityEvent,
 ): Promise<AppendSessionActivityResult> {
-  throw new Error("not implemented");
+  return createActivityLogEventIfAbsent(event.sessionId, event);
 }
 
 export async function appendSessionActivityEvent(

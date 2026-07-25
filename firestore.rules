@@ -132,6 +132,22 @@ service cloud.firestore {
       return validAnnotationType(type) || type == 'photo';
     }
 
+    function validActivityLogType(type) {
+      return type in [
+        'session_started',
+        'hiding_timer_started',
+        'seeking_started',
+        'question_asked',
+        'thermometer_walk_started',
+        'thermometer_walk_separated',
+        'question_answered',
+        'question_cancelled',
+        'photo_asked',
+        'photo_answered',
+        'game_ended',
+      ];
+    }
+
     function validPhotoAnswer(answer) {
       return answer == null
         || answer is string
@@ -762,6 +778,16 @@ service cloud.firestore {
           && request.resource.data.preferences is map
           && request.resource.data.preferences.enabled is bool;
         allow delete: if isSessionMember(sessionId) && request.auth.uid == deviceUid;
+      }
+
+      match /activityLog/{eventId} {
+        allow read: if isSessionMember(sessionId);
+        allow create: if isSessionMember(sessionId)
+          && request.resource.data.type is string
+          && validActivityLogType(request.resource.data.type)
+          && request.resource.data.createdAt is string
+          && request.resource.data.payload is map;
+        allow update, delete: if false;
       }
     }
 

@@ -2,16 +2,24 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import type { SessionActivityEvent } from "../../domain/session/sessionActivityLog";
 import { useActivityLogStore } from "../../state/activityLogStore";
-import {
-  appendRemoteSessionActivityEvent,
-  appendSessionActivityEvent,
-} from "./sessionActivityLog";
 
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => true));
+const createActivityLogEventIfAbsent = vi.hoisted(() =>
+  vi.fn(async () => ({ wrote: true })),
+);
 
 vi.mock("../core/firebase", () => ({
   isFirebaseConfigured,
 }));
+
+vi.mock("../firestore/firestoreActivityLog", () => ({
+  createActivityLogEventIfAbsent,
+}));
+
+import {
+  appendRemoteSessionActivityEvent,
+  appendSessionActivityEvent,
+} from "./sessionActivityLog";
 
 function fixedSessionStarted(
   sessionId: string = LOCAL_SESSION_ID,
@@ -29,6 +37,8 @@ describe("appendSessionActivityEvent", () => {
   beforeEach(() => {
     useActivityLogStore.setState({ eventsBySessionId: {} });
     isFirebaseConfigured.mockReturnValue(true);
+    createActivityLogEventIfAbsent.mockReset();
+    createActivityLogEventIfAbsent.mockResolvedValue({ wrote: true });
   });
 
   it("writes local store for LOCAL_SESSION_ID and is idempotent for fixed ids", async () => {
@@ -44,6 +54,7 @@ describe("appendSessionActivityEvent", () => {
     expect(useActivityLogStore.getState().getEvents(LOCAL_SESSION_ID)).toEqual([
       event,
     ]);
+    expect(createActivityLogEventIfAbsent).not.toHaveBeenCalled();
   });
 
   it("always appends events with distinct random ids locally", async () => {
@@ -84,22 +95,34 @@ describe("appendSessionActivityEvent", () => {
     expect(useActivityLogStore.getState().getEvents("remote-session")).toEqual([
       event,
     ]);
+    expect(createActivityLogEventIfAbsent).not.toHaveBeenCalled();
   });
 
-  it("uses remote stub for non-local sessions when Firebase is configured", async () => {
+  it("uses Firestore create-if-absent for remote sessions when Firebase is configured", async () => {
     const event = fixedSessionStarted("remote-session");
+    createActivityLogEventIfAbsent.mockResolvedValueOnce({ wrote: false });
 
-    await expect(appendSessionActivityEvent(event)).rejects.toThrow(
-      "not implemented",
+    await expect(appendSessionActivityEvent(event)).resolves.toEqual({
+      wrote: false,
+    });
+    expect(createActivityLogEventIfAbsent).toHaveBeenCalledWith(
+      "remote-session",
+      event,
     );
     expect(useActivityLogStore.getState().getEvents("remote-session")).toEqual(
       [],
     );
   });
 
-  it("exposes remote stub that tests can mock", async () => {
-    await expect(
-      appendRemoteSessionActivityEvent(fixedSessionStarted("remote-session")),
-    ).rejects.toThrow("not implemented");
+  it("exposes remote branch that delegates to Firestore", async () => {
+    const event = fixedSessionStarted("remote-session");
+
+    await expect(appendRemoteSessionActivityEvent(event)).resolves.toEqual({
+      wrote: true,
+    });
+    expect(createActivityLogEventIfAbsent).toHaveBeenCalledWith(
+      "remote-session",
+      event,
+    );
   });
 });
