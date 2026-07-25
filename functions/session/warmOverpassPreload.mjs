@@ -46,7 +46,6 @@ export function buildLandmassWarmQuery(bounds) {
     (
       way["natural"="water"](${bbox});
       way["waterway"~"^(river|canal|dock)$"](${bbox});
-      relation["natural"="water"](${bbox});
       relation["place"~"^(island|islet)$"]["name"](${bbox});
     );
     out geom;

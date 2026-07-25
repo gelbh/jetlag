@@ -7,6 +7,8 @@ import {
   type MeasuringFromKind,
   type MeasuringLocationCategory,
 } from "../../domain/questions";
+import { buildAdminDivisionQuery } from "../geo/adminDivisionBoundaries";
+import { buildLandmassQuery } from "../geo/landmassFeatures";
 import {
   formatOverpassBboxFromGameArea,
   overpassQueryTemplate,
@@ -17,36 +19,11 @@ export function auditAdminDivisionQuery(
   gameArea: GameArea,
   adminLevel: number,
 ): string {
-  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
-
-  const bbox = `${south},${west},${north},${east}`;
-
-  return `
-    [out:json][timeout:25];
-    (
-      relation["boundary"="administrative"]["admin_level"="${adminLevel}"]["name"](${bbox});
-    );
-    out center;
-    >;
-    out geom qt;
-  `;
+  return buildAdminDivisionQuery(gameArea, adminLevel);
 }
 
 export function auditLandmassQuery(gameArea: GameArea): string {
-  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
-
-  const bbox = `${south},${west},${north},${east}`;
-
-  return `
-    [out:json][timeout:25];
-    (
-      way["natural"="water"](${bbox});
-      way["waterway"~"^(river|canal|dock)$"](${bbox});
-      relation["natural"="water"](${bbox});
-      relation["place"~"^(island|islet)$"]["name"](${bbox});
-    );
-    out geom;
-  `;
+  return buildLandmassQuery(gameArea);
 }
 
 export function auditCoastlineQuery(gameArea: GameArea): string {

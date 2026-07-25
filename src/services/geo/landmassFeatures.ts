@@ -304,12 +304,13 @@ export function buildLandmassQuery(gameArea: GameArea): string {
   // `area.searchArea` was never populated (empty result). `out center` then
   // `>; out geom` emitted tagged ways without geometry, so obstacles were empty
   // and every play area collapsed to a single "Mainland".
+  // Waterway regex omits stream/ditch (compute cost). Water multipolygon
+  // relations are omitted until obstacleFeaturesFromElements consumes them.
   return `
     [out:json][timeout:25];
     (
       way["natural"="water"](${bbox});
       way["waterway"~"^(river|canal|dock)$"](${bbox});
-      relation["natural"="water"](${bbox});
       relation["place"~"^(island|islet)$"]["name"](${bbox});
     );
     out geom;

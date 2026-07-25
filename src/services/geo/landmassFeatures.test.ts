@@ -29,7 +29,7 @@ describe("landmass features", () => {
     expect(query).toContain(
       'way["waterway"~"^(river|canal|dock)$"](51.4,-0.2,51.5,-0.1)',
     );
-    expect(query).toContain('relation["natural"="water"](51.4,-0.2,51.5,-0.1)');
+    expect(query).not.toContain('relation["natural"="water"]');
     expect(query).toContain("out geom;");
     expect(query).not.toContain("out center;");
   });
