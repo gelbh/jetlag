@@ -3,17 +3,24 @@ import {
   buildMaskFromUnionInput as buildMaskFromUnionInputTs,
 } from "./buildMask";
 import type { MaskKernelMode } from "./maskKernelMode";
-import {
-  wasmBuildEndGameMaskFromDisks,
-  wasmBuildMaskFromUnionInput,
-} from "./maskWasm";
-import { bboxFromGameArea, maskTopologyMatches } from "./parity";
+import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
 import type {
   DiskSpec,
   EliminationUnionInput,
   GameAreaGeometry,
   PolygonFeature,
 } from "./types";
+
+type MaskWasmApi = typeof import("./maskWasm");
+
+let maskWasmModulePromise: Promise<MaskWasmApi> | null = null;
+
+function loadMaskWasmModule(): Promise<MaskWasmApi> {
+  if (!maskWasmModulePromise) {
+    maskWasmModulePromise = import(/* @vite-ignore */ "./maskWasm");
+  }
+  return maskWasmModulePromise;
+}
 
 function assertNever(value: never): never {
   throw new Error(`Unexpected mask kernel mode: ${String(value)}`);
@@ -24,14 +31,15 @@ async function runWithMaskKernel(
   label: string,
   gameArea: GameAreaGeometry,
   runTs: () => PolygonFeature | null,
-  runWasm: () => Promise<PolygonFeature | null>,
+  runWasm: (wasm: MaskWasmApi) => Promise<PolygonFeature | null>,
 ): Promise<PolygonFeature | null> {
   switch (mode) {
     case "ts":
       return runTs();
     case "wasm":
       try {
-        return await runWasm();
+        const wasm = await loadMaskWasmModule();
+        return await runWasm(wasm);
       } catch (error) {
         console.warn(`[geometry] mask kernel wasm failed (${label})`, error);
         return runTs();
@@ -39,7 +47,8 @@ async function runWithMaskKernel(
     case "dual": {
       const tsResult = runTs();
       try {
-        const wasmResult = await runWasm();
+        const wasm = await loadMaskWasmModule();
+        const wasmResult = await runWasm(wasm);
         if (
           !maskTopologyMatches(wasmResult, tsResult, bboxFromGameArea(gameArea))
         ) {
@@ -68,7 +77,7 @@ export async function runMaskFromUnionInput(
     "buildMaskFromUnionInput",
     gameArea,
     () => buildMaskFromUnionInputTs(input, gameArea),
-    () => wasmBuildMaskFromUnionInput(input, gameArea),
+    (wasm) => wasm.wasmBuildMaskFromUnionInput(input, gameArea),
   );
 }
 
@@ -82,6 +91,6 @@ export async function runEndGameMaskFromDisks(
     "buildEndGameMaskFromDisks",
     gameArea,
     () => buildEndGameMaskFromDisksTs(gameArea, disks),
-    () => wasmBuildEndGameMaskFromDisks(gameArea, disks),
+    (wasm) => wasm.wasmBuildEndGameMaskFromDisks(gameArea, disks),
   );
 }
