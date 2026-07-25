@@ -70,6 +70,7 @@ import {
   ensureRemoteSessionWriteAccess,
 } from "../services/firestore/firestoreAnnotations";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase";
+import { emitGameEndedActivity } from "../services/session/emitSessionActivity";
 import { useSessionAnnotations } from "../hooks/map/useSessionAnnotations";
 import { useAnnotations } from "../hooks/map/useAnnotations";
 import { useMapSessionChrome } from "../hooks/map-screen/useMapSessionChrome";
@@ -317,6 +318,11 @@ export function HiderMapScreen() {
           endGameRequestedAt: undefined,
           endGameRequestedByUid: undefined,
         },
+        uid,
+      );
+      emitGameEndedActivity(
+        session.id,
+        { outcome: "found", summary: "Hider found" },
         uid,
       );
       return;

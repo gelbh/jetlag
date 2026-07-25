@@ -11,6 +11,7 @@ import {
   useSessionMessagesSync,
 } from "./useSessionExtrasSync";
 import { useRemoteSessionTimerSync } from "./useRemoteSessionTimerSync";
+import { useSeekingStartedActivity } from "./useSeekingStartedActivity";
 import { useSessionEndedRedirect } from "./useSessionEndedRedirect";
 import { useSessionNotifications } from "./useSessionNotifications";
 import { useSessionSync } from "./useSessionSync";
@@ -153,6 +154,13 @@ export function useSharedSessionScreen({
     onControl: onTimerControl,
     remoteState,
     remoteSnapshot,
+  });
+
+  useSeekingStartedActivity({
+    sessionId,
+    canEmit: canControlTimer,
+    sessionRules: session ?? DEFAULT_SESSION_RULES,
+    timerState: timer.timerState,
   });
 
   const pendingQuestions = usePendingQuestionsSync(sessionId);
