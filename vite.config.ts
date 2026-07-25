@@ -24,10 +24,10 @@ export default defineConfig(({ mode }) => ({
     port: 5173,
     strictPort: false,
   },
-  // esnext: native top-level await for wasm-pack modules (Vite 8 / rolldown).
-  // vite-plugin-top-level-await is incompatible with this stack.
+  // es2022: enough for module workers + modern Safari; avoid global `esnext`
+  // (undownleveled main bundle). Worker wasm still loads via vite-plugin-wasm.
   build: {
-    target: "esnext",
+    target: "es2022",
     sourcemap: mode === "production" ? "hidden" : true,
     rolldownOptions: {
       output: {

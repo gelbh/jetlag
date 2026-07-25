@@ -6,7 +6,14 @@ import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(["dist", "coverage", "worker-configuration.d.ts"]),
+  globalIgnores([
+    "dist",
+    "coverage",
+    "worker-configuration.d.ts",
+    "crates/*/pkg/**",
+    "target/**",
+    "**/yqrd-*.test.ts",
+  ]),
   {
     files: ["scripts/**/*.mjs"],
     languageOptions: {
