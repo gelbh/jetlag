@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isHidingTimerEffectivelyRunning,
+  pausePreferringRemote,
   computeElapsedMs,
   formatElapsedTime,
   hasTimerStarted,
@@ -118,5 +119,15 @@ describe("isHidingTimerEffectivelyRunning", () => {
     expect(isHidingTimerEffectivelyRunning(true, false)).toBe(true);
     expect(isHidingTimerEffectivelyRunning(false, true)).toBe(true);
     expect(isHidingTimerEffectivelyRunning(false, false)).toBe(false);
+  });
+});
+
+describe("pausePreferringRemote", () => {
+  it("adopts running remote before pausing when local is already paused", () => {
+    const local = { accumulatedMs: 1_000, runningSince: null };
+    const remote = { accumulatedMs: 1_000, runningSince: 1_000 };
+    const paused = pausePreferringRemote(local, remote, 5_000);
+    expect(paused.runningSince).toBeNull();
+    expect(paused.accumulatedMs).toBe(5_000);
   });
 });

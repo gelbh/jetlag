@@ -374,6 +374,7 @@ export function useMapScreenController() {
     sessionId: session?.id ?? null,
     myUid: uid,
     myRole,
+    isHost,
     memberUids: session?.memberUids ?? [],
     pendingQuestions,
     seekerLocations,

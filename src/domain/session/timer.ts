@@ -48,6 +48,25 @@ export function startTimer(state: TimerState, now = Date.now()): TimerState {
   };
 }
 
+
+/**
+ * Pause local timer, adopting remote first when local is already paused but
+ * remote is still running (deadline pause across host desync).
+ */
+export function pausePreferringRemote(
+  local: TimerState,
+  remote: TimerState | null | undefined,
+  now = Date.now(),
+): TimerState {
+  const base =
+    remote &&
+    !isTimerRunning(local) &&
+    isTimerRunning(remote)
+      ? remote
+      : local;
+  return pauseTimer(base, now);
+}
+
 export function pauseTimer(state: TimerState, now = Date.now()): TimerState {
   if (state.runningSince === null) {
     return state;

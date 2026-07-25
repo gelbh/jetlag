@@ -50,6 +50,7 @@ describe("useCancelOrphanThermometerWalks", () => {
           sessionId: "session-1",
           myUid: "seeker-2",
           myRole: "seeker",
+          isHost: false,
           memberUids,
           pendingQuestions,
           seekerLocations: [],
@@ -90,6 +91,7 @@ describe("useCancelOrphanThermometerWalks", () => {
         sessionId: "session-1",
         myUid: "hider-1",
         myRole: "hider",
+        isHost: false,
         memberUids: ["host-1", "hider-1"],
         pendingQuestions: [walkingQuestion()],
         seekerLocations: [],
@@ -109,6 +111,7 @@ describe("useCancelOrphanThermometerWalks", () => {
         sessionId: "session-1",
         myUid: "seeker-2",
         myRole: "seeker",
+        isHost: false,
         memberUids: ["host-1", "seeker-2", "gone-1"],
         pendingQuestions: [walkingQuestion({ createdByUid: "gone-1", createdAt })],
         seekerLocations: [],
@@ -136,6 +139,7 @@ describe("useCancelOrphanThermometerWalks", () => {
           sessionId: "session-1",
           myUid: "seeker-2",
           myRole: "seeker",
+          isHost: true,
           memberUids: ["host-1", "seeker-1", "seeker-2"],
           pendingQuestions,
           seekerLocations: [
@@ -178,6 +182,7 @@ describe("useCancelOrphanThermometerWalks", () => {
         sessionId: "session-1",
         myUid: "seeker-2",
         myRole: "seeker",
+        isHost: true,
         memberUids: ["host-1", "seeker-1", "seeker-2"],
         pendingQuestions: [
           walkingQuestion({
@@ -206,6 +211,7 @@ describe("useCancelOrphanThermometerWalks", () => {
         sessionId: "session-1",
         myUid: "seeker-2",
         myRole: "seeker",
+        isHost: false,
         memberUids: ["host-1", "seeker-2"],
         pendingQuestions: [
           walkingQuestion({
@@ -240,6 +246,7 @@ describe("useCancelOrphanThermometerWalks", () => {
           sessionId: "session-1",
           myUid: "seeker-2",
           myRole: "seeker",
+          isHost: false,
           memberUids: ["host-1", "seeker-2"],
           pendingQuestions,
           seekerLocations: [],
@@ -269,15 +276,19 @@ describe("useCancelOrphanThermometerWalks", () => {
       createdAt,
     });
 
+    const locs = [
+      seekerLocation({ uid: "seeker-1", updatedAt: "2026-01-01T00:00:00.000Z" }),
+    ];
     const { rerender } = renderHook(
       ({ pendingQuestions }) =>
         useCancelOrphanThermometerWalks({
           sessionId: "session-1",
-          myUid: "seeker-2",
-          myRole: "seeker",
+          myUid: "host-1",
+          myRole: "hider",
+          isHost: true,
           memberUids: ["host-1", "seeker-1", "seeker-2"],
           pendingQuestions,
-          seekerLocations: [],
+          seekerLocations: locs,
           cancelThermometerWalk,
           nowMs: () => nowMs,
         }),
@@ -306,8 +317,9 @@ describe("useCancelOrphanThermometerWalks", () => {
       renderHook(() =>
         useCancelOrphanThermometerWalks({
           sessionId: "session-1",
-          myUid: "seeker-2",
-          myRole: "seeker",
+          myUid: "host-1",
+          myRole: "hider",
+          isHost: true,
           memberUids: ["host-1", "seeker-1", "seeker-2"],
           pendingQuestions: [
             walkingQuestion({
@@ -340,5 +352,101 @@ describe("useCancelOrphanThermometerWalks", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("does not stale-cancel when seekerLocations is empty", async () => {
+    const createdAt = "2026-01-01T00:00:00.000Z";
+    const nowMs = Date.parse(createdAt) + THERMOMETER_WALK_MAX_DURATION_MS + 1;
+
+    renderHook(() =>
+      useCancelOrphanThermometerWalks({
+        sessionId: "session-1",
+        myUid: "host-1",
+        myRole: "hider",
+        isHost: true,
+        memberUids: ["host-1", "seeker-1"],
+        pendingQuestions: [
+          walkingQuestion({
+            id: "pq-no-locs",
+            createdByUid: "seeker-1",
+            createdAt,
+          }),
+        ],
+        seekerLocations: [],
+        cancelThermometerWalk,
+        nowMs: () => nowMs,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(cancelThermometerWalk).not.toHaveBeenCalled();
+    });
+  });
+
+  it("does not stale-cancel for non-host seekers", async () => {
+    const createdAt = "2026-01-01T00:00:00.000Z";
+    const nowMs = Date.parse(createdAt) + THERMOMETER_WALK_MAX_DURATION_MS + 1;
+
+    renderHook(() =>
+      useCancelOrphanThermometerWalks({
+        sessionId: "session-1",
+        myUid: "seeker-2",
+        myRole: "seeker",
+        isHost: false,
+        memberUids: ["host-1", "seeker-1", "seeker-2"],
+        pendingQuestions: [
+          walkingQuestion({
+            id: "pq-peer-stale",
+            createdByUid: "seeker-1",
+            createdAt,
+          }),
+        ],
+        seekerLocations: [
+          seekerLocation({ uid: "seeker-1", updatedAt: "2026-01-01T00:00:00.000Z" }),
+        ],
+        cancelThermometerWalk,
+        nowMs: () => nowMs,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(cancelThermometerWalk).not.toHaveBeenCalled();
+    });
+  });
+
+  it("host hider can stale-cancel", async () => {
+    const createdAt = "2026-01-01T00:00:00.000Z";
+    const nowMs = Date.parse(createdAt) + THERMOMETER_WALK_MAX_DURATION_MS + 1;
+
+    renderHook(() =>
+      useCancelOrphanThermometerWalks({
+        sessionId: "session-1",
+        myUid: "host-1",
+        myRole: "hider",
+        isHost: true,
+        memberUids: ["host-1", "seeker-1"],
+        pendingQuestions: [
+          walkingQuestion({
+            id: "pq-host-stale",
+            createdByUid: "seeker-1",
+            createdAt,
+          }),
+        ],
+        seekerLocations: [
+          seekerLocation({ uid: "seeker-1", updatedAt: "2026-01-01T00:00:00.000Z" }),
+        ],
+        cancelThermometerWalk,
+        nowMs: () => nowMs,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(cancelThermometerWalk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pendingQuestionId: "pq-host-stale",
+          reason: "stale",
+        }),
+      );
+    });
   });
 });

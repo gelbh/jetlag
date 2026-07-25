@@ -12,15 +12,19 @@ import type { ThermometerWalkCancelReason } from "../../services/firestore/fires
 import { useStaleWalkNowMs } from "./useStaleWalkNowMs";
 
 /**
- * Auto-cancels abandoned thermometer walks for seekers:
- * orphan creators (left session) and stale walks (max duration + dead GPS).
- * Stale detection is driven by the shared 15s stale-walk clock — not only
- * Firestore snapshot churn — so time alone can cross the threshold.
+ * Auto-cancels abandoned thermometer walks:
+ * - Orphans (creator left): any seeker (Firestore rules allow).
+ * - Stale (max duration + dead/missing GPS): session host only (rules allow
+ *   host cancel; peer seekers cannot cancel another member's walk).
+ * Stale detection uses the shared 15s clock so time alone can cross thresholds.
+ * Skips stale evaluation until at least one seeker location row exists so an
+ * empty initial sync does not look like "location missing."
  */
 export function useCancelOrphanThermometerWalks(args: {
   sessionId: string | null;
   myUid: string | null;
   myRole: PlayerRole | null;
+  isHost: boolean;
   memberUids: readonly string[];
   pendingQuestions: readonly PendingQuestionRecord[];
   seekerLocations: readonly PlayerLocationRecord[];
@@ -38,6 +42,7 @@ export function useCancelOrphanThermometerWalks(args: {
     sessionId,
     myUid,
     myRole,
+    isHost,
     memberUids,
     pendingQuestions,
     seekerLocations,
@@ -52,7 +57,13 @@ export function useCancelOrphanThermometerWalks(args: {
   }, [sessionId]);
 
   useEffect(() => {
-    if (!sessionId || !myUid || myRole !== "seeker") {
+    if (!sessionId || !myUid || !myRole) {
+      return;
+    }
+
+    const canCancelOrphans = myRole === "seeker";
+    const canCancelStale = isHost;
+    if (!canCancelOrphans && !canCancelStale) {
       return;
     }
 
@@ -61,22 +72,23 @@ export function useCancelOrphanThermometerWalks(args: {
       return;
     }
 
-    const orphanIds = listOrphanWalkingThermometerQuestionIds(
-      pendingQuestions,
-      memberUids,
-    );
+    const orphanIds = canCancelOrphans
+      ? listOrphanWalkingThermometerQuestionIds(pendingQuestions, memberUids)
+      : [];
     const orphanIdSet = new Set(orphanIds);
 
-    const walkerLocationUpdatedAtByUid = new Map<string, string | null>();
-    for (const location of seekerLocations) {
-      walkerLocationUpdatedAtByUid.set(location.uid, location.updatedAt);
+    let staleIds: string[] = [];
+    if (canCancelStale && seekerLocations.length > 0) {
+      const walkerLocationUpdatedAtByUid = new Map<string, string | null>();
+      for (const location of seekerLocations) {
+        walkerLocationUpdatedAtByUid.set(location.uid, location.updatedAt);
+      }
+      staleIds = listStaleWalkingThermometerQuestionIds(
+        pendingQuestions,
+        walkerLocationUpdatedAtByUid,
+        now,
+      );
     }
-
-    const staleIds = listStaleWalkingThermometerQuestionIds(
-      pendingQuestions,
-      walkerLocationUpdatedAtByUid,
-      now,
-    );
 
     const toCancel: Array<{
       pendingQuestionId: string;
@@ -113,6 +125,7 @@ export function useCancelOrphanThermometerWalks(args: {
   }, [
     cancelThermometerWalk,
     clockMs,
+    isHost,
     memberUids,
     myRole,
     myUid,
