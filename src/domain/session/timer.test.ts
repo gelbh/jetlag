@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  isHidingTimerEffectivelyRunning,
+  pausePreferringRemote,
   computeElapsedMs,
   formatElapsedTime,
   hasTimerStarted,
@@ -89,11 +91,53 @@ describe("reconcileTimerState", () => {
     expect(computeElapsedMs(reconciled, t0 + 60_000)).toBe(90_000);
   });
 
-  it("prefers remote running state when elapsed times are close", () => {
+  it("prefers paused when elapsed is close and running state disagrees", () => {
     const local = pauseTimer(startTimer(INITIAL_TIMER_STATE, t0), t0 + 10_000);
-    const remote = startTimer({ accumulatedMs: 10_000, runningSince: t0 + 10_000 }, t0 + 12_000);
-    expect(reconcileTimerState(local, remote, t0 + 12_000).runningSince).toBe(
-      remote.runningSince,
+    const remote = startTimer(
+      { accumulatedMs: 10_000, runningSince: t0 + 10_000 },
+      t0 + 10_000,
     );
+    const reconciled = reconcileTimerState(local, remote, t0 + 12_000);
+    expect(reconciled.runningSince).toBeNull();
+    expect(computeElapsedMs(reconciled, t0 + 12_000)).toBe(10_000);
+  });
+
+  it("prefers remote paused when local is still running and elapsed is close", () => {
+    const remote = pauseTimer(startTimer(INITIAL_TIMER_STATE, t0), t0 + 10_000);
+    const local = startTimer(
+      { accumulatedMs: 10_000, runningSince: t0 + 10_000 },
+      t0 + 10_000,
+    );
+    const reconciled = reconcileTimerState(local, remote, t0 + 12_000);
+    expect(reconciled.runningSince).toBeNull();
+    expect(computeElapsedMs(reconciled, t0 + 12_000)).toBe(10_000);
+  });
+});
+
+describe("isHidingTimerEffectivelyRunning", () => {
+  it("is true when local or remote is running", () => {
+    expect(isHidingTimerEffectivelyRunning(true, false)).toBe(true);
+    expect(isHidingTimerEffectivelyRunning(false, true)).toBe(true);
+    expect(isHidingTimerEffectivelyRunning(true, true)).toBe(true);
+    expect(isHidingTimerEffectivelyRunning(false, false)).toBe(false);
+  });
+});
+
+describe("pausePreferringRemote", () => {
+  it("adopts running remote before pausing when local is already paused", () => {
+    const local = { accumulatedMs: 1_000, runningSince: null };
+    const remote = { accumulatedMs: 1_000, runningSince: 1_000 };
+    const paused = pausePreferringRemote(local, remote, 5_000);
+    expect(paused.runningSince).toBeNull();
+    expect(paused.accumulatedMs).toBe(5_000);
+  });
+
+  it("keeps local timing when both states are running", () => {
+    const local = { accumulatedMs: 1_000, runningSince: 3_000 };
+    const remote = { accumulatedMs: 1_000, runningSince: 1_000 };
+    expect(pausePreferringRemote(local, remote, 5_000)).toEqual({
+      accumulatedMs: 3_000,
+      runningSince: null,
+    });
   });
 });

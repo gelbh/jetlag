@@ -5,6 +5,7 @@ import {
   crowFliesDistanceMeters,
   isStaleThermometerWalk,
   listOrphanWalkingThermometerQuestionIds,
+  listStaleWalkingThermometerQuestionIds,
   listWalkingThermometerQuestionIds,
   parseThermometerStartPoint,
 } from "./thermometerWalk";
@@ -96,4 +97,51 @@ describe("thermometerWalk", () => {
       ),
     ).toBe(false);
   });
+
+  it("lists stale walking thermometer ids", () => {
+    const createdAt = "2026-01-01T00:00:00.000Z";
+    const nowMs = Date.parse(createdAt) + THERMOMETER_WALK_MAX_DURATION_MS;
+    const questions = [
+      {
+        id: "stale-1",
+        toolType: "thermometer",
+        status: "walking",
+        createdByUid: "u1",
+        createdAt,
+      },
+      {
+        id: "fresh-1",
+        toolType: "thermometer",
+        status: "walking",
+        createdByUid: "u2",
+        createdAt: new Date(nowMs - 60_000).toISOString(),
+      },
+      {
+        id: "radar-1",
+        toolType: "radar",
+        status: "walking",
+        createdByUid: "u1",
+        createdAt,
+      },
+      {
+        id: "pending-1",
+        toolType: "thermometer",
+        status: "pending",
+        createdByUid: "u1",
+        createdAt,
+      },
+    ] as never;
+
+    expect(listStaleWalkingThermometerQuestionIds(questions, new Map(), nowMs)).toEqual([
+      "stale-1",
+    ]);
+
+    const freshLoc = new Map<string, string | null>([
+      ["u1", new Date(nowMs - 30_000).toISOString()],
+    ]);
+    expect(listStaleWalkingThermometerQuestionIds(questions, freshLoc, nowMs)).toEqual([]);
+
+    expect(listStaleWalkingThermometerQuestionIds([], new Map(), nowMs)).toEqual([]);
+  });
+
 });
