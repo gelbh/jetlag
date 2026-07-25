@@ -64,25 +64,46 @@ export function TutorialInteractiveMapDraftProvider({
 
   useEffect(() => {
     if (!draft.sources) {
-      setBuilt(EMPTY_BUILT);
+      generationRef.current += 1;
+      queueMicrotask(() => {
+        setBuilt(EMPTY_BUILT);
+      });
       return;
     }
 
     const generation = generationRef.current + 1;
     generationRef.current = generation;
-
-    void buildMapDraftOverlays(draft.sources).then((result) => {
+    queueMicrotask(() => {
       if (generation === generationRef.current) {
-        setBuilt(result);
+        setBuilt(EMPTY_BUILT);
       }
     });
+
+    void buildMapDraftOverlays(draft.sources)
+      .then((result) => {
+        if (generation === generationRef.current) {
+          setBuilt(result);
+        }
+      })
+      .catch(() => {
+        if (generation === generationRef.current) {
+          setBuilt(EMPTY_BUILT);
+        }
+      });
   }, [draft.sources]);
 
-  const overlays = built.overlays;
-  const eliminationFeatures = useMemo(
-    () => [...built.eliminationFeatures, ...draft.extraEliminationFeatures],
-    [built.eliminationFeatures, draft.extraEliminationFeatures],
+  const overlays = useMemo(
+    () => (draft.sources ? built.overlays : []),
+    [built.overlays, draft.sources],
   );
+  const eliminationFeatures = useMemo(() => {
+    const base = draft.sources ? built.eliminationFeatures : [];
+    return [...base, ...draft.extraEliminationFeatures];
+  }, [
+    built.eliminationFeatures,
+    draft.extraEliminationFeatures,
+    draft.sources,
+  ]);
 
   const value = useMemo(
     (): TutorialInteractiveMapDraftContextValue => ({

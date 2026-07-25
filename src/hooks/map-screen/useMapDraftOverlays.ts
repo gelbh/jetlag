@@ -402,12 +402,23 @@ export function useMapDraftOverlays(
   useEffect(() => {
     const generation = generationRef.current + 1;
     generationRef.current = generation;
-
-    void buildMapDraftOverlays(sources).then((result) => {
+    queueMicrotask(() => {
       if (generation === generationRef.current) {
-        setBuilt(result);
+        setBuilt(EMPTY_DRAFT_RESULT);
       }
     });
+
+    void buildMapDraftOverlays(sources)
+      .then((result) => {
+        if (generation === generationRef.current) {
+          setBuilt(result);
+        }
+      })
+      .catch(() => {
+        if (generation === generationRef.current) {
+          setBuilt(EMPTY_DRAFT_RESULT);
+        }
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- field deps cover `sources` inputs
   }, [
     activeTool,

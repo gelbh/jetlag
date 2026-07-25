@@ -182,8 +182,9 @@ function coastlineNearRegionCacheKey(
   gameArea: GameArea,
   distanceMeters: number,
   segmentCount: number,
+  kernelMode: string = "ts",
 ): string {
-  return `${gameAreaFingerprint(gameArea)}:${distanceMeters}:${segmentCount}`;
+  return `${gameAreaFingerprint(gameArea)}:${distanceMeters}:${segmentCount}:${kernelMode}`;
 }
 
 export function clearCoastlineNearRegionCacheForTests(): void {
@@ -332,6 +333,7 @@ async function buildCoastlineNearRegionWithBuffer(
     gameArea,
     distanceMeters,
     segments.length,
+    "async",
   );
   const cached = coastlineNearRegionCache.get(cacheKey);
   if (cached) {
@@ -397,6 +399,7 @@ export function buildCoastlineNearRegionTs(
     gameArea,
     distanceMeters,
     segments.length,
+    "ts",
   );
   const cached = coastlineNearRegionCache.get(cacheKey);
   if (cached) {

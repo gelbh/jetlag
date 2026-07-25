@@ -96,7 +96,9 @@ export function useMeasuringPreviews(
         if (generation !== generationRef.current) {
           return;
         }
+        // Clear stale elimination while the matching elim rebuild runs.
         setMeasuringNearRegion(near);
+        setMeasuringEliminationPreview(null);
 
         const elimination = await buildMeasuringEliminationPreview({
           ...previewRegionInput,
