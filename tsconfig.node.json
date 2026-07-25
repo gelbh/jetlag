@@ -22,6 +22,7 @@
   },
   "include": [
     "vite.config.ts",
+    "vite.optional-mask-wasm-pkg.ts",
     "vitest.config.ts",
     "scripts/deploy-production.mjs"
   ]

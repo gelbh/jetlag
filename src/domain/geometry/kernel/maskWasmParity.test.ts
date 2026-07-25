@@ -10,10 +10,6 @@ import {
   runEndGameMaskFromDisks,
   runMaskFromUnionInput,
 } from "./maskKernelRunner";
-import {
-  wasmBuildEndGameMaskFromDisks,
-  wasmBuildMaskFromUnionInput,
-} from "./maskWasm";
 import { assertPolygonTopologyParity } from "./parity";
 import type { DiskSpec, GameAreaGeometry, PolygonFeature } from "./types";
 
@@ -76,11 +72,14 @@ function overlappingEndGameDisks(): DiskSpec[] {
 }
 
 describe.skipIf(!wasmPkgReady)("mask wasm parity", () => {
+  let wasmBuildMaskFromUnionInput: typeof import("./maskWasm").wasmBuildMaskFromUnionInput;
+  let wasmBuildEndGameMaskFromDisks: typeof import("./maskWasm").wasmBuildEndGameMaskFromDisks;
+
   beforeAll(async () => {
-    await wasmBuildMaskFromUnionInput(
-      { polygons: [], disks: [] },
-      gameArea,
-    );
+    const wasm = await import("./maskWasm");
+    wasmBuildMaskFromUnionInput = wasm.wasmBuildMaskFromUnionInput;
+    wasmBuildEndGameMaskFromDisks = wasm.wasmBuildEndGameMaskFromDisks;
+    await wasmBuildMaskFromUnionInput({ polygons: [], disks: [] }, gameArea);
   }, 60_000);
 
   it("matches TS topology on square union (no disks)", async () => {

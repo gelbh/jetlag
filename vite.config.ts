@@ -1,12 +1,11 @@
-import { existsSync, readFileSync } from "node:fs";
-import { dirname, isAbsolute, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
-import { defineConfig, type Plugin } from "vite";
+import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 import wasm from "vite-plugin-wasm";
+import { optionalMaskWasmPkg } from "./vite.optional-mask-wasm-pkg";
 
 const appVersion = (
   JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as {
@@ -18,56 +17,6 @@ const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
 const sentryOrg = process.env.SENTRY_ORG;
 const sentryProject = process.env.SENTRY_PROJECT;
 
-
-const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)));
-const maskWasmPkgJs = resolve(
-  repoRoot,
-  "crates/jetlag-geometry-mask/pkg/jetlag_geometry_mask.js",
-);
-const maskWasmPkgStubId = "\0jetlag-geometry-mask-wasm-stub";
-
-function isMaskWasmPkgSpecifier(id: string, importer: string | undefined): boolean {
-  if (id === maskWasmPkgStubId || id.includes("jetlag_geometry_mask.js")) {
-    return true;
-  }
-  if (importer && id.startsWith(".")) {
-    return resolve(dirname(importer), id) === maskWasmPkgJs;
-  }
-  if (isAbsolute(id)) {
-    return id === maskWasmPkgJs;
-  }
-  return false;
-}
-
-/** Stub gitignored pkg/ so Vite can build the worker graph for ts-mode without wasm:build. */
-function optionalMaskWasmPkg(): Plugin {
-  return {
-    name: "optional-mask-wasm-pkg",
-    resolveId(id, importer) {
-      if (!isMaskWasmPkgSpecifier(id, importer)) {
-        return null;
-      }
-      if (existsSync(maskWasmPkgJs)) {
-        return null;
-      }
-      return maskWasmPkgStubId;
-    },
-    load(id) {
-      if (id !== maskWasmPkgStubId) {
-        return null;
-      }
-      return `
-export function build_mask_from_union_input_json() {
-  throw new Error("jetlag-geometry-mask pkg missing; run npm run wasm:build");
-}
-export function build_end_game_mask_from_disks_json() {
-  throw new Error("jetlag-geometry-mask pkg missing; run npm run wasm:build");
-}
-export default {};
-`;
-    },
-  };
-}
 
 export default defineConfig(({ mode }) => ({
   server: {
