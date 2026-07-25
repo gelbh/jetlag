@@ -191,7 +191,7 @@ export function useMeasuringCommit({
       return;
     }
 
-    const regions = buildMeasuringRegions({
+    const regions = await buildMeasuringRegions({
       ...measuringRegionInput,
       precomputedNearRegion: measuringNearRegion,
     });

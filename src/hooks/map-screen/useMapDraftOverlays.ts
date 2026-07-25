@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
@@ -6,10 +6,11 @@ import type { GameArea, TentaclePoi } from "../../domain/map/annotations";
 import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
 import type { MapTool } from "../../state/sessionStore";
 import {
-  runHalfPlane,
-  runRadarShadedRegion,
+  dispatchHalfPlane,
+  dispatchRadarShadedRegion,
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
+import { resolveClientMaskKernelMode } from "../../domain/geometry/kernel/resolveClientMaskKernelMode";
 import { buildTentaclePoiAnswerEliminationRegion } from "../../domain/geometry/tentacleGeometry";
 import {
   radarInsideFromAnswer,
@@ -76,9 +77,9 @@ export interface MapDraftOverlayResult {
   eliminationFeatures: Feature<GeoPolygon | MultiPolygon>[];
 }
 
-export function buildMapDraftOverlays(
+export async function buildMapDraftOverlays(
   sources: MapDraftOverlaySources,
-): MapDraftOverlayResult {
+): Promise<MapDraftOverlayResult> {
   const overlays: MapDraftOverlay[] = [];
   const eliminationFeatures: Feature<GeoPolygon | MultiPolygon>[] = [];
   const { activeTool, gameArea, mapStyle } = sources;
@@ -130,12 +131,14 @@ export function buildMapDraftOverlays(
         style: { fillColor: c.radar },
       });
     } else {
+      const mode = resolveClientMaskKernelMode();
       pushElimination(
-        runRadarShadedRegion(
+        await dispatchRadarShadedRegion(
           center,
           radiusMeters,
           gameArea,
           radarInsideFromAnswer(answer),
+          mode,
         ),
       );
     }
@@ -245,12 +248,15 @@ export function buildMapDraftOverlays(
     );
 
     if (thermoA && thermoB && answer) {
+      const mode = resolveClientMaskKernelMode();
       pushElimination(
-        runHalfPlane(
+        await dispatchHalfPlane(
           thermoA,
           thermoB,
           gameArea,
           thermometerShadedSide(answer),
+          "midpoint",
+          mode,
         ),
       );
     }
@@ -369,6 +375,11 @@ export function buildMapDraftOverlays(
   return { overlays, eliminationFeatures };
 }
 
+const EMPTY_DRAFT_RESULT: MapDraftOverlayResult = {
+  overlays: [],
+  eliminationFeatures: [],
+};
+
 export function useMapDraftOverlays(
   sources: MapDraftOverlaySources,
   extraEliminationFeatures: readonly Feature<GeoPolygon | MultiPolygon>[] = EMPTY_GEOJSON_FEATURES,
@@ -385,19 +396,21 @@ export function useMapDraftOverlays(
     zone,
   } = sources;
 
-  return useMemo(() => {
-    const built = buildMapDraftOverlays(sources);
-    return {
-      overlays: built.overlays,
-      eliminationFeatures: [
-        ...built.eliminationFeatures,
-        ...extraEliminationFeatures,
-      ],
-    };
+  const [built, setBuilt] = useState<MapDraftOverlayResult>(EMPTY_DRAFT_RESULT);
+  const generationRef = useRef(0);
+
+  useEffect(() => {
+    const generation = generationRef.current + 1;
+    generationRef.current = generation;
+
+    void buildMapDraftOverlays(sources).then((result) => {
+      if (generation === generationRef.current) {
+        setBuilt(result);
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- field deps cover `sources` inputs
   }, [
     activeTool,
-    extraEliminationFeatures,
     gameArea,
     matching.boundaryPreview,
     matching.eliminationPreview,
@@ -430,4 +443,15 @@ export function useMapDraftOverlays(
     thermometer.thermoB,
     zone.vertices,
   ]);
+
+  return useMemo(
+    () => ({
+      overlays: built.overlays,
+      eliminationFeatures: [
+        ...built.eliminationFeatures,
+        ...extraEliminationFeatures,
+      ],
+    }),
+    [built.eliminationFeatures, built.overlays, extraEliminationFeatures],
+  );
 }

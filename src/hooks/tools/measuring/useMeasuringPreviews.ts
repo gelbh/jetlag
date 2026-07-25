@@ -1,4 +1,5 @@
-import { useDeferredValue, useMemo } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { GameArea } from "../../../domain/map/annotations";
 import {
   buildMeasuringBoundaryPreview,
@@ -78,12 +79,40 @@ export function useMeasuringPreviews(
     [deferredAnswer, deferredDistanceMeters, measuringRegionInput],
   );
 
-  const measuringNearRegion = useMemo(() => {
-    try {
-      return buildMeasuringBoundaryPreview(previewRegionInput);
-    } catch {
-      return null;
-    }
+  const [measuringNearRegion, setMeasuringNearRegion] = useState<Feature<
+    GeoPolygon | MultiPolygon
+  > | null>(null);
+  const [measuringEliminationPreview, setMeasuringEliminationPreview] =
+    useState<Feature<GeoPolygon | MultiPolygon> | null>(null);
+  const generationRef = useRef(0);
+
+  useEffect(() => {
+    const generation = generationRef.current + 1;
+    generationRef.current = generation;
+
+    void (async () => {
+      try {
+        const near = await buildMeasuringBoundaryPreview(previewRegionInput);
+        if (generation !== generationRef.current) {
+          return;
+        }
+        setMeasuringNearRegion(near);
+
+        const elimination = await buildMeasuringEliminationPreview({
+          ...previewRegionInput,
+          precomputedNearRegion: near,
+        });
+        if (generation !== generationRef.current) {
+          return;
+        }
+        setMeasuringEliminationPreview(elimination);
+      } catch {
+        if (generation === generationRef.current) {
+          setMeasuringNearRegion(null);
+          setMeasuringEliminationPreview(null);
+        }
+      }
+    })();
   }, [previewRegionInput]);
 
   const measuringBoundaryPreview = useMemo(() => {
@@ -96,17 +125,6 @@ export function useMeasuringPreviews(
 
     return measuringNearRegion;
   }, [measuringNearRegion, measuringSeaLevelEdgeCase, measuringSubject]);
-
-  const measuringEliminationPreview = useMemo(() => {
-    try {
-      return buildMeasuringEliminationPreview({
-        ...previewRegionInput,
-        precomputedNearRegion: measuringNearRegion,
-      });
-    } catch {
-      return null;
-    }
-  }, [measuringNearRegion, previewRegionInput]);
 
   return {
     resolvedCoastSegments,

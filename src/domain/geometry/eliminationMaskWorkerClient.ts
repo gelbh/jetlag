@@ -1,7 +1,6 @@
 import { wrap } from "comlink";
 import type { Remote } from "comlink";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import { getClientEnv } from "../../config/env";
 import type { AnnotationRecord, GameArea } from "../map/annotations";
 import type { HidingZoneRecord } from "../session/hidingZone";
 import {
@@ -14,7 +13,7 @@ import type {
   PolygonFeature,
 } from "./kernel/types";
 import type { MaskKernelMode } from "./kernel/maskKernelMode";
-import { resolveMaskKernelMode } from "./kernel/maskKernelMode";
+import { resolveClientMaskKernelMode } from "./kernel/resolveClientMaskKernelMode";
 
 type EliminationMaskWorkerApi = {
   buildMaskFromUnionInput: (
@@ -30,7 +29,6 @@ type EliminationMaskWorkerApi = {
 };
 
 const WORKER_FAILURE_MESSAGE = "Elimination mask worker failed";
-const MASK_KERNEL_STORAGE_KEY = "jl.geometry.maskKernel";
 
 let worker: Worker | null = null;
 let workerApi: Remote<EliminationMaskWorkerApi> | null = null;
@@ -68,21 +66,6 @@ function getWorkerApi(): Remote<EliminationMaskWorkerApi> {
   return workerApi;
 }
 
-function readMaskKernelLocalStorage(): string | null {
-  try {
-    return localStorage.getItem(MASK_KERNEL_STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function resolveClientMaskKernelMode(): MaskKernelMode {
-  return resolveMaskKernelMode({
-    envValue: getClientEnv().VITE_GEOMETRY_MASK_KERNEL,
-    localStorageValue: readMaskKernelLocalStorage(),
-  });
-}
-
 export async function requestCombinedEliminationMask(
   annotations: readonly AnnotationRecord[],
   gameArea: GameArea,
@@ -115,7 +98,7 @@ export async function requestCombinedEliminationMask(
       ]);
     }
 
-    const input = computeEliminationUnionInput(
+    const input = await computeEliminationUnionInput(
       annotations,
       gameArea,
       draftFeatures,

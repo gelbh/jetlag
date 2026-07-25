@@ -8,8 +8,8 @@ import {
   buildSameNearestRegion,
 } from "../geometry/matchingGeometry";
 import {
-  buildMeasuringBoundaryPreview,
-  buildMeasuringEliminationPreview,
+  buildMeasuringBoundaryPreviewTs,
+  buildMeasuringEliminationPreviewTs,
 } from "../geometry/measuringRegions";
 import { destinationPoint } from "../geometry/core/geodesicPrimitives";
 import { buildTentacleEliminationRegion } from "../geometry/tentacleGeometry";
@@ -123,11 +123,11 @@ export function buildTutorialMeasuringPreviews(
     usesAllPlacesInArea: false,
   };
 
-  const boundaryPreview = buildMeasuringBoundaryPreview(regionInput);
+  const boundaryPreview = buildMeasuringBoundaryPreviewTs(regionInput);
   const eliminationPreview =
     answer === null
       ? null
-      : buildMeasuringEliminationPreview({
+      : buildMeasuringEliminationPreviewTs({
           ...regionInput,
           precomputedNearRegion: boundaryPreview,
         });

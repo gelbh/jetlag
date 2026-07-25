@@ -11,13 +11,15 @@ import Flatbush from "flatbush";
 import { around as geoflatbushAround } from "geoflatbush";
 import { unionPolygonFeatures } from "../unionPolygonFeatures";
 import type { GameArea } from "../../map/annotations";
-import { runGeodesicLineBuffer } from "../geodesicLineBuffer";
+import { dispatchGeodesicLineBuffer } from "../geodesicLineBuffer";
+import { resolveClientMaskKernelMode } from "../kernel/resolveClientMaskKernelMode";
 import {
   gameAreaFingerprint,
   gameAreaToFeature,
   gameAreaToPolygon,
   type LatLngTuple,
 } from "../geometryCore";
+import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 
 type SegmentBoundingBox = {
   south: number;
@@ -313,11 +315,15 @@ function clipBufferedSegmentsToGameArea(
   return combinePolygonFeatures(clippedParts);
 }
 
-export function buildCoastlineNearRegion(
+async function buildCoastlineNearRegionWithBuffer(
   segments: Feature<LineString>[],
   distanceMeters: number,
   gameArea: GameArea,
-): Feature<Polygon | MultiPolygon> | null {
+  bufferLine: (
+    segment: Feature<LineString>,
+    meters: number,
+  ) => Promise<Feature<Polygon | MultiPolygon> | null> | Feature<Polygon | MultiPolygon> | null,
+): Promise<Feature<Polygon | MultiPolygon> | null> {
   if (segments.length === 0 || distanceMeters <= 0) {
     return null;
   }
@@ -336,7 +342,7 @@ export function buildCoastlineNearRegion(
     const bufferedFeatures: Feature<Polygon | MultiPolygon>[] = [];
 
     for (const segment of segments) {
-      const buffered = runGeodesicLineBuffer(segment, distanceMeters);
+      const buffered = await bufferLine(segment, distanceMeters);
 
       if (!buffered) {
         continue;
@@ -373,6 +379,82 @@ export function buildCoastlineNearRegion(
   } catch {
     return null;
   }
+}
+
+/** Sync TS path for tests/bootstrap. Prefer {@link buildCoastlineNearRegion}. */
+export function buildCoastlineNearRegionTs(
+  segments: Feature<LineString>[],
+  distanceMeters: number,
+  gameArea: GameArea,
+): Feature<Polygon | MultiPolygon> | null {
+  // Sync wrapper: geodesicLineBuffer is sync; Promise.resolve unused.
+  // Keep API sync for existing tests by inlining the sync buffer loop.
+  if (segments.length === 0 || distanceMeters <= 0) {
+    return null;
+  }
+
+  const cacheKey = coastlineNearRegionCacheKey(
+    gameArea,
+    distanceMeters,
+    segments.length,
+  );
+  const cached = coastlineNearRegionCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  try {
+    const bufferedFeatures: Feature<Polygon | MultiPolygon>[] = [];
+
+    for (const segment of segments) {
+      const buffered = geodesicLineBuffer(segment, distanceMeters);
+      if (buffered) {
+        bufferedFeatures.push(buffered);
+      }
+    }
+
+    if (bufferedFeatures.length === 0) {
+      return null;
+    }
+
+    const nearCoast = unionBufferedFeatures(bufferedFeatures);
+    if (!nearCoast) {
+      return null;
+    }
+
+    const result =
+      clipNearCoastToGameArea(nearCoast, gameArea) ??
+      clipBufferedSegmentsToGameArea(bufferedFeatures, gameArea);
+
+    if (!result) {
+      return null;
+    }
+
+    if (coastlineNearRegionCache.size >= COASTLINE_NEAR_REGION_CACHE_MAX) {
+      const oldestKey = coastlineNearRegionCache.keys().next().value;
+      if (oldestKey !== undefined) {
+        coastlineNearRegionCache.delete(oldestKey);
+      }
+    }
+    coastlineNearRegionCache.set(cacheKey, result);
+    return result;
+  } catch {
+    return null;
+  }
+}
+
+export async function buildCoastlineNearRegion(
+  segments: Feature<LineString>[],
+  distanceMeters: number,
+  gameArea: GameArea,
+): Promise<Feature<Polygon | MultiPolygon> | null> {
+  const mode = resolveClientMaskKernelMode();
+  return buildCoastlineNearRegionWithBuffer(
+    segments,
+    distanceMeters,
+    gameArea,
+    (segment, meters) => dispatchGeodesicLineBuffer(segment, meters, undefined, mode),
+  );
 }
 
 export function distanceBetweenPoints(

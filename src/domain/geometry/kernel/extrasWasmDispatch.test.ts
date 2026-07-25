@@ -32,21 +32,21 @@ const shortLine: Feature<LineString> = {
   },
 };
 
-describe("extras wasm dispatch (not ready)", () => {
+describe("extras wasm dispatch (halfPlane ready)", () => {
   afterEach(() => {
     vi.doUnmock("./halfPlaneWasm");
     vi.doUnmock("./geodesicWasm");
     vi.resetModules();
   });
 
-  it("mode wasm + halfPlane not ready → TS result, WASM not called", async () => {
+  it("mode wasm + halfPlane ready → calls WASM", async () => {
     vi.resetModules();
-    const wasmBuildHalfPlanePolygon = vi.fn(async () => {
-      throw new Error("should not call half-plane wasm");
-    });
-    const wasmBuildRadarShadedRegion = vi.fn(async () => {
-      throw new Error("should not call radar wasm");
-    });
+    const wasmBuildHalfPlanePolygon = vi.fn(async () =>
+      buildHalfPlanePolygon(pointA, pointB, gameArea, "cold"),
+    );
+    const wasmBuildRadarShadedRegion = vi.fn(async () =>
+      buildRadarShadedRegion([51.45, -0.15], 400, gameArea, false),
+    );
 
     vi.doMock("./halfPlaneWasm", () => ({
       wasmBuildHalfPlanePolygon,
@@ -58,7 +58,6 @@ describe("extras wasm dispatch (not ready)", () => {
       "./halfPlaneKernelRunner"
     );
 
-    const expected = buildHalfPlanePolygon(pointA, pointB, gameArea, "cold");
     const half = await dispatchHalfPlane(
       pointA,
       pointB,
@@ -67,15 +66,11 @@ describe("extras wasm dispatch (not ready)", () => {
       "midpoint",
       "wasm",
     );
-    expect(half).toEqual(expected);
-    expect(wasmBuildHalfPlanePolygon).not.toHaveBeenCalled();
-
-    const radarExpected = buildRadarShadedRegion(
-      [51.45, -0.15],
-      400,
-      gameArea,
-      false,
+    expect(half).toEqual(
+      buildHalfPlanePolygon(pointA, pointB, gameArea, "cold"),
     );
+    expect(wasmBuildHalfPlanePolygon).toHaveBeenCalledOnce();
+
     const radar = await dispatchRadarShadedRegion(
       [51.45, -0.15],
       400,
@@ -83,8 +78,40 @@ describe("extras wasm dispatch (not ready)", () => {
       false,
       "wasm",
     );
-    expect(radar).toEqual(radarExpected);
-    expect(wasmBuildRadarShadedRegion).not.toHaveBeenCalled();
+    expect(radar).toEqual(
+      buildRadarShadedRegion([51.45, -0.15], 400, gameArea, false),
+    );
+    expect(wasmBuildRadarShadedRegion).toHaveBeenCalledOnce();
+  });
+
+  it("mode dual + halfPlane ready → returns TS, still calls WASM", async () => {
+    vi.resetModules();
+    const wasmBuildHalfPlanePolygon = vi.fn(async () =>
+      buildHalfPlanePolygon(pointA, pointB, gameArea, "hot"),
+    );
+
+    vi.doMock("./halfPlaneWasm", () => ({
+      wasmBuildHalfPlanePolygon,
+      wasmBuildRadarShadedRegion: vi.fn(),
+      resetHalfPlaneWasmForTests: vi.fn(),
+    }));
+
+    const { dispatchHalfPlane } = await import("./halfPlaneKernelRunner");
+    const expected = buildHalfPlanePolygon(pointA, pointB, gameArea, "cold");
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const half = await dispatchHalfPlane(
+      pointA,
+      pointB,
+      gameArea,
+      "cold",
+      "midpoint",
+      "dual",
+    );
+
+    expect(half).toEqual(expected);
+    expect(wasmBuildHalfPlanePolygon).toHaveBeenCalledOnce();
+    warnSpy.mockRestore();
   });
 
   it("mode wasm + geodesicLineBuffer not ready → TS result, WASM not called", async () => {
@@ -110,5 +137,31 @@ describe("extras wasm dispatch (not ready)", () => {
     );
     expect(result).toEqual(expected);
     expect(wasmGeodesicLineBuffer).not.toHaveBeenCalled();
+  });
+
+  it("mode ts → never calls WASM for halfPlane", async () => {
+    vi.resetModules();
+    const wasmBuildHalfPlanePolygon = vi.fn(async () => {
+      throw new Error("should not call half-plane wasm");
+    });
+
+    vi.doMock("./halfPlaneWasm", () => ({
+      wasmBuildHalfPlanePolygon,
+      wasmBuildRadarShadedRegion: vi.fn(),
+      resetHalfPlaneWasmForTests: vi.fn(),
+    }));
+
+    const { dispatchHalfPlane } = await import("./halfPlaneKernelRunner");
+
+    await dispatchHalfPlane(
+      pointA,
+      pointB,
+      gameArea,
+      "cold",
+      "midpoint",
+      "ts",
+    );
+
+    expect(wasmBuildHalfPlanePolygon).not.toHaveBeenCalled();
   });
 });

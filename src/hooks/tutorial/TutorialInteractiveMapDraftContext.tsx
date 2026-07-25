@@ -3,12 +3,17 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import { buildMapDraftOverlays } from "../map-screen/useMapDraftOverlays";
+import {
+  buildMapDraftOverlays,
+  type MapDraftOverlayResult,
+} from "../map-screen/useMapDraftOverlays";
 import type { MapDraftOverlaySources } from "../map-screen/useMapDraftOverlays";
 
 interface TutorialInteractiveMapDraftState {
@@ -23,12 +28,17 @@ interface TutorialInteractiveMapDraftContextValue {
   ) => void;
   activeTool: MapDraftOverlaySources["activeTool"];
   sources: MapDraftOverlaySources | null;
-  overlays: ReturnType<typeof buildMapDraftOverlays>["overlays"];
+  overlays: MapDraftOverlayResult["overlays"];
   eliminationFeatures: Feature<GeoPolygon | MultiPolygon>[];
 }
 
 const TutorialInteractiveMapDraftContext =
   createContext<TutorialInteractiveMapDraftContextValue | null>(null);
+
+const EMPTY_BUILT: MapDraftOverlayResult = {
+  overlays: [],
+  eliminationFeatures: [],
+};
 
 export function TutorialInteractiveMapDraftProvider({
   children,
@@ -39,6 +49,8 @@ export function TutorialInteractiveMapDraftProvider({
     sources: null,
     extraEliminationFeatures: [],
   });
+  const [built, setBuilt] = useState<MapDraftOverlayResult>(EMPTY_BUILT);
+  const generationRef = useRef(0);
 
   const registerMapDraft = useCallback(
     (
@@ -50,20 +62,27 @@ export function TutorialInteractiveMapDraftProvider({
     [],
   );
 
-  const { overlays, eliminationFeatures } = useMemo(() => {
+  useEffect(() => {
     if (!draft.sources) {
-      return { overlays: [], eliminationFeatures: [] };
+      setBuilt(EMPTY_BUILT);
+      return;
     }
 
-    const built = buildMapDraftOverlays(draft.sources);
-    return {
-      overlays: built.overlays,
-      eliminationFeatures: [
-        ...built.eliminationFeatures,
-        ...draft.extraEliminationFeatures,
-      ],
-    };
-  }, [draft.extraEliminationFeatures, draft.sources]);
+    const generation = generationRef.current + 1;
+    generationRef.current = generation;
+
+    void buildMapDraftOverlays(draft.sources).then((result) => {
+      if (generation === generationRef.current) {
+        setBuilt(result);
+      }
+    });
+  }, [draft.sources]);
+
+  const overlays = built.overlays;
+  const eliminationFeatures = useMemo(
+    () => [...built.eliminationFeatures, ...draft.extraEliminationFeatures],
+    [built.eliminationFeatures, draft.extraEliminationFeatures],
+  );
 
   const value = useMemo(
     (): TutorialInteractiveMapDraftContextValue => ({
