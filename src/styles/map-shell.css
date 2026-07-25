@@ -72,6 +72,16 @@
     box-shadow: var(--shadow-hud-float);
   }
 
+  /*
+   * Safe-area inset must live in real CSS. Tailwind v4 omits utilities whose
+   * computed value collapses to 0 at build time (e.g. pt-[max(0px,env(...))]),
+   * which left the status rail under the iPhone PWA notch / Dynamic Island
+   * while .map-screen-shell::before still painted the safe-area band on top.
+   */
+  .jl-status-rail {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
   .jl-status-bar {
     position: relative;
     pointer-events: auto;

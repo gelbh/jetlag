@@ -38,4 +38,29 @@ export async function injectSimulatedSafeAreaBottom(
   }, safeBottomPx);
 }
 
+export async function injectSimulatedSafeAreaTop(
+  page: Page,
+  safeTopPx: number,
+) {
+  await page.evaluate((topPx) => {
+    const root = document.documentElement;
+    root.style.setProperty("--safe-area-top", `${topPx}px`);
+    // Mirror env(safe-area-inset-top) for components/CSS that read the env() directly.
+    root.style.paddingTop = "0px";
+    const sheet = document.getElementById("jl-e2e-safe-area-top");
+    const css = `:root { --jl-e2e-safe-top: ${topPx}px; }
+.jl-status-rail { padding-top: ${topPx}px !important; }
+.map-screen-shell::before { height: ${topPx}px !important; }`;
+    if (sheet) {
+      sheet.textContent = css;
+      return;
+    }
+    const el = document.createElement("style");
+    el.id = "jl-e2e-safe-area-top";
+    el.textContent = css;
+    document.head.appendChild(el);
+  }, safeTopPx);
+}
+
 export const SIMULATED_SAFE_AREA_BOTTOM_PX = 34;
+export const SIMULATED_SAFE_AREA_TOP_PX = 59;
