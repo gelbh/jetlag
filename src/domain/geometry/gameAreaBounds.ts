@@ -1,5 +1,5 @@
 import type { Position } from "geojson";
-import type { GameArea } from "../map/annotations";
+import type { GameAreaGeometry } from "./kernel/types";
 import {
   MIN_GAME_AREA_LAT_SPAN,
   MIN_GAME_AREA_LNG_SPAN,
@@ -48,7 +48,7 @@ export function intersectBoundingBoxes(
   return normalizeBoundingBox({ south, west, north, east });
 }
 
-function collectPositions(gameArea: GameArea): Position[] {
+function collectPositions(gameArea: GameAreaGeometry): Position[] {
   if (gameArea.type === "MultiPolygon") {
     return gameArea.coordinates.flatMap((polygon) =>
       polygon.flatMap((ring) => ring),
@@ -58,7 +58,7 @@ function collectPositions(gameArea: GameArea): Position[] {
   return gameArea.coordinates.flatMap((ring) => ring);
 }
 
-export function boundingBoxToGameArea(box: BoundingBox): GameArea {
+export function boundingBoxToGameArea(box: BoundingBox): GameAreaGeometry {
   const normalized = normalizeBoundingBox(box);
 
   return {
@@ -75,7 +75,7 @@ export function boundingBoxToGameArea(box: BoundingBox): GameArea {
   };
 }
 
-export function gameAreaToBoundingBox(gameArea: GameArea): BoundingBox {
+export function gameAreaToBoundingBox(gameArea: GameAreaGeometry): BoundingBox {
   const positions = collectPositions(gameArea);
   const lngs = positions.map(([lng]) => lng);
   const lats = positions.map(([, lat]) => lat);

@@ -1,4 +1,7 @@
 import { expose } from "comlink";
-import { buildCombinedEliminationMask } from "./combinedEliminationMask";
+import {
+  buildEndGameMaskFromDisks,
+  buildMaskFromUnionInput,
+} from "./kernel/buildMask";
 
-expose({ buildCombinedEliminationMask });
+expose({ buildMaskFromUnionInput, buildEndGameMaskFromDisks });

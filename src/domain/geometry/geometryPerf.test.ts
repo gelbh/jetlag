@@ -2,16 +2,17 @@ import { describe, expect, it } from "vitest";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
-import {
-  buildCombinedEliminationMask,
-} from "./combinedEliminationMask";
+import { computeEliminationUnionInput } from "./adapter/eliminationMask";
+import { buildMaskFromUnionInput } from "./kernel/buildMask";
 import {
   unionDiskSpecs,
+  unionEliminationParts,
   unionPolygonFeatures,
   unionPolygonFeaturesLegacy,
   type DiskSpec,
+  type EliminationUnionInput,
   type PolygonFeature,
-} from "./unionPolygonFeatures";
+} from "./kernel/unionPolygonFeatures";
 import type { AnnotationRecord, GameArea } from "../map/annotations";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
@@ -127,9 +128,10 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     const features = Array.from({ length: 10 }, (_, index) =>
       squareFeature(-0.19 + index * 0.008),
     );
+    const input: EliminationUnionInput = { polygons: features, disks: [] };
 
     const martinezMs = measureMedianMs(() => {
-      unionPolygonFeatures(features);
+      unionEliminationParts(input);
     });
     const legacyMs = measureMedianMs(() => {
       unionPolygonFeaturesLegacy(features);
@@ -142,12 +144,15 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     const annotations = Array.from({ length: 8 }, (_, index) =>
       matchingAnnotation(`a-${index}`, -0.19 + index * 0.01),
     );
+    const input = computeEliminationUnionInput(annotations, gameArea, []);
 
     const martinezMs = measureMedianMs(() => {
-      buildCombinedEliminationMask(annotations, gameArea);
+      buildMaskFromUnionInput(input, gameArea);
     });
     const legacyMs = measureMedianMs(() => {
-      const features = annotations.map((annotation) => annotation.geometry as PolygonFeature);
+      const features = annotations.map(
+        (annotation) => annotation.geometry as PolygonFeature,
+      );
       unionPolygonFeaturesLegacy(features);
     });
 

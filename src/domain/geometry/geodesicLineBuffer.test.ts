@@ -43,4 +43,20 @@ describe("geodesicLineBuffer", () => {
     expect(turfRemaining?.geometry.type).toBe("MultiPolygon");
     expect(remaining?.geometry.type).toBe("MultiPolygon");
   });
+
+  it("rejects non-positive sample spacing", () => {
+    const line = {
+      type: "Feature" as const,
+      properties: {},
+      geometry: {
+        type: "LineString" as const,
+        coordinates: [
+          [-0.15, 51.45],
+          [-0.14, 51.46],
+        ],
+      },
+    };
+    expect(() => geodesicLineBuffer(line, 200, 0)).toThrow(RangeError);
+  });
+
 });

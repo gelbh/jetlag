@@ -3,6 +3,7 @@ import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
+import { assertPolygonTopologyParity } from "./kernel/parity";
 import {
   unionDiskSpecs,
   unionEliminationParts,
@@ -31,28 +32,6 @@ function squareFeature(west: number): Feature<GeoPolygon> {
   };
 }
 
-function sampleGridPoints(
-  west: number,
-  east: number,
-  south: number,
-  north: number,
-  steps: number,
-): ReturnType<typeof turfPoint>[] {
-  const points: ReturnType<typeof turfPoint>[] = [];
-  const lngStep = (east - west) / steps;
-  const latStep = (north - south) / steps;
-
-  for (let lngIndex = 0; lngIndex <= steps; lngIndex += 1) {
-    for (let latIndex = 0; latIndex <= steps; latIndex += 1) {
-      points.push(
-        turfPoint([west + lngIndex * lngStep, south + latIndex * latStep]),
-      );
-    }
-  }
-
-  return points;
-}
-
 function assertMaskParity(
   candidate: PolygonFeature | null,
   baseline: PolygonFeature | null,
@@ -61,16 +40,12 @@ function assertMaskParity(
   south: number,
   north: number,
 ): void {
-  expect(candidate).not.toBeNull();
-  expect(baseline).not.toBeNull();
-
-  const points = sampleGridPoints(west, east, south, north, 12);
-
-  for (const sample of points) {
-    expect(booleanPointInPolygon(sample, candidate!)).toBe(
-      booleanPointInPolygon(sample, baseline!),
-    );
-  }
+  assertPolygonTopologyParity(candidate, baseline, {
+    west,
+    east,
+    south,
+    north,
+  });
 }
 
 function legacyDiskUnion(disks: DiskSpec[]): PolygonFeature | null {
