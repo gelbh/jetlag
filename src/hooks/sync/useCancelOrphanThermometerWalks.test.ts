@@ -211,7 +211,7 @@ describe("useCancelOrphanThermometerWalks", () => {
         sessionId: "session-1",
         myUid: "seeker-2",
         myRole: "seeker",
-        isHost: false,
+        isHost: true,
         memberUids: ["host-1", "seeker-2"],
         pendingQuestions: [
           walkingQuestion({
@@ -220,7 +220,9 @@ describe("useCancelOrphanThermometerWalks", () => {
             createdAt,
           }),
         ],
-        seekerLocations: [],
+        seekerLocations: [
+          seekerLocation({ uid: "gone-1", updatedAt: createdAt }),
+        ],
         cancelThermometerWalk,
         nowMs: () => nowMs,
       }),

@@ -118,6 +118,7 @@ describe("isHidingTimerEffectivelyRunning", () => {
   it("is true when local or remote is running", () => {
     expect(isHidingTimerEffectivelyRunning(true, false)).toBe(true);
     expect(isHidingTimerEffectivelyRunning(false, true)).toBe(true);
+    expect(isHidingTimerEffectivelyRunning(true, true)).toBe(true);
     expect(isHidingTimerEffectivelyRunning(false, false)).toBe(false);
   });
 });
@@ -129,5 +130,14 @@ describe("pausePreferringRemote", () => {
     const paused = pausePreferringRemote(local, remote, 5_000);
     expect(paused.runningSince).toBeNull();
     expect(paused.accumulatedMs).toBe(5_000);
+  });
+
+  it("keeps local timing when both states are running", () => {
+    const local = { accumulatedMs: 1_000, runningSince: 3_000 };
+    const remote = { accumulatedMs: 1_000, runningSince: 1_000 };
+    expect(pausePreferringRemote(local, remote, 5_000)).toEqual({
+      accumulatedMs: 3_000,
+      runningSince: null,
+    });
   });
 });

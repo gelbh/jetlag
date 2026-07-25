@@ -1,19 +1,38 @@
 import { useSyncExternalStore } from "react";
 
-/** Host STUCK? cue and seeker auto-cancel share this tick so time alone can cross thresholds. */
+/** Host STUCK? cue and host stale auto-cancel share this tick. */
 export const STALE_WALK_CLOCK_MS = 15_000;
 
 let staleWalkNowMs = 0;
+let intervalId: ReturnType<typeof setInterval> | null = null;
+const listeners = new Set<() => void>();
 
-function subscribeStaleWalkClock(onStoreChange: () => void): () => void {
+function ensureInterval(): void {
+  if (intervalId !== null) {
+    return;
+  }
   if (staleWalkNowMs === 0) {
     staleWalkNowMs = Date.now();
   }
-  const id = window.setInterval(() => {
+  intervalId = window.setInterval(() => {
     staleWalkNowMs = Date.now();
-    onStoreChange();
+    for (const listener of listeners) {
+      listener();
+    }
   }, STALE_WALK_CLOCK_MS);
-  return () => window.clearInterval(id);
+}
+
+function subscribeStaleWalkClock(onStoreChange: () => void): () => void {
+  listeners.add(onStoreChange);
+  ensureInterval();
+  return () => {
+    listeners.delete(onStoreChange);
+    if (listeners.size === 0 && intervalId !== null) {
+      window.clearInterval(intervalId);
+      intervalId = null;
+      staleWalkNowMs = 0;
+    }
+  };
 }
 
 function getStaleWalkNowMs(): number {
@@ -33,5 +52,10 @@ export function useStaleWalkNowMs(): number {
 
 /** Test helper — reset module clock between suites if needed. */
 export function resetStaleWalkClockForTests(): void {
+  if (intervalId !== null) {
+    window.clearInterval(intervalId);
+    intervalId = null;
+  }
+  listeners.clear();
   staleWalkNowMs = 0;
 }

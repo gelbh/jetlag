@@ -118,13 +118,16 @@ export function useQuestionDeadlineEnforcement({
           continue;
         }
 
+        // Wait until the host pause is visible (local+remote) and no move is
+        // in progress before marking handled — otherwise a late answer would
+        // skip resume forever while remote is still running.
+        if (hidingTimerRunningRef.current || hasMoveInProgress(hidingZones)) {
+          continue;
+        }
+
         resumeHandledRef.current.add(question.id);
         autoPausedQuestionRef.current = null;
-
-        // Resume only when local/remote effective running is false (pause stuck).
-        if (!hidingTimerRunningRef.current && !hasMoveInProgress(hidingZones)) {
-          resumeTimer();
-        }
+        resumeTimer();
       }
     };
 
