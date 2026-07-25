@@ -1,6 +1,10 @@
 import posthog from "posthog-js";
 import { getClientEnv } from "../../config/env";
 import {
+  readAnalyticsConsent,
+  writeAnalyticsConsent,
+} from "../../domain/device/analyticsConsent";
+import {
   ANALYTICS_EVENTS,
   type AnalyticsEventName,
   type AnalyticsEventProps,
@@ -88,6 +92,9 @@ export function initAnalytics(): void {
   if (!runtimeEnabled() || initialized) {
     return;
   }
+  if (readAnalyticsConsent() !== "granted") {
+    return;
+  }
 
   const key = getClientEnv().VITE_POSTHOG_KEY?.trim();
   if (!key) {
@@ -115,6 +122,19 @@ export function initAnalytics(): void {
   } catch {
     // Soft-fail: analytics must never break app boot.
   }
+}
+
+export function grantAnalyticsConsent(): void {
+  writeAnalyticsConsent("granted");
+  initAnalytics();
+  if (typeof window !== "undefined") {
+    trackPageView(window.location.pathname + window.location.search);
+  }
+}
+
+export function denyAnalyticsConsent(): void {
+  writeAnalyticsConsent("denied");
+  initialized = false;
 }
 
 export function trackPageView(path: string): void {
