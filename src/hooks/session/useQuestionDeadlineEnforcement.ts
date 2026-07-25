@@ -17,7 +17,8 @@ interface UseQuestionDeadlineEnforcementParams {
   sessionRules: SessionRulesInput;
   pendingQuestions: readonly PendingQuestionRecord[];
   hidingZones: readonly HidingZoneRecord[];
-  timerRunning: boolean;
+  /** Local or remote hiding timer is running (see isHidingTimerEffectivelyRunning). */
+  hidingTimerRunning: boolean;
   pauseTimer: () => void;
   resumeTimer: () => void;
   postSystemMessage: (text: string) => Promise<void>;
@@ -35,7 +36,7 @@ export function useQuestionDeadlineEnforcement({
   sessionRules,
   pendingQuestions,
   hidingZones,
-  timerRunning,
+  hidingTimerRunning,
   pauseTimer,
   resumeTimer,
   postSystemMessage,
@@ -43,7 +44,7 @@ export function useQuestionDeadlineEnforcement({
   const expiryHandledRef = useRef<Set<string>>(new Set());
   const autoPausedQuestionRef = useRef<string | null>(null);
   const resumeHandledRef = useRef<Set<string>>(new Set());
-  const timerRunningRef = useRef(timerRunning);
+  const hidingTimerRunningRef = useRef(hidingTimerRunning);
 
   useEffect(() => {
     expiryHandledRef.current = new Set();
@@ -52,8 +53,8 @@ export function useQuestionDeadlineEnforcement({
   }, [sessionId]);
 
   useEffect(() => {
-    timerRunningRef.current = timerRunning;
-  }, [timerRunning]);
+    hidingTimerRunningRef.current = hidingTimerRunning;
+  }, [hidingTimerRunning]);
 
   useEffect(() => {
     if (!sessionId || !enabled) {
@@ -94,7 +95,7 @@ export function useQuestionDeadlineEnforcement({
 
           await postSystemMessage(DEADLINE_EXPIRED_MESSAGE);
 
-          if (timerRunningRef.current) {
+          if (hidingTimerRunningRef.current) {
             autoPausedQuestionRef.current = question.id;
             pauseTimer();
           }
@@ -117,12 +118,16 @@ export function useQuestionDeadlineEnforcement({
           continue;
         }
 
+        // Wait until the host pause is visible (local+remote) and no move is
+        // in progress before marking handled — otherwise a late answer would
+        // skip resume forever while remote is still running.
+        if (hidingTimerRunningRef.current || hasMoveInProgress(hidingZones)) {
+          continue;
+        }
+
         resumeHandledRef.current.add(question.id);
         autoPausedQuestionRef.current = null;
-
-        if (!timerRunningRef.current && !hasMoveInProgress(hidingZones)) {
-          resumeTimer();
-        }
+        resumeTimer();
       }
     };
 

@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import { getPowerProfile } from "../../domain/device/powerProfile";
 import {
@@ -22,6 +22,7 @@ import {
   selectPrimaryQuestionTimer,
 } from "../../domain/questions";
 import { useMapStore } from "../../state/mapStore";
+import { useStaleWalkNowMs } from "../../hooks/sync/useStaleWalkNowMs";
 
 interface MapTimerClusterProps {
   sessionRules: SessionRulesInput;
@@ -47,35 +48,6 @@ function formatSeekPhaseTime(
 
 function formatSessionElapsedDuringHiding(timerState: TimerState): string {
   return formatElapsedTime(computeElapsedMs(timerState));
-}
-
-const STALE_WALK_CLOCK_MS = 15_000;
-let staleWalkNowMs = 0;
-
-function subscribeStaleWalkClock(onStoreChange: () => void): () => void {
-  if (staleWalkNowMs === 0) {
-    staleWalkNowMs = Date.now();
-  }
-  const id = window.setInterval(() => {
-    staleWalkNowMs = Date.now();
-    onStoreChange();
-  }, STALE_WALK_CLOCK_MS);
-  return () => window.clearInterval(id);
-}
-
-function getStaleWalkNowMs(): number {
-  if (staleWalkNowMs === 0) {
-    staleWalkNowMs = Date.now();
-  }
-  return staleWalkNowMs;
-}
-
-function useStaleWalkNowMs(): number {
-  return useSyncExternalStore(
-    subscribeStaleWalkClock,
-    getStaleWalkNowMs,
-    () => 0,
-  );
 }
 
 export function MapTimerCluster({
