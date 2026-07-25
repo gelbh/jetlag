@@ -11,7 +11,7 @@ import Flatbush from "flatbush";
 import { around as geoflatbushAround } from "geoflatbush";
 import { unionPolygonFeatures } from "../unionPolygonFeatures";
 import type { GameArea } from "../../map/annotations";
-import { geodesicLineBuffer } from "../geodesicLineBuffer";
+import { runGeodesicLineBuffer } from "../geodesicLineBuffer";
 import {
   gameAreaFingerprint,
   gameAreaToFeature,
@@ -336,7 +336,7 @@ export function buildCoastlineNearRegion(
     const bufferedFeatures: Feature<Polygon | MultiPolygon>[] = [];
 
     for (const segment of segments) {
-      const buffered = geodesicLineBuffer(segment, distanceMeters);
+      const buffered = runGeodesicLineBuffer(segment, distanceMeters);
 
       if (!buffered) {
         continue;

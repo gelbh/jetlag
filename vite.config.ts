@@ -5,7 +5,7 @@ import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 import wasm from "vite-plugin-wasm";
-import { optionalMaskWasmPkg } from "./vite.optional-mask-wasm-pkg";
+import { optionalKernelWasmPkg } from "./vite.optional-kernel-wasm-pkg";
 
 const appVersion = (
   JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as {
@@ -59,7 +59,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   worker: {
-    plugins: () => [optionalMaskWasmPkg(), wasm()],
+    plugins: () => [optionalKernelWasmPkg(), wasm()],
     format: "es",
     rolldownOptions: {
       output: {
@@ -68,7 +68,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [
-    optionalMaskWasmPkg(),
+    optionalKernelWasmPkg(),
     wasm(),
     ...(sentryAuthToken && sentryOrg && sentryProject
       ? [

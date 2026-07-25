@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
-import type { Feature, Polygon as GeoPolygon } from "geojson";
+import type { Feature, LineString, Polygon as GeoPolygon } from "geojson";
 import { computeEliminationUnionInput } from "./adapter/eliminationMask";
 import {
   buildEndGameMaskFromDisks,
@@ -11,6 +11,10 @@ import {
   wasmBuildEndGameMaskFromDisks,
   wasmBuildMaskFromUnionInput,
 } from "./kernel/maskWasm";
+import { wasmBuildHalfPlanePolygon } from "./kernel/halfPlaneWasm";
+import { wasmGeodesicLineBuffer } from "./kernel/geodesicWasm";
+import { buildHalfPlanePolygon } from "./kernel/radarHalfPlane";
+import { geodesicLineBuffer } from "./kernel/geodesicLineBuffer";
 import {
   unionDiskSpecs,
   unionEliminationParts,
@@ -21,6 +25,7 @@ import {
   type PolygonFeature,
 } from "./kernel/unionPolygonFeatures";
 import type { AnnotationRecord, GameArea } from "../map/annotations";
+import type { LatLngTuple } from "./kernel/types";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
 
@@ -36,6 +41,23 @@ const gameArea: GameArea = {
     ],
   ],
 };
+
+/** Thermo A/B across London (half-plane perf fixture). */
+const thermoA: LatLngTuple = [51.45, -0.18];
+const thermoB: LatLngTuple = [51.46, -0.12];
+
+/** ~10-vertex line for geodesic perf. */
+function tenVertexLine(): Feature<LineString> {
+  const coordinates: [number, number][] = [];
+  for (let index = 0; index < 10; index += 1) {
+    coordinates.push([-0.18 + index * 0.005, 51.42 + index * 0.004]);
+  }
+  return {
+    type: "Feature",
+    properties: {},
+    geometry: { type: "LineString", coordinates },
+  };
+}
 
 function squareFeature(west: number): Feature<GeoPolygon> {
   return {
@@ -233,6 +255,60 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     });
 
     expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
+  });
+
+  // Direct WASM calls (bypass KERNEL_WASM_READY) — gates for future ready flip.
+  // Measure sync pkg exports after warm-up so Promise microtasks don't dominate
+  // sub-millisecond entrypoints (geodesic especially).
+  it("wasm_half_plane_thermo median within 1.1x ts", async () => {
+    await wasmBuildHalfPlanePolygon(thermoA, thermoB, gameArea, "cold");
+    const wasmPkg = await import(
+      "../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
+    );
+    const pointAJson = JSON.stringify(thermoA);
+    const pointBJson = JSON.stringify(thermoB);
+    const gameAreaJson = JSON.stringify(gameArea);
+
+    const tsMs = measureMedianMs(() => {
+      buildHalfPlanePolygon(thermoA, thermoB, gameArea, "cold");
+    });
+    const wasmMs = measureMedianMs(() => {
+      wasmPkg.build_half_plane_polygon_json(
+        pointAJson,
+        pointBJson,
+        gameAreaJson,
+        "cold",
+        "midpoint",
+      );
+    });
+
+    if (tsMs === 0) {
+      expect(wasmMs).toBe(0);
+    } else {
+      expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
+    }
+  });
+
+  it("wasm_geodesic_10_vertex median within 1.1x ts", async () => {
+    const line = tenVertexLine();
+    await wasmGeodesicLineBuffer(line, 200);
+    const wasmPkg = await import(
+      "../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
+    );
+    const coordinatesJson = JSON.stringify(line.geometry.coordinates);
+
+    const tsMs = measureMedianMs(() => {
+      geodesicLineBuffer(line, 200);
+    });
+    const wasmMs = measureMedianMs(() => {
+      wasmPkg.geodesic_line_buffer_json(coordinatesJson, 200, null);
+    });
+
+    if (tsMs === 0) {
+      expect(wasmMs).toBe(0);
+    } else {
+      expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
+    }
   });
 });
 

@@ -6,8 +6,8 @@ import type { GameArea, TentaclePoi } from "../../domain/map/annotations";
 import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
 import type { MapTool } from "../../state/sessionStore";
 import {
-  buildHalfPlanePolygon,
-  buildRadarShadedRegion,
+  runHalfPlane,
+  runRadarShadedRegion,
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
 import { buildTentaclePoiAnswerEliminationRegion } from "../../domain/geometry/tentacleGeometry";
@@ -131,7 +131,7 @@ export function buildMapDraftOverlays(
       });
     } else {
       pushElimination(
-        buildRadarShadedRegion(
+        runRadarShadedRegion(
           center,
           radiusMeters,
           gameArea,
@@ -246,7 +246,7 @@ export function buildMapDraftOverlays(
 
     if (thermoA && thermoB && answer) {
       pushElimination(
-        buildHalfPlanePolygon(
+        runHalfPlane(
           thermoA,
           thermoB,
           gameArea,

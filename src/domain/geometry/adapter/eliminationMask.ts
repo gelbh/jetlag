@@ -7,8 +7,8 @@ import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import { thermometerShadedSide } from "../../questions/thermometerQuestions";
 import type { HidingZoneRecord } from "../../session/hidingZone";
 import {
-  buildHalfPlanePolygon,
-  buildRadarShadedRegion,
+  runHalfPlane,
+  runRadarShadedRegion,
 } from "../core/radarHalfPlane";
 import type {
   DiskSpec,
@@ -109,7 +109,7 @@ export function eliminationFeatureForAnnotation(
       coordinates[coordinates.length - 1][0],
     ];
 
-    return buildHalfPlanePolygon(
+    return runHalfPlane(
       thermoA,
       thermoB,
       gameArea,
@@ -145,7 +145,7 @@ export function eliminationFeatureForAnnotation(
       return null;
     }
 
-    return buildRadarShadedRegion(
+    return runRadarShadedRegion(
       center,
       radiusMeters,
       gameArea,
