@@ -1,0 +1,15 @@
+{
+  "siteOrigin": "https://jetlag.gelbhart.dev",
+  "indexablePaths": ["/", "/tutorial", "/premium", "/privacy", "/terms"],
+  "disallowPaths": [
+    "/admin",
+    "/map",
+    "/create",
+    "/join",
+    "/presets",
+    "/friends",
+    "/stats",
+    "/leaderboard",
+    "/feedback"
+  ]
+}

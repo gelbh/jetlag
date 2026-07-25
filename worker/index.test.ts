@@ -276,6 +276,32 @@ describe("worker fetch", () => {
     expect(await response.text()).toBe("");
   });
 
+  it("serves prerendered home HTML for exact /", async () => {
+    const html =
+      '<!doctype html><html><head><title>Home</title></head><body><div id="root">Jet Lag Hide+Seek home</div></body></html>';
+    const assetResponse = new Response(html, {
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+
+    const env = {
+      ASSETS: {
+        fetch: vi.fn().mockResolvedValue(assetResponse),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/"),
+      env,
+    );
+
+    expect(env.ASSETS.fetch).toHaveBeenCalledTimes(1);
+    const assetRequest = env.ASSETS.fetch.mock.calls[0][0] as Request;
+    expect(new URL(assetRequest.url).pathname).toBe(
+      "/prerender/home/index.html",
+    );
+    expect(await response.text()).toContain("Jet Lag Hide+Seek home");
+  });
+
   it("applies document CSP nonce to html asset responses", async () => {
     const html = '<!doctype html><script src="/boot-recovery.js"></script>';
     const csp = "default-src 'self'; script-src 'self' https://www.google.com";
@@ -293,7 +319,7 @@ describe("worker fetch", () => {
     } as Env;
 
     const response = await worker.fetch(
-      new Request("https://jetlag.gelbhart.dev/"),
+      new Request("https://jetlag.gelbhart.dev/how-to-play"),
       env,
     );
 
@@ -302,6 +328,9 @@ describe("worker fetch", () => {
     const headerNonce = headerCsp.match(/'nonce-([^']+)'/)?.[1];
     const bodyNonce = body.match(/nonce="([^"]+)"/)?.[1];
 
+    expect(env.ASSETS.fetch).toHaveBeenCalledTimes(1);
+    const assetRequest = env.ASSETS.fetch.mock.calls[0][0] as Request;
+    expect(new URL(assetRequest.url).pathname).toBe("/how-to-play");
     expect(headerNonce).toBeTruthy();
     expect(bodyNonce).toBe(headerNonce);
     expect(body).toContain(`nonce="${headerNonce}"`);

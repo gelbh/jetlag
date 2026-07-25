@@ -86,7 +86,13 @@ export default {
       return handleCspReportRequest(request);
     }
 
-    const assetResponse = await env.ASSETS.fetch(request);
+    // Exact `/` serves prerendered home HTML; keep dist/index.html as the SPA shell
+    // for nested-route fallbacks and the service worker.
+    const assetRequest =
+      pathname === "/"
+        ? new Request(new URL("/prerender/home/index.html", request.url), request)
+        : request;
+    const assetResponse = await env.ASSETS.fetch(assetRequest);
     if (isSpaFallbackForAssetRequest(request, assetResponse)) {
       return new Response("Not Found", {
         status: 404,

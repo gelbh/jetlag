@@ -9,6 +9,7 @@ function createLhciConfig({ formFactor, homeJoinPerf, createPerf, outputDir, col
       collect: {
         url: [
           "http://127.0.0.1:4173/",
+          "http://127.0.0.1:4173/tutorial",
           "http://127.0.0.1:4173/join",
           "http://127.0.0.1:4173/create",
         ],
@@ -31,6 +32,14 @@ function createLhciConfig({ formFactor, homeJoinPerf, createPerf, outputDir, col
               viewport: "off",
               "target-size": ["error", { minScore: 0.8 }],
               "cumulative-layout-shift": ["error", { maxNumericValue: 0.15 }],
+            },
+          },
+          {
+            // Vite preview serves SPA shell at `/` (noindex). SEO gate uses prerendered
+            // `/tutorial` (index,follow); production `/` is Worker-remapped to prerender home.
+            matchingUrlPattern: "http://127\\.0\\.0\\.1:4173/tutorial/?$",
+            assertions: {
+              "categories:seo": ["error", { minScore: 0.9 }],
             },
           },
           {
