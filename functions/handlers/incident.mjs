@@ -65,6 +65,7 @@ import {
   supportAgentTurnHandler,
 } from "../incident/supportAgentTurn.mjs";
 import { launchCursorHotfixForIncident } from "../incident/launchCursorHotfix.mjs";
+import { sendSessionNotification } from "../session/sessionNotificationTriggers.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
 const incidentEmailSecret = defineSecret("INCIDENT_EMAIL_SECRET");
@@ -413,6 +414,7 @@ export const postSupportAgentTurn = onCall(
           llmBaseUrl: sessionOpsLlmBaseUrl.value(),
           llmModel: sessionOpsLlmModel.value(),
           rateLimit: (options) => consumeRateLimit(db, options),
+          notifyHostConfirm: (payload) => sendSessionNotification(db, payload),
           executeDeps: {
             moderate: (sessionId, action, adminUid) =>
               moderateSession(db, sessionId, action, adminUid),
