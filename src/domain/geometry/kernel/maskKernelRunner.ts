@@ -3,11 +3,11 @@ import {
   buildMaskFromUnionInput as buildMaskFromUnionInputTs,
 } from "./buildMask";
 import type { MaskKernelMode } from "./maskKernelMode";
-import { bboxFromGameArea, maskTopologyMatches } from "./maskTopologyCompare";
 import {
   wasmBuildEndGameMaskFromDisks,
   wasmBuildMaskFromUnionInput,
 } from "./maskWasm";
+import { bboxFromGameArea, maskTopologyMatches } from "./parity";
 import type {
   DiskSpec,
   EliminationUnionInput,
@@ -19,34 +19,35 @@ function assertNever(value: never): never {
   throw new Error(`Unexpected mask kernel mode: ${String(value)}`);
 }
 
-export async function runMaskFromUnionInput(
-  input: EliminationUnionInput,
+async function runWithMaskKernel(
+  mode: MaskKernelMode,
+  label: string,
   gameArea: GameAreaGeometry,
-  mode: MaskKernelMode = "ts",
+  runTs: () => PolygonFeature | null,
+  runWasm: () => Promise<PolygonFeature | null>,
 ): Promise<PolygonFeature | null> {
   switch (mode) {
     case "ts":
-      return buildMaskFromUnionInputTs(input, gameArea);
+      return runTs();
     case "wasm":
       try {
-        return await wasmBuildMaskFromUnionInput(input, gameArea);
-      } catch {
-        return buildMaskFromUnionInputTs(input, gameArea);
+        return await runWasm();
+      } catch (error) {
+        console.warn(`[geometry] mask kernel wasm failed (${label})`, error);
+        return runTs();
       }
     case "dual": {
-      const tsResult = buildMaskFromUnionInputTs(input, gameArea);
+      const tsResult = runTs();
       try {
-        const wasmResult = await wasmBuildMaskFromUnionInput(input, gameArea);
+        const wasmResult = await runWasm();
         if (
           !maskTopologyMatches(wasmResult, tsResult, bboxFromGameArea(gameArea))
         ) {
-          console.warn(
-            "[geometry] mask kernel dual mismatch (buildMaskFromUnionInput)",
-          );
+          console.warn(`[geometry] mask kernel dual mismatch (${label})`);
         }
       } catch (error) {
         console.warn(
-          "[geometry] mask kernel dual wasm failed (buildMaskFromUnionInput)",
+          `[geometry] mask kernel dual wasm failed (${label})`,
           error,
         );
       }
@@ -57,40 +58,30 @@ export async function runMaskFromUnionInput(
   }
 }
 
+export async function runMaskFromUnionInput(
+  input: EliminationUnionInput,
+  gameArea: GameAreaGeometry,
+  mode: MaskKernelMode = "ts",
+): Promise<PolygonFeature | null> {
+  return runWithMaskKernel(
+    mode,
+    "buildMaskFromUnionInput",
+    gameArea,
+    () => buildMaskFromUnionInputTs(input, gameArea),
+    () => wasmBuildMaskFromUnionInput(input, gameArea),
+  );
+}
+
 export async function runEndGameMaskFromDisks(
   gameArea: GameAreaGeometry,
   disks: readonly DiskSpec[],
   mode: MaskKernelMode = "ts",
 ): Promise<PolygonFeature | null> {
-  switch (mode) {
-    case "ts":
-      return buildEndGameMaskFromDisksTs(gameArea, disks);
-    case "wasm":
-      try {
-        return await wasmBuildEndGameMaskFromDisks(gameArea, disks);
-      } catch {
-        return buildEndGameMaskFromDisksTs(gameArea, disks);
-      }
-    case "dual": {
-      const tsResult = buildEndGameMaskFromDisksTs(gameArea, disks);
-      try {
-        const wasmResult = await wasmBuildEndGameMaskFromDisks(gameArea, disks);
-        if (
-          !maskTopologyMatches(wasmResult, tsResult, bboxFromGameArea(gameArea))
-        ) {
-          console.warn(
-            "[geometry] mask kernel dual mismatch (buildEndGameMaskFromDisks)",
-          );
-        }
-      } catch (error) {
-        console.warn(
-          "[geometry] mask kernel dual wasm failed (buildEndGameMaskFromDisks)",
-          error,
-        );
-      }
-      return tsResult;
-    }
-    default:
-      return assertNever(mode);
-  }
+  return runWithMaskKernel(
+    mode,
+    "buildEndGameMaskFromDisks",
+    gameArea,
+    () => buildEndGameMaskFromDisksTs(gameArea, disks),
+    () => wasmBuildEndGameMaskFromDisks(gameArea, disks),
+  );
 }

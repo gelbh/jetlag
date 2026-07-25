@@ -1,7 +1,7 @@
 import { expect } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
-import type { PolygonFeature } from "./types";
+import type { GameAreaGeometry, PolygonFeature } from "./types";
 
 function sampleGridPoints(
   west: number,
@@ -25,15 +25,58 @@ function sampleGridPoints(
   return points;
 }
 
-/** Grid point-in-polygon agreement for dual-run / future WASM parity. */
-export function assertPolygonTopologyParity(
+export function bboxFromGameArea(gameArea: GameAreaGeometry): {
+  west: number;
+  east: number;
+  south: number;
+  north: number;
+} {
+  let west = Infinity;
+  let east = -Infinity;
+  let south = Infinity;
+  let north = -Infinity;
+
+  const rings =
+    gameArea.type === "Polygon"
+      ? gameArea.coordinates
+      : gameArea.coordinates.flatMap((polygon) => polygon);
+
+  for (const ring of rings) {
+    for (const position of ring) {
+      const lng = position[0];
+      const lat = position[1];
+      if (lng < west) west = lng;
+      if (lng > east) east = lng;
+      if (lat < south) south = lat;
+      if (lat > north) north = lat;
+    }
+  }
+
+  if (
+    !Number.isFinite(west) ||
+    !Number.isFinite(east) ||
+    !Number.isFinite(south) ||
+    !Number.isFinite(north)
+  ) {
+    return { west: 0, east: 0, south: 0, north: 0 };
+  }
+
+  return { west, east, south, north };
+}
+
+/** Non-throwing grid PIP topology compare for dual-run. */
+export function maskTopologyMatches(
   candidate: PolygonFeature | null,
   baseline: PolygonFeature | null,
   bbox: { west: number; east: number; south: number; north: number },
   steps = 12,
-): void {
-  expect(candidate).not.toBeNull();
-  expect(baseline).not.toBeNull();
+): boolean {
+  if (candidate === null && baseline === null) {
+    return true;
+  }
+  if (candidate === null || baseline === null) {
+    return false;
+  }
 
   const points = sampleGridPoints(
     bbox.west,
@@ -44,8 +87,25 @@ export function assertPolygonTopologyParity(
   );
 
   for (const sample of points) {
-    expect(booleanPointInPolygon(sample, candidate!)).toBe(
-      booleanPointInPolygon(sample, baseline!),
-    );
+    if (
+      booleanPointInPolygon(sample, candidate) !==
+      booleanPointInPolygon(sample, baseline)
+    ) {
+      return false;
+    }
   }
+
+  return true;
+}
+
+/** Grid point-in-polygon agreement for dual-run / future WASM parity. */
+export function assertPolygonTopologyParity(
+  candidate: PolygonFeature | null,
+  baseline: PolygonFeature | null,
+  bbox: { west: number; east: number; south: number; north: number },
+  steps = 12,
+): void {
+  expect(candidate).not.toBeNull();
+  expect(baseline).not.toBeNull();
+  expect(maskTopologyMatches(candidate, baseline, bbox, steps)).toBe(true);
 }
