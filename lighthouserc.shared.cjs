@@ -34,6 +34,12 @@ function createLhciConfig({ formFactor, homeJoinPerf, createPerf, outputDir, col
             },
           },
           {
+            matchingUrlPattern: "http://127\\.0\\.0\\.1:4173/?$",
+            assertions: {
+              "categories:seo": ["error", { minScore: 0.9 }],
+            },
+          },
+          {
             matchingUrlPattern: "http://127\\.0\\.0\\.1:4173/create/?$",
             assertions: {
               "categories:performance": ["error", { minScore: createPerf }],
