@@ -11,15 +11,26 @@ import {
   resetAnalyticsForTests,
   scrubAnalyticsProperties,
   shouldEnableAnalytics,
+  syncAnalyticsIdentity,
   track,
   trackPageView,
 } from "./analytics";
 import { resetClientEnvForTests } from "../../config/env";
 
-const { posthogInit, posthogCapture, posthogRegister } = vi.hoisted(() => ({
+const {
+  posthogInit,
+  posthogCapture,
+  posthogRegister,
+  posthogReset,
+  posthogOptOut,
+  posthogIdentify,
+} = vi.hoisted(() => ({
   posthogInit: vi.fn(),
   posthogCapture: vi.fn(),
   posthogRegister: vi.fn(),
+  posthogReset: vi.fn(),
+  posthogOptOut: vi.fn(),
+  posthogIdentify: vi.fn(),
 }));
 
 vi.mock("posthog-js", () => ({
@@ -27,6 +38,9 @@ vi.mock("posthog-js", () => ({
     init: posthogInit,
     capture: posthogCapture,
     register: posthogRegister,
+    reset: posthogReset,
+    opt_out_capturing: posthogOptOut,
+    identify: posthogIdentify,
   },
 }));
 
@@ -38,7 +52,6 @@ vi.mock("../../config/env", async () => {
     ...actual,
     getClientEnv: vi.fn(() => ({
       VITE_POSTHOG_KEY: "phc_test_key",
-      VITE_POSTHOG_HOST: "https://eu.i.posthog.com",
     })),
   };
 });
@@ -91,6 +104,9 @@ describe("analytics facade", () => {
     posthogInit.mockReset();
     posthogCapture.mockReset();
     posthogRegister.mockReset();
+    posthogReset.mockReset();
+    posthogOptOut.mockReset();
+    posthogIdentify.mockReset();
   });
 
   afterEach(() => {
@@ -144,9 +160,15 @@ describe("analytics facade", () => {
 
     expect(posthogInit).toHaveBeenCalledOnce();
     expect(posthogInit.mock.calls[0]?.[1]).toMatchObject({
+      api_host: "/ingest",
+      ui_host: "https://eu.posthog.com",
+      persistence: "localStorage",
+      capture_pageleave: true,
+      capture_performance: true,
       disable_session_recording: true,
-      disable_external_dependency_loading: true,
+      disable_external_dependency_loading: false,
       disable_surveys: true,
+      person_profiles: "identified_only",
     });
     expect(posthogRegister).toHaveBeenCalledWith({ $geoip_disable: true });
   });
@@ -217,6 +239,19 @@ describe("analytics facade", () => {
     expect(posthogInit).not.toHaveBeenCalled();
   });
 
+  it("denyAnalyticsConsent opts out, resets, and stops capture", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+    initAnalytics();
+    denyAnalyticsConsent();
+    trackPageView("/home");
+    expect(posthogOptOut).toHaveBeenCalledOnce();
+    expect(posthogReset).toHaveBeenCalled();
+    expect(localStorage.getItem(ANALYTICS_CONSENT_KEY)).toBe("denied");
+    expect(posthogCapture).not.toHaveBeenCalled();
+  });
+
   it("scrubs forbidden props before capture when initialized", () => {
     writeAnalyticsConsent("granted");
     resetAnalyticsForTests({ initialized: true });
@@ -247,5 +282,34 @@ describe("analytics facade", () => {
     track(ANALYTICS_EVENTS.session_ended, {});
 
     expect(posthogCapture).not.toHaveBeenCalled();
+  });
+
+  it("identifies permanent users once and resets when they sign out", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+    initAnalytics();
+
+    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false });
+    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false });
+    expect(posthogIdentify).toHaveBeenCalledTimes(1);
+    expect(posthogIdentify).toHaveBeenCalledWith("user-1");
+
+    syncAnalyticsIdentity({ uid: "anon-9", isAnonymous: true });
+    expect(posthogReset).toHaveBeenCalled();
+  });
+
+  it("does not identify anonymous users", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+    initAnalytics();
+    syncAnalyticsIdentity({ uid: "anon-1", isAnonymous: true });
+    expect(posthogIdentify).not.toHaveBeenCalled();
+  });
+
+  it("no-ops identity sync when not initialized", () => {
+    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false });
+    expect(posthogIdentify).not.toHaveBeenCalled();
   });
 });

@@ -12,7 +12,9 @@ import {
 
 export { ANALYTICS_EVENTS, type AnalyticsEventName, type AnalyticsEventProps };
 
-const DEFAULT_POSTHOG_HOST = "https://eu.i.posthog.com";
+/** First-party Worker reverse proxy (see worker/posthogProxy.ts). */
+export const POSTHOG_API_HOST = "/ingest";
+export const POSTHOG_UI_HOST = "https://eu.posthog.com";
 
 /** Keys that must never leave the device via product analytics. */
 const FORBIDDEN_PROP_KEYS = new Set([
@@ -40,6 +42,12 @@ const FORBIDDEN_PROP_KEYS = new Set([
 ]);
 
 let initialized = false;
+let identifiedUid: string | null = null;
+
+export type AnalyticsIdentityUser = {
+  uid: string;
+  isAnonymous: boolean;
+} | null;
 
 export function shouldEnableAnalytics(env: {
   prod: boolean;
@@ -101,18 +109,17 @@ export function initAnalytics(): void {
     return;
   }
 
-  const host =
-    getClientEnv().VITE_POSTHOG_HOST?.trim() || DEFAULT_POSTHOG_HOST;
-
   try {
     posthog.init(key, {
-      api_host: host,
-      persistence: "memory",
+      api_host: POSTHOG_API_HOST,
+      ui_host: POSTHOG_UI_HOST,
+      persistence: "localStorage",
       autocapture: false,
       capture_pageview: false,
-      capture_pageleave: false,
+      capture_pageleave: true,
+      capture_performance: true,
       disable_session_recording: true,
-      disable_external_dependency_loading: true,
+      disable_external_dependency_loading: false,
       disable_surveys: true,
       person_profiles: "identified_only",
     });
@@ -134,7 +141,35 @@ export function grantAnalyticsConsent(): void {
 
 export function denyAnalyticsConsent(): void {
   writeAnalyticsConsent("denied");
+  try {
+    posthog.opt_out_capturing();
+    posthog.reset(true);
+  } catch {
+    // Soft-fail: consent must still clear locally.
+  }
+  identifiedUid = null;
   initialized = false;
+}
+
+export function syncAnalyticsIdentity(user: AnalyticsIdentityUser): void {
+  if (!initialized) {
+    return;
+  }
+  try {
+    if (user && !user.isAnonymous) {
+      if (identifiedUid !== user.uid) {
+        posthog.identify(user.uid);
+        identifiedUid = user.uid;
+      }
+      return;
+    }
+    if (identifiedUid !== null) {
+      posthog.reset();
+      identifiedUid = null;
+    }
+  } catch {
+    // Soft-fail: identity must never break app boot.
+  }
 }
 
 function pageViewProperties(
@@ -196,4 +231,5 @@ export function resetAnalyticsForTests(options?: {
   initialized?: boolean;
 }): void {
   initialized = options?.initialized ?? false;
+  identifiedUid = null;
 }

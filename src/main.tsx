@@ -3,10 +3,15 @@ import "@fontsource/source-sans-3/500.css";
 import "@fontsource/source-sans-3/600.css";
 import "@fontsource/barlow-semi-condensed/600.css";
 import "@fontsource/barlow-semi-condensed/700.css";
+import { onAuthStateChanged } from "firebase/auth";
 import { unregisterDevServiceWorkers } from "./domain/device/unregisterDevServiceWorkers.ts";
-import { initAnalytics } from "./services/core/analytics.ts";
+import {
+  initAnalytics,
+  syncAnalyticsIdentity,
+} from "./services/core/analytics.ts";
 import { initSentry, setBootstrapTag } from "./services/core/sentry.ts";
 import {
+  getFirebaseAuth,
   isFirebaseConfigured,
   startAuthBootstrap,
 } from "./services/core/firebase.ts";
@@ -38,6 +43,11 @@ void unregisterDevServiceWorkers().then((cleared) => {
   renderApp();
 
   if (isFirebaseConfigured()) {
+    onAuthStateChanged(getFirebaseAuth(), (user) => {
+      syncAnalyticsIdentity(
+        user ? { uid: user.uid, isAnonymous: user.isAnonymous } : null,
+      );
+    });
     startAuthBootstrap();
   }
 });
