@@ -48,7 +48,7 @@ describe("useQuestionDeadlineEnforcement", () => {
         sessionRules: { gameSize: "small" },
         pendingQuestions: [pendingQuestion()],
         hidingZones: [],
-        timerRunning: true,
+        hidingTimerRunning: true,
         pauseTimer,
         resumeTimer: vi.fn(),
         postSystemMessage,
@@ -80,7 +80,7 @@ describe("useQuestionDeadlineEnforcement", () => {
         sessionRules: { gameSize: "small" },
         pendingQuestions: [pendingQuestion()],
         hidingZones: [],
-        timerRunning: true,
+        hidingTimerRunning: true,
         pauseTimer: vi.fn(),
         resumeTimer: vi.fn(),
         postSystemMessage: vi.fn(async () => undefined),
@@ -107,7 +107,7 @@ describe("useQuestionDeadlineEnforcement", () => {
           sessionRules: { gameSize: "small" },
           pendingQuestions,
           hidingZones: [],
-          timerRunning,
+          hidingTimerRunning: timerRunning,
           pauseTimer,
           resumeTimer,
           postSystemMessage: vi.fn(async () => undefined),
@@ -169,7 +169,7 @@ describe("useQuestionDeadlineEnforcement", () => {
               moveInProgress: true,
             },
           ],
-          timerRunning,
+          hidingTimerRunning: timerRunning,
           pauseTimer: vi.fn(),
           resumeTimer,
           postSystemMessage: vi.fn(async () => undefined),
@@ -203,4 +203,47 @@ describe("useQuestionDeadlineEnforcement", () => {
 
     expect(resumeTimer).not.toHaveBeenCalled();
   });
+
+  it("pauses when hidingTimerRunning is true (covers remote-only running)", async () => {
+    const pauseTimer = vi.fn();
+    renderHook(() =>
+      useQuestionDeadlineEnforcement({
+        sessionId: "session-1",
+        enabled: true,
+        sessionRules: { gameSize: "medium" },
+        pendingQuestions: [pendingQuestion()],
+        hidingZones: [],
+        hidingTimerRunning: true,
+        pauseTimer,
+        resumeTimer: vi.fn(),
+        postSystemMessage: vi.fn(async () => undefined),
+      }),
+    );
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+    expect(pauseTimer).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not pause when both local and remote timers are stopped", async () => {
+    const pauseTimer = vi.fn();
+    renderHook(() =>
+      useQuestionDeadlineEnforcement({
+        sessionId: "session-1",
+        enabled: true,
+        sessionRules: { gameSize: "medium" },
+        pendingQuestions: [pendingQuestion()],
+        hidingZones: [],
+        hidingTimerRunning: false,
+        pauseTimer,
+        resumeTimer: vi.fn(),
+        postSystemMessage: vi.fn(async () => undefined),
+      }),
+    );
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+    expect(pauseTimer).not.toHaveBeenCalled();
+  });
+
 });

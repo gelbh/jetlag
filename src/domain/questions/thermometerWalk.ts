@@ -68,6 +68,23 @@ export function listOrphanWalkingThermometerQuestionIds(
     .map((question) => question.id);
 }
 
+
+export function listStaleWalkingThermometerQuestionIds(
+  questions: readonly PendingQuestionRecord[],
+  walkerLocationUpdatedAtByUid: ReadonlyMap<string, string | null>,
+  nowMs: number,
+): string[] {
+  return questions
+    .filter((question) =>
+      isStaleThermometerWalk(
+        question,
+        walkerLocationUpdatedAtByUid.get(question.createdByUid) ?? null,
+        nowMs,
+      ),
+    )
+    .map((question) => question.id);
+}
+
 export function isStaleThermometerWalk(
   question: PendingQuestionRecord,
   walkerLocationUpdatedAt: string | null,

@@ -25,6 +25,14 @@ export function isTimerRunning(state: TimerState): boolean {
   return state.runningSince !== null;
 }
 
+/** True when local UI or remote Firestore says the hiding timer is running. */
+export function isHidingTimerEffectivelyRunning(
+  localRunning: boolean,
+  remoteRunning: boolean,
+): boolean {
+  return localRunning || remoteRunning;
+}
+
 export function hasTimerStarted(state: TimerState): boolean {
   return state.accumulatedMs > 0 || state.runningSince !== null;
 }
@@ -38,6 +46,25 @@ export function startTimer(state: TimerState, now = Date.now()): TimerState {
     accumulatedMs: state.accumulatedMs,
     runningSince: now,
   };
+}
+
+
+/**
+ * Pause local timer, adopting remote first when local is already paused but
+ * remote is still running (deadline pause across host desync).
+ */
+export function pausePreferringRemote(
+  local: TimerState,
+  remote: TimerState | null | undefined,
+  now = Date.now(),
+): TimerState {
+  const base =
+    remote &&
+    !isTimerRunning(local) &&
+    isTimerRunning(remote)
+      ? remote
+      : local;
+  return pauseTimer(base, now);
 }
 
 export function pauseTimer(state: TimerState, now = Date.now()): TimerState {
@@ -106,7 +133,9 @@ export function reconcileTimerState(
 
   if (Math.abs(elapsedDiff) <= 2_000) {
     if (isTimerRunning(local) !== isTimerRunning(remote)) {
-      return remote;
+      // Prefer paused: resume is always an explicit start() write; do not
+      // resurrect a still-running remote over a host pause in flight.
+      return isTimerRunning(local) ? remote : local;
     }
     return local;
   }
