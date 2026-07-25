@@ -35,5 +35,12 @@ export {
 
 export { claimUsername, profileFriends } from "./handlers/profile.mjs";
 
+export {
+  applyIncidentMitigation,
+  createIncident,
+  postIncidentMessage,
+  publishIncidentHotfix,
+} from "./handlers/incident.mjs";
+
 export { listActiveSessions } from "./admin/listActiveSessions.mjs";
 export { adminModerateSession } from "./admin/moderateSession.mjs";

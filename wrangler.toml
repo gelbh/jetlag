@@ -11,6 +11,13 @@ custom_domain = true
 [observability]
 enabled = true
 
+# Incident email transport (/api/incident-email → Resend). These are runtime
+# secrets injected via Doppler / `wrangler secret put`, never committed:
+#   RESEND_API_KEY        Resend API key
+#   INCIDENT_EMAIL_SECRET Shared bearer secret the Cloud Function presents
+#   INCIDENT_ADMIN_EMAIL  Recipient (defaults to the admin Gmail in code)
+#   INCIDENT_EMAIL_FROM   Verified Resend sender (defaults in code)
+
 [assets]
 directory = "./dist"
 not_found_handling = "single-page-application"

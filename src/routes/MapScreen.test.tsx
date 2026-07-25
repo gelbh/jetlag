@@ -10,6 +10,10 @@ vi.mock("../components/ui/AppUpdateMapChip", () => ({
   AppUpdateMapChip: () => null,
 }));
 
+vi.mock("../components/incident/HotfixGraceChip", () => ({
+  HotfixGraceChip: () => null,
+}));
+
 vi.mock("../components/map/MapView", () => ({
   MapView: ({ children }: { children?: React.ReactNode }) => (
     <div data-testid="map-screen-view">{children}</div>

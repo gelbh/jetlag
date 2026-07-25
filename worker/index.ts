@@ -11,6 +11,10 @@ import {
   shouldApplyDocumentCsp,
 } from "./documentCsp";
 import { applyCacheControlHeader } from "./assetCacheHeaders";
+import {
+  handleIncidentEmailRequest,
+  INCIDENT_EMAIL_PATH,
+} from "./incidentEmail";
 
 export const CSP_REPORT_PATH = "/api/csp-report";
 
@@ -92,6 +96,9 @@ export default {
     if (pathname === CSP_REPORT_PATH) {
       return handleCspReportRequest(request);
     }
+    if (pathname === INCIDENT_EMAIL_PATH) {
+      return handleIncidentEmailRequest(request, env);
+    }
 
     // Exact `/` serves prerendered home HTML; keep dist/index.html as the SPA shell
     // for nested-route fallbacks and the service worker.
@@ -121,6 +128,10 @@ export default {
   },
 } satisfies ExportedHandler<Env>;
 
+export {
+  handleIncidentEmailRequest,
+  INCIDENT_EMAIL_PATH,
+} from "./incidentEmail";
 export {
   handleSentryTunnelRequest,
   parseSentryEnvelopeTarget,
