@@ -52,7 +52,7 @@ npm run dev
 
 ### Geometry mask WASM (Rust)
 
-`npm run build` always runs `npm run wasm:build` first (wasm-pack → `crates/jetlag-geometry-mask/pkg/`, gitignored), even when the default mask kernel mode is `ts`. Local `vite` / `ts` mode can stub a missing `pkg/` via Vite’s optional plugin, but production and worker builds still need a real package.
+`npm run build` always runs `npm run wasm:build` first (wasm-pack → `crates/jetlag-geometry-mask/pkg/`, gitignored). Local `vite` / opt-out `ts` mode can stub a missing `pkg/` via Vite’s optional plugin, but production and worker builds still need a real package.
 
 **Toolchain (once per machine):** Rust stable with `wasm32-unknown-unknown`, plus [wasm-pack](https://rustwasm.github.io/wasm-pack/) (CI pins **0.13.1**).
 
@@ -62,7 +62,7 @@ cargo install wasm-pack --version 0.13.1   # or match CI
 npm run wasm:build
 ```
 
-**Kernel mode** (default `ts`): `VITE_GEOMETRY_MASK_KERNEL` (`ts` | `dual` | `wasm`; empty/invalid ignored) or localStorage `jl.geometry.maskKernel` (overrides env). Disk CircleUnion is not a WASM parity goal — `wasm` mode falls back to the TypeScript path when any disk is present.
+**Kernel mode** (default `wasm` when unset): override with localStorage `jl.geometry.maskKernel=ts` (or `dual`) or env `VITE_GEOMETRY_MASK_KERNEL` (`ts` | `dual` | `wasm`; localStorage overrides env). Empty values are ignored; invalid non-empty values fall back to `ts`. Disk CircleUnion is not a WASM parity goal — `wasm` mode falls back to the TypeScript path when any disk is present; WASM load/compute failure also falls back to TypeScript.
 
 ## Deploy
 
