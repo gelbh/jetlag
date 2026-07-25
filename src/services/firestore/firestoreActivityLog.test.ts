@@ -82,7 +82,9 @@ function sessionStartedEvent(
 }
 
 function snapshotHandlerFromLastSubscribe(): SnapshotHandler {
-  const call = firestoreMocks.onSnapshot.mock.calls.at(-1);
+  const call = firestoreMocks.onSnapshot.mock.calls.at(-1) as
+    | [unknown, SnapshotHandler, ...unknown[]]
+    | undefined;
   const handler = call?.[1];
   if (typeof handler !== "function") {
     throw new Error("Expected onSnapshot success handler");
