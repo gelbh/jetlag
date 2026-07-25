@@ -75,11 +75,7 @@ export function useMeasuringCommit({
     resetDraft,
   } = draft;
 
-  const {
-    resolvedCoastSegments,
-    measuringRegionInput,
-    measuringNearRegion,
-  } = previews;
+  const { resolvedCoastSegments, measuringRegionInput } = previews;
 
   const performCommit = useCallback(async () => {
     if (!measuringSeekerPoint || measuringDistanceMeters === null) {
@@ -191,9 +187,9 @@ export function useMeasuringCommit({
       return;
     }
 
-    const regions = buildMeasuringRegions({
+    // Rebuild near+elim together from current input (avoid stale deferred preview).
+    const regions = await buildMeasuringRegions({
       ...measuringRegionInput,
-      precomputedNearRegion: measuringNearRegion,
     });
     if (!regions) {
       setMeasuringError("Couldn't build measure distance regions.");
@@ -266,7 +262,6 @@ export function useMeasuringCommit({
     measuringAnswer,
     measuringDistanceMeters,
     measuringLocationCategory,
-    measuringNearRegion,
     measuringPlaces,
     measuringRegionInput,
     measuringSeekerPoint,
