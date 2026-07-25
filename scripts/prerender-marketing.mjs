@@ -28,8 +28,14 @@ function waitForServer(url, timeoutMs = 60_000) {
   })();
 }
 
+/**
+ * Home must not overwrite Vite's SPA shell at dist/index.html (Workers fallback + SW).
+ * Nested indexable routes write beside assets as usual.
+ */
 function distHtmlPath(urlPath) {
-  if (urlPath === "/") return join(root, "dist/index.html");
+  if (urlPath === "/") {
+    return join(root, "dist/prerender/home/index.html");
+  }
   return join(root, "dist", urlPath.slice(1), "index.html");
 }
 
@@ -83,7 +89,8 @@ try {
 
   for (const urlPath of policy.indexablePaths) {
     const target = `${BASE}${urlPath === "/" ? "/" : urlPath}`;
-    await page.goto(target, { waitUntil: "networkidle", timeout: 120_000 });
+    // "load" avoids hanging on long-lived analytics / SW connections that block networkidle.
+    await page.goto(target, { waitUntil: "load", timeout: 120_000 });
     await page.waitForFunction(
       () => {
         const rootEl = document.querySelector("#root");

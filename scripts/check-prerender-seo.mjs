@@ -9,7 +9,9 @@ const policy = JSON.parse(
 );
 
 function distHtmlPath(urlPath) {
-  if (urlPath === "/") return join(root, "dist/index.html");
+  if (urlPath === "/") {
+    return join(root, "dist/prerender/home/index.html");
+  }
   return join(root, "dist", urlPath.slice(1), "index.html");
 }
 
@@ -19,6 +21,22 @@ function expectedCanonical(path) {
 }
 
 let failed = false;
+
+const spaShell = join(root, "dist/index.html");
+try {
+  const shellHtml = readFileSync(spaShell, "utf8");
+  if (!shellHtml.includes('content="noindex,nofollow"')) {
+    console.error("dist/index.html SPA shell must keep robots noindex,nofollow");
+    failed = true;
+  }
+  if (shellHtml.includes('content="index,follow"')) {
+    console.error("dist/index.html SPA shell must not be overwritten with index,follow");
+    failed = true;
+  }
+} catch {
+  console.error(`Missing SPA shell: ${spaShell}`);
+  failed = true;
+}
 
 for (const urlPath of policy.indexablePaths) {
   const file = distHtmlPath(urlPath);
