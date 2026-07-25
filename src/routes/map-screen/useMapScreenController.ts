@@ -41,6 +41,7 @@ import { useAnnotations } from "../../hooks/map/useAnnotations";
 import { useSharedSessionScreen } from "../../hooks/session/useSharedSessionScreen";
 import { useEnsureSessionMembership } from "../../hooks/session/useEnsureSessionMembership";
 import { useQuestionDeadlineEnforcement } from "../../hooks/session/useQuestionDeadlineEnforcement";
+import { isHidingTimerEffectivelyRunning } from "../../domain/session/timer";
 import { usePendingQuestionResolver } from "../../hooks/sync/usePendingQuestionResolver";
 import { useCancelOrphanThermometerWalks } from "../../hooks/sync/useCancelOrphanThermometerWalks";
 import { useSeekerLocationSync } from "../../hooks/sync/useSeekerLocationSync";
@@ -345,7 +346,10 @@ export function useMapScreenController() {
     sessionRules,
     pendingQuestions,
     hidingZones,
-    timerRunning: timer.running,
+    hidingTimerRunning: isHidingTimerEffectivelyRunning(
+      timer.running,
+      Boolean(session?.timerRunningSince),
+    ),
     pauseTimer: timer.pause,
     resumeTimer: timer.start,
     postSystemMessage: postDeadlineSystemMessage,
@@ -370,8 +374,10 @@ export function useMapScreenController() {
     sessionId: session?.id ?? null,
     myUid: uid,
     myRole,
+    isHost,
     memberUids: session?.memberUids ?? [],
     pendingQuestions,
+    seekerLocations,
     cancelThermometerWalk,
   });
 

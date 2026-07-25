@@ -4,6 +4,7 @@ import {
   hasTimerStarted,
   INITIAL_TIMER_STATE,
   isTimerRunning,
+  pausePreferringRemote,
   pauseTimer,
   reconcileTimerState,
   resetTimer,
@@ -128,12 +129,13 @@ export function useSessionTimer(
       return;
     }
 
+    const remote = remoteSnapshot ?? (remoteState === null ? undefined : remoteState);
     setTimerState((current) => {
-      const next = pauseTimer(current);
+      const next = pausePreferringRemote(current, remote);
       onControlRef.current?.(next);
       return next;
     });
-  }, [canControl, setTimerState]);
+  }, [canControl, remoteSnapshot, remoteState, setTimerState]);
 
   const reset = useCallback(() => {
     if (!canControl) {
