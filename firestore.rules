@@ -786,6 +786,7 @@ service cloud.firestore {
           && request.resource.data.type is string
           && validActivityLogType(request.resource.data.type)
           && request.resource.data.createdAt is string
+          && request.resource.data.createdAt.size() > 0
           && request.resource.data.payload is map;
         allow update, delete: if false;
       }

@@ -12,6 +12,7 @@ import {
 import type { SessionActivityEvent } from "../../domain/session/sessionActivityLog";
 import { sortActivityEventsDesc } from "../../domain/session/sessionActivityLog";
 import { getFirestoreDb } from "../core/firebase";
+import { captureException } from "../core/sentry";
 import { isFirestorePermissionDenied } from "./firestoreAnnotations";
 import {
   buildActivityLogDocument,
@@ -64,13 +65,25 @@ export function subscribeActivityLog(
   return onSnapshot(
     query(activityLogCollection(sessionId), orderBy("createdAt", "desc")),
     (snapshot) => {
-      const events = snapshot.docs.map((eventDoc) =>
-        deserializeActivityLogFromFirestore(
-          eventDoc.id,
-          sessionId,
-          eventDoc.data() as Record<string, unknown>,
-        ),
-      );
+      const events: SessionActivityEvent[] = [];
+      for (const eventDoc of snapshot.docs) {
+        try {
+          events.push(
+            deserializeActivityLogFromFirestore(
+              eventDoc.id,
+              sessionId,
+              eventDoc.data() as Record<string, unknown>,
+            ),
+          );
+        } catch (error) {
+          // Append-only log: one poison doc must not kill the whole timeline.
+          console.warn(
+            `[activityLog] Skipping invalid doc ${eventDoc.id} in session ${sessionId}`,
+            error,
+          );
+          captureException(error);
+        }
+      }
       onChange(sortActivityEventsDesc(events));
     },
     (error) => onError(error),

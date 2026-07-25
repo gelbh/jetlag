@@ -28,6 +28,8 @@ const firestoreMocks = vi.hoisted(() => ({
   })),
 }));
 
+const captureException = vi.hoisted(() => vi.fn());
+
 vi.mock("firebase/firestore", () => ({
   collection: firestoreMocks.collection,
   doc: firestoreMocks.doc,
@@ -40,6 +42,10 @@ vi.mock("firebase/firestore", () => ({
 
 vi.mock("../core/firebase", () => ({
   getFirestoreDb: () => ({}),
+}));
+
+vi.mock("../core/sentry", () => ({
+  captureException,
 }));
 
 import {
@@ -167,5 +173,62 @@ describe("firestoreActivityLog", () => {
         },
       }),
     ).toThrow(/Invalid activity log toolType/);
+  });
+
+  it("skips invalid docs in a snapshot without failing the whole subscribe", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const onChange = vi.fn();
+    const onError = vi.fn();
+    subscribeActivityLog("session-1", onChange, onError);
+
+    const snapshotHandler = firestoreMocks.onSnapshot.mock.calls[0]?.[1] as (
+      snapshot: {
+        docs: Array<{ id: string; data: () => Record<string, unknown> }>;
+      },
+    ) => void;
+
+    snapshotHandler({
+      docs: [
+        {
+          id: "good",
+          data: () => ({
+            type: "seeking_started",
+            createdAt: "2026-07-25T11:00:00.000Z",
+            payload: {},
+          }),
+        },
+        {
+          id: "poison",
+          data: () => ({
+            type: "question_asked",
+            createdAt: "2026-07-25T10:30:00.000Z",
+            payload: {
+              toolType: "not-a-tool",
+              promptText: "Near water?",
+            },
+          }),
+        },
+        {
+          id: "also-good",
+          data: () => ({
+            type: "hiding_timer_started",
+            createdAt: "2026-07-25T10:00:00.000Z",
+            payload: {},
+          }),
+        },
+      ],
+    });
+
+    expect(onError).not.toHaveBeenCalled();
+    expect(onChange).toHaveBeenCalledWith([
+      expect.objectContaining({ id: "good", type: "seeking_started" }),
+      expect.objectContaining({ id: "also-good", type: "hiding_timer_started" }),
+    ]);
+    expect(captureException).toHaveBeenCalledTimes(1);
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("poison"),
+      expect.any(Error),
+    );
+    warnSpy.mockRestore();
   });
 });

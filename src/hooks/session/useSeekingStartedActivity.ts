@@ -8,6 +8,9 @@ import {
 } from "../../domain/session/timer";
 import { emitSeekingStartedActivity } from "../../services/session/emitSessionActivity";
 
+/** Poll while the timer is running so elapsed can cross the hiding boundary. */
+const SEEKING_STARTED_TICK_MS = 1_000;
+
 export interface ShouldEmitSeekingStartedInput {
   canEmit: boolean;
   hasTimerStarted: boolean;
@@ -36,6 +39,9 @@ interface UseSeekingStartedActivityParams {
 /**
  * Host/controller-only: append fixed `seeking_started` once when the hiding
  * period has elapsed. Non-controlling clients only read the log.
+ *
+ * While `runningSince` is set, elapsed grows without `timerState` identity
+ * changes, so we tick every second to recompute and emit when due.
  */
 export function useSeekingStartedActivity({
   sessionId,
@@ -48,18 +54,40 @@ export function useSeekingStartedActivity({
       return;
     }
 
-    const elapsedMs = computeElapsedMs(timerState);
-    if (
-      !shouldEmitSeekingStarted({
-        canEmit,
-        hasTimerStarted: hasTimerStarted(timerState),
-        sessionRules,
-        elapsedMs,
-      })
-    ) {
+    const tryEmit = (): boolean => {
+      const elapsedMs = computeElapsedMs(timerState);
+      if (
+        !shouldEmitSeekingStarted({
+          canEmit,
+          hasTimerStarted: hasTimerStarted(timerState),
+          sessionRules,
+          elapsedMs,
+        })
+      ) {
+        return false;
+      }
+
+      emitSeekingStartedActivity(sessionId);
+      return true;
+    };
+
+    if (tryEmit()) {
       return;
     }
 
-    emitSeekingStartedActivity(sessionId);
+    // Paused / not started: elapsed is stable until timerState changes.
+    if (timerState.runningSince === null) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      if (tryEmit()) {
+        window.clearInterval(intervalId);
+      }
+    }, SEEKING_STARTED_TICK_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
   }, [canEmit, sessionId, sessionRules, timerState]);
 }
