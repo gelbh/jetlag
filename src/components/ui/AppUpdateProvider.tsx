@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -16,6 +17,14 @@ import {
 } from "../../domain/device/serviceWorkerRefresh";
 import { setServiceWorkerChunkReloadContext } from "../../domain/device/lazyWithChunkRetry";
 import { tryUpdateServiceWorker } from "../../domain/device/serviceWorkerUpdate";
+import { compareAppVersions } from "../../domain/session/sessionVersion";
+import { useHotfixGraceReload } from "../../hooks/useHotfixGraceReload";
+import { isFirebaseConfigured } from "../../services/core/firebase";
+import {
+  DEFAULT_HOTFIX_GRACE_SECONDS,
+  subscribeAppConfigRuntime,
+  type AppConfigRuntime,
+} from "../../services/firestore/firestoreIncidents";
 import { useSessionStore } from "../../state/sessionStore";
 import {
   AppUpdateContext,
@@ -24,11 +33,31 @@ import {
 
 type ServiceWorkerReloader = (reloadPage?: boolean) => Promise<void>;
 
+function pickHigherVersion(
+  left: string | undefined,
+  right: string | undefined,
+): string | null {
+  if (!left && !right) {
+    return null;
+  }
+  if (!left) {
+    return right ?? null;
+  }
+  if (!right) {
+    return left;
+  }
+  return compareAppVersions(left, right) >= 0 ? left : right;
+}
+
 export function AppUpdateProvider({ children }: { children: ReactNode }) {
   const [needsRefresh, setNeedsRefresh] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [updateSW, setUpdateSW] = useState<ServiceWorkerReloader | null>(null);
+  const [runtimeConfig, setRuntimeConfig] = useState<AppConfigRuntime | null>(
+    null,
+  );
   const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
+  const lastSoftReloadMitigationIdRef = useRef<string | null>(null);
   const location = useLocation();
   const session = useSessionStore((state) => state.session);
 
@@ -38,6 +67,58 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     session,
     pathname: location.pathname,
   });
+
+  useEffect(() => {
+    if (!isFirebaseConfigured()) {
+      return;
+    }
+
+    return subscribeAppConfigRuntime(setRuntimeConfig, () => {
+      setRuntimeConfig(null);
+    });
+  }, []);
+
+  const effectiveRuntimeConfig = isFirebaseConfigured() ? runtimeConfig : null;
+
+  const requiredMinAppVersion = pickHigherVersion(
+    session?.requiredMinAppVersion,
+    effectiveRuntimeConfig?.requiredMinAppVersion,
+  );
+  const graceSeconds =
+    requiredMinAppVersion &&
+    session?.requiredMinAppVersion === requiredMinAppVersion &&
+    typeof session.requiredMinAppVersionGraceSeconds === "number"
+      ? session.requiredMinAppVersionGraceSeconds
+      : (effectiveRuntimeConfig?.hotfixGraceSeconds ?? DEFAULT_HOTFIX_GRACE_SECONDS);
+
+  const applyHotfixReload = useCallback(() => {
+    void applyServiceWorkerUpdate(
+      registrationRef.current,
+      updateSW ?? undefined,
+    );
+  }, [updateSW]);
+
+  const hotfixGrace = useHotfixGraceReload({
+    requiredMinAppVersion,
+    graceSeconds,
+    reload: applyHotfixReload,
+  });
+
+  // Honor admin soft_reload mitigations once per mitigation id.
+  useEffect(() => {
+    const mitigation = session?.opsMitigation;
+    if (!mitigation || mitigation.type !== "soft_reload") {
+      return;
+    }
+    if (lastSoftReloadMitigationIdRef.current === mitigation.id) {
+      return;
+    }
+    lastSoftReloadMitigationIdRef.current = mitigation.id;
+    void applyServiceWorkerUpdate(
+      registrationRef.current,
+      updateSW ?? undefined,
+    );
+  }, [session?.opsMitigation, updateSW]);
 
   useEffect(() => {
     if (import.meta.env.DEV) {
@@ -151,9 +232,15 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
           updateSW ?? undefined,
         );
       },
+      hotfixGraceActive: hotfixGrace.active,
+      hotfixGraceSecondsRemaining: hotfixGrace.secondsRemaining,
+      hotfixRequiredMinAppVersion: hotfixGrace.requiredMinAppVersion,
     };
   }, [
     dismissed,
+    hotfixGrace.active,
+    hotfixGrace.requiredMinAppVersion,
+    hotfixGrace.secondsRemaining,
     inActiveMapSession,
     needsRefresh,
     safeToReload,

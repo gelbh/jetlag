@@ -88,7 +88,12 @@ function sessionRecordsEqual(
     left.endGameRequestedByUid === right.endGameRequestedByUid &&
     left.hostAppVersion === right.hostAppVersion &&
     structuredFieldEqual(left.memberAppVersions, right.memberAppVersions) &&
-    left.lastActiveAt === right.lastActiveAt
+    left.lastActiveAt === right.lastActiveAt &&
+    structuredFieldEqual(left.opsMitigation, right.opsMitigation) &&
+    left.requiredMinAppVersion === right.requiredMinAppVersion &&
+    left.requiredMinAppVersionSetAt === right.requiredMinAppVersionSetAt &&
+    left.requiredMinAppVersionGraceSeconds ===
+      right.requiredMinAppVersionGraceSeconds
   );
 }
 
@@ -103,7 +108,8 @@ type SessionRecordStructuredKey =
   | "customCategories"
   | "customLocationPins"
   | "customMeasureGeometries"
-  | "memberAppVersions";
+  | "memberAppVersions"
+  | "opsMitigation";
 
 type SessionRecordScalarKey = Exclude<
   keyof SessionRecord,

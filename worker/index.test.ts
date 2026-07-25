@@ -451,6 +451,26 @@ describe("worker fetch", () => {
     expect(env.ASSETS.fetch).toHaveBeenCalledOnce();
   });
 
+  it("routes /api/incident-email to the incident email handler without hitting assets", async () => {
+    const env = {
+      ASSETS: { fetch: vi.fn() },
+      INCIDENT_EMAIL_SECRET: "s3cret",
+      RESEND_API_KEY: "re_test",
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/api/incident-email", {
+        method: "POST",
+        headers: { Authorization: "Bearer wrong" },
+        body: "{}",
+      }),
+      env,
+    );
+
+    expect(env.ASSETS.fetch).not.toHaveBeenCalled();
+    expect(response.status).toBe(401);
+  });
+
 
 });
 

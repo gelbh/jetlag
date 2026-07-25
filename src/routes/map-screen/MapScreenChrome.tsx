@@ -13,6 +13,7 @@ import { DesktopOpsShell } from "../../components/map/DesktopOpsShell";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
 import { AppUpdateMapChip } from "../../components/ui/AppUpdateMapChip";
+import { HotfixGraceChip } from "../../components/incident/HotfixGraceChip";
 import { FirestorePersistenceBanner } from "../../components/session/FirestorePersistenceBanner";
 import { MapStatusRail } from "../../components/session/MapStatusRail";
 import { SessionLog } from "../../components/session/SessionLog";
@@ -386,6 +387,7 @@ export function MapScreenChrome({
               {statusRail}
               <FirestorePersistenceBanner />
               <AppUpdateMapChip />
+              <HotfixGraceChip />
             </>
           }
           tools={toolDock}
@@ -400,6 +402,7 @@ export function MapScreenChrome({
           {statusRail}
           <FirestorePersistenceBanner />
           <AppUpdateMapChip />
+          <HotfixGraceChip />
           {toolDock}
         </div>
       )}

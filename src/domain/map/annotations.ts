@@ -184,6 +184,26 @@ export interface SessionRecord {
   hostAppVersion?: string;
   memberAppVersions?: Record<string, string>;
   gameAreaLabel?: string;
+  /** Server-written ops mitigation the client may honor (soft reload, etc.). */
+  opsMitigation?: SessionOpsMitigation;
+  /** Hotfix gate: clients below this version start a grace countdown then refresh. */
+  requiredMinAppVersion?: string;
+  requiredMinAppVersionSetAt?: string;
+  requiredMinAppVersionGraceSeconds?: number;
+}
+
+/** Bounded session override written by `applyIncidentMitigation` (server-only). */
+export interface SessionOpsMitigation {
+  id: string;
+  type:
+    | "soft_reload"
+    | "reset_board"
+    | "clear_pending_questions"
+    | "end_session";
+  appliedAt: string;
+  appliedByUid: string;
+  incidentId: string;
+  note?: string;
 }
 
 export function isEndGameActive(
