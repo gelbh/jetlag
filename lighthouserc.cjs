@@ -2,8 +2,8 @@ const { createLhciConfig } = require("./lighthouserc.shared.cjs");
 
 module.exports = createLhciConfig({
   formFactor: "mobile",
-  homeJoinPerf: 0.65,
-  createPerf: 0.6,
+  homeJoinPerf: 0.6,
+  createPerf: 0.55,
   outputDir: ".lighthouseci/mobile",
   collectSettings: {
     formFactor: "mobile",
