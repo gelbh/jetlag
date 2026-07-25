@@ -1,7 +1,8 @@
 import type { Feature, LineString } from "geojson";
-import { dispatchKernel } from "./dispatchKernel";
+import { dispatchKernel, dispatchKernelSync } from "./dispatchKernel";
 import { geodesicLineBuffer } from "./geodesicLineBuffer";
 import type { MaskKernelMode } from "./maskKernelMode";
+import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
 import type { PolygonFeature } from "./types";
 
 type GeodesicWasmApi = typeof import("./geodesicWasm");
@@ -16,6 +17,35 @@ function loadGeodesicWasmModule(): Promise<GeodesicWasmApi> {
     });
   }
   return geodesicWasmModulePromise;
+}
+
+function topologyBboxFromResults(
+  wasmResult: PolygonFeature | null,
+  tsResult: PolygonFeature | null,
+): { west: number; east: number; south: number; north: number } {
+  const feature = tsResult ?? wasmResult;
+  if (!feature) {
+    return { west: 0, east: 0, south: 0, north: 0 };
+  }
+  return bboxFromGameArea(feature.geometry);
+}
+
+/**
+ * Sync production path while geodesicLineBuffer not ready (always TS).
+ * When ready, use {@link dispatchGeodesicLineBuffer}.
+ */
+export function runGeodesicLineBuffer(
+  segment: Feature<LineString>,
+  distanceMeters: number,
+  sampleSpacingMeters?: number,
+  mode: MaskKernelMode = "wasm",
+): PolygonFeature | null {
+  return dispatchKernelSync({
+    mode,
+    entrypoint: "geodesicLineBuffer",
+    runTs: () =>
+      geodesicLineBuffer(segment, distanceMeters, sampleSpacingMeters),
+  });
 }
 
 /**
@@ -42,5 +72,11 @@ export async function dispatchGeodesicLineBuffer(
         sampleSpacingMeters,
       );
     },
+    matches: (wasmResult, tsResult) =>
+      maskTopologyMatches(
+        wasmResult,
+        tsResult,
+        topologyBboxFromResults(wasmResult, tsResult),
+      ),
   });
 }

@@ -18,6 +18,28 @@ export type DispatchKernelOptions<T> = {
   matches?: (wasm: T, ts: T) => boolean;
 };
 
+export type DispatchKernelSyncOptions<T> = {
+  mode: MaskKernelMode;
+  entrypoint: KernelEntrypoint;
+  runTs: () => T;
+};
+
+/**
+ * Sync TS-only path while entrypoint is not ready (or mode is ts).
+ * When WASM would run, throws — callers must use async {@link dispatchKernel}.
+ */
+export function dispatchKernelSync<T>(
+  options: DispatchKernelSyncOptions<T>,
+): T {
+  const { mode, entrypoint, runTs } = options;
+  if (!shouldUseWasm(mode, entrypoint)) {
+    return runTs();
+  }
+  throw new Error(
+    `[geometry] sync kernel path cannot use wasm for ${entrypoint}; use dispatchKernel`,
+  );
+}
+
 /**
  * Mode + KERNEL_WASM_READY dispatch:
  * - not ready → always TS (even if mode is wasm/dual)

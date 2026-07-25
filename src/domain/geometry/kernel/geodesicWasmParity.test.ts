@@ -46,20 +46,6 @@ describe.skipIf(!wasmPkgReady)("geodesic wasm parity", () => {
     const wasm = await wasmGeodesicLineBuffer(shortLine, 200);
     assertPolygonTopologyParity(wasm, ts, topologyBbox);
   });
-
-  it("dual mode returns TS while geodesicLineBuffer not ready", async () => {
-    const { dispatchGeodesicLineBuffer } = await import(
-      "./geodesicKernelRunner"
-    );
-    const ts = geodesicLineBuffer(shortLine, 200);
-    const dual = await dispatchGeodesicLineBuffer(
-      shortLine,
-      200,
-      undefined,
-      "dual",
-    );
-    expect(dual).toEqual(ts);
-  });
 });
 
 describe("geodesic wasm fallback", () => {

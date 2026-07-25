@@ -76,20 +76,6 @@ describe.skipIf(!wasmPkgReady)("half-plane wasm parity", () => {
     const wasm = await wasmBuildRadarShadedRegion(center, 400, gameArea, false);
     assertPolygonTopologyParity(wasm, ts, topologyBbox);
   });
-
-  it("dual mode returns TS while halfPlane not ready", async () => {
-    const { dispatchHalfPlane } = await import("./halfPlaneKernelRunner");
-    const ts = buildHalfPlanePolygon(thermoA, thermoB, gameArea, "cold");
-    const dual = await dispatchHalfPlane(
-      thermoA,
-      thermoB,
-      gameArea,
-      "cold",
-      "midpoint",
-      "dual",
-    );
-    expect(dual).toEqual(ts);
-  });
 });
 
 describe("half-plane wasm fallback", () => {

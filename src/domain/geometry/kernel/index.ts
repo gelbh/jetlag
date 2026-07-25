@@ -35,5 +35,10 @@ export { wasmGeodesicLineBuffer } from "./geodesicWasm";
 export {
   dispatchHalfPlane,
   dispatchRadarShadedRegion,
+  runHalfPlane,
+  runRadarShadedRegion,
 } from "./halfPlaneKernelRunner";
-export { dispatchGeodesicLineBuffer } from "./geodesicKernelRunner";
+export {
+  dispatchGeodesicLineBuffer,
+  runGeodesicLineBuffer,
+} from "./geodesicKernelRunner";

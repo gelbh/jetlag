@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { dispatchKernel } from "./dispatchKernel";
+import { dispatchKernel, dispatchKernelSync } from "./dispatchKernel";
 
 describe("dispatchKernel", () => {
   afterEach(() => {
@@ -96,5 +96,29 @@ describe("dispatchKernel", () => {
     expect(result).toBe("ts");
     expect(runTs).toHaveBeenCalledOnce();
     expect(runWasm).not.toHaveBeenCalled();
+  });
+});
+
+describe("dispatchKernelSync", () => {
+  it("returns TS when entrypoint is not ready", () => {
+    const runTs = vi.fn(() => "ts");
+    expect(
+      dispatchKernelSync({
+        mode: "wasm",
+        entrypoint: "halfPlane",
+        runTs,
+      }),
+    ).toBe("ts");
+    expect(runTs).toHaveBeenCalledOnce();
+  });
+
+  it("throws when WASM would run for a ready entrypoint", () => {
+    expect(() =>
+      dispatchKernelSync({
+        mode: "wasm",
+        entrypoint: "maskFromUnionInput",
+        runTs: () => "ts",
+      }),
+    ).toThrow(/sync kernel path cannot use wasm/);
   });
 });

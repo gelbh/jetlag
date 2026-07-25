@@ -1,4 +1,4 @@
-import { dispatchKernel } from "./dispatchKernel";
+import { dispatchKernel, dispatchKernelSync } from "./dispatchKernel";
 import type { MaskKernelMode } from "./maskKernelMode";
 import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
 import {
@@ -19,6 +19,51 @@ function loadHalfPlaneWasmModule(): Promise<HalfPlaneWasmApi> {
     });
   }
   return halfPlaneWasmModulePromise;
+}
+
+/**
+ * Sync production path while halfPlane not ready (always TS).
+ * When ready, use {@link dispatchHalfPlane}.
+ */
+export function runHalfPlane(
+  pointA: LatLngTuple,
+  pointB: LatLngTuple,
+  gameArea: GameAreaGeometry,
+  shadedSide: "hot" | "cold" = "cold",
+  divisionAnchor: "midpoint" | "start" = "midpoint",
+  mode: MaskKernelMode = "wasm",
+): PolygonFeature | null {
+  return dispatchKernelSync({
+    mode,
+    entrypoint: "halfPlane",
+    runTs: () =>
+      buildHalfPlanePolygon(
+        pointA,
+        pointB,
+        gameArea,
+        shadedSide,
+        divisionAnchor,
+      ),
+  });
+}
+
+/**
+ * Sync production path while halfPlane not ready (always TS).
+ * When ready, use {@link dispatchRadarShadedRegion}.
+ */
+export function runRadarShadedRegion(
+  center: LatLngTuple,
+  radiusMeters: number,
+  gameArea: GameAreaGeometry,
+  shadedInside: boolean,
+  mode: MaskKernelMode = "wasm",
+): PolygonFeature | null {
+  return dispatchKernelSync({
+    mode,
+    entrypoint: "halfPlane",
+    runTs: () =>
+      buildRadarShadedRegion(center, radiusMeters, gameArea, shadedInside),
+  });
 }
 
 /**
