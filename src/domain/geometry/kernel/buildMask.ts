@@ -28,25 +28,32 @@ export function buildEndGameMaskFromDisks(
   gameArea: GameAreaGeometry,
   disks: readonly DiskSpec[],
 ): PolygonFeature | null {
-  const playArea: PolygonFeature = {
-    type: "Feature",
-    properties: {},
-    geometry: gameArea,
-  };
+  try {
+    const playArea: PolygonFeature = {
+      type: "Feature",
+      properties: {},
+      geometry: gameArea,
+    };
 
-  const revealedZones = unionDiskSpecs(disks);
-  if (!revealedZones) {
+    const revealedZones = unionDiskSpecs(disks);
+    if (!revealedZones) {
+      return playArea;
+    }
+
+    const eliminated = difference(featureCollection([playArea, revealedZones]));
+    if (eliminated === null) {
+      // revealedZones fully covers the game area: nothing remains eliminated.
+      return null;
+    }
+    if (
+      eliminated.geometry.type === "Polygon" ||
+      eliminated.geometry.type === "MultiPolygon"
+    ) {
+      return eliminated as PolygonFeature;
+    }
+
     return playArea;
+  } catch {
+    return null;
   }
-
-  const eliminated = difference(featureCollection([playArea, revealedZones]));
-  if (
-    eliminated &&
-    (eliminated.geometry.type === "Polygon" ||
-      eliminated.geometry.type === "MultiPolygon")
-  ) {
-    return eliminated as PolygonFeature;
-  }
-
-  return playArea;
 }

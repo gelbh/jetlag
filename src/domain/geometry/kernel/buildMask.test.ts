@@ -57,5 +57,18 @@ describe("kernel/buildMask", () => {
     ];
     const mask = buildEndGameMaskFromDisks(gameArea, disks);
     expect(mask).not.toBeNull();
+    expect(
+      booleanPointInPolygon(turfPoint([-0.15, 51.45]), mask!),
+    ).toBe(false);
+    expect(
+      booleanPointInPolygon(turfPoint([-0.19, 51.49]), mask!),
+    ).toBe(true);
+  });
+
+  it("returns null when disks fully cover the game area", () => {
+    const disks: DiskSpec[] = [
+      { center: [51.45, -0.15], radiusMeters: 50_000 },
+    ];
+    expect(buildEndGameMaskFromDisks(gameArea, disks)).toBeNull();
   });
 });
