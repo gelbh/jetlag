@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
 export const STALE_WALK_CLOCK_MS = 15_000;
 
 let staleWalkNowMs = 0;
-let intervalId: ReturnType<typeof setInterval> | null = null;
+let intervalId: number | null = null;
 const listeners = new Set<() => void>();
 
 function ensureInterval(): void {
