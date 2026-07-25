@@ -1,3 +1,4 @@
+import { useEffect, useState, type ReactNode } from "react";
 import type { LatLngBoundsExpression } from "leaflet";
 import { MapView } from "../map/MapView";
 import { FramingPreviewLayers } from "../map/FramingPreviewLayers";
@@ -11,6 +12,10 @@ import {
 } from "./GameAreaFramingControls";
 import { framingModeHint } from "./gameAreaFramingUi";
 import { type GameSize } from "../../domain/session/gameSize";
+
+/** Shared outer shell so placeholder and live map keep identical layout (CLS). */
+export const CREATE_SESSION_MAP_SHELL_CLASS =
+  "relative h-[33dvh] max-h-[36dvh] min-h-[28dvh] shrink-0 touch-none";
 
 interface CreateSessionMapPaneProps {
   mapStyle: MapStyle;
@@ -28,6 +33,10 @@ interface CreateSessionMapPaneProps {
   onMapClick?: (lat: number, lng: number) => void;
 }
 
+function CreateSessionMapShell({ children }: { children?: ReactNode }) {
+  return <div className={CREATE_SESSION_MAP_SHELL_CLASS}>{children}</div>;
+}
+
 export function CreateSessionMapPane({
   mapStyle,
   onMapStyleChange,
@@ -43,8 +52,56 @@ export function CreateSessionMapPane({
   onUserViewportFramed,
   onMapClick,
 }: CreateSessionMapPaneProps) {
+  const [mapReady, setMapReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    let outerRaf = 0;
+    let innerRaf = 0;
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    outerRaf = requestAnimationFrame(() => {
+      innerRaf = requestAnimationFrame(() => {
+        if (cancelled) {
+          return;
+        }
+        const markReady = () => {
+          if (!cancelled) {
+            setMapReady(true);
+          }
+        };
+        if (typeof requestIdleCallback === "function") {
+          idleId = requestIdleCallback(markReady, { timeout: 500 });
+          return;
+        }
+        timeoutId = setTimeout(markReady, 0);
+      });
+    });
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(outerRaf);
+      cancelAnimationFrame(innerRaf);
+      if (idleId !== undefined && typeof cancelIdleCallback === "function") {
+        cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, []);
+
+  if (!mapReady) {
+    return (
+      <CreateSessionMapShell>
+        <div className="absolute inset-0 bg-surface-raised" aria-hidden />
+      </CreateSessionMapShell>
+    );
+  }
+
   return (
-    <div className="relative h-[33dvh] max-h-[36dvh] min-h-[28dvh] shrink-0 touch-none">
+    <CreateSessionMapShell>
       <div className="absolute inset-0">
         <MapView
           mapStyle={mapStyle}
@@ -92,6 +149,6 @@ export function CreateSessionMapPane({
           </div>
         )}
       </div>
-    </div>
+    </CreateSessionMapShell>
   );
 }

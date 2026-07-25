@@ -132,6 +132,7 @@ export function CreateSession() {
             onAddCurrentArea={session.addCurrentArea}
             onBoundaryImport={(event) => void session.handleBoundaryImport(event)}
             onApplyPlace={session.applyPlace}
+            onRequestLocationBias={session.requestLocationBias}
             onTransitMetroChange={session.setTransitMetroOverride}
             settingsSlot={
               <SessionSettingsSection

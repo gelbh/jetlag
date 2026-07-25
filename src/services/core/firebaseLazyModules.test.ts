@@ -20,6 +20,7 @@ vi.mock("firebase/functions", () => ({
 
 vi.mock("./firebase", () => ({
   getFirebaseApp: vi.fn(() => ({ name: "app" })),
+  getFirebaseAppCheck: vi.fn(() => null),
 }));
 
 describe("firebase lazy modules", () => {

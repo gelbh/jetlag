@@ -105,9 +105,6 @@ export function getFirebaseApp(): FirebaseApp {
 
     const existingApps = getApps();
     app = existingApps.length > 0 ? existingApps[0]! : initializeApp(config);
-    if (!firebaseUsesEmulator()) {
-      initializeAppCheckIfConfigured(app);
-    }
   }
 
   return app;
@@ -163,7 +160,13 @@ export function getFirebaseAppCheck(): AppCheck | null {
     return null;
   }
 
-  getFirebaseApp();
+  if (firebaseUsesEmulator()) {
+    getFirebaseApp();
+    return null;
+  }
+
+  const firebaseApp = getFirebaseApp();
+  initializeAppCheckIfConfigured(firebaseApp);
   return appCheck;
 }
 

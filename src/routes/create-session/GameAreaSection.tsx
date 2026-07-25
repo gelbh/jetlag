@@ -43,6 +43,7 @@ export interface GameAreaSectionProps {
   onAddCurrentArea: () => void;
   onBoundaryImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onApplyPlace: (place: GeocodedPlace) => void;
+  onRequestLocationBias: () => void;
   onTransitMetroChange: (metroId: string) => void;
   settingsSlot?: ReactNode;
 }
@@ -76,6 +77,7 @@ export function GameAreaSection({
   onAddCurrentArea,
   onBoundaryImport,
   onApplyPlace,
+  onRequestLocationBias,
   onTransitMetroChange,
   settingsSlot,
 }: GameAreaSectionProps) {
@@ -224,6 +226,15 @@ export function GameAreaSection({
           className="btn-secondary w-full disabled:opacity-50"
         >
           {searchLoading ? "Searching…" : "Find place"}
+        </button>
+
+        <button
+          type="button"
+          onClick={onRequestLocationBias}
+          disabled={searchLoading || importLoading}
+          className="btn-secondary w-full disabled:opacity-50"
+        >
+          Use my location
         </button>
 
         <button

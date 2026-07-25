@@ -100,12 +100,31 @@ vi.mock("../services/geo/seaLevelProgressive", () => ({
 }));
 
 const navigate = vi.fn();
-beforeEach(() => {
+beforeEach(async () => {
   navigate.mockReset();
+  const { getCurrentPosition } = await import("../services/core/geolocation");
+  vi.mocked(getCurrentPosition).mockClear();
+  vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+    cb(0);
+    return 0;
+  });
+  vi.stubGlobal("cancelAnimationFrame", vi.fn());
+  vi.stubGlobal("requestIdleCallback", (cb: IdleRequestCallback) => {
+    cb({
+      didTimeout: false,
+      timeRemaining: () => 50,
+    } as IdleDeadline);
+    return 0;
+  });
+  vi.stubGlobal("cancelIdleCallback", vi.fn());
 });
 vi.mock("../hooks/useAppNavigate", () => ({
   useAppNavigate: () => navigate,
 }));
+
+async function waitForCreateMap() {
+  expect(await screen.findByTestId("create-map")).toBeInTheDocument();
+}
 
 describe("CreateSession", () => {
   it("renders shape picker and fullscreen framing entry point", () => {
@@ -120,10 +139,9 @@ describe("CreateSession", () => {
   it("creates a local session and navigates to the map", async () => {
     renderWithRouter(<CreateSession />);
 
-    expect(screen.getByTestId("create-map")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Confirm game area" }));
-
+    await waitForCreateMap();
     await waitFor(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Confirm game area" }));
       expect(navigate).toHaveBeenCalledWith("/map");
     });
   });
@@ -138,16 +156,16 @@ describe("CreateSession", () => {
 
     renderWithRouter(<CreateSession />);
 
-    expect(screen.getByTestId("create-map")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Confirm game area" }));
-
+    await waitForCreateMap();
     await waitFor(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Confirm game area" }));
       expect(navigate).toHaveBeenCalledWith("/map");
     });
   });
 
   it("keeps place-based preview after user map pan", async () => {
     renderWithRouter(<CreateSession />);
+    await waitForCreateMap();
 
     fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
       target: { value: "Dublin" },
@@ -215,14 +233,27 @@ describe("CreateSession", () => {
     });
   });
 
-  it("passes user location into place search when GPS is available", async () => {
-    const { searchPlaces } = await import("../services/geo/geocoding");
+  it("does not request geolocation on mount", async () => {
     const { getCurrentPosition } = await import("../services/core/geolocation");
 
     renderWithRouter(<CreateSession />);
 
     await waitFor(() => {
-      expect(getCurrentPosition).toHaveBeenCalled();
+      expect(screen.getByRole("button", { name: "Use my location" })).toBeInTheDocument();
+    });
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+  });
+
+  it("passes user location into place search after Use my location", async () => {
+    const { searchPlaces } = await import("../services/geo/geocoding");
+    const { getCurrentPosition } = await import("../services/core/geolocation");
+
+    renderWithRouter(<CreateSession />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Use my location" }));
+
+    await waitFor(() => {
+      expect(getCurrentPosition).toHaveBeenCalledOnce();
     });
 
     fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
