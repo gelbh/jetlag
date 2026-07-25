@@ -50,6 +50,15 @@ export function build_mask_from_union_input_json() {
 export function build_end_game_mask_from_disks_json() {
   throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
 }
+export function build_half_plane_polygon_json() {
+  throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
+}
+export function build_radar_shaded_region_json() {
+  throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
+}
+export function geodesic_line_buffer_json() {
+  throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
+}
 export default {};
 `;
     },

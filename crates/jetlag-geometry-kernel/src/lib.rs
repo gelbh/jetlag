@@ -16,6 +16,11 @@ pub use mask::{
 };
 pub use types::{GameAreaGeometry, PolygonFeature};
 
+use geodesic_buffer::geodesic_line_buffer as geodesic_line_buffer_native;
+use half_plane::{
+    build_half_plane_polygon as build_half_plane_native,
+    build_radar_shaded_region as build_radar_shaded_native,
+};
 use mask::{
     build_end_game_mask_from_disks as build_end_game_native,
     build_mask_from_union_input as build_mask_native,
@@ -91,4 +96,80 @@ pub fn build_end_game_mask_from_disks_json(
     let game_area = parse_game_area(game_area_json)?;
     let disks = parse_disks(disks_json)?;
     feature_to_js(build_end_game_native(&game_area, &disks))
+}
+
+fn parse_lat_lng(point_json: &str, label: &str) -> Result<(f64, f64), JsValue> {
+    let parsed: [f64; 2] =
+        serde_json::from_str(point_json).map_err(|e| js_err(format!("{label}: {e}")))?;
+    Ok((parsed[0], parsed[1]))
+}
+
+fn parse_shaded_side(value: &str) -> Result<ShadedSide, JsValue> {
+    match value {
+        "hot" => Ok(ShadedSide::Hot),
+        "cold" => Ok(ShadedSide::Cold),
+        _ => Err(js_err(format!("shadedSide: unknown value {value}"))),
+    }
+}
+
+fn parse_division_anchor(value: &str) -> Result<DivisionAnchor, JsValue> {
+    match value {
+        "midpoint" => Ok(DivisionAnchor::Midpoint),
+        "start" => Ok(DivisionAnchor::Start),
+        _ => Err(js_err(format!("divisionAnchor: unknown value {value}"))),
+    }
+}
+
+/// WASM export: thermometer half-plane. Points are `[lat, lng]` JSON arrays.
+#[wasm_bindgen]
+pub fn build_half_plane_polygon_json(
+    point_a_json: &str,
+    point_b_json: &str,
+    game_area_json: &str,
+    shaded_side: &str,
+    division_anchor: &str,
+) -> Result<JsValue, JsValue> {
+    let point_a = parse_lat_lng(point_a_json, "pointA")?;
+    let point_b = parse_lat_lng(point_b_json, "pointB")?;
+    let game_area = parse_game_area(game_area_json)?;
+    let shaded = parse_shaded_side(shaded_side)?;
+    let anchor = parse_division_anchor(division_anchor)?;
+    feature_to_js(build_half_plane_native(
+        point_a, point_b, &game_area, shaded, anchor,
+    ))
+}
+
+/// WASM export: radar shaded disk / outside. Center is `[lat, lng]` JSON.
+#[wasm_bindgen]
+pub fn build_radar_shaded_region_json(
+    center_json: &str,
+    radius_meters: f64,
+    game_area_json: &str,
+    shaded_inside: bool,
+) -> Result<JsValue, JsValue> {
+    let center = parse_lat_lng(center_json, "center")?;
+    let game_area = parse_game_area(game_area_json)?;
+    feature_to_js(build_radar_shaded_native(
+        center,
+        radius_meters,
+        &game_area,
+        shaded_inside,
+    ))
+}
+
+/// WASM export: geodesic line buffer. `coordinates_json` is `[[lng,lat],...]`.
+/// Pass `sample_spacing_meters` as `undefined`/null for the default spacing.
+#[wasm_bindgen]
+pub fn geodesic_line_buffer_json(
+    coordinates_json: &str,
+    distance_meters: f64,
+    sample_spacing_meters: Option<f64>,
+) -> Result<JsValue, JsValue> {
+    let coordinates: Vec<[f64; 2]> = serde_json::from_str(coordinates_json)
+        .map_err(|e| js_err(format!("coordinates: {e}")))?;
+    feature_to_js(geodesic_line_buffer_native(
+        &coordinates,
+        distance_meters,
+        sample_spacing_meters,
+    ))
 }

@@ -7,4 +7,22 @@ declare module "*/jetlag_geometry_kernel.js" {
     gameAreaJson: string,
     disksJson: string,
   ): unknown;
+  export function build_half_plane_polygon_json(
+    pointAJson: string,
+    pointBJson: string,
+    gameAreaJson: string,
+    shadedSide: string,
+    divisionAnchor: string,
+  ): unknown;
+  export function build_radar_shaded_region_json(
+    centerJson: string,
+    radiusMeters: number,
+    gameAreaJson: string,
+    shadedInside: boolean,
+  ): unknown;
+  export function geodesic_line_buffer_json(
+    coordinatesJson: string,
+    distanceMeters: number,
+    sampleSpacingMeters?: number | null,
+  ): unknown;
 }

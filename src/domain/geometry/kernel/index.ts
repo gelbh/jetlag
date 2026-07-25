@@ -27,3 +27,13 @@ export {
   isPointInGameArea,
 } from "./radarHalfPlane";
 export { geodesicLineBuffer } from "./geodesicLineBuffer";
+export {
+  wasmBuildHalfPlanePolygon,
+  wasmBuildRadarShadedRegion,
+} from "./halfPlaneWasm";
+export { wasmGeodesicLineBuffer } from "./geodesicWasm";
+export {
+  dispatchHalfPlane,
+  dispatchRadarShadedRegion,
+} from "./halfPlaneKernelRunner";
+export { dispatchGeodesicLineBuffer } from "./geodesicKernelRunner";
