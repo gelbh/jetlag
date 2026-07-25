@@ -40,7 +40,8 @@ export function AnalyticsConsentBanner() {
           id="analytics-consent-body"
           className="text-pretty text-sm leading-snug text-ink-muted"
         >
-          Optional anonymous product analytics (PostHog).{" "}
+          Optional anonymous product analytics (PostHog). After Accept, an
+          analytics ID may be stored on this device.{" "}
           <AppLink to="/privacy" className="underline">
             Privacy
           </AppLink>

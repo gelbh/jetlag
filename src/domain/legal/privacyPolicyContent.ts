@@ -53,7 +53,7 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
     title: "Error reporting and analytics",
     paragraphs: [
       "In production, the app may send crash and error reports to Sentry. Session codes and certain identifiers are scrubbed before reports leave your device.",
-      "If configured and you Accept the in-app analytics prompt, the app sends anonymous product analytics to PostHog in the EU. Events cover page views and high-level actions such as creating a session or starting Premium checkout. IP/GeoIP enrichment is disabled. Session codes, map content, Overpass payloads, and precise hide locations are not included. Analytics use in-memory storage in this version (no analytics cookies). Decline keeps analytics off.",
+      "If configured and you Accept the in-app analytics prompt, the app sends anonymous product analytics to PostHog in the EU. Events cover page views, page leaves, Core Web Vitals, and high-level actions such as creating a session or starting Premium checkout. After Accept, an anonymous analytics ID may be stored in local storage on this device. If you sign in with a non-anonymous account, that analytics ID may be linked to your account identifier. IP/GeoIP enrichment is disabled. Session codes, map content, Overpass payloads, and precise hide locations are not included. PostHog session replay is not used. Decline keeps analytics off and clears the analytics ID.",
     ],
   },
   {
@@ -84,7 +84,7 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
     title: "Your choices",
     paragraphs: [
       "You do not need an account to play free sessions. Location sharing is optional. You can use the app without signing in to Premium.",
-      "Optional anonymous product analytics (PostHog) load only if you Accept on the in-app prompt. Decline keeps analytics off. Clearing site data resets this choice.",
+      "Optional anonymous product analytics (PostHog) load only if you Accept on the in-app prompt. After Accept, analytics may use local storage for an anonymous ID. Decline keeps analytics off. Clearing site data resets this choice.",
       "Clearing site data or uninstalling the app removes local preferences. Remote session data may remain until it expires or you request removal.",
     ],
   },
