@@ -6,10 +6,24 @@ import {
   deserializeActivityLogFromFirestore,
 } from "./firestoreActivityLogSerialization";
 
+type SnapshotHandler = (snapshot: {
+  docs: Array<{ id: string; data: () => Record<string, unknown> }>;
+}) => void;
+
 const firestoreMocks = vi.hoisted(() => ({
   setDoc: vi.fn(async () => undefined),
-  getDoc: vi.fn(async () => ({ exists: () => false })),
-  onSnapshot: vi.fn(() => vi.fn()),
+  getDoc: vi.fn(
+    async (): Promise<{ exists: () => boolean }> => ({
+      exists: () => false,
+    }),
+  ),
+  onSnapshot: vi.fn(
+    (
+      _query: unknown,
+      _onNext?: SnapshotHandler,
+      _onError?: (error: Error) => void,
+    ) => vi.fn(),
+  ),
   orderBy: vi.fn((...args: unknown[]) => ({ orderBy: args })),
   query: vi.fn((...args: unknown[]) => ({ query: args })),
   doc: vi.fn((...segments: unknown[]) => ({
@@ -54,7 +68,12 @@ import {
 } from "./firestoreActivityLog";
 
 function sessionStartedEvent(
-  overrides: Partial<SessionActivityEvent> = {},
+  overrides: Partial<{
+    id: string;
+    sessionId: string;
+    createdAt: string;
+    createdByUid: string;
+  }> = {},
 ): SessionActivityEvent {
   return {
     id: "session_started",
@@ -64,6 +83,15 @@ function sessionStartedEvent(
     payload: {},
     ...overrides,
   };
+}
+
+function snapshotHandlerFromLastSubscribe(): SnapshotHandler {
+  const call = firestoreMocks.onSnapshot.mock.calls.at(-1);
+  const handler = call?.[1];
+  if (typeof handler !== "function") {
+    throw new Error("Expected onSnapshot success handler");
+  }
+  return handler;
 }
 
 describe("firestoreActivityLog", () => {
@@ -129,11 +157,7 @@ describe("firestoreActivityLog", () => {
     expect(firestoreMocks.orderBy).toHaveBeenCalledWith("createdAt", "desc");
     expect(firestoreMocks.onSnapshot).toHaveBeenCalled();
 
-    const snapshotHandler = firestoreMocks.onSnapshot.mock.calls[0]?.[1] as (
-      snapshot: {
-        docs: Array<{ id: string; data: () => Record<string, unknown> }>;
-      },
-    ) => void;
+    const snapshotHandler = snapshotHandlerFromLastSubscribe();
 
     snapshotHandler({
       docs: [
@@ -181,11 +205,7 @@ describe("firestoreActivityLog", () => {
     const onError = vi.fn();
     subscribeActivityLog("session-1", onChange, onError);
 
-    const snapshotHandler = firestoreMocks.onSnapshot.mock.calls[0]?.[1] as (
-      snapshot: {
-        docs: Array<{ id: string; data: () => Record<string, unknown> }>;
-      },
-    ) => void;
+    const snapshotHandler = snapshotHandlerFromLastSubscribe();
 
     snapshotHandler({
       docs: [

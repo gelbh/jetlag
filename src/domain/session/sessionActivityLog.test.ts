@@ -125,7 +125,7 @@ describe("sessionActivityLog", () => {
         createdAt: "2026-07-25T12:00:00.000Z",
         type: "not_a_real_type",
         payload: {},
-      } as SessionActivityEvent),
+      } as unknown as SessionActivityEvent),
     ).toThrow(/Unhandled session activity type/);
   });
 

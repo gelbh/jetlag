@@ -199,8 +199,8 @@ export function sessionActivitySummary(event: SessionActivityEvent): string {
         ? `Game ended — ${event.payload.summary}`
         : "Game ended";
     default: {
-      const _exhaustive: never = event.type;
-      throw new Error(`Unhandled session activity type: ${String(_exhaustive)}`);
+      const _exhaustive: never = event;
+      throw new Error(`Unhandled session activity type: ${JSON.stringify(_exhaustive)}`);
     }
   }
 }

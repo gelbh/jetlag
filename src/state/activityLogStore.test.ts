@@ -4,13 +4,16 @@ import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { useActivityLogStore } from "./activityLogStore";
 
 function sessionStarted(
-  overrides: Partial<SessionActivityEvent> &
-    Pick<SessionActivityEvent, "id" | "sessionId"> = {
-    id: "session_started",
-    sessionId: LOCAL_SESSION_ID,
-  },
+  overrides: Partial<{
+    id: string;
+    sessionId: string;
+    createdAt: string;
+    createdByUid: string;
+  }> = {},
 ): SessionActivityEvent {
   return {
+    id: "session_started",
+    sessionId: LOCAL_SESSION_ID,
     type: "session_started",
     createdAt: "2026-07-25T10:00:00.000Z",
     payload: {},
