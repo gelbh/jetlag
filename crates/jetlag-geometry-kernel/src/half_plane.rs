@@ -104,11 +104,7 @@ pub fn build_half_plane_polygon(
     match shaded_side {
         ShadedSide::Cold => {
             let colder = game_area.multipolygon.difference(&hotter);
-            if colder.0.is_empty() {
-                multipolygon_to_feature(&bbox_polygon(game_area)?)
-            } else {
-                multipolygon_to_feature(&colder)
-            }
+            or_bbox(colder, game_area)
         }
         ShadedSide::Hot => {
             let hotter_clipped = game_area.multipolygon.intersection(&hotter);
