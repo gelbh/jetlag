@@ -1,27 +1,25 @@
 import type { SessionRecord } from "../map/annotations";
 import type { PlayerRole } from "./playerRole";
 
-function parseVersionParts(version: string): [number, number, number] {
+function parseVersionParts(version: string): [number, number, number, number] {
   const base = version.split("-")[0]?.trim() ?? "";
   const parts = base.split(".").map((part) => {
     const num = Number.parseInt(part, 10);
     return Number.isFinite(num) ? num : 0;
   });
-  return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0];
+  return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0, parts[3] ?? 0];
 }
 
 export function compareAppVersions(a: string, b: string): -1 | 0 | 1 {
-  const [aMajor, aMinor, aPatch] = parseVersionParts(a);
-  const [bMajor, bMinor, bPatch] = parseVersionParts(b);
+  const aParts = parseVersionParts(a);
+  const bParts = parseVersionParts(b);
 
-  if (aMajor !== bMajor) {
-    return aMajor < bMajor ? -1 : 1;
-  }
-  if (aMinor !== bMinor) {
-    return aMinor < bMinor ? -1 : 1;
-  }
-  if (aPatch !== bPatch) {
-    return aPatch < bPatch ? -1 : 1;
+  for (let i = 0; i < aParts.length; i += 1) {
+    const aPart = aParts[i] ?? 0;
+    const bPart = bParts[i] ?? 0;
+    if (aPart !== bPart) {
+      return aPart < bPart ? -1 : 1;
+    }
   }
   return 0;
 }

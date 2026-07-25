@@ -128,4 +128,8 @@ export const adminModerateSession = onCall(
   }),
 );
 
-export { moderateSession, softDeleteActiveAnnotations };
+export {
+  moderateSession,
+  softDeleteActiveAnnotations,
+  cancelOpenPendingQuestions,
+};

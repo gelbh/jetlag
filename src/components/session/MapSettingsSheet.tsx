@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SheetHeader } from "../ui/SheetHeader";
 import { SheetHost } from "../ui/SheetHost";
 import { CurseReferenceSheet } from "../expansion/CurseReferenceSheet";
+import { ReportProblemSheet } from "../incident/ReportProblemSheet";
 import {
   SettingsSegmentControl,
   type SettingsSegment,
@@ -111,6 +112,7 @@ export function MapSettingsSheet({
 }: MapSettingsSheetProps) {
   const [segment, setSegment] = useState<SettingsSegment>("map");
   const [curseSheetOpen, setCurseSheetOpen] = useState(false);
+  const [reportProblemOpen, setReportProblemOpen] = useState(false);
 
   const nativeNotificationsSupported =
     general.nativeNotificationsSupported ?? isNativeNotificationsSupported();
@@ -242,6 +244,7 @@ export function MapSettingsSheet({
             endGameBlocked={session.endGameBlocked}
             expansionPackEnabled={session.expansionPackEnabled}
             onOpenCurseReference={() => setCurseSheetOpen(true)}
+            onReportProblem={() => setReportProblemOpen(true)}
           />
         ) : null}
       </div>
@@ -253,6 +256,10 @@ export function MapSettingsSheet({
       <CurseReferenceSheet
         open={curseSheetOpen}
         onClose={() => setCurseSheetOpen(false)}
+      />
+      <ReportProblemSheet
+        open={reportProblemOpen}
+        onClose={() => setReportProblemOpen(false)}
       />
     </SheetHost>
   );

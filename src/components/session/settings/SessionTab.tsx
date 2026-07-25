@@ -14,6 +14,7 @@ export interface MapSettingsSessionTabProps {
   endGameBlocked?: boolean;
   expansionPackEnabled?: boolean;
   onOpenCurseReference?: () => void;
+  onReportProblem?: () => void;
 }
 
 export function MapSettingsSessionTab({
@@ -29,12 +30,23 @@ export function MapSettingsSessionTab({
   endGameBlocked = false,
   expansionPackEnabled = false,
   onOpenCurseReference,
+  onReportProblem,
 }: MapSettingsSessionTabProps) {
   const [resetMenuOpen, setResetMenuOpen] = useState(false);
 
   return (
     <div className="space-y-4">
       <ShareCode code={sessionCode} remote={remoteSession} />
+
+      {onReportProblem ? (
+        <button
+          type="button"
+          onClick={onReportProblem}
+          className="btn-secondary w-full"
+        >
+          Report a problem
+        </button>
+      ) : null}
 
       {expansionPackEnabled && onOpenCurseReference ? (
         <button

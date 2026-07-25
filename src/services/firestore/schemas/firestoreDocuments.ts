@@ -62,6 +62,25 @@ export const sessionDocumentSchema = z
     hostAppVersion: z.string().optional(),
     memberAppVersions: z.record(z.string(), z.string()).optional(),
     gameAreaLabel: z.string().optional(),
+    opsMitigation: z
+      .object({
+        id: z.string(),
+        type: z.enum([
+          "soft_reload",
+          "reset_board",
+          "clear_pending_questions",
+          "end_session",
+        ]),
+        appliedAt: z.string(),
+        appliedByUid: z.string(),
+        incidentId: z.string(),
+        note: z.string().optional(),
+      })
+      .passthrough()
+      .optional(),
+    requiredMinAppVersion: z.string().optional(),
+    requiredMinAppVersionSetAt: z.string().optional(),
+    requiredMinAppVersionGraceSeconds: z.number().finite().optional(),
   })
   .passthrough()
   .refine((value) => value.gameArea !== undefined && value.gameArea !== null, {

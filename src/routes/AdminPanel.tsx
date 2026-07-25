@@ -306,6 +306,12 @@ export function AdminPanel() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <AppLink
+              to="/admin/incidents"
+              className="hud-chrome inline-flex min-h-11 items-center justify-center px-3 text-sm font-semibold uppercase tracking-wide text-ink"
+            >
+              Incidents
+            </AppLink>
             <button
               type="button"
               className="hud-chrome inline-flex min-h-11 min-w-11 items-center justify-center"

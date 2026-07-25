@@ -16,6 +16,34 @@ describe("compareAppVersions", () => {
     expect(compareAppVersions("0.5.0", "0.5.1")).toBe(-1);
     expect(compareAppVersions("1.0.0", "0.9.9")).toBe(1);
   });
+
+  it("treats a missing fourth segment as zero", () => {
+    expect(compareAppVersions("0.9.5", "0.9.5.0")).toBe(0);
+    expect(compareAppVersions("0.9.5.0", "0.9.5")).toBe(0);
+  });
+
+  it("orders four-segment hotfix builds above their base patch", () => {
+    expect(compareAppVersions("0.9.5", "0.9.5.1")).toBe(-1);
+    expect(compareAppVersions("0.9.5.1", "0.9.5")).toBe(1);
+  });
+
+  it("orders a later patch above any hotfix of the earlier patch", () => {
+    expect(compareAppVersions("0.9.5.1", "0.9.6")).toBe(-1);
+    expect(compareAppVersions("0.9.6", "0.9.5.9")).toBe(1);
+  });
+
+  it("orders fourth segments numerically", () => {
+    expect(compareAppVersions("0.9.5.2", "0.9.5.10")).toBe(-1);
+    expect(compareAppVersions("0.9.5.10", "0.9.5.2")).toBe(1);
+  });
+
+  it("treats equal four-segment versions as equal", () => {
+    expect(compareAppVersions("0.9.5.3", "0.9.5.3")).toBe(0);
+  });
+
+  it("ignores prerelease suffixes on four-segment versions", () => {
+    expect(compareAppVersions("0.9.5.1-beta", "0.9.5.1")).toBe(0);
+  });
 });
 
 describe("sessionVersionCompatible", () => {

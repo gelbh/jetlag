@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { MotionPressable } from "../components/motion/MotionPressable";
@@ -5,6 +6,7 @@ import {
   ScreenHeader,
   screenHeaderOffsetClassName,
 } from "../components/ui/ScreenHeader";
+import { ReportProblemSheet } from "../components/incident/ReportProblemSheet";
 import {
   githubBugReportUrl,
   githubBugsBrowseUrl,
@@ -18,6 +20,8 @@ const externalLinkProps = {
 };
 
 export function Feedback() {
+  const [reportProblemOpen, setReportProblemOpen] = useState(false);
+
   return (
     <EntryScreenLayout>
       <ScreenHeader backTo="/" backLabel="Back" />
@@ -32,12 +36,26 @@ export function Feedback() {
             </h1>
             <p className="jl-selectable max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
               Search existing threads before posting so bugs and ideas stay in one
-              place.
+              place. For an urgent live issue mid-game, report a problem instead.
             </p>
           </div>
 
           <div className="home-enter-actions space-y-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
+              Live support
+            </p>
+            <MotionPressable
+              as="button"
+              type="button"
+              onClick={() => setReportProblemOpen(true)}
+              aria-label="Report a problem"
+              className="home-card-btn home-card-btn-primary"
+            >
+              <span>Report a problem</span>
+              <span className="home-card-btn-hint">Live incident desk</span>
+            </MotionPressable>
+
+            <p className="pt-2 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
               Improvement ideas
             </p>
             <MotionPressable
@@ -87,6 +105,11 @@ export function Feedback() {
           </div>
         </div>
       </DesktopContentColumn>
+
+      <ReportProblemSheet
+        open={reportProblemOpen}
+        onClose={() => setReportProblemOpen(false)}
+      />
     </EntryScreenLayout>
   );
 }

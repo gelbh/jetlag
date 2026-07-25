@@ -17,6 +17,7 @@ import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { AppLink } from "./components/navigation/AppLink";
 import { Home } from "./routes/Home";
 import { AdminPanel } from "./routes/AdminPanel";
+import { AdminIncidentDesk } from "./components/admin/AdminIncidentDesk";
 import { JoinSession } from "./routes/JoinSession";
 import { Feedback } from "./routes/Feedback";
 import { Privacy } from "./routes/Privacy";
@@ -231,6 +232,14 @@ export default function App() {
                 />
                 <Route path="/join" element={<JoinSession />} />
                 <Route path="/admin" element={<AdminPanel />} />
+                <Route
+                  path="/admin/incidents"
+                  element={<AdminIncidentDesk />}
+                />
+                <Route
+                  path="/admin/incidents/:incidentId"
+                  element={<AdminIncidentDesk />}
+                />
                 <Route
                   path="/presets"
                   element={
