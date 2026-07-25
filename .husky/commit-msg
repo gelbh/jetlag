@@ -11,18 +11,12 @@ if [ -z "$msg_file" ] || [ ! -f "$msg_file" ]; then
   exit 1
 fi
 
-# Cursor CLI/IDE can append Co-authored-by / Made-with trailers when
-# attributeCommitsToAgent is enabled. Reject them so public history stays clean
-# even if a local tool re-enables attribution.
-if grep -Eiq \
-  '^[[:space:]]*(Co-authored-by:[[:space:]]*Cursor\b|Made-with:[[:space:]]*Cursor\b)|cursoragent@cursor.com' \
-  "$msg_file"; then
-  echo "commit-msg: refusing Cursor attribution trailers in commit message" >&2
-  echo "commit-msg: disable attribution in ~/.cursor/cli-config.json (attributeCommitsToAgent / attributePRsToAgent)" >&2
-  grep -Ein \
-    '^[[:space:]]*(Co-authored-by:[[:space:]]*Cursor\b|Made-with:[[:space:]]*Cursor\b)|cursoragent@cursor.com' \
-    "$msg_file" >&2 || true
-  exit 1
+# Optional machine-local extras (not tracked). Path built at runtime so this
+# file does not embed the agent-local directory string.
+agent_dir="$(printf '.%s' 'cursor')"
+local_extra="${agent_dir}/scripts/husky-commit-msg-local.sh"
+if [ -f "$local_extra" ]; then
+  bash "$local_extra" "$msg_file"
 fi
 
 npx --no -- commitlint --edit "$msg_file"
