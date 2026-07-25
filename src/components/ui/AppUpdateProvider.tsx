@@ -70,7 +70,6 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
-      setRuntimeConfig(null);
       return;
     }
 
@@ -79,16 +78,18 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const effectiveRuntimeConfig = isFirebaseConfigured() ? runtimeConfig : null;
+
   const requiredMinAppVersion = pickHigherVersion(
     session?.requiredMinAppVersion,
-    runtimeConfig?.requiredMinAppVersion,
+    effectiveRuntimeConfig?.requiredMinAppVersion,
   );
   const graceSeconds =
     requiredMinAppVersion &&
     session?.requiredMinAppVersion === requiredMinAppVersion &&
     typeof session.requiredMinAppVersionGraceSeconds === "number"
       ? session.requiredMinAppVersionGraceSeconds
-      : (runtimeConfig?.hotfixGraceSeconds ?? DEFAULT_HOTFIX_GRACE_SECONDS);
+      : (effectiveRuntimeConfig?.hotfixGraceSeconds ?? DEFAULT_HOTFIX_GRACE_SECONDS);
 
   const applyHotfixReload = useCallback(() => {
     void applyServiceWorkerUpdate(

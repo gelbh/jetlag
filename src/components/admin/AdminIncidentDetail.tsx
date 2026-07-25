@@ -62,6 +62,38 @@ export function AdminIncidentDetail({
   emptyTitle = "Select an incident",
   emptyBody = "Choose a report from the queue to open chat, diagnostics, and timeline.",
 }: AdminIncidentDetailProps) {
+  if (!incidentId) {
+    return (
+      <div className="jl-incident-detail" data-testid="admin-incident-detail">
+        <div className="jl-incident-empty">
+          <p className="jl-incident-empty-title">{emptyTitle}</p>
+          <p className="jl-incident-empty-body">{emptyBody}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <AdminIncidentDetailBody
+      key={incidentId}
+      incidentId={incidentId}
+      incidentOverride={incidentOverride}
+      messagesOverride={messagesOverride}
+      errorOverride={errorOverride}
+      sendingOverride={sendingOverride}
+      onSendOverride={onSendOverride}
+    />
+  );
+}
+
+function AdminIncidentDetailBody({
+  incidentId,
+  incidentOverride,
+  messagesOverride,
+  errorOverride,
+  sendingOverride,
+  onSendOverride,
+}: AdminIncidentDetailProps & { incidentId: string }) {
   const live = useIncidentThread(
     incidentOverride !== undefined ? null : incidentId,
   );
@@ -78,12 +110,6 @@ export function AdminIncidentDetail({
   const [draft, setDraft] = useState("");
   const [sendError, setSendError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setTab("chat");
-    setDraft("");
-    setSendError(null);
-  }, [incidentId]);
 
   useEffect(() => {
     if (tab === "chat") {
@@ -135,17 +161,6 @@ export function AdminIncidentDetail({
       ...hotfix,
     ].sort((left, right) => left.createdAt.localeCompare(right.createdAt));
   }, [incident, messages]);
-
-  if (!incidentId) {
-    return (
-      <div className="jl-incident-detail" data-testid="admin-incident-detail">
-        <div className="jl-incident-empty">
-          <p className="jl-incident-empty-title">{emptyTitle}</p>
-          <p className="jl-incident-empty-body">{emptyBody}</p>
-        </div>
-      </div>
-    );
-  }
 
   if (error && !incident) {
     return (

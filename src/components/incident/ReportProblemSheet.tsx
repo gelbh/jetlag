@@ -49,9 +49,10 @@ function formatErrorAt(iso: string): string {
 }
 
 function useOnlineStatus(override?: boolean): boolean {
+  const isControlled = typeof override === "boolean";
   const [online, setOnline] = useState(
     () =>
-      typeof override === "boolean"
+      isControlled
         ? override
         : typeof navigator === "undefined"
           ? true
@@ -59,22 +60,20 @@ function useOnlineStatus(override?: boolean): boolean {
   );
 
   useEffect(() => {
-    if (typeof override === "boolean") {
-      setOnline(override);
+    if (isControlled) {
       return;
     }
     const handleOnline = () => setOnline(true);
     const handleOffline = () => setOnline(false);
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
-    setOnline(navigator.onLine);
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, [override]);
+  }, [isControlled]);
 
-  return online;
+  return isControlled ? override : online;
 }
 
 export function ReportProblemSheet({
@@ -84,6 +83,43 @@ export function ReportProblemSheet({
   createIncidentFn = createIncident,
   lastClientErrors = [],
 }: ReportProblemSheetProps) {
+  const handleClose = () => {
+    onClose();
+  };
+
+  return (
+    <MotionSheet
+      open={open}
+      onClose={handleClose}
+      ariaLabel="Report problem"
+      sheetClassName="mx-auto max-w-lg jl-report-host"
+      maxHeightClassName="max-h-[min(85dvh,760px)]"
+    >
+      {open ? (
+        <ReportProblemSheetContent
+          onlineOverride={onlineOverride}
+          createIncidentFn={createIncidentFn}
+          lastClientErrors={lastClientErrors}
+          onClose={handleClose}
+        />
+      ) : null}
+    </MotionSheet>
+  );
+}
+
+function ReportProblemSheetContent({
+  onlineOverride,
+  createIncidentFn,
+  lastClientErrors,
+  onClose,
+}: {
+  onlineOverride?: boolean;
+  createIncidentFn: (
+    input: CreateIncidentInput,
+  ) => Promise<CreateIncidentResult>;
+  lastClientErrors: readonly IncidentClientError[];
+  onClose: () => void;
+}) {
   const location = useLocation();
   const noteId = useId();
   const online = useOnlineStatus(onlineOverride);
@@ -95,15 +131,6 @@ export function ReportProblemSheet({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [incidentId, setIncidentId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!open) {
-      setNote("");
-      setSubmitting(false);
-      setSubmitError(null);
-      setIncidentId(null);
-    }
-  }, [open]);
 
   const diagnosticsPreview = useMemo(() => {
     const uid =
@@ -165,19 +192,13 @@ export function ReportProblemSheet({
     onClose();
   };
 
+  if (incidentId) {
+    return <IncidentChatPanel incidentId={incidentId} onClose={handleClose} />;
+  }
+
   return (
-    <MotionSheet
-      open={open}
-      onClose={handleClose}
-      ariaLabel="Report problem"
-      sheetClassName="mx-auto max-w-lg jl-report-host"
-      maxHeightClassName="max-h-[min(85dvh,760px)]"
-    >
-      {incidentId ? (
-        <IncidentChatPanel incidentId={incidentId} onClose={handleClose} />
-      ) : (
-        <div className="jl-report-sheet">
-          <SheetHeader
+    <div className="jl-report-sheet">
+      <SheetHeader
             title="REPORT PROBLEM"
             onClose={handleClose}
             titleSize="xl"
@@ -299,7 +320,5 @@ export function ReportProblemSheet({
             </button>
           </div>
         </div>
-      )}
-    </MotionSheet>
   );
 }

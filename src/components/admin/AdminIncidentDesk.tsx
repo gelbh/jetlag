@@ -25,6 +25,8 @@ import { AdminIncidentDetail } from "./AdminIncidentDetail";
 import { AdminIncidentInbox } from "./AdminIncidentInbox";
 import "./AdminIncidentDesk.css";
 
+const EMPTY_INCIDENTS: IncidentRecord[] = [];
+
 function formatUtcClock(now: Date): string {
   return now.toISOString().slice(11, 19) + " UTC";
 }
@@ -41,8 +43,17 @@ export function AdminIncidentDesk() {
   const [loading, setLoading] = useState(enabled);
   const [listError, setListError] = useState<string | null>(null);
   const [now, setNow] = useState(() => new Date());
+  const [enabledState, setEnabledState] = useState(enabled);
 
   const selectedId = routeIncidentId?.trim() || null;
+
+  if (enabled !== enabledState) {
+    setEnabledState(enabled);
+    if (enabled) {
+      setLoading(true);
+      setListError(null);
+    }
+  }
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
@@ -51,14 +62,9 @@ export function AdminIncidentDesk() {
 
   useEffect(() => {
     if (!enabled) {
-      setIncidents([]);
-      setLoading(false);
-      setListError(null);
       return;
     }
 
-    setLoading(true);
-    setListError(null);
     const unsubscribe = subscribeIncidentList(
       (next) => {
         setIncidents(next);
@@ -73,7 +79,14 @@ export function AdminIncidentDesk() {
     return unsubscribe;
   }, [enabled]);
 
-  const openCount = useMemo(() => countOpenIncidents(incidents), [incidents]);
+  const visibleIncidents = enabled ? incidents : EMPTY_INCIDENTS;
+  const visibleLoading = enabled ? loading : false;
+  const visibleListError = enabled ? listError : null;
+
+  const openCount = useMemo(
+    () => countOpenIncidents(visibleIncidents),
+    [visibleIncidents],
+  );
 
   const handleSelect = (incidentId: string) => {
     void navigate(`/admin/incidents/${encodeURIComponent(incidentId)}`);
@@ -183,7 +196,7 @@ export function AdminIncidentDesk() {
             </div>
             <div className="jl-incident-stat">
               <dt>In queue</dt>
-              <dd>{incidents.length}</dd>
+              <dd>{visibleIncidents.length}</dd>
             </div>
             <div className="jl-incident-stat">
               <dt>Time</dt>
@@ -192,19 +205,19 @@ export function AdminIncidentDesk() {
           </dl>
         </header>
 
-        {listError && incidents.length > 0 ? (
-          <InlineError>{listError}</InlineError>
+        {visibleListError && visibleIncidents.length > 0 ? (
+          <InlineError>{visibleListError}</InlineError>
         ) : null}
 
         {isDesktop ? (
           <div className="jl-incident-panes jl-incident-panes--desktop">
             <div className="jl-incident-pane">
               <AdminIncidentInbox
-                incidents={incidents}
+                incidents={visibleIncidents}
                 selectedId={selectedId}
                 openCount={openCount}
-                loading={loading}
-                error={listError}
+                loading={visibleLoading}
+                error={visibleListError}
                 onSelect={handleSelect}
               />
             </div>
@@ -224,11 +237,11 @@ export function AdminIncidentDesk() {
           <div className="jl-incident-panes jl-incident-panes--mobile">
             <div className="jl-incident-pane">
               <AdminIncidentInbox
-                incidents={incidents}
+                incidents={visibleIncidents}
                 selectedId={selectedId}
                 openCount={openCount}
-                loading={loading}
-                error={listError}
+                loading={visibleLoading}
+                error={visibleListError}
                 onSelect={handleSelect}
               />
             </div>

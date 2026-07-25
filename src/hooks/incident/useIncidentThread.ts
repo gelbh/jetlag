@@ -29,19 +29,27 @@ export function useIncidentThread(
   const [messages, setMessages] = useState<IncidentMessageRecord[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [sending, setSending] = useState(false);
+  const [syncedIncidentId, setSyncedIncidentId] = useState(
+    incidentId ?? null,
+  );
+
+  const normalizedIncidentId = incidentId ?? null;
+  if (normalizedIncidentId !== syncedIncidentId) {
+    setSyncedIncidentId(normalizedIncidentId);
+    setIncident(null);
+    setMessages([]);
+    setError(null);
+  }
+
+  const subscribed = Boolean(normalizedIncidentId && isFirebaseConfigured());
 
   useEffect(() => {
-    if (!incidentId || !isFirebaseConfigured()) {
-      setIncident(null);
-      setMessages([]);
-      setError(null);
+    if (!subscribed || !normalizedIncidentId) {
       return;
     }
 
-    setError(null);
-
     const unsubIncident = subscribeIncident(
-      incidentId,
+      normalizedIncidentId,
       setIncident,
       (nextError) => {
         setError(nextError);
@@ -50,7 +58,7 @@ export function useIncidentThread(
     );
 
     const unsubMessages = subscribeIncidentMessages(
-      incidentId,
+      normalizedIncidentId,
       setMessages,
       (nextError) => {
         setError(nextError);
@@ -62,27 +70,27 @@ export function useIncidentThread(
       unsubIncident();
       unsubMessages();
     };
-  }, [incidentId]);
+  }, [normalizedIncidentId, subscribed]);
 
   const sendMessage = useCallback(
     async (text: string) => {
-      if (!incidentId) {
+      if (!normalizedIncidentId) {
         throw new Error("No incident selected.");
       }
       setSending(true);
       try {
-        await postIncidentMessage(incidentId, text);
+        await postIncidentMessage(normalizedIncidentId, text);
       } finally {
         setSending(false);
       }
     },
-    [incidentId],
+    [normalizedIncidentId],
   );
 
   return {
-    incident,
-    messages,
-    error,
+    incident: subscribed ? incident : null,
+    messages: subscribed ? messages : [],
+    error: subscribed ? error : null,
     sending,
     sendMessage,
   };

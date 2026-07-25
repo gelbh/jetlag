@@ -59,8 +59,22 @@ export function useHotfixGraceReload(
     compareAppVersions(clientVersion, requiredMinAppVersion) < 0;
 
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
+  const [armedVersion, setArmedVersion] = useState<string | null>(null);
   const reloadRef = useRef(reload);
   const reloadedForVersionRef = useRef<string | null>(null);
+
+  const targetVersion =
+    needsUpdate && requiredMinAppVersion ? requiredMinAppVersion : null;
+
+  if (targetVersion !== armedVersion) {
+    setArmedVersion(targetVersion);
+    if (targetVersion) {
+      const totalSeconds = resolveGraceSeconds(graceSeconds);
+      setSecondsRemaining(totalSeconds <= 0 ? 0 : totalSeconds);
+    } else {
+      setSecondsRemaining(null);
+    }
+  }
 
   useEffect(() => {
     reloadRef.current = reload;
@@ -68,7 +82,6 @@ export function useHotfixGraceReload(
 
   useEffect(() => {
     if (!needsUpdate || !requiredMinAppVersion) {
-      setSecondsRemaining(null);
       return;
     }
 
@@ -77,12 +90,9 @@ export function useHotfixGraceReload(
     }
 
     const totalSeconds = resolveGraceSeconds(graceSeconds);
-    setSecondsRemaining(totalSeconds);
-
     if (totalSeconds <= 0) {
       reloadedForVersionRef.current = requiredMinAppVersion;
       void Promise.resolve(reloadRef.current());
-      setSecondsRemaining(0);
       return;
     }
 
