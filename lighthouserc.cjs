@@ -1,34 +1,18 @@
-module.exports = {
-  ci: {
-    collect: {
-      url: ["http://127.0.0.1:4173/", "http://127.0.0.1:4173/join"],
-      startServerCommand:
-        "npm run preview -- --host 127.0.0.1 --port 4173 --strictPort",
-      startServerReadyPattern: "Local:",
-      // Median of 3 runs stabilizes CLS before error assertions
-      numberOfRuns: 3,
-      settings: {
-        formFactor: "mobile",
-        screenEmulation: {
-          mobile: true,
-          width: 390,
-          height: 844,
-          deviceScaleFactor: 3,
-          disabled: false,
-        },
-      },
-    },
-    assert: {
-      assertions: {
-        viewport: "error",
-        "target-size": ["error", { minScore: 0.8 }],
-        // Floors slightly loose vs typical home/join mobile baseline; tighten after first CI artifacts
-        "cumulative-layout-shift": ["error", { maxNumericValue: 0.15 }],
-      },
-    },
-    upload: {
-      target: "filesystem",
-      outputDir: ".lighthouseci",
+const { createLhciConfig } = require("./lighthouserc.shared.cjs");
+
+module.exports = createLhciConfig({
+  formFactor: "mobile",
+  homeJoinPerf: 0.6,
+  createPerf: 0.55,
+  outputDir: ".lighthouseci/mobile",
+  collectSettings: {
+    formFactor: "mobile",
+    screenEmulation: {
+      mobile: true,
+      width: 390,
+      height: 844,
+      deviceScaleFactor: 3,
+      disabled: false,
     },
   },
-};
+});
