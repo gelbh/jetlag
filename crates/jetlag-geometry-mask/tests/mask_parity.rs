@@ -29,14 +29,18 @@ fn square(west: f64) -> PolygonFeature {
 #[test]
 fn unions_polygons_and_clips_to_game_area() {
     let area = london_game_area();
+    // square(-0.22): west=-0.22..-0.19 crosses game-area west edge (-0.2)
     let input = UnionInput {
-        polygons: vec![square(-0.18)],
+        polygons: vec![square(-0.22), square(-0.18)],
         disks: vec![],
     };
     let mask = build_mask_from_union_input(&input, &area).expect("mask");
-    // Inside the square (and game area)
+    // Inside clipped square / union and game area
+    assert!(feature_contains_lng_lat(&mask, -0.195, 51.45));
     assert!(feature_contains_lng_lat(&mask, -0.165, 51.45));
-    // Outside game area
+    // In the polygon west of the game-area boundary → clipped out
+    assert!(!feature_contains_lng_lat(&mask, -0.21, 51.45));
+    // Outside game area entirely
     assert!(!feature_contains_lng_lat(&mask, -0.25, 51.45));
 }
 

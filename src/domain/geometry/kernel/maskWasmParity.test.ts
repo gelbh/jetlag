@@ -82,8 +82,11 @@ describe.skipIf(!wasmPkgReady)("mask wasm parity", () => {
     await wasmBuildMaskFromUnionInput({ polygons: [], disks: [] }, gameArea);
   }, 60_000);
 
-  it("matches TS topology on square union (no disks)", async () => {
-    const input = { polygons: [square(-0.18)], disks: [] };
+  it("matches TS topology on overlapping square union (no disks)", async () => {
+    const input = {
+      polygons: [square(-0.19), square(-0.17), square(-0.15)],
+      disks: [],
+    };
     const ts = buildMaskFromUnionInput(input, gameArea);
     const wasm = await wasmBuildMaskFromUnionInput(input, gameArea);
     assertPolygonTopologyParity(wasm, ts, topologyBbox);

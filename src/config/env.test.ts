@@ -62,14 +62,17 @@ describe("parseClientEnv", () => {
   });
 
 
-  it("accepts optional geometry mask kernel mode", () => {
-    const env = parseClientEnv({
-      ...validFirebaseEnv,
-      VITE_GEOMETRY_MASK_KERNEL: "dual",
-    });
+  it.each(["ts", "wasm", "dual"] as const)(
+    "accepts optional geometry mask kernel mode %s",
+    (mode) => {
+      const env = parseClientEnv({
+        ...validFirebaseEnv,
+        VITE_GEOMETRY_MASK_KERNEL: mode,
+      });
 
-    expect(env.VITE_GEOMETRY_MASK_KERNEL).toBe("dual");
-  });
+      expect(env.VITE_GEOMETRY_MASK_KERNEL).toBe(mode);
+    },
+  );
 
   it("omits empty or invalid geometry mask kernel mode", () => {
     expect(

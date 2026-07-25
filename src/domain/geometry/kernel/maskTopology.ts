@@ -9,6 +9,10 @@ export function sampleGridPoints(
   north: number,
   steps: number,
 ): ReturnType<typeof turfPoint>[] {
+  if (!Number.isInteger(steps) || steps <= 0) {
+    return [];
+  }
+
   const points: ReturnType<typeof turfPoint>[] = [];
   const lngStep = (east - west) / steps;
   const latStep = (north - south) / steps;
@@ -74,6 +78,9 @@ export function maskTopologyMatches(
     return true;
   }
   if (candidate === null || baseline === null) {
+    return false;
+  }
+  if (!Number.isInteger(steps) || steps <= 0) {
     return false;
   }
 
