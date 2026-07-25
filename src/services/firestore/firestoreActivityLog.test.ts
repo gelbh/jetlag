@@ -17,13 +17,9 @@ const firestoreMocks = vi.hoisted(() => ({
       exists: () => false,
     }),
   ),
-  onSnapshot: vi.fn(
-    (
-      _query: unknown,
-      _onNext?: SnapshotHandler,
-      _onError?: (error: Error) => void,
-    ) => vi.fn(),
-  ),
+  onSnapshot: vi.fn(function onSnapshotMock() {
+    return vi.fn();
+  }),
   orderBy: vi.fn((...args: unknown[]) => ({ orderBy: args })),
   query: vi.fn((...args: unknown[]) => ({ query: args })),
   doc: vi.fn((...segments: unknown[]) => ({
