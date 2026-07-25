@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.9.4";
+export const APP_VERSION = "0.9.5";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,25 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.9.5",
+    date: "2026-07-25",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Measuring: near-region shading uses a finer circle so closer/further masks match the real distance again",
+          "Questions: answering a radar or thermometer once can no longer leave two shaded rings on the map",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Privacy: PostHog analytics may use local storage after Accept; page leaves and Core Web Vitals included; a signed-in account may be linked to the analytics ID",
+        ],
+      }
+    ],
+  },
   {
     version: "0.9.4",
     date: "2026-07-25",
