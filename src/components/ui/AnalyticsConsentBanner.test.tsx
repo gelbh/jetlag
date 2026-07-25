@@ -74,6 +74,18 @@ describe("AnalyticsConsentBanner", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+  it("hides when consent was previously denied", () => {
+    writeAnalyticsConsent("denied");
+
+    render(
+      <MemoryRouter>
+        <AnalyticsConsentBanner />
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
   it("hides outside production", () => {
     vi.stubEnv("PROD", false);
 

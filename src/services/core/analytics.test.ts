@@ -97,6 +97,7 @@ describe("analytics facade", () => {
     resetAnalyticsForTests();
     resetClientEnvForTests();
     vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
   });
 
   it("does not init PostHog outside production", () => {
