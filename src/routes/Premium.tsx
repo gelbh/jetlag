@@ -14,6 +14,10 @@ import {
   type PremiumProductKey,
 } from "../domain/billing/premiumProducts";
 import {
+  ANALYTICS_EVENTS,
+  track,
+} from "../services/core/analytics";
+import {
   ensureAnonymousUser,
   isFirebaseConfigured,
 } from "../services/core/firebase";
@@ -62,6 +66,7 @@ export function Premium() {
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- refresh entitlements after Stripe redirect */
     if (checkoutState === "success") {
+      track(ANALYTICS_EVENTS.premium_purchase_completed, {});
       void refreshEntitlementsWithError();
     }
     /* eslint-enable react-hooks/set-state-in-effect */
