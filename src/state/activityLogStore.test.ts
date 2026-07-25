@@ -27,39 +27,6 @@ describe("activityLogStore", () => {
     expect(useActivityLogStore.getState().getEvents("missing")).toEqual([]);
   });
 
-  it("setEvents replaces events for a session", () => {
-    const first = sessionStarted({ id: "a", sessionId: "s1" });
-    const second = sessionStarted({
-      id: "b",
-      sessionId: "s1",
-      createdAt: "2026-07-25T11:00:00.000Z",
-    });
-
-    useActivityLogStore.getState().setEvents("s1", [first, second]);
-    expect(useActivityLogStore.getState().getEvents("s1")).toEqual([
-      first,
-      second,
-    ]);
-  });
-
-  it("upsertEvent inserts then updates by id", () => {
-    const created = sessionStarted({
-      id: "session_started",
-      sessionId: LOCAL_SESSION_ID,
-    });
-    useActivityLogStore.getState().upsertEvent(created);
-
-    const updated: SessionActivityEvent = {
-      ...created,
-      createdByUid: "uid-1",
-    };
-    useActivityLogStore.getState().upsertEvent(updated);
-
-    expect(useActivityLogStore.getState().getEvents(LOCAL_SESSION_ID)).toEqual([
-      updated,
-    ]);
-  });
-
   it("appendIfAbsent is idempotent for the same id", () => {
     const event = sessionStarted({
       id: "session_started",

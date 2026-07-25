@@ -16,7 +16,7 @@ import { isFirestorePermissionDenied } from "./firestoreAnnotations";
 import {
   buildActivityLogDocument,
   deserializeActivityLogFromFirestore,
-} from "./firestoreSerialization";
+} from "./firestoreActivityLogSerialization";
 
 function activityLogCollection(sessionId: string) {
   return collection(getFirestoreDb(), "sessions", sessionId, "activityLog");

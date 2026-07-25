@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FirebaseError } from "firebase/app";
 import type { SessionActivityEvent } from "../../domain/session/sessionActivityLog";
-import { buildActivityLogDocument } from "./firestoreSerialization";
+import {
+  buildActivityLogDocument,
+  deserializeActivityLogFromFirestore,
+} from "./firestoreActivityLogSerialization";
 
 const firestoreMocks = vi.hoisted(() => ({
   setDoc: vi.fn(async () => undefined),
@@ -151,5 +154,18 @@ describe("firestoreActivityLog", () => {
       expect.objectContaining({ id: "newer", type: "seeking_started" }),
       expect.objectContaining({ id: "older", type: "hiding_timer_started" }),
     ]);
+  });
+
+  it("rejects question activity payloads with unknown toolType", () => {
+    expect(() =>
+      deserializeActivityLogFromFirestore("q1", "session-1", {
+        type: "question_asked",
+        createdAt: "2026-07-25T10:00:00.000Z",
+        payload: {
+          toolType: "not-a-tool",
+          promptText: "Near water?",
+        },
+      }),
+    ).toThrow(/Invalid activity log toolType/);
   });
 });
