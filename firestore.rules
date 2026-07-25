@@ -797,20 +797,64 @@ service cloud.firestore {
         return isSignedIn() && resource.data.reporterUid == request.auth.uid;
       }
 
+      function parentIncidentData() {
+        return get(/databases/$(database)/documents/incidents/$(incidentId)).data;
+      }
+
+      function isIncidentSessionHost() {
+        return isSignedIn()
+          && parentIncidentData().sessionId is string
+          && sessionData(parentIncidentData().sessionId).hostUid == request.auth.uid;
+      }
+
       allow get: if isAdmin() || isIncidentReporter();
       allow list: if isAdmin();
       // Incidents are created and mutated by Cloud Functions only.
       allow create, update, delete: if false;
 
       match /messages/{messageId} {
-        function parentIncident() {
-          return get(/databases/$(database)/documents/incidents/$(incidentId)).data;
-        }
-
         allow get, list: if isAdmin()
-          || (isSignedIn() && parentIncident().reporterUid == request.auth.uid);
+          || (isSignedIn() && parentIncidentData().reporterUid == request.auth.uid);
         // Incident messages are written by callables only.
         allow create, update, delete: if false;
+      }
+
+      // Host confirm docs: host (and admin/reporter) may read; approve via callable only.
+      match /hostConfirms/{confirmId} {
+        allow get, list: if isAdmin()
+          || isIncidentSessionHost()
+          || (isSignedIn() && parentIncidentData().reporterUid == request.auth.uid);
+        allow create, update, delete: if false;
+      }
+
+      // Tool audit is server-written; admin may read for desk.
+      match /toolAudit/{auditId} {
+        allow get, list: if isAdmin();
+        allow create, update, delete: if false;
+      }
+
+      // Dual threads: support (player/host/members/admin) vs hotfix (admin-only).
+      function canReadSupportThread() {
+        return isAdmin()
+          || (isSignedIn() && parentIncidentData().reporterUid == request.auth.uid)
+          || isIncidentSessionHost()
+          || (
+            parentIncidentData().sessionId is string
+            && isSessionMember(parentIncidentData().sessionId)
+          );
+      }
+
+      match /threads/{threadId} {
+        allow get, list: if (threadId == 'support' && canReadSupportThread())
+          || (threadId == 'hotfix' && isAdmin());
+        // Thread docs are written by Cloud Functions only.
+        allow create, update, delete: if false;
+
+        match /messages/{messageId} {
+          allow get, list: if (threadId == 'support' && canReadSupportThread())
+            || (threadId == 'hotfix' && isAdmin());
+          allow create, update, delete: if false;
+        }
       }
     }
 

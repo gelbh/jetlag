@@ -1,0 +1,36 @@
+/* Host confirm sheet — Broadcast HUD tokens; mirrors report sheet tone. */
+
+.jl-host-confirm-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0 1rem 1.25rem;
+}
+
+.jl-host-confirm-helper {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--color-ink-muted);
+}
+
+.jl-host-confirm-tool {
+  font-family: var(--font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+}
+
+.jl-host-confirm-error {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-danger, #b42318);
+}
+
+.jl-host-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
