@@ -126,13 +126,12 @@ export function SupportAgentChat({
   );
 
   const { pending } = usePendingHostConfirm(incidentId);
-  const [hostSheetOpen, setHostSheetOpen] = useState(false);
-
-  useEffect(() => {
-    if (isHost && pending) {
-      setHostSheetOpen(true);
-    }
-  }, [isHost, pending]);
+  const [dismissedConfirmId, setDismissedConfirmId] = useState<string | null>(
+    null,
+  );
+  const hostSheetOpen = Boolean(
+    isHost && pending && pending.id !== dismissedConfirmId,
+  );
 
   const [draft, setDraft] = useState("");
   const [sendError, setSendError] = useState<string | null>(null);
@@ -306,9 +305,9 @@ export function SupportAgentChat({
       )}
 
       <HostConfirmSheet
-        open={hostSheetOpen && Boolean(pending)}
+        open={hostSheetOpen}
         confirm={pending}
-        onClose={() => setHostSheetOpen(false)}
+        onClose={() => setDismissedConfirmId(pending?.id ?? null)}
       />
     </div>
   );
