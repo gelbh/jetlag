@@ -25,6 +25,13 @@ const pkgEntry = path.resolve(
   "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js",
 );
 const wasmPkgReady = existsSync(pkgEntry);
+const inCi = Boolean(process.env.CI);
+
+if (!wasmPkgReady && inCi) {
+  throw new Error(
+    `Gate B dual golden parity requires WASM pkg at ${pkgEntry} (run wasm:build before unit tests in CI)`,
+  );
+}
 
 const gameArea: GameAreaGeometry = {
   type: "Polygon",
@@ -89,7 +96,7 @@ type GoldenCase = {
   run: () => Promise<{ ts: PolygonFeature | null; wasm: PolygonFeature | null }>;
 };
 
-describe.skipIf(!wasmPkgReady)("Gate B dual golden parity", () => {
+describe.skipIf(!wasmPkgReady && !inCi)("Gate B dual golden parity", () => {
   let wasmBuildMaskFromUnionInput: typeof import("./maskWasm").wasmBuildMaskFromUnionInput;
   let wasmBuildEndGameMaskFromDisks: typeof import("./maskWasm").wasmBuildEndGameMaskFromDisks;
   let wasmBuildHalfPlanePolygon: typeof import("./halfPlaneWasm").wasmBuildHalfPlanePolygon;
