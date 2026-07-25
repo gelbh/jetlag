@@ -1,0 +1,145 @@
+/* Support agent chat — Broadcast HUD tokens; mirrors report / host-confirm tone. */
+
+.jl-support-chat {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.jl-support-chat-header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.jl-support-chat-eyebrow {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-brand-blue);
+}
+
+.jl-support-chat-title {
+  margin: 0.125rem 0 0;
+  font-size: 0.875rem;
+  color: var(--color-ink-muted);
+}
+
+.jl-support-chat-caps {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-dim);
+}
+
+.jl-support-chat-banner {
+  flex-shrink: 0;
+  border: 1px solid oklch(from var(--color-status-warning) l c h / 0.55);
+  background: var(--color-status-warning-surface);
+  padding: 0.5rem 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-status-warning);
+}
+
+.jl-support-chat-error {
+  flex-shrink: 0;
+  border: 2px solid oklch(from var(--color-status-error) l c h / 0.4);
+  background: var(--color-status-error-surface);
+  padding: 0.5rem 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-status-error);
+}
+
+.jl-support-chat-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.jl-support-msg {
+  margin-bottom: 0.375rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  padding: 0.375rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.jl-support-msg--player {
+  margin-left: 1.5rem;
+  border-color: oklch(from var(--color-highlight) l c h / 0.35);
+  background: var(
+    --color-highlight-soft,
+    oklch(from var(--color-highlight) l c h / 0.12)
+  );
+}
+
+.jl-support-msg--admin {
+  margin-right: 1.5rem;
+}
+
+.jl-support-msg--ops_agent {
+  border-color: oklch(from var(--color-brand-blue) l c h / 0.45);
+  background: oklch(from var(--color-brand-blue) l c h / 0.1);
+}
+
+.jl-support-msg--system,
+.jl-support-msg--tool {
+  background: var(--color-surface-deep);
+  color: var(--color-ink-secondary);
+}
+
+.jl-support-msg--tool {
+  border-style: dashed;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.jl-support-msg-sender {
+  margin: 0 0 0.125rem;
+  font-family: var(--font-display);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-dim);
+}
+
+.jl-support-msg-text {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.jl-support-msg-tool-name {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.jl-support-empty {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-ink-dim);
+}
+
+.jl-support-summon {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.jl-support-composer {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.5rem;
+}

@@ -14,6 +14,25 @@ vi.mock("../../hooks/incident/useIncidentThread", () => ({
   }),
 }));
 
+vi.mock("../../hooks/incident/useSupportThread", () => ({
+  useSupportThread: () => ({
+    incident: null,
+    messages: [],
+    error: null,
+    sending: false,
+    summonId: null,
+    sendTurn: vi.fn(),
+  }),
+}));
+
+vi.mock("../../hooks/incident/usePendingHostConfirm", () => ({
+  usePendingHostConfirm: () => ({
+    pending: null,
+    confirms: [],
+    error: null,
+  }),
+}));
+
 describe("ReportProblemSheet", () => {
   it("renders probe copy, diagnostics rows, and 0/140 counter", () => {
     renderWithRouter(
@@ -66,7 +85,7 @@ describe("ReportProblemSheet", () => {
     ).toBeInTheDocument();
   });
 
-  it("opens chat after a successful submit", async () => {
+  it("opens fix-agent tab after a successful submit", async () => {
     const createIncidentFn = vi.fn().mockResolvedValue({
       incidentId: "inc-test-1",
       status: "open",
@@ -86,8 +105,12 @@ describe("ReportProblemSheet", () => {
     await waitFor(() => {
       expect(createIncidentFn).toHaveBeenCalled();
     });
+    expect(await screen.findByTestId("support-agent-chat")).toBeInTheDocument();
     expect(
-      await screen.findByText("Report sent — you can chat here."),
+      screen.getByRole("tab", { name: "Fix agent" }),
+    ).toHaveAttribute("aria-selected", "true");
+    expect(
+      screen.getByRole("button", { name: "Ask fix agent" }),
     ).toBeInTheDocument();
   });
 });
