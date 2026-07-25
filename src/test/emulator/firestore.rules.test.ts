@@ -2175,6 +2175,168 @@ describe("firestore.rules", () => {
     );
   });
 
+  async function seedIncidentThreads() {
+    await seedIncident();
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      await db.collection("sessions").doc("session-1").set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "reporter-1", "member-1"],
+          memberRoles: {
+            "host-1": "seeker",
+            "reporter-1": "hider",
+            "member-1": "hider",
+          },
+        }),
+      );
+      await db
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("threads")
+        .doc("support")
+        .set({ id: "support", visibility: "support" });
+      await db
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("threads")
+        .doc("support")
+        .collection("messages")
+        .doc("support-msg-1")
+        .set({
+          sender: "ops_agent",
+          kind: "status",
+          text: "Looking into it",
+          visibility: "support",
+          createdAt: "2026-01-01T00:00:00.000Z",
+        });
+      await db
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("threads")
+        .doc("hotfix")
+        .set({ id: "hotfix", visibility: "hotfix" });
+      await db
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("threads")
+        .doc("hotfix")
+        .collection("messages")
+        .doc("hotfix-msg-1")
+        .set({
+          sender: "hotfix_agent",
+          kind: "agent_meta",
+          text: "Agent launched",
+          visibility: "hotfix",
+          createdAt: "2026-01-01T00:00:00.000Z",
+        });
+    });
+  }
+
+  it("allows reporter, host, and session members to read the support thread", async () => {
+    await seedIncidentThreads();
+
+    for (const uid of ["reporter-1", "host-1", "member-1"]) {
+      const client = testEnv.authenticatedContext(uid);
+      await assertSucceeds(
+        client
+          .firestore()
+          .collection("incidents")
+          .doc("inc-1")
+          .collection("threads")
+          .doc("support")
+          .collection("messages")
+          .doc("support-msg-1")
+          .get(),
+      );
+    }
+  });
+
+  it("allows admin to read support and hotfix threads", async () => {
+    await seedIncidentThreads();
+    const admin = adminContext(testEnv);
+    await assertSucceeds(
+      admin
+        .firestore()
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("threads")
+        .doc("support")
+        .collection("messages")
+        .doc("support-msg-1")
+        .get(),
+    );
+    await assertSucceeds(
+      admin
+        .firestore()
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("threads")
+        .doc("hotfix")
+        .collection("messages")
+        .doc("hotfix-msg-1")
+        .get(),
+    );
+  });
+
+  it("denies reporter and host reading the hotfix thread (admin-only)", async () => {
+    await seedIncidentThreads();
+
+    for (const uid of ["reporter-1", "host-1", "member-1", "stranger-1"]) {
+      const client = testEnv.authenticatedContext(uid);
+      await assertFails(
+        client
+          .firestore()
+          .collection("incidents")
+          .doc("inc-1")
+          .collection("threads")
+          .doc("hotfix")
+          .collection("messages")
+          .doc("hotfix-msg-1")
+          .get(),
+      );
+    }
+  });
+
+  it("denies clients writing thread messages", async () => {
+    await seedIncidentThreads();
+    const reporter = testEnv.authenticatedContext("reporter-1");
+    await assertFails(
+      reporter
+        .firestore()
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("threads")
+        .doc("support")
+        .collection("messages")
+        .doc("support-msg-2")
+        .set({
+          sender: "player",
+          kind: "chat",
+          text: "inject",
+          visibility: "support",
+          createdAt: "2026-01-01T00:01:00.000Z",
+        }),
+    );
+    const admin = adminContext(testEnv);
+    await assertFails(
+      admin
+        .firestore()
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("threads")
+        .doc("hotfix")
+        .collection("messages")
+        .doc("hotfix-msg-2")
+        .set({
+          sender: "admin",
+          kind: "chat",
+          text: "nope",
+          visibility: "hotfix",
+          createdAt: "2026-01-01T00:01:00.000Z",
+        }),
+    );
+  });
+
   it("allows signed-in clients to read appConfig but not write it", async () => {
     await testEnv.withSecurityRulesDisabled(async (ctx) => {
       await ctx.firestore().collection("appConfig").doc("runtime").set({

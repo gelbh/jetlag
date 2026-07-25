@@ -832,6 +832,30 @@ service cloud.firestore {
         allow get, list: if isAdmin();
         allow create, update, delete: if false;
       }
+
+      // Dual threads: support (player/host/members/admin) vs hotfix (admin-only).
+      function canReadSupportThread() {
+        return isAdmin()
+          || (isSignedIn() && parentIncidentData().reporterUid == request.auth.uid)
+          || isIncidentSessionHost()
+          || (
+            parentIncidentData().sessionId is string
+            && isSessionMember(parentIncidentData().sessionId)
+          );
+      }
+
+      match /threads/{threadId} {
+        allow get, list: if (threadId == 'support' && canReadSupportThread())
+          || (threadId == 'hotfix' && isAdmin());
+        // Thread docs are written by Cloud Functions only.
+        allow create, update, delete: if false;
+
+        match /messages/{messageId} {
+          allow get, list: if (threadId == 'support' && canReadSupportThread())
+            || (threadId == 'hotfix' && isAdmin());
+          allow create, update, delete: if false;
+        }
+      }
     }
 
     // Global hotfix / runtime config: read by any signed-in client, server-written only.
