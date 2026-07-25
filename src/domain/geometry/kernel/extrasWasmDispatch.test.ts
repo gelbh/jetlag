@@ -111,6 +111,7 @@ describe("extras wasm dispatch (halfPlane ready)", () => {
 
     expect(half).toEqual(expected);
     expect(wasmBuildHalfPlanePolygon).toHaveBeenCalledOnce();
+    expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();
   });
 

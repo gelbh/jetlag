@@ -91,26 +91,33 @@ export function useMeasuringPreviews(
     generationRef.current = generation;
 
     void (async () => {
+      let near: Feature<GeoPolygon | MultiPolygon> | null;
       try {
-        const near = await buildMeasuringBoundaryPreview(previewRegionInput);
-        if (generation !== generationRef.current) {
-          return;
+        near = await buildMeasuringBoundaryPreview(previewRegionInput);
+      } catch {
+        if (generation === generationRef.current) {
+          setMeasuringNearRegion(null);
+          setMeasuringEliminationPreview(null);
         }
-        // Clear stale elimination while the matching elim rebuild runs.
-        setMeasuringNearRegion(near);
-        setMeasuringEliminationPreview(null);
+        return;
+      }
+      if (generation !== generationRef.current) {
+        return;
+      }
+      // Clear stale elimination while the matching elim rebuild runs.
+      setMeasuringNearRegion(near);
+      setMeasuringEliminationPreview(null);
 
+      try {
         const elimination = await buildMeasuringEliminationPreview({
           ...previewRegionInput,
           precomputedNearRegion: near,
         });
-        if (generation !== generationRef.current) {
-          return;
+        if (generation === generationRef.current) {
+          setMeasuringEliminationPreview(elimination);
         }
-        setMeasuringEliminationPreview(elimination);
       } catch {
         if (generation === generationRef.current) {
-          setMeasuringNearRegion(null);
           setMeasuringEliminationPreview(null);
         }
       }
