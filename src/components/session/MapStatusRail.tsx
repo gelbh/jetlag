@@ -146,7 +146,7 @@ export function MapStatusRail({
   return (
     <div
       ref={railRef}
-      className={`jl-status-rail pointer-events-none z-[var(--z-banner)] pt-[max(0px,env(safe-area-inset-top))]${
+      className={`jl-status-rail pointer-events-none z-[var(--z-banner)]${
         expanded
           ? " jl-status-rail--expanded"
           : " absolute inset-x-0 top-0"
