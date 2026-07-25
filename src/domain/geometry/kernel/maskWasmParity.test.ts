@@ -10,7 +10,10 @@ import {
   runEndGameMaskFromDisks,
   runMaskFromUnionInput,
 } from "./maskKernelRunner";
-import { wasmBuildMaskFromUnionInput } from "./maskWasm";
+import {
+  wasmBuildEndGameMaskFromDisks,
+  wasmBuildMaskFromUnionInput,
+} from "./maskWasm";
 import { assertPolygonTopologyParity } from "./parity";
 import type { DiskSpec, GameAreaGeometry, PolygonFeature } from "./types";
 
@@ -59,32 +62,63 @@ function square(west: number): PolygonFeature {
   };
 }
 
+/** Five overlapping end-game disks (CircleUnion vs Rust geodesic gons). */
+function overlappingEndGameDisks(): DiskSpec[] {
+  const centerLat = 51.45;
+  const centerLng = -0.15;
+  return Array.from({ length: 5 }, (_, index) => ({
+    center: [centerLat + index * 0.002, centerLng + index * 0.002] as [
+      number,
+      number,
+    ],
+    radiusMeters: 500,
+  }));
+}
+
 describe.skipIf(!wasmPkgReady)("mask wasm parity", () => {
   beforeAll(async () => {
-    // Warm WASM init (wasm-pack module side effects).
     await wasmBuildMaskFromUnionInput(
       { polygons: [], disks: [] },
       gameArea,
     );
   }, 60_000);
 
-  it("matches TS topology on square union", async () => {
+  it("matches TS topology on square union (no disks)", async () => {
     const input = { polygons: [square(-0.18)], disks: [] };
     const ts = buildMaskFromUnionInput(input, gameArea);
     const wasm = await wasmBuildMaskFromUnionInput(input, gameArea);
     assertPolygonTopologyParity(wasm, ts, topologyBbox);
   });
 
-  it("matches TS topology on end-game disks", async () => {
+  it("raw wasm matches TS on a single end-game disk", async () => {
     const disks: DiskSpec[] = [
       { center: [51.45, -0.15], radiusMeters: 400 },
     ];
     const ts = buildEndGameMaskFromDisks(gameArea, disks);
-    const wasm = await runEndGameMaskFromDisks(gameArea, disks, "wasm");
+    const wasm = await wasmBuildEndGameMaskFromDisks(gameArea, disks);
     assertPolygonTopologyParity(wasm, ts, topologyBbox);
   });
 
-  it("dual mode returns TS", async () => {
+  it("wasm mode falls back to TS for multi-disk end-game (CircleUnion non-goal)", async () => {
+    const disks = overlappingEndGameDisks();
+    const ts = buildEndGameMaskFromDisks(gameArea, disks);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const result = await runEndGameMaskFromDisks(gameArea, disks, "wasm");
+    expect(result).toEqual(ts);
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("disks present"),
+    );
+    warnSpy.mockRestore();
+  });
+
+  it("dual mode returns TS for multi-disk end-game", async () => {
+    const disks = overlappingEndGameDisks();
+    const ts = buildEndGameMaskFromDisks(gameArea, disks);
+    const dual = await runEndGameMaskFromDisks(gameArea, disks, "dual");
+    expect(dual).toEqual(ts);
+  });
+
+  it("dual mode returns TS for polygon-only union", async () => {
     const input = { polygons: [square(-0.18)], disks: [] };
     const ts = buildMaskFromUnionInput(input, gameArea);
     const dual = await runMaskFromUnionInput(input, gameArea, "dual");
@@ -114,6 +148,39 @@ describe("mask wasm fallback", () => {
     const expected = buildTs(input, gameArea);
     const result = await runWithMock(input, gameArea, "wasm");
     expect(result).toEqual(expected);
+
+    vi.doUnmock("./maskWasm");
+    vi.resetModules();
+  });
+
+  it("wasm mode with any disks uses TS without loading wasm", async () => {
+    vi.resetModules();
+    const wasmBuild = vi.fn(async () => {
+      throw new Error("should not call wasm for disks");
+    });
+    vi.doMock("./maskWasm", () => ({
+      wasmBuildMaskFromUnionInput: wasmBuild,
+      wasmBuildEndGameMaskFromDisks: wasmBuild,
+      resetMaskWasmForTests: vi.fn(),
+    }));
+
+    const { runEndGameMaskFromDisks: runWithMock } = await import(
+      "./maskKernelRunner"
+    );
+    const { buildEndGameMaskFromDisks: buildTs } = await import("./buildMask");
+
+    const disks: DiskSpec[] = [
+      { center: [51.45, -0.15], radiusMeters: 400 },
+    ];
+    const expected = buildTs(gameArea, disks);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const result = await runWithMock(gameArea, disks, "wasm");
+    expect(result).toEqual(expected);
+    expect(wasmBuild).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("disks present"),
+    );
+    warnSpy.mockRestore();
 
     vi.doUnmock("./maskWasm");
     vi.resetModules();

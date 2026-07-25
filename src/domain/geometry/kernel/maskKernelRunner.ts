@@ -3,7 +3,7 @@ import {
   buildMaskFromUnionInput as buildMaskFromUnionInputTs,
 } from "./buildMask";
 import type { MaskKernelMode } from "./maskKernelMode";
-import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
+import { bboxFromGameArea, maskTopologyMatches } from "./parity";
 import type {
   DiskSpec,
   EliminationUnionInput,
@@ -17,13 +17,23 @@ let maskWasmModulePromise: Promise<MaskWasmApi> | null = null;
 
 function loadMaskWasmModule(): Promise<MaskWasmApi> {
   if (!maskWasmModulePromise) {
-    maskWasmModulePromise = import(/* @vite-ignore */ "./maskWasm");
+    // Lazy chunk: default ts mode never executes this; Vite still emits an async
+    // chunk, with optionalMaskWasmPkg stubbing when gitignored pkg/ is missing.
+    maskWasmModulePromise = import("./maskWasm");
   }
   return maskWasmModulePromise;
 }
 
 function assertNever(value: never): never {
   throw new Error(`Unexpected mask kernel mode: ${String(value)}`);
+}
+
+/**
+ * Disk CircleUnion (turf) is intentionally not a WASM parity goal.
+ * Skip wasm/dual compare when any disk is present.
+ */
+function skipWasmForDisks(mode: MaskKernelMode, diskCount: number): boolean {
+  return mode !== "ts" && diskCount > 0;
 }
 
 async function runWithMaskKernel(
@@ -72,6 +82,14 @@ export async function runMaskFromUnionInput(
   gameArea: GameAreaGeometry,
   mode: MaskKernelMode = "ts",
 ): Promise<PolygonFeature | null> {
+  if (skipWasmForDisks(mode, input.disks.length)) {
+    if (mode === "wasm") {
+      console.warn(
+        "[geometry] mask kernel wasm skipped (disks present; CircleUnion non-goal)",
+      );
+    }
+    return buildMaskFromUnionInputTs(input, gameArea);
+  }
   return runWithMaskKernel(
     mode,
     "buildMaskFromUnionInput",
@@ -86,6 +104,14 @@ export async function runEndGameMaskFromDisks(
   disks: readonly DiskSpec[],
   mode: MaskKernelMode = "ts",
 ): Promise<PolygonFeature | null> {
+  if (skipWasmForDisks(mode, disks.length)) {
+    if (mode === "wasm") {
+      console.warn(
+        "[geometry] mask kernel wasm skipped (disks present; CircleUnion non-goal)",
+      );
+    }
+    return buildEndGameMaskFromDisksTs(gameArea, disks);
+  }
   return runWithMaskKernel(
     mode,
     "buildEndGameMaskFromDisks",

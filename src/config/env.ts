@@ -33,7 +33,17 @@ const clientEnvSchema = firebaseEnvSchema
     VITE_SENTRY_ENVIRONMENT: optionalNonEmptyString,
     VITE_SENTRY_RELEASE_DIST: optionalNonEmptyString,
     VITE_POSTHOG_KEY: optionalNonEmptyString,
-    VITE_GEOMETRY_MASK_KERNEL: z.enum(["ts", "dual", "wasm"]).optional(),
+    // Empty/invalid → omit (resolveMaskKernelMode defaults to "ts").
+    VITE_GEOMETRY_MASK_KERNEL: z.preprocess((value) => {
+      if (typeof value !== "string") {
+        return undefined;
+      }
+      const trimmed = value.trim();
+      if (trimmed === "ts" || trimmed === "dual" || trimmed === "wasm") {
+        return trimmed;
+      }
+      return undefined;
+    }, z.enum(["ts", "dual", "wasm"]).optional()),
   })
   .superRefine((env, ctx) => {
     const firebaseFields = [

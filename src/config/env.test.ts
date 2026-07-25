@@ -71,6 +71,22 @@ describe("parseClientEnv", () => {
     expect(env.VITE_GEOMETRY_MASK_KERNEL).toBe("dual");
   });
 
+  it("omits empty or invalid geometry mask kernel mode", () => {
+    expect(
+      parseClientEnv({
+        ...validFirebaseEnv,
+        VITE_GEOMETRY_MASK_KERNEL: "",
+      }).VITE_GEOMETRY_MASK_KERNEL,
+    ).toBeUndefined();
+
+    expect(
+      parseClientEnv({
+        ...validFirebaseEnv,
+        VITE_GEOMETRY_MASK_KERNEL: "nope",
+      }).VITE_GEOMETRY_MASK_KERNEL,
+    ).toBeUndefined();
+  });
+
   it("rejects invalid proxy URLs", () => {
     expect(() =>
       parseClientEnv({
