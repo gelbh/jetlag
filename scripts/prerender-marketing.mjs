@@ -76,7 +76,14 @@ let browser;
 let exitCode = 0;
 try {
   await waitForServer(BASE);
-  browser = await chromium.launch();
+  try {
+    browser = await chromium.launch();
+  } catch (error) {
+    console.error(
+      "Playwright Chromium is required for prerender. Run: npx playwright install chromium",
+    );
+    throw error;
+  }
   const page = await browser.newPage();
 
   for (const urlPath of policy.indexablePaths) {
