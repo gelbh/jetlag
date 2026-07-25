@@ -14,11 +14,11 @@ export function measuringAnswerFromReplyId(
   return null;
 }
 
-export function resolveMeasuringPendingQuestion(
+export async function resolveMeasuringPendingQuestion(
   pending: PendingQuestionRecord,
   answer: MeasuringAnswer,
   gameArea: GameArea,
-): Omit<AnnotationRecord, "id" | "sessionId" | "status"> | null {
+): Promise<Omit<AnnotationRecord, "id" | "sessionId" | "status"> | null> {
   const metadata = pending.placement.metadata;
   const measuringRegionInputJson = metadata.measuringRegionInputJson;
 
@@ -30,7 +30,7 @@ export function resolveMeasuringPendingQuestion(
     MeasuringRegionInput,
     "measuringAnswer"
   >;
-  const regions = buildMeasuringRegions({
+  const regions = await buildMeasuringRegions({
     ...regionInput,
     measuringAnswer: answer,
     gameArea: regionInput.gameArea ?? gameArea,

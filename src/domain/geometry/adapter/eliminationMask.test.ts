@@ -48,8 +48,8 @@ function matchingAnnotation(id: string, west: number): AnnotationRecord {
 }
 
 describe("adapter/eliminationMask", () => {
-  it("maps matching annotations to polygon union input", () => {
-    const input = computeEliminationUnionInput(
+  it("maps matching annotations to polygon union input", async () => {
+    const input = await computeEliminationUnionInput(
       [matchingAnnotation("a", -0.18)],
       gameArea,
       [],
@@ -58,8 +58,8 @@ describe("adapter/eliminationMask", () => {
     expect(input.disks).toHaveLength(0);
   });
 
-  it("snapshots kernel union input ABI for matching annotations", () => {
-    const input = computeEliminationUnionInput(
+  it("snapshots kernel union input ABI for matching annotations", async () => {
+    const input = await computeEliminationUnionInput(
       [matchingAnnotation("a", -0.18)],
       gameArea,
       [],

@@ -57,15 +57,15 @@ const emptySources = {
 };
 
 describe("buildMapDraftOverlays", () => {
-  it("returns no overlays when no tool is active", () => {
-    const result = buildMapDraftOverlays(emptySources);
+  it("returns no overlays when no tool is active", async () => {
+    const result = await buildMapDraftOverlays(emptySources);
 
     expect(result.overlays).toEqual([]);
     expect(result.eliminationFeatures).toEqual([]);
   });
 
-  it("draws a radar draft circle before an answer is chosen", () => {
-    const result = buildMapDraftOverlays({
+  it("draws a radar draft circle before an answer is chosen", async () => {
+    const result = await buildMapDraftOverlays({
       ...emptySources,
       activeTool: "radar",
       radar: {
@@ -80,8 +80,8 @@ describe("buildMapDraftOverlays", () => {
     );
   });
 
-  it("shades tentacle POI answer elimination inline with the draft overlays", () => {
-    const result = buildMapDraftOverlays({
+  it("shades tentacle POI answer elimination inline with the draft overlays", async () => {
+    const result = await buildMapDraftOverlays({
       ...emptySources,
       activeTool: "tentacle",
       tentacle: {
@@ -124,8 +124,8 @@ describe("buildMapDraftOverlays", () => {
     ).toBe(true);
   });
 
-  it("shades only the exterior for a single tentacle POI answer draft", () => {
-    const result = buildMapDraftOverlays({
+  it("shades only the exterior for a single tentacle POI answer draft", async () => {
+    const result = await buildMapDraftOverlays({
       ...emptySources,
       activeTool: "tentacle",
       tentacle: {
@@ -157,7 +157,7 @@ describe("buildMapDraftOverlays", () => {
     ).toBe(false);
   });
 
-  it("4+ POI tentacle draft shades distinct cells per selection", () => {
+  it("4+ POI tentacle draft shades distinct cells per selection", async () => {
     const pois = Array.from({ length: 5 }, (_, index) => ({
       id: `poi-${index}`,
       name: `Museum ${index}`,
@@ -166,8 +166,8 @@ describe("buildMapDraftOverlays", () => {
       category: "museum" as const,
     }));
 
-    const forAnswer = (answeredId: string) =>
-      buildMapDraftOverlays({
+    const forAnswer = async (answeredId: string) => {
+      const result = await buildMapDraftOverlays({
         ...emptySources,
         activeTool: "tentacle",
         tentacle: {
@@ -179,10 +179,12 @@ describe("buildMapDraftOverlays", () => {
           outOfReach: false,
           seekerResolving: false,
         },
-      }).eliminationFeatures;
+      });
+      return result.eliminationFeatures;
+    };
 
-    const eastAnswer = forAnswer("poi-4");
-    const westAnswer = forAnswer("poi-0");
+    const eastAnswer = await forAnswer("poi-4");
+    const westAnswer = await forAnswer("poi-0");
 
     expect(pointInAnyElimination([pois[4]!.lng, pois[4]!.lat], eastAnswer)).toBe(
       false,
@@ -203,6 +205,7 @@ describe("buildMapDraftOverlays", () => {
 describe("useMapDraftOverlays", () => {
   it("includes pin overlays for the active pin draft", async () => {
     const { useMapDraftOverlays } = await import("./useMapDraftOverlays");
+    const { waitFor } = await import("@testing-library/react");
     const sources = {
       ...emptySources,
       activeTool: "pin" as const,
@@ -211,8 +214,10 @@ describe("useMapDraftOverlays", () => {
 
     const { result } = renderHook(() => useMapDraftOverlays(sources));
 
-    expect(result.current.overlays.some((overlay) => overlay.id === "pin-draft")).toBe(
-      true,
-    );
+    await waitFor(() => {
+      expect(
+        result.current.overlays.some((overlay) => overlay.id === "pin-draft"),
+      ).toBe(true);
+    });
   });
 });

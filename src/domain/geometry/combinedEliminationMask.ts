@@ -2,13 +2,15 @@ export {
   ELIMINATION_FILL_COLOR,
   annotationHasEliminationFeature,
   computeEliminationUnionInput,
+  computeEliminationUnionInputTs,
   eliminationDiskForAnnotation,
   eliminationFeatureForAnnotation,
+  eliminationFeatureForAnnotationTs,
 } from "./adapter/eliminationMask";
 
 import {
   annotationsToEndGameDisks,
-  computeEliminationUnionInput,
+  computeEliminationUnionInputTs,
 } from "./adapter/eliminationMask";
 import {
   buildEndGameMaskFromDisks,
@@ -18,6 +20,7 @@ import type { AnnotationRecord, GameArea } from "../map/annotations";
 import type { HidingZoneRecord } from "../session/hidingZone";
 import type { PolygonFeature } from "./kernel/types";
 
+/** Sync TS bootstrap/fallback mask (never WASM half-plane/radar). */
 export function buildCombinedEliminationMask(
   annotations: readonly AnnotationRecord[],
   gameArea: GameArea,
@@ -28,7 +31,7 @@ export function buildCombinedEliminationMask(
     return buildEndGameEliminationMask(gameArea, endGameHidingZones);
   }
   return buildMaskFromUnionInput(
-    computeEliminationUnionInput(annotations, gameArea, draftFeatures),
+    computeEliminationUnionInputTs(annotations, gameArea, draftFeatures),
     gameArea,
   );
 }

@@ -226,17 +226,17 @@ describe("resolveMatchingPendingQuestion", () => {
 });
 
 describe("resolveMeasuringPendingQuestion", () => {
-  it("returns null without region input metadata", () => {
-    expect(
+  it("returns null without region input metadata", async () => {
+    await expect(
       resolveMeasuringPendingQuestion(
         basePending({ toolType: "measuring" }),
         "closer",
         gameArea,
       ),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
-  it("builds measuring elimination from stored region input", () => {
+  it("builds measuring elimination from stored region input", async () => {
     const pending = basePending({
       toolType: "measuring",
       placement: {
@@ -261,7 +261,7 @@ describe("resolveMeasuringPendingQuestion", () => {
       },
     });
 
-    const resolved = resolveMeasuringPendingQuestion(
+    const resolved = await resolveMeasuringPendingQuestion(
       pending,
       "further",
       gameArea,

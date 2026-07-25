@@ -2,7 +2,8 @@ import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import area from "@turf/area";
 import difference from "@turf/difference";
 import { lineString } from "@turf/helpers";
-import { runGeodesicLineBuffer } from "../../domain/geometry/geodesicLineBuffer";
+import { dispatchGeodesicLineBuffer } from "../../domain/geometry/geodesicLineBuffer";
+import { resolveClientMaskKernelMode } from "../../domain/geometry/kernel/resolveClientMaskKernelMode";
 import { unionPolygonFeatures } from "../../domain/geometry/unionPolygonFeatures";
 import type { GameArea } from "../../domain/map/annotations";
 import {
@@ -112,10 +113,11 @@ function unionObstacles(
   return unionPolygonFeatures(obstacles);
 }
 
-export function obstacleFeaturesFromElements(
+export async function obstacleFeaturesFromElements(
   elements: OverpassElement[],
-): Feature<Polygon | MultiPolygon>[] {
+): Promise<Feature<Polygon | MultiPolygon>[]> {
   const obstacles: Feature<Polygon | MultiPolygon>[] = [];
+  const mode = resolveClientMaskKernelMode();
 
   for (const element of elements) {
     if (element.type !== "way" || !element.geometry) {
@@ -137,7 +139,12 @@ export function obstacleFeaturesFromElements(
         continue;
       }
 
-      const buffered = runGeodesicLineBuffer(line, WATERWAY_BUFFER_METERS);
+      const buffered = await dispatchGeodesicLineBuffer(
+        line,
+        WATERWAY_BUFFER_METERS,
+        undefined,
+        mode,
+      );
 
       if (buffered) {
         obstacles.push(buffered);
@@ -215,12 +222,12 @@ function labelForLandmass(
   return `Landmass ${fallbackIndex}`;
 }
 
-export function computeLandmassFeatures(
+export async function computeLandmassFeatures(
   gameArea: GameArea,
   elements: OverpassElement[],
-): LandmassFeature[] {
+): Promise<LandmassFeature[]> {
   const gameFeature = gameAreaToPolygon(gameArea);
-  const obstacles = obstacleFeaturesFromElements(elements);
+  const obstacles = await obstacleFeaturesFromElements(elements);
   const islandLabels = namedIslandLabels(elements);
 
   let remaining: Feature<Polygon | MultiPolygon> | null = gameFeature;

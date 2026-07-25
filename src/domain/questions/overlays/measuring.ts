@@ -4,7 +4,7 @@ import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import type { MapStyle } from "../../map/mapBasemaps";
 import {
-  buildMeasuringBoundaryPreview,
+  buildMeasuringBoundaryPreviewTs,
   type MeasuringRegionInput,
 } from "../../geometry/measuringRegions";
 import type { PendingQuestionRecord } from "../../session/sessionChat";
@@ -39,7 +39,7 @@ export function buildMeasuringOverlays(
     pushBoundaryOverlay(
       overlays,
       `${prefix}-boundary`,
-      buildMeasuringBoundaryPreview({
+      buildMeasuringBoundaryPreviewTs({
         ...regionInput,
         gameArea: regionInput.gameArea ?? gameArea,
       }),

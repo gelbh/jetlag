@@ -57,8 +57,8 @@ const emptySources: MapDraftOverlaySources = {
   zone: { vertices: [] },
 };
 
-function buildContext(sources: MapDraftOverlaySources) {
-  const { overlays, eliminationFeatures } = buildMapDraftOverlays(sources);
+async function buildContext(sources: MapDraftOverlaySources) {
+  const { overlays, eliminationFeatures } = await buildMapDraftOverlays(sources);
   const draft = placementCameraDraftFromOverlaySources(sources);
   const phase = resolvePlacementPhase(sources.activeTool, draft);
 
@@ -93,13 +93,13 @@ function boundsSpanMeters(target: CameraTarget | null): number {
 }
 
 describe("computePlacementCameraTarget", () => {
-  it("frames pin placement with max zoom and local span", () => {
+  it("frames pin placement with max zoom and local span", async () => {
     const sources = {
       ...emptySources,
       activeTool: "pin" as const,
       pin: { point: dublinCenter },
     };
-    const target = computePlacementCameraTarget(buildContext(sources));
+    const target = computePlacementCameraTarget(await buildContext(sources));
 
     expect(target).not.toBeNull();
     expect(target?.maxZoom).toBe(MAX_ZOOM_PIN);
@@ -107,7 +107,7 @@ describe("computePlacementCameraTarget", () => {
     expect(boundsSpanMeters(target)).toBeLessThan(800);
   });
 
-  it("frames radar draft circle with proportional padding", () => {
+  it("frames radar draft circle with proportional padding", async () => {
     const sources = {
       ...emptySources,
       activeTool: "radar" as const,
@@ -117,7 +117,7 @@ describe("computePlacementCameraTarget", () => {
         answer: null,
       },
     };
-    const target = computePlacementCameraTarget(buildContext(sources));
+    const target = computePlacementCameraTarget(await buildContext(sources));
 
     expect(target).not.toBeNull();
     const span = boundsSpanMeters(target);
@@ -125,7 +125,7 @@ describe("computePlacementCameraTarget", () => {
     expect(span).toBeLessThan(2_500);
   });
 
-  it("frames tentacle POI pick between center and selected POI", () => {
+  it("frames tentacle POI pick between center and selected POI", async () => {
     const poi: [number, number] = [53.351, -6.255];
     const sources = {
       ...emptySources,
@@ -148,7 +148,7 @@ describe("computePlacementCameraTarget", () => {
         seekerResolving: false,
       },
     };
-    const target = computePlacementCameraTarget(buildContext(sources));
+    const target = computePlacementCameraTarget(await buildContext(sources));
 
     expect(target).not.toBeNull();
     const bounds = toLeafletBounds(target!.bounds);
@@ -158,11 +158,11 @@ describe("computePlacementCameraTarget", () => {
     expect(boundsSpanMeters(target)).toBeGreaterThan(200);
   });
 
-  it("returns null when tool is idle", () => {
-    expect(computePlacementCameraTarget(buildContext(emptySources))).toBeNull();
+  it("returns null when tool is idle", async () => {
+    expect(computePlacementCameraTarget(await buildContext(emptySources))).toBeNull();
   });
 
-  it("frames thermometer axis between both pins", () => {
+  it("frames thermometer axis between both pins", async () => {
     const sources = {
       ...emptySources,
       activeTool: "thermometer" as const,
@@ -175,7 +175,7 @@ describe("computePlacementCameraTarget", () => {
         walkActive: false,
       },
     };
-    const target = computePlacementCameraTarget(buildContext(sources));
+    const target = computePlacementCameraTarget(await buildContext(sources));
 
     expect(target).not.toBeNull();
     expect(boundsSpanMeters(target)).toBeGreaterThan(500);

@@ -4,16 +4,34 @@ import { dispatchKernel, dispatchKernelSync } from "./dispatchKernel";
 describe("dispatchKernel", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.resetModules();
   });
 
   it("returns TS when entrypoint is not ready even in wasm mode", async () => {
+    vi.resetModules();
+    vi.doMock("./kernelWasmReady", () => ({
+      KERNEL_WASM_READY: {
+        maskFromUnionInput: true,
+        endGameMaskFromDisks: true,
+        halfPlane: true,
+        geodesicLineBuffer: false,
+      },
+      shouldUseWasm: (mode: "ts" | "dual" | "wasm", entrypoint: string) => {
+        if (entrypoint === "geodesicLineBuffer") {
+          return false;
+        }
+        return mode === "wasm" || mode === "dual";
+      },
+    }));
+
+    const { dispatchKernel: dispatch } = await import("./dispatchKernel");
     const runTs = vi.fn(() => "ts");
     const runWasm = vi.fn(async () => "wasm");
 
-    const result = await dispatchKernel({
+    const result = await dispatch({
       mode: "wasm",
-      entrypoint: "halfPlane",
-      label: "halfPlane",
+      entrypoint: "geodesicLineBuffer",
+      label: "geodesic",
       runTs,
       runWasm,
     });
@@ -29,8 +47,8 @@ describe("dispatchKernel", () => {
 
     const result = await dispatchKernel({
       mode: "wasm",
-      entrypoint: "maskFromUnionInput",
-      label: "mask",
+      entrypoint: "halfPlane",
+      label: "halfPlane",
       runTs,
       runWasm,
     });
@@ -82,10 +100,27 @@ describe("dispatchKernel", () => {
   });
 
   it("dual skips WASM when entrypoint not ready", async () => {
+    vi.resetModules();
+    vi.doMock("./kernelWasmReady", () => ({
+      KERNEL_WASM_READY: {
+        maskFromUnionInput: true,
+        endGameMaskFromDisks: true,
+        halfPlane: true,
+        geodesicLineBuffer: false,
+      },
+      shouldUseWasm: (mode: "ts" | "dual" | "wasm", entrypoint: string) => {
+        if (entrypoint === "geodesicLineBuffer") {
+          return false;
+        }
+        return mode === "wasm" || mode === "dual";
+      },
+    }));
+
+    const { dispatchKernel: dispatch } = await import("./dispatchKernel");
     const runTs = vi.fn(() => "ts");
     const runWasm = vi.fn(async () => "wasm");
 
-    const result = await dispatchKernel({
+    const result = await dispatch({
       mode: "dual",
       entrypoint: "geodesicLineBuffer",
       label: "geodesic",
@@ -100,11 +135,11 @@ describe("dispatchKernel", () => {
 });
 
 describe("dispatchKernelSync", () => {
-  it("returns TS when entrypoint is not ready", () => {
+  it("returns TS when mode is ts even if entrypoint is ready", () => {
     const runTs = vi.fn(() => "ts");
     expect(
       dispatchKernelSync({
-        mode: "wasm",
+        mode: "ts",
         entrypoint: "halfPlane",
         runTs,
       }),
@@ -116,9 +151,19 @@ describe("dispatchKernelSync", () => {
     expect(() =>
       dispatchKernelSync({
         mode: "wasm",
-        entrypoint: "maskFromUnionInput",
+        entrypoint: "halfPlane",
         runTs: () => "ts",
       }),
     ).toThrow(/sync kernel path cannot use wasm/);
+  });
+
+  it("stays on TS sync path while geodesic is not ready", () => {
+    expect(
+      dispatchKernelSync({
+        mode: "wasm",
+        entrypoint: "geodesicLineBuffer",
+        runTs: () => "ts",
+      }),
+    ).toBe("ts");
   });
 });

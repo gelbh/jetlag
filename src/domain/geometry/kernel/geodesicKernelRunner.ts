@@ -1,5 +1,5 @@
 import type { Feature, LineString } from "geojson";
-import { dispatchKernel, dispatchKernelSync } from "./dispatchKernel";
+import { dispatchKernel } from "./dispatchKernel";
 import { geodesicLineBuffer } from "./geodesicLineBuffer";
 import type { MaskKernelMode } from "./maskKernelMode";
 import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
@@ -30,33 +30,27 @@ function topologyBboxFromResults(
   return bboxFromGameArea(feature.geometry);
 }
 
-/**
- * Sync production path while geodesicLineBuffer not ready (always TS).
- * When ready, use {@link dispatchGeodesicLineBuffer}.
- */
-export function runGeodesicLineBuffer(
+/** Production geodesic buffer entrypoint (mode + KERNEL_WASM_READY). */
+export async function runGeodesicLineBuffer(
   segment: Feature<LineString>,
   distanceMeters: number,
   sampleSpacingMeters?: number,
   mode: MaskKernelMode = "wasm",
-): PolygonFeature | null {
-  return dispatchKernelSync({
+): Promise<PolygonFeature | null> {
+  return dispatchGeodesicLineBuffer(
+    segment,
+    distanceMeters,
+    sampleSpacingMeters,
     mode,
-    entrypoint: "geodesicLineBuffer",
-    runTs: () =>
-      geodesicLineBuffer(segment, distanceMeters, sampleSpacingMeters),
-  });
+  );
 }
 
-/**
- * Mode + KERNEL_WASM_READY dispatch for geodesic line buffer.
- * With geodesicLineBuffer not ready, always returns TS even when mode is wasm.
- */
+/** Mode + KERNEL_WASM_READY dispatch for geodesic line buffer. */
 export async function dispatchGeodesicLineBuffer(
   segment: Feature<LineString>,
   distanceMeters: number,
   sampleSpacingMeters?: number,
-  mode: MaskKernelMode = "ts",
+  mode: MaskKernelMode = "wasm",
 ): Promise<PolygonFeature | null> {
   return dispatchKernel({
     mode,

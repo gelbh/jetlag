@@ -3,7 +3,7 @@ import bboxPolygon from "@turf/bbox-polygon";
 import type { Feature, LineString } from "geojson";
 import {
   buildCoastlineEliminationRegion,
-  buildCoastlineNearRegion,
+  buildCoastlineNearRegionTs,
   buildLocationEliminationRegion,
   buildLocationNearRegion,
   buildHalfPlanePolygon,
@@ -171,7 +171,7 @@ describe("geometry helpers", () => {
     expect(nearest?.distanceMeters).toBeGreaterThan(0);
   });
 
-  it("builds coastline distance regions from shoreline segments", () => {
+  it("builds coastline distance regions from shoreline segments", async () => {
     const coast: Feature<LineString> = {
       type: "Feature",
       properties: {},
@@ -183,12 +183,13 @@ describe("geometry helpers", () => {
         ],
       },
     };
-    const nearCoast = buildCoastlineNearRegion([coast], 5_000, sampleGameArea);
-    const eliminated = buildCoastlineEliminationRegion(
+    const nearCoast = buildCoastlineNearRegionTs([coast], 5_000, sampleGameArea);
+    const eliminated = await buildCoastlineEliminationRegion(
       [coast],
       5_000,
       sampleGameArea,
       "closer",
+      nearCoast,
     );
 
     expect(nearCoast?.geometry.type).toBe("Polygon");
@@ -196,7 +197,7 @@ describe("geometry helpers", () => {
     expect(isPointInGameArea([51.45, -0.15], sampleGameArea)).toBe(true);
   });
 
-  it("reuses a precomputed near region when building elimination regions", () => {
+  it("reuses a precomputed near region when building elimination regions", async () => {
     const coast: Feature<LineString> = {
       type: "Feature",
       properties: {},
@@ -208,8 +209,8 @@ describe("geometry helpers", () => {
         ],
       },
     };
-    const nearCoast = buildCoastlineNearRegion([coast], 5_000, sampleGameArea);
-    const eliminated = buildCoastlineEliminationRegion(
+    const nearCoast = buildCoastlineNearRegionTs([coast], 5_000, sampleGameArea);
+    const eliminated = await buildCoastlineEliminationRegion(
       [coast],
       5_000,
       sampleGameArea,
@@ -235,8 +236,8 @@ describe("geometry helpers", () => {
       },
     };
 
-    const first = buildCoastlineNearRegion([coast], 5_000, sampleGameArea);
-    const second = buildCoastlineNearRegion([coast], 5_000, sampleGameArea);
+    const first = buildCoastlineNearRegionTs([coast], 5_000, sampleGameArea);
+    const second = buildCoastlineNearRegionTs([coast], 5_000, sampleGameArea);
 
     expect(first).toBe(second);
   });

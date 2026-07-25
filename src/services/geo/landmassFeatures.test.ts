@@ -20,8 +20,8 @@ const sampleGameArea: GameArea = {
 };
 
 describe("landmass features", () => {
-  it("buffers waterways and treats water polygons as obstacles", () => {
-    const obstacles = obstacleFeaturesFromElements([
+  it("buffers waterways and treats water polygons as obstacles", async () => {
+    const obstacles = await obstacleFeaturesFromElements([
       {
         type: "way",
         id: 1,
@@ -50,16 +50,16 @@ describe("landmass features", () => {
     expect(obstacles[1]?.geometry.type).toBe("Polygon");
   });
 
-  it("returns a single mainland landmass when no obstacles intersect the play area", () => {
-    const landmasses = computeLandmassFeatures(sampleGameArea, []);
+  it("returns a single mainland landmass when no obstacles intersect the play area", async () => {
+    const landmasses = await computeLandmassFeatures(sampleGameArea, []);
 
     expect(landmasses).toHaveLength(1);
     expect(landmasses[0]?.name).toBe("Mainland");
     expect(landmasses[0]?.id).toBe("landmass:1");
   });
 
-  it("splits the play area into separate landmasses across a waterway", () => {
-    const landmasses = computeLandmassFeatures(sampleGameArea, [
+  it("splits the play area into separate landmasses across a waterway", async () => {
+    const landmasses = await computeLandmassFeatures(sampleGameArea, [
       {
         type: "way",
         id: 3,
@@ -77,8 +77,8 @@ describe("landmass features", () => {
     );
   });
 
-  it("classifies anchors by containing landmass polygon", () => {
-    const landmasses = computeLandmassFeatures(sampleGameArea, [
+  it("classifies anchors by containing landmass polygon", async () => {
+    const landmasses = await computeLandmassFeatures(sampleGameArea, [
       {
         type: "way",
         id: 3,

@@ -7,9 +7,12 @@ import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import { thermometerShadedSide } from "../../questions/thermometerQuestions";
 import type { HidingZoneRecord } from "../../session/hidingZone";
 import {
-  runHalfPlane,
-  runRadarShadedRegion,
+  buildHalfPlanePolygon,
+  buildRadarShadedRegion,
+  dispatchHalfPlane,
+  dispatchRadarShadedRegion,
 } from "../core/radarHalfPlane";
+import { resolveClientMaskKernelMode } from "../kernel/resolveClientMaskKernelMode";
 import type {
   DiskSpec,
   EliminationUnionInput,
@@ -64,9 +67,8 @@ export function eliminationDiskForAnnotation(
   return null;
 }
 
-export function eliminationFeatureForAnnotation(
+function eliminationFeatureFromNonKernel(
   annotation: AnnotationRecord,
-  gameArea: GameArea,
 ): PolygonFeature | null {
   if (!isActive(annotation)) {
     return null;
@@ -97,26 +99,6 @@ export function eliminationFeatureForAnnotation(
     return null;
   }
 
-  if (
-    annotation.type === "thermometer" &&
-    annotation.geometry.geometry.type === "LineString" &&
-    annotation.metadata.thermometerAnswer
-  ) {
-    const coordinates = annotation.geometry.geometry.coordinates;
-    const thermoA: LatLngTuple = [coordinates[0][1], coordinates[0][0]];
-    const thermoB: LatLngTuple = [
-      coordinates[coordinates.length - 1][1],
-      coordinates[coordinates.length - 1][0],
-    ];
-
-    return runHalfPlane(
-      thermoA,
-      thermoB,
-      gameArea,
-      thermometerShadedSide(annotation.metadata.thermometerAnswer),
-    );
-  }
-
   if (annotation.type === "tentacle") {
     if (annotation.metadata.tentacleEliminationJson) {
       try {
@@ -129,6 +111,46 @@ export function eliminationFeatureForAnnotation(
     }
 
     return null;
+  }
+
+  if (
+    annotation.type === "zone" &&
+    (annotation.geometry.geometry.type === "Polygon" ||
+      annotation.geometry.geometry.type === "MultiPolygon")
+  ) {
+    return annotation.geometry as PolygonFeature;
+  }
+
+  return null;
+}
+
+/** Sync TS-only half-plane/radar for bootstrap and presence checks. */
+function eliminationFeatureKernelTs(
+  annotation: AnnotationRecord,
+  gameArea: GameArea,
+): PolygonFeature | null {
+  if (!isActive(annotation)) {
+    return null;
+  }
+
+  if (
+    annotation.type === "thermometer" &&
+    annotation.geometry.geometry.type === "LineString" &&
+    annotation.metadata.thermometerAnswer
+  ) {
+    const coordinates = annotation.geometry.geometry.coordinates;
+    const thermoA: LatLngTuple = [coordinates[0][1], coordinates[0][0]];
+    const thermoB: LatLngTuple = [
+      coordinates[coordinates.length - 1][1],
+      coordinates[coordinates.length - 1][0],
+    ];
+
+    return buildHalfPlanePolygon(
+      thermoA,
+      thermoB,
+      gameArea,
+      thermometerShadedSide(annotation.metadata.thermometerAnswer),
+    );
   }
 
   if (annotation.type === "radar") {
@@ -145,26 +167,86 @@ export function eliminationFeatureForAnnotation(
       return null;
     }
 
-    return runRadarShadedRegion(
-      center,
-      radiusMeters,
-      gameArea,
-      shadedInside,
-    );
-  }
-
-  if (
-    annotation.type === "zone" &&
-    (annotation.geometry.geometry.type === "Polygon" ||
-      annotation.geometry.geometry.type === "MultiPolygon")
-  ) {
-    return annotation.geometry as PolygonFeature;
+    return buildRadarShadedRegion(center, radiusMeters, gameArea, shadedInside);
   }
 
   return null;
 }
 
-export function computeEliminationUnionInput(
+export function eliminationFeatureForAnnotationTs(
+  annotation: AnnotationRecord,
+  gameArea: GameArea,
+): PolygonFeature | null {
+  return (
+    eliminationFeatureFromNonKernel(annotation) ??
+    eliminationFeatureKernelTs(annotation, gameArea)
+  );
+}
+
+export async function eliminationFeatureForAnnotation(
+  annotation: AnnotationRecord,
+  gameArea: GameArea,
+): Promise<PolygonFeature | null> {
+  const nonKernel = eliminationFeatureFromNonKernel(annotation);
+  if (nonKernel) {
+    return nonKernel;
+  }
+
+  if (!isActive(annotation)) {
+    return null;
+  }
+
+  const mode = resolveClientMaskKernelMode();
+
+  if (
+    annotation.type === "thermometer" &&
+    annotation.geometry.geometry.type === "LineString" &&
+    annotation.metadata.thermometerAnswer
+  ) {
+    const coordinates = annotation.geometry.geometry.coordinates;
+    const thermoA: LatLngTuple = [coordinates[0][1], coordinates[0][0]];
+    const thermoB: LatLngTuple = [
+      coordinates[coordinates.length - 1][1],
+      coordinates[coordinates.length - 1][0],
+    ];
+
+    return dispatchHalfPlane(
+      thermoA,
+      thermoB,
+      gameArea,
+      thermometerShadedSide(annotation.metadata.thermometerAnswer),
+      "midpoint",
+      mode,
+    );
+  }
+
+  if (annotation.type === "radar") {
+    const geometry = annotation.geometry.geometry;
+    if (geometry.type !== "Point") {
+      return null;
+    }
+
+    const center: LatLngTuple = [geometry.coordinates[1], geometry.coordinates[0]];
+    const radiusMeters = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
+    const shadedInside = annotation.metadata.inside === true;
+
+    if (shadedInside) {
+      return null;
+    }
+
+    return dispatchRadarShadedRegion(
+      center,
+      radiusMeters,
+      gameArea,
+      shadedInside,
+      mode,
+    );
+  }
+
+  return null;
+}
+
+export function computeEliminationUnionInputTs(
   annotations: readonly AnnotationRecord[],
   gameArea: GameArea,
   draftFeatures: readonly PolygonFeature[] = [],
@@ -179,7 +261,31 @@ export function computeEliminationUnionInput(
       continue;
     }
 
-    const feature = eliminationFeatureForAnnotation(annotation, gameArea);
+    const feature = eliminationFeatureForAnnotationTs(annotation, gameArea);
+    if (feature) {
+      polygons.push(feature);
+    }
+  }
+
+  return { polygons, disks };
+}
+
+export async function computeEliminationUnionInput(
+  annotations: readonly AnnotationRecord[],
+  gameArea: GameArea,
+  draftFeatures: readonly PolygonFeature[] = [],
+): Promise<EliminationUnionInput> {
+  const polygons: PolygonFeature[] = [...draftFeatures];
+  const disks: DiskSpec[] = [];
+
+  for (const annotation of annotations) {
+    const disk = eliminationDiskForAnnotation(annotation);
+    if (disk) {
+      disks.push(disk);
+      continue;
+    }
+
+    const feature = await eliminationFeatureForAnnotation(annotation, gameArea);
     if (feature) {
       polygons.push(feature);
     }
@@ -207,7 +313,7 @@ export function annotationHasEliminationFeature(
   }
 
   return (
-    eliminationFeatureForAnnotation(annotation, gameArea) !== null ||
+    eliminationFeatureForAnnotationTs(annotation, gameArea) !== null ||
     eliminationDiskForAnnotation(annotation) !== null
   );
 }
