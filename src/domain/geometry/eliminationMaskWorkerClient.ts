@@ -3,10 +3,19 @@ import type { Remote } from "comlink";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../map/annotations";
 import type { HidingZoneRecord } from "../session/hidingZone";
-import type { buildCombinedEliminationMask } from "./combinedEliminationMask";
+import {
+  annotationsToEndGameDisks,
+  computeEliminationUnionInput,
+} from "./adapter/eliminationMask";
+import type {
+  buildEndGameMaskFromDisks,
+  buildMaskFromUnionInput,
+} from "./kernel/buildMask";
+import type { PolygonFeature } from "./kernel/types";
 
 type EliminationMaskWorkerApi = {
-  buildCombinedEliminationMask: typeof buildCombinedEliminationMask;
+  buildMaskFromUnionInput: typeof buildMaskFromUnionInput;
+  buildEndGameMaskFromDisks: typeof buildEndGameMaskFromDisks;
 };
 
 const WORKER_FAILURE_MESSAGE = "Elimination mask worker failed";
@@ -52,7 +61,7 @@ export async function requestCombinedEliminationMask(
   gameArea: GameArea,
   draftFeatures: readonly Feature<GeoPolygon | MultiPolygon>[],
   endGameHidingZones: readonly HidingZoneRecord[],
-): Promise<ReturnType<typeof buildCombinedEliminationMask>> {
+): Promise<PolygonFeature | null> {
   const api = getWorkerApi();
   let releasePending: (() => void) | undefined;
 
@@ -67,13 +76,23 @@ export async function requestCombinedEliminationMask(
   });
 
   try {
+    if (endGameHidingZones.length > 0) {
+      return await Promise.race([
+        api.buildEndGameMaskFromDisks(
+          gameArea,
+          annotationsToEndGameDisks(endGameHidingZones),
+        ),
+        pendingFailure,
+      ]);
+    }
+
+    const input = computeEliminationUnionInput(
+      annotations,
+      gameArea,
+      draftFeatures,
+    );
     return await Promise.race([
-      api.buildCombinedEliminationMask(
-        annotations,
-        gameArea,
-        draftFeatures,
-        endGameHidingZones,
-      ),
+      api.buildMaskFromUnionInput(input, gameArea),
       pendingFailure,
     ]);
   } catch (error) {
