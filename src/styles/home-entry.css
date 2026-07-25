@@ -738,7 +738,7 @@
   }
 
   .wizard-swipe-surface {
-    touch-action: pan-y pinch-zoom;
+    touch-action: pan-y;
   }
 
   .wizard-swipe-surface-embedded {
