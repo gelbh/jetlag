@@ -21,7 +21,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-rust-wasm
-      - run: cargo test --locked -p jetlag-geometry-mask
+      - run: cargo test --locked -p jetlag-geometry-kernel
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
@@ -40,7 +40,7 @@ jobs:
             geometry:
               - 'src/domain/geometry/**'
               - 'src/hooks/map/useCombinedEliminationMask.ts'
-              - 'crates/jetlag-geometry-mask/**'
+              - 'crates/jetlag-geometry-kernel/**'
               - 'Cargo.toml'
               - 'Cargo.lock'
               - 'package.json'

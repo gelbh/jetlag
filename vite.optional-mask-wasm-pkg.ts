@@ -6,15 +6,15 @@ import type { Plugin } from "vite";
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)));
 const maskWasmPkgJs = resolve(
   repoRoot,
-  "crates/jetlag-geometry-mask/pkg/jetlag_geometry_mask.js",
+  "crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js",
 );
-const maskWasmPkgStubId = "\0jetlag-geometry-mask-wasm-stub";
+const maskWasmPkgStubId = "\0jetlag-geometry-kernel-wasm-stub";
 
 function isMaskWasmPkgSpecifier(
   id: string,
   importer: string | undefined,
 ): boolean {
-  if (id === maskWasmPkgStubId || id.includes("jetlag_geometry_mask.js")) {
+  if (id === maskWasmPkgStubId || id.includes("jetlag_geometry_kernel.js")) {
     return true;
   }
   if (importer && id.startsWith(".")) {
@@ -45,10 +45,10 @@ export function optionalMaskWasmPkg(): Plugin {
       }
       return `
 export function build_mask_from_union_input_json() {
-  throw new Error("jetlag-geometry-mask pkg missing; run npm run wasm:build");
+  throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
 }
 export function build_end_game_mask_from_disks_json() {
-  throw new Error("jetlag-geometry-mask pkg missing; run npm run wasm:build");
+  throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
 }
 export default {};
 `;

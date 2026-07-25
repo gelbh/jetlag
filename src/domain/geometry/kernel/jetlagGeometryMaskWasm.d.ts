@@ -1,4 +1,4 @@
-declare module "*/jetlag_geometry_mask.js" {
+declare module "*/jetlag_geometry_kernel.js" {
   export function build_mask_from_union_input_json(
     inputJson: string,
     gameAreaJson: string,

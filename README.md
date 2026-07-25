@@ -52,7 +52,7 @@ npm run dev
 
 ### Geometry mask WASM (Rust)
 
-`npm run build` always runs `npm run wasm:build` first (wasm-pack → `crates/jetlag-geometry-mask/pkg/`, gitignored). Local `vite` / opt-out `ts` mode can stub a missing `pkg/` via Vite’s optional plugin, but production and worker builds still need a real package.
+`npm run build` always runs `npm run wasm:build` first (wasm-pack → `crates/jetlag-geometry-kernel/pkg/`, gitignored). Local `vite` / opt-out `ts` mode can stub a missing `pkg/` via Vite’s optional plugin, but production and worker builds still need a real package.
 
 **Toolchain (once per machine):** Rust stable with `wasm32-unknown-unknown`, plus [wasm-pack](https://rustwasm.github.io/wasm-pack/) (CI pins **0.13.1**).
 

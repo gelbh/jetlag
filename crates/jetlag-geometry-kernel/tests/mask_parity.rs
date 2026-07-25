@@ -1,8 +1,8 @@
-use jetlag_geometry_mask::mask::{
+use jetlag_geometry_kernel::mask::{
     build_end_game_mask_from_disks, build_mask_from_union_input, feature_contains_lng_lat,
     DiskSpec, GameArea, UnionInput,
 };
-use jetlag_geometry_mask::types::PolygonFeature;
+use jetlag_geometry_kernel::types::PolygonFeature;
 use serde_json::json;
 
 fn london_game_area() -> GameArea {

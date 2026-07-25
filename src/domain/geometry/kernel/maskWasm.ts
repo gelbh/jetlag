@@ -51,7 +51,7 @@ async function loadMaskWasm(): Promise<MaskWasmModule> {
   if (!wasmModulePromise) {
     // Relative path: pkg/ is gitignored; avoid file: dep so npm ci works before wasm:build.
     wasmModulePromise = import(
-      "../../../../crates/jetlag-geometry-mask/pkg/jetlag_geometry_mask.js"
+      "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
     ) as Promise<MaskWasmModule>;
   }
   return wasmModulePromise;
