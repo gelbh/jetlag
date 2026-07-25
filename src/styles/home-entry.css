@@ -89,9 +89,13 @@
 
   .home-card-btn-hint {
     font-size: 0.6875rem;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.06em;
-    opacity: 0.75;
+    opacity: 1;
+  }
+
+  .home-card-btn-primary .home-card-btn-hint {
+    color: var(--color-action-ink);
   }
 
   .home-card-btn-text {
