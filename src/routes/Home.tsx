@@ -15,6 +15,7 @@ import { InlineError } from "../components/ui/InlineError";
 import { VersionChangelogSheet } from "../components/ui/VersionChangelogSheet";
 import { MotionPressable } from "../components/motion/MotionPressable";
 import { PlayHubSheet } from "../components/home/PlayHubSheet";
+import { ReportProblemSheet } from "../components/incident/ReportProblemSheet";
 import { APP_VERSION } from "../domain/device/changelog";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { playerRoleLabel, resolvePlayerRole } from "../domain/session/playerRole";
@@ -52,6 +53,7 @@ export function Home() {
   const [continuing, setContinuing] = useState(false);
   const [changelogOpen, setChangelogOpen] = useState(false);
   const [playHubOpen, setPlayHubOpen] = useState(false);
+  const [reportProblemOpen, setReportProblemOpen] = useState(false);
   const { entitlements: premiumEntitlements } = usePremiumEntitlements();
   const { user: permanentUser, isPermanent } = usePermanentAuthUser();
   const showAdminEntry = isAdminUser(permanentUser);
@@ -357,6 +359,17 @@ export function Home() {
               >
                 Feedback
               </AppLink>
+              <span className="text-ink-dim" aria-hidden="true">
+                ·
+              </span>
+              <button
+                type="button"
+                onClick={() => setReportProblemOpen(true)}
+                aria-label="Report a problem"
+                className="home-feedback-link !mt-0 !inline !px-1"
+              >
+                Report a problem
+              </button>
             </nav>
             {continueError ? <InlineError>{continueError}</InlineError> : null}
             </div>
@@ -371,6 +384,10 @@ export function Home() {
       <PlayHubSheet
         open={playHubOpen}
         onClose={() => setPlayHubOpen(false)}
+      />
+      <ReportProblemSheet
+        open={reportProblemOpen}
+        onClose={() => setReportProblemOpen(false)}
       />
     </>
   );
