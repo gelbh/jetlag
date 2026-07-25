@@ -2,6 +2,7 @@ import {
   buildEndGameMaskFromDisks as buildEndGameMaskFromDisksTs,
   buildMaskFromUnionInput as buildMaskFromUnionInputTs,
 } from "./buildMask";
+import { dispatchKernel } from "./dispatchKernel";
 import type { MaskKernelMode } from "./maskKernelMode";
 import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
 import type {
@@ -18,7 +19,7 @@ let maskWasmModulePromise: Promise<MaskWasmApi> | null = null;
 function loadMaskWasmModule(): Promise<MaskWasmApi> {
   if (!maskWasmModulePromise) {
     // Lazy chunk: ts mode never executes this; Vite still emits an async chunk,
-    // with optionalMaskWasmPkg stubbing when gitignored pkg/ is missing.
+    // with optionalKernelWasmPkg stubbing when gitignored pkg/ is missing.
     maskWasmModulePromise = import("./maskWasm").catch((error) => {
       maskWasmModulePromise = null;
       throw error;
@@ -27,57 +28,12 @@ function loadMaskWasmModule(): Promise<MaskWasmApi> {
   return maskWasmModulePromise;
 }
 
-function assertNever(value: never): never {
-  throw new Error(`Unexpected mask kernel mode: ${String(value)}`);
-}
-
 /**
  * Disk CircleUnion (turf) is intentionally not a WASM parity goal.
  * Skip wasm/dual compare when any disk is present.
  */
 function skipWasmForDisks(mode: MaskKernelMode, diskCount: number): boolean {
   return mode !== "ts" && diskCount > 0;
-}
-
-async function runWithMaskKernel(
-  mode: MaskKernelMode,
-  label: string,
-  gameArea: GameAreaGeometry,
-  runTs: () => PolygonFeature | null,
-  runWasm: (wasm: MaskWasmApi) => Promise<PolygonFeature | null>,
-): Promise<PolygonFeature | null> {
-  switch (mode) {
-    case "ts":
-      return runTs();
-    case "wasm":
-      try {
-        const wasm = await loadMaskWasmModule();
-        return await runWasm(wasm);
-      } catch (error) {
-        console.warn(`[geometry] mask kernel wasm failed (${label})`, error);
-        return runTs();
-      }
-    case "dual": {
-      const tsResult = runTs();
-      try {
-        const wasm = await loadMaskWasmModule();
-        const wasmResult = await runWasm(wasm);
-        if (
-          !maskTopologyMatches(wasmResult, tsResult, bboxFromGameArea(gameArea))
-        ) {
-          console.warn(`[geometry] mask kernel dual mismatch (${label})`);
-        }
-      } catch (error) {
-        console.warn(
-          `[geometry] mask kernel dual wasm failed (${label})`,
-          error,
-        );
-      }
-      return tsResult;
-    }
-    default:
-      return assertNever(mode);
-  }
 }
 
 export async function runMaskFromUnionInput(
@@ -93,13 +49,18 @@ export async function runMaskFromUnionInput(
     }
     return buildMaskFromUnionInputTs(input, gameArea);
   }
-  return runWithMaskKernel(
+  return dispatchKernel({
     mode,
-    "buildMaskFromUnionInput",
-    gameArea,
-    () => buildMaskFromUnionInputTs(input, gameArea),
-    (wasm) => wasm.wasmBuildMaskFromUnionInput(input, gameArea),
-  );
+    entrypoint: "maskFromUnionInput",
+    label: "buildMaskFromUnionInput",
+    runTs: () => buildMaskFromUnionInputTs(input, gameArea),
+    runWasm: async () => {
+      const wasm = await loadMaskWasmModule();
+      return wasm.wasmBuildMaskFromUnionInput(input, gameArea);
+    },
+    matches: (wasmResult, tsResult) =>
+      maskTopologyMatches(wasmResult, tsResult, bboxFromGameArea(gameArea)),
+  });
 }
 
 export async function runEndGameMaskFromDisks(
@@ -115,11 +76,16 @@ export async function runEndGameMaskFromDisks(
     }
     return buildEndGameMaskFromDisksTs(gameArea, disks);
   }
-  return runWithMaskKernel(
+  return dispatchKernel({
     mode,
-    "buildEndGameMaskFromDisks",
-    gameArea,
-    () => buildEndGameMaskFromDisksTs(gameArea, disks),
-    (wasm) => wasm.wasmBuildEndGameMaskFromDisks(gameArea, disks),
-  );
+    entrypoint: "endGameMaskFromDisks",
+    label: "buildEndGameMaskFromDisks",
+    runTs: () => buildEndGameMaskFromDisksTs(gameArea, disks),
+    runWasm: async () => {
+      const wasm = await loadMaskWasmModule();
+      return wasm.wasmBuildEndGameMaskFromDisks(gameArea, disks);
+    },
+    matches: (wasmResult, tsResult) =>
+      maskTopologyMatches(wasmResult, tsResult, bboxFromGameArea(gameArea)),
+  });
 }

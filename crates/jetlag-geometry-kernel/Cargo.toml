@@ -1,5 +1,5 @@
 [package]
-name = "jetlag-geometry-mask"
+name = "jetlag-geometry-kernel"
 version = "0.1.0"
 edition = "2021"
 
