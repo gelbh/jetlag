@@ -180,6 +180,8 @@ export async function createIncidentHandler(db, input, deps) {
   }
 
   // Clear-bug → private hotfix coding agent (best-effort; never fail create).
+  // Sole create-path launch: call `deps.launchCursorHotfix` at most once here.
+  // Idempotency for retries lives in `launchCursorHotfixForIncident` (already_launched).
   if (
     triage.outcome === "agent" &&
     typeof deps.launchCursorHotfix === "function"

@@ -194,6 +194,42 @@ test("launchCursorHotfixForIncident writes agent_meta into hotfix thread", async
   assert.equal(incident.triage.outcome, "agent");
 });
 
+test("launchCursorHotfixForIncident does not duplicate when already launched", async () => {
+  const db = createInMemoryFirestore({
+    "incidents/inc-1": {
+      status: "open",
+      diagnostics: clearBugDiagnostics,
+      agent: {
+        status: "launched",
+        cursorAgentId: "bc-existing",
+      },
+    },
+  });
+  let createCalls = 0;
+
+  const result = await launchCursorHotfixForIncident(
+    db,
+    {
+      incidentId: "inc-1",
+      diagnostics: clearBugDiagnostics,
+      triage: { outcome: "agent", reason: "client_exception" },
+    },
+    {
+      apiKey: "test-key",
+      repositoryUrl: "https://github.com/gelbh/jetlag",
+      createAgent: async () => {
+        createCalls += 1;
+        return { id: "bc-should-not" };
+      },
+    },
+  );
+
+  assert.equal(result.launched, false);
+  assert.equal(result.reason, "already_launched");
+  assert.equal(result.agentId, "bc-existing");
+  assert.equal(createCalls, 0);
+});
+
 test("launchCursorHotfixForIncident skips when triage is not agent", async () => {
   const db = createInMemoryFirestore({
     "incidents/inc-1": {

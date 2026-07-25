@@ -253,6 +253,7 @@ test("createIncidentHandler launches cursor hotfix only on clear-bug triage", as
   );
 
   assert.equal(result.triage.outcome, "agent");
+  // Sole create-path: exactly one launchCursorHotfix call (no desk v1 duplicate).
   assert.equal(launches.length, 1);
   assert.equal(launches[0].incidentId, "id-1");
   assert.equal(launches[0].triage.outcome, "agent");
