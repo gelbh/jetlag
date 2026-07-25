@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, LineString, Polygon as GeoPolygon } from "geojson";
-import { computeEliminationUnionInput } from "./adapter/eliminationMask";
+import { computeEliminationUnionInputTs } from "./adapter/eliminationMask";
 import {
   buildEndGameMaskFromDisks,
   buildMaskFromUnionInput,
@@ -193,7 +193,7 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     const annotations = Array.from({ length: 8 }, (_, index) =>
       matchingAnnotation(`a-${index}`, -0.19 + index * 0.01),
     );
-    const input = computeEliminationUnionInput(annotations, gameArea, []);
+    const input = computeEliminationUnionInputTs(annotations, gameArea, []);
 
     const martinezMs = measureMedianMs(() => {
       buildMaskFromUnionInput(input, gameArea);
