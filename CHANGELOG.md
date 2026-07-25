@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.9.4 - 2026-07-25
+
+### Improvements
+
+- SEO: marketing pages ship share previews and crawlable titles; app routes stay out of search results
+
+### Fixes
+
+- Timer: answer deadline expiry always pauses the hiding timer for everyone, even if the host device was out of sync
+- Thermometer: abandoned GPS walks auto-cancel on the host after they go stale so the game is not stuck on walking
+- App: page pinch zoom is locked again on mobile; map zoom unchanged
+
 ## 0.9.3 - 2026-07-25
 
 ### Improvements

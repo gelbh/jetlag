@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.9.3";
+export const APP_VERSION = "0.9.4";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,26 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.9.4",
+    date: "2026-07-25",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Timer: answer deadline expiry always pauses the hiding timer for everyone, even if the host device was out of sync",
+          "Thermometer: abandoned GPS walks auto-cancel on the host after they go stale so the game is not stuck on walking",
+          "App: page pinch zoom is locked again on mobile; map zoom unchanged",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "SEO: marketing pages ship share previews and crawlable titles; app routes stay out of search results",
+        ],
+      }
+    ],
+  },
   {
     version: "0.9.3",
     date: "2026-07-25",
