@@ -13,6 +13,10 @@ function sampleSpacingForBuffer(
   distanceMeters: number,
   sampleSpacingMeters: number,
 ): number {
+  if (!Number.isFinite(sampleSpacingMeters) || sampleSpacingMeters <= 0) {
+    throw new RangeError("sampleSpacingMeters must be a positive finite number");
+  }
+
   return Math.min(
     sampleSpacingMeters,
     Math.max(distanceMeters * 0.5, 1),
