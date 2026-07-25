@@ -1,14 +1,17 @@
 #!/usr/bin/env node
-import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 import { chromium } from "playwright";
+import {
+  distHtmlPath,
+  loadCrawlPolicy,
+  MIN_ROOT_TEXT_CHARS,
+} from "./seo-build-lib.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const policy = JSON.parse(
-  readFileSync(join(root, "src/domain/seo/seoCrawlPolicy.json"), "utf8"),
-);
+const policy = loadCrawlPolicy(root);
 const PORT = 4179;
 const BASE = `http://127.0.0.1:${PORT}`;
 
@@ -26,17 +29,6 @@ function waitForServer(url, timeoutMs = 60_000) {
     }
     throw new Error(`Preview server did not start: ${url}`);
   })();
-}
-
-/**
- * Home must not overwrite Vite's SPA shell at dist/index.html (Workers fallback + SW).
- * Nested indexable routes write beside assets as usual.
- */
-function distHtmlPath(urlPath) {
-  if (urlPath === "/") {
-    return join(root, "dist/prerender/home/index.html");
-  }
-  return join(root, "dist", urlPath.slice(1), "index.html");
 }
 
 function stopPreview(child) {
@@ -92,19 +84,20 @@ try {
     // "load" avoids hanging on long-lived analytics / SW connections that block networkidle.
     await page.goto(target, { waitUntil: "load", timeout: 120_000 });
     await page.waitForFunction(
-      () => {
+      (minChars) => {
         const rootEl = document.querySelector("#root");
         return Boolean(
-          rootEl && rootEl.textContent && rootEl.textContent.trim().length > 40,
+          rootEl && rootEl.textContent && rootEl.textContent.trim().length > minChars,
         );
       },
+      MIN_ROOT_TEXT_CHARS,
       { timeout: 120_000 },
     );
     await page.waitForFunction(() => document.title.trim().length > 0, {
       timeout: 30_000,
     });
     const html = await page.content();
-    const out = distHtmlPath(urlPath);
+    const out = distHtmlPath(root, urlPath);
     mkdirSync(dirname(out), { recursive: true });
     writeFileSync(out, html);
     console.log(`Prerendered ${urlPath} → ${out}`);

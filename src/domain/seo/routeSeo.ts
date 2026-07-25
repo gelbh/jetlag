@@ -12,6 +12,8 @@ export type RouteSeo = {
   jsonLd?: Record<string, unknown>;
 };
 
+type RouteSeoSource = Omit<RouteSeo, "robots">;
+
 export const APP_ROUTE_PATHS = [
   "/",
   "/tutorial",
@@ -33,6 +35,8 @@ export const APP_ROUTE_PATHS = [
 
 const PRESET_EDIT_PATH_RE = /^\/presets\/[^/]+\/edit$/;
 const DEFAULT_OG_IMAGE_PATH = "/og-default.png";
+
+const INDEXABLE_PATHS = new Set(crawlPolicy.indexablePaths);
 const UNOFFICIAL_DISCLAIMER =
   "Unofficial fan companion. Not affiliated with Jet Lag: The Game, the board game, or Nebula.";
 
@@ -88,12 +92,11 @@ const PRIVACY_DESCRIPTION = `Privacy policy for ${LEGAL_APP_NAME}, an unofficial
 const TERMS_TITLE = titleFor("Terms");
 const TERMS_DESCRIPTION = `Terms of use for ${LEGAL_APP_NAME}, an unofficial fan companion for Jet Lag Hide + Seek.`;
 
-const ROUTE_SEO_BY_PATH: Record<string, RouteSeo> = {
+const ROUTE_SEO_BY_PATH: Record<string, RouteSeoSource> = {
   "/": {
     title: LEGAL_APP_NAME,
     description: HOME_DESCRIPTION,
     canonicalPath: "/",
-    robots: "index,follow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
     jsonLd: {
       "@context": "https://schema.org",
@@ -110,7 +113,6 @@ const ROUTE_SEO_BY_PATH: Record<string, RouteSeo> = {
     title: TUTORIAL_TITLE,
     description: TUTORIAL_DESCRIPTION,
     canonicalPath: "/tutorial",
-    robots: "index,follow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
     jsonLd: webPageJsonLd("/tutorial", TUTORIAL_TITLE, TUTORIAL_DESCRIPTION),
   },
@@ -118,7 +120,6 @@ const ROUTE_SEO_BY_PATH: Record<string, RouteSeo> = {
     title: PREMIUM_TITLE,
     description: PREMIUM_DESCRIPTION,
     canonicalPath: "/premium",
-    robots: "index,follow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
     jsonLd: webPageJsonLd("/premium", PREMIUM_TITLE, PREMIUM_DESCRIPTION),
   },
@@ -126,7 +127,6 @@ const ROUTE_SEO_BY_PATH: Record<string, RouteSeo> = {
     title: PRIVACY_TITLE,
     description: PRIVACY_DESCRIPTION,
     canonicalPath: "/privacy",
-    robots: "index,follow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
     jsonLd: webPageJsonLd("/privacy", PRIVACY_TITLE, PRIVACY_DESCRIPTION),
   },
@@ -134,7 +134,6 @@ const ROUTE_SEO_BY_PATH: Record<string, RouteSeo> = {
     title: TERMS_TITLE,
     description: TERMS_DESCRIPTION,
     canonicalPath: "/terms",
-    robots: "index,follow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
     jsonLd: webPageJsonLd("/terms", TERMS_TITLE, TERMS_DESCRIPTION),
   },
@@ -142,77 +141,66 @@ const ROUTE_SEO_BY_PATH: Record<string, RouteSeo> = {
     title: titleFor("Feedback"),
     description: `Send feedback about ${LEGAL_APP_NAME}.`,
     canonicalPath: "/feedback",
-    robots: "noindex,nofollow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
   "/stats": {
     title: titleFor("Stats"),
     description: `Your session stats in ${LEGAL_APP_NAME}.`,
     canonicalPath: "/stats",
-    robots: "noindex,nofollow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
   "/friends": {
     title: titleFor("Friends"),
     description: `Manage friends in ${LEGAL_APP_NAME}.`,
     canonicalPath: "/friends",
-    robots: "noindex,nofollow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
   "/leaderboard": {
     title: titleFor("Leaderboard"),
     description: `Leaderboard for ${LEGAL_APP_NAME}.`,
     canonicalPath: "/leaderboard",
-    robots: "noindex,nofollow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
   "/create": {
     title: titleFor("Create"),
     description: `Create a map session in ${LEGAL_APP_NAME}.`,
     canonicalPath: "/create",
-    robots: "noindex,nofollow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
   "/join": {
     title: titleFor("Join"),
     description: `Join a map session in ${LEGAL_APP_NAME}.`,
     canonicalPath: "/join",
-    robots: "noindex,nofollow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
   "/admin": {
     title: titleFor("Admin"),
     description: `Admin tools for ${LEGAL_APP_NAME}.`,
     canonicalPath: "/admin",
-    robots: "noindex,nofollow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
   "/presets": {
     title: titleFor("Presets"),
     description: `Browse game presets in ${LEGAL_APP_NAME}.`,
     canonicalPath: "/presets",
-    robots: "noindex,nofollow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
   "/presets/new": {
     title: titleFor("New preset"),
     description: `Create a game preset in ${LEGAL_APP_NAME}.`,
     canonicalPath: "/presets/new",
-    robots: "noindex,nofollow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
   "/presets/:id/edit": {
     title: titleFor("Edit preset"),
     description: `Edit a game preset in ${LEGAL_APP_NAME}.`,
     canonicalPath: "/presets/:id/edit",
-    robots: "noindex,nofollow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
   "/map": {
     title: titleFor("Map"),
     description: `Live map session tools in ${LEGAL_APP_NAME}.`,
     canonicalPath: "/map",
-    robots: "noindex,nofollow",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
 };
@@ -227,5 +215,10 @@ export function getRouteSeo(pathname: string): RouteSeo {
       robots: "noindex,nofollow",
     };
   }
-  return { ...entry };
+  return {
+    ...entry,
+    robots: INDEXABLE_PATHS.has(normalized)
+      ? "index,follow"
+      : "noindex,nofollow",
+  };
 }

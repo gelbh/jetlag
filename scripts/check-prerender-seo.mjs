@@ -2,27 +2,20 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  absoluteUrl,
+  distHtmlPath,
+  loadCrawlPolicy,
+  MIN_ROOT_TEXT_CHARS,
+  spaShellPath,
+} from "./seo-build-lib.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const policy = JSON.parse(
-  readFileSync(join(root, "src/domain/seo/seoCrawlPolicy.json"), "utf8"),
-);
-
-function distHtmlPath(urlPath) {
-  if (urlPath === "/") {
-    return join(root, "dist/prerender/home/index.html");
-  }
-  return join(root, "dist", urlPath.slice(1), "index.html");
-}
-
-function expectedCanonical(path) {
-  if (path === "/") return `${policy.siteOrigin}/`;
-  return `${policy.siteOrigin}${path}`;
-}
+const policy = loadCrawlPolicy(root);
 
 let failed = false;
 
-const spaShell = join(root, "dist/index.html");
+const spaShell = spaShellPath(root);
 try {
   const shellHtml = readFileSync(spaShell, "utf8");
   if (!shellHtml.includes('content="noindex,nofollow"')) {
@@ -39,7 +32,7 @@ try {
 }
 
 for (const urlPath of policy.indexablePaths) {
-  const file = distHtmlPath(urlPath);
+  const file = distHtmlPath(root, urlPath);
   let html;
   try {
     html = readFileSync(file, "utf8");
@@ -56,7 +49,7 @@ for (const urlPath of policy.indexablePaths) {
     failed = true;
   }
 
-  const canonical = expectedCanonical(urlPath);
+  const canonical = absoluteUrl(policy.siteOrigin, urlPath);
   if (!html.includes(`rel="canonical"`) || !html.includes(canonical)) {
     console.error(`${urlPath}: missing canonical ${canonical}`);
     failed = true;
@@ -79,7 +72,7 @@ for (const urlPath of policy.indexablePaths) {
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-  if (rootText.length <= 40) {
+  if (rootText.length <= MIN_ROOT_TEXT_CHARS) {
     console.error(
       `${urlPath}: #root text too short (${rootText.length} chars)`,
     );

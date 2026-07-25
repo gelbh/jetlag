@@ -42,4 +42,23 @@ describe("routeSeo", () => {
     expect(seo.canonicalPath).toBe("/");
     expect(seo.robots).toBe("noindex,nofollow");
   });
+
+  it("indexable policy paths resolve to index,follow with matching canonical", () => {
+    for (const path of listIndexablePaths()) {
+      const seo = getRouteSeo(path);
+      expect(seo.robots).toBe("index,follow");
+      expect(seo.canonicalPath).toBe(path);
+    }
+  });
+
+  it("disallowPaths covers every non-indexable app route", () => {
+    const indexable = new Set(listIndexablePaths());
+    for (const path of APP_ROUTE_PATHS) {
+      if (indexable.has(path)) continue;
+      const covered = crawlPolicy.disallowPaths.some(
+        (prefix) => path === prefix || path.startsWith(`${prefix}/`),
+      );
+      expect(covered, `${path} missing from disallowPaths`).toBe(true);
+    }
+  });
 });

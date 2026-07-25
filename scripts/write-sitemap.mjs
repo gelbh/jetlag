@@ -1,22 +1,16 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { absoluteUrl, loadCrawlPolicy } from "./seo-build-lib.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const policy = JSON.parse(
-  readFileSync(join(root, "src/domain/seo/seoCrawlPolicy.json"), "utf8"),
-);
-
-function loc(path) {
-  if (path === "/") return `${policy.siteOrigin}/`;
-  return `${policy.siteOrigin}${path}`;
-}
+const policy = loadCrawlPolicy(root);
 
 const body = policy.indexablePaths
   .map(
     (path) => `  <url>
-    <loc>${loc(path)}</loc>
+    <loc>${absoluteUrl(policy.siteOrigin, path)}</loc>
     <changefreq>weekly</changefreq>
   </url>`,
   )

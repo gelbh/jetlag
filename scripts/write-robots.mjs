@@ -1,12 +1,11 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadCrawlPolicy } from "./seo-build-lib.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const policy = JSON.parse(
-  readFileSync(join(root, "src/domain/seo/seoCrawlPolicy.json"), "utf8"),
-);
+const policy = loadCrawlPolicy(root);
 
 const disallow = (policy.disallowPaths ?? [])
   .map((path) => `Disallow: ${path}`)

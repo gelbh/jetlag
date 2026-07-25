@@ -173,12 +173,9 @@ describe("analytics facade", () => {
       configurable: true,
       get: () => "https://www.google.com/search?q=jetlag",
     });
-    vi.stubGlobal("location", {
-      pathname: "/",
-      search: "?utm_source=newsletter&utm_medium=email&utm_campaign=launch",
-    });
-
-    trackPageView("/");
+    trackPageView(
+      "/?utm_source=newsletter&utm_medium=email&utm_campaign=launch",
+    );
 
     expect(posthogCapture).toHaveBeenCalledWith("$pageview", {
       path: "/",

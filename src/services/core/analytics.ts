@@ -153,8 +153,9 @@ function pageViewProperties(
       // ignore invalid referrer
     }
   }
-  if (typeof window !== "undefined") {
-    const params = new URLSearchParams(window.location.search);
+  const queryIndex = pathWithSearch.indexOf("?");
+  if (queryIndex >= 0) {
+    const params = new URLSearchParams(pathWithSearch.slice(queryIndex + 1));
     for (const key of [
       "utm_source",
       "utm_medium",
