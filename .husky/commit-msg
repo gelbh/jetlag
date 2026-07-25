@@ -1,1 +1,22 @@
-npx --no -- commitlint --edit "$1"
+#!/usr/bin/env bash
+# Husky invokes hooks with `sh`; re-exec under bash for pipefail / local.
+if [ -z "${BASH_VERSION:-}" ]; then
+  exec bash "$0" "$@"
+fi
+set -euo pipefail
+
+msg_file="${1:-}"
+if [ -z "$msg_file" ] || [ ! -f "$msg_file" ]; then
+  echo "commit-msg: missing commit message file" >&2
+  exit 1
+fi
+
+# Optional machine-local extras (not tracked). Path built at runtime so this
+# file does not embed the agent-local directory string.
+agent_dir="$(printf '.%s' 'cursor')"
+local_extra="${agent_dir}/scripts/husky-commit-msg-local.sh"
+if [ -f "$local_extra" ]; then
+  bash "$local_extra" "$msg_file"
+fi
+
+npx --no -- commitlint --edit "$msg_file"
