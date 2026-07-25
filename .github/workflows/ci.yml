@@ -20,19 +20,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
-      - name: Install wasm-pack
-        env:
-          WASM_PACK_VERSION: "0.13.1"
-        run: |
-          mkdir -p "$HOME/.cargo/bin"
-          curl -fsSL "https://github.com/wasm-bindgen/wasm-pack/releases/download/v${WASM_PACK_VERSION}/wasm-pack-v${WASM_PACK_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
-            | tar -xz --strip-components=1 -C "$HOME/.cargo/bin" \
-              "wasm-pack-v${WASM_PACK_VERSION}-x86_64-unknown-linux-musl/wasm-pack"
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          wasm-pack --version
+      - uses: ./.github/actions/setup-rust-wasm
       - run: cargo test -p jetlag-geometry-mask
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
@@ -57,6 +45,7 @@ jobs:
               - 'Cargo.lock'
       - name: Geometry perf gates
         if: steps.geometry.outputs.geometry == 'true'
+        # Reuses pkg/ from wasm:build above (test:perf does not rebuild)
         run: npm run test:perf
       - run: npm run test:functions
 
@@ -66,19 +55,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
-      - name: Install wasm-pack
-        env:
-          WASM_PACK_VERSION: "0.13.1"
-        run: |
-          mkdir -p "$HOME/.cargo/bin"
-          curl -fsSL "https://github.com/wasm-bindgen/wasm-pack/releases/download/v${WASM_PACK_VERSION}/wasm-pack-v${WASM_PACK_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
-            | tar -xz --strip-components=1 -C "$HOME/.cargo/bin" \
-              "wasm-pack-v${WASM_PACK_VERSION}-x86_64-unknown-linux-musl/wasm-pack"
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          wasm-pack --version
+      - uses: ./.github/actions/setup-rust-wasm
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
@@ -119,19 +96,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
-      - name: Install wasm-pack
-        env:
-          WASM_PACK_VERSION: "0.13.1"
-        run: |
-          mkdir -p "$HOME/.cargo/bin"
-          curl -fsSL "https://github.com/wasm-bindgen/wasm-pack/releases/download/v${WASM_PACK_VERSION}/wasm-pack-v${WASM_PACK_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
-            | tar -xz --strip-components=1 -C "$HOME/.cargo/bin" \
-              "wasm-pack-v${WASM_PACK_VERSION}-x86_64-unknown-linux-musl/wasm-pack"
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          wasm-pack --version
+      - uses: ./.github/actions/setup-rust-wasm
       - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
         with:
           distribution: temurin
@@ -162,19 +127,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
-      - name: Install wasm-pack
-        env:
-          WASM_PACK_VERSION: "0.13.1"
-        run: |
-          mkdir -p "$HOME/.cargo/bin"
-          curl -fsSL "https://github.com/wasm-bindgen/wasm-pack/releases/download/v${WASM_PACK_VERSION}/wasm-pack-v${WASM_PACK_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
-            | tar -xz --strip-components=1 -C "$HOME/.cargo/bin" \
-              "wasm-pack-v${WASM_PACK_VERSION}-x86_64-unknown-linux-musl/wasm-pack"
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          wasm-pack --version
+      - uses: ./.github/actions/setup-rust-wasm
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
