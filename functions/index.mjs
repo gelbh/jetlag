@@ -41,6 +41,7 @@ export {
   createIncident,
   denyHostConfirm,
   postIncidentMessage,
+  postSupportAgentTurn,
   publishIncidentHotfix,
 } from "./handlers/incident.mjs";
 
