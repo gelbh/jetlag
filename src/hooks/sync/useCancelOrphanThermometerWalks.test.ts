@@ -1,6 +1,7 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { THERMOMETER_WALK_MAX_DURATION_MS } from "../../domain/questions";
+import { STALE_WALK_CLOCK_MS } from "./useStaleWalkNowMs";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { useCancelOrphanThermometerWalks } from "./useCancelOrphanThermometerWalks";
 
@@ -18,6 +19,20 @@ function walkingQuestion(
     replyOptions: [],
     promptText: "Thermometer walk started",
     ...overrides,
+  };
+}
+
+
+function seekerLocation(
+  overrides: Partial<{ uid: string; updatedAt: string }> & { uid: string; updatedAt: string },
+) {
+  return {
+    uid: overrides.uid,
+    sessionId: "session-1",
+    lat: 0,
+    lng: 0,
+    updatedAt: overrides.updatedAt,
+    role: "seeker" as const,
   };
 }
 
@@ -124,7 +139,7 @@ describe("useCancelOrphanThermometerWalks", () => {
           memberUids: ["host-1", "seeker-1", "seeker-2"],
           pendingQuestions,
           seekerLocations: [
-            { uid: "seeker-1", updatedAt: "2026-01-01T00:00:00.000Z" },
+            seekerLocation({ uid: "seeker-1", updatedAt: "2026-01-01T00:00:00.000Z" }),
           ],
           cancelThermometerWalk,
           nowMs: () => nowMs,
@@ -281,5 +296,49 @@ describe("useCancelOrphanThermometerWalks", () => {
     expect(cancelThermometerWalk).toHaveBeenLastCalledWith(
       expect.objectContaining({ reason: "stale" }),
     );
+  });
+
+  it("cancels stale walks when the shared clock ticks past max duration", async () => {
+    vi.useFakeTimers();
+    try {
+      const createdAt = new Date().toISOString();
+
+      renderHook(() =>
+        useCancelOrphanThermometerWalks({
+          sessionId: "session-1",
+          myUid: "seeker-2",
+          myRole: "seeker",
+          memberUids: ["host-1", "seeker-1", "seeker-2"],
+          pendingQuestions: [
+            walkingQuestion({
+              id: "pq-clock-stale",
+              createdByUid: "seeker-1",
+              createdAt,
+            }),
+          ],
+          seekerLocations: [
+            seekerLocation({ uid: "seeker-1", updatedAt: createdAt }),
+          ],
+          cancelThermometerWalk,
+        }),
+      );
+
+      expect(cancelThermometerWalk).not.toHaveBeenCalled();
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(
+          THERMOMETER_WALK_MAX_DURATION_MS + STALE_WALK_CLOCK_MS,
+        );
+      });
+
+      expect(cancelThermometerWalk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pendingQuestionId: "pq-clock-stale",
+          reason: "stale",
+        }),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

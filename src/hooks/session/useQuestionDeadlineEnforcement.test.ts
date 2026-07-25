@@ -48,8 +48,7 @@ describe("useQuestionDeadlineEnforcement", () => {
         sessionRules: { gameSize: "small" },
         pendingQuestions: [pendingQuestion()],
         hidingZones: [],
-        timerRunning: true,
-        remoteTimerRunning: false,
+        hidingTimerRunning: true,
         pauseTimer,
         resumeTimer: vi.fn(),
         postSystemMessage,
@@ -81,8 +80,7 @@ describe("useQuestionDeadlineEnforcement", () => {
         sessionRules: { gameSize: "small" },
         pendingQuestions: [pendingQuestion()],
         hidingZones: [],
-        timerRunning: true,
-        remoteTimerRunning: false,
+        hidingTimerRunning: true,
         pauseTimer: vi.fn(),
         resumeTimer: vi.fn(),
         postSystemMessage: vi.fn(async () => undefined),
@@ -109,8 +107,7 @@ describe("useQuestionDeadlineEnforcement", () => {
           sessionRules: { gameSize: "small" },
           pendingQuestions,
           hidingZones: [],
-          timerRunning,
-          remoteTimerRunning: false,
+          hidingTimerRunning: timerRunning,
           pauseTimer,
           resumeTimer,
           postSystemMessage: vi.fn(async () => undefined),
@@ -172,8 +169,7 @@ describe("useQuestionDeadlineEnforcement", () => {
               moveInProgress: true,
             },
           ],
-          timerRunning,
-          remoteTimerRunning: false,
+          hidingTimerRunning: timerRunning,
           pauseTimer: vi.fn(),
           resumeTimer,
           postSystemMessage: vi.fn(async () => undefined),
@@ -208,7 +204,7 @@ describe("useQuestionDeadlineEnforcement", () => {
     expect(resumeTimer).not.toHaveBeenCalled();
   });
 
-  it("pauses when remote timer is running even if local timerRunning is false", async () => {
+  it("pauses when hidingTimerRunning is true (covers remote-only running)", async () => {
     const pauseTimer = vi.fn();
     renderHook(() =>
       useQuestionDeadlineEnforcement({
@@ -217,8 +213,7 @@ describe("useQuestionDeadlineEnforcement", () => {
         sessionRules: { gameSize: "medium" },
         pendingQuestions: [pendingQuestion()],
         hidingZones: [],
-        timerRunning: false,
-        remoteTimerRunning: true,
+        hidingTimerRunning: true,
         pauseTimer,
         resumeTimer: vi.fn(),
         postSystemMessage: vi.fn(async () => undefined),
@@ -239,8 +234,7 @@ describe("useQuestionDeadlineEnforcement", () => {
         sessionRules: { gameSize: "medium" },
         pendingQuestions: [pendingQuestion()],
         hidingZones: [],
-        timerRunning: false,
-        remoteTimerRunning: false,
+        hidingTimerRunning: false,
         pauseTimer,
         resumeTimer: vi.fn(),
         postSystemMessage: vi.fn(async () => undefined),

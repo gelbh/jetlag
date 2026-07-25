@@ -4,16 +4,26 @@ import {
   listStaleWalkingThermometerQuestionIds,
 } from "../../domain/questions";
 import type { PlayerRole } from "../../domain/session/playerRole";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type {
+  PendingQuestionRecord,
+  PlayerLocationRecord,
+} from "../../domain/session/sessionChat";
 import type { ThermometerWalkCancelReason } from "../../services/firestore/firestoreSessionExtras";
+import { useStaleWalkNowMs } from "./useStaleWalkNowMs";
 
+/**
+ * Auto-cancels abandoned thermometer walks for seekers:
+ * orphan creators (left session) and stale walks (max duration + dead GPS).
+ * Stale detection is driven by the shared 15s stale-walk clock — not only
+ * Firestore snapshot churn — so time alone can cross the threshold.
+ */
 export function useCancelOrphanThermometerWalks(args: {
   sessionId: string | null;
   myUid: string | null;
   myRole: PlayerRole | null;
   memberUids: readonly string[];
   pendingQuestions: readonly PendingQuestionRecord[];
-  seekerLocations: readonly { uid: string; updatedAt: string }[];
+  seekerLocations: readonly PlayerLocationRecord[];
   cancelThermometerWalk: (input: {
     sessionId: string;
     pendingQuestionId: string;
@@ -21,6 +31,7 @@ export function useCancelOrphanThermometerWalks(args: {
     senderRole: PlayerRole;
     reason: Extract<ThermometerWalkCancelReason, "orphan" | "stale">;
   }) => Promise<void>;
+  /** Override clock (tests). Production uses the shared stale-walk tick. */
   nowMs?: () => number;
 }): void {
   const {
@@ -31,8 +42,9 @@ export function useCancelOrphanThermometerWalks(args: {
     pendingQuestions,
     seekerLocations,
     cancelThermometerWalk,
-    nowMs = Date.now,
+    nowMs,
   } = args;
+  const clockMs = useStaleWalkNowMs();
   const handledIdsRef = useRef(new Set<string>());
 
   useEffect(() => {
@@ -41,6 +53,11 @@ export function useCancelOrphanThermometerWalks(args: {
 
   useEffect(() => {
     if (!sessionId || !myUid || myRole !== "seeker") {
+      return;
+    }
+
+    const now = nowMs ? nowMs() : clockMs;
+    if (!now) {
       return;
     }
 
@@ -58,7 +75,7 @@ export function useCancelOrphanThermometerWalks(args: {
     const staleIds = listStaleWalkingThermometerQuestionIds(
       pendingQuestions,
       walkerLocationUpdatedAtByUid,
-      nowMs(),
+      now,
     );
 
     const toCancel: Array<{
@@ -95,6 +112,7 @@ export function useCancelOrphanThermometerWalks(args: {
     }
   }, [
     cancelThermometerWalk,
+    clockMs,
     memberUids,
     myRole,
     myUid,

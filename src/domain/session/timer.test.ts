@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  isHidingTimerEffectivelyRunning,
   computeElapsedMs,
   formatElapsedTime,
   hasTimerStarted,
@@ -109,5 +110,13 @@ describe("reconcileTimerState", () => {
     const reconciled = reconcileTimerState(local, remote, t0 + 12_000);
     expect(reconciled.runningSince).toBeNull();
     expect(computeElapsedMs(reconciled, t0 + 12_000)).toBe(10_000);
+  });
+});
+
+describe("isHidingTimerEffectivelyRunning", () => {
+  it("is true when local or remote is running", () => {
+    expect(isHidingTimerEffectivelyRunning(true, false)).toBe(true);
+    expect(isHidingTimerEffectivelyRunning(false, true)).toBe(true);
+    expect(isHidingTimerEffectivelyRunning(false, false)).toBe(false);
   });
 });

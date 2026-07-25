@@ -25,6 +25,14 @@ export function isTimerRunning(state: TimerState): boolean {
   return state.runningSince !== null;
 }
 
+/** True when local UI or remote Firestore says the hiding timer is running. */
+export function isHidingTimerEffectivelyRunning(
+  localRunning: boolean,
+  remoteRunning: boolean,
+): boolean {
+  return localRunning || remoteRunning;
+}
+
 export function hasTimerStarted(state: TimerState): boolean {
   return state.accumulatedMs > 0 || state.runningSince !== null;
 }

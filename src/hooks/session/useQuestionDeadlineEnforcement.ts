@@ -17,8 +17,8 @@ interface UseQuestionDeadlineEnforcementParams {
   sessionRules: SessionRulesInput;
   pendingQuestions: readonly PendingQuestionRecord[];
   hidingZones: readonly HidingZoneRecord[];
-  timerRunning: boolean;
-  remoteTimerRunning: boolean;
+  /** Local or remote hiding timer is running (see isHidingTimerEffectivelyRunning). */
+  hidingTimerRunning: boolean;
   pauseTimer: () => void;
   resumeTimer: () => void;
   postSystemMessage: (text: string) => Promise<void>;
@@ -36,8 +36,7 @@ export function useQuestionDeadlineEnforcement({
   sessionRules,
   pendingQuestions,
   hidingZones,
-  timerRunning,
-  remoteTimerRunning,
+  hidingTimerRunning,
   pauseTimer,
   resumeTimer,
   postSystemMessage,
@@ -45,8 +44,7 @@ export function useQuestionDeadlineEnforcement({
   const expiryHandledRef = useRef<Set<string>>(new Set());
   const autoPausedQuestionRef = useRef<string | null>(null);
   const resumeHandledRef = useRef<Set<string>>(new Set());
-  const timerRunningRef = useRef(timerRunning);
-  const remoteTimerRunningRef = useRef(remoteTimerRunning);
+  const hidingTimerRunningRef = useRef(hidingTimerRunning);
 
   useEffect(() => {
     expiryHandledRef.current = new Set();
@@ -55,12 +53,8 @@ export function useQuestionDeadlineEnforcement({
   }, [sessionId]);
 
   useEffect(() => {
-    timerRunningRef.current = timerRunning;
-  }, [timerRunning]);
-
-  useEffect(() => {
-    remoteTimerRunningRef.current = remoteTimerRunning;
-  }, [remoteTimerRunning]);
+    hidingTimerRunningRef.current = hidingTimerRunning;
+  }, [hidingTimerRunning]);
 
   useEffect(() => {
     if (!sessionId || !enabled) {
@@ -101,7 +95,7 @@ export function useQuestionDeadlineEnforcement({
 
           await postSystemMessage(DEADLINE_EXPIRED_MESSAGE);
 
-          if (timerRunningRef.current || remoteTimerRunningRef.current) {
+          if (hidingTimerRunningRef.current) {
             autoPausedQuestionRef.current = question.id;
             pauseTimer();
           }
@@ -127,7 +121,8 @@ export function useQuestionDeadlineEnforcement({
         resumeHandledRef.current.add(question.id);
         autoPausedQuestionRef.current = null;
 
-        if (!timerRunningRef.current && !hasMoveInProgress(hidingZones)) {
+        // Resume only when local/remote effective running is false (pause stuck).
+        if (!hidingTimerRunningRef.current && !hasMoveInProgress(hidingZones)) {
           resumeTimer();
         }
       }
