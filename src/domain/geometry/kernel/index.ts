@@ -6,6 +6,15 @@ export type {
   PolygonFeature,
 } from "./types";
 export {
+  featureToGameAreaGeometry,
+  gameAreaGeometryToFeature,
+} from "./featureConvert";
+export { clipMaskToGameArea } from "./clipMask";
+export {
+  buildEndGameMaskFromDisks,
+  buildMaskFromUnionInput,
+} from "./buildMask";
+export {
   unionDiskSpecs,
   unionEliminationParts,
   unionEliminationPartsLegacy,
