@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Thin npm wrapper for plan-thermos-ship board poll.
- * Resolves the skill script under the user Cursor skills dir (not the repo).
+ * Resolves the skill script under the user skills dir (not the repo).
  */
 import { spawnSync } from "node:child_process";
 import { homedir } from "node:os";
