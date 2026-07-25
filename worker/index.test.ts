@@ -11,6 +11,10 @@ import {
   handleSentryTunnelRequest,
   parseSentryEnvelopeTarget,
 } from "./sentryTunnel";
+import {
+  handlePosthogProxyRequest,
+  shouldHandlePosthogProxy,
+} from "./posthogProxy";
 
 describe("isSpaFallbackForAssetRequest", () => {
   it("detects SPA index.html served for a missing asset", () => {
@@ -405,6 +409,49 @@ describe("worker fetch", () => {
     expect(body).toMatch(/<script nonce="[^"]+" src="\/boot-recovery\.js"><\/script>/);
     expect(response.headers.get("Content-Security-Policy")).toBeNull();
   });
+  it("routes /ingest/e/ through PostHog proxy without hitting assets", async () => {
+    const fetchMock = vi.fn(async () => new Response("ok", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      const env = {
+        ASSETS: {
+          fetch: vi.fn(),
+        },
+      } as Env;
+
+      const response = await worker.fetch(
+        new Request("https://jetlag.gelbhart.dev/ingest/e/", {
+          method: "POST",
+          body: "{}",
+        }),
+        env,
+      );
+
+      expect(env.ASSETS.fetch).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalledOnce();
+      expect(response.status).toBe(200);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("does not proxy /ingest-anything prefix boundary paths", async () => {
+    const assetResponse = new Response("missing", { status: 404 });
+    const env = {
+      ASSETS: {
+        fetch: vi.fn().mockResolvedValue(assetResponse),
+      },
+    } as Env;
+
+    await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/ingest-anything"),
+      env,
+    );
+
+    expect(env.ASSETS.fetch).toHaveBeenCalledOnce();
+  });
+
+
 });
 
 describe("parseSentryEnvelopeTarget", () => {
@@ -473,5 +520,66 @@ describe("handleSentryTunnelRequest", () => {
         body,
       }),
     );
+  });
+});
+
+describe("posthogProxy", () => {
+  it("shouldHandlePosthogProxy matches /ingest prefix", () => {
+    expect(shouldHandlePosthogProxy("/ingest")).toBe(true);
+    expect(shouldHandlePosthogProxy("/ingest/e/")).toBe(true);
+    expect(shouldHandlePosthogProxy("/ingest/static/foo.js")).toBe(true);
+    expect(shouldHandlePosthogProxy("/api/sentry-tunnel")).toBe(false);
+  });
+
+  it("forwards API paths to eu.i.posthog.com with Host set and cookies stripped", async () => {
+    const fetchImpl = vi.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const req = new Request(input, init);
+        expect(req.url).toBe("https://eu.i.posthog.com/e/?ip=0");
+        expect(req.headers.get("Host")).toBe("eu.i.posthog.com");
+        expect(req.headers.get("Cookie")).toBeNull();
+        expect(req.headers.get("X-Forwarded-For")).toBeNull();
+        return new Response("ok", { status: 200 });
+      },
+    );
+
+    const response = await handlePosthogProxyRequest(
+      new Request("https://jetlag.gelbhart.dev/ingest/e/?ip=0", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: "session=abc",
+        },
+        body: "{}",
+      }),
+      fetchImpl,
+    );
+    expect(response.status).toBe(200);
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
+
+  it("forwards /static and /array to eu-assets.i.posthog.com", async () => {
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      expect(
+        url.startsWith("https://eu-assets.i.posthog.com/static/") ||
+          url.startsWith("https://eu-assets.i.posthog.com/array/"),
+      ).toBe(true);
+      return new Response("asset", { status: 200 });
+    });
+
+    await handlePosthogProxyRequest(
+      new Request("https://jetlag.gelbhart.dev/ingest/static/banana.js", {
+        method: "GET",
+      }),
+      fetchImpl,
+    );
+    await handlePosthogProxyRequest(
+      new Request("https://jetlag.gelbhart.dev/ingest/array/config.json", {
+        method: "GET",
+      }),
+      fetchImpl,
+    );
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 });
