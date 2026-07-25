@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../domain/map/annotations";
 import {
+  buildAdminDivisionQuery,
   classifyAdminDivisionAtPoint,
   parseAdminDivisionFeatures,
   relationBoundaryFromElements,
@@ -20,6 +21,15 @@ const sampleGameArea: GameArea = {
 };
 
 describe("admin division boundaries", () => {
+  it("builds a bbox admin query without empty area.searchArea", () => {
+    const query = buildAdminDivisionQuery(sampleGameArea, 6);
+
+    expect(query).not.toContain("area.searchArea");
+    expect(query).toContain(
+      'relation["boundary"="administrative"]["admin_level"="6"]["name"](51.4,-0.2,51.5,-0.1)',
+    );
+  });
+
   it("builds a polygon from a relation outer way", () => {
     const relation = {
       type: "relation" as const,

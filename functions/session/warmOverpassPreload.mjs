@@ -39,19 +39,16 @@ export function buildCoastlineWarmQuery(bounds) {
 }
 
 export function buildLandmassWarmQuery(bounds) {
-  const { south, west, north, east } = bounds;
+  const bbox = formatBbox(bounds);
 
   return `
-    [out:json][timeout:25][bbox:${south},${west},${north},${east}];
-    area.searchArea;
+    [out:json][timeout:25];
     (
-      way(area.searchArea)["natural"="water"];
-      way(area.searchArea)["waterway"~"^(river|canal|stream|ditch|dock)$"];
-      relation(area.searchArea)["place"~"^(island|islet)$"]["name"];
+      way["natural"="water"](${bbox});
+      way["waterway"~"^(river|canal|dock)$"](${bbox});
+      relation["place"~"^(island|islet)$"]["name"](${bbox});
     );
-    out center;
-    >;
-    out geom qt;
+    out geom;
   `;
 }
 

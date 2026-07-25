@@ -13,17 +13,21 @@ import {
   overpassTaggedBboxClauses,
 } from "./query";
 
+// Keep landmass/admin QL in sync with buildLandmassQuery / buildAdminDivisionQuery.
+// Do not import those modules here — they pull leaflet via geometry and break
+// @vitest-environment node audit harnesses.
+
 export function auditAdminDivisionQuery(
   gameArea: GameArea,
   adminLevel: number,
 ): string {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
+  const bbox = `${south},${west},${north},${east}`;
 
   return `
-    [out:json][timeout:25][bbox:${south},${west},${north},${east}];
-    area.searchArea;
+    [out:json][timeout:25];
     (
-      relation(area.searchArea)["boundary"="administrative"]["admin_level"="${adminLevel}"]["name"];
+      relation["boundary"="administrative"]["admin_level"="${adminLevel}"]["name"](${bbox});
     );
     out center;
     >;
@@ -33,18 +37,16 @@ export function auditAdminDivisionQuery(
 
 export function auditLandmassQuery(gameArea: GameArea): string {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
+  const bbox = `${south},${west},${north},${east}`;
 
   return `
-    [out:json][timeout:25][bbox:${south},${west},${north},${east}];
-    area.searchArea;
+    [out:json][timeout:25];
     (
-      way(area.searchArea)["natural"="water"];
-      way(area.searchArea)["waterway"~"^(river|canal|stream|ditch|dock)$"];
-      relation(area.searchArea)["place"~"^(island|islet)$"]["name"];
+      way["natural"="water"](${bbox});
+      way["waterway"~"^(river|canal|dock)$"](${bbox});
+      relation["place"~"^(island|islet)$"]["name"](${bbox});
     );
-    out center;
-    >;
-    out geom qt;
+    out geom;
   `;
 }
 

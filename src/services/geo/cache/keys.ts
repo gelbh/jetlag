@@ -40,11 +40,13 @@ export function adminDivisionCacheKey(
   gameArea: GameArea,
   adminLevel: number,
 ): string {
-  return geographicCacheKey(gameArea, `admin:${adminLevel}`);
+  // v2: query no longer uses empty `area.searchArea` (zero-result bug).
+  return geographicCacheKey(gameArea, `admin:v2:${adminLevel}`);
 }
 
 export function landmassCacheKey(gameArea: GameArea): string {
-  return geographicCacheKey(gameArea, "landmass");
+  // v2: bbox + `out geom` (empty searchArea / missing way geometry bug).
+  return geographicCacheKey(gameArea, "landmass:v2");
 }
 
 export function measuringPlacesCacheKey(
