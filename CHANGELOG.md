@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.9.5 - 2026-07-25
+
+### Improvements
+
+- Privacy: PostHog analytics may use local storage after Accept; page leaves and Core Web Vitals included; a signed-in account may be linked to the analytics ID
+
+### Fixes
+
+- Measuring: near-region shading uses a finer circle so closer/further masks match the real distance again
+- Questions: answering a radar or thermometer once can no longer leave two shaded rings on the map
+
 ## 0.9.4 - 2026-07-25
 
 ### Improvements
