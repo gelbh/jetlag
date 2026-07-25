@@ -7,23 +7,47 @@ import {
   type MeasuringFromKind,
   type MeasuringLocationCategory,
 } from "../../domain/questions";
-import { buildAdminDivisionQuery } from "../geo/adminDivisionBoundaries";
-import { buildLandmassQuery } from "../geo/landmassFeatures";
 import {
   formatOverpassBboxFromGameArea,
   overpassQueryTemplate,
   overpassTaggedBboxClauses,
 } from "./query";
 
+// Keep landmass/admin QL in sync with buildLandmassQuery / buildAdminDivisionQuery.
+// Do not import those modules here — they pull leaflet via geometry and break
+// @vitest-environment node audit harnesses.
+
 export function auditAdminDivisionQuery(
   gameArea: GameArea,
   adminLevel: number,
 ): string {
-  return buildAdminDivisionQuery(gameArea, adminLevel);
+  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
+  const bbox = `${south},${west},${north},${east}`;
+
+  return `
+    [out:json][timeout:25];
+    (
+      relation["boundary"="administrative"]["admin_level"="${adminLevel}"]["name"](${bbox});
+    );
+    out center;
+    >;
+    out geom qt;
+  `;
 }
 
 export function auditLandmassQuery(gameArea: GameArea): string {
-  return buildLandmassQuery(gameArea);
+  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
+  const bbox = `${south},${west},${north},${east}`;
+
+  return `
+    [out:json][timeout:25];
+    (
+      way["natural"="water"](${bbox});
+      way["waterway"~"^(river|canal|dock)$"](${bbox});
+      relation["place"~"^(island|islet)$"]["name"](${bbox});
+    );
+    out geom;
+  `;
 }
 
 export function auditCoastlineQuery(gameArea: GameArea): string {
