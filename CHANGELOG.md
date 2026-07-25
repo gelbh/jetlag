@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.9.3 - 2026-07-25
+
+### Improvements
+
+- Privacy: replace Google Analytics with anonymous PostHog EU product analytics (no analytics cookies)
+- Privacy: ask before loading optional PostHog product analytics, with Accept or Decline
+- Accessibility: pinch zoom is allowed again on mobile viewports
+- Accessibility: action and dim text colors meet stronger contrast on dark surfaces
+- Create session: Use my location requests GPS only when you tap the button
+
+### Fixes
+
+- Map: top status bar clears the iPhone PWA notch again (safe-area padding was dropped from CSS)
+
 ## 0.9.2 - 2026-07-24
 
 ### Improvements
