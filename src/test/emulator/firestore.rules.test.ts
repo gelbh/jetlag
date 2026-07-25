@@ -1932,4 +1932,132 @@ describe("firestore.rules", () => {
         .set(annotationPayload()),
     );
   });
+
+  async function seedIncident() {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      await db.collection("incidents").doc("inc-1").set({
+        status: "open",
+        reporterUid: "reporter-1",
+        sessionId: "session-1",
+        sessionCode: "ABCD",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      });
+      await db
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("messages")
+        .doc("msg-1")
+        .set({
+          sender: "system",
+          kind: "prompt",
+          text: "Incident report",
+          createdAt: "2026-01-01T00:00:00.000Z",
+        });
+    });
+  }
+
+  it("allows admin to read an incident and its messages", async () => {
+    await seedIncident();
+    const admin = adminContext(testEnv);
+    await assertSucceeds(
+      admin.firestore().collection("incidents").doc("inc-1").get(),
+    );
+    await assertSucceeds(
+      admin
+        .firestore()
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("messages")
+        .doc("msg-1")
+        .get(),
+    );
+  });
+
+  it("allows the reporter to read their own incident and messages", async () => {
+    await seedIncident();
+    const reporter = testEnv.authenticatedContext("reporter-1");
+    await assertSucceeds(
+      reporter.firestore().collection("incidents").doc("inc-1").get(),
+    );
+    await assertSucceeds(
+      reporter
+        .firestore()
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("messages")
+        .doc("msg-1")
+        .get(),
+    );
+  });
+
+  it("denies a stranger reading an incident or its messages", async () => {
+    await seedIncident();
+    const stranger = testEnv.authenticatedContext("stranger-1");
+    await assertFails(
+      stranger.firestore().collection("incidents").doc("inc-1").get(),
+    );
+    await assertFails(
+      stranger
+        .firestore()
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("messages")
+        .doc("msg-1")
+        .get(),
+    );
+  });
+
+  it("denies clients creating incidents or messages", async () => {
+    await seedIncident();
+    const reporter = testEnv.authenticatedContext("reporter-1");
+    await assertFails(
+      reporter
+        .firestore()
+        .collection("incidents")
+        .doc("inc-2")
+        .set({
+          status: "open",
+          reporterUid: "reporter-1",
+          createdAt: "2026-01-01T00:00:00.000Z",
+        }),
+    );
+    await assertFails(
+      reporter
+        .firestore()
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("messages")
+        .doc("msg-2")
+        .set({
+          sender: "player",
+          kind: "chat",
+          text: "hello",
+          createdAt: "2026-01-01T00:00:00.000Z",
+        }),
+    );
+  });
+
+  it("allows signed-in clients to read appConfig but not write it", async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection("appConfig").doc("runtime").set({
+        requiredMinAppVersion: "0.9.5.1",
+        hotfixGraceSeconds: 30,
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      });
+    });
+
+    const client = testEnv.authenticatedContext("player-1");
+    await assertSucceeds(
+      client.firestore().collection("appConfig").doc("runtime").get(),
+    );
+    await assertFails(
+      client
+        .firestore()
+        .collection("appConfig")
+        .doc("runtime")
+        .set({ requiredMinAppVersion: "9.9.9.9" }),
+    );
+  });
 });

@@ -787,6 +787,34 @@ service cloud.firestore {
         );
     }
 
+    match /incidents/{incidentId} {
+      function isIncidentReporter() {
+        return isSignedIn() && resource.data.reporterUid == request.auth.uid;
+      }
+
+      allow get: if isAdmin() || isIncidentReporter();
+      allow list: if isAdmin();
+      // Incidents are created and mutated by Cloud Functions only.
+      allow create, update, delete: if false;
+
+      match /messages/{messageId} {
+        function parentIncident() {
+          return get(/databases/$(database)/documents/incidents/$(incidentId)).data;
+        }
+
+        allow get, list: if isAdmin()
+          || (isSignedIn() && parentIncident().reporterUid == request.auth.uid);
+        // Incident messages are written by callables only.
+        allow create, update, delete: if false;
+      }
+    }
+
+    // Global hotfix / runtime config: read by any signed-in client, server-written only.
+    match /appConfig/{docId} {
+      allow get: if isSignedIn();
+      allow list, create, update, delete: if false;
+    }
+
     match /_rateLimits/{docId} {
       allow read, write: if false;
     }
