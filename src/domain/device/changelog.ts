@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.9.1";
+export const APP_VERSION = "0.9.3";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,41 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.9.3",
+    date: "2026-07-25",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Map: top status bar clears the iPhone PWA notch again (safe-area padding was dropped from CSS)",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Privacy: replace Google Analytics with anonymous PostHog EU product analytics (no analytics cookies)",
+          "Privacy: ask before loading optional PostHog product analytics, with Accept or Decline",
+          "Accessibility: pinch zoom is allowed again on mobile viewports",
+          "Accessibility: action and dim text colors meet stronger contrast on dark surfaces",
+          "Create session: Use my location requests GPS only when you tap the button",
+        ],
+      }
+    ],
+  },
+  {
+    version: "0.9.2",
+    date: "2026-07-24",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Sessions: host Leave transfers host to another player, or ends the session when you are alone",
+          "Sessions: End session uses the server end path so join codes are freed",
+        ],
+      }
+    ],
+  },
   {
     version: "0.9.1",
     date: "2026-07-19",

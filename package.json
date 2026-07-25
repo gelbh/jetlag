@@ -1,7 +1,7 @@
 {
   "name": "jetlag",
   "private": true,
-  "version": "0.9.1",
+  "version": "0.9.3",
   "type": "module",
   "engines": {
     "node": ">=24.0.0"
@@ -49,7 +49,7 @@
     "cap:ios": "npm run cap:sync && npx cap open ios",
     "prepare": "husky",
     "lint:css": "stylelint \"src/**/*.css\" \"public/**/*.css\"",
-    "test:lighthouse": "lhci autorun"
+    "test:lighthouse": "lhci autorun --config=lighthouserc.cjs; m=$?; lhci autorun --config=lighthouserc.desktop.cjs; d=$?; exit $((m || d))"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
@@ -98,6 +98,7 @@
     "leaflet": "^1.9.4",
     "lru-cache": "^11.5.2",
     "martinez-polygon-clipping": "^0.8.1",
+    "posthog-js": "^1.407.2",
     "rbush": "^4.0.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",

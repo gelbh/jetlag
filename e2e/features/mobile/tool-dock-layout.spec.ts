@@ -6,7 +6,9 @@ import {
   prepareE2EPage,
   readToolDockOverflowMetrics,
   injectSimulatedSafeAreaBottom,
+  injectSimulatedSafeAreaTop,
   SIMULATED_SAFE_AREA_BOTTOM_PX,
+  SIMULATED_SAFE_AREA_TOP_PX,
 } from "../../fixtures";
 
 test.describe("mobile tool dock", () => {
@@ -170,6 +172,32 @@ test.describe("iPhone 13 PWA safe area", () => {
     );
     expect(metrics.barHeight).toBeLessThanOrEqual(60);
     expect(metrics.deadSpaceBelowIcons).toBeLessThanOrEqual(8);
+  });
+
+  test("status bar clears the notch safe-area band", async ({ page }) => {
+    await injectSimulatedSafeAreaTop(page, SIMULATED_SAFE_AREA_TOP_PX);
+
+    const metrics = await page.evaluate(() => {
+      const rail = document.querySelector(".jl-status-rail");
+      const bar = document.querySelector(".jl-status-bar");
+      const railRect = rail?.getBoundingClientRect();
+      const barRect = bar?.getBoundingClientRect();
+      return {
+        railPaddingTop: rail
+          ? Number.parseFloat(getComputedStyle(rail).paddingTop)
+          : 0,
+        barTop: barRect?.top ?? 0,
+        railTop: railRect?.top ?? 0,
+      };
+    });
+
+    expect(metrics.railPaddingTop).toBeGreaterThanOrEqual(
+      SIMULATED_SAFE_AREA_TOP_PX - 1,
+    );
+    expect(metrics.barTop).toBeGreaterThanOrEqual(
+      SIMULATED_SAFE_AREA_TOP_PX - 1,
+    );
+    expect(metrics.railTop).toBeLessThanOrEqual(1);
   });
 });
 

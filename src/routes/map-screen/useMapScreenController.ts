@@ -67,6 +67,7 @@ import {
   useSessionStore,
   type MapTool,
 } from "../../state/sessionStore";
+import { ANALYTICS_EVENTS, track } from "../../services/core/analytics";
 
 export function useMapScreenController() {
   const session = useSessionStore((state) => state.session);
@@ -717,6 +718,9 @@ export function useMapScreenController() {
       dismissTransientUi();
       setMapError(null);
       setActiveTool(tool);
+      if (tool !== "none") {
+        track(ANALYTICS_EVENTS.map_tool_used, { tool });
+      }
     },
     [
       awaitHiderAnswer,

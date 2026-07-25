@@ -8,6 +8,7 @@ import type {
   PremiumEntitlements,
   PremiumProductKey,
 } from "../../domain/billing/premiumProducts";
+import { ANALYTICS_EVENTS, track } from "../core/analytics";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
 import { deserializeSessionFromFirestore, serializeGameAreaForFirestore } from "../firestore/firestoreSerialization";
 
@@ -64,6 +65,7 @@ export async function startPremiumCheckout(
     if (!result.data.url) {
       throw new Error("Checkout URL missing.");
     }
+    track(ANALYTICS_EVENTS.premium_checkout_started, { productKey });
     return result.data.url;
   } catch (error) {
     throw mapCallableError(error, "Could not start checkout.");

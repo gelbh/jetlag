@@ -17,6 +17,8 @@ function mergeSessionsById(
   return [...byId.values()];
 }
 
+type RefreshOptions = { background?: boolean };
+
 export function useAdminSessionList(enabled: boolean) {
   const [sessions, setSessions] = useState<AdminSessionSummary[]>([]);
   const [loading, setLoading] = useState(enabled);
@@ -25,48 +27,86 @@ export function useAdminSessionList(enabled: boolean) {
   const [error, setError] = useState<string | null>(null);
   const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+  const [enabledState, setEnabledState] = useState(enabled);
   const requestGenerationRef = useRef(0);
+  const inFlightRefreshRef = useRef<Promise<void> | null>(null);
+  const trailingRefreshOptionsRef = useRef<RefreshOptions | null>(null);
 
-  const refresh = useCallback(async (options?: { background?: boolean }) => {
+  if (enabled !== enabledState) {
+    setEnabledState(enabled);
+    if (enabled) {
+      setLoading(true);
+      setError(null);
+    }
+  }
+
+  const refresh = useCallback(async (options?: RefreshOptions) => {
     if (!enabled) {
       return;
     }
 
-    const requestGeneration = ++requestGenerationRef.current;
-    const background = options?.background === true;
-
-    setLoadingMore(false);
-
-    if (background) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
+    if (inFlightRefreshRef.current) {
+      trailingRefreshOptionsRef.current = options ?? {};
+      await inFlightRefreshRef.current;
+      return;
     }
-    setError(null);
 
+    let currentOptions = options;
+    const run = (async () => {
+      for (;;) {
+        const requestGeneration = ++requestGenerationRef.current;
+        const background = currentOptions?.background === true;
+
+        setLoadingMore(false);
+
+        if (background) {
+          setRefreshing(true);
+        } else {
+          setLoading(true);
+        }
+        setError(null);
+
+        try {
+          const page = await fetchAdminSessionsPage(null);
+          if (requestGeneration !== requestGenerationRef.current) {
+            return;
+          }
+
+          setSessions(page.sessions);
+          setNextPageToken(page.nextPageToken);
+          setLastFetchedAt(new Date());
+        } catch (refreshError) {
+          if (requestGeneration !== requestGenerationRef.current) {
+            return;
+          }
+
+          setError(
+            refreshError instanceof Error
+              ? refreshError.message
+              : "Couldn't load live sessions.",
+          );
+        } finally {
+          if (requestGeneration === requestGenerationRef.current) {
+            setLoading(false);
+            setRefreshing(false);
+          }
+        }
+
+        const trailing = trailingRefreshOptionsRef.current;
+        trailingRefreshOptionsRef.current = null;
+        if (trailing == null) {
+          break;
+        }
+        currentOptions = trailing;
+      }
+    })();
+
+    inFlightRefreshRef.current = run;
     try {
-      const page = await fetchAdminSessionsPage(null);
-      if (requestGeneration !== requestGenerationRef.current) {
-        return;
-      }
-
-      setSessions(page.sessions);
-      setNextPageToken(page.nextPageToken);
-      setLastFetchedAt(new Date());
-    } catch (refreshError) {
-      if (requestGeneration !== requestGenerationRef.current) {
-        return;
-      }
-
-      setError(
-        refreshError instanceof Error
-          ? refreshError.message
-          : "Couldn't load live sessions.",
-      );
+      await run;
     } finally {
-      if (requestGeneration === requestGenerationRef.current) {
-        setLoading(false);
-        setRefreshing(false);
+      if (inFlightRefreshRef.current === run) {
+        inFlightRefreshRef.current = null;
       }
     }
   }, [enabled]);

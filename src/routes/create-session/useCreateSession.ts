@@ -52,6 +52,10 @@ import { grantAccess, hasAccessClaim } from "../../services/core/accessControl";
 import {
   createPremiumRemoteSession,
 } from "../../services/billing/premiumBilling";
+import {
+  ANALYTICS_EVENTS,
+  track,
+} from "../../services/core/analytics";
 import { setPremiumApiContext } from "../../services/core/premiumApiContext";
 import { unionGameAreas } from "../../domain/geometry/unionGameAreas";
 import { parseBoundaryFile } from "../../services/core/kmzImport";
@@ -230,7 +234,7 @@ export function useCreateSession() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- apply preset once per preset id; framing stable via hook
   }, [framing.applyFocusToGameArea, presets, searchParams]);
 
-  useEffect(() => {
+  const requestLocationBias = useCallback(() => {
     void getCurrentPosition({ highAccuracy: false })
       .then((reading) => {
         userLocationRef.current = [reading.lat, reading.lng];
@@ -659,6 +663,12 @@ export function useCreateSession() {
         setPremiumApiContext(localSession);
       }
 
+      track(ANALYTICS_EVENTS.session_created, {
+        tier: isFirebaseConfigured() ? tier : "free",
+        gameSize,
+        role: playerRole,
+      });
+
       if (!lowPowerMode) {
         const matchingAreas = await resolveSessionMatchingAreas({
           regionPackId,
@@ -804,5 +814,6 @@ export function useCreateSession() {
     handleSessionTierChange,
     handleDistanceUnitChange,
     handlePremiumSignedIn,
+    requestLocationBias,
   };
 }

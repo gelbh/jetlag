@@ -20,7 +20,7 @@ export function auditAdminDivisionQuery(
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
 
   return `
-    [out:json][timeout:45][bbox:${south},${west},${north},${east}];
+    [out:json][timeout:25][bbox:${south},${west},${north},${east}];
     area.searchArea;
     (
       relation(area.searchArea)["boundary"="administrative"]["admin_level"="${adminLevel}"]["name"];
@@ -35,7 +35,7 @@ export function auditLandmassQuery(gameArea: GameArea): string {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
 
   return `
-    [out:json][timeout:45][bbox:${south},${west},${north},${east}];
+    [out:json][timeout:25][bbox:${south},${west},${north},${east}];
     area.searchArea;
     (
       way(area.searchArea)["natural"="water"];
