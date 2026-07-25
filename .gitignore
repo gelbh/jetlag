@@ -18,3 +18,5 @@ ui-debug.log
 .DS_Store
 docs/
 .lighthouseci
+target/
+crates/*/pkg/

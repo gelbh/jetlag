@@ -18,12 +18,19 @@ const sampleFeature = {
 
 const buildMaskFromUnionInput = vi.fn(async () => sampleFeature);
 const buildEndGameMaskFromDisks = vi.fn(async () => sampleFeature);
+const getClientEnv = vi.fn(() => ({
+  VITE_GEOMETRY_MASK_KERNEL: undefined as string | undefined,
+}));
 
 vi.mock("comlink", () => ({
   wrap: vi.fn(() => ({
     buildMaskFromUnionInput,
     buildEndGameMaskFromDisks,
   })),
+}));
+
+vi.mock("../../config/env", () => ({
+  getClientEnv: () => getClientEnv(),
 }));
 
 import * as workerClient from "./eliminationMaskWorkerClient";
@@ -51,6 +58,11 @@ describe("eliminationMaskWorkerClient", () => {
     onMessageErrorHandler = null;
     buildMaskFromUnionInput.mockClear();
     buildEndGameMaskFromDisks.mockClear();
+    getClientEnv.mockReset();
+    getClientEnv.mockReturnValue({
+      VITE_GEOMETRY_MASK_KERNEL: undefined,
+    });
+    localStorage.removeItem("jl.geometry.maskKernel");
 
     class MockWorker {
       terminate = terminateSpy;
@@ -68,6 +80,9 @@ describe("eliminationMaskWorkerClient", () => {
     vi.stubGlobal("Worker", MockWorker);
     workerClient.resetEliminationMaskWorkerForTests();
     vi.clearAllMocks();
+    getClientEnv.mockReturnValue({
+      VITE_GEOMETRY_MASK_KERNEL: undefined,
+    });
   });
 
   it("requests combined elimination mask from the worker", async () => {
@@ -85,8 +100,70 @@ describe("eliminationMaskWorkerClient", () => {
         disks: expect.any(Array),
       }),
       gameArea,
+      "ts",
     );
     expect(buildEndGameMaskFromDisks).not.toHaveBeenCalled();
+  });
+
+  it("passes env mask kernel mode to the worker", async () => {
+    getClientEnv.mockReturnValue({
+      VITE_GEOMETRY_MASK_KERNEL: "wasm",
+    });
+
+    await workerClient.requestCombinedEliminationMask([], gameArea, [], []);
+
+    expect(buildMaskFromUnionInput).toHaveBeenCalledWith(
+      expect.any(Object),
+      gameArea,
+      "wasm",
+    );
+  });
+
+  it("passes localStorage mask kernel mode over env to the worker", async () => {
+    getClientEnv.mockReturnValue({
+      VITE_GEOMETRY_MASK_KERNEL: "ts",
+    });
+    localStorage.setItem("jl.geometry.maskKernel", "dual");
+
+    await workerClient.requestCombinedEliminationMask([], gameArea, [], []);
+
+    expect(buildMaskFromUnionInput).toHaveBeenCalledWith(
+      expect.any(Object),
+      gameArea,
+      "dual",
+    );
+  });
+
+  it("passes resolved mode to end-game worker calls", async () => {
+    getClientEnv.mockReturnValue({
+      VITE_GEOMETRY_MASK_KERNEL: "wasm",
+    });
+    const endGameHidingZones = [
+      {
+        hiderUid: "hider",
+        sessionId: "session",
+        stationId: "station",
+        stationName: "Station",
+        center: { lat: 51.5, lng: -0.1 },
+        radiusMeters: 500,
+        geometryJson: "{}",
+        status: "confirmed" as const,
+        confirmedAt: "2026-01-01T00:00:00.000Z",
+      },
+    ];
+
+    await workerClient.requestCombinedEliminationMask(
+      [],
+      gameArea,
+      [],
+      endGameHidingZones,
+    );
+
+    expect(buildEndGameMaskFromDisks).toHaveBeenCalledWith(
+      gameArea,
+      [{ center: [51.5, -0.1], radiusMeters: 500 }],
+      "wasm",
+    );
   });
 
   it("requests end-game mask from disks when hiding zones are present", async () => {
@@ -112,9 +189,11 @@ describe("eliminationMaskWorkerClient", () => {
     );
 
     expect(result?.geometry.type).toBe("Polygon");
-    expect(buildEndGameMaskFromDisks).toHaveBeenCalledWith(gameArea, [
-      { center: [51.5, -0.1], radiusMeters: 500 },
-    ]);
+    expect(buildEndGameMaskFromDisks).toHaveBeenCalledWith(
+      gameArea,
+      [{ center: [51.5, -0.1], radiusMeters: 500 }],
+      "ts",
+    );
     expect(buildMaskFromUnionInput).not.toHaveBeenCalled();
   });
 
