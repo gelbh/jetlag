@@ -12,7 +12,10 @@ import {
 
 export { ANALYTICS_EVENTS, type AnalyticsEventName, type AnalyticsEventProps };
 
-/** First-party Worker reverse proxy (see worker/posthogProxy.ts). */
+/**
+ * First-party Worker reverse proxy path.
+ * Must stay in sync with `POSTHOG_PROXY_PATH` in `worker/posthogProxy.ts`.
+ */
 export const POSTHOG_API_HOST = "/ingest";
 export const POSTHOG_UI_HOST = "https://eu.posthog.com";
 
@@ -43,11 +46,13 @@ const FORBIDDEN_PROP_KEYS = new Set([
 
 let initialized = false;
 let identifiedUid: string | null = null;
+/** Last auth identity seen — applied on init so Accept-after-sign-in still identifies. */
+let lastSeenIdentity: AnalyticsIdentity | null = null;
 
-export type AnalyticsIdentityUser = {
+export type AnalyticsIdentity = {
   uid: string;
   isAnonymous: boolean;
-} | null;
+};
 
 export function shouldEnableAnalytics(env: {
   prod: boolean;
@@ -96,6 +101,27 @@ function runtimeEnabled(): boolean {
   });
 }
 
+function applyIdentity(user: AnalyticsIdentity | null): void {
+  if (!initialized) {
+    return;
+  }
+  try {
+    if (user && !user.isAnonymous) {
+      if (identifiedUid !== user.uid) {
+        posthog.identify(user.uid);
+        identifiedUid = user.uid;
+      }
+      return;
+    }
+    if (identifiedUid !== null) {
+      posthog.reset(true);
+      identifiedUid = null;
+    }
+  } catch {
+    // Soft-fail: identity must never break app boot.
+  }
+}
+
 export function initAnalytics(): void {
   if (!runtimeEnabled() || initialized) {
     return;
@@ -110,6 +136,8 @@ export function initAnalytics(): void {
   }
 
   try {
+    // Sticky persistence can retain opt-out across deny → Accept; clear before init.
+    posthog.opt_in_capturing();
     posthog.init(key, {
       api_host: POSTHOG_API_HOST,
       ui_host: POSTHOG_UI_HOST,
@@ -126,6 +154,7 @@ export function initAnalytics(): void {
     // IP is personal data; PostHog's `ip: false` is a no-op — disable GeoIP enrichment.
     posthog.register({ $geoip_disable: true });
     initialized = true;
+    applyIdentity(lastSeenIdentity);
   } catch {
     // Soft-fail: analytics must never break app boot.
   }
@@ -151,25 +180,9 @@ export function denyAnalyticsConsent(): void {
   initialized = false;
 }
 
-export function syncAnalyticsIdentity(user: AnalyticsIdentityUser): void {
-  if (!initialized) {
-    return;
-  }
-  try {
-    if (user && !user.isAnonymous) {
-      if (identifiedUid !== user.uid) {
-        posthog.identify(user.uid);
-        identifiedUid = user.uid;
-      }
-      return;
-    }
-    if (identifiedUid !== null) {
-      posthog.reset();
-      identifiedUid = null;
-    }
-  } catch {
-    // Soft-fail: identity must never break app boot.
-  }
+export function syncAnalyticsIdentity(user: AnalyticsIdentity | null): void {
+  lastSeenIdentity = user;
+  applyIdentity(user);
 }
 
 function pageViewProperties(
@@ -232,4 +245,5 @@ export function resetAnalyticsForTests(options?: {
 }): void {
   initialized = options?.initialized ?? false;
   identifiedUid = null;
+  lastSeenIdentity = null;
 }

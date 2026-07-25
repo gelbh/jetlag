@@ -495,6 +495,7 @@ describe("posthogProxy", () => {
         expect(req.url).toBe("https://eu.i.posthog.com/e/?ip=0");
         expect(req.headers.get("Host")).toBe("eu.i.posthog.com");
         expect(req.headers.get("Cookie")).toBeNull();
+        expect(req.headers.get("X-Forwarded-For")).toBeNull();
         return new Response("ok", { status: 200 });
       },
     );

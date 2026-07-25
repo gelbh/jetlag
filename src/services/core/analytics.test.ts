@@ -23,6 +23,7 @@ const {
   posthogRegister,
   posthogReset,
   posthogOptOut,
+  posthogOptIn,
   posthogIdentify,
 } = vi.hoisted(() => ({
   posthogInit: vi.fn(),
@@ -30,6 +31,7 @@ const {
   posthogRegister: vi.fn(),
   posthogReset: vi.fn(),
   posthogOptOut: vi.fn(),
+  posthogOptIn: vi.fn(),
   posthogIdentify: vi.fn(),
 }));
 
@@ -40,6 +42,7 @@ vi.mock("posthog-js", () => ({
     register: posthogRegister,
     reset: posthogReset,
     opt_out_capturing: posthogOptOut,
+    opt_in_capturing: posthogOptIn,
     identify: posthogIdentify,
   },
 }));
@@ -106,6 +109,7 @@ describe("analytics facade", () => {
     posthogRegister.mockReset();
     posthogReset.mockReset();
     posthogOptOut.mockReset();
+    posthogOptIn.mockReset();
     posthogIdentify.mockReset();
   });
 
@@ -158,6 +162,7 @@ describe("analytics facade", () => {
 
     initAnalytics();
 
+    expect(posthogOptIn).toHaveBeenCalled();
     expect(posthogInit).toHaveBeenCalledOnce();
     expect(posthogInit.mock.calls[0]?.[1]).toMatchObject({
       api_host: "/ingest",
@@ -284,6 +289,28 @@ describe("analytics facade", () => {
     expect(posthogCapture).not.toHaveBeenCalled();
   });
 
+  it("applies stashed identity on init after sync before consent", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    syncAnalyticsIdentity({ uid: "user-accept", isAnonymous: false });
+    writeAnalyticsConsent("granted");
+    initAnalytics();
+    expect(posthogIdentify).toHaveBeenCalledOnce();
+    expect(posthogIdentify).toHaveBeenCalledWith("user-accept");
+  });
+
+  it("deny then grant calls opt_in and init twice", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    vi.stubGlobal("location", { pathname: "/", search: "" });
+    writeAnalyticsConsent("granted");
+    initAnalytics();
+    denyAnalyticsConsent();
+    grantAnalyticsConsent();
+    expect(posthogOptIn).toHaveBeenCalledTimes(2);
+    expect(posthogInit).toHaveBeenCalledTimes(2);
+  });
+
   it("identifies permanent users once and resets when they sign out", () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("MODE", "production");
@@ -297,6 +324,18 @@ describe("analytics facade", () => {
 
     syncAnalyticsIdentity({ uid: "anon-9", isAnonymous: true });
     expect(posthogReset).toHaveBeenCalled();
+  });
+
+  it("resets when sync receives null after identify", () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("MODE", "production");
+    writeAnalyticsConsent("granted");
+    initAnalytics();
+    syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false });
+    posthogReset.mockClear();
+    syncAnalyticsIdentity(null);
+    expect(posthogReset).toHaveBeenCalledWith(true);
+    expect(posthogIdentify).toHaveBeenCalledTimes(1);
   });
 
   it("does not identify anonymous users", () => {

@@ -1,3 +1,6 @@
+/**
+ * Must stay in sync with client `POSTHOG_API_HOST` in `src/services/core/analytics.ts`.
+ */
 export const POSTHOG_PROXY_PATH = "/ingest";
 
 const API_HOST = "eu.i.posthog.com";
@@ -36,10 +39,8 @@ export async function handlePosthogProxyRequest(
   const headers = new Headers(request.headers);
   headers.delete("cookie");
   headers.set("Host", host);
-  const clientIp = request.headers.get("CF-Connecting-IP");
-  if (clientIp) {
-    headers.set("X-Forwarded-For", clientIp);
-  }
+  // Do not forward CF-Connecting-IP / X-Forwarded-For: product disables GeoIP
+  // and privacy copy says IP enrichment is off.
 
   const init: RequestInit = {
     method: request.method,
@@ -51,11 +52,10 @@ export async function handlePosthogProxyRequest(
   }
 
   const upstream = await fetchImpl(`https://${host}${pathWithSearch}`, init);
+  const responseHeaders = new Headers(upstream.headers);
+  responseHeaders.delete("set-cookie");
   return new Response(upstream.body, {
     status: upstream.status,
-    headers: {
-      "Content-Type":
-        upstream.headers.get("Content-Type") ?? "application/octet-stream",
-    },
+    headers: responseHeaders,
   });
 }
