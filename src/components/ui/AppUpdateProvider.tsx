@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -16,6 +17,14 @@ import {
 } from "../../domain/device/serviceWorkerRefresh";
 import { setServiceWorkerChunkReloadContext } from "../../domain/device/lazyWithChunkRetry";
 import { tryUpdateServiceWorker } from "../../domain/device/serviceWorkerUpdate";
+import { compareAppVersions } from "../../domain/session/sessionVersion";
+import { useHotfixGraceReload } from "../../hooks/useHotfixGraceReload";
+import { isFirebaseConfigured } from "../../services/core/firebase";
+import {
+  DEFAULT_HOTFIX_GRACE_SECONDS,
+  subscribeAppConfigRuntime,
+  type AppConfigRuntime,
+} from "../../services/firestore/firestoreIncidents";
 import { useSessionStore } from "../../state/sessionStore";
 import {
   AppUpdateContext,
@@ -24,10 +33,29 @@ import {
 
 type ServiceWorkerReloader = (reloadPage?: boolean) => Promise<void>;
 
+function pickHigherVersion(
+  left: string | undefined,
+  right: string | undefined,
+): string | null {
+  if (!left && !right) {
+    return null;
+  }
+  if (!left) {
+    return right ?? null;
+  }
+  if (!right) {
+    return left;
+  }
+  return compareAppVersions(left, right) >= 0 ? left : right;
+}
+
 export function AppUpdateProvider({ children }: { children: ReactNode }) {
   const [needsRefresh, setNeedsRefresh] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [updateSW, setUpdateSW] = useState<ServiceWorkerReloader | null>(null);
+  const [runtimeConfig, setRuntimeConfig] = useState<AppConfigRuntime | null>(
+    null,
+  );
   const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
   const location = useLocation();
   const session = useSessionStore((state) => state.session);
@@ -37,6 +65,44 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
   const safeToReload = isSafeToReloadApp({
     session,
     pathname: location.pathname,
+  });
+
+  // TODO(Task 8 UI): Honor session.opsMitigation.type === "soft_reload" with a
+  // one-shot soft-reload chip/prompt (no board wipe). No client pattern yet.
+
+  useEffect(() => {
+    if (!isFirebaseConfigured()) {
+      setRuntimeConfig(null);
+      return;
+    }
+
+    return subscribeAppConfigRuntime(setRuntimeConfig, () => {
+      setRuntimeConfig(null);
+    });
+  }, []);
+
+  const requiredMinAppVersion = pickHigherVersion(
+    session?.requiredMinAppVersion,
+    runtimeConfig?.requiredMinAppVersion,
+  );
+  const graceSeconds =
+    requiredMinAppVersion &&
+    session?.requiredMinAppVersion === requiredMinAppVersion &&
+    typeof session.requiredMinAppVersionGraceSeconds === "number"
+      ? session.requiredMinAppVersionGraceSeconds
+      : (runtimeConfig?.hotfixGraceSeconds ?? DEFAULT_HOTFIX_GRACE_SECONDS);
+
+  const applyHotfixReload = useCallback(() => {
+    void applyServiceWorkerUpdate(
+      registrationRef.current,
+      updateSW ?? undefined,
+    );
+  }, [updateSW]);
+
+  const hotfixGrace = useHotfixGraceReload({
+    requiredMinAppVersion,
+    graceSeconds,
+    reload: applyHotfixReload,
   });
 
   useEffect(() => {
@@ -151,9 +217,15 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
           updateSW ?? undefined,
         );
       },
+      hotfixGraceActive: hotfixGrace.active,
+      hotfixGraceSecondsRemaining: hotfixGrace.secondsRemaining,
+      hotfixRequiredMinAppVersion: hotfixGrace.requiredMinAppVersion,
     };
   }, [
     dismissed,
+    hotfixGrace.active,
+    hotfixGrace.requiredMinAppVersion,
+    hotfixGrace.secondsRemaining,
     inActiveMapSession,
     needsRefresh,
     safeToReload,
