@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import wasm from "vite-plugin-wasm";
 
 const appVersion = (
   JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as {
@@ -21,15 +22,11 @@ export default defineConfig(({ mode }) => ({
     port: 5173,
     strictPort: false,
   },
+  // esnext: native top-level await for wasm-pack modules (Vite 8 / rolldown).
+  // vite-plugin-top-level-await is incompatible with this stack.
   build: {
+    target: "esnext",
     sourcemap: mode === "production" ? "hidden" : true,
-    worker: {
-      rollupOptions: {
-        output: {
-          inlineDynamicImports: true,
-        },
-      },
-    },
     rolldownOptions: {
       output: {
         codeSplitting: {
@@ -59,7 +56,17 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
+  worker: {
+    plugins: () => [wasm()],
+    format: "es",
+    rollupOptions: {
+      output: {
+        codeSplitting: false,
+      },
+    },
+  },
   plugins: [
+    wasm(),
     ...(sentryAuthToken && sentryOrg && sentryProject
       ? [
           sentryVitePlugin({
