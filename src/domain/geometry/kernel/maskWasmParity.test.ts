@@ -15,7 +15,7 @@ import type { DiskSpec, GameAreaGeometry, PolygonFeature } from "./types";
 
 const pkgEntry = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
-  "../../../../crates/jetlag-geometry-mask/pkg/jetlag_geometry_mask.js",
+  "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js",
 );
 const wasmPkgReady = existsSync(pkgEntry);
 

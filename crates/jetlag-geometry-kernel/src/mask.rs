@@ -155,7 +155,8 @@ fn merge_multipolygons(
     }
 }
 
-fn disk_to_polygon(disk: &DiskSpec) -> Polygon<f64> {
+/// Geodesic disk polygon (`center` is `[lat, lng]`), 64-step Turf-compatible.
+pub(crate) fn disk_to_polygon(disk: &DiskSpec) -> Polygon<f64> {
     let lat = disk.center[0];
     let lng = disk.center[1];
     let mut coords = Vec::with_capacity(DISK_STEPS + 1);
@@ -280,7 +281,7 @@ fn coords_to_linestring(ring: &[Vec<f64>]) -> Option<LineString<f64>> {
     Some(LineString(coords))
 }
 
-fn multipolygon_to_feature(mp: &MultiPolygon<f64>) -> Option<PolygonFeature> {
+pub(crate) fn multipolygon_to_feature(mp: &MultiPolygon<f64>) -> Option<PolygonFeature> {
     if mp.0.is_empty() {
         return None;
     }

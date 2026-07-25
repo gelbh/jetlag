@@ -1,10 +1,10 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 import wasm from "vite-plugin-wasm";
-import { optionalMaskWasmPkg } from "./vite.optional-mask-wasm-pkg";
+import { optionalKernelWasmPkg } from "./vite.optional-kernel-wasm-pkg";
 
 export default defineConfig({
-  plugins: [optionalMaskWasmPkg(), react(), wasm()],
+  plugins: [optionalKernelWasmPkg(), react(), wasm()],
   test: {
     environment: "jsdom",
     setupFiles: "./src/test/setup.ts",
