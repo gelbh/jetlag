@@ -5,10 +5,13 @@ import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import { usePendingQuestionResolver } from "./usePendingQuestionResolver";
 
 const updatePendingQuestion = vi.fn();
+const getPendingQuestionStatus = vi.fn();
 const createAnnotation = vi.fn();
 
 vi.mock("../../services/firestore/firestoreSessionExtras", () => ({
   updatePendingQuestion: (...args: unknown[]) => updatePendingQuestion(...args),
+  getPendingQuestionStatus: (...args: unknown[]) =>
+    getPendingQuestionStatus(...args),
 }));
 
 const gameArea: GameArea = {
@@ -46,7 +49,9 @@ const photoPending: PendingQuestionRecord = {
 describe("usePendingQuestionResolver", () => {
   beforeEach(() => {
     updatePendingQuestion.mockReset();
+    getPendingQuestionStatus.mockReset();
     createAnnotation.mockReset();
+    getPendingQuestionStatus.mockResolvedValue("answered");
   });
 
   it("resolves photo questions without creating annotations", async () => {
@@ -94,5 +99,86 @@ describe("usePendingQuestionResolver", () => {
     });
 
     expect(updatePendingQuestion).not.toHaveBeenCalled();
+    expect(getPendingQuestionStatus).not.toHaveBeenCalled();
+  });
+
+  it("skips create when the pending question is no longer answered", async () => {
+    getPendingQuestionStatus.mockResolvedValue("resolved");
+    updatePendingQuestion.mockResolvedValue(undefined);
+    createAnnotation.mockResolvedValue({ id: "ann-1" } as AnnotationRecord);
+
+    renderHook(() =>
+      usePendingQuestionResolver({
+        sessionId: "session-1",
+        enabled: true,
+        pendingQuestions: [photoPending],
+        createAnnotation,
+        gameArea,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(getPendingQuestionStatus).toHaveBeenCalledWith(
+        "session-1",
+        "pq-photo",
+      );
+    });
+
+    expect(createAnnotation).not.toHaveBeenCalled();
+    expect(updatePendingQuestion).not.toHaveBeenCalled();
+  });
+
+  it("creates radar annotations with the pending question id", async () => {
+    const radarPending: PendingQuestionRecord = {
+      id: "pq-radar-1",
+      sessionId: "session-1",
+      toolType: "radar",
+      createdByUid: "seeker-1",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      status: "answered",
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-0.15, 51.45] },
+        }),
+        metadata: { radiusKm: 1 },
+      },
+      replyOptions: [
+        { id: "yes", label: "Yes" },
+        { id: "no", label: "No" },
+      ],
+      promptText: "Radar?",
+      answer: "yes",
+    };
+
+    updatePendingQuestion.mockResolvedValue(undefined);
+    createAnnotation.mockResolvedValue({
+      id: "pq-radar-1",
+    } as AnnotationRecord);
+
+    renderHook(() =>
+      usePendingQuestionResolver({
+        sessionId: "session-1",
+        enabled: true,
+        pendingQuestions: [radarPending],
+        createAnnotation,
+        gameArea,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(createAnnotation).toHaveBeenCalledTimes(1);
+    });
+
+    expect(createAnnotation.mock.calls[0]?.[0]).toMatchObject({
+      id: "pq-radar-1",
+      type: "radar",
+    });
+    expect(updatePendingQuestion).toHaveBeenCalledWith(
+      "session-1",
+      "pq-radar-1",
+      { status: "resolved", resolvedAnnotationId: "pq-radar-1" },
+    );
   });
 });
