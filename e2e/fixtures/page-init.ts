@@ -7,6 +7,8 @@ import {
 async function applyPageCaptureInit(page: Page) {
   await page.addInitScript(() => {
     localStorage.setItem("jetlag.mapFirstRunDismissed", "1");
+    // Prod preview shows AnalyticsConsentBanner when unset — keep CI e2e/visual clean.
+    localStorage.setItem("jl.analytics.consent", "denied");
     try {
       indexedDB.deleteDatabase("jetlag-geographic-cache");
     } catch {
