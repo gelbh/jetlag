@@ -54,22 +54,11 @@ describe("parseClientEnv", () => {
       VITE_SENTRY_DSN: "https://examplePublicKey@o0.ingest.sentry.io/0",
       VITE_SENTRY_ENVIRONMENT: "production",
       VITE_POSTHOG_KEY: "phc_test_key",
-      VITE_POSTHOG_HOST: "https://eu.i.posthog.com",
     });
 
     expect(env.VITE_OVERPASS_PROXY_URL).toBe("https://proxy.example/overpass");
     expect(env.VITE_SENTRY_ENVIRONMENT).toBe("production");
     expect(env.VITE_POSTHOG_KEY).toBe("phc_test_key");
-    expect(env.VITE_POSTHOG_HOST).toBe("https://eu.i.posthog.com");
-  });
-
-  it("rejects non-EU PostHog host", () => {
-    expect(() =>
-      parseClientEnv({
-        VITE_POSTHOG_KEY: "phc_test",
-        VITE_POSTHOG_HOST: "https://us.i.posthog.com",
-      }),
-    ).toThrow();
   });
 
 

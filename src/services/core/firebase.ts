@@ -7,6 +7,7 @@ import {
   browserSessionPersistence,
   inMemoryPersistence,
   signInAnonymously,
+  onAuthStateChanged,
   type Auth,
   type User,
 } from "firebase/auth";
@@ -35,6 +36,7 @@ import {
   setBootstrapTag,
 } from "./sentry";
 import { isRecaptchaAlreadyRenderedError } from "./appCheckErrors";
+import { syncAnalyticsIdentity } from "./analytics";
 
 export async function getFirebaseStorage(): Promise<
   import("firebase/storage").FirebaseStorage
@@ -303,6 +305,8 @@ async function bootstrapAuthState(): Promise<void> {
   setBootstrapTag("auth_ready");
 }
 
+let authAnalyticsUnsubscribe: (() => void) | null = null;
+
 function getAuthBootstrapPromise(): Promise<void> {
   authStateReadyPromise ??= bootstrapAuthState()
     .catch((error) => {
@@ -319,6 +323,12 @@ export function startAuthBootstrap(): void {
   if (!isFirebaseConfigured()) {
     return;
   }
+
+  authAnalyticsUnsubscribe ??= onAuthStateChanged(getFirebaseAuth(), (user) => {
+    syncAnalyticsIdentity(
+      user ? { uid: user.uid, isAnonymous: user.isAnonymous } : null,
+    );
+  });
 
   void getAuthBootstrapPromise();
 }
