@@ -21,14 +21,19 @@ import {
   resolveTentaclePendingQuestion,
 } from "../../domain/questions/ui";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
-import { updatePendingQuestion } from "../../services/firestore/firestoreSessionExtras";
+import {
+  getPendingQuestionStatus,
+  updatePendingQuestion,
+} from "../../services/firestore/firestoreSessionExtras";
 
 interface UsePendingQuestionResolverParams {
   sessionId: string | undefined;
   enabled: boolean;
   pendingQuestions: readonly PendingQuestionRecord[];
   createAnnotation: (
-    annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
+    annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status"> & {
+      id?: string;
+    },
   ) => Promise<AnnotationRecord>;
   gameArea: GameArea;
   sessionResetAt?: string;
@@ -128,8 +133,17 @@ export function usePendingQuestionResolver({
       resolvingRef.current.add(pending.id);
 
       void (async () => {
+        let annotationCreated = false;
         try {
           if (isStaleAfterReset(pending.createdAt, sessionResetAt)) {
+            return;
+          }
+
+          const latestStatus = await getPendingQuestionStatus(
+            sessionId,
+            pending.id,
+          );
+          if (latestStatus !== "answered") {
             return;
           }
 
@@ -148,14 +162,23 @@ export function usePendingQuestionResolver({
             return;
           }
 
-          const created = await createAnnotation(annotation);
+          // Stable id so concurrent seekers/observers overwrite one doc, not two.
+          const created = await createAnnotation({
+            ...annotation,
+            id: pending.id,
+          });
+          annotationCreated = true;
 
           await updatePendingQuestion(sessionId, pending.id, {
             status: "resolved",
             resolvedAnnotationId: created.id,
           });
         } catch {
-          resolvingRef.current.delete(pending.id);
+          // Keep the guard if the annotation already landed so a retry cannot
+          // append a second local/remote annotation for the same question.
+          if (!annotationCreated) {
+            resolvingRef.current.delete(pending.id);
+          }
         }
       })();
     }

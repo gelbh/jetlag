@@ -388,6 +388,9 @@ export function distanceBetweenPoints(
   );
 }
 
+/** Match radar / elimination / hiding-zone disks — coarse steps undersize near chords. */
+const NEAR_REGION_DISK_STEPS = 64;
+
 export function buildLocationNearRegion(
   target: LatLngTuple,
   distanceMeters: number,
@@ -398,7 +401,7 @@ export function buildLocationNearRegion(
   }
 
   const buffered = turfCircle(turfPoint([target[1], target[0]]), distanceMeters / 1000, {
-    steps: 16,
+    steps: NEAR_REGION_DISK_STEPS,
     units: "kilometers",
   });
 
@@ -445,7 +448,7 @@ export function buildMultiPlaceNearRegion(
 
   for (const place of places) {
     const buffered = turfCircle(turfPoint([place[1], place[0]]), distanceMeters / 1000, {
-      steps: 16,
+      steps: NEAR_REGION_DISK_STEPS,
       units: "kilometers",
     });
 
