@@ -2093,6 +2093,88 @@ describe("firestore.rules", () => {
     );
   });
 
+  async function seedHostConfirm() {
+    await seedIncident();
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      await db.collection("sessions").doc("session-1").set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "reporter-1"],
+          memberRoles: { "host-1": "seeker", "reporter-1": "hider" },
+        }),
+      );
+      await db
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("hostConfirms")
+        .doc("confirm-1")
+        .set({
+          id: "confirm-1",
+          incidentId: "inc-1",
+          sessionId: "session-1",
+          tool: "reset_board",
+          args: {},
+          argsHash: "abc",
+          status: "pending",
+          hostUid: "host-1",
+          requestedByUid: "agent-1",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          expiresAt: "2026-01-01T00:05:00.000Z",
+        });
+    });
+  }
+
+  it("allows the session host to read hostConfirms but not write them", async () => {
+    await seedHostConfirm();
+    const host = testEnv.authenticatedContext("host-1");
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("hostConfirms")
+        .doc("confirm-1")
+        .get(),
+    );
+    await assertFails(
+      host
+        .firestore()
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("hostConfirms")
+        .doc("confirm-1")
+        .update({ status: "approved" }),
+    );
+  });
+
+  it("denies a non-host stranger reading hostConfirms", async () => {
+    await seedHostConfirm();
+    const stranger = testEnv.authenticatedContext("stranger-1");
+    await assertFails(
+      stranger
+        .firestore()
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("hostConfirms")
+        .doc("confirm-1")
+        .get(),
+    );
+  });
+
+  it("allows the reporter to read hostConfirms (status only; approve via callable)", async () => {
+    await seedHostConfirm();
+    const reporter = testEnv.authenticatedContext("reporter-1");
+    await assertSucceeds(
+      reporter
+        .firestore()
+        .collection("incidents")
+        .doc("inc-1")
+        .collection("hostConfirms")
+        .doc("confirm-1")
+        .get(),
+    );
+  });
+
   it("allows signed-in clients to read appConfig but not write it", async () => {
     await testEnv.withSecurityRulesDisabled(async (ctx) => {
       await ctx.firestore().collection("appConfig").doc("runtime").set({

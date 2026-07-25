@@ -52,6 +52,13 @@ export function NotificationPreferencesSection({
         disabled={!preferences.enabled}
       />
       <SettingsToggleRow
+        label="Host confirmations"
+        description="When a fix agent needs your OK for a destructive session change."
+        checked={preferences.incidentHostConfirm}
+        onChange={(incidentHostConfirm) => onChange({ incidentHostConfirm })}
+        disabled={!preferences.enabled}
+      />
+      <SettingsToggleRow
         label="Live Activities / ongoing alerts"
         description="Lock screen countdown for question deadlines and session timers on supported phones."
         checked={preferences.liveActivities}

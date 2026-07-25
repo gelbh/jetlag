@@ -37,6 +37,22 @@ import {
   INCIDENT_INVALID_HOTFIX_VERSION,
   publishIncidentHotfixHandler,
 } from "../incident/publishIncidentHotfix.mjs";
+import {
+  approveHostConfirmHandler,
+  denyHostConfirmHandler,
+  HOST_CONFIRM_EXPIRED,
+  HOST_CONFIRM_FORBIDDEN,
+  HOST_CONFIRM_INVALID_TOOL,
+  HOST_CONFIRM_NO_SESSION,
+  HOST_CONFIRM_NOT_FOUND,
+  HOST_CONFIRM_NOT_PENDING,
+  HOST_CONFIRM_SESSION_MISMATCH,
+  HOST_CONFIRM_UNAUTHENTICATED,
+} from "../incident/hostConfirm.mjs";
+import {
+  cancelPendingQuestionInSession,
+  softDeleteAnnotationInSession,
+} from "../incident/sessionOpsExecute.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
 const incidentEmailSecret = defineSecret("INCIDENT_EMAIL_SECRET");
@@ -90,6 +106,37 @@ function mapIncidentError(error) {
       throw new HttpsError(
         "invalid-argument",
         "Hotfix version must be greater than or equal to the reported app version.",
+      );
+    case HOST_CONFIRM_UNAUTHENTICATED:
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    case HOST_CONFIRM_NOT_FOUND:
+      throw new HttpsError("not-found", "Host confirmation not found.");
+    case HOST_CONFIRM_FORBIDDEN:
+      throw new HttpsError(
+        "permission-denied",
+        "Only the session host can approve this action.",
+      );
+    case HOST_CONFIRM_EXPIRED:
+      throw new HttpsError(
+        "failed-precondition",
+        "This confirmation expired. Ask the fix agent to try again.",
+      );
+    case HOST_CONFIRM_NOT_PENDING:
+      throw new HttpsError(
+        "failed-precondition",
+        "This confirmation was already used or denied.",
+      );
+    case HOST_CONFIRM_NO_SESSION:
+      throw new HttpsError(
+        "failed-precondition",
+        "Incident has no linked session host.",
+      );
+    case HOST_CONFIRM_INVALID_TOOL:
+      throw new HttpsError("invalid-argument", "Invalid tool for confirmation.");
+    case HOST_CONFIRM_SESSION_MISMATCH:
+      throw new HttpsError(
+        "invalid-argument",
+        "Confirmation session does not match the incident.",
       );
     default:
       throw error;
@@ -203,6 +250,68 @@ export const publishIncidentHotfix = onCall(
         incidentId: request.data?.incidentId,
         toVersion: request.data?.toVersion,
         graceSeconds: request.data?.graceSeconds,
+        uid: request.auth.uid,
+      });
+    } catch (error) {
+      mapIncidentError(error);
+    }
+  }),
+);
+
+/** Host approves a pending destructive session-ops confirm and executes once. */
+export const approveHostConfirm = onCall(
+  { secrets: [sentryDsnSecret], enforceAppCheck: true },
+  withSentryEventHandler(async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+
+    const db = getFirestore();
+    try {
+      return await approveHostConfirmHandler(
+        db,
+        {
+          incidentId: request.data?.incidentId,
+          confirmId: request.data?.confirmId,
+          uid: request.auth.uid,
+        },
+        {
+          executeDeps: {
+            moderate: (sessionId, action, adminUid) =>
+              moderateSession(db, sessionId, action, adminUid),
+            clearPendingQuestions: (sessionId) =>
+              cancelOpenPendingQuestions(db, sessionId),
+            cancelPendingQuestion: (sessionId, questionId) =>
+              cancelPendingQuestionInSession(db, sessionId, questionId),
+            softDeleteAnnotation: (sessionId, annotationId) =>
+              softDeleteAnnotationInSession(
+                db,
+                sessionId,
+                annotationId,
+                new Date().toISOString(),
+              ),
+          },
+        },
+      );
+    } catch (error) {
+      mapIncidentError(error);
+    }
+  }),
+);
+
+/** Host denies a pending confirm without executing. */
+export const denyHostConfirm = onCall(
+  { secrets: [sentryDsnSecret], enforceAppCheck: true },
+  withSentryEventHandler(async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+
+    const db = getFirestore();
+    try {
+      return await denyHostConfirmHandler(db, {
+        incidentId: request.data?.incidentId,
+        confirmId: request.data?.confirmId,
         uid: request.auth.uid,
       });
     } catch (error) {

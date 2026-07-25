@@ -19,11 +19,23 @@ describe("notifySessionEvent helpers", () => {
       newQuestions: true,
       timerChanges: false,
       chatMessages: false,
+      incidentHostConfirm: true,
       liveActivities: true,
     };
 
     assert.equal(shouldNotifyForPreference(prefs, "new_question"), true);
     assert.equal(shouldNotifyForPreference(prefs, "timer_changed"), false);
+    assert.equal(
+      shouldNotifyForPreference(prefs, "incident_host_confirm"),
+      true,
+    );
+    assert.equal(
+      shouldNotifyForPreference(
+        { ...prefs, incidentHostConfirm: false },
+        "incident_host_confirm",
+      ),
+      false,
+    );
     assert.equal(
       shouldNotifyForPreference({ ...prefs, enabled: false }, "new_question"),
       false,
@@ -60,5 +72,44 @@ describe("notifySessionEvent helpers", () => {
     assert.equal(payload.title, "New question");
     assert.match(payload.body, /Radar/);
     assert.equal(payload.data.sessionId, "session-1");
+  });
+
+  it("selects host token for incident_host_confirm via targetUid", () => {
+    const tokens = selectDeviceTokens(
+      {
+        host1: {
+          token: "host-token",
+          role: "seeker",
+          preferences: { enabled: true, incidentHostConfirm: true },
+        },
+        hider1: {
+          token: "hider-token",
+          role: "hider",
+          preferences: { enabled: true, incidentHostConfirm: true },
+        },
+      },
+      {
+        eventType: "incident_host_confirm",
+        targetUid: "host1",
+        senderUid: "agent-1",
+      },
+    );
+
+    assert.deepEqual(tokens, ["host-token"]);
+  });
+
+  it("builds incident_host_confirm payload", () => {
+    const payload = buildNotificationPayload("incident_host_confirm", {
+      sessionId: "session-1",
+      incidentId: "inc-1",
+      confirmId: "confirm-1",
+      tool: "reset_board",
+    });
+
+    assert.equal(payload.title, "Host confirmation needed");
+    assert.match(payload.body, /reset board/);
+    assert.equal(payload.data.incidentId, "inc-1");
+    assert.equal(payload.data.confirmId, "confirm-1");
+    assert.equal(payload.data.event, "incident_host_confirm");
   });
 });

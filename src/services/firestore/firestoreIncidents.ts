@@ -8,6 +8,8 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import {
+  type HostConfirmRecord,
+  type HostConfirmStatus,
   type IncidentDiagnostics,
   type IncidentEmailState,
   type IncidentHotfixState,
@@ -43,6 +45,10 @@ function incidentDoc(incidentId: string) {
 
 function incidentMessagesCollection(incidentId: string) {
   return collection(getFirestoreDb(), "incidents", incidentId, "messages");
+}
+
+function incidentHostConfirmsCollection(incidentId: string) {
+  return collection(getFirestoreDb(), "incidents", incidentId, "hostConfirms");
 }
 
 function appConfigRuntimeDoc() {
@@ -308,6 +314,97 @@ export function subscribeIncidentMessages(
         }
       }
       onChange(messages);
+    },
+    (error) => onError(error),
+  );
+}
+
+const HOST_CONFIRM_STATUSES = new Set<HostConfirmStatus>([
+  "pending",
+  "approved",
+  "denied",
+  "expired",
+]);
+
+export function deserializeHostConfirmFromFirestore(
+  id: string,
+  incidentId: string,
+  data: Record<string, unknown>,
+): HostConfirmRecord | null {
+  const status = data.status;
+  if (
+    typeof status !== "string" ||
+    !HOST_CONFIRM_STATUSES.has(status as HostConfirmStatus) ||
+    typeof data.sessionId !== "string" ||
+    typeof data.tool !== "string" ||
+    typeof data.argsHash !== "string" ||
+    typeof data.hostUid !== "string" ||
+    typeof data.createdAt !== "string" ||
+    typeof data.expiresAt !== "string"
+  ) {
+    return null;
+  }
+
+  const args =
+    data.args && typeof data.args === "object" && !Array.isArray(data.args)
+      ? (data.args as Record<string, unknown>)
+      : {};
+
+  const record: HostConfirmRecord = {
+    id,
+    incidentId,
+    sessionId: data.sessionId,
+    tool: data.tool,
+    args,
+    argsHash: data.argsHash,
+    status: status as HostConfirmStatus,
+    hostUid: data.hostUid,
+    requestedByUid: asNullableString(data.requestedByUid),
+    createdAt: data.createdAt,
+    expiresAt: data.expiresAt,
+  };
+  if (typeof data.approvedAt === "string") {
+    record.approvedAt = data.approvedAt;
+  }
+  if (typeof data.approvedByUid === "string") {
+    record.approvedByUid = data.approvedByUid;
+  }
+  if (typeof data.deniedAt === "string") {
+    record.deniedAt = data.deniedAt;
+  }
+  if (typeof data.deniedByUid === "string") {
+    record.deniedByUid = data.deniedByUid;
+  }
+  if (typeof data.executedAt === "string") {
+    record.executedAt = data.executedAt;
+  }
+  return record;
+}
+
+/** Live host-confirm docs for an incident (host modal / agent status). */
+export function subscribeIncidentHostConfirms(
+  incidentId: string,
+  onChange: (confirms: HostConfirmRecord[]) => void,
+  onError: (error: Error) => void,
+): Unsubscribe {
+  return onSnapshot(
+    query(
+      incidentHostConfirmsCollection(incidentId),
+      orderBy("createdAt", "desc"),
+    ),
+    (snapshot) => {
+      const confirms: HostConfirmRecord[] = [];
+      for (const confirmDoc of snapshot.docs) {
+        const confirm = deserializeHostConfirmFromFirestore(
+          confirmDoc.id,
+          incidentId,
+          confirmDoc.data() as Record<string, unknown>,
+        );
+        if (confirm) {
+          confirms.push(confirm);
+        }
+      }
+      onChange(confirms);
     },
     (error) => onError(error),
   );

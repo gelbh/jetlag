@@ -146,3 +146,55 @@ export async function publishIncidentHotfix(
     throw mapCallableError(error, "Could not publish the hotfix.");
   }
 }
+
+export interface ApproveHostConfirmResult {
+  confirmId: string;
+  status: "approved";
+  tool: string;
+  result: unknown;
+}
+
+export async function approveHostConfirm(
+  incidentId: string,
+  confirmId: string,
+): Promise<ApproveHostConfirmResult> {
+  requireFirebase();
+
+  const functions = await getFirebaseFunctions();
+  const callable = httpsCallable<
+    { incidentId: string; confirmId: string },
+    ApproveHostConfirmResult
+  >(functions, "approveHostConfirm");
+
+  try {
+    const result = await callable({ incidentId, confirmId });
+    return result.data;
+  } catch (error) {
+    throw mapCallableError(error, "Could not approve the session change.");
+  }
+}
+
+export interface DenyHostConfirmResult {
+  confirmId: string;
+  status: "denied";
+}
+
+export async function denyHostConfirm(
+  incidentId: string,
+  confirmId: string,
+): Promise<DenyHostConfirmResult> {
+  requireFirebase();
+
+  const functions = await getFirebaseFunctions();
+  const callable = httpsCallable<
+    { incidentId: string; confirmId: string },
+    DenyHostConfirmResult
+  >(functions, "denyHostConfirm");
+
+  try {
+    const result = await callable({ incidentId, confirmId });
+    return result.data;
+  } catch (error) {
+    throw mapCallableError(error, "Could not deny the confirmation.");
+  }
+}

@@ -122,6 +122,31 @@ export interface IncidentMessageRecord {
   kind: IncidentMessageKind;
 }
 
+export type HostConfirmStatus =
+  | "pending"
+  | "approved"
+  | "denied"
+  | "expired";
+
+export interface HostConfirmRecord {
+  id: string;
+  incidentId: string;
+  sessionId: string;
+  tool: string;
+  args: Record<string, unknown>;
+  argsHash: string;
+  status: HostConfirmStatus;
+  hostUid: string;
+  requestedByUid: string | null;
+  createdAt: string;
+  expiresAt: string;
+  approvedAt?: string;
+  approvedByUid?: string;
+  deniedAt?: string;
+  deniedByUid?: string;
+  executedAt?: string;
+}
+
 export function isIncidentStatus(value: unknown): value is IncidentStatus {
   return (
     typeof value === "string" &&
