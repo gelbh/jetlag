@@ -1,5 +1,7 @@
 import { AdminSettingsPanel } from "./AdminSettingsPanel";
 
+const SETTINGS_TITLE_ID = "admin-settings-title";
+
 interface AdminSettingsSheetProps {
   open: boolean;
   onClose: () => void;
@@ -15,7 +17,7 @@ export function AdminSettingsSheet({ open, onClose }: AdminSettingsSheetProps) {
       <div
         className="w-full max-w-md rounded-xl border border-border bg-surface-panel p-4 shadow-hud-float"
         role="dialog"
-        aria-labelledby="admin-settings-title"
+        aria-labelledby={SETTINGS_TITLE_ID}
       >
         <div className="mb-4 flex items-center justify-end">
           <button
@@ -26,9 +28,7 @@ export function AdminSettingsSheet({ open, onClose }: AdminSettingsSheetProps) {
             Close
           </button>
         </div>
-        <div id="admin-settings-title">
-          <AdminSettingsPanel />
-        </div>
+        <AdminSettingsPanel titleId={SETTINGS_TITLE_ID} />
       </div>
     </div>
   );

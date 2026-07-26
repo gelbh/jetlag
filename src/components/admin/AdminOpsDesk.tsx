@@ -1,5 +1,5 @@
 import { signOut } from "firebase/auth";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { AppLink } from "../navigation/AppLink";
 import { PremiumSignInGate } from "../billing/PremiumSignInGate";
@@ -149,6 +149,8 @@ export function AdminOpsDesk() {
     null,
   );
   const [monitorSessionId, setMonitorSessionId] = useState<string | null>(null);
+  const monitorRequestRef = useRef(0);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
 
   const uid = user?.uid ?? null;
 
@@ -304,12 +306,14 @@ export function AdminOpsDesk() {
 
   const handleMonitor = useCallback(
     async (summary: AdminSessionSummary) => {
+      const requestId = ++monitorRequestRef.current;
       setObserveError(null);
       setSelectedSessionId(summary.sessionId);
       setMonitorSessionId(null);
 
       if (isDesktop) {
         const joined = await joinSession(summary, { navigate: false });
+        if (monitorRequestRef.current !== requestId) return;
         if (!joined) {
           setSelectedSessionId(null);
           return;
@@ -319,6 +323,7 @@ export function AdminOpsDesk() {
       }
 
       const joined = await joinSession(summary, { navigate: true });
+      if (monitorRequestRef.current !== requestId) return;
       if (!joined) {
         setSelectedSessionId(null);
       }
@@ -331,7 +336,14 @@ export function AdminOpsDesk() {
   };
 
   const handleSignOut = async () => {
-    await signOut(getFirebaseAuth());
+    setSignOutError(null);
+    try {
+      await signOut(getFirebaseAuth());
+    } catch (error) {
+      setSignOutError(
+        error instanceof Error ? error.message : "Could not sign out.",
+      );
+    }
   };
 
   const handleSelectPreset = (presetId: string) => {
@@ -551,6 +563,7 @@ export function AdminOpsDesk() {
             Signed in as {user.email ?? "unknown"}. This panel is restricted to
             the app owner.
           </p>
+          {signOutError ? <InlineError>{signOutError}</InlineError> : null}
           <div className="flex flex-wrap gap-2">
             <button
               type="button"

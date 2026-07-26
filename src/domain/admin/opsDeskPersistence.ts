@@ -40,15 +40,22 @@ function sanitizeStack(raw: unknown): GridStack | null {
   const obj = raw as Record<string, unknown>;
   if (typeof obj.id !== "string" || obj.id.length === 0) return null;
 
-  const panelIds = Array.isArray(obj.panelIds)
-    ? obj.panelIds.filter(isPanelId)
-    : [];
+  const panelIdsRaw = Array.isArray(obj.panelIds) ? obj.panelIds : [];
+  const preferredActive =
+    typeof obj.activeIndex === "number" && Number.isFinite(obj.activeIndex)
+      ? panelIdsRaw[Math.floor(obj.activeIndex)]
+      : undefined;
+  const panelIds = panelIdsRaw.filter(isPanelId);
   if (panelIds.length === 0) return null;
 
-  const activeIndex =
-    typeof obj.activeIndex === "number" && Number.isFinite(obj.activeIndex)
-      ? Math.min(Math.max(0, Math.floor(obj.activeIndex)), panelIds.length - 1)
-      : 0;
+  const preferredId =
+    typeof preferredActive === "string" && isPanelId(preferredActive)
+      ? preferredActive
+      : null;
+  const resolvedIndex = preferredId
+    ? panelIds.indexOf(preferredId)
+    : -1;
+  const activeIndex = resolvedIndex >= 0 ? resolvedIndex : 0;
 
   const num = (v: unknown, fallback: number) =>
     typeof v === "number" && Number.isFinite(v) ? Math.floor(v) : fallback;
@@ -83,16 +90,16 @@ export function sanitizeDeskLayout(raw: unknown): DeskLayout {
     return cloneLayout(SESSION_WATCH_LAYOUT);
   }
 
-  const cols =
-    typeof obj.cols === "number" && Number.isFinite(obj.cols) && obj.cols > 0
+  const colsRaw =
+    typeof obj.cols === "number" && Number.isFinite(obj.cols)
       ? Math.floor(obj.cols)
       : DEFAULT_COLS;
-  const rowHeight =
-    typeof obj.rowHeight === "number" &&
-    Number.isFinite(obj.rowHeight) &&
-    obj.rowHeight > 0
+  const cols = colsRaw > 0 ? colsRaw : DEFAULT_COLS;
+  const rowHeightRaw =
+    typeof obj.rowHeight === "number" && Number.isFinite(obj.rowHeight)
       ? Math.floor(obj.rowHeight)
       : DEFAULT_ROW_HEIGHT;
+  const rowHeight = rowHeightRaw > 0 ? rowHeightRaw : DEFAULT_ROW_HEIGHT;
 
   return {
     cols,
@@ -124,10 +131,20 @@ function sanitizeStore(raw: unknown): OpsDeskStoreV1 {
   if (obj.version !== 1) return defaults;
 
   const customLayout = sanitizeDeskLayout(obj.customLayout);
+  const reservedIds = new Set<string>([
+    CUSTOM_PRESET_ID,
+    ...BUILTIN_PRESETS.map((p) => p.id),
+  ]);
+  const seenUserIds = new Set<string>();
   const userPresets = Array.isArray(obj.userPresets)
     ? obj.userPresets
         .map(sanitizeUserPreset)
-        .filter((p): p is DeskPreset => p !== null)
+        .filter((p): p is DeskPreset => {
+          if (p === null) return false;
+          if (reservedIds.has(p.id) || seenUserIds.has(p.id)) return false;
+          seenUserIds.add(p.id);
+          return true;
+        })
     : [];
 
   let activePresetId =
