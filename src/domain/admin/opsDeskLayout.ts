@@ -429,6 +429,7 @@ export function movePresetOrder(
   id: string,
   delta: number,
 ): string[] | null {
+  if (!Number.isInteger(delta)) return null;
   const index = orderedIds.indexOf(id);
   if (index < 0) return null;
   return movePresetToIndex(orderedIds, id, index + delta);
@@ -440,6 +441,7 @@ export function movePresetToIndex(
   id: string,
   toIndex: number,
 ): string[] | null {
+  if (!Number.isInteger(toIndex)) return null;
   const fromIndex = orderedIds.indexOf(id);
   if (fromIndex < 0) return null;
   if (toIndex < 0 || toIndex >= orderedIds.length) return null;

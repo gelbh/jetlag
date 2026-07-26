@@ -53,6 +53,7 @@ describe("opsDeskPresets", () => {
   it("labels builtins, custom, and user presets", () => {
     expect(presetLabel("session-watch", [])).toBe("Session watch");
     expect(presetLabel(CUSTOM_PRESET_ID, [])).toBe("Custom");
+    expect(presetLabel("unknown", [])).toBe("unknown");
     expect(
       presetLabel("user-a", [
         {
@@ -71,7 +72,14 @@ describe("opsDeskPresets", () => {
     expect(movePresetToIndex(order, "a", 2)).toEqual(["b", "c", "a"]);
     expect(movePresetOrder(order, "a", -1)).toBeNull();
     expect(movePresetToIndex(order, "a", 0)).toBeNull();
+    expect(movePresetOrder(order, "missing", 1)).toBeNull();
+    expect(movePresetToIndex(order, "a", 3)).toBeNull();
+    expect(movePresetToIndex(order, "a", 1.5)).toBeNull();
+    expect(movePresetOrder(order, "a", Number.NaN)).toBeNull();
+    expect(order).toEqual(["a", "b", "c"]);
   });
 });
+
+
 
 

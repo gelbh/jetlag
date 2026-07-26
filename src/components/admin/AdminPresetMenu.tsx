@@ -46,17 +46,27 @@ export function AdminPresetMenu({
   );
   const [manageOpen, setManageOpen] = useState(false);
   const manageAnchorRef = useRef<HTMLSpanElement>(null);
+  const manageTriggerRef = useRef<HTMLButtonElement>(null);
   const dragFromIdRef = useRef<string | null>(null);
+
+  const closeManage = () => {
+    setManageOpen(false);
+    manageTriggerRef.current?.focus();
+  };
 
   useEffect(() => {
     if (!manageOpen) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setManageOpen(false);
+      if (event.key !== "Escape") return;
+      setManageOpen(false);
+      manageTriggerRef.current?.focus();
     };
     const onPointer = (event: MouseEvent) => {
       const root = manageAnchorRef.current;
       if (!root || !(event.target instanceof Node)) return;
-      if (!root.contains(event.target)) setManageOpen(false);
+      if (root.contains(event.target)) return;
+      setManageOpen(false);
+      manageTriggerRef.current?.focus();
     };
     window.addEventListener("keydown", onKey);
     window.addEventListener("mousedown", onPointer);
@@ -149,9 +159,9 @@ export function AdminPresetMenu({
       <span className="jl-ops-preset-manage-anchor" ref={manageAnchorRef}>
         <button
           type="button"
+          ref={manageTriggerRef}
           className="jl-ops-preset-chip"
           aria-expanded={manageOpen}
-          aria-haspopup="true"
           onClick={() => setManageOpen((open) => !open)}
         >
           Manage
@@ -165,7 +175,7 @@ export function AdminPresetMenu({
             onReorderPresets={onReorderPresets}
             onRenameUserPreset={onRenameUserPreset}
             onDeleteUserPreset={onDeleteUserPreset}
-            onDismiss={() => setManageOpen(false)}
+            onDismiss={closeManage}
           />
         ) : null}
       </span>

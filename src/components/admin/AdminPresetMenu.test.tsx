@@ -84,4 +84,13 @@ describe("AdminPresetMenu", () => {
       CUSTOM_PRESET_ID,
     ]);
   });
+
+  it("closes Manage on Escape", () => {
+    render(<AdminPresetMenu {...baseProps} />);
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }));
+    expect(screen.getByTestId("admin-ops-preset-manage")).toBeTruthy();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByTestId("admin-ops-preset-manage")).toBeNull();
+  });
 });
+
