@@ -7,6 +7,7 @@ import {
   browserSessionPersistence,
   inMemoryPersistence,
   signInAnonymously,
+  signOut,
   onAuthStateChanged,
   type Auth,
   type User,
@@ -358,6 +359,20 @@ export async function ensureAnonymousUser(): Promise<User> {
   }
 
   return anonymousSignInPromise;
+}
+
+/** Ensure a signed-in user with a freshly forced ID token (join/heal paths). */
+export async function ensureFreshAnonymousUser(): Promise<User> {
+  let user = await ensureAnonymousUser();
+  try {
+    await user.getIdToken(true);
+    return user;
+  } catch {
+    await signOut(getFirebaseAuth());
+    user = await ensureAnonymousUser();
+    await user.getIdToken(true);
+    return user;
+  }
 }
 
 export async function resetFirebaseForTests(): Promise<void> {

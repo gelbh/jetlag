@@ -16,7 +16,8 @@ vi.mock("../services/core/firebase", () => ({
   isFirebaseConfigured: () => mockIsFirebaseConfigured(),
   isAuthBootstrapReady: () => true,
   subscribeAuthBootstrapReady: () => () => undefined,
-  ensureAnonymousUser: (...args: unknown[]) => mockEnsureAnonymousUser(...args),
+  ensureFreshAnonymousUser: (...args: unknown[]) =>
+    mockEnsureAnonymousUser(...args),
   getFirebaseAuth: () => ({ currentUser: null, onAuthStateChanged: () => () => undefined }),
 }));
 

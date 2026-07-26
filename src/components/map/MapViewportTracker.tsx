@@ -5,6 +5,7 @@ import {
   latLngBoundsToViewport,
   type MapViewportBounds,
 } from "../../domain/map/transitViewport";
+import { createThrottledPublisher } from "./mapViewportPublish";
 
 export interface MapViewportState {
   bounds: MapViewportBounds;
@@ -26,6 +27,26 @@ export function MapViewportTracker({
 }: MapViewportTrackerProps) {
   const map = useMap();
   const panActiveRef = useRef(false);
+  const draggingRef = useRef(false);
+  const onViewportChangeRef = useRef(onViewportChange);
+  const publisherRef = useRef<ReturnType<typeof createThrottledPublisher> | null>(
+    null,
+  );
+
+  useEffect(() => {
+    onViewportChangeRef.current = onViewportChange;
+  }, [onViewportChange]);
+
+  useEffect(() => {
+    const publisher = createThrottledPublisher(() => {
+      publishViewport(map, onViewportChangeRef.current);
+    });
+    publisherRef.current = publisher;
+    return () => {
+      publisher.cancel();
+      publisherRef.current = null;
+    };
+  }, [map]);
 
   const notifyPanStart = () => {
     if (suppressPanRef?.current || panActiveRef.current) {
@@ -47,17 +68,25 @@ export function MapViewportTracker({
 
   useMapEvents({
     dragstart: () => {
+      draggingRef.current = true;
       notifyPanStart();
     },
     dragend: () => {
+      draggingRef.current = false;
       notifyPanEnd();
+      publisherRef.current?.flush();
+    },
+    move: () => {
+      if (draggingRef.current) {
+        publisherRef.current?.schedule();
+      }
     },
     moveend: () => {
       notifyPanEnd();
-      publishViewport(map, onViewportChange);
+      publisherRef.current?.schedule();
     },
     zoomend: () => {
-      publishViewport(map, onViewportChange);
+      publisherRef.current?.flush();
     },
   });
 

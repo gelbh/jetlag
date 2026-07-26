@@ -42,7 +42,7 @@ describe("transitViewport", () => {
     ]);
   });
 
-  it("hides stops below zoom 12", () => {
+  it("hides stops below zoom 13", () => {
     const stops: TransitStop[] = [
       {
         id: "in",
@@ -53,7 +53,19 @@ describe("transitViewport", () => {
       },
     ];
 
-    expect(filterTransitStopsForViewport(stops, viewport, 11)).toEqual([]);
+    expect(filterTransitStopsForViewport(stops, viewport, 12)).toEqual([]);
+  });
+
+  it("caps stop markers in a dense viewport", () => {
+    const stops: TransitStop[] = Array.from({ length: 200 }, (_, index) => ({
+      id: `stop-${index}`,
+      name: `Stop ${index}`,
+      lat: 51.5,
+      lng: 0,
+      mode: "metro" as const,
+    }));
+
+    expect(filterTransitStopsForViewport(stops, viewport, 14)).toHaveLength(150);
   });
 
   it("keeps routes that intersect the viewport", () => {

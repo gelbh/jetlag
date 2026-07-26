@@ -37,7 +37,8 @@ import {
   sessionVersionMismatchMessage,
 } from "../../domain/session/sessionVersion";
 import { APP_VERSION } from "../../domain/device/changelog";
-import { getFirestoreDb } from "../core/firebase";
+import { ensureAnonymousUser, getFirebaseAuth, getFirestoreDb } from "../core/firebase";
+import { reportJoinPermissionDenied } from "../core/sentry";
 import {
   buildAnnotationDocument,
   buildSessionDocument,
@@ -86,6 +87,39 @@ function annotationsCollection(sessionId: string) {
 }
 export function isFirestorePermissionDenied(error: unknown): boolean {
   return error instanceof FirebaseError && error.code === "permission-denied";
+}
+
+export const JOIN_AUTH_FAILURE_MESSAGE =
+  "Couldn't authenticate with the server. Try again. If it keeps failing, sign out and back in.";
+
+async function forceRefreshIdTokenForJoin(): Promise<void> {
+  let user = getFirebaseAuth().currentUser;
+  if (!user) {
+    user = await ensureAnonymousUser();
+  }
+  await user.getIdToken(true);
+}
+
+async function withJoinPermissionRetry<T>(operation: () => Promise<T>): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (!isFirestorePermissionDenied(error)) {
+      throw error;
+    }
+
+    reportJoinPermissionDenied("initial");
+    try {
+      await forceRefreshIdTokenForJoin();
+      return await operation();
+    } catch (retryError) {
+      if (isFirestorePermissionDenied(retryError)) {
+        reportJoinPermissionDenied("retry");
+        throw new Error(JOIN_AUTH_FAILURE_MESSAGE, { cause: retryError });
+      }
+      throw retryError;
+    }
+  }
 }
 
 type SessionMembershipPatch = {
@@ -558,28 +592,19 @@ async function joinRemoteSessionWithoutRead(
   };
 }
 
-export async function joinRemoteSessionByCode(
+async function joinRemoteSessionByCodeOnce(
   code: string,
+  codeRecord: SessionCodeRecord,
   uid: string,
-  role: PlayerRole = "seeker",
-  clientVersion: string = APP_VERSION,
-  options: JoinRemoteSessionOptions = {},
+  role: PlayerRole,
+  clientVersion: string,
+  returningMemberUid: string | undefined,
 ): Promise<
   | { status: "missing" }
   | { status: "ended" }
   | { status: "incompatible"; hostVersion: string }
   | { status: "joined"; session: SessionRecord }
 > {
-  const codeRecord = await readSessionCodeRecord(code);
-  if (!codeRecord) {
-    return { status: "missing" };
-  }
-
-  if (codeRecord.status === "ended") {
-    return { status: "ended" };
-  }
-
-  const returningMemberUid = sanitizeJoinReturningMemberUid(options);
   let sessionDoc: Awaited<ReturnType<typeof getDoc>>;
   try {
     sessionDoc = await getDoc(doc(sessionsCollection(), codeRecord.sessionId));
@@ -661,6 +686,40 @@ export async function joinRemoteSessionByCode(
     };
   }
   return joinedWithoutRead;
+}
+
+export async function joinRemoteSessionByCode(
+  code: string,
+  uid: string,
+  role: PlayerRole = "seeker",
+  clientVersion: string = APP_VERSION,
+  options: JoinRemoteSessionOptions = {},
+): Promise<
+  | { status: "missing" }
+  | { status: "ended" }
+  | { status: "incompatible"; hostVersion: string }
+  | { status: "joined"; session: SessionRecord }
+> {
+  const codeRecord = await readSessionCodeRecord(code);
+  if (!codeRecord) {
+    return { status: "missing" };
+  }
+
+  if (codeRecord.status === "ended") {
+    return { status: "ended" };
+  }
+
+  const returningMemberUid = sanitizeJoinReturningMemberUid(options);
+  return withJoinPermissionRetry(() =>
+    joinRemoteSessionByCodeOnce(
+      code,
+      codeRecord,
+      uid,
+      role,
+      clientVersion,
+      returningMemberUid,
+    ),
+  );
 }
 
 export async function getRemoteSessionById(

@@ -14,7 +14,10 @@ import {
   filterTransitVehiclesForViewport,
   type MapViewportBounds,
 } from "../../domain/map/transitViewport";
-import { transitStopDivIcon } from "./transitStopIcons";
+import {
+  getTransitStopIcon,
+  getTransitVehicleIcon,
+} from "./transitLayerIcons";
 
 interface TransitLayerProps {
   staticData: TransitStaticData | null;
@@ -32,24 +35,7 @@ const MODE_COLORS: Record<TransitRouteMode, string> = {
   other: MAP_ANNOTATION_COLORS.transit.other,
 };
 
-function stopIcon(mode: TransitRouteMode) {
-  return L.divIcon({
-    className: "",
-    html: transitStopDivIcon(mode),
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
-  });
-}
-
-function vehicleIcon(bearing: number | undefined, color: string) {
-  const rotation = bearing ?? 0;
-  return L.divIcon({
-    className: "",
-    html: `<div style="transform: rotate(${rotation}deg); width: 14px; height: 14px; border-radius: 9999px; background:${color}; border:2px solid ${MAP_ANNOTATION_COLORS.playAreaMask}; box-shadow:0 0 0 1px ${color};"></div>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
-  });
-}
+const transitRouteRenderer = L.canvas({ padding: 0.5 });
 
 export const TransitLayer = memo(function TransitLayer({
   staticData,
@@ -81,6 +67,7 @@ export const TransitLayer = memo(function TransitLayer({
         <Polyline
           key={`route-${route.id}`}
           positions={route.positions as LatLngTuple[]}
+          renderer={transitRouteRenderer}
           pathOptions={{
             color: MODE_COLORS[route.mode],
             weight: route.mode === "rail" || route.mode === "metro" ? 4 : 3,
@@ -98,7 +85,7 @@ export const TransitLayer = memo(function TransitLayer({
         <Marker
           key={`stop-${stop.id}`}
           position={[stop.lat, stop.lng]}
-          icon={stopIcon(stop.mode)}
+          icon={getTransitStopIcon(stop.mode)}
         >
           <Popup>{stop.name}</Popup>
         </Marker>
@@ -108,7 +95,7 @@ export const TransitLayer = memo(function TransitLayer({
         <Marker
           key={`vehicle-${vehicle.id}`}
           position={[vehicle.lat, vehicle.lng]}
-          icon={vehicleIcon(vehicle.bearing, MODE_COLORS[vehicle.mode])}
+          icon={getTransitVehicleIcon(vehicle.bearing, MODE_COLORS[vehicle.mode])}
         >
           <Popup>
             {vehicle.label}

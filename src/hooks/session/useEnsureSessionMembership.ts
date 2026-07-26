@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { resolvePlayerRole } from "../../domain/session/playerRole";
 import {
-  ensureAnonymousUser,
+  ensureFreshAnonymousUser,
   isFirebaseConfigured,
 } from "../../services/core/firebase";
 import {
@@ -34,7 +34,7 @@ export function useEnsureSessionMembership(): void {
 
     void (async () => {
       try {
-        const user = await ensureAnonymousUser();
+        const user = await ensureFreshAnonymousUser();
         if (cancelled) {
           return;
         }
