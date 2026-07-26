@@ -12,10 +12,13 @@ export function useAdminAccessState(): {
   state: AdminAccessState;
   user: User | null;
   authReady: boolean;
+  isPermanent: boolean;
 } {
-  const { user, authReady } = usePermanentAuthUser();
+  const { user, authReady, isPermanent } = usePermanentAuthUser();
   const [resolved, setResolved] = useState<AdminAccessResolution | null>(null);
+  const [resolvedUserKey, setResolvedUserKey] = useState<string | null>(null);
   const generationRef = useRef(0);
+  const userKey = user?.uid ?? null;
 
   useEffect(() => {
     if (!authReady) {
@@ -24,17 +27,23 @@ export function useAdminAccessState(): {
 
     const generation = ++generationRef.current;
     setResolved(null);
+    setResolvedUserKey(null);
 
     void resolveAdminAccess(user).then((next) => {
       if (generation !== generationRef.current) {
         return;
       }
       setResolved(next);
+      setResolvedUserKey(user?.uid ?? null);
     });
   }, [authReady, user]);
 
   const state: AdminAccessState =
-    !authReady || resolved == null ? "loading" : resolved;
+    !authReady ||
+    resolved == null ||
+    resolvedUserKey !== userKey
+      ? "loading"
+      : resolved;
 
-  return { state, user, authReady };
+  return { state, user, authReady, isPermanent };
 }
