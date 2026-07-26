@@ -43,8 +43,6 @@ export type { BeginTransitionOptions, RouteTransitionPhase };
 
 const READY_POLL_MS = 16;
 const READY_TIMEOUT_MS = 15_000;
-const OVERLAY_DEFER_MS = 150;
-const ROUTE_OVERLAY_EXIT_MS = 200;
 
 type RouteNavigateOptions = NavigateOptions & {
   viewTransition: false;
@@ -114,10 +112,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
   const reportScreenReady = useCallback((ready: boolean) => {
     screenReadyRef.current = ready;
     const targetPath = loadingTargetPathRef.current;
-    if (
-      targetPath &&
-      (phaseRef.current === "loading" || phaseRef.current === "revealing")
-    ) {
+    if (targetPath && phaseRef.current === "settling") {
       setLoadingProgress(computeLoadingProgress(targetPath, ready));
     }
   }, []);
@@ -250,26 +245,12 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
       loadingTargetRef.current = destinationKey;
       loadingTargetPathRef.current = targetPath;
       screenReadyRef.current = getSyncRouteReady(targetPath);
-      const syncReadyBeforeMount = screenReadyRef.current;
       setLoadingReason(loadingReasonForPath(targetPath));
       setLoadingProgress(
         computeLoadingProgress(targetPath, screenReadyRef.current),
       );
-
-      let overlayTimer: number | undefined;
-      let overlayShown = false;
-
-      const showOverlay = () => {
-        if (transitionGenerationRef.current !== myGeneration || overlayShown) {
-          return;
-        }
-
-        overlayShown = true;
-        phaseRef.current = "loading";
-        setPhase("loading");
-      };
-
-      overlayTimer = window.setTimeout(showOverlay, OVERLAY_DEFER_MS);
+      phaseRef.current = "settling";
+      setPhase("settling");
 
       try {
         const preloadStartedAt = Date.now();
@@ -288,59 +269,28 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
           computeLoadingProgress(targetPath, screenReadyRef.current),
         );
 
-        let readyWaitMs = 0;
-
-        if (syncReadyBeforeMount) {
-          // Destination is already ready to commit: wrap navigate in the VT
-          // so WebKit captures distinct before/after snapshots. The overlay
-          // (if shown) may appear in the VT's root snapshot; it exits in
-          // parallel with the transition rather than gating on it.
-          if (overlayTimer !== undefined) {
-            window.clearTimeout(overlayTimer);
-            overlayTimer = undefined;
-          }
-
-          const revealPromise = revealRouteTransition(
+        // Navigate immediately — destination shell/skeleton mounts while
+        // readiness settles in-shell (no full-bleed load overlay).
+        setNavDirection(revealDirectionRef.current);
+        try {
+          await revealRouteTransition(
             revealDirectionRef.current,
             decorativeAnimate,
             () => navigate(to, navigateOptions),
-          ).catch(() => undefined);
-
-          if (overlayShown) {
-            phaseRef.current = "revealing";
-            setPhase("revealing");
-            await Promise.all([revealPromise, delay(ROUTE_OVERLAY_EXIT_MS)]);
-          } else {
-            await revealPromise;
-          }
-        } else {
-          // Destination needs to mount before it can report ready (map/geo).
-          // Navigate instantly under the overlay and reveal via the overlay's
-          // own directional exit instead of an empty VT.
-          setNavDirection(revealDirectionRef.current);
-          navigate(to, navigateOptions);
-
-          readyWaitMs = await waitForScreenReady();
-
-          if (transitionGenerationRef.current !== myGeneration) {
-            return;
-          }
-
-          setLoadingProgress(
-            computeLoadingProgress(targetPath, screenReadyRef.current),
           );
-
-          if (overlayTimer !== undefined) {
-            window.clearTimeout(overlayTimer);
-            overlayTimer = undefined;
-          }
-
-          if (overlayShown) {
-            phaseRef.current = "revealing";
-            setPhase("revealing");
-            await delay(ROUTE_OVERLAY_EXIT_MS);
-          }
+        } catch {
+          navigate(to, navigateOptions);
         }
+
+        const readyWaitMs = await waitForScreenReady();
+
+        if (transitionGenerationRef.current !== myGeneration) {
+          return;
+        }
+
+        setLoadingProgress(
+          computeLoadingProgress(targetPath, screenReadyRef.current),
+        );
 
         reportSlowRouteTransition({
           preload_ms: preloadMs,
@@ -353,10 +303,6 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
           warm_ready: warmReady,
         });
       } finally {
-        if (overlayTimer !== undefined) {
-          window.clearTimeout(overlayTimer);
-        }
-
         if (transitionGenerationRef.current === myGeneration) {
           loadingTargetRef.current = null;
           loadingTargetPathRef.current = null;
