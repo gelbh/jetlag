@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { buildPremiumProxyHeaders } from "./accessControl";
-import { captureAppCheckTokenFailure } from "./sentry";
+import { captureAppCheckTokenFailure } from "../analytics/sentry";
 
-vi.mock("./firebase", () => ({
+vi.mock("../firebase/firebase", () => ({
   getFirebaseAuth: () => ({
     currentUser: {
       getIdToken: vi.fn(async () => "token-123"),
@@ -19,7 +19,7 @@ vi.mock("./premiumApiContext", () => ({
   getPremiumApiContext: () => ({ sessionId: "session-abc" }),
 }));
 
-vi.mock("./sentry", () => ({
+vi.mock("../analytics/sentry", () => ({
   captureAppCheckTokenFailure: vi.fn(),
 }));
 

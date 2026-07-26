@@ -1,15 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { FetchTimeoutError } from "./fetchWithTimeout";
+import { FetchTimeoutError } from "../network/fetchWithTimeout";
 import {
   OverpassUnavailableError,
   overpassErrorMessage,
   queryOverpass,
 } from "./overpassClient";
-import { setPremiumApiContext } from "./premiumApiContext";
-import * as accessControl from "./accessControl";
-import * as firebase from "./firebase";
-import * as firebaseAuthReady from "./firebaseAuthReady";
-import type { SessionRecord } from "../../domain/map/annotations";
+import { setPremiumApiContext } from "../auth/premiumApiContext";
+import * as accessControl from "../auth/accessControl";
+import * as firebase from "../firebase/firebase";
+import * as firebaseAuthReady from "../firebase/firebaseAuthReady";
+import type { SessionRecord } from "../../../domain/map/annotations";
 
 function premiumSession(): SessionRecord {
   return {
