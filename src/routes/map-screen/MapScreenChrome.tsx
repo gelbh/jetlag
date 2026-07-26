@@ -133,6 +133,7 @@ type MapScreenChromeProps = Pick<
   | "handleDistanceUnitChange"
   | "exportMap"
   | "answerPendingQuestion"
+  | "dismissExpiredPendingQuestion"
   | "handleCancelWalkingQuestion"
   | "seekerLocations"
   | "setActiveTool"
@@ -245,6 +246,7 @@ export function MapScreenChrome({
   handleDistanceUnitChange,
   exportMap,
   answerPendingQuestion,
+  dismissExpiredPendingQuestion,
   handleCancelWalkingQuestion,
   seekerLocations,
   setActiveTool,
@@ -581,6 +583,23 @@ export function MapScreenChrome({
                   }
                 : undefined,
             );
+          }}
+          onDismissExpiredQuestion={async (pendingQuestionId, messageId) => {
+            const pending = pendingQuestions.find(
+              (question) => question.id === pendingQuestionId,
+            );
+            if (!pending) {
+              return;
+            }
+            await dismissExpiredPendingQuestion({
+              sessionId: session!.id,
+              pendingQuestionId,
+              messageId,
+              senderUid: uid ?? "",
+              senderRole: "seeker",
+              toolType: pending.toolType,
+              promptText: pending.promptText,
+            });
           }}
         />
       </MapScreenChromeSlots>

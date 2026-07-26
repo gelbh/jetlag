@@ -175,6 +175,7 @@ export function SeekerMapScreen() {
         handleDistanceUnitChange={controller.handleDistanceUnitChange}
         exportMap={controller.exportMap}
         answerPendingQuestion={controller.answerPendingQuestion}
+        dismissExpiredPendingQuestion={controller.dismissExpiredPendingQuestion}
         handleCancelWalkingQuestion={controller.handleCancelWalkingQuestion}
         seekerLocations={controller.seekerLocations}
         setActiveTool={controller.setActiveTool}
