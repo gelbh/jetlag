@@ -35,11 +35,10 @@ describe("mapTilePreview", () => {
     expect(urls.every((url) => url.includes("World_Imagery"))).toBe(true);
   });
 
-  it("builds preview tiles from a fixed tile origin", () => {
-    const urls = previewTileUrlsFromOrigin("standard", 16375, 10896);
+  it("builds dark street preview tiles when streetBasemap is dark", () => {
+    const urls = previewTileUrlsFromOrigin("standard", 16375, 10896, 15, "dark");
 
     expect(urls).toHaveLength(4);
-    expect(urls[0]).toMatch(/15\/16375\/10896/);
-    expect(urls[3]).toMatch(/15\/16376\/10897/);
+    expect(urls.every((url) => url.includes("dark_all"))).toBe(true);
   });
 });

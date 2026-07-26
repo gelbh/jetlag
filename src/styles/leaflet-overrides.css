@@ -9,6 +9,14 @@
   touch-action: none;
 }
 
+.leaflet-container.jl-basemap--dark-canvas {
+  background: var(--color-surface-deep);
+}
+
+.leaflet-container.jl-basemap--satellite-grade .leaflet-tile-pane {
+  filter: saturate(0.92) contrast(1.05) brightness(0.92);
+}
+
 .leaflet-control-attribution {
   display: none !important;
 }

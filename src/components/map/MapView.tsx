@@ -8,7 +8,8 @@ import type {
 import { LatLngBounds, latLngBounds, point } from "leaflet";
 import { computeFramedCenterZoom } from "../../domain/map/computeFramedCenterZoom";
 import { isLargeCameraJump } from "../../domain/map/isLargeCameraJump";
-import { getMapBasemap, type MapStyle } from "../../domain/map/mapBasemaps";
+import { getMapBasemap, type MapStyle, type StreetBasemap } from "../../domain/map/mapBasemaps";
+import { getBasemapSurface } from "../../domain/map/mapBasemaps";
 import { isUsableMapBounds } from "../../domain/geometry/geometry";
 import {
   MOTION_MAP_CAMERA_FLY_S,
@@ -25,6 +26,7 @@ interface MapViewProps {
   zoom?: number;
   className?: string;
   mapStyle?: MapStyle;
+  streetBasemap?: StreetBasemap;
   onBoundsChange?: (bounds: LatLngBounds) => void;
   /** Fired when the user pans or zooms the map (not programmatic fit/resize). */
   onUserViewportFramed?: () => void;
@@ -291,6 +293,7 @@ export function MapView({
   zoom = 13,
   className,
   mapStyle = "standard",
+  streetBasemap = "light",
   onBoundsChange,
   onUserViewportFramed,
   onMapClick,
@@ -315,12 +318,17 @@ export function MapView({
   children,
   mapKey,
 }: MapViewProps) {
-  const basemap = getMapBasemap(mapStyle);
+  const basemap = getMapBasemap(mapStyle, streetBasemap);
+  const surface = getBasemapSurface(mapStyle, streetBasemap);
   const zoomControlEnabled = showZoomControl ?? interactive;
   const mapStyleToggleEnabled =
     (showMapStyleToggle ?? Boolean(onMapStyleChange)) &&
     Boolean(onMapStyleChange);
   const styleControlInset = mapStyleControlInset ?? zoomControlInset;
+  const containerSurfaceClass =
+    surface === "light" ? "jl-basemap--light" : "jl-basemap--dark-canvas";
+  const satelliteGradeClass =
+    mapStyle === "satellite" ? " jl-basemap--satellite-grade" : "";
 
   return (
     <div className={className ?? "h-full w-full"}>
@@ -335,7 +343,9 @@ export function MapView({
         touchZoom={interactive}
         zoomControl={false}
         className={
-          interactive ? "h-full w-full" : "h-full w-full pointer-events-auto"
+          interactive
+            ? `h-full w-full ${containerSurfaceClass}${satelliteGradeClass}`
+            : `h-full w-full pointer-events-auto ${containerSurfaceClass}${satelliteGradeClass}`
         }
       >
         <TileLayer
@@ -345,6 +355,15 @@ export function MapView({
           maxZoom={basemap.maxZoom}
           {...(basemap.subdomains ? { subdomains: basemap.subdomains } : {})}
         />
+        {(basemap.overlays ?? []).map((overlay) => (
+          <TileLayer
+            key={overlay.id}
+            attribution=""
+            url={overlay.url}
+            maxZoom={overlay.maxZoom}
+            {...(overlay.subdomains ? { subdomains: overlay.subdomains } : {})}
+          />
+        ))}
         <MapEvents
           onBoundsChange={onBoundsChange}
           onUserViewportFramed={onUserViewportFramed}
@@ -382,6 +401,7 @@ export function MapView({
           <MapStyleToggle
             enabled={mapStyleToggleEnabled}
             mapStyle={mapStyle}
+            streetBasemap={streetBasemap}
             onMapStyleChange={onMapStyleChange}
             inset={styleControlInset}
             suppressRef={suppressChromeHideRef}
