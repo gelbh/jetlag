@@ -29,6 +29,10 @@ vi.mock("../../config/env", () => ({
   getClientEnv: () => getClientEnv(),
 }));
 
+vi.mock("./sentry", () => ({
+  captureAppCheckTokenFailure: vi.fn(),
+}));
+
 describe("appCheckProbe", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -72,6 +76,11 @@ describe("appCheckProbe", () => {
       ok: false,
       reason: "blocked",
     });
+  });
+
+  it("soft-fails unknown errors so the app still loads", async () => {
+    getToken.mockRejectedValueOnce(new Error("Internal App Check glitch"));
+    await expect(probeAppCheckAvailability()).resolves.toEqual({ ok: true });
   });
 
   it("caches the first result", async () => {

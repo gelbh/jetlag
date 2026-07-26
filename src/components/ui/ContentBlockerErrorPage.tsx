@@ -1,6 +1,15 @@
 import { AppErrorPage } from "./AppErrorPage";
 
+function allowlistHost(): string {
+  if (typeof window === "undefined") {
+    return "this site";
+  }
+  return window.location.host || "this site";
+}
+
 export function ContentBlockerErrorPage() {
+  const host = allowlistHost();
+
   return (
     <AppErrorPage
       title="Content blocker detected"
@@ -18,7 +27,7 @@ export function ContentBlockerErrorPage() {
           </li>
           <li>
             Other browsers: open your ad/content-blocker settings and allow{" "}
-            <span className="whitespace-nowrap">jetlag.gelbhart.dev</span>.
+            <span className="whitespace-nowrap">{host}</span>.
           </li>
           <li>Come back here and tap Try again.</li>
         </ol>

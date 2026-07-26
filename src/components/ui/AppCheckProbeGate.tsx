@@ -27,8 +27,16 @@ export function AppCheckProbeGate({ children }: { children: ReactNode }) {
     };
   }, [authReady]);
 
-  if (!authReady || probe === null) {
+  if (!authReady) {
     return children;
+  }
+
+  if (probe === null) {
+    return (
+      <p className="px-5 py-8 text-center text-sm text-ink-muted" aria-busy="true">
+        Checking security scripts…
+      </p>
+    );
   }
 
   if (!probe.ok) {

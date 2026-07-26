@@ -18,5 +18,6 @@ describe("ContentBlockerErrorPage", () => {
     expect(
       screen.getByText(/Settings → Apps → Safari → Content Blockers/i),
     ).toBeInTheDocument();
+    expect(screen.getByText(/localhost/i)).toBeInTheDocument();
   });
 });

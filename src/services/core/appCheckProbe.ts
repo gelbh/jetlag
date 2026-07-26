@@ -4,9 +4,10 @@ import {
   getFirebaseAppCheck,
   isFirebaseConfigured,
 } from "./firebase";
+import { captureAppCheckTokenFailure } from "./sentry";
 
 export const APP_CHECK_PROBE_SKIP_KEY = "jl.appCheckProbe.skip";
-export const APP_CHECK_PROBE_TIMEOUT_MS = 8_000;
+export const APP_CHECK_PROBE_TIMEOUT_MS = 15_000;
 
 export type AppCheckProbeResult =
   | { ok: true }
@@ -56,6 +57,10 @@ export async function probeAppCheckAvailability(): Promise<AppCheckProbeResult> 
   return inFlight;
 }
 
+function looksBlocked(message: string): boolean {
+  return /blocked|failed to fetch|load failed|recaptcha/i.test(message);
+}
+
 async function runProbe(): Promise<AppCheckProbeResult> {
   if (shouldSkipAppCheckProbe() || !isFirebaseConfigured()) {
     cachedProbe = { ok: true };
@@ -70,7 +75,6 @@ async function runProbe(): Promise<AppCheckProbeResult> {
 
   const appCheck = getFirebaseAppCheck();
   if (!appCheck) {
-    // Emulator / App Check not armed — not a blocker failure.
     cachedProbe = { ok: true };
     return cachedProbe;
   }
@@ -84,10 +88,19 @@ async function runProbe(): Promise<AppCheckProbeResult> {
     ]);
 
     if (raced === "timeout") {
-      cachedProbe = { ok: false, reason: "timeout" };
+      // Soft-fail: slow networks shouldn't hard-block the app as a "blocker".
+      captureAppCheckTokenFailure(new Error("App Check probe timed out"), {
+        source: "appCheckProbe",
+        reason: "timeout",
+      });
+      cachedProbe = { ok: true };
       return cachedProbe;
     }
     if (raced === "empty") {
+      captureAppCheckTokenFailure(new Error("App Check probe returned empty token"), {
+        source: "appCheckProbe",
+        reason: "blocked",
+      });
       cachedProbe = { ok: false, reason: "blocked" };
       return cachedProbe;
     }
@@ -95,11 +108,16 @@ async function runProbe(): Promise<AppCheckProbeResult> {
     return cachedProbe;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    const blocked =
-      /blocked|network|failed to fetch|load failed|recaptcha|timeout/i.test(
-        message,
-      );
-    cachedProbe = { ok: false, reason: blocked ? "blocked" : "error" };
+    captureAppCheckTokenFailure(error, {
+      source: "appCheckProbe",
+      reason: looksBlocked(message) ? "blocked" : "error",
+    });
+    if (looksBlocked(message)) {
+      cachedProbe = { ok: false, reason: "blocked" };
+      return cachedProbe;
+    }
+    // Transient / unknown errors: allow the app; App Check still enforced server-side.
+    cachedProbe = { ok: true };
     return cachedProbe;
   }
 }
