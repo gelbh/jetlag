@@ -30,6 +30,7 @@ import { APP_VERSION } from "../domain/device/changelog";
 import { sessionVersionMismatchMessage } from "../domain/session/sessionVersion";
 import { resolvePlayerRole } from "../domain/session/playerRole";
 import { retryAsync } from "../services/core/retryAsync";
+import { withTimeout } from "../services/core/withTimeout";
 import { MotionPressable } from "../components/motion/MotionPressable";
 import {
   ANALYTICS_EVENTS,
@@ -43,6 +44,10 @@ import {
   JOIN_PREVIEW_DEBOUNCE_MS,
   setCachedJoinPreview,
 } from "../services/session/joinSessionPreviewCache";
+
+const VERIFY_SESSION_TIMEOUT_MS = 15_000;
+const VERIFY_SESSION_TIMEOUT_MESSAGE =
+  "Couldn't verify the session. Check your connection and try again.";
 
 type JoinPreviewResult = Awaited<ReturnType<typeof lookupRemoteSessionByCode>>;
 
@@ -168,63 +173,73 @@ export function JoinSession() {
         return;
       }
 
-      const user = await retryAsync(() => ensureFreshAnonymousUser());
-      const joinOptions =
-        session?.code === normalized && myUid
-          ? { returningMemberUid: myUid, persistedMyUid: myUid }
-          : {};
-      const result = await retryAsync(() =>
-        joinRemoteSessionByCode(
-          normalized,
-          user.uid,
-          playerRole,
-          APP_VERSION,
-          joinOptions,
-        ),
+      await withTimeout(
+        (async () => {
+          const user = await retryAsync(() => ensureFreshAnonymousUser());
+          const joinOptions =
+            session?.code === normalized && myUid
+              ? { returningMemberUid: myUid, persistedMyUid: myUid }
+              : {};
+          const result = await retryAsync(() =>
+            joinRemoteSessionByCode(
+              normalized,
+              user.uid,
+              playerRole,
+              APP_VERSION,
+              joinOptions,
+            ),
+          );
+          if (result.status === "missing") {
+            setError("No session found for that code.");
+            return;
+          }
+
+          if (result.status === "ended") {
+            setError("That session has ended. Ask the host for a new code.");
+            return;
+          }
+
+          if (result.status === "incompatible") {
+            setError(
+              sessionVersionMismatchMessage(result.hostVersion, APP_VERSION),
+            );
+            return;
+          }
+
+          let joinedSession = result.session;
+          if (playerRole === "hider") {
+            const confirmed = await waitForServerHiderRole(
+              joinedSession.id,
+              user.uid,
+            );
+            if (!confirmed || confirmed.memberRoles?.[user.uid] !== "hider") {
+              setError(
+                "Couldn't confirm your hider role. Wait a moment and try again.",
+              );
+              return;
+            }
+            joinedSession = confirmed;
+          }
+
+          setSession(joinedSession, user.uid);
+          setPremiumApiContext(result.session);
+          track(ANALYTICS_EVENTS.session_joined, { role: playerRole });
+          if (joinedSession.gameArea) {
+            void (async () => {
+              const matchingAreas =
+                await resolveSessionMatchingAreas(joinedSession);
+              void preloadCriticalGameAreaCaches(
+                joinedSession.gameArea!,
+                matchingAreas,
+                joinedSession.regionPackId,
+              );
+            })();
+          }
+          navigate("/map");
+        })(),
+        VERIFY_SESSION_TIMEOUT_MS,
+        VERIFY_SESSION_TIMEOUT_MESSAGE,
       );
-      if (result.status === "missing") {
-        setError("No session found for that code.");
-        return;
-      }
-
-      if (result.status === "ended") {
-        setError("That session has ended. Ask the host for a new code.");
-        return;
-      }
-
-      if (result.status === "incompatible") {
-        setError(
-          sessionVersionMismatchMessage(result.hostVersion, APP_VERSION),
-        );
-        return;
-      }
-
-      let joinedSession = result.session;
-      if (playerRole === "hider") {
-        const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
-        if (!confirmed || confirmed.memberRoles?.[user.uid] !== "hider") {
-          setError(
-            "Couldn't confirm your hider role. Wait a moment and try again.",
-          );
-          return;
-        }
-        joinedSession = confirmed;
-      }
-
-      setSession(joinedSession, user.uid);
-      setPremiumApiContext(result.session);
-      track(ANALYTICS_EVENTS.session_joined, { role: playerRole });
-      if (joinedSession.gameArea) {
-        void (async () => {
-          const matchingAreas = await resolveSessionMatchingAreas(joinedSession);
-          void preloadCriticalGameAreaCaches(
-            joinedSession.gameArea!,
-            matchingAreas,
-            joinedSession.regionPackId,
-          );
-        })();
-      }
-      navigate("/map");
     } catch (nextError) {
       setError(
         nextError instanceof Error
