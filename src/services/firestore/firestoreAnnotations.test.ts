@@ -26,7 +26,9 @@ const zeroFallback: GameArea = {
 const getDoc = vi.hoisted(() => vi.fn());
 const getDocFromServer = vi.hoisted(() => vi.fn());
 const updateDoc = vi.hoisted(() => vi.fn(async () => undefined));
-const getIdToken = vi.hoisted(() => vi.fn(async () => "token"));
+const getIdToken = vi.hoisted(() =>
+  vi.fn(async (_forceRefresh?: boolean) => "token"),
+);
 const reportJoinPermissionDenied = vi.hoisted(() => vi.fn());
 const forceRefreshIdToken = vi.hoisted(() =>
   vi.fn(async () => {
