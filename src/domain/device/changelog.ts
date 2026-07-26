@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.9.5";
+export const APP_VERSION = "0.10.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,35 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.10.0",
+    date: "2026-07-26",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Matching: Landmass (and admin-division) questions no longer collapse the whole play area into one \"Mainland\" because of a broken Overpass query. Landmass splits still use river/canal/dock waterways (not stream/ditch) to keep Overpass payloads tractable.",
+          "Safari blank/broken load after the geometry WASM cutover: allow `wasm-unsafe-eval` in CSP (WebKit requires it; Chrome often did not) and stop shipping the main bundle as undownleveled `esnext`.",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Report a problem from the map or home: live incident chat with the admin, ops mitigations, and hotfix forced-refresh with a short grace countdown. Admin desk at /admin/incidents.",
+          "Ask a fix agent after reporting a problem: natural-language help, session-only tools, and a waiting-on-host banner when the host must approve a change.",
+          "Host confirmation sheet and push alert when a fix agent needs your OK for a destructive session change.",
+          "Session log: chronological activity timeline (session/timer phases, question lifecycle including thermometer walk, answers). Filters removed; newest events stay on top.",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Map: elimination masks use the WASM geometry kernel by default; set `jl.geometry.maskKernel=ts` (or the env override) to force TypeScript.",
+          "Enable the WASM geometry kernel for radar/half-plane shading (still overridable via `jl.geometry.maskKernel` / env). Measuring geodesic buffers stay on TypeScript until their ready flip.",
+        ],
+      }
+    ],
+  },
   {
     version: "0.9.5",
     date: "2026-07-25",
