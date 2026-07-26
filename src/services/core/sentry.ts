@@ -7,6 +7,7 @@ import {
   isWebkitLoadFailedMessage,
 } from "./clientNoiseErrors";
 import { isHtml2CanvasUnsupportedColorMessage } from "./html2canvasErrors";
+import { isExpectedSessionLeaveMessage } from "../session/sessionLeaveErrors";
 
 const SESSION_CODE_PATTERN = /\b[A-Z0-9]{4}\b/g;
 const FIRESTORE_PERMISSION_DENIED =
@@ -169,7 +170,8 @@ function isIgnoredClientNoiseEvent(
         isIdbConnectionClosingMessage(exception.value) ||
         isHtml2CanvasUnsupportedColorMessage(exception.value) ||
         RECAPTCHA_ALREADY_RENDERED.test(exception.value) ||
-        VIEW_TRANSITION_ABORTED.test(exception.value))
+        VIEW_TRANSITION_ABORTED.test(exception.value) ||
+        isExpectedSessionLeaveMessage(exception.value))
     ) {
       return true;
     }
@@ -181,7 +183,8 @@ function isIgnoredClientNoiseEvent(
       isIdbConnectionClosingMessage(event.message) ||
       isHtml2CanvasUnsupportedColorMessage(event.message) ||
       RECAPTCHA_ALREADY_RENDERED.test(event.message) ||
-      VIEW_TRANSITION_ABORTED.test(event.message))
+      VIEW_TRANSITION_ABORTED.test(event.message) ||
+      isExpectedSessionLeaveMessage(event.message))
   ) {
     return true;
   }
