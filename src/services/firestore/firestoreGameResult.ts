@@ -1,7 +1,7 @@
 import { doc, onSnapshot, type Unsubscribe } from "firebase/firestore";
 import type { GameResultRecord } from "../../domain/game/gameResult";
 import { getFirestoreDb } from "../core/firebase";
-import { deserializeGameResultFromFirestore } from "./firestoreSerialization";
+import { deserializeGameResultFromFirestore } from "./serialization/serializePlayer";
 
 function gameResultDoc(sessionId: string, gameResultId: string) {
   return doc(

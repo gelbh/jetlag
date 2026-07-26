@@ -10,7 +10,8 @@ import type {
 } from "../../domain/billing/premiumProducts";
 import { ANALYTICS_EVENTS, track } from "../core/analytics";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
-import { deserializeSessionFromFirestore, serializeGameAreaForFirestore } from "../firestore/firestoreSerialization";
+import { serializeGameAreaForFirestore } from "../firestore/serialization/shared";
+import { deserializeSessionFromFirestore } from "../firestore/serialization/serializeSession";
 
 function billingUnavailable(): never {
   throw new Error("Premium billing is not available offline.");

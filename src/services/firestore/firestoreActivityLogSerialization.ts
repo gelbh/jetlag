@@ -3,7 +3,7 @@ import type { SessionActivityEvent } from "../../domain/session/sessionActivityL
 import {
   assertNoNestedArrays,
   stripUndefinedValues,
-} from "./firestoreSerialization";
+} from "./serialization/shared";
 import { parseFirestoreDocument } from "./zodConverter";
 import { activityLogDocumentSchema } from "./schemas/firestoreDocuments";
 

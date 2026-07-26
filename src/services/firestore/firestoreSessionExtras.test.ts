@@ -4,7 +4,7 @@ import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
 import {
   buildPendingQuestionDocument,
   deserializePendingQuestionFromFirestore,
-} from "./firestoreSerialization";
+} from "./serialization/serializePlayer";
 
 const firestoreMocks = vi.hoisted(() => {
   const batchUpdate = vi.fn();
