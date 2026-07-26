@@ -1,11 +1,10 @@
-import { Capacitor, registerPlugin } from "@capacitor/core";
+import { Capacitor } from "@capacitor/core";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import {
   PushNotifications,
   type PushNotificationSchema,
   type Token,
 } from "@capacitor/push-notifications";
-import type { JetlagLiveActivityPlugin } from "../../../plugins/jetlag-live-activity/src/definitions";
 import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   type NotificationPlatform,
@@ -13,10 +12,10 @@ import {
 } from "../../domain/device/notifications";
 import type { PlayerRole } from "../../domain/session/playerRole";
 import { upsertSessionDevice } from "../firestore/firestoreDevices";
+import { JetlagLiveActivity } from "./liveActivity";
 
-export const JetlagLiveActivity = registerPlugin<JetlagLiveActivityPlugin>(
-  "JetlagLiveActivity",
-);
+/** Re-export for existing callers; prefer `./liveActivity` for new code. */
+export { JetlagLiveActivity } from "./liveActivity";
 
 let pushRegistrationStarted = false;
 let currentPushToken: string | null = null;
