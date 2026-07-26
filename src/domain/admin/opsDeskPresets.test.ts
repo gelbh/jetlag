@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  CUSTOM_PRESET_ID,
   OPS_OVERVIEW_LAYOUT,
   cloneLayout,
   deleteUserPreset,
+  movePresetOrder,
+  movePresetToIndex,
+  presetLabel,
   upsertUserPreset,
 } from "./opsDeskLayout";
 
@@ -45,4 +49,39 @@ describe("opsDeskPresets", () => {
     if (!saved.ok) return;
     expect(deleteUserPreset(saved.presets, saved.preset.id)).toEqual([]);
   });
+
+  it("labels builtins, custom, and user presets", () => {
+    expect(presetLabel("session-watch", [])).toBe("Session watch");
+    expect(presetLabel(CUSTOM_PRESET_ID, [])).toBe("Custom");
+    expect(presetLabel("unknown", [])).toBe("unknown");
+    expect(
+      presetLabel("user-a", [
+        {
+          id: "user-a",
+          name: "Night",
+          kind: "user",
+          layout: cloneLayout(OPS_OVERVIEW_LAYOUT),
+        },
+      ]),
+    ).toBe("Night");
+  });
+
+  it("moves presets by delta and by index", () => {
+    const order = ["a", "b", "c"];
+    expect(movePresetOrder(order, "b", -1)).toEqual(["b", "a", "c"]);
+    expect(movePresetToIndex(order, "a", 2)).toEqual(["b", "c", "a"]);
+    expect(movePresetOrder(order, "a", -1)).toBeNull();
+    expect(movePresetToIndex(order, "a", 0)).toBeNull();
+    expect(movePresetOrder(order, "missing", 1)).toBeNull();
+    expect(movePresetToIndex(order, "a", 3)).toBeNull();
+    expect(movePresetToIndex(order, "a", 1.5)).toBeNull();
+    expect(movePresetOrder(order, "a", 1.5)).toBeNull();
+    expect(movePresetOrder(order, "a", Number.NaN)).toBeNull();
+    expect(order).toEqual(["a", "b", "c"]);
+  });
 });
+
+
+
+
+
