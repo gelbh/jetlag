@@ -100,15 +100,21 @@ export async function probeAdminDivisionCounts(
   return counts;
 }
 
+function bundledAdminLevelsForSession(
+  customMatchingAreas: CustomMatchingAreasByLevel | undefined,
+): readonly number[] {
+  return ADMIN_DIVISION_PROBE_LEVELS.filter((level) =>
+    Boolean(customMatchingAreas?.[level as MatchingAdminLevel]),
+  );
+}
+
 export function adminBoundaryLevelsForSession(
   regionPackId: RegionPackId | undefined,
   customMatchingAreas: CustomMatchingAreasByLevel | undefined,
   adminDivisionCounts: AdminDivisionCounts | null | undefined,
 ): readonly number[] {
   if (regionPackHasBundledBoundaries(regionPackId)) {
-    return ADMIN_DIVISION_PROBE_LEVELS.filter((level) =>
-      Boolean(customMatchingAreas?.[level as MatchingAdminLevel]),
-    );
+    return bundledAdminLevelsForSession(customMatchingAreas);
   }
 
   return ADMIN_DIVISION_PROBE_LEVELS.filter((level) => {
@@ -123,6 +129,22 @@ export function adminBoundaryLevelsForSession(
       regionPackId,
     );
   });
+}
+
+/**
+ * Admin levels safe to Overpass-preload in the background. Bundled region
+ * packs (Dublin, NYC, ...) never have Overpass admin4/6 boundaries to show —
+ * preloading them anyway is what OOM'd the proxy (incident 9f05e1c1).
+ */
+export function adminLevelsForGeographicPreload(
+  regionPackId: RegionPackId | undefined,
+  customMatchingAreas: CustomMatchingAreasByLevel | undefined,
+): readonly number[] {
+  if (regionPackHasBundledBoundaries(regionPackId)) {
+    return bundledAdminLevelsForSession(customMatchingAreas);
+  }
+
+  return ADMIN_DIVISION_PROBE_LEVELS;
 }
 
 export function isAdminDivisionCountAvailable(count: number): boolean {
@@ -141,7 +163,7 @@ function isRegionPackMatchingCategorySupported(
   return !blocked?.has(categoryId);
 }
 
-function isRegionPackMeasuringBorderSupported(
+export function isMeasuringBorderKindSupportedForRegionPack(
   kind: MeasuringFromKind,
   regionPackId: RegionPackId | undefined,
 ): boolean {
@@ -210,7 +232,7 @@ export function adminBorderKindAvailability(
     return true;
   }
 
-  if (!isRegionPackMeasuringBorderSupported(kind, regionPackId)) {
+  if (!isMeasuringBorderKindSupportedForRegionPack(kind, regionPackId)) {
     return false;
   }
 

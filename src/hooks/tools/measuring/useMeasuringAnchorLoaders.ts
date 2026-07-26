@@ -319,6 +319,7 @@ export function useMeasuringAnchorLoaders({
           measuringLocationCategory,
           customMeasureGeometries,
           customMatchingAreas,
+          sessionRules?.regionPackId,
         );
 
         if (requestId !== linearRequestIdRef.current) {
@@ -363,6 +364,7 @@ export function useMeasuringAnchorLoaders({
       linearRequestIdRef,
       measuringLocationCategory,
       measuringSubject,
+      sessionRules,
       setMeasuringCoastSegments,
       setMeasuringDistanceMeters,
       setMeasuringError,

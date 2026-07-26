@@ -1,9 +1,17 @@
 import type { GameArea, SessionTier } from "../../domain/map/annotations";
-import type { MeasuringLocationCategory } from "../../domain/questions";
-import type { CustomMatchingAreasByLevel } from "../../domain/session/sessionCustomContent";
+import type { MeasuringFromKind, MeasuringLocationCategory } from "../../domain/questions";
+import type {
+  CustomMatchingAreasByLevel,
+  MatchingAdminLevel,
+} from "../../domain/session/sessionCustomContent";
 import type { RegionPackId } from "../../domain/regions/regionPack";
 import { fetchAdminDivisionFeaturesInArea } from "../geo/adminDivisionBoundaries";
-import { probeAdminDivisionCounts, emptyAdminDivisionCounts } from "../geo/adminDivisionAvailability";
+import {
+  adminLevelsForGeographicPreload,
+  emptyAdminDivisionCounts,
+  isMeasuringBorderKindSupportedForRegionPack,
+  probeAdminDivisionCounts,
+} from "../geo/adminDivisionAvailability";
 import { fetchPreparedCoastlineSegments } from "../geo/coastline";
 import { fetchLandmassFeaturesInArea } from "../geo/landmassFeatures";
 import { fetchMeasuringPlacesInArea } from "../geo/measuringPlaces";
@@ -11,7 +19,6 @@ import { fetchPreparedMeasuringLinearSegments } from "../geo/measuringLinearFeat
 import { fetchStaticTransit } from "../transit/transitStatic";
 import { usePreloadStore } from "../../state/preloadStore";
 
-const PRELOAD_ADMIN_LEVELS = [4, 6, 8, 9] as const;
 const PRELOAD_JOB_GAP_MS = 400;
 const PRELOAD_JOB_GAP_PREMIUM_MS = 100;
 
@@ -32,7 +39,15 @@ const PRELOAD_LINEAR_KINDS = [
   "admin2_border",
   "admin3_border",
   "admin4_border",
-] as const;
+] as const satisfies readonly MeasuringFromKind[];
+
+function linearKindsForGeographicPreload(
+  regionPackId: RegionPackId | undefined,
+): readonly MeasuringFromKind[] {
+  return PRELOAD_LINEAR_KINDS.filter((kind) =>
+    isMeasuringBorderKindSupportedForRegionPack(kind, regionPackId),
+  );
+}
 
 export function gameAreaPreloadKey(gameArea: GameArea): string {
   return JSON.stringify(gameArea.coordinates);
@@ -65,12 +80,15 @@ function buildPreloadJobs(
     );
   }
 
-  for (const adminLevel of PRELOAD_ADMIN_LEVELS) {
+  for (const adminLevel of adminLevelsForGeographicPreload(
+    regionPackId,
+    customMatchingAreas,
+  )) {
     jobs.push(() =>
       fetchAdminDivisionFeaturesInArea(
         gameArea,
         adminLevel,
-        customMatchingAreas?.[adminLevel],
+        customMatchingAreas?.[adminLevel as MatchingAdminLevel],
       ),
     );
   }
@@ -81,9 +99,14 @@ function buildPreloadJobs(
     );
   }
 
-  for (const kind of PRELOAD_LINEAR_KINDS) {
+  for (const kind of linearKindsForGeographicPreload(regionPackId)) {
     jobs.push(() =>
-      fetchPreparedMeasuringLinearSegments(gameArea, kind, customMatchingAreas),
+      fetchPreparedMeasuringLinearSegments(
+        gameArea,
+        kind,
+        customMatchingAreas,
+        regionPackId,
+      ),
     );
   }
 
@@ -224,12 +247,13 @@ export async function preloadCriticalGameAreaCaches(
   await Promise.allSettled([
     fetchPreparedCoastlineSegments(gameArea),
     fetchLandmassFeaturesInArea(gameArea),
-    ...PRELOAD_ADMIN_LEVELS.map((adminLevel) =>
-      fetchAdminDivisionFeaturesInArea(
-        gameArea,
-        adminLevel,
-        customMatchingAreas?.[adminLevel],
-      ),
+    ...adminLevelsForGeographicPreload(regionPackId, customMatchingAreas).map(
+      (adminLevel) =>
+        fetchAdminDivisionFeaturesInArea(
+          gameArea,
+          adminLevel,
+          customMatchingAreas?.[adminLevel as MatchingAdminLevel],
+        ),
     ),
   ]);
 }
