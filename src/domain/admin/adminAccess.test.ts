@@ -70,19 +70,38 @@ describe("resolveAdminAccess", () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
-  it("returns admin for verified admin without reload", async () => {
+  it("returns admin for verified admin after forced token claims", async () => {
     const reload = vi.fn(async () => undefined);
+    const getIdTokenResult = vi.fn(async () => ({
+      claims: { email: ADMIN_EMAIL, email_verified: true },
+    }));
     const user = createUser({
       email: ADMIN_EMAIL,
       emailVerified: true,
       reload,
+      getIdTokenResult,
     });
 
     await expect(resolveAdminAccess(user)).resolves.toBe("admin");
     expect(reload).not.toHaveBeenCalled();
+    expect(getIdTokenResult).toHaveBeenCalledWith(true);
   });
 
-  it("heals stale emailVerified via reload", async () => {
+  it("denies verified admin email when forced token claims are not admin", async () => {
+    const getIdTokenResult = vi.fn(async () => ({
+      claims: { email: ADMIN_EMAIL, email_verified: false },
+    }));
+    const user = createUser({
+      email: ADMIN_EMAIL,
+      emailVerified: true,
+      getIdTokenResult,
+    });
+
+    await expect(resolveAdminAccess(user)).resolves.toBe("denied");
+    expect(getIdTokenResult).toHaveBeenCalledWith(true);
+  });
+
+  it("heals stale emailVerified via reload then forced token", async () => {
     const user = createUser({
       email: ADMIN_EMAIL,
       emailVerified: false,
@@ -93,11 +112,16 @@ describe("resolveAdminAccess", () => {
         configurable: true,
       });
     });
+    const getIdTokenResult = vi.fn(async () => ({
+      claims: { email: ADMIN_EMAIL, email_verified: true },
+    }));
     (user as unknown as { reload: typeof reload }).reload = reload;
+    (user as unknown as { getIdTokenResult: typeof getIdTokenResult }).getIdTokenResult =
+      getIdTokenResult;
 
     await expect(resolveAdminAccess(user)).resolves.toBe("admin");
     expect(reload).toHaveBeenCalledTimes(1);
-    expect(user.getIdTokenResult).not.toHaveBeenCalled();
+    expect(getIdTokenResult).toHaveBeenCalledWith(true);
   });
 
   it("falls back to forced token claims after reload still stale", async () => {

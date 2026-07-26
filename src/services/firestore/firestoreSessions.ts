@@ -36,7 +36,8 @@ import {
   sessionVersionMismatchMessage,
 } from "../../domain/session/sessionVersion";
 import { APP_VERSION } from "../../domain/device/changelog";
-import { ensureAnonymousUser, getFirebaseAuth, getFirestoreDb } from "../core/firebase";
+import { getFirestoreDb } from "../core/firebase";
+import { forceRefreshIdToken } from "../core/auth/forceRefreshIdToken";
 import { reportJoinPermissionDenied } from "../core/sentry";
 import {
   buildSessionDocument,
@@ -90,14 +91,6 @@ export function isFirestorePermissionDenied(error: unknown): boolean {
 export const JOIN_AUTH_FAILURE_MESSAGE =
   "Couldn't authenticate with the server. Try again. If it keeps failing, sign out and back in.";
 
-async function forceRefreshIdTokenForJoin(): Promise<void> {
-  let user = getFirebaseAuth().currentUser;
-  if (!user) {
-    user = await ensureAnonymousUser();
-  }
-  await user.getIdToken(true);
-}
-
 async function withJoinPermissionRetry<T>(operation: () => Promise<T>): Promise<T> {
   try {
     return await operation();
@@ -108,7 +101,7 @@ async function withJoinPermissionRetry<T>(operation: () => Promise<T>): Promise<
 
     reportJoinPermissionDenied("initial");
     try {
-      await forceRefreshIdTokenForJoin();
+      await forceRefreshIdToken();
       return await operation();
     } catch (retryError) {
       if (isFirestorePermissionDenied(retryError)) {
