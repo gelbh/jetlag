@@ -25,6 +25,7 @@ import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQues
 import { useSubmitLock } from "../useSubmitLock";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 import type { GameSize } from "../../domain/session/gameSize";
+import { emitQuestionAnsweredActivity } from "../../services/session/emitSessionActivity";
 
 interface UseRadarToolParams {
   active: boolean;
@@ -259,7 +260,7 @@ export function useRadarTool({
         return;
       }
 
-      await createAnnotation({
+      const created = await createAnnotation({
         type: "radar",
         geometry,
         metadata: {
@@ -270,6 +271,20 @@ export function useRadarTool({
           color: MAP_ANNOTATION_COLORS.radar,
         },
       });
+
+      if (sessionId) {
+        const answerOption = yesNoAnswerOptions.find(
+          (option) => option.value === radarAnswer,
+        );
+        emitQuestionAnsweredActivity({
+          sessionId,
+          toolType: "radar",
+          promptText: radarQuestionPrompt(resolvedRadarRadius, distanceUnit),
+          annotationId: created.id,
+          answerSummary: answerOption?.label ?? String(radarAnswer),
+          createdByUid: senderUid ?? undefined,
+        });
+      }
 
       setRadarCenter(null);
       setRadarAnswer(null);

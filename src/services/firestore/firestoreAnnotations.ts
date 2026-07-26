@@ -53,6 +53,7 @@ import {
   cancelWalkingThermometersAfterIdentityHeal,
   postGameSystemMessage,
 } from "./firestoreSessionExtras";
+import { emitGameEndedActivity } from "../session/emitSessionActivity";
 import {
   buildMemberUidsAfterHeal,
   sanitizeReturningMemberUid,
@@ -863,6 +864,11 @@ export async function confirmFoundHiderSession(
     endGameRequestedAt: deleteField(),
     endGameRequestedByUid: deleteField(),
   });
+  emitGameEndedActivity(
+    sessionId,
+    { outcome: "found", summary: "Hider found" },
+    confirmedByUid,
+  );
 }
 
 export async function resetFoundHiderSession(sessionId: string): Promise<void> {
