@@ -5,7 +5,7 @@ import {
   gameAreaToPolygon,
   safeDifference,
   type LatLngTuple,
-} from "../geometryCore";
+} from "../gameArea/geometryCore";
 import {
   buildCoastlineNearRegion,
   buildLocationNearRegion,

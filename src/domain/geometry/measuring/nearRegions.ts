@@ -9,16 +9,16 @@ import nearestPointOnLine from "@turf/nearest-point-on-line";
 import simplify from "@turf/simplify";
 import Flatbush from "flatbush";
 import { around as geoflatbushAround } from "geoflatbush";
-import { unionPolygonFeatures } from "../unionPolygonFeatures";
+import { unionPolygonFeatures } from "../masks/unionPolygonFeatures";
 import type { GameArea } from "../../map/annotations";
-import { dispatchGeodesicLineBuffer } from "../geodesicLineBuffer";
+import { dispatchGeodesicLineBuffer } from "./geodesicLineBuffer";
 import { resolveClientMaskKernelMode } from "../kernel/resolveClientMaskKernelMode";
 import {
   gameAreaFingerprint,
   gameAreaToFeature,
   gameAreaToPolygon,
   type LatLngTuple,
-} from "../geometryCore";
+} from "../gameArea/geometryCore";
 import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 
 type SegmentBoundingBox = {

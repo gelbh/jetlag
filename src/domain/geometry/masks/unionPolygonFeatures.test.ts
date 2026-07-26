@@ -3,7 +3,7 @@ import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
-import { assertPolygonTopologyParity } from "./kernel/parity";
+import { assertPolygonTopologyParity } from "../kernel/parity";
 import {
   unionDiskSpecs,
   unionEliminationParts,

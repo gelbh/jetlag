@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { GameArea } from "../map/annotations";
+import type { GameArea } from "../../map/annotations";
 import {
   buildSeaLevelNearRegionFromSamples,
   distanceFromSeaLevelMeters,

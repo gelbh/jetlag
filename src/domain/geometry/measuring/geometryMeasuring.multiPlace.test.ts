@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
-import type { GameArea } from "../map/annotations";
+import type { GameArea } from "../../map/annotations";
 import {
   buildMultiPlaceEliminationRegion,
   buildMultiPlaceNearRegion,

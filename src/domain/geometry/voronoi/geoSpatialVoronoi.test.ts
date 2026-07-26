@@ -3,7 +3,7 @@ import area from "@turf/area";
 import { lineString } from "@turf/helpers";
 import { geoSpatialVoronoiFromSites } from "./geoSpatialVoronoi";
 import { resolveVoronoiCellPoiId, voronoiCellSiteId } from "./voronoiCellSiteId";
-import { geodesicLineBuffer } from "./geodesicLineBuffer";
+import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 
 describe("geoSpatialVoronoiFromSites", () => {
   it("returns polygon cells for multiple sites", () => {

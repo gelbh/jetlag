@@ -2,19 +2,19 @@ import { describe, expect, it } from "vitest";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, LineString, Polygon as GeoPolygon } from "geojson";
-import { computeEliminationUnionInputTs } from "./adapter/eliminationMask";
+import { computeEliminationUnionInputTs } from "../adapter/eliminationMask";
 import {
   buildEndGameMaskFromDisks,
   buildMaskFromUnionInput,
-} from "./kernel/buildMask";
+} from "../kernel/buildMask";
 import {
   wasmBuildEndGameMaskFromDisks,
   wasmBuildMaskFromUnionInput,
-} from "./kernel/maskWasm";
-import { wasmBuildHalfPlanePolygon } from "./kernel/halfPlaneWasm";
-import { wasmGeodesicLineBuffer } from "./kernel/geodesicWasm";
-import { buildHalfPlanePolygon } from "./kernel/radarHalfPlane";
-import { geodesicLineBuffer } from "./kernel/geodesicLineBuffer";
+} from "../kernel/maskWasm";
+import { wasmBuildHalfPlanePolygon } from "../kernel/halfPlaneWasm";
+import { wasmGeodesicLineBuffer } from "../kernel/geodesicWasm";
+import { buildHalfPlanePolygon } from "../kernel/radarHalfPlane";
+import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 import {
   unionDiskSpecs,
   unionEliminationParts,
@@ -23,9 +23,9 @@ import {
   type DiskSpec,
   type EliminationUnionInput,
   type PolygonFeature,
-} from "./kernel/unionPolygonFeatures";
-import type { AnnotationRecord, GameArea } from "../map/annotations";
-import type { LatLngTuple } from "./kernel/types";
+} from "../kernel/unionPolygonFeatures";
+import type { AnnotationRecord, GameArea } from "../../map/annotations";
+import type { LatLngTuple } from "../kernel/types";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
 
