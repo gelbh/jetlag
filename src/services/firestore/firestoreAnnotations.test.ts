@@ -5,7 +5,10 @@ import {
   JOIN_PREVIEW_PLACEHOLDER_AREA,
 } from "../../domain/session/joinPreviewGameArea";
 import type { GameArea } from "../../domain/map/annotations";
-import { joinRemoteSessionByCode } from "./firestoreAnnotations";
+import {
+  JOIN_AUTH_FAILURE_MESSAGE,
+  joinRemoteSessionByCode,
+} from "./firestoreAnnotations";
 
 const zeroFallback: GameArea = {
   type: "Polygon",
@@ -23,9 +26,22 @@ const zeroFallback: GameArea = {
 const getDoc = vi.hoisted(() => vi.fn());
 const getDocFromServer = vi.hoisted(() => vi.fn());
 const updateDoc = vi.hoisted(() => vi.fn(async () => undefined));
+const getIdToken = vi.hoisted(() => vi.fn(async () => "token"));
+const reportJoinPermissionDenied = vi.hoisted(() => vi.fn());
 
 vi.mock("../core/firebase", () => ({
   getFirestoreDb: () => ({}),
+  getFirebaseAuth: () => ({
+    currentUser: { uid: "admin-1", getIdToken },
+  }),
+  ensureAnonymousUser: vi.fn(async () => ({
+    uid: "admin-1",
+    getIdToken,
+  })),
+}));
+
+vi.mock("../core/sentry", () => ({
+  reportJoinPermissionDenied,
 }));
 
 vi.mock("firebase/firestore", () => ({
@@ -82,7 +98,11 @@ describe("joinRemoteSessionByCode without initial read", () => {
   beforeEach(() => {
     getDoc.mockReset();
     getDocFromServer.mockReset();
-    updateDoc.mockClear();
+    updateDoc.mockReset();
+    updateDoc.mockResolvedValue(undefined);
+    getIdToken.mockReset();
+    getIdToken.mockResolvedValue("token");
+    reportJoinPermissionDenied.mockReset();
   });
 
   it("re-reads the session after membership update and returns real gameArea", async () => {
@@ -181,5 +201,91 @@ describe("joinRemoteSessionByCode without initial read", () => {
     }
 
     expect(isPlaceholderGameArea(result.session.gameArea)).toBe(true);
+  });
+
+  it("retries once after forced token refresh on permission-denied", async () => {
+    const codeDoc = {
+      exists: () => true,
+      data: () => ({
+        sessionId: "session-1",
+        hostUid: "host-1",
+        hostAppVersion: "0.8.2",
+        tier: "free",
+        status: "active",
+        createdAt: "2026-05-14T00:00:00.000Z",
+      }),
+    };
+    const sessionPermissionDenied = new FirebaseError(
+      "permission-denied",
+      "Missing or insufficient permissions.",
+    );
+
+    getDoc
+      .mockResolvedValueOnce(codeDoc)
+      .mockRejectedValueOnce(sessionPermissionDenied)
+      .mockRejectedValueOnce(sessionPermissionDenied);
+
+    updateDoc
+      .mockRejectedValueOnce(sessionPermissionDenied)
+      .mockResolvedValueOnce(undefined);
+
+    getDocFromServer.mockResolvedValueOnce({
+      exists: () => true,
+      id: "session-1",
+      data: () => ({
+        code: "ABCD",
+        hostUid: "host-1",
+        createdAt: "2026-05-14T00:00:00.000Z",
+        memberUids: ["host-1", "admin-1"],
+        memberRoles: { "host-1": "hider", "admin-1": "admin" },
+        status: "active",
+      }),
+    });
+
+    const result = await joinRemoteSessionByCode(
+      "ABCD",
+      "admin-1",
+      "admin",
+      "0.8.2",
+    );
+
+    expect(result.status).toBe("joined");
+    expect(getIdToken).toHaveBeenCalledWith(true);
+    expect(reportJoinPermissionDenied).toHaveBeenCalledWith("initial");
+    expect(updateDoc.mock.calls.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("maps repeated permission-denied to a player-facing auth message", async () => {
+    const codeDoc = {
+      exists: () => true,
+      data: () => ({
+        sessionId: "session-1",
+        hostUid: "host-1",
+        hostAppVersion: "0.8.2",
+        tier: "free",
+        status: "active",
+        createdAt: "2026-05-14T00:00:00.000Z",
+      }),
+    };
+    const sessionPermissionDenied = new FirebaseError(
+      "permission-denied",
+      "Missing or insufficient permissions.",
+    );
+
+    getDoc
+      .mockResolvedValueOnce(codeDoc)
+      .mockRejectedValueOnce(sessionPermissionDenied)
+      .mockRejectedValueOnce(sessionPermissionDenied);
+
+    updateDoc.mockRejectedValue(sessionPermissionDenied);
+
+    await expect(
+      joinRemoteSessionByCode("ABCD", "admin-1", "admin", "0.8.2"),
+    ).rejects.toThrow(JOIN_AUTH_FAILURE_MESSAGE);
+
+    expect(getIdToken).toHaveBeenCalledWith(true);
+    expect(reportJoinPermissionDenied).toHaveBeenCalledWith("initial");
+    expect(reportJoinPermissionDenied).toHaveBeenCalledWith("retry");
+    expect(updateDoc).toHaveBeenCalledTimes(2);
   });
 });
