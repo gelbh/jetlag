@@ -4,16 +4,17 @@ import { useChatUnread } from "./useChatUnread";
 import type { SessionMessageRecord } from "../../domain/session/sessionChat";
 
 function message(
-  partial: Partial<SessionMessageRecord> & Pick<SessionMessageRecord, "id">,
+  overrides: Partial<SessionMessageRecord> & Pick<SessionMessageRecord, "id">,
 ): SessionMessageRecord {
   return {
-    id: partial.id,
-    type: partial.type ?? "text",
-    text: partial.text ?? "hi",
-    senderUid: partial.senderUid ?? "other",
-    createdAt: partial.createdAt ?? 1,
-    ...partial,
-  } as SessionMessageRecord;
+    sessionId: "s1",
+    channel: "social",
+    senderUid: "other",
+    senderRole: "seeker",
+    createdAt: "2026-01-01T00:00:00.000Z",
+    text: "hi",
+    ...overrides,
+  };
 }
 
 describe("useChatUnread sessionStorage soft-fail", () => {
