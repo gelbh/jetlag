@@ -22,6 +22,7 @@ export function isRoundComplete(
 ): boolean {
   return (
     typeof session?.foundConfirmedAt === "string" ||
+    session?.gameOutcome === "found" ||
     session?.gameOutcome === "ended_early" ||
     session?.gameOutcome === "abandoned"
   );

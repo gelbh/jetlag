@@ -92,4 +92,76 @@ describe("sessionStore", () => {
 
     expect(useSessionStore.getState().session?.timerAccumulatedMs).toBe(2000);
   });
+
+  it.each([
+    {
+      label: "foundRequestedAt",
+      patch: { foundRequestedAt: "2026-07-26T12:00:00.000Z" },
+      read: (s: ReturnType<typeof useSessionStore.getState>["session"]) =>
+        s?.foundRequestedAt,
+      expected: "2026-07-26T12:00:00.000Z",
+    },
+    {
+      label: "foundConfirmedAt + gameOutcome",
+      patch: {
+        foundConfirmedAt: "2026-07-26T12:05:00.000Z",
+        gameOutcome: "found" as const,
+      },
+      read: (s: ReturnType<typeof useSessionStore.getState>["session"]) =>
+        s?.gameOutcome,
+      expected: "found",
+    },
+    {
+      label: "gameResultId",
+      patch: { gameResultId: "result-1" },
+      read: (s: ReturnType<typeof useSessionStore.getState>["session"]) =>
+        s?.gameResultId,
+      expected: "result-1",
+    },
+    {
+      label: "sessionResetAt",
+      patch: { sessionResetAt: "2026-07-26T13:00:00.000Z" },
+      read: (s: ReturnType<typeof useSessionStore.getState>["session"]) =>
+        s?.sessionResetAt,
+      expected: "2026-07-26T13:00:00.000Z",
+    },
+    {
+      label: "gameAreaLabel",
+      patch: { gameAreaLabel: "Dublin City" },
+      read: (s: ReturnType<typeof useSessionStore.getState>["session"]) =>
+        s?.gameAreaLabel,
+      expected: "Dublin City",
+    },
+    {
+      label: "roundNumber",
+      patch: { roundNumber: 2 },
+      read: (s: ReturnType<typeof useSessionStore.getState>["session"]) =>
+        s?.roundNumber,
+      expected: 2,
+    },
+    {
+      label: "foundRequestedByUid",
+      patch: { foundRequestedByUid: "seeker-1" },
+      read: (s: ReturnType<typeof useSessionStore.getState>["session"]) =>
+        s?.foundRequestedByUid,
+      expected: "seeker-1",
+    },
+    {
+      label: "foundConfirmedByUid",
+      patch: { foundConfirmedByUid: "hider-1" },
+      read: (s: ReturnType<typeof useSessionStore.getState>["session"]) =>
+        s?.foundConfirmedByUid,
+      expected: "hider-1",
+    },
+  ])("updates session when only $label changes", ({ patch, read, expected }) => {
+    const session = createTestRemoteSession();
+    useSessionStore.getState().setSession(session);
+
+    useSessionStore.getState().setSession({
+      ...session,
+      ...patch,
+    });
+
+    expect(read(useSessionStore.getState().session)).toBe(expected);
+  });
 });
