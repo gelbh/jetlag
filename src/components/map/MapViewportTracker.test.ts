@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createThrottledPublisher,
   VIEWPORT_PUBLISH_THROTTLE_MS,
-} from "./MapViewportTracker";
+} from "./mapViewportPublish";
 
 describe("createThrottledPublisher", () => {
   beforeEach(() => {

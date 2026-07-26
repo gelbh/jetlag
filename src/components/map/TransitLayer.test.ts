@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getTransitStopIcon,
   getTransitVehicleIcon,
-} from "./TransitLayer";
+} from "./transitLayerIcons";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 
 describe("TransitLayer icon helpers", () => {

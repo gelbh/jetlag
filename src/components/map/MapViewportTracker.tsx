@@ -5,55 +5,23 @@ import {
   latLngBoundsToViewport,
   type MapViewportBounds,
 } from "../../domain/map/transitViewport";
+import { createThrottledPublisher } from "./mapViewportPublish";
+
+export {
+  VIEWPORT_PUBLISH_THROTTLE_MS,
+  createThrottledPublisher,
+} from "./mapViewportPublish";
 
 export interface MapViewportState {
   bounds: MapViewportBounds;
   zoom: number;
 }
 
-export const VIEWPORT_PUBLISH_THROTTLE_MS = 200;
-
 interface MapViewportTrackerProps {
   onViewportChange: (viewport: MapViewportState | null) => void;
   onUserPanStart?: () => void;
   onUserPanEnd?: () => void;
   suppressPanRef?: MutableRefObject<boolean>;
-}
-
-export function createThrottledPublisher(
-  publish: () => void,
-  throttleMs: number = VIEWPORT_PUBLISH_THROTTLE_MS,
-): {
-  schedule: () => void;
-  flush: () => void;
-  cancel: () => void;
-} {
-  let timer: ReturnType<typeof setTimeout> | null = null;
-
-  return {
-    schedule() {
-      if (timer != null) {
-        return;
-      }
-      timer = setTimeout(() => {
-        timer = null;
-        publish();
-      }, throttleMs);
-    },
-    flush() {
-      if (timer != null) {
-        clearTimeout(timer);
-        timer = null;
-      }
-      publish();
-    },
-    cancel() {
-      if (timer != null) {
-        clearTimeout(timer);
-        timer = null;
-      }
-    },
-  };
 }
 
 export function MapViewportTracker({
@@ -66,20 +34,22 @@ export function MapViewportTracker({
   const panActiveRef = useRef(false);
   const draggingRef = useRef(false);
   const onViewportChangeRef = useRef(onViewportChange);
-  onViewportChangeRef.current = onViewportChange;
-
-  const publisherRef = useRef(
-    createThrottledPublisher(() => {
-      publishViewport(map, onViewportChangeRef.current);
-    }),
+  const publisherRef = useRef<ReturnType<typeof createThrottledPublisher> | null>(
+    null,
   );
 
   useEffect(() => {
-    publisherRef.current = createThrottledPublisher(() => {
+    onViewportChangeRef.current = onViewportChange;
+  }, [onViewportChange]);
+
+  useEffect(() => {
+    const publisher = createThrottledPublisher(() => {
       publishViewport(map, onViewportChangeRef.current);
     });
+    publisherRef.current = publisher;
     return () => {
-      publisherRef.current.cancel();
+      publisher.cancel();
+      publisherRef.current = null;
     };
   }, [map]);
 
@@ -109,19 +79,19 @@ export function MapViewportTracker({
     dragend: () => {
       draggingRef.current = false;
       notifyPanEnd();
-      publisherRef.current.flush();
+      publisherRef.current?.flush();
     },
     move: () => {
       if (draggingRef.current) {
-        publisherRef.current.schedule();
+        publisherRef.current?.schedule();
       }
     },
     moveend: () => {
       notifyPanEnd();
-      publisherRef.current.schedule();
+      publisherRef.current?.schedule();
     },
     zoomend: () => {
-      publisherRef.current.flush();
+      publisherRef.current?.flush();
     },
   });
 
