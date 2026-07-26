@@ -5,7 +5,10 @@ import {
   verifyOverpassProxyAccess,
   verifyProxyAccess,
 } from "../proxies/verifyProxyAccess.mjs";
-import { consumeRateLimit } from "../lib/firestoreRateLimit.mjs";
+import {
+  consumeRateLimit,
+  isFirestoreContentionError,
+} from "../lib/firestoreRateLimit.mjs";
 
 export const PROXY_RATE_LIMITS = {
   overpass: {
@@ -31,14 +34,46 @@ function sendRateLimitFailure(res, retryAfterMs) {
   res.status(429).json({ error: "Too many requests. Try again later." });
 }
 
-export async function enforceRateLimit(res, route, uid, tier = "free") {
+function sendContentionFailure(res, route) {
+  console.warn(
+    JSON.stringify({
+      type: "firestore_rate_limit_contention_exhausted",
+      route,
+    }),
+  );
+  res.set("Retry-After", "1");
+  res.status(503).json({ error: "Temporarily unavailable. Try again." });
+}
+
+/**
+ * @param {{ set: Function, status: Function, json: Function }} res
+ * @param {string} route
+ * @param {string} uid
+ * @param {string} [tier]
+ * @param {{ db?: object, consumeRateLimit?: typeof consumeRateLimit }} [deps]
+ */
+export async function enforceRateLimit(res, route, uid, tier = "free", deps = {}) {
   const routeLimits = PROXY_RATE_LIMITS[route];
   const limits =
     route === "overpass"
       ? routeLimits[tier] ?? routeLimits.free
       : routeLimits;
   const { limit, windowMs } = limits;
-  const result = await consumeRateLimit(adminDb(), { route, uid, limit, windowMs });
+  const db = deps.db ?? adminDb();
+  const consume = deps.consumeRateLimit ?? consumeRateLimit;
+
+  let result;
+  try {
+    result = await consume(db, { route, uid, limit, windowMs });
+  } catch (error) {
+    // Retries exhausted — soft-fail with log signal instead of Sentry (JETLAG-26).
+    if (isFirestoreContentionError(error)) {
+      sendContentionFailure(res, route);
+      return false;
+    }
+    throw error;
+  }
+
   if (!result.allowed) {
     sendRateLimitFailure(res, result.retryAfterMs ?? 0);
     return false;

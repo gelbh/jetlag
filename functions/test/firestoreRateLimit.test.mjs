@@ -6,6 +6,7 @@ import {
   clearGrantAccessFailures,
   consumeRateLimit,
   getGrantAccessFailureCount,
+  isFirestoreContentionError,
   rateLimitDocId,
   recordGrantAccessFailure,
 } from "../lib/firestoreRateLimit.mjs";
@@ -207,5 +208,107 @@ describe("firestoreRateLimit", () => {
       nowMs: 2_000,
     });
     assert.equal(db.documents.has(grantPath), true);
+  });
+
+  it("detects Firestore ABORTED contention errors", () => {
+    assert.equal(
+      isFirestoreContentionError({
+        code: 10,
+        message: "10 ABORTED: Too much contention on these documents. Please try again.",
+      }),
+      true,
+    );
+    assert.equal(isFirestoreContentionError({ code: "ABORTED", message: "aborted" }), true);
+    assert.equal(
+      isFirestoreContentionError({
+        message: "Too much contention on these documents. Please try again.",
+      }),
+      true,
+    );
+    assert.equal(isFirestoreContentionError({ code: 14, message: "UNAVAILABLE" }), false);
+    assert.equal(isFirestoreContentionError(null), false);
+  });
+
+  it("retries consumeRateLimit after transient ABORTED contention", async () => {
+    const db = createInMemoryFirestore();
+    let attempts = 0;
+    const originalRunTransaction = db.runTransaction.bind(db);
+    db.runTransaction = async (callback) => {
+      attempts += 1;
+      if (attempts < 3) {
+        const error = new Error(
+          "10 ABORTED: Too much contention on these documents. Please try again.",
+        );
+        error.code = 10;
+        throw error;
+      }
+      return originalRunTransaction(callback);
+    };
+
+    const delays = [];
+    const result = await consumeRateLimit(db, {
+      route: "overpass",
+      uid: "user-contention",
+      limit: 5,
+      windowMs: 60_000,
+      nowMs: 1_000,
+      sleep: async (ms) => {
+        delays.push(ms);
+      },
+    });
+
+    assert.deepEqual(result, { allowed: true });
+    assert.equal(attempts, 3);
+    assert.deepEqual(delays, [25, 50]);
+  });
+
+  it("rethrows when ABORTED contention retries are exhausted", async () => {
+    const db = createInMemoryFirestore();
+    db.runTransaction = async () => {
+      const error = new Error(
+        "10 ABORTED: Too much contention on these documents. Please try again.",
+      );
+      error.code = 10;
+      throw error;
+    };
+
+    await assert.rejects(
+      () =>
+        consumeRateLimit(db, {
+          route: "overpass",
+          uid: "user-exhausted",
+          limit: 5,
+          windowMs: 60_000,
+          maxAttempts: 2,
+          sleep: async () => {},
+        }),
+      (error) => isFirestoreContentionError(error),
+    );
+  });
+
+  it("does not retry non-contention Firestore errors", async () => {
+    const db = createInMemoryFirestore();
+    let attempts = 0;
+    db.runTransaction = async () => {
+      attempts += 1;
+      const error = new Error("14 UNAVAILABLE: upstream");
+      error.code = 14;
+      throw error;
+    };
+
+    await assert.rejects(
+      () =>
+        consumeRateLimit(db, {
+          route: "overpass",
+          uid: "user-unavailable",
+          limit: 5,
+          windowMs: 60_000,
+          sleep: async () => {
+            assert.fail("should not sleep for non-contention errors");
+          },
+        }),
+      /UNAVAILABLE/,
+    );
+    assert.equal(attempts, 1);
   });
 });
