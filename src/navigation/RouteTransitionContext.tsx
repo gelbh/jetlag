@@ -184,7 +184,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
   );
 
   const resetStuckTransition = useCallback(() => {
-    if (phaseRef.current !== "loading" && phaseRef.current !== "revealing") {
+    if (phaseRef.current !== "settling") {
       return;
     }
 
