@@ -305,6 +305,18 @@ describe("accountAuth", () => {
     expect(window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY)).toBeNull();
   });
 
+  it("still honors a legacy pending marker of 1", async () => {
+    window.sessionStorage.setItem(OAUTH_REDIRECT_PENDING_KEY, "1");
+    getRedirectResult.mockResolvedValueOnce(null);
+
+    const user = await completeOAuthRedirectIfPending();
+
+    expect(user).toBeNull();
+    expect(consumeOAuthRedirectFailureMessage()).toBe(
+      OAUTH_REDIRECT_FAILED_MESSAGE,
+    );
+  });
+
   it("signs in with email link when the credential is already in use", async () => {
     mockAuth.currentUser = { isAnonymous: true, uid: "anon-4" };
     isSignInWithEmailLink.mockReturnValueOnce(true);
