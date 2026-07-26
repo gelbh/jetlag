@@ -1,8 +1,8 @@
 import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { useMotionProfile } from "./useMotionProfile";
-import { useMapStore } from "../state/mapStore";
-import { resetAllStores } from "../test/helpers/storeReset";
+import { useMapStore } from "../../state/mapStore";
+import { resetAllStores } from "../../test/helpers/storeReset";
 
 describe("useMotionProfile", () => {
   beforeEach(() => {
