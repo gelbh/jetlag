@@ -172,7 +172,7 @@ describe("accountAuth", () => {
       mockAuth.currentUser,
       expect.anything(),
     );
-    expect(window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY)).toBe("1");
+    expect(window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY)).toBeTruthy();
   });
 
   it("redirects when signed-in Google popup is blocked", async () => {
@@ -278,7 +278,7 @@ describe("accountAuth", () => {
   });
 
   it("notes a player-facing failure when a pending redirect returns no user", async () => {
-    window.sessionStorage.setItem(OAUTH_REDIRECT_PENDING_KEY, "1");
+    window.sessionStorage.setItem(OAUTH_REDIRECT_PENDING_KEY, String(Date.now()));
     getRedirectResult.mockResolvedValueOnce(null);
 
     const user = await completeOAuthRedirectIfPending();
@@ -287,6 +287,20 @@ describe("accountAuth", () => {
     expect(consumeOAuthRedirectFailureMessage()).toBe(
       OAUTH_REDIRECT_FAILED_MESSAGE,
     );
+    expect(consumeOAuthRedirectFailureMessage()).toBeNull();
+    expect(window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY)).toBeNull();
+  });
+
+  it("ignores a stale redirect-pending flag without surfacing failure", async () => {
+    window.sessionStorage.setItem(
+      OAUTH_REDIRECT_PENDING_KEY,
+      String(Date.now() - 11 * 60 * 1000),
+    );
+    getRedirectResult.mockResolvedValueOnce(null);
+
+    const user = await completeOAuthRedirectIfPending();
+
+    expect(user).toBeNull();
     expect(consumeOAuthRedirectFailureMessage()).toBeNull();
     expect(window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY)).toBeNull();
   });

@@ -51,7 +51,8 @@ export function AccountSignInGate({
   const [error, setError] = useState<string | null>(null);
   const [completingEmailLink, setCompletingEmailLink] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const oauthControlsDisabled = busyAction !== null || !hasAuthUser;
+  const oauthControlsDisabled =
+    completingEmailLink || busyAction !== null || !hasAuthUser;
 
   const handleSignedIn = useCallback(async () => {
     setError(null);
@@ -71,9 +72,11 @@ export function AccountSignInGate({
         }
 
         const oauthCompleted = await completeOAuthRedirectIfPending();
-        const redirectFailure = consumeOAuthRedirectFailureMessage();
-        if (!cancelled && redirectFailure) {
-          setError(redirectFailure);
+        if (!cancelled) {
+          const redirectFailure = consumeOAuthRedirectFailureMessage();
+          if (redirectFailure) {
+            setError(redirectFailure);
+          }
         }
         if (!cancelled && oauthCompleted && isPermanentUser(oauthCompleted)) {
           await handleSignedIn();

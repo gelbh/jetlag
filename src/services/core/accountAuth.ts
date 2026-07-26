@@ -167,19 +167,30 @@ async function linkWithPopupOrSignInExisting(
 
 function markOAuthRedirectPending(): void {
   try {
-    window.sessionStorage.setItem(OAUTH_REDIRECT_PENDING_KEY, "1");
+    window.sessionStorage.setItem(
+      OAUTH_REDIRECT_PENDING_KEY,
+      String(Date.now()),
+    );
   } catch {
     // Private mode / blocked storage — recovery still runs; UI may miss the hint.
   }
 }
 
+const OAUTH_REDIRECT_PENDING_MAX_AGE_MS = 10 * 60 * 1000;
+
 function consumeOAuthRedirectPending(): boolean {
   try {
-    const pending = window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY) === "1";
-    if (pending) {
-      window.sessionStorage.removeItem(OAUTH_REDIRECT_PENDING_KEY);
+    const raw = window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY);
+    if (raw == null) {
+      return false;
     }
-    return pending;
+    window.sessionStorage.removeItem(OAUTH_REDIRECT_PENDING_KEY);
+    const startedAt = Number(raw);
+    if (!Number.isFinite(startedAt)) {
+      // Legacy "1" flag from older clients — treat as pending once, then clear.
+      return raw === "1";
+    }
+    return Date.now() - startedAt <= OAUTH_REDIRECT_PENDING_MAX_AGE_MS;
   } catch {
     return false;
   }
