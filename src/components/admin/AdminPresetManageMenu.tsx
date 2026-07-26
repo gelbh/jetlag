@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import {
   BUILTIN_PRESETS,
   CUSTOM_PRESET_ID,
@@ -37,6 +37,8 @@ interface AdminPresetManageMenuProps {
   onRenameUserPreset: (presetId: string) => void;
   onDeleteUserPreset: (presetId: string) => void;
   onDismiss: () => void;
+  /** Keep Manage toggle clicks from counting as outside dismiss. */
+  dismissIgnoreRef?: RefObject<HTMLElement | null>;
 }
 
 export function AdminPresetManageMenu({
@@ -48,6 +50,7 @@ export function AdminPresetManageMenu({
   onRenameUserPreset,
   onDeleteUserPreset,
   onDismiss,
+  dismissIgnoreRef,
 }: AdminPresetManageMenuProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const userIds = new Set(userPresets.map((p) => p.id));
@@ -58,10 +61,10 @@ export function AdminPresetManageMenu({
     };
     const onPointer = (event: MouseEvent) => {
       const root = rootRef.current;
-      if (!root) return;
-      if (event.target instanceof Node && !root.contains(event.target)) {
-        onDismiss();
-      }
+      if (!root || !(event.target instanceof Node)) return;
+      if (root.contains(event.target)) return;
+      if (dismissIgnoreRef?.current?.contains(event.target)) return;
+      onDismiss();
     };
     window.addEventListener("keydown", onKey);
     window.addEventListener("mousedown", onPointer);
@@ -69,7 +72,7 @@ export function AdminPresetManageMenu({
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("mousedown", onPointer);
     };
-  }, [onDismiss]);
+  }, [onDismiss, dismissIgnoreRef]);
 
   return (
     <div

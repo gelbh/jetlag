@@ -49,6 +49,7 @@ export function AdminPresetMenu({
       userIds.has(id),
   );
   const [manageOpen, setManageOpen] = useState(false);
+  const manageAnchorRef = useRef<HTMLSpanElement>(null);
   const dragActiveRef = useRef(false);
   const dragFromIdRef = useRef<string | null>(null);
 
@@ -146,7 +147,7 @@ export function AdminPresetMenu({
           </span>
         );
       })}
-      <span className="jl-ops-preset-manage-anchor">
+      <span className="jl-ops-preset-manage-anchor" ref={manageAnchorRef}>
         <button
           type="button"
           className="jl-ops-preset-chip"
@@ -162,12 +163,11 @@ export function AdminPresetMenu({
             defaultPresetId={defaultPresetId}
             userPresets={userPresets}
             onSetDefault={onSetDefault}
-            onReorderPresets={(next) => {
-              onReorderPresets(next);
-            }}
+            onReorderPresets={onReorderPresets}
             onRenameUserPreset={onRenameUserPreset}
             onDeleteUserPreset={onDeleteUserPreset}
             onDismiss={() => setManageOpen(false)}
+            dismissIgnoreRef={manageAnchorRef}
           />
         ) : null}
       </span>
