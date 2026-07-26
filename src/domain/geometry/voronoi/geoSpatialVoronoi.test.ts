@@ -7,8 +7,8 @@ import { geoSpatialVoronoiFromSites } from "./geoSpatialVoronoi";
 import { resolveVoronoiCellPoiId, voronoiCellSiteId } from "./voronoiCellSiteId";
 import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 
-/** Play-area-scale ceiling; a correct local Voronoi cell never approaches this. */
-const MAX_PLAUSIBLE_CELL_AREA_M2 = 1e10;
+/** Finite clip cells can reach ~1e10–1e11 m²; planet-scale was ≫1e14. */
+const MAX_PLAUSIBLE_CELL_AREA_M2 = 1e12;
 
 const DUBLIN_GRID_SPACING_DEGREES = 0.003;
 const DUBLIN_GRID_ORIGIN = { lat: 53.35, lng: -6.26 };
@@ -126,3 +126,24 @@ describe("geodesicLineBuffer", () => {
     expect(area(buffered!)).toBeGreaterThan(0);
   });
 });
+
+describe("geoSpatialVoronoiFromSites — extent coverage", () => {
+  it("includes a far probe that is nearest to a site beyond a 6 km bbox margin", () => {
+    const sites = [
+      { lng: -6.26, lat: 53.35, properties: { poiId: "west" } },
+      { lng: -6.257, lat: 53.35, properties: { poiId: "east" } },
+    ];
+    const cells = geoSpatialVoronoiFromSites(sites);
+    const westCell = cells.features.find((f) => f.properties?.poiId === "west");
+    expect(westCell).toBeDefined();
+    const farWest: [number, number] = [-6.26 - 8 / 111.32, 53.35];
+    expect(
+      booleanPointInPolygon(
+        turfPoint(farWest),
+        westCell as Feature<Polygon | MultiPolygon>,
+      ),
+      "8 km west probe should remain in western cell",
+    ).toBe(true);
+  });
+});
+
