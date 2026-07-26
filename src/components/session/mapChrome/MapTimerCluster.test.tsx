@@ -111,3 +111,44 @@ describe("MapTimerCluster thermometer cancel", () => {
     expect(screen.queryByRole("button", { name: "Cancel thermometer walk" })).toBeNull();
   });
 });
+
+describe("MapTimerCluster dual stack", () => {
+  it("shows SESSION secondary under hiding countdown", () => {
+    render(
+      <MapTimerCluster
+        sessionRules={{ gameSize: "medium", hidingPeriodMinutes: 90 }}
+        timerState={{ accumulatedMs: 60_000, runningSince: Date.now() }}
+        timerRunning
+        timerHasStarted
+        pendingQuestions={[]}
+        onOpenTimerMenu={vi.fn()}
+        timerMenuOpen={false}
+      />,
+    );
+
+    expect(screen.getByText("SESSION")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: /Session elapsed/i }),
+    ).toBeTruthy();
+  });
+
+  it("shows SEEK primary without SESSION when hiding is over", () => {
+    render(
+      <MapTimerCluster
+        sessionRules={{ gameSize: "medium", hidingPeriodMinutes: 1 }}
+        timerState={{
+          accumulatedMs: 10 * 60_000,
+          runningSince: null,
+        }}
+        timerRunning={false}
+        timerHasStarted
+        pendingQuestions={[]}
+        onOpenTimerMenu={vi.fn()}
+        timerMenuOpen={false}
+      />,
+    );
+
+    expect(screen.getByText("SEEK")).toBeTruthy();
+    expect(screen.queryByText("SESSION")).toBeNull();
+  });
+});
