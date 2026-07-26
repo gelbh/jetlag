@@ -21,6 +21,18 @@ test("isExpectedFunctionsError matches session-already-ended HttpsError", () => 
   );
 });
 
+test("isExpectedFunctionsError matches support agent LLM unavailable HttpsError", () => {
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError(
+        "internal",
+        "Support agent is temporarily unavailable.",
+      ),
+    ),
+    true,
+  );
+});
+
 test("isExpectedFunctionsError ignores unrelated HttpsErrors and plain Errors", () => {
   assert.equal(
     isExpectedFunctionsError(
@@ -34,6 +46,16 @@ test("isExpectedFunctionsError ignores unrelated HttpsErrors and plain Errors", 
     ),
     false,
   );
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError("internal", "Unexpected support agent failure."),
+    ),
+    false,
+  );
   assert.equal(isExpectedFunctionsError(new Error("LEAVE_NOT_HOST")), false);
+  assert.equal(
+    isExpectedFunctionsError(new Error("SESSION_OPS_LLM_FAILED")),
+    false,
+  );
   assert.equal(isExpectedFunctionsError(null), false);
 });
