@@ -1,18 +1,18 @@
 import { describe, expect, it, vi } from "vitest";
-import type { GameArea } from "../../domain/map/annotations";
-import * as overpassClient from "../core/overpassClient";
+import type { GameArea } from "../../../domain/map/annotations";
+import * as overpassClient from "../../core/overpassClient";
 import {
   deserializeMatchingFeatures,
   pickNearestMatchingFeature,
   serializeMatchingFeatures,
-} from "../../domain/geo/matchingAdapters";
+} from "../../../domain/geo/matchingAdapters";
 import {
   fetchMatchingFeaturesInArea,
   findNearestMatchingFeature,
   parseMatchingFeatures,
   matchingNullAnswerMessage,
   matchingFeatureCountLabel,
-} from "./matchingFeatures";
+} from "./index";
 
 const sampleGameArea: GameArea = {
   type: "Polygon",
