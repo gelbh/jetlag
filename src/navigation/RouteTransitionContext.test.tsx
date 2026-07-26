@@ -41,7 +41,7 @@ describe("RouteTransitionProvider resetStuckTransition", () => {
     vi.restoreAllMocks();
   });
 
-  it("resets loading phase to idle", async () => {
+  it("resets settling phase to idle", async () => {
     render(
       <MemoryRouter>
         <RouteTransitionProvider>
@@ -60,7 +60,7 @@ describe("RouteTransitionProvider resetStuckTransition", () => {
       await vi.advanceTimersByTimeAsync(150);
     });
 
-    expect(screen.getByTestId("phase")).toHaveTextContent("loading");
+    expect(screen.getByTestId("phase")).toHaveTextContent("settling");
 
     act(() => {
       screen.getByRole("button", { name: "Reset stuck" }).click();
