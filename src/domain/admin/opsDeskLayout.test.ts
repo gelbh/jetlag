@@ -11,6 +11,7 @@ import {
   setPinned,
   showPanel,
   unstackPanelToCell,
+  reorderPanelInStack,
   type DeskLayout,
   type GridStack,
 } from "./opsDeskLayout";
@@ -135,6 +136,52 @@ describe("opsDeskLayout", () => {
       y: 0,
       w: 6,
       h: 4,
+    });
+  });
+
+  it("reorderPanelInStack moves a middle tab to the front and follows activeIndex", () => {
+    const layout = layoutOf(
+      stack({
+        id: "a",
+        panelIds: ["inbox", "detail", "actions"],
+        activeIndex: 1,
+      }),
+    );
+
+    const next = reorderPanelInStack(layout, "a", 1, 0);
+
+    expect(next.stacks[0]).toMatchObject({
+      panelIds: ["detail", "inbox", "actions"],
+      activeIndex: 0,
+    });
+  });
+
+  it("reorderPanelInStack is a no-op for the same index", () => {
+    const layout = layoutOf(
+      stack({
+        id: "a",
+        panelIds: ["inbox", "detail"],
+        activeIndex: 1,
+      }),
+    );
+
+    expect(reorderPanelInStack(layout, "a", 1, 1)).toBe(layout);
+  });
+
+  it("reorderPanelInStack clamps out-of-bounds toIndex", () => {
+    const layout = layoutOf(
+      stack({
+        id: "a",
+        panelIds: ["inbox", "detail", "actions"],
+        activeIndex: 0,
+      }),
+    );
+
+    const next = reorderPanelInStack(layout, "a", 0, 99);
+
+    expect(next.stacks[0]).toMatchObject({
+      panelIds: ["detail", "actions", "inbox"],
+      activeIndex: 2,
     });
   });
 

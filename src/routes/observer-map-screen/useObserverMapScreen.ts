@@ -26,10 +26,6 @@ export function useObserverMapScreen() {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
   const layerVisibility = useMapStore((state) => state.layerVisibility);
-  const observerPerspective = useMapStore((state) => state.observerPerspective);
-  const setObserverPerspective = useMapStore(
-    (state) => state.setObserverPerspective,
-  );
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const overlay = useMapOverlayState();
   const distanceUnit = useSessionDistanceUnit();
@@ -105,10 +101,7 @@ export function useObserverMapScreen() {
     localLivePoint: null,
   });
 
-  const spectatorLayers = useMemo(
-    () => resolveSpectatorLayers(observerPerspective, spectatorRole),
-    [observerPerspective, spectatorRole],
-  );
+  const spectatorLayers = useMemo(() => resolveSpectatorLayers(), []);
 
   return {
     session,
@@ -124,8 +117,6 @@ export function useObserverMapScreen() {
     handleMapStyleChange,
     effectiveBasemapStyle,
     layerVisibility,
-    observerPerspective,
-    setObserverPerspective,
     spectatorLayers,
     annotations,
     pendingQuestions,
