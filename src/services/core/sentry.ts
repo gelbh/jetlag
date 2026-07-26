@@ -4,6 +4,7 @@ import { getClientEnv } from "../../config/env";
 import { APP_VERSION } from "../../domain/device/changelog";
 import {
   isIdbConnectionClosingMessage,
+  isRecaptchaOtTypeErrorMessage,
   isWebkitLoadFailedMessage,
 } from "./clientNoiseErrors";
 import { isHtml2CanvasUnsupportedColorMessage } from "./html2canvasErrors";
@@ -151,7 +152,8 @@ function isIgnoredClientNoiseEvent(
         LEAFLET_CLASSLIST_ERROR.test(exception.value) ||
         MODULE_SCRIPT_IMPORT_FAILED.test(exception.value) ||
         BATTERY_ADD_EVENT_LISTENER.test(exception.value) ||
-        isWebkitLoadFailedMessage(exception.value))
+        isWebkitLoadFailedMessage(exception.value) ||
+        isRecaptchaOtTypeErrorMessage(exception.value))
     ) {
       return true;
     }
