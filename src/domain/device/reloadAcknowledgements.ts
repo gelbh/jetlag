@@ -16,11 +16,12 @@ function hotfixReloadKey(requiredMinAppVersion: string): string {
   return `${HOTFIX_RELOAD_PREFIX}${requiredMinAppVersion}`;
 }
 
-function readSessionFlag(key: string): boolean {
+/** `null` means storage is unavailable (fail closed for forced reloads). */
+function readSessionFlag(key: string): boolean | null {
   try {
     return sessionStorage.getItem(key) === "1";
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -35,7 +36,7 @@ function writeSessionFlag(key: string): boolean {
 }
 
 export function hasSoftReloadBeenAcknowledged(mitigationId: string): boolean {
-  return readSessionFlag(softReloadKey(mitigationId));
+  return readSessionFlag(softReloadKey(mitigationId)) === true;
 }
 
 export function acknowledgeSoftReload(mitigationId: string): boolean {
@@ -45,11 +46,21 @@ export function acknowledgeSoftReload(mitigationId: string): boolean {
 export function hasHotfixReloadBeenAcknowledged(
   requiredMinAppVersion: string,
 ): boolean {
-  return readSessionFlag(hotfixReloadKey(requiredMinAppVersion));
+  return readSessionFlag(hotfixReloadKey(requiredMinAppVersion)) === true;
 }
 
 export function acknowledgeHotfixReload(requiredMinAppVersion: string): boolean {
   return writeSessionFlag(hotfixReloadKey(requiredMinAppVersion));
+}
+
+/** False when sessionStorage cannot be read — callers must not force-reload. */
+export function isReloadAckStorageAvailable(): boolean {
+  try {
+    sessionStorage.getItem(`${SOFT_RELOAD_PREFIX}__probe`);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function shouldHonorSoftReload(options: {
@@ -63,7 +74,9 @@ export function shouldHonorSoftReload(options: {
   if (lastHonoredId === mitigation.id) {
     return false;
   }
-  if (hasSoftReloadBeenAcknowledged(mitigation.id)) {
+  // Absent flag → honor; already set or storage unreadable → skip (fail closed).
+  const acknowledgement = readSessionFlag(softReloadKey(mitigation.id));
+  if (acknowledgement !== false) {
     return false;
   }
   return true;

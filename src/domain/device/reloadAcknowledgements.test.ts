@@ -102,5 +102,11 @@ describe("reloadAcknowledgements", () => {
     expect(hasHotfixReloadBeenAcknowledged("9.9.9")).toBe(false);
     expect(acknowledgeSoftReload("mit-x")).toBe(false);
     expect(acknowledgeHotfixReload("9.9.9")).toBe(false);
+    expect(
+      shouldHonorSoftReload({
+        mitigation: softReloadMitigation("mit-x"),
+        lastHonoredId: null,
+      }),
+    ).toBe(false);
   });
 });

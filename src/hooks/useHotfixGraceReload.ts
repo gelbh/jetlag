@@ -3,6 +3,7 @@ import { APP_VERSION } from "../domain/device/changelog";
 import {
   acknowledgeHotfixReload,
   hasHotfixReloadBeenAcknowledged,
+  isReloadAckStorageAvailable,
 } from "../domain/device/reloadAcknowledgements";
 import { applyServiceWorkerUpdate } from "../domain/device/serviceWorkerRefresh";
 import { compareAppVersions } from "../domain/session/sessionVersion";
@@ -72,7 +73,8 @@ export function useHotfixGraceReload(
     typeof requiredMinAppVersion === "string" &&
     requiredMinAppVersion.length > 0 &&
     (attemptedVersion === requiredMinAppVersion ||
-      hasHotfixReloadBeenAcknowledged(requiredMinAppVersion));
+      hasHotfixReloadBeenAcknowledged(requiredMinAppVersion) ||
+      !isReloadAckStorageAvailable());
 
   const targetVersion =
     needsUpdate && requiredMinAppVersion && !alreadyAttempted
