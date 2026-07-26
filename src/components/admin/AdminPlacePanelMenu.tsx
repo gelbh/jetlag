@@ -20,6 +20,7 @@ export function AdminPlacePanelMenu({
       style={{ left: anchor.left, top: anchor.top }}
       role="menu"
       aria-label="Place panel"
+      onClick={(event) => event.stopPropagation()}
     >
       {hiddenPanelIds.length === 0 ? (
         <p className="jl-ops-place-menu-empty">All panels on desk</p>

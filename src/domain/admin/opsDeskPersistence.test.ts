@@ -8,6 +8,7 @@ import {
 } from "./opsDeskLayout";
 import {
   defaultOpsDeskStore,
+  coldStartOpsDeskStore,
   loadOpsDeskStore,
   saveOpsDeskStore,
   storageKey,
@@ -90,6 +91,22 @@ describe("opsDeskPersistence", () => {
     expect(loaded.presetOrder).toContain(CUSTOM_PRESET_ID);
     expect(loaded.customLayout.cols).toBe(24);
     expect(loaded.customLayout.stacks[0]).toMatchObject({ x: 0, w: 12 });
+  });
+
+  it("coldStartOpsDeskStore opens defaultPresetId", () => {
+    localStorage.setItem(
+      storageKey(null),
+      JSON.stringify({
+        version: 1,
+        activePresetId: CUSTOM_PRESET_ID,
+        defaultPresetId: "ops-overview",
+        customLayout: cloneLayout(OPS_OVERVIEW_LAYOUT),
+        userPresets: [],
+      }),
+    );
+    const started = coldStartOpsDeskStore(null);
+    expect(started.defaultPresetId).toBe("ops-overview");
+    expect(started.activePresetId).toBe("ops-overview");
   });
 
   it("falls back invalid defaultPresetId to builtin", () => {

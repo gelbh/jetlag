@@ -238,6 +238,12 @@ export function loadOpsDeskStore(uid: string | null): OpsDeskStoreV1 {
   }
 }
 
+/** Cold `/admin` start: open `defaultPresetId`, not last `activePresetId`. */
+export function coldStartOpsDeskStore(uid: string | null): OpsDeskStoreV1 {
+  const loaded = loadOpsDeskStore(uid);
+  return { ...loaded, activePresetId: loaded.defaultPresetId };
+}
+
 export function saveOpsDeskStore(
   uid: string | null,
   store: OpsDeskStoreV1,

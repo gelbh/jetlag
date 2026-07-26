@@ -187,7 +187,7 @@ export function unstackPanelToCell(
       h,
       collapsed: false,
     };
-    return next;
+    return clampLayoutToCols(next);
   }
 
   const next = cloneLayout(layout);
@@ -205,7 +205,7 @@ export function unstackPanelToCell(
     h,
   });
 
-  return next;
+  return clampLayoutToCols(next);
 }
 
 export function setPinned(
@@ -293,7 +293,7 @@ export function showPanel(
     h: cell.h,
   });
 
-  return next;
+  return clampLayoutToCols(next);
 }
 
 /**

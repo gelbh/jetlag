@@ -18,7 +18,9 @@ import type {
 import {
   CUSTOM_PRESET_ID,
   PANEL_IDS,
+  BUILTIN_PRESETS,
   cloneLayout,
+  clampLayoutToCols,
   deleteUserPreset,
   ensureIncidentPanelsVisible,
   hidePanel,
@@ -36,7 +38,7 @@ import {
   type PanelId,
 } from "../../domain/admin/opsDeskLayout";
 import {
-  loadOpsDeskStore,
+  coldStartOpsDeskStore,
   saveOpsDeskStore,
   type OpsDeskStoreV1,
 } from "../../domain/admin/opsDeskPersistence";
@@ -115,10 +117,9 @@ export function AdminOpsDesk() {
   const selectedIncidentId = routeIncidentId?.trim() || null;
   const onIncidentsRoute = location.pathname.startsWith("/admin/incidents");
 
-  const [store, setStore] = useState<OpsDeskStoreV1>(() => {
-    const loaded = loadOpsDeskStore(user?.uid ?? null);
-    return { ...loaded, activePresetId: loaded.defaultPresetId };
-  });
+  const [store, setStore] = useState<OpsDeskStoreV1>(() =>
+    coldStartOpsDeskStore(user?.uid ?? null),
+  );
   const [storeUid, setStoreUid] = useState<string | null>(user?.uid ?? null);
   const [now, setNow] = useState(() => new Date());
   const [incidents, setIncidents] = useState<IncidentRecord[]>([]);
@@ -168,8 +169,7 @@ export function AdminOpsDesk() {
 
   if (uid !== storeUid) {
     setStoreUid(uid);
-    const loaded = loadOpsDeskStore(uid);
-    setStore({ ...loaded, activePresetId: loaded.defaultPresetId });
+    setStore(coldStartOpsDeskStore(uid));
     setDeepLinkKey(null);
   }
 
@@ -228,7 +228,7 @@ export function AdminOpsDesk() {
           prev.customLayout,
           prev.userPresets,
         );
-        const nextLayout = mutator(current);
+        const nextLayout = clampLayoutToCols(mutator(current));
         if (layoutsEqual(current, nextLayout)) return prev;
         const next: OpsDeskStoreV1 = {
           ...prev,
@@ -511,7 +511,7 @@ export function AdminOpsDesk() {
       presetOrder: store.presetOrder.filter((id) => id !== presetId),
       defaultPresetId:
         store.defaultPresetId === presetId
-          ? "session-watch"
+          ? BUILTIN_PRESETS[0]!.id
           : store.defaultPresetId,
       activePresetId:
         store.activePresetId === presetId
