@@ -29,6 +29,9 @@ export const proxy = onRequest(
       ctaTrainTrackerApiKeySecret,
     ],
     enforceAppCheck: true,
+    // Multi-MB Overpass admin/landmass payloads OOM'd the 256MiB default
+    // (incident 9f05e1c1). Requires a functions deploy to take effect.
+    memory: "512MiB",
   },
   withSentryHttpHandler(proxyRouter),
 );
