@@ -321,7 +321,6 @@ html[data-motion="static"] .jl-incident-queue-row {
   overflow-x: auto;
   border-bottom: 1px solid var(--color-border);
   padding: 0.375rem 0.5rem;
-  scrollbar-width: thin;
 }
 
 .jl-incident-tab {

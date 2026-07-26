@@ -29,7 +29,7 @@ export function EditSheetFrame({
             className="mb-0"
           />
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-3">
+        <div className="jl-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-3">
           <div className="space-y-4">{children}</div>
         </div>
         <div className="grid shrink-0 grid-cols-2 gap-2 border-t border-border p-4">

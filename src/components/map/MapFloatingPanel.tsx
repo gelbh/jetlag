@@ -74,7 +74,7 @@ export function MapFloatingPanel({
   const shellScrollClass = isWizardLayout
     ? "flex min-h-0 flex-col overflow-hidden"
     : bodyScrollable
-      ? "overflow-y-auto"
+      ? "jl-scroll overflow-y-auto"
       : "overflow-hidden";
 
   return (

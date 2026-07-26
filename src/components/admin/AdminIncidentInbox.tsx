@@ -109,7 +109,7 @@ export function AdminIncidentInbox({
       ) : null}
 
       {visible.length > 0 ? (
-        <div className="jl-incident-queue-scroll">
+        <div className="jl-scroll jl-incident-queue-scroll">
           {visible.map((incident) => {
             const tone = incidentStatusChipTone(incident.status);
             const active = selectedId === incident.id;

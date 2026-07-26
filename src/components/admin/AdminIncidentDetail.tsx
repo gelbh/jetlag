@@ -226,7 +226,7 @@ function AdminIncidentDetailBody({
         </span>
       </header>
 
-      <div className="jl-incident-tabs" role="tablist" aria-label="Incident views">
+      <div className="jl-scroll jl-incident-tabs" role="tablist" aria-label="Incident views">
         {(
           [
             ["chat", "Chat"],
@@ -253,7 +253,7 @@ function AdminIncidentDetailBody({
         {tab === "chat" ? (
           <>
             {incident.adminPrompt.trim() ? (
-              <section className="jl-incident-prompt" aria-label="Admin prompt">
+              <section className="jl-scroll jl-incident-prompt" aria-label="Admin prompt">
                 <p className="jl-incident-prompt-label">
                   System (pinned) — admin prompt
                 </p>
@@ -271,7 +271,7 @@ function AdminIncidentDetailBody({
             ) : null}
 
             <div className="jl-incident-chat">
-              <div className="jl-incident-chat-scroll">
+              <div className="jl-scroll jl-incident-chat-scroll">
                 {chatMessages.length === 0 ? (
                   <p className="text-sm text-ink-dim">No messages yet.</p>
                 ) : (
@@ -334,7 +334,7 @@ function AdminIncidentDetailBody({
         ) : null}
 
         {tab === "diagnostics" ? (
-          <dl className="jl-incident-diag-list">
+          <dl className="jl-scroll jl-incident-diag-list">
             {(
               [
                 ["Route", incident.diagnostics.route],
@@ -383,7 +383,7 @@ function AdminIncidentDetailBody({
               </p>
             </div>
           ) : (
-            <ul className="jl-incident-timeline">
+            <ul className="jl-scroll jl-incident-timeline">
               {timelineItems.map((item) => (
                 <li key={item.id} className="jl-incident-timeline-item">
                   <span className="jl-incident-timeline-time">

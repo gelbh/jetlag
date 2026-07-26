@@ -22,7 +22,7 @@ export function TutorialWizardSplitPanelPreview({
           <figcaption className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
             {compare.leftLabel}
           </figcaption>
-          <div className="tutorial-split-card-body flex min-h-0 flex-1 items-start justify-center overflow-y-auto">
+          <div className="tutorial-split-card-body jl-scroll flex min-h-0 flex-1 items-start justify-center overflow-y-auto">
             <TutorialToolPanelPreview
               toolId={toolId}
               compare={compare}
@@ -34,7 +34,7 @@ export function TutorialWizardSplitPanelPreview({
           <figcaption className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
             {compare.rightLabel}
           </figcaption>
-          <div className="tutorial-split-card-body flex min-h-0 flex-1 items-start justify-center overflow-y-auto">
+          <div className="tutorial-split-card-body jl-scroll flex min-h-0 flex-1 items-start justify-center overflow-y-auto">
             <TutorialToolPanelPreview
               toolId={toolId}
               compare={compare}

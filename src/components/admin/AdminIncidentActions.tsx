@@ -140,7 +140,7 @@ export function AdminIncidentActions({
   };
 
   return (
-    <aside className="jl-incident-actions" aria-label="Incident actions">
+    <aside className="jl-scroll jl-incident-actions" aria-label="Incident actions">
       <div className="jl-incident-pane-header">
         <h2 className="jl-incident-pane-title">Actions</h2>
       </div>

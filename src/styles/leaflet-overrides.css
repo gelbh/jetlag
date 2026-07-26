@@ -237,14 +237,7 @@ html:not([data-motion="reduced"]):not([data-motion="static"]) .map-recenter-cont
   cursor: crosshair;
 }
 
-.scrollbar-hidden {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hidden::-webkit-scrollbar {
-  display: none;
-}
+/* .scrollbar-hidden lives in scrollbars.css */
 
 .user-location-icon {
   background: transparent;
