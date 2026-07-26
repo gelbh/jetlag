@@ -16,7 +16,7 @@ import {
   isTimerRunning,
   type TimerState,
 } from "../../domain/session/timer";
-import { JetlagLiveActivity } from "../../services/core/notifications";
+import { JetlagLiveActivity } from "../../services/core/liveActivity";
 
 const ANDROID_QUESTION_NOTIFICATION_ID = 1001;
 const ANDROID_TIMER_NOTIFICATION_ID = 1002;

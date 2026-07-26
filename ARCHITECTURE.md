@@ -76,7 +76,7 @@ Keep `index.ts` a thin orchestrator; concerns live in dedicated modules.
 | R4 | Tool hook framework | `src/hooks/tools/` — `useToolSession` + thin tool adapters |
 | R5 | Firestore boundary | `src/services/firestore/` serialization split by document type |
 | R6 | Geo services decomposition | `src/services/geo/{overpass,elevation,geocoding,matching,cache,shared}/` (+ flat re-export shims) |
-| R7 | Native / plugin hygiene | `plugins/jetlag-live-activity/`, Capacitor shell touch only as needed |
+| R7 | Native / plugin hygiene | `plugins/jetlag-live-activity/` + app bridge `src/services/core/liveActivity.ts` (no second `registerPlugin`); Capacitor shell touch only as needed |
 | R8 | DevEx | `@/` path alias (`tsconfig` + Vite), import codemod, keep this doc current |
 
 Each wave PR must include `## Player-visible / contract changes` (`None` or an explicit list). Default is zero player-visible change.
