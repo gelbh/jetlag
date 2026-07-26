@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.10.0";
+export const APP_VERSION = "0.10.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,22 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.10.1",
+    date: "2026-07-26",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Found Hider: remote found/confirm/reset fields sync to every device again",
+          "Thermometer: max walk duration still fires while GPS keeps updating",
+          "Play Move: timer resumes if relocating fails after pause",
+          "Join and continue: refresh auth before joining and retry once on permission errors, with clearer error copy when the server still rejects",
+          "Map: throttle viewport updates while panning and keep transit icons/polylines stable so the map stays interactive with transit on",
+        ],
+      }
+    ],
+  },
   {
     version: "0.10.0",
     date: "2026-07-26",
