@@ -33,17 +33,19 @@ import { captureException } from "../core/sentry";
 import { emitQuestionCancelledActivity } from "../session/emitSessionActivity";
 import {
   buildHidingZoneDocument,
+  buildTimeTrapDocument,
+  deserializeHidingZoneFromFirestore,
+  deserializeTimeTrapFromFirestore,
+} from "./serialization/serializeSession";
+import {
   buildPendingQuestionDocument,
   buildPlayerLocationDocument,
   buildSessionMessageDocument,
-  buildTimeTrapDocument,
-  deserializeHidingZoneFromFirestore,
   deserializePendingQuestionFromFirestore,
   deserializePlayerLocationFromFirestore,
   deserializeSessionMessageFromFirestore,
-  deserializeTimeTrapFromFirestore,
-  stripUndefinedValues,
-} from "./firestoreSerialization";
+} from "./serialization/serializePlayer";
+import { stripUndefinedValues } from "./serialization/shared";
 
 export const THERMOMETER_WALK_CANCEL_TEXT = {
   left: "Thermometer walk cancelled — seeker left.",
