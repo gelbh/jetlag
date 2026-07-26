@@ -108,8 +108,9 @@ export function activityAnnotationId(
   switch (event.type) {
     case "question_asked":
     case "question_answered":
-    case "question_cancelled":
       return event.payload.annotationId;
+    case "question_cancelled":
+      return undefined;
     case "session_started":
     case "hiding_timer_started":
     case "seeking_started":
