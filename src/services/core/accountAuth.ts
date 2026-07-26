@@ -21,6 +21,12 @@ import {
 import { getFirebaseAuth, ensureAnonymousUser } from "./firebase";
 
 export const EMAIL_LINK_STORAGE_KEY = "premiumEmailForSignIn";
+/** Set before linkWithRedirect / signInWithRedirect; cleared on redirect recovery. */
+export const OAUTH_REDIRECT_PENDING_KEY = "jl.oauthRedirectPending";
+
+export const OAUTH_REDIRECT_FAILED_MESSAGE =
+  "Sign-in didn’t complete. Allow popups for this site and try again.";
+
 export class OAuthRedirectInProgressError extends Error {
   constructor() {
     super("OAuth redirect in progress");
@@ -159,13 +165,39 @@ async function linkWithPopupOrSignInExisting(
   }
 }
 
+function markOAuthRedirectPending(): void {
+  try {
+    window.sessionStorage.setItem(OAUTH_REDIRECT_PENDING_KEY, "1");
+  } catch {
+    // Private mode / blocked storage — recovery still runs; UI may miss the hint.
+  }
+}
+
+function consumeOAuthRedirectPending(): boolean {
+  try {
+    const pending = window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY) === "1";
+    if (pending) {
+      window.sessionStorage.removeItem(OAUTH_REDIRECT_PENDING_KEY);
+    }
+    return pending;
+  } catch {
+    return false;
+  }
+}
+
 async function beginOAuthRedirect(provider: AuthProvider): Promise<never> {
   const auth = getFirebaseAuth();
+  markOAuthRedirectPending();
 
-  if (auth.currentUser?.isAnonymous) {
-    await linkWithRedirect(auth.currentUser, provider);
-  } else {
-    await signInWithRedirect(auth, provider);
+  try {
+    if (auth.currentUser?.isAnonymous) {
+      await linkWithRedirect(auth.currentUser, provider);
+    } else {
+      await signInWithRedirect(auth, provider);
+    }
+  } catch (error) {
+    consumeOAuthRedirectPending();
+    throw error;
   }
 
   throw new OAuthRedirectInProgressError();
@@ -218,14 +250,32 @@ let redirectResultPromise: Promise<User | null> | null = null;
 
 async function completeOAuthRedirectOnce(): Promise<User | null> {
   const auth = getFirebaseAuth();
+  const wasPending = consumeOAuthRedirectPending();
 
   try {
     const result = await getRedirectResult(auth);
-    return result?.user ?? null;
+    const user = result?.user ?? null;
+    if (user) {
+      return user;
+    }
+    if (wasPending) {
+      throw new Error(OAUTH_REDIRECT_FAILED_MESSAGE);
+    }
+    return null;
   } catch (error) {
+    if (error instanceof Error && error.message === OAUTH_REDIRECT_FAILED_MESSAGE) {
+      throw error;
+    }
+
     if (isFirebasePendingPromiseAssertion(error)) {
       const current = auth.currentUser;
-      return current && !current.isAnonymous ? current : null;
+      if (current && !current.isAnonymous) {
+        return current;
+      }
+      if (wasPending) {
+        throw new Error(OAUTH_REDIRECT_FAILED_MESSAGE);
+      }
+      return null;
     }
 
     if (!isCredentialAlreadyInUse(error)) {

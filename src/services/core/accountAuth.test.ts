@@ -5,6 +5,8 @@ import {
   completePremiumEmailSignInLink,
   isAnonymousUser,
   isPermanentUser,
+  OAUTH_REDIRECT_FAILED_MESSAGE,
+  OAUTH_REDIRECT_PENDING_KEY,
   OAuthRedirectInProgressError,
   resetOAuthRedirectRecoveryForTests,
   signInWithGoogle,
@@ -74,6 +76,7 @@ describe("accountAuth", () => {
     vi.resetAllMocks();
     mockAuth.currentUser = null;
     window.localStorage.clear();
+    window.sessionStorage.clear();
     resetOAuthRedirectRecoveryForTests();
   });
 
@@ -168,6 +171,7 @@ describe("accountAuth", () => {
       mockAuth.currentUser,
       expect.anything(),
     );
+    expect(window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY)).toBe("1");
   });
 
   it("redirects when signed-in Google popup is blocked", async () => {
@@ -184,6 +188,37 @@ describe("accountAuth", () => {
       mockAuth,
       expect.anything(),
     );
+  });
+
+  it("clears the redirect-pending flag when the fallback redirect fails to start", async () => {
+    mockAuth.currentUser = { isAnonymous: true, uid: "anon-5" };
+    linkWithPopup.mockRejectedValueOnce(
+      new FirebaseError("auth/popup-blocked", "Popup blocked."),
+    );
+    linkWithRedirect.mockRejectedValueOnce(
+      new FirebaseError("auth/network-request-failed", "Network error."),
+    );
+
+    await expect(signInWithGoogle()).rejects.toMatchObject({
+      code: "auth/network-request-failed",
+    });
+    expect(window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY)).toBeNull();
+  });
+
+  it("surfaces the redirect's own error when the fallback redirect fails to start", async () => {
+    mockAuth.currentUser = { isAnonymous: true, uid: "anon-5b" };
+    linkWithPopup.mockRejectedValueOnce(
+      new FirebaseError("auth/popup-blocked", "Popup blocked."),
+    );
+    linkWithRedirect.mockRejectedValueOnce(
+      new FirebaseError("auth/network-request-failed", "Network error."),
+    );
+
+    await expect(signInWithGoogle()).rejects.toMatchObject({
+      code: "auth/network-request-failed",
+    });
+    expect(linkWithPopup).toHaveBeenCalledTimes(1);
+    expect(linkWithRedirect).toHaveBeenCalledTimes(1);
   });
 
   it("signs in with Google popup when credential is already in use", async () => {
@@ -221,22 +256,6 @@ describe("accountAuth", () => {
     expect(signInWithRedirect).not.toHaveBeenCalled();
   });
 
-  it("surfaces the redirect's own error when the fallback redirect fails to start", async () => {
-    mockAuth.currentUser = { isAnonymous: true, uid: "anon-5" };
-    linkWithPopup.mockRejectedValueOnce(
-      new FirebaseError("auth/popup-blocked", "Popup blocked."),
-    );
-    linkWithRedirect.mockRejectedValueOnce(
-      new FirebaseError("auth/network-request-failed", "Network error."),
-    );
-
-    await expect(signInWithGoogle()).rejects.toMatchObject({
-      code: "auth/network-request-failed",
-    });
-    expect(linkWithPopup).toHaveBeenCalledTimes(1);
-    expect(linkWithRedirect).toHaveBeenCalledTimes(1);
-  });
-
   it("dedupes concurrent OAuth redirect completion", async () => {
     getRedirectResult.mockResolvedValueOnce({
       user: { uid: "redirect-user", isAnonymous: false },
@@ -269,6 +288,16 @@ describe("accountAuth", () => {
     const user = await completeOAuthRedirectIfPending();
 
     expect(user).toBeNull();
+  });
+
+  it("errors when a pending redirect returns no user", async () => {
+    window.sessionStorage.setItem(OAUTH_REDIRECT_PENDING_KEY, "1");
+    getRedirectResult.mockResolvedValueOnce(null);
+
+    await expect(completeOAuthRedirectIfPending()).rejects.toThrow(
+      OAUTH_REDIRECT_FAILED_MESSAGE,
+    );
+    expect(window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY)).toBeNull();
   });
 
   it("signs in with email link when the credential is already in use", async () => {

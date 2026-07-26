@@ -35,6 +35,7 @@ export function AccountSignInGate({
   extraSignInProviders,
 }: AccountSignInGateProps) {
   const { user, isPermanent, authReady } = usePermanentAuthUser();
+  const oauthReady = Boolean(user);
   const [email, setEmail] = useState("");
   const [busyAction, setBusyAction] = useState<"email" | null>(null);
   const [emailLinkSent, setEmailLinkSent] = useState(false);
@@ -77,6 +78,11 @@ export function AccountSignInGate({
               ? nextError.message
               : "Could not complete email sign-in.",
           );
+        }
+        try {
+          await ensureAnonymousUser();
+        } catch {
+          // Keep the original sign-in error visible.
         }
       } finally {
         if (!cancelled) {
@@ -172,7 +178,7 @@ export function AccountSignInGate({
 
       <div className="oauth-sign-in-stack space-y-2">
         <GoogleSignInButton
-          disabled={busyAction !== null}
+          disabled={busyAction !== null || !oauthReady}
           onSuccess={handleOAuthSignedIn}
           onError={setError}
         />
