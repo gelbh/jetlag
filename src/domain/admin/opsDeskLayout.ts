@@ -404,3 +404,82 @@ export function upsertUserPreset(
   const without = userPresets.filter((p) => p.id !== id && p.name !== trimmed);
   return { ok: true, presets: [...without, preset], preset };
 }
+
+export function deleteUserPreset(
+  userPresets: DeskPreset[],
+  presetId: string,
+): DeskPreset[] {
+  return userPresets.filter((p) => p.id !== presetId);
+}
+
+export function setStackActiveIndex(
+  layout: DeskLayout,
+  stackId: StackId,
+  activeIndex: number,
+): DeskLayout {
+  const found = findStack(layout, stackId);
+  if (!found) return layout;
+  const next = cloneLayout(layout);
+  next.stacks[found.index] = clampActiveIndex({
+    ...next.stacks[found.index]!,
+    activeIndex,
+  });
+  return next;
+}
+
+export type StackGeometryItem = {
+  i: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+/** Apply RGL geometry; pinned stacks keep position/size; collapsed keeps domain h. */
+export function applyStackGeometry(
+  layout: DeskLayout,
+  items: readonly StackGeometryItem[],
+): DeskLayout {
+  const next = cloneLayout(layout);
+  const byId = new Map(items.map((item) => [item.i, item]));
+  next.stacks = next.stacks.map((stack) => {
+    const item = byId.get(stack.id);
+    if (!item || stack.pinned) return stack;
+    return {
+      ...stack,
+      x: item.x,
+      y: item.y,
+      w: item.w,
+      h: stack.collapsed ? stack.h : item.h,
+    };
+  });
+  return next;
+}
+
+export function layoutsEqual(a: DeskLayout, b: DeskLayout): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+export const PANEL_LABELS: Record<PanelId, string> = {
+  sessions: "Sessions",
+  monitor: "Monitor",
+  inbox: "Inbox",
+  detail: "Detail",
+  actions: "Actions",
+  settings: "Settings",
+};
+
+export function resolvePresetLayout(
+  activePresetId: string,
+  customLayout: DeskLayout,
+  userPresets: DeskPreset[],
+): DeskLayout {
+  if (activePresetId === CUSTOM_PRESET_ID) {
+    return cloneLayout(customLayout);
+  }
+  const builtin = getBuiltinPreset(activePresetId);
+  if (builtin) return cloneLayout(builtin.layout);
+  const user = userPresets.find((p) => p.id === activePresetId);
+  if (user) return cloneLayout(user.layout);
+  return cloneLayout(SESSION_WATCH_LAYOUT);
+}
