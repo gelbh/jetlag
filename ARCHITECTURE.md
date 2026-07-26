@@ -75,7 +75,7 @@ Keep `index.ts` a thin orchestrator; concerns live in dedicated modules.
 | R3 | Map screen unification | `src/routes/map-screen/` shared core + role adapters / chrome slots |
 | R4 | Tool hook framework | `src/hooks/tools/` — `useToolSession` + thin tool adapters |
 | R5 | Firestore boundary | `src/services/firestore/` serialization split by document type |
-| R6 | Geo services decomposition | `src/services/geo/` packages (overpass / elevation / geocoding / matching) |
+| R6 | Geo services decomposition | `src/services/geo/{overpass,elevation,geocoding,matching,cache,shared}/` (+ flat re-export shims) |
 | R7 | Native / plugin hygiene | `plugins/jetlag-live-activity/`, Capacitor shell touch only as needed |
 | R8 | DevEx | `@/` path alias (`tsconfig` + Vite), import codemod, keep this doc current |
 

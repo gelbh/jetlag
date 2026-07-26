@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseNominatimResult } from "./geocoding";
+import { parseNominatimResult } from "./index";
 
 describe("geocoding", () => {
   it("parses nominatim bounding boxes into map bounds", async () => {

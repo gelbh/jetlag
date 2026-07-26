@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
-import { clearGeographicFeatureCacheForTests } from "./geographicFeatureCache";
+import { DUBLIN_CITY_GAME_AREA } from "../../../test/fixtures/dublinGameArea";
+import { clearGeographicFeatureCacheForTests } from "../geographicFeatureCache";
 import {
   clearSeaLevelProgressiveStateForTests,
   ensureSeaLevelSamplingComplete,
@@ -8,7 +8,7 @@ import {
   startSeaLevelBackgroundSampling,
 } from "./seaLevelProgressive";
 
-vi.mock("./elevation", () => ({
+vi.mock("./index", () => ({
   fetchElevations: vi.fn(async (points: Array<[number, number]>) =>
     points.map((_, index) => 10 + index),
   ),
@@ -47,7 +47,7 @@ describe("seaLevelProgressive", () => {
   });
 
   it("starts background sampling only once per game area", async () => {
-    const { fetchElevations } = await import("./elevation");
+    const { fetchElevations } = await import("./index");
     const fetchMock = vi.mocked(fetchElevations);
 
     startSeaLevelBackgroundSampling(DUBLIN_CITY_GAME_AREA);

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { BUNDLED_REGION_PACK_GEO_REVISION } from "../../domain/regions/regionPack";
+import { BUNDLED_REGION_PACK_GEO_REVISION } from "../../../domain/regions/regionPack";
 import {
   clearResolvedMatchingAreasCacheForTests,
   matchingAreasCacheKey,
