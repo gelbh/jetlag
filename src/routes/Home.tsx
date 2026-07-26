@@ -21,7 +21,7 @@ import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { playerRoleLabel, resolvePlayerRole } from "../domain/session/playerRole";
 import { useSessionStore } from "../state/sessionStore";
 import {
-  ensureAnonymousUser,
+  ensureFreshAnonymousUser,
   isFirebaseConfigured,
 } from "../services/core/firebase";
 import {
@@ -89,7 +89,7 @@ export function Home() {
         return;
       }
 
-      const user = await ensureAnonymousUser();
+      const user = await ensureFreshAnonymousUser();
       let remoteSession = null;
       try {
         remoteSession = await getRemoteSessionById(session.id);
