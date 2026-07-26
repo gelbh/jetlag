@@ -1,10 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   APP_CHECK_PROBE_SKIP_KEY,
+  APP_CHECK_PROBE_TIMEOUT_MS,
   probeAppCheckAvailability,
   resetAppCheckProbeForTests,
   shouldSkipAppCheckProbe,
 } from "./appCheckProbe";
+import { captureAppCheckTokenFailure } from "./sentry";
 
 const { getFirebaseAppCheck, getToken, isFirebaseConfigured, getClientEnv } =
   vi.hoisted(() => ({
@@ -47,6 +49,10 @@ describe("appCheckProbe", () => {
     getToken.mockResolvedValue({ token: "ok-token" });
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("skips when sessionStorage skip flag is set", () => {
     window.sessionStorage.setItem(APP_CHECK_PROBE_SKIP_KEY, "1");
     expect(shouldSkipAppCheckProbe()).toBe(true);
@@ -87,5 +93,37 @@ describe("appCheckProbe", () => {
     await probeAppCheckAvailability();
     await probeAppCheckAvailability();
     expect(getToken).toHaveBeenCalledTimes(1);
+  });
+
+  it("dedupes concurrent probes while one is in flight", async () => {
+    let resolveToken: (value: { token: string }) => void = () => {};
+    getToken.mockImplementationOnce(
+      () =>
+        new Promise<{ token: string }>((resolve) => {
+          resolveToken = resolve;
+        }),
+    );
+
+    const first = probeAppCheckAvailability();
+    const second = probeAppCheckAvailability();
+    expect(getToken).toHaveBeenCalledTimes(1);
+    resolveToken({ token: "ok-token" });
+    await expect(Promise.all([first, second])).resolves.toEqual([
+      { ok: true },
+      { ok: true },
+    ]);
+  });
+
+  it("soft-fails when the probe times out", async () => {
+    vi.useFakeTimers();
+    getToken.mockImplementationOnce(() => new Promise(() => {}));
+
+    const probePromise = probeAppCheckAvailability();
+    await vi.advanceTimersByTimeAsync(APP_CHECK_PROBE_TIMEOUT_MS);
+    await expect(probePromise).resolves.toEqual({ ok: true });
+    expect(captureAppCheckTokenFailure).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ reason: "timeout" }),
+    );
   });
 });
