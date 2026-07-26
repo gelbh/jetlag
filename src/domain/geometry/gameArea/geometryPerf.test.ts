@@ -263,7 +263,7 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
   it("wasm_half_plane_thermo median within 1.1x ts", async () => {
     await wasmBuildHalfPlanePolygon(thermoA, thermoB, gameArea, "cold");
     const wasmPkg = await import(
-      "../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
+      "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
     );
     const pointAJson = JSON.stringify(thermoA);
     const pointBJson = JSON.stringify(thermoB);
@@ -293,7 +293,7 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     const line = tenVertexLine();
     await wasmGeodesicLineBuffer(line, 200);
     const wasmPkg = await import(
-      "../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
+      "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
     );
     const coordinatesJson = JSON.stringify(line.geometry.coordinates);
 
