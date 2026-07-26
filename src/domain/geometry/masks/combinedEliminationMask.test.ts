@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
-import type { AnnotationRecord, GameArea } from "../map/annotations";
-import type { HidingZoneRecord } from "../session/hidingZone";
+import type { AnnotationRecord, GameArea } from "../../map/annotations";
+import type { HidingZoneRecord } from "../../session/hidingZone";
 import {
   buildCombinedEliminationMask,
   buildEndGameEliminationMask,

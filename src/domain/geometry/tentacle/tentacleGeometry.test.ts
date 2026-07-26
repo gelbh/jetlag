@@ -2,21 +2,21 @@ import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import type { GameArea, TentaclePoi } from "../map/annotations";
-import { milesToMeters } from "../map/distance";
+import type { GameArea, TentaclePoi } from "../../map/annotations";
+import { milesToMeters } from "../../map/distance";
 import {
   clearVoronoiCellCacheForTests,
   getCachedVoronoiCells,
   tentacleSitesFingerprint,
-} from "./voronoiCellCache";
-import { voronoiCellSiteId } from "./voronoiCellSiteId";
+} from "../voronoi/voronoiCellCache";
+import { voronoiCellSiteId } from "../voronoi/voronoiCellSiteId";
 import {
   buildTentacleEliminationRegion,
   buildTentaclePoiAnswerEliminationRegion,
   clearTentacleEliminationCacheForTests,
   tentacleEliminationJsonForAnswer,
 } from "./tentacleGeometry";
-import { resolveVoronoiCellPoiId } from "./voronoiCellSiteId";
+import { resolveVoronoiCellPoiId } from "../voronoi/voronoiCellSiteId";
 
 const oneMileMeters = milesToMeters(1);
 const POLYGON_OR_MULTIPOLYGON = /Polygon|MultiPolygon/;
