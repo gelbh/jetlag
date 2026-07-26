@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.10.1";
+export const APP_VERSION = "0.10.2";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,25 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.10.2",
+    date: "2026-07-26",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Prevented repeated reloads when a server-requested app refresh stays active after you reload",
+          "Session leave: still leave locally when host role already moved or the session already ended",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Error screens: branded 404 page and shared crash shell instead of a silent home redirect",
+        ],
+      }
+    ],
+  },
   {
     version: "0.10.1",
     date: "2026-07-26",
