@@ -43,7 +43,7 @@ export function HiderToolDock({
     <div
       className={`jl-tool-dock pointer-events-auto${isRail ? " jl-tool-dock--rail" : ""}`}
     >
-      <div className="jl-tool-dock-bar jl-tool-dock-group-main">
+      <div className={`jl-tool-dock-bar jl-tool-dock-group-main${isRail ? " jl-scroll" : ""}`}>
         <button
           type="button"
           onClick={onZoneAction}
