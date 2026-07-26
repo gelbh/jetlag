@@ -43,8 +43,8 @@ export function TransitStationPicker({
     rowMinHeight === "11" ? "btn-secondary min-h-11" : "btn-secondary min-h-10";
   const listClassName =
     layout === "flex"
-      ? "max-h-[min(28dvh,240px)] space-y-1 overflow-y-auto"
-      : "max-h-36 space-y-1 overflow-y-auto";
+      ? "jl-scroll max-h-[min(28dvh,240px)] space-y-1 overflow-y-auto"
+      : "jl-scroll max-h-36 space-y-1 overflow-y-auto";
 
   const searchInput = (
     <input

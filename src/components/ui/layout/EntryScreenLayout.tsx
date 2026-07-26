@@ -17,7 +17,7 @@ export function EntryScreenLayout({
 }: EntryScreenLayoutProps) {
   const justifyClass =
     justify === "center"
-      ? "justify-center gap-8 overflow-y-auto"
+      ? "jl-scroll justify-center gap-8 overflow-y-auto"
       : justify === "start"
         ? "justify-start gap-4"
         : "justify-between";
@@ -28,7 +28,7 @@ export function EntryScreenLayout({
     ? viewportLayout === "between"
       ? "home-poster-viewport h-[100dvh] max-h-[100dvh] min-h-0 overflow-hidden justify-between gap-2"
       : viewportLayout === "center"
-        ? "home-poster-viewport h-[100dvh] max-h-[100dvh] min-h-0 overflow-y-auto overscroll-y-contain justify-center gap-6"
+        ? "home-poster-viewport jl-scroll h-[100dvh] max-h-[100dvh] min-h-0 overflow-y-auto overscroll-y-contain justify-center gap-6"
         : "home-poster-viewport h-[100dvh] max-h-[100dvh] min-h-0 overflow-hidden justify-start gap-2"
     : "";
 

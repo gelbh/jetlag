@@ -266,7 +266,7 @@ export function VersionChangelogSheet({
     >
       <SheetHeader title="Changelog" onClose={onClose} />
 
-      <div className="jl-selectable space-y-5 overflow-y-auto pr-1">
+      <div className="jl-scroll jl-selectable space-y-5 overflow-y-auto pr-1">
         {changelogNodes.map((node) => {
           const isLatestVersion =
             node.kind === "version" && node.entry.version === latestVersion;
