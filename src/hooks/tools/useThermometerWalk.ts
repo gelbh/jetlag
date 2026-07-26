@@ -30,6 +30,7 @@ export function useThermometerWalk({
   const completedRef = useRef(false);
   const stoppingRef = useRef(false);
   const [currentPoint, setCurrentPoint] = useState<LatLngTuple | null>(null);
+  const currentPointRef = useRef<LatLngTuple | null>(null);
 
   useEffect(() => {
     onAutoStopRef.current = onAutoStop;
@@ -40,9 +41,14 @@ export function useThermometerWalk({
   }, [onError]);
 
   useEffect(() => {
+    currentPointRef.current = currentPoint;
+  }, [currentPoint]);
+
+  useEffect(() => {
     if (!active) {
       completedRef.current = false;
       stoppingRef.current = false;
+      currentPointRef.current = null;
     }
   }, [active]);
 
@@ -108,12 +114,12 @@ export function useThermometerWalk({
         return;
       }
 
-      const fallbackPoint = currentPoint ?? startPoint;
+      const fallbackPoint = currentPointRef.current ?? startPoint;
       void finishWalk(fallbackPoint);
     }, maxDurationMs);
 
     return () => window.clearTimeout(timeoutId);
-  }, [active, currentPoint, finishWalk, maxDurationMs, startPoint]);
+  }, [active, finishWalk, maxDurationMs, startPoint]);
 
   const cancelWalk = useCallback(() => {
     completedRef.current = false;

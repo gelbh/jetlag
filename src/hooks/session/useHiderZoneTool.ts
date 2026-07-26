@@ -172,6 +172,7 @@ export function useHiderZoneTool({
         moveInProgress: true,
       });
     } catch (nextError) {
+      resumeTimer();
       setMoveMode(false);
       setWizardOpen(false);
       setError(
@@ -189,6 +190,7 @@ export function useHiderZoneTool({
     pauseTimer,
     postSystemMessage,
     resetWizardDraft,
+    resumeTimer,
     sessionId,
     writesEnabled,
   ]);
