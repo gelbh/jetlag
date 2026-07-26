@@ -6,6 +6,7 @@ import {
   type SessionActivityEvent,
 } from "../../domain/session/sessionActivityLog";
 import type { PendingQuestionToolType } from "../../domain/session/sessionChat";
+import { parsePhotoAnswer } from "../../domain/questions/photoQuestions";
 import { appendSessionActivityEvent } from "./sessionActivityLog";
 
 /** Fire-and-forget append; lifecycle writers must not fail the primary action. */
@@ -140,7 +141,7 @@ export function emitQuestionAnsweredActivity(input: {
 
 export function emitQuestionCancelledActivity(input: {
   sessionId: string;
-  toolType: AnnotationType;
+  toolType: PendingQuestionToolType;
   promptText: string;
   pendingQuestionId?: string;
   createdByUid?: string;
@@ -260,18 +261,25 @@ export function answerSummaryFromPendingReply(
     const match = replyOptions.find((option) => option.id === answer);
     return match?.label ?? answer;
   }
-  if (
-    answer &&
-    typeof answer === "object" &&
-    "kind" in answer &&
-    (answer as { kind?: string }).kind === "photo"
-  ) {
-    return "Photo received";
-  }
   if (answer == null) {
     return undefined;
   }
-  return String(answer);
+  const photo = parsePhotoAnswer(answer);
+  if (photo) {
+    if (photo.kind === "photo") {
+      return "Photo received";
+    }
+    const match = replyOptions.find((option) => option.id === photo.kind);
+    return match?.label ?? photo.kind;
+  }
+  if (typeof answer === "object" && answer !== null && "kind" in answer) {
+    const kind = (answer as { kind?: unknown }).kind;
+    if (typeof kind === "string") {
+      const match = replyOptions.find((option) => option.id === kind);
+      return match?.label ?? kind;
+    }
+  }
+  return undefined;
 }
 
 export function isAnnotationQuestionTool(
