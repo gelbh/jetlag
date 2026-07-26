@@ -21,6 +21,8 @@ interface UseSessionTimerOptions {
   remoteState?: TimerState | null | undefined;
   /** Firestore snapshot for host remount reconcile */
   remoteSnapshot?: TimerState | undefined;
+  /** When this changes, clear local timer cache before reconciling remote */
+  sessionResetAt?: string;
 }
 
 export function useSessionTimer(
@@ -32,6 +34,7 @@ export function useSessionTimer(
     onControl,
     remoteState = null,
     remoteSnapshot,
+    sessionResetAt,
   } = options;
   const getStoredTimer = useTimerStore((state) => state.getTimer);
   const setStoredTimer = useTimerStore((state) => state.setTimer);
@@ -42,6 +45,8 @@ export function useSessionTimer(
   );
   const timerStateRef = useRef(timerState);
   const onControlRef = useRef(onControl);
+  const lastSessionIdRef = useRef<string | undefined>(undefined);
+  const lastSessionResetAtRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     timerStateRef.current = timerState;
@@ -67,6 +72,8 @@ export function useSessionTimer(
 
   useEffect(() => {
     if (!sessionId) {
+      lastSessionIdRef.current = undefined;
+      lastSessionResetAtRef.current = undefined;
       /* eslint-disable react-hooks/set-state-in-effect -- reset when leaving a session */
       setTimerStateInternal(INITIAL_TIMER_STATE);
       /* eslint-enable react-hooks/set-state-in-effect */
@@ -77,14 +84,38 @@ export function useSessionTimer(
       return;
     }
 
-    const local = getStoredTimer(sessionId);
+    const sessionChanged = lastSessionIdRef.current !== sessionId;
+    if (sessionChanged) {
+      lastSessionIdRef.current = sessionId;
+      lastSessionResetAtRef.current = sessionResetAt;
+    }
+
+    const resetChanged =
+      !sessionChanged &&
+      sessionResetAt !== undefined &&
+      sessionResetAt !== lastSessionResetAtRef.current;
+    if (resetChanged) {
+      lastSessionResetAtRef.current = sessionResetAt;
+      clearStoredTimer(sessionId);
+    }
+
+    const local = resetChanged
+      ? INITIAL_TIMER_STATE
+      : getStoredTimer(sessionId);
     const next =
       remoteSnapshot !== undefined
         ? reconcileTimerState(local, remoteSnapshot)
         : local;
     setTimerStateInternal(next);
     timerStateRef.current = next;
-  }, [canControl, getStoredTimer, remoteSnapshot, sessionId]);
+  }, [
+    canControl,
+    clearStoredTimer,
+    getStoredTimer,
+    remoteSnapshot,
+    sessionId,
+    sessionResetAt,
+  ]);
 
   useEffect(() => {
     if (canControl || remoteState === null || remoteState === undefined) {
@@ -102,11 +133,15 @@ export function useSessionTimer(
   }, [canControl, remoteState, sessionId, setStoredTimer]);
 
   useEffect(() => {
-    if (!sessionId || !canControl || !isTimerRunning(timerStateRef.current)) {
+    if (!sessionId || !canControl) {
       return;
     }
 
     return () => {
+      if (!isTimerRunning(timerStateRef.current)) {
+        return;
+      }
+
       const paused = pauseTimer(timerStateRef.current);
       setStoredTimer(sessionId, paused);
       onControlRef.current?.(paused);

@@ -21,7 +21,12 @@ export function buildPendingQuestionOverlay(
   }
 
   const prefix = `pending-${question.id}`;
-  const result = builder(question, gameArea, prefix, mapStyle);
+  let result;
+  try {
+    result = builder(question, gameArea, prefix, mapStyle);
+  } catch {
+    return null;
+  }
 
   if (result.overlays.length === 0) {
     return null;

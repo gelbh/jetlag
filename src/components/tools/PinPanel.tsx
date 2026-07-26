@@ -5,6 +5,7 @@ interface PinPanelProps {
   onLabelChange: (value: string) => void;
   onCommit: () => void;
   hasPoint: boolean;
+  isSubmitting?: boolean;
 }
 
 export function PinPanel({
@@ -12,6 +13,7 @@ export function PinPanel({
   onLabelChange,
   onCommit,
   hasPoint,
+  isSubmitting = false,
 }: PinPanelProps) {
   return (
     <div className="space-y-3">
@@ -34,10 +36,10 @@ export function PinPanel({
       <button
         type="button"
         onClick={onCommit}
-        disabled={!hasPoint || label.trim().length === 0}
+        disabled={!hasPoint || label.trim().length === 0 || isSubmitting}
         className="btn-primary w-full"
       >
-        Add note
+        {isSubmitting ? "Adding…" : "Add note"}
       </button>
     </div>
   );

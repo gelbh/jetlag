@@ -14,6 +14,10 @@ import {
   resolveToolDockEnabled,
   clampHidingPeriodMinutes,
 } from "./sessionRules";
+import {
+  sessionRulesFromRecord,
+  timerNeverStarted,
+} from "./rules/core";
 
 function baseSession(overrides: Partial<SessionRecord> = {}): SessionRecord {
   return {
@@ -93,5 +97,21 @@ describe("sessionRules", () => {
     expect(restored.customHidingPeriodEnabled).toBe(true);
     expect(restored.hidingPeriodMinutes).toBe(90);
     expect(restored.disabledTools).toEqual(["photo"]);
+  });
+
+  it("maps session records into rules input and detects unstarted timers", () => {
+    const session = baseSession({
+      hidingPeriodMinutes: 40,
+      timerAccumulatedMs: 0,
+      timerRunningSince: null,
+    });
+    expect(sessionRulesFromRecord(session).hidingPeriodMinutes).toBe(40);
+    expect(timerNeverStarted(session)).toBe(true);
+    expect(
+      timerNeverStarted({
+        ...session,
+        timerAccumulatedMs: 1_000,
+      }),
+    ).toBe(false);
   });
 });

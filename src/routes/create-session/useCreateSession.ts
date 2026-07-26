@@ -74,10 +74,14 @@ import {
 import { buildBundledPresetSelectGroups } from "../../domain/regions/bundledPresetHierarchy";
 import { buildFavouritePresetSelectOptions } from "../../domain/session/presetFavourites";
 import { placeToFocusBounds } from "./utils";
+import { useLatestRequest } from "../../hooks/useLatestRequest";
+import { useSubmitLock } from "../../hooks/useSubmitLock";
 
 export function useCreateSession() {
   const navigate = useAppNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { beginRequest, isLatestRequest } = useLatestRequest();
+  const { isSubmitting, runLocked } = useSubmitLock();
   const presets = useGamePresetStore((state) => state.presets);
   const favouritePresetIds = useGamePresetStore(
     (state) => state.favouritePresetIds,
@@ -148,6 +152,7 @@ export function useCreateSession() {
   const importFileInputRef = useRef<HTMLInputElement>(null);
   const userLocationRef = useRef<LatLngTuple | null>(null);
   const appliedPresetRef = useRef<string | null>(null);
+  const presetApplyGenerationRef = useRef(0);
   const [transitMetroOverride, setTransitMetroOverride] = useState<
     string | null
   >(null);
@@ -155,6 +160,7 @@ export function useCreateSession() {
   useEffect(() => {
     const presetId = searchParams.get("preset");
     if (!presetId) {
+      appliedPresetRef.current = null;
       return;
     }
 
@@ -168,6 +174,7 @@ export function useCreateSession() {
     }
 
     appliedPresetRef.current = presetId;
+    const applyGeneration = ++presetApplyGenerationRef.current;
     const draft = gamePresetToCreateSessionDraft(preset);
     const applyPreset = async () => {
       let customMatchingAreas =
@@ -184,9 +191,15 @@ export function useCreateSession() {
             draft.regionPackId,
             subregionId,
           );
+          if (applyGeneration !== presetApplyGenerationRef.current) {
+            return;
+          }
           customMatchingAreas = boundaries.customMatchingAreas;
           gameArea = boundaries.playArea;
         } catch (loadError) {
+          if (applyGeneration !== presetApplyGenerationRef.current) {
+            return;
+          }
           setError(
             loadError instanceof Error
               ? loadError.message
@@ -196,6 +209,10 @@ export function useCreateSession() {
       } else {
         setRegionPackId(undefined);
         setRegionPackSubregionId(undefined);
+      }
+
+      if (applyGeneration !== presetApplyGenerationRef.current) {
+        return;
       }
 
       const resolvedGameSize = gameArea
@@ -467,6 +484,7 @@ export function useCreateSession() {
       return;
     }
 
+    const requestId = beginRequest();
     setSearchLoading(true);
     setError(null);
 
@@ -475,6 +493,9 @@ export function useCreateSession() {
         trimmed,
         userLocationRef.current ? { near: userLocationRef.current } : undefined,
       );
+      if (!isLatestRequest(requestId)) {
+        return;
+      }
       if (results.length === 0) {
         setSearchResults([]);
         setError("No matching places found. Try a more specific name.");
@@ -488,17 +509,23 @@ export function useCreateSession() {
 
       setSearchResults(results);
     } catch (nextError) {
+      if (!isLatestRequest(requestId)) {
+        return;
+      }
       setError(
         nextError instanceof Error
           ? nextError.message
           : "Place search failed.",
       );
     } finally {
-      setSearchLoading(false);
+      if (isLatestRequest(requestId)) {
+        setSearchLoading(false);
+      }
     }
   };
 
-  const handleConfirm = async () => {
+  const handleConfirm = () =>
+    void runLocked(async () => {
     if (!importedGameArea && !framing.manualGameArea && !selectedPlace) {
       setError(
         "Search for a place, import a boundary, or move the map until the play area is framed.",
@@ -703,11 +730,12 @@ export function useCreateSession() {
     } finally {
       setLoading(false);
     }
-  };
+  });
 
+  const confirmBusy = loading || isSubmitting;
   const confirmLabel = verifyingAccess
     ? "Verifying…"
-    : loading
+    : confirmBusy
       ? "Creating…"
       : "Confirm game area";
 
@@ -762,7 +790,7 @@ export function useCreateSession() {
     bundledPresetSelectGroups,
     favouritePresetSelectOptions,
     userPresets,
-    loading,
+    loading: confirmBusy,
     verifyingAccess,
     searchLoading,
     importLoading,

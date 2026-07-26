@@ -3,6 +3,7 @@ import { PinPanel } from "../../components/tools/PinPanel";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
+import { useSubmitLock } from "../useSubmitLock";
 
 interface UsePinToolParams {
   active: boolean;
@@ -19,6 +20,7 @@ export function usePinTool({
 }: UsePinToolParams) {
   const [pinLabel, setPinLabel] = useState("");
   const [pinPoint, setPinPoint] = useState<LatLngTuple | null>(null);
+  const { isSubmitting, runLocked } = useSubmitLock();
 
   const resetDraft = useCallback(() => {
     setPinLabel("");
@@ -61,8 +63,9 @@ export function usePinTool({
     <PinPanel
       label={pinLabel}
       onLabelChange={setPinLabel}
-      onCommit={() => void commit()}
+      onCommit={() => void runLocked(commit)}
       hasPoint={pinPoint !== null}
+      isSubmitting={isSubmitting}
     />
   );
 
