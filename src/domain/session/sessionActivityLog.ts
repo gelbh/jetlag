@@ -1,6 +1,7 @@
 import type { GameOutcome } from "../game/foundHider";
 import type { AnnotationType } from "../map/annotations";
 import { MAP_TOOL_DOCK_ENTRIES } from "../map/mapTools";
+import type { PendingQuestionToolType } from "./sessionChat";
 
 export const SESSION_ACTIVITY_TYPES = [
   "session_started",
@@ -41,7 +42,7 @@ export type SessionActivityEvent = SessionActivityEventBase &
     | { type: "hiding_timer_started"; payload: Record<string, never> }
     | { type: "seeking_started"; payload: Record<string, never> }
     | {
-        type: "question_asked" | "question_answered" | "question_cancelled";
+        type: "question_asked" | "question_answered";
         payload: {
           toolType: AnnotationType;
           promptText: string;
@@ -49,6 +50,14 @@ export type SessionActivityEvent = SessionActivityEventBase &
           annotationId?: string;
           answerSummary?: string;
           answeredLate?: boolean;
+        };
+      }
+    | {
+        type: "question_cancelled";
+        payload: {
+          toolType: PendingQuestionToolType;
+          promptText: string;
+          pendingQuestionId?: string;
         };
       }
     | {
@@ -99,8 +108,9 @@ export function activityAnnotationId(
   switch (event.type) {
     case "question_asked":
     case "question_answered":
-    case "question_cancelled":
       return event.payload.annotationId;
+    case "question_cancelled":
+      return undefined;
     case "session_started":
     case "hiding_timer_started":
     case "seeking_started":
@@ -148,7 +158,7 @@ export function sessionActivityTypeLabel(type: SessionActivityType): string {
   }
 }
 
-function activityToolLabel(toolType: AnnotationType): string {
+function activityToolLabel(toolType: PendingQuestionToolType): string {
   const entry = MAP_TOOL_DOCK_ENTRIES.find((item) => item.id === toolType);
   return entry?.name ?? toolType;
 }

@@ -557,6 +557,7 @@ export function useMapScreenController() {
     handleDistanceUnitChange: sessionActions.handleDistanceUnitChange,
     exportMap,
     answerPendingQuestion: tools.answerPendingQuestion,
+    dismissExpiredPendingQuestion: tools.dismissExpiredPendingQuestion,
     handleCancelWalkingQuestion,
     setActiveTool,
     setAwaitingPlacement,

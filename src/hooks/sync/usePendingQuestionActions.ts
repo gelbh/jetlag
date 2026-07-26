@@ -16,6 +16,7 @@ import {
   postGameSystemMessage,
   THERMOMETER_WALK_CANCEL_TEXT,
   updateGameMessageAnswer,
+  updateGameMessageStatus,
   updatePendingQuestion,
   writePendingQuestion,
   writeSessionMessage,
@@ -322,11 +323,56 @@ export function usePendingQuestionActions() {
     [],
   );
 
+  const dismissExpiredPendingQuestion = useCallback(
+    async (options: {
+      sessionId: string;
+      pendingQuestionId: string;
+      messageId: string;
+      senderUid: string;
+      senderRole: PlayerRole;
+      toolType: PendingQuestionToolType;
+      promptText: string;
+    }) => {
+      const status = await getPendingQuestionStatus(
+        options.sessionId,
+        options.pendingQuestionId,
+      );
+      if (status !== "pending") {
+        return;
+      }
+
+      await updatePendingQuestion(options.sessionId, options.pendingQuestionId, {
+        status: "cancelled",
+      });
+      await updateGameMessageStatus(
+        options.sessionId,
+        options.messageId,
+        "cancelled",
+      );
+      await postGameSystemMessage(
+        options.sessionId,
+        options.senderUid,
+        options.senderRole,
+        "Expired question dismissed. You can ask again.",
+        createMessageId(),
+      );
+      emitQuestionCancelledActivity({
+        sessionId: options.sessionId,
+        toolType: options.toolType,
+        promptText: options.promptText,
+        pendingQuestionId: options.pendingQuestionId,
+        createdByUid: options.senderUid,
+      });
+    },
+    [],
+  );
+
   return {
     submitPendingQuestion,
     completeThermometerWalk,
     answerPendingQuestion,
     postSystemMessage,
     cancelThermometerWalk,
+    dismissExpiredPendingQuestion,
   };
 }
