@@ -31,9 +31,6 @@ export function AdminMapScreen({
 }) {
   const navigate = useAppNavigate();
   const setSession = useSessionStore((state) => state.setSession);
-  const resetObserverPerspective = useMapStore(
-    (state) => state.resetObserverPerspective,
-  );
   const setLayerVisibility = useMapStore((state) => state.setLayerVisibility);
   const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
   const setSelectedAnnotationId = useAnnotationStore(
@@ -59,13 +56,11 @@ export function AdminMapScreen({
     if (sessionId && sessionId !== LOCAL_SESSION_ID) {
       await clearSessionLocalArtifacts(sessionId);
     }
-    resetObserverPerspective();
     setSession(null);
     navigate("/admin");
   }, [
     controller.session?.id,
     navigate,
-    resetObserverPerspective,
     setSession,
   ]);
 
@@ -194,8 +189,6 @@ export function AdminMapScreen({
         myRole="admin"
         timer={controller.timer}
         overlay={controller.overlay}
-        perspective={controller.observerPerspective}
-        onPerspectiveChange={controller.setObserverPerspective}
         onLeave={() => void handleLeave()}
         isWide={isWide}
         syncStatus={controller.syncStatus.status}
@@ -274,7 +267,7 @@ export function AdminMapScreen({
               sessionId={controller.sessionId}
               senderUid={controller.uid}
               senderRole={chatDisplayRole}
-              isHider={chatDisplayRole === "hider"}
+              isHider={false}
               bottomClassName="bottom-[calc(7.75rem+env(safe-area-inset-bottom))]"
               onAnswerQuestion={async () => undefined}
               readOnly

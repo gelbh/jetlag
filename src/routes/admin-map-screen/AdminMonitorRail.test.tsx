@@ -30,8 +30,6 @@ function createController(): ObserverMapScreenController {
       tentacle: true,
       transit: true,
     },
-    observerPerspective: "both",
-    setObserverPerspective: vi.fn(),
     spectatorLayers: {
       chatDisplayRole: "admin",
       showSeekerPins: true,
