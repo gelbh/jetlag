@@ -23,9 +23,11 @@ export {
 } from "./keys";
 export {
   clearStaleCacheNoticesForTests,
+  memoryGeoCache,
   readCachedMemoryEntry,
   staleCacheCaptionForKey,
 } from "./memory";
+export type { GeoCacheLayer } from "../shared/cacheInterface";
 
 interface CacheOptions {
   persistEmpty?: boolean;
