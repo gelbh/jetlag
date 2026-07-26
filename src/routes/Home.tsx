@@ -39,8 +39,7 @@ import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements"
 import { resolveHomePremiumButtonDisplay } from "../domain/billing/premiumProducts";
 import { useAuthBootstrapReady } from "../hooks/useAuthBootstrapReady";
 import { LEGAL_APP_NAME } from "../domain/legal/legalContact";
-import { isAdminUser } from "../domain/admin/adminAccess";
-import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
+import { useAdminAccessState } from "../hooks/admin/useAdminAccessState";
 import { useUserProfile } from "../hooks/profile/useUserProfile";
 
 const VERIFY_SESSION_TIMEOUT_MS = 15_000;
@@ -60,8 +59,12 @@ export function Home() {
   const [playHubOpen, setPlayHubOpen] = useState(false);
   const [reportProblemOpen, setReportProblemOpen] = useState(false);
   const { entitlements: premiumEntitlements } = usePremiumEntitlements();
-  const { user: permanentUser, isPermanent } = usePermanentAuthUser();
-  const showAdminEntry = isAdminUser(permanentUser);
+  const {
+    state: adminAccessState,
+    user: permanentUser,
+    isPermanent,
+  } = useAdminAccessState();
+  const showAdminEntry = adminAccessState === "admin";
   const authBootstrapReady = useAuthBootstrapReady();
   const { phase: routeTransitionPhase } = useRouteTransition();
   const { profile, ready: profileReady, error: profileError } = useUserProfile(

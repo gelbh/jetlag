@@ -66,9 +66,10 @@ function makeIncident(
 }
 
 const authState = vi.hoisted(() => ({
+  state: "loading" as "loading" | "unsigned" | "denied" | "admin",
   user: null as { email: string; emailVerified: boolean } | null,
-  isPermanent: false,
   authReady: true,
+  isPermanent: false,
 }));
 
 const listState = vi.hoisted(() => ({
@@ -76,13 +77,12 @@ const listState = vi.hoisted(() => ({
   error: null as Error | null,
 }));
 
-vi.mock("../../hooks/billing/usePermanentAuthUser", () => ({
-  usePermanentAuthUser: () => authState,
+vi.mock("../../hooks/admin/useAdminAccessState", () => ({
+  useAdminAccessState: () => authState,
 }));
 
-vi.mock("../../domain/admin/adminAccess", () => ({
-  isAdminUser: (user: { email: string; emailVerified: boolean } | null) =>
-    user?.email === "admin@example.com" && user.emailVerified,
+vi.mock("../../hooks/billing/usePermanentAuthUser", () => ({
+  usePermanentAuthUser: () => authState,
 }));
 
 vi.mock("../../components/billing/PremiumSignInGate", () => ({
@@ -304,6 +304,7 @@ describe("AdminIncidentDesk gate + mobile stack", () => {
   beforeEach(() => {
     listState.incidents = [];
     listState.error = null;
+    authState.state = "unsigned";
     authState.authReady = true;
     authState.user = null;
     authState.isPermanent = false;
@@ -330,6 +331,7 @@ describe("AdminIncidentDesk gate + mobile stack", () => {
 
   it("shows access denied for non-admin users", () => {
     stubMatchMedia(true);
+    authState.state = "denied";
     authState.isPermanent = true;
     authState.user = { email: "player@example.com", emailVerified: true };
 
@@ -342,6 +344,7 @@ describe("AdminIncidentDesk gate + mobile stack", () => {
 
   it("shows empty queue for admin with no incidents", () => {
     stubMatchMedia(true);
+    authState.state = "admin";
     authState.isPermanent = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
 
@@ -353,6 +356,7 @@ describe("AdminIncidentDesk gate + mobile stack", () => {
 
   it("shows queue error state", () => {
     stubMatchMedia(true);
+    authState.state = "admin";
     authState.isPermanent = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
     listState.error = new Error("Firestore unavailable");
@@ -365,6 +369,7 @@ describe("AdminIncidentDesk gate + mobile stack", () => {
 
   it("opens mobile desk on the detail panel for a deep-linked incident", () => {
     stubMatchMedia(false);
+    authState.state = "admin";
     authState.isPermanent = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
     listState.incidents = [makeIncident()];
