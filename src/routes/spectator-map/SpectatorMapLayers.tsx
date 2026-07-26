@@ -16,6 +16,7 @@ import type { LayerVisibility } from "../../state/mapStore";
 import type { MapStyle } from "../../domain/map/mapBasemaps";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
+import { useAnnotationStore } from "../../state/annotationStore";
 
 type SpectatorMapLayersProps = {
   session: SessionRecord;
@@ -50,11 +51,16 @@ export function SpectatorMapLayers({
   uid,
   activeThermometerWalk,
 }: SpectatorMapLayersProps) {
+  const selectedAnnotationId = useAnnotationStore(
+    (state) => state.selectedAnnotationId,
+  );
+
   return (
     <>
       <AnnotationLayer
         annotations={annotations}
         gameArea={gameArea}
+        selectedAnnotationId={selectedAnnotationId}
         layerVisibility={layerVisibility}
         session={session}
         hidingZones={hidingZones}

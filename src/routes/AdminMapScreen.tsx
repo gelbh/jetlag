@@ -12,6 +12,7 @@ import { useAppNavigate } from "../hooks/useAppNavigate";
 import { useAdminMapWideLayout } from "../hooks/admin/useAdminMapWideLayout";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { adminModerateSession } from "../services/admin/adminModeration";
+import { useAnnotationStore } from "../state/annotationStore";
 import { useMapStore, useSessionStore } from "../state/sessionStore";
 import { useObserverMapScreen } from "./observer-map-screen/useObserverMapScreen";
 import { SpectatorMapLayers } from "./spectator-map/SpectatorMapLayers";
@@ -35,6 +36,12 @@ export function AdminMapScreen({
   );
   const setLayerVisibility = useMapStore((state) => state.setLayerVisibility);
   const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
+  const setSelectedAnnotationId = useAnnotationStore(
+    (state) => state.setSelectedAnnotationId,
+  );
+  const markAnnotationPulse = useAnnotationStore(
+    (state) => state.markAnnotationPulse,
+  );
   const controller = useObserverMapScreen();
   const shellRef = useRef<HTMLDivElement>(null);
   const isWide = useAdminMapWideLayout(shellRef, {
@@ -244,11 +251,17 @@ export function AdminMapScreen({
 
           <SessionLog
             open={controller.overlay.isLogOpen}
+            sessionId={controller.session.id}
             annotations={controller.annotations}
             onClose={controller.overlay.closeSheet}
             onDelete={() => undefined}
             onEdit={() => undefined}
             readOnly
+            onSelect={(id) => {
+              controller.overlay.closeSheet();
+              setSelectedAnnotationId(id);
+              markAnnotationPulse(id);
+            }}
           />
 
           {controller.sessionId && controller.uid ? (

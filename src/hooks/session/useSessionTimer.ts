@@ -11,6 +11,7 @@ import {
   startTimer,
   type TimerState,
 } from "../../domain/session/timer";
+import { emitHidingTimerStartedActivity } from "../../services/session/emitSessionActivity";
 import { useTimerStore } from "../../state/timerStore";
 
 interface UseSessionTimerOptions {
@@ -118,11 +119,15 @@ export function useSessionTimer(
     }
 
     setTimerState((current) => {
+      const wasStarted = hasTimerStarted(current);
       const next = startTimer(current);
       onControlRef.current?.(next);
+      if (sessionId && !wasStarted && hasTimerStarted(next)) {
+        emitHidingTimerStartedActivity(sessionId);
+      }
       return next;
     });
-  }, [canControl, setTimerState]);
+  }, [canControl, sessionId, setTimerState]);
 
   const pause = useCallback(() => {
     if (!canControl) {

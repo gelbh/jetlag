@@ -34,6 +34,7 @@ import { fetchTentaclePois } from "../../services/geo/tentacleOverpass";
 import { overpassErrorMessage } from "../../services/core/overpassClient";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
+import { emitQuestionAnsweredActivity } from "../../services/session/emitSessionActivity";
 
 interface UseTentacleToolParams {
   active: boolean;
@@ -388,7 +389,7 @@ export function useTentacleTool({
       metadata.tentacleEliminationJson = eliminationJson;
     }
 
-    await createAnnotation({
+    const created = await createAnnotation({
       type: "tentacle",
       geometry: {
         type: "Feature",
@@ -400,6 +401,23 @@ export function useTentacleTool({
       },
       metadata,
     });
+
+    if (sessionId) {
+      emitQuestionAnsweredActivity({
+        sessionId,
+        toolType: "tentacle",
+        promptText: tentacleQuestionPrompt(
+          tentacleCategoryId,
+          distanceUnit,
+          searchRadiusMeters,
+        ),
+        annotationId: created.id,
+        answerSummary: tentacleOutOfReach
+          ? TENTACLE_NOT_WITHIN_REACH_LABEL
+          : (selectedPoi?.name ?? selectedPoiId ?? undefined),
+        createdByUid: senderUid ?? undefined,
+      });
+    }
 
     setTentacleCenter(null);
     setTentaclePois([]);
