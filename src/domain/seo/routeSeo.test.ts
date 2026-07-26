@@ -37,9 +37,11 @@ describe("routeSeo", () => {
     );
   });
 
-  it("normalizes unknown paths to home SEO with noindex", () => {
+  it("returns dedicated not-found SEO for unknown paths with noindex", () => {
     const seo = getRouteSeo("/not-a-real-route");
-    expect(seo.canonicalPath).toBe("/");
+    expect(seo.title).toContain("Page not found");
+    expect(seo.description).toMatch(/does not exist/i);
+    expect(seo.canonicalPath).toBe("/not-a-real-route");
     expect(seo.robots).toBe("noindex,nofollow");
   });
 

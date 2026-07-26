@@ -205,13 +205,18 @@ const ROUTE_SEO_BY_PATH: Record<string, RouteSeoSource> = {
   },
 };
 
+const NOT_FOUND_TITLE = titleFor("Page not found");
+const NOT_FOUND_DESCRIPTION = `This page does not exist in ${LEGAL_APP_NAME}.`;
+
 export function getRouteSeo(pathname: string): RouteSeo {
   const normalized = normalizeSeoPath(pathname);
   const entry = ROUTE_SEO_BY_PATH[normalized];
   if (!entry) {
-    const home = ROUTE_SEO_BY_PATH["/"]!;
     return {
-      ...home,
+      title: NOT_FOUND_TITLE,
+      description: NOT_FOUND_DESCRIPTION,
+      canonicalPath: normalized,
+      ogImagePath: DEFAULT_OG_IMAGE_PATH,
       robots: "noindex,nofollow",
     };
   }

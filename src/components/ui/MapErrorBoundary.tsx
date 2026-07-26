@@ -1,5 +1,4 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
-import { AppLink } from "../navigation/AppLink";
 import {
   clearChunkReloadFlag,
   hasChunkReloadBeenAttempted,
@@ -8,6 +7,7 @@ import {
 } from "../../domain/device/chunkLoadRecovery";
 import { appUpdateCopy } from "../../domain/device/appUpdateCopy";
 import { captureException } from "../../services/core/sentry";
+import { AppErrorPage } from "./AppErrorPage";
 import { MapFloatAlertPanel } from "./MapFloatAlert";
 
 interface MapErrorBoundaryProps {
@@ -67,40 +67,41 @@ export class MapErrorBoundary extends Component<
 
   render(): ReactNode {
     if (this.state.error) {
-      const deferredChunk = isChunkLoadError(this.state.error) && wasChunkReloadDeferred();
+      const deferredChunk =
+        isChunkLoadError(this.state.error) && wasChunkReloadDeferred();
 
       return (
-        <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 px-6 text-center">
-          <h1 className="text-xl font-semibold text-ink">
-            {appUpdateCopy.mapErrorTitle}
-          </h1>
-          {deferredChunk ? (
-            <p className="max-w-md text-sm text-ink-dim">
-              {appUpdateCopy.deferredTitle} — {appUpdateCopy.chunkDeferredBody}
-            </p>
-          ) : (
-            <MapFloatAlertPanel className="mx-auto max-w-md border-highlight/55 bg-surface-deep normal-case tracking-normal">
-              <p className="min-w-0 text-left text-sm text-ink">
-                {this.errorMessage()}
-              </p>
-              {this.showReloadAction() ? (
-                <button
-                  type="button"
-                  className="btn-primary min-h-11 shrink-0 px-4 text-xs"
-                  onClick={this.handleReload}
-                >
-                  {appUpdateCopy.mapErrorReload}
-                </button>
-              ) : null}
-            </MapFloatAlertPanel>
-          )}
-          <AppLink
-            to="/"
-            className="btn-secondary border border-border px-4 py-2 text-sm"
-          >
-            {appUpdateCopy.mapErrorBackHome}
-          </AppLink>
-        </div>
+        <AppErrorPage
+          title={appUpdateCopy.mapErrorTitle}
+          message={
+            deferredChunk
+              ? `${appUpdateCopy.deferredTitle} — ${appUpdateCopy.chunkDeferredBody}`
+              : ""
+          }
+          assertive
+          detail={
+            deferredChunk ? undefined : (
+              <MapFloatAlertPanel className="mx-auto max-w-md border-highlight/55 bg-surface-deep normal-case tracking-normal">
+                <p className="min-w-0 text-left text-sm text-ink">
+                  {this.errorMessage()}
+                </p>
+                {this.showReloadAction() ? (
+                  <button
+                    type="button"
+                    className="btn-primary min-h-11 shrink-0 px-4 text-xs"
+                    onClick={this.handleReload}
+                  >
+                    {appUpdateCopy.mapErrorReload}
+                  </button>
+                ) : null}
+              </MapFloatAlertPanel>
+            )
+          }
+          secondaryAction={{
+            label: appUpdateCopy.mapErrorBackHome,
+            to: "/",
+          }}
+        />
       );
     }
 
