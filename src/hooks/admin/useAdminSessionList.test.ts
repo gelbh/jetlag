@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { clearAdminSessionListCacheForTests } from "../../services/admin/adminSessionListCache";
 import { useAdminSessionList } from "./useAdminSessionList";
 
 const { fetchAdminSessionsPage } = vi.hoisted(() => ({
@@ -29,6 +30,7 @@ const otherSession = {
 describe("useAdminSessionList", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    clearAdminSessionListCacheForTests();
   });
 
   it("shows loading when enabled flips true before the first fetch settles", async () => {
@@ -63,7 +65,7 @@ describe("useAdminSessionList", () => {
     expect(result.current.sessions).toEqual([sampleSession]);
   });
 
-  it("shows loading again when re-enabled after a successful fetch", async () => {
+  it("keeps cached sessions when re-enabled and background-refreshes", async () => {
     fetchAdminSessionsPage.mockResolvedValue({
       sessions: [sampleSession],
       nextPageToken: null,
@@ -94,16 +96,86 @@ describe("useAdminSessionList", () => {
     expect(result.current.loading).toBe(false);
 
     rerender({ enabled: true });
-    expect(result.current.loading).toBe(true);
+    expect(result.current.loading).toBe(false);
+    expect(result.current.sessions).toEqual([sampleSession]);
+
+    await waitFor(() => {
+      expect(result.current.refreshing).toBe(true);
+    });
 
     await act(async () => {
       resolveSecond({ sessions: [otherSession], nextPageToken: null });
     });
 
     await waitFor(() => {
-      expect(result.current.loading).toBe(false);
+      expect(result.current.sessions).toEqual([otherSession]);
     });
-    expect(result.current.sessions).toEqual([otherSession]);
+    expect(result.current.refreshing).toBe(false);
+    expect(result.current.loading).toBe(false);
+  });
+
+  it("paints cached sessions on remount and background-refreshes", async () => {
+    fetchAdminSessionsPage.mockResolvedValue({
+      sessions: [sampleSession],
+      nextPageToken: null,
+    });
+
+    const first = renderHook(() => useAdminSessionList(true));
+    await waitFor(() => {
+      expect(first.result.current.loading).toBe(false);
+    });
+    first.unmount();
+
+    let resolveSecond!: (value: {
+      sessions: typeof sampleSession[];
+      nextPageToken: string | null;
+    }) => void;
+    fetchAdminSessionsPage.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveSecond = resolve;
+        }),
+    );
+
+    const second = renderHook(() => useAdminSessionList(true));
+    expect(second.result.current.loading).toBe(false);
+    expect(second.result.current.sessions).toEqual([sampleSession]);
+    await waitFor(() => {
+      expect(second.result.current.refreshing).toBe(true);
+    });
+
+    await act(async () => {
+      resolveSecond({ sessions: [otherSession], nextPageToken: null });
+    });
+    await waitFor(() => {
+      expect(second.result.current.sessions).toEqual([otherSession]);
+    });
+    expect(second.result.current.refreshing).toBe(false);
+  });
+
+  it("keeps hydrated sessions when background refresh fails after remount", async () => {
+    fetchAdminSessionsPage.mockResolvedValue({
+      sessions: [sampleSession],
+      nextPageToken: null,
+    });
+
+    const first = renderHook(() => useAdminSessionList(true));
+    await waitFor(() => {
+      expect(first.result.current.loading).toBe(false);
+    });
+    first.unmount();
+
+    fetchAdminSessionsPage.mockRejectedValue(new Error("offline"));
+
+    const second = renderHook(() => useAdminSessionList(true));
+    expect(second.result.current.loading).toBe(false);
+    expect(second.result.current.sessions).toEqual([sampleSession]);
+
+    await waitFor(() => {
+      expect(second.result.current.error).toBe("offline");
+    });
+    expect(second.result.current.sessions).toEqual([sampleSession]);
+    expect(second.result.current.loading).toBe(false);
   });
 
   it("queues a trailing refresh when refresh is called while one is in flight", async () => {
