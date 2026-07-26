@@ -144,4 +144,49 @@ describe("matching geometry", () => {
       buildMatchingEliminationRegion([], "missing", sampleGameArea, "yes"),
     ).toBeNull();
   });
+
+  it("Voronoi same-nearest region contains its own feature for a small clustered grid", () => {
+    const gridGameArea: GameArea = {
+      type: "Polygon",
+      coordinates: [
+        [
+          [-0.3, 51.3],
+          [-0.1, 51.3],
+          [-0.1, 51.5],
+          [-0.3, 51.5],
+          [-0.3, 51.3],
+        ],
+      ],
+    };
+
+    const gridFeatures: MatchingFeature[] = Array.from(
+      { length: 4 },
+      (_, index) => {
+        const row = Math.floor(index / 2);
+        const col = index % 2;
+        return {
+          id: `grid-${index}`,
+          name: `Grid Feature ${index}`,
+          point: [51.4 + row * 0.003, -0.2 + col * 0.003] as LatLngTuple,
+        };
+      },
+    );
+
+    for (const feature of gridFeatures) {
+      const region = buildSameNearestRegion(
+        gridFeatures,
+        feature.id,
+        gridGameArea,
+      );
+
+      expect(region, `no region for ${feature.id}`).not.toBeNull();
+      expect(
+        booleanPointInPolygon(
+          turfPoint([feature.point[1], feature.point[0]]),
+          region!,
+        ),
+        `${feature.id} not inside its own same-nearest region`,
+      ).toBe(true);
+    }
+  });
 });
