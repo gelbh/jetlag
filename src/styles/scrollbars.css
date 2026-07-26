@@ -1,0 +1,37 @@
+/* Theme-matched HUD scrollbars — restrained thin (companion option A). */
+
+.jl-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+}
+
+.jl-scroll::-webkit-scrollbar {
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+}
+
+.jl-scroll::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track);
+}
+
+.jl-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb);
+  border-radius: var(--radius-hud-md);
+  border: 2px solid var(--color-scrollbar-track);
+}
+
+.jl-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-scrollbar-thumb-hover);
+}
+
+/* Hide wins over theme — keep after .jl-scroll. */
+.scrollbar-hidden,
+.jl-scroll.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar,
+.jl-scroll.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
