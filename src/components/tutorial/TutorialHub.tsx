@@ -94,7 +94,7 @@ export function TutorialHub({
   };
 
   return (
-    <div className="tutorial-hub">
+    <div className="jl-scroll tutorial-hub">
       {coreSection ? renderSectionButton(coreSection) : null}
 
       <button

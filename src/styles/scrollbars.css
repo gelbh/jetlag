@@ -1,157 +1,35 @@
 /* Theme-matched HUD scrollbars — restrained thin (companion option A). */
 
-.jl-scroll,
-.jl-ops-workspace,
-.jl-ops-tabs,
-.jl-ops-panel-scroll,
-.jl-ops-mobile-chips,
-.jl-incident-queue-scroll,
-.jl-incident-tabs,
-.jl-incident-prompt,
-.jl-incident-chat-scroll,
-.jl-incident-diag-list,
-.jl-incident-timeline,
-.jl-incident-actions,
-.jl-support-chat-scroll,
-.jl-wizard-search-results,
-.jl-tool-menu,
-.jl-tool-dock--rail .jl-tool-dock-bar,
-.contextual-rail__tabs,
-.contextual-rail__panel,
-.admin-monitor-rail__tabs,
-.admin-monitor-rail__panel,
-.admin-dashboard-list-scroll,
-.app-scroll-root,
-.jl-segment-chips,
-.tutorial-hub,
-.tutorial-questions-list {
+.jl-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
 }
 
-.jl-scroll::-webkit-scrollbar,
-.jl-ops-workspace::-webkit-scrollbar,
-.jl-ops-tabs::-webkit-scrollbar,
-.jl-ops-panel-scroll::-webkit-scrollbar,
-.jl-ops-mobile-chips::-webkit-scrollbar,
-.jl-incident-queue-scroll::-webkit-scrollbar,
-.jl-incident-tabs::-webkit-scrollbar,
-.jl-incident-prompt::-webkit-scrollbar,
-.jl-incident-chat-scroll::-webkit-scrollbar,
-.jl-incident-diag-list::-webkit-scrollbar,
-.jl-incident-timeline::-webkit-scrollbar,
-.jl-incident-actions::-webkit-scrollbar,
-.jl-support-chat-scroll::-webkit-scrollbar,
-.jl-wizard-search-results::-webkit-scrollbar,
-.jl-tool-menu::-webkit-scrollbar,
-.jl-tool-dock--rail .jl-tool-dock-bar::-webkit-scrollbar,
-.contextual-rail__tabs::-webkit-scrollbar,
-.contextual-rail__panel::-webkit-scrollbar,
-.admin-monitor-rail__tabs::-webkit-scrollbar,
-.admin-monitor-rail__panel::-webkit-scrollbar,
-.admin-dashboard-list-scroll::-webkit-scrollbar,
-.app-scroll-root::-webkit-scrollbar,
-.jl-segment-chips::-webkit-scrollbar,
-.tutorial-hub::-webkit-scrollbar,
-.tutorial-questions-list::-webkit-scrollbar {
+.jl-scroll::-webkit-scrollbar {
   width: var(--scrollbar-size);
   height: var(--scrollbar-size);
 }
 
-.jl-scroll::-webkit-scrollbar-track,
-.jl-ops-workspace::-webkit-scrollbar-track,
-.jl-ops-tabs::-webkit-scrollbar-track,
-.jl-ops-panel-scroll::-webkit-scrollbar-track,
-.jl-ops-mobile-chips::-webkit-scrollbar-track,
-.jl-incident-queue-scroll::-webkit-scrollbar-track,
-.jl-incident-tabs::-webkit-scrollbar-track,
-.jl-incident-prompt::-webkit-scrollbar-track,
-.jl-incident-chat-scroll::-webkit-scrollbar-track,
-.jl-incident-diag-list::-webkit-scrollbar-track,
-.jl-incident-timeline::-webkit-scrollbar-track,
-.jl-incident-actions::-webkit-scrollbar-track,
-.jl-support-chat-scroll::-webkit-scrollbar-track,
-.jl-wizard-search-results::-webkit-scrollbar-track,
-.jl-tool-menu::-webkit-scrollbar-track,
-.jl-tool-dock--rail .jl-tool-dock-bar::-webkit-scrollbar-track,
-.contextual-rail__tabs::-webkit-scrollbar-track,
-.contextual-rail__panel::-webkit-scrollbar-track,
-.admin-monitor-rail__tabs::-webkit-scrollbar-track,
-.admin-monitor-rail__panel::-webkit-scrollbar-track,
-.admin-dashboard-list-scroll::-webkit-scrollbar-track,
-.app-scroll-root::-webkit-scrollbar-track,
-.jl-segment-chips::-webkit-scrollbar-track,
-.tutorial-hub::-webkit-scrollbar-track,
-.tutorial-questions-list::-webkit-scrollbar-track {
+.jl-scroll::-webkit-scrollbar-track {
   background: var(--color-scrollbar-track);
 }
 
-.jl-scroll::-webkit-scrollbar-thumb,
-.jl-ops-workspace::-webkit-scrollbar-thumb,
-.jl-ops-tabs::-webkit-scrollbar-thumb,
-.jl-ops-panel-scroll::-webkit-scrollbar-thumb,
-.jl-ops-mobile-chips::-webkit-scrollbar-thumb,
-.jl-incident-queue-scroll::-webkit-scrollbar-thumb,
-.jl-incident-tabs::-webkit-scrollbar-thumb,
-.jl-incident-prompt::-webkit-scrollbar-thumb,
-.jl-incident-chat-scroll::-webkit-scrollbar-thumb,
-.jl-incident-diag-list::-webkit-scrollbar-thumb,
-.jl-incident-timeline::-webkit-scrollbar-thumb,
-.jl-incident-actions::-webkit-scrollbar-thumb,
-.jl-support-chat-scroll::-webkit-scrollbar-thumb,
-.jl-wizard-search-results::-webkit-scrollbar-thumb,
-.jl-tool-menu::-webkit-scrollbar-thumb,
-.jl-tool-dock--rail .jl-tool-dock-bar::-webkit-scrollbar-thumb,
-.contextual-rail__tabs::-webkit-scrollbar-thumb,
-.contextual-rail__panel::-webkit-scrollbar-thumb,
-.admin-monitor-rail__tabs::-webkit-scrollbar-thumb,
-.admin-monitor-rail__panel::-webkit-scrollbar-thumb,
-.admin-dashboard-list-scroll::-webkit-scrollbar-thumb,
-.app-scroll-root::-webkit-scrollbar-thumb,
-.jl-segment-chips::-webkit-scrollbar-thumb,
-.tutorial-hub::-webkit-scrollbar-thumb,
-.tutorial-questions-list::-webkit-scrollbar-thumb {
+.jl-scroll::-webkit-scrollbar-thumb {
   background: var(--color-scrollbar-thumb);
   border-radius: var(--radius-hud-md);
   border: 2px solid var(--color-scrollbar-track);
 }
 
-.jl-scroll::-webkit-scrollbar-thumb:hover,
-.jl-ops-workspace::-webkit-scrollbar-thumb:hover,
-.jl-ops-tabs::-webkit-scrollbar-thumb:hover,
-.jl-ops-panel-scroll::-webkit-scrollbar-thumb:hover,
-.jl-ops-mobile-chips::-webkit-scrollbar-thumb:hover,
-.jl-incident-queue-scroll::-webkit-scrollbar-thumb:hover,
-.jl-incident-tabs::-webkit-scrollbar-thumb:hover,
-.jl-incident-prompt::-webkit-scrollbar-thumb:hover,
-.jl-incident-chat-scroll::-webkit-scrollbar-thumb:hover,
-.jl-incident-diag-list::-webkit-scrollbar-thumb:hover,
-.jl-incident-timeline::-webkit-scrollbar-thumb:hover,
-.jl-incident-actions::-webkit-scrollbar-thumb:hover,
-.jl-support-chat-scroll::-webkit-scrollbar-thumb:hover,
-.jl-wizard-search-results::-webkit-scrollbar-thumb:hover,
-.jl-tool-menu::-webkit-scrollbar-thumb:hover,
-.jl-tool-dock--rail .jl-tool-dock-bar::-webkit-scrollbar-thumb:hover,
-.contextual-rail__tabs::-webkit-scrollbar-thumb:hover,
-.contextual-rail__panel::-webkit-scrollbar-thumb:hover,
-.admin-monitor-rail__tabs::-webkit-scrollbar-thumb:hover,
-.admin-monitor-rail__panel::-webkit-scrollbar-thumb:hover,
-.admin-dashboard-list-scroll::-webkit-scrollbar-thumb:hover,
-.app-scroll-root::-webkit-scrollbar-thumb:hover,
-.jl-segment-chips::-webkit-scrollbar-thumb:hover,
-.tutorial-hub::-webkit-scrollbar-thumb:hover,
-.tutorial-questions-list::-webkit-scrollbar-thumb:hover {
+.jl-scroll::-webkit-scrollbar-thumb:hover {
   background: var(--color-scrollbar-thumb-hover);
 }
 
-/* Hide wins over theme — keep after theme rules. */
-.scrollbar-hidden,
-.jl-scroll.scrollbar-hidden {
+/* Hide wins over theme — keep after .jl-scroll. */
+.scrollbar-hidden {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-.scrollbar-hidden::-webkit-scrollbar,
-.jl-scroll.scrollbar-hidden::-webkit-scrollbar {
+.scrollbar-hidden::-webkit-scrollbar {
   display: none;
 }

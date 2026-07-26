@@ -228,7 +228,7 @@ export function HidingZonePanel({
 
       {stepId === "location" && !zoneTool.manualMode ? (
         <ToolSection first compact status="active">
-          <div className="jl-wizard-search-results">
+          <div className="jl-scroll jl-wizard-search-results">
             <TransitStationPicker
             layout="flex"
             labeled
