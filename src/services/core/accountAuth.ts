@@ -21,6 +21,12 @@ import {
 import { getFirebaseAuth, ensureAnonymousUser } from "./firebase";
 
 export const EMAIL_LINK_STORAGE_KEY = "premiumEmailForSignIn";
+/** Set before linkWithRedirect / signInWithRedirect; cleared on redirect recovery. */
+export const OAUTH_REDIRECT_PENDING_KEY = "jl.oauthRedirectPending";
+
+export const OAUTH_REDIRECT_FAILED_MESSAGE =
+  "Sign-in didn’t complete. Allow popups for this site and try again.";
+
 export class OAuthRedirectInProgressError extends Error {
   constructor() {
     super("OAuth redirect in progress");
@@ -159,13 +165,53 @@ async function linkWithPopupOrSignInExisting(
   }
 }
 
+function markOAuthRedirectPending(): void {
+  try {
+    window.sessionStorage.setItem(
+      OAUTH_REDIRECT_PENDING_KEY,
+      String(Date.now()),
+    );
+  } catch {
+    // Private mode / blocked storage — recovery still runs; UI may miss the hint.
+  }
+}
+
+const OAUTH_REDIRECT_PENDING_MAX_AGE_MS = 10 * 60 * 1000;
+
+function consumeOAuthRedirectPending(): boolean {
+  try {
+    const raw = window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY);
+    if (raw == null) {
+      return false;
+    }
+    window.sessionStorage.removeItem(OAUTH_REDIRECT_PENDING_KEY);
+    if (raw === "1") {
+      // Legacy boolean flag from older clients.
+      return true;
+    }
+    const startedAt = Number(raw);
+    if (!Number.isFinite(startedAt)) {
+      return false;
+    }
+    return Date.now() - startedAt <= OAUTH_REDIRECT_PENDING_MAX_AGE_MS;
+  } catch {
+    return false;
+  }
+}
+
 async function beginOAuthRedirect(provider: AuthProvider): Promise<never> {
   const auth = getFirebaseAuth();
+  markOAuthRedirectPending();
 
-  if (auth.currentUser?.isAnonymous) {
-    await linkWithRedirect(auth.currentUser, provider);
-  } else {
-    await signInWithRedirect(auth, provider);
+  try {
+    if (auth.currentUser?.isAnonymous) {
+      await linkWithRedirect(auth.currentUser, provider);
+    } else {
+      await signInWithRedirect(auth, provider);
+    }
+  } catch (error) {
+    consumeOAuthRedirectPending();
+    throw error;
   }
 
   throw new OAuthRedirectInProgressError();
@@ -215,17 +261,45 @@ async function signInWithOAuthPopup(
 }
 
 let redirectResultPromise: Promise<User | null> | null = null;
+let pendingRedirectFailureMessage: string | null = null;
+
+function notePendingRedirectFailure(): void {
+  pendingRedirectFailureMessage = OAUTH_REDIRECT_FAILED_MESSAGE;
+}
+
+/** Player-visible message after a redirect returned no user; cleared on read. */
+export function consumeOAuthRedirectFailureMessage(): string | null {
+  const message = pendingRedirectFailureMessage;
+  pendingRedirectFailureMessage = null;
+  return message;
+}
+
+function resolveRedirectUser(
+  user: User | null,
+  wasPending: boolean,
+): User | null {
+  if (user) {
+    return user;
+  }
+  if (wasPending) {
+    notePendingRedirectFailure();
+  }
+  return null;
+}
 
 async function completeOAuthRedirectOnce(): Promise<User | null> {
   const auth = getFirebaseAuth();
+  const wasPending = consumeOAuthRedirectPending();
 
   try {
     const result = await getRedirectResult(auth);
-    return result?.user ?? null;
+    return resolveRedirectUser(result?.user ?? null, wasPending);
   } catch (error) {
     if (isFirebasePendingPromiseAssertion(error)) {
       const current = auth.currentUser;
-      return current && !current.isAnonymous ? current : null;
+      const recovered =
+        current && !current.isAnonymous ? current : null;
+      return resolveRedirectUser(recovered, wasPending);
     }
 
     if (!isCredentialAlreadyInUse(error)) {
@@ -248,6 +322,7 @@ export async function completeOAuthRedirectIfPending(): Promise<User | null> {
 
 export function resetOAuthRedirectRecoveryForTests(): void {
   redirectResultPromise = null;
+  pendingRedirectFailureMessage = null;
 }
 
 export async function sendPremiumEmailSignInLink(

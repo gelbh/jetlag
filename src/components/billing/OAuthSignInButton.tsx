@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { isOAuthRedirectInProgress } from "../../services/core/accountAuth";
-import { ensureAnonymousUser } from "../../services/core/firebase";
+import { getFirebaseAuth } from "../../services/core/firebase";
 
 interface OAuthSignInButtonProps {
   provider: "apple" | "google";
@@ -28,7 +28,11 @@ export function OAuthSignInButton({
   const handleClick = async () => {
     setBusy(true);
     try {
-      await ensureAnonymousUser();
+      // Never await before opening the popup — Chrome spends the user gesture
+      // on any prior await and returns auth/popup-blocked → redirect fallback.
+      if (!getFirebaseAuth().currentUser) {
+        throw new Error("Sign-in isn’t ready yet. Wait a moment and try again.");
+      }
       await onSignIn();
       await onSuccess();
       setBusy(false);
