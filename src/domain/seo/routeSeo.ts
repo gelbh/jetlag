@@ -27,6 +27,8 @@ export const APP_ROUTE_PATHS = [
   "/create",
   "/join",
   "/admin",
+  "/admin/incidents",
+  "/admin/incidents/:incidentId",
   "/presets",
   "/presets/new",
   "/presets/:id/edit",
@@ -34,6 +36,7 @@ export const APP_ROUTE_PATHS = [
 ] as const;
 
 const PRESET_EDIT_PATH_RE = /^\/presets\/[^/]+\/edit$/;
+const ADMIN_INCIDENT_PATH_RE = /^\/admin\/incidents\/[^/]+$/;
 const DEFAULT_OG_IMAGE_PATH = "/og-default.png";
 
 const INDEXABLE_PATHS = new Set(crawlPolicy.indexablePaths);
@@ -77,6 +80,9 @@ function normalizeSeoPath(pathname: string): string {
   const base = pathname.split("?")[0]?.split("#")[0] ?? "/";
   if (PRESET_EDIT_PATH_RE.test(base)) {
     return "/presets/:id/edit";
+  }
+  if (ADMIN_INCIDENT_PATH_RE.test(base)) {
+    return "/admin/incidents/:incidentId";
   }
   return base || "/";
 }
@@ -177,6 +183,18 @@ const ROUTE_SEO_BY_PATH: Record<string, RouteSeoSource> = {
     title: titleFor("Admin"),
     description: `Admin tools for ${LEGAL_APP_NAME}.`,
     canonicalPath: "/admin",
+    ogImagePath: DEFAULT_OG_IMAGE_PATH,
+  },
+  "/admin/incidents": {
+    title: titleFor("Incidents"),
+    description: `Player incident desk for ${LEGAL_APP_NAME}.`,
+    canonicalPath: "/admin/incidents",
+    ogImagePath: DEFAULT_OG_IMAGE_PATH,
+  },
+  "/admin/incidents/:incidentId": {
+    title: titleFor("Incident"),
+    description: `Incident detail for ${LEGAL_APP_NAME}.`,
+    canonicalPath: "/admin/incidents/:incidentId",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
   "/presets": {

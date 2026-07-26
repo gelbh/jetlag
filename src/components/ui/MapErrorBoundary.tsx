@@ -78,7 +78,9 @@ export class MapErrorBoundary extends Component<
               ? `${appUpdateCopy.deferredTitle} — ${appUpdateCopy.chunkDeferredBody}`
               : ""
           }
-          assertive
+          // Nested MapFloatAlertPanel already uses role="alert"; keep outer assertive
+          // only for the deferred message path (no inner panel).
+          assertive={deferredChunk}
           detail={
             deferredChunk ? undefined : (
               <MapFloatAlertPanel className="mx-auto max-w-md border-highlight/55 bg-surface-deep normal-case tracking-normal">
