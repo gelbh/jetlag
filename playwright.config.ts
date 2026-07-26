@@ -36,26 +36,34 @@ export default defineConfig({
     permissions: ["geolocation"],
     serviceWorkers: "block",
   },
-  projects: process.env.E2E_SMOKE
-    ? [{ name: "smoke", grep: /@smoke/, use: mobileDevice }]
-    : [
+  projects: process.env.E2E_GATE_SMOKE
+    ? [
         {
-          name: "features",
-          testMatch: /e2e\/features\/.+\.spec\.ts/,
-          use: mobileDevice,
-        },
-        {
-          name: "visual",
-          testMatch: /e2e\/visual\/.+\.spec\.ts/,
-          grepInvert: /@manual/,
-          use: mobileDevice,
-        },
-        {
-          name: "smoke-folder",
+          name: "gate-smoke",
           testMatch: /e2e\/smoke\/.+\.spec\.ts/,
           use: mobileDevice,
         },
-      ],
+      ]
+    : process.env.E2E_SMOKE
+      ? [{ name: "smoke", grep: /@smoke/, use: mobileDevice }]
+      : [
+          {
+            name: "features",
+            testMatch: /e2e\/features\/.+\.spec\.ts/,
+            use: mobileDevice,
+          },
+          {
+            name: "visual",
+            testMatch: /e2e\/visual\/.+\.spec\.ts/,
+            grepInvert: /@manual/,
+            use: mobileDevice,
+          },
+          {
+            name: "smoke-folder",
+            testMatch: /e2e\/smoke\/.+\.spec\.ts/,
+            use: mobileDevice,
+          },
+        ],
   webServer: {
     command: process.env.CI
       ? "npm run build && npm run preview -- --host 127.0.0.1 --port 4173 --strictPort"

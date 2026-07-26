@@ -50,7 +50,8 @@
     "cap:ios": "npm run cap:sync && npx cap open ios",
     "prepare": "husky",
     "lint:css": "stylelint \"src/**/*.css\" \"public/**/*.css\"",
-    "test:lighthouse": "lhci autorun --config=lighthouserc.cjs; m=$?; lhci autorun --config=lighthouserc.desktop.cjs; d=$?; exit $((m || d))"
+    "test:lighthouse": "lhci autorun --config=lighthouserc.cjs; m=$?; lhci autorun --config=lighthouserc.desktop.cjs; d=$?; exit $((m || d))",
+    "test:e2e:gate-smoke": "E2E_GATE_SMOKE=1 playwright test"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
