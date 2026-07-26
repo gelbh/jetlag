@@ -1,5 +1,6 @@
 import type { PathOptions } from "leaflet";
-import type { MapStyle } from "./mapBasemaps";
+import type { MapStyle, StreetBasemap } from "./mapBasemaps";
+import { getBasemapSurface } from "./mapBasemaps";
 import type { MapDraftOverlayStyle } from "./mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "./mapAnnotationColors";
 
@@ -17,16 +18,24 @@ const ADMIN_LEVEL_STROKE_OPACITY: Record<number, number> = {
   9: 0.42,
 };
 
+function highContrastSurface(
+  mapStyle: MapStyle,
+  streetBasemap: StreetBasemap,
+): boolean {
+  const surface = getBasemapSurface(mapStyle, streetBasemap);
+  return surface === "satellite" || surface === "dark";
+}
+
 export function getAdminBoundaryStrokeStyle(
   adminLevel: number,
   mapStyle: MapStyle,
+  streetBasemap: StreetBasemap = "light",
 ): PathOptions {
   const weight = ADMIN_LEVEL_STROKE_WEIGHT[adminLevel] ?? 1;
   const opacity = ADMIN_LEVEL_STROKE_OPACITY[adminLevel] ?? 0.5;
-  const color =
-    mapStyle === "satellite"
-      ? MAP_ANNOTATION_COLORS.strokeLight
-      : MAP_ANNOTATION_COLORS.boundary;
+  const color = highContrastSurface(mapStyle, streetBasemap)
+    ? MAP_ANNOTATION_COLORS.strokeLight
+    : MAP_ANNOTATION_COLORS.boundary;
 
   return {
     color,
@@ -36,8 +45,11 @@ export function getAdminBoundaryStrokeStyle(
   };
 }
 
-export function getBoundaryPreviewStyle(mapStyle: MapStyle): MapDraftOverlayStyle {
-  if (mapStyle === "satellite") {
+export function getBoundaryPreviewStyle(
+  mapStyle: MapStyle,
+  streetBasemap: StreetBasemap = "light",
+): MapDraftOverlayStyle {
+  if (highContrastSurface(mapStyle, streetBasemap)) {
     return {
       color: MAP_ANNOTATION_COLORS.strokeLight,
       fillColor: MAP_ANNOTATION_COLORS.strokeLight,

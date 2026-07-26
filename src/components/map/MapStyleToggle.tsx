@@ -4,6 +4,7 @@ import { useMap } from "react-leaflet";
 import {
   getMapBasemap,
   type MapStyle,
+  type StreetBasemap,
 } from "../../domain/map/mapBasemaps";
 import { previewTileUrlsFromOrigin } from "../../domain/map/mapTilePreview";
 import type { MapChromeControlInset } from "./mapChromeControlInset";
@@ -13,6 +14,7 @@ import { useMapPreviewTileOrigin } from "./useMapPreviewTileOrigin";
 interface MapStyleToggleProps {
   enabled: boolean;
   mapStyle: MapStyle;
+  streetBasemap?: StreetBasemap;
   onMapStyleChange: (style: MapStyle) => void;
   inset?: MapChromeControlInset;
   suppressRef?: RefObject<boolean>;
@@ -21,6 +23,7 @@ interface MapStyleToggleProps {
 export function MapStyleToggle({
   enabled,
   mapStyle,
+  streetBasemap = "light",
   onMapStyleChange,
   inset = "dock",
   suppressRef,
@@ -31,13 +34,20 @@ export function MapStyleToggle({
   const tileOrigin = useMapPreviewTileOrigin();
 
   const nextStyle = mapStyle === "standard" ? "satellite" : "standard";
-  const previewBasemap = getMapBasemap(nextStyle);
+  const previewBasemap = getMapBasemap(nextStyle, streetBasemap);
   const label =
     mapStyle === "standard" ? "Switch to satellite view" : "Switch to map view";
   const satelliteActive = mapStyle === "satellite";
   const previewTileUrls = useMemo(
-    () => previewTileUrlsFromOrigin(nextStyle, tileOrigin.x, tileOrigin.y),
-    [nextStyle, tileOrigin.x, tileOrigin.y],
+    () =>
+      previewTileUrlsFromOrigin(
+        nextStyle,
+        tileOrigin.x,
+        tileOrigin.y,
+        undefined,
+        streetBasemap,
+      ),
+    [nextStyle, streetBasemap, tileOrigin.x, tileOrigin.y],
   );
 
   if (!enabled || !portalTarget) {

@@ -2,6 +2,7 @@ import {
   getMapBasemap,
   type MapBasemapDefinition,
   type MapStyle,
+  type StreetBasemap,
 } from "./mapBasemaps";
 
 export const MAP_STYLE_PREVIEW_ZOOM = 15;
@@ -47,9 +48,10 @@ export function previewTileUrlsForStyle(
   lat: number,
   lng: number,
   zoom = MAP_STYLE_PREVIEW_ZOOM,
+  streetBasemap: StreetBasemap = "light",
 ): string[] {
   const { x, y } = latLngToTileXY(lat, lng, zoom);
-  return previewTileUrlsFromOrigin(style, x, y, zoom);
+  return previewTileUrlsFromOrigin(style, x, y, zoom, streetBasemap);
 }
 
 export function previewTileUrlsFromOrigin(
@@ -57,8 +59,9 @@ export function previewTileUrlsFromOrigin(
   x: number,
   y: number,
   zoom = MAP_STYLE_PREVIEW_ZOOM,
+  streetBasemap: StreetBasemap = "light",
 ): string[] {
-  const basemap = getMapBasemap(style);
+  const basemap = getMapBasemap(style, streetBasemap);
 
   return [
     [x, y],
