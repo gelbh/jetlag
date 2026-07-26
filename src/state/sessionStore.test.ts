@@ -93,6 +93,30 @@ describe("sessionStore", () => {
     expect(useSessionStore.getState().session?.timerAccumulatedMs).toBe(2000);
   });
 
+  it("updates session when opsMitigation or hotfix gate fields change", () => {
+    const session = createTestRemoteSession();
+    useSessionStore.getState().setSession(session);
+
+    useSessionStore.getState().setSession({
+      ...session,
+      opsMitigation: {
+        id: "mit-1",
+        type: "soft_reload",
+        appliedAt: "2026-07-26T12:00:00.000Z",
+        appliedByUid: "ops-1",
+        incidentId: "inc-1",
+      },
+      requiredMinAppVersion: "0.10.1",
+      requiredMinAppVersionSetAt: "2026-07-26T12:01:00.000Z",
+      requiredMinAppVersionGraceSeconds: 60,
+    });
+
+    const next = useSessionStore.getState().session;
+    expect(next?.opsMitigation?.id).toBe("mit-1");
+    expect(next?.requiredMinAppVersion).toBe("0.10.1");
+    expect(next?.requiredMinAppVersionGraceSeconds).toBe(60);
+  });
+
   it.each([
     {
       label: "foundRequestedAt",
