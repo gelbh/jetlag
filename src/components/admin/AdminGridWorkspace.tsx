@@ -9,8 +9,10 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import {
   applyStackGeometry,
+  clampLayoutToCols,
   type DeskLayout,
   type PanelId,
+  type StackGeometryItem,
 } from "../../domain/admin/opsDeskLayout";
 import {
   AdminPanelStack,
@@ -20,9 +22,17 @@ import {
 import type { AdminPanelBodies } from "./AdminPanelBody";
 
 const COLLAPSED_H = 1;
-const UNSTACK_DEFAULT_W = 4;
+const UNSTACK_DEFAULT_W = 8;
 const UNSTACK_DEFAULT_H = 6;
 const ALL_RESIZE_HANDLES = ["n", "s", "e", "w", "ne", "nw", "se", "sw"] as const;
+
+/** Apply RGL geometry then clamp so stacks never exceed cols (no H-scroll). */
+export function commitWorkspaceGeometry(
+  layout: DeskLayout,
+  next: readonly StackGeometryItem[],
+): DeskLayout {
+  return clampLayoutToCols(applyStackGeometry(layout, next));
+}
 
 interface AdminGridWorkspaceProps {
   layout: DeskLayout;
@@ -79,15 +89,16 @@ export function AdminGridWorkspace({
         w: stack.w,
         h: stack.collapsed ? COLLAPSED_H : stack.h,
         minH: stack.collapsed ? COLLAPSED_H : 2,
+        maxW: Math.max(1, layout.cols - stack.x),
         static: stack.pinned === true,
         isDraggable: stack.pinned !== true,
         isResizable: stack.pinned !== true && !stack.collapsed,
       })),
-    [layout.stacks],
+    [layout.cols, layout.stacks],
   );
 
   const commitGeometry = (next: Layout) => {
-    onLayoutChange(applyStackGeometry(layout, next));
+    onLayoutChange(commitWorkspaceGeometry(layout, next));
   };
 
   const cellFromPointer = (clientX: number, clientY: number) => {
@@ -171,6 +182,7 @@ export function AdminGridWorkspace({
           }}
           compactor={verticalCompactor}
           onDragStop={(next) => commitGeometry(next)}
+          onResize={(next) => commitGeometry(next)}
           onResizeStop={(next) => commitGeometry(next)}
         >
           {layout.stacks.map((stack) => (

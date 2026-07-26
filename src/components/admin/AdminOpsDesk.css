@@ -129,7 +129,8 @@
   position: relative;
   min-height: 0;
   flex: 1;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   overscroll-behavior: contain;
 }
 
@@ -295,7 +296,7 @@
 
 .jl-ops-workspace .react-resizable-handle {
   background: none;
-  opacity: 0.55;
+  opacity: 0;
 }
 
 .jl-ops-workspace .react-resizable-handle::after {
@@ -308,8 +309,15 @@
 }
 
 .jl-ops-workspace .react-grid-item:hover > .react-resizable-handle,
+.jl-ops-workspace .react-grid-item:focus-within > .react-resizable-handle,
 .jl-ops-workspace .react-grid-item.resizing > .react-resizable-handle {
   opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jl-ops-workspace .react-resizable-handle {
+    transition: none;
+  }
 }
 
 .jl-ops-mobile {
