@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   adminBorderKindAvailability,
   adminBoundaryLevelsForSession,
+  allowsOverpassAdminBorderFallthrough,
   emptyAdminDivisionCounts,
   isAdminDivisionCategoryAvailable,
   isAdminDivisionCountAvailable,
@@ -89,6 +90,23 @@ describe("adminDivisionAvailability", () => {
     expect(
       adminBoundaryLevelsForSession("dublin", { 8: "{}" }, counts),
     ).toEqual([8]);
+  });
+
+  it("returns every standard admin level for preload sessions (counts omitted)", () => {
+    expect(adminBoundaryLevelsForSession(undefined, undefined)).toEqual([
+      4, 6, 8, 9,
+    ]);
+  });
+
+  it("still restricts Dublin region-pack preload to bundled admin levels", () => {
+    expect(
+      adminBoundaryLevelsForSession("dublin", { 8: "{}", 9: "{}" }),
+    ).toEqual([8, 9]);
+  });
+
+  it("gates Overpass admin-border fallthrough by bundled region packs only", () => {
+    expect(allowsOverpassAdminBorderFallthrough(undefined)).toBe(true);
+    expect(allowsOverpassAdminBorderFallthrough("dublin")).toBe(false);
   });
 
   it("mirrors matching availability for measuring admin border kinds", () => {

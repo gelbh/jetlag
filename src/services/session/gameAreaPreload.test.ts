@@ -3,8 +3,10 @@ import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 import { selectPreloadBanner, usePreloadStore } from "../../state/preloadStore";
 import { OverpassUnavailableError } from "../core/overpassClient";
 import * as adminDivisionAvailability from "../geo/overpass/adminDivisionAvailability";
+import { fetchAdminDivisionFeaturesInArea } from "../geo/overpass/adminDivisionBoundaries";
 import { fetchPreparedCoastlineSegments } from "../geo/overpass/coastline";
 import { fetchLandmassFeaturesInArea } from "../geo/overpass/landmassFeatures";
+import { fetchPreparedMeasuringLinearSegments } from "../geo/overpass/measuringLinearFeatures";
 import {
   gameAreaPreloadKey,
   preloadCriticalGameAreaCaches,
@@ -58,6 +60,7 @@ describe("gameAreaPreload", () => {
   beforeEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+    vi.clearAllMocks();
     usePreloadStore.setState({
       activeGameAreaKey: null,
       totalJobs: 0,
@@ -108,6 +111,34 @@ describe("gameAreaPreload", () => {
 
     expect(fetchPreparedCoastlineSegments).toHaveBeenCalled();
     expect(fetchLandmassFeaturesInArea).toHaveBeenCalled();
+  });
+
+  it("never Overpass-preloads admin 4/6 or admin2_border for a bundled region pack (Dublin)", async () => {
+    vi.useFakeTimers();
+
+    const preloadPromise = preloadGameAreaCachesAsync(
+      DUBLIN_CITY_GAME_AREA,
+      { 8: "{}", 9: "{}" },
+      "dublin",
+    );
+
+    await vi.runAllTimersAsync();
+    await preloadPromise;
+
+    const fetchedAdminLevels = vi
+      .mocked(fetchAdminDivisionFeaturesInArea)
+      .mock.calls.map(([, level]) => level);
+    expect(fetchedAdminLevels).not.toContain(4);
+    expect(fetchedAdminLevels).not.toContain(6);
+    expect(fetchedAdminLevels).toEqual(expect.arrayContaining([8, 9]));
+
+    const fetchedLinearKinds = vi
+      .mocked(fetchPreparedMeasuringLinearSegments)
+      .mock.calls.map(([, kind]) => kind);
+    expect(fetchedLinearKinds).not.toContain("admin2_border");
+    expect(fetchedLinearKinds).toEqual(
+      expect.arrayContaining(["admin3_border", "admin4_border"]),
+    );
   });
 
   it("uses a shorter preload gap for premium sessions", () => {

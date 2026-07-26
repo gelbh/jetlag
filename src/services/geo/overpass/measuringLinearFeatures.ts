@@ -16,6 +16,7 @@ import {
   measuringLocationLabel,
   type MeasuringFromKind,
 } from "../../../domain/questions";
+import type { RegionPackId } from "../../../domain/regions/regionPack";
 import {
   getOrFetchCached,
   linearSegmentsCacheKey,
@@ -23,6 +24,7 @@ import {
 import { queryOverpass } from "../../core/overpassClient";
 import {
   adminLevelForMeasuringBorderKind,
+  allowsOverpassAdminBorderFallthrough,
   isMeasuringAdminBorderKind,
 } from "./adminDivisionAvailability";
 import { fetchCustomAdminBorderLineSegments } from "./adminDivisionLineStrings";
@@ -89,6 +91,7 @@ async function fetchMeasuringLinearSegmentsForKind(
   gameArea: GameArea,
   kind: MeasuringFromKind,
   customMatchingAreas?: CustomMatchingAreasByLevel,
+  regionPackId?: RegionPackId,
 ): Promise<Feature<LineString>[]> {
   if (isMeasuringAdminBorderKind(kind)) {
     const customSegments = await fetchCustomAdminBorderLineSegments(
@@ -99,6 +102,10 @@ async function fetchMeasuringLinearSegmentsForKind(
     if (customSegments.length > 0) {
       return customSegments;
     }
+
+    if (!allowsOverpassAdminBorderFallthrough(regionPackId)) {
+      return [];
+    }
   }
 
   return fetchMeasuringLinearSegmentsFromOverpass(gameArea, kind);
@@ -108,11 +115,13 @@ export async function fetchMeasuringLinearSegments(
   gameArea: GameArea,
   kind: MeasuringFromKind,
   customMatchingAreas?: CustomMatchingAreasByLevel,
+  regionPackId?: RegionPackId,
 ): Promise<Feature<LineString>[]> {
   const prepared = await fetchPreparedMeasuringLinearSegments(
     gameArea,
     kind,
     customMatchingAreas,
+    regionPackId,
   );
   return prepared.segments;
 }
@@ -120,6 +129,7 @@ export async function fetchMeasuringLinearSegments(
 function customBorderCacheSuffix(
   kind: MeasuringFromKind,
   customMatchingAreas?: CustomMatchingAreasByLevel,
+  regionPackId?: RegionPackId,
 ): string {
   if (!isMeasuringAdminBorderKind(kind)) {
     return "";
@@ -127,23 +137,27 @@ function customBorderCacheSuffix(
 
   const level = adminLevelForMeasuringBorderKind(kind) as MatchingAdminLevel;
   const custom = customMatchingAreas?.[level];
-  return custom ? `:custom-${level}-${custom.length}` : "";
+  const customSuffix = custom ? `:custom-${level}-${custom.length}` : "";
+  const packSuffix = regionPackId ? `:pack-${regionPackId}` : "";
+  return `${customSuffix}${packSuffix}`;
 }
 
 export async function fetchPreparedMeasuringLinearSegments(
   gameArea: GameArea,
   kind: MeasuringFromKind,
   customMatchingAreas?: CustomMatchingAreasByLevel,
+  regionPackId?: RegionPackId,
 ): Promise<PreparedLinearSegments> {
   const cacheKey =
     linearSegmentsCacheKey(gameArea, kind) +
-    customBorderCacheSuffix(kind, customMatchingAreas);
+    customBorderCacheSuffix(kind, customMatchingAreas, regionPackId);
 
   return getOrFetchCached(cacheKey, async () => {
     const segments = await fetchMeasuringLinearSegmentsForKind(
       gameArea,
       kind,
       customMatchingAreas,
+      regionPackId,
     );
     return prepareMeasuringLineSegments(segments, gameArea);
   });
@@ -154,6 +168,7 @@ export async function loadMeasuringLinearContext(
   gameArea: GameArea,
   kind: MeasuringFromKind,
   customMatchingAreas?: CustomMatchingAreasByLevel,
+  regionPackId?: RegionPackId,
 ): Promise<{
   point: LatLngTuple;
   distanceMeters: number;
@@ -163,6 +178,7 @@ export async function loadMeasuringLinearContext(
     gameArea,
     kind,
     customMatchingAreas,
+    regionPackId,
   );
   const nearest = nearestPointToCoastlines(seeker, prepared.segments, prepared);
 
