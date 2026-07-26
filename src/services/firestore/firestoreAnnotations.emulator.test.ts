@@ -15,7 +15,7 @@ import {
   subscribeToRemoteAnnotations,
   writeRemoteAnnotation,
 } from "./firestoreAnnotations";
-import { buildAnnotationDocument } from "./firestoreSerialization";
+import { buildAnnotationDocument } from "./serialization/serializeAnnotation";
 import { APP_VERSION } from "../../domain/device/changelog";
 
 describe("firestoreAnnotations emulator", () => {
