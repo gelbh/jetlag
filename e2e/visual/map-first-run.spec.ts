@@ -10,6 +10,7 @@ test.describe("map first-run screenshots", () => {
     await page.addInitScript(() => {
       localStorage.removeItem("jetlag.mapFirstRunDismissed");
       localStorage.setItem("jl.analytics.consent", "denied");
+      sessionStorage.setItem("jl.appCheckProbe.skip", "1");
     });
     await blockExternalAssets(page);
     await seedLocalSession(page);
