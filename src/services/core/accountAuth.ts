@@ -185,10 +185,13 @@ function consumeOAuthRedirectPending(): boolean {
       return false;
     }
     window.sessionStorage.removeItem(OAUTH_REDIRECT_PENDING_KEY);
+    if (raw === "1") {
+      // Legacy boolean flag from older clients.
+      return true;
+    }
     const startedAt = Number(raw);
     if (!Number.isFinite(startedAt)) {
-      // Legacy "1" flag from older clients — treat as pending once, then clear.
-      return raw === "1";
+      return false;
     }
     return Date.now() - startedAt <= OAUTH_REDIRECT_PENDING_MAX_AGE_MS;
   } catch {
