@@ -105,11 +105,12 @@ describe("geoSpatialVoronoiFromSites — Dublin-like grid", () => {
     const cells = geoSpatialVoronoiFromSites(dublinGridSites);
 
     for (const cell of cells.features) {
-      if (cell.geometry.type === "Polygon" || cell.geometry.type === "MultiPolygon") {
-        expect(area(cell as Feature<Polygon | MultiPolygon>)).toBeLessThan(
-          MAX_PLAUSIBLE_CELL_AREA_M2,
-        );
+      if (cell.geometry.type !== "Polygon" && cell.geometry.type !== "MultiPolygon") {
+        throw new Error(`Unexpected Voronoi geometry: ${cell.geometry.type}`);
       }
+      const cellArea = area(cell as Feature<Polygon | MultiPolygon>);
+      expect(cellArea).toBeGreaterThan(0);
+      expect(cellArea).toBeLessThan(MAX_PLAUSIBLE_CELL_AREA_M2);
     }
   });
 });
@@ -136,7 +137,8 @@ describe("geoSpatialVoronoiFromSites — extent coverage", () => {
     const cells = geoSpatialVoronoiFromSites(sites);
     const westCell = cells.features.find((f) => f.properties?.poiId === "west");
     expect(westCell).toBeDefined();
-    const farWest: [number, number] = [-6.26 - 8 / 111.32, 53.35];
+    const kmPerLongitudeDegree = 111.32 * Math.cos((53.35 * Math.PI) / 180);
+    const farWest: [number, number] = [-6.26 - 8 / kmPerLongitudeDegree, 53.35];
     expect(
       booleanPointInPolygon(
         turfPoint(farWest),
@@ -144,6 +146,21 @@ describe("geoSpatialVoronoiFromSites — extent coverage", () => {
       ),
       "8 km west probe should remain in western cell",
     ).toBe(true);
+  });
+});
+
+describe("geoSpatialVoronoiFromSites — coincident sites", () => {
+  it("keeps the first site when coordinates are exact duplicates", () => {
+    const cells = geoSpatialVoronoiFromSites([
+      { lng: -6.26, lat: 53.35, properties: { poiId: "first" } },
+      { lng: -6.26, lat: 53.35, properties: { poiId: "dup" } },
+      { lng: -6.25, lat: 53.35, properties: { poiId: "other" } },
+    ]);
+    const ids = cells.features.map((f) => f.properties?.poiId);
+    expect(ids).toContain("first");
+    expect(ids).toContain("other");
+    expect(ids).not.toContain("dup");
+    expect(cells.features).toHaveLength(2);
   });
 });
 

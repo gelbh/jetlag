@@ -31,7 +31,19 @@ export function geoSpatialVoronoiFromSites<T extends Record<string, unknown>>(
     return { type: "FeatureCollection", features: [] };
   }
 
-  const meanLat = sites.reduce((sum, site) => sum + site.lat, 0) / sites.length;
+  // Exact duplicate coordinates yield null cellPolygon in d3-delaunay; keep first site only.
+  const seen = new Set<string>();
+  const workingSites = sites.filter((site) => {
+    const key = `${site.lng},${site.lat}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+
+  const meanLat =
+    workingSites.reduce((sum, site) => sum + site.lat, 0) / workingSites.length;
   const lngScale = metersPerDegreeLng(meanLat);
 
   const toPlanar = (lng: number, lat: number): [number, number] => [
@@ -43,7 +55,7 @@ export function geoSpatialVoronoiFromSites<T extends Record<string, unknown>>(
     y / METERS_PER_DEGREE_LAT,
   ];
 
-  const points = sites.map((site) => toPlanar(site.lng, site.lat));
+  const points = workingSites.map((site) => toPlanar(site.lng, site.lat));
 
   const xs = points.map(([x]) => x);
   const ys = points.map(([, y]) => y);
@@ -63,7 +75,7 @@ export function geoSpatialVoronoiFromSites<T extends Record<string, unknown>>(
   const voronoi = delaunay.voronoi(bounds);
 
   const features: Feature<Polygon>[] = [];
-  sites.forEach((site, index) => {
+  workingSites.forEach((site, index) => {
     const cellPolygon = voronoi.cellPolygon(index);
     if (!cellPolygon) {
       return;
