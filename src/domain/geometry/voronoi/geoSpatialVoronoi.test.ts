@@ -1,9 +1,27 @@
 import { describe, expect, it } from "vitest";
 import area from "@turf/area";
-import { lineString } from "@turf/helpers";
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import { lineString, point as turfPoint } from "@turf/helpers";
+import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { geoSpatialVoronoiFromSites } from "./geoSpatialVoronoi";
 import { resolveVoronoiCellPoiId, voronoiCellSiteId } from "./voronoiCellSiteId";
 import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
+
+/** Play-area-scale ceiling; a correct local Voronoi cell never approaches this. */
+const MAX_PLAUSIBLE_CELL_AREA_M2 = 1e10;
+
+const DUBLIN_GRID_SPACING_DEGREES = 0.003;
+const DUBLIN_GRID_ORIGIN = { lat: 53.35, lng: -6.26 };
+
+const dublinGridSites = Array.from({ length: 8 }, (_, index) => {
+  const row = Math.floor(index / 4);
+  const col = index % 4;
+  return {
+    lng: DUBLIN_GRID_ORIGIN.lng + col * DUBLIN_GRID_SPACING_DEGREES,
+    lat: DUBLIN_GRID_ORIGIN.lat + row * DUBLIN_GRID_SPACING_DEGREES,
+    properties: { poiId: `grid-${index}` },
+  };
+});
 
 describe("geoSpatialVoronoiFromSites", () => {
   it("returns polygon cells for multiple sites", () => {
@@ -50,6 +68,49 @@ describe("geoSpatialVoronoiFromSites", () => {
     );
 
     expect(new Set(resolved.filter(Boolean)).size).toBe(7);
+  });
+});
+
+describe("geoSpatialVoronoiFromSites — Dublin-like grid", () => {
+  it("every labeled cell contains its own site", () => {
+    const cells = geoSpatialVoronoiFromSites(dublinGridSites);
+
+    for (const site of dublinGridSites) {
+      const owningCell = cells.features.find(
+        (cell) => voronoiCellSiteId(cell, ["poiId"]) === site.properties.poiId,
+      );
+
+      expect(owningCell, `missing cell for ${site.properties.poiId}`).toBeDefined();
+      expect(
+        booleanPointInPolygon(
+          turfPoint([site.lng, site.lat]),
+          owningCell as Feature<Polygon | MultiPolygon>,
+        ),
+        `${site.properties.poiId} not inside its own cell`,
+      ).toBe(true);
+    }
+  });
+
+  it("each site owns exactly one cell", () => {
+    const cells = geoSpatialVoronoiFromSites(dublinGridSites);
+    const siteIds = cells.features
+      .map((cell) => voronoiCellSiteId(cell, ["poiId"]))
+      .filter((id): id is string => Boolean(id));
+
+    expect(siteIds.length).toBe(dublinGridSites.length);
+    expect(new Set(siteIds).size).toBe(dublinGridSites.length);
+  });
+
+  it("produces no cell at planet-scale relative to the play area", () => {
+    const cells = geoSpatialVoronoiFromSites(dublinGridSites);
+
+    for (const cell of cells.features) {
+      if (cell.geometry.type === "Polygon" || cell.geometry.type === "MultiPolygon") {
+        expect(area(cell as Feature<Polygon | MultiPolygon>)).toBeLessThan(
+          MAX_PLAUSIBLE_CELL_AREA_M2,
+        );
+      }
+    }
   });
 });
 
