@@ -43,6 +43,38 @@ vi.mock("../components/billing/PremiumSignInGate", () => ({
   ),
 }));
 
+vi.mock("../services/admin/adminIncidents", () => ({
+  subscribeIncidentList: (
+    onNext: (incidents: unknown[]) => void,
+    _onError: (error: Error) => void,
+  ) => {
+    onNext([]);
+    return () => undefined;
+  },
+  countOpenIncidents: () => 0,
+}));
+
+vi.mock("../hooks/admin/useAdminJoinSession", () => ({
+  useAdminJoinSession: () => ({
+    joinSession: vi.fn(),
+    joiningCode: null,
+    error: null,
+    setError: vi.fn(),
+  }),
+}));
+
+vi.mock("react-grid-layout", () => ({
+  default: ({ children }: { children: unknown }) => (
+    <div data-testid="mock-grid">{children as never}</div>
+  ),
+  useContainerWidth: () => ({
+    width: 1200,
+    containerRef: { current: null },
+    mounted: true,
+  }),
+  verticalCompactor: {},
+}));
+
 describe("AdminPanel", () => {
   const originalMatchMedia = window.matchMedia;
 
@@ -192,6 +224,10 @@ describe("AdminPanel", () => {
 
     expect(document.querySelector(".admin-dashboard-list-scroll")).toBeInTheDocument();
     expect(document.querySelector(".home-poster-viewport")).toBeInTheDocument();
+    expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute(
+      "data-layout",
+      "desktop",
+    );
   });
 
   it("loads more sessions from the list footer", () => {
