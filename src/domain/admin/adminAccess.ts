@@ -27,10 +27,9 @@ export function isAdminUser(user: User | null | undefined): boolean {
 
 export type AdminAccessResolution = "unsigned" | "denied" | "admin";
 
-export function claimsLookAdmin(claims: {
-  email?: unknown;
-  email_verified?: unknown;
-}): boolean {
+export function claimsLookAdmin(
+  claims: Record<string, unknown> | { email?: unknown; email_verified?: unknown },
+): boolean {
   return (
     claims.email_verified === true &&
     typeof claims.email === "string" &&

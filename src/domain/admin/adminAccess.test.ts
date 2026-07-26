@@ -93,7 +93,7 @@ describe("resolveAdminAccess", () => {
         configurable: true,
       });
     });
-    (user as { reload: typeof reload }).reload = reload;
+    (user as unknown as { reload: typeof reload }).reload = reload;
 
     await expect(resolveAdminAccess(user)).resolves.toBe("admin");
     expect(reload).toHaveBeenCalledTimes(1);
