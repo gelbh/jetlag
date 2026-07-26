@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
-import { computeEliminationUnionInput } from "./eliminationMask";
+import {
+  computeEliminationUnionInput,
+  eliminationFeatureForAnnotationTs,
+} from "./eliminationMask";
 
 const gameArea: GameArea = {
   type: "Polygon",
@@ -47,7 +50,37 @@ function matchingAnnotation(id: string, west: number): AnnotationRecord {
   };
 }
 
+function radarAnnotation(
+  inside: boolean | undefined,
+): AnnotationRecord {
+  return {
+    id: "radar-1",
+    sessionId: "session",
+    status: "active",
+    type: "radar",
+    geometry: {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "Point",
+        coordinates: [-0.15, 51.45],
+      },
+    },
+    metadata: {
+      createdAt: "2026-01-01T00:00:00.000Z",
+      radiusMeters: 800,
+      ...(inside === undefined ? {} : { inside }),
+    },
+  };
+}
+
 describe("adapter/eliminationMask", () => {
+  it("does not shade exterior when radar inside is undefined", () => {
+    expect(
+      eliminationFeatureForAnnotationTs(radarAnnotation(undefined), gameArea),
+    ).toBeNull();
+  });
+
   it("maps matching annotations to polygon union input", async () => {
     const input = await computeEliminationUnionInput(
       [matchingAnnotation("a", -0.18)],
