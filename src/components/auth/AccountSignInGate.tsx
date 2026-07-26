@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import {
+  cloneElement,
+  isValidElement,
+  useCallback,
+  useEffect,
+  useState,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 import { isSignInWithEmailLink } from "firebase/auth";
 import { LegalInlineLinks } from "../legal/LegalInlineLinks";
 import { InlineError } from "../ui/InlineError";
@@ -6,6 +14,7 @@ import { GoogleSignInButton } from "../billing/GoogleSignInButton";
 import {
   completeOAuthRedirectIfPending,
   completePremiumEmailSignInLink,
+  consumeOAuthRedirectFailureMessage,
   isPermanentUser,
   sendPremiumEmailSignInLink,
   signOutToAnonymous,
@@ -35,12 +44,15 @@ export function AccountSignInGate({
   extraSignInProviders,
 }: AccountSignInGateProps) {
   const { user, isPermanent, authReady } = usePermanentAuthUser();
+  const hasAuthUser = Boolean(user);
   const [email, setEmail] = useState("");
   const [busyAction, setBusyAction] = useState<"email" | null>(null);
   const [emailLinkSent, setEmailLinkSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [completingEmailLink, setCompletingEmailLink] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const oauthControlsDisabled =
+    completingEmailLink || busyAction !== null || !hasAuthUser;
 
   const handleSignedIn = useCallback(async () => {
     setError(null);
@@ -60,6 +72,12 @@ export function AccountSignInGate({
         }
 
         const oauthCompleted = await completeOAuthRedirectIfPending();
+        if (!cancelled) {
+          const redirectFailure = consumeOAuthRedirectFailureMessage();
+          if (redirectFailure) {
+            setError(redirectFailure);
+          }
+        }
         if (!cancelled && oauthCompleted && isPermanentUser(oauthCompleted)) {
           await handleSignedIn();
           return;
@@ -77,6 +95,11 @@ export function AccountSignInGate({
               ? nextError.message
               : "Could not complete email sign-in.",
           );
+        }
+        try {
+          await ensureAnonymousUser();
+        } catch {
+          // Keep the original sign-in error visible.
         }
       } finally {
         if (!cancelled) {
@@ -172,11 +195,16 @@ export function AccountSignInGate({
 
       <div className="oauth-sign-in-stack space-y-2">
         <GoogleSignInButton
-          disabled={busyAction !== null}
+          disabled={oauthControlsDisabled}
           onSuccess={handleOAuthSignedIn}
           onError={setError}
         />
-        {extraSignInProviders}
+        {isValidElement(extraSignInProviders)
+          ? cloneElement(
+              extraSignInProviders as ReactElement<{ disabled?: boolean }>,
+              { disabled: oauthControlsDisabled },
+            )
+          : extraSignInProviders}
       </div>
       <LegalInlineLinks />
 
