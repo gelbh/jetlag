@@ -91,6 +91,142 @@
     box-shadow: 0 4px 24px oklch(0.06 0.04 265 / 0.65);
   }
 
+  .jl-status-header {
+    display: grid;
+    grid-template-columns: minmax(4.5rem, 1.1fr) minmax(0, 1fr) minmax(0, 0.85fr) minmax(0, 1.35fr);
+    align-items: center;
+    gap: 0;
+    min-height: var(--status-bar-height);
+    width: 100%;
+    padding: 0.375rem 0.5rem;
+    padding-left: max(0.5rem, env(safe-area-inset-left));
+    padding-right: max(0.5rem, env(safe-area-inset-right));
+  }
+
+  .jl-status-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 0;
+    padding-right: 0.5rem;
+  }
+
+  .jl-status-header-brand-mark {
+    color: var(--color-action);
+    font-size: 0.75rem;
+    line-height: 1;
+  }
+
+  .jl-status-header-brand-text {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .jl-status-header-brand-name {
+    font-family: var(--font-display);
+    font-size: clamp(0.7rem, 2.8vw, 0.95rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+
+  .jl-status-header-brand-role {
+    font-family: var(--font-display);
+    font-size: clamp(0.55rem, 2.2vw, 0.7rem);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: var(--color-action);
+  }
+
+  .jl-status-header-col {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    padding-inline: 0.35rem;
+    border-left: 1px solid oklch(from var(--color-border) l c h / 0.85);
+  }
+
+  .jl-status-header-col--timer {
+    align-items: flex-end;
+  }
+
+  .jl-status-header-label {
+    font-family: var(--font-display);
+    font-size: clamp(0.45rem, 1.8vw, 0.55rem);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  .jl-status-header-value {
+    font-family: var(--font-mono);
+    font-size: clamp(0.75rem, 3.2vw, 1rem);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    line-height: 1.15;
+    color: var(--color-ink);
+    white-space: nowrap;
+  }
+
+  .jl-status-header-value--action {
+    color: var(--color-action);
+  }
+
+  .jl-status-header-waiting {
+    font-family: var(--font-display);
+    font-size: clamp(0.65rem, 2.6vw, 0.8rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  .jl-status-below-home {
+    top: calc(100% + var(--jl-sync-beacon-inset)) !important;
+    bottom: auto !important;
+    height: auto !important;
+    align-items: flex-start !important;
+  }
+
+  .jl-status-header-col--timer .jl-ticker {
+    min-height: auto;
+    border: none;
+    background: transparent;
+    padding-inline: 0;
+    font-size: clamp(0.85rem, 3.4vw, 1.1rem);
+    color: var(--color-ink);
+    animation: none;
+  }
+
+  .jl-status-header-col--timer .jl-ticker-secondary {
+    min-height: auto;
+    font-size: clamp(0.55rem, 2.2vw, 0.7rem);
+    color: var(--color-ink-muted);
+  }
+
+  .jl-status-header-col--timer .jl-ticker-question {
+    color: var(--color-status-warning);
+  }
+
+  .jl-status-header-col--timer .jl-ticker-hiding {
+    color: var(--color-action);
+  }
+
+  .jl-status-header-col--timer .jl-ticker-idle {
+    color: var(--color-ink-muted);
+  }
+
   .jl-status-bar-inner {
     display: flex;
     min-height: var(--status-bar-height);

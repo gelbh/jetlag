@@ -4,15 +4,19 @@ import type {
   PlayerLocationRecord,
 } from "../../../domain/session/sessionChat";
 import type { SessionRulesInput } from "../../../domain/session/sessionRules";
-import type { TimerState } from "../../../domain/session/timer";
+import {
+  computeElapsedMs,
+  type TimerState,
+} from "../../../domain/session/timer";
+import {
+  isHidingPeriodActive,
+} from "../../../domain/session/hidingPeriod";
 import {
   playerRoleLabel,
   type PlayerRole,
 } from "../../../domain/session/playerRole";
-import { mapToolPlacingLabel } from "../../../domain/map/mapTools";
 import { HudPlayIcon } from "../../ui/HudIcons";
 import { MapTimerCluster } from "../MapTimerCluster";
-import { idleModeLabel } from "./syncRailDisplay";
 
 interface ToolStatusBlockProps {
   sessionCode: string;
@@ -36,10 +40,22 @@ interface ToolStatusBlockProps {
   expanded?: boolean;
 }
 
+function phaseLabel(
+  timerHasStarted: boolean,
+  sessionRules: SessionRulesInput,
+  timerState: TimerState,
+): string {
+  if (!timerHasStarted) {
+    return "—";
+  }
+  const elapsed = computeElapsedMs(timerState);
+  return isHidingPeriodActive(sessionRules, elapsed) ? "HIDE" : "SEEK";
+}
+
 export function ToolStatusBlock({
   sessionCode,
   playerRole,
-  activeTool,
+  activeTool: _activeTool,
   timerState,
   timerRunning,
   timerHasStarted,
@@ -56,41 +72,45 @@ export function ToolStatusBlock({
   onOpenTimerMenu,
   expanded = false,
 }: ToolStatusBlockProps) {
-  const placing = activeTool !== "none";
-  const modeLabel = placing
-    ? mapToolPlacingLabel(activeTool)
-    : idleModeLabel(playerRole);
+  void _activeTool;
+  void expanded;
+  const phase = phaseLabel(timerHasStarted, sessionRules, timerState);
+  const phaseClass =
+    phase === "HIDE"
+      ? "jl-status-header-value jl-status-header-value--action"
+      : "jl-status-header-value";
 
   return (
-    <div className="jl-status-bar-inner pl-[calc(2.75rem+max(0.625rem,env(safe-area-inset-left)))]">
-      <div className="jl-stamp">
-        <span className="jl-stamp-label">Session</span>
-        <span className="jl-stamp-code jl-view-transition-session-code">
+    <div className="jl-status-header">
+      <div className="jl-status-header-brand">
+        <span className="jl-status-header-brand-mark" aria-hidden>
+          ▸
+        </span>
+        <div className="jl-status-header-brand-text">
+          <span className="jl-status-header-brand-name">JETLAG</span>
+          <span className="jl-status-header-brand-role">
+            {playerRoleLabel(playerRole)}
+          </span>
+        </div>
+      </div>
+
+      <div className="jl-status-header-col">
+        <span className="jl-status-header-label">OPERATION</span>
+        <span className="jl-status-header-value jl-view-transition-session-code">
           {sessionCode}
         </span>
       </div>
 
-      {expanded ? (
-        <div className="jl-stamp">
-          <span className="jl-stamp-label">Role</span>
-          <span className="jl-stamp-code">{playerRoleLabel(playerRole)}</span>
-        </div>
-      ) : null}
+      <div className="jl-status-header-col">
+        <span className="jl-status-header-label">PHASE</span>
+        <span className={phaseClass}>{phase}</span>
+      </div>
 
-      <p
-        className={`jl-mode-ticker min-w-0 flex-1 ${
-          placing ? "text-highlight" : "text-ink-muted"
-        } ${timerHasStarted && !expanded ? "sr-only" : ""}`}
-      >
-        {modeLabel}
-      </p>
-
-      <div className="jl-status-bar-timer">
+      <div className="jl-status-header-col jl-status-header-col--timer">
+        <span className="jl-status-header-label">TIME LEFT</span>
         {!timerHasStarted ? (
           timerSyncing ? (
-            <p className="dock-waiting-host max-w-[6.5rem] shrink-0 px-2 text-[10px] sm:max-w-none">
-              Syncing timer…
-            </p>
+            <p className="jl-status-header-waiting">Syncing…</p>
           ) : canStartGame ? (
             <button
               type="button"
@@ -101,9 +121,7 @@ export function ToolStatusBlock({
               Start
             </button>
           ) : (
-            <p className="dock-waiting-host max-w-[6.5rem] shrink-0 px-2 text-[10px] sm:max-w-none">
-              Waiting…
-            </p>
+            <p className="jl-status-header-waiting">WAITING</p>
           )
         ) : (
           <MapTimerCluster
