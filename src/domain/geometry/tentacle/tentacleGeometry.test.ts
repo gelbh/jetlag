@@ -246,4 +246,68 @@ describe("tentacleGeometry", () => {
       }
     }
   });
+
+  it("Dublin-like 8-POI grid: answered site stays clear, every other site is shaded", () => {
+    clearVoronoiCellCacheForTests();
+    clearTentacleEliminationCacheForTests();
+
+    const gridSpacing = 0.003;
+    const gridOrigin = { lat: 53.35, lng: -6.26 };
+    const gridPois: TentaclePoi[] = Array.from({ length: 8 }, (_, index) => {
+      const row = Math.floor(index / 4);
+      const col = index % 4;
+      return {
+        id: `grid-${index}`,
+        name: `Grid POI ${index}`,
+        lat: gridOrigin.lat + row * gridSpacing,
+        lng: gridOrigin.lng + col * gridSpacing,
+        category: "museum",
+      };
+    });
+
+    const gridGameArea: GameArea = {
+      type: "Polygon",
+      coordinates: [
+        [
+          [-6.4, 53.2],
+          [-6.1, 53.2],
+          [-6.1, 53.5],
+          [-6.4, 53.5],
+          [-6.4, 53.2],
+        ],
+      ],
+    };
+
+    const anchor: [number, number] = [
+      gridOrigin.lat + 0.5 * gridSpacing,
+      gridOrigin.lng + 1.5 * gridSpacing,
+    ];
+
+    for (const answered of gridPois) {
+      const region = buildTentacleEliminationRegion(
+        anchor,
+        oneMileMeters,
+        gridPois,
+        answered.id,
+        gridGameArea,
+      );
+
+      expect(region, `no region for ${answered.id}`).not.toBeNull();
+
+      const answeredPoint = turfPoint([answered.lng, answered.lat]);
+      expect(
+        booleanPointInPolygon(answeredPoint, region!),
+        `${answered.id} should stay clear of its own elimination region`,
+      ).toBe(false);
+
+      for (const other of gridPois) {
+        if (other.id === answered.id) continue;
+        const otherPoint = turfPoint([other.lng, other.lat]);
+        expect(
+          booleanPointInPolygon(otherPoint, region!),
+          `${other.id} should be shaded when ${answered.id} is answered`,
+        ).toBe(true);
+      }
+    }
+  });
 });

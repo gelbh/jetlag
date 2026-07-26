@@ -73,7 +73,7 @@ function clipToGameArea(
     /* polyclip / intersect can throw on complex polygons */
   }
 
-  return feature;
+  return null;
 }
 
 function buildSearchDisk(
