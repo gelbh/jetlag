@@ -37,10 +37,26 @@ describe("routeSeo", () => {
     );
   });
 
-  it("normalizes unknown paths to home SEO with noindex", () => {
+  it("returns dedicated not-found SEO for unknown paths with noindex", () => {
     const seo = getRouteSeo("/not-a-real-route");
-    expect(seo.canonicalPath).toBe("/");
+    expect(seo.title).toContain("Page not found");
+    expect(seo.description).toMatch(/does not exist/i);
+    expect(seo.canonicalPath).toBe("/not-a-real-route");
     expect(seo.robots).toBe("noindex,nofollow");
+  });
+
+  it("keeps admin incident routes on admin SEO instead of not-found", () => {
+    const list = getRouteSeo("/admin/incidents");
+    expect(list.title).toContain("Incidents");
+    expect(list.title).not.toContain("Page not found");
+    expect(list.canonicalPath).toBe("/admin/incidents");
+    expect(list.robots).toBe("noindex,nofollow");
+
+    const detail = getRouteSeo("/admin/incidents/inc-123");
+    expect(detail.title).toContain("Incident");
+    expect(detail.title).not.toContain("Page not found");
+    expect(detail.canonicalPath).toBe("/admin/incidents/:incidentId");
+    expect(detail.robots).toBe("noindex,nofollow");
   });
 
   it("indexable policy paths resolve to index,follow with matching canonical", () => {

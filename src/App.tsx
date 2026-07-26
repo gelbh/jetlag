@@ -14,12 +14,13 @@ import { AppUpdateBanner } from "./components/ui/AppUpdateBanner";
 import { AppUpdateProvider } from "./components/ui/AppUpdateProvider";
 import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
-import { AppLink } from "./components/navigation/AppLink";
+import { AppErrorPage } from "./components/ui/AppErrorPage";
 import { Home } from "./routes/Home";
 import { AdminPanel } from "./routes/AdminPanel";
 import { AdminIncidentDesk } from "./components/admin/AdminIncidentDesk";
 import { JoinSession } from "./routes/JoinSession";
 import { Feedback } from "./routes/Feedback";
+import { NotFound } from "./routes/NotFound";
 import { Privacy } from "./routes/Privacy";
 import { Premium } from "./routes/Premium";
 import { Terms } from "./routes/Terms";
@@ -39,7 +40,6 @@ import { useEdgeSwipeBack } from "./hooks/useEdgeSwipeBack";
 import { useRouteSeo } from "./hooks/useRouteSeo";
 import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";
 import { useSessionStore } from "./state/sessionStore";
-import { AppNavigate } from "./navigation/AppNavigate";
 import { RouteReadinessSensor } from "./navigation/RouteReadinessSensor";
 import { RouteTransitionOverlay } from "./navigation/RouteTransitionOverlay";
 import { RouteTransitionProvider } from "./navigation/RouteTransitionContext";
@@ -123,27 +123,16 @@ function ChunkReloadContextBinder() {
 
 function AppErrorFallback() {
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 px-6 text-center">
-      <h1 className="text-xl font-semibold text-ink">Something went wrong</h1>
-      <p className="max-w-md text-sm text-ink-dim">
-        The app hit an unexpected error.
-      </p>
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        <button
-          type="button"
-          className="btn-primary px-4 py-2 text-sm"
-          onClick={() => window.location.reload()}
-        >
-          Reload
-        </button>
-        <AppLink
-          to="/"
-          className="btn-secondary border border-border px-4 py-2 text-sm"
-        >
-          Back home
-        </AppLink>
-      </div>
-    </div>
+    <AppErrorPage
+      title="Something went wrong"
+      message="The app hit an unexpected error."
+      assertive
+      primaryAction={{
+        label: "Reload",
+        onClick: () => window.location.reload(),
+      }}
+      secondaryAction={{ label: "Back home", to: "/" }}
+    />
   );
 }
 
@@ -274,7 +263,7 @@ export default function App() {
                     </LazyRoute>
                   }
                 />
-                <Route path="*" element={<AppNavigate to="/" replace />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
           </Sentry.ErrorBoundary>
