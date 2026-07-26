@@ -94,6 +94,12 @@ export function revealRouteTransition(
   }
 }
 
-export function clearActiveRevealTransitionForTests(): void {
+/** Skip any in-flight view transition and drop the handle (resume / hide). */
+export function clearActiveRevealTransition(): void {
+  activeViewTransition?.skipTransition();
   activeViewTransition = null;
+}
+
+export function clearActiveRevealTransitionForTests(): void {
+  clearActiveRevealTransition();
 }
