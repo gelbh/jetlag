@@ -92,4 +92,15 @@ describe("reloadAcknowledgements", () => {
     expect(acknowledgeSoftReload("mit-x")).toBe(false);
     expect(acknowledgeHotfixReload("9.9.9")).toBe(false);
   });
+
+  it("returns false when sessionStorage reads throw", () => {
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("privacy mode");
+    });
+
+    expect(hasSoftReloadBeenAcknowledged("mit-x")).toBe(false);
+    expect(hasHotfixReloadBeenAcknowledged("9.9.9")).toBe(false);
+    expect(acknowledgeSoftReload("mit-x")).toBe(false);
+    expect(acknowledgeHotfixReload("9.9.9")).toBe(false);
+  });
 });
