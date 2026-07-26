@@ -2,9 +2,8 @@ import type { ReactNode } from "react";
 import { AppLink } from "../../components/navigation/AppLink";
 import { ContextualRail } from "../../components/map/ContextualRail";
 import type { ContextualRailTab } from "../../components/map/ContextualRailContext";
-import { SessionTimerLabel } from "../../components/session/SessionTimerLabel";
+import { MapStatusRail } from "../../components/session/MapStatusRail";
 import { HudHomeIcon } from "../../components/ui/HudIcons";
-import { playerRoleLabel } from "../../domain/session/playerRole";
 import type { PlayerRole } from "../../domain/session/playerRole";
 import type { SessionRecord } from "../../domain/map/annotations";
 import type { UseMapOverlayStateResult } from "../../hooks/map/useMapOverlayState";
@@ -35,40 +34,42 @@ export function ObserverMapScreenChrome({
     myRole === "admin"
       ? getMapScreenRoleConfig("admin")
       : getMapScreenRoleConfig("observer");
-  const roleLabel = playerRoleLabel(roleConfig.statusPlayerRole);
   const leaveLabel =
     roleConfig.role === "admin" ? "Leave admin monitor" : "Leave observation";
   const isDesktop = useDesktopLayout();
 
   const statusBar = (
-    <div
-      className={
-        isDesktop
-          ? "desktop-ops-observer-status pointer-events-none px-3 pt-[max(0.75rem,env(safe-area-inset-top))]"
-          : "pointer-events-none absolute inset-x-0 top-0 z-[var(--z-dock)] px-3 pt-[max(0.75rem,env(safe-area-inset-top))]"
-      }
-    >
-      <div className="pointer-events-auto jl-status-bar mx-auto flex max-w-xl items-center justify-between gap-3 px-3 py-2">
-        <div className="min-w-0">
-          <p className="font-mono text-sm font-bold tracking-[0.18em] text-ink">
-            {session.code}
-          </p>
-          <p className="text-xs tabular-nums text-ink-muted">
-            <SessionTimerLabel timerState={timer.timerState} />
-          </p>
-        </div>
-        <span className="shrink-0 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-brand-blue">
-          {roleLabel}
-        </span>
-        <button
-          type="button"
-          className="hud-chrome inline-flex min-h-11 min-w-11 items-center justify-center"
-          aria-label={leaveLabel}
-          onClick={onLeave}
-        >
-          <HudHomeIcon className="size-5" />
-        </button>
-      </div>
+    <div className={isDesktop ? "jl-status-rail--expanded" : undefined}>
+      <MapStatusRail
+        sessionCode={session.code}
+        sessionRules={session}
+        playerRole={roleConfig.statusPlayerRole}
+        activeTool="none"
+        syncStatus="synced"
+        queuedWrites={0}
+        timerState={timer.timerState}
+        timerRunning={timer.running}
+        timerHasStarted={timer.hasStarted}
+        canStartGame={false}
+        onStartGame={() => undefined}
+        onTimerStart={() => undefined}
+        onTimerPause={() => undefined}
+        onTimerReset={() => undefined}
+        timerControlsDisabled
+        expanded={isDesktop}
+        belowBarLeft={
+          <div className="jl-status-below-home pointer-events-auto absolute left-0 z-[var(--z-banner)] flex items-center px-[max(0.625rem,env(safe-area-inset-left))]">
+            <button
+              type="button"
+              className="hud-chrome map-hud-home inline-flex min-h-11 min-w-11 items-center justify-center text-ink"
+              aria-label={leaveLabel}
+              onClick={onLeave}
+            >
+              <HudHomeIcon className="h-5 w-5" />
+            </button>
+          </div>
+        }
+      />
     </div>
   );
 

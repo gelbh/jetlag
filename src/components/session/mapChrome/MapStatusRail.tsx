@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { SyncStatus } from "../../../domain/device/sync";
 import type { TimerState } from "../../../domain/session/timer";
 import type { MapTool } from "../../../state/sessionStore";
@@ -60,6 +60,8 @@ interface MapStatusRailProps {
   onSyncErrorAction?: () => void;
   /** In-flow status for DesktopOpsShell (vs absolute overlay on mobile). */
   expanded?: boolean;
+  /** Replace default home ScreenNav (e.g. observer leave control). */
+  belowBarLeft?: ReactNode;
 }
 
 export function MapStatusRail({
@@ -101,6 +103,7 @@ export function MapStatusRail({
   hiderOutsideZone = false,
   onSyncErrorAction,
   expanded = false,
+  belowBarLeft,
 }: MapStatusRailProps) {
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
   const [syncMenuOpen, setSyncMenuOpen] = useState(false);
@@ -167,33 +170,6 @@ export function MapStatusRail({
         />
 
         <div className="jl-status-bar">
-          <ScreenNav variant="home" />
-          {showPreloadBanner ? (
-            <GameAreaPreloadBeacon
-              detailOpen={showPreloadMenu}
-              onDetailOpenChange={(open) => {
-                setPreloadMenuOpen(open);
-                if (open) {
-                  setTimerMenuOpen(false);
-                  setSyncMenuOpen(false);
-                }
-              }}
-            />
-          ) : null}
-          <SyncBlock
-            syncStatus={syncStatus}
-            queuedWrites={queuedWrites}
-            message={message}
-            menuOpen={showSyncMenu}
-            onMenuOpenChange={(open) => {
-              setSyncMenuOpen(open);
-              if (open) {
-                setTimerMenuOpen(false);
-                setPreloadMenuOpen(false);
-              }
-            }}
-            onSyncErrorAction={onSyncErrorAction}
-          />
           <ToolStatusBlock
             sessionCode={sessionCode}
             playerRole={playerRole}
@@ -219,6 +195,36 @@ export function MapStatusRail({
             }}
           />
         </div>
+
+        {belowBarLeft ?? (
+          <ScreenNav variant="home" className="jl-status-below-home" />
+        )}
+        {showPreloadBanner ? (
+          <GameAreaPreloadBeacon
+            detailOpen={showPreloadMenu}
+            onDetailOpenChange={(open) => {
+              setPreloadMenuOpen(open);
+              if (open) {
+                setTimerMenuOpen(false);
+                setSyncMenuOpen(false);
+              }
+            }}
+          />
+        ) : null}
+        <SyncBlock
+          syncStatus={syncStatus}
+          queuedWrites={queuedWrites}
+          message={message}
+          menuOpen={showSyncMenu}
+          onMenuOpenChange={(open) => {
+            setSyncMenuOpen(open);
+            if (open) {
+              setTimerMenuOpen(false);
+              setPreloadMenuOpen(false);
+            }
+          }}
+          onSyncErrorAction={onSyncErrorAction}
+        />
 
         {sync.banner?.visible ? (
           syncErrorDisplay && onSyncErrorAction ? (

@@ -139,7 +139,7 @@ test.describe("cross-device sync", () => {
       timeout: 45_000,
     });
 
-    await expect(guestPage.getByText("Waiting…")).toBeVisible({
+    await expect(guestPage.getByText("WAITING")).toBeVisible({
       timeout: 45_000,
     });
 
