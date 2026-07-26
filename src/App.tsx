@@ -17,8 +17,7 @@ import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { AppCheckProbeGate } from "./components/ui/AppCheckProbeGate";
 import { AppErrorPage } from "./components/ui/AppErrorPage";
 import { Home } from "./routes/Home";
-import { AdminPanel } from "./routes/AdminPanel";
-import { AdminIncidentDesk } from "./components/admin/AdminIncidentDesk";
+import { AdminOpsDesk } from "./components/admin/AdminOpsDesk";
 import { JoinSession } from "./routes/JoinSession";
 import { Feedback } from "./routes/Feedback";
 import { NotFound } from "./routes/NotFound";
@@ -222,14 +221,11 @@ export default function App() {
                   }
                 />
                 <Route path="/join" element={<JoinSession />} />
-                <Route path="/admin" element={<AdminPanel />} />
-                <Route
-                  path="/admin/incidents"
-                  element={<AdminIncidentDesk />}
-                />
+                <Route path="/admin" element={<AdminOpsDesk />} />
+                <Route path="/admin/incidents" element={<AdminOpsDesk />} />
                 <Route
                   path="/admin/incidents/:incidentId"
-                  element={<AdminIncidentDesk />}
+                  element={<AdminOpsDesk />}
                 />
                 <Route
                   path="/presets"

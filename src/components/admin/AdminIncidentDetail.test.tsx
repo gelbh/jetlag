@@ -363,7 +363,7 @@ describe("AdminIncidentDesk gate + mobile stack", () => {
     expect(screen.getByText("Firestore unavailable")).toBeInTheDocument();
   });
 
-  it("collapses to mobile stack when a deep-linked incident is open", () => {
+  it("opens mobile desk on the detail panel for a deep-linked incident", () => {
     stubMatchMedia(false);
     authState.isPermanent = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
@@ -371,16 +371,15 @@ describe("AdminIncidentDesk gate + mobile stack", () => {
 
     renderDesk("/admin/incidents/inc-abc12345");
 
-    expect(screen.getByTestId("admin-incident-desk")).toHaveAttribute(
+    expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute(
       "data-layout",
       "mobile",
     );
-    expect(
-      screen.getByTestId("admin-incident-mobile-stack"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Back to queue" }),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("admin-ops-mobile")).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Detail" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     expect(screen.queryByLabelText("Incident queue")).not.toBeInTheDocument();
   });
 });

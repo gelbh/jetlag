@@ -1,0 +1,77 @@
+import { APP_VERSION } from "../../domain/device/changelog";
+import type { DeskPreset } from "../../domain/admin/opsDeskLayout";
+import { AdminPresetMenu } from "./AdminPresetMenu";
+
+function formatUtcClock(now: Date): string {
+  return now.toISOString().slice(11, 19) + " UTC";
+}
+
+interface AdminDeskTopbarProps {
+  openIncidents: number;
+  inQueue: number;
+  now: Date;
+  activePresetId: string;
+  userPresets: DeskPreset[];
+  onSelectPreset: (presetId: string) => void;
+  onSaveCurrent: () => void;
+  onDeleteUserPreset: (presetId: string) => void;
+  onRefreshSessions?: () => void;
+  refreshing?: boolean;
+}
+
+export function AdminDeskTopbar({
+  openIncidents,
+  inQueue,
+  now,
+  activePresetId,
+  userPresets,
+  onSelectPreset,
+  onSaveCurrent,
+  onDeleteUserPreset,
+  onRefreshSessions,
+  refreshing = false,
+}: AdminDeskTopbarProps) {
+  return (
+    <header className="jl-ops-topbar" data-testid="admin-ops-topbar">
+      <div className="jl-ops-brand">
+        <span className="jl-ops-brand-mark">Jetlag</span>
+        <span className="jl-ops-brand-title">
+          Broadcast HUD // Admin ops desk v{APP_VERSION}
+        </span>
+      </div>
+      <AdminPresetMenu
+        activePresetId={activePresetId}
+        userPresets={userPresets}
+        onSelectPreset={onSelectPreset}
+        onSaveCurrent={onSaveCurrent}
+        onDeleteUserPreset={onDeleteUserPreset}
+      />
+      <div className="jl-ops-topbar-actions">
+        <dl className="jl-ops-top-stats">
+          <div className="jl-ops-stat">
+            <dt>Open incidents</dt>
+            <dd>{openIncidents}</dd>
+          </div>
+          <div className="jl-ops-stat">
+            <dt>In queue</dt>
+            <dd>{inQueue}</dd>
+          </div>
+          <div className="jl-ops-stat">
+            <dt>Time</dt>
+            <dd>{formatUtcClock(now)}</dd>
+          </div>
+        </dl>
+        {onRefreshSessions ? (
+          <button
+            type="button"
+            className="jl-ops-preset-chip"
+            onClick={onRefreshSessions}
+            aria-label="Refresh live sessions"
+          >
+            {refreshing ? "Refreshing…" : "Refresh"}
+          </button>
+        ) : null}
+      </div>
+    </header>
+  );
+}
