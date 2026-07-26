@@ -519,4 +519,71 @@ describe("useMapSessionChrome", () => {
       expect.objectContaining({ reason: "end", sessionId: "session-remote" }),
     );
   });
+
+  it("leaves a local session without calling ensureAnonymousUser", async () => {
+    const { ensureAnonymousUser } = await import("../../services/core/firebase");
+    const ensureSpy = vi.mocked(ensureAnonymousUser);
+    ensureSpy.mockClear();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: {
+          id: LOCAL_SESSION_ID,
+          code: "WXYZ",
+          gameArea: remoteSession.gameArea,
+          createdAt: "2026-01-01T00:00:00.000Z",
+          memberUids: ["host-1"],
+        },
+        isHost: true,
+        annotations: [],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleLeaveSession();
+    });
+
+    expect(ensureSpy).not.toHaveBeenCalled();
+    expect(mockLeaveHostSession).not.toHaveBeenCalled();
+    expect(exitSession).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: "leave", sessionId: LOCAL_SESSION_ID }),
+    );
+  });
+
+  it("skips endSession when session hostUid is not the current user", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: {
+          ...remoteSession,
+          hostUid: "other-host",
+          memberUids: ["other-host", "host-1"],
+        },
+        isHost: true,
+        annotations: [],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleEndSession();
+    });
+
+    expect(mockEndSession).not.toHaveBeenCalled();
+    expect(window.confirm).not.toHaveBeenCalled();
+    expect(exitSession).not.toHaveBeenCalled();
+  });
 });
