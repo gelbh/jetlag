@@ -7,10 +7,11 @@ import { HttpsError } from "firebase-functions/v2/https";
 
 const sentryDsnSecret = defineSecret("SENTRY_DSN");
 
-/** Expected leave/end HttpsError outcomes — not product bugs (JETLAG-21/22/25). */
+/** Expected callable HttpsError outcomes — not product bugs. */
 const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "permission-denied:Only the host can do that.",
   "failed-precondition:Session already ended.",
+  "internal:Support agent is temporarily unavailable.",
 ]);
 
 let initialized = false;
