@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  readAdminSessionListCache,
+  writeAdminSessionListCache,
+} from "../../services/admin/adminSessionListCache";
+import {
   fetchAdminSessionsPage,
   type AdminSessionSummary,
 } from "../../services/admin/adminSessions";
@@ -17,25 +21,76 @@ function mergeSessionsById(
   return [...byId.values()];
 }
 
+function initialFromCache(enabled: boolean): {
+  sessions: AdminSessionSummary[];
+  nextPageToken: string | null;
+  lastFetchedAt: Date | null;
+  loading: boolean;
+} {
+  if (!enabled) {
+    return {
+      sessions: [],
+      nextPageToken: null,
+      lastFetchedAt: null,
+      loading: false,
+    };
+  }
+  const cached = readAdminSessionListCache();
+  if (cached == null) {
+    return {
+      sessions: [],
+      nextPageToken: null,
+      lastFetchedAt: null,
+      loading: true,
+    };
+  }
+  return {
+    sessions: cached.sessions,
+    nextPageToken: cached.nextPageToken,
+    lastFetchedAt: cached.lastFetchedAt,
+    loading: false,
+  };
+}
+
 type RefreshOptions = { background?: boolean };
 
 export function useAdminSessionList(enabled: boolean) {
-  const [sessions, setSessions] = useState<AdminSessionSummary[]>([]);
-  const [loading, setLoading] = useState(enabled);
+  const initial = initialFromCache(enabled);
+  const [sessions, setSessions] = useState<AdminSessionSummary[]>(
+    () => initial.sessions,
+  );
+  const [loading, setLoading] = useState(() => initial.loading);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
-  const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+  const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(
+    () => initial.lastFetchedAt,
+  );
+  const [nextPageToken, setNextPageToken] = useState<string | null>(
+    () => initial.nextPageToken,
+  );
   const [enabledState, setEnabledState] = useState(enabled);
   const requestGenerationRef = useRef(0);
   const inFlightRefreshRef = useRef<Promise<void> | null>(null);
   const trailingRefreshOptionsRef = useRef<RefreshOptions | null>(null);
+  const lastFetchedAtRef = useRef<Date | null>(initial.lastFetchedAt);
+
+  useEffect(() => {
+    lastFetchedAtRef.current = lastFetchedAt;
+  }, [lastFetchedAt]);
 
   if (enabled !== enabledState) {
     setEnabledState(enabled);
     if (enabled) {
-      setLoading(true);
+      const cached = readAdminSessionListCache();
+      if (cached != null) {
+        setSessions(cached.sessions);
+        setNextPageToken(cached.nextPageToken);
+        setLastFetchedAt(cached.lastFetchedAt);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
       setError(null);
     }
   }
@@ -72,9 +127,15 @@ export function useAdminSessionList(enabled: boolean) {
             return;
           }
 
+          const fetchedAt = new Date();
           setSessions(page.sessions);
           setNextPageToken(page.nextPageToken);
-          setLastFetchedAt(new Date());
+          setLastFetchedAt(fetchedAt);
+          writeAdminSessionListCache({
+            sessions: page.sessions,
+            nextPageToken: page.nextPageToken,
+            lastFetchedAt: fetchedAt,
+          });
         } catch (refreshError) {
           if (requestGeneration !== requestGenerationRef.current) {
             return;
@@ -129,7 +190,15 @@ export function useAdminSessionList(enabled: boolean) {
         return;
       }
 
-      setSessions((current) => mergeSessionsById(current, page.sessions));
+      setSessions((current) => {
+        const merged = mergeSessionsById(current, page.sessions);
+        writeAdminSessionListCache({
+          sessions: merged,
+          nextPageToken: page.nextPageToken,
+          lastFetchedAt: lastFetchedAtRef.current ?? new Date(),
+        });
+        return merged;
+      });
       setNextPageToken(page.nextPageToken);
     } catch (loadMoreError) {
       if (requestGeneration !== requestGenerationRef.current) {
@@ -152,8 +221,10 @@ export function useAdminSessionList(enabled: boolean) {
     if (!enabled) {
       return;
     }
-
-    void refresh();
+    const cached = readAdminSessionListCache();
+    /* eslint-disable react-hooks/set-state-in-effect -- initial session list load */
+    void refresh(cached != null ? { background: true } : undefined);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [enabled, refresh]);
 
   return {
