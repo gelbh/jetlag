@@ -7,11 +7,6 @@ import {
 } from "../../domain/map/transitViewport";
 import { createThrottledPublisher } from "./mapViewportPublish";
 
-export {
-  VIEWPORT_PUBLISH_THROTTLE_MS,
-  createThrottledPublisher,
-} from "./mapViewportPublish";
-
 export interface MapViewportState {
   bounds: MapViewportBounds;
   zoom: number;
