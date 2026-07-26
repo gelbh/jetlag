@@ -1,3 +1,8 @@
+/**
+ * Shared Capacitor contract for Jetlag Live Activities / ongoing notifications.
+ * Keep Swift + Java method names and payload fields aligned with this file.
+ * App code imports types through `src/services/core/liveActivity.ts`, not here.
+ */
 export type LiveActivityKind = "question" | "session_timer";
 
 export interface QuestionActivityInput {

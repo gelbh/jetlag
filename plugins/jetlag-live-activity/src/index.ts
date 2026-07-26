@@ -3,6 +3,11 @@ import type { JetlagLiveActivityPlugin } from "./definitions";
 
 export * from "./definitions";
 
+/**
+ * Sole `registerPlugin("JetlagLiveActivity")` call (includes web no-op stub).
+ * App code must use `src/services/core/liveActivity.ts` instead of importing this
+ * entry or registering the plugin again.
+ */
 export const JetlagLiveActivity = registerPlugin<JetlagLiveActivityPlugin>(
   "JetlagLiveActivity",
   {
