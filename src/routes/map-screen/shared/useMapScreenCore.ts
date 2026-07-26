@@ -66,6 +66,8 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
   const distanceUnit = useSessionDistanceUnit();
   const mapStyle = useMapStore((state) => state.mapStyle);
   const setMapStyle = useMapStore((state) => state.setMapStyle);
+  const streetBasemap = useMapStore((state) => state.streetBasemap);
+  const setStreetBasemap = useMapStore((state) => state.setStreetBasemap);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const effectiveBasemapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
   const { sessionRules, gameArea, matchingAreasReady, matchingAreasError, playAreaReady } =
@@ -313,6 +315,8 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
     distanceUnit,
     mapStyle,
     setMapStyle,
+    streetBasemap,
+    setStreetBasemap,
     lowPowerMode,
     setLowPowerMode,
     effectiveBasemapStyle,
