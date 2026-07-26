@@ -224,7 +224,6 @@ export function AdminGridWorkspace({
           }}
           compactor={verticalCompactor}
           onDragStop={(next) => commitGeometry(next)}
-          onResize={(next) => commitGeometry(next)}
           onResizeStop={(next) => commitGeometry(next)}
         >
           {layout.stacks.map((stack) => (
