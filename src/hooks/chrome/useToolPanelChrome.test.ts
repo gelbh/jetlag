@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { WIZARD_STEP_CHANGE_EVENT } from "./tools/useSyncWizardStepRef";
+import { WIZARD_STEP_CHANGE_EVENT } from "../tools/useSyncWizardStepRef";
 import { useToolPanelChrome } from "./useToolPanelChrome";
 
 describe("useToolPanelChrome", () => {

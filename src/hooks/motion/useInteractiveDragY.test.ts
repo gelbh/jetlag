@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MIN_DRAG_START_PX } from "../domain/device/motionTokens";
+import { MIN_DRAG_START_PX } from "../../domain/device/motionTokens";
 import {
   computeDragOffset,
   hasExceededDragSlop,

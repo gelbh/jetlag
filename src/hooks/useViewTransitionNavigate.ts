@@ -1,1 +1,1 @@
-export { useAppNavigate as useViewTransitionNavigate } from "./useAppNavigate";
+export * from "./navigation/useViewTransitionNavigate";
