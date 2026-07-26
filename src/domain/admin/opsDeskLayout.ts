@@ -39,8 +39,8 @@ export type DeskPreset = {
 
 export const CUSTOM_PRESET_ID = "custom";
 
-export const DEFAULT_COLS = 12;
-export const DEFAULT_ROW_HEIGHT = 36;
+export const DEFAULT_COLS = 24;
+export const DEFAULT_ROW_HEIGHT = 24;
 
 const INCIDENT_PANEL_IDS: readonly PanelId[] = ["inbox", "detail", "actions"];
 
@@ -187,7 +187,7 @@ export function unstackPanelToCell(
       h,
       collapsed: false,
     };
-    return next;
+    return clampLayoutToCols(next);
   }
 
   const next = cloneLayout(layout);
@@ -205,7 +205,7 @@ export function unstackPanelToCell(
     h,
   });
 
-  return next;
+  return clampLayoutToCols(next);
 }
 
 export function setPinned(
@@ -279,7 +279,7 @@ export function showPanel(
   const cell = placement ?? {
     x: 0,
     y: next.stacks.reduce((max, s) => Math.max(max, s.y + s.h), 0),
-    w: 4,
+    w: 8,
     h: 4,
   };
 
@@ -293,7 +293,7 @@ export function showPanel(
     h: cell.h,
   });
 
-  return next;
+  return clampLayoutToCols(next);
 }
 
 /**
@@ -309,12 +309,12 @@ export function ensureIncidentPanelsVisible(layout: DeskLayout): DeskLayout {
   // Classic triage strip along the bottom (or empty grid).
   const baseY = next.stacks.reduce((max, s) => Math.max(max, s.y + s.h), 0);
   const widths: Record<PanelId, number> = {
-    sessions: 4,
-    monitor: 4,
-    inbox: 4,
-    detail: 4,
-    actions: 4,
-    settings: 4,
+    sessions: 8,
+    monitor: 8,
+    inbox: 8,
+    detail: 8,
+    actions: 8,
+    settings: 8,
   };
   let x = 0;
   for (const panelId of missing) {
@@ -360,8 +360,8 @@ function layoutFromVisible(
 /** Session watch: sessions + monitor dominate; incident panels hidden. */
 export const SESSION_WATCH_LAYOUT: DeskLayout = layoutFromVisible(
   [
-    makeStack("sessions", "sessions", 0, 0, 7, 10),
-    makeStack("monitor", "monitor", 7, 0, 5, 10),
+    makeStack("sessions", "sessions", 0, 0, 14, 10),
+    makeStack("monitor", "monitor", 14, 0, 10, 10),
   ],
   ["inbox", "detail", "actions", "settings"],
 );
@@ -369,9 +369,9 @@ export const SESSION_WATCH_LAYOUT: DeskLayout = layoutFromVisible(
 /** Incident triage: classic three-pane; sessions/monitor/settings hidden. */
 export const INCIDENT_TRIAGE_LAYOUT: DeskLayout = layoutFromVisible(
   [
-    makeStack("inbox", "inbox", 0, 0, 3, 10),
-    makeStack("detail", "detail", 3, 0, 5, 10),
-    makeStack("actions", "actions", 8, 0, 4, 10),
+    makeStack("inbox", "inbox", 0, 0, 6, 10),
+    makeStack("detail", "detail", 6, 0, 10, 10),
+    makeStack("actions", "actions", 16, 0, 8, 10),
   ],
   ["sessions", "monitor", "settings"],
 );
@@ -382,11 +382,11 @@ export const INCIDENT_TRIAGE_LAYOUT: DeskLayout = layoutFromVisible(
  */
 export const OPS_OVERVIEW_LAYOUT: DeskLayout = layoutFromVisible(
   [
-    makeStack("sessions", "sessions", 0, 0, 4, 5),
-    makeStack("inbox", "inbox", 0, 5, 4, 5),
-    makeStack("detail", "detail", 4, 0, 4, 10),
-    makeStack("actions", "actions", 8, 0, 4, 5),
-    makeStack("monitor", "monitor", 8, 5, 4, 5),
+    makeStack("sessions", "sessions", 0, 0, 8, 5),
+    makeStack("inbox", "inbox", 0, 5, 8, 5),
+    makeStack("detail", "detail", 8, 0, 8, 10),
+    makeStack("actions", "actions", 16, 0, 8, 5),
+    makeStack("monitor", "monitor", 16, 5, 8, 5),
   ],
   ["settings"],
 );
@@ -498,6 +498,45 @@ export function applyStackGeometry(
 
 export function layoutsEqual(a: DeskLayout, b: DeskLayout): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
+}
+
+/** Clamp every stack so `x + w ≤ cols` (and `w ≤ cols`, `x ≥ 0`). */
+export function clampLayoutToCols(layout: DeskLayout): DeskLayout {
+  const cols = layout.cols > 0 ? layout.cols : DEFAULT_COLS;
+  const next = cloneLayout(layout);
+  next.cols = cols;
+  next.stacks = next.stacks.map((stack) => {
+    const w = Math.max(1, Math.min(stack.w, cols));
+    const x = Math.max(0, Math.min(stack.x, cols - w));
+    if (x === stack.x && w === stack.w) return stack;
+    return { ...stack, x, w };
+  });
+  return next;
+}
+
+/**
+ * Scale stack `x`/`w` when migrating col counts (e.g. 12 → 24), then clamp.
+ * Sets `cols` and `rowHeight` to the target / current defaults.
+ */
+export function migrateLayoutToCols(
+  layout: DeskLayout,
+  targetCols: number = DEFAULT_COLS,
+): DeskLayout {
+  const fromCols = layout.cols > 0 ? layout.cols : DEFAULT_COLS;
+  const next = cloneLayout(layout);
+  next.cols = targetCols;
+  next.rowHeight =
+    layout.rowHeight > 0 ? layout.rowHeight : DEFAULT_ROW_HEIGHT;
+  if (fromCols !== targetCols) {
+    next.rowHeight = DEFAULT_ROW_HEIGHT;
+    const scale = targetCols / fromCols;
+    next.stacks = next.stacks.map((stack) => ({
+      ...stack,
+      x: Math.round(stack.x * scale),
+      w: Math.max(1, Math.round(stack.w * scale)),
+    }));
+  }
+  return clampLayoutToCols(next);
 }
 
 export const PANEL_LABELS: Record<PanelId, string> = {

@@ -15,10 +15,16 @@ interface AdminMobileDeskProps {
   inQueue: number;
   now: Date;
   activePresetId: string;
+  defaultPresetId: string;
+  presetOrder: string[];
   userPresets: DeskPreset[];
   onSelectPreset: (presetId: string) => void;
   onSaveCurrent: () => void;
   onDeleteUserPreset: (presetId: string) => void;
+  onSetDefault: (presetId: string) => void;
+  onReorderPresets: (orderedIds: string[]) => void;
+  onRenameUserPreset: (presetId: string) => void;
+  onOverwriteUserPreset: () => void;
   onRefreshSessions?: () => void;
   refreshing?: boolean;
 }
@@ -31,10 +37,16 @@ export function AdminMobileDesk({
   inQueue,
   now,
   activePresetId,
+  defaultPresetId,
+  presetOrder,
   userPresets,
   onSelectPreset,
   onSaveCurrent,
   onDeleteUserPreset,
+  onSetDefault,
+  onReorderPresets,
+  onRenameUserPreset,
+  onOverwriteUserPreset,
   onRefreshSessions,
   refreshing,
 }: AdminMobileDeskProps) {
@@ -45,10 +57,16 @@ export function AdminMobileDesk({
         inQueue={inQueue}
         now={now}
         activePresetId={activePresetId}
+        defaultPresetId={defaultPresetId}
+        presetOrder={presetOrder}
         userPresets={userPresets}
         onSelectPreset={onSelectPreset}
         onSaveCurrent={onSaveCurrent}
         onDeleteUserPreset={onDeleteUserPreset}
+        onSetDefault={onSetDefault}
+        onReorderPresets={onReorderPresets}
+        onRenameUserPreset={onRenameUserPreset}
+        onOverwriteUserPreset={onOverwriteUserPreset}
         onRefreshSessions={onRefreshSessions}
         refreshing={refreshing}
       />

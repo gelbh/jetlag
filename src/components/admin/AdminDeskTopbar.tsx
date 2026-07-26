@@ -11,10 +11,16 @@ interface AdminDeskTopbarProps {
   inQueue: number;
   now: Date;
   activePresetId: string;
+  defaultPresetId: string;
+  presetOrder: string[];
   userPresets: DeskPreset[];
   onSelectPreset: (presetId: string) => void;
   onSaveCurrent: () => void;
   onDeleteUserPreset: (presetId: string) => void;
+  onSetDefault: (presetId: string) => void;
+  onReorderPresets: (orderedIds: string[]) => void;
+  onRenameUserPreset: (presetId: string) => void;
+  onOverwriteUserPreset: () => void;
   onRefreshSessions?: () => void;
   refreshing?: boolean;
 }
@@ -24,10 +30,16 @@ export function AdminDeskTopbar({
   inQueue,
   now,
   activePresetId,
+  defaultPresetId,
+  presetOrder,
   userPresets,
   onSelectPreset,
   onSaveCurrent,
   onDeleteUserPreset,
+  onSetDefault,
+  onReorderPresets,
+  onRenameUserPreset,
+  onOverwriteUserPreset,
   onRefreshSessions,
   refreshing = false,
 }: AdminDeskTopbarProps) {
@@ -41,10 +53,16 @@ export function AdminDeskTopbar({
       </div>
       <AdminPresetMenu
         activePresetId={activePresetId}
+        defaultPresetId={defaultPresetId}
+        presetOrder={presetOrder}
         userPresets={userPresets}
         onSelectPreset={onSelectPreset}
         onSaveCurrent={onSaveCurrent}
         onDeleteUserPreset={onDeleteUserPreset}
+        onSetDefault={onSetDefault}
+        onReorderPresets={onReorderPresets}
+        onRenameUserPreset={onRenameUserPreset}
+        onOverwriteUserPreset={onOverwriteUserPreset}
       />
       <div className="jl-ops-topbar-actions">
         <dl className="jl-ops-top-stats">

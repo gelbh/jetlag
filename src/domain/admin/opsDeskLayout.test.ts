@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
   BUILTIN_PRESETS,
   CUSTOM_PRESET_ID,
+  DEFAULT_COLS,
+  DEFAULT_ROW_HEIGHT,
   PANEL_IDS,
   cloneLayout,
+  clampLayoutToCols,
   ensureIncidentPanelsVisible,
   hidePanel,
   mergePanelOntoStack,
+  migrateLayoutToCols,
   setCollapsed,
   setPinned,
   showPanel,
@@ -31,8 +35,8 @@ function stack(
 
 function layoutOf(...stacks: GridStack[]): DeskLayout {
   return {
-    cols: 12,
-    rowHeight: 36,
+    cols: DEFAULT_COLS,
+    rowHeight: DEFAULT_ROW_HEIGHT,
     stacks,
     hiddenPanelIds: [],
   };
@@ -56,8 +60,53 @@ describe("opsDeskLayout", () => {
     ]);
     for (const preset of BUILTIN_PRESETS) {
       expect(preset.kind).toBe("builtin");
-      expect(preset.layout.cols).toBe(12);
+      expect(preset.layout.cols).toBe(24);
+      expect(preset.layout.rowHeight).toBe(DEFAULT_ROW_HEIGHT);
     }
+  });
+
+  it("migrates 12-col layouts to 24 and clamps overflow", () => {
+    const legacy: DeskLayout = {
+      cols: 12,
+      rowHeight: 36,
+      stacks: [
+        {
+          id: "a",
+          panelIds: ["sessions"],
+          activeIndex: 0,
+          x: 6,
+          y: 0,
+          w: 6,
+          h: 4,
+        },
+      ],
+      hiddenPanelIds: [],
+    };
+
+    const migrated = migrateLayoutToCols(legacy, 24);
+    expect(migrated.cols).toBe(24);
+    expect(migrated.rowHeight).toBe(DEFAULT_ROW_HEIGHT);
+    expect(migrated.stacks[0]).toMatchObject({ x: 12, w: 12 });
+
+    const overflow: DeskLayout = {
+      cols: 24,
+      rowHeight: 24,
+      stacks: [
+        {
+          id: "b",
+          panelIds: ["monitor"],
+          activeIndex: 0,
+          x: 20,
+          y: 0,
+          w: 10,
+          h: 4,
+        },
+      ],
+      hiddenPanelIds: [],
+    };
+    const clamped = clampLayoutToCols(overflow);
+    expect(clamped.stacks[0]).toMatchObject({ x: 14, w: 10 });
+    expect(clamped.stacks[0]!.x + clamped.stacks[0]!.w).toBe(24);
   });
 
   it("mergePanelOntoStack moves a panel into the target stack and removes empty source", () => {
