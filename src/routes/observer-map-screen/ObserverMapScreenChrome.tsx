@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { AppLink } from "../../components/navigation/AppLink";
 import { ContextualRail } from "../../components/map/ContextualRail";
 import type { ContextualRailTab } from "../../components/map/ContextualRailContext";
-import { DesktopOpsShell } from "../../components/map/DesktopOpsShell";
 import { SessionTimerLabel } from "../../components/session/SessionTimerLabel";
 import { SegmentControl } from "../../components/ui/SegmentControl";
 import { HudHomeIcon } from "../../components/ui/HudIcons";
@@ -16,6 +15,8 @@ import type { SessionRecord } from "../../domain/map/annotations";
 import type { UseMapOverlayStateResult } from "../../hooks/map/useMapOverlayState";
 import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
 import { useDesktopLayout } from "../../hooks/useDesktopLayout";
+import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
+import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
 
 interface ObserverMapScreenChromeProps {
   session: SessionRecord;
@@ -39,9 +40,13 @@ export function ObserverMapScreenChrome({
   onLeave,
   mapSlot,
 }: ObserverMapScreenChromeProps) {
-  const roleLabel = playerRoleLabel(myRole);
+  const roleConfig =
+    myRole === "admin"
+      ? getMapScreenRoleConfig("admin")
+      : getMapScreenRoleConfig("observer");
+  const roleLabel = playerRoleLabel(roleConfig.statusPlayerRole);
   const leaveLabel =
-    myRole === "admin" ? "Leave admin monitor" : "Leave observation";
+    roleConfig.role === "admin" ? "Leave admin monitor" : "Leave observation";
   const isDesktop = useDesktopLayout();
 
   const statusBar = (
@@ -115,7 +120,7 @@ export function ObserverMapScreenChrome({
       >
         Chat
       </button>
-      {myRole === "admin" ? (
+      {roleConfig.role === "admin" ? (
         <AppLink
           to="/admin"
           className="btn-secondary inline-flex min-h-11 items-center px-3 text-sm"
@@ -150,7 +155,7 @@ export function ObserverMapScreenChrome({
       >
         Chat
       </button>
-      {myRole === "admin" ? (
+      {roleConfig.role === "admin" ? (
         <AppLink
           to="/admin"
           className="desktop-ops-observer-rail__btn mt-auto no-underline"
@@ -158,6 +163,25 @@ export function ObserverMapScreenChrome({
           Admin
         </AppLink>
       ) : null}
+    </div>
+  );
+
+  const mobileToolbar = (
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-dock)] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="pointer-events-auto mx-auto flex max-w-xl flex-col gap-2">
+        <div className="rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
+          <SegmentControl
+            value={perspective}
+            options={OBSERVER_PERSPECTIVE_OPTIONS}
+            onChange={onPerspectiveChange}
+            aria-label="Spectator perspective"
+            variant="pill"
+          />
+        </div>
+        <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
+          {logChatActions}
+        </div>
+      </div>
     </div>
   );
 
@@ -185,10 +209,10 @@ export function ObserverMapScreenChrome({
     };
 
     return (
-      <DesktopOpsShell
-        status={statusBar}
-        tools={toolRail}
-        map={mapSlot}
+      <MapScreenChromeSlots
+        header={statusBar}
+        toolbar={toolRail}
+        mapSlot={mapSlot}
         contextual={
           <ContextualRail
             open={overlay.sheet === "log" || overlay.sheet === "chat"}
@@ -203,25 +227,10 @@ export function ObserverMapScreenChrome({
   }
 
   return (
-    <>
-      {statusBar}
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-dock)] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <div className="pointer-events-auto mx-auto flex max-w-xl flex-col gap-2">
-          <div className="rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
-            <SegmentControl
-              value={perspective}
-              options={OBSERVER_PERSPECTIVE_OPTIONS}
-              onChange={onPerspectiveChange}
-              aria-label="Spectator perspective"
-              variant="pill"
-            />
-          </div>
-          <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
-            {logChatActions}
-          </div>
-        </div>
-      </div>
-    </>
+    <MapScreenChromeSlots
+      layout="fragments"
+      header={statusBar}
+      toolbar={mobileToolbar}
+    />
   );
 }

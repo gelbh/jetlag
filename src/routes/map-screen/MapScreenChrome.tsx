@@ -9,7 +9,6 @@ import {
   ContextualRailPanelProvider,
   type ContextualRailTab,
 } from "../../components/map/ContextualRailContext";
-import { DesktopOpsShell } from "../../components/map/DesktopOpsShell";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
 import { AppUpdateMapChip } from "../../components/ui/AppUpdateMapChip";
@@ -26,6 +25,8 @@ import { useSyncRetryAction } from "../../hooks/session/useSyncRetryAction";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import { useAnnotationStore } from "../../state/annotationStore";
 import { SeekerChromeOverlays } from "./SeekerChromeOverlays";
+import { MapScreenChromeSlots } from "./shared/MapScreenChromeSlots";
+import { getMapScreenRoleConfig } from "./shared/mapScreenRoleConfig";
 
 type MapScreenChromeProps = Pick<
   MapScreenController,
@@ -254,6 +255,7 @@ export function MapScreenChrome({
   const gameOverActions = useGameOverActions(session, overlay);
   const isDesktop = useDesktopLayout();
   const toolLayout = isDesktop ? "rail" : "dock";
+  const roleConfig = getMapScreenRoleConfig("seeker");
   const markAnnotationPulse = useAnnotationStore(
     (state) => state.markAnnotationPulse,
   );
@@ -309,7 +311,7 @@ export function MapScreenChrome({
     <MapStatusRail
       sessionCode={session!.code}
       sessionRules={session!}
-      playerRole="seeker"
+      playerRole={roleConfig.statusPlayerRole}
       showPreloadBanner
       expanded={isDesktop}
       activeTool={activeTool}
@@ -381,218 +383,207 @@ export function MapScreenChrome({
     />
   );
 
+  const header = (
+    <>
+      {statusRail}
+      <FirestorePersistenceBanner />
+      <AppUpdateMapChip />
+      <HotfixGraceChip />
+    </>
+  );
+
   return (
     <ContextualRailPanelProvider>
-      {isDesktop && mapSlot ? (
-        <DesktopOpsShell
-          chromeHudRef={chromeHudRef}
-          status={
-            <>
-              {statusRail}
-              <FirestorePersistenceBanner />
-              <AppUpdateMapChip />
-              <HotfixGraceChip />
-            </>
+      <MapScreenChromeSlots
+        chromeHudRef={chromeHudRef}
+        header={header}
+        toolbar={toolDock}
+        mapSlot={mapSlot}
+        contextual={contextualRail}
+      >
+        <SeekerChromeOverlays
+          timer={timer}
+          activeTool={activeTool}
+          overlay={overlay}
+          firstRunDismissed={firstRunDismissed}
+          setFirstRunDismissed={setFirstRunDismissed}
+          selectedAnnotation={selectedAnnotation}
+          geometryEditAnnotation={geometryEditAnnotation}
+          geometryDraft={geometryDraft}
+          mapPanning={mapPanning}
+          userMinimized={userMinimized}
+          setUserMinimized={setUserMinimized}
+          handleSelectTool={handleSelectTool}
+          cancelGeometryEdit={cancelGeometryEdit}
+          saveGeometryEdit={saveGeometryEdit}
+          tools={{
+            radarTool,
+            photoTool,
+            thermometerTool,
+            matchingTool,
+            measuringTool,
+            pinTool,
+            zoneTool,
+            tentacleTool,
+          }}
+        />
+
+        <GameOverChrome
+          sessionId={session!.id}
+          playerRole={roleConfig.statusPlayerRole}
+          myUid={uid ?? undefined}
+          actions={gameOverActions}
+        />
+
+        <MapSettingsSheet
+          key={overlay.isSettingsOpen ? "open" : "closed"}
+          open={overlay.isSettingsOpen}
+          onClose={overlay.closeSheet}
+          pendingWrites={pendingWrites}
+          general={{
+            showCurrentLocation,
+            onShowCurrentLocationChange: setShowCurrentLocation,
+            showAdminBoundaries,
+            onShowAdminBoundariesChange: setShowAdminBoundaries,
+            keepScreenAwake,
+            onKeepScreenAwakeChange: setKeepScreenAwake,
+            lowPowerMode,
+            onLowPowerModeChange: setLowPowerMode,
+            distanceUnit,
+            onDistanceUnitChange: (unit) => {
+              void handleDistanceUnitChange(unit);
+            },
+            distanceUnitEditable: gameRulesEditable,
+            mapStyle: effectiveBasemapStyle,
+            onMapStyleChange: handleMapStyleChange,
+            locationError: liveLocationError,
+            transitEnabled,
+            transitLiveEnabled,
+            transitLiveSupported,
+            sessionIsPremium,
+            transitRouteFilter,
+            metroLabel: transitMetro?.label ?? null,
+            loadingStatic: transitLoadingStatic,
+            loadingLive: transitLoadingLive,
+            liveDataStale: transitLiveDataStale,
+            stopCount: transitStaticData?.stops.length ?? 0,
+            routeCount: transitStaticData?.routes.length ?? 0,
+            vehicleCount: transitLiveData?.vehicles.length ?? 0,
+            lastUpdated:
+              transitLiveData?.fetchedAt ?? transitStaticData?.fetchedAt,
+            transitError,
+            onToggleTransit: () => setTransitEnabled(!transitEnabled),
+            onToggleLiveTransit: () => setTransitLiveEnabled(!transitLiveEnabled),
+            onTransitRouteFilterChange: setTransitRouteFilter,
+            notificationPreferences,
+            onNotificationPreferencesChange: updateNotificationPreferences,
+            onEnableNotifications: enableNotifications,
+          }}
+          layers={{
+            layerVisibility,
+            onLayerVisibilityChange: setLayerVisibility,
+          }}
+          rules={
+            draftAdvancedSettings
+              ? {
+                  gameRulesEditable: gameRulesEditable && isHost,
+                  gameSize: session!.gameSize ?? "medium",
+                  advancedSettings: draftAdvancedSettings,
+                  onAdvancedSettingsChange: setDraftAdvancedSettings,
+                  onSaveGameRules: handleSaveGameRules,
+                }
+              : undefined
           }
-          tools={toolDock}
-          map={mapSlot}
-          contextual={contextualRail}
+          session={{
+            sessionCode: session!.code,
+            remoteSession: isRemote,
+            onClearMap: handleClearMap,
+            endGameBlocked,
+            onExport: () => {
+              overlay.closeSheet();
+              void exportMap();
+            },
+            isHost,
+            onResetBoard: handleResetBoard,
+            onResetSession: () => void handleResetSession(),
+            onEndSession: () => void handleEndSession(),
+            onLeaveSession: () => void handleLeaveSession(),
+            expansionPackEnabled: session!.expansionPackEnabled === true,
+          }}
         />
-      ) : (
-        <div
-          ref={chromeHudRef}
-          className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
-        >
-          {statusRail}
-          <FirestorePersistenceBanner />
-          <AppUpdateMapChip />
-          <HotfixGraceChip />
-          {toolDock}
-        </div>
-      )}
 
-      <SeekerChromeOverlays
-        timer={timer}
-        activeTool={activeTool}
-        overlay={overlay}
-        firstRunDismissed={firstRunDismissed}
-        setFirstRunDismissed={setFirstRunDismissed}
-        selectedAnnotation={selectedAnnotation}
-        geometryEditAnnotation={geometryEditAnnotation}
-        geometryDraft={geometryDraft}
-        mapPanning={mapPanning}
-        userMinimized={userMinimized}
-        setUserMinimized={setUserMinimized}
-        handleSelectTool={handleSelectTool}
-        cancelGeometryEdit={cancelGeometryEdit}
-        saveGeometryEdit={saveGeometryEdit}
-        tools={{
-          radarTool,
-          photoTool,
-          thermometerTool,
-          matchingTool,
-          measuringTool,
-          pinTool,
-          zoneTool,
-          tentacleTool,
-        }}
-      />
+        {selectedAnnotation ? (
+          <AnnotationEditSheet
+            annotation={selectedAnnotation}
+            gameArea={gameArea!}
+            onClose={() => setSelectedAnnotationId(null)}
+            onSave={(annotation) => {
+              void updateAnnotation(annotation);
+              setSelectedAnnotationId(null);
+            }}
+            onDelete={(id) => {
+              void deleteAnnotation(id);
+              setSelectedAnnotationId(null);
+            }}
+            onEditOnMap={() => startGeometryEdit(selectedAnnotation.id)}
+          />
+        ) : null}
 
-      <GameOverChrome
-        sessionId={session!.id}
-        playerRole="seeker"
-        myUid={uid ?? undefined}
-        actions={gameOverActions}
-      />
-
-      <MapSettingsSheet
-        key={overlay.isSettingsOpen ? "open" : "closed"}
-        open={overlay.isSettingsOpen}
-        onClose={overlay.closeSheet}
-        pendingWrites={pendingWrites}
-        general={{
-          showCurrentLocation,
-          onShowCurrentLocationChange: setShowCurrentLocation,
-          showAdminBoundaries,
-          onShowAdminBoundariesChange: setShowAdminBoundaries,
-          keepScreenAwake,
-          onKeepScreenAwakeChange: setKeepScreenAwake,
-          lowPowerMode,
-          onLowPowerModeChange: setLowPowerMode,
-          distanceUnit,
-          onDistanceUnitChange: (unit) => {
-            void handleDistanceUnitChange(unit);
-          },
-          distanceUnitEditable: gameRulesEditable,
-          mapStyle: effectiveBasemapStyle,
-          onMapStyleChange: handleMapStyleChange,
-          locationError: liveLocationError,
-          transitEnabled,
-          transitLiveEnabled,
-          transitLiveSupported,
-          sessionIsPremium,
-          transitRouteFilter,
-          metroLabel: transitMetro?.label ?? null,
-          loadingStatic: transitLoadingStatic,
-          loadingLive: transitLoadingLive,
-          liveDataStale: transitLiveDataStale,
-          stopCount: transitStaticData?.stops.length ?? 0,
-          routeCount: transitStaticData?.routes.length ?? 0,
-          vehicleCount: transitLiveData?.vehicles.length ?? 0,
-          lastUpdated:
-            transitLiveData?.fetchedAt ?? transitStaticData?.fetchedAt,
-          transitError,
-          onToggleTransit: () => setTransitEnabled(!transitEnabled),
-          onToggleLiveTransit: () => setTransitLiveEnabled(!transitLiveEnabled),
-          onTransitRouteFilterChange: setTransitRouteFilter,
-          notificationPreferences,
-          onNotificationPreferencesChange: updateNotificationPreferences,
-          onEnableNotifications: enableNotifications,
-        }}
-        layers={{
-          layerVisibility,
-          onLayerVisibilityChange: setLayerVisibility,
-        }}
-        rules={
-          draftAdvancedSettings
-            ? {
-                gameRulesEditable: gameRulesEditable && isHost,
-                gameSize: session!.gameSize ?? "medium",
-                advancedSettings: draftAdvancedSettings,
-                onAdvancedSettingsChange: setDraftAdvancedSettings,
-                onSaveGameRules: handleSaveGameRules,
-              }
-            : undefined
-        }
-        session={{
-          sessionCode: session!.code,
-          remoteSession: isRemote,
-          onClearMap: handleClearMap,
-          endGameBlocked,
-          onExport: () => {
+        <SessionLog
+          open={overlay.isLogOpen}
+          sessionId={session!.id}
+          annotations={annotations}
+          onClose={overlay.closeSheet}
+          onDelete={(id) => void deleteAnnotation(id)}
+          onEdit={(id) => {
             overlay.closeSheet();
-            void exportMap();
-          },
-          isHost,
-          onResetBoard: handleResetBoard,
-          onResetSession: () => void handleResetSession(),
-          onEndSession: () => void handleEndSession(),
-          onLeaveSession: () => void handleLeaveSession(),
-          expansionPackEnabled: session!.expansionPackEnabled === true,
-        }}
-      />
-
-      {selectedAnnotation ? (
-        <AnnotationEditSheet
-          annotation={selectedAnnotation}
-          gameArea={gameArea!}
-          onClose={() => setSelectedAnnotationId(null)}
-          onSave={(annotation) => {
-            void updateAnnotation(annotation);
-            setSelectedAnnotationId(null);
+            setActiveTool("none");
+            setAwaitingPlacement(false);
+            setSelectedAnnotationId(id);
           }}
-          onDelete={(id) => {
-            void deleteAnnotation(id);
-            setSelectedAnnotationId(null);
+          onSelect={(id) => {
+            overlay.closeSheet();
+            setActiveTool("none");
+            setAwaitingPlacement(false);
+            setSelectedAnnotationId(id);
+            markAnnotationPulse(id);
           }}
-          onEditOnMap={() => startGeometryEdit(selectedAnnotation.id)}
         />
-      ) : null}
 
-      <SessionLog
-        open={overlay.isLogOpen}
-        sessionId={session!.id}
-        annotations={annotations}
-        onClose={overlay.closeSheet}
-        onDelete={(id) => void deleteAnnotation(id)}
-        onEdit={(id) => {
-          overlay.closeSheet();
-          setActiveTool("none");
-          setAwaitingPlacement(false);
-          setSelectedAnnotationId(id);
-        }}
-        onSelect={(id) => {
-          overlay.closeSheet();
-          setActiveTool("none");
-          setAwaitingPlacement(false);
-          setSelectedAnnotationId(id);
-          markAnnotationPulse(id);
-        }}
-      />
-
-      <ChatPanel
-        open={overlay.isChatOpen}
-        onClose={overlay.closeSheet}
-        messages={chatMessages}
-        pendingQuestions={pendingQuestions}
-        sessionRules={session!}
-        sessionId={session!.id}
-        senderUid={uid ?? ""}
-        senderRole="seeker"
-        isHider={false}
-        onAnswerQuestion={async (
-          pendingQuestionId,
-          messageId,
-          answer,
-          selectedReply,
-          deadlineExpired,
-        ) => {
-          await answerPendingQuestion(
-            session!.id,
+        <ChatPanel
+          open={overlay.isChatOpen}
+          onClose={overlay.closeSheet}
+          messages={chatMessages}
+          pendingQuestions={pendingQuestions}
+          sessionRules={session!}
+          sessionId={session!.id}
+          senderUid={uid ?? ""}
+          senderRole="seeker"
+          isHider={false}
+          onAnswerQuestion={async (
             pendingQuestionId,
             messageId,
             answer,
             selectedReply,
-            deadlineExpired
-              ? {
-                  deadlineExpired: true,
-                  senderUid: uid ?? "",
-                  senderRole: "seeker",
-                }
-              : undefined,
-          );
-        }}
-      />
+            deadlineExpired,
+          ) => {
+            await answerPendingQuestion(
+              session!.id,
+              pendingQuestionId,
+              messageId,
+              answer,
+              selectedReply,
+              deadlineExpired
+                ? {
+                    deadlineExpired: true,
+                    senderUid: uid ?? "",
+                    senderRole: "seeker",
+                  }
+                : undefined,
+            );
+          }}
+        />
+      </MapScreenChromeSlots>
     </ContextualRailPanelProvider>
   );
 }

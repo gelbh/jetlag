@@ -21,8 +21,9 @@ import {
   ContextualRailPanelProvider,
   type ContextualRailTab,
 } from "../../components/map/ContextualRailContext";
-import { DesktopOpsShell } from "../../components/map/DesktopOpsShell";
 import { HidingZonePanel } from "../../components/hider/HidingZonePanel";
+import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
+import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
 import { TimeTrapPanel } from "../../components/hider/TimeTrapPanel";
 import { ExpansionHiderMenu } from "../../components/hider/ExpansionHiderMenu";
 import { CurseReferenceSheet } from "../../components/expansion/CurseReferenceSheet";
@@ -248,6 +249,7 @@ export function HiderMapScreenChrome({
   const gameOverActions = useGameOverActions(session, overlay);
   const isDesktop = useDesktopLayout();
   const toolLayout = isDesktop ? "rail" : "dock";
+  const roleConfig = getMapScreenRoleConfig("hider");
   const setSelectedAnnotationId = useAnnotationStore(
     (state) => state.setSelectedAnnotationId,
   );
@@ -294,7 +296,7 @@ export function HiderMapScreenChrome({
       <MapStatusRail
         sessionCode={session.code}
         sessionRules={session}
-        playerRole="hider"
+        playerRole={roleConfig.statusPlayerRole}
         expanded={isDesktop}
         activeTool="none"
         syncStatus={syncStatus.status}
@@ -361,204 +363,197 @@ export function HiderMapScreenChrome({
 
   return (
     <ContextualRailPanelProvider>
-      {isDesktop && mapSlot ? (
-        <DesktopOpsShell
-          status={statusRail}
-          tools={toolDock}
-          map={mapSlot}
-          contextual={contextualRail}
-        />
-      ) : (
-        <div className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible">
-          {statusRail}
-          {toolDock}
-        </div>
-      )}
-
-      <GameOverChrome
-        sessionId={session.id}
-        playerRole="hider"
-        myUid={uid ?? undefined}
-        actions={gameOverActions}
-      />
-
-      <HiderZoneWizardShell
-        open={zoneTool.wizardOpen && !sheetBlocksWizard}
-        peeked={wizardPeeked}
-        onPeekedChange={onWizardPeekedChange}
-        peekLabel={
-          zoneTool.moveMode
-            ? "Move zone"
-            : zoneTool.hasZone
-              ? "Change zone"
-              : "Set zone"
-        }
-        onClose={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
-        closeLabel="Close hiding zone"
-        contentKey={zoneTool.moveMode ? "move" : "set"}
+      <MapScreenChromeSlots
+        header={statusRail}
+        toolbar={toolDock}
+        mapSlot={mapSlot}
+        contextual={contextualRail}
       >
-        <HidingZonePanel
-          wizardOpen={zoneTool.wizardOpen}
-          moveMode={zoneTool.moveMode}
-          radiusLabel={hidingZoneRadiusLabel}
-          confirmDisabled={!zoneTool.writesEnabled}
-          zoneTool={hidingZonePanelTool}
-          onStepChange={onHidingZoneStepChange}
-          onSearchThisArea={onSearchThisArea}
+        <GameOverChrome
+          sessionId={session.id}
+          playerRole={roleConfig.statusPlayerRole}
+          myUid={uid ?? undefined}
+          actions={gameOverActions}
         />
-      </HiderZoneWizardShell>
 
-      <ChatPanel
-        open={overlay.isChatOpen}
-        onClose={overlay.closeSheet}
-        bottomClassName="jl-panel-hider-wizard"
-        messages={messages}
-        pendingQuestions={pendingQuestions}
-        sessionRules={session}
-        sessionId={session.id}
-        senderUid={uid ?? ""}
-        senderRole="hider"
-        isHider
-        questionTruths={chat.questionTruths}
-        truthsLoading={chat.truthsLoading}
-        answerError={chat.answerError}
-        onAnswerQuestion={chat.onAnswerQuestion}
-      />
-
-      <MapSettingsSheet
-        key={overlay.isSettingsOpen ? "open" : "closed"}
-        open={overlay.isSettingsOpen}
-        onClose={overlay.closeSheet}
-        pendingWrites={0}
-        general={{
-          showCurrentLocation: mapSettings.showCurrentLocation,
-          onShowCurrentLocationChange: mapSettings.setShowCurrentLocation,
-          showAdminBoundaries: mapSettings.showAdminBoundaries,
-          onShowAdminBoundariesChange: mapSettings.setShowAdminBoundaries,
-          keepScreenAwake: mapSettings.keepScreenAwake,
-          onKeepScreenAwakeChange: mapSettings.setKeepScreenAwake,
-          lowPowerMode: mapSettings.lowPowerMode,
-          onLowPowerModeChange: mapSettings.setLowPowerMode,
-          distanceUnit: mapSettings.distanceUnit,
-          onDistanceUnitChange: () => {},
-          distanceUnitEditable: false,
-          mapStyle: mapSettings.mapStyle,
-          onMapStyleChange: mapSettings.setMapStyle,
-          locationError: null,
-          transitEnabled: false,
-          transitLiveEnabled: false,
-          transitLiveSupported: false,
-          sessionIsPremium: session.tier === "premium",
-          transitRouteFilter: "all",
-          metroLabel: null,
-          loadingStatic: false,
-          loadingLive: false,
-          liveDataStale: false,
-          stopCount: 0,
-          routeCount: 0,
-          vehicleCount: 0,
-          lastUpdated: undefined,
-          transitError: null,
-          onToggleTransit: () => undefined,
-          onToggleLiveTransit: () => undefined,
-          onTransitRouteFilterChange: () => undefined,
-          notificationPreferences: mapSettings.notificationPreferences,
-          onNotificationPreferencesChange:
-            mapSettings.updateNotificationPreferences,
-          onEnableNotifications: mapSettings.enableNotifications,
-        }}
-        layers={{
-          layerVisibility: mapSettings.layerVisibility,
-          onLayerVisibilityChange: mapSettings.setLayerVisibility,
-        }}
-        session={{
-          sessionCode: session.code,
-          remoteSession: isRemote,
-          onClearMap,
-          endGameBlocked:
-            isEndGameActive(session) || isEndGamePending(session),
-          onExport: overlay.closeSheet,
-          isHost,
-          onResetBoard,
-          onResetSession: onResetSession
-            ? () => void onResetSession()
-            : undefined,
-          onEndSession: onEndSession ? () => void onEndSession() : undefined,
-          onLeaveSession: onLeaveSession
-            ? () => void onLeaveSession()
-            : undefined,
-          expansionPackEnabled,
-        }}
-      />
-
-      <ExpansionHiderMenu
-        open={expansionMenuOpen}
-        onClose={() => onExpansionMenuOpenChange(false)}
-        canPlaceTimeTrap={Boolean(hasMyZone && !myTrap)}
-        trapPlaced={Boolean(myTrap)}
-        onPlaceTimeTrap={() => {
-          onExpansionMenuOpenChange(false);
-          onTimeTrapSheetOpenChange(true);
-        }}
-        onOpenCurseReference={() => {
-          onExpansionMenuOpenChange(false);
-          onCurseSheetOpenChange(true);
-        }}
-      />
-
-      <HiderZoneWizardShell
-        open={timeTrapSheetOpen}
-        peeked={timeTrapPeeked}
-        onPeekedChange={onTimeTrapPeekedChange}
-      >
-        <div className="relative space-y-2">
-          <PopupCloseButton
-            label="Close time trap"
-            onClick={() => onTimeTrapSheetOpenChange(false)}
+        <HiderZoneWizardShell
+          open={zoneTool.wizardOpen && !sheetBlocksWizard}
+          peeked={wizardPeeked}
+          onPeekedChange={onWizardPeekedChange}
+          peekLabel={
+            zoneTool.moveMode
+              ? "Move zone"
+              : zoneTool.hasZone
+                ? "Change zone"
+                : "Set zone"
+          }
+          onClose={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
+          closeLabel="Close hiding zone"
+          contentKey={zoneTool.moveMode ? "move" : "set"}
+        >
+          <HidingZonePanel
+            wizardOpen={zoneTool.wizardOpen}
+            moveMode={zoneTool.moveMode}
+            radiusLabel={hidingZoneRadiusLabel}
+            confirmDisabled={!zoneTool.writesEnabled}
+            zoneTool={hidingZonePanelTool}
+            onStepChange={onHidingZoneStepChange}
+            onSearchThisArea={onSearchThisArea}
           />
-          <p className="font-display pr-10 text-xs font-semibold uppercase tracking-[0.12em] text-highlight">
-            Time trap
-          </p>
-          <TimeTrapPanel
-            query={timeTrapTool.query}
-            onQueryChange={timeTrapTool.setQuery}
-            stations={timeTrapTool.stations}
-            stationsLoading={timeTrapTool.stationsLoading}
-            stationsError={timeTrapTool.stationsError}
-            selectedStation={timeTrapTool.selectedStation}
-            onSelectStation={timeTrapTool.setSelectedStation}
-            onSearchThisArea={onTimeTrapSearchThisArea}
-            searchDisabled={timeTrapTool.stationsLoading}
-            existingTrapStationName={myTrap?.stationName ?? null}
-            onConfirm={() =>
-              void timeTrapTool.confirmTrap().then(() => onTimeTrapSheetOpenChange(false))
-            }
-            saving={timeTrapTool.saving}
-            error={timeTrapTool.error}
-            bonusMinutes={myTrap?.bonusMinutes ?? 5}
-          />
-        </div>
-      </HiderZoneWizardShell>
+        </HiderZoneWizardShell>
 
-      <CurseReferenceSheet
-        open={curseSheetOpen}
-        onClose={() => onCurseSheetOpenChange(false)}
-      />
+        <ChatPanel
+          open={overlay.isChatOpen}
+          onClose={overlay.closeSheet}
+          bottomClassName="jl-panel-hider-wizard"
+          messages={messages}
+          pendingQuestions={pendingQuestions}
+          sessionRules={session}
+          sessionId={session.id}
+          senderUid={uid ?? ""}
+          senderRole="hider"
+          isHider
+          questionTruths={chat.questionTruths}
+          truthsLoading={chat.truthsLoading}
+          answerError={chat.answerError}
+          onAnswerQuestion={chat.onAnswerQuestion}
+        />
 
-      <SessionLog
-        open={overlay.isLogOpen}
-        sessionId={session.id}
-        annotations={annotations}
-        onClose={overlay.closeSheet}
-        onDelete={() => undefined}
-        onEdit={() => undefined}
-        readOnly
-        onSelect={(id) => {
-          overlay.closeSheet();
-          setSelectedAnnotationId(id);
-          markAnnotationPulse(id);
-        }}
-      />
+        <MapSettingsSheet
+          key={overlay.isSettingsOpen ? "open" : "closed"}
+          open={overlay.isSettingsOpen}
+          onClose={overlay.closeSheet}
+          pendingWrites={0}
+          general={{
+            showCurrentLocation: mapSettings.showCurrentLocation,
+            onShowCurrentLocationChange: mapSettings.setShowCurrentLocation,
+            showAdminBoundaries: mapSettings.showAdminBoundaries,
+            onShowAdminBoundariesChange: mapSettings.setShowAdminBoundaries,
+            keepScreenAwake: mapSettings.keepScreenAwake,
+            onKeepScreenAwakeChange: mapSettings.setKeepScreenAwake,
+            lowPowerMode: mapSettings.lowPowerMode,
+            onLowPowerModeChange: mapSettings.setLowPowerMode,
+            distanceUnit: mapSettings.distanceUnit,
+            onDistanceUnitChange: () => {},
+            distanceUnitEditable: false,
+            mapStyle: mapSettings.mapStyle,
+            onMapStyleChange: mapSettings.setMapStyle,
+            locationError: null,
+            transitEnabled: false,
+            transitLiveEnabled: false,
+            transitLiveSupported: false,
+            sessionIsPremium: session.tier === "premium",
+            transitRouteFilter: "all",
+            metroLabel: null,
+            loadingStatic: false,
+            loadingLive: false,
+            liveDataStale: false,
+            stopCount: 0,
+            routeCount: 0,
+            vehicleCount: 0,
+            lastUpdated: undefined,
+            transitError: null,
+            onToggleTransit: () => undefined,
+            onToggleLiveTransit: () => undefined,
+            onTransitRouteFilterChange: () => undefined,
+            notificationPreferences: mapSettings.notificationPreferences,
+            onNotificationPreferencesChange:
+              mapSettings.updateNotificationPreferences,
+            onEnableNotifications: mapSettings.enableNotifications,
+          }}
+          layers={{
+            layerVisibility: mapSettings.layerVisibility,
+            onLayerVisibilityChange: mapSettings.setLayerVisibility,
+          }}
+          session={{
+            sessionCode: session.code,
+            remoteSession: isRemote,
+            onClearMap,
+            endGameBlocked:
+              isEndGameActive(session) || isEndGamePending(session),
+            onExport: overlay.closeSheet,
+            isHost,
+            onResetBoard,
+            onResetSession: onResetSession
+              ? () => void onResetSession()
+              : undefined,
+            onEndSession: onEndSession ? () => void onEndSession() : undefined,
+            onLeaveSession: onLeaveSession
+              ? () => void onLeaveSession()
+              : undefined,
+            expansionPackEnabled,
+          }}
+        />
+
+        <ExpansionHiderMenu
+          open={expansionMenuOpen}
+          onClose={() => onExpansionMenuOpenChange(false)}
+          canPlaceTimeTrap={Boolean(hasMyZone && !myTrap)}
+          trapPlaced={Boolean(myTrap)}
+          onPlaceTimeTrap={() => {
+            onExpansionMenuOpenChange(false);
+            onTimeTrapSheetOpenChange(true);
+          }}
+          onOpenCurseReference={() => {
+            onExpansionMenuOpenChange(false);
+            onCurseSheetOpenChange(true);
+          }}
+        />
+
+        <HiderZoneWizardShell
+          open={timeTrapSheetOpen}
+          peeked={timeTrapPeeked}
+          onPeekedChange={onTimeTrapPeekedChange}
+        >
+          <div className="relative space-y-2">
+            <PopupCloseButton
+              label="Close time trap"
+              onClick={() => onTimeTrapSheetOpenChange(false)}
+            />
+            <p className="font-display pr-10 text-xs font-semibold uppercase tracking-[0.12em] text-highlight">
+              Time trap
+            </p>
+            <TimeTrapPanel
+              query={timeTrapTool.query}
+              onQueryChange={timeTrapTool.setQuery}
+              stations={timeTrapTool.stations}
+              stationsLoading={timeTrapTool.stationsLoading}
+              stationsError={timeTrapTool.stationsError}
+              selectedStation={timeTrapTool.selectedStation}
+              onSelectStation={timeTrapTool.setSelectedStation}
+              onSearchThisArea={onTimeTrapSearchThisArea}
+              searchDisabled={timeTrapTool.stationsLoading}
+              existingTrapStationName={myTrap?.stationName ?? null}
+              onConfirm={() =>
+                void timeTrapTool.confirmTrap().then(() => onTimeTrapSheetOpenChange(false))
+              }
+              saving={timeTrapTool.saving}
+              error={timeTrapTool.error}
+              bonusMinutes={myTrap?.bonusMinutes ?? 5}
+            />
+          </div>
+        </HiderZoneWizardShell>
+
+        <CurseReferenceSheet
+          open={curseSheetOpen}
+          onClose={() => onCurseSheetOpenChange(false)}
+        />
+
+        <SessionLog
+          open={overlay.isLogOpen}
+          sessionId={session.id}
+          annotations={annotations}
+          onClose={overlay.closeSheet}
+          onDelete={() => undefined}
+          onEdit={() => undefined}
+          readOnly
+          onSelect={(id) => {
+            overlay.closeSheet();
+            setSelectedAnnotationId(id);
+            markAnnotationPulse(id);
+          }}
+        />
+      </MapScreenChromeSlots>
     </ContextualRailPanelProvider>
   );
 }
