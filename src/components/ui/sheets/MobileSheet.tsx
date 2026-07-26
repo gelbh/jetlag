@@ -75,7 +75,7 @@ export function MobileSheet({
           </div>
           <div
             ref={scrollRef}
-            className={`min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 bg-surface-panel px-4 pb-[max(1rem,env(safe-area-inset-bottom))] ${scrollClassName}`.trim()}
+            className={`jl-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 bg-surface-panel px-4 pb-[max(1rem,env(safe-area-inset-bottom))] ${scrollClassName}`.trim()}
           >
             {children}
           </div>
@@ -89,7 +89,7 @@ export function MobileSheet({
       <div className="mx-auto w-full max-w-xl">
         <div
           ref={scrollRef}
-          className={`${maxHeightClassName} overflow-y-auto overscroll-contain scroll-pb-4 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 ${scrollClassName}`.trim()}
+          className={`jl-scroll ${maxHeightClassName} overflow-y-auto overscroll-contain scroll-pb-4 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 ${scrollClassName}`.trim()}
         >
           {handle}
           {children}

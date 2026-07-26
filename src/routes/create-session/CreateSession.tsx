@@ -102,7 +102,7 @@ export function CreateSession() {
         maxHeightClassName="max-h-[min(58dvh,640px)]"
         className="flex min-h-0 flex-1 flex-col"
       >
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 px-4">
+        <div className="jl-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 px-4">
           <GameAreaSection
             bundledPresetSelectGroups={session.bundledPresetSelectGroups}
             favouritePresetSelectOptions={session.favouritePresetSelectOptions}

@@ -133,7 +133,7 @@ export function ContextualRail({
       ) : (
         <>
           <div
-            className="contextual-rail__tabs"
+            className="jl-scroll contextual-rail__tabs"
             role="tablist"
             aria-label="Map panel sections"
           >
@@ -157,7 +157,7 @@ export function ContextualRail({
           </div>
           <div
             ref={setPanelNode}
-            className="contextual-rail__panel"
+            className="jl-scroll contextual-rail__panel"
             role="tabpanel"
             aria-label={activeLabel}
             tabIndex={-1}

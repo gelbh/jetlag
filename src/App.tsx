@@ -176,7 +176,7 @@ export default function App() {
             <AppUpdateBanner />
             <AnalyticsConsentBanner />
             <AppEntryBackdrop />
-            <div className="app-scroll-root">
+            <div className="jl-scroll app-scroll-root">
               <LowBatteryPrompt />
               <Routes>
                 <Route path="/" element={<Home />} />

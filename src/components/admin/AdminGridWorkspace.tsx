@@ -145,7 +145,7 @@ export function AdminGridWorkspace({
   return (
     <div
       ref={containerRef}
-      className="jl-ops-workspace"
+      className="jl-scroll jl-ops-workspace"
       data-testid="admin-ops-grid"
       onDragOver={handleWorkspaceDragOver}
       onDrop={handleWorkspaceDrop}

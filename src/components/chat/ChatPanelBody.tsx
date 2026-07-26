@@ -68,7 +68,7 @@ export function ChatPanelBody({
       </div>
       <div
         key={tab}
-        className="jl-game-chat-scroll jl-chat-tab-enter min-h-0 flex-1 overflow-y-auto overscroll-contain motion-reduce:animate-none"
+        className="jl-scroll jl-game-chat-scroll jl-chat-tab-enter min-h-0 flex-1 overflow-y-auto overscroll-contain motion-reduce:animate-none"
       >
         {tab === "social" ? (
           <SocialChatTab

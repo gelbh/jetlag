@@ -458,7 +458,7 @@ export function AdminOpsDesk() {
   ) : null;
 
   const sessionsBody = (
-    <div className="jl-ops-panel-scroll" data-testid="admin-ops-sessions">
+    <div className="jl-scroll jl-ops-panel-scroll" data-testid="admin-ops-sessions">
       {sessionsError ? <InlineError>{sessionsError}</InlineError> : null}
       {observeError ? <InlineError>{observeError}</InlineError> : null}
       <div className="mb-3">
@@ -497,7 +497,7 @@ export function AdminOpsDesk() {
           {loadMoreButton}
         </div>
       ) : (
-        <div className="admin-dashboard-list-scroll space-y-2.5">
+        <div className="jl-scroll admin-dashboard-list-scroll space-y-2.5">
           {filteredSessions.map((summary) => (
             <AdminSessionRow
               key={summary.sessionId}
@@ -516,7 +516,7 @@ export function AdminOpsDesk() {
   const bodies: AdminPanelBodies = {
     sessions: sessionsBody,
     monitor: (
-      <div className="jl-ops-panel-scroll jl-ops-panel-scroll--flush">
+      <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
         <AdminMonitorPane
           active={monitorActive}
           sessionCode={activeSession?.code ?? null}
@@ -525,7 +525,7 @@ export function AdminOpsDesk() {
       </div>
     ),
     inbox: (
-      <div className="jl-ops-panel-scroll jl-ops-panel-scroll--flush">
+      <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
         <AdminIncidentInbox
           incidents={visibleIncidents}
           selectedId={selectedIncidentId}
@@ -537,12 +537,12 @@ export function AdminOpsDesk() {
       </div>
     ),
     detail: (
-      <div className="jl-ops-panel-scroll jl-ops-panel-scroll--flush">
+      <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
         <AdminIncidentDetail incidentId={selectedIncidentId} />
       </div>
     ),
     actions: (
-      <div className="jl-ops-panel-scroll jl-ops-panel-scroll--flush">
+      <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
         <AdminIncidentActions
           incidentId={selectedIncidentId}
           status={

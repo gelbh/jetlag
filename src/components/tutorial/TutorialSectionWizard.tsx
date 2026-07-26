@@ -321,7 +321,7 @@ export function TutorialSectionWizard({
           className={
             isInteractiveStep
               ? "tutorial-scroll flex min-h-0 flex-col gap-2 overflow-hidden"
-              : "flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto"
+              : "jl-scroll flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto"
           }
         >
           {step.toolId ? (

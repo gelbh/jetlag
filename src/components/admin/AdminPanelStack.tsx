@@ -122,7 +122,7 @@ export function AdminPanelStack({
   let titleNode: ReactNode;
   if (multi) {
     titleNode = (
-      <div className="jl-ops-tabs" role="tablist" aria-label="Stacked panels">
+      <div className="jl-scroll jl-ops-tabs" role="tablist" aria-label="Stacked panels">
         {stack.panelIds.map((panelId, index) => (
           <button
             key={panelId}

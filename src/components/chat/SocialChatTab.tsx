@@ -49,7 +49,7 @@ export function SocialChatTab({
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
-      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain">
+      <div className="jl-scroll min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain">
         {socialMessages.length === 0 ? (
           <p className="text-sm text-ink-dim">No messages yet.</p>
         ) : (

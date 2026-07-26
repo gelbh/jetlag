@@ -133,7 +133,7 @@ export function AdminMonitorRail({
       ) : (
         <>
           <div
-            className="admin-monitor-rail__tabs"
+            className="jl-scroll admin-monitor-rail__tabs"
             role="tablist"
             aria-label="Monitor sections"
           >
@@ -154,7 +154,7 @@ export function AdminMonitorRail({
           </div>
 
           <div
-            className="admin-monitor-rail__panel"
+            className="jl-scroll admin-monitor-rail__panel"
             role="tabpanel"
             aria-label={activeLabel}
           >

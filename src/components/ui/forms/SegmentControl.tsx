@@ -25,7 +25,7 @@ export function SegmentControl<Value extends string>({
 }: SegmentControlProps<Value>) {
   if (variant === "chips") {
     return (
-      <div className="jl-segment-chips" role="tablist" aria-label={ariaLabel}>
+      <div className="jl-scroll jl-segment-chips" role="tablist" aria-label={ariaLabel}>
         {options.map((option) => {
           const selected = value === option.value;
 

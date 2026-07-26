@@ -294,7 +294,7 @@ export function MeasuringPanel({
         ) : null}
 
         {allowsSearch && searchResults.length > 0 && step !== "answer" && step !== "target" ? (
-          <div className="jl-wizard-search-results">
+          <div className="jl-scroll jl-wizard-search-results">
             <SearchResultsList
               results={searchResults}
               onSelect={(place) => onSearchResultSelect(place, searchRole)}

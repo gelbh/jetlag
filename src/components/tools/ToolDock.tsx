@@ -140,7 +140,7 @@ export function ToolDock({
         onRequestFoundHider={onRequestFoundHider}
       />
 
-      <div className="jl-tool-dock-bar">
+      <div className={`jl-tool-dock-bar${isRail ? " jl-scroll" : ""}`}>
         {dockHighlight ? (
           <div
             aria-hidden={true}

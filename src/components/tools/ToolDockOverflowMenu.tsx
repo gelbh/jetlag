@@ -27,7 +27,7 @@ export function ToolDockDrawMenu({
 
   return (
     <div
-      className="jl-tool-menu jl-tool-menu-dock jl-tool-dock-wide-only hud-panel"
+      className="jl-scroll jl-tool-menu jl-tool-menu-dock jl-tool-dock-wide-only hud-panel"
       role="menu"
       aria-label="Draw on map"
     >

@@ -26,7 +26,7 @@ export function SearchResultsList<Item extends SearchResultItem>({
 
   if (variant === "compact") {
     return (
-      <div className="max-h-40 space-y-1 overflow-y-auto border-2 border-border bg-surface-deep p-1.5">
+      <div className="jl-scroll max-h-40 space-y-1 overflow-y-auto border-2 border-border bg-surface-deep p-1.5">
         {results.map((item) => {
           const selected = selectedId === item.id;
 
@@ -55,7 +55,7 @@ export function SearchResultsList<Item extends SearchResultItem>({
   }
 
   return (
-    <div className="max-h-40 space-y-2 overflow-y-auto overscroll-contain rounded-[var(--radius-hud-md)] border border-border bg-surface-base p-2">
+    <div className="jl-scroll max-h-40 space-y-2 overflow-y-auto overscroll-contain rounded-[var(--radius-hud-md)] border border-border bg-surface-base p-2">
       {results.map((item) => (
         <button
           key={item.id}

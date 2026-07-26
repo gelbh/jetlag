@@ -215,7 +215,7 @@ export function SupportAgentChat({
         </p>
       ) : null}
 
-      <div className="jl-support-chat-scroll">
+      <div className="jl-scroll jl-support-chat-scroll">
         {messages.length === 0 ? (
           <p className="jl-support-empty">
             {hasActiveSummon

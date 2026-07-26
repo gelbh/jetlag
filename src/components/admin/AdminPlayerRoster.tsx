@@ -40,7 +40,7 @@ export function AdminPlayerRoster({
   }
 
   return (
-    <div className="max-h-40 overflow-y-auto rounded-lg border border-border bg-surface-panel/90">
+    <div className="jl-scroll max-h-40 overflow-y-auto rounded-lg border border-border bg-surface-panel/90">
       <table className="w-full text-left text-xs">
         <thead className="sticky top-0 border-b border-border bg-surface-raised/70 text-ink-muted">
           <tr>
