@@ -21,12 +21,12 @@ vi.mock("firebase/app-check", () => ({
 }));
 
 vi.mock("./firebase", () => ({
-  getFirebaseAppCheck: (...args: unknown[]) => getFirebaseAppCheck(...args),
-  isFirebaseConfigured: (...args: unknown[]) => isFirebaseConfigured(...args),
+  getFirebaseAppCheck: () => getFirebaseAppCheck(),
+  isFirebaseConfigured: () => isFirebaseConfigured(),
 }));
 
 vi.mock("../../config/env", () => ({
-  getClientEnv: (...args: unknown[]) => getClientEnv(...args),
+  getClientEnv: () => getClientEnv(),
 }));
 
 describe("appCheckProbe", () => {
