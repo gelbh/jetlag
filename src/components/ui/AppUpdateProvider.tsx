@@ -125,24 +125,40 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    let cancelled = false;
     let stopScheduledChecks = () => {};
 
     void import("virtual:pwa-register").then(({ registerSW }) => {
+      if (cancelled) {
+        return;
+      }
       const applyUpdateFn = registerSW({
         immediate: true,
         onNeedRefresh() {
+          if (cancelled) {
+            return;
+          }
           setNeedsRefresh(true);
           setDismissed(false);
         },
         onRegistered(nextRegistration) {
+          if (cancelled) {
+            return;
+          }
           registrationRef.current = nextRegistration;
           promptIfWaiting(nextRegistration, () => {
+            if (cancelled) {
+              return;
+            }
             setNeedsRefresh(true);
             setDismissed(false);
           });
           stopScheduledChecks = scheduleServiceWorkerUpdateChecks(
             nextRegistration,
             () => {
+              if (cancelled) {
+                return;
+              }
               setNeedsRefresh(true);
               setDismissed(false);
             },
@@ -167,6 +183,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
 
     document.addEventListener("visibilitychange", handleVisibility);
     return () => {
+      cancelled = true;
       document.removeEventListener("visibilitychange", handleVisibility);
       stopScheduledChecks();
     };

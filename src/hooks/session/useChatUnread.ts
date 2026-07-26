@@ -44,7 +44,11 @@ function saveAcknowledgedFingerprints(
     return;
   }
 
-  sessionStorage.setItem(storageKey, JSON.stringify([...acknowledged]));
+  try {
+    sessionStorage.setItem(storageKey, JSON.stringify([...acknowledged]));
+  } catch {
+    // Quota / security errors: unread still works in-memory for this tab.
+  }
 }
 
 export function useChatUnread({

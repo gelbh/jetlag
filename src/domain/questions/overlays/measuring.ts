@@ -32,19 +32,23 @@ export function buildMeasuringOverlays(
   }
 
   if (typeof regionInputJson === "string") {
-    const regionInput = JSON.parse(regionInputJson) as Omit<
-      MeasuringRegionInput,
-      "measuringAnswer"
-    >;
-    pushBoundaryOverlay(
-      overlays,
-      `${prefix}-boundary`,
-      buildMeasuringBoundaryPreviewTs({
-        ...regionInput,
-        gameArea: regionInput.gameArea ?? gameArea,
-      }),
-      mapStyle,
-    );
+    try {
+      const regionInput = JSON.parse(regionInputJson) as Omit<
+        MeasuringRegionInput,
+        "measuringAnswer"
+      >;
+      pushBoundaryOverlay(
+        overlays,
+        `${prefix}-boundary`,
+        buildMeasuringBoundaryPreviewTs({
+          ...regionInput,
+          gameArea: regionInput.gameArea ?? gameArea,
+        }),
+        mapStyle,
+      );
+    } catch {
+      // Corrupt region JSON: keep markers, skip boundary.
+    }
   }
 
   const targetPoint = metadata.measuringCoastPoint as

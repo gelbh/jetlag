@@ -387,6 +387,7 @@ export function useMapDraftOverlays(
   const {
     activeTool,
     gameArea,
+    mapStyle,
     radar,
     pin,
     tentacle,
@@ -423,6 +424,7 @@ export function useMapDraftOverlays(
   }, [
     activeTool,
     gameArea,
+    mapStyle,
     matching.boundaryPreview,
     matching.eliminationPreview,
     matching.nearestFeaturePoint,

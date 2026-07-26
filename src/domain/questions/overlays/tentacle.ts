@@ -42,19 +42,23 @@ export function buildTentacleOverlays(
 
   const poisJson = metadata.poisJson;
   if (typeof poisJson === "string") {
-    const pois = JSON.parse(poisJson) as TentaclePoi[];
-    for (const poi of pois) {
-      overlays.push({
-        kind: "marker",
-        id: `${prefix}-poi-${poi.id}`,
-        point: [poi.lat, poi.lng],
-        popup: poi.name,
-        style: {
-          color: MAP_ANNOTATION_COLORS.strokeLight,
-          fillColor: MAP_ANNOTATION_COLORS.tentacle,
-          markerRadius: 6,
-        },
-      });
+    try {
+      const pois = JSON.parse(poisJson) as TentaclePoi[];
+      for (const poi of pois) {
+        overlays.push({
+          kind: "marker",
+          id: `${prefix}-poi-${poi.id}`,
+          point: [poi.lat, poi.lng],
+          popup: poi.name,
+          style: {
+            color: MAP_ANNOTATION_COLORS.strokeLight,
+            fillColor: MAP_ANNOTATION_COLORS.tentacle,
+            markerRadius: 6,
+          },
+        });
+      }
+    } catch {
+      // Corrupt POI JSON: keep range/center markers, skip POIs.
     }
   }
 

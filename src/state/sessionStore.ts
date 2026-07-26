@@ -25,6 +25,85 @@ function structuredFieldEqual<T>(left: T, right: T): boolean {
   return false;
 }
 
+const SESSION_RECORD_STRUCTURED_KEYS = [
+  "gameArea",
+  "memberUids",
+  "memberRoles",
+  "disabledTools",
+  "thermometerPresetMiles",
+  "thermometerPresetMeters",
+  "customMatchingAreas",
+  "customCategories",
+  "customLocationPins",
+  "customMeasureGeometries",
+  "memberAppVersions",
+  "opsMitigation",
+] as const satisfies readonly (keyof SessionRecord)[];
+
+type SessionRecordStructuredKey =
+  (typeof SESSION_RECORD_STRUCTURED_KEYS)[number];
+
+const SESSION_RECORD_SCALAR_KEYS = [
+  "id",
+  "code",
+  "hostUid",
+  "createdAt",
+  "gameSize",
+  "distanceUnit",
+  "hidingZoneRadiusMeters",
+  "hidingPeriodMinutes",
+  "photoAnswerDeadlineMinutes",
+  "questionAnswerDeadlineMinutes",
+  "tentaclesEnabled",
+  "tentacleMediumRadiusMeters",
+  "tentacleLargeRadiusMeters",
+  "regionPackId",
+  "regionPackSubregionId",
+  "bundledGeoRevision",
+  "expansionPackEnabled",
+  "customQuestionPackEnabled",
+  "previewQuestionBeforeSend",
+  "tier",
+  "transitMetroId",
+  "endedAt",
+  "status",
+  "timerAccumulatedMs",
+  "timerRunningSince",
+  "endGameStartedAt",
+  "endGameStartedByUid",
+  "endGameRequestedAt",
+  "endGameRequestedByUid",
+  "foundRequestedAt",
+  "foundRequestedByUid",
+  "foundConfirmedAt",
+  "foundConfirmedByUid",
+  "gameOutcome",
+  "gameResultId",
+  "roundNumber",
+  "sessionResetAt",
+  "lastActiveAt",
+  "hostAppVersion",
+  "gameAreaLabel",
+  "requiredMinAppVersion",
+  "requiredMinAppVersionSetAt",
+  "requiredMinAppVersionGraceSeconds",
+] as const satisfies readonly (keyof SessionRecord)[];
+
+type SessionRecordScalarKey = (typeof SESSION_RECORD_SCALAR_KEYS)[number];
+
+type SessionRecordComparedKey =
+  | SessionRecordStructuredKey
+  | SessionRecordScalarKey;
+
+type _AssertSessionRecordEqualityComplete =
+  Exclude<keyof SessionRecord, SessionRecordComparedKey> extends never
+    ? true
+    : never;
+
+const _sessionRecordEqualityComplete: _AssertSessionRecordEqualityComplete =
+  true;
+void _sessionRecordEqualityComplete;
+
 function sessionRecordsEqual(
   left: SessionRecord | null,
   right: SessionRecord | null,
@@ -37,97 +116,20 @@ function sessionRecordsEqual(
     return false;
   }
 
-  return (
-    left.id === right.id &&
-    left.code === right.code &&
-    structuredFieldEqual(left.gameArea, right.gameArea) &&
-    left.hostUid === right.hostUid &&
-    left.createdAt === right.createdAt &&
-    structuredFieldEqual(left.memberUids, right.memberUids) &&
-    structuredFieldEqual(left.memberRoles, right.memberRoles) &&
-    left.gameSize === right.gameSize &&
-    left.distanceUnit === right.distanceUnit &&
-    left.hidingZoneRadiusMeters === right.hidingZoneRadiusMeters &&
-    left.hidingPeriodMinutes === right.hidingPeriodMinutes &&
-    left.photoAnswerDeadlineMinutes === right.photoAnswerDeadlineMinutes &&
-    left.questionAnswerDeadlineMinutes === right.questionAnswerDeadlineMinutes &&
-    structuredFieldEqual(left.disabledTools, right.disabledTools) &&
-    left.tentaclesEnabled === right.tentaclesEnabled &&
-    structuredFieldEqual(
-      left.thermometerPresetMiles,
-      right.thermometerPresetMiles,
-    ) &&
-    structuredFieldEqual(
-      left.thermometerPresetMeters,
-      right.thermometerPresetMeters,
-    ) &&
-    left.tentacleMediumRadiusMeters === right.tentacleMediumRadiusMeters &&
-    left.tentacleLargeRadiusMeters === right.tentacleLargeRadiusMeters &&
-    structuredFieldEqual(left.customMatchingAreas, right.customMatchingAreas) &&
-    structuredFieldEqual(left.customCategories, right.customCategories) &&
-    structuredFieldEqual(left.customLocationPins, right.customLocationPins) &&
-    structuredFieldEqual(
-      left.customMeasureGeometries,
-      right.customMeasureGeometries,
-    ) &&
-    left.regionPackId === right.regionPackId &&
-    left.regionPackSubregionId === right.regionPackSubregionId &&
-    left.bundledGeoRevision === right.bundledGeoRevision &&
-    left.expansionPackEnabled === right.expansionPackEnabled &&
-    left.customQuestionPackEnabled === right.customQuestionPackEnabled &&
-    left.previewQuestionBeforeSend === right.previewQuestionBeforeSend &&
-    left.tier === right.tier &&
-    left.transitMetroId === right.transitMetroId &&
-    left.endedAt === right.endedAt &&
-    left.status === right.status &&
-    left.timerAccumulatedMs === right.timerAccumulatedMs &&
-    left.timerRunningSince === right.timerRunningSince &&
-    left.endGameStartedAt === right.endGameStartedAt &&
-    left.endGameStartedByUid === right.endGameStartedByUid &&
-    left.endGameRequestedAt === right.endGameRequestedAt &&
-    left.endGameRequestedByUid === right.endGameRequestedByUid &&
-    left.hostAppVersion === right.hostAppVersion &&
-    structuredFieldEqual(left.memberAppVersions, right.memberAppVersions) &&
-    left.lastActiveAt === right.lastActiveAt &&
-    structuredFieldEqual(left.opsMitigation, right.opsMitigation) &&
-    left.requiredMinAppVersion === right.requiredMinAppVersion &&
-    left.requiredMinAppVersionSetAt === right.requiredMinAppVersionSetAt &&
-    left.requiredMinAppVersionGraceSeconds ===
-      right.requiredMinAppVersionGraceSeconds
-  );
+  for (const key of SESSION_RECORD_STRUCTURED_KEYS) {
+    if (!structuredFieldEqual(left[key], right[key])) {
+      return false;
+    }
+  }
+
+  for (const key of SESSION_RECORD_SCALAR_KEYS) {
+    if (left[key] !== right[key]) {
+      return false;
+    }
+  }
+
+  return true;
 }
-
-type SessionRecordStructuredKey =
-  | "gameArea"
-  | "memberUids"
-  | "memberRoles"
-  | "disabledTools"
-  | "thermometerPresetMiles"
-  | "thermometerPresetMeters"
-  | "customMatchingAreas"
-  | "customCategories"
-  | "customLocationPins"
-  | "customMeasureGeometries"
-  | "memberAppVersions"
-  | "opsMitigation";
-
-type SessionRecordScalarKey = Exclude<
-  keyof SessionRecord,
-  SessionRecordStructuredKey
->;
-
-type _AssertSessionRecordEqualityComplete =
-  SessionRecordScalarKey extends Exclude<keyof SessionRecord, SessionRecordStructuredKey>
-    ? SessionRecordStructuredKey extends Exclude<
-        keyof SessionRecord,
-        SessionRecordScalarKey
-      >
-      ? true
-      : never
-    : never;
-
-const _sessionRecordEqualityComplete: _AssertSessionRecordEqualityComplete = true;
-void _sessionRecordEqualityComplete;
 
 export type { MapTool } from "../domain/map/mapToolTypes";
 export { useAnnotationStore } from "./annotationStore";

@@ -257,4 +257,68 @@ describe("buildPendingQuestionOverlay", () => {
 
     expect(results).toHaveLength(2);
   });
+
+  it("skips corrupt measuring region JSON without failing the batch", () => {
+    const results = buildPendingQuestionOverlays(
+      [
+        basePendingQuestion({
+          id: "pq-measuring-bad",
+          toolType: "measuring",
+          placement: {
+            geometryJson: JSON.stringify({
+              type: "Feature",
+              properties: {},
+              geometry: {
+                type: "Point",
+                coordinates: [-0.15, 51.45],
+              },
+            }),
+            metadata: {
+              measuringRegionInputJson: "{not-json",
+            },
+          },
+        }),
+        basePendingQuestion({ id: "pq-radar-ok" }),
+      ],
+      gameArea,
+    );
+
+    expect(results.some((entry) => entry.questionId === "pq-radar-ok")).toBe(
+      true,
+    );
+    const measuring = results.find(
+      (entry) => entry.questionId === "pq-measuring-bad",
+    );
+    expect(measuring?.overlays.some((overlay) => overlay.kind === "marker")).toBe(
+      true,
+    );
+  });
+
+  it("skips corrupt tentacle pois JSON without failing the batch", () => {
+    const result = buildPendingQuestionOverlay(
+      basePendingQuestion({
+        id: "pq-tentacle-bad",
+        toolType: "tentacle",
+        placement: {
+          geometryJson: JSON.stringify({
+            type: "Feature",
+            properties: {},
+            geometry: {
+              type: "Point",
+              coordinates: [-0.15, 51.45],
+            },
+          }),
+          metadata: {
+            poisJson: "{not-json",
+          },
+        },
+      }),
+      gameArea,
+    );
+
+    expect(result).not.toBeNull();
+    expect(result?.overlays.some((overlay) => overlay.kind === "circle")).toBe(
+      true,
+    );
+  });
 });

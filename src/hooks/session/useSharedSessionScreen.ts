@@ -154,6 +154,7 @@ export function useSharedSessionScreen({
     onControl: onTimerControl,
     remoteState,
     remoteSnapshot,
+    sessionResetAt: session?.sessionResetAt,
   });
 
   useSeekingStartedActivity({

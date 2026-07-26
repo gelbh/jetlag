@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDesktopLayout } from "../../hooks/useDesktopLayout";
+import { useLatestRequest } from "../../hooks/useLatestRequest";
 import {
   acceptFriendRequest,
   cancelFriendRequest,
@@ -45,43 +46,69 @@ export function FriendsPanel() {
   const [busyUid, setBusyUid] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedUid, setSelectedUid] = useState<string | null>(null);
+  const cancelledRef = useRef(false);
+  const { beginRequest, isLatestRequest } = useLatestRequest();
 
   const refresh = useCallback(async () => {
     setLoadingList(true);
     setError(null);
     try {
       const next = await listFriends();
+      if (cancelledRef.current) {
+        return;
+      }
       setFriends(next.friends);
       setIncoming(next.incoming);
       setOutgoing(next.outgoing);
     } catch (nextError) {
+      if (cancelledRef.current) {
+        return;
+      }
       setError(
         nextError instanceof Error ? nextError.message : "Could not load friends.",
       );
     } finally {
-      setLoadingList(false);
+      if (!cancelledRef.current) {
+        setLoadingList(false);
+      }
     }
   }, []);
 
   useEffect(() => {
+    cancelledRef.current = false;
     /* eslint-disable react-hooks/set-state-in-effect -- initial friends list load */
     void refresh();
     /* eslint-enable react-hooks/set-state-in-effect */
+    return () => {
+      cancelledRef.current = true;
+    };
   }, [refresh]);
 
   const handleSearch = async () => {
+    if (searching) {
+      return;
+    }
+    const requestId = beginRequest();
     setSearching(true);
     setError(null);
     try {
       const next = await searchFriends(query);
+      if (!isLatestRequest(requestId) || cancelledRef.current) {
+        return;
+      }
       setSearchResults(next.results);
     } catch (nextError) {
+      if (!isLatestRequest(requestId) || cancelledRef.current) {
+        return;
+      }
       setSearchResults([]);
       setError(
         nextError instanceof Error ? nextError.message : "Search failed.",
       );
     } finally {
-      setSearching(false);
+      if (isLatestRequest(requestId) && !cancelledRef.current) {
+        setSearching(false);
+      }
     }
   };
 

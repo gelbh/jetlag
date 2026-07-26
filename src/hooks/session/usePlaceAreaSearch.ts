@@ -5,6 +5,7 @@ import {
   searchPlaces,
   type GeocodedPlace,
 } from "../../services/geo/geocoding";
+import { useLatestRequest } from "../useLatestRequest";
 
 interface UsePlaceAreaSearchOptions {
   initialQuery?: string;
@@ -22,6 +23,7 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const userLocationRef = useRef<LatLngTuple | null>(null);
+  const { beginRequest, isLatestRequest } = useLatestRequest();
 
   useEffect(() => {
     void getCurrentPosition({ highAccuracy: false })
@@ -60,6 +62,7 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
       return;
     }
 
+    const requestId = beginRequest();
     setSearchLoading(true);
     setSearchError(null);
 
@@ -68,6 +71,9 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
         trimmed,
         userLocationRef.current ? { near: userLocationRef.current } : undefined,
       );
+      if (!isLatestRequest(requestId)) {
+        return;
+      }
       if (results.length === 0) {
         setSearchResults([]);
         setSearchError("No matching places found. Try a more specific name.");
@@ -81,15 +87,20 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
 
       setSearchResults(results);
     } catch (nextError) {
+      if (!isLatestRequest(requestId)) {
+        return;
+      }
       setSearchError(
         nextError instanceof Error
           ? nextError.message
           : "Place search failed.",
       );
     } finally {
-      setSearchLoading(false);
+      if (isLatestRequest(requestId)) {
+        setSearchLoading(false);
+      }
     }
-  }, [applyPlace, locationQuery]);
+  }, [applyPlace, beginRequest, isLatestRequest, locationQuery]);
 
   const resetSearch = useCallback(() => {
     setLocationQueryState("");

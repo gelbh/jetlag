@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   IncidentMessageRecord,
   IncidentRecord,
@@ -29,6 +29,7 @@ export function useIncidentThread(
   const [messages, setMessages] = useState<IncidentMessageRecord[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [sending, setSending] = useState(false);
+  const sendInFlightRef = useRef(false);
   const [syncedIncidentId, setSyncedIncidentId] = useState(
     incidentId ?? null,
   );
@@ -77,10 +78,15 @@ export function useIncidentThread(
       if (!normalizedIncidentId) {
         throw new Error("No incident selected.");
       }
+      if (sendInFlightRef.current) {
+        return;
+      }
+      sendInFlightRef.current = true;
       setSending(true);
       try {
         await postIncidentMessage(normalizedIncidentId, text);
       } finally {
+        sendInFlightRef.current = false;
         setSending(false);
       }
     },

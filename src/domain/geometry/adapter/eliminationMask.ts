@@ -159,9 +159,13 @@ function eliminationFeatureKernelTs(
       return null;
     }
 
+    if (typeof annotation.metadata.inside !== "boolean") {
+      return null;
+    }
+
     const center: LatLngTuple = [geometry.coordinates[1], geometry.coordinates[0]];
     const radiusMeters = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
-    const shadedInside = annotation.metadata.inside === true;
+    const shadedInside = annotation.metadata.inside;
 
     if (shadedInside) {
       return null;
@@ -226,9 +230,13 @@ export async function eliminationFeatureForAnnotation(
       return null;
     }
 
+    if (typeof annotation.metadata.inside !== "boolean") {
+      return null;
+    }
+
     const center: LatLngTuple = [geometry.coordinates[1], geometry.coordinates[0]];
     const radiusMeters = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
-    const shadedInside = annotation.metadata.inside === true;
+    const shadedInside = annotation.metadata.inside;
 
     if (shadedInside) {
       return null;

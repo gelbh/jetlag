@@ -90,10 +90,9 @@ function openDatabase(): Promise<IDBDatabase> {
       reject(request.error ?? new Error("IndexedDB open failed"));
     };
 
-    request.onblocked = () => {
-      databasePromise = null;
-      reject(new Error("IndexedDB upgrade blocked."));
-    };
+    // Wait for onsuccess/onerror — rejecting onblocked abandons a promise that
+    // may still succeed, leaving a dangling open handle and a null cache.
+    request.onblocked = () => {};
   });
 
   return databasePromise;

@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createTestGameArea } from "../../test/fixtures/sessions";
 import { useGameAreaFraming } from "./useGameAreaFraming";
 
 const mockBounds = {
@@ -102,5 +103,40 @@ describe("useGameAreaFraming", () => {
     expect(result.current.circleCenter).toBeNull();
     expect(result.current.manualGameArea).toBeNull();
     expect(result.current.userFramed).toBe(true);
+  });
+
+  describe("viewport suppress timeout", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("keeps suppression armed until the latest focus duration elapses", () => {
+      const { result } = renderHook(() => useGameAreaFraming());
+      const area = createTestGameArea();
+
+      act(() => {
+        result.current.applyFocusToGameArea(area);
+      });
+      expect(result.current.ignoreViewportUpdatesRef.current).toBe(true);
+
+      act(() => {
+        vi.advanceTimersByTime(300);
+        result.current.applyFocusToGameArea(area);
+      });
+
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
+      expect(result.current.ignoreViewportUpdatesRef.current).toBe(true);
+
+      act(() => {
+        vi.advanceTimersByTime(200);
+      });
+      expect(result.current.ignoreViewportUpdatesRef.current).toBe(false);
+    });
   });
 });

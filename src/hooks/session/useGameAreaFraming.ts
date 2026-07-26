@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LatLngBounds, LatLngBoundsExpression } from "leaflet";
 import { LatLngBounds as LeafletLatLngBounds } from "leaflet";
 import type { GameArea } from "../../domain/map/annotations";
@@ -76,6 +76,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
     Boolean(options.initialGameArea) || !options.initialFocusBounds,
   );
   const ignoreViewportUpdatesRef = useRef(false);
+  const suppressTimeoutRef = useRef<number | null>(null);
   const boundsRef = useRef<LatLngBounds | null>(
     options.initialFocusBounds
       ? boundingBoxToLeafletBounds(options.initialFocusBounds)
@@ -84,10 +85,23 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
 
   const suppressViewportUpdates = useCallback((durationMs = 600) => {
     ignoreViewportUpdatesRef.current = true;
-    window.setTimeout(() => {
+    if (suppressTimeoutRef.current !== null) {
+      window.clearTimeout(suppressTimeoutRef.current);
+    }
+    suppressTimeoutRef.current = window.setTimeout(() => {
       ignoreViewportUpdatesRef.current = false;
+      suppressTimeoutRef.current = null;
     }, durationMs);
   }, []);
+
+  useEffect(
+    () => () => {
+      if (suppressTimeoutRef.current !== null) {
+        window.clearTimeout(suppressTimeoutRef.current);
+      }
+    },
+    [],
+  );
 
   const computeManualGameArea = useCallback(
     (
