@@ -1,4 +1,6 @@
 import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
@@ -6,6 +8,8 @@ import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 import wasm from "vite-plugin-wasm";
 import { optionalKernelWasmPkg } from "./vite.optional-kernel-wasm-pkg";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const appVersion = (
   JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as {
@@ -19,6 +23,11 @@ const sentryProject = process.env.SENTRY_PROJECT;
 
 
 export default defineConfig(({ mode }) => ({
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+    },
+  },
   server: {
     // Avoid colliding with `vite preview` / Playwright (4173), which registers a SW.
     port: 5173,

@@ -5,7 +5,7 @@ import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import type { MapStyle } from "../../map/mapBasemaps";
 import { buildSameNearestRegion } from "../../geometry/matchingGeometry";
 import type { PendingQuestionRecord } from "../../session/sessionChat";
-import { deserializeMatchingFeatures } from "../../../domain/geo/matchingAdapters";
+import { deserializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import { pushBoundaryOverlay, type OverlayBuildResult } from "./shared";
 
 export function buildMatchingOverlays(

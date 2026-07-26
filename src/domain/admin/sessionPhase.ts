@@ -1,4 +1,4 @@
-import type { AdminSessionPhase } from "../../services/admin/adminSessions";
+import type { AdminSessionPhase } from "@/services/admin/adminSessions";
 
 export function adminSessionPhaseLabel(phase: AdminSessionPhase): string {
   switch (phase) {

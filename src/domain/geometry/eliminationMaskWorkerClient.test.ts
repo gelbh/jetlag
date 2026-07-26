@@ -29,7 +29,7 @@ vi.mock("comlink", () => ({
   })),
 }));
 
-vi.mock("../../config/env", () => ({
+vi.mock("@/config/env", () => ({
   getClientEnv: () => getClientEnv(),
 }));
 

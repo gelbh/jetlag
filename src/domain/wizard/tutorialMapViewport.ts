@@ -1,9 +1,9 @@
 import type { GameArea } from "../map/annotations";
 import type { LatLngTuple } from "../geometry/geometry";
 import { gameAreaToBoundingBox } from "../geometry/gameAreaBounds";
-import type { GeocodedPlace } from "../../services/geo/geocoding";
-import { reverseGeocodePoint } from "../../services/geo/geocoding";
-import { getCurrentPosition } from "../../services/core/geolocation";
+import type { GeocodedPlace } from "@/services/geo/geocoding";
+import { reverseGeocodePoint } from "@/services/geo/geocoding";
+import { getCurrentPosition } from "@/services/core/geolocation";
 import { TUTORIAL_DUBLIN_GAME_AREA } from "./tutorialGameArea";
 
 /** Nominatim zoom: 4 ≈ state/province/canton; 3 ≈ country. */

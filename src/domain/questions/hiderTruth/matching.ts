@@ -1,12 +1,12 @@
 import type { GameArea } from "../../map/annotations";
 import type { LatLngTuple } from "../../geometry/geometry";
-import { classifyAdminDivisionAtPoint } from "../../../services/geo/adminDivisionBoundaries";
-import { classifyLandmassAtPoint } from "../../../services/geo/landmassFeatures";
+import { classifyAdminDivisionAtPoint } from "@/services/geo/adminDivisionBoundaries";
+import { classifyLandmassAtPoint } from "@/services/geo/landmassFeatures";
 import {
   gtfsStopsShareStationOrRoute,
   loadGtfsBundle,
   nearestGtfsStopInGameArea,
-} from "../../../services/transit/gtfsRouteGraph";
+} from "@/services/transit/gtfsRouteGraph";
 import type { PendingQuestionRecord } from "../../session/sessionChat";
 import {
   deserializeMatchingFeatures,

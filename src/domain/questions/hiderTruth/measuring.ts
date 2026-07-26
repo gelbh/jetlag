@@ -4,7 +4,7 @@ import {
   type LatLngTuple,
 } from "../../geometry/geometry";
 import type { MeasuringRegionInput } from "../../geometry/measuringRegions";
-import { fetchElevations } from "../../../services/geo/elevation";
+import { fetchElevations } from "@/services/geo/elevation";
 import type { PendingQuestionRecord } from "../../session/sessionChat";
 import { isMeasuringLinearLocation } from "../measuringQuestions";
 import {
