@@ -183,6 +183,20 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
     [decorativeAnimate, navigate],
   );
 
+  const resetStuckTransition = useCallback(() => {
+    if (phaseRef.current !== "loading" && phaseRef.current !== "revealing") {
+      return;
+    }
+
+    transitionGenerationRef.current += 1;
+    loadingTargetRef.current = null;
+    loadingTargetPathRef.current = null;
+    phaseRef.current = "idle";
+    setPhase("idle");
+    setLoadingReason(null);
+    setLoadingProgress(null);
+  }, []);
+
   const beginTransition = useCallback(
     async (to: To, options?: BeginTransitionOptions) => {
       const startedAt = Date.now();
@@ -323,8 +337,16 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
       loadingProgress,
       beginTransition,
       reportScreenReady,
+      resetStuckTransition,
     }),
-    [phase, loadingReason, loadingProgress, beginTransition, reportScreenReady],
+    [
+      phase,
+      loadingReason,
+      loadingProgress,
+      beginTransition,
+      reportScreenReady,
+      resetStuckTransition,
+    ],
   );
 
   return (

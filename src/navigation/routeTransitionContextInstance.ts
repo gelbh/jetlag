@@ -16,6 +16,7 @@ export interface RouteTransitionContextValue {
   loadingProgress: RouteLoadingProgress | null;
   beginTransition: (to: To, options?: BeginTransitionOptions) => Promise<void>;
   reportScreenReady: (ready: boolean) => void;
+  resetStuckTransition: () => void;
 }
 
 export const RouteTransitionContext =
