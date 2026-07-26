@@ -58,15 +58,13 @@ export function AdminPresetMenu({
     if (!manageOpen) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      setManageOpen(false);
-      manageTriggerRef.current?.focus();
+      closeManage();
     };
     const onPointer = (event: MouseEvent) => {
       const root = manageAnchorRef.current;
       if (!root || !(event.target instanceof Node)) return;
       if (root.contains(event.target)) return;
-      setManageOpen(false);
-      manageTriggerRef.current?.focus();
+      closeManage();
     };
     window.addEventListener("keydown", onKey);
     window.addEventListener("mousedown", onPointer);
@@ -122,7 +120,8 @@ export function AdminPresetMenu({
               type="button"
               className="jl-ops-preset-drag jl-ops-drag-handle"
               draggable
-              aria-label={`Reorder ${label}`}
+              aria-hidden="true"
+              tabIndex={-1}
               onDragStart={(event) => handleDragStart(event, presetId)}
               onDragEnd={handleDragEnd}
             >

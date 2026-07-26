@@ -27,7 +27,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Improvements",
         items: [
-          "Admin ops desk: denser preset chips with drag reorder, split-hit default star, and a Manage list",
+          "Admin ops desk: preset chips take less space, and you can drag to reorder, choose a default, and manage presets from one list",
           "Admin ops desk: always show both spectator map layers, polish panel resize/drag, resolve/dismiss incidents from the queue, and hide admin prompts from player incident chat",
           "Admin ops desk: denser grid, no horizontal scroll, hover resize handles, place-from-empty, and preset default/reorder/edit",
           "Map: add Light and Dark street basemap themes (Light default), keep Map↔Satellite toggle, and soften satellite tiles under the HUD",

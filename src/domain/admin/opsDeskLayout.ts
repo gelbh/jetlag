@@ -448,7 +448,7 @@ export function movePresetToIndex(
   if (fromIndex === toIndex) return null;
   const next = [...orderedIds];
   const [item] = next.splice(fromIndex, 1);
-  if (!item) return null;
+  if (item === undefined) return null;
   next.splice(toIndex, 0, item);
   return next;
 }
