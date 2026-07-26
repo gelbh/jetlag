@@ -188,7 +188,9 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
           // Registration failures are handled by the browser.
         },
       });
-      setUpdateSW(() => applyUpdateFn);
+      if (!cancelled) {
+        setUpdateSW(() => applyUpdateFn);
+      }
     });
 
     const handleVisibility = () => {
