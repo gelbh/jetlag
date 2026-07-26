@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ChangelogEntry } from "./changelog";
+import type { ChangelogEntry } from "../changelog";
 import {
   buildGroupSummary,
   filterUserFacingChangelog,
