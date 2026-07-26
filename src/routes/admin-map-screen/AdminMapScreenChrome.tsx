@@ -1,12 +1,7 @@
 import { SessionTimerLabel } from "../../components/session/SessionTimerLabel";
 import { SyncStatusBeacon } from "../../components/session/SyncStatusDot";
 import { syncBeaconAriaLabel } from "../../components/session/status/syncRailDisplay";
-import { SegmentControl } from "../../components/ui/SegmentControl";
 import { HudHomeIcon } from "../../components/ui/HudIcons";
-import {
-  OBSERVER_PERSPECTIVE_OPTIONS,
-  type ObserverPerspective,
-} from "../../domain/session/observerPerspective";
 import { playerRoleLabel } from "../../domain/session/playerRole";
 import type { PlayerRole } from "../../domain/session/playerRole";
 import type { SessionRecord } from "../../domain/map/annotations";
@@ -21,8 +16,6 @@ interface AdminMapScreenChromeProps {
   myRole: PlayerRole;
   timer: ReturnType<typeof useSessionTimer>;
   overlay: UseMapOverlayStateResult;
-  perspective: ObserverPerspective;
-  onPerspectiveChange: (perspective: ObserverPerspective) => void;
   onLeave: () => void;
   isWide: boolean;
   syncStatus: SyncStatus;
@@ -38,8 +31,6 @@ export function AdminMapScreenChrome({
   myRole,
   timer,
   overlay,
-  perspective,
-  onPerspectiveChange,
   onLeave,
   isWide,
   syncStatus,
@@ -76,16 +67,6 @@ export function AdminMapScreenChrome({
               >
                 {roleLabel}
               </span>
-
-              <div className="hidden min-w-[10rem] flex-1 sm:block">
-                <SegmentControl
-                  value={perspective}
-                  options={OBSERVER_PERSPECTIVE_OPTIONS}
-                  onChange={onPerspectiveChange}
-                  aria-label="Spectator perspective"
-                  variant="pill"
-                />
-              </div>
 
               <span
                 className="inline-flex shrink-0 items-center gap-1.5 text-[0.6875rem] font-semibold uppercase tracking-wide text-ink-muted"
@@ -192,15 +173,6 @@ export function AdminMapScreenChrome({
   const toolbar = (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-dock)] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <div className="pointer-events-auto mx-auto flex max-w-xl flex-col gap-2">
-        <div className="rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
-          <SegmentControl
-            value={perspective}
-            options={OBSERVER_PERSPECTIVE_OPTIONS}
-            onChange={onPerspectiveChange}
-            aria-label="Spectator perspective"
-            variant="pill"
-          />
-        </div>
         <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
           <button
             type="button"

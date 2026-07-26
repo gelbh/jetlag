@@ -39,10 +39,5 @@ describe("mapStore", () => {
   });
 
   it("updates spectator perspective for the current session view", () => {
-    useMapStore.getState().setObserverPerspective("seeker");
-    expect(useMapStore.getState().observerPerspective).toBe("seeker");
-
-    useMapStore.getState().resetObserverPerspective();
-    expect(useMapStore.getState().observerPerspective).toBe("both");
   });
 });

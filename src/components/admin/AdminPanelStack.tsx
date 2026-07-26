@@ -4,9 +4,15 @@ import {
   type GridStack,
   type PanelId,
 } from "../../domain/admin/opsDeskLayout";
+import {
+  HudCloseIcon,
+  HudCollapseIcon,
+  HudExpandIcon,
+  HudPinIcon,
+} from "../ui/HudIcons";
 import { AdminPanelBody, type AdminPanelBodies } from "./AdminPanelBody";
 
-const MERGE_MIME = "application/x-jl-ops-panel";
+export const OPS_PANEL_MIME = "application/x-jl-ops-panel";
 
 export type PanelMergePayload = {
   sourceStackId: string;
@@ -23,6 +29,11 @@ interface AdminPanelStackProps {
   onMergePanel: (
     targetStackId: string,
     payload: PanelMergePayload,
+  ) => void;
+  onReorderPanel: (
+    stackId: string,
+    fromIndex: number,
+    toIndex: number,
   ) => void;
   dropTargetStackId: string | null;
   onDropTargetChange: (stackId: string | null) => void;
@@ -43,6 +54,7 @@ export function AdminPanelStack({
   onCollapseToggle,
   onCloseActive,
   onMergePanel,
+  onReorderPanel,
   dropTargetStackId,
   onDropTargetChange,
 }: AdminPanelStackProps) {
@@ -56,12 +68,12 @@ export function AdminPanelStack({
       sourceStackId: stack.id,
       panelId,
     };
-    event.dataTransfer.setData(MERGE_MIME, JSON.stringify(payload));
+    event.dataTransfer.setData(OPS_PANEL_MIME, JSON.stringify(payload));
     event.dataTransfer.effectAllowed = "move";
   };
 
   const handleDragOver = (event: DragEvent) => {
-    if (![...event.dataTransfer.types].includes(MERGE_MIME)) return;
+    if (![...event.dataTransfer.types].includes(OPS_PANEL_MIME)) return;
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
     onDropTargetChange(stack.id);
@@ -73,24 +85,38 @@ export function AdminPanelStack({
     }
   };
 
-  const handleDrop = (event: DragEvent) => {
-    event.preventDefault();
-    onDropTargetChange(null);
-    const raw = event.dataTransfer.getData(MERGE_MIME);
-    if (!raw) return;
+  const applyDrop = (raw: string, toIndex: number | null) => {
     try {
       const payload = JSON.parse(raw) as PanelMergePayload;
-      if (
-        !payload?.sourceStackId ||
-        !payload?.panelId ||
-        payload.sourceStackId === stack.id
-      ) {
+      if (!payload?.sourceStackId || !payload?.panelId) return;
+
+      if (payload.sourceStackId === stack.id) {
+        const fromIndex = stack.panelIds.indexOf(payload.panelId);
+        if (fromIndex < 0 || toIndex === null) return;
+        onReorderPanel(stack.id, fromIndex, toIndex);
         return;
       }
+
       onMergePanel(stack.id, payload);
     } catch {
       // ignore malformed drag payload
     }
+  };
+
+  const handleDrop = (event: DragEvent) => {
+    event.preventDefault();
+    onDropTargetChange(null);
+    const raw = event.dataTransfer.getData(OPS_PANEL_MIME);
+    if (!raw) return;
+    const target = event.target as HTMLElement | null;
+    const tab = target?.closest?.("[data-tab-index]") as HTMLElement | null;
+    const toIndex =
+      tab?.dataset.tabIndex !== undefined
+        ? Number(tab.dataset.tabIndex)
+        : multi
+          ? stack.panelIds.length - 1
+          : null;
+    applyDrop(raw, Number.isFinite(toIndex) ? toIndex : null);
   };
 
   let titleNode: ReactNode;
@@ -103,6 +129,7 @@ export function AdminPanelStack({
             type="button"
             role="tab"
             aria-selected={index === stack.activeIndex}
+            data-tab-index={index}
             className={
               index === stack.activeIndex
                 ? "jl-ops-tab jl-ops-tab--active"
@@ -110,6 +137,7 @@ export function AdminPanelStack({
             }
             draggable
             onDragStart={(event) => handleDragStart(event, panelId)}
+            onDragOver={handleDragOver}
             onClick={() => onActiveIndexChange(stack.id, index)}
           >
             {PANEL_LABELS[panelId]}
@@ -163,7 +191,7 @@ export function AdminPanelStack({
             aria-label={stack.pinned ? "Unpin panel" : "Pin panel"}
             onClick={() => onPinToggle(stack.id)}
           >
-            Pin
+            <HudPinIcon className="size-4" />
           </button>
           <button
             type="button"
@@ -172,7 +200,11 @@ export function AdminPanelStack({
             aria-label={stack.collapsed ? "Expand panel" : "Collapse panel"}
             onClick={() => onCollapseToggle(stack.id)}
           >
-            {stack.collapsed ? "Open" : "Hide"}
+            {stack.collapsed ? (
+              <HudExpandIcon className="size-4" />
+            ) : (
+              <HudCollapseIcon className="size-4" />
+            )}
           </button>
           <button
             type="button"
@@ -180,7 +212,7 @@ export function AdminPanelStack({
             aria-label="Close panel"
             onClick={() => onCloseActive(stack.id)}
           >
-            Close
+            <HudCloseIcon className="size-4" />
           </button>
         </div>
       </header>

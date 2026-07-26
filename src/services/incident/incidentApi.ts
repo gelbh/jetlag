@@ -116,6 +116,33 @@ export async function applyIncidentMitigation(
   }
 }
 
+export interface UpdateIncidentStatusResult {
+  status: IncidentStatus;
+}
+
+export async function updateIncidentStatus(
+  incidentId: string,
+  status: Extract<IncidentStatus, "resolved" | "dismissed" | "chatting">,
+): Promise<UpdateIncidentStatusResult> {
+  requireFirebase();
+
+  const functions = await getFirebaseFunctions();
+  const callable = httpsCallable<
+    {
+      incidentId: string;
+      status: Extract<IncidentStatus, "resolved" | "dismissed" | "chatting">;
+    },
+    UpdateIncidentStatusResult
+  >(functions, "updateIncidentStatus");
+
+  try {
+    const result = await callable({ incidentId, status });
+    return result.data;
+  } catch (error) {
+    throw mapCallableError(error, "Could not update the incident status.");
+  }
+}
+
 export interface PublishIncidentHotfixResult {
   toVersion: string;
   graceSeconds: number;

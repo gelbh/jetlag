@@ -31,6 +31,8 @@ describe("AdminGridWorkspace", () => {
         }}
         onLayoutChange={vi.fn()}
         onMergePanel={vi.fn()}
+        onReorderPanel={vi.fn()}
+        onUnstackPanel={vi.fn()}
         onActiveIndexChange={vi.fn()}
         onPinToggle={vi.fn()}
         onCollapseToggle={vi.fn()}
@@ -41,5 +43,6 @@ describe("AdminGridWorkspace", () => {
     expect(screen.getByText("Sessions")).toBeInTheDocument();
     expect(screen.getByText("Inbox")).toBeInTheDocument();
     expect(screen.getByTestId("admin-ops-grid")).toBeInTheDocument();
+    expect(screen.getAllByLabelText("Pin panel").length).toBeGreaterThan(0);
   });
 });

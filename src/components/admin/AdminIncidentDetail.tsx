@@ -128,9 +128,8 @@ function AdminIncidentDetailBody({
     () =>
       messages.filter(
         (message) =>
-          message.kind === "chat" ||
-          message.kind === "prompt" ||
-          message.sender === "system",
+          message.kind !== "prompt" &&
+          (message.kind === "chat" || message.sender === "system"),
       ),
     [messages],
   );

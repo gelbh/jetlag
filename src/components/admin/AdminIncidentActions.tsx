@@ -1,5 +1,8 @@
 import { useState } from "react";
-import type { IncidentMitigationType } from "../../domain/incident/incidentTypes";
+import type {
+  IncidentMitigationType,
+  IncidentStatus,
+} from "../../domain/incident/incidentTypes";
 import { APP_VERSION } from "../../domain/device/changelog";
 import {
   DEFAULT_HOTFIX_GRACE_SECONDS,
@@ -8,20 +11,34 @@ import {
 import {
   applyIncidentMitigation,
   publishIncidentHotfix,
+  updateIncidentStatus,
 } from "../../services/incident/incidentApi";
+
+const CLOSEABLE = new Set<IncidentStatus>([
+  "open",
+  "chatting",
+  "mitigating",
+  "hotfix_pending",
+]);
+
+const REOPENABLE = new Set<IncidentStatus>(["resolved", "dismissed"]);
 
 export interface AdminIncidentActionsProps {
   incidentId: string | null;
+  status?: IncidentStatus | null;
   disabled?: boolean;
   applyMitigationFn?: typeof applyIncidentMitigation;
   publishHotfixFn?: typeof publishIncidentHotfix;
+  updateStatusFn?: typeof updateIncidentStatus;
 }
 
 export function AdminIncidentActions({
   incidentId,
+  status = null,
   disabled = false,
   applyMitigationFn = applyIncidentMitigation,
   publishHotfixFn = publishIncidentHotfix,
+  updateStatusFn = updateIncidentStatus,
 }: AdminIncidentActionsProps) {
   const [mitigationType, setMitigationType] =
     useState<IncidentMitigationType>("soft_reload");
@@ -37,7 +54,13 @@ export function AdminIncidentActions({
   const [hotfixError, setHotfixError] = useState<string | null>(null);
   const [hotfixOk, setHotfixOk] = useState<string | null>(null);
 
+  const [statusBusy, setStatusBusy] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const [statusOk, setStatusOk] = useState<string | null>(null);
+
   const actionsDisabled = disabled || !incidentId;
+  const canClose = status != null && CLOSEABLE.has(status);
+  const canReopen = status != null && REOPENABLE.has(status);
 
   const onApplyMitigation = async () => {
     if (!incidentId) {
@@ -93,10 +116,80 @@ export function AdminIncidentActions({
     }
   };
 
+  const onUpdateStatus = async (
+    next: Extract<IncidentStatus, "resolved" | "dismissed" | "chatting">,
+  ) => {
+    if (!incidentId) {
+      return;
+    }
+    setStatusBusy(true);
+    setStatusError(null);
+    setStatusOk(null);
+    try {
+      const result = await updateStatusFn(incidentId, next);
+      setStatusOk(`Status set to ${result.status}.`);
+    } catch (error) {
+      setStatusError(
+        error instanceof Error
+          ? error.message
+          : "Could not update the incident status.",
+      );
+    } finally {
+      setStatusBusy(false);
+    }
+  };
+
   return (
     <aside className="jl-incident-actions" aria-label="Incident actions">
       <div className="jl-incident-pane-header">
         <h2 className="jl-incident-pane-title">Actions</h2>
+      </div>
+
+      <div className="jl-incident-module">
+        <h3 className="jl-incident-module-title">0 · Queue</h3>
+        {statusError ? (
+          <p className="text-sm font-semibold text-status-error" role="alert">
+            {statusError}
+          </p>
+        ) : null}
+        {statusOk ? (
+          <p className="text-sm text-status-success">{statusOk}</p>
+        ) : null}
+        {canClose ? (
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn-primary uppercase"
+              disabled={actionsDisabled || statusBusy}
+              onClick={() => void onUpdateStatus("resolved")}
+            >
+              {statusBusy ? "Updating…" : "Resolve"}
+            </button>
+            <button
+              type="button"
+              className="btn-secondary uppercase"
+              disabled={actionsDisabled || statusBusy}
+              onClick={() => void onUpdateStatus("dismissed")}
+            >
+              Dismiss
+            </button>
+          </div>
+        ) : null}
+        {canReopen ? (
+          <button
+            type="button"
+            className="btn-primary uppercase"
+            disabled={actionsDisabled || statusBusy}
+            onClick={() => void onUpdateStatus("chatting")}
+          >
+            {statusBusy ? "Updating…" : "Reopen"}
+          </button>
+        ) : null}
+        {!canClose && !canReopen ? (
+          <p className="jl-incident-module-hint">
+            Select an incident to resolve, dismiss, or reopen.
+          </p>
+        ) : null}
       </div>
 
       <div className="jl-incident-module">

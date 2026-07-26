@@ -21,7 +21,7 @@ export function useAdminJoinSession(options: UseAdminJoinSessionOptions = {}) {
 
   const joinSession = useCallback(
     async (
-      summary: AdminSessionSummary,
+      summary: Pick<AdminSessionSummary, "sessionId" | "code">,
       options: { navigate?: boolean } = {},
     ) => {
       const navigateToMap = options.navigate !== false;

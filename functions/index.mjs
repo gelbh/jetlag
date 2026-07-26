@@ -43,6 +43,7 @@ export {
   postIncidentMessage,
   postSupportAgentTurn,
   publishIncidentHotfix,
+  updateIncidentStatus,
 } from "./handlers/incident.mjs";
 
 export { listActiveSessions } from "./admin/listActiveSessions.mjs";

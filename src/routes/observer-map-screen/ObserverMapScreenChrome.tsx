@@ -3,12 +3,7 @@ import { AppLink } from "../../components/navigation/AppLink";
 import { ContextualRail } from "../../components/map/ContextualRail";
 import type { ContextualRailTab } from "../../components/map/ContextualRailContext";
 import { SessionTimerLabel } from "../../components/session/SessionTimerLabel";
-import { SegmentControl } from "../../components/ui/SegmentControl";
 import { HudHomeIcon } from "../../components/ui/HudIcons";
-import {
-  OBSERVER_PERSPECTIVE_OPTIONS,
-  type ObserverPerspective,
-} from "../../domain/session/observerPerspective";
 import { playerRoleLabel } from "../../domain/session/playerRole";
 import type { PlayerRole } from "../../domain/session/playerRole";
 import type { SessionRecord } from "../../domain/map/annotations";
@@ -23,8 +18,6 @@ interface ObserverMapScreenChromeProps {
   myRole: PlayerRole;
   timer: ReturnType<typeof useSessionTimer>;
   overlay: UseMapOverlayStateResult;
-  perspective: ObserverPerspective;
-  onPerspectiveChange: (perspective: ObserverPerspective) => void;
   onLeave: () => void;
   /** When set with desktop layout, map fills the ops shell center slot. */
   mapSlot?: ReactNode;
@@ -35,8 +28,6 @@ export function ObserverMapScreenChrome({
   myRole,
   timer,
   overlay,
-  perspective,
-  onPerspectiveChange,
   onLeave,
   mapSlot,
 }: ObserverMapScreenChromeProps) {
@@ -78,17 +69,6 @@ export function ObserverMapScreenChrome({
           <HudHomeIcon className="size-5" />
         </button>
       </div>
-      {isDesktop ? (
-        <div className="pointer-events-auto mx-auto mt-2 max-w-xl rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
-          <SegmentControl
-            value={perspective}
-            options={OBSERVER_PERSPECTIVE_OPTIONS}
-            onChange={onPerspectiveChange}
-            aria-label="Spectator perspective"
-            variant="pill"
-          />
-        </div>
-      ) : null}
     </div>
   );
 
@@ -169,15 +149,6 @@ export function ObserverMapScreenChrome({
   const mobileToolbar = (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-dock)] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <div className="pointer-events-auto mx-auto flex max-w-xl flex-col gap-2">
-        <div className="rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
-          <SegmentControl
-            value={perspective}
-            options={OBSERVER_PERSPECTIVE_OPTIONS}
-            onChange={onPerspectiveChange}
-            aria-label="Spectator perspective"
-            variant="pill"
-          />
-        </div>
         <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
           {logChatActions}
         </div>

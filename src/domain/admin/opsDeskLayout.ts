@@ -123,6 +123,46 @@ export function mergePanelOntoStack(
   return next;
 }
 
+export function reorderPanelInStack(
+  layout: DeskLayout,
+  stackId: StackId,
+  fromIndex: number,
+  toIndex: number,
+): DeskLayout {
+  const found = findStack(layout, stackId);
+  if (!found) return layout;
+
+  const { panelIds, activeIndex } = found.stack;
+  const len = panelIds.length;
+  if (len === 0) return layout;
+  if (fromIndex === toIndex) return layout;
+  if (fromIndex < 0 || fromIndex >= len) return layout;
+
+  const clampedTo = Math.min(Math.max(0, toIndex), len - 1);
+  if (fromIndex === clampedTo) return layout;
+
+  const next = cloneLayout(layout);
+  const stack = next.stacks[found.index]!;
+  const ids = [...stack.panelIds];
+  const [moved] = ids.splice(fromIndex, 1);
+  if (moved === undefined) return layout;
+  ids.splice(clampedTo, 0, moved);
+
+  let nextActive = activeIndex;
+  const activeId = stack.panelIds[activeIndex];
+  if (activeId !== undefined) {
+    const idx = ids.indexOf(activeId);
+    nextActive = idx >= 0 ? idx : activeIndex;
+  }
+
+  next.stacks[found.index] = clampActiveIndex({
+    ...stack,
+    panelIds: ids,
+    activeIndex: nextActive,
+  });
+  return next;
+}
+
 export function unstackPanelToCell(
   layout: DeskLayout,
   stackId: StackId,

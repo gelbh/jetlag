@@ -64,8 +64,6 @@ function mockController(): ObserverMapScreenController {
       tentacle: true,
       transit: true,
     },
-    observerPerspective: "both" as const,
-    setObserverPerspective: vi.fn(),
     spectatorLayers: {
       chatDisplayRole: "admin" as const,
       showSeekerPins: true,

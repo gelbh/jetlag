@@ -25,10 +25,12 @@ import {
   hidePanel,
   layoutsEqual,
   mergePanelOntoStack,
+  reorderPanelInStack,
   resolvePresetLayout,
   setCollapsed,
   setPinned,
   setStackActiveIndex,
+  unstackPanelToCell,
   upsertUserPreset,
   type DeskLayout,
   type PanelId,
@@ -305,7 +307,7 @@ export function AdminOpsDesk() {
     activeRole === "admin";
 
   const handleMonitor = useCallback(
-    async (summary: AdminSessionSummary) => {
+    async (summary: Pick<AdminSessionSummary, "sessionId" | "code">) => {
       const requestId = ++monitorRequestRef.current;
       setObserveError(null);
       setSelectedSessionId(summary.sessionId);
@@ -330,6 +332,41 @@ export function AdminOpsDesk() {
     },
     [isDesktop, joinSession, setObserveError],
   );
+
+  const incidentMonitorKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!isDesktop || !selectedIncidentId) {
+      return;
+    }
+    const incident = incidents.find((row) => row.id === selectedIncidentId);
+    if (!incident?.sessionId || !incident.sessionCode) {
+      return;
+    }
+    if (monitorSessionId === incident.sessionId) {
+      incidentMonitorKeyRef.current = selectedIncidentId;
+      return;
+    }
+    if (incidentMonitorKeyRef.current === selectedIncidentId) {
+      return;
+    }
+    incidentMonitorKeyRef.current = selectedIncidentId;
+
+    const fromList = sessions.find((row) => row.sessionId === incident.sessionId);
+    const summary = fromList ?? {
+      sessionId: incident.sessionId,
+      code: incident.sessionCode,
+    };
+
+    void handleMonitor(summary);
+  }, [
+    handleMonitor,
+    incidents,
+    isDesktop,
+    monitorSessionId,
+    selectedIncidentId,
+    sessions,
+  ]);
 
   const handleSelectIncident = (incidentId: string) => {
     void navigate(`/admin/incidents/${encodeURIComponent(incidentId)}`);
@@ -509,6 +546,10 @@ export function AdminOpsDesk() {
       <div className="jl-ops-panel-scroll jl-ops-panel-scroll--flush">
         <AdminIncidentActions
           incidentId={selectedIncidentId}
+          status={
+            visibleIncidents.find((row) => row.id === selectedIncidentId)
+              ?.status ?? null
+          }
           disabled={!selectedIncidentId}
         />
       </div>
@@ -621,6 +662,16 @@ export function AdminOpsDesk() {
                     payload.panelId,
                     targetStackId,
                   ),
+                );
+              }}
+              onReorderPanel={(stackId, fromIndex, toIndex) => {
+                mutateLayout((layout) =>
+                  reorderPanelInStack(layout, stackId, fromIndex, toIndex),
+                );
+              }}
+              onUnstackPanel={(sourceStackId, panelId, x, y, w, h) => {
+                mutateLayout((layout) =>
+                  unstackPanelToCell(layout, sourceStackId, panelId, x, y, w, h),
                 );
               }}
               onActiveIndexChange={(stackId, activeIndex) => {

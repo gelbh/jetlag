@@ -33,6 +33,11 @@ import {
   INCIDENT_REPORTER_NOT_MEMBER,
 } from "../incident/applyIncidentMitigation.mjs";
 import {
+  INCIDENT_INVALID_STATUS,
+  INCIDENT_INVALID_TRANSITION,
+  updateIncidentStatusHandler,
+} from "../incident/updateIncidentStatus.mjs";
+import {
   INCIDENT_HOTFIX_VERSION_TOO_LOW,
   INCIDENT_INVALID_HOTFIX_VERSION,
   publishIncidentHotfixHandler,
@@ -116,6 +121,13 @@ function mapIncidentError(error) {
       throw new HttpsError("invalid-argument", "Invalid message.");
     case INCIDENT_INVALID_MITIGATION:
       throw new HttpsError("invalid-argument", "Invalid mitigation type.");
+    case INCIDENT_INVALID_STATUS:
+      throw new HttpsError("invalid-argument", "Invalid incident status.");
+    case INCIDENT_INVALID_TRANSITION:
+      throw new HttpsError(
+        "failed-precondition",
+        "That status transition is not allowed.",
+      );
     case INCIDENT_NO_SESSION:
       throw new HttpsError(
         "failed-precondition",
@@ -296,6 +308,24 @@ export const applyIncidentMitigation = onCall(
             cancelOpenPendingQuestions(db, sessionId),
         },
       );
+    } catch (error) {
+      mapIncidentError(error);
+    }
+  }),
+);
+
+export const updateIncidentStatus = onCall(
+  { secrets: [sentryDsnSecret], enforceAppCheck: true },
+  withSentryEventHandler(async (request) => {
+    requireAdminAuth(request.auth);
+
+    const db = getFirestore();
+    try {
+      return await updateIncidentStatusHandler(db, {
+        incidentId: request.data?.incidentId,
+        status: request.data?.status,
+        uid: request.auth.uid,
+      });
     } catch (error) {
       mapIncidentError(error);
     }
