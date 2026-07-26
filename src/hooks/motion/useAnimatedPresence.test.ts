@@ -1,7 +1,7 @@
 import { renderHook, act } from "@testing-library/react";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { useAnimatedPresence } from "./useAnimatedPresence";
-import { resetAllStores } from "../test/helpers/storeReset";
+import { resetAllStores } from "../../test/helpers/storeReset";
 
 describe("useAnimatedPresence", () => {
   beforeEach(() => {
