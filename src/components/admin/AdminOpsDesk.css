@@ -295,11 +295,17 @@
 }
 
 .jl-ops-workspace .react-resizable-handle {
+  background: none;
   opacity: 0.55;
 }
 
 .jl-ops-workspace .react-resizable-handle::after {
-  border-color: var(--color-ink-muted);
+  border-color: var(--color-ink-dim);
+  border-width: 0 2px 2px 0;
+  width: 0.4rem;
+  height: 0.4rem;
+  right: 0.25rem;
+  bottom: 0.25rem;
 }
 
 .jl-ops-workspace .react-grid-item:hover > .react-resizable-handle,
@@ -423,19 +429,6 @@
   border: 1px dashed oklch(from var(--color-action) l c h / 0.65);
   opacity: 1;
   border-radius: 0;
-}
-
-.jl-ops-workspace .react-resizable-handle {
-  background: none;
-}
-
-.jl-ops-workspace .react-resizable-handle::after {
-  border-color: var(--color-ink-dim);
-  border-width: 0 2px 2px 0;
-  width: 0.4rem;
-  height: 0.4rem;
-  right: 0.25rem;
-  bottom: 0.25rem;
 }
 
 .jl-ops-workspace .react-grid-item > .react-resizable-handle.react-resizable-handle-se {
