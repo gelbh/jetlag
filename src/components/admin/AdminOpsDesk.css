@@ -594,10 +594,7 @@ html[data-motion="static"] .jl-ops-tab {
 }
 
 .jl-ops-preset-manage {
-  position: absolute;
-  top: calc(100% + 0.25rem);
-  left: 0;
-  z-index: 20;
+  /* Position via inline fixed coords — escapes .jl-ops-desk overflow:hidden */
   min-width: 16rem;
   max-width: min(22rem, 90vw);
   padding: 0.375rem;

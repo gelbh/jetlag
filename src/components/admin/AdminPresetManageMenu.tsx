@@ -1,3 +1,4 @@
+import type { CSSProperties, Ref } from "react";
 import {
   movePresetOrder,
   presetLabel,
@@ -13,6 +14,8 @@ interface AdminPresetManageMenuProps {
   onRenameUserPreset: (presetId: string) => void;
   onDeleteUserPreset: (presetId: string) => void;
   onDismiss: () => void;
+  panelRef?: Ref<HTMLDivElement>;
+  style?: CSSProperties;
 }
 
 export function AdminPresetManageMenu({
@@ -24,15 +27,19 @@ export function AdminPresetManageMenu({
   onRenameUserPreset,
   onDeleteUserPreset,
   onDismiss,
+  panelRef,
+  style,
 }: AdminPresetManageMenuProps) {
   const userIds = new Set(userPresets.map((p) => p.id));
 
   return (
     <div
+      ref={panelRef}
       className="jl-ops-preset-manage hud-panel"
       data-testid="admin-ops-preset-manage"
       role="group"
       aria-label="Manage presets"
+      style={style}
       onClick={(event) => event.stopPropagation()}
     >
       <ul className="jl-ops-preset-manage-list">

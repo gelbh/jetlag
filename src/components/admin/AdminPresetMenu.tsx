@@ -45,32 +45,53 @@ export function AdminPresetMenu({
       userIds.has(id),
   );
   const [manageOpen, setManageOpen] = useState(false);
+  const [managePos, setManagePos] = useState<{ left: number; top: number } | null>(
+    null,
+  );
   const manageAnchorRef = useRef<HTMLSpanElement>(null);
   const manageTriggerRef = useRef<HTMLButtonElement>(null);
+  const managePanelRef = useRef<HTMLDivElement>(null);
   const dragFromIdRef = useRef<string | null>(null);
 
   const closeManage = () => {
     setManageOpen(false);
+    setManagePos(null);
     manageTriggerRef.current?.focus();
   };
 
   useEffect(() => {
     if (!manageOpen) return;
+    const updatePos = () => {
+      const trigger = manageTriggerRef.current;
+      if (!trigger) return;
+      const rect = trigger.getBoundingClientRect();
+      const width = 16 * 16; // min-width 16rem ≈ clamp left
+      const left = Math.max(
+        8,
+        Math.min(rect.left, window.innerWidth - width - 8),
+      );
+      setManagePos({ left, top: rect.bottom + 4 });
+    };
+    updatePos();
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       closeManage();
     };
     const onPointer = (event: MouseEvent) => {
-      const root = manageAnchorRef.current;
-      if (!root || !(event.target instanceof Node)) return;
-      if (root.contains(event.target)) return;
+      if (!(event.target instanceof Node)) return;
+      if (manageAnchorRef.current?.contains(event.target)) return;
+      if (managePanelRef.current?.contains(event.target)) return;
       closeManage();
     };
     window.addEventListener("keydown", onKey);
     window.addEventListener("mousedown", onPointer);
+    window.addEventListener("resize", updatePos);
+    window.addEventListener("scroll", updatePos, true);
     return () => {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("mousedown", onPointer);
+      window.removeEventListener("resize", updatePos);
+      window.removeEventListener("scroll", updatePos, true);
     };
   }, [manageOpen]);
 
@@ -161,11 +182,29 @@ export function AdminPresetMenu({
           ref={manageTriggerRef}
           className="jl-ops-preset-chip"
           aria-expanded={manageOpen}
-          onClick={() => setManageOpen((open) => !open)}
+          onClick={() => {
+            if (manageOpen) {
+              closeManage();
+              return;
+            }
+            const trigger = manageTriggerRef.current;
+            if (trigger) {
+              const rect = trigger.getBoundingClientRect();
+              const width = 16 * 16;
+              setManagePos({
+                left: Math.max(
+                  8,
+                  Math.min(rect.left, window.innerWidth - width - 8),
+                ),
+                top: rect.bottom + 4,
+              });
+            }
+            setManageOpen(true);
+          }}
         >
           Manage
         </button>
-        {manageOpen ? (
+        {manageOpen && managePos ? (
           <AdminPresetManageMenu
             orderedIds={orderedIds}
             defaultPresetId={defaultPresetId}
@@ -175,6 +214,13 @@ export function AdminPresetMenu({
             onRenameUserPreset={onRenameUserPreset}
             onDeleteUserPreset={onDeleteUserPreset}
             onDismiss={closeManage}
+            panelRef={managePanelRef}
+            style={{
+              position: "fixed",
+              left: managePos.left,
+              top: managePos.top,
+              zIndex: 40,
+            }}
           />
         ) : null}
       </span>
