@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { isActive } from "../../domain/map/annotations";
 import {
   measuringFromKind,
@@ -9,7 +9,7 @@ import { questionCostBreakdown } from "../../domain/questions";
 import { adminBorderKindAvailability } from "../../services/geo/adminDivisionAvailability";
 import { firstUnusedCatalogOption } from "../../domain/session/toolSessionOptions";
 import type { MeasuringFromKind } from "../../domain/questions";
-import { useSubmitLock } from "../useSubmitLock";
+import { useToolSession } from "./framework/useToolSession";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import { MeasuringToolPanel } from "./measuring/MeasuringToolPanel";
 import { useMeasuringAnchorLoaders } from "./measuring/useMeasuringAnchorLoaders";
@@ -25,6 +25,10 @@ import {
 import type { UseMeasuringToolParams } from "./measuring/types";
 
 export type { UseMeasuringToolParams } from "./measuring/types";
+
+interface MeasuringSessionConfig {
+  ready: true;
+}
 
 export function useMeasuringTool({
   active,
@@ -47,7 +51,6 @@ export function useMeasuringTool({
   ensurePointInGameArea,
   canSubmitQuestion = true,
 }: UseMeasuringToolParams) {
-  const { isSubmitting, runLocked } = useSubmitLock();
   const activeAnnotations = useMemo(
     () => annotations.filter(isActive),
     [annotations],
@@ -72,7 +75,7 @@ export function useMeasuringTool({
     loaders,
   });
 
-  const { commit, performCommit } = useMeasuringCommit({
+  const { commit: commitMeasuring, performCommit } = useMeasuringCommit({
     annotations,
     pendingQuestions,
     createAnnotation,
@@ -84,6 +87,26 @@ export function useMeasuringTool({
     canSubmitQuestion,
     draft,
     previews,
+  });
+
+  const commitRef = useRef(commitMeasuring);
+  const performCommitRef = useRef(performCommit);
+
+  useEffect(() => {
+    commitRef.current = commitMeasuring;
+  }, [commitMeasuring]);
+
+  useEffect(() => {
+    performCommitRef.current = performCommit;
+  }, [performCommit]);
+
+  const session = useToolSession<MeasuringSessionConfig>({
+    toolId: "measuring",
+    active,
+    createInitialConfig: () => ({ ready: true }),
+    onSubmit: async () => {
+      await commitRef.current();
+    },
   });
 
   useToolSessionOptions({
@@ -126,6 +149,8 @@ export function useMeasuringTool({
     return questionCostBreakdown("D3P1", useCount);
   }, [activeAnnotations, draft.measureFromKind, pendingQuestions]);
 
+  const commit = () => session.submit();
+
   const panel = (
     <MeasuringToolPanel
       distanceUnit={distanceUnit}
@@ -133,13 +158,17 @@ export function useMeasuringTool({
       gpsLoading={gpsLoading}
       gpsError={gpsError}
       mapError={mapError}
-      isSubmitting={isSubmitting}
+      isSubmitting={session.isBusy}
       costLabel={questionCost.label}
       hasMeasuringTarget={hasMeasuringTarget}
       draft={draft}
       loaders={loaders}
-      onCommit={() => void runLocked(commit)}
-      onPreviewConfirm={() => void runLocked(performCommit)}
+      onCommit={() => void commit()}
+      onPreviewConfirm={() =>
+        void session.runAction(async () => {
+          await performCommitRef.current();
+        })
+      }
       handleGps={interactions.handleGps}
       handleSearch={interactions.handleSearch}
       applySearchResult={interactions.applySearchResult}

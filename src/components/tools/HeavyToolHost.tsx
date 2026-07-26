@@ -175,7 +175,8 @@ function HeavyToolRunner({
   return null;
 }
 
-/** Mounts one heavy seeker tool at a time and publishes its API to the map controller. */
+/** Mounts one heavy seeker tool at a time and publishes its API to the map controller.
+ * Tool hooks share the useToolSession open/submit/close machine; registry API is unchanged. */
 export function HeavyToolHost({ activeTool, ...sharedProps }: HeavyToolHostProps) {
   if (
     activeTool !== "matching" &&
