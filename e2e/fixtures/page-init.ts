@@ -9,6 +9,8 @@ async function applyPageCaptureInit(page: Page) {
     localStorage.setItem("jetlag.mapFirstRunDismissed", "1");
     // Prod preview shows AnalyticsConsentBanner when unset — keep CI e2e/visual clean.
     localStorage.setItem("jl.analytics.consent", "denied");
+    // App Check / reCAPTCHA is blocked by e2e network stubs — skip the probe gate.
+    sessionStorage.setItem("jl.appCheckProbe.skip", "1");
     try {
       indexedDB.deleteDatabase("jetlag-geographic-cache");
     } catch {
