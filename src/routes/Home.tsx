@@ -39,7 +39,7 @@ import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements"
 import { resolveHomePremiumButtonDisplay } from "../domain/billing/premiumProducts";
 import { useAuthBootstrapReady } from "../hooks/useAuthBootstrapReady";
 import { LEGAL_APP_NAME } from "../domain/legal/legalContact";
-import { isAdminUser } from "../domain/admin/adminAccess";
+import { useAdminAccessState } from "../hooks/admin/useAdminAccessState";
 import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
 import { useUserProfile } from "../hooks/profile/useUserProfile";
 
@@ -61,7 +61,8 @@ export function Home() {
   const [reportProblemOpen, setReportProblemOpen] = useState(false);
   const { entitlements: premiumEntitlements } = usePremiumEntitlements();
   const { user: permanentUser, isPermanent } = usePermanentAuthUser();
-  const showAdminEntry = isAdminUser(permanentUser);
+  const { state: adminAccessState } = useAdminAccessState();
+  const showAdminEntry = adminAccessState === "admin";
   const authBootstrapReady = useAuthBootstrapReady();
   const { phase: routeTransitionPhase } = useRouteTransition();
   const { profile, ready: profileReady, error: profileError } = useUserProfile(
