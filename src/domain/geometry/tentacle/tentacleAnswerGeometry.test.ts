@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
-import type { GameArea } from "../map/annotations";
+import type { GameArea } from "../../map/annotations";
 import {
   TENTACLE_ANSWER_RADIUS_METERS,
   TENTACLE_SEARCH_RADIUS_METERS,
-} from "../questions/tentacleQuestions";
-import { gameAreaToPolygon, safeDifference } from "./geometry";
+} from "../../questions/tentacleQuestions";
+import { gameAreaToPolygon, safeDifference } from "../gameArea/geometry";
 
 const sampleGameArea: GameArea = {
   type: "Polygon",
