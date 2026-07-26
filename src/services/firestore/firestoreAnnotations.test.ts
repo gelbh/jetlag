@@ -28,6 +28,11 @@ const getDocFromServer = vi.hoisted(() => vi.fn());
 const updateDoc = vi.hoisted(() => vi.fn(async () => undefined));
 const getIdToken = vi.hoisted(() => vi.fn(async () => "token"));
 const reportJoinPermissionDenied = vi.hoisted(() => vi.fn());
+const forceRefreshIdToken = vi.hoisted(() =>
+  vi.fn(async () => {
+    await getIdToken(true);
+  }),
+);
 
 vi.mock("../core/firebase", () => ({
   getFirestoreDb: () => ({}),
@@ -38,6 +43,10 @@ vi.mock("../core/firebase", () => ({
     uid: "admin-1",
     getIdToken,
   })),
+}));
+
+vi.mock("../core/auth/forceRefreshIdToken", () => ({
+  forceRefreshIdToken,
 }));
 
 vi.mock("../core/sentry", () => ({
