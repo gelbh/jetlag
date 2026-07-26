@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.10.2 - 2026-07-26
+
+### Improvements
+
+- Error screens: branded 404 page and shared crash shell instead of a silent home redirect
+
+### Fixes
+
+- Prevented repeated reloads when a server-requested app refresh stays active after you reload
+- Session leave: still leave locally when host role already moved or the session already ended
+
 ## 0.10.1 - 2026-07-26
 
 ### Fixes
