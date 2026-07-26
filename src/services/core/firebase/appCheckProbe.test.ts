@@ -6,7 +6,7 @@ import {
   resetAppCheckProbeForTests,
   shouldSkipAppCheckProbe,
 } from "./appCheckProbe";
-import { captureAppCheckTokenFailure } from "./sentry";
+import { captureAppCheckTokenFailure } from "../analytics/sentry";
 
 const { getFirebaseAppCheck, getToken, isFirebaseConfigured, getClientEnv } =
   vi.hoisted(() => ({
@@ -27,11 +27,11 @@ vi.mock("./firebase", () => ({
   isFirebaseConfigured: () => isFirebaseConfigured(),
 }));
 
-vi.mock("../../config/env", () => ({
+vi.mock("../../../config/env", () => ({
   getClientEnv: () => getClientEnv(),
 }));
 
-vi.mock("./sentry", () => ({
+vi.mock("../analytics/sentry", () => ({
   captureAppCheckTokenFailure: vi.fn(),
 }));
 

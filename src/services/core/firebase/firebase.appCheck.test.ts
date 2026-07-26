@@ -66,7 +66,7 @@ vi.mock("firebase/firestore", () => ({
   persistentMultipleTabManager: vi.fn(),
 }));
 
-vi.mock("../../config/env", () => ({
+vi.mock("../../../config/env", () => ({
   clientEnvUsesFirebaseEmulator: envMocks.clientEnvUsesFirebaseEmulator,
   getClientEnv: envMocks.getClientEnv,
   isFirebaseConfiguredFromEnv: envMocks.isFirebaseConfiguredFromEnv,
