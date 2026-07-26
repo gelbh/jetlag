@@ -17,6 +17,7 @@ import type { PlayerRole } from "../domain/session/playerRole";
 import { RolePicker } from "../components/session/RolePicker";
 import {
   ensureAnonymousUser,
+  ensureFreshAnonymousUser,
   isFirebaseConfigured,
 } from "../services/core/firebase";
 import {
@@ -163,7 +164,7 @@ export function JoinSession() {
         return;
       }
 
-      const user = await retryAsync(() => ensureAnonymousUser());
+      const user = await retryAsync(() => ensureFreshAnonymousUser());
       const joinOptions =
         session?.code === normalized && myUid
           ? { returningMemberUid: myUid, persistedMyUid: myUid }
