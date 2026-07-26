@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { GameArea } from "../map/annotations";
+import type { GameArea } from "../../map/annotations";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
 } from "./matchingGeometry";
 import type { MatchingFeature } from "@/domain/geo/types";
 import { pickNearestMatchingFeature } from "@/domain/geo/matchingAdapters";
-import type { LatLngTuple } from "./geometry";
+import type { LatLngTuple } from "../gameArea/geometry";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
-import { gameAreaToPolygon } from "./geometry";
+import { gameAreaToPolygon } from "../gameArea/geometry";
 
 const sampleGameArea: GameArea = {
   type: "Polygon",
