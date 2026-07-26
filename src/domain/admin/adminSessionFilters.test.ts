@@ -3,7 +3,7 @@ import {
   filterAdminSessions,
   summarizeAdminSessions,
 } from "./adminSessionFilters";
-import type { AdminSessionSummary } from "../../services/admin/adminSessions";
+import type { AdminSessionSummary } from "@/services/admin/adminSessions";
 
 function summary(
   overrides: Partial<AdminSessionSummary> = {},

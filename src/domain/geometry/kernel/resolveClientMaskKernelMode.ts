@@ -1,4 +1,4 @@
-import { getClientEnv } from "../../../config/env";
+import { getClientEnv } from "@/config/env";
 import {
   resolveMaskKernelMode,
   type MaskKernelMode,
