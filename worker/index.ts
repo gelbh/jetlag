@@ -18,7 +18,41 @@ import {
 
 export const CSP_REPORT_PATH = "/api/csp-report";
 
+const HOME_PRERENDER_PATH = "/prerender/home/";
+const MAX_ASSET_REDIRECT_HOPS = 2;
+
 const CSP_REPORT_LOG_BYTES = 8_000;
+
+function isPrerenderHomePath(pathname: string): boolean {
+  return pathname === "/prerender/home" || pathname === "/prerender/home/";
+}
+
+async function fetchAssetsFollowingRedirects(
+  env: Env,
+  request: Request,
+  maxHops = MAX_ASSET_REDIRECT_HOPS,
+): Promise<Response> {
+  let current = request;
+  let response = await env.ASSETS.fetch(current);
+  let hops = 0;
+  const origin = new URL(request.url).origin;
+
+  while (hops < maxHops && response.status >= 300 && response.status < 400) {
+    const location = response.headers.get("Location");
+    if (!location) {
+      break;
+    }
+    const nextUrl = new URL(location, current.url);
+    if (nextUrl.origin !== origin) {
+      break;
+    }
+    current = new Request(nextUrl, current);
+    response = await env.ASSETS.fetch(current);
+    hops += 1;
+  }
+
+  return response;
+}
 
 async function handleCspReportRequest(request: Request): Promise<Response> {
   // Some browsers and intermediaries appear to probe this endpoint with non-POST
@@ -100,13 +134,22 @@ export default {
       return handleIncidentEmailRequest(request, env);
     }
 
+    if (isPrerenderHomePath(pathname)) {
+      const target = new URL("/", request.url);
+      target.search = new URL(request.url).search;
+      return Response.redirect(target.toString(), 308);
+    }
+
     // Exact `/` serves prerendered home HTML; keep dist/index.html as the SPA shell
     // for nested-route fallbacks and the service worker.
     const assetRequest =
       pathname === "/"
-        ? new Request(new URL("/prerender/home/index.html", request.url), request)
+        ? new Request(new URL(HOME_PRERENDER_PATH, request.url), request)
         : request;
-    const assetResponse = await env.ASSETS.fetch(assetRequest);
+    const assetResponse = await fetchAssetsFollowingRedirects(
+      env,
+      assetRequest,
+    );
     if (isSpaFallbackForAssetRequest(request, assetResponse)) {
       return new Response("Not Found", {
         status: 404,

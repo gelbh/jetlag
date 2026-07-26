@@ -124,6 +124,7 @@ jobs:
               - 'tsconfig*.json'
               - 'tailwind.css'
               - 'eslint.config.js'
+              - 'scripts/**'
               - 'crates/**'
               - 'Cargo.toml'
               - 'Cargo.lock'
