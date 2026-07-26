@@ -6,7 +6,7 @@ import {
   hasSoftReloadBeenAcknowledged,
   shouldHonorSoftReload,
 } from "./reloadAcknowledgements";
-import type { SessionOpsMitigation } from "../map/annotations";
+import type { SessionOpsMitigation } from "../../map/annotations";
 
 const softReloadMitigation = (
   id: string,

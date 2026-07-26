@@ -6,7 +6,7 @@ import {
   isUnreadEligibleMessage,
   messageFingerprint,
 } from "./chatUnread";
-import type { SessionMessageRecord } from "../session/sessionChat";
+import type { SessionMessageRecord } from "../../session/sessionChat";
 
 const seekerUid = "seeker-1";
 const hiderUid = "hider-1";
