@@ -446,6 +446,14 @@ export async function updateGameMessageAnswer(
   });
 }
 
+export async function updateGameMessageStatus(
+  sessionId: string,
+  messageId: string,
+  status: "cancelled",
+): Promise<void> {
+  await updateDoc(doc(messagesCollection(sessionId), messageId), { status });
+}
+
 export function subscribeToPendingQuestions(
   sessionId: string,
   onChange: (questions: PendingQuestionRecord[]) => void,

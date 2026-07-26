@@ -665,13 +665,22 @@ service cloud.firestore {
               && request.resource.data.promptText is string
             )
           );
-        allow update: if isSessionMember(sessionId)
+        allow update: if (
+          isSessionMember(sessionId)
           && resource.data.channel == 'game'
           && resource.data.kind == 'question'
           && isHiderMember(sessionId)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['selectedReply', 'status'])
           && request.resource.data.selectedReply is string
-          && request.resource.data.status == 'answered';
+          && request.resource.data.status == 'answered'
+        ) || (
+          isSeekerMember(sessionId)
+          && resource.data.channel == 'game'
+          && resource.data.kind == 'question'
+          && resource.data.status == 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+          && request.resource.data.status == 'cancelled'
+        );
         allow delete: if false;
       }
 
@@ -713,6 +722,12 @@ service cloud.firestore {
         ) || (
           isSessionHost(sessionId)
           && resource.data.status in ['pending', 'walking', 'answered']
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+          && request.resource.data.status == 'cancelled'
+        ) || (
+          isSeekerMember(sessionId)
+          && resource.data.status == 'pending'
+          && resource.data.deadlineExpiredAt is string
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
           && request.resource.data.status == 'cancelled'
         ) || (

@@ -102,13 +102,13 @@ export function useQuestionDeadlineEnforcement({
         })();
       }
 
-      const answeredAfterExpiry = pendingQuestions.filter(
+      const closedAfterExpiry = pendingQuestions.filter(
         (question) =>
-          question.status === "answered" &&
+          (question.status === "answered" || question.status === "cancelled") &&
           (question.deadlineExpiredAt !== undefined || question.answeredLate),
       );
 
-      for (const question of answeredAfterExpiry) {
+      for (const question of closedAfterExpiry) {
         if (resumeHandledRef.current.has(question.id)) {
           continue;
         }

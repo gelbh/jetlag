@@ -28,6 +28,10 @@ interface ChatPanelBodyProps {
     selectedReply: string,
     deadlineExpired?: boolean,
   ) => Promise<void>;
+  onDismissExpiredQuestion?: (
+    pendingQuestionId: string,
+    messageId: string,
+  ) => Promise<void>;
   readOnly?: boolean;
 }
 
@@ -43,6 +47,7 @@ export function ChatPanelBody({
   truthsLoading = false,
   answerError = null,
   onAnswerQuestion,
+  onDismissExpiredQuestion,
   readOnly = false,
 }: ChatPanelBodyProps) {
   const [tab, setTab] = useState<"social" | "game">("game");
@@ -85,6 +90,7 @@ export function ChatPanelBody({
             truthsLoading={truthsLoading}
             answerError={answerError}
             onAnswerQuestion={onAnswerQuestion}
+            onDismissExpiredQuestion={onDismissExpiredQuestion}
             readOnly={readOnly}
           />
         )}

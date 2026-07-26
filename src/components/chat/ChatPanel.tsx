@@ -32,6 +32,10 @@ interface ChatPanelProps {
     selectedReply: string,
     deadlineExpired?: boolean,
   ) => Promise<void>;
+  onDismissExpiredQuestion?: (
+    pendingQuestionId: string,
+    messageId: string,
+  ) => Promise<void>;
   readOnly?: boolean;
 }
 
@@ -50,6 +54,7 @@ export function ChatPanel({
   truthsLoading = false,
   answerError = null,
   onAnswerQuestion,
+  onDismissExpiredQuestion,
   readOnly = false,
 }: ChatPanelProps) {
   const isDesktop = useDesktopLayout();
@@ -75,6 +80,7 @@ export function ChatPanel({
       truthsLoading={truthsLoading}
       answerError={answerError}
       onAnswerQuestion={onAnswerQuestion}
+      onDismissExpiredQuestion={onDismissExpiredQuestion}
       readOnly={readOnly}
     />
   );

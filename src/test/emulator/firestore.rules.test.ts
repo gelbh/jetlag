@@ -1170,6 +1170,151 @@ describe("firestore.rules", () => {
     await assertSucceeds(questionRef.update({ status: "cancelled" }));
   });
 
+  it("allows seeker to cancel expired pending question", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "seeker-2"],
+          memberRoles: { "host-1": "seeker", "seeker-2": "seeker" },
+        }),
+      );
+
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-expired")
+        .set({
+          toolType: "radar",
+          createdByUid: "seeker-2",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          status: "pending",
+          deadlineExpiredAt: "2026-01-01T00:05:00.000Z",
+          placement: {
+            geometryJson: JSON.stringify({
+              type: "Feature",
+              properties: {},
+              geometry: { type: "Point", coordinates: [-6.26, 53.35] },
+            }),
+            metadata: {},
+          },
+          replyOptions: [],
+          promptText: "Are you within 1 mile?",
+        });
+    });
+
+    const seeker = testEnv.authenticatedContext("seeker-2");
+    await assertSucceeds(
+      seeker
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-expired")
+        .update({ status: "cancelled" }),
+    );
+  });
+
+  it("denies seeker cancel of pending question without deadlineExpiredAt", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "seeker-2"],
+          memberRoles: { "host-1": "seeker", "seeker-2": "seeker" },
+        }),
+      );
+
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-open")
+        .set({
+          toolType: "radar",
+          createdByUid: "seeker-2",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          status: "pending",
+          placement: {
+            geometryJson: JSON.stringify({
+              type: "Feature",
+              properties: {},
+              geometry: { type: "Point", coordinates: [-6.26, 53.35] },
+            }),
+            metadata: {},
+          },
+          replyOptions: [],
+          promptText: "Are you within 1 mile?",
+        });
+    });
+
+    const seeker = testEnv.authenticatedContext("seeker-2");
+    await assertFails(
+      seeker
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("pendingQuestions")
+        .doc("pq-open")
+        .update({ status: "cancelled" }),
+    );
+  });
+
+  it("allows seeker to cancel expired game question message", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "seeker-2"],
+          memberRoles: { "host-1": "seeker", "seeker-2": "seeker" },
+        }),
+      );
+
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("messages")
+        .doc("msg-expired")
+        .set({
+          channel: "game",
+          kind: "question",
+          senderUid: "seeker-2",
+          senderRole: "seeker",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          pendingQuestionId: "pq-expired",
+          promptText: "Are you within 1 mile?",
+          status: "pending",
+        });
+    });
+
+    const seeker = testEnv.authenticatedContext("seeker-2");
+    await assertSucceeds(
+      seeker
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("messages")
+        .doc("msg-expired")
+        .update({ status: "cancelled" }),
+    );
+  });
+
   it("allows seeker to cancel orphan walking thermometer", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

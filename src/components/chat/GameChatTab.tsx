@@ -31,6 +31,10 @@ interface GameChatTabProps {
     selectedReply: string,
     deadlineExpired?: boolean,
   ) => Promise<void>;
+  onDismissExpiredQuestion?: (
+    pendingQuestionId: string,
+    messageId: string,
+  ) => Promise<void>;
   readOnly?: boolean;
 }
 
@@ -56,6 +60,7 @@ export function GameChatTab({
   truthsLoading = false,
   answerError = null,
   onAnswerQuestion,
+  onDismissExpiredQuestion,
   readOnly = false,
 }: GameChatTabProps) {
   const [nowMs, setNowMs] = useState(0);
@@ -103,13 +108,16 @@ export function GameChatTab({
             message.pendingQuestionId,
           );
           const walking = pending?.status === "walking";
+          const cancelled =
+            message.status === "cancelled" || pending?.status === "cancelled";
           const answered =
             message.status === "answered" || message.status === "resolved";
+          const closed = answered || cancelled;
           const deadlineMs = pending
             ? questionAnswerDeadlineMs(pending.toolType, sessionRules)
             : questionAnswerDeadlineMs("matching", sessionRules);
           const countdown =
-            !walking && !answered && pending?.answerableAt
+            !walking && !closed && pending?.answerableAt
               ? formatExpiredAnswerCountdown(
                   pending.answerableAt,
                   deadlineMs,
@@ -126,6 +134,14 @@ export function GameChatTab({
             message.toolType && isQuestionDockTool(message.toolType)
               ? mapToolDockShortLabel(message.toolType)
               : (message.toolType ?? "Question");
+          const canDismissExpired =
+            !isHider &&
+            !readOnly &&
+            !closed &&
+            pending?.status === "pending" &&
+            expired &&
+            Boolean(onDismissExpiredQuestion) &&
+            Boolean(message.pendingQuestionId);
 
           return (
             <div
@@ -160,7 +176,7 @@ export function GameChatTab({
                   Answered late. Card draw forfeited.
                 </p>
               ) : null}
-              {isHider && !readOnly && !answered && !walking && isPhotoQuestion && pending ? (
+              {isHider && !readOnly && !closed && !walking && isPhotoQuestion && pending ? (
                 <PhotoAnswerUploader
                   sessionId={sessionId}
                   pendingQuestion={pending}
@@ -171,7 +187,7 @@ export function GameChatTab({
               ) : null}
               {isHider &&
               !readOnly &&
-              !answered &&
+              !closed &&
               !walking &&
               !isPhotoQuestion &&
               message.replyOptions ? (
@@ -200,8 +216,24 @@ export function GameChatTab({
                 <p className="mt-2 text-xs text-ink-dim">
                   Answered: {message.selectedReply ?? "-"}
                 </p>
+              ) : cancelled ? (
+                <p className="mt-2 text-xs text-ink-dim">Question dismissed.</p>
               ) : !isHider && !walking ? (
                 <p className="mt-2 text-xs text-ink-dim">Waiting for hider…</p>
+              ) : null}
+              {canDismissExpired ? (
+                <button
+                  type="button"
+                  className="mt-2 text-xs text-ink-muted underline"
+                  onClick={() =>
+                    void onDismissExpiredQuestion?.(
+                      message.pendingQuestionId!,
+                      message.id,
+                    )
+                  }
+                >
+                  Dismiss question
+                </button>
               ) : null}
               {message.senderUid === senderUid ? null : null}
             </div>

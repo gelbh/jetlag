@@ -75,4 +75,72 @@ describe("GameChatTab", () => {
     expect(screen.queryByText("Draw 2, pick 1")).not.toBeInTheDocument();
     expect(screen.getByText(pendingQuestion.promptText!)).toBeInTheDocument();
   });
+
+  it("shows dismiss for seekers on expired pending questions", () => {
+    const onDismiss = vi.fn();
+    render(
+      <GameChatTab
+        messages={[questionMessage]}
+        pendingQuestions={[
+          {
+            ...pendingQuestion,
+            deadlineExpiredAt: "2026-01-01T00:05:00.000Z",
+          },
+        ]}
+        sessionRules={{ gameSize: "medium" }}
+        sessionId="session-1"
+        isHider={false}
+        senderUid="seeker-1"
+        onAnswerQuestion={vi.fn()}
+        onDismissExpiredQuestion={onDismiss}
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Dismiss question" }),
+    ).toBeInTheDocument();
+  });
+
+  it("hides dismiss from hiders", () => {
+    render(
+      <GameChatTab
+        messages={[questionMessage]}
+        pendingQuestions={[
+          {
+            ...pendingQuestion,
+            deadlineExpiredAt: "2026-01-01T00:05:00.000Z",
+          },
+        ]}
+        sessionRules={{ gameSize: "medium" }}
+        sessionId="session-1"
+        isHider
+        senderUid="hider-1"
+        onAnswerQuestion={vi.fn()}
+        onDismissExpiredQuestion={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Dismiss question" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("hides waiting copy when the question was cancelled", () => {
+    render(
+      <GameChatTab
+        messages={[{ ...questionMessage, status: "cancelled" }]}
+        pendingQuestions={[{ ...pendingQuestion, status: "cancelled" }]}
+        sessionRules={{ gameSize: "medium" }}
+        sessionId="session-1"
+        isHider={false}
+        senderUid="seeker-1"
+        onAnswerQuestion={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByText("Waiting for hider…")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Dismiss question" }),
+    ).not.toBeInTheDocument();
+  });
 });
