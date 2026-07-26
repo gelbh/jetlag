@@ -20,7 +20,7 @@ import {
   prepareMeasuringLineSegments,
   safeDifference,
 } from "./geometry";
-import type { GameArea } from "../map/annotations";
+import type { GameArea } from "../../map/annotations";
 
 const sampleGameArea: GameArea = {
   type: "Polygon",

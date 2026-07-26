@@ -1,12 +1,12 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { GameArea } from "../map/annotations";
+import type { GameArea } from "../../map/annotations";
 import { unionGameAreas } from "./unionGameAreas";
-import { gameAreaToBoundingBox } from "./gameAreaBounds";
-import { gameAreaWithoutInteriorRings } from "./geometryCore";
+import { gameAreaToBoundingBox } from "../gameArea/gameAreaBounds";
+import { gameAreaWithoutInteriorRings } from "../gameArea/geometryCore";
 
-const ROOT = resolve(import.meta.dirname, "../../..");
+const ROOT = resolve(import.meta.dirname, "../../../..");
 
 const dublin: GameArea = {
   type: "Polygon",
