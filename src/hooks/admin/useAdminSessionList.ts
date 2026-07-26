@@ -153,9 +153,7 @@ export function useAdminSessionList(enabled: boolean) {
       return;
     }
 
-    /* eslint-disable react-hooks/set-state-in-effect -- initial session list load */
     void refresh();
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [enabled, refresh]);
 
   return {

@@ -13,7 +13,7 @@ import { useAppNavigate } from "../hooks/useAppNavigate";
 import { useDesktopLayout } from "../hooks/useDesktopLayout";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { useAnnotationStore } from "../state/annotationStore";
-import { useMapStore, useSessionStore } from "../state/sessionStore";
+import { useSessionStore } from "../state/sessionStore";
 import { ObserverMapScreenChrome } from "./observer-map-screen/ObserverMapScreenChrome";
 import { useObserverMapScreen } from "./observer-map-screen/useObserverMapScreen";
 import { SpectatorMapLayers } from "./spectator-map/SpectatorMapLayers";
@@ -22,9 +22,6 @@ export function ObserverMapScreen() {
   const navigate = useAppNavigate();
   const isDesktop = useDesktopLayout();
   const setSession = useSessionStore((state) => state.setSession);
-  const resetObserverPerspective = useMapStore(
-    (state) => state.resetObserverPerspective,
-  );
   const controller = useObserverMapScreen();
   const setSelectedAnnotationId = useAnnotationStore(
     (state) => state.setSelectedAnnotationId,
@@ -38,14 +35,12 @@ export function ObserverMapScreen() {
     if (sessionId && sessionId !== LOCAL_SESSION_ID) {
       await clearSessionLocalArtifacts(sessionId);
     }
-    resetObserverPerspective();
     setSession(null);
     navigate(controller.exitPath);
   }, [
     controller.exitPath,
     controller.session?.id,
     navigate,
-    resetObserverPerspective,
     setSession,
   ]);
 
@@ -125,8 +120,6 @@ export function ObserverMapScreen() {
           myRole={controller.myRole ?? "observer"}
           timer={controller.timer}
           overlay={controller.overlay}
-          perspective={controller.observerPerspective}
-          onPerspectiveChange={controller.setObserverPerspective}
           onLeave={() => void handleLeave()}
           mapSlot={isDesktop ? mapLayers : undefined}
         />
@@ -164,7 +157,7 @@ export function ObserverMapScreen() {
             sessionId={controller.sessionId}
             senderUid={controller.uid}
             senderRole={chatDisplayRole}
-            isHider={chatDisplayRole === "hider"}
+            isHider={false}
             bottomClassName="bottom-[calc(7.75rem+env(safe-area-inset-bottom))]"
             onAnswerQuestion={async () => undefined}
             readOnly

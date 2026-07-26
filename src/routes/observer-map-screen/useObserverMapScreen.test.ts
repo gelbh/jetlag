@@ -76,10 +76,8 @@ vi.mock("../../state/sessionStore", () => ({
       mapStyle: "voyager",
       lowPowerMode: false,
       layerVisibility: {},
-      observerPerspective: "both",
       setMapStyle: vi.fn(),
       setLowPowerMode: vi.fn(),
-      setObserverPerspective: vi.fn(),
     }),
 }));
 
