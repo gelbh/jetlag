@@ -1,4 +1,6 @@
 import L from "leaflet";
+import type { MapStyle, StreetBasemap } from "../../domain/map/mapBasemaps";
+import { getBasemapSurface } from "../../domain/map/mapBasemaps";
 
 interface DotIconOptions {
   color: string;
@@ -90,10 +92,12 @@ export function createCountdownBadgeIcon(label: string, expired: boolean) {
 export function createThermometerWalkProgressIcon(
   walkedLabel: string,
   targetLabel: string | null,
-  mapStyle: "standard" | "satellite",
+  mapStyle: MapStyle,
+  streetBasemap: StreetBasemap = "light",
 ) {
+  const surface = getBasemapSurface(mapStyle, streetBasemap);
   const variant =
-    mapStyle === "satellite"
+    surface === "satellite" || surface === "dark"
       ? "jl-thermometer-walk-progress--satellite"
       : "jl-thermometer-walk-progress--standard";
   const targetHtml = targetLabel
@@ -110,10 +114,12 @@ export function createThermometerWalkProgressIcon(
 
 export function createThermometerWalkEndLabelIcon(
   label: string,
-  mapStyle: "standard" | "satellite",
+  mapStyle: MapStyle,
+  streetBasemap: StreetBasemap = "light",
 ) {
+  const surface = getBasemapSurface(mapStyle, streetBasemap);
   const variant =
-    mapStyle === "satellite"
+    surface === "satellite" || surface === "dark"
       ? "jl-thermometer-walk-end-label--satellite"
       : "jl-thermometer-walk-end-label--standard";
 

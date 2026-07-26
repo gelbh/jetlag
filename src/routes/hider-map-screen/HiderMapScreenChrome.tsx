@@ -6,7 +6,7 @@ import type {
 } from "../../domain/session/sessionChat";
 import type { LayerVisibility } from "../../state/sessionStore";
 import type { DistanceUnit } from "../../domain/map/distance";
-import type { MapStyle } from "../../domain/map/mapBasemaps";
+import type { MapStyle, StreetBasemap } from "../../domain/map/mapBasemaps";
 import type { NotificationPreferences } from "../../domain/device/notifications";
 import type { HidingZoneStepId } from "../../components/hider/hidingZoneSteps";
 import type { HiderTruthRevealState } from "../../components/session/HiderTruthRevealBanner";
@@ -165,6 +165,8 @@ export type HiderMapScreenChromeProps = {
     distanceUnit: DistanceUnit;
     mapStyle: MapStyle;
     setMapStyle: (style: MapStyle) => void;
+    streetBasemap: StreetBasemap;
+    setStreetBasemap: (theme: StreetBasemap) => void;
     notificationPreferences: NotificationPreferences;
     updateNotificationPreferences: (
       patch: Partial<NotificationPreferences>,
@@ -438,6 +440,8 @@ export function HiderMapScreenChrome({
             distanceUnitEditable: false,
             mapStyle: mapSettings.mapStyle,
             onMapStyleChange: mapSettings.setMapStyle,
+            streetBasemap: mapSettings.streetBasemap,
+            onStreetBasemapChange: mapSettings.setStreetBasemap,
             locationError: null,
             transitEnabled: false,
             transitLiveEnabled: false,

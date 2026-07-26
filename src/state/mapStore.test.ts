@@ -38,6 +38,9 @@ describe("mapStore", () => {
     expect(useMapStore.getState().lowPowerMode).toBe(true);
   });
 
-  it("updates spectator perspective for the current session view", () => {
+  it("defaults streetBasemap to light and persists dark", () => {
+    expect(useMapStore.getState().streetBasemap).toBe("light");
+    useMapStore.getState().setStreetBasemap("dark");
+    expect(useMapStore.getState().streetBasemap).toBe("dark");
   });
 });

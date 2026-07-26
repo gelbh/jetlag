@@ -15,6 +15,7 @@ export function SeekerMapScreen() {
       gameArea={controller.gameArea!}
       toolGameArea={controller.toolGameArea}
       effectiveBasemapStyle={controller.effectiveBasemapStyle}
+      streetBasemap={controller.streetBasemap}
       handleMapStyleChange={controller.handleMapStyleChange}
       mapChromeControlInset={controller.mapChromeControlInset}
       center={controller.center}
@@ -83,6 +84,8 @@ export function SeekerMapScreen() {
         distanceUnit={controller.distanceUnit}
         handleMapStyleChange={controller.handleMapStyleChange}
         effectiveBasemapStyle={controller.effectiveBasemapStyle}
+        streetBasemap={controller.streetBasemap}
+        setStreetBasemap={controller.setStreetBasemap}
         lowPowerMode={controller.lowPowerMode}
         layerVisibility={controller.layerVisibility}
         showCurrentLocation={controller.showCurrentLocation}

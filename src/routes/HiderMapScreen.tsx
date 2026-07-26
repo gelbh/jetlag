@@ -102,6 +102,8 @@ export function HiderMapScreen() {
   );
   const distanceUnit = useSessionDistanceUnit();
   const setMapStyle = useMapStore((state) => state.setMapStyle);
+  const streetBasemap = useMapStore((state) => state.streetBasemap);
+  const setStreetBasemap = useMapStore((state) => state.setStreetBasemap);
   const setLayerVisibility = useMapStore((state) => state.setLayerVisibility);
   const keepScreenAwake = useMapStore((state) => state.keepScreenAwake);
   const setKeepScreenAwake = useMapStore((state) => state.setKeepScreenAwake);
@@ -554,6 +556,7 @@ export function HiderMapScreen() {
           key={session.id}
           mapKey={session.id}
           mapStyle={effectiveBasemapStyle}
+          streetBasemap={streetBasemap}
           onMapStyleChange={handleMapStyleChange}
           mapStyleControlInset={mapControlInset}
           zoomControlInset={mapControlInset}
@@ -729,6 +732,8 @@ export function HiderMapScreen() {
           distanceUnit,
           mapStyle: effectiveBasemapStyle,
           setMapStyle: handleMapStyleChange,
+          streetBasemap,
+          setStreetBasemap,
           notificationPreferences,
           updateNotificationPreferences,
           enableNotifications,

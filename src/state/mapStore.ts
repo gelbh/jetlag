@@ -6,7 +6,7 @@ import type { MapTool } from "../domain/map/mapToolTypes";
 import type { TransitRouteFilter } from "../domain/map/transit";
 import type { NotificationPreferences } from "../domain/device/notifications";
 import { DEFAULT_NOTIFICATION_PREFERENCES } from "../domain/device/notifications";
-import type { MapStyle } from "../domain/map/mapBasemaps";
+import type { MapStyle, StreetBasemap } from "../domain/map/mapBasemaps";
 
 export type LayerVisibility = Record<AnnotationType | "transit", boolean>;
 
@@ -33,6 +33,7 @@ export const useMapStore = create<{
   notificationPreferences: NotificationPreferences;
   distanceUnit: DistanceUnit;
   mapStyle: MapStyle;
+  streetBasemap: StreetBasemap;
   layerVisibility: LayerVisibility;
   setActiveTool: (tool: MapTool) => void;
   setTransitEnabled: (enabled: boolean) => void;
@@ -45,6 +46,7 @@ export const useMapStore = create<{
   setNotificationPreferences: (preferences: NotificationPreferences) => void;
   setDistanceUnit: (unit: DistanceUnit) => void;
   setMapStyle: (style: MapStyle) => void;
+  setStreetBasemap: (streetBasemap: StreetBasemap) => void;
   setLayerVisibility: (layer: keyof LayerVisibility, visible: boolean) => void;
 }>()(
   persist(
@@ -60,6 +62,7 @@ export const useMapStore = create<{
       notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
       distanceUnit: "imperial",
       mapStyle: "standard",
+      streetBasemap: "light",
       layerVisibility: DEFAULT_LAYER_VISIBILITY,
       setActiveTool: (activeTool) => set({ activeTool }),
       setTransitEnabled: (transitEnabled) => set({ transitEnabled }),
@@ -77,6 +80,7 @@ export const useMapStore = create<{
         set({ notificationPreferences }),
       setDistanceUnit: (distanceUnit) => set({ distanceUnit }),
       setMapStyle: (mapStyle) => set({ mapStyle }),
+      setStreetBasemap: (streetBasemap) => set({ streetBasemap }),
       setLayerVisibility: (layer, visible) =>
         set((state) => ({
           layerVisibility: {
@@ -87,25 +91,34 @@ export const useMapStore = create<{
     }),
     {
       name: "jetlag-map",
-      merge: (persistedState, currentState) => ({
-        ...currentState,
-        ...((persistedState as typeof currentState | undefined) ?? {}),
-        showCurrentLocation: true,
-        showAdminBoundaries:
-          (persistedState as typeof currentState | undefined)
-            ?.showAdminBoundaries ?? false,
-        layerVisibility: {
-          ...DEFAULT_LAYER_VISIBILITY,
-          ...((persistedState as typeof currentState | undefined)
-            ?.layerVisibility ?? {}),
-        },
-      }),
+      merge: (persistedState, currentState) => {
+        const persisted = {
+          ...currentState,
+          ...((persistedState as Partial<typeof currentState> | undefined) ??
+            {}),
+        };
+        return {
+          ...persisted,
+          streetBasemap:
+            persisted.streetBasemap === "dark" ||
+            persisted.streetBasemap === "light"
+              ? persisted.streetBasemap
+              : "light",
+          showCurrentLocation: true,
+          showAdminBoundaries: persisted.showAdminBoundaries ?? false,
+          layerVisibility: {
+            ...DEFAULT_LAYER_VISIBILITY,
+            ...(persisted.layerVisibility ?? {}),
+          },
+        };
+      },
       partialize: (state) => ({
         keepScreenAwake: state.keepScreenAwake,
         lowPowerMode: state.lowPowerMode,
         notificationPreferences: state.notificationPreferences,
         distanceUnit: state.distanceUnit,
         mapStyle: state.mapStyle,
+        streetBasemap: state.streetBasemap,
         showAdminBoundaries: state.showAdminBoundaries,
         layerVisibility: state.layerVisibility,
       }),

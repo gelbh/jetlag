@@ -36,7 +36,7 @@ registerRoute(
 
 registerRoute(
   ({ url }) =>
-    /^https:\/\/([a-d]\.)?basemaps\.cartocdn\.com\/rastertiles\/voyager\//i.test(
+    /^https:\/\/([a-d]\.)?basemaps\.cartocdn\.com\/(rastertiles\/voyager|dark_all)\//i.test(
       url.href,
     ),
   new CacheFirst({

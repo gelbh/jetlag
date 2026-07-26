@@ -37,6 +37,7 @@ export function resetAllStores(): void {
     },
     distanceUnit: "imperial",
     mapStyle: "standard",
+    streetBasemap: "light",
     layerVisibility: {
       radar: true,
       thermometer: true,

@@ -1,15 +1,21 @@
 import type { PathOptions } from "leaflet";
-import type { MapStyle } from "./mapBasemaps";
+import type { BasemapSurface, MapStyle, StreetBasemap } from "./mapBasemaps";
+import { getBasemapSurface } from "./mapBasemaps";
 import { MAP_ANNOTATION_COLORS } from "./mapAnnotationColors";
 
 export type EliminationOverlayLayer = PathOptions & {
   className?: string;
 };
 
+function highContrastSurface(surface: BasemapSurface): boolean {
+  return surface === "satellite" || surface === "dark";
+}
+
 export function getEliminationOverlayLayers(
   mapStyle: MapStyle,
+  streetBasemap: StreetBasemap = "light",
 ): EliminationOverlayLayer[] {
-  if (mapStyle === "satellite") {
+  if (highContrastSurface(getBasemapSurface(mapStyle, streetBasemap))) {
     return [
       {
         stroke: false,

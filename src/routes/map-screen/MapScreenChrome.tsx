@@ -41,6 +41,8 @@ type MapScreenChromeProps = Pick<
   | "distanceUnit"
   | "handleMapStyleChange"
   | "effectiveBasemapStyle"
+  | "streetBasemap"
+  | "setStreetBasemap"
   | "lowPowerMode"
   | "layerVisibility"
   | "showCurrentLocation"
@@ -155,6 +157,8 @@ export function MapScreenChrome({
   distanceUnit,
   handleMapStyleChange,
   effectiveBasemapStyle,
+  streetBasemap,
+  setStreetBasemap,
   lowPowerMode,
   layerVisibility,
   showCurrentLocation,
@@ -458,6 +462,8 @@ export function MapScreenChrome({
             distanceUnitEditable: gameRulesEditable,
             mapStyle: effectiveBasemapStyle,
             onMapStyleChange: handleMapStyleChange,
+            streetBasemap,
+            onStreetBasemapChange: setStreetBasemap,
             locationError: liveLocationError,
             transitEnabled,
             transitLiveEnabled,

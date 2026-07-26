@@ -1,7 +1,7 @@
 import { TransitControls } from "../../map/TransitControls";
 import type { TransitRouteFilter } from "../../../domain/map/transit";
 import type { DistanceUnit } from "../../../domain/map/distance";
-import type { MapStyle } from "../../../domain/map/mapBasemaps";
+import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
 import { effectiveMapStyle } from "../../../domain/device/powerProfile";
 import type { NotificationPreferences } from "../../../domain/device/notifications";
 import { SegmentControl } from "../../ui/SegmentControl";
@@ -22,6 +22,8 @@ export interface MapSettingsGeneralTabProps {
   distanceUnitEditable?: boolean;
   mapStyle: MapStyle;
   onMapStyleChange: (style: MapStyle) => void;
+  streetBasemap: StreetBasemap;
+  onStreetBasemapChange: (theme: StreetBasemap) => void;
   locationError?: string | null;
   transitEnabled: boolean;
   transitLiveEnabled: boolean;
@@ -62,6 +64,8 @@ export function MapSettingsGeneralTab({
   distanceUnitEditable = false,
   mapStyle,
   onMapStyleChange,
+  streetBasemap,
+  onStreetBasemapChange,
   locationError,
   transitEnabled,
   transitLiveEnabled,
@@ -141,9 +145,23 @@ export function MapSettingsGeneralTab({
 
       <SegmentControl
         variant="pill"
+        value={streetBasemap}
+        options={[
+          { value: "light", label: "Light" },
+          { value: "dark", label: "Dark" },
+        ]}
+        onChange={onStreetBasemapChange}
+        aria-label="Street map theme"
+      />
+      <p className="text-xs text-ink-dim">
+        Light / Dark apply to the street map. Map / Sat stays on the map.
+      </p>
+
+      <SegmentControl
+        variant="pill"
         value={displayedMapStyle}
         options={[
-          { value: "standard", label: "Standard map" },
+          { value: "standard", label: "Street map" },
           { value: "satellite", label: "Satellite", disabled: lowPowerMode },
         ]}
         onChange={onMapStyleChange}
@@ -151,7 +169,7 @@ export function MapSettingsGeneralTab({
       />
       {lowPowerMode ? (
         <p className="text-xs text-ink-dim">
-          Low power mode keeps the standard map. Turn it off to use satellite.
+          Low power mode keeps the street map. Turn it off to use satellite.
         </p>
       ) : (
         <p className="text-xs text-ink-dim">
