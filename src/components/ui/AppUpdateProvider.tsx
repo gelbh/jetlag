@@ -130,7 +130,10 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
       return;
     }
     lastSoftReloadMitigationIdRef.current = mitigation.id;
-    acknowledgeSoftReload(mitigation.id);
+    // Prefer skipping reload over looping when durable ack cannot be stored.
+    if (!acknowledgeSoftReload(mitigation.id)) {
+      return;
+    }
     void applyServiceWorkerUpdate(
       registrationRef.current,
       updateSW ?? undefined,

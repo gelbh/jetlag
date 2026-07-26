@@ -64,11 +64,20 @@ export function useHotfixGraceReload(
 
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
   const [armedVersion, setArmedVersion] = useState<string | null>(null);
+  const [attemptedVersion, setAttemptedVersion] = useState<string | null>(null);
   const reloadRef = useRef(reload);
   const reloadedForVersionRef = useRef<string | null>(null);
 
+  const alreadyAttempted =
+    typeof requiredMinAppVersion === "string" &&
+    requiredMinAppVersion.length > 0 &&
+    (attemptedVersion === requiredMinAppVersion ||
+      hasHotfixReloadBeenAcknowledged(requiredMinAppVersion));
+
   const targetVersion =
-    needsUpdate && requiredMinAppVersion ? requiredMinAppVersion : null;
+    needsUpdate && requiredMinAppVersion && !alreadyAttempted
+      ? requiredMinAppVersion
+      : null;
 
   if (targetVersion !== armedVersion) {
     setArmedVersion(targetVersion);
@@ -102,7 +111,11 @@ export function useHotfixGraceReload(
         return;
       }
       reloadedForVersionRef.current = requiredMinAppVersion;
-      acknowledgeHotfixReload(requiredMinAppVersion);
+      setAttemptedVersion(requiredMinAppVersion);
+      // Prefer skipping reload over looping when durable ack cannot be stored.
+      if (!acknowledgeHotfixReload(requiredMinAppVersion)) {
+        return;
+      }
       void Promise.resolve(reloadRef.current());
     };
 
@@ -129,9 +142,10 @@ export function useHotfixGraceReload(
     };
   }, [needsUpdate, requiredMinAppVersion, graceSeconds]);
 
+  const countingDown = Boolean(targetVersion);
   return {
-    active: needsUpdate,
-    secondsRemaining: needsUpdate ? secondsRemaining : null,
+    active: countingDown,
+    secondsRemaining: countingDown ? secondsRemaining : null,
     requiredMinAppVersion: needsUpdate ? requiredMinAppVersion : null,
   };
 }
