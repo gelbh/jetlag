@@ -14,6 +14,7 @@ import { AppUpdateBanner } from "./components/ui/AppUpdateBanner";
 import { AppUpdateProvider } from "./components/ui/AppUpdateProvider";
 import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
+import { AppCheckProbeGate } from "./components/ui/AppCheckProbeGate";
 import { AppErrorPage } from "./components/ui/AppErrorPage";
 import { Home } from "./routes/Home";
 import { AdminPanel } from "./routes/AdminPanel";
@@ -161,7 +162,8 @@ export default function App() {
       <RouteTransitionProvider>
         <AppUpdateProvider>
           <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
-            <MotionDatasetEffect />
+            <AppCheckProbeGate>
+              <MotionDatasetEffect />
             <RouteTransitionOverlay />
             <RouteReadinessSensor />
             <EdgeSwipeBackBinder />
@@ -266,6 +268,7 @@ export default function App() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
+            </AppCheckProbeGate>
           </Sentry.ErrorBoundary>
         </AppUpdateProvider>
       </RouteTransitionProvider>
