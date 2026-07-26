@@ -1,7 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { OPS_OVERVIEW_LAYOUT, cloneLayout } from "../../domain/admin/opsDeskLayout";
-import { AdminGridWorkspace } from "./AdminGridWorkspace";
+import {
+  DEFAULT_COLS,
+  OPS_OVERVIEW_LAYOUT,
+  cloneLayout,
+} from "../../domain/admin/opsDeskLayout";
+import {
+  AdminGridWorkspace,
+} from "./AdminGridWorkspace";
+import { commitWorkspaceGeometry } from "./adminGridGeometry";
 
 vi.mock("react-grid-layout", () => ({
   default: ({ children }: { children: unknown }) => (
@@ -16,6 +23,17 @@ vi.mock("react-grid-layout", () => ({
 }));
 
 describe("AdminGridWorkspace", () => {
+  it("clamps committed geometry so stacks never exceed cols", () => {
+    const layout = cloneLayout(OPS_OVERVIEW_LAYOUT);
+    const next = commitWorkspaceGeometry(layout, [
+      { i: "sessions", x: 20, y: 0, w: 10, h: 5 },
+    ]);
+    const sessions = next.stacks.find((s) => s.id === "sessions");
+    expect(sessions).toBeDefined();
+    expect(sessions!.x + sessions!.w).toBeLessThanOrEqual(DEFAULT_COLS);
+    expect(sessions!.w).toBeLessThanOrEqual(DEFAULT_COLS);
+  });
+
   it("renders stack titles from the layout fixture", () => {
     const layout = cloneLayout(OPS_OVERVIEW_LAYOUT);
     render(
@@ -33,6 +51,7 @@ describe("AdminGridWorkspace", () => {
         onMergePanel={vi.fn()}
         onReorderPanel={vi.fn()}
         onUnstackPanel={vi.fn()}
+        onPlacePanel={vi.fn()}
         onActiveIndexChange={vi.fn()}
         onPinToggle={vi.fn()}
         onCollapseToggle={vi.fn()}

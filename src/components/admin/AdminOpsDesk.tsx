@@ -18,7 +18,9 @@ import type {
 import {
   CUSTOM_PRESET_ID,
   PANEL_IDS,
+  BUILTIN_PRESETS,
   cloneLayout,
+  clampLayoutToCols,
   deleteUserPreset,
   ensureIncidentPanelsVisible,
   hidePanel,
@@ -29,13 +31,14 @@ import {
   setCollapsed,
   setPinned,
   setStackActiveIndex,
+  showPanel,
   unstackPanelToCell,
   upsertUserPreset,
   type DeskLayout,
   type PanelId,
 } from "../../domain/admin/opsDeskLayout";
 import {
-  loadOpsDeskStore,
+  coldStartOpsDeskStore,
   saveOpsDeskStore,
   type OpsDeskStoreV1,
 } from "../../domain/admin/opsDeskPersistence";
@@ -61,6 +64,10 @@ import { AdminMobileDesk } from "./AdminMobileDesk";
 import { AdminMonitorPane } from "./AdminMonitorPane";
 import type { AdminPanelBodies } from "./AdminPanelBody";
 import type { PanelMergePayload } from "./AdminPanelStack";
+import {
+  AdminPresetDialog,
+  type AdminPresetDialogMode,
+} from "./AdminPresetDialog";
 import { AdminSessionFilters } from "./AdminSessionFilters";
 import { AdminSessionRow } from "./AdminSessionRow";
 import { AdminSettingsPanel } from "./AdminSettingsPanel";
@@ -111,7 +118,7 @@ export function AdminOpsDesk() {
   const onIncidentsRoute = location.pathname.startsWith("/admin/incidents");
 
   const [store, setStore] = useState<OpsDeskStoreV1>(() =>
-    loadOpsDeskStore(user?.uid ?? null),
+    coldStartOpsDeskStore(user?.uid ?? null),
   );
   const [storeUid, setStoreUid] = useState<string | null>(user?.uid ?? null);
   const [now, setNow] = useState(() => new Date());
@@ -120,6 +127,11 @@ export function AdminOpsDesk() {
   const [incidentsError, setIncidentsError] = useState<string | null>(null);
   const [enabledState, setEnabledState] = useState(enabled);
   const [deepLinkKey, setDeepLinkKey] = useState<string | null>(null);
+  const [presetDialog, setPresetDialog] = useState<{
+    mode: AdminPresetDialogMode;
+    presetId?: string;
+    initialName?: string;
+  } | null>(null);
 
   const activeSession = useSessionStore((state) => state.session);
   const activeRole = useSessionStore((state) => state.myRole);
@@ -157,7 +169,7 @@ export function AdminOpsDesk() {
 
   if (uid !== storeUid) {
     setStoreUid(uid);
-    setStore(loadOpsDeskStore(uid));
+    setStore(coldStartOpsDeskStore(uid));
     setDeepLinkKey(null);
   }
 
@@ -216,7 +228,7 @@ export function AdminOpsDesk() {
           prev.customLayout,
           prev.userPresets,
         );
-        const nextLayout = mutator(current);
+        const nextLayout = clampLayoutToCols(mutator(current));
         if (layoutsEqual(current, nextLayout)) return prev;
         const next: OpsDeskStoreV1 = {
           ...prev,
@@ -400,42 +412,111 @@ export function AdminOpsDesk() {
   };
 
   const handleSaveCurrent = () => {
-    const name = window.prompt("Save current layout as…");
-    if (name == null) return;
+    setPresetDialog({ mode: "save", initialName: "" });
+  };
+
+  const handleRenameUserPreset = (presetId: string) => {
+    const preset = store.userPresets.find((p) => p.id === presetId);
+    if (!preset) return;
+    setPresetDialog({
+      mode: "rename",
+      presetId,
+      initialName: preset.name,
+    });
+  };
+
+  const handleOverwriteUserPreset = () => {
+    const preset = store.userPresets.find((p) => p.id === store.activePresetId);
+    if (!preset) return;
+    setPresetDialog({
+      mode: "overwrite",
+      presetId: preset.id,
+      initialName: preset.name,
+    });
+  };
+
+  const handlePresetDialogConfirm = (name: string) => {
+    if (!presetDialog) return;
+    if (presetDialog.mode === "rename" && presetDialog.presetId) {
+      const trimmed = name.trim();
+      if (!trimmed) return;
+      persistStore({
+        ...store,
+        userPresets: store.userPresets.map((preset) =>
+          preset.id === presetDialog.presetId
+            ? { ...preset, name: trimmed }
+            : preset,
+        ),
+      });
+      setPresetDialog(null);
+      return;
+    }
+
+    if (presetDialog.mode === "overwrite" && presetDialog.presetId) {
+      const result = upsertUserPreset(
+        store.userPresets,
+        presetDialog.initialName ?? name,
+        deskLayout,
+        { overwriteId: presetDialog.presetId },
+      );
+      if (!result.ok) return;
+      persistStore({
+        ...store,
+        activePresetId: result.preset.id,
+        userPresets: result.presets,
+        customLayout: cloneLayout(deskLayout),
+      });
+      setPresetDialog(null);
+      return;
+    }
+
     const existing = store.userPresets.find(
       (p) => p.name.trim().toLowerCase() === name.trim().toLowerCase(),
     );
     if (existing) {
-      const ok = window.confirm(`Overwrite preset “${existing.name}”?`);
-      if (!ok) return;
-    }
-    const result = upsertUserPreset(
-      store.userPresets,
-      name,
-      deskLayout,
-      existing ? { overwriteId: existing.id } : undefined,
-    );
-    if (!result.ok) {
-      window.alert("Preset name cannot be empty.");
+      setPresetDialog({
+        mode: "overwrite",
+        presetId: existing.id,
+        initialName: existing.name,
+      });
       return;
     }
+    const result = upsertUserPreset(store.userPresets, name, deskLayout);
+    if (!result.ok) return;
     persistStore({
       ...store,
       activePresetId: result.preset.id,
       userPresets: result.presets,
+      presetOrder: [...store.presetOrder, result.preset.id].filter(
+        (id, index, all) => all.indexOf(id) === index,
+      ),
       customLayout: cloneLayout(deskLayout),
     });
+    setPresetDialog(null);
   };
 
   const handleDeleteUserPreset = (presetId: string) => {
     persistStore({
       ...store,
       userPresets: deleteUserPreset(store.userPresets, presetId),
+      presetOrder: store.presetOrder.filter((id) => id !== presetId),
+      defaultPresetId:
+        store.defaultPresetId === presetId
+          ? BUILTIN_PRESETS[0]!.id
+          : store.defaultPresetId,
       activePresetId:
         store.activePresetId === presetId
           ? CUSTOM_PRESET_ID
           : store.activePresetId,
     });
+  };
+
+  const handleSetDefault = (presetId: string) => {
+    persistStore({ ...store, defaultPresetId: presetId });
+  };
+
+  const handleReorderPresets = (orderedIds: string[]) => {
+    persistStore({ ...store, presetOrder: orderedIds });
   };
 
   const mobilePanelId: PanelId =
@@ -639,10 +720,16 @@ export function AdminOpsDesk() {
               inQueue={visibleIncidents.length}
               now={now}
               activePresetId={store.activePresetId}
+              defaultPresetId={store.defaultPresetId}
+              presetOrder={store.presetOrder}
               userPresets={store.userPresets}
               onSelectPreset={handleSelectPreset}
               onSaveCurrent={handleSaveCurrent}
               onDeleteUserPreset={handleDeleteUserPreset}
+              onSetDefault={handleSetDefault}
+              onReorderPresets={handleReorderPresets}
+              onRenameUserPreset={handleRenameUserPreset}
+              onOverwriteUserPreset={handleOverwriteUserPreset}
               onRefreshSessions={() => void refresh({ background: true })}
               refreshing={refreshing}
             />
@@ -671,6 +758,11 @@ export function AdminOpsDesk() {
               onUnstackPanel={(sourceStackId, panelId, x, y, w, h) => {
                 mutateLayout((layout) =>
                   unstackPanelToCell(layout, sourceStackId, panelId, x, y, w, h),
+                );
+              }}
+              onPlacePanel={(panelId, x, y, w, h) => {
+                mutateLayout((layout) =>
+                  showPanel(layout, panelId, { x, y, w, h }),
                 );
               }}
               onActiveIndexChange={(stackId, activeIndex) => {
@@ -703,6 +795,28 @@ export function AdminOpsDesk() {
                 });
               }}
             />
+            <AdminPresetDialog
+              key={
+                presetDialog
+                  ? `${presetDialog.mode}:${presetDialog.presetId ?? "new"}:${presetDialog.initialName ?? ""}`
+                  : "closed"
+              }
+              open={presetDialog != null}
+              mode={presetDialog?.mode ?? "save"}
+              initialName={presetDialog?.initialName ?? ""}
+              title={
+                presetDialog?.mode === "rename"
+                  ? "Rename preset"
+                  : presetDialog?.mode === "overwrite"
+                    ? "Update preset"
+                    : "Save layout as…"
+              }
+              confirmLabel={
+                presetDialog?.mode === "overwrite" ? "Overwrite" : "Save"
+              }
+              onCancel={() => setPresetDialog(null)}
+              onConfirm={handlePresetDialogConfirm}
+            />
           </>
         ) : (
           <AdminMobileDesk
@@ -727,10 +841,16 @@ export function AdminOpsDesk() {
             inQueue={visibleIncidents.length}
             now={now}
             activePresetId={store.activePresetId}
+            defaultPresetId={store.defaultPresetId}
+            presetOrder={store.presetOrder}
             userPresets={store.userPresets}
             onSelectPreset={handleSelectPreset}
             onSaveCurrent={handleSaveCurrent}
             onDeleteUserPreset={handleDeleteUserPreset}
+            onSetDefault={handleSetDefault}
+            onReorderPresets={handleReorderPresets}
+            onRenameUserPreset={handleRenameUserPreset}
+            onOverwriteUserPreset={handleOverwriteUserPreset}
             onRefreshSessions={() => void refresh({ background: true })}
             refreshing={refreshing}
           />
