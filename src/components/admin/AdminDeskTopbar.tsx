@@ -1,5 +1,7 @@
 import { APP_VERSION } from "../../domain/device/changelog";
 import type { DeskPreset } from "../../domain/admin/opsDeskLayout";
+import { AppLink } from "../navigation/AppLink";
+import { HudHomeIcon } from "../ui/HudIcons";
 import { AdminPresetMenu } from "./AdminPresetMenu";
 
 function formatUtcClock(now: Date): string {
@@ -46,6 +48,9 @@ export function AdminDeskTopbar({
   return (
     <header className="jl-ops-topbar" data-testid="admin-ops-topbar">
       <div className="jl-ops-brand">
+        <AppLink to="/" className="jl-ops-home" aria-label="Home">
+          <HudHomeIcon className="size-4" aria-hidden="true" />
+        </AppLink>
         <span className="jl-ops-brand-mark">Jetlag</span>
         <span className="jl-ops-brand-title">
           Broadcast HUD // Admin ops desk v{APP_VERSION}
