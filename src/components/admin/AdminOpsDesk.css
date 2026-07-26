@@ -25,8 +25,29 @@
   display: flex;
   min-width: 0;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: 0.5rem 0.75rem;
+}
+
+.jl-ops-home {
+  display: inline-flex;
+  min-height: 2rem;
+  min-width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-panel);
+  color: var(--color-ink-muted);
+}
+
+.jl-ops-home:hover {
+  border-color: oklch(from var(--color-highlight) l c h / 0.55);
+  color: var(--color-ink);
+}
+
+.jl-ops-home:focus-visible {
+  outline: 2px solid var(--color-action);
+  outline-offset: 2px;
 }
 
 .jl-ops-brand-mark {
