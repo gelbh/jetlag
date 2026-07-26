@@ -469,21 +469,27 @@ export function HiderMapScreen() {
   }, [overlay.closeSheet, zoneTool.openWizard]);
 
   const openChatExclusive = useCallback(() => {
+    if (zoneTool.moveMode) {
+      return;
+    }
     zoneTool.closeWizard();
     setChatAnswerError(null);
     overlay.openChat();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only openChat and closeWizard methods used
-  }, [overlay.openChat, zoneTool.closeWizard]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- moveMode gates sheet openers during Play Move
+  }, [overlay.openChat, zoneTool.closeWizard, zoneTool.moveMode]);
 
   const dismissTruthReveal = useCallback(() => {
     setTruthReveal(null);
   }, []);
 
   const openSettingsExclusive = useCallback(() => {
+    if (zoneTool.moveMode) {
+      return;
+    }
     zoneTool.closeWizard();
     overlay.openSettings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only openSettings and closeWizard methods used
-  }, [overlay.openSettings, zoneTool.closeWizard]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- moveMode gates sheet openers during Play Move
+  }, [overlay.openSettings, zoneTool.closeWizard, zoneTool.moveMode]);
 
   const handleMapPanStart = useCallback(() => {
     if (zoneTool.wizardOpen) {
@@ -496,10 +502,13 @@ export function HiderMapScreen() {
   }, [setWizardPeeked]);
 
   const openLogExclusive = useCallback(() => {
+    if (zoneTool.moveMode) {
+      return;
+    }
     zoneTool.closeWizard();
     overlay.openLog();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only openLog and closeWizard methods used
-  }, [overlay.openLog, zoneTool.closeWizard]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- moveMode gates sheet openers during Play Move
+  }, [overlay.openLog, zoneTool.closeWizard, zoneTool.moveMode]);
 
   const handleMapClick = useCallback(
     (lat: number, lng: number) => {

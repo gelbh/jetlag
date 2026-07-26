@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAppNavigate } from "../hooks/useAppNavigate";
+import { useSubmitLock } from "../hooks/useSubmitLock";
 import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { InlineError } from "../components/ui/InlineError";
@@ -53,6 +54,8 @@ export function JoinSession() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { isSubmitting, runLocked } = useSubmitLock();
+  const joinBusy = loading || isSubmitting;
   const [previewPremium, setPreviewPremium] = useState(false);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [playerRole, setPlayerRole] = useState<PlayerRole>("hider");
@@ -148,7 +151,8 @@ export function JoinSession() {
     };
   }, [code]);
 
-  const handleJoin = async () => {
+  const handleJoin = () =>
+    void runLocked(async () => {
     const normalized = normalizeSessionCode(code);
     if (!isValidSessionCode(normalized)) {
       setError("Enter a 4-letter session code.");
@@ -230,7 +234,7 @@ export function JoinSession() {
     } finally {
       setLoading(false);
     }
-  };
+  });
 
   return (
     <EntryScreenLayout justify="center">
@@ -278,17 +282,17 @@ export function JoinSession() {
           <RolePicker
             value={playerRole}
             onChange={setPlayerRole}
-            disabled={loading}
+            disabled={joinBusy}
             includeObserver
           />
 
           <MotionPressable
             type="button"
             onClick={() => void handleJoin()}
-            disabled={loading}
+            disabled={joinBusy}
             className="btn-primary home-entry-action min-h-14 w-full disabled:opacity-50"
           >
-            {loading ? "Joining…" : "Join session"}
+            {joinBusy ? "Joining…" : "Join session"}
           </MotionPressable>
 
           {error ? <InlineError>{error}</InlineError> : null}

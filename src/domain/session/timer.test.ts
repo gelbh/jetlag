@@ -112,6 +112,18 @@ describe("reconcileTimerState", () => {
     expect(reconciled.runningSince).toBeNull();
     expect(computeElapsedMs(reconciled, t0 + 12_000)).toBe(10_000);
   });
+
+  it("keeps local when remote is still unstarted (host start before Firestore write)", () => {
+    const local = startTimer(INITIAL_TIMER_STATE, t0);
+    const reconciled = reconcileTimerState(local, INITIAL_TIMER_STATE, t0 + 1_000);
+    expect(reconciled).toEqual(local);
+  });
+
+  it("adopts remote unstarted after local cache is cleared for session reset", () => {
+    const clearedLocal = INITIAL_TIMER_STATE;
+    const remote = INITIAL_TIMER_STATE;
+    expect(reconcileTimerState(clearedLocal, remote, t0)).toEqual(INITIAL_TIMER_STATE);
+  });
 });
 
 describe("isHidingTimerEffectivelyRunning", () => {
