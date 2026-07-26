@@ -53,7 +53,9 @@ export function useMatchingTool({
 }: UseMatchingToolParams) {
   const wizardStepRef = useRef("anchor");
   const finishPlacementRef = useRef(finishPlacement);
-  finishPlacementRef.current = finishPlacement;
+  useEffect(() => {
+    finishPlacementRef.current = finishPlacement;
+  }, [finishPlacement]);
 
   const draft = useMatchingDraftState();
   const {

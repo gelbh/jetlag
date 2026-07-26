@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { isActive } from "../../domain/map/annotations";
 import {
   measuringFromKind,
@@ -90,9 +90,15 @@ export function useMeasuringTool({
   });
 
   const commitRef = useRef(commitMeasuring);
-  commitRef.current = commitMeasuring;
   const performCommitRef = useRef(performCommit);
-  performCommitRef.current = performCommit;
+
+  useEffect(() => {
+    commitRef.current = commitMeasuring;
+  }, [commitMeasuring]);
+
+  useEffect(() => {
+    performCommitRef.current = performCommit;
+  }, [performCommit]);
 
   const session = useToolSession<MeasuringSessionConfig>({
     toolId: "measuring",

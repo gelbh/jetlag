@@ -20,7 +20,6 @@ function mergeConfig<TConfig>(
  * Tools keep domain-specific draft logic; this owns phase + submit lock + error.
  */
 export function useToolSession<TConfig>({
-  toolId: _toolId,
   active,
   createInitialConfig,
   onSubmit,

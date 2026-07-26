@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { ThermometerPanel } from "../../components/tools/ThermometerPanel";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import { distanceBetweenPoints } from "../../domain/geometry/geometry";
@@ -63,8 +63,11 @@ export function useThermometerTool({
 }: UseThermometerToolParams) {
   const wizardStepRef = useRef("distance");
   const finishPlacementRef = useRef(finishPlacement);
-  finishPlacementRef.current = finishPlacement;
   const resetAfterSuccessRef = useRef(() => undefined as void);
+
+  useEffect(() => {
+    finishPlacementRef.current = finishPlacement;
+  }, [finishPlacement]);
 
   const activeAnnotations = useMemo(
     () => annotations.filter(isActive),
@@ -103,11 +106,20 @@ export function useThermometerTool({
   }, [syncedWalkingQuestion]);
 
   const syncedWalkDraftRef = useRef(syncedWalkDraft);
-  syncedWalkDraftRef.current = syncedWalkDraft;
   const activeAnnotationsRef = useRef(activeAnnotations);
-  activeAnnotationsRef.current = activeAnnotations;
   const pendingQuestionsRef = useRef(pendingQuestions);
-  pendingQuestionsRef.current = pendingQuestions;
+
+  useEffect(() => {
+    syncedWalkDraftRef.current = syncedWalkDraft;
+  }, [syncedWalkDraft]);
+
+  useEffect(() => {
+    activeAnnotationsRef.current = activeAnnotations;
+  }, [activeAnnotations]);
+
+  useEffect(() => {
+    pendingQuestionsRef.current = pendingQuestions;
+  }, [pendingQuestions]);
 
   const createInitialConfig = useCallback(
     () => createThermometerConfig(sessionRules),
@@ -176,9 +188,10 @@ export function useThermometerTool({
     },
   });
 
-  resetAfterSuccessRef.current = () => {
-    session.open();
-  };
+  const openSession = session.open;
+  useEffect(() => {
+    resetAfterSuccessRef.current = openSession;
+  }, [openSession]);
 
   const config = session.config ?? createInitialConfig();
   const patchConfig = session.setConfig;

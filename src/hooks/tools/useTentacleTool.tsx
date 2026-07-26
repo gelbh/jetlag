@@ -93,7 +93,9 @@ export function useTentacleTool({
 }: UseTentacleToolParams) {
   const wizardStepRef = useRef("anchor");
   const finishPlacementRef = useRef(finishPlacement);
-  finishPlacementRef.current = finishPlacement;
+  useEffect(() => {
+    finishPlacementRef.current = finishPlacement;
+  }, [finishPlacement]);
   const activeAnnotations = useMemo(
     () => annotations.filter(isActive),
     [annotations],
