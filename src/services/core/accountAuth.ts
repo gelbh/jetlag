@@ -247,6 +247,31 @@ async function signInWithOAuthPopup(
 }
 
 let redirectResultPromise: Promise<User | null> | null = null;
+let pendingRedirectFailureMessage: string | null = null;
+
+function notePendingRedirectFailure(): void {
+  pendingRedirectFailureMessage = OAUTH_REDIRECT_FAILED_MESSAGE;
+}
+
+/** Player-visible message after a redirect returned no user; cleared on read. */
+export function consumeOAuthRedirectFailureMessage(): string | null {
+  const message = pendingRedirectFailureMessage;
+  pendingRedirectFailureMessage = null;
+  return message;
+}
+
+function resolveRedirectUser(
+  user: User | null,
+  wasPending: boolean,
+): User | null {
+  if (user) {
+    return user;
+  }
+  if (wasPending) {
+    notePendingRedirectFailure();
+  }
+  return null;
+}
 
 async function completeOAuthRedirectOnce(): Promise<User | null> {
   const auth = getFirebaseAuth();
@@ -254,28 +279,13 @@ async function completeOAuthRedirectOnce(): Promise<User | null> {
 
   try {
     const result = await getRedirectResult(auth);
-    const user = result?.user ?? null;
-    if (user) {
-      return user;
-    }
-    if (wasPending) {
-      throw new Error(OAUTH_REDIRECT_FAILED_MESSAGE);
-    }
-    return null;
+    return resolveRedirectUser(result?.user ?? null, wasPending);
   } catch (error) {
-    if (error instanceof Error && error.message === OAUTH_REDIRECT_FAILED_MESSAGE) {
-      throw error;
-    }
-
     if (isFirebasePendingPromiseAssertion(error)) {
       const current = auth.currentUser;
-      if (current && !current.isAnonymous) {
-        return current;
-      }
-      if (wasPending) {
-        throw new Error(OAUTH_REDIRECT_FAILED_MESSAGE);
-      }
-      return null;
+      const recovered =
+        current && !current.isAnonymous ? current : null;
+      return resolveRedirectUser(recovered, wasPending);
     }
 
     if (!isCredentialAlreadyInUse(error)) {
@@ -298,6 +308,7 @@ export async function completeOAuthRedirectIfPending(): Promise<User | null> {
 
 export function resetOAuthRedirectRecoveryForTests(): void {
   redirectResultPromise = null;
+  pendingRedirectFailureMessage = null;
 }
 
 export async function sendPremiumEmailSignInLink(

@@ -21,8 +21,16 @@ describe("OAuthSignInButton", () => {
     mockAuth.currentUser = { uid: "anon-1" };
   });
 
-  it("does not await ensureAnonymousUser before opening the provider popup", async () => {
-    const onSignIn = vi.fn(async () => undefined);
+  it("starts the provider popup in the same turn as the click", async () => {
+    let resolveSignIn: (() => void) | undefined;
+    const onSignInStarted = vi.fn();
+    const onSignIn = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          onSignInStarted();
+          resolveSignIn = resolve;
+        }),
+    );
     const onSuccess = vi.fn(async () => undefined);
     const onError = vi.fn();
 
@@ -39,10 +47,13 @@ describe("OAuthSignInButton", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Continue with Google/i }));
 
+    // Gesture preservation: popup path must start before any later microtask work.
+    expect(onSignInStarted).toHaveBeenCalledOnce();
+    resolveSignIn?.();
+
     await waitFor(() => {
-      expect(onSignIn).toHaveBeenCalledOnce();
+      expect(onSuccess).toHaveBeenCalledOnce();
     });
-    expect(onSuccess).toHaveBeenCalledOnce();
     expect(onError).not.toHaveBeenCalled();
   });
 
