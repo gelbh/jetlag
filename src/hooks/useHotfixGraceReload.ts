@@ -116,7 +116,13 @@ export function useHotfixGraceReload(
       if (!acknowledgeHotfixReload(requiredMinAppVersion)) {
         return;
       }
-      void Promise.resolve(reloadRef.current());
+      try {
+        void Promise.resolve(reloadRef.current()).catch(() => {
+          // Ack already persisted — do not retry; avoid unhandled rejection.
+        });
+      } catch {
+        // Sync throw from injectable reload — same: do not retry.
+      }
     };
 
     const totalSeconds = resolveGraceSeconds(graceSeconds);
