@@ -16,7 +16,7 @@ vi.mock("firebase/storage", () => ({
   uploadBytes: vi.fn(),
 }));
 
-vi.mock("./firebase", () => ({
+vi.mock("../firebase/firebase", () => ({
   ensureAnonymousUser: vi.fn().mockResolvedValue({
     uid: "hider-1",
     getIdToken: vi.fn().mockResolvedValue("token"),
@@ -24,20 +24,20 @@ vi.mock("./firebase", () => ({
   getFirebaseStorage: vi.fn(async () => ({ bucket: "demo" })),
 }));
 
-vi.mock("./sentry", () => ({
+vi.mock("../analytics/sentry", () => ({
   addPhotoUploadBreadcrumb: vi.fn(),
   capturePhotoUploadFailure: vi.fn(),
 }));
 
 const ensureHiderPhotoUploadAccess = vi.fn();
 
-vi.mock("../firestore/firestoreAnnotations", () => ({
+vi.mock("../../firestore/firestoreAnnotations", () => ({
   ensureHiderPhotoUploadAccess: (...args: unknown[]) =>
     ensureHiderPhotoUploadAccess(...args),
 }));
 
 import { deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
-import { addPhotoUploadBreadcrumb } from "./sentry";
+import { addPhotoUploadBreadcrumb } from "../analytics/sentry";
 
 const hiderSession = {
   id: "session-1",
