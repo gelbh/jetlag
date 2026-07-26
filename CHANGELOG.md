@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.10.4 - 2026-07-26
+
+### Improvements
+
+- Admin ops desk: always show both spectator map layers, polish panel resize/drag, resolve/dismiss incidents from the queue, and hide admin prompts from player incident chat
+- Admin ops desk: denser grid, no horizontal scroll, hover resize handles, place-from-empty, and preset default/reorder/edit
+- Map: add Light and Dark street basemap themes (Light default), keep Map↔Satellite toggle, and soften satellite tiles under the HUD
+- Map: restyle the session status bar to labeled OPERATION / PHASE / TIME LEFT columns with dual timers, and move home/sync below the bar so values stay readable on narrow phones
+- Navigation: open the next screen right away instead of covering the app with a loading overlay, and show settle progress in-shell
+- HUD panels and sheets: restrained theme-matched scrollbars on desktop and admin chrome
+
+### Fixes
+
+- Questions: seekers can dismiss an expired open question so the game is not stuck waiting forever
+- Photo: Mark sent and cannot-answer show the right text in the session log
+- Home: keep the public URL on `/` when serving the prerendered marketing page, and stop leaking `/prerender/home/` in the address bar
+- Returning to the app after switching away no longer shows a blank screen; rejoining an active session no longer sticks on Verifying
+- Map: tentacle and matching elimination shading keeps the answered site clear when POIs are clustered
+
 ## 0.10.3 - 2026-07-26
 
 ### Fixes
