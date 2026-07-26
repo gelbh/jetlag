@@ -7,7 +7,7 @@ import {
   BASE_MEASURING_CATALOG_COUNT,
   isCategoryInDefaultPicker,
 } from "./sessionCatalogAvailability";
-import { isCustomQuestionPackCategoryId } from "../questions/customQuestionPack";
+import { isCustomQuestionPackCategoryId } from "../../questions/customQuestionPack";
 
 describe("sessionCatalogAvailability", () => {
   it("keeps base catalog counts aligned with official defaults", () => {
