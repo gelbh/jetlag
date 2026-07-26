@@ -7,8 +7,8 @@ import {
 } from "../../domain/admin/opsDeskLayout";
 import {
   AdminGridWorkspace,
-  commitWorkspaceGeometry,
 } from "./AdminGridWorkspace";
+import { commitWorkspaceGeometry } from "./adminGridGeometry";
 
 vi.mock("react-grid-layout", () => ({
   default: ({ children }: { children: unknown }) => (

@@ -8,11 +8,8 @@ import GridLayout, {
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import {
-  applyStackGeometry,
-  clampLayoutToCols,
   type DeskLayout,
   type PanelId,
-  type StackGeometryItem,
 } from "../../domain/admin/opsDeskLayout";
 import {
   AdminPanelStack,
@@ -21,6 +18,7 @@ import {
 } from "./AdminPanelStack";
 import type { AdminPanelBodies } from "./AdminPanelBody";
 import { AdminPlacePanelMenu } from "./AdminPlacePanelMenu";
+import { commitWorkspaceGeometry } from "./adminGridGeometry";
 
 const COLLAPSED_H = 1;
 const UNSTACK_DEFAULT_W = 8;
@@ -28,14 +26,6 @@ const UNSTACK_DEFAULT_H = 6;
 const PLACE_DEFAULT_W = 8;
 const PLACE_DEFAULT_H = 8;
 const ALL_RESIZE_HANDLES = ["n", "s", "e", "w", "ne", "nw", "se", "sw"] as const;
-
-/** Apply RGL geometry then clamp so stacks never exceed cols (no H-scroll). */
-export function commitWorkspaceGeometry(
-  layout: DeskLayout,
-  next: readonly StackGeometryItem[],
-): DeskLayout {
-  return clampLayoutToCols(applyStackGeometry(layout, next));
-}
 
 interface AdminGridWorkspaceProps {
   layout: DeskLayout;

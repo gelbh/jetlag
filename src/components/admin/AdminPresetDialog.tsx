@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 
 export type AdminPresetDialogMode = "save" | "rename" | "overwrite";
 
@@ -23,10 +23,6 @@ export function AdminPresetDialog({
 }: AdminPresetDialogProps) {
   const titleId = useId();
   const [name, setName] = useState(initialName);
-
-  useEffect(() => {
-    if (open) setName(initialName);
-  }, [open, initialName]);
 
   if (!open) return null;
 

@@ -805,6 +805,11 @@ export function AdminOpsDesk() {
               }}
             />
             <AdminPresetDialog
+              key={
+                presetDialog
+                  ? `${presetDialog.mode}:${presetDialog.presetId ?? "new"}:${presetDialog.initialName ?? ""}`
+                  : "closed"
+              }
               open={presetDialog != null}
               mode={presetDialog?.mode ?? "save"}
               initialName={presetDialog?.initialName ?? ""}
