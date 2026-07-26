@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 import { selectPreloadBanner, usePreloadStore } from "../../state/preloadStore";
 import { OverpassUnavailableError } from "../core/overpassClient";
-import * as adminDivisionAvailability from "../geo/adminDivisionAvailability";
-import { fetchPreparedCoastlineSegments } from "../geo/coastline";
-import { fetchLandmassFeaturesInArea } from "../geo/landmassFeatures";
+import * as adminDivisionAvailability from "../geo/overpass/adminDivisionAvailability";
+import { fetchPreparedCoastlineSegments } from "../geo/overpass/coastline";
+import { fetchLandmassFeaturesInArea } from "../geo/overpass/landmassFeatures";
 import {
   gameAreaPreloadKey,
   preloadCriticalGameAreaCaches,
@@ -14,23 +14,25 @@ import {
   preloadJobGapMsForTier,
 } from "./gameAreaPreload";
 
-vi.mock("../geo/adminDivisionBoundaries", () => ({
+// Mock implementation modules (not barrels) so importOriginal of availability
+// and other overpass/matching importers see the stub.
+vi.mock("../geo/overpass/adminDivisionBoundaries", () => ({
   fetchAdminDivisionFeaturesInArea: vi.fn(async () => []),
 }));
 
-vi.mock("../geo/coastline", () => ({
+vi.mock("../geo/overpass/coastline", () => ({
   fetchPreparedCoastlineSegments: vi.fn(async () => []),
 }));
 
-vi.mock("../geo/landmassFeatures", () => ({
+vi.mock("../geo/overpass/landmassFeatures", () => ({
   fetchLandmassFeaturesInArea: vi.fn(async () => []),
 }));
 
-vi.mock("../geo/measuringPlaces", () => ({
+vi.mock("../geo/overpass/measuringPlaces", () => ({
   fetchMeasuringPlacesInArea: vi.fn(async () => []),
 }));
 
-vi.mock("../geo/measuringLinearFeatures", () => ({
+vi.mock("../geo/overpass/measuringLinearFeatures", () => ({
   fetchPreparedMeasuringLinearSegments: vi.fn(async () => []),
 }));
 
@@ -42,9 +44,9 @@ vi.mock("../transit/transitStatic", () => ({
   })),
 }));
 
-vi.mock("../geo/adminDivisionAvailability", async (importOriginal) => {
+vi.mock("../geo/overpass/adminDivisionAvailability", async (importOriginal) => {
   const actual = await importOriginal<
-    typeof import("../geo/adminDivisionAvailability")
+    typeof import("../geo/overpass/adminDivisionAvailability")
   >();
   return {
     ...actual,

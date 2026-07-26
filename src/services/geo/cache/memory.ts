@@ -1,3 +1,4 @@
+import type { GeoCacheLayer } from "../shared/cacheInterface";
 import { isStableCacheKey } from "./keys";
 
 export const DEFAULT_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -38,12 +39,28 @@ export function readCachedMemoryEntry<T>(key: string): T | undefined {
   return entry.value as T;
 }
 
-export function writeMemoryEntry<T>(key: string, value: T): void {
+export function writeMemoryEntry<T>(
+  key: string,
+  value: T,
+  ttlMs?: number,
+): void {
+  const ttl = ttlMs ?? cacheTtlMsForKey(key);
   memoryCache.set(key, {
     value,
-    expiresAt: Date.now() + cacheTtlMsForKey(key),
+    expiresAt: Date.now() + ttl,
   });
 }
+
+/** L1 memory adapter for {@link GeoCacheLayer}. */
+export const memoryGeoCache: GeoCacheLayer = {
+  async get(key: string): Promise<unknown | null> {
+    const value = readCachedMemoryEntry(key);
+    return value === undefined ? null : value;
+  },
+  async set(key: string, value: unknown, ttlMs?: number): Promise<void> {
+    writeMemoryEntry(key, value, ttlMs);
+  },
+};
 
 export function staleCacheCaptionForKey(key: string): string | undefined {
   return staleServedKeys.has(key)

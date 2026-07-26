@@ -1,16 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/geometry";
 import {
   clearElevationCacheForTests,
   fetchElevations,
   isUsElevationPoint,
   openElevationCircuitForTests,
   requestGapMsForBatchSize,
-} from "./elevation";
+} from "./index";
 
 // IndexedDB callbacks do not settle under Vitest fake timers; this suite only
 // needs the in-memory elevation path.
-vi.mock("./cache/indexedDb", () => ({
+vi.mock("../cache/indexedDb", () => ({
   readPersistedEntry: vi.fn(async () => undefined),
   writePersistedEntry: vi.fn(async () => undefined),
   clearPersistedCacheForTests: vi.fn(async () => undefined),

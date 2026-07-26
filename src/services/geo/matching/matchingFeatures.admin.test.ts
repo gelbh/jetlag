@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
-import type { GameArea } from "../../domain/map/annotations";
-import * as adminDivisionBoundaries from "./adminDivisionBoundaries";
+import type { GameArea } from "../../../domain/map/annotations";
+import * as adminDivisionBoundaries from "../overpass/adminDivisionBoundaries";
 import {
   deserializeMatchingFeatures,
   serializeMatchingFeatures,
-} from "../../domain/geo/matchingAdapters";
+} from "../../../domain/geo/matchingAdapters";
 import {
   fetchMatchingFeaturesInArea,
   pickMatchingFeatureForAnchor,
-} from "./matchingFeatures";
+} from "./index";
 
 const sampleGameArea: GameArea = {
   type: "Polygon",

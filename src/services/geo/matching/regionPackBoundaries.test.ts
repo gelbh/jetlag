@@ -5,9 +5,9 @@ import {
   clearRegionPackGeoCacheForTests,
   loadRegionPackPlayArea,
 } from "./regionPackBoundaries";
-import { gameAreaSquareMiles } from "../../domain/session/gameSize";
+import { gameAreaSquareMiles } from "../../../domain/session/gameSize";
 
-const ROOT = resolve(import.meta.dirname, "../../..");
+const ROOT = resolve(import.meta.dirname, "../../../..");
 
 function stubFetchForDublinAssets() {
   const read = (relativePath: string) =>

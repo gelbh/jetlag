@@ -21,12 +21,12 @@ import {
 import {
   classifyAdminDivisionAtPoint,
   fetchAdminDivisionFeaturesInArea,
-} from "../adminDivisionBoundaries";
+} from "../overpass/adminDivisionBoundaries";
 import {
   classifyLandmassAtPoint,
   fetchLandmassFeaturesInArea,
   landmassToMatchingFeature,
-} from "../landmassFeatures";
+} from "../overpass/landmassFeatures";
 import { queryOverpass } from "../../core/overpassClient";
 import { getOrFetchCached } from "../geographicFeatureCache";
 import {

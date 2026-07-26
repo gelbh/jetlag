@@ -15,13 +15,13 @@ import {
 } from "../../../domain/questions";
 import { resolveMatchingCategory } from "../../../domain/session/sessionCustomCatalog";
 import type { SessionCustomCategory } from "../../../domain/session/sessionCustomContent";
-import { customMatchingAreasCacheSuffix } from "../matchingAreaGeoJson";
+import { customMatchingAreasCacheSuffix } from "./matchingAreaGeoJson";
 import { geographicCacheKey } from "../geographicFeatureCache";
 import {
   buildNodeWayRelationBboxQuery,
   formatOverpassBbox,
   overpassQueryTemplate,
-} from "../queryHelpers";
+} from "../overpass/queryHelpers";
 import { MATCHING_NEAR_FEATURE_SEARCH_BUFFER_METERS, type MatchingFetchOptions } from "./types";
 
 export function matchingFeaturesCacheKey(
@@ -64,7 +64,7 @@ export function matchingSearchBoundingBox(
   return expandBoundingBox(bbox, MATCHING_NEAR_FEATURE_SEARCH_BUFFER_METERS);
 }
 
-export { formatOverpassBbox } from "../queryHelpers";
+export { formatOverpassBbox } from "../overpass/queryHelpers";
 
 export function buildMatchingFeaturesQuery(
   gameArea: GameArea,
