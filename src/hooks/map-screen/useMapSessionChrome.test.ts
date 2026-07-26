@@ -1,3 +1,4 @@
+import { FirebaseError } from "firebase/app";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AnnotationRecord } from "../../domain/map/annotations";
@@ -410,5 +411,112 @@ describe("useMapSessionChrome", () => {
       "Another player will become host so others can keep playing. Leave anyway?",
     );
     expect(mockLeaveHostSession).toHaveBeenCalledWith("session-remote");
+  });
+
+  it("skips host leave callable when session hostUid is not the current user", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: {
+          ...remoteSession,
+          hostUid: "other-host",
+          memberUids: ["other-host", "host-1"],
+        },
+        // Stale host chrome must not call leaveHostSession.
+        isHost: true,
+        annotations: [],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleLeaveSession();
+    });
+
+    expect(mockLeaveHostSession).not.toHaveBeenCalled();
+    expect(window.confirm).toHaveBeenCalledWith(
+      "Leave this session on this device? Other players can keep playing.",
+    );
+    expect(exitSession).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
+    );
+  });
+
+  it("continues local leave on expected host-only leave error without capturing", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => undefined);
+    mockLeaveHostSession.mockRejectedValueOnce(
+      new FirebaseError(
+        "functions/permission-denied",
+        "Only the host can do that.",
+      ),
+    );
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: {
+          ...remoteSession,
+          memberUids: ["host-1", "seeker-2"],
+        },
+        isHost: true,
+        annotations: [],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleLeaveSession();
+    });
+
+    expect(mockCaptureException).not.toHaveBeenCalled();
+    expect(alertSpy).not.toHaveBeenCalled();
+    expect(exitSession).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
+    );
+  });
+
+  it("continues local end on expected session-already-ended without capturing", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    mockEndSession.mockRejectedValueOnce(
+      new FirebaseError(
+        "functions/failed-precondition",
+        "Session already ended.",
+      ),
+    );
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: remoteSession,
+        isHost: true,
+        annotations: [],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleEndSession();
+    });
+
+    expect(mockCaptureException).not.toHaveBeenCalled();
+    expect(mockEndRemoteSession).not.toHaveBeenCalled();
+    expect(exitSession).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: "end", sessionId: "session-remote" }),
+    );
   });
 });

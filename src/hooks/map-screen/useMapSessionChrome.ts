@@ -23,6 +23,7 @@ import {
   endSession,
   leaveHostSession,
 } from "../../services/session/sessionLifecycle";
+import { isExpectedSessionLeaveError } from "../../services/session/sessionLeaveErrors";
 import { emitGameEndedActivity } from "../../services/session/emitSessionActivity";
 import { useSessionExit } from "../session/useSessionExit";
 import { ensureAnonymousUser } from "../../services/core/firebase";
@@ -202,14 +203,18 @@ export function useMapSessionChrome({
     try {
       await endSession(sessionId);
     } catch (error) {
-      captureException(error);
-      // Emulator / no Functions: fall back to client end write.
-      try {
-        await endRemoteSession(sessionId);
-      } catch (fallbackError) {
-        captureException(fallbackError);
-        window.alert("Couldn't end the session. Try again.");
-        return;
+      if (isExpectedSessionLeaveError(error)) {
+        // Already ended or host role moved — continue local exit.
+      } else {
+        captureException(error);
+        // Emulator / no Functions: fall back to client end write.
+        try {
+          await endRemoteSession(sessionId);
+        } catch (fallbackError) {
+          captureException(fallbackError);
+          window.alert("Couldn't end the session. Try again.");
+          return;
+        }
       }
     }
     emitGameEndedActivity(sessionId, {
@@ -229,8 +234,19 @@ export function useMapSessionChrome({
       return;
     }
 
+    let user: { uid: string };
+    try {
+      user = await ensureAnonymousUser();
+    } catch (error) {
+      captureException(error);
+      window.alert("Couldn't leave the session. Try again.");
+      return;
+    }
+
+    // Prefer live hostUid over the isHost prop so stale host chrome cannot
+    // call the host-only leave callable after a transfer.
     const isRemoteHost =
-      isHost && session.id !== LOCAL_SESSION_ID;
+      session.id !== LOCAL_SESSION_ID && session.hostUid === user.uid;
 
     if (isRemoteHost) {
       const hostUid = session.hostUid ?? "";
@@ -245,18 +261,22 @@ export function useMapSessionChrome({
       try {
         await leaveHostSession(session.id);
       } catch (error) {
-        captureException(error);
-        if (alone) {
-          try {
-            await endRemoteSession(session.id);
-          } catch (fallbackError) {
-            captureException(fallbackError);
+        if (isExpectedSessionLeaveError(error)) {
+          // Host role moved or session already ended — continue local leave.
+        } else {
+          captureException(error);
+          if (alone) {
+            try {
+              await endRemoteSession(session.id);
+            } catch (fallbackError) {
+              captureException(fallbackError);
+              window.alert("Couldn't leave the session. Try again.");
+              return;
+            }
+          } else {
             window.alert("Couldn't leave the session. Try again.");
             return;
           }
-        } else {
-          window.alert("Couldn't leave the session. Try again.");
-          return;
         }
       }
     } else if (
@@ -269,7 +289,6 @@ export function useMapSessionChrome({
 
     if (session.id !== LOCAL_SESSION_ID) {
       try {
-        const user = await ensureAnonymousUser();
         const walkIds = listWalkingThermometerQuestionIds(
           pendingQuestions,
           user.uid,
@@ -292,7 +311,7 @@ export function useMapSessionChrome({
       replace: true,
       closeOverlays: closeSettingsPanel,
     });
-  }, [closeSettingsPanel, exitSession, isHost, pendingQuestions, session]);
+  }, [closeSettingsPanel, exitSession, pendingQuestions, session]);
 
   const exportMap = useCallback(async () => {
     if (!session || !mapShellRef.current) {
