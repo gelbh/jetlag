@@ -2,7 +2,7 @@ import { createContext } from "react";
 import type { NavigateOptions, To } from "react-router-dom";
 import type { RouteLoadingProgress } from "./routeLoadingSteps";
 
-export type RouteTransitionPhase = "idle" | "loading" | "revealing";
+export type RouteTransitionPhase = "idle" | "settling";
 
 export type RouteLoadingReason = "page" | "map" | "sign-in" | "premium" | "admin";
 

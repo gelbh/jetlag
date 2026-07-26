@@ -41,7 +41,8 @@ import { useRouteSeo } from "./hooks/useRouteSeo";
 import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";
 import { useSessionStore } from "./state/sessionStore";
 import { RouteReadinessSensor } from "./navigation/RouteReadinessSensor";
-import { RouteTransitionOverlay } from "./navigation/RouteTransitionOverlay";
+import { RouteProgressChrome } from "./navigation/RouteProgressChrome";
+import { AppGlobalActivity } from "./navigation/AppGlobalActivity";
 import { RouteTransitionProvider } from "./navigation/RouteTransitionContext";
 import {
   CreateSessionLazy,
@@ -163,7 +164,8 @@ export default function App() {
           <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
             <AppCheckProbeGate>
               <MotionDatasetEffect />
-            <RouteTransitionOverlay />
+            <RouteProgressChrome />
+            <AppGlobalActivity />
             <RouteReadinessSensor />
             <EdgeSwipeBackBinder />
             <AnalyticsPageViewTracker />
