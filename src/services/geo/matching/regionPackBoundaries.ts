@@ -15,13 +15,24 @@ import type { RegionPackId } from "../../../domain/regions/regionPack";
 
 const regionPackGeoCache = new Map<string, string>();
 
+function resolveGeoAssetUrl(path: string): string {
+  // Node/undici fetch (Vitest) rejects relative URLs; browsers resolve against the origin.
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return new URL(path, window.location.origin).href;
+  }
+  return path;
+}
+
 async function fetchGeoJsonText(path: string): Promise<string> {
   const cached = regionPackGeoCache.get(path);
   if (cached) {
     return cached;
   }
 
-  const response = await fetch(path);
+  const response = await fetch(resolveGeoAssetUrl(path));
   if (!response.ok) {
     throw new Error(`Couldn't load region boundary data (${response.status}).`);
   }
