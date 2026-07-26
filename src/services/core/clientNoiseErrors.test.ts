@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isIdbConnectionClosingMessage,
+  isRecaptchaOtTypeErrorMessage,
   isWebkitLoadFailedMessage,
 } from "./clientNoiseErrors";
 
@@ -37,3 +38,26 @@ describe("isWebkitLoadFailedMessage", () => {
     expect(isWebkitLoadFailedMessage("Load failed to fetch")).toBe(false);
   });
 });
+
+describe("isRecaptchaOtTypeErrorMessage", () => {
+  it("matches Chrome/Safari reCAPTCHA oT property access TypeErrors", () => {
+    expect(
+      isRecaptchaOtTypeErrorMessage(
+        "Cannot read properties of null (reading 'oT')",
+      ),
+    ).toBe(true);
+    expect(
+      isRecaptchaOtTypeErrorMessage(
+        "null is not an object (evaluating 'a.oT')",
+      ),
+    ).toBe(true);
+  });
+
+  it("ignores unrelated TypeError messages", () => {
+    expect(
+      isRecaptchaOtTypeErrorMessage("Cannot read properties of null (reading 'x')"),
+    ).toBe(false);
+    expect(isRecaptchaOtTypeErrorMessage("Load failed")).toBe(false);
+  });
+});
+
