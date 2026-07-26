@@ -11,7 +11,8 @@ Handlers run in this order (first match wins for early returns):
 3. **CSP report** — `POST /api/csp-report` (other methods → `204`) → logs truncated body
 4. **Incident email** — `INCIDENT_EMAIL_PATH` → `handleIncidentEmailRequest`
 5. **Static assets** — `env.ASSETS.fetch`
-   - Exact `/` is rewritten to `/prerender/home/index.html` (prerendered home)
+   - Exact `/` is rewritten to `/prerender/home/` (prerendered home; Assets redirects are followed so the client stays on `/`)
+   - `/prerender/home` and `/prerender/home/` **308** → `/`
    - Nested SPA routes still fall through to the asset shell as usual
 6. **Asset SPA-fallback guard** — if a `/assets/*` request would get HTML (`text/html` 200), respond `404` instead (stale chunk / missing file)
 7. **Document CSP nonce** — HTML documents get a per-response script nonce via `applyDocumentCspNonce`

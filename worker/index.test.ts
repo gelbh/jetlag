@@ -300,10 +300,76 @@ describe("worker fetch", () => {
 
     expect(env.ASSETS.fetch).toHaveBeenCalledTimes(1);
     const assetRequest = env.ASSETS.fetch.mock.calls[0][0] as Request;
-    expect(new URL(assetRequest.url).pathname).toBe(
-      "/prerender/home/index.html",
-    );
+    expect(new URL(assetRequest.url).pathname).toBe("/prerender/home/");
+    expect(response.headers.get("Location")).toBeNull();
+    expect(response.status).toBe(200);
     expect(await response.text()).toContain("Jet Lag Hide+Seek home");
+  });
+
+  it("redirects /prerender/home/ to / with 308", async () => {
+    const env = {
+      ASSETS: { fetch: vi.fn() },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/prerender/home/?x=1"),
+      env,
+    );
+
+    expect(env.ASSETS.fetch).not.toHaveBeenCalled();
+    expect(response.status).toBe(308);
+    expect(response.headers.get("Location")).toBe(
+      "https://jetlag.gelbhart.dev/?x=1",
+    );
+  });
+
+  it("redirects /prerender/home to / with 308", async () => {
+    const env = {
+      ASSETS: { fetch: vi.fn() },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/prerender/home"),
+      env,
+    );
+
+    expect(env.ASSETS.fetch).not.toHaveBeenCalled();
+    expect(response.status).toBe(308);
+    expect(new URL(response.headers.get("Location")!).pathname).toBe("/");
+  });
+
+  it("does not forward Assets directory redirects for /", async () => {
+    const html =
+      '<!doctype html><html><body><div id="root">home</div></body></html>';
+    const env = {
+      ASSETS: {
+        fetch: vi
+          .fn()
+          .mockResolvedValueOnce(
+            new Response(null, {
+              status: 307,
+              headers: {
+                Location: "https://jetlag.gelbhart.dev/prerender/home/",
+              },
+            }),
+          )
+          .mockResolvedValueOnce(
+            new Response(html, {
+              headers: { "Content-Type": "text/html; charset=utf-8" },
+            }),
+          ),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/"),
+      env,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Location")).toBeNull();
+    expect(await response.text()).toContain('id="root"');
+    expect(env.ASSETS.fetch).toHaveBeenCalledTimes(2);
   });
 
   it("applies document CSP nonce to html asset responses", async () => {
