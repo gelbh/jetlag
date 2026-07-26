@@ -27,7 +27,7 @@
   --color-map-canvas: oklch(0.88 0.015 250);
   --color-scrollbar-track: var(--color-surface-deep);
   --color-scrollbar-thumb: var(--color-border-muted);
-  --color-scrollbar-thumb-hover: oklch(0.55 0.04 250);
+  --color-scrollbar-thumb-hover: oklch(0.50 0.04 250);
   --scrollbar-size: 0.5rem;
   --radius-hud-sm: 0.125rem;
   --radius-hud-md: 0.25rem;

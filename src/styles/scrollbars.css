@@ -33,3 +33,10 @@
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
 }
+
+/* Firefox: scrollbar-* inherits from ancestors. Keep map/Leaflet on OS default. */
+.map-screen-shell,
+.leaflet-container {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+}
