@@ -9,7 +9,7 @@ import {
   recommendGameSize,
   hidingZoneRadiusMeters,
 } from "./gameSize";
-import { milesToMeters } from "../map/distance";
+import { milesToMeters } from "../../map/distance";
 
 describe("gameSize", () => {
   it("recommends small for compact play areas", () => {
