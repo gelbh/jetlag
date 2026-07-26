@@ -6,7 +6,7 @@ import { unionGameAreas } from "./unionGameAreas";
 import { gameAreaToBoundingBox } from "../gameArea/gameAreaBounds";
 import { gameAreaWithoutInteriorRings } from "../gameArea/geometryCore";
 
-const ROOT = resolve(import.meta.dirname, "../../..");
+const ROOT = resolve(import.meta.dirname, "../../../..");
 
 const dublin: GameArea = {
   type: "Polygon",
