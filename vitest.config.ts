@@ -1,9 +1,18 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 import wasm from "vite-plugin-wasm";
 import { optionalKernelWasmPkg } from "./vite.optional-kernel-wasm-pkg";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+    },
+  },
   plugins: [optionalKernelWasmPkg(), react(), wasm()],
   test: {
     environment: "jsdom",

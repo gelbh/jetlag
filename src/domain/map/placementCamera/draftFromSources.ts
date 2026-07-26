@@ -1,4 +1,4 @@
-import type { MapDraftOverlaySources } from "../../../hooks/map-screen/useMapDraftOverlays";
+import type { MapDraftOverlaySources } from "@/hooks/map-screen/useMapDraftOverlays";
 import type { PlacementCameraDraftState } from "./types";
 
 export function placementCameraDraftFromOverlaySources(
