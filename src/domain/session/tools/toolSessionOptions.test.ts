@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AnnotationRecord } from "../map/annotations";
+import type { AnnotationRecord } from "../../map/annotations";
 import {
   collectUsedAnnotationOptions,
   firstUnusedCatalogOption,
