@@ -29,8 +29,9 @@ describe("useThermometerWalk", () => {
     const startPoint: [number, number] = [53.35, -6.26];
     const maxDurationMs = 5_000;
 
+    type Reading = { lat: number; lng: number; accuracy: number } | null;
     const { rerender, result } = renderHook(
-      ({ reading }: { reading: { lat: number; lng: number; accuracy: number } | null }) => {
+      ({ reading }: { reading: Reading }) => {
         useLiveLocationMock.mockReturnValue({ reading, error: null });
         return useThermometerWalk({
           active: true,
@@ -40,7 +41,7 @@ describe("useThermometerWalk", () => {
           maxDurationMs,
         });
       },
-      { initialProps: { reading: null } },
+      { initialProps: { reading: null as Reading } },
     );
 
     expect(result.current.currentPoint).toBeNull();
