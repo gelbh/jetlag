@@ -46,16 +46,12 @@ export async function resolveAdminAccess(
   if (!isAdminEmail(user.email)) {
     return "denied";
   }
-  if (isAdminUser(user)) {
-    return "admin";
-  }
-  try {
-    await user.reload();
-  } catch {
-    // fall through to token / deny
-  }
-  if (isAdminUser(user)) {
-    return "admin";
+  if (!isAdminUser(user)) {
+    try {
+      await user.reload();
+    } catch {
+      // fall through to forced token / deny
+    }
   }
   try {
     const token = await user.getIdTokenResult(true);

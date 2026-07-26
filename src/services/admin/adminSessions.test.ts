@@ -1,15 +1,23 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { FirebaseError } from "firebase/app";
 import {
   fetchActiveAdminSessions,
   fetchAdminSessionsPage,
   type AdminSessionSummary,
 } from "./adminSessions";
 
-const mockCallable = vi.fn();
+const { mockCallable, forceRefreshIdToken } = vi.hoisted(() => ({
+  mockCallable: vi.fn(),
+  forceRefreshIdToken: vi.fn(async () => undefined),
+}));
 
 vi.mock("../core/firebase", () => ({
   isFirebaseConfigured: () => true,
   getFirebaseFunctions: async () => ({}),
+}));
+
+vi.mock("../core/auth/forceRefreshIdToken", () => ({
+  forceRefreshIdToken,
 }));
 
 vi.mock("firebase/functions", () => ({
@@ -50,6 +58,11 @@ function sessionSummary(
 }
 
 describe("fetchActiveAdminSessions", () => {
+  beforeEach(() => {
+    mockCallable.mockReset();
+    forceRefreshIdToken.mockClear();
+  });
+
   it("sorts merged pages globally by last activity", async () => {
     mockCallable
       .mockResolvedValueOnce({
@@ -87,6 +100,11 @@ describe("fetchActiveAdminSessions", () => {
 });
 
 describe("fetchAdminSessionsPage", () => {
+  beforeEach(() => {
+    mockCallable.mockReset();
+    forceRefreshIdToken.mockClear();
+  });
+
   it("forwards page token and limit to the callable", async () => {
     mockCallable.mockResolvedValueOnce({
       data: {
@@ -126,5 +144,40 @@ describe("fetchAdminSessionsPage", () => {
       pageToken: "page-2",
     });
     expect(page.nextPageToken).toBeNull();
+  });
+
+  it("refreshes the ID token once after permission-denied then succeeds", async () => {
+    mockCallable
+      .mockRejectedValueOnce(
+        new FirebaseError("functions/permission-denied", "Admin access required."),
+      )
+      .mockResolvedValueOnce({
+        data: {
+          sessions: [
+            sessionSummary({
+              sessionId: "recovered",
+              lastActivityAt: "2026-01-02T00:00:00.000Z",
+              createdAt: "2026-01-01T00:00:00.000Z",
+            }),
+          ],
+          nextPageToken: null,
+        },
+      });
+
+    const page = await fetchAdminSessionsPage();
+
+    expect(forceRefreshIdToken).toHaveBeenCalledTimes(1);
+    expect(mockCallable).toHaveBeenCalledTimes(2);
+    expect(page.sessions[0]?.sessionId).toBe("recovered");
+  });
+
+  it("maps double permission-denied to Admin access required", async () => {
+    mockCallable.mockRejectedValue(
+      new FirebaseError("functions/permission-denied", "nope"),
+    );
+
+    await expect(fetchAdminSessionsPage()).rejects.toThrow("Admin access required.");
+    expect(forceRefreshIdToken).toHaveBeenCalledTimes(1);
+    expect(mockCallable).toHaveBeenCalledTimes(2);
   });
 });

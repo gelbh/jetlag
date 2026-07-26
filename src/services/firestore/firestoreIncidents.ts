@@ -7,6 +7,7 @@ import {
   query,
   type Unsubscribe,
 } from "firebase/firestore";
+import { FirebaseError } from "firebase/app";
 import {
   type HostConfirmRecord,
   type HostConfirmStatus,
@@ -23,6 +24,7 @@ import {
   isIncidentStatus,
 } from "../../domain/incident/incidentTypes";
 import type { PlayerRole } from "../../domain/session/playerRole";
+import { forceRefreshIdToken } from "../core/auth/forceRefreshIdToken";
 import { getFirestoreDb, isFirebaseConfigured } from "../core/firebase";
 
 export const DEFAULT_HOTFIX_GRACE_SECONDS = 30;
@@ -432,27 +434,64 @@ export function subscribeIncidentList(
   options: { limitCount?: number } = {},
 ): Unsubscribe {
   const limitCount = options.limitCount ?? 50;
-  return onSnapshot(
-    query(
-      incidentsCollection(),
-      orderBy("updatedAt", "desc"),
-      limit(limitCount),
-    ),
-    (snapshot) => {
-      const incidents: IncidentRecord[] = [];
-      for (const incidentSnapshot of snapshot.docs) {
-        const incident = deserializeIncidentFromFirestore(
-          incidentSnapshot.id,
-          incidentSnapshot.data() as Record<string, unknown>,
-        );
-        if (incident) {
-          incidents.push(incident);
+  let unsubscribed = false;
+  let activeUnsub: Unsubscribe | null = null;
+  let retriedAuth = false;
+
+  const attach = () => {
+    activeUnsub = onSnapshot(
+      query(
+        incidentsCollection(),
+        orderBy("updatedAt", "desc"),
+        limit(limitCount),
+      ),
+      (snapshot) => {
+        const incidents: IncidentRecord[] = [];
+        for (const incidentSnapshot of snapshot.docs) {
+          const incident = deserializeIncidentFromFirestore(
+            incidentSnapshot.id,
+            incidentSnapshot.data() as Record<string, unknown>,
+          );
+          if (incident) {
+            incidents.push(incident);
+          }
         }
-      }
-      onChange(incidents);
-    },
-    (error) => onError(error),
-  );
+        onChange(incidents);
+      },
+      (error) => {
+        const permissionDenied =
+          error instanceof FirebaseError && error.code === "permission-denied";
+        if (!retriedAuth && permissionDenied && !unsubscribed) {
+          retriedAuth = true;
+          activeUnsub?.();
+          activeUnsub = null;
+          void forceRefreshIdToken()
+            .then(() => {
+              if (!unsubscribed) {
+                attach();
+              }
+            })
+            .catch((refreshError) => {
+              onError(
+                refreshError instanceof Error
+                  ? refreshError
+                  : new Error(String(refreshError)),
+              );
+            });
+          return;
+        }
+        onError(error);
+      },
+    );
+  };
+
+  attach();
+
+  return () => {
+    unsubscribed = true;
+    activeUnsub?.();
+    activeUnsub = null;
+  };
 }
 
 export function subscribeAppConfigRuntime(

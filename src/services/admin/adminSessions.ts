@@ -1,5 +1,6 @@
 import { FirebaseError } from "firebase/app";
 import { httpsCallable, type HttpsCallableResult } from "firebase/functions";
+import { forceRefreshIdToken } from "../core/auth/forceRefreshIdToken";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
 
 function compareSessionsByLastActivity(
@@ -72,6 +73,44 @@ export type ListActiveSessionsResponse = {
   nextPageToken: string | null;
 };
 
+function isRetriableAdminAuthError(error: unknown): boolean {
+  return (
+    error instanceof FirebaseError &&
+    (error.code === "functions/permission-denied" ||
+      error.code === "functions/unauthenticated")
+  );
+}
+
+function mapAdminSessionsError(error: unknown): never {
+  if (error instanceof FirebaseError && error.code === "functions/permission-denied") {
+    throw new Error("Admin access required.", { cause: error });
+  }
+
+  if (error instanceof FirebaseError && error.code === "functions/unauthenticated") {
+    throw new Error("Sign in required.", { cause: error });
+  }
+
+  if (
+    error instanceof FirebaseError &&
+    (error.code === "functions/internal" || error.message?.trim() === "INTERNAL")
+  ) {
+    throw new Error("Couldn't load live sessions.", { cause: error });
+  }
+
+  if (error instanceof FirebaseError && error.code === "functions/not-found") {
+    throw new Error(
+      "Admin session service isn't available yet. Try again after deploy.",
+      { cause: error },
+    );
+  }
+
+  if (error instanceof Error) {
+    throw error;
+  }
+
+  throw new Error("Couldn't load live sessions.", { cause: error });
+}
+
 export async function fetchAdminSessionsPage(
   pageToken: string | null = null,
   limit = 50,
@@ -86,7 +125,7 @@ export async function fetchAdminSessionsPage(
     ListActiveSessionsResponse
   >(functions, "listActiveSessions");
 
-  try {
+  const callOnce = async (): Promise<ListActiveSessionsResponse> => {
     const result: HttpsCallableResult<ListActiveSessionsResponse> =
       await callable({
         limit,
@@ -97,34 +136,20 @@ export async function fetchAdminSessionsPage(
       sessions: result.data.sessions ?? [],
       nextPageToken: result.data.nextPageToken ?? null,
     };
+  };
+
+  try {
+    return await callOnce();
   } catch (error) {
-    if (error instanceof FirebaseError && error.code === "functions/permission-denied") {
-      throw new Error("Admin access required.", { cause: error });
+    if (!isRetriableAdminAuthError(error)) {
+      mapAdminSessionsError(error);
     }
-
-    if (error instanceof FirebaseError && error.code === "functions/unauthenticated") {
-      throw new Error("Sign in required.", { cause: error });
+    try {
+      await forceRefreshIdToken();
+      return await callOnce();
+    } catch (retryError) {
+      mapAdminSessionsError(retryError);
     }
-
-    if (
-      error instanceof FirebaseError &&
-      (error.code === "functions/internal" || error.message?.trim() === "INTERNAL")
-    ) {
-      throw new Error("Couldn't load live sessions.", { cause: error });
-    }
-
-    if (error instanceof FirebaseError && error.code === "functions/not-found") {
-      throw new Error(
-        "Admin session service isn't available yet. Try again after deploy.",
-        { cause: error },
-      );
-    }
-
-    if (error instanceof Error) {
-      throw error;
-    }
-
-    throw new Error("Couldn't load live sessions.", { cause: error });
   }
 }
 
