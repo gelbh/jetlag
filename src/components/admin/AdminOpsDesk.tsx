@@ -110,9 +110,10 @@ export function AdminOpsDesk() {
   const selectedIncidentId = routeIncidentId?.trim() || null;
   const onIncidentsRoute = location.pathname.startsWith("/admin/incidents");
 
-  const [store, setStore] = useState<OpsDeskStoreV1>(() =>
-    loadOpsDeskStore(user?.uid ?? null),
-  );
+  const [store, setStore] = useState<OpsDeskStoreV1>(() => {
+    const loaded = loadOpsDeskStore(user?.uid ?? null);
+    return { ...loaded, activePresetId: loaded.defaultPresetId };
+  });
   const [storeUid, setStoreUid] = useState<string | null>(user?.uid ?? null);
   const [now, setNow] = useState(() => new Date());
   const [incidents, setIncidents] = useState<IncidentRecord[]>([]);
@@ -157,7 +158,8 @@ export function AdminOpsDesk() {
 
   if (uid !== storeUid) {
     setStoreUid(uid);
-    setStore(loadOpsDeskStore(uid));
+    const loaded = loadOpsDeskStore(uid);
+    setStore({ ...loaded, activePresetId: loaded.defaultPresetId });
     setDeepLinkKey(null);
   }
 
