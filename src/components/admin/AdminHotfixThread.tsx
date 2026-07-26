@@ -82,7 +82,7 @@ export function AdminHotfixThread({
         </p>
       ) : null}
 
-      <div className="jl-incident-chat-scroll">
+      <div className="jl-scroll jl-incident-chat-scroll">
         {messages.length === 0 ? (
           <p className="text-sm text-ink-dim">
             No coding-agent activity yet. Clear-bug triage launches here

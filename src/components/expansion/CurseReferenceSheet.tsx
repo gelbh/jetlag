@@ -48,7 +48,7 @@ export function CurseReferenceSheet({ open, onClose }: CurseReferenceSheetProps)
         />
       </label>
 
-      <div className="space-y-4 overflow-y-auto pr-1">
+      <div className="jl-scroll space-y-4 overflow-y-auto pr-1">
         {visibleCurses.map((curse) => (
           <section key={curse.id} className="space-y-1">
             <h3 className="text-sm font-semibold text-ink">{curse.name}</h3>

@@ -52,7 +52,7 @@ export function AdminMobileDesk({
         onRefreshSessions={onRefreshSessions}
         refreshing={refreshing}
       />
-      <div className="jl-ops-mobile-chips" role="tablist" aria-label="Panels">
+      <div className="jl-scroll jl-ops-mobile-chips" role="tablist" aria-label="Panels">
         {PANEL_IDS.map((panelId) => (
           <button
             key={panelId}

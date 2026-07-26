@@ -57,7 +57,7 @@ export function TutorialQuestionsHub({
         </p>
       </div>
 
-      <div className="tutorial-questions-list">
+      <div className="jl-scroll tutorial-questions-list">
         {questions.map((question) => {
           const walkthroughCount = questionWalkthroughSteps(question.steps).length;
           const complete = isQuestionTutorialComplete(

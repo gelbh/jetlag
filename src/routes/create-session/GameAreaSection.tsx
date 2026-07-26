@@ -264,7 +264,7 @@ export function GameAreaSection({
         </button>
 
         {searchResults.length > 0 ? (
-          <div className="max-h-40 space-y-1 overflow-y-auto border-2 border-border bg-surface-deep p-1.5">
+          <div className="jl-scroll max-h-40 space-y-1 overflow-y-auto border-2 border-border bg-surface-deep p-1.5">
             {searchResults.map((place) => (
               <button
                 key={place.id}

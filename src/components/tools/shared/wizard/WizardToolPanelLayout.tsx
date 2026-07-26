@@ -19,7 +19,7 @@ export function WizardToolPanelLayout({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="wizard-tool-scroll-body min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <div className="jl-scroll wizard-tool-scroll-body min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {children}
       </div>
       {stickyFooter ? (
