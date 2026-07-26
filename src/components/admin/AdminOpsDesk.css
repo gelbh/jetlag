@@ -88,7 +88,7 @@
 
 .jl-ops-preset-chip {
   display: inline-flex;
-  min-height: 2.75rem;
+  min-height: 2rem;
   align-items: center;
   border: 1px solid var(--color-border);
   background: var(--color-surface-panel);
@@ -532,13 +532,37 @@ html[data-motion="static"] .jl-ops-tab {
 
 .jl-ops-preset-chip-wrap .jl-ops-preset-chip {
   border: none;
-  min-height: 2rem;
   background: transparent;
 }
 
-.jl-ops-preset-chip-wrap .jl-ops-preset-chip--active {
+.jl-ops-preset-chip-wrap--active .jl-ops-preset-chip {
   background: oklch(from var(--color-action) l c h / 0.14);
   color: var(--color-action);
+}
+
+.jl-ops-preset-drag {
+  display: inline-flex;
+  min-height: 2rem;
+  min-width: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-right: 1px solid var(--color-border);
+  background: transparent;
+  padding: 0;
+  color: var(--color-ink-muted);
+  cursor: grab;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.jl-ops-preset-drag:active {
+  cursor: grabbing;
+}
+
+.jl-ops-preset-drag:focus-visible {
+  outline: 2px solid var(--color-action);
+  outline-offset: -2px;
 }
 
 .jl-ops-preset-star {
@@ -665,10 +689,6 @@ html[data-motion="static"] .jl-ops-tab {
 .jl-ops-preset-default-mark {
   margin-left: 0.25rem;
   color: var(--color-highlight);
-}
-
-.jl-ops-preset-chip {
-  min-height: 2rem;
 }
 
 .jl-ops-dialog-backdrop {

@@ -75,7 +75,7 @@ describe("AdminPresetMenu", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Manage" }));
     fireEvent.click(
-      screen.getByRole("menuitem", { name: "Move Incident triage earlier" }),
+      screen.getByRole("button", { name: "Move Incident triage earlier" }),
     );
 
     expect(onReorderPresets).toHaveBeenCalledWith([

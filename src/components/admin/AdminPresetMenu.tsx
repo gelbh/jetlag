@@ -1,16 +1,12 @@
-import { useRef, useState, type DragEvent } from "react";
+import { useEffect, useRef, useState, type DragEvent } from "react";
 import {
   BUILTIN_PRESETS,
   CUSTOM_PRESET_ID,
+  movePresetToIndex,
+  presetLabel,
   type DeskPreset,
 } from "../../domain/admin/opsDeskLayout";
-import {
-  AdminPresetManageMenu,
-  movePresetOrder,
-  presetLabel,
-} from "./AdminPresetManageMenu";
-
-export { movePresetOrder, presetLabel };
+import { AdminPresetManageMenu } from "./AdminPresetManageMenu";
 
 const PRESET_MIME = "application/x-jl-ops-preset-id";
 
@@ -50,11 +46,27 @@ export function AdminPresetMenu({
   );
   const [manageOpen, setManageOpen] = useState(false);
   const manageAnchorRef = useRef<HTMLSpanElement>(null);
-  const dragActiveRef = useRef(false);
   const dragFromIdRef = useRef<string | null>(null);
 
+  useEffect(() => {
+    if (!manageOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setManageOpen(false);
+    };
+    const onPointer = (event: MouseEvent) => {
+      const root = manageAnchorRef.current;
+      if (!root || !(event.target instanceof Node)) return;
+      if (!root.contains(event.target)) setManageOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("mousedown", onPointer);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("mousedown", onPointer);
+    };
+  }, [manageOpen]);
+
   const handleDragStart = (event: DragEvent, presetId: string) => {
-    dragActiveRef.current = true;
     dragFromIdRef.current = presetId;
     event.dataTransfer.setData(PRESET_MIME, presetId);
     event.dataTransfer.effectAllowed = "move";
@@ -62,9 +74,6 @@ export function AdminPresetMenu({
 
   const handleDragEnd = () => {
     dragFromIdRef.current = null;
-    window.setTimeout(() => {
-      dragActiveRef.current = false;
-    }, 0);
   };
 
   const handleDragOver = (event: DragEvent) => {
@@ -78,14 +87,9 @@ export function AdminPresetMenu({
     const fromId =
       event.dataTransfer.getData(PRESET_MIME) || dragFromIdRef.current;
     if (!fromId || fromId === targetId) return;
-    const fromIndex = orderedIds.indexOf(fromId);
     const toIndex = orderedIds.indexOf(targetId);
-    if (fromIndex < 0 || toIndex < 0) return;
-    const next = [...orderedIds];
-    const [item] = next.splice(fromIndex, 1);
-    if (!item) return;
-    next.splice(toIndex, 0, item);
-    onReorderPresets(next);
+    const next = movePresetToIndex(orderedIds, fromId, toIndex);
+    if (next) onReorderPresets(next);
   };
 
   return (
@@ -94,32 +98,31 @@ export function AdminPresetMenu({
         const isDefault = defaultPresetId === presetId;
         const isActive = activePresetId === presetId;
         const label = presetLabel(presetId, userPresets);
+        const wrapClass = isActive
+          ? "jl-ops-preset-chip-wrap jl-ops-preset-chip-wrap--active"
+          : "jl-ops-preset-chip-wrap";
         return (
           <span
             key={presetId}
-            className={
-              isActive
-                ? "jl-ops-preset-chip-wrap jl-ops-preset-chip-wrap--active"
-                : "jl-ops-preset-chip-wrap"
-            }
-            draggable
-            onDragStart={(event) => handleDragStart(event, presetId)}
-            onDragEnd={handleDragEnd}
+            className={wrapClass}
             onDragOver={handleDragOver}
             onDrop={(event) => handleDrop(event, presetId)}
           >
             <button
               type="button"
-              className={
-                isActive
-                  ? "jl-ops-preset-chip jl-ops-preset-chip--active"
-                  : "jl-ops-preset-chip"
-              }
+              className="jl-ops-preset-drag jl-ops-drag-handle"
+              draggable
+              aria-label={`Reorder ${label}`}
+              onDragStart={(event) => handleDragStart(event, presetId)}
+              onDragEnd={handleDragEnd}
+            >
+              ⠿
+            </button>
+            <button
+              type="button"
+              className="jl-ops-preset-chip"
               aria-pressed={isActive}
-              onClick={() => {
-                if (dragActiveRef.current) return;
-                onSelectPreset(presetId);
-              }}
+              onClick={() => onSelectPreset(presetId)}
             >
               {label}
             </button>
@@ -130,17 +133,13 @@ export function AdminPresetMenu({
                   ? "jl-ops-preset-star jl-ops-preset-star--active"
                   : "jl-ops-preset-star"
               }
-              draggable={false}
               aria-label={
                 isDefault
                   ? `${label} is default`
                   : `Set ${label} as default`
               }
               aria-pressed={isDefault}
-              onClick={(event) => {
-                event.stopPropagation();
-                onSetDefault(presetId);
-              }}
+              onClick={() => onSetDefault(presetId)}
             >
               {isDefault ? "★" : "☆"}
             </button>
@@ -152,7 +151,7 @@ export function AdminPresetMenu({
           type="button"
           className="jl-ops-preset-chip"
           aria-expanded={manageOpen}
-          aria-haspopup="menu"
+          aria-haspopup="true"
           onClick={() => setManageOpen((open) => !open)}
         >
           Manage
@@ -167,7 +166,6 @@ export function AdminPresetMenu({
             onRenameUserPreset={onRenameUserPreset}
             onDeleteUserPreset={onDeleteUserPreset}
             onDismiss={() => setManageOpen(false)}
-            dismissIgnoreRef={manageAnchorRef}
           />
         ) : null}
       </span>

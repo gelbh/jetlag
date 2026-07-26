@@ -416,6 +416,41 @@ export function getBuiltinPreset(id: string): DeskPreset | undefined {
   return BUILTIN_PRESETS.find((p) => p.id === id);
 }
 
+export function presetLabel(id: string, userPresets: DeskPreset[]): string {
+  if (id === CUSTOM_PRESET_ID) return "Custom";
+  const builtin = getBuiltinPreset(id);
+  if (builtin) return builtin.name;
+  return userPresets.find((p) => p.id === id)?.name ?? id;
+}
+
+/** Move `id` by `delta` steps (−1 earlier, +1 later). Null if no-op. */
+export function movePresetOrder(
+  orderedIds: string[],
+  id: string,
+  delta: number,
+): string[] | null {
+  const index = orderedIds.indexOf(id);
+  if (index < 0) return null;
+  return movePresetToIndex(orderedIds, id, index + delta);
+}
+
+/** Move `id` to `toIndex`. Null if no-op or out of range. */
+export function movePresetToIndex(
+  orderedIds: string[],
+  id: string,
+  toIndex: number,
+): string[] | null {
+  const fromIndex = orderedIds.indexOf(id);
+  if (fromIndex < 0) return null;
+  if (toIndex < 0 || toIndex >= orderedIds.length) return null;
+  if (fromIndex === toIndex) return null;
+  const next = [...orderedIds];
+  const [item] = next.splice(fromIndex, 1);
+  if (!item) return null;
+  next.splice(toIndex, 0, item);
+  return next;
+}
+
 export function defaultOpsDeskLayout(): DeskLayout {
   return cloneLayout(SESSION_WATCH_LAYOUT);
 }
