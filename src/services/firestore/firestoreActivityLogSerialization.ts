@@ -1,4 +1,5 @@
 import type { AnnotationType } from "../../domain/map/annotations";
+import type { PendingQuestionToolType } from "../../domain/session/sessionChat";
 import type { SessionActivityEvent } from "../../domain/session/sessionActivityLog";
 import {
   assertNoNestedArrays,
@@ -17,8 +18,17 @@ const ACTIVITY_ANNOTATION_TYPES = [
   "matching",
 ] as const satisfies readonly AnnotationType[];
 
+const ACTIVITY_PENDING_TOOL_TYPES = [
+  ...ACTIVITY_ANNOTATION_TYPES,
+  "photo",
+] as const satisfies readonly PendingQuestionToolType[];
+
 const ACTIVITY_ANNOTATION_TYPE_SET: ReadonlySet<string> = new Set(
   ACTIVITY_ANNOTATION_TYPES,
+);
+
+const ACTIVITY_PENDING_TOOL_TYPE_SET: ReadonlySet<string> = new Set(
+  ACTIVITY_PENDING_TOOL_TYPES,
 );
 
 function optionalString(value: unknown): string | undefined {
@@ -32,6 +42,13 @@ function optionalBoolean(value: unknown): boolean | undefined {
 function parseActivityToolType(value: unknown): AnnotationType {
   if (typeof value === "string" && ACTIVITY_ANNOTATION_TYPE_SET.has(value)) {
     return value as AnnotationType;
+  }
+  throw new Error(`Invalid activity log toolType: ${String(value)}`);
+}
+
+function parsePendingQuestionToolType(value: unknown): PendingQuestionToolType {
+  if (typeof value === "string" && ACTIVITY_PENDING_TOOL_TYPE_SET.has(value)) {
+    return value as PendingQuestionToolType;
   }
   throw new Error(`Invalid activity log toolType: ${String(value)}`);
 }
@@ -75,7 +92,6 @@ export function deserializeActivityLogFromFirestore(
       return { ...base, type: document.type, payload: {} };
     case "question_asked":
     case "question_answered":
-    case "question_cancelled":
       return {
         ...base,
         type: document.type,
@@ -86,6 +102,16 @@ export function deserializeActivityLogFromFirestore(
           annotationId: optionalString(payload.annotationId),
           answerSummary: optionalString(payload.answerSummary),
           answeredLate: optionalBoolean(payload.answeredLate),
+        },
+      };
+    case "question_cancelled":
+      return {
+        ...base,
+        type: document.type,
+        payload: {
+          toolType: parsePendingQuestionToolType(payload.toolType),
+          promptText: String(payload.promptText ?? ""),
+          pendingQuestionId: optionalString(payload.pendingQuestionId),
         },
       };
     case "thermometer_walk_started":

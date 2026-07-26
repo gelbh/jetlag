@@ -144,6 +144,55 @@ describe("useQuestionDeadlineEnforcement", () => {
     expect(resumeTimer).toHaveBeenCalledTimes(1);
   });
 
+  it("resumes the timer after an expired question is dismissed", async () => {
+    const pauseTimer = vi.fn();
+    const resumeTimer = vi.fn();
+    const expiredAt = new Date().toISOString();
+
+    const { rerender } = renderHook(
+      ({ pendingQuestions, timerRunning }) =>
+        useQuestionDeadlineEnforcement({
+          sessionId: "session-1",
+          enabled: true,
+          sessionRules: { gameSize: "small" },
+          pendingQuestions,
+          hidingZones: [],
+          hidingTimerRunning: timerRunning,
+          pauseTimer,
+          resumeTimer,
+          postSystemMessage: vi.fn(async () => undefined),
+        }),
+      {
+        initialProps: {
+          pendingQuestions: [pendingQuestion()],
+          timerRunning: true,
+        },
+      },
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+
+    expect(pauseTimer).toHaveBeenCalledTimes(1);
+
+    rerender({
+      pendingQuestions: [
+        pendingQuestion({
+          status: "cancelled",
+          deadlineExpiredAt: expiredAt,
+        }),
+      ],
+      timerRunning: false,
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+
+    expect(resumeTimer).toHaveBeenCalledTimes(1);
+  });
+
   it("skips resume while a hiding-zone move is in progress", async () => {
     const resumeTimer = vi.fn();
     const expiredAt = new Date().toISOString();

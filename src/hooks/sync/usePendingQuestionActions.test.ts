@@ -9,6 +9,7 @@ const firestoreMocks = vi.hoisted(() => ({
   deletePendingQuestion: vi.fn(async () => undefined),
   postGameSystemMessage: vi.fn(async () => undefined),
   updateGameMessageAnswer: vi.fn(async () => undefined),
+  updateGameMessageStatus: vi.fn(async () => undefined),
   getPendingQuestionStatus: vi.fn(async () => "walking"),
   THERMOMETER_WALK_CANCEL_TEXT: {
     left: "Thermometer walk cancelled — seeker left.",
@@ -19,6 +20,17 @@ const firestoreMocks = vi.hoisted(() => ({
 }));
 
 vi.mock("../../services/firestore/firestoreSessionExtras", () => firestoreMocks);
+
+const activityMocks = vi.hoisted(() => ({
+  emitQuestionCancelledActivity: vi.fn(),
+  emitQuestionAskedActivity: vi.fn(),
+  emitPhotoAskedActivity: vi.fn(),
+  emitThermometerWalkStartedActivity: vi.fn(),
+  emitThermometerWalkSeparatedActivity: vi.fn(),
+  isAnnotationQuestionTool: (toolType: string) => toolType !== "photo",
+}));
+
+vi.mock("../../services/session/emitSessionActivity", () => activityMocks);
 
 describe("usePendingQuestionActions", () => {
   beforeEach(() => {
@@ -143,5 +155,47 @@ describe("usePendingQuestionActions", () => {
     ).rejects.toThrow("permission-denied");
 
     expect(firestoreMocks.postGameSystemMessage).not.toHaveBeenCalled();
+  });
+
+  it("dismisses an expired pending question and posts system message", async () => {
+    firestoreMocks.getPendingQuestionStatus.mockResolvedValueOnce("pending");
+    const { result } = renderHook(() => usePendingQuestionActions());
+
+    await act(async () => {
+      await result.current.dismissExpiredPendingQuestion({
+        sessionId: "session-1",
+        pendingQuestionId: "pq-1",
+        messageId: "msg-1",
+        senderUid: "seeker-1",
+        senderRole: "seeker",
+        toolType: "radar",
+        promptText: "Are you within 1 mile?",
+      });
+    });
+
+    expect(firestoreMocks.updatePendingQuestion).toHaveBeenCalledWith(
+      "session-1",
+      "pq-1",
+      { status: "cancelled" },
+    );
+    expect(firestoreMocks.updateGameMessageStatus).toHaveBeenCalledWith(
+      "session-1",
+      "msg-1",
+      "cancelled",
+    );
+    expect(firestoreMocks.postGameSystemMessage).toHaveBeenCalledWith(
+      "session-1",
+      "seeker-1",
+      "seeker",
+      "Expired question dismissed. You can ask again.",
+      expect.any(String),
+    );
+    expect(activityMocks.emitQuestionCancelledActivity).toHaveBeenCalledWith({
+      sessionId: "session-1",
+      toolType: "radar",
+      promptText: "Are you within 1 mile?",
+      pendingQuestionId: "pq-1",
+      createdByUid: "seeker-1",
+    });
   });
 });
