@@ -31,7 +31,7 @@ type SegmentBoundingBox = {
 export interface PreparedLinearSegments {
   segments: Feature<LineString>[];
   boundingBoxes: SegmentBoundingBox[];
-  spatialIndex: Flatbush;
+  spatialIndex: Flatbush | null;
 }
 
 const MIN_MEASURING_SEGMENT_LENGTH_METERS = 5;
@@ -91,12 +91,15 @@ export function prepareMeasuringLineSegments(
     preparedSegments.push(simplified);
   }
 
+  const boundingBoxes = preparedSegments.map(segmentBoundingBox);
+
   return {
     segments: preparedSegments,
-    boundingBoxes: preparedSegments.map(segmentBoundingBox),
-    spatialIndex: buildSegmentSpatialIndex(
-      preparedSegments.map(segmentBoundingBox),
-    ),
+    boundingBoxes,
+    // Flatbush rejects a zero-item index; no-segment play areas (e.g. blocked
+    // admin borders for a metro region pack) legitimately have none to index.
+    spatialIndex:
+      boundingBoxes.length > 0 ? buildSegmentSpatialIndex(boundingBoxes) : null,
   };
 }
 
@@ -116,7 +119,7 @@ function candidateSegmentIndices(
   prepared: PreparedLinearSegments,
 ): number[] {
   const { segments, spatialIndex } = prepared;
-  if (segments.length === 0) {
+  if (segments.length === 0 || !spatialIndex) {
     return [];
   }
 
