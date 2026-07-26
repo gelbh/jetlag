@@ -24,10 +24,10 @@ import {
 import { queryOverpass } from "../../core/overpassClient";
 import {
   adminLevelForMeasuringBorderKind,
+  allowsOverpassAdminBorderFallthrough,
   isMeasuringAdminBorderKind,
 } from "./adminDivisionAvailability";
 import { fetchCustomAdminBorderLineSegments } from "./adminDivisionLineStrings";
-import { regionPackHasBundledBoundaries } from "../matching/regionPackBoundaries";
 
 type OverpassWay = {
   type: string;
@@ -103,10 +103,7 @@ async function fetchMeasuringLinearSegmentsForKind(
       return customSegments;
     }
 
-    // Bundled region packs (Dublin, NYC, ...) never ship Overpass-sized
-    // admin borders for the levels they hide — Overpass-falling-through
-    // here is what OOM'd the proxy (incident 9f05e1c1).
-    if (regionPackHasBundledBoundaries(regionPackId)) {
+    if (!allowsOverpassAdminBorderFallthrough(regionPackId)) {
       return [];
     }
   }

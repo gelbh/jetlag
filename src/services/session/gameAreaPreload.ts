@@ -7,9 +7,10 @@ import type {
 import type { RegionPackId } from "../../domain/regions/regionPack";
 import { fetchAdminDivisionFeaturesInArea } from "../geo/adminDivisionBoundaries";
 import {
-  adminLevelsForGeographicPreload,
+  adminBoundaryLevelsForSession,
+  adminLevelForMeasuringBorderKind,
   emptyAdminDivisionCounts,
-  isMeasuringBorderKindSupportedForRegionPack,
+  isMeasuringAdminBorderKind,
   probeAdminDivisionCounts,
 } from "../geo/adminDivisionAvailability";
 import { fetchPreparedCoastlineSegments } from "../geo/coastline";
@@ -41,12 +42,25 @@ const PRELOAD_LINEAR_KINDS = [
   "admin4_border",
 ] as const satisfies readonly MeasuringFromKind[];
 
+// Derives which preload linear kinds are safe from the same admin-levels
+// policy used for admin preload above: an admin-border kind is only safe to
+// preload when its backing admin level is available (non-admin-border
+// kinds, i.e. `international_border`, are always kept).
 function linearKindsForGeographicPreload(
   regionPackId: RegionPackId | undefined,
+  customMatchingAreas: CustomMatchingAreasByLevel | undefined,
 ): readonly MeasuringFromKind[] {
-  return PRELOAD_LINEAR_KINDS.filter((kind) =>
-    isMeasuringBorderKindSupportedForRegionPack(kind, regionPackId),
+  const availableLevels = new Set(
+    adminBoundaryLevelsForSession(regionPackId, customMatchingAreas),
   );
+
+  return PRELOAD_LINEAR_KINDS.filter((kind) => {
+    if (!isMeasuringAdminBorderKind(kind)) {
+      return true;
+    }
+
+    return availableLevels.has(adminLevelForMeasuringBorderKind(kind));
+  });
 }
 
 export function gameAreaPreloadKey(gameArea: GameArea): string {
@@ -80,7 +94,7 @@ function buildPreloadJobs(
     );
   }
 
-  for (const adminLevel of adminLevelsForGeographicPreload(
+  for (const adminLevel of adminBoundaryLevelsForSession(
     regionPackId,
     customMatchingAreas,
   )) {
@@ -99,7 +113,10 @@ function buildPreloadJobs(
     );
   }
 
-  for (const kind of linearKindsForGeographicPreload(regionPackId)) {
+  for (const kind of linearKindsForGeographicPreload(
+    regionPackId,
+    customMatchingAreas,
+  )) {
     jobs.push(() =>
       fetchPreparedMeasuringLinearSegments(
         gameArea,
@@ -247,7 +264,7 @@ export async function preloadCriticalGameAreaCaches(
   await Promise.allSettled([
     fetchPreparedCoastlineSegments(gameArea),
     fetchLandmassFeaturesInArea(gameArea),
-    ...adminLevelsForGeographicPreload(regionPackId, customMatchingAreas).map(
+    ...adminBoundaryLevelsForSession(regionPackId, customMatchingAreas).map(
       (adminLevel) =>
         fetchAdminDivisionFeaturesInArea(
           gameArea,

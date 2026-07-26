@@ -12,6 +12,24 @@ export const MIN_ADMIN_DIVISIONS_FOR_AVAILABILITY = 2;
 
 export const ADMIN_DIVISION_PROBE_LEVELS = [4, 6, 8, 9] as const;
 
+export function isBundledAdminRegionPack(
+  regionPackId: RegionPackId | undefined,
+): boolean {
+  return regionPackHasBundledBoundaries(regionPackId);
+}
+
+/**
+ * Single Overpass-admin-border-fallthrough gate. Bundled region packs
+ * (Dublin, NYC, ...) never have Overpass-sized admin boundaries for the
+ * levels they hide — Overpass-falling-through for an admin border with no
+ * bundled custom data is what OOM'd the proxy (incident 9f05e1c1).
+ */
+export function allowsOverpassAdminBorderFallthrough(
+  regionPackId: RegionPackId | undefined,
+): boolean {
+  return !isBundledAdminRegionPack(regionPackId);
+}
+
 export type AdminDivisionMatchingCategory =
   | "admin_division_1"
   | "admin_division_2"
@@ -108,13 +126,34 @@ function bundledAdminLevelsForSession(
   );
 }
 
+/**
+ * Admin levels safe to touch for this session: the single source of truth
+ * for both UI availability (real `adminDivisionCounts`) and speculative
+ * background preload (omit `adminDivisionCounts` entirely).
+ *
+ * - Bundled region packs (Dublin, NYC, ...) are always restricted to the
+ *   levels backed by bundled `customMatchingAreas` — they never have
+ *   Overpass-sized boundaries for the levels they hide, and preloading or
+ *   Overpass-falling-through for those levels anyway is what OOM'd the proxy
+ *   (incident 9f05e1c1).
+ * - Non-bundled sessions with real counts (`adminDivisionCounts` passed as
+ *   `AdminDivisionCounts | null`) filter to levels with enough divisions,
+ *   hiding categories while the probe is still pending.
+ * - Non-bundled sessions with `adminDivisionCounts` omitted (preload has no
+ *   counts yet and doesn't need any — it's warming caches speculatively)
+ *   return every standard level.
+ */
 export function adminBoundaryLevelsForSession(
   regionPackId: RegionPackId | undefined,
   customMatchingAreas: CustomMatchingAreasByLevel | undefined,
-  adminDivisionCounts: AdminDivisionCounts | null | undefined,
+  adminDivisionCounts?: AdminDivisionCounts | null,
 ): readonly number[] {
-  if (regionPackHasBundledBoundaries(regionPackId)) {
+  if (isBundledAdminRegionPack(regionPackId)) {
     return bundledAdminLevelsForSession(customMatchingAreas);
+  }
+
+  if (adminDivisionCounts === undefined) {
+    return ADMIN_DIVISION_PROBE_LEVELS;
   }
 
   return ADMIN_DIVISION_PROBE_LEVELS.filter((level) => {
@@ -129,22 +168,6 @@ export function adminBoundaryLevelsForSession(
       regionPackId,
     );
   });
-}
-
-/**
- * Admin levels safe to Overpass-preload in the background. Bundled region
- * packs (Dublin, NYC, ...) never have Overpass admin4/6 boundaries to show —
- * preloading them anyway is what OOM'd the proxy (incident 9f05e1c1).
- */
-export function adminLevelsForGeographicPreload(
-  regionPackId: RegionPackId | undefined,
-  customMatchingAreas: CustomMatchingAreasByLevel | undefined,
-): readonly number[] {
-  if (regionPackHasBundledBoundaries(regionPackId)) {
-    return bundledAdminLevelsForSession(customMatchingAreas);
-  }
-
-  return ADMIN_DIVISION_PROBE_LEVELS;
 }
 
 export function isAdminDivisionCountAvailable(count: number): boolean {
@@ -291,10 +314,4 @@ export function matchingCategoryAdminLevel(
   categoryId: AdminDivisionMatchingCategory,
 ): number | null {
   return adminLevelForMatchingCategory(categoryId);
-}
-
-export function isBundledAdminRegionPack(
-  regionPackId: RegionPackId | undefined,
-): boolean {
-  return regionPackHasBundledBoundaries(regionPackId);
 }
