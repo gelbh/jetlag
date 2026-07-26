@@ -3,7 +3,7 @@ import {
   JOIN_PREVIEW_PLACEHOLDER_AREA,
   isPlaceholderGameArea,
 } from "./joinPreviewGameArea";
-import type { GameArea } from "../map/annotations";
+import type { GameArea } from "../../map/annotations";
 
 const zeroFallback: GameArea = {
   type: "Polygon",

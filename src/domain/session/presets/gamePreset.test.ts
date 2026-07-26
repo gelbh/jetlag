@@ -7,7 +7,7 @@ import {
   migrateGamePreset,
   migrateGamePresets,
 } from "./gamePreset";
-import { defaultAdvancedSessionSettings } from "./advancedSessionSettings";
+import { defaultAdvancedSessionSettings } from "../tools/advancedSessionSettings";
 
 describe("migrateGamePreset", () => {
   it("deep-merges partial advancedSettings with defaults", () => {
