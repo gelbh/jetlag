@@ -3,10 +3,29 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as Sentry from "@sentry/node";
 import { defineSecret } from "firebase-functions/params";
+import { HttpsError } from "firebase-functions/v2/https";
 
 const sentryDsnSecret = defineSecret("SENTRY_DSN");
 
+/** Expected leave/end HttpsError outcomes — not product bugs (JETLAG-21/22/25). */
+const EXPECTED_HTTPS_ERROR_KEYS = new Set([
+  "permission-denied:Only the host can do that.",
+  "failed-precondition:Session already ended.",
+]);
+
 let initialized = false;
+
+/**
+ * @param {unknown} error
+ * @returns {boolean}
+ */
+export function isExpectedFunctionsError(error) {
+  if (!(error instanceof HttpsError)) {
+    return false;
+  }
+
+  return EXPECTED_HTTPS_ERROR_KEYS.has(`${error.code}:${error.message}`);
+}
 
 function readAppVersion() {
   const functionsDir = dirname(fileURLToPath(import.meta.url));
@@ -45,6 +64,10 @@ export function initFunctionsSentry() {
 
 export function captureFunctionsException(error) {
   if (!initialized) {
+    return;
+  }
+
+  if (isExpectedFunctionsError(error)) {
     return;
   }
 
