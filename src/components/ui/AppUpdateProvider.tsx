@@ -8,6 +8,10 @@ import {
 } from "react";
 import { useLocation } from "react-router-dom";
 import {
+  acknowledgeSoftReload,
+  shouldHonorSoftReload,
+} from "../../domain/device/reloadAcknowledgements";
+import {
   applyServiceWorkerUpdate,
   isSafeToReloadApp,
   maybeApplyPendingUpdate,
@@ -104,16 +108,29 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     reload: applyHotfixReload,
   });
 
-  // Honor admin soft_reload mitigations once per mitigation id.
+  // Honor admin soft_reload mitigations once per mitigation id (durable across reloads).
   useEffect(() => {
     const mitigation = session?.opsMitigation;
-    if (!mitigation || mitigation.type !== "soft_reload") {
+    if (!mitigation) {
       return;
     }
-    if (lastSoftReloadMitigationIdRef.current === mitigation.id) {
+    if (
+      !shouldHonorSoftReload({
+        mitigation,
+        lastHonoredId: lastSoftReloadMitigationIdRef.current,
+      })
+    ) {
+      if (
+        mitigation.type === "soft_reload" &&
+        lastSoftReloadMitigationIdRef.current !== mitigation.id
+      ) {
+        // Sync in-memory ref when sessionStorage already acknowledged this id.
+        lastSoftReloadMitigationIdRef.current = mitigation.id;
+      }
       return;
     }
     lastSoftReloadMitigationIdRef.current = mitigation.id;
+    acknowledgeSoftReload(mitigation.id);
     void applyServiceWorkerUpdate(
       registrationRef.current,
       updateSW ?? undefined,

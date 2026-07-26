@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { APP_VERSION } from "../domain/device/changelog";
+import {
+  acknowledgeHotfixReload,
+  hasHotfixReloadBeenAcknowledged,
+} from "../domain/device/reloadAcknowledgements";
 import { applyServiceWorkerUpdate } from "../domain/device/serviceWorkerRefresh";
 import { compareAppVersions } from "../domain/session/sessionVersion";
 import { DEFAULT_HOTFIX_GRACE_SECONDS } from "../services/firestore/firestoreIncidents";
@@ -85,14 +89,26 @@ export function useHotfixGraceReload(
       return;
     }
 
-    if (reloadedForVersionRef.current === requiredMinAppVersion) {
+    if (
+      reloadedForVersionRef.current === requiredMinAppVersion ||
+      hasHotfixReloadBeenAcknowledged(requiredMinAppVersion)
+    ) {
+      reloadedForVersionRef.current = requiredMinAppVersion;
       return;
     }
 
+    const fireReload = () => {
+      if (reloadedForVersionRef.current === requiredMinAppVersion) {
+        return;
+      }
+      reloadedForVersionRef.current = requiredMinAppVersion;
+      acknowledgeHotfixReload(requiredMinAppVersion);
+      void Promise.resolve(reloadRef.current());
+    };
+
     const totalSeconds = resolveGraceSeconds(graceSeconds);
     if (totalSeconds <= 0) {
-      reloadedForVersionRef.current = requiredMinAppVersion;
-      void Promise.resolve(reloadRef.current());
+      fireReload();
       return;
     }
 
@@ -103,10 +119,7 @@ export function useHotfixGraceReload(
       setSecondsRemaining(remaining);
       if (remaining <= 0) {
         window.clearInterval(intervalId);
-        if (reloadedForVersionRef.current !== requiredMinAppVersion) {
-          reloadedForVersionRef.current = requiredMinAppVersion;
-          void Promise.resolve(reloadRef.current());
-        }
+        fireReload();
       }
     };
 

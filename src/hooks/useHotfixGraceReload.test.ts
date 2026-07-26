@@ -5,10 +5,12 @@ import { useHotfixGraceReload } from "./useHotfixGraceReload";
 describe("useHotfixGraceReload", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    sessionStorage.clear();
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    sessionStorage.clear();
   });
 
   it("stays inactive when the client already meets the required version", () => {
@@ -88,5 +90,53 @@ describe("useHotfixGraceReload", () => {
       vi.advanceTimersByTime(5_000);
     });
     expect(reload).not.toHaveBeenCalled();
+  });
+
+  it("does not reload again after remount when the version was already acknowledged", () => {
+    const reload = vi.fn();
+    renderHook(() =>
+      useHotfixGraceReload({
+        requiredMinAppVersion: "0.9.5.1",
+        clientVersion: "0.9.5",
+        graceSeconds: 0,
+        reload,
+      }),
+    );
+    expect(reload).toHaveBeenCalledTimes(1);
+
+    const reloadAgain = vi.fn();
+    renderHook(() =>
+      useHotfixGraceReload({
+        requiredMinAppVersion: "0.9.5.1",
+        clientVersion: "0.9.5",
+        graceSeconds: 0,
+        reload: reloadAgain,
+      }),
+    );
+    expect(reloadAgain).not.toHaveBeenCalled();
+  });
+
+  it("reloads once for a new required version after a prior acknowledgement", () => {
+    const reload = vi.fn();
+    renderHook(() =>
+      useHotfixGraceReload({
+        requiredMinAppVersion: "0.9.5.1",
+        clientVersion: "0.9.5",
+        graceSeconds: 0,
+        reload,
+      }),
+    );
+    expect(reload).toHaveBeenCalledTimes(1);
+
+    const reloadNext = vi.fn();
+    renderHook(() =>
+      useHotfixGraceReload({
+        requiredMinAppVersion: "0.9.6",
+        clientVersion: "0.9.5",
+        graceSeconds: 0,
+        reload: reloadNext,
+      }),
+    );
+    expect(reloadNext).toHaveBeenCalledTimes(1);
   });
 });
