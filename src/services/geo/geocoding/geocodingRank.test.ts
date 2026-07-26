@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
-import type { GeocodedPlace } from "./geocoding";
+import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { GeocodedPlace } from "./index";
 import {
   formatPlaceSearchSubtitle,
   mergeRankedGeocodedPlaceCandidates,
