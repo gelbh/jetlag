@@ -64,6 +64,11 @@ function segmentIntersectsViewport(
   );
 }
 
+/** Hide dense stop markers until close enough to be useful. */
+export const TRANSIT_STOP_MIN_ZOOM = 13;
+/** Cap markers per viewport publish to limit Leaflet remount cost. */
+export const TRANSIT_STOP_MARKER_CAP = 150;
+
 export function filterTransitStopsForViewport(
   stops: readonly TransitStop[],
   viewport: MapViewportBounds | null,
@@ -73,11 +78,17 @@ export function filterTransitStopsForViewport(
     return [...stops];
   }
 
-  if (zoom !== null && zoom < 12) {
+  if (zoom !== null && zoom < TRANSIT_STOP_MIN_ZOOM) {
     return [];
   }
 
-  return stops.filter((stop) => pointInViewport(stop.lat, stop.lng, viewport));
+  const inView = stops.filter((stop) =>
+    pointInViewport(stop.lat, stop.lng, viewport),
+  );
+  if (inView.length <= TRANSIT_STOP_MARKER_CAP) {
+    return inView;
+  }
+  return inView.slice(0, TRANSIT_STOP_MARKER_CAP);
 }
 
 export function filterTransitRoutesForViewport(

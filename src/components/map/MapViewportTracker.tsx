@@ -11,11 +11,49 @@ export interface MapViewportState {
   zoom: number;
 }
 
+export const VIEWPORT_PUBLISH_THROTTLE_MS = 200;
+
 interface MapViewportTrackerProps {
   onViewportChange: (viewport: MapViewportState | null) => void;
   onUserPanStart?: () => void;
   onUserPanEnd?: () => void;
   suppressPanRef?: MutableRefObject<boolean>;
+}
+
+export function createThrottledPublisher(
+  publish: () => void,
+  throttleMs: number = VIEWPORT_PUBLISH_THROTTLE_MS,
+): {
+  schedule: () => void;
+  flush: () => void;
+  cancel: () => void;
+} {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+
+  return {
+    schedule() {
+      if (timer != null) {
+        return;
+      }
+      timer = setTimeout(() => {
+        timer = null;
+        publish();
+      }, throttleMs);
+    },
+    flush() {
+      if (timer != null) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      publish();
+    },
+    cancel() {
+      if (timer != null) {
+        clearTimeout(timer);
+        timer = null;
+      }
+    },
+  };
 }
 
 export function MapViewportTracker({
@@ -26,6 +64,24 @@ export function MapViewportTracker({
 }: MapViewportTrackerProps) {
   const map = useMap();
   const panActiveRef = useRef(false);
+  const draggingRef = useRef(false);
+  const onViewportChangeRef = useRef(onViewportChange);
+  onViewportChangeRef.current = onViewportChange;
+
+  const publisherRef = useRef(
+    createThrottledPublisher(() => {
+      publishViewport(map, onViewportChangeRef.current);
+    }),
+  );
+
+  useEffect(() => {
+    publisherRef.current = createThrottledPublisher(() => {
+      publishViewport(map, onViewportChangeRef.current);
+    });
+    return () => {
+      publisherRef.current.cancel();
+    };
+  }, [map]);
 
   const notifyPanStart = () => {
     if (suppressPanRef?.current || panActiveRef.current) {
@@ -47,17 +103,25 @@ export function MapViewportTracker({
 
   useMapEvents({
     dragstart: () => {
+      draggingRef.current = true;
       notifyPanStart();
     },
     dragend: () => {
+      draggingRef.current = false;
       notifyPanEnd();
+      publisherRef.current.flush();
+    },
+    move: () => {
+      if (draggingRef.current) {
+        publisherRef.current.schedule();
+      }
     },
     moveend: () => {
       notifyPanEnd();
-      publishViewport(map, onViewportChange);
+      publisherRef.current.schedule();
     },
     zoomend: () => {
-      publishViewport(map, onViewportChange);
+      publisherRef.current.flush();
     },
   });
 
