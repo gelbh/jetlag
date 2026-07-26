@@ -25,10 +25,12 @@ import {
   hidePanel,
   layoutsEqual,
   mergePanelOntoStack,
+  reorderPanelInStack,
   resolvePresetLayout,
   setCollapsed,
   setPinned,
   setStackActiveIndex,
+  unstackPanelToCell,
   upsertUserPreset,
   type DeskLayout,
   type PanelId,
@@ -621,6 +623,16 @@ export function AdminOpsDesk() {
                     payload.panelId,
                     targetStackId,
                   ),
+                );
+              }}
+              onReorderPanel={(stackId, fromIndex, toIndex) => {
+                mutateLayout((layout) =>
+                  reorderPanelInStack(layout, stackId, fromIndex, toIndex),
+                );
+              }}
+              onUnstackPanel={(sourceStackId, panelId, x, y, w, h) => {
+                mutateLayout((layout) =>
+                  unstackPanelToCell(layout, sourceStackId, panelId, x, y, w, h),
                 );
               }}
               onActiveIndexChange={(stackId, activeIndex) => {
