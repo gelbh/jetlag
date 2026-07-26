@@ -16,6 +16,7 @@ vi.mock("../../navigation/useRouteTransition", () => ({
     loadingProgress: null,
     beginTransition: beginTransitionMock,
     reportScreenReady: vi.fn(),
+    resetStuckTransition: vi.fn(),
   }),
 }));
 
