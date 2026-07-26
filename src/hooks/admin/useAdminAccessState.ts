@@ -8,6 +8,11 @@ import { usePermanentAuthUser } from "../billing/usePermanentAuthUser";
 
 export type AdminAccessState = "loading" | AdminAccessResolution;
 
+type ResolvedAccess = {
+  userKey: string | null;
+  value: AdminAccessResolution;
+};
+
 export function useAdminAccessState(): {
   state: AdminAccessState;
   user: User | null;
@@ -15,8 +20,7 @@ export function useAdminAccessState(): {
   isPermanent: boolean;
 } {
   const { user, authReady, isPermanent } = usePermanentAuthUser();
-  const [resolved, setResolved] = useState<AdminAccessResolution | null>(null);
-  const [resolvedUserKey, setResolvedUserKey] = useState<string | null>(null);
+  const [resolved, setResolved] = useState<ResolvedAccess | null>(null);
   const generationRef = useRef(0);
   const userKey = user?.uid ?? null;
 
@@ -26,24 +30,20 @@ export function useAdminAccessState(): {
     }
 
     const generation = ++generationRef.current;
-    setResolved(null);
-    setResolvedUserKey(null);
+    const requestUserKey = user?.uid ?? null;
 
     void resolveAdminAccess(user).then((next) => {
       if (generation !== generationRef.current) {
         return;
       }
-      setResolved(next);
-      setResolvedUserKey(user?.uid ?? null);
+      setResolved({ userKey: requestUserKey, value: next });
     });
   }, [authReady, user]);
 
   const state: AdminAccessState =
-    !authReady ||
-    resolved == null ||
-    resolvedUserKey !== userKey
+    !authReady || resolved == null || resolved.userKey !== userKey
       ? "loading"
-      : resolved;
+      : resolved.value;
 
   return { state, user, authReady, isPermanent };
 }
