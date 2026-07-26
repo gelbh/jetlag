@@ -8,6 +8,8 @@ import type { ObserverMapScreenController } from "../observer-map-screen/useObse
 import { SessionLogBody } from "../../components/session/SessionLogBody";
 import { ChatPanelBody } from "../../components/chat/ChatPanelBody";
 import { HudChevronLeftIcon, HudChevronRightIcon } from "../../components/ui/HudIcons";
+import { useSessionActivityLog } from "../../hooks/session/useSessionActivityLog";
+import { useAnnotationStore } from "../../state/annotationStore";
 import { OverviewPanel } from "./panels/OverviewPanel";
 import { SyncPanel } from "./panels/SyncPanel";
 import { MapPanel } from "./panels/MapPanel";
@@ -68,6 +70,13 @@ export function AdminMonitorRail({
   onLayerVisibilityChange,
   onLowPowerModeChange,
 }: AdminMonitorRailProps) {
+  const events = useSessionActivityLog(session.id);
+  const setSelectedAnnotationId = useAnnotationStore(
+    (state) => state.setSelectedAnnotationId,
+  );
+  const markAnnotationPulse = useAnnotationStore(
+    (state) => state.markAnnotationPulse,
+  );
   const activeLabel = useMemo(
     () => TABS.find((tab) => tab.id === activeTab)?.label ?? "Overview",
     [activeTab],
@@ -164,11 +173,16 @@ export function AdminMonitorRail({
 
             {activeTab === "log" ? (
               <SessionLogBody
+                events={events}
                 annotations={controller.annotations}
                 onDelete={() => undefined}
                 onEdit={() => undefined}
                 readOnly
                 compact
+                onSelect={(id) => {
+                  setSelectedAnnotationId(id);
+                  markAnnotationPulse(id);
+                }}
               />
             ) : null}
 

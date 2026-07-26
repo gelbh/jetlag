@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  activityLogDocumentSchema,
   annotationDocumentSchema,
   pendingQuestionDocumentSchema,
   sessionDocumentSchema,
@@ -56,5 +57,29 @@ describe("firestore document schemas", () => {
     });
 
     expect(parsed.toolType).toBe("matching");
+  });
+
+  it("accepts activity log documents", () => {
+    const parsed = activityLogDocumentSchema.parse({
+      type: "question_asked",
+      createdAt: "2026-07-25T10:00:00.000Z",
+      payload: {
+        toolType: "radar",
+        promptText: "Within 1 mi?",
+      },
+      createdByUid: "seeker-1",
+    });
+
+    expect(parsed.type).toBe("question_asked");
+  });
+
+  it("rejects activity log documents with unknown types", () => {
+    expect(() =>
+      activityLogDocumentSchema.parse({
+        type: "timer_paused",
+        createdAt: "2026-07-25T10:00:00.000Z",
+        payload: {},
+      }),
+    ).toThrow();
   });
 });

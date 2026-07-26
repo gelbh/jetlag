@@ -24,6 +24,7 @@ import { useToolRailShortcuts } from "../../hooks/map/useToolRailShortcuts";
 import type { MapScreenController } from "./useMapScreenController";
 import { useSyncRetryAction } from "../../hooks/session/useSyncRetryAction";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
+import { useAnnotationStore } from "../../state/annotationStore";
 import { SeekerChromeOverlays } from "./SeekerChromeOverlays";
 
 type MapScreenChromeProps = Pick<
@@ -253,6 +254,9 @@ export function MapScreenChrome({
   const gameOverActions = useGameOverActions(session, overlay);
   const isDesktop = useDesktopLayout();
   const toolLayout = isDesktop ? "rail" : "dock";
+  const markAnnotationPulse = useAnnotationStore(
+    (state) => state.markAnnotationPulse,
+  );
 
   const visibleQuestionTools = useMemo(
     () =>
@@ -537,6 +541,7 @@ export function MapScreenChrome({
 
       <SessionLog
         open={overlay.isLogOpen}
+        sessionId={session!.id}
         annotations={annotations}
         onClose={overlay.closeSheet}
         onDelete={(id) => void deleteAnnotation(id)}
@@ -545,6 +550,13 @@ export function MapScreenChrome({
           setActiveTool("none");
           setAwaitingPlacement(false);
           setSelectedAnnotationId(id);
+        }}
+        onSelect={(id) => {
+          overlay.closeSheet();
+          setActiveTool("none");
+          setAwaitingPlacement(false);
+          setSelectedAnnotationId(id);
+          markAnnotationPulse(id);
         }}
       />
 

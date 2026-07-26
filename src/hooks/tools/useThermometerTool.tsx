@@ -34,6 +34,11 @@ import {
   useThermometerWalk,
 } from "./useThermometerWalk";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
+import {
+  emitQuestionAnsweredActivity,
+  emitThermometerWalkSeparatedActivity,
+  emitThermometerWalkStartedActivity,
+} from "../../services/session/emitSessionActivity";
 
 type PlacementMode = "gps" | "manual";
 
@@ -197,6 +202,17 @@ export function useThermometerTool({
         setThermoB(endPoint);
         setLocalWalkingQuestionId(null);
         setPanelError(null);
+        if (sessionId) {
+          emitThermometerWalkSeparatedActivity({
+            sessionId,
+            pendingQuestionId: walkingQuestionId,
+            promptText: thermometerQuestionPrompt(
+              activeThermometerDistanceMeters,
+              distanceUnit,
+            ),
+            createdByUid: senderUid ?? undefined,
+          });
+        }
         return;
       }
 
@@ -244,6 +260,8 @@ export function useThermometerTool({
       completeThermometerWalk,
       distanceUnit,
       finishPlacement,
+      senderUid,
+      sessionId,
       thermoA,
       activeThermometerDistanceMeters,
       walkingQuestionId,
@@ -319,8 +337,21 @@ export function useThermometerTool({
     setLocalThermoA(start);
     setThermoB(null);
 
+    const distanceLabel = thermometerQuestionPrompt(
+      activeThermometerDistanceMeters,
+      distanceUnit,
+    );
+
     if (!awaitHiderAnswer) {
       setLocalWalkingQuestionId(LOCAL_THERMOMETER_WALK_ID);
+      if (sessionId) {
+        emitThermometerWalkStartedActivity({
+          sessionId,
+          pendingQuestionId: LOCAL_THERMOMETER_WALK_ID,
+          promptText: distanceLabel,
+          createdByUid: senderUid ?? undefined,
+        });
+      }
       return;
     }
 
@@ -330,10 +361,6 @@ export function useThermometerTool({
       return;
     }
 
-    const distanceLabel = thermometerQuestionPrompt(
-      activeThermometerDistanceMeters,
-      distanceUnit,
-    );
     const startMessage = `Thermometer walk started. ${distanceLabel}`;
 
     try {
@@ -455,7 +482,7 @@ export function useThermometerTool({
       return;
     }
 
-    await createAnnotation({
+    const created = await createAnnotation({
       type: "thermometer",
       geometry,
       metadata: {
@@ -466,6 +493,20 @@ export function useThermometerTool({
         color: MAP_ANNOTATION_COLORS.elimination,
       },
     });
+
+    if (sessionId) {
+      const answerOption = hotterColderAnswerOptions.find(
+        (option) => option.value === thermometerAnswer,
+      );
+      emitQuestionAnsweredActivity({
+        sessionId,
+        toolType: "thermometer",
+        promptText,
+        annotationId: created.id,
+        answerSummary: answerOption?.label ?? String(thermometerAnswer),
+        createdByUid: senderUid ?? undefined,
+      });
+    }
 
     resetDraft();
     finishPlacement();

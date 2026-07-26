@@ -23,6 +23,7 @@ import {
   endSession,
   leaveHostSession,
 } from "../../services/session/sessionLifecycle";
+import { emitGameEndedActivity } from "../../services/session/emitSessionActivity";
 import { useSessionExit } from "../session/useSessionExit";
 import { ensureAnonymousUser } from "../../services/core/firebase";
 import { captureException } from "../../services/core/sentry";
@@ -211,6 +212,10 @@ export function useMapSessionChrome({
         return;
       }
     }
+    emitGameEndedActivity(sessionId, {
+      outcome: "ended_early",
+      summary: "Session ended",
+    });
     await exitSession({
       reason: "end",
       sessionId,

@@ -46,6 +46,7 @@ import { sessionCustomContentFromRules } from "../../domain/session/sessionCusto
 import { yesNoAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import type { DistanceUnit } from "../../domain/map/distance";
+import { emitQuestionAnsweredActivity } from "../../services/session/emitSessionActivity";
 import {
   fetchMatchingFeaturesInArea,
   countMatchingFeaturesInPlayArea,
@@ -609,7 +610,7 @@ export function useMatchingTool({
       };
 
     try {
-      await createAnnotation({
+      const created = await createAnnotation({
         type: "matching",
         geometry,
         metadata: {
@@ -641,6 +642,20 @@ export function useMatchingTool({
           color: MAP_ANNOTATION_COLORS.elimination,
         },
       });
+
+      if (sessionId) {
+        const answerOption = yesNoAnswerOptions.find(
+          (option) => option.value === matchingAnswer,
+        );
+        emitQuestionAnsweredActivity({
+          sessionId,
+          toolType: "matching",
+          promptText: question.prompt,
+          annotationId: created.id,
+          answerSummary: answerOption?.label ?? String(matchingAnswer),
+          createdByUid: senderUid ?? undefined,
+        });
+      }
     } catch (error) {
       setMatchingError(
         error instanceof Error

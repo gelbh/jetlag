@@ -30,6 +30,7 @@ import type { StartingLocationRecord } from "../../domain/game/startingLocation"
 import { listWalkingThermometerQuestionIds } from "../../domain/questions";
 import { getFirestoreDb } from "../core/firebase";
 import { captureException } from "../core/sentry";
+import { emitQuestionCancelledActivity } from "../session/emitSessionActivity";
 import {
   buildHidingZoneDocument,
   buildPendingQuestionDocument,
@@ -392,6 +393,16 @@ export async function cancelWalkingThermometersAndAnnounce(
     THERMOMETER_WALK_CANCEL_TEXT[reason],
     createMessageId(),
   );
+
+  for (const pendingQuestionId of stillWalking) {
+    emitQuestionCancelledActivity({
+      sessionId,
+      toolType: "thermometer",
+      promptText: "Thermometer walk",
+      pendingQuestionId,
+      createdByUid: senderUid,
+    });
+  }
 }
 
 export async function cancelWalkingThermometersAfterIdentityHeal(

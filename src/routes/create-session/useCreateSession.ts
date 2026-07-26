@@ -57,6 +57,7 @@ import {
   track,
 } from "../../services/core/analytics";
 import { setPremiumApiContext } from "../../services/core/premiumApiContext";
+import { emitSessionStartedActivity } from "../../services/session/emitSessionActivity";
 import { unionGameAreas } from "../../domain/geometry/unionGameAreas";
 import { parseBoundaryFile } from "../../services/core/kmzImport";
 import { gamePresetToCreateSessionDraft } from "../../domain/session/gamePreset";
@@ -642,6 +643,7 @@ export function useCreateSession() {
             );
         setSession(session, user.uid);
         setPremiumApiContext(session);
+        emitSessionStartedActivity(session.id, user.uid);
       } else {
         const localSession = {
           id: LOCAL_SESSION_ID,
@@ -661,6 +663,7 @@ export function useCreateSession() {
         };
         setSession(localSession, "local");
         setPremiumApiContext(localSession);
+        emitSessionStartedActivity(LOCAL_SESSION_ID, "local");
       }
 
       track(ANALYTICS_EVENTS.session_created, {

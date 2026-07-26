@@ -25,6 +25,7 @@ import {
   resetFoundHiderSession,
   updateSessionRules,
 } from "../../services/firestore/firestoreAnnotations";
+import { emitGameEndedActivity } from "../../services/session/emitSessionActivity";
 
 interface UseMapSessionActionsParams {
   session: SessionRecord | null;
@@ -154,6 +155,11 @@ export function useMapSessionActions({
           endGameRequestedAt: undefined,
           endGameRequestedByUid: undefined,
         },
+        uid,
+      );
+      emitGameEndedActivity(
+        session.id,
+        { outcome: "found", summary: "Hider found" },
         uid,
       );
       return;

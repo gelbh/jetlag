@@ -16,6 +16,7 @@ import { adminBorderKindAvailability } from "../../../services/geo/adminDivision
 import { closerFurtherAnswerOptions } from "../../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { emitQuestionAnsweredActivity } from "../../../services/session/emitSessionActivity";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 import type { MeasuringPreviews } from "./useMeasuringPreviews";
 
@@ -244,11 +245,25 @@ export function useMeasuringCommit({
       );
     }
 
-    await createAnnotation({
+    const created = await createAnnotation({
       type: "measuring",
       geometry: elimination,
       metadata,
     });
+
+    if (sessionId) {
+      const answerOption = closerFurtherAnswerOptions.find(
+        (option) => option.value === measuringAnswer,
+      );
+      emitQuestionAnsweredActivity({
+        sessionId,
+        toolType: "measuring",
+        promptText: question.prompt,
+        annotationId: created.id,
+        answerSummary: answerOption?.label ?? String(measuringAnswer),
+        createdByUid: senderUid ?? undefined,
+      });
+    }
 
     resetDraft(committedKind);
     setPreviewOpen(false);

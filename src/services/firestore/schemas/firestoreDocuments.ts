@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SESSION_ACTIVITY_TYPES } from "../../../domain/session/sessionActivityLog";
 
 export const firestoreGameAreaSchema = z
   .object({
@@ -128,9 +129,19 @@ export const pendingQuestionDocumentSchema = z
   })
   .passthrough();
 
+export const activityLogDocumentSchema = z
+  .object({
+    type: z.enum(SESSION_ACTIVITY_TYPES),
+    createdAt: z.string().min(1),
+    payload: z.record(z.string(), z.unknown()),
+    createdByUid: z.string().optional(),
+  })
+  .passthrough();
+
 export type SessionDocument = z.infer<typeof sessionDocumentSchema>;
 export type AnnotationDocument = z.infer<typeof annotationDocumentSchema>;
 export type PendingQuestionDocument = z.infer<typeof pendingQuestionDocumentSchema>;
+export type ActivityLogDocument = z.infer<typeof activityLogDocumentSchema>;
 
 export const userEntitlementsDocumentSchema = z
   .object({

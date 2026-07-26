@@ -21,6 +21,14 @@ import {
   writeSessionMessage,
   type ThermometerWalkCancelReason,
 } from "../../services/firestore/firestoreSessionExtras";
+import {
+  emitPhotoAskedActivity,
+  emitQuestionAskedActivity,
+  emitQuestionCancelledActivity,
+  emitThermometerWalkSeparatedActivity,
+  emitThermometerWalkStartedActivity,
+  isAnnotationQuestionTool,
+} from "../../services/session/emitSessionActivity";
 
 export interface SubmitPendingQuestionInput {
   sessionId: string;
@@ -83,6 +91,12 @@ export function usePendingQuestionActions() {
             promptText,
             messageId,
           );
+          emitThermometerWalkStartedActivity({
+            sessionId,
+            pendingQuestionId,
+            promptText,
+            createdByUid: senderUid,
+          });
           return pendingQuestionId;
         }
 
@@ -109,6 +123,23 @@ export function usePendingQuestionActions() {
         await updatePendingQuestion(sessionId, pendingQuestionId, {
           answerableAt: createdAt,
         });
+
+        if (toolType === "photo") {
+          emitPhotoAskedActivity({
+            sessionId,
+            pendingQuestionId,
+            promptText,
+            createdByUid: senderUid,
+          });
+        } else if (isAnnotationQuestionTool(toolType)) {
+          emitQuestionAskedActivity({
+            sessionId,
+            toolType,
+            promptText,
+            pendingQuestionId,
+            createdByUid: senderUid,
+          });
+        }
 
         return pendingQuestionId;
       } finally {
@@ -179,6 +210,13 @@ export function usePendingQuestionActions() {
         promptText,
         replyOptions,
         status: "pending",
+      });
+
+      emitThermometerWalkSeparatedActivity({
+        sessionId,
+        pendingQuestionId,
+        promptText,
+        createdByUid: senderUid,
       });
     },
     [],
@@ -272,6 +310,14 @@ export function usePendingQuestionActions() {
         THERMOMETER_WALK_CANCEL_TEXT[reason],
         createMessageId(),
       );
+
+      emitQuestionCancelledActivity({
+        sessionId,
+        toolType: "thermometer",
+        promptText: "Thermometer walk",
+        pendingQuestionId,
+        createdByUid: senderUid,
+      });
     },
     [],
   );
