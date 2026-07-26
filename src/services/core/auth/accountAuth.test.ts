@@ -68,7 +68,7 @@ vi.mock("firebase/auth", () => ({
   signInWithRedirect: (...args: unknown[]) => signInWithRedirect(...args),
 }));
 
-vi.mock("./firebase", () => ({
+vi.mock("../firebase/firebase", () => ({
   getFirebaseAuth: () => mockAuth,
 }));
 
