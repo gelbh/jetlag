@@ -75,10 +75,12 @@ describe("opsDeskPresets", () => {
     expect(movePresetOrder(order, "missing", 1)).toBeNull();
     expect(movePresetToIndex(order, "a", 3)).toBeNull();
     expect(movePresetToIndex(order, "a", 1.5)).toBeNull();
+    expect(movePresetOrder(order, "a", 1.5)).toBeNull();
     expect(movePresetOrder(order, "a", Number.NaN)).toBeNull();
     expect(order).toEqual(["a", "b", "c"]);
   });
 });
+
 
 
 

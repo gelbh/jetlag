@@ -107,12 +107,6 @@
   color: var(--color-ink);
 }
 
-.jl-ops-preset-chip--active {
-  border-color: var(--color-action);
-  background: oklch(from var(--color-action) l c h / 0.14);
-  color: var(--color-action);
-}
-
 .jl-ops-preset-chip:focus-visible {
   outline: 2px solid var(--color-action);
   outline-offset: 2px;
@@ -636,6 +630,10 @@ html[data-motion="static"] .jl-ops-tab {
 
 .jl-ops-preset-manage-name {
   min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-family: var(--font-display);
   font-size: 0.6875rem;
   font-weight: 700;
