@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.3 - 2026-07-26
+
+### Fixes
+
+- Safari: when a content blocker stops App Check, show a clear error page with steps to allow this site and a Try again button
+- Premium: Google sign-in opens a popup again on Chrome instead of a full-page refresh that leaves you signed out. If a fallback redirect still fails, show a clear allow-popups message instead of staying signed out silently
+
 ## 0.10.2 - 2026-07-26
 
 ### Improvements

@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.10.2";
+export const APP_VERSION = "0.10.3";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.10.3",
+    date: "2026-07-26",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Safari: when a content blocker stops App Check, show a clear error page with steps to allow this site and a Try again button",
+          "Premium: Google sign-in opens a popup again on Chrome instead of a full-page refresh that leaves you signed out. If a fallback redirect still fails, show a clear allow-popups message instead of staying signed out silently",
+        ],
+      }
+    ],
+  },
   {
     version: "0.10.2",
     date: "2026-07-26",
