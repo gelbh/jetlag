@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { APP_VERSION } from "../domain/device/changelog";
+import {
+  acknowledgeHotfixReload,
+  hasHotfixReloadBeenAcknowledged,
+  isReloadAckStorageAvailable,
+} from "../domain/device/reloadAcknowledgements";
 import { applyServiceWorkerUpdate } from "../domain/device/serviceWorkerRefresh";
 import { compareAppVersions } from "../domain/session/sessionVersion";
 import { DEFAULT_HOTFIX_GRACE_SECONDS } from "../services/firestore/firestoreIncidents";
@@ -60,11 +65,21 @@ export function useHotfixGraceReload(
 
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
   const [armedVersion, setArmedVersion] = useState<string | null>(null);
+  const [attemptedVersion, setAttemptedVersion] = useState<string | null>(null);
   const reloadRef = useRef(reload);
   const reloadedForVersionRef = useRef<string | null>(null);
 
+  const alreadyAttempted =
+    typeof requiredMinAppVersion === "string" &&
+    requiredMinAppVersion.length > 0 &&
+    (attemptedVersion === requiredMinAppVersion ||
+      hasHotfixReloadBeenAcknowledged(requiredMinAppVersion) ||
+      !isReloadAckStorageAvailable());
+
   const targetVersion =
-    needsUpdate && requiredMinAppVersion ? requiredMinAppVersion : null;
+    needsUpdate && requiredMinAppVersion && !alreadyAttempted
+      ? requiredMinAppVersion
+      : null;
 
   if (targetVersion !== armedVersion) {
     setArmedVersion(targetVersion);
@@ -85,14 +100,36 @@ export function useHotfixGraceReload(
       return;
     }
 
-    if (reloadedForVersionRef.current === requiredMinAppVersion) {
+    if (
+      reloadedForVersionRef.current === requiredMinAppVersion ||
+      hasHotfixReloadBeenAcknowledged(requiredMinAppVersion)
+    ) {
+      reloadedForVersionRef.current = requiredMinAppVersion;
       return;
     }
 
+    const fireReload = () => {
+      if (reloadedForVersionRef.current === requiredMinAppVersion) {
+        return;
+      }
+      reloadedForVersionRef.current = requiredMinAppVersion;
+      setAttemptedVersion(requiredMinAppVersion);
+      // Prefer skipping reload over looping when durable ack cannot be stored.
+      if (!acknowledgeHotfixReload(requiredMinAppVersion)) {
+        return;
+      }
+      try {
+        void Promise.resolve(reloadRef.current()).catch(() => {
+          // Ack already persisted — do not retry; avoid unhandled rejection.
+        });
+      } catch {
+        // Sync throw from injectable reload — same: do not retry.
+      }
+    };
+
     const totalSeconds = resolveGraceSeconds(graceSeconds);
     if (totalSeconds <= 0) {
-      reloadedForVersionRef.current = requiredMinAppVersion;
-      void Promise.resolve(reloadRef.current());
+      fireReload();
       return;
     }
 
@@ -103,10 +140,7 @@ export function useHotfixGraceReload(
       setSecondsRemaining(remaining);
       if (remaining <= 0) {
         window.clearInterval(intervalId);
-        if (reloadedForVersionRef.current !== requiredMinAppVersion) {
-          reloadedForVersionRef.current = requiredMinAppVersion;
-          void Promise.resolve(reloadRef.current());
-        }
+        fireReload();
       }
     };
 
@@ -116,9 +150,10 @@ export function useHotfixGraceReload(
     };
   }, [needsUpdate, requiredMinAppVersion, graceSeconds]);
 
+  const countingDown = Boolean(targetVersion);
   return {
-    active: needsUpdate,
-    secondsRemaining: needsUpdate ? secondsRemaining : null,
+    active: countingDown,
+    secondsRemaining: countingDown ? secondsRemaining : null,
     requiredMinAppVersion: needsUpdate ? requiredMinAppVersion : null,
   };
 }
