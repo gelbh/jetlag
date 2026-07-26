@@ -62,6 +62,7 @@ export function AdminPresetDialog({
           <button
             type="button"
             className="btn-primary"
+            disabled={mode !== "overwrite" && name.trim().length === 0}
             onClick={() => {
               if (mode === "overwrite") {
                 onConfirm(initialName);

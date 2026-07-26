@@ -439,10 +439,7 @@ export function AdminOpsDesk() {
     if (!presetDialog) return;
     if (presetDialog.mode === "rename" && presetDialog.presetId) {
       const trimmed = name.trim();
-      if (!trimmed) {
-        setPresetDialog(null);
-        return;
-      }
+      if (!trimmed) return;
       persistStore({
         ...store,
         userPresets: store.userPresets.map((preset) =>
@@ -462,10 +459,7 @@ export function AdminOpsDesk() {
         deskLayout,
         { overwriteId: presetDialog.presetId },
       );
-      if (!result.ok) {
-        setPresetDialog(null);
-        return;
-      }
+      if (!result.ok) return;
       persistStore({
         ...store,
         activePresetId: result.preset.id,
@@ -488,10 +482,7 @@ export function AdminOpsDesk() {
       return;
     }
     const result = upsertUserPreset(store.userPresets, name, deskLayout);
-    if (!result.ok) {
-      setPresetDialog(null);
-      return;
-    }
+    if (!result.ok) return;
     persistStore({
       ...store,
       activePresetId: result.preset.id,
