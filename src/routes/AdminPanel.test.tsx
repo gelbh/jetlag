@@ -44,10 +44,7 @@ vi.mock("../components/billing/PremiumSignInGate", () => ({
 }));
 
 vi.mock("../services/admin/adminIncidents", () => ({
-  subscribeIncidentList: (
-    onNext: (incidents: unknown[]) => void,
-    _onError: (error: Error) => void,
-  ) => {
+  subscribeIncidentList: (onNext: (incidents: unknown[]) => void) => {
     onNext([]);
     return () => undefined;
   },

@@ -232,6 +232,7 @@ export function AdminOpsDesk() {
     const key = `${location.pathname}:${uid ?? "anon"}`;
     if (deepLinkKey === key) return;
 
+    /* eslint-disable react-hooks/set-state-in-effect -- deep-link ensure-visible + Custom preset flip from route */
     setStore((prev) => {
       const current = resolvePresetLayout(
         prev.activePresetId,
@@ -258,6 +259,7 @@ export function AdminOpsDesk() {
       return next;
     });
     setDeepLinkKey(key);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [
     deepLinkKey,
     enabled,
