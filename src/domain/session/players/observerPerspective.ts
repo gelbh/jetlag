@@ -1,5 +1,3 @@
-import type { PlayerRole } from "./playerRole";
-
 export type SpectatorLayerConfig = {
   showSeekerLocations: boolean;
   showHiderLocations: boolean;
@@ -8,9 +6,7 @@ export type SpectatorLayerConfig = {
 };
 
 /** Admin + observer maps always show both seeker and hider layers. */
-export function resolveSpectatorLayers(
-  _myRole?: PlayerRole,
-): SpectatorLayerConfig {
+export function resolveSpectatorLayers(): SpectatorLayerConfig {
   return {
     showSeekerLocations: true,
     showHiderLocations: true,

@@ -3,13 +3,7 @@ import { resolveSpectatorLayers } from "./observerPerspective";
 
 describe("resolveSpectatorLayers", () => {
   it("always shows both seeker and hider layers for spectators", () => {
-    expect(resolveSpectatorLayers("observer")).toEqual({
-      showSeekerLocations: true,
-      showHiderLocations: true,
-      showHidingZones: true,
-      chatDisplayRole: "observer",
-    });
-    expect(resolveSpectatorLayers("admin")).toEqual({
+    expect(resolveSpectatorLayers()).toEqual({
       showSeekerLocations: true,
       showHiderLocations: true,
       showHidingZones: true,

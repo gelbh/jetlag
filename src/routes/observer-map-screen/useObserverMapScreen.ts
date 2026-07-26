@@ -101,10 +101,7 @@ export function useObserverMapScreen() {
     localLivePoint: null,
   });
 
-  const spectatorLayers = useMemo(
-    () => resolveSpectatorLayers(spectatorRole),
-    [spectatorRole],
-  );
+  const spectatorLayers = useMemo(() => resolveSpectatorLayers(), []);
 
   return {
     session,
