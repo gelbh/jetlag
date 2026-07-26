@@ -8,6 +8,7 @@ import {
   distHtmlPath,
   loadCrawlPolicy,
   MIN_ROOT_TEXT_CHARS,
+  rewritePrerenderPreviewUrls,
 } from "./seo-build-lib.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -103,7 +104,7 @@ try {
     await page.waitForFunction(() => document.title.trim().length > 0, {
       timeout: 30_000,
     });
-    const html = await page.content();
+    const html = rewritePrerenderPreviewUrls(await page.content(), BASE);
     const out = distHtmlPath(root, urlPath);
     mkdirSync(dirname(out), { recursive: true });
     writeFileSync(out, html);

@@ -60,6 +60,16 @@ for (const urlPath of policy.indexablePaths) {
     failed = true;
   }
 
+  if (
+    html.includes("http://127.0.0.1") ||
+    html.includes("http://localhost")
+  ) {
+    console.error(
+      `${urlPath}: prerender HTML still contains preview-origin absolute URLs`,
+    );
+    failed = true;
+  }
+
   const rootOpen = html.search(/id=["']root["']/i);
   if (rootOpen < 0) {
     console.error(`${urlPath}: missing #root`);
