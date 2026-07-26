@@ -1,5 +1,5 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Home } from "./Home";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { renderWithRouter } from "../test/renderWithRouter";
@@ -43,6 +43,7 @@ vi.mock("../services/firestore/sessionMembershipHeal", () => ({
   getRemoteSessionById: (...args: unknown[]) => mockGetRemoteSessionById(...args),
   healSessionMembership: (...args: unknown[]) =>
     mockEnsureRemoteSessionMembership(...args),
+  lookupRemoteSessionByCode: vi.fn(),
 }));
 
 vi.mock("../hooks/useAppNavigate", () => ({
@@ -55,6 +56,10 @@ describe("Home", () => {
     mockIsFirebaseConfigured.mockReturnValue(false);
     mockEnsureAnonymousUser.mockResolvedValue({ uid: "user-new" });
     useSessionStore.getState().setSession(null);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("opens play hub with create, join, and custom actions", async () => {
@@ -178,5 +183,39 @@ describe("Home", () => {
     const main = screen.getByRole("main");
     expect(main.className).toContain("justify-center");
     expect(main.className).toContain("overflow-y-auto");
+  });
+
+  it("clears verifying when ensureFreshAnonymousUser times out", async () => {
+    vi.useFakeTimers();
+    mockIsFirebaseConfigured.mockReturnValue(true);
+    mockEnsureAnonymousUser.mockImplementation(
+      () => new Promise(() => undefined),
+    );
+
+    const remoteSession = createTestRemoteSession({
+      memberUids: ["user-old"],
+      memberRoles: { "user-old": "seeker" },
+    });
+    useSessionStore.getState().setSession(remoteSession, "user-old");
+    useSessionStore.getState().setMyUid("user-old");
+
+    renderWithRouter(<Home />, { resetStores: false });
+    const continueButton = screen.getByRole("button", {
+      name: /Return to map for session ABCD/i,
+    });
+    fireEvent.click(continueButton);
+
+    expect(continueButton).toHaveAttribute("aria-busy", "true");
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_000);
+    });
+
+    expect(
+      screen.getByText(
+        "Couldn't verify the session. Check your connection and try again.",
+      ),
+    ).toBeInTheDocument();
+    expect(continueButton).toHaveAttribute("aria-busy", "false");
   });
 });

@@ -24,6 +24,7 @@ import {
   ensureFreshAnonymousUser,
   isFirebaseConfigured,
 } from "../services/core/firebase";
+import { withTimeout } from "../services/core/withTimeout";
 import {
   getRemoteSessionById,
   healSessionMembership,
@@ -41,6 +42,10 @@ import { LEGAL_APP_NAME } from "../domain/legal/legalContact";
 import { isAdminUser } from "../domain/admin/adminAccess";
 import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
 import { useUserProfile } from "../hooks/profile/useUserProfile";
+
+const VERIFY_SESSION_TIMEOUT_MS = 15_000;
+const VERIFY_SESSION_TIMEOUT_MESSAGE =
+  "Couldn't verify the session. Check your connection and try again.";
 
 export function Home() {
   const navigate = useAppNavigate();
@@ -89,72 +94,85 @@ export function Home() {
         return;
       }
 
-      const user = await ensureFreshAnonymousUser();
-      let remoteSession = null;
-      try {
-        remoteSession = await getRemoteSessionById(session.id);
-      } catch (error) {
-        if (!isFirestorePermissionDenied(error)) {
-          throw error;
-        }
-      }
+      await withTimeout(
+        (async () => {
+          const user = await ensureFreshAnonymousUser();
+          let remoteSession = null;
+          try {
+            remoteSession = await getRemoteSessionById(session.id);
+          } catch (error) {
+            if (!isFirestorePermissionDenied(error)) {
+              throw error;
+            }
+          }
 
-      if (!remoteSession) {
-        const lookup = await lookupRemoteSessionByCode(session.code);
-        if (lookup.status === "missing") {
-          await exitSession({
-            reason: "reset",
-            sessionId: session.id,
-            animate: false,
-          });
-          setContinueError("That session no longer exists.");
-          return;
-        }
-        if (lookup.status === "ended") {
-          await exitSession({
-            reason: "reset",
-            sessionId: session.id,
-            animate: false,
-          });
-          setContinueError("That session has ended. Join or create a new one.");
-          return;
-        }
-        remoteSession = lookup.session;
-      }
+          if (!remoteSession) {
+            const lookup = await lookupRemoteSessionByCode(session.code);
+            if (lookup.status === "missing") {
+              await exitSession({
+                reason: "reset",
+                sessionId: session.id,
+                animate: false,
+              });
+              setContinueError("That session no longer exists.");
+              return;
+            }
+            if (lookup.status === "ended") {
+              await exitSession({
+                reason: "reset",
+                sessionId: session.id,
+                animate: false,
+              });
+              setContinueError(
+                "That session has ended. Join or create a new one.",
+              );
+              return;
+            }
+            remoteSession = lookup.session;
+          }
 
-      if (remoteSession.endedAt) {
-        await exitSession({
-          reason: "reset",
-          sessionId: session.id,
-          animate: false,
-        });
-        setContinueError("That session has ended. Join or create a new one.");
-        return;
-      }
+          if (remoteSession.endedAt) {
+            await exitSession({
+              reason: "reset",
+              sessionId: session.id,
+              animate: false,
+            });
+            setContinueError(
+              "That session has ended. Join or create a new one.",
+            );
+            return;
+          }
 
-      const resumeRole =
-        myRole ?? resolvePlayerRole(remoteSession.memberRoles, myUid ?? user.uid);
-      const activeSession = await healSessionMembership(
-        remoteSession,
-        user.uid,
-        resumeRole,
-        { returningMemberUid: myUid, persistedMyUid: myUid },
+          const resumeRole =
+            myRole ??
+            resolvePlayerRole(remoteSession.memberRoles, myUid ?? user.uid);
+          const activeSession = await healSessionMembership(
+            remoteSession,
+            user.uid,
+            resumeRole,
+            { returningMemberUid: myUid, persistedMyUid: myUid },
+          );
+
+          const role = resolvePlayerRole(activeSession.memberRoles, user.uid);
+          if (
+            myRole &&
+            activeSession.memberRoles &&
+            activeSession.memberRoles[user.uid] &&
+            myRole !== role
+          ) {
+            setContinueError(
+              "Your role changed for this session. Rejoin with a new code.",
+            );
+            return;
+          }
+
+          setSession(activeSession, user.uid);
+          setPremiumApiContext(activeSession);
+          navigate("/map");
+        })(),
+        VERIFY_SESSION_TIMEOUT_MS,
+        VERIFY_SESSION_TIMEOUT_MESSAGE,
       );
-
-      const role = resolvePlayerRole(activeSession.memberRoles, user.uid);
-      if (
-        myRole &&
-        activeSession.memberRoles &&
-        activeSession.memberRoles[user.uid] &&
-        myRole !== role
-      ) {
-        setContinueError("Your role changed for this session. Rejoin with a new code.");
-        return;
-      }
-
-      setSession(activeSession, user.uid);
-      setPremiumApiContext(activeSession);
-      navigate("/map");
     } catch (error) {
       const message =
         error instanceof Error

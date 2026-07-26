@@ -447,3 +447,67 @@ export function reportSlowRouteTransition(
     });
   });
 }
+
+export interface AppResumeContext {
+  pathname: string;
+  backgroundMs: number;
+  standalone: boolean;
+  iosStandalone: boolean;
+}
+
+export function addAppResumeBreadcrumb(context: AppResumeContext): void {
+  if (import.meta.env.MODE === "test") {
+    return;
+  }
+
+  Sentry.addBreadcrumb({
+    category: "app.resume",
+    message: "App resumed",
+    level: "info",
+    data: context,
+  });
+}
+
+export function captureResumeShellUnresponsive(
+  context: Omit<AppResumeContext, "backgroundMs"> & { backgroundMs: number },
+): void {
+  if (import.meta.env.MODE === "test") {
+    return;
+  }
+
+  withSentryScope((scope) => {
+    scope.setTag("resume_watchdog", "unresponsive");
+    scope.setTag("standalone", String(context.standalone));
+    scope.setTag("ios_standalone", String(context.iosStandalone));
+    scope.setExtra("pathname", context.pathname);
+    scope.setExtra("backgroundMs", context.backgroundMs);
+    Sentry.addBreadcrumb({
+      category: "app.resume",
+      message: "resume_shell_unresponsive",
+      level: "error",
+      data: context,
+    });
+    Sentry.captureMessage("resume_shell_unresponsive", "error");
+  });
+}
+
+export function addIdbDeleteFailureBreadcrumb(error: unknown): void {
+  if (import.meta.env.MODE === "test") {
+    return;
+  }
+
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : "IndexedDB delete failed";
+
+  Sentry.addBreadcrumb({
+    category: "idb",
+    message: "IndexedDB delete failed",
+    level: "warning",
+    data: { message },
+  });
+}
+

@@ -16,6 +16,7 @@ import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { AppCheckProbeGate } from "./components/ui/AppCheckProbeGate";
 import { AppErrorPage } from "./components/ui/AppErrorPage";
+import { AppResumeWatchdog } from "./components/ui/AppResumeWatchdog";
 import { Home } from "./routes/Home";
 import { AdminOpsDesk } from "./components/admin/AdminOpsDesk";
 import { JoinSession } from "./routes/JoinSession";
@@ -171,6 +172,7 @@ export default function App() {
             <AnalyticsPageViewTracker />
             <RouteSeoTracker />
             <ChunkReloadContextBinder />
+            <AppResumeWatchdog />
             <AppUpdateBanner />
             <AnalyticsConsentBanner />
             <AppEntryBackdrop />

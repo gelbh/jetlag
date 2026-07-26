@@ -1,4 +1,5 @@
 import type { AnnotationRecord } from "../../domain/map/annotations";
+import { addIdbDeleteFailureBreadcrumb } from "../core/sentry";
 import { isDatabaseDeletedError } from "./indexedDbErrors";
 
 const DB_NAME = "jetlag-offline-queue";
@@ -211,12 +212,36 @@ export async function recordOfflineWriteFailure(
 export async function removeOfflineWrite(id: string): Promise<void> {
   await withDatabaseRetry(async (database) => {
     const transaction = database.transaction(STORE_NAME, "readwrite");
-    transaction.objectStore(STORE_NAME).delete(id);
+    const request = transaction.objectStore(STORE_NAME).delete(id);
 
     await new Promise<void>((resolve, reject) => {
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () =>
-        reject(transaction.error ?? new Error("Queue delete failed"));
+      let settled = false;
+      const fail = (error: unknown) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        addIdbDeleteFailureBreadcrumb(error);
+        reject(
+          error instanceof Error
+            ? error
+            : new Error("Queue delete failed"),
+        );
+      };
+
+      request.onerror = () => {
+        fail(request.error ?? new Error("Queue delete failed"));
+      };
+      transaction.oncomplete = () => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        resolve();
+      };
+      transaction.onerror = () => {
+        fail(transaction.error ?? new Error("Queue delete failed"));
+      };
     });
   });
 }

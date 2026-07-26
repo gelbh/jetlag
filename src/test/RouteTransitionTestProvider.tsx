@@ -42,6 +42,7 @@ export function RouteTransitionTestProvider({ children }: { children: ReactNode 
       reportScreenReady: (ready: boolean) => {
         screenReadyRef.current = ready;
       },
+      resetStuckTransition: () => undefined,
     }),
     [beginTransition],
   );

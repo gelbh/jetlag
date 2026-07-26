@@ -98,4 +98,32 @@ describe("offlineQueue", () => {
     expect(await readOfflineQueueForSession("session-1")).toHaveLength(0);
     expect(await readOfflineQueueForSession("session-2")).toHaveLength(1);
   });
+
+  it("rejects when the IndexedDB delete request fails", async () => {
+    await enqueueOfflineWrite("session-1", annotation);
+
+    const deleteError = new DOMException(
+      "Failed to delete record from object store",
+      "UnknownError",
+    );
+    const deleteSpy = vi
+      .spyOn(IDBObjectStore.prototype, "delete")
+      .mockImplementation(() => {
+        const request = {
+          error: deleteError,
+          onerror: null as ((this: IDBRequest, ev: Event) => void) | null,
+          onsuccess: null as ((this: IDBRequest, ev: Event) => void) | null,
+        };
+        queueMicrotask(() => {
+          request.onerror?.call(request as unknown as IDBRequest, new Event("error"));
+        });
+        return request as unknown as IDBRequest;
+      });
+
+    await expect(removeOfflineWrite("ann-offline")).rejects.toThrow(
+      /Failed to delete record from object store|Queue delete failed/,
+    );
+
+    deleteSpy.mockRestore();
+  });
 });
