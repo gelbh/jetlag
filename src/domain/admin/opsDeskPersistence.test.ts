@@ -26,6 +26,7 @@ describe("opsDeskPersistence", () => {
   it("round-trips save/load", () => {
     const store = defaultOpsDeskStore();
     store.activePresetId = CUSTOM_PRESET_ID;
+    store.defaultPresetId = CUSTOM_PRESET_ID;
     store.customLayout = cloneLayout(OPS_OVERVIEW_LAYOUT);
     store.userPresets = [
       {
@@ -35,18 +36,75 @@ describe("opsDeskPersistence", () => {
         layout: cloneLayout(OPS_OVERVIEW_LAYOUT),
       },
     ];
+    store.presetOrder = [
+      "ops-overview",
+      CUSTOM_PRESET_ID,
+      "user-night",
+      "session-watch",
+      "incident-triage",
+    ];
     store.lastMobilePanelId = "inbox";
 
     saveOpsDeskStore("alice", store);
     const loaded = loadOpsDeskStore("alice");
 
     expect(loaded.activePresetId).toBe(CUSTOM_PRESET_ID);
+    expect(loaded.defaultPresetId).toBe(CUSTOM_PRESET_ID);
+    expect(loaded.presetOrder[0]).toBe("ops-overview");
     expect(loaded.customLayout.stacks.map((s) => s.panelIds)).toEqual(
       store.customLayout.stacks.map((s) => s.panelIds),
     );
     expect(loaded.userPresets).toHaveLength(1);
     expect(loaded.userPresets[0]?.name).toBe("Night shift");
     expect(loaded.lastMobilePanelId).toBe("inbox");
+  });
+
+  it("migrates legacy 12-col stores and fills defaultPresetId", () => {
+    localStorage.setItem(
+      storageKey(null),
+      JSON.stringify({
+        version: 1,
+        activePresetId: CUSTOM_PRESET_ID,
+        customLayout: {
+          cols: 12,
+          rowHeight: 36,
+          stacks: [
+            {
+              id: "a",
+              panelIds: ["sessions"],
+              activeIndex: 0,
+              x: 0,
+              y: 0,
+              w: 6,
+              h: 4,
+            },
+          ],
+          hiddenPanelIds: [],
+        },
+        userPresets: [],
+      }),
+    );
+
+    const loaded = loadOpsDeskStore(null);
+    expect(loaded.defaultPresetId).toBe(BUILTIN_PRESETS[0]!.id);
+    expect(loaded.presetOrder).toContain(CUSTOM_PRESET_ID);
+    expect(loaded.customLayout.cols).toBe(24);
+    expect(loaded.customLayout.stacks[0]).toMatchObject({ x: 0, w: 12 });
+  });
+
+  it("falls back invalid defaultPresetId to builtin", () => {
+    localStorage.setItem(
+      storageKey(null),
+      JSON.stringify({
+        version: 1,
+        activePresetId: "session-watch",
+        defaultPresetId: "missing-preset",
+        customLayout: cloneLayout(OPS_OVERVIEW_LAYOUT),
+        userPresets: [],
+      }),
+    );
+    const loaded = loadOpsDeskStore(null);
+    expect(loaded.defaultPresetId).toBe(BUILTIN_PRESETS[0]!.id);
   });
 
   it("returns builtins default on corrupt JSON", () => {
@@ -86,6 +144,12 @@ describe("opsDeskPersistence", () => {
     saveOpsDeskStore(null, {
       version: 1,
       activePresetId: CUSTOM_PRESET_ID,
+      defaultPresetId: CUSTOM_PRESET_ID,
+      presetOrder: [
+        ...BUILTIN_PRESETS.map((p) => p.id),
+        CUSTOM_PRESET_ID,
+        "user-x",
+      ],
       customLayout: layout,
       userPresets: [
         {

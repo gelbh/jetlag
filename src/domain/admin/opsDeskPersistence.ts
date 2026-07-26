@@ -10,6 +10,7 @@ import {
   type DeskPreset,
   type GridStack,
   type PanelId,
+  migrateLayoutToCols,
 } from "./opsDeskLayout";
 
 export const OPS_DESK_STORAGE_PREFIX = "jetlag.adminOpsDesk.v1";
@@ -17,6 +18,10 @@ export const OPS_DESK_STORAGE_PREFIX = "jetlag.adminOpsDesk.v1";
 export type OpsDeskStoreV1 = {
   version: 1;
   activePresetId: string;
+  /** Cold-load target (builtin, custom, or user). */
+  defaultPresetId: string;
+  /** Chip order: builtins + custom + user ids. */
+  presetOrder: string[];
   customLayout: DeskLayout;
   userPresets: DeskPreset[];
   lastMobilePanelId?: PanelId;
@@ -26,10 +31,29 @@ export function storageKey(uid: string | null): string {
   return uid ? `${OPS_DESK_STORAGE_PREFIX}:${uid}` : OPS_DESK_STORAGE_PREFIX;
 }
 
+function buildPresetOrder(userPresets: DeskPreset[]): string[] {
+  return [
+    ...BUILTIN_PRESETS.map((p) => p.id),
+    CUSTOM_PRESET_ID,
+    ...userPresets.map((p) => p.id),
+  ];
+}
+
+function knownPresetIds(userPresets: DeskPreset[]): Set<string> {
+  return new Set([
+    CUSTOM_PRESET_ID,
+    ...BUILTIN_PRESETS.map((p) => p.id),
+    ...userPresets.map((p) => p.id),
+  ]);
+}
+
 export function defaultOpsDeskStore(): OpsDeskStoreV1 {
+  const defaultPresetId = BUILTIN_PRESETS[0]!.id;
   return {
     version: 1,
-    activePresetId: BUILTIN_PRESETS[0]!.id,
+    activePresetId: defaultPresetId,
+    defaultPresetId,
+    presetOrder: buildPresetOrder([]),
     customLayout: cloneLayout(SESSION_WATCH_LAYOUT),
     userPresets: [],
   };
@@ -101,12 +125,15 @@ export function sanitizeDeskLayout(raw: unknown): DeskLayout {
       : DEFAULT_ROW_HEIGHT;
   const rowHeight = rowHeightRaw > 0 ? rowHeightRaw : DEFAULT_ROW_HEIGHT;
 
-  return {
-    cols,
-    rowHeight,
-    stacks,
-    hiddenPanelIds,
-  };
+  return migrateLayoutToCols(
+    {
+      cols,
+      rowHeight,
+      stacks,
+      hiddenPanelIds,
+    },
+    DEFAULT_COLS,
+  );
 }
 
 function sanitizeUserPreset(raw: unknown): DeskPreset | null {
@@ -121,6 +148,27 @@ function sanitizeUserPreset(raw: unknown): DeskPreset | null {
     kind: "user",
     layout: sanitizeDeskLayout(obj.layout),
   };
+}
+
+function sanitizePresetOrder(
+  raw: unknown,
+  userPresets: DeskPreset[],
+): string[] {
+  const known = knownPresetIds(userPresets);
+  const fallback = buildPresetOrder(userPresets);
+  if (!Array.isArray(raw)) return fallback;
+
+  const seen = new Set<string>();
+  const ordered: string[] = [];
+  for (const id of raw) {
+    if (typeof id !== "string" || !known.has(id) || seen.has(id)) continue;
+    seen.add(id);
+    ordered.push(id);
+  }
+  for (const id of fallback) {
+    if (!seen.has(id)) ordered.push(id);
+  }
+  return ordered;
 }
 
 function sanitizeStore(raw: unknown): OpsDeskStoreV1 {
@@ -147,18 +195,22 @@ function sanitizeStore(raw: unknown): OpsDeskStoreV1 {
         })
     : [];
 
+  const knownIds = knownPresetIds(userPresets);
+
   let activePresetId =
     typeof obj.activePresetId === "string" && obj.activePresetId.length > 0
       ? obj.activePresetId
       : defaults.activePresetId;
-
-  const knownIds = new Set<string>([
-    CUSTOM_PRESET_ID,
-    ...BUILTIN_PRESETS.map((p) => p.id),
-    ...userPresets.map((p) => p.id),
-  ]);
   if (!knownIds.has(activePresetId)) {
     activePresetId = defaults.activePresetId;
+  }
+
+  let defaultPresetId =
+    typeof obj.defaultPresetId === "string" && obj.defaultPresetId.length > 0
+      ? obj.defaultPresetId
+      : defaults.defaultPresetId;
+  if (!knownIds.has(defaultPresetId)) {
+    defaultPresetId = defaults.defaultPresetId;
   }
 
   const lastMobilePanelId = isPanelId(obj.lastMobilePanelId)
@@ -168,6 +220,8 @@ function sanitizeStore(raw: unknown): OpsDeskStoreV1 {
   return {
     version: 1,
     activePresetId,
+    defaultPresetId,
+    presetOrder: sanitizePresetOrder(obj.presetOrder, userPresets),
     customLayout,
     userPresets,
     lastMobilePanelId,
