@@ -7,8 +7,8 @@ import type { AdminSessionSummary } from "../services/admin/adminSessions";
 const SEEKER_HIDER_META = /1S \/ 1H/i;
 
 const authState = vi.hoisted(() => ({
+  state: "loading" as "loading" | "unsigned" | "denied" | "admin",
   user: null as { email: string; emailVerified: boolean } | null,
-  isPermanent: false,
   authReady: true,
 }));
 
@@ -24,13 +24,8 @@ const sessionListState = vi.hoisted(() => ({
   loadMore: vi.fn(),
 }));
 
-vi.mock("../hooks/billing/usePermanentAuthUser", () => ({
-  usePermanentAuthUser: () => authState,
-}));
-
-vi.mock("../domain/admin/adminAccess", () => ({
-  isAdminUser: (user: { email: string; emailVerified: boolean } | null) =>
-    user?.email === "admin@example.com" && user.emailVerified,
+vi.mock("../hooks/admin/useAdminAccessState", () => ({
+  useAdminAccessState: () => authState,
 }));
 
 vi.mock("../hooks/admin/useAdminSessionList", () => ({
@@ -83,16 +78,18 @@ describe("AdminPanel", () => {
   });
 
   it("shows skeleton rows while auth is loading", () => {
+    authState.state = "loading";
     authState.authReady = false;
+    authState.user = null;
     renderWithRouter(<AdminPanel />);
 
     expect(document.querySelector(".animate-pulse")).toBeInTheDocument();
   });
 
   it("shows the sign-in gate for signed-out users", () => {
+    authState.state = "unsigned";
     authState.authReady = true;
     authState.user = null;
-    authState.isPermanent = false;
     sessionListState.sessions = [];
 
     renderWithRouter(<AdminPanel />);
@@ -104,8 +101,8 @@ describe("AdminPanel", () => {
   });
 
   it("shows access denied for non-admin permanent users", () => {
+    authState.state = "denied";
     authState.authReady = true;
-    authState.isPermanent = true;
     authState.user = { email: "player@example.com", emailVerified: true };
 
     renderWithRouter(<AdminPanel />);
@@ -114,8 +111,8 @@ describe("AdminPanel", () => {
   });
 
   it("shows an empty state for admin users with no live sessions", () => {
+    authState.state = "admin";
     authState.authReady = true;
-    authState.isPermanent = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
     sessionListState.loading = false;
     sessionListState.sessions = [];
@@ -126,8 +123,8 @@ describe("AdminPanel", () => {
   });
 
   it("renders session phase labels for admin users", () => {
+    authState.state = "admin";
     authState.authReady = true;
-    authState.isPermanent = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
     sessionListState.sessions = [
       {
@@ -169,8 +166,8 @@ describe("AdminPanel", () => {
   });
 
   it("uses a scrollable session list column on desktop", () => {
+    authState.state = "admin";
     authState.authReady = true;
-    authState.isPermanent = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
     sessionListState.sessions = [
       {
@@ -228,8 +225,8 @@ describe("AdminPanel", () => {
   });
 
   it("loads more sessions from the list footer", () => {
+    authState.state = "admin";
     authState.authReady = true;
-    authState.isPermanent = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
     sessionListState.loading = false;
     sessionListState.hasMore = true;
@@ -273,8 +270,8 @@ describe("AdminPanel", () => {
   });
 
   it("shows load more when filters hide every loaded session", () => {
+    authState.state = "admin";
     authState.authReady = true;
-    authState.isPermanent = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
     sessionListState.loading = false;
     sessionListState.hasMore = true;
