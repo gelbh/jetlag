@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  clearActiveRevealTransition,
   clearActiveRevealTransitionForTests,
   revealRouteTransition,
 } from "./revealRouteTransition";
@@ -81,6 +82,22 @@ describe("revealRouteTransition", () => {
 
     expect(transitions[0]?.skipTransition).toHaveBeenCalledTimes(1);
     expect(transitions[1]?.skipTransition).not.toHaveBeenCalled();
+  });
+
+  it("clearActiveRevealTransition skips and drops the active handle", () => {
+    const transition = createFakeViewTransition();
+    document.startViewTransition = vi.fn((callback: () => void) => {
+      callback();
+      return transition;
+    });
+
+    void revealRouteTransition("forward", true, vi.fn());
+    clearActiveRevealTransition();
+
+    expect(transition.skipTransition).toHaveBeenCalledTimes(1);
+
+    clearActiveRevealTransition();
+    expect(transition.skipTransition).toHaveBeenCalledTimes(1);
   });
 
   it("navigates immediately without VT when startViewTransition is missing", async () => {
