@@ -1,4 +1,4 @@
-import type { DragEvent } from "react";
+import type { DragEvent, MouseEvent as ReactMouseEvent } from "react";
 import { useMemo, useState } from "react";
 import GridLayout, {
   useContainerWidth,
@@ -20,10 +20,13 @@ import {
   type PanelMergePayload,
 } from "./AdminPanelStack";
 import type { AdminPanelBodies } from "./AdminPanelBody";
+import { AdminPlacePanelMenu } from "./AdminPlacePanelMenu";
 
 const COLLAPSED_H = 1;
 const UNSTACK_DEFAULT_W = 8;
 const UNSTACK_DEFAULT_H = 6;
+const PLACE_DEFAULT_W = 8;
+const PLACE_DEFAULT_H = 8;
 const ALL_RESIZE_HANDLES = ["n", "s", "e", "w", "ne", "nw", "se", "sw"] as const;
 
 /** Apply RGL geometry then clamp so stacks never exceed cols (no H-scroll). */
@@ -55,11 +58,25 @@ interface AdminGridWorkspaceProps {
     w: number,
     h: number,
   ) => void;
+  onPlacePanel: (
+    panelId: PanelId,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+  ) => void;
   onActiveIndexChange: (stackId: string, activeIndex: number) => void;
   onPinToggle: (stackId: string) => void;
   onCollapseToggle: (stackId: string) => void;
   onCloseActive: (stackId: string) => void;
 }
+
+type PlaceMenuState = {
+  cellX: number;
+  cellY: number;
+  left: number;
+  top: number;
+};
 
 export function AdminGridWorkspace({
   layout,
@@ -68,6 +85,7 @@ export function AdminGridWorkspace({
   onMergePanel,
   onReorderPanel,
   onUnstackPanel,
+  onPlacePanel,
   onActiveIndexChange,
   onPinToggle,
   onCollapseToggle,
@@ -79,6 +97,8 @@ export function AdminGridWorkspace({
   const [dropTargetStackId, setDropTargetStackId] = useState<string | null>(
     null,
   );
+  const [placeMenu, setPlaceMenu] = useState<PlaceMenuState | null>(null);
+  const [emptyHover, setEmptyHover] = useState(false);
 
   const rglLayout: Layout = useMemo(
     () =>
@@ -120,22 +140,28 @@ export function AdminGridWorkspace({
     return { x, y };
   };
 
+  const isEmptyTarget = (target: EventTarget | null) => {
+    const el = target as HTMLElement | null;
+    return !el?.closest?.("[data-stack-id]");
+  };
+
   const handleWorkspaceDragOver = (event: DragEvent) => {
     if (![...event.dataTransfer.types].includes(OPS_PANEL_MIME)) return;
-    const target = event.target as HTMLElement | null;
-    if (target?.closest?.("[data-stack-id]")) return;
+    if (!isEmptyTarget(event.target)) return;
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
     setDropTargetStackId(null);
+    setEmptyHover(true);
   };
 
   const handleWorkspaceDrop = (event: DragEvent) => {
-    const target = event.target as HTMLElement | null;
-    if (target?.closest?.("[data-stack-id]")) return;
+    if (!isEmptyTarget(event.target)) return;
     const raw = event.dataTransfer.getData(OPS_PANEL_MIME);
     if (!raw) return;
     event.preventDefault();
     setDropTargetStackId(null);
+    setEmptyHover(false);
+    setPlaceMenu(null);
     try {
       const payload = JSON.parse(raw) as PanelMergePayload;
       if (!payload?.sourceStackId || !payload?.panelId) return;
@@ -153,13 +179,29 @@ export function AdminGridWorkspace({
     }
   };
 
+  const handleWorkspaceClick = (event: ReactMouseEvent) => {
+    if (!isEmptyTarget(event.target)) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const { x, y } = cellFromPointer(event.clientX, event.clientY);
+    setPlaceMenu({
+      cellX: x,
+      cellY: y,
+      left: Math.min(event.clientX - rect.left, Math.max(0, rect.width - 180)),
+      top: Math.min(event.clientY - rect.top, Math.max(0, rect.height - 160)),
+    });
+  };
+
   return (
     <div
       ref={containerRef}
-      className="jl-scroll jl-ops-workspace"
+      className={`jl-scroll jl-ops-workspace${emptyHover ? " jl-ops-workspace--empty-hover" : ""}`}
       data-testid="admin-ops-grid"
       onDragOver={handleWorkspaceDragOver}
+      onDragLeave={() => setEmptyHover(false)}
       onDrop={handleWorkspaceDrop}
+      onClick={handleWorkspaceClick}
     >
       {mounted ? (
         <GridLayout
@@ -202,6 +244,23 @@ export function AdminGridWorkspace({
             </div>
           ))}
         </GridLayout>
+      ) : null}
+      {placeMenu ? (
+        <AdminPlacePanelMenu
+          hiddenPanelIds={layout.hiddenPanelIds}
+          anchor={{ left: placeMenu.left, top: placeMenu.top }}
+          onDismiss={() => setPlaceMenu(null)}
+          onPlace={(panelId) => {
+            onPlacePanel(
+              panelId,
+              placeMenu.cellX,
+              placeMenu.cellY,
+              PLACE_DEFAULT_W,
+              PLACE_DEFAULT_H,
+            );
+            setPlaceMenu(null);
+          }}
+        />
       ) : null}
     </div>
   );

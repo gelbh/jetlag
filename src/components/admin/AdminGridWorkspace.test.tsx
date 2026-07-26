@@ -51,6 +51,7 @@ describe("AdminGridWorkspace", () => {
         onMergePanel={vi.fn()}
         onReorderPanel={vi.fn()}
         onUnstackPanel={vi.fn()}
+        onPlacePanel={vi.fn()}
         onActiveIndexChange={vi.fn()}
         onPinToggle={vi.fn()}
         onCollapseToggle={vi.fn()}
