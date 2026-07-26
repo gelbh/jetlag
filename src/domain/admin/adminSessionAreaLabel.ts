@@ -1,7 +1,7 @@
 import { BUNDLED_GAME_PRESET_DEFINITIONS } from "../regions/bundledGamePresets";
 import { titleCase } from "../regions/bundledPresets/shared";
 import type { RegionPackId } from "../regions/regionPack";
-import { getTransitMetro } from "../../services/transit/transitCatalog";
+import { getTransitMetro } from "@/services/transit/transitCatalog";
 
 export interface AdminSessionAreaInput {
   gameAreaLabel?: string | null;

@@ -2,7 +2,7 @@ import type {
   AdminSessionMode,
   AdminSessionPhase,
   AdminSessionSummary,
-} from "../../services/admin/adminSessions";
+} from "@/services/admin/adminSessions";
 import { resolveAdminSessionAreaLabel } from "./adminSessionAreaLabel";
 
 export type AdminSessionPhaseFilter = AdminSessionPhase | "all";

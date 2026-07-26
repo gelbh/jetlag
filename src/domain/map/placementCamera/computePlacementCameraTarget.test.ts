@@ -3,8 +3,8 @@ import { toLeafletBounds } from "./leafletBounds";
 import {
   buildMapDraftOverlays,
   type MapDraftOverlaySources,
-} from "../../../hooks/map-screen/useMapDraftOverlays";
-import { DUBLIN_CITY_GAME_AREA } from "../../../test/fixtures/dublinGameArea";
+} from "@/hooks/map-screen/useMapDraftOverlays";
+import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import {
   computePlacementCameraTarget,
   placementCameraDraftFromOverlaySources,
