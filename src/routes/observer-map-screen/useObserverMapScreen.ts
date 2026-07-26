@@ -15,6 +15,7 @@ import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUn
 import { useSessionAnnotations } from "../../hooks/map/useSessionAnnotations";
 import { isPlaceholderGameArea } from "../../domain/session/joinPreviewGameArea";
 import { useMapStore, useSessionStore } from "../../state/sessionStore";
+import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
 
 const DEFAULT_MAP_CENTER: LatLngTuple = [51.505, -0.09];
 
@@ -36,8 +37,9 @@ export function useObserverMapScreen() {
   const [mapViewport, setMapViewport] = useState<MapViewportState | null>(null);
 
   const spectatorRole = myRole === "admin" || myRole === "observer" ? myRole : "observer";
-  const authMode = myRole === "admin" ? "admin-permanent" : "hider-anonymous";
-  const exitPath = myRole === "admin" ? "/admin" : "/";
+  const roleConfig = getMapScreenRoleConfig(spectatorRole);
+  const authMode = roleConfig.authMode;
+  const exitPath = roleConfig.exitPath;
 
   const { gameArea, sessionRules, playAreaReady: resolvedPlayAreaReady } =
     useResolvedSessionRules(session);
@@ -89,9 +91,9 @@ export function useObserverMapScreen() {
     authReady,
   } = useSharedSessionScreen({
     isChatOpen: overlay.isChatOpen,
-    notificationRole: spectatorRole,
+    notificationRole: roleConfig.notificationRole,
     authMode,
-    liveActivityEnabled: false,
+    liveActivityEnabled: roleConfig.liveActivityEnabled,
     exitPath,
   });
 
