@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import type { GameArea } from "../../domain/map/annotations";
+import type { GameArea } from "../../../domain/map/annotations";
 import {
   adminDivisionCacheKey,
   clearGeographicFeatureCacheForTests,
@@ -8,7 +8,7 @@ import {
   getOrFetchCached,
   landmassCacheKey,
   staticTransitCacheKey,
-} from "./geographicFeatureCache";
+} from "./index";
 
 const sampleGameArea: GameArea = {
   type: "Polygon",
