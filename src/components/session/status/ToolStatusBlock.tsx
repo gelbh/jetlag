@@ -96,7 +96,7 @@ export function ToolStatusBlock({
 
       <div className="jl-status-header-col">
         <span className="jl-status-header-label">OPERATION</span>
-        <span className="jl-status-header-value jl-view-transition-session-code">
+        <span className="jl-status-header-value jl-stamp-code jl-view-transition-session-code">
           {sessionCode}
         </span>
       </div>

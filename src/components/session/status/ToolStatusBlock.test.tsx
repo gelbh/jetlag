@@ -58,6 +58,7 @@ describe("ToolStatusBlock", () => {
 
     expect(screen.getByText("OPERATION")).toBeInTheDocument();
     expect(screen.getByText("WXYZ")).toBeInTheDocument();
+    expect(screen.getByText("WXYZ").closest(".jl-stamp-code")).toBeTruthy();
     expect(screen.getByText("PHASE")).toBeInTheDocument();
     expect(screen.getByText("—")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /start/i })).toBeInTheDocument();
