@@ -9,7 +9,6 @@ import {
   screenHeaderOffsetClassName,
 } from "../ui/ScreenHeader";
 import { InlineError } from "../ui/InlineError";
-import { isAdminUser } from "../../domain/admin/adminAccess";
 import { filterAdminSessions } from "../../domain/admin/adminSessionFilters";
 import type {
   AdminSessionModeFilter,
@@ -43,7 +42,7 @@ import {
 import type { IncidentRecord } from "../../domain/incident/incidentTypes";
 import { useAdminJoinSession } from "../../hooks/admin/useAdminJoinSession";
 import { useAdminSessionList } from "../../hooks/admin/useAdminSessionList";
-import { usePermanentAuthUser } from "../../hooks/billing/usePermanentAuthUser";
+import { useAdminAccessState } from "../../hooks/admin/useAdminAccessState";
 import { useAppNavigate } from "../../hooks/useAppNavigate";
 import { useMinWidth } from "../../hooks/useMinWidth";
 import {
@@ -104,9 +103,9 @@ export function AdminOpsDesk() {
   const { incidentId: routeIncidentId } = useParams<{ incidentId?: string }>();
   const location = useLocation();
   const navigate = useAppNavigate();
-  const { user, isPermanent, authReady } = usePermanentAuthUser();
-  const isAdmin = isAdminUser(user);
-  const enabled = authReady && isAdmin;
+  const { state: accessState, user, authReady } = useAdminAccessState();
+  const isAdmin = accessState === "admin";
+  const enabled = isAdmin;
   const isDesktop = useMinWidth(1024);
   const selectedIncidentId = routeIncidentId?.trim() || null;
   const onIncidentsRoute = location.pathname.startsWith("/admin/incidents");
@@ -557,7 +556,7 @@ export function AdminOpsDesk() {
     settings: <AdminSettingsPanel />,
   };
 
-  if (!authReady) {
+  if (accessState === "loading" || !authReady) {
     return (
       <EntryScreenLayout justify="start">
         <ScreenHeader backTo="/" backLabel="Back" />
@@ -568,7 +567,7 @@ export function AdminOpsDesk() {
     );
   }
 
-  if (!isPermanent || !user) {
+  if (accessState === "unsigned") {
     return (
       <EntryScreenLayout justify="start">
         <ScreenHeader backTo="/" backLabel="Back" />
@@ -592,7 +591,7 @@ export function AdminOpsDesk() {
     );
   }
 
-  if (!isAdmin) {
+  if (accessState === "denied") {
     return (
       <EntryScreenLayout justify="start">
         <ScreenHeader backTo="/" backLabel="Back" />
@@ -601,7 +600,7 @@ export function AdminOpsDesk() {
             Access denied
           </h1>
           <p className="text-sm text-ink-muted">
-            Signed in as {user.email ?? "unknown"}. This panel is restricted to
+            Signed in as {user?.email ?? "unknown"}. This panel is restricted to
             the app owner.
           </p>
           {signOutError ? <InlineError>{signOutError}</InlineError> : null}
