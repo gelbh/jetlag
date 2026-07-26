@@ -25,6 +25,12 @@ import {
   getPendingQuestionStatus,
   updatePendingQuestion,
 } from "../../services/firestore/firestoreSessionExtras";
+import {
+  answerSummaryFromPendingReply,
+  emitPhotoAnsweredActivity,
+  emitQuestionAnsweredActivity,
+  isAnnotationQuestionTool,
+} from "../../services/session/emitSessionActivity";
 
 interface UsePendingQuestionResolverParams {
   sessionId: string | undefined;
@@ -153,6 +159,15 @@ export function usePendingQuestionResolver({
               await updatePendingQuestion(sessionId, pending.id, {
                 status: "resolved",
               });
+              emitPhotoAnsweredActivity({
+                sessionId,
+                pendingQuestionId: pending.id,
+                promptText: pending.promptText,
+                answerSummary: answerSummaryFromPendingReply(
+                  pending.answer,
+                  pending.replyOptions,
+                ),
+              });
               return;
             }
 
@@ -173,6 +188,21 @@ export function usePendingQuestionResolver({
             status: "resolved",
             resolvedAnnotationId: created.id,
           });
+
+          if (isAnnotationQuestionTool(pending.toolType)) {
+            emitQuestionAnsweredActivity({
+              sessionId,
+              toolType: pending.toolType,
+              promptText: pending.promptText,
+              pendingQuestionId: pending.id,
+              annotationId: created.id,
+              answerSummary: answerSummaryFromPendingReply(
+                pending.answer,
+                pending.replyOptions,
+              ),
+              answeredLate: Boolean(pending.answeredLate),
+            });
+          }
         } catch {
           // Keep the guard if the annotation already landed so a retry cannot
           // append a second local/remote annotation for the same question.

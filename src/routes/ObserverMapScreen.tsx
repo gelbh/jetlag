@@ -12,6 +12,7 @@ import { fallbackGameArea } from "../domain/geometry/geometry";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import { useDesktopLayout } from "../hooks/useDesktopLayout";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
+import { useAnnotationStore } from "../state/annotationStore";
 import { useMapStore, useSessionStore } from "../state/sessionStore";
 import { ObserverMapScreenChrome } from "./observer-map-screen/ObserverMapScreenChrome";
 import { useObserverMapScreen } from "./observer-map-screen/useObserverMapScreen";
@@ -25,6 +26,12 @@ export function ObserverMapScreen() {
     (state) => state.resetObserverPerspective,
   );
   const controller = useObserverMapScreen();
+  const setSelectedAnnotationId = useAnnotationStore(
+    (state) => state.setSelectedAnnotationId,
+  );
+  const markAnnotationPulse = useAnnotationStore(
+    (state) => state.markAnnotationPulse,
+  );
 
   const handleLeave = useCallback(async () => {
     const sessionId = controller.session?.id;
@@ -134,11 +141,17 @@ export function ObserverMapScreen() {
 
         <SessionLog
           open={controller.overlay.isLogOpen}
+          sessionId={controller.session.id}
           annotations={controller.annotations}
           onClose={controller.overlay.closeSheet}
           onDelete={() => undefined}
           onEdit={() => undefined}
           readOnly
+          onSelect={(id) => {
+            controller.overlay.closeSheet();
+            setSelectedAnnotationId(id);
+            markAnnotationPulse(id);
+          }}
         />
 
         {controller.sessionId && controller.uid ? (

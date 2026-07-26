@@ -46,6 +46,7 @@ import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
 import type { HiderTruthResult } from "../../domain/questions/ui";
+import { useAnnotationStore } from "../../state/annotationStore";
 
 type MapOverlayState = ReturnType<typeof useMapOverlayState>;
 type SyncStatusState = ReturnType<typeof useSyncStatus>;
@@ -247,6 +248,12 @@ export function HiderMapScreenChrome({
   const gameOverActions = useGameOverActions(session, overlay);
   const isDesktop = useDesktopLayout();
   const toolLayout = isDesktop ? "rail" : "dock";
+  const setSelectedAnnotationId = useAnnotationStore(
+    (state) => state.setSelectedAnnotationId,
+  );
+  const markAnnotationPulse = useAnnotationStore(
+    (state) => state.markAnnotationPulse,
+  );
 
   const railActiveTab: ContextualRailTab | null =
     overlay.sheet === "none" ? null : overlay.sheet;
@@ -540,10 +547,17 @@ export function HiderMapScreenChrome({
 
       <SessionLog
         open={overlay.isLogOpen}
+        sessionId={session.id}
         annotations={annotations}
         onClose={overlay.closeSheet}
         onDelete={() => undefined}
-        onEdit={overlay.closeSheet}
+        onEdit={() => undefined}
+        readOnly
+        onSelect={(id) => {
+          overlay.closeSheet();
+          setSelectedAnnotationId(id);
+          markAnnotationPulse(id);
+        }}
       />
     </ContextualRailPanelProvider>
   );

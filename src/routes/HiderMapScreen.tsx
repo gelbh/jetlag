@@ -70,6 +70,7 @@ import {
   ensureRemoteSessionWriteAccess,
 } from "../services/firestore/firestoreAnnotations";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase";
+import { emitGameEndedActivity } from "../services/session/emitSessionActivity";
 import { useSessionAnnotations } from "../hooks/map/useSessionAnnotations";
 import { useAnnotations } from "../hooks/map/useAnnotations";
 import { useMapSessionChrome } from "../hooks/map-screen/useMapSessionChrome";
@@ -174,6 +175,9 @@ export function HiderMapScreen() {
   );
   const annotations = useSessionAnnotations(sessionId);
   const { clearAllAnnotations } = useAnnotations();
+  const selectedAnnotationId = useAnnotationStore(
+    (state) => state.selectedAnnotationId,
+  );
   const setSelectedAnnotationId = useAnnotationStore(
     (state) => state.setSelectedAnnotationId,
   );
@@ -317,6 +321,11 @@ export function HiderMapScreen() {
           endGameRequestedAt: undefined,
           endGameRequestedByUid: undefined,
         },
+        uid,
+      );
+      emitGameEndedActivity(
+        session.id,
+        { outcome: "found", summary: "Hider found" },
         uid,
       );
       return;
@@ -557,6 +566,7 @@ export function HiderMapScreen() {
           <AnnotationLayer
             annotations={annotations}
             gameArea={gameArea}
+            selectedAnnotationId={selectedAnnotationId}
             layerVisibility={layerVisibility}
             session={session}
             hidingZones={confirmedHidingZones}
