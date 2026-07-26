@@ -28,6 +28,7 @@ export default defineConfig({
       "dist/**",
       "node_modules/**",
       "e2e/**",
+      "scripts/**",
       "**/*.emulator.test.*",
       "src/test/emulator/**",
     ],
