@@ -1,0 +1,380 @@
+import { FirebaseError } from "firebase/app";
+import {
+  EmailAuthProvider,
+  GoogleAuthProvider,
+  OAuthProvider,
+  getRedirectResult,
+  isSignInWithEmailLink,
+  linkWithCredential,
+  linkWithPopup,
+  linkWithRedirect,
+  sendSignInLinkToEmail,
+  signInWithCredential,
+  signInWithEmailLink,
+  signInWithPopup,
+  signInWithRedirect,
+  signOut,
+  type AuthCredential,
+  type AuthProvider,
+  type User,
+} from "firebase/auth";
+import { getFirebaseAuth, ensureAnonymousUser } from "../firebase/firebase";
+
+export const EMAIL_LINK_STORAGE_KEY = "premiumEmailForSignIn";
+/** Set before linkWithRedirect / signInWithRedirect; cleared on redirect recovery. */
+export const OAUTH_REDIRECT_PENDING_KEY = "jl.oauthRedirectPending";
+
+export const OAUTH_REDIRECT_FAILED_MESSAGE =
+  "Sign-in didn’t complete. Allow popups for this site and try again.";
+
+export class OAuthRedirectInProgressError extends Error {
+  constructor() {
+    super("OAuth redirect in progress");
+    this.name = "OAuthRedirectInProgressError";
+  }
+}
+
+export function isOAuthRedirectInProgress(error: unknown): boolean {
+  return error instanceof OAuthRedirectInProgressError;
+}
+
+export async function signOutToAnonymous(): Promise<void> {
+  const auth = getFirebaseAuth();
+  await signOut(auth);
+  await ensureAnonymousUser();
+}
+
+/** Flip when Apple Sign-In is configured in Firebase + Apple Developer. */
+export const APPLE_SIGN_IN_ENABLED = false;
+
+export function isAnonymousUser(user?: User | null): boolean {
+  if (user !== undefined) {
+    return user?.isAnonymous === true;
+  }
+
+  const current = getFirebaseAuth().currentUser;
+  return current?.isAnonymous === true;
+}
+
+export function isPermanentUser(user?: User | null): boolean {
+  if (user !== undefined) {
+    return user != null && !user.isAnonymous;
+  }
+
+  const current = getFirebaseAuth().currentUser;
+  return current != null && !current.isAnonymous;
+}
+
+export function premiumAuthContinueUrl(path = "/premium"): string {
+  if (typeof window === "undefined") {
+    return `https://jetlag.gelbhart.dev${path}`;
+  }
+
+  return `${window.location.origin}${path}`;
+}
+
+function mapAuthError(error: unknown, fallback: string): Error {
+  if (error instanceof Error) {
+    return error;
+  }
+
+  return new Error(fallback);
+}
+
+function isCredentialAlreadyInUse(error: unknown): boolean {
+  return (
+    error instanceof FirebaseError &&
+    error.code === "auth/credential-already-in-use"
+  );
+}
+
+function isPopupBlockedError(error: unknown): boolean {
+  return (
+    error instanceof FirebaseError && error.code === "auth/popup-blocked"
+  );
+}
+
+function isFirebasePendingPromiseAssertion(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes("Pending promise was never set")
+  );
+}
+
+async function linkCredentialOrSignInExisting(
+  credential: AuthCredential,
+): Promise<User> {
+  const auth = getFirebaseAuth();
+
+  if (!auth.currentUser?.isAnonymous) {
+    const signedIn = await signInWithCredential(auth, credential);
+    return signedIn.user;
+  }
+
+  try {
+    const linked = await linkWithCredential(auth.currentUser, credential);
+    return linked.user;
+  } catch (error) {
+    if (!isCredentialAlreadyInUse(error)) {
+      throw error;
+    }
+
+    const signedIn = await signInWithCredential(auth, credential);
+    return signedIn.user;
+  }
+}
+
+async function linkWithPopupOrSignInExisting(
+  provider: AuthProvider,
+): Promise<User> {
+  const auth = getFirebaseAuth();
+
+  if (!auth.currentUser?.isAnonymous) {
+    try {
+      const signedIn = await signInWithPopup(auth, provider);
+      return signedIn.user;
+    } catch (error) {
+      if (isPopupBlockedError(error)) {
+        return beginOAuthRedirect(provider);
+      }
+      throw error;
+    }
+  }
+
+  try {
+    const linked = await linkWithPopup(auth.currentUser, provider);
+    return linked.user;
+  } catch (error) {
+    if (isPopupBlockedError(error)) {
+      return beginOAuthRedirect(provider);
+    }
+
+    if (!isCredentialAlreadyInUse(error)) {
+      throw error;
+    }
+
+    const credential = OAuthProvider.credentialFromError(
+      error as FirebaseError,
+    );
+    if (!credential) {
+      throw error;
+    }
+
+    const signedIn = await signInWithCredential(auth, credential);
+    return signedIn.user;
+  }
+}
+
+function markOAuthRedirectPending(): void {
+  try {
+    window.sessionStorage.setItem(
+      OAUTH_REDIRECT_PENDING_KEY,
+      String(Date.now()),
+    );
+  } catch {
+    // Private mode / blocked storage — recovery still runs; UI may miss the hint.
+  }
+}
+
+const OAUTH_REDIRECT_PENDING_MAX_AGE_MS = 10 * 60 * 1000;
+
+function consumeOAuthRedirectPending(): boolean {
+  try {
+    const raw = window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY);
+    if (raw == null) {
+      return false;
+    }
+    window.sessionStorage.removeItem(OAUTH_REDIRECT_PENDING_KEY);
+    if (raw === "1") {
+      // Legacy boolean flag from older clients.
+      return true;
+    }
+    const startedAt = Number(raw);
+    if (!Number.isFinite(startedAt)) {
+      return false;
+    }
+    return Date.now() - startedAt <= OAUTH_REDIRECT_PENDING_MAX_AGE_MS;
+  } catch {
+    return false;
+  }
+}
+
+async function beginOAuthRedirect(provider: AuthProvider): Promise<never> {
+  const auth = getFirebaseAuth();
+  markOAuthRedirectPending();
+
+  try {
+    if (auth.currentUser?.isAnonymous) {
+      await linkWithRedirect(auth.currentUser, provider);
+    } else {
+      await signInWithRedirect(auth, provider);
+    }
+  } catch (error) {
+    consumeOAuthRedirectPending();
+    throw error;
+  }
+
+  throw new OAuthRedirectInProgressError();
+}
+
+async function completeGoogleCredential(credential: ReturnType<
+  typeof GoogleAuthProvider.credential
+>): Promise<User> {
+  return linkCredentialOrSignInExisting(credential);
+}
+
+export async function signInWithGoogleIdToken(idToken: string): Promise<User> {
+  try {
+    return await completeGoogleCredential(GoogleAuthProvider.credential(idToken));
+  } catch (error) {
+    throw mapAuthError(error, "Google sign-in failed.");
+  }
+}
+
+export async function signInWithGoogle(): Promise<User> {
+  return signInWithOAuthPopup(new GoogleAuthProvider(), "Google sign-in failed.");
+}
+
+function createAppleProvider(): OAuthProvider {
+  const provider = new OAuthProvider("apple.com");
+  provider.addScope("email");
+  provider.addScope("name");
+  return provider;
+}
+
+export async function signInWithApple(): Promise<User> {
+  return signInWithOAuthPopup(createAppleProvider(), "Apple sign-in failed.");
+}
+
+async function signInWithOAuthPopup(
+  provider: AuthProvider,
+  fallbackMessage: string,
+): Promise<User> {
+  try {
+    return await linkWithPopupOrSignInExisting(provider);
+  } catch (error) {
+    if (isOAuthRedirectInProgress(error)) {
+      throw error;
+    }
+    throw mapAuthError(error, fallbackMessage);
+  }
+}
+
+let redirectResultPromise: Promise<User | null> | null = null;
+let pendingRedirectFailureMessage: string | null = null;
+
+function notePendingRedirectFailure(): void {
+  pendingRedirectFailureMessage = OAUTH_REDIRECT_FAILED_MESSAGE;
+}
+
+/** Player-visible message after a redirect returned no user; cleared on read. */
+export function consumeOAuthRedirectFailureMessage(): string | null {
+  const message = pendingRedirectFailureMessage;
+  pendingRedirectFailureMessage = null;
+  return message;
+}
+
+function resolveRedirectUser(
+  user: User | null,
+  wasPending: boolean,
+): User | null {
+  if (user) {
+    return user;
+  }
+  if (wasPending) {
+    notePendingRedirectFailure();
+  }
+  return null;
+}
+
+async function completeOAuthRedirectOnce(): Promise<User | null> {
+  const auth = getFirebaseAuth();
+  const wasPending = consumeOAuthRedirectPending();
+
+  try {
+    const result = await getRedirectResult(auth);
+    return resolveRedirectUser(result?.user ?? null, wasPending);
+  } catch (error) {
+    if (isFirebasePendingPromiseAssertion(error)) {
+      const current = auth.currentUser;
+      const recovered =
+        current && !current.isAnonymous ? current : null;
+      return resolveRedirectUser(recovered, wasPending);
+    }
+
+    if (!isCredentialAlreadyInUse(error)) {
+      throw mapAuthError(error, "Google sign-in failed.");
+    }
+
+    const credential = OAuthProvider.credentialFromError(error as FirebaseError);
+    if (!credential) {
+      throw mapAuthError(error, "Google sign-in failed.");
+    }
+
+    return linkCredentialOrSignInExisting(credential);
+  }
+}
+
+export async function completeOAuthRedirectIfPending(): Promise<User | null> {
+  redirectResultPromise ??= completeOAuthRedirectOnce();
+  return redirectResultPromise;
+}
+
+export function resetOAuthRedirectRecoveryForTests(): void {
+  redirectResultPromise = null;
+  pendingRedirectFailureMessage = null;
+}
+
+export async function sendPremiumEmailSignInLink(
+  email: string,
+  continuePath = "/premium",
+): Promise<void> {
+  const trimmedEmail = email.trim();
+  if (!trimmedEmail) {
+    throw new Error("Enter your email address.");
+  }
+
+  const auth = getFirebaseAuth();
+
+  try {
+    await sendSignInLinkToEmail(auth, trimmedEmail, {
+      url: premiumAuthContinueUrl(continuePath),
+      handleCodeInApp: true,
+    });
+    window.localStorage.setItem(EMAIL_LINK_STORAGE_KEY, trimmedEmail);
+  } catch (error) {
+    throw mapAuthError(error, "Could not send sign-in link.");
+  }
+}
+
+export async function completePremiumEmailSignInLink(
+  linkUrl = window.location.href,
+): Promise<User | null> {
+  const auth = getFirebaseAuth();
+  if (!isSignInWithEmailLink(auth, linkUrl)) {
+    return null;
+  }
+
+  const storedEmail = window.localStorage.getItem(EMAIL_LINK_STORAGE_KEY);
+  if (!storedEmail) {
+    throw new Error("Open the sign-in link on the same device where you requested it.");
+  }
+
+  try {
+    if (auth.currentUser?.isAnonymous) {
+      const credential = EmailAuthProvider.credentialWithLink(
+        storedEmail,
+        linkUrl,
+      );
+      const user = await linkCredentialOrSignInExisting(credential);
+      window.localStorage.removeItem(EMAIL_LINK_STORAGE_KEY);
+      return user;
+    }
+
+    const credential = await signInWithEmailLink(auth, storedEmail, linkUrl);
+    window.localStorage.removeItem(EMAIL_LINK_STORAGE_KEY);
+    return credential.user;
+  } catch (error) {
+    throw mapAuthError(error, "Email sign-in link is invalid or expired.");
+  }
+}

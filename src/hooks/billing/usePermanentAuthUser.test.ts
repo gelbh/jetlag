@@ -2,7 +2,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { usePermanentAuthUser } from "./usePermanentAuthUser";
 
-const { getFirebaseAuth, isFirebaseConfigured, waitForAuthStateReady } =
+const { getFirebaseAuth, isFirebaseConfigured, waitForPermanentAuthReady } =
   vi.hoisted(() => {
     const onAuthStateChanged = vi.fn(
       (callback: (user: { uid: string; isAnonymous: boolean } | null) => void) => {
@@ -12,7 +12,7 @@ const { getFirebaseAuth, isFirebaseConfigured, waitForAuthStateReady } =
     );
 
     return {
-      waitForAuthStateReady: vi.fn(async () => undefined),
+      waitForPermanentAuthReady: vi.fn(async () => undefined),
       isFirebaseConfigured: vi.fn(() => true),
       getFirebaseAuth: vi.fn(() => ({
         currentUser: { uid: "google-1", isAnonymous: false },
@@ -29,7 +29,10 @@ vi.mock("../../services/core/accountAuth", () => ({
 vi.mock("../../services/core/firebase", () => ({
   getFirebaseAuth,
   isFirebaseConfigured,
-  waitForAuthStateReady,
+}));
+
+vi.mock("../../services/core/firebaseAuthReady", () => ({
+  waitForPermanentAuthReady,
 }));
 
 describe("usePermanentAuthUser", () => {
@@ -46,7 +49,7 @@ describe("usePermanentAuthUser", () => {
       expect(result.current.authReady).toBe(true);
     });
 
-    expect(waitForAuthStateReady).toHaveBeenCalled();
+    expect(waitForPermanentAuthReady).toHaveBeenCalled();
     expect(result.current.isPermanent).toBe(true);
     expect(result.current.user).toMatchObject({ uid: "google-1" });
   });
