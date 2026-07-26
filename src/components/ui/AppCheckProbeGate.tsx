@@ -6,6 +6,10 @@ import {
 } from "../../services/core/appCheckProbe";
 import { ContentBlockerErrorPage } from "./ContentBlockerErrorPage";
 
+/**
+ * Keep the app mounted while probing. Only swap to the blocker page on a hard
+ * blocked result — never unmount routes during the in-flight check.
+ */
 export function AppCheckProbeGate({ children }: { children: ReactNode }) {
   const authReady = useAuthBootstrapReady();
   const [probe, setProbe] = useState<AppCheckProbeResult | null>(null);
@@ -27,19 +31,7 @@ export function AppCheckProbeGate({ children }: { children: ReactNode }) {
     };
   }, [authReady]);
 
-  if (!authReady) {
-    return children;
-  }
-
-  if (probe === null) {
-    return (
-      <p className="px-5 py-8 text-center text-sm text-ink-muted" aria-busy="true">
-        Checking security scripts…
-      </p>
-    );
-  }
-
-  if (!probe.ok) {
+  if (probe && !probe.ok) {
     return <ContentBlockerErrorPage />;
   }
 
