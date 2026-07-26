@@ -1,91 +1,35 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useLatestRequest } from "../useLatestRequest";
 import { useDebouncedValue } from "../useDebouncedValue";
-import { useSubmitLock } from "../useSubmitLock";
-import type {
-  Feature,
-  MultiPolygon,
-  Point,
-  Polygon as GeoPolygon,
-} from "geojson";
-import { MatchingPanel } from "../../components/tools/MatchingPanel";
-import { overpassErrorMessage } from "../../services/core/overpassClient";
-import type { GameArea } from "../../domain/map/annotations";
-import { isActive, type AnnotationRecord } from "../../domain/map/annotations";
+import { isActive } from "../../domain/map/annotations";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
-import {
-  buildMatchingEliminationRegion,
-  buildSameNearestRegion,
-} from "../../domain/geometry/matchingGeometry";
 import {
   defaultMatchingCategoryId,
   firstAvailableMatchingCategoryId,
-  getMatchingCategory,
   isMatchingCategoryAvailable,
   isMatchingCategoryEnabled,
-  matchingCategoryUseCount,
-  matchingCategoryUseCountFromPending,
   matchingQuestionFor,
   usedMatchingCategoryIds,
-  type MatchingAnswer,
   type MatchingCategoryId,
 } from "../../domain/questions";
-import { resolveMatchingCategory } from "../../domain/session/sessionCustomCatalog";
-import {
-  availableMatchingCategories,
-  isPreviewQuestionBeforeSendEnabled,
-} from "../../domain/session/sessionCatalogAvailability";
 import { isAdminDivisionCategoryAvailable } from "../../services/geo/adminDivisionAvailability";
-import { usePreloadStore } from "../../state/preloadStore";
-import { QuestionPreviewSheet } from "../../components/tools/shared/QuestionPreviewSheet";
-import { questionCostBreakdown } from "../../domain/questions";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
-import type { MatchingFetchOptions } from "../../services/geo/matchingFeatures";
-import { sessionCustomContentFromRules } from "../../domain/session/sessionCustomCatalog";
-import { yesNoAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
-import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
-import type { DistanceUnit } from "../../domain/map/distance";
-import { emitQuestionAnsweredActivity } from "../../services/session/emitSessionActivity";
-import {
-  fetchMatchingFeaturesInArea,
-  countMatchingFeaturesInPlayArea,
-  matchingResolveFailureMessage,
-  pickMatchingFeatureForAnchor,
-  type MatchingFeature,
-} from "../../services/geo/matchingFeatures";
-import { serializeMatchingFeatures } from "../../domain/geo/matchingAdapters";
-import { inferTransitMetroId } from "../../services/transit/transitCatalog";
+import { useToolSession } from "./framework/useToolSession";
 import { useToolSessionOptions } from "./useToolSessionOptions";
-import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
+import {
+  commitMatching,
+  performMatchingCommit,
+  type CommitMatchingInput,
+} from "./matching/commitMatching";
+import { MatchingToolPanel } from "./matching/MatchingToolPanel";
+import { resolveMatchingAnchor } from "./matching/resolveMatchingAnchor";
+import type {
+  MatchingSessionConfig,
+  UseMatchingToolParams,
+} from "./matching/types";
+import { useMatchingCatalog } from "./matching/useMatchingCatalog";
+import { useMatchingDraftState } from "./matching/useMatchingDraftState";
 
-interface UseMatchingToolParams {
-  active: boolean;
-  annotations: AnnotationRecord[];
-  pendingQuestions?: readonly PendingQuestionRecord[];
-  gameArea: GameArea;
-  createAnnotation: (
-    annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
-  ) => Promise<AnnotationRecord>;
-  awaitHiderAnswer?: boolean;
-  submitPendingQuestion?: (
-    input: Omit<
-      SubmitPendingQuestionInput,
-      "sessionId" | "senderUid" | "senderRole" | "toolType"
-    >,
-  ) => Promise<void>;
-  sessionId?: string;
-  senderUid?: string | null;
-  sessionRules?: SessionRulesInput;
-  distanceUnit: DistanceUnit;
-  finishPlacement: () => void;
-  gpsLoading: boolean;
-  gpsError?: string | null;
-  mapError: string | null;
-  refreshGps: () => Promise<{ lat: number; lng: number }>;
-  ensurePointInGameArea: (point: LatLngTuple) => boolean;
-  canSubmitQuestion?: boolean;
-}
+export type { UseMatchingToolParams } from "./matching/types";
 
 export function useMatchingTool({
   active,
@@ -107,8 +51,48 @@ export function useMatchingTool({
   ensurePointInGameArea,
   canSubmitQuestion = true,
 }: UseMatchingToolParams) {
-  const { isSubmitting, runLocked } = useSubmitLock();
   const wizardStepRef = useRef("anchor");
+  const finishPlacementRef = useRef(finishPlacement);
+  useEffect(() => {
+    finishPlacementRef.current = finishPlacement;
+  }, [finishPlacement]);
+
+  const draft = useMatchingDraftState();
+  const {
+    matchingSeekerPoint,
+    matchingCategoryId,
+    matchingCategoryChosen,
+    matchingFeatures,
+    matchingNearestFeatureId,
+    matchingNearestFeatureName,
+    matchingNearestFeaturePoint,
+    matchingDistanceMeters,
+    matchingFeatureCount,
+    matchingInPlayAreaFeatureCount,
+    matchingNearestOutsidePlayArea,
+    matchingNullAnswer,
+    matchingAnswer,
+    matchingLoading,
+    matchingError,
+    previewOpen,
+    setMatchingFeatures,
+    setMatchingNearestFeatureId,
+    setMatchingNearestFeatureName,
+    setMatchingNearestFeaturePoint,
+    setMatchingDistanceMeters,
+    setMatchingFeatureCount,
+    setMatchingInPlayAreaFeatureCount,
+    setMatchingNearestOutsidePlayArea,
+    setMatchingNullAnswer,
+    setMatchingAnswer,
+    setMatchingLoading,
+    setMatchingError,
+    setPreviewOpen,
+    setMatchingSeekerAnchor,
+    resetDraft: resetMatchingDraft,
+    selectCategory,
+  } = draft;
+
   const activeAnnotations = useMemo(
     () => annotations.filter(isActive),
     [annotations],
@@ -117,105 +101,18 @@ export function useMatchingTool({
     () => usedMatchingCategoryIds(activeAnnotations),
     [activeAnnotations],
   );
-  const [matchingSeekerPoint, setMatchingSeekerPoint] =
-    useState<LatLngTuple | null>(null);
-  const [matchingCategoryId, setMatchingCategoryId] =
-    useState<MatchingCategoryId | null>(null);
-  const [matchingCategoryChosen, setMatchingCategoryChosen] = useState(false);
-  const matchingUseCount = matchingCategoryId
-    ? Math.max(
-        matchingCategoryUseCount(activeAnnotations, matchingCategoryId),
-        matchingCategoryUseCountFromPending(
-          pendingQuestions,
-          matchingCategoryId,
-        ),
-      )
-    : 0;
-  const { label: costLabel, draw: cardDraw, keep: cardKeep } =
-    questionCostBreakdown("D3P1", matchingUseCount);
-  const [matchingFeatures, setMatchingFeatures] = useState<MatchingFeature[]>(
-    [],
-  );
-  const [matchingNearestFeatureId, setMatchingNearestFeatureId] = useState<
-    string | null
-  >(null);
-  const [matchingNearestFeatureName, setMatchingNearestFeatureName] = useState<
-    string | null
-  >(null);
-  const [matchingNearestFeaturePoint, setMatchingNearestFeaturePoint] =
-    useState<LatLngTuple | null>(null);
-  const [matchingDistanceMeters, setMatchingDistanceMeters] = useState<
-    number | null
-  >(null);
-  const [matchingFeatureCount, setMatchingFeatureCount] = useState<
-    number | null
-  >(null);
-  const [matchingInPlayAreaFeatureCount, setMatchingInPlayAreaFeatureCount] =
-    useState<number | null>(null);
-  const [matchingNearestOutsidePlayArea, setMatchingNearestOutsidePlayArea] =
-    useState(false);
-  const [matchingNullAnswer, setMatchingNullAnswer] = useState(false);
-  const [matchingAnswer, setMatchingAnswer] = useState<MatchingAnswer | null>(
-    null,
-  );
-  const [matchingLoading, setMatchingLoading] = useState(false);
-  const [matchingError, setMatchingError] = useState<string | null>(null);
 
-  const matchingFetchOptions = useMemo((): MatchingFetchOptions => {
-    const content = sessionRules
-      ? sessionCustomContentFromRules(sessionRules)
-      : {
-          customMatchingAreas: undefined,
-          customCategories: [],
-          customLocationPins: [],
-        };
-    return {
-      customMatchingAreas: content.customMatchingAreas,
-      customCategories: content.customCategories,
-    };
-  }, [sessionRules]);
-
-  const matchingTransitMetroId = useMemo(
-    () =>
-      matchingCategoryId === "transit_line"
-        ? inferTransitMetroId(gameArea)
-        : null,
-    [matchingCategoryId, gameArea],
-  );
-
-  const customCategories = matchingFetchOptions.customCategories ?? [];
-  const matchingCategory = matchingCategoryId
-    ? (resolveMatchingCategory(matchingCategoryId, customCategories) ??
-      getMatchingCategory(matchingCategoryId))
-    : null;
-  const matchingUsesContainment =
-    matchingCategory?.resolver === "reverseGeocodeAdmin" ||
-    matchingCategory?.resolver === "letterZone" ||
-    matchingCategory?.resolver === "landmass";
-
-  const adminDivisionCounts = usePreloadStore((state) => state.adminDivisionCounts);
-  const regionPackId = sessionRules?.regionPackId;
-
-  const matchingCatalog = useMemo(
-    () => {
-      const categories = sessionRules
-        ? availableMatchingCategories(sessionRules)
-        : availableMatchingCategories({ gameSize: "medium" });
-      return categories.filter((category) =>
-        isAdminDivisionCategoryAvailable(
-          category.id,
-          adminDivisionCounts,
-          regionPackId,
-        ),
-      );
-    },
-    [adminDivisionCounts, regionPackId, sessionRules],
-  );
-
-  const previewBeforeSend = isPreviewQuestionBeforeSendEnabled(
-    sessionRules ?? { gameSize: "medium" },
-  );
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const catalog = useMatchingCatalog({
+    activeAnnotations,
+    pendingQuestions,
+    matchingCategoryId,
+    matchingFeatures,
+    matchingNearestFeatureId,
+    matchingNullAnswer,
+    matchingAnswer,
+    gameArea,
+    sessionRules,
+  });
 
   useToolSessionOptions({
     active: active && matchingCategoryId !== null,
@@ -225,162 +122,63 @@ export function useMatchingTool({
       isMatchingCategoryAvailable(currentOption) &&
       isAdminDivisionCategoryAvailable(
         currentOption,
-        adminDivisionCounts,
-        regionPackId,
+        catalog.adminDivisionCounts,
+        catalog.regionPackId,
       ),
     pickNext: firstAvailableMatchingCategoryId,
-    onUnavailable: useCallback((nextCategory: MatchingCategoryId) => {
-      setMatchingCategoryId(nextCategory);
-      setMatchingFeatures([]);
-      setMatchingNearestFeatureId(null);
-      setMatchingNearestFeatureName(null);
-      setMatchingNearestFeaturePoint(null);
-      setMatchingDistanceMeters(null);
-      setMatchingFeatureCount(null);
-      setMatchingInPlayAreaFeatureCount(null);
-      setMatchingNearestOutsidePlayArea(false);
-      setMatchingNullAnswer(false);
-      setMatchingAnswer(null);
-      setMatchingError(null);
-    }, []),
+    onUnavailable: selectCategory,
   });
-
-  const matchingBoundaryPreview = useMemo(() => {
-    if (
-      matchingNullAnswer ||
-      !matchingNearestFeatureId ||
-      matchingFeatures.length === 0
-    ) {
-      return null;
-    }
-
-    return buildSameNearestRegion(
-      matchingFeatures,
-      matchingNearestFeatureId,
-      gameArea,
-    );
-  }, [
-    gameArea,
-    matchingFeatures,
-    matchingNearestFeatureId,
-    matchingNullAnswer,
-  ]);
-
-  const matchingEliminationPreview = useMemo(() => {
-    if (
-      matchingNullAnswer ||
-      !matchingNearestFeatureId ||
-      matchingFeatures.length === 0 ||
-      matchingAnswer === null
-    ) {
-      return null;
-    }
-
-    return buildMatchingEliminationRegion(
-      matchingFeatures,
-      matchingNearestFeatureId,
-      gameArea,
-      matchingAnswer,
-    );
-  }, [
-    gameArea,
-    matchingAnswer,
-    matchingFeatures,
-    matchingNearestFeatureId,
-    matchingNullAnswer,
-  ]);
 
   const { beginRequest, cancelRequests, isLatestRequest } = useLatestRequest();
 
   const resolveForAnchor = useCallback(
     async (seekerPoint: LatLngTuple, categoryId: MatchingCategoryId) => {
-      if (
-        !isMatchingCategoryEnabled(categoryId) ||
-        !isMatchingCategoryAvailable(categoryId)
-      ) {
-        setMatchingError("This matching category is not available yet.");
-        return;
-      }
-
       const requestId = beginRequest();
       setMatchingLoading(true);
       setMatchingError(null);
 
-      try {
-        const features = await fetchMatchingFeaturesInArea(
-          gameArea,
-          categoryId,
-          matchingFetchOptions,
-        );
+      const result = await resolveMatchingAnchor({
+        seekerPoint,
+        categoryId,
+        gameArea,
+        matchingFetchOptions: catalog.matchingFetchOptions,
+      });
 
-        if (!isLatestRequest(requestId)) {
-          return;
-        }
-
-        setMatchingFeatures(features);
-        setMatchingFeatureCount(features.length);
-        setMatchingInPlayAreaFeatureCount(countMatchingFeaturesInPlayArea(features));
-
-        if (features.length === 0) {
-          setMatchingNearestFeatureId(null);
-          setMatchingNearestFeatureName(null);
-          setMatchingNearestFeaturePoint(null);
-          setMatchingDistanceMeters(null);
-          setMatchingNearestOutsidePlayArea(false);
-          setMatchingNullAnswer(true);
-          setMatchingAnswer(null);
-          return;
-        }
-
-        const category = getMatchingCategory(categoryId);
-        const usesContainment =
-          category.resolver === "reverseGeocodeAdmin" ||
-          category.resolver === "landmass";
-
-        const nearest = pickMatchingFeatureForAnchor(
-          seekerPoint,
-          features,
-          categoryId,
-        );
-
-        if (!nearest) {
-          setMatchingNearestFeatureId(null);
-          setMatchingNearestFeatureName(null);
-          setMatchingNearestFeaturePoint(null);
-          setMatchingDistanceMeters(null);
-          setMatchingNearestOutsidePlayArea(false);
-          setMatchingNullAnswer(features.length === 0);
-          setMatchingAnswer(null);
-          setMatchingError(
-            matchingResolveFailureMessage(categoryId, features.length),
-          );
-          return;
-        }
-
-        setMatchingNearestFeatureId(nearest.id);
-        setMatchingNearestFeatureName(nearest.name);
-        setMatchingNearestFeaturePoint(nearest.point);
-        setMatchingDistanceMeters(
-          usesContainment ? null : nearest.distanceMeters,
-        );
-        setMatchingNearestOutsidePlayArea(nearest.inPlayArea === false);
-        setMatchingNullAnswer(false);
-        setMatchingAnswer(null);
-      } catch (error) {
-        if (!isLatestRequest(requestId)) {
-          return;
-        }
-
-        setMatchingError(
-          overpassErrorMessage(error, "Couldn't resolve nearest feature."),
-        );
-      } finally {
-        if (isLatestRequest(requestId)) {
-          setMatchingLoading(false);
-        }
+      if (!isLatestRequest(requestId)) {
+        return;
       }
+
+      setMatchingFeatures(result.features);
+      setMatchingFeatureCount(result.featureCount);
+      setMatchingInPlayAreaFeatureCount(result.inPlayAreaFeatureCount);
+      setMatchingNearestFeatureId(result.nearestFeatureId);
+      setMatchingNearestFeatureName(result.nearestFeatureName);
+      setMatchingNearestFeaturePoint(result.nearestFeaturePoint);
+      setMatchingDistanceMeters(result.distanceMeters);
+      setMatchingNearestOutsidePlayArea(result.nearestOutsidePlayArea);
+      setMatchingNullAnswer(result.nullAnswer);
+      setMatchingAnswer(null);
+      setMatchingError(result.error);
+      setMatchingLoading(false);
     },
-    [beginRequest, gameArea, isLatestRequest, matchingFetchOptions],
+    [
+      beginRequest,
+      catalog.matchingFetchOptions,
+      gameArea,
+      isLatestRequest,
+      setMatchingAnswer,
+      setMatchingDistanceMeters,
+      setMatchingError,
+      setMatchingFeatureCount,
+      setMatchingFeatures,
+      setMatchingInPlayAreaFeatureCount,
+      setMatchingLoading,
+      setMatchingNearestFeatureId,
+      setMatchingNearestFeatureName,
+      setMatchingNearestFeaturePoint,
+      setMatchingNearestOutsidePlayArea,
+      setMatchingNullAnswer,
+    ],
   );
 
   const debouncedSeekerPoint = useDebouncedValue(matchingSeekerPoint, 400);
@@ -408,51 +206,14 @@ export function useMatchingTool({
     resolveForAnchor,
   ]);
 
-  const setMatchingSeekerAnchor = useCallback((point: LatLngTuple) => {
-    setMatchingSeekerPoint(point);
-    setMatchingFeatures([]);
-    setMatchingNearestFeatureId(null);
-    setMatchingNearestFeatureName(null);
-    setMatchingNearestFeaturePoint(null);
-    setMatchingDistanceMeters(null);
-    setMatchingFeatureCount(null);
-    setMatchingInPlayAreaFeatureCount(null);
-    setMatchingNearestOutsidePlayArea(false);
-    setMatchingNullAnswer(false);
-    setMatchingAnswer(null);
-    setMatchingError(null);
-    if (matchingCategoryChosen && matchingCategoryId) {
-      setMatchingLoading(true);
-    }
-  }, [matchingCategoryChosen, matchingCategoryId]);
-
   const resetDraft = useCallback(() => {
     cancelRequests();
-    setMatchingLoading(false);
-    setMatchingSeekerPoint(null);
-    setMatchingCategoryId(null);
-    setMatchingCategoryChosen(false);
-    setMatchingFeatures([]);
-    setMatchingNearestFeatureId(null);
-    setMatchingNearestFeatureName(null);
-    setMatchingNearestFeaturePoint(null);
-    setMatchingDistanceMeters(null);
-    setMatchingFeatureCount(null);
-    setMatchingInPlayAreaFeatureCount(null);
-    setMatchingNearestOutsidePlayArea(false);
-    setMatchingNullAnswer(false);
-    setMatchingAnswer(null);
-    setMatchingLoading(false);
-    setMatchingError(null);
-  }, [cancelRequests]);
+    resetMatchingDraft();
+  }, [cancelRequests, resetMatchingDraft]);
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
-      if (!active) {
-        return false;
-      }
-
-      if (wizardStepRef.current !== "anchor") {
+      if (!active || wizardStepRef.current !== "anchor") {
         return false;
       }
 
@@ -481,283 +242,144 @@ export function useMatchingTool({
     }
   };
 
-  const commit = async () => {
-    if (!canSubmitQuestion) {
-      setMatchingError("Finish the open question before starting another.");
+  const buildCommitInput = useCallback((): CommitMatchingInput => {
+    return {
+      canSubmitQuestion,
+      matchingSeekerPoint,
+      matchingCategoryId,
+      matchingNullAnswer,
+      matchingNearestFeatureId,
+      matchingNearestFeatureName,
+      matchingNearestFeaturePoint,
+      matchingDistanceMeters,
+      matchingFeatureCount,
+      matchingFeatures,
+      matchingAnswer,
+      matchingTransitMetroId: catalog.matchingTransitMetroId,
+      previewBeforeSend: catalog.previewBeforeSend,
+      customCategories: catalog.customCategories,
+      gameArea,
+      awaitHiderAnswer,
+      submitPendingQuestion,
+      sessionId,
+      senderUid,
+      cardDraw: catalog.cardDraw,
+      cardKeep: catalog.cardKeep,
+      createAnnotation,
+      setMatchingError,
+      setPreviewOpen,
+      onSuccess: () => {
+        resetDraft();
+        finishPlacementRef.current();
+      },
+    };
+  }, [
+    awaitHiderAnswer,
+    canSubmitQuestion,
+    catalog.cardDraw,
+    catalog.cardKeep,
+    catalog.customCategories,
+    catalog.matchingTransitMetroId,
+    catalog.previewBeforeSend,
+    createAnnotation,
+    gameArea,
+    matchingAnswer,
+    matchingCategoryId,
+    matchingDistanceMeters,
+    matchingFeatureCount,
+    matchingFeatures,
+    matchingNearestFeatureId,
+    matchingNearestFeatureName,
+    matchingNearestFeaturePoint,
+    matchingNullAnswer,
+    matchingSeekerPoint,
+    resetDraft,
+    senderUid,
+    sessionId,
+    setMatchingError,
+    setPreviewOpen,
+    submitPendingQuestion,
+  ]);
+
+  const session = useToolSession<MatchingSessionConfig>({
+    toolId: "matching",
+    active,
+    createInitialConfig: () => ({ ready: true }),
+    onSubmit: async () => {
+      await commitMatching(buildCommitInput());
+    },
+  });
+
+  const commit = () => session.submit();
+
+  const handleCategoryChange = (categoryId: MatchingCategoryId) => {
+    if (
+      !isMatchingCategoryEnabled(categoryId) ||
+      !isMatchingCategoryAvailable(categoryId)
+    ) {
       return;
     }
 
-    if (!matchingSeekerPoint || !matchingCategoryId) {
-      return;
-    }
-
-    if (!matchingNullAnswer && !matchingNearestFeatureId) {
-      return;
-    }
-
-    if (previewBeforeSend) {
-      setPreviewOpen(true);
-      return;
-    }
-
-    await performCommit();
+    selectCategory(categoryId);
   };
-
-  const performCommit = async () => {
-    if (!matchingSeekerPoint || !matchingCategoryId) {
-      return;
-    }
-
-    const question = matchingQuestionFor(matchingCategoryId);
-
-    if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
-      const geometry: Feature<Point> = {
-        type: "Feature",
-        properties: {},
-        geometry: {
-          type: "Point",
-          coordinates: [matchingSeekerPoint[1], matchingSeekerPoint[0]],
-        },
-      };
-
-      try {
-        await submitPendingQuestion({
-          promptText: question.prompt,
-          replyOptions: [
-            ...yesNoAnswerOptions.map((option) => ({
-              id: option.value,
-              label: option.label,
-            })),
-            ...(matchingNullAnswer
-              ? [{ id: "null", label: "Null (not in play area)" }]
-              : []),
-          ],
-          placement: {
-            geometryJson: JSON.stringify(geometry),
-            metadata: {
-              matchingCategory: matchingCategoryId,
-              matchingAnchor: {
-                lat: matchingSeekerPoint[0],
-                lng: matchingSeekerPoint[1],
-              },
-              matchingNearestFeatureId: matchingNearestFeatureId ?? undefined,
-              matchingNearestFeatureName: matchingNearestFeatureName ?? undefined,
-              matchingNearestFeaturePoint: matchingNearestFeaturePoint
-                ? {
-                    lat: matchingNearestFeaturePoint[0],
-                    lng: matchingNearestFeaturePoint[1],
-                  }
-                : undefined,
-              matchingDistanceMeters: matchingDistanceMeters ?? undefined,
-              matchingFeatureCount: matchingFeatureCount ?? undefined,
-              matchingNullAnswer,
-              matchingFeaturesJson: serializeMatchingFeatures(matchingFeatures),
-              ...(matchingTransitMetroId
-                ? { transitMetroId: matchingTransitMetroId }
-                : {}),
-            },
-          },
-          cardDraw,
-          cardKeep,
-        });
-      } catch (error) {
-        setMatchingError(
-          error instanceof Error
-            ? error.message
-            : "Couldn't send this match question.",
-        );
-        return;
-      }
-
-      resetDraft();
-      finishPlacement();
-      return;
-    }
-
-    if (matchingAnswer === null) {
-      return;
-    }
-
-    const boundaryRegion = matchingNullAnswer
-      ? null
-      : buildSameNearestRegion(
-          matchingFeatures,
-          matchingNearestFeatureId!,
-          gameArea,
-        );
-    const eliminationRegion = matchingNullAnswer
-      ? null
-      : buildMatchingEliminationRegion(
-          matchingFeatures,
-          matchingNearestFeatureId!,
-          gameArea,
-          matchingAnswer,
-        );
-
-    if (!matchingNullAnswer && (!boundaryRegion || !eliminationRegion)) {
-      setMatchingError("Couldn't build matching elimination regions.");
-      return;
-    }
-
-    const geometry: Feature<Point | GeoPolygon | MultiPolygon> =
-      eliminationRegion ?? {
-        type: "Feature",
-        properties: {},
-        geometry: {
-          type: "Point",
-          coordinates: [matchingSeekerPoint[1], matchingSeekerPoint[0]],
-        },
-      };
-
-    try {
-      const created = await createAnnotation({
-        type: "matching",
-        geometry,
-        metadata: {
-          createdAt: new Date().toISOString(),
-          matchingCategory: matchingCategoryId,
-          matchingAnswer,
-          matchingAnchor: {
-            lat: matchingSeekerPoint[0],
-            lng: matchingSeekerPoint[1],
-          },
-          matchingNearestFeatureId: matchingNearestFeatureId ?? undefined,
-          matchingNearestFeatureName: matchingNearestFeatureName ?? undefined,
-          matchingNearestFeaturePoint: matchingNearestFeaturePoint
-            ? {
-                lat: matchingNearestFeaturePoint[0],
-                lng: matchingNearestFeaturePoint[1],
-              }
-            : undefined,
-          matchingDistanceMeters: matchingDistanceMeters ?? undefined,
-          matchingFeatureCount: matchingFeatureCount ?? undefined,
-          matchingNullAnswer,
-          matchingBoundaryJson: boundaryRegion
-            ? JSON.stringify(boundaryRegion)
-            : undefined,
-          matchingFeaturesJson: serializeMatchingFeatures(matchingFeatures),
-          ...(matchingTransitMetroId
-            ? { transitMetroId: matchingTransitMetroId }
-            : {}),
-          color: MAP_ANNOTATION_COLORS.elimination,
-        },
-      });
-
-      if (sessionId) {
-        const answerOption = yesNoAnswerOptions.find(
-          (option) => option.value === matchingAnswer,
-        );
-        emitQuestionAnsweredActivity({
-          sessionId,
-          toolType: "matching",
-          promptText: question.prompt,
-          annotationId: created.id,
-          answerSummary: answerOption?.label ?? String(matchingAnswer),
-          createdByUid: senderUid ?? undefined,
-        });
-      }
-    } catch (error) {
-      setMatchingError(
-        error instanceof Error
-          ? error.message
-          : "Couldn't save this match question.",
-      );
-      return;
-    }
-
-    resetDraft();
-    setPreviewOpen(false);
-    finishPlacement();
-  };
-
-  const placementCrosshair = active && matchingSeekerPoint === null;
 
   const previewQuestion =
     matchingCategoryId !== null
-      ? matchingQuestionFor(matchingCategoryId, customCategories)
+      ? matchingQuestionFor(matchingCategoryId, catalog.customCategories)
       : null;
 
   const panel = (
-    <>
-    <MatchingPanel
+    <MatchingToolPanel
       distanceUnit={distanceUnit}
       categoryId={matchingCategoryId}
       categoryChosen={matchingCategoryChosen}
       usedCategoryIds={usedMatchingCategories}
-      catalogCategories={matchingCatalog}
-      anchorLat={matchingSeekerPoint?.[0] ?? null}
-      anchorLng={matchingSeekerPoint?.[1] ?? null}
-      usesContainmentMatching={matchingUsesContainment}
-      hasSeekerPoint={matchingSeekerPoint !== null}
-      nearestFeatureName={matchingNearestFeatureName}
-      distanceMeters={matchingDistanceMeters}
-      featureCount={matchingFeatureCount}
-      inPlayAreaFeatureCount={matchingInPlayAreaFeatureCount}
-      nearestOutsidePlayArea={matchingNearestOutsidePlayArea}
-      nullAnswer={matchingNullAnswer}
-      loading={matchingLoading}
+      catalogCategories={catalog.matchingCatalog}
+      matchingSeekerPoint={matchingSeekerPoint}
+      matchingUsesContainment={catalog.matchingUsesContainment}
+      matchingNearestFeatureName={matchingNearestFeatureName}
+      matchingDistanceMeters={matchingDistanceMeters}
+      matchingFeatureCount={matchingFeatureCount}
+      matchingInPlayAreaFeatureCount={matchingInPlayAreaFeatureCount}
+      matchingNearestOutsidePlayArea={matchingNearestOutsidePlayArea}
+      matchingNullAnswer={matchingNullAnswer}
+      matchingLoading={matchingLoading}
       gpsLoading={gpsLoading}
-      answer={matchingAnswer}
+      matchingAnswer={matchingAnswer}
       error={matchingError ?? gpsError ?? mapError}
-      onCategoryChange={(categoryId) => {
-        if (
-          !isMatchingCategoryEnabled(categoryId) ||
-          !isMatchingCategoryAvailable(categoryId)
-        ) {
-          return;
-        }
-
-        setMatchingCategoryChosen(true);
-        setMatchingCategoryId(categoryId);
-        setMatchingFeatures([]);
-        setMatchingNearestFeatureId(null);
-        setMatchingNearestFeatureName(null);
-        setMatchingNearestFeaturePoint(null);
-        setMatchingDistanceMeters(null);
-        setMatchingFeatureCount(null);
-        setMatchingInPlayAreaFeatureCount(null);
-        setMatchingNearestOutsidePlayArea(false);
-        setMatchingNullAnswer(false);
-        setMatchingAnswer(null);
-        setMatchingError(null);
-      }}
+      awaitHiderAnswer={awaitHiderAnswer}
+      costLabel={catalog.costLabel}
+      isSubmitting={session.isBusy}
+      previewOpen={previewOpen}
+      previewQuestion={previewQuestion}
+      wizardStepRef={wizardStepRef}
+      onCategoryChange={handleCategoryChange}
       onUseGps={() => void handleGps()}
       onAnswerChange={setMatchingAnswer}
-      onCommit={() => void runLocked(commit)}
-      awaitHiderAnswer={awaitHiderAnswer}
-      costLabel={costLabel}
-      isSubmitting={isSubmitting}
+      onCommit={() => void commit()}
       onRetry={
         matchingSeekerPoint && matchingCategoryId
-          ? () =>
-              void resolveForAnchor(matchingSeekerPoint, matchingCategoryId)
+          ? () => void resolveForAnchor(matchingSeekerPoint, matchingCategoryId)
           : undefined
       }
-      wizardStepRef={wizardStepRef}
+      onPreviewConfirm={() =>
+        void session.runAction(async () => {
+          await performMatchingCommit(buildCommitInput());
+        })
+      }
+      onPreviewCancel={() => setPreviewOpen(false)}
     />
-    <QuestionPreviewSheet
-      open={previewOpen}
-      prompt={previewQuestion?.prompt ?? ""}
-      ruleSummary={previewQuestion?.ruleSummary}
-      anchorLat={matchingSeekerPoint?.[0] ?? null}
-      anchorLng={matchingSeekerPoint?.[1] ?? null}
-      costLabel={costLabel}
-      onConfirm={() => void runLocked(performCommit)}
-      onCancel={() => setPreviewOpen(false)}
-      isSubmitting={isSubmitting}
-    />
-    </>
   );
 
   return {
     draft: {
       matchingSeekerPoint,
       matchingNearestFeaturePoint,
-      matchingBoundaryPreview,
-      matchingEliminationPreview,
+      matchingBoundaryPreview: catalog.matchingBoundaryPreview,
+      matchingEliminationPreview: catalog.matchingEliminationPreview,
       seekerResolving: matchingLoading && matchingSeekerPoint !== null,
     },
-    placementCrosshair,
+    placementCrosshair: active && matchingSeekerPoint === null,
     handleMapClick,
     resetDraft,
     commit,
