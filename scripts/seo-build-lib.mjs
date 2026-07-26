@@ -26,3 +26,15 @@ export function absoluteUrl(siteOrigin, path) {
 export function spaShellPath(root) {
   return join(root, "dist/index.html");
 }
+
+/**
+ * Vite preview injects absolute modulepreload hrefs (e.g. http://127.0.0.1:4179/assets/…).
+ * Rewrite them to root-relative paths so Worker CSP `script-src 'self'` allows them in prod.
+ */
+export function rewritePrerenderPreviewUrls(html, previewOrigin) {
+  const origin = String(previewOrigin).replace(/\/$/, "");
+  if (!origin) {
+    return html;
+  }
+  return html.split(origin).join("");
+}
