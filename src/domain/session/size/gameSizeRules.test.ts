@@ -11,7 +11,7 @@ import {
   thermometerPresetsMilesForGameSize,
   toolDockEnabled,
 } from "./gameSizeRules";
-import { milesToMeters } from "../map/distance";
+import { milesToMeters } from "../../map/distance";
 
 describe("gameSizeRules", () => {
   it("maps hiding period by game size", () => {

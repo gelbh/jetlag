@@ -7,7 +7,7 @@ import {
   LIVE_LOCATION_DEDUPE_METERS,
   locationClusterStableKey,
 } from "./liveMapLocations";
-import type { PlayerLocationRecord } from "./sessionChat";
+import type { PlayerLocationRecord } from "../activity/sessionChat";
 
 function location(
   uid: string,

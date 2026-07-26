@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createSessionDraftToGamePreset } from "./gamePreset";
-import { defaultAdvancedSessionSettings } from "./advancedSessionSettings";
+import { defaultAdvancedSessionSettings } from "../tools/advancedSessionSettings";
 import {
   buildFavouritePresetSelectOptions,
   isFavouritePresetId,

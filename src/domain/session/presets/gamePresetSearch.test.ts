@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   mergeBundledPresets,
-} from "../regions/bundledGamePresets";
-import { defaultAdvancedSessionSettings } from "./advancedSessionSettings";
+} from "../../regions/bundledGamePresets";
+import { defaultAdvancedSessionSettings } from "../tools/advancedSessionSettings";
 import { filterGamePresetsForSearch } from "./gamePresetSearch";
 
 describe("filterGamePresetsForSearch", () => {
