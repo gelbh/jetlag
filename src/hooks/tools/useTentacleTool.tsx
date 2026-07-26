@@ -9,32 +9,31 @@ import {
   type GameArea,
   type TentaclePoi,
 } from "../../domain/map/annotations";
-import {
-  tentacleEliminationJsonForAnswer,
-} from "../../domain/geometry/tentacleGeometry";
 import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
 import type { SessionRulesInput } from "../../domain/session/sessionRules";
 import { sessionGameSize } from "../../domain/session/sessionRules";
 import {
   firstAvailableTentacleCategoryIdForSession,
   isTentacleCategoryAvailableInSession,
-  tentacleSearchRadiusMetersForSession,
-  TENTACLE_NOT_WITHIN_REACH_LABEL,
   tentacleCategoryUseCount,
   tentacleCategoryUseCountFromPending,
-  tentacleQuestionPrompt,
+  tentacleSearchRadiusMetersForSession,
   usedTentacleCategoryIds,
   type TentacleExtendedCategoryId,
 } from "../../domain/questions";
 import { questionCostBreakdown } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
-import { useSubmitLock } from "../useSubmitLock";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import { fetchTentaclePois } from "../../services/geo/tentacleOverpass";
 import { overpassErrorMessage } from "../../services/core/overpassClient";
+import { useToolSession } from "./framework/useToolSession";
 import { useToolSessionOptions } from "./useToolSessionOptions";
-import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
-import { emitQuestionAnsweredActivity } from "../../services/session/emitSessionActivity";
+import { commitTentacle } from "./tentacle/commitTentacle";
+
+interface TentacleSessionConfig {
+  /** Marker config — draft state stays in local React state for this adapter. */
+  ready: true;
+}
 
 interface UseTentacleToolParams {
   active: boolean;
@@ -92,8 +91,9 @@ export function useTentacleTool({
   armPlacement,
   canSubmitQuestion = true,
 }: UseTentacleToolParams) {
-  const { isSubmitting, runLocked } = useSubmitLock();
   const wizardStepRef = useRef("anchor");
+  const finishPlacementRef = useRef(finishPlacement);
+  finishPlacementRef.current = finishPlacement;
   const activeAnnotations = useMemo(
     () => annotations.filter(isActive),
     [annotations],
@@ -282,150 +282,46 @@ export function useTentacleTool({
     }
   };
 
-  const commit = async () => {
-    if (!canSubmitQuestion) {
-      setMapError("Finish the open question before starting another.");
-      return;
-    }
-
-    if (!tentacleCategoryChosen || !tentacleCategoryId) {
-      setMapError("Choose a category before sending this question.");
-      return;
-    }
-
-    if (!tentacleCenter) {
-      setMapError("Choose a center with GPS or a map tap.");
-      return;
-    }
-
-    if (tentaclePois.length === 0) {
-      setMapError("No locations found near this anchor.");
-      return;
-    }
-
-    if (!isTentacleCategoryAvailableInSession(sessionRules, tentacleCategoryId)) {
-      setMapError("That location type is not available for this game size.");
-      return;
-    }
-
-    const geometry = {
-      type: "Feature" as const,
-      properties: {},
-      geometry: {
-        type: "Point" as const,
-        coordinates: [tentacleCenter[1], tentacleCenter[0]],
-      },
-    };
-
-    if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
-      await submitPendingQuestion({
-        promptText: tentacleQuestionPrompt(
-          tentacleCategoryId,
-          distanceUnit,
-          searchRadiusMeters,
-        ),
-        replyOptions: [
-          ...tentaclePois.map((poi) => ({
-            id: poi.id,
-            label: poi.name,
-          })),
-          {
-            id: "out-of-reach",
-            label: TENTACLE_NOT_WITHIN_REACH_LABEL,
-          },
-        ],
-        placement: {
-          geometryJson: JSON.stringify(geometry),
-          metadata: {
-            tentacleCategoryId,
-            radiusMeters: searchRadiusMeters,
-            centerJson: JSON.stringify({
-              lat: tentacleCenter[0],
-              lng: tentacleCenter[1],
-            }),
-            poisJson: JSON.stringify(tentaclePois),
-          },
-        },
-        cardDraw,
-        cardKeep,
-      });
-
-      setTentacleCenter(null);
-      setTentaclePois([]);
-      setTentacleOutOfReach(false);
-      setSelectedPoiId(null);
-      setMapError(null);
-      finishPlacement();
-      return;
-    }
-
-    if (!tentacleOutOfReach && !selectedPoiId) {
-      setMapError("Record the answer before adding the tentacle question.");
-      return;
-    }
-
-    const selectedPoi = tentaclePois.find((poi) => poi.id === selectedPoiId);
-    const eliminationJson = tentacleEliminationJsonForAnswer({
-      anchor: tentacleCenter,
-      radiusMeters: searchRadiusMeters,
-      pois: tentaclePois,
-      answeredPoiId: selectedPoi?.id,
-      outOfReach: tentacleOutOfReach,
-      gameArea,
-    });
-
-    const metadata: AnnotationRecord["metadata"] = {
-      createdAt: new Date().toISOString(),
-      radiusMeters: searchRadiusMeters,
-      tentacleCategoryId,
-      tentacleOutOfReach,
-      highlightedPoiId: selectedPoi?.id,
-      tentacleAnswerPoiName: selectedPoi?.name,
-      poiIds: tentaclePois.map((poi) => poi.id),
-      pois: tentaclePois,
-      color: MAP_ANNOTATION_COLORS.tentacle,
-    };
-    if (eliminationJson !== undefined) {
-      metadata.tentacleEliminationJson = eliminationJson;
-    }
-
-    const created = await createAnnotation({
-      type: "tentacle",
-      geometry: {
-        type: "Feature",
-        properties: {},
-        geometry: {
-          type: "Point",
-          coordinates: [tentacleCenter[1], tentacleCenter[0]],
-        },
-      },
-      metadata,
-    });
-
-    if (sessionId) {
-      emitQuestionAnsweredActivity({
-        sessionId,
-        toolType: "tentacle",
-        promptText: tentacleQuestionPrompt(
-          tentacleCategoryId,
-          distanceUnit,
-          searchRadiusMeters,
-        ),
-        annotationId: created.id,
-        answerSummary: tentacleOutOfReach
-          ? TENTACLE_NOT_WITHIN_REACH_LABEL
-          : (selectedPoi?.name ?? selectedPoiId ?? undefined),
-        createdByUid: senderUid ?? undefined,
-      });
-    }
-
+  const clearAfterCommit = useCallback(() => {
     setTentacleCenter(null);
     setTentaclePois([]);
     setTentacleOutOfReach(false);
     setSelectedPoiId(null);
     setMapError(null);
-    finishPlacement();
-  };
+    finishPlacementRef.current();
+  }, [setMapError]);
+
+  const session = useToolSession<TentacleSessionConfig>({
+    toolId: "tentacle",
+    active,
+    createInitialConfig: () => ({ ready: true }),
+    onSubmit: async () => {
+      await commitTentacle({
+        canSubmitQuestion,
+        tentacleCategoryChosen,
+        tentacleCategoryId,
+        tentacleCenter,
+        tentaclePois,
+        tentacleOutOfReach,
+        selectedPoiId,
+        searchRadiusMeters,
+        sessionRules,
+        gameArea,
+        awaitHiderAnswer,
+        submitPendingQuestion,
+        sessionId,
+        senderUid,
+        distanceUnit,
+        cardDraw,
+        cardKeep,
+        createAnnotation,
+        setMapError,
+        onSuccess: clearAfterCommit,
+      });
+    },
+  });
+
+  const commit = () => session.submit();
 
   const placementCrosshair =
     active && (awaitingPlacement || tentacleCenter === null);
@@ -466,10 +362,10 @@ export function useTentacleTool({
           setSelectedPoiId(null);
         }
       }}
-      onCommit={() => void runLocked(commit)}
+      onCommit={() => void commit()}
       awaitHiderAnswer={awaitHiderAnswer}
       costLabel={costLabel}
-      isSubmitting={isSubmitting}
+      isSubmitting={session.isBusy}
       onRetry={
         tentacleCenter && tentacleCategoryId
           ? () => void loadPoisForCenter(tentacleCenter, tentacleCategoryId)

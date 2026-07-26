@@ -1,82 +1,44 @@
-import { useCallback, useMemo, useRef, useState } from "react";
-import type { Feature, LineString } from "geojson";
+import { useCallback, useMemo, useRef } from "react";
 import { ThermometerPanel } from "../../components/tools/ThermometerPanel";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import { distanceBetweenPoints } from "../../domain/geometry/geometry";
-import { isActive, type AnnotationRecord } from "../../domain/map/annotations";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
-import { hasOpenPendingQuestion, questionCostBreakdown } from "../../domain/questions";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import { isActive } from "../../domain/map/annotations";
 import {
   DEFAULT_THERMOMETER_DISTANCE_METERS,
   availableThermometerDistancePresetsForSession,
-  isThermometerDistanceOptionAvailableForSession,
-  thermometerHotterTowards,
-  thermometerQuestionPrompt,
+  isThermometerWalkActive,
+  parseThermometerStartPoint,
+  questionCostBreakdown,
   thermometerUseCount,
   thermometerUseCountFromPending,
-  type ThermometerAnswer,
 } from "../../domain/questions";
-import type { DistanceUnit } from "../../domain/map/distance";
-import { hotterColderAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
-import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
-import { useSubmitLock } from "../useSubmitLock";
 import { useLiveLocation } from "../location/useLiveLocation";
-import type { GeolocationReading } from "../../services/core/geolocation";
-import {
-  isLocalThermometerWalkId,
-  isThermometerWalkActive,
-  LOCAL_THERMOMETER_WALK_ID,
-  parseThermometerStartPoint,
-} from "../../domain/questions";
-import {
-  thermometerWalkStartPlacement,
-  useThermometerWalk,
-} from "./useThermometerWalk";
-import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
-import {
-  emitQuestionAnsweredActivity,
-  emitThermometerWalkSeparatedActivity,
-  emitThermometerWalkStartedActivity,
-} from "../../services/session/emitSessionActivity";
+import { useThermometerWalk } from "./useThermometerWalk";
+import { useToolSession } from "./framework/useToolSession";
+import { commitThermometerManual } from "./thermometer/commitThermometer";
+import { completeThermometerWalkStep } from "./thermometer/completeThermometerWalk";
+import { startThermometerGpsWalk } from "./thermometer/startThermometerWalk";
+import type {
+  ThermometerSessionConfig,
+  UseThermometerToolParams,
+} from "./thermometer/types";
 
-type PlacementMode = "gps" | "manual";
+export type { UseThermometerToolParams } from "./thermometer/types";
 
-interface UseThermometerToolParams {
-  active: boolean;
-  annotations: AnnotationRecord[];
-  sessionRules: SessionRulesInput;
-  pendingQuestions?: readonly PendingQuestionRecord[];
-  canSubmitQuestion?: boolean;
-  createAnnotation: (
-    annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
-  ) => Promise<AnnotationRecord>;
-  awaitHiderAnswer?: boolean;
-  submitPendingQuestion?: (
-    input: Omit<
-      SubmitPendingQuestionInput,
-      "sessionId" | "senderUid" | "senderRole" | "toolType"
-    >,
-  ) => Promise<string | void>;
-  completeThermometerWalk?: (input: {
-    pendingQuestionId: string;
-    startPoint: LatLngTuple;
-    endPoint: LatLngTuple;
-    distanceMeters: number;
-    promptText: string;
-    replyOptions: { id: string; label: string }[];
-    cardDraw?: number;
-    cardKeep?: number;
-  }) => Promise<void>;
-  sessionId?: string;
-  senderUid?: string | null;
-  distanceUnit: DistanceUnit;
-  finishPlacement: () => void;
-  setMapError: (message: string | null) => void;
-  gpsLoading?: boolean;
-  gpsError?: string | null;
-  refreshGps?: () => Promise<GeolocationReading>;
-  ensurePointInGameArea?: (point: LatLngTuple) => boolean;
+function createThermometerConfig(
+  sessionRules: UseThermometerToolParams["sessionRules"],
+): ThermometerSessionConfig {
+  return {
+    placementMode: "gps",
+    localThermoA: null,
+    thermoB: null,
+    localWalkingQuestionId: null,
+    distanceMeters:
+      availableThermometerDistancePresetsForSession(sessionRules)[0] ??
+      DEFAULT_THERMOMETER_DISTANCE_METERS,
+    answer: null,
+    panelError: null,
+  };
 }
 
 export function useThermometerTool({
@@ -99,7 +61,11 @@ export function useThermometerTool({
   refreshGps,
   ensurePointInGameArea,
 }: UseThermometerToolParams) {
-  const { isSubmitting, runLocked } = useSubmitLock();
+  const wizardStepRef = useRef("distance");
+  const finishPlacementRef = useRef(finishPlacement);
+  finishPlacementRef.current = finishPlacement;
+  const resetAfterSuccessRef = useRef(() => undefined as void);
+
   const activeAnnotations = useMemo(
     () => annotations.filter(isActive),
     [annotations],
@@ -136,58 +102,123 @@ export function useThermometerTool({
     };
   }, [syncedWalkingQuestion]);
 
-  const [placementMode, setPlacementMode] = useState<PlacementMode>("gps");
-  const [localThermoA, setLocalThermoA] = useState<LatLngTuple | null>(null);
-  const [thermoB, setThermoB] = useState<LatLngTuple | null>(null);
-  const [localWalkingQuestionId, setLocalWalkingQuestionId] = useState<
-    string | null
-  >(null);
-  const [thermometerDistanceMeters, setThermometerDistanceMeters] = useState(
-    () =>
-      availableThermometerDistancePresetsForSession(sessionRules)[0] ??
-      DEFAULT_THERMOMETER_DISTANCE_METERS,
+  const syncedWalkDraftRef = useRef(syncedWalkDraft);
+  syncedWalkDraftRef.current = syncedWalkDraft;
+  const activeAnnotationsRef = useRef(activeAnnotations);
+  activeAnnotationsRef.current = activeAnnotations;
+  const pendingQuestionsRef = useRef(pendingQuestions);
+  pendingQuestionsRef.current = pendingQuestions;
+
+  const createInitialConfig = useCallback(
+    () => createThermometerConfig(sessionRules),
+    [sessionRules],
   );
-  const [thermometerAnswer, setThermometerAnswer] =
-    useState<ThermometerAnswer | null>(null);
-  const [panelError, setPanelError] = useState<string | null>(null);
-  const wizardStepRef = useRef("distance");
+
+  const session = useToolSession<ThermometerSessionConfig>({
+    toolId: "thermometer",
+    active,
+    createInitialConfig,
+    onSubmit: async (config) => {
+      const synced = syncedWalkDraftRef.current;
+      const walkingQuestionId =
+        config.localWalkingQuestionId ?? synced?.questionId ?? null;
+      const thermoA =
+        config.localThermoA ??
+        (synced && walkingQuestionId === synced.questionId
+          ? synced.startPoint
+          : null);
+      const distanceMeters =
+        config.localWalkingQuestionId === null &&
+        synced &&
+        walkingQuestionId === synced.questionId &&
+        synced.distanceMeters !== null
+          ? synced.distanceMeters
+          : config.distanceMeters;
+
+      if (!thermoA || !config.thermoB) {
+        return;
+      }
+
+      const travelMeters = distanceBetweenPoints(thermoA, config.thermoB);
+      const useCount = Math.max(
+        thermometerUseCount(activeAnnotationsRef.current, distanceMeters),
+        thermometerUseCountFromPending(
+          pendingQuestionsRef.current,
+          distanceMeters,
+        ),
+      );
+      const { draw: cardDraw, keep: cardKeep } = questionCostBreakdown(
+        "D2P1",
+        useCount,
+      );
+
+      await commitThermometerManual({
+        thermoA,
+        thermoB: config.thermoB,
+        thermoTravelMeters: travelMeters,
+        distanceMeters,
+        answer: config.answer,
+        pendingQuestions: pendingQuestionsRef.current,
+        awaitHiderAnswer,
+        submitPendingQuestion,
+        sessionId,
+        senderUid,
+        distanceUnit,
+        cardDraw,
+        cardKeep,
+        createAnnotation,
+        setMapError,
+        onSuccess: () => {
+          resetAfterSuccessRef.current();
+          finishPlacementRef.current();
+        },
+      });
+    },
+  });
+
+  resetAfterSuccessRef.current = () => {
+    session.open();
+  };
+
+  const config = session.config ?? createInitialConfig();
+  const patchConfig = session.setConfig;
 
   const walkingQuestionId =
-    localWalkingQuestionId ?? syncedWalkDraft?.questionId ?? null;
+    config.localWalkingQuestionId ?? syncedWalkDraft?.questionId ?? null;
   const thermoA =
-    localThermoA ??
+    config.localThermoA ??
     (syncedWalkDraft && walkingQuestionId === syncedWalkDraft.questionId
       ? syncedWalkDraft.startPoint
       : null);
-  const activeThermometerDistanceMeters =
-    localWalkingQuestionId === null &&
+  const activeDistanceMeters =
+    config.localWalkingQuestionId === null &&
     syncedWalkDraft &&
     walkingQuestionId === syncedWalkDraft.questionId &&
     syncedWalkDraft.distanceMeters !== null
       ? syncedWalkDraft.distanceMeters
-      : thermometerDistanceMeters;
+      : config.distanceMeters;
 
-  const { reading: gpsReading } = useLiveLocation(active && placementMode === "gps", {
-    highAccuracy: true,
-  });
+  const { reading: gpsReading } = useLiveLocation(
+    active && config.placementMode === "gps",
+    { highAccuracy: true },
+  );
 
   const thermoStep: "a" | "b" | "ready" | "walking" = walkingQuestionId
     ? "walking"
     : !thermoA
       ? "a"
-      : !thermoB
+      : !config.thermoB
         ? "b"
         : "ready";
 
   const thermoTravelMeters =
-    thermoA && thermoB ? distanceBetweenPoints(thermoA, thermoB) : null;
+    thermoA && config.thermoB
+      ? distanceBetweenPoints(thermoA, config.thermoB)
+      : null;
 
   const presetUseCount = Math.max(
-    thermometerUseCount(activeAnnotations, activeThermometerDistanceMeters),
-    thermometerUseCountFromPending(
-      pendingQuestions,
-      activeThermometerDistanceMeters,
-    ),
+    thermometerUseCount(activeAnnotations, activeDistanceMeters),
+    thermometerUseCountFromPending(pendingQuestions, activeDistanceMeters),
   );
   const { label: costLabel, draw: cardDraw, keep: cardKeep } =
     questionCostBreakdown("D2P1", presetUseCount);
@@ -198,368 +229,152 @@ export function useThermometerTool({
         return;
       }
 
-      if (isLocalThermometerWalkId(walkingQuestionId)) {
-        setThermoB(endPoint);
-        setLocalWalkingQuestionId(null);
-        setPanelError(null);
-        if (sessionId) {
-          emitThermometerWalkSeparatedActivity({
-            sessionId,
-            pendingQuestionId: walkingQuestionId,
-            promptText: thermometerQuestionPrompt(
-              activeThermometerDistanceMeters,
-              distanceUnit,
-            ),
-            createdByUid: senderUid ?? undefined,
-          });
-        }
-        return;
-      }
-
-      if (!completeThermometerWalk) {
-        setPanelError("Walk finished but couldn't save. Try again.");
-        return;
-      }
-
-      const promptText = thermometerQuestionPrompt(
-        activeThermometerDistanceMeters,
+      await completeThermometerWalkStep({
+        endPoint,
+        thermoA,
+        walkingQuestionId,
+        distanceMeters: activeDistanceMeters,
         distanceUnit,
-      );
-
-      try {
-        await completeThermometerWalk({
-          pendingQuestionId: walkingQuestionId,
-          startPoint: thermoA,
-          endPoint,
-          distanceMeters: activeThermometerDistanceMeters,
-          promptText,
-          replyOptions: hotterColderAnswerOptions.map((option) => ({
-            id: option.value,
-            label: option.label,
-          })),
-          cardDraw,
-          cardKeep,
-        });
-      } catch (error) {
-        setPanelError(
-          error instanceof Error
-            ? error.message
-            : "Thermometer walk could not finish. Try again.",
-        );
-        return;
-      }
-
-      setLocalWalkingQuestionId(null);
-      setLocalThermoA(null);
-      setThermoB(null);
-      finishPlacement();
+        sessionId,
+        senderUid,
+        cardDraw,
+        cardKeep,
+        completeThermometerWalk,
+        patchConfig,
+        onRemoteSuccess: () => finishPlacementRef.current(),
+      });
     },
     [
+      activeDistanceMeters,
       cardDraw,
       cardKeep,
       completeThermometerWalk,
       distanceUnit,
-      finishPlacement,
+      patchConfig,
       senderUid,
       sessionId,
       thermoA,
-      activeThermometerDistanceMeters,
       walkingQuestionId,
     ],
   );
 
-  const walkTrackingActive =
-    walkingQuestionId !== null && thermoA !== null;
-
   const walkTracker = useThermometerWalk({
-    active: walkTrackingActive,
+    active: walkingQuestionId !== null && thermoA !== null,
     startPoint: thermoA,
-    targetDistanceMeters: activeThermometerDistanceMeters,
+    targetDistanceMeters: activeDistanceMeters,
     onAutoStop: handleWalkComplete,
     onError: setMapError,
   });
 
   const resetDraft = useCallback(() => {
     walkTracker.cancelWalk();
-    setLocalThermoA(null);
-    setThermoB(null);
-    setLocalWalkingQuestionId(null);
-    setThermometerAnswer(null);
-    setPanelError(null);
-    setThermometerDistanceMeters(
-      availableThermometerDistancePresetsForSession(sessionRules)[0] ??
-        DEFAULT_THERMOMETER_DISTANCE_METERS,
-    );
-  }, [sessionRules, walkTracker]);
+    session.open();
+  }, [session.open, walkTracker]);
 
   const startGpsWalk = useCallback(async () => {
-    setPanelError(null);
-    setMapError(null);
-
-    if (!canSubmitQuestion || hasOpenPendingQuestion(pendingQuestions)) {
-      setPanelError("Finish the current question before starting another.");
-      return;
-    }
-
-    if (
-      !isThermometerDistanceOptionAvailableForSession(
-        sessionRules,
-        activeThermometerDistanceMeters,
-      )
-    ) {
-      setPanelError("That distance is not available for this game size.");
-      return;
-    }
-
-    let reading = gpsReading;
-    if (!reading && refreshGps) {
-      try {
-        reading = await refreshGps();
-      } catch (error) {
-        setPanelError(
-          error instanceof Error ? error.message : "GPS location unavailable.",
-        );
-        return;
-      }
-    }
-
-    if (!reading) {
-      setPanelError("Waiting for GPS fix…");
-      return;
-    }
-
-    const start: LatLngTuple = [reading.lat, reading.lng];
-    if (ensurePointInGameArea && !ensurePointInGameArea(start)) {
-      setPanelError("That point is outside the play area.");
-      return;
-    }
-
-    setLocalThermoA(start);
-    setThermoB(null);
-
-    const distanceLabel = thermometerQuestionPrompt(
-      activeThermometerDistanceMeters,
+    await startThermometerGpsWalk({
+      config,
+      canSubmitQuestion,
+      pendingQuestions,
+      sessionRules,
+      gpsReading,
+      refreshGps,
+      ensurePointInGameArea,
+      awaitHiderAnswer,
+      submitPendingQuestion,
+      sessionId,
+      senderUid,
       distanceUnit,
-    );
-
-    if (!awaitHiderAnswer) {
-      setLocalWalkingQuestionId(LOCAL_THERMOMETER_WALK_ID);
-      if (sessionId) {
-        emitThermometerWalkStartedActivity({
-          sessionId,
-          pendingQuestionId: LOCAL_THERMOMETER_WALK_ID,
-          promptText: distanceLabel,
-          createdByUid: senderUid ?? undefined,
-        });
-      }
-      return;
-    }
-
-    if (!submitPendingQuestion || !sessionId || !senderUid) {
-      setPanelError("Session is still loading. Try again in a moment.");
-      setLocalThermoA(null);
-      return;
-    }
-
-    const startMessage = `Thermometer walk started. ${distanceLabel}`;
-
-    try {
-      const questionId = await submitPendingQuestion({
-        promptText: startMessage,
-        replyOptions: [],
-        placement: thermometerWalkStartPlacement(
-          start,
-          activeThermometerDistanceMeters,
-        ),
-        status: "walking",
-      });
-
-      if (typeof questionId !== "string") {
-        setPanelError("Couldn't start the walk. Try again.");
-        setLocalThermoA(null);
-        return;
-      }
-
-      setLocalWalkingQuestionId(questionId);
-    } catch (error) {
-      setPanelError(
-        error instanceof Error
-          ? error.message
-          : "Couldn't start the walk. Try again.",
-      );
-      setLocalThermoA(null);
-    }
+      distanceMeters: activeDistanceMeters,
+      setMapError,
+      patchConfig,
+    });
   }, [
+    activeDistanceMeters,
     awaitHiderAnswer,
     canSubmitQuestion,
+    config,
     distanceUnit,
     ensurePointInGameArea,
-    sessionRules,
     gpsReading,
+    patchConfig,
     pendingQuestions,
     refreshGps,
-    sessionId,
     senderUid,
+    sessionId,
+    sessionRules,
     setMapError,
     submitPendingQuestion,
-    activeThermometerDistanceMeters,
   ]);
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
-      if (!active || placementMode !== "manual") {
+      if (!active || config.placementMode !== "manual") {
         return false;
       }
 
       if (!thermoA) {
-        setLocalThermoA(point);
-      } else if (!thermoB) {
-        setThermoB(point);
+        patchConfig({ localThermoA: point });
+      } else if (!config.thermoB) {
+        patchConfig({ thermoB: point });
       }
 
       return true;
     },
-    [active, placementMode, thermoA, thermoB],
+    [active, config.placementMode, config.thermoB, patchConfig, thermoA],
   );
 
-  const commitManual = async () => {
-    if (!thermoA || !thermoB) {
-      return;
-    }
+  const commit = () => session.submit();
 
-    if (hasOpenPendingQuestion(pendingQuestions)) {
-      setMapError("Finish the current question before starting another.");
-      return;
-    }
-
-    if (
-      thermoTravelMeters !== null &&
-      thermoTravelMeters + 1 < activeThermometerDistanceMeters
-    ) {
-      setMapError("Movement is shorter than the selected distance.");
-      return;
-    }
-
-    const geometry: Feature<LineString> = {
-      type: "Feature",
-      properties: {},
-      geometry: {
-        type: "LineString",
-        coordinates: [
-          [thermoA[1], thermoA[0]],
-          [thermoB[1], thermoB[0]],
-        ],
-      },
-    };
-
-    const promptText = thermometerQuestionPrompt(
-      activeThermometerDistanceMeters,
-      distanceUnit,
-    );
-
-    if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
-      await submitPendingQuestion({
-        promptText,
-        replyOptions: hotterColderAnswerOptions.map((option) => ({
-          id: option.value,
-          label: option.label,
-        })),
-        placement: {
-          geometryJson: JSON.stringify(geometry),
-          metadata: { thermometerDistanceMeters: activeThermometerDistanceMeters },
-        },
-        status: "pending",
-        cardDraw,
-        cardKeep,
-      });
-
-      resetDraft();
-      finishPlacement();
-      return;
-    }
-
-    if (thermometerAnswer === null) {
-      return;
-    }
-
-    const created = await createAnnotation({
-      type: "thermometer",
-      geometry,
-      metadata: {
-        createdAt: new Date().toISOString(),
-        hotterTowards: thermometerHotterTowards(thermometerAnswer),
-        thermometerDistanceMeters: activeThermometerDistanceMeters,
-        thermometerAnswer,
-        color: MAP_ANNOTATION_COLORS.elimination,
-      },
+  const startWalkLocked = () => {
+    void session.runAction(async () => {
+      await startGpsWalk();
     });
-
-    if (sessionId) {
-      const answerOption = hotterColderAnswerOptions.find(
-        (option) => option.value === thermometerAnswer,
-      );
-      emitQuestionAnsweredActivity({
-        sessionId,
-        toolType: "thermometer",
-        promptText,
-        annotationId: created.id,
-        answerSummary: answerOption?.label ?? String(thermometerAnswer),
-        createdByUid: senderUid ?? undefined,
-      });
-    }
-
-    resetDraft();
-    finishPlacement();
   };
-
-  const commitManualLocked = () =>
-    runLocked(async () => {
-      await commitManual();
-    });
-
-  const placementCrosshair =
-    active && placementMode === "manual" && thermoStep !== "ready";
-
-  const panel = (
-    <ThermometerPanel
-      distanceUnit={distanceUnit}
-      sessionRules={sessionRules}
-      distanceMeters={activeThermometerDistanceMeters}
-      travelMeters={walkTracker.distanceTraveledMeters ?? thermoTravelMeters}
-      answer={thermometerAnswer}
-      step={thermoStep === "walking" ? "b" : thermoStep}
-      presetUseCount={presetUseCount}
-      costLabel={costLabel}
-      placementMode={placementMode}
-      walkingActive={thermoStep === "walking"}
-      onPlacementModeChange={setPlacementMode}
-      onDistanceChange={setThermometerDistanceMeters}
-      onAnswerChange={setThermometerAnswer}
-      onReset={resetDraft}
-      onStartWalk={() => void runLocked(startGpsWalk)}
-      onCommit={() => void commitManualLocked()}
-      awaitHiderAnswer={awaitHiderAnswer}
-      canSubmitQuestion={canSubmitQuestion}
-      isSubmitting={isSubmitting}
-      gpsLoading={gpsLoading}
-      error={panelError ?? gpsError ?? walkTracker.gpsError}
-      wizardStepRef={wizardStepRef}
-    />
-  );
 
   return {
     draft: {
       thermoA,
-      thermoB,
-      thermometerAnswer,
-      thermometerDistanceMeters: activeThermometerDistanceMeters,
+      thermoB: config.thermoB,
+      thermometerAnswer: config.answer,
+      thermometerDistanceMeters: activeDistanceMeters,
       walkingQuestionId,
     },
-    placementCrosshair,
+    placementCrosshair:
+      active && config.placementMode === "manual" && thermoStep !== "ready",
     handleMapClick,
     resetDraft,
-    commit: commitManualLocked,
-    panel,
+    commit,
+    panel: (
+      <ThermometerPanel
+        distanceUnit={distanceUnit}
+        sessionRules={sessionRules}
+        distanceMeters={activeDistanceMeters}
+        travelMeters={walkTracker.distanceTraveledMeters ?? thermoTravelMeters}
+        answer={config.answer}
+        step={thermoStep === "walking" ? "b" : thermoStep}
+        presetUseCount={presetUseCount}
+        costLabel={costLabel}
+        placementMode={config.placementMode}
+        walkingActive={thermoStep === "walking"}
+        onPlacementModeChange={(placementMode) =>
+          patchConfig({ placementMode })
+        }
+        onDistanceChange={(distanceMeters) => patchConfig({ distanceMeters })}
+        onAnswerChange={(answer) => patchConfig({ answer })}
+        onReset={resetDraft}
+        onStartWalk={startWalkLocked}
+        onCommit={commit}
+        awaitHiderAnswer={awaitHiderAnswer}
+        canSubmitQuestion={canSubmitQuestion}
+        isSubmitting={session.isBusy}
+        gpsLoading={gpsLoading}
+        error={
+          config.panelError ?? session.error ?? gpsError ?? walkTracker.gpsError
+        }
+        wizardStepRef={wizardStepRef}
+      />
+    ),
     walkCurrentPoint: walkTracker.currentPoint,
   };
 }
