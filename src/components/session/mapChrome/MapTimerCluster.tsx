@@ -128,50 +128,54 @@ export function MapTimerCluster({
       : questionTimer.countdownLabel;
 
     return (
-      <div className="flex shrink-0 flex-col items-end gap-0.5">
-        <p
-          className="jl-ticker jl-ticker-question jl-ticker-active"
-          aria-live="polite"
-        >
-          <span className="jl-ticker-phase">{questionTimer.toolLabel}</span>
-          <span className="jl-ticker-value tabular-nums">
-            {countdownLabel}
-          </span>
-        </p>
+      <>
+        <div className="jl-timer-cluster">
+          <p
+            className="jl-ticker jl-ticker-question jl-ticker-active"
+            aria-live="polite"
+          >
+            <span className="jl-ticker-phase">{questionTimer.toolLabel}</span>
+            <span className="jl-ticker-value tabular-nums">
+              {countdownLabel}
+            </span>
+          </p>
+          {hidingActive && hidingLabel ? (
+            <p className="jl-ticker jl-ticker-secondary tabular-nums">
+              <span className="jl-ticker-value">{hidingLabel}</span>
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={onOpenTimerMenu}
+              className={`jl-ticker jl-ticker-secondary ${tickerRunningClass}`}
+              aria-label="Seek phase time. Open timer settings"
+              aria-expanded={timerMenuOpen}
+              aria-haspopup="menu"
+            >
+              <span className="jl-ticker-phase">SEEK</span>
+              <span className="jl-ticker-value tabular-nums">
+                {formatSeekPhaseTime(sessionRules, timerState)}
+              </span>
+            </button>
+          )}
+        </div>
         {canCancelWalk ? (
           <button
             type="button"
             onClick={() => onCancelWalkingQuestion?.(primaryQuestion.id)}
-            className="jl-ticker jl-ticker-secondary text-highlight"
+            className="jl-timer-cancel"
             aria-label="Cancel thermometer walk"
           >
             Cancel
           </button>
         ) : null}
-        {hidingActive && hidingLabel ? (
-          <p className="jl-ticker-secondary tabular-nums">{hidingLabel}</p>
-        ) : (
-          <button
-            type="button"
-            onClick={onOpenTimerMenu}
-            className={`jl-ticker jl-ticker-secondary ${tickerRunningClass}`}
-            aria-label="Seek phase time. Open timer settings"
-            aria-expanded={timerMenuOpen}
-            aria-haspopup="menu"
-          >
-            <span className="jl-ticker-phase">SEEK</span>
-            <span className="jl-ticker-value tabular-nums">
-              {formatSeekPhaseTime(sessionRules, timerState)}
-            </span>
-          </button>
-        )}
-      </div>
+      </>
     );
   }
 
   if (hidingActive && hidingLabel) {
     return (
-      <div className="flex shrink-0 flex-col items-end gap-0.5">
+      <div className="jl-timer-cluster">
         <p className="jl-ticker jl-ticker-hiding jl-ticker-active" aria-live="polite">
           <span className="jl-ticker-value tabular-nums">{hidingLabel}</span>
         </p>
@@ -193,7 +197,7 @@ export function MapTimerCluster({
   }
 
   return (
-    <div className="flex shrink-0 flex-col items-end gap-0.5">
+    <div className="jl-timer-cluster">
       <button
         type="button"
         onClick={onOpenTimerMenu}

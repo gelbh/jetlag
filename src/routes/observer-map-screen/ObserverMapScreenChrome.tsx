@@ -57,17 +57,15 @@ export function ObserverMapScreenChrome({
         onTimerReset={() => undefined}
         timerControlsDisabled
         expanded={isDesktop}
-        belowBarLeft={
-          <div className="jl-status-below-home pointer-events-auto absolute left-0 z-[var(--z-banner)] flex items-center px-[max(0.625rem,env(safe-area-inset-left))]">
-            <button
-              type="button"
-              className="hud-chrome map-hud-home inline-flex min-h-11 min-w-11 items-center justify-center text-ink"
-              aria-label={leaveLabel}
-              onClick={onLeave}
-            >
-              <HudHomeIcon className="h-5 w-5" />
-            </button>
-          </div>
+        headerLeading={
+          <button
+            type="button"
+            className="hud-chrome map-hud-home inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-ink"
+            aria-label={leaveLabel}
+            onClick={onLeave}
+          >
+            <HudHomeIcon className="h-5 w-5" />
+          </button>
         }
       />
     </div>
