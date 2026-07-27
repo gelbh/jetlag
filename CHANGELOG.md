@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.6 - 2026-07-27
+
+### Fixes
+
+- Admin ops desk: dragging a preset chip onto another lands on that chip instead of one slot past it
+- Admin ops desk: leaving /admin uses only the top-bar Home control, and the duplicate Back header above the desk no longer shows
+
 ## 0.10.5 - 2026-07-27
 
 ### Fixes
