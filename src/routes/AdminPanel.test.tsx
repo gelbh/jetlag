@@ -222,6 +222,46 @@ describe("AdminPanel", () => {
       "data-layout",
       "desktop",
     );
+    expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    expect(screen.queryByRole("banner", { name: /screen header/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /←\s*back/i })).toBeNull();
+  });
+
+  it("keeps topbar Home on mobile without a ScreenHeader Back", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.sessions = [];
+
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+
+    renderWithRouter(<AdminPanel />);
+
+    expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute(
+      "data-layout",
+      "mobile",
+    );
+    expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    expect(screen.queryByRole("banner", { name: /screen header/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /←\s*back/i })).toBeNull();
   });
 
   it("loads more sessions from the list footer", () => {
