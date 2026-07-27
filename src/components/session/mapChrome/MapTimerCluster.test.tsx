@@ -113,7 +113,7 @@ describe("MapTimerCluster thermometer cancel", () => {
 });
 
 describe("MapTimerCluster dual stack", () => {
-  it("shows SESSION secondary beside hiding countdown", () => {
+  it("stacks SESSION secondary under hiding countdown", () => {
     const { container } = render(
       <MapTimerCluster
         sessionRules={{ gameSize: "medium", hidingPeriodMinutes: 90 }}
@@ -130,8 +130,12 @@ describe("MapTimerCluster dual stack", () => {
     expect(
       screen.getByRole("button", { name: /Session elapsed/i }),
     ).toBeTruthy();
-    expect(container.querySelector(".jl-timer-cluster")).toBeTruthy();
-    expect(container.querySelector(".jl-timer-cluster .jl-ticker-secondary")).toBeTruthy();
+    const cluster = container.querySelector(".jl-timer-cluster");
+    expect(cluster).toBeTruthy();
+    const children = cluster?.children ?? [];
+    expect(children.length).toBeGreaterThanOrEqual(2);
+    expect(children[0]?.classList.contains("jl-ticker-hiding")).toBe(true);
+    expect(children[1]?.classList.contains("jl-ticker-secondary")).toBe(true);
   });
 
   it("shows SEEK primary without SESSION when hiding is over", () => {
