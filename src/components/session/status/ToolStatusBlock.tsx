@@ -88,9 +88,6 @@ export function ToolStatusBlock({
     <div className="jl-status-header">
       <div className="jl-status-header-brand">
         {headerLeading}
-        <span className="jl-status-header-brand-mark" aria-hidden>
-          ▸
-        </span>
         <div className="jl-status-header-brand-text">
           <span className="jl-status-header-brand-name">JETLAG</span>
           <span className="jl-status-header-brand-role">
