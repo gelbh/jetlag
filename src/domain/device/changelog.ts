@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.10.4";
+export const APP_VERSION = "0.10.5";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.10.5",
+    date: "2026-07-27",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Metro games (Dublin and others): stop downloading huge hidden admin border data in the background, fixing a Safari crash when measuring a local electoral area border",
+        ],
+      }
+    ],
+  },
   {
     version: "0.10.4",
     date: "2026-07-26",

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.5 - 2026-07-27
+
+### Fixes
+
+- Metro games (Dublin and others): stop downloading huge hidden admin border data in the background, fixing a Safari crash when measuring a local electoral area border
+
 ## 0.10.4 - 2026-07-26
 
 ### Improvements
