@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.10.7";
+export const APP_VERSION = "0.10.8";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.10.8",
+    date: "2026-07-27",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Map: status rail keeps fixed height with stacked dual timers and aligned columns so header fields no longer overlap",
+        ],
+      }
+    ],
+  },
   {
     version: "0.10.7",
     date: "2026-07-27",
