@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.8 - 2026-07-27
+
+### Fixes
+
+- Map: status rail keeps fixed height with stacked dual timers and aligned columns so header fields no longer overlap
+
 ## 0.10.7 - 2026-07-27
 
 ### Improvements
