@@ -60,8 +60,8 @@ interface MapStatusRailProps {
   onSyncErrorAction?: () => void;
   /** In-flow status for DesktopOpsShell (vs absolute overlay on mobile). */
   expanded?: boolean;
-  /** Replace default home ScreenNav (e.g. observer leave control). */
-  belowBarLeft?: ReactNode;
+  /** Replace default in-header home ScreenNav (e.g. observer leave control). */
+  headerLeading?: ReactNode;
 }
 
 export function MapStatusRail({
@@ -103,7 +103,7 @@ export function MapStatusRail({
   hiderOutsideZone = false,
   onSyncErrorAction,
   expanded = false,
-  belowBarLeft,
+  headerLeading,
 }: MapStatusRailProps) {
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
   const [syncMenuOpen, setSyncMenuOpen] = useState(false);
@@ -188,6 +188,11 @@ export function MapStatusRail({
             onCancelWalkingQuestion={onCancelWalkingQuestion}
             timerMenuOpen={showTimerMenu}
             expanded={expanded}
+            headerLeading={
+              headerLeading ?? (
+                <ScreenNav variant="home" placement="inline" />
+              )
+            }
             onOpenTimerMenu={() => {
               setTimerMenuOpen((open) => !open);
               setSyncMenuOpen(false);
@@ -196,9 +201,6 @@ export function MapStatusRail({
           />
         </div>
 
-        {belowBarLeft ?? (
-          <ScreenNav variant="home" className="jl-status-below-home" />
-        )}
         {showPreloadBanner ? (
           <GameAreaPreloadBeacon
             detailOpen={showPreloadMenu}

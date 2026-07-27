@@ -113,8 +113,8 @@ describe("MapTimerCluster thermometer cancel", () => {
 });
 
 describe("MapTimerCluster dual stack", () => {
-  it("shows SESSION secondary under hiding countdown", () => {
-    render(
+  it("shows SESSION secondary beside hiding countdown", () => {
+    const { container } = render(
       <MapTimerCluster
         sessionRules={{ gameSize: "medium", hidingPeriodMinutes: 90 }}
         timerState={{ accumulatedMs: 60_000, runningSince: Date.now() }}
@@ -130,6 +130,8 @@ describe("MapTimerCluster dual stack", () => {
     expect(
       screen.getByRole("button", { name: /Session elapsed/i }),
     ).toBeTruthy();
+    expect(container.querySelector(".jl-timer-cluster")).toBeTruthy();
+    expect(container.querySelector(".jl-timer-cluster .jl-ticker-secondary")).toBeTruthy();
   });
 
   it("shows SEEK primary without SESSION when hiding is over", () => {
@@ -150,5 +152,29 @@ describe("MapTimerCluster dual stack", () => {
 
     expect(screen.getByText("SEEK")).toBeTruthy();
     expect(screen.queryByText("SESSION")).toBeNull();
+  });
+
+  it("renders Cancel outside the timer cluster row", () => {
+    const { container } = render(
+      <MapTimerCluster
+        sessionRules={{ gameSize: "medium" }}
+        timerState={timerState}
+        timerRunning
+        timerHasStarted
+        pendingQuestions={[walkingQuestion]}
+        myUid="host-1"
+        hostUid="host-1"
+        onCancelWalkingQuestion={vi.fn()}
+        onOpenTimerMenu={vi.fn()}
+        timerMenuOpen={false}
+      />,
+    );
+
+    const cancel = screen.getByRole("button", {
+      name: "Cancel thermometer walk",
+    });
+    expect(cancel.classList.contains("jl-timer-cancel")).toBe(true);
+    expect(cancel.closest(".jl-timer-cluster")).toBeNull();
+    expect(container.querySelector(".jl-timer-cluster")).toBeTruthy();
   });
 });

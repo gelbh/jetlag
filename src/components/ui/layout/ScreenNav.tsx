@@ -29,6 +29,9 @@ export function ScreenNav({
 
   const shellClassName = (() => {
     if (isHome) {
+      if (placement === "inline") {
+        return `pointer-events-auto inline-flex shrink-0 items-center ${className}`;
+      }
       return `pointer-events-auto absolute inset-y-0 left-0 z-[var(--z-banner)] flex items-center px-[max(0.625rem,env(safe-area-inset-left))] ${className}`;
     }
 
@@ -43,12 +46,17 @@ export function ScreenNav({
     }
   })();
 
+  const homeLinkClassName =
+    placement === "inline"
+      ? "hud-chrome map-hud-home inline-flex min-h-11 min-w-11 items-center justify-center text-ink"
+      : "hud-chrome map-hud-home inline-flex h-full min-w-11 items-center justify-center text-ink";
+
   return (
     <nav className={shellClassName} aria-label="Screen navigation">
       {isHome ? (
         <AppLink
           to={homeTo}
-          className="hud-chrome map-hud-home inline-flex h-full min-w-11 items-center justify-center text-ink"
+          className={homeLinkClassName}
           aria-label="Home"
         >
           <HudHomeIcon className="h-5 w-5" />
