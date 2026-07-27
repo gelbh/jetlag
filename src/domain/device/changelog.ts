@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.10.5";
+export const APP_VERSION = "0.10.6";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.10.6",
+    date: "2026-07-27",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Admin ops desk: dragging a preset chip onto another lands on that chip instead of one slot past it",
+          "Admin ops desk: leaving /admin uses only the top-bar Home control, and the duplicate Back header above the desk no longer shows",
+        ],
+      }
+    ],
+  },
   {
     version: "0.10.5",
     date: "2026-07-27",
