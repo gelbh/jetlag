@@ -20,7 +20,7 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-rust-wasm
       - run: cargo test --locked -p jetlag-geometry-kernel
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -56,7 +56,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-rust-wasm
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -96,7 +96,7 @@ jobs:
               - 'src/services/admin/**'
               - 'src/hooks/admin/**'
               - 'src/routes/AdminPanel.tsx'
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         if: steps.changes.outputs.backend == 'true'
         with:
           node-version: 24
@@ -181,7 +181,7 @@ jobs:
           fi
       - uses: ./.github/actions/setup-rust-wasm
         if: steps.changes.outputs.frontend == 'true'
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         if: steps.changes.outputs.frontend == 'true'
         with:
           node-version: 24
