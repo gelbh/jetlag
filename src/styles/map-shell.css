@@ -93,94 +93,118 @@
 
   .jl-status-header {
     display: grid;
-    grid-template-columns: minmax(4.5rem, 1.1fr) minmax(0, 1fr) minmax(0, 0.85fr) minmax(0, 1.35fr);
-    align-items: center;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1.2fr);
+    align-items: stretch;
     gap: 0;
+    height: var(--status-bar-height);
     min-height: var(--status-bar-height);
+    max-height: var(--status-bar-height);
     width: 100%;
-    padding: 0.375rem 0.5rem;
-    padding-left: max(0.5rem, env(safe-area-inset-left));
-    padding-right: max(0.5rem, env(safe-area-inset-right));
+    overflow: hidden;
+    padding: 0.25rem 0.375rem;
+    padding-left: max(0.375rem, env(safe-area-inset-left));
+    padding-right: max(0.375rem, env(safe-area-inset-right));
   }
 
   .jl-status-header-brand {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.25rem;
     min-width: 0;
-    padding-right: 0.5rem;
+    max-width: 100%;
+    padding-right: 0.35rem;
+    overflow: hidden;
   }
 
   .jl-status-header-brand > nav {
     flex-shrink: 0;
   }
 
-  .jl-status-header-brand-mark {
-    color: var(--color-action);
-    font-size: 0.75rem;
-    line-height: 1;
+  .jl-status-header-brand .map-hud-home {
+    min-height: 2.5rem;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    width: 2.5rem;
   }
 
   .jl-status-header-brand-text {
     display: flex;
     min-width: 0;
+    flex: 1 1 auto;
     flex-direction: column;
-    gap: 0.1rem;
+    justify-content: center;
+    gap: 0.05rem;
+    overflow: hidden;
   }
 
   .jl-status-header-brand-name {
     font-family: var(--font-display);
-    font-size: clamp(0.7rem, 2.8vw, 0.95rem);
+    font-size: clamp(0.62rem, 2.4vw, 0.85rem);
     font-weight: 700;
-    letter-spacing: 0.08em;
-    line-height: 1.1;
+    letter-spacing: 0.06em;
+    line-height: 1.05;
     text-transform: uppercase;
     color: var(--color-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .jl-status-header-brand-role {
     font-family: var(--font-display);
-    font-size: clamp(0.55rem, 2.2vw, 0.7rem);
+    font-size: clamp(0.5rem, 2vw, 0.65rem);
     font-weight: 700;
-    letter-spacing: 0.1em;
-    line-height: 1.1;
+    letter-spacing: 0.08em;
+    line-height: 1.05;
     text-transform: uppercase;
     color: var(--color-action);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .jl-status-header-col {
     display: flex;
     min-width: 0;
+    max-width: 100%;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.15rem;
-    padding-inline: 0.35rem;
+    gap: 0.1rem;
+    padding-inline: 0.3rem;
+    overflow: hidden;
     border-left: 1px solid oklch(from var(--color-border) l c h / 0.85);
   }
 
   .jl-status-header-col--timer {
-    align-items: flex-end;
+    align-items: center;
   }
 
   .jl-status-header-label {
     font-family: var(--font-display);
-    font-size: clamp(0.45rem, 1.8vw, 0.55rem);
+    font-size: clamp(0.42rem, 1.6vw, 0.5rem);
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
+    line-height: 1;
     text-transform: uppercase;
     color: var(--color-ink-muted);
   }
 
   .jl-status-header-value {
     font-family: var(--font-mono);
-    font-size: clamp(0.75rem, 3.2vw, 1rem);
+    font-size: clamp(0.7rem, 2.8vw, 0.9rem);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.04em;
-    line-height: 1.15;
+    line-height: 1.1;
     color: var(--color-ink);
     white-space: nowrap;
+  }
+
+  .jl-status-header .jl-stamp-code {
+    font-size: clamp(0.7rem, 2.8vw, 0.9rem);
+    letter-spacing: 0.12em;
+    line-height: 1.1;
   }
 
   .jl-status-header-value--action {
@@ -189,7 +213,7 @@
 
   .jl-status-header-waiting {
     font-family: var(--font-display);
-    font-size: clamp(0.65rem, 2.6vw, 0.8rem);
+    font-size: clamp(0.58rem, 2.2vw, 0.72rem);
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -198,20 +222,14 @@
 
   .jl-timer-cluster {
     display: inline-flex;
-    flex-shrink: 0;
-    flex-direction: row;
-    align-items: baseline;
-    justify-content: flex-end;
-    gap: 0.45rem;
+    flex-shrink: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.05rem;
     max-width: 100%;
     min-height: 0;
-  }
-
-  .jl-timer-cluster .jl-ticker-secondary::before {
-    content: "·";
-    margin-right: 0.35rem;
-    font-weight: 700;
-    color: oklch(from var(--color-ink-muted) l c h / 0.85);
+    min-width: 0;
   }
 
   .jl-timer-cancel {
@@ -238,20 +256,38 @@
   }
 
   .jl-status-header-col--timer .jl-ticker {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.25rem;
     min-height: auto;
+    max-width: 100%;
     border: none;
     background: transparent;
-    padding-inline: 0;
-    font-size: clamp(0.8rem, 3.2vw, 1.05rem);
-    line-height: 1.1;
+    padding: 0;
+    font-size: clamp(0.68rem, 2.6vw, 0.88rem);
+    line-height: 1.05;
     color: var(--color-ink);
     animation: none;
   }
 
+  .jl-status-header-col--timer .jl-ticker-phase {
+    font-size: 0.5rem;
+    letter-spacing: 0.06em;
+  }
+
   .jl-status-header-col--timer .jl-ticker-secondary {
     min-height: auto;
-    font-size: clamp(0.55rem, 2.2vw, 0.7rem);
+    font-size: clamp(0.48rem, 1.8vw, 0.58rem);
+    line-height: 1;
     color: var(--color-ink-muted);
+  }
+
+  .jl-status-header-col--timer .btn-primary {
+    min-height: 2.25rem;
+    height: 2.25rem;
+    padding-inline: 0.625rem;
+    font-size: 0.6875rem;
   }
 
   .jl-status-header-col--timer .jl-ticker-question {
