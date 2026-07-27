@@ -120,13 +120,6 @@
     flex-shrink: 0;
   }
 
-  .jl-status-header-brand .map-hud-home {
-    min-height: 2.5rem;
-    min-width: 2.5rem;
-    height: 2.5rem;
-    width: 2.5rem;
-  }
-
   .jl-status-header-brand-text {
     display: flex;
     min-width: 0;
@@ -281,13 +274,6 @@
     font-size: clamp(0.48rem, 1.8vw, 0.58rem);
     line-height: 1;
     color: var(--color-ink-muted);
-  }
-
-  .jl-status-header-col--timer .btn-primary {
-    min-height: 2.25rem;
-    height: 2.25rem;
-    padding-inline: 0.625rem;
-    font-size: 0.6875rem;
   }
 
   .jl-status-header-col--timer .jl-ticker-question {
