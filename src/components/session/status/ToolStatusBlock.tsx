@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { MapTool } from "../../../state/sessionStore";
 import type {
   PendingQuestionRecord,
@@ -38,6 +39,8 @@ interface ToolStatusBlockProps {
   onOpenTimerMenu: () => void;
   /** Show role + mode inline (desktop ops status). */
   expanded?: boolean;
+  /** Home / leave control rendered leading in the brand cell. */
+  headerLeading?: ReactNode;
 }
 
 function phaseLabel(
@@ -71,6 +74,7 @@ export function ToolStatusBlock({
   timerMenuOpen,
   onOpenTimerMenu,
   expanded = false,
+  headerLeading,
 }: ToolStatusBlockProps) {
   void _activeTool;
   void expanded;
@@ -83,6 +87,7 @@ export function ToolStatusBlock({
   return (
     <div className="jl-status-header">
       <div className="jl-status-header-brand">
+        {headerLeading}
         <span className="jl-status-header-brand-mark" aria-hidden>
           ▸
         </span>

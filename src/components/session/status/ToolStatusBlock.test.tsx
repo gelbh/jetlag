@@ -37,6 +37,35 @@ describe("ToolStatusBlock", () => {
     expect(screen.queryByText(/LIVE OPS/i)).not.toBeInTheDocument();
   });
 
+  it("renders headerLeading home control in the brand cell", () => {
+    render(
+      <ToolStatusBlock
+        sessionCode="ABCD"
+        playerRole="seeker"
+        activeTool="none"
+        timerState={timerState}
+        timerRunning={false}
+        timerHasStarted={false}
+        timerSyncing={false}
+        canStartGame={false}
+        onStartGame={vi.fn()}
+        sessionRules={{ gameSize: "medium" }}
+        pendingQuestions={[]}
+        timerMenuOpen={false}
+        onOpenTimerMenu={vi.fn()}
+        headerLeading={
+          <button type="button" aria-label="Home">
+            Home
+          </button>
+        }
+      />,
+    );
+
+    const home = screen.getByRole("button", { name: "Home" });
+    expect(home).toBeInTheDocument();
+    expect(home.closest(".jl-status-header-brand")).toBeTruthy();
+  });
+
   it("shows OPERATION session code and PHASE dash before start", () => {
     render(
       <ToolStatusBlock
