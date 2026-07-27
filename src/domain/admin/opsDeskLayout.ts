@@ -453,6 +453,24 @@ export function movePresetToIndex(
   return next;
 }
 
+/**
+ * Drop `fromId` onto `targetId` in the strip (HTML5 DnD).
+ * `movePresetToIndex` uses a post-removal index; normalize so forward drops land
+ * on the target slot instead of one past it.
+ */
+export function movePresetOntoId(
+  orderedIds: string[],
+  fromId: string,
+  targetId: string,
+): string[] | null {
+  if (fromId === targetId) return null;
+  const fromIndex = orderedIds.indexOf(fromId);
+  const targetIndex = orderedIds.indexOf(targetId);
+  if (fromIndex < 0 || targetIndex < 0) return null;
+  const toIndex = fromIndex < targetIndex ? targetIndex - 1 : targetIndex;
+  return movePresetToIndex(orderedIds, fromId, toIndex);
+}
+
 export function defaultOpsDeskLayout(): DeskLayout {
   return cloneLayout(SESSION_WATCH_LAYOUT);
 }

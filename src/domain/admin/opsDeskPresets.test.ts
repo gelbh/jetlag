@@ -4,6 +4,7 @@ import {
   OPS_OVERVIEW_LAYOUT,
   cloneLayout,
   deleteUserPreset,
+  movePresetOntoId,
   movePresetOrder,
   movePresetToIndex,
   presetLabel,
@@ -78,6 +79,32 @@ describe("opsDeskPresets", () => {
     expect(movePresetOrder(order, "a", 1.5)).toBeNull();
     expect(movePresetOrder(order, "a", Number.NaN)).toBeNull();
     expect(order).toEqual(["a", "b", "c"]);
+  });
+
+  it("drops onto a target without forward off-by-one", () => {
+    const order = ["session-watch", "incident-triage", "ops-overview", "custom"];
+    // Forward: land on the drop target's slot, not one past it.
+    expect(movePresetOntoId(order, "session-watch", "ops-overview")).toEqual([
+      "incident-triage",
+      "session-watch",
+      "ops-overview",
+      "custom",
+    ]);
+    // Backward: still lands at the target.
+    expect(movePresetOntoId(order, "ops-overview", "session-watch")).toEqual([
+      "ops-overview",
+      "session-watch",
+      "incident-triage",
+      "custom",
+    ]);
+    expect(movePresetOntoId(order, "session-watch", "session-watch")).toBeNull();
+    expect(movePresetOntoId(order, "missing", "ops-overview")).toBeNull();
+    expect(order).toEqual([
+      "session-watch",
+      "incident-triage",
+      "ops-overview",
+      "custom",
+    ]);
   });
 });
 

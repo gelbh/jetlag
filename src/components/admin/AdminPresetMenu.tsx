@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type DragEvent } from "react";
 import {
   BUILTIN_PRESETS,
   CUSTOM_PRESET_ID,
-  movePresetToIndex,
+  movePresetOntoId,
   presetLabel,
   type DeskPreset,
 } from "../../domain/admin/opsDeskLayout";
@@ -116,8 +116,7 @@ export function AdminPresetMenu({
     const fromId =
       event.dataTransfer.getData(PRESET_MIME) || dragFromIdRef.current;
     if (!fromId || fromId === targetId) return;
-    const toIndex = orderedIds.indexOf(targetId);
-    const next = movePresetToIndex(orderedIds, fromId, toIndex);
+    const next = movePresetOntoId(orderedIds, fromId, targetId);
     if (next) onReorderPresets(next);
   };
 
