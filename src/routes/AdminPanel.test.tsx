@@ -222,6 +222,12 @@ describe("AdminPanel", () => {
       "data-layout",
       "desktop",
     );
+    expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    expect(screen.queryByRole("banner", { name: /screen header/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /←\s*back/i })).toBeNull();
   });
 
   it("loads more sessions from the list footer", () => {

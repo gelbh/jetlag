@@ -707,9 +707,13 @@ export function AdminOpsDesk() {
 
   return (
     <EntryScreenLayout justify="start" viewport={isDesktop}>
-      <ScreenHeader backTo="/" backLabel="Back" />
+      {isDesktop ? null : <ScreenHeader backTo="/" backLabel="Back" />}
       <div
-        className={`jl-ops-desk ${screenHeaderOffsetClassName}`}
+        className={
+          isDesktop
+            ? "jl-ops-desk"
+            : `jl-ops-desk ${screenHeaderOffsetClassName}`
+        }
         data-testid="admin-ops-desk"
         data-layout={isDesktop ? "desktop" : "mobile"}
       >
