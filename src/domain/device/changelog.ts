@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.10.6";
+export const APP_VERSION = "0.10.7";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.10.7",
+    date: "2026-07-27",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Map: home control sits in the status-bar brand cell, and dual timers share one row so the header no longer grows",
+        ],
+      }
+    ],
+  },
   {
     version: "0.10.6",
     date: "2026-07-27",
