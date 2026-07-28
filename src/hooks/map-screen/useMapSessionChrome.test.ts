@@ -13,12 +13,17 @@ const mockCancelWalkingThermometersAndAnnounce = vi.hoisted(() =>
   vi.fn(async () => undefined),
 );
 const mockCaptureException = vi.hoisted(() => vi.fn());
+const mockTrackSessionEnded = vi.hoisted(() => vi.fn());
 const mockLeaveHostSession = vi.hoisted(() =>
   vi.fn(async (): Promise<
     { action: "ended" } | { action: "promoted"; newHostUid: string }
   > => ({ action: "ended" })),
 );
-const mockEndSession = vi.hoisted(() => vi.fn(async () => undefined));
+const mockEndSession = vi.hoisted(() =>
+  vi.fn(async () => {
+    mockTrackSessionEnded("host_end");
+  }),
+);
 const mockEndRemoteSession = vi.hoisted(() => vi.fn(async () => undefined));
 
 vi.mock("../session/useSessionExit", () => ({
@@ -31,6 +36,10 @@ vi.mock("../../services/core/firebase", () => ({
 
 vi.mock("../../services/core/sentry", () => ({
   captureException: mockCaptureException,
+}));
+
+vi.mock("../../services/core/analytics", () => ({
+  trackSessionEnded: mockTrackSessionEnded,
 }));
 
 vi.mock("../../services/session/sessionLifecycle", () => ({
@@ -117,8 +126,13 @@ describe("useMapSessionChrome", () => {
     mockCancelWalkingThermometersAndAnnounce.mockClear();
     mockCaptureException.mockClear();
     mockLeaveHostSession.mockClear();
+    mockLeaveHostSession.mockResolvedValue({ action: "ended" });
     mockEndSession.mockClear();
+    mockEndSession.mockImplementation(async () => {
+      mockTrackSessionEnded("host_end");
+    });
     mockEndRemoteSession.mockClear();
+    mockTrackSessionEnded.mockClear();
   });
 
   it("does not clear the map while end game is active", () => {
@@ -370,9 +384,64 @@ describe("useMapSessionChrome", () => {
     });
 
     expect(mockEndSession).toHaveBeenCalledWith("session-remote");
+    expect(mockTrackSessionEnded).toHaveBeenCalledOnce();
+    expect(mockTrackSessionEnded).toHaveBeenCalledWith("host_end");
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "end", sessionId: "session-remote" }),
     );
+  });
+
+  it("tracks host_leave_ended when alone host leave ends the session", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: remoteSession,
+        isHost: true,
+        annotations: [],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleLeaveSession();
+    });
+
+    expect(mockLeaveHostSession).toHaveBeenCalledWith("session-remote");
+    expect(mockTrackSessionEnded).toHaveBeenCalledOnce();
+    expect(mockTrackSessionEnded).toHaveBeenCalledWith("host_leave_ended");
+  });
+
+  it("tracks fallback_client_end when host end falls back to client write", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    mockEndSession.mockRejectedValueOnce(new Error("functions unavailable"));
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: remoteSession,
+        isHost: true,
+        annotations: [],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleEndSession();
+    });
+
+    expect(mockEndRemoteSession).toHaveBeenCalledWith("session-remote");
+    expect(mockTrackSessionEnded).toHaveBeenCalledOnce();
+    expect(mockTrackSessionEnded).toHaveBeenCalledWith("fallback_client_end");
   });
 
   it("confirms promote copy when host leave has another player", async () => {
@@ -411,6 +480,7 @@ describe("useMapSessionChrome", () => {
       "Another player will become host so others can keep playing. Leave anyway?",
     );
     expect(mockLeaveHostSession).toHaveBeenCalledWith("session-remote");
+    expect(mockTrackSessionEnded).not.toHaveBeenCalled();
   });
 
   it("skips host leave callable when session hostUid is not the current user", async () => {
@@ -481,6 +551,8 @@ describe("useMapSessionChrome", () => {
 
     expect(mockCaptureException).not.toHaveBeenCalled();
     expect(alertSpy).not.toHaveBeenCalled();
+    expect(mockTrackSessionEnded).toHaveBeenCalledOnce();
+    expect(mockTrackSessionEnded).toHaveBeenCalledWith("expected_already_ended");
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
     );
@@ -515,6 +587,8 @@ describe("useMapSessionChrome", () => {
 
     expect(mockCaptureException).not.toHaveBeenCalled();
     expect(mockEndRemoteSession).not.toHaveBeenCalled();
+    expect(mockTrackSessionEnded).toHaveBeenCalledOnce();
+    expect(mockTrackSessionEnded).toHaveBeenCalledWith("expected_already_ended");
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "end", sessionId: "session-remote" }),
     );
@@ -552,6 +626,8 @@ describe("useMapSessionChrome", () => {
 
     expect(ensureSpy).not.toHaveBeenCalled();
     expect(mockLeaveHostSession).not.toHaveBeenCalled();
+    expect(mockTrackSessionEnded).toHaveBeenCalledOnce();
+    expect(mockTrackSessionEnded).toHaveBeenCalledWith("local");
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "leave", sessionId: LOCAL_SESSION_ID }),
     );
