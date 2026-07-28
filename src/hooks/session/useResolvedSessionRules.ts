@@ -8,7 +8,9 @@ import {
 } from "../../domain/session/sessionRules";
 import { isKnownRegionPack } from "../../domain/regions/regionPackRegistry";
 import {
+  isPlayAreaReadySync,
   matchingAreasCacheKey,
+  peekResolvedPlayArea,
   playAreaCacheKey,
   resolveSessionMatchingAreas,
   resolveSessionPlayArea,
@@ -75,7 +77,12 @@ export function useResolvedSessionRules(
             Boolean(session.customMatchingAreas?.[8] && session.customMatchingAreas?.[9]),
           )
         : "",
-    [session],
+    [
+      session?.regionPackId,
+      session?.regionPackSubregionId,
+      session?.customMatchingAreas?.[8],
+      session?.customMatchingAreas?.[9],
+    ],
   );
 
   const playAreaCacheKeyValue = useMemo(
@@ -83,7 +90,7 @@ export function useResolvedSessionRules(
       session
         ? playAreaCacheKey(session.regionPackId, session.regionPackSubregionId)
         : "",
-    [session],
+    [session?.regionPackId, session?.regionPackSubregionId],
   );
 
   const needsAsyncResolve = sessionNeedsAsyncMatchingAreas(session);
@@ -93,38 +100,48 @@ export function useResolvedSessionRules(
     SessionRulesInput["customMatchingAreas"]
   >(undefined);
   const [resolvedGameArea, setResolvedGameArea] = useState<GameArea | undefined>(
-    undefined,
+    () => peekResolvedPlayArea(session),
   );
   const [matchingAreasError, setMatchingAreasError] = useState<string | null>(
     null,
   );
 
   useEffect(() => {
-    if (!session) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset when session clears
-      setResolvedAreas(undefined);
-      setMatchingAreasError(null);
-      return;
-    }
-
-    if (!needsAsyncResolve) {
+    if (!needsAsyncResolve || !playAreaCacheKeyValue) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset when resolve not needed
       setResolvedAreas(undefined);
       setMatchingAreasError(null);
       return;
     }
 
     let cancelled = false;
+    const expectedKey = areasCacheKey;
 
     void (async () => {
       try {
-        const areas = await resolveSessionMatchingAreas(session);
-        if (!cancelled) {
+        // Read session at start; discard if pack key churned away.
+        const snapshot = session;
+        if (!snapshot) {
+          return;
+        }
+        const areas = await resolveSessionMatchingAreas(snapshot);
+        if (
+          !cancelled &&
+          matchingAreasCacheKey(
+            snapshot.regionPackId,
+            snapshot.regionPackSubregionId,
+            Boolean(
+              snapshot.customMatchingAreas?.[8] &&
+                snapshot.customMatchingAreas?.[9],
+            ),
+          ) === expectedKey
+        ) {
           setResolvedAreas(areas);
           setMatchingAreasError(null);
         }
       } catch {
         if (!cancelled) {
-          setResolvedAreas(session.customMatchingAreas);
+          setResolvedAreas(session?.customMatchingAreas);
           setMatchingAreasError(
             "Bundled admin categories could not load. Matching may be limited until you retry.",
           );
@@ -135,31 +152,44 @@ export function useResolvedSessionRules(
     return () => {
       cancelled = true;
     };
-  }, [areasCacheKey, needsAsyncResolve, session]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pack-key only; session churn must not cancel
+  }, [areasCacheKey, needsAsyncResolve]);
 
   useEffect(() => {
-    if (!session) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset when session clears
+    if (!needsPlayAreaResolve || !playAreaCacheKeyValue) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset when resolve not needed
       setResolvedGameArea(undefined);
       return;
     }
 
-    if (!needsPlayAreaResolve) {
-      setResolvedGameArea(undefined);
+    const peeked = peekResolvedPlayArea(session);
+    if (peeked) {
+      setResolvedGameArea(peeked);
       return;
     }
 
     let cancelled = false;
+    const expectedKey = playAreaCacheKeyValue;
+    const snapshot = session;
 
     void (async () => {
+      if (!snapshot) {
+        return;
+      }
       try {
-        const playArea = await resolveSessionPlayArea(session);
-        if (!cancelled) {
+        const playArea = await resolveSessionPlayArea(snapshot);
+        if (
+          !cancelled &&
+          playAreaCacheKey(
+            snapshot.regionPackId,
+            snapshot.regionPackSubregionId,
+          ) === expectedKey
+        ) {
           setResolvedGameArea(playArea);
         }
       } catch {
         if (!cancelled) {
-          setResolvedGameArea(session.gameArea);
+          setResolvedGameArea(snapshot.gameArea);
         }
       }
     })();
@@ -167,7 +197,8 @@ export function useResolvedSessionRules(
     return () => {
       cancelled = true;
     };
-  }, [needsPlayAreaResolve, playAreaCacheKeyValue, session]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pack-key only; session churn must not cancel
+  }, [needsPlayAreaResolve, playAreaCacheKeyValue]);
 
   const sessionRules = useMemo(
     () =>
@@ -177,7 +208,8 @@ export function useResolvedSessionRules(
     [baseRules, resolvedAreas],
   );
 
-  const gameArea = resolvedGameArea ?? session?.gameArea ?? null;
+  const gameArea =
+    resolvedGameArea ?? peekResolvedPlayArea(session) ?? session?.gameArea ?? null;
 
   const matchingAreasReady =
     !session ||
@@ -188,7 +220,8 @@ export function useResolvedSessionRules(
   const playAreaReady =
     !session ||
     !needsPlayAreaResolve ||
-    resolvedGameArea !== undefined;
+    resolvedGameArea !== undefined ||
+    isPlayAreaReadySync(session);
 
   return {
     sessionRules,
