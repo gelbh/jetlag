@@ -25,7 +25,7 @@ describe("useResolvedSessionRules play area readiness", () => {
     vi.mocked(regionPackBoundaries.loadRegionPackPlayArea).mockReset();
     vi.mocked(regionPackBoundaries.loadRegionPackMatchingAreas).mockReset();
     vi.mocked(regionPackBoundaries.loadRegionPackMatchingAreas).mockResolvedValue(
-      undefined,
+      undefined as never,
     );
   });
 
