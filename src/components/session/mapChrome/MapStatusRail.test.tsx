@@ -39,4 +39,37 @@ describe("MapStatusRail header home", () => {
     const home = screen.getByRole("link", { name: "Home" });
     expect(home.closest(".jl-status-header-brand")).toBeTruthy();
   });
+
+  it("keeps probe A composition with stamp-code and below-bar sync", () => {
+    const { container } = render(
+      <MemoryRouter>
+        <RouteTransitionProvider>
+          <MapStatusRail
+            sessionCode="ABCD"
+            activeTool="none"
+            syncStatus="synced"
+            queuedWrites={0}
+            timerState={{ accumulatedMs: 0, runningSince: null }}
+            timerRunning={false}
+            timerHasStarted={false}
+            canStartGame
+            onStartGame={vi.fn()}
+            onTimerStart={vi.fn()}
+            onTimerPause={vi.fn()}
+            onTimerReset={vi.fn()}
+          />
+        </RouteTransitionProvider>
+      </MemoryRouter>,
+    );
+
+    expect(container.querySelector(".jl-status-header")).toBeTruthy();
+    expect(screen.getByText("ABCD").closest(".jl-stamp-code")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /start/i }).className).toContain(
+      "jl-status-header-start",
+    );
+    expect(container.querySelector(".jl-sync-map-indicator")).toBeTruthy();
+    expect(
+      container.querySelector(".jl-sync-map-indicator")?.closest(".jl-status-header"),
+    ).toBeNull();
+  });
 });
