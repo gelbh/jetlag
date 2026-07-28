@@ -17,15 +17,75 @@ const EXPECTED_HTTPS_ERROR_KEYS = new Set([
 let initialized = false;
 
 /**
+ * Upstream fetch timeout / client disconnect aborts — not product bugs.
+ * JETLAG-T: AbortError on POST /overpass (Cloud Functions), often with HTTP 200
+ * after failover success while an aborted attempt was still reported.
+ * @param {unknown} error
+ * @returns {boolean}
+ */
+export function isAbortErrorNoise(error) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const name = "name" in error ? error.name : undefined;
+  if (name === "AbortError") {
+    return true;
+  }
+
+  if (
+    typeof DOMException !== "undefined" &&
+    error instanceof DOMException &&
+    error.name === "AbortError"
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * @param {unknown} error
  * @returns {boolean}
  */
 export function isExpectedFunctionsError(error) {
+  if (isAbortErrorNoise(error)) {
+    return true;
+  }
+
   if (!(error instanceof HttpsError)) {
     return false;
   }
 
   return EXPECTED_HTTPS_ERROR_KEYS.has(`${error.code}:${error.message}`);
+}
+
+/**
+ * @param {import("@sentry/node").ErrorEvent} event
+ * @returns {boolean}
+ */
+function isAbortErrorEvent(event) {
+  for (const exception of event.exception?.values ?? []) {
+    if (exception.type === "AbortError") {
+      return true;
+    }
+    if (
+      typeof exception.value === "string" &&
+      /operation was aborted/i.test(exception.value)
+    ) {
+      return true;
+    }
+  }
+
+  if (
+    typeof event.message === "string" &&
+    (/AbortError/i.test(event.message) ||
+      /operation was aborted/i.test(event.message))
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 function readAppVersion() {
@@ -59,6 +119,12 @@ export function initFunctionsSentry() {
     environment: "production",
     release: `jetlag@${readAppVersion()}`,
     tracesSampleRate: 0.1,
+    beforeSend(event) {
+      if (isAbortErrorEvent(event)) {
+        return null;
+      }
+      return event;
+    },
   });
   initialized = true;
 }
