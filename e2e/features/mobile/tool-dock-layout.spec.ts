@@ -5,6 +5,7 @@ import {
   placePin,
   prepareE2EPage,
   readToolDockOverflowMetrics,
+  readVisibleToolDockLabelMetrics,
   injectSimulatedSafeAreaBottom,
   injectSimulatedSafeAreaTop,
   SIMULATED_SAFE_AREA_BOTTOM_PX,
@@ -38,6 +39,41 @@ test.describe("mobile tool dock", () => {
 
     expect(metrics.overflowSlots).toBe(0);
     expect(metrics.barRight).toBeLessThanOrEqual(metrics.viewportWidth);
+  });
+
+  test("shows short labels on every visible dock slot at 320px", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await openMapWithLocalSession(page);
+
+    const labels = await readVisibleToolDockLabelMetrics(page);
+
+    expect(labels.length).toBeGreaterThan(0);
+    for (const label of labels) {
+      expect(label.display).not.toBe("none");
+      expect(label.text.length).toBeGreaterThan(0);
+      expect(label.slotHeight).toBeGreaterThanOrEqual(43);
+    }
+    expect(labels.some((label) => label.text === "Match")).toBe(true);
+    expect(labels.some((label) => label.text === "More")).toBe(true);
+  });
+
+  test("shows short labels on every visible dock slot at 390px", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openMapWithLocalSession(page);
+
+    const labels = await readVisibleToolDockLabelMetrics(page);
+
+    expect(labels.length).toBeGreaterThan(0);
+    for (const label of labels) {
+      expect(label.display).not.toBe("none");
+      expect(label.text.length).toBeGreaterThan(0);
+    }
+    expect(labels.some((label) => label.text === "Measure")).toBe(true);
+    expect(labels.some((label) => label.text === "More")).toBe(true);
   });
 
   test("supports undo from the overflow sheet after placing a pin", async ({
@@ -162,7 +198,7 @@ test.describe("iPhone 13 PWA safe area", () => {
     expect(Math.abs(metrics.mapBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
       2,
     );
-    expect(metrics.barHeight).toBeLessThanOrEqual(60);
+    expect(metrics.barHeight).toBeLessThanOrEqual(64);
     expect(metrics.deadSpaceBelowIcons).toBeLessThanOrEqual(8);
   });
 
