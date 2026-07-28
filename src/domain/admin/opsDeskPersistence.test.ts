@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
-  BUILTIN_PRESETS,
   CUSTOM_PRESET_ID,
-  OPS_OVERVIEW_LAYOUT,
+  FORMER_BUILTIN_IDS,
   cloneLayout,
+  defaultScratchLayout,
+  layoutForFormerBuiltinId,
   type DeskLayout,
 } from "./opsDeskLayout";
 import {
@@ -24,17 +25,31 @@ describe("opsDeskPersistence", () => {
     expect(storageKey("uid-abc")).toBe("jetlag.adminOpsDesk.v1:uid-abc");
   });
 
-  it("round-trips save/load", () => {
+  it("cold-starts Scratch with no former builtin ids", () => {
+    const store = defaultOpsDeskStore();
+    expect(store.activePresetId).toBe(CUSTOM_PRESET_ID);
+    expect(store.defaultPresetId).toBe(CUSTOM_PRESET_ID);
+    expect(store.presetOrder).toEqual([CUSTOM_PRESET_ID]);
+    for (const id of FORMER_BUILTIN_IDS) {
+      expect(store.presetOrder).not.toContain(id);
+    }
+    expect(store.customLayout.stacks.map((s) => s.panelIds[0])).toEqual(
+      defaultScratchLayout().stacks.map((s) => s.panelIds[0]),
+    );
+  });
+
+  it("round-trips save/load without reintroducing builtins", () => {
+    const overview = layoutForFormerBuiltinId("ops-overview")!;
     const store = defaultOpsDeskStore();
     store.activePresetId = CUSTOM_PRESET_ID;
     store.defaultPresetId = CUSTOM_PRESET_ID;
-    store.customLayout = cloneLayout(OPS_OVERVIEW_LAYOUT);
+    store.customLayout = cloneLayout(overview);
     store.userPresets = [
       {
         id: "user-night",
         name: "Night shift",
         kind: "user",
-        layout: cloneLayout(OPS_OVERVIEW_LAYOUT),
+        layout: cloneLayout(overview),
       },
     ];
     store.presetOrder = [
@@ -51,7 +66,7 @@ describe("opsDeskPersistence", () => {
 
     expect(loaded.activePresetId).toBe(CUSTOM_PRESET_ID);
     expect(loaded.defaultPresetId).toBe(CUSTOM_PRESET_ID);
-    expect(loaded.presetOrder[0]).toBe("ops-overview");
+    expect(loaded.presetOrder).toEqual([CUSTOM_PRESET_ID, "user-night"]);
     expect(loaded.customLayout.stacks.map((s) => s.panelIds)).toEqual(
       store.customLayout.stacks.map((s) => s.panelIds),
     );
@@ -60,7 +75,45 @@ describe("opsDeskPersistence", () => {
     expect(loaded.lastMobilePanelId).toBe("inbox");
   });
 
-  it("migrates legacy 12-col stores and fills defaultPresetId", () => {
+  it("migrates defaultPresetId session-watch to Scratch with cloned layout", () => {
+    const expected = layoutForFormerBuiltinId("session-watch")!;
+    localStorage.setItem(
+      storageKey(null),
+      JSON.stringify({
+        version: 1,
+        activePresetId: "session-watch",
+        defaultPresetId: "session-watch",
+        customLayout: {
+          cols: 24,
+          rowHeight: 24,
+          stacks: [
+            {
+              id: "a",
+              panelIds: ["inbox"],
+              activeIndex: 0,
+              x: 0,
+              y: 0,
+              w: 6,
+              h: 4,
+            },
+          ],
+          hiddenPanelIds: [],
+        },
+        userPresets: [],
+        presetOrder: ["session-watch", "incident-triage", CUSTOM_PRESET_ID],
+      }),
+    );
+
+    const loaded = loadOpsDeskStore(null);
+    expect(loaded.activePresetId).toBe(CUSTOM_PRESET_ID);
+    expect(loaded.defaultPresetId).toBe(CUSTOM_PRESET_ID);
+    expect(loaded.presetOrder).toEqual([CUSTOM_PRESET_ID]);
+    expect(loaded.customLayout.stacks.map((s) => s.panelIds)).toEqual(
+      expected.stacks.map((s) => s.panelIds),
+    );
+  });
+
+  it("migrates legacy 12-col stores and fills defaultPresetId as Scratch", () => {
     localStorage.setItem(
       storageKey(null),
       JSON.stringify({
@@ -87,48 +140,69 @@ describe("opsDeskPersistence", () => {
     );
 
     const loaded = loadOpsDeskStore(null);
-    expect(loaded.defaultPresetId).toBe(BUILTIN_PRESETS[0]!.id);
-    expect(loaded.presetOrder).toContain(CUSTOM_PRESET_ID);
+    expect(loaded.defaultPresetId).toBe(CUSTOM_PRESET_ID);
+    expect(loaded.presetOrder).toEqual([CUSTOM_PRESET_ID]);
     expect(loaded.customLayout.cols).toBe(24);
     expect(loaded.customLayout.stacks[0]).toMatchObject({ x: 0, w: 12 });
   });
 
-  it("coldStartOpsDeskStore opens defaultPresetId", () => {
+  it("coldStartOpsDeskStore opens defaultPresetId after migrate", () => {
     localStorage.setItem(
       storageKey(null),
       JSON.stringify({
         version: 1,
         activePresetId: CUSTOM_PRESET_ID,
         defaultPresetId: "ops-overview",
-        customLayout: cloneLayout(OPS_OVERVIEW_LAYOUT),
+        customLayout: defaultScratchLayout(),
         userPresets: [],
       }),
     );
     const started = coldStartOpsDeskStore(null);
-    expect(started.defaultPresetId).toBe("ops-overview");
-    expect(started.activePresetId).toBe("ops-overview");
+    expect(started.defaultPresetId).toBe(CUSTOM_PRESET_ID);
+    expect(started.activePresetId).toBe(CUSTOM_PRESET_ID);
+    expect(started.customLayout.stacks.map((s) => s.panelIds)).toEqual(
+      layoutForFormerBuiltinId("ops-overview")!.stacks.map((s) => s.panelIds),
+    );
   });
 
-  it("falls back invalid defaultPresetId to builtin", () => {
+  it("falls back invalid defaultPresetId to Scratch", () => {
     localStorage.setItem(
       storageKey(null),
       JSON.stringify({
         version: 1,
-        activePresetId: "session-watch",
+        activePresetId: CUSTOM_PRESET_ID,
         defaultPresetId: "missing-preset",
-        customLayout: cloneLayout(OPS_OVERVIEW_LAYOUT),
+        customLayout: defaultScratchLayout(),
         userPresets: [],
       }),
     );
     const loaded = loadOpsDeskStore(null);
-    expect(loaded.defaultPresetId).toBe(BUILTIN_PRESETS[0]!.id);
+    expect(loaded.defaultPresetId).toBe(CUSTOM_PRESET_ID);
   });
 
-  it("returns builtins default on corrupt JSON", () => {
+  it("returns Scratch default on corrupt JSON", () => {
     localStorage.setItem(storageKey(null), "{not-json");
     const loaded = loadOpsDeskStore(null);
     expect(loaded).toEqual(defaultOpsDeskStore());
-    expect(loaded.activePresetId).toBe(BUILTIN_PRESETS[0]!.id);
+    expect(loaded.activePresetId).toBe(CUSTOM_PRESET_ID);
+  });
+
+  it("preserves optional monitor field on layouts", () => {
+    const layout = defaultScratchLayout();
+    layout.monitor = { cols: 8, stacks: [{ id: "map" }] };
+    saveOpsDeskStore(null, {
+      version: 1,
+      activePresetId: CUSTOM_PRESET_ID,
+      defaultPresetId: CUSTOM_PRESET_ID,
+      presetOrder: [CUSTOM_PRESET_ID],
+      customLayout: layout,
+      userPresets: [],
+    });
+    const loaded = loadOpsDeskStore(null);
+    expect(loaded.customLayout.monitor).toEqual({
+      cols: 8,
+      stacks: [{ id: "map" }],
+    });
   });
 
   it("strips unknown panel ids from stacks and hidden lists", () => {
@@ -163,7 +237,7 @@ describe("opsDeskPersistence", () => {
       activePresetId: CUSTOM_PRESET_ID,
       defaultPresetId: CUSTOM_PRESET_ID,
       presetOrder: [
-        ...BUILTIN_PRESETS.map((p) => p.id),
+        ...FORMER_BUILTIN_IDS,
         CUSTOM_PRESET_ID,
         "user-x",
       ],
@@ -179,6 +253,7 @@ describe("opsDeskPersistence", () => {
     });
 
     const loaded = loadOpsDeskStore(null);
+    expect(loaded.presetOrder).toEqual([CUSTOM_PRESET_ID, "user-x"]);
     expect(loaded.customLayout.stacks).toHaveLength(1);
     expect(loaded.customLayout.stacks[0]?.panelIds).toEqual([
       "sessions",
