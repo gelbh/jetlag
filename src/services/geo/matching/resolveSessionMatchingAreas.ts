@@ -30,6 +30,9 @@ function bundledGeoRevisionIsCurrent(
 
 const resolvedMatchingAreasCache = new Map<string, CustomMatchingAreasByLevel>();
 const resolvedPlayAreaCache = new Map<string, GameArea>();
+const inFlightPlayAreaLoads = new Map<string, Promise<GameArea>>();
+/** Pack keys that failed to load — ready for settle, but no geometry cached. */
+const failedPlayAreaKeys = new Set<string>();
 
 export function matchingAreasCacheKey(
   regionPackId: RegionPackId | undefined,
@@ -58,6 +61,8 @@ export function playAreaCacheKey(
 export function clearResolvedMatchingAreasCacheForTests(): void {
   resolvedMatchingAreasCache.clear();
   resolvedPlayAreaCache.clear();
+  inFlightPlayAreaLoads.clear();
+  failedPlayAreaKeys.clear();
 }
 
 export type SessionMatchingAreasInput = Pick<
@@ -119,7 +124,25 @@ export function isPlayAreaReadySync(
   }
 
   const cacheKey = playAreaCacheKey(packId, session.regionPackSubregionId);
-  return resolvedPlayAreaCache.has(cacheKey);
+  return (
+    resolvedPlayAreaCache.has(cacheKey) || failedPlayAreaKeys.has(cacheKey)
+  );
+}
+
+export function peekResolvedPlayArea(
+  session: SessionPlayAreaInput | null | undefined,
+): GameArea | undefined {
+  if (!session) {
+    return undefined;
+  }
+
+  const packId = session.regionPackId;
+  if (!isKnownRegionPack(packId)) {
+    return undefined;
+  }
+
+  const cacheKey = playAreaCacheKey(packId, session.regionPackSubregionId);
+  return resolvedPlayAreaCache.get(cacheKey);
 }
 
 export async function resolveSessionPlayArea(
@@ -136,10 +159,34 @@ export async function resolveSessionPlayArea(
     return cached;
   }
 
-  const playArea = await loadRegionPackPlayArea(
-    packId,
-    session.regionPackSubregionId,
-  );
-  resolvedPlayAreaCache.set(cacheKey, playArea);
-  return playArea;
+  const inFlight = inFlightPlayAreaLoads.get(cacheKey);
+  if (inFlight) {
+    return inFlight;
+  }
+
+  // Register the in-flight promise before invoking the loader so concurrent
+  // callers coalesce even if the loader starts synchronously.
+  let settle!: (value: GameArea) => void;
+  const loadPromise = new Promise<GameArea>((resolve) => {
+    settle = resolve;
+  });
+  inFlightPlayAreaLoads.set(cacheKey, loadPromise);
+
+  void loadRegionPackPlayArea(packId, session.regionPackSubregionId).then(
+    (playArea) => {
+      failedPlayAreaKeys.delete(cacheKey);
+      resolvedPlayAreaCache.set(cacheKey, playArea);
+      settle(playArea);
+    },
+    () => {
+      // Mark ready without caching session.gameArea under the pack key —
+      // fallback geometry is session-specific and must not poison other sessions.
+      failedPlayAreaKeys.add(cacheKey);
+      settle(session.gameArea);
+    },
+  ).finally(() => {
+    inFlightPlayAreaLoads.delete(cacheKey);
+  });
+
+  return loadPromise;
 }
