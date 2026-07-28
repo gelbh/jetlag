@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type DragEvent } from "react";
 import {
-  BUILTIN_PRESETS,
   CUSTOM_PRESET_ID,
   movePresetOntoId,
   presetLabel,
@@ -39,10 +38,7 @@ export function AdminPresetMenu({
 }: AdminPresetMenuProps) {
   const userIds = new Set(userPresets.map((p) => p.id));
   const orderedIds = (presetOrder ?? []).filter(
-    (id) =>
-      id === CUSTOM_PRESET_ID ||
-      BUILTIN_PRESETS.some((p) => p.id === id) ||
-      userIds.has(id),
+    (id) => id === CUSTOM_PRESET_ID || userIds.has(id),
   );
   const [manageOpen, setManageOpen] = useState(false);
   const [managePos, setManagePos] = useState<{ left: number; top: number } | null>(

@@ -2,9 +2,11 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_COLS,
-  OPS_OVERVIEW_LAYOUT,
   cloneLayout,
+  layoutForFormerBuiltinId,
 } from "../../domain/admin/opsDeskLayout";
+
+const OPS_OVERVIEW_LAYOUT = layoutForFormerBuiltinId("ops-overview")!;
 import {
   AdminGridWorkspace,
 } from "./AdminGridWorkspace";

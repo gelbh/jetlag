@@ -28,16 +28,31 @@ export type DeskLayout = {
   rowHeight: number;
   stacks: GridStack[];
   hiddenPanelIds: PanelId[];
+  /** Nested Monitor WM layout (Track F); ignored until that ships. */
+  monitor?: unknown;
 };
 
 export type DeskPreset = {
   id: string;
   name: string;
-  kind: "builtin" | "user";
+  kind: "user";
   layout: DeskLayout;
 };
 
 export const CUSTOM_PRESET_ID = "custom";
+
+/** Former stock preset ids — invalid after sanitize; migrate source only. */
+export const FORMER_BUILTIN_IDS = [
+  "session-watch",
+  "incident-triage",
+  "ops-overview",
+] as const;
+
+export type FormerBuiltinId = (typeof FORMER_BUILTIN_IDS)[number];
+
+export function isFormerBuiltinId(id: string): id is FormerBuiltinId {
+  return (FORMER_BUILTIN_IDS as readonly string[]).includes(id);
+}
 
 export const DEFAULT_COLS = 24;
 export const DEFAULT_ROW_HEIGHT = 24;
@@ -49,7 +64,7 @@ export function isPanelId(value: unknown): value is PanelId {
 }
 
 export function cloneLayout(layout: DeskLayout): DeskLayout {
-  return {
+  const next: DeskLayout = {
     cols: layout.cols,
     rowHeight: layout.rowHeight,
     stacks: layout.stacks.map((stack) => ({
@@ -58,6 +73,10 @@ export function cloneLayout(layout: DeskLayout): DeskLayout {
     })),
     hiddenPanelIds: [...layout.hiddenPanelIds],
   };
+  if ("monitor" in layout) {
+    next.monitor = layout.monitor;
+  }
+  return next;
 }
 
 function clampActiveIndex(stack: GridStack): GridStack {
@@ -298,7 +317,7 @@ export function showPanel(
 
 /**
  * Ensure inbox/detail/actions are on the grid for deep links.
- * Does not rewrite named/builtin presets — caller flips activePresetId to Custom.
+ * Does not rewrite named presets — caller flips activePresetId to Scratch.
  */
 export function ensureIncidentPanelsVisible(layout: DeskLayout): DeskLayout {
   let next = cloneLayout(layout);
@@ -357,8 +376,8 @@ function layoutFromVisible(
   };
 }
 
-/** Session watch: sessions + monitor dominate; incident panels hidden. */
-export const SESSION_WATCH_LAYOUT: DeskLayout = layoutFromVisible(
+/** Former Session watch geometry — Scratch cold-start / wipe default. */
+const SESSION_WATCH_LAYOUT: DeskLayout = layoutFromVisible(
   [
     makeStack("sessions", "sessions", 0, 0, 14, 10),
     makeStack("monitor", "monitor", 14, 0, 10, 10),
@@ -366,8 +385,8 @@ export const SESSION_WATCH_LAYOUT: DeskLayout = layoutFromVisible(
   ["inbox", "detail", "actions", "settings"],
 );
 
-/** Incident triage: classic three-pane; sessions/monitor/settings hidden. */
-export const INCIDENT_TRIAGE_LAYOUT: DeskLayout = layoutFromVisible(
+/** Former Incident triage — migrate source only. */
+const INCIDENT_TRIAGE_LAYOUT: DeskLayout = layoutFromVisible(
   [
     makeStack("inbox", "inbox", 0, 0, 6, 10),
     makeStack("detail", "detail", 6, 0, 10, 10),
@@ -377,10 +396,10 @@ export const INCIDENT_TRIAGE_LAYOUT: DeskLayout = layoutFromVisible(
 );
 
 /**
- * Ops overview: sessions + inbox left, detail center, actions + monitor right.
+ * Former Ops overview — migrate / multi-panel test fixture source.
  * Settings stays hidden (open from menu).
  */
-export const OPS_OVERVIEW_LAYOUT: DeskLayout = layoutFromVisible(
+const OPS_OVERVIEW_LAYOUT: DeskLayout = layoutFromVisible(
   [
     makeStack("sessions", "sessions", 0, 0, 8, 5),
     makeStack("inbox", "inbox", 0, 5, 8, 5),
@@ -391,35 +410,20 @@ export const OPS_OVERVIEW_LAYOUT: DeskLayout = layoutFromVisible(
   ["settings"],
 );
 
-export const BUILTIN_PRESETS: DeskPreset[] = [
-  {
-    id: "session-watch",
-    name: "Session watch",
-    kind: "builtin",
-    layout: SESSION_WATCH_LAYOUT,
-  },
-  {
-    id: "incident-triage",
-    name: "Incident triage",
-    kind: "builtin",
-    layout: INCIDENT_TRIAGE_LAYOUT,
-  },
-  {
-    id: "ops-overview",
-    name: "Ops overview",
-    kind: "builtin",
-    layout: OPS_OVERVIEW_LAYOUT,
-  },
-];
+const FORMER_BUILTIN_LAYOUTS: Record<FormerBuiltinId, DeskLayout> = {
+  "session-watch": SESSION_WATCH_LAYOUT,
+  "incident-triage": INCIDENT_TRIAGE_LAYOUT,
+  "ops-overview": OPS_OVERVIEW_LAYOUT,
+};
 
-export function getBuiltinPreset(id: string): DeskPreset | undefined {
-  return BUILTIN_PRESETS.find((p) => p.id === id);
+/** One-shot migrate: clone former stock layout, or null if unknown. */
+export function layoutForFormerBuiltinId(id: string): DeskLayout | null {
+  if (!isFormerBuiltinId(id)) return null;
+  return cloneLayout(FORMER_BUILTIN_LAYOUTS[id]);
 }
 
 export function presetLabel(id: string, userPresets: DeskPreset[]): string {
-  if (id === CUSTOM_PRESET_ID) return "Custom";
-  const builtin = getBuiltinPreset(id);
-  if (builtin) return builtin.name;
+  if (id === CUSTOM_PRESET_ID) return "Scratch";
   return userPresets.find((p) => p.id === id)?.name ?? id;
 }
 
@@ -471,7 +475,8 @@ export function movePresetOntoId(
   return movePresetToIndex(orderedIds, fromId, toIndex);
 }
 
-export function defaultOpsDeskLayout(): DeskLayout {
+/** Cold-start Scratch desk (former Session watch geometry). */
+export function defaultScratchLayout(): DeskLayout {
   return cloneLayout(SESSION_WATCH_LAYOUT);
 }
 
@@ -611,9 +616,7 @@ export function resolvePresetLayout(
   if (activePresetId === CUSTOM_PRESET_ID) {
     return cloneLayout(customLayout);
   }
-  const builtin = getBuiltinPreset(activePresetId);
-  if (builtin) return cloneLayout(builtin.layout);
   const user = userPresets.find((p) => p.id === activePresetId);
   if (user) return cloneLayout(user.layout);
-  return cloneLayout(SESSION_WATCH_LAYOUT);
+  return defaultScratchLayout();
 }

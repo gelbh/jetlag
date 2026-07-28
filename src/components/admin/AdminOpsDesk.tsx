@@ -18,7 +18,6 @@ import type {
 import {
   CUSTOM_PRESET_ID,
   PANEL_IDS,
-  BUILTIN_PRESETS,
   cloneLayout,
   clampLayoutToCols,
   deleteUserPreset,
@@ -247,7 +246,7 @@ export function AdminOpsDesk() {
     const key = `${location.pathname}:${uid ?? "anon"}`;
     if (deepLinkKey === key) return;
 
-    /* eslint-disable react-hooks/set-state-in-effect -- deep-link ensure-visible + Custom preset flip from route */
+    /* eslint-disable react-hooks/set-state-in-effect -- deep-link ensure-visible + Scratch preset flip from route */
     setStore((prev) => {
       const current = resolvePresetLayout(
         prev.activePresetId,
@@ -502,7 +501,7 @@ export function AdminOpsDesk() {
       presetOrder: store.presetOrder.filter((id) => id !== presetId),
       defaultPresetId:
         store.defaultPresetId === presetId
-          ? BUILTIN_PRESETS[0]!.id
+          ? CUSTOM_PRESET_ID
           : store.defaultPresetId,
       activePresetId:
         store.activePresetId === presetId

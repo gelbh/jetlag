@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   CUSTOM_PRESET_ID,
-  OPS_OVERVIEW_LAYOUT,
   cloneLayout,
+  defaultScratchLayout,
   deleteUserPreset,
+  layoutForFormerBuiltinId,
   movePresetOntoId,
   movePresetOrder,
   movePresetToIndex,
@@ -13,12 +14,12 @@ import {
 
 describe("opsDeskPresets", () => {
   it("rejects empty preset names", () => {
-    const result = upsertUserPreset([], "   ", cloneLayout(OPS_OVERVIEW_LAYOUT));
+    const result = upsertUserPreset([], "   ", defaultScratchLayout());
     expect(result).toEqual({ ok: false, reason: "empty-name" });
   });
 
   it("saves a named user preset", () => {
-    const layout = cloneLayout(OPS_OVERVIEW_LAYOUT);
+    const layout = defaultScratchLayout();
     const result = upsertUserPreset([], "Morning triage", layout);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -28,11 +29,11 @@ describe("opsDeskPresets", () => {
   });
 
   it("overwrites an existing preset by id", () => {
-    const first = upsertUserPreset([], "A", cloneLayout(OPS_OVERVIEW_LAYOUT));
+    const first = upsertUserPreset([], "A", defaultScratchLayout());
     expect(first.ok).toBe(true);
     if (!first.ok) return;
 
-    const nextLayout = cloneLayout(OPS_OVERVIEW_LAYOUT);
+    const nextLayout = defaultScratchLayout();
     nextLayout.stacks[0]!.w = 8;
     const second = upsertUserPreset(first.presets, "A renamed", nextLayout, {
       overwriteId: first.preset.id,
@@ -45,15 +46,15 @@ describe("opsDeskPresets", () => {
   });
 
   it("deletes a user preset by id", () => {
-    const saved = upsertUserPreset([], "Temp", cloneLayout(OPS_OVERVIEW_LAYOUT));
+    const saved = upsertUserPreset([], "Temp", defaultScratchLayout());
     expect(saved.ok).toBe(true);
     if (!saved.ok) return;
     expect(deleteUserPreset(saved.presets, saved.preset.id)).toEqual([]);
   });
 
-  it("labels builtins, custom, and user presets", () => {
-    expect(presetLabel("session-watch", [])).toBe("Session watch");
-    expect(presetLabel(CUSTOM_PRESET_ID, [])).toBe("Custom");
+  it("labels Scratch and user presets (not former builtins)", () => {
+    expect(presetLabel(CUSTOM_PRESET_ID, [])).toBe("Scratch");
+    expect(presetLabel("session-watch", [])).toBe("session-watch");
     expect(presetLabel("unknown", [])).toBe("unknown");
     expect(
       presetLabel("user-a", [
@@ -61,7 +62,7 @@ describe("opsDeskPresets", () => {
           id: "user-a",
           name: "Night",
           kind: "user",
-          layout: cloneLayout(OPS_OVERVIEW_LAYOUT),
+          layout: defaultScratchLayout(),
         },
       ]),
     ).toBe("Night");
@@ -82,33 +83,31 @@ describe("opsDeskPresets", () => {
   });
 
   it("drops onto a target without forward off-by-one", () => {
-    const order = ["session-watch", "incident-triage", "ops-overview", "custom"];
-    // Forward: land on the drop target's slot, not one past it.
-    expect(movePresetOntoId(order, "session-watch", "ops-overview")).toEqual([
-      "incident-triage",
-      "session-watch",
-      "ops-overview",
+    const order = ["custom", "user-a", "user-b", "user-c"];
+    expect(movePresetOntoId(order, "custom", "user-b")).toEqual([
+      "user-a",
       "custom",
+      "user-b",
+      "user-c",
     ]);
-    // Backward: still lands at the target.
-    expect(movePresetOntoId(order, "ops-overview", "session-watch")).toEqual([
-      "ops-overview",
-      "session-watch",
-      "incident-triage",
+    expect(movePresetOntoId(order, "user-c", "custom")).toEqual([
+      "user-c",
       "custom",
+      "user-a",
+      "user-b",
     ]);
-    expect(movePresetOntoId(order, "session-watch", "session-watch")).toBeNull();
-    expect(movePresetOntoId(order, "missing", "ops-overview")).toBeNull();
-    expect(order).toEqual([
-      "session-watch",
-      "incident-triage",
-      "ops-overview",
-      "custom",
+    expect(movePresetOntoId(order, "custom", "custom")).toBeNull();
+    expect(movePresetOntoId(order, "missing", "user-b")).toBeNull();
+    expect(order).toEqual(["custom", "user-a", "user-b", "user-c"]);
+  });
+
+  it("exposes former builtin layouts for migrate only", () => {
+    const triage = layoutForFormerBuiltinId("incident-triage");
+    expect(triage?.stacks.map((s) => s.panelIds[0])).toEqual([
+      "inbox",
+      "detail",
+      "actions",
     ]);
+    expect(cloneLayout(triage!).stacks[0]?.panelIds).toEqual(["inbox"]);
   });
 });
-
-
-
-
-

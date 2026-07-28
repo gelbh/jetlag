@@ -1,14 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
-  BUILTIN_PRESETS,
   CUSTOM_PRESET_ID,
   DEFAULT_COLS,
   DEFAULT_ROW_HEIGHT,
+  FORMER_BUILTIN_IDS,
   PANEL_IDS,
   cloneLayout,
   clampLayoutToCols,
+  defaultScratchLayout,
   ensureIncidentPanelsVisible,
   hidePanel,
+  layoutForFormerBuiltinId,
   mergePanelOntoStack,
   migrateLayoutToCols,
   setCollapsed,
@@ -43,7 +45,7 @@ function layoutOf(...stacks: GridStack[]): DeskLayout {
 }
 
 describe("opsDeskLayout", () => {
-  it("exposes the six locked panel ids and three builtin presets", () => {
+  it("exposes six panel ids, Scratch id, and former builtin migrate ids only", () => {
     expect(PANEL_IDS).toEqual([
       "sessions",
       "monitor",
@@ -53,16 +55,29 @@ describe("opsDeskLayout", () => {
       "settings",
     ]);
     expect(CUSTOM_PRESET_ID).toBe("custom");
-    expect(BUILTIN_PRESETS.map((p) => p.id)).toEqual([
+    expect(FORMER_BUILTIN_IDS).toEqual([
       "session-watch",
       "incident-triage",
       "ops-overview",
     ]);
-    for (const preset of BUILTIN_PRESETS) {
-      expect(preset.kind).toBe("builtin");
-      expect(preset.layout.cols).toBe(24);
-      expect(preset.layout.rowHeight).toBe(DEFAULT_ROW_HEIGHT);
-    }
+    const scratch = defaultScratchLayout();
+    expect(scratch.cols).toBe(DEFAULT_COLS);
+    expect(scratch.rowHeight).toBe(DEFAULT_ROW_HEIGHT);
+    expect(scratch.stacks.map((s) => s.panelIds[0])).toEqual([
+      "sessions",
+      "monitor",
+    ]);
+    expect(layoutForFormerBuiltinId("session-watch")).toEqual(scratch);
+    expect(layoutForFormerBuiltinId("not-a-builtin")).toBeNull();
+  });
+
+  it("cloneLayout preserves optional monitor field", () => {
+    const layout = defaultScratchLayout();
+    layout.monitor = { cols: 12, stacks: [] };
+    const cloned = cloneLayout(layout);
+    expect(cloned.monitor).toEqual({ cols: 12, stacks: [] });
+    cloned.monitor = { cols: 8 };
+    expect(layout.monitor).toEqual({ cols: 12, stacks: [] });
   });
 
   it("migrates 12-col layouts to 24 and clamps overflow", () => {
