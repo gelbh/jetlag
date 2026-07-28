@@ -8,6 +8,7 @@ import {
   clearResumeVisualArtifacts,
   resumeWatchdogBudgets,
   rootHasInteractiveShell,
+  rootHasResumeReady,
 } from "./resumeShell";
 
 describe("resumeShell", () => {
@@ -40,6 +41,33 @@ describe("resumeShell", () => {
     root.appendChild(status);
     document.body.appendChild(root);
     expect(rootHasInteractiveShell(root)).toBe(true);
+  });
+
+  it("rootHasResumeReady is false for empty root", () => {
+    const root = document.createElement("div");
+    root.id = "root";
+    document.body.appendChild(root);
+    expect(rootHasResumeReady(root)).toBe(false);
+  });
+
+  it("rootHasResumeReady is true when data-resume-ready is set", () => {
+    const root = document.createElement("div");
+    root.id = "root";
+    const desk = document.createElement("div");
+    desk.setAttribute("data-resume-ready", "true");
+    root.appendChild(desk);
+    document.body.appendChild(root);
+    expect(rootHasResumeReady(root)).toBe(true);
+  });
+
+  it("rootHasResumeReady ignores other data-resume-ready values", () => {
+    const root = document.createElement("div");
+    root.id = "root";
+    const desk = document.createElement("div");
+    desk.setAttribute("data-resume-ready", "false");
+    root.appendChild(desk);
+    document.body.appendChild(root);
+    expect(rootHasResumeReady(root)).toBe(false);
   });
 
   it("clearResumeVisualArtifacts strips fallback classes and skips VT", () => {
@@ -97,8 +125,30 @@ describe("resumeShell", () => {
       vi.unstubAllGlobals();
     });
 
-    it("returns desktop browser budgets by default", () => {
-      expect(resumeWatchdogBudgets()).toEqual({ graceMs: 800, budgetMs: 3000 });
+    it("returns desktop browser budgets for player routes", () => {
+      expect(resumeWatchdogBudgets("/")).toEqual({ graceMs: 800, budgetMs: 3000 });
+      expect(resumeWatchdogBudgets("/map")).toEqual({
+        graceMs: 800,
+        budgetMs: 3000,
+      });
+    });
+
+    it("applies admin multipliers with budget capped at 6000ms", () => {
+      expect(resumeWatchdogBudgets("/admin")).toEqual({
+        graceMs: 1200,
+        budgetMs: 6000,
+      });
+      expect(resumeWatchdogBudgets("/admin/incidents")).toEqual({
+        graceMs: 1200,
+        budgetMs: 6000,
+      });
+    });
+
+    it("does not treat /administration as an admin route", () => {
+      expect(resumeWatchdogBudgets("/administration")).toEqual({
+        graceMs: 800,
+        budgetMs: 3000,
+      });
     });
   });
 });
