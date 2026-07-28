@@ -469,7 +469,10 @@ export function addAppResumeBreadcrumb(context: AppResumeContext): void {
 }
 
 export function captureResumeShellUnresponsive(
-  context: Omit<AppResumeContext, "backgroundMs"> & { backgroundMs: number },
+  context: Omit<AppResumeContext, "backgroundMs"> & {
+    backgroundMs: number;
+    adminRoute?: boolean;
+  },
 ): void {
   if (import.meta.env.MODE === "test") {
     return;
@@ -481,6 +484,9 @@ export function captureResumeShellUnresponsive(
     scope.setTag("ios_standalone", String(context.iosStandalone));
     scope.setExtra("pathname", context.pathname);
     scope.setExtra("backgroundMs", context.backgroundMs);
+    if (context.adminRoute) {
+      scope.setExtra("admin_route", true);
+    }
     Sentry.addBreadcrumb({
       category: "app.resume",
       message: "resume_shell_unresponsive",

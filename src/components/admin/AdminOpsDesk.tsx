@@ -711,6 +711,7 @@ export function AdminOpsDesk() {
         className="jl-ops-desk"
         data-testid="admin-ops-desk"
         data-layout={isDesktop ? "desktop" : "mobile"}
+        data-resume-ready="true"
       >
         {isDesktop ? (
           <>
