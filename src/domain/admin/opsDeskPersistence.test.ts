@@ -3,6 +3,7 @@ import {
   CUSTOM_PRESET_ID,
   FORMER_BUILTIN_IDS,
   cloneLayout,
+  defaultMonitorLayout,
   defaultScratchLayout,
   layoutForFormerBuiltinId,
   type DeskLayout,
@@ -244,6 +245,25 @@ describe("opsDeskPersistence", () => {
     expect(loaded.customLayout.monitor?.stacks.flatMap((s) => s.panelIds)).toEqual(
       ["map", "roster", "overview", "log"],
     );
+  });
+
+  it("persists monitor layout edits on Scratch customLayout", () => {
+    const layout = defaultScratchLayout();
+    const monitor = defaultMonitorLayout();
+    monitor.stacks[0] = { ...monitor.stacks[0]!, x: 3, w: 10 };
+    layout.monitor = monitor;
+
+    saveOpsDeskStore(null, {
+      version: 1,
+      activePresetId: CUSTOM_PRESET_ID,
+      defaultPresetId: CUSTOM_PRESET_ID,
+      presetOrder: [CUSTOM_PRESET_ID],
+      customLayout: layout,
+      userPresets: [],
+    });
+
+    const loaded = loadOpsDeskStore(null);
+    expect(loaded.customLayout.monitor?.stacks[0]).toMatchObject({ x: 3, w: 10 });
   });
 
   it("strips unknown panel ids from stacks and hidden lists", () => {
