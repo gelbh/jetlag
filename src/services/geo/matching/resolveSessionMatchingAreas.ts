@@ -30,6 +30,7 @@ function bundledGeoRevisionIsCurrent(
 
 const resolvedMatchingAreasCache = new Map<string, CustomMatchingAreasByLevel>();
 const resolvedPlayAreaCache = new Map<string, GameArea>();
+const inFlightPlayAreaLoads = new Map<string, Promise<GameArea>>();
 
 export function matchingAreasCacheKey(
   regionPackId: RegionPackId | undefined,
@@ -58,6 +59,7 @@ export function playAreaCacheKey(
 export function clearResolvedMatchingAreasCacheForTests(): void {
   resolvedMatchingAreasCache.clear();
   resolvedPlayAreaCache.clear();
+  inFlightPlayAreaLoads.clear();
 }
 
 export type SessionMatchingAreasInput = Pick<
@@ -122,6 +124,22 @@ export function isPlayAreaReadySync(
   return resolvedPlayAreaCache.has(cacheKey);
 }
 
+export function peekResolvedPlayArea(
+  session: SessionPlayAreaInput | null | undefined,
+): GameArea | undefined {
+  if (!session) {
+    return undefined;
+  }
+
+  const packId = session.regionPackId;
+  if (!isKnownRegionPack(packId)) {
+    return undefined;
+  }
+
+  const cacheKey = playAreaCacheKey(packId, session.regionPackSubregionId);
+  return resolvedPlayAreaCache.get(cacheKey);
+}
+
 export async function resolveSessionPlayArea(
   session: SessionPlayAreaInput,
 ): Promise<GameArea> {
@@ -136,10 +154,31 @@ export async function resolveSessionPlayArea(
     return cached;
   }
 
-  const playArea = await loadRegionPackPlayArea(
-    packId,
-    session.regionPackSubregionId,
-  );
-  resolvedPlayAreaCache.set(cacheKey, playArea);
-  return playArea;
+  const inFlight = inFlightPlayAreaLoads.get(cacheKey);
+  if (inFlight) {
+    return inFlight;
+  }
+
+  // Register the in-flight promise before invoking the loader so concurrent
+  // callers coalesce even if the loader starts synchronously.
+  let settle!: (value: GameArea) => void;
+  const loadPromise = new Promise<GameArea>((resolve) => {
+    settle = resolve;
+  });
+  inFlightPlayAreaLoads.set(cacheKey, loadPromise);
+
+  void loadRegionPackPlayArea(packId, session.regionPackSubregionId).then(
+    (playArea) => {
+      resolvedPlayAreaCache.set(cacheKey, playArea);
+      settle(playArea);
+    },
+    () => {
+      resolvedPlayAreaCache.set(cacheKey, session.gameArea);
+      settle(session.gameArea);
+    },
+  ).finally(() => {
+    inFlightPlayAreaLoads.delete(cacheKey);
+  });
+
+  return loadPromise;
 }

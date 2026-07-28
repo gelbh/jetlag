@@ -53,6 +53,7 @@ export {
   clearResolvedMatchingAreasCacheForTests,
   isPlayAreaReadySync,
   matchingAreasCacheKey,
+  peekResolvedPlayArea,
   playAreaCacheKey,
   resolveSessionMatchingAreas,
   resolveSessionPlayArea,
