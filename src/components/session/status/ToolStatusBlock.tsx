@@ -117,7 +117,7 @@ export function ToolStatusBlock({
             <button
               type="button"
               onClick={onStartGame}
-              className="btn-primary min-h-10 shrink-0 px-3 text-xs sm:text-sm"
+              className="btn-primary jl-status-header-start min-h-11 shrink-0 px-3 text-xs sm:text-sm"
             >
               <HudPlayIcon className="h-4 w-4 shrink-0" />
               Start
