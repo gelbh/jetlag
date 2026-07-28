@@ -191,6 +191,8 @@
     letter-spacing: 0.04em;
     line-height: 1.1;
     color: var(--color-ink);
+    overflow: visible;
+    text-overflow: clip;
     white-space: nowrap;
   }
 
@@ -198,6 +200,24 @@
     font-size: clamp(0.7rem, 2.8vw, 0.9rem);
     letter-spacing: 0.12em;
     line-height: 1.1;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  /*
+   * Start needs a ≥44px hit target inside the fixed bar. Hide the TIME LEFT
+   * label while Start is showing so min-h-11 fits without growing the rail.
+   */
+  .jl-status-header-col--timer:has(.jl-status-header-start) .jl-status-header-label {
+    display: none;
+  }
+
+  .jl-status-header-start {
+    width: 100%;
+    max-width: 100%;
+    min-height: 2.75rem;
+    padding-block: 0;
   }
 
   .jl-status-header-value--action {
@@ -223,6 +243,24 @@
     max-width: 100%;
     min-height: 0;
     min-width: 0;
+  }
+
+  /* Seek-only: stretch the open-timer control into remaining cell space. */
+  .jl-status-header-col--timer .jl-timer-cluster:has(> .jl-ticker:only-child) {
+    align-self: stretch;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+  }
+
+  .jl-status-header-col--timer
+    .jl-timer-cluster:has(> .jl-ticker:only-child)
+    > .jl-ticker {
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    width: 100%;
   }
 
   .jl-timer-cancel {
@@ -320,6 +358,10 @@
   .jl-sync-map-indicator__btn {
     pointer-events: auto;
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    min-width: 2.75rem;
     padding: 0;
     border: none;
     background: transparent;

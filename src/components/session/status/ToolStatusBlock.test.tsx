@@ -114,4 +114,54 @@ describe("ToolStatusBlock", () => {
 
     expect(screen.getByText("WAITING")).toBeInTheDocument();
   });
+
+  it("keeps Start at a 44px touch target class without LIVE OPS fantasy", () => {
+    render(
+      <ToolStatusBlock
+        sessionCode="ABCD"
+        playerRole="seeker"
+        activeTool="none"
+        timerState={timerState}
+        timerRunning={false}
+        timerHasStarted={false}
+        timerSyncing={false}
+        canStartGame
+        onStartGame={vi.fn()}
+        sessionRules={{ gameSize: "medium" }}
+        pendingQuestions={[]}
+        timerMenuOpen={false}
+        onOpenTimerMenu={vi.fn()}
+      />,
+    );
+
+    const start = screen.getByRole("button", { name: /start/i });
+    expect(start.className).toContain("jl-status-header-start");
+    expect(start.className).toContain("min-h-11");
+    expect(screen.queryByText(/LIVE OPS/i)).not.toBeInTheDocument();
+  });
+
+  it("shows HIDE phase and keeps stamp-code on the session code while running", () => {
+    render(
+      <ToolStatusBlock
+        sessionCode="WXYZ"
+        playerRole="hider"
+        activeTool="none"
+        timerState={{ accumulatedMs: 30_000, runningSince: Date.now() }}
+        timerRunning
+        timerHasStarted
+        timerSyncing={false}
+        canStartGame={false}
+        onStartGame={vi.fn()}
+        sessionRules={{ gameSize: "medium", hidingPeriodMinutes: 90 }}
+        pendingQuestions={[]}
+        timerMenuOpen={false}
+        onOpenTimerMenu={vi.fn()}
+      />,
+    );
+
+    const phase = screen.getByText("HIDE");
+    expect(phase.classList.contains("jl-status-header-value--action")).toBe(true);
+    expect(screen.getByText("OPERATION")).toBeInTheDocument();
+    expect(screen.getByText("WXYZ").closest(".jl-stamp-code")).toBeTruthy();
+  });
 });
