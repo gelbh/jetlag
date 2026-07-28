@@ -28,8 +28,40 @@ export type DeskLayout = {
   rowHeight: number;
   stacks: GridStack[];
   hiddenPanelIds: PanelId[];
-  /** Nested Monitor WM layout (Track F); ignored until that ships. */
-  monitor?: unknown;
+  /** Nested Monitor WM layout (Track F). */
+  monitor?: MonitorLayout;
+};
+
+export const MONITOR_PANEL_IDS = [
+  "map",
+  "roster",
+  "overview",
+  "log",
+  "chat",
+  "sync",
+  "mapTools",
+  "mod",
+] as const;
+
+export type MonitorPanelId = (typeof MONITOR_PANEL_IDS)[number];
+
+export type MonitorStack = {
+  id: StackId;
+  panelIds: MonitorPanelId[];
+  activeIndex: number;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  pinned?: boolean;
+  collapsed?: boolean;
+};
+
+export type MonitorLayout = {
+  cols: number;
+  rowHeight: number;
+  stacks: MonitorStack[];
+  hiddenPanelIds: MonitorPanelId[];
 };
 
 export type DeskPreset = {
@@ -63,6 +95,84 @@ export function isPanelId(value: unknown): value is PanelId {
   return typeof value === "string" && (PANEL_IDS as readonly string[]).includes(value);
 }
 
+export function isMonitorPanelId(value: unknown): value is MonitorPanelId {
+  return (
+    typeof value === "string" &&
+    (MONITOR_PANEL_IDS as readonly string[]).includes(value)
+  );
+}
+
+export function cloneMonitorLayout(layout: MonitorLayout): MonitorLayout {
+  return {
+    cols: layout.cols,
+    rowHeight: layout.rowHeight,
+    stacks: layout.stacks.map((stack) => ({
+      ...stack,
+      panelIds: [...stack.panelIds],
+    })),
+    hiddenPanelIds: [...layout.hiddenPanelIds],
+  };
+}
+
+/** Probe A–inspired seed: map + roster + overview + log; chat/sync/mapTools/mod hidden. */
+export function defaultMonitorLayout(): MonitorLayout {
+  return {
+    cols: DEFAULT_COLS,
+    rowHeight: DEFAULT_ROW_HEIGHT,
+    stacks: [
+      {
+        id: "monitor-map",
+        panelIds: ["map"],
+        activeIndex: 0,
+        x: 0,
+        y: 0,
+        w: 14,
+        h: 8,
+      },
+      {
+        id: "monitor-roster",
+        panelIds: ["roster"],
+        activeIndex: 0,
+        x: 0,
+        y: 8,
+        w: 14,
+        h: 3,
+      },
+      {
+        id: "monitor-overview",
+        panelIds: ["overview"],
+        activeIndex: 0,
+        x: 14,
+        y: 0,
+        w: 10,
+        h: 5,
+      },
+      {
+        id: "monitor-log",
+        panelIds: ["log"],
+        activeIndex: 0,
+        x: 14,
+        y: 5,
+        w: 10,
+        h: 4,
+      },
+    ],
+    hiddenPanelIds: ["chat", "sync", "mapTools", "mod"],
+  };
+}
+
+export function clampMonitorLayoutToCols(layout: MonitorLayout): MonitorLayout {
+  const cols = layout.cols > 0 ? layout.cols : DEFAULT_COLS;
+  const next = cloneMonitorLayout(layout);
+  next.cols = cols;
+  next.stacks = next.stacks.map((stack) => {
+    const w = Math.max(1, Math.min(stack.w, cols));
+    const x = Math.max(0, Math.min(stack.x, cols - w));
+    return { ...stack, x, w };
+  });
+  return next;
+}
+
 export function cloneLayout(layout: DeskLayout): DeskLayout {
   const next: DeskLayout = {
     cols: layout.cols,
@@ -73,8 +183,8 @@ export function cloneLayout(layout: DeskLayout): DeskLayout {
     })),
     hiddenPanelIds: [...layout.hiddenPanelIds],
   };
-  if ("monitor" in layout) {
-    next.monitor = layout.monitor;
+  if (layout.monitor) {
+    next.monitor = cloneMonitorLayout(layout.monitor);
   }
   return next;
 }

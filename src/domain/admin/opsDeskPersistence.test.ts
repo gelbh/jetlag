@@ -187,9 +187,33 @@ describe("opsDeskPersistence", () => {
     expect(loaded.activePresetId).toBe(CUSTOM_PRESET_ID);
   });
 
-  it("preserves optional monitor field on layouts", () => {
+  it("sanitizes monitor layout: defaults when missing, strips unknown ids", () => {
     const layout = defaultScratchLayout();
-    layout.monitor = { cols: 8, stacks: [{ id: "map" }] };
+    layout.monitor = {
+      cols: 8,
+      rowHeight: 24,
+      stacks: [
+        {
+          id: "m1",
+          panelIds: ["map", "fantasy" as never],
+          activeIndex: 0,
+          x: 0,
+          y: 0,
+          w: 10,
+          h: 6,
+        },
+        {
+          id: "empty",
+          panelIds: ["nope" as never],
+          activeIndex: 0,
+          x: 0,
+          y: 0,
+          w: 4,
+          h: 4,
+        },
+      ],
+      hiddenPanelIds: ["roster", "bogus" as never],
+    };
     saveOpsDeskStore(null, {
       version: 1,
       activePresetId: CUSTOM_PRESET_ID,
@@ -199,10 +223,27 @@ describe("opsDeskPersistence", () => {
       userPresets: [],
     });
     const loaded = loadOpsDeskStore(null);
-    expect(loaded.customLayout.monitor).toEqual({
-      cols: 8,
-      stacks: [{ id: "map" }],
+    expect(loaded.customLayout.monitor?.stacks).toHaveLength(1);
+    expect(loaded.customLayout.monitor?.stacks[0]?.panelIds).toEqual(["map"]);
+    expect(loaded.customLayout.monitor?.hiddenPanelIds).toContain("roster");
+    expect(loaded.customLayout.monitor?.hiddenPanelIds).not.toContain("bogus");
+  });
+
+  it("fills defaultMonitorLayout when monitor field absent", () => {
+    const layout = defaultScratchLayout();
+    delete layout.monitor;
+    saveOpsDeskStore(null, {
+      version: 1,
+      activePresetId: CUSTOM_PRESET_ID,
+      defaultPresetId: CUSTOM_PRESET_ID,
+      presetOrder: [CUSTOM_PRESET_ID],
+      customLayout: layout,
+      userPresets: [],
     });
+    const loaded = loadOpsDeskStore(null);
+    expect(loaded.customLayout.monitor?.stacks.flatMap((s) => s.panelIds)).toEqual(
+      ["map", "roster", "overview", "log"],
+    );
   });
 
   it("strips unknown panel ids from stacks and hidden lists", () => {
