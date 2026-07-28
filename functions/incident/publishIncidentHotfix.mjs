@@ -13,7 +13,7 @@ const FOUR_SEGMENT_VERSION = /^\d+\.\d+\.\d+\.\d+$/;
 
 /**
  * Four-segment-aware compare (missing 4th segment = 0). Same rules as
- * `src/domain/session/sessionVersion.ts`.
+ * `src/domain/session/meta/sessionVersion.ts`.
  * @returns {-1 | 0 | 1}
  */
 export function compareAppVersions(a, b) {

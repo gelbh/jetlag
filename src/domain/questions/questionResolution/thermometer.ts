@@ -5,7 +5,7 @@ import {
   thermometerHotterTowards,
   type ThermometerAnswer,
 } from "../thermometerQuestions";
-import type { PendingQuestionRecord } from "../../session/sessionChat";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 
 export function resolveThermometerPendingQuestion(
   pending: PendingQuestionRecord,

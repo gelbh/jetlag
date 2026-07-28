@@ -1,5 +1,5 @@
 import type { GameArea, SessionRecord } from "../../../domain/map/annotations";
-import type { CustomMatchingAreasByLevel } from "../../../domain/session/sessionCustomContent";
+import type { CustomMatchingAreasByLevel } from "../../../domain/session/catalog/sessionCustomContent";
 import {
   BUNDLED_REGION_PACK_GEO_REVISION,
   type RegionPackId,

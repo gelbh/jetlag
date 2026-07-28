@@ -1,6 +1,6 @@
 import type { LatLngTuple } from "../../geometry/geometry";
 import { distanceBetweenPoints } from "../../geometry/geometryMeasuring";
-import type { PendingQuestionRecord } from "../../session/sessionChat";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 
 export interface HiderTruthResult {
   replyId: string;

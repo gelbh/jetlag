@@ -1,9 +1,9 @@
 import { useState } from "react";
-import type { AdvancedSessionSettingsValue } from "../../../domain/session/advancedSessionSettings";
+import type { AdvancedSessionSettingsValue } from "../../../domain/session/tools/advancedSessionSettings";
 import {
   createSessionCustomCategoryId,
   type SessionCustomCategory,
-} from "../../../domain/session/sessionCustomContent";
+} from "../../../domain/session/catalog/sessionCustomContent";
 
 interface CategoryEditorProps {
   value: AdvancedSessionSettingsValue;

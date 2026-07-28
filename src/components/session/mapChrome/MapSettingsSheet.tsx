@@ -9,8 +9,8 @@ import {
 } from "../settings/SettingsSegmentControl";
 import { LayerVisibilityGrid } from "./LayerVisibilityGrid";
 import type { DistanceUnit } from "../../../domain/map/distance";
-import type { GameSize } from "../../../domain/session/gameSize";
-import { type AdvancedSessionSettingsValue } from "../../../domain/session/advancedSessionSettings";
+import type { GameSize } from "../../../domain/session/size/gameSize";
+import { type AdvancedSessionSettingsValue } from "../../../domain/session/tools/advancedSessionSettings";
 import { AdvancedSessionSettings } from "../settings/AdvancedSessionSettings";
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
 import type { LayerVisibility } from "../../../state/sessionStore";

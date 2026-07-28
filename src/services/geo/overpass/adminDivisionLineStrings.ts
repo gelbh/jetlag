@@ -3,7 +3,7 @@ import type { GameArea } from "../../../domain/map/annotations";
 import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
-} from "../../../domain/session/sessionCustomContent";
+} from "../../../domain/session/catalog/sessionCustomContent";
 import { polygonRingsToLineStrings } from "../../../domain/geometry/ringToLineString";
 import { parseMatchingAreaGeoJson } from "../matching/matchingAreaGeoJson";
 import {

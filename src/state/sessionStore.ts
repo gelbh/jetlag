@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { GameArea, SessionRecord } from "../domain/map/annotations";
-import type { PlayerRole } from "../domain/session/playerRole";
-import { resolvePlayerRole } from "../domain/session/playerRole";
+import type { PlayerRole } from "../domain/session/players/playerRole";
+import { resolvePlayerRole } from "../domain/session/players/playerRole";
 
 function structuredFieldEqual<T>(left: T, right: T): boolean {
   if (left === right) {

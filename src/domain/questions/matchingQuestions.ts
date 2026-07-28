@@ -1,7 +1,7 @@
 import type { AnnotationRecord } from "../map/annotations";
-import type { PendingQuestionRecord } from "../session/sessionChat";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { resolveCustomPackMatchingCategory } from "./customQuestionPack";
-import type { SessionCustomCategory } from "../session/sessionCustomContent";
+import type { SessionCustomCategory } from "../session/catalog/sessionCustomContent";
 import {
   customCategoryToMatchingDefinition,
   MATCHING_CATEGORIES,

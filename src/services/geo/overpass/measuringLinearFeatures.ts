@@ -3,7 +3,7 @@ import type { GameArea } from "../../../domain/map/annotations";
 import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
-} from "../../../domain/session/sessionCustomContent";
+} from "../../../domain/session/catalog/sessionCustomContent";
 import {
   gameAreaToBoundingBox,
   nearestPointToCoastlines,

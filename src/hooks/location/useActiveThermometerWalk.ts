@@ -3,7 +3,7 @@ import type { LatLngTuple } from "../../domain/geometry/geometry";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
-} from "../../domain/session/sessionChat";
+} from "../../domain/session/activity/sessionChat";
 import {
   crowFliesDistanceMeters,
   isThermometerWalkActive,

@@ -6,8 +6,8 @@ import {
   prepareMeasuringLineSegments,
 } from "../../../domain/geometry/geometry";
 import { polygonOuterRingToLineString } from "../../../domain/geometry/ringToLineString";
-import type { SessionCustomMeasureGeometry } from "../../../domain/session/customMeasureGeometry";
-import { parseCustomMeasureGeometryFeature } from "../../../domain/session/customMeasureGeometry";
+import type { SessionCustomMeasureGeometry } from "../../../domain/session/catalog/customMeasureGeometry";
+import { parseCustomMeasureGeometryFeature } from "../../../domain/session/catalog/customMeasureGeometry";
 
 function geometryToLineSegments(
   feature: Feature<LineString | Polygon>,

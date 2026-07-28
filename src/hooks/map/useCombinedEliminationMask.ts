@@ -4,7 +4,7 @@ import { buildCombinedEliminationMask } from "../../domain/geometry/combinedElim
 import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/emptyFeatures";
 import { requestCombinedEliminationMask } from "../../domain/geometry/eliminationMaskWorkerClient";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
-import type { HidingZoneRecord } from "../../domain/session/hidingZone";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 
 interface UseCombinedEliminationMaskOptions {
   annotations: readonly AnnotationRecord[];

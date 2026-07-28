@@ -14,7 +14,7 @@ import type {
 } from "../../questions/measuringQuestions";
 import { MEASURING_CATALOG } from "../../questions/measuringQuestions";
 import type { TentacleExtendedCategoryId } from "../../questions/tentacleQuestions";
-import type { SessionRulesInput } from "../sessionRules";
+import type { SessionRulesInput } from "../rules";
 import type {
   SessionCustomCategory,
   SessionCustomLocationPin,

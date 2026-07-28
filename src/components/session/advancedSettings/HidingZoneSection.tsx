@@ -5,7 +5,7 @@ import {
   HIDING_ZONE_RADIUS_MAX_METERS,
   HIDING_ZONE_RADIUS_MIN_METERS,
   hidingZoneRadiusMeters,
-} from "../../../domain/session/gameSize";
+} from "../../../domain/session/size/gameSize";
 import {
   AdvancedSettingsSectionHeader,
   ToggleNumberWithPresets,

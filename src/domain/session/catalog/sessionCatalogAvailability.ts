@@ -16,7 +16,7 @@ import type { SessionCustomMeasureGeometry } from "./customMeasureGeometry";
 import { customMeasureGeometryToMeasuringOption } from "./customMeasureGeometryCatalog";
 import { applyRegionPackMatchingLabels } from "../../regions/regionPackLabels";
 import { applyRegionPackMeasuringLabels } from "../../regions/regionPackLabels";
-import type { SessionRulesInput } from "../sessionRules";
+import type { SessionRulesInput } from "../rules";
 
 function withRegionPackMatchingLabels(
   categories: MatchingCategoryDefinition[],

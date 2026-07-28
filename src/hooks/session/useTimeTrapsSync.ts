@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
-import { filterExtrasAfterReset } from "../../domain/session/sessionReset";
+import { filterExtrasAfterReset } from "../../domain/session/meta/sessionReset";
 import { isFirebaseConfigured } from "../../services/core/firebase";
 import { subscribeToTimeTraps } from "../../services/firestore/firestoreSessionExtras";
 import { useSessionStore } from "../../state/sessionStore";

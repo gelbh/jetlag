@@ -1,6 +1,6 @@
 import type { GameArea } from "../map/annotations";
-import type { TransitStation } from "../session/hidingZone";
-import { isValidHidingStation } from "../session/hidingZone";
+import type { TransitStation } from "../session/hiding/hidingZone";
+import { isValidHidingStation } from "../session/hiding/hidingZone";
 
 export const DEFAULT_TIME_TRAP_BONUS_MINUTES = 5;
 

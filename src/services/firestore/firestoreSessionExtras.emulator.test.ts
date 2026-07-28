@@ -10,7 +10,7 @@ import {
   updatePendingQuestion,
   writePendingQuestion,
 } from "./firestoreSessionExtras";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 
 function samplePendingQuestion(
   sessionId: string,

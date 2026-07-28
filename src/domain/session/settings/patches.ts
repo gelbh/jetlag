@@ -1,18 +1,18 @@
 import type { DistanceUnit } from "../../map/distance";
 import { resolveDistanceUnit } from "../../map/distancePresets";
 import type { SessionRecord } from "../../map/annotations";
-import type { GameSize } from "../gameSize";
-import { hidingZoneRadiusMeters } from "../gameSize";
+import type { GameSize } from "../size/gameSize";
+import { hidingZoneRadiusMeters } from "../size/gameSize";
 import {
   thermometerPresetsMetersForGameSize,
-} from "../gameSizeRules";
-import { sessionDistanceUnit } from "../sessionDistanceUnit";
+} from "../size/gameSizeRules";
+import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
 import {
   clampHidingPeriodMinutes,
   clampPhotoAnswerDeadlineMinutes,
   clampQuestionAnswerDeadlineMinutes,
   clampTentacleRadiusMeters,
-} from "../sessionRules";
+} from "../rules";
 import type { AdvancedSessionSettingsValue, SessionRulesPatch } from "./types";
 
 export function sessionRulesPatchFromAdvancedSettings(

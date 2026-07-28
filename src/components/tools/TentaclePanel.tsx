@@ -1,7 +1,7 @@
 import { type RefObject } from "react";
 import type { TentaclePoi } from "../../domain/map/annotations";
 import { formatPresetDistance, type DistanceUnit } from "../../domain/map/distance";
-import type { GameSize } from "../../domain/session/gameSize";
+import type { GameSize } from "../../domain/session/size/gameSize";
 import {
   isTentacleCategoryAvailable,
   tentacleCategoriesForGameSize,

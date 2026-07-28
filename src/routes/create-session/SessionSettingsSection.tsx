@@ -6,10 +6,10 @@ import {
   type PremiumEntitlements,
 } from "../../domain/billing/premiumProducts";
 import type { GameArea, SessionTier } from "../../domain/map/annotations";
-import type { AdvancedSessionSettingsValue } from "../../domain/session/advancedSessionSettings";
-import type { GameSize } from "../../domain/session/gameSize";
+import type { AdvancedSessionSettingsValue } from "../../domain/session/tools/advancedSessionSettings";
+import type { GameSize } from "../../domain/session/size/gameSize";
 import type { DistanceUnit } from "../../domain/map/distance";
-import type { PlayerRole } from "../../domain/session/playerRole";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { isFirebaseConfigured } from "../../services/core/firebase";
 import type { usePremiumHostEligibility } from "../../hooks/billing/usePremiumHostEligibility";
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PhotoPanel } from "../../components/tools/PhotoPanel";
-import type { GameSize } from "../../domain/session/gameSize";
+import type { GameSize } from "../../domain/session/size/gameSize";
 import {
   firstAvailablePhotoCategoryId,
   isPhotoCategoryAvailableForGameSize,
@@ -16,7 +16,7 @@ import {
 } from "../../domain/questions";
 import type { SubmitPendingQuestionInput } from "../sync/usePendingQuestionActions";
 import { useSubmitLock } from "../useSubmitLock";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 
 interface UsePhotoToolParams {
   active: boolean;

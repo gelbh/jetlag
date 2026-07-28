@@ -1,6 +1,6 @@
 import type { AnnotationRecord } from "./annotations";
 import type { MapTool } from "./mapToolTypes";
-import type { PendingQuestionToolType } from "../session/sessionChat";
+import type { PendingQuestionToolType } from "../session/activity/sessionChat";
 
 export type QuestionCardCost = "D3P1" | "D2P1" | "D4P2" | "D1P1";
 

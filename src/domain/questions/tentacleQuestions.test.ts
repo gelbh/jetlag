@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../map/annotations";
-import type { SessionRulesInput } from "../session/sessionRules";
+import type { SessionRulesInput } from "../session/rules";
 import {
   defaultTentacleCategoryId,
   defaultTentacleCategoryIdForSession,

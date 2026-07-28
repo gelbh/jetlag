@@ -15,10 +15,10 @@ import {
   type MeasuringSubject,
   type MeasuringTargetMode,
 } from "../../../domain/questions";
-import type { SessionRulesInput } from "../../../domain/session/sessionRules";
+import type { SessionRulesInput } from "../../../domain/session/rules";
 import { adminBorderKindAvailability } from "../../../services/geo/adminDivisionAvailability";
 import { usePreloadStore } from "../../../state/preloadStore";
-import { availableMeasuringCatalog, isPreviewQuestionBeforeSendEnabled } from "../../../domain/session/sessionCatalogAvailability";
+import { availableMeasuringCatalog, isPreviewQuestionBeforeSendEnabled } from "../../../domain/session/catalog/sessionCatalogAvailability";
 import type { MeasuringPlace } from "../../../domain/geo/types";
 import type { GeocodedPlace } from "../../../services/geo/geocoding";
 import type { SeaLevelEdgeCase } from "../../../domain/geometry/seaLevel";

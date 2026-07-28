@@ -11,8 +11,8 @@ import {
   questionCostBreakdown,
   questionCostLabel,
 } from "./questionRules";
-import { answerDeadlineMs } from "../session/gameSizeRules";
-import type { PendingQuestionRecord } from "../session/sessionChat";
+import { answerDeadlineMs } from "../session/size/gameSizeRules";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 
 describe("questionRules", () => {
   it("scales card costs by reuse count", () => {

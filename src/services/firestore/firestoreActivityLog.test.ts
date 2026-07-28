@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FirebaseError } from "firebase/app";
-import type { SessionActivityEvent } from "../../domain/session/sessionActivityLog";
+import type { SessionActivityEvent } from "../../domain/session/activity/sessionActivityLog";
 import {
   buildActivityLogDocument,
   deserializeActivityLogFromFirestore,

@@ -5,7 +5,7 @@ import type {
   RadarDistanceOptionKey,
   ThermometerDistanceOptionMiles,
 } from "../../../domain/questions";
-import type { GameSize } from "../../../domain/session/gameSize";
+import type { GameSize } from "../../../domain/session/size/gameSize";
 import { MatchingEditFields, type MatchingAnnotation } from "./MatchingEditFields";
 import { MeasuringEditFields, type MeasuringAnnotation } from "./MeasuringEditFields";
 import { PinZoneEditFields, type PinZoneAnnotation } from "./PinZoneEditFields";

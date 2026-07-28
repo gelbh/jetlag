@@ -1,4 +1,4 @@
-import type { GameSize } from "../session/gameSize";
+import type { GameSize } from "../session/size/gameSize";
 
 export type LeaderboardScope = "global" | "friends";
 export type LeaderboardRole = "seeker" | "hider";

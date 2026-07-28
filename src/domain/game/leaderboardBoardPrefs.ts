@@ -1,4 +1,4 @@
-import { GAME_SIZE_OPTIONS, type GameSize } from "../session/gameSize";
+import { GAME_SIZE_OPTIONS, type GameSize } from "../session/size/gameSize";
 import {
   LEADERBOARD_METRICS,
   LEADERBOARD_ROLES,

@@ -10,7 +10,7 @@ import {
   type NotificationPlatform,
   type NotificationPreferences,
 } from "../../../domain/device/notifications";
-import type { PlayerRole } from "../../../domain/session/playerRole";
+import type { PlayerRole } from "../../../domain/session/players/playerRole";
 import { upsertSessionDevice } from "../../firestore/firestoreDevices";
 import { JetlagLiveActivity } from "./liveActivity";
 

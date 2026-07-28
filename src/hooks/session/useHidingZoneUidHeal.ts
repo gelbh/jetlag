@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import type { HidingZoneRecord } from "../../domain/session/hidingZone";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import { isFirebaseConfigured } from "../../services/core/firebase";
 import { writeHidingZone } from "../../services/firestore/firestoreSessionExtras";
 

@@ -8,10 +8,10 @@ import { princeRupertPresets } from "./princeRupert";
 import { swissPresets } from "./swiss";
 import { tokyoPresets } from "./tokyo";
 import type { BundledGamePresetDefinition } from "./shared";
-import type { GamePreset } from "../../session/gamePreset";
-import { GAME_PRESET_SCHEMA_VERSION } from "../../session/gamePreset";
-import { defaultAdvancedSessionSettings } from "../../session/advancedSessionSettings";
-import { recommendGameSizeFromPlayAreaSquareMiles } from "../../session/gameSize";
+import type { GamePreset } from "../../session/presets/gamePreset";
+import { GAME_PRESET_SCHEMA_VERSION } from "../../session/presets/gamePreset";
+import { defaultAdvancedSessionSettings } from "../../session/tools/advancedSessionSettings";
+import { recommendGameSizeFromPlayAreaSquareMiles } from "../../session/size/gameSize";
 
 export type { BundledGamePresetDefinition } from "./shared";
 export { EXPANSION_ON, titleCase } from "./shared";

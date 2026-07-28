@@ -12,8 +12,8 @@ import {
   type MeasuringLocationCategory,
   type MeasuringTargetMode,
 } from "../../../domain/questions";
-import type { SessionRulesInput } from "../../../domain/session/sessionRules";
-import { manualPinAsMeasuringPlace } from "../../../domain/session/sessionCustomCatalog";
+import type { SessionRulesInput } from "../../../domain/session/rules";
+import { manualPinAsMeasuringPlace } from "../../../domain/session/catalog/sessionCustomCatalog";
 import { measuringLinearNotFoundMessage } from "../../../services/geo/measuringLinearFeatures";
 import { overpassErrorMessage } from "../../../services/core/overpassClient";
 import {

@@ -2,8 +2,8 @@ import {
   isRadarCustomRadiusAllowedForGameSize,
   isRadarPresetAvailableForGameSize,
   radarPresetsMetersForGameSize,
-} from "../gameSizeRules";
-import { sessionDistanceUnit } from "../sessionDistanceUnit";
+} from "../size/gameSizeRules";
+import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
 import { sessionGameSize, type SessionRulesInput } from "./types";
 
 export function resolveRadarPresetsMeters(session: SessionRulesInput): number[] {

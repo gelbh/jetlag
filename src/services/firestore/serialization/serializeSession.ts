@@ -3,9 +3,9 @@ import type {
   SessionRecord,
   SessionTier,
 } from "../../../domain/map/annotations";
-import type { SessionRulesPatch } from "../../../domain/session/advancedSessionSettings";
-import type { GameSize } from "../../../domain/session/gameSize";
-import { hidingZoneRadiusMeters } from "../../../domain/session/gameSize";
+import type { SessionRulesPatch } from "../../../domain/session/tools/advancedSessionSettings";
+import type { GameSize } from "../../../domain/session/size/gameSize";
+import { hidingZoneRadiusMeters } from "../../../domain/session/size/gameSize";
 import {
   parseDisabledTools,
   parseDistanceUnit,
@@ -21,16 +21,16 @@ import {
   PHOTO_ANSWER_DEADLINE_MINUTES_MAX,
   QUESTION_ANSWER_DEADLINE_MINUTES_MIN,
   QUESTION_ANSWER_DEADLINE_MINUTES_MAX,
-} from "../../../domain/session/sessionRules";
-import type { MemberRoles, PlayerRole } from "../../../domain/session/playerRole";
-import type { HidingZoneRecord } from "../../../domain/session/hidingZone";
+} from "../../../domain/session/rules";
+import type { MemberRoles, PlayerRole } from "../../../domain/session/players/playerRole";
+import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
 import {
   parseCustomCategories,
   parseCustomLocationPins,
   parseCustomMatchingAreas,
-} from "../../../domain/session/sessionCustomContent";
+} from "../../../domain/session/catalog/sessionCustomContent";
 import { parseRegionPackId } from "../../../domain/regions/regionPack";
-import { parseCustomMeasureGeometries } from "../../../domain/session/customMeasureGeometry";
+import { parseCustomMeasureGeometries } from "../../../domain/session/catalog/customMeasureGeometry";
 import type { TimeTrapRecord } from "../../../domain/expansion/timeTraps";
 import { parseSessionOpsMitigation } from "../firestoreSessionOps";
 import { parseFirestoreDocument } from "../zodConverter";

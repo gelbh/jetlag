@@ -7,7 +7,7 @@ import {
   sortActivityEventsDesc,
   type SessionActivityEvent,
   type SessionActivityType,
-} from "../../../domain/session/sessionActivityLog";
+} from "../../../domain/session/activity/sessionActivityLog";
 
 interface SessionLogBodyProps {
   events: readonly SessionActivityEvent[];

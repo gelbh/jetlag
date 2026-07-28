@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { AnnotationRecord, GameArea } from "../map/annotations";
 import { eliminationFeatureForAnnotationTs } from "../geometry/adapter/eliminationMask";
 import { milesToMeters } from "../map/distance";
-import type { PendingQuestionRecord } from "../session/sessionChat";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { buildPendingQuestionOverlay } from "./pendingQuestionOverlays";
 
 const gameArea: GameArea = {
