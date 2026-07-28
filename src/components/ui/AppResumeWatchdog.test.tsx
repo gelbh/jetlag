@@ -35,18 +35,33 @@ vi.mock("../../domain/device/resumeShell", async () => {
   >("../../domain/device/resumeShell");
   return {
     ...actual,
-    resumeWatchdogBudgets: () => ({ graceMs: 100, budgetMs: 200 }),
+    resumeWatchdogBudgets: (pathname: string = "") => {
+      if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+        return { graceMs: 50, budgetMs: 400 };
+      }
+      return { graceMs: 100, budgetMs: 200 };
+    },
   };
 });
 
-function renderWatchdog() {
+function renderWatchdog(initialPath = "/") {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[initialPath]}>
       <RouteTransitionTestProvider>
         <AppResumeWatchdog />
       </RouteTransitionTestProvider>
     </MemoryRouter>,
   );
+}
+
+function triggerVisibleResume() {
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    get: () => "visible",
+  });
+  act(() => {
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
 }
 
 describe("AppResumeWatchdog", () => {
@@ -74,14 +89,7 @@ describe("AppResumeWatchdog", () => {
     document.body.appendChild(root);
 
     renderWatchdog();
-
-    Object.defineProperty(document, "visibilityState", {
-      configurable: true,
-      get: () => "visible",
-    });
-    act(() => {
-      document.dispatchEvent(new Event("visibilitychange"));
-    });
+    triggerVisibleResume();
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(350);
@@ -99,14 +107,7 @@ describe("AppResumeWatchdog", () => {
     document.body.appendChild(root);
 
     renderWatchdog();
-
-    Object.defineProperty(document, "visibilityState", {
-      configurable: true,
-      get: () => "visible",
-    });
-    act(() => {
-      document.dispatchEvent(new Event("visibilitychange"));
-    });
+    triggerVisibleResume();
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(350);
@@ -123,5 +124,53 @@ describe("AppResumeWatchdog", () => {
       await vi.advanceTimersByTimeAsync(350);
     });
     expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("on /admin, delayed data-resume-ready succeeds within admin budget", async () => {
+    const root = document.createElement("div");
+    root.id = "root";
+    document.body.appendChild(root);
+
+    renderWatchdog("/admin");
+    triggerVisibleResume();
+
+    // Past player mock budget (grace 100 + budget 200) but inside admin budget (50 + 400).
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(250);
+    });
+    expect(captureResumeShellUnresponsiveMock).not.toHaveBeenCalled();
+    expect(reload).not.toHaveBeenCalled();
+
+    const desk = document.createElement("div");
+    desk.setAttribute("data-resume-ready", "true");
+    root.appendChild(desk);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+
+    expect(captureResumeShellUnresponsiveMock).not.toHaveBeenCalled();
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it("tags admin_route when /admin stays unresponsive", async () => {
+    const root = document.createElement("div");
+    root.id = "root";
+    document.body.appendChild(root);
+
+    renderWatchdog("/admin");
+    triggerVisibleResume();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+
+    expect(reload).toHaveBeenCalledTimes(1);
+    expect(captureResumeShellUnresponsiveMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pathname: "/admin",
+        adminRoute: true,
+      }),
+    );
   });
 });

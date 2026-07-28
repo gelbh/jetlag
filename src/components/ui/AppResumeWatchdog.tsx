@@ -11,6 +11,7 @@ import {
   clearResumeVisualArtifacts,
   resumeWatchdogBudgets,
   rootHasInteractiveShell,
+  rootHasResumeReady,
 } from "../../domain/device/resumeShell";
 import { clearActiveRevealTransition } from "../../navigation/revealRouteTransition";
 import { useRouteTransition } from "../../navigation/useRouteTransition";
@@ -20,6 +21,16 @@ import {
 } from "../../services/core/sentry";
 
 export const RESUME_WATCHDOG_RELOAD_KEY = "jetlag:resume-watchdog-reload";
+
+function isAdminPathname(pathname: string): boolean {
+  return pathname === "/admin" || pathname.startsWith("/admin/");
+}
+
+function rootHasResumeSuccess(
+  root: HTMLElement | null = document.getElementById("root"),
+): boolean {
+  return rootHasInteractiveShell(root) || rootHasResumeReady(root);
+}
 
 function readResumeWatchdogLatch(): boolean {
   try {
@@ -101,7 +112,7 @@ export function AppResumeWatchdog() {
 
     cancelWatchdog();
 
-    const { graceMs, budgetMs } = resumeWatchdogBudgets();
+    const { graceMs, budgetMs } = resumeWatchdogBudgets(pathnameRef.current);
 
     graceTimerRef.current = window.setTimeout(() => {
       graceTimerRef.current = null;
@@ -139,18 +150,20 @@ export function AppResumeWatchdog() {
           return;
         }
 
+        const pathname = pathnameRef.current;
         captureResumeShellUnresponsive({
-          pathname: pathnameRef.current,
+          pathname,
           standalone: isStandalonePwa(),
           iosStandalone: isIosStandalonePwa(),
           backgroundMs,
+          ...(isAdminPathname(pathname) ? { adminRoute: true } : {}),
         });
         window.location.reload();
       };
 
       budgetTimerRef.current = window.setTimeout(() => {
         budgetTimerRef.current = null;
-        if (rafCount < 2 || !rootHasInteractiveShell()) {
+        if (rafCount < 2 || !rootHasResumeSuccess()) {
           fail();
           return;
         }
@@ -159,7 +172,7 @@ export function AppResumeWatchdog() {
 
       const tick = () => {
         rafCount += 1;
-        if (rafCount >= 2 && rootHasInteractiveShell()) {
+        if (rafCount >= 2 && rootHasResumeSuccess()) {
           succeed();
           return;
         }
