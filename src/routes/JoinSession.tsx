@@ -296,7 +296,13 @@ export function JoinSession() {
 
           <RolePicker
             value={playerRole}
-            onChange={setPlayerRole}
+            onChange={(role) => {
+              track(ANALYTICS_EVENTS.role_selected, {
+                role,
+                surface: "join",
+              });
+              setPlayerRole(role);
+            }}
             disabled={joinBusy}
             includeObserver
           />

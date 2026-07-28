@@ -69,7 +69,12 @@ export async function startPremiumCheckout(
     track(ANALYTICS_EVENTS.premium_checkout_started, { productKey });
     return result.data.url;
   } catch (error) {
-    throw mapCallableError(error, "Could not start checkout.");
+    const mapped = mapCallableError(error, "Could not start checkout.");
+    track(ANALYTICS_EVENTS.premium_checkout_failed, {
+      productKey,
+      message: mapped.message,
+    });
+    throw mapped;
   }
 }
 
