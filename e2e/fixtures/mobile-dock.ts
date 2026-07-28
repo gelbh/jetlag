@@ -31,10 +31,22 @@ export async function injectSimulatedSafeAreaBottom(
   safeBottomPx: number,
 ) {
   await page.evaluate((bottomPx) => {
-    document.documentElement.style.setProperty(
-      "--safe-area-bottom",
-      `${bottomPx}px`,
-    );
+    const root = document.documentElement;
+    root.style.setProperty("--safe-area-bottom", `${bottomPx}px`);
+    // Mirror env(safe-area-inset-bottom) for wrapper chassis CSS that reads env() directly.
+    const sheet = document.getElementById("jl-e2e-safe-area-bottom");
+    const css = `:root { --jl-e2e-safe-bottom: ${bottomPx}px; }
+.jl-tool-dock:not(.jl-tool-dock--rail) {
+  padding-bottom: ${bottomPx}px !important;
+}`;
+    if (sheet) {
+      sheet.textContent = css;
+      return;
+    }
+    const el = document.createElement("style");
+    el.id = "jl-e2e-safe-area-bottom";
+    el.textContent = css;
+    document.head.appendChild(el);
   }, safeBottomPx);
 }
 
