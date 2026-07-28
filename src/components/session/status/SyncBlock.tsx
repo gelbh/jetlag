@@ -3,7 +3,11 @@ import { userErrorFromSyncMessage } from "../../../domain/device/userErrors";
 import { SyncStatusBeacon } from "../SyncStatusDot";
 import { SyncStatusDetailPanel } from "../SyncStatusDetailPanel";
 import { syncDetailContent } from "../syncStatusDetailContent";
-import { syncBeaconAriaLabel } from "./syncRailDisplay";
+import {
+  SYNC_TONE_CLASSES,
+  syncBeaconAriaLabel,
+  syncRailDisplay,
+} from "./syncRailDisplay";
 
 interface SyncBlockProps {
   syncStatus: SyncStatus;
@@ -23,6 +27,11 @@ export function SyncBlock({
   onSyncErrorAction,
 }: SyncBlockProps) {
   const syncErrorDisplay = userErrorFromSyncMessage(message);
+  const syncDisplay = syncRailDisplay(syncStatus, queuedWrites, message);
+  const shortLabel = syncDisplay.inline?.visible
+    ? syncDisplay.inline.label
+    : null;
+  const shortLabelTone = syncDisplay.inline?.tone;
   const syncDetail = syncDetailContent(
     syncStatus,
     queuedWrites,
@@ -52,12 +61,23 @@ export function SyncBlock({
     <div className="jl-sync-map-indicator">
       <button
         type="button"
-        className={`jl-sync-map-indicator__btn${menuOpen ? " jl-sync-map-indicator__btn--open" : ""}`}
+        className={`jl-sync-map-indicator__btn inline-flex min-h-11 min-w-11 items-center justify-center${menuOpen ? " jl-sync-map-indicator__btn--open" : ""}${shortLabel ? " jl-sync-map-indicator__btn--labeled gap-1.5 border-2 border-border bg-surface-deep px-2.5 shadow-hud-float" : ""}`}
         onClick={() => onMenuOpenChange(!menuOpen)}
         aria-expanded={menuOpen}
         aria-haspopup="dialog"
-        aria-label={syncBeaconAriaLabel(syncStatus)}
+        aria-label={
+          shortLabel
+            ? `${shortLabel}. Show sync details`
+            : syncBeaconAriaLabel(syncStatus)
+        }
       >
+        {shortLabel ? (
+          <span
+            className={`max-w-[7.5rem] text-pretty text-xs font-semibold leading-tight${shortLabelTone ? ` ${SYNC_TONE_CLASSES[shortLabelTone].text}` : ""}`}
+          >
+            {shortLabel}
+          </span>
+        ) : null}
         <SyncStatusBeacon status={syncStatus} size="md" />
       </button>
 
