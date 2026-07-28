@@ -45,7 +45,7 @@ export function syncRailDisplay(
     return {
       inline: {
         visible: true,
-        label: "Sync failed",
+        label: "Sync issue",
         tone: "error",
       },
       banner: null,
@@ -115,7 +115,7 @@ export function syncBeaconAriaLabel(status: SyncStatus): string {
     case "degraded":
       return "Unstable connection. Show sync details";
     case "error":
-      return "Sync failed. Show sync details";
+      return "Sync issue. Show sync details";
     default: {
       const exhaustive: never = status;
       return exhaustive;
