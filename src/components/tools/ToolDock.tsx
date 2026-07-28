@@ -47,6 +47,8 @@ interface ToolDockProps {
   canSubmitQuestion?: boolean;
   /** Bottom dock (default) or vertical left rail inside DesktopOpsShell. */
   layout?: ToolDockLayout;
+  /** Block tool activation when the session is gone. */
+  inactive?: boolean;
 }
 
 export function ToolDock({
@@ -70,6 +72,7 @@ export function ToolDock({
   onRequestFoundHider,
   canSubmitQuestion = true,
   layout = "dock",
+  inactive = false,
 }: ToolDockProps) {
   const dockRef = useRef<HTMLDivElement>(null);
   const mainGroupRef = useRef<HTMLDivElement>(null);
@@ -98,6 +101,9 @@ export function ToolDock({
   );
 
   const selectTool = (tool: MapTool) => {
+    if (inactive) {
+      return;
+    }
     onSelect(activeTool === tool ? "none" : tool);
     closeMenus();
   };
@@ -107,7 +113,7 @@ export function ToolDock({
   return (
     <div
       ref={dockRef}
-      className={`jl-tool-dock pointer-events-auto${isRail ? " jl-tool-dock--rail" : ""}`}
+      className={`jl-tool-dock pointer-events-auto${isRail ? " jl-tool-dock--rail" : ""}${inactive ? " pointer-events-none opacity-55 saturate-50" : ""}`}
       style={
         !isRail && viewportBottomInset > 0
           ? { bottom: `${viewportBottomInset}px` }

@@ -38,7 +38,7 @@ import {
   HiderTruthRevealBanner,
 } from "../../components/session/HiderTruthRevealBanner";
 import { useDesktopLayout } from "../../hooks/useDesktopLayout";
-import { useSyncRetryAction } from "../../hooks/session/useSyncRetryAction";
+import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
 import { SessionLog } from "../../components/session/SessionLog";
 import { isEndGameActive, isEndGamePending, isFoundHiderPending } from "../../domain/map/annotations";
@@ -247,7 +247,18 @@ export function HiderMapScreenChrome({
   chat,
   mapSlot,
 }: HiderMapScreenChromeProps) {
-  const onSyncErrorAction = useSyncRetryAction();
+  const syncMessage = syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError;
+  const {
+    inactiveChrome,
+    terminalSessionError,
+    onReturnToJoin,
+    onSyncRetry,
+  } = useMapTerminalSessionChrome({
+    syncMessage,
+    sessionId: session.id,
+    closeOverlays: overlay.closeSheet,
+  });
+  const onSyncErrorAction = onSyncRetry;
   const gameOverActions = useGameOverActions(session, overlay);
   const isDesktop = useDesktopLayout();
   const toolLayout = isDesktop ? "rail" : "dock";
@@ -303,7 +314,7 @@ export function HiderMapScreenChrome({
         activeTool="none"
         syncStatus={syncStatus.status}
         queuedWrites={syncStatus.queuedWrites}
-        message={syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError}
+        message={syncMessage}
         timerState={timer.timerState}
         timerRunning={timer.running}
         timerHasStarted={timer.hasStarted}
@@ -313,7 +324,7 @@ export function HiderMapScreenChrome({
         onTimerStart={timer.start}
         onTimerPause={timer.pause}
         onTimerReset={timer.reset}
-        timerControlsDisabled={!canControlTimer}
+        timerControlsDisabled={!canControlTimer || inactiveChrome}
         onOpenLog={onOpenLog}
         pendingQuestions={pendingQuestions}
         closeTimerMenu={overlay.sheet !== "none" || zoneTool.wizardOpen}
@@ -330,6 +341,9 @@ export function HiderMapScreenChrome({
         onDeclineFoundHider={() => void onDeclineFoundHider()}
         hiderOutsideZone={hiderOutsideZone}
         onSyncErrorAction={onSyncErrorAction}
+        inactiveChrome={inactiveChrome}
+        terminalSessionError={terminalSessionError}
+        onReturnToJoin={onReturnToJoin}
       />
       <FirestorePersistenceBanner />
       <AppUpdateMapChip />
@@ -352,7 +366,8 @@ export function HiderMapScreenChrome({
           ? onOpenWizard
           : () => void zoneTool.startMove()
       }
-      zoneDisabled={!zoneTool.writesEnabled}
+      zoneDisabled={!zoneTool.writesEnabled || inactiveChrome}
+      inactive={inactiveChrome}
       showExpansion={expansionPackEnabled}
       onExpansion={() => onExpansionMenuOpenChange(true)}
       onRecenter={onRecenter}
