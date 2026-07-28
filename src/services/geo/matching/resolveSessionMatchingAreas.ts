@@ -31,6 +31,8 @@ function bundledGeoRevisionIsCurrent(
 const resolvedMatchingAreasCache = new Map<string, CustomMatchingAreasByLevel>();
 const resolvedPlayAreaCache = new Map<string, GameArea>();
 const inFlightPlayAreaLoads = new Map<string, Promise<GameArea>>();
+/** Pack keys that failed to load — ready for settle, but no geometry cached. */
+const failedPlayAreaKeys = new Set<string>();
 
 export function matchingAreasCacheKey(
   regionPackId: RegionPackId | undefined,
@@ -60,6 +62,7 @@ export function clearResolvedMatchingAreasCacheForTests(): void {
   resolvedMatchingAreasCache.clear();
   resolvedPlayAreaCache.clear();
   inFlightPlayAreaLoads.clear();
+  failedPlayAreaKeys.clear();
 }
 
 export type SessionMatchingAreasInput = Pick<
@@ -121,7 +124,9 @@ export function isPlayAreaReadySync(
   }
 
   const cacheKey = playAreaCacheKey(packId, session.regionPackSubregionId);
-  return resolvedPlayAreaCache.has(cacheKey);
+  return (
+    resolvedPlayAreaCache.has(cacheKey) || failedPlayAreaKeys.has(cacheKey)
+  );
 }
 
 export function peekResolvedPlayArea(
@@ -169,11 +174,14 @@ export async function resolveSessionPlayArea(
 
   void loadRegionPackPlayArea(packId, session.regionPackSubregionId).then(
     (playArea) => {
+      failedPlayAreaKeys.delete(cacheKey);
       resolvedPlayAreaCache.set(cacheKey, playArea);
       settle(playArea);
     },
     () => {
-      resolvedPlayAreaCache.set(cacheKey, session.gameArea);
+      // Mark ready without caching session.gameArea under the pack key —
+      // fallback geometry is session-specific and must not poison other sessions.
+      failedPlayAreaKeys.add(cacheKey);
       settle(session.gameArea);
     },
   ).finally(() => {

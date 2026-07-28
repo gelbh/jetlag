@@ -159,7 +159,7 @@ describe("resolveSessionPlayArea", () => {
     await expect(p2).resolves.toBe(session.gameArea);
   });
 
-  it("caches session.gameArea fallback when load rejects", async () => {
+  it("marks ready on load reject without caching session.gameArea", async () => {
     const session = createTestSession({
       regionPackId: "london",
       regionPackSubregionId: "camden",
@@ -171,6 +171,6 @@ describe("resolveSessionPlayArea", () => {
 
     await expect(resolveSessionPlayArea(session)).resolves.toBe(session.gameArea);
     expect(isPlayAreaReadySync(session)).toBe(true);
-    expect(peekResolvedPlayArea(session)).toBe(session.gameArea);
+    expect(peekResolvedPlayArea(session)).toBeUndefined();
   });
 });
