@@ -11,7 +11,7 @@ export function AdminSettingsPanel({ titleId }: { titleId?: string }) {
       </p>
       <p className="jl-ops-settings-body">
         Desk layouts and named presets stay on this device. Arranging panels
-        switches the active preset to Custom.
+        switches the active preset to Scratch.
       </p>
     </div>
   );

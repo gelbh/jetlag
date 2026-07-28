@@ -6,11 +6,31 @@ import {
 } from "../../domain/admin/opsDeskLayout";
 import { AdminPresetMenu } from "./AdminPresetMenu";
 
+const userPresets: DeskPreset[] = [
+  {
+    id: "user-night",
+    name: "Night shift",
+    kind: "user",
+    layout: {
+      cols: 24,
+      rowHeight: 24,
+      stacks: [],
+      hiddenPanelIds: [],
+    },
+  },
+];
+
 const baseProps = {
-  activePresetId: "session-watch",
-  defaultPresetId: "session-watch",
-  presetOrder: ["session-watch", "incident-triage", CUSTOM_PRESET_ID],
-  userPresets: [] as DeskPreset[],
+  activePresetId: CUSTOM_PRESET_ID,
+  defaultPresetId: CUSTOM_PRESET_ID,
+  presetOrder: [
+    "session-watch",
+    "incident-triage",
+    "ops-overview",
+    CUSTOM_PRESET_ID,
+    "user-night",
+  ],
+  userPresets,
   onSelectPreset: vi.fn(),
   onSaveCurrent: vi.fn(),
   onDeleteUserPreset: vi.fn(),
@@ -21,6 +41,15 @@ const baseProps = {
 };
 
 describe("AdminPresetMenu", () => {
+  it("shows Scratch and user chips only — no stock catalog", () => {
+    render(<AdminPresetMenu {...baseProps} />);
+    expect(screen.getByRole("button", { name: "Scratch" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Night shift" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Session watch" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Incident triage" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Ops overview" })).toBeNull();
+  });
+
   it("selects via label without calling setDefault", () => {
     const onSelectPreset = vi.fn();
     const onSetDefault = vi.fn();
@@ -32,8 +61,8 @@ describe("AdminPresetMenu", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Incident triage" }));
-    expect(onSelectPreset).toHaveBeenCalledWith("incident-triage");
+    fireEvent.click(screen.getByRole("button", { name: "Night shift" }));
+    expect(onSelectPreset).toHaveBeenCalledWith("user-night");
     expect(onSetDefault).not.toHaveBeenCalled();
   });
 
@@ -49,9 +78,9 @@ describe("AdminPresetMenu", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Set Incident triage as default" }),
+      screen.getByRole("button", { name: "Set Night shift as default" }),
     );
-    expect(onSetDefault).toHaveBeenCalledWith("incident-triage");
+    expect(onSetDefault).toHaveBeenCalledWith("user-night");
     expect(onSelectPreset).not.toHaveBeenCalled();
   });
 
@@ -75,12 +104,11 @@ describe("AdminPresetMenu", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Manage" }));
     fireEvent.click(
-      screen.getByRole("button", { name: "Move Incident triage earlier" }),
+      screen.getByRole("button", { name: "Move Night shift earlier" }),
     );
 
     expect(onReorderPresets).toHaveBeenCalledWith([
-      "incident-triage",
-      "session-watch",
+      "user-night",
       CUSTOM_PRESET_ID,
     ]);
   });
@@ -93,4 +121,3 @@ describe("AdminPresetMenu", () => {
     expect(screen.queryByTestId("admin-ops-preset-manage")).toBeNull();
   });
 });
-
