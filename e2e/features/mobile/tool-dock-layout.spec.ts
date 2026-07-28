@@ -101,20 +101,16 @@ test.describe("iPhone 13 PWA safe area", () => {
     await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 
-  test("dock floats above home indicator with map full bleed", async ({
+  test("dock flush chassis absorbs home indicator with map full bleed", async ({
     page,
   }) => {
     const metrics = await page.evaluate(() => {
       const dock = document.querySelector(".jl-tool-dock");
       const bar = document.querySelector(".jl-tool-dock-bar");
       const map = document.querySelector(".leaflet-container");
-      const topBand = document.querySelector(".map-screen-shell");
       const dockRect = dock?.getBoundingClientRect();
       const barRect = bar?.getBoundingClientRect();
       const mapRect = map?.getBoundingClientRect();
-      const topBandStyle = topBand
-        ? getComputedStyle(topBand, "::before")
-        : null;
       const slots = [...document.querySelectorAll(".jl-tool-slot")].filter(
         (el) => el.getBoundingClientRect().width > 0,
       );
@@ -122,51 +118,47 @@ test.describe("iPhone 13 PWA safe area", () => {
         ...slots.map((el) => el.getBoundingClientRect().bottom),
         0,
       );
+      const dockStyle = dock ? getComputedStyle(dock) : null;
+      const barStyle = bar ? getComputedStyle(bar) : null;
       return {
         viewportHeight: window.innerHeight,
         dockBottom: dockRect?.bottom ?? 0,
         barHeight: barRect?.height ?? 0,
         barBottom: barRect?.bottom ?? 0,
         mapBottom: mapRect?.bottom ?? 0,
-        topBandHeight: topBandStyle
-          ? Number.parseFloat(topBandStyle.height)
+        dockPaddingBottom: dockStyle
+          ? Number.parseFloat(dockStyle.paddingBottom)
           : 0,
-        dockPaddingBottom: dock
-          ? Number.parseFloat(getComputedStyle(dock).paddingBottom)
+        dockBottomOffset: dockStyle
+          ? Number.parseFloat(dockStyle.bottom)
           : 0,
-        dockBottomOffset: dock
-          ? Number.parseFloat(getComputedStyle(dock).bottom)
-          : 0,
-        barPaddingBottom: bar
-          ? Number.parseFloat(getComputedStyle(bar).paddingBottom)
+        barPaddingBottom: barStyle
+          ? Number.parseFloat(barStyle.paddingBottom)
           : 0,
         lowestSlotBottom,
         gapBelowDock: window.innerHeight - (dockRect?.bottom ?? 0),
         deadSpaceBelowIcons:
           (barRect?.bottom ?? 0) -
           lowestSlotBottom -
-          (bar
-            ? Number.parseFloat(getComputedStyle(bar).paddingBottom)
-            : 0),
+          (barStyle ? Number.parseFloat(barStyle.paddingBottom) : 0),
+        barCount: document.querySelectorAll(".jl-tool-dock-bar").length,
         backdropOnMap: document.querySelector(".app-entry-backdrop"),
       };
     });
 
     expect(metrics.backdropOnMap).toBeNull();
-    expect(metrics.dockPaddingBottom).toBeLessThanOrEqual(1);
-    expect(metrics.dockBottomOffset).toBeGreaterThanOrEqual(
+    expect(metrics.barCount).toBe(1);
+    // Wrapper chassis: flush to physical bottom, pad absorbs safe-area.
+    expect(metrics.dockBottomOffset).toBeLessThanOrEqual(1);
+    expect(metrics.gapBelowDock).toBeLessThanOrEqual(2);
+    expect(
+      Math.abs(metrics.dockBottom - metrics.viewportHeight),
+    ).toBeLessThanOrEqual(2);
+    expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(
       SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
     );
+    // Forbidden: safe-area pad inside the bordered bar (reverted stripe).
     expect(metrics.barPaddingBottom).toBeLessThanOrEqual(6);
-    expect(
-      Math.abs(
-        metrics.dockBottom -
-          (metrics.viewportHeight - SIMULATED_SAFE_AREA_BOTTOM_PX),
-      ),
-    ).toBeLessThanOrEqual(4);
-    expect(metrics.gapBelowDock).toBeGreaterThanOrEqual(
-      SIMULATED_SAFE_AREA_BOTTOM_PX - 4,
-    );
     expect(Math.abs(metrics.mapBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
       2,
     );
