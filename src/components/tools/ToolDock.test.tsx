@@ -74,6 +74,33 @@ describe("ToolDock", () => {
     expect(document.querySelector(".jl-unread-badge")).toBeNull();
   });
 
+  it("renders short plain labels on every dock slot", () => {
+    renderWithRouter(
+      <ToolDock
+        activeTool="none"
+        onSelect={vi.fn()}
+        canUndo={false}
+        canRedo={false}
+        onUndo={vi.fn()}
+        onRedo={vi.fn()}
+        onOpenSettings={vi.fn()}
+        onOpenChat={vi.fn()}
+      />,
+    );
+
+    const labels = [...document.querySelectorAll(".jl-tool-slot-label")].map(
+      (node) => node.textContent?.trim() ?? "",
+    );
+
+    expect(labels).toEqual(
+      expect.arrayContaining(["Match", "Measure", "Thermo", "Radar", "More"]),
+    );
+    for (const label of labels) {
+      expect(label.length).toBeGreaterThan(0);
+      expect(label.endsWith(".")).toBe(false);
+    }
+  });
+
   it("applies rail layout class when layout is rail", () => {
     const { container } = renderWithRouter(
       <ToolDock
