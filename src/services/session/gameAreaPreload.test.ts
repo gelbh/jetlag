@@ -109,8 +109,42 @@ describe("gameAreaPreload", () => {
       preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA),
     ).resolves.toBeUndefined();
 
-    expect(fetchPreparedCoastlineSegments).toHaveBeenCalled();
-    expect(fetchLandmassFeaturesInArea).toHaveBeenCalled();
+    expect(fetchPreparedCoastlineSegments).not.toHaveBeenCalled();
+    expect(fetchLandmassFeaturesInArea).not.toHaveBeenCalled();
+  });
+
+  it("never preloads landmass Overpass on background or critical paths", async () => {
+    vi.useFakeTimers();
+
+    const backgroundPromise = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA);
+    await vi.runAllTimersAsync();
+    await backgroundPromise;
+
+    await preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA);
+
+    expect(fetchLandmassFeaturesInArea).not.toHaveBeenCalled();
+  });
+
+  it("never preloads coastline or measuring linear segments on map enter", async () => {
+    vi.useFakeTimers();
+
+    const preloadPromise = preloadGameAreaCachesAsync(
+      DUBLIN_CITY_GAME_AREA,
+      { 8: "{}", 9: "{}" },
+      "dublin",
+    );
+
+    await vi.runAllTimersAsync();
+    await preloadPromise;
+
+    await preloadCriticalGameAreaCaches(
+      DUBLIN_CITY_GAME_AREA,
+      { 8: "{}", 9: "{}" },
+      "dublin",
+    );
+
+    expect(fetchPreparedCoastlineSegments).not.toHaveBeenCalled();
+    expect(fetchPreparedMeasuringLinearSegments).not.toHaveBeenCalled();
   });
 
   it("never Overpass-preloads admin 4/6 or admin2_border for a bundled region pack (Dublin)", async () => {
@@ -136,9 +170,7 @@ describe("gameAreaPreload", () => {
       .mocked(fetchPreparedMeasuringLinearSegments)
       .mock.calls.map(([, kind]) => kind);
     expect(fetchedLinearKinds).not.toContain("admin2_border");
-    expect(fetchedLinearKinds).toEqual(
-      expect.arrayContaining(["admin3_border", "admin4_border"]),
-    );
+    expect(fetchedLinearKinds).toHaveLength(0);
   });
 
   it("uses a shorter preload gap for premium sessions", () => {

@@ -76,6 +76,7 @@ export function useMatchingCatalog(input: {
     return {
       customMatchingAreas: content.customMatchingAreas,
       customCategories: content.customCategories,
+      regionPackId: sessionRules?.regionPackId,
     };
   }, [sessionRules]);
 

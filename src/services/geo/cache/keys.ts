@@ -1,4 +1,5 @@
 import type { GameArea } from "../../../domain/map/annotations";
+import type { RegionPackId } from "../../../domain/regions/regionPack";
 
 function stableGameAreaKey(gameArea: GameArea): string {
   return JSON.stringify(gameArea.coordinates);
@@ -44,9 +45,13 @@ export function adminDivisionCacheKey(
   return geographicCacheKey(gameArea, `admin:v2:${adminLevel}`);
 }
 
-export function landmassCacheKey(gameArea: GameArea): string {
-  // v2: bbox + `out geom` (empty searchArea / missing way geometry bug).
-  return geographicCacheKey(gameArea, "landmass:v2");
+export function landmassCacheKey(
+  gameArea: GameArea,
+  regionPackId?: RegionPackId,
+): string {
+  // v3: skip Overpass for bundled metro packs; bbox + out geom from v2.
+  const packSuffix = regionPackId ? `:${regionPackId}` : "";
+  return geographicCacheKey(gameArea, `landmass:v3${packSuffix}`);
 }
 
 export function measuringPlacesCacheKey(
