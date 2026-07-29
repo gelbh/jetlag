@@ -3,11 +3,12 @@ import { LRUCache } from "lru-cache";
 import type { GameArea, TentaclePoi } from "../../map/annotations";
 import { gameAreaFingerprint } from "../core/gameAreaConvert";
 import type { LatLngTuple } from "../kernel/types";
+import { resolveClientMaskKernelMode } from "../kernel/resolveClientMaskKernelMode";
 import {
-  buildTentacleEliminationRegion as kernelBuildTentacleEliminationRegion,
-  buildTentaclePoiAnswerEliminationRegion as kernelBuildTentaclePoiAnswerEliminationRegion,
+  dispatchTentacleEliminationRegion,
+  dispatchTentaclePoiAnswerEliminationRegion,
   type TentacleSite,
-} from "../kernel/tentacleRegions";
+} from "../kernel/tentacleKernelRunner";
 import {
   getCachedVoronoiCells,
   tentacleSitesFingerprint,
@@ -40,31 +41,35 @@ function voronoiCellsForPois(pois: readonly TentaclePoi[]): FeatureCollection {
   );
 }
 
-export function buildTentacleEliminationRegion(
+export async function buildTentacleEliminationRegion(
   anchor: LatLngTuple,
   radiusMeters: number,
   pois: readonly TentaclePoi[],
   answeredPoiId: string,
   gameArea: GameArea,
-): Feature<Polygon | MultiPolygon> | null {
+): Promise<Feature<Polygon | MultiPolygon> | null> {
   const cells = voronoiCellsForPois(pois);
-  return kernelBuildTentacleEliminationRegion(
-    anchor,
-    radiusMeters,
-    toTentacleSites(pois),
-    answeredPoiId,
-    gameArea,
-    cells,
+  const mode = resolveClientMaskKernelMode();
+  return dispatchTentacleEliminationRegion(
+    {
+      anchor,
+      radiusMeters,
+      sites: toTentacleSites(pois),
+      answeredSiteId: answeredPoiId,
+      gameArea,
+      voronoiCells: cells,
+    },
+    mode,
   );
 }
 
-export function buildTentaclePoiAnswerEliminationRegion(
+export async function buildTentaclePoiAnswerEliminationRegion(
   anchor: LatLngTuple,
   radiusMeters: number,
   pois: readonly TentaclePoi[],
   answeredPoiId: string,
   gameArea: GameArea,
-): Feature<Polygon | MultiPolygon> | null {
+): Promise<Feature<Polygon | MultiPolygon> | null> {
   if (!pois.some((poi) => poi.id === answeredPoiId)) {
     return null;
   }
@@ -76,13 +81,17 @@ export function buildTentaclePoiAnswerEliminationRegion(
   }
 
   const cells = voronoiCellsForPois(pois);
-  const region = kernelBuildTentaclePoiAnswerEliminationRegion(
-    anchor,
-    radiusMeters,
-    toTentacleSites(pois),
-    answeredPoiId,
-    gameArea,
-    cells,
+  const mode = resolveClientMaskKernelMode();
+  const region = await dispatchTentaclePoiAnswerEliminationRegion(
+    {
+      anchor,
+      radiusMeters,
+      sites: toTentacleSites(pois),
+      answeredSiteId: answeredPoiId,
+      gameArea,
+      voronoiCells: cells,
+    },
+    mode,
   );
   if (region) {
     poiAnswerEliminationCache.set(cacheKey, region);
@@ -95,14 +104,14 @@ export function clearTentacleEliminationCacheForTests(): void {
 }
 
 /** Serialized GeoJSON for metadata, or `undefined` when no shaded region applies. */
-export function tentacleEliminationJsonForAnswer(params: {
+export async function tentacleEliminationJsonForAnswer(params: {
   anchor: LatLngTuple;
   radiusMeters: number;
   pois: readonly TentaclePoi[] | undefined;
   answeredPoiId: string | undefined;
   outOfReach: boolean;
   gameArea: GameArea;
-}): string | undefined {
+}): Promise<string | undefined> {
   if (
     params.outOfReach ||
     !params.answeredPoiId ||
@@ -112,7 +121,7 @@ export function tentacleEliminationJsonForAnswer(params: {
     return undefined;
   }
 
-  const region = buildTentaclePoiAnswerEliminationRegion(
+  const region = await buildTentaclePoiAnswerEliminationRegion(
     params.anchor,
     params.radiusMeters,
     params.pois,

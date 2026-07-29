@@ -10,11 +10,11 @@ export function tentacleAnswerFromReplyId(replyId: string): string {
   return replyId;
 }
 
-export function resolveTentaclePendingQuestion(
+export async function resolveTentaclePendingQuestion(
   pending: PendingQuestionRecord,
   answerReplyId: string,
   gameArea: GameArea,
-): Omit<AnnotationRecord, "id" | "sessionId" | "status"> | null {
+): Promise<Omit<AnnotationRecord, "id" | "sessionId" | "status"> | null> {
   const metadata = pending.placement.metadata;
   const poisJson = metadata.poisJson;
   const centerJson = metadata.centerJson;
@@ -34,7 +34,7 @@ export function resolveTentaclePendingQuestion(
     ? undefined
     : pois.find((poi) => poi.id === answerReplyId);
   const radiusMeters = tentacleRadiusFromMetadata(metadata, DEFAULT_RADIUS_METERS);
-  const eliminationJson = tentacleEliminationJsonForAnswer({
+  const eliminationJson = await tentacleEliminationJsonForAnswer({
     anchor,
     radiusMeters,
     pois,

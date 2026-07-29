@@ -1,6 +1,7 @@
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
-import { dispatchKernelSync } from "./dispatchKernel";
+import { dispatchKernel } from "./dispatchKernel";
 import type { MaskKernelMode } from "./maskKernelMode";
+import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
 import {
   buildTentacleEliminationRegion,
   buildTentaclePoiAnswerEliminationRegion,
@@ -17,42 +18,112 @@ export type TentacleEliminationParams = {
   voronoiCells: FeatureCollection;
 };
 
-/** Sync tentacle elimination region (mode + KERNEL_WASM_READY; TS-only until Phase E). */
-export function runTentacleEliminationRegion(
+type TentacleWasmApi = typeof import("./tentacleWasm");
+
+let tentacleWasmModulePromise: Promise<TentacleWasmApi> | null = null;
+
+function loadTentacleWasmModule(): Promise<TentacleWasmApi> {
+  if (!tentacleWasmModulePromise) {
+    tentacleWasmModulePromise = import("./tentacleWasm").catch((error) => {
+      tentacleWasmModulePromise = null;
+      throw error;
+    });
+  }
+  return tentacleWasmModulePromise;
+}
+
+function tentacleTopologyMatches(
+  wasm: Feature<Polygon | MultiPolygon> | null,
+  ts: Feature<Polygon | MultiPolygon> | null,
+  gameArea: GameAreaGeometry,
+): boolean {
+  return maskTopologyMatches(wasm, ts, bboxFromGameArea(gameArea));
+}
+
+/** Production tentacle elimination entrypoint (mode + KERNEL_WASM_READY). */
+export async function runTentacleEliminationRegion(
   params: TentacleEliminationParams,
   mode: MaskKernelMode = "wasm",
-): Feature<Polygon | MultiPolygon> | null {
-  return dispatchKernelSync({
+): Promise<Feature<Polygon | MultiPolygon> | null> {
+  return dispatchTentacleEliminationRegion(params, mode);
+}
+
+/** Production POI-answer tentacle elimination (mode + KERNEL_WASM_READY). */
+export async function runTentaclePoiAnswerEliminationRegion(
+  params: TentacleEliminationParams,
+  mode: MaskKernelMode = "wasm",
+): Promise<Feature<Polygon | MultiPolygon> | null> {
+  return dispatchTentaclePoiAnswerEliminationRegion(params, mode);
+}
+
+/** Mode + KERNEL_WASM_READY dispatch for tentacle elimination. */
+export async function dispatchTentacleEliminationRegion(
+  params: TentacleEliminationParams,
+  mode: MaskKernelMode = "wasm",
+): Promise<Feature<Polygon | MultiPolygon> | null> {
+  const { anchor, radiusMeters, sites, answeredSiteId, gameArea, voronoiCells } =
+    params;
+  return dispatchKernel({
     mode,
     entrypoint: "tentacleEliminationRegion",
+    label: "buildTentacleEliminationRegion",
     runTs: () =>
       buildTentacleEliminationRegion(
-        params.anchor,
-        params.radiusMeters,
-        params.sites,
-        params.answeredSiteId,
-        params.gameArea,
-        params.voronoiCells,
+        anchor,
+        radiusMeters,
+        sites,
+        answeredSiteId,
+        gameArea,
+        voronoiCells,
       ),
+    runWasm: async () => {
+      const wasm = await loadTentacleWasmModule();
+      return wasm.wasmBuildTentacleEliminationRegion(
+        anchor,
+        radiusMeters,
+        sites,
+        answeredSiteId,
+        gameArea,
+        voronoiCells,
+      );
+    },
+    matches: (wasmResult, tsResult) =>
+      tentacleTopologyMatches(wasmResult, tsResult, gameArea),
   });
 }
 
-/** Sync POI-answer tentacle elimination (mode + KERNEL_WASM_READY). */
-export function runTentaclePoiAnswerEliminationRegion(
+/** Mode + KERNEL_WASM_READY dispatch for POI-answer tentacle elimination. */
+export async function dispatchTentaclePoiAnswerEliminationRegion(
   params: TentacleEliminationParams,
   mode: MaskKernelMode = "wasm",
-): Feature<Polygon | MultiPolygon> | null {
-  return dispatchKernelSync({
+): Promise<Feature<Polygon | MultiPolygon> | null> {
+  const { anchor, radiusMeters, sites, answeredSiteId, gameArea, voronoiCells } =
+    params;
+  return dispatchKernel({
     mode,
     entrypoint: "tentacleEliminationRegion",
+    label: "buildTentaclePoiAnswerEliminationRegion",
     runTs: () =>
       buildTentaclePoiAnswerEliminationRegion(
-        params.anchor,
-        params.radiusMeters,
-        params.sites,
-        params.answeredSiteId,
-        params.gameArea,
-        params.voronoiCells,
+        anchor,
+        radiusMeters,
+        sites,
+        answeredSiteId,
+        gameArea,
+        voronoiCells,
       ),
+    runWasm: async () => {
+      const wasm = await loadTentacleWasmModule();
+      return wasm.wasmBuildTentaclePoiAnswerEliminationRegion(
+        anchor,
+        radiusMeters,
+        sites,
+        answeredSiteId,
+        gameArea,
+        voronoiCells,
+      );
+    },
+    matches: (wasmResult, tsResult) =>
+      tentacleTopologyMatches(wasmResult, tsResult, gameArea),
   });
 }
