@@ -16,11 +16,11 @@ import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
 import type { useHiderZoneTool } from "../../hooks/session/useHiderZoneTool";
 import type { useTimeTrapTool } from "../../hooks/session/useTimeTrapTool";
 import { ChatPanel } from "../../components/chat/ChatPanel";
-import { ContextualRail } from "../../components/map/ContextualRail";
+import { ContextualRail } from "../../components/map/chrome/ContextualRail";
 import {
   ContextualRailPanelProvider,
   type ContextualRailTab,
-} from "../../components/map/ContextualRailContext";
+} from "../../components/map/chrome/ContextualRailContext";
 import { HidingZonePanel } from "../../components/hider/HidingZonePanel";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";

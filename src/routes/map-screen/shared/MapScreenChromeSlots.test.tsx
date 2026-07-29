@@ -8,7 +8,7 @@ vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
   useDesktopLayout: () => false,
 }));
 
-vi.mock("../../../components/map/DesktopOpsShell", () => ({
+vi.mock("../../../components/map/chrome/DesktopOpsShell", () => ({
   DesktopOpsShell: ({
     status,
     tools,

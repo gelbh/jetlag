@@ -5,7 +5,7 @@ import {
   mapToolPlacingLabel,
   type DockableMapTool,
 } from "../../domain/map/mapTools";
-import { MapFloatingPanel } from "../map/MapFloatingPanel";
+import { MapFloatingPanel } from "../map/chrome/MapFloatingPanel";
 
 interface ToolFloatingPanelProps {
   toolId: DockableMapTool;

@@ -1,15 +1,15 @@
 import { Suspense } from "react";
-import { AnnotationLayer } from "../../components/map/AnnotationLayer";
-import { LiveSeekerLocationsLayer } from "../../components/map/LiveSeekerLocationsLayer";
-import { GeometryEditLayer } from "../../components/map/GeometryEditLayer";
-import { GameAreaMask } from "../../components/map/GameAreaMask";
-import { MapView } from "../../components/map/MapView";
-import { MapDraftLayer } from "../../components/map/MapDraftLayer";
-import { AdminBoundariesLayer } from "../../components/map/AdminBoundariesLayer";
-import { LiveUserLocationLayer } from "../../components/map/LiveUserLocationLayer";
-import { MapViewportTracker } from "../../components/map/MapViewportTracker";
-import { ActiveThermometerWalkLayer } from "../../components/map/ActiveThermometerWalkLayer";
-import { PendingQuestionLayer } from "../../components/map/PendingQuestionLayer";
+import { AnnotationLayer } from "../../components/map/layers/AnnotationLayer";
+import { LiveSeekerLocationsLayer } from "../../components/map/layers/LiveSeekerLocationsLayer";
+import { GeometryEditLayer } from "../../components/map/layers/GeometryEditLayer";
+import { GameAreaMask } from "../../components/map/layers/GameAreaMask";
+import { MapView } from "../../components/map/chrome/MapView";
+import { MapDraftLayer } from "../../components/map/layers/MapDraftLayer";
+import { AdminBoundariesLayer } from "../../components/map/layers/AdminBoundariesLayer";
+import { LiveUserLocationLayer } from "../../components/map/layers/LiveUserLocationLayer";
+import { MapViewportTracker } from "../../components/map/chrome/MapViewportTracker";
+import { ActiveThermometerWalkLayer } from "../../components/map/layers/ActiveThermometerWalkLayer";
+import { PendingQuestionLayer } from "../../components/map/layers/PendingQuestionLayer";
 import { TransitLayer } from "./lazyImports";
 import type { MapScreenController } from "./useMapScreenController";
 

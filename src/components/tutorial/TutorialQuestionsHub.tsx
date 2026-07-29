@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { HudToolIcon } from "../map/ToolIcons";
+import { HudToolIcon } from "../map/icons/ToolIcons";
 import {
   getQuestionTutorial,
   getQuestionTutorials,

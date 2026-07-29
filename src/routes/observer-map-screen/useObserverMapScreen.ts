@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import type { MapViewportState } from "../../components/map/MapViewportTracker";
+import type { MapViewportState } from "../../components/map/chrome/MapViewportTracker";
 import {
   gameAreaCenter,
   gameAreaToBoundsExpression,

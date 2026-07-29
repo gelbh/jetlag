@@ -7,7 +7,7 @@ export const HeavyToolHost = lazyWithChunkRetry(() =>
 );
 
 export const TransitLayer = lazyWithChunkRetry(() =>
-  import("../../components/map/TransitLayer").then((module) => ({
+  import("../../components/map/layers/TransitLayer").then((module) => ({
     default: module.TransitLayer,
   })),
 );

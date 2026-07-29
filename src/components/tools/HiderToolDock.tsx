@@ -5,7 +5,7 @@ import {
   HudRefreshIcon,
   HudSettingsIcon,
 } from "../ui/brand/HudIcons";
-import { HudPinIcon } from "../map/ToolIcons";
+import { HudPinIcon } from "../map/icons/ToolIcons";
 
 import type { ToolDockLayout } from "./ToolDock";
 

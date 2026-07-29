@@ -1,10 +1,10 @@
 import { useCallback } from "react";
 import { AppNavigate } from "../navigation/AppNavigate";
-import { GameAreaMask } from "../components/map/GameAreaMask";
+import { GameAreaMask } from "../components/map/layers/GameAreaMask";
 import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
-import { MapViewportTracker } from "../components/map/MapViewportTracker";
+import { MapViewportTracker } from "../components/map/chrome/MapViewportTracker";
 import { ChatPanel } from "../components/chat/ChatPanel";
-import { ContextualRailPanelProvider } from "../components/map/ContextualRailContext";
+import { ContextualRailPanelProvider } from "../components/map/chrome/ContextualRailContext";
 import { SessionLog } from "../components/session/log/SessionLog";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
 import { InlineError } from "../components/ui/banners/InlineError";

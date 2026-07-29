@@ -1,4 +1,4 @@
-import type { MapViewportState } from "../../../components/map/MapViewportTracker";
+import type { MapViewportState } from "../../../components/map/chrome/MapViewportTracker";
 import type { MapStyle } from "../../../domain/map/mapBasemaps";
 import type { LayerVisibility } from "../../../state/sessionStore";
 import { LayerVisibilityGrid } from "../../../components/session/mapChrome/LayerVisibilityGrid";

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { AppLink } from "../../components/navigation/AppLink";
-import { ContextualRail } from "../../components/map/ContextualRail";
-import type { ContextualRailTab } from "../../components/map/ContextualRailContext";
+import { ContextualRail } from "../../components/map/chrome/ContextualRail";
+import type { ContextualRailTab } from "../../components/map/chrome/ContextualRailContext";
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { HudHomeIcon } from "../../components/ui/brand/HudIcons";
 import type { PlayerRole } from "../../domain/session/players/playerRole";

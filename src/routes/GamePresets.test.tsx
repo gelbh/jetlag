@@ -12,15 +12,15 @@ vi.mock("../hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => navigate,
 }));
 
-vi.mock("../components/map/MapView", () => ({
+vi.mock("../components/map/chrome/MapView", () => ({
   MapView: () => <div data-testid="framing-map" />,
 }));
 
-vi.mock("../components/map/GameAreaMask", () => ({
+vi.mock("../components/map/layers/GameAreaMask", () => ({
   GameAreaMask: () => null,
 }));
 
-vi.mock("../components/map/FramingPreviewLayers", () => ({
+vi.mock("../components/map/layers/FramingPreviewLayers", () => ({
   FramingPreviewLayers: () => null,
 }));
 

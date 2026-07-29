@@ -2,7 +2,7 @@ import type { SessionRecord } from "../../domain/map/annotations";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { LayerVisibility } from "../../state/sessionStore";
-import type { MapViewportState } from "../../components/map/MapViewportTracker";
+import type { MapViewportState } from "../../components/map/chrome/MapViewportTracker";
 import type { ObserverMapScreenController } from "../observer-map-screen/useObserverMapScreen";
 import type { MonitorPanelId } from "../../domain/admin/opsDeskLayout";
 import { SessionLogBody } from "../../components/session/log/SessionLogBody";

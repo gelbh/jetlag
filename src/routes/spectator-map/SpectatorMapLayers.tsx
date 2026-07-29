@@ -1,9 +1,9 @@
-import { AnnotationLayer } from "../../components/map/AnnotationLayer";
-import { ActiveThermometerWalkLayer } from "../../components/map/ActiveThermometerWalkLayer";
-import { HidingZonesLayer } from "../../components/map/HidingZonesLayer";
-import { LiveHiderLocationsLayer } from "../../components/map/LiveHiderLocationsLayer";
-import { LiveSeekerLocationsLayer } from "../../components/map/LiveSeekerLocationsLayer";
-import { PendingQuestionLayer } from "../../components/map/PendingQuestionLayer";
+import { AnnotationLayer } from "../../components/map/layers/AnnotationLayer";
+import { ActiveThermometerWalkLayer } from "../../components/map/layers/ActiveThermometerWalkLayer";
+import { HidingZonesLayer } from "../../components/map/layers/HidingZonesLayer";
+import { LiveHiderLocationsLayer } from "../../components/map/layers/LiveHiderLocationsLayer";
+import { LiveSeekerLocationsLayer } from "../../components/map/layers/LiveSeekerLocationsLayer";
+import { PendingQuestionLayer } from "../../components/map/layers/PendingQuestionLayer";
 import type { SessionRecord, GameArea, AnnotationRecord } from "../../domain/map/annotations";
 import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import type {

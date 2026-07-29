@@ -14,7 +14,7 @@ import {
   HudSettingsIcon,
   HudUndoIcon,
 } from "../ui/brand/HudIcons";
-import { HudPinIcon, HudZoneIcon } from "../map/ToolIcons";
+import { HudPinIcon, HudZoneIcon } from "../map/icons/ToolIcons";
 
 interface ToolOverflowSheetProps {
   open: boolean;

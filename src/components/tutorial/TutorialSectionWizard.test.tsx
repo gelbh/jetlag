@@ -4,7 +4,7 @@ import { getQuestionTutorial } from "../../domain/tutorial/tutorialQuestions";
 import { renderWithRouter } from "../../test/renderWithRouter";
 import { TutorialSectionWizard } from "./TutorialSectionWizard";
 
-vi.mock("../map/MapView", () => ({
+vi.mock("../map/chrome/MapView", () => ({
   MapView: ({ children }: { children?: React.ReactNode }) => (
     <div data-testid="tutorial-map-preview">{children}</div>
   ),

@@ -12,17 +12,17 @@ vi.mock("./observer-map-screen/useObserverMapScreen", () => ({
   useObserverMapScreen: vi.fn(),
 }));
 
-vi.mock("../components/map/MapView", () => ({
+vi.mock("../components/map/chrome/MapView", () => ({
   MapView: ({ children }: { children?: React.ReactNode }) => (
     <div data-testid="admin-map-view">{children}</div>
   ),
 }));
 
-vi.mock("../components/map/MapViewportTracker", () => ({
+vi.mock("../components/map/chrome/MapViewportTracker", () => ({
   MapViewportTracker: () => null,
 }));
 
-vi.mock("../components/map/GameAreaMask", () => ({
+vi.mock("../components/map/layers/GameAreaMask", () => ({
   GameAreaMask: () => null,
 }));
 

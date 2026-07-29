@@ -4,8 +4,8 @@ import { MotionSheet } from "../../motion/MotionSheet";
 import { useDesktopLayout } from "../../../hooks/layout/useDesktopLayout";
 import {
   type ContextualRailTab,
-} from "../../map/ContextualRailContext";
-import { useContextualRailPanel } from "../../map/useContextualRailPanel";
+} from "../../map/chrome/ContextualRailContext";
+import { useContextualRailPanel } from "../../map/helpers/useContextualRailPanel";
 
 export interface SheetHostProps {
   open: boolean;

@@ -1,17 +1,17 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { AppNavigate } from "../navigation/AppNavigate";
 import { Polygon } from "react-leaflet";
-import { AnnotationLayer } from "../components/map/AnnotationLayer";
-import { GameAreaMask } from "../components/map/GameAreaMask";
-import { HidingZonesLayer } from "../components/map/HidingZonesLayer";
-import { HidingZoneStationsLayer } from "../components/map/HidingZoneStationsLayer";
-import { LiveHiderLocationsLayer } from "../components/map/LiveHiderLocationsLayer";
-import { LiveSeekerLocationsLayer } from "../components/map/LiveSeekerLocationsLayer";
+import { AnnotationLayer } from "../components/map/layers/AnnotationLayer";
+import { GameAreaMask } from "../components/map/layers/GameAreaMask";
+import { HidingZonesLayer } from "../components/map/layers/HidingZonesLayer";
+import { HidingZoneStationsLayer } from "../components/map/layers/HidingZoneStationsLayer";
+import { LiveHiderLocationsLayer } from "../components/map/layers/LiveHiderLocationsLayer";
+import { LiveSeekerLocationsLayer } from "../components/map/layers/LiveSeekerLocationsLayer";
 import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
 import {
   MapViewportTracker,
   type MapViewportState,
-} from "../components/map/MapViewportTracker";
+} from "../components/map/chrome/MapViewportTracker";
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
 import { isWizardPlacementStep } from "../components/tools/shared/wizard/toolWizardPlacementSteps";
 import { timeTrapForHider } from "../domain/expansion/timeTraps";
@@ -32,7 +32,7 @@ import {
   resolveMyHidingZone,
 } from "../domain/session/hiding/hidingZone";
 import { DEFAULT_SESSION_RULES } from "../domain/session/rules";
-import { AdminBoundariesLayer } from "../components/map/AdminBoundariesLayer";
+import { AdminBoundariesLayer } from "../components/map/layers/AdminBoundariesLayer";
 import { useAdminBoundaryFeatures } from "../hooks/map-screen/useAdminBoundaryFeatures";
 import {
   fallbackGameArea,
@@ -52,9 +52,9 @@ import { useMapOverlayState } from "../hooks/map/useMapOverlayState";
 import { useHiderLocationSync } from "../hooks/sync/useHiderLocationSync";
 import { useSharedSessionScreen } from "../hooks/session/useSharedSessionScreen";
 import { usePendingQuestionActions } from "../hooks/sync/usePendingQuestionActions";
-import { ActiveThermometerWalkLayer } from "../components/map/ActiveThermometerWalkLayer";
-import { LiveUserLocationLayer } from "../components/map/LiveUserLocationLayer";
-import { PendingQuestionLayer } from "../components/map/PendingQuestionLayer";
+import { ActiveThermometerWalkLayer } from "../components/map/layers/ActiveThermometerWalkLayer";
+import { LiveUserLocationLayer } from "../components/map/layers/LiveUserLocationLayer";
+import { PendingQuestionLayer } from "../components/map/layers/PendingQuestionLayer";
 import { useActiveThermometerWalk } from "../hooks/location/useActiveThermometerWalk";
 import { useHiderZoneAdvisory } from "../hooks/location/useHiderZoneAdvisory";
 import { useLiveLocation } from "../hooks/location/useLiveLocation";

@@ -4,11 +4,11 @@ import { isEndGameActive, isEndGamePending, isFoundHiderPending } from "../../do
 import { QUESTION_DOCK_TOOL_IDS } from "../../domain/map/mapTools";
 import { resolveToolDockEnabled } from "../../domain/session/rules";
 import { ChatPanel } from "../../components/chat/ChatPanel";
-import { ContextualRail } from "../../components/map/ContextualRail";
+import { ContextualRail } from "../../components/map/chrome/ContextualRail";
 import {
   ContextualRailPanelProvider,
   type ContextualRailTab,
-} from "../../components/map/ContextualRailContext";
+} from "../../components/map/chrome/ContextualRailContext";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
 import { AppUpdateMapChip } from "../../components/ui/banners/AppUpdateMapChip";

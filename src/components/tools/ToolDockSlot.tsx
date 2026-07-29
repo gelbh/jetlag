@@ -17,7 +17,7 @@ import {
   HudPinIcon,
   HudToolIcon,
   HudZoneIcon,
-} from "../map/ToolIcons";
+} from "../map/icons/ToolIcons";
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 import { MotionPressable } from "../motion/MotionPressable";
 
