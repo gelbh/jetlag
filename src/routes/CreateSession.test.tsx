@@ -49,7 +49,7 @@ vi.mock("../services/core/location/geolocation", () => ({
   }),
 }));
 
-vi.mock("../components/map/MapView", () => ({
+vi.mock("../components/map/chrome/MapView", () => ({
   MapView: ({
     onBoundsChange,
     onUserViewportFramed,
@@ -80,7 +80,7 @@ vi.mock("../components/map/MapView", () => ({
   },
 }));
 
-vi.mock("../components/map/GameAreaMask", () => ({
+vi.mock("../components/map/layers/GameAreaMask", () => ({
   GameAreaMask: () => null,
 }));
 

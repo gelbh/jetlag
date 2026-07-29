@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { useCallback, useRef } from "react";
 import { useAnimatedPresence } from "../../hooks/motion/useAnimatedPresence";
 import { usePanelDrag } from "../../hooks/motion/usePanelDrag";
-import { MapFloatingPanel } from "../map/MapFloatingPanel";
+import { MapFloatingPanel } from "../map/chrome/MapFloatingPanel";
 
 interface HiderZoneWizardShellProps {
   open: boolean;

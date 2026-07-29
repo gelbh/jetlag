@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import type { LatLngBoundsExpression } from "leaflet";
 import type { LineString, MultiPolygon, Point, Polygon } from "geojson";
-import { MapView } from "../../map/MapView";
-import { CombinedEliminationLayer } from "../../map/CombinedEliminationLayer";
+import { MapView } from "../../map/chrome/MapView";
+import { CombinedEliminationLayer } from "../../map/layers/CombinedEliminationLayer";
 import type { QuestionTutorialId } from "../../../domain/tutorial/tutorialQuestions";
 import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
 import { tutorialMapFixtureForArea } from "../../../domain/wizard/tutorialMapFixtureForArea";
