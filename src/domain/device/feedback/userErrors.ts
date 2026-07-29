@@ -5,6 +5,8 @@ export interface UserErrorDisplay {
   message: string;
   action?: UserErrorAction;
   actionLabel?: string;
+  secondaryAction?: UserErrorAction;
+  secondaryActionLabel?: string;
 }
 
 export function formatUserError(
@@ -73,4 +75,18 @@ export function userErrorFromSyncMessage(
   }
 
   return formatUserError("unknown", message);
+}
+
+export function userErrorFromTerminalSessionMessage(
+  message: string,
+): UserErrorDisplay {
+  const missing = /no longer exists/i.test(message);
+  return {
+    title: missing ? "Session gone" : "Session ended",
+    message,
+    action: "retry",
+    actionLabel: "Retry",
+    secondaryAction: "rejoin",
+    secondaryActionLabel: "Return to join",
+  };
 }
