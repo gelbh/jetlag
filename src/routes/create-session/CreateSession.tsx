@@ -140,7 +140,7 @@ export function CreateSession() {
                 verifyingAccess={session.verifyingAccess}
                 previewGameArea={session.previewGameArea}
                 playerRole={session.playerRole}
-                onPlayerRoleChange={session.setPlayerRole}
+                onPlayerRoleChange={session.handlePlayerRoleChange}
                 gameSize={session.gameSize}
                 distanceUnit={session.distanceUnit}
                 advancedSettings={session.advancedSettings}

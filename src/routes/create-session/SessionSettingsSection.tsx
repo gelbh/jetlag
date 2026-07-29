@@ -57,8 +57,10 @@ export function SessionSettingsSection({
   packPremiumFlow,
 }: SessionSettingsSectionProps) {
   const handlePlayerRoleChange = (role: PlayerRole) => {
-    track(ANALYTICS_EVENTS.role_selected, { role, surface: "create" });
     onPlayerRoleChange(role);
+    queueMicrotask(() => {
+      track(ANALYTICS_EVENTS.role_selected, { role, surface: "create" });
+    });
   };
 
   return (

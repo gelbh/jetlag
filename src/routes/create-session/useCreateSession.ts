@@ -1,4 +1,11 @@
-import { useMemo, useRef, useState, useEffect, useCallback } from "react";
+import {
+  startTransition,
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAppNavigate } from "../../hooks/useAppNavigate";
 import { useGameAreaFraming } from "../../hooks/session/useGameAreaFraming";
@@ -134,12 +141,14 @@ export function useCreateSession() {
   const [accessCodeExpanded, setAccessCodeExpanded] = useState(false);
   const handleGameSizeChange = useCallback(
     (size: GameSize) => {
-      setGameSize(size);
-      setAdvancedSettings((current) => ({
-        ...defaultAdvancedSessionSettings(size, distanceUnit),
-        ...current,
-        hidingZoneRadiusMeters: hidingZoneRadiusMeters(size, distanceUnit),
-      }));
+      startTransition(() => {
+        setGameSize(size);
+        setAdvancedSettings((current) => ({
+          ...defaultAdvancedSessionSettings(size, distanceUnit),
+          ...current,
+          hidingZoneRadiusMeters: hidingZoneRadiusMeters(size, distanceUnit),
+        }));
+      });
     },
     [distanceUnit],
   );
@@ -765,15 +774,25 @@ export function useCreateSession() {
     setAccessCodeError(null);
   };
 
+  const handlePlayerRoleChange = useCallback((role: PlayerRole) => {
+    startTransition(() => {
+      setPlayerRole(role);
+    });
+  }, []);
+
   const handleSessionTierChange = (tier: SessionTier) => {
-    setTierManuallySet(true);
-    setSessionTier(tier);
-    setAccessCodeError(null);
+    startTransition(() => {
+      setTierManuallySet(true);
+      setSessionTier(tier);
+      setAccessCodeError(null);
+    });
   };
 
   const handleDistanceUnitChange = (unit: DistanceUnit) => {
-    setDistanceUnit(unit);
-    setAdvancedSettings(defaultAdvancedSessionSettings(gameSize, unit));
+    startTransition(() => {
+      setDistanceUnit(unit);
+      setAdvancedSettings(defaultAdvancedSessionSettings(gameSize, unit));
+    });
   };
 
   const handlePremiumSignedIn = () => {
@@ -810,7 +829,7 @@ export function useCreateSession() {
     metros,
     setTransitMetroOverride,
     playerRole,
-    setPlayerRole,
+    handlePlayerRoleChange,
     gameSize,
     distanceUnit,
     advancedSettings,
