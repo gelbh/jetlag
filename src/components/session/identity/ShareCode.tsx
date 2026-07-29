@@ -1,4 +1,4 @@
-import { useCopyFeedback } from "../../../hooks/useCopyFeedback";
+import { useCopyFeedback } from "../../../hooks/forms/useCopyFeedback";
 
 interface ShareCodeProps {
   code: string;

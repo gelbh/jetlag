@@ -1,6 +1,6 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { MapChromeControlInset } from "../../components/map/mapChromeControlInset";
-import { useDesktopLayout } from "../../hooks/useDesktopLayout";
+import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useMapScreenTools } from "../../hooks/map-screen/useMapScreenTools";
 import { useMapSessionActions } from "../../hooks/map-screen/useMapSessionActions";
 import { useMapOverlayActions } from "../../hooks/map-screen/useMapOverlayActions";
@@ -20,7 +20,7 @@ import { useMapToolInteraction } from "../../hooks/map-screen/useMapToolInteract
 import { useAdminBoundaryFeatures } from "../../hooks/map-screen/useAdminBoundaryFeatures";
 import { resolveToolDockEnabled } from "../../domain/session/rules";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
-import { useToolPanelChrome } from "../../hooks/useToolPanelChrome";
+import { useToolPanelChrome } from "../../hooks/chrome/useToolPanelChrome";
 import type { MapTool } from "../../state/sessionStore";
 import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
 import { buildPlacementCameraDraft } from "./shared/placementCameraDraft";

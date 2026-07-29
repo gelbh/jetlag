@@ -8,7 +8,7 @@ import { mergeBundledPresets, BUNDLED_GAME_PRESET_DEFINITIONS } from "../domain/
 
 const navigate = vi.fn();
 
-vi.mock("../hooks/useAppNavigate", () => ({
+vi.mock("../hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => navigate,
 }));
 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useAppNavigate } from "../hooks/useAppNavigate";
+import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import {
@@ -24,7 +24,7 @@ import {
   isSectionComplete,
   sectionStartIndex,
 } from "../domain/tutorial/tutorialProgress";
-import { useTutorialProgress } from "../hooks/useTutorialProgress";
+import { useTutorialProgress } from "../hooks/chrome/useTutorialProgress";
 
 type TutorialView =
   | { mode: "hub" }

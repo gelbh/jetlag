@@ -21,7 +21,7 @@ import {
   measuringPlaceNotFoundMessage,
 } from "../../../services/geo/overpass/measuringPlaces";
 import { resolveCoastlineContextFromCache } from "../../../services/geo/overpass/coastline";
-import { useDebouncedValue } from "../../useDebouncedValue";
+import { useDebouncedValue } from "../../forms/useDebouncedValue";
 import {
   fetchMeasuringCoastlineContext,
   fetchMeasuringLinearContext,

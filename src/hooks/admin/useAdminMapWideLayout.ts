@@ -1,5 +1,5 @@
 import { useEffect, useState, type RefObject } from "react";
-import { useMinWidth } from "../useMinWidth";
+import { useMinWidth } from "../layout/useMinWidth";
 
 const VIEWPORT_WIDE_PX = 768;
 const CONTAINER_WIDE_PX = 640;

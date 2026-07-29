@@ -6,7 +6,7 @@ import {
 import type { GameArea } from "../../domain/map/annotations";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
-import { useLatestRequest } from "../useLatestRequest";
+import { useLatestRequest } from "../forms/useLatestRequest";
 
 const EMPTY_TRUTHS = new Map<string, HiderTruthResult>();
 

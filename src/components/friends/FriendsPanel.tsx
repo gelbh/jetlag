@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useDesktopLayout } from "../../hooks/useDesktopLayout";
-import { useLatestRequest } from "../../hooks/useLatestRequest";
+import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
+import { useLatestRequest } from "../../hooks/forms/useLatestRequest";
 import {
   acceptFriendRequest,
   cancelFriendRequest,

@@ -1,6 +1,6 @@
 import type { CSSProperties, Ref } from "react";
-import type { PanelHandleProps } from "../../../hooks/usePanelDrag";
-import { useMotionProfile } from "../../../hooks/useMotionProfile";
+import type { PanelHandleProps } from "../../../hooks/motion/usePanelDrag";
+import { useMotionProfile } from "../../../hooks/motion/useMotionProfile";
 import { PopupCloseButton } from "../../ui/PopupCloseButton";
 
 type PeekHandleProps = PanelHandleProps & {

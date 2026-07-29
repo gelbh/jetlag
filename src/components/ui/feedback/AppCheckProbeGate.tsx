@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { useAuthBootstrapReady } from "../../../hooks/useAuthBootstrapReady";
+import { useAuthBootstrapReady } from "../../../hooks/app/useAuthBootstrapReady";
 import {
   probeAppCheckAvailability,
   type AppCheckProbeResult,

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { useLatestRequest } from "../useLatestRequest";
+import { useLatestRequest } from "../forms/useLatestRequest";
 import type { GameArea } from "../../domain/map/annotations";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";

@@ -18,7 +18,7 @@ import { timeTrapForHider } from "../domain/expansion/timeTraps";
 import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
 import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
 import type { HiderTruthRevealState } from "../components/session/HiderTruthRevealBanner";
-import { useDesktopLayout } from "../hooks/useDesktopLayout";
+import { useDesktopLayout } from "../hooks/layout/useDesktopLayout";
 import { HiderMapScreenChrome } from "./hider-map-screen/HiderMapScreenChrome";
 import { useResolvedSessionRules } from "../hooks/session/useResolvedSessionRules";
 import {

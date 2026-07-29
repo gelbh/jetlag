@@ -8,7 +8,7 @@ import { SessionLog } from "../components/session/SessionLog";
 import { InlineError } from "../components/ui/InlineError";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { fallbackGameArea } from "../domain/geometry/gameArea/geometry";
-import { useAppNavigate } from "../hooks/useAppNavigate";
+import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { useAdminMapWideLayout } from "../hooks/admin/useAdminMapWideLayout";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { adminModerateSession } from "../services/admin/adminModeration";

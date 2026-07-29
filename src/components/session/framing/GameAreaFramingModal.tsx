@@ -1,7 +1,7 @@
 import { MapView } from "../../map/MapView";
 import { FramingPreviewLayers } from "../../map/FramingPreviewLayers";
 import { GameAreaMask } from "../../map/GameAreaMask";
-import { useScrollLock } from "../../../hooks/useScrollLock";
+import { useScrollLock } from "../../../hooks/layout/useScrollLock";
 import type { MapStyle } from "../../../domain/map/mapBasemaps";
 import {
   boundingBoxHasMinimumSpan,

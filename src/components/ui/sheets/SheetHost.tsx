@@ -1,7 +1,7 @@
 import { createPortal } from "react-dom";
 import type { ReactNode } from "react";
 import { MotionSheet } from "../../motion/MotionSheet";
-import { useDesktopLayout } from "../../../hooks/useDesktopLayout";
+import { useDesktopLayout } from "../../../hooks/layout/useDesktopLayout";
 import {
   type ContextualRailTab,
 } from "../../map/ContextualRailContext";

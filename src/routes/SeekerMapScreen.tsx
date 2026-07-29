@@ -3,7 +3,7 @@ import { isTerminalSessionSyncMessage } from "../domain/device/sync/terminalSess
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
 import { useMapLandscapeChrome } from "../components/session/mapChrome/MapLandscapeChromeContext";
 import { resolveLandscapeMapControlInset } from "../components/session/mapChrome/resolveLandscapeMapControlInset";
-import { useDesktopLayout } from "../hooks/useDesktopLayout";
+import { useDesktopLayout } from "../hooks/layout/useDesktopLayout";
 import { HeavyToolHost } from "./map-screen/lazyImports";
 import { MapScreenChrome } from "./map-screen/MapScreenChrome";
 import { MapScreenMapLayers } from "./map-screen/MapScreenMapLayers";

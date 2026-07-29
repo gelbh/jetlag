@@ -11,7 +11,7 @@ import { ToolPanelShell } from "../tools/shared/ToolPanelShell";
 import { ToolSection } from "../tools/shared/ToolSection";
 import { WizardSwipeSurface } from "../tools/shared/WizardSwipeSurface";
 import { TransitStationPicker } from "./TransitStationPicker";
-import { useToolWizard } from "../../hooks/useToolWizard";
+import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 
 export interface HidingZoneToolPanelState {
   query: string;

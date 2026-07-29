@@ -18,7 +18,7 @@ import { MapStatusRail } from "../../components/session/MapStatusRail";
 import { SessionLog } from "../../components/session/SessionLog";
 import { AnnotationEditSheet } from "../../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../../components/tools/ToolDock";
-import { useDesktopLayout } from "../../hooks/useDesktopLayout";
+import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useToolRailShortcuts } from "../../hooks/map/useToolRailShortcuts";
 import type { MapScreenController } from "./useMapScreenController";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";

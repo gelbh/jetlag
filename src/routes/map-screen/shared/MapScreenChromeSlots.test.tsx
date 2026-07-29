@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { MapLandscapeChromeProvider } from "../../../components/session/mapChrome/MapLandscapeChromeContext";
 import { MapScreenChromeSlots } from "./MapScreenChromeSlots";
 
-vi.mock("../../../hooks/useDesktopLayout", () => ({
+vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
+  DESKTOP_LAYOUT_MIN_WIDTH_PX: 1024,
   useDesktopLayout: () => false,
 }));
 

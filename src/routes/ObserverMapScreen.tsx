@@ -10,8 +10,8 @@ import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLand
 import { InlineError } from "../components/ui/InlineError";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { fallbackGameArea } from "../domain/geometry/gameArea/geometry";
-import { useAppNavigate } from "../hooks/useAppNavigate";
-import { useDesktopLayout } from "../hooks/useDesktopLayout";
+import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
+import { useDesktopLayout } from "../hooks/layout/useDesktopLayout";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { useAnnotationStore } from "../state/annotationStore";
 import { useSessionStore } from "../state/sessionStore";

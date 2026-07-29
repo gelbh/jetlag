@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { useLatestRequest } from "../useLatestRequest";
+import { useLatestRequest } from "../forms/useLatestRequest";
 import type { GameArea } from "../../domain/map/annotations";
 import type { MapViewportBounds } from "../../domain/map/transitViewport";
 import {

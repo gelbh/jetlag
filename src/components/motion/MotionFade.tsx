@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useMotionProfile } from "../../hooks/useMotionProfile";
+import { useMotionProfile } from "../../hooks/motion/useMotionProfile";
 
 interface MotionFadeProps {
   children: ReactNode;

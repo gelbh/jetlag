@@ -3,7 +3,7 @@ import { PinPanel } from "../../components/tools/PinPanel";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
-import { useSubmitLock } from "../useSubmitLock";
+import { useSubmitLock } from "../forms/useSubmitLock";
 
 interface UsePinToolParams {
   active: boolean;

@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { usePanelDrag } from "../../hooks/usePanelDrag";
+import { usePanelDrag } from "../../hooks/motion/usePanelDrag";
 import {
   isQuestionDockTool,
   mapToolPlacingLabel,

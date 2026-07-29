@@ -5,9 +5,9 @@ import type {
   SessionMessageRecord,
 } from "../../domain/session/activity/sessionChat";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
-import { useDesktopLayout } from "../../hooks/useDesktopLayout";
-import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
-import { useAnimatedPresence } from "../../hooks/useAnimatedPresence";
+import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
+import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
+import { useAnimatedPresence } from "../../hooks/motion/useAnimatedPresence";
 import { SheetHost } from "../ui/SheetHost";
 import { ChatPanelBody } from "./ChatPanelBody";
 

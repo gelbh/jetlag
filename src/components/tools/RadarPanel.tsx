@@ -11,7 +11,7 @@ import { WizardPanelFrame } from "./shared/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
 import { RADAR_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
-import { useToolWizard } from "../../hooks/useToolWizard";
+import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import { parseDistanceInput, type DistanceUnit } from "../../domain/map/distance";
 import {
   isRadarRadiusAllowedForGameSize,

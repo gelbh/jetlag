@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useAppNavigate } from "../hooks/useAppNavigate";
+import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { InlineError } from "../components/ui/InlineError";
