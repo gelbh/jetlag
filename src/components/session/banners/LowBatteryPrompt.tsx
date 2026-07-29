@@ -4,7 +4,7 @@ import {
   dismissLowBatteryPromptForSession,
   readLowBatteryPromptDismissed,
   shouldOfferLowPowerMode,
-} from "../../../domain/device/batteryPrompt";
+} from "../../../domain/device/power/batteryPrompt";
 import { useBatteryStatus } from "../../../hooks/location/useBatteryStatus";
 import { useMapStore } from "../../../state/mapStore";
 import { HudBanner } from "../../ui/HudBanner";

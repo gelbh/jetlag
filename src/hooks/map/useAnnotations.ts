@@ -27,7 +27,7 @@ import {
   countOfflineQueueForSession,
   enqueueOfflineWrite,
 } from "../../services/session/offlineQueue";
-import { isRetriableSyncError } from "../../domain/device/syncRetry";
+import { isRetriableSyncError } from "../../domain/device/sync/syncRetry";
 import { shouldQueueAnnotationOffline } from "./shouldQueueAnnotationOffline";
 
 export function useAnnotations() {

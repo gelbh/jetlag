@@ -4,7 +4,7 @@ import { isLargeCameraJump } from "./isLargeCameraJump";
 import {
   MAP_CAMERA_LARGE_JUMP_CENTER_FRACTION,
   MAP_CAMERA_LARGE_JUMP_ZOOM_DELTA,
-} from "../device/motionTokens";
+} from "../device/motion/motionTokens";
 
 const VIEWPORT_WIDTH_PX = 800;
 const VIEWPORT_HEIGHT_PX = 600;

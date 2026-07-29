@@ -30,13 +30,13 @@ import {
   clearBootReloadFlag,
   clearChunkReloadFlag,
   tryApplyDeferredChunkReload,
-} from "./domain/device/chunkLoadRecovery";
+} from "./domain/device/updates/chunkLoadRecovery";
 import {
   getServiceWorkerChunkReloadContext,
   setChunkReloadContextGetter,
-} from "./domain/device/lazyWithChunkRetry";
-import { removeBootSplash } from "./domain/device/bootSplash";
-import { notifyAppNeedRefresh } from "./domain/device/serviceWorkerRefresh";
+} from "./domain/device/updates/lazyWithChunkRetry";
+import { removeBootSplash } from "./domain/device/chrome/bootSplash";
+import { notifyAppNeedRefresh } from "./domain/device/updates/serviceWorkerRefresh";
 import { useEdgeSwipeBack } from "./hooks/useEdgeSwipeBack";
 import { useRouteSeo } from "./hooks/useRouteSeo";
 import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";

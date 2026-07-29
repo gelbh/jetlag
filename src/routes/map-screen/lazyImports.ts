@@ -1,4 +1,4 @@
-import { lazyWithChunkRetry } from "../../domain/device/lazyWithChunkRetry";
+import { lazyWithChunkRetry } from "../../domain/device/updates/lazyWithChunkRetry";
 
 export const HeavyToolHost = lazyWithChunkRetry(() =>
   import("../../components/tools/HeavyToolHost").then((module) => ({

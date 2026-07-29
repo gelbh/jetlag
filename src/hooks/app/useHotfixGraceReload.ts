@@ -4,8 +4,8 @@ import {
   acknowledgeHotfixReload,
   hasHotfixReloadBeenAcknowledged,
   isReloadAckStorageAvailable,
-} from "../../domain/device/reloadAcknowledgements";
-import { applyServiceWorkerUpdate } from "../../domain/device/serviceWorkerRefresh";
+} from "../../domain/device/updates/reloadAcknowledgements";
+import { applyServiceWorkerUpdate } from "../../domain/device/updates/serviceWorkerRefresh";
 import { compareAppVersions } from "../../domain/session/meta/sessionVersion";
 import { DEFAULT_HOTFIX_GRACE_SECONDS } from "../../services/firestore/firestoreIncidents";
 
