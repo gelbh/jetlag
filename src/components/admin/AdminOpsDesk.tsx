@@ -18,8 +18,10 @@ import type {
 import {
   CUSTOM_PRESET_ID,
   PANEL_IDS,
+  clampMonitorLayoutToCols,
   cloneLayout,
   clampLayoutToCols,
+  defaultMonitorLayout,
   deleteUserPreset,
   ensureIncidentPanelsVisible,
   hidePanel,
@@ -34,6 +36,7 @@ import {
   unstackPanelToCell,
   upsertUserPreset,
   type DeskLayout,
+  type MonitorLayout,
   type PanelId,
 } from "../../domain/admin/opsDeskLayout";
 import {
@@ -219,6 +222,11 @@ export function AdminOpsDesk() {
     [store.activePresetId, store.customLayout, store.userPresets],
   );
 
+  const monitorLayout = useMemo(
+    () => deskLayout.monitor ?? defaultMonitorLayout(),
+    [deskLayout.monitor],
+  );
+
   const mutateLayout = useCallback(
     (mutator: (layout: DeskLayout) => DeskLayout) => {
       setStore((prev) => {
@@ -239,6 +247,16 @@ export function AdminOpsDesk() {
       });
     },
     [uid],
+  );
+
+  const handleMonitorLayoutChange = useCallback(
+    (nextMonitor: MonitorLayout) => {
+      mutateLayout((layout) => ({
+        ...layout,
+        monitor: clampMonitorLayoutToCols(nextMonitor),
+      }));
+    },
+    [mutateLayout],
   );
 
   useEffect(() => {
@@ -601,6 +619,8 @@ export function AdminOpsDesk() {
           active={monitorActive}
           sessionCode={activeSession?.code ?? null}
           errorMessage={monitorRoleError}
+          monitorLayout={monitorLayout}
+          onMonitorLayoutChange={handleMonitorLayoutChange}
         />
       </div>
     ),

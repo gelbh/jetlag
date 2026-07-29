@@ -46,6 +46,12 @@ vi.mock("../services/admin/adminIncidents", () => ({
   countOpenIncidents: () => 0,
 }));
 
+vi.mock("../services/core/firebase", () => ({
+  isFirebaseConfigured: () => true,
+  getFirebaseAuth: () => ({}),
+  ensureAnonymousUser: vi.fn(async () => ({ uid: "anon-test" })),
+}));
+
 vi.mock("../hooks/admin/useAdminJoinSession", () => ({
   useAdminJoinSession: () => ({
     joinSession: vi.fn(),

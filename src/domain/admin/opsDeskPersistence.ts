@@ -3,13 +3,19 @@ import {
   DEFAULT_COLS,
   DEFAULT_ROW_HEIGHT,
   FORMER_BUILTIN_IDS,
+  clampMonitorLayoutToCols,
+  defaultMonitorLayout,
   defaultScratchLayout,
   isFormerBuiltinId,
+  isMonitorPanelId,
   isPanelId,
   layoutForFormerBuiltinId,
   type DeskLayout,
   type DeskPreset,
   type GridStack,
+  type MonitorLayout,
+  type MonitorPanelId,
+  type MonitorStack,
   type PanelId,
   migrateLayoutToCols,
 } from "./opsDeskLayout";
@@ -89,6 +95,102 @@ function sanitizeStack(raw: unknown): GridStack | null {
   };
 }
 
+function sanitizeMonitorStack(raw: unknown): MonitorStack | null {
+  if (!raw || typeof raw !== "object") return null;
+  const obj = raw as Record<string, unknown>;
+  if (typeof obj.id !== "string" || obj.id.length === 0) return null;
+
+  const panelIdsRaw = Array.isArray(obj.panelIds) ? obj.panelIds : [];
+  const preferredActive =
+    typeof obj.activeIndex === "number" && Number.isFinite(obj.activeIndex)
+      ? panelIdsRaw[Math.floor(obj.activeIndex)]
+      : undefined;
+  const panelIds = panelIdsRaw.filter(isMonitorPanelId);
+  if (panelIds.length === 0) return null;
+
+  const preferredId =
+    typeof preferredActive === "string" && isMonitorPanelId(preferredActive)
+      ? preferredActive
+      : null;
+  const resolvedIndex = preferredId ? panelIds.indexOf(preferredId) : -1;
+  const activeIndex = resolvedIndex >= 0 ? resolvedIndex : 0;
+
+  const num = (v: unknown, fallback: number) =>
+    typeof v === "number" && Number.isFinite(v) ? Math.floor(v) : fallback;
+
+  return {
+    id: obj.id,
+    panelIds,
+    activeIndex,
+    x: Math.max(0, num(obj.x, 0)),
+    y: Math.max(0, num(obj.y, 0)),
+    w: Math.max(1, num(obj.w, 4)),
+    h: Math.max(1, num(obj.h, 4)),
+    pinned: obj.pinned === true ? true : undefined,
+    collapsed: obj.collapsed === true ? true : undefined,
+  };
+}
+
+export function sanitizeMonitorLayout(raw: unknown): MonitorLayout {
+  if (!raw || typeof raw !== "object") {
+    return defaultMonitorLayout();
+  }
+  const obj = raw as Record<string, unknown>;
+  const stacks = Array.isArray(obj.stacks)
+    ? obj.stacks
+        .map(sanitizeMonitorStack)
+        .filter((s): s is MonitorStack => s !== null)
+    : [];
+
+  const hiddenPanelIds = Array.isArray(obj.hiddenPanelIds)
+    ? obj.hiddenPanelIds.filter(isMonitorPanelId)
+    : [];
+
+  if (stacks.length === 0) {
+    return defaultMonitorLayout();
+  }
+
+  const colsRaw =
+    typeof obj.cols === "number" && Number.isFinite(obj.cols)
+      ? Math.floor(obj.cols)
+      : DEFAULT_COLS;
+  const cols = colsRaw > 0 ? colsRaw : DEFAULT_COLS;
+  const rowHeightRaw =
+    typeof obj.rowHeight === "number" && Number.isFinite(obj.rowHeight)
+      ? Math.floor(obj.rowHeight)
+      : DEFAULT_ROW_HEIGHT;
+  const rowHeight = rowHeightRaw > 0 ? rowHeightRaw : DEFAULT_ROW_HEIGHT;
+
+  const visible = new Set(stacks.flatMap((s) => s.panelIds));
+  const hidden: MonitorPanelId[] = [];
+  for (const id of hiddenPanelIds) {
+    if (!visible.has(id) && !hidden.includes(id)) {
+      hidden.push(id);
+    }
+  }
+  for (const id of [
+    "map",
+    "roster",
+    "overview",
+    "log",
+    "chat",
+    "sync",
+    "mapTools",
+    "mod",
+  ] as const) {
+    if (!visible.has(id) && !hidden.includes(id)) {
+      hidden.push(id);
+    }
+  }
+
+  return clampMonitorLayoutToCols({
+    cols,
+    rowHeight,
+    stacks,
+    hiddenPanelIds: hidden,
+  });
+}
+
 export function sanitizeDeskLayout(raw: unknown): DeskLayout {
   if (!raw || typeof raw !== "object") {
     return defaultScratchLayout();
@@ -127,10 +229,8 @@ export function sanitizeDeskLayout(raw: unknown): DeskLayout {
     DEFAULT_COLS,
   );
 
-  // Pass through optional nested Monitor WM field for Track F (do not strip).
-  if ("monitor" in obj) {
-    layout.monitor = obj.monitor;
-  }
+  layout.monitor =
+    "monitor" in obj ? sanitizeMonitorLayout(obj.monitor) : defaultMonitorLayout();
   return layout;
 }
 
