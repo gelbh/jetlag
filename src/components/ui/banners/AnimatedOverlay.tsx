@@ -5,10 +5,10 @@ import {
   type RefCallback,
   type RefObject,
 } from "react";
-import { useAnimatedPresence } from "../../../hooks/useAnimatedPresence";
-import { useScrollLock } from "../../../hooks/useScrollLock";
-import { useSheetGesture } from "../../../hooks/useSheetGesture";
-import { useMotionProfile } from "../../../hooks/useMotionProfile";
+import { useAnimatedPresence } from "../../../hooks/motion/useAnimatedPresence";
+import { useScrollLock } from "../../../hooks/layout/useScrollLock";
+import { useSheetGesture } from "../../../hooks/motion/useSheetGesture";
+import { useMotionProfile } from "../../../hooks/motion/useMotionProfile";
 import { MobileSheet } from "../sheets/MobileSheet";
 
 export interface AnimatedOverlayProps {

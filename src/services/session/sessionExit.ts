@@ -1,4 +1,4 @@
-import type { useAppNavigate } from "../../hooks/useAppNavigate";
+import type { useAppNavigate } from "../../hooks/navigation/useAppNavigate";
 import {
   clearSessionLocalArtifacts,
   teardownSessionUiState,

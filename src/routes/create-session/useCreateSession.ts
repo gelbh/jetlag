@@ -7,7 +7,7 @@ import {
   useCallback,
 } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useAppNavigate } from "../../hooks/useAppNavigate";
+import { useAppNavigate } from "../../hooks/navigation/useAppNavigate";
 import { useGameAreaFraming } from "../../hooks/session/useGameAreaFraming";
 import {
   LOCAL_SESSION_ID,
@@ -81,8 +81,8 @@ import {
 import { buildBundledPresetSelectGroups } from "../../domain/regions/bundledPresetHierarchy";
 import { buildFavouritePresetSelectOptions } from "../../domain/session/presets/presetFavourites";
 import { placeToFocusBounds } from "./utils";
-import { useLatestRequest } from "../../hooks/useLatestRequest";
-import { useSubmitLock } from "../../hooks/useSubmitLock";
+import { useLatestRequest } from "../../hooks/forms/useLatestRequest";
+import { useSubmitLock } from "../../hooks/forms/useSubmitLock";
 
 export function useCreateSession() {
   const navigate = useAppNavigate();

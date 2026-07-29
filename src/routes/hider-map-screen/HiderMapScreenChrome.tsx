@@ -37,7 +37,7 @@ import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
 import {
   HiderTruthRevealBanner,
 } from "../../components/session/HiderTruthRevealBanner";
-import { useDesktopLayout } from "../../hooks/useDesktopLayout";
+import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
 import { SessionLog } from "../../components/session/SessionLog";

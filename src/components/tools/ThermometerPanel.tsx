@@ -22,7 +22,7 @@ import { WizardPanelFrame } from "./shared/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
 import { THERMOMETER_STEPS, stepsForMode } from "./shared/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
-import { useToolWizard } from "../../hooks/useToolWizard";
+import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import type { ToolPanelSandboxMode } from "./shared/toolPanelSandbox";
 
 type PlacementMode = "gps" | "manual";

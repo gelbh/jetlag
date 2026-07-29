@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useDesktopLayout } from "../../../hooks/useDesktopLayout";
+import { useDesktopLayout } from "../../../hooks/layout/useDesktopLayout";
 
 export type DesktopContentMaxWidth = "entry" | "social";
 

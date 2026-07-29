@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useAppNavigate } from "../hooks/useAppNavigate";
-import { useSubmitLock } from "../hooks/useSubmitLock";
+import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
+import { useSubmitLock } from "../hooks/forms/useSubmitLock";
 import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
 import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
 import { InlineError } from "../components/ui/InlineError";
