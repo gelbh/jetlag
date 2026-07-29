@@ -112,7 +112,7 @@ const CORE_SECTION: TutorialSection = {
       id: "map-dock",
       title: "Map and dock",
       body:
-        "The status rail shows your code and timer. Question tools sit on the bottom bar. Zone and pin live under Draw; layers, timer, and settings under Setup (or More on narrow phones).",
+        "The status rail shows your code and timer. Question tools sit on the bottom bar. Zone and pin live under Draw; layers, timer, and settings under Settings (or More on narrow phones).",
       imageAlt: "Map screen with bottom tool dock",
       imageSrc: "/tutorial/core/tool-dock.png",
     },
@@ -120,7 +120,7 @@ const CORE_SECTION: TutorialSection = {
       id: "more-tools",
       title: "More tools",
       body:
-        "On smaller screens, overflow tools open in a sheet: Draw markup, Setup, chat, and undo history.",
+        "On smaller screens, overflow tools open in a sheet: Draw markup, Settings, chat, and undo history.",
       imageAlt: "More tools overflow sheet on the map",
       imageSrc: "/tutorial/core/tool-overflow.png",
     },
