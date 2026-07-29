@@ -28,27 +28,11 @@ function loadMaskWasmModule(): Promise<MaskWasmApi> {
   return maskWasmModulePromise;
 }
 
-/**
- * Disk CircleUnion (turf) is intentionally not a WASM parity goal.
- * Skip wasm/dual compare when any disk is present.
- */
-function skipWasmForDisks(mode: MaskKernelMode, diskCount: number): boolean {
-  return mode !== "ts" && diskCount > 0;
-}
-
 export async function runMaskFromUnionInput(
   input: EliminationUnionInput,
   gameArea: GameAreaGeometry,
   mode: MaskKernelMode = "ts",
 ): Promise<PolygonFeature | null> {
-  if (skipWasmForDisks(mode, input.disks.length)) {
-    if (mode === "wasm") {
-      console.warn(
-        "[geometry] mask kernel wasm skipped (disks present; CircleUnion non-goal)",
-      );
-    }
-    return buildMaskFromUnionInputTs(input, gameArea);
-  }
   return dispatchKernel({
     mode,
     entrypoint: "maskFromUnionInput",
@@ -68,14 +52,6 @@ export async function runEndGameMaskFromDisks(
   disks: readonly DiskSpec[],
   mode: MaskKernelMode = "ts",
 ): Promise<PolygonFeature | null> {
-  if (skipWasmForDisks(mode, disks.length)) {
-    if (mode === "wasm") {
-      console.warn(
-        "[geometry] mask kernel wasm skipped (disks present; CircleUnion non-goal)",
-      );
-    }
-    return buildEndGameMaskFromDisksTs(gameArea, disks);
-  }
   return dispatchKernel({
     mode,
     entrypoint: "endGameMaskFromDisks",
