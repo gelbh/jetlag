@@ -1,4 +1,4 @@
-import { isEffectivelyOffline } from "../../domain/device/sync";
+import { isEffectivelyOffline } from "../../domain/device/sync/sync";
 import { isFirestorePersistenceUnavailable } from "../core/firebase";
 import { countOfflineQueueForSession } from "./offlineQueue";
 import { useSessionStore } from "../../state/sessionStore";

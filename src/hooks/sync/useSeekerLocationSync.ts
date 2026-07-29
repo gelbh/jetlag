@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import { getPowerProfile } from "../../domain/device/powerProfile";
+import { getPowerProfile } from "../../domain/device/power/powerProfile";
 import type { PlayerLocationRecord } from "../../domain/session/activity/sessionChat";
 import { useMapStore } from "../../state/mapStore";
 import { useLiveLocation } from "../location/useLiveLocation";

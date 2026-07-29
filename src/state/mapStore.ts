@@ -4,8 +4,8 @@ import type { AnnotationType } from "../domain/map/annotations";
 import type { DistanceUnit } from "../domain/map/distance";
 import type { MapTool } from "../domain/map/mapToolTypes";
 import type { TransitRouteFilter } from "../domain/map/transit";
-import type { NotificationPreferences } from "../domain/device/notifications";
-import { DEFAULT_NOTIFICATION_PREFERENCES } from "../domain/device/notifications";
+import type { NotificationPreferences } from "../domain/device/chrome/notifications";
+import { DEFAULT_NOTIFICATION_PREFERENCES } from "../domain/device/chrome/notifications";
 import type { MapStyle, StreetBasemap } from "../domain/map/mapBasemaps";
 
 export type LayerVisibility = Record<AnnotationType | "transit", boolean>;

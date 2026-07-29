@@ -1,5 +1,5 @@
-import type { SyncStatus } from "../../../domain/device/sync";
-import { userErrorFromSyncMessage } from "../../../domain/device/userErrors";
+import type { SyncStatus } from "../../../domain/device/sync/sync";
+import { userErrorFromSyncMessage } from "../../../domain/device/feedback/userErrors";
 import { SyncStatusBeacon } from "../SyncStatusDot";
 import { SyncStatusDetailPanel } from "../SyncStatusDetailPanel";
 import { syncDetailContent } from "../syncStatusDetailContent";

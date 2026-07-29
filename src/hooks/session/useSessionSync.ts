@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
-import { getPowerProfile } from "../../domain/device/powerProfile";
+import { getPowerProfile } from "../../domain/device/power/powerProfile";
 import { useAnnotationStore, useMapStore, useSessionStore } from "../../state/sessionStore";
 import {
   getFirestoreDb,

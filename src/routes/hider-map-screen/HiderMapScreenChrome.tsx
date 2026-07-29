@@ -7,7 +7,7 @@ import type {
 import type { LayerVisibility } from "../../state/sessionStore";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { MapStyle, StreetBasemap } from "../../domain/map/mapBasemaps";
-import type { NotificationPreferences } from "../../domain/device/notifications";
+import type { NotificationPreferences } from "../../domain/device/chrome/notifications";
 import type { HidingZoneStepId } from "../../components/hider/hidingZoneSteps";
 import type { HiderTruthRevealState } from "../../components/session/HiderTruthRevealBanner";
 import type { useMapOverlayState } from "../../hooks/map/useMapOverlayState";

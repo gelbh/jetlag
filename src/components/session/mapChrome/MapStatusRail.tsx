@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import type { SyncStatus } from "../../../domain/device/sync";
+import type { SyncStatus } from "../../../domain/device/sync/sync";
 import type { TimerState } from "../../../domain/session/timer/timer";
 import type { MapTool } from "../../../state/sessionStore";
 import type {
@@ -9,7 +9,7 @@ import type {
 import { ScreenNav } from "../../ui/ScreenNav";
 import { GameAreaPreloadBeacon } from "../preload/GameAreaPreloadBeacon";
 import { HudErrorBanner } from "../../ui/HudErrorBanner";
-import { userErrorFromSyncMessage } from "../../../domain/device/userErrors";
+import { userErrorFromSyncMessage } from "../../../domain/device/feedback/userErrors";
 import type { SessionRulesInput } from "../../../domain/session/rules";
 import type { PlayerRole } from "../../../domain/session/players/playerRole";
 import { EndGameAlert } from "../status/EndGameAlert";
@@ -60,7 +60,7 @@ interface MapStatusRailProps {
   onSyncErrorAction?: () => void;
   /** Dim chrome and block tool/timer interaction when the session is gone. */
   inactiveChrome?: boolean;
-  terminalSessionError?: import("../../../domain/device/userErrors").UserErrorDisplay | null;
+  terminalSessionError?: import("../../../domain/device/feedback/userErrors").UserErrorDisplay | null;
   onReturnToJoin?: () => void;
   /** In-flow status for DesktopOpsShell (vs absolute overlay on mobile). */
   expanded?: boolean;

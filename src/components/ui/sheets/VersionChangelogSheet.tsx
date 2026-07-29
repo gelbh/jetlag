@@ -5,7 +5,7 @@ import {
   type ChangelogNode,
   type MajorGroupNode,
   type MinorGroupNode,
-} from "../../../domain/device/groupChangelog";
+} from "../../../domain/device/chrome/groupChangelog";
 import { MotionSheet } from "../../motion/MotionSheet";
 import { SheetHeader } from "./SheetHeader";
 

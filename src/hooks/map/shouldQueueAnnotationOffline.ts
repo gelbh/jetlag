@@ -1,4 +1,4 @@
-import { isEffectivelyOffline } from "../../domain/device/sync";
+import { isEffectivelyOffline } from "../../domain/device/sync/sync";
 import { useSessionStore } from "../../state/sessionStore";
 
 export function shouldQueueAnnotationOffline(): boolean {

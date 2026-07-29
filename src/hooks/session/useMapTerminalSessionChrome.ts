@@ -3,7 +3,7 @@ import { isTerminalSessionSyncMessage } from "../../domain/device/sync/terminalS
 import {
   userErrorFromTerminalSessionMessage,
   type UserErrorDisplay,
-} from "../../domain/device/userErrors";
+} from "../../domain/device/feedback/userErrors";
 import { useSessionExit } from "./useSessionExit";
 import { useSyncRetryAction } from "./useSyncRetryAction";
 
