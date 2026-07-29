@@ -74,6 +74,7 @@ import { emitGameEndedActivity } from "../services/session/emitSessionActivity";
 import { useSessionAnnotations } from "../hooks/map/useSessionAnnotations";
 import { useAnnotations } from "../hooks/map/useAnnotations";
 import { useMapSessionChrome } from "../hooks/map-screen/useMapSessionChrome";
+import { isTerminalSessionSyncMessage } from "../domain/device/sync/terminalSessionMessage";
 import { useMapStore, useSessionStore } from "../state/sessionStore";
 import { useAnnotationStore } from "../state/annotationStore";
 
@@ -642,15 +643,30 @@ export function HiderMapScreen() {
       </div>
   );
 
+  const syncMessage = syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError;
+  const inactiveChrome = isTerminalSessionSyncMessage(syncMessage);
+
+  const mapLayersContent = inactiveChrome ? (
+    <div className="h-full w-full saturate-50 brightness-95">{mapLayers}</div>
+  ) : (
+    mapLayers
+  );
+
   return (
     <div className="map-screen-shell">
-      {isDesktop ? null : mapLayers}
+      {inactiveChrome ? (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-0 z-[calc(var(--z-banner)-1)] bg-surface-deep/30"
+        />
+      ) : null}
+      {isDesktop ? null : mapLayersContent}
       <HiderMapScreenChrome
         session={session}
         hasMyZone={Boolean(myZone)}
         uid={uid}
         isHost={isHost}
-        mapSlot={isDesktop ? mapLayers : undefined}
+        mapSlot={isDesktop ? mapLayersContent : undefined}
         annotations={annotations}
         pendingQuestions={pendingQuestions}
         messages={messages}

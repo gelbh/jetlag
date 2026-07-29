@@ -58,6 +58,10 @@ interface MapStatusRailProps {
   onDeclineFoundHider?: () => void;
   hiderOutsideZone?: boolean;
   onSyncErrorAction?: () => void;
+  /** Dim chrome and block tool/timer interaction when the session is gone. */
+  inactiveChrome?: boolean;
+  terminalSessionError?: import("../../../domain/device/userErrors").UserErrorDisplay | null;
+  onReturnToJoin?: () => void;
   /** In-flow status for DesktopOpsShell (vs absolute overlay on mobile). */
   expanded?: boolean;
   /** Replace default in-header home ScreenNav (e.g. observer leave control). */
@@ -102,6 +106,9 @@ export function MapStatusRail({
   onDeclineFoundHider,
   hiderOutsideZone = false,
   onSyncErrorAction,
+  inactiveChrome = false,
+  terminalSessionError = null,
+  onReturnToJoin,
   expanded = false,
   headerLeading,
 }: MapStatusRailProps) {
@@ -111,6 +118,11 @@ export function MapStatusRail({
   const railRef = useRef<HTMLDivElement>(null);
   const sync = syncRailDisplay(syncStatus, queuedWrites, message);
   const syncErrorDisplay = userErrorFromSyncMessage(message);
+  const showTerminalBanner =
+    inactiveChrome &&
+    terminalSessionError &&
+    onSyncErrorAction &&
+    onReturnToJoin;
   const showTimerMenu = timerMenuOpen && !closeTimerMenu;
   const showSyncMenu = syncMenuOpen && !closeTimerMenu;
   const showPreloadMenu = preloadMenuOpen && !closeTimerMenu;
@@ -153,6 +165,10 @@ export function MapStatusRail({
         expanded
           ? " jl-status-rail--expanded"
           : " absolute inset-x-0 top-0"
+      }${
+        inactiveChrome
+          ? " [&_.jl-status-header-col--timer_.jl-ticker]:pointer-events-none [&_.jl-status-header-col--timer_.jl-ticker]:opacity-55 [&_.jl-status-header-col--timer_button]:pointer-events-none [&_.jl-status-header-col--timer_button]:opacity-55"
+          : ""
       }`}
     >
       <div className="relative">
@@ -166,7 +182,7 @@ export function MapStatusRail({
           onTimerPause={onTimerPause}
           onTimerReset={onTimerReset}
           onOpenLog={onOpenLog}
-          disabled={timerControlsDisabled}
+          disabled={timerControlsDisabled || inactiveChrome}
         />
 
         <div className="jl-status-bar">
@@ -194,6 +210,9 @@ export function MapStatusRail({
               )
             }
             onOpenTimerMenu={() => {
+              if (inactiveChrome) {
+                return;
+              }
               setTimerMenuOpen((open) => !open);
               setSyncMenuOpen(false);
               setPreloadMenuOpen(false);
@@ -228,7 +247,13 @@ export function MapStatusRail({
           onSyncErrorAction={onSyncErrorAction}
         />
 
-        {sync.banner?.visible ? (
+        {showTerminalBanner ? (
+          <HudErrorBanner
+            error={terminalSessionError}
+            onAction={onSyncErrorAction}
+            onSecondaryAction={onReturnToJoin}
+          />
+        ) : sync.banner?.visible ? (
           syncErrorDisplay && onSyncErrorAction ? (
             <HudErrorBanner
               error={syncErrorDisplay}
