@@ -29,7 +29,10 @@ describe("geographicFeatureCache TTL tiers", () => {
 
   it("uses stable cache key prefixes for long-lived layers", () => {
     expect(adminDivisionCacheKey(sampleGameArea, 6)).toMatch(/^admin:v2:6:/);
-    expect(landmassCacheKey(sampleGameArea)).toMatch(/^landmass:v2:/);
+    expect(landmassCacheKey(sampleGameArea)).toMatch(/^landmass:v3:/);
+    expect(landmassCacheKey(sampleGameArea, "dublin")).toMatch(
+      /^landmass:v3:dublin:/,
+    );
     expect(coastlineSegmentsCacheKey(sampleGameArea)).toMatch(/^coastline:/);
     expect(staticTransitCacheKey(sampleGameArea)).toMatch(/^transit:static:/);
     expect(geographicCacheKey(sampleGameArea, "measuring:park")).toMatch(

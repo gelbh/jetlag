@@ -6,6 +6,7 @@ import { dispatchGeodesicLineBuffer } from "../../../domain/geometry/geodesicLin
 import { resolveClientMaskKernelMode } from "../../../domain/geometry/kernel/resolveClientMaskKernelMode";
 import { unionPolygonFeatures } from "../../../domain/geometry/unionPolygonFeatures";
 import type { GameArea } from "../../../domain/map/annotations";
+import type { RegionPackId } from "../../../domain/regions/regionPack";
 import {
   featureToGameArea,
   gameAreaToBoundingBox,
@@ -13,7 +14,7 @@ import {
   simplifyGameArea,
   type LatLngTuple,
 } from "../../../domain/geometry/geometry";
-import { queryOverpass } from "../../core/overpassClient";
+import { queryOverpass, OverpassPayloadTooLargeError } from "../../core/overpassClient";
 import {
   getOrFetchCached,
   landmassCacheKey,
@@ -22,6 +23,7 @@ import {
   classifyAdminDivisionAtPoint,
   type AdminDivisionFeature,
 } from "./adminDivisionBoundaries";
+import { isBundledAdminRegionPack } from "./adminDivisionAvailability";
 
 export const MAX_LANDMASSES = 50;
 const WATERWAY_BUFFER_METERS = 2;
@@ -319,13 +321,28 @@ export function buildLandmassQuery(gameArea: GameArea): string {
 
 export async function fetchLandmassFeaturesInArea(
   gameArea: GameArea,
+  regionPackId?: RegionPackId,
 ): Promise<LandmassFeature[]> {
-  return getOrFetchCached(landmassCacheKey(gameArea), async () => {
-    const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-      buildLandmassQuery(gameArea),
+  if (isBundledAdminRegionPack(regionPackId)) {
+    return getOrFetchCached(landmassCacheKey(gameArea, regionPackId), async () =>
+      computeLandmassFeatures(gameArea, []),
     );
+  }
 
-    return computeLandmassFeatures(gameArea, payload.elements);
+  return getOrFetchCached(landmassCacheKey(gameArea, regionPackId), async () => {
+    try {
+      const payload = await queryOverpass<{ elements: OverpassElement[] }>(
+        buildLandmassQuery(gameArea),
+      );
+
+      return computeLandmassFeatures(gameArea, payload.elements);
+    } catch (error) {
+      if (error instanceof OverpassPayloadTooLargeError) {
+        return computeLandmassFeatures(gameArea, []);
+      }
+
+      throw error;
+    }
   });
 }
 

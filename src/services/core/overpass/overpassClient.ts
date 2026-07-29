@@ -19,6 +19,13 @@ export class OverpassUnavailableError extends Error {
   }
 }
 
+export class OverpassPayloadTooLargeError extends Error {
+  constructor(message = "Overpass response too large.") {
+    super(message);
+    this.name = "OverpassPayloadTooLargeError";
+  }
+}
+
 export function overpassErrorMessage(
   error: unknown,
   fallback = "Map data didn't load.",
@@ -135,6 +142,10 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
           break;
         }
 
+        if (response.status === 413) {
+          throw new OverpassPayloadTooLargeError();
+        }
+
         throw new Error("Overpass query failed.");
       } catch (error) {
         if (isNonRetryableOverpassFailure(error)) {
@@ -234,6 +245,10 @@ async function fetchOverpassViaProxy(
 
       if (isRetryableOverpassStatus(response.status)) {
         throw new OverpassUnavailableError();
+      }
+
+      if (response.status === 413) {
+        throw new OverpassPayloadTooLargeError();
       }
 
       throw new Error("Overpass query failed.");
