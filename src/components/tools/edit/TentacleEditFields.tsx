@@ -38,7 +38,7 @@ export function TentacleEditFields({
     annotation.metadata.highlightedPoiId ?? null,
   );
 
-  const save = useCallback(() => {
+  const save = useCallback(async () => {
     const selectedPoi = annotation.metadata.pois?.find(
       (poi) => poi.id === tentacleAnswerPoiId,
     );
@@ -58,7 +58,7 @@ export function TentacleEditFields({
     const geom = annotation.geometry.geometry;
     if (geom.type === "Point") {
       const [lng, lat] = geom.coordinates;
-      const eliminationJson = tentacleEliminationJsonForAnswer({
+      const eliminationJson = await tentacleEliminationJsonForAnswer({
         anchor: [lat, lng],
         radiusMeters,
         pois: annotation.metadata.pois,
