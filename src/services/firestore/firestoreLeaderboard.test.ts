@@ -11,7 +11,7 @@ const getDoc = vi.hoisted(() => vi.fn());
 const doc = vi.hoisted(() => vi.fn(() => ({ path: "entry" })));
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => true));
 
-vi.mock("../core/firebase", () => ({
+vi.mock("../core/firebase/firebase", () => ({
   getFirestoreDb: () => ({}),
   isFirebaseConfigured,
 }));

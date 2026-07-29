@@ -5,7 +5,7 @@ import type {
   SessionDeviceRecord,
 } from "../../domain/device/chrome/notifications";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
-import { getFirestoreDb } from "../core/firebase";
+import { getFirestoreDb } from "../core/firebase/firebase";
 
 export async function upsertSessionDevice(
   sessionId: string,

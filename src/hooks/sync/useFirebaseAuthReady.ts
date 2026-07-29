@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
-import { ensureAnonymousUser, isFirebaseConfigured } from "../../services/core/firebase";
+import { ensureAnonymousUser, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 
 function sessionNeedsFirebaseAuth(
   session: SessionRecord | null | undefined,

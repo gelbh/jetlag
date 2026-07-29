@@ -11,7 +11,7 @@ import {
   getOrFetchCached,
   readCachedMemoryEntry,
 } from "../geographicFeatureCache";
-import { queryOverpass } from "../../core/overpassClient";
+import { queryOverpass } from "../../core/overpass/overpassClient";
 import {
   formatOverpassBboxFromGameArea,
   overpassQueryTemplate,

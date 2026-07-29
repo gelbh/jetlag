@@ -11,7 +11,7 @@ import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import {
   ensureAnonymousUser,
   isFirebaseConfigured,
-} from "../../services/core/firebase";
+} from "../../services/core/firebase/firebase";
 import {
   ensureRemoteSessionWriteAccess,
   isFirestorePermissionDenied,

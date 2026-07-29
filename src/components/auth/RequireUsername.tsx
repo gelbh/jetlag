@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { usePermanentAuthUser } from "../../hooks/billing/usePermanentAuthUser";
 import { useUserProfile } from "../../hooks/profile/useUserProfile";
-import { isFirebaseConfigured } from "../../services/core/firebase";
+import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { BootSplash } from "../ui/BootSplash";
 import { InlineError } from "../ui/InlineError";
 import { AccountSignInGate } from "./AccountSignInGate";

@@ -6,7 +6,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { collection, doc, getDocs, updateDoc } from "firebase/firestore";
-import { getFirebaseAuth, getFirestoreDb } from "../services/core/firebase";
+import { getFirebaseAuth, getFirestoreDb } from "../services/core/firebase/firebase";
 import { endRemoteSession } from "../services/firestore/firestoreAnnotations";
 import { updatePendingQuestion } from "../services/firestore/firestoreSessionExtras";
 

@@ -5,7 +5,7 @@ import {
   isRoundComplete,
   type SessionRecord,
 } from "../../domain/map/annotations";
-import { isFirebaseConfigured } from "../../services/core/firebase";
+import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { subscribeToGameResult } from "../../services/firestore/firestoreGameResult";
 
 function buildLocalGameResult(session: SessionRecord): GameResultRecord {

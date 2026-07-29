@@ -25,7 +25,7 @@ import {
 } from "../../domain/incident/incidentTypes";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { forceRefreshIdToken } from "../core/auth/forceRefreshIdToken";
-import { getFirestoreDb, isFirebaseConfigured } from "../core/firebase";
+import { getFirestoreDb, isFirebaseConfigured } from "../core/firebase/firebase";
 
 export const DEFAULT_HOTFIX_GRACE_SECONDS = 30;
 

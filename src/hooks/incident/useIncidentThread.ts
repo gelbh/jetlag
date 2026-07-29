@@ -3,7 +3,7 @@ import type {
   IncidentMessageRecord,
   IncidentRecord,
 } from "../../domain/incident/incidentTypes";
-import { isFirebaseConfigured } from "../../services/core/firebase";
+import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import {
   subscribeIncident,
   subscribeIncidentMessages,

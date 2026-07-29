@@ -28,7 +28,7 @@ import {
   fetchLandmassFeaturesInArea,
   landmassToMatchingFeature,
 } from "../overpass/landmassFeatures";
-import { queryOverpass } from "../../core/overpassClient";
+import { queryOverpass } from "../../core/overpass/overpassClient";
 import { getOrFetchCached } from "../geographicFeatureCache";
 import {
   buildMatchingFeaturesQuery,

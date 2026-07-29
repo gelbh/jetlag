@@ -36,7 +36,7 @@ import { useSessionStore, useMapStore } from "../../state/sessionStore";
 import {
   isFirebaseConfigured,
   ensureAnonymousUser,
-} from "../../services/core/firebase";
+} from "../../services/core/firebase/firebase";
 import { usePremiumHostEligibility } from "../../hooks/billing/usePremiumHostEligibility";
 import { shouldDefaultSessionTierToPremium, canSelectPremiumSessionTier } from "../../domain/billing/premiumProducts";
 import { usePremiumEntitlements } from "../../hooks/billing/usePremiumEntitlements";
@@ -47,26 +47,26 @@ import {
 } from "../../services/session/gameAreaPreload";
 import { resolveSessionMatchingAreas } from "../../services/geo/resolveSessionMatchingAreas";
 import { startSeaLevelBackgroundSampling } from "../../services/geo/seaLevelProgressive";
-import { retryAsync } from "../../services/core/retryAsync";
+import { retryAsync } from "../../services/core/network/retryAsync";
 import {
   inferTransitMetroId,
   listTransitMetros,
 } from "../../services/transit/transitCatalog";
 import { searchPlaces, type GeocodedPlace } from "../../services/geo/geocoding";
-import { getCurrentPosition } from "../../services/core/geolocation";
+import { getCurrentPosition } from "../../services/core/location/geolocation";
 import { APP_VERSION } from "../../domain/device/changelog";
-import { grantAccess, hasAccessClaim } from "../../services/core/accessControl";
+import { grantAccess, hasAccessClaim } from "../../services/core/auth/accessControl";
 import {
   createPremiumRemoteSession,
 } from "../../services/billing/premiumBilling";
 import {
   ANALYTICS_EVENTS,
   track,
-} from "../../services/core/analytics";
-import { setPremiumApiContext } from "../../services/core/premiumApiContext";
+} from "../../services/core/analytics/analytics";
+import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
 import { emitSessionStartedActivity } from "../../services/session/emitSessionActivity";
 import { unionGameAreas } from "../../domain/geometry/masks/unionGameAreas";
-import { parseBoundaryFile } from "../../services/core/kmzImport";
+import { parseBoundaryFile } from "../../services/core/capture/kmzImport";
 import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
 import { useGamePresetStore } from "../../state/gamePresetStore";
 import {

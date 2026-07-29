@@ -1,7 +1,7 @@
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import type { SessionActivityEvent } from "../../domain/session/activity/sessionActivityLog";
 import { useActivityLogStore } from "../../state/activityLogStore";
-import { isFirebaseConfigured } from "../core/firebase";
+import { isFirebaseConfigured } from "../core/firebase/firebase";
 import { createActivityLogEventIfAbsent } from "../firestore/firestoreActivityLog";
 
 export type AppendSessionActivityResult = { wrote: boolean };

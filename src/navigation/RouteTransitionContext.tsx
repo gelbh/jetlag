@@ -13,7 +13,7 @@ import {
   type To,
 } from "react-router-dom";
 import { useMotionProfile } from "../hooks/useMotionProfile";
-import { reportSlowRouteTransition } from "../services/core/sentry";
+import { reportSlowRouteTransition } from "../services/core/analytics/sentry";
 import {
   isLazyRoute,
   preloadRoute,

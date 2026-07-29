@@ -23,9 +23,9 @@ import {
   ensureAnonymousUser,
   getFirebaseAuth,
   isFirebaseConfigured,
-} from "../../services/core/firebase";
-import { waitForPermanentAuthReady } from "../../services/core/firebaseAuthReady";
-import { setPremiumApiContext } from "../../services/core/premiumApiContext";
+} from "../../services/core/firebase/firebase";
+import { waitForPermanentAuthReady } from "../../services/core/firebase/firebaseAuthReady";
+import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
 import { useSessionStore } from "../../state/sessionStore";
 
 export type SessionAuthMode =

@@ -1,5 +1,5 @@
 import type { User } from "firebase/auth";
-import { isPermanentUser } from "@/services/core/accountAuth";
+import { isPermanentUser } from "@/services/core/auth/accountAuth";
 
 export const ADMIN_EMAIL = "gelbharttomer@gmail.com";
 

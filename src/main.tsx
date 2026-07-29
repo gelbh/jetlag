@@ -4,12 +4,12 @@ import "@fontsource/source-sans-3/600.css";
 import "@fontsource/barlow-semi-condensed/600.css";
 import "@fontsource/barlow-semi-condensed/700.css";
 import { unregisterDevServiceWorkers } from "./domain/device/updates/unregisterDevServiceWorkers.ts";
-import { initAnalytics } from "./services/core/analytics.ts";
-import { initSentry, setBootstrapTag } from "./services/core/sentry.ts";
+import { initAnalytics } from "./services/core/analytics/analytics.ts";
+import { initSentry, setBootstrapTag } from "./services/core/analytics/sentry.ts";
 import {
   isFirebaseConfigured,
   startAuthBootstrap,
-} from "./services/core/firebase.ts";
+} from "./services/core/firebase/firebase.ts";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";

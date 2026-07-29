@@ -40,7 +40,7 @@ vi.mock("../services/geo/geocoding", () => ({
   searchPlaces: vi.fn(async () => [dublinPlace]),
 }));
 
-vi.mock("../services/core/geolocation", () => ({
+vi.mock("../services/core/location/geolocation", () => ({
   getCurrentPosition: vi.fn().mockResolvedValue({
     lat: 53.35,
     lng: -6.26,
@@ -84,7 +84,7 @@ vi.mock("../components/map/GameAreaMask", () => ({
   GameAreaMask: () => null,
 }));
 
-vi.mock("../services/core/firebase", () => ({
+vi.mock("../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => false,
   ensureAnonymousUser: vi.fn(),
   getFirebaseAuth: () => ({ currentUser: null }),
@@ -102,7 +102,7 @@ vi.mock("../services/geo/seaLevelProgressive", () => ({
 const navigate = vi.fn();
 beforeEach(async () => {
   navigate.mockReset();
-  const { getCurrentPosition } = await import("../services/core/geolocation");
+  const { getCurrentPosition } = await import("../services/core/location/geolocation");
   vi.mocked(getCurrentPosition).mockClear();
   vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
     cb(0);
@@ -234,7 +234,7 @@ describe("CreateSession", () => {
   });
 
   it("does not request geolocation on mount", async () => {
-    const { getCurrentPosition } = await import("../services/core/geolocation");
+    const { getCurrentPosition } = await import("../services/core/location/geolocation");
 
     renderWithRouter(<CreateSession />);
 
@@ -246,7 +246,7 @@ describe("CreateSession", () => {
 
   it("passes user location into place search after Use my location", async () => {
     const { searchPlaces } = await import("../services/geo/geocoding");
-    const { getCurrentPosition } = await import("../services/core/geolocation");
+    const { getCurrentPosition } = await import("../services/core/location/geolocation");
 
     renderWithRouter(<CreateSession />);
 

@@ -15,7 +15,7 @@ import {
 import type { SessionRulesInput } from "../../../domain/session/rules";
 import { manualPinAsMeasuringPlace } from "../../../domain/session/catalog/sessionCustomCatalog";
 import { measuringLinearNotFoundMessage } from "../../../services/geo/measuringLinearFeatures";
-import { overpassErrorMessage } from "../../../services/core/overpassClient";
+import { overpassErrorMessage } from "../../../services/core/overpass/overpassClient";
 import {
   fetchMeasuringPlacesInArea,
   measuringPlaceNotFoundMessage,

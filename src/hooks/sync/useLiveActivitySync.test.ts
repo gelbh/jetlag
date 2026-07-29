@@ -18,7 +18,7 @@ vi.mock("@capacitor/core", () => ({
   },
 }));
 
-vi.mock("../../services/core/liveActivity", () => ({
+vi.mock("../../services/core/native/liveActivity", () => ({
   JetlagLiveActivity: {
     startQuestionActivity: vi.fn(),
     updateQuestionActivity: vi.fn(),

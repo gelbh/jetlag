@@ -18,7 +18,7 @@ const httpsCallable = vi.hoisted(() => vi.fn(() => callable));
 const getFirebaseFunctions = vi.hoisted(() => vi.fn(async () => ({})));
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => true));
 
-vi.mock("../core/firebase", () => ({
+vi.mock("../core/firebase/firebase", () => ({
   getFirebaseFunctions,
   isFirebaseConfigured,
 }));

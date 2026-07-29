@@ -6,7 +6,7 @@ import {
   isMatchingCategoryEnabled,
   type MatchingCategoryId,
 } from "../../../domain/questions";
-import { overpassErrorMessage } from "../../../services/core/overpassClient";
+import { overpassErrorMessage } from "../../../services/core/overpass/overpassClient";
 import {
   countMatchingFeaturesInPlayArea,
   fetchMatchingFeaturesInArea,

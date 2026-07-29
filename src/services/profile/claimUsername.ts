@@ -1,6 +1,6 @@
 import { FirebaseError } from "firebase/app";
 import { httpsCallable } from "firebase/functions";
-import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
+import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
 
 function mapCallableError(error: unknown, fallback: string): Error {
   if (error instanceof FirebaseError) {

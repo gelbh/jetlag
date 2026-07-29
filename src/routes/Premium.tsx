@@ -16,11 +16,11 @@ import {
 import {
   ANALYTICS_EVENTS,
   track,
-} from "../services/core/analytics";
+} from "../services/core/analytics/analytics";
 import {
   ensureAnonymousUser,
   isFirebaseConfigured,
-} from "../services/core/firebase";
+} from "../services/core/firebase/firebase";
 import {
   openPremiumBillingPortal,
   startPremiumCheckout,

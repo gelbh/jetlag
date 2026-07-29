@@ -21,7 +21,7 @@ import {
 import {
   getCurrentPosition,
   unknownGeolocationErrorMessage,
-} from "../../services/core/geolocation";
+} from "../../services/core/location/geolocation";
 import { getTentacleLocationCategory } from "../../domain/questions/tentacleQuestions";
 
 const MOCK_RESOLVE_MS = 450;
