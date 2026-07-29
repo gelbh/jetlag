@@ -5,8 +5,8 @@ import {
   tentacleRadiusMeters,
   type TentacleGameSizeCategoryId,
   type TentacleOptionForGameSize,
-} from "../gameSizeRules";
-import { sessionDistanceUnit } from "../sessionDistanceUnit";
+} from "../size/gameSizeRules";
+import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
 import { clampTentacleRadiusMeters } from "./clamps";
 import { sessionGameSize, type SessionRulesInput } from "./types";
 

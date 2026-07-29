@@ -1,6 +1,6 @@
 import { distanceBetweenPoints, type LatLngTuple } from "../../geometry/geometry";
 import { parsePointGeometry } from "../../geometry/geometryParsing";
-import type { PendingQuestionRecord } from "../../session/sessionChat";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import {
   resultFromReplyId,
   truthUnavailable,

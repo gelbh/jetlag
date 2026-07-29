@@ -1,7 +1,7 @@
 import type { MapTool } from "../../map/mapToolTypes";
 import type { DistanceUnit } from "../../map/distance";
 import type { ThermometerDistanceOptionMiles } from "../../questions/thermometerQuestions";
-import { toolDockEnabled } from "../gameSizeRules";
+import { toolDockEnabled } from "../size/gameSizeRules";
 import { resolveTentaclesEnabledForSession } from "./tentacleRules";
 import {
   ALL_CONFIGURABLE_TOOLS,

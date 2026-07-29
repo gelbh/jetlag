@@ -14,7 +14,7 @@ import {
   normalizeSessionCode,
 } from "../services/session/sessionCodes";
 import { useSessionStore } from "../state/sessionStore";
-import type { PlayerRole } from "../domain/session/playerRole";
+import type { PlayerRole } from "../domain/session/players/playerRole";
 import { RolePicker } from "../components/session/RolePicker";
 import {
   ensureAnonymousUser,
@@ -27,8 +27,8 @@ import {
   waitForServerHiderRole,
 } from "../services/firestore/firestoreAnnotations";
 import { APP_VERSION } from "../domain/device/changelog";
-import { sessionVersionMismatchMessage } from "../domain/session/sessionVersion";
-import { resolvePlayerRole } from "../domain/session/playerRole";
+import { sessionVersionMismatchMessage } from "../domain/session/meta/sessionVersion";
+import { resolvePlayerRole } from "../domain/session/players/playerRole";
 import { retryAsync } from "../services/core/retryAsync";
 import { withTimeout } from "../services/core/withTimeout";
 import { MotionPressable } from "../components/motion/MotionPressable";

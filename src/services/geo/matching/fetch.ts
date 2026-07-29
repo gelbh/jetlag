@@ -9,9 +9,9 @@ import {
 import {
   matchingOverpassSelectorsForCategory,
   resolveMatchingCategory,
-} from "../../../domain/session/sessionCustomCatalog";
-import type { CustomMatchingAreasByLevel } from "../../../domain/session/sessionCustomContent";
-import type { SessionCustomCategory } from "../../../domain/session/sessionCustomContent";
+} from "../../../domain/session/catalog/sessionCustomCatalog";
+import type { CustomMatchingAreasByLevel } from "../../../domain/session/catalog/sessionCustomContent";
+import type { SessionCustomCategory } from "../../../domain/session/catalog/sessionCustomContent";
 import {
   adminDivisionToMatchingFeature,
   matchingFeaturesToAdminDivisions,

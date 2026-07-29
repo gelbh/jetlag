@@ -13,18 +13,18 @@ import {
   gameAreaToBoundingBox,
   placeToGameArea,
 } from "../../domain/geometry/geometry";
-import { generateLocalCode } from "../../domain/session/sessionCode";
+import { generateLocalCode } from "../../domain/session/meta/sessionCode";
 import type { DistanceUnit } from "../../domain/map/distance";
 import {
   hidingZoneRadiusMeters,
   recommendGameSize,
   type GameSize,
-} from "../../domain/session/gameSize";
-import type { PlayerRole } from "../../domain/session/playerRole";
+} from "../../domain/session/size/gameSize";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import {
   defaultAdvancedSessionSettings,
   sessionRulesPatchFromAdvancedSettings,
-} from "../../domain/session/advancedSessionSettings";
+} from "../../domain/session/tools/advancedSessionSettings";
 import { useSessionStore, useMapStore } from "../../state/sessionStore";
 import {
   isFirebaseConfigured,
@@ -60,7 +60,7 @@ import { setPremiumApiContext } from "../../services/core/premiumApiContext";
 import { emitSessionStartedActivity } from "../../services/session/emitSessionActivity";
 import { unionGameAreas } from "../../domain/geometry/unionGameAreas";
 import { parseBoundaryFile } from "../../services/core/kmzImport";
-import { gamePresetToCreateSessionDraft } from "../../domain/session/gamePreset";
+import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
 import { useGamePresetStore } from "../../state/gamePresetStore";
 import {
   BUNDLED_REGION_PACK_GEO_REVISION,
@@ -72,7 +72,7 @@ import {
   isBundledPresetId,
 } from "../../domain/regions/bundledGamePresets";
 import { buildBundledPresetSelectGroups } from "../../domain/regions/bundledPresetHierarchy";
-import { buildFavouritePresetSelectOptions } from "../../domain/session/presetFavourites";
+import { buildFavouritePresetSelectOptions } from "../../domain/session/presets/presetFavourites";
 import { placeToFocusBounds } from "./utils";
 import { useLatestRequest } from "../../hooks/useLatestRequest";
 import { useSubmitLock } from "../../hooks/useSubmitLock";

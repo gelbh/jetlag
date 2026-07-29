@@ -5,7 +5,7 @@ import {
   gameAreaSquareMiles,
   gameSizeLabel,
   recommendGameSize,
-} from "../../../domain/session/gameSize";
+} from "../../../domain/session/size/gameSize";
 import { HudSegmentControl } from "../../ui/HudSegmentControl";
 import { FRAMING_MODE_OPTIONS } from "./gameAreaFramingUi";
 

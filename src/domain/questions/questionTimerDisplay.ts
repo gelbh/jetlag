@@ -1,6 +1,6 @@
-import type { SessionRulesInput } from "../session/sessionRules";
+import type { SessionRulesInput } from "../session/rules";
 import { questionAnswerDeadlineMs } from "./questionRules";
-import type { PendingQuestionRecord } from "../session/sessionChat";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { mapToolDockShortLabel } from "../map/mapTools";
 import type { QuestionToolType } from "./questionRules";
 import { formatShortCountdownFromMs } from "../time/formatClockDuration";

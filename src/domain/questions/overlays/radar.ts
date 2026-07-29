@@ -2,7 +2,7 @@ import type { LatLngTuple } from "../../geometry/geometry";
 import { parseGeometryJson, pointFromGeometryFeature } from "../../geometry/geometryParsing";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
-import type { PendingQuestionRecord } from "../../session/sessionChat";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import type { OverlayBuildResult } from "./shared";
 
 export function buildRadarOverlays(

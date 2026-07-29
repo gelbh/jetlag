@@ -4,7 +4,7 @@ import {
   advancedSettingsFromSession,
   defaultAdvancedSessionSettings,
   sessionRulesPatchFromAdvancedSettings,
-} from "./advancedSessionSettings";
+} from "./tools/advancedSessionSettings";
 import type { SessionRecord } from "../map/annotations";
 import {
   resolveAnswerDeadlineMs,
@@ -13,7 +13,7 @@ import {
   resolveThermometerPresetsMiles,
   resolveToolDockEnabled,
   clampHidingPeriodMinutes,
-} from "./sessionRules";
+} from "./rules";
 import {
   sessionRulesFromRecord,
   timerNeverStarted,

@@ -7,7 +7,7 @@ import {
 } from "../../domain/questions";
 import { questionCostBreakdown } from "../../domain/questions";
 import { adminBorderKindAvailability } from "../../services/geo/adminDivisionAvailability";
-import { firstUnusedCatalogOption } from "../../domain/session/toolSessionOptions";
+import { firstUnusedCatalogOption } from "../../domain/session/tools/toolSessionOptions";
 import type { MeasuringFromKind } from "../../domain/questions";
 import { useToolSession } from "./framework/useToolSession";
 import { useToolSessionOptions } from "./useToolSessionOptions";

@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import { timerStateFromRemote, type TimerState } from "../../domain/session/timer";
+import { timerStateFromRemote, type TimerState } from "../../domain/session/timer/timer";
 import { isFirebaseConfigured } from "../../services/core/firebase";
 import {
   isFirestorePermissionDenied,

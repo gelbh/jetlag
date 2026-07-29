@@ -10,7 +10,7 @@ import {
   resetTimer,
   startTimer,
   type TimerState,
-} from "../../domain/session/timer";
+} from "../../domain/session/timer/timer";
 import { emitHidingTimerStartedActivity } from "../../services/session/emitSessionActivity";
 import { useTimerStore } from "../../state/timerStore";
 

@@ -1,4 +1,4 @@
-import { formatPlayAreaSummary, gameAreaSquareMiles } from "../../../domain/session/gameSize";
+import { formatPlayAreaSummary, gameAreaSquareMiles } from "../../../domain/session/size/gameSize";
 import type { LatLngTuple } from "../../../domain/geometry/geometry";
 import { isPointInGameArea, placeToGameArea } from "../../../domain/geometry/geometryCore";
 import { haversineMeters } from "../../../domain/geometry/distance";

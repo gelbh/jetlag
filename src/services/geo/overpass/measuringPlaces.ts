@@ -5,8 +5,8 @@ import {
   isPointInGameArea,
   type LatLngTuple,
 } from "../../../domain/geometry/geometry";
-import type { SessionCustomCategory } from "../../../domain/session/sessionCustomContent";
-import { measuringOverpassSelectorsForKind } from "../../../domain/session/sessionCustomCatalog";
+import type { SessionCustomCategory } from "../../../domain/session/catalog/sessionCustomContent";
+import { measuringOverpassSelectorsForKind } from "../../../domain/session/catalog/sessionCustomCatalog";
 import {
   measuringLocationLabel,
   type MeasuringLocationCategory,

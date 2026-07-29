@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
-import type { HidingZoneRecord } from "../../domain/session/hidingZone";
+import type { SessionRulesInput } from "../../domain/session/rules";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import {
   isQuestionAnswerDeadlineExpired,
   questionAnswerDeadlineMs,
 } from "../../domain/questions";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { updatePendingQuestion } from "../../services/firestore/firestoreSessionExtras";
 
 const DEADLINE_EXPIRED_MESSAGE =

@@ -4,7 +4,7 @@ import {
   buildPendingQuestionOverlay,
   buildPendingQuestionOverlays,
 } from "./pendingQuestionOverlays";
-import type { PendingQuestionRecord } from "../session/sessionChat";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { milesToMeters } from "../map/distance";
 import { serializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 

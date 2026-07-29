@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import type { SessionRulesInput } from "../../domain/session/rules";
 import {
   formatDrawPickSummary,
   formatExpiredAnswerCountdown,
@@ -7,8 +7,8 @@ import {
 } from "../../domain/questions";
 import type { HiderTruthResult } from "../../domain/questions/ui";
 import { mapToolDockShortLabel, isQuestionDockTool } from "../../domain/map/mapTools";
-import type { SessionMessageRecord } from "../../domain/session/sessionChat";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { SessionMessageRecord } from "../../domain/session/activity/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { HiderAnswerPicker } from "./HiderAnswerPicker";
 import { InlineError } from "../ui/InlineError";
 import { PhotoAnswerPreview } from "./PhotoAnswerPreview";

@@ -10,8 +10,8 @@ import {
   type TentaclePoi,
 } from "../../domain/map/annotations";
 import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
-import { sessionGameSize } from "../../domain/session/sessionRules";
+import type { SessionRulesInput } from "../../domain/session/rules";
+import { sessionGameSize } from "../../domain/session/rules";
 import {
   firstAvailableTentacleCategoryIdForSession,
   isTentacleCategoryAvailableInSession,
@@ -22,7 +22,7 @@ import {
   type TentacleExtendedCategoryId,
 } from "../../domain/questions";
 import { questionCostBreakdown } from "../../domain/questions";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import { fetchTentaclePois } from "../../services/geo/tentacleOverpass";
 import { overpassErrorMessage } from "../../services/core/overpassClient";

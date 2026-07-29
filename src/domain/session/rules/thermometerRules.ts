@@ -5,8 +5,8 @@ import {
   isThermometerPresetAvailableForGameSize,
   thermometerPresetsMilesForGameSize,
   thermometerPresetsMetersForGameSize,
-} from "../gameSizeRules";
-import { sessionDistanceUnit } from "../sessionDistanceUnit";
+} from "../size/gameSizeRules";
+import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
 import { sessionGameSize, type SessionRulesInput } from "./types";
 
 export function resolveThermometerPresetsMiles(

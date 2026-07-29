@@ -23,7 +23,7 @@ import {
   type IncidentStatus,
   isIncidentStatus,
 } from "../../domain/incident/incidentTypes";
-import type { PlayerRole } from "../../domain/session/playerRole";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { forceRefreshIdToken } from "../core/auth/forceRefreshIdToken";
 import { getFirestoreDb, isFirebaseConfigured } from "../core/firebase";
 

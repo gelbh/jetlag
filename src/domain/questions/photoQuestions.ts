@@ -1,7 +1,7 @@
-import type { GameSize } from "../session/gameSize";
-import { firstUnusedCatalogOption } from "../session/toolSessionOptions";
-import type { PendingQuestionRecord } from "../session/sessionChat";
-import type { GameReplyOption } from "../session/sessionChat";
+import type { GameSize } from "../session/size/gameSize";
+import { firstUnusedCatalogOption } from "../session/tools/toolSessionOptions";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
+import type { GameReplyOption } from "../session/activity/sessionChat";
 import { buildCatalogHelpers } from "./catalogHelpers";
 
 export type PhotoCategoryId =

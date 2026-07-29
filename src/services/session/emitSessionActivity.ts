@@ -4,8 +4,8 @@ import {
   createActivityEventId,
   phaseActivityEventId,
   type SessionActivityEvent,
-} from "../../domain/session/sessionActivityLog";
-import type { PendingQuestionToolType } from "../../domain/session/sessionChat";
+} from "../../domain/session/activity/sessionActivityLog";
+import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
 import { parsePhotoAnswer } from "../../domain/questions/photoQuestions";
 import { appendSessionActivityEvent } from "./sessionActivityLog";
 

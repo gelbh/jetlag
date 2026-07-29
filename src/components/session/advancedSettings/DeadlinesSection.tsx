@@ -11,7 +11,7 @@ import {
   QUESTION_ANSWER_DEADLINE_MINUTES_MAX,
   QUESTION_ANSWER_DEADLINE_MINUTES_MIN,
   QUESTION_ANSWER_DEADLINE_PRESET_MINUTES,
-} from "../../../domain/session/sessionRules";
+} from "../../../domain/session/rules";
 import {
   AdvancedSettingsSectionHeader,
   ToggleNumberWithPresets,

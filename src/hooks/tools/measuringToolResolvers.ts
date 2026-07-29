@@ -24,9 +24,9 @@ import {
   measuringLinearNotFoundMessage,
 } from "../../services/geo/measuringLinearFeatures";
 import { loadCustomMeasureGeometryContext } from "../../services/geo/customMeasureGeometryFeatures";
-import { isCustomMeasureGeometryId } from "../../domain/session/customMeasureGeometry";
-import type { SessionCustomMeasureGeometry } from "../../domain/session/customMeasureGeometry";
-import type { CustomMatchingAreasByLevel } from "../../domain/session/sessionCustomContent";
+import { isCustomMeasureGeometryId } from "../../domain/session/catalog/customMeasureGeometry";
+import type { SessionCustomMeasureGeometry } from "../../domain/session/catalog/customMeasureGeometry";
+import type { CustomMatchingAreasByLevel } from "../../domain/session/catalog/sessionCustomContent";
 import type { RegionPackId } from "../../domain/regions/regionPack";
 import { loadSeaLevelContext } from "../../services/geo/seaLevel";
 

@@ -21,7 +21,7 @@ import {
 } from "../../../domain/device/serviceWorkerRefresh";
 import { setServiceWorkerChunkReloadContext } from "../../../domain/device/lazyWithChunkRetry";
 import { tryUpdateServiceWorker } from "../../../domain/device/serviceWorkerUpdate";
-import { compareAppVersions } from "../../../domain/session/sessionVersion";
+import { compareAppVersions } from "../../../domain/session/meta/sessionVersion";
 import { useHotfixGraceReload } from "../../../hooks/useHotfixGraceReload";
 import { isFirebaseConfigured } from "../../../services/core/firebase";
 import {

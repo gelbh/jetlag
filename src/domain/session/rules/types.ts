@@ -1,6 +1,6 @@
 import type { SessionRecord } from "../../map/annotations";
 import type { MapTool } from "../../map/mapToolTypes";
-import type { GameSize } from "../gameSize";
+import type { GameSize } from "../size/gameSize";
 
 export const ALL_CONFIGURABLE_TOOLS = [
   "matching",

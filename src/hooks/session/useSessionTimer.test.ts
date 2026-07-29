@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { INITIAL_TIMER_STATE, startTimer } from "../../domain/session/timer";
+import { INITIAL_TIMER_STATE, startTimer } from "../../domain/session/timer/timer";
 import { useTimerStore } from "../../state/timerStore";
 import { useSessionTimer } from "./useSessionTimer";
 

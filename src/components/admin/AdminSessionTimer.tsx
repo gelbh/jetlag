@@ -3,7 +3,7 @@ import {
   computeElapsedMs,
   formatElapsedTime,
   isTimerRunning,
-} from "../../domain/session/timer";
+} from "../../domain/session/timer/timer";
 import { adminSessionTimerState } from "../../domain/admin/sessionPhase";
 import type { AdminSessionSummary } from "../../services/admin/adminSessions";
 

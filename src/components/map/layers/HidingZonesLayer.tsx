@@ -1,6 +1,6 @@
 import { Circle, Polygon } from "react-leaflet";
 import type { LatLngTuple } from "../../../domain/geometry/geometry";
-import type { HidingZoneRecord } from "../../../domain/session/hidingZone";
+import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 
 interface HidingZonesLayerProps {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { SessionRulesInput } from "../../../domain/session/sessionRules";
+import type { SessionRulesInput } from "../../../domain/session/rules";
 import {
   selectPrimaryQuestionTimer,
   type ActiveQuestionTimer,
@@ -8,7 +8,7 @@ import { HudBanner } from "../../ui/HudBanner";
 import { MapFloatAlert } from "../../ui/MapFloatAlert";
 
 interface QuestionAlertBannerProps {
-  pendingQuestions: readonly import("../../../domain/session/sessionChat").PendingQuestionRecord[];
+  pendingQuestions: readonly import("../../../domain/session/activity/sessionChat").PendingQuestionRecord[];
   sessionRules: SessionRulesInput;
 }
 

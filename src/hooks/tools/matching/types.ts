@@ -2,8 +2,8 @@ import type { GameArea } from "../../../domain/map/annotations";
 import type { AnnotationRecord } from "../../../domain/map/annotations";
 import type { LatLngTuple } from "../../../domain/geometry/geometry";
 import type { DistanceUnit } from "../../../domain/map/distance";
-import type { PendingQuestionRecord } from "../../../domain/session/sessionChat";
-import type { SessionRulesInput } from "../../../domain/session/sessionRules";
+import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "../../../domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 
 export interface UseMatchingToolParams {

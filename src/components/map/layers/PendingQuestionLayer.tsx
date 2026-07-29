@@ -1,9 +1,9 @@
 import { memo, useMemo } from "react";
 import type { GameArea } from "../../../domain/map/annotations";
 import type { MapStyle } from "../../../domain/map/mapBasemaps";
-import type { SessionRulesInput } from "../../../domain/session/sessionRules";
+import type { SessionRulesInput } from "../../../domain/session/rules";
 import { buildPendingQuestionOverlays } from "../../../domain/questions/ui";
-import type { PendingQuestionRecord } from "../../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
 import { MapDraftLayer } from "./MapDraftLayer";
 
 interface PendingQuestionLayerProps {

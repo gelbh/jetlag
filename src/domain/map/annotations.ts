@@ -21,20 +21,20 @@ import { thermometerQuestionPrompt } from "../questions/thermometerQuestions";
 import type { TentacleExtendedCategoryId } from "../questions/tentacleQuestions";
 import { tentacleAnnotationSummary } from "../questions/tentacleQuestions";
 import type { MapTool } from "./mapToolTypes";
-import type { GameSize } from "../session/gameSize";
-import type { MemberRoles } from "../session/playerRole";
+import type { GameSize } from "../session/size/gameSize";
+import type { MemberRoles } from "../session/players/playerRole";
 import type { ThermometerDistanceOptionMiles } from "../questions/thermometerQuestions";
 import type {
   CustomMatchingAreasByLevel,
   SessionCustomCategory,
   SessionCustomLocationPin,
-} from "../session/sessionCustomContent";
-import type { SessionCustomMeasureGeometry } from "../session/customMeasureGeometry";
+} from "../session/catalog/sessionCustomContent";
+import type { SessionCustomMeasureGeometry } from "../session/catalog/customMeasureGeometry";
 import type { RegionPackId } from "../regions/regionPack";
 import type { GameOutcome } from "../game/foundHider";
 
-export type { GameSize } from "../session/gameSize";
-export type { MemberRoles, PlayerRole } from "../session/playerRole";
+export type { GameSize } from "../session/size/gameSize";
+export type { MemberRoles, PlayerRole } from "../session/players/playerRole";
 
 export type AnnotationType =
   | "radar"

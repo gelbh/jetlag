@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { SyncStatus } from "../../../domain/device/sync";
-import type { TimerState } from "../../../domain/session/timer";
+import type { TimerState } from "../../../domain/session/timer/timer";
 import type { MapTool } from "../../../state/sessionStore";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
-} from "../../../domain/session/sessionChat";
+} from "../../../domain/session/activity/sessionChat";
 import { ScreenNav } from "../../ui/ScreenNav";
 import { GameAreaPreloadBeacon } from "../preload/GameAreaPreloadBeacon";
 import { HudErrorBanner } from "../../ui/HudErrorBanner";
 import { userErrorFromSyncMessage } from "../../../domain/device/userErrors";
-import type { SessionRulesInput } from "../../../domain/session/sessionRules";
-import type { PlayerRole } from "../../../domain/session/playerRole";
+import type { SessionRulesInput } from "../../../domain/session/rules";
+import type { PlayerRole } from "../../../domain/session/players/playerRole";
 import { EndGameAlert } from "../status/EndGameAlert";
 import { FoundHiderAlert } from "../status/FoundHiderAlert";
 import { HiderOutsideZoneAlert } from "../status/HiderOutsideZoneAlert";

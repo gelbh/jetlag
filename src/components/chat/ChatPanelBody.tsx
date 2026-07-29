@@ -1,11 +1,11 @@
 import { useState } from "react";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import type { SessionRulesInput } from "../../domain/session/rules";
 import type { HiderTruthResult } from "../../domain/questions/ui";
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,
-} from "../../domain/session/sessionChat";
-import type { PlayerRole } from "../../domain/session/playerRole";
+} from "../../domain/session/activity/sessionChat";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { SegmentControl } from "../ui/SegmentControl";
 import { GameChatTab } from "./GameChatTab";
 import { SocialChatTab } from "./SocialChatTab";
