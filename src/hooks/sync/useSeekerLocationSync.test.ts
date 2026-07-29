@@ -9,7 +9,7 @@ const { writePlayerLocation, appendPlayerTrailPoint, isFirebaseConfigured } = vi
   isFirebaseConfigured: vi.fn(() => true),
 }));
 
-vi.mock("../../services/core/firebase", () => ({
+vi.mock("../../services/core/firebase/firebase", () => ({
   isFirebaseConfigured,
 }));
 

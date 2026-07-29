@@ -1,4 +1,4 @@
-import { signInWithApple } from "../../services/core/accountAuth";
+import { signInWithApple } from "../../services/core/auth/accountAuth";
 import { OAuthSignInButton } from "./OAuthSignInButton";
 
 interface AppleSignInButtonProps {

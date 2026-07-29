@@ -3,7 +3,7 @@ import type { LatLngTuple } from "../geometry/gameArea/geometry";
 import { gameAreaToBoundingBox } from "../geometry/gameArea/gameAreaBounds";
 import type { GeocodedPlace } from "@/services/geo/geocoding";
 import { reverseGeocodePoint } from "@/services/geo/geocoding";
-import { getCurrentPosition } from "@/services/core/geolocation";
+import { getCurrentPosition } from "@/services/core/location/geolocation";
 import { TUTORIAL_DUBLIN_GAME_AREA } from "./tutorialGameArea";
 
 /** Nominatim zoom: 4 ≈ state/province/canton; 3 ≈ country. */

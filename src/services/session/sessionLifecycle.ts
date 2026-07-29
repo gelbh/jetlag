@@ -1,6 +1,6 @@
 import { httpsCallable } from "firebase/functions";
-import { trackSessionEnded } from "../core/analytics";
-import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
+import { trackSessionEnded } from "../core/analytics/analytics";
+import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
 
 export type LeaveHostSessionResult =
   | { action: "promoted"; newHostUid: string }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { isFirebaseConfigured } from "../../services/core/firebase";
+import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import {
   subscribeHotfixThreadMessages,
   type IncidentThreadMessageRecord,

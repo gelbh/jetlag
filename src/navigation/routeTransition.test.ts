@@ -19,7 +19,7 @@ import {
   labelForStep,
   resolveLoadingSteps,
 } from "./routeLoadingSteps";
-import * as firebase from "../services/core/firebase";
+import * as firebase from "../services/core/firebase/firebase";
 import {
   clearResolvedMatchingAreasCacheForTests,
   isPlayAreaReadySync,

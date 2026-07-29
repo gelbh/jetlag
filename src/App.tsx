@@ -6,7 +6,7 @@ import {
   Routes,
   useLocation,
 } from "react-router-dom";
-import { trackPageView } from "./services/core/analytics";
+import { trackPageView } from "./services/core/analytics/analytics";
 import { MapErrorBoundary } from "./components/ui/MapErrorBoundary";
 import { AppEntryBackdrop } from "./components/ui/AppEntryBackdrop";
 import { AnalyticsConsentBanner } from "./components/ui/AnalyticsConsentBanner";

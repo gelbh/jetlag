@@ -1,7 +1,7 @@
 import { FirebaseError } from "firebase/app";
 import { httpsCallable, type HttpsCallableResult } from "firebase/functions";
 import { forceRefreshIdToken } from "../core/auth/forceRefreshIdToken";
-import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
+import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
 
 function compareSessionsByLastActivity(
   left: AdminSessionSummary,

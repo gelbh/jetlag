@@ -16,7 +16,7 @@ import {
 } from "../../domain/session/tools/advancedSessionSettings";
 import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
-import { isFirebaseConfigured } from "../../services/core/firebase";
+import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import {
   confirmFoundHiderSession,
   requestEndGameSession,

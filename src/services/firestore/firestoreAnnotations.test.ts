@@ -34,7 +34,7 @@ const forceRefreshIdToken = vi.hoisted(() =>
   }),
 );
 
-vi.mock("../core/firebase", () => ({
+vi.mock("../core/firebase/firebase", () => ({
   getFirestoreDb: () => ({}),
   getFirebaseAuth: () => ({
     currentUser: { uid: "admin-1", getIdToken },
@@ -49,7 +49,7 @@ vi.mock("../core/auth/forceRefreshIdToken", () => ({
   forceRefreshIdToken,
 }));
 
-vi.mock("../core/sentry", () => ({
+vi.mock("../core/analytics/sentry", () => ({
   reportJoinPermissionDenied,
 }));
 

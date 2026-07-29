@@ -6,7 +6,7 @@ import {
   wasChunkReloadDeferred,
 } from "../../../domain/device/updates/chunkLoadRecovery";
 import { appUpdateCopy } from "../../../domain/device/updates/appUpdateCopy";
-import { captureException } from "../../../services/core/sentry";
+import { captureException } from "../../../services/core/analytics/sentry";
 import { AppErrorPage } from "./AppErrorPage";
 import { MapFloatAlertPanel } from "../banners/MapFloatAlert";
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { IncidentRecord } from "../../domain/incident/incidentTypes";
-import { isFirebaseConfigured } from "../../services/core/firebase";
+import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { subscribeIncident } from "../../services/firestore/firestoreIncidents";
 import {
   subscribeSupportThreadMessages,

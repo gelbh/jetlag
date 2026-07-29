@@ -42,14 +42,14 @@ const {
   };
 });
 
-vi.mock("../services/core/firebase", () => ({
+vi.mock("../services/core/firebase/firebase", () => ({
   isFirebaseConfigured,
   ensureAnonymousUser,
   waitForAuthStateReady,
   getFirebaseAuth: () => mockAuth,
 }));
 
-vi.mock("../services/core/accountAuth", () => ({
+vi.mock("../services/core/auth/accountAuth", () => ({
   APPLE_SIGN_IN_ENABLED: false,
   isPermanentUser,
   isAnonymousUser: vi.fn(() => false),

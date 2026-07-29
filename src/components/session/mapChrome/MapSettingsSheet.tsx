@@ -15,7 +15,7 @@ import { AdvancedSessionSettings } from "../settings/AdvancedSessionSettings";
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
 import type { LayerVisibility } from "../../../state/sessionStore";
 import type { NotificationPreferences } from "../../../domain/device/chrome/notifications";
-import { isNativeNotificationsSupported } from "../../../services/core/notifications";
+import { isNativeNotificationsSupported } from "../../../services/core/native/notifications";
 import type { TransitRouteFilter } from "../../../domain/map/transit";
 import { MapSettingsGeneralTab } from "../settings/GeneralTab";
 import { MapSettingsSessionTab } from "../settings/SessionTab";

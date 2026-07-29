@@ -9,7 +9,7 @@ const { ensureAnonymousUser, isFirebaseConfigured } = vi.hoisted(() => ({
   isFirebaseConfigured: vi.fn(() => true),
 }));
 
-vi.mock("../../services/core/firebase", () => ({
+vi.mock("../../services/core/firebase/firebase", () => ({
   ensureAnonymousUser,
   isFirebaseConfigured,
 }));

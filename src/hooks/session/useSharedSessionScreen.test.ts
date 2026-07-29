@@ -7,13 +7,13 @@ const waitForPermanentAuthReady = vi.fn();
 const getFirebaseAuth = vi.fn();
 const useSessionSyncMock = vi.fn();
 
-vi.mock("../../services/core/firebase", () => ({
+vi.mock("../../services/core/firebase/firebase", () => ({
   ensureAnonymousUser: (...args: unknown[]) => ensureAnonymousUser(...args),
   getFirebaseAuth: () => getFirebaseAuth(),
   isFirebaseConfigured: vi.fn(() => true),
 }));
 
-vi.mock("../../services/core/firebaseAuthReady", () => ({
+vi.mock("../../services/core/firebase/firebaseAuthReady", () => ({
   waitForPermanentAuthReady: (...args: unknown[]) =>
     waitForPermanentAuthReady(...args),
 }));

@@ -1,4 +1,4 @@
-import { signInWithGoogle } from "../../services/core/accountAuth";
+import { signInWithGoogle } from "../../services/core/auth/accountAuth";
 import { OAuthSignInButton } from "./OAuthSignInButton";
 
 interface GoogleSignInButtonProps {

@@ -4,7 +4,7 @@ import {
   sortActivityEventsDesc,
   type SessionActivityEvent,
 } from "../../domain/session/activity/sessionActivityLog";
-import { isFirebaseConfigured } from "../../services/core/firebase";
+import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { subscribeActivityLog } from "../../services/firestore/firestoreActivityLog";
 import { useActivityLogStore } from "../../state/activityLogStore";
 

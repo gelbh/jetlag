@@ -69,7 +69,7 @@ import {
   resetFoundHiderSession,
   ensureRemoteSessionWriteAccess,
 } from "../services/firestore/firestoreAnnotations";
-import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase";
+import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase/firebase";
 import { emitGameEndedActivity } from "../services/session/emitSessionActivity";
 import { useSessionAnnotations } from "../hooks/map/useSessionAnnotations";
 import { useAnnotations } from "../hooks/map/useAnnotations";

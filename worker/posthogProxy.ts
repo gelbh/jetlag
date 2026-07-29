@@ -1,5 +1,5 @@
 /**
- * Must stay in sync with client `POSTHOG_API_HOST` in `src/services/core/analytics.ts`.
+ * Must stay in sync with client `POSTHOG_API_HOST` in `src/services/core/analytics/analytics.ts`.
  */
 export const POSTHOG_PROXY_PATH = "/ingest";
 

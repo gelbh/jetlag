@@ -4,7 +4,7 @@ import {
   denyAnalyticsConsent,
   grantAnalyticsConsent,
   shouldEnableAnalytics,
-} from "../../../services/core/analytics";
+} from "../../../services/core/analytics/analytics";
 import { AppLink } from "../../navigation/AppLink";
 import { HudBanner } from "../hud/HudBanner";
 

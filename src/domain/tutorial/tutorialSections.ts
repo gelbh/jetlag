@@ -1,4 +1,4 @@
-import { isFirebaseConfigured } from "@/services/core/firebase";
+import { isFirebaseConfigured } from "@/services/core/firebase/firebase";
 import {
   MAP_TOOL_DOCK_ENTRIES,
   mapToolDockMenuHint,

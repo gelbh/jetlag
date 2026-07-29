@@ -3,7 +3,7 @@ import { useAppNavigate } from "../useAppNavigate";
 import { usePermanentAuthUser } from "../billing/usePermanentAuthUser";
 import { resolvePlayerRole } from "../../domain/session/players/playerRole";
 import { joinRemoteSessionByCode } from "../../services/firestore/firestoreAnnotations";
-import { setPremiumApiContext } from "../../services/core/premiumApiContext";
+import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
 import { useSessionStore } from "../../state/sessionStore";
 import type { AdminSessionSummary } from "../../services/admin/adminSessions";
 
