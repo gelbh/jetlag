@@ -14,7 +14,7 @@ import {
 } from "../../map/distanceScaledAnnotationStyle";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
-import type { PendingQuestionRecord } from "../../session/sessionChat";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { crowFliesDistanceMeters } from "../thermometerWalk";
 import type { ThermometerAnswer } from "../thermometerQuestions";
 import type { OverlayBuildResult } from "./shared";

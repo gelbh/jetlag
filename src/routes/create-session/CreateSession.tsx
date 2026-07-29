@@ -9,7 +9,7 @@ import { MobileSheet } from "../../components/ui/MobileSheet";
 import {
   buildCreateSessionPresetDraft,
   createSessionDraftToGamePreset,
-} from "../../domain/session/gamePreset";
+} from "../../domain/session/presets/gamePreset";
 import { useGamePresetStore } from "../../state/gamePresetStore";
 import { ConfirmFooter } from "./ConfirmFooter";
 import { GameAreaSection } from "./GameAreaSection";

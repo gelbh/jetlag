@@ -1,6 +1,6 @@
 import type { AnnotationType } from "../../domain/map/annotations";
-import type { PendingQuestionToolType } from "../../domain/session/sessionChat";
-import type { SessionActivityEvent } from "../../domain/session/sessionActivityLog";
+import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
+import type { SessionActivityEvent } from "../../domain/session/activity/sessionActivityLog";
 import {
   assertNoNestedArrays,
   stripUndefinedValues,

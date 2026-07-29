@@ -18,7 +18,7 @@ import { PlayHubSheet } from "../components/home/PlayHubSheet";
 import { ReportProblemSheet } from "../components/incident/ReportProblemSheet";
 import { APP_VERSION } from "../domain/device/changelog";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
-import { playerRoleLabel, resolvePlayerRole } from "../domain/session/playerRole";
+import { playerRoleLabel, resolvePlayerRole } from "../domain/session/players/playerRole";
 import { useSessionStore } from "../state/sessionStore";
 import {
   ensureFreshAnonymousUser,

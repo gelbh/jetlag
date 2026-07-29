@@ -13,7 +13,7 @@ import {
   parseDistanceInput,
   type DistanceUnit,
 } from "../../domain/map/distance";
-import type { GameSize } from "../../domain/session/gameSize";
+import type { GameSize } from "../../domain/session/size/gameSize";
 import { CatalogExhaustedMessage } from "./shared/CatalogExhaustedMessage";
 import { OptionChip, OptionChipRow } from "./shared/OptionChip";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";

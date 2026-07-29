@@ -7,7 +7,7 @@ import type {
   SessionRecord,
 } from "../../../domain/map/annotations";
 import { isEndGameActive } from "../../../domain/map/annotations";
-import type { HidingZoneRecord } from "../../../domain/session/hidingZone";
+import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
 import {
   annotationHasEliminationFeature,
 } from "../../../domain/geometry/combinedEliminationMask";

@@ -5,7 +5,7 @@ import {
   sessionRulesFromRecord,
   sessionRulesSnapshot,
   type SessionRulesInput,
-} from "../../domain/session/sessionRules";
+} from "../../domain/session/rules";
 import { isKnownRegionPack } from "../../domain/regions/regionPackRegistry";
 import {
   isPlayAreaReadySync,

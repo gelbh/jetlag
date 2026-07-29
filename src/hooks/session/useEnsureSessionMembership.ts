@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import { resolvePlayerRole } from "../../domain/session/playerRole";
+import { resolvePlayerRole } from "../../domain/session/players/playerRole";
 import {
   ensureFreshAnonymousUser,
   isFirebaseConfigured,

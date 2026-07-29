@@ -6,7 +6,7 @@ import {
 import { framingModeHint } from "../../components/session/gameAreaFramingUi";
 import type { GameArea } from "../../domain/map/annotations";
 import type { BundledPresetSelectGroup } from "../../domain/regions/bundledPresetHierarchy";
-import type { GamePreset } from "../../domain/session/gamePreset";
+import type { GamePreset } from "../../domain/session/presets/gamePreset";
 import type { useGameAreaFraming } from "../../hooks/session/useGameAreaFraming";
 import type { GeocodedPlace } from "../../services/geo/geocoding";
 import { formatPlaceSearchSubtitle } from "../../services/geo/geocodingRank";

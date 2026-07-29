@@ -24,14 +24,14 @@ import { useResolvedSessionRules } from "../hooks/session/useResolvedSessionRule
 import {
   effectiveHidingZoneRadiusMeters,
   formatHidingZoneRadiusLabel,
-} from "../domain/session/gameSize";
+} from "../domain/session/size/gameSize";
 import {
   hidingZonePreviewPositions,
   hiderStationCenter,
   nearestStation,
   resolveMyHidingZone,
-} from "../domain/session/hidingZone";
-import { DEFAULT_SESSION_RULES } from "../domain/session/sessionRules";
+} from "../domain/session/hiding/hidingZone";
+import { DEFAULT_SESSION_RULES } from "../domain/session/rules";
 import { AdminBoundariesLayer } from "../components/map/AdminBoundariesLayer";
 import { useAdminBoundaryFeatures } from "../hooks/map-screen/useAdminBoundaryFeatures";
 import {

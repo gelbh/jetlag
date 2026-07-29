@@ -1,4 +1,4 @@
-import type { PendingQuestionRecord } from "../../session/sessionChat";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 
 export function isPhotoPendingQuestion(
   pending: PendingQuestionRecord | undefined,

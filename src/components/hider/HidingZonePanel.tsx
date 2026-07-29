@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import type { TransitStation } from "../../domain/session/hidingZone";
+import type { TransitStation } from "../../domain/session/hiding/hidingZone";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {
   stepsForHidingZoneMode,

@@ -13,9 +13,9 @@ import {
   mergeSessionRulesPatch,
   sessionRulesPatchFromAdvancedSettings,
   type AdvancedSessionSettingsValue,
-} from "../../domain/session/advancedSessionSettings";
-import type { HidingZoneRecord } from "../../domain/session/hidingZone";
-import type { PlayerRole } from "../../domain/session/playerRole";
+} from "../../domain/session/tools/advancedSessionSettings";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { isFirebaseConfigured } from "../../services/core/firebase";
 import {
   confirmFoundHiderSession,

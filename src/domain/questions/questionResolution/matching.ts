@@ -6,7 +6,7 @@ import {
   buildSameNearestRegion,
 } from "../../geometry/matchingGeometry";
 import { deserializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
-import type { PendingQuestionRecord } from "../../session/sessionChat";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 
 export function matchingAnswerFromReplyId(
   replyId: string,

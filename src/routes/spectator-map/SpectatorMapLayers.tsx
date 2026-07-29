@@ -5,13 +5,13 @@ import { LiveHiderLocationsLayer } from "../../components/map/LiveHiderLocations
 import { LiveSeekerLocationsLayer } from "../../components/map/LiveSeekerLocationsLayer";
 import { PendingQuestionLayer } from "../../components/map/PendingQuestionLayer";
 import type { SessionRecord, GameArea, AnnotationRecord } from "../../domain/map/annotations";
-import type { HidingZoneRecord } from "../../domain/session/hidingZone";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
-} from "../../domain/session/sessionChat";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
-import type { SpectatorLayerConfig } from "../../domain/session/observerPerspective";
+} from "../../domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "../../domain/session/rules";
+import type { SpectatorLayerConfig } from "../../domain/session/players/observerPerspective";
 import type { LayerVisibility } from "../../state/mapStore";
 import type { MapStyle } from "../../domain/map/mapBasemaps";
 import type { DistanceUnit } from "../../domain/map/distance";

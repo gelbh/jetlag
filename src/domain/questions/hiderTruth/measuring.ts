@@ -5,7 +5,7 @@ import {
 } from "../../geometry/geometry";
 import type { MeasuringRegionInput } from "../../geometry/measuringRegions";
 import { fetchElevations } from "@/services/geo/elevation";
-import type { PendingQuestionRecord } from "../../session/sessionChat";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { isMeasuringLinearLocation } from "../measuringQuestions";
 import {
   minDistanceToPlaces,

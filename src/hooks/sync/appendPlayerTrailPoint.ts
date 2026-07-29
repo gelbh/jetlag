@@ -1,4 +1,4 @@
-import type { PlayerRole } from "../../domain/session/playerRole";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { haversineMeters } from "../../domain/geometry/distance";
 import {
   TRAIL_MIN_DISTANCE_METERS,

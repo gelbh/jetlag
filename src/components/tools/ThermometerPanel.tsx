@@ -9,7 +9,7 @@ import {
   thermometerQuestionPrompt,
   type ThermometerAnswer,
 } from "../../domain/questions";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import type { SessionRulesInput } from "../../domain/session/rules";
 import { hotterColderAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { OptionChip, OptionChipRow } from "./shared/OptionChip";

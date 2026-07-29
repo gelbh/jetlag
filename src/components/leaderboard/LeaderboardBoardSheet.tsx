@@ -4,8 +4,8 @@ import {
   leaderboardMetricLabel,
 } from "../../domain/game/leaderboard";
 import type { LeaderboardBoardSelection } from "../../domain/game/leaderboardBoardPrefs";
-import { GAME_SIZE_OPTIONS, gameSizeLabel } from "../../domain/session/gameSize";
-import { playerRoleLabel } from "../../domain/session/playerRole";
+import { GAME_SIZE_OPTIONS, gameSizeLabel } from "../../domain/session/size/gameSize";
+import { playerRoleLabel } from "../../domain/session/players/playerRole";
 import { MotionSheet } from "../motion/MotionSheet";
 import { SegmentControl } from "../ui/SegmentControl";
 import { SheetHeader } from "../ui/SheetHeader";

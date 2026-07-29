@@ -16,15 +16,15 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
-import type { PlayerRole } from "../../domain/session/playerRole";
-import type { HidingZoneRecord } from "../../domain/session/hidingZone";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
 import {
   createMessageId,
   type PendingQuestionRecord,
   type PlayerLocationRecord,
   type SessionMessageRecord,
-} from "../../domain/session/sessionChat";
+} from "../../domain/session/activity/sessionChat";
 import type { PlayerTrailPointRecord } from "../../domain/game/playerTrail";
 import type { StartingLocationRecord } from "../../domain/game/startingLocation";
 import { listWalkingThermometerQuestionIds } from "../../domain/questions";

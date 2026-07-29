@@ -16,7 +16,7 @@ import {
   type MatchingAnswer,
   type MatchingCategoryId,
 } from "../../../domain/questions";
-import type { SessionCustomCategory } from "../../../domain/session/sessionCustomContent";
+import type { SessionCustomCategory } from "../../../domain/session/catalog/sessionCustomContent";
 import { yesNoAnswerOptions } from "../../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 import { serializeMatchingFeatures } from "../../../domain/geo/matchingAdapters";

@@ -1,6 +1,6 @@
 import type { GameArea } from "../../map/annotations";
 import type { MapStyle } from "../../map/mapBasemaps";
-import type { PendingQuestionRecord } from "../../session/sessionChat";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { pendingQuestionOverlayBuilders } from "../questionToolRegistry";
 import type { PendingQuestionOverlayResult } from "./shared";
 

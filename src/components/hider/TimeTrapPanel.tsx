@@ -1,4 +1,4 @@
-import type { TransitStation } from "../../domain/session/hidingZone";
+import type { TransitStation } from "../../domain/session/hiding/hidingZone";
 import { TransitStationPicker } from "./TransitStationPicker";
 
 interface TimeTrapPanelProps {

@@ -1,6 +1,6 @@
 import { FirebaseError } from "firebase/app";
 import type { SessionRecord } from "../map/annotations";
-import type { PlayerRole } from "../session/playerRole";
+import type { PlayerRole } from "../session/players/playerRole";
 
 export function isStorageUnauthorized(error: unknown): boolean {
   if (error instanceof FirebaseError) {

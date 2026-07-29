@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import type { SessionMessageRecord } from "../../domain/session/sessionChat";
-import { createMessageId } from "../../domain/session/sessionChat";
-import type { PlayerRole } from "../../domain/session/playerRole";
+import type { SessionMessageRecord } from "../../domain/session/activity/sessionChat";
+import { createMessageId } from "../../domain/session/activity/sessionChat";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { postSocialMessage } from "../../services/firestore/firestoreSessionExtras";
 
 interface SocialChatTabProps {

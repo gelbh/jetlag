@@ -1,8 +1,8 @@
 import { useRef } from "react";
-import type { GameSize } from "../../domain/session/gameSize";
+import type { GameSize } from "../../domain/session/size/gameSize";
 import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
-import { resolveToolDockEnabled } from "../../domain/session/sessionRules";
+import type { SessionRulesInput } from "../../domain/session/rules";
+import { resolveToolDockEnabled } from "../../domain/session/rules";
 import {
   MARKUP_DOCK_TOOL_IDS,
   QUESTION_DOCK_TOOL_IDS,

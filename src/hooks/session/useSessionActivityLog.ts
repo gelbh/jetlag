@@ -3,7 +3,7 @@ import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import {
   sortActivityEventsDesc,
   type SessionActivityEvent,
-} from "../../domain/session/sessionActivityLog";
+} from "../../domain/session/activity/sessionActivityLog";
 import { isFirebaseConfigured } from "../../services/core/firebase";
 import { subscribeActivityLog } from "../../services/firestore/firestoreActivityLog";
 import { useActivityLogStore } from "../../state/activityLogStore";

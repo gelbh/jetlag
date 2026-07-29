@@ -1,5 +1,5 @@
 import type { GameArea } from "../../../domain/map/annotations";
-import type { CustomMatchingAreasByLevel, MatchingAdminLevel } from "../../../domain/session/sessionCustomContent";
+import type { CustomMatchingAreasByLevel, MatchingAdminLevel } from "../../../domain/session/catalog/sessionCustomContent";
 import { adminLevelForMatchingCategory } from "../../../domain/questions";
 import type { MatchingCategoryId } from "../../../domain/questions";
 import type { MeasuringFromKind } from "../../../domain/questions";

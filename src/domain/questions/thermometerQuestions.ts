@@ -4,14 +4,14 @@ import {
   type DistanceUnit,
 } from "../map/distance";
 import type { AnnotationRecord } from "../map/annotations";
-import type { PendingQuestionRecord } from "../session/sessionChat";
-import type { GameSize } from "../session/gameSize";
-import { thermometerPresetsMetersForGameSize } from "../session/gameSizeRules";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
+import type { GameSize } from "../session/size/gameSize";
+import { thermometerPresetsMetersForGameSize } from "../session/size/gameSizeRules";
 import {
   resolveIsThermometerPresetAvailable,
   resolveThermometerPresetsMeters,
   type SessionRulesInput,
-} from "../session/sessionRules";
+} from "../session/rules";
 import {
   buildPresetCatalogHelpers,
   presetMilesForDistanceMeters,

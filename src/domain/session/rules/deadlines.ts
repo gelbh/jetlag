@@ -1,5 +1,5 @@
 import type { AnnotationType } from "../../map/annotations";
-import { answerDeadlineMs, hidingPeriodMinutes } from "../gameSizeRules";
+import { answerDeadlineMs, hidingPeriodMinutes } from "../size/gameSizeRules";
 import { clampHidingPeriodMinutes, clampPhotoAnswerDeadlineMinutes, clampQuestionAnswerDeadlineMinutes } from "./clamps";
 import { sessionGameSize, type SessionRulesInput } from "./types";
 

@@ -3,11 +3,11 @@ import type { TentaclePoi } from "../../../domain/map/annotations";
 import type {
   SessionCustomCategory,
   SessionCustomLocationPin,
-} from "../../../domain/session/sessionCustomContent";
+} from "../../../domain/session/catalog/sessionCustomContent";
 import {
   manualPinsWithinRadius,
   tentacleOverpassSelectorsForCategory,
-} from "../../../domain/session/sessionCustomCatalog";
+} from "../../../domain/session/catalog/sessionCustomCatalog";
 import {
   tentacleCategoryOverpassSelectors,
   type TentacleExtendedCategoryId,

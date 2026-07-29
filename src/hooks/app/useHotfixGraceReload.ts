@@ -6,7 +6,7 @@ import {
   isReloadAckStorageAvailable,
 } from "../../domain/device/reloadAcknowledgements";
 import { applyServiceWorkerUpdate } from "../../domain/device/serviceWorkerRefresh";
-import { compareAppVersions } from "../../domain/session/sessionVersion";
+import { compareAppVersions } from "../../domain/session/meta/sessionVersion";
 import { DEFAULT_HOTFIX_GRACE_SECONDS } from "../../services/firestore/firestoreIncidents";
 
 export interface UseHotfixGraceReloadOptions {
