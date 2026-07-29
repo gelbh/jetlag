@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useMap, useMapEvents } from "react-leaflet";
 import {
   computeZoomAdaptiveWeight,
@@ -42,13 +42,6 @@ export function useZoomAdaptiveWeight(
 
   const [weight, setWeight] = useState(() => compute(map.getZoom()));
 
-  useEffect(() => {
-    setWeight((prev) => {
-      const next = compute(map.getZoom());
-      return next === prev ? prev : next;
-    });
-  }, [compute, map]);
-
   useMapEvents({
     zoomend: (event) => {
       const next = compute(event.target.getZoom());
@@ -83,10 +76,6 @@ export function useStrokeScaleZoom(
       ),
     [refZoom, scaleFactor, minWeight, maxWeight],
   );
-
-  useEffect(() => {
-    setZoom(map.getZoom());
-  }, [map]);
 
   useMapEvents({
     zoomend: (event) => {
