@@ -11,10 +11,7 @@ import {
   emptyAdminDivisionCounts,
   probeAdminDivisionCounts,
 } from "../geo/overpass/adminDivisionAvailability";
-import { fetchPreparedCoastlineSegments } from "../geo/overpass/coastline";
-import { fetchLandmassFeaturesInArea } from "../geo/overpass/landmassFeatures";
 import { fetchMeasuringPlacesInArea } from "../geo/overpass/measuringPlaces";
-import { fetchPreparedMeasuringLinearSegments } from "../geo/overpass/measuringLinearFeatures";
 import { fetchStaticTransit } from "../transit/transitStatic";
 import { usePreloadStore } from "../../state/preloadStore";
 
