@@ -17,7 +17,7 @@ import { parseMatchingAreaGeoJson } from "../matching/matchingAreaGeoJson";
 import {
   adminDivisionCacheKey,
   getOrFetchCached,
-} from "../geographicFeatureCache";
+} from "../cache";
 
 export const MAX_ADMIN_DIVISIONS = 50;
 

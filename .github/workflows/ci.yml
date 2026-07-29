@@ -41,7 +41,7 @@ jobs:
               - 'src/domain/geometry/**'
               - 'src/hooks/map/useCombinedEliminationMask.ts'
               - 'src/hooks/map-screen/useMapDraftOverlays.ts'
-              - 'src/services/geo/landmassFeatures.ts'
+              - 'src/services/geo/overpass/landmassFeatures.ts'
               - 'crates/jetlag-geometry-kernel/**'
               - 'Cargo.toml'
               - 'Cargo.lock'

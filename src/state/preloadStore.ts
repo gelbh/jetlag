@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { AdminDivisionCounts } from "../services/geo/adminDivisionAvailability";
+import type { AdminDivisionCounts } from "../services/geo/overpass/adminDivisionAvailability";
 
 interface PreloadStoreState {
   activeGameAreaKey: string | null;

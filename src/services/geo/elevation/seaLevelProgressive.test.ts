@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DUBLIN_CITY_GAME_AREA } from "../../../test/fixtures/dublinGameArea";
-import { clearGeographicFeatureCacheForTests } from "../geographicFeatureCache";
+import { clearGeographicFeatureCacheForTests } from "../cache";
 import {
   clearSeaLevelProgressiveStateForTests,
   ensureSeaLevelSamplingComplete,

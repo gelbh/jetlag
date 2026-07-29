@@ -7,11 +7,11 @@ vi.mock("../../state/preloadStore", () => ({
   usePreloadStore: vi.fn(() => ({ "4": 12 })),
 }));
 
-vi.mock("../../services/geo/adminDivisionAvailability", () => ({
+vi.mock("../../services/geo/overpass/adminDivisionAvailability", () => ({
   adminBoundaryLevelsForSession: vi.fn(() => [4]),
 }));
 
-vi.mock("../../services/geo/adminDivisionBoundaries", () => ({
+vi.mock("../../services/geo/overpass/adminDivisionBoundaries", () => ({
   fetchAdminDivisionFeaturesInArea: vi.fn(async () => [
     {
       id: "division-1",

@@ -23,11 +23,11 @@ import {
 } from "../../../domain/session/catalog/sessionCatalogAvailability";
 import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "../../../domain/session/rules";
-import { isAdminDivisionCategoryAvailable } from "../../../services/geo/adminDivisionAvailability";
+import { isAdminDivisionCategoryAvailable } from "../../../services/geo/overpass/adminDivisionAvailability";
 import type {
   MatchingFeature,
   MatchingFetchOptions,
-} from "../../../services/geo/matchingFeatures";
+} from "../../../services/geo/matching";
 import { inferTransitMetroId } from "../../../services/transit/transitCatalog";
 import { usePreloadStore } from "../../../state/preloadStore";
 

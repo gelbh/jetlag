@@ -8,7 +8,7 @@ import {
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { fetchElevations } from "./index";
-import type { CachedSeaLevelSampling } from "../geographicFeatureCache";
+import type { CachedSeaLevelSampling } from "../cache";
 import { ensureSeaLevelSamplingComplete } from "./seaLevelProgressive";
 
 export interface SeaLevelContext {

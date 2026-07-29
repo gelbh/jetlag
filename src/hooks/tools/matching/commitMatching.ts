@@ -20,7 +20,7 @@ import type { SessionCustomCategory } from "../../../domain/session/catalog/sess
 import { yesNoAnswerOptions } from "../../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 import { serializeMatchingFeatures } from "../../../domain/geo/matchingAdapters";
-import type { MatchingFeature } from "../../../services/geo/matchingFeatures";
+import type { MatchingFeature } from "../../../services/geo/matching";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { emitQuestionAnsweredActivity } from "../../../services/session/emitSessionActivity";
 

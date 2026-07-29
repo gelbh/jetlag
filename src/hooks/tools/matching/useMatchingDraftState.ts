@@ -4,7 +4,7 @@ import type {
   MatchingAnswer,
   MatchingCategoryId,
 } from "../../../domain/questions";
-import type { MatchingFeature } from "../../../services/geo/matchingFeatures";
+import type { MatchingFeature } from "../../../services/geo/matching";
 
 export function useMatchingDraftState() {
   const [matchingSeekerPoint, setMatchingSeekerPoint] =

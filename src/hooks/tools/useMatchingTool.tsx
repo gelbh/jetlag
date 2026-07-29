@@ -12,7 +12,7 @@ import {
   usedMatchingCategoryIds,
   type MatchingCategoryId,
 } from "../../domain/questions";
-import { isAdminDivisionCategoryAvailable } from "../../services/geo/adminDivisionAvailability";
+import { isAdminDivisionCategoryAvailable } from "../../services/geo/overpass/adminDivisionAvailability";
 import { useToolSession } from "./framework/useToolSession";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import {

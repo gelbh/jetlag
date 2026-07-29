@@ -4,7 +4,7 @@ import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import {
   computeApproximateAreaSqMi,
   placeCategoryLabel,
-} from "../geocodingRank";
+} from "../geocoding/geocodingRank";
 
 export interface GeocodedPlace {
   id: string;

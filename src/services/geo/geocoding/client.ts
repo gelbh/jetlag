@@ -4,7 +4,7 @@ import {
   placeBoundsFingerprint,
   rankGeocodedPlaceCandidates,
   type RankedGeocodedPlaceCandidate,
-} from "../geocodingRank";
+} from "../geocoding/geocodingRank";
 import { geographicCacheKey, getOrFetchCached } from "../cache";
 import { FetchTimeoutError, fetchWithTimeout } from "../../core/network/fetchWithTimeout";
 import { retryAsync } from "../../core/network/retryAsync";

@@ -23,7 +23,7 @@ import type { RegionPackId } from "../../../domain/regions/regionPack";
 import {
   getOrFetchCached,
   tentaclePoisCacheKey,
-} from "../geographicFeatureCache";
+} from "../cache";
 
 type OverpassElement = {
   id: number;

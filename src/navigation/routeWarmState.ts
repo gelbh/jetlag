@@ -1,5 +1,5 @@
 import { isAuthBootstrapReady, isFirebaseConfigured } from "../services/core/firebase/firebase";
-import { isPlayAreaReadySync } from "../services/geo/resolveSessionMatchingAreas";
+import { isPlayAreaReadySync } from "../services/geo/matching/resolveSessionMatchingAreas";
 import { usePremiumEntitlementsStore } from "../state/premiumEntitlementsStore";
 import { useSessionStore } from "../state/sessionStore";
 import { isLazyRoute, normalizeRoutePath } from "./routeMetadata";

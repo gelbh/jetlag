@@ -10,7 +10,7 @@ import {
   coastlineSegmentsCacheKey,
   getOrFetchCached,
   readCachedMemoryEntry,
-} from "../geographicFeatureCache";
+} from "../cache";
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import {
   formatOverpassBboxFromGameArea,

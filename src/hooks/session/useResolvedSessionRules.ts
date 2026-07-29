@@ -14,7 +14,7 @@ import {
   playAreaCacheKey,
   resolveSessionMatchingAreas,
   resolveSessionPlayArea,
-} from "../../services/geo/resolveSessionMatchingAreas";
+} from "../../services/geo/matching/resolveSessionMatchingAreas";
 
 function sessionHasBundledMatchingLevels(
   session: SessionRecord | null | undefined,

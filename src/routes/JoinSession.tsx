@@ -38,7 +38,7 @@ import {
 } from "../services/core/analytics/analytics";
 import { setPremiumApiContext } from "../services/core/auth/premiumApiContext";
 import { preloadCriticalGameAreaCaches } from "../services/session/gameAreaPreload";
-import { resolveSessionMatchingAreas } from "../services/geo/resolveSessionMatchingAreas";
+import { resolveSessionMatchingAreas } from "../services/geo/matching/resolveSessionMatchingAreas";
 import {
   getCachedJoinPreview,
   JOIN_PREVIEW_DEBOUNCE_MS,

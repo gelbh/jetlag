@@ -14,7 +14,7 @@ import {
   pickMatchingFeatureForAnchor,
   type MatchingFeature,
   type MatchingFetchOptions,
-} from "../../../services/geo/matchingFeatures";
+} from "../../../services/geo/matching";
 
 export interface ResolveMatchingAnchorResult {
   features: MatchingFeature[];

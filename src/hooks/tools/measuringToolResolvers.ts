@@ -13,22 +13,22 @@ import {
   type MeasuringLocationCategory,
   type MeasuringSubject,
 } from "../../domain/questions";
-import { loadCoastlineContext } from "../../services/geo/coastline";
+import { loadCoastlineContext } from "../../services/geo/overpass/coastline";
 import {
   findNearestMeasuringPlace,
   measuringPlaceNotFoundMessage,
   MEASURING_MAP_SNAP_RADIUS_METERS,
-} from "../../services/geo/measuringPlaces";
+} from "../../services/geo/overpass/measuringPlaces";
 import {
   loadMeasuringLinearContext,
   measuringLinearNotFoundMessage,
-} from "../../services/geo/measuringLinearFeatures";
-import { loadCustomMeasureGeometryContext } from "../../services/geo/customMeasureGeometryFeatures";
+} from "../../services/geo/overpass/measuringLinearFeatures";
+import { loadCustomMeasureGeometryContext } from "../../services/geo/overpass/customMeasureGeometryFeatures";
 import { isCustomMeasureGeometryId } from "../../domain/session/catalog/customMeasureGeometry";
 import type { SessionCustomMeasureGeometry } from "../../domain/session/catalog/customMeasureGeometry";
 import type { CustomMatchingAreasByLevel } from "../../domain/session/catalog/sessionCustomContent";
 import type { RegionPackId } from "../../domain/regions/regionPack";
-import { loadSeaLevelContext } from "../../services/geo/seaLevel";
+import { loadSeaLevelContext } from "../../services/geo/elevation/seaLevel";
 
 const SEA_LEVEL_LOWEST_MESSAGE =
   'You\'re at the lowest elevation in this play area. A "closer" answer may be impossible.';

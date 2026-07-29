@@ -20,7 +20,7 @@ import type { RegionPackId } from "../../../domain/regions/regionPack";
 import {
   getOrFetchCached,
   linearSegmentsCacheKey,
-} from "../geographicFeatureCache";
+} from "../cache";
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import {
   adminLevelForMeasuringBorderKind,

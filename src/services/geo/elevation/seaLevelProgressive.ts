@@ -11,7 +11,7 @@ import {
   readSeaLevelSamplingCacheAsync,
   writeSeaLevelSamplingCache,
   type CachedSeaLevelSampling,
-} from "../geographicFeatureCache";
+} from "../cache";
 import { gameAreaPreloadKey } from "../../session/gameAreaPreload";
 
 const SAMPLING_BATCH_SIZE = 50;

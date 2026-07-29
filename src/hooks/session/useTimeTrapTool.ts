@@ -11,7 +11,7 @@ import {
   searchStations,
   type TransitStation,
 } from "../../domain/session/hiding/hidingZone";
-import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matchingFeatures";
+import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matching";
 import { writeTimeTrap } from "../../services/firestore/firestoreSessionExtras";
 
 interface UseTimeTrapToolParams {

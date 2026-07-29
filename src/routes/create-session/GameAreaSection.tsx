@@ -9,7 +9,7 @@ import type { BundledPresetSelectGroup } from "../../domain/regions/bundledPrese
 import type { GamePreset } from "../../domain/session/presets/gamePreset";
 import type { useGameAreaFraming } from "../../hooks/session/useGameAreaFraming";
 import type { GeocodedPlace } from "../../services/geo/geocoding";
-import { formatPlaceSearchSubtitle } from "../../services/geo/geocodingRank";
+import { formatPlaceSearchSubtitle } from "../../services/geo/geocoding/geocodingRank";
 import type { TransitMetro } from "../../domain/map/transit";
 
 type GameAreaFraming = ReturnType<typeof useGameAreaFraming>;

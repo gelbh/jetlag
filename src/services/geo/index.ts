@@ -1,10 +1,8 @@
 /**
  * Geo services package barrel.
  *
- * Prefer deep imports from package folders in new code:
+ * Prefer deep imports from package folders:
  *   ./overpass, ./elevation, ./geocoding, ./matching, ./cache, ./shared
- *
- * Legacy flat paths (./coastline, ./matchingFeatures, …) remain as re-export shims.
  */
 
 export type { GeoCacheLayer } from "./shared/cacheInterface";

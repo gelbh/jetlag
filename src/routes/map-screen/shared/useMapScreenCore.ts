@@ -27,7 +27,7 @@ import {
   preloadGameAreaCachesAsync,
   gameAreaPreloadKey,
 } from "../../../services/session/gameAreaPreload";
-import { startSeaLevelBackgroundSampling } from "../../../services/geo/seaLevelProgressive";
+import { startSeaLevelBackgroundSampling } from "../../../services/geo/elevation/seaLevelProgressive";
 import {
   useAnnotationStore,
   useMapStore,

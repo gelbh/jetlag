@@ -6,7 +6,7 @@ import {
   buildMeasuringEliminationPreview,
 } from "../../../domain/geometry/measuring/measuringRegions";
 import { previewGeometryFingerprint } from "../../../domain/geometry/measuring/previewGeometryFingerprint";
-import { getCachedPreparedCoastlineSegments } from "../../../services/geo/coastline";
+import { getCachedPreparedCoastlineSegments } from "../../../services/geo/overpass/coastline";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 
 export function useMeasuringPreviews(

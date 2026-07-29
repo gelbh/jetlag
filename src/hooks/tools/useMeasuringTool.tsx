@@ -6,7 +6,7 @@ import {
   measuringFromKindUseCountFromPending,
 } from "../../domain/questions";
 import { questionCostBreakdown } from "../../domain/questions";
-import { adminBorderKindAvailability } from "../../services/geo/adminDivisionAvailability";
+import { adminBorderKindAvailability } from "../../services/geo/overpass/adminDivisionAvailability";
 import { firstUnusedCatalogOption } from "../../domain/session/tools/toolSessionOptions";
 import type { MeasuringFromKind } from "../../domain/questions";
 import { useToolSession } from "./framework/useToolSession";
