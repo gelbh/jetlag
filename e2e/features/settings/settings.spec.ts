@@ -8,8 +8,9 @@ test.describe("settings", () => {
     await openSettings(page);
 
     const settingsPanel = page.getByRole("tabpanel");
-    // Low power lives on Session (map essentials split); disable so Satellite unlocks.
+    // Low power lives under Session → Device & alerts (map essentials split).
     await page.getByRole("tab", { name: "Session" }).click();
+    await settingsPanel.getByRole("button", { name: "Device & alerts" }).click();
     const lowPowerToggle = settingsPanel.getByLabel("Low power mode");
     await expect(lowPowerToggle).toBeChecked();
     await lowPowerToggle.click();
