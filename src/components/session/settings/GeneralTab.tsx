@@ -1,4 +1,4 @@
-import { TransitControls } from "../../map/TransitControls";
+import { TransitControls } from "../../map/chrome/TransitControls";
 import type { TransitRouteFilter } from "../../../domain/map/transit";
 import type { DistanceUnit } from "../../../domain/map/distance";
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";

@@ -1,5 +1,5 @@
 import type { ReactNode, Ref } from "react";
-import { DesktopOpsShell } from "../../../components/map/DesktopOpsShell";
+import { DesktopOpsShell } from "../../../components/map/chrome/DesktopOpsShell";
 import { useMapLandscapeChrome } from "../../../components/session/mapChrome/MapLandscapeChromeContext";
 import {
   mapLandscapeChromeHeaderCollapseClass,

@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { CircleMarker } from "react-leaflet";
-import { MapView } from "../../map/MapView";
-import { GameAreaMask } from "../../map/GameAreaMask";
-import { CombinedEliminationLayer } from "../../map/CombinedEliminationLayer";
-import { MapDraftLayer } from "../../map/MapDraftLayer";
+import { MapView } from "../../map/chrome/MapView";
+import { GameAreaMask } from "../../map/layers/GameAreaMask";
+import { CombinedEliminationLayer } from "../../map/layers/CombinedEliminationLayer";
+import { MapDraftLayer } from "../../map/layers/MapDraftLayer";
 import { useTutorialMapViewport } from "../../../hooks/tutorial/TutorialMapViewportContext";
 import { useTutorialInteractiveMapDraft } from "../../../hooks/tutorial/TutorialInteractiveMapDraftContext";
 import { usePlacementMapFocus } from "../../../hooks/map-screen/usePlacementMapFocus";
