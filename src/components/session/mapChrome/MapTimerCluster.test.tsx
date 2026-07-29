@@ -51,7 +51,7 @@ describe("MapTimerCluster thermometer cancel", () => {
     expect(onCancel).toHaveBeenCalledWith("pq-walk");
   });
 
-  it("shows STUCK? for host when the walk is stale", () => {
+  it("shows Stale GPS for host when the walk is stale", () => {
     render(
       <MapTimerCluster
         sessionRules={{ gameSize: "medium" }}
@@ -68,7 +68,7 @@ describe("MapTimerCluster thermometer cancel", () => {
       />,
     );
 
-    expect(screen.getByText("STUCK?")).toBeTruthy();
+    expect(screen.getByText("Stale GPS")).toBeTruthy();
   });
 
   it("shows Cancel for the walk creator even when not host", () => {
@@ -113,7 +113,7 @@ describe("MapTimerCluster thermometer cancel", () => {
 });
 
 describe("MapTimerCluster dual stack", () => {
-  it("stacks SESSION secondary under hiding countdown", () => {
+  it("stacks Elapsed secondary under hiding countdown", () => {
     const { container } = render(
       <MapTimerCluster
         sessionRules={{ gameSize: "medium", hidingPeriodMinutes: 90 }}
@@ -126,7 +126,7 @@ describe("MapTimerCluster dual stack", () => {
       />,
     );
 
-    expect(screen.getByText("SESSION")).toBeTruthy();
+    expect(screen.getByText("Elapsed")).toBeTruthy();
     expect(
       screen.getByRole("button", { name: /Session elapsed/i }),
     ).toBeTruthy();
@@ -138,7 +138,7 @@ describe("MapTimerCluster dual stack", () => {
     expect(children[1]?.classList.contains("jl-ticker-secondary")).toBe(true);
   });
 
-  it("shows SEEK primary without SESSION when hiding is over", () => {
+  it("shows SEEK primary without Elapsed when hiding is over", () => {
     render(
       <MapTimerCluster
         sessionRules={{ gameSize: "medium", hidingPeriodMinutes: 1 }}
@@ -155,7 +155,7 @@ describe("MapTimerCluster dual stack", () => {
     );
 
     expect(screen.getByText("SEEK")).toBeTruthy();
-    expect(screen.queryByText("SESSION")).toBeNull();
+    expect(screen.queryByText("Elapsed")).toBeNull();
   });
 
   it("renders Cancel outside the timer cluster row", () => {

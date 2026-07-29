@@ -66,7 +66,7 @@ describe("ToolStatusBlock", () => {
     expect(home.closest(".jl-status-header-brand")).toBeTruthy();
   });
 
-  it("shows OPERATION session code and PHASE dash before start", () => {
+  it("shows CODE session code and PHASE dash before start", () => {
     render(
       <ToolStatusBlock
         sessionCode="WXYZ"
@@ -85,7 +85,7 @@ describe("ToolStatusBlock", () => {
       />,
     );
 
-    expect(screen.getByText("OPERATION")).toBeInTheDocument();
+    expect(screen.getByText("CODE")).toBeInTheDocument();
     expect(screen.getByText("WXYZ")).toBeInTheDocument();
     expect(screen.getByText("WXYZ").closest(".jl-stamp-code")).toBeTruthy();
     expect(screen.getByText("PHASE")).toBeInTheDocument();
@@ -161,7 +161,7 @@ describe("ToolStatusBlock", () => {
 
     const phase = screen.getByText("HIDE");
     expect(phase.classList.contains("jl-status-header-value--action")).toBe(true);
-    expect(screen.getByText("OPERATION")).toBeInTheDocument();
+    expect(screen.getByText("CODE")).toBeInTheDocument();
     expect(screen.getByText("WXYZ").closest(".jl-stamp-code")).toBeTruthy();
   });
 });

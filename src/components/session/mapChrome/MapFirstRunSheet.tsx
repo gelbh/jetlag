@@ -40,7 +40,7 @@ export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
 
         <ul className="space-y-2 text-sm text-ink-secondary">
           <li>
-            <span className="font-medium text-ink">Match, Measure, Thermo, Radar, Tent.</span>{" "}
+            <span className="font-medium text-ink">Match, Measure, Thermo, Radar, Tent</span>{" "}
             The five game questions, always on the dock.
           </li>
           <li>
@@ -48,7 +48,7 @@ export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
             markup tools.
           </li>
           <li>
-            <span className="font-medium text-ink">Setup.</span> Layers,
+            <span className="font-medium text-ink">Settings.</span> Layers,
             timer, and session options.
           </li>
         </ul>

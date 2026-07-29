@@ -198,7 +198,7 @@ export function ToolOverflowSheet({
 
         <ToolOverflowRow
           icon={<HudSettingsIcon className="h-5 w-5" />}
-          title="Setup"
+          title="Settings"
           hint="Session settings and layers"
           onClick={() => closeAnd(onOpenSettings)}
           ariaLabel="Open settings"

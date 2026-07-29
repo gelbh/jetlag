@@ -9,7 +9,7 @@ import {
 import { useContextualRailPanel } from "../helpers/useContextualRailPanel";
 
 const TAB_META: Record<ContextualRailTab, { label: string; short: string }> = {
-  settings: { label: "Settings", short: "Set" },
+  settings: { label: "Settings", short: "Settings" },
   chat: { label: "Chat", short: "Chat" },
   log: { label: "Log", short: "Log" },
 };

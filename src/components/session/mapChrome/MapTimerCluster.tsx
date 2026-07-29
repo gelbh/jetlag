@@ -124,7 +124,7 @@ export function MapTimerCluster({
         staleWalkNowMs,
       );
     const countdownLabel = showStuckCue
-      ? "STUCK?"
+      ? "Stale GPS"
       : questionTimer.countdownLabel;
 
     return (
@@ -187,7 +187,7 @@ export function MapTimerCluster({
           aria-expanded={timerMenuOpen}
           aria-haspopup="menu"
         >
-          <span className="jl-ticker-phase">SESSION</span>
+          <span className="jl-ticker-phase">Elapsed</span>
           <span className="jl-ticker-value tabular-nums">
             {formatSessionElapsedDuringHiding(timerState)}
           </span>
