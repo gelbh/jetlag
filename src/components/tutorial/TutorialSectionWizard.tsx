@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState } from "react";
 import { AppLink } from "../navigation/AppLink";
 import { HudToolIcon } from "../map/ToolIcons";
-import { ToolStepper } from "../tools/shared/ToolStepper";
-import { WizardSwipeSurface } from "../tools/shared/WizardSwipeSurface";
-import { buildSteps, deriveStepStates } from "../tools/shared/toolStepUtils";
+import { ToolStepper } from "../tools/shared/wizard/ToolStepper";
+import { WizardSwipeSurface } from "../tools/shared/wizard/WizardSwipeSurface";
+import { buildSteps, deriveStepStates } from "../tools/shared/wizard/toolStepUtils";
 import type { TutorialStep } from "../../domain/tutorial/tutorialSections";
 import {
   getTutorialSection,

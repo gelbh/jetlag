@@ -1,4 +1,4 @@
-import type { ToolStepDefinition } from "../tools/shared/toolStepUtils";
+import type { ToolStepDefinition } from "../tools/shared/wizard/toolStepUtils";
 
 export const HIDING_ZONE_STEPS = [
   { id: "method", label: "Method" },

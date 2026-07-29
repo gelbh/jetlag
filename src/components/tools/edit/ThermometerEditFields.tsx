@@ -13,12 +13,12 @@ import {
   type ThermometerAnswer,
   type ThermometerDistanceOptionMiles,
 } from "../../../domain/questions";
-import { BinaryAnswerPicker } from "../shared/BinaryAnswerPicker";
-import { hotterColderAnswerOptions } from "../shared/binaryAnswerOptions";
-import { OptionChip, OptionChipRow } from "../shared/OptionChip";
-import { QuestionPromptBlock } from "../shared/QuestionPromptBlock";
-import { ResolvedReadout } from "../shared/ResolvedReadout";
-import { ToolSection } from "../shared/ToolSection";
+import { BinaryAnswerPicker } from "../shared/answers/BinaryAnswerPicker";
+import { hotterColderAnswerOptions } from "../shared/answers/binaryAnswerOptions";
+import { OptionChip, OptionChipRow } from "../shared/controls/OptionChip";
+import { QuestionPromptBlock } from "../shared/controls/QuestionPromptBlock";
+import { ResolvedReadout } from "../shared/readout/ResolvedReadout";
+import { ToolSection } from "../shared/panels/ToolSection";
 import type { EditSavePayload } from "./types";
 
 export type ThermometerAnnotation = AnnotationRecord & { type: "thermometer" };

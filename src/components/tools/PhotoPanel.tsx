@@ -5,11 +5,11 @@ import {
   type PhotoCategoryId,
 } from "../../domain/questions";
 import type { GameSize } from "../../domain/session/size/gameSize";
-import { CatalogExhaustedMessage } from "./shared/CatalogExhaustedMessage";
-import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
-import { SendToHidersButton } from "./shared/SendToHidersButton";
-import { ToolPanelShell } from "./shared/ToolPanelShell";
-import { ToolSection } from "./shared/ToolSection";
+import { CatalogExhaustedMessage } from "./shared/readout/CatalogExhaustedMessage";
+import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
+import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
+import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
+import { ToolSection } from "./shared/panels/ToolSection";
 
 interface PhotoPanelProps {
   gameSize: GameSize;

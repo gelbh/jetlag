@@ -11,9 +11,9 @@ import {
   tentacleQuestionPrompt,
   type TentacleExtendedCategoryId,
 } from "../../../domain/questions";
-import { QuestionPromptBlock } from "../shared/QuestionPromptBlock";
-import { TentacleAnswerPicker } from "../shared/TentacleAnswerPicker";
-import { ToolSection } from "../shared/ToolSection";
+import { QuestionPromptBlock } from "../shared/controls/QuestionPromptBlock";
+import { TentacleAnswerPicker } from "../shared/answers/TentacleAnswerPicker";
+import { ToolSection } from "../shared/panels/ToolSection";
 import type { EditSavePayload } from "./types";
 
 export type TentacleAnnotation = AnnotationRecord & { type: "tentacle" };

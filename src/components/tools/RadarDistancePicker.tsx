@@ -14,10 +14,10 @@ import {
   type DistanceUnit,
 } from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/size/gameSize";
-import { CatalogExhaustedMessage } from "./shared/CatalogExhaustedMessage";
-import { OptionChip, OptionChipRow } from "./shared/OptionChip";
-import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
-import { ToolSection } from "./shared/ToolSection";
+import { CatalogExhaustedMessage } from "./shared/readout/CatalogExhaustedMessage";
+import { OptionChip, OptionChipRow } from "./shared/controls/OptionChip";
+import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
+import { ToolSection } from "./shared/panels/ToolSection";
 
 interface RadarDistancePickerProps {
   radiusMeters: number;

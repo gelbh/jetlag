@@ -1,6 +1,6 @@
 import { startTransition } from "react";
 import { MeasuringPanel } from "../../../components/tools/MeasuringPanel";
-import { QuestionPreviewSheet } from "../../../components/tools/shared/QuestionPreviewSheet";
+import { QuestionPreviewSheet } from "../../../components/tools/shared/controls/QuestionPreviewSheet";
 import {
   measuringFromKind,
   measuringQuestionFor,

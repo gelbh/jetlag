@@ -4,7 +4,7 @@ import {
   isLocalThermometerWalkId,
   thermometerQuestionPrompt,
 } from "../../../domain/questions";
-import { hotterColderAnswerOptions } from "../../../components/tools/shared/binaryAnswerOptions";
+import { hotterColderAnswerOptions } from "../../../components/tools/shared/answers/binaryAnswerOptions";
 import { emitThermometerWalkSeparatedActivity } from "../../../services/session/emitSessionActivity";
 import type { ThermometerSessionConfig } from "./types";
 

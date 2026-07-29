@@ -3,7 +3,7 @@ import type { GameArea } from "../../domain/map/annotations";
 import { baseQuestionCostForTool } from "../../domain/map/mapTools";
 import { questionCostBreakdown } from "../../domain/questions";
 import type { QuestionTutorialId } from "../../domain/tutorial/tutorialQuestions";
-import type { ToolPanelSandboxMode } from "../../components/tools/shared/toolPanelSandbox";
+import type { ToolPanelSandboxMode } from "../../components/tools/shared/panels/toolPanelSandbox";
 import {
   useTutorialInteractiveSession,
   type TutorialInteractiveSessionValue,

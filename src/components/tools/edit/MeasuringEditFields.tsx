@@ -4,10 +4,10 @@ import {
   measuringQuestionFor,
   type MeasuringAnswer,
 } from "../../../domain/questions";
-import { BinaryAnswerPicker } from "../shared/BinaryAnswerPicker";
-import { closerFurtherAnswerOptions } from "../shared/binaryAnswerOptions";
-import { QuestionPromptBlock } from "../shared/QuestionPromptBlock";
-import { ToolSection } from "../shared/ToolSection";
+import { BinaryAnswerPicker } from "../shared/answers/BinaryAnswerPicker";
+import { closerFurtherAnswerOptions } from "../shared/answers/binaryAnswerOptions";
+import { QuestionPromptBlock } from "../shared/controls/QuestionPromptBlock";
+import { ToolSection } from "../shared/panels/ToolSection";
 import type { EditSavePayload } from "./types";
 
 export type MeasuringAnnotation = AnnotationRecord & { type: "measuring" };

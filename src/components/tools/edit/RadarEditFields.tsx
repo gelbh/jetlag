@@ -16,9 +16,9 @@ import {
 } from "../../../domain/questions";
 import type { GameSize } from "../../../domain/session/size/gameSize";
 import { RadarDistancePicker } from "../RadarDistancePicker";
-import { BinaryAnswerPicker } from "../shared/BinaryAnswerPicker";
-import { yesNoAnswerOptions } from "../shared/binaryAnswerOptions";
-import { ToolSection } from "../shared/ToolSection";
+import { BinaryAnswerPicker } from "../shared/answers/BinaryAnswerPicker";
+import { yesNoAnswerOptions } from "../shared/answers/binaryAnswerOptions";
+import { ToolSection } from "../shared/panels/ToolSection";
 import type { EditSavePayload } from "./types";
 
 export type RadarAnnotation = AnnotationRecord & { type: "radar" };

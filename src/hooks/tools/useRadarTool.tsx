@@ -20,7 +20,7 @@ import {
 } from "../../domain/questions";
 import { questionCostBreakdown } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
-import { yesNoAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
+import { yesNoAnswerOptions } from "../../components/tools/shared/answers/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import { useSubmitLock } from "../forms/useSubmitLock";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";

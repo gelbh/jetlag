@@ -11,7 +11,7 @@ import {
 } from "../../domain/questions";
 import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
-import { EditSheetFrame } from "./shared/EditSheetFrame";
+import { EditSheetFrame } from "./shared/panels/EditSheetFrame";
 import { annotationEditFields } from "./edit/annotationEditFields";
 import type { EditSavePayload } from "./edit/types";
 
