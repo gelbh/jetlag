@@ -7,7 +7,7 @@ import { HidingZonesLayer } from "../components/map/HidingZonesLayer";
 import { HidingZoneStationsLayer } from "../components/map/HidingZoneStationsLayer";
 import { LiveHiderLocationsLayer } from "../components/map/LiveHiderLocationsLayer";
 import { LiveSeekerLocationsLayer } from "../components/map/LiveSeekerLocationsLayer";
-import { MapView } from "../components/map/MapView";
+import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
 import {
   MapViewportTracker,
   type MapViewportState,
@@ -75,6 +75,7 @@ import { useSessionAnnotations } from "../hooks/map/useSessionAnnotations";
 import { useAnnotations } from "../hooks/map/useAnnotations";
 import { useMapSessionChrome } from "../hooks/map-screen/useMapSessionChrome";
 import { isTerminalSessionSyncMessage } from "../domain/device/sync/terminalSessionMessage";
+import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
 import { useMapStore, useSessionStore } from "../state/sessionStore";
 import { useAnnotationStore } from "../state/annotationStore";
 
@@ -536,7 +537,6 @@ export function HiderMapScreen() {
   );
 
   const isDesktop = useDesktopLayout();
-  const mapControlInset = isDesktop ? "safe-area" : "dock";
 
   if (!session || !gameArea) {
     return <AppNavigate to="/" replace />;
@@ -553,14 +553,13 @@ export function HiderMapScreen() {
 
   const mapLayers = (
       <div className="absolute inset-0">
-        <MapView
+        <MapViewWithLandscapeInset
+          isDesktop={isDesktop}
           key={session.id}
           mapKey={session.id}
           mapStyle={effectiveBasemapStyle}
           streetBasemap={streetBasemap}
           onMapStyleChange={handleMapStyleChange}
-          mapStyleControlInset={mapControlInset}
-          zoomControlInset={mapControlInset}
           center={center}
           zoom={12}
           focusBounds={mapFocusBounds}
@@ -639,7 +638,7 @@ export function HiderMapScreen() {
             />
           ) : null}
           <LiveUserLocationLayer enabled={showCurrentLocation} lowPowerMode={lowPowerMode} />
-        </MapView>
+        </MapViewWithLandscapeInset>
       </div>
   );
 
@@ -653,6 +652,15 @@ export function HiderMapScreen() {
   );
 
   return (
+    <MapLandscapeChromeShell
+      sessionRules={session}
+      timerState={timer.timerState}
+      timerHasStarted={timer.hasStarted}
+      pendingQuestions={pendingQuestions}
+      syncStatus={syncStatus.status}
+      queuedWrites={syncStatus.queuedWrites}
+      syncMessage={syncMessage}
+    >
     <div className="map-screen-shell">
       {inactiveChrome ? (
         <div
@@ -828,5 +836,6 @@ export function HiderMapScreen() {
         }}
       />
     </div>
+    </MapLandscapeChromeShell>
   );
 }

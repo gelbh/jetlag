@@ -98,7 +98,12 @@ export async function openMapWithLocalSession(
   await prepareE2EPage(page, network);
   await seedLocalSession(page, seedOptions);
   await page.goto("/map");
-  await page.getByRole("button", { name: "Radar" }).waitFor();
+  // Portrait: Radar is in the dock. Landscape map-dominant: dock is collapsed,
+  // so wait for the chrome chip instead.
+  await Promise.race([
+    page.getByRole("button", { name: "Radar" }).waitFor(),
+    page.getByRole("button", { name: /Show map controls/i }).waitFor(),
+  ]);
   await dismissMapOnboarding(page);
 }
 

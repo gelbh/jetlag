@@ -146,7 +146,7 @@ export function ObserverMapScreenChrome({
   );
 
   const mobileToolbar = (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-dock)] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+    <div className="jl-map-mobile-toolbar pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-dock)] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <div className="pointer-events-auto mx-auto flex max-w-xl flex-col gap-2">
         <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
           {logChatActions}

@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { MapLandscapeChromeProvider } from "../../../components/session/mapChrome/MapLandscapeChromeContext";
 import { MapScreenChromeSlots } from "./MapScreenChromeSlots";
 
 vi.mock("../../../hooks/useDesktopLayout", () => ({
@@ -24,9 +25,23 @@ vi.mock("../../../components/map/DesktopOpsShell", () => ({
   ),
 }));
 
+function renderWithLandscapeProvider(ui: React.ReactElement) {
+  return render(
+    <MapLandscapeChromeProvider
+      sessionRules={{ gameSize: "medium" }}
+      timerState={{ runningSince: null, accumulatedMs: 0 }}
+      timerHasStarted={false}
+      syncStatus="synced"
+      queuedWrites={0}
+    >
+      {ui}
+    </MapLandscapeChromeProvider>,
+  );
+}
+
 describe("MapScreenChromeSlots", () => {
   it("renders header and toolbar in the mobile HUD shell", () => {
-    render(
+    renderWithLandscapeProvider(
       <MapScreenChromeSlots
         header={<div>Header slot</div>}
         toolbar={<div>Toolbar slot</div>}
@@ -41,8 +56,8 @@ describe("MapScreenChromeSlots", () => {
     expect(document.querySelector(".map-chrome-hud")).not.toBeNull();
   });
 
-  it("passes fragments without the HUD wrapper when layout is fragments", () => {
-    render(
+  it("passes fragments inside a HUD wrapper for landscape collapse hooks", () => {
+    renderWithLandscapeProvider(
       <MapScreenChromeSlots
         layout="fragments"
         header={<div>Fragment header</div>}
@@ -52,6 +67,6 @@ describe("MapScreenChromeSlots", () => {
 
     expect(screen.getByText("Fragment header")).toBeInTheDocument();
     expect(screen.getByText("Fragment toolbar")).toBeInTheDocument();
-    expect(document.querySelector(".map-chrome-hud")).toBeNull();
+    expect(document.querySelector(".map-chrome-hud--fragments")).not.toBeNull();
   });
 });
