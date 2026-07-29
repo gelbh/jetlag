@@ -18,7 +18,7 @@ import { queryOverpass, OverpassPayloadTooLargeError } from "../../core/overpass
 import {
   getOrFetchCached,
   landmassCacheKey,
-} from "../geographicFeatureCache";
+} from "../cache";
 import {
   classifyAdminDivisionAtPoint,
   type AdminDivisionFeature,

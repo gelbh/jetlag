@@ -16,7 +16,7 @@ import {
 import { resolveMatchingCategory } from "../../../domain/session/catalog/sessionCustomCatalog";
 import type { SessionCustomCategory } from "../../../domain/session/catalog/sessionCustomContent";
 import { customMatchingAreasCacheSuffix } from "./matchingAreaGeoJson";
-import { geographicCacheKey } from "../geographicFeatureCache";
+import { geographicCacheKey } from "../cache";
 import {
   buildNodeWayRelationBboxQuery,
   formatOverpassBbox,

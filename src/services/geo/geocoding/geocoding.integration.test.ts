@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clearGeographicFeatureCacheForTests } from "../geographicFeatureCache";
+import { clearGeographicFeatureCacheForTests } from "../cache";
 import { searchPlaces } from "./index";
 
 describe("geocoding integration", () => {

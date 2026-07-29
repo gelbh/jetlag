@@ -14,13 +14,13 @@ import {
 } from "../../../domain/questions";
 import type { SessionRulesInput } from "../../../domain/session/rules";
 import { manualPinAsMeasuringPlace } from "../../../domain/session/catalog/sessionCustomCatalog";
-import { measuringLinearNotFoundMessage } from "../../../services/geo/measuringLinearFeatures";
+import { measuringLinearNotFoundMessage } from "../../../services/geo/overpass/measuringLinearFeatures";
 import { overpassErrorMessage } from "../../../services/core/overpass/overpassClient";
 import {
   fetchMeasuringPlacesInArea,
   measuringPlaceNotFoundMessage,
-} from "../../../services/geo/measuringPlaces";
-import { resolveCoastlineContextFromCache } from "../../../services/geo/coastline";
+} from "../../../services/geo/overpass/measuringPlaces";
+import { resolveCoastlineContextFromCache } from "../../../services/geo/overpass/coastline";
 import { useDebouncedValue } from "../../useDebouncedValue";
 import {
   fetchMeasuringCoastlineContext,

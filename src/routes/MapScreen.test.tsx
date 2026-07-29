@@ -75,9 +75,9 @@ vi.mock("../hooks/sync/useLiveActivitySync", () => ({
   useLiveActivitySync: () => undefined,
 }));
 
-vi.mock("../services/geo/resolveSessionMatchingAreas", async (importOriginal) => {
+vi.mock("../services/geo/matching/resolveSessionMatchingAreas", async (importOriginal) => {
   const actual = await importOriginal<
-    typeof import("../services/geo/resolveSessionMatchingAreas")
+    typeof import("../services/geo/matching/resolveSessionMatchingAreas")
   >();
   return {
     ...actual,
@@ -93,7 +93,7 @@ vi.mock("../services/session/gameAreaPreload", () => ({
   abortActiveGameAreaPreload: vi.fn(),
 }));
 
-vi.mock("../services/geo/seaLevelProgressive", () => ({
+vi.mock("../services/geo/elevation/seaLevelProgressive", () => ({
   startSeaLevelBackgroundSampling: vi.fn(),
 }));
 
