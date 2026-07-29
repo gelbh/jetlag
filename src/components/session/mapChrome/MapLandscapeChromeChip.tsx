@@ -2,7 +2,7 @@ import type { SyncStatus } from "../../../domain/device/sync/sync";
 import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "../../../domain/session/rules";
 import type { TimerState } from "../../../domain/session/timer/timer";
-import { SyncStatusBeacon } from "../SyncStatusDot";
+import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
 import { SYNC_TONE_CLASSES, syncRailDisplay } from "../status/syncRailDisplay";
 import { mapLandscapeChipTimerLabel } from "./mapLandscapeChipTimerLabel";
 
