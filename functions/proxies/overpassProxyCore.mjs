@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { fetchWithTimeout } from "../lib/fetchWithTimeout.mjs";
+import { FetchTimeoutError, fetchWithTimeout } from "../lib/fetchWithTimeout.mjs";
 import { createMemoryCache } from "../lib/memoryCache.mjs";
 import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "./overpassEndpoints.mjs";
 import { enqueueOverpassFetch } from "./overpassQueue.mjs";
@@ -24,7 +24,9 @@ function logCache(result, tier) {
 
 function isAbortOrTimeoutError(error) {
   return (
+    error instanceof FetchTimeoutError ||
     (error instanceof Error && error.name === "AbortError") ||
+    (error instanceof Error && error.name === "FetchTimeoutError") ||
     (typeof DOMException !== "undefined" &&
       error instanceof DOMException &&
       error.name === "AbortError")

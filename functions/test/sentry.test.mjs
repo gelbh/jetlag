@@ -1,7 +1,28 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { HttpsError } from "firebase-functions/v2/https";
-import { isExpectedFunctionsError } from "../lib/sentry.mjs";
+import {
+  isAbortErrorNoise,
+  isExpectedFunctionsError,
+} from "../lib/sentry.mjs";
+
+test("isAbortErrorNoise matches AbortError Error and DOMException", () => {
+  const named = new Error("This operation was aborted");
+  named.name = "AbortError";
+  assert.equal(isAbortErrorNoise(named), true);
+  assert.equal(
+    isAbortErrorNoise(new DOMException("Aborted", "AbortError")),
+    true,
+  );
+  assert.equal(isAbortErrorNoise(new Error("Overpass timed out.")), false);
+  assert.equal(isAbortErrorNoise(null), false);
+});
+
+test("isExpectedFunctionsError treats AbortError as expected noise", () => {
+  const named = new Error("This operation was aborted");
+  named.name = "AbortError";
+  assert.equal(isExpectedFunctionsError(named), true);
+});
 
 test("isExpectedFunctionsError matches host-only leave HttpsError", () => {
   assert.equal(
