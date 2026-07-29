@@ -1,5 +1,5 @@
 import type { GameArea, SessionTier } from "../../domain/map/annotations";
-import type { MeasuringFromKind, MeasuringLocationCategory } from "../../domain/questions";
+import type { MeasuringLocationCategory } from "../../domain/questions";
 import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
@@ -8,15 +8,10 @@ import type { RegionPackId } from "../../domain/regions/regionPack";
 import { fetchAdminDivisionFeaturesInArea } from "../geo/adminDivisionBoundaries";
 import {
   adminBoundaryLevelsForSession,
-  adminLevelForMeasuringBorderKind,
   emptyAdminDivisionCounts,
-  isMeasuringAdminBorderKind,
   probeAdminDivisionCounts,
 } from "../geo/adminDivisionAvailability";
-import { fetchPreparedCoastlineSegments } from "../geo/coastline";
-import { fetchLandmassFeaturesInArea } from "../geo/landmassFeatures";
 import { fetchMeasuringPlacesInArea } from "../geo/measuringPlaces";
-import { fetchPreparedMeasuringLinearSegments } from "../geo/measuringLinearFeatures";
 import { fetchStaticTransit } from "../transit/transitStatic";
 import { usePreloadStore } from "../../state/preloadStore";
 
@@ -35,34 +30,6 @@ const PRELOAD_MEASURING_CATEGORIES = [
   "museum",
 ] as const satisfies readonly MeasuringLocationCategory[];
 
-const PRELOAD_LINEAR_KINDS = [
-  "international_border",
-  "admin2_border",
-  "admin3_border",
-  "admin4_border",
-] as const satisfies readonly MeasuringFromKind[];
-
-// Derives which preload linear kinds are safe from the same admin-levels
-// policy used for admin preload above: an admin-border kind is only safe to
-// preload when its backing admin level is available (non-admin-border
-// kinds, i.e. `international_border`, are always kept).
-function linearKindsForGeographicPreload(
-  regionPackId: RegionPackId | undefined,
-  customMatchingAreas: CustomMatchingAreasByLevel | undefined,
-): readonly MeasuringFromKind[] {
-  const availableLevels = new Set(
-    adminBoundaryLevelsForSession(regionPackId, customMatchingAreas),
-  );
-
-  return PRELOAD_LINEAR_KINDS.filter((kind) => {
-    if (!isMeasuringAdminBorderKind(kind)) {
-      return true;
-    }
-
-    return availableLevels.has(adminLevelForMeasuringBorderKind(kind));
-  });
-}
-
 export function gameAreaPreloadKey(gameArea: GameArea): string {
   return JSON.stringify(gameArea.coordinates);
 }
@@ -74,8 +41,6 @@ function buildPreloadJobs(
   options?: { includeAdminProbe?: boolean },
 ): Array<() => Promise<unknown>> {
   const jobs: Array<() => Promise<unknown>> = [
-    () => fetchPreparedCoastlineSegments(gameArea),
-    () => fetchLandmassFeaturesInArea(gameArea),
     () => fetchStaticTransit(gameArea),
   ];
 
@@ -110,20 +75,6 @@ function buildPreloadJobs(
   for (const category of PRELOAD_MEASURING_CATEGORIES) {
     jobs.push(() =>
       fetchMeasuringPlacesInArea(gameArea, category, [], regionPackId),
-    );
-  }
-
-  for (const kind of linearKindsForGeographicPreload(
-    regionPackId,
-    customMatchingAreas,
-  )) {
-    jobs.push(() =>
-      fetchPreparedMeasuringLinearSegments(
-        gameArea,
-        kind,
-        customMatchingAreas,
-        regionPackId,
-      ),
     );
   }
 
@@ -261,10 +212,8 @@ export async function preloadCriticalGameAreaCaches(
     .getState()
     .setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);
 
-  await Promise.allSettled([
-    fetchPreparedCoastlineSegments(gameArea),
-    fetchLandmassFeaturesInArea(gameArea),
-    ...adminBoundaryLevelsForSession(regionPackId, customMatchingAreas).map(
+  await Promise.allSettled(
+    adminBoundaryLevelsForSession(regionPackId, customMatchingAreas).map(
       (adminLevel) =>
         fetchAdminDivisionFeaturesInArea(
           gameArea,
@@ -272,7 +221,7 @@ export async function preloadCriticalGameAreaCaches(
           customMatchingAreas?.[adminLevel as MatchingAdminLevel],
         ),
     ),
-  ]);
+  );
 }
 
 export function preloadJobGapMsForTests(): number {

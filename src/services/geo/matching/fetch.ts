@@ -12,6 +12,7 @@ import {
 } from "../../../domain/session/catalog/sessionCustomCatalog";
 import type { CustomMatchingAreasByLevel } from "../../../domain/session/catalog/sessionCustomContent";
 import type { SessionCustomCategory } from "../../../domain/session/catalog/sessionCustomContent";
+import type { RegionPackId } from "../../../domain/regions/regionPack";
 import {
   adminDivisionToMatchingFeature,
   matchingFeaturesToAdminDivisions,
@@ -95,8 +96,9 @@ async function fetchAdminMatchingFeaturesInArea(
 
 async function fetchLandmassMatchingFeaturesInArea(
   gameArea: GameArea,
+  regionPackId?: RegionPackId,
 ): Promise<MatchingFeature[]> {
-  const landmasses = await fetchLandmassFeaturesInArea(gameArea);
+  const landmasses = await fetchLandmassFeaturesInArea(gameArea, regionPackId);
   return landmasses.map(landmassToMatchingFeature);
 }
 
@@ -146,7 +148,10 @@ export async function fetchMatchingFeaturesInArea(
             options?.customMatchingAreas,
           );
         case "landmass":
-          return fetchLandmassMatchingFeaturesInArea(gameArea);
+          return fetchLandmassMatchingFeaturesInArea(
+            gameArea,
+            options?.regionPackId,
+          );
         case "transitLine":
           return fetchTransitLineMatchingFeaturesInArea(gameArea);
         default: {
@@ -250,7 +255,10 @@ export async function findNearestMatchingFeature(
   }
 
   if (category.resolver === "landmass") {
-    const landmasses = await fetchLandmassFeaturesInArea(gameArea);
+    const landmasses = await fetchLandmassFeaturesInArea(
+      gameArea,
+      options?.regionPackId,
+    );
     const landmass = classifyLandmassAtPoint(anchor, landmasses);
     if (!landmass) {
       return null;

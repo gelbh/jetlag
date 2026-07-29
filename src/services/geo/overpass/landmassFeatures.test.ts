@@ -1,11 +1,23 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { DUBLIN_CITY_GAME_AREA } from "../../../test/fixtures/dublinGameArea";
 import type { GameArea } from "../../../domain/map/annotations";
+import * as overpassClient from "../../core/overpassClient";
 import {
   buildLandmassQuery,
   classifyLandmassAtPoint,
   computeLandmassFeatures,
+  fetchLandmassFeaturesInArea,
   obstacleFeaturesFromElements,
 } from "./landmassFeatures";
+
+vi.mock("../../core/overpassClient", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../../core/overpassClient")>();
+  return {
+    ...actual,
+    queryOverpass: vi.fn(actual.queryOverpass),
+  };
+});
 
 const sampleGameArea: GameArea = {
   type: "Polygon",
@@ -21,6 +33,10 @@ const sampleGameArea: GameArea = {
 };
 
 describe("landmass features", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("builds a bbox landmass query that keeps way geometry", () => {
     const query = buildLandmassQuery(sampleGameArea);
 
@@ -110,5 +126,27 @@ describe("landmass features", () => {
     expect(west).not.toBeNull();
     expect(east).not.toBeNull();
     expect(west?.id).not.toBe(east?.id);
+  });
+
+  it("returns a single mainland for bundled metro packs without Overpass", async () => {
+    const landmasses = await fetchLandmassFeaturesInArea(
+      DUBLIN_CITY_GAME_AREA,
+      "dublin",
+    );
+
+    expect(overpassClient.queryOverpass).not.toHaveBeenCalled();
+    expect(landmasses).toHaveLength(1);
+    expect(landmasses[0]?.name).toBe("Mainland");
+  });
+
+  it("falls back to mainland when Overpass returns payload too large", async () => {
+    vi.mocked(overpassClient.queryOverpass).mockRejectedValue(
+      new overpassClient.OverpassPayloadTooLargeError(),
+    );
+
+    const landmasses = await fetchLandmassFeaturesInArea(sampleGameArea);
+
+    expect(landmasses).toHaveLength(1);
+    expect(landmasses[0]?.name).toBe("Mainland");
   });
 });
