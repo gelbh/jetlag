@@ -9,13 +9,13 @@ import {
 } from "react";
 import type { LatLngBoundsExpression } from "leaflet";
 import type { GameArea } from "../../domain/map/annotations";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
   defaultTutorialMapViewport,
   resolveTutorialMapViewport,
   type TutorialMapViewport,
 } from "../../domain/wizard/tutorialMapViewport";
-import { gameAreaToBoundingBox } from "../../domain/geometry/gameAreaBounds";
+import { gameAreaToBoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
 
 interface TutorialMapViewportContextValue {
   viewport: TutorialMapViewport;

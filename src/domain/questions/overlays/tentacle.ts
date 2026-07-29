@@ -1,5 +1,5 @@
 import type { TentaclePoi } from "../../map/annotations";
-import { parseGeometryJson, pointFromGeometryFeature } from "../../geometry/geometryParsing";
+import { parseGeometryJson, pointFromGeometryFeature } from "../../geometry/gameArea/geometryParsing";
 import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";

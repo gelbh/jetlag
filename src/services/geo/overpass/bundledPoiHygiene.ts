@@ -1,5 +1,5 @@
 // Keep in sync with the build-time POI hygiene mirror script.
-import { haversineMeters } from "../../../domain/geometry/distance";
+import { haversineMeters } from "../../../domain/geometry/gameArea/distance";
 
 export interface BundledPoiPlaceLike {
   id: string;

@@ -11,7 +11,7 @@ import {
   type PlacementCameraDraftState,
   type PlacementViewportFrame,
 } from "../../domain/map/placementCamera";
-import { gameAreaToBoundingBox } from "../../domain/geometry/gameAreaBounds";
+import { gameAreaToBoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
 import type { GameArea } from "../../domain/map/annotations";
 import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
 import type { MapTool } from "../../state/sessionStore";

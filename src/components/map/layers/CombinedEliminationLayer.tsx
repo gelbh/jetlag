@@ -10,9 +10,9 @@ import { isEndGameActive } from "../../../domain/map/annotations";
 import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
 import {
   annotationHasEliminationFeature,
-} from "../../../domain/geometry/combinedEliminationMask";
-import { EMPTY_GEOJSON_FEATURES } from "../../../domain/geometry/emptyFeatures";
-import { polygonFeatureToLeafletPolygonGroups } from "../../../domain/geometry/geometry";
+} from "../../../domain/geometry/masks/combinedEliminationMask";
+import { EMPTY_GEOJSON_FEATURES } from "../../../domain/geometry/masks/emptyFeatures";
+import { polygonFeatureToLeafletPolygonGroups } from "../../../domain/geometry/gameArea/geometry";
 import { getEliminationOverlayLayers } from "../../../domain/map/mapEliminationOverlayStyle";
 import { useCombinedEliminationMask } from "../../../hooks/map/useCombinedEliminationMask";
 import { useMapStore } from "../../../state/sessionStore";

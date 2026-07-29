@@ -2,7 +2,7 @@ import { Circle, CircleMarker, Polyline } from "react-leaflet";
 import { GameAreaMask } from "./GameAreaMask";
 import type { GameArea } from "../../../domain/map/annotations";
 import type { FramingMode } from "../../../hooks/session/useGameAreaFraming";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 
 interface FramingPreviewLayersProps {

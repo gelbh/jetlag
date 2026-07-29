@@ -2,9 +2,9 @@ import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import area from "@turf/area";
 import difference from "@turf/difference";
 import { lineString } from "@turf/helpers";
-import { dispatchGeodesicLineBuffer } from "../../../domain/geometry/geodesicLineBuffer";
+import { dispatchGeodesicLineBuffer } from "../../../domain/geometry/measuring/geodesicLineBuffer";
 import { resolveClientMaskKernelMode } from "../../../domain/geometry/kernel/resolveClientMaskKernelMode";
-import { unionPolygonFeatures } from "../../../domain/geometry/unionPolygonFeatures";
+import { unionPolygonFeatures } from "../../../domain/geometry/masks/unionPolygonFeatures";
 import type { GameArea } from "../../../domain/map/annotations";
 import type { RegionPackId } from "../../../domain/regions/regionPack";
 import {
@@ -13,7 +13,7 @@ import {
   gameAreaToPolygon,
   simplifyGameArea,
   type LatLngTuple,
-} from "../../../domain/geometry/geometry";
+} from "../../../domain/geometry/gameArea/geometry";
 import { queryOverpass, OverpassPayloadTooLargeError } from "../../core/overpassClient";
 import {
   getOrFetchCached,

@@ -6,8 +6,8 @@ import {
   gameAreaToBoundingBox,
   isPointInGameArea,
   type LatLngTuple,
-} from "../../domain/geometry/geometry";
-import type { BoundingBox } from "../../domain/geometry/gameAreaBounds";
+} from "../../domain/geometry/gameArea/geometry";
+import type { BoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
 import type { GtfsBundleStop, GtfsStaticBundle } from "./gtfsBundle";
 import { GTFS_BUNDLE_MANIFEST_PATH } from "./gtfsBundle";
 

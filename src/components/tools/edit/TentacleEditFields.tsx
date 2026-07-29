@@ -5,7 +5,7 @@ import {
   formatPresetDistance,
   type DistanceUnit,
 } from "../../../domain/map/distance";
-import { tentacleEliminationJsonForAnswer } from "../../../domain/geometry/tentacleGeometry";
+import { tentacleEliminationJsonForAnswer } from "../../../domain/geometry/tentacle/tentacleGeometry";
 import {
   tentacleCategoryIdForAnnotation,
   tentacleQuestionPrompt,

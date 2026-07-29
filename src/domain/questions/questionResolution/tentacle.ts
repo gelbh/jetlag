@@ -1,8 +1,8 @@
 import type { AnnotationRecord, GameArea, TentaclePoi } from "../../map/annotations";
-import type { LatLngTuple } from "../../geometry/geometry";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
-import { tentacleEliminationJsonForAnswer } from "../../geometry/tentacleGeometry";
+import { tentacleEliminationJsonForAnswer } from "../../geometry/tentacle/tentacleGeometry";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { tentacleRadiusFromMetadata } from "../tentacleQuestions";
 

@@ -5,7 +5,7 @@ import {
   type MeasuringFromKind,
   type MeasuringTargetMode,
 } from "../../domain/questions";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { DEFAULT_SESSION_RULES } from "../../domain/session/rules/types";
 import { buildTutorialMeasuringPreviews } from "../../domain/wizard/tutorialInteractiveMocks";
 import type { MeasuringPreviewFixture } from "../../domain/wizard/previewFixtures/measuring";

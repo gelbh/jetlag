@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { GameArea, SessionRecord } from "../../../domain/map/annotations";
-import { fallbackGameArea } from "../../../domain/geometry/geometry";
+import { fallbackGameArea } from "../../../domain/geometry/gameArea/geometry";
 import { isPremiumSession } from "../../../domain/map/annotations";
 import { useTransitLayer } from "../../../hooks/map/useTransitLayer";
 import {

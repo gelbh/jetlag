@@ -5,8 +5,8 @@ import type {
   MultiPolygon,
 } from "geojson";
 import type { GameArea } from "../../domain/map/annotations";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
-import type { SeaLevelEdgeCase } from "../../domain/geometry/seaLevel";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import type { SeaLevelEdgeCase } from "../../domain/geometry/measuring/seaLevel";
 import {
   isMeasuringLinearLocation,
   measuringFromKind,

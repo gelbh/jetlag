@@ -7,7 +7,7 @@ import type { QuestionTutorialId } from "../../../domain/tutorial/tutorialQuesti
 import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
 import { tutorialMapFixtureForArea } from "../../../domain/wizard/tutorialMapFixtureForArea";
 import { useTutorialMapViewport } from "../../../hooks/tutorial/TutorialMapViewportContext";
-import { gameAreaToBoundingBox } from "../../../domain/geometry/gameAreaBounds";
+import { gameAreaToBoundingBox } from "../../../domain/geometry/gameArea/gameAreaBounds";
 
 interface TutorialMapPreviewProps {
   toolId: QuestionTutorialId;

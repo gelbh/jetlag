@@ -3,8 +3,8 @@ import {
   dedupeTransitStations,
   type TransitStation,
 } from "../../domain/session/hiding/hidingZone";
-import type { BoundingBox } from "../../domain/geometry/gameAreaBounds";
-import { isPointInGameArea } from "../../domain/geometry/geometry";
+import type { BoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
+import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
 
 export const TRANSIT_STOP_OVERPASS_LIMIT = 250;
 

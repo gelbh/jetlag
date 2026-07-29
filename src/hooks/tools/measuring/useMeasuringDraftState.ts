@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { Feature, LineString, Polygon as GeoPolygon, MultiPolygon } from "geojson";
 import { isActive, type AnnotationRecord } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import {
   applyMeasuringFromKind,
   DEFAULT_MEASURING_FROM_KIND,
@@ -21,7 +21,7 @@ import { usePreloadStore } from "../../../state/preloadStore";
 import { availableMeasuringCatalog, isPreviewQuestionBeforeSendEnabled } from "../../../domain/session/catalog/sessionCatalogAvailability";
 import type { MeasuringPlace } from "../../../domain/geo/types";
 import type { GeocodedPlace } from "../../../services/geo/geocoding";
-import type { SeaLevelEdgeCase } from "../../../domain/geometry/seaLevel";
+import type { SeaLevelEdgeCase } from "../../../domain/geometry/measuring/seaLevel";
 
 export function useMeasuringDraftState(
   annotations: AnnotationRecord[],

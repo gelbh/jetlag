@@ -5,11 +5,11 @@ import { useCombinedEliminationMask } from "./useCombinedEliminationMask";
 
 const requestCombinedEliminationMask = vi.hoisted(() => vi.fn());
 
-vi.mock("../../domain/geometry/eliminationMaskWorkerClient", () => ({
+vi.mock("../../domain/geometry/masks/eliminationMaskWorkerClient", () => ({
   requestCombinedEliminationMask,
 }));
 
-vi.mock("../../domain/geometry/combinedEliminationMask", () => ({
+vi.mock("../../domain/geometry/masks/combinedEliminationMask", () => ({
   buildCombinedEliminationMask: vi.fn(() => ({
     type: "Feature",
     properties: { source: "bootstrap" },

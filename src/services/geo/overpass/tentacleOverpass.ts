@@ -1,4 +1,4 @@
-import { distanceBetweenPoints, type LatLngTuple } from "../../../domain/geometry/geometry";
+import { distanceBetweenPoints, type LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { TentaclePoi } from "../../../domain/map/annotations";
 import type {
   SessionCustomCategory,

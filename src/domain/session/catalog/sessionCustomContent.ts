@@ -1,4 +1,4 @@
-import type { LatLngTuple } from "../../geometry/geometry";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import type { MatchingCategoryId } from "../../questions/matchingQuestions";
 
 export type MatchingAdminLevel = 4 | 6 | 8 | 9;

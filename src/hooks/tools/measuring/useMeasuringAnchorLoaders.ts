@@ -1,7 +1,7 @@
 import { startTransition, useCallback, useEffect, useRef } from "react";
 import type { GameArea } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
-import { distanceBetweenPoints } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
+import { distanceBetweenPoints } from "../../../domain/geometry/gameArea/geometry";
 import {
   isMeasuringLinearLocation,
   measuringFromKind,

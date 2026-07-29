@@ -1,4 +1,4 @@
-import { haversineMeters } from "../../geometry/distance";
+import { haversineMeters } from "../../geometry/gameArea/distance";
 import type { PlayerLocationRecord } from "../activity/sessionChat";
 
 export const LIVE_LOCATION_DEDUPE_METERS = 50;

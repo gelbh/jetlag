@@ -6,11 +6,11 @@ import type {
 } from "geojson";
 import type { GameArea } from "../../../domain/map/annotations";
 import type { AnnotationRecord } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
-} from "../../../domain/geometry/matchingGeometry";
+} from "../../../domain/geometry/measuring/matchingGeometry";
 import {
   matchingQuestionFor,
   type MatchingAnswer,

@@ -4,7 +4,7 @@ import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
 } from "../../../domain/session/catalog/sessionCustomContent";
-import { polygonRingsToLineStrings } from "../../../domain/geometry/ringToLineString";
+import { polygonRingsToLineStrings } from "../../../domain/geometry/measuring/ringToLineString";
 import { parseMatchingAreaGeoJson } from "../matching/matchingAreaGeoJson";
 import {
   adminLevelForMeasuringBorderKind,
