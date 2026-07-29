@@ -161,10 +161,7 @@ export function MapSettingsSheet({
             onShowCurrentLocationChange={general.onShowCurrentLocationChange}
             showAdminBoundaries={general.showAdminBoundaries}
             onShowAdminBoundariesChange={general.onShowAdminBoundariesChange}
-            keepScreenAwake={general.keepScreenAwake}
-            onKeepScreenAwakeChange={general.onKeepScreenAwakeChange}
             lowPowerMode={general.lowPowerMode}
-            onLowPowerModeChange={general.onLowPowerModeChange}
             distanceUnit={general.distanceUnit}
             onDistanceUnitChange={general.onDistanceUnitChange}
             distanceUnitEditable={general.distanceUnitEditable}
@@ -190,12 +187,6 @@ export function MapSettingsSheet({
             onToggleTransit={general.onToggleTransit}
             onToggleLiveTransit={general.onToggleLiveTransit}
             onTransitRouteFilterChange={general.onTransitRouteFilterChange}
-            notificationPreferences={general.notificationPreferences}
-            nativeNotificationsSupported={nativeNotificationsSupported}
-            onNotificationPreferencesChange={
-              general.onNotificationPreferencesChange
-            }
-            onEnableNotifications={general.onEnableNotifications}
           />
         ) : null}
 
@@ -238,6 +229,16 @@ export function MapSettingsSheet({
           <MapSettingsSessionTab
             sessionCode={session.sessionCode}
             remoteSession={session.remoteSession}
+            keepScreenAwake={general.keepScreenAwake}
+            onKeepScreenAwakeChange={general.onKeepScreenAwakeChange}
+            lowPowerMode={general.lowPowerMode}
+            onLowPowerModeChange={general.onLowPowerModeChange}
+            notificationPreferences={general.notificationPreferences}
+            nativeNotificationsSupported={nativeNotificationsSupported}
+            onNotificationPreferencesChange={
+              general.onNotificationPreferencesChange
+            }
+            onEnableNotifications={general.onEnableNotifications}
             onClearMap={session.onClearMap}
             onExport={session.onExport}
             isHost={session.isHost ?? false}
@@ -253,7 +254,7 @@ export function MapSettingsSheet({
         ) : null}
       </div>
 
-      <p className="mt-6 border-t-2 border-border pt-3 text-[10px] leading-relaxed text-ink-dim">
+      <p className="mt-6 border-t-2 border-border pt-3 text-xs leading-relaxed text-ink-dim">
         Map data © OpenStreetMap contributors · © CARTO
       </p>
 

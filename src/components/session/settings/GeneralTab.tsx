@@ -3,20 +3,16 @@ import type { TransitRouteFilter } from "../../../domain/map/transit";
 import type { DistanceUnit } from "../../../domain/map/distance";
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
 import { effectiveMapStyle } from "../../../domain/device/power/powerProfile";
-import type { NotificationPreferences } from "../../../domain/device/chrome/notifications";
 import { SegmentControl } from "../../ui/SegmentControl";
 import { SettingsToggleRow } from "../SettingsToggleRow";
-import { NotificationPreferencesSection } from "./NotificationPreferencesSection";
 
 export interface MapSettingsGeneralTabProps {
   showCurrentLocation: boolean;
   onShowCurrentLocationChange: (enabled: boolean) => void;
   showAdminBoundaries: boolean;
   onShowAdminBoundariesChange: (enabled: boolean) => void;
-  keepScreenAwake: boolean;
-  onKeepScreenAwakeChange: (enabled: boolean) => void;
+  /** Read-only: satellite option and effective style respect low power from Session tab. */
   lowPowerMode: boolean;
-  onLowPowerModeChange: (enabled: boolean) => void;
   distanceUnit: DistanceUnit;
   onDistanceUnitChange: (unit: DistanceUnit) => void;
   distanceUnitEditable?: boolean;
@@ -42,12 +38,6 @@ export interface MapSettingsGeneralTabProps {
   onToggleTransit: () => void;
   onToggleLiveTransit: () => void;
   onTransitRouteFilterChange: (value: TransitRouteFilter) => void;
-  notificationPreferences?: NotificationPreferences;
-  nativeNotificationsSupported?: boolean;
-  onNotificationPreferencesChange?: (
-    patch: Partial<NotificationPreferences>,
-  ) => void;
-  onEnableNotifications?: () => Promise<boolean>;
 }
 
 export function MapSettingsGeneralTab({
@@ -55,10 +45,7 @@ export function MapSettingsGeneralTab({
   onShowCurrentLocationChange,
   showAdminBoundaries,
   onShowAdminBoundariesChange,
-  keepScreenAwake,
-  onKeepScreenAwakeChange,
   lowPowerMode,
-  onLowPowerModeChange,
   distanceUnit,
   onDistanceUnitChange,
   distanceUnitEditable = false,
@@ -84,10 +71,6 @@ export function MapSettingsGeneralTab({
   onToggleTransit,
   onToggleLiveTransit,
   onTransitRouteFilterChange,
-  notificationPreferences,
-  nativeNotificationsSupported,
-  onNotificationPreferencesChange,
-  onEnableNotifications,
 }: MapSettingsGeneralTabProps) {
   const displayedMapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
 
@@ -104,27 +87,6 @@ export function MapSettingsGeneralTab({
         checked={showAdminBoundaries}
         onChange={onShowAdminBoundariesChange}
       />
-      <SettingsToggleRow
-        label="Keep screen awake"
-        checked={keepScreenAwake}
-        onChange={onKeepScreenAwakeChange}
-      />
-      <SettingsToggleRow
-        label="Low power mode"
-        description="Reduces GPS polling, live transit, animations, and background downloads. Core session sync and tools stay available."
-        checked={lowPowerMode}
-        onChange={onLowPowerModeChange}
-      />
-
-      {nativeNotificationsSupported &&
-      notificationPreferences &&
-      onNotificationPreferencesChange ? (
-        <NotificationPreferencesSection
-          preferences={notificationPreferences}
-          onChange={onNotificationPreferencesChange}
-          onEnableNotifications={onEnableNotifications}
-        />
-      ) : null}
 
       <SegmentControl
         variant="pill"
