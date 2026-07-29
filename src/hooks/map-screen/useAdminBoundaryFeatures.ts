@@ -3,9 +3,9 @@ import type { Feature, MultiPolygon, Polygon } from "geojson";
 import type { GameArea } from "../../domain/map/annotations";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import type { MatchingAdminLevel } from "../../domain/session/catalog/sessionCustomContent";
-import { gameAreaToPolygon } from "../../domain/geometry/gameArea/geometry";
-import { adminBoundaryLevelsForSession } from "../../services/geo/adminDivisionAvailability";
-import { fetchAdminDivisionFeaturesInArea } from "../../services/geo/adminDivisionBoundaries";
+import { gameAreaToPolygon } from "../../domain/geometry/geometry";
+import { adminBoundaryLevelsForSession } from "../../services/geo/overpass/adminDivisionAvailability";
+import { fetchAdminDivisionFeaturesInArea } from "../../services/geo/overpass/adminDivisionBoundaries";
 import { usePreloadStore } from "../../state/preloadStore";
 
 export interface AdminBoundaryFeature {

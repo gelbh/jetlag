@@ -15,7 +15,7 @@ import { queryOverpass } from "../../core/overpass/overpassClient";
 import {
   getOrFetchCached,
   measuringPlacesCacheKey,
-} from "../geographicFeatureCache";
+} from "../cache";
 import {
   buildTaggedBboxOverpassQuery,
   formatOverpassBboxFromGameArea,

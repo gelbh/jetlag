@@ -14,7 +14,7 @@ import {
 import {
   getOrFetchCached,
   staticTransitCacheKey,
-} from "../geo/geographicFeatureCache";
+} from "../geo/cache";
 
 const MAX_STOPS = 250;
 const MAX_ROUTES = 80;

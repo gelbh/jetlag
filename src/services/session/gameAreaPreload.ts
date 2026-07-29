@@ -5,13 +5,16 @@ import type {
   MatchingAdminLevel,
 } from "../../domain/session/catalog/sessionCustomContent";
 import type { RegionPackId } from "../../domain/regions/regionPack";
-import { fetchAdminDivisionFeaturesInArea } from "../geo/adminDivisionBoundaries";
+import { fetchAdminDivisionFeaturesInArea } from "../geo/overpass/adminDivisionBoundaries";
 import {
   adminBoundaryLevelsForSession,
   emptyAdminDivisionCounts,
   probeAdminDivisionCounts,
-} from "../geo/adminDivisionAvailability";
-import { fetchMeasuringPlacesInArea } from "../geo/measuringPlaces";
+} from "../geo/overpass/adminDivisionAvailability";
+import { fetchPreparedCoastlineSegments } from "../geo/overpass/coastline";
+import { fetchLandmassFeaturesInArea } from "../geo/overpass/landmassFeatures";
+import { fetchMeasuringPlacesInArea } from "../geo/overpass/measuringPlaces";
+import { fetchPreparedMeasuringLinearSegments } from "../geo/overpass/measuringLinearFeatures";
 import { fetchStaticTransit } from "../transit/transitStatic";
 import { usePreloadStore } from "../../state/preloadStore";
 

@@ -95,7 +95,7 @@ vi.mock("../services/session/gameAreaPreload", () => ({
   preloadCriticalGameAreaCaches: vi.fn(async () => undefined),
 }));
 
-vi.mock("../services/geo/seaLevelProgressive", () => ({
+vi.mock("../services/geo/elevation/seaLevelProgressive", () => ({
   startSeaLevelBackgroundSampling: vi.fn(),
 }));
 

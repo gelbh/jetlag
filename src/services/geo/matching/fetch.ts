@@ -29,7 +29,7 @@ import {
   landmassToMatchingFeature,
 } from "../overpass/landmassFeatures";
 import { queryOverpass } from "../../core/overpass/overpassClient";
-import { getOrFetchCached } from "../geographicFeatureCache";
+import { getOrFetchCached } from "../cache";
 import {
   buildMatchingFeaturesQuery,
   matchingFeaturesCacheKey,

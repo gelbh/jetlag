@@ -1,5 +1,5 @@
 import type { GeocodedPlace } from "../../../services/geo/geocoding";
-import { formatPlaceSearchSubtitle } from "../../../services/geo/geocodingRank";
+import { formatPlaceSearchSubtitle } from "../../../services/geo/geocoding/geocodingRank";
 import { SearchField } from "../../ui/SearchField";
 import { SearchResultsList } from "../../tools/shared/SearchResultsList";
 

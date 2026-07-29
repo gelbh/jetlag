@@ -14,7 +14,7 @@ import {
 } from "../../domain/session/hiding/hidingZone";
 import type { MapViewportBounds } from "../../domain/map/transitViewport";
 import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
-import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matchingFeatures";
+import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matching";
 import { writeHidingZone } from "../../services/firestore/firestoreSessionExtras";
 
 const MOVE_MIN_DISTANCE_METERS = 50;

@@ -10,7 +10,7 @@ import {
   type MatchingCategoryId,
 } from "../../domain/questions";
 import { resolveMatchingCategory } from "../../domain/session/catalog/sessionCustomCatalog";
-import { matchingFeatureCountLabel, matchingNullAnswerMessage } from "../../services/geo/matchingFeatures";
+import { matchingFeatureCountLabel, matchingNullAnswerMessage } from "../../services/geo/matching";
 import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
 import { GroupedSelectField } from "../ui/GroupedSelectField";
 import { yesNoAnswerOptions } from "./shared/binaryAnswerOptions";
