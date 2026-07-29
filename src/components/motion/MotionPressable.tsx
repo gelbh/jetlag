@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { feedback } from "../../services/device/feedbackService";
-import { useMotionProfile } from "../../hooks/useMotionProfile";
+import { useMotionProfile } from "../../hooks/motion/useMotionProfile";
 
 type MotionPressableProps = ComponentPropsWithoutRef<"button"> & {
   as?: "button" | "div" | "a";

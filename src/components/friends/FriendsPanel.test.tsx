@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FriendsPanel } from "./FriendsPanel";
 
 const useDesktopLayout = vi.fn();
-vi.mock("../../hooks/useDesktopLayout", () => ({
+vi.mock("../../hooks/layout/useDesktopLayout", () => ({
   useDesktopLayout: () => useDesktopLayout(),
 }));
 

@@ -1,7 +1,7 @@
 import { useCallback, useId, useMemo, useState } from "react";
 import { AppLink } from "../components/navigation/AppLink";
 import { useParams } from "react-router-dom";
-import { useAppNavigate } from "../hooks/useAppNavigate";
+import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import type { LatLngBoundsExpression } from "leaflet";
 import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
 import {

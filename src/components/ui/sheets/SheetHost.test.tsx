@@ -8,7 +8,7 @@ import {
 import { useContextualRailPanel } from "../../map/useContextualRailPanel";
 
 const useDesktopLayout = vi.fn();
-vi.mock("../../../hooks/useDesktopLayout", () => ({
+vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
   useDesktopLayout: () => useDesktopLayout(),
 }));
 

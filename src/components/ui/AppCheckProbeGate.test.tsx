@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { AppCheckProbeGate } from "./AppCheckProbeGate";
 
-vi.mock("../../hooks/useAuthBootstrapReady", () => ({
+vi.mock("../../hooks/app/useAuthBootstrapReady", () => ({
   useAuthBootstrapReady: () => true,
 }));
 

@@ -12,7 +12,7 @@ import {
   type NavigateOptions,
   type To,
 } from "react-router-dom";
-import { useMotionProfile } from "../hooks/useMotionProfile";
+import { useMotionProfile } from "../hooks/motion/useMotionProfile";
 import { reportSlowRouteTransition } from "../services/core/analytics/sentry";
 import {
   isLazyRoute,

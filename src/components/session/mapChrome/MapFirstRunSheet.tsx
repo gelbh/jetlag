@@ -1,6 +1,6 @@
 import { AppLink } from "../../navigation/AppLink";
 import { MotionSheet } from "../../motion/MotionSheet";
-import { usePersistedDismiss } from "../../../hooks/usePersistedDismiss";
+import { usePersistedDismiss } from "../../../hooks/forms/usePersistedDismiss";
 
 const STORAGE_KEY = "jetlag.mapFirstRunDismissed";
 

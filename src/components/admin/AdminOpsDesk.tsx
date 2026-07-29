@@ -48,8 +48,8 @@ import type { IncidentRecord } from "../../domain/incident/incidentTypes";
 import { useAdminJoinSession } from "../../hooks/admin/useAdminJoinSession";
 import { useAdminSessionList } from "../../hooks/admin/useAdminSessionList";
 import { useAdminAccessState } from "../../hooks/admin/useAdminAccessState";
-import { useAppNavigate } from "../../hooks/useAppNavigate";
-import { useMinWidth } from "../../hooks/useMinWidth";
+import { useAppNavigate } from "../../hooks/navigation/useAppNavigate";
+import { useMinWidth } from "../../hooks/layout/useMinWidth";
 import {
   countOpenIncidents,
   subscribeIncidentList,

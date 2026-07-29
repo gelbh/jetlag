@@ -5,7 +5,7 @@ import {
   searchPlaces,
   type GeocodedPlace,
 } from "../../services/geo/geocoding";
-import { useLatestRequest } from "../useLatestRequest";
+import { useLatestRequest } from "../forms/useLatestRequest";
 
 interface UsePlaceAreaSearchOptions {
   initialQuery?: string;

@@ -37,8 +37,8 @@ import {
 } from "./domain/device/updates/lazyWithChunkRetry";
 import { removeBootSplash } from "./domain/device/chrome/bootSplash";
 import { notifyAppNeedRefresh } from "./domain/device/updates/serviceWorkerRefresh";
-import { useEdgeSwipeBack } from "./hooks/useEdgeSwipeBack";
-import { useRouteSeo } from "./hooks/useRouteSeo";
+import { useEdgeSwipeBack } from "./hooks/navigation/useEdgeSwipeBack";
+import { useRouteSeo } from "./hooks/navigation/useRouteSeo";
 import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";
 import { useSessionStore } from "./state/sessionStore";
 import { RouteReadinessSensor } from "./navigation/RouteReadinessSensor";

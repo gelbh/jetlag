@@ -118,7 +118,7 @@ beforeEach(async () => {
   });
   vi.stubGlobal("cancelIdleCallback", vi.fn());
 });
-vi.mock("../hooks/useAppNavigate", () => ({
+vi.mock("../hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => navigate,
 }));
 
