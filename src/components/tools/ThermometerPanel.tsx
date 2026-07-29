@@ -10,20 +10,20 @@ import {
   type ThermometerAnswer,
 } from "../../domain/questions";
 import type { SessionRulesInput } from "../../domain/session/rules";
-import { hotterColderAnswerOptions } from "./shared/binaryAnswerOptions";
-import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
-import { OptionChip, OptionChipRow } from "./shared/OptionChip";
-import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
-import { ResolvedReadout } from "./shared/ResolvedReadout";
-import { ToolPanelShell } from "./shared/ToolPanelShell";
-import { ToolSection } from "./shared/ToolSection";
-import { SendToHidersButton } from "./shared/SendToHidersButton";
-import { WizardPanelFrame } from "./shared/WizardPanelFrame";
-import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
-import { THERMOMETER_STEPS, stepsForMode } from "./shared/toolStepUtils";
-import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
+import { hotterColderAnswerOptions } from "./shared/answers/binaryAnswerOptions";
+import { BinaryAnswerPicker } from "./shared/answers/BinaryAnswerPicker";
+import { OptionChip, OptionChipRow } from "./shared/controls/OptionChip";
+import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
+import { ResolvedReadout } from "./shared/readout/ResolvedReadout";
+import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
+import { ToolSection } from "./shared/panels/ToolSection";
+import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
+import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
+import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
+import { THERMOMETER_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
+import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
-import type { ToolPanelSandboxMode } from "./shared/toolPanelSandbox";
+import type { ToolPanelSandboxMode } from "./shared/panels/toolPanelSandbox";
 
 type PlacementMode = "gps" | "manual";
 

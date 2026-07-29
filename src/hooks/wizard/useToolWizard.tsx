@@ -1,11 +1,11 @@
 import { useCallback, useMemo, useState, type RefObject } from "react";
-import { ToolStepper } from "../../components/tools/shared/ToolStepper";
-import type { WizardStepNavProps } from "../../components/tools/shared/WizardStepNav";
+import { ToolStepper } from "../../components/tools/shared/wizard/ToolStepper";
+import type { WizardStepNavProps } from "../../components/tools/shared/wizard/WizardStepNav";
 import {
   buildSteps,
   deriveStepStates,
   type ToolStepDefinition,
-} from "../../components/tools/shared/toolStepUtils";
+} from "../../components/tools/shared/wizard/toolStepUtils";
 import { useSyncWizardStepRef } from "../tools/useSyncWizardStepRef";
 
 interface UseToolWizardOptions {

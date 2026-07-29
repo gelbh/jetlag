@@ -1,7 +1,7 @@
 import type { GeocodedPlace } from "../../../services/geo/geocoding";
 import { formatPlaceSearchSubtitle } from "../../../services/geo/geocoding/geocodingRank";
 import { SearchField } from "../../ui/forms/SearchField";
-import { SearchResultsList } from "../../tools/shared/SearchResultsList";
+import { SearchResultsList } from "../../tools/shared/controls/SearchResultsList";
 
 interface PlaceAreaSearchFieldsProps {
   locationQuery: string;

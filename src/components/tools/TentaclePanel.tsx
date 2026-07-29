@@ -8,21 +8,21 @@ import {
   tentacleQuestionPrompt,
   type TentacleExtendedCategoryId,
 } from "../../domain/questions";
-import { AnchorControls } from "./shared/AnchorControls";
-import { ErrorWithRetry } from "./shared/ErrorWithRetry";
-import { LoadingReadout } from "./shared/LoadingReadout";
-import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
-import { ResolvedReadout } from "./shared/ResolvedReadout";
-import { TentacleAnswerPicker } from "./shared/TentacleAnswerPicker";
-import { ToolPanelShell } from "./shared/ToolPanelShell";
-import { ToolSection } from "./shared/ToolSection";
-import { SendToHidersButton } from "./shared/SendToHidersButton";
-import { WizardPanelFrame } from "./shared/WizardPanelFrame";
-import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
-import { TENTACLE_STEPS, stepsForMode } from "./shared/toolStepUtils";
-import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
+import { AnchorControls } from "./shared/controls/AnchorControls";
+import { ErrorWithRetry } from "./shared/readout/ErrorWithRetry";
+import { LoadingReadout } from "./shared/readout/LoadingReadout";
+import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
+import { ResolvedReadout } from "./shared/readout/ResolvedReadout";
+import { TentacleAnswerPicker } from "./shared/answers/TentacleAnswerPicker";
+import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
+import { ToolSection } from "./shared/panels/ToolSection";
+import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
+import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
+import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
+import { TENTACLE_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
+import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
-import type { ToolPanelSandboxMode } from "./shared/toolPanelSandbox";
+import type { ToolPanelSandboxMode } from "./shared/panels/toolPanelSandbox";
 
 interface TentaclePanelProps {
   gameSize: GameSize;
