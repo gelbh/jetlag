@@ -9,6 +9,10 @@ import {
 } from "../../../domain/geometry/gameArea/geometry";
 
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import {
+  scaleDashArray,
+  useZoomAdaptiveWeight,
+} from "../../../hooks/map/useZoomAdaptiveWeight";
 
 interface GameAreaMaskProps {
   gameArea: GameArea;
@@ -28,6 +32,10 @@ const PLAY_OUTSIDE_TINT = {
   fillColor: MAP_ANNOTATION_COLORS.playArea,
   fillOpacity: 0.35,
 } as const;
+
+const FRAMING_BASE_WEIGHT = 3;
+const PLAY_BASE_WEIGHT = 2;
+const FRAMING_DASH = "8 6";
 
 function renderGameAreaPolygons(
   area: GameArea,
@@ -69,15 +77,17 @@ export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
     [gameArea],
   );
   const outsideTint = framing ? FRAMING_OUTSIDE_TINT : PLAY_OUTSIDE_TINT;
+  const baseWeight = framing ? FRAMING_BASE_WEIGHT : PLAY_BASE_WEIGHT;
+  const weight = useZoomAdaptiveWeight(baseWeight);
   const borderOptions = framing
     ? {
         color: MAP_ANNOTATION_COLORS.playArea,
-        weight: 3,
-        dashArray: "8 6",
+        weight,
+        dashArray: scaleDashArray(FRAMING_DASH, weight, FRAMING_BASE_WEIGHT),
       }
     : {
         color: MAP_ANNOTATION_COLORS.playArea,
-        weight: 2,
+        weight,
       };
 
   return (

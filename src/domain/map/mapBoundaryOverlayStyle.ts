@@ -3,6 +3,10 @@ import type { MapStyle, StreetBasemap } from "./mapBasemaps";
 import { getBasemapSurface } from "./mapBasemaps";
 import type { MapDraftOverlayStyle } from "./mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "./mapAnnotationColors";
+import {
+  computeZoomAdaptiveWeight,
+  quantizeWeight,
+} from "./zoomAdaptiveStrokeWeight";
 
 const ADMIN_LEVEL_STROKE_WEIGHT: Record<number, number> = {
   4: 2.5,
@@ -18,6 +22,9 @@ const ADMIN_LEVEL_STROKE_OPACITY: Record<number, number> = {
   9: 0.42,
 };
 
+/** Reference zoom for admin stroke base weights (matches useZoomAdaptiveWeight). */
+const ADMIN_STROKE_REF_ZOOM = 12;
+
 function highContrastSurface(
   mapStyle: MapStyle,
   streetBasemap: StreetBasemap,
@@ -30,8 +37,10 @@ export function getAdminBoundaryStrokeStyle(
   adminLevel: number,
   mapStyle: MapStyle,
   streetBasemap: StreetBasemap = "light",
+  zoom: number = ADMIN_STROKE_REF_ZOOM,
 ): PathOptions {
-  const weight = ADMIN_LEVEL_STROKE_WEIGHT[adminLevel] ?? 1;
+  const baseWeight = ADMIN_LEVEL_STROKE_WEIGHT[adminLevel] ?? 1;
+  const weight = quantizeWeight(computeZoomAdaptiveWeight(baseWeight, zoom));
   const opacity = ADMIN_LEVEL_STROKE_OPACITY[adminLevel] ?? 0.5;
   const color = highContrastSurface(mapStyle, streetBasemap)
     ? MAP_ANNOTATION_COLORS.strokeLight
