@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import { MotionSheet } from "../motion/MotionSheet";
-import { SheetHeader } from "../ui/SheetHeader";
+import { SheetHeader } from "../ui/sheets/SheetHeader";
 import {
   EXPANSION_CURSE_COUNT,
   searchExpansionCurses,

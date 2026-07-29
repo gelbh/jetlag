@@ -1,4 +1,4 @@
-import { HudStarIcon } from "../ui/HudIcons";
+import { HudStarIcon } from "../ui/brand/HudIcons";
 import { useGamePresetStore } from "../../state/gamePresetStore";
 
 export function PresetFavouriteButton({ presetId }: { presetId: string }) {

@@ -6,7 +6,7 @@ import { createTestSession } from "../test/fixtures/sessions";
 import { renderWithRouter } from "../test/renderWithRouter";
 import { useSessionStore } from "../state/sessionStore";
 
-vi.mock("../components/ui/AppUpdateMapChip", () => ({
+vi.mock("../components/ui/banners/AppUpdateMapChip", () => ({
   AppUpdateMapChip: () => null,
 }));
 

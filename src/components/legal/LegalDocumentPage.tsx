@@ -1,9 +1,9 @@
 import { AppLink } from "../navigation/AppLink";
-import { EntryScreenLayout } from "../ui/EntryScreenLayout";
+import { EntryScreenLayout } from "../ui/layout/EntryScreenLayout";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
-} from "../ui/ScreenHeader";
+} from "../ui/layout/ScreenHeader";
 import {
   LEGAL_EFFECTIVE_DATE,
   LEGAL_FEEDBACK_URL,

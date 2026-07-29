@@ -6,7 +6,7 @@ import type {
   SessionMessageRecord,
 } from "../../domain/session/activity/sessionChat";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
-import { SegmentControl } from "../ui/SegmentControl";
+import { SegmentControl } from "../ui/forms/SegmentControl";
 import { GameChatTab } from "./GameChatTab";
 import { SocialChatTab } from "./SocialChatTab";
 

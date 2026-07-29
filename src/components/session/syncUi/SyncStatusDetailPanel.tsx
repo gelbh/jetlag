@@ -1,6 +1,6 @@
 import type { SyncStatus } from "../../../domain/device/sync/sync";
 import { SyncStatusBeacon } from "./SyncStatusDot";
-import { HudDetailPanel } from "../../ui/HudDetailPanel";
+import { HudDetailPanel } from "../../ui/hud/HudDetailPanel";
 
 interface SyncStatusDetailPanelProps {
   status: SyncStatus;

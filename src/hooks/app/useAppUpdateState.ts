@@ -2,7 +2,7 @@ import { useContext } from "react";
 import {
   AppUpdateContext,
   type AppUpdateContextValue,
-} from "../../components/ui/appUpdateContext";
+} from "../../components/ui/banners/appUpdateContext";
 
 export function useAppUpdateState(): AppUpdateContextValue {
   const value = useContext(AppUpdateContext);

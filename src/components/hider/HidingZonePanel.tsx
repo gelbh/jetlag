@@ -5,8 +5,8 @@ import {
   stepsForHidingZoneMode,
   type HidingZoneStepId,
 } from "./hidingZoneSteps";
-import { SegmentControl } from "../ui/SegmentControl";
-import { InlineError } from "../ui/InlineError";
+import { SegmentControl } from "../ui/forms/SegmentControl";
+import { InlineError } from "../ui/banners/InlineError";
 import { ToolPanelShell } from "../tools/shared/ToolPanelShell";
 import { ToolSection } from "../tools/shared/ToolSection";
 import { WizardSwipeSurface } from "../tools/shared/WizardSwipeSurface";

@@ -6,9 +6,9 @@ import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
 } from "../../../domain/session/activity/sessionChat";
-import { ScreenNav } from "../../ui/ScreenNav";
+import { ScreenNav } from "../../ui/layout/ScreenNav";
 import { GameAreaPreloadBeacon } from "../preload/GameAreaPreloadBeacon";
-import { HudErrorBanner } from "../../ui/HudErrorBanner";
+import { HudErrorBanner } from "../../ui/banners/HudErrorBanner";
 import { userErrorFromSyncMessage } from "../../../domain/device/feedback/userErrors";
 import type { SessionRulesInput } from "../../../domain/session/rules";
 import type { PlayerRole } from "../../../domain/session/players/playerRole";

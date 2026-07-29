@@ -9,7 +9,7 @@ import {
 } from "react";
 import { isSignInWithEmailLink } from "firebase/auth";
 import { LegalInlineLinks } from "../legal/LegalInlineLinks";
-import { InlineError } from "../ui/InlineError";
+import { InlineError } from "../ui/banners/InlineError";
 import { GoogleSignInButton } from "../billing/GoogleSignInButton";
 import {
   completeOAuthRedirectIfPending,

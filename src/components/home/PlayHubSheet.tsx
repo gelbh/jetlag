@@ -1,7 +1,7 @@
 import { AppLink } from "../navigation/AppLink";
 import { MotionSheet } from "../motion/MotionSheet";
-import { DesktopContentColumn } from "../ui/DesktopContentColumn";
-import { SheetHeader } from "../ui/SheetHeader";
+import { DesktopContentColumn } from "../ui/layout/DesktopContentColumn";
+import { SheetHeader } from "../ui/sheets/SheetHeader";
 
 interface PlayHubSheetProps {
   open: boolean;

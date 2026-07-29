@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HudBanner } from "../../ui/HudBanner";
+import { HudBanner } from "../../ui/hud/HudBanner";
 
 const STORAGE_KEY = "jetlag.mapToolsHintDismissed";
 

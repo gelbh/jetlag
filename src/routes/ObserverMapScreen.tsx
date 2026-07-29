@@ -7,7 +7,7 @@ import { ChatPanel } from "../components/chat/ChatPanel";
 import { ContextualRailPanelProvider } from "../components/map/ContextualRailContext";
 import { SessionLog } from "../components/session/SessionLog";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
-import { InlineError } from "../components/ui/InlineError";
+import { InlineError } from "../components/ui/banners/InlineError";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { fallbackGameArea } from "../domain/geometry/gameArea/geometry";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
