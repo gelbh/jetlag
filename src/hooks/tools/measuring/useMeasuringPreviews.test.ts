@@ -48,7 +48,7 @@ const baseDraft = {
   measuringTargetMode: "map",
   measuringTargetPlaceName: null,
   measuringTargetPoint: null,
-} as MeasuringDraftState;
+} as unknown as MeasuringDraftState;
 
 describe("useMeasuringPublishSignature", () => {
   it("uses previewGeometryFingerprint instead of JSON.stringify", () => {
