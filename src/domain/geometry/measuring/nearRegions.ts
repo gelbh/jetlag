@@ -38,15 +38,19 @@ const MIN_MEASURING_SEGMENT_LENGTH_METERS = 5;
 
 function segmentBoundingBox(segment: Feature<LineString>): SegmentBoundingBox {
   const coordinates = segment.geometry.coordinates;
-  const lngs = coordinates.map(([lng]) => lng);
-  const lats = coordinates.map(([, lat]) => lat);
+  let south = Infinity;
+  let west = Infinity;
+  let north = -Infinity;
+  let east = -Infinity;
 
-  return {
-    south: Math.min(...lats),
-    west: Math.min(...lngs),
-    north: Math.max(...lats),
-    east: Math.max(...lngs),
-  };
+  for (const [lng, lat] of coordinates) {
+    if (lat < south) south = lat;
+    if (lat > north) north = lat;
+    if (lng < west) west = lng;
+    if (lng > east) east = lng;
+  }
+
+  return { south, west, north, east };
 }
 
 function bboxMinDistanceMeters(
