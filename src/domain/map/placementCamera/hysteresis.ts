@@ -1,5 +1,5 @@
-import type { BoundingBox } from "../../geometry/gameAreaBounds";
-import { normalizeBoundingBox } from "../../geometry/gameAreaBounds";
+import type { BoundingBox } from "../../geometry/gameArea/gameAreaBounds";
+import { normalizeBoundingBox } from "../../geometry/gameArea/gameAreaBounds";
 import { SAFE_RECT_FRACTION } from "./constants";
 import type { PlacementPhase, PlacementViewportFrame } from "./types";
 

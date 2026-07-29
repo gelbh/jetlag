@@ -1,5 +1,5 @@
 import type { GameArea } from "../../../domain/map/annotations";
-import { gameAreaToBoundingBox } from "../../../domain/geometry/gameAreaBounds";
+import { gameAreaToBoundingBox } from "../../../domain/geometry/gameArea/gameAreaBounds";
 import {
   MEASURING_CATALOG,
   measuringLinearOverpassSelectors,

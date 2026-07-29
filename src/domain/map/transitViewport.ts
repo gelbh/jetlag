@@ -1,5 +1,5 @@
 import type { LatLngBounds } from "leaflet";
-import type { LatLngTuple } from "../geometry/geometry";
+import type { LatLngTuple } from "../geometry/gameArea/geometry";
 import type {
   TransitRouteLine,
   TransitStop,

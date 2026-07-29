@@ -2,7 +2,7 @@ import type { GameArea } from "../../../domain/map/annotations";
 import {
   isPointInGameArea,
   type LatLngTuple,
-} from "../../../domain/geometry/geometry";
+} from "../../../domain/geometry/gameArea/geometry";
 import type { MatchingFeature } from "../../../domain/geo/types";
 import {
   getMatchingCategory,

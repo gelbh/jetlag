@@ -4,7 +4,7 @@ import { isHidingPeriodActive } from "../../domain/session/hiding/hidingPeriod";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import type { TimerState } from "../../domain/session/timer/timer";
 import { computeElapsedMs } from "../../domain/session/timer/timer";
-import { distanceBetweenPoints } from "../../domain/geometry/geometry";
+import { distanceBetweenPoints } from "../../domain/geometry/gameArea/geometry";
 
 const MIN_GPS_BUFFER_METERS = 25;
 

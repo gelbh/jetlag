@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, Point } from "geojson";
 import { RadarPanel } from "../../components/tools/RadarPanel";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isActive, type AnnotationRecord } from "../../domain/map/annotations";
 import {
   parseDistanceInput,

@@ -3,7 +3,7 @@ import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
-} from "../../../domain/geometry/matchingGeometry";
+} from "../../../domain/geometry/measuring/matchingGeometry";
 import {
   deserializeMatchingFeatures,
   serializeMatchingFeatures,

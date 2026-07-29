@@ -5,13 +5,13 @@ import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { lineString, point as turfPoint } from "@turf/helpers";
 import polygonize from "@turf/polygonize";
 import type { GameArea } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { AdminDivisionFeature } from "../../../domain/geo/types";
 import {
   gameAreaToBoundingBox,
   gameAreaToPolygon,
   simplifyGameArea,
-} from "../../../domain/geometry/geometry";
+} from "../../../domain/geometry/gameArea/geometry";
 import { queryOverpass } from "../../core/overpassClient";
 import { parseMatchingAreaGeoJson } from "../matching/matchingAreaGeoJson";
 import {

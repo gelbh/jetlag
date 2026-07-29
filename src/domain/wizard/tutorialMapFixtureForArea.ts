@@ -1,7 +1,7 @@
 import type { Feature, LineString, Polygon } from "geojson";
 import type { AnnotationRecord, AnnotationType, GameArea } from "../map/annotations";
 import type { QuestionTutorialId } from "../tutorial/tutorialQuestions";
-import { gameAreaToBoundingBox } from "../geometry/gameAreaBounds";
+import { gameAreaToBoundingBox } from "../geometry/gameArea/gameAreaBounds";
 import { milesToMeters } from "../map/distance";
 
 function insetPolygon(gameArea: GameArea, insetRatio: number): Polygon {

@@ -8,7 +8,7 @@ import {
   hidingZoneDefaultRadiusMeters,
   resolveDistanceUnit,
 } from "../../map/distancePresets";
-import { gameAreaToBoundingBox } from "../../geometry/gameAreaBounds";
+import { gameAreaToBoundingBox } from "../../geometry/gameArea/gameAreaBounds";
 
 export type GameSize = "small" | "medium" | "large";
 

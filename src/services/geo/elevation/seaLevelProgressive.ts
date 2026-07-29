@@ -4,7 +4,7 @@ import {
   resolveFineSeaLevelDivisions,
   sampleGameAreaCells,
   type ElevationSampleCell,
-} from "../../../domain/geometry/seaLevel";
+} from "../../../domain/geometry/measuring/seaLevel";
 import { fetchElevations, type ElevationFetchProfile } from "./index";
 import {
   readSeaLevelSamplingCache,

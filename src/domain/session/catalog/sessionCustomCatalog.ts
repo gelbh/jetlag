@@ -22,8 +22,8 @@ import type {
 import { isSessionCustomCategoryId } from "./sessionCustomContent";
 import type { MeasuringPlace } from "../../geo/types";
 import type { TentaclePoi } from "../../map/annotations";
-import type { LatLngTuple } from "../../geometry/geometry";
-import { distanceBetweenLatLngPoints } from "../../geometry/distance";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
+import { distanceBetweenLatLngPoints } from "../../geometry/gameArea/distance";
 
 export function customCategoryToMeasuringOption(
   category: SessionCustomCategory,

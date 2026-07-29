@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import { buildCombinedEliminationMask } from "../../domain/geometry/combinedEliminationMask";
-import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/emptyFeatures";
-import { requestCombinedEliminationMask } from "../../domain/geometry/eliminationMaskWorkerClient";
+import { buildCombinedEliminationMask } from "../../domain/geometry/masks/combinedEliminationMask";
+import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/masks/emptyFeatures";
+import { requestCombinedEliminationMask } from "../../domain/geometry/masks/eliminationMaskWorkerClient";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 

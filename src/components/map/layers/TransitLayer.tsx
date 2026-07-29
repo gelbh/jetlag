@@ -1,7 +1,7 @@
 import { memo, useMemo } from "react";
 import L from "leaflet";
 import { Marker, Polyline, Popup } from "react-leaflet";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import type {
   TransitRealtimeSnapshot,

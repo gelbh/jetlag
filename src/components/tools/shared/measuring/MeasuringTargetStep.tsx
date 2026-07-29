@@ -1,4 +1,4 @@
-import type { SeaLevelEdgeCase } from "../../../../domain/geometry/seaLevel";
+import type { SeaLevelEdgeCase } from "../../../../domain/geometry/measuring/seaLevel";
 import {
   formatAltitudeLabel,
   formatDistance,

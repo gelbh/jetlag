@@ -1,9 +1,9 @@
 import type { GameArea } from "../../map/annotations";
-import { parseGeometryJson, pointFromGeometryFeature } from "../../geometry/geometryParsing";
+import { parseGeometryJson, pointFromGeometryFeature } from "../../geometry/gameArea/geometryParsing";
 import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import type { MapStyle } from "../../map/mapBasemaps";
-import { buildSameNearestRegion } from "../../geometry/matchingGeometry";
+import { buildSameNearestRegion } from "../../geometry/measuring/matchingGeometry";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { deserializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import { pushBoundaryOverlay, type OverlayBuildResult } from "./shared";

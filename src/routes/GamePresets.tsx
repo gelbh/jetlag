@@ -16,14 +16,14 @@ import { GameSizePicker } from "../components/session/GameSizePicker";
 import {
   gameAreaToBoundingBox,
   placeToGameArea,
-} from "../domain/geometry/geometry";
+} from "../domain/geometry/gameArea/geometry";
 import {
   defaultAdvancedSessionSettings,
   type AdvancedSessionSettingsValue,
 } from "../domain/session/tools/advancedSessionSettings";
 import type { DistanceUnit } from "../domain/map/distance";
 import type { GameArea } from "../domain/map/annotations";
-import type { BoundingBox } from "../domain/geometry/gameAreaBounds";
+import type { BoundingBox } from "../domain/geometry/gameArea/gameAreaBounds";
 import { hidingZoneRadiusMeters, type GameSize } from "../domain/session/size/gameSize";
 import {
   createGamePresetId,

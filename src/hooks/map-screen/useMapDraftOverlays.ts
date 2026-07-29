@@ -9,9 +9,9 @@ import {
   dispatchHalfPlane,
   dispatchRadarShadedRegion,
   type LatLngTuple,
-} from "../../domain/geometry/geometry";
+} from "../../domain/geometry/gameArea/geometry";
 import { resolveClientMaskKernelMode } from "../../domain/geometry/kernel/resolveClientMaskKernelMode";
-import { buildTentaclePoiAnswerEliminationRegion } from "../../domain/geometry/tentacleGeometry";
+import { buildTentaclePoiAnswerEliminationRegion } from "../../domain/geometry/tentacle/tentacleGeometry";
 import {
   radarInsideFromAnswer,
   type RadarAnswer,
@@ -24,7 +24,7 @@ import { buildThermometerDraftOverlays } from "../../domain/questions/overlays/t
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 import { getBoundaryPreviewStyle } from "../../domain/map/mapBoundaryOverlayStyle";
 import type { MapStyle } from "../../domain/map/mapBasemaps";
-import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/emptyFeatures";
+import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/masks/emptyFeatures";
 
 export interface MapDraftOverlaySources {
   activeTool: MapTool;

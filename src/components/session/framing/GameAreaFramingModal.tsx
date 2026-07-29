@@ -6,13 +6,13 @@ import type { MapStyle } from "../../../domain/map/mapBasemaps";
 import {
   boundingBoxHasMinimumSpan,
   gameAreaToBoundingBox,
-} from "../../../domain/geometry/geometry";
+} from "../../../domain/geometry/gameArea/geometry";
 import type {
   FramingMode,
   GameAreaFramingResult,
 } from "../../../hooks/session/useGameAreaFraming";
 import type { LatLngBoundsExpression } from "leaflet";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../../domain/map/annotations";
 import {
   FramingModeSegmentControl,

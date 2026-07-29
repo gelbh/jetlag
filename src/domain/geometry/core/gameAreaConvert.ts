@@ -10,21 +10,21 @@ import {
   gameAreaToBoundingBox,
   normalizeBoundingBox,
   type BoundingBox,
-} from "../gameAreaBounds";
+} from "../gameArea/gameAreaBounds";
 import {
   MIN_GAME_AREA_LAT_SPAN,
   MIN_GAME_AREA_LNG_SPAN,
-} from "../gameAreaConstants";
+} from "../gameArea/gameAreaConstants";
 import { featureToGameArea, gameAreaToFeature } from "./featureConvert";
 import { safeDifference } from "./geodesicPrimitives";
 import type { GameAreaLeafletPositions, LatLngTuple } from "./types";
 
-export type { BoundingBox } from "../gameAreaBounds";
+export type { BoundingBox } from "../gameArea/gameAreaBounds";
 export {
   boundingBoxToGameArea,
   gameAreaToBoundingBox,
   normalizeBoundingBox,
-} from "../gameAreaBounds";
+} from "../gameArea/gameAreaBounds";
 
 const ZERO_GAME_AREA_RING: number[][] = [
   [0, 0],

@@ -4,7 +4,7 @@ import {
   distanceBetweenPoints,
   isPointInGameArea,
   type LatLngTuple,
-} from "../../../domain/geometry/geometry";
+} from "../../../domain/geometry/gameArea/geometry";
 import type { SessionCustomCategory } from "../../../domain/session/catalog/sessionCustomContent";
 import { measuringOverpassSelectorsForKind } from "../../../domain/session/catalog/sessionCustomCatalog";
 import {

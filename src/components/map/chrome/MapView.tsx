@@ -14,7 +14,7 @@ import {
   type MapStyle,
   type StreetBasemap,
 } from "../../../domain/map/mapBasemaps";
-import { isUsableMapBounds } from "../../../domain/geometry/geometry";
+import { isUsableMapBounds } from "../../../domain/geometry/gameArea/geometry";
 import {
   MOTION_MAP_CAMERA_FLY_S,
   MOTION_MAP_CAMERA_S,

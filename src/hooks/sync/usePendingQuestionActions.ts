@@ -9,7 +9,7 @@ import {
   type PendingQuestionPlacement,
 } from "../../domain/session/activity/sessionChat";
 import { buildThermometerLineGeometry } from "../../domain/questions";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
   deletePendingQuestion,
   getPendingQuestionStatus,

@@ -2,7 +2,7 @@ import { memo } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea, SessionRecord } from "../../../domain/map/annotations";
 import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
-import { EMPTY_GEOJSON_FEATURES } from "../../../domain/geometry/emptyFeatures";
+import { EMPTY_GEOJSON_FEATURES } from "../../../domain/geometry/masks/emptyFeatures";
 import { isActive } from "../../../domain/map/annotations";
 import {
   useAnnotationStore,

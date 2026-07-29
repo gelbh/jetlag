@@ -1,5 +1,5 @@
-import type { LatLngTuple } from "../../geometry/geometry";
-import { parseGeometryJson, pointFromGeometryFeature } from "../../geometry/geometryParsing";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
+import { parseGeometryJson, pointFromGeometryFeature } from "../../geometry/gameArea/geometryParsing";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";

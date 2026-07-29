@@ -1,5 +1,5 @@
 import type { Feature, LineString } from "geojson";
-import type { LatLngTuple } from "../../geometry/geometry";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import {
   bearingDegrees,
   destinationPoint,
@@ -7,7 +7,7 @@ import {
 import {
   lineEndpointsFromFeature,
   parseGeometryJson,
-} from "../../geometry/geometryParsing";
+} from "../../geometry/gameArea/geometryParsing";
 import {
   quietRadarAnnotationStyle,
   walkRemainingAnnotationStyle,

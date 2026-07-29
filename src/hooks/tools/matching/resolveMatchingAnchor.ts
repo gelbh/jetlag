@@ -1,5 +1,5 @@
 import type { GameArea } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import {
   getMatchingCategory,
   isMatchingCategoryAvailable,

@@ -2,7 +2,7 @@ import { CircleMarker, Polyline, Popup } from "react-leaflet";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
 import { pointToolRadiusFromMetadata } from "../../../domain/map/annotations";
-import { polygonFeatureToLeafletRings } from "../../../domain/geometry/geometry";
+import { polygonFeatureToLeafletRings } from "../../../domain/geometry/gameArea/geometry";
 import type { LayerVisibility } from "../../../state/sessionStore";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { renderPointRadiusAnnotation } from "../helpers/renderHelpers";

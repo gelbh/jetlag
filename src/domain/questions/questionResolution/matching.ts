@@ -4,7 +4,7 @@ import type { MatchingAnswer } from "../matchingQuestions";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
-} from "../../geometry/matchingGeometry";
+} from "../../geometry/measuring/matchingGeometry";
 import { deserializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 

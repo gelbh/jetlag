@@ -4,8 +4,8 @@ import {
   distanceFromSeaLevelMeters,
   type ElevationSampleCell,
   type SeaLevelEdgeCase,
-} from "../../../domain/geometry/seaLevel";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+} from "../../../domain/geometry/measuring/seaLevel";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { fetchElevations } from "./index";
 import type { CachedSeaLevelSampling } from "../geographicFeatureCache";

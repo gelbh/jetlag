@@ -13,7 +13,7 @@ import {
   gameAreaCenter,
   gameAreaToBoundsExpression,
   type LatLngTuple,
-} from "../../../domain/geometry/geometry";
+} from "../../../domain/geometry/gameArea/geometry";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../../domain/device/power/powerProfile";
 import { useWakeLock } from "../../../hooks/location/useWakeLock";
 import { useAnnotations } from "../../../hooks/map/useAnnotations";

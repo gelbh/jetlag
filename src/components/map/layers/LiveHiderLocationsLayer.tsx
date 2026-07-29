@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { CircleMarker, Tooltip } from "react-leaflet";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import {
   clusterHiderLocations,
   clusterTooltipLabel,

@@ -4,7 +4,7 @@ import {
   tentacleSearchRadiusMeters,
   type TentacleExtendedCategoryId,
 } from "../../domain/questions";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { DEFAULT_SESSION_RULES } from "../../domain/session/rules/types";
 import { buildTutorialTentacleElimination } from "../../domain/wizard/tutorialInteractiveMocks";
 import type { TentaclePreviewFixture } from "../../domain/wizard/previewFixtures/tentacle";

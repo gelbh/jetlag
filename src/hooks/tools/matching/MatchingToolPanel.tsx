@@ -1,7 +1,7 @@
 import type { RefObject } from "react";
 import { MatchingPanel } from "../../../components/tools/MatchingPanel";
 import { QuestionPreviewSheet } from "../../../components/tools/shared/QuestionPreviewSheet";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { DistanceUnit } from "../../../domain/map/distance";
 import type {
   MatchingAnswer,

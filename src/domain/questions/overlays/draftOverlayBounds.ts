@@ -1,12 +1,12 @@
 import type { Position } from "geojson";
 import type { LatLngBoundsExpression } from "leaflet";
-import type { LatLngTuple } from "../../geometry/geometry";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import { boundingBoxToLeafletBounds } from "../../geometry/core/gameAreaConvert";
 import {
   type BoundingBox,
   expandBoundingBox,
   normalizeBoundingBox,
-} from "../../geometry/gameAreaBounds";
+} from "../../geometry/gameArea/gameAreaBounds";
 import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 
 export function unionBoundingBoxes(a: BoundingBox, b: BoundingBox): BoundingBox {

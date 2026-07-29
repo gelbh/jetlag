@@ -8,7 +8,7 @@ import { useTutorialMapViewport } from "../../../hooks/tutorial/TutorialMapViewp
 import { useTutorialInteractiveMapDraft } from "../../../hooks/tutorial/TutorialInteractiveMapDraftContext";
 import { usePlacementMapFocus } from "../../../hooks/map-screen/usePlacementMapFocus";
 import { placementCameraDraftFromOverlaySources } from "../../../domain/map/placementCamera";
-import { ZERO_GAME_AREA } from "../../../domain/geometry/geometry";
+import { ZERO_GAME_AREA } from "../../../domain/geometry/gameArea/geometry";
 
 interface TutorialMapContextPreviewProps {
   anchorLat?: number | null;

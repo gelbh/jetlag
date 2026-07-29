@@ -1,6 +1,6 @@
 import type { Feature, LineString } from "geojson";
 import type { AnnotationRecord } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import type { DistanceUnit } from "../../../domain/map/distance";
 import {

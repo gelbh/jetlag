@@ -3,7 +3,7 @@ import type { Feature, Point } from "geojson";
 import { isActive, type AnnotationRecord } from "../../../domain/map/annotations";
 import {
   buildMeasuringRegions,
-} from "../../../domain/geometry/measuringRegions";
+} from "../../../domain/geometry/measuring/measuringRegions";
 import {
   measuringFromKind,
   measuringFromKindUseCount,

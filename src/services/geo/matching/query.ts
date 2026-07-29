@@ -2,11 +2,11 @@ import type { GameArea } from "../../../domain/map/annotations";
 import {
   gameAreaToBoundingBox,
   type LatLngTuple,
-} from "../../../domain/geometry/geometry";
+} from "../../../domain/geometry/gameArea/geometry";
 import {
   expandBoundingBox,
   type BoundingBox,
-} from "../../../domain/geometry/gameAreaBounds";
+} from "../../../domain/geometry/gameArea/gameAreaBounds";
 import {
   adminLevelForMatchingCategory,
   getMatchingCategory,

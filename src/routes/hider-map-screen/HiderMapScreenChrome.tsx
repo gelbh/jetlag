@@ -44,7 +44,7 @@ import { SessionLog } from "../../components/session/SessionLog";
 import { isEndGameActive, isEndGamePending, isFoundHiderPending } from "../../domain/map/annotations";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
 import type { HiderTruthResult } from "../../domain/questions/ui";
 import { useAnnotationStore } from "../../state/annotationStore";

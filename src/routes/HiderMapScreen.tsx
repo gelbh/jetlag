@@ -40,7 +40,7 @@ import {
   gameAreaToBoundsExpression,
   gameAreaToBoundingBox,
   type LatLngTuple,
-} from "../domain/geometry/geometry";
+} from "../domain/geometry/gameArea/geometry";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/device/power/powerProfile";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";

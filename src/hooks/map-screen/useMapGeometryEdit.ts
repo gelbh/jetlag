@@ -6,9 +6,9 @@ import type {
   Point,
   Polygon as GeoPolygon,
 } from "geojson";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
-import { tentacleEliminationJsonForAnswer } from "../../domain/geometry/tentacleGeometry";
+import { tentacleEliminationJsonForAnswer } from "../../domain/geometry/tentacle/tentacleGeometry";
 import { DEFAULT_RADIUS_METERS } from "../../domain/map/distance";
 import { useAnnotationStore, useMapStore } from "../../state/sessionStore";
 

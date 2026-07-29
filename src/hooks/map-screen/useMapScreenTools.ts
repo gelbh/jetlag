@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
-import { isPointInGameArea } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
 import type {
   AnnotationRecord,
   GameArea,

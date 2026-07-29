@@ -11,8 +11,8 @@ import type {
   SessionCustomLocationPin,
 } from "../catalog/sessionCustomContent";
 import type { GameArea, SessionTier } from "../../map/annotations";
-import type { BoundingBox } from "../../geometry/gameAreaBounds";
-import { gameAreaToBoundingBox } from "../../geometry/gameAreaBounds";
+import type { BoundingBox } from "../../geometry/gameArea/gameAreaBounds";
+import { gameAreaToBoundingBox } from "../../geometry/gameArea/gameAreaBounds";
 import type { GameSize } from "../size/gameSize";
 import type { RegionPackId } from "../../regions/regionPack";
 import type { DublinCouncilFilter } from "../../regions/regionPack";

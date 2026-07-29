@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
 import { ZonePanel } from "../../components/tools/ZonePanel";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 

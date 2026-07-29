@@ -3,8 +3,8 @@ import type {
   GameArea,
   TentaclePoi,
 } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
-import { tentacleEliminationJsonForAnswer } from "../../../domain/geometry/tentacleGeometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
+import { tentacleEliminationJsonForAnswer } from "../../../domain/geometry/tentacle/tentacleGeometry";
 import type { DistanceUnit } from "../../../domain/map/distance";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import {

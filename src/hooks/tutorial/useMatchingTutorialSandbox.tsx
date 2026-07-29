@@ -6,7 +6,7 @@ import {
   type MatchingCategoryId,
 } from "../../domain/questions";
 import { DEFAULT_SESSION_RULES } from "../../domain/session/rules/types";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
   buildTutorialMatchingPreviews,
   syntheticMatchingFeatures,

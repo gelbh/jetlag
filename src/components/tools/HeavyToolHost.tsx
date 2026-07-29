@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import type { AnnotationType, GameArea } from "../../domain/map/annotations";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";

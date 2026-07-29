@@ -1,9 +1,9 @@
 import turfCircle from "@turf/circle";
 import type { Feature, Polygon } from "geojson";
 import type { GameArea } from "../../map/annotations";
-import type { LatLngTuple } from "../../geometry/geometry";
-import { isPointInGameArea } from "../../geometry/geometry";
-import { haversineMeters } from "../../geometry/distance";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
+import { isPointInGameArea } from "../../geometry/gameArea/geometry";
+import { haversineMeters } from "../../geometry/gameArea/distance";
 
 export interface TransitStation {
   id: string;
@@ -136,7 +136,7 @@ export function searchStations(
 
 export const MANUAL_STATION_ID = "manual";
 
-export { haversineMeters } from "../../geometry/distance";
+export { haversineMeters } from "../../geometry/gameArea/distance";
 
 export function shortPlayerLabel(uid: string): string {
   return uid.slice(0, 4).toUpperCase();

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { ThermometerPanel } from "../../components/tools/ThermometerPanel";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
-import { distanceBetweenPoints } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import { distanceBetweenPoints } from "../../domain/geometry/gameArea/geometry";
 import { isActive } from "../../domain/map/annotations";
 import {
   DEFAULT_THERMOMETER_DISTANCE_METERS,

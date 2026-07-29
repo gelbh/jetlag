@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import JSZip from "jszip";
 import { describe, expect, it } from "vitest";
-import { gameAreaToBoundingBox } from "../../../domain/geometry/geometry";
+import { gameAreaToBoundingBox } from "../../../domain/geometry/gameArea/geometry";
 import { parseBoundaryFile, parseBoundaryKml } from "./kmzImport";
 
 const fixturesDir = join(dirname(fileURLToPath(import.meta.url)), "../../../test/fixtures");

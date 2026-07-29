@@ -9,7 +9,7 @@ import {
   featureToGameArea,
   gameAreaToBoundingBox,
   simplifyGameArea,
-} from "../../../domain/geometry/geometry";
+} from "../../../domain/geometry/gameArea/geometry";
 
 function isPolygonFeature(
   feature: Feature,

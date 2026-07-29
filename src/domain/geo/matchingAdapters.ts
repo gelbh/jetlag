@@ -1,6 +1,6 @@
 import type { GameArea } from "../map/annotations";
-import type { LatLngTuple } from "../geometry/geometry";
-import { distanceBetweenPoints } from "../geometry/geometry";
+import type { LatLngTuple } from "../geometry/gameArea/geometry";
+import { distanceBetweenPoints } from "../geometry/gameArea/geometry";
 import type {
   AdminDivisionFeature,
   MatchingFeature,

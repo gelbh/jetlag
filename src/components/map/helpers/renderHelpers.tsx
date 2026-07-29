@@ -2,7 +2,7 @@ import { Fragment, type ReactNode } from "react";
 import { Circle, CircleMarker, Polygon } from "react-leaflet";
 import type { PathOptions } from "leaflet";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import { polygonFeatureToLeafletPolygonGroups } from "../../../domain/geometry/geometry";
+import { polygonFeatureToLeafletPolygonGroups } from "../../../domain/geometry/gameArea/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 
 export interface PointRadiusAnnotationStyle {
