@@ -11,7 +11,7 @@ import {
 } from "../../components/map/ContextualRailContext";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
-import { AppUpdateMapChip } from "../../components/ui/AppUpdateMapChip";
+import { AppUpdateMapChip } from "../../components/ui/banners/AppUpdateMapChip";
 import { HotfixGraceChip } from "../../components/incident/HotfixGraceChip";
 import { FirestorePersistenceBanner } from "../../components/session/FirestorePersistenceBanner";
 import { MapStatusRail } from "../../components/session/MapStatusRail";

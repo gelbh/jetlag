@@ -3,7 +3,7 @@ import type { GameOutcome } from "../../../domain/game/foundHider";
 import type { GameResultRecord } from "../../../domain/game/gameResult";
 import type { PlayerRole } from "../../../domain/session/players/playerRole";
 import { formatClockDurationFromMs } from "../../../domain/time/formatClockDuration";
-import { AnimatedOverlay } from "../../ui/AnimatedOverlay";
+import { AnimatedOverlay } from "../../ui/banners/AnimatedOverlay";
 import { MapReplayLayer } from "./MapReplayLayer";
 
 interface GameOverSheetProps {

@@ -1,11 +1,11 @@
 import { RequireUsername } from "../components/auth/RequireUsername";
 import { FriendsPanel } from "../components/friends/FriendsPanel";
-import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
-import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
+import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
+import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
-} from "../components/ui/ScreenHeader";
+} from "../components/ui/layout/ScreenHeader";
 
 export function Friends() {
   return (

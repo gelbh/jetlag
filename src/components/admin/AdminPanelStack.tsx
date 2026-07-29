@@ -9,7 +9,7 @@ import {
   HudCollapseIcon,
   HudExpandIcon,
   HudPinIcon,
-} from "../ui/HudIcons";
+} from "../ui/brand/HudIcons";
 import { AdminPanelBody, type AdminPanelBodies } from "./AdminPanelBody";
 
 export const OPS_PANEL_MIME = "application/x-jl-ops-panel";

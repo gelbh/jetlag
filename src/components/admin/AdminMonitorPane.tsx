@@ -21,7 +21,7 @@ import { useMapStore, useSessionStore } from "../../state/sessionStore";
 import { AdminMapScreen } from "../../routes/AdminMapScreen";
 import { AdminMonitorPanelContent } from "../../routes/admin-map-screen/AdminMonitorPanelContent";
 import { useObserverMapScreen } from "../../routes/observer-map-screen/useObserverMapScreen";
-import { InlineError } from "../ui/InlineError";
+import { InlineError } from "../ui/banners/InlineError";
 import { useAdminMonitorFocus } from "../../domain/admin/adminMonitorFocus";
 import type { AdminMonitorPanelBodies } from "./AdminMonitorPanelBody";
 import { AdminMonitorGridWorkspace } from "./AdminMonitorGridWorkspace";

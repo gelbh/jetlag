@@ -1,5 +1,5 @@
 import { MotionSheet } from "../motion/MotionSheet";
-import { SheetHeader } from "../ui/SheetHeader";
+import { SheetHeader } from "../ui/sheets/SheetHeader";
 
 interface ExpansionHiderMenuProps {
   open: boolean;

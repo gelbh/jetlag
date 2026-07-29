@@ -1,5 +1,5 @@
 import type { TimerState } from "../../../domain/session/timer/timer";
-import { PopupCloseButton } from "../../ui/PopupCloseButton";
+import { PopupCloseButton } from "../../ui/brand/PopupCloseButton";
 import { TimerActions } from "../../tools/TimerActions";
 import { SessionTimerLabel } from "../SessionTimerLabel";
 

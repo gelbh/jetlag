@@ -12,7 +12,7 @@ import {
   recommendGameSize,
 } from "../../../domain/session/size/gameSize";
 import { gameSizeRulesSummary } from "../../../domain/session/size/gameSizeRules";
-import { RadioCardGroup } from "../../ui/RadioCardGroup";
+import { RadioCardGroup } from "../../ui/forms/RadioCardGroup";
 
 interface GameSizePickerProps {
   gameArea: GameArea | null;
