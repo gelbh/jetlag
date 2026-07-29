@@ -28,6 +28,31 @@ export {
 } from "./radarHalfPlane";
 export { geodesicLineBuffer } from "./geodesicLineBuffer";
 export {
+  geoSpatialVoronoi,
+  geoSpatialVoronoiFromSites,
+  type SpatialVoronoiSite,
+} from "./spatialVoronoi";
+export {
+  resolveVoronoiCellPoiId,
+  resolveVoronoiCellSiteId,
+  voronoiCellSiteId,
+  type VoronoiSiteRef,
+} from "./voronoiCellSiteId";
+export {
+  buildTentacleEliminationRegion,
+  buildTentaclePoiAnswerEliminationRegion,
+  type TentacleSite,
+} from "./tentacleRegions";
+export {
+  dispatchSpatialVoronoi,
+  runSpatialVoronoi,
+} from "./voronoiKernelRunner";
+export {
+  runTentacleEliminationRegion,
+  runTentaclePoiAnswerEliminationRegion,
+  type TentacleEliminationParams,
+} from "./tentacleKernelRunner";
+export {
   wasmBuildHalfPlanePolygon,
   wasmBuildRadarShadedRegion,
 } from "./halfPlaneWasm";
