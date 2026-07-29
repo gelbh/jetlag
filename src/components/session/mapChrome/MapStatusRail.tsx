@@ -60,7 +60,7 @@ interface MapStatusRailProps {
   onSyncErrorAction?: () => void;
   /** Dim chrome and block tool/timer interaction when the session is gone. */
   inactiveChrome?: boolean;
-  terminalSessionError?: import("../../../domain/device/userErrors").UserErrorDisplay | null;
+  terminalSessionError?: import("../../../domain/device/feedback/userErrors").UserErrorDisplay | null;
   onReturnToJoin?: () => void;
   /** In-flow status for DesktopOpsShell (vs absolute overlay on mobile). */
   expanded?: boolean;
