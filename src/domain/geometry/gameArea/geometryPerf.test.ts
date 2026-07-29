@@ -289,7 +289,7 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     }
   });
 
-  it("wasm_geodesic_10_vertex median within 1.25x ts", async () => {
+  it("wasm_geodesic_10_vertex median within 1.2x ts", async () => {
     const line = tenVertexLine();
     await wasmGeodesicLineBuffer(line, 200);
     const wasmPkg = await import(
@@ -307,8 +307,8 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     if (tsMs === 0) {
       expect(wasmMs).toBe(0);
     } else {
-      // CI hosts show ~1.17×; keep headroom above flaky 1.1 bound.
-      expect(wasmMs / tsMs).toBeLessThanOrEqual(1.25);
+      // CI runners show ~1.15x noise on this short path; keep a tight but stable gate.
+      expect(wasmMs / tsMs).toBeLessThanOrEqual(1.2);
     }
   });
 });

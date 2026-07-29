@@ -85,31 +85,33 @@ function useTentacleSandboxBody({
     }
 
     const center: LatLngTuple = [session.anchorLat, session.anchorLng];
-    const elimination = buildTutorialTentacleElimination(
-      center,
-      searchRadiusMeters,
-      poiOptions,
-      selectedPoiId,
-      outOfReach,
-      gameArea,
-    );
+    void (async () => {
+      const elimination = await buildTutorialTentacleElimination(
+        center,
+        searchRadiusMeters,
+        poiOptions,
+        selectedPoiId,
+        outOfReach,
+        gameArea,
+      );
 
-    registerMapDraft(
-      {
-        activeTool: "tentacle",
-        ...tutorialMapDraftBase(gameArea),
-        tentacle: {
-          center,
-          searchRadiusMeters,
-          answerRadiusMeters: searchRadiusMeters,
-          pois: poiOptions,
-          selectedPoiId,
-          outOfReach,
-          seekerResolving: loading,
+      registerMapDraft(
+        {
+          activeTool: "tentacle",
+          ...tutorialMapDraftBase(gameArea),
+          tentacle: {
+            center,
+            searchRadiusMeters,
+            answerRadiusMeters: searchRadiusMeters,
+            pois: poiOptions,
+            selectedPoiId,
+            outOfReach,
+            seekerResolving: loading,
+          },
         },
-      },
-      elimination ? [elimination] : [],
-    );
+        elimination ? [elimination] : [],
+      );
+    })();
   }, [
     committed,
     gameArea,

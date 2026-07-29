@@ -19,7 +19,7 @@ export const KERNEL_WASM_READY: Record<KernelEntrypoint, boolean> = {
   halfPlane: true,
   geodesicLineBuffer: true,
   spatialVoronoi: false,
-  tentacleEliminationRegion: false,
+  tentacleEliminationRegion: true,
 };
 
 /** True when mode asks for WASM and the entrypoint registry marks it ready. */

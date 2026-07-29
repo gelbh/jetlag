@@ -94,7 +94,7 @@ export function useMapGeometryEdit({
       if (geometryDraft.geometry.type === "Point") {
         const [lng, lat] = geometryDraft.geometry.coordinates;
         const radiusMeters = meta.radiusMeters ?? DEFAULT_RADIUS_METERS;
-        const eliminationJson = tentacleEliminationJsonForAnswer({
+        const eliminationJson = await tentacleEliminationJsonForAnswer({
           anchor: [lat, lng],
           radiusMeters,
           pois: meta.pois,

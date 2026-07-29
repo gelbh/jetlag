@@ -148,7 +148,7 @@ export async function commitTentacle(input: CommitTentacleInput): Promise<void> 
   }
 
   const selectedPoi = tentaclePois.find((poi) => poi.id === selectedPoiId);
-  const eliminationJson = tentacleEliminationJsonForAnswer({
+  const eliminationJson = await tentacleEliminationJsonForAnswer({
     anchor: tentacleCenter,
     radiusMeters: searchRadiusMeters,
     pois: tentaclePois,

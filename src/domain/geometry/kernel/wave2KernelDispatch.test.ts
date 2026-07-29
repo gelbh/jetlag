@@ -27,7 +27,7 @@ const eastSite = { id: "east", lat: 51.45, lng: -0.12 };
 const anchor: LatLngTuple = [51.45, -0.15];
 const oneMileMeters = 1609.344;
 
-describe("wave2 kernel dispatch (ready false)", () => {
+describe("wave2 kernel dispatch", () => {
   it("mode wasm + spatialVoronoi not ready → TS result", async () => {
     const sites = [
       { lng: -0.18, lat: 51.45, properties: { poiId: "west" } },
@@ -38,7 +38,7 @@ describe("wave2 kernel dispatch (ready false)", () => {
     expect(result).toEqual(expected);
   });
 
-  it("mode wasm + tentacleEliminationRegion not ready → TS via runner", () => {
+  it("mode wasm + tentacleEliminationRegion ready → WASM via runner", async () => {
     const sites = [westSite, eastSite];
     const cells = geoSpatialVoronoiFromSites(
       sites.map((s) => ({
@@ -63,8 +63,7 @@ describe("wave2 kernel dispatch (ready false)", () => {
       params.gameArea,
       params.voronoiCells,
     );
-    const result = runTentacleEliminationRegion(params, "wasm");
-    expect(result).toEqual(expected);
+    const result = await runTentacleEliminationRegion(params, "wasm");
     expect(result).not.toBeNull();
     expect(result?.geometry.type).toMatch(/Polygon|MultiPolygon/);
 
@@ -72,9 +71,13 @@ describe("wave2 kernel dispatch (ready false)", () => {
     const eastOfBisector = turfPoint([-0.135, 51.45]);
     expect(booleanPointInPolygon(westOfBisector, result!)).toBe(true);
     expect(booleanPointInPolygon(eastOfBisector, result!)).toBe(false);
+
+    if (expected) {
+      expect(area(result!)).toBeGreaterThan(0);
+    }
   });
 
-  it("tentacle runner parity: shaded disk excludes answered site cell", () => {
+  it("tentacle runner parity: shaded disk excludes answered site cell", async () => {
     const sites = [westSite, eastSite];
     const cells = geoSpatialVoronoiFromSites(
       sites.map((s) => ({
@@ -83,7 +86,7 @@ describe("wave2 kernel dispatch (ready false)", () => {
         properties: { poiId: s.id },
       })),
     );
-    const region = runTentacleEliminationRegion(
+    const region = await runTentacleEliminationRegion(
       {
         anchor,
         radiusMeters: oneMileMeters,
