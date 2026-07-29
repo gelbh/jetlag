@@ -8,6 +8,7 @@ import {
   readVisibleToolDockLabelMetrics,
   injectSimulatedSafeAreaBottom,
   injectSimulatedSafeAreaTop,
+  injectStandaloneDisplayMode,
   SIMULATED_SAFE_AREA_BOTTOM_PX,
   SIMULATED_SAFE_AREA_TOP_PX,
 } from "../../fixtures";
@@ -200,6 +201,34 @@ test.describe("iPhone 13 PWA safe area", () => {
     );
     expect(metrics.barHeight).toBeLessThanOrEqual(64);
     expect(metrics.deadSpaceBelowIcons).toBeLessThanOrEqual(8);
+  });
+
+  test("standalone display-mode keeps flush dock chassis with home indicator", async ({
+    page,
+  }) => {
+    await injectStandaloneDisplayMode(page);
+    await page.reload();
+    await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
+
+    const metrics = await page.evaluate(() => {
+      const dock = document.querySelector(".jl-tool-dock");
+      const dockRect = dock?.getBoundingClientRect();
+      const dockStyle = dock ? getComputedStyle(dock) : null;
+      return {
+        viewportHeight: window.innerHeight,
+        dockBottom: dockRect?.bottom ?? 0,
+        dockPaddingBottom: dockStyle
+          ? Number.parseFloat(dockStyle.paddingBottom)
+          : 0,
+      };
+    });
+
+    expect(Math.abs(metrics.dockBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
+      2,
+    );
+    expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(
+      SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
+    );
   });
 
   test("status bar clears the notch safe-area band", async ({ page }) => {
