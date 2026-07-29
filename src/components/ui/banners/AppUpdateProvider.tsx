@@ -4,8 +4,8 @@ import {
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from "react";
+import type { ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import {
   acknowledgeSoftReload,
