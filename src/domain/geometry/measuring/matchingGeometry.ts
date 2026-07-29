@@ -7,7 +7,7 @@ import {
   getCachedVoronoiCells,
   matchingSitesFingerprint,
 } from "../voronoi/voronoiCellCache";
-import { voronoiCellSiteId } from "../voronoi/voronoiCellSiteId";
+import { voronoiCellSiteId } from "../kernel/voronoiCellSiteId";
 import {
   gameAreaToPolygon,
   safeDifference,

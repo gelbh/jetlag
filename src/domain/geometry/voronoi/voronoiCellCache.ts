@@ -1,6 +1,6 @@
 import { LRUCache } from "lru-cache";
 import type { FeatureCollection } from "geojson";
-import { geoSpatialVoronoiFromSites } from "./geoSpatialVoronoi";
+import { geoSpatialVoronoiFromSites } from "../kernel/spatialVoronoi";
 
 const VORONOI_CACHE_MAX = 8;
 

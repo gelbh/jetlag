@@ -4,17 +4,22 @@ export type KernelEntrypoint =
   | "maskFromUnionInput"
   | "endGameMaskFromDisks"
   | "halfPlane"
-  | "geodesicLineBuffer";
+  | "geodesicLineBuffer"
+  | "spatialVoronoi"
+  | "tentacleEliminationRegion";
 
 /**
  * Per-entrypoint WASM readiness. Wave-1 entrypoints are enabled after
- * topology + perf gates; keep TS fallback via dispatchKernel.
+ * topology + perf gates; Wave-2 entrypoints ship false until Phase E.
+ * Keep TS fallback via dispatchKernel.
  */
 export const KERNEL_WASM_READY: Record<KernelEntrypoint, boolean> = {
   maskFromUnionInput: true,
   endGameMaskFromDisks: true,
   halfPlane: true,
   geodesicLineBuffer: true,
+  spatialVoronoi: false,
+  tentacleEliminationRegion: false,
 };
 
 /** True when mode asks for WASM and the entrypoint registry marks it ready. */
