@@ -106,3 +106,45 @@ export async function injectSimulatedSafeAreaTop(
 
 export const SIMULATED_SAFE_AREA_BOTTOM_PX = 34;
 export const SIMULATED_SAFE_AREA_TOP_PX = 59;
+
+/** Emulate standalone PWA display mode for dock safe-area smoke. */
+export async function injectStandaloneDisplayMode(page: Page) {
+  await page.emulateMedia({ media: "screen" });
+  await page.addInitScript(() => {
+    Object.defineProperty(window.matchMedia("(display-mode: standalone)"), "matches", {
+      configurable: true,
+      get: () => true,
+    });
+    const apply = () => {
+      document.documentElement.classList.add("jl-e2e-standalone");
+      if (document.getElementById("jl-e2e-standalone-mode")) return;
+      const el = document.createElement("style");
+      el.id = "jl-e2e-standalone-mode";
+      el.textContent = `@media (display-mode: standalone) {
+  .jl-e2e-standalone .jl-tool-dock:not(.jl-tool-dock--rail) {
+    bottom: 0;
+  }
+}`;
+      document.documentElement.appendChild(el);
+    };
+    if (document.documentElement) apply();
+    else document.addEventListener("DOMContentLoaded", apply);
+  });
+  await page.evaluate(() => {
+    document.documentElement.classList.add("jl-e2e-standalone");
+    const sheet = document.getElementById("jl-e2e-standalone-mode");
+    const css = `@media (display-mode: standalone) {
+  .jl-e2e-standalone .jl-tool-dock:not(.jl-tool-dock--rail) {
+    bottom: 0;
+  }
+}`;
+    if (sheet) {
+      sheet.textContent = css;
+      return;
+    }
+    const el = document.createElement("style");
+    el.id = "jl-e2e-standalone-mode";
+    el.textContent = css;
+    document.head.appendChild(el);
+  });
+}
