@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { RolePicker } from "./RolePicker";
 
-vi.mock("../../ui/RadioCardGroup", () => ({
+vi.mock("../../ui/forms/RadioCardGroup", () => ({
   RadioCardGroup: ({
     options,
     label,

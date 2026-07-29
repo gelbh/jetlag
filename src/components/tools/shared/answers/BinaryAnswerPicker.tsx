@@ -1,4 +1,4 @@
-import { ChoiceButton } from "../../../ui/ChoiceButton";
+import { ChoiceButton } from "../../../ui/forms/ChoiceButton";
 
 interface BinaryAnswerOption<Value extends string> {
   value: Value;

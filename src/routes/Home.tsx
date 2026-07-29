@@ -1,18 +1,18 @@
 import { AppLink } from "../components/navigation/AppLink";
 import { useState } from "react";
-import { AppLogo } from "../components/ui/AppLogo";
-import { BootSplash } from "../components/ui/BootSplash";
-import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
-import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
+import { AppLogo } from "../components/ui/brand/AppLogo";
+import { BootSplash } from "../components/ui/feedback/BootSplash";
+import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
+import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
 import {
   HudGuideIcon,
   HudPlayIcon,
   HudAdminIcon,
   HudFriendsIcon,
   HudLeaderboardIcon,
-} from "../components/ui/HudIcons";
-import { InlineError } from "../components/ui/InlineError";
-import { VersionChangelogSheet } from "../components/ui/VersionChangelogSheet";
+} from "../components/ui/brand/HudIcons";
+import { InlineError } from "../components/ui/banners/InlineError";
+import { VersionChangelogSheet } from "../components/ui/sheets/VersionChangelogSheet";
 import { MotionPressable } from "../components/motion/MotionPressable";
 import { PlayHubSheet } from "../components/home/PlayHubSheet";
 import { ReportProblemSheet } from "../components/incident/ReportProblemSheet";

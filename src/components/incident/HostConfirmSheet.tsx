@@ -5,7 +5,7 @@ import {
   denyHostConfirm,
 } from "../../services/incident/incidentApi";
 import { MotionSheet } from "../motion/MotionSheet";
-import { SheetHeader } from "../ui/SheetHeader";
+import { SheetHeader } from "../ui/sheets/SheetHeader";
 import "./HostConfirmSheet.css";
 
 function formatToolLabel(tool: string): string {

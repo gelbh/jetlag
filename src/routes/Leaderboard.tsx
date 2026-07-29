@@ -5,15 +5,15 @@ import { LeaderboardBoardSheet } from "../components/leaderboard/LeaderboardBoar
 import { LeaderboardLeadPack } from "../components/leaderboard/LeaderboardLeadPack";
 import { LeaderboardRankList } from "../components/leaderboard/LeaderboardRankList";
 import { LeaderboardSelfFooter } from "../components/leaderboard/LeaderboardSelfFooter";
-import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
-import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
-import { InlineError } from "../components/ui/InlineError";
-import { SegmentControl } from "../components/ui/SegmentControl";
+import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
+import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
+import { InlineError } from "../components/ui/banners/InlineError";
+import { SegmentControl } from "../components/ui/forms/SegmentControl";
 import {
   ScreenHeader,
   screenHeaderInsetTopClassName,
   screenHeaderOffsetClassName,
-} from "../components/ui/ScreenHeader";
+} from "../components/ui/layout/ScreenHeader";
 import {
   LEADERBOARD_SCOPES,
   leaderboardScopeLabel,

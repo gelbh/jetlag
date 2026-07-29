@@ -1,4 +1,4 @@
-import { screenHeaderOffsetClassName } from "../ui/ScreenHeader";
+import { screenHeaderOffsetClassName } from "../ui/layout/ScreenHeader";
 
 export function PremiumFeatureList({
   entitlementSummary,

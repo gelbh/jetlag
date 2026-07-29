@@ -1,7 +1,7 @@
 import { useId } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { HudRefreshIcon } from "../../ui/HudIcons";
-import { loadingSpinnerClass } from "../../ui/loadingSpinnerClass";
+import { HudRefreshIcon } from "../../ui/brand/HudIcons";
+import { loadingSpinnerClass } from "../../ui/feedback/loadingSpinnerClass";
 import { selectPreloadBanner, usePreloadStore } from "../../../state/preloadStore";
 import { GameAreaPreloadDetailPanel } from "./GameAreaPreloadDetailPanel";
 

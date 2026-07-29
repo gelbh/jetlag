@@ -1,4 +1,4 @@
-import { GlobalActivity } from "../components/ui/GlobalActivity";
+import { GlobalActivity } from "../components/ui/feedback/GlobalActivity";
 import { useSessionStore } from "../state/sessionStore";
 
 /** App-level non-blocking activity from the sync write queue. */

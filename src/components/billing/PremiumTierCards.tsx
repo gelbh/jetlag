@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AppLink } from "../navigation/AppLink";
-import { SegmentControl } from "../ui/SegmentControl";
+import { SegmentControl } from "../ui/forms/SegmentControl";
 import {
   formatBankedPremiumSessionCreditsLabel,
   formatPremiumSessionCreditsLabel,

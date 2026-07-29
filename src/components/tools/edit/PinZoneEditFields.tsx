@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { AnnotationRecord } from "../../../domain/map/annotations";
-import { TextField } from "../../ui/TextField";
+import { TextField } from "../../ui/forms/TextField";
 import type { EditSavePayload, EditSaveResult } from "./types";
 
 export type PinZoneAnnotation = AnnotationRecord & {

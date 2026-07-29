@@ -1,4 +1,4 @@
-import { AppErrorPage } from "../components/ui/AppErrorPage";
+import { AppErrorPage } from "../components/ui/feedback/AppErrorPage";
 
 export function NotFound() {
   return (

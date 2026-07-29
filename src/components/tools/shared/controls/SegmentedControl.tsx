@@ -1,4 +1,4 @@
-import { HudSegmentControl } from "../../../ui/HudSegmentControl";
+import { HudSegmentControl } from "../../../ui/forms/HudSegmentControl";
 
 interface SegmentedOption<Value extends string> {
   value: Value;

@@ -6,7 +6,7 @@ import {
   gameSizeLabel,
   recommendGameSize,
 } from "../../../domain/session/size/gameSize";
-import { HudSegmentControl } from "../../ui/HudSegmentControl";
+import { HudSegmentControl } from "../../ui/forms/HudSegmentControl";
 import { FRAMING_MODE_OPTIONS } from "./gameAreaFramingUi";
 
 interface FramingModeSegmentControlProps {
