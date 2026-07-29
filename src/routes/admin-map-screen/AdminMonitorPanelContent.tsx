@@ -1,6 +1,6 @@
 import type { SessionRecord } from "../../domain/map/annotations";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
-import type { PlayerRole } from "../../domain/session/playerRole";
+import type { SessionRulesInput } from "../../domain/session/rules";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { LayerVisibility } from "../../state/sessionStore";
 import type { MapViewportState } from "../../components/map/MapViewportTracker";
 import type { ObserverMapScreenController } from "../observer-map-screen/useObserverMapScreen";
