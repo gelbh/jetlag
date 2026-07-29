@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useLandscapeMapDominant } from "../layout/useLandscapeMapDominant";
 
 export type MapLandscapeChromeMode = "portrait" | "collapsed" | "revealed";
@@ -13,11 +13,10 @@ export function useMapLandscapeChromeReveal(): {
   const landscapeActive = useLandscapeMapDominant();
   const [revealed, setRevealed] = useState(false);
 
-  useEffect(() => {
-    if (!landscapeActive) {
-      setRevealed(false);
-    }
-  }, [landscapeActive]);
+  // Reset reveal when leaving landscape (adjust during render — avoids setState-in-effect).
+  if (!landscapeActive && revealed) {
+    setRevealed(false);
+  }
 
   const toggle = useCallback(() => {
     setRevealed((open) => !open);
