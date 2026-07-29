@@ -25,6 +25,16 @@ vi.mock("../core/firebase", () => ({
   getFirebaseFunctions: vi.fn(async () => ({})),
 }));
 
+const track = vi.hoisted(() => vi.fn());
+
+vi.mock("../core/analytics", () => ({
+  ANALYTICS_EVENTS: {
+    premium_checkout_started: "premium_checkout_started",
+    premium_checkout_failed: "premium_checkout_failed",
+  },
+  track,
+}));
+
 describe("premiumBilling", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -75,6 +85,10 @@ describe("premiumBilling", () => {
     await expect(startPremiumCheckout("pack_1")).rejects.toThrow(
       "Could not start checkout.",
     );
+    expect(track).toHaveBeenCalledWith("premium_checkout_failed", {
+      productKey: "pack_1",
+      message: "Could not start checkout.",
+    });
   });
 
   it("starts checkout and returns the redirect URL", async () => {
@@ -86,14 +100,21 @@ describe("premiumBilling", () => {
     expect(callable).toHaveBeenCalledWith({
       productKey: "pack_3",
     });
+    expect(track).toHaveBeenCalledWith("premium_checkout_started", {
+      productKey: "pack_3",
+    });
   });
 
-  it("rejects checkout when the redirect URL is missing", async () => {
+  it("tracks checkout failure when redirect URL is missing", async () => {
     callable.mockResolvedValueOnce({ data: {} });
 
     await expect(startPremiumCheckout("monthly")).rejects.toThrow(
       "Checkout URL missing.",
     );
+    expect(track).toHaveBeenCalledWith("premium_checkout_failed", {
+      productKey: "monthly",
+      message: "Checkout URL missing.",
+    });
   });
 
   it("starts the app-managed free trial", async () => {

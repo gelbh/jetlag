@@ -7,6 +7,7 @@ import {
 } from "../../domain/session/activity/sessionActivityLog";
 import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
 import { parsePhotoAnswer } from "../../domain/questions/photoQuestions";
+import { trackSessionEnded } from "../core/analytics";
 import { appendSessionActivityEvent } from "./sessionActivityLog";
 
 /** Fire-and-forget append; lifecycle writers must not fail the primary action. */
@@ -16,6 +17,12 @@ export function voidAppendSessionActivityEvent(
   void appendSessionActivityEvent(event).catch(() => {
     // Silent miss — timeline stays on last good snapshot.
   });
+}
+
+function isGameOverAnalyticsOutcome(
+  outcome: GameOutcome | string | undefined,
+): boolean {
+  return outcome === "found" || outcome === "abandoned";
 }
 
 export function pendingActivityEventId(
@@ -83,6 +90,10 @@ export function emitGameEndedActivity(
     createdByUid,
     payload,
   });
+  // Host end / leave paths track separately; ended_early must not double-fire.
+  if (isGameOverAnalyticsOutcome(payload.outcome)) {
+    trackSessionEnded("game_over");
+  }
 }
 
 export function emitQuestionAskedActivity(input: {
