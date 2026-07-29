@@ -200,14 +200,19 @@ export function boundsForVertexPolygon(vertices: readonly LatLngTuple[]): Boundi
     return null;
   }
 
-  const lats = vertices.map(([lat]) => lat);
-  const lngs = vertices.map(([, lng]) => lng);
-  const box = normalizeBoundingBox({
-    south: Math.min(...lats),
-    west: Math.min(...lngs),
-    north: Math.max(...lats),
-    east: Math.max(...lngs),
-  });
+  let south = Infinity;
+  let west = Infinity;
+  let north = -Infinity;
+  let east = -Infinity;
+
+  for (const [lat, lng] of vertices) {
+    if (lat < south) south = lat;
+    if (lat > north) north = lat;
+    if (lng < west) west = lng;
+    if (lng > east) east = lng;
+  }
+
+  const box = normalizeBoundingBox({ south, west, north, east });
 
   const latSpanMeters = (box.north - box.south) * 111_320;
   const lngSpanMeters =

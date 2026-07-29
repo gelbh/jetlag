@@ -25,15 +25,19 @@ export function boundingBoxFromPositions(
     return null;
   }
 
-  const lats = positions.map(([lat]) => lat);
-  const lngs = positions.map(([, lng]) => lng);
+  let south = Infinity;
+  let west = Infinity;
+  let north = -Infinity;
+  let east = -Infinity;
 
-  return normalizeBoundingBox({
-    south: Math.min(...lats),
-    west: Math.min(...lngs),
-    north: Math.max(...lats),
-    east: Math.max(...lngs),
-  });
+  for (const [lat, lng] of positions) {
+    if (lat < south) south = lat;
+    if (lat > north) north = lat;
+    if (lng < west) west = lng;
+    if (lng > east) east = lng;
+  }
+
+  return normalizeBoundingBox({ south, west, north, east });
 }
 
 function boundingBoxFromPoint(point: LatLngTuple): BoundingBox {
@@ -58,12 +62,16 @@ function collectPolygonPositions(
 
   if (feature.geometry.type === "Polygon") {
     for (const ring of feature.geometry.coordinates) {
-      positions.push(...positionsFromGeoJson(ring));
+      for (const pos of positionsFromGeoJson(ring)) {
+        positions.push(pos);
+      }
     }
   } else if (feature.geometry.type === "MultiPolygon") {
     for (const polygon of feature.geometry.coordinates) {
       for (const ring of polygon) {
-        positions.push(...positionsFromGeoJson(ring));
+        for (const pos of positionsFromGeoJson(ring)) {
+          positions.push(pos);
+        }
       }
     }
   }

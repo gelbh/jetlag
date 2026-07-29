@@ -49,4 +49,35 @@ describe("placementCameraFingerprint", () => {
 
     expect(withoutWalk).toBe(withWalk);
   });
+
+  it("does not crash with >65K elimination coordinates (RangeError regression)", () => {
+    const coordCount = 80_000;
+    const ring: [number, number][] = Array.from({ length: coordCount }, (_, i) => [
+      -6.26 + (i % 100) * 0.001,
+      53.35 + Math.floor(i / 100) * 0.001,
+    ]);
+    ring.push(ring[0]!);
+
+    const result = placementCameraFingerprint({
+      tool: "thermometer",
+      phase: "answered",
+      overlays: [],
+      eliminationFeatures: [
+        {
+          geometry: {
+            type: "MultiPolygon",
+            coordinates: [[ring]],
+          },
+        },
+      ],
+      selectedPoiId: null,
+      seekerResolving: false,
+      eliminationPreview: true,
+    });
+
+    expect(() => JSON.parse(result)).not.toThrow();
+    const parsed = JSON.parse(result);
+    expect(parsed.eliminationHash).toBeTypeOf("string");
+    expect(parsed.eliminationHash).toContain(",");
+  });
 });
