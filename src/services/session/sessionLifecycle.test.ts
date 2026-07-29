@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { endSession, leaveHostSession } from "./sessionLifecycle";
 
 const callable = vi.hoisted(() =>
@@ -7,6 +7,7 @@ const callable = vi.hoisted(() =>
 const httpsCallable = vi.hoisted(() => vi.fn(() => callable));
 const getFirebaseFunctions = vi.hoisted(() => vi.fn(async () => ({})));
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => true));
+const trackSessionEnded = vi.hoisted(() => vi.fn());
 
 vi.mock("../core/firebase", () => ({
   getFirebaseFunctions,
@@ -17,20 +18,40 @@ vi.mock("firebase/functions", () => ({
   httpsCallable,
 }));
 
+vi.mock("../core/analytics", () => ({
+  trackSessionEnded,
+}));
+
 describe("sessionLifecycle", () => {
+  beforeEach(() => {
+    trackSessionEnded.mockClear();
+    callable.mockClear();
+    httpsCallable.mockClear();
+    isFirebaseConfigured.mockReturnValue(true);
+  });
+
   it("calls leaveHostSession with the session id", async () => {
     await leaveHostSession("session-42");
 
     expect(httpsCallable).toHaveBeenCalledWith({}, "leaveHostSession");
     expect(callable).toHaveBeenCalledWith({ sessionId: "session-42" });
+    expect(trackSessionEnded).not.toHaveBeenCalled();
   });
 
-  it("calls endSession with the session id", async () => {
+  it("calls endSession and tracks host_end once", async () => {
     callable.mockResolvedValueOnce({ data: { ok: true } } as never);
     await endSession("session-42");
 
     expect(httpsCallable).toHaveBeenCalledWith({}, "endSession");
     expect(callable).toHaveBeenCalledWith({ sessionId: "session-42" });
+    expect(trackSessionEnded).toHaveBeenCalledOnce();
+    expect(trackSessionEnded).toHaveBeenCalledWith("host_end");
+  });
+
+  it("does not track when endSession callable fails", async () => {
+    callable.mockRejectedValueOnce(new Error("network"));
+    await expect(endSession("session-42")).rejects.toThrow("network");
+    expect(trackSessionEnded).not.toHaveBeenCalled();
   });
 
   it("throws when Firebase is not configured", async () => {
