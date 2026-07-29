@@ -6,6 +6,36 @@ export interface ToolDockOverflowMetrics {
   overflowSlots: number;
 }
 
+export interface ToolDockVisibleLabelMetrics {
+  text: string;
+  display: string;
+  slotHeight: number;
+}
+
+export async function readVisibleToolDockLabelMetrics(
+  page: Page,
+): Promise<ToolDockVisibleLabelMetrics[]> {
+  return page.evaluate(() => {
+    const labels = [
+      ...document.querySelectorAll(".jl-tool-dock-bar .jl-tool-slot-label"),
+    ];
+    return labels
+      .map((label) => {
+        const slot = label.closest(".jl-tool-slot");
+        const slotRect = slot?.getBoundingClientRect();
+        if (!slotRect || slotRect.width <= 0) {
+          return null;
+        }
+        return {
+          text: label.textContent?.trim() ?? "",
+          display: getComputedStyle(label).display,
+          slotHeight: slotRect.height,
+        };
+      })
+      .filter((entry): entry is ToolDockVisibleLabelMetrics => entry !== null);
+  });
+}
+
 export async function readToolDockOverflowMetrics(
   page: Page,
 ): Promise<ToolDockOverflowMetrics> {
