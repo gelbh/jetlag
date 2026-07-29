@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { memo, useEffect, useState, type ReactNode } from "react";
 import type { LatLngBoundsExpression } from "leaflet";
 import { MapView } from "../../map/MapView";
 import { FramingPreviewLayers } from "../../map/FramingPreviewLayers";
@@ -37,7 +37,7 @@ function CreateSessionMapShell({ children }: { children?: ReactNode }) {
   return <div className={CREATE_SESSION_MAP_SHELL_CLASS}>{children}</div>;
 }
 
-export function CreateSessionMapPane({
+function CreateSessionMapPaneInner({
   mapStyle,
   onMapStyleChange,
   focusBounds,
@@ -152,3 +152,5 @@ export function CreateSessionMapPane({
     </CreateSessionMapShell>
   );
 }
+
+export const CreateSessionMapPane = memo(CreateSessionMapPaneInner);
