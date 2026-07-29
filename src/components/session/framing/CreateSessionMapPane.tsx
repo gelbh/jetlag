@@ -1,8 +1,8 @@
 import { memo, useEffect, useState, type ReactNode } from "react";
 import type { LatLngBoundsExpression } from "leaflet";
-import { MapView } from "../../map/MapView";
-import { FramingPreviewLayers } from "../../map/FramingPreviewLayers";
-import { GameAreaMask } from "../../map/GameAreaMask";
+import { MapView } from "../../map/chrome/MapView";
+import { FramingPreviewLayers } from "../../map/layers/FramingPreviewLayers";
+import { GameAreaMask } from "../../map/layers/GameAreaMask";
 import type { GameArea } from "../../../domain/map/annotations";
 import type { MapStyle } from "../../../domain/map/mapBasemaps";
 import type { FramingMode } from "../../../hooks/session/useGameAreaFraming";

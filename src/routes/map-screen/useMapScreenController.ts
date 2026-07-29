@@ -1,5 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
-import type { MapChromeControlInset } from "../../components/map/mapChromeControlInset";
+import type { MapChromeControlInset } from "../../components/map/helpers/mapChromeControlInset";
 import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useMapScreenTools } from "../../hooks/map-screen/useMapScreenTools";
 import { useMapSessionActions } from "../../hooks/map-screen/useMapSessionActions";

@@ -14,33 +14,33 @@ vi.mock("../components/incident/HotfixGraceChip", () => ({
   HotfixGraceChip: () => null,
 }));
 
-vi.mock("../components/map/MapView", () => ({
+vi.mock("../components/map/chrome/MapView", () => ({
   MapView: ({ children }: { children?: React.ReactNode }) => (
     <div data-testid="map-screen-view">{children}</div>
   ),
 }));
 
-vi.mock("../components/map/MapViewportTracker", () => ({
+vi.mock("../components/map/chrome/MapViewportTracker", () => ({
   MapViewportTracker: () => null,
 }));
 
-vi.mock("../components/map/GameAreaMask", () => ({
+vi.mock("../components/map/layers/GameAreaMask", () => ({
   GameAreaMask: () => null,
 }));
 
-vi.mock("../components/map/LiveUserLocationLayer", () => ({
+vi.mock("../components/map/layers/LiveUserLocationLayer", () => ({
   LiveUserLocationLayer: () => null,
 }));
 
-vi.mock("../components/map/AnnotationLayer", () => ({
+vi.mock("../components/map/layers/AnnotationLayer", () => ({
   AnnotationLayer: () => null,
 }));
 
-vi.mock("../components/map/GeometryEditLayer", () => ({
+vi.mock("../components/map/layers/GeometryEditLayer", () => ({
   GeometryEditLayer: () => null,
 }));
 
-vi.mock("../components/map/MapDraftLayer", () => ({
+vi.mock("../components/map/layers/MapDraftLayer", () => ({
   MapDraftLayer: () => null,
 }));
 

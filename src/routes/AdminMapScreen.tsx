@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppNavigate } from "../navigation/AppNavigate";
-import { GameAreaMask } from "../components/map/GameAreaMask";
-import { MapView } from "../components/map/MapView";
-import { MapViewportTracker } from "../components/map/MapViewportTracker";
+import { GameAreaMask } from "../components/map/layers/GameAreaMask";
+import { MapView } from "../components/map/chrome/MapView";
+import { MapViewportTracker } from "../components/map/chrome/MapViewportTracker";
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { SessionLog } from "../components/session/log/SessionLog";
 import { InlineError } from "../components/ui/banners/InlineError";

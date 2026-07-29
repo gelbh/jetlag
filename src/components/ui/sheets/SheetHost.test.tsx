@@ -4,8 +4,8 @@ import { useEffect, type ReactNode } from "react";
 import { SheetHost } from "./SheetHost";
 import {
   ContextualRailPanelProvider,
-} from "../../map/ContextualRailContext";
-import { useContextualRailPanel } from "../../map/useContextualRailPanel";
+} from "../../map/chrome/ContextualRailContext";
+import { useContextualRailPanel } from "../../map/helpers/useContextualRailPanel";
 
 const useDesktopLayout = vi.fn();
 vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
