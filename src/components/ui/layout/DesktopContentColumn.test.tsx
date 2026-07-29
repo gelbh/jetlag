@@ -4,6 +4,7 @@ import { DesktopContentColumn } from "./DesktopContentColumn";
 
 const useDesktopLayout = vi.fn();
 vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
+  DESKTOP_LAYOUT_MIN_WIDTH_PX: 1024,
   useDesktopLayout: () => useDesktopLayout(),
 }));
 

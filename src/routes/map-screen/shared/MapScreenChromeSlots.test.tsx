@@ -4,6 +4,7 @@ import { MapLandscapeChromeProvider } from "../../../components/session/mapChrom
 import { MapScreenChromeSlots } from "./MapScreenChromeSlots";
 
 vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
+  DESKTOP_LAYOUT_MIN_WIDTH_PX: 1024,
   useDesktopLayout: () => false,
 }));
 
