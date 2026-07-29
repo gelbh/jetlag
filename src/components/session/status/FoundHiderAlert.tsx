@@ -1,4 +1,4 @@
-import type { PlayerRole } from "../../../domain/session/playerRole";
+import type { PlayerRole } from "../../../domain/session/players/playerRole";
 import { MapFloatAlert, MapFloatAlertPanel } from "../../ui/MapFloatAlert";
 
 interface FoundHiderAlertProps {

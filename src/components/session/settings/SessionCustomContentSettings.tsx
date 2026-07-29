@@ -1,5 +1,5 @@
 import { useId } from "react";
-import type { AdvancedSessionSettingsValue } from "../../../domain/session/advancedSessionSettings";
+import type { AdvancedSessionSettingsValue } from "../../../domain/session/tools/advancedSessionSettings";
 import type { GameArea } from "../../../domain/map/annotations";
 import { CategoryEditor } from "../customContent/CategoryEditor";
 import { MatchingAreaUpload } from "../customContent/MatchingAreaUpload";

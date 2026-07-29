@@ -5,8 +5,8 @@ import {
   clusterHiderLocations,
   clusterTooltipLabel,
   locationClusterStableKey,
-} from "../../../domain/session/liveMapLocations";
-import type { PlayerLocationRecord } from "../../../domain/session/sessionChat";
+} from "../../../domain/session/live/liveMapLocations";
+import type { PlayerLocationRecord } from "../../../domain/session/activity/sessionChat";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 
 interface LiveHiderLocationsLayerProps {

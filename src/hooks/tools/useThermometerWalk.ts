@@ -5,7 +5,7 @@ import {
   buildThermometerStartPointGeometry,
   crowFliesDistanceMeters,
 } from "../../domain/questions";
-import type { PendingQuestionPlacement } from "../../domain/session/sessionChat";
+import type { PendingQuestionPlacement } from "../../domain/session/activity/sessionChat";
 import { useLiveLocation } from "../location/useLiveLocation";
 
 interface UseThermometerWalkParams {

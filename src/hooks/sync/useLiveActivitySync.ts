@@ -1,21 +1,21 @@
 import { useEffect, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import type { SessionRulesInput } from "../../domain/session/rules";
 import {
   formatHidingPeriodCountdown,
   hidingPeriodRemainingMs,
   isHidingPeriodActive,
   seekPhaseElapsedMs,
-} from "../../domain/session/hidingPeriod";
+} from "../../domain/session/hiding/hidingPeriod";
 import type { NotificationPreferences } from "../../domain/device/notifications";
 import { selectPrimaryQuestionTimer } from "../../domain/questions";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import {
   computeElapsedMs,
   formatElapsedTime,
   isTimerRunning,
   type TimerState,
-} from "../../domain/session/timer";
+} from "../../domain/session/timer/timer";
 import { JetlagLiveActivity } from "../../services/core/liveActivity";
 
 const ANDROID_QUESTION_NOTIFICATION_ID = 1001;

@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { THERMOMETER_WALK_MAX_DURATION_MS } from "../../domain/questions";
 import { STALE_WALK_CLOCK_MS } from "./useStaleWalkNowMs";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { useCancelOrphanThermometerWalks } from "./useCancelOrphanThermometerWalks";
 
 function walkingQuestion(

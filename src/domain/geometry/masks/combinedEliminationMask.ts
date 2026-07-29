@@ -17,7 +17,7 @@ import {
   buildMaskFromUnionInput,
 } from "../kernel/buildMask";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
-import type { HidingZoneRecord } from "../../session/hidingZone";
+import type { HidingZoneRecord } from "../../session/hiding/hidingZone";
 import type { PolygonFeature } from "../kernel/types";
 
 /** Sync TS bootstrap/fallback mask (never WASM half-plane/radar). */

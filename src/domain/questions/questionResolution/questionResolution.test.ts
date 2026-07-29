@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
-import type { PendingQuestionRecord } from "../../session/sessionChat";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { milesToMeters } from "../../map/distance";
 import { serializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import {

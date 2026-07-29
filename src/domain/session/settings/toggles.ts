@@ -1,10 +1,10 @@
 import type { DistanceUnit } from "../../map/distance";
-import type { GameSize } from "../gameSize";
-import { thermometerPresetsMetersForGameSize } from "../gameSizeRules";
+import type { GameSize } from "../size/gameSize";
+import { thermometerPresetsMetersForGameSize } from "../size/gameSizeRules";
 import {
   ALL_CONFIGURABLE_TOOLS,
   type ConfigurableMapTool,
-} from "../sessionRules";
+} from "../rules";
 import type { AdvancedSessionSettingsValue } from "./types";
 
 export function isToolDisabledInSettings(

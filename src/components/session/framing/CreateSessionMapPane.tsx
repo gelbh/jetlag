@@ -11,7 +11,7 @@ import {
   GameAreaFramingStats,
 } from "./GameAreaFramingControls";
 import { framingModeHint } from "./gameAreaFramingUi";
-import { type GameSize } from "../../../domain/session/gameSize";
+import { type GameSize } from "../../../domain/session/size/gameSize";
 
 /** Shared outer shell so placeholder and live map keep identical layout (CLS). */
 export const CREATE_SESSION_MAP_SHELL_CLASS =

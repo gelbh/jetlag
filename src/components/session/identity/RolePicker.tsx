@@ -1,5 +1,5 @@
-import type { PlayerRole } from "../../../domain/session/playerRole";
-import { playerRoleLabel } from "../../../domain/session/playerRole";
+import type { PlayerRole } from "../../../domain/session/players/playerRole";
+import { playerRoleLabel } from "../../../domain/session/players/playerRole";
 import { RadioCardGroup } from "../../ui/RadioCardGroup";
 
 interface RolePickerProps {

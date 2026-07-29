@@ -1,9 +1,9 @@
-import { toggleToolInSettings } from "../../../domain/session/advancedSessionSettings";
+import { toggleToolInSettings } from "../../../domain/session/tools/advancedSessionSettings";
 import { MAP_TOOL_DOCK_ENTRIES } from "../../../domain/map/mapTools";
 import {
   ALL_CONFIGURABLE_TOOLS,
   type ConfigurableMapTool,
-} from "../../../domain/session/sessionRules";
+} from "../../../domain/session/rules";
 import {
   AdvancedSettingsSectionHeader,
   AdvancedSettingsToggle,

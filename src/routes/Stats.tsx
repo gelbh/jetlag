@@ -8,7 +8,7 @@ import {
   screenHeaderOffsetClassName,
 } from "../components/ui/ScreenHeader";
 import type { LeaderboardRole } from "../domain/game/leaderboard";
-import { playerRoleLabel } from "../domain/session/playerRole";
+import { playerRoleLabel } from "../domain/session/players/playerRole";
 
 const ROLE_TABS: Array<{ value: LeaderboardRole; label: string }> = [
   { value: "hider", label: playerRoleLabel("hider") },

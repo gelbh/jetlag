@@ -1,5 +1,5 @@
 import type { GameArea } from "../../../domain/map/annotations";
-import type { TransitStation } from "../../../domain/session/hidingZone";
+import type { TransitStation } from "../../../domain/session/hiding/hidingZone";
 import { gameAreaToBoundingBox } from "../../../domain/geometry/geometry";
 import { intersectBoundingBoxes } from "../../../domain/geometry/gameAreaBounds";
 import type { MatchingFeature } from "../../../domain/geo/types";

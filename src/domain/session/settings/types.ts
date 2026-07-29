@@ -4,9 +4,9 @@ import type {
   CustomMatchingAreasByLevel,
   SessionCustomCategory,
   SessionCustomLocationPin,
-} from "../sessionCustomContent";
-import type { SessionCustomMeasureGeometry } from "../customMeasureGeometry";
-import type { ConfigurableMapTool } from "../sessionRules";
+} from "../catalog/sessionCustomContent";
+import type { SessionCustomMeasureGeometry } from "../catalog/customMeasureGeometry";
+import type { ConfigurableMapTool } from "../rules";
 
 export interface AdvancedSessionSettingsValue {
   customHidingZoneRadiusEnabled: boolean;

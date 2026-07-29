@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../map/annotations";
-import type { PendingQuestionRecord } from "../session/sessionChat";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { buildCatalogHelpers } from "./catalogHelpers";
 
 type TestOption = "a" | "b" | "c";

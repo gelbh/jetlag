@@ -1,5 +1,5 @@
 import { useId } from "react";
-import type { TransitStation } from "../../domain/session/hidingZone";
+import type { TransitStation } from "../../domain/session/hiding/hidingZone";
 import { LoadingReadout } from "../tools/shared/LoadingReadout";
 
 interface TransitStationPickerProps {

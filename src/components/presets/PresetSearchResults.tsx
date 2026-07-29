@@ -4,7 +4,7 @@ import {
   isBundledPresetId,
 } from "../../domain/regions/bundledGamePresets";
 import { formatBundledPresetLocation } from "../../domain/regions/bundledPresetHierarchy";
-import { migrateGamePreset } from "../../domain/session/gamePreset";
+import { migrateGamePreset } from "../../domain/session/presets/gamePreset";
 import { PresetCard } from "./PresetCard";
 import { PresetFavouriteButton } from "./PresetFavouriteButton";
 

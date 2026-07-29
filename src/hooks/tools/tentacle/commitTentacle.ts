@@ -13,7 +13,7 @@ import {
   tentacleQuestionPrompt,
   type TentacleExtendedCategoryId,
 } from "../../../domain/questions";
-import type { SessionRulesInput } from "../../../domain/session/sessionRules";
+import type { SessionRulesInput } from "../../../domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 import { emitQuestionAnsweredActivity } from "../../../services/session/emitSessionActivity";
 

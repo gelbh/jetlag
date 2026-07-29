@@ -24,17 +24,17 @@ import type {
   SessionRecord,
   SessionTier,
 } from "../../domain/map/annotations";
-import { hidingZoneRadiusMeters, type GameSize } from "../../domain/session/gameSize";
-import type { SessionRulesPatch } from "../../domain/session/advancedSessionSettings";
+import { hidingZoneRadiusMeters, type GameSize } from "../../domain/session/size/gameSize";
+import type { SessionRulesPatch } from "../../domain/session/tools/advancedSessionSettings";
 import {
   resolvePlayerRole,
   type PlayerRole,
-} from "../../domain/session/playerRole";
-import { timerStateToRemote, type TimerState } from "../../domain/session/timer";
+} from "../../domain/session/players/playerRole";
+import { timerStateToRemote, type TimerState } from "../../domain/session/timer/timer";
 import {
   sessionVersionCompatible,
   sessionVersionMismatchMessage,
-} from "../../domain/session/sessionVersion";
+} from "../../domain/session/meta/sessionVersion";
 import { APP_VERSION } from "../../domain/device/changelog";
 import { getFirestoreDb } from "../core/firebase";
 import { forceRefreshIdToken } from "../core/auth/forceRefreshIdToken";
@@ -44,7 +44,7 @@ import {
   deserializeSessionFromFirestore,
   sessionRulesPatchToFirestore,
 } from "./serialization/serializeSession";
-import { buildJoinPreviewSession } from "../../domain/session/joinPreviewSession";
+import { buildJoinPreviewSession } from "../../domain/session/join/joinPreviewSession";
 import { photoUploadAccessError } from "../../domain/questions";
 import { generateSessionCode } from "../session/sessionCodes";
 import {
@@ -56,7 +56,7 @@ import { emitGameEndedActivity } from "../session/emitSessionActivity";
 import {
   buildMemberUidsAfterHeal,
   sanitizeReturningMemberUid,
-} from "../../domain/session/returningMember";
+} from "../../domain/session/players/returningMember";
 
 const HIDER_ROLE_POLL_MS = 250;
 const HIDER_ROLE_POLL_MAX_MS = 3000;

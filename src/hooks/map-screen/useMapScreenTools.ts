@@ -11,9 +11,9 @@ import { hasOpenPendingQuestion } from "../../domain/questions";
 import type {
   PendingQuestionRecord,
   PendingQuestionToolType,
-} from "../../domain/session/sessionChat";
-import { sessionHasHiders } from "../../domain/session/playerRole";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
+} from "../../domain/session/activity/sessionChat";
+import { sessionHasHiders } from "../../domain/session/players/playerRole";
+import type { SessionRulesInput } from "../../domain/session/rules";
 import { useGeolocation } from "../location/useGeolocation";
 import { usePendingQuestionActions } from "../sync/usePendingQuestionActions";
 import { usePhotoTool } from "../tools/usePhotoTool";

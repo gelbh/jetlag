@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { SessionActivityEvent } from "../domain/session/sessionActivityLog";
+import type { SessionActivityEvent } from "../domain/session/activity/sessionActivityLog";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { useActivityLogStore } from "./activityLogStore";
 

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
-import { resolvePlayerRole } from "../../domain/session/playerRole";
+import { resolvePlayerRole } from "../../domain/session/players/playerRole";
 import {
   findLastRedoableAnnotation,
   findLastUndoableAnnotation,

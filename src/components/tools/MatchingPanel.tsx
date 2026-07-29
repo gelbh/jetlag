@@ -9,7 +9,7 @@ import {
   type MatchingCategoryDefinition,
   type MatchingCategoryId,
 } from "../../domain/questions";
-import { resolveMatchingCategory } from "../../domain/session/sessionCustomCatalog";
+import { resolveMatchingCategory } from "../../domain/session/catalog/sessionCustomCatalog";
 import { matchingFeatureCountLabel, matchingNullAnswerMessage } from "../../services/geo/matchingFeatures";
 import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
 import { GroupedSelectField } from "../ui/GroupedSelectField";

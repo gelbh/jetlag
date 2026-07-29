@@ -1,4 +1,4 @@
-import type { SessionCustomCategory } from "../../session/sessionCustomContent";
+import type { SessionCustomCategory } from "../../session/catalog/sessionCustomContent";
 
 export type MatchingAnswer = "yes" | "no";
 

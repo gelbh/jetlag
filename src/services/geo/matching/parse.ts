@@ -9,8 +9,8 @@ import {
   matchingUsesExpandedFeatureSearch,
   type MatchingCategoryId,
 } from "../../../domain/questions";
-import { resolveMatchingCategory } from "../../../domain/session/sessionCustomCatalog";
-import type { SessionCustomCategory } from "../../../domain/session/sessionCustomContent";
+import { resolveMatchingCategory } from "../../../domain/session/catalog/sessionCustomCatalog";
+import type { SessionCustomCategory } from "../../../domain/session/catalog/sessionCustomContent";
 import type { OverpassElement } from "./types";
 
 function isHonoraryConsulate(tags: Record<string, string>): boolean {

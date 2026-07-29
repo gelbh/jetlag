@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import type { PlayerRole } from "../../../domain/session/playerRole";
-import { isHidingTimerEffectivelyRunning } from "../../../domain/session/timer";
+import type { PlayerRole } from "../../../domain/session/players/playerRole";
+import { isHidingTimerEffectivelyRunning } from "../../../domain/session/timer/timer";
 import { useQuestionDeadlineEnforcement } from "../../../hooks/session/useQuestionDeadlineEnforcement";
 import { useCancelOrphanThermometerWalks } from "../../../hooks/sync/useCancelOrphanThermometerWalks";
 import { usePendingQuestionResolver } from "../../../hooks/sync/usePendingQuestionResolver";

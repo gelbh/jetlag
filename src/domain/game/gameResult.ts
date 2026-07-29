@@ -1,4 +1,4 @@
-import type { GameSize } from "../session/gameSize";
+import type { GameSize } from "../session/size/gameSize";
 import type { GameOutcome } from "./foundHider";
 
 export interface GameResultPlayer {

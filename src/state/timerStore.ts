@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import {
   INITIAL_TIMER_STATE,
   type TimerState,
-} from "../domain/session/timer";
+} from "../domain/session/timer/timer";
 
 interface TimerStoreState {
   bySessionId: Record<string, TimerState>;

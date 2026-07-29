@@ -11,7 +11,7 @@ import {
   searchStations,
   type HidingZoneRecord,
   type TransitStation,
-} from "../../domain/session/hidingZone";
+} from "../../domain/session/hiding/hidingZone";
 import type { MapViewportBounds } from "../../domain/map/transitViewport";
 import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
 import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matchingFeatures";

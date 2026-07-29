@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FirebaseError } from "firebase/app";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import {
   buildPendingQuestionDocument,
   deserializePendingQuestionFromFirestore,

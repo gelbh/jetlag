@@ -1,8 +1,8 @@
 import type { Feature, LineString, Point } from "geojson";
 import type { LatLngTuple } from "../geometry/geometry";
 import { haversineMeters } from "../geometry/distance";
-import type { PendingQuestionPlacement } from "../session/sessionChat";
-import type { PendingQuestionRecord } from "../session/sessionChat";
+import type { PendingQuestionPlacement } from "../session/activity/sessionChat";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 
 export function parseThermometerStartPoint(
   placement: PendingQuestionPlacement,

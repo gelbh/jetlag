@@ -1,6 +1,6 @@
 import type { MatchingCategoryDefinition } from "../questions/matchingQuestions";
 import type { MeasuringCatalogOption } from "../questions/measuringQuestions";
-import type { SessionRulesInput } from "../session/sessionRules";
+import type { SessionRulesInput } from "../session/rules";
 import {
   getRegionPackConfig,
   isKnownRegionPack,

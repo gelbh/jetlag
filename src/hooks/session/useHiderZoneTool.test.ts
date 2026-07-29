@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestGameArea } from "../../test/fixtures/sessions";
-import type { HidingZoneRecord } from "../../domain/session/hidingZone";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import { useHiderZoneTool } from "./useHiderZoneTool";
 
 const writeHidingZone = vi.hoisted(() => vi.fn());

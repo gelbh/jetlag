@@ -11,8 +11,8 @@ import { milesToMeters } from "./distance";
 import {
   createSessionDraftToGamePreset,
   gamePresetToCreateSessionDraft,
-} from "../session/gamePreset";
-import { defaultAdvancedSessionSettings } from "../session/advancedSessionSettings";
+} from "../session/presets/gamePreset";
+import { defaultAdvancedSessionSettings } from "../session/tools/advancedSessionSettings";
 
 describe("distancePresets", () => {
   it("uses native metric radar presets", () => {

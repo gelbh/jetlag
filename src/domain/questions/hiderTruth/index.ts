@@ -1,6 +1,6 @@
 import type { GameArea } from "../../map/annotations";
 import type { LatLngTuple } from "../../geometry/geometry";
-import type { PendingQuestionRecord } from "../../session/sessionChat";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { truthMatching, truthMatchingAsync } from "./matching";
 import { truthMeasuringSeaLevel, truthMeasuringSync } from "./measuring";
 import { truthRadar } from "./radar";

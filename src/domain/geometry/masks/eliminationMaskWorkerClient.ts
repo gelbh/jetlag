@@ -2,7 +2,7 @@ import { wrap } from "comlink";
 import type { Remote } from "comlink";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
-import type { HidingZoneRecord } from "../../session/hidingZone";
+import type { HidingZoneRecord } from "../../session/hiding/hidingZone";
 import {
   annotationsToEndGameDisks,
   computeEliminationUnionInput,

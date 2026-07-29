@@ -1,5 +1,5 @@
-import { gameSizeLabel, type GameSize } from "../session/gameSize";
-import { playerRoleLabel } from "../session/playerRole";
+import { gameSizeLabel, type GameSize } from "../session/size/gameSize";
+import { playerRoleLabel } from "../session/players/playerRole";
 import {
   leaderboardMetricLabel,
   type LeaderboardEntry,

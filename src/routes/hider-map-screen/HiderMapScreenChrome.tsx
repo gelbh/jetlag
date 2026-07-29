@@ -3,7 +3,7 @@ import type { AnnotationRecord, SessionRecord } from "../../domain/map/annotatio
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,
-} from "../../domain/session/sessionChat";
+} from "../../domain/session/activity/sessionChat";
 import type { LayerVisibility } from "../../state/sessionStore";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { MapStyle, StreetBasemap } from "../../domain/map/mapBasemaps";

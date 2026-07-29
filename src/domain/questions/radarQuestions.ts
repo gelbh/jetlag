@@ -1,7 +1,7 @@
 import type { AnnotationRecord } from "../map/annotations";
-import type { PendingQuestionRecord } from "../session/sessionChat";
-import type { GameSize } from "../session/gameSize";
-import { presetMetersForMiles } from "../session/toolSessionOptions";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
+import type { GameSize } from "../session/size/gameSize";
+import { presetMetersForMiles } from "../session/tools/toolSessionOptions";
 import {
   formatDistance,
   MILE_RADIUS_PRESETS,

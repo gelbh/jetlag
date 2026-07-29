@@ -18,7 +18,7 @@ import {
 } from "../../domain/device/motionTokens";
 import { useMapToolInteraction } from "../../hooks/map-screen/useMapToolInteraction";
 import { useAdminBoundaryFeatures } from "../../hooks/map-screen/useAdminBoundaryFeatures";
-import { resolveToolDockEnabled } from "../../domain/session/sessionRules";
+import { resolveToolDockEnabled } from "../../domain/session/rules";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useToolPanelChrome } from "../../hooks/useToolPanelChrome";
 import type { MapTool } from "../../state/sessionStore";

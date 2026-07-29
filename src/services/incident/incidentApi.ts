@@ -5,7 +5,7 @@ import type {
   IncidentMitigationType,
   IncidentStatus,
 } from "../../domain/incident/incidentTypes";
-import type { PlayerRole } from "../../domain/session/playerRole";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
 
 function mapCallableError(error: unknown, fallback: string): Error {

@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import type { HidingZoneRecord } from "../../domain/session/hidingZone";
-import { isHidingPeriodActive } from "../../domain/session/hidingPeriod";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
-import type { TimerState } from "../../domain/session/timer";
-import { computeElapsedMs } from "../../domain/session/timer";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
+import { isHidingPeriodActive } from "../../domain/session/hiding/hidingPeriod";
+import type { SessionRulesInput } from "../../domain/session/rules";
+import type { TimerState } from "../../domain/session/timer/timer";
+import { computeElapsedMs } from "../../domain/session/timer/timer";
 import { distanceBetweenPoints } from "../../domain/geometry/geometry";
 
 const MIN_GPS_BUFFER_METERS = 25;

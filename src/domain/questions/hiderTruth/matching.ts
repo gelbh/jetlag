@@ -7,7 +7,7 @@ import {
   loadGtfsBundle,
   nearestGtfsStopInGameArea,
 } from "@/services/transit/gtfsRouteGraph";
-import type { PendingQuestionRecord } from "../../session/sessionChat";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import {
   deserializeMatchingFeatures,
   matchingFeaturesToAdminDivisions,

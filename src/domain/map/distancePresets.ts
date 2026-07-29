@@ -1,6 +1,6 @@
 import type { DistanceUnit } from "./distance";
 import { milesToMeters } from "./distance";
-import type { GameSize } from "../session/gameSize";
+import type { GameSize } from "../session/size/gameSize";
 
 /** Official metric edition hiding zone radii (m). */
 export const METRIC_HIDING_ZONE_RADIUS_METERS: Record<

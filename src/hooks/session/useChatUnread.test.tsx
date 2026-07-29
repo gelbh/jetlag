@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useChatUnread } from "./useChatUnread";
-import type { SessionMessageRecord } from "../../domain/session/sessionChat";
+import type { SessionMessageRecord } from "../../domain/session/activity/sessionChat";
 
 function message(
   overrides: Partial<SessionMessageRecord> & Pick<SessionMessageRecord, "id">,

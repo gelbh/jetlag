@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   isPlaceholderGameArea,
   JOIN_PREVIEW_PLACEHOLDER_AREA,
-} from "../../domain/session/joinPreviewGameArea";
+} from "../../domain/session/join/joinPreviewGameArea";
 import type { GameArea } from "../../domain/map/annotations";
 import {
   JOIN_AUTH_FAILURE_MESSAGE,

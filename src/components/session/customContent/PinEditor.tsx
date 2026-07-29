@@ -1,7 +1,7 @@
 import { useState } from "react";
-import type { AdvancedSessionSettingsValue } from "../../../domain/session/advancedSessionSettings";
+import type { AdvancedSessionSettingsValue } from "../../../domain/session/tools/advancedSessionSettings";
 import type { LatLngTuple } from "../../../domain/geometry/geometry";
-import type { SessionCustomLocationPin } from "../../../domain/session/sessionCustomContent";
+import type { SessionCustomLocationPin } from "../../../domain/session/catalog/sessionCustomContent";
 
 interface PinEditorProps {
   value: AdvancedSessionSettingsValue;

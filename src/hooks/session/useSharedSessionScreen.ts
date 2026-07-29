@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import type { PlayerRole } from "../../domain/session/playerRole";
-import { DEFAULT_SESSION_RULES } from "../../domain/session/sessionRules";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
+import { DEFAULT_SESSION_RULES } from "../../domain/session/rules";
 import { useChatUnread } from "./useChatUnread";
 import {
   useHidingZonesSync,

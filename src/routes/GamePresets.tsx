@@ -20,22 +20,22 @@ import {
 import {
   defaultAdvancedSessionSettings,
   type AdvancedSessionSettingsValue,
-} from "../domain/session/advancedSessionSettings";
+} from "../domain/session/tools/advancedSessionSettings";
 import type { DistanceUnit } from "../domain/map/distance";
 import type { GameArea } from "../domain/map/annotations";
 import type { BoundingBox } from "../domain/geometry/gameAreaBounds";
-import { hidingZoneRadiusMeters, type GameSize } from "../domain/session/gameSize";
+import { hidingZoneRadiusMeters, type GameSize } from "../domain/session/size/gameSize";
 import {
   createGamePresetId,
   createSessionDraftToGamePreset,
   migrateGamePreset,
   type CreateSessionDraft,
-} from "../domain/session/gamePreset";
+} from "../domain/session/presets/gamePreset";
 import { useGameAreaFraming } from "../hooks/session/useGameAreaFraming";
 import { usePlaceAreaSearch } from "../hooks/session/usePlaceAreaSearch";
 import { useGamePresetStore } from "../state/gamePresetStore";
-import { filterGamePresetsForSearch } from "../domain/session/gamePresetSearch";
-import { resolveFavouritePresets } from "../domain/session/presetFavourites";
+import { filterGamePresetsForSearch } from "../domain/session/presets/gamePresetSearch";
+import { resolveFavouritePresets } from "../domain/session/presets/presetFavourites";
 import { isBundledPresetId } from "../domain/regions/bundledGamePresets";
 import { PresetBrowseLayout } from "../components/presets/PresetBrowseLayout";
 import { useMapStore } from "../state/sessionStore";

@@ -8,7 +8,7 @@ import {
   readPhotoCategoryId,
   type PhotoAnswer,
 } from "../../domain/questions";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 
 interface PhotoAnswerUploaderProps {
   sessionId: string;

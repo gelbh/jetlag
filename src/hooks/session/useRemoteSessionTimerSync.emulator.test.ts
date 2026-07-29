@@ -8,7 +8,7 @@ import {
 } from "../../test/emulator/connectEmulators";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 import { createRemoteSession } from "../../services/firestore/firestoreAnnotations";
-import { startTimer, INITIAL_TIMER_STATE } from "../../domain/session/timer";
+import { startTimer, INITIAL_TIMER_STATE } from "../../domain/session/timer/timer";
 import { useSessionStore } from "../../state/sessionStore";
 import { useRemoteSessionTimerSync } from "./useRemoteSessionTimerSync";
 import { useSessionSync } from "./useSessionSync";

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { getPowerProfile } from "../../domain/device/powerProfile";
-import type { PlayerLocationRecord } from "../../domain/session/sessionChat";
+import type { PlayerLocationRecord } from "../../domain/session/activity/sessionChat";
 import { useMapStore } from "../../state/mapStore";
 import { useLiveLocation } from "../location/useLiveLocation";
 import { isFirebaseConfigured } from "../../services/core/firebase";

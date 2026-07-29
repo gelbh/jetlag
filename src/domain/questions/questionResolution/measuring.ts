@@ -2,7 +2,7 @@ import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import { buildMeasuringRegions, type MeasuringRegionInput } from "../../geometry/measuringRegions";
 import type { MeasuringAnswer } from "../measuringQuestions";
-import type { PendingQuestionRecord } from "../../session/sessionChat";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 
 export function measuringAnswerFromReplyId(
   replyId: string,

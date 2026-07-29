@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { useAppNavigate } from "../useAppNavigate";
 import { usePermanentAuthUser } from "../billing/usePermanentAuthUser";
-import { resolvePlayerRole } from "../../domain/session/playerRole";
+import { resolvePlayerRole } from "../../domain/session/players/playerRole";
 import { joinRemoteSessionByCode } from "../../services/firestore/firestoreAnnotations";
 import { setPremiumApiContext } from "../../services/core/premiumApiContext";
 import { useSessionStore } from "../../state/sessionStore";

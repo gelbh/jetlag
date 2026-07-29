@@ -13,8 +13,8 @@ import {
   matchingUsesExpandedFeatureSearch,
   type MatchingCategoryId,
 } from "../../../domain/questions";
-import { resolveMatchingCategory } from "../../../domain/session/sessionCustomCatalog";
-import type { SessionCustomCategory } from "../../../domain/session/sessionCustomContent";
+import { resolveMatchingCategory } from "../../../domain/session/catalog/sessionCustomCatalog";
+import type { SessionCustomCategory } from "../../../domain/session/catalog/sessionCustomContent";
 import { customMatchingAreasCacheSuffix } from "./matchingAreaGeoJson";
 import { geographicCacheKey } from "../geographicFeatureCache";
 import {

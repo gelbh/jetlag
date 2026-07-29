@@ -1,5 +1,5 @@
 import type { HiderTruthResult } from "../../domain/questions/ui";
-import type { GameReplyOption } from "../../domain/session/sessionChat";
+import type { GameReplyOption } from "../../domain/session/activity/sessionChat";
 import { LoadingReadout } from "../tools/shared/LoadingReadout";
 
 interface HiderAnswerPickerProps {

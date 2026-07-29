@@ -19,12 +19,12 @@ import {
   type RadarAnswer,
 } from "../../domain/questions";
 import { questionCostBreakdown } from "../../domain/questions";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { yesNoAnswerOptions } from "../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import { useSubmitLock } from "../useSubmitLock";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
-import type { GameSize } from "../../domain/session/gameSize";
+import type { GameSize } from "../../domain/session/size/gameSize";
 import { emitQuestionAnsweredActivity } from "../../services/session/emitSessionActivity";
 
 interface UseRadarToolParams {

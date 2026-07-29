@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { JOIN_PREVIEW_PLACEHOLDER_AREA } from "../../domain/session/joinPreviewGameArea";
+import { JOIN_PREVIEW_PLACEHOLDER_AREA } from "../../domain/session/join/joinPreviewGameArea";
 import type { GameArea } from "../../domain/map/annotations";
 import { useObserverMapScreen } from "./useObserverMapScreen";
 

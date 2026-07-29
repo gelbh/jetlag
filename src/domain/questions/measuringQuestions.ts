@@ -1,6 +1,6 @@
 import { resolveCustomPackMeasuringOption } from "./customQuestionPack";
 import type { AnnotationRecord } from "../map/annotations";
-import type { PendingQuestionRecord } from "../session/sessionChat";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { buildCatalogHelpers } from "./catalogHelpers";
 import {
   BODY_OF_WATER_MEASURING_QUESTION,

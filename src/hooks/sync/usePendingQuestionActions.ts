@@ -1,13 +1,13 @@
 import { useCallback, useRef } from "react";
 import type { Feature, LineString } from "geojson";
-import type { PendingQuestionToolType } from "../../domain/session/sessionChat";
-import type { PlayerRole } from "../../domain/session/playerRole";
-import type { GameReplyOption } from "../../domain/session/sessionChat";
+import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
+import type { GameReplyOption } from "../../domain/session/activity/sessionChat";
 import {
   createMessageId,
   createPendingQuestionId,
   type PendingQuestionPlacement,
-} from "../../domain/session/sessionChat";
+} from "../../domain/session/activity/sessionChat";
 import { buildThermometerLineGeometry } from "../../domain/questions";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import {

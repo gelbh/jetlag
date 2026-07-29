@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import type { SessionActivityEvent } from "../../domain/session/sessionActivityLog";
+import type { SessionActivityEvent } from "../../domain/session/activity/sessionActivityLog";
 import { useActivityLogStore } from "../../state/activityLogStore";
 
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => true));

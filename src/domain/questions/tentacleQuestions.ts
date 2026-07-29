@@ -1,17 +1,17 @@
-import type { GameSize } from "../session/gameSize";
+import type { GameSize } from "../session/size/gameSize";
 import {
   isTentacleCategoryAvailableForGameSize,
   tentacleOptionsForGameSize,
   tentacleRadiusMeters,
   type TentacleGameSizeCategoryId,
-} from "../session/gameSizeRules";
+} from "../session/size/gameSizeRules";
 import {
   resolveTentacleOptions,
   sessionGameSize,
   type SessionRulesInput,
-} from "../session/sessionRules";
+} from "../session/rules";
 import type { AnnotationRecord } from "../map/annotations";
-import type { PendingQuestionRecord } from "../session/sessionChat";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { buildCatalogHelpers } from "./catalogHelpers";
 import {
   formatDistance,

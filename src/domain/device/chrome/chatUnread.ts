@@ -1,4 +1,4 @@
-import type { SessionMessageRecord } from "../../session/sessionChat";
+import type { SessionMessageRecord } from "../../session/activity/sessionChat";
 
 export function messageFingerprint(message: SessionMessageRecord): string {
   return `${message.id}|${message.status ?? ""}|${message.selectedReply ?? ""}`;

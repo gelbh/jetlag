@@ -1,6 +1,6 @@
 import type { MapTool } from "../../../domain/map/mapToolTypes";
-import type { PlayerRole } from "../../../domain/session/playerRole";
-import type { GameSize } from "../../../domain/session/gameSize";
+import type { PlayerRole } from "../../../domain/session/players/playerRole";
+import type { GameSize } from "../../../domain/session/size/gameSize";
 import type { SessionTier } from "../../../domain/map/annotations";
 import type { PremiumProductKey } from "../../../domain/billing/premiumProducts";
 

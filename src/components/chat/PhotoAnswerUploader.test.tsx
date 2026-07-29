@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 
 const pendingQuestion: PendingQuestionRecord = {
   id: "pq-photo",

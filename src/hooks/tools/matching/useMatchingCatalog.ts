@@ -16,13 +16,13 @@ import {
 import {
   resolveMatchingCategory,
   sessionCustomContentFromRules,
-} from "../../../domain/session/sessionCustomCatalog";
+} from "../../../domain/session/catalog/sessionCustomCatalog";
 import {
   availableMatchingCategories,
   isPreviewQuestionBeforeSendEnabled,
-} from "../../../domain/session/sessionCatalogAvailability";
-import type { PendingQuestionRecord } from "../../../domain/session/sessionChat";
-import type { SessionRulesInput } from "../../../domain/session/sessionRules";
+} from "../../../domain/session/catalog/sessionCatalogAvailability";
+import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "../../../domain/session/rules";
 import { isAdminDivisionCategoryAvailable } from "../../../services/geo/adminDivisionAvailability";
 import type {
   MatchingFeature,

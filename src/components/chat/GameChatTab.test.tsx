@@ -4,7 +4,7 @@ import { GameChatTab } from "./GameChatTab";
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,
-} from "../../domain/session/sessionChat";
+} from "../../domain/session/activity/sessionChat";
 
 const pendingQuestion: PendingQuestionRecord = {
   id: "pq-radar",

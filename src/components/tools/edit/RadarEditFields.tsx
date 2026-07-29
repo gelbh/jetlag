@@ -14,7 +14,7 @@ import {
   type RadarAnswer,
   type RadarDistanceOptionKey,
 } from "../../../domain/questions";
-import type { GameSize } from "../../../domain/session/gameSize";
+import type { GameSize } from "../../../domain/session/size/gameSize";
 import { RadarDistancePicker } from "../RadarDistancePicker";
 import { BinaryAnswerPicker } from "../shared/BinaryAnswerPicker";
 import { yesNoAnswerOptions } from "../shared/binaryAnswerOptions";

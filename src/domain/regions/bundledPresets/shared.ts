@@ -1,5 +1,5 @@
 import type { DistanceUnit } from "../../map/distance";
-import type { AdvancedSessionSettingsValue } from "../../session/advancedSessionSettings";
+import type { AdvancedSessionSettingsValue } from "../../session/tools/advancedSessionSettings";
 import type { PresetHierarchySegment } from "../bundledPresetHierarchy";
 import type { RegionPackId } from "../regionPack";
 

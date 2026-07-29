@@ -1,5 +1,5 @@
-import type { CustomMatchingAreasByLevel } from "../../../domain/session/sessionCustomContent";
-import type { SessionCustomCategory } from "../../../domain/session/sessionCustomContent";
+import type { CustomMatchingAreasByLevel } from "../../../domain/session/catalog/sessionCustomContent";
+import type { SessionCustomCategory } from "../../../domain/session/catalog/sessionCustomContent";
 
 export const MATCHING_NEAR_FEATURE_SEARCH_BUFFER_METERS = 50_000;
 

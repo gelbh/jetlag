@@ -5,8 +5,8 @@ import { gameAreaToBoundingBox } from "../../../domain/geometry/gameAreaBounds";
 import { featureToGameArea } from "../../../domain/geometry/geometry";
 import { gameAreaWithoutInteriorRings } from "../../../domain/geometry/geometryCore";
 import { unionGameAreas } from "../../../domain/geometry/unionGameAreas";
-import type { CustomMatchingAreasByLevel } from "../../../domain/session/sessionCustomContent";
-import type { MatchingAdminLevel } from "../../../domain/session/sessionCustomContent";
+import type { CustomMatchingAreasByLevel } from "../../../domain/session/catalog/sessionCustomContent";
+import type { MatchingAdminLevel } from "../../../domain/session/catalog/sessionCustomContent";
 import {
   getRegionPackConfig,
   isKnownRegionPack,

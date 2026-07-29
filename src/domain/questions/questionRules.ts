@@ -1,12 +1,12 @@
 import type { AnnotationRecord, SessionRecord } from "../map/annotations";
 import type { QuestionCardCost } from "../map/mapTools";
-import type { GameSize } from "../session/gameSize";
+import type { GameSize } from "../session/size/gameSize";
 import type {
   PendingQuestionRecord,
   PendingQuestionStatus,
   PendingQuestionToolType,
-} from "../session/sessionChat";
-import { resolveAnswerDeadlineMs } from "../session/sessionRules";
+} from "../session/activity/sessionChat";
+import { resolveAnswerDeadlineMs } from "../session/rules";
 import {
   formatRemainingCountdownFromMs,
 } from "../time/formatClockDuration";

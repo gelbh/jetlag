@@ -1,9 +1,9 @@
 import type { AnnotationRecord } from "../map/annotations";
-import type { PendingQuestionRecord } from "../session/sessionChat";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import {
   collectUsedAnnotationOptions,
   firstUnusedCatalogOption,
-} from "../session/toolSessionOptions";
+} from "../session/tools/toolSessionOptions";
 import { isCountablePendingQuestionStatus } from "./questionRules";
 
 export interface CatalogHelpersConfig<Option> {

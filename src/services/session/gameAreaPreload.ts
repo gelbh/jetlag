@@ -3,7 +3,7 @@ import type { MeasuringFromKind, MeasuringLocationCategory } from "../../domain/
 import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
-} from "../../domain/session/sessionCustomContent";
+} from "../../domain/session/catalog/sessionCustomContent";
 import type { RegionPackId } from "../../domain/regions/regionPack";
 import { fetchAdminDivisionFeaturesInArea } from "../geo/adminDivisionBoundaries";
 import {

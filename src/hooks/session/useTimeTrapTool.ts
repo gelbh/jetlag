@@ -10,7 +10,7 @@ import {
   isValidHidingStation,
   searchStations,
   type TransitStation,
-} from "../../domain/session/hidingZone";
+} from "../../domain/session/hiding/hidingZone";
 import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matchingFeatures";
 import { writeTimeTrap } from "../../services/firestore/firestoreSessionExtras";
 

@@ -1,9 +1,9 @@
 import { FirebaseError } from "firebase/app";
 import { httpsCallable } from "firebase/functions";
 import type { GameArea, SessionRecord, SessionTier } from "../../domain/map/annotations";
-import type { GameSize } from "../../domain/session/gameSize";
-import type { SessionRulesPatch } from "../../domain/session/advancedSessionSettings";
-import type { PlayerRole } from "../../domain/session/playerRole";
+import type { GameSize } from "../../domain/session/size/gameSize";
+import type { SessionRulesPatch } from "../../domain/session/tools/advancedSessionSettings";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type {
   PremiumEntitlements,
   PremiumProductKey,

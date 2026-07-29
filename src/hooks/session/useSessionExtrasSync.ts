@@ -1,15 +1,15 @@
 import { useMemo } from "react";
-import type { HidingZoneRecord } from "../../domain/session/hidingZone";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import {
   isHiderLocationRole,
   isSeekerLocationRole,
-} from "../../domain/session/liveMapLocations";
+} from "../../domain/session/live/liveMapLocations";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
   SessionMessageRecord,
-} from "../../domain/session/sessionChat";
-import { filterExtrasAfterReset } from "../../domain/session/sessionReset";
+} from "../../domain/session/activity/sessionChat";
+import { filterExtrasAfterReset } from "../../domain/session/meta/sessionReset";
 import {
   subscribeToHiderPlayerLocations,
   subscribeToHidingZones,

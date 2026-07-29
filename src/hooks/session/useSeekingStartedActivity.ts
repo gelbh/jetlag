@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import { isHidingPeriodActive } from "../../domain/session/hidingPeriod";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import { isHidingPeriodActive } from "../../domain/session/hiding/hidingPeriod";
+import type { SessionRulesInput } from "../../domain/session/rules";
 import {
   computeElapsedMs,
   hasTimerStarted,
   type TimerState,
-} from "../../domain/session/timer";
+} from "../../domain/session/timer/timer";
 import { emitSeekingStartedActivity } from "../../services/session/emitSessionActivity";
 
 /** Poll while the timer is running so elapsed can cross the hiding boundary. */

@@ -5,7 +5,7 @@ import { isActive } from "../../map/annotationActive";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import { thermometerShadedSide } from "../../questions/thermometerQuestions";
-import type { HidingZoneRecord } from "../../session/hidingZone";
+import type { HidingZoneRecord } from "../../session/hiding/hidingZone";
 import {
   buildHalfPlanePolygon,
   buildRadarShadedRegion,

@@ -9,7 +9,7 @@ import {
   photoQuestionPrompt,
   usedPhotoCategoryIds,
 } from "./photoQuestions";
-import type { PendingQuestionRecord } from "../session/sessionChat";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 
 function photoPending(
   overrides: Partial<PendingQuestionRecord> = {},

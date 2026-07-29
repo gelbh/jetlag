@@ -9,7 +9,7 @@ import {
   thermometerQuestionPrompt,
   type ThermometerAnswer,
 } from "../../../domain/questions";
-import type { PendingQuestionRecord } from "../../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
 import { hotterColderAnswerOptions } from "../../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 import { emitQuestionAnsweredActivity } from "../../../services/session/emitSessionActivity";

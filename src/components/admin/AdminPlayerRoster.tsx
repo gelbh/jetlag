@@ -1,6 +1,6 @@
 import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
-import { resolvePlayerRole, playerRoleLabel } from "../../domain/session/playerRole";
-import type { PlayerLocationRecord } from "../../domain/session/sessionChat";
+import { resolvePlayerRole, playerRoleLabel } from "../../domain/session/players/playerRole";
+import type { PlayerLocationRecord } from "../../domain/session/activity/sessionChat";
 import type { SessionRecord } from "../../domain/map/annotations";
 import { useFreshnessClock } from "../../hooks/admin/useFreshnessClock";
 import { useAdminMonitorFocus } from "../../domain/admin/adminMonitorFocus";

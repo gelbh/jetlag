@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { SessionActivityEvent } from "../domain/session/sessionActivityLog";
+import type { SessionActivityEvent } from "../domain/session/activity/sessionActivityLog";
 
 interface ActivityLogState {
   eventsBySessionId: Record<string, SessionActivityEvent[]>;

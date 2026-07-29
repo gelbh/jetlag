@@ -1,4 +1,4 @@
-import type { PlayerRole } from "../session/playerRole";
+import type { PlayerRole } from "../session/players/playerRole";
 import {
   INCIDENT_MAX_CLIENT_ERRORS,
   INCIDENT_MAX_ERROR_MESSAGE_LENGTH,

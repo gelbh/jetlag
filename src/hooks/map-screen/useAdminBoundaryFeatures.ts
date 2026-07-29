@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import type { GameArea } from "../../domain/map/annotations";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
-import type { MatchingAdminLevel } from "../../domain/session/sessionCustomContent";
+import type { SessionRulesInput } from "../../domain/session/rules";
+import type { MatchingAdminLevel } from "../../domain/session/catalog/sessionCustomContent";
 import { gameAreaToPolygon } from "../../domain/geometry/geometry";
 import { adminBoundaryLevelsForSession } from "../../services/geo/adminDivisionAvailability";
 import { fetchAdminDivisionFeaturesInArea } from "../../services/geo/adminDivisionBoundaries";

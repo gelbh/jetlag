@@ -3,19 +3,19 @@ import type { MapTool } from "../../../state/sessionStore";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
-} from "../../../domain/session/sessionChat";
-import type { SessionRulesInput } from "../../../domain/session/sessionRules";
+} from "../../../domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "../../../domain/session/rules";
 import {
   computeElapsedMs,
   type TimerState,
-} from "../../../domain/session/timer";
+} from "../../../domain/session/timer/timer";
 import {
   isHidingPeriodActive,
-} from "../../../domain/session/hidingPeriod";
+} from "../../../domain/session/hiding/hidingPeriod";
 import {
   playerRoleLabel,
   type PlayerRole,
-} from "../../../domain/session/playerRole";
+} from "../../../domain/session/players/playerRole";
 import { HudPlayIcon } from "../../ui/HudIcons";
 import { MapTimerCluster } from "../MapTimerCluster";
 

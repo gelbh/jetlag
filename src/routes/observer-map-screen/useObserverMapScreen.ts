@@ -6,14 +6,14 @@ import {
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../domain/device/powerProfile";
-import { resolveSpectatorLayers } from "../../domain/session/observerPerspective";
+import { resolveSpectatorLayers } from "../../domain/session/players/observerPerspective";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
 import { useResolvedSessionRules } from "../../hooks/session/useResolvedSessionRules";
 import { useSharedSessionScreen } from "../../hooks/session/useSharedSessionScreen";
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import { useSessionAnnotations } from "../../hooks/map/useSessionAnnotations";
-import { isPlaceholderGameArea } from "../../domain/session/joinPreviewGameArea";
+import { isPlaceholderGameArea } from "../../domain/session/join/joinPreviewGameArea";
 import { useMapStore, useSessionStore } from "../../state/sessionStore";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
 

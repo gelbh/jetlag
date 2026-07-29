@@ -1,7 +1,7 @@
 import type { GameArea } from "../map/annotations";
 import type { MapStyle } from "../map/mapBasemaps";
-import type { PendingQuestionRecord } from "../session/sessionChat";
-import type { PendingQuestionToolType } from "../session/sessionChat";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
+import type { PendingQuestionToolType } from "../session/activity/sessionChat";
 import { buildMatchingOverlays } from "./overlays/matching";
 import { buildMeasuringOverlays } from "./overlays/measuring";
 import { buildRadarOverlays } from "./overlays/radar";

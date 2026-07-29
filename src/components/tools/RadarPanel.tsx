@@ -18,7 +18,7 @@ import {
   type RadarAnswer,
   type RadarDistanceOptionKey,
 } from "../../domain/questions";
-import type { GameSize } from "../../domain/session/gameSize";
+import type { GameSize } from "../../domain/session/size/gameSize";
 import type { ToolPanelSandboxMode } from "./shared/toolPanelSandbox";
 
 interface RadarPanelProps {

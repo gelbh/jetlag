@@ -9,7 +9,7 @@ import type { AnnotationRecord } from "../../domain/map/annotations";
 import {
   listWalkingThermometerQuestionIds,
 } from "../../domain/questions";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import {
   endRemoteSession,
   resetRemoteSession,

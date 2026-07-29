@@ -4,9 +4,9 @@ import {
   migrateGamePreset,
   migrateGamePresets,
   type GamePreset,
-} from "../domain/session/gamePreset";
+} from "../domain/session/presets/gamePreset";
 import { mergeBundledPresets } from "../domain/regions/bundledGamePresets";
-import { withoutFavouritePresetId } from "../domain/session/presetFavourites";
+import { withoutFavouritePresetId } from "../domain/session/presets/presetFavourites";
 
 interface GamePresetState {
   presets: GamePreset[];

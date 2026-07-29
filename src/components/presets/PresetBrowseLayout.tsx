@@ -7,7 +7,7 @@ import {
 import { BundledPresetTree } from "./BundledPresetTree";
 import { PresetSearchResults } from "./PresetSearchResults";
 import { PresetDetailPanel } from "./PresetDetailPanel";
-import { migrateGamePreset } from "../../domain/session/gamePreset";
+import { migrateGamePreset } from "../../domain/session/presets/gamePreset";
 
 export function PresetBrowseLayout({
   searchId,

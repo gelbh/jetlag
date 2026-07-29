@@ -9,8 +9,8 @@ import {
   setDoc,
   type Unsubscribe,
 } from "firebase/firestore";
-import type { SessionActivityEvent } from "../../domain/session/sessionActivityLog";
-import { sortActivityEventsDesc } from "../../domain/session/sessionActivityLog";
+import type { SessionActivityEvent } from "../../domain/session/activity/sessionActivityLog";
+import { sortActivityEventsDesc } from "../../domain/session/activity/sessionActivityLog";
 import { getFirestoreDb } from "../core/firebase";
 import { captureException } from "../core/sentry";
 import { isFirestorePermissionDenied } from "./firestoreAnnotations";

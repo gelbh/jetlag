@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { useQuestionDeadlineEnforcement } from "./useQuestionDeadlineEnforcement";
 
 vi.mock("../../services/firestore/firestoreSessionExtras", () => ({

@@ -3,9 +3,9 @@ import { PRESET_MATCH_TOLERANCE_METERS } from "../../map/distancePresets";
 import {
   effectiveHidingZoneRadiusMeters,
   hidingZoneRadiusMeters,
-} from "../gameSize";
-import { gameSizeRulesSummary, hidingPeriodMs } from "../gameSizeRules";
-import { sessionDistanceUnit } from "../sessionDistanceUnit";
+} from "../size/gameSize";
+import { gameSizeRulesSummary, hidingPeriodMs } from "../size/gameSizeRules";
+import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
 import { resolveHidingPeriodMinutes } from "./deadlines";
 import { resolveTentaclesEnabledForSession } from "./tentacleRules";
 import {

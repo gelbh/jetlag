@@ -3,7 +3,7 @@ import type { LatLngTuple } from "../../geometry/geometry";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import { tentacleEliminationJsonForAnswer } from "../../geometry/tentacleGeometry";
-import type { PendingQuestionRecord } from "../../session/sessionChat";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { tentacleRadiusFromMetadata } from "../tentacleQuestions";
 
 export function tentacleAnswerFromReplyId(replyId: string): string {

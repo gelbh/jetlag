@@ -4,7 +4,7 @@ import {
   photoQuestionFor,
   type PhotoCategoryId,
 } from "../../domain/questions";
-import type { GameSize } from "../../domain/session/gameSize";
+import type { GameSize } from "../../domain/session/size/gameSize";
 import { CatalogExhaustedMessage } from "./shared/CatalogExhaustedMessage";
 import { QuestionPromptBlock } from "./shared/QuestionPromptBlock";
 import { SendToHidersButton } from "./shared/SendToHidersButton";

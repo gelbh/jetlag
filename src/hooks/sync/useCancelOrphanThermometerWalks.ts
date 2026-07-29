@@ -3,11 +3,11 @@ import {
   listOrphanWalkingThermometerQuestionIds,
   listStaleWalkingThermometerQuestionIds,
 } from "../../domain/questions";
-import type { PlayerRole } from "../../domain/session/playerRole";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
-} from "../../domain/session/sessionChat";
+} from "../../domain/session/activity/sessionChat";
 import type { ThermometerWalkCancelReason } from "../../services/firestore/firestoreSessionExtras";
 import { useStaleWalkNowMs } from "./useStaleWalkNowMs";
 

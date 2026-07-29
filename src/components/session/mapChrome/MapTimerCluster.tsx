@@ -1,22 +1,22 @@
 import { useEffect, useState } from "react";
-import type { SessionRulesInput } from "../../../domain/session/sessionRules";
+import type { SessionRulesInput } from "../../../domain/session/rules";
 import { getPowerProfile } from "../../../domain/device/powerProfile";
 import {
   computeElapsedMs,
   formatElapsedTime,
   isTimerRunning,
   type TimerState,
-} from "../../../domain/session/timer";
+} from "../../../domain/session/timer/timer";
 import {
   formatHidingPeriodCountdown,
   hidingPeriodRemainingMs,
   isHidingPeriodActive,
   seekPhaseElapsedMs,
-} from "../../../domain/session/hidingPeriod";
+} from "../../../domain/session/hiding/hidingPeriod";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
-} from "../../../domain/session/sessionChat";
+} from "../../../domain/session/activity/sessionChat";
 import {
   isStaleThermometerWalk,
   selectPrimaryQuestionTimer,

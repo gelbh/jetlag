@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import type { AnnotationType, GameArea } from "../../domain/map/annotations";
 import type { LatLngTuple } from "../../domain/geometry/geometry";
 import type { DistanceUnit } from "../../domain/map/distance";
-import type { SessionRulesInput } from "../../domain/session/sessionRules";
+import type { SessionRulesInput } from "../../domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import { useMatchingTool } from "../../hooks/tools/useMatchingTool";
 import { useMeasuringTool } from "../../hooks/tools/useMeasuringTool";

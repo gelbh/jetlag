@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
-import type { AdvancedSessionSettingsValue } from "../../../domain/session/advancedSessionSettings";
-import type { MatchingAdminLevel } from "../../../domain/session/sessionCustomContent";
+import type { AdvancedSessionSettingsValue } from "../../../domain/session/tools/advancedSessionSettings";
+import type { MatchingAdminLevel } from "../../../domain/session/catalog/sessionCustomContent";
 import { parseMatchingAreaGeoJson } from "../../../services/geo/matchingAreaGeoJson";
 import type { GameArea } from "../../../domain/map/annotations";
 

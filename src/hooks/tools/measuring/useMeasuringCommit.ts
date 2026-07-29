@@ -11,7 +11,7 @@ import {
   measuringQuestionFor,
 } from "../../../domain/questions";
 import { questionCostBreakdown } from "../../../domain/questions";
-import type { PendingQuestionRecord } from "../../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
 import { adminBorderKindAvailability } from "../../../services/geo/adminDivisionAvailability";
 import { closerFurtherAnswerOptions } from "../../../components/tools/shared/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";

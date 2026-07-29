@@ -4,7 +4,7 @@ import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
   SessionMessageRecord,
-} from "../../../domain/session/sessionChat";
+} from "../../../domain/session/activity/sessionChat";
 import { parseFirestoreDocument } from "../zodConverter";
 import { pendingQuestionDocumentSchema } from "../schemas/firestoreDocuments";
 import { assertNoNestedArrays, stripUndefinedValues } from "./shared";

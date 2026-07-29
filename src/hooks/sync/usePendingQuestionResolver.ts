@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
-import { isStaleAfterReset } from "../../domain/session/sessionReset";
+import { isStaleAfterReset } from "../../domain/session/meta/sessionReset";
 import {
   radarAnswerFromReplyId,
   resolveRadarPendingQuestion,
@@ -20,7 +20,7 @@ import {
 import {
   resolveTentaclePendingQuestion,
 } from "../../domain/questions/ui";
-import type { PendingQuestionRecord } from "../../domain/session/sessionChat";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import {
   getPendingQuestionStatus,
   updatePendingQuestion,

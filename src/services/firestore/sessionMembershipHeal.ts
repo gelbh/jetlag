@@ -1,5 +1,5 @@
 import type { SessionRecord } from "../../domain/map/annotations";
-import type { PlayerRole } from "../../domain/session/playerRole";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import {
   ensureRemoteSessionMembership,
   ensureRemoteSessionWriteAccess,
@@ -11,7 +11,7 @@ import {
 import {
   memberUidSetsEqual,
   sanitizeReturningMemberUid,
-} from "../../domain/session/returningMember";
+} from "../../domain/session/players/returningMember";
 
 export type HealSessionMembershipOptions = EnsureRemoteSessionMembershipOptions & {
   persistedMyUid?: string | null;

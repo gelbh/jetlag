@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { AnnotationRecord } from "../../../domain/map/annotations";
-import type { SessionActivityEvent } from "../../../domain/session/sessionActivityLog";
+import type { SessionActivityEvent } from "../../../domain/session/activity/sessionActivityLog";
 import { SessionLogBody } from "./SessionLogBody";
 
 function annotation(id: string): AnnotationRecord {

@@ -1,4 +1,4 @@
-import type { PlayerRole } from "../session/playerRole";
+import type { PlayerRole } from "../session/players/playerRole";
 
 export interface PlayerTrailPointRecord {
   uid: string;
