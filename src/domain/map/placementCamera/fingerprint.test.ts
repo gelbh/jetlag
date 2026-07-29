@@ -68,7 +68,7 @@ describe("placementCameraFingerprint", () => {
             type: "MultiPolygon",
             coordinates: [[ring]],
           },
-        },
+        } as { geometry: { type: string } },
       ],
       selectedPoiId: null,
       seekerResolving: false,
