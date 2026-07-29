@@ -3,7 +3,7 @@ import "@fontsource/source-sans-3/500.css";
 import "@fontsource/source-sans-3/600.css";
 import "@fontsource/barlow-semi-condensed/600.css";
 import "@fontsource/barlow-semi-condensed/700.css";
-import { unregisterDevServiceWorkers } from "./domain/device/unregisterDevServiceWorkers.ts";
+import { unregisterDevServiceWorkers } from "./domain/device/updates/unregisterDevServiceWorkers.ts";
 import { initAnalytics } from "./services/core/analytics.ts";
 import { initSentry, setBootstrapTag } from "./services/core/sentry.ts";
 import {

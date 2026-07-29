@@ -2,7 +2,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useLiveActivitySync } from "./useLiveActivitySync";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
-import { DEFAULT_NOTIFICATION_PREFERENCES } from "../../domain/device/notifications";
+import { DEFAULT_NOTIFICATION_PREFERENCES } from "../../domain/device/chrome/notifications";
 
 const { showOngoingNotification, dismissOngoingNotification } = vi.hoisted(
   () => ({

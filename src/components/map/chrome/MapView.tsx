@@ -18,7 +18,7 @@ import { isUsableMapBounds } from "../../../domain/geometry/geometry";
 import {
   MOTION_MAP_CAMERA_FLY_S,
   MOTION_MAP_CAMERA_S,
-} from "../../../domain/device/motionTokens";
+} from "../../../domain/device/motion/motionTokens";
 import { useMotionProfile } from "../../../hooks/useMotionProfile";
 import { MapChromeListener } from "./MapChromeListener";
 import { MapStyleToggle } from "./MapStyleToggle";

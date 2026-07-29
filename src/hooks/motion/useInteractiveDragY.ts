@@ -4,7 +4,7 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { MIN_DRAG_START_PX } from "../../domain/device/motionTokens";
+import { MIN_DRAG_START_PX } from "../../domain/device/motion/motionTokens";
 
 export interface PointerDragBindings {
   onPointerDown: (event: ReactPointerEvent<HTMLElement>) => void;

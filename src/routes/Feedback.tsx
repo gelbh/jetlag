@@ -12,7 +12,7 @@ import {
   githubBugsBrowseUrl,
   githubIdeasBrowseUrl,
   githubIdeaSubmitUrl,
-} from "../domain/device/githubFeedback";
+} from "../domain/device/feedback/githubFeedback";
 
 const externalLinkProps = {
   target: "_blank" as const,

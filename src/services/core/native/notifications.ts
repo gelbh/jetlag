@@ -9,7 +9,7 @@ import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   type NotificationPlatform,
   type NotificationPreferences,
-} from "../../../domain/device/notifications";
+} from "../../../domain/device/chrome/notifications";
 import type { PlayerRole } from "../../../domain/session/players/playerRole";
 import { upsertSessionDevice } from "../../firestore/firestoreDevices";
 import { JetlagLiveActivity } from "./liveActivity";

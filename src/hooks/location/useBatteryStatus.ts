@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   LOW_BATTERY_RECOVERY_LEVEL,
   clearLowBatteryPromptDismissal,
-} from "../../domain/device/batteryPrompt";
+} from "../../domain/device/power/batteryPrompt";
 
 function supportsBatteryEvents(
   battery: BatteryManagerLike,

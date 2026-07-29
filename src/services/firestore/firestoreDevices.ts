@@ -3,7 +3,7 @@ import type {
   NotificationPreferences,
   NotificationPlatform,
   SessionDeviceRecord,
-} from "../../domain/device/notifications";
+} from "../../domain/device/chrome/notifications";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { getFirestoreDb } from "../core/firebase";
 

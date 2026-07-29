@@ -14,7 +14,7 @@ import {
   gameAreaToBoundsExpression,
   type LatLngTuple,
 } from "../../../domain/geometry/geometry";
-import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../../domain/device/powerProfile";
+import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../../domain/device/power/powerProfile";
 import { useWakeLock } from "../../../hooks/location/useWakeLock";
 import { useAnnotations } from "../../../hooks/map/useAnnotations";
 import { useMapOverlayState } from "../../../hooks/map/useMapOverlayState";

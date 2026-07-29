@@ -5,7 +5,7 @@ import {
   gameAreaToBoundsExpression,
   type LatLngTuple,
 } from "../../domain/geometry/geometry";
-import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../domain/device/powerProfile";
+import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../domain/device/power/powerProfile";
 import { resolveSpectatorLayers } from "../../domain/session/players/observerPerspective";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useMapOverlayState } from "../../hooks/map/useMapOverlayState";

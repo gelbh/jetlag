@@ -1,4 +1,4 @@
-import { githubIssuesUrl } from "../device/githubFeedback";
+import { githubIssuesUrl } from "../device/feedback/githubFeedback";
 
 export const LEGAL_APP_NAME = "Jet Lag Map Companion";
 export const LEGAL_OPERATOR = "Gelbhart";

@@ -1,6 +1,6 @@
 import { clearActiveRevealTransition } from "../../navigation/revealRouteTransition";
-import { isIosStandalonePwa } from "./isIosStandalonePwa";
-import { isStandalonePwa } from "./isStandalonePwa";
+import { isIosStandalonePwa } from "./pwa/isIosStandalonePwa";
+import { isStandalonePwa } from "./pwa/isStandalonePwa";
 
 export const RESUME_FALLBACK_CLASSES = [
   "jl-route-fallback-enter-forward",

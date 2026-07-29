@@ -16,7 +16,7 @@ import {
   PANEL_MINIMIZE_VELOCITY_PX_MS,
   PANEL_PEEK_HEIGHT_PX,
   PANEL_SNAP_FRACTION,
-} from "../../domain/device/motionTokens";
+} from "../../domain/device/motion/motionTokens";
 import {
   hasExceededDragSlop,
   useInteractiveDragY,
@@ -345,7 +345,7 @@ export {
   PANEL_MINIMIZE_VELOCITY_PX_MS,
   PANEL_PEEK_HEIGHT_PX,
   PANEL_SNAP_FRACTION,
-} from "../../domain/device/motionTokens";
+} from "../../domain/device/motion/motionTokens";
 
 /** @deprecated Use PANEL_PEEK_HEIGHT_PX */
 export const PANEL_PEEK_HEIGHT_PX_EXPORT = PANEL_PEEK_HEIGHT_PX;

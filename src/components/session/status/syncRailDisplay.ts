@@ -1,4 +1,4 @@
-import type { SyncStatus } from "../../../domain/device/sync";
+import type { SyncStatus } from "../../../domain/device/sync/sync";
 import type { PlayerRole } from "../../../domain/session/players/playerRole";
 import { syncToneForStatus } from "../syncStatusDetailContent";
 

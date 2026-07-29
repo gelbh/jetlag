@@ -17,7 +17,7 @@ export const PANEL_PADDING_EXTRA_PX = 24;
 
 export const WALK_REFRAME_INTERVAL_MS = 2000;
 
-export { MOTION_MAP_CAMERA_MS } from "../../device/motionTokens";
+export { MOTION_MAP_CAMERA_MS } from "../../device/motion/motionTokens";
 
 /** Target bounds must span at least this fraction of play-area width to skip minZoom. */
 export const PLAY_AREA_CONTEXT_MIN_WIDTH_FRACTION = 0.4;

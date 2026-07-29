@@ -3,7 +3,7 @@ import { getClientEnv } from "../../../config/env";
 import {
   readAnalyticsConsent,
   writeAnalyticsConsent,
-} from "../../../domain/device/analyticsConsent";
+} from "../../../domain/device/consent/analyticsConsent";
 import {
   ANALYTICS_EVENTS,
   type AnalyticsEventName,

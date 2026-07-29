@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import { getPowerProfile } from "../../domain/device/powerProfile";
-import { resolveSyncStatus, type SyncStatus } from "../../domain/device/sync";
+import { getPowerProfile } from "../../domain/device/power/powerProfile";
+import { resolveSyncStatus, type SyncStatus } from "../../domain/device/sync/sync";
 import { useReachability } from "../location/useReachability";
 import { useMapStore } from "../../state/mapStore";
 import { useSessionStore } from "../../state/sessionStore";

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ANALYTICS_CONSENT_KEY,
   writeAnalyticsConsent,
-} from "../../../domain/device/analyticsConsent";
+} from "../../../domain/device/consent/analyticsConsent";
 import {
   ANALYTICS_EVENTS,
   denyAnalyticsConsent,

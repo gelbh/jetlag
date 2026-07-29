@@ -2,7 +2,7 @@ import type { LatLng, Map as LeafletMap } from "leaflet";
 import {
   MAP_CAMERA_LARGE_JUMP_CENTER_FRACTION,
   MAP_CAMERA_LARGE_JUMP_ZOOM_DELTA,
-} from "../device/motionTokens";
+} from "../device/motion/motionTokens";
 
 /** Large reframes (phase changes, answers, Recenter) read better as a cinematic
  * `flyTo`; small edits stay a short `setView` so walk/POI updates don't lag. */

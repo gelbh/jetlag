@@ -1,5 +1,5 @@
 import type { To } from "react-router-dom";
-import { lazyWithChunkRetry } from "../domain/device/lazyWithChunkRetry";
+import { lazyWithChunkRetry } from "../domain/device/updates/lazyWithChunkRetry";
 import { lazyRouteLoaderKey, normalizeRoutePath } from "./routeMetadata";
 import { markRouteImportWarm } from "./routeWarmState";
 

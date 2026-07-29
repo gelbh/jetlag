@@ -1,4 +1,4 @@
-import type { SyncStatus } from "../../../domain/device/sync";
+import type { SyncStatus } from "../../../domain/device/sync/sync";
 import {
   SYNC_TONE_CLASSES,
   syncRailDisplay,

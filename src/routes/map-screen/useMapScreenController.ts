@@ -15,7 +15,7 @@ import {
 import {
   DEFAULT_PANEL_HEIGHT_PX,
   PANEL_PEEK_HEIGHT_PX,
-} from "../../domain/device/motionTokens";
+} from "../../domain/device/motion/motionTokens";
 import { useMapToolInteraction } from "../../hooks/map-screen/useMapToolInteraction";
 import { useAdminBoundaryFeatures } from "../../hooks/map-screen/useAdminBoundaryFeatures";
 import { resolveToolDockEnabled } from "../../domain/session/rules";

@@ -6,7 +6,7 @@ import { AnalyticsConsentBanner } from "./AnalyticsConsentBanner";
 import {
   ANALYTICS_CONSENT_KEY,
   writeAnalyticsConsent,
-} from "../../../domain/device/analyticsConsent";
+} from "../../../domain/device/consent/analyticsConsent";
 import { resetAnalyticsForTests } from "../../../services/core/analytics";
 
 vi.mock("posthog-js", () => ({

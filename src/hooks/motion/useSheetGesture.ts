@@ -10,7 +10,7 @@ import {
   MOTION_TRANSITION_SHEET,
   SHEET_DISMISS_FRACTION,
   SHEET_VELOCITY_DISMISS_PX_MS,
-} from "../../domain/device/motionTokens";
+} from "../../domain/device/motion/motionTokens";
 import { useInteractiveDragY } from "./useInteractiveDragY";
 
 export interface UseSheetGestureOptions {
@@ -117,4 +117,4 @@ export function shouldDismissSheetDrag(
 export {
   SHEET_DISMISS_FRACTION,
   SHEET_VELOCITY_DISMISS_PX_MS,
-} from "../../domain/device/motionTokens";
+} from "../../domain/device/motion/motionTokens";

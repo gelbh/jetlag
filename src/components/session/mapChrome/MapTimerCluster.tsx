@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { SessionRulesInput } from "../../../domain/session/rules";
-import { getPowerProfile } from "../../../domain/device/powerProfile";
+import { getPowerProfile } from "../../../domain/device/power/powerProfile";
 import {
   computeElapsedMs,
   formatElapsedTime,

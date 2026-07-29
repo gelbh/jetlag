@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import type { NotificationPreferences } from "../../domain/device/notifications";
+import type { NotificationPreferences } from "../../domain/device/chrome/notifications";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { useMapStore } from "../../state/mapStore";
 import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";

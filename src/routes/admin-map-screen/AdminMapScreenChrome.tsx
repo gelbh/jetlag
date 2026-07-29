@@ -5,7 +5,7 @@ import { HudHomeIcon } from "../../components/ui/HudIcons";
 import { playerRoleLabel } from "../../domain/session/players/playerRole";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { SessionRecord } from "../../domain/map/annotations";
-import type { SyncStatus } from "../../domain/device/sync";
+import type { SyncStatus } from "../../domain/device/sync/sync";
 import type { UseMapOverlayStateResult } from "../../hooks/map/useMapOverlayState";
 import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";

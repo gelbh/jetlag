@@ -6,7 +6,7 @@ import {
   githubBugsBrowseUrl,
   githubIdeasBrowseUrl,
   githubIdeaSubmitUrl,
-} from "../domain/device/githubFeedback";
+} from "../domain/device/feedback/githubFeedback";
 import { renderWithRouter } from "../test/renderWithRouter";
 
 describe("Feedback", () => {

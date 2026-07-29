@@ -1,4 +1,4 @@
-import type { SyncStatus } from "../../../domain/device/sync";
+import type { SyncStatus } from "../../../domain/device/sync/sync";
 
 interface SyncStatusBeaconProps {
   status: SyncStatus;

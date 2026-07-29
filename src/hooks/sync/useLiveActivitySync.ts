@@ -7,7 +7,7 @@ import {
   isHidingPeriodActive,
   seekPhaseElapsedMs,
 } from "../../domain/session/hiding/hidingPeriod";
-import type { NotificationPreferences } from "../../domain/device/notifications";
+import type { NotificationPreferences } from "../../domain/device/chrome/notifications";
 import { selectPrimaryQuestionTimer } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import {

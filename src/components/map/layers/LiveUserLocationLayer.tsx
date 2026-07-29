@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { getPowerProfile } from "../../../domain/device/powerProfile";
+import { getPowerProfile } from "../../../domain/device/power/powerProfile";
 import { useLiveLocation } from "../../../hooks/location/useLiveLocation";
 import { UserLocationLayer } from "./UserLocationLayer";
 

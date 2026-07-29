@@ -10,7 +10,7 @@ import { useLocation } from "react-router-dom";
 import {
   acknowledgeSoftReload,
   shouldHonorSoftReload,
-} from "../../../domain/device/reloadAcknowledgements";
+} from "../../../domain/device/updates/reloadAcknowledgements";
 import {
   applyServiceWorkerUpdate,
   isSafeToReloadApp,
@@ -18,9 +18,9 @@ import {
   promptIfWaiting,
   registerAppNeedRefreshHandler,
   scheduleServiceWorkerUpdateChecks,
-} from "../../../domain/device/serviceWorkerRefresh";
-import { setServiceWorkerChunkReloadContext } from "../../../domain/device/lazyWithChunkRetry";
-import { tryUpdateServiceWorker } from "../../../domain/device/serviceWorkerUpdate";
+} from "../../../domain/device/updates/serviceWorkerRefresh";
+import { setServiceWorkerChunkReloadContext } from "../../../domain/device/updates/lazyWithChunkRetry";
+import { tryUpdateServiceWorker } from "../../../domain/device/updates/serviceWorkerUpdate";
 import { compareAppVersions } from "../../../domain/session/meta/sessionVersion";
 import { useHotfixGraceReload } from "../../../hooks/useHotfixGraceReload";
 import { isFirebaseConfigured } from "../../../services/core/firebase";

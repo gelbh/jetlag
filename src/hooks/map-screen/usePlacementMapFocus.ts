@@ -18,7 +18,7 @@ import type { MapTool } from "../../state/sessionStore";
 import {
   DEFAULT_PANEL_HEIGHT_PX,
   PANEL_PEEK_HEIGHT_PX,
-} from "../../domain/device/motionTokens";
+} from "../../domain/device/motion/motionTokens";
 
 export interface UsePlacementMapFocusOptions {
   activeTool: MapTool;
