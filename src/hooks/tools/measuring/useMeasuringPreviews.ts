@@ -5,6 +5,7 @@ import {
   buildMeasuringBoundaryPreview,
   buildMeasuringEliminationPreview,
 } from "../../../domain/geometry/measuringRegions";
+import { previewGeometryFingerprint } from "../../../domain/geometry/measuring/previewGeometryFingerprint";
 import { getCachedPreparedCoastlineSegments } from "../../../services/geo/coastline";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 
@@ -202,10 +203,10 @@ export function useMeasuringPublishSignature(
         measuringCoastSegments.length,
         coastlineContextVersion,
         measuringBoundaryPreview
-          ? JSON.stringify(measuringBoundaryPreview.geometry)
+          ? previewGeometryFingerprint(measuringBoundaryPreview)
           : null,
         measuringEliminationPreview
-          ? JSON.stringify(measuringEliminationPreview.geometry)
+          ? previewGeometryFingerprint(measuringEliminationPreview)
           : null,
         placementCrosshair,
       ].join("|"),
