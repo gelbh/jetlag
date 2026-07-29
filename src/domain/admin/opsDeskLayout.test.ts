@@ -7,6 +7,7 @@ import {
   PANEL_IDS,
   cloneLayout,
   clampLayoutToCols,
+  defaultMonitorLayout,
   defaultScratchLayout,
   ensureIncidentPanelsVisible,
   hidePanel,
@@ -71,13 +72,25 @@ describe("opsDeskLayout", () => {
     expect(layoutForFormerBuiltinId("not-a-builtin")).toBeNull();
   });
 
-  it("cloneLayout preserves optional monitor field", () => {
+  it("cloneLayout deep-clones MonitorLayout", () => {
     const layout = defaultScratchLayout();
-    layout.monitor = { cols: 12, stacks: [] };
+    layout.monitor = defaultMonitorLayout();
     const cloned = cloneLayout(layout);
-    expect(cloned.monitor).toEqual({ cols: 12, stacks: [] });
-    cloned.monitor = { cols: 8 };
-    expect(layout.monitor).toEqual({ cols: 12, stacks: [] });
+    expect(cloned.monitor).toEqual(defaultMonitorLayout());
+    cloned.monitor!.cols = 8;
+    expect(layout.monitor?.cols).toBe(DEFAULT_COLS);
+  });
+
+  it("defaultMonitorLayout seeds Probe A panels and hides the rest", () => {
+    const monitor = defaultMonitorLayout();
+    const visible = monitor.stacks.flatMap((s) => s.panelIds);
+    expect(visible).toEqual(["map", "roster", "overview", "log"]);
+    expect(monitor.hiddenPanelIds).toEqual([
+      "chat",
+      "sync",
+      "mapTools",
+      "mod",
+    ]);
   });
 
   it("migrates 12-col layouts to 24 and clamps overflow", () => {
