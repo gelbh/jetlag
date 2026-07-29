@@ -224,7 +224,7 @@ export function ToolDockWideActions({
         <span className="jl-tool-slot-icon">
           <HudSettingsIcon className="h-5 w-5" />
         </span>
-        <span className="jl-tool-slot-label">Setup</span>
+        <span className="jl-tool-slot-label">Settings</span>
       </MotionPressable>
     </div>
   );
@@ -254,7 +254,7 @@ export function ToolDockCompactMoreButton({
         aria-label={hasUnreadChat ? "More tools, unread chat" : "More tools"}
         aria-expanded={moreMenuOpen}
         aria-haspopup="dialog"
-        title="Draw, chat, setup"
+        title="Draw, chat, settings"
       >
         <span className="jl-tool-slot-icon jl-unread-badge-host">
           <HudMoreIcon className="h-5 w-5" />

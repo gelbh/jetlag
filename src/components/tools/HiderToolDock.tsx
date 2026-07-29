@@ -107,7 +107,7 @@ export function HiderToolDock({
           <span className="jl-tool-slot-icon">
             <HudSettingsIcon className="h-5 w-5 shrink-0" />
           </span>
-          <span className="jl-tool-slot-label">Setup</span>
+          <span className="jl-tool-slot-label">Settings</span>
         </button>
       </div>
     </div>
