@@ -53,6 +53,7 @@ const baseProps = {
     sessionCode: "ABCD",
     remoteSession: false,
     onClearMap: vi.fn(),
+    onLeaveSession: vi.fn(),
   },
 };
 
@@ -73,5 +74,19 @@ describe("MapSettingsSheet", () => {
     fireEvent.click(screen.getByRole("button", { name: "Satellite" }));
 
     expect(onMapStyleChange).toHaveBeenCalledWith("satellite");
+  });
+
+  it("keeps session admin off the default map essentials tab", () => {
+    renderWithRouter(<MapSettingsSheet {...baseProps} />);
+
+    expect(screen.getByText("Show my location")).toBeInTheDocument();
+    expect(screen.queryByText("Keep screen awake")).not.toBeInTheDocument();
+    expect(screen.queryByText("Low power mode")).not.toBeInTheDocument();
+    expect(screen.queryByText("Leave session")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Session" }));
+
+    expect(screen.getByRole("button", { name: "Device & alerts" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Leave session" })).toBeInTheDocument();
   });
 });

@@ -1,9 +1,22 @@
 import { useState } from "react";
+import type { NotificationPreferences } from "../../../domain/device/chrome/notifications";
 import { ShareCode } from "../ShareCode";
+import { SettingsToggleRow } from "../SettingsToggleRow";
+import { NotificationPreferencesSection } from "./NotificationPreferencesSection";
 
 export interface MapSettingsSessionTabProps {
   sessionCode: string;
   remoteSession: boolean;
+  keepScreenAwake: boolean;
+  onKeepScreenAwakeChange: (enabled: boolean) => void;
+  lowPowerMode: boolean;
+  onLowPowerModeChange: (enabled: boolean) => void;
+  notificationPreferences?: NotificationPreferences;
+  nativeNotificationsSupported?: boolean;
+  onNotificationPreferencesChange?: (
+    patch: Partial<NotificationPreferences>,
+  ) => void;
+  onEnableNotifications?: () => Promise<boolean>;
   onClearMap?: () => void;
   onExport?: () => void;
   isHost: boolean;
@@ -20,6 +33,14 @@ export interface MapSettingsSessionTabProps {
 export function MapSettingsSessionTab({
   sessionCode,
   remoteSession,
+  keepScreenAwake,
+  onKeepScreenAwakeChange,
+  lowPowerMode,
+  onLowPowerModeChange,
+  notificationPreferences,
+  nativeNotificationsSupported = false,
+  onNotificationPreferencesChange,
+  onEnableNotifications,
   onClearMap,
   onExport,
   isHost,
@@ -32,11 +53,47 @@ export function MapSettingsSessionTab({
   onOpenCurseReference,
   onReportProblem,
 }: MapSettingsSessionTabProps) {
+  const [deviceSectionOpen, setDeviceSectionOpen] = useState(false);
   const [resetMenuOpen, setResetMenuOpen] = useState(false);
 
   return (
     <div className="space-y-4">
       <ShareCode code={sessionCode} remote={remoteSession} />
+
+      <div className="space-y-2 border-t-2 border-border pt-4">
+        <button
+          type="button"
+          onClick={() => setDeviceSectionOpen((open) => !open)}
+          aria-expanded={deviceSectionOpen}
+          className="btn-secondary w-full"
+        >
+          Device & alerts
+        </button>
+        {deviceSectionOpen ? (
+          <div className="space-y-3 border-l-2 border-border pl-3">
+            <SettingsToggleRow
+              label="Keep screen awake"
+              checked={keepScreenAwake}
+              onChange={onKeepScreenAwakeChange}
+            />
+            <SettingsToggleRow
+              label="Low power mode"
+              description="Reduces GPS polling, live transit, animations, and background downloads. Core session sync and tools stay available."
+              checked={lowPowerMode}
+              onChange={onLowPowerModeChange}
+            />
+            {nativeNotificationsSupported &&
+            notificationPreferences &&
+            onNotificationPreferencesChange ? (
+              <NotificationPreferencesSection
+                preferences={notificationPreferences}
+                onChange={onNotificationPreferencesChange}
+                onEnableNotifications={onEnableNotifications}
+              />
+            ) : null}
+          </div>
+        ) : null}
+      </div>
 
       {onReportProblem ? (
         <button
