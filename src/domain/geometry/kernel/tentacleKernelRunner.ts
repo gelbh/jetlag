@@ -9,6 +9,8 @@ import {
 } from "./tentacleRegions";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 
+export type { TentacleSite };
+
 export type TentacleEliminationParams = {
   anchor: LatLngTuple;
   radiusMeters: number;
