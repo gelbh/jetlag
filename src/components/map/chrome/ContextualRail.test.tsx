@@ -32,6 +32,13 @@ describe("ContextualRail", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows Settings short label on collapsed icon tabs", () => {
+    renderRail({ open: false });
+    expect(screen.getByRole("button", { name: "Settings" })).toHaveTextContent(
+      "Settings",
+    );
+  });
+
   it("shows collapsed icon tabs when closed", () => {
     const { onSelectTab } = renderRail({ open: false });
     fireEvent.click(screen.getByRole("button", { name: "Settings" }));
