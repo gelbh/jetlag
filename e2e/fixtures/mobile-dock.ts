@@ -115,6 +115,20 @@ export async function injectStandaloneDisplayMode(page: Page) {
       configurable: true,
       get: () => true,
     });
+    const apply = () => {
+      document.documentElement.classList.add("jl-e2e-standalone");
+      if (document.getElementById("jl-e2e-standalone-mode")) return;
+      const el = document.createElement("style");
+      el.id = "jl-e2e-standalone-mode";
+      el.textContent = `@media (display-mode: standalone) {
+  .jl-e2e-standalone .jl-tool-dock:not(.jl-tool-dock--rail) {
+    bottom: 0;
+  }
+}`;
+      document.documentElement.appendChild(el);
+    };
+    if (document.documentElement) apply();
+    else document.addEventListener("DOMContentLoaded", apply);
   });
   await page.evaluate(() => {
     document.documentElement.classList.add("jl-e2e-standalone");

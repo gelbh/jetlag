@@ -208,6 +208,7 @@ test.describe("iPhone 13 PWA safe area", () => {
   }) => {
     await injectStandaloneDisplayMode(page);
     await page.reload();
+    await expect(page.locator(".jl-tool-dock")).toBeVisible();
     await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
 
     const metrics = await page.evaluate(() => {
