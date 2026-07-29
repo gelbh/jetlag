@@ -50,11 +50,11 @@ vi.mock("firebase/firestore", () => ({
   setDoc: firestoreMocks.setDoc,
 }));
 
-vi.mock("../core/firebase", () => ({
+vi.mock("../core/firebase/firebase", () => ({
   getFirestoreDb: () => ({}),
 }));
 
-vi.mock("../core/sentry", () => ({
+vi.mock("../core/analytics/sentry", () => ({
   captureException,
 }));
 

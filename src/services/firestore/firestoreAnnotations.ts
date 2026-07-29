@@ -8,7 +8,7 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import type { AnnotationRecord } from "../../domain/map/annotations";
-import { getFirestoreDb } from "../core/firebase";
+import { getFirestoreDb } from "../core/firebase/firebase";
 import {
   buildAnnotationDocument,
   deserializeAnnotationFromFirestore,

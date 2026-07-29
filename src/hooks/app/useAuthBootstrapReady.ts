@@ -3,7 +3,7 @@ import {
   isAuthBootstrapReady,
   isFirebaseConfigured,
   subscribeAuthBootstrapReady,
-} from "../../services/core/firebase";
+} from "../../services/core/firebase/firebase";
 
 function getAuthBootstrapReadySnapshot(): boolean {
   return !isFirebaseConfigured() || isAuthBootstrapReady();

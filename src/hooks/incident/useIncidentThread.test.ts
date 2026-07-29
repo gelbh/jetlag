@@ -4,7 +4,7 @@ import { useIncidentThread } from "./useIncidentThread";
 
 const postIncidentMessage = vi.hoisted(() => vi.fn());
 
-vi.mock("../../services/core/firebase", () => ({
+vi.mock("../../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => true,
 }));
 

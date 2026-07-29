@@ -10,8 +10,8 @@ import type { AdvancedSessionSettingsValue } from "../../domain/session/tools/ad
 import type { GameSize } from "../../domain/session/size/gameSize";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
-import { ANALYTICS_EVENTS, track } from "../../services/core/analytics";
-import { isFirebaseConfigured } from "../../services/core/firebase";
+import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
+import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import type { usePremiumHostEligibility } from "../../hooks/billing/usePremiumHostEligibility";
 
 type VisibleTierOption =

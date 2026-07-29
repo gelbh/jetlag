@@ -22,7 +22,7 @@ const onSnapshot = vi.hoisted(() =>
   }),
 );
 
-vi.mock("../core/firebase", () => ({
+vi.mock("../core/firebase/firebase", () => ({
   getFirestoreDb: vi.fn(() => ({})),
 }));
 

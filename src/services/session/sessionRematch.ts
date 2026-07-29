@@ -1,5 +1,5 @@
 import { httpsCallable } from "firebase/functions";
-import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
+import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
 
 export async function resetSessionForRematch(sessionId: string): Promise<void> {
   if (!isFirebaseConfigured()) {

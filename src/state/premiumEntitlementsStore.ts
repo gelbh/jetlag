@@ -3,7 +3,7 @@ import type { PremiumEntitlements } from "../domain/billing/premiumProducts";
 import {
   ensureAnonymousUser,
   isFirebaseConfigured,
-} from "../services/core/firebase";
+} from "../services/core/firebase/firebase";
 import { fetchPremiumEntitlements } from "../services/billing/premiumBilling";
 
 const STORAGE_KEY = "jetlag-premium-entitlements-v1";

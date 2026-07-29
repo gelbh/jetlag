@@ -6,7 +6,7 @@ import {
   getFirestoreDb,
   isFirebaseConfigured,
   isFirestorePersistenceUnavailable,
-} from "../../services/core/firebase";
+} from "../../services/core/firebase/firebase";
 import {
   subscribeToRemoteAnnotations,
   subscribeToSession,

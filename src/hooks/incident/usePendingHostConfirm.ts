@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { HostConfirmRecord } from "../../domain/incident/incidentTypes";
-import { isFirebaseConfigured } from "../../services/core/firebase";
+import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { subscribeIncidentHostConfirms } from "../../services/firestore/firestoreIncidents";
 
 function isStillPending(confirm: HostConfirmRecord, nowMs: number): boolean {

@@ -1,5 +1,5 @@
 import type { AnnotationRecord } from "../../domain/map/annotations";
-import { addIdbDeleteFailureBreadcrumb } from "../core/sentry";
+import { addIdbDeleteFailureBreadcrumb } from "../core/analytics/sentry";
 import { isDatabaseDeletedError } from "./indexedDbErrors";
 
 const DB_NAME = "jetlag-offline-queue";

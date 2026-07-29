@@ -6,7 +6,7 @@ import type {
   TransitStaticData,
   TransitStop,
 } from "../../domain/map/transit";
-import { queryOverpass } from "../core/overpassClient";
+import { queryOverpass } from "../core/overpass/overpassClient";
 import {
   buildTransitStopOverpassQuery,
   transitStopDisplayName,

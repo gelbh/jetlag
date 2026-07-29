@@ -21,7 +21,7 @@ import {
   getOrFetchCached,
   linearSegmentsCacheKey,
 } from "../geographicFeatureCache";
-import { queryOverpass } from "../../core/overpassClient";
+import { queryOverpass } from "../../core/overpass/overpassClient";
 import {
   adminLevelForMeasuringBorderKind,
   allowsOverpassAdminBorderFallthrough,

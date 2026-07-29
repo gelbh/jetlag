@@ -23,7 +23,7 @@ import { setServiceWorkerChunkReloadContext } from "../../../domain/device/updat
 import { tryUpdateServiceWorker } from "../../../domain/device/updates/serviceWorkerUpdate";
 import { compareAppVersions } from "../../../domain/session/meta/sessionVersion";
 import { useHotfixGraceReload } from "../../../hooks/useHotfixGraceReload";
-import { isFirebaseConfigured } from "../../../services/core/firebase";
+import { isFirebaseConfigured } from "../../../services/core/firebase/firebase";
 import {
   DEFAULT_HOTFIX_GRACE_SECONDS,
   subscribeAppConfigRuntime,

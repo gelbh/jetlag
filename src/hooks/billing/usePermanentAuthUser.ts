@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { isPermanentUser } from "../../services/core/accountAuth";
+import { isPermanentUser } from "../../services/core/auth/accountAuth";
 import {
   getFirebaseAuth,
   isFirebaseConfigured,
-} from "../../services/core/firebase";
-import { waitForPermanentAuthReady } from "../../services/core/firebaseAuthReady";
+} from "../../services/core/firebase/firebase";
+import { waitForPermanentAuthReady } from "../../services/core/firebase/firebaseAuthReady";
 
 export function usePermanentAuthUser(): {
   user: User | null;

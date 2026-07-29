@@ -20,14 +20,14 @@ vi.mock("firebase/functions", () => ({
   httpsCallable,
 }));
 
-vi.mock("../core/firebase", () => ({
+vi.mock("../core/firebase/firebase", () => ({
   isFirebaseConfigured,
   getFirebaseFunctions: vi.fn(async () => ({})),
 }));
 
 const track = vi.hoisted(() => vi.fn());
 
-vi.mock("../core/analytics", () => ({
+vi.mock("../core/analytics/analytics", () => ({
   ANALYTICS_EVENTS: {
     premium_checkout_started: "premium_checkout_started",
     premium_checkout_failed: "premium_checkout_failed",

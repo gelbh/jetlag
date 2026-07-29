@@ -97,7 +97,7 @@ vi.mock("../services/geo/seaLevelProgressive", () => ({
   startSeaLevelBackgroundSampling: vi.fn(),
 }));
 
-vi.mock("../services/core/firebase", () => ({
+vi.mock("../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => false,
   isFirestorePersistenceUnavailable: () => false,
   ensureAnonymousUser: vi.fn(),
