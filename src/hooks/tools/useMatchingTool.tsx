@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useLatestRequest } from "../useLatestRequest";
-import { useDebouncedValue } from "../useDebouncedValue";
+import { useLatestRequest } from "../forms/useLatestRequest";
+import { useDebouncedValue } from "../forms/useDebouncedValue";
 import { isActive } from "../../domain/map/annotations";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {

@@ -1,6 +1,6 @@
 import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
 import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
-import { useAuthBootstrapReady } from "../hooks/useAuthBootstrapReady";
+import { useAuthBootstrapReady } from "../hooks/app/useAuthBootstrapReady";
 import { useResolvedSessionRules } from "../hooks/session/useResolvedSessionRules";
 import { useSessionStore } from "../state/sessionStore";
 

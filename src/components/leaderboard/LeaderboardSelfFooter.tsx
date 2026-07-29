@@ -4,7 +4,7 @@ import {
   type LeaderboardMetric,
 } from "../../domain/game/leaderboard";
 import type { SelfFooterMode } from "../../domain/game/leaderboardView";
-import { useDesktopLayout } from "../../hooks/useDesktopLayout";
+import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 
 interface LeaderboardSelfFooterProps {
   mode: SelfFooterMode;

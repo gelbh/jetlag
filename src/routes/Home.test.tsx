@@ -46,7 +46,7 @@ vi.mock("../services/firestore/sessionMembershipHeal", () => ({
   lookupRemoteSessionByCode: vi.fn(),
 }));
 
-vi.mock("../hooks/useAppNavigate", () => ({
+vi.mock("../hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => navigate,
 }));
 

@@ -5,7 +5,7 @@ import {
   mapLandscapeChromeHeaderCollapseClass,
   mapLandscapeChromeToolbarCollapseClass,
 } from "../../../components/session/mapChrome/mapLandscapeChromeClasses";
-import { useDesktopLayout } from "../../../hooks/useDesktopLayout";
+import { useDesktopLayout } from "../../../hooks/layout/useDesktopLayout";
 
 export type MapScreenChromeSlotsLayout = "ops-or-hud" | "fragments";
 

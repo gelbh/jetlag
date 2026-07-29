@@ -15,7 +15,7 @@ import {
   questionCostBreakdown,
 } from "../../domain/questions";
 import type { SubmitPendingQuestionInput } from "../sync/usePendingQuestionActions";
-import { useSubmitLock } from "../useSubmitLock";
+import { useSubmitLock } from "../forms/useSubmitLock";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 
 interface UsePhotoToolParams {

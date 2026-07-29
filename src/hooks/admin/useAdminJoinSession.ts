@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useAppNavigate } from "../useAppNavigate";
+import { useAppNavigate } from "../navigation/useAppNavigate";
 import { usePermanentAuthUser } from "../billing/usePermanentAuthUser";
 import { resolvePlayerRole } from "../../domain/session/players/playerRole";
 import { joinRemoteSessionByCode } from "../../services/firestore/firestoreAnnotations";

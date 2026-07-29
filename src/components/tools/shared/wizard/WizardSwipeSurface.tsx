@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { useMotionProfile } from "../../../../hooks/useMotionProfile";
-import { useWizardSwipe } from "../../../../hooks/useWizardSwipe";
+import { useMotionProfile } from "../../../../hooks/motion/useMotionProfile";
+import { useWizardSwipe } from "../../../../hooks/motion/useWizardSwipe";
 
 interface WizardSwipeSurfaceProps {
   stepId: string;

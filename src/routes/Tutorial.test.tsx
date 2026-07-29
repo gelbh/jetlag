@@ -7,7 +7,7 @@ import { renderWithRouter } from "../test/renderWithRouter";
 const completeStep = vi.fn();
 const completeQuestionStep = vi.fn();
 
-vi.mock("../hooks/useTutorialProgress", () => ({
+vi.mock("../hooks/chrome/useTutorialProgress", () => ({
   useTutorialProgress: () => ({
     progress: {
       core: 6,

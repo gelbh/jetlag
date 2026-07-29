@@ -5,7 +5,7 @@ import {
   tentacleHiderAnswerClipboardText,
   type TentacleExtendedCategoryId,
 } from "../../../../domain/questions";
-import { useCopyFeedback } from "../../../../hooks/useCopyFeedback";
+import { useCopyFeedback } from "../../../../hooks/forms/useCopyFeedback";
 import { ListSelectRow } from "../controls/ListSelectRow";
 import { ToolSection } from "../panels/ToolSection";
 

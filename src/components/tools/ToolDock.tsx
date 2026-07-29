@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import type { GameSize } from "../../domain/session/size/gameSize";
-import { useVisualViewportBottomInset } from "../../hooks/useVisualViewportBottomInset";
+import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { resolveToolDockEnabled } from "../../domain/session/rules";
 import {

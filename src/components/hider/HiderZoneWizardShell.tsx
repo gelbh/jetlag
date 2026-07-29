@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useCallback, useRef } from "react";
-import { useAnimatedPresence } from "../../hooks/useAnimatedPresence";
-import { usePanelDrag } from "../../hooks/usePanelDrag";
+import { useAnimatedPresence } from "../../hooks/motion/useAnimatedPresence";
+import { usePanelDrag } from "../../hooks/motion/usePanelDrag";
 import { MapFloatingPanel } from "../map/MapFloatingPanel";
 
 interface HiderZoneWizardShellProps {

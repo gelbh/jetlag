@@ -1,5 +1,5 @@
 import { appUpdateCopy } from "../../../domain/device/updates/appUpdateCopy";
-import { useAppUpdateState } from "../../../hooks/useAppUpdateState";
+import { useAppUpdateState } from "../../../hooks/app/useAppUpdateState";
 import { HudBanner } from "../hud/HudBanner";
 
 export function AppUpdateMapChip() {

@@ -1,4 +1,4 @@
-import { useAppUpdateState } from "../../hooks/useAppUpdateState";
+import { useAppUpdateState } from "../../hooks/app/useAppUpdateState";
 import { HudBanner } from "../ui/HudBanner";
 
 export function HotfixGraceChip() {
