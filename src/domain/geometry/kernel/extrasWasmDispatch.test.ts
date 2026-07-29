@@ -117,6 +117,15 @@ describe("extras wasm dispatch (halfPlane ready)", () => {
 
   it("mode wasm + geodesicLineBuffer not ready → TS result, WASM not called", async () => {
     vi.resetModules();
+    vi.doMock("./kernelWasmReady", () => ({
+      KERNEL_WASM_READY: {
+        maskFromUnionInput: true,
+        endGameMaskFromDisks: true,
+        halfPlane: true,
+        geodesicLineBuffer: false,
+      },
+      shouldUseWasm: () => false,
+    }));
     const wasmGeodesicLineBuffer = vi.fn(async () => {
       throw new Error("should not call geodesic wasm");
     });

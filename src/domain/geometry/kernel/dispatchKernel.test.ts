@@ -157,13 +157,13 @@ describe("dispatchKernelSync", () => {
     ).toThrow(/sync kernel path cannot use wasm/);
   });
 
-  it("stays on TS sync path while geodesic is not ready", () => {
-    expect(
+  it("throws on sync path when geodesic is ready in wasm mode", () => {
+    expect(() =>
       dispatchKernelSync({
         mode: "wasm",
         entrypoint: "geodesicLineBuffer",
         runTs: () => "ts",
       }),
-    ).toBe("ts");
+    ).toThrow(/sync kernel path cannot use wasm/);
   });
 });
