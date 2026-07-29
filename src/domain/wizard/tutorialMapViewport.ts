@@ -1,6 +1,6 @@
 import type { GameArea } from "../map/annotations";
-import type { LatLngTuple } from "../geometry/geometry";
-import { gameAreaToBoundingBox } from "../geometry/gameAreaBounds";
+import type { LatLngTuple } from "../geometry/gameArea/geometry";
+import { gameAreaToBoundingBox } from "../geometry/gameArea/gameAreaBounds";
 import type { GeocodedPlace } from "@/services/geo/geocoding";
 import { reverseGeocodePoint } from "@/services/geo/geocoding";
 import { getCurrentPosition } from "@/services/core/geolocation";

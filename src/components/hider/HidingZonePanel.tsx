@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import type { TransitStation } from "../../domain/session/hiding/hidingZone";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
   stepsForHidingZoneMode,
   type HidingZoneStepId,

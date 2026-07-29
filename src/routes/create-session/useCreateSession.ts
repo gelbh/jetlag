@@ -14,12 +14,12 @@ import {
   type GameArea,
   type SessionTier,
 } from "../../domain/map/annotations";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
   boundingBoxHasMinimumSpan,
   gameAreaToBoundingBox,
   placeToGameArea,
-} from "../../domain/geometry/geometry";
+} from "../../domain/geometry/gameArea/geometry";
 import { generateLocalCode } from "../../domain/session/meta/sessionCode";
 import type { DistanceUnit } from "../../domain/map/distance";
 import {
@@ -65,7 +65,7 @@ import {
 } from "../../services/core/analytics";
 import { setPremiumApiContext } from "../../services/core/premiumApiContext";
 import { emitSessionStartedActivity } from "../../services/session/emitSessionActivity";
-import { unionGameAreas } from "../../domain/geometry/unionGameAreas";
+import { unionGameAreas } from "../../domain/geometry/masks/unionGameAreas";
 import { parseBoundaryFile } from "../../services/core/kmzImport";
 import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
 import { useGamePresetStore } from "../../state/gamePresetStore";

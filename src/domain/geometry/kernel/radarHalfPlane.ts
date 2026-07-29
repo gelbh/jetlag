@@ -5,7 +5,7 @@ import turfCircle from "@turf/circle";
 import intersect from "@turf/intersect";
 import { point as turfPoint } from "@turf/helpers";
 import { polygon as turfPolygon } from "@turf/helpers";
-import { gameAreaToBoundingBox } from "../gameAreaBounds";
+import { gameAreaToBoundingBox } from "../gameArea/gameAreaBounds";
 import {
   bearingDegrees,
   destinationPoint,

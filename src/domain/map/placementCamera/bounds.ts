@@ -1,14 +1,14 @@
 import bbox from "@turf/bbox";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import type { LatLngBoundsExpression } from "leaflet";
-import { haversineMeters } from "../../geometry/distance";
+import { haversineMeters } from "../../geometry/gameArea/distance";
 import { boundingBoxToLeafletBounds } from "../../geometry/core/gameAreaConvert";
 import {
   gameAreaToBoundingBox,
   normalizeBoundingBox,
   type BoundingBox,
-} from "../../geometry/gameAreaBounds";
-import type { LatLngTuple } from "../../geometry/geometry";
+} from "../../geometry/gameArea/gameAreaBounds";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import type { GameArea } from "../annotations";
 import {
   PADDING_FRACTION,

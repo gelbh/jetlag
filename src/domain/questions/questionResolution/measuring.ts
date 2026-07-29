@@ -1,6 +1,6 @@
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
-import { buildMeasuringRegions, type MeasuringRegionInput } from "../../geometry/measuringRegions";
+import { buildMeasuringRegions, type MeasuringRegionInput } from "../../geometry/measuring/measuringRegions";
 import type { MeasuringAnswer } from "../measuringQuestions";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 

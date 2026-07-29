@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ThermometerPanel } from "../../components/tools/ThermometerPanel";
 import { DEFAULT_THERMOMETER_DISTANCE_METERS } from "../../domain/questions";
 import type { ThermometerAnswer } from "../../domain/questions/thermometerQuestions";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { DEFAULT_SESSION_RULES } from "../../domain/session/rules/types";
 import type { ThermometerPreviewFixture } from "../../domain/wizard/previewFixtures/thermometer";
 import {

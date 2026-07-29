@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { MapTool } from "../../domain/map/mapToolTypes";
 
 interface ToolMapClickHandler {

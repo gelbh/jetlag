@@ -1,5 +1,5 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import type { LatLngTuple } from "../../geometry/geometry";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import { getBoundaryPreviewStyle } from "../../map/mapBoundaryOverlayStyle";
 import type { MapStyle } from "../../map/mapBasemaps";

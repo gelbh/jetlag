@@ -10,7 +10,7 @@ import {
   prepareMeasuringLineSegments,
   type LatLngTuple,
   type PreparedLinearSegments,
-} from "../../../domain/geometry/geometry";
+} from "../../../domain/geometry/gameArea/geometry";
 import {
   measuringLinearOverpassSelectors,
   measuringLocationLabel,

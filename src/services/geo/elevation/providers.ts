@@ -1,4 +1,4 @@
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import {
   ELEVATION_MIN_429_BACKOFF_MS,
   OPEN_METEO_ELEVATION_ENDPOINT,

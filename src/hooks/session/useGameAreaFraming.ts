@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LatLngBounds, LatLngBoundsExpression } from "leaflet";
 import { LatLngBounds as LeafletLatLngBounds } from "leaflet";
 import type { GameArea } from "../../domain/map/annotations";
-import type { BoundingBox } from "../../domain/geometry/gameAreaBounds";
+import type { BoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
 import {
   boundsToGameArea,
   boundingBoxToLeafletBounds,
@@ -14,7 +14,7 @@ import {
   isUsableMapBounds,
   type LatLngTuple,
   verticesToGameArea,
-} from "../../domain/geometry/geometry";
+} from "../../domain/geometry/gameArea/geometry";
 
 export type FramingMode = "rectangle" | "circle" | "polygon";
 

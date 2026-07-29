@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
 import { useLatestRequest } from "../useLatestRequest";
 import type { GameArea } from "../../domain/map/annotations";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
-import { isPointInGameArea } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
 import {
   buildHidingZoneCircle,
   haversineMeters,

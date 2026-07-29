@@ -1,4 +1,4 @@
-import type { LatLngTuple } from "../geometry/geometry";
+import type { LatLngTuple } from "../geometry/gameArea/geometry";
 
 export type TransitRouteMode =
   | "rail"

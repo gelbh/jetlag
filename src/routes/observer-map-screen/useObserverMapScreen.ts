@@ -4,7 +4,7 @@ import {
   gameAreaCenter,
   gameAreaToBoundsExpression,
   type LatLngTuple,
-} from "../../domain/geometry/geometry";
+} from "../../domain/geometry/gameArea/geometry";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../domain/device/power/powerProfile";
 import { resolveSpectatorLayers } from "../../domain/session/players/observerPerspective";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";

@@ -5,7 +5,7 @@ import {
   isRadarRadiusAllowedForGameSize,
   type RadarAnswer,
 } from "../../domain/questions";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { DEFAULT_SESSION_RULES } from "../../domain/session/rules/types";
 import type { RadarPreviewFixture } from "../../domain/wizard/previewFixtures/radar";
 import {

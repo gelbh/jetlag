@@ -1,18 +1,18 @@
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { GameArea } from "../map/annotations";
-import type { LatLngTuple } from "../geometry/geometry";
+import type { LatLngTuple } from "../geometry/gameArea/geometry";
 import type { MatchingFeature } from "../geo/types";
 import { pickNearestMatchingFeature } from "../geo/matchingAdapters";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
-} from "../geometry/matchingGeometry";
+} from "../geometry/measuring/matchingGeometry";
 import {
   buildMeasuringBoundaryPreviewTs,
   buildMeasuringEliminationPreviewTs,
-} from "../geometry/measuringRegions";
+} from "../geometry/measuring/measuringRegions";
 import { destinationPoint } from "../geometry/core/geodesicPrimitives";
-import { buildTentacleEliminationRegion } from "../geometry/tentacleGeometry";
+import { buildTentacleEliminationRegion } from "../geometry/tentacle/tentacleGeometry";
 import type { TentaclePoi } from "../map/annotations";
 import type {
   MatchingAnswer,

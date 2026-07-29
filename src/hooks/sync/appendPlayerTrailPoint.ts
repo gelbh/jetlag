@@ -1,5 +1,5 @@
 import type { PlayerRole } from "../../domain/session/players/playerRole";
-import { haversineMeters } from "../../domain/geometry/distance";
+import { haversineMeters } from "../../domain/geometry/gameArea/distance";
 import {
   TRAIL_MIN_DISTANCE_METERS,
   TRAIL_MIN_INTERVAL_MS,
