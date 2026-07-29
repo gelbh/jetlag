@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { MeasuringPlace } from "../../services/geo/overpass/measuringPlaces";
 import {
   TENTACLE_ANSWER_RADIUS_METERS,

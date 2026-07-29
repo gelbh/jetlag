@@ -1,5 +1,5 @@
 import type { GameArea } from "../../map/annotations";
-import type { LatLngTuple } from "../../geometry/geometry";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import { classifyAdminDivisionAtPoint } from "@/services/geo/overpass/adminDivisionBoundaries";
 import { classifyLandmassAtPoint } from "@/services/geo/overpass/landmassFeatures";
 import {
