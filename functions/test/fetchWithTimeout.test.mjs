@@ -14,7 +14,12 @@ describe("fetchWithTimeout", () => {
 
     await assert.rejects(
       () => fetchWithTimeout("https://example.com", {}, 10),
-      /Aborted/,
+      (error) => {
+        assert.equal(error.name, "FetchTimeoutError");
+        assert.match(error.message, /timed out after 10ms/);
+        assert.notEqual(error.name, "AbortError");
+        return true;
+      },
     );
 
     globalThis.fetch = originalFetch;
