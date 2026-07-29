@@ -1,11 +1,12 @@
 import { useCallback } from "react";
 import { AppNavigate } from "../navigation/AppNavigate";
 import { GameAreaMask } from "../components/map/GameAreaMask";
-import { MapView } from "../components/map/MapView";
+import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
 import { MapViewportTracker } from "../components/map/MapViewportTracker";
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { ContextualRailPanelProvider } from "../components/map/ContextualRailContext";
 import { SessionLog } from "../components/session/SessionLog";
+import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
 import { InlineError } from "../components/ui/InlineError";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { fallbackGameArea } from "../domain/geometry/geometry";
@@ -70,17 +71,15 @@ export function ObserverMapScreen() {
   const gameArea = fallbackGameArea(controller.gameArea);
   const sessionRules = controller.sessionRules ?? controller.session;
   const chatDisplayRole = controller.spectatorLayers.chatDisplayRole;
-  const mapControlInset = isDesktop ? "safe-area" : "dock";
 
   const mapLayers = (
     <div className="absolute inset-0">
-      <MapView
+      <MapViewWithLandscapeInset
+        isDesktop={isDesktop}
         key={controller.session.id}
         mapKey={controller.session.id}
         mapStyle={controller.effectiveBasemapStyle}
         onMapStyleChange={controller.handleMapStyleChange}
-        mapStyleControlInset={mapControlInset}
-        zoomControlInset={mapControlInset}
         center={controller.center}
         zoom={12}
         focusBounds={controller.mapFocusBounds}
@@ -106,12 +105,21 @@ export function ObserverMapScreen() {
           uid={controller.uid}
           activeThermometerWalk={controller.activeThermometerWalk}
         />
-      </MapView>
+      </MapViewWithLandscapeInset>
     </div>
   );
 
   return (
     <ContextualRailPanelProvider>
+      <MapLandscapeChromeShell
+        sessionRules={sessionRules}
+        timerState={controller.timer.timerState}
+        timerHasStarted={controller.timer.hasStarted}
+        pendingQuestions={controller.pendingQuestions}
+        syncStatus={controller.syncStatus.status}
+        queuedWrites={controller.syncStatus.queuedWrites}
+        syncMessage={controller.syncStatus.lastSyncError}
+      >
       <div className="map-screen-shell">
         {isDesktop ? null : mapLayers}
 
@@ -164,6 +172,7 @@ export function ObserverMapScreen() {
           />
         ) : null}
       </div>
+      </MapLandscapeChromeShell>
     </ContextualRailPanelProvider>
   );
 }
