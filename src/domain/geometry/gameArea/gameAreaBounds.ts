@@ -77,15 +77,19 @@ export function boundingBoxToGameArea(box: BoundingBox): GameAreaGeometry {
 
 export function gameAreaToBoundingBox(gameArea: GameAreaGeometry): BoundingBox {
   const positions = collectPositions(gameArea);
-  const lngs = positions.map(([lng]) => lng);
-  const lats = positions.map(([, lat]) => lat);
+  let south = Infinity;
+  let west = Infinity;
+  let north = -Infinity;
+  let east = -Infinity;
 
-  return normalizeBoundingBox({
-    south: Math.min(...lats),
-    west: Math.min(...lngs),
-    north: Math.max(...lats),
-    east: Math.max(...lngs),
-  });
+  for (const [lng, lat] of positions) {
+    if (lat < south) south = lat;
+    if (lat > north) north = lat;
+    if (lng < west) west = lng;
+    if (lng > east) east = lng;
+  }
+
+  return normalizeBoundingBox({ south, west, north, east });
 }
 
 export function expandBoundingBox(

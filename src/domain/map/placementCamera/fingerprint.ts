@@ -71,16 +71,25 @@ function eliminationBboxHash(
     return null;
   }
 
-  const lats = positions.map(([, lat]) => lat);
-  const lngs = positions.map(([lng]) => lng);
+  let minLng = Infinity;
+  let maxLng = -Infinity;
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+
+  for (const [lng, lat] of positions) {
+    if (lng < minLng) minLng = lng;
+    if (lng > maxLng) maxLng = lng;
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+  }
 
   const round = (value: number) => value.toFixed(6);
 
   return [
-    round(Math.min(...lngs)),
-    round(Math.min(...lats)),
-    round(Math.max(...lngs)),
-    round(Math.max(...lats)),
+    round(minLng),
+    round(minLat),
+    round(maxLng),
+    round(maxLat),
   ].join(",");
 }
 
@@ -108,13 +117,17 @@ export function placementCameraFingerprint(
     for (const feature of input.eliminationFeatures) {
       if (feature.geometry.type === "Polygon") {
         for (const ring of (feature as Feature<Polygon>).geometry.coordinates) {
-          eliminationPositions.push(...ring);
+          for (const pos of ring) {
+            eliminationPositions.push(pos);
+          }
         }
       } else if (feature.geometry.type === "MultiPolygon") {
         for (const polygon of (feature as Feature<MultiPolygon>).geometry
           .coordinates) {
           for (const ring of polygon) {
-            eliminationPositions.push(...ring);
+            for (const pos of ring) {
+              eliminationPositions.push(pos);
+            }
           }
         }
       }
