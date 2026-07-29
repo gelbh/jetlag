@@ -14,6 +14,7 @@ import {
   syncAnalyticsIdentity,
   track,
   trackPageView,
+  trackSessionEnded,
 } from "./analytics";
 import { resetClientEnvForTests } from "../../../config/env";
 
@@ -126,7 +127,7 @@ describe("analytics facade", () => {
     writeAnalyticsConsent("granted");
     initAnalytics();
     trackPageView("/home");
-    track(ANALYTICS_EVENTS.session_ended, {});
+    track(ANALYTICS_EVENTS.session_ended, { reason: "host_end" });
 
     expect(posthogInit).not.toHaveBeenCalled();
     expect(posthogCapture).not.toHaveBeenCalled();
@@ -138,7 +139,7 @@ describe("analytics facade", () => {
 
     initAnalytics();
     trackPageView("/home");
-    track(ANALYTICS_EVENTS.session_ended, {});
+    track(ANALYTICS_EVENTS.session_ended, { reason: "host_end" });
 
     expect(posthogInit).not.toHaveBeenCalled();
     expect(posthogCapture).not.toHaveBeenCalled();
@@ -301,7 +302,7 @@ describe("analytics facade", () => {
 
     denyAnalyticsConsent();
     trackPageView("/home");
-    track(ANALYTICS_EVENTS.session_ended, {});
+    track(ANALYTICS_EVENTS.session_ended, { reason: "host_end" });
 
     expect(posthogCapture).not.toHaveBeenCalled();
   });
@@ -367,5 +368,31 @@ describe("analytics facade", () => {
   it("no-ops identity sync when not initialized", () => {
     syncAnalyticsIdentity({ uid: "user-1", isAnonymous: false });
     expect(posthogIdentify).not.toHaveBeenCalled();
+  });
+
+  it("trackSessionEnded captures session_ended with reason", () => {
+    writeAnalyticsConsent("granted");
+    resetAnalyticsForTests({ initialized: true });
+
+    trackSessionEnded("host_end");
+
+    expect(posthogCapture).toHaveBeenCalledWith("session_ended", {
+      reason: "host_end",
+    });
+  });
+
+  it("skips pageviews for static assets and prerender paths", () => {
+    writeAnalyticsConsent("granted");
+    resetAnalyticsForTests({ initialized: true });
+
+    trackPageView("/og-default.png");
+    trackPageView("/prerender/home/");
+    expect(posthogCapture).not.toHaveBeenCalled();
+
+    trackPageView("/create");
+    expect(posthogCapture).toHaveBeenCalledWith("$pageview", {
+      path: "/create",
+      $pathname: "/create",
+    });
   });
 });

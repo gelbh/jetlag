@@ -10,6 +10,7 @@ import type { AdvancedSessionSettingsValue } from "../../domain/session/tools/ad
 import type { GameSize } from "../../domain/session/size/gameSize";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
+import { ANALYTICS_EVENTS, track } from "../../services/core/analytics";
 import { isFirebaseConfigured } from "../../services/core/firebase";
 import type { usePremiumHostEligibility } from "../../hooks/billing/usePremiumHostEligibility";
 
@@ -55,6 +56,11 @@ export function SessionSettingsSection({
   packCreditsLabel,
   packPremiumFlow,
 }: SessionSettingsSectionProps) {
+  const handlePlayerRoleChange = (role: PlayerRole) => {
+    track(ANALYTICS_EVENTS.role_selected, { role, surface: "create" });
+    onPlayerRoleChange(role);
+  };
+
   return (
     <>
       {isFirebaseConfigured() ? (
@@ -111,7 +117,7 @@ export function SessionSettingsSection({
 
       <RolePicker
         value={playerRole}
-        onChange={onPlayerRoleChange}
+        onChange={handlePlayerRoleChange}
         disabled={loading || verifyingAccess}
       />
 

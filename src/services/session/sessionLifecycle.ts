@@ -1,5 +1,5 @@
 import { httpsCallable } from "firebase/functions";
-import { ANALYTICS_EVENTS, track } from "../core/analytics";
+import { trackSessionEnded } from "../core/analytics";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
 
 export type LeaveHostSessionResult =
@@ -33,5 +33,5 @@ export async function endSession(sessionId: string): Promise<void> {
     "endSession",
   );
   await callable({ sessionId });
-  track(ANALYTICS_EVENTS.session_ended, {});
+  trackSessionEnded("host_end");
 }

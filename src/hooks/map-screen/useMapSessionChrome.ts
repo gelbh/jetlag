@@ -25,6 +25,7 @@ import {
 } from "../../services/session/sessionLifecycle";
 import { isExpectedSessionLeaveError } from "../../services/session/sessionLeaveErrors";
 import { emitGameEndedActivity } from "../../services/session/emitSessionActivity";
+import { trackSessionEnded } from "../../services/core/analytics";
 import { useSessionExit } from "../session/useSessionExit";
 import { ensureAnonymousUser } from "../../services/core/firebase";
 import { captureException } from "../../services/core/sentry";
@@ -219,12 +220,13 @@ export function useMapSessionChrome({
       await endSession(sessionId);
     } catch (error) {
       if (isExpectedSessionLeaveError(error)) {
-        // Already ended — continue local exit.
+        trackSessionEnded("expected_already_ended");
       } else {
         captureException(error);
         // Emulator / no Functions: fall back to client end write.
         try {
           await endRemoteSession(sessionId);
+          trackSessionEnded("fallback_client_end");
         } catch (fallbackError) {
           captureException(fallbackError);
           window.alert("Couldn't end the session. Try again.");
@@ -232,6 +234,7 @@ export function useMapSessionChrome({
         }
       }
     }
+    // Activity only — session_ended already tracked via endSession / paths above.
     emitGameEndedActivity(sessionId, {
       outcome: "ended_early",
       summary: "Session ended",
@@ -276,15 +279,20 @@ export function useMapSessionChrome({
       }
 
       try {
-        await leaveHostSession(session.id);
+        const leaveResult = await leaveHostSession(session.id);
+        if (leaveResult.action === "ended") {
+          trackSessionEnded("host_leave_ended");
+        }
+        // promoted: session continues — do not emit session_ended
       } catch (error) {
         if (isExpectedSessionLeaveError(error)) {
-          // Host role moved or session already ended — continue local leave.
+          trackSessionEnded("expected_already_ended");
         } else {
           captureException(error);
           if (alone) {
             try {
               await endRemoteSession(session.id);
+              trackSessionEnded("fallback_client_end");
             } catch (fallbackError) {
               captureException(fallbackError);
               window.alert("Couldn't leave the session. Try again.");
@@ -302,6 +310,10 @@ export function useMapSessionChrome({
       )
     ) {
       return;
+    }
+
+    if (isLocalSession) {
+      trackSessionEnded("local");
     }
 
     if (!isLocalSession && user) {

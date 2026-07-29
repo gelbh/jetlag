@@ -8,9 +8,18 @@ import {
   ANALYTICS_EVENTS,
   type AnalyticsEventName,
   type AnalyticsEventProps,
+  type SessionEndedReason,
 } from "./analyticsEvents";
 
-export { ANALYTICS_EVENTS, type AnalyticsEventName, type AnalyticsEventProps };
+export {
+  ANALYTICS_EVENTS,
+  type AnalyticsEventName,
+  type AnalyticsEventProps,
+  type SessionEndedReason,
+};
+
+const ASSET_PAGEVIEW_PATH =
+  /\.(png|jpe?g|webp|gif|svg|ico|json|xml|txt)$/i;
 
 /**
  * First-party Worker reverse proxy path.
@@ -232,8 +241,19 @@ function pageViewProperties(
   return props;
 }
 
+function shouldSkipPageView(path: string): boolean {
+  const pathname = path.split("?", 1)[0] ?? path;
+  if (pathname.startsWith("/prerender/")) {
+    return true;
+  }
+  return ASSET_PAGEVIEW_PATH.test(pathname);
+}
+
 export function trackPageView(path: string): void {
   if (!initialized) {
+    return;
+  }
+  if (shouldSkipPageView(path)) {
     return;
   }
 
@@ -252,6 +272,10 @@ export function track<E extends AnalyticsEventName>(
     props as Record<string, unknown> | undefined,
   );
   posthog.capture(event, scrubbed);
+}
+
+export function trackSessionEnded(reason: SessionEndedReason): void {
+  track(ANALYTICS_EVENTS.session_ended, { reason });
 }
 
 export function resetAnalyticsForTests(options?: {
