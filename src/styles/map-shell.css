@@ -1026,3 +1026,17 @@
   }
 
 }
+
+  .admin-monitor-pane--nested-wm {
+    position: relative;
+  }
+
+  .admin-monitor-grid-workspace {
+    height: 100%;
+    min-height: 0;
+    overflow-x: hidden;
+  }
+
+  .admin-monitor-stack-body {
+    min-height: 0;
+  }

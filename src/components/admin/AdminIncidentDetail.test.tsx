@@ -94,6 +94,7 @@ vi.mock("../../components/billing/PremiumSignInGate", () => ({
 vi.mock("../../services/core/firebase", () => ({
   isFirebaseConfigured: () => true,
   getFirebaseAuth: () => ({}),
+  ensureAnonymousUser: vi.fn(async () => ({ uid: "anon-test" })),
 }));
 
 vi.mock("../../services/admin/adminIncidents", async () => {
