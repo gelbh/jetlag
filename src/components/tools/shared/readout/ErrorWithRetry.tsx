@@ -1,4 +1,4 @@
-import { InlineError } from "../../../ui/InlineError";
+import { InlineError } from "../../../ui/banners/InlineError";
 
 interface ErrorWithRetryProps {
   error: string;

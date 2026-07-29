@@ -1,4 +1,4 @@
-import { HUD_BINARY_NO, HUD_BINARY_YES } from "../../../ui/hudTokens";
+import { HUD_BINARY_NO, HUD_BINARY_YES } from "../../../ui/hud/hudTokens";
 
 export const yesNoAnswerOptions = [
   {

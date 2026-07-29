@@ -8,7 +8,7 @@ import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
 import { useAnimatedPresence } from "../../hooks/motion/useAnimatedPresence";
-import { SheetHost } from "../ui/SheetHost";
+import { SheetHost } from "../ui/sheets/SheetHost";
 import { ChatPanelBody } from "./ChatPanelBody";
 
 interface ChatPanelProps {

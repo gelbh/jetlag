@@ -1,5 +1,5 @@
-import { AnimatedOverlay } from "../../ui/AnimatedOverlay";
-import { PopupCloseButton } from "../../ui/PopupCloseButton";
+import { AnimatedOverlay } from "../../ui/banners/AnimatedOverlay";
+import { PopupCloseButton } from "../../ui/brand/PopupCloseButton";
 
 interface MapReplayLayerProps {
   open: boolean;

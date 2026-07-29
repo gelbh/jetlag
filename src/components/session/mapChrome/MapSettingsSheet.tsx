@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { SheetHeader } from "../../ui/SheetHeader";
-import { SheetHost } from "../../ui/SheetHost";
+import { SheetHeader } from "../../ui/sheets/SheetHeader";
+import { SheetHost } from "../../ui/sheets/SheetHost";
 import { CurseReferenceSheet } from "../../expansion/CurseReferenceSheet";
 import { ReportProblemSheet } from "../../incident/ReportProblemSheet";
 import {

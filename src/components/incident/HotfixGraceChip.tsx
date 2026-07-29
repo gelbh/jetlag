@@ -1,5 +1,5 @@
 import { useAppUpdateState } from "../../hooks/app/useAppUpdateState";
-import { HudBanner } from "../ui/HudBanner";
+import { HudBanner } from "../ui/hud/HudBanner";
 
 export function HotfixGraceChip() {
   const { hotfixGraceActive, hotfixGraceSecondsRemaining } = useAppUpdateState();

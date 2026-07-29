@@ -12,7 +12,7 @@ import {
   HudRedoIcon,
   HudSettingsIcon,
   HudUndoIcon,
-} from "../ui/HudIcons";
+} from "../ui/brand/HudIcons";
 import {
   HudPinIcon,
   HudToolIcon,

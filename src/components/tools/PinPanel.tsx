@@ -1,4 +1,4 @@
-import { TextAreaField } from "../ui/TextAreaField";
+import { TextAreaField } from "../ui/forms/TextAreaField";
 
 interface PinPanelProps {
   label: string;

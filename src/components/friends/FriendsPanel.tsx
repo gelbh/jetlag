@@ -10,8 +10,8 @@ import {
   searchFriends,
   type FriendListEntry,
 } from "../../services/profile/profileFriends";
-import { InlineError } from "../ui/InlineError";
-import { SearchField } from "../ui/SearchField";
+import { InlineError } from "../ui/banners/InlineError";
+import { SearchField } from "../ui/forms/SearchField";
 
 type FriendRelation = "incoming" | "outgoing" | "friend";
 

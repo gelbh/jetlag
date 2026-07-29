@@ -3,12 +3,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { AppLink } from "../navigation/AppLink";
 import { PremiumSignInGate } from "../billing/PremiumSignInGate";
-import { EntryScreenLayout } from "../ui/EntryScreenLayout";
+import { EntryScreenLayout } from "../ui/layout/EntryScreenLayout";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
-} from "../ui/ScreenHeader";
-import { InlineError } from "../ui/InlineError";
+} from "../ui/layout/ScreenHeader";
+import { InlineError } from "../ui/banners/InlineError";
 import { filterAdminSessions } from "../../domain/admin/adminSessionFilters";
 import type {
   AdminSessionModeFilter,

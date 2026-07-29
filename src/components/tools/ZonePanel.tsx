@@ -1,4 +1,4 @@
-import { TextField } from "../ui/TextField";
+import { TextField } from "../ui/forms/TextField";
 
 interface ZonePanelProps {
   vertexCount: number;

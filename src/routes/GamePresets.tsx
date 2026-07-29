@@ -3,11 +3,11 @@ import { AppLink } from "../components/navigation/AppLink";
 import { useParams } from "react-router-dom";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import type { LatLngBoundsExpression } from "leaflet";
-import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
+import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
-} from "../components/ui/ScreenHeader";
+} from "../components/ui/layout/ScreenHeader";
 import { AdvancedSessionSettings } from "../components/session/AdvancedSessionSettings";
 import { GameAreaFramingModal } from "../components/session/GameAreaFramingModal";
 import { GameAreaFramingStats } from "../components/session/GameAreaFramingControls";

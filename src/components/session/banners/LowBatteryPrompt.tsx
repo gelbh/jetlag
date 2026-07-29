@@ -7,7 +7,7 @@ import {
 } from "../../../domain/device/power/batteryPrompt";
 import { useBatteryStatus } from "../../../hooks/location/useBatteryStatus";
 import { useMapStore } from "../../../state/mapStore";
-import { HudBanner } from "../../ui/HudBanner";
+import { HudBanner } from "../../ui/hud/HudBanner";
 
 export function LowBatteryPrompt() {
   const location = useLocation();

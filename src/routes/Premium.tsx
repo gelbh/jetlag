@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
-import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
-import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
-import { InlineError } from "../components/ui/InlineError";
-import { ScreenHeader } from "../components/ui/ScreenHeader";
+import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
+import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
+import { InlineError } from "../components/ui/banners/InlineError";
+import { ScreenHeader } from "../components/ui/layout/ScreenHeader";
 import { PremiumSignInGate } from "../components/billing/PremiumSignInGate";
 import { PremiumFeatureList } from "../components/billing/PremiumFeatureList";
 import { PremiumTierCards } from "../components/billing/PremiumTierCards";

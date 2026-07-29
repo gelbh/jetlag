@@ -5,7 +5,7 @@ import { MapView } from "../components/map/MapView";
 import { MapViewportTracker } from "../components/map/MapViewportTracker";
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { SessionLog } from "../components/session/SessionLog";
-import { InlineError } from "../components/ui/InlineError";
+import { InlineError } from "../components/ui/banners/InlineError";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { fallbackGameArea } from "../domain/geometry/gameArea/geometry";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";

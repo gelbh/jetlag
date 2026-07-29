@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import {
   HudChevronLeftIcon,
   HudChevronRightIcon,
-} from "../../ui/HudIcons";
+} from "../../ui/brand/HudIcons";
 import {
   type ContextualRailTab,
 } from "./ContextualRailContext";

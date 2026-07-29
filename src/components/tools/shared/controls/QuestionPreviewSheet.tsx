@@ -1,5 +1,5 @@
 import { MotionSheet } from "../../../motion/MotionSheet";
-import { SheetHeader } from "../../../ui/SheetHeader";
+import { SheetHeader } from "../../../ui/sheets/SheetHeader";
 import { QuestionPromptBlock } from "./QuestionPromptBlock";
 import { CoordinateCopyButton } from "./CoordinateCopyButton";
 

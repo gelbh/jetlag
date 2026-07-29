@@ -4,8 +4,8 @@ import {
   selectPrimaryQuestionTimer,
   type ActiveQuestionTimer,
 } from "../../../domain/questions";
-import { HudBanner } from "../../ui/HudBanner";
-import { MapFloatAlert } from "../../ui/MapFloatAlert";
+import { HudBanner } from "../../ui/hud/HudBanner";
+import { MapFloatAlert } from "../../ui/banners/MapFloatAlert";
 
 interface QuestionAlertBannerProps {
   pendingQuestions: readonly import("../../../domain/session/activity/sessionChat").PendingQuestionRecord[];

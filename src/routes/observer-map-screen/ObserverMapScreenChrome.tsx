@@ -3,7 +3,7 @@ import { AppLink } from "../../components/navigation/AppLink";
 import { ContextualRail } from "../../components/map/ContextualRail";
 import type { ContextualRailTab } from "../../components/map/ContextualRailContext";
 import { MapStatusRail } from "../../components/session/MapStatusRail";
-import { HudHomeIcon } from "../../components/ui/HudIcons";
+import { HudHomeIcon } from "../../components/ui/brand/HudIcons";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { SessionRecord } from "../../domain/map/annotations";
 import type { UseMapOverlayStateResult } from "../../hooks/map/useMapOverlayState";

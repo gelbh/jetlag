@@ -1,5 +1,5 @@
 import type { PlayerRole } from "../../../domain/session/players/playerRole";
-import { MapFloatAlert, MapFloatAlertPanel } from "../../ui/MapFloatAlert";
+import { MapFloatAlert, MapFloatAlertPanel } from "../../ui/banners/MapFloatAlert";
 
 interface EndGameAlertProps {
   endGamePending: boolean;

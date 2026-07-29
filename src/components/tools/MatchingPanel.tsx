@@ -12,7 +12,7 @@ import {
 import { resolveMatchingCategory } from "../../domain/session/catalog/sessionCustomCatalog";
 import { matchingFeatureCountLabel, matchingNullAnswerMessage } from "../../services/geo/matching";
 import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
-import { GroupedSelectField } from "../ui/GroupedSelectField";
+import { GroupedSelectField } from "../ui/forms/GroupedSelectField";
 import { yesNoAnswerOptions } from "./shared/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
 import { AnchorControls } from "./shared/AnchorControls";

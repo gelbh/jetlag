@@ -15,7 +15,7 @@ import {
 import { getFirebaseAuth, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { useSessionStore } from "../../state/sessionStore";
 import { MotionSheet } from "../motion/MotionSheet";
-import { SheetHeader } from "../ui/SheetHeader";
+import { SheetHeader } from "../ui/sheets/SheetHeader";
 import { IncidentChatPanel } from "./IncidentChatPanel";
 import { SupportAgentChat } from "./SupportAgentChat";
 import "./ReportProblemSheet.css";

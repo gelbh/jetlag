@@ -1,9 +1,9 @@
 import { AppLink } from "../navigation/AppLink";
-import { DesktopContentColumn } from "../ui/DesktopContentColumn";
+import { DesktopContentColumn } from "../ui/layout/DesktopContentColumn";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
-} from "../ui/ScreenHeader";
+} from "../ui/layout/ScreenHeader";
 import { BundledPresetTree } from "./BundledPresetTree";
 import { PresetSearchResults } from "./PresetSearchResults";
 import { PresetDetailPanel } from "./PresetDetailPanel";

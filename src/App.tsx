@@ -7,15 +7,15 @@ import {
   useLocation,
 } from "react-router-dom";
 import { trackPageView } from "./services/core/analytics/analytics";
-import { MapErrorBoundary } from "./components/ui/MapErrorBoundary";
-import { AppEntryBackdrop } from "./components/ui/AppEntryBackdrop";
-import { AnalyticsConsentBanner } from "./components/ui/AnalyticsConsentBanner";
-import { AppUpdateBanner } from "./components/ui/AppUpdateBanner";
-import { AppUpdateProvider } from "./components/ui/AppUpdateProvider";
+import { MapErrorBoundary } from "./components/ui/feedback/MapErrorBoundary";
+import { AppEntryBackdrop } from "./components/ui/layout/AppEntryBackdrop";
+import { AnalyticsConsentBanner } from "./components/ui/banners/AnalyticsConsentBanner";
+import { AppUpdateBanner } from "./components/ui/banners/AppUpdateBanner";
+import { AppUpdateProvider } from "./components/ui/banners/AppUpdateProvider";
 import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
-import { AppCheckProbeGate } from "./components/ui/AppCheckProbeGate";
-import { AppErrorPage } from "./components/ui/AppErrorPage";
+import { AppCheckProbeGate } from "./components/ui/feedback/AppCheckProbeGate";
+import { AppErrorPage } from "./components/ui/feedback/AppErrorPage";
 import { AppResumeWatchdog } from "./components/ui/AppResumeWatchdog";
 import { Home } from "./routes/Home";
 import { AdminOpsDesk } from "./components/admin/AdminOpsDesk";

@@ -3,7 +3,7 @@ import type { TransitRouteFilter } from "../../../domain/map/transit";
 import type { DistanceUnit } from "../../../domain/map/distance";
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
 import { effectiveMapStyle } from "../../../domain/device/power/powerProfile";
-import { SegmentControl } from "../../ui/SegmentControl";
+import { SegmentControl } from "../../ui/forms/SegmentControl";
 import { SettingsToggleRow } from "../SettingsToggleRow";
 
 export interface MapSettingsGeneralTabProps {

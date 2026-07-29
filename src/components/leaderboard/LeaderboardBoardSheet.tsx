@@ -7,8 +7,8 @@ import type { LeaderboardBoardSelection } from "../../domain/game/leaderboardBoa
 import { GAME_SIZE_OPTIONS, gameSizeLabel } from "../../domain/session/size/gameSize";
 import { playerRoleLabel } from "../../domain/session/players/playerRole";
 import { MotionSheet } from "../motion/MotionSheet";
-import { SegmentControl } from "../ui/SegmentControl";
-import { SheetHeader } from "../ui/SheetHeader";
+import { SegmentControl } from "../ui/forms/SegmentControl";
+import { SheetHeader } from "../ui/sheets/SheetHeader";
 
 interface LeaderboardBoardSheetProps {
   open: boolean;

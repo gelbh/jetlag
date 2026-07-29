@@ -1,7 +1,7 @@
 import { useMemo, type MutableRefObject } from "react";
 import { createPortal } from "react-dom";
 import { useMap } from "react-leaflet";
-import { HudRefreshIcon } from "../../ui/HudIcons";
+import { HudRefreshIcon } from "../../ui/brand/HudIcons";
 import type { MapChromeControlInset } from "../helpers/mapChromeControlInset";
 import { useMapInteracting } from "../helpers/useMapInteracting";
 

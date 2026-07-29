@@ -1,4 +1,4 @@
-import { MapFloatAlert } from "../../ui/MapFloatAlert";
+import { MapFloatAlert } from "../../ui/banners/MapFloatAlert";
 
 export function HiderOutsideZoneAlert() {
   return (

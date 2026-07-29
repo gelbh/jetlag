@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { HiderTruthResult } from "../../../domain/questions/ui";
-import { HudBanner } from "../../ui/HudBanner";
+import { HudBanner } from "../../ui/hud/HudBanner";
 
 export interface HiderTruthRevealState {
   truth: HiderTruthResult;

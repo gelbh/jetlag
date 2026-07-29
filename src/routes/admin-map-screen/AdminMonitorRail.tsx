@@ -7,7 +7,7 @@ import type { MapViewportState } from "../../components/map/MapViewportTracker";
 import type { ObserverMapScreenController } from "../observer-map-screen/useObserverMapScreen";
 import { SessionLogBody } from "../../components/session/SessionLogBody";
 import { ChatPanelBody } from "../../components/chat/ChatPanelBody";
-import { HudChevronLeftIcon, HudChevronRightIcon } from "../../components/ui/HudIcons";
+import { HudChevronLeftIcon, HudChevronRightIcon } from "../../components/ui/brand/HudIcons";
 import { useSessionActivityLog } from "../../hooks/session/useSessionActivityLog";
 import { useAnnotationStore } from "../../state/annotationStore";
 import { OverviewPanel } from "./panels/OverviewPanel";

@@ -1,2 +1,2 @@
-export { AnimatedOverlay as MotionSheet } from "../ui/AnimatedOverlay";
-export type { AnimatedOverlayProps as MotionSheetProps } from "../ui/AnimatedOverlay";
+export { AnimatedOverlay as MotionSheet } from "../ui/banners/AnimatedOverlay";
+export type { AnimatedOverlayProps as MotionSheetProps } from "../ui/banners/AnimatedOverlay";

@@ -10,7 +10,7 @@ import { mapToolDockShortLabel, isQuestionDockTool } from "../../domain/map/mapT
 import type { SessionMessageRecord } from "../../domain/session/activity/sessionChat";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { HiderAnswerPicker } from "./HiderAnswerPicker";
-import { InlineError } from "../ui/InlineError";
+import { InlineError } from "../ui/banners/InlineError";
 import { PhotoAnswerPreview } from "./PhotoAnswerPreview";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 

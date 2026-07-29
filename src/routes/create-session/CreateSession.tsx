@@ -2,10 +2,10 @@ import { useCallback } from "react";
 import {
   ScreenHeader,
   screenHeaderShellClassName,
-} from "../../components/ui/ScreenHeader";
+} from "../../components/ui/layout/ScreenHeader";
 import { CreateSessionMapPane } from "../../components/session/CreateSessionMapPane";
 import { GameAreaFramingModal } from "../../components/session/GameAreaFramingModal";
-import { MobileSheet } from "../../components/ui/MobileSheet";
+import { MobileSheet } from "../../components/ui/sheets/MobileSheet";
 import {
   buildCreateSessionPresetDraft,
   createSessionDraftToGamePreset,

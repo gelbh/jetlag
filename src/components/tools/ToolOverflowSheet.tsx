@@ -7,13 +7,13 @@ import {
 } from "../../domain/map/mapTools";
 import type { MapTool } from "../../state/sessionStore";
 import { MotionSheet } from "../motion/MotionSheet";
-import { SheetHeader } from "../ui/SheetHeader";
+import { SheetHeader } from "../ui/sheets/SheetHeader";
 import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 import {
   HudRedoIcon,
   HudSettingsIcon,
   HudUndoIcon,
-} from "../ui/HudIcons";
+} from "../ui/brand/HudIcons";
 import { HudPinIcon, HudZoneIcon } from "../map/ToolIcons";
 
 interface ToolOverflowSheetProps {

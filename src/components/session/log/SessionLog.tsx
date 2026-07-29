@@ -1,7 +1,7 @@
 import { type AnnotationRecord } from "../../../domain/map/annotations";
 import { useSessionActivityLog } from "../../../hooks/session/useSessionActivityLog";
-import { SheetHeader } from "../../ui/SheetHeader";
-import { SheetHost } from "../../ui/SheetHost";
+import { SheetHeader } from "../../ui/sheets/SheetHeader";
+import { SheetHost } from "../../ui/sheets/SheetHost";
 import { SessionLogBody } from "./SessionLogBody";
 
 interface SessionLogProps {

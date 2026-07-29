@@ -4,8 +4,8 @@ import {
   validateUsername,
 } from "../../domain/game/playerProfile";
 import { claimUsername } from "../../services/profile/claimUsername";
-import { InlineError } from "../ui/InlineError";
-import { TextField } from "../ui/TextField";
+import { InlineError } from "../ui/banners/InlineError";
+import { TextField } from "../ui/forms/TextField";
 
 interface UsernameSetupGateProps {
   onClaimed?: (username: string) => void;

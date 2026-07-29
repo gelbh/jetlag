@@ -1,4 +1,4 @@
-import { HudSegmentControl } from "../../ui/HudSegmentControl";
+import { HudSegmentControl } from "../../ui/forms/HudSegmentControl";
 
 export type SettingsSegment = "map" | "layers" | "rules" | "session";
 

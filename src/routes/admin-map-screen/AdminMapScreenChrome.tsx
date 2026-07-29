@@ -1,7 +1,7 @@
 import { SessionTimerLabel } from "../../components/session/SessionTimerLabel";
 import { SyncStatusBeacon } from "../../components/session/SyncStatusDot";
 import { syncBeaconAriaLabel } from "../../components/session/status/syncRailDisplay";
-import { HudHomeIcon } from "../../components/ui/HudIcons";
+import { HudHomeIcon } from "../../components/ui/brand/HudIcons";
 import { playerRoleLabel } from "../../domain/session/players/playerRole";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { SessionRecord } from "../../domain/map/annotations";

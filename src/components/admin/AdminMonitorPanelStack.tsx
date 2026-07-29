@@ -9,7 +9,7 @@ import {
   HudCollapseIcon,
   HudExpandIcon,
   HudPinIcon,
-} from "../ui/HudIcons";
+} from "../ui/brand/HudIcons";
 import {
   AdminMonitorPanelBody,
   type AdminMonitorPanelBodies,

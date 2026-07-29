@@ -1,7 +1,7 @@
 import { APP_VERSION } from "../../domain/device/changelog";
 import type { DeskPreset } from "../../domain/admin/opsDeskLayout";
 import { AppLink } from "../navigation/AppLink";
-import { HudHomeIcon } from "../ui/HudIcons";
+import { HudHomeIcon } from "../ui/brand/HudIcons";
 import { AdminPresetMenu } from "./AdminPresetMenu";
 
 function formatUtcClock(now: Date): string {

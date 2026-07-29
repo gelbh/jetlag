@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
-import { AppCheckProbeGate } from "./AppCheckProbeGate";
+import { AppCheckProbeGate } from "./feedback/AppCheckProbeGate";
 
 vi.mock("../../hooks/app/useAuthBootstrapReady", () => ({
   useAuthBootstrapReady: () => true,

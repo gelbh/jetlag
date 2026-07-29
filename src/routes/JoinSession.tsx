@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { useSubmitLock } from "../hooks/forms/useSubmitLock";
-import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
-import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
-import { InlineError } from "../components/ui/InlineError";
+import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
+import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
+import { InlineError } from "../components/ui/banners/InlineError";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
-} from "../components/ui/ScreenHeader";
+} from "../components/ui/layout/ScreenHeader";
 import { isPremiumSession } from "../domain/map/annotations";
 import {
   isValidSessionCode,

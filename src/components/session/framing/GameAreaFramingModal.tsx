@@ -20,7 +20,7 @@ import {
   GameAreaFramingStats,
 } from "./GameAreaFramingControls";
 import { framingModeHint } from "./gameAreaFramingUi";
-import { SheetHeader } from "../../ui/SheetHeader";
+import { SheetHeader } from "../../ui/sheets/SheetHeader";
 
 export interface GameAreaFramingController {
   framingMode: FramingMode;

@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
-import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
+import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
+import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
 import { MotionPressable } from "../components/motion/MotionPressable";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
-} from "../components/ui/ScreenHeader";
+} from "../components/ui/layout/ScreenHeader";
 import { ReportProblemSheet } from "../components/incident/ReportProblemSheet";
 import {
   githubBugReportUrl,

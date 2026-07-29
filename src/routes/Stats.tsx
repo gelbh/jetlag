@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { RequireUsername } from "../components/auth/RequireUsername";
-import { DesktopContentColumn } from "../components/ui/DesktopContentColumn";
-import { EntryScreenLayout } from "../components/ui/EntryScreenLayout";
-import { SegmentControl } from "../components/ui/SegmentControl";
+import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
+import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
+import { SegmentControl } from "../components/ui/forms/SegmentControl";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
-} from "../components/ui/ScreenHeader";
+} from "../components/ui/layout/ScreenHeader";
 import type { LeaderboardRole } from "../domain/game/leaderboard";
 import { playerRoleLabel } from "../domain/session/players/playerRole";
 

@@ -1,6 +1,6 @@
-import { HudRefreshIcon } from "../../ui/HudIcons";
-import { HudDetailPanel } from "../../ui/HudDetailPanel";
-import { loadingSpinnerClass } from "../../ui/loadingSpinnerClass";
+import { HudRefreshIcon } from "../../ui/brand/HudIcons";
+import { HudDetailPanel } from "../../ui/hud/HudDetailPanel";
+import { loadingSpinnerClass } from "../../ui/feedback/loadingSpinnerClass";
 
 interface GameAreaPreloadDetailPanelProps {
   loading: boolean;
