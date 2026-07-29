@@ -5,7 +5,7 @@ import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscap
 import { MapViewportTracker } from "../components/map/MapViewportTracker";
 import { ChatPanel } from "../components/chat/ChatPanel";
 import { ContextualRailPanelProvider } from "../components/map/ContextualRailContext";
-import { SessionLog } from "../components/session/SessionLog";
+import { SessionLog } from "../components/session/log/SessionLog";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
 import { InlineError } from "../components/ui/banners/InlineError";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
