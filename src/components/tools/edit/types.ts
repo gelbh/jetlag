@@ -6,5 +6,5 @@ export type EditSaveResult =
 
 export interface EditSavePayload {
   canSave: boolean;
-  save: () => EditSaveResult;
+  save: () => EditSaveResult | Promise<EditSaveResult>;
 }

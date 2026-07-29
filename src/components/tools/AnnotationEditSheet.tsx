@@ -84,13 +84,15 @@ function AnnotationEditSheetForm({
       return;
     }
 
-    const result = savePayload.save();
-    if (result.type === "save") {
-      onSave(result.annotation);
-      return;
-    }
+    void (async () => {
+      const result = await savePayload.save();
+      if (result.type === "save") {
+        onSave(result.annotation);
+        return;
+      }
 
-    onClose();
+      onClose();
+    })();
   }, [onClose, onSave, savePayload]);
 
   return (

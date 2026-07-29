@@ -121,7 +121,7 @@ fn union_disk_specs(disks: &[DiskSpec]) -> Option<MultiPolygon<f64>> {
     fold_union(parts)
 }
 
-fn fold_union(mut parts: Vec<MultiPolygon<f64>>) -> Option<MultiPolygon<f64>> {
+pub(crate) fn fold_union(mut parts: Vec<MultiPolygon<f64>>) -> Option<MultiPolygon<f64>> {
     if parts.is_empty() {
         return None;
     }
@@ -217,7 +217,7 @@ fn game_area_to_multipolygon(geometry: &GameAreaGeometry) -> Option<MultiPolygon
     }
 }
 
-fn feature_to_multipolygon(feature: &PolygonFeature) -> Option<MultiPolygon<f64>> {
+pub(crate) fn feature_to_multipolygon(feature: &PolygonFeature) -> Option<MultiPolygon<f64>> {
     let geom_type = feature.geometry.get("type")?.as_str()?;
     match geom_type {
         "Polygon" => {

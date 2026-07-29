@@ -28,6 +28,22 @@ export type KernelWasmModule = {
     distanceMeters: number,
     sampleSpacingMeters?: number | null,
   ) => unknown;
+  build_tentacle_elimination_region_json: (
+    anchorJson: string,
+    radiusMeters: number,
+    sitesJson: string,
+    answeredSiteId: string,
+    gameAreaJson: string,
+    voronoiCellsJson: string,
+  ) => unknown;
+  build_tentacle_poi_answer_elimination_region_json: (
+    anchorJson: string,
+    radiusMeters: number,
+    sitesJson: string,
+    answeredSiteId: string,
+    gameAreaJson: string,
+    voronoiCellsJson: string,
+  ) => unknown;
 };
 
 let wasmModulePromise: Promise<KernelWasmModule> | null = null;
