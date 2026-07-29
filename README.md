@@ -62,7 +62,20 @@ cargo install wasm-pack --version 0.13.1   # or match CI
 npm run wasm:build
 ```
 
-**Kernel mode** (default `wasm` when unset): override with localStorage `jl.geometry.maskKernel=ts` (or `dual`) or env `VITE_GEOMETRY_MASK_KERNEL` (`ts` | `dual` | `wasm`; localStorage overrides env). Empty values are ignored; invalid non-empty values fall back to `ts`. Disk CircleUnion is not a WASM parity goal — `wasm` mode falls back to the TypeScript path when any disk is present; WASM load/compute failure also falls back to TypeScript.
+**Kernel mode** (default `wasm` when unset): override with localStorage `jl.geometry.maskKernel=ts` (or `dual`) or env `VITE_GEOMETRY_MASK_KERNEL` (`ts` | `dual` | `wasm`; localStorage overrides env). Empty values are ignored; invalid non-empty values fall back to `ts`. WASM load/compute failure falls back to TypeScript on every entrypoint.
+
+**Ready flags** (default `wasm` mode uses WASM when ready):
+
+| Entrypoint | WASM default |
+|------------|--------------|
+| Mask union (polygons) | yes |
+| End-game disks | yes (when no disk skip applies) |
+| Half-plane / radar | yes |
+| Geodesic line buffer | yes |
+| Tentacle elimination | yes |
+| Spatial Voronoi | no (TS / d3-geo-voronoi) |
+
+Disk masks may still use the TypeScript CircleUnion path when disks are present and WASM offers no advantage — see ship notes. `dual` mode always returns TypeScript for diagnosis; it never changes player-visible defaults.
 
 ## Deploy
 
