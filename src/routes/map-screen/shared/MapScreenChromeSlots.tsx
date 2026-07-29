@@ -1,5 +1,10 @@
 import type { ReactNode, Ref } from "react";
 import { DesktopOpsShell } from "../../../components/map/DesktopOpsShell";
+import { useMapLandscapeChrome } from "../../../components/session/mapChrome/MapLandscapeChromeContext";
+import {
+  mapLandscapeChromeHeaderCollapseClass,
+  mapLandscapeChromeToolbarCollapseClass,
+} from "../../../components/session/mapChrome/mapLandscapeChromeClasses";
 import { useDesktopLayout } from "../../../hooks/useDesktopLayout";
 
 export type MapScreenChromeSlotsLayout = "ops-or-hud" | "fragments";
@@ -35,14 +40,22 @@ export function MapScreenChromeSlots({
   children,
 }: MapScreenChromeSlotsProps) {
   const isDesktop = useDesktopLayout();
+  const { mode: landscapeChromeMode, chip: landscapeChip } =
+    useMapLandscapeChrome();
 
   if (layout === "fragments") {
     return (
-      <>
-        {header}
-        {toolbar}
+      <div
+        className="map-chrome-hud map-chrome-hud--fragments group/map-chrome pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
+        data-landscape-chrome={
+          landscapeChromeMode === "portrait" ? undefined : landscapeChromeMode
+        }
+      >
+        <div className={mapLandscapeChromeHeaderCollapseClass}>{header}</div>
+        <div className={mapLandscapeChromeToolbarCollapseClass}>{toolbar}</div>
+        {landscapeChip}
         {children}
-      </>
+      </div>
     );
   }
 
@@ -65,10 +78,15 @@ export function MapScreenChromeSlots({
     <>
       <div
         ref={chromeHudRef}
-        className="map-chrome-hud pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
+        id="map-chrome-hud-controls"
+        className="map-chrome-hud group/map-chrome pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
+        data-landscape-chrome={
+          landscapeChromeMode === "portrait" ? undefined : landscapeChromeMode
+        }
       >
-        {header}
-        {toolbar}
+        <div className={mapLandscapeChromeHeaderCollapseClass}>{header}</div>
+        <div className={mapLandscapeChromeToolbarCollapseClass}>{toolbar}</div>
+        {landscapeChip}
       </div>
       {children}
     </>

@@ -267,6 +267,29 @@ test.describe("iPhone 13 PWA home safe area", () => {
   });
 });
 
+test.describe("landscape map-dominant chrome", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize({ width: 844, height: 390 });
+    await openMapWithLocalSession(page);
+  });
+
+  test("collapses the dock by default and reveals it from the chip", async ({
+    page,
+  }) => {
+    const dockBar = page.locator(".jl-tool-dock-bar");
+    await expect(dockBar).toBeHidden();
+
+    const chip = page.getByRole("button", { name: /Show map controls/i });
+    await expect(chip).toBeVisible();
+    await chip.click();
+
+    await expect(dockBar).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Hide map controls" }),
+    ).toBeVisible();
+  });
+});
+
 test.describe("iPhone 13 PWA join safe area", () => {
   test.beforeEach(async ({ page }) => {
     await prepareE2EPage(page);
