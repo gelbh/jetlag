@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
-import { isOAuthRedirectInProgress } from "../../services/core/accountAuth";
-import { getFirebaseAuth } from "../../services/core/firebase";
+import { isOAuthRedirectInProgress } from "../../services/core/auth/accountAuth";
+import { getFirebaseAuth } from "../../services/core/firebase/firebase";
 
 interface OAuthSignInButtonProps {
   provider: "apple" | "google";

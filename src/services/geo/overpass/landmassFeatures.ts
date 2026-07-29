@@ -14,7 +14,7 @@ import {
   simplifyGameArea,
   type LatLngTuple,
 } from "../../../domain/geometry/gameArea/geometry";
-import { queryOverpass, OverpassPayloadTooLargeError } from "../../core/overpassClient";
+import { queryOverpass, OverpassPayloadTooLargeError } from "../../core/overpass/overpassClient";
 import {
   getOrFetchCached,
   landmassCacheKey,

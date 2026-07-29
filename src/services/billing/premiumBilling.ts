@@ -8,8 +8,8 @@ import type {
   PremiumEntitlements,
   PremiumProductKey,
 } from "../../domain/billing/premiumProducts";
-import { ANALYTICS_EVENTS, track } from "../core/analytics";
-import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
+import { ANALYTICS_EVENTS, track } from "../core/analytics/analytics";
+import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
 import { serializeGameAreaForFirestore } from "../firestore/serialization/shared";
 import { deserializeSessionFromFirestore } from "../firestore/serialization/serializeSession";
 

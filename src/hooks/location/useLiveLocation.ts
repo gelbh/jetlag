@@ -5,7 +5,7 @@ import {
   unknownGeolocationErrorMessage,
   watchPosition,
   type GeolocationReading,
-} from "../../services/core/geolocation";
+} from "../../services/core/location/geolocation";
 
 interface UseLiveLocationOptions {
   highAccuracy?: boolean;

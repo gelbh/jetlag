@@ -5,7 +5,7 @@ const STORAGE_KEY = "jetlag-premium-entitlements-v1";
 const mockFetchPremiumEntitlements = vi.fn();
 const mockEnsureAnonymousUser = vi.fn();
 
-vi.mock("../services/core/firebase", () => ({
+vi.mock("../services/core/firebase/firebase", () => ({
   ensureAnonymousUser: () => mockEnsureAnonymousUser(),
   isFirebaseConfigured: () => true,
 }));

@@ -6,7 +6,7 @@ import type {
   IncidentStatus,
 } from "../../domain/incident/incidentTypes";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
-import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
+import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
 
 function mapCallableError(error: unknown, fallback: string): Error {
   if (error instanceof FirebaseError) {

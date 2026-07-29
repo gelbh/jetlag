@@ -6,7 +6,7 @@ import {
   query,
   type Unsubscribe,
 } from "firebase/firestore";
-import { getFirestoreDb } from "../core/firebase";
+import { getFirestoreDb } from "../core/firebase/firebase";
 
 /** Thread ids under `incidents/{id}/threads/{threadId}`. */
 export type IncidentThreadId = "support" | "hotfix";

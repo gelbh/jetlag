@@ -7,8 +7,8 @@ import {
   formatPremiumSessionCreditsLabel,
   type PremiumEntitlements,
 } from "../../domain/billing/premiumProducts";
-import { isFirebaseConfigured } from "../../services/core/firebase";
-import { isPermanentUser } from "../../services/core/accountAuth";
+import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
+import { isPermanentUser } from "../../services/core/auth/accountAuth";
 import type { User } from "firebase/auth";
 import { usePermanentAuthUser } from "./usePermanentAuthUser";
 

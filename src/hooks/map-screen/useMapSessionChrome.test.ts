@@ -30,15 +30,15 @@ vi.mock("../session/useSessionExit", () => ({
   useSessionExit: () => exitSession,
 }));
 
-vi.mock("../../services/core/firebase", () => ({
+vi.mock("../../services/core/firebase/firebase", () => ({
   ensureAnonymousUser: vi.fn(async () => ({ uid: "host-1" })),
 }));
 
-vi.mock("../../services/core/sentry", () => ({
+vi.mock("../../services/core/analytics/sentry", () => ({
   captureException: mockCaptureException,
 }));
 
-vi.mock("../../services/core/analytics", () => ({
+vi.mock("../../services/core/analytics/analytics", () => ({
   trackSessionEnded: mockTrackSessionEnded,
 }));
 
@@ -595,7 +595,7 @@ describe("useMapSessionChrome", () => {
   });
 
   it("leaves a local session without calling ensureAnonymousUser", async () => {
-    const { ensureAnonymousUser } = await import("../../services/core/firebase");
+    const { ensureAnonymousUser } = await import("../../services/core/firebase/firebase");
     const ensureSpy = vi.mocked(ensureAnonymousUser);
     ensureSpy.mockClear();
     vi.spyOn(window, "confirm").mockReturnValue(true);

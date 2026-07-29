@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 import { selectPreloadBanner, usePreloadStore } from "../../state/preloadStore";
-import { OverpassUnavailableError } from "../core/overpassClient";
+import { OverpassUnavailableError } from "../core/overpass/overpassClient";
 import * as adminDivisionAvailability from "../geo/overpass/adminDivisionAvailability";
 import { fetchAdminDivisionFeaturesInArea } from "../geo/overpass/adminDivisionBoundaries";
 import { fetchPreparedCoastlineSegments } from "../geo/overpass/coastline";

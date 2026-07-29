@@ -9,7 +9,7 @@ vi.mock("../../services/geo/geocoding", () => ({
   searchPlaces,
 }));
 
-vi.mock("../../services/core/geolocation", () => ({
+vi.mock("../../services/core/location/geolocation", () => ({
   getCurrentPosition: vi.fn(async () => {
     throw new Error("no gps");
   }),

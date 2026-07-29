@@ -22,7 +22,7 @@ vi.mock("../../navigation/useRouteTransition", () => ({
   }),
 }));
 
-vi.mock("../../services/core/sentry", () => ({
+vi.mock("../../services/core/analytics/sentry", () => ({
   addAppResumeBreadcrumb: (...args: unknown[]) =>
     addAppResumeBreadcrumbMock(...args),
   captureResumeShellUnresponsive: (...args: unknown[]) =>

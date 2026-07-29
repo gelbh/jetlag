@@ -11,7 +11,7 @@ import {
   measuringLocationLabel,
   type MeasuringLocationCategory,
 } from "../../../domain/questions";
-import { queryOverpass } from "../../core/overpassClient";
+import { queryOverpass } from "../../core/overpass/overpassClient";
 import {
   getOrFetchCached,
   measuringPlacesCacheKey,

@@ -17,8 +17,8 @@ let mockUser: {
 } | null = null;
 let mockAuthReady = true;
 
-vi.mock("../../services/core/accountAuth", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../../services/core/accountAuth")>();
+vi.mock("../../services/core/auth/accountAuth", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../services/core/auth/accountAuth")>();
   return {
     ...actual,
     completePremiumEmailSignInLink: (...args: unknown[]) =>
@@ -29,7 +29,7 @@ vi.mock("../../services/core/accountAuth", async (importOriginal) => {
   };
 });
 
-vi.mock("../../services/core/firebase", () => ({
+vi.mock("../../services/core/firebase/firebase", () => ({
   ensureAnonymousUser: (...args: unknown[]) => mockEnsureAnonymousUser(...args),
   getFirebaseAuth: () => ({ currentUser: mockUser }),
   isFirebaseConfigured: () => true,

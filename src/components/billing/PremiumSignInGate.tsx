@@ -2,7 +2,7 @@ import { useCallback, useState, type ReactNode } from "react";
 import { AccountSignInGate } from "../auth/AccountSignInGate";
 import { AppleSignInButton } from "./AppleSignInButton";
 import { InlineError } from "../ui/InlineError";
-import { APPLE_SIGN_IN_ENABLED } from "../../services/core/accountAuth";
+import { APPLE_SIGN_IN_ENABLED } from "../../services/core/auth/accountAuth";
 import { recoverPremiumEntitlements } from "../../services/billing/premiumBilling";
 
 interface PremiumSignInGateProps {

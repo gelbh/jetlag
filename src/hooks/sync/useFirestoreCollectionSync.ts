@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import { isFirebaseConfigured } from "../../services/core/firebase";
+import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 
 function isRemoteSession(sessionId: string | undefined): sessionId is string {
   return (

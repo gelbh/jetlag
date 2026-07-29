@@ -3,7 +3,7 @@ import { useAnnotationStore } from "../../state/annotationStore";
 import { usePreloadStore } from "../../state/preloadStore";
 import { useSessionStore } from "../../state/sessionStore";
 import { useTimerStore } from "../../state/timerStore";
-import { setPremiumApiContext } from "../core/premiumApiContext";
+import { setPremiumApiContext } from "../core/auth/premiumApiContext";
 import { abortActiveGameAreaPreload } from "./gameAreaPreload";
 import { clearOfflineQueueForSession } from "./offlineQueue";
 

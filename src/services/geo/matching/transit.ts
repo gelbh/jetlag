@@ -4,7 +4,7 @@ import { gameAreaToBoundingBox } from "../../../domain/geometry/gameArea/geometr
 import { intersectBoundingBoxes } from "../../../domain/geometry/gameArea/gameAreaBounds";
 import type { MatchingFeature } from "../../../domain/geo/types";
 import type { MapViewportBounds } from "../../../domain/map/transitViewport";
-import { queryOverpass } from "../../core/overpassClient";
+import { queryOverpass } from "../../core/overpass/overpassClient";
 import {
   buildTransitStopOverpassQuery,
   overpassTransitStopsToMatchingFeatures,

@@ -4,7 +4,7 @@ import {
   PHOTO_CANNOT_ANSWER_LABEL,
   PHOTO_SENT_EXTERNALLY_SEEKER_LABEL,
 } from "../../domain/questions";
-import { getPhotoDownloadUrl } from "../../services/core/photoStorage";
+import { getPhotoDownloadUrl } from "../../services/core/capture/photoStorage";
 
 interface PhotoAnswerPreviewProps {
   answer: unknown;

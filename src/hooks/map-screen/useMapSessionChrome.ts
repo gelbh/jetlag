@@ -25,12 +25,12 @@ import {
 } from "../../services/session/sessionLifecycle";
 import { isExpectedSessionLeaveError } from "../../services/session/sessionLeaveErrors";
 import { emitGameEndedActivity } from "../../services/session/emitSessionActivity";
-import { trackSessionEnded } from "../../services/core/analytics";
+import { trackSessionEnded } from "../../services/core/analytics/analytics";
 import { useSessionExit } from "../session/useSessionExit";
-import { ensureAnonymousUser } from "../../services/core/firebase";
-import { captureException } from "../../services/core/sentry";
-import { forceRgbCssColorsInClone } from "../../services/core/html2canvasColors";
-import { isHtml2CanvasUnsupportedColorMessage } from "../../services/core/html2canvasErrors";
+import { ensureAnonymousUser } from "../../services/core/firebase/firebase";
+import { captureException } from "../../services/core/analytics/sentry";
+import { forceRgbCssColorsInClone } from "../../services/core/capture/html2canvasColors";
+import { isHtml2CanvasUnsupportedColorMessage } from "../../services/core/capture/html2canvasErrors";
 import { useSessionStore } from "../../state/sessionStore";
 
 const MAP_EXPORT_BACKGROUND = "#0f172a";

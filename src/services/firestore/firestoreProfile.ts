@@ -1,5 +1,5 @@
 import { doc, getDoc, onSnapshot, type Unsubscribe } from "firebase/firestore";
-import { getFirestoreDb } from "../core/firebase";
+import { getFirestoreDb } from "../core/firebase/firebase";
 
 export interface UserProfile {
   username: string;

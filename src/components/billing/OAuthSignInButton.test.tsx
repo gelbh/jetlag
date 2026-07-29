@@ -12,7 +12,7 @@ const { getFirebaseAuth, mockAuth } = vi.hoisted(() => {
   };
 });
 
-vi.mock("../../services/core/firebase", () => ({
+vi.mock("../../services/core/firebase/firebase", () => ({
   getFirebaseAuth,
 }));
 

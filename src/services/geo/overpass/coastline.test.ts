@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "../../../domain/map/annotations";
-import * as overpassClient from "../../core/overpassClient";
+import * as overpassClient from "../../core/overpass/overpassClient";
 import { clearGeographicFeatureCacheForTests } from "../geographicFeatureCache";
 import { fetchCoastlineSegments } from "./coastline";
 

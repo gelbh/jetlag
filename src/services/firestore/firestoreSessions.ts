@@ -36,9 +36,9 @@ import {
   sessionVersionMismatchMessage,
 } from "../../domain/session/meta/sessionVersion";
 import { APP_VERSION } from "../../domain/device/changelog";
-import { getFirestoreDb } from "../core/firebase";
+import { getFirestoreDb } from "../core/firebase/firebase";
 import { forceRefreshIdToken } from "../core/auth/forceRefreshIdToken";
-import { reportJoinPermissionDenied } from "../core/sentry";
+import { reportJoinPermissionDenied } from "../core/analytics/sentry";
 import {
   buildSessionDocument,
   deserializeSessionFromFirestore,

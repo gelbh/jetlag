@@ -15,7 +15,7 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-vi.mock("../services/core/firebase", () => ({
+vi.mock("../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => mockIsFirebaseConfigured(),
   ensureAnonymousUser: vi.fn(),
   ensureFreshAnonymousUser: (...args: unknown[]) =>

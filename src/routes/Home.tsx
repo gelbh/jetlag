@@ -23,7 +23,7 @@ import { useSessionStore } from "../state/sessionStore";
 import {
   ensureFreshAnonymousUser,
   isFirebaseConfigured,
-} from "../services/core/firebase";
+} from "../services/core/firebase/firebase";
 import { withTimeout } from "../services/core/withTimeout";
 import {
   getRemoteSessionById,
@@ -32,7 +32,7 @@ import {
 } from "../services/firestore/sessionMembershipHeal";
 import { isFirestorePermissionDenied } from "../services/firestore/firestoreAnnotations";
 import { useSessionExit } from "../hooks/session/useSessionExit";
-import { setPremiumApiContext } from "../services/core/premiumApiContext";
+import { setPremiumApiContext } from "../services/core/auth/premiumApiContext";
 import { useAppNavigate } from "../hooks/useAppNavigate";
 import { useRouteTransition } from "../navigation/useRouteTransition";
 import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";

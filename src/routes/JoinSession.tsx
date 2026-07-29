@@ -20,7 +20,7 @@ import {
   ensureAnonymousUser,
   ensureFreshAnonymousUser,
   isFirebaseConfigured,
-} from "../services/core/firebase";
+} from "../services/core/firebase/firebase";
 import {
   joinRemoteSessionByCode,
   lookupRemoteSessionByCode,
@@ -29,14 +29,14 @@ import {
 import { APP_VERSION } from "../domain/device/changelog";
 import { sessionVersionMismatchMessage } from "../domain/session/meta/sessionVersion";
 import { resolvePlayerRole } from "../domain/session/players/playerRole";
-import { retryAsync } from "../services/core/retryAsync";
+import { retryAsync } from "../services/core/network/retryAsync";
 import { withTimeout } from "../services/core/withTimeout";
 import { MotionPressable } from "../components/motion/MotionPressable";
 import {
   ANALYTICS_EVENTS,
   track,
-} from "../services/core/analytics";
-import { setPremiumApiContext } from "../services/core/premiumApiContext";
+} from "../services/core/analytics/analytics";
+import { setPremiumApiContext } from "../services/core/auth/premiumApiContext";
 import { preloadCriticalGameAreaCaches } from "../services/session/gameAreaPreload";
 import { resolveSessionMatchingAreas } from "../services/geo/resolveSessionMatchingAreas";
 import {

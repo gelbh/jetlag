@@ -12,7 +12,7 @@ import {
   type CreateIncidentInput,
   type CreateIncidentResult,
 } from "../../services/incident/incidentApi";
-import { getFirebaseAuth, isFirebaseConfigured } from "../../services/core/firebase";
+import { getFirebaseAuth, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { useSessionStore } from "../../state/sessionStore";
 import { MotionSheet } from "../motion/MotionSheet";
 import { SheetHeader } from "../ui/SheetHeader";

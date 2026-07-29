@@ -5,7 +5,7 @@ import { useQuestionDeadlineEnforcement } from "../../../hooks/session/useQuesti
 import { useCancelOrphanThermometerWalks } from "../../../hooks/sync/useCancelOrphanThermometerWalks";
 import { usePendingQuestionResolver } from "../../../hooks/sync/usePendingQuestionResolver";
 import { useSeekerLocationSync } from "../../../hooks/sync/useSeekerLocationSync";
-import { captureException } from "../../../services/core/sentry";
+import { captureException } from "../../../services/core/analytics/sentry";
 import type { MapScreenCore } from "./useMapScreenCore";
 
 type SeekerEffectsInput = Pick<

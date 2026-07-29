@@ -4,7 +4,7 @@ import { getPowerProfile } from "../../domain/device/power/powerProfile";
 import type { PlayerLocationRecord } from "../../domain/session/activity/sessionChat";
 import { useMapStore } from "../../state/mapStore";
 import { useLiveLocation } from "../location/useLiveLocation";
-import { isFirebaseConfigured } from "../../services/core/firebase";
+import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
 import { writePlayerLocation } from "../../services/firestore/firestoreSessionExtras";
 import { maybeAppendPlayerTrailPoint } from "./appendPlayerTrailPoint";

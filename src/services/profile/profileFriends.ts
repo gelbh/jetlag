@@ -1,6 +1,6 @@
 import { FirebaseError } from "firebase/app";
 import { httpsCallable } from "firebase/functions";
-import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase";
+import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
 
 export interface FriendListEntry {
   uid: string;

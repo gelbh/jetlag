@@ -16,7 +16,7 @@ import type {
 } from "../../domain/game/leaderboard";
 import { leaderboardBoardKey } from "../../domain/game/leaderboard";
 import type { GameSize } from "../../domain/session/size/gameSize";
-import { getFirestoreDb, isFirebaseConfigured } from "../core/firebase";
+import { getFirestoreDb, isFirebaseConfigured } from "../core/firebase/firebase";
 
 const BOARD_LIMIT = 50;
 

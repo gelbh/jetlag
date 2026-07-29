@@ -9,7 +9,7 @@ import {
 import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "../../../domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
-import type { GeolocationReading } from "../../../services/core/geolocation";
+import type { GeolocationReading } from "../../../services/core/location/geolocation";
 import { emitThermometerWalkStartedActivity } from "../../../services/session/emitSessionActivity";
 import { thermometerWalkStartPlacement } from "../useThermometerWalk";
 import type { ThermometerSessionConfig } from "./types";

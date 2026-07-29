@@ -9,7 +9,7 @@ const getFirebaseFunctions = vi.hoisted(() => vi.fn(async () => ({})));
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => true));
 const trackSessionEnded = vi.hoisted(() => vi.fn());
 
-vi.mock("../core/firebase", () => ({
+vi.mock("../core/firebase/firebase", () => ({
   getFirebaseFunctions,
   isFirebaseConfigured,
 }));
@@ -18,7 +18,7 @@ vi.mock("firebase/functions", () => ({
   httpsCallable,
 }));
 
-vi.mock("../core/analytics", () => ({
+vi.mock("../core/analytics/analytics", () => ({
   trackSessionEnded,
 }));
 

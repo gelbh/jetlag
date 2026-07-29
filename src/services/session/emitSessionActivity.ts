@@ -7,7 +7,7 @@ import {
 } from "../../domain/session/activity/sessionActivityLog";
 import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
 import { parsePhotoAnswer } from "../../domain/questions/photoQuestions";
-import { trackSessionEnded } from "../core/analytics";
+import { trackSessionEnded } from "../core/analytics/analytics";
 import { appendSessionActivityEvent } from "./sessionActivityLog";
 
 /** Fire-and-forget append; lifecycle writers must not fail the primary action. */

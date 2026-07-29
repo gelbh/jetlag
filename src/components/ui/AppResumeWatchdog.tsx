@@ -18,7 +18,7 @@ import { useRouteTransition } from "../../navigation/useRouteTransition";
 import {
   addAppResumeBreadcrumb,
   captureResumeShellUnresponsive,
-} from "../../services/core/sentry";
+} from "../../services/core/analytics/sentry";
 
 export const RESUME_WATCHDOG_RELOAD_KEY = "jetlag:resume-watchdog-reload";
 

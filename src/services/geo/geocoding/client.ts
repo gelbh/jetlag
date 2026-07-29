@@ -6,8 +6,8 @@ import {
   type RankedGeocodedPlaceCandidate,
 } from "../geocodingRank";
 import { geographicCacheKey, getOrFetchCached } from "../cache";
-import { FetchTimeoutError, fetchWithTimeout } from "../../core/fetchWithTimeout";
-import { retryAsync } from "../../core/retryAsync";
+import { FetchTimeoutError, fetchWithTimeout } from "../../core/network/fetchWithTimeout";
+import { retryAsync } from "../../core/network/retryAsync";
 import {
   adminLabelFromAddress,
   locationBucketKey,

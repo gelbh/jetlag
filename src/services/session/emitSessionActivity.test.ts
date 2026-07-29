@@ -14,7 +14,7 @@ const appendSessionActivityEvent = vi.hoisted(() =>
   vi.fn(async () => ({ wrote: true })),
 );
 
-vi.mock("../core/analytics", () => ({
+vi.mock("../core/analytics/analytics", () => ({
   trackSessionEnded,
 }));
 

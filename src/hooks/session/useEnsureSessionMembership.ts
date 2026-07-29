@@ -4,7 +4,7 @@ import { resolvePlayerRole } from "../../domain/session/players/playerRole";
 import {
   ensureFreshAnonymousUser,
   isFirebaseConfigured,
-} from "../../services/core/firebase";
+} from "../../services/core/firebase/firebase";
 import {
   healSessionMembership,
   sessionMembershipChanged,

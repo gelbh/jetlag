@@ -4,7 +4,7 @@ import { useSessionNotifications } from "./useSessionNotifications";
 import { resetAllStores } from "../../test/helpers/storeReset";
 import { useMapStore } from "../../state/mapStore";
 
-vi.mock("../../services/core/notifications", () => ({
+vi.mock("../../services/core/native/notifications", () => ({
   initializeNativeNotifications: vi.fn(),
   isNativeNotificationsSupported: vi.fn(() => true),
   refreshActivityPushToken: vi.fn(async () => undefined),
@@ -17,7 +17,7 @@ import {
   refreshActivityPushToken,
   requestNotificationPermission,
   syncSessionDeviceRegistration,
-} from "../../services/core/notifications";
+} from "../../services/core/native/notifications";
 
 describe("useSessionNotifications", () => {
   beforeEach(() => {

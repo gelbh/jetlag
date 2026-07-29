@@ -21,17 +21,17 @@ const { getFirebaseAuth, isFirebaseConfigured, waitForPermanentAuthReady } =
     };
   });
 
-vi.mock("../../services/core/accountAuth", () => ({
+vi.mock("../../services/core/auth/accountAuth", () => ({
   isPermanentUser: (user: { isAnonymous?: boolean } | null) =>
     user != null && user.isAnonymous !== true,
 }));
 
-vi.mock("../../services/core/firebase", () => ({
+vi.mock("../../services/core/firebase/firebase", () => ({
   getFirebaseAuth,
   isFirebaseConfigured,
 }));
 
-vi.mock("../../services/core/firebaseAuthReady", () => ({
+vi.mock("../../services/core/firebase/firebaseAuthReady", () => ({
   waitForPermanentAuthReady,
 }));
 

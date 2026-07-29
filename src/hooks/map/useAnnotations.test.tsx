@@ -6,7 +6,7 @@ import { resetAllStores } from "../../test/helpers/storeReset";
 import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import { useAnnotations } from "./useAnnotations";
 
-vi.mock("../../services/core/firebase", () => ({
+vi.mock("../../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => false,
   ensureAnonymousUser: vi.fn(),
 }));

@@ -18,12 +18,12 @@ import {
   isPermanentUser,
   sendPremiumEmailSignInLink,
   signOutToAnonymous,
-} from "../../services/core/accountAuth";
+} from "../../services/core/auth/accountAuth";
 import {
   ensureAnonymousUser,
   getFirebaseAuth,
   isFirebaseConfigured,
-} from "../../services/core/firebase";
+} from "../../services/core/firebase/firebase";
 import { usePermanentAuthUser } from "../../hooks/billing/usePermanentAuthUser";
 
 interface AccountSignInGateProps {

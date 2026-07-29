@@ -12,7 +12,7 @@ const mockEnsureAnonymousUser = vi.fn();
 const mockGetRemoteSessionById = vi.fn();
 const mockEnsureRemoteSessionMembership = vi.fn();
 
-vi.mock("../services/core/firebase", () => ({
+vi.mock("../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => mockIsFirebaseConfigured(),
   isAuthBootstrapReady: () => true,
   subscribeAuthBootstrapReady: () => () => undefined,
@@ -21,7 +21,7 @@ vi.mock("../services/core/firebase", () => ({
   getFirebaseAuth: () => ({ currentUser: null, onAuthStateChanged: () => () => undefined }),
 }));
 
-vi.mock("../services/core/firebaseAuthReady", () => ({
+vi.mock("../services/core/firebase/firebaseAuthReady", () => ({
   waitForPermanentAuthReady: vi.fn().mockResolvedValue(undefined),
 }));
 

@@ -3,7 +3,7 @@ import { useAuthBootstrapReady } from "../../../hooks/useAuthBootstrapReady";
 import {
   probeAppCheckAvailability,
   type AppCheckProbeResult,
-} from "../../../services/core/appCheckProbe";
+} from "../../../services/core/firebase/appCheckProbe";
 import { ContentBlockerErrorPage } from "./ContentBlockerErrorPage";
 
 /**

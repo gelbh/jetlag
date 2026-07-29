@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { getPhotoDownloadUrl } from "../../services/core/photoStorage";
+import { getPhotoDownloadUrl } from "../../services/core/capture/photoStorage";
 import { PhotoAnswerPreview } from "./PhotoAnswerPreview";
 
-vi.mock("../../services/core/photoStorage", () => ({
+vi.mock("../../services/core/capture/photoStorage", () => ({
   getPhotoDownloadUrl: vi.fn(),
 }));
 

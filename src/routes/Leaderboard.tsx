@@ -33,7 +33,7 @@ import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
 import { useLeaderboardSelfEntry } from "../hooks/leaderboard/useLeaderboardSelfEntry";
 import { useRowInView } from "../hooks/leaderboard/useRowInView";
 import { useUserProfile } from "../hooks/profile/useUserProfile";
-import { isFirebaseConfigured } from "../services/core/firebase";
+import { isFirebaseConfigured } from "../services/core/firebase/firebase";
 import { subscribeLeaderboardBoard } from "../services/firestore/firestoreLeaderboard";
 
 const EMPTY_BOARD_MESSAGE =

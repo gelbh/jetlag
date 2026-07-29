@@ -11,7 +11,7 @@ const { mockCallable, forceRefreshIdToken } = vi.hoisted(() => ({
   forceRefreshIdToken: vi.fn(async () => undefined),
 }));
 
-vi.mock("../core/firebase", () => ({
+vi.mock("../core/firebase/firebase", () => ({
   isFirebaseConfigured: () => true,
   getFirebaseFunctions: async () => ({}),
 }));

@@ -22,7 +22,7 @@ import { resolveToolDockEnabled } from "../../domain/session/rules";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useToolPanelChrome } from "../../hooks/useToolPanelChrome";
 import type { MapTool } from "../../state/sessionStore";
-import { ANALYTICS_EVENTS, track } from "../../services/core/analytics";
+import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
 import { buildPlacementCameraDraft } from "./shared/placementCameraDraft";
 import { useMapScreenCore } from "./shared/useMapScreenCore";
 import { useMapScreenSeekerEffects } from "./shared/useMapScreenSeekerEffects";

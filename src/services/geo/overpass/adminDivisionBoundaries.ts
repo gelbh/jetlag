@@ -12,7 +12,7 @@ import {
   gameAreaToPolygon,
   simplifyGameArea,
 } from "../../../domain/geometry/gameArea/geometry";
-import { queryOverpass } from "../../core/overpassClient";
+import { queryOverpass } from "../../core/overpass/overpassClient";
 import { parseMatchingAreaGeoJson } from "../matching/matchingAreaGeoJson";
 import {
   adminDivisionCacheKey,

@@ -8,7 +8,7 @@ const createActivityLogEventIfAbsent = vi.hoisted(() =>
   vi.fn(async () => ({ wrote: true })),
 );
 
-vi.mock("../core/firebase", () => ({
+vi.mock("../core/firebase/firebase", () => ({
   isFirebaseConfigured,
 }));
 

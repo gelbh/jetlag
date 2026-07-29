@@ -6,9 +6,9 @@ import type {
   TransitVehicle,
 } from "../../domain/map/transit";
 import { getTransitMetro } from "./transitCatalog";
-import { fetchWithTimeout } from "../core/fetchWithTimeout";
-import { buildPremiumProxyHeaders } from "../core/accessControl";
-import { shouldUsePremiumProxies } from "../core/premiumApiContext";
+import { fetchWithTimeout } from "../core/network/fetchWithTimeout";
+import { buildPremiumProxyHeaders } from "../core/auth/accessControl";
+import { shouldUsePremiumProxies } from "../core/auth/premiumApiContext";
 
 const TRANSIT_FETCH_TIMEOUT_MS = 30_000;
 

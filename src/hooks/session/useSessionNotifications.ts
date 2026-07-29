@@ -9,7 +9,7 @@ import {
   refreshActivityPushToken,
   requestNotificationPermission,
   syncSessionDeviceRegistration,
-} from "../../services/core/notifications";
+} from "../../services/core/native/notifications";
 
 function ignoreFirestorePermissionDenied(error: unknown): void {
   if (!isFirestorePermissionDenied(error)) {

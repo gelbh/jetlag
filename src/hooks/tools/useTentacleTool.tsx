@@ -25,7 +25,7 @@ import { questionCostBreakdown } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import { fetchTentaclePois } from "../../services/geo/tentacleOverpass";
-import { overpassErrorMessage } from "../../services/core/overpassClient";
+import { overpassErrorMessage } from "../../services/core/overpass/overpassClient";
 import { useToolSession } from "./framework/useToolSession";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import { commitTentacle } from "./tentacle/commitTentacle";

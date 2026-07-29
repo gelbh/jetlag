@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { isFirestorePersistenceUnavailable } from "../../../services/core/firebase";
+import { isFirestorePersistenceUnavailable } from "../../../services/core/firebase/firebase";
 
 const DISMISS_KEY = "jetlag-firestore-persistence-warning-dismissed";
 

@@ -28,8 +28,8 @@ import {
 import type { PlayerTrailPointRecord } from "../../domain/game/playerTrail";
 import type { StartingLocationRecord } from "../../domain/game/startingLocation";
 import { listWalkingThermometerQuestionIds } from "../../domain/questions";
-import { getFirestoreDb } from "../core/firebase";
-import { captureException } from "../core/sentry";
+import { getFirestoreDb } from "../core/firebase/firebase";
+import { captureException } from "../core/analytics/sentry";
 import { emitQuestionCancelledActivity } from "../session/emitSessionActivity";
 import {
   buildHidingZoneDocument,

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { useFirestoreCollectionSync } from "./useFirestoreCollectionSync";
 
-vi.mock("../../services/core/firebase", () => ({
+vi.mock("../../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: vi.fn(() => true),
 }));
 

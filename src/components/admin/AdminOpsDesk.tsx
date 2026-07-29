@@ -55,7 +55,7 @@ import {
   subscribeIncidentList,
 } from "../../services/admin/adminIncidents";
 import type { AdminSessionSummary } from "../../services/admin/adminSessions";
-import { getFirebaseAuth } from "../../services/core/firebase";
+import { getFirebaseAuth } from "../../services/core/firebase/firebase";
 import { useSessionStore } from "../../state/sessionStore";
 import { AdminDeskTopbar } from "./AdminDeskTopbar";
 import { AdminGridWorkspace } from "./AdminGridWorkspace";

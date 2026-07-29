@@ -1,5 +1,5 @@
 import { Circle, Marker } from "react-leaflet";
-import type { GeolocationReading } from "../../../services/core/geolocation";
+import type { GeolocationReading } from "../../../services/core/location/geolocation";
 import { createUserLocationIcon } from "../icons/mapIcons";
 
 interface UserLocationLayerProps {

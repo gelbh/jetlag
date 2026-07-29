@@ -8,7 +8,7 @@ vi.mock("../../hooks/useAuthBootstrapReady", () => ({
 
 const probeAppCheckAvailability = vi.fn();
 
-vi.mock("../../services/core/appCheckProbe", () => ({
+vi.mock("../../services/core/firebase/appCheckProbe", () => ({
   probeAppCheckAvailability: (...args: unknown[]) =>
     probeAppCheckAvailability(...args),
 }));
