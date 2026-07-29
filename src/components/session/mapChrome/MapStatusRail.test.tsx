@@ -73,3 +73,45 @@ describe("MapStatusRail header home", () => {
     ).toBeNull();
   });
 });
+
+describe("MapStatusRail inactive chrome", () => {
+  it("shows retry and return to join for terminal session errors", () => {
+    render(
+      <MemoryRouter>
+        <RouteTransitionProvider>
+          <MapStatusRail
+            sessionCode="ABCD"
+            activeTool="none"
+            syncStatus="error"
+            queuedWrites={0}
+            message="That session no longer exists."
+            timerState={{ accumulatedMs: 120_000, runningSince: Date.now() - 60_000 }}
+            timerRunning
+            timerHasStarted
+            canStartGame={false}
+            onStartGame={vi.fn()}
+            onTimerStart={vi.fn()}
+            onTimerPause={vi.fn()}
+            onTimerReset={vi.fn()}
+            inactiveChrome
+            terminalSessionError={{
+              title: "Session gone",
+              message: "That session no longer exists.",
+              action: "retry",
+              actionLabel: "Retry",
+              secondaryAction: "rejoin",
+              secondaryActionLabel: "Return to join",
+            }}
+            onSyncErrorAction={vi.fn()}
+            onReturnToJoin={vi.fn()}
+          />
+        </RouteTransitionProvider>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Return to join" }),
+    ).toBeInTheDocument();
+  });
+});

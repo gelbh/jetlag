@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { isTerminalSessionSyncMessage } from "../domain/device/sync/terminalSessionMessage";
 import { useDesktopLayout } from "../hooks/useDesktopLayout";
 import { HeavyToolHost } from "./map-screen/lazyImports";
 import { MapScreenChrome } from "./map-screen/MapScreenChrome";
@@ -8,6 +9,11 @@ import { useMapScreenController } from "./map-screen/useMapScreenController";
 export function SeekerMapScreen() {
   const controller = useMapScreenController();
   const isDesktop = useDesktopLayout();
+  const syncMessage =
+    controller.syncStatus.remoteUpdateNotice ??
+    controller.syncStatus.lastSyncError ??
+    controller.matchingAreasError;
+  const inactiveChrome = isTerminalSessionSyncMessage(syncMessage);
 
   const mapLayers = (
     <MapScreenMapLayers
@@ -64,14 +70,26 @@ export function SeekerMapScreen() {
     />
   );
 
+  const mapLayersContent = inactiveChrome ? (
+    <div className="h-full w-full saturate-50 brightness-95">{mapLayers}</div>
+  ) : (
+    mapLayers
+  );
+
   return (
     <div className="map-screen-shell">
+      {inactiveChrome ? (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-0 z-[calc(var(--z-banner)-1)] bg-surface-deep/30"
+        />
+      ) : null}
       {controller.heavyToolActive ? (
         <Suspense fallback={null}>
           <HeavyToolHost {...controller.heavyMapToolsSlotProps} />
         </Suspense>
       ) : null}
-      {isDesktop ? null : mapLayers}
+      {isDesktop ? null : mapLayersContent}
       <MapScreenChrome
         session={controller.session!}
         gameArea={controller.gameArea!}
@@ -183,7 +201,7 @@ export function SeekerMapScreen() {
         seekerLocations={controller.seekerLocations}
         setActiveTool={controller.setActiveTool}
         setAwaitingPlacement={controller.setAwaitingPlacement}
-        mapSlot={isDesktop ? mapLayers : undefined}
+        mapSlot={isDesktop ? mapLayersContent : undefined}
       />
     </div>
   );

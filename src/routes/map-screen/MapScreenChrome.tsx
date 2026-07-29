@@ -21,7 +21,7 @@ import { ToolDock } from "../../components/tools/ToolDock";
 import { useDesktopLayout } from "../../hooks/useDesktopLayout";
 import { useToolRailShortcuts } from "../../hooks/map/useToolRailShortcuts";
 import type { MapScreenController } from "./useMapScreenController";
-import { useSyncRetryAction } from "../../hooks/session/useSyncRetryAction";
+import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import { useAnnotationStore } from "../../state/annotationStore";
 import { SeekerChromeOverlays } from "./SeekerChromeOverlays";
@@ -257,7 +257,21 @@ export function MapScreenChrome({
   setAwaitingPlacement,
   mapSlot,
 }: MapScreenChromeProps) {
-  const onSyncErrorAction = useSyncRetryAction();
+  const syncMessage =
+    syncStatus.remoteUpdateNotice ??
+    syncStatus.lastSyncError ??
+    matchingAreasError;
+  const {
+    inactiveChrome,
+    terminalSessionError,
+    onReturnToJoin,
+    onSyncRetry,
+  } = useMapTerminalSessionChrome({
+    syncMessage,
+    sessionId: session!.id,
+    closeOverlays: overlay.closeSheet,
+  });
+  const onSyncErrorAction = onSyncRetry;
   const gameOverActions = useGameOverActions(session, overlay);
   const isDesktop = useDesktopLayout();
   const toolLayout = isDesktop ? "rail" : "dock";
@@ -277,7 +291,7 @@ export function MapScreenChrome({
   );
 
   useToolRailShortcuts({
-    enabled: isDesktop && overlay.sheet === "none",
+    enabled: isDesktop && overlay.sheet === "none" && !inactiveChrome,
     activeTool,
     onSelect: handleSelectTool,
     toolOrder: visibleQuestionTools,
@@ -323,11 +337,7 @@ export function MapScreenChrome({
       activeTool={activeTool}
       syncStatus={syncStatus.status}
       queuedWrites={syncStatus.queuedWrites}
-      message={
-        syncStatus.remoteUpdateNotice ??
-        syncStatus.lastSyncError ??
-        matchingAreasError
-      }
+      message={syncMessage}
       endGameActive={isEndGameActive(session)}
       endGamePending={isEndGamePending(session)}
       endGameRequestedByUid={session!.endGameRequestedByUid}
@@ -351,7 +361,7 @@ export function MapScreenChrome({
       onTimerStart={timer.start}
       onTimerPause={timer.pause}
       onTimerReset={timer.reset}
-      timerControlsDisabled={!canControlTimer}
+      timerControlsDisabled={!canControlTimer || inactiveChrome}
       onOpenLog={handleOpenLog}
       pendingQuestions={pendingQuestions}
       closeTimerMenu={
@@ -361,12 +371,16 @@ export function MapScreenChrome({
         Boolean(geometryEditAnnotation && geometryDraft)
       }
       onSyncErrorAction={onSyncErrorAction}
+      inactiveChrome={inactiveChrome}
+      terminalSessionError={terminalSessionError}
+      onReturnToJoin={onReturnToJoin}
     />
   );
 
   const toolDock = (
     <ToolDock
       layout={toolLayout}
+      inactive={inactiveChrome}
       activeTool={activeTool}
       sessionRules={session!}
       gameSize={session!.gameSize ?? "medium"}

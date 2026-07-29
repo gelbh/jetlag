@@ -22,6 +22,7 @@ interface HiderToolDockProps {
   unreadCount?: number;
   /** Bottom dock (default) or vertical left rail inside DesktopOpsShell. */
   layout?: ToolDockLayout;
+  inactive?: boolean;
 }
 
 export function HiderToolDock({
@@ -36,18 +37,19 @@ export function HiderToolDock({
   hasUnreadChat = false,
   unreadCount = 0,
   layout = "dock",
+  inactive = false,
 }: HiderToolDockProps) {
   const isRail = layout === "rail";
 
   return (
     <div
-      className={`jl-tool-dock pointer-events-auto${isRail ? " jl-tool-dock--rail" : ""}`}
+      className={`jl-tool-dock pointer-events-auto${isRail ? " jl-tool-dock--rail" : ""}${inactive ? " pointer-events-none opacity-55 saturate-50" : ""}`}
     >
       <div className={`jl-tool-dock-bar jl-tool-dock-group-main${isRail ? " jl-scroll" : ""}`}>
         <button
           type="button"
           onClick={onZoneAction}
-          disabled={zoneDisabled}
+          disabled={zoneDisabled || inactive}
           className="jl-tool-slot"
           aria-label={zoneLabel}
         >
