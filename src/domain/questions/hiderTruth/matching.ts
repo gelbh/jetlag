@@ -1,7 +1,7 @@
 import type { GameArea } from "../../map/annotations";
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
-import { classifyAdminDivisionAtPoint } from "@/services/geo/adminDivisionBoundaries";
-import { classifyLandmassAtPoint } from "@/services/geo/landmassFeatures";
+import { classifyAdminDivisionAtPoint } from "@/services/geo/overpass/adminDivisionBoundaries";
+import { classifyLandmassAtPoint } from "@/services/geo/overpass/landmassFeatures";
 import {
   gtfsStopsShareStationOrRoute,
   loadGtfsBundle,

@@ -10,7 +10,7 @@ vi.mock("../../services/firestore/firestoreSessionExtras", () => ({
   writeHidingZone,
 }));
 
-vi.mock("../../services/geo/matchingFeatures", () => ({
+vi.mock("../../services/geo/matching", () => ({
   fetchTransitStationsForHidingZoneViewport: vi.fn(async () => []),
 }));
 

@@ -24,7 +24,7 @@ import {
   clearResolvedMatchingAreasCacheForTests,
   isPlayAreaReadySync,
   resolveSessionPlayArea,
-} from "../services/geo/resolveSessionMatchingAreas";
+} from "../services/geo/matching/resolveSessionMatchingAreas";
 import * as regionPackBoundaries from "../services/geo/matching/regionPackBoundaries";
 import { usePremiumEntitlementsStore } from "../state/premiumEntitlementsStore";
 import { useSessionStore } from "../state/sessionStore";

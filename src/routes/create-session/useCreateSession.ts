@@ -45,8 +45,8 @@ import {
   preloadCriticalGameAreaCaches,
   preloadGameAreaCaches,
 } from "../../services/session/gameAreaPreload";
-import { resolveSessionMatchingAreas } from "../../services/geo/resolveSessionMatchingAreas";
-import { startSeaLevelBackgroundSampling } from "../../services/geo/seaLevelProgressive";
+import { resolveSessionMatchingAreas } from "../../services/geo/matching/resolveSessionMatchingAreas";
+import { startSeaLevelBackgroundSampling } from "../../services/geo/elevation/seaLevelProgressive";
 import { retryAsync } from "../../services/core/network/retryAsync";
 import {
   inferTransitMetroId,
@@ -73,7 +73,7 @@ import {
   BUNDLED_REGION_PACK_GEO_REVISION,
   type RegionPackId,
 } from "../../domain/regions/regionPack";
-import { loadRegionPackSessionBoundaries } from "../../services/geo/regionPackBoundaries";
+import { loadRegionPackSessionBoundaries } from "../../services/geo/matching/regionPackBoundaries";
 import {
   BUNDLED_GAME_PRESET_DEFINITIONS,
   isBundledPresetId,
