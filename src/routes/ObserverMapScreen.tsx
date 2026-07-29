@@ -9,7 +9,7 @@ import { SessionLog } from "../components/session/SessionLog";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
 import { InlineError } from "../components/ui/InlineError";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
-import { fallbackGameArea } from "../domain/geometry/geometry";
+import { fallbackGameArea } from "../domain/geometry/gameArea/geometry";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { useDesktopLayout } from "../hooks/layout/useDesktopLayout";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
