@@ -13,7 +13,7 @@ import {
   type MapViewportState,
 } from "../components/map/MapViewportTracker";
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
-import { isWizardPlacementStep } from "../components/tools/shared/toolWizardPlacementSteps";
+import { isWizardPlacementStep } from "../components/tools/shared/wizard/toolWizardPlacementSteps";
 import { timeTrapForHider } from "../domain/expansion/timeTraps";
 import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
 import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";

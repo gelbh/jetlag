@@ -15,26 +15,26 @@ import {
 import type { GeocodedPlace } from "../../services/geo/geocoding";
 import type { SeaLevelEdgeCase } from "../../domain/geometry/measuring/seaLevel";
 import { type DistanceUnit } from "../../domain/map/distance";
-import { MeasuringAnchorStep } from "./shared/MeasuringAnchorStep";
+import { MeasuringAnchorStep } from "./shared/measuring/MeasuringAnchorStep";
 import {
   MeasuringAnswerSection,
   MeasuringTargetSection,
-} from "./shared/MeasuringTargetStep";
-import { MeasuringSourceStep } from "./shared/MeasuringSourceStep";
+} from "./shared/measuring/MeasuringTargetStep";
+import { MeasuringSourceStep } from "./shared/measuring/MeasuringSourceStep";
 import {
   anchorResolveLoadingMessage,
   measuringUsesDebouncedSeekerResolve,
   type MeasuringSearchRole,
-} from "./shared/measuringPanelUtils";
-import { SearchResultsList } from "./shared/SearchResultsList";
-import { ToolPanelShell } from "./shared/ToolPanelShell";
-import { ToolSection } from "./shared/ToolSection";
-import { WizardPanelFrame } from "./shared/WizardPanelFrame";
-import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
-import { MEASURING_STEPS, stepsForMode } from "./shared/toolStepUtils";
-import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
+} from "./shared/measuring/measuringPanelUtils";
+import { SearchResultsList } from "./shared/controls/SearchResultsList";
+import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
+import { ToolSection } from "./shared/panels/ToolSection";
+import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
+import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
+import { MEASURING_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
+import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
-import type { ToolPanelSandboxMode } from "./shared/toolPanelSandbox";
+import type { ToolPanelSandboxMode } from "./shared/panels/toolPanelSandbox";
 
 interface MeasuringPanelProps {
   distanceUnit: DistanceUnit;

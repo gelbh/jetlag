@@ -1,16 +1,16 @@
 import { type RefObject } from "react";
 import { RadarDistancePicker } from "./RadarDistancePicker";
-import { yesNoAnswerOptions } from "./shared/binaryAnswerOptions";
-import { BinaryAnswerPicker } from "./shared/BinaryAnswerPicker";
-import { PlacementActions } from "./shared/PlacementActions";
-import { ToolPanelShell } from "./shared/ToolPanelShell";
-import { ViewOnlyQuestionBanner } from "./shared/ViewOnlyQuestionBanner";
-import { ToolSection } from "./shared/ToolSection";
-import { SendToHidersButton } from "./shared/SendToHidersButton";
-import { WizardPanelFrame } from "./shared/WizardPanelFrame";
-import { WizardSwipeSurface } from "./shared/WizardSwipeSurface";
-import { RADAR_STEPS, stepsForMode } from "./shared/toolStepUtils";
-import { toolWizardSwipeNext } from "./shared/toolWizardGuards";
+import { yesNoAnswerOptions } from "./shared/answers/binaryAnswerOptions";
+import { BinaryAnswerPicker } from "./shared/answers/BinaryAnswerPicker";
+import { PlacementActions } from "./shared/controls/PlacementActions";
+import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
+import { ViewOnlyQuestionBanner } from "./shared/readout/ViewOnlyQuestionBanner";
+import { ToolSection } from "./shared/panels/ToolSection";
+import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
+import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
+import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
+import { RADAR_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
+import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import { parseDistanceInput, type DistanceUnit } from "../../domain/map/distance";
 import {
@@ -19,7 +19,7 @@ import {
   type RadarDistanceOptionKey,
 } from "../../domain/questions";
 import type { GameSize } from "../../domain/session/size/gameSize";
-import type { ToolPanelSandboxMode } from "./shared/toolPanelSandbox";
+import type { ToolPanelSandboxMode } from "./shared/panels/toolPanelSandbox";
 
 interface RadarPanelProps {
   radiusMeters: number | null;

@@ -7,9 +7,9 @@ import {
 } from "./hidingZoneSteps";
 import { SegmentControl } from "../ui/forms/SegmentControl";
 import { InlineError } from "../ui/banners/InlineError";
-import { ToolPanelShell } from "../tools/shared/ToolPanelShell";
-import { ToolSection } from "../tools/shared/ToolSection";
-import { WizardSwipeSurface } from "../tools/shared/WizardSwipeSurface";
+import { ToolPanelShell } from "../tools/shared/panels/ToolPanelShell";
+import { ToolSection } from "../tools/shared/panels/ToolSection";
+import { WizardSwipeSurface } from "../tools/shared/wizard/WizardSwipeSurface";
 import { TransitStationPicker } from "./TransitStationPicker";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 
