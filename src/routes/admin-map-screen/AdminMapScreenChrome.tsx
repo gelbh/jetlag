@@ -1,5 +1,5 @@
-import { SessionTimerLabel } from "../../components/session/SessionTimerLabel";
-import { SyncStatusBeacon } from "../../components/session/SyncStatusDot";
+import { SessionTimerLabel } from "../../components/session/identity/SessionTimerLabel";
+import { SyncStatusBeacon } from "../../components/session/syncUi/SyncStatusDot";
 import { syncBeaconAriaLabel } from "../../components/session/status/syncRailDisplay";
 import { HudHomeIcon } from "../../components/ui/brand/HudIcons";
 import { playerRoleLabel } from "../../domain/session/players/playerRole";

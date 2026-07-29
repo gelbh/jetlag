@@ -2,8 +2,8 @@ import type { ReactNode, RefObject } from "react";
 import {
   FramingModeSegmentControl,
   GameAreaFramingPolygonActions,
-} from "../../components/session/GameAreaFramingControls";
-import { framingModeHint } from "../../components/session/gameAreaFramingUi";
+} from "../../components/session/framing/GameAreaFramingControls";
+import { framingModeHint } from "../../components/session/framing/gameAreaFramingUi";
 import type { GameArea } from "../../domain/map/annotations";
 import type { BundledPresetSelectGroup } from "../../domain/regions/bundledPresetHierarchy";
 import type { GamePreset } from "../../domain/session/presets/gamePreset";

@@ -5,7 +5,7 @@ import type { LayerVisibility } from "../../state/sessionStore";
 import type { MapViewportState } from "../../components/map/MapViewportTracker";
 import type { ObserverMapScreenController } from "../observer-map-screen/useObserverMapScreen";
 import type { MonitorPanelId } from "../../domain/admin/opsDeskLayout";
-import { SessionLogBody } from "../../components/session/SessionLogBody";
+import { SessionLogBody } from "../../components/session/log/SessionLogBody";
 import { ChatPanelBody } from "../../components/chat/ChatPanelBody";
 import { useSessionActivityLog } from "../../hooks/session/useSessionActivityLog";
 import { useAnnotationStore } from "../../state/annotationStore";
