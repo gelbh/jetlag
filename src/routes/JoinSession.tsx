@@ -15,7 +15,7 @@ import {
 } from "../services/session/sessionCodes";
 import { useSessionStore } from "../state/sessionStore";
 import type { PlayerRole } from "../domain/session/players/playerRole";
-import { RolePicker } from "../components/session/RolePicker";
+import { RolePicker } from "../components/session/identity/RolePicker";
 import {
   ensureAnonymousUser,
   ensureFreshAnonymousUser,

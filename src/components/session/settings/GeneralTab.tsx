@@ -4,7 +4,7 @@ import type { DistanceUnit } from "../../../domain/map/distance";
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
 import { effectiveMapStyle } from "../../../domain/device/power/powerProfile";
 import { SegmentControl } from "../../ui/forms/SegmentControl";
-import { SettingsToggleRow } from "../SettingsToggleRow";
+import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 
 export interface MapSettingsGeneralTabProps {
   showCurrentLocation: boolean;
