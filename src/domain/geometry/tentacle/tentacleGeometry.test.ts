@@ -73,9 +73,9 @@ describe("tentacleGeometry", () => {
     expect(new Set(siteIds.filter(Boolean)).size).toBe(2);
   });
 
-  it("returns null when fewer than two POIs", () => {
+  it("returns null when fewer than two POIs", async () => {
     expect(
-      buildTentacleEliminationRegion(
+      await buildTentacleEliminationRegion(
         [51.45, -0.15],
         oneMileMeters,
         [westMuseum],
@@ -86,9 +86,9 @@ describe("tentacleGeometry", () => {
   });
 
 
-  it("single POI answer shades only the exterior of the search disk", () => {
+  it("single POI answer shades only the exterior of the search disk", async () => {
     const anchor: [number, number] = [51.45, -0.15];
-    const region = buildTentaclePoiAnswerEliminationRegion(
+    const region = await buildTentaclePoiAnswerEliminationRegion(
       anchor,
       oneMileMeters,
       [westMuseum],
@@ -105,8 +105,8 @@ describe("tentacleGeometry", () => {
     expect(booleanPointInPolygon(insideDisk, region!)).toBe(false);
   });
 
-  it("tentacleEliminationJsonForAnswer serializes single-POI exterior shading", () => {
-    const json = tentacleEliminationJsonForAnswer({
+  it("tentacleEliminationJsonForAnswer serializes single-POI exterior shading", async () => {
+    const json = await tentacleEliminationJsonForAnswer({
       anchor: [51.45, -0.15],
       radiusMeters: oneMileMeters,
       pois: [westMuseum],
@@ -121,9 +121,9 @@ describe("tentacleGeometry", () => {
     });
   });
 
-  it("multi-POI answer combines exterior and inner Voronoi shading", () => {
+  it("multi-POI answer combines exterior and inner Voronoi shading", async () => {
     const anchor: [number, number] = [51.45, -0.15];
-    const region = buildTentaclePoiAnswerEliminationRegion(
+    const region = await buildTentaclePoiAnswerEliminationRegion(
       anchor,
       oneMileMeters,
       [westMuseum, eastMuseum],
@@ -143,9 +143,9 @@ describe("tentacleGeometry", () => {
     expect(booleanPointInPolygon(nearAnsweredPoi, region!)).toBe(false);
   });
 
-  it("Voronoi cells inside the answer radius nearer to another POI than the answer", () => {
+  it("Voronoi cells inside the answer radius nearer to another POI than the answer", async () => {
     const anchor: [number, number] = [51.45, -0.15];
-    const region = buildTentacleEliminationRegion(
+    const region = await buildTentacleEliminationRegion(
       anchor,
       oneMileMeters,
       [westMuseum, eastMuseum],
@@ -163,9 +163,9 @@ describe("tentacleGeometry", () => {
     );
   });
 
-  it("shades the search disk except near the answered poi", () => {
+  it("shades the search disk except near the answered poi", async () => {
     const anchor: [number, number] = [51.45, -0.15];
-    const region = buildTentacleEliminationRegion(
+    const region = await buildTentacleEliminationRegion(
       anchor,
       oneMileMeters,
       [westMuseum, eastMuseum],
@@ -180,9 +180,9 @@ describe("tentacleGeometry", () => {
     expect(booleanPointInPolygon(farFromAnsweredPoi, region!)).toBe(true);
   });
 
-  it("tentacleEliminationJsonForAnswer is undefined when out of reach", () => {
+  it("tentacleEliminationJsonForAnswer is undefined when out of reach", async () => {
     expect(
-      tentacleEliminationJsonForAnswer({
+      await tentacleEliminationJsonForAnswer({
         anchor: [51.45, -0.15],
         radiusMeters: oneMileMeters,
         pois: [westMuseum, eastMuseum],
@@ -193,7 +193,7 @@ describe("tentacleGeometry", () => {
     ).toBeUndefined();
   });
 
-  it("7+ POI answers produce distinct inner-disk shading per selection", () => {
+  it("7+ POI answers produce distinct inner-disk shading per selection", async () => {
     clearVoronoiCellCacheForTests();
     clearTentacleEliminationCacheForTests();
 
@@ -223,7 +223,7 @@ describe("tentacleGeometry", () => {
 
     const regionsByAnswer = new Map<string, Feature<Polygon | MultiPolygon>>();
     for (const poi of sevenPois) {
-      const region = buildTentacleEliminationRegion(
+      const region = await buildTentacleEliminationRegion(
         anchor,
         oneMileMeters,
         sevenPois,
@@ -247,7 +247,7 @@ describe("tentacleGeometry", () => {
     }
   });
 
-  it("Dublin-like 8-POI grid: answered site stays clear, every other site is shaded", () => {
+  it("Dublin-like 8-POI grid: answered site stays clear, every other site is shaded", async () => {
     clearVoronoiCellCacheForTests();
     clearTentacleEliminationCacheForTests();
 
@@ -284,7 +284,7 @@ describe("tentacleGeometry", () => {
     ];
 
     for (const answered of gridPois) {
-      const region = buildTentacleEliminationRegion(
+      const region = await buildTentacleEliminationRegion(
         anchor,
         oneMileMeters,
         gridPois,

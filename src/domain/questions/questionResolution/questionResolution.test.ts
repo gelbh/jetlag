@@ -274,9 +274,9 @@ describe("resolveMeasuringPendingQuestion", () => {
 });
 
 describe("resolveTentaclePendingQuestion", () => {
-  it("returns null when poi metadata is missing", () => {
+  it("returns null when poi metadata is missing", async () => {
     expect(
-      resolveTentaclePendingQuestion(
+      await resolveTentaclePendingQuestion(
         basePending({ toolType: "tentacle" }),
         "poi-1",
         gameArea,
@@ -284,7 +284,7 @@ describe("resolveTentaclePendingQuestion", () => {
     ).toBeNull();
   });
 
-  it("marks out-of-reach answers without a highlighted poi", () => {
+  it("marks out-of-reach answers without a highlighted poi", async () => {
     const pending = basePending({
       toolType: "tentacle",
       placement: {
@@ -308,7 +308,7 @@ describe("resolveTentaclePendingQuestion", () => {
       },
     });
 
-    const resolved = resolveTentaclePendingQuestion(
+    const resolved = await resolveTentaclePendingQuestion(
       pending,
       "out-of-reach",
       gameArea,
@@ -319,7 +319,7 @@ describe("resolveTentaclePendingQuestion", () => {
     expect(resolved?.metadata.tentacleAnswerRadiusMeters).toBeUndefined();
   });
 
-  it("highlights the answered poi", () => {
+  it("highlights the answered poi", async () => {
     const pending = basePending({
       toolType: "tentacle",
       placement: {
@@ -343,7 +343,7 @@ describe("resolveTentaclePendingQuestion", () => {
       },
     });
 
-    const resolved = resolveTentaclePendingQuestion(
+    const resolved = await resolveTentaclePendingQuestion(
       pending,
       "poi-west",
       gameArea,
@@ -354,7 +354,7 @@ describe("resolveTentaclePendingQuestion", () => {
     expect(resolved?.metadata.tentacleAnswerPoiName).toBe("West Museum");
   });
 
-  it("stores radius from pending metadata", () => {
+  it("stores radius from pending metadata", async () => {
     const largeRadius = milesToMeters(15);
     const pending = basePending({
       toolType: "tentacle",
@@ -387,7 +387,7 @@ describe("resolveTentaclePendingQuestion", () => {
       },
     });
 
-    const resolved = resolveTentaclePendingQuestion(
+    const resolved = await resolveTentaclePendingQuestion(
       pending,
       "poi-west",
       gameArea,

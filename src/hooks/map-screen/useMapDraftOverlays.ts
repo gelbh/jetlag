@@ -222,7 +222,7 @@ export async function buildMapDraftOverlays(
 
       if (hasPoiAnswer && selectedPoiId) {
         pushElimination(
-          buildTentaclePoiAnswerEliminationRegion(
+          await buildTentaclePoiAnswerEliminationRegion(
             center,
             searchRadiusMeters,
             pois,

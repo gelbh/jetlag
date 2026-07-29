@@ -135,14 +135,14 @@ export function buildTutorialMeasuringPreviews(
   return { targetPoint, boundaryPreview, eliminationPreview };
 }
 
-export function buildTutorialTentacleElimination(
+export async function buildTutorialTentacleElimination(
   center: LatLngTuple,
   searchRadiusMeters: number,
   pois: readonly TentaclePoi[],
   selectedPoiId: string | null,
   outOfReach: boolean,
   gameArea: GameArea,
-): Feature<GeoPolygon | MultiPolygon> | null {
+): Promise<Feature<GeoPolygon | MultiPolygon> | null> {
   if (outOfReach || !selectedPoiId || pois.length < 2) {
     return null;
   }

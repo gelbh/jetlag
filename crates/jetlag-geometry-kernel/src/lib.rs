@@ -4,6 +4,7 @@ pub mod geodesic;
 pub mod geodesic_buffer;
 pub mod half_plane;
 pub mod mask;
+pub mod tentacle;
 pub mod types;
 
 pub use geodesic_buffer::geodesic_line_buffer;
@@ -24,6 +25,11 @@ use half_plane::{
 use mask::{
     build_end_game_mask_from_disks as build_end_game_native,
     build_mask_from_union_input as build_mask_native,
+};
+use tentacle::{
+    build_tentacle_elimination_region as build_tentacle_elimination_native,
+    build_tentacle_poi_answer_elimination_region as build_tentacle_poi_answer_native,
+    game_area_from_json, parse_anchor, parse_sites, parse_voronoi_cells,
 };
 use types::{DiskSpecJson, EliminationUnionInputJson};
 use wasm_bindgen::prelude::*;
@@ -171,5 +177,53 @@ pub fn geodesic_line_buffer_json(
         &coordinates,
         distance_meters,
         sample_spacing_meters,
+    ))
+}
+
+/// WASM export: tentacle elimination within search disk. Anchor is `[lat,lng]` JSON.
+#[wasm_bindgen]
+pub fn build_tentacle_elimination_region_json(
+    anchor_json: &str,
+    radius_meters: f64,
+    sites_json: &str,
+    answered_site_id: &str,
+    game_area_json: &str,
+    voronoi_cells_json: &str,
+) -> Result<JsValue, JsValue> {
+    let anchor = parse_anchor(anchor_json).map_err(js_err)?;
+    let sites = parse_sites(sites_json).map_err(js_err)?;
+    let game_area = game_area_from_json(game_area_json).map_err(js_err)?;
+    let cells = parse_voronoi_cells(voronoi_cells_json).map_err(js_err)?;
+    feature_to_js(build_tentacle_elimination_native(
+        anchor,
+        radius_meters,
+        &sites,
+        answered_site_id,
+        &game_area,
+        &cells,
+    ))
+}
+
+/// WASM export: POI-answer tentacle elimination (exterior + inner shading).
+#[wasm_bindgen]
+pub fn build_tentacle_poi_answer_elimination_region_json(
+    anchor_json: &str,
+    radius_meters: f64,
+    sites_json: &str,
+    answered_site_id: &str,
+    game_area_json: &str,
+    voronoi_cells_json: &str,
+) -> Result<JsValue, JsValue> {
+    let anchor = parse_anchor(anchor_json).map_err(js_err)?;
+    let sites = parse_sites(sites_json).map_err(js_err)?;
+    let game_area = game_area_from_json(game_area_json).map_err(js_err)?;
+    let cells = parse_voronoi_cells(voronoi_cells_json).map_err(js_err)?;
+    feature_to_js(build_tentacle_poi_answer_native(
+        anchor,
+        radius_meters,
+        &sites,
+        answered_site_id,
+        &game_area,
+        &cells,
     ))
 }
