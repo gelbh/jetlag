@@ -12,7 +12,7 @@ import { AppEntryBackdrop } from "./components/ui/layout/AppEntryBackdrop";
 import { AnalyticsConsentBanner } from "./components/ui/banners/AnalyticsConsentBanner";
 import { AppUpdateBanner } from "./components/ui/banners/AppUpdateBanner";
 import { AppUpdateProvider } from "./components/ui/banners/AppUpdateProvider";
-import { LowBatteryPrompt } from "./components/session/LowBatteryPrompt";
+import { LowBatteryPrompt } from "./components/session/banners/LowBatteryPrompt";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { AppCheckProbeGate } from "./components/ui/feedback/AppCheckProbeGate";
 import { AppErrorPage } from "./components/ui/feedback/AppErrorPage";

@@ -1,5 +1,5 @@
-import { MapFirstRunSheet } from "../../components/session/MapFirstRunSheet";
-import { MapToolsHintBanner } from "../../components/session/MapToolsHintBanner";
+import { MapFirstRunSheet } from "../../components/session/mapChrome/MapFirstRunSheet";
+import { MapToolsHintBanner } from "../../components/session/mapChrome/MapToolsHintBanner";
 import { ToolFloatingPanel } from "../../components/tools/ToolFloatingPanel";
 import type { MapScreenController } from "./useMapScreenController";
 

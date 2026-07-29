@@ -10,12 +10,12 @@ import {
   type ContextualRailTab,
 } from "../../components/map/ContextualRailContext";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
-import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
+import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
 import { AppUpdateMapChip } from "../../components/ui/banners/AppUpdateMapChip";
 import { HotfixGraceChip } from "../../components/incident/HotfixGraceChip";
-import { FirestorePersistenceBanner } from "../../components/session/FirestorePersistenceBanner";
-import { MapStatusRail } from "../../components/session/MapStatusRail";
-import { SessionLog } from "../../components/session/SessionLog";
+import { FirestorePersistenceBanner } from "../../components/session/banners/FirestorePersistenceBanner";
+import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
+import { SessionLog } from "../../components/session/log/SessionLog";
 import { AnnotationEditSheet } from "../../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../../components/tools/ToolDock";
 import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";

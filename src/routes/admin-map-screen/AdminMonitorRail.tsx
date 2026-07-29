@@ -5,7 +5,7 @@ import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { LayerVisibility } from "../../state/sessionStore";
 import type { MapViewportState } from "../../components/map/MapViewportTracker";
 import type { ObserverMapScreenController } from "../observer-map-screen/useObserverMapScreen";
-import { SessionLogBody } from "../../components/session/SessionLogBody";
+import { SessionLogBody } from "../../components/session/log/SessionLogBody";
 import { ChatPanelBody } from "../../components/chat/ChatPanelBody";
 import { HudChevronLeftIcon, HudChevronRightIcon } from "../../components/ui/brand/HudIcons";
 import { useSessionActivityLog } from "../../hooks/session/useSessionActivityLog";

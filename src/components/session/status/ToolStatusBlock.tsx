@@ -17,7 +17,7 @@ import {
   type PlayerRole,
 } from "../../../domain/session/players/playerRole";
 import { HudPlayIcon } from "../../ui/brand/HudIcons";
-import { MapTimerCluster } from "../MapTimerCluster";
+import { MapTimerCluster } from "../mapChrome/MapTimerCluster";
 
 interface ToolStatusBlockProps {
   sessionCode: string;

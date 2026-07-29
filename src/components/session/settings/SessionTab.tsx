@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { NotificationPreferences } from "../../../domain/device/chrome/notifications";
-import { ShareCode } from "../ShareCode";
-import { SettingsToggleRow } from "../SettingsToggleRow";
+import { ShareCode } from "../identity/ShareCode";
+import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 import { NotificationPreferencesSection } from "./NotificationPreferencesSection";
 
 export interface MapSettingsSessionTabProps {

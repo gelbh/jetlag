@@ -3,8 +3,8 @@ import {
   ScreenHeader,
   screenHeaderShellClassName,
 } from "../../components/ui/layout/ScreenHeader";
-import { CreateSessionMapPane } from "../../components/session/CreateSessionMapPane";
-import { GameAreaFramingModal } from "../../components/session/GameAreaFramingModal";
+import { CreateSessionMapPane } from "../../components/session/framing/CreateSessionMapPane";
+import { GameAreaFramingModal } from "../../components/session/framing/GameAreaFramingModal";
 import { MobileSheet } from "../../components/ui/sheets/MobileSheet";
 import {
   buildCreateSessionPresetDraft,

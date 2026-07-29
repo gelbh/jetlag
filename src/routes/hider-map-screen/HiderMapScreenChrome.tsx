@@ -9,7 +9,7 @@ import type { DistanceUnit } from "../../domain/map/distance";
 import type { MapStyle, StreetBasemap } from "../../domain/map/mapBasemaps";
 import type { NotificationPreferences } from "../../domain/device/chrome/notifications";
 import type { HidingZoneStepId } from "../../components/hider/hidingZoneSteps";
-import type { HiderTruthRevealState } from "../../components/session/HiderTruthRevealBanner";
+import type { HiderTruthRevealState } from "../../components/session/banners/HiderTruthRevealBanner";
 import type { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
 import type { useSyncStatus } from "../../hooks/sync/useSyncStatus";
 import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
@@ -31,16 +31,16 @@ import { HiderZoneWizardShell } from "../../components/hider/HiderZoneWizardShel
 import { PopupCloseButton } from "../../components/ui/brand/PopupCloseButton";
 import { AppUpdateMapChip } from "../../components/ui/banners/AppUpdateMapChip";
 import { HotfixGraceChip } from "../../components/incident/HotfixGraceChip";
-import { FirestorePersistenceBanner } from "../../components/session/FirestorePersistenceBanner";
-import { MapStatusRail } from "../../components/session/MapStatusRail";
-import { MapSettingsSheet } from "../../components/session/MapSettingsSheet";
+import { FirestorePersistenceBanner } from "../../components/session/banners/FirestorePersistenceBanner";
+import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
+import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
 import {
   HiderTruthRevealBanner,
-} from "../../components/session/HiderTruthRevealBanner";
+} from "../../components/session/banners/HiderTruthRevealBanner";
 import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
-import { SessionLog } from "../../components/session/SessionLog";
+import { SessionLog } from "../../components/session/log/SessionLog";
 import { isEndGameActive, isEndGamePending, isFoundHiderPending } from "../../domain/map/annotations";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";

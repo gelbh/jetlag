@@ -8,11 +8,11 @@ import {
   ScreenHeader,
   screenHeaderOffsetClassName,
 } from "../components/ui/layout/ScreenHeader";
-import { AdvancedSessionSettings } from "../components/session/AdvancedSessionSettings";
-import { GameAreaFramingModal } from "../components/session/GameAreaFramingModal";
-import { GameAreaFramingStats } from "../components/session/GameAreaFramingControls";
-import { PlaceAreaSearchFields } from "../components/session/PlaceAreaSearchFields";
-import { GameSizePicker } from "../components/session/GameSizePicker";
+import { AdvancedSessionSettings } from "../components/session/settings/AdvancedSessionSettings";
+import { GameAreaFramingModal } from "../components/session/framing/GameAreaFramingModal";
+import { GameAreaFramingStats } from "../components/session/framing/GameAreaFramingControls";
+import { PlaceAreaSearchFields } from "../components/session/framing/PlaceAreaSearchFields";
+import { GameSizePicker } from "../components/session/identity/GameSizePicker";
 import {
   gameAreaToBoundingBox,
   placeToGameArea,

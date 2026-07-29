@@ -1,6 +1,6 @@
-import { AdvancedSessionSettings } from "../../components/session/AdvancedSessionSettings";
-import { GameSizePicker } from "../../components/session/GameSizePicker";
-import { RolePicker } from "../../components/session/RolePicker";
+import { AdvancedSessionSettings } from "../../components/session/settings/AdvancedSessionSettings";
+import { GameSizePicker } from "../../components/session/identity/GameSizePicker";
+import { RolePicker } from "../../components/session/identity/RolePicker";
 import {
   formatPremiumSessionTierHint,
   type PremiumEntitlements,

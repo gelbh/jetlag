@@ -1,7 +1,7 @@
 import type { MapViewportState } from "../../../components/map/MapViewportTracker";
 import type { MapStyle } from "../../../domain/map/mapBasemaps";
 import type { LayerVisibility } from "../../../state/sessionStore";
-import { LayerVisibilityGrid } from "../../../components/session/LayerVisibilityGrid";
+import { LayerVisibilityGrid } from "../../../components/session/mapChrome/LayerVisibilityGrid";
 
 interface MapPanelProps {
   mapViewport: MapViewportState | null;

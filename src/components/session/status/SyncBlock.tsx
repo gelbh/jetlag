@@ -1,8 +1,8 @@
 import type { SyncStatus } from "../../../domain/device/sync/sync";
 import { userErrorFromSyncMessage } from "../../../domain/device/feedback/userErrors";
-import { SyncStatusBeacon } from "../SyncStatusDot";
-import { SyncStatusDetailPanel } from "../SyncStatusDetailPanel";
-import { syncDetailContent } from "../syncStatusDetailContent";
+import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
+import { SyncStatusDetailPanel } from "../syncUi/SyncStatusDetailPanel";
+import { syncDetailContent } from "../syncUi/syncStatusDetailContent";
 import {
   SYNC_TONE_CLASSES,
   syncBeaconAriaLabel,
