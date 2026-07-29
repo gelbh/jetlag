@@ -40,7 +40,7 @@ describe("MapStatusRail header home", () => {
     expect(home.closest(".jl-status-header-brand")).toBeTruthy();
   });
 
-  it("keeps probe A composition with stamp-code and below-bar sync", () => {
+  it("keeps ticker-band composition with stamp-code and below-bar sync", () => {
     const { container } = render(
       <MemoryRouter>
         <RouteTransitionProvider>

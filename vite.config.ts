@@ -32,6 +32,15 @@ export default defineConfig(({ mode }) => ({
     // Avoid colliding with `vite preview` / Playwright (4173), which registers a SW.
     port: 5173,
     strictPort: false,
+    // Worktrees under `.worktrees/` often resolve fonts from the primary
+    // checkout's node_modules; allow that path so visual e2e matches CI.
+    fs: {
+      allow: [
+        __dirname,
+        path.resolve(__dirname, ".."),
+        path.resolve(__dirname, "../.."),
+      ],
+    },
   },
   // es2022: enough for module workers + modern Safari; avoid global `esnext`
   // (undownleveled main bundle). Worker wasm still loads via vite-plugin-wasm.
