@@ -12,10 +12,10 @@ import {
   matchingQuestionFor,
   type MatchingAnswer,
 } from "../../../domain/questions";
-import { BinaryAnswerPicker } from "../shared/BinaryAnswerPicker";
-import { yesNoAnswerOptions } from "../shared/binaryAnswerOptions";
-import { QuestionPromptBlock } from "../shared/QuestionPromptBlock";
-import { ToolSection } from "../shared/ToolSection";
+import { BinaryAnswerPicker } from "../shared/answers/BinaryAnswerPicker";
+import { yesNoAnswerOptions } from "../shared/answers/binaryAnswerOptions";
+import { QuestionPromptBlock } from "../shared/controls/QuestionPromptBlock";
+import { ToolSection } from "../shared/panels/ToolSection";
 import type { EditSavePayload } from "./types";
 
 export type MatchingAnnotation = AnnotationRecord & { type: "matching" };
