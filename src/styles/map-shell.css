@@ -94,7 +94,8 @@
   .jl-status-header {
     box-sizing: border-box;
     display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1.2fr);
+    /* Probe B ticker band: compress OPERATION/PHASE, hero timer column */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr) minmax(0, 0.65fr) minmax(0, 1.65fr);
     align-items: stretch;
     gap: 0;
     height: var(--status-bar-height);
@@ -161,16 +162,17 @@
     min-width: 0;
     max-width: 100%;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    gap: 0.1rem;
-    padding-inline: 0.3rem;
+    gap: 0.08rem;
+    padding-inline: 0.22rem;
     overflow: hidden;
     border-left: 1px solid oklch(from var(--color-border) l c h / 0.85);
   }
 
   .jl-status-header-col--timer {
-    align-items: center;
+    align-items: flex-start;
+    padding-inline: 0.35rem;
   }
 
   .jl-status-header-label {
@@ -185,7 +187,7 @@
 
   .jl-status-header-value {
     font-family: var(--font-mono);
-    font-size: clamp(0.7rem, 2.8vw, 0.9rem);
+    font-size: clamp(0.8125rem, 2.1vw, 0.8125rem);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.04em;
@@ -196,8 +198,14 @@
     white-space: nowrap;
   }
 
+  .jl-status-header-col:not(.jl-status-header-col--timer)
+    .jl-status-header-value:not(.jl-stamp-code) {
+    font-family: var(--font-display);
+    letter-spacing: 0.06em;
+  }
+
   .jl-status-header .jl-stamp-code {
-    font-size: clamp(0.7rem, 2.8vw, 0.9rem);
+    font-size: clamp(0.8125rem, 2.1vw, 0.8125rem);
     letter-spacing: 0.12em;
     line-height: 1.1;
     overflow: visible;
@@ -237,9 +245,9 @@
     display: inline-flex;
     flex-shrink: 1;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    gap: 0.05rem;
+    gap: 0.04rem;
     max-width: 100%;
     min-height: 0;
     min-width: 0;
@@ -296,14 +304,14 @@
     border: none;
     background: transparent;
     padding: 0;
-    font-size: clamp(0.68rem, 2.6vw, 0.88rem);
-    line-height: 1.05;
+    font-size: clamp(0.8125rem, 3.2vw, 1.125rem);
+    line-height: 1.02;
     color: var(--color-ink);
     animation: none;
   }
 
   .jl-status-header-col--timer .jl-ticker-phase {
-    font-size: 0.5rem;
+    font-size: 0.8125rem;
     letter-spacing: 0.06em;
   }
 
@@ -319,7 +327,7 @@
   }
 
   .jl-status-header-col--timer .jl-ticker-hiding {
-    color: var(--color-action);
+    color: var(--color-ink);
   }
 
   .jl-status-header-col--timer .jl-ticker-idle {
