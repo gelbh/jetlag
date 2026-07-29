@@ -1,5 +1,5 @@
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import type { LatLngTuple } from "../geometry/geometry";
+import type { LatLngTuple } from "../geometry/gameArea/geometry";
 
 export interface MapDraftOverlayStyle {
   color?: string;

@@ -1,11 +1,11 @@
 import { CircleMarker, Marker, Polyline } from "react-leaflet";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import {
   formatThermometerWalkProgress,
   type DistanceUnit,
 } from "../../../domain/map/distance";
-import { distanceBetweenPoints } from "../../../domain/geometry/geometry";
+import { distanceBetweenPoints } from "../../../domain/geometry/gameArea/geometry";
 import {
   createThermometerWalkEndLabelIcon,
   createThermometerWalkProgressIcon,

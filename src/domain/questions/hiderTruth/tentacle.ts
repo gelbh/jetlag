@@ -1,5 +1,5 @@
 import type { TentaclePoi } from "../../map/annotations";
-import { distanceBetweenPoints, type LatLngTuple } from "../../geometry/geometry";
+import { distanceBetweenPoints, type LatLngTuple } from "../../geometry/gameArea/geometry";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { tentacleRadiusFromMetadata } from "../tentacleQuestions";

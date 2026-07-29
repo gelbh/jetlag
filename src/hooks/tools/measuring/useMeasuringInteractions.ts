@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import type { GameArea } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import { overpassErrorMessage } from "../../../services/core/overpassClient";
 import { searchPlaces, type GeocodedPlace } from "../../../services/geo/geocoding";
 import {

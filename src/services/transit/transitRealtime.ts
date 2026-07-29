@@ -1,5 +1,5 @@
 import type { GameArea } from "../../domain/map/annotations";
-import { gameAreaToBoundingBox } from "../../domain/geometry/geometry";
+import { gameAreaToBoundingBox } from "../../domain/geometry/gameArea/geometry";
 import type {
   TransitRealtimeSnapshot,
   TransitRouteMode,

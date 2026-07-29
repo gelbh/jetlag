@@ -1,5 +1,5 @@
 import type { GameArea } from "../map/annotations";
-import type { LatLngTuple } from "../geometry/geometry";
+import type { LatLngTuple } from "../geometry/gameArea/geometry";
 
 export interface MeasuringPlace {
   id: string;

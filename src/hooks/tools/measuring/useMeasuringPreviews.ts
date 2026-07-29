@@ -4,7 +4,7 @@ import type { GameArea } from "../../../domain/map/annotations";
 import {
   buildMeasuringBoundaryPreview,
   buildMeasuringEliminationPreview,
-} from "../../../domain/geometry/measuringRegions";
+} from "../../../domain/geometry/measuring/measuringRegions";
 import { previewGeometryFingerprint } from "../../../domain/geometry/measuring/previewGeometryFingerprint";
 import { getCachedPreparedCoastlineSegments } from "../../../services/geo/coastline";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";

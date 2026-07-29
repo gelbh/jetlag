@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { haversineMeters } from "../../domain/geometry/distance";
+import { haversineMeters } from "../../domain/geometry/gameArea/distance";
 import {
   requestLocationAccess,
   unknownGeolocationErrorMessage,

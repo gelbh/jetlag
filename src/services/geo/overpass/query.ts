@@ -2,7 +2,7 @@ import type { GameArea } from "../../../domain/map/annotations";
 import {
   gameAreaToBoundingBox,
   type BoundingBox,
-} from "../../../domain/geometry/gameAreaBounds";
+} from "../../../domain/geometry/gameArea/gameAreaBounds";
 
 export const OVERPASS_JSON_QUERY_HEADER = "[out:json][timeout:25];";
 

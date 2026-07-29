@@ -2,13 +2,13 @@ import type { Feature, FeatureCollection, Polygon, MultiPolygon } from "geojson"
 import area from "@turf/area";
 import booleanIntersects from "@turf/boolean-intersects";
 import type { GameArea } from "../../../domain/map/annotations";
-import { gameAreaToBoundingBox } from "../../../domain/geometry/gameAreaBounds";
+import { gameAreaToBoundingBox } from "../../../domain/geometry/gameArea/gameAreaBounds";
 import {
   featureToGameArea,
   gameAreaToPolygon,
   simplifyGameArea,
   type LatLngTuple,
-} from "../../../domain/geometry/geometry";
+} from "../../../domain/geometry/gameArea/geometry";
 import type { AdminDivisionFeature } from "../overpass/adminDivisionBoundaries";
 import { MAX_ADMIN_DIVISIONS } from "../overpass/adminDivisionBoundaries";
 

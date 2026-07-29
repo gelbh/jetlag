@@ -1,5 +1,5 @@
-import { distanceBetweenPoints, type LatLngTuple } from "../../geometry/geometry";
-import { parsePointGeometry } from "../../geometry/geometryParsing";
+import { distanceBetweenPoints, type LatLngTuple } from "../../geometry/gameArea/geometry";
+import { parsePointGeometry } from "../../geometry/gameArea/geometryParsing";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import {
   resultFromReplyId,

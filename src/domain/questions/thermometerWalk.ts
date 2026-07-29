@@ -1,6 +1,6 @@
 import type { Feature, LineString, Point } from "geojson";
-import type { LatLngTuple } from "../geometry/geometry";
-import { haversineMeters } from "../geometry/distance";
+import type { LatLngTuple } from "../geometry/gameArea/geometry";
+import { haversineMeters } from "../geometry/gameArea/distance";
 import type { PendingQuestionPlacement } from "../session/activity/sessionChat";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 

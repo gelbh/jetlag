@@ -1,5 +1,5 @@
 import type { Feature, MultiPolygon, Polygon, Position } from "geojson";
-import type { LatLngTuple } from "../../geometry/geometry";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import { boundingBoxFromPositions } from "../../questions/overlays/draftOverlayBounds";
 import type { MapDraftOverlay } from "../mapDraftOverlay";
 import type { MapTool } from "../mapToolTypes";

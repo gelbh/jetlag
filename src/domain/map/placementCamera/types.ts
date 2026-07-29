@@ -1,7 +1,7 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import type { LatLngBoundsExpression } from "leaflet";
-import type { BoundingBox } from "../../geometry/gameAreaBounds";
-import type { LatLngTuple } from "../../geometry/geometry";
+import type { BoundingBox } from "../../geometry/gameArea/gameAreaBounds";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import type { GameArea } from "../annotations";
 import type { MapDraftOverlay } from "../mapDraftOverlay";
 import type { MapTool } from "../mapToolTypes";

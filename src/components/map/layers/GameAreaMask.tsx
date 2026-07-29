@@ -6,7 +6,7 @@ import {
   gameAreaOutsideMask,
   gameAreaToLeafletPositions,
   type LatLngTuple,
-} from "../../../domain/geometry/geometry";
+} from "../../../domain/geometry/gameArea/geometry";
 
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 

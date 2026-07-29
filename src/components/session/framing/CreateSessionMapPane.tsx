@@ -6,7 +6,7 @@ import { GameAreaMask } from "../../map/GameAreaMask";
 import type { GameArea } from "../../../domain/map/annotations";
 import type { MapStyle } from "../../../domain/map/mapBasemaps";
 import type { FramingMode } from "../../../hooks/session/useGameAreaFraming";
-import type { LatLngTuple } from "../../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import {
   GameAreaFramingStats,
 } from "./GameAreaFramingControls";

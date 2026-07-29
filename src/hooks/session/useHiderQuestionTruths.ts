@@ -4,7 +4,7 @@ import {
   type HiderTruthResult,
 } from "../../domain/questions/ui";
 import type { GameArea } from "../../domain/map/annotations";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { useLatestRequest } from "../useLatestRequest";
 

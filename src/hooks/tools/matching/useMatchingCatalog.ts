@@ -4,7 +4,7 @@ import type { AnnotationRecord } from "../../../domain/map/annotations";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
-} from "../../../domain/geometry/matchingGeometry";
+} from "../../../domain/geometry/measuring/matchingGeometry";
 import {
   getMatchingCategory,
   matchingCategoryUseCount,

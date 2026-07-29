@@ -13,7 +13,7 @@ import {
   type MeasuringTargetMode,
 } from "../../domain/questions";
 import type { GeocodedPlace } from "../../services/geo/geocoding";
-import type { SeaLevelEdgeCase } from "../../domain/geometry/seaLevel";
+import type { SeaLevelEdgeCase } from "../../domain/geometry/measuring/seaLevel";
 import { type DistanceUnit } from "../../domain/map/distance";
 import { MeasuringAnchorStep } from "./shared/MeasuringAnchorStep";
 import {

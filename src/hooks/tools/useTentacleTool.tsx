@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLatestRequest } from "../useLatestRequest";
 import { useDebouncedValue } from "../useDebouncedValue";
 import { TentaclePanel } from "../../components/tools/TentaclePanel";
-import type { LatLngTuple } from "../../domain/geometry/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
   isActive,
   type AnnotationRecord,
