@@ -42,7 +42,7 @@ import {
   type LatLngTuple,
 } from "../domain/geometry/geometry";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
-import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/device/powerProfile";
+import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/device/power/powerProfile";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
@@ -59,7 +59,7 @@ import { useActiveThermometerWalk } from "../hooks/location/useActiveThermometer
 import { useHiderZoneAdvisory } from "../hooks/location/useHiderZoneAdvisory";
 import { useLiveLocation } from "../hooks/location/useLiveLocation";
 import { useWakeLock } from "../hooks/location/useWakeLock";
-import { getPowerProfile } from "../domain/device/powerProfile";
+import { getPowerProfile } from "../domain/device/power/powerProfile";
 import { useSessionDistanceUnit } from "../hooks/session/useSessionDistanceUnit";
 import { isEndGameActive, isEndGamePending, isFoundHiderPending, LOCAL_SESSION_ID } from "../domain/map/annotations";
 import {

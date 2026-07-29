@@ -1,4 +1,4 @@
-import type { NotificationPreferences } from "../../../domain/device/notifications";
+import type { NotificationPreferences } from "../../../domain/device/chrome/notifications";
 import { SettingsToggleRow } from "../SettingsToggleRow";
 
 export function NotificationPreferencesSection({

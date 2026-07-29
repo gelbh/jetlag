@@ -1,4 +1,4 @@
-import { appUpdateCopy } from "../../../domain/device/appUpdateCopy";
+import { appUpdateCopy } from "../../../domain/device/updates/appUpdateCopy";
 import { useAppUpdateState } from "../../../hooks/useAppUpdateState";
 import { HudBanner } from "../hud/HudBanner";
 

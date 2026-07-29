@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { readAnalyticsConsent } from "../../../domain/device/analyticsConsent";
+import { readAnalyticsConsent } from "../../../domain/device/consent/analyticsConsent";
 import {
   denyAnalyticsConsent,
   grantAnalyticsConsent,

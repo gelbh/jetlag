@@ -4,9 +4,9 @@ import {
   BOOT_RELOAD_KEY,
   CHUNK_RELOAD_CLEAR_MS,
   hasChunkReloadBeenAttempted,
-} from "../../domain/device/chunkLoadRecovery";
-import { isIosStandalonePwa } from "../../domain/device/isIosStandalonePwa";
-import { isStandalonePwa } from "../../domain/device/isStandalonePwa";
+} from "../../domain/device/updates/chunkLoadRecovery";
+import { isIosStandalonePwa } from "../../domain/device/pwa/isIosStandalonePwa";
+import { isStandalonePwa } from "../../domain/device/pwa/isStandalonePwa";
 import {
   clearResumeVisualArtifacts,
   resumeWatchdogBudgets,
