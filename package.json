@@ -163,7 +163,9 @@
       "whatwg-url": "^14.0.0"
     },
     "uuid": "^11.1.1",
-    "@opentelemetry/core": "^2.8.0"
+    "@opentelemetry/core": "^2.8.0",
+    "tmp": "^0.2.6",
+    "@hono/node-server": "^2.0.5"
   },
   "allowScripts": {
     "@firebase/util@1.15.1": true,
