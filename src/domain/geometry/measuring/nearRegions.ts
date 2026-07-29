@@ -194,6 +194,25 @@ export function clearCoastlineNearRegionCacheForTests(): void {
   coastlineNearRegionCache.clear();
 }
 
+export const COASTLINE_NEAR_REGION_YIELD_EVERY = 4;
+
+let coastlineNearRegionYieldHook: (() => Promise<void>) | null = null;
+
+function yieldToEventLoop(): Promise<void> {
+  if (coastlineNearRegionYieldHook) {
+    return coastlineNearRegionYieldHook();
+  }
+  return new Promise((resolve) => {
+    setTimeout(resolve, 0);
+  });
+}
+
+export function setCoastlineNearRegionYieldHookForTests(
+  hook: (() => Promise<void>) | null,
+): void {
+  coastlineNearRegionYieldHook = hook;
+}
+
 function combinePolygonFeatures(
   features: Feature<Polygon | MultiPolygon>[],
 ): Feature<Polygon | MultiPolygon> | null {
@@ -346,7 +365,8 @@ async function buildCoastlineNearRegionWithBuffer(
   try {
     const bufferedFeatures: Feature<Polygon | MultiPolygon>[] = [];
 
-    for (const segment of segments) {
+    for (let index = 0; index < segments.length; index++) {
+      const segment = segments[index]!;
       const buffered = await bufferLine(segment, distanceMeters);
 
       if (!buffered) {
@@ -354,6 +374,13 @@ async function buildCoastlineNearRegionWithBuffer(
       }
 
       bufferedFeatures.push(buffered);
+
+      if (
+        (index + 1) % COASTLINE_NEAR_REGION_YIELD_EVERY === 0 &&
+        index + 1 < segments.length
+      ) {
+        await yieldToEventLoop();
+      }
     }
 
     if (bufferedFeatures.length === 0) {

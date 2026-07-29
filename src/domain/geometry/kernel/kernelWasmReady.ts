@@ -14,7 +14,7 @@ export const KERNEL_WASM_READY: Record<KernelEntrypoint, boolean> = {
   maskFromUnionInput: true,
   endGameMaskFromDisks: true,
   halfPlane: true,
-  geodesicLineBuffer: false,
+  geodesicLineBuffer: true,
 };
 
 /** True when mode asks for WASM and the entrypoint registry marks it ready. */
