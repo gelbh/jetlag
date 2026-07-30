@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  isAppCheckSoftFailureMessage,
+  isBrowserExtensionNoiseMessage,
+  isFirestoreIdbPersistenceNoiseMessage,
   isIdbConnectionClosingMessage,
   isRecaptchaOtTypeErrorMessage,
+  isRecaptchaTimeoutMessage,
   isWebkitLoadFailedMessage,
 } from "./clientNoiseErrors";
 
@@ -58,6 +62,75 @@ describe("isRecaptchaOtTypeErrorMessage", () => {
       isRecaptchaOtTypeErrorMessage("Cannot read properties of null (reading 'x')"),
     ).toBe(false);
     expect(isRecaptchaOtTypeErrorMessage("Load failed")).toBe(false);
+  });
+});
+
+describe("isFirestoreIdbPersistenceNoiseMessage", () => {
+  it("matches Firestore b815 / key-generator persistence failures", () => {
+    expect(
+      isFirestoreIdbPersistenceNoiseMessage(
+        'FIRESTORE (12.16.0) INTERNAL ASSERTION FAILED: Unexpected state (ID: b815) CONTEXT: {"el":"Error storing new key generator value in database"}',
+      ),
+    ).toBe(true);
+    expect(
+      isFirestoreIdbPersistenceNoiseMessage(
+        "ConstraintError: Error storing new key generator value in database",
+      ),
+    ).toBe(true);
+  });
+
+  it("ignores unrelated Firestore errors", () => {
+    expect(
+      isFirestoreIdbPersistenceNoiseMessage("Missing or insufficient permissions."),
+    ).toBe(false);
+  });
+});
+
+describe("isRecaptchaTimeoutMessage", () => {
+  it("matches Google reCAPTCHA Timeout errors", () => {
+    expect(isRecaptchaTimeoutMessage("reCAPTCHA Timeout (b)")).toBe(true);
+  });
+
+  it("ignores unrelated timeouts", () => {
+    expect(isRecaptchaTimeoutMessage("App Check probe timed out")).toBe(false);
+  });
+});
+
+describe("isBrowserExtensionNoiseMessage", () => {
+  it("matches extension sendMessage and Object Not Found injector noise", () => {
+    expect(
+      isBrowserExtensionNoiseMessage(
+        "Invalid call to runtime.sendMessage(). Tab not found.",
+      ),
+    ).toBe(true);
+    expect(
+      isBrowserExtensionNoiseMessage(
+        "Object Not Found Matching Id:1, MethodName:update, ParamCount:4",
+      ),
+    ).toBe(true);
+  });
+
+  it("ignores first-party messages", () => {
+    expect(isBrowserExtensionNoiseMessage("Couldn't leave the session.")).toBe(
+      false,
+    );
+  });
+});
+
+describe("isAppCheckSoftFailureMessage", () => {
+  it("matches probe timeout and initial-throttle", () => {
+    expect(isAppCheckSoftFailureMessage("App Check probe timed out")).toBe(true);
+    expect(
+      isAppCheckSoftFailureMessage(
+        "AppCheck: 403 error. Attempts allowed again after 01d:00m:00s (appCheck/initial-throttle).",
+      ),
+    ).toBe(true);
+  });
+
+  it("ignores hard App Check failures", () => {
+    expect(
+      isAppCheckSoftFailureMessage("App Check probe returned empty token"),
+    ).toBe(false);
   });
 });
 

@@ -61,6 +61,10 @@ function looksBlocked(message: string): boolean {
   return /blocked|failed to fetch|load failed|recaptcha/i.test(message);
 }
 
+function isInitialThrottleMessage(message: string): boolean {
+  return /appCheck\/initial-throttle|initial-throttle/i.test(message);
+}
+
 async function runProbe(): Promise<AppCheckProbeResult> {
   if (shouldSkipAppCheckProbe() || !isFirebaseConfigured()) {
     cachedProbe = { ok: true };
@@ -92,6 +96,7 @@ async function runProbe(): Promise<AppCheckProbeResult> {
       captureAppCheckTokenFailure(new Error("App Check probe timed out"), {
         source: "appCheckProbe",
         reason: "timeout",
+        soft: true,
       });
       cachedProbe = { ok: true };
       return cachedProbe;
@@ -100,6 +105,7 @@ async function runProbe(): Promise<AppCheckProbeResult> {
       captureAppCheckTokenFailure(new Error("App Check probe returned empty token"), {
         source: "appCheckProbe",
         reason: "blocked",
+        soft: false,
       });
       cachedProbe = { ok: false, reason: "blocked" };
       return cachedProbe;
@@ -108,15 +114,30 @@ async function runProbe(): Promise<AppCheckProbeResult> {
     return cachedProbe;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    captureAppCheckTokenFailure(error, {
-      source: "appCheckProbe",
-      reason: looksBlocked(message) ? "blocked" : "error",
-    });
+    if (isInitialThrottleMessage(message)) {
+      captureAppCheckTokenFailure(error, {
+        source: "appCheckProbe",
+        reason: "error",
+        soft: true,
+      });
+      cachedProbe = { ok: true };
+      return cachedProbe;
+    }
     if (looksBlocked(message)) {
+      captureAppCheckTokenFailure(error, {
+        source: "appCheckProbe",
+        reason: "blocked",
+        soft: false,
+      });
       cachedProbe = { ok: false, reason: "blocked" };
       return cachedProbe;
     }
     // Transient / unknown errors: allow the app; App Check still enforced server-side.
+    captureAppCheckTokenFailure(error, {
+      source: "appCheckProbe",
+      reason: "error",
+      soft: true,
+    });
     cachedProbe = { ok: true };
     return cachedProbe;
   }

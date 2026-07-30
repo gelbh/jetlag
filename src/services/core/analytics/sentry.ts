@@ -3,8 +3,12 @@ import * as SentryReact from "@sentry/react";
 import { getClientEnv } from "../../../config/env";
 import { APP_VERSION } from "../../../domain/device/changelog";
 import {
+  isAppCheckSoftFailureMessage,
+  isBrowserExtensionNoiseMessage,
+  isFirestoreIdbPersistenceNoiseMessage,
   isIdbConnectionClosingMessage,
   isRecaptchaOtTypeErrorMessage,
+  isRecaptchaTimeoutMessage,
   isWebkitLoadFailedMessage,
 } from "../network/clientNoiseErrors";
 import { isHtml2CanvasUnsupportedColorMessage } from "../capture/html2canvasErrors";
@@ -170,10 +174,14 @@ function isIgnoredClientNoiseEvent(
       typeof exception.value === "string" &&
       (IDB_DATABASE_DELETED.test(exception.value) ||
         isIdbConnectionClosingMessage(exception.value) ||
+        isFirestoreIdbPersistenceNoiseMessage(exception.value) ||
         isHtml2CanvasUnsupportedColorMessage(exception.value) ||
         RECAPTCHA_ALREADY_RENDERED.test(exception.value) ||
+        isRecaptchaTimeoutMessage(exception.value) ||
         VIEW_TRANSITION_ABORTED.test(exception.value) ||
-        isExpectedSessionLeaveMessage(exception.value))
+        isExpectedSessionLeaveMessage(exception.value) ||
+        isBrowserExtensionNoiseMessage(exception.value) ||
+        isAppCheckSoftFailureMessage(exception.value))
     ) {
       return true;
     }
@@ -183,10 +191,14 @@ function isIgnoredClientNoiseEvent(
     typeof event.message === "string" &&
     (IDB_DATABASE_DELETED.test(event.message) ||
       isIdbConnectionClosingMessage(event.message) ||
+      isFirestoreIdbPersistenceNoiseMessage(event.message) ||
       isHtml2CanvasUnsupportedColorMessage(event.message) ||
       RECAPTCHA_ALREADY_RENDERED.test(event.message) ||
+      isRecaptchaTimeoutMessage(event.message) ||
       VIEW_TRANSITION_ABORTED.test(event.message) ||
-      isExpectedSessionLeaveMessage(event.message))
+      isExpectedSessionLeaveMessage(event.message) ||
+      isBrowserExtensionNoiseMessage(event.message) ||
+      isAppCheckSoftFailureMessage(event.message))
   ) {
     return true;
   }
@@ -334,14 +346,16 @@ export function captureAuthBootstrapFailure(error: unknown): void {
 
 export function captureAppCheckTokenFailure(
   error: unknown,
-  context?: Record<string, unknown>,
+  context?: Record<string, unknown> & { soft?: boolean; reason?: string },
 ): void {
   if (import.meta.env.MODE === "test") {
     return;
   }
 
+  const soft = context?.soft === true || context?.reason === "timeout";
+
   withSentryScope((scope) => {
-    scope.setTag("app_check_token", "failed");
+    scope.setTag("app_check_token", soft ? "soft_failed" : "failed");
     if (context) {
       for (const [key, value] of Object.entries(context)) {
         scope.setExtra(key, value);
@@ -349,9 +363,14 @@ export function captureAppCheckTokenFailure(
     }
     Sentry.addBreadcrumb({
       category: "app_check",
-      message: "App Check token fetch failed",
+      message: soft
+        ? "App Check soft failure"
+        : "App Check token fetch failed",
       level: "warning",
     });
+    if (soft) {
+      return;
+    }
     Sentry.captureException(error);
   });
 }

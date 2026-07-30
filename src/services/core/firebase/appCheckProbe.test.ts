@@ -87,6 +87,32 @@ describe("appCheckProbe", () => {
   it("soft-fails unknown errors so the app still loads", async () => {
     getToken.mockRejectedValueOnce(new Error("Internal App Check glitch"));
     await expect(probeAppCheckAvailability()).resolves.toEqual({ ok: true });
+    expect(captureAppCheckTokenFailure).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ reason: "error", soft: true }),
+    );
+  });
+
+  it("soft-fails initial-throttle without treating as blocked", async () => {
+    getToken.mockRejectedValueOnce(
+      new Error(
+        "AppCheck: 403 error. Attempts allowed again after 01d:00m:00s (appCheck/initial-throttle).",
+      ),
+    );
+    await expect(probeAppCheckAvailability()).resolves.toEqual({ ok: true });
+    expect(captureAppCheckTokenFailure).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ reason: "error", soft: true }),
+    );
+  });
+
+  it("keeps hard capture for blocked empty token", async () => {
+    getToken.mockResolvedValueOnce({ token: "" });
+    await probeAppCheckAvailability();
+    expect(captureAppCheckTokenFailure).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ reason: "blocked", soft: false }),
+    );
   });
 
   it("caches the first result", async () => {
@@ -123,7 +149,7 @@ describe("appCheckProbe", () => {
     await expect(probePromise).resolves.toEqual({ ok: true });
     expect(captureAppCheckTokenFailure).toHaveBeenCalledWith(
       expect.any(Error),
-      expect.objectContaining({ reason: "timeout" }),
+      expect.objectContaining({ reason: "timeout", soft: true }),
     );
   });
 });
