@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_COLS,
@@ -65,5 +65,38 @@ describe("AdminGridWorkspace", () => {
     expect(screen.getByText("Inbox")).toBeInTheDocument();
     expect(screen.getByTestId("admin-ops-grid")).toBeInTheDocument();
     expect(screen.getAllByLabelText("Pin panel").length).toBeGreaterThan(0);
+  });
+
+  it("opens the place menu on right-click empty space, not left-click", () => {
+    const layout = cloneLayout(OPS_OVERVIEW_LAYOUT);
+    render(
+      <AdminGridWorkspace
+        layout={layout}
+        bodies={{
+          sessions: <div>sessions-body</div>,
+          monitor: <div>monitor-body</div>,
+          inbox: <div>inbox-body</div>,
+          detail: <div>detail-body</div>,
+          actions: <div>actions-body</div>,
+          settings: <div>settings-body</div>,
+        }}
+        onLayoutChange={vi.fn()}
+        onMergePanel={vi.fn()}
+        onReorderPanel={vi.fn()}
+        onUnstackPanel={vi.fn()}
+        onPlacePanel={vi.fn()}
+        onActiveIndexChange={vi.fn()}
+        onPinToggle={vi.fn()}
+        onCollapseToggle={vi.fn()}
+        onCloseActive={vi.fn()}
+      />,
+    );
+
+    const workspace = screen.getByTestId("admin-ops-grid");
+    fireEvent.click(workspace);
+    expect(screen.queryByLabelText("Place panel")).not.toBeInTheDocument();
+
+    fireEvent.contextMenu(workspace);
+    expect(screen.getByLabelText("Place panel")).toBeInTheDocument();
   });
 });
