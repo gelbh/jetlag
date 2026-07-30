@@ -5,13 +5,17 @@ import {
   isFirebaseConfigured,
 } from "./firebase";
 import { captureAppCheckTokenFailure } from "../analytics/sentry";
+import {
+  classifyAppCheckProbeFailure,
+  type AppCheckProbeFailureClass,
+} from "../network/clientNoiseErrors";
 
 export const APP_CHECK_PROBE_SKIP_KEY = "jl.appCheckProbe.skip";
 export const APP_CHECK_PROBE_TIMEOUT_MS = 15_000;
 
 export type AppCheckProbeResult =
   | { ok: true }
-  | { ok: false; reason: "blocked" | "timeout" | "error" };
+  | { ok: false; reason: "blocked" };
 
 let cachedProbe: AppCheckProbeResult | null = null;
 let inFlight: Promise<AppCheckProbeResult> | null = null;
@@ -57,8 +61,19 @@ export async function probeAppCheckAvailability(): Promise<AppCheckProbeResult> 
   return inFlight;
 }
 
-function looksBlocked(message: string): boolean {
-  return /blocked|failed to fetch|load failed|recaptcha/i.test(message);
+function reportProbeFailure(
+  error: unknown,
+  classification: AppCheckProbeFailureClass,
+): AppCheckProbeResult {
+  captureAppCheckTokenFailure(error, {
+    source: "appCheckProbe",
+    reason: classification.reason,
+    soft: classification.soft,
+  });
+  cachedProbe = classification.allowApp
+    ? { ok: true }
+    : { ok: false, reason: "blocked" };
+  return cachedProbe;
 }
 
 async function runProbe(): Promise<AppCheckProbeResult> {
@@ -89,35 +104,21 @@ async function runProbe(): Promise<AppCheckProbeResult> {
 
     if (raced === "timeout") {
       // Soft-fail: slow networks shouldn't hard-block the app as a "blocker".
-      captureAppCheckTokenFailure(new Error("App Check probe timed out"), {
-        source: "appCheckProbe",
-        reason: "timeout",
-      });
-      cachedProbe = { ok: true };
-      return cachedProbe;
+      return reportProbeFailure(
+        new Error("App Check probe timed out"),
+        classifyAppCheckProbeFailure("timeout"),
+      );
     }
     if (raced === "empty") {
-      captureAppCheckTokenFailure(new Error("App Check probe returned empty token"), {
-        source: "appCheckProbe",
-        reason: "blocked",
-      });
-      cachedProbe = { ok: false, reason: "blocked" };
-      return cachedProbe;
+      return reportProbeFailure(
+        new Error("App Check probe returned empty token"),
+        classifyAppCheckProbeFailure("empty"),
+      );
     }
     cachedProbe = { ok: true };
     return cachedProbe;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    captureAppCheckTokenFailure(error, {
-      source: "appCheckProbe",
-      reason: looksBlocked(message) ? "blocked" : "error",
-    });
-    if (looksBlocked(message)) {
-      cachedProbe = { ok: false, reason: "blocked" };
-      return cachedProbe;
-    }
-    // Transient / unknown errors: allow the app; App Check still enforced server-side.
-    cachedProbe = { ok: true };
-    return cachedProbe;
+    return reportProbeFailure(error, classifyAppCheckProbeFailure({ message }));
   }
 }

@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  classifyAppCheckProbeFailure,
+  isAppCheckSoftFailureMessage,
+  isBrowserExtensionNoiseMessage,
+  isFirestoreIdbPersistenceNoiseMessage,
   isIdbConnectionClosingMessage,
   isRecaptchaOtTypeErrorMessage,
+  isRecaptchaTimeoutMessage,
   isWebkitLoadFailedMessage,
 } from "./clientNoiseErrors";
 
@@ -58,6 +63,121 @@ describe("isRecaptchaOtTypeErrorMessage", () => {
       isRecaptchaOtTypeErrorMessage("Cannot read properties of null (reading 'x')"),
     ).toBe(false);
     expect(isRecaptchaOtTypeErrorMessage("Load failed")).toBe(false);
+  });
+});
+
+describe("isFirestoreIdbPersistenceNoiseMessage", () => {
+  it("matches Firestore b815 / key-generator persistence failures", () => {
+    expect(
+      isFirestoreIdbPersistenceNoiseMessage(
+        'FIRESTORE (12.16.0) INTERNAL ASSERTION FAILED: Unexpected state (ID: b815) CONTEXT: {"el":"Error storing new key generator value in database"}',
+      ),
+    ).toBe(true);
+    expect(
+      isFirestoreIdbPersistenceNoiseMessage(
+        "ConstraintError: Error storing new key generator value in database",
+      ),
+    ).toBe(true);
+  });
+
+  it("ignores unrelated Firestore errors", () => {
+    expect(
+      isFirestoreIdbPersistenceNoiseMessage("Missing or insufficient permissions."),
+    ).toBe(false);
+  });
+});
+
+describe("isRecaptchaTimeoutMessage", () => {
+  it("matches Google reCAPTCHA Timeout errors", () => {
+    expect(isRecaptchaTimeoutMessage("reCAPTCHA Timeout (b)")).toBe(true);
+  });
+
+  it("ignores unrelated timeouts", () => {
+    expect(isRecaptchaTimeoutMessage("App Check probe timed out")).toBe(false);
+  });
+});
+
+describe("isBrowserExtensionNoiseMessage", () => {
+  it("matches extension sendMessage and Object Not Found injector noise", () => {
+    expect(
+      isBrowserExtensionNoiseMessage(
+        "Invalid call to runtime.sendMessage(). Tab not found.",
+      ),
+    ).toBe(true);
+    expect(
+      isBrowserExtensionNoiseMessage(
+        "Object Not Found Matching Id:1, MethodName:update, ParamCount:4",
+      ),
+    ).toBe(true);
+  });
+
+  it("ignores first-party messages", () => {
+    expect(isBrowserExtensionNoiseMessage("Couldn't leave the session.")).toBe(
+      false,
+    );
+  });
+});
+
+describe("isAppCheckSoftFailureMessage", () => {
+  it("matches probe timeout, initial-throttle, and reCAPTCHA Timeout", () => {
+    expect(isAppCheckSoftFailureMessage("App Check probe timed out")).toBe(true);
+    expect(
+      isAppCheckSoftFailureMessage(
+        "AppCheck: 403 error. Attempts allowed again after 01d:00m:00s (appCheck/initial-throttle).",
+      ),
+    ).toBe(true);
+    expect(isAppCheckSoftFailureMessage("reCAPTCHA Timeout (b)")).toBe(true);
+  });
+
+  it("ignores hard App Check failures and bare throttle substrings", () => {
+    expect(
+      isAppCheckSoftFailureMessage("App Check probe returned empty token"),
+    ).toBe(false);
+    expect(isAppCheckSoftFailureMessage("initial-throttle alone")).toBe(false);
+  });
+});
+
+describe("classifyAppCheckProbeFailure", () => {
+  it("classifies timeout and empty token", () => {
+    expect(classifyAppCheckProbeFailure("timeout")).toEqual({
+      soft: true,
+      reason: "timeout",
+      allowApp: true,
+    });
+    expect(classifyAppCheckProbeFailure("empty")).toEqual({
+      soft: false,
+      reason: "blocked",
+      allowApp: false,
+    });
+  });
+
+  it("classifies throttle, reCAPTCHA timeout, blocked fetch, and unknown soft errors", () => {
+    expect(
+      classifyAppCheckProbeFailure({
+        message:
+          "AppCheck: 403 error. Attempts allowed again after 01d:00m:00s (appCheck/initial-throttle).",
+      }),
+    ).toEqual({ soft: true, reason: "error", allowApp: true });
+    expect(
+      classifyAppCheckProbeFailure({ message: "reCAPTCHA Timeout (b)" }),
+    ).toEqual({ soft: true, reason: "error", allowApp: true });
+    expect(
+      classifyAppCheckProbeFailure({ message: "Failed to fetch" }),
+    ).toEqual({ soft: false, reason: "blocked", allowApp: false });
+    expect(
+      classifyAppCheckProbeFailure({ message: "Load failed" }),
+    ).toEqual({ soft: false, reason: "blocked", allowApp: false });
+    expect(
+      classifyAppCheckProbeFailure({
+        message: "App Check request blocked by a content blocker",
+      }),
+    ).toEqual({ soft: false, reason: "blocked", allowApp: false });
+    expect(
+      classifyAppCheckProbeFailure({ message: "unblocked-after-retry" }),
+    ).toEqual({ soft: true, reason: "error", allowApp: true });
+    expect(
+      classifyAppCheckProbeFailure({ message: "Internal App Check glitch" }),
+    ).toEqual({ soft: true, reason: "error", allowApp: true });
   });
 });
 
