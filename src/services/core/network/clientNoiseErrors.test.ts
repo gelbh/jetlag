@@ -119,13 +119,14 @@ describe("isBrowserExtensionNoiseMessage", () => {
 });
 
 describe("isAppCheckSoftFailureMessage", () => {
-  it("matches probe timeout and initial-throttle", () => {
+  it("matches probe timeout, initial-throttle, and reCAPTCHA Timeout", () => {
     expect(isAppCheckSoftFailureMessage("App Check probe timed out")).toBe(true);
     expect(
       isAppCheckSoftFailureMessage(
         "AppCheck: 403 error. Attempts allowed again after 01d:00m:00s (appCheck/initial-throttle).",
       ),
     ).toBe(true);
+    expect(isAppCheckSoftFailureMessage("reCAPTCHA Timeout (b)")).toBe(true);
   });
 
   it("ignores hard App Check failures and bare throttle substrings", () => {
@@ -150,7 +151,7 @@ describe("classifyAppCheckProbeFailure", () => {
     });
   });
 
-  it("classifies throttle, blocked fetch, and unknown soft errors", () => {
+  it("classifies throttle, reCAPTCHA timeout, blocked fetch, and unknown soft errors", () => {
     expect(
       classifyAppCheckProbeFailure({
         message:
@@ -158,7 +159,13 @@ describe("classifyAppCheckProbeFailure", () => {
       }),
     ).toEqual({ soft: true, reason: "error", allowApp: true });
     expect(
+      classifyAppCheckProbeFailure({ message: "reCAPTCHA Timeout (b)" }),
+    ).toEqual({ soft: true, reason: "error", allowApp: true });
+    expect(
       classifyAppCheckProbeFailure({ message: "Failed to fetch" }),
+    ).toEqual({ soft: false, reason: "blocked", allowApp: false });
+    expect(
+      classifyAppCheckProbeFailure({ message: "Load failed" }),
     ).toEqual({ soft: false, reason: "blocked", allowApp: false });
     expect(
       classifyAppCheckProbeFailure({ message: "Internal App Check glitch" }),

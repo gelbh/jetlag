@@ -358,10 +358,12 @@ export function captureAppCheckTokenFailure(
   const soft = context?.soft === true;
 
   withSentryScope((scope) => {
-    scope.setTag("app_check_token", soft ? "soft_failed" : "failed");
-    if (context) {
-      for (const [key, value] of Object.entries(context)) {
-        scope.setExtra(key, value);
+    if (!soft) {
+      scope.setTag("app_check_token", "failed");
+      if (context) {
+        for (const [key, value] of Object.entries(context)) {
+          scope.setExtra(key, value);
+        }
       }
     }
     Sentry.addBreadcrumb({
@@ -370,6 +372,13 @@ export function captureAppCheckTokenFailure(
         ? "App Check soft failure"
         : "App Check token fetch failed",
       level: "warning",
+      data: context
+        ? {
+            reason: context.reason,
+            source: context.source,
+            soft: soft || undefined,
+          }
+        : undefined,
     });
     if (soft) {
       return;

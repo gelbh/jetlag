@@ -9,8 +9,7 @@ const BROWSER_EXTENSION_NOISE =
   /Invalid call to runtime\.sendMessage\(\)|Object Not Found Matching Id:/i;
 const APP_CHECK_INITIAL_THROTTLE = /appCheck\/initial-throttle/i;
 const APP_CHECK_PROBE_TIMED_OUT = /App Check probe timed out/i;
-const APP_CHECK_BLOCKED_FETCH =
-  /blocked|failed to fetch|load failed|recaptcha/i;
+const APP_CHECK_BLOCKED_FETCH = /blocked|failed to fetch|load failed/i;
 
 export function isIdbConnectionClosingMessage(message: string): boolean {
   return IDB_CONNECTION_CLOSING.test(message);
@@ -52,11 +51,12 @@ export function isAppCheckInitialThrottleMessage(message: string): boolean {
 export function isAppCheckSoftFailureMessage(message: string): boolean {
   return (
     APP_CHECK_PROBE_TIMED_OUT.test(message) ||
-    isAppCheckInitialThrottleMessage(message)
+    isAppCheckInitialThrottleMessage(message) ||
+    isRecaptchaTimeoutMessage(message)
   );
 }
 
-/** Content-blocker / reCAPTCHA load failures that should hard-block the app. */
+/** Content-blocker load/fetch failures that should hard-block the app. */
 export function isAppCheckBlockedFetchMessage(message: string): boolean {
   return APP_CHECK_BLOCKED_FETCH.test(message);
 }
@@ -76,6 +76,10 @@ export function classifyAppCheckProbeFailure(
     return { soft: false, reason: "blocked", allowApp: false };
   }
   if (isAppCheckInitialThrottleMessage(outcome.message)) {
+    return { soft: true, reason: "error", allowApp: true };
+  }
+  // Google script timeouts must not ContentBlocker + then vanish in beforeSend.
+  if (isRecaptchaTimeoutMessage(outcome.message)) {
     return { soft: true, reason: "error", allowApp: true };
   }
   if (isAppCheckBlockedFetchMessage(outcome.message)) {
