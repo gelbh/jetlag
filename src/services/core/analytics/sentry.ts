@@ -3,8 +3,12 @@ import * as SentryReact from "@sentry/react";
 import { getClientEnv } from "../../../config/env";
 import { APP_VERSION } from "../../../domain/device/changelog";
 import {
+  isAppCheckSoftFailureMessage,
+  isBrowserExtensionNoiseMessage,
+  isFirestoreIdbPersistenceNoiseMessage,
   isIdbConnectionClosingMessage,
   isRecaptchaOtTypeErrorMessage,
+  isRecaptchaTimeoutMessage,
   isWebkitLoadFailedMessage,
 } from "../network/clientNoiseErrors";
 import { isHtml2CanvasUnsupportedColorMessage } from "../capture/html2canvasErrors";
@@ -168,12 +172,7 @@ function isIgnoredClientNoiseEvent(
 
     if (
       typeof exception.value === "string" &&
-      (IDB_DATABASE_DELETED.test(exception.value) ||
-        isIdbConnectionClosingMessage(exception.value) ||
-        isHtml2CanvasUnsupportedColorMessage(exception.value) ||
-        RECAPTCHA_ALREADY_RENDERED.test(exception.value) ||
-        VIEW_TRANSITION_ABORTED.test(exception.value) ||
-        isExpectedSessionLeaveMessage(exception.value))
+      isGenericClientNoiseMessage(exception.value)
     ) {
       return true;
     }
@@ -181,17 +180,27 @@ function isIgnoredClientNoiseEvent(
 
   if (
     typeof event.message === "string" &&
-    (IDB_DATABASE_DELETED.test(event.message) ||
-      isIdbConnectionClosingMessage(event.message) ||
-      isHtml2CanvasUnsupportedColorMessage(event.message) ||
-      RECAPTCHA_ALREADY_RENDERED.test(event.message) ||
-      VIEW_TRANSITION_ABORTED.test(event.message) ||
-      isExpectedSessionLeaveMessage(event.message))
+    isGenericClientNoiseMessage(event.message)
   ) {
     return true;
   }
 
   return false;
+}
+
+function isGenericClientNoiseMessage(message: string): boolean {
+  return (
+    IDB_DATABASE_DELETED.test(message) ||
+    isIdbConnectionClosingMessage(message) ||
+    isFirestoreIdbPersistenceNoiseMessage(message) ||
+    isHtml2CanvasUnsupportedColorMessage(message) ||
+    RECAPTCHA_ALREADY_RENDERED.test(message) ||
+    isRecaptchaTimeoutMessage(message) ||
+    VIEW_TRANSITION_ABORTED.test(message) ||
+    isExpectedSessionLeaveMessage(message) ||
+    isBrowserExtensionNoiseMessage(message) ||
+    isAppCheckSoftFailureMessage(message)
+  );
 }
 
 function scrubEvent(
@@ -332,11 +341,37 @@ export function captureAuthBootstrapFailure(error: unknown): void {
   });
 }
 
+export type AppCheckCaptureContext = {
+  source?: string;
+  reason?: "timeout" | "blocked" | "error" | string;
+  soft?: boolean;
+};
+
 export function captureAppCheckTokenFailure(
   error: unknown,
-  context?: Record<string, unknown>,
+  context?: AppCheckCaptureContext,
 ): void {
   if (import.meta.env.MODE === "test") {
+    return;
+  }
+
+  const soft = context?.soft === true;
+  const breadcrumbData = context
+    ? {
+        reason: context.reason,
+        source: context.source,
+        soft: soft || undefined,
+      }
+    : undefined;
+
+  if (soft) {
+    // Soft failures must not open a temporary scope — breadcrumbs would be discarded.
+    Sentry.addBreadcrumb({
+      category: "app_check",
+      message: "App Check soft failure",
+      level: "warning",
+      data: breadcrumbData,
+    });
     return;
   }
 
@@ -351,6 +386,7 @@ export function captureAppCheckTokenFailure(
       category: "app_check",
       message: "App Check token fetch failed",
       level: "warning",
+      data: breadcrumbData,
     });
     Sentry.captureException(error);
   });
