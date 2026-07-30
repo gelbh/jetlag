@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  classifyAppCheckProbeFailure,
   isAppCheckSoftFailureMessage,
   isBrowserExtensionNoiseMessage,
   isFirestoreIdbPersistenceNoiseMessage,
@@ -127,10 +128,41 @@ describe("isAppCheckSoftFailureMessage", () => {
     ).toBe(true);
   });
 
-  it("ignores hard App Check failures", () => {
+  it("ignores hard App Check failures and bare throttle substrings", () => {
     expect(
       isAppCheckSoftFailureMessage("App Check probe returned empty token"),
     ).toBe(false);
+    expect(isAppCheckSoftFailureMessage("initial-throttle alone")).toBe(false);
+  });
+});
+
+describe("classifyAppCheckProbeFailure", () => {
+  it("classifies timeout and empty token", () => {
+    expect(classifyAppCheckProbeFailure("timeout")).toEqual({
+      soft: true,
+      reason: "timeout",
+      allowApp: true,
+    });
+    expect(classifyAppCheckProbeFailure("empty")).toEqual({
+      soft: false,
+      reason: "blocked",
+      allowApp: false,
+    });
+  });
+
+  it("classifies throttle, blocked fetch, and unknown soft errors", () => {
+    expect(
+      classifyAppCheckProbeFailure({
+        message:
+          "AppCheck: 403 error. Attempts allowed again after 01d:00m:00s (appCheck/initial-throttle).",
+      }),
+    ).toEqual({ soft: true, reason: "error", allowApp: true });
+    expect(
+      classifyAppCheckProbeFailure({ message: "Failed to fetch" }),
+    ).toEqual({ soft: false, reason: "blocked", allowApp: false });
+    expect(
+      classifyAppCheckProbeFailure({ message: "Internal App Check glitch" }),
+    ).toEqual({ soft: true, reason: "error", allowApp: true });
   });
 });
 

@@ -172,16 +172,7 @@ function isIgnoredClientNoiseEvent(
 
     if (
       typeof exception.value === "string" &&
-      (IDB_DATABASE_DELETED.test(exception.value) ||
-        isIdbConnectionClosingMessage(exception.value) ||
-        isFirestoreIdbPersistenceNoiseMessage(exception.value) ||
-        isHtml2CanvasUnsupportedColorMessage(exception.value) ||
-        RECAPTCHA_ALREADY_RENDERED.test(exception.value) ||
-        isRecaptchaTimeoutMessage(exception.value) ||
-        VIEW_TRANSITION_ABORTED.test(exception.value) ||
-        isExpectedSessionLeaveMessage(exception.value) ||
-        isBrowserExtensionNoiseMessage(exception.value) ||
-        isAppCheckSoftFailureMessage(exception.value))
+      isGenericClientNoiseMessage(exception.value)
     ) {
       return true;
     }
@@ -189,21 +180,27 @@ function isIgnoredClientNoiseEvent(
 
   if (
     typeof event.message === "string" &&
-    (IDB_DATABASE_DELETED.test(event.message) ||
-      isIdbConnectionClosingMessage(event.message) ||
-      isFirestoreIdbPersistenceNoiseMessage(event.message) ||
-      isHtml2CanvasUnsupportedColorMessage(event.message) ||
-      RECAPTCHA_ALREADY_RENDERED.test(event.message) ||
-      isRecaptchaTimeoutMessage(event.message) ||
-      VIEW_TRANSITION_ABORTED.test(event.message) ||
-      isExpectedSessionLeaveMessage(event.message) ||
-      isBrowserExtensionNoiseMessage(event.message) ||
-      isAppCheckSoftFailureMessage(event.message))
+    isGenericClientNoiseMessage(event.message)
   ) {
     return true;
   }
 
   return false;
+}
+
+function isGenericClientNoiseMessage(message: string): boolean {
+  return (
+    IDB_DATABASE_DELETED.test(message) ||
+    isIdbConnectionClosingMessage(message) ||
+    isFirestoreIdbPersistenceNoiseMessage(message) ||
+    isHtml2CanvasUnsupportedColorMessage(message) ||
+    RECAPTCHA_ALREADY_RENDERED.test(message) ||
+    isRecaptchaTimeoutMessage(message) ||
+    VIEW_TRANSITION_ABORTED.test(message) ||
+    isExpectedSessionLeaveMessage(message) ||
+    isBrowserExtensionNoiseMessage(message) ||
+    isAppCheckSoftFailureMessage(message)
+  );
 }
 
 function scrubEvent(
@@ -344,15 +341,21 @@ export function captureAuthBootstrapFailure(error: unknown): void {
   });
 }
 
+export type AppCheckCaptureContext = {
+  source?: string;
+  reason?: "timeout" | "blocked" | "error" | string;
+  soft?: boolean;
+};
+
 export function captureAppCheckTokenFailure(
   error: unknown,
-  context?: Record<string, unknown> & { soft?: boolean; reason?: string },
+  context?: AppCheckCaptureContext,
 ): void {
   if (import.meta.env.MODE === "test") {
     return;
   }
 
-  const soft = context?.soft === true || context?.reason === "timeout";
+  const soft = context?.soft === true;
 
   withSentryScope((scope) => {
     scope.setTag("app_check_token", soft ? "soft_failed" : "failed");
