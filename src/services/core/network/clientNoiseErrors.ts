@@ -9,7 +9,8 @@ const BROWSER_EXTENSION_NOISE =
   /Invalid call to runtime\.sendMessage\(\)|Object Not Found Matching Id:/i;
 const APP_CHECK_INITIAL_THROTTLE = /appCheck\/initial-throttle/i;
 const APP_CHECK_PROBE_TIMED_OUT = /App Check probe timed out/i;
-const APP_CHECK_BLOCKED_FETCH = /blocked|failed to fetch|load failed/i;
+const APP_CHECK_BLOCKED_FETCH =
+  /failed to fetch|load failed|content[\s-]?blocker|ad[\s-]?blocker|request blocked/i;
 
 export function isIdbConnectionClosingMessage(message: string): boolean {
   return IDB_CONNECTION_CLOSING.test(message);

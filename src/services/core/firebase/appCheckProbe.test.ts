@@ -108,7 +108,10 @@ describe("appCheckProbe", () => {
 
   it("keeps hard capture for blocked empty token", async () => {
     getToken.mockResolvedValueOnce({ token: "" });
-    await probeAppCheckAvailability();
+    await expect(probeAppCheckAvailability()).resolves.toEqual({
+      ok: false,
+      reason: "blocked",
+    });
     expect(captureAppCheckTokenFailure).toHaveBeenCalledWith(
       expect.any(Error),
       expect.objectContaining({ reason: "blocked", soft: false }),

@@ -173,6 +173,9 @@ describe("classifyAppCheckProbeFailure", () => {
       }),
     ).toEqual({ soft: false, reason: "blocked", allowApp: false });
     expect(
+      classifyAppCheckProbeFailure({ message: "unblocked-after-retry" }),
+    ).toEqual({ soft: true, reason: "error", allowApp: true });
+    expect(
       classifyAppCheckProbeFailure({ message: "Internal App Check glitch" }),
     ).toEqual({ soft: true, reason: "error", allowApp: true });
   });
