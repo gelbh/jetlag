@@ -168,6 +168,11 @@ describe("classifyAppCheckProbeFailure", () => {
       classifyAppCheckProbeFailure({ message: "Load failed" }),
     ).toEqual({ soft: false, reason: "blocked", allowApp: false });
     expect(
+      classifyAppCheckProbeFailure({
+        message: "App Check request blocked by a content blocker",
+      }),
+    ).toEqual({ soft: false, reason: "blocked", allowApp: false });
+    expect(
       classifyAppCheckProbeFailure({ message: "Internal App Check glitch" }),
     ).toEqual({ soft: true, reason: "error", allowApp: true });
   });

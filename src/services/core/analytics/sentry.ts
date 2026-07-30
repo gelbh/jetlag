@@ -356,33 +356,38 @@ export function captureAppCheckTokenFailure(
   }
 
   const soft = context?.soft === true;
+  const breadcrumbData = context
+    ? {
+        reason: context.reason,
+        source: context.source,
+        soft: soft || undefined,
+      }
+    : undefined;
+
+  if (soft) {
+    // Soft failures must not open a temporary scope — breadcrumbs would be discarded.
+    Sentry.addBreadcrumb({
+      category: "app_check",
+      message: "App Check soft failure",
+      level: "warning",
+      data: breadcrumbData,
+    });
+    return;
+  }
 
   withSentryScope((scope) => {
-    if (!soft) {
-      scope.setTag("app_check_token", "failed");
-      if (context) {
-        for (const [key, value] of Object.entries(context)) {
-          scope.setExtra(key, value);
-        }
+    scope.setTag("app_check_token", "failed");
+    if (context) {
+      for (const [key, value] of Object.entries(context)) {
+        scope.setExtra(key, value);
       }
     }
     Sentry.addBreadcrumb({
       category: "app_check",
-      message: soft
-        ? "App Check soft failure"
-        : "App Check token fetch failed",
+      message: "App Check token fetch failed",
       level: "warning",
-      data: context
-        ? {
-            reason: context.reason,
-            source: context.source,
-            soft: soft || undefined,
-          }
-        : undefined,
+      data: breadcrumbData,
     });
-    if (soft) {
-      return;
-    }
     Sentry.captureException(error);
   });
 }
