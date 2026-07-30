@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_COLS,
@@ -66,6 +66,34 @@ describe("AdminMonitorGridWorkspace", () => {
     expect(screen.getByTestId("admin-monitor-grid")).toBeInTheDocument();
     expect(screen.getByText("Map")).toBeInTheDocument();
     expect(screen.getByText("Overview")).toBeInTheDocument();
+  });
+
+  it("opens the place menu on right-click empty space, not left-click", () => {
+    const layout = cloneMonitorLayout(defaultMonitorLayout());
+    render(
+      <AdminMonitorGridWorkspace
+        layout={layout}
+        bodies={emptyBodies}
+        onLayoutChange={vi.fn()}
+        onMergePanel={vi.fn()}
+        onReorderPanel={vi.fn()}
+        onUnstackPanel={vi.fn()}
+        onPlacePanel={vi.fn()}
+        onActiveIndexChange={vi.fn()}
+        onPinToggle={vi.fn()}
+        onCollapseToggle={vi.fn()}
+        onCloseActive={vi.fn()}
+      />,
+    );
+
+    const workspace = screen.getByTestId("admin-monitor-grid");
+    fireEvent.click(workspace);
+    expect(
+      screen.queryByLabelText("Place monitor panel"),
+    ).not.toBeInTheDocument();
+
+    fireEvent.contextMenu(workspace);
+    expect(screen.getByLabelText("Place monitor panel")).toBeInTheDocument();
   });
 
   it("calls onLayoutChange when geometry is committed", () => {
