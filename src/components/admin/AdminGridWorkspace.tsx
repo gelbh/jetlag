@@ -169,8 +169,9 @@ export function AdminGridWorkspace({
     }
   };
 
-  const handleWorkspaceClick = (event: ReactMouseEvent) => {
+  const handleWorkspaceContextMenu = (event: ReactMouseEvent) => {
     if (!isEmptyTarget(event.target)) return;
+    event.preventDefault();
     const el = containerRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -191,7 +192,7 @@ export function AdminGridWorkspace({
       onDragOver={handleWorkspaceDragOver}
       onDragLeave={() => setEmptyHover(false)}
       onDrop={handleWorkspaceDrop}
-      onClick={handleWorkspaceClick}
+      onContextMenu={handleWorkspaceContextMenu}
     >
       {mounted ? (
         <GridLayout
