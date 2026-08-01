@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { IncidentCodingAgentState } from "../../domain/incident/incidentTypes";
 import {
   launchIncidentCursorAgent,
@@ -39,6 +39,7 @@ export interface AdminIncidentCursorLaunchProps {
 
 /**
  * Actions module 2 — Launch / Open / Retry Cursor coding agent.
+ * Parent should pass `key={incidentId}` so local state resets on selection change.
  */
 export function AdminIncidentCursorLaunch({
   incidentId,
@@ -55,32 +56,19 @@ export function AdminIncidentCursorLaunch({
   const [localAgent, setLocalAgent] = useState<IncidentCodingAgentState | null>(
     null,
   );
-  const launchGenerationRef = useRef(0);
+  const incidentIdRef = useRef(incidentId);
+  incidentIdRef.current = incidentId;
 
-  useEffect(() => {
-    launchGenerationRef.current += 1;
-    setLocalAgent(null);
-    setError(null);
-    setOk(null);
-    setBusy(false);
-  }, [incidentId]);
-
-  useEffect(() => {
-    if (agent?.cursorAgentId) {
-      setLocalAgent(null);
-    }
-  }, [agent?.cursorAgentId]);
-
-  const effectiveAgent = localAgent ?? agent;
+  const effectiveAgent = agent?.cursorAgentId
+    ? agent
+    : (localAgent ?? agent);
   const actionsDisabled = disabled || !incidentId;
   const agentUrl =
     typeof effectiveAgent?.cursorAgentUrl === "string" &&
     effectiveAgent.cursorAgentUrl.trim()
       ? effectiveAgent.cursorAgentUrl.trim()
       : null;
-  const hasOpenableAgent = Boolean(
-    effectiveAgent?.cursorAgentId && agentUrl,
-  );
+  const hasOpenableAgent = Boolean(effectiveAgent?.cursorAgentId && agentUrl);
   const canRetry =
     effectiveAgent?.status === "failed" ||
     effectiveAgent?.status === "misconfigured" ||
@@ -90,17 +78,13 @@ export function AdminIncidentCursorLaunch({
     if (!incidentId) {
       return;
     }
-    const generation = launchGenerationRef.current;
     const launchedForId = incidentId;
     setBusy(true);
     setError(null);
     setOk(null);
     try {
       const result = await launchCursorAgentFn(launchedForId);
-      if (
-        generation !== launchGenerationRef.current ||
-        launchedForId !== incidentId
-      ) {
+      if (launchedForId !== incidentIdRef.current) {
         return;
       }
       setLocalAgent({
@@ -116,10 +100,7 @@ export function AdminIncidentCursorLaunch({
           : "Cursor agent launched (no URL returned).",
       );
     } catch (err) {
-      if (
-        generation !== launchGenerationRef.current ||
-        launchedForId !== incidentId
-      ) {
+      if (launchedForId !== incidentIdRef.current) {
         return;
       }
       setError(
@@ -128,7 +109,7 @@ export function AdminIncidentCursorLaunch({
           : "Could not launch the Cursor agent.",
       );
     } finally {
-      if (generation === launchGenerationRef.current) {
+      if (launchedForId === incidentIdRef.current) {
         setBusy(false);
       }
     }

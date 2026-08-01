@@ -240,6 +240,7 @@ export function AdminIncidentActions({
       </div>
 
       <AdminIncidentCursorLaunch
+        key={incidentId ?? "none"}
         incidentId={incidentId}
         agent={agent}
         disabled={disabled}
