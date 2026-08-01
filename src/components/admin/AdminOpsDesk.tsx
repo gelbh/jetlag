@@ -649,6 +649,10 @@ export function AdminOpsDesk() {
             visibleIncidents.find((row) => row.id === selectedIncidentId)
               ?.status ?? null
           }
+          agent={
+            visibleIncidents.find((row) => row.id === selectedIncidentId)
+              ?.agent ?? null
+          }
           disabled={!selectedIncidentId}
         />
       </div>

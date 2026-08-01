@@ -174,6 +174,33 @@ export async function publishIncidentHotfix(
   }
 }
 
+export interface LaunchIncidentCursorAgentResult {
+  launched: boolean;
+  agentId?: string | null;
+  agentUrl?: string | null;
+  runId?: string | null;
+  status?: string;
+}
+
+export async function launchIncidentCursorAgent(
+  incidentId: string,
+): Promise<LaunchIncidentCursorAgentResult> {
+  requireFirebase();
+
+  const functions = await getFirebaseFunctions();
+  const callable = httpsCallable<
+    { incidentId: string },
+    LaunchIncidentCursorAgentResult
+  >(functions, "launchIncidentCursorAgent");
+
+  try {
+    const result = await callable({ incidentId });
+    return result.data;
+  } catch (error) {
+    throw mapCallableError(error, "Could not launch the Cursor agent.");
+  }
+}
+
 export interface ApproveHostConfirmResult {
   confirmId: string;
   status: "approved";
