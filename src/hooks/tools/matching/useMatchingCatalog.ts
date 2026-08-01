@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { GameArea } from "../../../domain/map/annotations";
 import type { AnnotationRecord } from "../../../domain/map/annotations";
 import {
@@ -118,49 +119,86 @@ export function useMatchingCatalog(input: {
     sessionRules ?? { gameSize: "medium" },
   );
 
-  const matchingBoundaryPreview = useMemo(() => {
-    if (
-      matchingNullAnswer ||
-      !matchingNearestFeatureId ||
-      matchingFeatures.length === 0
-    ) {
-      return null;
-    }
+  const [matchingBoundaryPreview, setMatchingBoundaryPreview] = useState<
+    Feature<GeoPolygon | MultiPolygon> | null
+  >(null);
+  const [matchingEliminationPreview, setMatchingEliminationPreview] = useState<
+    Feature<GeoPolygon | MultiPolygon> | null
+  >(null);
 
-    return buildSameNearestRegion(
+  const boundaryEligible =
+    !matchingNullAnswer &&
+    Boolean(matchingNearestFeatureId) &&
+    matchingFeatures.length > 0;
+  const eliminationEligible =
+    boundaryEligible && matchingAnswer !== null;
+
+  useEffect(() => {
+    if (!boundaryEligible || !matchingNearestFeatureId) {
+      return;
+    }
+    let cancelled = false;
+    void buildSameNearestRegion(
       matchingFeatures,
       matchingNearestFeatureId,
       gameArea,
-    );
+    )
+      .then((region) => {
+        if (!cancelled) {
+          setMatchingBoundaryPreview(region);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setMatchingBoundaryPreview(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [
+    boundaryEligible,
     gameArea,
     matchingFeatures,
     matchingNearestFeatureId,
-    matchingNullAnswer,
   ]);
 
-  const matchingEliminationPreview = useMemo(() => {
+  useEffect(() => {
     if (
-      matchingNullAnswer ||
+      !eliminationEligible ||
       !matchingNearestFeatureId ||
-      matchingFeatures.length === 0 ||
       matchingAnswer === null
     ) {
-      return null;
+      return;
     }
-
-    return buildMatchingEliminationRegion(
+    let cancelled = false;
+    void buildMatchingEliminationRegion(
       matchingFeatures,
       matchingNearestFeatureId,
       gameArea,
       matchingAnswer,
-    );
+    )
+      .then((region) => {
+        if (!cancelled) {
+          setMatchingEliminationPreview(region);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setMatchingEliminationPreview(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [
+    eliminationEligible,
     gameArea,
     matchingAnswer,
     matchingFeatures,
     matchingNearestFeatureId,
-    matchingNullAnswer,
   ]);
 
   return {
@@ -175,7 +213,11 @@ export function useMatchingCatalog(input: {
     regionPackId,
     matchingCatalog,
     previewBeforeSend,
-    matchingBoundaryPreview,
-    matchingEliminationPreview,
+    matchingBoundaryPreview: boundaryEligible
+      ? matchingBoundaryPreview
+      : null,
+    matchingEliminationPreview: eliminationEligible
+      ? matchingEliminationPreview
+      : null,
   };
 }

@@ -4,7 +4,7 @@ import simplify from "@turf/simplify";
 import type { GameArea } from "../../map/annotations";
 import type { MatchingAnswer } from "../../questions/matchingQuestions";
 import {
-  getCachedVoronoiCells,
+  getCachedVoronoiCellsAsync,
   matchingSitesFingerprint,
 } from "../voronoi/voronoiCellCache";
 import { voronoiCellSiteId } from "../kernel/voronoiCellSiteId";
@@ -47,13 +47,13 @@ function clipToGameArea(
   return null;
 }
 
-function buildSameNearestRegionFromVoronoi(
+async function buildSameNearestRegionFromVoronoi(
   features: MatchingFeature[],
   seekerFeatureId: string,
   gameArea: GameArea,
-): Feature<Polygon | MultiPolygon> | null {
+): Promise<Feature<Polygon | MultiPolygon> | null> {
   const fingerprint = matchingSitesFingerprint(features);
-  const cells = getCachedVoronoiCells(
+  const cells = await getCachedVoronoiCellsAsync(
     fingerprint,
     features.map((feature) => ({
       lng: feature.point[1],
@@ -92,11 +92,11 @@ function buildSameNearestRegionFromVoronoi(
   }
 }
 
-export function buildSameNearestRegion(
+export async function buildSameNearestRegion(
   features: MatchingFeature[],
   seekerFeatureId: string,
   gameArea: GameArea,
-): Feature<Polygon | MultiPolygon> | null {
+): Promise<Feature<Polygon | MultiPolygon> | null> {
   const adminDivisions = matchingFeaturesToAdminDivisions(features);
   if (adminDivisions) {
     const division = findAdminDivisionById(adminDivisions, seekerFeatureId);
@@ -122,12 +122,12 @@ export function buildSameNearestRegion(
   );
 }
 
-export function buildMatchingEliminationRegion(
+export async function buildMatchingEliminationRegion(
   features: MatchingFeature[],
   seekerFeatureId: string,
   gameArea: GameArea,
   answer: MatchingAnswer,
-): Feature<Polygon | MultiPolygon> | null {
+): Promise<Feature<Polygon | MultiPolygon> | null> {
   const adminDivisions = matchingFeaturesToAdminDivisions(features);
   if (adminDivisions) {
     const division = findAdminDivisionById(adminDivisions, seekerFeatureId);
@@ -138,7 +138,7 @@ export function buildMatchingEliminationRegion(
     return buildAdminDivisionEliminationRegion(division, gameArea, answer);
   }
 
-  const sameNearestRegion = buildSameNearestRegion(
+  const sameNearestRegion = await buildSameNearestRegion(
     features,
     seekerFeatureId,
     gameArea,

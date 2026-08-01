@@ -6,6 +6,20 @@ import {
   type SpatialVoronoiSite,
 } from "./spatialVoronoi";
 
+type VoronoiWasmApi = typeof import("./voronoiWasm");
+
+let voronoiWasmModulePromise: Promise<VoronoiWasmApi> | null = null;
+
+function loadVoronoiWasmModule(): Promise<VoronoiWasmApi> {
+  if (!voronoiWasmModulePromise) {
+    voronoiWasmModulePromise = import("./voronoiWasm").catch((error) => {
+      voronoiWasmModulePromise = null;
+      throw error;
+    });
+  }
+  return voronoiWasmModulePromise;
+}
+
 /** Production spatial Voronoi entrypoint (mode + KERNEL_WASM_READY). */
 export async function runSpatialVoronoi<
   T extends Record<string, unknown> = Record<string, unknown>,
@@ -16,7 +30,7 @@ export async function runSpatialVoronoi<
   return dispatchSpatialVoronoi(sites, mode);
 }
 
-/** Mode + KERNEL_WASM_READY dispatch for spatial Voronoi (Wave-2; TS-only until Phase E). */
+/** Mode + KERNEL_WASM_READY dispatch for spatial Voronoi. */
 export async function dispatchSpatialVoronoi<
   T extends Record<string, unknown> = Record<string, unknown>,
 >(
@@ -29,7 +43,8 @@ export async function dispatchSpatialVoronoi<
     label: "spatialVoronoi",
     runTs: () => geoSpatialVoronoiFromSites(sites),
     runWasm: async () => {
-      throw new Error("[geometry] spatialVoronoi wasm not ready");
+      const wasm = await loadVoronoiWasmModule();
+      return wasm.wasmBuildSpatialVoronoiFromSites(sites);
     },
   });
 }

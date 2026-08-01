@@ -8,12 +8,12 @@ import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { deserializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import { pushBoundaryOverlay, type OverlayBuildResult } from "./shared";
 
-export function buildMatchingOverlays(
+export async function buildMatchingOverlays(
   question: PendingQuestionRecord,
   gameArea: GameArea,
   prefix: string,
   mapStyle: MapStyle,
-): OverlayBuildResult {
+): Promise<OverlayBuildResult> {
   const metadata = question.placement.metadata;
   const geometry = parseGeometryJson(question.placement.geometryJson);
   const anchor = geometry ? pointFromGeometryFeature(geometry) : null;
@@ -35,7 +35,7 @@ export function buildMatchingOverlays(
     pushBoundaryOverlay(
       overlays,
       `${prefix}-boundary`,
-      buildSameNearestRegion(features, seekerFeatureId, gameArea),
+      await buildSameNearestRegion(features, seekerFeatureId, gameArea),
       mapStyle,
     );
   }

@@ -1,4 +1,4 @@
-//! Tentacle elimination regions (Wave-2). Voronoi cells are supplied by TS (d3-geo-voronoi).
+//! Tentacle elimination regions (Wave-2). Voronoi cells from WASM spatial Voronoi or TS (d3-delaunay fallback).
 
 use crate::mask::{
     disk_to_polygon, feature_to_multipolygon, fold_union, multipolygon_to_feature, DiskSpec,
