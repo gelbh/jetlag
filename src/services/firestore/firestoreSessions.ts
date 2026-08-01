@@ -57,6 +57,7 @@ import {
   buildMemberUidsAfterHeal,
   sanitizeReturningMemberUid,
 } from "../../domain/session/players/returningMember";
+import { resolveHostUidAfterHeal } from "../../domain/session/players/pickHostPromotee";
 
 const HIDER_ROLE_POLL_MS = 250;
 const HIDER_ROLE_POLL_MAX_MS = 3000;
@@ -117,6 +118,7 @@ type SessionMembershipPatch = {
   memberUids?: string[];
   memberRoles?: Record<string, PlayerRole>;
   memberAppVersions?: Record<string, string>;
+  hostUid?: string;
 };
 async function writeSessionMembershipPatch(
   sessionRef: DocumentReference,
@@ -135,6 +137,9 @@ async function writeSessionMembershipPatch(
     }
     if (patch.memberRoles !== undefined) {
       legacyPatch.memberRoles = patch.memberRoles;
+    }
+    if (patch.hostUid !== undefined) {
+      legacyPatch.hostUid = patch.hostUid;
     }
     await updateDoc(sessionRef, legacyPatch);
   }
@@ -467,12 +472,32 @@ async function joinRemoteSessionWithRead(
     delete memberAppVersions[returningMemberUid];
   }
 
+  const currentHostUid =
+    typeof data.hostUid === "string" ? data.hostUid : "";
+  const nextHostUid =
+    currentHostUid.length > 0
+      ? resolveHostUidAfterHeal({
+          currentHostUid,
+          memberUidsAfterHeal: memberUids,
+          memberRolesAfterHeal: memberRoles,
+          removedUid:
+            returningMemberUid != null && returningMemberUid !== uid
+              ? returningMemberUid
+              : undefined,
+        })
+      : null;
+  const hostUid = nextHostUid ?? currentHostUid;
+
   if (!existingMemberUids.includes(uid) || returningMemberUid != null) {
-    await writeSessionMembershipPatch(sessionDoc.ref, {
+    const membershipPatch: SessionMembershipPatch = {
       memberUids,
       memberRoles,
       memberAppVersions,
-    });
+    };
+    if (nextHostUid != null) {
+      membershipPatch.hostUid = nextHostUid;
+    }
+    await writeSessionMembershipPatch(sessionDoc.ref, membershipPatch);
     if (returningMemberUid != null && returningMemberUid !== uid) {
       void cancelWalkingThermometersAfterIdentityHeal(
         sessionDoc.id,
@@ -494,6 +519,7 @@ async function joinRemoteSessionWithRead(
     status: "joined",
     session: deserializeSessionFromFirestore(sessionDoc.id, {
       ...data,
+      hostUid,
       memberUids,
       memberRoles,
       memberAppVersions,
@@ -537,6 +563,82 @@ async function joinRemoteSessionWithoutRead(
       [`memberAppVersions.${uid}`]: clientVersion,
     });
     if (returningMemberUid !== uid) {
+      // Re-read after join so we can remove the old uid and transfer hostUid
+      // in one rules-compliant write (hostUid-only updates are rejected).
+      try {
+        const joinedDoc = await getDocFromServer(sessionRef);
+        if (joinedDoc.exists()) {
+          const joinedData = joinedDoc.data() as Record<string, unknown>;
+          const existingMemberUids = Array.isArray(joinedData.memberUids)
+            ? joinedData.memberUids.filter(
+                (memberUid): memberUid is string => typeof memberUid === "string",
+              )
+            : [];
+          const existingRoles =
+            joinedData.memberRoles && typeof joinedData.memberRoles === "object"
+              ? (joinedData.memberRoles as Record<string, PlayerRole>)
+              : {};
+          const existingAppVersions =
+            joinedData.memberAppVersions &&
+            typeof joinedData.memberAppVersions === "object"
+              ? (joinedData.memberAppVersions as Record<string, string>)
+              : {};
+
+          const memberUids = buildMemberUidsAfterHeal(
+            existingMemberUids,
+            uid,
+            returningMemberUid,
+          );
+          const memberRoles = { ...existingRoles, [uid]: role };
+          delete memberRoles[returningMemberUid];
+          const memberAppVersions = {
+            ...existingAppVersions,
+            [uid]: clientVersion,
+          };
+          delete memberAppVersions[returningMemberUid];
+
+          const currentHostUid =
+            typeof joinedData.hostUid === "string"
+              ? joinedData.hostUid
+              : codeRecord.hostUid;
+          const nextHostUid = resolveHostUidAfterHeal({
+            currentHostUid,
+            memberUidsAfterHeal: memberUids,
+            memberRolesAfterHeal: memberRoles,
+            removedUid: returningMemberUid,
+          });
+
+          const healPatch: SessionMembershipPatch = {
+            memberUids,
+            memberRoles,
+            memberAppVersions,
+          };
+          if (nextHostUid != null) {
+            healPatch.hostUid = nextHostUid;
+          }
+          await writeSessionMembershipPatch(sessionRef, healPatch);
+          void cancelWalkingThermometersAfterIdentityHeal(
+            sessionId,
+            returningMemberUid,
+            uid,
+            role,
+          );
+
+          return {
+            status: "joined",
+            session: deserializeSessionFromFirestore(sessionId, {
+              ...joinedData,
+              hostUid: nextHostUid ?? currentHostUid,
+              memberUids,
+              memberRoles,
+              memberAppVersions,
+            }),
+          };
+        }
+      } catch {
+        // Fall through to arrayRemove-only heal without host transfer.
+      }
+
       await updateDoc(sessionRef, {
         memberUids: arrayRemove(returningMemberUid),
         [`memberRoles.${returningMemberUid}`]: deleteField(),

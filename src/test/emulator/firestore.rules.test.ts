@@ -256,6 +256,62 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows membership heal to transfer hostUid when the old host uid is removed", async () => {
+    const host = testEnv.authenticatedContext("host-old");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-old", {
+          memberUids: ["host-old", "seeker-a"],
+          memberRoles: { "host-old": "seeker", "seeker-a": "seeker" },
+          memberAppVersions: { "host-old": "0.10.8", "seeker-a": "0.10.8" },
+        }),
+      );
+
+    const returning = testEnv.authenticatedContext("uid-new");
+    await assertSucceeds(
+      returning
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          hostUid: "seeker-a",
+          memberUids: ["uid-new", "seeker-a"],
+          memberRoles: { "uid-new": "seeker", "seeker-a": "seeker" },
+          memberAppVersions: { "uid-new": "0.10.8", "seeker-a": "0.10.8" },
+        }),
+    );
+  });
+
+  it("denies hostUid transfer when the old host remains a member", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "guest-1"],
+          memberRoles: { "host-1": "seeker", "guest-1": "seeker" },
+        }),
+      );
+
+    const guest = testEnv.authenticatedContext("guest-1");
+    await assertFails(
+      guest
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          hostUid: "guest-1",
+          memberUids: ["host-1", "guest-1"],
+          memberRoles: { "host-1": "seeker", "guest-1": "seeker" },
+        }),
+    );
+  });
+
   it("allows session members to update lastActiveAt only", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

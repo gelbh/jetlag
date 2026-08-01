@@ -1,6 +1,9 @@
 /**
  * Prefer another seeker, else any other member; lexicographic uid tie-break.
  * Returns null when the host is alone.
+ *
+ * Source of truth for client heal: `src/domain/session/players/pickHostPromotee.ts`.
+ * Keep this Functions copy identical (no TS import from src).
  */
 export function pickHostPromotee(memberUids, memberRoles, hostUid) {
   const candidates = (Array.isArray(memberUids) ? memberUids : []).filter(

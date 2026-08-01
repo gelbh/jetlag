@@ -308,6 +308,28 @@ service cloud.firestore {
         && request.resource.data.memberRoles[request.auth.uid] is string
         && validJoinRole(request.resource.data.memberRoles[request.auth.uid])
       ) || (
+        // Auth-drift heal: old host uid removed from memberUids → transfer hostUid
+        // in the same write so timer control is not orphaned.
+        isSignedIn()
+        && resource.data.status != 'ended'
+        && !('endedAt' in resource.data)
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['memberUids', 'memberRoles', 'memberAppVersions', 'hostUid'])
+        && request.resource.data.memberUids is list
+        && request.auth.uid in request.resource.data.memberUids
+        && request.resource.data.memberRoles is map
+        && request.resource.data.memberRoles[request.auth.uid] is string
+        && validJoinRole(request.resource.data.memberRoles[request.auth.uid])
+        && request.resource.data.hostUid is string
+        && request.resource.data.hostUid != resource.data.hostUid
+        && request.resource.data.hostUid in request.resource.data.memberUids
+        && !(resource.data.hostUid in request.resource.data.memberUids)
+      ) || (
         isSessionMember(sessionId)
         && resource.data.status != 'ended'
         && !('endedAt' in resource.data)
