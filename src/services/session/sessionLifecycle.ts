@@ -39,7 +39,21 @@ export async function repairGhostHost(
     "repairGhostHost",
   );
   const result = await callable({ sessionId });
-  return result.data;
+  const data = result.data;
+  if (
+    data?.action === "repaired" &&
+    typeof data.newHostUid === "string" &&
+    data.newHostUid.length > 0
+  ) {
+    return { action: "repaired", newHostUid: data.newHostUid };
+  }
+  if (
+    data?.action === "noop" &&
+    typeof data.hostUid === "string"
+  ) {
+    return { action: "noop", hostUid: data.hostUid };
+  }
+  throw new Error("Unexpected repairGhostHost response.");
 }
 
 export async function endSession(sessionId: string): Promise<void> {

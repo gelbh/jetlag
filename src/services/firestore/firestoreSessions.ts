@@ -535,8 +535,9 @@ async function joinRemoteSessionWithRead(
   });
   const roleChanged = existingRoles[uid] !== role;
 
+  let joinedHeal = heal;
   if (returningMemberUid != null && returningMemberUid !== uid) {
-    await applyReturningMemberHealWrite(
+    joinedHeal = await applyReturningMemberHealWrite(
       sessionDoc.ref,
       sessionDoc.id,
       data,
@@ -565,10 +566,10 @@ async function joinRemoteSessionWithRead(
     status: "joined",
     session: deserializeSessionFromFirestore(sessionDoc.id, {
       ...data,
-      hostUid: heal.hostUid,
-      memberUids: heal.memberUids,
-      memberRoles: heal.memberRoles,
-      memberAppVersions: heal.memberAppVersions,
+      hostUid: joinedHeal.hostUid,
+      memberUids: joinedHeal.memberUids,
+      memberRoles: joinedHeal.memberRoles,
+      memberAppVersions: joinedHeal.memberAppVersions,
     }),
   };
 }
@@ -603,31 +604,34 @@ async function joinRemoteSessionWithoutRead(
   });
 
   if (returningMemberUid != null && returningMemberUid !== uid) {
-    const joinedDoc = await getDocFromServer(sessionRef);
-    if (!joinedDoc.exists()) {
-      throw new Error("Session missing after membership join");
+    try {
+      const joinedDoc = await getDocFromServer(sessionRef);
+      if (joinedDoc.exists()) {
+        const joinedData = joinedDoc.data() as Record<string, unknown>;
+        const heal = await applyReturningMemberHealWrite(
+          sessionRef,
+          sessionId,
+          joinedData,
+          uid,
+          role,
+          clientVersion,
+          returningMemberUid,
+          codeRecord.hostUid,
+        );
+        return {
+          status: "joined",
+          session: deserializeSessionFromFirestore(sessionId, {
+            ...joinedData,
+            hostUid: heal.hostUid,
+            memberUids: heal.memberUids,
+            memberRoles: heal.memberRoles,
+            memberAppVersions: heal.memberAppVersions,
+          }),
+        };
+      }
+    } catch {
+      // Fall through to the preview fallback below; membership already landed.
     }
-    const joinedData = joinedDoc.data() as Record<string, unknown>;
-    const heal = await applyReturningMemberHealWrite(
-      sessionRef,
-      sessionId,
-      joinedData,
-      uid,
-      role,
-      clientVersion,
-      returningMemberUid,
-      codeRecord.hostUid,
-    );
-    return {
-      status: "joined",
-      session: deserializeSessionFromFirestore(sessionId, {
-        ...joinedData,
-        hostUid: heal.hostUid,
-        memberUids: heal.memberUids,
-        memberRoles: heal.memberRoles,
-        memberAppVersions: heal.memberAppVersions,
-      }),
-    };
   }
 
   try {

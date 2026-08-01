@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  REPAIR_ALREADY_ENDED,
   REPAIR_NOT_MEMBER,
+  REPAIR_SESSION_NOT_FOUND,
   repairGhostHostHandler,
 } from "../session/repairGhostHost.mjs";
 
@@ -67,6 +69,39 @@ test("repairGhostHostHandler noops when host is still a member", async () => {
   const result = await repairGhostHostHandler(db, "s1", "sess-1");
   assert.deepEqual(result, { action: "noop", hostUid: "host" });
   assert.deepEqual(updates, []);
+});
+
+test("repairGhostHostHandler rejects missing session", async () => {
+  const updates = [];
+  const db = mockSessionDb({
+    sessionData: {},
+    sessionExists: false,
+    updates,
+  });
+
+  await assert.rejects(
+    () => repairGhostHostHandler(db, "uid-new", "sess-1"),
+    (error) =>
+      error instanceof Error && error.message === REPAIR_SESSION_NOT_FOUND,
+  );
+});
+
+test("repairGhostHostHandler rejects ended session", async () => {
+  const updates = [];
+  const sessionData = {
+    hostUid: "host-old",
+    status: "ended",
+    endedAt: "2026-08-01T00:00:00.000Z",
+    memberUids: ["uid-new"],
+    memberRoles: { "uid-new": "seeker" },
+  };
+  const db = mockSessionDb({ sessionData, updates });
+
+  await assert.rejects(
+    () => repairGhostHostHandler(db, "uid-new", "sess-1"),
+    (error) =>
+      error instanceof Error && error.message === REPAIR_ALREADY_ENDED,
+  );
 });
 
 test("repairGhostHostHandler rejects non-members", async () => {
