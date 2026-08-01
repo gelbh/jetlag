@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyClientSentryDisposition,
   classifyClientSentryEvent,
+  QUOTA_SAMPLE_RATE,
   type SentryEventLike,
 } from "./sentryEventPolicy";
 
@@ -91,15 +92,26 @@ describe("classifyClientSentryEvent", () => {
 describe("applyClientSentryDisposition", () => {
   it("samples quota at rate and fingerprints", () => {
     const event = exc("QuotaExceededError", "The quota has been exceeded.");
-    const sent = applyClientSentryDisposition(event, "meter_quota", () => 0.01);
+    const justBelow = Math.max(0, QUOTA_SAMPLE_RATE - Number.EPSILON);
+    const sent = applyClientSentryDisposition(
+      event,
+      "meter_quota",
+      () => justBelow,
+    );
     expect(sent).not.toBeNull();
     expect(sent?.fingerprint).toEqual(["storage-quota-exceeded"]);
     expect(sent?.level).toBe("warning");
-    const dropped = applyClientSentryDisposition(
+    const atRate = applyClientSentryDisposition(
       event,
       "meter_quota",
-      () => 0.99,
+      () => QUOTA_SAMPLE_RATE,
     );
-    expect(dropped).toBeNull();
+    expect(atRate).toBeNull();
+    const above = applyClientSentryDisposition(
+      event,
+      "meter_quota",
+      () => QUOTA_SAMPLE_RATE + 0.01,
+    );
+    expect(above).toBeNull();
   });
 });

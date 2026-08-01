@@ -29,7 +29,7 @@ const VIEW_TRANSITION_ABORTED =
   /Transition was aborted because of invalid state/i;
 const APP_CHECK_INVALID_SESSION = /Invalid session .*: Invalid input/i;
 
-/** Belt-and-suspenders for Sentry.init ignoreErrors — same strings as drop matchers. */
+/** Belt-and-suspenders for Sentry.init ignoreErrors — high-volume drop subset only (not the full classify matrix; not canaries). */
 export const CLIENT_SENTRY_IGNORE_ERRORS: Array<string | RegExp> = [
   "This operation was aborted",
   "App Check probe timed out",
