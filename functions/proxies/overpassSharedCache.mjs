@@ -1,4 +1,8 @@
 import { createHash, createHmac } from "node:crypto";
+import {
+  OVERPASS_L2_ENV_KEYS as K,
+  OVERPASS_L2_ENV_KEY_LIST,
+} from "./overpassL2Env.mjs";
 
 /** Match L1 TTL in overpassProxyCore.mjs */
 const OVERPASS_L2_TTL_MS = 60 * 60 * 1000;
@@ -37,15 +41,7 @@ export function createMemoryL2Backend() {
 }
 
 function envConfigured() {
-  return Boolean(
-    process.env.CF_ACCOUNT_ID &&
-      process.env.CF_KV_NAMESPACE_ID &&
-      process.env.CF_API_TOKEN &&
-      process.env.CF_R2_ACCESS_KEY_ID &&
-      process.env.CF_R2_SECRET_ACCESS_KEY &&
-      process.env.CF_R2_BUCKET &&
-      process.env.CF_R2_ENDPOINT,
-  );
+  return OVERPASS_L2_ENV_KEY_LIST.every((key) => Boolean(process.env[key]));
 }
 
 function resolveBackend() {
@@ -59,13 +55,13 @@ function resolveBackend() {
 }
 
 function kvUrl(key) {
-  const accountId = process.env.CF_ACCOUNT_ID;
-  const namespaceId = process.env.CF_KV_NAMESPACE_ID;
+  const accountId = process.env[K.ACCOUNT_ID];
+  const namespaceId = process.env[K.KV_NAMESPACE_ID];
   return `https://api.cloudflare.com/client/v4/accounts/${accountId}/storage/kv/namespaces/${namespaceId}/values/${encodeURIComponent(key)}`;
 }
 
 function createCloudflareL2Backend() {
-  const token = process.env.CF_API_TOKEN;
+  const token = process.env[K.API_TOKEN];
   return {
     async kvGet(key) {
       const response = await fetch(kvUrl(key), {
@@ -133,10 +129,10 @@ function hmac(key, value) {
 }
 
 async function signR2Request(method, objectKey, body = "", contentType = "application/json") {
-  const accessKeyId = process.env.CF_R2_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.CF_R2_SECRET_ACCESS_KEY;
-  const bucket = process.env.CF_R2_BUCKET;
-  const endpoint = process.env.CF_R2_ENDPOINT.replace(/\/$/, "");
+  const accessKeyId = process.env[K.R2_ACCESS_KEY_ID];
+  const secretAccessKey = process.env[K.R2_SECRET_ACCESS_KEY];
+  const bucket = process.env[K.R2_BUCKET];
+  const endpoint = process.env[K.R2_ENDPOINT].replace(/\/$/, "");
   const url = new URL(`${endpoint}/${bucket}/${objectKey}`);
   const amzDate = new Date().toISOString().replace(/[:-]|\.\d{3}/g, "");
   const dateStamp = amzDate.slice(0, 8);

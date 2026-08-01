@@ -7,8 +7,13 @@ import {
   getGrantAccessFailureCount,
   recordGrantAccessFailure,
 } from "../../lib/firestoreRateLimit.mjs";
+import {
+  getSentryDsnSecret,
+  withSentryEventHandler,
+} from "../../lib/sentry.mjs";
 
 const accessCodeSecret = defineSecret("ACCESS_CODE");
+const sentryDsnSecret = getSentryDsnSecret();
 
 const GRANT_ACCESS_FAILURE_DELAY_MS = 300;
 const GRANT_ACCESS_MAX_FAILURES = 8;
@@ -19,8 +24,11 @@ function adminDb() {
 }
 
 export const grantAccess = onCall(
-  { secrets: [accessCodeSecret], enforceAppCheck: true },
-  async (request) => {
+  {
+    secrets: [accessCodeSecret, sentryDsnSecret],
+    enforceAppCheck: true,
+  },
+  withSentryEventHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -57,5 +65,5 @@ export const grantAccess = onCall(
     await clearGrantAccessFailures(adminDb(), uid);
     await adminAuth().setCustomUserClaims(uid, { access: true });
     return { granted: true };
-  },
+  }),
 );
