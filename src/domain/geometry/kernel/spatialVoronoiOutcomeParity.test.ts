@@ -1,20 +1,15 @@
 import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
-import type { Feature, MultiPolygon, Polygon } from "geojson";
+import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
+import intersect from "@turf/intersect";
+import simplify from "@turf/simplify";
 import { buildTentacleEliminationRegion } from "./tentacleRegions";
 import { geoSpatialVoronoiFromSites } from "./spatialVoronoi";
 import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 import { maskTopologyMatches, bboxFromGameArea } from "./maskTopology";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
-import type { MatchingFeature } from "../../geo/types";
-import {
-  gameAreaToPolygon,
-} from "../gameArea/geometry";
-import intersect from "@turf/intersect";
-import simplify from "@turf/simplify";
 import { voronoiCellSiteId } from "./voronoiCellSiteId";
-import type { GameArea } from "../../map/annotations";
 
 const sampleGameArea: GameAreaGeometry = {
   type: "Polygon",
@@ -29,26 +24,18 @@ const sampleGameArea: GameAreaGeometry = {
   ],
 };
 
-const gameAreaAnnotation: GameArea = {
-  type: "Polygon",
-  coordinates: sampleGameArea.coordinates,
-};
-
 const westSite = { id: "west", lat: 51.44, lng: -0.18 };
 const eastSite = { id: "east", lat: 51.45, lng: -0.12 };
 const northSite = { id: "north", lat: 51.5, lng: -0.15 };
 const anchor: LatLngTuple = [51.45, -0.15];
 const oneMileMeters = 1609.344;
-
 const SIMPLIFY_TOLERANCE = 0.000012;
 
-async function sameNearestFromCells(
-  features: MatchingFeature[],
+function sameNearestFromCells(
   seekerFeatureId: string,
-  gameArea: GameArea,
-  cells: FeatureCollectionLike,
-): Promise<Feature<Polygon | MultiPolygon> | null> {
-  void features;
+  gameArea: GameAreaGeometry,
+  cells: FeatureCollection,
+): Feature<Polygon | MultiPolygon> | null {
   const seekerCell = cells.features.find(
     (cell) => voronoiCellSiteId(cell, ["featureId"]) === seekerFeatureId,
   );
@@ -59,7 +46,11 @@ async function sameNearestFromCells(
   ) {
     return null;
   }
-  const gameFeature = gameAreaToPolygon(gameArea);
+  const gameFeature: Feature<Polygon | MultiPolygon> = {
+    type: "Feature",
+    properties: {},
+    geometry: gameArea,
+  };
   let clipped: Feature<Polygon | MultiPolygon> | null = null;
   try {
     const hit = intersect({
@@ -87,10 +78,6 @@ async function sameNearestFromCells(
     return clipped;
   }
 }
-
-type FeatureCollectionLike = {
-  features: Feature[];
-};
 
 describe("spatialVoronoiOutcomeParity", () => {
   it("tentacle elimination outcomes stay topology-close vs TS Voronoi cells", async () => {
@@ -135,46 +122,28 @@ describe("spatialVoronoiOutcomeParity", () => {
   });
 
   it("matching same-nearest outcomes stay topology-close vs TS Voronoi cells", async () => {
-    const features: MatchingFeature[] = [
+    const siteInputs = [
       {
-        id: "west",
-        name: "West",
-        point: [51.44, -0.18],
-        inPlayArea: true,
+        lng: -0.18,
+        lat: 51.44,
+        properties: { featureId: "west" },
       },
       {
-        id: "east",
-        name: "East",
-        point: [51.45, -0.12],
-        inPlayArea: true,
+        lng: -0.12,
+        lat: 51.45,
+        properties: { featureId: "east" },
       },
       {
-        id: "north",
-        name: "North",
-        point: [51.5, -0.15],
-        inPlayArea: true,
+        lng: -0.15,
+        lat: 51.5,
+        properties: { featureId: "north" },
       },
     ];
-    const siteInputs = features.map((feature) => ({
-      lng: feature.point[1],
-      lat: feature.point[0],
-      properties: { featureId: feature.id },
-    }));
     const tsCells = geoSpatialVoronoiFromSites(siteInputs);
     const wasmCells = await wasmBuildSpatialVoronoiFromSites(siteInputs);
 
-    const tsRegion = await sameNearestFromCells(
-      features,
-      "west",
-      gameAreaAnnotation,
-      tsCells,
-    );
-    const wasmRegion = await sameNearestFromCells(
-      features,
-      "west",
-      gameAreaAnnotation,
-      wasmCells,
-    );
+    const tsRegion = sameNearestFromCells("west", sampleGameArea, tsCells);
+    const wasmRegion = sameNearestFromCells("west", sampleGameArea, wasmCells);
 
     expect(tsRegion).not.toBeNull();
     expect(wasmRegion).not.toBeNull();

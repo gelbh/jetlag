@@ -126,21 +126,18 @@ export function useMatchingCatalog(input: {
     Feature<GeoPolygon | MultiPolygon> | null
   >(null);
 
+  const boundaryEligible =
+    !matchingNullAnswer &&
+    Boolean(matchingNearestFeatureId) &&
+    matchingFeatures.length > 0;
+  const eliminationEligible =
+    boundaryEligible && matchingAnswer !== null;
+
   useEffect(() => {
-    let cancelled = false;
-
-    if (
-      matchingNullAnswer ||
-      !matchingNearestFeatureId ||
-      matchingFeatures.length === 0
-    ) {
-      setMatchingBoundaryPreview(null);
-      return () => {
-        cancelled = true;
-      };
+    if (!boundaryEligible || !matchingNearestFeatureId) {
+      return;
     }
-
-    setMatchingBoundaryPreview(null);
+    let cancelled = false;
     void buildSameNearestRegion(
       matchingFeatures,
       matchingNearestFeatureId,
@@ -161,28 +158,21 @@ export function useMatchingCatalog(input: {
       cancelled = true;
     };
   }, [
+    boundaryEligible,
     gameArea,
     matchingFeatures,
     matchingNearestFeatureId,
-    matchingNullAnswer,
   ]);
 
   useEffect(() => {
-    let cancelled = false;
-
     if (
-      matchingNullAnswer ||
+      !eliminationEligible ||
       !matchingNearestFeatureId ||
-      matchingFeatures.length === 0 ||
       matchingAnswer === null
     ) {
-      setMatchingEliminationPreview(null);
-      return () => {
-        cancelled = true;
-      };
+      return;
     }
-
-    setMatchingEliminationPreview(null);
+    let cancelled = false;
     void buildMatchingEliminationRegion(
       matchingFeatures,
       matchingNearestFeatureId,
@@ -204,11 +194,11 @@ export function useMatchingCatalog(input: {
       cancelled = true;
     };
   }, [
+    eliminationEligible,
     gameArea,
     matchingAnswer,
     matchingFeatures,
     matchingNearestFeatureId,
-    matchingNullAnswer,
   ]);
 
   return {
@@ -223,7 +213,11 @@ export function useMatchingCatalog(input: {
     regionPackId,
     matchingCatalog,
     previewBeforeSend,
-    matchingBoundaryPreview,
-    matchingEliminationPreview,
+    matchingBoundaryPreview: boundaryEligible
+      ? matchingBoundaryPreview
+      : null,
+    matchingEliminationPreview: eliminationEligible
+      ? matchingEliminationPreview
+      : null,
   };
 }

@@ -21,13 +21,19 @@ export const PendingQuestionLayer = memo(function PendingQuestionLayer({
   gameArea,
   mapStyle = "standard",
 }: PendingQuestionLayerProps) {
+  const overlayKey = useMemo(
+    () =>
+      `${mapStyle}|${pendingQuestions.map((question) => `${question.id}:${question.status}`).join(",")}`,
+    [mapStyle, pendingQuestions],
+  );
+
   const [overlayResults, setOverlayResults] = useState<
     PendingQuestionOverlayResult[]
   >([]);
+  const [loadedKey, setLoadedKey] = useState("");
 
   useEffect(() => {
     let cancelled = false;
-    setOverlayResults([]);
 
     void buildPendingQuestionOverlays(
       pendingQuestions,
@@ -37,23 +43,27 @@ export const PendingQuestionLayer = memo(function PendingQuestionLayer({
       .then((results) => {
         if (!cancelled) {
           setOverlayResults(results);
+          setLoadedKey(overlayKey);
         }
       })
       .catch(() => {
         if (!cancelled) {
           setOverlayResults([]);
+          setLoadedKey(overlayKey);
         }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [gameArea, mapStyle, pendingQuestions]);
+  }, [gameArea, mapStyle, overlayKey, pendingQuestions]);
 
-  const overlays = useMemo(
-    () => overlayResults.flatMap((result) => result.overlays),
-    [overlayResults],
-  );
+  const overlays = useMemo(() => {
+    if (loadedKey !== overlayKey) {
+      return [];
+    }
+    return overlayResults.flatMap((result) => result.overlays);
+  }, [loadedKey, overlayKey, overlayResults]);
 
   if (overlays.length === 0) {
     return null;
