@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type {
+  IncidentCodingAgentState,
   IncidentMitigationType,
   IncidentStatus,
 } from "../../domain/incident/incidentTypes";
@@ -10,9 +11,11 @@ import {
 } from "../../services/admin/adminIncidents";
 import {
   applyIncidentMitigation,
+  launchIncidentCursorAgent,
   publishIncidentHotfix,
   updateIncidentStatus,
 } from "../../services/incident/incidentApi";
+import { AdminIncidentCursorLaunch } from "./AdminIncidentCursorLaunch";
 
 const CLOSEABLE = new Set<IncidentStatus>([
   "open",
@@ -26,19 +29,25 @@ const REOPENABLE = new Set<IncidentStatus>(["resolved", "dismissed"]);
 export interface AdminIncidentActionsProps {
   incidentId: string | null;
   status?: IncidentStatus | null;
+  agent?: IncidentCodingAgentState | null;
   disabled?: boolean;
   applyMitigationFn?: typeof applyIncidentMitigation;
   publishHotfixFn?: typeof publishIncidentHotfix;
   updateStatusFn?: typeof updateIncidentStatus;
+  launchCursorAgentFn?: typeof launchIncidentCursorAgent;
+  openExternalUrlFn?: (url: string) => void;
 }
 
 export function AdminIncidentActions({
   incidentId,
   status = null,
+  agent = null,
   disabled = false,
   applyMitigationFn = applyIncidentMitigation,
   publishHotfixFn = publishIncidentHotfix,
   updateStatusFn = updateIncidentStatus,
+  launchCursorAgentFn = launchIncidentCursorAgent,
+  openExternalUrlFn,
 }: AdminIncidentActionsProps) {
   const [mitigationType, setMitigationType] =
     useState<IncidentMitigationType>("soft_reload");
@@ -230,21 +239,14 @@ export function AdminIncidentActions({
         </button>
       </div>
 
-      <div className="jl-incident-module">
-        <h3 className="jl-incident-module-title">2 · Launch Cursor agent</h3>
-        <p className="jl-incident-module-hint">
-          Coming in follow-up — session-ops agent is not available in v1.
-        </p>
-        <button
-          type="button"
-          className="btn-secondary uppercase"
-          disabled
-          aria-disabled="true"
-          title="Coming in follow-up"
-        >
-          Launch Cursor agent
-        </button>
-      </div>
+      <AdminIncidentCursorLaunch
+        key={incidentId ?? "none"}
+        incidentId={incidentId}
+        agent={agent}
+        disabled={disabled}
+        launchCursorAgentFn={launchCursorAgentFn}
+        openExternalUrlFn={openExternalUrlFn}
+      />
 
       <div className="jl-incident-module">
         <h3 className="jl-incident-module-title">3 · Publish hotfix</h3>
