@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { IncidentCodingAgentState } from "../../domain/incident/incidentTypes";
 import {
   launchIncidentCursorAgent,
@@ -55,11 +55,14 @@ export function AdminIncidentCursorLaunch({
   const [localAgent, setLocalAgent] = useState<IncidentCodingAgentState | null>(
     null,
   );
+  const launchGenerationRef = useRef(0);
 
   useEffect(() => {
+    launchGenerationRef.current += 1;
     setLocalAgent(null);
     setError(null);
     setOk(null);
+    setBusy(false);
   }, [incidentId]);
 
   useEffect(() => {
@@ -70,25 +73,36 @@ export function AdminIncidentCursorLaunch({
 
   const effectiveAgent = localAgent ?? agent;
   const actionsDisabled = disabled || !incidentId;
-  const hasLiveAgent = Boolean(effectiveAgent?.cursorAgentId);
-  const canRetry =
-    effectiveAgent?.status === "failed" ||
-    effectiveAgent?.status === "misconfigured";
   const agentUrl =
     typeof effectiveAgent?.cursorAgentUrl === "string" &&
     effectiveAgent.cursorAgentUrl.trim()
       ? effectiveAgent.cursorAgentUrl.trim()
       : null;
+  const hasOpenableAgent = Boolean(
+    effectiveAgent?.cursorAgentId && agentUrl,
+  );
+  const canRetry =
+    effectiveAgent?.status === "failed" ||
+    effectiveAgent?.status === "misconfigured" ||
+    Boolean(effectiveAgent?.cursorAgentId && !agentUrl);
 
   const onLaunch = async () => {
     if (!incidentId) {
       return;
     }
+    const generation = launchGenerationRef.current;
+    const launchedForId = incidentId;
     setBusy(true);
     setError(null);
     setOk(null);
     try {
-      const result = await launchCursorAgentFn(incidentId);
+      const result = await launchCursorAgentFn(launchedForId);
+      if (
+        generation !== launchGenerationRef.current ||
+        launchedForId !== incidentId
+      ) {
+        return;
+      }
       setLocalAgent({
         status: "launched",
         cursorAgentId: result.agentId ?? null,
@@ -102,13 +116,21 @@ export function AdminIncidentCursorLaunch({
           : "Cursor agent launched (no URL returned).",
       );
     } catch (err) {
+      if (
+        generation !== launchGenerationRef.current ||
+        launchedForId !== incidentId
+      ) {
+        return;
+      }
       setError(
         err instanceof Error
           ? err.message
           : "Could not launch the Cursor agent.",
       );
     } finally {
-      setBusy(false);
+      if (generation === launchGenerationRef.current) {
+        setBusy(false);
+      }
     }
   };
 
@@ -122,40 +144,40 @@ export function AdminIncidentCursorLaunch({
         </p>
       ) : null}
       {ok ? <p className="text-sm text-status-success">{ok}</p> : null}
-      {hasLiveAgent ? (
+      {hasOpenableAgent ? (
+        <button
+          type="button"
+          className="btn-secondary uppercase"
+          disabled={actionsDisabled}
+          onClick={() => {
+            if (agentUrl) {
+              openExternalUrlFn(agentUrl);
+            }
+          }}
+        >
+          Open Cursor agent
+        </button>
+      ) : (
         <>
           <button
             type="button"
             className="btn-secondary uppercase"
-            disabled={actionsDisabled || !agentUrl}
-            onClick={() => {
-              if (agentUrl) {
-                openExternalUrlFn(agentUrl);
-              }
-            }}
+            disabled={actionsDisabled || busy}
+            onClick={() => void onLaunch()}
           >
-            Open Cursor agent
+            {busy
+              ? "Launching…"
+              : canRetry
+                ? "Retry launch"
+                : "Launch Cursor agent"}
           </button>
-          {!agentUrl ? (
+          {effectiveAgent?.cursorAgentId && !agentUrl ? (
             <p className="jl-incident-module-hint">
-              Agent id is set but no URL was returned — open the hotfix thread
-              for details.
+              Agent id is set but no URL was returned — retry or check the
+              hotfix thread.
             </p>
           ) : null}
         </>
-      ) : (
-        <button
-          type="button"
-          className="btn-secondary uppercase"
-          disabled={actionsDisabled || busy}
-          onClick={() => void onLaunch()}
-        >
-          {busy
-            ? "Launching…"
-            : canRetry
-              ? "Retry launch"
-              : "Launch Cursor agent"}
-        </button>
       )}
     </div>
   );

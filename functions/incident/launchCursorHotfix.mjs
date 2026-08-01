@@ -496,7 +496,9 @@ async function loadIncidentForCursorLaunch(db, incidentId) {
     incident.agent &&
     typeof incident.agent === "object" &&
     typeof incident.agent.cursorAgentId === "string" &&
-    incident.agent.cursorAgentId
+    incident.agent.cursorAgentId &&
+    typeof incident.agent.cursorAgentUrl === "string" &&
+    incident.agent.cursorAgentUrl
   ) {
     return {
       ok: false,

@@ -203,6 +203,7 @@ test("launchCursorHotfixForIncident does not duplicate when already launched", a
       agent: {
         status: "launched",
         cursorAgentId: "bc-existing",
+        cursorAgentUrl: "https://cursor.com/agents/bc-existing",
       },
     },
   });
@@ -307,6 +308,7 @@ test("forceLaunchCursorHotfixForIncident skips when already launched", async () 
       agent: {
         status: "launched",
         cursorAgentId: "bc-existing",
+        cursorAgentUrl: "https://cursor.com/agents/bc-existing",
       },
     },
   });

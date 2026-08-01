@@ -215,6 +215,7 @@ function parseCodingAgent(value: unknown): IncidentCodingAgentState | undefined 
 export function deserializeIncidentFromFirestore(
   id: string,
   data: Record<string, unknown>,
+  options: { includeCodingAgent?: boolean } = {},
 ): IncidentRecord | null {
   const diagnostics = parseDiagnostics(data.diagnostics);
   if (!diagnostics) {
@@ -241,9 +242,11 @@ export function deserializeIncidentFromFirestore(
     mitigations: parseMitigations(data.mitigations),
     hotfix: parseHotfix(data.hotfix),
   };
-  const agent = parseCodingAgent(data.agent);
-  if (agent) {
-    record.agent = agent;
+  if (options.includeCodingAgent) {
+    const agent = parseCodingAgent(data.agent);
+    if (agent) {
+      record.agent = agent;
+    }
   }
   if ("activeSessionOpsSummonId" in data) {
     record.activeSessionOpsSummonId = asNullableString(
@@ -499,6 +502,7 @@ export function subscribeIncidentList(
           const incident = deserializeIncidentFromFirestore(
             incidentSnapshot.id,
             incidentSnapshot.data() as Record<string, unknown>,
+            { includeCodingAgent: true },
           );
           if (incident) {
             incidents.push(incident);
