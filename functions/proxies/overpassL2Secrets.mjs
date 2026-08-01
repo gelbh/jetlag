@@ -1,20 +1,35 @@
-import { defineSecret } from "firebase-functions/params";
+import { defineSecret, defineString } from "firebase-functions/params";
+import { OVERPASS_L2_ENV_KEYS as K } from "./overpassL2Env.mjs";
 
-/** Cloudflare Overpass L2 (KV index + R2 body) — injected onto `proxy` / warm preload. */
-export const cfAccountIdSecret = defineSecret("CF_ACCOUNT_ID");
-export const cfKvNamespaceIdSecret = defineSecret("CF_KV_NAMESPACE_ID");
-export const cfApiTokenSecret = defineSecret("CF_API_TOKEN");
-export const cfR2AccessKeyIdSecret = defineSecret("CF_R2_ACCESS_KEY_ID");
-export const cfR2SecretAccessKeySecret = defineSecret("CF_R2_SECRET_ACCESS_KEY");
-export const cfR2BucketSecret = defineSecret("CF_R2_BUCKET");
-export const cfR2EndpointSecret = defineSecret("CF_R2_ENDPOINT");
+/** Credentials only — mirrored after Stripe's secrets vs params split. */
+const cfApiTokenSecret = defineSecret(K.API_TOKEN);
+const cfR2AccessKeyIdSecret = defineSecret(K.R2_ACCESS_KEY_ID);
+const cfR2SecretAccessKeySecret = defineSecret(K.R2_SECRET_ACCESS_KEY);
+
+/** Non-secret config — defaults match gelbhart prod L2 resources. */
+const cfAccountIdParam = defineString(K.ACCOUNT_ID, {
+  default: "578279c4ee8d8a1b0bda8ecf8ecc3f67",
+});
+const cfKvNamespaceIdParam = defineString(K.KV_NAMESPACE_ID, {
+  default: "f12e5b59e28348e9a41371b98616cbb9",
+});
+const cfR2BucketParam = defineString(K.R2_BUCKET, {
+  default: "jetlag-overpass-l2",
+});
+const cfR2EndpointParam = defineString(K.R2_ENDPOINT, {
+  default:
+    "https://578279c4ee8d8a1b0bda8ecf8ecc3f67.r2.cloudflarestorage.com",
+});
 
 export const OVERPASS_L2_SECRETS = [
-  cfAccountIdSecret,
-  cfKvNamespaceIdSecret,
   cfApiTokenSecret,
   cfR2AccessKeyIdSecret,
   cfR2SecretAccessKeySecret,
-  cfR2BucketSecret,
-  cfR2EndpointSecret,
+];
+
+export const OVERPASS_L2_PARAMS = [
+  cfAccountIdParam,
+  cfKvNamespaceIdParam,
+  cfR2BucketParam,
+  cfR2EndpointParam,
 ];
