@@ -1,4 +1,5 @@
 import { kml } from "@tmcw/togeojson";
+import { DOMParser } from "@xmldom/xmldom";
 import JSZip from "jszip";
 import union from "@turf/union";
 import { featureCollection } from "@turf/helpers";
@@ -62,14 +63,26 @@ function unionPolygonFeatures(
   return combined;
 }
 
-export function parseBoundaryKml(kmlText: string): GameArea {
-  // codeql[js/xss-through-dom] — XML→GeoJSON only; never inserted into the live DOM as HTML.
-  const doc = new DOMParser().parseFromString(kmlText, "application/xml");
-  const parserError = doc.getElementsByTagName("parsererror")[0];
-  if (parserError) {
+function parseKmlDocument(kmlText: string) {
+  try {
+    const doc = new DOMParser({
+      onError(level) {
+        if (level === "error" || level === "fatalError") {
+          throw new Error("Invalid KML file.");
+        }
+      },
+    }).parseFromString(kmlText, "application/xml");
+    if (!doc.documentElement) {
+      throw new Error("Invalid KML file.");
+    }
+    return doc;
+  } catch {
     throw new Error("Invalid KML file.");
   }
+}
 
+export function parseBoundaryKml(kmlText: string): GameArea {
+  const doc = parseKmlDocument(kmlText);
   const geojson = kml(doc) as FeatureCollection;
   const polygonFeatures = collectPolygonFeatures(geojson);
 
