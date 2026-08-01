@@ -255,7 +255,9 @@ export function MapSettingsSheet({
       </div>
 
       <p className="mt-6 border-t-2 border-border pt-3 text-xs leading-relaxed text-ink-dim">
-        Map data © OpenStreetMap contributors · © CARTO
+        {general.mapStyle === "satellite"
+          ? "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community"
+          : "Map data © OpenStreetMap contributors · © CARTO"}
       </p>
 
       <CurseReferenceSheet
