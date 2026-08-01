@@ -95,6 +95,27 @@ service cloud.firestore {
       return value == null || !(value is int) || (value >= 200 && value <= 50000);
     }
 
+    function membershipJoinFieldsStable() {
+      return request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.memberUids is list
+        && request.auth.uid in request.resource.data.memberUids
+        && request.resource.data.memberRoles is map
+        && request.resource.data.memberRoles[request.auth.uid] is string
+        && validJoinRole(request.resource.data.memberRoles[request.auth.uid]);
+    }
+
+    function isMembershipJoinUpdate() {
+      return isSignedIn()
+        && membershipJoinFieldsStable()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['memberUids', 'memberRoles', 'memberAppVersions']);
+    }
+
     function sessionData(sessionId) {
       return get(/databases/$(database)/documents/sessions/$(sessionId)).data;
     }
@@ -294,19 +315,7 @@ service cloud.firestore {
         );
 
       allow update: if validSessionRulesUpdate(sessionId) || (
-        isSignedIn()
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'memberRoles', 'memberAppVersions'])
-        && request.resource.data.memberUids is list
-        && request.auth.uid in request.resource.data.memberUids
-        && request.resource.data.memberRoles is map
-        && request.resource.data.memberRoles[request.auth.uid] is string
-        && validJoinRole(request.resource.data.memberRoles[request.auth.uid])
+        isMembershipJoinUpdate()
       ) || (
         isSessionMember(sessionId)
         && resource.data.status != 'ended'
