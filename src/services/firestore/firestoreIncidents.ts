@@ -11,6 +11,8 @@ import { FirebaseError } from "firebase/app";
 import {
   type HostConfirmRecord,
   type HostConfirmStatus,
+  type IncidentCodingAgentState,
+  type IncidentCodingAgentStatus,
   type IncidentDiagnostics,
   type IncidentEmailState,
   type IncidentHotfixState,
@@ -168,9 +170,52 @@ function parseHotfix(value: unknown): IncidentHotfixState | undefined {
   return hotfix;
 }
 
+function isCodingAgentStatus(value: string): value is IncidentCodingAgentStatus {
+  return (
+    value === "launched" || value === "failed" || value === "misconfigured"
+  );
+}
+
+function parseCodingAgent(value: unknown): IncidentCodingAgentState | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+  const raw = value as Record<string, unknown>;
+  if (typeof raw.status !== "string" || !isCodingAgentStatus(raw.status)) {
+    return undefined;
+  }
+  const agent: IncidentCodingAgentState = { status: raw.status };
+  if ("cursorAgentId" in raw) {
+    agent.cursorAgentId = asNullableString(raw.cursorAgentId);
+  }
+  if ("cursorAgentUrl" in raw) {
+    agent.cursorAgentUrl = asNullableString(raw.cursorAgentUrl);
+  }
+  if ("cursorRunId" in raw) {
+    agent.cursorRunId = asNullableString(raw.cursorRunId);
+  }
+  if ("error" in raw) {
+    agent.error = asNullableString(raw.error);
+  }
+  if (typeof raw.forced === "boolean") {
+    agent.forced = raw.forced;
+  }
+  if ("forcedByUid" in raw) {
+    agent.forcedByUid = asNullableString(raw.forcedByUid);
+  }
+  if (typeof raw.launchedAt === "string") {
+    agent.launchedAt = raw.launchedAt;
+  }
+  if (typeof raw.updatedAt === "string") {
+    agent.updatedAt = raw.updatedAt;
+  }
+  return agent;
+}
+
 export function deserializeIncidentFromFirestore(
   id: string,
   data: Record<string, unknown>,
+  options: { includeCodingAgent?: boolean } = {},
 ): IncidentRecord | null {
   const diagnostics = parseDiagnostics(data.diagnostics);
   if (!diagnostics) {
@@ -197,6 +242,12 @@ export function deserializeIncidentFromFirestore(
     mitigations: parseMitigations(data.mitigations),
     hotfix: parseHotfix(data.hotfix),
   };
+  if (options.includeCodingAgent) {
+    const agent = parseCodingAgent(data.agent);
+    if (agent) {
+      record.agent = agent;
+    }
+  }
   if ("activeSessionOpsSummonId" in data) {
     record.activeSessionOpsSummonId = asNullableString(
       data.activeSessionOpsSummonId,
@@ -451,6 +502,7 @@ export function subscribeIncidentList(
           const incident = deserializeIncidentFromFirestore(
             incidentSnapshot.id,
             incidentSnapshot.data() as Record<string, unknown>,
+            { includeCodingAgent: true },
           );
           if (incident) {
             incidents.push(incident);

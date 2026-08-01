@@ -41,6 +41,7 @@ export {
   approveHostConfirm,
   createIncident,
   denyHostConfirm,
+  launchIncidentCursorAgent,
   postIncidentMessage,
   postSupportAgentTurn,
   publishIncidentHotfix,

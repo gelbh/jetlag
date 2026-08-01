@@ -611,6 +611,11 @@ export function AdminOpsDesk() {
     </div>
   );
 
+  const selectedIncident =
+    selectedIncidentId == null
+      ? null
+      : (visibleIncidents.find((row) => row.id === selectedIncidentId) ?? null);
+
   const bodies: AdminPanelBodies = {
     sessions: sessionsBody,
     monitor: (
@@ -645,10 +650,8 @@ export function AdminOpsDesk() {
       <div className="jl-scroll jl-ops-panel-scroll jl-ops-panel-scroll--flush">
         <AdminIncidentActions
           incidentId={selectedIncidentId}
-          status={
-            visibleIncidents.find((row) => row.id === selectedIncidentId)
-              ?.status ?? null
-          }
+          status={selectedIncident?.status ?? null}
+          agent={selectedIncident?.agent ?? null}
           disabled={!selectedIncidentId}
         />
       </div>
