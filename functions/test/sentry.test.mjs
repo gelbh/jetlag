@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { HttpsError } from "firebase-functions/v2/https";
 import {
+  isAbortErrorEvent,
   isAbortErrorNoise,
   isExpectedFunctionsError,
 } from "../lib/sentry.mjs";
@@ -16,6 +17,15 @@ test("isAbortErrorNoise matches AbortError Error and DOMException", () => {
   );
   assert.equal(isAbortErrorNoise(new Error("Overpass timed out.")), false);
   assert.equal(isAbortErrorNoise(null), false);
+});
+
+test("isAbortErrorEvent matches Discover AbortError title shape", () => {
+  const event = {
+    exception: {
+      values: [{ type: "AbortError", value: "This operation was aborted" }],
+    },
+  };
+  assert.equal(isAbortErrorEvent(event), true);
 });
 
 test("isExpectedFunctionsError treats AbortError as expected noise", () => {
@@ -49,6 +59,36 @@ test("isExpectedFunctionsError matches support agent LLM unavailable HttpsError"
         "internal",
         "Support agent is temporarily unavailable.",
       ),
+    ),
+    true,
+  );
+});
+
+test("isExpectedFunctionsError matches grantAccess expected HttpsErrors", () => {
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError("unauthenticated", "Sign in required."),
+    ),
+    true,
+  );
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError("invalid-argument", "Access code required."),
+    ),
+    true,
+  );
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError(
+        "resource-exhausted",
+        "Too many attempts. Try again later.",
+      ),
+    ),
+    true,
+  );
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError("permission-denied", "Invalid access code."),
     ),
     true,
   );

@@ -68,7 +68,7 @@ export function isExpectedFunctionsError(error) {
  * @param {import("@sentry/node").ErrorEvent} event
  * @returns {boolean}
  */
-function isAbortErrorEvent(event) {
+export function isAbortErrorEvent(event) {
   for (const exception of event.exception?.values ?? []) {
     if (exception.type === "AbortError") {
       return true;
