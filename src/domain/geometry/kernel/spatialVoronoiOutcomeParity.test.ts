@@ -6,11 +6,14 @@ import { buildTentacleEliminationRegion } from "./tentacleRegions";
 import { geoSpatialVoronoiFromSites } from "./spatialVoronoi";
 import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 import { maskTopologyMatches, bboxFromGameArea } from "./maskTopology";
-import {
-  buildSameNearestRegion,
-} from "../measuring/matchingGeometry";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 import type { MatchingFeature } from "../../geo/types";
+import {
+  gameAreaToPolygon,
+} from "../gameArea/geometry";
+import intersect from "@turf/intersect";
+import simplify from "@turf/simplify";
+import { voronoiCellSiteId } from "./voronoiCellSiteId";
 import type { GameArea } from "../../map/annotations";
 
 const sampleGameArea: GameAreaGeometry = {
@@ -36,6 +39,58 @@ const eastSite = { id: "east", lat: 51.45, lng: -0.12 };
 const northSite = { id: "north", lat: 51.5, lng: -0.15 };
 const anchor: LatLngTuple = [51.45, -0.15];
 const oneMileMeters = 1609.344;
+
+const SIMPLIFY_TOLERANCE = 0.000012;
+
+async function sameNearestFromCells(
+  features: MatchingFeature[],
+  seekerFeatureId: string,
+  gameArea: GameArea,
+  cells: FeatureCollectionLike,
+): Promise<Feature<Polygon | MultiPolygon> | null> {
+  void features;
+  const seekerCell = cells.features.find(
+    (cell) => voronoiCellSiteId(cell, ["featureId"]) === seekerFeatureId,
+  );
+  if (
+    !seekerCell ||
+    (seekerCell.geometry.type !== "Polygon" &&
+      seekerCell.geometry.type !== "MultiPolygon")
+  ) {
+    return null;
+  }
+  const gameFeature = gameAreaToPolygon(gameArea);
+  let clipped: Feature<Polygon | MultiPolygon> | null = null;
+  try {
+    const hit = intersect({
+      type: "FeatureCollection",
+      features: [gameFeature, seekerCell as Feature<Polygon | MultiPolygon>],
+    });
+    if (
+      hit &&
+      (hit.geometry.type === "Polygon" || hit.geometry.type === "MultiPolygon")
+    ) {
+      clipped = hit as Feature<Polygon | MultiPolygon>;
+    }
+  } catch {
+    clipped = null;
+  }
+  if (!clipped) {
+    return null;
+  }
+  try {
+    return simplify(clipped, {
+      tolerance: SIMPLIFY_TOLERANCE,
+      highQuality: true,
+    }) as Feature<Polygon | MultiPolygon>;
+  } catch {
+    return clipped;
+  }
+}
+
+type FeatureCollectionLike = {
+  features: Feature[];
+};
 
 describe("spatialVoronoiOutcomeParity", () => {
   it("tentacle elimination outcomes stay topology-close vs TS Voronoi cells", async () => {
@@ -100,53 +155,35 @@ describe("spatialVoronoiOutcomeParity", () => {
         inPlayArea: true,
       },
     ];
+    const siteInputs = features.map((feature) => ({
+      lng: feature.point[1],
+      lat: feature.point[0],
+      properties: { featureId: feature.id },
+    }));
+    const tsCells = geoSpatialVoronoiFromSites(siteInputs);
+    const wasmCells = await wasmBuildSpatialVoronoiFromSites(siteInputs);
 
-    // Force TS path for baseline by calling geometry with mode override via
-    // localStorage is brittle in unit tests — compare TS cells→region vs WASM
-    // cells→region using the same matching clip helpers.
-    const { clearVoronoiCellCacheForTests } = await import(
-      "../voronoi/voronoiCellCache"
+    const tsRegion = await sameNearestFromCells(
+      features,
+      "west",
+      gameAreaAnnotation,
+      tsCells,
     );
-    clearVoronoiCellCacheForTests();
+    const wasmRegion = await sameNearestFromCells(
+      features,
+      "west",
+      gameAreaAnnotation,
+      wasmCells,
+    );
 
-    // Baseline: sync TS cells through matching by temporarily using ts mode
-    const prev =
-      typeof localStorage !== "undefined"
-        ? localStorage.getItem("jl.geometry.maskKernel")
-        : null;
-    try {
-      localStorage.setItem("jl.geometry.maskKernel", "ts");
-      clearVoronoiCellCacheForTests();
-      const tsRegion = await buildSameNearestRegion(
-        features,
-        "west",
-        gameAreaAnnotation,
-      );
-
-      localStorage.setItem("jl.geometry.maskKernel", "wasm");
-      clearVoronoiCellCacheForTests();
-      const wasmRegion = await buildSameNearestRegion(
-        features,
-        "west",
-        gameAreaAnnotation,
-      );
-
-      expect(tsRegion).not.toBeNull();
-      expect(wasmRegion).not.toBeNull();
-      expect(
-        maskTopologyMatches(
-          wasmRegion!,
-          tsRegion!,
-          bboxFromGameArea(sampleGameArea),
-        ),
-      ).toBe(true);
-    } finally {
-      if (prev == null) {
-        localStorage.removeItem("jl.geometry.maskKernel");
-      } else {
-        localStorage.setItem("jl.geometry.maskKernel", prev);
-      }
-      clearVoronoiCellCacheForTests();
-    }
+    expect(tsRegion).not.toBeNull();
+    expect(wasmRegion).not.toBeNull();
+    expect(
+      maskTopologyMatches(
+        wasmRegion!,
+        tsRegion!,
+        bboxFromGameArea(sampleGameArea),
+      ),
+    ).toBe(true);
   });
 });

@@ -28,17 +28,14 @@ const anchor: LatLngTuple = [51.45, -0.15];
 const oneMileMeters = 1609.344;
 
 describe("wave2 kernel dispatch", () => {
-  it("mode wasm + spatialVoronoi ready → FeatureCollection with one cell per site", async () => {
+  it("mode wasm + spatialVoronoi not ready → TS result", async () => {
     const sites = [
       { lng: -0.18, lat: 51.45, properties: { poiId: "west" } },
       { lng: -0.12, lat: 51.45, properties: { poiId: "east" } },
     ];
+    const expected = geoSpatialVoronoiFromSites(sites);
     const result = await dispatchSpatialVoronoi(sites, "wasm");
-    expect(result.type).toBe("FeatureCollection");
-    expect(result.features).toHaveLength(2);
-    for (const feature of result.features) {
-      expect(feature.geometry.type).toMatch(/Polygon|MultiPolygon/);
-    }
+    expect(result).toEqual(expected);
   });
 
   it("mode wasm + tentacleEliminationRegion ready → WASM via runner", async () => {

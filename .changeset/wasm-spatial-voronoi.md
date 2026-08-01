@@ -4,4 +4,4 @@
 
 ### Technical
 
-- Spatial Voronoi geometry now runs on WASM by default (TypeScript fallback retained)
+- Spatial Voronoi WASM kernel + async caller wiring (ready flag stays off until the ≤1.1× perf gate)

@@ -9,8 +9,8 @@ describe("KERNEL_WASM_READY", () => {
     expect(KERNEL_WASM_READY.geodesicLineBuffer).toBe(true);
   });
 
-  it("marks spatial voronoi and tentacle ready after Phase E", () => {
-    expect(KERNEL_WASM_READY.spatialVoronoi).toBe(true);
+  it("keeps spatial voronoi not ready until perf gate; tentacle ready", () => {
+    expect(KERNEL_WASM_READY.spatialVoronoi).toBe(false);
     expect(KERNEL_WASM_READY.tentacleEliminationRegion).toBe(true);
   });
 });
@@ -25,10 +25,10 @@ describe("shouldUseWasm", () => {
     expect(shouldUseWasm("dual", "geodesicLineBuffer")).toBe(true);
   });
 
-  it("returns true for spatialVoronoi and tentacle when ready", () => {
-    expect(shouldUseWasm("wasm", "spatialVoronoi")).toBe(true);
+  it("returns false for spatialVoronoi; true for tentacle when ready", () => {
+    expect(shouldUseWasm("wasm", "spatialVoronoi")).toBe(false);
     expect(shouldUseWasm("wasm", "tentacleEliminationRegion")).toBe(true);
-    expect(shouldUseWasm("dual", "spatialVoronoi")).toBe(true);
+    expect(shouldUseWasm("dual", "spatialVoronoi")).toBe(false);
     expect(shouldUseWasm("dual", "tentacleEliminationRegion")).toBe(true);
   });
 });

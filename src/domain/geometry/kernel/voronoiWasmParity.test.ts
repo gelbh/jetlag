@@ -2,8 +2,29 @@ import { describe, expect, it, vi } from "vitest";
 import { geoSpatialVoronoiFromSites } from "./spatialVoronoi";
 
 describe("voronoiWasmParity", () => {
-  it("wasm init failure falls back to TS", async () => {
+  it("wasm init failure falls back to TS when entrypoint is ready", async () => {
     vi.resetModules();
+    vi.doMock("./kernelWasmReady", async () => {
+      const actual = await vi.importActual<typeof import("./kernelWasmReady")>(
+        "./kernelWasmReady",
+      );
+      return {
+        ...actual,
+        KERNEL_WASM_READY: {
+          ...actual.KERNEL_WASM_READY,
+          spatialVoronoi: true,
+        },
+        shouldUseWasm: (mode: string, entrypoint: string) => {
+          if (entrypoint === "spatialVoronoi") {
+            return mode === "wasm" || mode === "dual";
+          }
+          return actual.shouldUseWasm(
+            mode as "ts" | "dual" | "wasm",
+            entrypoint as import("./kernelWasmReady").KernelEntrypoint,
+          );
+        },
+      };
+    });
     vi.doMock("./voronoiWasm", () => ({
       wasmBuildSpatialVoronoiFromSites: vi.fn(async () => {
         throw new Error("wasm init failed");
@@ -22,6 +43,7 @@ describe("voronoiWasmParity", () => {
     expect(result).toEqual(expected);
 
     vi.doUnmock("./voronoiWasm");
+    vi.doUnmock("./kernelWasmReady");
     vi.resetModules();
   });
 

@@ -18,7 +18,7 @@ export const KERNEL_WASM_READY: Record<KernelEntrypoint, boolean> = {
   endGameMaskFromDisks: true,
   halfPlane: true,
   geodesicLineBuffer: true,
-  spatialVoronoi: true,
+  spatialVoronoi: false,
   tentacleEliminationRegion: true,
 };
 
