@@ -30,6 +30,7 @@ export {
 export {
   endSession,
   leaveHostSession,
+  repairGhostHost,
   resetSessionForRematch,
 } from "./handlers/session.mjs";
 
