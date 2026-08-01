@@ -84,6 +84,7 @@
     "@turf/projection": "^7.3.5",
     "@turf/simplify": "^7.3.5",
     "@turf/union": "^7.3.5",
+    "@xmldom/xmldom": "^0.9.10",
     "circle-union": "^1.0.0",
     "comlink": "^4.4.2",
     "d3-delaunay": "^6.0.4",

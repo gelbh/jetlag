@@ -62,6 +62,12 @@ describe("parseBoundaryKml", () => {
       "Imported area is too small.",
     );
   });
+
+  it("rejects malformed XML", () => {
+    expect(() => parseBoundaryKml("<kml><Placemark><unclosed>")).toThrow(
+      "Invalid KML file.",
+    );
+  });
 });
 
 describe("parseBoundaryFile", () => {
