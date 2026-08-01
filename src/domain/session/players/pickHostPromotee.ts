@@ -31,31 +31,3 @@ export function pickHostPromotee(
 
   return [...candidates].sort((a, b) => a.localeCompare(b))[0] ?? null;
 }
-
-/**
- * When membership heal removes the current host uid, return the promotee to write.
- * Returns null when hostUid should stay unchanged.
- */
-export function resolveHostUidAfterHeal(input: {
-  currentHostUid: string;
-  memberUidsAfterHeal: readonly string[];
-  memberRolesAfterHeal: Record<string, PlayerRole | string>;
-  removedUid: string | undefined;
-}): string | null {
-  const { currentHostUid, memberUidsAfterHeal, memberRolesAfterHeal, removedUid } =
-    input;
-
-  if (removedUid == null || removedUid !== currentHostUid) {
-    return null;
-  }
-
-  if (memberUidsAfterHeal.includes(currentHostUid)) {
-    return null;
-  }
-
-  return pickHostPromotee(
-    memberUidsAfterHeal,
-    memberRolesAfterHeal,
-    currentHostUid,
-  );
-}
