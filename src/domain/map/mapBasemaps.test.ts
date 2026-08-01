@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+  getBasemapAttributionText,
   getBasemapSurface,
   getMapBasemap,
   getStreetBasemap,
 } from "./mapBasemaps";
+import {
+  isCartoTileUrl,
+  isEsriWorldImageryTileUrl,
+  isMapTileHostname,
+} from "./mapTileHosts";
 
 describe("mapBasemaps", () => {
   it("resolves light street to Carto voyager", () => {
@@ -30,5 +36,31 @@ describe("mapBasemaps", () => {
   it("exposes an overlays extension point", () => {
     expect(getMapBasemap("standard", "light").overlays).toEqual([]);
     expect(getMapBasemap("satellite", "light").overlays).toEqual([]);
+  });
+
+  it("returns plain-text attribution for settings chrome", () => {
+    expect(getBasemapAttributionText("standard")).toContain("CARTO");
+    expect(getBasemapAttributionText("satellite")).toContain("Esri");
+  });
+});
+
+describe("mapTileHosts", () => {
+  it("matches CARTO and Esri tile URLs", () => {
+    expect(
+      isCartoTileUrl(
+        "https://a.basemaps.cartocdn.com/rastertiles/voyager/1/2/3.png",
+      ),
+    ).toBe(true);
+    expect(
+      isEsriWorldImageryTileUrl(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/1/2/3",
+      ),
+    ).toBe(true);
+    expect(isMapTileHostname("a.basemaps.cartocdn.com")).toBe(true);
+    expect(isMapTileHostname("server.arcgisonline.com")).toBe(true);
+    expect(isMapTileHostname("evil.arcgisonline.com.attacker.example")).toBe(
+      false,
+    );
+    expect(isMapTileHostname("tile.openstreetmap.org")).toBe(false);
   });
 });

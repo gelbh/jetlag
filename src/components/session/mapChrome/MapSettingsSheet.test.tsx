@@ -76,6 +76,23 @@ describe("MapSettingsSheet", () => {
     expect(onMapStyleChange).toHaveBeenCalledWith("satellite");
   });
 
+  it("shows CARTO attribution for street basemap and Esri for satellite", () => {
+    renderWithRouter(<MapSettingsSheet {...baseProps} />);
+
+    expect(
+      screen.getByText(/OpenStreetMap contributors · © CARTO/),
+    ).toBeInTheDocument();
+
+    renderWithRouter(
+      <MapSettingsSheet
+        {...baseProps}
+        general={{ ...baseProps.general, mapStyle: "satellite" }}
+      />,
+    );
+
+    expect(screen.getByText(/Tiles © Esri/)).toBeInTheDocument();
+  });
+
   it("keeps session admin off the default map essentials tab", () => {
     renderWithRouter(<MapSettingsSheet {...baseProps} />);
 

@@ -2,7 +2,7 @@ import { fetchWithTimeoutAndRetry } from "../lib/fetchWithTimeout.mjs";
 
 const CTA_BUS_API_BASE = "https://www.ctabustracker.com/bustime/api/v3";
 const CTA_TRAIN_POSITIONS_URL =
-  "http://lapi.transitchicago.com/api/1.0/ttpositions.aspx";
+  "https://lapi.transitchicago.com/api/1.0/ttpositions.aspx";
 const CTA_FETCH_TIMEOUT_MS = 15_000;
 const CTA_ROUTE_BATCH_SIZE = 10;
 const CTA_TRAIN_ROUTES = [

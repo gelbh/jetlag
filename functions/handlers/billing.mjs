@@ -1,6 +1,7 @@
 import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import {
   getSentryDsnSecret,
+  withSentryEventHandler,
   withSentryHttpHandler,
 } from "../lib/sentry.mjs";
 import {
@@ -35,17 +36,20 @@ const stripeBillingOptions = {
   params: STRIPE_BILLING_PARAMS,
 };
 
-export const getPremiumEntitlements = onCall(stripeBillingOptions, async (request) => {
-  if (!request.auth) {
-    throw new HttpsError("unauthenticated", "Sign in required.");
-  }
+export const getPremiumEntitlements = onCall(
+  stripeBillingOptions,
+  withSentryEventHandler(async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
 
-  return getPremiumEntitlementsHandler(adminDb(), request.auth.uid);
-});
+    return getPremiumEntitlementsHandler(adminDb(), request.auth.uid);
+  }),
+);
 
 export const createCheckoutSession = onCall(
   { ...stripeBillingOptions, enforceAppCheck: true },
-  async (request) => {
+  withSentryEventHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -68,24 +72,24 @@ export const createCheckoutSession = onCall(
       request.auth.token.email,
       productKey,
     );
-  },
+  }),
 );
 
 export const startPremiumTrial = onCall(
-  { enforceAppCheck: true },
-  async (request) => {
+  { secrets: [sentryDsnSecret], enforceAppCheck: true },
+  withSentryEventHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
     rejectAnonymousBillingAuth(request);
 
     return startPremiumTrialHandler(adminDb(), request.auth.uid);
-  },
+  }),
 );
 
 export const createBillingPortalSession = onCall(
   { ...stripeBillingOptions, enforceAppCheck: true },
-  async (request) => {
+  withSentryEventHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -98,12 +102,12 @@ export const createBillingPortalSession = onCall(
       request.auth.uid,
       request.auth.token.email,
     );
-  },
+  }),
 );
 
 export const createPremiumSession = onCall(
   { ...stripeBillingOptions, enforceAppCheck: true },
-  async (request) => {
+  withSentryEventHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -114,12 +118,12 @@ export const createPremiumSession = onCall(
       request.auth.uid,
       request.data,
     );
-  },
+  }),
 );
 
 export const recoverPremiumByStripeEmail = onCall(
   { ...stripeBillingOptions, enforceAppCheck: true },
-  async (request) => {
+  withSentryEventHandler(async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
@@ -146,7 +150,7 @@ export const recoverPremiumByStripeEmail = onCall(
       request.auth.token.email,
       request.auth.token.email_verified,
     );
-  },
+  }),
 );
 
 // Stripe webhooks authenticate via signature verification only — App Check is not applicable.

@@ -60,8 +60,8 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
     id: "third-parties",
     title: "Map and geo services",
     paragraphs: [
-      "The map loads tiles and data from third-party services such as OpenStreetMap, CARTO, Overpass, and bundled transit feeds. Requests may include map coordinates or place names needed to render the map and answer game tools.",
-      "Firebase, Google (for sign-in and App Check), Stripe, Sentry, and PostHog process data under their own privacy policies.",
+      "The map loads tiles and data from third-party services such as OpenStreetMap (including Nominatim place search), CARTO street tiles, Esri satellite imagery, Overpass (and public Overpass mirrors), Open-Meteo and USGS elevation, and bundled transit feeds. Live vehicle data for some cities is fetched server-side via Transitland, TfL, or CTA APIs. Requests may include map coordinates or place names needed to render the map and answer game tools.",
+      "The app is hosted on Cloudflare. Firebase and Google (for sign-in and App Check / reCAPTCHA), Stripe, Sentry, and PostHog process data under their own privacy policies. Admin incident alerts may be emailed through Resend.",
     ],
   },
   {

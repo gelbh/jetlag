@@ -1,4 +1,5 @@
 import { type Page } from "@playwright/test";
+import { isMapTileHostname } from "../../src/domain/map/mapTileHosts";
 import {
   resolveOverpassResponse,
   type OverpassFixtureProfile,
@@ -49,11 +50,7 @@ function isLocalAppRequest(url: string): boolean {
 }
 
 function isMapTileHost(hostname: string): boolean {
-  return (
-    hostname === "tile.openstreetmap.org" ||
-    hostname.endsWith(".basemaps.cartocdn.com") ||
-    hostname.includes("arcgisonline.com")
-  );
+  return isMapTileHostname(hostname);
 }
 
 export async function blockExternalAssets(
