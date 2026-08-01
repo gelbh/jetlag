@@ -20,7 +20,7 @@ test("launchIncidentCursorAgentHandler force-launches with forcedByUid", async (
     {},
     { incidentId: "inc-1", uid: "admin-9" },
     {
-      launchCursorHotfix: async (_db, input, deps) => {
+      forceLaunchCursorHotfix: async (_db, input, deps) => {
         launches.push({ input, deps });
         return {
           launched: true,
@@ -37,9 +37,9 @@ test("launchIncidentCursorAgentHandler force-launches with forcedByUid", async (
   assert.equal(result.agentId, "bc-1");
   assert.equal(result.status, "launched");
   assert.equal(launches.length, 1);
-  assert.equal(launches[0].input.force, true);
   assert.equal(launches[0].input.forcedByUid, "admin-9");
   assert.equal(launches[0].input.incidentId, "inc-1");
+  assert.equal(launches[0].input.force, undefined);
 });
 
 test("launchIncidentCursorAgentHandler maps not_found", async () => {
@@ -48,7 +48,7 @@ test("launchIncidentCursorAgentHandler maps not_found", async () => {
       {},
       { incidentId: "missing", uid: "admin-1" },
       {
-        launchCursorHotfix: async () => ({
+        forceLaunchCursorHotfix: async () => ({
           launched: false,
           reason: "not_found",
           code: "CURSOR_HOTFIX_SKIPPED",
@@ -65,7 +65,7 @@ test("launchIncidentCursorAgentHandler maps already_launched", async () => {
       {},
       { incidentId: "inc-1", uid: "admin-1" },
       {
-        launchCursorHotfix: async () => ({
+        forceLaunchCursorHotfix: async () => ({
           launched: false,
           reason: "already_launched",
           agentId: "bc-existing",
@@ -83,7 +83,7 @@ test("launchIncidentCursorAgentHandler maps misconfigured", async () => {
       {},
       { incidentId: "inc-1", uid: "admin-1" },
       {
-        launchCursorHotfix: async () => ({
+        forceLaunchCursorHotfix: async () => ({
           launched: false,
           code: CURSOR_HOTFIX_MISCONFIGURED,
         }),

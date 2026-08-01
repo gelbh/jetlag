@@ -179,7 +179,7 @@ export interface LaunchIncidentCursorAgentResult {
   agentId?: string | null;
   agentUrl?: string | null;
   runId?: string | null;
-  status?: string;
+  status?: "launched";
 }
 
 export async function launchIncidentCursorAgent(

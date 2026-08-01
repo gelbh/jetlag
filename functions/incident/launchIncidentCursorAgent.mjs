@@ -8,7 +8,7 @@ import {
   CURSOR_HOTFIX_FAILED,
   CURSOR_HOTFIX_MISCONFIGURED,
   CURSOR_HOTFIX_SKIPPED,
-  launchCursorHotfixForIncident,
+  forceLaunchCursorHotfixForIncident,
 } from "./launchCursorHotfix.mjs";
 
 export const CURSOR_HOTFIX_ALREADY_LAUNCHED = "CURSOR_HOTFIX_ALREADY_LAUNCHED";
@@ -17,7 +17,7 @@ export const CURSOR_HOTFIX_ALREADY_LAUNCHED = "CURSOR_HOTFIX_ALREADY_LAUNCHED";
  * @param db
  * @param {{ incidentId: string, uid: string }} input
  * @param {{
- *   launchCursorHotfix?: typeof launchCursorHotfixForIncident,
+ *   forceLaunchCursorHotfix?: typeof forceLaunchCursorHotfixForIncident,
  *   launchDeps?: object,
  * }} [deps]
  */
@@ -29,12 +29,11 @@ export async function launchIncidentCursorAgentHandler(db, input, deps = {}) {
     throw new Error(INCIDENT_NOT_FOUND);
   }
 
-  const launch = deps.launchCursorHotfix ?? launchCursorHotfixForIncident;
+  const launch = deps.forceLaunchCursorHotfix ?? forceLaunchCursorHotfixForIncident;
   const result = await launch(
     db,
     {
       incidentId,
-      force: true,
       forcedByUid: uid || null,
     },
     deps.launchDeps ?? {},

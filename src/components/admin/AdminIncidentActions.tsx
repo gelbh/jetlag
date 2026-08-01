@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type {
   IncidentCodingAgentState,
   IncidentMitigationType,
@@ -15,6 +15,7 @@ import {
   publishIncidentHotfix,
   updateIncidentStatus,
 } from "../../services/incident/incidentApi";
+import { AdminIncidentCursorLaunch } from "./AdminIncidentCursorLaunch";
 
 const CLOSEABLE = new Set<IncidentStatus>([
   "open",
@@ -24,26 +25,6 @@ const CLOSEABLE = new Set<IncidentStatus>([
 ]);
 
 const REOPENABLE = new Set<IncidentStatus>(["resolved", "dismissed"]);
-
-function codingAgentHint(agent: IncidentCodingAgentState | null | undefined): string {
-  if (!agent) {
-    return "Force-launch a Cursor coding agent into the private hotfix thread.";
-  }
-  switch (agent.status) {
-    case "launched":
-      return agent.forced
-        ? "Cursor agent launched (admin force)."
-        : "Cursor agent launched.";
-    case "failed":
-      return "Last launch failed — retry when ready.";
-    case "misconfigured":
-      return "Cursor API is not configured — fix the secret, then retry.";
-    default: {
-      const _exhaustive: never = agent.status;
-      return _exhaustive;
-    }
-  }
-}
 
 export interface AdminIncidentActionsProps {
   incidentId: string | null;
@@ -66,9 +47,7 @@ export function AdminIncidentActions({
   publishHotfixFn = publishIncidentHotfix,
   updateStatusFn = updateIncidentStatus,
   launchCursorAgentFn = launchIncidentCursorAgent,
-  openExternalUrlFn = (url) => {
-    window.open(url, "_blank", "noopener,noreferrer");
-  },
+  openExternalUrlFn,
 }: AdminIncidentActionsProps) {
   const [mitigationType, setMitigationType] =
     useState<IncidentMitigationType>("soft_reload");
@@ -88,33 +67,9 @@ export function AdminIncidentActions({
   const [statusError, setStatusError] = useState<string | null>(null);
   const [statusOk, setStatusOk] = useState<string | null>(null);
 
-  const [cursorBusy, setCursorBusy] = useState(false);
-  const [cursorError, setCursorError] = useState<string | null>(null);
-  const [cursorOk, setCursorOk] = useState<string | null>(null);
-  const [localAgent, setLocalAgent] = useState<IncidentCodingAgentState | null>(
-    null,
-  );
-
-  useEffect(() => {
-    setLocalAgent(null);
-    setCursorError(null);
-    setCursorOk(null);
-  }, [incidentId]);
-
   const actionsDisabled = disabled || !incidentId;
   const canClose = status != null && CLOSEABLE.has(status);
   const canReopen = status != null && REOPENABLE.has(status);
-  const effectiveAgent =
-    agent?.cursorAgentId || (agent && !localAgent) ? agent : (localAgent ?? agent);
-  const hasLiveAgent = Boolean(effectiveAgent?.cursorAgentId);
-  const canRetry =
-    effectiveAgent?.status === "failed" ||
-    effectiveAgent?.status === "misconfigured";
-  const agentUrl =
-    typeof effectiveAgent?.cursorAgentUrl === "string" &&
-    effectiveAgent.cursorAgentUrl.trim()
-      ? effectiveAgent.cursorAgentUrl.trim()
-      : null;
 
   const onApplyMitigation = async () => {
     if (!incidentId) {
@@ -191,45 +146,6 @@ export function AdminIncidentActions({
     } finally {
       setStatusBusy(false);
     }
-  };
-
-  const onLaunchCursorAgent = async () => {
-    if (!incidentId) {
-      return;
-    }
-    setCursorBusy(true);
-    setCursorError(null);
-    setCursorOk(null);
-    try {
-      const result = await launchCursorAgentFn(incidentId);
-      setLocalAgent({
-        status: "launched",
-        cursorAgentId: result.agentId ?? null,
-        cursorAgentUrl: result.agentUrl ?? null,
-        cursorRunId: result.runId ?? null,
-        forced: true,
-      });
-      setCursorOk(
-        result.agentUrl
-          ? "Cursor agent launched."
-          : "Cursor agent launched (no URL returned).",
-      );
-    } catch (error) {
-      setCursorError(
-        error instanceof Error
-          ? error.message
-          : "Could not launch the Cursor agent.",
-      );
-    } finally {
-      setCursorBusy(false);
-    }
-  };
-
-  const onOpenCursorAgent = () => {
-    if (!agentUrl) {
-      return;
-    }
-    openExternalUrlFn(agentUrl);
   };
 
   return (
@@ -323,49 +239,13 @@ export function AdminIncidentActions({
         </button>
       </div>
 
-      <div className="jl-incident-module">
-        <h3 className="jl-incident-module-title">2 · Launch Cursor agent</h3>
-        <p className="jl-incident-module-hint">{codingAgentHint(effectiveAgent)}</p>
-        {cursorError ? (
-          <p className="text-sm font-semibold text-status-error" role="alert">
-            {cursorError}
-          </p>
-        ) : null}
-        {cursorOk ? (
-          <p className="text-sm text-status-success">{cursorOk}</p>
-        ) : null}
-        {hasLiveAgent ? (
-          <>
-            <button
-              type="button"
-              className="btn-secondary uppercase"
-              disabled={actionsDisabled || !agentUrl}
-              onClick={onOpenCursorAgent}
-            >
-              Open Cursor agent
-            </button>
-            {!agentUrl ? (
-              <p className="jl-incident-module-hint">
-                Agent id is set but no URL was returned — open the hotfix
-                thread for details.
-              </p>
-            ) : null}
-          </>
-        ) : (
-          <button
-            type="button"
-            className="btn-secondary uppercase"
-            disabled={actionsDisabled || cursorBusy}
-            onClick={() => void onLaunchCursorAgent()}
-          >
-            {cursorBusy
-              ? "Launching…"
-              : canRetry
-                ? "Retry launch"
-                : "Launch Cursor agent"}
-          </button>
-        )}
-      </div>
+      <AdminIncidentCursorLaunch
+        incidentId={incidentId}
+        agent={agent}
+        disabled={disabled}
+        launchCursorAgentFn={launchCursorAgentFn}
+        openExternalUrlFn={openExternalUrlFn}
+      />
 
       <div className="jl-incident-module">
         <h3 className="jl-incident-module-title">3 · Publish hotfix</h3>

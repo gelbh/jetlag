@@ -5,6 +5,7 @@ import {
   CURSOR_HOTFIX_SKIPPED,
   buildCursorHotfixPrompt,
   createCursorCloudAgent,
+  forceLaunchCursorHotfixForIncident,
   launchCursorHotfixForIncident,
 } from "../incident/launchCursorHotfix.mjs";
 
@@ -254,7 +255,7 @@ test("launchCursorHotfixForIncident skips when triage is not agent", async () =>
   assert.equal(result.code, CURSOR_HOTFIX_SKIPPED);
 });
 
-test("launchCursorHotfixForIncident force-launches when triage is human", async () => {
+test("forceLaunchCursorHotfixForIncident launches when triage is human", async () => {
   const db = createInMemoryFirestore({
     "incidents/inc-1": {
       status: "open",
@@ -264,12 +265,11 @@ test("launchCursorHotfixForIncident force-launches when triage is human", async 
   });
   let promptSeen = "";
 
-  const result = await launchCursorHotfixForIncident(
+  const result = await forceLaunchCursorHotfixForIncident(
     db,
     {
       incidentId: "inc-1",
       diagnostics: { lastClientErrors: [] },
-      force: true,
       forcedByUid: "admin-1",
     },
     {
@@ -299,7 +299,7 @@ test("launchCursorHotfixForIncident force-launches when triage is human", async 
   assert.equal(incident.triage.outcome, "human");
 });
 
-test("launchCursorHotfixForIncident force still skips when already launched", async () => {
+test("forceLaunchCursorHotfixForIncident skips when already launched", async () => {
   const db = createInMemoryFirestore({
     "incidents/inc-1": {
       status: "open",
@@ -312,11 +312,10 @@ test("launchCursorHotfixForIncident force still skips when already launched", as
   });
   let createCalls = 0;
 
-  const result = await launchCursorHotfixForIncident(
+  const result = await forceLaunchCursorHotfixForIncident(
     db,
     {
       incidentId: "inc-1",
-      force: true,
       forcedByUid: "admin-1",
     },
     {
