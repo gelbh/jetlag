@@ -94,7 +94,11 @@ async function resolvePendingQuestion(
         return null;
       }
 
-      return resolveMatchingPendingQuestion(pending, matchingAnswer, gameArea);
+      return await resolveMatchingPendingQuestion(
+        pending,
+        matchingAnswer,
+        gameArea,
+      );
     }
     case "tentacle": {
       const tentacleAnswer =

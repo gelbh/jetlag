@@ -38,8 +38,8 @@ const features: MatchingFeature[] = [
 ];
 
 describe("matching geometry", () => {
-  it("builds a same-nearest region for a single feature", () => {
-    const region = buildSameNearestRegion(
+  it("builds a same-nearest region for a single feature", async () => {
+    const region = await buildSameNearestRegion(
       [features[0]],
       "west",
       sampleGameArea,
@@ -54,10 +54,10 @@ describe("matching geometry", () => {
     ).toBe(true);
   });
 
-  it("keeps the seeker anchor inside the same-nearest region", () => {
+  it("keeps the seeker anchor inside the same-nearest region", async () => {
     const anchor: LatLngTuple = [51.45, -0.16];
     const nearest = pickNearestMatchingFeature(anchor, features);
-    const region = buildSameNearestRegion(
+    const region = await buildSameNearestRegion(
       features,
       nearest?.id ?? "west",
       sampleGameArea,
@@ -72,8 +72,12 @@ describe("matching geometry", () => {
     ).toBe(true);
   });
 
-  it("partitions the play area by nearest feature using Voronoi cells", () => {
-    const region = buildSameNearestRegion(features, "west", sampleGameArea);
+  it("partitions the play area by nearest feature using Voronoi cells", async () => {
+    const region = await buildSameNearestRegion(
+      features,
+      "west",
+      sampleGameArea,
+    );
 
     expect(region).not.toBeNull();
     expect(region?.geometry.type).toBe("Polygon");
@@ -91,8 +95,12 @@ describe("matching geometry", () => {
     ).toBe(false);
   });
 
-  it("produces a smooth single polygon rather than a coarse grid of rectangles", () => {
-    const region = buildSameNearestRegion(features, "west", sampleGameArea);
+  it("produces a smooth single polygon rather than a coarse grid of rectangles", async () => {
+    const region = await buildSameNearestRegion(
+      features,
+      "west",
+      sampleGameArea,
+    );
 
     expect(region).not.toBeNull();
     expect(region?.geometry.type).toBe("Polygon");
@@ -108,14 +116,14 @@ describe("matching geometry", () => {
     expect(ring!.length).toBeGreaterThan(4);
   });
 
-  it("eliminates the complement on yes and the same-nearest region on no", () => {
-    const yesRegion = buildMatchingEliminationRegion(
+  it("eliminates the complement on yes and the same-nearest region on no", async () => {
+    const yesRegion = await buildMatchingEliminationRegion(
       features,
       "west",
       sampleGameArea,
       "yes",
     );
-    const noRegion = buildMatchingEliminationRegion(
+    const noRegion = await buildMatchingEliminationRegion(
       features,
       "west",
       sampleGameArea,
@@ -138,14 +146,21 @@ describe("matching geometry", () => {
     ).toBe(true);
   });
 
-  it("returns null when there are no features", () => {
-    expect(buildSameNearestRegion([], "missing", sampleGameArea)).toBeNull();
+  it("returns null when there are no features", async () => {
     expect(
-      buildMatchingEliminationRegion([], "missing", sampleGameArea, "yes"),
+      await buildSameNearestRegion([], "missing", sampleGameArea),
+    ).toBeNull();
+    expect(
+      await buildMatchingEliminationRegion(
+        [],
+        "missing",
+        sampleGameArea,
+        "yes",
+      ),
     ).toBeNull();
   });
 
-  it("Voronoi same-nearest region contains its own feature for a small clustered grid", () => {
+  it("Voronoi same-nearest region contains its own feature for a small clustered grid", async () => {
     const gridGameArea: GameArea = {
       type: "Polygon",
       coordinates: [
@@ -173,7 +188,7 @@ describe("matching geometry", () => {
     );
 
     for (const feature of gridFeatures) {
-      const region = buildSameNearestRegion(
+      const region = await buildSameNearestRegion(
         gridFeatures,
         feature.id,
         gridGameArea,
