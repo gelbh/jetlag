@@ -23,7 +23,7 @@ export const INCIDENT_EMAIL_PATH = "/api/incident-email";
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const DEFAULT_INCIDENT_ADMIN_EMAIL = "gelbharttomer@gmail.com";
 const DEFAULT_INCIDENT_EMAIL_FROM =
-  "Jet Lag Incidents <incidents@jetlag.gelbhart.dev>";
+  "Jet Lag Incidents <incidents@gelbhart.dev>";
 
 export interface IncidentEmailRequestBody {
   to?: string;
@@ -126,6 +126,18 @@ export async function handleIncidentEmailRequest(
   }
 
   if (!upstream.ok) {
+    let providerDetail = "";
+    try {
+      const errBody = (await upstream.json()) as { message?: string; name?: string };
+      providerDetail = [errBody.name, errBody.message].filter(Boolean).join(": ");
+    } catch {
+      providerDetail = "";
+    }
+    console.warn(
+      "incident email Resend rejected",
+      upstream.status,
+      providerDetail || "(no body)",
+    );
     return jsonResponse(502, { error: "Email provider rejected the request" });
   }
 
