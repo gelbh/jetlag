@@ -12,6 +12,10 @@ const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "permission-denied:Only the host can do that.",
   "failed-precondition:Session already ended.",
   "internal:Support agent is temporarily unavailable.",
+  "unauthenticated:Sign in required.",
+  "invalid-argument:Access code required.",
+  "resource-exhausted:Too many attempts. Try again later.",
+  "permission-denied:Invalid access code.",
 ]);
 
 let initialized = false;
