@@ -151,17 +151,17 @@ describe("resolveThermometerPendingQuestion", () => {
 });
 
 describe("resolveMatchingPendingQuestion", () => {
-  it("returns null when matching metadata is incomplete", () => {
-    expect(
+  it("returns null when matching metadata is incomplete", async () => {
+    await expect(
       resolveMatchingPendingQuestion(
         basePending({ toolType: "matching" }),
         "yes",
         gameArea,
       ),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
-  it("builds elimination geometry for a yes answer", () => {
+  it("builds elimination geometry for a yes answer", async () => {
     const features = serializeMatchingFeatures([
       {
         id: "museum-a",
@@ -192,7 +192,11 @@ describe("resolveMatchingPendingQuestion", () => {
       },
     });
 
-    const resolved = resolveMatchingPendingQuestion(pending, "yes", gameArea);
+    const resolved = await resolveMatchingPendingQuestion(
+      pending,
+      "yes",
+      gameArea,
+    );
 
     expect(resolved).not.toBeNull();
     expect(resolved?.type).toBe("matching");
@@ -201,7 +205,7 @@ describe("resolveMatchingPendingQuestion", () => {
     expect(resolved?.metadata.color).toBe(MAP_ANNOTATION_COLORS.elimination);
   });
 
-  it("stores answer on null-answer matching questions without boundary geometry", () => {
+  it("stores answer on null-answer matching questions without boundary geometry", async () => {
     const pending = basePending({
       toolType: "matching",
       placement: {
@@ -218,7 +222,11 @@ describe("resolveMatchingPendingQuestion", () => {
       },
     });
 
-    const resolved = resolveMatchingPendingQuestion(pending, "no", gameArea);
+    const resolved = await resolveMatchingPendingQuestion(
+      pending,
+      "no",
+      gameArea,
+    );
 
     expect(resolved?.metadata.matchingAnswer).toBe("no");
     expect(resolved?.metadata.matchingBoundaryJson).toBeUndefined();

@@ -96,27 +96,37 @@ function useMatchingSandboxBody({
       return;
     }
 
+    let cancelled = false;
+
     const { features, nearestId, nearestPoint } =
       syntheticMatchingFeatures(pendingAnchor);
-    const previews = buildTutorialMatchingPreviews(
+
+    void buildTutorialMatchingPreviews(
       pendingAnchor,
       answer,
       gameArea,
       features,
       nearestId,
-    );
-
-    registerMapDraft({
-      activeTool: "matching",
-      ...tutorialMapDraftBase(gameArea),
-      matching: {
-        seekerPoint: pendingAnchor,
-        nearestFeaturePoint: nearestPoint,
-        boundaryPreview: previews.boundaryPreview,
-        eliminationPreview: previews.eliminationPreview,
-        seekerResolving: false,
-      },
+    ).then((previews) => {
+      if (cancelled) {
+        return;
+      }
+      registerMapDraft({
+        activeTool: "matching",
+        ...tutorialMapDraftBase(gameArea),
+        matching: {
+          seekerPoint: pendingAnchor,
+          nearestFeaturePoint: nearestPoint,
+          boundaryPreview: previews.boundaryPreview,
+          eliminationPreview: previews.eliminationPreview,
+          seekerResolving: false,
+        },
+      });
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     answer,
     committed,

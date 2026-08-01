@@ -73,7 +73,7 @@ npm run wasm:build
 | Half-plane / radar | yes |
 | Geodesic line buffer | yes |
 | Tentacle elimination | yes |
-| Spatial Voronoi | no (TS / d3-geo-voronoi) |
+| Spatial Voronoi | yes (WASM; TS fallback uses d3-delaunay) |
 
 Disk masks may still use the TypeScript CircleUnion path when disks are present and WASM offers no advantage — see ship notes. `dual` mode always returns TypeScript for diagnosis; it never changes player-visible defaults.
 

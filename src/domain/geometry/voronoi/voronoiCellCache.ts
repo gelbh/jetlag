@@ -1,6 +1,7 @@
 import { LRUCache } from "lru-cache";
 import type { FeatureCollection } from "geojson";
-import { geoSpatialVoronoiFromSites } from "../kernel/spatialVoronoi";
+import { resolveClientMaskKernelMode } from "../kernel/resolveClientMaskKernelMode";
+import { runSpatialVoronoi } from "../kernel/voronoiKernelRunner";
 
 const VORONOI_CACHE_MAX = 8;
 
@@ -29,20 +30,20 @@ export function tentacleSitesFingerprint(
     .join("|");
 }
 
-export function getCachedVoronoiCells(
+export async function getCachedVoronoiCellsAsync(
   fingerprint: string,
   sites: Array<{
     lng: number;
     lat: number;
     properties: Record<string, unknown>;
   }>,
-): FeatureCollection {
+): Promise<FeatureCollection> {
   const cached = voronoiCellCache.get(fingerprint);
   if (cached) {
     return cached;
   }
 
-  const cells = geoSpatialVoronoiFromSites(sites);
+  const cells = await runSpatialVoronoi(sites, resolveClientMaskKernelMode());
   voronoiCellCache.set(fingerprint, cells);
   return cells;
 }

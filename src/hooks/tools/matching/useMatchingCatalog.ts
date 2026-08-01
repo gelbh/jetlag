@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { GameArea } from "../../../domain/map/annotations";
 import type { AnnotationRecord } from "../../../domain/map/annotations";
 import {
@@ -118,20 +119,40 @@ export function useMatchingCatalog(input: {
     sessionRules ?? { gameSize: "medium" },
   );
 
-  const matchingBoundaryPreview = useMemo(() => {
+  const [matchingBoundaryPreview, setMatchingBoundaryPreview] = useState<
+    Feature<GeoPolygon | MultiPolygon> | null
+  >(null);
+  const [matchingEliminationPreview, setMatchingEliminationPreview] = useState<
+    Feature<GeoPolygon | MultiPolygon> | null
+  >(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
     if (
       matchingNullAnswer ||
       !matchingNearestFeatureId ||
       matchingFeatures.length === 0
     ) {
-      return null;
+      setMatchingBoundaryPreview(null);
+      return () => {
+        cancelled = true;
+      };
     }
 
-    return buildSameNearestRegion(
+    void buildSameNearestRegion(
       matchingFeatures,
       matchingNearestFeatureId,
       gameArea,
-    );
+    ).then((region) => {
+      if (!cancelled) {
+        setMatchingBoundaryPreview(region);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     gameArea,
     matchingFeatures,
@@ -139,22 +160,35 @@ export function useMatchingCatalog(input: {
     matchingNullAnswer,
   ]);
 
-  const matchingEliminationPreview = useMemo(() => {
+  useEffect(() => {
+    let cancelled = false;
+
     if (
       matchingNullAnswer ||
       !matchingNearestFeatureId ||
       matchingFeatures.length === 0 ||
       matchingAnswer === null
     ) {
-      return null;
+      setMatchingEliminationPreview(null);
+      return () => {
+        cancelled = true;
+      };
     }
 
-    return buildMatchingEliminationRegion(
+    void buildMatchingEliminationRegion(
       matchingFeatures,
       matchingNearestFeatureId,
       gameArea,
       matchingAnswer,
-    );
+    ).then((region) => {
+      if (!cancelled) {
+        setMatchingEliminationPreview(region);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     gameArea,
     matchingAnswer,

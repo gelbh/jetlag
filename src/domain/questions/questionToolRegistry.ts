@@ -19,7 +19,7 @@ type OverlayBuilder = (
   gameArea: GameArea,
   prefix: string,
   mapStyle: MapStyle,
-) => OverlayBuilderResult;
+) => OverlayBuilderResult | Promise<OverlayBuilderResult>;
 
 export const pendingQuestionOverlayBuilders: Partial<
   Record<PendingQuestionToolType, OverlayBuilder>
