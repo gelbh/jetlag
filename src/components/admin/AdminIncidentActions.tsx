@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type {
   IncidentCodingAgentState,
   IncidentMitigationType,
@@ -94,6 +94,12 @@ export function AdminIncidentActions({
   const [localAgent, setLocalAgent] = useState<IncidentCodingAgentState | null>(
     null,
   );
+
+  useEffect(() => {
+    setLocalAgent(null);
+    setCursorError(null);
+    setCursorOk(null);
+  }, [incidentId]);
 
   const actionsDisabled = disabled || !incidentId;
   const canClose = status != null && CLOSEABLE.has(status);
@@ -329,14 +335,22 @@ export function AdminIncidentActions({
           <p className="text-sm text-status-success">{cursorOk}</p>
         ) : null}
         {hasLiveAgent ? (
-          <button
-            type="button"
-            className="btn-secondary uppercase"
-            disabled={actionsDisabled || !agentUrl}
-            onClick={onOpenCursorAgent}
-          >
-            Open Cursor agent
-          </button>
+          <>
+            <button
+              type="button"
+              className="btn-secondary uppercase"
+              disabled={actionsDisabled || !agentUrl}
+              onClick={onOpenCursorAgent}
+            >
+              Open Cursor agent
+            </button>
+            {!agentUrl ? (
+              <p className="jl-incident-module-hint">
+                Agent id is set but no URL was returned — open the hotfix
+                thread for details.
+              </p>
+            ) : null}
+          </>
         ) : (
           <button
             type="button"
