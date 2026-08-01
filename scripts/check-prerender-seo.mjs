@@ -78,7 +78,8 @@ for (const urlPath of policy.indexablePaths) {
   }
   const afterRoot = html.slice(rootOpen);
   const rootText = afterRoot
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    // Match forgiving browser end tags (e.g. </script >, </script foo="bar">).
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/gi, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim();

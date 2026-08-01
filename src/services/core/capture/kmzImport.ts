@@ -63,8 +63,9 @@ function unionPolygonFeatures(
 }
 
 export function parseBoundaryKml(kmlText: string): GameArea {
-  const doc = new DOMParser().parseFromString(kmlText, "text/xml");
-  const parserError = doc.querySelector("parsererror");
+  // XML→GeoJSON only; never inserted into the live DOM as HTML.
+  const doc = new DOMParser().parseFromString(kmlText, "application/xml"); // codeql[js/xss-through-dom]
+  const parserError = doc.getElementsByTagName("parsererror")[0];
   if (parserError) {
     throw new Error("Invalid KML file.");
   }
