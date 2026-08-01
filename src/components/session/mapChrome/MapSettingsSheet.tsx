@@ -13,6 +13,7 @@ import type { GameSize } from "../../../domain/session/size/gameSize";
 import { type AdvancedSessionSettingsValue } from "../../../domain/session/tools/advancedSessionSettings";
 import { AdvancedSessionSettings } from "../settings/AdvancedSessionSettings";
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
+import { getBasemapAttributionText } from "../../../domain/map/mapBasemaps";
 import type { LayerVisibility } from "../../../state/sessionStore";
 import type { NotificationPreferences } from "../../../domain/device/chrome/notifications";
 import { isNativeNotificationsSupported } from "../../../services/core/native/notifications";
@@ -255,9 +256,7 @@ export function MapSettingsSheet({
       </div>
 
       <p className="mt-6 border-t-2 border-border pt-3 text-xs leading-relaxed text-ink-dim">
-        {general.mapStyle === "satellite"
-          ? "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community"
-          : "Map data © OpenStreetMap contributors · © CARTO"}
+        {getBasemapAttributionText(general.mapStyle)}
       </p>
 
       <CurseReferenceSheet

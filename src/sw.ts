@@ -16,6 +16,10 @@ import {
   ANNOTATION_SYNC_MESSAGE_TYPE,
   ANNOTATION_SYNC_TAG,
 } from "./services/session/backgroundSync";
+import {
+  isCartoTileUrl,
+  isEsriWorldImageryTileUrl,
+} from "./domain/map/mapTileHosts";
 
 declare let self: ServiceWorkerGlobalScope;
 
@@ -35,10 +39,7 @@ registerRoute(
 );
 
 registerRoute(
-  ({ url }) =>
-    /^https:\/\/([a-d]\.)?basemaps\.cartocdn\.com\/(rastertiles\/voyager|dark_all)\//i.test(
-      url.href,
-    ),
+  ({ url }) => isCartoTileUrl(url.href),
   new CacheFirst({
     cacheName: "carto-voyager-tiles",
     plugins: [
@@ -51,10 +52,7 @@ registerRoute(
 );
 
 registerRoute(
-  ({ url }) =>
-    /^https:\/\/server\.arcgisonline\.com\/ArcGIS\/rest\/services\/World_Imagery\/MapServer\/tile\//i.test(
-      url.href,
-    ),
+  ({ url }) => isEsriWorldImageryTileUrl(url.href),
   new CacheFirst({
     cacheName: "esri-satellite-tiles",
     plugins: [
