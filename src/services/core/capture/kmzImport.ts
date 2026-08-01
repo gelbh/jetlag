@@ -67,7 +67,7 @@ function parseKmlDocument(kmlText: string) {
   try {
     const doc = new DOMParser({
       onError(level) {
-        if (level === "error" || level === "fatalError") {
+        if (level === "warning" || level === "error" || level === "fatalError") {
           throw new Error("Invalid KML file.");
         }
       },
