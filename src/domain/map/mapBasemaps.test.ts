@@ -57,6 +57,10 @@ describe("mapTileHosts", () => {
       ),
     ).toBe(true);
     expect(isMapTileHostname("a.basemaps.cartocdn.com")).toBe(true);
+    expect(isMapTileHostname("server.arcgisonline.com")).toBe(true);
+    expect(isMapTileHostname("evil.arcgisonline.com.attacker.example")).toBe(
+      false,
+    );
     expect(isMapTileHostname("tile.openstreetmap.org")).toBe(false);
   });
 });

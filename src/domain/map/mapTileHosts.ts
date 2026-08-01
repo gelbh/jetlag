@@ -21,8 +21,7 @@ export function isEsriWorldImageryTileUrl(href: string): boolean {
 /** Hostname-only check for Playwright external-asset gating. */
 export function isMapTileHostname(hostname: string): boolean {
   return (
-    hostname.endsWith(".basemaps.cartocdn.com") ||
-    hostname === "basemaps.cartocdn.com" ||
-    hostname.includes("arcgisonline.com")
+    /^(?:[a-d]\.)?basemaps\.cartocdn\.com$/i.test(hostname) ||
+    /^server\.arcgisonline\.com$/i.test(hostname)
   );
 }
