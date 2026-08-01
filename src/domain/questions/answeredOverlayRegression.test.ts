@@ -68,11 +68,11 @@ function answeredRadarAnnotation(): AnnotationRecord {
 }
 
 describe("answered overlay regression", () => {
-  it("drops pending radar/thermometer overlays after answer so they cannot double-shade", () => {
-    expect(
+  it("drops pending radar/thermometer overlays after answer so they cannot double-shade", async () => {
+    await expect(
       buildPendingQuestionOverlay(pendingRadar("answered"), gameArea),
-    ).toBeNull();
-    expect(
+    ).resolves.toBeNull();
+    await expect(
       buildPendingQuestionOverlay(
         {
           ...pendingRadar("answered"),
@@ -97,11 +97,14 @@ describe("answered overlay regression", () => {
         },
         gameArea,
       ),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
-  it("keeps answered radar elimination on the annotation while pending has no polygon shade", () => {
-    const pending = buildPendingQuestionOverlay(pendingRadar("pending"), gameArea);
+  it("keeps answered radar elimination on the annotation while pending has no polygon shade", async () => {
+    const pending = await buildPendingQuestionOverlay(
+      pendingRadar("pending"),
+      gameArea,
+    );
     expect(pending?.overlays.some((overlay) => overlay.kind === "polygon")).toBe(
       false,
     );

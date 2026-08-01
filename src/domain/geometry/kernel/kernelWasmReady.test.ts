@@ -9,7 +9,7 @@ describe("KERNEL_WASM_READY", () => {
     expect(KERNEL_WASM_READY.geodesicLineBuffer).toBe(true);
   });
 
-  it("keeps spatial voronoi not ready; tentacle ready after Phase E", () => {
+  it("keeps spatial voronoi not ready until perf gate; tentacle ready", () => {
     expect(KERNEL_WASM_READY.spatialVoronoi).toBe(false);
     expect(KERNEL_WASM_READY.tentacleEliminationRegion).toBe(true);
   });

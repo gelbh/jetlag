@@ -1,4 +1,4 @@
-//! Geometry kernel (Rust / WASM) — mask + half-plane + geodesic.
+//! Geometry kernel (Rust / WASM) — mask + half-plane + geodesic + voronoi.
 
 pub mod geodesic;
 pub mod geodesic_buffer;
@@ -6,6 +6,7 @@ pub mod half_plane;
 pub mod mask;
 pub mod tentacle;
 pub mod types;
+pub mod voronoi;
 
 pub use geodesic_buffer::geodesic_line_buffer;
 pub use half_plane::{
@@ -32,6 +33,7 @@ use tentacle::{
     game_area_from_json, parse_anchor, parse_sites, parse_voronoi_cells,
 };
 use types::{DiskSpecJson, EliminationUnionInputJson};
+use voronoi::spatial_voronoi_from_sites_json as spatial_voronoi_native;
 use wasm_bindgen::prelude::*;
 
 fn js_err(msg: impl Into<String>) -> JsValue {
@@ -178,6 +180,13 @@ pub fn geodesic_line_buffer_json(
         distance_meters,
         sample_spacing_meters,
     ))
+}
+
+/// WASM export: spatial Voronoi cells for sites `[{lng,lat,properties},…]`.
+#[wasm_bindgen]
+pub fn build_spatial_voronoi_json(sites_json: &str) -> Result<JsValue, JsValue> {
+    let json = spatial_voronoi_native(sites_json).map_err(js_err)?;
+    Ok(JsValue::from_str(&json))
 }
 
 /// WASM export: tentacle elimination within search disk. Anchor is `[lat,lng]` JSON.

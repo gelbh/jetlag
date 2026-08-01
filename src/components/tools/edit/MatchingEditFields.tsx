@@ -35,7 +35,7 @@ export function MatchingEditFields({
     annotation.metadata.matchingAnswer ?? null,
   );
 
-  const save = useCallback(() => {
+  const save = useCallback(async () => {
     if (
       annotation.metadata.matchingCategory &&
       matchingAnswer &&
@@ -45,12 +45,12 @@ export function MatchingEditFields({
       const features = deserializeMatchingFeatures(
         annotation.metadata.matchingFeaturesJson,
       );
-      const boundaryRegion = buildSameNearestRegion(
+      const boundaryRegion = await buildSameNearestRegion(
         features,
         annotation.metadata.matchingNearestFeatureId,
         gameArea,
       );
-      const eliminationRegion = buildMatchingEliminationRegion(
+      const eliminationRegion = await buildMatchingEliminationRegion(
         features,
         annotation.metadata.matchingNearestFeatureId,
         gameArea,

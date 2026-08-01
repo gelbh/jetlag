@@ -55,17 +55,20 @@ function basePendingQuestion(
 }
 
 describe("buildPendingQuestionOverlay", () => {
-  it("returns null for non-pending questions", () => {
-    expect(
+  it("returns null for non-pending questions", async () => {
+    await expect(
       buildPendingQuestionOverlay(
         basePendingQuestion({ status: "walking" }),
         gameArea,
       ),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
-  it("builds radar circle and center marker without elimination shading", () => {
-    const result = buildPendingQuestionOverlay(basePendingQuestion(), gameArea);
+  it("builds radar circle and center marker without elimination shading", async () => {
+    const result = await buildPendingQuestionOverlay(
+      basePendingQuestion(),
+      gameArea,
+    );
 
     expect(result).not.toBeNull();
     expect(result?.overlays.some((overlay) => overlay.kind === "circle")).toBe(
@@ -79,8 +82,8 @@ describe("buildPendingQuestionOverlay", () => {
     );
   });
 
-  it("builds thermometer axis markers for pending line geometry", () => {
-    const result = buildPendingQuestionOverlay(
+  it("builds thermometer axis markers for pending line geometry", async () => {
+    const result = await buildPendingQuestionOverlay(
       basePendingQuestion({
         toolType: "thermometer",
         placement: {
@@ -111,9 +114,9 @@ describe("buildPendingQuestionOverlay", () => {
     ).toBe(2);
   });
 
-  it("builds tentacle search circle and poi markers", () => {
+  it("builds tentacle search circle and poi markers", async () => {
     const largeRadius = milesToMeters(15);
-    const result = buildPendingQuestionOverlay(
+    const result = await buildPendingQuestionOverlay(
       basePendingQuestion({
         toolType: "tentacle",
         placement: {
@@ -152,7 +155,7 @@ describe("buildPendingQuestionOverlay", () => {
     ).toBe(true);
   });
 
-  it("builds matching boundary and feature markers from stored metadata", () => {
+  it("builds matching boundary and feature markers from stored metadata", async () => {
     const features = serializeMatchingFeatures([
       {
         id: "museum-a",
@@ -168,7 +171,7 @@ describe("buildPendingQuestionOverlay", () => {
       },
     ]);
 
-    const result = buildPendingQuestionOverlay(
+    const result = await buildPendingQuestionOverlay(
       basePendingQuestion({
         toolType: "matching",
         placement: {
@@ -198,8 +201,8 @@ describe("buildPendingQuestionOverlay", () => {
     );
   });
 
-  it("builds measuring boundary and target marker from region input", () => {
-    const result = buildPendingQuestionOverlay(
+  it("builds measuring boundary and target marker from region input", async () => {
+    const result = await buildPendingQuestionOverlay(
       basePendingQuestion({
         toolType: "measuring",
         placement: {
@@ -235,8 +238,8 @@ describe("buildPendingQuestionOverlay", () => {
     );
   });
 
-  it("returns null for invalid geometry", () => {
-    expect(
+  it("returns null for invalid geometry", async () => {
+    await expect(
       buildPendingQuestionOverlay(
         basePendingQuestion({
           placement: {
@@ -246,11 +249,11 @@ describe("buildPendingQuestionOverlay", () => {
         }),
         gameArea,
       ),
-    ).toBeNull();
+    ).resolves.toBeNull();
   });
 
-  it("collects overlays for all pending questions", () => {
-    const results = buildPendingQuestionOverlays(
+  it("collects overlays for all pending questions", async () => {
+    const results = await buildPendingQuestionOverlays(
       [basePendingQuestion(), basePendingQuestion({ id: "pq-2" })],
       gameArea,
     );
@@ -258,8 +261,8 @@ describe("buildPendingQuestionOverlay", () => {
     expect(results).toHaveLength(2);
   });
 
-  it("skips corrupt measuring region JSON without failing the batch", () => {
-    const results = buildPendingQuestionOverlays(
+  it("skips corrupt measuring region JSON without failing the batch", async () => {
+    const results = await buildPendingQuestionOverlays(
       [
         basePendingQuestion({
           id: "pq-measuring-bad",
@@ -294,8 +297,8 @@ describe("buildPendingQuestionOverlay", () => {
     );
   });
 
-  it("skips corrupt tentacle pois JSON without failing the batch", () => {
-    const result = buildPendingQuestionOverlay(
+  it("skips corrupt tentacle pois JSON without failing the batch", async () => {
+    const result = await buildPendingQuestionOverlay(
       basePendingQuestion({
         id: "pq-tentacle-bad",
         toolType: "tentacle",

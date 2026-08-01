@@ -96,15 +96,10 @@ function useMatchingSandboxBody({
       return;
     }
 
+    let cancelled = false;
+
     const { features, nearestId, nearestPoint } =
       syntheticMatchingFeatures(pendingAnchor);
-    const previews = buildTutorialMatchingPreviews(
-      pendingAnchor,
-      answer,
-      gameArea,
-      features,
-      nearestId,
-    );
 
     registerMapDraft({
       activeTool: "matching",
@@ -112,11 +107,55 @@ function useMatchingSandboxBody({
       matching: {
         seekerPoint: pendingAnchor,
         nearestFeaturePoint: nearestPoint,
-        boundaryPreview: previews.boundaryPreview,
-        eliminationPreview: previews.eliminationPreview,
-        seekerResolving: false,
+        boundaryPreview: null,
+        eliminationPreview: null,
+        seekerResolving: true,
       },
     });
+
+    void buildTutorialMatchingPreviews(
+      pendingAnchor,
+      answer,
+      gameArea,
+      features,
+      nearestId,
+    )
+      .then((previews) => {
+        if (cancelled) {
+          return;
+        }
+        registerMapDraft({
+          activeTool: "matching",
+          ...tutorialMapDraftBase(gameArea),
+          matching: {
+            seekerPoint: pendingAnchor,
+            nearestFeaturePoint: nearestPoint,
+            boundaryPreview: previews.boundaryPreview,
+            eliminationPreview: previews.eliminationPreview,
+            seekerResolving: false,
+          },
+        });
+      })
+      .catch(() => {
+        if (cancelled) {
+          return;
+        }
+        registerMapDraft({
+          activeTool: "matching",
+          ...tutorialMapDraftBase(gameArea),
+          matching: {
+            seekerPoint: pendingAnchor,
+            nearestFeaturePoint: nearestPoint,
+            boundaryPreview: null,
+            eliminationPreview: null,
+            seekerResolving: false,
+          },
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     answer,
     committed,

@@ -59,6 +59,15 @@ export function build_radar_shaded_region_json() {
 export function geodesic_line_buffer_json() {
   throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
 }
+export function build_tentacle_elimination_region_json() {
+  throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
+}
+export function build_tentacle_poi_answer_elimination_region_json() {
+  throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
+}
+export function build_spatial_voronoi_json() {
+  throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
+}
 export default {};
 `;
     },

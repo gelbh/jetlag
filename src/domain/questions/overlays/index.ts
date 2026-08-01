@@ -6,11 +6,11 @@ import type { PendingQuestionOverlayResult } from "./shared";
 
 export type { PendingQuestionOverlayResult } from "./shared";
 
-export function buildPendingQuestionOverlay(
+export async function buildPendingQuestionOverlay(
   question: PendingQuestionRecord,
   gameArea: GameArea,
   mapStyle: MapStyle = "standard",
-): PendingQuestionOverlayResult | null {
+): Promise<PendingQuestionOverlayResult | null> {
   if (question.status !== "pending") {
     return null;
   }
@@ -23,7 +23,7 @@ export function buildPendingQuestionOverlay(
   const prefix = `pending-${question.id}`;
   let result;
   try {
-    result = builder(question, gameArea, prefix, mapStyle);
+    result = await builder(question, gameArea, prefix, mapStyle);
   } catch {
     return null;
   }
@@ -39,12 +39,17 @@ export function buildPendingQuestionOverlay(
   };
 }
 
-export function buildPendingQuestionOverlays(
+export async function buildPendingQuestionOverlays(
   questions: readonly PendingQuestionRecord[],
   gameArea: GameArea,
   mapStyle: MapStyle = "standard",
-): PendingQuestionOverlayResult[] {
-  return questions
-    .map((question) => buildPendingQuestionOverlay(question, gameArea, mapStyle))
-    .filter((result): result is PendingQuestionOverlayResult => result !== null);
+): Promise<PendingQuestionOverlayResult[]> {
+  const results = await Promise.all(
+    questions.map((question) =>
+      buildPendingQuestionOverlay(question, gameArea, mapStyle),
+    ),
+  );
+  return results.filter(
+    (result): result is PendingQuestionOverlayResult => result !== null,
+  );
 }

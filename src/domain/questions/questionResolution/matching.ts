@@ -18,11 +18,11 @@ export function matchingAnswerFromReplyId(
   return null;
 }
 
-export function resolveMatchingPendingQuestion(
+export async function resolveMatchingPendingQuestion(
   pending: PendingQuestionRecord,
   answer: MatchingAnswer,
   gameArea: GameArea,
-): Omit<AnnotationRecord, "id" | "sessionId" | "status"> | null {
+): Promise<Omit<AnnotationRecord, "id" | "sessionId" | "status"> | null> {
   const metadata = pending.placement.metadata;
   const featuresJson = metadata.matchingFeaturesJson;
   const seekerFeatureId = metadata.matchingNearestFeatureId;
@@ -50,12 +50,12 @@ export function resolveMatchingPendingQuestion(
     };
   }
 
-  const boundaryRegion = buildSameNearestRegion(
+  const boundaryRegion = await buildSameNearestRegion(
     features,
     seekerFeatureId,
     gameArea,
   );
-  const eliminationRegion = buildMatchingEliminationRegion(
+  const eliminationRegion = await buildMatchingEliminationRegion(
     features,
     seekerFeatureId,
     gameArea,

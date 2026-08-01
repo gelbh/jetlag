@@ -198,14 +198,14 @@ export async function performMatchingCommit(
 
   const boundaryRegion = matchingNullAnswer
     ? null
-    : buildSameNearestRegion(
+    : await buildSameNearestRegion(
         matchingFeatures,
         matchingNearestFeatureId!,
         gameArea,
       );
   const eliminationRegion = matchingNullAnswer
     ? null
-    : buildMatchingEliminationRegion(
+    : await buildMatchingEliminationRegion(
         matchingFeatures,
         matchingNearestFeatureId!,
         gameArea,

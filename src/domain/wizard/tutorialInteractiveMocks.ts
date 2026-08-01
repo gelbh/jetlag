@@ -62,21 +62,30 @@ export function syntheticMatchingFeatures(anchor: LatLngTuple): {
   return { features, nearestId, nearestPoint };
 }
 
-export function buildTutorialMatchingPreviews(
+export async function buildTutorialMatchingPreviews(
   _anchor: LatLngTuple,
   answer: MatchingAnswer | null,
   gameArea: GameArea,
   features: MatchingFeature[],
   nearestId: string,
-): {
+): Promise<{
   boundaryPreview: Feature<GeoPolygon | MultiPolygon> | null;
   eliminationPreview: Feature<GeoPolygon | MultiPolygon> | null;
-} {
-  const boundaryPreview = buildSameNearestRegion(features, nearestId, gameArea);
+}> {
+  const boundaryPreview = await buildSameNearestRegion(
+    features,
+    nearestId,
+    gameArea,
+  );
   const eliminationPreview =
     answer === null
       ? null
-      : buildMatchingEliminationRegion(features, nearestId, gameArea, answer);
+      : await buildMatchingEliminationRegion(
+          features,
+          nearestId,
+          gameArea,
+          answer,
+        );
 
   return { boundaryPreview, eliminationPreview };
 }

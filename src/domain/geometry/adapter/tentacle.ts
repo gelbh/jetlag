@@ -10,7 +10,7 @@ import {
   type TentacleSite,
 } from "../kernel/tentacleKernelRunner";
 import {
-  getCachedVoronoiCells,
+  getCachedVoronoiCellsAsync,
   tentacleSitesFingerprint,
 } from "../voronoi/voronoiCellCache";
 
@@ -29,9 +29,11 @@ function toTentacleSites(pois: readonly TentaclePoi[]): TentacleSite[] {
   }));
 }
 
-function voronoiCellsForPois(pois: readonly TentaclePoi[]): FeatureCollection {
+async function voronoiCellsForPois(
+  pois: readonly TentaclePoi[],
+): Promise<FeatureCollection> {
   const fingerprint = tentacleSitesFingerprint(pois);
-  return getCachedVoronoiCells(
+  return getCachedVoronoiCellsAsync(
     fingerprint,
     pois.map((poi) => ({
       lng: poi.lng,
@@ -48,7 +50,7 @@ export async function buildTentacleEliminationRegion(
   answeredPoiId: string,
   gameArea: GameArea,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
-  const cells = voronoiCellsForPois(pois);
+  const cells = await voronoiCellsForPois(pois);
   const mode = resolveClientMaskKernelMode();
   return dispatchTentacleEliminationRegion(
     {
@@ -80,7 +82,7 @@ export async function buildTentaclePoiAnswerEliminationRegion(
     return cached;
   }
 
-  const cells = voronoiCellsForPois(pois);
+  const cells = await voronoiCellsForPois(pois);
   const mode = resolveClientMaskKernelMode();
   const region = await dispatchTentaclePoiAnswerEliminationRegion(
     {
