@@ -95,6 +95,24 @@ export interface IncidentHotfixState {
   publishedAt?: string;
 }
 
+export type IncidentCodingAgentStatus =
+  | "launched"
+  | "failed"
+  | "misconfigured";
+
+/** Private coding-agent / Cursor hotfix launch state on the incident doc. */
+export interface IncidentCodingAgentState {
+  status: IncidentCodingAgentStatus;
+  cursorAgentId?: string | null;
+  cursorAgentUrl?: string | null;
+  cursorRunId?: string | null;
+  error?: string | null;
+  forced?: boolean;
+  forcedByUid?: string | null;
+  launchedAt?: string;
+  updatedAt?: string;
+}
+
 export interface IncidentRecord {
   id: string;
   status: IncidentStatus;
@@ -110,6 +128,8 @@ export interface IncidentRecord {
   email?: IncidentEmailState;
   mitigations?: IncidentMitigationRecord[];
   hotfix?: IncidentHotfixState;
+  /** Cursor coding-agent launch state (admin hotfix thread). */
+  agent?: IncidentCodingAgentState | null;
   /** Active session-ops summon id when a fix agent is running. */
   activeSessionOpsSummonId?: string | null;
   /** Summons consumed on this incident (free/premium capped). */

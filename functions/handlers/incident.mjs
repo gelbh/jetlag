@@ -69,7 +69,16 @@ import {
   SESSION_OPS_TURN_CAP,
   supportAgentTurnHandler,
 } from "../incident/supportAgentTurn.mjs";
-import { launchCursorHotfixForIncident } from "../incident/launchCursorHotfix.mjs";
+import {
+  CURSOR_HOTFIX_FAILED,
+  CURSOR_HOTFIX_MISCONFIGURED,
+  CURSOR_HOTFIX_SKIPPED,
+  launchCursorHotfixForIncident,
+} from "../incident/launchCursorHotfix.mjs";
+import {
+  CURSOR_HOTFIX_ALREADY_LAUNCHED,
+  launchIncidentCursorAgentHandler,
+} from "../incident/launchIncidentCursorAgent.mjs";
 import { sendSessionNotification } from "../session/sessionNotificationTriggers.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
@@ -203,6 +212,23 @@ function mapIncidentError(error) {
       throw new HttpsError(
         "failed-precondition",
         "Session-ops summon not found. Ask the fix agent again.",
+      );
+    case CURSOR_HOTFIX_MISCONFIGURED:
+      throw new HttpsError(
+        "failed-precondition",
+        "Cursor API is not configured.",
+      );
+    case CURSOR_HOTFIX_FAILED:
+      throw new HttpsError("internal", "Could not launch the Cursor agent.");
+    case CURSOR_HOTFIX_ALREADY_LAUNCHED:
+      throw new HttpsError(
+        "failed-precondition",
+        "A Cursor agent is already running for this incident.",
+      );
+    case CURSOR_HOTFIX_SKIPPED:
+      throw new HttpsError(
+        "failed-precondition",
+        "Could not launch the Cursor agent for this incident.",
       );
     default:
       throw error;
@@ -345,6 +371,37 @@ export const publishIncidentHotfix = onCall(
         graceSeconds: request.data?.graceSeconds,
         uid: request.auth.uid,
       });
+    } catch (error) {
+      mapIncidentError(error);
+    }
+  }),
+);
+
+/** Admin force-launch of Cursor coding agent (private hotfix thread). */
+export const launchIncidentCursorAgent = onCall(
+  {
+    secrets: [sentryDsnSecret, cursorApiKey],
+    enforceAppCheck: true,
+  },
+  withSentryEventHandler(async (request) => {
+    requireAdminAuth(request.auth);
+
+    const db = getFirestore();
+    try {
+      return await launchIncidentCursorAgentHandler(
+        db,
+        {
+          incidentId: request.data?.incidentId,
+          uid: request.auth.uid,
+        },
+        {
+          launchDeps: {
+            apiKey: cursorApiKey.value(),
+            repositoryUrl: cursorHotfixRepoUrl.value(),
+            startingRef: cursorHotfixStartingRef.value(),
+          },
+        },
+      );
     } catch (error) {
       mapIncidentError(error);
     }

@@ -271,72 +271,45 @@ export async function appendHotfixThreadMessage(
 }
 
 /**
- * Launch Cursor for a clear-bug incident and write agent_meta into hotfix thread.
+ * @param {object | null | undefined} agentExtras
+ * @returns {object}
+ */
+function normalizeAgentExtras(agentExtras) {
+  if (!agentExtras || typeof agentExtras !== "object") {
+    return {};
+  }
+  return { ...agentExtras };
+}
+
+/**
+ * Shared Cursor launch body: prompt → API → hotfix thread + incident.agent.
+ * Callers own triage gating and force metadata.
  *
  * @param db
  * @param {{
  *   incidentId: string,
- *   diagnostics?: object,
+ *   incidentRef: object,
+ *   incident: object,
+ *   diagnostics: object,
+ *   triage: object,
  *   adminPrompt?: string | null,
- *   triage?: object | null,
- * }} input
- * @param {{
- *   apiKey?: string,
- *   repositoryUrl?: string,
- *   startingRef?: string,
- *   autoCreatePR?: boolean,
- *   baseUrl?: string,
- *   fetch?: typeof fetch,
- *   now?: () => Date,
- *   generateId?: () => string,
- *   createAgent?: typeof createCursorCloudAgent,
- *   buildPrompt?: typeof buildCursorHotfixPrompt,
- *   triage?: typeof triageIncidentDiagnostics,
- * }} [deps]
+ *   agentExtras?: object,
+ *   metaLead: string,
+ * }} ctx
+ * @param {object} deps
  */
-export async function launchCursorHotfixForIncident(db, input, deps = {}) {
-  const incidentId =
-    typeof input?.incidentId === "string" ? input.incidentId : "";
-  if (!incidentId) {
-    return { launched: false, code: CURSOR_HOTFIX_SKIPPED, reason: "no_incident" };
-  }
-
-  const incidentRef = db.collection("incidents").doc(incidentId);
-  const incidentSnap = await incidentRef.get();
-  if (!incidentSnap.exists) {
-    return { launched: false, code: CURSOR_HOTFIX_SKIPPED, reason: "not_found" };
-  }
-
-  const incident = incidentSnap.data() ?? {};
-  if (
-    incident.agent &&
-    typeof incident.agent === "object" &&
-    typeof incident.agent.cursorAgentId === "string" &&
-    incident.agent.cursorAgentId
-  ) {
-    return {
-      launched: false,
-      code: CURSOR_HOTFIX_SKIPPED,
-      reason: "already_launched",
-      agentId: incident.agent.cursorAgentId,
-    };
-  }
-
-  const diagnostics = input?.diagnostics ?? incident.diagnostics ?? {};
-  const triageFn = deps.triage ?? triageIncidentDiagnostics;
-  const triage =
-    input?.triage && typeof input.triage === "object"
-      ? input.triage
-      : triageFn(diagnostics);
-
-  if (triage.outcome !== TRIAGE_OUTCOME_AGENT) {
-    return {
-      launched: false,
-      code: CURSOR_HOTFIX_SKIPPED,
-      reason: triage.reason ?? "not_agent",
-      triage,
-    };
-  }
+async function executeCursorHotfixLaunch(db, ctx, deps = {}) {
+  const {
+    incidentId,
+    incidentRef,
+    incident,
+    diagnostics,
+    triage,
+    adminPrompt,
+    agentExtras,
+    metaLead,
+  } = ctx;
+  const extras = normalizeAgentExtras(agentExtras);
 
   const apiKey = typeof deps.apiKey === "string" ? deps.apiKey : "";
   const repositoryUrl =
@@ -362,6 +335,7 @@ export async function launchCursorHotfixForIncident(db, input, deps = {}) {
           status: "misconfigured",
           error: CURSOR_HOTFIX_MISCONFIGURED,
           updatedAt: nowIso,
+          ...extras,
         },
         updatedAt: nowIso,
       },
@@ -379,7 +353,7 @@ export async function launchCursorHotfixForIncident(db, input, deps = {}) {
     incidentId,
     diagnostics,
     triage,
-    adminPrompt: input?.adminPrompt ?? incident.adminPrompt ?? "",
+    adminPrompt: adminPrompt ?? incident.adminPrompt ?? "",
   });
 
   const now = deps.now ?? (() => new Date());
@@ -423,6 +397,7 @@ export async function launchCursorHotfixForIncident(db, input, deps = {}) {
           status: "failed",
           error: code,
           updatedAt: nowIso,
+          ...extras,
         },
         updatedAt: nowIso,
       },
@@ -432,7 +407,7 @@ export async function launchCursorHotfixForIncident(db, input, deps = {}) {
   }
 
   const agentMetaText = [
-    "Coding agent launched for clear-bug triage.",
+    metaLead,
     `Agent id: ${agentResult.agentId}`,
     agentResult.agentUrl ? `URL: ${agentResult.agentUrl}` : null,
     agentResult.runId ? `Run: ${agentResult.runId}` : null,
@@ -467,6 +442,7 @@ export async function launchCursorHotfixForIncident(db, input, deps = {}) {
         cursorRunId: agentResult.runId ?? null,
         launchedAt: nowIso,
         updatedAt: nowIso,
+        ...extras,
       },
       updatedAt: nowIso,
     },
@@ -481,4 +457,163 @@ export async function launchCursorHotfixForIncident(db, input, deps = {}) {
     triage,
     promptText,
   };
+}
+
+/**
+ * Load incident and short-circuit if a Cursor agent id already exists.
+ * @returns {Promise<
+ *   | { ok: false, result: object }
+ *   | { ok: true, incidentId: string, incidentRef: object, incident: object }
+ * >}
+ */
+async function loadIncidentForCursorLaunch(db, incidentId) {
+  if (!incidentId) {
+    return {
+      ok: false,
+      result: {
+        launched: false,
+        code: CURSOR_HOTFIX_SKIPPED,
+        reason: "no_incident",
+      },
+    };
+  }
+
+  const incidentRef = db.collection("incidents").doc(incidentId);
+  const incidentSnap = await incidentRef.get();
+  if (!incidentSnap.exists) {
+    return {
+      ok: false,
+      result: {
+        launched: false,
+        code: CURSOR_HOTFIX_SKIPPED,
+        reason: "not_found",
+      },
+    };
+  }
+
+  const incident = incidentSnap.data() ?? {};
+  if (
+    incident.agent &&
+    typeof incident.agent === "object" &&
+    typeof incident.agent.cursorAgentId === "string" &&
+    incident.agent.cursorAgentId &&
+    typeof incident.agent.cursorAgentUrl === "string" &&
+    incident.agent.cursorAgentUrl
+  ) {
+    return {
+      ok: false,
+      result: {
+        launched: false,
+        code: CURSOR_HOTFIX_SKIPPED,
+        reason: "already_launched",
+        agentId: incident.agent.cursorAgentId,
+      },
+    };
+  }
+
+  return { ok: true, incidentId, incidentRef, incident };
+}
+
+/**
+ * Clear-bug triage gate → Cursor Cloud Agents API → private hotfix thread.
+ * Create-path entry; does not accept admin force flags.
+ *
+ * @param db
+ * @param {{
+ *   incidentId: string,
+ *   diagnostics?: object,
+ *   adminPrompt?: string | null,
+ *   triage?: object | null,
+ * }} input
+ * @param {object} [deps]
+ */
+export async function launchCursorHotfixForIncident(db, input, deps = {}) {
+  const incidentId =
+    typeof input?.incidentId === "string" ? input.incidentId : "";
+  const loaded = await loadIncidentForCursorLaunch(db, incidentId);
+  if (!loaded.ok) {
+    return loaded.result;
+  }
+
+  const { incidentRef, incident } = loaded;
+  const diagnostics = input?.diagnostics ?? incident.diagnostics ?? {};
+  const triageFn = deps.triage ?? triageIncidentDiagnostics;
+  const triage =
+    input?.triage && typeof input.triage === "object"
+      ? input.triage
+      : triageFn(diagnostics);
+
+  if (triage.outcome !== TRIAGE_OUTCOME_AGENT) {
+    return {
+      launched: false,
+      code: CURSOR_HOTFIX_SKIPPED,
+      reason: triage.reason ?? "not_agent",
+      triage,
+    };
+  }
+
+  return executeCursorHotfixLaunch(
+    db,
+    {
+      incidentId,
+      incidentRef,
+      incident,
+      diagnostics,
+      triage,
+      adminPrompt: input?.adminPrompt ?? incident.adminPrompt ?? "",
+      metaLead: "Coding agent launched for clear-bug triage.",
+    },
+    deps,
+  );
+}
+
+/**
+ * Admin force-launch: same core as clear-bug path, no triage outcome gate.
+ *
+ * @param db
+ * @param {{
+ *   incidentId: string,
+ *   diagnostics?: object,
+ *   adminPrompt?: string | null,
+ *   triage?: object | null,
+ *   forcedByUid?: string | null,
+ * }} input
+ * @param {object} [deps]
+ */
+export async function forceLaunchCursorHotfixForIncident(db, input, deps = {}) {
+  const incidentId =
+    typeof input?.incidentId === "string" ? input.incidentId : "";
+  const loaded = await loadIncidentForCursorLaunch(db, incidentId);
+  if (!loaded.ok) {
+    return loaded.result;
+  }
+
+  const { incidentRef, incident } = loaded;
+  const diagnostics = input?.diagnostics ?? incident.diagnostics ?? {};
+  const triageFn = deps.triage ?? triageIncidentDiagnostics;
+  const triage =
+    input?.triage && typeof input.triage === "object"
+      ? input.triage
+      : triageFn(diagnostics);
+
+  return executeCursorHotfixLaunch(
+    db,
+    {
+      incidentId,
+      incidentRef,
+      incident,
+      diagnostics,
+      triage,
+      adminPrompt: input?.adminPrompt ?? incident.adminPrompt ?? "",
+      agentExtras: {
+        forced: true,
+        forcedByUid:
+          typeof input?.forcedByUid === "string" && input.forcedByUid
+            ? input.forcedByUid
+            : null,
+      },
+      metaLead: "Coding agent force-launched by admin.",
+    },
+    deps,
+  );
 }

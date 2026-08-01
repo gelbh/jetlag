@@ -262,7 +262,7 @@ describe("AdminIncidentDetail", () => {
 });
 
 describe("AdminIncidentActions", () => {
-  it("keeps Launch Cursor agent disabled and wires mitigation + hotfix", async () => {
+  it("launches Cursor agent and wires mitigation + hotfix", async () => {
     const applyMitigationFn = vi.fn().mockResolvedValue({
       mitigationId: "m1",
       type: "soft_reload",
@@ -272,18 +272,27 @@ describe("AdminIncidentActions", () => {
       graceSeconds: 30,
       fannedOutSessionCount: 2,
     });
+    const launchCursorAgentFn = vi.fn().mockResolvedValue({
+      launched: true,
+      agentId: "bc-1",
+      agentUrl: "https://cursor.com/agents/bc-1",
+      status: "launched",
+    });
 
     renderWithRouter(
       <AdminIncidentActions
         incidentId="inc-1"
         applyMitigationFn={applyMitigationFn}
         publishHotfixFn={publishHotfixFn}
+        launchCursorAgentFn={launchCursorAgentFn}
       />,
     );
 
+    fireEvent.click(screen.getByRole("button", { name: "Launch Cursor agent" }));
+    expect(launchCursorAgentFn).toHaveBeenCalledWith("inc-1");
     expect(
-      screen.getByRole("button", { name: "Launch Cursor agent" }),
-    ).toBeDisabled();
+      await screen.findByRole("button", { name: "Open Cursor agent" }),
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Apply mitigation" }));
     expect(applyMitigationFn).toHaveBeenCalledWith(
@@ -296,6 +305,49 @@ describe("AdminIncidentActions", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Publish hotfix" }));
     expect(publishHotfixFn).toHaveBeenCalledWith("inc-1", "0.9.5.1", 30);
+  });
+
+  it("opens Cursor agent when already launched", () => {
+    const openExternalUrlFn = vi.fn();
+    renderWithRouter(
+      <AdminIncidentActions
+        incidentId="inc-1"
+        agent={{
+          status: "launched",
+          cursorAgentId: "bc-live",
+          cursorAgentUrl: "https://cursor.com/agents/bc-live",
+        }}
+        openExternalUrlFn={openExternalUrlFn}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Open Cursor agent" }));
+    expect(openExternalUrlFn).toHaveBeenCalledWith(
+      "https://cursor.com/agents/bc-live",
+    );
+  });
+
+  it("shows Retry launch when misconfigured", async () => {
+    const launchCursorAgentFn = vi.fn().mockResolvedValue({
+      launched: true,
+      agentId: "bc-retry",
+      agentUrl: "https://cursor.com/agents/bc-retry",
+      status: "launched",
+    });
+
+    renderWithRouter(
+      <AdminIncidentActions
+        incidentId="inc-1"
+        agent={{ status: "misconfigured", error: "CURSOR_HOTFIX_MISCONFIGURED" }}
+        launchCursorAgentFn={launchCursorAgentFn}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Retry launch" }));
+    expect(launchCursorAgentFn).toHaveBeenCalledWith("inc-1");
+    expect(
+      await screen.findByRole("button", { name: "Open Cursor agent" }),
+    ).toBeInTheDocument();
   });
 });
 
