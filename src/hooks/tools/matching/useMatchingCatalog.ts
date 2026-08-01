@@ -140,15 +140,22 @@ export function useMatchingCatalog(input: {
       };
     }
 
+    setMatchingBoundaryPreview(null);
     void buildSameNearestRegion(
       matchingFeatures,
       matchingNearestFeatureId,
       gameArea,
-    ).then((region) => {
-      if (!cancelled) {
-        setMatchingBoundaryPreview(region);
-      }
-    });
+    )
+      .then((region) => {
+        if (!cancelled) {
+          setMatchingBoundaryPreview(region);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setMatchingBoundaryPreview(null);
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -175,16 +182,23 @@ export function useMatchingCatalog(input: {
       };
     }
 
+    setMatchingEliminationPreview(null);
     void buildMatchingEliminationRegion(
       matchingFeatures,
       matchingNearestFeatureId,
       gameArea,
       matchingAnswer,
-    ).then((region) => {
-      if (!cancelled) {
-        setMatchingEliminationPreview(region);
-      }
-    });
+    )
+      .then((region) => {
+        if (!cancelled) {
+          setMatchingEliminationPreview(region);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setMatchingEliminationPreview(null);
+        }
+      });
 
     return () => {
       cancelled = true;

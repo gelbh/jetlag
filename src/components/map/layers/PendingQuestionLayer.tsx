@@ -27,16 +27,23 @@ export const PendingQuestionLayer = memo(function PendingQuestionLayer({
 
   useEffect(() => {
     let cancelled = false;
+    setOverlayResults([]);
 
     void buildPendingQuestionOverlays(
       pendingQuestions,
       gameArea,
       mapStyle,
-    ).then((results) => {
-      if (!cancelled) {
-        setOverlayResults(results);
-      }
-    });
+    )
+      .then((results) => {
+        if (!cancelled) {
+          setOverlayResults(results);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setOverlayResults([]);
+        }
+      });
 
     return () => {
       cancelled = true;

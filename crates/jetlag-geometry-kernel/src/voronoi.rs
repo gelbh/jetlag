@@ -1,7 +1,7 @@
 //! Spatial Voronoi (Wave-2). Local equirectangular planar frame + geo Voronoi.
 
 use geo::{
-    Coord, LineString, MultiPoint, Point, Polygon, Voronoi, VoronoiClip, VoronoiError,
+    Coord, Contains, LineString, MultiPoint, Point, Polygon, Voronoi, VoronoiClip, VoronoiError,
     VoronoiParams,
 };
 use serde::Deserialize;
@@ -141,27 +141,27 @@ fn spatial_voronoi_feature_collection(sites: &[SiteIn]) -> Result<Value, String>
         .voronoi_cells_with_params(VoronoiParams::new().clip(VoronoiClip::Polygon(&clip)))
         .map_err(|e| format!("voronoi: {e}"))?;
 
-    if all_cells.len() < working.len() {
-        return Err(format!(
-            "voronoi: expected at least {} cells, got {}",
-            working.len(),
-            all_cells.len()
-        ));
-    }
-    let cells = &all_cells[..working.len()];
-
     let features: Vec<Value> = working
         .iter()
-        .zip(cells.iter())
-        .map(|(site, cell)| {
+        .enumerate()
+        .map(|(index, site)| {
+            let (sx, sy) = points[index];
+            let site_pt = Point::new(sx, sy);
+            let cell = all_cells
+                .iter()
+                .find(|candidate| candidate.contains(&site_pt))
+                .or_else(|| all_cells.get(index))
+                .ok_or_else(|| {
+                    format!("voronoi: no cell contains site index {index}")
+                })?;
             let props = if site.properties.is_null() {
                 Value::Object(Map::new())
             } else {
                 site.properties.clone()
             };
-            polygon_to_geojson(cell, props, &from_planar)
+            Ok(polygon_to_geojson(cell, props, &from_planar))
         })
-        .collect();
+        .collect::<Result<Vec<_>, String>>()?;
 
     Ok(json!({
         "type": "FeatureCollection",
