@@ -51,19 +51,6 @@ registerRoute(
 );
 
 registerRoute(
-  ({ url }) => /^https:\/\/tile\.openstreetmap\.org\//i.test(url.href),
-  new CacheFirst({
-    cacheName: "osm-tiles",
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 500,
-        maxAgeSeconds: 60 * 60 * 24 * 7,
-      }),
-    ],
-  }),
-);
-
-registerRoute(
   ({ url }) =>
     /^https:\/\/server\.arcgisonline\.com\/ArcGIS\/rest\/services\/World_Imagery\/MapServer\/tile\//i.test(
       url.href,

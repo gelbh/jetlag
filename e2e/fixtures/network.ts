@@ -50,7 +50,6 @@ function isLocalAppRequest(url: string): boolean {
 
 function isMapTileHost(hostname: string): boolean {
   return (
-    hostname === "tile.openstreetmap.org" ||
     hostname.endsWith(".basemaps.cartocdn.com") ||
     hostname.includes("arcgisonline.com")
   );
