@@ -126,17 +126,25 @@ export async function handleIncidentEmailRequest(
   }
 
   if (!upstream.ok) {
-    let providerDetail = "";
+    let providerDetail = "(no body)";
     try {
-      const errBody = (await upstream.json()) as { message?: string; name?: string };
-      providerDetail = [errBody.name, errBody.message].filter(Boolean).join(": ");
+      const errBody = (await upstream.json()) as {
+        message?: string;
+        name?: string;
+      };
+      const detail = [errBody.name, errBody.message]
+        .filter(Boolean)
+        .join(": ");
+      if (detail) {
+        providerDetail = detail;
+      }
     } catch {
-      providerDetail = "";
+      // keep default
     }
     console.warn(
       "incident email Resend rejected",
       upstream.status,
-      providerDetail || "(no body)",
+      providerDetail,
     );
     return jsonResponse(502, { error: "Email provider rejected the request" });
   }
