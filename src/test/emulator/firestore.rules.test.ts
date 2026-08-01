@@ -256,7 +256,7 @@ describe("firestore.rules", () => {
     );
   });
 
-  it("allows membership heal to transfer hostUid when the old host uid is removed", async () => {
+  it("allows membership heal without client hostUid writes", async () => {
     const host = testEnv.authenticatedContext("host-old");
     await host
       .firestore()
@@ -277,7 +277,35 @@ describe("firestore.rules", () => {
         .collection("sessions")
         .doc("session-1")
         .update({
-          hostUid: "seeker-a",
+          memberUids: ["uid-new", "seeker-a"],
+          memberRoles: { "uid-new": "seeker", "seeker-a": "seeker" },
+          memberAppVersions: { "uid-new": "0.10.8", "seeker-a": "0.10.8" },
+        }),
+    );
+  });
+
+  it("denies client hostUid transfer even when the old host is removed", async () => {
+    const host = testEnv.authenticatedContext("host-old");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-old", {
+          memberUids: ["host-old", "seeker-a"],
+          memberRoles: { "host-old": "seeker", "seeker-a": "seeker" },
+          memberAppVersions: { "host-old": "0.10.8", "seeker-a": "0.10.8" },
+        }),
+      );
+
+    const returning = testEnv.authenticatedContext("uid-new");
+    await assertFails(
+      returning
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          hostUid: "uid-new",
           memberUids: ["uid-new", "seeker-a"],
           memberRoles: { "uid-new": "seeker", "seeker-a": "seeker" },
           memberAppVersions: { "uid-new": "0.10.8", "seeker-a": "0.10.8" },

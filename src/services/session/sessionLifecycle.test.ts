@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { endSession, leaveHostSession } from "./sessionLifecycle";
+import { endSession, leaveHostSession, repairGhostHost } from "./sessionLifecycle";
 
 const callable = vi.hoisted(() =>
   vi.fn(async () => ({ data: { action: "ended" as const } })),
@@ -36,6 +36,16 @@ describe("sessionLifecycle", () => {
     expect(httpsCallable).toHaveBeenCalledWith({}, "leaveHostSession");
     expect(callable).toHaveBeenCalledWith({ sessionId: "session-42" });
     expect(trackSessionEnded).not.toHaveBeenCalled();
+  });
+
+  it("calls repairGhostHost with the session id", async () => {
+    callable.mockResolvedValueOnce({
+      data: { action: "repaired", newHostUid: "seeker-1" },
+    } as never);
+    await repairGhostHost("session-42");
+
+    expect(httpsCallable).toHaveBeenCalledWith({}, "repairGhostHost");
+    expect(callable).toHaveBeenCalledWith({ sessionId: "session-42" });
   });
 
   it("calls endSession and tracks host_end once", async () => {

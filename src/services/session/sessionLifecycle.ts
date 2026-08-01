@@ -22,6 +22,26 @@ export async function leaveHostSession(
   return result.data;
 }
 
+export type RepairGhostHostResult =
+  | { action: "repaired"; newHostUid: string }
+  | { action: "noop"; hostUid: string };
+
+export async function repairGhostHost(
+  sessionId: string,
+): Promise<RepairGhostHostResult> {
+  if (!isFirebaseConfigured()) {
+    throw new Error("Firebase is not configured.");
+  }
+
+  const functions = await getFirebaseFunctions();
+  const callable = httpsCallable<{ sessionId: string }, RepairGhostHostResult>(
+    functions,
+    "repairGhostHost",
+  );
+  const result = await callable({ sessionId });
+  return result.data;
+}
+
 export async function endSession(sessionId: string): Promise<void> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");

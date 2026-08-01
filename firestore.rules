@@ -98,6 +98,7 @@ service cloud.firestore {
     function membershipJoinFieldsStable() {
       return request.resource.data.code == resource.data.code
         && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
         && request.resource.data.tier == resource.data.tier
         && request.resource.data.gameSize == resource.data.gameSize
         && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
@@ -108,27 +109,11 @@ service cloud.firestore {
         && validJoinRole(request.resource.data.memberRoles[request.auth.uid]);
     }
 
-    // Join / auth-drift heal: membership fields, optionally transferring hostUid
-    // when the old host uid is removed from memberUids in the same write.
-    function isMembershipJoinOrHealUpdate() {
+    function isMembershipJoinUpdate() {
       return isSignedIn()
         && membershipJoinFieldsStable()
-        && (
-          (
-            request.resource.data.hostUid == resource.data.hostUid
-            && request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['memberUids', 'memberRoles', 'memberAppVersions'])
-          ) || (
-            resource.data.status != 'ended'
-            && !('endedAt' in resource.data)
-            && request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['memberUids', 'memberRoles', 'memberAppVersions', 'hostUid'])
-            && request.resource.data.hostUid is string
-            && request.resource.data.hostUid != resource.data.hostUid
-            && request.resource.data.hostUid in request.resource.data.memberUids
-            && !(resource.data.hostUid in request.resource.data.memberUids)
-          )
-        );
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['memberUids', 'memberRoles', 'memberAppVersions']);
     }
 
     function sessionData(sessionId) {
@@ -330,7 +315,7 @@ service cloud.firestore {
         );
 
       allow update: if validSessionRulesUpdate(sessionId) || (
-        isMembershipJoinOrHealUpdate()
+        isMembershipJoinUpdate()
       ) || (
         isSessionMember(sessionId)
         && resource.data.status != 'ended'

@@ -57,6 +57,7 @@ import {
   buildMembershipHealState,
   sanitizeReturningMemberUid,
 } from "../../domain/session/players/returningMember";
+import { repairGhostHost } from "../session/sessionLifecycle";
 
 const HIDER_ROLE_POLL_MS = 250;
 const HIDER_ROLE_POLL_MAX_MS = 3000;
@@ -117,7 +118,6 @@ type SessionMembershipPatch = {
   memberUids?: string[];
   memberRoles?: Record<string, PlayerRole>;
   memberAppVersions?: Record<string, string>;
-  hostUid?: string;
 };
 
 function readSessionMembershipFields(data: Record<string, unknown>): {
@@ -146,15 +146,11 @@ function readSessionMembershipFields(data: Record<string, unknown>): {
 function membershipPatchFromHealState(
   heal: ReturnType<typeof buildMembershipHealState>,
 ): SessionMembershipPatch {
-  const patch: SessionMembershipPatch = {
+  return {
     memberUids: heal.memberUids,
     memberRoles: heal.memberRoles,
     memberAppVersions: heal.memberAppVersions,
   };
-  if (heal.nextHostUid != null) {
-    patch.hostUid = heal.nextHostUid;
-  }
-  return patch;
 }
 
 async function writeSessionMembershipPatch(
@@ -174,9 +170,6 @@ async function writeSessionMembershipPatch(
     }
     if (patch.memberRoles !== undefined) {
       legacyPatch.memberRoles = patch.memberRoles;
-    }
-    if (patch.hostUid !== undefined) {
-      legacyPatch.hostUid = patch.hostUid;
     }
     await updateDoc(sessionRef, legacyPatch);
   }
@@ -213,6 +206,19 @@ async function applyReturningMemberHealWrite(
     uid,
     role,
   );
+
+  // hostUid is Admin-only — repair ghost host after membership heal removes it.
+  if (heal.nextHostUid != null) {
+    try {
+      const repaired = await repairGhostHost(sessionId);
+      if (repaired.action === "repaired") {
+        return { ...heal, hostUid: repaired.newHostUid, nextHostUid: repaired.newHostUid };
+      }
+    } catch {
+      // Membership heal already landed; host repair can retry on next join.
+    }
+  }
+
   return heal;
 }
 
