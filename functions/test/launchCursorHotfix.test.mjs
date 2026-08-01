@@ -254,6 +254,86 @@ test("launchCursorHotfixForIncident skips when triage is not agent", async () =>
   assert.equal(result.code, CURSOR_HOTFIX_SKIPPED);
 });
 
+test("launchCursorHotfixForIncident force-launches when triage is human", async () => {
+  const db = createInMemoryFirestore({
+    "incidents/inc-1": {
+      status: "open",
+      diagnostics: { lastClientErrors: [] },
+      adminPrompt: "## Incident report\n\n- Incident: `inc-1`",
+    },
+  });
+  let promptSeen = "";
+
+  const result = await launchCursorHotfixForIncident(
+    db,
+    {
+      incidentId: "inc-1",
+      diagnostics: { lastClientErrors: [] },
+      force: true,
+      forcedByUid: "admin-1",
+    },
+    {
+      apiKey: "test-key",
+      repositoryUrl: "https://github.com/gelbh/jetlag",
+      now: () => new Date("2026-08-01T12:00:00.000Z"),
+      generateId: () => "msg-force",
+      createAgent: async (input) => {
+        promptSeen = input.promptText;
+        return {
+          agentId: "bc-forced",
+          agentUrl: "https://cursor.com/agents/bc-forced",
+          runId: "run-forced",
+        };
+      },
+    },
+  );
+
+  assert.equal(result.launched, true);
+  assert.equal(result.agentId, "bc-forced");
+  assert.match(promptSeen, /Bound context \(server policy\)/);
+  assert.doesNotMatch(promptSeen, /player said:/i);
+  const incident = db.documents.get("incidents/inc-1");
+  assert.equal(incident.agent.status, "launched");
+  assert.equal(incident.agent.forced, true);
+  assert.equal(incident.agent.forcedByUid, "admin-1");
+  assert.equal(incident.triage.outcome, "human");
+});
+
+test("launchCursorHotfixForIncident force still skips when already launched", async () => {
+  const db = createInMemoryFirestore({
+    "incidents/inc-1": {
+      status: "open",
+      diagnostics: clearBugDiagnostics,
+      agent: {
+        status: "launched",
+        cursorAgentId: "bc-existing",
+      },
+    },
+  });
+  let createCalls = 0;
+
+  const result = await launchCursorHotfixForIncident(
+    db,
+    {
+      incidentId: "inc-1",
+      force: true,
+      forcedByUid: "admin-1",
+    },
+    {
+      apiKey: "test-key",
+      repositoryUrl: "https://github.com/gelbh/jetlag",
+      createAgent: async () => {
+        createCalls += 1;
+        return { agentId: "bc-should-not" };
+      },
+    },
+  );
+
+  assert.equal(result.launched, false);
+  assert.equal(result.reason, "already_launched");
+  assert.equal(createCalls, 0);
+});
+
 test("launchCursorHotfixForIncident records misconfigured when API key missing", async () => {
   const db = createInMemoryFirestore({
     "incidents/inc-1": {

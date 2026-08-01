@@ -271,7 +271,25 @@ export async function appendHotfixThreadMessage(
 }
 
 /**
+ * @param {object} input
+ * @returns {{ forced: true, forcedByUid: string | null } | Record<string, never>}
+ */
+function forcedAgentFields(input) {
+  if (input?.force !== true) {
+    return {};
+  }
+  return {
+    forced: true,
+    forcedByUid:
+      typeof input?.forcedByUid === "string" && input.forcedByUid
+        ? input.forcedByUid
+        : null,
+  };
+}
+
+/**
  * Launch Cursor for a clear-bug incident and write agent_meta into hotfix thread.
+ * When `input.force === true`, bypass the triage≠agent gate (admin force-launch).
  *
  * @param db
  * @param {{
@@ -279,6 +297,8 @@ export async function appendHotfixThreadMessage(
  *   diagnostics?: object,
  *   adminPrompt?: string | null,
  *   triage?: object | null,
+ *   force?: boolean,
+ *   forcedByUid?: string | null,
  * }} input
  * @param {{
  *   apiKey?: string,
@@ -328,8 +348,10 @@ export async function launchCursorHotfixForIncident(db, input, deps = {}) {
     input?.triage && typeof input.triage === "object"
       ? input.triage
       : triageFn(diagnostics);
+  const force = input?.force === true;
+  const forcedFields = forcedAgentFields(input);
 
-  if (triage.outcome !== TRIAGE_OUTCOME_AGENT) {
+  if (!force && triage.outcome !== TRIAGE_OUTCOME_AGENT) {
     return {
       launched: false,
       code: CURSOR_HOTFIX_SKIPPED,
@@ -362,6 +384,7 @@ export async function launchCursorHotfixForIncident(db, input, deps = {}) {
           status: "misconfigured",
           error: CURSOR_HOTFIX_MISCONFIGURED,
           updatedAt: nowIso,
+          ...forcedFields,
         },
         updatedAt: nowIso,
       },
@@ -423,6 +446,7 @@ export async function launchCursorHotfixForIncident(db, input, deps = {}) {
           status: "failed",
           error: code,
           updatedAt: nowIso,
+          ...forcedFields,
         },
         updatedAt: nowIso,
       },
@@ -432,7 +456,9 @@ export async function launchCursorHotfixForIncident(db, input, deps = {}) {
   }
 
   const agentMetaText = [
-    "Coding agent launched for clear-bug triage.",
+    force
+      ? "Coding agent force-launched by admin."
+      : "Coding agent launched for clear-bug triage.",
     `Agent id: ${agentResult.agentId}`,
     agentResult.agentUrl ? `URL: ${agentResult.agentUrl}` : null,
     agentResult.runId ? `Run: ${agentResult.runId}` : null,
@@ -467,6 +493,7 @@ export async function launchCursorHotfixForIncident(db, input, deps = {}) {
         cursorRunId: agentResult.runId ?? null,
         launchedAt: nowIso,
         updatedAt: nowIso,
+        ...forcedFields,
       },
       updatedAt: nowIso,
     },
