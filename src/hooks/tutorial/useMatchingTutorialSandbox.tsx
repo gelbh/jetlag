@@ -101,28 +101,57 @@ function useMatchingSandboxBody({
     const { features, nearestId, nearestPoint } =
       syntheticMatchingFeatures(pendingAnchor);
 
+    registerMapDraft({
+      activeTool: "matching",
+      ...tutorialMapDraftBase(gameArea),
+      matching: {
+        seekerPoint: pendingAnchor,
+        nearestFeaturePoint: nearestPoint,
+        boundaryPreview: null,
+        eliminationPreview: null,
+        seekerResolving: true,
+      },
+    });
+
     void buildTutorialMatchingPreviews(
       pendingAnchor,
       answer,
       gameArea,
       features,
       nearestId,
-    ).then((previews) => {
-      if (cancelled) {
-        return;
-      }
-      registerMapDraft({
-        activeTool: "matching",
-        ...tutorialMapDraftBase(gameArea),
-        matching: {
-          seekerPoint: pendingAnchor,
-          nearestFeaturePoint: nearestPoint,
-          boundaryPreview: previews.boundaryPreview,
-          eliminationPreview: previews.eliminationPreview,
-          seekerResolving: false,
-        },
+    )
+      .then((previews) => {
+        if (cancelled) {
+          return;
+        }
+        registerMapDraft({
+          activeTool: "matching",
+          ...tutorialMapDraftBase(gameArea),
+          matching: {
+            seekerPoint: pendingAnchor,
+            nearestFeaturePoint: nearestPoint,
+            boundaryPreview: previews.boundaryPreview,
+            eliminationPreview: previews.eliminationPreview,
+            seekerResolving: false,
+          },
+        });
+      })
+      .catch(() => {
+        if (cancelled) {
+          return;
+        }
+        registerMapDraft({
+          activeTool: "matching",
+          ...tutorialMapDraftBase(gameArea),
+          matching: {
+            seekerPoint: pendingAnchor,
+            nearestFeaturePoint: nearestPoint,
+            boundaryPreview: null,
+            eliminationPreview: null,
+            seekerResolving: false,
+          },
+        });
       });
-    });
 
     return () => {
       cancelled = true;
