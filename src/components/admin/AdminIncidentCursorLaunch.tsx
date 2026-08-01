@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { IncidentCodingAgentState } from "../../domain/incident/incidentTypes";
 import {
   launchIncidentCursorAgent,
@@ -56,8 +56,6 @@ export function AdminIncidentCursorLaunch({
   const [localAgent, setLocalAgent] = useState<IncidentCodingAgentState | null>(
     null,
   );
-  const incidentIdRef = useRef(incidentId);
-  incidentIdRef.current = incidentId;
 
   const effectiveAgent = agent?.cursorAgentId
     ? agent
@@ -78,15 +76,11 @@ export function AdminIncidentCursorLaunch({
     if (!incidentId) {
       return;
     }
-    const launchedForId = incidentId;
     setBusy(true);
     setError(null);
     setOk(null);
     try {
-      const result = await launchCursorAgentFn(launchedForId);
-      if (launchedForId !== incidentIdRef.current) {
-        return;
-      }
+      const result = await launchCursorAgentFn(incidentId);
       setLocalAgent({
         status: "launched",
         cursorAgentId: result.agentId ?? null,
@@ -100,18 +94,13 @@ export function AdminIncidentCursorLaunch({
           : "Cursor agent launched (no URL returned).",
       );
     } catch (err) {
-      if (launchedForId !== incidentIdRef.current) {
-        return;
-      }
       setError(
         err instanceof Error
           ? err.message
           : "Could not launch the Cursor agent.",
       );
     } finally {
-      if (launchedForId === incidentIdRef.current) {
-        setBusy(false);
-      }
+      setBusy(false);
     }
   };
 
