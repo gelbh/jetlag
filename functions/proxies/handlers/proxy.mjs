@@ -11,6 +11,10 @@ import {
   ctaBusTrackerApiKeySecret,
   ctaTrainTrackerApiKeySecret,
 } from "./vehicles.mjs";
+import {
+  OVERPASS_L2_PARAMS,
+  OVERPASS_L2_SECRETS,
+} from "../overpassL2Secrets.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
 
@@ -27,7 +31,9 @@ export const proxy = onRequest(
       transitlandApiKeySecret,
       ctaBusTrackerApiKeySecret,
       ctaTrainTrackerApiKeySecret,
+      ...OVERPASS_L2_SECRETS,
     ],
+    params: OVERPASS_L2_PARAMS,
     enforceAppCheck: true,
     // Multi-MB Overpass admin/landmass payloads OOM'd the 256MiB default
     // (incident 9f05e1c1). Requires a functions deploy to take effect.
