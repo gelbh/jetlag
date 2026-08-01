@@ -13,6 +13,12 @@ import {
   REMATCH_SESSION_NOT_FOUND,
   resetSessionForRematchHandler,
 } from "../session/resetSessionForRematch.mjs";
+import {
+  REPAIR_ALREADY_ENDED,
+  REPAIR_NOT_MEMBER,
+  REPAIR_SESSION_NOT_FOUND,
+  repairGhostHostHandler,
+} from "../session/repairGhostHost.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
 
@@ -93,6 +99,32 @@ export const endSession = onCall(
       return await endSessionHandler(db, uid, sessionId);
     } catch (error) {
       mapLeaveError(error);
+    }
+  }),
+);
+
+export const repairGhostHost = onCall(
+  { secrets: [sentryDsnSecret], enforceAppCheck: true },
+  withSentryEventHandler(async (request) => {
+    const { uid, sessionId } = requireAuthSessionId(request);
+    const db = getFirestore();
+
+    try {
+      return await repairGhostHostHandler(db, uid, sessionId);
+    } catch (error) {
+      if (!(error instanceof Error)) {
+        throw error;
+      }
+      if (error.message === REPAIR_SESSION_NOT_FOUND) {
+        throw new HttpsError("not-found", "Session not found.");
+      }
+      if (error.message === REPAIR_NOT_MEMBER) {
+        throw new HttpsError("permission-denied", "Session membership required.");
+      }
+      if (error.message === REPAIR_ALREADY_ENDED) {
+        throw new HttpsError("failed-precondition", "Session already ended.");
+      }
+      throw error;
     }
   }),
 );
