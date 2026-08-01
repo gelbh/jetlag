@@ -3,32 +3,14 @@ import * as SentryReact from "@sentry/react";
 import { getClientEnv } from "../../../config/env";
 import { APP_VERSION } from "../../../domain/device/changelog";
 import {
-  isAppCheckSoftFailureMessage,
-  isBrowserExtensionNoiseMessage,
-  isFirestoreIdbPersistenceNoiseMessage,
-  isIdbConnectionClosingMessage,
-  isRecaptchaOtTypeErrorMessage,
-  isRecaptchaTimeoutMessage,
-  isWebkitLoadFailedMessage,
-} from "../network/clientNoiseErrors";
-import { isHtml2CanvasUnsupportedColorMessage } from "../capture/html2canvasErrors";
-import { isExpectedSessionLeaveMessage } from "../../session/sessionLeaveErrors";
+  applyClientSentryDisposition,
+  CLIENT_SENTRY_IGNORE_ERRORS,
+  classifyClientSentryEvent,
+  isFirestorePermissionDeniedEvent,
+} from "./sentryEventPolicy";
 
 const SESSION_CODE_PATTERN = /\b[A-Z0-9]{4}\b/g;
-const FIRESTORE_PERMISSION_DENIED =
-  /missing or insufficient permissions/i;
-const STORAGE_QUOTA_EXCEEDED = /quota has been exceeded/i;
-const AUTH_NETWORK_FAILED = /auth\/network-request-failed/i;
-const STORAGE_UNAUTHORIZED = /storage\/unauthorized/i;
-const LEAFLET_POS_ERROR = /_leaflet_pos/i;
-const LEAFLET_CLASSLIST_ERROR = /evaluating 'e\.classList'/i;
-const MODULE_SCRIPT_IMPORT_FAILED = /Importing a module script failed/i;
-const BATTERY_ADD_EVENT_LISTENER = /addEventListener is not a function/i;
-const IDB_DATABASE_DELETED = /Database deleted by request of the user/i;
-const RECAPTCHA_ALREADY_RENDERED = /reCAPTCHA has already been rendered/i;
-const VIEW_TRANSITION_ABORTED = /Transition was aborted because of invalid state/i;
 const REACT_REFRESH_FRAME = /@react-refresh/i;
-const APP_CHECK_INVALID_SESSION = /Invalid session .*: Invalid input/i;
 const SENSITIVE_EXTRA_KEYS = new Set([
   "sessionId",
   "authUid",
@@ -65,24 +47,6 @@ function scrubUnknown(value: unknown): unknown {
   return value;
 }
 
-function isFirestorePermissionDeniedEvent(
-  event: Parameters<
-    NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>
-  >[0],
-): boolean {
-  for (const exception of event.exception?.values ?? []) {
-    if (
-      exception.type === "FirebaseError" &&
-      typeof exception.value === "string" &&
-      FIRESTORE_PERMISSION_DENIED.test(exception.value)
-    ) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 function isReactRefreshNoiseEvent(
   event: Parameters<
     NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>
@@ -99,108 +63,6 @@ function isReactRefreshNoiseEvent(
   }
 
   return false;
-}
-
-function isIgnoredClientNoiseEvent(
-  event: Parameters<
-    NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>
-  >[0],
-): boolean {
-  if (event.type === "transaction") {
-    const hasOverpassSpan = event.spans?.some((span) =>
-      span.description?.includes("proxy/overpass"),
-    );
-    if (hasOverpassSpan) {
-      return true;
-    }
-  }
-
-  for (const exception of event.exception?.values ?? []) {
-    if (
-      exception.type === "QuotaExceededError" &&
-      typeof exception.value === "string" &&
-      STORAGE_QUOTA_EXCEEDED.test(exception.value)
-    ) {
-      return true;
-    }
-
-    if (
-      exception.type === "FirebaseError" &&
-      typeof exception.value === "string" &&
-      (AUTH_NETWORK_FAILED.test(exception.value) ||
-        STORAGE_UNAUTHORIZED.test(exception.value))
-    ) {
-      return true;
-    }
-
-    if (
-      exception.type === "AbortError" &&
-      typeof exception.value === "string" &&
-      /aborted/i.test(exception.value)
-    ) {
-      return true;
-    }
-
-    if (
-      exception.type === "ReferenceError" &&
-      typeof exception.value === "string" &&
-      /window is not defined/i.test(exception.value)
-    ) {
-      return true;
-    }
-
-    if (
-      exception.type === "TypeError" &&
-      typeof exception.value === "string" &&
-      (LEAFLET_POS_ERROR.test(exception.value) ||
-        LEAFLET_CLASSLIST_ERROR.test(exception.value) ||
-        MODULE_SCRIPT_IMPORT_FAILED.test(exception.value) ||
-        BATTERY_ADD_EVENT_LISTENER.test(exception.value) ||
-        isWebkitLoadFailedMessage(exception.value) ||
-        isRecaptchaOtTypeErrorMessage(exception.value))
-    ) {
-      return true;
-    }
-
-    if (
-      exception.type === "Error" &&
-      typeof exception.value === "string" &&
-      APP_CHECK_INVALID_SESSION.test(exception.value)
-    ) {
-      return true;
-    }
-
-    if (
-      typeof exception.value === "string" &&
-      isGenericClientNoiseMessage(exception.value)
-    ) {
-      return true;
-    }
-  }
-
-  if (
-    typeof event.message === "string" &&
-    isGenericClientNoiseMessage(event.message)
-  ) {
-    return true;
-  }
-
-  return false;
-}
-
-function isGenericClientNoiseMessage(message: string): boolean {
-  return (
-    IDB_DATABASE_DELETED.test(message) ||
-    isIdbConnectionClosingMessage(message) ||
-    isFirestoreIdbPersistenceNoiseMessage(message) ||
-    isHtml2CanvasUnsupportedColorMessage(message) ||
-    RECAPTCHA_ALREADY_RENDERED.test(message) ||
-    isRecaptchaTimeoutMessage(message) ||
-    VIEW_TRANSITION_ABORTED.test(message) ||
-    isExpectedSessionLeaveMessage(message) ||
-    isBrowserExtensionNoiseMessage(message) ||
-    isAppCheckSoftFailureMessage(message)
-  );
 }
 
 function scrubEvent(
@@ -241,24 +103,26 @@ function scrubEvent(
     }
   }
 
+  // Side effect only — disposition still comes from classifyClientSentryEvent.
   if (isFirestorePermissionDeniedEvent(event)) {
     Sentry.addBreadcrumb({
       category: "firestore",
       message: "permission-denied",
       level: "warning",
     });
+  }
+
+  const disposition = classifyClientSentryEvent(event);
+  const next = applyClientSentryDisposition(event, disposition, Math.random);
+  if (!next) {
     return null;
   }
 
-  if (isIgnoredClientNoiseEvent(event)) {
+  if (isReactRefreshNoiseEvent(next)) {
     return null;
   }
 
-  if (isReactRefreshNoiseEvent(event)) {
-    return null;
-  }
-
-  return event;
+  return next;
 }
 
 export function initSentry(): void {
@@ -272,6 +136,8 @@ export function initSentry(): void {
     return;
   }
 
+  // Forward options into @sentry/react init so beforeSend stays on the browser client.
+  // ignoreErrors belt shares CLIENT_SENTRY_IGNORE_ERRORS with drop matchers (not canaries).
   Sentry.init(
     {
       dsn,
@@ -280,6 +146,7 @@ export function initSentry(): void {
       release: `jetlag@${APP_VERSION}`,
       dist: env.VITE_SENTRY_RELEASE_DIST || undefined,
       tracesSampleRate: import.meta.env.PROD ? 0.1 : 0,
+      ignoreErrors: CLIENT_SENTRY_IGNORE_ERRORS,
       integrations: [
         SentryReact.browserTracingIntegration({
           enableInp: true,
@@ -294,6 +161,8 @@ export function initSentry(): void {
     (browserOptions) => {
       SentryReact.init({
         ...browserOptions,
+        beforeSend: scrubEvent,
+        ignoreErrors: CLIENT_SENTRY_IGNORE_ERRORS,
         replaysSessionSampleRate: import.meta.env.PROD ? 0.1 : 0,
         replaysOnErrorSampleRate: 1.0,
       });
