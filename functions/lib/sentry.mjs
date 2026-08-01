@@ -12,6 +12,10 @@ const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "permission-denied:Only the host can do that.",
   "failed-precondition:Session already ended.",
   "internal:Support agent is temporarily unavailable.",
+  "unauthenticated:Sign in required.",
+  "invalid-argument:Access code required.",
+  "resource-exhausted:Too many attempts. Try again later.",
+  "permission-denied:Invalid access code.",
 ]);
 
 let initialized = false;
@@ -64,7 +68,7 @@ export function isExpectedFunctionsError(error) {
  * @param {import("@sentry/node").ErrorEvent} event
  * @returns {boolean}
  */
-function isAbortErrorEvent(event) {
+export function isAbortErrorEvent(event) {
   for (const exception of event.exception?.values ?? []) {
     if (exception.type === "AbortError") {
       return true;
