@@ -19,6 +19,16 @@ vi.mock("../cache/indexedDb", () => ({
 
 const dublinPoint: LatLngTuple = [53.29602, -6.139977];
 const timesSquarePoint: LatLngTuple = [40.758, -73.9855];
+const USGS_EPQS_HOST = "epqs.nationalmap.gov";
+const OPEN_METEO_HOST = "api.open-meteo.com";
+
+function requestHostname(input: RequestInfo | URL): string {
+  try {
+    return new URL(String(input)).hostname;
+  } catch {
+    return "";
+  }
+}
 
 function mockElevationResponse(elevations: number[]) {
   return {
@@ -81,18 +91,19 @@ describe("elevation", () => {
 
   it("uses USGS EPQS for US coordinates", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
-      const url = String(input);
-      if (url.includes("epqs.nationalmap.gov")) {
+      if (requestHostname(input) === USGS_EPQS_HOST) {
         return mockUsgsResponse(14.8);
       }
 
-      throw new Error(`Unexpected fetch: ${url}`);
+      throw new Error(`Unexpected fetch: ${String(input)}`);
     });
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(fetchSingleElevation(timesSquarePoint)).resolves.toBe(14.8);
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("epqs.nationalmap.gov");
+    expect(requestHostname(fetchMock.mock.calls[0]?.[0] as RequestInfo)).toBe(
+      USGS_EPQS_HOST,
+    );
   });
 
   it("falls back to Open-Meteo when USGS lookup fails", async () => {
@@ -109,8 +120,12 @@ describe("elevation", () => {
 
     await expect(fetchSingleElevation(timesSquarePoint)).resolves.toBe(135);
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("epqs.nationalmap.gov");
-    expect(String(fetchMock.mock.calls[1]?.[0])).toContain("open-meteo.com");
+    expect(requestHostname(fetchMock.mock.calls[0]?.[0] as RequestInfo)).toBe(
+      USGS_EPQS_HOST,
+    );
+    expect(requestHostname(fetchMock.mock.calls[1]?.[0] as RequestInfo)).toBe(
+      OPEN_METEO_HOST,
+    );
   });
 
   it("reuses cached elevations for repeated coordinates", async () => {
