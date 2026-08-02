@@ -522,6 +522,8 @@ export function MapScreenChrome({
           session={{
             sessionCode: session!.code,
             remoteSession: isRemote,
+            session: session!,
+            myUid: uid ?? undefined,
             onClearMap: handleClearMap,
             endGameBlocked,
             onExport: () => {

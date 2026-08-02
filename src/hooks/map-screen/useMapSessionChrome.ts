@@ -23,6 +23,8 @@ import {
   endSession,
   leaveHostSession,
 } from "../../services/session/sessionLifecycle";
+import { leaveSessionMembership } from "../../services/session/rolePasscodeLifecycle";
+import { isSessionRoleGated } from "../../domain/session/players/roleGates";
 import { isExpectedSessionLeaveError } from "../../services/session/sessionLeaveErrors";
 import { emitGameEndedActivity } from "../../services/session/emitSessionActivity";
 import { trackSessionEnded } from "../../services/core/analytics/analytics";
@@ -317,6 +319,18 @@ export function useMapSessionChrome({
     }
 
     if (!isLocalSession && user) {
+      if (isSessionRoleGated(session) && !isRemoteHost) {
+        try {
+          await leaveSessionMembership(session.id);
+        } catch (error) {
+          if (!isExpectedSessionLeaveError(error)) {
+            captureException(error);
+            window.alert("Couldn't leave the session. Try again.");
+            return;
+          }
+        }
+      }
+
       try {
         const walkIds = listWalkingThermometerQuestionIds(
           pendingQuestions,

@@ -23,6 +23,7 @@ import {
   QUESTION_ANSWER_DEADLINE_MINUTES_MAX,
 } from "../../../domain/session/rules";
 import type { MemberRoles, PlayerRole } from "../../../domain/session/players/playerRole";
+import { buildRoleGatesForHost } from "../../../domain/session/players/roleGates";
 import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
 import {
   parseCustomCategories,
@@ -64,6 +65,32 @@ function parseMemberRoles(value: unknown): MemberRoles | undefined {
   }
 
   return Object.keys(roles).length > 0 ? roles : undefined;
+}
+
+function parseRoleGates(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const gates = value as { version?: unknown; leaders?: unknown };
+  if (gates.version !== 1 || !gates.leaders || typeof gates.leaders !== "object") {
+    return undefined;
+  }
+
+  const leaders = gates.leaders as Record<string, unknown>;
+  const parsed: { version: 1; leaders: { seeker?: string; hider?: string } } = {
+    version: 1,
+    leaders: {},
+  };
+
+  if (typeof leaders.seeker === "string") {
+    parsed.leaders.seeker = leaders.seeker;
+  }
+  if (typeof leaders.hider === "string") {
+    parsed.leaders.hider = leaders.hider;
+  }
+
+  return parsed;
 }
 
 function parseGameSize(value: unknown): GameSize | undefined {
@@ -198,6 +225,7 @@ export function buildSessionDocument(
     createdAt,
     memberUids: [hostUid],
     memberRoles: { [hostUid]: hostRole },
+    roleGates: buildRoleGatesForHost(hostUid, hostRole),
     gameSize,
     distanceUnit: unit,
     hidingZoneRadiusMeters: radiusMeters,
@@ -240,6 +268,7 @@ export function deserializeSessionFromFirestore(
       ? document.memberUids.filter((uid): uid is string => typeof uid === "string")
       : [],
     memberRoles: parseMemberRoles(document.memberRoles),
+    roleGates: parseRoleGates(document.roleGates),
     gameSize: parseGameSize(document.gameSize),
     distanceUnit: parseDistanceUnit(document.distanceUnit),
     hidingZoneRadiusMeters:

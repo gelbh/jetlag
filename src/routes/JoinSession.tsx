@@ -15,6 +15,9 @@ import {
 } from "../services/session/sessionCodes";
 import { useSessionStore } from "../state/sessionStore";
 import type { PlayerRole } from "../domain/session/players/playerRole";
+import { joinRequiresRolePasscode } from "../domain/session/players/roleGates";
+import { normalizeRolePasscode } from "../domain/session/players/rolePasscode";
+import type { SessionRecord } from "../domain/map/annotations";
 import { RolePicker } from "../components/session/identity/RolePicker";
 import {
   ensureAnonymousUser,
@@ -64,6 +67,13 @@ export function JoinSession() {
   const [previewPremium, setPreviewPremium] = useState(false);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [playerRole, setPlayerRole] = useState<PlayerRole>("hider");
+  const [rolePasscode, setRolePasscode] = useState("");
+  const [previewSession, setPreviewSession] = useState<SessionRecord | null>(null);
+  const needsRolePasscode = joinRequiresRolePasscode(
+    previewSession?.memberRoles,
+    playerRole,
+    myUid ?? undefined,
+  );
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
@@ -86,6 +96,7 @@ export function JoinSession() {
         result.status === "found" && isPremiumSession(result.session),
       );
       if (result.status === "found") {
+        setPreviewSession(result.session);
         const existingRole = resolvePlayerRole(
           result.session.memberRoles,
           uid,
@@ -93,6 +104,8 @@ export function JoinSession() {
         if (result.session.memberRoles?.[uid]) {
           setPlayerRole(existingRole);
         }
+      } else {
+        setPreviewSession(null);
       }
       if (result.status === "missing") {
         setError(null);
@@ -178,8 +191,12 @@ export function JoinSession() {
           const user = await retryAsync(() => ensureFreshAnonymousUser());
           const joinOptions =
             session?.code === normalized && myUid
-              ? { returningMemberUid: myUid, persistedMyUid: myUid }
-              : {};
+              ? {
+                  returningMemberUid: myUid,
+                  persistedMyUid: myUid,
+                  rolePasscode: rolePasscode || undefined,
+                }
+              : { rolePasscode: rolePasscode || undefined };
           const result = await retryAsync(() =>
             joinRemoteSessionByCode(
               normalized,
@@ -302,10 +319,34 @@ export function JoinSession() {
                 surface: "join",
               });
               setPlayerRole(role);
+              setRolePasscode("");
             }}
             disabled={joinBusy}
             includeObserver
           />
+
+          {needsRolePasscode ? (
+            <label className="field-label font-display text-xs uppercase tracking-[0.12em]">
+              Role code
+              <input
+                value={rolePasscode}
+                onChange={(event) =>
+                  setRolePasscode(normalizeRolePasscode(event.target.value))
+                }
+                maxLength={4}
+                className="field-input mt-2 min-h-12 w-full text-center font-mono text-2xl font-bold tracking-[0.35em]"
+                placeholder="Team code"
+                autoCapitalize="characters"
+                autoCorrect="off"
+                spellCheck={false}
+              />
+              <span className="mt-2 block text-xs normal-case tracking-normal text-ink-muted">
+                {playerRole === "observer"
+                  ? "Ask the host for the observer code."
+                  : "Ask a teammate on that side for the role code."}
+              </span>
+            </label>
+          ) : null}
 
           <MotionPressable
             type="button"
