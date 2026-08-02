@@ -1,4 +1,4 @@
-import { Fragment, useMemo, type ReactNode } from "react";
+import { useMemo, type ReactElement } from "react";
 import { Layer, Source } from "react-map-gl/maplibre";
 import type {
   Feature,
@@ -40,44 +40,52 @@ function asFeatureCollection(
   };
 }
 
-function renderPaintLayers(
+/**
+ * Layers must be *direct* Source children. react-map-gl clones each child with
+ * `source={id}`; Fragments swallow that prop and fill/line layers never paint.
+ */
+function paintLayersForSpec(
   spec: MapLibreGeoJsonLayerSpec,
   beforeId?: string,
-): ReactNode {
-  return (
-    <>
-      {spec.fill ? (
-        <Layer
-          id={`${spec.id}-fill`}
-          type="fill"
-          beforeId={beforeId}
-          paint={{
-            "fill-color": spec.fill.fillColor,
-            "fill-opacity": spec.fill.fillOpacity ?? 0.35,
-            ...(spec.fill.fillOutlineColor
-              ? { "fill-outline-color": spec.fill.fillOutlineColor }
-              : {}),
-          }}
-        />
-      ) : null}
-      {spec.line ? (
-        <Layer
-          id={`${spec.id}-line`}
-          type="line"
-          beforeId={beforeId}
-          paint={{
-            "line-color": spec.line.color,
-            "line-width": spec.line.width ?? 1,
-            "line-opacity": spec.line.opacity ?? 1,
-            ...(spec.line.dashArray
-              ? { "line-dasharray": spec.line.dashArray }
-              : {}),
-          }}
-          layout={{ "line-join": "round", "line-cap": "round" }}
-        />
-      ) : null}
-    </>
-  );
+): ReactElement[] {
+  const layers: ReactElement[] = [];
+  if (spec.fill) {
+    layers.push(
+      <Layer
+        key={`${spec.id}-fill`}
+        id={`${spec.id}-fill`}
+        type="fill"
+        beforeId={beforeId}
+        paint={{
+          "fill-color": spec.fill.fillColor,
+          "fill-opacity": spec.fill.fillOpacity ?? 0.35,
+          ...(spec.fill.fillOutlineColor
+            ? { "fill-outline-color": spec.fill.fillOutlineColor }
+            : {}),
+        }}
+      />,
+    );
+  }
+  if (spec.line) {
+    layers.push(
+      <Layer
+        key={`${spec.id}-line`}
+        id={`${spec.id}-line`}
+        type="line"
+        beforeId={beforeId}
+        paint={{
+          "line-color": spec.line.color,
+          "line-width": spec.line.width ?? 1,
+          "line-opacity": spec.line.opacity ?? 1,
+          ...(spec.line.dashArray
+            ? { "line-dasharray": spec.line.dashArray }
+            : {}),
+        }}
+        layout={{ "line-join": "round", "line-cap": "round" }}
+      />,
+    );
+  }
+  return layers;
 }
 
 /** GeoJSON fill (+ optional line) for MapLibre — no Leaflet CSS zoom compensation. */
@@ -122,9 +130,7 @@ export function MapLibreGeoJsonOverlay({
 
   return (
     <Source id={`${id}-src`} type="geojson" data={collection}>
-      {resolvedLayers.map((spec) => (
-        <Fragment key={spec.id}>{renderPaintLayers(spec, beforeId)}</Fragment>
-      ))}
+      {resolvedLayers.flatMap((spec) => paintLayersForSpec(spec, beforeId))}
     </Source>
   );
 }

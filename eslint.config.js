@@ -13,6 +13,8 @@ export default defineConfig([
     "crates/*/pkg/**",
     "target/**",
     "**/yqrd-*.test.ts",
+    // Sibling git worktrees must not be linted from the primary clone.
+    ".worktrees/**",
   ]),
   {
     files: ["scripts/**/*.mjs"],
@@ -38,6 +40,9 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: globals.browser,
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
   },
   {
@@ -46,6 +51,9 @@ export default defineConfig([
     extends: [js.configs.recommended, tseslint.configs.recommended],
     languageOptions: {
       globals: globals.serviceworker,
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
   },
   {
