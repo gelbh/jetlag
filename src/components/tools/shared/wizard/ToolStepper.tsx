@@ -11,7 +11,7 @@ export interface ToolStep {
 
 interface ToolStepperProps {
   steps: readonly ToolStep[];
-  /** Step title row; off when an outer heading already shows the step name (tutorial). */
+  /** Step title row; off when an outer heading already shows the step name. */
   showLabel?: boolean;
   /** Extra classes on the centered step title row. */
   labelClassName?: string;

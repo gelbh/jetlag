@@ -11,17 +11,17 @@ describe("applyDocumentSeo", () => {
     document.title = "";
   });
 
-  it("sets title, description, canonical, robots, and og tags for /tutorial", () => {
-    applyDocumentSeo("/tutorial");
-    expect(document.title).toContain("Tutorial");
+  it("sets title, description, canonical, robots, and og tags for /premium", () => {
+    applyDocumentSeo("/premium");
+    expect(document.title).toContain("Premium");
     expect(metaContent('meta[name="description"]')).toBeTruthy();
     expect(
       document.head.querySelector('link[rel="canonical"]')?.getAttribute("href"),
-    ).toBe("https://jetlag.gelbhart.dev/tutorial");
+    ).toBe("https://jetlag.gelbhart.dev/premium");
     expect(metaContent('meta[name="robots"]')).toBe("index,follow");
-    expect(metaContent('meta[property="og:title"]')).toContain("Tutorial");
+    expect(metaContent('meta[property="og:title"]')).toContain("Premium");
     expect(metaContent('meta[property="og:url"]')).toBe(
-      "https://jetlag.gelbhart.dev/tutorial",
+      "https://jetlag.gelbhart.dev/premium",
     );
     expect(metaContent('meta[property="og:image"]')).toBe(
       "https://jetlag.gelbhart.dev/og-default.png",

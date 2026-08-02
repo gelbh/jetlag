@@ -50,8 +50,8 @@ export async function openPlayHub(page: Page) {
 }
 
 export async function dismissMapOnboarding(page: Page) {
-  const close = page.getByRole("button", { name: "Close" });
-  if (await close.isVisible().catch(() => false)) {
-    await close.click();
+  const dismiss = page.getByRole("button", { name: "Got it" });
+  if (await dismiss.isVisible().catch(() => false)) {
+    await dismiss.click();
   }
 }

@@ -30,7 +30,6 @@ import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 import { MATCHING_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
-import type { ToolPanelSandboxMode } from "./shared/panels/toolPanelSandbox";
 
 interface MatchingPanelProps {
   distanceUnit: DistanceUnit;
@@ -61,7 +60,6 @@ interface MatchingPanelProps {
   isSubmitting?: boolean;
   onRetry?: () => void;
   wizardStepRef?: RefObject<string>;
-  sandbox?: ToolPanelSandboxMode;
 }
 
 export function MatchingPanel({
@@ -93,10 +91,7 @@ export function MatchingPanel({
   isSubmitting = false,
   onRetry,
   wizardStepRef,
-  sandbox,
 }: MatchingPanelProps) {
-  const readOnly = sandbox?.readOnly ?? false;
-  const embeddedWizard = sandbox !== undefined;
   const steps = stepsForMode(MATCHING_STEPS, awaitHiderAnswer);
   const {
     stepId: step,
@@ -105,11 +100,7 @@ export function MatchingPanel({
     goNext,
     goBack,
     Stepper,
-  } = useToolWizard(steps, {
-    wizardStepRef,
-    initialStepId: sandbox?.initialWizardStepId,
-    syncStep: sandbox ? (sandbox.syncWizardStep ?? false) : true,
-  });
+  } = useToolWizard(steps, { wizardStepRef });
   const categoryStepIndex = steps.findIndex((item) => item.id === "category");
 
   const handleCategoryChange = (nextCategoryId: MatchingCategoryId) => {
@@ -194,7 +185,6 @@ export function MatchingPanel({
     (step === "category" && categoryAvailable && categoryChosen) ||
     (step === "resolve" && resolveComplete && !loading);
   const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
-  const useStickyAnswerFooter = !readOnly && !embeddedWizard;
 
   const matchingAnswerStepReadout =
     step === "answer" && !nullAnswer && nearestFeatureSummary ? (
@@ -206,7 +196,6 @@ export function MatchingPanel({
   const matchingAnswerStepActions =
     step === "answer" ? (
       <>
-        {!useStickyAnswerFooter && matchingAnswerStepReadout}
         <BinaryAnswerPicker
           value={answer}
           onChange={onAnswerChange}
@@ -305,19 +294,10 @@ export function MatchingPanel({
               Set your anchor to look up the nearest feature.
             </ResolvedReadout>
           ) : null}
-          {matchingResolveSendActions && !useStickyAnswerFooter
-            ? matchingResolveSendActions
-            : null}
         </ToolSection>
       ) : null}
 
-      {step === "answer" && !useStickyAnswerFooter ? (
-        <ToolSection first compact status="active">
-          {matchingAnswerStepActions}
-        </ToolSection>
-      ) : null}
-
-      {step === "answer" && useStickyAnswerFooter && matchingAnswerStepReadout ? (
+      {step === "answer" && matchingAnswerStepReadout ? (
         <ToolSection first compact status="active">
           {matchingAnswerStepReadout}
         </ToolSection>
@@ -332,60 +312,45 @@ export function MatchingPanel({
         ? matchingResolveSendActions
         : null;
 
-  const answerFooter =
-    useStickyAnswerFooter && stickyFooterActions ? (
-      <ToolSection first compact status="active">
-        {stickyFooterActions}
-      </ToolSection>
-    ) : undefined;
-
-  const wizardContent = readOnly ? (
-    panelBody
-  ) : (
-    <WizardSwipeSurface
-      stepId={step}
-      stepIndex={stepIndex}
-      canGoBack={stepIndex > 0}
-      canGoNext={canSwipeNext}
-      onBack={goBack}
-      onNext={goNext}
-      embedded={embeddedWizard}
-    >
-      {panelBody}
-    </WizardSwipeSurface>
-  );
+  const answerFooter = stickyFooterActions ? (
+    <ToolSection first compact status="active">
+      {stickyFooterActions}
+    </ToolSection>
+  ) : undefined;
 
   return (
     <ToolPanelShell
       toolId="matching"
-      fillHeight={useStickyAnswerFooter}
+      fillHeight
       stepper={
-        sandbox?.hideStepper ? undefined : (
-          <Stepper
-            nav={
-              readOnly
-                ? undefined
-                : {
-                    stepIndex,
-                    stepCount: steps.length,
-                    onBack: goBack,
-                    onNext: goNext,
-                    canGoNext,
-                  }
-            }
-          />
-        )
+        <Stepper
+          nav={{
+            stepIndex,
+            stepCount: steps.length,
+            onBack: goBack,
+            onNext: goNext,
+            canGoNext,
+          }}
+        />
       }
     >
       <WizardPanelFrame
-        readOnly={readOnly}
-        scrollable={useStickyAnswerFooter}
+        scrollable
         stickyFooter={answerFooter}
         trailing={
           error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null
         }
       >
-        {wizardContent}
+        <WizardSwipeSurface
+          stepId={step}
+          stepIndex={stepIndex}
+          canGoBack={stepIndex > 0}
+          canGoNext={canSwipeNext}
+          onBack={goBack}
+          onNext={goNext}
+        >
+          {panelBody}
+        </WizardSwipeSurface>
       </WizardPanelFrame>
     </ToolPanelShell>
   );

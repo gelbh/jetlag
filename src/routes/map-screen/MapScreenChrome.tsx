@@ -258,6 +258,7 @@ export function MapScreenChrome({
   setAwaitingPlacement,
   mapSlot,
 }: MapScreenChromeProps) {
+  const [forceMapToolsGuide, setForceMapToolsGuide] = useState(false);
   const syncMessage =
     syncStatus.remoteUpdateNotice ??
     syncStatus.lastSyncError ??
@@ -433,6 +434,8 @@ export function MapScreenChrome({
           overlay={overlay}
           firstRunDismissed={firstRunDismissed}
           setFirstRunDismissed={setFirstRunDismissed}
+          forceMapToolsGuide={forceMapToolsGuide}
+          setForceMapToolsGuide={setForceMapToolsGuide}
           selectedAnnotation={selectedAnnotation}
           geometryEditAnnotation={geometryEditAnnotation}
           geometryDraft={geometryDraft}
@@ -537,6 +540,10 @@ export function MapScreenChrome({
             onEndSession: () => void handleEndSession(),
             onLeaveSession: () => void handleLeaveSession(),
             expansionPackEnabled: session!.expansionPackEnabled === true,
+            onReviewMapTools: () => {
+              overlay.closeSheet();
+              setForceMapToolsGuide(true);
+            },
           }}
           onReportProblem={() => {
             overlay.closeSheet();

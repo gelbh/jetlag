@@ -1,21 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { geoSpatialVoronoiFromSites } from "./spatialVoronoi";
 import { KERNEL_WASM_READY } from "./kernelWasmReady";
+import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
 
 /**
- * Interleaved median: Wave-2 Gate A for the sync pkg export.
- * Compares serialized FeatureCollections (build_*_json vs JSON.stringify(TS)),
- * matching the string-returning pkg API (same posture as half-plane pkg gates
- * that pre-stringify inputs). Production async wrappers add JS stringify/parse
- * around this export — same pattern as other kernel wasm wrappers.
+ * Interleaved median: Wave-2 Gate A for the production Voronoi path
+ * (`wasmBuildSpatialVoronoiFromSites` vs `geoSpatialVoronoiFromSites`).
  */
-function measureInterleavedMedianRatio(
+async function measureInterleavedMedianRatio(
   runTs: () => void,
-  runWasm: () => void,
+  runWasm: () => Promise<void>,
   iterations = 31,
-): number {
+): Promise<number> {
   const tsSamples: number[] = [];
   const wasmSamples: number[] = [];
   for (let i = 0; i < iterations; i += 1) {
@@ -23,7 +21,7 @@ function measureInterleavedMedianRatio(
     runTs();
     tsSamples.push(performance.now() - tsStart);
     const wasmStart = performance.now();
-    runWasm();
+    await runWasm();
     wasmSamples.push(performance.now() - wasmStart);
   }
   tsSamples.sort((a, b) => a - b);
@@ -38,7 +36,7 @@ describe("spatialVoronoiPerf", () => {
     expect(runGeometryPerf || true).toBe(true);
   });
 
-  it("wasm_spatial_voronoi median within 1.1x ts (required before ready flip)", async () => {
+  it("wasm_spatial_voronoi median within 1.1x ts (production-shaped)", async () => {
     if (!runGeometryPerf) {
       return;
     }
@@ -48,19 +46,15 @@ describe("spatialVoronoiPerf", () => {
       { lng: -0.15, lat: 51.5, properties: { poiId: "north" } },
       { lng: -0.2, lat: 51.48, properties: { poiId: "far" } },
     ];
-    const sitesJson = JSON.stringify(sites);
-    const wasmPkg = await import(
-      "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
-    );
-    wasmPkg.build_spatial_voronoi_json(sitesJson);
-    JSON.stringify(geoSpatialVoronoiFromSites(sites));
+    await wasmBuildSpatialVoronoiFromSites(sites);
+    geoSpatialVoronoiFromSites(sites);
 
-    const ratio = measureInterleavedMedianRatio(
+    const ratio = await measureInterleavedMedianRatio(
       () => {
-        JSON.stringify(geoSpatialVoronoiFromSites(sites));
+        geoSpatialVoronoiFromSites(sites);
       },
-      () => {
-        wasmPkg.build_spatial_voronoi_json(sitesJson);
+      async () => {
+        await wasmBuildSpatialVoronoiFromSites(sites);
       },
     );
 
