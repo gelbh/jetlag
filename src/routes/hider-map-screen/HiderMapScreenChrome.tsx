@@ -494,6 +494,8 @@ export function HiderMapScreenChrome({
           session={{
             sessionCode: session.code,
             remoteSession: isRemote,
+            session,
+            myUid: uid ?? undefined,
             onClearMap,
             endGameBlocked:
               isEndGameActive(session) || isEndGamePending(session),

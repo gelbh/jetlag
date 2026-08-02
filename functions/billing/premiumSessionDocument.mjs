@@ -82,6 +82,10 @@ export function buildPremiumSessionFirestoreDocument(
     createdAt,
     memberUids: [hostUid],
     memberRoles: { [hostUid]: input.hostRole },
+    roleGates: {
+      version: 1,
+      leaders: { [input.hostRole]: hostUid },
+    },
     gameSize: input.gameSize,
     distanceUnit: input.distanceUnit,
     hidingZoneRadiusMeters: radiusMeters,

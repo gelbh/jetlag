@@ -29,6 +29,7 @@ const SESSION_RECORD_STRUCTURED_KEYS = [
   "gameArea",
   "memberUids",
   "memberRoles",
+  "roleGates",
   "disabledTools",
   "thermometerPresetMiles",
   "thermometerPresetMeters",

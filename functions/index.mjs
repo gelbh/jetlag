@@ -29,9 +29,14 @@ export {
 
 export {
   endSession,
+  initSessionRoleGates,
+  joinSessionWithRole,
   leaveHostSession,
+  leaveSessionMembership,
+  regenerateRolePasscode,
   repairGhostHost,
   resetSessionForRematch,
+  revealRolePasscode,
 } from "./handlers/session.mjs";
 
 export { claimUsername, profileFriends } from "./handlers/profile.mjs";

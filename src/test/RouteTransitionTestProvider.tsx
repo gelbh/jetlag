@@ -2,10 +2,13 @@ import { useCallback, useMemo, useRef, type ReactNode } from "react";
 import { useNavigate, type To } from "react-router-dom";
 import type { BeginTransitionOptions, RouteTransitionPhase } from "../navigation/routeTransitionContextInstance";
 import { RouteTransitionContext } from "../navigation/routeTransitionContextInstance";
-import { preloadRoute, resolveNavigatePath } from "../navigation/routePreloaders";
 import { revealRouteTransition } from "../navigation/revealRouteTransition";
 
-/** Fast path for unit tests: skip readiness polling and motion. */
+/**
+ * Fast path for unit tests: skip chunk preload, readiness polling, and motion.
+ * Awaiting real `preloadRoute` under `--changed` / large suites races
+ * `AppNavigate` redirects (empty body until CreateSession/MapScreen import finishes).
+ */
 export function RouteTransitionTestProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const screenReadyRef = useRef(true);
@@ -13,7 +16,6 @@ export function RouteTransitionTestProvider({ children }: { children: ReactNode 
   const beginTransition = useCallback(
     async (to: To, options?: BeginTransitionOptions) => {
       screenReadyRef.current = true;
-      await preloadRoute(resolveNavigatePath(to));
       const direction =
         options?.direction === "back"
           ? "back"

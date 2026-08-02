@@ -24,6 +24,9 @@ import {
   parseCreatePremiumSessionInput,
 } from "./premiumSessionDocument.mjs";
 import { generateSessionCode } from "../session/sessionCodes.mjs";
+import {
+  buildInitialRoleSecrets,
+} from "../session/roleGateShared.mjs";
 
 const CHECKOUT_BILLING_ERROR_MESSAGE = "Couldn't start checkout. Try again.";
 const PORTAL_BILLING_ERROR_MESSAGE = "Couldn't open billing portal. Try again.";
@@ -242,6 +245,8 @@ export async function createPremiumSessionHandler(db, uid, rawInput) {
   const userRef = userEntitlementsRef(db, uid);
   let sessionId = "";
   let sessionPayload = null;
+  let observerPasscode;
+  let rolePasscode;
 
   await db.runTransaction(async (transaction) => {
     const userSnapshot = await transaction.get(userRef);
@@ -295,6 +300,11 @@ export async function createPremiumSessionHandler(db, uid, rawInput) {
       createdAt,
       status: "active",
     });
+
+    const secrets = buildInitialRoleSecrets(input.hostRole);
+    observerPasscode = secrets.observer.code;
+    rolePasscode = secrets[input.hostRole]?.code;
+    transaction.set(db.collection("sessionRoleSecrets").doc(sessionId), secrets);
   });
 
   return {
@@ -302,6 +312,8 @@ export async function createPremiumSessionHandler(db, uid, rawInput) {
       id: sessionId,
       ...sessionPayload,
     },
+    observerPasscode,
+    rolePasscode,
   };
 }
 

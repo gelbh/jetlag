@@ -14,6 +14,7 @@ import { type AdvancedSessionSettingsValue } from "../../../domain/session/tools
 import { AdvancedSessionSettings } from "../settings/AdvancedSessionSettings";
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
 import { getBasemapAttributionText } from "../../../domain/map/mapBasemaps";
+import type { SessionRecord } from "../../../domain/map/annotations";
 import { MAP_LIBRE_PLAY_READY } from "../../../domain/map/mapLibrePlayReady";
 import { useMapStore } from "../../../state/mapStore";
 import type { LayerVisibility } from "../../../state/sessionStore";
@@ -95,6 +96,8 @@ export interface MapSettingsSessionProps {
   endGameBlocked?: boolean;
   expansionPackEnabled?: boolean;
   onReviewMapTools?: () => void;
+  session?: SessionRecord | null;
+  myUid?: string;
 }
 
 interface MapSettingsSheetProps {
@@ -268,6 +271,8 @@ export function MapSettingsSheet({
               setReportProblemOpen(true);
             }}
             onReviewMapTools={session.onReviewMapTools}
+            session={session.session}
+            myUid={session.myUid}
           />
         ) : null}
       </div>

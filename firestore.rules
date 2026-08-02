@@ -314,6 +314,17 @@ service cloud.firestore {
         && validJoinRole(request.resource.data.memberRoles[request.auth.uid]);
     }
 
+    function isRoleGatedSessionData(data) {
+      return 'roleGates' in data
+        && data.roleGates is map
+        && data.roleGates.version == 1;
+    }
+
+    function isLegacyMembershipJoinUpdate() {
+      return isMembershipJoinUpdate()
+        && !isRoleGatedSessionData(resource.data);
+    }
+
     function isMembershipJoinUpdate() {
       return isSignedIn()
         && membershipJoinFieldsStable()
@@ -534,7 +545,7 @@ service cloud.firestore {
         || isTimerHostUpdate()
         || isHostEndSessionUpdate()
         || validSessionRulesUpdate(sessionId) || (
-        isMembershipJoinUpdate()
+        isLegacyMembershipJoinUpdate()
       ) || (
         isSessionMember(sessionId)
         && resource.data.status != 'ended'
@@ -1034,6 +1045,10 @@ service cloud.firestore {
     }
 
     match /stripeEvents/{eventId} {
+      allow read, write: if false;
+    }
+
+    match /sessionRoleSecrets/{sessionId} {
       allow read, write: if false;
     }
   }
