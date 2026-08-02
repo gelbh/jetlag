@@ -43,13 +43,13 @@ export function buildLocationEliminationRegion(
   return buildMeasuringEliminationRegion(nearRegion, gameArea, answer);
 }
 
-export function buildMultiPlaceEliminationRegion(
+export async function buildMultiPlaceEliminationRegion(
   places: readonly LatLngTuple[],
   distanceMeters: number,
   gameArea: GameArea,
   answer: MeasuringAnswer,
-): Feature<Polygon | MultiPolygon> | null {
-  const nearRegion = buildMultiPlaceNearRegion(
+): Promise<Feature<Polygon | MultiPolygon> | null> {
+  const nearRegion = await buildMultiPlaceNearRegion(
     places,
     distanceMeters,
     gameArea,

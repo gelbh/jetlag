@@ -67,3 +67,8 @@ export {
   dispatchGeodesicLineBuffer,
   runGeodesicLineBuffer,
 } from "./geodesicKernelRunner";
+export {
+  dispatchNearRegionBatch,
+  runNearRegionBatch,
+} from "./nearRegionKernelRunner";
+export { wasmBuildNearRegion } from "./nearRegionWasm";
