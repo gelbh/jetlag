@@ -1,9 +1,14 @@
-import type {
-  LngLatBoundsLike,
-  LngLatLike,
-  Map as MapLibreMap,
-  PaddingOptions,
+import {
+  LngLatBounds,
+  MercatorCoordinate,
+  type LngLatBoundsLike,
+  type LngLatLike,
+  type Map as MapLibreMap,
+  type PaddingOptions,
 } from "maplibre-gl";
+
+/** Web Mercator tile size used by MapLibre / Leaflet CRS.EPSG3857. */
+const WORLD_TILE_SIZE = 512;
 
 function normalizeLngLat(center: LngLatLike): { lng: number; lat: number } {
   if (Array.isArray(center)) {
@@ -20,9 +25,62 @@ function normalizeLngLat(center: LngLatLike): { lng: number; lat: number } {
   throw new Error("computeFramedCenterZoomMapLibre: unsupported center");
 }
 
+function worldScaleAtZoom(zoom: number): number {
+  return WORLD_TILE_SIZE * 2 ** zoom;
+}
+
+/** Project lng/lat into world pixels at `zoom` (Leaflet `map.project(_, zoom)`). */
+export function projectLngLatAtZoom(
+  lngLat: { lng: number; lat: number },
+  zoom: number,
+): { x: number; y: number } {
+  const mc = MercatorCoordinate.fromLngLat(lngLat);
+  const scale = worldScaleAtZoom(zoom);
+  return { x: mc.x * scale, y: mc.y * scale };
+}
+
+/** Unproject world pixels at `zoom` (Leaflet `map.unproject(_, zoom)`). */
+export function unprojectPointAtZoom(
+  point: { x: number; y: number },
+  zoom: number,
+): { lng: number; lat: number } {
+  const scale = worldScaleAtZoom(zoom);
+  const lngLat = new MercatorCoordinate(point.x / scale, point.y / scale).toLngLat();
+  return { lng: lngLat.lng, lat: lngLat.lat };
+}
+
+/**
+ * Midpoint of SW/NE at `zoom`, shifted by asymmetric padding — same math as
+ * Leaflet {@link computeFramedCenterZoom} after a min/max zoom clamp.
+ */
+export function computePaddedCenterAtZoom(
+  sw: { lng: number; lat: number },
+  ne: { lng: number; lat: number },
+  padding: PaddingOptions,
+  zoom: number,
+): { lng: number; lat: number } {
+  const top = padding.top ?? 0;
+  const right = padding.right ?? 0;
+  const bottom = padding.bottom ?? 0;
+  const left = padding.left ?? 0;
+  const paddingOffsetX = (right - left) / 2;
+  const paddingOffsetY = (bottom - top) / 2;
+  const swPoint = projectLngLatAtZoom(sw, zoom);
+  const nePoint = projectLngLatAtZoom(ne, zoom);
+  return unprojectPointAtZoom(
+    {
+      x: (swPoint.x + nePoint.x) / 2 + paddingOffsetX,
+      y: (swPoint.y + nePoint.y) / 2 + paddingOffsetY,
+    },
+    zoom,
+  );
+}
+
 /**
  * MapLibre equivalent of {@link computeFramedCenterZoom}: uses `cameraForBounds`
- * so asymmetric padding shifts the center the same way fitBounds would.
+ * so asymmetric padding shifts the center the same way fitBounds would. When
+ * min/max zoom clamps change the camera zoom, recompute the center at the final
+ * zoom (MapLibre `project`/`unproject` are transform-bound and cannot take zoom).
  */
 export function computeFramedCenterZoomMapLibre(
   map: MapLibreMap,
@@ -47,5 +105,16 @@ export function computeFramedCenterZoomMapLibre(
     zoom = Math.max(minZoom, zoom);
   }
 
-  return { center: normalizeLngLat(camera.center), zoom };
+  if (zoom === camera.zoom) {
+    return { center: normalizeLngLat(camera.center), zoom };
+  }
+
+  const llb = LngLatBounds.convert(bounds);
+  const center = computePaddedCenterAtZoom(
+    llb.getSouthWest(),
+    llb.getNorthEast(),
+    padding,
+    zoom,
+  );
+  return { center, zoom };
 }

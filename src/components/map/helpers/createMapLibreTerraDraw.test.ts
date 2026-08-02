@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Feature, Polygon } from "geojson";
 import {
+  ensureTerraDrawStarted,
   fromTerraDrawSnapshot,
   toTerraDrawFeatures,
 } from "./createMapLibreTerraDraw";
@@ -36,5 +37,17 @@ describe("createMapLibreTerraDraw GeoJSON round-trip", () => {
     expect(roundTripped).toHaveLength(1);
     expect(roundTripped[0].properties).toEqual({ label: "zone" });
     expect(roundTripped[0].geometry).toEqual(polygon.geometry);
+  });
+});
+
+describe("ensureTerraDrawStarted", () => {
+  it("starts when disabled and is a no-op when already enabled", () => {
+    const start = vi.fn();
+    ensureTerraDrawStarted({ enabled: false, start });
+    expect(start).toHaveBeenCalledOnce();
+
+    start.mockClear();
+    ensureTerraDrawStarted({ enabled: true, start });
+    expect(start).not.toHaveBeenCalled();
   });
 });

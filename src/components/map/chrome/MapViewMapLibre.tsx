@@ -3,6 +3,7 @@ import Map, { type MapLayerMouseEvent, type MapRef } from "react-map-gl/maplibre
 import { setWorkerUrl, type Map as MapLibreMap } from "maplibre-gl";
 import {
   LatLngBounds,
+  latLngBounds,
   type LatLngBoundsExpression,
   type LatLngExpression,
 } from "leaflet";
@@ -16,6 +17,7 @@ import { isUsableMapBounds } from "../../../domain/geometry/gameArea/geometry";
 import { computeFramedCenterZoomMapLibre } from "../../../domain/map/computeFramedCenterZoomMapLibre";
 import { focusBoundsToLngLatBounds } from "../../../domain/map/focusBoundsToLngLatBounds";
 import { isLargeCameraJumpMapLibre } from "../../../domain/map/isLargeCameraJumpMapLibre";
+import { shouldApplyMapFocus } from "../../../domain/map/mapFocusPolicy";
 import {
   MOTION_MAP_CAMERA_FLY_MS,
   MOTION_MAP_CAMERA_MS,
@@ -115,18 +117,17 @@ function MapFocus({
       return;
     }
 
-    const map = mapRef.getMap();
-    const recenterRequested = recenterToken !== lastRecenterRef.current;
-    if (
-      fitBoundsMode === "once" &&
-      hasFittedRef.current &&
-      !recenterRequested
-    ) {
+    const { apply } = shouldApplyMapFocus({
+      fitBoundsMode,
+      hasFitted: hasFittedRef.current,
+      recenterToken,
+      lastRecenterToken: lastRecenterRef.current,
+    });
+    if (!apply) {
       return;
     }
 
-    lastRecenterRef.current = recenterToken;
-
+    const map = mapRef.getMap();
     map.resize();
 
     const padding = {
@@ -136,23 +137,15 @@ function MapFocus({
       bottom: padY + (focusPaddingBias ?? 0),
     };
 
-    const lngLatBounds = focusBoundsToLngLatBounds(focusBounds);
-    const [[west, south], [east, north]] = lngLatBounds as [
-      [number, number],
-      [number, number],
-    ];
-    if (
-      !isUsableMapBounds(
-        new LatLngBounds([south, west], [north, east]),
-      )
-    ) {
+    const leafletBounds =
+      focusBounds instanceof LatLngBounds
+        ? focusBounds
+        : latLngBounds(focusBounds);
+    if (!isUsableMapBounds(leafletBounds)) {
       return;
     }
 
-    if (suppressChromeHideRef) {
-      suppressChromeHideRef.current = true;
-    }
-
+    const lngLatBounds = focusBoundsToLngLatBounds(leafletBounds);
     const framed = computeFramedCenterZoomMapLibre(
       map,
       lngLatBounds,
@@ -164,7 +157,12 @@ function MapFocus({
       return;
     }
 
+    lastRecenterRef.current = recenterToken;
     hasFittedRef.current = true;
+
+    if (suppressChromeHideRef) {
+      suppressChromeHideRef.current = true;
+    }
 
     const onMoveEnd = () => {
       if (suppressChromeHideRef) {

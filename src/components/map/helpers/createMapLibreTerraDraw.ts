@@ -75,6 +75,16 @@ export function fromTerraDrawSnapshot(
   return features.map(stripDrawProperties);
 }
 
+/** Terra Draw mutators require an enabled instance — start lazily if needed. */
+export function ensureTerraDrawStarted(draw: {
+  enabled: boolean;
+  start: () => void;
+}): void {
+  if (!draw.enabled) {
+    draw.start();
+  }
+}
+
 export function createMapLibreTerraDraw(map: MapLibreMap): MapLibreTerraDrawHandle {
   const draw = new TerraDraw({
     adapter: new TerraDrawMapLibreGLAdapter({ map }),
@@ -95,9 +105,11 @@ export function createMapLibreTerraDraw(map: MapLibreMap): MapLibreTerraDrawHand
       draw.stop();
     },
     setMode: (mode) => {
+      ensureTerraDrawStarted(draw);
       draw.setMode(mode);
     },
     setFeatures: (features, mode) => {
+      ensureTerraDrawStarted(draw);
       draw.clear();
       const prepared = toTerraDrawFeatures(features, mode);
       if (prepared.length > 0) {
@@ -106,6 +118,7 @@ export function createMapLibreTerraDraw(map: MapLibreMap): MapLibreTerraDrawHand
     },
     getFeatures: () => fromTerraDrawSnapshot(draw.getSnapshot()),
     clear: () => {
+      ensureTerraDrawStarted(draw);
       draw.clear();
     },
     destroy: () => {

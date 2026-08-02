@@ -7,6 +7,7 @@ import type {
 import { LatLngBounds, latLngBounds, point } from "leaflet";
 import { computeFramedCenterZoom } from "../../../domain/map/computeFramedCenterZoom";
 import { isLargeCameraJump } from "../../../domain/map/isLargeCameraJump";
+import { shouldApplyMapFocus } from "../../../domain/map/mapFocusPolicy";
 import {
   getBasemapSurface,
   getMapBasemap,
@@ -78,16 +79,15 @@ function MapFocus({
       return;
     }
 
-    const recenterRequested = recenterToken !== lastRecenterRef.current;
-    if (
-      fitBoundsMode === "once" &&
-      hasFittedRef.current &&
-      !recenterRequested
-    ) {
+    const { apply } = shouldApplyMapFocus({
+      fitBoundsMode,
+      hasFitted: hasFittedRef.current,
+      recenterToken,
+      lastRecenterToken: lastRecenterRef.current,
+    });
+    if (!apply) {
       return;
     }
-
-    lastRecenterRef.current = recenterToken;
 
     map.invalidateSize();
 
@@ -115,7 +115,12 @@ function MapFocus({
       focusMaxZoom,
     );
 
+    lastRecenterRef.current = recenterToken;
     hasFittedRef.current = true;
+
+    if (suppressChromeHideRef) {
+      suppressChromeHideRef.current = true;
+    }
 
     const onMoveEnd = () => {
       if (suppressChromeHideRef) {
