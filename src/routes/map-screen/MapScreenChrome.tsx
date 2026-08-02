@@ -393,7 +393,10 @@ export function MapScreenChrome({
       onUndo={handleUndoLastAnnotation}
       onRedo={handleRedoLastAnnotation}
       onOpenSettings={handleOpenSettings}
-      onOpenReportProblem={() => setReportProblemOpen(true)}
+      onOpenReportProblem={() => {
+        overlay.closeSheet();
+        setReportProblemOpen(true);
+      }}
       onOpenChat={handleOpenChat}
       hasUnreadChat={hasUnreadChat}
       unreadCount={unreadCount}

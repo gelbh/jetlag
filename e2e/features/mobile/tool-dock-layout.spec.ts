@@ -32,13 +32,24 @@ test.describe("mobile tool dock", () => {
     ).toBeVisible();
     await expect(sheet.getByRole("button", { name: "Redo last annotation" })).toBeVisible();
     await expect(sheet.getByText("Draw a play boundary")).toBeVisible();
-    await expect(page.getByLabel("Session tools")).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Open settings" }),
+      sheet.getByRole("button", { name: "Open settings" }),
+    ).toHaveCount(0);
+    await expect(
+      sheet.getByRole("button", { name: "Open chat" }),
+    ).toHaveCount(0);
+
+    const sessionTools = page.getByLabel("Session tools");
+    await expect(sessionTools).toBeVisible();
+    await expect(
+      sessionTools.getByRole("button", { name: "Open settings" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Report a problem" }),
+      sessionTools.getByRole("button", { name: "Report a problem" }),
     ).toBeVisible();
+
+    const barCount = await page.locator(".jl-tool-dock-bar").count();
+    expect(barCount).toBe(2);
   });
 
   test("dock fits without clipping question tools", async ({ page }) => {

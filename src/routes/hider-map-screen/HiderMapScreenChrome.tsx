@@ -376,7 +376,10 @@ export function HiderMapScreenChrome({
       onRecenter={onRecenter}
       onOpenChat={onOpenChat}
       onOpenSettings={onOpenSettings}
-      onOpenReportProblem={() => setReportProblemOpen(true)}
+      onOpenReportProblem={() => {
+        overlay.closeSheet();
+        setReportProblemOpen(true);
+      }}
       hasUnreadChat={hasUnreadChat}
       unreadCount={unreadCount}
     />
