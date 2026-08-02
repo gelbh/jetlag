@@ -45,6 +45,9 @@ test.describe("mobile tool dock", () => {
       sessionTools.getByRole("button", { name: "Open settings" }),
     ).toBeVisible();
     await expect(
+      sessionTools.getByRole("button", { name: /^Open chat/ }),
+    ).toBeVisible();
+    await expect(
       sessionTools.getByRole("button", { name: "Report a problem" }),
     ).toBeVisible();
     await sessionTools.getByRole("button", { name: "Report a problem" }).click();

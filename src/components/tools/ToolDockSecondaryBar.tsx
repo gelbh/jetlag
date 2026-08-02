@@ -25,6 +25,7 @@ export function ToolDockSecondaryBar({
 }: ToolDockSecondaryBarProps) {
   return (
     <div
+      role="group"
       className="jl-tool-dock-bar jl-tool-dock-bar--secondary"
       aria-label="Session tools"
     >
