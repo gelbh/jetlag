@@ -14,6 +14,8 @@ import { type AdvancedSessionSettingsValue } from "../../../domain/session/tools
 import { AdvancedSessionSettings } from "../settings/AdvancedSessionSettings";
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
 import { getBasemapAttributionText } from "../../../domain/map/mapBasemaps";
+import { MAP_LIBRE_PLAY_READY } from "../../../domain/map/mapLibrePlayReady";
+import { useMapStore } from "../../../state/mapStore";
 import type { LayerVisibility } from "../../../state/sessionStore";
 import type { NotificationPreferences } from "../../../domain/device/chrome/notifications";
 import { isNativeNotificationsSupported } from "../../../services/core/native/notifications";
@@ -121,6 +123,9 @@ export function MapSettingsSheet({
   const [curseSheetOpen, setCurseSheetOpen] = useState(false);
   const [reportProblemOpen, setReportProblemOpen] = useState(false);
   const ownsReportSheet = !onReportProblem;
+  const mapEngine = useMapStore((s) => s.mapEngine);
+  const attributionEngine =
+    MAP_LIBRE_PLAY_READY && mapEngine === "maplibre" ? "maplibre" : "leaflet";
 
   const nativeNotificationsSupported =
     general.nativeNotificationsSupported ?? isNativeNotificationsSupported();
@@ -268,7 +273,7 @@ export function MapSettingsSheet({
       </div>
 
       <p className="mt-6 border-t-2 border-border pt-3 text-xs leading-relaxed text-ink-dim">
-        {getBasemapAttributionText(general.mapStyle)}
+        {getBasemapAttributionText(general.mapStyle, attributionEngine)}
       </p>
 
       <CurseReferenceSheet
