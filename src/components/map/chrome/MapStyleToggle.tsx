@@ -15,6 +15,7 @@ import {
   useMapLibrePreviewTileOrigin,
 } from "../helpers/useMapLibreMap";
 import { useMapPreviewTileOrigin } from "../helpers/useMapPreviewTileOrigin";
+import { matchMapEngine } from "./matchMapEngine";
 import { useMapEngine } from "./mapEngineContext";
 
 interface MapStyleToggleProps {
@@ -160,8 +161,8 @@ function MapStyleToggleLeaflet({
 
 export function MapStyleToggle(props: MapStyleToggleProps) {
   const engine = useMapEngine();
-  if (engine === "maplibre") {
-    return <MapStyleToggleMapLibre {...props} />;
-  }
-  return <MapStyleToggleLeaflet {...props} />;
+  return matchMapEngine(engine, {
+    maplibre: () => <MapStyleToggleMapLibre {...props} />,
+    leaflet: () => <MapStyleToggleLeaflet {...props} />,
+  });
 }

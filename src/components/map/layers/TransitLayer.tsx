@@ -15,6 +15,7 @@ import {
   filterTransitVehiclesForViewport,
   type MapViewportBounds,
 } from "../../../domain/map/transitViewport";
+import { matchMapEngine } from "../chrome/matchMapEngine";
 import { useMapEngine } from "../chrome/mapEngineContext";
 import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
@@ -237,8 +238,8 @@ function TransitLayerLeaflet({
 
 export const TransitLayer = memo(function TransitLayer(props: TransitLayerProps) {
   const engine = useMapEngine();
-  if (engine === "maplibre") {
-    return <TransitLayerMapLibre {...props} />;
-  }
-  return <TransitLayerLeaflet {...props} />;
+  return matchMapEngine(engine, {
+    maplibre: () => <TransitLayerMapLibre {...props} />,
+    leaflet: () => <TransitLayerLeaflet {...props} />,
+  });
 });

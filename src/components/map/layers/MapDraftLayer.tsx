@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import turfCircle from "@turf/circle";
 import type { Feature, LineString } from "geojson";
 import { Popup } from "react-leaflet";
@@ -8,9 +8,10 @@ import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
 import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import type { MapDraftOverlay } from "../../../domain/map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { matchMapEngine } from "../chrome/matchMapEngine";
 import { useMapEngine } from "../chrome/mapEngineContext";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
-import { MapLibreDotMarker } from "../helpers/MapLibreHtmlMarker";
+import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { renderGeoJsonPolygonGroups } from "../helpers/renderHelpers";
 
@@ -33,6 +34,13 @@ function draftPolylineFeature(
 
 function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
   const c = MAP_ANNOTATION_COLORS;
+  const [openPopupId, setOpenPopupId] = useState<string | null>(null);
+  const openMarker = overlays.find(
+    (overlay): overlay is Extract<MapDraftOverlay, { kind: "marker" }> =>
+      overlay.kind === "marker" &&
+      overlay.id === openPopupId &&
+      Boolean(overlay.popup),
+  );
 
   return (
     <>
@@ -75,18 +83,14 @@ function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
                 className={
                   overlay.style?.pulsing ? "draft-seeker-pulse" : undefined
                 }
-              >
-                {overlay.popup ? (
-                  <MapLibrePopup
-                    latitude={lat}
-                    longitude={lng}
-                    closeButton={false}
-                    anchor="bottom"
-                  >
-                    {overlay.popup}
-                  </MapLibrePopup>
-                ) : null}
-              </MapLibreDotMarker>
+                onClick={
+                  overlay.popup
+                    ? () => {
+                        setOpenPopupId(overlay.id);
+                      }
+                    : undefined
+                }
+              />
             );
           }
           case "circle": {
@@ -101,17 +105,10 @@ function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
                 key={overlay.id}
                 id={`draft-circle-${overlay.id}`}
                 data={feature}
-                fill={
-                  overlay.style?.fillColor
-                    ? {
-                        fillColor: overlay.style.fillColor,
-                        fillOpacity: overlay.style.fillOpacity ?? 0.08,
-                      }
-                    : {
-                        fillColor: c.radar,
-                        fillOpacity: overlay.style?.fillOpacity ?? 0.08,
-                      }
-                }
+                fill={{
+                  fillColor: overlay.style?.fillColor ?? c.radar,
+                  fillOpacity: overlay.style?.fillOpacity ?? 0.08,
+                }}
                 line={{
                   color: overlay.style?.color ?? c.radar,
                   width,
@@ -149,6 +146,18 @@ function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
           }
         }
       })}
+      {openMarker ? (
+        <MapLibrePopup
+          latitude={openMarker.point[0]}
+          longitude={openMarker.point[1]}
+          closeButton={false}
+          closeOnClick={false}
+          anchor="bottom"
+          onClose={() => setOpenPopupId(null)}
+        >
+          {openMarker.popup}
+        </MapLibrePopup>
+      ) : null}
     </>
   );
 }
@@ -235,8 +244,8 @@ export const MapDraftLayer = memo(function MapDraftLayer(
   props: MapDraftLayerProps,
 ) {
   const engine = useMapEngine();
-  if (engine === "maplibre") {
-    return <MapDraftLayerMapLibre {...props} />;
-  }
-  return <MapDraftLayerLeaflet {...props} />;
+  return matchMapEngine(engine, {
+    maplibre: () => <MapDraftLayerMapLibre {...props} />,
+    leaflet: () => <MapDraftLayerLeaflet {...props} />,
+  });
 });

@@ -6,8 +6,9 @@ import {
   latLngBoundsToViewport,
   type MapViewportBounds,
 } from "../../../domain/map/transitViewport";
-import { createThrottledPublisher } from "../helpers/mapViewportPublish";
+import { createViewportTrackerHandlers } from "../helpers/createViewportTrackerHandlers";
 import { useMapLibreMap } from "../helpers/useMapLibreMap";
+import { matchMapEngine } from "./matchMapEngine";
 import { useMapEngine } from "./mapEngineContext";
 
 export interface MapViewportState {
@@ -29,88 +30,36 @@ function MapViewportTrackerMapLibre({
   suppressPanRef,
 }: MapViewportTrackerProps) {
   const map = useMapLibreMap();
-  const panActiveRef = useRef(false);
-  const skipMoveEndScheduleRef = useRef(false);
   const onViewportChangeRef = useRef(onViewportChange);
-  const publisherRef = useRef<ReturnType<typeof createThrottledPublisher> | null>(
-    null,
-  );
 
   useEffect(() => {
     onViewportChangeRef.current = onViewportChange;
   }, [onViewportChange]);
 
   useEffect(() => {
-    const publisher = createThrottledPublisher(() => {
-      publishViewportMapLibre(map, onViewportChangeRef.current);
+    const handlers = createViewportTrackerHandlers({
+      publish: () =>
+        publishViewportMapLibre(map, onViewportChangeRef.current),
+      onUserPanStart,
+      onUserPanEnd,
+      suppressPanRef,
     });
-    publisherRef.current = publisher;
-    return () => {
-      publisher.cancel();
-      publisherRef.current = null;
-    };
-  }, [map]);
 
-  useEffect(() => {
-    const notifyPanStart = () => {
-      if (suppressPanRef?.current || panActiveRef.current) {
-        return;
-      }
-
-      panActiveRef.current = true;
-      onUserPanStart?.();
-    };
-
-    const notifyPanEnd = () => {
-      if (!panActiveRef.current) {
-        return;
-      }
-
-      panActiveRef.current = false;
-      onUserPanEnd?.();
-    };
-
-    const onDragStart = () => {
-      notifyPanStart();
-    };
-    const onDragEnd = () => {
-      notifyPanEnd();
-      publisherRef.current?.flush();
-      skipMoveEndScheduleRef.current = true;
-    };
-    const onMove = () => {
-      publisherRef.current?.schedule();
-    };
-    const onZoom = () => {
-      publisherRef.current?.schedule();
-    };
-    const onMoveEnd = () => {
-      notifyPanEnd();
-      if (skipMoveEndScheduleRef.current) {
-        skipMoveEndScheduleRef.current = false;
-        return;
-      }
-      publisherRef.current?.schedule();
-    };
-    const onZoomEnd = () => {
-      skipMoveEndScheduleRef.current = true;
-      publisherRef.current?.flush();
-    };
-
-    map.on("dragstart", onDragStart);
-    map.on("dragend", onDragEnd);
-    map.on("move", onMove);
-    map.on("zoom", onZoom);
-    map.on("moveend", onMoveEnd);
-    map.on("zoomend", onZoomEnd);
+    map.on("dragstart", handlers.onDragStart);
+    map.on("dragend", handlers.onDragEnd);
+    map.on("move", handlers.onMove);
+    map.on("zoom", handlers.onZoom);
+    map.on("moveend", handlers.onMoveEnd);
+    map.on("zoomend", handlers.onZoomEnd);
 
     return () => {
-      map.off("dragstart", onDragStart);
-      map.off("dragend", onDragEnd);
-      map.off("move", onMove);
-      map.off("zoom", onZoom);
-      map.off("moveend", onMoveEnd);
-      map.off("zoomend", onZoomEnd);
+      map.off("dragstart", handlers.onDragStart);
+      map.off("dragend", handlers.onDragEnd);
+      map.off("move", handlers.onMove);
+      map.off("zoom", handlers.onZoom);
+      map.off("moveend", handlers.onMoveEnd);
+      map.off("zoomend", handlers.onZoomEnd);
+      handlers.disposePublisher();
     };
   }, [map, onUserPanStart, onUserPanEnd, suppressPanRef]);
 
@@ -128,72 +77,48 @@ function MapViewportTrackerLeaflet({
   suppressPanRef,
 }: MapViewportTrackerProps) {
   const map = useMap();
-  const panActiveRef = useRef(false);
-  const skipMoveEndScheduleRef = useRef(false);
   const onViewportChangeRef = useRef(onViewportChange);
-  const publisherRef = useRef<ReturnType<typeof createThrottledPublisher> | null>(
-    null,
-  );
+  const handlersRef = useRef<ReturnType<
+    typeof createViewportTrackerHandlers
+  > | null>(null);
 
   useEffect(() => {
     onViewportChangeRef.current = onViewportChange;
   }, [onViewportChange]);
 
   useEffect(() => {
-    const publisher = createThrottledPublisher(() => {
-      publishViewportLeaflet(map, onViewportChangeRef.current);
+    const handlers = createViewportTrackerHandlers({
+      publish: () =>
+        publishViewportLeaflet(map, onViewportChangeRef.current),
+      onUserPanStart,
+      onUserPanEnd,
+      suppressPanRef,
     });
-    publisherRef.current = publisher;
+    handlersRef.current = handlers;
     return () => {
-      publisher.cancel();
-      publisherRef.current = null;
+      handlers.disposePublisher();
+      handlersRef.current = null;
     };
-  }, [map]);
-
-  const notifyPanStart = () => {
-    if (suppressPanRef?.current || panActiveRef.current) {
-      return;
-    }
-
-    panActiveRef.current = true;
-    onUserPanStart?.();
-  };
-
-  const notifyPanEnd = () => {
-    if (!panActiveRef.current) {
-      return;
-    }
-
-    panActiveRef.current = false;
-    onUserPanEnd?.();
-  };
+  }, [map, onUserPanStart, onUserPanEnd, suppressPanRef]);
 
   useMapEvents({
     dragstart: () => {
-      notifyPanStart();
+      handlersRef.current?.onDragStart();
     },
     dragend: () => {
-      notifyPanEnd();
-      publisherRef.current?.flush();
-      skipMoveEndScheduleRef.current = true;
+      handlersRef.current?.onDragEnd();
     },
     move: () => {
-      publisherRef.current?.schedule();
+      handlersRef.current?.onMove();
     },
     zoom: () => {
-      publisherRef.current?.schedule();
+      handlersRef.current?.onZoom();
     },
     moveend: () => {
-      notifyPanEnd();
-      if (skipMoveEndScheduleRef.current) {
-        skipMoveEndScheduleRef.current = false;
-        return;
-      }
-      publisherRef.current?.schedule();
+      handlersRef.current?.onMoveEnd();
     },
     zoomend: () => {
-      skipMoveEndScheduleRef.current = true;
-      publisherRef.current?.flush();
+      handlersRef.current?.onZoomEnd();
     },
   });
 
@@ -206,10 +131,10 @@ function MapViewportTrackerLeaflet({
 
 export function MapViewportTracker(props: MapViewportTrackerProps) {
   const engine = useMapEngine();
-  if (engine === "maplibre") {
-    return <MapViewportTrackerMapLibre {...props} />;
-  }
-  return <MapViewportTrackerLeaflet {...props} />;
+  return matchMapEngine(engine, {
+    maplibre: () => <MapViewportTrackerMapLibre {...props} />,
+    leaflet: () => <MapViewportTrackerLeaflet {...props} />,
+  });
 }
 
 function publishViewportLeaflet(

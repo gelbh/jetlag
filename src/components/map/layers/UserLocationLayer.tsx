@@ -3,6 +3,7 @@ import turfCircle from "@turf/circle";
 import { Marker } from "react-leaflet";
 import { Marker as MapLibreMarker } from "react-map-gl/maplibre";
 import type { GeolocationReading } from "../../../services/core/location/geolocation";
+import { matchMapEngine } from "../chrome/matchMapEngine";
 import { useMapEngine } from "../chrome/mapEngineContext";
 import { CompensatedCircle } from "../helpers/CompensatedCircle";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
@@ -53,7 +54,7 @@ function UserLocationLayerMapLibre({ reading }: UserLocationLayerProps) {
         latitude={reading.lat}
         longitude={reading.lng}
         anchor="center"
-        style={{ zIndex: 1000 }}
+        style={{ zIndex: 1000, pointerEvents: "none" }}
       >
         <div
           className="user-location-icon"
@@ -98,8 +99,8 @@ function UserLocationLayerLeaflet({ reading }: UserLocationLayerProps) {
 
 export function UserLocationLayer(props: UserLocationLayerProps) {
   const engine = useMapEngine();
-  if (engine === "maplibre") {
-    return <UserLocationLayerMapLibre {...props} />;
-  }
-  return <UserLocationLayerLeaflet {...props} />;
+  return matchMapEngine(engine, {
+    maplibre: () => <UserLocationLayerMapLibre {...props} />,
+    leaflet: () => <UserLocationLayerLeaflet {...props} />,
+  });
 }

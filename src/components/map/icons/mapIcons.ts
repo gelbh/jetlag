@@ -1,6 +1,10 @@
 import L from "leaflet";
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
 import { getBasemapSurface } from "../../../domain/map/mapBasemaps";
+import {
+  thermometerWalkEndLabelMarkup,
+  thermometerWalkProgressMarkup,
+} from "./thermometerWalkMarkup";
 
 interface DotIconOptions {
   color: string;
@@ -89,27 +93,33 @@ export function createCountdownBadgeIcon(label: string, expired: boolean) {
   });
 }
 
+function divIconFromMarkup(
+  markup: { className: string; html: string },
+  iconAnchor: [number, number],
+) {
+  return L.divIcon({
+    className: markup.className,
+    html: markup.html,
+    iconSize: [0, 0],
+    iconAnchor,
+  });
+}
+
 export function createThermometerWalkProgressIcon(
   walkedLabel: string,
   targetLabel: string | null,
   mapStyle: MapStyle,
   streetBasemap: StreetBasemap = "light",
 ) {
-  const surface = getBasemapSurface(mapStyle, streetBasemap);
-  const variant =
-    surface === "satellite" || surface === "dark"
-      ? "jl-thermometer-walk-progress--satellite"
-      : "jl-thermometer-walk-progress--standard";
-  const targetHtml = targetLabel
-    ? `<span class="jl-thermometer-walk-progress__target"> / ${targetLabel}</span>`
-    : "";
-
-  return L.divIcon({
-    className: `jl-thermometer-walk-progress ${variant}`,
-    html: `<span class="jl-thermometer-walk-progress__pill"><span class="jl-thermometer-walk-progress__walked">${walkedLabel}</span>${targetHtml}</span>`,
-    iconSize: [0, 0],
-    iconAnchor: [0, 14],
-  });
+  return divIconFromMarkup(
+    thermometerWalkProgressMarkup(
+      walkedLabel,
+      targetLabel,
+      mapStyle,
+      streetBasemap,
+    ),
+    [0, 14],
+  );
 }
 
 export function createThermometerWalkEndLabelIcon(
@@ -117,16 +127,8 @@ export function createThermometerWalkEndLabelIcon(
   mapStyle: MapStyle,
   streetBasemap: StreetBasemap = "light",
 ) {
-  const surface = getBasemapSurface(mapStyle, streetBasemap);
-  const variant =
-    surface === "satellite" || surface === "dark"
-      ? "jl-thermometer-walk-end-label--satellite"
-      : "jl-thermometer-walk-end-label--standard";
-
-  return L.divIcon({
-    className: `jl-thermometer-walk-end-label ${variant}`,
-    html: `<span class="jl-thermometer-walk-end-label__text">${label}</span>`,
-    iconSize: [0, 0],
-    iconAnchor: [0, 28],
-  });
+  return divIconFromMarkup(
+    thermometerWalkEndLabelMarkup(label, mapStyle, streetBasemap),
+    [0, 28],
+  );
 }

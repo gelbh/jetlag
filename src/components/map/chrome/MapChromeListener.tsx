@@ -3,6 +3,7 @@ import { useMap } from "react-leaflet";
 import {
   useMapLibreMap,
 } from "../helpers/useMapLibreMap";
+import { matchMapEngine } from "./matchMapEngine";
 import { useMapEngine } from "./mapEngineContext";
 
 interface MapChromeListenerProps {
@@ -103,8 +104,8 @@ function MapChromeListenerLeaflet({
 
 export function MapChromeListener(props: MapChromeListenerProps) {
   const engine = useMapEngine();
-  if (engine === "maplibre") {
-    return <MapChromeListenerMapLibre {...props} />;
-  }
-  return <MapChromeListenerLeaflet {...props} />;
+  return matchMapEngine(engine, {
+    maplibre: () => <MapChromeListenerMapLibre {...props} />,
+    leaflet: () => <MapChromeListenerLeaflet {...props} />,
+  });
 }
