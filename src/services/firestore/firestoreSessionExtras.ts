@@ -121,6 +121,13 @@ export async function writePlayerLocation(
   );
 }
 
+export async function deletePlayerLocation(
+  sessionId: string,
+  uid: string,
+): Promise<void> {
+  await deleteDoc(doc(playerLocationsCollection(sessionId), uid));
+}
+
 export async function appendPlayerTrailPoint(
   sessionId: string,
   point: PlayerTrailPointRecord,

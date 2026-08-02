@@ -12,6 +12,9 @@ const mockResetRemoteSession = vi.hoisted(() =>
 const mockCancelWalkingThermometersAndAnnounce = vi.hoisted(() =>
   vi.fn(async () => undefined),
 );
+const mockDeletePlayerLocation = vi.hoisted(() =>
+  vi.fn(async () => undefined),
+);
 const mockCaptureException = vi.hoisted(() => vi.fn());
 const mockTrackSessionEnded = vi.hoisted(() => vi.fn());
 const mockLeaveHostSession = vi.hoisted(() =>
@@ -66,6 +69,7 @@ vi.mock("../../services/firestore/firestoreSessionExtras", async () => {
     ...actual,
     cancelWalkingThermometersAndAnnounce:
       mockCancelWalkingThermometersAndAnnounce,
+    deletePlayerLocation: mockDeletePlayerLocation,
   };
 });
 
@@ -124,6 +128,7 @@ describe("useMapSessionChrome", () => {
     exitSession.mockClear();
     mockResetRemoteSession.mockClear();
     mockCancelWalkingThermometersAndAnnounce.mockClear();
+    mockDeletePlayerLocation.mockClear();
     mockCaptureException.mockClear();
     mockLeaveHostSession.mockClear();
     mockLeaveHostSession.mockResolvedValue({ action: "ended" });
@@ -314,6 +319,10 @@ describe("useMapSessionChrome", () => {
       "seeker",
       "left",
     );
+    expect(mockDeletePlayerLocation).toHaveBeenCalledWith(
+      "session-remote",
+      "host-1",
+    );
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
     );
@@ -357,6 +366,10 @@ describe("useMapSessionChrome", () => {
 
     expect(mockLeaveHostSession).toHaveBeenCalledWith("session-remote");
     expect(mockCaptureException).toHaveBeenCalledWith(cancelError);
+    expect(mockDeletePlayerLocation).toHaveBeenCalledWith(
+      "session-remote",
+      "host-1",
+    );
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
     );

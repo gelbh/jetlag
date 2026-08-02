@@ -14,7 +14,11 @@ import {
   endRemoteSession,
   resetRemoteSession,
 } from "../../services/firestore/firestoreAnnotations";
-import { cancelWalkingThermometersAndAnnounce } from "../../services/firestore/firestoreSessionExtras";
+import {
+  cancelWalkingThermometersAndAnnounce,
+  deletePlayerLocation,
+} from "../../services/firestore/firestoreSessionExtras";
+import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
 import {
   clearSessionLocalArtifacts,
   teardownSessionUiState,
@@ -331,6 +335,14 @@ export function useMapSessionChrome({
         );
       } catch (error) {
         captureException(error);
+      }
+
+      try {
+        await deletePlayerLocation(session.id, user.uid);
+      } catch (error) {
+        if (!isFirestorePermissionDenied(error)) {
+          captureException(error);
+        }
       }
     }
 
