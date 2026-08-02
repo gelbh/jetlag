@@ -9,7 +9,14 @@ import {
 import { previewTileUrlsFromOrigin } from "../../../domain/map/mapTilePreview";
 import type { MapChromeControlInset } from "../helpers/mapChromeControlInset";
 import { useMapInteracting } from "../helpers/useMapInteracting";
+import {
+  useMapLibreInteracting,
+  useMapLibreMap,
+  useMapLibrePreviewTileOrigin,
+} from "../helpers/useMapLibreMap";
 import { useMapPreviewTileOrigin } from "../helpers/useMapPreviewTileOrigin";
+import { matchMapEngine } from "./matchMapEngine";
+import { useMapEngine } from "./mapEngineContext";
 
 interface MapStyleToggleProps {
   enabled: boolean;
@@ -20,19 +27,25 @@ interface MapStyleToggleProps {
   suppressRef?: RefObject<boolean>;
 }
 
-export function MapStyleToggle({
+function MapStyleToggleChrome({
   enabled,
   mapStyle,
-  streetBasemap = "light",
+  streetBasemap,
   onMapStyleChange,
-  inset = "dock",
-  suppressRef,
-}: MapStyleToggleProps) {
-  const map = useMap();
-  const portalTarget = useMemo(() => map.getContainer(), [map]);
-  const interacting = useMapInteracting(suppressRef);
-  const tileOrigin = useMapPreviewTileOrigin();
-
+  inset,
+  portalTarget,
+  interacting,
+  tileOrigin,
+}: {
+  enabled: boolean;
+  mapStyle: MapStyle;
+  streetBasemap: StreetBasemap;
+  onMapStyleChange: (style: MapStyle) => void;
+  inset: MapChromeControlInset;
+  portalTarget: HTMLElement | null;
+  interacting: boolean;
+  tileOrigin: { x: number; y: number };
+}) {
   const nextStyle = mapStyle === "standard" ? "satellite" : "standard";
   const previewBasemap = getMapBasemap(nextStyle, streetBasemap);
   const label =
@@ -90,4 +103,66 @@ export function MapStyleToggle({
     </div>,
     portalTarget,
   );
+}
+
+function MapStyleToggleMapLibre({
+  enabled,
+  mapStyle,
+  streetBasemap = "light",
+  onMapStyleChange,
+  inset = "dock",
+  suppressRef,
+}: MapStyleToggleProps) {
+  const map = useMapLibreMap();
+  const portalTarget = useMemo(() => map.getContainer(), [map]);
+  const interacting = useMapLibreInteracting(suppressRef);
+  const tileOrigin = useMapLibrePreviewTileOrigin();
+
+  return (
+    <MapStyleToggleChrome
+      enabled={enabled}
+      mapStyle={mapStyle}
+      streetBasemap={streetBasemap}
+      onMapStyleChange={onMapStyleChange}
+      inset={inset}
+      portalTarget={portalTarget}
+      interacting={interacting}
+      tileOrigin={tileOrigin}
+    />
+  );
+}
+
+function MapStyleToggleLeaflet({
+  enabled,
+  mapStyle,
+  streetBasemap = "light",
+  onMapStyleChange,
+  inset = "dock",
+  suppressRef,
+}: MapStyleToggleProps) {
+  const map = useMap();
+  const portalTarget = useMemo(() => map.getContainer(), [map]);
+  const interacting = useMapInteracting(suppressRef);
+  const tileOrigin = useMapPreviewTileOrigin();
+
+  return (
+    <MapStyleToggleChrome
+      enabled={enabled}
+      mapStyle={mapStyle}
+      streetBasemap={streetBasemap}
+      onMapStyleChange={onMapStyleChange}
+      inset={inset}
+      portalTarget={portalTarget}
+      interacting={interacting}
+      tileOrigin={tileOrigin}
+    />
+  );
+}
+
+export function MapStyleToggle(props: MapStyleToggleProps) {
+  const engine = useMapEngine();
+  return matchMapEngine(engine, {
+    maplibre: () => <MapStyleToggleMapLibre {...props} />,
+    leaflet: () => <MapStyleToggleLeaflet {...props} />,
+  });
 }
