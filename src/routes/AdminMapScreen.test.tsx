@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { AdminMapScreen } from "./AdminMapScreen";
 import { createTestSession } from "../test/fixtures/sessions";
@@ -135,5 +135,33 @@ describe("AdminMapScreen", () => {
 
     expect(screen.getByLabelText("Admin monitor rail")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Force end" })).not.toBeInTheDocument();
+  });
+
+  it("opens session log and chat from compact dock actions", () => {
+    const controller = mockController();
+    mockedUseObserverMapScreen.mockReturnValue(controller);
+
+    renderWithRouter(<AdminMapScreen />, { route: "/map" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Open session log" }));
+    expect(controller.overlay.openLog).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Open chat" }));
+    expect(controller.overlay.openChat).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes open log or chat sheets from active dock actions", () => {
+    const controller = mockController();
+    controller.overlay.isLogOpen = true;
+    controller.overlay.isChatOpen = true;
+    mockedUseObserverMapScreen.mockReturnValue(controller);
+
+    renderWithRouter(<AdminMapScreen />, { route: "/map" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Open session log" }));
+    expect(controller.overlay.closeSheet).toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Open chat" }));
+    expect(controller.overlay.closeSheet).toHaveBeenCalledTimes(2);
   });
 });

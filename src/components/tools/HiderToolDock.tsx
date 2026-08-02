@@ -1,6 +1,7 @@
 import { HudPlusIcon, HudRefreshIcon } from "../ui/brand/HudIcons";
 import { HudPinIcon } from "../map/icons/ToolIcons";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
+import { MotionPressable } from "../motion/MotionPressable";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
 
 import type { ToolDockLayout } from "./ToolDock";
@@ -47,7 +48,7 @@ export function HiderToolDock({
       inactive={inactive}
       hunt={
         <div className="jl-tool-dock-group jl-tool-dock-group-main">
-          <button
+          <MotionPressable
             type="button"
             onClick={onZoneAction}
             disabled={zoneDisabled || inactive}
@@ -58,10 +59,10 @@ export function HiderToolDock({
               <HudPinIcon className="h-5 w-5 shrink-0" />
             </span>
             <span className="jl-tool-slot-label">{zoneLabel}</span>
-          </button>
+          </MotionPressable>
 
           {showExpansion ? (
-            <button
+            <MotionPressable
               type="button"
               onClick={onExpansion}
               disabled={inactive}
@@ -72,7 +73,7 @@ export function HiderToolDock({
                 <HudPlusIcon className="h-5 w-5 shrink-0" />
               </span>
               <span className="jl-tool-slot-label">Expansion</span>
-            </button>
+            </MotionPressable>
           ) : null}
         </div>
       }
@@ -89,7 +90,7 @@ export function HiderToolDock({
       }
       mapControls={
         <div className="jl-tool-dock-group">
-          <button
+          <MotionPressable
             type="button"
             onClick={onRecenter}
             disabled={inactive}
@@ -100,7 +101,7 @@ export function HiderToolDock({
               <HudRefreshIcon className="h-5 w-5 shrink-0" />
             </span>
             <span className="jl-tool-slot-label">Recenter</span>
-          </button>
+          </MotionPressable>
         </div>
       }
     />
