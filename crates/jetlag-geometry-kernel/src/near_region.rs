@@ -11,8 +11,9 @@ use geo::{BooleanOps, MultiPolygon};
 /// Buffer all geodesic line segments at `distance_meters`, union with disks,
 /// then clip to `game_area`. Coordinates on each segment are `[lng, lat]`.
 ///
-/// Skips failed individual line buffers. Returns `None` when nothing unions or
-/// the intersection with the game area is empty.
+/// Skips failed individual line buffers. When union-then-clip is empty, falls
+/// back to clipping each part then unioning (matches TS `clipBufferedSegmentsToGameArea`).
+/// Returns `None` when nothing unions or both clip strategies yield empty.
 pub fn build_near_region(
     segments: &[Vec<[f64; 2]>],
     distance_meters: f64,
@@ -41,10 +42,23 @@ pub fn build_near_region(
         }
     }
 
-    let unioned = fold_union(parts)?;
-    let clipped = game_area.multipolygon.intersection(&unioned);
-    if clipped.0.is_empty() {
+    if parts.is_empty() {
         return None;
     }
-    multipolygon_to_feature(&clipped)
+
+    let unioned = fold_union(parts.clone())?;
+    let clipped = game_area.multipolygon.intersection(&unioned);
+    if !clipped.0.is_empty() {
+        return multipolygon_to_feature(&clipped);
+    }
+
+    let mut clipped_parts: Vec<MultiPolygon<f64>> = Vec::new();
+    for part in &parts {
+        let part_clipped = game_area.multipolygon.intersection(part);
+        if !part_clipped.0.is_empty() {
+            clipped_parts.push(part_clipped);
+        }
+    }
+    let fallback = fold_union(clipped_parts)?;
+    multipolygon_to_feature(&fallback)
 }
