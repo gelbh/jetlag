@@ -48,7 +48,6 @@ import { resolveHiderTruthReference } from "../domain/questions/hiderTruth/resol
 import {
   assembleEndGameAcceptAnchors,
 } from "../domain/session/hiding/endGameTruthAnchors";
-import { hiderMemberUids } from "../domain/session/players/playerRole";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
 import { useHidingZoneUidHeal } from "../hooks/session/useHidingZoneUidHeal";
@@ -313,8 +312,9 @@ export function HiderMapScreen() {
     }
 
     const frozenAt = new Date().toISOString();
+    const confirmedHiderUids = confirmedHidingZones.map((zone) => zone.hiderUid);
     const anchorsResult = assembleEndGameAcceptAnchors({
-      hiderUids: hiderMemberUids(session.memberRoles),
+      hiderUids: confirmedHiderUids,
       hiderLocations,
       localHiderUid: uid,
       localPoint: liveLocationReading
@@ -325,7 +325,7 @@ export function HiderMapScreen() {
 
     if ("missing" in anchorsResult) {
       window.alert(
-        "Need a recent GPS location for every hider before starting end game.",
+        "Need a recent GPS location for every confirmed hider before starting end game.",
       );
       return;
     }
@@ -347,6 +347,7 @@ export function HiderMapScreen() {
 
     await acceptEndGameSession(session.id, uid, anchorsResult, frozenAt);
   }, [
+    confirmedHidingZones,
     hiderLocations,
     liveLocationReading,
     session,

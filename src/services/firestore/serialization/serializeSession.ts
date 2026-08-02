@@ -75,7 +75,7 @@ function parseGameSize(value: unknown): GameSize | undefined {
   return undefined;
 }
 
-function parseEndGameTruthAnchors(
+export function parseEndGameTruthAnchors(
   value: unknown,
 ): Record<string, EndGameTruthAnchor> | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -367,7 +367,8 @@ export function deserializeSessionFromFirestore(
       typeof document.endGameStartedByUid === "string"
         ? document.endGameStartedByUid
         : undefined,
-    endGameTruthAnchors: parseEndGameTruthAnchors(document.endGameTruthAnchors),
+    // Freeze coords live under sessions/{id}/endGameTruth/anchors — never on the session doc.
+    endGameTruthAnchors: undefined,
     endGameRequestedAt:
       typeof document.endGameRequestedAt === "string"
         ? document.endGameRequestedAt

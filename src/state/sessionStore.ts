@@ -173,23 +173,40 @@ export const useSessionStore = create<SessionState>()(
       setSession: (session, myUid) =>
         set((state) => {
           const uid = myUid === undefined ? state.myUid : myUid;
+          let nextSession = session;
           if (
-            sessionRecordsEqual(session, state.session) &&
+            session &&
+            state.session &&
+            session.id === state.session.id &&
+            session.endGameStartedAt &&
+            session.endGameTruthAnchors === undefined &&
+            state.session.endGameTruthAnchors
+          ) {
+            nextSession = {
+              ...session,
+              endGameTruthAnchors: state.session.endGameTruthAnchors,
+            };
+          } else if (session && !session.endGameStartedAt && session.endGameTruthAnchors) {
+            nextSession = { ...session, endGameTruthAnchors: undefined };
+          }
+
+          if (
+            sessionRecordsEqual(nextSession, state.session) &&
             uid === state.myUid
           ) {
             return state;
           }
 
           const sessionChanged =
-            session?.id !== state.session?.id ||
-            (session === null && state.session !== null);
+            nextSession?.id !== state.session?.id ||
+            (nextSession === null && state.session !== null);
 
           return {
-            session,
+            session: nextSession,
             myUid: uid,
             myRole:
-              session && uid
-                ? resolvePlayerRole(session.memberRoles, uid)
+              nextSession && uid
+                ? resolvePlayerRole(nextSession.memberRoles, uid)
                 : null,
             ...(sessionChanged
               ? { remoteUpdateNotice: null, lastSyncError: null }

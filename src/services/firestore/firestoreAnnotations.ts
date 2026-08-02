@@ -40,6 +40,7 @@ export {
   resetFoundHiderSession,
   resetRemoteSession,
   subscribeToSession,
+  subscribeToEndGameTruthAnchors,
   JOIN_AUTH_FAILURE_MESSAGE,
   type EnsureRemoteSessionMembershipOptions,
 } from "./firestoreSessions";

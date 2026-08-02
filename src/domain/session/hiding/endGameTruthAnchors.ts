@@ -83,7 +83,7 @@ export function withLocalHiderLocationOverride(
   return locationsByUid;
 }
 
-/** Assemble accept-time anchors from confirmed hiders + optional local GPS override. */
+/** Assemble accept-time anchors from confirmed-zone hiders + optional local GPS override. */
 export function assembleEndGameAcceptAnchors(input: {
   hiderUids: readonly string[];
   hiderLocations: readonly { uid: string; lat: number; lng: number }[];

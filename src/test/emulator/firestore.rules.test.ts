@@ -1132,7 +1132,7 @@ describe("firestore.rules", () => {
     );
   });
 
-  it("allows a hider to accept end game with truth anchors", async () => {
+  it("allows a hider to accept end game without session-doc truth anchors", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
       .firestore()
@@ -1152,20 +1152,106 @@ describe("firestore.rules", () => {
       hider.firestore().collection("sessions").doc("session-1").update({
         endGameStartedAt: "2026-01-01T00:01:00.000Z",
         endGameStartedByUid: "hider-1",
-        endGameTruthAnchors: {
-          "hider-1": {
-            lat: 53.35,
-            lng: -6.26,
-            frozenAt: "2026-01-01T00:01:00.000Z",
-          },
-        },
+        endGameTruthAnchors: deleteField(),
         endGameRequestedAt: deleteField(),
         endGameRequestedByUid: deleteField(),
       }),
     );
+
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("endGameTruth")
+        .doc("anchors")
+        .set({
+          anchors: {
+            "hider-1": {
+              lat: 53.35,
+              lng: -6.26,
+              frozenAt: "2026-01-01T00:01:00.000Z",
+            },
+          },
+        }),
+    );
   });
 
-  it("denies end-game accept with malformed truth anchors", async () => {
+  it("scopes end-game truth anchors so seekers cannot read freeze coords", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "seeker-1", "hider-1", "observer-1"],
+          memberRoles: {
+            "host-1": "seeker",
+            "seeker-1": "seeker",
+            "hider-1": "hider",
+            "observer-1": "observer",
+          },
+        }),
+      );
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    const seeker = testEnv.authenticatedContext("seeker-1");
+    const observer = testEnv.authenticatedContext("observer-1");
+
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("endGameTruth")
+        .doc("anchors")
+        .set({
+          anchors: {
+            "hider-1": {
+              lat: 53.35,
+              lng: -6.26,
+              frozenAt: "2026-01-01T00:01:00.000Z",
+            },
+          },
+        }),
+    );
+
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("endGameTruth")
+        .doc("anchors")
+        .get(),
+    );
+    await assertSucceeds(
+      observer
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("endGameTruth")
+        .doc("anchors")
+        .get(),
+    );
+    await assertFails(
+      seeker
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("endGameTruth")
+        .doc("anchors")
+        .get(),
+    );
+
+    const sessionSnap = await assertSucceeds(
+      seeker.firestore().collection("sessions").doc("session-1").get(),
+    );
+    expect(sessionSnap.data()?.endGameTruthAnchors).toBeUndefined();
+  });
+
+  it("denies end-game truth anchors with malformed payload", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
       .firestore()
@@ -1175,26 +1261,26 @@ describe("firestore.rules", () => {
         ...sessionPayload("host-1", {
           memberUids: ["host-1", "hider-1"],
           memberRoles: { "host-1": "seeker", "hider-1": "hider" },
-          endGameRequestedAt: "2026-01-01T00:00:00.000Z",
-          endGameRequestedByUid: "host-1",
         }),
       });
 
     const hider = testEnv.authenticatedContext("hider-1");
     await assertFails(
-      hider.firestore().collection("sessions").doc("session-1").update({
-        endGameStartedAt: "2026-01-01T00:01:00.000Z",
-        endGameStartedByUid: "hider-1",
-        endGameTruthAnchors: {
-          "hider-1": { foo: 1 },
-        },
-        endGameRequestedAt: deleteField(),
-        endGameRequestedByUid: deleteField(),
-      }),
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("endGameTruth")
+        .doc("anchors")
+        .set({
+          anchors: {
+            "hider-1": { foo: 1 },
+          },
+        }),
     );
   });
 
-  it("denies end-game accept when accepter has no self anchor", async () => {
+  it("denies end-game truth anchors when writer has no self anchor", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
       .firestore()
@@ -1208,26 +1294,26 @@ describe("firestore.rules", () => {
             "hider-1": "hider",
             "hider-2": "hider",
           },
-          endGameRequestedAt: "2026-01-01T00:00:00.000Z",
-          endGameRequestedByUid: "host-1",
         }),
       });
 
     const hider = testEnv.authenticatedContext("hider-1");
     await assertFails(
-      hider.firestore().collection("sessions").doc("session-1").update({
-        endGameStartedAt: "2026-01-01T00:01:00.000Z",
-        endGameStartedByUid: "hider-1",
-        endGameTruthAnchors: {
-          "hider-2": {
-            lat: 53.35,
-            lng: -6.26,
-            frozenAt: "2026-01-01T00:01:00.000Z",
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("endGameTruth")
+        .doc("anchors")
+        .set({
+          anchors: {
+            "hider-2": {
+              lat: 53.35,
+              lng: -6.26,
+              frozenAt: "2026-01-01T00:01:00.000Z",
+            },
           },
-        },
-        endGameRequestedAt: deleteField(),
-        endGameRequestedByUid: deleteField(),
-      }),
+        }),
     );
   });
 
@@ -1255,9 +1341,47 @@ describe("firestore.rules", () => {
     );
   });
 
-  it("allows end-game accept when anchors include another member uid", async () => {
+  it("allows end-game truth anchors that include another member uid", async () => {
     // Rules only fully validate the accepter's own anchor (expression budget);
-    // keys must still be session members. Client requires every hider.
+    // keys must still be session members. Client requires every confirmed hider.
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+        }),
+      });
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("endGameTruth")
+        .doc("anchors")
+        .set({
+          anchors: {
+            "hider-1": {
+              lat: 53.35,
+              lng: -6.26,
+              frozenAt: "2026-01-01T00:01:00.000Z",
+            },
+            "host-1": {
+              lat: 53.36,
+              lng: -6.27,
+              frozenAt: "2026-01-01T00:01:00.000Z",
+            },
+          },
+        }),
+    );
+  });
+
+  it("denies writing freeze coords onto the shared session document", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
       .firestore()
@@ -1273,7 +1397,7 @@ describe("firestore.rules", () => {
       });
 
     const hider = testEnv.authenticatedContext("hider-1");
-    await assertSucceeds(
+    await assertFails(
       hider.firestore().collection("sessions").doc("session-1").update({
         endGameStartedAt: "2026-01-01T00:01:00.000Z",
         endGameStartedByUid: "hider-1",
@@ -1281,11 +1405,6 @@ describe("firestore.rules", () => {
           "hider-1": {
             lat: 53.35,
             lng: -6.26,
-            frozenAt: "2026-01-01T00:01:00.000Z",
-          },
-          "host-1": {
-            lat: 53.36,
-            lng: -6.27,
             frozenAt: "2026-01-01T00:01:00.000Z",
           },
         },
@@ -1307,13 +1426,6 @@ describe("firestore.rules", () => {
         timerRunningSince: "2026-01-01T00:01:00.000Z",
         endGameStartedAt: "2026-01-01T00:01:00.000Z",
         endGameStartedByUid: "hider-1",
-        endGameTruthAnchors: {
-          "hider-1": {
-            lat: 53.35,
-            lng: -6.26,
-            frozenAt: "2026-01-01T00:01:00.000Z",
-          },
-        },
       });
 
     await assertSucceeds(

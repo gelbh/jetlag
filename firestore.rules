@@ -105,14 +105,15 @@ service cloud.firestore {
     }
 
     // Minimal checks only — session update rules are near the 1000-expression budget.
-    // Client still requires every hider; rules require the accepter's own valid anchor.
-    function validEndGameTruthAnchors(anchors) {
+    // Client still requires every confirmed hider; rules require the accepter's own valid anchor.
+    // Anchors live under sessions/{id}/endGameTruth/anchors (hider/observer/admin only).
+    function validEndGameTruthAnchorsMap(sessionId, anchors) {
       return anchors is map
         && anchors.size() > 0
         && anchors.size() <= 4
         && request.auth.uid in anchors
         && validEndGameTruthAnchor(anchors[request.auth.uid])
-        && anchors.keys().hasOnly(resource.data.memberUids);
+        && anchors.keys().hasOnly(sessionData(sessionId).memberUids);
     }
 
     function sessionIdentityUnchanged() {
@@ -161,11 +162,12 @@ service cloud.firestore {
           .hasOnly([
             'endGameStartedAt',
             'endGameStartedByUid',
-            'endGameTruthAnchors',
             'endGameRequestedAt',
-            'endGameRequestedByUid'
+            'endGameRequestedByUid',
+            // Legacy strip only — freeze coords must not live on the session doc.
+            'endGameTruthAnchors'
           ])
-        && validEndGameTruthAnchors(request.resource.data.endGameTruthAnchors)
+        && !('endGameTruthAnchors' in request.resource.data)
         && !('endGameRequestedAt' in request.resource.data)
         && !('endGameRequestedByUid' in request.resource.data)
         && sessionIdentityUnchanged();
@@ -280,6 +282,12 @@ service cloud.firestore {
     function canReadPlayerLocationDoc(sessionId, data) {
       return isSeekerLocationDoc(data)
         || isHiderMember(sessionId)
+        || memberRole(sessionId) == 'observer'
+        || memberRole(sessionId) == 'admin';
+    }
+
+    function canReadEndGameTruthAnchors(sessionId) {
+      return isHiderMember(sessionId)
         || memberRole(sessionId) == 'observer'
         || memberRole(sessionId) == 'admin';
     }
@@ -673,6 +681,21 @@ service cloud.firestore {
           && request.resource.data.updatedAt is string
         );
         allow delete: if isSignedIn() && request.auth.uid == uid;
+      }
+
+      // Frozen end-game GPS — hider/observer/admin only (never on the seeker-readable session doc).
+      match /endGameTruth/{docId} {
+        allow get, list: if docId == 'anchors'
+          && canReadEndGameTruthAnchors(sessionId);
+        allow create, update: if docId == 'anchors'
+          && isHiderMember(sessionId)
+          && request.resource.data.keys().hasOnly(['anchors'])
+          && validEndGameTruthAnchorsMap(sessionId, request.resource.data.anchors);
+        allow delete: if docId == 'anchors'
+          && (
+            isHiderMember(sessionId)
+            || isSessionHost(sessionId)
+          );
       }
 
       match /messages/{messageId} {

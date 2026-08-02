@@ -81,4 +81,21 @@ describe("endGameTruthAnchors", () => {
       frozenAt: "2026-01-01T00:00:00.000Z",
     });
   });
+
+  it("only requires locations for the confirmed-zone hider uids passed in", () => {
+    const result = assembleEndGameAcceptAnchors({
+      hiderUids: ["hider-a"],
+      hiderLocations: [{ uid: "hider-a", lat: 51.1, lng: -0.1 }],
+      localHiderUid: null,
+      localPoint: null,
+      frozenAt: "2026-01-01T00:00:00.000Z",
+    });
+
+    expect("missing" in result).toBe(false);
+    if ("missing" in result) {
+      return;
+    }
+
+    expect(Object.keys(result)).toEqual(["hider-a"]);
+  });
 });
