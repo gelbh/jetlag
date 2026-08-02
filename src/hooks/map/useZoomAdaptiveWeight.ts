@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { useMap } from "react-leaflet";
 import {
   computeZoomAdaptiveWeight,
@@ -8,6 +8,7 @@ import {
   type ZoomAdaptiveWeightOptions,
 } from "../../domain/map/zoomAdaptiveStrokeWeight";
 import { compensateZoomTransformWeight } from "../../domain/map/zoomTransformCompensation";
+import { useMapZoomRaf } from "./useMapZoomRaf";
 import { useZoomCssScale } from "./useZoomCssScale";
 
 export type { ZoomAdaptiveWeightOptions };
@@ -29,7 +30,6 @@ export function useZoomAdaptiveWeight(
   const { refZoom, scaleFactor, minWeight, maxWeight } =
     resolveZoomAdaptiveWeightOptions(options);
   const map = useMap();
-  const rafRef = useRef(0);
 
   const compute = useCallback(
     (zoom: number) =>
@@ -46,34 +46,12 @@ export function useZoomAdaptiveWeight(
 
   const [weight, setWeight] = useState(() => compute(map.getZoom()));
 
-  useEffect(() => {
-    const apply = () => {
-      const next = compute(map.getZoom());
-      setWeight((prev) => (next === prev ? prev : next));
-    };
-
-    const schedule = () => {
-      if (rafRef.current !== 0) {
-        return;
-      }
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = 0;
-        apply();
-      });
-    };
-
-    map.on("zoom", schedule);
-    map.on("zoomend", apply);
-
-    return () => {
-      map.off("zoom", schedule);
-      map.off("zoomend", apply);
-      if (rafRef.current !== 0) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = 0;
-      }
-    };
+  const apply = useCallback(() => {
+    const next = compute(map.getZoom());
+    setWeight((prev) => (next === prev ? prev : next));
   }, [compute, map]);
+
+  useMapZoomRaf(map, apply);
 
   return weight;
 }
@@ -92,15 +70,6 @@ export function useCompensatedZoomAdaptiveWeight(
 }
 
 /**
- * Screen-pixel size (CircleMarker radius, fixed weights) compensated for
- * mid-gesture CSS zoom scale.
- */
-export function useCompensatedPixelSize(logicalSize: number): number {
-  const cssScale = useZoomCssScale();
-  return compensateZoomTransformWeight(logicalSize, cssScale);
-}
-
-/**
  * Current map zoom, but only re-renders when adaptive stroke scale for
  * base weight 1 crosses a 0.5 quantization step (shared by overlay layers).
  */
@@ -110,7 +79,6 @@ export function useStrokeScaleZoom(
   const { refZoom, scaleFactor, minWeight, maxWeight } =
     resolveZoomAdaptiveWeightOptions(options);
   const map = useMap();
-  const rafRef = useRef(0);
   const [zoom, setZoom] = useState(() => map.getZoom());
 
   const scaleToken = useCallback(
@@ -126,36 +94,14 @@ export function useStrokeScaleZoom(
     [refZoom, scaleFactor, minWeight, maxWeight],
   );
 
-  useEffect(() => {
-    const apply = () => {
-      const nextZoom = map.getZoom();
-      setZoom((prev) =>
-        scaleToken(prev) === scaleToken(nextZoom) ? prev : nextZoom,
-      );
-    };
-
-    const schedule = () => {
-      if (rafRef.current !== 0) {
-        return;
-      }
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = 0;
-        apply();
-      });
-    };
-
-    map.on("zoom", schedule);
-    map.on("zoomend", apply);
-
-    return () => {
-      map.off("zoom", schedule);
-      map.off("zoomend", apply);
-      if (rafRef.current !== 0) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = 0;
-      }
-    };
+  const apply = useCallback(() => {
+    const nextZoom = map.getZoom();
+    setZoom((prev) =>
+      scaleToken(prev) === scaleToken(nextZoom) ? prev : nextZoom,
+    );
   }, [map, scaleToken]);
+
+  useMapZoomRaf(map, apply);
 
   return zoom;
 }

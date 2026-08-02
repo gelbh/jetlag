@@ -7,15 +7,16 @@ import {
 } from "../../../domain/map/transitViewport";
 import { createThrottledPublisher } from "../helpers/mapViewportPublish";
 
-/** Mid-gesture viewport policy: schedule on move/zoom; flush on settle. */
-export function viewportPublishActionForEvent(
-  phase: "move" | "zoom" | "moveend" | "dragend" | "zoomend",
-): "schedule" | "flush" {
-  if (phase === "dragend" || phase === "zoomend") {
-    return "flush";
-  }
-  return "schedule";
-}
+/** Mid-gesture viewport policy keyed by Leaflet event phase. */
+export const VIEWPORT_PUBLISH_BY_PHASE = {
+  move: "schedule",
+  zoom: "schedule",
+  moveend: "schedule",
+  dragend: "flush",
+  zoomend: "flush",
+} as const;
+
+export type ViewportPublishPhase = keyof typeof VIEWPORT_PUBLISH_BY_PHASE;
 
 export interface MapViewportState {
   bounds: MapViewportBounds;
@@ -81,30 +82,20 @@ export function MapViewportTracker({
     },
     dragend: () => {
       notifyPanEnd();
-      if (viewportPublishActionForEvent("dragend") === "flush") {
-        publisherRef.current?.flush();
-      }
+      publisherRef.current?.flush();
     },
     move: () => {
-      if (viewportPublishActionForEvent("move") === "schedule") {
-        publisherRef.current?.schedule();
-      }
+      publisherRef.current?.schedule();
     },
     zoom: () => {
-      if (viewportPublishActionForEvent("zoom") === "schedule") {
-        publisherRef.current?.schedule();
-      }
+      publisherRef.current?.schedule();
     },
     moveend: () => {
       notifyPanEnd();
-      if (viewportPublishActionForEvent("moveend") === "schedule") {
-        publisherRef.current?.schedule();
-      }
+      publisherRef.current?.schedule();
     },
     zoomend: () => {
-      if (viewportPublishActionForEvent("zoomend") === "flush") {
-        publisherRef.current?.flush();
-      }
+      publisherRef.current?.flush();
     },
   });
 

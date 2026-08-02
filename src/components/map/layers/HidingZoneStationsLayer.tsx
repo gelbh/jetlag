@@ -1,4 +1,3 @@
-
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { TransitStation } from "../../../domain/session/hiding/hidingZone";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";

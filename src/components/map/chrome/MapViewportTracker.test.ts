@@ -3,7 +3,7 @@ import {
   createThrottledPublisher,
   VIEWPORT_PUBLISH_THROTTLE_MS,
 } from "../helpers/mapViewportPublish";
-import { viewportPublishActionForEvent } from "./MapViewportTracker";
+import { VIEWPORT_PUBLISH_BY_PHASE } from "./MapViewportTracker";
 
 describe("createThrottledPublisher", () => {
   beforeEach(() => {
@@ -42,15 +42,15 @@ describe("createThrottledPublisher", () => {
   });
 });
 
-describe("viewportPublishActionForEvent", () => {
+describe("VIEWPORT_PUBLISH_BY_PHASE", () => {
   it("schedules on pinch-style zoom and move without requiring drag", () => {
-    expect(viewportPublishActionForEvent("zoom")).toBe("schedule");
-    expect(viewportPublishActionForEvent("move")).toBe("schedule");
-    expect(viewportPublishActionForEvent("moveend")).toBe("schedule");
+    expect(VIEWPORT_PUBLISH_BY_PHASE.zoom).toBe("schedule");
+    expect(VIEWPORT_PUBLISH_BY_PHASE.move).toBe("schedule");
+    expect(VIEWPORT_PUBLISH_BY_PHASE.moveend).toBe("schedule");
   });
 
   it("flushes on gesture settle", () => {
-    expect(viewportPublishActionForEvent("zoomend")).toBe("flush");
-    expect(viewportPublishActionForEvent("dragend")).toBe("flush");
+    expect(VIEWPORT_PUBLISH_BY_PHASE.zoomend).toBe("flush");
+    expect(VIEWPORT_PUBLISH_BY_PHASE.dragend).toBe("flush");
   });
 });

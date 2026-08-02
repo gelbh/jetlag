@@ -1,5 +1,4 @@
 import { Fragment, useMemo } from "react";
-import { Polygon, Polyline } from "react-leaflet";
 import type { GameArea } from "../../../domain/map/annotations";
 import {
   gameAreaExteriorStrokeRings,
@@ -13,8 +12,9 @@ import {
   scaleDashArray,
   useZoomAdaptiveWeight,
 } from "../../../hooks/map/useZoomAdaptiveWeight";
-import { useZoomCssScale } from "../../../hooks/map/useZoomCssScale";
-import { compensateZoomTransformWeight } from "../../../domain/map/zoomTransformCompensation";
+import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
+import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
+import { MID_GESTURE_PATH_DEFAULTS } from "../helpers/midGesturePathDefaults";
 
 interface GameAreaMaskProps {
   gameArea: GameArea;
@@ -52,7 +52,7 @@ function renderGameAreaPolygons(
 ) {
   if (area.type === "MultiPolygon") {
     return area.coordinates.map((polygon, index) => (
-      <Polygon
+      <CompensatedPolygon
         key={`${keyPrefix}-${index}`}
         positions={polygon.map((ring) =>
           ring.map(([lng, lat]) => [lat, lng] as LatLngTuple),
@@ -64,7 +64,7 @@ function renderGameAreaPolygons(
   }
 
   return (
-    <Polygon
+    <CompensatedPolygon
       key={keyPrefix}
       positions={gameAreaToLeafletPositions(area)}
       interactive={false}
@@ -82,12 +82,10 @@ export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
   const outsideTint = framing ? FRAMING_OUTSIDE_TINT : PLAY_OUTSIDE_TINT;
   const baseWeight = framing ? FRAMING_BASE_WEIGHT : PLAY_BASE_WEIGHT;
   const logicalWeight = useZoomAdaptiveWeight(baseWeight);
-  const cssScale = useZoomCssScale();
-  const weight = compensateZoomTransformWeight(logicalWeight, cssScale);
   const borderOptions = framing
     ? {
         color: MAP_ANNOTATION_COLORS.playArea,
-        weight,
+        weight: logicalWeight,
         dashArray: scaleDashArray(
           FRAMING_DASH,
           logicalWeight,
@@ -96,9 +94,9 @@ export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
       }
     : {
         color: MAP_ANNOTATION_COLORS.playArea,
-        weight,
+        weight: logicalWeight,
       };
-  const outsideTintOptions = { ...outsideTint, noClip: true as const };
+  const outsideTintOptions = { ...outsideTint, ...MID_GESTURE_PATH_DEFAULTS };
 
   return (
     <Fragment>
@@ -110,7 +108,7 @@ export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
           )
         : null}
       {exteriorStrokeRings.map((ring, index) => (
-        <Polyline
+        <CompensatedPolyline
           key={`play-area-border-${index}`}
           positions={ring}
           interactive={false}

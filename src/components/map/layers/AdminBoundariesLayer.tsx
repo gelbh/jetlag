@@ -4,7 +4,7 @@ import { getAdminBoundaryStrokeStyle } from "../../../domain/map/mapBoundaryOver
 import type { AdminBoundaryFeature } from "../../../hooks/map-screen/useAdminBoundaryFeatures";
 import { useStrokeScaleZoom } from "../../../hooks/map/useZoomAdaptiveWeight";
 import { useZoomCssScale } from "../../../hooks/map/useZoomCssScale";
-import { compensateZoomTransformWeight } from "../../../domain/map/zoomTransformCompensation";
+import { compensatePathOptionsWeight } from "../helpers/compensatePathOptionsWeight";
 
 interface AdminBoundariesLayerProps {
   features: readonly AdminBoundaryFeature[];
@@ -28,18 +28,17 @@ export function AdminBoundariesLayer({
         <GeoJSON
           key={entry.id}
           data={entry.feature}
-          style={() => {
-            const base = getAdminBoundaryStrokeStyle(
-              entry.adminLevel,
-              mapStyle,
-              "light",
-              zoom,
-            );
-            return {
-              ...base,
-              weight: compensateZoomTransformWeight(base.weight ?? 1, cssScale),
-            };
-          }}
+          style={() =>
+            compensatePathOptionsWeight(
+              getAdminBoundaryStrokeStyle(
+                entry.adminLevel,
+                mapStyle,
+                "light",
+                zoom,
+              ),
+              cssScale,
+            ) ?? {}
+          }
           interactive={false}
         />
       ))}

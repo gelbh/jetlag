@@ -1,67 +1,128 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
+import type { Map as LeafletMap } from "leaflet";
 import { useMap } from "react-leaflet";
 import { cssZoomScale } from "../../domain/map/zoomTransformCompensation";
 
+type ScaleStore = {
+  subscribe: (listener: () => void) => () => void;
+  getSnapshot: () => number;
+  listenerCount: () => number;
+  destroy: () => void;
+};
+
+const scaleStores = new WeakMap<LeafletMap, ScaleStore>();
+
+function getOrCreateScaleStore(map: LeafletMap): ScaleStore {
+  let store = scaleStores.get(map);
+  if (store) {
+    return store;
+  }
+
+  let anchorZoom = map.getZoom();
+  let scale = 1;
+  let raf = 0;
+  const listeners = new Set<() => void>();
+
+  const emit = () => {
+    for (const listener of listeners) {
+      listener();
+    }
+  };
+
+  const syncScale = () => {
+    const next = cssZoomScale(map.getZoom(), anchorZoom);
+    if (next === scale) {
+      return;
+    }
+    scale = next;
+    emit();
+  };
+
+  const scheduleSync = () => {
+    if (raf !== 0) {
+      return;
+    }
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      syncScale();
+    });
+  };
+
+  const settleAnchor = () => {
+    if (raf !== 0) {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    }
+    anchorZoom = map.getZoom();
+    if (scale !== 1) {
+      scale = 1;
+      emit();
+    }
+  };
+
+  const onZoom = () => {
+    scheduleSync();
+  };
+
+  map.on("zoom", onZoom);
+  map.on("viewreset", settleAnchor);
+  map.on("zoomend", settleAnchor);
+
+  store = {
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    getSnapshot() {
+      return scale;
+    },
+    listenerCount() {
+      return listeners.size;
+    },
+    destroy() {
+      map.off("zoom", onZoom);
+      map.off("viewreset", settleAnchor);
+      map.off("zoomend", settleAnchor);
+      if (raf !== 0) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
+      listeners.clear();
+    },
+  };
+  scaleStores.set(map, store);
+  return store;
+}
+
 /**
  * CSS scale Leaflet applies to the vector renderer since the last path
- * project (`viewreset` / `zoomend`). Mid-pinch `zoom` must not advance the
- * anchor — only settle events do.
+ * project (`viewreset` / `zoomend`). Shared per Leaflet map instance so
+ * many Compensated* overlays do not each attach zoom listeners.
  */
 export function useZoomCssScale(): number {
   const map = useMap();
-  const anchorZoomRef = useRef(map.getZoom());
-  const [scale, setScale] = useState(1);
-  const rafRef = useRef(0);
 
-  const syncScale = useCallback(() => {
-    const next = cssZoomScale(map.getZoom(), anchorZoomRef.current);
-    setScale((prev) => (prev === next ? prev : next));
-  }, [map]);
+  const subscribe = useCallback(
+    (listener: () => void) => {
+      const store = getOrCreateScaleStore(map);
+      const unsubscribe = store.subscribe(listener);
+      return () => {
+        unsubscribe();
+        if (store.listenerCount() === 0) {
+          store.destroy();
+          scaleStores.delete(map);
+        }
+      };
+    },
+    [map],
+  );
 
-  const scheduleSync = useCallback(() => {
-    if (rafRef.current !== 0) {
-      return;
-    }
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = 0;
-      syncScale();
-    });
-  }, [syncScale]);
+  const getSnapshot = useCallback(
+    () => getOrCreateScaleStore(map).getSnapshot(),
+    [map],
+  );
 
-  const settleAnchor = useCallback(() => {
-    anchorZoomRef.current = map.getZoom();
-    setScale(1);
-  }, [map]);
-
-  useEffect(() => {
-    anchorZoomRef.current = map.getZoom();
-    setScale(1);
-
-    const onZoom = () => {
-      scheduleSync();
-    };
-    const onSettle = () => {
-      if (rafRef.current !== 0) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = 0;
-      }
-      settleAnchor();
-    };
-
-    map.on("zoom", onZoom);
-    map.on("viewreset", onSettle);
-    map.on("zoomend", onSettle);
-
-    return () => {
-      map.off("zoom", onZoom);
-      map.off("viewreset", onSettle);
-      map.off("zoomend", onSettle);
-      if (rafRef.current !== 0) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = 0;
-      }
-    };
-  }, [map, scheduleSync, settleAnchor]);
-
-  return scale;
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }

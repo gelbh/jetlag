@@ -1,5 +1,4 @@
 import { Fragment, memo, useMemo } from "react";
-import { Polygon } from "react-leaflet";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type {
   AnnotationRecord,
@@ -16,6 +15,7 @@ import { polygonFeatureToLeafletPolygonGroups } from "../../../domain/geometry/g
 import { getEliminationOverlayLayers } from "../../../domain/map/mapEliminationOverlayStyle";
 import { useCombinedEliminationMask } from "../../../hooks/map/useCombinedEliminationMask";
 import { useMapStore } from "../../../state/sessionStore";
+import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
 
 interface CombinedEliminationLayerProps {
   annotations: AnnotationRecord[];
@@ -79,21 +79,19 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
         <Fragment key={`combined-elimination-${index}`}>
           {overlayLayers.map((layer, layerIndex) => {
             const isTopLayer = layerIndex === overlayLayers.length - 1;
-            const pathOptions = {
-              ...layer,
-              noClip: true,
-              className:
-                pulsing && isTopLayer
-                  ? "annotation-pulse"
-                  : layer.className,
-            };
 
             return (
-              <Polygon
+              <CompensatedPolygon
                 key={`combined-elimination-${index}-${layerIndex}`}
                 positions={rings}
                 interactive={false}
-                pathOptions={pathOptions}
+                pathOptions={{
+                  ...layer,
+                  className:
+                    pulsing && isTopLayer
+                      ? "annotation-pulse"
+                      : layer.className,
+                }}
               />
             );
           })}
