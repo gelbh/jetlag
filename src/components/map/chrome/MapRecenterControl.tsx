@@ -8,6 +8,7 @@ import {
   useMapLibreInteracting,
   useMapLibreMap,
 } from "../helpers/useMapLibreMap";
+import { matchMapEngine } from "./matchMapEngine";
 import { useMapEngine } from "./mapEngineContext";
 
 export type MapRecenterControlInset = MapChromeControlInset;
@@ -19,17 +20,20 @@ interface MapRecenterControlProps {
   onRecenter?: () => void;
 }
 
-function MapRecenterControlMapLibre({
+function MapRecenterControlChrome({
   enabled,
-  inset = "dock",
-  suppressRef,
+  inset,
+  portalTarget,
+  interacting,
   onRecenter,
-}: MapRecenterControlProps) {
-  const map = useMapLibreMap();
-  const portalTarget = useMemo(() => map.getContainer(), [map]);
-  const interacting = useMapLibreInteracting(suppressRef);
-
-  if (!enabled || !portalTarget || !onRecenter) {
+}: {
+  enabled: boolean;
+  inset: MapChromeControlInset;
+  portalTarget: HTMLElement | null;
+  interacting: boolean;
+  onRecenter: () => void;
+}) {
+  if (!enabled || !portalTarget) {
     return null;
   }
 
@@ -49,6 +53,31 @@ function MapRecenterControlMapLibre({
       </button>
     </div>,
     portalTarget,
+  );
+}
+
+function MapRecenterControlMapLibre({
+  enabled,
+  inset = "dock",
+  suppressRef,
+  onRecenter,
+}: MapRecenterControlProps) {
+  const map = useMapLibreMap();
+  const portalTarget = useMemo(() => map.getContainer(), [map]);
+  const interacting = useMapLibreInteracting(suppressRef);
+
+  if (!onRecenter) {
+    return null;
+  }
+
+  return (
+    <MapRecenterControlChrome
+      enabled={enabled}
+      inset={inset}
+      portalTarget={portalTarget}
+      interacting={interacting}
+      onRecenter={onRecenter}
+    />
   );
 }
 
@@ -62,33 +91,25 @@ function MapRecenterControlLeaflet({
   const portalTarget = useMemo(() => map.getContainer(), [map]);
   const interacting = useMapInteracting(suppressRef);
 
-  if (!enabled || !portalTarget || !onRecenter) {
+  if (!onRecenter) {
     return null;
   }
 
-  return createPortal(
-    <div
-      className={`map-recenter-control map-recenter-control--${inset}`}
-      data-map-interacting={interacting ? "true" : undefined}
-    >
-      <button
-        type="button"
-        className="map-recenter-control__btn hud-chrome"
-        onClick={onRecenter}
-        aria-label="Recenter on question"
-        title="Recenter on question"
-      >
-        <HudRefreshIcon className="h-5 w-5" />
-      </button>
-    </div>,
-    portalTarget,
+  return (
+    <MapRecenterControlChrome
+      enabled={enabled}
+      inset={inset}
+      portalTarget={portalTarget}
+      interacting={interacting}
+      onRecenter={onRecenter}
+    />
   );
 }
 
 export function MapRecenterControl(props: MapRecenterControlProps) {
   const engine = useMapEngine();
-  if (engine === "maplibre") {
-    return <MapRecenterControlMapLibre {...props} />;
-  }
-  return <MapRecenterControlLeaflet {...props} />;
+  return matchMapEngine(engine, {
+    maplibre: () => <MapRecenterControlMapLibre {...props} />,
+    leaflet: () => <MapRecenterControlLeaflet {...props} />,
+  });
 }
