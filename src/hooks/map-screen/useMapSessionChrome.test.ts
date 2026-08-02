@@ -9,7 +9,7 @@ const exitSession = vi.hoisted(() => vi.fn(async () => undefined));
 const mockResetRemoteSession = vi.hoisted(() =>
   vi.fn(async () => "2026-01-02T00:00:00.000Z"),
 );
-const mockCancelWalkingThermometersAndAnnounce = vi.hoisted(() =>
+const mockClearLiveLocationOnLeave = vi.hoisted(() =>
   vi.fn(async () => undefined),
 );
 const mockCaptureException = vi.hoisted(() => vi.fn());
@@ -58,16 +58,9 @@ vi.mock("../../services/firestore/firestoreAnnotations", async () => {
   };
 });
 
-vi.mock("../../services/firestore/firestoreSessionExtras", async () => {
-  const actual = await vi.importActual<
-    typeof import("../../services/firestore/firestoreSessionExtras")
-  >("../../services/firestore/firestoreSessionExtras");
-  return {
-    ...actual,
-    cancelWalkingThermometersAndAnnounce:
-      mockCancelWalkingThermometersAndAnnounce,
-  };
-});
+vi.mock("../../services/session/clearLiveLocationOnLeave", () => ({
+  clearLiveLocationOnLeave: mockClearLiveLocationOnLeave,
+}));
 
 vi.mock("../../services/session/sessionCleanup", async () => {
   const actual = await vi.importActual<
@@ -123,7 +116,8 @@ describe("useMapSessionChrome", () => {
   beforeEach(() => {
     exitSession.mockClear();
     mockResetRemoteSession.mockClear();
-    mockCancelWalkingThermometersAndAnnounce.mockClear();
+    mockClearLiveLocationOnLeave.mockReset();
+    mockClearLiveLocationOnLeave.mockResolvedValue(undefined);
     mockCaptureException.mockClear();
     mockLeaveHostSession.mockClear();
     mockLeaveHostSession.mockResolvedValue({ action: "ended" });
@@ -307,21 +301,22 @@ describe("useMapSessionChrome", () => {
       "You're the only player. Leaving will end this session.",
     );
     expect(mockLeaveHostSession).toHaveBeenCalledWith("session-remote");
-    expect(mockCancelWalkingThermometersAndAnnounce).toHaveBeenCalledWith(
-      "session-remote",
-      ["pq-walk"],
-      "host-1",
-      "seeker",
-      "left",
-    );
+    expect(mockClearLiveLocationOnLeave).toHaveBeenCalledWith({
+      sessionId: "session-remote",
+      uid: "host-1",
+      role: "seeker",
+      pendingQuestions: expect.arrayContaining([
+        expect.objectContaining({ id: "pq-walk" }),
+      ]),
+    });
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
     );
   });
 
-  it("still exits when thermometer cancel rejects on leave", async () => {
+  it("still exits when live-location leave cleanup rejects", async () => {
     const cancelError = new Error("network");
-    mockCancelWalkingThermometersAndAnnounce.mockRejectedValueOnce(cancelError);
+    mockClearLiveLocationOnLeave.mockRejectedValueOnce(cancelError);
     vi.spyOn(window, "confirm").mockReturnValue(true);
 
     const { result } = renderHook(() =>
