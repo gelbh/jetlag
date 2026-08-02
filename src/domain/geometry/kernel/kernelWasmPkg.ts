@@ -45,6 +45,7 @@ export type KernelWasmModule = {
     voronoiCellsJson: string,
   ) => unknown;
   build_spatial_voronoi_json: (sitesJson: string) => unknown;
+  build_near_region_json: (inputJson: string) => unknown;
 };
 
 let wasmModulePromise: Promise<KernelWasmModule> | null = null;
