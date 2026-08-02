@@ -1,0 +1,62 @@
+import type { SessionRecord } from "../../map/annotations";
+import type { PlayerRole } from "./playerRole";
+
+export type RoleGates = {
+  version: 1;
+  leaders: {
+    seeker?: string;
+    hider?: string;
+  };
+};
+
+export function isSessionRoleGated(
+  session: Pick<SessionRecord, "roleGates"> | null | undefined,
+): boolean {
+  return session?.roleGates?.version === 1;
+}
+
+export function countMembersWithRole(
+  memberRoles: Record<string, PlayerRole | string> | undefined,
+  role: PlayerRole,
+): number {
+  if (!memberRoles) {
+    return 0;
+  }
+
+  return Object.values(memberRoles).filter((memberRole) => memberRole === role)
+    .length;
+}
+
+export function joinRequiresRolePasscode(
+  memberRoles: Record<string, PlayerRole | string> | undefined,
+  role: PlayerRole,
+  uid: string | undefined,
+): boolean {
+  if (role === "observer") {
+    return true;
+  }
+
+  if (role !== "seeker" && role !== "hider") {
+    return false;
+  }
+
+  const existingRole = uid ? memberRoles?.[uid] : undefined;
+  if (existingRole === role) {
+    return false;
+  }
+
+  return countMembersWithRole(memberRoles, role) > 0;
+}
+
+export function buildRoleGatesForHost(
+  hostUid: string,
+  hostRole: PlayerRole,
+): RoleGates {
+  const leaders: RoleGates["leaders"] = {};
+
+  if (hostRole === "seeker" || hostRole === "hider") {
+    leaders[hostRole] = hostUid;
+  }
+
+  return { version: 1, leaders };
+}
