@@ -49,6 +49,25 @@ describe("useWizardSheetSnap", () => {
     expect(result.current.wizardStepId).toBe("place");
   });
 
+  it("seeds peek from legacy sync that publishes toolId null", () => {
+    function useLegacyPanelAndSheet(tool: MapTool, stepId: string) {
+      // Matches production RadarPanel etc.: legacy steps, no toolId arg.
+      useSyncWizardStepRef(undefined, stepId);
+      return useWizardSheetSnap(tool);
+    }
+
+    const { result, rerender } = renderHook(
+      ({ tool, stepId }: { tool: MapTool; stepId: string }) =>
+        useLegacyPanelAndSheet(tool, stepId),
+      { initialProps: { tool: "none" as MapTool, stepId: "place" } },
+    );
+
+    rerender({ tool: "radar", stepId: "place" });
+
+    expect(result.current.sheetSnap).toBe("peek");
+    expect(result.current.mapAttentionActive).toBe(true);
+  });
+
   it("keeps place peek when switching between question tools", () => {
     const { result, rerender } = renderHook(
       ({ tool, stepId }: { tool: MapTool; stepId: string }) =>

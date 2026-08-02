@@ -10,7 +10,18 @@ type WizardStepSnapshot = {
 let latestWizardStep: WizardStepSnapshot = { toolId: null, stepId: null };
 
 export function getLatestWizardStepIdForTool(toolId: string): string | null {
-  return latestWizardStep.toolId === toolId ? latestWizardStep.stepId : null;
+  if (latestWizardStep.stepId == null) {
+    return null;
+  }
+  // Legacy useToolWizard(steps) publishes toolId null; phase spine publishes
+  // def.toolId. Accept unscoped publishes so place peek still seeds.
+  if (
+    latestWizardStep.toolId == null ||
+    latestWizardStep.toolId === toolId
+  ) {
+    return latestWizardStep.stepId;
+  }
+  return null;
 }
 
 /**
