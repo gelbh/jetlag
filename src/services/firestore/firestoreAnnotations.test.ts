@@ -43,6 +43,20 @@ vi.mock("../core/firebase/firebase", () => ({
     uid: "admin-1",
     getIdToken,
   })),
+  isFirebaseConfigured: () => true,
+  getFirebaseFunctions: async () => ({}),
+}));
+
+vi.mock("../session/rolePasscodeLifecycle", () => ({
+  initSessionRoleGates: vi.fn(),
+  joinSessionWithRole: vi.fn(async () => {
+    throw new Error("Session uses legacy join.");
+  }),
+  mapRolePasscodeJoinError: (error: unknown) =>
+    error instanceof Error ? error.message : "Couldn't join the session.",
+  leaveSessionMembership: vi.fn(),
+  revealRolePasscode: vi.fn(),
+  regenerateRolePasscode: vi.fn(),
 }));
 
 vi.mock("../core/auth/forceRefreshIdToken", () => ({
