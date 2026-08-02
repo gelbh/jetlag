@@ -100,6 +100,10 @@ function MapFocus({
         : point(padX, padY);
 
     const bounds = normalizeFocusBounds(focusBounds);
+    if (!isUsableMapBounds(bounds)) {
+      return;
+    }
+
     const { center, zoom } = computeFramedCenterZoom(
       map,
       bounds,

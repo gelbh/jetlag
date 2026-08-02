@@ -84,6 +84,11 @@ describe("mapTileHosts", () => {
     expect(
       isOpenFreeMapUrl("https://tiles.openfreemap.org/styles/liberty"),
     ).toBe(true);
+    expect(
+      isOpenFreeMapUrl(
+        "https://tiles.openfreemap.org.attacker.example/styles/liberty",
+      ),
+    ).toBe(false);
     expect(isMapTileHostname("a.basemaps.cartocdn.com")).toBe(true);
     expect(isMapTileHostname("server.arcgisonline.com")).toBe(true);
     expect(isMapTileHostname("tiles.openfreemap.org")).toBe(true);

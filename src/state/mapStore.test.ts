@@ -49,4 +49,14 @@ describe("mapStore", () => {
     useMapStore.getState().setMapEngine("maplibre");
     expect(useMapStore.getState().mapEngine).toBe("maplibre");
   });
+
+  it("omits mapEngine from persisted snapshot", () => {
+    useMapStore.getState().setMapEngine("maplibre");
+    const raw = localStorage.getItem("jetlag-map");
+    expect(raw).toBeTruthy();
+    const parsed = JSON.parse(raw!) as {
+      state?: { mapEngine?: string };
+    };
+    expect(parsed.state?.mapEngine).toBeUndefined();
+  });
 });

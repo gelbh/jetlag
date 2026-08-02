@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { useMapStore, type MapEngine } from "../../../state/mapStore";
 import { MAP_LIBRE_PLAY_READY } from "../../../domain/map/mapLibrePlayReady";
 import type { MapViewCoreProps, MapViewProps } from "./mapViewTypes";
@@ -36,7 +36,7 @@ function MapLibreSuspense({
   children,
 }: {
   className?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <Suspense
@@ -74,18 +74,19 @@ export function MapView(
   }
 
   if (previewMapLibre && !MAP_LIBRE_PLAY_READY) {
-    const core = pickCoreProps(props);
-    if (import.meta.env.DEV && core.children != null) {
+    const { children, ...core } = pickCoreProps(props);
+    if (import.meta.env.DEV && children != null) {
       console.warn(
         "[MapView] MapLibre preview ignores children until MAP_LIBRE_PLAY_READY",
       );
     }
     return (
       <MapLibreSuspense className={props.className}>
-        <MapViewMapLibreLazy {...core} children={undefined} />
+        <MapViewMapLibreLazy {...core} />
       </MapLibreSuspense>
     );
   }
 
-  return <MapViewLeaflet {...props} />;
+  const { mapEngine: _mapEngine, ...leafletProps } = props;
+  return <MapViewLeaflet {...leafletProps} />;
 }
