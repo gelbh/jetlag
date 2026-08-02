@@ -48,19 +48,8 @@ export interface MapViewLeafletChromeProps {
   onRecenter?: () => void;
 }
 
-/** MapLibre-ready chrome (Slice 3). Camera/focus remains Leaflet-only until Slice 4. */
-export type MapViewMapLibreChromeProps = Pick<
-  MapViewLeafletChromeProps,
-  | "chromeHudRef"
-  | "suppressChromeHideRef"
-  | "showZoomControl"
-  | "zoomControlInset"
-  | "onMapStyleChange"
-  | "showMapStyleToggle"
-  | "mapStyleControlInset"
-  | "showRecenterControl"
-  | "onRecenter"
->;
+/** MapLibre chrome + camera/focus (Slice 4). */
+export type MapViewMapLibreChromeProps = MapViewLeafletChromeProps;
 
 export type MapViewMapLibreProps = MapViewCoreProps & MapViewMapLibreChromeProps;
 

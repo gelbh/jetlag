@@ -7,6 +7,7 @@ import type {
 import { LatLngBounds, latLngBounds, point } from "leaflet";
 import { computeFramedCenterZoom } from "../../../domain/map/computeFramedCenterZoom";
 import { isLargeCameraJump } from "../../../domain/map/isLargeCameraJump";
+import { shouldApplyMapFocus } from "../../../domain/map/mapFocusPolicy";
 import {
   getBasemapSurface,
   getMapBasemap,
@@ -26,6 +27,15 @@ import type { MapViewProps } from "./mapViewTypes";
 
 function normalizeFocusBounds(bounds: LatLngBoundsExpression): LatLngBounds {
   return bounds instanceof LatLngBounds ? bounds : latLngBounds(bounds);
+}
+
+/** Leaflet `stop()` reads pane position; unmount can already have torn the map down. */
+function safeLeafletMapStop(map: { stop: () => void }): void {
+  try {
+    map.stop();
+  } catch {
+    // Ignore teardown races during MapFocus cleanup.
+  }
 }
 
 function MapFocus({
@@ -61,7 +71,7 @@ function MapFocus({
 
   useEffect(() => {
     const handleDragStart = () => {
-      map.stop();
+      safeLeafletMapStop(map);
       if (suppressChromeHideRef) {
         suppressChromeHideRef.current = false;
       }
@@ -78,16 +88,16 @@ function MapFocus({
       return;
     }
 
-    const recenterRequested = recenterToken !== lastRecenterRef.current;
     if (
-      fitBoundsMode === "once" &&
-      hasFittedRef.current &&
-      !recenterRequested
+      !shouldApplyMapFocus({
+        fitBoundsMode,
+        hasFitted: hasFittedRef.current,
+        recenterToken,
+        lastRecenterToken: lastRecenterRef.current,
+      })
     ) {
       return;
     }
-
-    lastRecenterRef.current = recenterToken;
 
     map.invalidateSize();
 
@@ -115,7 +125,12 @@ function MapFocus({
       focusMaxZoom,
     );
 
+    lastRecenterRef.current = recenterToken;
     hasFittedRef.current = true;
+
+    if (suppressChromeHideRef) {
+      suppressChromeHideRef.current = true;
+    }
 
     const onMoveEnd = () => {
       if (suppressChromeHideRef) {
@@ -129,6 +144,7 @@ function MapFocus({
     if (!animate) {
       map.setView(center, zoom, { animate: false });
       return () => {
+        safeLeafletMapStop(map);
         map.off("moveend", onMoveEnd);
         if (suppressChromeHideRef) {
           suppressChromeHideRef.current = false;
@@ -143,6 +159,7 @@ function MapFocus({
     }
 
     return () => {
+      safeLeafletMapStop(map);
       map.off("moveend", onMoveEnd);
       if (suppressChromeHideRef) {
         suppressChromeHideRef.current = false;
