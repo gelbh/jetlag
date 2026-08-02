@@ -9,6 +9,7 @@ import {
   getMapLibreStyle,
 } from "../../../domain/map/mapBasemaps";
 import { isUsableMapBounds } from "../../../domain/geometry/gameArea/geometry";
+import { MapEngineProvider } from "./mapEngineContext";
 import type { MapViewCoreProps } from "./mapViewTypes";
 
 setWorkerUrl(mapLibreWorkerUrl);
@@ -162,7 +163,7 @@ export function MapViewMapLibre({
           onZoomEnd={handleZoomEnd}
           onClick={handleClick}
         >
-          {children}
+          <MapEngineProvider engine="maplibre">{children}</MapEngineProvider>
         </Map>
       </div>
     </div>

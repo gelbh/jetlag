@@ -12,10 +12,14 @@ import {
 } from "../../../domain/geometry/masks/combinedEliminationMask";
 import { EMPTY_GEOJSON_FEATURES } from "../../../domain/geometry/masks/emptyFeatures";
 import { polygonFeatureToLeafletPolygonGroups } from "../../../domain/geometry/gameArea/geometry";
+import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { getEliminationOverlayLayers } from "../../../domain/map/mapEliminationOverlayStyle";
 import { useCombinedEliminationMask } from "../../../hooks/map/useCombinedEliminationMask";
 import { useMapStore } from "../../../state/sessionStore";
+import { useMapEngine } from "../chrome/mapEngineContext";
 import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
+import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
+import { pathOptionsToMapLibrePaint } from "../helpers/pathOptionsToMapLibrePaint";
 
 interface CombinedEliminationLayerProps {
   annotations: AnnotationRecord[];
@@ -27,7 +31,7 @@ interface CombinedEliminationLayerProps {
   hidingZones?: readonly HidingZoneRecord[];
 }
 
-export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
+function useCombinedEliminationState({
   annotations,
   gameArea,
   draftFeatures = EMPTY_GEOJSON_FEATURES,
@@ -69,6 +73,55 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
     [annotations, gameArea, pulsingIds],
   );
 
+  return { overlayLayers, combinedMask, pulsing, hidden };
+}
+
+function CombinedEliminationLayerMapLibre(
+  props: CombinedEliminationLayerProps,
+) {
+  const { overlayLayers, combinedMask, pulsing, hidden } =
+    useCombinedEliminationState(props);
+
+  if (hidden || !combinedMask) {
+    return null;
+  }
+
+  return (
+    <MapLibreGeoJsonOverlay
+      id="combined-elimination"
+      data={combinedMask}
+      layers={[
+        ...overlayLayers.map((layer, layerIndex) => {
+          const paint = pathOptionsToMapLibrePaint(layer);
+          return {
+            id: `combined-elimination-${layerIndex}`,
+            fill: paint.fill,
+            line: paint.line,
+          };
+        }),
+        ...(pulsing
+          ? [
+              {
+                id: "combined-elimination-pulse",
+                line: {
+                  color: MAP_ANNOTATION_COLORS.strokeLight,
+                  width: 2,
+                  opacity: 0.8,
+                },
+              },
+            ]
+          : []),
+      ]}
+    />
+  );
+}
+
+function CombinedEliminationLayerLeaflet(
+  props: CombinedEliminationLayerProps,
+) {
+  const { overlayLayers, combinedMask, pulsing, hidden } =
+    useCombinedEliminationState(props);
+
   if (hidden || !combinedMask) {
     return null;
   }
@@ -99,4 +152,14 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
       ))}
     </>
   );
-});
+}
+
+export const CombinedEliminationLayer = memo(
+  function CombinedEliminationLayer(props: CombinedEliminationLayerProps) {
+    const engine = useMapEngine();
+    if (engine === "maplibre") {
+      return <CombinedEliminationLayerMapLibre {...props} />;
+    }
+    return <CombinedEliminationLayerLeaflet {...props} />;
+  },
+);

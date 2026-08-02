@@ -21,6 +21,7 @@ import { MapChromeListener } from "./MapChromeListener";
 import { MapStyleToggle } from "./MapStyleToggle";
 import { MapRecenterControl } from "./MapRecenterControl";
 import { MapZoomControl } from "./MapZoomControl";
+import { MapEngineProvider } from "./mapEngineContext";
 import type { MapViewProps } from "./mapViewTypes";
 
 function normalizeFocusBounds(bounds: LatLngBoundsExpression): LatLngBounds {
@@ -330,6 +331,7 @@ export function MapViewLeaflet({
             : `h-full w-full pointer-events-auto ${containerSurfaceClass}${satelliteGradeClass}`
         }
       >
+        <MapEngineProvider engine="leaflet">
         <TileLayer
           key={basemap.id}
           attribution=""
@@ -391,6 +393,7 @@ export function MapViewLeaflet({
         ) : null}
         <MapResize />
         {children}
+        </MapEngineProvider>
       </MapContainer>
     </div>
   );
