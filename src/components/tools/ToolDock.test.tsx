@@ -159,10 +159,12 @@ describe("HiderToolDock", () => {
     const primary = document.querySelector(
       ".jl-tool-dock-bar:not(.jl-tool-dock-bar--secondary)",
     );
+    expect(primary).not.toBeNull();
     const primaryLabels = [
       ...(primary?.querySelectorAll(".jl-tool-slot-label") ?? []),
     ].map((node) => node.textContent?.trim() ?? "");
     expect(primaryLabels).not.toContain("Chat");
+    expect(primaryLabels).not.toContain("Report");
     expect(primaryLabels).not.toContain("Settings");
 
     const sessionTools = screen.getByLabelText("Session tools");
