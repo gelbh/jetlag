@@ -21,7 +21,7 @@ describe("liveLocationFreshness", () => {
     expect(liveLocationAgeMs("not-a-date", NOW)).toBeNull();
   });
 
-  it("marks locations gone at exactly 10 minutes", () => {
+  it("marks locations gone at exactly 60 minutes", () => {
     expect(isLiveLocationGone(isoAgo(LIVE_LOCATION_GONE_MS - 1), NOW)).toBe(
       false,
     );
