@@ -1,15 +1,24 @@
 import turfCircle from "@turf/circle";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
+import { Fragment } from "react";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
+import type { SessionRecord } from "../../../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { resolveHiderTruthReference } from "../../../domain/questions/hiderTruth/resolveHiderTruthReference";
+import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
+import { hiderTruthReferenceMapTooltip } from "../../tools/shared/questionTruthReferenceHint";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
+import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 
 interface HidingZonesLayerProps {
   zones: readonly HidingZoneRecord[];
   myUid?: string | null;
   memberUids?: readonly string[];
+  session?: Pick<
+    SessionRecord,
+    "endGameStartedAt" | "endGameTruthAnchors"
+  > | null;
 }
 
 function polygonFeature(ring: LatLngTuple[]): Feature<GeoPolygon> {
@@ -45,6 +54,7 @@ export function HidingZonesLayer({
   zones,
   myUid,
   memberUids,
+  session,
 }: HidingZonesLayerProps) {
   const memberSet = memberUids ? new Set(memberUids) : null;
   const visibleZones = memberSet
@@ -71,18 +81,40 @@ export function HidingZonesLayer({
               units: "kilometers",
             });
 
+        const truthReference = resolveHiderTruthReference({
+          hiderUid: zone.hiderUid,
+          zoneCenter: center,
+          session,
+        });
+        const referencePoint = truthReference.point;
+        const showReferencePin =
+          zone.status === "confirmed" &&
+          referencePoint != null &&
+          truthReference.mode !== "unavailable";
+
         return (
-          <MapLibreGeoJsonOverlay
-            key={zone.hiderUid}
-            id={`hiding-zone-${zone.hiderUid}`}
-            data={data}
-            fill={{ fillColor, fillOpacity }}
-            line={{
-              color: fillColor,
-              width: weight,
-              dashArray: cssPxDashToMapLibre(dashArray, weight),
-            }}
-          />
+          <Fragment key={zone.hiderUid}>
+            <MapLibreGeoJsonOverlay
+              id={`hiding-zone-${zone.hiderUid}`}
+              data={data}
+              fill={{ fillColor, fillOpacity }}
+              line={{
+                color: fillColor,
+                width: weight,
+                dashArray: cssPxDashToMapLibre(dashArray, weight),
+              }}
+            />
+            {showReferencePin ? (
+              <MapLibreDotMarker
+                latitude={referencePoint[0]}
+                longitude={referencePoint[1]}
+                radiusPx={7}
+                borderColor={MAP_ANNOTATION_COLORS.strokeLight}
+                fillColor={MAP_ANNOTATION_COLORS.highlight}
+                title={hiderTruthReferenceMapTooltip(truthReference.mode)}
+              />
+            ) : null}
+          </Fragment>
         );
       })}
     </>

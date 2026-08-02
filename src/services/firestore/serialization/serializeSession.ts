@@ -3,6 +3,7 @@ import type {
   SessionRecord,
   SessionTier,
 } from "../../../domain/map/annotations";
+import type { EndGameTruthAnchor } from "../../../domain/session/hiding/endGameTruthAnchors";
 import type { SessionRulesPatch } from "../../../domain/session/tools/advancedSessionSettings";
 import type { GameSize } from "../../../domain/session/size/gameSize";
 import { hidingZoneRadiusMeters } from "../../../domain/session/size/gameSize";
@@ -72,6 +73,34 @@ function parseGameSize(value: unknown): GameSize | undefined {
   }
 
   return undefined;
+}
+
+export function parseEndGameTruthAnchors(
+  value: unknown,
+): Record<string, EndGameTruthAnchor> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const anchors: Record<string, EndGameTruthAnchor> = {};
+  for (const [uid, anchor] of Object.entries(value as Record<string, unknown>)) {
+    if (!anchor || typeof anchor !== "object" || Array.isArray(anchor)) {
+      continue;
+    }
+
+    const { lat, lng, frozenAt } = anchor as Record<string, unknown>;
+    if (
+      typeof lat === "number" &&
+      typeof lng === "number" &&
+      typeof frozenAt === "string" &&
+      Number.isFinite(lat) &&
+      Number.isFinite(lng)
+    ) {
+      anchors[uid] = { lat, lng, frozenAt };
+    }
+  }
+
+  return Object.keys(anchors).length > 0 ? anchors : undefined;
 }
 
 function parseOptionalMinutes(
@@ -338,6 +367,8 @@ export function deserializeSessionFromFirestore(
       typeof document.endGameStartedByUid === "string"
         ? document.endGameStartedByUid
         : undefined,
+    // Freeze coords live under sessions/{id}/endGameTruth/anchors — never on the session doc.
+    endGameTruthAnchors: undefined,
     endGameRequestedAt:
       typeof document.endGameRequestedAt === "string"
         ? document.endGameRequestedAt

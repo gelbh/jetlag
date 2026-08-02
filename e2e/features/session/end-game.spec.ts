@@ -20,6 +20,7 @@ test("decline clears pending; accept starts end game; cancel and reset work", as
   const { hostPage, guestPage } = hostHider;
 
   await confirmInitialHidingZoneAtStation(guestPage, "Dublin Central");
+  await dismissMapOnboarding(guestPage);
 
   await startSessionTimer(hostPage);
   await dismissMapOnboarding(hostPage);
