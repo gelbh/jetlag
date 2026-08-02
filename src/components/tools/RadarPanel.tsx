@@ -9,7 +9,7 @@ import { ToolSection } from "./shared/panels/ToolSection";
 import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
-import { RADAR_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
+import { RADAR_WIZARD } from "./shared/wizard/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import { parseDistanceInput, type DistanceUnit } from "../../domain/map/distance";
@@ -71,11 +71,20 @@ export function RadarPanel({
   viewOnly = false,
   wizardStepRef,
 }: RadarPanelProps) {
-  const steps = stepsForMode(RADAR_STEPS, awaitHiderAnswer);
-  const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
-    steps,
-    { wizardStepRef },
-  );
+  const {
+    phaseId,
+    stepId,
+    phaseIndex,
+    configureIndex,
+    goNext,
+    goBack,
+    Stepper,
+  } = useToolWizard(RADAR_WIZARD, {
+    wizardStepRef,
+    awaitHiderAnswer,
+    toolCommitLabel: "Add radar question",
+    isSubmitting,
+  });
 
   const resolvedRadius = chooseCustom
     ? (parseDistanceInput(customRadius, distanceUnit) ?? radiusMeters)
@@ -102,12 +111,12 @@ export function RadarPanel({
   const canCommitActions = !viewOnly && canCommit;
 
   const canGoNext =
-    (step === "anchor" && hasCenter) ||
-    (step === "distance" && distanceSelectionAvailable);
-  const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
+    (phaseId === "place" && hasCenter) ||
+    (phaseId === "configure" && distanceSelectionAvailable);
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
 
   const radarAnswerStepActions =
-    step === "answer" ? (
+    phaseId === "ask" && !awaitHiderAnswer ? (
       <>
         <BinaryAnswerPicker
           value={answer}
@@ -132,8 +141,8 @@ export function RadarPanel({
       </>
     ) : null;
 
-  const radarDistanceSendActions =
-    step === "distance" && awaitHiderAnswer ? (
+  const radarSendActions =
+    phaseId === "ask" && awaitHiderAnswer ? (
       <SendToHidersButton
         costLabel={costLabel}
         isSubmitting={isSubmitting}
@@ -146,7 +155,7 @@ export function RadarPanel({
   const panelBody = (
     <>
       {viewOnly ? <ViewOnlyQuestionBanner /> : null}
-      {step === "distance" ? (
+      {phaseId === "configure" ? (
         <ToolSection first compact status="active">
           <p className="text-xs text-ink-dim">
             Radar tests your location at answer time, not your hiding zone.
@@ -165,7 +174,7 @@ export function RadarPanel({
         </ToolSection>
       ) : null}
 
-      {step === "anchor" ? (
+      {phaseId === "place" ? (
         <ToolSection first compact status="active">
           <PlacementActions
             awaitingPlacement={awaitingPlacement}
@@ -180,12 +189,7 @@ export function RadarPanel({
     </>
   );
 
-  const stickyFooterActions =
-    step === "answer"
-      ? radarAnswerStepActions
-      : step === "distance"
-        ? radarDistanceSendActions
-        : null;
+  const stickyFooterActions = radarAnswerStepActions ?? radarSendActions;
 
   const answerFooter = stickyFooterActions ? (
     <ToolSection first compact status="active">
@@ -200,20 +204,21 @@ export function RadarPanel({
       stepper={
         <Stepper
           nav={{
-            stepIndex,
-            stepCount: steps.length,
+            canGoBack:
+              phaseIndex > 0 ||
+              (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             onNext: goNext,
-            canGoNext,
+            canGoNext: phaseId !== "ask" ? canGoNext : undefined,
           }}
         />
       }
     >
       <WizardPanelFrame scrollable stickyFooter={answerFooter} error={error}>
         <WizardSwipeSurface
-          stepId={step}
-          stepIndex={stepIndex}
-          canGoBack={stepIndex > 0}
+          stepId={stepId}
+          stepIndex={phaseIndex}
+          canGoBack={phaseIndex > 0}
           canGoNext={canSwipeNext}
           onBack={goBack}
           onNext={goNext}

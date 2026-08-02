@@ -20,7 +20,7 @@ import { ToolSection } from "./shared/panels/ToolSection";
 import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
-import { THERMOMETER_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
+import { THERMOMETER_WIZARD } from "./shared/wizard/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 
@@ -97,11 +97,20 @@ export function ThermometerPanel({
   error = null,
   wizardStepRef,
 }: ThermometerPanelProps) {
-  const steps = stepsForMode(THERMOMETER_STEPS, awaitHiderAnswer);
-  const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
-    steps,
-    { wizardStepRef },
-  );
+  const {
+    phaseId,
+    stepId,
+    phaseIndex,
+    configureIndex,
+    goNext,
+    goBack,
+    Stepper,
+  } = useToolWizard(THERMOMETER_WIZARD, {
+    wizardStepRef,
+    awaitHiderAnswer,
+    toolCommitLabel: "Add thermometer",
+    isSubmitting,
+  });
 
   const travelTooShort =
     travelMeters !== null && travelMeters + 1 < distanceMeters;
@@ -122,13 +131,13 @@ export function ThermometerPanel({
     !isSubmitting;
 
   const canGoNext =
-    (step === "placement" &&
+    (phaseId === "place" &&
       (walkingActive || pinsReady || placementMode === "gps")) ||
-    (step === "distance" && distanceAvailable);
-  const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
+    (phaseId === "configure" && distanceAvailable);
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
 
   const thermometerAnswerStepActions =
-    step === "answer" ? (
+    phaseId === "ask" && !awaitHiderAnswer ? (
       <>
         <BinaryAnswerPicker
           value={answer}
@@ -150,8 +159,8 @@ export function ThermometerPanel({
       </>
     ) : null;
 
-  const thermometerPlacementSendActions =
-    step === "placement" &&
+  const thermometerSendActions =
+    phaseId === "ask" &&
     awaitHiderAnswer &&
     placementMode === "manual" &&
     pinsReady &&
@@ -169,7 +178,7 @@ export function ThermometerPanel({
 
   const panelBody = (
     <>
-      {step === "distance" ? (
+      {phaseId === "configure" ? (
         <ToolSection first compact status="active">
           <QuestionPromptBlock
             prompt={thermometerQuestionPrompt(distanceMeters, distanceUnit)}
@@ -221,7 +230,7 @@ export function ThermometerPanel({
         </ToolSection>
       ) : null}
 
-      {step === "placement" ? (
+      {phaseId === "place" ? (
         <ToolSection first compact status="active">
           <ResolvedReadout variant={walkingActive ? "default" : "dim"}>
             {placementStatus(mapStep, placementMode, walkingActive)}
@@ -264,11 +273,7 @@ export function ThermometerPanel({
   );
 
   const stickyFooterActions =
-    step === "answer"
-      ? thermometerAnswerStepActions
-      : step === "placement"
-        ? thermometerPlacementSendActions
-        : null;
+    thermometerAnswerStepActions ?? thermometerSendActions;
 
   const answerFooter = stickyFooterActions ? (
     <ToolSection first compact status="active">
@@ -283,11 +288,12 @@ export function ThermometerPanel({
       stepper={
         <Stepper
           nav={{
-            stepIndex,
-            stepCount: steps.length,
+            canGoBack:
+              phaseIndex > 0 ||
+              (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             onNext: goNext,
-            canGoNext,
+            canGoNext: phaseId !== "ask" ? canGoNext : undefined,
           }}
         />
       }
@@ -302,9 +308,9 @@ export function ThermometerPanel({
         }
       >
         <WizardSwipeSurface
-          stepId={step}
-          stepIndex={stepIndex}
-          canGoBack={stepIndex > 0}
+          stepId={stepId}
+          stepIndex={phaseIndex}
+          canGoBack={phaseIndex > 0}
           canGoNext={canSwipeNext}
           onBack={goBack}
           onNext={goNext}
