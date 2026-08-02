@@ -24,9 +24,9 @@ const westAirport: [number, number] = [51.45, -0.18];
 const eastAirport: [number, number] = [51.45, -0.12];
 
 describe("multi-place measuring geometry", () => {
-  it("builds a union near region around every site", () => {
+  it("builds a union near region around every site", async () => {
     const distanceMeters = 2_500;
-    const nearRegion = buildMultiPlaceNearRegion(
+    const nearRegion = await buildMultiPlaceNearRegion(
       [westAirport, eastAirport],
       distanceMeters,
       sampleGameArea,
@@ -41,9 +41,9 @@ describe("multi-place measuring geometry", () => {
     );
   });
 
-  it("further answer shades inside any equal-distance disk", () => {
+  it("further answer shades inside any equal-distance disk", async () => {
     const distanceMeters = 2_500;
-    const eliminated = buildMultiPlaceEliminationRegion(
+    const eliminated = await buildMultiPlaceEliminationRegion(
       [westAirport, eastAirport],
       distanceMeters,
       sampleGameArea,
@@ -57,9 +57,9 @@ describe("multi-place measuring geometry", () => {
     expect(booleanPointInPolygon(farSouthWestCorner, eliminated!)).toBe(false);
   });
 
-  it("closer answer shades outside every equal-distance disk", () => {
+  it("closer answer shades outside every equal-distance disk", async () => {
     const distanceMeters = 2_500;
-    const eliminated = buildMultiPlaceEliminationRegion(
+    const eliminated = await buildMultiPlaceEliminationRegion(
       [westAirport, eastAirport],
       distanceMeters,
       sampleGameArea,

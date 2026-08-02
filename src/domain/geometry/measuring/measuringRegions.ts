@@ -7,8 +7,8 @@ import {
   buildCoastlineNearRegionTs,
   buildLocationEliminationRegion,
   buildLocationNearRegion,
-  buildMultiPlaceEliminationRegion,
   buildMultiPlaceNearRegion,
+  buildMultiPlaceNearRegionTs,
 } from "./geometryMeasuring";
 import { buildMeasuringEliminationRegion } from "./eliminationRegions";
 import {
@@ -153,9 +153,8 @@ export async function buildMeasuringRegions(
   }
 
   if (usesAllPlacesInArea) {
-    const elimination = buildMultiPlaceEliminationRegion(
-      measuringPlaces.map((place) => place.point),
-      measuringDistanceMeters,
+    const elimination = buildMeasuringEliminationRegion(
+      near,
       gameArea,
       measuringAnswer,
     );
@@ -236,7 +235,7 @@ function buildMeasuringNearRegionTs(
       return null;
     }
 
-    return buildMultiPlaceNearRegion(
+    return buildMultiPlaceNearRegionTs(
       measuringPlaces.map((place) => place.point),
       measuringDistanceMeters,
       gameArea,
@@ -291,9 +290,8 @@ export function buildMeasuringEliminationPreviewTs(
   }
 
   if (input.usesAllPlacesInArea) {
-    return buildMultiPlaceEliminationRegion(
-      input.measuringPlaces.map((place) => place.point),
-      input.measuringDistanceMeters,
+    return buildMeasuringEliminationRegion(
+      near,
       input.gameArea,
       input.measuringAnswer,
     );

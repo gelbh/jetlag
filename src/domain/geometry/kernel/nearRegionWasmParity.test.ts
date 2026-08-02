@@ -73,12 +73,12 @@ describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {
   });
 
   it("matches TS multi-place disks topology", async () => {
-    const { buildMultiPlaceNearRegion } = await import("../measuring/nearRegions");
+    const { buildMultiPlaceNearRegionTs } = await import("../measuring/nearRegions");
     const places = [
       [51.45, -0.15] as [number, number],
       [51.46, -0.14] as [number, number],
     ];
-    const ts = buildMultiPlaceNearRegion(places, 400, sampleGameArea);
+    const ts = buildMultiPlaceNearRegionTs(places, 400, sampleGameArea);
     const wasm = await wasmBuildNearRegion({
       segments: [],
       distanceMeters: 0,
