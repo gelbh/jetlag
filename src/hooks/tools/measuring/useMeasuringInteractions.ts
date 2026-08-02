@@ -217,7 +217,7 @@ export function useMeasuringInteractions({
         return true;
       }
 
-      if (wizardStep !== "anchor") {
+      if (wizardStep !== "place") {
         return false;
       }
 

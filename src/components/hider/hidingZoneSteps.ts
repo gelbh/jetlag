@@ -1,22 +1,29 @@
-import type { ToolStepDefinition } from "../tools/shared/wizard/toolStepUtils";
+import type { ToolWizardPhaseId } from "../../domain/wizard/toolWizardPhases";
+import {
+  HIDING_ZONE_CREATE_WIZARD,
+  HIDING_ZONE_MOVE_WIZARD,
+} from "../../domain/wizard/toolWizardPhases";
 
-export const HIDING_ZONE_STEPS = [
-  { id: "method", label: "Method" },
-  { id: "location", label: "Location" },
-  { id: "confirm", label: "Confirm" },
-] as const satisfies readonly ToolStepDefinition[];
+export {
+  HIDING_ZONE_CREATE_WIZARD,
+  HIDING_ZONE_MOVE_WIZARD,
+};
 
-export const HIDING_ZONE_MOVE_STEPS = [
-  { id: "location", label: "Location" },
-  { id: "confirm", label: "Confirm" },
-] as const satisfies readonly ToolStepDefinition[];
+/** Legacy step ids consumed by map pick / peek wiring outside the panel. */
+export type HidingZoneStepId = "method" | "location" | "confirm";
 
-export type HidingZoneStepId =
-  | (typeof HIDING_ZONE_STEPS)[number]["id"]
-  | (typeof HIDING_ZONE_MOVE_STEPS)[number]["id"];
+export function hidingZoneWizardDef(moveMode: boolean) {
+  return moveMode ? HIDING_ZONE_MOVE_WIZARD : HIDING_ZONE_CREATE_WIZARD;
+}
 
-export function stepsForHidingZoneMode(
-  moveMode: boolean,
-): readonly ToolStepDefinition[] {
-  return moveMode ? HIDING_ZONE_MOVE_STEPS : HIDING_ZONE_STEPS;
+export function hidingZoneStepIdFromPhase(
+  phaseId: ToolWizardPhaseId,
+): HidingZoneStepId {
+  if (phaseId === "configure") {
+    return "method";
+  }
+  if (phaseId === "place") {
+    return "location";
+  }
+  return "confirm";
 }

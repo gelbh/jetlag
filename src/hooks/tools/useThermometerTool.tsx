@@ -61,7 +61,7 @@ export function useThermometerTool({
   refreshGps,
   ensurePointInGameArea,
 }: UseThermometerToolParams) {
-  const wizardStepRef = useRef("distance");
+  const wizardStepRef = useRef("place");
   const finishPlacementRef = useRef(finishPlacement);
   const resetAfterSuccessRef = useRef(() => undefined as void);
 

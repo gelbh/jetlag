@@ -300,11 +300,9 @@ export function useMapScreenController() {
     handleMapPanStart,
     handleMapPanEnd,
   } = useToolPanelChrome(activeTool, {
-    // Thermometer needs an expanded wizard step before map taps; peeking on Manual pins blocks Next.
-    autoPeek:
-      tools.placementCrosshair &&
-      canSubmitQuestion &&
-      activeTool !== "thermometer",
+    // Peek while the crosshair is up so map taps aren't covered; clearing
+    // placementCrosshair expands again and re-enables Continue.
+    autoPeek: tools.placementCrosshair && canSubmitQuestion,
   });
   const isDesktopLayout = useDesktopLayout();
   const mapChromeControlInset: MapChromeControlInset =

@@ -18,7 +18,7 @@ test.describe("matching tool panel screenshots", () => {
     await waitForMapPlacementCrosshair(page);
     await clickMapCenter(page);
     await waitForWizardNext(page);
-    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "Continue" }).click();
     await page.locator("select.field-input").selectOption("museum");
     await waitForWizardNext(page);
 

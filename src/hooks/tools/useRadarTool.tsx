@@ -83,7 +83,7 @@ export function useRadarTool({
   canSubmitQuestion = true,
 }: UseRadarToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
-  const wizardStepRef = useRef("anchor");
+  const wizardStepRef = useRef("place");
   const activeAnnotations = useMemo(
     () => annotations.filter(isActive),
     [annotations],
@@ -148,7 +148,7 @@ export function useRadarTool({
         return false;
       }
 
-      if (wizardStepRef.current !== "anchor") {
+      if (wizardStepRef.current !== "place") {
         return false;
       }
 
