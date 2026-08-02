@@ -299,7 +299,9 @@ export function useMapScreenController() {
     setPanelMinimized: setUserMinimized,
     handleMapPanStart,
     handleMapPanEnd,
-  } = useToolPanelChrome(activeTool);
+  } = useToolPanelChrome(activeTool, {
+    autoPeek: tools.placementCrosshair && canSubmitQuestion,
+  });
   const isDesktopLayout = useDesktopLayout();
   const mapChromeControlInset: MapChromeControlInset =
     panelMinimized || mapPanning

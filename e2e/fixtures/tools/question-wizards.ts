@@ -7,6 +7,14 @@ import {
   expectMapHasAnnotations,
 } from "../map";
 
+/** Expand a peeked tool panel so wizard chrome is interactable. */
+export async function expandToolPanelIfPeeked(page: Page) {
+  const expand = page.getByRole("button", { name: /Expand .+ panel/i });
+  if (await expand.isVisible({ timeout: 500 }).catch(() => false)) {
+    await expand.click();
+  }
+}
+
 /** Reads "N of M" from the wizard stepper; throws while no counter is rendered. */
 export async function currentWizardStep(page: Page): Promise<number> {
   const stepper = page.getByRole("list", { name: "Progress" }).first();
@@ -192,6 +200,7 @@ export async function sendMeasuringToHiders(page: Page) {
 export async function completeThermometerSolo(page: Page) {
   await clickToolDockButton(page, "Thermometer");
   await page.getByRole("button", { name: "Manual pins" }).click();
+  await expandToolPanelIfPeeked(page);
   await advanceWizard(page);
   await clickMapAt(page, 0.35, 0.5);
   await clickMapAt(page, 0.65, 0.5);
@@ -206,6 +215,7 @@ export async function completeThermometerSolo(page: Page) {
 export async function sendThermometerToHiders(page: Page) {
   await clickToolDockButton(page, "Thermometer");
   await page.getByRole("button", { name: "Manual pins" }).click();
+  await expandToolPanelIfPeeked(page);
   await advanceWizard(page);
   await clickMapAt(page, 0.35, 0.5);
   await clickMapAt(page, 0.65, 0.5);

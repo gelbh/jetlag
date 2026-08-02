@@ -87,7 +87,6 @@ type MapScreenChromeProps = Pick<
   | "firstRunDismissed"
   | "setFirstRunDismissed"
   | "mapPanning"
-  | "placementCrosshair"
   | "userMinimized"
   | "setUserMinimized"
   | "selectedAnnotation"
@@ -204,7 +203,6 @@ export function MapScreenChrome({
   firstRunDismissed,
   setFirstRunDismissed,
   mapPanning,
-  placementCrosshair,
   userMinimized,
   setUserMinimized,
   selectedAnnotation,
@@ -442,7 +440,6 @@ export function MapScreenChrome({
           geometryEditAnnotation={geometryEditAnnotation}
           geometryDraft={geometryDraft}
           mapPanning={mapPanning}
-          placementCrosshair={placementCrosshair}
           userMinimized={userMinimized}
           setUserMinimized={setUserMinimized}
           handleSelectTool={handleSelectTool}
