@@ -1,10 +1,10 @@
 import type { Feature, MultiPolygon, Polygon, Position } from "geojson";
 
-function collectPositions(geometry: Polygon | MultiPolygon): Position[] {
+function ringsOf(geometry: Polygon | MultiPolygon): Position[][] {
   if (geometry.type === "Polygon") {
-    return geometry.coordinates.flat();
+    return geometry.coordinates;
   }
-  return geometry.coordinates.flat(2);
+  return geometry.coordinates.flatMap((polygon) => polygon);
 }
 
 /** Cheap publish signature for measuring preview polygons (avoids JSON.stringify). */
@@ -15,26 +15,34 @@ export function previewGeometryFingerprint(
     return null;
   }
 
-  const positions = collectPositions(feature.geometry);
-  const coordCount = positions.length;
-  if (coordCount === 0) {
-    return `${feature.geometry.type}:0`;
-  }
-
+  const rings = ringsOf(feature.geometry);
+  let coordCount = 0;
   let minLng = Infinity;
   let maxLng = -Infinity;
   let minLat = Infinity;
   let maxLat = -Infinity;
-  for (const [lng, lat] of positions) {
-    if (lng < minLng) minLng = lng;
-    if (lng > maxLng) maxLng = lng;
-    if (lat < minLat) minLat = lat;
-    if (lat > maxLat) maxLat = lat;
+  let first: Position | undefined;
+  let last: Position | undefined;
+
+  for (const ring of rings) {
+    for (const position of ring) {
+      const lng = position[0];
+      const lat = position[1];
+      if (first === undefined) first = position;
+      last = position;
+      coordCount += 1;
+      if (lng < minLng) minLng = lng;
+      if (lng > maxLng) maxLng = lng;
+      if (lat < minLat) minLat = lat;
+      if (lat > maxLat) maxLat = lat;
+    }
+  }
+
+  if (coordCount === 0 || first === undefined || last === undefined) {
+    return `${feature.geometry.type}:0`;
   }
 
   const round = (value: number) => value.toFixed(6);
-  const first = positions[0]!;
-  const last = positions[coordCount - 1]!;
 
   return [
     feature.geometry.type,
