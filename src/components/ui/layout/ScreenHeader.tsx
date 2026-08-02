@@ -20,7 +20,7 @@ export const screenHeaderOffsetClassName =
 interface ScreenHeaderProps {
   backTo?: string;
   backLabel?: string;
-  /** In-screen back (e.g. tutorial sub-views) instead of routing away. */
+  /** In-screen back (e.g. nested sub-views) instead of routing away. */
   onBack?: () => void;
   placement?: ScreenHeaderPlacement;
   className?: string;

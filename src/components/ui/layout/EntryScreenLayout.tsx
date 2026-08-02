@@ -3,9 +3,9 @@ import type { ReactNode } from "react";
 interface EntryScreenLayoutProps {
   children: ReactNode;
   justify?: "between" | "center" | "start";
-  /** Locks content to one viewport with no page scroll (tutorial). */
+  /** Locks content to one viewport with no page scroll. */
   viewport?: boolean;
-  /** Viewport layout: tutorial hub uses start; home uses between or center. */
+  /** Viewport layout: start packs from the top; home uses between or center. */
   viewportLayout?: "start" | "between" | "center";
 }
 

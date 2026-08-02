@@ -28,6 +28,7 @@ export interface MapSettingsSessionTabProps {
   expansionPackEnabled?: boolean;
   onOpenCurseReference?: () => void;
   onReportProblem?: () => void;
+  onReviewMapTools?: () => void;
 }
 
 export function MapSettingsSessionTab({
@@ -52,6 +53,7 @@ export function MapSettingsSessionTab({
   expansionPackEnabled = false,
   onOpenCurseReference,
   onReportProblem,
+  onReviewMapTools,
 }: MapSettingsSessionTabProps) {
   const [deviceSectionOpen, setDeviceSectionOpen] = useState(false);
   const [resetMenuOpen, setResetMenuOpen] = useState(false);
@@ -94,6 +96,16 @@ export function MapSettingsSessionTab({
           </div>
         ) : null}
       </div>
+
+      {onReviewMapTools ? (
+        <button
+          type="button"
+          onClick={onReviewMapTools}
+          className="btn-secondary w-full"
+        >
+          Map tools guide
+        </button>
+      ) : null}
 
       {onReportProblem ? (
         <button

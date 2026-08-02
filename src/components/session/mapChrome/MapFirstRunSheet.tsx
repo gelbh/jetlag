@@ -1,4 +1,3 @@
-import { AppLink } from "../../navigation/AppLink";
 import { MotionSheet } from "../../motion/MotionSheet";
 import { usePersistedDismiss } from "../../../hooks/forms/usePersistedDismiss";
 
@@ -7,12 +6,18 @@ const STORAGE_KEY = "jetlag.mapFirstRunDismissed";
 interface MapFirstRunSheetProps {
   open: boolean;
   onDismiss: () => void;
+  /** Open from Settings even after first-run dismiss. */
+  forceOpen?: boolean;
 }
 
-export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
+export function MapFirstRunSheet({
+  open,
+  onDismiss,
+  forceOpen = false,
+}: MapFirstRunSheetProps) {
   const { dismissed, dismiss: persistDismiss } = usePersistedDismiss(STORAGE_KEY);
 
-  if (dismissed) {
+  if (dismissed && !forceOpen) {
     return null;
   }
 
@@ -58,12 +63,8 @@ export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
           onClick={dismiss}
           className="btn-primary min-h-12 w-full"
         >
-          Close
+          Got it
         </button>
-
-        <AppLink to="/tutorial" className="home-feedback-link block text-center">
-          Full tutorial →
-        </AppLink>
       </div>
     </MotionSheet>
   );

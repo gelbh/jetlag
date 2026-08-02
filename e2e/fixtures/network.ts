@@ -18,8 +18,6 @@ const TILE_PNG = Buffer.from(
 
 export interface BlockExternalAssetsOptions {
   overpassProfile?: OverpassFixtureProfile;
-  /** Let basemap tile requests reach the network (tutorial screenshot capture). */
-  allowMapTiles?: boolean;
 }
 
 function extractOverpassQuery(postData: string): string {
@@ -58,7 +56,6 @@ export async function blockExternalAssets(
   options: BlockExternalAssetsOptions = {},
 ) {
   const overpassProfile = options.overpassProfile ?? "default";
-  const allowMapTiles = options.allowMapTiles === true;
 
   await page.route("**/*", async (route) => {
     const url = route.request().url();
@@ -99,10 +96,6 @@ export async function blockExternalAssets(
     }
 
     if (isMapTileHost(hostname)) {
-      if (allowMapTiles) {
-        await route.continue();
-        return;
-      }
       await route.fulfill({
         status: 200,
         contentType: "image/png",

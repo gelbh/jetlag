@@ -2,6 +2,7 @@ import { Suspense, useEffect, useLayoutEffect, type ReactNode } from "react";
 import * as Sentry from "@sentry/react";
 import {
   BrowserRouter,
+  Navigate,
   Route,
   Routes,
   useLocation,
@@ -53,7 +54,6 @@ import {
   LeaderboardLazy,
   MapScreenLazy,
   StatsLazy,
-  TutorialLazy,
 } from "./navigation/routePreloaders";
 
 function RouteFallback() {
@@ -180,14 +180,6 @@ export default function App() {
               <LowBatteryPrompt />
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route
-                  path="/tutorial"
-                  element={
-                    <LazyRoute>
-                      <TutorialLazy />
-                    </LazyRoute>
-                  }
-                />
                 <Route path="/feedback" element={<Feedback />} />
                 <Route
                   path="/stats"
@@ -265,6 +257,7 @@ export default function App() {
                     </LazyRoute>
                   }
                 />
+                <Route path="/tutorial" element={<Navigate to="/" replace />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

@@ -19,7 +19,6 @@ import {
   type RadarDistanceOptionKey,
 } from "../../domain/questions";
 import type { GameSize } from "../../domain/session/size/gameSize";
-import type { ToolPanelSandboxMode } from "./shared/panels/toolPanelSandbox";
 
 interface RadarPanelProps {
   radiusMeters: number | null;
@@ -45,7 +44,6 @@ interface RadarPanelProps {
   isSubmitting?: boolean;
   viewOnly?: boolean;
   wizardStepRef?: RefObject<string>;
-  sandbox?: ToolPanelSandboxMode;
 }
 
 export function RadarPanel({
@@ -72,18 +70,11 @@ export function RadarPanel({
   isSubmitting = false,
   viewOnly = false,
   wizardStepRef,
-  sandbox,
 }: RadarPanelProps) {
-  const readOnly = sandbox?.readOnly ?? false;
-  const embeddedWizard = sandbox !== undefined;
   const steps = stepsForMode(RADAR_STEPS, awaitHiderAnswer);
   const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
     steps,
-    {
-      wizardStepRef,
-      initialStepId: sandbox?.initialWizardStepId,
-      syncStep: sandbox ? (sandbox.syncWizardStep ?? false) : true,
-    },
+    { wizardStepRef },
   );
 
   const resolvedRadius = chooseCustom
@@ -114,7 +105,6 @@ export function RadarPanel({
     (step === "anchor" && hasCenter) ||
     (step === "distance" && distanceSelectionAvailable);
   const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
-  const useStickyAnswerFooter = !readOnly && !embeddedWizard;
 
   const radarAnswerStepActions =
     step === "answer" ? (
@@ -172,7 +162,6 @@ export function RadarPanel({
             onChooseSelect={onChooseSelect}
             onCustomRadiusChange={onCustomRadiusChange}
           />
-          {awaitHiderAnswer && !useStickyAnswerFooter ? radarDistanceSendActions : null}
         </ToolSection>
       ) : null}
 
@@ -188,12 +177,6 @@ export function RadarPanel({
           />
         </ToolSection>
       ) : null}
-
-      {step === "answer" && !useStickyAnswerFooter ? (
-        <ToolSection first compact status="active">
-          {radarAnswerStepActions}
-        </ToolSection>
-      ) : null}
     </>
   );
 
@@ -204,58 +187,39 @@ export function RadarPanel({
         ? radarDistanceSendActions
         : null;
 
-  const answerFooter =
-    useStickyAnswerFooter && stickyFooterActions ? (
-      <ToolSection first compact status="active">
-        {stickyFooterActions}
-      </ToolSection>
-    ) : undefined;
-
-  const wizardContent = readOnly ? (
-    panelBody
-  ) : (
-    <WizardSwipeSurface
-      stepId={step}
-      stepIndex={stepIndex}
-      canGoBack={stepIndex > 0}
-      canGoNext={canSwipeNext}
-      onBack={goBack}
-      onNext={goNext}
-      embedded={embeddedWizard}
-    >
-      {panelBody}
-    </WizardSwipeSurface>
-  );
+  const answerFooter = stickyFooterActions ? (
+    <ToolSection first compact status="active">
+      {stickyFooterActions}
+    </ToolSection>
+  ) : undefined;
 
   return (
     <ToolPanelShell
       toolId="radar"
-      fillHeight={useStickyAnswerFooter}
+      fillHeight
       stepper={
-        sandbox?.hideStepper ? undefined : (
-          <Stepper
-            nav={
-              readOnly
-                ? undefined
-                : {
-                    stepIndex,
-                    stepCount: steps.length,
-                    onBack: goBack,
-                    onNext: goNext,
-                    canGoNext,
-                  }
-            }
-          />
-        )
+        <Stepper
+          nav={{
+            stepIndex,
+            stepCount: steps.length,
+            onBack: goBack,
+            onNext: goNext,
+            canGoNext,
+          }}
+        />
       }
     >
-      <WizardPanelFrame
-        readOnly={readOnly}
-        scrollable={useStickyAnswerFooter}
-        stickyFooter={answerFooter}
-        error={error}
-      >
-        {wizardContent}
+      <WizardPanelFrame scrollable stickyFooter={answerFooter} error={error}>
+        <WizardSwipeSurface
+          stepId={step}
+          stepIndex={stepIndex}
+          canGoBack={stepIndex > 0}
+          canGoNext={canSwipeNext}
+          onBack={goBack}
+          onNext={goNext}
+        >
+          {panelBody}
+        </WizardSwipeSurface>
       </WizardPanelFrame>
     </ToolPanelShell>
   );

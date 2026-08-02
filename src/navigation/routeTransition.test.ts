@@ -86,7 +86,6 @@ describe("isLazyRoute", () => {
   it("marks known lazy routes", () => {
     expect(isLazyRoute("/map")).toBe(true);
     expect(isLazyRoute("/create")).toBe(true);
-    expect(isLazyRoute("/tutorial")).toBe(true);
     expect(isLazyRoute("/presets")).toBe(true);
     expect(isLazyRoute("/presets/new")).toBe(true);
     expect(isLazyRoute("/presets/foo/edit")).toBe(true);
@@ -106,7 +105,7 @@ describe("preloadRoute", () => {
   });
 
   it("loads lazy route modules without throwing", async () => {
-    await expect(preloadRoute("/tutorial")).resolves.toBeUndefined();
+    await expect(preloadRoute("/create")).resolves.toBeUndefined();
   }, 20000);
 
   it("invokes the lazy loader for /map and query-bearing paths", async () => {
@@ -136,7 +135,6 @@ describe("routeReadinessKind", () => {
   it("uses layout readiness for secondary routes", () => {
     expect(routeReadinessKind("/join")).toBe("layout");
     expect(routeReadinessKind("/create")).toBe("layout");
-    expect(routeReadinessKind("/tutorial")).toBe("layout");
     expect(routeReadinessKind("/presets")).toBe("layout");
     expect(routeReadinessKind("/feedback")).toBe("layout");
   });
@@ -274,7 +272,9 @@ describe("routeLoadingSteps", () => {
 
   it("labels loading steps for player-facing copy", () => {
     expect(labelForStep("download-screen", "Map")).toBe("Downloading screen…");
-    expect(labelForStep("open-screen", "Tutorial")).toBe("Opening Tutorial…");
+    expect(labelForStep("open-screen", "Create session")).toBe(
+      "Opening Create session…",
+    );
   });
 
   it("lists cold map steps in order", () => {

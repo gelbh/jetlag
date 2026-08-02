@@ -32,8 +32,8 @@ describe("routeSeo", () => {
 
   it("builds absolute canonical URLs without trailing slash (except root)", () => {
     expect(absoluteUrl("/")).toBe("https://jetlag.gelbhart.dev/");
-    expect(absoluteUrl("/tutorial")).toBe(
-      "https://jetlag.gelbhart.dev/tutorial",
+    expect(absoluteUrl("/premium")).toBe(
+      "https://jetlag.gelbhart.dev/premium",
     );
   });
 

@@ -16,7 +16,6 @@ type RouteSeoSource = Omit<RouteSeo, "robots">;
 
 export const APP_ROUTE_PATHS = [
   "/",
-  "/tutorial",
   "/feedback",
   "/stats",
   "/friends",
@@ -87,9 +86,6 @@ function normalizeSeoPath(pathname: string): string {
   return base || "/";
 }
 
-const TUTORIAL_TITLE = titleFor("Tutorial");
-const TUTORIAL_DESCRIPTION =
-  "Learn how to host and join Jet Lag Hide + Seek map sessions with the unofficial Jet Lag Map Companion.";
 const PREMIUM_TITLE = titleFor("Premium");
 const PREMIUM_DESCRIPTION =
   "Unlock premium map companion tools for Jet Lag Hide + Seek sessions.";
@@ -114,13 +110,6 @@ const ROUTE_SEO_BY_PATH: Record<string, RouteSeoSource> = {
       offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
       disclaimer: UNOFFICIAL_DISCLAIMER,
     },
-  },
-  "/tutorial": {
-    title: TUTORIAL_TITLE,
-    description: TUTORIAL_DESCRIPTION,
-    canonicalPath: "/tutorial",
-    ogImagePath: DEFAULT_OG_IMAGE_PATH,
-    jsonLd: webPageJsonLd("/tutorial", TUTORIAL_TITLE, TUTORIAL_DESCRIPTION),
   },
   "/premium": {
     title: PREMIUM_TITLE,

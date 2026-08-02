@@ -68,7 +68,7 @@ describe("useAppNavigate", () => {
     });
 
     act(() => {
-      result.current("/tutorial");
+      result.current("/feedback");
       result.current("/", { direction: "back" });
     });
 

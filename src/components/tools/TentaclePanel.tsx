@@ -22,7 +22,6 @@ import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 import { TENTACLE_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
-import type { ToolPanelSandboxMode } from "./shared/panels/toolPanelSandbox";
 
 interface TentaclePanelProps {
   gameSize: GameSize;
@@ -50,7 +49,6 @@ interface TentaclePanelProps {
   isSubmitting?: boolean;
   onRetry?: () => void;
   wizardStepRef?: RefObject<string>;
-  sandbox?: ToolPanelSandboxMode;
 }
 
 export function TentaclePanel({
@@ -78,18 +76,11 @@ export function TentaclePanel({
   isSubmitting = false,
   onRetry,
   wizardStepRef,
-  sandbox,
 }: TentaclePanelProps) {
-  const readOnly = sandbox?.readOnly ?? false;
-  const embeddedWizard = sandbox !== undefined;
   const steps = stepsForMode(TENTACLE_STEPS, awaitHiderAnswer);
   const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
     steps,
-    {
-      wizardStepRef,
-      initialStepId: sandbox?.initialWizardStepId,
-      syncStep: sandbox ? (sandbox.syncWizardStep ?? false) : true,
-    },
+    { wizardStepRef },
   );
 
   const prompt =
@@ -119,7 +110,6 @@ export function TentaclePanel({
     (step === "category" && categorySelectionAvailable) ||
     (step === "locations" && locationsReady && !loading);
   const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
-  const useStickyAnswerFooter = !readOnly && !embeddedWizard;
 
   const tentacleAnswerStepActions =
     step === "answer" && categoryId ? (
@@ -219,42 +209,20 @@ export function TentaclePanel({
               No named locations were found within {searchRadiusLabel}.
             </ResolvedReadout>
           )}
-          {tentacleLocationsSendActions && !useStickyAnswerFooter
-            ? tentacleLocationsSendActions
-            : null}
         </ToolSection>
       ) : null}
 
       {step === "answer" && categoryId ? (
-        <>
-          {useStickyAnswerFooter ? (
-            <TentacleAnswerPicker
-              categoryId={categoryId}
-              distanceUnit={distanceUnit}
-              searchRadiusMeters={searchRadiusMeters}
-              poiOptions={poiOptions}
-              selectedPoiId={selectedPoiId}
-              outOfReach={outOfReach}
-              onSelectPoi={onSelectPoi}
-              onOutOfReachChange={onOutOfReachChange}
-            />
-          ) : null}
-          {!useStickyAnswerFooter ? (
-            <>
-              <TentacleAnswerPicker
-                categoryId={categoryId}
-                distanceUnit={distanceUnit}
-                searchRadiusMeters={searchRadiusMeters}
-                poiOptions={poiOptions}
-                selectedPoiId={selectedPoiId}
-                outOfReach={outOfReach}
-                onSelectPoi={onSelectPoi}
-                onOutOfReachChange={onOutOfReachChange}
-              />
-              {tentacleAnswerStepActions}
-            </>
-          ) : null}
-        </>
+        <TentacleAnswerPicker
+          categoryId={categoryId}
+          distanceUnit={distanceUnit}
+          searchRadiusMeters={searchRadiusMeters}
+          poiOptions={poiOptions}
+          selectedPoiId={selectedPoiId}
+          outOfReach={outOfReach}
+          onSelectPoi={onSelectPoi}
+          onOutOfReachChange={onOutOfReachChange}
+        />
       ) : null}
     </>
   );
@@ -266,60 +234,45 @@ export function TentaclePanel({
         ? tentacleLocationsSendActions
         : null;
 
-  const answerFooter =
-    useStickyAnswerFooter && stickyFooterActions ? (
-      <ToolSection first compact status="active">
-        {stickyFooterActions}
-      </ToolSection>
-    ) : undefined;
-
-  const wizardContent = readOnly ? (
-    panelBody
-  ) : (
-    <WizardSwipeSurface
-      stepId={step}
-      stepIndex={stepIndex}
-      canGoBack={stepIndex > 0}
-      canGoNext={canSwipeNext}
-      onBack={goBack}
-      onNext={goNext}
-      embedded={embeddedWizard}
-    >
-      {panelBody}
-    </WizardSwipeSurface>
-  );
+  const answerFooter = stickyFooterActions ? (
+    <ToolSection first compact status="active">
+      {stickyFooterActions}
+    </ToolSection>
+  ) : undefined;
 
   return (
     <ToolPanelShell
       toolId="tentacle"
-      fillHeight={useStickyAnswerFooter}
+      fillHeight
       stepper={
-        sandbox?.hideStepper ? undefined : (
-          <Stepper
-            nav={
-              readOnly
-                ? undefined
-                : {
-                    stepIndex,
-                    stepCount: steps.length,
-                    onBack: goBack,
-                    onNext: goNext,
-                    canGoNext,
-                  }
-            }
-          />
-        )
+        <Stepper
+          nav={{
+            stepIndex,
+            stepCount: steps.length,
+            onBack: goBack,
+            onNext: goNext,
+            canGoNext,
+          }}
+        />
       }
     >
       <WizardPanelFrame
-        readOnly={readOnly}
-        scrollable={useStickyAnswerFooter}
+        scrollable
         stickyFooter={answerFooter}
         trailing={
           error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null
         }
       >
-        {wizardContent}
+        <WizardSwipeSurface
+          stepId={step}
+          stepIndex={stepIndex}
+          canGoBack={stepIndex > 0}
+          canGoNext={canSwipeNext}
+          onBack={goBack}
+          onNext={goNext}
+        >
+          {panelBody}
+        </WizardSwipeSurface>
       </WizardPanelFrame>
     </ToolPanelShell>
   );
