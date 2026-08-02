@@ -138,6 +138,8 @@
     right: max(0.5rem, env(safe-area-inset-right));
     bottom: calc(var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem);
     z-index: calc(var(--z-panel) + 1);
+    /* Host is pe-none; islands re-enable PE — overlays must too. */
+    pointer-events: auto;
   }
 
   /* Desktop ops rail: stack islands as sections */
