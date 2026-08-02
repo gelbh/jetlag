@@ -14,6 +14,7 @@ import { type AdvancedSessionSettingsValue } from "../../../domain/session/tools
 import { AdvancedSessionSettings } from "../settings/AdvancedSessionSettings";
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
 import { getBasemapAttributionText } from "../../../domain/map/mapBasemaps";
+import type { SessionRecord } from "../../../domain/map/annotations";
 import type { LayerVisibility } from "../../../state/sessionStore";
 import type { NotificationPreferences } from "../../../domain/device/chrome/notifications";
 import { isNativeNotificationsSupported } from "../../../services/core/native/notifications";
