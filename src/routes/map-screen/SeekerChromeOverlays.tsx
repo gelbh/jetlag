@@ -9,6 +9,8 @@ type SeekerChromeOverlaysProps = {
   overlay: MapScreenController["overlay"];
   firstRunDismissed: MapScreenController["firstRunDismissed"];
   setFirstRunDismissed: MapScreenController["setFirstRunDismissed"];
+  forceMapToolsGuide: boolean;
+  setForceMapToolsGuide: (open: boolean) => void;
   selectedAnnotation: MapScreenController["selectedAnnotation"];
   geometryEditAnnotation: MapScreenController["geometryEditAnnotation"];
   geometryDraft: MapScreenController["geometryDraft"];
@@ -67,6 +69,8 @@ export function SeekerChromeOverlays({
   overlay,
   firstRunDismissed,
   setFirstRunDismissed,
+  forceMapToolsGuide,
+  setForceMapToolsGuide,
   selectedAnnotation,
   geometryEditAnnotation,
   geometryDraft,
@@ -113,14 +117,19 @@ export function SeekerChromeOverlays({
 
       <MapFirstRunSheet
         open={
-          !timer.hasStarted &&
-          !firstRunDismissed &&
-          overlay.sheet === "none" &&
-          activeTool === "none" &&
-          !selectedAnnotation &&
-          !geometryEditAnnotation
+          forceMapToolsGuide ||
+          (!timer.hasStarted &&
+            !firstRunDismissed &&
+            overlay.sheet === "none" &&
+            activeTool === "none" &&
+            !selectedAnnotation &&
+            !geometryEditAnnotation)
         }
-        onDismiss={() => setFirstRunDismissed(true)}
+        forceOpen={forceMapToolsGuide}
+        onDismiss={() => {
+          setFirstRunDismissed(true);
+          setForceMapToolsGuide(false);
+        }}
       />
 
       {activeTool !== "none" && !selectedAnnotation ? (

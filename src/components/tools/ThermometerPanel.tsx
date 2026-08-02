@@ -23,7 +23,6 @@ import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 import { THERMOMETER_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
-import type { ToolPanelSandboxMode } from "./shared/panels/toolPanelSandbox";
 
 type PlacementMode = "gps" | "manual";
 
@@ -50,7 +49,6 @@ interface ThermometerPanelProps {
   gpsLoading?: boolean;
   error?: string | null;
   wizardStepRef?: RefObject<string>;
-  sandbox?: ToolPanelSandboxMode;
 }
 
 function placementStatus(
@@ -98,18 +96,11 @@ export function ThermometerPanel({
   gpsLoading = false,
   error = null,
   wizardStepRef,
-  sandbox,
 }: ThermometerPanelProps) {
-  const readOnly = sandbox?.readOnly ?? false;
-  const embeddedWizard = sandbox !== undefined;
   const steps = stepsForMode(THERMOMETER_STEPS, awaitHiderAnswer);
   const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
     steps,
-    {
-      wizardStepRef,
-      initialStepId: sandbox?.initialWizardStepId,
-      syncStep: sandbox ? (sandbox.syncWizardStep ?? false) : true,
-    },
+    { wizardStepRef },
   );
 
   const travelTooShort =
@@ -134,9 +125,7 @@ export function ThermometerPanel({
     (step === "placement" &&
       (walkingActive || pinsReady || placementMode === "gps")) ||
     (step === "distance" && distanceAvailable);
-  const canSwipeNext =
-    !readOnly && toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
-  const useStickyAnswerFooter = !readOnly && !embeddedWizard;
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
 
   const thermometerAnswerStepActions =
     step === "answer" ? (
@@ -266,18 +255,9 @@ export function ThermometerPanel({
               {gpsLoading ? "Getting GPS…" : "Start track"}
             </button>
           ) : null}
-          {thermometerPlacementSendActions && !useStickyAnswerFooter
-            ? thermometerPlacementSendActions
-            : null}
           <button type="button" onClick={onReset} className="btn-secondary w-full">
             Reset
           </button>
-        </ToolSection>
-      ) : null}
-
-      {step === "answer" && !useStickyAnswerFooter ? (
-        <ToolSection first compact status="active">
-          {thermometerAnswerStepActions}
         </ToolSection>
       ) : null}
     </>
@@ -290,54 +270,30 @@ export function ThermometerPanel({
         ? thermometerPlacementSendActions
         : null;
 
-  const answerFooter =
-    useStickyAnswerFooter && stickyFooterActions ? (
-      <ToolSection first compact status="active">
-        {stickyFooterActions}
-      </ToolSection>
-    ) : undefined;
-
-  const wizardContent = readOnly ? (
-    panelBody
-  ) : (
-    <WizardSwipeSurface
-      stepId={step}
-      stepIndex={stepIndex}
-      canGoBack={stepIndex > 0}
-      canGoNext={canSwipeNext}
-      onBack={goBack}
-      onNext={goNext}
-      embedded={embeddedWizard}
-    >
-      {panelBody}
-    </WizardSwipeSurface>
-  );
+  const answerFooter = stickyFooterActions ? (
+    <ToolSection first compact status="active">
+      {stickyFooterActions}
+    </ToolSection>
+  ) : undefined;
 
   return (
     <ToolPanelShell
       toolId="thermometer"
-      fillHeight={useStickyAnswerFooter}
+      fillHeight
       stepper={
-        sandbox?.hideStepper ? undefined : (
-          <Stepper
-            nav={
-              readOnly
-                ? undefined
-                : {
-                    stepIndex,
-                    stepCount: steps.length,
-                    onBack: goBack,
-                    onNext: goNext,
-                    canGoNext,
-                  }
-            }
-          />
-        )
+        <Stepper
+          nav={{
+            stepIndex,
+            stepCount: steps.length,
+            onBack: goBack,
+            onNext: goNext,
+            canGoNext,
+          }}
+        />
       }
     >
       <WizardPanelFrame
-        readOnly={readOnly}
-        scrollable={useStickyAnswerFooter}
+        scrollable
         stickyFooter={answerFooter}
         trailing={
           error ? (
@@ -345,7 +301,16 @@ export function ThermometerPanel({
           ) : null
         }
       >
-        {wizardContent}
+        <WizardSwipeSurface
+          stepId={step}
+          stepIndex={stepIndex}
+          canGoBack={stepIndex > 0}
+          canGoNext={canSwipeNext}
+          onBack={goBack}
+          onNext={goNext}
+        >
+          {panelBody}
+        </WizardSwipeSurface>
       </WizardPanelFrame>
     </ToolPanelShell>
   );

@@ -15,9 +15,6 @@ export const importGamePresetList = () =>
 export const importGamePresetEditor = () =>
   import("../routes/GamePresets").then((m) => ({ default: m.GamePresetEditor }));
 
-export const importTutorial = () =>
-  import("../routes/Tutorial").then((m) => ({ default: m.Tutorial }));
-
 export const importStats = () =>
   import("../routes/Stats").then((m) => ({ default: m.Stats }));
 
@@ -32,7 +29,6 @@ export const routeImporter = {
   importCreateSession,
   importGamePresetList,
   importGamePresetEditor,
-  importTutorial,
   importStats,
   importFriends,
   importLeaderboard,
@@ -42,7 +38,6 @@ export const MapScreenLazy = lazyWithChunkRetry(importMapScreen);
 export const CreateSessionLazy = lazyWithChunkRetry(importCreateSession);
 export const GamePresetListLazy = lazyWithChunkRetry(importGamePresetList);
 export const GamePresetEditorLazy = lazyWithChunkRetry(importGamePresetEditor);
-export const TutorialLazy = lazyWithChunkRetry(importTutorial);
 export const StatsLazy = lazyWithChunkRetry(importStats);
 export const FriendsLazy = lazyWithChunkRetry(importFriends);
 export const LeaderboardLazy = lazyWithChunkRetry(importLeaderboard);

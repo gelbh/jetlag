@@ -12,8 +12,6 @@ interface WizardSwipeSurfaceProps {
   children: ReactNode;
   footer?: ReactNode;
   className?: string;
-  /** Tutorial / read-only previews: natural height, no flex collapse. */
-  embedded?: boolean;
   /** When false, children stay clickable without horizontal swipe handling. */
   swipeEnabled?: boolean;
 }
@@ -28,7 +26,6 @@ export function WizardSwipeSurface({
   children,
   footer,
   className = "",
-  embedded = false,
   swipeEnabled = true,
 }: WizardSwipeSurfaceProps) {
   const { decorativeAnimate } = useMotionProfile();
@@ -68,28 +65,18 @@ export function WizardSwipeSurface({
     };
   }, [stepIndex, decorativeAnimate]);
 
-  const surfaceLayout = embedded
-    ? "wizard-swipe-surface-embedded flex flex-col"
-    : "flex min-h-0 flex-1 flex-col overflow-hidden";
-  const stepLayout = embedded
-    ? "flex flex-col"
-    : "flex min-h-0 flex-1 flex-col overflow-hidden";
-  const bodyLayout = embedded
-    ? "wizard-swipe-body flex flex-col"
-    : "wizard-swipe-body flex min-h-0 flex-1 flex-col overflow-hidden";
-
   return (
     <div
       ref={containerRef}
-      className={`wizard-swipe-surface ${surfaceLayout} ${className}`.trim()}
-      {...(swipeEnabled && !embedded ? surfaceProps : undefined)}
+      className={`wizard-swipe-surface flex min-h-0 flex-1 flex-col overflow-hidden ${className}`.trim()}
+      {...(swipeEnabled ? surfaceProps : undefined)}
     >
       <div
         key={stepId}
-        className={`${stepLayout} ${enterClass} motion-reduce:animate-none`.trim()}
+        className={`flex min-h-0 flex-1 flex-col overflow-hidden ${enterClass} motion-reduce:animate-none`.trim()}
         style={surfaceStyle}
       >
-        <div className={bodyLayout}>
+        <div className="wizard-swipe-body flex min-h-0 flex-1 flex-col overflow-hidden">
           {children}
         </div>
         {footer ? (

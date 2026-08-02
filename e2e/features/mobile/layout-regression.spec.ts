@@ -5,7 +5,6 @@ import {
   prepareE2EPage,
   openPlayHub,
   openMapWithLocalSession,
-  openTutorialHub,
   openSocialRoute,
   socialRouteViewportLocator,
   SOCIAL_LAYOUT_PATHS,
@@ -91,11 +90,6 @@ test.describe("layout regression @ default mobile", () => {
     await assertInViewport(more);
     // Leaflet markers trip aria-command-name; layout smoke is chrome-only
     await assertLayoutSmoke(page, { exclude: [".leaflet-container"] });
-  });
-
-  test("@smoke tutorial hub has no overflow", async ({ page }) => {
-    await openTutorialHub(page);
-    await assertLayoutSmoke(page);
   });
 
   for (const path of SOCIAL_LAYOUT_PATHS) {
