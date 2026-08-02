@@ -110,6 +110,7 @@ export function useToolWizard(
   useSyncWizardStepRef(
     options?.syncStep === false ? undefined : options?.wizardStepRef,
     stepId,
+    def.toolId,
   );
 
   const goNext = useCallback(() => {

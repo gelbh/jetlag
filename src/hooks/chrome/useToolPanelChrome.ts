@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 import type { DockableMapTool } from "../../domain/map/mapTools";
+import type { WizardSheetSnap } from "../../domain/wizard/phaseToSheetSnap";
 
 type ToolPanelChromeOptions = {
-  /** Peek while placing so map clicks aren't covered; expand still sticks until this clears. */
-  autoPeek?: boolean;
+  /** Phase-driven sheet height; peek keeps the map clear for placement taps. */
+  sheetSnap?: WizardSheetSnap;
 };
 
 export function useToolPanelChrome(
   activeTool: DockableMapTool | "none",
   options: ToolPanelChromeOptions = {},
 ) {
-  const { autoPeek = false } = options;
+  const { sheetSnap = "mid" } = options;
+  const shouldAutoPeek = sheetSnap === "peek";
   const [mapPanning, setMapPanning] = useState(false);
   const [userMinimized, setUserMinimized] = useState(false);
 
@@ -22,14 +24,14 @@ export function useToolPanelChrome(
   }, [activeTool]);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- placement auto-peek; user expand sticks until autoPeek flips */
-    if (autoPeek) {
+    /* eslint-disable react-hooks/set-state-in-effect -- phase snap; user expand sticks until snap flips */
+    if (shouldAutoPeek) {
       setUserMinimized(true);
     } else {
       setUserMinimized(false);
     }
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [autoPeek]);
+  }, [shouldAutoPeek]);
 
   const handleMapPanStart = useCallback(() => {
     if (activeTool !== "none") {
