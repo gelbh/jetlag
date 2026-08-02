@@ -8,11 +8,23 @@ import {
 } from "../map";
 
 /** Expand a peeked tool panel so wizard chrome is interactable. */
-export async function expandToolPanelIfPeeked(page: Page) {
+export async function expandToolPanelIfPeeked(
+  page: Page,
+  { timeoutMs = 2_000 }: { timeoutMs?: number } = {},
+) {
   const expand = page.getByRole("button", { name: /Expand .+ panel/i });
-  const peeked = await expand.isVisible({ timeout: 2_000 }).catch(() => false);
-  if (!peeked) {
-    return;
+  // Playwright treats timeout: 0 as "wait forever" — use isVisible() for a
+  // non-blocking check, or waitFor only when timeoutMs > 0.
+  if (timeoutMs <= 0) {
+    if (!(await expand.isVisible().catch(() => false))) {
+      return;
+    }
+  } else {
+    try {
+      await expand.waitFor({ state: "visible", timeout: timeoutMs });
+    } catch {
+      return;
+    }
   }
   await expand.click();
   await expect(expand).toBeHidden({ timeout: 5_000 });
@@ -20,6 +32,8 @@ export async function expandToolPanelIfPeeked(page: Page) {
 
 /** Phase rail + configure continuum fingerprint for advance/retreat assertions. */
 export async function wizardNavFingerprint(page: Page): Promise<string> {
+  // Retreat/place snap re-peeks the panel; phase rail lives in the hidden body.
+  await expandToolPanelIfPeeked(page, { timeoutMs: 0 });
   const phase = page
     .getByRole("list", { name: "Wizard phases" })
     .locator('[role="listitem"][aria-current="step"]');
@@ -51,6 +65,7 @@ export async function advanceWizard(page: Page) {
 
 /** Clicks Previous step and verifies nav fingerprint changed. */
 export async function retreatWizard(page: Page) {
+  await expandToolPanelIfPeeked(page);
   const before = await wizardNavFingerprint(page);
   await page.getByRole("button", { name: "Previous step" }).click();
   await expect
@@ -221,7 +236,17 @@ export async function sendMeasuringToHiders(page: Page) {
 
 async function placeThermometerManualPins(page: Page) {
   await clickToolDockButton(page, "Thermometer");
-  await page.getByRole("button", { name: "Manual pins" }).click();
+  // Place-phase peek sets hidden/aria-hidden on the body, so getByRole misses
+  // Manual pins. DOM click keeps the panel peeked so map taps can place pins.
+  await page.evaluate(() => {
+    const btn = [...document.querySelectorAll("button")].find(
+      (el) => el.textContent?.trim() === "Manual pins",
+    );
+    if (!(btn instanceof HTMLButtonElement)) {
+      throw new Error("Manual pins control not found");
+    }
+    btn.click();
+  });
   await waitForMapPlacementCrosshair(page);
   // Span ~60% of the map so crow-flies exceeds the default 1/2 mi preset
   // (0.35→0.65 landed at ~0.48 mi and tripped travelTooShort / canCommit).
