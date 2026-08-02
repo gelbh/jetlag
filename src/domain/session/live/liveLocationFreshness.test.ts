@@ -22,10 +22,10 @@ describe("liveLocationFreshness", () => {
   });
 
   it("marks locations gone at exactly 60 minutes", () => {
-    expect(isLiveLocationGone(isoAgo(LIVE_LOCATION_GONE_MS - 1), NOW)).toBe(
-      false,
-    );
-    expect(isLiveLocationGone(isoAgo(LIVE_LOCATION_GONE_MS), NOW)).toBe(true);
+    const sixtyMinutesMs = 60 * 60 * 1000;
+    expect(LIVE_LOCATION_GONE_MS).toBe(sixtyMinutesMs);
+    expect(isLiveLocationGone(isoAgo(sixtyMinutesMs - 1), NOW)).toBe(false);
+    expect(isLiveLocationGone(isoAgo(sixtyMinutesMs), NOW)).toBe(true);
     expect(isLiveLocationGone("bad", NOW)).toBe(true);
   });
 
