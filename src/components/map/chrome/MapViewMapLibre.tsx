@@ -374,8 +374,10 @@ export function MapViewMapLibre({
           onLoad={() => {
             const map = mapRef.current?.getMap();
             // Re-assert after react-map-gl handler sync: pinch zoom on, rotate off.
-            map?.touchZoomRotate.enable();
-            map?.touchZoomRotate.disableRotation();
+            if (interactive) {
+              map?.touchZoomRotate.enable();
+              map?.touchZoomRotate.disableRotation();
+            }
             map?.setMaxPitch(maxPitchDegrees);
             if (maxPitchDegrees === 0) {
               map?.easeTo({ pitch: 0, duration: 0 });
