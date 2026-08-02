@@ -170,6 +170,7 @@ export function useMapSessionChrome({
         timerRunningSince: null,
         endGameStartedAt: undefined,
         endGameStartedByUid: undefined,
+        endGameTruthAnchors: undefined,
         endGameRequestedAt: undefined,
         endGameRequestedByUid: undefined,
       });
