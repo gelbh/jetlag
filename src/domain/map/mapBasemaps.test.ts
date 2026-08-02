@@ -3,12 +3,16 @@ import {
   getBasemapAttributionText,
   getBasemapSurface,
   getMapBasemap,
+  getMapLibreAttributionText,
+  getMapLibreStyle,
   getStreetBasemap,
+  OPENFREEMAP_STYLE_URLS,
 } from "./mapBasemaps";
 import {
   isCartoTileUrl,
   isEsriWorldImageryTileUrl,
   isMapTileHostname,
+  isOpenFreeMapUrl,
 } from "./mapTileHosts";
 
 describe("mapBasemaps", () => {
@@ -42,10 +46,25 @@ describe("mapBasemaps", () => {
     expect(getBasemapAttributionText("standard")).toContain("CARTO");
     expect(getBasemapAttributionText("satellite")).toContain("Esri");
   });
+
+  it("resolves MapLibre OpenFreeMap styles and satellite raster style", () => {
+    expect(getMapLibreStyle("standard", "light")).toBe(
+      OPENFREEMAP_STYLE_URLS.light,
+    );
+    expect(getMapLibreStyle("standard", "dark")).toBe(
+      OPENFREEMAP_STYLE_URLS.dark,
+    );
+    const sat = getMapLibreStyle("satellite", "dark");
+    expect(typeof sat).toBe("object");
+    if (typeof sat === "object") {
+      expect(sat.sources.esri.tiles[0]).toContain("World_Imagery");
+    }
+    expect(getMapLibreAttributionText("standard")).toContain("OpenFreeMap");
+  });
 });
 
 describe("mapTileHosts", () => {
-  it("matches CARTO and Esri tile URLs", () => {
+  it("matches CARTO, Esri, and OpenFreeMap URLs", () => {
     expect(
       isCartoTileUrl(
         "https://a.basemaps.cartocdn.com/rastertiles/voyager/1/2/3.png",
@@ -56,8 +75,12 @@ describe("mapTileHosts", () => {
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/1/2/3",
       ),
     ).toBe(true);
+    expect(
+      isOpenFreeMapUrl("https://tiles.openfreemap.org/styles/liberty"),
+    ).toBe(true);
     expect(isMapTileHostname("a.basemaps.cartocdn.com")).toBe(true);
     expect(isMapTileHostname("server.arcgisonline.com")).toBe(true);
+    expect(isMapTileHostname("tiles.openfreemap.org")).toBe(true);
     expect(isMapTileHostname("evil.arcgisonline.com.attacker.example")).toBe(
       false,
     );

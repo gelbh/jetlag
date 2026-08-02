@@ -43,4 +43,10 @@ describe("mapStore", () => {
     useMapStore.getState().setStreetBasemap("dark");
     expect(useMapStore.getState().streetBasemap).toBe("dark");
   });
+
+  it("defaults mapEngine to leaflet and accepts maplibre", () => {
+    expect(useMapStore.getState().mapEngine).toBe("leaflet");
+    useMapStore.getState().setMapEngine("maplibre");
+    expect(useMapStore.getState().mapEngine).toBe("maplibre");
+  });
 });

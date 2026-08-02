@@ -19,6 +19,7 @@ import {
 import {
   isCartoTileUrl,
   isEsriWorldImageryTileUrl,
+  isOpenFreeMapUrl,
 } from "./domain/map/mapTileHosts";
 
 declare let self: ServiceWorkerGlobalScope;
@@ -55,6 +56,19 @@ registerRoute(
   ({ url }) => isEsriWorldImageryTileUrl(url.href),
   new CacheFirst({
     cacheName: "esri-satellite-tiles",
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 500,
+        maxAgeSeconds: 60 * 60 * 24 * 7,
+      }),
+    ],
+  }),
+);
+
+registerRoute(
+  ({ url }) => isOpenFreeMapUrl(url.href),
+  new CacheFirst({
+    cacheName: "openfreemap-tiles",
     plugins: [
       new ExpirationPlugin({
         maxEntries: 500,
