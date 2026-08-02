@@ -19,6 +19,7 @@ import { focusBoundsToLngLatBounds } from "../../../domain/map/focusBoundsToLngL
 import { isLargeCameraJumpMapLibre } from "../../../domain/map/isLargeCameraJumpMapLibre";
 import { shouldApplyMapFocus } from "../../../domain/map/mapFocusPolicy";
 import { resolveMapPitchDegrees } from "../../../domain/map/resolveMapPitchDegrees";
+import { stopMapCameraEase } from "../../../domain/map/stopMapCameraEase";
 import {
   MOTION_MAP_CAMERA_FLY_MS,
   MOTION_MAP_CAMERA_MS,
@@ -103,7 +104,8 @@ function MapFocus({
   useEffect(() => {
     const map = mapRef.getMap();
     const handleDragStart = () => {
-      map.stop();
+      // Interrupt flyTo/easeTo only — never map.stop() here (resets TouchPan).
+      stopMapCameraEase(map);
       if (suppressChromeHideRef) {
         suppressChromeHideRef.current = false;
       }
