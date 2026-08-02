@@ -1,4 +1,4 @@
-import type { FeatureCollection } from "geojson";
+import type { Feature, FeatureCollection, Polygon } from "geojson";
 import {
   loadKernelWasm,
   resetKernelWasmForTests,
@@ -8,22 +8,90 @@ import type { SpatialVoronoiSite } from "./spatialVoronoi";
 /** Reset lazy WASM module (tests). */
 export const resetVoronoiWasmForTests = resetKernelWasmForTests;
 
+function dedupeSpatialVoronoiSites<
+  T extends Record<string, unknown> = Record<string, unknown>,
+>(sites: Array<SpatialVoronoiSite<T>>): Array<SpatialVoronoiSite<T>> {
+  const seen = new Set<string>();
+  return sites.filter((site) => {
+    const key = `${site.lng},${site.lat}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
+
+function spatialVoronoiSitesToCoords(
+  sites: Array<SpatialVoronoiSite>,
+): Float64Array {
+  const coords = new Float64Array(sites.length * 2);
+  for (let i = 0; i < sites.length; i += 1) {
+    const site = sites[i]!;
+    coords[i * 2] = site.lng;
+    coords[i * 2 + 1] = site.lat;
+  }
+  return coords;
+}
+
+/** Unpack packed rings; `sites` must be 1:1 with cells (dedupe first). */
+function featureCollectionFromVoronoiRings<
+  T extends Record<string, unknown> = Record<string, unknown>,
+>(
+  sites: Array<SpatialVoronoiSite<T>>,
+  packed: ArrayLike<number>,
+): FeatureCollection {
+  const features: Feature<Polygon>[] = [];
+  let offset = 0;
+  let siteIndex = 0;
+  while (offset < packed.length) {
+    const vertexCount = packed[offset]!;
+    if (!Number.isFinite(vertexCount) || vertexCount < 4) {
+      throw new Error("Geometry kernel returned an invalid Voronoi ring");
+    }
+    const n = vertexCount | 0;
+    offset += 1;
+    if (offset + n * 2 > packed.length) {
+      throw new Error("Geometry kernel returned a truncated Voronoi ring");
+    }
+    if (siteIndex >= sites.length) {
+      throw new Error("Geometry kernel returned more rings than sites");
+    }
+    const ring: [number, number][] = [];
+    for (let i = 0; i < n; i += 1) {
+      ring.push([packed[offset]!, packed[offset + 1]!]);
+      offset += 2;
+    }
+    const site = sites[siteIndex]!;
+    features.push({
+      type: "Feature",
+      properties: { ...site.properties },
+      geometry: {
+        type: "Polygon",
+        coordinates: [ring],
+      },
+    });
+    siteIndex += 1;
+  }
+  if (siteIndex !== sites.length) {
+    throw new Error("Geometry kernel returned fewer rings than sites");
+  }
+  return { type: "FeatureCollection", features };
+}
+
 export async function wasmBuildSpatialVoronoiFromSites<
   T extends Record<string, unknown> = Record<string, unknown>,
 >(sites: Array<SpatialVoronoiSite<T>>): Promise<FeatureCollection> {
+  const working = dedupeSpatialVoronoiSites(sites);
+  if (working.length === 0) {
+    return { type: "FeatureCollection", features: [] };
+  }
   const wasm = await loadKernelWasm();
-  const result = wasm.build_spatial_voronoi_json(JSON.stringify(sites));
-  if (typeof result !== "string") {
-    throw new Error("Geometry kernel returned a non-string Voronoi payload");
+  const result = wasm.build_spatial_voronoi_rings(
+    spatialVoronoiSitesToCoords(working),
+  );
+  if (result == null || typeof (result as { length?: unknown }).length !== "number") {
+    throw new Error("Geometry kernel returned a non-array Voronoi rings payload");
   }
-  const parsed: unknown = JSON.parse(result);
-  if (
-    parsed == null ||
-    typeof parsed !== "object" ||
-    (parsed as { type?: unknown }).type !== "FeatureCollection" ||
-    !Array.isArray((parsed as { features?: unknown }).features)
-  ) {
-    throw new Error("Geometry kernel returned an invalid FeatureCollection");
-  }
-  return parsed as FeatureCollection;
+  return featureCollectionFromVoronoiRings(working, result as ArrayLike<number>);
 }
