@@ -4,17 +4,6 @@ import { KERNEL_WASM_READY } from "./kernelWasmReady";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
 
-function measureMedianMs(run: () => void, iterations = 31): number {
-  const samples: number[] = [];
-  for (let i = 0; i < iterations; i += 1) {
-    const start = performance.now();
-    run();
-    samples.push(performance.now() - start);
-  }
-  samples.sort((a, b) => a - b);
-  return samples[Math.floor(samples.length / 2)]!;
-}
-
 describe("spatialVoronoiPerf", () => {
   it("skips unless GEOMETRY_PERF=1", () => {
     expect(runGeometryPerf || true).toBe(true);
@@ -34,18 +23,28 @@ describe("spatialVoronoiPerf", () => {
     const wasmPkg = await import(
       "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
     );
+    // Warm both paths (including TS stringify — sync pkg returns a JSON string).
     wasmPkg.build_spatial_voronoi_json(sitesJson);
-    geoSpatialVoronoiFromSites(sites);
+    JSON.stringify(geoSpatialVoronoiFromSites(sites));
 
-    const tsMs = measureMedianMs(() => {
-      geoSpatialVoronoiFromSites(sites);
-    });
-    const wasmMs = measureMedianMs(() => {
+    const tsSamples: number[] = [];
+    const wasmSamples: number[] = [];
+    for (let i = 0; i < 31; i += 1) {
+      const tsStart = performance.now();
+      JSON.stringify(geoSpatialVoronoiFromSites(sites));
+      tsSamples.push(performance.now() - tsStart);
+      const wasmStart = performance.now();
       wasmPkg.build_spatial_voronoi_json(sitesJson);
-    });
+      wasmSamples.push(performance.now() - wasmStart);
+    }
+    tsSamples.sort((a, b) => a - b);
+    wasmSamples.sort((a, b) => a - b);
+    const tsMs = tsSamples[Math.floor(tsSamples.length / 2)]!;
+    const wasmMs = wasmSamples[Math.floor(wasmSamples.length / 2)]!;
 
     const ratio = tsMs === 0 ? 0 : wasmMs / tsMs;
-    // Ready stays false while this gate fails (~2× on local/CI today).
+    // Compare serialized FC artifacts: build_spatial_voronoi_json vs
+    // JSON.stringify(geoSpatialVoronoiFromSites). Interleaved samples.
     if (KERNEL_WASM_READY.spatialVoronoi) {
       expect(ratio).toBeLessThanOrEqual(1.1);
     } else {
