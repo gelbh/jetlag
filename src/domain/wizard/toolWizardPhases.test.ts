@@ -33,8 +33,21 @@ describe("toolWizardPhases", () => {
   it("labels Ask vs Send from awaitHiderAnswer", () => {
     const solo = phaseRailLabels(THERMOMETER_WIZARD, false);
     const mp = phaseRailLabels(THERMOMETER_WIZARD, true);
-    expect(solo.find((p) => p.id === "ask")?.label).toBe("Ask");
-    expect(mp.find((p) => p.id === "ask")?.label).toBe("Send");
+    expect(solo.map((phase) => phase.id)).toEqual([
+      "place",
+      "configure",
+      "ask",
+    ]);
+    expect(solo.map((phase) => phase.label)).toEqual([
+      "Place",
+      "Configure",
+      "Ask",
+    ]);
+    expect(mp.map((phase) => phase.label)).toEqual([
+      "Place",
+      "Configure",
+      "Send",
+    ]);
     expect(resolveAskMode(THERMOMETER_WIZARD, true)).toBe("send");
   });
 
