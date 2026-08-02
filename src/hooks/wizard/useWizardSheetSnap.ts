@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import type { MapTool } from "../../domain/map/mapToolTypes";
 import { isQuestionDockTool } from "../../domain/map/mapTools";
 import {
@@ -6,31 +6,45 @@ import {
   sheetSnapFromStepId,
   type WizardSheetSnap,
 } from "../../domain/wizard/phaseToSheetSnap";
-import { WIZARD_STEP_CHANGE_EVENT } from "../tools/useSyncWizardStepRef";
+import {
+  getLatestWizardStepIdForTool,
+  WIZARD_STEP_CHANGE_EVENT,
+} from "../tools/useSyncWizardStepRef";
+
+type WizardStepChangeDetail = {
+  stepId: string;
+  toolId?: string | null;
+};
 
 export function useWizardSheetSnap(activeTool: MapTool) {
   const wizardActive = activeTool !== "none" && isQuestionDockTool(activeTool);
   const [wizardStepId, setWizardStepId] = useState<string | null>(null);
 
-  useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- reset step when the active tool changes */
-    setWizardStepId(null);
-    /* eslint-enable react-hooks/set-state-in-effect */
-  }, [activeTool]);
-
-  useEffect(() => {
-    if (!wizardActive) {
+  useLayoutEffect(() => {
+    if (!wizardActive || activeTool === "none") {
+      setWizardStepId(null);
       return;
     }
 
+    const toolId = activeTool;
+
     const handleStepChange = (event: Event) => {
-      const detail = (event as CustomEvent<{ stepId: string }>).detail;
+      const detail = (event as CustomEvent<WizardStepChangeDetail>).detail;
+      if (detail.toolId != null && detail.toolId !== toolId) {
+        return;
+      }
       setWizardStepId(detail.stepId);
     };
 
     window.addEventListener(WIZARD_STEP_CHANGE_EVENT, handleStepChange);
-    return () => window.removeEventListener(WIZARD_STEP_CHANGE_EVENT, handleStepChange);
-  }, [wizardActive]);
+    // Child panel layout effects publish first; seed in case the event already
+    // fired before this listener attached in the same commit.
+    setWizardStepId(getLatestWizardStepIdForTool(toolId));
+
+    return () => {
+      window.removeEventListener(WIZARD_STEP_CHANGE_EVENT, handleStepChange);
+    };
+  }, [activeTool, wizardActive]);
 
   const sheetSnap: WizardSheetSnap = wizardStepId
     ? sheetSnapFromStepId(wizardStepId)
