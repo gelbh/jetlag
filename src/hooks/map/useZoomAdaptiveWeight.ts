@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useMap, useMapEvents } from "react-leaflet";
+import { useMap } from "react-leaflet";
 import {
   computeZoomAdaptiveWeight,
   quantizeWeight,
@@ -7,6 +7,9 @@ import {
   scaleDashArray,
   type ZoomAdaptiveWeightOptions,
 } from "../../domain/map/zoomAdaptiveStrokeWeight";
+import { compensateZoomTransformWeight } from "../../domain/map/zoomTransformCompensation";
+import { useMapZoomRaf } from "./useMapZoomRaf";
+import { useZoomCssScale } from "./useZoomCssScale";
 
 export type { ZoomAdaptiveWeightOptions };
 export {
@@ -17,7 +20,8 @@ export {
 
 /**
  * Stroke weight that tracks map zoom. State only updates when the
- * quantized (0.5-step) weight changes.
+ * quantized (0.5-step) weight changes. Listens to live `zoom` (pinch) as
+ * well as `zoomend`.
  */
 export function useZoomAdaptiveWeight(
   baseWeight: number,
@@ -42,14 +46,27 @@ export function useZoomAdaptiveWeight(
 
   const [weight, setWeight] = useState(() => compute(map.getZoom()));
 
-  useMapEvents({
-    zoomend: (event) => {
-      const next = compute(event.target.getZoom());
-      setWeight((prev) => (next === prev ? prev : next));
-    },
-  });
+  const apply = useCallback(() => {
+    const next = compute(map.getZoom());
+    setWeight((prev) => (next === prev ? prev : next));
+  }, [compute, map]);
+
+  useMapZoomRaf(map, apply);
 
   return weight;
+}
+
+/**
+ * Logical adaptive weight with CSS-zoom compensation so stroke stays
+ * screen-stable during Leaflet's mid-gesture vector transform.
+ */
+export function useCompensatedZoomAdaptiveWeight(
+  baseWeight: number,
+  options: ZoomAdaptiveWeightOptions = {},
+): number {
+  const logical = useZoomAdaptiveWeight(baseWeight, options);
+  const cssScale = useZoomCssScale();
+  return compensateZoomTransformWeight(logical, cssScale);
 }
 
 /**
@@ -77,14 +94,14 @@ export function useStrokeScaleZoom(
     [refZoom, scaleFactor, minWeight, maxWeight],
   );
 
-  useMapEvents({
-    zoomend: (event) => {
-      const nextZoom = event.target.getZoom();
-      setZoom((prev) =>
-        scaleToken(prev) === scaleToken(nextZoom) ? prev : nextZoom,
-      );
-    },
-  });
+  const apply = useCallback(() => {
+    const nextZoom = map.getZoom();
+    setZoom((prev) =>
+      scaleToken(prev) === scaleToken(nextZoom) ? prev : nextZoom,
+    );
+  }, [map, scaleToken]);
+
+  useMapZoomRaf(map, apply);
 
   return zoom;
 }

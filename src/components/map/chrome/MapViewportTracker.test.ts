@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createThrottledPublisher,
+  VIEWPORT_PUBLISH_BY_PHASE,
   VIEWPORT_PUBLISH_THROTTLE_MS,
 } from "../helpers/mapViewportPublish";
 
@@ -38,5 +39,18 @@ describe("createThrottledPublisher", () => {
     expect(publish).toHaveBeenCalledTimes(1);
     vi.advanceTimersByTime(VIEWPORT_PUBLISH_THROTTLE_MS);
     expect(publish).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("VIEWPORT_PUBLISH_BY_PHASE", () => {
+  it("schedules on pinch-style zoom and move without requiring drag", () => {
+    expect(VIEWPORT_PUBLISH_BY_PHASE.zoom).toBe("schedule");
+    expect(VIEWPORT_PUBLISH_BY_PHASE.move).toBe("schedule");
+    expect(VIEWPORT_PUBLISH_BY_PHASE.moveend).toBe("schedule");
+  });
+
+  it("flushes on gesture settle", () => {
+    expect(VIEWPORT_PUBLISH_BY_PHASE.zoomend).toBe("flush");
+    expect(VIEWPORT_PUBLISH_BY_PHASE.dragend).toBe("flush");
   });
 });

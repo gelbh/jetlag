@@ -1,4 +1,5 @@
-import { Circle, Polygon } from "react-leaflet";
+import { CompensatedCircle } from "../helpers/CompensatedCircle";
+import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
@@ -49,7 +50,7 @@ export function HidingZonesLayer({
           : MAP_ANNOTATION_COLORS.hidingZone;
 
         return ring ? (
-          <Polygon
+          <CompensatedPolygon
             key={zone.hiderUid}
             positions={ring}
             pathOptions={{
@@ -61,7 +62,7 @@ export function HidingZonesLayer({
             }}
           />
         ) : (
-          <Circle
+          <CompensatedCircle
             key={zone.hiderUid}
             center={center}
             radius={zone.radiusMeters}
