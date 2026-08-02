@@ -1,8 +1,8 @@
 import bbox from "@turf/bbox";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import type { LatLngBoundsExpression } from "leaflet";
+import type { MapBoundsExpression } from "../mapBounds";
+import { boundingBoxToBoundsExpression } from "../mapBounds";
 import { haversineMeters } from "../../geometry/gameArea/distance";
-import { boundingBoxToLeafletBounds } from "../../geometry/core/gameAreaConvert";
 import {
   gameAreaToBoundingBox,
   normalizeBoundingBox,
@@ -159,15 +159,11 @@ function expandBoundingBoxByPadding(
   });
 }
 
-export function boundsForPlayArea(gameArea: GameArea): LatLngBoundsExpression {
-  return boundingBoxToLeafletBounds(gameAreaToBoundingBox(gameArea));
+export function boundsForPlayArea(gameArea: GameArea): MapBoundsExpression {
+  return boundingBoxToBoundsExpression(gameAreaToBoundingBox(gameArea));
 }
 
-export function boundingBoxToBoundsExpression(
-  box: BoundingBox,
-): LatLngBoundsExpression {
-  return boundingBoxToLeafletBounds(box);
-}
+export { boundingBoxToBoundsExpression } from "../mapBounds";
 
 export function approximatePlayAreaContextMinZoom(
   gameArea: GameArea,

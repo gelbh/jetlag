@@ -1,13 +1,8 @@
 import { useMemo } from "react";
-import { Tooltip } from "react-leaflet";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
+import type { PlayerLocationRecord } from "../../../domain/session/activity/sessionChat";
 import { clusterNearbyPoints } from "../../../domain/session/live/liveMapLocations";
 import { isLiveLocationGone } from "../../../domain/session/live/liveLocationFreshness";
-import type { PlayerLocationRecord } from "../../../domain/session/activity/sessionChat";
 import { useLiveLocationNowMs } from "../../../hooks/map/useLiveLocationNowMs";
-import { matchMapEngine } from "../chrome/matchMapEngine";
-import { useMapEngine } from "../chrome/mapEngineContext";
-import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
 import { buildLiveClusterPaint } from "../helpers/liveClusterPaint";
 import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
 
@@ -17,13 +12,13 @@ interface LivePlayerLocationsLayerProps {
   role: "seeker" | "hider";
 }
 
-function useLiveClusterPaints(
-  locations: readonly PlayerLocationRecord[],
-  role: "seeker" | "hider",
-  myUid: string | null,
-) {
+export function LivePlayerLocationsLayer({
+  locations,
+  myUid = null,
+  role,
+}: LivePlayerLocationsLayerProps) {
   const nowMs = useLiveLocationNowMs();
-  return useMemo(() => {
+  const paints = useMemo(() => {
     const fresh = locations.filter(
       (location) => !isLiveLocationGone(location.updatedAt, nowMs),
     );
@@ -31,14 +26,6 @@ function useLiveClusterPaints(
       buildLiveClusterPaint(cluster, role, myUid, nowMs),
     );
   }, [locations, myUid, nowMs, role]);
-}
-
-function LivePlayerLocationsLayerMapLibre({
-  locations,
-  myUid = null,
-  role,
-}: LivePlayerLocationsLayerProps) {
-  const paints = useLiveClusterPaints(locations, role, myUid);
 
   return (
     <>
@@ -57,48 +44,4 @@ function LivePlayerLocationsLayerMapLibre({
       ))}
     </>
   );
-}
-
-function LivePlayerLocationsLayerLeaflet({
-  locations,
-  myUid = null,
-  role,
-}: LivePlayerLocationsLayerProps) {
-  const paints = useLiveClusterPaints(locations, role, myUid);
-
-  return (
-    <>
-      {paints.map((paint) => {
-        const center: LatLngTuple = [paint.lat, paint.lng];
-        return (
-          <CompensatedCircleMarker
-            key={paint.key}
-            center={center}
-            radius={paint.radius}
-            pathOptions={{
-              color: paint.borderColor,
-              weight: paint.borderWidth,
-              fillColor: paint.fillColor,
-              fillOpacity: paint.fillOpacity,
-              opacity: paint.fillOpacity,
-              // Let map tool clicks (pin / radar place) pass through GPS dots.
-              bubblingMouseEvents: true,
-            }}
-          >
-            <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-              {paint.label}
-            </Tooltip>
-          </CompensatedCircleMarker>
-        );
-      })}
-    </>
-  );
-}
-
-export function LivePlayerLocationsLayer(props: LivePlayerLocationsLayerProps) {
-  const engine = useMapEngine();
-  return matchMapEngine(engine, {
-    maplibre: () => <LivePlayerLocationsLayerMapLibre {...props} />,
-    leaflet: () => <LivePlayerLocationsLayerLeaflet {...props} />,
-  });
 }

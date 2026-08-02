@@ -1,13 +1,8 @@
 import { useMemo } from "react";
 import turfCircle from "@turf/circle";
-import { Marker } from "react-leaflet";
 import { Marker as MapLibreMarker } from "react-map-gl/maplibre";
 import type { GeolocationReading } from "../../../services/core/location/geolocation";
-import { matchMapEngine } from "../chrome/matchMapEngine";
-import { useMapEngine } from "../chrome/mapEngineContext";
-import { CompensatedCircle } from "../helpers/CompensatedCircle";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
-import { createUserLocationIcon } from "../icons/mapIcons";
 import { userLocationIconHtml } from "../icons/userLocationIconHtml";
 
 interface UserLocationLayerProps {
@@ -17,7 +12,7 @@ interface UserLocationLayerProps {
 const ACCURACY_FILL = "rgba(66, 133, 244, 0.15)";
 const ACCURACY_STROKE = "rgba(66, 133, 244, 0.35)";
 
-function UserLocationLayerMapLibre({ reading }: UserLocationLayerProps) {
+export function UserLocationLayer({ reading }: UserLocationLayerProps) {
   const accuracyFeature = useMemo(() => {
     if (!reading) {
       return null;
@@ -58,49 +53,9 @@ function UserLocationLayerMapLibre({ reading }: UserLocationLayerProps) {
       >
         <div
           className="user-location-icon"
-          // Trusted SVG from userLocationIconHtml.
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </MapLibreMarker>
     </>
   );
-}
-
-function UserLocationLayerLeaflet({ reading }: UserLocationLayerProps) {
-  if (!reading) {
-    return null;
-  }
-
-  const position: [number, number] = [reading.lat, reading.lng];
-  const accuracy = reading.accuracy ?? 35;
-
-  return (
-    <>
-      <CompensatedCircle
-        center={position}
-        radius={accuracy}
-        pathOptions={{
-          color: ACCURACY_STROKE,
-          weight: 1,
-          fillColor: ACCURACY_FILL,
-          fillOpacity: 1,
-          className: "user-location-accuracy",
-        }}
-      />
-      <Marker
-        position={position}
-        icon={createUserLocationIcon(reading.heading)}
-        interactive={false}
-        zIndexOffset={1000}
-      />
-    </>
-  );
-}
-
-export function UserLocationLayer(props: UserLocationLayerProps) {
-  const engine = useMapEngine();
-  return matchMapEngine(engine, {
-    maplibre: () => <UserLocationLayerMapLibre {...props} />,
-    leaflet: () => <UserLocationLayerLeaflet {...props} />,
-  });
 }

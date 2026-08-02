@@ -1,5 +1,5 @@
 import { memo, useEffect, useState, type ReactNode } from "react";
-import type { LatLngBoundsExpression } from "leaflet";
+import type { MapBounds, MapBoundsExpression } from "../../../domain/map/mapBounds";
 import { MapView } from "../../map/chrome/MapView";
 import { FramingPreviewLayers } from "../../map/layers/FramingPreviewLayers";
 import { GameAreaMask } from "../../map/layers/GameAreaMask";
@@ -20,7 +20,7 @@ export const CREATE_SESSION_MAP_SHELL_CLASS =
 interface CreateSessionMapPaneProps {
   mapStyle: MapStyle;
   onMapStyleChange?: (style: MapStyle) => void;
-  focusBounds: LatLngBoundsExpression | null;
+  focusBounds: MapBoundsExpression | null;
   previewGameArea: GameArea | null;
   selectedGameSize: GameSize;
   manualFramingActive: boolean;
@@ -28,7 +28,7 @@ interface CreateSessionMapPaneProps {
   circleCenter: LatLngTuple | null;
   circleRadiusMeters: number | null;
   polygonVertices: readonly LatLngTuple[];
-  onBoundsChange: (bounds: import("leaflet").LatLngBounds) => void;
+  onBoundsChange: (bounds: MapBounds) => void;
   onUserViewportFramed: () => void;
   onMapClick?: (lat: number, lng: number) => void;
 }

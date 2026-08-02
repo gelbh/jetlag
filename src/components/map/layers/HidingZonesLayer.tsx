@@ -1,13 +1,25 @@
-import { CompensatedCircle } from "../helpers/CompensatedCircle";
-import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
+import turfCircle from "@turf/circle";
+import type { Feature, Polygon as GeoPolygon } from "geojson";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
+import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 
 interface HidingZonesLayerProps {
   zones: readonly HidingZoneRecord[];
   myUid?: string | null;
   memberUids?: readonly string[];
+}
+
+function polygonFeature(ring: LatLngTuple[]): Feature<GeoPolygon> {
+  const coordinates = [ring.map(([lat, lng]) => [lng, lat] as [number, number])];
+  coordinates[0]!.push(coordinates[0]![0]!);
+  return {
+    type: "Feature",
+    properties: {},
+    geometry: { type: "Polygon", coordinates },
+  };
 }
 
 function polygonPositions(geometryJson: string): LatLngTuple[] | null {
@@ -48,30 +60,27 @@ export function HidingZonesLayer({
         const fillColor = isOwn
           ? MAP_ANNOTATION_COLORS.hidingZoneOwn
           : MAP_ANNOTATION_COLORS.hidingZone;
+        const weight = isOwn ? 3 : 2;
+        const fillOpacity = zone.moveInProgress ? 0.08 : 0.18;
+        const dashArray = zone.moveInProgress ? "8 8" : undefined;
 
-        return ring ? (
-          <CompensatedPolygon
+        const data = ring
+          ? polygonFeature(ring)
+          : turfCircle([center[1], center[0]], zone.radiusMeters / 1000, {
+              steps: 64,
+              units: "kilometers",
+            });
+
+        return (
+          <MapLibreGeoJsonOverlay
             key={zone.hiderUid}
-            positions={ring}
-            pathOptions={{
+            id={`hiding-zone-${zone.hiderUid}`}
+            data={data}
+            fill={{ fillColor, fillOpacity }}
+            line={{
               color: fillColor,
-              weight: isOwn ? 3 : 2,
-              fillColor,
-              fillOpacity: zone.moveInProgress ? 0.08 : 0.18,
-              dashArray: zone.moveInProgress ? "8 8" : undefined,
-            }}
-          />
-        ) : (
-          <CompensatedCircle
-            key={zone.hiderUid}
-            center={center}
-            radius={zone.radiusMeters}
-            pathOptions={{
-              color: fillColor,
-              weight: isOwn ? 3 : 2,
-              fillColor,
-              fillOpacity: zone.moveInProgress ? 0.08 : 0.18,
-              dashArray: zone.moveInProgress ? "8 8" : undefined,
+              width: weight,
+              dashArray: cssPxDashToMapLibre(dashArray, weight),
             }}
           />
         );

@@ -11,7 +11,7 @@ import type {
   FramingMode,
   GameAreaFramingResult,
 } from "../../../hooks/session/useGameAreaFraming";
-import type { LatLngBoundsExpression } from "leaflet";
+import type { MapBounds, MapBoundsExpression } from "../../../domain/map/mapBounds";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../../domain/map/annotations";
 import {
@@ -25,14 +25,14 @@ import { SheetHeader } from "../../ui/sheets/SheetHeader";
 export interface GameAreaFramingController {
   framingMode: FramingMode;
   setFramingMode: (mode: FramingMode) => void;
-  focusBounds: LatLngBoundsExpression | null;
+  focusBounds: MapBoundsExpression | null;
   previewGameArea: GameArea | null;
   circleCenter: LatLngTuple | null;
   circleRadiusMeters: number | null;
   polygonVertices: readonly LatLngTuple[];
   hasValidDraft: boolean;
   userFramed: boolean;
-  handleBoundsChange: (bounds: import("leaflet").LatLngBounds) => void;
+  handleBoundsChange: (bounds: MapBounds) => void;
   handleUserViewportFramed: () => void;
   handleMapClick: (lat: number, lng: number) => void;
   closePolygon: () => boolean;
@@ -46,7 +46,7 @@ interface GameAreaFramingModalProps {
   framing: GameAreaFramingController;
   /** Place search or saved area shown until the user draws on the map. */
   referenceGameArea?: GameArea | null;
-  referenceFocusBounds?: LatLngBoundsExpression | null;
+  referenceFocusBounds?: MapBoundsExpression | null;
   onClose: () => void;
   onConfirm: (result: GameAreaFramingResult) => void;
 }

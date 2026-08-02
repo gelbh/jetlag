@@ -37,7 +37,8 @@ export {
   shouldReframeWithHysteresis,
 } from "./hysteresis";
 export { resolvePlacementPhase } from "./resolvePlacementPhase";
-export { toLeafletBounds } from "./leafletBounds";
+export { toMapBounds } from "../mapBounds";
+export { toLeafletBounds } from "./normalizeBounds";
 
 export type {
   CameraTarget,

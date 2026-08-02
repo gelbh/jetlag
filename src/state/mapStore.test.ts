@@ -55,20 +55,4 @@ describe("mapStore", () => {
     useMapStore.getState().setStreetBasemap("dark");
     expect(useMapStore.getState().streetBasemap).toBe("dark");
   });
-
-  it("defaults mapEngine to leaflet and accepts maplibre", () => {
-    expect(useMapStore.getState().mapEngine).toBe("leaflet");
-    useMapStore.getState().setMapEngine("maplibre");
-    expect(useMapStore.getState().mapEngine).toBe("maplibre");
-  });
-
-  it("omits mapEngine from persisted snapshot", () => {
-    useMapStore.getState().setMapEngine("maplibre");
-    const raw = localStorage.getItem("jetlag-map");
-    expect(raw).toBeTruthy();
-    const parsed = JSON.parse(raw!) as {
-      state?: { mapEngine?: string };
-    };
-    expect(parsed.state?.mapEngine).toBeUndefined();
-  });
 });

@@ -10,9 +10,6 @@ import type {
 import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
-import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
-import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import {
   buildGeometryEditModel,
   type GeometryEditModel,
@@ -20,13 +17,6 @@ import {
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
 import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
-import {
-  renderEditCircleWithMarker,
-  renderEditPointMarker,
-  renderGeoJsonPolygonGroups,
-} from "../helpers/renderHelpers";
-import { matchMapEngine } from "../chrome/matchMapEngine";
-import { useMapEngine } from "../chrome/mapEngineContext";
 
 interface GeometryEditLayerProps {
   annotation: AnnotationRecord;
@@ -220,153 +210,15 @@ function renderGeometryEditMapLibre(model: GeometryEditModel) {
   }
 }
 
-function renderGeometryEditLeaflet(model: GeometryEditModel) {
-  switch (model.kind) {
-    case "radar":
-      return renderEditCircleWithMarker({
-        center: model.center,
-        radiusMeters: model.radiusMeters,
-        markerFillColor: model.color,
-        circleOptions: {
-          color: model.color,
-          weight: 2,
-          dashArray: "6 6",
-          fillOpacity: 0.08,
-        },
-      });
-    case "tentacle":
-      if (model.outOfReach) {
-        return (
-          <>
-            {renderEditCircleWithMarker({
-              center: model.center,
-              radiusMeters: model.searchRadiusMeters,
-              markerFillColor: model.color,
-              circleOptions: {
-                color: model.color,
-                weight: 2,
-                fillOpacity: 0.05,
-              },
-            })}
-            {model.noRadarDisk
-              ? renderGeoJsonPolygonGroups({
-                  id: "tentacle-edit-no-radar",
-                  feature: model.noRadarDisk,
-                  pathOptions: {
-                    color: model.color,
-                    weight: 1,
-                    fillColor: model.color,
-                    fillOpacity: 0.35,
-                  },
-                })
-              : null}
-          </>
-        );
-      }
-      return (
-        <>
-          {renderEditCircleWithMarker({
-            center: model.center,
-            radiusMeters: model.searchRadiusMeters,
-            markerFillColor: model.color,
-            circleOptions: {
-              color: model.color,
-              weight: 2,
-              dashArray: "6 6",
-              fillOpacity: 0.05,
-            },
-          })}
-          {model.yesRadarOutside
-            ? renderGeoJsonPolygonGroups({
-                id: "tentacle-edit-yes-radar",
-                feature: model.yesRadarOutside,
-                pathOptions: {
-                  color: model.color,
-                  weight: 1,
-                  fillColor: model.color,
-                  fillOpacity: 0.35,
-                },
-              })
-            : null}
-        </>
-      );
-    case "pin":
-      return renderEditPointMarker({
-        center: [model.latitude, model.longitude],
-        fillColor: model.color,
-      });
-    case "thermometer":
-      return (
-        <>
-          <CompensatedPolyline
-            positions={[model.pointA, model.pointB]}
-            pathOptions={{
-              color: model.axisColor,
-              weight: 4,
-              dashArray: "6 6",
-            }}
-          />
-          {renderEditPointMarker({
-            center: model.pointA,
-            radius: 7,
-            fillColor: model.colorA,
-          })}
-          {renderEditPointMarker({
-            center: model.pointB,
-            radius: 7,
-            fillColor: model.colorB,
-          })}
-        </>
-      );
-    case "zone":
-      return (
-        <>
-          <CompensatedPolygon
-            positions={model.ringLatLng}
-            pathOptions={{
-              color: model.color,
-              weight: 2,
-              dashArray: "6 6",
-              fillOpacity: 0.12,
-            }}
-          />
-          {model.ringLatLng.slice(0, -1).map((vertex, index) => (
-            <CompensatedCircleMarker
-              key={`zone-edit-${index}`}
-              center={vertex}
-              radius={6}
-              pathOptions={{
-                color: model.color,
-                fillColor: model.color,
-                fillOpacity: 1,
-              }}
-            />
-          ))}
-        </>
-      );
-    case "empty":
-      return null;
-    default: {
-      const _exhaustive: never = model;
-      void _exhaustive;
-      return null;
-    }
-  }
-}
-
 export const GeometryEditLayer = memo(function GeometryEditLayer({
   annotation,
   draftGeometry,
   gameArea,
 }: GeometryEditLayerProps) {
-  const engine = useMapEngine();
   const model = useMemo(
     () => buildGeometryEditModel(annotation, draftGeometry, gameArea),
     [annotation, draftGeometry, gameArea],
   );
 
-  return matchMapEngine(engine, {
-    maplibre: () => renderGeometryEditMapLibre(model),
-    leaflet: () => renderGeometryEditLeaflet(model),
-  });
+  return renderGeometryEditMapLibre(model);
 });
