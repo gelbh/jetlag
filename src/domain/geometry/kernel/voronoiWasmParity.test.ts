@@ -59,4 +59,20 @@ describe("voronoiWasmParity", () => {
     expect(result.features).toHaveLength(3);
     expect(result.features[0]?.properties?.poiId).toBe("west");
   });
+
+  it("wasm path keeps near-duplicate coords that TS string keys treat as distinct", async () => {
+    const { wasmBuildSpatialVoronoiFromSites } = await import("./voronoiWasm");
+    const sites = [
+      { lng: -0.18, lat: 51.44, properties: { poiId: "a" } },
+      { lng: -0.18, lat: 51.44 + 4e-10, properties: { poiId: "near" } },
+      { lng: -0.12, lat: 51.45, properties: { poiId: "b" } },
+    ];
+    const result = await wasmBuildSpatialVoronoiFromSites(sites);
+    expect(result.features).toHaveLength(3);
+    expect(result.features.map((f) => f.properties?.poiId)).toEqual([
+      "a",
+      "near",
+      "b",
+    ]);
+  });
 });
