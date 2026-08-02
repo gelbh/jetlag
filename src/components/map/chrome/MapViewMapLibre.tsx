@@ -18,11 +18,13 @@ import { computeFramedCenterZoomMapLibre } from "../../../domain/map/computeFram
 import { focusBoundsToLngLatBounds } from "../../../domain/map/focusBoundsToLngLatBounds";
 import { isLargeCameraJumpMapLibre } from "../../../domain/map/isLargeCameraJumpMapLibre";
 import { shouldApplyMapFocus } from "../../../domain/map/mapFocusPolicy";
+import { resolveMapPitchDegrees } from "../../../domain/map/resolveMapPitchDegrees";
 import {
   MOTION_MAP_CAMERA_FLY_MS,
   MOTION_MAP_CAMERA_MS,
 } from "../../../domain/device/motion/motionTokens";
 import { useMotionProfile } from "../../../hooks/motion/useMotionProfile";
+import { useMapStore } from "../../../state/mapStore";
 import { useMapLibreMap } from "../helpers/useMapLibreMap";
 import { MapChromeListener } from "./MapChromeListener";
 import { MapEngineProvider } from "./mapEngineContext";
@@ -277,11 +279,26 @@ export function MapViewMapLibre({
     (showMapStyleToggle ?? Boolean(onMapStyleChange)) &&
     Boolean(onMapStyleChange);
   const styleControlInset = mapStyleControlInset ?? zoomControlInset;
+  const mapPitchEnabled = useMapStore((state) => state.mapPitchEnabled);
+  const { lowPowerMode } = useMotionProfile();
+  const maxPitchDegrees = resolveMapPitchDegrees(mapPitchEnabled, lowPowerMode);
+  const pitchGesturesEnabled = interactive && maxPitchDegrees > 0;
 
   useEffect(() => {
     onBoundsChangeRef.current = onBoundsChange;
     onUserViewportFramedRef.current = onUserViewportFramed;
   }, [onBoundsChange, onUserViewportFramed]);
+
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (!map) {
+      return;
+    }
+    map.setMaxPitch(maxPitchDegrees);
+    if (maxPitchDegrees === 0 && map.getPitch() !== 0) {
+      map.easeTo({ pitch: 0, duration: 0 });
+    }
+  }, [maxPitchDegrees]);
 
   const emitBounds = useCallback(() => {
     const map = mapRef.current?.getMap();
@@ -342,18 +359,23 @@ export function MapViewMapLibre({
           style={{ width: "100%", height: "100%" }}
           mapStyle={style}
           attributionControl={false}
+          maxPitch={maxPitchDegrees}
           dragPan={interactive}
           boxZoom={interactive}
           keyboard={interactive}
           scrollZoom={interactive}
           doubleClickZoom={interactive}
           dragRotate={false}
-          touchPitch={false}
+          touchPitch={pitchGesturesEnabled}
           touchZoomRotate={interactive}
-          pitchWithRotate={false}
+          pitchWithRotate={pitchGesturesEnabled}
           onLoad={() => {
             const map = mapRef.current?.getMap();
             map?.touchZoomRotate.disableRotation();
+            map?.setMaxPitch(maxPitchDegrees);
+            if (maxPitchDegrees === 0) {
+              map?.easeTo({ pitch: 0, duration: 0 });
+            }
             emitBounds();
           }}
           onMoveEnd={handleMoveEnd}

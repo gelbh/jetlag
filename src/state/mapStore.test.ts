@@ -38,6 +38,18 @@ describe("mapStore", () => {
     expect(useMapStore.getState().lowPowerMode).toBe(true);
   });
 
+  it("defaults mapPitchEnabled to false and persists when enabled", () => {
+    expect(useMapStore.getState().mapPitchEnabled).toBe(false);
+    useMapStore.getState().setMapPitchEnabled(true);
+    expect(useMapStore.getState().mapPitchEnabled).toBe(true);
+    const raw = localStorage.getItem("jetlag-map");
+    expect(raw).toBeTruthy();
+    const parsed = JSON.parse(raw!) as {
+      state?: { mapPitchEnabled?: boolean };
+    };
+    expect(parsed.state?.mapPitchEnabled).toBe(true);
+  });
+
   it("defaults streetBasemap to light and persists dark", () => {
     expect(useMapStore.getState().streetBasemap).toBe("light");
     useMapStore.getState().setStreetBasemap("dark");

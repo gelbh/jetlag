@@ -31,6 +31,8 @@ export const useMapStore = create<{
   showAdminBoundaries: boolean;
   keepScreenAwake: boolean;
   lowPowerMode: boolean;
+  /** MapLibre tilt gestures; default flat. Ignored on Leaflet path. */
+  mapPitchEnabled: boolean;
   notificationPreferences: NotificationPreferences;
   distanceUnit: DistanceUnit;
   mapStyle: MapStyle;
@@ -46,6 +48,7 @@ export const useMapStore = create<{
   setShowAdminBoundaries: (enabled: boolean) => void;
   setKeepScreenAwake: (enabled: boolean) => void;
   setLowPowerMode: (enabled: boolean) => void;
+  setMapPitchEnabled: (enabled: boolean) => void;
   setNotificationPreferences: (preferences: NotificationPreferences) => void;
   setDistanceUnit: (unit: DistanceUnit) => void;
   setMapStyle: (style: MapStyle) => void;
@@ -63,6 +66,7 @@ export const useMapStore = create<{
       showAdminBoundaries: false,
       keepScreenAwake: false,
       lowPowerMode: false,
+      mapPitchEnabled: false,
       notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
       distanceUnit: "imperial",
       mapStyle: "standard",
@@ -81,6 +85,7 @@ export const useMapStore = create<{
         set({ showAdminBoundaries }),
       setKeepScreenAwake: (keepScreenAwake) => set({ keepScreenAwake }),
       setLowPowerMode: (lowPowerMode) => set({ lowPowerMode }),
+      setMapPitchEnabled: (mapPitchEnabled) => set({ mapPitchEnabled }),
       setNotificationPreferences: (notificationPreferences) =>
         set({ notificationPreferences }),
       setDistanceUnit: (distanceUnit) => set({ distanceUnit }),
@@ -115,6 +120,7 @@ export const useMapStore = create<{
             persisted.mapEngine === "leaflet"
               ? persisted.mapEngine
               : "leaflet",
+          mapPitchEnabled: persisted.mapPitchEnabled === true,
           showCurrentLocation: true,
           showAdminBoundaries: persisted.showAdminBoundaries ?? false,
           layerVisibility: {
@@ -126,6 +132,7 @@ export const useMapStore = create<{
       partialize: (state) => ({
         keepScreenAwake: state.keepScreenAwake,
         lowPowerMode: state.lowPowerMode,
+        mapPitchEnabled: state.mapPitchEnabled,
         notificationPreferences: state.notificationPreferences,
         distanceUnit: state.distanceUnit,
         mapStyle: state.mapStyle,
