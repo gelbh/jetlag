@@ -165,7 +165,17 @@ describe("HiderToolDock", () => {
     expect(primaryLabels).not.toContain("Chat");
     expect(primaryLabels).not.toContain("Settings");
 
-    fireEvent.click(screen.getByRole("button", { name: "Report a problem" }));
+    const sessionTools = screen.getByLabelText("Session tools");
+    expect(
+      within(sessionTools).getByRole("button", { name: "Open chat" }),
+    ).toBeInTheDocument();
+    expect(
+      within(sessionTools).getByRole("button", { name: "Open settings" }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(
+      within(sessionTools).getByRole("button", { name: "Report a problem" }),
+    );
     expect(onOpenReportProblem).toHaveBeenCalledTimes(1);
   });
 });
