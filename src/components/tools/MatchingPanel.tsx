@@ -33,6 +33,7 @@ import {
   toolWizardSwipeNext,
 } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
 interface MatchingPanelProps {
   distanceUnit: DistanceUnit;
@@ -249,6 +250,9 @@ export function MatchingPanel({
     <>
       {phaseId === "configure" && stepId === "category" ? (
         <ToolSection first compact status="active">
+          {awaitHiderAnswer ? (
+            <QuestionTruthReferenceHint />
+          ) : null}
           {availableCategories.length === 0 ? (
             <CatalogExhaustedMessage message="Every match category has already been used on this map." />
           ) : (

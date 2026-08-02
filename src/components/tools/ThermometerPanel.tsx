@@ -26,6 +26,7 @@ import {
   toolWizardSwipeNext,
 } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
 type PlacementMode = "gps" | "manual";
 
@@ -244,6 +245,9 @@ export function ThermometerPanel({
 
       {phaseId === "configure" ? (
         <ToolSection first compact status="active">
+          {awaitHiderAnswer ? (
+            <QuestionTruthReferenceHint />
+          ) : null}
           <QuestionPromptBlock
             prompt={thermometerQuestionPrompt(distanceMeters, distanceUnit)}
           />

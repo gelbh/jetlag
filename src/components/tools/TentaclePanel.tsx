@@ -25,6 +25,7 @@ import {
   toolWizardSwipeNext,
 } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
 interface TentaclePanelProps {
   gameSize: GameSize;
@@ -159,6 +160,9 @@ export function TentaclePanel({
     <>
       {phaseId === "configure" && stepId === "category" ? (
         <ToolSection first compact status="active">
+          {awaitHiderAnswer ? (
+            <QuestionTruthReferenceHint />
+          ) : null}
           <QuestionPromptBlock
             prompt={prompt}
             ruleSummary={

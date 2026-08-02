@@ -37,6 +37,7 @@ import {
   toolWizardSwipeNext,
 } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
 interface MeasuringPanelProps {
   distanceUnit: DistanceUnit;
@@ -203,15 +204,20 @@ export function MeasuringPanel({
   const panelBody = (
     <>
         {phaseId === "configure" && stepId === "source" ? (
-          <MeasuringSourceStep
-            measureFrom={measureFrom}
-            optionChosen={optionChosen}
-            usedMeasuringFromKinds={usedMeasuringFromKinds}
-            catalogOptions={catalogOptions}
-            subject={subject}
-            locationCategory={locationCategory}
-            onMeasureFromChange={onMeasureFromChange}
-          />
+          <>
+            {awaitHiderAnswer ? (
+              <QuestionTruthReferenceHint />
+            ) : null}
+            <MeasuringSourceStep
+              measureFrom={measureFrom}
+              optionChosen={optionChosen}
+              usedMeasuringFromKinds={usedMeasuringFromKinds}
+              catalogOptions={catalogOptions}
+              subject={subject}
+              locationCategory={locationCategory}
+              onMeasureFromChange={onMeasureFromChange}
+            />
+          </>
         ) : null}
 
         {phaseId === "place" ? (
