@@ -41,6 +41,7 @@ import { reportJoinPermissionDenied } from "../core/analytics/sentry";
 import {
   buildSessionDocument,
   deserializeSessionFromFirestore,
+  parseEndGameTruthAnchors,
   sessionRulesPatchToFirestore,
 } from "./serialization/serializeSession";
 import { buildJoinPreviewSession } from "../../domain/session/join/joinPreviewSession";
@@ -65,6 +66,24 @@ const FIRESTORE_BATCH_LIMIT = 500;
 
 function sessionsCollection() {
   return collection(getFirestoreDb(), "sessions");
+}
+
+function endGameTruthAnchorsDoc(sessionId: string) {
+  return doc(getFirestoreDb(), "sessions", sessionId, "endGameTruth", "anchors");
+}
+
+async function clearEndGameTruthAnchorsDoc(sessionId: string): Promise<void> {
+  try {
+    await deleteDoc(endGameTruthAnchorsDoc(sessionId));
+  } catch (error) {
+    if (
+      error instanceof FirebaseError &&
+      (error.code === "not-found" || error.code === "firestore/not-found")
+    ) {
+      return;
+    }
+    throw error;
+  }
 }
 function sessionCodeDoc(code: string) {
   return doc(getFirestoreDb(), "sessionCodes", code);
@@ -937,13 +956,20 @@ export async function requestEndGameSession(
 export async function acceptEndGameSession(
   sessionId: string,
   acceptedByUid: string,
+  anchors: Record<string, { lat: number; lng: number; frozenAt: string }>,
+  endGameStartedAt: string,
 ): Promise<void> {
-  await updateDoc(doc(sessionsCollection(), sessionId), {
-    endGameStartedAt: new Date().toISOString(),
+  const batch = writeBatch(getFirestoreDb());
+  batch.update(doc(sessionsCollection(), sessionId), {
+    endGameStartedAt,
     endGameStartedByUid: acceptedByUid,
+    // Strip any legacy session-doc anchors (coords belong in endGameTruth/anchors).
+    endGameTruthAnchors: deleteField(),
     endGameRequestedAt: deleteField(),
     endGameRequestedByUid: deleteField(),
   });
+  batch.set(endGameTruthAnchorsDoc(sessionId), { anchors });
+  await batch.commit();
 }
 
 export async function startEndGameSession(
@@ -959,13 +985,26 @@ export async function touchSessionLastActive(sessionId: string): Promise<void> {
   });
 }
 
+/** Clear a pending end-game request only (hider decline / seeker cancel). */
+export async function clearEndGameRequestSession(
+  sessionId: string,
+): Promise<void> {
+  await updateDoc(doc(sessionsCollection(), sessionId), {
+    endGameRequestedAt: deleteField(),
+    endGameRequestedByUid: deleteField(),
+  });
+}
+
+/** Clear active or pending end game, including frozen truth anchors. */
 export async function resetEndGameSession(sessionId: string): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), {
     endGameStartedAt: deleteField(),
     endGameStartedByUid: deleteField(),
+    endGameTruthAnchors: deleteField(),
     endGameRequestedAt: deleteField(),
     endGameRequestedByUid: deleteField(),
   });
+  await clearEndGameTruthAnchorsDoc(sessionId);
 }
 
 export async function requestFoundHiderSession(
@@ -990,9 +1029,11 @@ export async function confirmFoundHiderSession(
     foundRequestedByUid: deleteField(),
     endGameStartedAt: deleteField(),
     endGameStartedByUid: deleteField(),
+    endGameTruthAnchors: deleteField(),
     endGameRequestedAt: deleteField(),
     endGameRequestedByUid: deleteField(),
   });
+  await clearEndGameTruthAnchorsDoc(sessionId);
   emitGameEndedActivity(
     sessionId,
     { outcome: "found", summary: "Hider found" },
@@ -1041,9 +1082,12 @@ export async function resetRemoteSession(
     timerRunningSince: deleteField(),
     endGameStartedAt: deleteField(),
     endGameStartedByUid: deleteField(),
+    endGameTruthAnchors: deleteField(),
     endGameRequestedAt: deleteField(),
     endGameRequestedByUid: deleteField(),
   });
+
+  await clearEndGameTruthAnchorsDoc(sessionId);
 
   await postGameSystemMessage(
     sessionId,
@@ -1074,6 +1118,28 @@ export function subscribeToSession(
           snapshot.data() as Record<string, unknown>,
         ),
       );
+    },
+    (error) => onError(error),
+  );
+}
+
+/** Hider/observer/admin-only freeze points (not on the seeker-readable session doc). */
+export function subscribeToEndGameTruthAnchors(
+  sessionId: string,
+  onChange: (
+    anchors: SessionRecord["endGameTruthAnchors"] | undefined,
+  ) => void,
+  onError: (error: Error) => void,
+): Unsubscribe {
+  return onSnapshot(
+    endGameTruthAnchorsDoc(sessionId),
+    (snapshot) => {
+      if (!snapshot.exists()) {
+        onChange(undefined);
+        return;
+      }
+
+      onChange(parseEndGameTruthAnchors(snapshot.data()?.anchors));
     },
     (error) => onError(error),
   );
