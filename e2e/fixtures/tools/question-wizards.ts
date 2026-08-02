@@ -73,6 +73,9 @@ export async function waitForMapPlacementCrosshair(page: Page) {
 }
 
 export async function waitForWizardNext(page: Page) {
+  // Place-phase sheet snap peeks the panel (body hidden), so Continue is not
+  // in the a11y tree until the peek chrome is expanded.
+  await expandToolPanelIfPeeked(page);
   await expect(page.getByRole("button", { name: "Continue" })).toBeEnabled({
     timeout: 60_000,
   });
