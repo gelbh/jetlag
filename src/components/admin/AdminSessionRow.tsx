@@ -1,7 +1,7 @@
 import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
 import { resolveAdminSessionAreaLabel } from "../../domain/admin/adminSessionAreaLabel";
 import { adminSessionPhaseLabel } from "../../domain/admin/sessionPhase";
-import { useFreshnessClock } from "../../hooks/admin/useFreshnessClock";
+import { useFreshnessClock } from "../../hooks/time/useFreshnessClock";
 import type { AdminSessionSummary } from "../../services/admin/adminSessions";
 
 interface AdminSessionRowProps {
