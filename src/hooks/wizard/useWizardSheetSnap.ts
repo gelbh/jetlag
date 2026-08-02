@@ -13,7 +13,9 @@ export function useWizardSheetSnap(activeTool: MapTool) {
   const [wizardStepId, setWizardStepId] = useState<string | null>(null);
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- reset step when the active tool changes */
     setWizardStepId(null);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [activeTool]);
 
   useEffect(() => {
