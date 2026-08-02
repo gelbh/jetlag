@@ -1,4 +1,5 @@
-import { Circle, Marker } from "react-leaflet";
+import { Marker } from "react-leaflet";
+import { CompensatedCircle } from "../helpers/CompensatedCircle";
 import type { GeolocationReading } from "../../../services/core/location/geolocation";
 import { createUserLocationIcon } from "../icons/mapIcons";
 
@@ -19,7 +20,7 @@ export function UserLocationLayer({ reading }: UserLocationLayerProps) {
 
   return (
     <>
-      <Circle
+      <CompensatedCircle
         center={position}
         radius={accuracy}
         pathOptions={{

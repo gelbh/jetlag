@@ -1,9 +1,9 @@
-import { Polygon } from "react-leaflet";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import {
   polygonToLeafletLatLngs,
   type LatLngTuple,
 } from "../../../domain/geometry/gameArea/geometry";
+import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
 
 export function renderMaskPolygon(
   polygon: Feature<GeoPolygon | MultiPolygon>,
@@ -30,7 +30,7 @@ export function renderMaskPolygon(
       );
 
       return (
-        <Polygon
+        <CompensatedPolygon
           key={`${key}-${index}`}
           positions={ringsLatLng}
           interactive={selectionEnabled}
@@ -56,7 +56,7 @@ export function renderMaskPolygon(
   }
 
   return (
-    <Polygon
+    <CompensatedPolygon
       key={key}
       positions={rings}
       interactive={selectionEnabled}

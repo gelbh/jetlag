@@ -27,7 +27,7 @@ export function MapViewportTracker({
 }: MapViewportTrackerProps) {
   const map = useMap();
   const panActiveRef = useRef(false);
-  const draggingRef = useRef(false);
+  const skipMoveEndScheduleRef = useRef(false);
   const onViewportChangeRef = useRef(onViewportChange);
   const publisherRef = useRef<ReturnType<typeof createThrottledPublisher> | null>(
     null,
@@ -68,24 +68,29 @@ export function MapViewportTracker({
 
   useMapEvents({
     dragstart: () => {
-      draggingRef.current = true;
       notifyPanStart();
     },
     dragend: () => {
-      draggingRef.current = false;
       notifyPanEnd();
       publisherRef.current?.flush();
+      skipMoveEndScheduleRef.current = true;
     },
     move: () => {
-      if (draggingRef.current) {
-        publisherRef.current?.schedule();
-      }
+      publisherRef.current?.schedule();
+    },
+    zoom: () => {
+      publisherRef.current?.schedule();
     },
     moveend: () => {
       notifyPanEnd();
+      if (skipMoveEndScheduleRef.current) {
+        skipMoveEndScheduleRef.current = false;
+        return;
+      }
       publisherRef.current?.schedule();
     },
     zoomend: () => {
+      skipMoveEndScheduleRef.current = true;
       publisherRef.current?.flush();
     },
   });

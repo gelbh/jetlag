@@ -1,5 +1,8 @@
 import { memo } from "react";
-import { Circle, CircleMarker, Polyline, Popup } from "react-leaflet";
+import { Popup } from "react-leaflet";
+import { CompensatedCircle } from "../helpers/CompensatedCircle";
+import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
+import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import type { MapDraftOverlay } from "../../../domain/map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { renderGeoJsonPolygonGroups } from "../helpers/renderHelpers";
@@ -19,7 +22,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
         switch (overlay.kind) {
           case "marker":
             return (
-              <CircleMarker
+              <CompensatedCircleMarker
                 key={overlay.id}
                 center={overlay.point}
                 radius={overlay.style?.markerRadius ?? 8}
@@ -35,11 +38,11 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                 }}
               >
                 {overlay.popup ? <Popup>{overlay.popup}</Popup> : null}
-              </CircleMarker>
+              </CompensatedCircleMarker>
             );
           case "circle":
             return (
-              <Circle
+              <CompensatedCircle
                 key={overlay.id}
                 center={overlay.center}
                 radius={overlay.radiusMeters}
@@ -67,7 +70,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
             });
           case "polyline":
             return (
-              <Polyline
+              <CompensatedPolyline
                 key={overlay.id}
                 positions={overlay.positions}
                 pathOptions={{

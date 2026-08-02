@@ -5,6 +5,8 @@ import { MAP_ANNOTATION_COLORS } from "./mapAnnotationColors";
 
 export type EliminationOverlayLayer = PathOptions & {
   className?: string;
+  /** Leaflet polyline/polygon option — omit clip against renderer bounds. */
+  noClip?: boolean;
 };
 
 function highContrastSurface(surface: BasemapSurface): boolean {

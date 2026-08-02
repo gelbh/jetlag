@@ -1,4 +1,6 @@
-import { Circle, CircleMarker, Polyline } from "react-leaflet";
+import { CompensatedCircle } from "../helpers/CompensatedCircle";
+import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
+import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import { GameAreaMask } from "./GameAreaMask";
 import type { GameArea } from "../../../domain/map/annotations";
 import type { FramingMode } from "../../../hooks/session/useGameAreaFraming";
@@ -31,9 +33,9 @@ export function FramingPreviewLayers({
   circleRadiusMeters,
   polygonVertices,
 }: FramingPreviewLayersProps) {
-  const strokeWeight = useZoomAdaptiveWeight(PREVIEW_STROKE_BASE);
-  const markerWeight = useZoomAdaptiveWeight(PREVIEW_MARKER_WEIGHT_BASE);
-  const radiusScale = strokeWeight / PREVIEW_STROKE_BASE;
+  const logicalStroke = useZoomAdaptiveWeight(PREVIEW_STROKE_BASE);
+  const logicalMarkerWeight = useZoomAdaptiveWeight(PREVIEW_MARKER_WEIGHT_BASE);
+  const radiusScale = logicalStroke / PREVIEW_STROKE_BASE;
 
   return (
     <>
@@ -41,27 +43,27 @@ export function FramingPreviewLayers({
 
       {framingMode === "circle" && circleCenter && circleRadiusMeters ? (
         <>
-          <Circle
+          <CompensatedCircle
             center={circleCenter}
             radius={circleRadiusMeters}
             pathOptions={{
               color: MAP_ANNOTATION_COLORS.playArea,
-              weight: strokeWeight,
+              weight: logicalStroke,
               dashArray: scaleDashArray(
                 CIRCLE_DASH,
-                strokeWeight,
+                logicalStroke,
                 PREVIEW_STROKE_BASE,
               ),
               fillColor: MAP_ANNOTATION_COLORS.playArea,
               fillOpacity: 0.08,
             }}
           />
-          <CircleMarker
+          <CompensatedCircleMarker
             center={circleCenter}
             radius={CENTER_MARKER_RADIUS * radiusScale}
             pathOptions={{
               color: MAP_ANNOTATION_COLORS.strokeLight,
-              weight: markerWeight,
+              weight: logicalMarkerWeight,
               fillColor: MAP_ANNOTATION_COLORS.playArea,
               fillOpacity: 1,
             }}
@@ -71,26 +73,26 @@ export function FramingPreviewLayers({
 
       {framingMode === "polygon" && polygonVertices.length > 0 ? (
         <>
-          <Polyline
+          <CompensatedPolyline
             positions={[...polygonVertices]}
             pathOptions={{
               color: MAP_ANNOTATION_COLORS.playArea,
-              weight: strokeWeight,
+              weight: logicalStroke,
               dashArray: scaleDashArray(
                 POLYGON_DASH,
-                strokeWeight,
+                logicalStroke,
                 PREVIEW_STROKE_BASE,
               ),
             }}
           />
           {polygonVertices.map(([lat, lng], index) => (
-            <CircleMarker
+            <CompensatedCircleMarker
               key={`framing-vertex-${index}`}
               center={[lat, lng]}
               radius={VERTEX_MARKER_RADIUS * radiusScale}
               pathOptions={{
                 color: MAP_ANNOTATION_COLORS.strokeLight,
-                weight: markerWeight,
+                weight: logicalMarkerWeight,
                 fillColor: MAP_ANNOTATION_COLORS.playArea,
                 fillOpacity: 1,
               }}

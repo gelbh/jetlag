@@ -1,5 +1,5 @@
 import { memo, useMemo } from "react";
-import { Polygon, Polyline, CircleMarker } from "react-leaflet";
+import { Polygon } from "react-leaflet";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
 import type {
@@ -17,6 +17,8 @@ import {
   type LatLngTuple,
 } from "../../../domain/geometry/gameArea/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
+import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import {
   renderEditCircleWithMarker,
   renderEditPointMarker,
@@ -182,7 +184,7 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
 
     return (
       <>
-        <Polyline
+        <CompensatedPolyline
           positions={[pointA, pointB]}
           pathOptions={{ color: MAP_ANNOTATION_COLORS.thermometerAxis, weight: 4, dashArray: "6 6" }}
         />
@@ -218,7 +220,7 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
           }}
         />
         {ring.slice(0, -1).map((vertex, index) => (
-          <CircleMarker
+          <CompensatedCircleMarker
             key={`zone-edit-${index}`}
             center={vertex}
             radius={6}

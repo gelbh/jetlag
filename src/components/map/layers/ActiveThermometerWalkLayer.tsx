@@ -1,4 +1,4 @@
-import { CircleMarker, Marker, Polyline } from "react-leaflet";
+import { Marker } from "react-leaflet";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import {
@@ -6,6 +6,8 @@ import {
   type DistanceUnit,
 } from "../../../domain/map/distance";
 import { distanceBetweenPoints } from "../../../domain/geometry/gameArea/geometry";
+import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
+import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import {
   createThermometerWalkEndLabelIcon,
   createThermometerWalkProgressIcon,
@@ -51,7 +53,7 @@ export function ActiveThermometerWalkLayer({
 
   return (
     <>
-      <Polyline
+      <CompensatedPolyline
         positions={[start, livePoint]}
         pathOptions={{
           color: axisColor,
@@ -61,7 +63,7 @@ export function ActiveThermometerWalkLayer({
           lineCap: "round",
         }}
       />
-      <Polyline
+      <CompensatedPolyline
         positions={[start, livePoint]}
         pathOptions={{
           color: liveColor,
@@ -70,7 +72,7 @@ export function ActiveThermometerWalkLayer({
           lineCap: "round",
         }}
       />
-      <CircleMarker
+      <CompensatedCircleMarker
         center={start}
         radius={7}
         pathOptions={{
@@ -85,7 +87,7 @@ export function ActiveThermometerWalkLayer({
         icon={createThermometerWalkEndLabelIcon("Start", mapStyle)}
         zIndexOffset={400}
       />
-      <CircleMarker
+      <CompensatedCircleMarker
         center={livePoint}
         radius={9}
         pathOptions={{

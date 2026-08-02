@@ -1,4 +1,4 @@
-import { CircleMarker, Polyline, Popup } from "react-leaflet";
+import { Popup } from "react-leaflet";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
 import { pointToolRadiusFromMetadata } from "../../../domain/map/annotations";
@@ -6,6 +6,8 @@ import { polygonFeatureToLeafletRings } from "../../../domain/geometry/gameArea/
 import type { LayerVisibility } from "../../../state/sessionStore";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { renderPointRadiusAnnotation } from "../helpers/renderHelpers";
+import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
+import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 
 interface RenderAnnotationLayerItemParams {
   annotation: AnnotationRecord;
@@ -111,7 +113,7 @@ export function renderAnnotationLayerItem({
   ) {
     const zonePolygon = annotation.geometry as Feature<GeoPolygon>;
     return polygonFeatureToLeafletRings(zonePolygon).map((ring, index) => (
-      <Polyline
+      <CompensatedPolyline
         key={`${annotation.id}-outline-${index}`}
         positions={ring}
         interactive={selectionEnabled}
@@ -140,7 +142,7 @@ export function renderAnnotationLayerItem({
   ) {
     const [lng, lat] = annotation.geometry.geometry.coordinates;
     return (
-      <CircleMarker
+      <CompensatedCircleMarker
         key={annotation.id}
         center={[lat, lng]}
         radius={8}
@@ -163,7 +165,7 @@ export function renderAnnotationLayerItem({
         }
       >
         <Popup>{annotation.metadata.label ?? "Note"}</Popup>
-      </CircleMarker>
+      </CompensatedCircleMarker>
     );
   }
 
