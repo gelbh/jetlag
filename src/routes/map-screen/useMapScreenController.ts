@@ -299,7 +299,13 @@ export function useMapScreenController() {
     setPanelMinimized: setUserMinimized,
     handleMapPanStart,
     handleMapPanEnd,
-  } = useToolPanelChrome(activeTool);
+  } = useToolPanelChrome(activeTool, {
+    // Thermometer needs an expanded wizard step before map taps; peeking on Manual pins blocks Next.
+    autoPeek:
+      tools.placementCrosshair &&
+      canSubmitQuestion &&
+      activeTool !== "thermometer",
+  });
   const isDesktopLayout = useDesktopLayout();
   const mapChromeControlInset: MapChromeControlInset =
     panelMinimized || mapPanning

@@ -1,6 +1,5 @@
 import { type Page, expect } from "@playwright/test";
 import { dismissMapOnboarding } from "../page-init";
-import { clickOverflowToolButton } from "./navigation";
 import { dismissActiveToolPanel } from "./question-wizards";
 
 export async function openChat(page: Page) {
@@ -17,13 +16,21 @@ export async function openChat(page: Page) {
     return;
   }
 
+  const unreadChat = page.getByRole("button", {
+    name: "Open chat, unread messages",
+  });
+  if (await unreadChat.isVisible().catch(() => false)) {
+    await unreadChat.click();
+    return;
+  }
+
   const chatTab = page.getByRole("button", { name: "Chat", exact: true });
   if (await chatTab.isVisible().catch(() => false)) {
     await chatTab.click();
     return;
   }
 
-  await clickOverflowToolButton(page, "Open chat");
+  throw new Error("Chat control not found on map chrome");
 }
 
 export async function answerInChat(page: Page, label: string) {

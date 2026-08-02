@@ -1,11 +1,6 @@
-import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
-import {
-  HudChatIcon,
-  HudPlusIcon,
-  HudRefreshIcon,
-  HudSettingsIcon,
-} from "../ui/brand/HudIcons";
+import { HudPlusIcon, HudRefreshIcon } from "../ui/brand/HudIcons";
 import { HudPinIcon } from "../map/icons/ToolIcons";
+import { ToolDockSecondaryBar } from "./ToolDockSecondaryBar";
 
 import type { ToolDockLayout } from "./ToolDock";
 
@@ -18,6 +13,7 @@ interface HiderToolDockProps {
   onRecenter: () => void;
   onOpenChat: () => void;
   onOpenSettings: () => void;
+  onOpenReportProblem: () => void;
   hasUnreadChat?: boolean;
   unreadCount?: number;
   /** Bottom dock (default) or vertical left rail inside DesktopOpsShell. */
@@ -34,6 +30,7 @@ export function HiderToolDock({
   onRecenter,
   onOpenChat,
   onOpenSettings,
+  onOpenReportProblem,
   hasUnreadChat = false,
   unreadCount = 0,
   layout = "dock",
@@ -84,32 +81,16 @@ export function HiderToolDock({
           </span>
           <span className="jl-tool-slot-label">Recenter</span>
         </button>
-
-        <button
-          type="button"
-          onClick={onOpenChat}
-          className="jl-tool-slot"
-          aria-label={hasUnreadChat ? "Open chat, unread messages" : "Open chat"}
-        >
-          <span className="jl-tool-slot-icon jl-unread-badge-host">
-            <HudChatIcon className="h-5 w-5 shrink-0" />
-            {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
-          </span>
-          <span className="jl-tool-slot-label">Chat</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={onOpenSettings}
-          className="jl-tool-slot"
-          aria-label="Open settings"
-        >
-          <span className="jl-tool-slot-icon">
-            <HudSettingsIcon className="h-5 w-5 shrink-0" />
-          </span>
-          <span className="jl-tool-slot-label">Settings</span>
-        </button>
       </div>
+
+      <ToolDockSecondaryBar
+        onOpenChat={onOpenChat}
+        onOpenReportProblem={onOpenReportProblem}
+        onOpenSettings={onOpenSettings}
+        hasUnreadChat={hasUnreadChat}
+        unreadCount={unreadCount}
+        inactive={inactive}
+      />
     </div>
   );
 }

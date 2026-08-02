@@ -18,6 +18,7 @@ import {
   ToolDockDrawMenu,
   ToolDockOverflowMenu,
 } from "./ToolDockOverflowMenu";
+import { ToolDockSecondaryBar } from "./ToolDockSecondaryBar";
 import {
   useToolDockHighlight,
   useToolDockMenus,
@@ -36,6 +37,7 @@ interface ToolDockProps {
   onUndo: () => void;
   onRedo: () => void;
   onOpenSettings: () => void;
+  onOpenReportProblem: () => void;
   onOpenChat?: () => void;
   hasUnreadChat?: boolean;
   unreadCount?: number;
@@ -62,6 +64,7 @@ export function ToolDock({
   onUndo,
   onRedo,
   onOpenSettings,
+  onOpenReportProblem,
   onOpenChat,
   hasUnreadChat = false,
   unreadCount = 0,
@@ -120,12 +123,6 @@ export function ToolDock({
           : undefined
       }
     >
-      <ToolDockDrawMenu
-        open={drawMenuVisible}
-        activeTool={activeTool}
-        onSelect={selectTool}
-      />
-
       <ToolDockOverflowMenu
         moreMenuOpen={moreMenuOpen}
         dismissOverflowMenus={dismissOverflowMenus}
@@ -136,10 +133,6 @@ export function ToolDock({
         canRedo={canRedo}
         onUndo={onUndo}
         onRedo={onRedo}
-        onOpenSettings={onOpenSettings}
-        onOpenChat={onOpenChat}
-        hasUnreadChat={hasUnreadChat}
-        unreadCount={unreadCount}
         canStartEndGame={canStartEndGame}
         onStartEndGame={onStartEndGame}
         canRequestFoundHider={canRequestFoundHider}
@@ -196,17 +189,11 @@ export function ToolDock({
             setMoreMenuOpen(false);
             setDrawMenuOpen((open) => !open);
           }}
-          onOpenChat={onOpenChat}
-          hasUnreadChat={hasUnreadChat}
-          unreadCount={unreadCount}
-          onOpenSettings={onOpenSettings}
         />
 
         <ToolDockCompactMoreButton
           moreMenuActive={moreMenuActive}
           moreMenuOpen={moreMenuOpen}
-          hasUnreadChat={hasUnreadChat}
-          unreadCount={unreadCount}
           onToggleMoreMenu={() => {
             setDrawMenuOpen(false);
             const opening = !moreMenuOpen;
@@ -217,6 +204,21 @@ export function ToolDock({
           }}
         />
       </div>
+
+      <ToolDockSecondaryBar
+        onOpenChat={onOpenChat}
+        onOpenReportProblem={onOpenReportProblem}
+        onOpenSettings={onOpenSettings}
+        hasUnreadChat={hasUnreadChat}
+        unreadCount={unreadCount}
+        inactive={inactive}
+      />
+
+      <ToolDockDrawMenu
+        open={drawMenuVisible}
+        activeTool={activeTool}
+        onSelect={selectTool}
+      />
     </div>
   );
 }

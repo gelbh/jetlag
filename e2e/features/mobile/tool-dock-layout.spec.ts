@@ -32,7 +32,34 @@ test.describe("mobile tool dock", () => {
     ).toBeVisible();
     await expect(sheet.getByRole("button", { name: "Redo last annotation" })).toBeVisible();
     await expect(sheet.getByText("Draw a play boundary")).toBeVisible();
-    await expect(sheet.getByRole("button", { name: "Open settings" })).toBeVisible();
+    await expect(
+      sheet.getByRole("button", { name: "Open settings" }),
+    ).toHaveCount(0);
+    await expect(
+      sheet.getByRole("button", { name: "Open chat" }),
+    ).toHaveCount(0);
+
+    await page.keyboard.press("Escape");
+    await expect(sheet).toBeHidden();
+
+    const sessionTools = page.getByLabel("Session tools");
+    await expect(sessionTools).toBeVisible();
+    await expect(
+      sessionTools.getByRole("button", { name: "Open settings" }),
+    ).toBeVisible();
+    await expect(
+      sessionTools.getByRole("button", { name: /^Open chat/ }),
+    ).toBeVisible();
+    await expect(
+      sessionTools.getByRole("button", { name: "Report a problem" }),
+    ).toBeVisible();
+    await sessionTools.getByRole("button", { name: "Report a problem" }).click();
+    await expect(
+      page.getByRole("dialog", { name: "Report problem" }),
+    ).toBeVisible();
+
+    const barCount = await page.locator(".jl-tool-dock-bar").count();
+    expect(barCount).toBe(2);
   });
 
   test("dock fits without clipping question tools", async ({ page }) => {
@@ -102,8 +129,8 @@ test.describe("iPhone 14 Pro Max tool dock", () => {
     await openMapWithLocalSession(page);
   });
 
-  test("renders a single dock bar without a stacked duplicate", async ({ page }) => {
-    await expect(page.locator(".jl-tool-dock-bar")).toHaveCount(1);
+  test("renders primary and secondary dock bars without a duplicate stack", async ({ page }) => {
+    await expect(page.locator(".jl-tool-dock-bar")).toHaveCount(2);
 
     const metrics = await page.evaluate(() => {
       const bars = [...document.querySelectorAll(".jl-tool-dock-bar")];
@@ -118,7 +145,7 @@ test.describe("iPhone 14 Pro Max tool dock", () => {
       };
     });
 
-    expect(metrics.barCount).toBe(1);
+    expect(metrics.barCount).toBe(2);
     expect(metrics.barBottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
     expect(metrics.dockBottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
   });
@@ -184,7 +211,7 @@ test.describe("iPhone 13 PWA safe area", () => {
     });
 
     expect(metrics.backdropOnMap).toBeNull();
-    expect(metrics.barCount).toBe(1);
+    expect(metrics.barCount).toBe(2);
     // Wrapper chassis: flush to physical bottom, pad absorbs safe-area.
     expect(metrics.dockBottomOffset).toBeLessThanOrEqual(1);
     expect(metrics.gapBelowDock).toBeLessThanOrEqual(2);
@@ -306,14 +333,15 @@ test.describe("landscape map-dominant chrome", () => {
   test("collapses the dock by default and reveals it from the chip", async ({
     page,
   }) => {
-    const dockBar = page.locator(".jl-tool-dock-bar");
-    await expect(dockBar).toBeHidden();
+    const dock = page.locator(".jl-tool-dock");
+    await expect(dock).toBeHidden();
 
     const chip = page.getByRole("button", { name: /Show map controls/i });
     await expect(chip).toBeVisible();
     await chip.click();
 
-    await expect(dockBar).toBeVisible();
+    await expect(dock).toBeVisible();
+    await expect(page.locator(".jl-tool-dock-bar")).toHaveCount(2);
     await expect(
       page.getByRole("button", { name: "Hide map controls" }),
     ).toBeVisible();

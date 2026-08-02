@@ -7,6 +7,17 @@ import {
   expectMapHasAnnotations,
 } from "../map";
 
+/** Expand a peeked tool panel so wizard chrome is interactable. */
+export async function expandToolPanelIfPeeked(page: Page) {
+  const expand = page.getByRole("button", { name: /Expand .+ panel/i });
+  const peeked = await expand.isVisible({ timeout: 2_000 }).catch(() => false);
+  if (!peeked) {
+    return;
+  }
+  await expand.click();
+  await expect(expand).toBeHidden({ timeout: 5_000 });
+}
+
 /** Reads "N of M" from the wizard stepper; throws while no counter is rendered. */
 export async function currentWizardStep(page: Page): Promise<number> {
   const stepper = page.getByRole("list", { name: "Progress" }).first();
@@ -20,6 +31,7 @@ export async function currentWizardStep(page: Page): Promise<number> {
 
 /** Clicks Next and verifies the click registered by watching the step counter. */
 export async function advanceWizard(page: Page) {
+  await expandToolPanelIfPeeked(page);
   const before = await currentWizardStep(page);
   const next = page.getByRole("button", { name: "Next" });
   await expect(next).toBeEnabled({ timeout: 15_000 });

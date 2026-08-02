@@ -60,7 +60,7 @@ export function useZoneTool({
     finishPlacement();
   }, [createAnnotation, finishPlacement, resetDraft, zoneLabel, zoneVertices]);
 
-  const placementCrosshair = active;
+  const placementCrosshair = active && zoneVertices.length === 0;
 
   const panel = (
     <ZonePanel
