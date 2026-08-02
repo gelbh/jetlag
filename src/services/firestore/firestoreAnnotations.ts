@@ -33,6 +33,7 @@ export {
   acceptEndGameSession,
   startEndGameSession,
   touchSessionLastActive,
+  clearEndGameRequestSession,
   resetEndGameSession,
   requestFoundHiderSession,
   confirmFoundHiderSession,

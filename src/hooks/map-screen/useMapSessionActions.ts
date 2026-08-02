@@ -18,6 +18,7 @@ import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import {
+  clearEndGameRequestSession,
   confirmFoundHiderSession,
   requestEndGameSession,
   requestFoundHiderSession,
@@ -228,7 +229,11 @@ export function useMapSessionActions({
       },
       uid,
     );
-    await resetEndGameSession(session.id);
+    if (isEndGamePending(session) && !isEndGameActive(session)) {
+      await clearEndGameRequestSession(session.id);
+    } else {
+      await resetEndGameSession(session.id);
+    }
   }, [session, setSession, uid]);
 
   const handleSaveGameRules = useCallback(async () => {

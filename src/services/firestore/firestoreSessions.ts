@@ -962,6 +962,17 @@ export async function touchSessionLastActive(sessionId: string): Promise<void> {
   });
 }
 
+/** Clear a pending end-game request only (hider decline / seeker cancel). */
+export async function clearEndGameRequestSession(
+  sessionId: string,
+): Promise<void> {
+  await updateDoc(doc(sessionsCollection(), sessionId), {
+    endGameRequestedAt: deleteField(),
+    endGameRequestedByUid: deleteField(),
+  });
+}
+
+/** Clear active or pending end game, including frozen truth anchors. */
 export async function resetEndGameSession(sessionId: string): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), {
     endGameStartedAt: deleteField(),

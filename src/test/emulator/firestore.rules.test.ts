@@ -1194,7 +1194,7 @@ describe("firestore.rules", () => {
     );
   });
 
-  it("denies end-game accept missing a hider anchor", async () => {
+  it("denies end-game accept when accepter has no self anchor", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
       .firestore()
@@ -1219,7 +1219,7 @@ describe("firestore.rules", () => {
         endGameStartedAt: "2026-01-01T00:01:00.000Z",
         endGameStartedByUid: "hider-1",
         endGameTruthAnchors: {
-          "hider-1": {
+          "hider-2": {
             lat: 53.35,
             lng: -6.26,
             frozenAt: "2026-01-01T00:01:00.000Z",
@@ -1231,7 +1231,7 @@ describe("firestore.rules", () => {
     );
   });
 
-  it("denies end-game accept with a non-hider anchor key", async () => {
+  it("allows a hider to decline a pending end-game request", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
       .firestore()
@@ -1247,7 +1247,33 @@ describe("firestore.rules", () => {
       });
 
     const hider = testEnv.authenticatedContext("hider-1");
-    await assertFails(
+    await assertSucceeds(
+      hider.firestore().collection("sessions").doc("session-1").update({
+        endGameRequestedAt: deleteField(),
+        endGameRequestedByUid: deleteField(),
+      }),
+    );
+  });
+
+  it("allows end-game accept when anchors include another member uid", async () => {
+    // Rules only fully validate the accepter's own anchor (expression budget);
+    // keys must still be session members. Client requires every hider.
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+          endGameRequestedAt: "2026-01-01T00:00:00.000Z",
+          endGameRequestedByUid: "host-1",
+        }),
+      });
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await assertSucceeds(
       hider.firestore().collection("sessions").doc("session-1").update({
         endGameStartedAt: "2026-01-01T00:01:00.000Z",
         endGameStartedByUid: "hider-1",

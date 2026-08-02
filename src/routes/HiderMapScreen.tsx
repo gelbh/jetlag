@@ -69,6 +69,7 @@ import { useSessionDistanceUnit } from "../hooks/session/useSessionDistanceUnit"
 import { isEndGameActive, isEndGamePending, isFoundHiderPending, LOCAL_SESSION_ID } from "../domain/map/annotations";
 import {
   acceptEndGameSession,
+  clearEndGameRequestSession,
   confirmFoundHiderSession,
   resetEndGameSession,
   resetFoundHiderSession,
@@ -434,7 +435,11 @@ export function HiderMapScreen() {
       return;
     }
 
-    await resetEndGameSession(session.id);
+    if (isEndGamePending(session) && !isEndGameActive(session)) {
+      await clearEndGameRequestSession(session.id);
+    } else {
+      await resetEndGameSession(session.id);
+    }
     setSession(
       {
         ...session,
