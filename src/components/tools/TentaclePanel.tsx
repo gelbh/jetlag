@@ -19,7 +19,7 @@ import { ToolSection } from "./shared/panels/ToolSection";
 import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
-import { TENTACLE_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
+import { TENTACLE_WIZARD } from "./shared/wizard/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 
@@ -77,11 +77,20 @@ export function TentaclePanel({
   onRetry,
   wizardStepRef,
 }: TentaclePanelProps) {
-  const steps = stepsForMode(TENTACLE_STEPS, awaitHiderAnswer);
-  const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
-    steps,
-    { wizardStepRef },
-  );
+  const {
+    phaseId,
+    stepId,
+    phaseIndex,
+    configureIndex,
+    goNext,
+    goBack,
+    Stepper,
+  } = useToolWizard(TENTACLE_WIZARD, {
+    wizardStepRef,
+    awaitHiderAnswer,
+    toolCommitLabel: "Add tentacle question",
+    isSubmitting,
+  });
 
   const prompt =
     categoryId !== null
@@ -106,13 +115,18 @@ export function TentaclePanel({
   const availableCategories = tentacleCategoriesForGameSize(gameSize);
 
   const canGoNext =
-    (step === "anchor" && hasCenter && !loading) ||
-    (step === "category" && categorySelectionAvailable) ||
-    (step === "locations" && locationsReady && !loading);
-  const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
+    (phaseId === "place" && hasCenter && !loading) ||
+    (phaseId === "configure" &&
+      stepId === "category" &&
+      categorySelectionAvailable) ||
+    (phaseId === "configure" &&
+      stepId === "locations" &&
+      locationsReady &&
+      !loading);
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
 
   const tentacleAnswerStepActions =
-    step === "answer" && categoryId ? (
+    phaseId === "ask" && !awaitHiderAnswer && categoryId ? (
       <button
         type="button"
         onClick={onCommit}
@@ -123,8 +137,8 @@ export function TentaclePanel({
       </button>
     ) : null;
 
-  const tentacleLocationsSendActions =
-    step === "locations" &&
+  const tentacleSendActions =
+    phaseId === "ask" &&
     awaitHiderAnswer &&
     locationsReady &&
     !loading &&
@@ -140,7 +154,7 @@ export function TentaclePanel({
 
   const panelBody = (
     <>
-      {step === "category" ? (
+      {phaseId === "configure" && stepId === "category" ? (
         <ToolSection first compact status="active">
           <QuestionPromptBlock
             prompt={prompt}
@@ -174,7 +188,7 @@ export function TentaclePanel({
         </ToolSection>
       ) : null}
 
-      {step === "anchor" ? (
+      {phaseId === "place" ? (
         <ToolSection first compact status="active">
           <AnchorControls
             awaitingPlacement={awaitingPlacement}
@@ -193,7 +207,7 @@ export function TentaclePanel({
         </ToolSection>
       ) : null}
 
-      {step === "locations" ? (
+      {phaseId === "configure" && stepId === "locations" ? (
         <ToolSection first compact status="active">
           {loading ? (
             <LoadingReadout>
@@ -212,7 +226,7 @@ export function TentaclePanel({
         </ToolSection>
       ) : null}
 
-      {step === "answer" && categoryId ? (
+      {phaseId === "ask" && !awaitHiderAnswer && categoryId ? (
         <TentacleAnswerPicker
           categoryId={categoryId}
           distanceUnit={distanceUnit}
@@ -228,11 +242,7 @@ export function TentaclePanel({
   );
 
   const stickyFooterActions =
-    step === "answer"
-      ? tentacleAnswerStepActions
-      : step === "locations"
-        ? tentacleLocationsSendActions
-        : null;
+    tentacleAnswerStepActions ?? tentacleSendActions;
 
   const answerFooter = stickyFooterActions ? (
     <ToolSection first compact status="active">
@@ -247,11 +257,12 @@ export function TentaclePanel({
       stepper={
         <Stepper
           nav={{
-            stepIndex,
-            stepCount: steps.length,
+            canGoBack:
+              phaseIndex > 0 ||
+              (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             onNext: goNext,
-            canGoNext,
+            canGoNext: phaseId !== "ask" ? canGoNext : undefined,
           }}
         />
       }
@@ -264,9 +275,9 @@ export function TentaclePanel({
         }
       >
         <WizardSwipeSurface
-          stepId={step}
-          stepIndex={stepIndex}
-          canGoBack={stepIndex > 0}
+          stepId={stepId}
+          stepIndex={phaseIndex}
+          canGoBack={phaseIndex > 0}
           canGoNext={canSwipeNext}
           onBack={goBack}
           onNext={goNext}

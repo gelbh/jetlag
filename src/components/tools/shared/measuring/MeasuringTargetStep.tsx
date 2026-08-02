@@ -293,7 +293,7 @@ export function MeasuringAnswerSection({
 
   const actions =
     awaitHiderAnswer ? (
-      step === "target" ? (
+      step === "ask" ? (
         <SendToHidersButton
           costLabel={costLabel}
           isSubmitting={isSubmitting}
@@ -319,7 +319,7 @@ export function MeasuringAnswerSection({
             the question.
           </p>
         ) : null}
-        {step === "answer" ? (
+        {step === "ask" ? (
           <button
             type="button"
             onClick={onCommit}
@@ -341,7 +341,7 @@ export function MeasuringAnswerSection({
     return readout ? (
       <ToolSection
         compact
-        first={step === "answer"}
+        first={step === "ask"}
         status={answer !== null ? "complete" : "active"}
       >
         {readout}
@@ -353,7 +353,7 @@ export function MeasuringAnswerSection({
     return actions ? (
       <ToolSection
         compact
-        first={step === "answer"}
+        first={step === "ask"}
         status={answer !== null ? "complete" : "active"}
       >
         {actions}
@@ -364,7 +364,7 @@ export function MeasuringAnswerSection({
   return (
     <ToolSection
       compact
-      first={step === "answer"}
+      first={step === "ask"}
       status={answer !== null ? "complete" : "active"}
     >
       {readout}

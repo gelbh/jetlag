@@ -31,7 +31,7 @@ import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
 import { ToolSection } from "./shared/panels/ToolSection";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
-import { MEASURING_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
+import { MEASURING_WIZARD } from "./shared/wizard/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 
@@ -126,11 +126,20 @@ export function MeasuringPanel({
   isSubmitting = false,
   wizardStepRef,
 }: MeasuringPanelProps) {
-  const steps = stepsForMode(MEASURING_STEPS, awaitHiderAnswer);
-  const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
-    steps,
-    { wizardStepRef },
-  );
+  const {
+    phaseId,
+    stepId,
+    phaseIndex,
+    configureIndex,
+    goNext,
+    goBack,
+    Stepper,
+  } = useToolWizard(MEASURING_WIZARD, {
+    wizardStepRef,
+    awaitHiderAnswer,
+    toolCommitLabel: "Add measure question",
+    isSubmitting,
+  });
 
   const locationCategory: MeasuringLocationCategory | undefined =
     subject === "location"
@@ -169,16 +178,22 @@ export function MeasuringPanel({
     distanceMeters !== null;
 
   const canGoNext =
-    (step === "anchor" && canAdvanceFromAnchor) ||
-    (step === "source" && optionChosen && hasAvailableMeasureOptions) ||
-    (step === "target" && canAdvanceFromTarget);
-  const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
+    (phaseId === "place" && canAdvanceFromAnchor) ||
+    (phaseId === "configure" &&
+      stepId === "source" &&
+      optionChosen &&
+      hasAvailableMeasureOptions) ||
+    (phaseId === "configure" &&
+      stepId === "target" &&
+      canAdvanceFromTarget);
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
   const showMeasuringAnswer =
-    canPreviewAnswer && (step === "target" || step === "answer");
+    canPreviewAnswer &&
+    (stepId === "target" || phaseId === "ask");
 
   const panelBody = (
     <>
-        {step === "source" ? (
+        {phaseId === "configure" && stepId === "source" ? (
           <MeasuringSourceStep
             measureFrom={measureFrom}
             optionChosen={optionChosen}
@@ -190,7 +205,7 @@ export function MeasuringPanel({
           />
         ) : null}
 
-        {step === "anchor" ? (
+        {phaseId === "place" ? (
           <MeasuringAnchorStep
             hasSeekerPoint={hasSeekerPoint}
             gpsLoading={gpsLoading}
@@ -208,7 +223,7 @@ export function MeasuringPanel({
           />
         ) : null}
 
-        {step === "target" ? (
+        {phaseId === "configure" && stepId === "target" ? (
           <ToolSection first compact status="active">
             <MeasuringTargetSection
               subject={subject}
@@ -240,7 +255,7 @@ export function MeasuringPanel({
 
         {showMeasuringAnswer ? (
           <MeasuringAnswerSection
-            step={step}
+            step={stepId}
             part="readout"
             isSeaLevel={isSeaLevel}
             isCoastline={isCoastline}
@@ -261,7 +276,7 @@ export function MeasuringPanel({
           />
         ) : null}
 
-        {allowsSearch && searchResults.length > 0 && step !== "answer" && step !== "target" ? (
+        {allowsSearch && searchResults.length > 0 && phaseId !== "ask" && stepId !== "target" ? (
           <div className="jl-scroll jl-wizard-search-results">
             <SearchResultsList
               results={searchResults}
@@ -274,7 +289,7 @@ export function MeasuringPanel({
 
   const answerFooter = showMeasuringAnswer ? (
       <MeasuringAnswerSection
-        step={step}
+        step={stepId}
         part="actions"
         isSeaLevel={isSeaLevel}
         isCoastline={isCoastline}
@@ -302,20 +317,21 @@ export function MeasuringPanel({
       stepper={
         <Stepper
           nav={{
-            stepIndex,
-            stepCount: steps.length,
+            canGoBack:
+              phaseIndex > 0 ||
+              (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             onNext: goNext,
-            canGoNext,
+            canGoNext: phaseId !== "ask" ? canGoNext : undefined,
           }}
         />
       }
     >
       <WizardPanelFrame scrollable stickyFooter={answerFooter} error={error}>
         <WizardSwipeSurface
-          stepId={step}
-          stepIndex={stepIndex}
-          canGoBack={stepIndex > 0}
+          stepId={stepId}
+          stepIndex={phaseIndex}
+          canGoBack={phaseIndex > 0}
           canGoNext={canSwipeNext}
           onBack={goBack}
           onNext={goNext}
