@@ -22,6 +22,14 @@ function normalizeLngLat(center: LngLatLike): { lng: number; lat: number } {
   ) {
     return { lng: center.lng, lat: center.lat };
   }
+  if (
+    typeof center === "object" &&
+    center !== null &&
+    "lon" in center &&
+    "lat" in center
+  ) {
+    return { lng: center.lon, lat: center.lat };
+  }
   throw new Error("computeFramedCenterZoomMapLibre: unsupported center");
 }
 

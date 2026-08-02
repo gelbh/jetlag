@@ -179,6 +179,7 @@ function MapFocus({
     if (!animate) {
       map.jumpTo({ center, zoom });
       return () => {
+        map.stop();
         map.off("moveend", onMoveEnd);
         if (suppressChromeHideRef) {
           suppressChromeHideRef.current = false;
@@ -201,6 +202,7 @@ function MapFocus({
     }
 
     return () => {
+      map.stop();
       map.off("moveend", onMoveEnd);
       if (suppressChromeHideRef) {
         suppressChromeHideRef.current = false;

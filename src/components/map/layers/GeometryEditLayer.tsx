@@ -1,5 +1,4 @@
 import { memo, useMemo } from "react";
-import { Polygon } from "react-leaflet";
 import turfCircle from "@turf/circle";
 import type {
   Feature,
@@ -12,6 +11,7 @@ import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
+import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
 import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import {
   buildGeometryEditModel,
@@ -321,7 +321,7 @@ function renderGeometryEditLeaflet(model: GeometryEditModel) {
     case "zone":
       return (
         <>
-          <Polygon
+          <CompensatedPolygon
             positions={model.ringLatLng}
             pathOptions={{
               color: model.color,

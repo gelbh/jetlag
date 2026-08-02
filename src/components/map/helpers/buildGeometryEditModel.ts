@@ -16,6 +16,8 @@ import {
   type LatLngTuple,
 } from "../../../domain/geometry/gameArea/geometry";
 
+const TENTACLE_CIRCLE_STEPS = 64;
+
 export type GeometryEditModel =
   | {
       kind: "radar";
@@ -56,6 +58,18 @@ export type GeometryEditModel =
     }
   | { kind: "empty" };
 
+function asPoint(geometry: Feature["geometry"]): Point | null {
+  return geometry.type === "Point" ? geometry : null;
+}
+
+function asLineString(geometry: Feature["geometry"]): LineString | null {
+  return geometry.type === "LineString" ? geometry : null;
+}
+
+function asPolygon(geometry: Feature["geometry"]): GeoPolygon | null {
+  return geometry.type === "Polygon" ? geometry : null;
+}
+
 export function buildGeometryEditModel(
   annotation: AnnotationRecord,
   draftGeometry: Feature<Point | LineString | GeoPolygon | MultiPolygon>,
@@ -63,7 +77,10 @@ export function buildGeometryEditModel(
 ): GeometryEditModel {
   switch (annotation.type) {
     case "radar": {
-      const point = draftGeometry.geometry as Point;
+      const point = asPoint(draftGeometry.geometry);
+      if (!point) {
+        return { kind: "empty" };
+      }
       return {
         kind: "radar",
         center: [point.coordinates[1], point.coordinates[0]],
@@ -72,7 +89,10 @@ export function buildGeometryEditModel(
       };
     }
     case "tentacle": {
-      const point = draftGeometry.geometry as Point;
+      const point = asPoint(draftGeometry.geometry);
+      if (!point) {
+        return { kind: "empty" };
+      }
       const center: LatLngTuple = [
         point.coordinates[1],
         point.coordinates[0],
@@ -82,29 +102,24 @@ export function buildGeometryEditModel(
       const color =
         annotation.metadata.color ?? MAP_ANNOTATION_COLORS.tentacle;
       const outOfReach = Boolean(annotation.metadata.tentacleOutOfReach);
+      const searchCircle = turfCircle(
+        turfPoint(point.coordinates),
+        searchRadiusMeters / 1000,
+        { steps: TENTACLE_CIRCLE_STEPS, units: "kilometers" },
+      ) as Feature<GeoPolygon>;
 
       if (outOfReach) {
-        const noRadarDisk = turfCircle(
-          turfPoint(point.coordinates),
-          searchRadiusMeters / 1000,
-          { steps: 64, units: "kilometers" },
-        ) as Feature<GeoPolygon>;
         return {
           kind: "tentacle",
           center,
           searchRadiusMeters,
           color,
           outOfReach: true,
-          noRadarDisk,
+          noRadarDisk: searchCircle,
           yesRadarOutside: null,
         };
       }
 
-      const radarCircle = turfCircle(
-        turfPoint(point.coordinates),
-        searchRadiusMeters / 1000,
-        { steps: 64, units: "kilometers" },
-      );
       return {
         kind: "tentacle",
         center,
@@ -114,12 +129,15 @@ export function buildGeometryEditModel(
         noRadarDisk: null,
         yesRadarOutside: safeDifference(
           gameAreaToPolygon(gameArea),
-          radarCircle as Feature<GeoPolygon>,
+          searchCircle,
         ),
       };
     }
     case "pin": {
-      const point = draftGeometry.geometry as Point;
+      const point = asPoint(draftGeometry.geometry);
+      if (!point) {
+        return { kind: "empty" };
+      }
       return {
         kind: "pin",
         latitude: point.coordinates[1],
@@ -128,7 +146,10 @@ export function buildGeometryEditModel(
       };
     }
     case "thermometer": {
-      const line = draftGeometry.geometry as LineString;
+      const line = asLineString(draftGeometry.geometry);
+      if (!line) {
+        return { kind: "empty" };
+      }
       const pointALngLat = line.coordinates[0];
       const pointBLngLat = line.coordinates[line.coordinates.length - 1];
       const pointA: LatLngTuple = [pointALngLat[1], pointALngLat[0]];
@@ -151,13 +172,16 @@ export function buildGeometryEditModel(
       };
     }
     case "zone": {
-      const polygon = draftGeometry.geometry as GeoPolygon;
+      const polygon = asPolygon(draftGeometry.geometry);
+      if (!polygon) {
+        return { kind: "empty" };
+      }
       const ringLatLng = polygon.coordinates[0].map(
         ([lng, lat]) => [lat, lng] as LatLngTuple,
       );
       return {
         kind: "zone",
-        polygonFeature: draftGeometry as Feature<GeoPolygon>,
+        polygonFeature: { type: "Feature", properties: {}, geometry: polygon },
         ringLatLng,
         color: MAP_ANNOTATION_COLORS.zoneDraft,
       };
@@ -165,5 +189,10 @@ export function buildGeometryEditModel(
     case "measuring":
     case "matching":
       return { kind: "empty" };
+    default: {
+      const exhaustive: never = annotation.type;
+      void exhaustive;
+      return { kind: "empty" };
+    }
   }
 }
