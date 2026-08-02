@@ -7,14 +7,14 @@ export function shouldApplyMapFocus(args: {
   hasFitted: boolean;
   recenterToken: number;
   lastRecenterToken: number;
-}): { apply: boolean; recenterRequested: boolean } {
+}): boolean {
   const recenterRequested = args.recenterToken !== args.lastRecenterToken;
   if (
     args.fitBoundsMode === "once" &&
     args.hasFitted &&
     !recenterRequested
   ) {
-    return { apply: false, recenterRequested };
+    return false;
   }
-  return { apply: true, recenterRequested };
+  return true;
 }

@@ -10,7 +10,7 @@ describe("shouldApplyMapFocus", () => {
         recenterToken: 1,
         lastRecenterToken: 1,
       }),
-    ).toEqual({ apply: false, recenterRequested: false });
+    ).toBe(false);
   });
 
   it("applies once-mode when recenter token advances", () => {
@@ -21,7 +21,7 @@ describe("shouldApplyMapFocus", () => {
         recenterToken: 2,
         lastRecenterToken: 1,
       }),
-    ).toEqual({ apply: true, recenterRequested: true });
+    ).toBe(true);
   });
 
   it("always applies in always-mode", () => {
@@ -32,7 +32,7 @@ describe("shouldApplyMapFocus", () => {
         recenterToken: 1,
         lastRecenterToken: 1,
       }),
-    ).toEqual({ apply: true, recenterRequested: false });
+    ).toBe(true);
   });
 
   it("applies the first fit in once-mode", () => {
@@ -43,6 +43,6 @@ describe("shouldApplyMapFocus", () => {
         recenterToken: 0,
         lastRecenterToken: 0,
       }),
-    ).toEqual({ apply: true, recenterRequested: false });
+    ).toBe(true);
   });
 });

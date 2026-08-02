@@ -79,13 +79,14 @@ function MapFocus({
       return;
     }
 
-    const { apply } = shouldApplyMapFocus({
-      fitBoundsMode,
-      hasFitted: hasFittedRef.current,
-      recenterToken,
-      lastRecenterToken: lastRecenterRef.current,
-    });
-    if (!apply) {
+    if (
+      !shouldApplyMapFocus({
+        fitBoundsMode,
+        hasFitted: hasFittedRef.current,
+        recenterToken,
+        lastRecenterToken: lastRecenterRef.current,
+      })
+    ) {
       return;
     }
 
