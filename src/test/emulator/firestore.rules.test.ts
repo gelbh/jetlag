@@ -686,6 +686,78 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows a player to delete only their own live location", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(sessionPayload("host-1"));
+
+    const seeker = testEnv.authenticatedContext("seeker-1");
+    const hider = testEnv.authenticatedContext("hider-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .update({
+        memberUids: ["host-1", "seeker-1", "hider-1"],
+        memberRoles: {
+          "host-1": "seeker",
+          "seeker-1": "seeker",
+          "hider-1": "hider",
+        },
+      });
+
+    await assertSucceeds(
+      seeker
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("playerLocations")
+        .doc("seeker-1")
+        .set(playerLocationPayload("seeker")),
+    );
+    await assertSucceeds(
+      hider
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("playerLocations")
+        .doc("hider-1")
+        .set(playerLocationPayload("hider")),
+    );
+
+    await assertSucceeds(
+      seeker
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("playerLocations")
+        .doc("seeker-1")
+        .delete(),
+    );
+    await assertFails(
+      seeker
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("playerLocations")
+        .doc("hider-1")
+        .delete(),
+    );
+    await assertFails(
+      testEnv
+        .unauthenticatedContext()
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("playerLocations")
+        .doc("hider-1")
+        .delete(),
+    );
+  });
+
   it("allows seekers to list only seeker player locations when hider docs exist", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

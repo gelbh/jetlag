@@ -6,6 +6,7 @@ import { useMapStore } from "../../state/mapStore";
 import { useLiveLocation } from "../location/useLiveLocation";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
+import { arePlayerLocationPublishesBlocked } from "../../services/session/playerLocationPublishGate";
 import { writePlayerLocation } from "../../services/firestore/firestoreSessionExtras";
 import { maybeAppendPlayerTrailPoint } from "./appendPlayerTrailPoint";
 
@@ -31,7 +32,8 @@ export function useSeekerLocationSync({
       !sessionId ||
       !uid ||
       !isFirebaseConfigured() ||
-      sessionId === LOCAL_SESSION_ID
+      sessionId === LOCAL_SESSION_ID ||
+      arePlayerLocationPublishesBlocked()
     ) {
       return;
     }

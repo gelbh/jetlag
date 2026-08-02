@@ -6,15 +6,16 @@ import {
   type SessionRecord,
 } from "../../domain/map/annotations";
 import type { AnnotationRecord } from "../../domain/map/annotations";
-import {
-  listWalkingThermometerQuestionIds,
-} from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import {
   endRemoteSession,
   resetRemoteSession,
 } from "../../services/firestore/firestoreAnnotations";
-import { cancelWalkingThermometersAndAnnounce } from "../../services/firestore/firestoreSessionExtras";
+import { clearLiveLocationOnLeave } from "../../services/session/clearLiveLocationOnLeave";
+import {
+  allowPlayerLocationPublishes,
+  blockPlayerLocationPublishes,
+} from "../../services/session/playerLocationPublishGate";
 import {
   clearSessionLocalArtifacts,
   teardownSessionUiState,
@@ -280,6 +281,8 @@ export function useMapSessionChrome({
         return;
       }
 
+      blockPlayerLocationPublishes();
+
       try {
         const leaveResult = await leaveHostSession(session.id);
         if (leaveResult.action === "ended") {
@@ -297,10 +300,12 @@ export function useMapSessionChrome({
               trackSessionEnded("fallback_client_end");
             } catch (fallbackError) {
               captureException(fallbackError);
+              allowPlayerLocationPublishes();
               window.alert("Couldn't leave the session. Try again.");
               return;
             }
           } else {
+            allowPlayerLocationPublishes();
             window.alert("Couldn't leave the session. Try again.");
             return;
           }
@@ -312,6 +317,8 @@ export function useMapSessionChrome({
       )
     ) {
       return;
+    } else if (!isLocalSession) {
+      blockPlayerLocationPublishes();
     }
 
     if (isLocalSession) {
@@ -332,17 +339,12 @@ export function useMapSessionChrome({
       }
 
       try {
-        const walkIds = listWalkingThermometerQuestionIds(
+        await clearLiveLocationOnLeave({
+          sessionId: session.id,
+          uid: user.uid,
+          role: session.memberRoles?.[user.uid] ?? "seeker",
           pendingQuestions,
-          user.uid,
-        );
-        await cancelWalkingThermometersAndAnnounce(
-          session.id,
-          walkIds,
-          user.uid,
-          session.memberRoles?.[user.uid] ?? "seeker",
-          "left",
-        );
+        });
       } catch (error) {
         captureException(error);
       }

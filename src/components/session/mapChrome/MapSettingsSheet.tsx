@@ -108,6 +108,8 @@ interface MapSettingsSheetProps {
   layers: MapSettingsLayersProps;
   rules?: MapSettingsRulesProps;
   session: MapSettingsSessionProps;
+  /** When set, Report opens via this callback (chrome-owned sheet) instead of a nested sheet. */
+  onReportProblem?: () => void;
 }
 
 export function MapSettingsSheet({
@@ -118,10 +120,12 @@ export function MapSettingsSheet({
   layers,
   rules,
   session,
+  onReportProblem,
 }: MapSettingsSheetProps) {
   const [segment, setSegment] = useState<SettingsSegment>("map");
   const [curseSheetOpen, setCurseSheetOpen] = useState(false);
   const [reportProblemOpen, setReportProblemOpen] = useState(false);
+  const ownsReportSheet = !onReportProblem;
   const mapEngine = useMapStore((s) => s.mapEngine);
   const attributionEngine =
     MAP_LIBRE_PLAY_READY && mapEngine === "maplibre" ? "maplibre" : "leaflet";
@@ -259,7 +263,13 @@ export function MapSettingsSheet({
             endGameBlocked={session.endGameBlocked}
             expansionPackEnabled={session.expansionPackEnabled}
             onOpenCurseReference={() => setCurseSheetOpen(true)}
-            onReportProblem={() => setReportProblemOpen(true)}
+            onReportProblem={() => {
+              if (onReportProblem) {
+                onReportProblem();
+                return;
+              }
+              setReportProblemOpen(true);
+            }}
             onReviewMapTools={session.onReviewMapTools}
             session={session.session}
             myUid={session.myUid}
@@ -275,10 +285,12 @@ export function MapSettingsSheet({
         open={curseSheetOpen}
         onClose={() => setCurseSheetOpen(false)}
       />
-      <ReportProblemSheet
-        open={reportProblemOpen}
-        onClose={() => setReportProblemOpen(false)}
-      />
+      {ownsReportSheet ? (
+        <ReportProblemSheet
+          open={reportProblemOpen}
+          onClose={() => setReportProblemOpen(false)}
+        />
+      ) : null}
     </SheetHost>
   );
 }

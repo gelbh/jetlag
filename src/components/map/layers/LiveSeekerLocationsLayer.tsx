@@ -1,14 +1,5 @@
-import { useMemo } from "react";
-import { Tooltip } from "react-leaflet";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import {
-  clusterSeekerLocations,
-  clusterTooltipLabel,
-  locationClusterStableKey,
-} from "../../../domain/session/live/liveMapLocations";
 import type { PlayerLocationRecord } from "../../../domain/session/activity/sessionChat";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
-import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
+import { LivePlayerLocationsLayer } from "./LivePlayerLocationsLayer";
 
 interface LiveSeekerLocationsLayerProps {
   locations: readonly PlayerLocationRecord[];
@@ -19,39 +10,11 @@ export function LiveSeekerLocationsLayer({
   locations,
   myUid = null,
 }: LiveSeekerLocationsLayerProps) {
-  const clusters = useMemo(
-    () => clusterSeekerLocations(locations),
-    [locations],
-  );
-
   return (
-    <>
-      {clusters.map((cluster) => {
-        const center: LatLngTuple = [cluster.lat, cluster.lng];
-        const isSelf =
-          myUid !== null && cluster.uids.some((uid) => uid === myUid);
-        const count = cluster.members.length;
-
-        return (
-          <CompensatedCircleMarker
-            key={locationClusterStableKey(cluster)}
-            center={center}
-            radius={isSelf ? 10 : 9}
-            pathOptions={{
-              color: MAP_ANNOTATION_COLORS.strokeLight,
-              weight: isSelf ? 3 : 2,
-              fillColor: isSelf
-                ? MAP_ANNOTATION_COLORS.userLocation
-                : MAP_ANNOTATION_COLORS.seekerLive,
-              fillOpacity: 1,
-            }}
-          >
-            <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-              {clusterTooltipLabel(count, "seeker", isSelf)}
-            </Tooltip>
-          </CompensatedCircleMarker>
-        );
-      })}
-    </>
+    <LivePlayerLocationsLayer
+      locations={locations}
+      myUid={myUid}
+      role="seeker"
+    />
   );
 }

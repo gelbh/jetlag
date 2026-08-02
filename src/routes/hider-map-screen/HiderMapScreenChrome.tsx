@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useState } from "react";
 import type { AnnotationRecord, SessionRecord } from "../../domain/map/annotations";
 import type {
   PendingQuestionRecord,
@@ -31,6 +32,7 @@ import { HiderZoneWizardShell } from "../../components/hider/HiderZoneWizardShel
 import { PopupCloseButton } from "../../components/ui/brand/PopupCloseButton";
 import { AppUpdateMapChip } from "../../components/ui/banners/AppUpdateMapChip";
 import { HotfixGraceChip } from "../../components/incident/HotfixGraceChip";
+import { ReportProblemSheet } from "../../components/incident/ReportProblemSheet";
 import { FirestorePersistenceBanner } from "../../components/session/banners/FirestorePersistenceBanner";
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
@@ -263,6 +265,7 @@ export function HiderMapScreenChrome({
   const isDesktop = useDesktopLayout();
   const toolLayout = isDesktop ? "rail" : "dock";
   const roleConfig = getMapScreenRoleConfig("hider");
+  const [reportProblemOpen, setReportProblemOpen] = useState(false);
   const setSelectedAnnotationId = useAnnotationStore(
     (state) => state.setSelectedAnnotationId,
   );
@@ -373,6 +376,10 @@ export function HiderMapScreenChrome({
       onRecenter={onRecenter}
       onOpenChat={onOpenChat}
       onOpenSettings={onOpenSettings}
+      onOpenReportProblem={() => {
+        overlay.closeSheet();
+        setReportProblemOpen(true);
+      }}
       hasUnreadChat={hasUnreadChat}
       unreadCount={unreadCount}
     />
@@ -504,6 +511,15 @@ export function HiderMapScreenChrome({
               : undefined,
             expansionPackEnabled,
           }}
+          onReportProblem={() => {
+            overlay.closeSheet();
+            setReportProblemOpen(true);
+          }}
+        />
+
+        <ReportProblemSheet
+          open={reportProblemOpen}
+          onClose={() => setReportProblemOpen(false)}
         />
 
         <ExpansionHiderMenu

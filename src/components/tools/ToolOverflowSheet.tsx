@@ -8,12 +8,7 @@ import {
 import type { MapTool } from "../../state/sessionStore";
 import { MotionSheet } from "../motion/MotionSheet";
 import { SheetHeader } from "../ui/sheets/SheetHeader";
-import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
-import {
-  HudRedoIcon,
-  HudSettingsIcon,
-  HudUndoIcon,
-} from "../ui/brand/HudIcons";
+import { HudRedoIcon, HudUndoIcon } from "../ui/brand/HudIcons";
 import { HudPinIcon, HudZoneIcon } from "../map/icons/ToolIcons";
 
 interface ToolOverflowSheetProps {
@@ -25,10 +20,6 @@ interface ToolOverflowSheetProps {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
-  onOpenSettings: () => void;
-  onOpenChat?: () => void;
-  hasUnreadChat?: boolean;
-  unreadCount?: number;
   canStartEndGame?: boolean;
   onStartEndGame?: () => void;
   canRequestFoundHider?: boolean;
@@ -45,8 +36,6 @@ interface ToolOverflowRowProps {
   hint?: string;
   active?: boolean;
   disabled?: boolean;
-  showBadge?: boolean;
-  unreadCount?: number;
   onClick: () => void;
   ariaLabel: string;
 }
@@ -57,8 +46,6 @@ function ToolOverflowRow({
   hint,
   active = false,
   disabled = false,
-  showBadge = false,
-  unreadCount = 0,
   onClick,
   ariaLabel,
 }: ToolOverflowRowProps) {
@@ -70,10 +57,7 @@ function ToolOverflowRow({
       aria-label={ariaLabel}
       className={`jl-tool-overflow-row ${active ? "jl-tool-overflow-row-active" : ""}`}
     >
-      <span className="jl-tool-overflow-row-icon jl-unread-badge-host">
-        {icon}
-        {showBadge ? <ChatUnreadBadge count={unreadCount} /> : null}
-      </span>
+      <span className="jl-tool-overflow-row-icon">{icon}</span>
       <span className="jl-tool-overflow-row-text">
         <span className="font-display text-sm font-semibold uppercase tracking-wide">
           {title}
@@ -95,10 +79,6 @@ export function ToolOverflowSheet({
   canRedo,
   onUndo,
   onRedo,
-  onOpenSettings,
-  onOpenChat,
-  hasUnreadChat = false,
-  unreadCount = 0,
   canStartEndGame = false,
   onStartEndGame,
   canRequestFoundHider = false,
@@ -177,34 +157,6 @@ export function ToolOverflowSheet({
             ariaLabel="Start end game"
           />
         ) : null}
-
-        {onOpenChat ? (
-          <ToolOverflowRow
-            icon={
-              <span className="text-sm font-bold" aria-hidden="true">
-                @
-              </span>
-            }
-            title="Chat"
-            hint="Game and social messages"
-            showBadge={hasUnreadChat}
-            unreadCount={unreadCount}
-            onClick={() => closeAnd(onOpenChat)}
-            ariaLabel={
-              hasUnreadChat ? "Open chat, unread messages" : "Open chat"
-            }
-          />
-        ) : null}
-
-        <ToolOverflowRow
-          icon={<HudSettingsIcon className="h-5 w-5" />}
-          title="Settings"
-          hint="Session settings and layers"
-          onClick={() => closeAnd(onOpenSettings)}
-          ariaLabel="Open settings"
-        />
-
-        <div className="jl-tool-overflow-divider" aria-hidden="true" />
 
         <ToolOverflowRow
           icon={<HudUndoIcon className="h-5 w-5" />}
