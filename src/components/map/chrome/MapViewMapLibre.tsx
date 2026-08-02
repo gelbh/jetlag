@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import Map, { type MapLayerMouseEvent, type MapRef } from "react-map-gl/maplibre";
-import type { Map as MapLibreMap } from "maplibre-gl";
+import { setWorkerUrl, type Map as MapLibreMap } from "maplibre-gl";
 import { LatLngBounds, type LatLngExpression } from "leaflet";
 import "maplibre-gl/dist/maplibre-gl.css";
+import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import {
   getBasemapSurface,
   getMapLibreStyle,
 } from "../../../domain/map/mapBasemaps";
 import { isUsableMapBounds } from "../../../domain/geometry/gameArea/geometry";
 import type { MapViewCoreProps } from "./mapViewTypes";
+
+setWorkerUrl(mapLibreWorkerUrl);
 
 const FALLBACK_LNGLAT: [number, number] = [-0.09, 51.505];
 

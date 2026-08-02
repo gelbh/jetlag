@@ -87,6 +87,7 @@ export function MapView(
     );
   }
 
-  const { mapEngine: _mapEngine, ...leafletProps } = props;
+  const { mapEngine: _ignoredMapEngine, ...leafletProps } = props;
+  void _ignoredMapEngine;
   return <MapViewLeaflet {...leafletProps} />;
 }
