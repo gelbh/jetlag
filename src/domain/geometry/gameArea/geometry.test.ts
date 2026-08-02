@@ -122,8 +122,8 @@ describe("geometry helpers", () => {
     expect(outsideMask?.coordinates.length).toBeGreaterThan(1);
     // MapLibre cannot reliably paint a full-world outer ring; keep a local pad.
     const outerRing = outsideMask?.coordinates[0] ?? [];
-    const lngs = outerRing.map((c) => c[0]!);
-    const lats = outerRing.map((c) => c[1]!);
+    const lngs = outerRing.map((c) => Number(c[0]));
+    const lats = outerRing.map((c) => Number(c[1]));
     expect(Math.min(...lngs)).toBeGreaterThan(-180);
     expect(Math.max(...lngs)).toBeLessThan(180);
     expect(Math.min(...lats)).toBeGreaterThan(-85);
