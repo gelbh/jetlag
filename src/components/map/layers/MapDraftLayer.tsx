@@ -86,7 +86,9 @@ function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
                 onClick={
                   overlay.popup
                     ? () => {
-                        setOpenPopupId(overlay.id);
+                        setOpenPopupId((current) =>
+                          current === overlay.id ? null : overlay.id,
+                        );
                       }
                     : undefined
                 }
@@ -150,8 +152,6 @@ function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
         <MapLibrePopup
           latitude={openMarker.point[0]}
           longitude={openMarker.point[1]}
-          closeButton={false}
-          closeOnClick={false}
           anchor="bottom"
           onClose={() => setOpenPopupId(null)}
         >
