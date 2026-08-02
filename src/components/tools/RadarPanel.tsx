@@ -79,6 +79,7 @@ export function RadarPanel({
     phaseId,
     stepId,
     phaseIndex,
+    phaseCount,
     configureIndex,
     goNext,
     goBack,
@@ -119,7 +120,7 @@ export function RadarPanel({
   const canGoNext =
     (phaseId === "place" && hasCenter) ||
     (phaseId === "configure" && distanceSelectionAvailable);
-  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, phaseCount);
 
   const radarAnswerStepActions =
     phaseId === "ask" && !awaitHiderAnswer ? (
