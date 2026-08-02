@@ -40,7 +40,13 @@ function MapLibreSuspense({
 }) {
   return (
     <Suspense
-      fallback={<div className={className ?? "h-full w-full"} aria-busy="true" />}
+      fallback={
+        <div
+          className={`${className ?? "h-full w-full"} jl-basemap--dark-canvas`}
+          aria-busy="true"
+          role="status"
+        />
+      }
     >
       {children}
     </Suspense>

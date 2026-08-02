@@ -34,7 +34,7 @@ function MapFocus({
   fitBoundsMode,
   recenterToken = 0,
   suppressChromeHideRef,
-  fitBoundsPadding = [32, 32],
+  fitBoundsPadding: fitBoundsPaddingProp,
   focusPaddingBias,
   preferFly = false,
 }: {
@@ -55,6 +55,8 @@ function MapFocus({
   const hasFittedRef = useRef(false);
   const lastRecenterRef = useRef(recenterToken);
   const animate = !prefersReducedMotion && !lowPowerMode;
+  const padY = fitBoundsPaddingProp?.[0] ?? 32;
+  const padX = fitBoundsPaddingProp?.[1] ?? 32;
 
   useEffect(() => {
     const handleDragStart = () => {
@@ -92,7 +94,6 @@ function MapFocus({
 
     map.invalidateSize();
 
-    const [padY, padX] = fitBoundsPadding;
     const paddingTopLeft = point(padX, padY);
     const paddingBottomRight =
       focusPaddingBias !== undefined
@@ -126,7 +127,12 @@ function MapFocus({
 
     if (!animate) {
       map.setView(center, zoom, { animate: false });
-      return;
+      return () => {
+        map.off("moveend", onMoveEnd);
+        if (suppressChromeHideRef) {
+          suppressChromeHideRef.current = false;
+        }
+      };
     }
 
     if (isLargeCameraJump(map, center, zoom, preferFly)) {
@@ -134,13 +140,21 @@ function MapFocus({
     } else {
       map.setView(center, zoom, { animate: true, duration: MOTION_MAP_CAMERA_S });
     }
+
+    return () => {
+      map.off("moveend", onMoveEnd);
+      if (suppressChromeHideRef) {
+        suppressChromeHideRef.current = false;
+      }
+    };
   }, [
     animate,
     focusBounds,
     focusMaxZoom,
     focusMinZoom,
     fitBoundsMode,
-    fitBoundsPadding,
+    padX,
+    padY,
     focusPaddingBias,
     map,
     preferFly,

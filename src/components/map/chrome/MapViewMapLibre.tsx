@@ -144,6 +144,8 @@ export function MapViewMapLibre({
           mapStyle={style}
           attributionControl={false}
           dragPan={interactive}
+          boxZoom={interactive}
+          keyboard={interactive}
           scrollZoom={interactive}
           doubleClickZoom={interactive}
           dragRotate={false}
