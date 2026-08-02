@@ -19,11 +19,16 @@ export function hidingZoneWizardDef(moveMode: boolean) {
 export function hidingZoneStepIdFromPhase(
   phaseId: ToolWizardPhaseId,
 ): HidingZoneStepId {
-  if (phaseId === "configure") {
-    return "method";
+  switch (phaseId) {
+    case "configure":
+      return "method";
+    case "place":
+      return "location";
+    case "ask":
+      return "confirm";
+    default: {
+      const _exhaustive: never = phaseId;
+      return _exhaustive;
+    }
   }
-  if (phaseId === "place") {
-    return "location";
-  }
-  return "confirm";
 }
