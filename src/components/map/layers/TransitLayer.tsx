@@ -1,4 +1,5 @@
 import { memo, useMemo, useState } from "react";
+import type { FeatureCollection, LineString } from "geojson";
 import L from "leaflet";
 import { Marker, Popup } from "react-leaflet";
 import { Marker as MapLibreMarker, Popup as MapLibrePopup } from "react-map-gl/maplibre";
@@ -52,10 +53,38 @@ function TransitLayerMapLibre({
 }: TransitLayerProps) {
   const [openPopupId, setOpenPopupId] = useState<string | null>(null);
 
-  const visibleRoutes = useMemo(
-    () => filterTransitRoutesForViewport(staticData?.routes ?? [], viewport),
-    [staticData?.routes, viewport],
-  );
+  const visibleRoutes = useMemo(() => {
+    // MapLibre Sources are costly; wait for viewport before mounting route
+    // geometry (null viewport would otherwise dump the full network).
+    if (viewport == null) {
+      return [];
+    }
+    return filterTransitRoutesForViewport(staticData?.routes ?? [], viewport);
+  }, [staticData?.routes, viewport]);
+
+  const routeCollectionsByMode = useMemo(() => {
+    const byMode = new Map<
+      TransitRouteMode,
+      FeatureCollection<LineString, { id: string }>
+    >();
+    for (const route of visibleRoutes) {
+      let collection = byMode.get(route.mode);
+      if (!collection) {
+        collection = { type: "FeatureCollection", features: [] };
+        byMode.set(route.mode, collection);
+      }
+      collection.features.push({
+        type: "Feature",
+        properties: { id: route.id },
+        geometry: {
+          type: "LineString",
+          coordinates: route.positions.map(([lat, lng]) => [lng, lat]),
+        },
+      });
+    }
+    return byMode;
+  }, [visibleRoutes]);
+
   const visibleStops = useMemo(
     () =>
       filterTransitStopsForViewport(staticData?.stops ?? [], viewport, zoom),
@@ -77,22 +106,15 @@ function TransitLayerMapLibre({
 
   return (
     <>
-      {visibleRoutes.map((route) => {
-        const width = route.mode === "rail" || route.mode === "metro" ? 4 : 3;
+      {[...routeCollectionsByMode.entries()].map(([mode, data]) => {
+        const width = mode === "rail" || mode === "metro" ? 4 : 3;
         return (
           <MapLibreGeoJsonOverlay
-            key={`route-${route.id}`}
-            id={`transit-route-${route.id}`}
-            data={{
-              type: "Feature",
-              properties: {},
-              geometry: {
-                type: "LineString",
-                coordinates: route.positions.map(([lat, lng]) => [lng, lat]),
-              },
-            }}
+            key={`routes-${mode}`}
+            id={`transit-routes-${mode}`}
+            data={data}
             line={{
-              color: MODE_COLORS[route.mode],
+              color: MODE_COLORS[mode],
               width,
               opacity: 0.75,
             }}
