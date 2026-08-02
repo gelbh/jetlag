@@ -1,4 +1,5 @@
 import { Fragment, useMemo } from "react";
+import type { FeatureCollection, LineString } from "geojson";
 import type { GameArea } from "../../../domain/map/annotations";
 import {
   gameAreaExteriorStrokeRings,
@@ -12,8 +13,12 @@ import {
   scaleDashArray,
   useZoomAdaptiveWeight,
 } from "../../../hooks/map/useZoomAdaptiveWeight";
+import { useMapEngine } from "../chrome/mapEngineContext";
 import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
 import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
+import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
+import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
+import { polygonGeometryFeature } from "../helpers/polygonGeometryFeature";
 import { MID_GESTURE_PATH_DEFAULTS } from "../helpers/midGesturePathDefaults";
 
 interface GameAreaMaskProps {
@@ -38,6 +43,22 @@ const PLAY_OUTSIDE_TINT = {
 const FRAMING_BASE_WEIGHT = 3;
 const PLAY_BASE_WEIGHT = 2;
 const FRAMING_DASH = "8 6";
+
+function exteriorStrokeFeatureCollection(
+  rings: LatLngTuple[][],
+): FeatureCollection<LineString> {
+  return {
+    type: "FeatureCollection",
+    features: rings.map((ring) => ({
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "LineString",
+        coordinates: ring.map(([lat, lng]) => [lng, lat]),
+      },
+    })),
+  };
+}
 
 function renderGameAreaPolygons(
   area: GameArea,
@@ -73,7 +94,54 @@ function renderGameAreaPolygons(
   );
 }
 
-export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
+function GameAreaMaskMapLibre({
+  gameArea,
+  framing = false,
+}: GameAreaMaskProps) {
+  const outsideMask = useMemo(() => gameAreaOutsideMask(gameArea), [gameArea]);
+  const exteriorStrokeRings = useMemo(
+    () => gameAreaExteriorStrokeRings(gameArea),
+    [gameArea],
+  );
+  const exteriorStroke = useMemo(
+    () => exteriorStrokeFeatureCollection(exteriorStrokeRings),
+    [exteriorStrokeRings],
+  );
+  const outsideTint = framing ? FRAMING_OUTSIDE_TINT : PLAY_OUTSIDE_TINT;
+  const baseWeight = framing ? FRAMING_BASE_WEIGHT : PLAY_BASE_WEIGHT;
+
+  return (
+    <>
+      {outsideMask ? (
+        <MapLibreGeoJsonOverlay
+          id="game-area-outside"
+          data={polygonGeometryFeature(outsideMask)}
+          fill={{
+            fillColor: outsideTint.fillColor,
+            fillOpacity: outsideTint.fillOpacity,
+          }}
+        />
+      ) : null}
+      <MapLibreGeoJsonOverlay
+        id="game-area-border"
+        data={exteriorStroke}
+        line={{
+          color: MAP_ANNOTATION_COLORS.playArea,
+          width: baseWeight,
+          opacity: 1,
+          dashArray: framing
+            ? cssPxDashToMapLibre(FRAMING_DASH, baseWeight)
+            : undefined,
+        }}
+      />
+    </>
+  );
+}
+
+function GameAreaMaskLeaflet({
+  gameArea,
+  framing = false,
+}: GameAreaMaskProps) {
   const outsideMask = useMemo(() => gameAreaOutsideMask(gameArea), [gameArea]);
   const exteriorStrokeRings = useMemo(
     () => gameAreaExteriorStrokeRings(gameArea),
@@ -117,4 +185,12 @@ export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
       ))}
     </Fragment>
   );
+}
+
+export function GameAreaMask(props: GameAreaMaskProps) {
+  const engine = useMapEngine();
+  if (engine === "maplibre") {
+    return <GameAreaMaskMapLibre {...props} />;
+  }
+  return <GameAreaMaskLeaflet {...props} />;
 }
