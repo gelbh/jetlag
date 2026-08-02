@@ -2,6 +2,11 @@ export type ToolWizardPhaseId = "place" | "configure" | "ask";
 
 export type ToolWizardAskMode = "ask" | "send" | "confirm";
 
+/**
+ * Frozen phase spine for tool wizards. Configure continua here are the
+ * migration target; legacy per-tool step arrays in shared wizard utils stay
+ * until panel migration re-exports from these defs.
+ */
 export type ToolWizardDefinition = {
   toolId: string;
   phases: readonly ToolWizardPhaseId[];
@@ -12,54 +17,41 @@ export type ToolWizardDefinition = {
 
 const SEEKER_PHASES = ["place", "configure", "ask"] as const satisfies readonly ToolWizardPhaseId[];
 
-export const RADAR_WIZARD: ToolWizardDefinition = {
-  toolId: "radar",
-  phases: SEEKER_PHASES,
-  configureSteps: [{ id: "distance", label: "Distance" }],
-  askMode: "ask",
-  startsOn: "place",
-};
+function seekerWizard(
+  toolId: string,
+  configureSteps: readonly { id: string; label: string }[],
+): ToolWizardDefinition {
+  return {
+    toolId,
+    phases: SEEKER_PHASES,
+    configureSteps,
+    askMode: "ask",
+    startsOn: "place",
+  };
+}
 
-export const THERMOMETER_WIZARD: ToolWizardDefinition = {
-  toolId: "thermometer",
-  phases: SEEKER_PHASES,
-  configureSteps: [{ id: "distance", label: "Distance" }],
-  askMode: "ask",
-  startsOn: "place",
-};
+export const RADAR_WIZARD = seekerWizard("radar", [
+  { id: "distance", label: "Distance" },
+]);
 
-export const MATCHING_WIZARD: ToolWizardDefinition = {
-  toolId: "matching",
-  phases: SEEKER_PHASES,
-  configureSteps: [
-    { id: "category", label: "Category" },
-    { id: "resolve", label: "Feature" },
-  ],
-  askMode: "ask",
-  startsOn: "place",
-};
+export const THERMOMETER_WIZARD = seekerWizard("thermometer", [
+  { id: "distance", label: "Distance" },
+]);
 
-export const TENTACLE_WIZARD: ToolWizardDefinition = {
-  toolId: "tentacle",
-  phases: SEEKER_PHASES,
-  configureSteps: [
-    { id: "category", label: "Category" },
-    { id: "locations", label: "Locations" },
-  ],
-  askMode: "ask",
-  startsOn: "place",
-};
+export const MATCHING_WIZARD = seekerWizard("matching", [
+  { id: "category", label: "Category" },
+  { id: "resolve", label: "Feature" },
+]);
 
-export const MEASURING_WIZARD: ToolWizardDefinition = {
-  toolId: "measuring",
-  phases: SEEKER_PHASES,
-  configureSteps: [
-    { id: "source", label: "Question" },
-    { id: "target", label: "Target" },
-  ],
-  askMode: "ask",
-  startsOn: "place",
-};
+export const TENTACLE_WIZARD = seekerWizard("tentacle", [
+  { id: "category", label: "Category" },
+  { id: "locations", label: "Locations" },
+]);
+
+export const MEASURING_WIZARD = seekerWizard("measuring", [
+  { id: "source", label: "Question" },
+  { id: "target", label: "Target" },
+]);
 
 /** Create: Method → Place → Confirm (starts on Configure). */
 export const HIDING_ZONE_CREATE_WIZARD: ToolWizardDefinition = {
