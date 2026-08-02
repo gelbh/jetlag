@@ -4,15 +4,33 @@ import { KERNEL_WASM_READY } from "./kernelWasmReady";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
 
-function measureMedianMs(run: () => void, iterations = 31): number {
-  const samples: number[] = [];
+/**
+ * Interleaved median: Wave-2 Gate A for the sync pkg export.
+ * Compares serialized FeatureCollections (build_*_json vs JSON.stringify(TS)),
+ * matching the string-returning pkg API (same posture as half-plane pkg gates
+ * that pre-stringify inputs). Production async wrappers add JS stringify/parse
+ * around this export — same pattern as other kernel wasm wrappers.
+ */
+function measureInterleavedMedianRatio(
+  runTs: () => void,
+  runWasm: () => void,
+  iterations = 31,
+): number {
+  const tsSamples: number[] = [];
+  const wasmSamples: number[] = [];
   for (let i = 0; i < iterations; i += 1) {
-    const start = performance.now();
-    run();
-    samples.push(performance.now() - start);
+    const tsStart = performance.now();
+    runTs();
+    tsSamples.push(performance.now() - tsStart);
+    const wasmStart = performance.now();
+    runWasm();
+    wasmSamples.push(performance.now() - wasmStart);
   }
-  samples.sort((a, b) => a - b);
-  return samples[Math.floor(samples.length / 2)]!;
+  tsSamples.sort((a, b) => a - b);
+  wasmSamples.sort((a, b) => a - b);
+  const tsMs = tsSamples[Math.floor(tsSamples.length / 2)]!;
+  const wasmMs = wasmSamples[Math.floor(wasmSamples.length / 2)]!;
+  return tsMs === 0 ? 0 : wasmMs / tsMs;
 }
 
 describe("spatialVoronoiPerf", () => {
@@ -35,17 +53,17 @@ describe("spatialVoronoiPerf", () => {
       "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
     );
     wasmPkg.build_spatial_voronoi_json(sitesJson);
-    geoSpatialVoronoiFromSites(sites);
+    JSON.stringify(geoSpatialVoronoiFromSites(sites));
 
-    const tsMs = measureMedianMs(() => {
-      geoSpatialVoronoiFromSites(sites);
-    });
-    const wasmMs = measureMedianMs(() => {
-      wasmPkg.build_spatial_voronoi_json(sitesJson);
-    });
+    const ratio = measureInterleavedMedianRatio(
+      () => {
+        JSON.stringify(geoSpatialVoronoiFromSites(sites));
+      },
+      () => {
+        wasmPkg.build_spatial_voronoi_json(sitesJson);
+      },
+    );
 
-    const ratio = tsMs === 0 ? 0 : wasmMs / tsMs;
-    // Ready stays false while this gate fails (~2× on local/CI today).
     if (KERNEL_WASM_READY.spatialVoronoi) {
       expect(ratio).toBeLessThanOrEqual(1.1);
     } else {

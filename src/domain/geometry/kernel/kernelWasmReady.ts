@@ -9,16 +9,15 @@ export type KernelEntrypoint =
   | "tentacleEliminationRegion";
 
 /**
- * Per-entrypoint WASM readiness. Wave-1 entrypoints are enabled after
- * topology + perf gates; Wave-2 entrypoints ship false until Phase E.
- * Keep TS fallback via dispatchKernel.
+ * Per-entrypoint WASM readiness. Wave-1 and Wave-2 entrypoints are enabled
+ * after topology + perf gates. Keep TS fallback via dispatchKernel.
  */
 export const KERNEL_WASM_READY: Record<KernelEntrypoint, boolean> = {
   maskFromUnionInput: true,
   endGameMaskFromDisks: true,
   halfPlane: true,
   geodesicLineBuffer: true,
-  spatialVoronoi: false,
+  spatialVoronoi: true,
   tentacleEliminationRegion: true,
 };
 
