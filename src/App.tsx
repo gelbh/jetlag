@@ -53,7 +53,6 @@ import {
   LeaderboardLazy,
   MapScreenLazy,
   StatsLazy,
-  TutorialLazy,
 } from "./navigation/routePreloaders";
 
 function RouteFallback() {
@@ -180,14 +179,6 @@ export default function App() {
               <LowBatteryPrompt />
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route
-                  path="/tutorial"
-                  element={
-                    <LazyRoute>
-                      <TutorialLazy />
-                    </LazyRoute>
-                  }
-                />
                 <Route path="/feedback" element={<Feedback />} />
                 <Route
                   path="/stats"

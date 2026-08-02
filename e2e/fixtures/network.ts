@@ -18,7 +18,7 @@ const TILE_PNG = Buffer.from(
 
 export interface BlockExternalAssetsOptions {
   overpassProfile?: OverpassFixtureProfile;
-  /** Let basemap tile requests reach the network (tutorial screenshot capture). */
+  /** Let basemap tile requests reach the network (visual screenshot capture). */
   allowMapTiles?: boolean;
 }
 

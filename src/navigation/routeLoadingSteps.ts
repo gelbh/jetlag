@@ -31,8 +31,6 @@ export function destinationTitleForPath(path: string): string {
       return "Create session";
     case "/join":
       return "Join session";
-    case "/tutorial":
-      return "Tutorial";
     case "/presets":
       return "Presets";
     case "/presets/new":
@@ -84,8 +82,6 @@ function baseStepsForPath(normalizedPath: string): RouteLoadingStepId[] {
       return ["download-screen", "open-screen"];
     case "/join":
       return ["open-screen"];
-    case "/tutorial":
-      return ["download-screen", "open-screen"];
     case "/presets":
     case "/presets/new":
     case "/presets/:id/edit":

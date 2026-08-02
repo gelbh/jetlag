@@ -35,8 +35,8 @@ async function patchSessionTimer(
   });
 }
 
-const TUTORIAL_PREMIUM_CAPTURE_EMAIL = "tutorial-premium@jetlag.test";
-const TUTORIAL_PREMIUM_CAPTURE_PASSWORD = "tutorial-premium-pass";
+const E2E_PREMIUM_CAPTURE_EMAIL = "e2e-premium@jetlag.test";
+const E2E_PREMIUM_CAPTURE_PASSWORD = "e2e-premium-pass";
 
 async function waitForPermanentAuthUser(): Promise<void> {
   const auth = getFirebaseAuth();
@@ -73,8 +73,8 @@ async function signInPermanentUserForCapture(): Promise<string> {
   try {
     await createUserWithEmailAndPassword(
       auth,
-      TUTORIAL_PREMIUM_CAPTURE_EMAIL,
-      TUTORIAL_PREMIUM_CAPTURE_PASSWORD,
+      E2E_PREMIUM_CAPTURE_EMAIL,
+      E2E_PREMIUM_CAPTURE_PASSWORD,
     );
   } catch (error) {
     const code =
@@ -84,8 +84,8 @@ async function signInPermanentUserForCapture(): Promise<string> {
     if (code === "auth/email-already-in-use") {
       await signInWithEmailAndPassword(
         auth,
-        TUTORIAL_PREMIUM_CAPTURE_EMAIL,
-        TUTORIAL_PREMIUM_CAPTURE_PASSWORD,
+        E2E_PREMIUM_CAPTURE_EMAIL,
+        E2E_PREMIUM_CAPTURE_PASSWORD,
       );
     } else {
       throw error;

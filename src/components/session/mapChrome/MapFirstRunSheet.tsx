@@ -1,4 +1,3 @@
-import { AppLink } from "../../navigation/AppLink";
 import { MotionSheet } from "../../motion/MotionSheet";
 import { usePersistedDismiss } from "../../../hooks/forms/usePersistedDismiss";
 
@@ -60,10 +59,6 @@ export function MapFirstRunSheet({ open, onDismiss }: MapFirstRunSheetProps) {
         >
           Close
         </button>
-
-        <AppLink to="/tutorial" className="home-feedback-link block text-center">
-          Full tutorial →
-        </AppLink>
       </div>
     </MotionSheet>
   );

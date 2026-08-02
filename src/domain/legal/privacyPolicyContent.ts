@@ -68,7 +68,7 @@ export const PRIVACY_POLICY_SECTIONS: LegalSection[] = [
     id: "local-storage",
     title: "Data on your device",
     paragraphs: [
-      "The app stores tutorial progress, map preferences, and similar settings in your browser or app storage. This data stays on your device unless you clear app data.",
+      "The app stores map preferences and similar settings in your browser or app storage. This data stays on your device unless you clear app data.",
     ],
   },
   {

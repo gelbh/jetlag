@@ -3,7 +3,6 @@ const PRESET_EDIT_PATH_RE = /^\/presets\/[^/]+\/edit$/;
 const LAZY_ROUTE_PATHS = new Set([
   "/map",
   "/create",
-  "/tutorial",
   "/presets",
   "/presets/new",
   "/presets/:id/edit",
@@ -26,7 +25,6 @@ export function isLazyRoute(path: string): boolean {
 export type LazyRouteLoaderKey =
   | "importMapScreen"
   | "importCreateSession"
-  | "importTutorial"
   | "importGamePresetList"
   | "importGamePresetEditor";
 
@@ -37,8 +35,6 @@ export function lazyRouteLoaderKey(path: string): LazyRouteLoaderKey | undefined
       return "importMapScreen";
     case "/create":
       return "importCreateSession";
-    case "/tutorial":
-      return "importTutorial";
     case "/presets":
       return "importGamePresetList";
     case "/presets/new":

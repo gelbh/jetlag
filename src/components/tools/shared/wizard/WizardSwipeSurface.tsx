@@ -12,7 +12,7 @@ interface WizardSwipeSurfaceProps {
   children: ReactNode;
   footer?: ReactNode;
   className?: string;
-  /** Tutorial / read-only previews: natural height, no flex collapse. */
+  /** Read-only / embedded previews: natural height, no flex collapse. */
   embedded?: boolean;
   /** When false, children stay clickable without horizontal swipe handling. */
   swipeEnabled?: boolean;
