@@ -127,10 +127,6 @@ function MapFocus({
 
     lastRecenterRef.current = recenterToken;
 
-    if (suppressChromeHideRef) {
-      suppressChromeHideRef.current = true;
-    }
-
     map.resize();
 
     const padding = {
@@ -151,6 +147,10 @@ function MapFocus({
       )
     ) {
       return;
+    }
+
+    if (suppressChromeHideRef) {
+      suppressChromeHideRef.current = true;
     }
 
     const framed = computeFramedCenterZoomMapLibre(
