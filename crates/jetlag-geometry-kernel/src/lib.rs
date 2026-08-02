@@ -1,9 +1,10 @@
-//! Geometry kernel (Rust / WASM) — mask + half-plane + geodesic + voronoi.
+//! Geometry kernel (Rust / WASM) — mask + half-plane + geodesic + voronoi + near-region.
 
 pub mod geodesic;
 pub mod geodesic_buffer;
 pub mod half_plane;
 pub mod mask;
+pub mod near_region;
 pub mod tentacle;
 pub mod types;
 pub mod voronoi;
@@ -32,7 +33,8 @@ use tentacle::{
     build_tentacle_poi_answer_elimination_region as build_tentacle_poi_answer_native,
     game_area_from_json, parse_anchor, parse_sites, parse_voronoi_cells,
 };
-use types::{DiskSpecJson, EliminationUnionInputJson};
+use near_region::build_near_region as build_near_region_native;
+use types::{DiskSpecJson, EliminationUnionInputJson, NearRegionInputJson};
 use voronoi::spatial_voronoi_from_sites_json as spatial_voronoi_native;
 use wasm_bindgen::prelude::*;
 
@@ -179,6 +181,30 @@ pub fn geodesic_line_buffer_json(
         &coordinates,
         distance_meters,
         sample_spacing_meters,
+    ))
+}
+
+/// WASM export: batch near-region (buffer lines + union disks + clip).
+#[wasm_bindgen]
+pub fn build_near_region_json(input_json: &str) -> Result<JsValue, JsValue> {
+    let parsed: NearRegionInputJson =
+        serde_json::from_str(input_json).map_err(|e| js_err(format!("input: {e}")))?;
+    let game_area = GameArea::from_geometry(&parsed.game_area)
+        .ok_or_else(|| js_err("invalid game area geometry"))?;
+    let disks: Vec<DiskSpec> = parsed
+        .disks
+        .into_iter()
+        .map(|d| DiskSpec {
+            center: d.center,
+            radius_meters: d.radius_meters,
+        })
+        .collect();
+    let distance = parsed.distance_meters.unwrap_or(0.0);
+    feature_to_js(build_near_region_native(
+        &parsed.segments,
+        distance,
+        &disks,
+        &game_area,
     ))
 }
 

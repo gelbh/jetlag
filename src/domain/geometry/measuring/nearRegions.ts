@@ -12,6 +12,9 @@ import { around as geoflatbushAround } from "geoflatbush";
 import { unionPolygonFeatures } from "../masks/unionPolygonFeatures";
 import type { GameArea } from "../../map/annotations";
 import { dispatchGeodesicLineBuffer } from "./geodesicLineBuffer";
+import { featureToGameAreaGeometry } from "../kernel/featureConvert";
+import { shouldUseWasm } from "../kernel/kernelWasmReady";
+import { dispatchNearRegionBatch } from "../kernel/nearRegionKernelRunner";
 import { resolveClientMaskKernelMode } from "../kernel/resolveClientMaskKernelMode";
 import {
   gameAreaFingerprint,
@@ -198,6 +201,25 @@ export function clearCoastlineNearRegionCacheForTests(): void {
   coastlineNearRegionCache.clear();
 }
 
+function getCachedCoastlineNearRegion(
+  cacheKey: string,
+): Feature<Polygon | MultiPolygon> | undefined {
+  return coastlineNearRegionCache.get(cacheKey);
+}
+
+function setCachedCoastlineNearRegion(
+  cacheKey: string,
+  result: Feature<Polygon | MultiPolygon>,
+): void {
+  if (coastlineNearRegionCache.size >= COASTLINE_NEAR_REGION_CACHE_MAX) {
+    const oldestKey = coastlineNearRegionCache.keys().next().value;
+    if (oldestKey !== undefined) {
+      coastlineNearRegionCache.delete(oldestKey);
+    }
+  }
+  coastlineNearRegionCache.set(cacheKey, result);
+}
+
 export const COASTLINE_NEAR_REGION_YIELD_EVERY = 4;
 
 let coastlineNearRegionYieldHook: (() => Promise<void>) | null = null;
@@ -361,7 +383,7 @@ async function buildCoastlineNearRegionWithBuffer(
     segments.length,
     "async",
   );
-  const cached = coastlineNearRegionCache.get(cacheKey);
+  const cached = getCachedCoastlineNearRegion(cacheKey);
   if (cached) {
     return cached;
   }
@@ -404,13 +426,7 @@ async function buildCoastlineNearRegionWithBuffer(
       return null;
     }
 
-    if (coastlineNearRegionCache.size >= COASTLINE_NEAR_REGION_CACHE_MAX) {
-      const oldestKey = coastlineNearRegionCache.keys().next().value;
-      if (oldestKey !== undefined) {
-        coastlineNearRegionCache.delete(oldestKey);
-      }
-    }
-    coastlineNearRegionCache.set(cacheKey, result);
+    setCachedCoastlineNearRegion(cacheKey, result);
     return result;
   } catch {
     return null;
@@ -435,7 +451,7 @@ export function buildCoastlineNearRegionTs(
     segments.length,
     "ts",
   );
-  const cached = coastlineNearRegionCache.get(cacheKey);
+  const cached = getCachedCoastlineNearRegion(cacheKey);
   if (cached) {
     return cached;
   }
@@ -467,13 +483,7 @@ export function buildCoastlineNearRegionTs(
       return null;
     }
 
-    if (coastlineNearRegionCache.size >= COASTLINE_NEAR_REGION_CACHE_MAX) {
-      const oldestKey = coastlineNearRegionCache.keys().next().value;
-      if (oldestKey !== undefined) {
-        coastlineNearRegionCache.delete(oldestKey);
-      }
-    }
-    coastlineNearRegionCache.set(cacheKey, result);
+    setCachedCoastlineNearRegion(cacheKey, result);
     return result;
   } catch {
     return null;
@@ -486,11 +496,43 @@ export async function buildCoastlineNearRegion(
   gameArea: GameArea,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
   const mode = resolveClientMaskKernelMode();
+  if (shouldUseWasm(mode, "nearRegionBatch")) {
+    const cacheKey = coastlineNearRegionCacheKey(
+      gameArea,
+      distanceMeters,
+      segments.length,
+      `batch:${mode}`,
+    );
+    const cached = getCachedCoastlineNearRegion(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const result = await dispatchNearRegionBatch(
+      {
+        segments,
+        distanceMeters,
+        disks: [],
+        gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
+        // Sync runTs: dispatchKernel requires sync TS; WASM-fail skips cooperative yield.
+        runTs: () =>
+          buildCoastlineNearRegionTs(segments, distanceMeters, gameArea),
+      },
+      mode,
+    );
+
+    if (result) {
+      setCachedCoastlineNearRegion(cacheKey, result);
+    }
+    return result;
+  }
+
   return buildCoastlineNearRegionWithBuffer(
     segments,
     distanceMeters,
     gameArea,
-    (segment, meters) => dispatchGeodesicLineBuffer(segment, meters, undefined, mode),
+    (segment, meters) =>
+      dispatchGeodesicLineBuffer(segment, meters, undefined, mode),
   );
 }
 
@@ -549,8 +591,8 @@ export function buildLocationNearRegion(
   return clipped as Feature<Polygon | MultiPolygon>;
 }
 
-/** Union of equal-radius buffers around every site (e.g. all airports in the play area). */
-export function buildMultiPlaceNearRegion(
+/** Sync TS multi-place path for tests/overlays. Prefer {@link buildMultiPlaceNearRegion}. */
+export function buildMultiPlaceNearRegionTs(
   places: readonly LatLngTuple[],
   distanceMeters: number,
   gameArea: GameArea,
@@ -614,4 +656,31 @@ export function buildMultiPlaceNearRegion(
   }
 
   return clipped as Feature<Polygon | MultiPolygon>;
+}
+
+/** Union of equal-radius buffers around every site (e.g. all airports in the play area). */
+export async function buildMultiPlaceNearRegion(
+  places: readonly LatLngTuple[],
+  distanceMeters: number,
+  gameArea: GameArea,
+): Promise<Feature<Polygon | MultiPolygon> | null> {
+  const mode = resolveClientMaskKernelMode();
+  if (shouldUseWasm(mode, "nearRegionBatch")) {
+    return dispatchNearRegionBatch(
+      {
+        segments: [],
+        distanceMeters: 0,
+        disks: places.map((center) => ({
+          center,
+          radiusMeters: distanceMeters,
+        })),
+        gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
+        runTs: () =>
+          buildMultiPlaceNearRegionTs(places, distanceMeters, gameArea),
+      },
+      mode,
+    );
+  }
+
+  return buildMultiPlaceNearRegionTs(places, distanceMeters, gameArea);
 }

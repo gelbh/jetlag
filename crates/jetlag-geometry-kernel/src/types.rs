@@ -36,3 +36,16 @@ pub struct EliminationUnionInputJson {
     pub polygons: Vec<PolygonFeature>,
     pub disks: Vec<DiskSpecJson>,
 }
+
+/// Batch near-region input: line segments (`[lng,lat]` rings) and/or disks.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NearRegionInputJson {
+    #[serde(default)]
+    pub segments: Vec<Vec<[f64; 2]>>,
+    #[serde(default, rename = "distanceMeters")]
+    pub distance_meters: Option<f64>,
+    #[serde(default)]
+    pub disks: Vec<DiskSpecJson>,
+    #[serde(rename = "gameArea")]
+    pub game_area: GameAreaGeometry,
+}
