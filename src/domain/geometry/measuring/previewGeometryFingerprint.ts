@@ -1,12 +1,5 @@
 import type { Feature, MultiPolygon, Polygon, Position } from "geojson";
 
-function collectPositions(geometry: Polygon | MultiPolygon): Position[] {
-  if (geometry.type === "Polygon") {
-    return geometry.coordinates.flat();
-  }
-  return geometry.coordinates.flat(2);
-}
-
 /** Cheap publish signature for measuring preview polygons (avoids JSON.stringify). */
 export function previewGeometryFingerprint(
   feature: Feature<Polygon | MultiPolygon> | null,
@@ -15,24 +8,51 @@ export function previewGeometryFingerprint(
     return null;
   }
 
-  const positions = collectPositions(feature.geometry);
-  const coordCount = positions.length;
-  if (coordCount === 0) {
-    return `${feature.geometry.type}:0`;
+  let coordCount = 0;
+  let minLng = Infinity;
+  let maxLng = -Infinity;
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+  let first: Position | undefined;
+  let last: Position | undefined;
+
+  const visit = (position: Position) => {
+    const lng = position[0];
+    const lat = position[1];
+    if (first === undefined) first = position;
+    last = position;
+    coordCount += 1;
+    if (lng < minLng) minLng = lng;
+    if (lng > maxLng) maxLng = lng;
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+  };
+
+  const geometry = feature.geometry;
+  if (geometry.type === "Polygon") {
+    for (const ring of geometry.coordinates) {
+      for (const position of ring) visit(position);
+    }
+  } else {
+    for (const polygon of geometry.coordinates) {
+      for (const ring of polygon) {
+        for (const position of ring) visit(position);
+      }
+    }
   }
 
-  const lngs = positions.map(([lng]) => lng);
-  const lats = positions.map(([, lat]) => lat);
+  if (coordCount === 0 || first === undefined || last === undefined) {
+    return `${geometry.type}:0`;
+  }
+
   const round = (value: number) => value.toFixed(6);
-  const first = positions[0]!;
-  const last = positions[coordCount - 1]!;
 
   return [
-    feature.geometry.type,
-    round(Math.min(...lngs)),
-    round(Math.min(...lats)),
-    round(Math.max(...lngs)),
-    round(Math.max(...lats)),
+    geometry.type,
+    round(minLng),
+    round(minLat),
+    round(maxLng),
+    round(maxLat),
     coordCount,
     round(first[0]),
     round(first[1]),

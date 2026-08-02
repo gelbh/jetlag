@@ -89,4 +89,26 @@ describe("previewGeometryFingerprint", () => {
 
     expect(previewGeometryFingerprint(multi)).toMatch(/^MultiPolygon:/);
   });
+
+  it("does not RangeError on MultiPolygons with >200K coordinates", () => {
+    const coordCount = 200_000;
+    const ring: [number, number][] = Array.from({ length: coordCount }, (_, i) => [
+      -6.26 + (i % 100) * 0.001,
+      53.35 + Math.floor(i / 100) * 0.001,
+    ]);
+    ring.push(ring[0]!);
+
+    const dense: Feature<MultiPolygon> = {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "MultiPolygon",
+        coordinates: [[ring]],
+      },
+    };
+
+    const fingerprint = previewGeometryFingerprint(dense);
+    expect(fingerprint).toMatch(/^MultiPolygon:/);
+    expect(fingerprint).toContain(`:${coordCount + 1}:`);
+  });
 });
