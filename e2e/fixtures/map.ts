@@ -21,12 +21,16 @@ export async function clickMapCenter(page: Page) {
   await clickMapAt(page, 0.5, 0.5);
 }
 
+/** Leaflet or MapLibre map surface (dual-path until cutover). */
+export const MAP_CONTAINER_SELECTOR =
+  ".leaflet-container, .maplibregl-map";
+
 export async function clickMapAt(
   page: Page,
   xRatio: number,
   yRatio: number,
 ) {
-  const map = page.locator(".leaflet-container");
+  const map = page.locator(MAP_CONTAINER_SELECTOR).first();
   await map.waitFor();
   const box = await map.boundingBox();
   if (!box) {
@@ -64,14 +68,15 @@ export async function expectMapHasAnnotations(page: Page, minCount = 1) {
 }
 
 export async function waitForMapTilesLoaded(page: Page) {
-  const map = page.locator(".leaflet-container");
+  const map = page.locator(MAP_CONTAINER_SELECTOR).first();
   if (!(await map.isVisible().catch(() => false))) {
     return;
   }
 
   await expect
     .poll(
-      async () => page.locator(".leaflet-tile-loaded").count(),
+      async () =>
+        page.locator(".leaflet-tile-loaded, .maplibregl-canvas").count(),
       { timeout: 30_000 },
     )
     .toBeGreaterThan(0);

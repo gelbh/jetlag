@@ -1,5 +1,9 @@
 import { type Browser, type Page, expect } from "@playwright/test";
-import { E2E_GEOLOCATION, LOCAL_GAME_AREA } from "./map";
+import {
+  E2E_GEOLOCATION,
+  LOCAL_GAME_AREA,
+  MAP_CONTAINER_SELECTOR,
+} from "./map";
 import { dismissMapOnboarding, prepareE2EPage } from "./page-init";
 import type { BlockExternalAssetsOptions } from "./network";
 
@@ -108,7 +112,7 @@ export async function openMapWithLocalSession(
 }
 
 export async function expectCreatePageMapPreviewLoaded(page: Page) {
-  const map = page.locator(".leaflet-container");
+  const map = page.locator(MAP_CONTAINER_SELECTOR).first();
   await map.waitFor({ state: "visible", timeout: 10_000 });
 
   await expect
@@ -116,7 +120,10 @@ export async function expectCreatePageMapPreviewLoaded(page: Page) {
     .toBeGreaterThan(200);
 
   await expect
-    .poll(async () => page.locator(".leaflet-tile-pane img").count())
+    .poll(
+      async () =>
+        page.locator(".leaflet-tile-pane img, .maplibregl-canvas").count(),
+    )
     .toBeGreaterThan(0);
 }
 
