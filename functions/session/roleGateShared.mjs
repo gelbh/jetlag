@@ -10,6 +10,23 @@ export function isRoleGatedSession(data) {
   );
 }
 
+export function readMembershipFields(data) {
+  const memberUids = Array.isArray(data.memberUids)
+    ? data.memberUids.filter((uid) => typeof uid === "string")
+    : [];
+  const memberRoles =
+    data.memberRoles && typeof data.memberRoles === "object"
+      ? { ...data.memberRoles }
+      : {};
+  const memberAppVersions =
+    data.memberAppVersions && typeof data.memberAppVersions === "object"
+      ? { ...data.memberAppVersions }
+      : {};
+  const hostUid = typeof data.hostUid === "string" ? data.hostUid : "";
+
+  return { memberUids, memberRoles, memberAppVersions, hostUid };
+}
+
 export function buildRoleGatesForHost(hostUid, hostRole) {
   const leaders = {};
 

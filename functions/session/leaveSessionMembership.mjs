@@ -8,27 +8,12 @@ import { pickHostPromotee } from "./pickHostPromotee.mjs";
 import {
   isRoleGatedSession,
   promoteOrClearRoleLeader,
+  readMembershipFields,
   removeMemberFromMaps,
 } from "./roleGateShared.mjs";
 
 export const LEAVE_MEMBERSHIP_NOT_MEMBER = "LEAVE_MEMBERSHIP_NOT_MEMBER";
-
-function readMembershipFields(data) {
-  const memberUids = Array.isArray(data.memberUids)
-    ? data.memberUids.filter((uid) => typeof uid === "string")
-    : [];
-  const memberRoles =
-    data.memberRoles && typeof data.memberRoles === "object"
-      ? { ...data.memberRoles }
-      : {};
-  const memberAppVersions =
-    data.memberAppVersions && typeof data.memberAppVersions === "object"
-      ? { ...data.memberAppVersions }
-      : {};
-  const hostUid = typeof data.hostUid === "string" ? data.hostUid : "";
-
-  return { memberUids, memberRoles, memberAppVersions, hostUid };
-}
+export const LEAVE_NOT_GATED = "LEAVE_NOT_GATED";
 
 function assertActiveSession(sessionSnap) {
   if (!sessionSnap.exists) {
@@ -66,6 +51,64 @@ function applyRoleLeaderPromotionOnLeave(uid, role, roleGates, memberUids, membe
   };
 }
 
+/**
+ * Shared remove-member → promote role leader → optional secret clear.
+ * Callers must read session + secrets before invoking, then write once.
+ */
+export function applyGatedMemberRemoval({
+  uid,
+  data,
+  secrets,
+}) {
+  const { memberUids, memberRoles, memberAppVersions, hostUid } =
+    readMembershipFields(data);
+  if (!memberUids.includes(uid)) {
+    throw new Error(LEAVE_MEMBERSHIP_NOT_MEMBER);
+  }
+
+  const leavingRole = memberRoles[uid];
+  let roleGates = {
+    version: 1,
+    leaders: { ...(data.roleGates?.leaders ?? {}) },
+  };
+  const withoutMember = removeMemberFromMaps(
+    memberUids,
+    memberRoles,
+    memberAppVersions,
+    uid,
+  );
+
+  const leaderUpdate = applyRoleLeaderPromotionOnLeave(
+    uid,
+    leavingRole,
+    roleGates,
+    withoutMember.memberUids,
+    withoutMember.memberRoles,
+  );
+  roleGates = leaderUpdate.roleGates;
+
+  const sessionUpdate = {
+    memberUids: withoutMember.memberUids,
+    memberRoles: withoutMember.memberRoles,
+    memberAppVersions: withoutMember.memberAppVersions,
+    roleGates,
+  };
+
+  let nextSecrets = null;
+  if (leaderUpdate.clearSecretRole && secrets) {
+    nextSecrets = { ...secrets };
+    delete nextSecrets[leaderUpdate.clearSecretRole];
+  }
+
+  return {
+    hostUid,
+    withoutMember,
+    sessionUpdate,
+    nextSecrets,
+    clearSecretRole: leaderUpdate.clearSecretRole,
+  };
+}
+
 export async function leaveSessionMembershipHandler(db, uid, sessionId) {
   const sessionRef = db.collection("sessions").doc(sessionId);
   const secretsRef = db.collection("sessionRoleSecrets").doc(sessionId);
@@ -75,56 +118,21 @@ export async function leaveSessionMembershipHandler(db, uid, sessionId) {
     const data = assertActiveSession(sessionSnap);
 
     if (!isRoleGatedSession(data)) {
-      throw new Error("LEAVE_NOT_GATED");
+      throw new Error(LEAVE_NOT_GATED);
     }
 
-    const { memberUids, memberRoles, memberAppVersions, hostUid } =
-      readMembershipFields(data);
-    if (!memberUids.includes(uid)) {
-      throw new Error(LEAVE_MEMBERSHIP_NOT_MEMBER);
-    }
+    const secretsSnap = await tx.get(secretsRef);
+    const secrets = secretsSnap.exists ? secretsSnap.data() : null;
 
-    const leavingRole = memberRoles[uid];
-    let roleGates = {
-      version: 1,
-      leaders: { ...(data.roleGates?.leaders ?? {}) },
-    };
-    const withoutMember = removeMemberFromMaps(
-      memberUids,
-      memberRoles,
-      memberAppVersions,
-      uid,
-    );
+    const removal = applyGatedMemberRemoval({ uid, data, secrets });
 
-    const leaderUpdate = applyRoleLeaderPromotionOnLeave(
-      uid,
-      leavingRole,
-      roleGates,
-      withoutMember.memberUids,
-      withoutMember.memberRoles,
-    );
-    roleGates = leaderUpdate.roleGates;
-
-    const sessionUpdate = {
-      memberUids: withoutMember.memberUids,
-      memberRoles: withoutMember.memberRoles,
-      memberAppVersions: withoutMember.memberAppVersions,
-      roleGates,
-    };
-
-    if (uid === hostUid) {
+    if (uid === removal.hostUid) {
       throw new Error(LEAVE_NOT_HOST);
     }
 
-    tx.update(sessionRef, sessionUpdate);
-
-    if (leaderUpdate.clearSecretRole) {
-      const secretsSnap = await tx.get(secretsRef);
-      if (secretsSnap.exists) {
-        const secrets = { ...secretsSnap.data() };
-        delete secrets[leaderUpdate.clearSecretRole];
-        tx.set(secretsRef, secrets);
-      }
+    tx.update(sessionRef, removal.sessionUpdate);
+    if (removal.nextSecrets != null) {
+      tx.set(secretsRef, removal.nextSecrets);
     }
   });
 
@@ -144,32 +152,14 @@ export async function leaveGatedHostSessionHandler(db, uid, sessionId) {
       throw new Error(LEAVE_NOT_HOST);
     }
 
-    const { memberUids, memberRoles, memberAppVersions } = readMembershipFields(data);
-    const leavingRole = memberRoles[uid];
-    let roleGates = {
-      version: 1,
-      leaders: { ...(data.roleGates?.leaders ?? {}) },
-    };
+    const secretsSnap = await tx.get(secretsRef);
+    const secrets = secretsSnap.exists ? secretsSnap.data() : null;
 
-    const withoutMember = removeMemberFromMaps(
-      memberUids,
-      memberRoles,
-      memberAppVersions,
-      uid,
-    );
-
-    const leaderUpdate = applyRoleLeaderPromotionOnLeave(
-      uid,
-      leavingRole,
-      roleGates,
-      withoutMember.memberUids,
-      withoutMember.memberRoles,
-    );
-    roleGates = leaderUpdate.roleGates;
+    const removal = applyGatedMemberRemoval({ uid, data, secrets });
 
     const promotee = pickHostPromotee(
-      withoutMember.memberUids,
-      withoutMember.memberRoles,
+      removal.withoutMember.memberUids,
+      removal.withoutMember.memberRoles,
       uid,
     );
 
@@ -179,23 +169,12 @@ export async function leaveGatedHostSessionHandler(db, uid, sessionId) {
       return;
     }
 
-    const sessionUpdate = {
+    tx.update(sessionRef, {
+      ...removal.sessionUpdate,
       hostUid: promotee,
-      memberUids: withoutMember.memberUids,
-      memberRoles: withoutMember.memberRoles,
-      memberAppVersions: withoutMember.memberAppVersions,
-      roleGates,
-    };
-
-    tx.update(sessionRef, sessionUpdate);
-
-    if (leaderUpdate.clearSecretRole) {
-      const secretsSnap = await tx.get(secretsRef);
-      if (secretsSnap.exists) {
-        const secrets = { ...secretsSnap.data() };
-        delete secrets[leaderUpdate.clearSecretRole];
-        tx.set(secretsRef, secrets);
-      }
+    });
+    if (removal.nextSecrets != null) {
+      tx.set(secretsRef, removal.nextSecrets);
     }
 
     outcome = { action: "promoted", newHostUid: promotee };

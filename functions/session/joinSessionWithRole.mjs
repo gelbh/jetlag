@@ -5,7 +5,7 @@ import {
   countMembersWithRole,
   isRoleGatedSession,
   promoteOrClearRoleLeader,
-  roleHasOtherMembers,
+  readMembershipFields,
 } from "./roleGateShared.mjs";
 import {
   newRoleSecret,
@@ -40,49 +40,19 @@ function sanitizeReturningMemberUid(persistedMyUid, candidate) {
   return persistedMyUid === candidate ? candidate : undefined;
 }
 
-function readMembershipFields(data) {
-  const memberUids = Array.isArray(data.memberUids)
-    ? data.memberUids.filter((uid) => typeof uid === "string")
-    : [];
-  const memberRoles =
-    data.memberRoles && typeof data.memberRoles === "object"
-      ? { ...data.memberRoles }
-      : {};
-  const memberAppVersions =
-    data.memberAppVersions && typeof data.memberAppVersions === "object"
-      ? { ...data.memberAppVersions }
-      : {};
-  const hostUid = typeof data.hostUid === "string" ? data.hostUid : "";
-
-  return { memberUids, memberRoles, memberAppVersions, hostUid };
-}
-
 function applyLeaderPromotionOnRoleSwitch({
   uid,
   currentRole,
   roleGates,
   memberUids,
   memberRoles,
-  secrets,
 }) {
   if (currentRole !== "seeker" && currentRole !== "hider") {
-    return { roleGates, secretsPatch: null };
+    return { roleGates, clearSecret: false };
   }
 
   if (roleGates?.leaders?.[currentRole] !== uid) {
-    return { roleGates, secretsPatch: null };
-  }
-
-  const remainingSameRole = roleHasOtherMembers(memberRoles, currentRole, uid);
-  if (remainingSameRole) {
-    const promoted = promoteOrClearRoleLeader(
-      roleGates,
-      memberUids,
-      memberRoles,
-      currentRole,
-      uid,
-    );
-    return { roleGates: promoted.roleGates, secretsPatch: null };
+    return { roleGates, clearSecret: false };
   }
 
   const promoted = promoteOrClearRoleLeader(
@@ -92,8 +62,10 @@ function applyLeaderPromotionOnRoleSwitch({
     currentRole,
     uid,
   );
-  const secretsPatch = promoted.clearSecret ? { [currentRole]: null } : null;
-  return { roleGates: promoted.roleGates, secretsPatch };
+  return {
+    roleGates: promoted.roleGates,
+    clearSecret: promoted.clearSecret,
+  };
 }
 
 function assertRolePasscodeForJoin(role, memberRoles, uid, rolePasscode, secrets) {
@@ -221,6 +193,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
 
     const secretsSnap = await tx.get(secretsRef);
     const secrets = secretsSnap.exists ? { ...secretsSnap.data() } : {};
+    let secretsChanged = false;
 
     const currentRole = memberRoles[uid];
     if (
@@ -234,11 +207,11 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
         roleGates,
         memberUids,
         memberRoles,
-        secrets,
       });
       roleGates = switched.roleGates;
-      if (switched.secretsPatch?.[currentRole] === null) {
+      if (switched.clearSecret) {
         delete secrets[currentRole];
+        secretsChanged = true;
       }
     }
 
@@ -260,6 +233,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
 
     if (passcodeResult.secretsPatch) {
       Object.assign(secrets, passcodeResult.secretsPatch);
+      secretsChanged = true;
     }
     if (passcodeResult.roleGatesPatch) {
       for (const [gateRole, leaderUid] of Object.entries(
@@ -291,7 +265,10 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
     }
 
     tx.update(sessionRef, sessionUpdate);
-    tx.set(secretsRef, secrets, { merge: true });
+    // Full replace so vacated role keys are deleted (merge:true would leave them).
+    if (secretsChanged || Object.keys(secrets).length > 0) {
+      tx.set(secretsRef, secrets);
+    }
 
     result = {
       sessionId,

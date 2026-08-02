@@ -23,7 +23,6 @@ import {
   QUESTION_ANSWER_DEADLINE_MINUTES_MAX,
 } from "../../../domain/session/rules";
 import type { MemberRoles, PlayerRole } from "../../../domain/session/players/playerRole";
-import { buildRoleGatesForHost } from "../../../domain/session/players/roleGates";
 import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
 import {
   parseCustomCategories,
@@ -225,7 +224,6 @@ export function buildSessionDocument(
     createdAt,
     memberUids: [hostUid],
     memberRoles: { [hostUid]: hostRole },
-    roleGates: buildRoleGatesForHost(hostUid, hostRole),
     gameSize,
     distanceUnit: unit,
     hidingZoneRadiusMeters: radiusMeters,

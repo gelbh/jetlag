@@ -8,3 +8,18 @@ vi.stubEnv("VITE_FIREBASE_PROJECT_ID", "demo-jetlag");
 vi.stubEnv("VITE_FIREBASE_STORAGE_BUCKET", "demo-jetlag.appspot.com");
 vi.stubEnv("VITE_FIREBASE_MESSAGING_SENDER_ID", "1234567890");
 vi.stubEnv("VITE_FIREBASE_APP_ID", "1:1234567890:web:demo");
+
+// Firestore emulator suites do not start the Functions emulator. Free create
+// still needs initSessionRoleGates to succeed so createRemoteSession does not
+// throw; secrets/roleGates remain server-owned in production.
+vi.mock("../../services/session/rolePasscodeLifecycle", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../../services/session/rolePasscodeLifecycle")>();
+  return {
+    ...actual,
+    initSessionRoleGates: async () => ({
+      observerPasscode: "OBSV",
+      rolePasscode: "ROLE",
+    }),
+  };
+});

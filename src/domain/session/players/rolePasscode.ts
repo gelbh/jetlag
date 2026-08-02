@@ -5,14 +5,24 @@ export function normalizeRolePasscode(input: string): string {
   return input.replace(/\s+/g, "").toUpperCase();
 }
 
+/** CSPRNG role codes (matches functions/session/rolePasscodes.mjs). */
 export function generateRolePasscode(): string {
   let code = "";
+  const limit =
+    ROLE_PASSCODE_ALPHABET.length *
+    Math.floor(256 / ROLE_PASSCODE_ALPHABET.length);
+  const bytes = new Uint8Array(ROLE_PASSCODE_LENGTH);
 
-  for (let index = 0; index < ROLE_PASSCODE_LENGTH; index += 1) {
-    code +=
-      ROLE_PASSCODE_ALPHABET[
-        Math.floor(Math.random() * ROLE_PASSCODE_ALPHABET.length)
-      ];
+  while (code.length < ROLE_PASSCODE_LENGTH) {
+    crypto.getRandomValues(bytes);
+    for (const byte of bytes) {
+      if (code.length >= ROLE_PASSCODE_LENGTH) {
+        break;
+      }
+      if (byte < limit) {
+        code += ROLE_PASSCODE_ALPHABET[byte % ROLE_PASSCODE_ALPHABET.length];
+      }
+    }
   }
 
   return code;

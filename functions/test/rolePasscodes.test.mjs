@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  hashRolePasscode,
+  generateRolePasscode,
   newRoleSecret,
   normalizeRolePasscode,
   verifyRolePasscode,
@@ -11,13 +11,20 @@ test("normalizeRolePasscode uppercases and strips spaces", () => {
   assert.equal(normalizeRolePasscode(" ab cd "), "ABCD");
 });
 
-test("verifyRolePasscode matches stored secret", () => {
+test("verifyRolePasscode matches stored plaintext secret", () => {
   const secret = newRoleSecret();
   assert.equal(verifyRolePasscode(secret, secret.code), true);
   assert.equal(verifyRolePasscode(secret, "WRNG"), false);
 });
 
-test("hashRolePasscode is deterministic for salt and code", () => {
-  const hash = hashRolePasscode("salt", "ABCD");
-  assert.equal(hashRolePasscode("salt", "ABCD"), hash);
+test("generateRolePasscode returns 4 alphabet chars", () => {
+  const code = generateRolePasscode();
+  assert.match(code, /^[ABCDEFGHJKLMNPQRSTUVWXYZ]{4}$/);
+});
+
+test("newRoleSecret stores plaintext code only", () => {
+  const secret = newRoleSecret();
+  assert.match(secret.code, /^[ABCDEFGHJKLMNPQRSTUVWXYZ]{4}$/);
+  assert.equal(secret.hash, undefined);
+  assert.equal(secret.salt, undefined);
 });

@@ -45,7 +45,9 @@ export function joinRequiresRolePasscode(
     return false;
   }
 
-  return countMembersWithRole(memberRoles, role) > 0;
+  // Always collect — join preview often lacks memberRoles for non-members.
+  // Empty side: leave blank; occupied side: server rejects missing/wrong codes.
+  return true;
 }
 
 export function buildRoleGatesForHost(

@@ -1,4 +1,4 @@
-import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { randomBytes, timingSafeEqual } from "node:crypto";
 
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ";
 export const ROLE_PASSCODE_LENGTH = 4;
@@ -9,19 +9,32 @@ export function normalizeRolePasscode(input) {
     : "";
 }
 
+/** Rejection-sample CSPRNG codes over the role-passcode alphabet. */
 export function generateRolePasscode() {
   let code = "";
+  const limit = ALPHABET.length * Math.floor(256 / ALPHABET.length);
 
-  for (let index = 0; index < ROLE_PASSCODE_LENGTH; index += 1) {
-    code += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+  while (code.length < ROLE_PASSCODE_LENGTH) {
+    const bytes = randomBytes(ROLE_PASSCODE_LENGTH);
+    for (const byte of bytes) {
+      if (code.length >= ROLE_PASSCODE_LENGTH) {
+        break;
+      }
+      if (byte < limit) {
+        code += ALPHABET[byte % ALPHABET.length];
+      }
+    }
   }
 
   return code;
 }
 
-export function hashRolePasscode(salt, code) {
-  const normalized = normalizeRolePasscode(code);
-  return scryptSync(normalized, salt, 32).toString("hex");
+/**
+ * Admin-only secret doc stores plaintext for reveal/copy.
+ * Clients cannot read `sessionRoleSecrets`; hashing adds no client-facing security.
+ */
+export function newRoleSecret() {
+  return { code: generateRolePasscode() };
 }
 
 export function verifyRolePasscode(record, code) {
@@ -29,26 +42,13 @@ export function verifyRolePasscode(record, code) {
     return false;
   }
 
-  const salt = typeof record.salt === "string" ? record.salt : "";
-  const hash = typeof record.hash === "string" ? record.hash : "";
-  if (!salt || !hash) {
+  const expected = normalizeRolePasscode(
+    typeof record.code === "string" ? record.code : "",
+  );
+  const candidate = normalizeRolePasscode(code);
+  if (!expected || expected.length !== candidate.length) {
     return false;
   }
 
-  const candidate = hashRolePasscode(salt, code);
-  if (candidate.length !== hash.length) {
-    return false;
-  }
-
-  return timingSafeEqual(Buffer.from(candidate, "hex"), Buffer.from(hash, "hex"));
-}
-
-export function newRoleSecret() {
-  const code = generateRolePasscode();
-  const salt = randomBytes(16).toString("hex");
-  return {
-    salt,
-    hash: hashRolePasscode(salt, code),
-    code,
-  };
+  return timingSafeEqual(Buffer.from(expected), Buffer.from(candidate));
 }

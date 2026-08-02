@@ -54,6 +54,9 @@ function buildMockDb({ sessionData, secrets = {}, writes, codeSessionId = "sess-
           Object.assign(sessionData, payload);
         },
         set: async (_ref, payload) => {
+          for (const key of Object.keys(secrets)) {
+            delete secrets[key];
+          }
           Object.assign(secrets, payload);
         },
       };
@@ -162,4 +165,33 @@ test("observer always requires passcode", async () => {
     (error) =>
       error instanceof Error && error.message === JOIN_PASSCODE_REQUIRED,
   );
+});
+
+test("role switch vacates prior role secret with full replace", async () => {
+  const writes = [];
+  const seekerSecret = newRoleSecret();
+  const observerSecret = newRoleSecret();
+  const secrets = { seeker: seekerSecret, observer: observerSecret };
+  const sessionData = {
+    status: "active",
+    hostUid: "host",
+    hostAppVersion: "0.1.0",
+    memberUids: ["host", "switcher"],
+    memberRoles: { host: "hider", switcher: "seeker" },
+    roleGates: { version: 1, leaders: { hider: "host", seeker: "switcher" } },
+  };
+  const db = buildMockDb({ sessionData, secrets, writes });
+
+  const result = await joinSessionWithRoleHandler(db, { uid: "switcher" }, {
+    code: "ABCD",
+    role: "observer",
+    rolePasscode: observerSecret.code,
+    clientVersion: "0.2.0",
+  });
+
+  assert.equal(result.sessionId, "sess-1");
+  assert.equal(sessionData.memberRoles.switcher, "observer");
+  assert.equal(sessionData.roleGates.leaders.seeker, undefined);
+  assert.equal(secrets.seeker, undefined);
+  assert.ok(secrets.observer);
 });

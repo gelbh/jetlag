@@ -6,6 +6,7 @@ import { newRoleSecret } from "../session/rolePasscodes.mjs";
 function buildMockDb({ sessionData, secrets, writes, secretWrites }) {
   const sessionRef = { id: "sess-1" };
   const secretsRef = { id: "sess-1" };
+  let wrote = false;
 
   return {
     collection: (name) => {
@@ -20,6 +21,9 @@ function buildMockDb({ sessionData, secrets, writes, secretWrites }) {
     runTransaction: async (fn) => {
       const tx = {
         get: async (ref) => {
+          if (wrote) {
+            throw new Error("Firestore read-after-write in transaction");
+          }
           if (ref === secretsRef) {
             return {
               exists: secrets != null,
@@ -32,10 +36,12 @@ function buildMockDb({ sessionData, secrets, writes, secretWrites }) {
           };
         },
         update: async (_ref, payload) => {
+          wrote = true;
           writes.push(payload);
           Object.assign(sessionData, payload);
         },
         set: async (_ref, payload) => {
+          wrote = true;
           secretWrites.push(payload);
           for (const key of Object.keys(secrets)) {
             delete secrets[key];
@@ -76,7 +82,7 @@ test("leave promotes lexicographic next role leader", async () => {
   assert.ok(secrets.seeker);
 });
 
-test("leave last role member clears secret", async () => {
+test("leave last role member clears secret without read-after-write", async () => {
   const writes = [];
   const secretWrites = [];
   const sessionData = {
@@ -89,11 +95,13 @@ test("leave last role member clears secret", async () => {
       leaders: { seeker: "host", hider: "solo-hider" },
     },
   };
-  const secrets = { hider: newRoleSecret() };
+  const secrets = { hider: newRoleSecret(), observer: newRoleSecret() };
   const db = buildMockDb({ sessionData, secrets, writes, secretWrites });
 
   await leaveSessionMembershipHandler(db, "solo-hider", "sess-1");
 
   assert.equal(sessionData.roleGates.leaders.hider, undefined);
   assert.equal(secrets.hider, undefined);
+  assert.ok(secrets.observer);
+  assert.equal(secretWrites.length, 1);
 });

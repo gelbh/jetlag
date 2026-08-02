@@ -19,6 +19,7 @@ import { joinRequiresRolePasscode } from "../domain/session/players/roleGates";
 import { normalizeRolePasscode } from "../domain/session/players/rolePasscode";
 import type { SessionRecord } from "../domain/map/annotations";
 import { RolePicker } from "../components/session/identity/RolePicker";
+import { copyToClipboard } from "../platform/copyToClipboard";
 import {
   ensureAnonymousUser,
   ensureFreshAnonymousUser,
@@ -238,6 +239,15 @@ export function JoinSession() {
             joinedSession = confirmed;
           }
 
+          if (result.rolePasscode) {
+            const copied = await copyToClipboard(result.rolePasscode);
+            window.alert(
+              copied
+                ? `You're first on this side. Role code ${result.rolePasscode} was copied — share it with teammates.`
+                : `You're first on this side. Your role code is ${result.rolePasscode} — share it with teammates.`,
+            );
+          }
+
           setSession(joinedSession, user.uid);
           setPremiumApiContext(result.session);
           track(ANALYTICS_EVENTS.session_joined, { role: playerRole });
@@ -343,7 +353,7 @@ export function JoinSession() {
               <span className="mt-2 block text-xs normal-case tracking-normal text-ink-muted">
                 {playerRole === "observer"
                   ? "Ask the host for the observer code."
-                  : "Ask a teammate on that side for the role code."}
+                  : "Leave blank if you're first on that side; otherwise ask a teammate for the role code."}
               </span>
             </label>
           ) : null}

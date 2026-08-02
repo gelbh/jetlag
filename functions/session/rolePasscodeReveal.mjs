@@ -1,7 +1,6 @@
 import { HttpsError } from "firebase-functions/v2/https";
 import {
   generateRolePasscode,
-  hashRolePasscode,
   newRoleSecret,
   normalizeRolePasscode,
   verifyRolePasscode,
@@ -101,4 +100,4 @@ export async function regenerateRolePasscodeHandler(db, uid, sessionId, role) {
   return { role, rolePasscode };
 }
 
-export { verifyRolePasscode, hashRolePasscode, generateRolePasscode, normalizeRolePasscode };
+export { verifyRolePasscode, generateRolePasscode, normalizeRolePasscode };

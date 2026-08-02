@@ -59,11 +59,8 @@ import {
 } from "../../domain/session/players/returningMember";
 import { isSessionRoleGated, buildRoleGatesForHost } from "../../domain/session/players/roleGates";
 import { repairGhostHost } from "../session/sessionLifecycle";
-import {
-  initSessionRoleGates,
-  joinSessionWithRole,
-  mapRolePasscodeJoinError,
-} from "../session/rolePasscodeLifecycle";
+import { initSessionRoleGates } from "../session/rolePasscodeLifecycle";
+import { joinGatedRemoteSessionByCode } from "./joinGatedRemoteSession";
 
 const HIDER_ROLE_POLL_MS = 250;
 const HIDER_ROLE_POLL_MAX_MS = 3000;
@@ -241,7 +238,12 @@ export type JoinRemoteSessionResult =
   | { status: "missing" }
   | { status: "ended" }
   | { status: "incompatible"; hostVersion: string }
-  | { status: "joined"; session: SessionRecord; rolePasscode?: string };
+  | {
+      status: "joined";
+      session: SessionRecord;
+      rolePasscode?: string;
+      becameLeader?: boolean;
+    };
 type SessionCodeRecord = {
   sessionId: string;
   hostUid: string;
@@ -417,7 +419,6 @@ export async function createRemoteSession(
     createdAt,
     memberUids: [hostUid],
     memberRoles: { [hostUid]: hostRole },
-    roleGates: buildRoleGatesForHost(hostUid, hostRole),
     gameSize,
     distanceUnit: distanceUnit ?? "imperial",
     hidingZoneRadiusMeters: radiusMeters,
@@ -453,11 +454,16 @@ export async function createRemoteSession(
     createdAt,
   });
 
+  // Stamp roleGates + secrets together via callable (do not gate without secrets).
   try {
     await initSessionRoleGates(sessionRef.id);
-  } catch {
-    // Host can retry from settings; membership is already created.
+  } catch (error) {
+    throw new Error(
+      "Couldn't set up role codes for this session. Try creating again.",
+      { cause: error },
+    );
   }
+  session.roleGates = buildRoleGatesForHost(hostUid, hostRole);
 
   return session;
 }
@@ -681,52 +687,26 @@ async function joinRemoteSessionWithoutRead(
   };
 }
 
-async function joinGatedRemoteSessionByCode(
+function callJoinGatedRemoteSession(
   code: string,
   codeRecord: SessionCodeRecord,
-  _uid: string,
   role: PlayerRole,
   clientVersion: string,
   options: JoinRemoteSessionOptions,
 ): Promise<JoinRemoteSessionResult> {
-  try {
-    const callableResult = await joinSessionWithRole({
-      code,
-      role,
-      rolePasscode: options.rolePasscode,
-      clientVersion,
-      returningMemberUid: options.returningMemberUid,
-      persistedMyUid: options.persistedMyUid ?? undefined,
-    });
-
-    let session: SessionRecord | null = null;
-    try {
-      session = await getRemoteSessionByIdFromServer(callableResult.sessionId);
-    } catch {
-      // Fall through to code lookup.
-    }
-
-    if (!session) {
-      const lookup = await lookupRemoteSessionByCode(code);
-      if (lookup.status === "found") {
-        session = lookup.session;
-      }
-    }
-
-    if (!session) {
-      throw new Error("Joined session could not be loaded.");
-    }
-
-    void touchSessionLastActive(codeRecord.sessionId);
-
-    return {
-      status: "joined",
-      session: { ...session, code },
-      rolePasscode: callableResult.rolePasscode,
-    };
-  } catch (error) {
-    throw new Error(mapRolePasscodeJoinError(error), { cause: error });
-  }
+  return joinGatedRemoteSessionByCode({
+    code,
+    codeRecord,
+    role,
+    clientVersion,
+    rolePasscode: options.rolePasscode,
+    returningMemberUid: options.returningMemberUid,
+    persistedMyUid: options.persistedMyUid,
+    lookupRemoteSessionByCode,
+    touchSessionLastActive: (sessionId) => {
+      void touchSessionLastActive(sessionId);
+    },
+  });
 }
 
 async function joinRemoteSessionByCodeOnce(
@@ -771,17 +751,22 @@ async function joinRemoteSessionByCodeOnce(
         throw legacyJoinError;
       }
 
+      // Gated sessions deny client membership writes. Probe the callable;
+      // if the session is not gated, keep the permission-denied for auth retry.
       try {
-        return await joinGatedRemoteSessionByCode(
-          code,
-          codeRecord,
-          uid,
-          role,
-          clientVersion,
-          { ...options, returningMemberUid, rolePasscode: options.rolePasscode },
-        );
-      } catch {
-        throw legacyJoinError;
+        return await callJoinGatedRemoteSession(code, codeRecord, role, clientVersion, {
+          ...options,
+          returningMemberUid,
+          rolePasscode: options.rolePasscode,
+        });
+      } catch (gatedError) {
+        if (
+          gatedError instanceof Error &&
+          gatedError.message.includes("legacy join")
+        ) {
+          throw legacyJoinError;
+        }
+        throw gatedError;
       }
     }
   }
@@ -800,14 +785,11 @@ async function joinRemoteSessionByCodeOnce(
       deserializeSessionFromFirestore(sessionDoc.id, data),
     )
   ) {
-    return joinGatedRemoteSessionByCode(
-      code,
-      codeRecord,
-      uid,
-      role,
-      clientVersion,
-      { ...options, returningMemberUid, rolePasscode: options.rolePasscode },
-    );
+    return callJoinGatedRemoteSession(code, codeRecord, role, clientVersion, {
+      ...options,
+      returningMemberUid,
+      rolePasscode: options.rolePasscode,
+    });
   }
 
   try {
