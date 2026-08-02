@@ -220,9 +220,17 @@ async function placeThermometerManualPins(page: Page) {
   await clickToolDockButton(page, "Thermometer");
   await page.getByRole("button", { name: "Manual pins" }).click();
   await waitForMapPlacementCrosshair(page);
-  await clickMapAt(page, 0.35, 0.5);
-  await clickMapAt(page, 0.65, 0.5);
+  // Span ~60% of the map so crow-flies exceeds the default 1/2 mi preset
+  // (0.35→0.65 landed at ~0.48 mi and tripped travelTooShort / canCommit).
+  await clickMapAt(page, 0.2, 0.5);
+  await clickMapAt(page, 0.8, 0.5);
   await expandToolPanelIfPeeked(page);
+  await expect(page.getByText("Both pins are set.")).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(
+    page.getByText("Movement is shorter than the selected distance."),
+  ).toHaveCount(0);
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForWizardNext(page);

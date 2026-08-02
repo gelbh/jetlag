@@ -35,6 +35,21 @@ describe("ThermometerPanel place→configure→ask commit chrome", () => {
     expect(screen.getByRole("button", { name: "Continue" })).toBeEnabled();
   });
 
+  it("keeps Place Continue disabled when manual travel is shorter than distance", () => {
+    render(
+      <ThermometerPanel
+        {...baseProps}
+        travelMeters={700}
+        distanceMeters={804.672}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
+    expect(
+      screen.getByText("Movement is shorter than the selected distance."),
+    ).toBeInTheDocument();
+  });
+
   it("exposes exactly one enabled Add thermometer control on ask", () => {
     render(<ThermometerPanel {...baseProps} answer="hotter" />);
 

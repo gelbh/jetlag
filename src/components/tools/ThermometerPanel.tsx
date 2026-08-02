@@ -136,9 +136,21 @@ export function ThermometerPanel({
     canSubmitQuestion &&
     !isSubmitting;
 
+  const placeReadyByMode = ((): boolean => {
+    switch (placementMode) {
+      case "manual":
+        return pinsReady && !travelTooShort;
+      case "gps":
+        return true;
+      default: {
+        const _exhaustive: never = placementMode;
+        return _exhaustive;
+      }
+    }
+  })();
+  const placeReady = walkingActive || placeReadyByMode;
   const canGoNext =
-    (phaseId === "place" &&
-      (walkingActive || pinsReady || placementMode === "gps")) ||
+    (phaseId === "place" && placeReady) ||
     (phaseId === "configure" && distanceAvailable);
   const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
 
