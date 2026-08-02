@@ -95,6 +95,211 @@ service cloud.firestore {
       return value == null || !(value is int) || (value >= 200 && value <= 50000);
     }
 
+    function validEndGameTruthAnchor(anchor) {
+      return anchor is map
+        && anchor.keys().hasOnly(['lat', 'lng', 'frozenAt'])
+        && anchor.lat is number
+        && anchor.lng is number
+        && anchor.frozenAt is string
+        && anchor.frozenAt.size() > 0;
+    }
+
+    // Minimal checks only — session update rules are near the 1000-expression budget.
+    // Client still requires every confirmed hider; rules require the accepter's own valid anchor.
+    // Anchors live under sessions/{id}/endGameTruth/anchors (hider/observer/admin only).
+    function validEndGameTruthAnchorsMap(sessionId, anchors) {
+      return anchors is map
+        && anchors.size() > 0
+        && anchors.size() <= 4
+        && request.auth.uid in anchors
+        && validEndGameTruthAnchor(anchors[request.auth.uid])
+        && anchors.keys().hasOnly(sessionData(sessionId).memberUids);
+    }
+
+    function sessionIdentityUnchanged() {
+      return request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.memberRoles == resource.data.memberRoles;
+    }
+
+    function isHiderOnSessionDoc() {
+      return isSignedIn()
+        && resource.data.memberUids is list
+        && request.auth.uid in resource.data.memberUids
+        && resource.data.memberRoles is map
+        && resource.data.memberRoles[request.auth.uid] == 'hider';
+    }
+
+    // Prefer resource.data (no get()) so end-game paths stay under the 1000-expression budget.
+    function isSeekerOnSessionDoc() {
+      return isSignedIn()
+        && resource.data.memberUids is list
+        && request.auth.uid in resource.data.memberUids
+        && (
+          !('memberRoles' in resource.data)
+          || resource.data.memberRoles == null
+          || (
+            resource.data.memberRoles is map
+            && resource.data.memberRoles[request.auth.uid] == 'seeker'
+          )
+        );
+    }
+
+    function isHostOnSessionDoc() {
+      return isSignedIn()
+        && resource.data.hostUid == request.auth.uid;
+    }
+
+    function isEndGameDeclineUpdate() {
+      return isHiderOnSessionDoc()
+        && resource.data.endGameRequestedAt is string
+        && (
+          !('endGameStartedAt' in resource.data)
+          || resource.data.endGameStartedAt == null
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['endGameRequestedAt', 'endGameRequestedByUid'])
+        && !('endGameRequestedAt' in request.resource.data)
+        && !('endGameRequestedByUid' in request.resource.data)
+        && sessionIdentityUnchanged();
+    }
+
+    function isEndGameAcceptUpdate() {
+      return isHiderOnSessionDoc()
+        && resource.data.endGameRequestedAt is string
+        && (
+          !('endGameStartedAt' in resource.data)
+          || resource.data.endGameStartedAt == null
+        )
+        && request.resource.data.endGameStartedAt is string
+        && request.resource.data.endGameStartedByUid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'endGameStartedAt',
+            'endGameStartedByUid',
+            'endGameRequestedAt',
+            'endGameRequestedByUid',
+            // Legacy strip only — freeze coords must not live on the session doc.
+            'endGameTruthAnchors'
+          ])
+        && !('endGameTruthAnchors' in request.resource.data)
+        && !('endGameRequestedAt' in request.resource.data)
+        && !('endGameRequestedByUid' in request.resource.data)
+        && sessionIdentityUnchanged();
+    }
+
+    function isEndGameRequestUpdate() {
+      return isSeekerOnSessionDoc()
+        && (
+          !('endGameStartedAt' in resource.data)
+          || resource.data.endGameStartedAt == null
+        )
+        && (
+          !('endGameRequestedAt' in resource.data)
+          || resource.data.endGameRequestedAt == null
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['endGameRequestedAt', 'endGameRequestedByUid'])
+        && request.resource.data.endGameRequestedAt is string
+        && request.resource.data.endGameRequestedByUid == request.auth.uid
+        && sessionIdentityUnchanged();
+    }
+
+    function isEndGameCancelRequestUpdate() {
+      return isSeekerOnSessionDoc()
+        && resource.data.endGameRequestedAt is string
+        && resource.data.endGameRequestedByUid == request.auth.uid
+        && (
+          !('endGameStartedAt' in resource.data)
+          || resource.data.endGameStartedAt == null
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['endGameRequestedAt', 'endGameRequestedByUid'])
+        && !('endGameRequestedAt' in request.resource.data)
+        && !('endGameRequestedByUid' in request.resource.data)
+        && sessionIdentityUnchanged();
+    }
+
+    function isEndGameHostClearUpdate() {
+      return isHostOnSessionDoc()
+        && (
+          resource.data.endGameStartedAt is string
+          || resource.data.endGameRequestedAt is string
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'endGameStartedAt',
+            'endGameStartedByUid',
+            'endGameTruthAnchors',
+            'endGameRequestedAt',
+            'endGameRequestedByUid'
+          ])
+        && !('endGameStartedAt' in request.resource.data)
+        && !('endGameStartedByUid' in request.resource.data)
+        && !('endGameTruthAnchors' in request.resource.data)
+        && !('endGameRequestedAt' in request.resource.data)
+        && !('endGameRequestedByUid' in request.resource.data)
+        && sessionIdentityUnchanged();
+    }
+
+    function isSessionProgressResetUpdate() {
+      return isHostOnSessionDoc()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'sessionResetAt',
+            'timerAccumulatedMs',
+            'timerRunningSince',
+            'endGameStartedAt',
+            'endGameStartedByUid',
+            'endGameTruthAnchors',
+            'endGameRequestedAt',
+            'endGameRequestedByUid'
+          ])
+        && request.resource.data.sessionResetAt is string
+        && request.resource.data.timerAccumulatedMs == 0
+        && !('timerRunningSince' in request.resource.data)
+        && !('endGameStartedAt' in request.resource.data)
+        && !('endGameStartedByUid' in request.resource.data)
+        && !('endGameTruthAnchors' in request.resource.data)
+        && !('endGameRequestedAt' in request.resource.data)
+        && !('endGameRequestedByUid' in request.resource.data)
+        && sessionIdentityUnchanged();
+    }
+
+    function isTimerHostUpdate() {
+      return isHostOnSessionDoc()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['timerAccumulatedMs', 'timerRunningSince'])
+        && request.resource.data.timerAccumulatedMs is number
+        && request.resource.data.timerAccumulatedMs >= 0
+        && (
+          request.resource.data.timerRunningSince == null
+          || request.resource.data.timerRunningSince is string
+        )
+        && sessionIdentityUnchanged();
+    }
+
+    function isHostEndSessionUpdate() {
+      return isHostOnSessionDoc()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['endedAt', 'code', 'status'])
+        && request.resource.data.endedAt is string
+        && request.resource.data.status == 'ended'
+        && !('code' in request.resource.data)
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
+        && request.resource.data.memberRoles == resource.data.memberRoles;
+    }
+
     function membershipJoinFieldsStable() {
       return request.resource.data.code == resource.data.code
         && request.resource.data.gameArea == resource.data.gameArea
@@ -208,6 +413,12 @@ service cloud.firestore {
         || memberRole(sessionId) == 'admin';
     }
 
+    function canReadEndGameTruthAnchors(sessionId) {
+      return isHiderMember(sessionId)
+        || memberRole(sessionId) == 'observer'
+        || memberRole(sessionId) == 'admin';
+    }
+
     function validSessionRulesUpdate(sessionId) {
       return isSessionHost(sessionId)
         && timerNeverStarted(resource.data)
@@ -314,7 +525,15 @@ service cloud.firestore {
           || hasHostAccess()
         );
 
-      allow update: if validSessionRulesUpdate(sessionId) || (
+      allow update: if isEndGameDeclineUpdate()
+        || isEndGameAcceptUpdate()
+        || isEndGameRequestUpdate()
+        || isEndGameCancelRequestUpdate()
+        || isEndGameHostClearUpdate()
+        || isSessionProgressResetUpdate()
+        || isTimerHostUpdate()
+        || isHostEndSessionUpdate()
+        || validSessionRulesUpdate(sessionId) || (
         isMembershipJoinUpdate()
       ) || (
         isSessionMember(sessionId)
@@ -330,163 +549,6 @@ service cloud.firestore {
         && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastActiveAt'])
         && lastActiveAtWithinGrace(request.resource.data.lastActiveAt)
-      ) || (
-        isSessionHost(sessionId)
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.memberRoles == resource.data.memberRoles
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['endedAt', 'code', 'status'])
-        && request.resource.data.endedAt is string
-        && request.resource.data.status == 'ended'
-        && !('code' in request.resource.data)
-      ) || (
-        isSessionHost(sessionId)
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.memberRoles == resource.data.memberRoles
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['timerAccumulatedMs', 'timerRunningSince'])
-        && request.resource.data.timerAccumulatedMs is number
-        && request.resource.data.timerAccumulatedMs >= 0
-        && (request.resource.data.timerRunningSince == null
-          || request.resource.data.timerRunningSince is string)
-      ) || (
-        isSessionHost(sessionId)
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.memberRoles == resource.data.memberRoles
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly([
-            'sessionResetAt',
-            'timerAccumulatedMs',
-            'timerRunningSince',
-            'endGameStartedAt',
-            'endGameStartedByUid',
-            'endGameRequestedAt',
-            'endGameRequestedByUid'
-          ])
-        && request.resource.data.sessionResetAt is string
-        && request.resource.data.timerAccumulatedMs == 0
-        && !('timerRunningSince' in request.resource.data)
-        && !('endGameStartedAt' in request.resource.data)
-        && !('endGameStartedByUid' in request.resource.data)
-        && !('endGameRequestedAt' in request.resource.data)
-        && !('endGameRequestedByUid' in request.resource.data)
-      ) || (
-        isSeekerMember(sessionId)
-        && (
-          !('endGameStartedAt' in resource.data)
-          || resource.data.endGameStartedAt == null
-        )
-        && (
-          !('endGameRequestedAt' in resource.data)
-          || resource.data.endGameRequestedAt == null
-        )
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['endGameRequestedAt', 'endGameRequestedByUid'])
-        && request.resource.data.endGameRequestedAt is string
-        && request.resource.data.endGameRequestedByUid == request.auth.uid
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.memberRoles == resource.data.memberRoles
-      ) || (
-        isHiderMember(sessionId)
-        && resource.data.endGameRequestedAt is string
-        && (
-          !('endGameStartedAt' in resource.data)
-          || resource.data.endGameStartedAt == null
-        )
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['endGameStartedAt', 'endGameStartedByUid', 'endGameRequestedAt', 'endGameRequestedByUid'])
-        && request.resource.data.endGameStartedAt is string
-        && request.resource.data.endGameStartedByUid == request.auth.uid
-        && !('endGameRequestedAt' in request.resource.data)
-        && !('endGameRequestedByUid' in request.resource.data)
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.memberRoles == resource.data.memberRoles
-      ) || (
-        isHiderMember(sessionId)
-        && resource.data.endGameRequestedAt is string
-        && (
-          !('endGameStartedAt' in resource.data)
-          || resource.data.endGameStartedAt == null
-        )
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['endGameRequestedAt', 'endGameRequestedByUid'])
-        && !('endGameRequestedAt' in request.resource.data)
-        && !('endGameRequestedByUid' in request.resource.data)
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.memberRoles == resource.data.memberRoles
-      ) || (
-        isSeekerMember(sessionId)
-        && resource.data.endGameRequestedAt is string
-        && resource.data.endGameRequestedByUid == request.auth.uid
-        && (
-          !('endGameStartedAt' in resource.data)
-          || resource.data.endGameStartedAt == null
-        )
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['endGameRequestedAt', 'endGameRequestedByUid'])
-        && !('endGameRequestedAt' in request.resource.data)
-        && !('endGameRequestedByUid' in request.resource.data)
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.memberRoles == resource.data.memberRoles
-      ) || (
-        isSessionHost(sessionId)
-        && (
-          resource.data.endGameStartedAt is string
-          || resource.data.endGameRequestedAt is string
-        )
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['endGameStartedAt', 'endGameStartedByUid', 'endGameRequestedAt', 'endGameRequestedByUid'])
-        && !('endGameStartedAt' in request.resource.data)
-        && !('endGameStartedByUid' in request.resource.data)
-        && !('endGameRequestedAt' in request.resource.data)
-        && !('endGameRequestedByUid' in request.resource.data)
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.memberRoles == resource.data.memberRoles
       ) || (
         isSeekerMember(sessionId)
         && (
@@ -517,7 +579,7 @@ service cloud.firestore {
           || resource.data.foundConfirmedAt == null
         )
         && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['foundConfirmedAt', 'foundConfirmedByUid', 'gameOutcome', 'foundRequestedAt', 'foundRequestedByUid', 'endGameStartedAt', 'endGameStartedByUid', 'endGameRequestedAt', 'endGameRequestedByUid'])
+          .hasOnly(['foundConfirmedAt', 'foundConfirmedByUid', 'gameOutcome', 'foundRequestedAt', 'foundRequestedByUid', 'endGameStartedAt', 'endGameStartedByUid', 'endGameTruthAnchors', 'endGameRequestedAt', 'endGameRequestedByUid'])
         && request.resource.data.foundConfirmedAt is string
         && request.resource.data.foundConfirmedByUid == request.auth.uid
         && request.resource.data.gameOutcome == 'found'
@@ -525,6 +587,7 @@ service cloud.firestore {
         && !('foundRequestedByUid' in request.resource.data)
         && !('endGameStartedAt' in request.resource.data)
         && !('endGameStartedByUid' in request.resource.data)
+        && !('endGameTruthAnchors' in request.resource.data)
         && !('endGameRequestedAt' in request.resource.data)
         && !('endGameRequestedByUid' in request.resource.data)
         && request.resource.data.code == resource.data.code
@@ -647,6 +710,21 @@ service cloud.firestore {
           && request.resource.data.updatedAt is string
         );
         allow delete: if isSignedIn() && request.auth.uid == uid;
+      }
+
+      // Frozen end-game GPS — hider/observer/admin only (never on the seeker-readable session doc).
+      match /endGameTruth/{docId} {
+        allow get, list: if docId == 'anchors'
+          && canReadEndGameTruthAnchors(sessionId);
+        allow create, update: if docId == 'anchors'
+          && isHiderMember(sessionId)
+          && request.resource.data.keys().hasOnly(['anchors'])
+          && validEndGameTruthAnchorsMap(sessionId, request.resource.data.anchors);
+        allow delete: if docId == 'anchors'
+          && (
+            isHiderMember(sessionId)
+            || isSessionHost(sessionId)
+          );
       }
 
       match /messages/{messageId} {

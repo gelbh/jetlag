@@ -23,6 +23,7 @@ import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 import { THERMOMETER_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
 type PlacementMode = "gps" | "manual";
 
@@ -171,6 +172,9 @@ export function ThermometerPanel({
     <>
       {step === "distance" ? (
         <ToolSection first compact status="active">
+          {awaitHiderAnswer ? (
+            <QuestionTruthReferenceHint />
+          ) : null}
           <QuestionPromptBlock
             prompt={thermometerQuestionPrompt(distanceMeters, distanceUnit)}
           />

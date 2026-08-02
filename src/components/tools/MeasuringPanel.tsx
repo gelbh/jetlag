@@ -34,6 +34,7 @@ import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 import { MEASURING_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
 interface MeasuringPanelProps {
   distanceUnit: DistanceUnit;
@@ -179,7 +180,11 @@ export function MeasuringPanel({
   const panelBody = (
     <>
         {step === "source" ? (
-          <MeasuringSourceStep
+          <>
+            {awaitHiderAnswer ? (
+            <QuestionTruthReferenceHint />
+          ) : null}
+            <MeasuringSourceStep
             measureFrom={measureFrom}
             optionChosen={optionChosen}
             usedMeasuringFromKinds={usedMeasuringFromKinds}
@@ -188,6 +193,7 @@ export function MeasuringPanel({
             locationCategory={locationCategory}
             onMeasureFromChange={onMeasureFromChange}
           />
+          </>
         ) : null}
 
         {step === "anchor" ? (
