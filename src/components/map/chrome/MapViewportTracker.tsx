@@ -1,15 +1,8 @@
 import { useEffect, useRef, type MutableRefObject } from "react";
-import { useMap, useMapEvents } from "react-leaflet";
-import type { Map as LeafletMap } from "leaflet";
 import type { MapRef } from "react-map-gl/maplibre";
-import {
-  latLngBoundsToViewport,
-  type MapViewportBounds,
-} from "../../../domain/map/transitViewport";
+import type { MapViewportBounds } from "../../../domain/map/transitViewport";
 import { createViewportTrackerHandlers } from "../helpers/createViewportTrackerHandlers";
 import { useMapLibreMap } from "../helpers/useMapLibreMap";
-import { matchMapEngine } from "./matchMapEngine";
-import { useMapEngine } from "./mapEngineContext";
 
 export interface MapViewportState {
   bounds: MapViewportBounds;
@@ -23,7 +16,33 @@ interface MapViewportTrackerProps {
   suppressPanRef?: MutableRefObject<boolean>;
 }
 
-function MapViewportTrackerMapLibre({
+function publishViewportMapLibre(
+  map: MapRef,
+  onViewportChange: (viewport: MapViewportState | null) => void,
+) {
+  const bounds = map.getBounds();
+  const south = bounds.getSouth();
+  const west = bounds.getWest();
+  const north = bounds.getNorth();
+  const east = bounds.getEast();
+
+  if (
+    !Number.isFinite(south) ||
+    !Number.isFinite(west) ||
+    !Number.isFinite(north) ||
+    !Number.isFinite(east)
+  ) {
+    onViewportChange(null);
+    return;
+  }
+
+  onViewportChange({
+    bounds: { south, west, north, east },
+    zoom: map.getZoom(),
+  });
+}
+
+export function MapViewportTracker({
   onViewportChange,
   onUserPanStart,
   onUserPanEnd,
@@ -68,121 +87,4 @@ function MapViewportTrackerMapLibre({
   }, [map, onViewportChange]);
 
   return null;
-}
-
-function MapViewportTrackerLeaflet({
-  onViewportChange,
-  onUserPanStart,
-  onUserPanEnd,
-  suppressPanRef,
-}: MapViewportTrackerProps) {
-  const map = useMap();
-  const onViewportChangeRef = useRef(onViewportChange);
-  const handlersRef = useRef<ReturnType<
-    typeof createViewportTrackerHandlers
-  > | null>(null);
-
-  useEffect(() => {
-    onViewportChangeRef.current = onViewportChange;
-  }, [onViewportChange]);
-
-  useEffect(() => {
-    const handlers = createViewportTrackerHandlers({
-      publish: () =>
-        publishViewportLeaflet(map, onViewportChangeRef.current),
-      onUserPanStart,
-      onUserPanEnd,
-      suppressPanRef,
-    });
-    handlersRef.current = handlers;
-    return () => {
-      handlers.disposePublisher();
-      handlersRef.current = null;
-    };
-  }, [map, onUserPanStart, onUserPanEnd, suppressPanRef]);
-
-  useMapEvents({
-    dragstart: () => {
-      handlersRef.current?.onDragStart();
-    },
-    dragend: () => {
-      handlersRef.current?.onDragEnd();
-    },
-    move: () => {
-      handlersRef.current?.onMove();
-    },
-    zoom: () => {
-      handlersRef.current?.onZoom();
-    },
-    moveend: () => {
-      handlersRef.current?.onMoveEnd();
-    },
-    zoomend: () => {
-      handlersRef.current?.onZoomEnd();
-    },
-  });
-
-  useEffect(() => {
-    publishViewportLeaflet(map, onViewportChange);
-  }, [map, onViewportChange]);
-
-  return null;
-}
-
-export function MapViewportTracker(props: MapViewportTrackerProps) {
-  const engine = useMapEngine();
-  return matchMapEngine(engine, {
-    maplibre: () => <MapViewportTrackerMapLibre {...props} />,
-    leaflet: () => <MapViewportTrackerLeaflet {...props} />,
-  });
-}
-
-function publishViewportLeaflet(
-  map: LeafletMap,
-  onViewportChange: (viewport: MapViewportState | null) => void,
-) {
-  const bounds = map.getBounds();
-  const southWest = bounds.getSouthWest();
-  const northEast = bounds.getNorthEast();
-
-  if (
-    !Number.isFinite(southWest.lat) ||
-    !Number.isFinite(southWest.lng) ||
-    !Number.isFinite(northEast.lat) ||
-    !Number.isFinite(northEast.lng)
-  ) {
-    onViewportChange(null);
-    return;
-  }
-
-  onViewportChange({
-    bounds: latLngBoundsToViewport(bounds),
-    zoom: map.getZoom(),
-  });
-}
-
-function publishViewportMapLibre(
-  map: MapRef,
-  onViewportChange: (viewport: MapViewportState | null) => void,
-) {
-  const bounds = map.getBounds();
-  const south = bounds.getSouth();
-  const west = bounds.getWest();
-  const north = bounds.getNorth();
-  const east = bounds.getEast();
-
-  if (
-    !Number.isFinite(south) ||
-    !Number.isFinite(west) ||
-    !Number.isFinite(north) ||
-    !Number.isFinite(east)
-  ) {
-    onViewportChange(null);
-    return;
-  }
-
-  onViewportChange({
-    bounds: { south, west, north, east },
-    zoom: map.getZoom(),
-  });
 }

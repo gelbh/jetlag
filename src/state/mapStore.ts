@@ -8,7 +8,6 @@ import type { NotificationPreferences } from "../domain/device/chrome/notificati
 import { DEFAULT_NOTIFICATION_PREFERENCES } from "../domain/device/chrome/notifications";
 import type { MapStyle, StreetBasemap } from "../domain/map/mapBasemaps";
 
-export type MapEngine = "leaflet" | "maplibre";
 export type LayerVisibility = Record<AnnotationType | "transit", boolean>;
 
 const DEFAULT_LAYER_VISIBILITY: LayerVisibility = {
@@ -31,14 +30,12 @@ export const useMapStore = create<{
   showAdminBoundaries: boolean;
   keepScreenAwake: boolean;
   lowPowerMode: boolean;
-  /** MapLibre tilt gestures; default flat. Ignored on Leaflet path. */
+  /** MapLibre tilt gestures; default flat. */
   mapPitchEnabled: boolean;
   notificationPreferences: NotificationPreferences;
   distanceUnit: DistanceUnit;
   mapStyle: MapStyle;
   streetBasemap: StreetBasemap;
-  /** Dual-path preference for later slices. Not persisted until play-ready. */
-  mapEngine: MapEngine;
   layerVisibility: LayerVisibility;
   setActiveTool: (tool: MapTool) => void;
   setTransitEnabled: (enabled: boolean) => void;
@@ -53,7 +50,6 @@ export const useMapStore = create<{
   setDistanceUnit: (unit: DistanceUnit) => void;
   setMapStyle: (style: MapStyle) => void;
   setStreetBasemap: (streetBasemap: StreetBasemap) => void;
-  setMapEngine: (mapEngine: MapEngine) => void;
   setLayerVisibility: (layer: keyof LayerVisibility, visible: boolean) => void;
 }>()(
   persist(
@@ -71,7 +67,6 @@ export const useMapStore = create<{
       distanceUnit: "imperial",
       mapStyle: "standard",
       streetBasemap: "light",
-      mapEngine: "leaflet",
       layerVisibility: DEFAULT_LAYER_VISIBILITY,
       setActiveTool: (activeTool) => set({ activeTool }),
       setTransitEnabled: (transitEnabled) => set({ transitEnabled }),
@@ -91,7 +86,6 @@ export const useMapStore = create<{
       setDistanceUnit: (distanceUnit) => set({ distanceUnit }),
       setMapStyle: (mapStyle) => set({ mapStyle }),
       setStreetBasemap: (streetBasemap) => set({ streetBasemap }),
-      setMapEngine: (mapEngine) => set({ mapEngine }),
       setLayerVisibility: (layer, visible) =>
         set((state) => ({
           layerVisibility: {
@@ -115,11 +109,6 @@ export const useMapStore = create<{
             persisted.streetBasemap === "light"
               ? persisted.streetBasemap
               : "light",
-          mapEngine:
-            persisted.mapEngine === "maplibre" ||
-            persisted.mapEngine === "leaflet"
-              ? persisted.mapEngine
-              : "leaflet",
           mapPitchEnabled: persisted.mapPitchEnabled === true,
           showCurrentLocation: true,
           showAdminBoundaries: persisted.showAdminBoundaries ?? false,
@@ -137,8 +126,6 @@ export const useMapStore = create<{
         distanceUnit: state.distanceUnit,
         mapStyle: state.mapStyle,
         streetBasemap: state.streetBasemap,
-        // mapEngine intentionally not persisted until MAP_LIBRE_PLAY_READY —
-        // a half-built MapLibre shell must not revive across reloads.
         showAdminBoundaries: state.showAdminBoundaries,
         layerVisibility: state.layerVisibility,
       }),

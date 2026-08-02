@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toLeafletBounds } from "./leafletBounds";
+import { toMapBounds } from "../mapBounds";
 import {
   buildMapDraftOverlays,
   type MapDraftOverlaySources,
@@ -80,7 +80,7 @@ function boundsSpanMeters(target: CameraTarget | null): number {
     return 0;
   }
 
-  const bounds = toLeafletBounds(target.bounds);
+  const bounds = toMapBounds(target.bounds);
   const southWest = bounds.getSouthWest();
   const northEast = bounds.getNorthEast();
   const latSpan = (northEast.lat - southWest.lat) * 111_320;
@@ -151,8 +151,13 @@ describe("computePlacementCameraTarget", () => {
     const target = computePlacementCameraTarget(await buildContext(sources));
 
     expect(target).not.toBeNull();
-    const bounds = toLeafletBounds(target!.bounds);
-    const center = bounds.getCenter();
+    const bounds = toMapBounds(target!.bounds);
+    const southWest = bounds.getSouthWest();
+    const northEast = bounds.getNorthEast();
+    const center = {
+      lat: (southWest.lat + northEast.lat) / 2,
+      lng: (southWest.lng + northEast.lng) / 2,
+    };
     expect(center.lat).toBeGreaterThan(Math.min(dublinCenter[0], poi[0]));
     expect(center.lat).toBeLessThan(Math.max(dublinCenter[0], poi[0]));
     expect(boundsSpanMeters(target)).toBeGreaterThan(200);

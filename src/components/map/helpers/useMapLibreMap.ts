@@ -4,7 +4,10 @@ import {
   latLngToTileXY,
   MAP_STYLE_PREVIEW_ZOOM,
 } from "../../../domain/map/mapTilePreview";
-import type { PreviewTileOrigin } from "./useMapPreviewTileOrigin";
+export interface PreviewTileOrigin {
+  x: number;
+  y: number;
+}
 
 /** Current MapLibre map from react-map-gl context (children of Map). */
 export function useMapLibreMap(): MapRef {
