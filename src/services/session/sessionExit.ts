@@ -3,6 +3,7 @@ import {
   clearSessionLocalArtifacts,
   teardownSessionUiState,
 } from "./sessionCleanup";
+import { allowPlayerLocationPublishes } from "./playerLocationPublishGate";
 import { useSessionStore } from "../../state/sessionStore";
 
 export type SessionExitReason = "leave" | "end" | "remote-ended" | "reset";
@@ -89,6 +90,7 @@ export async function exitSession({
 
     void reason;
   } finally {
+    allowPlayerLocationPublishes();
     exitInFlight = false;
   }
 }
