@@ -1,4 +1,5 @@
 const PLACEMENT_STEP_IDS = new Set([
+  "place",
   "anchor",
   "placement",
   "target",

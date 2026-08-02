@@ -1,5 +1,17 @@
 import type { ToolStep, ToolStepState } from "./ToolStepper";
 
+export {
+  HIDING_ZONE_CREATE_WIZARD,
+  HIDING_ZONE_MOVE_WIZARD,
+  MATCHING_WIZARD,
+  MEASURING_WIZARD,
+  RADAR_WIZARD,
+  TENTACLE_WIZARD,
+  THERMOMETER_WIZARD,
+  type ToolWizardDefinition,
+  type ToolWizardPhaseId,
+} from "../../../../domain/wizard/toolWizardPhases";
+
 export type ToolStepDefinition = { id: string; label: string };
 
 export function deriveStepStates(
