@@ -335,17 +335,18 @@ export function MapViewMapLibre({
     [onMapClick],
   );
 
-  const mapShellClass = interactive
-    ? `h-full w-full ${containerSurfaceClass}${satelliteGradeClass}`
-    : `h-full w-full pointer-events-auto ${containerSurfaceClass}${satelliteGradeClass}`;
-
   return (
     <div className={className ?? "h-full w-full"}>
-      <div className={mapShellClass}>
+      <div
+        className={
+          interactive
+            ? `h-full w-full maplibregl-map ${containerSurfaceClass}${satelliteGradeClass}`
+            : `h-full w-full maplibregl-map pointer-events-auto ${containerSurfaceClass}${satelliteGradeClass}`
+        }
+      >
         <Map
           key={mapKey}
           ref={mapRef}
-          className={mapShellClass}
           initialViewState={{
             longitude,
             latitude,
