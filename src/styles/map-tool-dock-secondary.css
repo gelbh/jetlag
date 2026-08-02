@@ -42,12 +42,12 @@
   }
 
   .jl-tool-dock-bar--secondary .jl-tool-slot {
-    color: var(--color-ink-muted);
+    color: var(--color-ink-secondary);
     min-height: 2.75rem;
   }
 
   .jl-tool-dock-bar--secondary .jl-tool-slot-label {
-    color: var(--color-ink-muted);
+    color: var(--color-ink-secondary);
   }
 
   @container tool-dock (min-width: 28.01rem) {
