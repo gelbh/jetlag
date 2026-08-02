@@ -1,7 +1,7 @@
 /* map-tool-dock-secondary.css — dual-row session strip under the primary dock */
 
 :root {
-  --dock-secondary-height: 2.75rem;
+  --dock-secondary-height: 2.5rem;
   --dock-row-gap: 0.125rem;
   --dock-primary-content-height: 2.75rem;
   /*
@@ -29,6 +29,7 @@
 
   .jl-tool-dock-bar--secondary {
     min-height: var(--dock-secondary-height);
+    padding-block: 0.125rem;
     border-top-width: 2px;
     border-top-style: solid;
     border-top-color: var(--color-border);
@@ -46,7 +47,7 @@
 
   .jl-tool-dock-bar--secondary .jl-tool-slot {
     color: var(--color-ink-secondary);
-    min-height: 2.75rem;
+    min-height: var(--dock-secondary-height);
   }
 
   .jl-tool-dock-bar--secondary .jl-tool-slot-label {
@@ -93,5 +94,16 @@
   /* Keep draw menu above the secondary bar (same stacking context as dock). */
   .jl-tool-dock .jl-tool-menu-dock {
     z-index: calc(var(--z-panel) + 1);
+  }
+
+  /*
+   * Dual dock lifts --map-panel-bottom. On short phone viewports the default
+   * wizard/compact panel caps cover the map center used for placement taps —
+   * tighten those caps so the mid-map stays clickable.
+   */
+  @media (max-height: 720px) {
+    .jl-wizard-panel-max-h {
+      max-height: min(40dvh, 22rem);
+    }
   }
 }

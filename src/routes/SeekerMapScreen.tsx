@@ -160,6 +160,7 @@ function SeekerMapScreenBody({
         firstRunDismissed={controller.firstRunDismissed}
         setFirstRunDismissed={controller.setFirstRunDismissed}
         mapPanning={controller.mapPanning}
+        placementCrosshair={controller.placementCrosshair}
         userMinimized={controller.userMinimized}
         setUserMinimized={controller.setUserMinimized}
         selectedAnnotation={controller.selectedAnnotation}
