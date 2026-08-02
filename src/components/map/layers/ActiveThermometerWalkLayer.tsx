@@ -156,7 +156,7 @@ function ActiveThermometerWalkLayerMapLibre({
         longitude={start[1]}
         anchor="bottom"
         offset={[0, -8]}
-        style={{ zIndex: 400 }}
+        style={{ zIndex: 400, pointerEvents: "none" }}
       >
         <div
           className={model.startLabel.className}
@@ -177,7 +177,7 @@ function ActiveThermometerWalkLayerMapLibre({
         longitude={livePoint[1]}
         anchor="bottom"
         offset={[0, -8]}
-        style={{ zIndex: 401 }}
+        style={{ zIndex: 401, pointerEvents: "none" }}
       >
         <div
           className={model.liveLabel.className}
@@ -189,7 +189,7 @@ function ActiveThermometerWalkLayerMapLibre({
         longitude={model.midpoint[1]}
         anchor="bottom"
         offset={[0, -4]}
-        style={{ zIndex: 402 }}
+        style={{ zIndex: 402, pointerEvents: "none" }}
       >
         <div
           className={model.progressLabel.className}
