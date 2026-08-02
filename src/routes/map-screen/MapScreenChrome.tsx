@@ -535,7 +535,10 @@ export function MapScreenChrome({
             onLeaveSession: () => void handleLeaveSession(),
             expansionPackEnabled: session!.expansionPackEnabled === true,
           }}
-          onReportProblem={() => setReportProblemOpen(true)}
+          onReportProblem={() => {
+            overlay.closeSheet();
+            setReportProblemOpen(true);
+          }}
         />
 
         <ReportProblemSheet

@@ -506,7 +506,10 @@ export function HiderMapScreenChrome({
               : undefined,
             expansionPackEnabled,
           }}
-          onReportProblem={() => setReportProblemOpen(true)}
+          onReportProblem={() => {
+            overlay.closeSheet();
+            setReportProblemOpen(true);
+          }}
         />
 
         <ReportProblemSheet
