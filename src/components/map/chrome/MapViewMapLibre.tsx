@@ -115,40 +115,41 @@ export function MapViewMapLibre({
   );
 
   return (
-    <div
-      className={
-        className ??
-        (interactive
-          ? `h-full w-full ${containerSurfaceClass}${satelliteGradeClass}`
-          : `h-full w-full pointer-events-auto ${containerSurfaceClass}${satelliteGradeClass}`)
-      }
-    >
-      <Map
-        key={mapKey}
-        ref={mapRef}
-        initialViewState={{
-          longitude,
-          latitude,
-          zoom,
-          pitch: 0,
-          bearing: 0,
-        }}
-        style={{ width: "100%", height: "100%" }}
-        mapStyle={style}
-        attributionControl={false}
-        dragPan={interactive}
-        scrollZoom={interactive}
-        doubleClickZoom={interactive}
-        touchZoomRotate={interactive}
-        pitchWithRotate={false}
-        onLoad={emitBounds}
-        onMoveEnd={handleMoveEnd}
-        onDragEnd={handleDragEnd}
-        onZoomEnd={handleZoomEnd}
-        onClick={handleClick}
+    <div className={className ?? "h-full w-full"}>
+      <div
+        className={
+          interactive
+            ? `h-full w-full ${containerSurfaceClass}${satelliteGradeClass}`
+            : `h-full w-full pointer-events-auto ${containerSurfaceClass}${satelliteGradeClass}`
+        }
       >
-        {children}
-      </Map>
+        <Map
+          key={mapKey}
+          ref={mapRef}
+          initialViewState={{
+            longitude,
+            latitude,
+            zoom,
+            pitch: 0,
+            bearing: 0,
+          }}
+          style={{ width: "100%", height: "100%" }}
+          mapStyle={style}
+          attributionControl={false}
+          dragPan={interactive}
+          scrollZoom={interactive}
+          doubleClickZoom={interactive}
+          touchZoomRotate={interactive}
+          pitchWithRotate={false}
+          onLoad={emitBounds}
+          onMoveEnd={handleMoveEnd}
+          onDragEnd={handleDragEnd}
+          onZoomEnd={handleZoomEnd}
+          onClick={handleClick}
+        >
+          {children}
+        </Map>
+      </div>
     </div>
   );
 }
