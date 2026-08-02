@@ -2,6 +2,7 @@ import { Suspense, useEffect, useLayoutEffect, type ReactNode } from "react";
 import * as Sentry from "@sentry/react";
 import {
   BrowserRouter,
+  Navigate,
   Route,
   Routes,
   useLocation,
@@ -256,6 +257,7 @@ export default function App() {
                     </LazyRoute>
                   }
                 />
+                <Route path="/tutorial" element={<Navigate to="/" replace />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

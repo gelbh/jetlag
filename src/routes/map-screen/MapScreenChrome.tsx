@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { isEndGameActive, isEndGamePending, isFoundHiderPending } from "../../domain/map/annotations";
 import { QUESTION_DOCK_TOOL_IDS } from "../../domain/map/mapTools";
 import { resolveToolDockEnabled } from "../../domain/session/rules";
@@ -257,6 +257,7 @@ export function MapScreenChrome({
   setAwaitingPlacement,
   mapSlot,
 }: MapScreenChromeProps) {
+  const [forceMapToolsGuide, setForceMapToolsGuide] = useState(false);
   const syncMessage =
     syncStatus.remoteUpdateNotice ??
     syncStatus.lastSyncError ??
@@ -427,6 +428,8 @@ export function MapScreenChrome({
           overlay={overlay}
           firstRunDismissed={firstRunDismissed}
           setFirstRunDismissed={setFirstRunDismissed}
+          forceMapToolsGuide={forceMapToolsGuide}
+          setForceMapToolsGuide={setForceMapToolsGuide}
           selectedAnnotation={selectedAnnotation}
           geometryEditAnnotation={geometryEditAnnotation}
           geometryDraft={geometryDraft}
@@ -531,6 +534,10 @@ export function MapScreenChrome({
             onEndSession: () => void handleEndSession(),
             onLeaveSession: () => void handleLeaveSession(),
             expansionPackEnabled: session!.expansionPackEnabled === true,
+            onReviewMapTools: () => {
+              overlay.closeSheet();
+              setForceMapToolsGuide(true);
+            },
           }}
         />
 
