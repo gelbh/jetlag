@@ -1,9 +1,10 @@
-//! Geometry kernel (Rust / WASM) — mask + half-plane + geodesic + voronoi.
+//! Geometry kernel (Rust / WASM) — mask + half-plane + geodesic + voronoi + near-region.
 
 pub mod geodesic;
 pub mod geodesic_buffer;
 pub mod half_plane;
 pub mod mask;
+pub mod near_region;
 pub mod tentacle;
 pub mod types;
 pub mod voronoi;
