@@ -14,7 +14,7 @@ test.describe("onboarding", () => {
     await expect(page.getByRole("heading", { name: "Map tools" })).toBeVisible({
       timeout: 10_000,
     });
-    await page.getByRole("button", { name: "Close" }).click();
+    await page.getByRole("button", { name: "Got it" }).click();
     await expect(page.getByRole("heading", { name: "Map tools" })).toBeHidden();
   });
 });
