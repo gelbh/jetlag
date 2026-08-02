@@ -3,6 +3,7 @@ import {
   createThrottledPublisher,
   VIEWPORT_PUBLISH_THROTTLE_MS,
 } from "../helpers/mapViewportPublish";
+import { viewportPublishActionForEvent } from "./MapViewportTracker";
 
 describe("createThrottledPublisher", () => {
   beforeEach(() => {
@@ -38,5 +39,18 @@ describe("createThrottledPublisher", () => {
     expect(publish).toHaveBeenCalledTimes(1);
     vi.advanceTimersByTime(VIEWPORT_PUBLISH_THROTTLE_MS);
     expect(publish).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("viewportPublishActionForEvent", () => {
+  it("schedules on pinch-style zoom and move without requiring drag", () => {
+    expect(viewportPublishActionForEvent("zoom")).toBe("schedule");
+    expect(viewportPublishActionForEvent("move")).toBe("schedule");
+    expect(viewportPublishActionForEvent("moveend")).toBe("schedule");
+  });
+
+  it("flushes on gesture settle", () => {
+    expect(viewportPublishActionForEvent("zoomend")).toBe("flush");
+    expect(viewportPublishActionForEvent("dragend")).toBe("flush");
   });
 });
