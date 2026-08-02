@@ -1,5 +1,8 @@
 import { memo } from "react";
+import turfCircle from "@turf/circle";
+import type { Feature, LineString } from "geojson";
 import { Popup } from "react-leaflet";
+import { Popup as MapLibrePopup } from "react-map-gl/maplibre";
 import { CompensatedCircle } from "../helpers/CompensatedCircle";
 import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
 import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
@@ -7,6 +10,7 @@ import type { MapDraftOverlay } from "../../../domain/map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { useMapEngine } from "../chrome/mapEngineContext";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
+import { MapLibreDotMarker } from "../helpers/MapLibreHtmlMarker";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { renderGeoJsonPolygonGroups } from "../helpers/renderHelpers";
 
@@ -14,7 +18,19 @@ interface MapDraftLayerProps {
   overlays: readonly MapDraftOverlay[];
 }
 
-/** MapLibre Slice 2: polygons only; marker/circle/polyline land in Slice 3. */
+function draftPolylineFeature(
+  positions: readonly [number, number][],
+): Feature<LineString> {
+  return {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "LineString",
+      coordinates: positions.map(([lat, lng]) => [lng, lat]),
+    },
+  };
+}
+
 function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
   const c = MAP_ANNOTATION_COLORS;
 
@@ -45,10 +61,88 @@ function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
               />
             );
           }
-          case "marker":
-          case "circle":
-          case "polyline":
-            return null;
+          case "marker": {
+            const [lat, lng] = overlay.point;
+            return (
+              <MapLibreDotMarker
+                key={overlay.id}
+                latitude={lat}
+                longitude={lng}
+                radiusPx={overlay.style?.markerRadius ?? 8}
+                fillColor={overlay.style?.fillColor ?? c.pin}
+                borderColor={overlay.style?.color ?? c.strokeLight}
+                borderWidth={overlay.style?.weight ?? 2}
+                className={
+                  overlay.style?.pulsing ? "draft-seeker-pulse" : undefined
+                }
+              >
+                {overlay.popup ? (
+                  <MapLibrePopup
+                    latitude={lat}
+                    longitude={lng}
+                    closeButton={false}
+                    anchor="bottom"
+                  >
+                    {overlay.popup}
+                  </MapLibrePopup>
+                ) : null}
+              </MapLibreDotMarker>
+            );
+          }
+          case "circle": {
+            const [lat, lng] = overlay.center;
+            const width = overlay.style?.weight ?? 2;
+            const feature = turfCircle([lng, lat], overlay.radiusMeters / 1000, {
+              steps: 64,
+              units: "kilometers",
+            });
+            return (
+              <MapLibreGeoJsonOverlay
+                key={overlay.id}
+                id={`draft-circle-${overlay.id}`}
+                data={feature}
+                fill={
+                  overlay.style?.fillColor
+                    ? {
+                        fillColor: overlay.style.fillColor,
+                        fillOpacity: overlay.style.fillOpacity ?? 0.08,
+                      }
+                    : {
+                        fillColor: c.radar,
+                        fillOpacity: overlay.style?.fillOpacity ?? 0.08,
+                      }
+                }
+                line={{
+                  color: overlay.style?.color ?? c.radar,
+                  width,
+                  opacity: overlay.style?.opacity ?? 1,
+                  dashArray: cssPxDashToMapLibre(
+                    overlay.style?.dashArray,
+                    width,
+                  ),
+                }}
+              />
+            );
+          }
+          case "polyline": {
+            const width = overlay.style?.weight ?? 4;
+            return (
+              <MapLibreGeoJsonOverlay
+                key={overlay.id}
+                id={`draft-line-${overlay.id}`}
+                data={draftPolylineFeature(overlay.positions)}
+                line={{
+                  color: overlay.style?.color ?? c.thermometerAxis,
+                  width,
+                  opacity: overlay.style?.opacity ?? 1,
+                  dashArray: cssPxDashToMapLibre(
+                    overlay.style?.dashArray,
+                    width,
+                  ),
+                }}
+              />
+            );
+          }
           default: {
             const _exhaustive: never = overlay;
             return _exhaustive;
