@@ -48,4 +48,18 @@ describe("WizardStepFooter", () => {
     expect(screen.getByLabelText("Previous step")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Next section" })).toBeInTheDocument();
   });
+
+  it("shows a labeled primary button when primaryLabel is set", () => {
+    render(
+      <WizardStepFooter
+        stepIndex={0}
+        stepCount={3}
+        onBack={() => {}}
+        onNext={() => {}}
+        primaryLabel="Continue"
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument();
+  });
 });
