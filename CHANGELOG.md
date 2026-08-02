@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.11.0 - 2026-08-02
+
+### Improvements
+
+- Admin ops desk: Monitor map, roster, and rail panels are draggable and resizable inside each saved desk preset on wide layouts
+- Admin ops desk: drop stock Session watch / Incident triage / Ops overview presets; cold-start Scratch and keep only user-named layouts
+- Map landscape: collapse status rail and tool dock by default on phone/tablet landscape, with a mini timer chip (and sync text when unhealthy) to reveal full chrome on demand
+- Create session: role, size, tier, and unit changes feel more responsive on mobile
+- Map: when a session is gone, dim the map chrome, disable tools and timer, and show Retry plus Return to join
+- Map tool dock keeps short text labels under each icon on compact phone widths instead of icon-only slots
+- Map sync indicator shows plain Offline or Sync issue text when connection is unhealthy
+- Map status rail: ticker-band layout gives the timer column more room and compresses operation and phase fields
+- Map: play-area and admin boundary strokes scale with zoom so borders stay readable from country to street level
+- Privacy: name Nominatim, Esri, Open-Meteo, USGS, Transitland/TfL/CTA, Cloudflare, and Resend among third parties
+- Map settings: show Esri attribution when satellite basemap is selected
+- End-game disk elimination masks use the WASM geometry kernel when available (override with `jl.geometry.maskKernel=ts`)
+- Tentacle elimination shading now uses the Rust geometry kernel by default (override with `jl.geometry.maskKernel=ts`)
+
+### Fixes
+
+- Admin ops desk is less likely to false-reload after returning to the tab
+- iPhone PWA: tool dock sits flush through the home indicator with no navy gap below tools
+- Map: stop downloading huge landmass data in the background when you open the map. Large Overpass responses are blocked at the server (fixes random freezes and tab crashes on mobile Safari)
+- Map: measuring distance previews (including local electoral area borders) no longer freeze the map
+- Map opens without getting stuck on Loading game boundaries for many seconds
+- Map status rail: Start and sync controls keep ≥44px touch targets without growing the bar
+- Session: if the host’s account drifts, the session transfers host control to another player so the timer stays controllable
+
+### Technical
+
+- Disk WASM measured ≤1.0× TS on overlapping and ten-disk fixtures with topology parity (2026-07-29)
+- Spatial Voronoi WASM kernel + async caller wiring (ready flag stays off until the ≤1.1× perf gate)
+
 ## 0.10.8 - 2026-07-27
 
 ### Fixes
