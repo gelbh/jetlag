@@ -134,6 +134,7 @@ export function MeasuringPanel({
     phaseId,
     stepId,
     phaseIndex,
+    phaseCount,
     configureIndex,
     goNext,
     goBack,
@@ -198,7 +199,7 @@ export function MeasuringPanel({
     hasTargetPoint &&
     (awaitHiderAnswer || answer !== null) &&
     !isSubmitting;
-  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, phaseCount);
   const showMeasuringAnswer =
     canPreviewAnswer &&
     (stepId === "target" || phaseId === "ask");
@@ -293,7 +294,7 @@ export function MeasuringPanel({
           />
         ) : null}
 
-        {allowsSearch && searchResults.length > 0 && phaseId !== "ask" && stepId !== "target" ? (
+        {allowsSearch && searchResults.length > 0 && phaseId !== "ask" ? (
           <div className="jl-scroll jl-wizard-search-results">
             <SearchResultsList
               results={searchResults}

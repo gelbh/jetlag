@@ -105,6 +105,7 @@ export function ThermometerPanel({
     phaseId,
     stepId,
     phaseIndex,
+    phaseCount,
     configureIndex,
     goNext,
     goBack,
@@ -152,7 +153,7 @@ export function ThermometerPanel({
   const canGoNext =
     (phaseId === "place" && placeReady) ||
     (phaseId === "configure" && distanceAvailable);
-  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, phaseCount);
 
   const thermometerAnswerStepActions =
     phaseId === "ask" && !awaitHiderAnswer ? (

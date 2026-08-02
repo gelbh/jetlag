@@ -85,6 +85,7 @@ export function TentaclePanel({
     phaseId,
     stepId,
     phaseIndex,
+    phaseCount,
     configureIndex,
     goNext,
     goBack,
@@ -129,7 +130,7 @@ export function TentaclePanel({
       stepId === "locations" &&
       locationsReady &&
       !loading);
-  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, phaseCount);
 
   const tentacleSendActions =
     phaseId === "ask" &&
