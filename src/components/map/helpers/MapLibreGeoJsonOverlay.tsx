@@ -4,8 +4,6 @@ import type {
   Feature,
   FeatureCollection,
   Geometry,
-  MultiPolygon,
-  Polygon,
 } from "geojson";
 
 export interface MapLibreFillPaint {
