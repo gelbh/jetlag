@@ -85,9 +85,66 @@ export function getBasemapSurface(
 }
 
 /** Plain-text basemap credits for settings / chrome (not Leaflet HTML). */
-export function getBasemapAttributionText(style: MapStyle): string {
+export function getBasemapAttributionText(
+  style: MapStyle,
+  engine: "leaflet" | "maplibre" = "leaflet",
+): string {
   if (style === "satellite") {
     return ESRI_ATTRIBUTION_TEXT;
   }
+  if (engine === "maplibre") {
+    return OPENFREEMAP_ATTRIBUTION_TEXT;
+  }
   return CARTO_ATTRIBUTION_TEXT;
+}
+
+const OPENFREEMAP_ATTRIBUTION_TEXT =
+  "Map data © OpenStreetMap contributors · © OpenFreeMap";
+
+/** OpenFreeMap style URLs (no API key). Light locked to liberty after Slice 1 smoke. */
+export const OPENFREEMAP_STYLE_URLS = {
+  light: "https://tiles.openfreemap.org/styles/liberty",
+  dark: "https://tiles.openfreemap.org/styles/dark",
+} as const;
+
+/** Inline MapLibre style for Esri World Imagery (raster-only). */
+export type MapLibreSatelliteStyle = {
+  version: 8;
+  sources: {
+    esri: {
+      type: "raster";
+      tiles: string[];
+      tileSize?: number;
+      attribution?: string;
+      maxzoom?: number;
+    };
+  };
+  layers: Array<{
+    id: string;
+    type: "raster";
+    source: "esri";
+  }>;
+};
+
+/** MapLibre `mapStyle` — style URL for streets, inline raster style for satellite. */
+export function getMapLibreStyle(
+  style: MapStyle,
+  streetBasemap: StreetBasemap = "light",
+): string | MapLibreSatelliteStyle {
+  if (style === "satellite") {
+    return {
+      version: 8,
+      sources: {
+        esri: {
+          type: "raster",
+          tiles: [SATELLITE_BASEMAP.url],
+          tileSize: 256,
+          attribution: ESRI_ATTRIBUTION_TEXT,
+          maxzoom: SATELLITE_BASEMAP.maxZoom,
+        },
+      },
+      layers: [{ id: "esri-world-imagery", type: "raster", source: "esri" }],
+    };
+  }
+  return OPENFREEMAP_STYLE_URLS[streetBasemap];
 }
