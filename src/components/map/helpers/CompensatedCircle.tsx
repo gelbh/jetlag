@@ -1,6 +1,6 @@
 import { Circle, type CircleProps } from "react-leaflet";
-import { compensateZoomTransformWeight } from "../../../domain/map/zoomTransformCompensation";
 import { useZoomCssScale } from "../../../hooks/map/useZoomCssScale";
+import { compensatePathOptionsWeight } from "./compensatePathOptionsWeight";
 
 /**
  * Geographic Circle (meter radius) with stroke weight compensated for
@@ -8,18 +8,10 @@ import { useZoomCssScale } from "../../../hooks/map/useZoomCssScale";
  */
 export function CompensatedCircle({ pathOptions, ...rest }: CircleProps) {
   const cssScale = useZoomCssScale();
-  const logicalWeight = pathOptions?.weight;
-  const compensatedPathOptions =
-    pathOptions == null && logicalWeight == null
-      ? pathOptions
-      : {
-          ...pathOptions,
-          ...(logicalWeight == null
-            ? {}
-            : {
-                weight: compensateZoomTransformWeight(logicalWeight, cssScale),
-              }),
-        };
-
-  return <Circle {...rest} pathOptions={compensatedPathOptions} />;
+  return (
+    <Circle
+      {...rest}
+      pathOptions={compensatePathOptionsWeight(pathOptions, cssScale)}
+    />
+  );
 }
