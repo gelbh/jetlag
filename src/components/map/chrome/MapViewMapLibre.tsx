@@ -1,25 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import Map, { type MapLayerMouseEvent, type MapRef } from "react-map-gl/maplibre";
 import type { Map as MapLibreMap } from "maplibre-gl";
-import { LatLngBounds } from "leaflet";
+import { LatLngBounds, type LatLngExpression } from "leaflet";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
   getBasemapSurface,
   getMapLibreStyle,
 } from "../../../domain/map/mapBasemaps";
 import { isUsableMapBounds } from "../../../domain/geometry/gameArea/geometry";
-import type { MapViewProps } from "./mapViewTypes";
+import type { MapViewCoreProps } from "./mapViewTypes";
 
-function centerToLngLat(
-  center: MapViewProps["center"],
-): [number, number] {
+const FALLBACK_LNGLAT: [number, number] = [-0.09, 51.505];
+
+function centerToLngLat(center: LatLngExpression | undefined): [number, number] {
   if (center == null) {
-    return [-0.09, 51.505];
+    return FALLBACK_LNGLAT;
   }
   if (Array.isArray(center)) {
-    const [a, b] = center;
-    // Leaflet LatLngExpression tuples are [lat, lng]
-    return [b, a];
+    const [lat, lng] = center;
+    return [lng, lat];
   }
   if (
     typeof center === "object" &&
@@ -30,7 +29,12 @@ function centerToLngLat(
   ) {
     return [center.lng, center.lat];
   }
-  return [-0.09, 51.505];
+  if (import.meta.env.DEV) {
+    throw new Error(
+      `MapViewMapLibre: unsupported LatLngExpression ${String(center)}`,
+    );
+  }
+  return FALLBACK_LNGLAT;
 }
 
 function leafletBoundsFromMapLibre(map: MapLibreMap): LatLngBounds {
@@ -43,7 +47,7 @@ function leafletBoundsFromMapLibre(map: MapLibreMap): LatLngBounds {
 
 /**
  * MapLibre shell (Slice 1): basemap + click/bounds bridge.
- * Leaflet chrome controls / focus camera land in later slices.
+ * Accepts {@link MapViewCoreProps} only — Leaflet chrome is out of contract.
  */
 export function MapViewMapLibre({
   center = [51.505, -0.09],
@@ -57,7 +61,7 @@ export function MapViewMapLibre({
   interactive = true,
   children,
   mapKey,
-}: MapViewProps) {
+}: MapViewCoreProps) {
   const mapRef = useRef<MapRef>(null);
   const onBoundsChangeRef = useRef(onBoundsChange);
   const onUserViewportFramedRef = useRef(onUserViewportFramed);
@@ -139,9 +143,15 @@ export function MapViewMapLibre({
           dragPan={interactive}
           scrollZoom={interactive}
           doubleClickZoom={interactive}
+          dragRotate={false}
+          touchPitch={false}
           touchZoomRotate={interactive}
           pitchWithRotate={false}
-          onLoad={emitBounds}
+          onLoad={() => {
+            const map = mapRef.current?.getMap();
+            map?.touchZoomRotate.disableRotation();
+            emitBounds();
+          }}
           onMoveEnd={handleMoveEnd}
           onDragEnd={handleDragEnd}
           onZoomEnd={handleZoomEnd}

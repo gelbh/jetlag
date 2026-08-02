@@ -85,9 +85,15 @@ export function getBasemapSurface(
 }
 
 /** Plain-text basemap credits for settings / chrome (not Leaflet HTML). */
-export function getBasemapAttributionText(style: MapStyle): string {
+export function getBasemapAttributionText(
+  style: MapStyle,
+  engine: "leaflet" | "maplibre" = "leaflet",
+): string {
   if (style === "satellite") {
     return ESRI_ATTRIBUTION_TEXT;
+  }
+  if (engine === "maplibre") {
+    return OPENFREEMAP_ATTRIBUTION_TEXT;
   }
   return CARTO_ATTRIBUTION_TEXT;
 }
@@ -101,22 +107,22 @@ export const OPENFREEMAP_STYLE_URLS = {
   dark: "https://tiles.openfreemap.org/styles/dark",
 } as const;
 
-export type MapLibreStyleSpec = {
+/** Inline MapLibre style for Esri World Imagery (raster-only). */
+export type MapLibreSatelliteStyle = {
   version: 8;
-  sources: Record<
-    string,
-    {
+  sources: {
+    esri: {
       type: "raster";
       tiles: string[];
       tileSize?: number;
       attribution?: string;
       maxzoom?: number;
-    }
-  >;
+    };
+  };
   layers: Array<{
     id: string;
     type: "raster";
-    source: string;
+    source: "esri";
   }>;
 };
 
@@ -124,7 +130,7 @@ export type MapLibreStyleSpec = {
 export function getMapLibreStyle(
   style: MapStyle,
   streetBasemap: StreetBasemap = "light",
-): string | MapLibreStyleSpec {
+): string | MapLibreSatelliteStyle {
   if (style === "satellite") {
     return {
       version: 8,
@@ -141,11 +147,4 @@ export function getMapLibreStyle(
     };
   }
   return OPENFREEMAP_STYLE_URLS[streetBasemap];
-}
-
-export function getMapLibreAttributionText(style: MapStyle): string {
-  if (style === "satellite") {
-    return ESRI_ATTRIBUTION_TEXT;
-  }
-  return OPENFREEMAP_ATTRIBUTION_TEXT;
 }

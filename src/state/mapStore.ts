@@ -35,7 +35,7 @@ export const useMapStore = create<{
   distanceUnit: DistanceUnit;
   mapStyle: MapStyle;
   streetBasemap: StreetBasemap;
-  /** Dual-path map engine. Default leaflet until MapLibre cutover. */
+  /** Dual-path preference for later slices. Not persisted until play-ready. */
   mapEngine: MapEngine;
   layerVisibility: LayerVisibility;
   setActiveTool: (tool: MapTool) => void;
@@ -130,7 +130,8 @@ export const useMapStore = create<{
         distanceUnit: state.distanceUnit,
         mapStyle: state.mapStyle,
         streetBasemap: state.streetBasemap,
-        mapEngine: state.mapEngine,
+        // mapEngine intentionally not persisted until MAP_LIBRE_PLAY_READY —
+        // a half-built MapLibre shell must not revive across reloads.
         showAdminBoundaries: state.showAdminBoundaries,
         layerVisibility: state.layerVisibility,
       }),

@@ -7,7 +7,8 @@ import type {
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
 import type { MapZoomControlInset } from "./MapZoomControl";
 
-export interface MapViewProps {
+/** Engine-agnostic map surface (Slice 1 MapLibre shell + shared fields). */
+export interface MapViewCoreProps {
   center?: LatLngExpression;
   zoom?: number;
   className?: string;
@@ -17,22 +18,26 @@ export interface MapViewProps {
   /** Fired when the user pans or zooms the map (not programmatic fit/resize). */
   onUserViewportFramed?: () => void;
   onMapClick?: (lat: number, lng: number) => void;
+  interactive?: boolean;
+  mapKey?: string;
+  /**
+   * MapLibre-safe children only (react-map-gl Source/Layer/Marker).
+   * Do not pass react-leaflet layers here.
+   */
+  children?: React.ReactNode;
+}
+
+/** Leaflet chrome / camera — unsupported on the incomplete MapLibre shell. */
+export interface MapViewLeafletChromeProps {
   chromeHudRef?: RefObject<HTMLElement | null>;
   suppressChromeHideRef?: RefObject<boolean>;
-  interactive?: boolean;
   focusBounds?: LatLngBoundsExpression | null;
   focusMinZoom?: number;
   focusMaxZoom?: number;
-  /** When "once", fitBounds runs on mount and on recenterToken changes only. */
   fitBoundsMode?: "once" | "always";
-  /** Leaflet fitBounds padding in pixels. */
   fitBoundsPadding?: [number, number];
-  /** Extra bottom padding (px) when framing placement overlays. */
   focusPaddingBias?: number;
-  /** Force the cinematic `flyTo` path on the next reframe even if the geometry
-   * delta looks small (e.g. a placement phase transition). */
   focusPreferFly?: boolean;
-  /** Increment to programmatically refit focusBounds (e.g. Recenter button). */
   recenterToken?: number;
   showZoomControl?: boolean;
   zoomControlInset?: MapZoomControlInset;
@@ -41,6 +46,6 @@ export interface MapViewProps {
   mapStyleControlInset?: MapZoomControlInset;
   showRecenterControl?: boolean;
   onRecenter?: () => void;
-  children?: React.ReactNode;
-  mapKey?: string;
 }
+
+export type MapViewProps = MapViewCoreProps & MapViewLeafletChromeProps;
