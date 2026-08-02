@@ -13,10 +13,46 @@ interface MapDraftLayerProps {
   overlays: readonly MapDraftOverlay[];
 }
 
-export const MapDraftLayer = memo(function MapDraftLayer({
-  overlays,
-}: MapDraftLayerProps) {
-  const engine = useMapEngine();
+/** MapLibre Slice 2: polygons only; marker/circle/polyline land in Slice 3. */
+function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
+  const c = MAP_ANNOTATION_COLORS;
+
+  return (
+    <>
+      {overlays.map((overlay) => {
+        switch (overlay.kind) {
+          case "polygon":
+            return (
+              <MapLibreGeoJsonOverlay
+                key={overlay.id}
+                id={`draft-poly-${overlay.id}`}
+                data={overlay.feature}
+                fill={{
+                  fillColor: overlay.style?.fillColor ?? c.boundary,
+                  fillOpacity: overlay.style?.fillOpacity ?? 0.2,
+                }}
+                line={{
+                  color: overlay.style?.color ?? c.boundary,
+                  width: overlay.style?.weight ?? 1,
+                  opacity: overlay.style?.opacity ?? 1,
+                }}
+              />
+            );
+          case "marker":
+          case "circle":
+          case "polyline":
+            return null;
+          default: {
+            const _exhaustive: never = overlay;
+            return _exhaustive;
+          }
+        }
+      })}
+    </>
+  );
+}
+
+function MapDraftLayerLeaflet({ overlays }: MapDraftLayerProps) {
   const c = MAP_ANNOTATION_COLORS;
 
   return (
@@ -24,9 +60,6 @@ export const MapDraftLayer = memo(function MapDraftLayer({
       {overlays.map((overlay) => {
         switch (overlay.kind) {
           case "marker":
-            if (engine === "maplibre") {
-              return null;
-            }
             return (
               <CompensatedCircleMarker
                 key={overlay.id}
@@ -47,9 +80,6 @@ export const MapDraftLayer = memo(function MapDraftLayer({
               </CompensatedCircleMarker>
             );
           case "circle":
-            if (engine === "maplibre") {
-              return null;
-            }
             return (
               <CompensatedCircle
                 key={overlay.id}
@@ -66,24 +96,6 @@ export const MapDraftLayer = memo(function MapDraftLayer({
               />
             );
           case "polygon":
-            if (engine === "maplibre") {
-              return (
-                <MapLibreGeoJsonOverlay
-                  key={overlay.id}
-                  id={`draft-poly-${overlay.id}`}
-                  data={overlay.feature}
-                  fill={{
-                    fillColor: overlay.style?.fillColor ?? c.boundary,
-                    fillOpacity: overlay.style?.fillOpacity ?? 0.2,
-                  }}
-                  line={{
-                    color: overlay.style?.color ?? c.boundary,
-                    width: overlay.style?.weight ?? 1,
-                    opacity: overlay.style?.opacity ?? 1,
-                  }}
-                />
-              );
-            }
             return renderGeoJsonPolygonGroups({
               id: overlay.id,
               feature: overlay.feature,
@@ -96,9 +108,6 @@ export const MapDraftLayer = memo(function MapDraftLayer({
               },
             });
           case "polyline":
-            if (engine === "maplibre") {
-              return null;
-            }
             return (
               <CompensatedPolyline
                 key={overlay.id}
@@ -111,10 +120,22 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                 }}
               />
             );
-          default:
-            return null;
+          default: {
+            const _exhaustive: never = overlay;
+            return _exhaustive;
+          }
         }
       })}
     </>
   );
+}
+
+export const MapDraftLayer = memo(function MapDraftLayer(
+  props: MapDraftLayerProps,
+) {
+  const engine = useMapEngine();
+  if (engine === "maplibre") {
+    return <MapDraftLayerMapLibre {...props} />;
+  }
+  return <MapDraftLayerLeaflet {...props} />;
 });

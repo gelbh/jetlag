@@ -7,16 +7,15 @@ import type {
   MultiPolygon,
   Polygon,
 } from "geojson";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 
 export interface MapLibreFillPaint {
-  fillColor?: string;
+  fillColor: string;
   fillOpacity?: number;
   fillOutlineColor?: string;
 }
 
 export interface MapLibreLinePaint {
-  color?: string;
+  color: string;
   width?: number;
   opacity?: number;
   dashArray?: number[];
@@ -68,7 +67,7 @@ export function MapLibreGeoJsonOverlay({
           type="fill"
           beforeId={beforeId}
           paint={{
-            "fill-color": fill.fillColor ?? MAP_ANNOTATION_COLORS.elimination,
+            "fill-color": fill.fillColor,
             "fill-opacity": fill.fillOpacity ?? 0.35,
             ...(fill.fillOutlineColor
               ? { "fill-outline-color": fill.fillOutlineColor }
@@ -82,7 +81,7 @@ export function MapLibreGeoJsonOverlay({
           type="line"
           beforeId={beforeId}
           paint={{
-            "line-color": line.color ?? MAP_ANNOTATION_COLORS.boundary,
+            "line-color": line.color,
             "line-width": line.width ?? 1,
             "line-opacity": line.opacity ?? 1,
             ...(line.dashArray

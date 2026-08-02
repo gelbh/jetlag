@@ -1,4 +1,5 @@
 import { Fragment, useMemo } from "react";
+import type { FeatureCollection, LineString } from "geojson";
 import type { GameArea } from "../../../domain/map/annotations";
 import {
   gameAreaExteriorStrokeRings,
@@ -43,6 +44,23 @@ const PLAY_OUTSIDE_TINT = {
 const FRAMING_BASE_WEIGHT = 3;
 const PLAY_BASE_WEIGHT = 2;
 const FRAMING_DASH = "8 6";
+const FRAMING_DASH_ARRAY = [8, 6] as const;
+
+function exteriorStrokeFeatureCollection(
+  rings: LatLngTuple[][],
+): FeatureCollection<LineString> {
+  return {
+    type: "FeatureCollection",
+    features: rings.map((ring) => ({
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "LineString",
+        coordinates: ring.map(([lat, lng]) => [lng, lat]),
+      },
+    })),
+  };
+}
 
 function renderGameAreaPolygons(
   area: GameArea,
@@ -78,18 +96,19 @@ function renderGameAreaPolygons(
   );
 }
 
-function parseDashArray(dash: string): number[] {
-  return dash
-    .split(/\s+/)
-    .map((part) => Number(part))
-    .filter((n) => Number.isFinite(n) && n > 0);
-}
-
 function GameAreaMaskMapLibre({
   gameArea,
   framing = false,
 }: GameAreaMaskProps) {
   const outsideMask = useMemo(() => gameAreaOutsideMask(gameArea), [gameArea]);
+  const exteriorStrokeRings = useMemo(
+    () => gameAreaExteriorStrokeRings(gameArea),
+    [gameArea],
+  );
+  const exteriorStroke = useMemo(
+    () => exteriorStrokeFeatureCollection(exteriorStrokeRings),
+    [exteriorStrokeRings],
+  );
   const outsideTint = framing ? FRAMING_OUTSIDE_TINT : PLAY_OUTSIDE_TINT;
   const baseWeight = framing ? FRAMING_BASE_WEIGHT : PLAY_BASE_WEIGHT;
 
@@ -107,12 +126,12 @@ function GameAreaMaskMapLibre({
       ) : null}
       <MapLibreGeoJsonOverlay
         id="game-area-border"
-        data={polygonGeometryFeature(gameArea)}
+        data={exteriorStroke}
         line={{
           color: MAP_ANNOTATION_COLORS.playArea,
           width: baseWeight,
           opacity: 1,
-          dashArray: framing ? parseDashArray(FRAMING_DASH) : undefined,
+          dashArray: framing ? [...FRAMING_DASH_ARRAY] : undefined,
         }}
       />
     </>

@@ -1,7 +1,7 @@
 import { createContext, useContext, type ReactNode } from "react";
 import type { MapEngine } from "../../../state/mapStore";
 
-const MapEngineContext = createContext<MapEngine>("leaflet");
+const MapEngineContext = createContext<MapEngine | null>(null);
 
 export function MapEngineProvider({
   engine,
@@ -17,7 +17,11 @@ export function MapEngineProvider({
   );
 }
 
-/** Active map shell engine. Defaults to leaflet outside a provider. */
+/** Active map shell engine. Must be used under MapEngineProvider. */
 export function useMapEngine(): MapEngine {
-  return useContext(MapEngineContext);
+  const engine = useContext(MapEngineContext);
+  if (engine == null) {
+    throw new Error("useMapEngine must be used within MapEngineProvider");
+  }
+  return engine;
 }

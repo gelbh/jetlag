@@ -7,6 +7,7 @@ import { useZoomCssScale } from "../../../hooks/map/useZoomCssScale";
 import { useMapEngine } from "../chrome/mapEngineContext";
 import { compensatePathOptionsWeight } from "../helpers/compensatePathOptionsWeight";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
+import { pathOptionsToMapLibrePaint } from "../helpers/pathOptionsToMapLibrePaint";
 
 interface AdminBoundariesLayerProps {
   features: readonly AdminBoundaryFeature[];
@@ -29,16 +30,16 @@ function AdminBoundariesLayerMapLibre({
           mapStyle,
           "light",
         );
+        const paint = pathOptionsToMapLibrePaint({
+          ...style,
+          opacity: style.opacity ?? 0.5,
+        });
         return (
           <MapLibreGeoJsonOverlay
             key={entry.id}
             id={`admin-boundary-${entry.id}`}
             data={entry.feature}
-            line={{
-              color: style.color,
-              width: style.weight ?? 1,
-              opacity: style.opacity ?? 0.5,
-            }}
+            line={paint.line}
           />
         );
       })}
