@@ -1,5 +1,9 @@
 import { useEffect, useRef, type MutableRefObject } from "react";
 import { useMap } from "react-leaflet";
+import {
+  useMapLibreMap,
+} from "../helpers/useMapLibreMap";
+import { useMapEngine } from "./mapEngineContext";
 
 interface MapChromeListenerProps {
   chromeHudRef: MutableRefObject<HTMLElement | null>;
@@ -18,11 +22,14 @@ function setHudInteracting(hud: HTMLElement | null, interacting: boolean): void 
   }
 }
 
-export function MapChromeListener({
-  chromeHudRef,
-  suppressRef,
-}: MapChromeListenerProps) {
-  const map = useMap();
+function useChromeDragListener(
+  map: {
+    on: (type: string, fn: () => void) => void;
+    off: (type: string, fn: () => void) => void;
+  },
+  chromeHudRef: MutableRefObject<HTMLElement | null>,
+  suppressRef?: MutableRefObject<boolean>,
+) {
   const countRef = useRef(0);
 
   useEffect(() => {
@@ -74,6 +81,30 @@ export function MapChromeListener({
       countRef.current = 0;
     };
   }, [map, chromeHudRef, suppressRef]);
+}
 
+function MapChromeListenerMapLibre({
+  chromeHudRef,
+  suppressRef,
+}: MapChromeListenerProps) {
+  const map = useMapLibreMap();
+  useChromeDragListener(map, chromeHudRef, suppressRef);
   return null;
+}
+
+function MapChromeListenerLeaflet({
+  chromeHudRef,
+  suppressRef,
+}: MapChromeListenerProps) {
+  const map = useMap();
+  useChromeDragListener(map, chromeHudRef, suppressRef);
+  return null;
+}
+
+export function MapChromeListener(props: MapChromeListenerProps) {
+  const engine = useMapEngine();
+  if (engine === "maplibre") {
+    return <MapChromeListenerMapLibre {...props} />;
+  }
+  return <MapChromeListenerLeaflet {...props} />;
 }

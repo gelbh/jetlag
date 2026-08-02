@@ -1,6 +1,7 @@
-import { memo, useMemo } from "react";
+import { memo, useMemo, useState } from "react";
 import L from "leaflet";
 import { Marker, Popup } from "react-leaflet";
+import { Marker as MapLibreMarker, Popup as MapLibrePopup } from "react-map-gl/maplibre";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import type {
@@ -14,11 +15,14 @@ import {
   filterTransitVehiclesForViewport,
   type MapViewportBounds,
 } from "../../../domain/map/transitViewport";
+import { useMapEngine } from "../chrome/mapEngineContext";
 import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
+import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import {
   getTransitStopIcon,
   getTransitVehicleIcon,
 } from "../icons/transitLayerIcons";
+import { transitStopDivIcon } from "../icons/transitStopIcons";
 
 interface TransitLayerProps {
   staticData: TransitStaticData | null;
@@ -38,7 +42,130 @@ const MODE_COLORS: Record<TransitRouteMode, string> = {
 
 const transitRouteRenderer = L.canvas({ padding: 0.5 });
 
-export const TransitLayer = memo(function TransitLayer({
+function TransitLayerMapLibre({
+  staticData,
+  liveData,
+  viewport = null,
+  zoom = null,
+}: TransitLayerProps) {
+  const [openPopupId, setOpenPopupId] = useState<string | null>(null);
+
+  const visibleRoutes = useMemo(
+    () => filterTransitRoutesForViewport(staticData?.routes ?? [], viewport),
+    [staticData?.routes, viewport],
+  );
+  const visibleStops = useMemo(
+    () =>
+      filterTransitStopsForViewport(staticData?.stops ?? [], viewport, zoom),
+    [staticData?.stops, viewport, zoom],
+  );
+  const visibleVehicles = useMemo(
+    () => filterTransitVehiclesForViewport(liveData?.vehicles ?? [], viewport),
+    [liveData?.vehicles, viewport],
+  );
+
+  if (!staticData && !liveData) {
+    return null;
+  }
+
+  const openStop = visibleStops.find((stop) => `stop-${stop.id}` === openPopupId);
+  const openVehicle = visibleVehicles.find(
+    (vehicle) => `vehicle-${vehicle.id}` === openPopupId,
+  );
+
+  return (
+    <>
+      {visibleRoutes.map((route) => {
+        const width = route.mode === "rail" || route.mode === "metro" ? 4 : 3;
+        return (
+          <MapLibreGeoJsonOverlay
+            key={`route-${route.id}`}
+            id={`transit-route-${route.id}`}
+            data={{
+              type: "Feature",
+              properties: {},
+              geometry: {
+                type: "LineString",
+                coordinates: route.positions.map(([lat, lng]) => [lng, lat]),
+              },
+            }}
+            line={{
+              color: MODE_COLORS[route.mode],
+              width,
+              opacity: 0.75,
+            }}
+          />
+        );
+      })}
+
+      {visibleStops.map((stop) => (
+        <MapLibreMarker
+          key={`stop-${stop.id}`}
+          latitude={stop.lat}
+          longitude={stop.lng}
+          anchor="center"
+          onClick={(event) => {
+            event.originalEvent.stopPropagation();
+            setOpenPopupId(`stop-${stop.id}`);
+          }}
+        >
+          <div
+            // transitStopDivIcon is trusted SVG HTML.
+            dangerouslySetInnerHTML={{ __html: transitStopDivIcon(stop.mode) }}
+          />
+        </MapLibreMarker>
+      ))}
+
+      {visibleVehicles.map((vehicle) => {
+        const icon = getTransitVehicleIcon(
+          vehicle.bearing,
+          MODE_COLORS[vehicle.mode],
+        );
+        const html =
+          typeof icon.options.html === "string" ? icon.options.html : "";
+        return (
+          <MapLibreMarker
+            key={`vehicle-${vehicle.id}`}
+            latitude={vehicle.lat}
+            longitude={vehicle.lng}
+            anchor="center"
+            onClick={(event) => {
+              event.originalEvent.stopPropagation();
+              setOpenPopupId(`vehicle-${vehicle.id}`);
+            }}
+          >
+            <div dangerouslySetInnerHTML={{ __html: html }} />
+          </MapLibreMarker>
+        );
+      })}
+
+      {openStop ? (
+        <MapLibrePopup
+          latitude={openStop.lat}
+          longitude={openStop.lng}
+          closeOnClick={false}
+          onClose={() => setOpenPopupId(null)}
+        >
+          {openStop.name}
+        </MapLibrePopup>
+      ) : null}
+
+      {openVehicle ? (
+        <MapLibrePopup
+          latitude={openVehicle.lat}
+          longitude={openVehicle.lng}
+          closeOnClick={false}
+          onClose={() => setOpenPopupId(null)}
+        >
+          {openVehicle.label}
+          {openVehicle.routeRef ? ` · ${openVehicle.routeRef}` : ""}
+        </MapLibrePopup>
+      ) : null}
+    </>
+  );
+}
+
+function TransitLayerLeaflet({
   staticData,
   liveData,
   viewport = null,
@@ -106,4 +233,12 @@ export const TransitLayer = memo(function TransitLayer({
       ))}
     </>
   );
+}
+
+export const TransitLayer = memo(function TransitLayer(props: TransitLayerProps) {
+  const engine = useMapEngine();
+  if (engine === "maplibre") {
+    return <TransitLayerMapLibre {...props} />;
+  }
+  return <TransitLayerLeaflet {...props} />;
 });

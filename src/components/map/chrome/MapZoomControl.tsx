@@ -4,6 +4,11 @@ import { useMap } from "react-leaflet";
 import { HudMinusIcon, HudPlusIcon } from "../../ui/brand/HudIcons";
 import type { MapChromeControlInset } from "../helpers/mapChromeControlInset";
 import { useMapInteracting } from "../helpers/useMapInteracting";
+import {
+  useMapLibreInteracting,
+  useMapLibreMap,
+} from "../helpers/useMapLibreMap";
+import { useMapEngine } from "./mapEngineContext";
 
 export type MapZoomControlInset = MapChromeControlInset;
 
@@ -13,7 +18,69 @@ interface MapZoomControlProps {
   suppressRef?: MutableRefObject<boolean>;
 }
 
-export function MapZoomControl({
+function MapZoomControlMapLibre({
+  enabled,
+  inset = "dock",
+  suppressRef,
+}: MapZoomControlProps) {
+  const map = useMapLibreMap();
+  const portalTarget = useMemo(() => map.getContainer(), [map]);
+  const [zoom, setZoom] = useState(() => map.getZoom());
+  const interacting = useMapLibreInteracting(suppressRef);
+
+  useEffect(() => {
+    const syncZoom = () => {
+      setZoom(map.getZoom());
+    };
+
+    syncZoom();
+    map.on("zoomend", syncZoom);
+
+    return () => {
+      map.off("zoomend", syncZoom);
+    };
+  }, [map]);
+
+  if (!enabled || !portalTarget) {
+    return null;
+  }
+
+  const minZoom = map.getMinZoom();
+  const maxZoom = map.getMaxZoom();
+  const canZoomIn = zoom < maxZoom;
+  const canZoomOut = zoom > minZoom;
+
+  return createPortal(
+    <div
+      className={`map-zoom-control map-zoom-control--${inset}`}
+      data-map-interacting={interacting ? "true" : undefined}
+    >
+      <button
+        type="button"
+        className="map-zoom-control__btn hud-chrome"
+        onClick={() => map.zoomIn()}
+        disabled={!canZoomIn}
+        aria-label="Zoom in"
+        title="Zoom in"
+      >
+        <HudPlusIcon className="h-5 w-5" />
+      </button>
+      <button
+        type="button"
+        className="map-zoom-control__btn hud-chrome"
+        onClick={() => map.zoomOut()}
+        disabled={!canZoomOut}
+        aria-label="Zoom out"
+        title="Zoom out"
+      >
+        <HudMinusIcon className="h-5 w-5" />
+      </button>
+    </div>,
+    portalTarget,
+  );
+}
+
+function MapZoomControlLeaflet({
   enabled,
   inset = "dock",
   suppressRef,
@@ -73,4 +140,12 @@ export function MapZoomControl({
     </div>,
     portalTarget,
   );
+}
+
+export function MapZoomControl(props: MapZoomControlProps) {
+  const engine = useMapEngine();
+  if (engine === "maplibre") {
+    return <MapZoomControlMapLibre {...props} />;
+  }
+  return <MapZoomControlLeaflet {...props} />;
 }

@@ -13,7 +13,9 @@ import {
 import type { PlayerLocationRecord } from "../../../domain/session/activity/sessionChat";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { useLiveLocationNowMs } from "../../../hooks/map/useLiveLocationNowMs";
+import { useMapEngine } from "../chrome/mapEngineContext";
 import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
+import { MapLibreDotMarker } from "../helpers/MapLibreHtmlMarker";
 
 interface LivePlayerLocationsLayerProps {
   locations: readonly PlayerLocationRecord[];
@@ -23,7 +25,19 @@ interface LivePlayerLocationsLayerProps {
   otherFillColor: string;
 }
 
-export function LivePlayerLocationsLayer({
+function useLiveLocationClusters(
+  locations: readonly PlayerLocationRecord[],
+  nowMs: number,
+) {
+  return useMemo(() => {
+    const fresh = locations.filter(
+      (location) => !isLiveLocationGone(location.updatedAt, nowMs),
+    );
+    return clusterNearbyPoints(fresh);
+  }, [locations, nowMs]);
+}
+
+function LivePlayerLocationsLayerMapLibre({
   locations,
   myUid = null,
   role,
@@ -31,12 +45,50 @@ export function LivePlayerLocationsLayer({
   otherFillColor,
 }: LivePlayerLocationsLayerProps) {
   const nowMs = useLiveLocationNowMs();
-  const clusters = useMemo(() => {
-    const fresh = locations.filter(
-      (location) => !isLiveLocationGone(location.updatedAt, nowMs),
-    );
-    return clusterNearbyPoints(fresh);
-  }, [locations, nowMs]);
+  const clusters = useLiveLocationClusters(locations, nowMs);
+
+  return (
+    <>
+      {clusters.map((cluster) => {
+        const isSelf =
+          myUid !== null && cluster.uids.some((uid) => uid === myUid);
+        const count = cluster.members.length;
+        const { fillOpacity, lastSeenLabel } = liveClusterPresentation(
+          cluster.members.map((member) => member.updatedAt),
+          nowMs,
+        );
+        const roleLabel = clusterTooltipLabel(count, role, isSelf);
+        const tooltipLabel = lastSeenLabel
+          ? `${roleLabel} · ${lastSeenLabel}`
+          : roleLabel;
+
+        return (
+          <MapLibreDotMarker
+            key={locationClusterStableKey(cluster)}
+            latitude={cluster.lat}
+            longitude={cluster.lng}
+            radiusPx={isSelf ? 10 : 9}
+            borderColor={MAP_ANNOTATION_COLORS.strokeLight}
+            borderWidth={isSelf ? 3 : 2}
+            fillColor={isSelf ? selfFillColor : otherFillColor}
+            opacity={fillOpacity}
+            title={tooltipLabel}
+          />
+        );
+      })}
+    </>
+  );
+}
+
+function LivePlayerLocationsLayerLeaflet({
+  locations,
+  myUid = null,
+  role,
+  selfFillColor,
+  otherFillColor,
+}: LivePlayerLocationsLayerProps) {
+  const nowMs = useLiveLocationNowMs();
+  const clusters = useLiveLocationClusters(locations, nowMs);
 
   return (
     <>
@@ -77,4 +129,12 @@ export function LivePlayerLocationsLayer({
       })}
     </>
   );
+}
+
+export function LivePlayerLocationsLayer(props: LivePlayerLocationsLayerProps) {
+  const engine = useMapEngine();
+  if (engine === "maplibre") {
+    return <LivePlayerLocationsLayerMapLibre {...props} />;
+  }
+  return <LivePlayerLocationsLayerLeaflet {...props} />;
 }
