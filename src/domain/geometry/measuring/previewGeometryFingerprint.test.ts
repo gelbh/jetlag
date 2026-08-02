@@ -107,7 +107,6 @@ describe("previewGeometryFingerprint", () => {
       },
     };
 
-    expect(() => previewGeometryFingerprint(dense)).not.toThrow();
     const fingerprint = previewGeometryFingerprint(dense);
     expect(fingerprint).toMatch(/^MultiPolygon:/);
     expect(fingerprint).toContain(`:${coordCount + 1}:`);
