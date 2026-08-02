@@ -2,11 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, type RefObject } from "react";
 import Map, { type MapLayerMouseEvent, type MapRef } from "react-map-gl/maplibre";
 import { setWorkerUrl, type Map as MapLibreMap } from "maplibre-gl";
 import {
-  LatLngBounds,
-  latLngBounds,
-  type LatLngBoundsExpression,
-  type LatLngExpression,
-} from "leaflet";
+  createMapBounds,
+  toMapBounds,
+  type MapBoundsExpression,
+  type MapLatLng,
+} from "../../../domain/map/mapBounds";
 import "maplibre-gl/dist/maplibre-gl.css";
 import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import {
@@ -27,7 +27,6 @@ import { useMotionProfile } from "../../../hooks/motion/useMotionProfile";
 import { useMapStore } from "../../../state/mapStore";
 import { useMapLibreMap } from "../helpers/useMapLibreMap";
 import { MapChromeListener } from "./MapChromeListener";
-import { MapEngineProvider } from "./mapEngineContext";
 import { MapRecenterControl } from "./MapRecenterControl";
 import { MapStyleToggle } from "./MapStyleToggle";
 import { MapZoomControl } from "./MapZoomControl";
@@ -37,7 +36,7 @@ setWorkerUrl(mapLibreWorkerUrl);
 
 const FALLBACK_LNGLAT: [number, number] = [-0.09, 51.505];
 
-function centerToLngLat(center: LatLngExpression | undefined): [number, number] {
+function centerToLngLat(center: MapLatLng | undefined): [number, number] {
   if (center == null) {
     return FALLBACK_LNGLAT;
   }
@@ -62,12 +61,14 @@ function centerToLngLat(center: LatLngExpression | undefined): [number, number] 
   return FALLBACK_LNGLAT;
 }
 
-function leafletBoundsFromMapLibre(map: MapLibreMap): LatLngBounds {
+function mapBoundsFromMapLibre(map: MapLibreMap) {
   const b = map.getBounds();
-  return new LatLngBounds(
-    [b.getSouth(), b.getWest()],
-    [b.getNorth(), b.getEast()],
-  );
+  return createMapBounds({
+    south: b.getSouth(),
+    west: b.getWest(),
+    north: b.getNorth(),
+    east: b.getEast(),
+  });
 }
 
 function MapFocus({
@@ -81,7 +82,7 @@ function MapFocus({
   focusPaddingBias,
   preferFly = false,
 }: {
-  focusBounds: LatLngBoundsExpression | null;
+  focusBounds: MapBoundsExpression | null;
   focusMinZoom?: number;
   focusMaxZoom?: number;
   fitBoundsMode: "once" | "always";
@@ -140,15 +141,12 @@ function MapFocus({
       bottom: padY + (focusPaddingBias ?? 0),
     };
 
-    const leafletBounds =
-      focusBounds instanceof LatLngBounds
-        ? focusBounds
-        : latLngBounds(focusBounds);
-    if (!isUsableMapBounds(leafletBounds)) {
+    const mapBounds = toMapBounds(focusBounds);
+    if (!isUsableMapBounds(mapBounds)) {
       return;
     }
 
-    const lngLatBounds = focusBoundsToLngLatBounds(leafletBounds);
+    const lngLatBounds = focusBoundsToLngLatBounds(mapBounds);
     const framed = computeFramedCenterZoomMapLibre(
       map,
       lngLatBounds,
@@ -305,7 +303,7 @@ export function MapViewMapLibre({
     if (!map) {
       return;
     }
-    const nextBounds = leafletBoundsFromMapLibre(map);
+    const nextBounds = mapBoundsFromMapLibre(map);
     if (!isUsableMapBounds(nextBounds)) {
       return;
     }
@@ -342,8 +340,8 @@ export function MapViewMapLibre({
       <div
         className={
           interactive
-            ? `h-full w-full ${containerSurfaceClass}${satelliteGradeClass}`
-            : `h-full w-full pointer-events-auto ${containerSurfaceClass}${satelliteGradeClass}`
+            ? `h-full w-full maplibregl-map ${containerSurfaceClass}${satelliteGradeClass}`
+            : `h-full w-full maplibregl-map pointer-events-auto ${containerSurfaceClass}${satelliteGradeClass}`
         }
       >
         <Map
@@ -383,8 +381,7 @@ export function MapViewMapLibre({
           onZoomEnd={handleZoomEnd}
           onClick={handleClick}
         >
-          <MapEngineProvider engine="maplibre">
-            <MapFocus
+          <MapFocus
               focusBounds={focusBounds ?? null}
               focusMinZoom={focusMinZoom}
               focusMaxZoom={focusMaxZoom}
@@ -423,7 +420,6 @@ export function MapViewMapLibre({
               />
             ) : null}
             {children}
-          </MapEngineProvider>
         </Map>
       </div>
     </div>

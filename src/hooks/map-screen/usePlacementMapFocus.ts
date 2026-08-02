@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { LatLngBoundsExpression } from "leaflet";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
+import type { MapBoundsExpression } from "../../domain/map/mapBounds";
 import {
   computePlacementCameraTarget,
   placementCameraFingerprint,
   resolvePlacementPhase,
   shouldReframeWithHysteresis,
-  toLeafletBounds,
+  toMapBounds,
   WALK_REFRAME_INTERVAL_MS,
   type PlacementCameraDraftState,
   type PlacementViewportFrame,
@@ -26,7 +26,7 @@ export interface UsePlacementMapFocusOptions {
   overlays: readonly MapDraftOverlay[];
   eliminationFeatures: Feature<Polygon | MultiPolygon>[];
   gameArea: GameArea;
-  defaultFocusBounds: LatLngBoundsExpression | null;
+  defaultFocusBounds: MapBoundsExpression | null;
   enabled: boolean;
   panelMinimized: boolean;
   selectedPoiId?: string | null;
@@ -35,7 +35,7 @@ export interface UsePlacementMapFocusOptions {
 }
 
 export interface UsePlacementMapFocusResult {
-  effectiveFocusBounds: LatLngBoundsExpression | null;
+  effectiveFocusBounds: MapBoundsExpression | null;
   focusMinZoom?: number;
   focusMaxZoom?: number;
   placementRecenterToken: number;
@@ -51,15 +51,15 @@ function resolvePanelPeekHeightPx(panelMinimized: boolean): number {
 }
 
 function targetBoundsBox(
-  bounds: LatLngBoundsExpression | null | undefined,
+  bounds: MapBoundsExpression | null | undefined,
 ): ReturnType<typeof gameAreaToBoundingBox> | null {
   if (!bounds) {
     return null;
   }
 
-  const leafletBounds = toLeafletBounds(bounds);
-  const southWest = leafletBounds.getSouthWest();
-  const northEast = leafletBounds.getNorthEast();
+  const mapBounds = toMapBounds(bounds);
+  const southWest = mapBounds.getSouthWest();
+  const northEast = mapBounds.getNorthEast();
 
   return gameAreaToBoundingBox({
     type: "Polygon",

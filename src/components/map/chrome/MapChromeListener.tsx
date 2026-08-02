@@ -1,10 +1,5 @@
 import { useEffect, useRef, type MutableRefObject } from "react";
-import { useMap } from "react-leaflet";
-import {
-  useMapLibreMap,
-} from "../helpers/useMapLibreMap";
-import { matchMapEngine } from "./matchMapEngine";
-import { useMapEngine } from "./mapEngineContext";
+import { useMapLibreMap } from "../helpers/useMapLibreMap";
 
 interface MapChromeListenerProps {
   chromeHudRef: MutableRefObject<HTMLElement | null>;
@@ -23,14 +18,11 @@ function setHudInteracting(hud: HTMLElement | null, interacting: boolean): void 
   }
 }
 
-function useChromeDragListener(
-  map: {
-    on: (type: string, fn: () => void) => void;
-    off: (type: string, fn: () => void) => void;
-  },
-  chromeHudRef: MutableRefObject<HTMLElement | null>,
-  suppressRef?: MutableRefObject<boolean>,
-) {
+export function MapChromeListener({
+  chromeHudRef,
+  suppressRef,
+}: MapChromeListenerProps) {
+  const map = useMapLibreMap();
   const countRef = useRef(0);
 
   useEffect(() => {
@@ -60,7 +52,6 @@ function useChromeDragListener(
       showIfIdle();
     };
 
-    // Recovers missed dragend when touch gestures hand off to pinch-zoom.
     const onMoveEnd = () => {
       if (countRef.current === 0) {
         return;
@@ -82,30 +73,6 @@ function useChromeDragListener(
       countRef.current = 0;
     };
   }, [map, chromeHudRef, suppressRef]);
-}
 
-function MapChromeListenerMapLibre({
-  chromeHudRef,
-  suppressRef,
-}: MapChromeListenerProps) {
-  const map = useMapLibreMap();
-  useChromeDragListener(map, chromeHudRef, suppressRef);
   return null;
-}
-
-function MapChromeListenerLeaflet({
-  chromeHudRef,
-  suppressRef,
-}: MapChromeListenerProps) {
-  const map = useMap();
-  useChromeDragListener(map, chromeHudRef, suppressRef);
-  return null;
-}
-
-export function MapChromeListener(props: MapChromeListenerProps) {
-  const engine = useMapEngine();
-  return matchMapEngine(engine, {
-    maplibre: () => <MapChromeListenerMapLibre {...props} />,
-    leaflet: () => <MapChromeListenerLeaflet {...props} />,
-  });
 }

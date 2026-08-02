@@ -1,14 +1,15 @@
+import turfCircle from "@turf/circle";
+import type { Feature, Polygon as GeoPolygon } from "geojson";
 import { Fragment } from "react";
-import { CompensatedCircle } from "../helpers/CompensatedCircle";
-import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
-import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { SessionRecord } from "../../../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { resolveHiderTruthReference } from "../../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
 import { hiderTruthReferenceMapTooltip } from "../../tools/shared/questionTruthReferenceHint";
-import { Tooltip } from "react-leaflet";
+import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
+import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
+import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 
 interface HidingZonesLayerProps {
   zones: readonly HidingZoneRecord[];
@@ -18,6 +19,16 @@ interface HidingZonesLayerProps {
     SessionRecord,
     "endGameStartedAt" | "endGameTruthAnchors"
   > | null;
+}
+
+function polygonFeature(ring: LatLngTuple[]): Feature<GeoPolygon> {
+  const coordinates = [ring.map(([lat, lng]) => [lng, lat] as [number, number])];
+  coordinates[0]!.push(coordinates[0]![0]!);
+  return {
+    type: "Feature",
+    properties: {},
+    geometry: { type: "Polygon", coordinates },
+  };
 }
 
 function polygonPositions(geometryJson: string): LatLngTuple[] | null {
@@ -59,6 +70,17 @@ export function HidingZonesLayer({
         const fillColor = isOwn
           ? MAP_ANNOTATION_COLORS.hidingZoneOwn
           : MAP_ANNOTATION_COLORS.hidingZone;
+        const weight = isOwn ? 3 : 2;
+        const fillOpacity = zone.moveInProgress ? 0.08 : 0.18;
+        const dashArray = zone.moveInProgress ? "8 8" : undefined;
+
+        const data = ring
+          ? polygonFeature(ring)
+          : turfCircle([center[1], center[0]], zone.radiusMeters / 1000, {
+              steps: 64,
+              units: "kilometers",
+            });
+
         const truthReference = resolveHiderTruthReference({
           hiderUid: zone.hiderUid,
           zoneCenter: center,
@@ -72,45 +94,25 @@ export function HidingZonesLayer({
 
         return (
           <Fragment key={zone.hiderUid}>
-            {ring ? (
-              <CompensatedPolygon
-                positions={ring}
-                pathOptions={{
-                  color: fillColor,
-                  weight: isOwn ? 3 : 2,
-                  fillColor,
-                  fillOpacity: zone.moveInProgress ? 0.08 : 0.18,
-                  dashArray: zone.moveInProgress ? "8 8" : undefined,
-                }}
-              />
-            ) : (
-              <CompensatedCircle
-                center={center}
-                radius={zone.radiusMeters}
-                pathOptions={{
-                  color: fillColor,
-                  weight: isOwn ? 3 : 2,
-                  fillColor,
-                  fillOpacity: zone.moveInProgress ? 0.08 : 0.18,
-                  dashArray: zone.moveInProgress ? "8 8" : undefined,
-                }}
-              />
-            )}
+            <MapLibreGeoJsonOverlay
+              id={`hiding-zone-${zone.hiderUid}`}
+              data={data}
+              fill={{ fillColor, fillOpacity }}
+              line={{
+                color: fillColor,
+                width: weight,
+                dashArray: cssPxDashToMapLibre(dashArray, weight),
+              }}
+            />
             {showReferencePin ? (
-              <CompensatedCircleMarker
-                center={referencePoint}
-                radius={7}
-                pathOptions={{
-                  color: MAP_ANNOTATION_COLORS.strokeLight,
-                  weight: 2,
-                  fillColor: MAP_ANNOTATION_COLORS.highlight,
-                  fillOpacity: 1,
-                }}
-              >
-                <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-                  {hiderTruthReferenceMapTooltip(truthReference.mode)}
-                </Tooltip>
-              </CompensatedCircleMarker>
+              <MapLibreDotMarker
+                latitude={referencePoint[0]}
+                longitude={referencePoint[1]}
+                radiusPx={7}
+                borderColor={MAP_ANNOTATION_COLORS.strokeLight}
+                fillColor={MAP_ANNOTATION_COLORS.highlight}
+                title={hiderTruthReferenceMapTooltip(truthReference.mode)}
+              />
             ) : null}
           </Fragment>
         );

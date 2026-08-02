@@ -1,5 +1,5 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import type { LatLngBounds } from "leaflet";
+import type { MapBounds } from "../../map/mapBounds";
 import difference from "@turf/difference";
 import type { LatLngTuple } from "./types";
 
@@ -19,7 +19,7 @@ function geodesicMeters(a: LatLngTuple, b: LatLngTuple): number {
 /** Geodesic distance from center to the nearest viewport edge. */
 export function centerToViewportEdgeRadiusMeters(
   center: LatLngTuple,
-  bounds: LatLngBounds,
+  bounds: MapBounds,
 ): number {
   const southWest = bounds.getSouthWest();
   const northEast = bounds.getNorthEast();

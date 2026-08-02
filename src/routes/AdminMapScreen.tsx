@@ -105,7 +105,7 @@ export function AdminMapScreen({
       return;
     }
 
-    const map = shellRef.current?.querySelector(".leaflet-container");
+    const map = shellRef.current?.querySelector(".maplibregl-map");
     if (map && "dispatchEvent" in map) {
       window.dispatchEvent(new Event("resize"));
     }

@@ -1,13 +1,14 @@
-import { Popup } from "react-leaflet";
+import turfCircle from "@turf/circle";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
 import { pointToolRadiusFromMetadata } from "../../../domain/map/annotations";
 import { polygonFeatureToLeafletRings } from "../../../domain/geometry/gameArea/geometry";
 import type { LayerVisibility } from "../../../state/sessionStore";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
-import { renderPointRadiusAnnotation } from "../helpers/renderHelpers";
-import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
-import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
+import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
+import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
+import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
+import { PinAnnotationMarker } from "./PinAnnotationMarker";
 
 interface RenderAnnotationLayerItemParams {
   annotation: AnnotationRecord;
@@ -16,6 +17,68 @@ interface RenderAnnotationLayerItemParams {
   selectedAnnotationId: string | null;
   selectionEnabled: boolean;
   selectAnnotation: () => void;
+}
+
+function pointRadiusAnnotation({
+  annotationId,
+  center,
+  radiusMeters,
+  selected,
+  selectionEnabled,
+  selectAnnotation,
+  markerFillColor,
+  strokeColor,
+  fillColor,
+  fillOpacity,
+  dashArray,
+}: {
+  annotationId: string;
+  center: [number, number];
+  radiusMeters: number;
+  selected: boolean;
+  selectionEnabled: boolean;
+  selectAnnotation: () => void;
+  markerFillColor: string;
+  strokeColor: string;
+  fillColor: string;
+  fillOpacity: number;
+  dashArray?: string;
+}) {
+  const [lat, lng] = center;
+  const weight = selected ? 3 : 2;
+  const feature = turfCircle([lng, lat], radiusMeters / 1000, {
+    steps: 64,
+    units: "kilometers",
+  });
+
+  return (
+    <>
+      <MapLibreGeoJsonOverlay
+        id={`annotation-${annotationId}-radius`}
+        data={feature}
+        fill={{ fillColor, fillOpacity }}
+        line={{
+          color: strokeColor,
+          width: weight,
+          dashArray: cssPxDashToMapLibre(dashArray, weight),
+        }}
+      />
+      <MapLibreDotMarker
+        latitude={lat}
+        longitude={lng}
+        radiusPx={6}
+        fillColor={markerFillColor}
+        borderColor={MAP_ANNOTATION_COLORS.strokeLight}
+        onClick={
+          selectionEnabled
+            ? () => {
+                selectAnnotation();
+              }
+            : undefined
+        }
+      />
+    </>
+  );
 }
 
 export function renderAnnotationLayerItem({
@@ -36,7 +99,6 @@ export function renderAnnotationLayerItem({
       : MAP_ANNOTATION_COLORS.elimination);
   const selected = annotation.id === selectedAnnotationId;
 
-  // Committed answered radar: elimination fill only (CombinedEliminationLayer).
   if (
     annotation.type === "radar" &&
     annotation.geometry.geometry.type === "Point" &&
@@ -51,21 +113,17 @@ export function renderAnnotationLayerItem({
   ) {
     const [lng, lat] = annotation.geometry.geometry.coordinates;
     const radiusMeters = pointToolRadiusFromMetadata(annotation.metadata);
-    const radarColor = MAP_ANNOTATION_COLORS.radar;
-
-    return renderPointRadiusAnnotation({
+    return pointRadiusAnnotation({
       annotationId: annotation.id,
       center: [lat, lng],
       radiusMeters,
       selected,
       selectionEnabled,
       selectAnnotation,
-      markerFillColor: radarColor,
-      style: {
-        strokeColor: radarColor,
-        fillColor: radarColor,
-        fillOpacity: 0.08,
-      },
+      markerFillColor: MAP_ANNOTATION_COLORS.radar,
+      strokeColor: MAP_ANNOTATION_COLORS.radar,
+      fillColor: MAP_ANNOTATION_COLORS.radar,
+      fillOpacity: 0.08,
     });
   }
 
@@ -75,27 +133,21 @@ export function renderAnnotationLayerItem({
   ) {
     const [lng, lat] = annotation.geometry.geometry.coordinates;
     const radiusMeters = pointToolRadiusFromMetadata(annotation.metadata);
-    const tentacleColor = MAP_ANNOTATION_COLORS.tentacle;
-    const tentacleAccent = MAP_ANNOTATION_COLORS.tentacleAccent;
-
-    return renderPointRadiusAnnotation({
+    return pointRadiusAnnotation({
       annotationId: annotation.id,
       center: [lat, lng],
       radiusMeters,
       selected,
       selectionEnabled,
       selectAnnotation,
-      markerFillColor: tentacleColor,
-      style: {
-        strokeColor: tentacleAccent,
-        fillColor: tentacleColor,
-        fillOpacity: 0.06,
-        dashArray: "6 6",
-      },
+      markerFillColor: MAP_ANNOTATION_COLORS.tentacle,
+      strokeColor: MAP_ANNOTATION_COLORS.tentacleAccent,
+      fillColor: MAP_ANNOTATION_COLORS.tentacle,
+      fillOpacity: 0.06,
+      dashArray: "6 6",
     });
   }
 
-  // Committed question tools: elimination fill only (CombinedEliminationLayer).
   if (
     annotation.type === "matching" ||
     (annotation.type === "measuring" &&
@@ -112,26 +164,23 @@ export function renderAnnotationLayerItem({
     annotation.geometry.geometry.type === "Polygon"
   ) {
     const zonePolygon = annotation.geometry as Feature<GeoPolygon>;
+    const weight = selected ? 4 : 2;
     return polygonFeatureToLeafletRings(zonePolygon).map((ring, index) => (
-      <CompensatedPolyline
+      <MapLibreGeoJsonOverlay
         key={`${annotation.id}-outline-${index}`}
-        positions={ring}
-        interactive={selectionEnabled}
-        pathOptions={{
-          color,
-          weight: selected ? 4 : 2,
-          fillOpacity: 0,
+        id={`annotation-${annotation.id}-zone-${index}`}
+        data={{
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "LineString",
+            coordinates: ring.map(([lat, lng]) => [lng, lat]),
+          },
         }}
-        eventHandlers={
-          selectionEnabled
-            ? {
-                click: (event) => {
-                  event.originalEvent?.stopPropagation();
-                  selectAnnotation();
-                },
-              }
-            : undefined
-        }
+        line={{
+          color,
+          width: weight,
+        }}
       />
     ));
   }
@@ -142,30 +191,15 @@ export function renderAnnotationLayerItem({
   ) {
     const [lng, lat] = annotation.geometry.geometry.coordinates;
     return (
-      <CompensatedCircleMarker
+      <PinAnnotationMarker
         key={annotation.id}
-        center={[lat, lng]}
-        radius={8}
-        interactive={selectionEnabled}
-        pathOptions={{
-          color: MAP_ANNOTATION_COLORS.strokeLight,
-          weight: 2,
-          fillColor: color,
-          fillOpacity: 1,
-        }}
-        eventHandlers={
-          selectionEnabled
-            ? {
-                click: (event) => {
-                  event.originalEvent?.stopPropagation();
-                  selectAnnotation();
-                },
-              }
-            : undefined
-        }
-      >
-        <Popup>{annotation.metadata.label ?? "Note"}</Popup>
-      </CompensatedCircleMarker>
+        lat={lat}
+        lng={lng}
+        color={color}
+        label={annotation.metadata.label ?? "Note"}
+        selectionEnabled={selectionEnabled}
+        onSelect={selectAnnotation}
+      />
     );
   }
 

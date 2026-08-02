@@ -15,10 +15,6 @@ export interface MapBasemapDefinition {
 const CARTO_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
-/** Plain-text credits for in-app UI (Leaflet attribution stays HTML above). */
-const CARTO_ATTRIBUTION_TEXT =
-  "Map data © OpenStreetMap contributors · © CARTO";
-
 const ESRI_ATTRIBUTION =
   "Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community";
 
@@ -84,18 +80,12 @@ export function getBasemapSurface(
   return streetBasemap;
 }
 
-/** Plain-text basemap credits for settings / chrome (not Leaflet HTML). */
-export function getBasemapAttributionText(
-  style: MapStyle,
-  engine: "leaflet" | "maplibre" = "leaflet",
-): string {
+/** Plain-text basemap credits for settings / chrome. */
+export function getBasemapAttributionText(style: MapStyle): string {
   if (style === "satellite") {
     return ESRI_ATTRIBUTION_TEXT;
   }
-  if (engine === "maplibre") {
-    return OPENFREEMAP_ATTRIBUTION_TEXT;
-  }
-  return CARTO_ATTRIBUTION_TEXT;
+  return OPENFREEMAP_ATTRIBUTION_TEXT;
 }
 
 const OPENFREEMAP_ATTRIBUTION_TEXT =

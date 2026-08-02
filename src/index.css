@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "leaflet/dist/leaflet.css";
 @import "./styles/tokens.css";
 @import "./styles/base.css";
 @import "./styles/primitives.css";
@@ -11,7 +10,7 @@
 @import "./styles/map-tool-dock-secondary.css";
 @import "./styles/map-tool-dock-compact-labels.css";
 @import "./styles/home-entry.css";
-@import "./styles/leaflet-overrides.css";
+@import "./styles/map-chrome-controls.css";
 @import "./styles/motion.css";
 @import "./styles/route-transition.css";
 @import "./styles/motion-utilities.css";

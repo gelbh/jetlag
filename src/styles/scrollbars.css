@@ -34,9 +34,9 @@
   display: none;
 }
 
-/* Firefox: scrollbar-* inherits from ancestors. Keep map/Leaflet on OS default. */
+/* Firefox: scrollbar-* inherits from ancestors. Keep map/MapLibre on OS default. */
 .map-screen-shell,
-.leaflet-container {
+.maplibregl-map {
   scrollbar-width: auto;
   scrollbar-color: auto;
 }

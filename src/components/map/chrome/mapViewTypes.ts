@@ -1,37 +1,32 @@
 import type { RefObject } from "react";
 import type {
-  LatLngBounds,
-  LatLngBoundsExpression,
-  LatLngExpression,
-} from "leaflet";
+  MapBounds,
+  MapBoundsExpression,
+  MapLatLng,
+} from "../../../domain/map/mapBounds";
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
 import type { MapZoomControlInset } from "./MapZoomControl";
 
-/** Engine-agnostic map surface (Slice 1 MapLibre shell + shared fields). */
+/** MapLibre map surface props. */
 export interface MapViewCoreProps {
-  center?: LatLngExpression;
+  center?: MapLatLng;
   zoom?: number;
   className?: string;
   mapStyle?: MapStyle;
   streetBasemap?: StreetBasemap;
-  onBoundsChange?: (bounds: LatLngBounds) => void;
+  onBoundsChange?: (bounds: MapBounds) => void;
   /** Fired when the user pans or zooms the map (not programmatic fit/resize). */
   onUserViewportFramed?: () => void;
   onMapClick?: (lat: number, lng: number) => void;
   interactive?: boolean;
   mapKey?: string;
-  /**
-   * MapLibre-safe children only (react-map-gl Source/Layer/Marker).
-   * Do not pass react-leaflet layers here.
-   */
   children?: React.ReactNode;
 }
 
-/** Leaflet chrome / camera — unsupported on the incomplete MapLibre shell. */
-export interface MapViewLeafletChromeProps {
+export interface MapViewMapLibreChromeProps {
   chromeHudRef?: RefObject<HTMLElement | null>;
   suppressChromeHideRef?: RefObject<boolean>;
-  focusBounds?: LatLngBoundsExpression | null;
+  focusBounds?: MapBoundsExpression | null;
   focusMinZoom?: number;
   focusMaxZoom?: number;
   fitBoundsMode?: "once" | "always";
@@ -48,9 +43,6 @@ export interface MapViewLeafletChromeProps {
   onRecenter?: () => void;
 }
 
-/** MapLibre chrome + camera/focus (Slice 4). */
-export type MapViewMapLibreChromeProps = MapViewLeafletChromeProps;
-
 export type MapViewMapLibreProps = MapViewCoreProps & MapViewMapLibreChromeProps;
 
-export type MapViewProps = MapViewCoreProps & MapViewLeafletChromeProps;
+export type MapViewProps = MapViewMapLibreProps;

@@ -122,7 +122,7 @@ export async function expectCreatePageMapPreviewLoaded(page: Page) {
   await expect
     .poll(
       async () =>
-        page.locator(".leaflet-tile-pane img, .maplibregl-canvas").count(),
+        page.locator(".maplibregl-canvas").count(),
     )
     .toBeGreaterThan(0);
 }

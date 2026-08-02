@@ -14,7 +14,7 @@ function isDeniedTarget(target: EventTarget | null): boolean {
     return true;
   }
 
-  if (target.closest(".leaflet-container")) {
+  if (target.closest(".maplibregl-map")) {
     return true;
   }
 

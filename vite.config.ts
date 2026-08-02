@@ -64,10 +64,6 @@ export default defineConfig(({ mode }) => ({
               test: /node_modules\/firebase\/functions/,
             },
             {
-              name: "vendor-leaflet",
-              test: /node_modules\/(leaflet|react-leaflet)/,
-            },
-            {
               name: "vendor-turf",
               test: /node_modules\/@turf\//,
             },

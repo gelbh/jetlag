@@ -1,9 +1,6 @@
 import { memo, useMemo, useState } from "react";
 import type { FeatureCollection, LineString } from "geojson";
-import L from "leaflet";
-import { Marker, Popup } from "react-leaflet";
 import { Marker as MapLibreMarker, Popup as MapLibrePopup } from "react-map-gl/maplibre";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import type {
   TransitRealtimeSnapshot,
@@ -16,16 +13,9 @@ import {
   filterTransitVehiclesForViewport,
   type MapViewportBounds,
 } from "../../../domain/map/transitViewport";
-import { matchMapEngine } from "../chrome/matchMapEngine";
-import { useMapEngine } from "../chrome/mapEngineContext";
-import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
-import {
-  getTransitStopIcon,
-  getTransitVehicleIcon,
-  transitVehicleIconHtml,
-} from "../icons/transitLayerIcons";
 import { transitStopDivIcon } from "../icons/transitStopIcons";
+import { transitVehicleIconHtml } from "../icons/transitVehicleIconHtml";
 
 interface TransitLayerProps {
   staticData: TransitStaticData | null;
@@ -43,9 +33,7 @@ const MODE_COLORS: Record<TransitRouteMode, string> = {
   other: MAP_ANNOTATION_COLORS.transit.other,
 };
 
-const transitRouteRenderer = L.canvas({ padding: 0.5 });
-
-function TransitLayerMapLibre({
+export const TransitLayer = memo(function TransitLayer({
   staticData,
   liveData,
   viewport = null,
@@ -54,8 +42,6 @@ function TransitLayerMapLibre({
   const [openPopupId, setOpenPopupId] = useState<string | null>(null);
 
   const visibleRoutes = useMemo(() => {
-    // MapLibre Sources are costly; wait for viewport before mounting route
-    // geometry (null viewport would otherwise dump the full network).
     if (viewport == null) {
       return [];
     }
@@ -134,7 +120,6 @@ function TransitLayerMapLibre({
           }}
         >
           <div
-            // transitStopDivIcon is trusted SVG HTML.
             dangerouslySetInnerHTML={{ __html: transitStopDivIcon(stop.mode) }}
           />
         </MapLibreMarker>
@@ -185,82 +170,4 @@ function TransitLayerMapLibre({
       ) : null}
     </>
   );
-}
-
-function TransitLayerLeaflet({
-  staticData,
-  liveData,
-  viewport = null,
-  zoom = null,
-}: TransitLayerProps) {
-  const visibleRoutes = useMemo(
-    () => filterTransitRoutesForViewport(staticData?.routes ?? [], viewport),
-    [staticData?.routes, viewport],
-  );
-  const visibleStops = useMemo(
-    () =>
-      filterTransitStopsForViewport(staticData?.stops ?? [], viewport, zoom),
-    [staticData?.stops, viewport, zoom],
-  );
-  const visibleVehicles = useMemo(
-    () => filterTransitVehiclesForViewport(liveData?.vehicles ?? [], viewport),
-    [liveData?.vehicles, viewport],
-  );
-
-  if (!staticData && !liveData) {
-    return null;
-  }
-
-  return (
-    <>
-      {visibleRoutes.map((route) => (
-        <CompensatedPolyline
-          key={`route-${route.id}`}
-          positions={route.positions as LatLngTuple[]}
-          renderer={transitRouteRenderer}
-          pathOptions={{
-            color: MODE_COLORS[route.mode],
-            weight: route.mode === "rail" || route.mode === "metro" ? 4 : 3,
-            opacity: 0.75,
-          }}
-        >
-          <Popup>
-            {route.name}
-            {route.ref ? ` (${route.ref})` : ""}
-          </Popup>
-        </CompensatedPolyline>
-      ))}
-
-      {visibleStops.map((stop) => (
-        <Marker
-          key={`stop-${stop.id}`}
-          position={[stop.lat, stop.lng]}
-          icon={getTransitStopIcon(stop.mode)}
-        >
-          <Popup>{stop.name}</Popup>
-        </Marker>
-      ))}
-
-      {visibleVehicles.map((vehicle) => (
-        <Marker
-          key={`vehicle-${vehicle.id}`}
-          position={[vehicle.lat, vehicle.lng]}
-          icon={getTransitVehicleIcon(vehicle.bearing, MODE_COLORS[vehicle.mode])}
-        >
-          <Popup>
-            {vehicle.label}
-            {vehicle.routeRef ? ` · ${vehicle.routeRef}` : ""}
-          </Popup>
-        </Marker>
-      ))}
-    </>
-  );
-}
-
-export const TransitLayer = memo(function TransitLayer(props: TransitLayerProps) {
-  const engine = useMapEngine();
-  return matchMapEngine(engine, {
-    maplibre: () => <TransitLayerMapLibre {...props} />,
-    leaflet: () => <TransitLayerLeaflet {...props} />,
-  });
 });

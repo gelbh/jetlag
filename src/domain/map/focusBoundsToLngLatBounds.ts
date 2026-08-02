@@ -1,18 +1,17 @@
-import {
-  LatLngBounds,
-  latLngBounds,
-  type LatLngBoundsExpression,
-} from "leaflet";
 import type { LngLatBoundsLike } from "maplibre-gl";
+import {
+  normalizeBoundsExpression,
+  type MapBounds,
+  type MapBoundsExpression,
+} from "./mapBounds";
 
-/** Leaflet focus bounds → MapLibre `[[west,south],[east,north]]`. */
+/** Map focus bounds → MapLibre `[[west,south],[east,north]]`. */
 export function focusBoundsToLngLatBounds(
-  bounds: LatLngBoundsExpression,
+  bounds: MapBoundsExpression | MapBounds,
 ): LngLatBoundsLike {
-  const leaflet =
-    bounds instanceof LatLngBounds ? bounds : latLngBounds(bounds);
+  const viewport = normalizeBoundsExpression(bounds);
   return [
-    [leaflet.getWest(), leaflet.getSouth()],
-    [leaflet.getEast(), leaflet.getNorth()],
+    [viewport.west, viewport.south],
+    [viewport.east, viewport.north],
   ];
 }

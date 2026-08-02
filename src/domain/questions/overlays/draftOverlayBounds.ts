@@ -1,7 +1,7 @@
 import type { Position } from "geojson";
-import type { LatLngBoundsExpression } from "leaflet";
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
-import { boundingBoxToLeafletBounds } from "../../geometry/core/gameAreaConvert";
+import type { MapBoundsExpression } from "../../map/mapBounds";
+import { boundingBoxToBoundsExpression } from "../../map/mapBounds";
 import {
   type BoundingBox,
   expandBoundingBox,
@@ -120,14 +120,17 @@ export function boundingBoxFromDraftOverlays(
   return expandBoundingBox(union, bufferMeters);
 }
 
-export function draftOverlayBoundsToLeafletBounds(
+export function draftOverlayBoundsToMapBounds(
   overlays: readonly MapDraftOverlay[],
   bufferMeters = 50,
-): LatLngBoundsExpression | null {
+): MapBoundsExpression | null {
   const box = boundingBoxFromDraftOverlays(overlays, bufferMeters);
   if (!box) {
     return null;
   }
 
-  return boundingBoxToLeafletBounds(box);
+  return boundingBoxToBoundsExpression(box);
 }
+
+/** @deprecated Prefer `draftOverlayBoundsToMapBounds`. */
+export const draftOverlayBoundsToLeafletBounds = draftOverlayBoundsToMapBounds;

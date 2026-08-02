@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { LatLngBounds, LatLngBoundsExpression } from "leaflet";
-import { LatLngBounds as LeafletLatLngBounds } from "leaflet";
+import type {
+  MapBounds,
+  MapBoundsExpression,
+} from "../../domain/map/mapBounds";
+import {
+  boundingBoxToBoundsExpression,
+  createMapBounds,
+} from "../../domain/map/mapBounds";
 import type { GameArea } from "../../domain/map/annotations";
 import type { BoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
 import {
   boundsToGameArea,
-  boundingBoxToLeafletBounds,
+  boundingBoxToMapBounds,
   boundingBoxHasMinimumSpan,
   centerToViewportEdgeRadiusMeters,
   circleToGameArea,
@@ -27,15 +33,17 @@ export interface GameAreaFramingResult {
 const MIN_CIRCLE_RADIUS_METERS = 200;
 const RECTANGLE_VIEWPORT_INSET_FRACTION = 0.12;
 
-function insetMapBounds(bounds: LatLngBounds, fraction: number): LatLngBounds {
+function insetMapBounds(bounds: MapBounds, fraction: number): MapBounds {
   const southWest = bounds.getSouthWest();
   const northEast = bounds.getNorthEast();
   const latSpan = northEast.lat - southWest.lat;
   const lngSpan = northEast.lng - southWest.lng;
-  return new LeafletLatLngBounds(
-    [southWest.lat + latSpan * fraction, southWest.lng + lngSpan * fraction],
-    [northEast.lat - latSpan * fraction, northEast.lng - lngSpan * fraction],
-  );
+  return createMapBounds({
+    south: southWest.lat + latSpan * fraction,
+    west: southWest.lng + lngSpan * fraction,
+    north: northEast.lat - latSpan * fraction,
+    east: northEast.lng - lngSpan * fraction,
+  });
 }
 
 interface UseGameAreaFramingOptions {
@@ -48,22 +56,19 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
   const [framingMode, setFramingModeState] = useState<FramingMode>(
     options.initialMode ?? "rectangle",
   );
-  const [bounds, setBounds] = useState<LatLngBounds | null>(() => {
+  const [bounds, setBounds] = useState<MapBounds | null>(() => {
     if (options.initialFocusBounds) {
-      return boundingBoxToLeafletBounds(options.initialFocusBounds);
+      return boundingBoxToMapBounds(options.initialFocusBounds);
     }
 
     return null;
   });
-  const [focusBounds, setFocusBounds] =
-    useState<LatLngBoundsExpression | null>(() =>
+  const [focusBounds, setFocusBounds] = useState<MapBoundsExpression | null>(
+    () =>
       options.initialFocusBounds
-        ? [
-            [options.initialFocusBounds.south, options.initialFocusBounds.west],
-            [options.initialFocusBounds.north, options.initialFocusBounds.east],
-          ]
+        ? boundingBoxToBoundsExpression(options.initialFocusBounds)
         : null,
-    );
+  );
   const [circleCenter, setCircleCenter] = useState<LatLngTuple | null>(null);
   const [polygonVertices, setPolygonVertices] = useState<LatLngTuple[]>([]);
   const [manualGameArea, setManualGameArea] = useState<GameArea | null>(
@@ -77,9 +82,9 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
   );
   const ignoreViewportUpdatesRef = useRef(false);
   const suppressTimeoutRef = useRef<number | null>(null);
-  const boundsRef = useRef<LatLngBounds | null>(
+  const boundsRef = useRef<MapBounds | null>(
     options.initialFocusBounds
-      ? boundingBoxToLeafletBounds(options.initialFocusBounds)
+      ? boundingBoxToMapBounds(options.initialFocusBounds)
       : null,
   );
 
@@ -106,7 +111,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
   const computeManualGameArea = useCallback(
     (
       mode: FramingMode,
-      nextBounds: LatLngBounds | null,
+      nextBounds: MapBounds | null,
       center: LatLngTuple | null,
       vertices: LatLngTuple[],
     ): GameArea | null => {
@@ -143,7 +148,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
   );
 
   const handleBoundsChange = useCallback(
-    (nextBounds: LatLngBounds) => {
+    (nextBounds: MapBounds) => {
       if (ignoreViewportUpdatesRef.current || !isUsableMapBounds(nextBounds)) {
         return;
       }
@@ -246,7 +251,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
     setUserFramed(true);
     setFocusBounds(gameAreaToBoundsExpression(nextArea));
     suppressViewportUpdates();
-    const nextBounds = boundingBoxToLeafletBounds(gameAreaToBoundingBox(nextArea));
+    const nextBounds = boundingBoxToMapBounds(gameAreaToBoundingBox(nextArea));
     boundsRef.current = nextBounds;
     setBounds(nextBounds);
     return true;
@@ -278,7 +283,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
 
   const loadFramingResult = useCallback(
     (result: GameAreaFramingResult) => {
-      const nextBounds = boundingBoxToLeafletBounds(
+      const nextBounds = boundingBoxToMapBounds(
         gameAreaToBoundingBox(result.gameArea),
       );
       setManualDrawingEnabled(true);
@@ -294,7 +299,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
 
   const applyFocusToGameArea = useCallback(
     (gameArea: GameArea) => {
-      const nextBounds = boundingBoxToLeafletBounds(
+      const nextBounds = boundingBoxToMapBounds(
         gameAreaToBoundingBox(gameArea),
       );
       setFocusBounds(gameAreaToBoundsExpression(gameArea));

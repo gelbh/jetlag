@@ -1,11 +1,10 @@
-import type { PathOptions } from "leaflet";
+import type { MapPathOptions } from "./mapPathOptions";
 import type { BasemapSurface, MapStyle, StreetBasemap } from "./mapBasemaps";
 import { getBasemapSurface } from "./mapBasemaps";
 import { MAP_ANNOTATION_COLORS } from "./mapAnnotationColors";
 
-export type EliminationOverlayLayer = PathOptions & {
+export type EliminationOverlayLayer = MapPathOptions & {
   className?: string;
-  /** Leaflet polyline/polygon option — omit clip against renderer bounds. */
   noClip?: boolean;
 };
 

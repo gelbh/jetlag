@@ -2,7 +2,7 @@ import { useCallback, useId, useMemo, useState } from "react";
 import { AppLink } from "../components/navigation/AppLink";
 import { useParams } from "react-router-dom";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
-import type { LatLngBoundsExpression } from "leaflet";
+import type { MapBoundsExpression } from "../domain/map/mapBounds";
 import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
 import {
   ScreenHeader,
@@ -141,7 +141,7 @@ export function GamePresetEditor() {
     return [
       [focusBounds.south, focusBounds.west],
       [focusBounds.north, focusBounds.east],
-    ] satisfies LatLngBoundsExpression;
+    ] satisfies MapBoundsExpression;
   }, [focusBounds]);
 
   return (

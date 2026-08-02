@@ -1,6 +1,7 @@
 import {
   test,
   expect,
+  countMapAnnotations,
   createHostSession,
   createMultiplayerContexts,
   joinAsRole,
@@ -19,10 +20,7 @@ test.describe("cross-device sync", () => {
     await placePin(hostPage, "Shared pin");
 
     await expect(async () => {
-      const shapes = guestPage.locator(
-        ".leaflet-overlay-pane .leaflet-interactive",
-      );
-      expect(await shapes.count()).toBeGreaterThan(0);
+      expect(await countMapAnnotations(guestPage)).toBeGreaterThan(0);
     }).toPass({ timeout: 30_000 });
 
     await cleanup();
@@ -40,10 +38,7 @@ test.describe("cross-device sync", () => {
     await hostContext.setOffline(false);
 
     await expect(async () => {
-      const shapes = guestPage.locator(
-        ".leaflet-overlay-pane .leaflet-interactive",
-      );
-      expect(await shapes.count()).toBeGreaterThan(0);
+      expect(await countMapAnnotations(guestPage)).toBeGreaterThan(0);
     }).toPass({ timeout: 25_000 });
 
     await cleanup();
@@ -72,18 +67,15 @@ test.describe("cross-device sync", () => {
     const { code } = await createHostSession(hostPage);
     await joinAsRole(guestPage, code, "seeker");
 
-    const guestShapes = guestPage.locator(
-      ".leaflet-overlay-pane .leaflet-interactive",
-    );
-    const baselineCount = await guestShapes.count();
+    const baselineCount = await countMapAnnotations(guestPage);
 
     await placePin(hostPage, "Temporary");
 
     await expect(async () => {
-      expect(await guestShapes.count()).toBeGreaterThan(baselineCount);
+      expect(await countMapAnnotations(guestPage)).toBeGreaterThan(baselineCount);
     }).toPass({ timeout: 30_000 });
 
-    const afterPinCount = await guestShapes.count();
+    const afterPinCount = await countMapAnnotations(guestPage);
 
     hostPage.once("dialog", (dialog) => dialog.accept());
     await openSettings(hostPage);
@@ -94,7 +86,7 @@ test.describe("cross-device sync", () => {
       .click();
 
     await expect(async () => {
-      expect(await guestShapes.count()).toBeLessThan(afterPinCount);
+      expect(await countMapAnnotations(guestPage)).toBeLessThan(afterPinCount);
     }).toPass({ timeout: 45_000 });
 
     await cleanup();
@@ -109,10 +101,7 @@ test.describe("cross-device sync", () => {
     const { code } = await createHostSession(hostPage);
     await joinAsRole(guestPage, code, "seeker");
 
-    const guestShapes = guestPage.locator(
-      ".leaflet-overlay-pane .leaflet-interactive",
-    );
-    const baselineCount = await guestShapes.count();
+    const baselineCount = await countMapAnnotations(guestPage);
 
     await placePin(hostPage, "Before reset");
     await hostPage.getByRole("button", { name: "Start" }).click();
@@ -122,10 +111,10 @@ test.describe("cross-device sync", () => {
     });
 
     await expect(async () => {
-      expect(await guestShapes.count()).toBeGreaterThan(baselineCount);
+      expect(await countMapAnnotations(guestPage)).toBeGreaterThan(baselineCount);
     }).toPass({ timeout: 30_000 });
 
-    const afterPinCount = await guestShapes.count();
+    const afterPinCount = await countMapAnnotations(guestPage);
 
     hostPage.once("dialog", (dialog) => dialog.accept());
     await openSettings(hostPage);
@@ -148,7 +137,7 @@ test.describe("cross-device sync", () => {
     });
 
     await expect(async () => {
-      expect(await guestShapes.count()).toBeLessThan(afterPinCount);
+      expect(await countMapAnnotations(guestPage)).toBeLessThan(afterPinCount);
     }).toPass({ timeout: 45_000 });
 
     await cleanup();

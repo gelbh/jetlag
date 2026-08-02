@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { AppNavigate } from "../navigation/AppNavigate";
-import { Polygon } from "react-leaflet";
+import { MapLibreGeoJsonOverlay } from "../components/map/helpers/MapLibreGeoJsonOverlay";
+import { cssPxDashToMapLibre } from "../components/map/helpers/cssPxDashToMapLibre";
 import { AnnotationLayer } from "../components/map/layers/AnnotationLayer";
 import { GameAreaMask } from "../components/map/layers/GameAreaMask";
 import { HidingZonesLayer } from "../components/map/layers/HidingZonesLayer";
@@ -662,14 +663,29 @@ export function HiderMapScreen() {
             />
           ) : null}
           {previewRing.length > 0 ? (
-            <Polygon
-              positions={previewRing}
-              pathOptions={{
-                color: MAP_ANNOTATION_COLORS.hidingZoneOwn,
-                weight: 2,
+            <MapLibreGeoJsonOverlay
+              id="hider-zone-preview"
+              data={{
+                type: "Feature",
+                properties: {},
+                geometry: {
+                  type: "Polygon",
+                  coordinates: [
+                    [
+                      ...previewRing.map(([lat, lng]) => [lng, lat] as [number, number]),
+                      [previewRing[0]![1], previewRing[0]![0]],
+                    ],
+                  ],
+                },
+              }}
+              fill={{
                 fillColor: MAP_ANNOTATION_COLORS.hidingZoneOwn,
                 fillOpacity: 0.12,
-                dashArray: "6 6",
+              }}
+              line={{
+                color: MAP_ANNOTATION_COLORS.hidingZoneOwn,
+                width: 2,
+                dashArray: cssPxDashToMapLibre("6 6", 2),
               }}
             />
           ) : null}

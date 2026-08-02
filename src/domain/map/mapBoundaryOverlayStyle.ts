@@ -1,4 +1,4 @@
-import type { PathOptions } from "leaflet";
+import type { MapPathOptions } from "./mapPathOptions";
 import type { MapStyle, StreetBasemap } from "./mapBasemaps";
 import { getBasemapSurface } from "./mapBasemaps";
 import type { MapDraftOverlayStyle } from "./mapDraftOverlay";
@@ -38,7 +38,7 @@ export function getAdminBoundaryStrokeStyle(
   mapStyle: MapStyle,
   streetBasemap: StreetBasemap = "light",
   zoom: number = ADMIN_STROKE_REF_ZOOM,
-): PathOptions {
+): MapPathOptions {
   const baseWeight = ADMIN_LEVEL_STROKE_WEIGHT[adminLevel] ?? 1;
   const weight = quantizeWeight(computeZoomAdaptiveWeight(baseWeight, zoom));
   const opacity = ADMIN_LEVEL_STROKE_OPACITY[adminLevel] ?? 0.5;
@@ -50,7 +50,6 @@ export function getAdminBoundaryStrokeStyle(
     color,
     weight,
     opacity,
-    fill: false,
   };
 }
 

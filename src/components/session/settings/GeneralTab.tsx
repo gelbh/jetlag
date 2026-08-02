@@ -76,8 +76,6 @@ export function MapSettingsGeneralTab({
   const displayedMapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
   const mapPitchEnabled = useMapStore((state) => state.mapPitchEnabled);
   const setMapPitchEnabled = useMapStore((state) => state.setMapPitchEnabled);
-  const mapEngine = useMapStore((state) => state.mapEngine);
-  const showPitchToggle = mapEngine === "maplibre";
 
   return (
     <div className="space-y-3">
@@ -92,18 +90,16 @@ export function MapSettingsGeneralTab({
         checked={showAdminBoundaries}
         onChange={onShowAdminBoundariesChange}
       />
-      {showPitchToggle ? (
-        <SettingsToggleRow
-          label="Tilted map view"
-          description={
-            lowPowerMode
-              ? "Low power mode keeps the map flat. Turn it off to allow tilt."
-              : "Two-finger drag to tilt the map. Off by default."
-          }
-          checked={mapPitchEnabled}
-          onChange={setMapPitchEnabled}
-        />
-      ) : null}
+      <SettingsToggleRow
+        label="Tilted map view"
+        description={
+          lowPowerMode
+            ? "Low power mode keeps the map flat. Turn it off to allow tilt."
+            : "Two-finger drag to tilt the map. Off by default."
+        }
+        checked={mapPitchEnabled}
+        onChange={setMapPitchEnabled}
+      />
 
       <SegmentControl
         variant="pill"

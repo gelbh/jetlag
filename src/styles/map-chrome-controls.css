@@ -1,5 +1,5 @@
-/* leaflet-overrides.css — Leaflet + map floating controls */
-.leaflet-container {
+/* map-chrome-controls.css — MapLibre map shell + floating controls */
+.maplibregl-map {
   width: 100%;
   height: 100%;
   background: var(--color-map-canvas);
@@ -9,15 +9,15 @@
   touch-action: none;
 }
 
-.leaflet-container.jl-basemap--dark-canvas {
+.maplibregl-map.jl-basemap--dark-canvas {
   background: var(--color-surface-deep);
 }
 
-.leaflet-container.jl-basemap--satellite-grade .leaflet-tile-pane {
+.maplibregl-map.jl-basemap--satellite-grade .maplibregl-canvas-container {
   filter: saturate(0.92) contrast(1.05) brightness(0.92);
 }
 
-.leaflet-control-attribution {
+.maplibregl-ctrl-attrib {
   display: none !important;
 }
 

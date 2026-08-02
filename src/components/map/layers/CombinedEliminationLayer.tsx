@@ -1,4 +1,4 @@
-import { Fragment, memo, useMemo } from "react";
+import { memo, useMemo } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type {
   AnnotationRecord,
@@ -7,17 +7,12 @@ import type {
 } from "../../../domain/map/annotations";
 import { isEndGameActive } from "../../../domain/map/annotations";
 import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
-import {
-  annotationHasEliminationFeature,
-} from "../../../domain/geometry/masks/combinedEliminationMask";
+import { annotationHasEliminationFeature } from "../../../domain/geometry/masks/combinedEliminationMask";
 import { EMPTY_GEOJSON_FEATURES } from "../../../domain/geometry/masks/emptyFeatures";
-import { polygonFeatureToLeafletPolygonGroups } from "../../../domain/geometry/gameArea/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { getEliminationOverlayLayers } from "../../../domain/map/mapEliminationOverlayStyle";
 import { useCombinedEliminationMask } from "../../../hooks/map/useCombinedEliminationMask";
 import { useMapStore } from "../../../state/sessionStore";
-import { useMapEngine } from "../chrome/mapEngineContext";
-import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { pathOptionsToMapLibrePaint } from "../helpers/pathOptionsToMapLibrePaint";
 
@@ -31,7 +26,7 @@ interface CombinedEliminationLayerProps {
   hidingZones?: readonly HidingZoneRecord[];
 }
 
-function useCombinedEliminationState({
+export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
   annotations,
   gameArea,
   draftFeatures = EMPTY_GEOJSON_FEATURES,
@@ -73,15 +68,6 @@ function useCombinedEliminationState({
     [annotations, gameArea, pulsingIds],
   );
 
-  return { overlayLayers, combinedMask, pulsing, hidden };
-}
-
-function CombinedEliminationLayerMapLibre(
-  props: CombinedEliminationLayerProps,
-) {
-  const { overlayLayers, combinedMask, pulsing, hidden } =
-    useCombinedEliminationState(props);
-
   if (hidden || !combinedMask) {
     return null;
   }
@@ -114,52 +100,4 @@ function CombinedEliminationLayerMapLibre(
       ]}
     />
   );
-}
-
-function CombinedEliminationLayerLeaflet(
-  props: CombinedEliminationLayerProps,
-) {
-  const { overlayLayers, combinedMask, pulsing, hidden } =
-    useCombinedEliminationState(props);
-
-  if (hidden || !combinedMask) {
-    return null;
-  }
-
-  return (
-    <>
-      {polygonFeatureToLeafletPolygonGroups(combinedMask).map((rings, index) => (
-        <Fragment key={`combined-elimination-${index}`}>
-          {overlayLayers.map((layer, layerIndex) => {
-            const isTopLayer = layerIndex === overlayLayers.length - 1;
-
-            return (
-              <CompensatedPolygon
-                key={`combined-elimination-${index}-${layerIndex}`}
-                positions={rings}
-                interactive={false}
-                pathOptions={{
-                  ...layer,
-                  className:
-                    pulsing && isTopLayer
-                      ? "annotation-pulse"
-                      : layer.className,
-                }}
-              />
-            );
-          })}
-        </Fragment>
-      ))}
-    </>
-  );
-}
-
-export const CombinedEliminationLayer = memo(
-  function CombinedEliminationLayer(props: CombinedEliminationLayerProps) {
-    const engine = useMapEngine();
-    if (engine === "maplibre") {
-      return <CombinedEliminationLayerMapLibre {...props} />;
-    }
-    return <CombinedEliminationLayerLeaflet {...props} />;
-  },
-);
+});

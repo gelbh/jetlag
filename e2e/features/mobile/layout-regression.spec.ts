@@ -89,7 +89,7 @@ test.describe("layout regression @ default mobile", () => {
     await assertMinTapTargets(more);
     await assertInViewport(more);
     // Leaflet markers trip aria-command-name; layout smoke is chrome-only
-    await assertLayoutSmoke(page, { exclude: [".leaflet-container"] });
+    await assertLayoutSmoke(page, { exclude: [".maplibregl-map"] });
   });
 
   for (const path of SOCIAL_LAYOUT_PATHS) {

@@ -1,9 +1,6 @@
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import {
-  polygonToLeafletLatLngs,
-  type LatLngTuple,
-} from "../../../domain/geometry/gameArea/geometry";
-import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
+import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
+import { polygonGeometryFeature } from "../helpers/polygonGeometryFeature";
 
 export function renderMaskPolygon(
   polygon: Feature<GeoPolygon | MultiPolygon>,
@@ -14,63 +11,23 @@ export function renderMaskPolygon(
   selectionEnabled: boolean,
   onSelect?: () => void,
 ) {
-  const pathOptions = {
-    stroke: !selected,
-    color: selected ? color : undefined,
-    weight: selected ? 3 : 0,
-    fillColor: color,
-    fillOpacity: 0.35,
-    className: pulsing ? "annotation-pulse" : undefined,
-  };
+  void pulsing;
+  void selectionEnabled;
+  void onSelect;
 
-  if (polygon.geometry.type === "MultiPolygon") {
-    return polygon.geometry.coordinates.map((rings, index) => {
-      const ringsLatLng = rings.map((ring) =>
-        ring.map(([lng, lat]) => [lat, lng] as LatLngTuple),
-      );
-
-      return (
-        <CompensatedPolygon
-          key={`${key}-${index}`}
-          positions={ringsLatLng}
-          interactive={selectionEnabled}
-          pathOptions={pathOptions}
-          eventHandlers={
-            selectionEnabled && onSelect
-              ? {
-                  click: (event) => {
-                    event.originalEvent?.stopPropagation();
-                    onSelect();
-                  },
-                }
-              : undefined
-          }
-        />
-      );
-    });
-  }
-
-  const rings = polygonToLeafletLatLngs(polygon as Feature<GeoPolygon>);
-  if (rings.length === 0) {
-    return null;
-  }
+  const fillOpacity = 0.35;
+  const line =
+    selected
+      ? { color, width: 3, opacity: 1 }
+      : null;
 
   return (
-    <CompensatedPolygon
+    <MapLibreGeoJsonOverlay
       key={key}
-      positions={rings}
-      interactive={selectionEnabled}
-      pathOptions={pathOptions}
-      eventHandlers={
-        selectionEnabled && onSelect
-          ? {
-              click: (event) => {
-                event.originalEvent?.stopPropagation();
-                onSelect();
-              },
-            }
-          : undefined
-      }
+      id={key}
+      data={polygonGeometryFeature(polygon.geometry as GeoPolygon)}
+      fill={{ fillColor: color, fillOpacity }}
+      line={line}
     />
   );
 }

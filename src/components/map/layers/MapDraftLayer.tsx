@@ -1,19 +1,12 @@
 import { memo, useState } from "react";
 import turfCircle from "@turf/circle";
 import type { Feature, LineString } from "geojson";
-import { Popup } from "react-leaflet";
 import { Popup as MapLibrePopup } from "react-map-gl/maplibre";
-import { CompensatedCircle } from "../helpers/CompensatedCircle";
-import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
-import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import type { MapDraftOverlay } from "../../../domain/map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
-import { matchMapEngine } from "../chrome/matchMapEngine";
-import { useMapEngine } from "../chrome/mapEngineContext";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
 import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
-import { renderGeoJsonPolygonGroups } from "../helpers/renderHelpers";
 
 interface MapDraftLayerProps {
   overlays: readonly MapDraftOverlay[];
@@ -32,7 +25,9 @@ function draftPolylineFeature(
   };
 }
 
-function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
+export const MapDraftLayer = memo(function MapDraftLayer({
+  overlays,
+}: MapDraftLayerProps) {
   const c = MAP_ANNOTATION_COLORS;
   const [openPopupId, setOpenPopupId] = useState<string | null>(null);
   const openMarker = overlays.find(
@@ -160,92 +155,4 @@ function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
       ) : null}
     </>
   );
-}
-
-function MapDraftLayerLeaflet({ overlays }: MapDraftLayerProps) {
-  const c = MAP_ANNOTATION_COLORS;
-
-  return (
-    <>
-      {overlays.map((overlay) => {
-        switch (overlay.kind) {
-          case "marker":
-            return (
-              <CompensatedCircleMarker
-                key={overlay.id}
-                center={overlay.point}
-                radius={overlay.style?.markerRadius ?? 8}
-                pathOptions={{
-                  color: overlay.style?.color ?? c.strokeLight,
-                  weight: overlay.style?.weight ?? 2,
-                  fillColor: overlay.style?.fillColor ?? c.pin,
-                  fillOpacity: overlay.style?.fillOpacity ?? 1,
-                  opacity: overlay.style?.opacity,
-                  className: overlay.style?.pulsing
-                    ? "draft-seeker-pulse"
-                    : undefined,
-                }}
-              >
-                {overlay.popup ? <Popup>{overlay.popup}</Popup> : null}
-              </CompensatedCircleMarker>
-            );
-          case "circle":
-            return (
-              <CompensatedCircle
-                key={overlay.id}
-                center={overlay.center}
-                radius={overlay.radiusMeters}
-                pathOptions={{
-                  color: overlay.style?.color ?? c.radar,
-                  weight: overlay.style?.weight ?? 2,
-                  dashArray: overlay.style?.dashArray,
-                  fillColor: overlay.style?.fillColor,
-                  fillOpacity: overlay.style?.fillOpacity ?? 0.08,
-                  opacity: overlay.style?.opacity,
-                }}
-              />
-            );
-          case "polygon":
-            return renderGeoJsonPolygonGroups({
-              id: overlay.id,
-              feature: overlay.feature,
-              pathOptions: {
-                color: overlay.style?.color ?? c.boundary,
-                weight: overlay.style?.weight ?? 1,
-                dashArray: overlay.style?.dashArray,
-                fillColor: overlay.style?.fillColor ?? c.boundary,
-                fillOpacity: overlay.style?.fillOpacity ?? 0.2,
-              },
-            });
-          case "polyline":
-            return (
-              <CompensatedPolyline
-                key={overlay.id}
-                positions={overlay.positions}
-                pathOptions={{
-                  color: overlay.style?.color ?? c.thermometerAxis,
-                  weight: overlay.style?.weight ?? 4,
-                  dashArray: overlay.style?.dashArray,
-                  opacity: overlay.style?.opacity,
-                }}
-              />
-            );
-          default: {
-            const _exhaustive: never = overlay;
-            return _exhaustive;
-          }
-        }
-      })}
-    </>
-  );
-}
-
-export const MapDraftLayer = memo(function MapDraftLayer(
-  props: MapDraftLayerProps,
-) {
-  const engine = useMapEngine();
-  return matchMapEngine(engine, {
-    maplibre: () => <MapDraftLayerMapLibre {...props} />,
-    leaflet: () => <MapDraftLayerLeaflet {...props} />,
-  });
 });
