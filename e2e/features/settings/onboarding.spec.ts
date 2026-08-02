@@ -1,4 +1,10 @@
-import { test, expect, blockExternalAssets, seedLocalSession } from "../../fixtures";
+import {
+  test,
+  expect,
+  blockExternalAssets,
+  seedLocalSession,
+  openSettings,
+} from "../../fixtures";
 
 test.describe("onboarding", () => {
   test("map first-run sheet can be dismissed", async ({ page }) => {
@@ -16,5 +22,27 @@ test.describe("onboarding", () => {
     });
     await page.getByRole("button", { name: "Got it" }).click();
     await expect(page.getByRole("heading", { name: "Map tools" })).toBeHidden();
+  });
+
+  test("map tools guide reopens from settings after dismiss", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.removeItem("jetlag.mapFirstRunDismissed");
+      localStorage.setItem("jl.analytics.consent", "denied");
+      sessionStorage.setItem("jl.appCheckProbe.skip", "1");
+    });
+    await blockExternalAssets(page);
+    await seedLocalSession(page);
+    await page.goto("/map");
+
+    await expect(page.getByRole("heading", { name: "Map tools" })).toBeVisible({
+      timeout: 10_000,
+    });
+    await page.getByRole("button", { name: "Got it" }).click();
+    await expect(page.getByRole("heading", { name: "Map tools" })).toBeHidden();
+
+    await openSettings(page);
+    await page.getByRole("tab", { name: "Session" }).click();
+    await page.getByRole("button", { name: "Map tools guide" }).click();
+    await expect(page.getByRole("heading", { name: "Map tools" })).toBeVisible();
   });
 });
