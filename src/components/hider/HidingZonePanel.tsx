@@ -11,6 +11,7 @@ import { InlineError } from "../ui/banners/InlineError";
 import { ToolPanelShell } from "../tools/shared/panels/ToolPanelShell";
 import { ToolSection } from "../tools/shared/panels/ToolSection";
 import { WizardSwipeSurface } from "../tools/shared/wizard/WizardSwipeSurface";
+import { toolWizardPhasePrimaryNav } from "../tools/shared/wizard/toolWizardGuards";
 import { TransitStationPicker } from "./TransitStationPicker";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 
@@ -169,6 +170,8 @@ export function HidingZonePanel({
   const canGoNext =
     (phaseId === "configure" && zoneTool.methodChosen) ||
     (phaseId === "place" && zoneTool.hasPlacement);
+  const canCommit =
+    zoneTool.hasPlacement && !zoneTool.saving && !confirmDisabled;
   const phaseCount = wizardDef.phases.length;
   const canSwipeNext = canGoNext && phaseIndex < phaseCount - 1;
 
@@ -182,8 +185,15 @@ export function HidingZonePanel({
               phaseIndex > 0 ||
               (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
-            onNext: goNext,
-            canGoNext: phaseId !== "ask" ? canGoNext : undefined,
+            ...toolWizardPhasePrimaryNav({
+              phaseId,
+              goNext,
+              onCommit: () => {
+                void zoneTool.confirmZone();
+              },
+              canGoNext,
+              canCommit,
+            }),
           }}
         />
       }

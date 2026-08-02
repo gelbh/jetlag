@@ -300,7 +300,7 @@ export function useMapScreenController() {
     handleMapPanStart,
     handleMapPanEnd,
   } = useToolPanelChrome(activeTool, {
-    // Thermometer needs an expanded wizard step before map taps; peeking on Manual pins blocks Next.
+    // Thermometer Place (Manual pins / GPS) needs an expanded sheet; peeking blocks map taps.
     autoPeek:
       tools.placementCrosshair &&
       canSubmitQuestion &&

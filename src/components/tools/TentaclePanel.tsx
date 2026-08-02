@@ -20,7 +20,10 @@ import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 import { TENTACLE_WIZARD } from "./shared/wizard/toolStepUtils";
-import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
+import {
+  toolWizardPhasePrimaryNav,
+  toolWizardSwipeNext,
+} from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 
 interface TentaclePanelProps {
@@ -261,8 +264,13 @@ export function TentaclePanel({
               phaseIndex > 0 ||
               (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
-            onNext: goNext,
-            canGoNext: phaseId !== "ask" ? canGoNext : undefined,
+            ...toolWizardPhasePrimaryNav({
+              phaseId,
+              goNext,
+              onCommit,
+              canGoNext,
+              canCommit,
+            }),
           }}
         />
       }

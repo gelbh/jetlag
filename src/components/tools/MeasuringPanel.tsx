@@ -32,7 +32,10 @@ import { ToolSection } from "./shared/panels/ToolSection";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 import { MEASURING_WIZARD } from "./shared/wizard/toolStepUtils";
-import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
+import {
+  toolWizardPhasePrimaryNav,
+  toolWizardSwipeNext,
+} from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 
 interface MeasuringPanelProps {
@@ -186,6 +189,12 @@ export function MeasuringPanel({
     (phaseId === "configure" &&
       stepId === "target" &&
       canAdvanceFromTarget);
+  const canCommit =
+    hasAvailableMeasureOptions &&
+    hasSeekerPoint &&
+    hasTargetPoint &&
+    (awaitHiderAnswer || answer !== null) &&
+    !isSubmitting;
   const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
   const showMeasuringAnswer =
     canPreviewAnswer &&
@@ -321,8 +330,13 @@ export function MeasuringPanel({
               phaseIndex > 0 ||
               (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
-            onNext: goNext,
-            canGoNext: phaseId !== "ask" ? canGoNext : undefined,
+            ...toolWizardPhasePrimaryNav({
+              phaseId,
+              goNext,
+              onCommit,
+              canGoNext,
+              canCommit,
+            }),
           }}
         />
       }
