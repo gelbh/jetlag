@@ -12,10 +12,13 @@ import {
 } from "../../../domain/geometry/masks/combinedEliminationMask";
 import { EMPTY_GEOJSON_FEATURES } from "../../../domain/geometry/masks/emptyFeatures";
 import { polygonFeatureToLeafletPolygonGroups } from "../../../domain/geometry/gameArea/geometry";
+import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { getEliminationOverlayLayers } from "../../../domain/map/mapEliminationOverlayStyle";
 import { useCombinedEliminationMask } from "../../../hooks/map/useCombinedEliminationMask";
 import { useMapStore } from "../../../state/sessionStore";
+import { useMapEngine } from "../chrome/mapEngineContext";
 import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
+import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 
 interface CombinedEliminationLayerProps {
   annotations: AnnotationRecord[];
@@ -36,6 +39,7 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
   session = null,
   hidingZones = [],
 }: CombinedEliminationLayerProps) {
+  const engine = useMapEngine();
   const mapStyle = useMapStore((state) => state.mapStyle);
   const overlayLayers = useMemo(
     () => getEliminationOverlayLayers(mapStyle),
@@ -71,6 +75,51 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
 
   if (hidden || !combinedMask) {
     return null;
+  }
+
+  if (engine === "maplibre") {
+    return (
+      <>
+        {overlayLayers.map((layer, layerIndex) => (
+          <MapLibreGeoJsonOverlay
+            key={`combined-elimination-ml-${layerIndex}`}
+            id={`combined-elimination-${layerIndex}`}
+            data={combinedMask}
+            fill={
+              layer.fillColor
+                ? {
+                    fillColor: layer.fillColor,
+                    fillOpacity: layer.fillOpacity ?? 0.35,
+                  }
+                : null
+            }
+            line={
+              layer.stroke === false
+                ? null
+                : {
+                    color:
+                      layer.color ??
+                      layer.fillColor ??
+                      MAP_ANNOTATION_COLORS.elimination,
+                    width: layer.weight ?? 1,
+                    opacity: layer.opacity ?? 0.6,
+                  }
+            }
+          />
+        ))}
+        {pulsing ? (
+          <MapLibreGeoJsonOverlay
+            id="combined-elimination-pulse"
+            data={combinedMask}
+            line={{
+              color: MAP_ANNOTATION_COLORS.strokeLight,
+              width: 2,
+              opacity: 0.8,
+            }}
+          />
+        ) : null}
+      </>
+    );
   }
 
   return (

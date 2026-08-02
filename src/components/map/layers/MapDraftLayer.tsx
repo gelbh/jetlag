@@ -5,6 +5,8 @@ import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
 import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import type { MapDraftOverlay } from "../../../domain/map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { useMapEngine } from "../chrome/mapEngineContext";
+import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { renderGeoJsonPolygonGroups } from "../helpers/renderHelpers";
 
 interface MapDraftLayerProps {
@@ -14,6 +16,7 @@ interface MapDraftLayerProps {
 export const MapDraftLayer = memo(function MapDraftLayer({
   overlays,
 }: MapDraftLayerProps) {
+  const engine = useMapEngine();
   const c = MAP_ANNOTATION_COLORS;
 
   return (
@@ -21,6 +24,9 @@ export const MapDraftLayer = memo(function MapDraftLayer({
       {overlays.map((overlay) => {
         switch (overlay.kind) {
           case "marker":
+            if (engine === "maplibre") {
+              return null;
+            }
             return (
               <CompensatedCircleMarker
                 key={overlay.id}
@@ -41,6 +47,9 @@ export const MapDraftLayer = memo(function MapDraftLayer({
               </CompensatedCircleMarker>
             );
           case "circle":
+            if (engine === "maplibre") {
+              return null;
+            }
             return (
               <CompensatedCircle
                 key={overlay.id}
@@ -57,6 +66,24 @@ export const MapDraftLayer = memo(function MapDraftLayer({
               />
             );
           case "polygon":
+            if (engine === "maplibre") {
+              return (
+                <MapLibreGeoJsonOverlay
+                  key={overlay.id}
+                  id={`draft-poly-${overlay.id}`}
+                  data={overlay.feature}
+                  fill={{
+                    fillColor: overlay.style?.fillColor ?? c.boundary,
+                    fillOpacity: overlay.style?.fillOpacity ?? 0.2,
+                  }}
+                  line={{
+                    color: overlay.style?.color ?? c.boundary,
+                    width: overlay.style?.weight ?? 1,
+                    opacity: overlay.style?.opacity ?? 1,
+                  }}
+                />
+              );
+            }
             return renderGeoJsonPolygonGroups({
               id: overlay.id,
               feature: overlay.feature,
@@ -69,6 +96,9 @@ export const MapDraftLayer = memo(function MapDraftLayer({
               },
             });
           case "polyline":
+            if (engine === "maplibre") {
+              return null;
+            }
             return (
               <CompensatedPolyline
                 key={overlay.id}

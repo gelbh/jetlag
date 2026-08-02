@@ -12,8 +12,13 @@ import {
   scaleDashArray,
   useZoomAdaptiveWeight,
 } from "../../../hooks/map/useZoomAdaptiveWeight";
+import { useMapEngine } from "../chrome/mapEngineContext";
 import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
 import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
+import {
+  MapLibreGeoJsonOverlay,
+  polygonGeometryFeature,
+} from "../helpers/MapLibreGeoJsonOverlay";
 import { MID_GESTURE_PATH_DEFAULTS } from "../helpers/midGesturePathDefaults";
 
 interface GameAreaMaskProps {
@@ -73,7 +78,51 @@ function renderGameAreaPolygons(
   );
 }
 
-export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
+function parseDashArray(dash: string): number[] {
+  return dash
+    .split(/\s+/)
+    .map((part) => Number(part))
+    .filter((n) => Number.isFinite(n) && n > 0);
+}
+
+function GameAreaMaskMapLibre({
+  gameArea,
+  framing = false,
+}: GameAreaMaskProps) {
+  const outsideMask = useMemo(() => gameAreaOutsideMask(gameArea), [gameArea]);
+  const outsideTint = framing ? FRAMING_OUTSIDE_TINT : PLAY_OUTSIDE_TINT;
+  const baseWeight = framing ? FRAMING_BASE_WEIGHT : PLAY_BASE_WEIGHT;
+
+  return (
+    <>
+      {outsideMask ? (
+        <MapLibreGeoJsonOverlay
+          id="game-area-outside"
+          data={polygonGeometryFeature(outsideMask)}
+          fill={{
+            fillColor: outsideTint.fillColor,
+            fillOpacity: outsideTint.fillOpacity,
+          }}
+        />
+      ) : null}
+      <MapLibreGeoJsonOverlay
+        id="game-area-border"
+        data={polygonGeometryFeature(gameArea)}
+        line={{
+          color: MAP_ANNOTATION_COLORS.playArea,
+          width: baseWeight,
+          opacity: 1,
+          dashArray: framing ? parseDashArray(FRAMING_DASH) : undefined,
+        }}
+      />
+    </>
+  );
+}
+
+function GameAreaMaskLeaflet({
+  gameArea,
+  framing = false,
+}: GameAreaMaskProps) {
   const outsideMask = useMemo(() => gameAreaOutsideMask(gameArea), [gameArea]);
   const exteriorStrokeRings = useMemo(
     () => gameAreaExteriorStrokeRings(gameArea),
@@ -117,4 +166,12 @@ export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
       ))}
     </Fragment>
   );
+}
+
+export function GameAreaMask(props: GameAreaMaskProps) {
+  const engine = useMapEngine();
+  if (engine === "maplibre") {
+    return <GameAreaMaskMapLibre {...props} />;
+  }
+  return <GameAreaMaskLeaflet {...props} />;
 }
