@@ -8,6 +8,7 @@ import { useMapEngine } from "../chrome/mapEngineContext";
 import { CompensatedCircle } from "../helpers/CompensatedCircle";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { createUserLocationIcon } from "../icons/mapIcons";
+import { userLocationIconHtml } from "../icons/userLocationIconHtml";
 
 interface UserLocationLayerProps {
   reading: GeolocationReading | null;
@@ -32,8 +33,7 @@ function UserLocationLayerMapLibre({ reading }: UserLocationLayerProps) {
     return null;
   }
 
-  const icon = createUserLocationIcon(reading.heading);
-  const html = typeof icon.options.html === "string" ? icon.options.html : "";
+  const html = userLocationIconHtml(reading.heading);
 
   return (
     <>
@@ -58,7 +58,7 @@ function UserLocationLayerMapLibre({ reading }: UserLocationLayerProps) {
       >
         <div
           className="user-location-icon"
-          // DivIcon HTML from createUserLocationIcon (trusted).
+          // Trusted SVG from userLocationIconHtml.
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </MapLibreMarker>

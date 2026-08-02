@@ -22,6 +22,7 @@ import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import {
   getTransitStopIcon,
   getTransitVehicleIcon,
+  transitVehicleIconHtml,
 } from "../icons/transitLayerIcons";
 import { transitStopDivIcon } from "../icons/transitStopIcons";
 
@@ -118,12 +119,10 @@ function TransitLayerMapLibre({
       ))}
 
       {visibleVehicles.map((vehicle) => {
-        const icon = getTransitVehicleIcon(
+        const html = transitVehicleIconHtml(
           vehicle.bearing,
           MODE_COLORS[vehicle.mode],
         );
-        const html =
-          typeof icon.options.html === "string" ? icon.options.html : "";
         return (
           <MapLibreMarker
             key={`vehicle-${vehicle.id}`}

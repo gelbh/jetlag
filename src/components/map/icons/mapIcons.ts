@@ -4,6 +4,10 @@ import {
   thermometerWalkEndLabelMarkup,
   thermometerWalkProgressMarkup,
 } from "./thermometerWalkMarkup";
+import {
+  USER_LOCATION_ICON_PIXEL_SIZE,
+  userLocationIconHtml,
+} from "./userLocationIconHtml";
 
 interface DotIconOptions {
   color: string;
@@ -32,23 +36,13 @@ export function createDotIcon({
   });
 }
 
-const USER_LOCATION_BLUE = "#4285F4";
-const USER_LOCATION_CONE = "rgba(66, 133, 244, 0.3)";
-const USER_LOCATION_ICON_SIZE = 48;
-
 export function createUserLocationIcon(heading: number | null = null) {
-  const showHeading =
-    typeof heading === "number" && Number.isFinite(heading) && heading >= 0;
-  const rotation = showHeading ? heading : 0;
-  const cone = showHeading
-    ? `<g transform="rotate(${rotation} 24 24)"><path d="M24 24 L14.5 9.5 A11.5 11.5 0 0 1 33.5 9.5 Z" fill="${USER_LOCATION_CONE}"/></g>`
-    : "";
-
+  const size = USER_LOCATION_ICON_PIXEL_SIZE;
   return L.divIcon({
     className: "user-location-icon",
-    html: `<svg xmlns="http://www.w3.org/2000/svg" width="${USER_LOCATION_ICON_SIZE}" height="${USER_LOCATION_ICON_SIZE}" viewBox="0 0 48 48" aria-hidden="true">${cone}<circle cx="24" cy="24" r="8" fill="${USER_LOCATION_BLUE}" stroke="#ffffff" stroke-width="3"/></svg>`,
-    iconSize: [USER_LOCATION_ICON_SIZE, USER_LOCATION_ICON_SIZE],
-    iconAnchor: [USER_LOCATION_ICON_SIZE / 2, USER_LOCATION_ICON_SIZE / 2],
+    html: userLocationIconHtml(heading),
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
   });
 }
 
