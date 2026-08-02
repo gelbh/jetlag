@@ -8,8 +8,7 @@ import type { SpatialVoronoiSite } from "./spatialVoronoi";
 /** Reset lazy WASM module (tests). */
 export const resetVoronoiWasmForTests = resetKernelWasmForTests;
 
-/** Dedupe exact lng/lat pairs — keep first (matches Rust + TS SoT). */
-export function dedupeSpatialVoronoiSites<
+function dedupeSpatialVoronoiSites<
   T extends Record<string, unknown> = Record<string, unknown>,
 >(sites: Array<SpatialVoronoiSite<T>>): Array<SpatialVoronoiSite<T>> {
   const seen = new Set<string>();
@@ -23,8 +22,7 @@ export function dedupeSpatialVoronoiSites<
   });
 }
 
-/** Flat `[lng0, lat0, …]` for `build_spatial_voronoi_rings`. */
-export function spatialVoronoiSitesToCoords(
+function spatialVoronoiSitesToCoords(
   sites: Array<SpatialVoronoiSite>,
 ): Float64Array {
   const coords = new Float64Array(sites.length * 2);
@@ -36,11 +34,8 @@ export function spatialVoronoiSitesToCoords(
   return coords;
 }
 
-/**
- * Unpack packed rings from `build_spatial_voronoi_rings` into a FeatureCollection.
- * `sites` must be 1:1 with cells (dedupe before calling WASM).
- */
-export function featureCollectionFromVoronoiRings<
+/** Unpack packed rings; `sites` must be 1:1 with cells (dedupe first). */
+function featureCollectionFromVoronoiRings<
   T extends Record<string, unknown> = Record<string, unknown>,
 >(
   sites: Array<SpatialVoronoiSite<T>>,
@@ -84,7 +79,7 @@ export function featureCollectionFromVoronoiRings<
   return { type: "FeatureCollection", features };
 }
 
-/** Sync production-shaped path used by perf gates (pkg already loaded). */
+/** Sync path for perf gates (pkg already loaded). */
 export function buildSpatialVoronoiFromRingsSync<
   T extends Record<string, unknown> = Record<string, unknown>,
 >(
