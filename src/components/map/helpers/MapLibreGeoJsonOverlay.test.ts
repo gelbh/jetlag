@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Polygon } from "geojson";
-import { polygonGeometryFeature } from "./MapLibreGeoJsonOverlay";
+import { polygonGeometryFeature } from "./polygonGeometryFeature";
 
 describe("polygonGeometryFeature", () => {
   it("wraps a polygon geometry as a Feature", () => {
