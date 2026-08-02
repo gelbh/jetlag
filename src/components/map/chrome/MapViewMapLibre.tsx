@@ -1,7 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, type RefObject } from "react";
 import Map, { type MapLayerMouseEvent, type MapRef } from "react-map-gl/maplibre";
 import { setWorkerUrl, type Map as MapLibreMap } from "maplibre-gl";
-import { LatLngBounds, type LatLngExpression } from "leaflet";
+import {
+  LatLngBounds,
+  type LatLngBoundsExpression,
+  type LatLngExpression,
+} from "leaflet";
 import "maplibre-gl/dist/maplibre-gl.css";
 import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import {
@@ -9,6 +13,15 @@ import {
   getMapLibreStyle,
 } from "../../../domain/map/mapBasemaps";
 import { isUsableMapBounds } from "../../../domain/geometry/gameArea/geometry";
+import { computeFramedCenterZoomMapLibre } from "../../../domain/map/computeFramedCenterZoomMapLibre";
+import { focusBoundsToLngLatBounds } from "../../../domain/map/focusBoundsToLngLatBounds";
+import { isLargeCameraJumpMapLibre } from "../../../domain/map/isLargeCameraJumpMapLibre";
+import {
+  MOTION_MAP_CAMERA_FLY_MS,
+  MOTION_MAP_CAMERA_MS,
+} from "../../../domain/device/motion/motionTokens";
+import { useMotionProfile } from "../../../hooks/motion/useMotionProfile";
+import { useMapLibreMap } from "../helpers/useMapLibreMap";
 import { MapChromeListener } from "./MapChromeListener";
 import { MapEngineProvider } from "./mapEngineContext";
 import { MapRecenterControl } from "./MapRecenterControl";
@@ -53,9 +66,153 @@ function leafletBoundsFromMapLibre(map: MapLibreMap): LatLngBounds {
   );
 }
 
+function MapFocus({
+  focusBounds,
+  focusMinZoom,
+  focusMaxZoom,
+  fitBoundsMode,
+  recenterToken = 0,
+  suppressChromeHideRef,
+  fitBoundsPadding = [32, 32],
+  focusPaddingBias,
+  preferFly = false,
+}: {
+  focusBounds: LatLngBoundsExpression | null;
+  focusMinZoom?: number;
+  focusMaxZoom?: number;
+  fitBoundsMode: "once" | "always";
+  recenterToken: number;
+  suppressChromeHideRef?: RefObject<boolean>;
+  fitBoundsPadding?: [number, number];
+  focusPaddingBias?: number;
+  preferFly?: boolean;
+}) {
+  const mapRef = useMapLibreMap();
+  const { prefersReducedMotion, lowPowerMode } = useMotionProfile();
+  const hasFittedRef = useRef(false);
+  const lastRecenterRef = useRef(recenterToken);
+  const animate = !prefersReducedMotion && !lowPowerMode;
+
+  useEffect(() => {
+    const map = mapRef.getMap();
+    const handleDragStart = () => {
+      map.stop();
+      if (suppressChromeHideRef) {
+        suppressChromeHideRef.current = false;
+      }
+    };
+
+    map.on("dragstart", handleDragStart);
+    return () => {
+      map.off("dragstart", handleDragStart);
+    };
+  }, [mapRef, suppressChromeHideRef]);
+
+  useEffect(() => {
+    if (!focusBounds) {
+      return;
+    }
+
+    const map = mapRef.getMap();
+    const recenterRequested = recenterToken !== lastRecenterRef.current;
+    if (
+      fitBoundsMode === "once" &&
+      hasFittedRef.current &&
+      !recenterRequested
+    ) {
+      return;
+    }
+
+    lastRecenterRef.current = recenterToken;
+
+    if (suppressChromeHideRef) {
+      suppressChromeHideRef.current = true;
+    }
+
+    map.resize();
+
+    const [padY, padX] = fitBoundsPadding;
+    const padding = {
+      top: padY,
+      left: padX,
+      right: padX,
+      bottom: padY + (focusPaddingBias ?? 0),
+    };
+
+    const lngLatBounds = focusBoundsToLngLatBounds(focusBounds);
+    const [[west, south], [east, north]] = lngLatBounds as [
+      [number, number],
+      [number, number],
+    ];
+    if (
+      !isUsableMapBounds(
+        new LatLngBounds([south, west], [north, east]),
+      )
+    ) {
+      return;
+    }
+
+    const framed = computeFramedCenterZoomMapLibre(
+      map,
+      lngLatBounds,
+      padding,
+      focusMinZoom,
+      focusMaxZoom,
+    );
+    if (!framed) {
+      return;
+    }
+
+    hasFittedRef.current = true;
+
+    const onMoveEnd = () => {
+      if (suppressChromeHideRef) {
+        suppressChromeHideRef.current = false;
+      }
+      map.off("moveend", onMoveEnd);
+    };
+
+    map.on("moveend", onMoveEnd);
+
+    const { center, zoom } = framed;
+
+    if (!animate) {
+      map.jumpTo({ center, zoom });
+      return;
+    }
+
+    if (isLargeCameraJumpMapLibre(map, center, zoom, preferFly)) {
+      map.flyTo({
+        center,
+        zoom,
+        duration: MOTION_MAP_CAMERA_FLY_MS,
+      });
+    } else {
+      map.easeTo({
+        center,
+        zoom,
+        duration: MOTION_MAP_CAMERA_MS,
+      });
+    }
+  }, [
+    animate,
+    focusBounds,
+    focusMaxZoom,
+    focusMinZoom,
+    fitBoundsMode,
+    fitBoundsPadding,
+    focusPaddingBias,
+    mapRef,
+    preferFly,
+    recenterToken,
+    suppressChromeHideRef,
+  ]);
+
+  return null;
+}
+
 /**
- * MapLibre shell: basemap + chrome controls + click/bounds bridge.
- * Camera/focus (`MapFocus`) stays Leaflet-only until Slice 4.
+ * MapLibre shell: basemap + chrome + click/bounds + camera/focus parity.
  */
 export function MapViewMapLibre({
   center = [51.505, -0.09],
@@ -71,6 +228,14 @@ export function MapViewMapLibre({
   mapKey,
   chromeHudRef,
   suppressChromeHideRef,
+  focusBounds = null,
+  focusMinZoom,
+  focusMaxZoom,
+  fitBoundsMode = "always",
+  fitBoundsPadding,
+  focusPaddingBias,
+  focusPreferFly,
+  recenterToken = 0,
   showZoomControl,
   zoomControlInset = "dock",
   onMapStyleChange,
@@ -182,6 +347,17 @@ export function MapViewMapLibre({
           onClick={handleClick}
         >
           <MapEngineProvider engine="maplibre">
+            <MapFocus
+              focusBounds={focusBounds ?? null}
+              focusMinZoom={focusMinZoom}
+              focusMaxZoom={focusMaxZoom}
+              fitBoundsMode={fitBoundsMode}
+              recenterToken={recenterToken}
+              suppressChromeHideRef={suppressChromeHideRef}
+              fitBoundsPadding={fitBoundsPadding}
+              focusPaddingBias={focusPaddingBias}
+              preferFly={focusPreferFly}
+            />
             {chromeHudRef ? (
               <MapChromeListener
                 chromeHudRef={chromeHudRef}

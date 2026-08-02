@@ -108,7 +108,9 @@ export async function openMapWithLocalSession(
 }
 
 export async function expectCreatePageMapPreviewLoaded(page: Page) {
-  const map = page.locator(".leaflet-container");
+  const map = page
+    .locator(".leaflet-container, .maplibregl-map")
+    .first();
   await map.waitFor({ state: "visible", timeout: 10_000 });
 
   await expect
@@ -116,7 +118,10 @@ export async function expectCreatePageMapPreviewLoaded(page: Page) {
     .toBeGreaterThan(200);
 
   await expect
-    .poll(async () => page.locator(".leaflet-tile-pane img").count())
+    .poll(
+      async () =>
+        page.locator(".leaflet-tile-pane img, .maplibregl-canvas").count(),
+    )
     .toBeGreaterThan(0);
 }
 
