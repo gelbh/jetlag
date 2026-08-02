@@ -56,6 +56,27 @@ describe("useToolPanelChrome", () => {
     expect(result.current.panelMinimized).toBe(false);
   });
 
+  it("auto-peeks while placing and keeps an explicit expand", () => {
+    const { result, rerender } = renderHook(
+      ({ autoPeek }) => useToolPanelChrome("thermometer", { autoPeek }),
+      { initialProps: { autoPeek: false } },
+    );
+
+    rerender({ autoPeek: true });
+    expect(result.current.userMinimized).toBe(true);
+
+    act(() => {
+      result.current.setPanelMinimized(false);
+    });
+    expect(result.current.userMinimized).toBe(false);
+
+    rerender({ autoPeek: true });
+    expect(result.current.userMinimized).toBe(false);
+
+    rerender({ autoPeek: false });
+    expect(result.current.userMinimized).toBe(false);
+  });
+
   it("keeps user-minimized state after panning ends", () => {
     const { result } = renderHook(() => useToolPanelChrome("matching"));
 
