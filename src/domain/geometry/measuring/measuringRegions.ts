@@ -119,7 +119,6 @@ export async function buildMeasuringRegions(
     measuringDistanceMeters,
     measuringAnswer,
     measuringTargetPoint,
-    measuringPlaces,
     measuringCoastSegments,
     usesAllPlacesInArea,
   } = input;
