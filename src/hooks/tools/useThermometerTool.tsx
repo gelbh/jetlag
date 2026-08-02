@@ -322,7 +322,11 @@ export function useThermometerTool({
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
-      if (!active || config.placementMode !== "manual") {
+      if (
+        !active ||
+        config.placementMode !== "manual" ||
+        wizardStepRef.current !== "place"
+      ) {
         return false;
       }
 
