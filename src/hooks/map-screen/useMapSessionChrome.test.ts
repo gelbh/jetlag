@@ -19,6 +19,9 @@ const mockLeaveHostSession = vi.hoisted(() =>
     { action: "ended" } | { action: "promoted"; newHostUid: string }
   > => ({ action: "ended" })),
 );
+const mockLeaveSessionMembership = vi.hoisted(() =>
+  vi.fn(async () => undefined),
+);
 const mockEndSession = vi.hoisted(() =>
   vi.fn(async () => {
     mockTrackSessionEnded("host_end");
@@ -45,6 +48,10 @@ vi.mock("../../services/core/analytics/analytics", () => ({
 vi.mock("../../services/session/sessionLifecycle", () => ({
   leaveHostSession: mockLeaveHostSession,
   endSession: mockEndSession,
+}));
+
+vi.mock("../../services/session/rolePasscodeLifecycle", () => ({
+  leaveSessionMembership: mockLeaveSessionMembership,
 }));
 
 vi.mock("../../services/firestore/firestoreAnnotations", async () => {
@@ -121,6 +128,7 @@ describe("useMapSessionChrome", () => {
     mockCaptureException.mockClear();
     mockLeaveHostSession.mockClear();
     mockLeaveHostSession.mockResolvedValue({ action: "ended" });
+    mockLeaveSessionMembership.mockClear();
     mockEndSession.mockClear();
     mockEndSession.mockImplementation(async () => {
       mockTrackSessionEnded("host_end");
@@ -476,6 +484,39 @@ describe("useMapSessionChrome", () => {
     );
     expect(mockLeaveHostSession).toHaveBeenCalledWith("session-remote");
     expect(mockTrackSessionEnded).not.toHaveBeenCalled();
+  });
+
+  it("calls leaveSessionMembership before exit for gated non-host leave", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      useMapSessionChrome({
+        session: {
+          ...remoteSession,
+          hostUid: "other-host",
+          memberUids: ["other-host", "host-1"],
+          roleGates: { version: 1, leaders: { seeker: "other-host" } },
+        },
+        isHost: false,
+        annotations: [],
+        mapShellRef: { current: null },
+        exportLegendRef: { current: null },
+        clearAllAnnotations: vi.fn(async () => undefined),
+        setSelectedAnnotationId: vi.fn(),
+        closeSettingsPanel: vi.fn(),
+        resetTimer: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleLeaveSession();
+    });
+
+    expect(mockLeaveSessionMembership).toHaveBeenCalledWith("session-remote");
+    expect(mockLeaveHostSession).not.toHaveBeenCalled();
+    expect(exitSession).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
+    );
   });
 
   it("skips host leave callable when session hostUid is not the current user", async () => {

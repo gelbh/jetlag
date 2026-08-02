@@ -23,6 +23,7 @@ import { tentacleAnnotationSummary } from "../questions/tentacleQuestions";
 import type { MapTool } from "./mapToolTypes";
 import type { GameSize } from "../session/size/gameSize";
 import type { MemberRoles } from "../session/players/playerRole";
+import type { RoleGates } from "../session/players/roleGates";
 import type { ThermometerDistanceOptionMiles } from "../questions/thermometerQuestions";
 import type {
   CustomMatchingAreasByLevel,
@@ -142,6 +143,7 @@ export interface SessionRecord {
   createdAt: string;
   memberUids: string[];
   memberRoles?: MemberRoles;
+  roleGates?: RoleGates;
   gameSize?: GameSize;
   distanceUnit?: DistanceUnit;
   hidingZoneRadiusMeters?: number;

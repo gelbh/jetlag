@@ -1,5 +1,7 @@
 import { applyEndSessionInTx, endSessionCanonical } from "./endSessionCanonical.mjs";
+import { leaveGatedHostSessionHandler } from "./leaveSessionMembership.mjs";
 import { pickHostPromotee } from "./pickHostPromotee.mjs";
+import { isRoleGatedSession } from "./roleGateShared.mjs";
 
 export { pickHostPromotee };
 
@@ -26,6 +28,11 @@ function assertHostSession(sessionSnap, uid) {
 
 export async function leaveHostSessionHandler(db, uid, sessionId) {
   const sessionRef = db.collection("sessions").doc(sessionId);
+  const sessionDoc = await sessionRef.get();
+  if (sessionDoc.exists && isRoleGatedSession(sessionDoc.data())) {
+    return leaveGatedHostSessionHandler(db, uid, sessionId);
+  }
+
   let outcome = null;
 
   await db.runTransaction(async (tx) => {
