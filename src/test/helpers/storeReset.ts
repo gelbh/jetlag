@@ -27,6 +27,7 @@ export function resetAllStores(): void {
     showAdminBoundaries: false,
     keepScreenAwake: false,
     lowPowerMode: false,
+    mapPitchEnabled: false,
     notificationPreferences: {
       enabled: false,
       newQuestions: true,
