@@ -4,8 +4,14 @@
   --dock-secondary-height: 2.75rem;
   --dock-row-gap: 0.125rem;
   --dock-primary-content-height: 2.75rem;
-  /* Fold primary + secondary so --map-panel-bottom consumers clear both bars. */
-  --dock-content-height: calc(var(--dock-primary-content-height) + var(--dock-row-gap) + var(--dock-secondary-height));
+  /*
+   * Fold primary + secondary into the shared dock height tokens so leaflet
+   * dock-inset controls and map panels clear both bars. Observer maps without
+   * a secondary bar get a slightly larger bottom inset (accepted).
+   */
+  --dock-content-height: calc(
+    var(--dock-primary-content-height) + var(--dock-row-gap) + var(--dock-secondary-height)
+  );
 }
 
 @media (min-width: 28.01rem) {
