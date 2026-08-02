@@ -21,18 +21,27 @@ export function previewGeometryFingerprint(
     return `${feature.geometry.type}:0`;
   }
 
-  const lngs = positions.map(([lng]) => lng);
-  const lats = positions.map(([, lat]) => lat);
+  let minLng = Infinity;
+  let maxLng = -Infinity;
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+  for (const [lng, lat] of positions) {
+    if (lng < minLng) minLng = lng;
+    if (lng > maxLng) maxLng = lng;
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+  }
+
   const round = (value: number) => value.toFixed(6);
   const first = positions[0]!;
   const last = positions[coordCount - 1]!;
 
   return [
     feature.geometry.type,
-    round(Math.min(...lngs)),
-    round(Math.min(...lats)),
-    round(Math.max(...lngs)),
-    round(Math.max(...lats)),
+    round(minLng),
+    round(minLat),
+    round(maxLng),
+    round(maxLat),
     coordCount,
     round(first[0]),
     round(first[1]),
