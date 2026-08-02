@@ -50,14 +50,9 @@ export async function expectRedoEnabled(page: Page) {
 }
 
 export async function openSettings(page: Page) {
-  const wideSetup = page
-    .locator(".jl-tool-dock-wide-only")
-    .getByRole("button", { name: "Open settings" });
-  if (await wideSetup.isVisible().catch(() => false)) {
-    await wideSetup.click();
-  } else {
-    await clickOverflowToolButton(page, "Open settings");
-  }
+  const settings = page.getByRole("button", { name: "Open settings" });
+  await expect(settings).toBeVisible();
+  await settings.click();
   await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
 }
 
