@@ -1,7 +1,7 @@
 import { formatFreshnessAge } from "../../admin/formatAdminFreshness";
 
 /** Age at which a shared live pin is removed from the map. */
-export const LIVE_LOCATION_GONE_MS = 10 * 60 * 1000;
+export const LIVE_LOCATION_GONE_MS = 60 * 60 * 1000;
 
 /** Shared UI tick for opacity / last-seen refresh. */
 export const LIVE_LOCATION_FRESHNESS_TICK_MS = 15_000;
