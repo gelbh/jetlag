@@ -48,7 +48,7 @@ describe("useToolPanelChrome", () => {
     act(() => {
       window.dispatchEvent(
         new CustomEvent(WIZARD_STEP_CHANGE_EVENT, {
-          detail: { stepId: "anchor" },
+          detail: { stepId: "place" },
         }),
       );
     });

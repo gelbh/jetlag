@@ -20,8 +20,11 @@ import { ToolSection } from "./shared/panels/ToolSection";
 import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
-import { THERMOMETER_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
-import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
+import { THERMOMETER_WIZARD } from "./shared/wizard/toolStepUtils";
+import {
+  toolWizardPhasePrimaryNav,
+  toolWizardSwipeNext,
+} from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
@@ -98,11 +101,22 @@ export function ThermometerPanel({
   error = null,
   wizardStepRef,
 }: ThermometerPanelProps) {
-  const steps = stepsForMode(THERMOMETER_STEPS, awaitHiderAnswer);
-  const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
-    steps,
-    { wizardStepRef },
-  );
+  const {
+    phaseId,
+    stepId,
+    phaseIndex,
+    configureIndex,
+    goNext,
+    goBack,
+    Stepper,
+  } = useToolWizard(THERMOMETER_WIZARD, {
+    wizardStepRef,
+    awaitHiderAnswer,
+    toolCommitLabel: awaitHiderAnswer
+      ? `Send to hiders (${costLabel})`
+      : "Add thermometer",
+    isSubmitting,
+  });
 
   const travelTooShort =
     travelMeters !== null && travelMeters + 1 < distanceMeters;
@@ -122,37 +136,36 @@ export function ThermometerPanel({
     canSubmitQuestion &&
     !isSubmitting;
 
+  const placeReadyByMode = ((): boolean => {
+    switch (placementMode) {
+      case "manual":
+        return pinsReady && !travelTooShort;
+      case "gps":
+        return true;
+      default: {
+        const _exhaustive: never = placementMode;
+        return _exhaustive;
+      }
+    }
+  })();
+  const placeReady = walkingActive || placeReadyByMode;
   const canGoNext =
-    (step === "placement" &&
-      (walkingActive || pinsReady || placementMode === "gps")) ||
-    (step === "distance" && distanceAvailable);
-  const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
+    (phaseId === "place" && placeReady) ||
+    (phaseId === "configure" && distanceAvailable);
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
 
   const thermometerAnswerStepActions =
-    step === "answer" ? (
-      <>
-        <BinaryAnswerPicker
-          value={answer}
-          onChange={onAnswerChange}
-          options={hotterColderAnswerOptions}
-          label=""
-        />
-        {placementMode === "manual" ? (
-          <button
-            type="button"
-            onClick={onCommit}
-            disabled={!canCommit}
-            aria-busy={isSubmitting}
-            className="btn-primary w-full disabled:opacity-40"
-          >
-            {isSubmitting ? "Sending…" : "Add thermometer"}
-          </button>
-        ) : null}
-      </>
+    phaseId === "ask" && !awaitHiderAnswer ? (
+      <BinaryAnswerPicker
+        value={answer}
+        onChange={onAnswerChange}
+        options={hotterColderAnswerOptions}
+        label=""
+      />
     ) : null;
 
-  const thermometerPlacementSendActions =
-    step === "placement" &&
+  const thermometerSendActions =
+    phaseId === "ask" &&
     awaitHiderAnswer &&
     placementMode === "manual" &&
     pinsReady &&
@@ -164,44 +177,16 @@ export function ThermometerPanel({
         isSubmitting={isSubmitting}
         disabled={!canCommit}
         onClick={onCommit}
+        showButton={false}
         instruction="Hiders answer hotter or colder in game chat once you send this question."
       />
     ) : null;
 
   const panelBody = (
     <>
-      {step === "distance" ? (
+      {phaseId === "place" ? (
         <ToolSection first compact status="active">
-          {awaitHiderAnswer ? (
-            <QuestionTruthReferenceHint />
-          ) : null}
-          <QuestionPromptBlock
-            prompt={thermometerQuestionPrompt(distanceMeters, distanceUnit)}
-          />
           <div className="space-y-3">
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                Distance
-              </p>
-              <OptionChipRow>
-                {availableDistancePresets.map((preset) => {
-                  const reuse =
-                    presetUseCount > 0 && preset === distanceMeters
-                      ? costLabel
-                      : null;
-                  return (
-                    <OptionChip
-                      key={preset}
-                      selected={distanceMeters === preset}
-                      onClick={() => onDistanceChange(preset)}
-                    >
-                      {formatPresetDistance(preset, distanceUnit)}
-                      {reuse ? ` · ${reuse}` : ""}
-                    </OptionChip>
-                  );
-                })}
-              </OptionChipRow>
-            </div>
             <div>
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
                 Movement mode
@@ -221,58 +206,83 @@ export function ThermometerPanel({
                 </OptionChip>
               </OptionChipRow>
             </div>
+            <ResolvedReadout variant={walkingActive ? "default" : "dim"}>
+              {placementStatus(mapStep, placementMode, walkingActive)}
+            </ResolvedReadout>
+            {travelMeters !== null ? (
+              <ResolvedReadout>
+                {placementMode === "gps" ? "Crow-flies: " : "Movement on map: "}
+                {formatPresetDistance(travelMeters, distanceUnit)}
+              </ResolvedReadout>
+            ) : null}
+            {travelTooShort ? (
+              <ResolvedReadout variant="warning">
+                Movement is shorter than the selected distance.
+              </ResolvedReadout>
+            ) : null}
+            {!canSubmitQuestion ? (
+              <ResolvedReadout variant="warning">
+                Finish the open question before starting another.
+              </ResolvedReadout>
+            ) : null}
+            {placementMode === "gps" && !walkingActive ? (
+              <button
+                type="button"
+                onClick={onStartWalk}
+                disabled={
+                  !distanceAvailable || !canSubmitQuestion || isSubmitting
+                }
+                aria-busy={gpsLoading || isSubmitting}
+                className="btn-primary w-full disabled:opacity-40"
+              >
+                {gpsLoading ? "Getting GPS…" : "Start track"}
+              </button>
+            ) : null}
+            <button type="button" onClick={onReset} className="btn-secondary w-full">
+              Reset
+            </button>
           </div>
         </ToolSection>
       ) : null}
 
-      {step === "placement" ? (
+      {phaseId === "configure" ? (
         <ToolSection first compact status="active">
-          <ResolvedReadout variant={walkingActive ? "default" : "dim"}>
-            {placementStatus(mapStep, placementMode, walkingActive)}
-          </ResolvedReadout>
-          {travelMeters !== null ? (
-            <ResolvedReadout>
-              {placementMode === "gps" ? "Crow-flies: " : "Movement on map: "}
-              {formatPresetDistance(travelMeters, distanceUnit)}
-            </ResolvedReadout>
+          {awaitHiderAnswer ? (
+            <QuestionTruthReferenceHint />
           ) : null}
-          {travelTooShort ? (
-            <ResolvedReadout variant="warning">
-              Movement is shorter than the selected distance.
-            </ResolvedReadout>
-          ) : null}
-          {!canSubmitQuestion ? (
-            <ResolvedReadout variant="warning">
-              Finish the open question before starting another.
-            </ResolvedReadout>
-          ) : null}
-          {placementMode === "gps" && !walkingActive ? (
-            <button
-              type="button"
-              onClick={onStartWalk}
-              disabled={
-                !distanceAvailable || !canSubmitQuestion || isSubmitting
-              }
-              aria-busy={gpsLoading || isSubmitting}
-              className="btn-primary w-full disabled:opacity-40"
-            >
-              {gpsLoading ? "Getting GPS…" : "Start track"}
-            </button>
-          ) : null}
-          <button type="button" onClick={onReset} className="btn-secondary w-full">
-            Reset
-          </button>
+          <QuestionPromptBlock
+            prompt={thermometerQuestionPrompt(distanceMeters, distanceUnit)}
+          />
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+              Distance
+            </p>
+            <OptionChipRow>
+              {availableDistancePresets.map((preset) => {
+                const reuse =
+                  presetUseCount > 0 && preset === distanceMeters
+                    ? costLabel
+                    : null;
+                return (
+                  <OptionChip
+                    key={preset}
+                    selected={distanceMeters === preset}
+                    onClick={() => onDistanceChange(preset)}
+                  >
+                    {formatPresetDistance(preset, distanceUnit)}
+                    {reuse ? ` · ${reuse}` : ""}
+                  </OptionChip>
+                );
+              })}
+            </OptionChipRow>
+          </div>
         </ToolSection>
       ) : null}
     </>
   );
 
   const stickyFooterActions =
-    step === "answer"
-      ? thermometerAnswerStepActions
-      : step === "placement"
-        ? thermometerPlacementSendActions
-        : null;
+    thermometerAnswerStepActions ?? thermometerSendActions;
 
   const answerFooter = stickyFooterActions ? (
     <ToolSection first compact status="active">
@@ -287,11 +297,17 @@ export function ThermometerPanel({
       stepper={
         <Stepper
           nav={{
-            stepIndex,
-            stepCount: steps.length,
+            canGoBack:
+              phaseIndex > 0 ||
+              (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
-            onNext: goNext,
-            canGoNext,
+            ...toolWizardPhasePrimaryNav({
+              phaseId,
+              goNext,
+              onCommit,
+              canGoNext,
+              canCommit,
+            }),
           }}
         />
       }
@@ -306,9 +322,9 @@ export function ThermometerPanel({
         }
       >
         <WizardSwipeSurface
-          stepId={step}
-          stepIndex={stepIndex}
-          canGoBack={stepIndex > 0}
+          stepId={stepId}
+          stepIndex={phaseIndex}
+          canGoBack={phaseIndex > 0}
           canGoNext={canSwipeNext}
           onBack={goBack}
           onNext={goNext}

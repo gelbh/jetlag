@@ -2,7 +2,8 @@ import { useEffect, useMemo } from "react";
 import type { TransitStation } from "../../domain/session/hiding/hidingZone";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
-  stepsForHidingZoneMode,
+  hidingZoneStepIdFromPhase,
+  hidingZoneWizardDef,
   type HidingZoneStepId,
 } from "./hidingZoneSteps";
 import { SegmentControl } from "../ui/forms/SegmentControl";
@@ -10,6 +11,7 @@ import { InlineError } from "../ui/banners/InlineError";
 import { ToolPanelShell } from "../tools/shared/panels/ToolPanelShell";
 import { ToolSection } from "../tools/shared/panels/ToolSection";
 import { WizardSwipeSurface } from "../tools/shared/wizard/WizardSwipeSurface";
+import { toolWizardPhasePrimaryNav } from "../tools/shared/wizard/toolWizardGuards";
 import { TransitStationPicker } from "./TransitStationPicker";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 
@@ -43,12 +45,12 @@ interface HidingZonePanelProps {
 }
 
 function stepPrompt(
-  stepId: HidingZoneStepId,
+  legacyStepId: HidingZoneStepId,
   moveMode: boolean,
   manualMode: boolean,
 ): { title: string; body: string } {
   if (moveMode) {
-    if (stepId === "location") {
+    if (legacyStepId === "location") {
       return {
         title: "Pick new location",
         body: manualMode
@@ -63,14 +65,14 @@ function stepPrompt(
     };
   }
 
-  if (stepId === "method") {
+  if (legacyStepId === "method") {
     return {
       title: "Set hiding zone",
       body: "Center your zone on a transit station or place it on the map.",
     };
   }
 
-  if (stepId === "location") {
+  if (legacyStepId === "location") {
     return {
       title: manualMode ? "Place on map" : "Pick station",
       body: manualMode
@@ -110,18 +112,26 @@ export function HidingZonePanel({
   onStepChange,
   onSearchThisArea,
 }: HidingZonePanelProps) {
-  const steps = useMemo(
-    () => stepsForHidingZoneMode(moveMode),
+  const wizardDef = useMemo(
+    () => hidingZoneWizardDef(moveMode),
     [moveMode],
   );
+  const confirmLabel = moveMode ? "Confirm new zone" : "Confirm hiding zone";
   const {
+    phaseId,
     stepId,
-    stepIndex,
+    phaseIndex,
+    configureIndex,
     goNext,
     goBack,
     Stepper,
     resetStep,
-  } = useToolWizard(steps);
+  } = useToolWizard(wizardDef, {
+    toolCommitLabel: confirmLabel,
+    isSubmitting: zoneTool.saving,
+  });
+
+  const legacyStepId = hidingZoneStepIdFromPhase(phaseId);
 
   useEffect(() => {
     if (wizardOpen) {
@@ -134,23 +144,23 @@ export function HidingZonePanel({
   }, [moveMode, resetStep]);
 
   useEffect(() => {
-    onStepChange(stepId as HidingZoneStepId);
-  }, [onStepChange, stepId]);
+    onStepChange(legacyStepId);
+  }, [legacyStepId, onStepChange]);
 
   useEffect(() => {
-    if (!wizardOpen || zoneTool.manualMode || stepId !== "location") {
+    if (!wizardOpen || zoneTool.manualMode || phaseId !== "place") {
       return;
     }
 
     onSearchThisArea();
   }, [
     onSearchThisArea,
-    stepId,
+    phaseId,
     wizardOpen,
     zoneTool.manualMode,
   ]);
 
-  const prompt = stepPrompt(stepId as HidingZoneStepId, moveMode, zoneTool.manualMode);
+  const prompt = stepPrompt(legacyStepId, moveMode, zoneTool.manualMode);
   const methodSegmentValue = zoneTool.methodChosen
     ? zoneTool.manualMode
       ? "map"
@@ -158,9 +168,12 @@ export function HidingZonePanel({
     : "unset";
 
   const canGoNext =
-    (stepId === "method" && zoneTool.methodChosen) ||
-    (stepId === "location" && zoneTool.hasPlacement);
-  const canSwipeNext = canGoNext && stepIndex < steps.length - 1;
+    (phaseId === "configure" && zoneTool.methodChosen) ||
+    (phaseId === "place" && zoneTool.hasPlacement);
+  const canCommit =
+    zoneTool.hasPlacement && !zoneTool.saving && !confirmDisabled;
+  const phaseCount = wizardDef.phases.length;
+  const canSwipeNext = canGoNext && phaseIndex < phaseCount - 1;
 
   return (
     <ToolPanelShell
@@ -168,11 +181,19 @@ export function HidingZonePanel({
       stepper={
         <Stepper
           nav={{
-            stepIndex,
-            stepCount: steps.length,
+            canGoBack:
+              phaseIndex > 0 ||
+              (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
-            onNext: goNext,
-            canGoNext: stepId !== "confirm" ? canGoNext : undefined,
+            ...toolWizardPhasePrimaryNav({
+              phaseId,
+              goNext,
+              onCommit: () => {
+                void zoneTool.confirmZone();
+              },
+              canGoNext,
+              canCommit,
+            }),
           }}
         />
       }
@@ -186,13 +207,13 @@ export function HidingZonePanel({
       </div>
       <WizardSwipeSurface
         stepId={stepId}
-        stepIndex={stepIndex}
-        canGoBack={stepIndex > 0}
+        stepIndex={phaseIndex}
+        canGoBack={phaseIndex > 0}
         canGoNext={canSwipeNext}
         onBack={goBack}
         onNext={goNext}
       >
-      {stepId === "method" ? (
+      {phaseId === "configure" ? (
         <ToolSection first compact status="active">
           <SegmentControl
             variant="hud"
@@ -211,7 +232,7 @@ export function HidingZonePanel({
         </ToolSection>
       ) : null}
 
-      {stepId === "location" && zoneTool.manualMode ? (
+      {phaseId === "place" && zoneTool.manualMode ? (
         <ToolSection first compact status="active">
           <p className="text-sm text-ink-secondary">
             {zoneTool.hasPlacement
@@ -226,7 +247,7 @@ export function HidingZonePanel({
         </ToolSection>
       ) : null}
 
-      {stepId === "location" && !zoneTool.manualMode ? (
+      {phaseId === "place" && !zoneTool.manualMode ? (
         <ToolSection first compact status="active">
           <div className="jl-scroll jl-wizard-search-results">
             <TransitStationPicker
@@ -247,7 +268,7 @@ export function HidingZonePanel({
         </ToolSection>
       ) : null}
 
-      {stepId === "confirm" ? (
+      {phaseId === "ask" ? (
         <ToolSection first compact status="active">
           <div className="space-y-2 rounded-[var(--radius-hud-md)] border border-border bg-surface-raised px-3 py-3">
             <p className="text-xs font-medium uppercase tracking-wide text-ink-dim">
@@ -267,19 +288,6 @@ export function HidingZonePanel({
               </p>
             ) : null}
           </div>
-          <button
-            type="button"
-            onClick={() => void zoneTool.confirmZone()}
-            disabled={!zoneTool.hasPlacement || zoneTool.saving || confirmDisabled}
-            aria-busy={zoneTool.saving}
-            className="btn-primary w-full disabled:opacity-50"
-          >
-            {zoneTool.saving
-              ? "Saving…"
-              : moveMode
-                ? "Confirm new zone"
-                : "Confirm hiding zone"}
-          </button>
         </ToolSection>
       ) : null}
       </WizardSwipeSurface>

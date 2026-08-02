@@ -10,8 +10,11 @@ import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
 import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
-import { RADAR_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
-import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
+import { RADAR_WIZARD } from "./shared/wizard/toolStepUtils";
+import {
+  toolWizardPhasePrimaryNav,
+  toolWizardSwipeNext,
+} from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import { parseDistanceInput, type DistanceUnit } from "../../domain/map/distance";
 import {
@@ -72,11 +75,22 @@ export function RadarPanel({
   viewOnly = false,
   wizardStepRef,
 }: RadarPanelProps) {
-  const steps = stepsForMode(RADAR_STEPS, awaitHiderAnswer);
-  const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
-    steps,
-    { wizardStepRef },
-  );
+  const {
+    phaseId,
+    stepId,
+    phaseIndex,
+    configureIndex,
+    goNext,
+    goBack,
+    Stepper,
+  } = useToolWizard(RADAR_WIZARD, {
+    wizardStepRef,
+    awaitHiderAnswer,
+    toolCommitLabel: awaitHiderAnswer
+      ? `Send to hiders (${costLabel})`
+      : "Add radar question",
+    isSubmitting,
+  });
 
   const resolvedRadius = chooseCustom
     ? (parseDistanceInput(customRadius, distanceUnit) ?? radiusMeters)
@@ -103,12 +117,12 @@ export function RadarPanel({
   const canCommitActions = !viewOnly && canCommit;
 
   const canGoNext =
-    (step === "anchor" && hasCenter) ||
-    (step === "distance" && distanceSelectionAvailable);
-  const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
+    (phaseId === "place" && hasCenter) ||
+    (phaseId === "configure" && distanceSelectionAvailable);
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
 
   const radarAnswerStepActions =
-    step === "answer" ? (
+    phaseId === "ask" && !awaitHiderAnswer ? (
       <>
         <BinaryAnswerPicker
           value={answer}
@@ -121,25 +135,17 @@ export function RadarPanel({
             The map shows the shaded area for your choice.
           </p>
         ) : null}
-        <button
-          type="button"
-          onClick={onCommit}
-          disabled={!canCommitActions}
-          aria-busy={isSubmitting}
-          className="btn-primary w-full disabled:opacity-40"
-        >
-          {isSubmitting ? "Sending…" : "Add radar question"}
-        </button>
       </>
     ) : null;
 
-  const radarDistanceSendActions =
-    step === "distance" && awaitHiderAnswer ? (
+  const radarSendActions =
+    phaseId === "ask" && awaitHiderAnswer ? (
       <SendToHidersButton
         costLabel={costLabel}
         isSubmitting={isSubmitting}
         disabled={!canSendToHiders}
         onClick={onCommit}
+        showButton={false}
         instruction="Hiders answer yes or no in game chat once you send this question."
       />
     ) : null;
@@ -147,7 +153,7 @@ export function RadarPanel({
   const panelBody = (
     <>
       {viewOnly ? <ViewOnlyQuestionBanner /> : null}
-      {step === "distance" ? (
+      {phaseId === "configure" ? (
         <ToolSection first compact status="active">
           {awaitHiderAnswer ? (
             <QuestionTruthReferenceHint />
@@ -166,7 +172,7 @@ export function RadarPanel({
         </ToolSection>
       ) : null}
 
-      {step === "anchor" ? (
+      {phaseId === "place" ? (
         <ToolSection first compact status="active">
           <PlacementActions
             awaitingPlacement={awaitingPlacement}
@@ -181,12 +187,7 @@ export function RadarPanel({
     </>
   );
 
-  const stickyFooterActions =
-    step === "answer"
-      ? radarAnswerStepActions
-      : step === "distance"
-        ? radarDistanceSendActions
-        : null;
+  const stickyFooterActions = radarAnswerStepActions ?? radarSendActions;
 
   const answerFooter = stickyFooterActions ? (
     <ToolSection first compact status="active">
@@ -201,20 +202,26 @@ export function RadarPanel({
       stepper={
         <Stepper
           nav={{
-            stepIndex,
-            stepCount: steps.length,
+            canGoBack:
+              phaseIndex > 0 ||
+              (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
-            onNext: goNext,
-            canGoNext,
+            ...toolWizardPhasePrimaryNav({
+              phaseId,
+              goNext,
+              onCommit,
+              canGoNext,
+              canCommit: canCommitActions,
+            }),
           }}
         />
       }
     >
       <WizardPanelFrame scrollable stickyFooter={answerFooter} error={error}>
         <WizardSwipeSurface
-          stepId={step}
-          stepIndex={stepIndex}
-          canGoBack={stepIndex > 0}
+          stepId={stepId}
+          stepIndex={phaseIndex}
+          canGoBack={phaseIndex > 0}
           canGoNext={canSwipeNext}
           onBack={goBack}
           onNext={goNext}
