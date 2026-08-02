@@ -130,9 +130,3 @@ export function MapLibreGeoJsonOverlay({
     </Source>
   );
 }
-
-export function polygonGeometryFeature(
-  geometry: Polygon | MultiPolygon,
-): Feature<Polygon | MultiPolygon> {
-  return { type: "Feature", properties: {}, geometry };
-}

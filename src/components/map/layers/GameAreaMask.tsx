@@ -17,10 +17,8 @@ import { useMapEngine } from "../chrome/mapEngineContext";
 import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
 import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
-import {
-  MapLibreGeoJsonOverlay,
-  polygonGeometryFeature,
-} from "../helpers/MapLibreGeoJsonOverlay";
+import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
+import { polygonGeometryFeature } from "../helpers/polygonGeometryFeature";
 import { MID_GESTURE_PATH_DEFAULTS } from "../helpers/midGesturePathDefaults";
 
 interface GameAreaMaskProps {
