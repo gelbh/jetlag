@@ -71,4 +71,11 @@ describe("liveLocationFreshness", () => {
     );
     expect(presentation.lastSeenLabel).toBe("Last seen 3m ago");
   });
+
+  it("hides an empty cluster presentation", () => {
+    expect(liveClusterPresentation([], NOW)).toEqual({
+      fillOpacity: 0,
+      lastSeenLabel: null,
+    });
+  });
 });

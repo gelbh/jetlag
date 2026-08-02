@@ -646,7 +646,7 @@ service cloud.firestore {
           && request.resource.data.lng is number
           && request.resource.data.updatedAt is string
         );
-        allow delete: if request.auth.uid == uid;
+        allow delete: if isSignedIn() && request.auth.uid == uid;
       }
 
       match /messages/{messageId} {

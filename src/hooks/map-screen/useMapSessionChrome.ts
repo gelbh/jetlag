@@ -13,6 +13,10 @@ import {
 } from "../../services/firestore/firestoreAnnotations";
 import { clearLiveLocationOnLeave } from "../../services/session/clearLiveLocationOnLeave";
 import {
+  allowPlayerLocationPublishes,
+  blockPlayerLocationPublishes,
+} from "../../services/session/playerLocationPublishGate";
+import {
   clearSessionLocalArtifacts,
   teardownSessionUiState,
 } from "../../services/session/sessionCleanup";
@@ -275,6 +279,8 @@ export function useMapSessionChrome({
         return;
       }
 
+      blockPlayerLocationPublishes();
+
       try {
         const leaveResult = await leaveHostSession(session.id);
         if (leaveResult.action === "ended") {
@@ -292,10 +298,12 @@ export function useMapSessionChrome({
               trackSessionEnded("fallback_client_end");
             } catch (fallbackError) {
               captureException(fallbackError);
+              allowPlayerLocationPublishes();
               window.alert("Couldn't leave the session. Try again.");
               return;
             }
           } else {
+            allowPlayerLocationPublishes();
             window.alert("Couldn't leave the session. Try again.");
             return;
           }
@@ -307,6 +315,8 @@ export function useMapSessionChrome({
       )
     ) {
       return;
+    } else if (!isLocalSession) {
+      blockPlayerLocationPublishes();
     }
 
     if (isLocalSession) {

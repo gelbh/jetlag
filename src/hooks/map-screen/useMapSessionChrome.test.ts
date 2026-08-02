@@ -116,7 +116,8 @@ describe("useMapSessionChrome", () => {
   beforeEach(() => {
     exitSession.mockClear();
     mockResetRemoteSession.mockClear();
-    mockClearLiveLocationOnLeave.mockClear();
+    mockClearLiveLocationOnLeave.mockReset();
+    mockClearLiveLocationOnLeave.mockResolvedValue(undefined);
     mockCaptureException.mockClear();
     mockLeaveHostSession.mockClear();
     mockLeaveHostSession.mockResolvedValue({ action: "ended" });

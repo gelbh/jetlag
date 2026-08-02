@@ -57,12 +57,16 @@ export function useGameOverActions(
         }
       }
 
-      await exitSession({
-        reason: "leave",
-        sessionId: session.id,
-        replace: true,
-        closeOverlays: overlay.closeSheet,
-      });
+      try {
+        await exitSession({
+          reason: "leave",
+          sessionId: session.id,
+          replace: true,
+          closeOverlays: overlay.closeSheet,
+        });
+      } catch {
+        // Navigation teardown failed; user may already be leaving.
+      }
     })();
   }, [exitSession, overlay.closeSheet, session]);
 
