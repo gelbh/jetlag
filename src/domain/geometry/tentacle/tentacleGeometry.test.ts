@@ -6,7 +6,7 @@ import type { GameArea, TentaclePoi } from "../../map/annotations";
 import { milesToMeters } from "../../map/distance";
 import {
   clearVoronoiCellCacheForTests,
-  getCachedVoronoiCells,
+  getCachedVoronoiCellsAsync,
   tentacleSitesFingerprint,
 } from "../voronoi/voronoiCellCache";
 import { voronoiCellSiteId } from "../voronoi/voronoiCellSiteId";
@@ -51,11 +51,11 @@ const eastMuseum: TentaclePoi = {
 };
 
 describe("tentacleGeometry", () => {
-  it("resolves poiId from cached voronoi cells used in elimination", () => {
+  it("resolves poiId from cached voronoi cells used in elimination", async () => {
     clearVoronoiCellCacheForTests();
     clearTentacleEliminationCacheForTests();
     const pois = [westMuseum, eastMuseum];
-    const cells = getCachedVoronoiCells(
+    const cells = await getCachedVoronoiCellsAsync(
       tentacleSitesFingerprint(pois),
       pois.map((poi) => ({
         lng: poi.lng,
@@ -207,7 +207,7 @@ describe("tentacleGeometry", () => {
     }));
 
     const fingerprint = tentacleSitesFingerprint(sevenPois);
-    const cells = getCachedVoronoiCells(
+    const cells = await getCachedVoronoiCellsAsync(
       fingerprint,
       sevenPois.map((poi) => ({
         lng: poi.lng,
