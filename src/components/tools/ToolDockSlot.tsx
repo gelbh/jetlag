@@ -10,7 +10,6 @@ import {
   HudDrawIcon,
   HudMoreIcon,
   HudRedoIcon,
-  HudSettingsIcon,
   HudUndoIcon,
 } from "../ui/brand/HudIcons";
 import {
@@ -18,7 +17,6 @@ import {
   HudToolIcon,
   HudZoneIcon,
 } from "../map/icons/ToolIcons";
-import { ChatUnreadBadge } from "../chat/ChatUnreadBadge";
 import { MotionPressable } from "../motion/MotionPressable";
 
 interface ToolDockQuestionSlotProps {
@@ -164,20 +162,12 @@ interface ToolDockWideActionsProps {
   drawMenuOpen: boolean;
   markupActive: boolean;
   onToggleDrawMenu: () => void;
-  onOpenChat?: () => void;
-  hasUnreadChat: boolean;
-  unreadCount: number;
-  onOpenSettings: () => void;
 }
 
 export function ToolDockWideActions({
   drawMenuOpen,
   markupActive,
   onToggleDrawMenu,
-  onOpenChat,
-  hasUnreadChat,
-  unreadCount,
-  onOpenSettings,
 }: ToolDockWideActionsProps) {
   return (
     <div className="jl-tool-dock-group jl-tool-dock-group-end jl-tool-dock-wide-only">
@@ -197,35 +187,6 @@ export function ToolDockWideActions({
         </span>
         <span className="jl-tool-slot-label">Draw</span>
       </MotionPressable>
-
-      {onOpenChat ? (
-        <MotionPressable
-          type="button"
-          onClick={onOpenChat}
-          className="jl-tool-slot"
-          aria-label={
-            hasUnreadChat ? "Open chat, unread messages" : "Open chat"
-          }
-        >
-          <span className="jl-tool-slot-icon jl-unread-badge-host text-xs font-bold">
-            @
-            {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
-          </span>
-          <span className="jl-tool-slot-label">Chat</span>
-        </MotionPressable>
-      ) : null}
-
-      <MotionPressable
-        type="button"
-        onClick={onOpenSettings}
-        className="jl-tool-slot"
-        aria-label="Open settings"
-      >
-        <span className="jl-tool-slot-icon">
-          <HudSettingsIcon className="h-5 w-5" />
-        </span>
-        <span className="jl-tool-slot-label">Settings</span>
-      </MotionPressable>
     </div>
   );
 }
@@ -233,16 +194,12 @@ export function ToolDockWideActions({
 interface ToolDockCompactMoreButtonProps {
   moreMenuActive: boolean;
   moreMenuOpen: boolean;
-  hasUnreadChat: boolean;
-  unreadCount: number;
   onToggleMoreMenu: () => void;
 }
 
 export function ToolDockCompactMoreButton({
   moreMenuActive,
   moreMenuOpen,
-  hasUnreadChat,
-  unreadCount,
   onToggleMoreMenu,
 }: ToolDockCompactMoreButtonProps) {
   return (
@@ -251,14 +208,13 @@ export function ToolDockCompactMoreButton({
         type="button"
         onClick={onToggleMoreMenu}
         className={`jl-tool-slot ${moreMenuActive ? "jl-tool-slot-active" : ""}`}
-        aria-label={hasUnreadChat ? "More tools, unread chat" : "More tools"}
+        aria-label="More tools"
         aria-expanded={moreMenuOpen}
         aria-haspopup="dialog"
-        title="Draw, chat, settings"
+        title="Draw and history"
       >
-        <span className="jl-tool-slot-icon jl-unread-badge-host">
+        <span className="jl-tool-slot-icon">
           <HudMoreIcon className="h-5 w-5" />
-          {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
         </span>
         <span className="jl-tool-slot-label">More</span>
       </MotionPressable>

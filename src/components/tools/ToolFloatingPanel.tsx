@@ -46,7 +46,7 @@ export function ToolFloatingPanel({
       onClose={onClose}
       closeLabel={`Close ${mapToolPlacingLabel(toolId)}`}
       maxHeightClassName={
-        isWizardTool ? "jl-wizard-panel-max-h" : "max-h-[min(34dvh,320px)]"
+        isWizardTool ? "jl-wizard-panel-max-h" : "max-h-[min(30dvh,280px)]"
       }
       bodyScrollable={!isWizardTool}
       panelLayout={isWizardTool ? "wizard" : "default"}
