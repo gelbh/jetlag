@@ -1317,6 +1317,76 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows a seeker to request end game", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+        }),
+      });
+
+    await assertSucceeds(
+      host.firestore().collection("sessions").doc("session-1").update({
+        endGameRequestedAt: "2026-01-01T00:00:00.000Z",
+        endGameRequestedByUid: "host-1",
+      }),
+    );
+  });
+
+  it("allows the requester to cancel a pending end-game request", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+          endGameRequestedAt: "2026-01-01T00:00:00.000Z",
+          endGameRequestedByUid: "host-1",
+        }),
+      });
+
+    await assertSucceeds(
+      host.firestore().collection("sessions").doc("session-1").update({
+        endGameRequestedAt: deleteField(),
+        endGameRequestedByUid: deleteField(),
+      }),
+    );
+  });
+
+  it("allows the host to clear active end game fields", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+          endGameStartedAt: "2026-01-01T00:01:00.000Z",
+          endGameStartedByUid: "hider-1",
+        }),
+      });
+
+    await assertSucceeds(
+      host.firestore().collection("sessions").doc("session-1").update({
+        endGameStartedAt: deleteField(),
+        endGameStartedByUid: deleteField(),
+        endGameTruthAnchors: deleteField(),
+        endGameRequestedAt: deleteField(),
+        endGameRequestedByUid: deleteField(),
+      }),
+    );
+  });
+
   it("allows a hider to decline a pending end-game request", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
