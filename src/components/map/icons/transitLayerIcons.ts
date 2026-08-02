@@ -1,7 +1,8 @@
 import L from "leaflet";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import type { TransitRouteMode } from "../../../domain/map/transit";
-import { transitStopDivIcon } from "../icons/transitStopIcons";
+import { transitStopDivIcon } from "./transitStopIcons";
+import { transitVehicleIconHtml } from "./transitVehicleIconHtml";
+export { transitVehicleIconHtml } from "./transitVehicleIconHtml";
 
 const TRANSIT_ROUTE_MODES: readonly TransitRouteMode[] = [
   "rail",
@@ -43,7 +44,7 @@ export function getTransitVehicleIcon(
 
   const icon = L.divIcon({
     className: "",
-    html: `<div style="transform: rotate(${rotation}deg); width: 14px; height: 14px; border-radius: 9999px; background:${color}; border:2px solid ${MAP_ANNOTATION_COLORS.playAreaMask}; box-shadow:0 0 0 1px ${color};"></div>`,
+    html: transitVehicleIconHtml(bearing, color),
     iconSize: [14, 14],
     iconAnchor: [7, 7],
   });

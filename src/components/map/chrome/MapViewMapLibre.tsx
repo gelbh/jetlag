@@ -9,8 +9,12 @@ import {
   getMapLibreStyle,
 } from "../../../domain/map/mapBasemaps";
 import { isUsableMapBounds } from "../../../domain/geometry/gameArea/geometry";
+import { MapChromeListener } from "./MapChromeListener";
 import { MapEngineProvider } from "./mapEngineContext";
-import type { MapViewCoreProps } from "./mapViewTypes";
+import { MapRecenterControl } from "./MapRecenterControl";
+import { MapStyleToggle } from "./MapStyleToggle";
+import { MapZoomControl } from "./MapZoomControl";
+import type { MapViewMapLibreProps } from "./mapViewTypes";
 
 setWorkerUrl(mapLibreWorkerUrl);
 
@@ -50,8 +54,8 @@ function leafletBoundsFromMapLibre(map: MapLibreMap): LatLngBounds {
 }
 
 /**
- * MapLibre shell (Slice 1): basemap + click/bounds bridge.
- * Accepts {@link MapViewCoreProps} only — Leaflet chrome is out of contract.
+ * MapLibre shell: basemap + chrome controls + click/bounds bridge.
+ * Camera/focus (`MapFocus`) stays Leaflet-only until Slice 4.
  */
 export function MapViewMapLibre({
   center = [51.505, -0.09],
@@ -65,7 +69,16 @@ export function MapViewMapLibre({
   interactive = true,
   children,
   mapKey,
-}: MapViewCoreProps) {
+  chromeHudRef,
+  suppressChromeHideRef,
+  showZoomControl,
+  zoomControlInset = "dock",
+  onMapStyleChange,
+  showMapStyleToggle,
+  mapStyleControlInset,
+  showRecenterControl,
+  onRecenter,
+}: MapViewMapLibreProps) {
   const mapRef = useRef<MapRef>(null);
   const onBoundsChangeRef = useRef(onBoundsChange);
   const onUserViewportFramedRef = useRef(onUserViewportFramed);
@@ -79,6 +92,11 @@ export function MapViewMapLibre({
   const satelliteGradeClass =
     mapStyle === "satellite" ? " jl-basemap--satellite-grade" : "";
   const [longitude, latitude] = centerToLngLat(center);
+  const zoomControlEnabled = showZoomControl ?? interactive;
+  const mapStyleToggleEnabled =
+    (showMapStyleToggle ?? Boolean(onMapStyleChange)) &&
+    Boolean(onMapStyleChange);
+  const styleControlInset = mapStyleControlInset ?? zoomControlInset;
 
   useEffect(() => {
     onBoundsChangeRef.current = onBoundsChange;
@@ -163,7 +181,36 @@ export function MapViewMapLibre({
           onZoomEnd={handleZoomEnd}
           onClick={handleClick}
         >
-          <MapEngineProvider engine="maplibre">{children}</MapEngineProvider>
+          <MapEngineProvider engine="maplibre">
+            {chromeHudRef ? (
+              <MapChromeListener
+                chromeHudRef={chromeHudRef}
+                suppressRef={suppressChromeHideRef}
+              />
+            ) : null}
+            <MapRecenterControl
+              enabled={showRecenterControl ?? false}
+              inset={zoomControlInset}
+              suppressRef={suppressChromeHideRef}
+              onRecenter={onRecenter}
+            />
+            <MapZoomControl
+              enabled={zoomControlEnabled}
+              inset={zoomControlInset}
+              suppressRef={suppressChromeHideRef}
+            />
+            {onMapStyleChange ? (
+              <MapStyleToggle
+                enabled={mapStyleToggleEnabled}
+                mapStyle={mapStyle}
+                streetBasemap={streetBasemap}
+                onMapStyleChange={onMapStyleChange}
+                inset={styleControlInset}
+                suppressRef={suppressChromeHideRef}
+              />
+            ) : null}
+            {children}
+          </MapEngineProvider>
         </Map>
       </div>
     </div>
