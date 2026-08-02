@@ -65,7 +65,6 @@ interface UseTentacleToolParams {
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
   armPlacement: () => void;
   canSubmitQuestion?: boolean;
-  endGameActive?: boolean;
 }
 
 export function useTentacleTool({
@@ -91,7 +90,6 @@ export function useTentacleTool({
   ensurePointInGameArea,
   armPlacement,
   canSubmitQuestion = true,
-  endGameActive = false,
 }: UseTentacleToolParams) {
   const wizardStepRef = useRef("anchor");
   const finishPlacementRef = useRef(finishPlacement);
@@ -376,7 +374,6 @@ export function useTentacleTool({
           : undefined
       }
       wizardStepRef={wizardStepRef}
-      endGameActive={endGameActive}
     />
   );
 

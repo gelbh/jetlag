@@ -1,6 +1,7 @@
+import { isEndGameActive } from "../../domain/map/annotations";
 import type { HiderTruthResult } from "../../domain/questions/ui";
-import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { GameReplyOption } from "../../domain/session/activity/sessionChat";
+import { useSessionStore } from "../../state/sessionStore";
 import {
   hiderTruthReferenceLabel,
   hiderTruthReferenceLoadingLabel,
@@ -11,7 +12,6 @@ interface HiderAnswerPickerProps {
   replyOptions: readonly GameReplyOption[];
   truth: HiderTruthResult | null;
   loading: boolean;
-  truthReferenceMode?: HiderTruthReferenceMode;
   onSelect: (option: GameReplyOption) => void;
 }
 
@@ -23,9 +23,11 @@ export function HiderAnswerPicker({
   replyOptions,
   truth,
   loading,
-  truthReferenceMode = "hidingZoneCenter",
   onSelect,
 }: HiderAnswerPickerProps) {
+  const truthReferenceMode = useSessionStore((state) =>
+    isEndGameActive(state.session) ? "endGameFreeze" : "hidingZoneCenter",
+  );
   const truthAvailable =
     truth !== null && !truth.unavailable && truth.replyId.length > 0;
   const gridClass =

@@ -61,7 +61,6 @@ interface MatchingPanelProps {
   isSubmitting?: boolean;
   onRetry?: () => void;
   wizardStepRef?: RefObject<string>;
-  endGameActive?: boolean;
 }
 
 export function MatchingPanel({
@@ -93,7 +92,6 @@ export function MatchingPanel({
   isSubmitting = false,
   onRetry,
   wizardStepRef,
-  endGameActive = false,
 }: MatchingPanelProps) {
   const steps = stepsForMode(MATCHING_STEPS, awaitHiderAnswer);
   const {
@@ -238,7 +236,7 @@ export function MatchingPanel({
       {step === "category" ? (
         <ToolSection first compact status="active">
           {awaitHiderAnswer ? (
-            <QuestionTruthReferenceHint endGameActive={endGameActive} />
+            <QuestionTruthReferenceHint />
           ) : null}
           {availableCategories.length === 0 ? (
             <CatalogExhaustedMessage message="Every match category has already been used on this map." />

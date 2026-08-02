@@ -100,13 +100,66 @@ service cloud.firestore {
         && anchor.keys().hasOnly(['lat', 'lng', 'frozenAt'])
         && anchor.lat is number
         && anchor.lng is number
-        && anchor.frozenAt is string;
+        && anchor.frozenAt is string
+        && anchor.frozenAt.size() > 0;
     }
 
+    // Rules cannot loop; unroll a small fixed cap (Jet Lag sessions stay tiny).
     function validEndGameTruthAnchors(anchors) {
       return anchors is map
         && anchors.size() > 0
-        && anchors.size() <= 32;
+        && anchors.size() <= 6
+        && resource.data.memberUids is list
+        && resource.data.memberRoles is map
+        && anchors.keys().hasOnly(resource.data.memberUids)
+        && (anchors.size() < 1 || (
+          resource.data.memberRoles[anchors.keys()[0]] == 'hider'
+          && validEndGameTruthAnchor(anchors[anchors.keys()[0]])
+        ))
+        && (anchors.size() < 2 || (
+          resource.data.memberRoles[anchors.keys()[1]] == 'hider'
+          && validEndGameTruthAnchor(anchors[anchors.keys()[1]])
+        ))
+        && (anchors.size() < 3 || (
+          resource.data.memberRoles[anchors.keys()[2]] == 'hider'
+          && validEndGameTruthAnchor(anchors[anchors.keys()[2]])
+        ))
+        && (anchors.size() < 4 || (
+          resource.data.memberRoles[anchors.keys()[3]] == 'hider'
+          && validEndGameTruthAnchor(anchors[anchors.keys()[3]])
+        ))
+        && (anchors.size() < 5 || (
+          resource.data.memberRoles[anchors.keys()[4]] == 'hider'
+          && validEndGameTruthAnchor(anchors[anchors.keys()[4]])
+        ))
+        && (anchors.size() < 6 || (
+          resource.data.memberRoles[anchors.keys()[5]] == 'hider'
+          && validEndGameTruthAnchor(anchors[anchors.keys()[5]])
+        ))
+        && (resource.data.memberUids.size() < 1 || (
+          resource.data.memberRoles[resource.data.memberUids[0]] != 'hider'
+          || resource.data.memberUids[0] in anchors
+        ))
+        && (resource.data.memberUids.size() < 2 || (
+          resource.data.memberRoles[resource.data.memberUids[1]] != 'hider'
+          || resource.data.memberUids[1] in anchors
+        ))
+        && (resource.data.memberUids.size() < 3 || (
+          resource.data.memberRoles[resource.data.memberUids[2]] != 'hider'
+          || resource.data.memberUids[2] in anchors
+        ))
+        && (resource.data.memberUids.size() < 4 || (
+          resource.data.memberRoles[resource.data.memberUids[3]] != 'hider'
+          || resource.data.memberUids[3] in anchors
+        ))
+        && (resource.data.memberUids.size() < 5 || (
+          resource.data.memberRoles[resource.data.memberUids[4]] != 'hider'
+          || resource.data.memberUids[4] in anchors
+        ))
+        && (resource.data.memberUids.size() < 6 || (
+          resource.data.memberRoles[resource.data.memberUids[5]] != 'hider'
+          || resource.data.memberUids[5] in anchors
+        ));
     }
 
     function membershipJoinFieldsStable() {

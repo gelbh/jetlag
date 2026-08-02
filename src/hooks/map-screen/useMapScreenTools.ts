@@ -2,7 +2,6 @@ import { useCallback, useMemo, useState } from "react";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
 import {
-  isEndGameActive,
   type AnnotationRecord,
   type GameArea,
   type SessionRecord,
@@ -59,7 +58,6 @@ export function useMapScreenTools({
   const [mapError, setMapError] = useState<string | null>(null);
   const [awaitingPlacement, setAwaitingPlacement] = useState(false);
   const awaitHiderAnswer = sessionHasHiders(session?.memberRoles);
-  const endGameActive = isEndGameActive(session);
   const canSubmitQuestion = !hasOpenPendingQuestion(pendingQuestions);
   const {
     submitPendingQuestion,
@@ -172,7 +170,6 @@ export function useMapScreenTools({
     ensurePointInGameArea,
     armPlacement,
     canSubmitQuestion,
-    endGameActive,
   });
   const photoTool = usePhotoTool({
     active: activeTool === "photo",
@@ -188,7 +185,6 @@ export function useMapScreenTools({
     setMapError,
     mapError,
     canSubmitQuestion,
-    endGameActive,
   });
   const thermometerTool = useThermometerTool({
     active: activeTool === "thermometer",
@@ -213,7 +209,6 @@ export function useMapScreenTools({
     gpsError,
     refreshGps: refresh,
     ensurePointInGameArea,
-    endGameActive,
   });
   const {
     heavyToolActive,
@@ -289,7 +284,6 @@ export function useMapScreenTools({
     sessionId: session?.id,
     senderUid: uid,
     canSubmitQuestion,
-    endGameActive,
     onToolsChange: handleHeavyToolsChange,
   };
 

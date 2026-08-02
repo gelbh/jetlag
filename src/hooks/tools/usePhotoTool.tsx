@@ -35,7 +35,6 @@ interface UsePhotoToolParams {
   setMapError: (message: string | null) => void;
   mapError: string | null;
   canSubmitQuestion?: boolean;
-  endGameActive?: boolean;
 }
 
 export function usePhotoTool({
@@ -50,7 +49,6 @@ export function usePhotoTool({
   setMapError,
   mapError,
   canSubmitQuestion = true,
-  endGameActive = false,
 }: UsePhotoToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
   const usedCategories = useMemo(
@@ -152,7 +150,6 @@ export function usePhotoTool({
         isSubmitting={isSubmitting}
         canSubmitQuestion={canSubmitQuestion}
         hasOpenQuestion={hasOpenQuestion}
-        endGameActive={endGameActive}
       />
     ) : null;
 

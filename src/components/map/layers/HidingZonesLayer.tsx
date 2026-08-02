@@ -3,13 +3,11 @@ import { CompensatedCircle } from "../helpers/CompensatedCircle";
 import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
 import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import {
-  isEndGameActive,
-  type SessionRecord,
-} from "../../../domain/map/annotations";
+import type { SessionRecord } from "../../../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { resolveHiderTruthReference } from "../../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
+import { hiderTruthReferenceMapTooltip } from "../../tools/shared/questionTruthReferenceHint";
 import { Tooltip } from "react-leaflet";
 
 interface HidingZonesLayerProps {
@@ -41,12 +39,6 @@ function polygonPositions(geometryJson: string): LatLngTuple[] | null {
   }
 }
 
-function answerReferenceTooltip(mode: "hidingZoneCenter" | "endGameFreeze"): string {
-  return mode === "endGameFreeze"
-    ? "Answer reference · End-game location"
-    : "Answer reference · Hiding-zone center";
-}
-
 export function HidingZonesLayer({
   zones,
   myUid,
@@ -57,7 +49,6 @@ export function HidingZonesLayer({
   const visibleZones = memberSet
     ? zones.filter((zone) => memberSet.has(zone.hiderUid))
     : zones;
-  const endGameActive = isEndGameActive(session);
 
   return (
     <>
@@ -77,8 +68,7 @@ export function HidingZonesLayer({
         const showReferencePin =
           zone.status === "confirmed" &&
           referencePoint != null &&
-          (truthReference.mode === "endGameFreeze" ||
-            (truthReference.mode === "hidingZoneCenter" && !endGameActive));
+          truthReference.mode !== "unavailable";
 
         return (
           <Fragment key={zone.hiderUid}>
@@ -118,11 +108,7 @@ export function HidingZonesLayer({
                 }}
               >
                 <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-                  {answerReferenceTooltip(
-                    truthReference.mode === "endGameFreeze"
-                      ? "endGameFreeze"
-                      : "hidingZoneCenter",
-                  )}
+                  {hiderTruthReferenceMapTooltip(truthReference.mode)}
                 </Tooltip>
               </CompensatedCircleMarker>
             ) : null}

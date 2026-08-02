@@ -16,8 +16,12 @@ export function hiderTruthReferenceLoadingLabel(
       return "Checking end-game location…";
     case "hidingZoneCenter":
       return "Checking hiding-zone center…";
-    default:
+    case "unavailable":
       return "Checking answer reference…";
+    default: {
+      const _exhaustive: never = mode;
+      return _exhaustive;
+    }
   }
 }
 
@@ -27,7 +31,28 @@ export function hiderTruthReferenceLabel(mode: HiderTruthReferenceMode): string 
       return "At your end-game location";
     case "hidingZoneCenter":
       return "At hiding-zone center";
-    default:
+    case "unavailable":
       return "";
+    default: {
+      const _exhaustive: never = mode;
+      return _exhaustive;
+    }
+  }
+}
+
+export function hiderTruthReferenceMapTooltip(
+  mode: HiderTruthReferenceMode,
+): string {
+  switch (mode) {
+    case "endGameFreeze":
+      return "Answer reference · End-game location";
+    case "hidingZoneCenter":
+      return "Answer reference · Hiding-zone center";
+    case "unavailable":
+      return "Answer reference";
+    default: {
+      const _exhaustive: never = mode;
+      return _exhaustive;
+    }
   }
 }

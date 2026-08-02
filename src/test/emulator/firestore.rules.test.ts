@@ -1165,6 +1165,110 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("denies end-game accept with malformed truth anchors", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+          endGameRequestedAt: "2026-01-01T00:00:00.000Z",
+          endGameRequestedByUid: "host-1",
+        }),
+      });
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await assertFails(
+      hider.firestore().collection("sessions").doc("session-1").update({
+        endGameStartedAt: "2026-01-01T00:01:00.000Z",
+        endGameStartedByUid: "hider-1",
+        endGameTruthAnchors: {
+          "hider-1": { foo: 1 },
+        },
+        endGameRequestedAt: deleteField(),
+        endGameRequestedByUid: deleteField(),
+      }),
+    );
+  });
+
+  it("denies end-game accept missing a hider anchor", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1", "hider-2"],
+          memberRoles: {
+            "host-1": "seeker",
+            "hider-1": "hider",
+            "hider-2": "hider",
+          },
+          endGameRequestedAt: "2026-01-01T00:00:00.000Z",
+          endGameRequestedByUid: "host-1",
+        }),
+      });
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await assertFails(
+      hider.firestore().collection("sessions").doc("session-1").update({
+        endGameStartedAt: "2026-01-01T00:01:00.000Z",
+        endGameStartedByUid: "hider-1",
+        endGameTruthAnchors: {
+          "hider-1": {
+            lat: 53.35,
+            lng: -6.26,
+            frozenAt: "2026-01-01T00:01:00.000Z",
+          },
+        },
+        endGameRequestedAt: deleteField(),
+        endGameRequestedByUid: deleteField(),
+      }),
+    );
+  });
+
+  it("denies end-game accept with a non-hider anchor key", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+          endGameRequestedAt: "2026-01-01T00:00:00.000Z",
+          endGameRequestedByUid: "host-1",
+        }),
+      });
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await assertFails(
+      hider.firestore().collection("sessions").doc("session-1").update({
+        endGameStartedAt: "2026-01-01T00:01:00.000Z",
+        endGameStartedByUid: "hider-1",
+        endGameTruthAnchors: {
+          "hider-1": {
+            lat: 53.35,
+            lng: -6.26,
+            frozenAt: "2026-01-01T00:01:00.000Z",
+          },
+          "host-1": {
+            lat: 53.36,
+            lng: -6.27,
+            frozenAt: "2026-01-01T00:01:00.000Z",
+          },
+        },
+        endGameRequestedAt: deleteField(),
+        endGameRequestedByUid: deleteField(),
+      }),
+    );
+  });
+
   it("allows the host to reset session progress with end-game anchors cleared", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

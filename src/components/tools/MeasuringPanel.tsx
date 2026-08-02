@@ -82,7 +82,6 @@ interface MeasuringPanelProps {
   costLabel?: string;
   isSubmitting?: boolean;
   wizardStepRef?: RefObject<string>;
-  endGameActive?: boolean;
 }
 
 export function MeasuringPanel({
@@ -127,7 +126,6 @@ export function MeasuringPanel({
   costLabel = "D3P1",
   isSubmitting = false,
   wizardStepRef,
-  endGameActive = false,
 }: MeasuringPanelProps) {
   const steps = stepsForMode(MEASURING_STEPS, awaitHiderAnswer);
   const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
@@ -184,8 +182,8 @@ export function MeasuringPanel({
         {step === "source" ? (
           <>
             {awaitHiderAnswer ? (
-              <QuestionTruthReferenceHint endGameActive={endGameActive} />
-            ) : null}
+            <QuestionTruthReferenceHint />
+          ) : null}
             <MeasuringSourceStep
             measureFrom={measureFrom}
             optionChosen={optionChosen}

@@ -50,7 +50,6 @@ interface TentaclePanelProps {
   isSubmitting?: boolean;
   onRetry?: () => void;
   wizardStepRef?: RefObject<string>;
-  endGameActive?: boolean;
 }
 
 export function TentaclePanel({
@@ -78,7 +77,6 @@ export function TentaclePanel({
   isSubmitting = false,
   onRetry,
   wizardStepRef,
-  endGameActive = false,
 }: TentaclePanelProps) {
   const steps = stepsForMode(TENTACLE_STEPS, awaitHiderAnswer);
   const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
@@ -146,7 +144,7 @@ export function TentaclePanel({
       {step === "category" ? (
         <ToolSection first compact status="active">
           {awaitHiderAnswer ? (
-            <QuestionTruthReferenceHint endGameActive={endGameActive} />
+            <QuestionTruthReferenceHint />
           ) : null}
           <QuestionPromptBlock
             prompt={prompt}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  hiderMemberUids,
   isAdminRole,
   isHiderRole,
   isObserverRole,
@@ -22,6 +23,7 @@ describe("playerRole", () => {
     expect(isHiderRole(roles, "u1")).toBe(true);
     expect(isSeekerRole(roles, "u2")).toBe(true);
     expect(sessionHasHiders(roles)).toBe(true);
+    expect(hiderMemberUids(roles)).toEqual(["u1"]);
     expect(playerRoleLabel("hider")).toBe("Hider");
   });
 

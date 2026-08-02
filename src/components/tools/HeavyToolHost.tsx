@@ -50,7 +50,6 @@ export interface HeavyToolHostProps {
   senderUid?: string | null;
   onToolsChange: (tools: HeavyMapToolsApi) => void;
   canSubmitQuestion?: boolean;
-  endGameActive?: boolean;
 }
 
 const idleTools = createIdleHeavyMapTools();
@@ -136,7 +135,6 @@ interface HeavyToolHookParams {
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
   armPlacement: () => void;
   canSubmitQuestion?: boolean;
-  endGameActive?: boolean;
 }
 
 const HEAVY_TOOL_HOOKS: {

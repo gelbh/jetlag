@@ -3,7 +3,7 @@ import type {
   SessionRecord,
   SessionTier,
 } from "../../../domain/map/annotations";
-import type { EndGameTruthAnchor } from "../../../domain/questions/hiderTruth/resolveHiderTruthReference";
+import type { EndGameTruthAnchor } from "../../../domain/session/hiding/endGameTruthAnchors";
 import type { SessionRulesPatch } from "../../../domain/session/tools/advancedSessionSettings";
 import type { GameSize } from "../../../domain/session/size/gameSize";
 import { hidingZoneRadiusMeters } from "../../../domain/session/size/gameSize";

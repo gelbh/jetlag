@@ -1,4 +1,8 @@
-import type { EndGameTruthAnchor } from "../../questions/hiderTruth/resolveHiderTruthReference";
+export interface EndGameTruthAnchor {
+  lat: number;
+  lng: number;
+  frozenAt: string;
+}
 
 export interface PlayerLocationPoint {
   lat: number;
@@ -77,4 +81,24 @@ export function withLocalHiderLocationOverride(
   }
 
   return locationsByUid;
+}
+
+/** Assemble accept-time anchors from confirmed hiders + optional local GPS override. */
+export function assembleEndGameAcceptAnchors(input: {
+  hiderUids: readonly string[];
+  hiderLocations: readonly { uid: string; lat: number; lng: number }[];
+  localHiderUid: string | null;
+  localPoint: PlayerLocationPoint | null;
+  frozenAt: string;
+}): Record<string, EndGameTruthAnchor> | { missing: string[] } {
+  const locationsByUid = withLocalHiderLocationOverride(
+    playerLocationsByUid(input.hiderLocations),
+    input.localHiderUid,
+    input.localPoint,
+  );
+  return buildEndGameTruthAnchors(
+    input.hiderUids,
+    locationsByUid,
+    input.frozenAt,
+  );
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  assembleEndGameAcceptAnchors,
   buildEndGameTruthAnchors,
   missingHiderUidsForAnchors,
 } from "./endGameTruthAnchors";
@@ -55,5 +56,29 @@ describe("endGameTruthAnchors", () => {
     expect(missingHiderUidsForAnchors(["hider-a", "hider-b"], locations)).toEqual([
       "hider-a",
     ]);
+  });
+
+  it("assembles accept anchors with a local GPS override", () => {
+    const result = assembleEndGameAcceptAnchors({
+      hiderUids: ["hider-a", "hider-b"],
+      hiderLocations: [
+        { uid: "hider-a", lat: 51.1, lng: -0.1 },
+        { uid: "hider-b", lat: 51.2, lng: -0.2 },
+      ],
+      localHiderUid: "hider-a",
+      localPoint: { lat: 52.0, lng: -1.0 },
+      frozenAt: "2026-01-01T00:00:00.000Z",
+    });
+
+    expect("missing" in result).toBe(false);
+    if ("missing" in result) {
+      return;
+    }
+
+    expect(result["hider-a"]).toEqual({
+      lat: 52.0,
+      lng: -1.0,
+      frozenAt: "2026-01-01T00:00:00.000Z",
+    });
   });
 });

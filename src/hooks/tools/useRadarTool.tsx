@@ -57,7 +57,6 @@ interface UseRadarToolParams {
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
   armPlacement: () => void;
   canSubmitQuestion?: boolean;
-  endGameActive?: boolean;
 }
 
 export function useRadarTool({
@@ -82,7 +81,6 @@ export function useRadarTool({
   ensurePointInGameArea,
   armPlacement,
   canSubmitQuestion = true,
-  endGameActive = false,
 }: UseRadarToolParams) {
   const { isSubmitting, runLocked } = useSubmitLock();
   const wizardStepRef = useRef("anchor");
@@ -335,7 +333,6 @@ export function useRadarTool({
       isSubmitting={isSubmitting}
       viewOnly={!canSubmitQuestion}
       wizardStepRef={wizardStepRef}
-      endGameActive={endGameActive}
     />
   );
 

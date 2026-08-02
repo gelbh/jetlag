@@ -45,7 +45,6 @@ interface RadarPanelProps {
   isSubmitting?: boolean;
   viewOnly?: boolean;
   wizardStepRef?: RefObject<string>;
-  endGameActive?: boolean;
 }
 
 export function RadarPanel({
@@ -72,7 +71,6 @@ export function RadarPanel({
   isSubmitting = false,
   viewOnly = false,
   wizardStepRef,
-  endGameActive = false,
 }: RadarPanelProps) {
   const steps = stepsForMode(RADAR_STEPS, awaitHiderAnswer);
   const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
@@ -152,7 +150,7 @@ export function RadarPanel({
       {step === "distance" ? (
         <ToolSection first compact status="active">
           {awaitHiderAnswer ? (
-            <QuestionTruthReferenceHint endGameActive={endGameActive} />
+            <QuestionTruthReferenceHint />
           ) : null}
           <RadarDistancePicker
             radiusMeters={radiusMeters ?? 0}

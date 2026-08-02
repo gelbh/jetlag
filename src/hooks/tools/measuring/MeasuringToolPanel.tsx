@@ -28,7 +28,6 @@ interface MeasuringToolPanelProps {
   handleSearch: (role: "seeker" | "target") => Promise<void>;
   applySearchResult: (place: GeocodedPlace, role: "seeker" | "target") => void;
   loadNearest: () => Promise<void>;
-  endGameActive?: boolean;
 }
 
 export function MeasuringToolPanel({
@@ -48,7 +47,6 @@ export function MeasuringToolPanel({
   handleSearch,
   applySearchResult,
   loadNearest,
-  endGameActive = false,
 }: MeasuringToolPanelProps) {
   const {
     wizardStepRef,
@@ -149,7 +147,6 @@ export function MeasuringToolPanel({
         costLabel={costLabel}
         isSubmitting={isSubmitting}
         wizardStepRef={wizardStepRef}
-        endGameActive={endGameActive}
       />
       <QuestionPreviewSheet
         open={previewOpen}

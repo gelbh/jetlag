@@ -41,7 +41,6 @@ interface MatchingToolPanelProps {
   onRetry?: () => void;
   onPreviewConfirm: () => void;
   onPreviewCancel: () => void;
-  endGameActive?: boolean;
 }
 
 export function MatchingToolPanel({
@@ -75,7 +74,6 @@ export function MatchingToolPanel({
   onRetry,
   onPreviewConfirm,
   onPreviewCancel,
-  endGameActive = false,
 }: MatchingToolPanelProps) {
   return (
     <>
@@ -108,7 +106,6 @@ export function MatchingToolPanel({
         isSubmitting={isSubmitting}
         onRetry={onRetry}
         wizardStepRef={wizardStepRef}
-        endGameActive={endGameActive}
       />
       <QuestionPreviewSheet
         open={previewOpen}

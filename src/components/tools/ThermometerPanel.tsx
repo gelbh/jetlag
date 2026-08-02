@@ -50,7 +50,6 @@ interface ThermometerPanelProps {
   gpsLoading?: boolean;
   error?: string | null;
   wizardStepRef?: RefObject<string>;
-  endGameActive?: boolean;
 }
 
 function placementStatus(
@@ -98,7 +97,6 @@ export function ThermometerPanel({
   gpsLoading = false,
   error = null,
   wizardStepRef,
-  endGameActive = false,
 }: ThermometerPanelProps) {
   const steps = stepsForMode(THERMOMETER_STEPS, awaitHiderAnswer);
   const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
@@ -175,7 +173,7 @@ export function ThermometerPanel({
       {step === "distance" ? (
         <ToolSection first compact status="active">
           {awaitHiderAnswer ? (
-            <QuestionTruthReferenceHint endGameActive={endGameActive} />
+            <QuestionTruthReferenceHint />
           ) : null}
           <QuestionPromptBlock
             prompt={thermometerQuestionPrompt(distanceMeters, distanceUnit)}

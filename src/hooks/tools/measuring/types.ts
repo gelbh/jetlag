@@ -33,5 +33,4 @@ export interface UseMeasuringToolParams {
   refreshGps: () => Promise<{ lat: number; lng: number }>;
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
   canSubmitQuestion?: boolean;
-  endGameActive?: boolean;
 }

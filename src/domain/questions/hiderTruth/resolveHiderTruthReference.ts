@@ -4,11 +4,7 @@ import {
   type SessionRecord,
 } from "../../map/annotations";
 
-export interface EndGameTruthAnchor {
-  lat: number;
-  lng: number;
-  frozenAt: string;
-}
+export type { EndGameTruthAnchor } from "../../session/hiding/endGameTruthAnchors";
 
 export type HiderTruthReferenceMode =
   | "hidingZoneCenter"
@@ -30,8 +26,12 @@ export interface HiderTruthReference {
 }
 
 function isUsableLatLng(lat: unknown, lng: unknown): lat is number {
-  return typeof lat === "number" && typeof lng === "number" &&
-    Number.isFinite(lat) && Number.isFinite(lng);
+  return (
+    typeof lat === "number" &&
+    typeof lng === "number" &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lng)
+  );
 }
 
 export function resolveHiderTruthReference({

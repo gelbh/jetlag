@@ -49,7 +49,6 @@ import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
 import type { HiderTruthResult } from "../../domain/questions/ui";
-import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import { useAnnotationStore } from "../../state/annotationStore";
 
 type MapOverlayState = ReturnType<typeof useMapOverlayState>;
@@ -180,7 +179,6 @@ export type HiderMapScreenChromeProps = {
     sessionId: string;
     questionTruths: ReadonlyMap<string, HiderTruthResult>;
     truthsLoading: boolean;
-    truthReferenceMode: HiderTruthReferenceMode;
     answerError: string | null;
     onAnswerQuestion: (
       pendingQuestionId: string,
@@ -441,7 +439,6 @@ export function HiderMapScreenChrome({
           isHider
           questionTruths={chat.questionTruths}
           truthsLoading={chat.truthsLoading}
-          truthReferenceMode={chat.truthReferenceMode}
           answerError={chat.answerError}
           onAnswerQuestion={chat.onAnswerQuestion}
         />

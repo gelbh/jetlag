@@ -23,7 +23,6 @@ interface PhotoPanelProps {
   isSubmitting?: boolean;
   canSubmitQuestion?: boolean;
   hasOpenQuestion?: boolean;
-  endGameActive?: boolean;
 }
 
 export function PhotoPanel({
@@ -37,7 +36,6 @@ export function PhotoPanel({
   isSubmitting = false,
   canSubmitQuestion = true,
   hasOpenQuestion = false,
-  endGameActive = false,
 }: PhotoPanelProps) {
   const availableCategories = photoCategoriesForGameSize(gameSize).filter(
     (category) => !usedCategoryIds.has(category.id),
@@ -61,7 +59,6 @@ export function PhotoPanel({
   return (
     <ToolPanelShell toolId="photo">
       <ToolSection first compact status="active">
-        <QuestionTruthReferenceHint endGameActive={endGameActive} />
         {availableCategories.length === 0 ? (
           <CatalogExhaustedMessage message="Every photo question has already been used this session." />
         ) : (
@@ -86,6 +83,7 @@ export function PhotoPanel({
           prompt={question.prompt}
           ruleSummary={question.ruleSummary}
         />
+        <QuestionTruthReferenceHint />
         <SendToHidersButton
           costLabel={costLabel}
           isSubmitting={isSubmitting}

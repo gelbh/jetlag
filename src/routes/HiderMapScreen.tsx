@@ -46,10 +46,9 @@ import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/devi
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import { resolveHiderTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
 import {
-  buildEndGameTruthAnchors,
-  playerLocationsByUid,
-  withLocalHiderLocationOverride,
+  assembleEndGameAcceptAnchors,
 } from "../domain/session/hiding/endGameTruthAnchors";
+import { hiderMemberUids } from "../domain/session/players/playerRole";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
 import { useHidingZoneUidHeal } from "../hooks/session/useHidingZoneUidHeal";
@@ -312,20 +311,16 @@ export function HiderMapScreen() {
       return;
     }
 
-    const hiderUids = confirmedHidingZones.map((zone) => zone.hiderUid);
     const frozenAt = new Date().toISOString();
-    const locationsByUid = withLocalHiderLocationOverride(
-      playerLocationsByUid(hiderLocations),
-      uid,
-      liveLocationReading
+    const anchorsResult = assembleEndGameAcceptAnchors({
+      hiderUids: hiderMemberUids(session.memberRoles),
+      hiderLocations,
+      localHiderUid: uid,
+      localPoint: liveLocationReading
         ? { lat: liveLocationReading.lat, lng: liveLocationReading.lng }
         : null,
-    );
-    const anchorsResult = buildEndGameTruthAnchors(
-      hiderUids,
-      locationsByUid,
       frozenAt,
-    );
+    });
 
     if ("missing" in anchorsResult) {
       window.alert(
@@ -349,9 +344,8 @@ export function HiderMapScreen() {
       return;
     }
 
-    await acceptEndGameSession(session.id, uid, anchorsResult);
+    await acceptEndGameSession(session.id, uid, anchorsResult, frozenAt);
   }, [
-    confirmedHidingZones,
     hiderLocations,
     liveLocationReading,
     session,
@@ -823,7 +817,6 @@ export function HiderMapScreen() {
           sessionId: sessionId ?? "",
           questionTruths,
           truthsLoading,
-          truthReferenceMode: truthReference.mode,
           answerError: chatAnswerError,
           onAnswerQuestion: async (
             pendingQuestionId,
@@ -846,14 +839,6 @@ export function HiderMapScreen() {
               return;
             }
 
-            const truthReferenceForAnswer = resolveHiderTruthReference({
-              hiderUid: uid ?? "",
-              zoneCenter: myZone
-                ? [myZone.center.lat, myZone.center.lng]
-                : null,
-              session,
-            }).point;
-
             try {
               const user = await ensureAnonymousUser();
               await answerPendingQuestion(
@@ -873,7 +858,7 @@ export function HiderMapScreen() {
 
               const truth = await computeHiderTruthReplyAsync(
                 pending,
-                truthReferenceForAnswer,
+                truthReference.point,
                 gameArea,
               );
               if (

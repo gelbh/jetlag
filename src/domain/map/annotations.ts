@@ -32,10 +32,10 @@ import type {
 import type { SessionCustomMeasureGeometry } from "../session/catalog/customMeasureGeometry";
 import type { RegionPackId } from "../regions/regionPack";
 import type { GameOutcome } from "../game/foundHider";
-import type { EndGameTruthAnchor } from "../questions/hiderTruth/resolveHiderTruthReference";
+import type { EndGameTruthAnchor } from "../session/hiding/endGameTruthAnchors";
 
 export type { GameSize } from "../session/size/gameSize";
-export type { EndGameTruthAnchor } from "../questions/hiderTruth/resolveHiderTruthReference";
+export type { EndGameTruthAnchor } from "../session/hiding/endGameTruthAnchors";
 export type { MemberRoles, PlayerRole } from "../session/players/playerRole";
 
 export type AnnotationType =

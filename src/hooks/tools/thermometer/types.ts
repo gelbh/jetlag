@@ -54,5 +54,4 @@ export interface UseThermometerToolParams {
   gpsError?: string | null;
   refreshGps?: () => Promise<GeolocationReading>;
   ensurePointInGameArea?: (point: LatLngTuple) => boolean;
-  endGameActive?: boolean;
 }

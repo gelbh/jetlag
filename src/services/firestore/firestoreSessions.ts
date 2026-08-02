@@ -938,9 +938,10 @@ export async function acceptEndGameSession(
   sessionId: string,
   acceptedByUid: string,
   anchors: Record<string, { lat: number; lng: number; frozenAt: string }>,
+  endGameStartedAt: string,
 ): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), {
-    endGameStartedAt: new Date().toISOString(),
+    endGameStartedAt,
     endGameStartedByUid: acceptedByUid,
     endGameTruthAnchors: anchors,
     endGameRequestedAt: deleteField(),
