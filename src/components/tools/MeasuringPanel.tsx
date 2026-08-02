@@ -141,7 +141,9 @@ export function MeasuringPanel({
   } = useToolWizard(MEASURING_WIZARD, {
     wizardStepRef,
     awaitHiderAnswer,
-    toolCommitLabel: "Add measure question",
+    toolCommitLabel: awaitHiderAnswer
+      ? `Send to hiders (${costLabel})`
+      : "Add measure question",
     isSubmitting,
   });
 

@@ -112,7 +112,9 @@ export function ThermometerPanel({
   } = useToolWizard(THERMOMETER_WIZARD, {
     wizardStepRef,
     awaitHiderAnswer,
-    toolCommitLabel: "Add thermometer",
+    toolCommitLabel: awaitHiderAnswer
+      ? `Send to hiders (${costLabel})`
+      : "Add thermometer",
     isSubmitting,
   });
 
@@ -142,25 +144,12 @@ export function ThermometerPanel({
 
   const thermometerAnswerStepActions =
     phaseId === "ask" && !awaitHiderAnswer ? (
-      <>
-        <BinaryAnswerPicker
-          value={answer}
-          onChange={onAnswerChange}
-          options={hotterColderAnswerOptions}
-          label=""
-        />
-        {placementMode === "manual" ? (
-          <button
-            type="button"
-            onClick={onCommit}
-            disabled={!canCommit}
-            aria-busy={isSubmitting}
-            className="btn-primary w-full disabled:opacity-40"
-          >
-            {isSubmitting ? "Sending…" : "Add thermometer"}
-          </button>
-        ) : null}
-      </>
+      <BinaryAnswerPicker
+        value={answer}
+        onChange={onAnswerChange}
+        options={hotterColderAnswerOptions}
+        label=""
+      />
     ) : null;
 
   const thermometerSendActions =
@@ -176,6 +165,7 @@ export function ThermometerPanel({
         isSubmitting={isSubmitting}
         disabled={!canCommit}
         onClick={onCommit}
+        showButton={false}
         instruction="Hiders answer hotter or colder in game chat once you send this question."
       />
     ) : null;

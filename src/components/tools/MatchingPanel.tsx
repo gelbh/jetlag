@@ -108,7 +108,9 @@ export function MatchingPanel({
   } = useToolWizard(MATCHING_WIZARD, {
     wizardStepRef,
     awaitHiderAnswer,
-    toolCommitLabel: "Add match question",
+    toolCommitLabel: awaitHiderAnswer
+      ? `Send to hiders (${costLabel})`
+      : "Add match question",
     isSubmitting,
   });
   const configurePhaseIndex = MATCHING_WIZARD.phases.indexOf("configure");
@@ -223,15 +225,6 @@ export function MatchingPanel({
             The map shows the shaded area for your choice.
           </p>
         ) : null}
-        <button
-          type="button"
-          onClick={onCommit}
-          disabled={!canCommit}
-          aria-busy={isSubmitting}
-          className="btn-primary w-full disabled:opacity-40"
-        >
-          {isSubmitting ? "Sending…" : "Add match question"}
-        </button>
       </>
     ) : null;
 
@@ -242,6 +235,7 @@ export function MatchingPanel({
         isSubmitting={isSubmitting}
         disabled={!canCommit}
         onClick={onCommit}
+        showButton={false}
         instruction="Hiders answer yes or no in game chat once you send this question."
       />
     ) : null;

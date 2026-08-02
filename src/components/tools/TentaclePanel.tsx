@@ -92,7 +92,9 @@ export function TentaclePanel({
   } = useToolWizard(TENTACLE_WIZARD, {
     wizardStepRef,
     awaitHiderAnswer,
-    toolCommitLabel: "Add tentacle question",
+    toolCommitLabel: awaitHiderAnswer
+      ? `Send to hiders (${costLabel})`
+      : "Add tentacle question",
     isSubmitting,
   });
 
@@ -129,18 +131,6 @@ export function TentaclePanel({
       !loading);
   const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
 
-  const tentacleAnswerStepActions =
-    phaseId === "ask" && !awaitHiderAnswer && categoryId ? (
-      <button
-        type="button"
-        onClick={onCommit}
-        disabled={!canCommit}
-        className="btn-primary w-full disabled:opacity-40"
-      >
-        Add tentacle question
-      </button>
-    ) : null;
-
   const tentacleSendActions =
     phaseId === "ask" &&
     awaitHiderAnswer &&
@@ -152,6 +142,7 @@ export function TentaclePanel({
         isSubmitting={isSubmitting}
         disabled={!canCommit}
         onClick={onCommit}
+        showButton={false}
         instruction='Hiders pick a location or "Not within reach" in game chat once you send this question.'
       />
     ) : null;
@@ -248,8 +239,7 @@ export function TentaclePanel({
     </>
   );
 
-  const stickyFooterActions =
-    tentacleAnswerStepActions ?? tentacleSendActions;
+  const stickyFooterActions = tentacleSendActions;
 
   const answerFooter = stickyFooterActions ? (
     <ToolSection first compact status="active">

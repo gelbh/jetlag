@@ -301,6 +301,7 @@ export function MeasuringAnswerSection({
             !hasAvailableMeasureOptions || !hasSeekerPoint || !hasTargetPoint
           }
           onClick={onCommit}
+          showButton={false}
           instruction="Hiders answer closer or further in game chat once you send this question."
         />
       ) : null
@@ -318,21 +319,6 @@ export function MeasuringAnswerSection({
             The map shows the shaded area for your choice. Tap Next when ready to add
             the question.
           </p>
-        ) : null}
-        {step === "ask" ? (
-          <button
-            type="button"
-            onClick={onCommit}
-            disabled={
-              !hasAvailableMeasureOptions ||
-              !hasSeekerPoint ||
-              !hasTargetPoint ||
-              answer === null
-            }
-            className="btn-primary w-full disabled:opacity-40"
-          >
-            Add measure question
-          </button>
         ) : null}
       </>
     );

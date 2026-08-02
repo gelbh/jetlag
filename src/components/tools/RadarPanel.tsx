@@ -86,7 +86,9 @@ export function RadarPanel({
   } = useToolWizard(RADAR_WIZARD, {
     wizardStepRef,
     awaitHiderAnswer,
-    toolCommitLabel: "Add radar question",
+    toolCommitLabel: awaitHiderAnswer
+      ? `Send to hiders (${costLabel})`
+      : "Add radar question",
     isSubmitting,
   });
 
@@ -133,15 +135,6 @@ export function RadarPanel({
             The map shows the shaded area for your choice.
           </p>
         ) : null}
-        <button
-          type="button"
-          onClick={onCommit}
-          disabled={!canCommitActions}
-          aria-busy={isSubmitting}
-          className="btn-primary w-full disabled:opacity-40"
-        >
-          {isSubmitting ? "Sending…" : "Add radar question"}
-        </button>
       </>
     ) : null;
 
@@ -152,6 +145,7 @@ export function RadarPanel({
         isSubmitting={isSubmitting}
         disabled={!canSendToHiders}
         onClick={onCommit}
+        showButton={false}
         instruction="Hiders answer yes or no in game chat once you send this question."
       />
     ) : null;

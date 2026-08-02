@@ -288,19 +288,6 @@ export function HidingZonePanel({
               </p>
             ) : null}
           </div>
-          <button
-            type="button"
-            onClick={() => void zoneTool.confirmZone()}
-            disabled={!zoneTool.hasPlacement || zoneTool.saving || confirmDisabled}
-            aria-busy={zoneTool.saving}
-            className="btn-primary w-full disabled:opacity-50"
-          >
-            {zoneTool.saving
-              ? "Saving…"
-              : moveMode
-                ? "Confirm new zone"
-                : "Confirm hiding zone"}
-          </button>
         </ToolSection>
       ) : null}
       </WizardSwipeSurface>
