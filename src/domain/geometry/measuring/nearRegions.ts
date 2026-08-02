@@ -201,6 +201,25 @@ export function clearCoastlineNearRegionCacheForTests(): void {
   coastlineNearRegionCache.clear();
 }
 
+function getCachedCoastlineNearRegion(
+  cacheKey: string,
+): Feature<Polygon | MultiPolygon> | undefined {
+  return coastlineNearRegionCache.get(cacheKey);
+}
+
+function setCachedCoastlineNearRegion(
+  cacheKey: string,
+  result: Feature<Polygon | MultiPolygon>,
+): void {
+  if (coastlineNearRegionCache.size >= COASTLINE_NEAR_REGION_CACHE_MAX) {
+    const oldestKey = coastlineNearRegionCache.keys().next().value;
+    if (oldestKey !== undefined) {
+      coastlineNearRegionCache.delete(oldestKey);
+    }
+  }
+  coastlineNearRegionCache.set(cacheKey, result);
+}
+
 export const COASTLINE_NEAR_REGION_YIELD_EVERY = 4;
 
 let coastlineNearRegionYieldHook: (() => Promise<void>) | null = null;
@@ -364,7 +383,7 @@ async function buildCoastlineNearRegionWithBuffer(
     segments.length,
     "async",
   );
-  const cached = coastlineNearRegionCache.get(cacheKey);
+  const cached = getCachedCoastlineNearRegion(cacheKey);
   if (cached) {
     return cached;
   }
@@ -407,13 +426,7 @@ async function buildCoastlineNearRegionWithBuffer(
       return null;
     }
 
-    if (coastlineNearRegionCache.size >= COASTLINE_NEAR_REGION_CACHE_MAX) {
-      const oldestKey = coastlineNearRegionCache.keys().next().value;
-      if (oldestKey !== undefined) {
-        coastlineNearRegionCache.delete(oldestKey);
-      }
-    }
-    coastlineNearRegionCache.set(cacheKey, result);
+    setCachedCoastlineNearRegion(cacheKey, result);
     return result;
   } catch {
     return null;
@@ -438,7 +451,7 @@ export function buildCoastlineNearRegionTs(
     segments.length,
     "ts",
   );
-  const cached = coastlineNearRegionCache.get(cacheKey);
+  const cached = getCachedCoastlineNearRegion(cacheKey);
   if (cached) {
     return cached;
   }
@@ -470,13 +483,7 @@ export function buildCoastlineNearRegionTs(
       return null;
     }
 
-    if (coastlineNearRegionCache.size >= COASTLINE_NEAR_REGION_CACHE_MAX) {
-      const oldestKey = coastlineNearRegionCache.keys().next().value;
-      if (oldestKey !== undefined) {
-        coastlineNearRegionCache.delete(oldestKey);
-      }
-    }
-    coastlineNearRegionCache.set(cacheKey, result);
+    setCachedCoastlineNearRegion(cacheKey, result);
     return result;
   } catch {
     return null;
@@ -496,7 +503,7 @@ export async function buildCoastlineNearRegion(
       segments.length,
       `batch:${mode}`,
     );
-    const cached = coastlineNearRegionCache.get(cacheKey);
+    const cached = getCachedCoastlineNearRegion(cacheKey);
     if (cached) {
       return cached;
     }
@@ -507,6 +514,7 @@ export async function buildCoastlineNearRegion(
         distanceMeters,
         disks: [],
         gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
+        // Sync runTs: dispatchKernel requires sync TS; WASM-fail skips cooperative yield.
         runTs: () =>
           buildCoastlineNearRegionTs(segments, distanceMeters, gameArea),
       },
@@ -514,13 +522,7 @@ export async function buildCoastlineNearRegion(
     );
 
     if (result) {
-      if (coastlineNearRegionCache.size >= COASTLINE_NEAR_REGION_CACHE_MAX) {
-        const oldestKey = coastlineNearRegionCache.keys().next().value;
-        if (oldestKey !== undefined) {
-          coastlineNearRegionCache.delete(oldestKey);
-        }
-      }
-      coastlineNearRegionCache.set(cacheKey, result);
+      setCachedCoastlineNearRegion(cacheKey, result);
     }
     return result;
   }

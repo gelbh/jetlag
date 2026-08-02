@@ -19,17 +19,6 @@ function loadNearRegionWasmModule(): Promise<NearRegionWasmApi> {
   return nearRegionWasmModulePromise;
 }
 
-function topologyBboxFromResults(
-  wasmResult: PolygonFeature | null,
-  tsResult: PolygonFeature | null,
-): { west: number; east: number; south: number; north: number } {
-  const feature = tsResult ?? wasmResult;
-  if (!feature) {
-    return { west: 0, east: 0, south: 0, north: 0 };
-  }
-  return bboxFromGameArea(feature.geometry);
-}
-
 export type NearRegionBatchParams = {
   segments: readonly Feature<LineString>[];
   distanceMeters: number;
@@ -71,7 +60,7 @@ export async function dispatchNearRegionBatch(
       maskTopologyMatches(
         wasmResult,
         tsResult,
-        topologyBboxFromResults(wasmResult, tsResult),
+        bboxFromGameArea(params.gameArea),
       ),
   });
 }

@@ -110,7 +110,7 @@ fn union_polygon_features(features: &[PolygonFeature]) -> Option<MultiPolygon<f6
     fold_union(parts)
 }
 
-pub(crate) fn union_disk_specs(disks: &[DiskSpec]) -> Option<MultiPolygon<f64>> {
+fn union_disk_specs(disks: &[DiskSpec]) -> Option<MultiPolygon<f64>> {
     if disks.is_empty() {
         return None;
     }
