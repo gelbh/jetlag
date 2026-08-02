@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { WizardStepFooter } from "./WizardStepFooter";
 import { WizardStepNav } from "./WizardStepNav";
+import { WizardStepPrimaryButton } from "./WizardStepPrimaryButton";
 import { render, screen } from "@testing-library/react";
 
 describe("WizardStepNav", () => {
@@ -48,16 +49,12 @@ describe("WizardStepFooter", () => {
     expect(screen.getByLabelText("Previous step")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Next section" })).toBeInTheDocument();
   });
+});
 
-  it("shows a labeled primary button when primaryLabel is set", () => {
+describe("WizardStepPrimaryButton", () => {
+  it("renders a labeled primary CTA", () => {
     render(
-      <WizardStepFooter
-        stepIndex={0}
-        stepCount={3}
-        onBack={() => {}}
-        onNext={() => {}}
-        primaryLabel="Continue"
-      />,
+      <WizardStepPrimaryButton label="Continue" onClick={() => {}} />,
     );
 
     expect(screen.getByRole("button", { name: "Continue" })).toBeInTheDocument();

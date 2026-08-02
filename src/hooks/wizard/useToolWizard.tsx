@@ -1,12 +1,10 @@
 import { useCallback, useMemo, useState, type ReactElement, type RefObject } from "react";
-import { WizardConfigureContinuum } from "../../components/tools/shared/wizard/WizardConfigureContinuum";
-import { WizardPhaseRail } from "../../components/tools/shared/wizard/WizardPhaseRail";
 import { ToolStepper } from "../../components/tools/shared/wizard/ToolStepper";
 import type { WizardStepNavProps } from "../../components/tools/shared/wizard/WizardStepNav";
 import {
-  WizardStepBackButton,
-  WizardStepNextButton,
-} from "../../components/tools/shared/wizard/WizardStepNav";
+  WizardPhaseStepper,
+  type WizardPhaseStepperNav,
+} from "../../components/tools/shared/wizard/WizardPhaseStepper";
 import {
   buildSteps,
   deriveStepStates,
@@ -49,16 +47,12 @@ interface UseToolWizardPhaseOptions extends UseToolWizardBaseOptions {
   isSubmitting?: boolean;
 }
 
-type UseToolWizardOptions =
-  | UseToolWizardLegacyOptions
-  | UseToolWizardPhaseOptions;
-
-type PhaseStepperComponent = (props: {
-  nav?: WizardStepNavProps;
-}) => ReactElement | null;
-
 type LegacyStepperComponent = (props: {
   nav?: WizardStepNavProps;
+}) => ReactElement;
+
+type PhaseStepperComponent = (props: {
+  nav?: WizardPhaseStepperNav;
 }) => ReactElement;
 
 export interface LegacyToolWizardResult {
@@ -78,14 +72,13 @@ export interface PhaseToolWizardResult {
   phaseId: ToolWizardPhaseId;
   configureIndex: number;
   stepId: string;
-  stepIndex: number;
-  stepCount: number;
+  phaseIndex: number;
+  phaseCount: number;
   goNext: () => void;
   goBack: () => void;
   resetStep: () => void;
-  Stepper: PhaseStepperComponent;
-  phaseIndex: number;
   setPhaseIndex: (index: number) => void;
+  Stepper: PhaseStepperComponent;
 }
 
 function isWizardDefinition(
@@ -134,77 +127,87 @@ function initialPhaseState(
   return base;
 }
 
-export function useToolWizard(
-  def: ToolWizardDefinition,
-  options?: UseToolWizardPhaseOptions,
-): PhaseToolWizardResult;
-export function useToolWizard(
+function useLegacyToolWizard(
   steps: readonly ToolStepDefinition[],
   options?: UseToolWizardLegacyOptions,
-): LegacyToolWizardResult;
-export function useToolWizard(
-  stepsOrDef: readonly ToolStepDefinition[] | ToolWizardDefinition,
-  options?: UseToolWizardOptions,
-): LegacyToolWizardResult | PhaseToolWizardResult {
-  const phaseMode = isWizardDefinition(stepsOrDef);
-  const legacySteps = phaseMode ? [] : stepsOrDef;
-  const phaseDef = phaseMode ? stepsOrDef : null;
-
+): LegacyToolWizardResult {
   const [stepIndex, setStepIndex] = useState(() =>
-    phaseMode ? 0 : initialStepIndex(legacySteps, options?.initialStepId),
-  );
-  const [navState, setNavState] = useState<PhaseNavState>(() =>
-    phaseDef
-      ? initialPhaseState(phaseDef, options?.initialStepId)
-      : initialPhaseNavState({
-          toolId: "",
-          phases: ["place"],
-          configureSteps: [],
-          askMode: "ask",
-          startsOn: "place",
-        }),
+    initialStepIndex(steps, options?.initialStepId),
   );
 
-  const awaitHiderAnswer =
-    phaseMode && options && "awaitHiderAnswer" in options
-      ? (options.awaitHiderAnswer ?? false)
-      : false;
-  const toolCommitLabel =
-    phaseMode && options && "toolCommitLabel" in options
-      ? (options.toolCommitLabel ?? "Continue")
-      : "Continue";
-  const isSubmitting =
-    phaseMode && options && "isSubmitting" in options
-      ? (options.isSubmitting ?? false)
-      : false;
-
-  const legacyStep = legacySteps[stepIndex] ?? legacySteps[0];
-  const legacyStepId = legacyStep?.id ?? "";
+  const step = steps[stepIndex] ?? steps[0]!;
+  const stepId = step.id;
   const stepStates = useMemo(
-    () => deriveStepStates(legacySteps.length, stepIndex),
-    [legacySteps.length, stepIndex],
+    () => deriveStepStates(steps.length, stepIndex),
+    [stepIndex, steps.length],
   );
   const progressSteps = useMemo(
-    () => buildSteps(legacySteps, stepStates),
-    [legacySteps, stepStates],
+    () => buildSteps(steps, stepStates),
+    [stepStates, steps],
   );
 
-  const phaseId = phaseDef ? resolvePhaseId(phaseDef, navState) : "place";
-  const configureIndex = phaseDef ? navState.configureIndex : 0;
-  const stepId = phaseDef
-    ? resolveWizardStepId(phaseDef, navState)
-    : legacyStepId;
+  useSyncWizardStepRef(
+    options?.syncStep === false ? undefined : options?.wizardStepRef,
+    stepId,
+  );
+
+  const goNext = useCallback(() => {
+    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
+  }, [steps.length]);
+
+  const goBack = useCallback(() => {
+    setStepIndex((current) => Math.max(current - 1, 0));
+  }, []);
+
+  const resetStep = useCallback(() => {
+    setStepIndex(0);
+  }, []);
+
+  const Stepper = useCallback(
+    ({ nav }: { nav?: WizardStepNavProps }) => (
+      <ToolStepper steps={progressSteps} nav={nav} />
+    ),
+    [progressSteps],
+  );
+
+  return {
+    step,
+    stepId,
+    stepIndex,
+    stepStates,
+    goNext,
+    goBack,
+    resetStep,
+    setStepIndex,
+    progressSteps,
+    Stepper,
+  };
+}
+
+function usePhaseToolWizard(
+  def: ToolWizardDefinition,
+  options?: UseToolWizardPhaseOptions,
+): PhaseToolWizardResult {
+  const awaitHiderAnswer = options?.awaitHiderAnswer ?? false;
+  const toolCommitLabel = options?.toolCommitLabel ?? "Continue";
+  const isSubmitting = options?.isSubmitting ?? false;
+
+  const [navState, setNavState] = useState<PhaseNavState>(() =>
+    initialPhaseState(def, options?.initialStepId),
+  );
+
+  const phaseId = resolvePhaseId(def, navState);
+  const configureIndex = navState.configureIndex;
+  const stepId = resolveWizardStepId(def, navState);
   const phases = useMemo(
-    () => (phaseDef ? phaseRailLabels(phaseDef, awaitHiderAnswer) : []),
-    [awaitHiderAnswer, phaseDef],
+    () => phaseRailLabels(def, awaitHiderAnswer),
+    [awaitHiderAnswer, def],
   );
   const completedIds = useMemo(
-    () => (phaseDef ? completePhaseIds(phaseDef, navState) : []),
-    [navState, phaseDef],
+    () => completePhaseIds(def, navState),
+    [def, navState],
   );
-  const askMode = phaseDef
-    ? resolveAskMode(phaseDef, awaitHiderAnswer)
-    : "ask";
+  const askMode = resolveAskMode(def, awaitHiderAnswer);
   const footerLabel = primaryFooterLabel({
     phase: phaseId,
     askMode,
@@ -218,113 +221,78 @@ export function useToolWizard(
   );
 
   const goNext = useCallback(() => {
-    if (phaseDef) {
-      setNavState((current) => advancePhaseNavState(phaseDef, current));
-      return;
-    }
-    setStepIndex((current) => Math.min(current + 1, legacySteps.length - 1));
-  }, [legacySteps.length, phaseDef]);
+    setNavState((current) => advancePhaseNavState(def, current));
+  }, [def]);
 
   const goBack = useCallback(() => {
-    if (phaseDef) {
-      setNavState((current) => retreatPhaseNavState(phaseDef, current));
-      return;
-    }
-    setStepIndex((current) => Math.max(current - 1, 0));
-  }, [phaseDef]);
+    setNavState((current) => retreatPhaseNavState(def, current));
+  }, [def]);
 
   const resetStep = useCallback(() => {
-    if (phaseDef) {
-      setNavState(initialPhaseNavState(phaseDef));
-      return;
-    }
-    setStepIndex(0);
-  }, [phaseDef]);
+    setNavState(initialPhaseNavState(def));
+  }, [def]);
 
-  const LegacyStepper = useCallback(
-    ({ nav }: { nav?: WizardStepNavProps }) => (
-      <ToolStepper steps={progressSteps} nav={nav} />
+  const setPhaseIndex = useCallback((index: number) => {
+    setNavState({ phaseIndex: index, configureIndex: 0 });
+  }, []);
+
+  const Stepper = useCallback(
+    ({ nav }: { nav?: WizardPhaseStepperNav }) => (
+      <WizardPhaseStepper
+        phases={phases}
+        currentPhaseId={phaseId}
+        completePhaseIds={completedIds}
+        configureSteps={def.configureSteps}
+        configureIndex={configureIndex}
+        nav={
+          nav
+            ? {
+                ...nav,
+                primaryLabel: nav.primaryLabel ?? footerLabel,
+              }
+            : undefined
+        }
+      />
     ),
-    [progressSteps],
+    [completedIds, configureIndex, def.configureSteps, footerLabel, phaseId, phases],
   );
-
-  const PhaseStepper = useCallback(
-    ({ nav }: { nav?: WizardStepNavProps }) => {
-      if (!phaseDef) {
-        return null;
-      }
-
-      const navBack = nav ? (
-        <WizardStepBackButton
-          canGoBack={nav.canGoBack}
-          onBack={nav.onBack}
-          reserveSpace
-        />
-      ) : null;
-      const navNext = nav ? (
-        <WizardStepNextButton
-          stepIndex={nav.stepIndex}
-          stepCount={nav.stepCount}
-          canGoNext={nav.canGoNext}
-          onNext={nav.onNext}
-          primaryLabel={nav.primaryLabel ?? footerLabel}
-          reserveSpace
-        />
-      ) : null;
-
-      return (
-        <div className="wizard-phase-stepper space-y-1.5">
-          <div className="grid grid-cols-[2.25rem_minmax(0,1fr)_auto] items-center gap-x-1">
-            {navBack}
-            <WizardPhaseRail
-              phases={phases}
-              currentPhaseId={phaseId}
-              completePhaseIds={completedIds}
-            />
-            {navNext}
-          </div>
-          {phaseId === "configure" ? (
-            <WizardConfigureContinuum
-              steps={phaseDef.configureSteps}
-              index={configureIndex}
-            />
-          ) : null}
-        </div>
-      );
-    },
-    [completedIds, configureIndex, footerLabel, phaseDef, phaseId, phases],
-  );
-
-  if (phaseMode && phaseDef) {
-    return {
-      phaseId,
-      configureIndex,
-      stepId,
-      stepIndex: navState.phaseIndex,
-      stepCount: phaseDef.phases.length,
-      goNext,
-      goBack,
-      resetStep,
-      Stepper: PhaseStepper,
-      phaseIndex: navState.phaseIndex,
-      setPhaseIndex: (index: number) => {
-        setNavState({ phaseIndex: index, configureIndex: 0 });
-      },
-    } satisfies PhaseToolWizardResult;
-  }
 
   return {
-    step: legacyStep!,
-    stepId: legacyStepId,
-    stepIndex,
-    stepStates,
+    phaseId,
+    configureIndex,
+    stepId,
+    phaseIndex: navState.phaseIndex,
+    phaseCount: def.phases.length,
     goNext,
     goBack,
     resetStep,
-    setStepIndex,
-    progressSteps,
-    Stepper: LegacyStepper,
-  } satisfies LegacyToolWizardResult;
+    setPhaseIndex,
+    Stepper,
+  };
+}
+
+export function useToolWizard(
+  def: ToolWizardDefinition,
+  options?: UseToolWizardPhaseOptions,
+): PhaseToolWizardResult;
+export function useToolWizard(
+  steps: readonly ToolStepDefinition[],
+  options?: UseToolWizardLegacyOptions,
+): LegacyToolWizardResult;
+export function useToolWizard(
+  stepsOrDef: readonly ToolStepDefinition[] | ToolWizardDefinition,
+  options?: UseToolWizardLegacyOptions | UseToolWizardPhaseOptions,
+): LegacyToolWizardResult | PhaseToolWizardResult {
+  // Call sites are mode-stable (always array or always definition across renders).
+  if (isWizardDefinition(stepsOrDef)) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- phase overload only
+    return usePhaseToolWizard(stepsOrDef, options as UseToolWizardPhaseOptions | undefined);
+  }
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- legacy overload only
+  return useLegacyToolWizard(
+    stepsOrDef,
+    options as UseToolWizardLegacyOptions | undefined,
+  );
 }
 
 export type { ToolWizardPhaseId };

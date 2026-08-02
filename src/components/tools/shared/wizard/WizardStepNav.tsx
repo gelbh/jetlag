@@ -14,8 +14,6 @@ export interface WizardStepNavProps {
   nextLabel?: string;
   finishLabel?: string;
   showFinish?: boolean;
-  /** Labeled primary CTA (Continue / tool commit) instead of icon-only nav. */
-  primaryLabel?: string;
 }
 
 function navSlotClassName(ready: boolean) {
@@ -53,7 +51,6 @@ export function WizardStepNextButton({
   nextLabel = "Next step",
   finishLabel = "Finish",
   showFinish = false,
-  primaryLabel,
   reserveSpace = true,
 }: Pick<
   WizardStepNavProps,
@@ -64,28 +61,10 @@ export function WizardStepNextButton({
   | "nextLabel"
   | "finishLabel"
   | "showFinish"
-  | "primaryLabel"
 > & {
   reserveSpace?: boolean;
 }) {
   const isLastStep = stepIndex >= stepCount - 1;
-
-  if (primaryLabel) {
-    return (
-      <button
-        type="button"
-        onClick={onNext}
-        disabled={!canGoNext}
-        className={`inline-flex min-h-9 min-w-[5.5rem] shrink-0 items-center justify-center rounded-[var(--radius-hud-md)] border border-border/85 bg-surface-panel px-3 font-display text-xs font-semibold uppercase tracking-[0.06em] text-ink-muted motion-safe:transition-[background,border-color,color] motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action disabled:pointer-events-none disabled:opacity-35 ${
-          canGoNext
-            ? "border-highlight/55 text-highlight hover:border-highlight/45 hover:bg-surface-raised"
-            : ""
-        }`}
-      >
-        {primaryLabel}
-      </button>
-    );
-  }
 
   if (isLastStep && !showFinish) {
     return reserveSpace ? <span className="wizard-step-nav-slot" aria-hidden /> : null;
@@ -120,7 +99,6 @@ export function WizardStepNav({
   nextLabel = "Next step",
   finishLabel = "Finish",
   showFinish = false,
-  primaryLabel,
 }: WizardStepNavProps) {
   return (
     <div className="flex shrink-0 items-center gap-1">
@@ -133,7 +111,6 @@ export function WizardStepNav({
         nextLabel={nextLabel}
         finishLabel={finishLabel}
         showFinish={showFinish}
-        primaryLabel={primaryLabel}
       />
     </div>
   );
