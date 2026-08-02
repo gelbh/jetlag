@@ -47,6 +47,10 @@ test.describe("mobile tool dock", () => {
     await expect(
       sessionTools.getByRole("button", { name: "Report a problem" }),
     ).toBeVisible();
+    await sessionTools.getByRole("button", { name: "Report a problem" }).click();
+    await expect(
+      page.getByRole("dialog", { name: "Report problem" }),
+    ).toBeVisible();
 
     const barCount = await page.locator(".jl-tool-dock-bar").count();
     expect(barCount).toBe(2);
@@ -119,8 +123,8 @@ test.describe("iPhone 14 Pro Max tool dock", () => {
     await openMapWithLocalSession(page);
   });
 
-  test("renders a single dock bar without a stacked duplicate", async ({ page }) => {
-    await expect(page.locator(".jl-tool-dock-bar")).toHaveCount(1);
+  test("renders primary and secondary dock bars without a duplicate stack", async ({ page }) => {
+    await expect(page.locator(".jl-tool-dock-bar")).toHaveCount(2);
 
     const metrics = await page.evaluate(() => {
       const bars = [...document.querySelectorAll(".jl-tool-dock-bar")];
@@ -135,7 +139,7 @@ test.describe("iPhone 14 Pro Max tool dock", () => {
       };
     });
 
-    expect(metrics.barCount).toBe(1);
+    expect(metrics.barCount).toBe(2);
     expect(metrics.barBottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
     expect(metrics.dockBottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
   });
@@ -201,7 +205,7 @@ test.describe("iPhone 13 PWA safe area", () => {
     });
 
     expect(metrics.backdropOnMap).toBeNull();
-    expect(metrics.barCount).toBe(1);
+    expect(metrics.barCount).toBe(2);
     // Wrapper chassis: flush to physical bottom, pad absorbs safe-area.
     expect(metrics.dockBottomOffset).toBeLessThanOrEqual(1);
     expect(metrics.gapBelowDock).toBeLessThanOrEqual(2);

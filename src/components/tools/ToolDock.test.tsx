@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ToolDock } from "./ToolDock";
 import { ToolOverflowSheet } from "./ToolOverflowSheet";
@@ -45,10 +45,16 @@ describe("ToolDock", () => {
       />,
     );
 
-    expect(screen.getByLabelText("Session tools")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Report a problem" }));
-    fireEvent.click(screen.getByRole("button", { name: "Open settings" }));
-    fireEvent.click(screen.getByRole("button", { name: "Open chat" }));
+    const sessionTools = screen.getByLabelText("Session tools");
+    fireEvent.click(
+      within(sessionTools).getByRole("button", { name: "Report a problem" }),
+    );
+    fireEvent.click(
+      within(sessionTools).getByRole("button", { name: "Open settings" }),
+    );
+    fireEvent.click(
+      within(sessionTools).getByRole("button", { name: "Open chat" }),
+    );
 
     expect(onOpenReportProblem).toHaveBeenCalledTimes(1);
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
@@ -67,6 +73,7 @@ describe("ToolDock", () => {
     ].map((node) => node.textContent?.trim() ?? "");
     expect(primaryLabels).not.toContain("Chat");
     expect(primaryLabels).not.toContain("Settings");
+    expect(primaryLabels).not.toContain("Report");
     expect(primaryLabels).toContain("Draw");
   });
 

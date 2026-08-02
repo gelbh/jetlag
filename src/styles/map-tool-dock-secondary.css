@@ -6,9 +6,9 @@
   --dock-primary-content-height: 2.75rem;
   /* Fold primary + secondary so --map-panel-bottom consumers clear both bars. */
   --dock-content-height: calc(
-    var(--dock-primary-content-height)
-      + var(--dock-row-gap)
-      + var(--dock-secondary-height)
+    var(--dock-primary-content-height) +
+      var(--dock-row-gap) +
+      var(--dock-secondary-height)
   );
 }
 
