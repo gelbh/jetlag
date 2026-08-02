@@ -216,31 +216,34 @@ export async function sendMeasuringToHiders(page: Page) {
   await dismissActiveToolPanel(page);
 }
 
-export async function completeThermometerSolo(page: Page) {
+async function placeThermometerManualPins(page: Page) {
   await clickToolDockButton(page, "Thermometer");
   await page.getByRole("button", { name: "Manual pins" }).click();
+  await waitForMapPlacementCrosshair(page);
   await clickMapAt(page, 0.35, 0.5);
   await clickMapAt(page, 0.65, 0.5);
+  await expandToolPanelIfPeeked(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForWizardNext(page);
   await advanceWizard(page);
+}
+
+export async function completeThermometerSolo(page: Page) {
+  await placeThermometerManualPins(page);
   await chooseAnswer(page, "Hotter");
-  await page.getByRole("button", { name: "Add thermometer" }).click();
+  const commit = page.getByRole("button", { name: "Add thermometer" });
+  await expect(commit).toHaveCount(1);
+  await expect(commit).toBeEnabled({ timeout: 15_000 });
+  await commit.click();
   await expectMapHasAnnotations(page);
   await expectEliminationMaskVisible(page);
 }
 
 export async function sendThermometerToHiders(page: Page) {
-  await clickToolDockButton(page, "Thermometer");
-  await page.getByRole("button", { name: "Manual pins" }).click();
-  await clickMapAt(page, 0.35, 0.5);
-  await clickMapAt(page, 0.65, 0.5);
-  await waitForWizardNext(page);
-  await advanceWizard(page);
-  await waitForWizardNext(page);
-  await advanceWizard(page);
+  await placeThermometerManualPins(page);
   const sendButton = page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON });
+  await expect(sendButton).toHaveCount(1);
   await expect(sendButton).toBeEnabled({ timeout: 15_000 });
   await sendButton.click();
   await dismissActiveToolPanel(page);
