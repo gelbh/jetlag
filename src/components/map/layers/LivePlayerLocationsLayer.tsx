@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Popup, Tooltip } from "react-leaflet";
+import { Tooltip } from "react-leaflet";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import {
   clusterNearbyPoints,
@@ -50,6 +50,9 @@ export function LivePlayerLocationsLayer({
           nowMs,
         );
         const roleLabel = clusterTooltipLabel(count, role, isSelf);
+        const tooltipLabel = lastSeenLabel
+          ? `${roleLabel} · ${lastSeenLabel}`
+          : roleLabel;
 
         return (
           <CompensatedCircleMarker
@@ -62,17 +65,13 @@ export function LivePlayerLocationsLayer({
               fillColor: isSelf ? selfFillColor : otherFillColor,
               fillOpacity,
               opacity: fillOpacity,
+              // Let map tool clicks (pin / radar place) pass through GPS dots.
+              bubblingMouseEvents: true,
             }}
           >
             <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-              {roleLabel}
+              {tooltipLabel}
             </Tooltip>
-            {lastSeenLabel ? (
-              <Popup>
-                <div>{roleLabel}</div>
-                <div>{lastSeenLabel}</div>
-              </Popup>
-            ) : null}
           </CompensatedCircleMarker>
         );
       })}
