@@ -18,8 +18,16 @@ describe("phaseToSheetSnap", () => {
     expect(wizardStepIdToPhase("location")).toBe("place");
     expect(wizardStepIdToPhase("method")).toBe("configure");
     expect(wizardStepIdToPhase("distance")).toBe("configure");
+    // Measuring Target is configure, not place/peek.
+    expect(wizardStepIdToPhase("target")).toBe("configure");
+    expect(wizardStepIdToPhase("source")).toBe("configure");
     expect(wizardStepIdToPhase("answer")).toBe("ask");
     expect(wizardStepIdToPhase("confirm")).toBe("ask");
+  });
+
+  it("keeps measuring target on mid snap, not peek", () => {
+    expect(sheetSnapFromStepId("target")).toBe("mid");
+    expect(isWizardPlacePhaseStep("target")).toBe(false);
   });
 
   it("derives sheet snap from step id", () => {

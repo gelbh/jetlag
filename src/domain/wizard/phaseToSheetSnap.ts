@@ -6,7 +6,7 @@ const PLACEMENT_STEP_IDS = new Set([
   "place",
   "anchor",
   "placement",
-  "target",
+  // Measuring "target" is configure (category/POI), not map placement.
   "location",
 ]);
 
