@@ -1,7 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import type { DockableMapTool } from "../../domain/map/mapTools";
 
-export function useToolPanelChrome(activeTool: DockableMapTool | "none") {
+type ToolPanelChromeOptions = {
+  /** Peek while placing so map clicks aren't covered; expand still sticks until this clears. */
+  autoPeek?: boolean;
+};
+
+export function useToolPanelChrome(
+  activeTool: DockableMapTool | "none",
+  options: ToolPanelChromeOptions = {},
+) {
+  const { autoPeek = false } = options;
   const [mapPanning, setMapPanning] = useState(false);
   const [userMinimized, setUserMinimized] = useState(false);
 
@@ -11,6 +20,16 @@ export function useToolPanelChrome(activeTool: DockableMapTool | "none") {
     setUserMinimized(false);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [activeTool]);
+
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- placement auto-peek; user expand sticks until autoPeek flips */
+    if (autoPeek) {
+      setUserMinimized(true);
+    } else {
+      setUserMinimized(false);
+    }
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [autoPeek]);
 
   const handleMapPanStart = useCallback(() => {
     if (activeTool !== "none") {

@@ -53,10 +53,6 @@ interface ToolDockOverflowMenuProps {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
-  onOpenSettings: () => void;
-  onOpenChat?: () => void;
-  hasUnreadChat: boolean;
-  unreadCount: number;
   canStartEndGame: boolean;
   onStartEndGame?: () => void;
   canRequestFoundHider: boolean;
@@ -73,10 +69,6 @@ export function ToolDockOverflowMenu({
   canRedo,
   onUndo,
   onRedo,
-  onOpenSettings,
-  onOpenChat,
-  hasUnreadChat,
-  unreadCount,
   canStartEndGame,
   onStartEndGame,
   canRequestFoundHider,
@@ -94,10 +86,6 @@ export function ToolDockOverflowMenu({
       canRedo={canRedo}
       onUndo={onUndo}
       onRedo={onRedo}
-      onOpenSettings={onOpenSettings}
-      onOpenChat={onOpenChat}
-      hasUnreadChat={hasUnreadChat}
-      unreadCount={unreadCount}
       canStartEndGame={canStartEndGame}
       onStartEndGame={onStartEndGame}
       canRequestFoundHider={canRequestFoundHider}
