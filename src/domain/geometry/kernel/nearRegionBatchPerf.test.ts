@@ -4,9 +4,7 @@ import {
   buildCoastlineNearRegionTs,
   clearCoastlineNearRegionCacheForTests,
 } from "../measuring/nearRegions";
-import { featureToGameAreaGeometry } from "./featureConvert";
-import { gameAreaToFeature } from "../gameArea/geometryCore";
-import type { GameArea } from "../../map/annotations";
+import type { GameAreaGeometry } from "./types";
 import { KERNEL_WASM_READY } from "./kernelWasmReady";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
@@ -22,7 +20,7 @@ function measureMedianMs(run: () => void, iterations = 31): number {
   return samples[Math.floor(samples.length / 2)]!;
 }
 
-const sampleGameArea: GameArea = {
+const sampleGameArea: GameAreaGeometry = {
   type: "Polygon",
   coordinates: [
     [
@@ -65,14 +63,11 @@ describe("nearRegionBatchPerf", () => {
 
     const segments = coastSegments(8);
     const distanceMeters = 500;
-    const gameAreaGeometry = featureToGameAreaGeometry(
-      gameAreaToFeature(sampleGameArea),
-    );
     const inputJson = JSON.stringify({
       segments: segments.map((s) => s.geometry.coordinates),
       distanceMeters,
       disks: [],
-      gameArea: gameAreaGeometry,
+      gameArea: sampleGameArea,
     });
 
     const wasmPkg = await import(

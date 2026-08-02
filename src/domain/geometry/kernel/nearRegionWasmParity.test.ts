@@ -5,9 +5,7 @@ import path from "node:path";
 import type { Feature, LineString } from "geojson";
 import { assertPolygonTopologyParity } from "./parity";
 import { buildCoastlineNearRegionTs } from "../measuring/nearRegions";
-import type { GameArea } from "../../map/annotations";
-import { featureToGameAreaGeometry } from "./featureConvert";
-import { gameAreaToFeature } from "../gameArea/geometryCore";
+import type { GameAreaGeometry } from "./types";
 
 const pkgEntry = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -15,7 +13,7 @@ const pkgEntry = path.resolve(
 );
 const wasmPkgReady = existsSync(pkgEntry);
 
-const sampleGameArea: GameArea = {
+const sampleGameArea: GameAreaGeometry = {
   type: "Polygon",
   coordinates: [
     [
@@ -57,7 +55,7 @@ describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {
       segments: [segment],
       distanceMeters: 200,
       disks: [],
-      gameArea: featureToGameAreaGeometry(gameAreaToFeature(sampleGameArea)),
+      gameArea: sampleGameArea,
     });
   }, 60_000);
 
@@ -67,7 +65,7 @@ describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {
       segments: [segment],
       distanceMeters: 200,
       disks: [],
-      gameArea: featureToGameAreaGeometry(gameAreaToFeature(sampleGameArea)),
+      gameArea: sampleGameArea,
     });
     assertPolygonTopologyParity(wasm, ts, topologyBbox);
   });
@@ -86,7 +84,7 @@ describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {
         center,
         radiusMeters: 400,
       })),
-      gameArea: featureToGameAreaGeometry(gameAreaToFeature(sampleGameArea)),
+      gameArea: sampleGameArea,
     });
     assertPolygonTopologyParity(wasm, ts, topologyBbox);
   });
@@ -130,7 +128,7 @@ describe("near-region batch wasm fallback", () => {
         segments: [segment],
         distanceMeters: 200,
         disks: [],
-        gameArea: featureToGameAreaGeometry(gameAreaToFeature(sampleGameArea)),
+        gameArea: sampleGameArea,
         runTs: () => ts,
       },
       "wasm",
