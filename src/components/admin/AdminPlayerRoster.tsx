@@ -2,7 +2,7 @@ import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
 import { resolvePlayerRole, playerRoleLabel } from "../../domain/session/players/playerRole";
 import type { PlayerLocationRecord } from "../../domain/session/activity/sessionChat";
 import type { SessionRecord } from "../../domain/map/annotations";
-import { useFreshnessClock } from "../../hooks/admin/useFreshnessClock";
+import { useFreshnessClock } from "../../hooks/time/useFreshnessClock";
 import { useAdminMonitorFocus } from "../../domain/admin/adminMonitorFocus";
 
 interface AdminPlayerRosterProps {

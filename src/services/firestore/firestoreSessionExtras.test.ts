@@ -69,6 +69,7 @@ import {
   cancelWalkingThermometersAndAnnounce,
   cancelWalkingThermometersAfterIdentityHeal,
   deletePendingQuestion,
+  deletePlayerLocation,
   updatePendingQuestion,
   writePendingQuestion,
   writePlayerLocation,
@@ -294,6 +295,14 @@ describe("firestoreSessionExtras writes", () => {
         lng: -6.25,
         role: "hider",
       }),
+    );
+  });
+
+  it("deletes player locations by uid", async () => {
+    await deletePlayerLocation("session-1", "hider-1");
+
+    expect(firestoreMocks.deleteDoc).toHaveBeenCalledWith(
+      expect.objectContaining({ path: expect.stringContaining("hider-1") }),
     );
   });
 
