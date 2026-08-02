@@ -6,7 +6,8 @@ export type KernelEntrypoint =
   | "halfPlane"
   | "geodesicLineBuffer"
   | "spatialVoronoi"
-  | "tentacleEliminationRegion";
+  | "tentacleEliminationRegion"
+  | "nearRegionBatch";
 
 /**
  * Per-entrypoint WASM readiness. Wave-1 entrypoints are enabled after
@@ -20,6 +21,7 @@ export const KERNEL_WASM_READY: Record<KernelEntrypoint, boolean> = {
   geodesicLineBuffer: true,
   spatialVoronoi: false,
   tentacleEliminationRegion: true,
+  nearRegionBatch: false,
 };
 
 /** True when mode asks for WASM and the entrypoint registry marks it ready. */
