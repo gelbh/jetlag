@@ -150,12 +150,53 @@ pub fn spatial_voronoi_from_sites_json(sites_json: &str) -> Result<String, Strin
     spatial_voronoi_feature_collection_json(&sites)
 }
 
+/// Packed rings for `coords = [lng0, lat0, lng1, lat1, …]` (unique sites).
+/// Layout: for each cell — `vertex_count`, then `lng,lat` pairs (closed ring).
+pub fn spatial_voronoi_rings_from_coords(coords: &[f64]) -> Result<Vec<f64>, String> {
+    if coords.is_empty() {
+        return Ok(Vec::new());
+    }
+    if coords.len() % 2 != 0 {
+        return Err("voronoi: coords length must be even (lng/lat pairs)".into());
+    }
+    let sites: Vec<SiteIn> = coords
+        .chunks_exact(2)
+        .map(|pair| SiteIn {
+            lng: pair[0],
+            lat: pair[1],
+            properties: Value::Null,
+        })
+        .collect();
+    let (working, rings, lng_scale) = spatial_voronoi_rings(&sites)?;
+    if working.len() != rings.len() {
+        return Err("voronoi: ring count mismatch".into());
+    }
+    let mut out: Vec<f64> = Vec::with_capacity(rings.iter().map(|r| 1 + r.len() * 2).sum());
+    for ring in &rings {
+        out.push(ring.len() as f64);
+        for &(x, y) in ring {
+            out.push(x / lng_scale);
+            out.push(y / METERS_PER_DEGREE_LAT);
+        }
+    }
+    Ok(out)
+}
+
 fn spatial_voronoi_feature_collection_json(sites: &[SiteIn]) -> Result<String, String> {
     if sites.is_empty() {
         return Ok(r#"{"type":"FeatureCollection","features":[]}"#.to_string());
     }
+    let (working, rings, lng_scale) = spatial_voronoi_rings(sites)?;
+    write_feature_collection_json(&working, &rings, lng_scale)
+}
 
+fn spatial_voronoi_rings(
+    sites: &[SiteIn],
+) -> Result<(Vec<SiteIn>, Vec<Vec<PlanarPt>>, f64), String> {
     let working = dedupe_sites(sites);
+    if working.is_empty() {
+        return Ok((working, Vec::new(), 1.0));
+    }
     let mean_lat = working.iter().map(|s| s.lat).sum::<f64>() / working.len() as f64;
     let lng_scale = meters_per_degree_lng(mean_lat);
     let points: Vec<PlanarPt> = working
@@ -179,7 +220,7 @@ fn spatial_voronoi_feature_collection_json(sites: &[SiteIn]) -> Result<String, S
     let clip = (min_x - margin, min_y - margin, max_x + margin, max_y + margin);
 
     let rings = voronoi_rings_for_points(&points, clip)?;
-    write_feature_collection_json(&working, &rings, lng_scale)
+    Ok((working, rings, lng_scale))
 }
 
 #[cfg(test)]
@@ -319,5 +360,22 @@ mod tests {
         ];
         let fc = parse_fc(&spatial_voronoi_feature_collection_json(&sites).unwrap());
         assert_eq!(fc["features"].as_array().unwrap().len(), 4);
+    }
+
+    #[test]
+    fn packed_rings_match_site_count() {
+        let coords = [
+            -0.18, 51.44, -0.12, 51.45, -0.15, 51.5, -0.2, 51.48,
+        ];
+        let packed = spatial_voronoi_rings_from_coords(&coords).unwrap();
+        let mut offset = 0usize;
+        let mut cells = 0usize;
+        while offset < packed.len() {
+            let n = packed[offset] as usize;
+            offset += 1 + n * 2;
+            cells += 1;
+        }
+        assert_eq!(cells, 4);
+        assert_eq!(offset, packed.len());
     }
 }

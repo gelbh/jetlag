@@ -1,15 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { geoSpatialVoronoiFromSites } from "./spatialVoronoi";
 import { KERNEL_WASM_READY } from "./kernelWasmReady";
+import { buildSpatialVoronoiFromRingsSync } from "./voronoiWasm";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
 
 /**
- * Interleaved median: Wave-2 Gate A for the sync pkg export.
- * Compares serialized FeatureCollections (build_*_json vs JSON.stringify(TS)),
- * matching the string-returning pkg API (same posture as half-plane pkg gates
- * that pre-stringify inputs). Production async wrappers add JS stringify/parse
- * around this export — same pattern as other kernel wasm wrappers.
+ * Interleaved median: Wave-2 Gate A for the **production** Voronoi path.
+ * WASM = rings export + TS FeatureCollection assemble (same as voronoiWasm.ts).
+ * TS = geoSpatialVoronoiFromSites (objects only — no stringify).
  */
 function measureInterleavedMedianRatio(
   runTs: () => void,
@@ -38,7 +37,7 @@ describe("spatialVoronoiPerf", () => {
     expect(runGeometryPerf || true).toBe(true);
   });
 
-  it("wasm_spatial_voronoi median within 1.1x ts (required before ready flip)", async () => {
+  it("wasm_spatial_voronoi median within 1.1x ts (production-shaped)", async () => {
     if (!runGeometryPerf) {
       return;
     }
@@ -48,20 +47,22 @@ describe("spatialVoronoiPerf", () => {
       { lng: -0.15, lat: 51.5, properties: { poiId: "north" } },
       { lng: -0.2, lat: 51.48, properties: { poiId: "far" } },
     ];
-    const sitesJson = JSON.stringify(sites);
     const wasmPkg = await import(
       "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
     );
-    wasmPkg.build_spatial_voronoi_json(sitesJson);
-    JSON.stringify(geoSpatialVoronoiFromSites(sites));
+    const runWasm = () => {
+      buildSpatialVoronoiFromRingsSync(sites, (coords) =>
+        wasmPkg.build_spatial_voronoi_rings(coords),
+      );
+    };
+    runWasm();
+    geoSpatialVoronoiFromSites(sites);
 
     const ratio = measureInterleavedMedianRatio(
       () => {
-        JSON.stringify(geoSpatialVoronoiFromSites(sites));
+        geoSpatialVoronoiFromSites(sites);
       },
-      () => {
-        wasmPkg.build_spatial_voronoi_json(sitesJson);
-      },
+      runWasm,
     );
 
     if (KERNEL_WASM_READY.spatialVoronoi) {

@@ -45,6 +45,7 @@ export type KernelWasmModule = {
     voronoiCellsJson: string,
   ) => unknown;
   build_spatial_voronoi_json: (sitesJson: string) => unknown;
+  build_spatial_voronoi_rings: (coords: Float64Array | number[]) => ArrayLike<number>;
   build_near_region_json: (inputJson: string) => unknown;
 };
 
