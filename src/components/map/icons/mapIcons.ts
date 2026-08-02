@@ -1,6 +1,5 @@
 import L from "leaflet";
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
-import { getBasemapSurface } from "../../../domain/map/mapBasemaps";
 import {
   thermometerWalkEndLabelMarkup,
   thermometerWalkProgressMarkup,
