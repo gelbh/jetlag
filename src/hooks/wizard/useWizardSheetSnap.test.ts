@@ -2,8 +2,8 @@ import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type { MapTool } from "../../domain/map/mapToolTypes";
 import {
+  publishWizardStep,
   useSyncWizardStepRef,
-  WIZARD_STEP_CHANGE_EVENT,
 } from "../tools/useSyncWizardStepRef";
 import { useWizardSheetSnap } from "./useWizardSheetSnap";
 
@@ -18,15 +18,11 @@ function usePanelAndSheetSnap(tool: MapTool, stepId: string) {
 }
 
 describe("useWizardSheetSnap", () => {
-  it("derives peek snap and map attention from wizard step events", () => {
+  it("derives peek snap and map attention from wizard step publishes", () => {
     const { result } = renderHook(() => useWizardSheetSnap("radar"));
 
     act(() => {
-      window.dispatchEvent(
-        new CustomEvent(WIZARD_STEP_CHANGE_EVENT, {
-          detail: { stepId: "anchor", toolId: "radar" },
-        }),
-      );
+      publishWizardStep("radar", "anchor");
     });
 
     expect(result.current.sheetSnap).toBe("peek");
@@ -51,7 +47,6 @@ describe("useWizardSheetSnap", () => {
 
   it("seeds peek from legacy sync that publishes toolId null", () => {
     function useLegacyPanelAndSheet(tool: MapTool, stepId: string) {
-      // Matches production RadarPanel etc.: legacy steps, no toolId arg.
       useSyncWizardStepRef(undefined, stepId);
       return useWizardSheetSnap(tool);
     }
@@ -83,18 +78,14 @@ describe("useWizardSheetSnap", () => {
     expect(result.current.mapAttentionActive).toBe(true);
   });
 
-  it("resets when the active tool changes to none", () => {
+  it("clears attention when the active tool becomes none", () => {
     const { result, rerender } = renderHook(
       ({ activeTool }: { activeTool: MapTool }) => useWizardSheetSnap(activeTool),
       { initialProps: { activeTool: "radar" as MapTool } },
     );
 
     act(() => {
-      window.dispatchEvent(
-        new CustomEvent(WIZARD_STEP_CHANGE_EVENT, {
-          detail: { stepId: "distance", toolId: "radar" },
-        }),
-      );
+      publishWizardStep("radar", "distance");
     });
 
     expect(result.current.sheetSnap).toBe("mid");
@@ -104,15 +95,11 @@ describe("useWizardSheetSnap", () => {
     expect(result.current.mapAttentionActive).toBe(false);
   });
 
-  it("ignores step events from a different tool", () => {
+  it("ignores step publishes from a different tool", () => {
     const { result } = renderHook(() => useWizardSheetSnap("radar"));
 
     act(() => {
-      window.dispatchEvent(
-        new CustomEvent(WIZARD_STEP_CHANGE_EVENT, {
-          detail: { stepId: "place", toolId: "matching" },
-        }),
-      );
+      publishWizardStep("matching", "place");
     });
 
     expect(result.current.wizardStepId).toBeNull();
