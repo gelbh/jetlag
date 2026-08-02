@@ -8,6 +8,7 @@ import {
   type MapLatLng,
 } from "../../../domain/map/mapBounds";
 import "maplibre-gl/dist/maplibre-gl.css";
+import "../../../styles/map-touch-gestures.css";
 import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import {
   getBasemapSurface,
@@ -104,7 +105,7 @@ function MapFocus({
   useEffect(() => {
     const map = mapRef.getMap();
     const handleDragStart = () => {
-      // Interrupt flyTo/easeTo only — never map.stop() here (resets TouchPan).
+      // Interrupt flyTo/easeTo only — never map.stop() (resets TouchPan/TouchZoom).
       stopMapCameraEase(map);
       if (suppressChromeHideRef) {
         suppressChromeHideRef.current = false;
@@ -181,7 +182,8 @@ function MapFocus({
     if (!animate) {
       map.jumpTo({ center, zoom });
       return () => {
-        map.stop();
+        // Same as dragstart: cancel ease only — map.stop() resets active pinch/pan.
+        stopMapCameraEase(map);
         map.off("moveend", onMoveEnd);
         if (suppressChromeHideRef) {
           suppressChromeHideRef.current = false;
@@ -204,7 +206,7 @@ function MapFocus({
     }
 
     return () => {
-      map.stop();
+      stopMapCameraEase(map);
       map.off("moveend", onMoveEnd);
       if (suppressChromeHideRef) {
         suppressChromeHideRef.current = false;
@@ -371,6 +373,8 @@ export function MapViewMapLibre({
           pitchWithRotate={pitchGesturesEnabled}
           onLoad={() => {
             const map = mapRef.current?.getMap();
+            // Re-assert after react-map-gl handler sync: pinch zoom on, rotate off.
+            map?.touchZoomRotate.enable();
             map?.touchZoomRotate.disableRotation();
             map?.setMaxPitch(maxPitchDegrees);
             if (maxPitchDegrees === 0) {
