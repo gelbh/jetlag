@@ -1,5 +1,4 @@
 import type { PlayerLocationRecord } from "../../../domain/session/activity/sessionChat";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { LivePlayerLocationsLayer } from "./LivePlayerLocationsLayer";
 
 interface LiveHiderLocationsLayerProps {
@@ -16,8 +15,6 @@ export function LiveHiderLocationsLayer({
       locations={locations}
       myUid={myUid}
       role="hider"
-      selfFillColor={MAP_ANNOTATION_COLORS.hidingZoneOwn}
-      otherFillColor={MAP_ANNOTATION_COLORS.hidingZone}
     />
   );
 }

@@ -1,80 +1,104 @@
 import { useMemo } from "react";
 import { Tooltip } from "react-leaflet";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import {
-  clusterNearbyPoints,
-  clusterTooltipLabel,
-  locationClusterStableKey,
-} from "../../../domain/session/live/liveMapLocations";
-import {
-  isLiveLocationGone,
-  liveClusterPresentation,
-} from "../../../domain/session/live/liveLocationFreshness";
+import { clusterNearbyPoints } from "../../../domain/session/live/liveMapLocations";
+import { isLiveLocationGone } from "../../../domain/session/live/liveLocationFreshness";
 import type { PlayerLocationRecord } from "../../../domain/session/activity/sessionChat";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { useLiveLocationNowMs } from "../../../hooks/map/useLiveLocationNowMs";
+import { matchMapEngine } from "../chrome/matchMapEngine";
+import { useMapEngine } from "../chrome/mapEngineContext";
 import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
+import { buildLiveClusterPaint } from "../helpers/liveClusterPaint";
+import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
 
 interface LivePlayerLocationsLayerProps {
   locations: readonly PlayerLocationRecord[];
   myUid?: string | null;
   role: "seeker" | "hider";
-  selfFillColor: string;
-  otherFillColor: string;
 }
 
-export function LivePlayerLocationsLayer({
-  locations,
-  myUid = null,
-  role,
-  selfFillColor,
-  otherFillColor,
-}: LivePlayerLocationsLayerProps) {
+function useLiveClusterPaints(
+  locations: readonly PlayerLocationRecord[],
+  role: "seeker" | "hider",
+  myUid: string | null,
+) {
   const nowMs = useLiveLocationNowMs();
-  const clusters = useMemo(() => {
+  return useMemo(() => {
     const fresh = locations.filter(
       (location) => !isLiveLocationGone(location.updatedAt, nowMs),
     );
-    return clusterNearbyPoints(fresh);
-  }, [locations, nowMs]);
+    return clusterNearbyPoints(fresh).map((cluster) =>
+      buildLiveClusterPaint(cluster, role, myUid, nowMs),
+    );
+  }, [locations, myUid, nowMs, role]);
+}
+
+function LivePlayerLocationsLayerMapLibre({
+  locations,
+  myUid = null,
+  role,
+}: LivePlayerLocationsLayerProps) {
+  const paints = useLiveClusterPaints(locations, role, myUid);
 
   return (
     <>
-      {clusters.map((cluster) => {
-        const center: LatLngTuple = [cluster.lat, cluster.lng];
-        const isSelf =
-          myUid !== null && cluster.uids.some((uid) => uid === myUid);
-        const count = cluster.members.length;
-        const { fillOpacity, lastSeenLabel } = liveClusterPresentation(
-          cluster.members.map((member) => member.updatedAt),
-          nowMs,
-        );
-        const roleLabel = clusterTooltipLabel(count, role, isSelf);
-        const tooltipLabel = lastSeenLabel
-          ? `${roleLabel} · ${lastSeenLabel}`
-          : roleLabel;
+      {paints.map((paint) => (
+        <MapLibreDotMarker
+          key={paint.key}
+          latitude={paint.lat}
+          longitude={paint.lng}
+          radiusPx={paint.radius}
+          borderColor={paint.borderColor}
+          borderWidth={paint.borderWidth}
+          fillColor={paint.fillColor}
+          opacity={paint.fillOpacity}
+          title={paint.label}
+        />
+      ))}
+    </>
+  );
+}
 
+function LivePlayerLocationsLayerLeaflet({
+  locations,
+  myUid = null,
+  role,
+}: LivePlayerLocationsLayerProps) {
+  const paints = useLiveClusterPaints(locations, role, myUid);
+
+  return (
+    <>
+      {paints.map((paint) => {
+        const center: LatLngTuple = [paint.lat, paint.lng];
         return (
           <CompensatedCircleMarker
-            key={locationClusterStableKey(cluster)}
+            key={paint.key}
             center={center}
-            radius={isSelf ? 10 : 9}
+            radius={paint.radius}
             pathOptions={{
-              color: MAP_ANNOTATION_COLORS.strokeLight,
-              weight: isSelf ? 3 : 2,
-              fillColor: isSelf ? selfFillColor : otherFillColor,
-              fillOpacity,
-              opacity: fillOpacity,
+              color: paint.borderColor,
+              weight: paint.borderWidth,
+              fillColor: paint.fillColor,
+              fillOpacity: paint.fillOpacity,
+              opacity: paint.fillOpacity,
               // Let map tool clicks (pin / radar place) pass through GPS dots.
               bubblingMouseEvents: true,
             }}
           >
             <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
-              {tooltipLabel}
+              {paint.label}
             </Tooltip>
           </CompensatedCircleMarker>
         );
       })}
     </>
   );
+}
+
+export function LivePlayerLocationsLayer(props: LivePlayerLocationsLayerProps) {
+  const engine = useMapEngine();
+  return matchMapEngine(engine, {
+    maplibre: () => <LivePlayerLocationsLayerMapLibre {...props} />,
+    leaflet: () => <LivePlayerLocationsLayerLeaflet {...props} />,
+  });
 }

@@ -14,11 +14,18 @@ vi.mock("../components/incident/HotfixGraceChip", () => ({
   HotfixGraceChip: () => null,
 }));
 
-vi.mock("../components/map/chrome/MapView", () => ({
-  MapView: ({ children }: { children?: React.ReactNode }) => (
-    <div data-testid="map-screen-view">{children}</div>
-  ),
-}));
+vi.mock("../components/map/chrome/MapView", async () => {
+  const { MapEngineProvider } = await import(
+    "../components/map/chrome/mapEngineContext"
+  );
+  return {
+    MapView: ({ children }: { children?: React.ReactNode }) => (
+      <MapEngineProvider engine="leaflet">
+        <div data-testid="map-screen-view">{children}</div>
+      </MapEngineProvider>
+    ),
+  };
+});
 
 vi.mock("../components/map/chrome/MapViewportTracker", () => ({
   MapViewportTracker: () => null,

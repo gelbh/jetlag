@@ -1,11 +1,15 @@
 import { useEffect, useRef, type MutableRefObject } from "react";
 import { useMap, useMapEvents } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
+import type { MapRef } from "react-map-gl/maplibre";
 import {
   latLngBoundsToViewport,
   type MapViewportBounds,
 } from "../../../domain/map/transitViewport";
-import { createThrottledPublisher } from "../helpers/mapViewportPublish";
+import { createViewportTrackerHandlers } from "../helpers/createViewportTrackerHandlers";
+import { useMapLibreMap } from "../helpers/useMapLibreMap";
+import { matchMapEngine } from "./matchMapEngine";
+import { useMapEngine } from "./mapEngineContext";
 
 export interface MapViewportState {
   bounds: MapViewportBounds;
@@ -19,90 +23,121 @@ interface MapViewportTrackerProps {
   suppressPanRef?: MutableRefObject<boolean>;
 }
 
-export function MapViewportTracker({
+function MapViewportTrackerMapLibre({
   onViewportChange,
   onUserPanStart,
   onUserPanEnd,
   suppressPanRef,
 }: MapViewportTrackerProps) {
-  const map = useMap();
-  const panActiveRef = useRef(false);
-  const skipMoveEndScheduleRef = useRef(false);
+  const map = useMapLibreMap();
   const onViewportChangeRef = useRef(onViewportChange);
-  const publisherRef = useRef<ReturnType<typeof createThrottledPublisher> | null>(
-    null,
-  );
 
   useEffect(() => {
     onViewportChangeRef.current = onViewportChange;
   }, [onViewportChange]);
 
   useEffect(() => {
-    const publisher = createThrottledPublisher(() => {
-      publishViewport(map, onViewportChangeRef.current);
+    const handlers = createViewportTrackerHandlers({
+      publish: () =>
+        publishViewportMapLibre(map, onViewportChangeRef.current),
+      onUserPanStart,
+      onUserPanEnd,
+      suppressPanRef,
     });
-    publisherRef.current = publisher;
+
+    map.on("dragstart", handlers.onDragStart);
+    map.on("dragend", handlers.onDragEnd);
+    map.on("move", handlers.onMove);
+    map.on("zoom", handlers.onZoom);
+    map.on("moveend", handlers.onMoveEnd);
+    map.on("zoomend", handlers.onZoomEnd);
+
     return () => {
-      publisher.cancel();
-      publisherRef.current = null;
+      map.off("dragstart", handlers.onDragStart);
+      map.off("dragend", handlers.onDragEnd);
+      map.off("move", handlers.onMove);
+      map.off("zoom", handlers.onZoom);
+      map.off("moveend", handlers.onMoveEnd);
+      map.off("zoomend", handlers.onZoomEnd);
+      handlers.disposePublisher();
     };
-  }, [map]);
-
-  const notifyPanStart = () => {
-    if (suppressPanRef?.current || panActiveRef.current) {
-      return;
-    }
-
-    panActiveRef.current = true;
-    onUserPanStart?.();
-  };
-
-  const notifyPanEnd = () => {
-    if (!panActiveRef.current) {
-      return;
-    }
-
-    panActiveRef.current = false;
-    onUserPanEnd?.();
-  };
-
-  useMapEvents({
-    dragstart: () => {
-      notifyPanStart();
-    },
-    dragend: () => {
-      notifyPanEnd();
-      publisherRef.current?.flush();
-      skipMoveEndScheduleRef.current = true;
-    },
-    move: () => {
-      publisherRef.current?.schedule();
-    },
-    zoom: () => {
-      publisherRef.current?.schedule();
-    },
-    moveend: () => {
-      notifyPanEnd();
-      if (skipMoveEndScheduleRef.current) {
-        skipMoveEndScheduleRef.current = false;
-        return;
-      }
-      publisherRef.current?.schedule();
-    },
-    zoomend: () => {
-      skipMoveEndScheduleRef.current = true;
-      publisherRef.current?.flush();
-    },
-  });
+  }, [map, onUserPanStart, onUserPanEnd, suppressPanRef]);
 
   useEffect(() => {
-    publishViewport(map, onViewportChange);
+    publishViewportMapLibre(map, onViewportChange);
   }, [map, onViewportChange]);
 
   return null;
 }
 
-function publishViewport(
+function MapViewportTrackerLeaflet({
+  onViewportChange,
+  onUserPanStart,
+  onUserPanEnd,
+  suppressPanRef,
+}: MapViewportTrackerProps) {
+  const map = useMap();
+  const onViewportChangeRef = useRef(onViewportChange);
+  const handlersRef = useRef<ReturnType<
+    typeof createViewportTrackerHandlers
+  > | null>(null);
+
+  useEffect(() => {
+    onViewportChangeRef.current = onViewportChange;
+  }, [onViewportChange]);
+
+  useEffect(() => {
+    const handlers = createViewportTrackerHandlers({
+      publish: () =>
+        publishViewportLeaflet(map, onViewportChangeRef.current),
+      onUserPanStart,
+      onUserPanEnd,
+      suppressPanRef,
+    });
+    handlersRef.current = handlers;
+    return () => {
+      handlers.disposePublisher();
+      handlersRef.current = null;
+    };
+  }, [map, onUserPanStart, onUserPanEnd, suppressPanRef]);
+
+  useMapEvents({
+    dragstart: () => {
+      handlersRef.current?.onDragStart();
+    },
+    dragend: () => {
+      handlersRef.current?.onDragEnd();
+    },
+    move: () => {
+      handlersRef.current?.onMove();
+    },
+    zoom: () => {
+      handlersRef.current?.onZoom();
+    },
+    moveend: () => {
+      handlersRef.current?.onMoveEnd();
+    },
+    zoomend: () => {
+      handlersRef.current?.onZoomEnd();
+    },
+  });
+
+  useEffect(() => {
+    publishViewportLeaflet(map, onViewportChange);
+  }, [map, onViewportChange]);
+
+  return null;
+}
+
+export function MapViewportTracker(props: MapViewportTrackerProps) {
+  const engine = useMapEngine();
+  return matchMapEngine(engine, {
+    maplibre: () => <MapViewportTrackerMapLibre {...props} />,
+    leaflet: () => <MapViewportTrackerLeaflet {...props} />,
+  });
+}
+
+function publishViewportLeaflet(
   map: LeafletMap,
   onViewportChange: (viewport: MapViewportState | null) => void,
 ) {
@@ -122,6 +157,32 @@ function publishViewport(
 
   onViewportChange({
     bounds: latLngBoundsToViewport(bounds),
+    zoom: map.getZoom(),
+  });
+}
+
+function publishViewportMapLibre(
+  map: MapRef,
+  onViewportChange: (viewport: MapViewportState | null) => void,
+) {
+  const bounds = map.getBounds();
+  const south = bounds.getSouth();
+  const west = bounds.getWest();
+  const north = bounds.getNorth();
+  const east = bounds.getEast();
+
+  if (
+    !Number.isFinite(south) ||
+    !Number.isFinite(west) ||
+    !Number.isFinite(north) ||
+    !Number.isFinite(east)
+  ) {
+    onViewportChange(null);
+    return;
+  }
+
+  onViewportChange({
+    bounds: { south, west, north, east },
     zoom: map.getZoom(),
   });
 }
