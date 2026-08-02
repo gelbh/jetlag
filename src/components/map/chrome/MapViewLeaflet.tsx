@@ -88,10 +88,6 @@ function MapFocus({
 
     lastRecenterRef.current = recenterToken;
 
-    if (suppressChromeHideRef) {
-      suppressChromeHideRef.current = true;
-    }
-
     map.invalidateSize();
 
     const paddingTopLeft = point(padX, padY);
@@ -103,6 +99,10 @@ function MapFocus({
     const bounds = normalizeFocusBounds(focusBounds);
     if (!isUsableMapBounds(bounds)) {
       return;
+    }
+
+    if (suppressChromeHideRef) {
+      suppressChromeHideRef.current = true;
     }
 
     const { center, zoom } = computeFramedCenterZoom(
