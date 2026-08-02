@@ -122,8 +122,8 @@ describe("AdminMapScreen", () => {
   it("keeps phone sheets and moderation overlay in compact layout", () => {
     renderWithRouter(<AdminMapScreen />, { route: "/map" });
 
-    expect(screen.getByRole("button", { name: "Log" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Chat" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open session log" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open chat" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Force end" })).toBeInTheDocument();
     expect(screen.queryByLabelText("Admin monitor rail")).not.toBeInTheDocument();
   });

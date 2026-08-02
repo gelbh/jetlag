@@ -84,10 +84,10 @@ test.describe("layout regression @ default mobile", () => {
 
   test("@smoke map dock chrome stays in viewport", async ({ page }) => {
     await openMapWithLocalSession(page);
-    const more = page.getByRole("button", { name: "More tools" });
-    await expect(more).toBeVisible();
-    await assertMinTapTargets(more);
-    await assertInViewport(more);
+    const draw = page.getByRole("button", { name: "Draw on map" });
+    await expect(draw).toBeVisible();
+    await assertMinTapTargets(draw);
+    await assertInViewport(draw);
     // Leaflet markers trip aria-command-name; layout smoke is chrome-only
     await assertLayoutSmoke(page, { exclude: [".maplibregl-map"] });
   });

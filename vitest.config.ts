@@ -29,6 +29,7 @@ export default defineConfig({
       "node_modules/**",
       "e2e/**",
       "scripts/**",
+      ".worktrees/**",
       "**/*.emulator.test.*",
       "src/test/emulator/**",
       // Sibling git worktrees must not be collected from the primary clone.

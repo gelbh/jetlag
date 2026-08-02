@@ -1,5 +1,4 @@
 import { type Page, expect } from "@playwright/test";
-import { clickViaEvaluate } from "./dom";
 
 /** Matches Playwright `use.geolocation` in playwright.config.ts */
 export const E2E_GEOLOCATION = { latitude: 53.35, longitude: -6.26 };
@@ -129,18 +128,9 @@ export async function waitForMapTilesLoaded(page: Page) {
 
 export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
   const drawButton = page.getByRole("button", { name: "Draw on map" });
-  if (await drawButton.isVisible().catch(() => false)) {
-    await drawButton.click();
-    await page.getByRole("menuitem", { name: toolName }).click();
-    return;
-  }
-
-  await page.getByRole("button", { name: "More tools" }).click();
-  const sheet = page.getByRole("dialog", { name: "More tools" });
-  await sheet.waitFor({ state: "visible" });
-  const toolButton = sheet.getByRole("button", { name: toolName });
-  await expect(toolButton).toBeVisible();
-  await clickViaEvaluate(toolButton);
+  await expect(drawButton).toBeVisible();
+  await drawButton.click();
+  await page.getByRole("menuitem", { name: toolName }).click();
 }
 
 export async function clickToolDockButton(page: Page, name: string) {
