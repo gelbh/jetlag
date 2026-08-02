@@ -5,15 +5,61 @@ import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
 import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import type { MapDraftOverlay } from "../../../domain/map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { useMapEngine } from "../chrome/mapEngineContext";
+import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
+import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { renderGeoJsonPolygonGroups } from "../helpers/renderHelpers";
 
 interface MapDraftLayerProps {
   overlays: readonly MapDraftOverlay[];
 }
 
-export const MapDraftLayer = memo(function MapDraftLayer({
-  overlays,
-}: MapDraftLayerProps) {
+/** MapLibre Slice 2: polygons only; marker/circle/polyline land in Slice 3. */
+function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
+  const c = MAP_ANNOTATION_COLORS;
+
+  return (
+    <>
+      {overlays.map((overlay) => {
+        switch (overlay.kind) {
+          case "polygon": {
+            const width = overlay.style?.weight ?? 1;
+            return (
+              <MapLibreGeoJsonOverlay
+                key={overlay.id}
+                id={`draft-poly-${overlay.id}`}
+                data={overlay.feature}
+                fill={{
+                  fillColor: overlay.style?.fillColor ?? c.boundary,
+                  fillOpacity: overlay.style?.fillOpacity ?? 0.2,
+                }}
+                line={{
+                  color: overlay.style?.color ?? c.boundary,
+                  width,
+                  opacity: overlay.style?.opacity ?? 1,
+                  dashArray: cssPxDashToMapLibre(
+                    overlay.style?.dashArray,
+                    width,
+                  ),
+                }}
+              />
+            );
+          }
+          case "marker":
+          case "circle":
+          case "polyline":
+            return null;
+          default: {
+            const _exhaustive: never = overlay;
+            return _exhaustive;
+          }
+        }
+      })}
+    </>
+  );
+}
+
+function MapDraftLayerLeaflet({ overlays }: MapDraftLayerProps) {
   const c = MAP_ANNOTATION_COLORS;
 
   return (
@@ -81,10 +127,22 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                 }}
               />
             );
-          default:
-            return null;
+          default: {
+            const _exhaustive: never = overlay;
+            return _exhaustive;
+          }
         }
       })}
     </>
   );
+}
+
+export const MapDraftLayer = memo(function MapDraftLayer(
+  props: MapDraftLayerProps,
+) {
+  const engine = useMapEngine();
+  if (engine === "maplibre") {
+    return <MapDraftLayerMapLibre {...props} />;
+  }
+  return <MapDraftLayerLeaflet {...props} />;
 });
