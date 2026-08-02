@@ -747,41 +747,43 @@ async function joinRemoteSessionByCodeOnce(
     }
 
     try {
-      return await joinGatedRemoteSessionByCode(
-        code,
+      const joinedWithoutRead = await joinRemoteSessionWithoutRead(
+        codeRecord.sessionId,
         codeRecord,
         uid,
         role,
         clientVersion,
-        { ...options, returningMemberUid },
+        returningMemberUid,
       );
-    } catch (callableError) {
-      const message =
-        callableError instanceof Error ? callableError.message : "";
-      if (!message.includes("legacy join")) {
-        throw callableError;
+      if (joinedWithoutRead.status === "joined") {
+        void touchSessionLastActive(codeRecord.sessionId);
+        return {
+          status: "joined",
+          session: {
+            ...joinedWithoutRead.session,
+            code,
+          },
+        };
+      }
+      return joinedWithoutRead;
+    } catch (legacyJoinError) {
+      if (!isFirestorePermissionDenied(legacyJoinError)) {
+        throw legacyJoinError;
+      }
+
+      try {
+        return await joinGatedRemoteSessionByCode(
+          code,
+          codeRecord,
+          uid,
+          role,
+          clientVersion,
+          { ...options, returningMemberUid, rolePasscode: options.rolePasscode },
+        );
+      } catch {
+        throw legacyJoinError;
       }
     }
-
-    const joinedWithoutRead = await joinRemoteSessionWithoutRead(
-      codeRecord.sessionId,
-      codeRecord,
-      uid,
-      role,
-      clientVersion,
-      returningMemberUid,
-    );
-    if (joinedWithoutRead.status === "joined") {
-      void touchSessionLastActive(codeRecord.sessionId);
-      return {
-        status: "joined",
-        session: {
-          ...joinedWithoutRead.session,
-          code,
-        },
-      };
-    }
-    return joinedWithoutRead;
   }
 
   if (!sessionDoc.exists()) {
