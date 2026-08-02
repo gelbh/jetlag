@@ -34,7 +34,6 @@ import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 import { MEASURING_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
-import type { ToolPanelSandboxMode } from "./shared/panels/toolPanelSandbox";
 
 interface MeasuringPanelProps {
   distanceUnit: DistanceUnit;
@@ -82,7 +81,6 @@ interface MeasuringPanelProps {
   costLabel?: string;
   isSubmitting?: boolean;
   wizardStepRef?: RefObject<string>;
-  sandbox?: ToolPanelSandboxMode;
 }
 
 export function MeasuringPanel({
@@ -127,18 +125,11 @@ export function MeasuringPanel({
   costLabel = "D3P1",
   isSubmitting = false,
   wizardStepRef,
-  sandbox,
 }: MeasuringPanelProps) {
-  const readOnly = sandbox?.readOnly ?? false;
-  const embeddedWizard = sandbox !== undefined;
   const steps = stepsForMode(MEASURING_STEPS, awaitHiderAnswer);
   const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
     steps,
-    {
-      wizardStepRef,
-      initialStepId: sandbox?.initialWizardStepId,
-      syncStep: sandbox ? (sandbox.syncWizardStep ?? false) : true,
-    },
+    { wizardStepRef },
   );
 
   const locationCategory: MeasuringLocationCategory | undefined =
@@ -182,7 +173,6 @@ export function MeasuringPanel({
     (step === "source" && optionChosen && hasAvailableMeasureOptions) ||
     (step === "target" && canAdvanceFromTarget);
   const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
-  const useStickyAnswerFooter = !readOnly && !embeddedWizard;
   const showMeasuringAnswer =
     canPreviewAnswer && (step === "target" || step === "answer");
 
@@ -248,29 +238,7 @@ export function MeasuringPanel({
           </ToolSection>
         ) : null}
 
-        {showMeasuringAnswer && !useStickyAnswerFooter ? (
-          <MeasuringAnswerSection
-            step={step}
-            isSeaLevel={isSeaLevel}
-            isCoastline={isCoastline}
-            hasTargetPoint={hasTargetPoint}
-            distanceMeters={distanceMeters}
-            targetPlaceName={targetPlaceName}
-            targetLabel={targetLabel}
-            distanceUnit={distanceUnit}
-            awaitHiderAnswer={awaitHiderAnswer}
-            costLabel={costLabel}
-            isSubmitting={isSubmitting}
-            hasAvailableMeasureOptions={hasAvailableMeasureOptions}
-            hasSeekerPoint={hasSeekerPoint}
-            answer={answer}
-            seaLevelEdgeCase={seaLevelEdgeCase}
-            onAnswerChange={onAnswerChange}
-            onCommit={onCommit}
-          />
-        ) : null}
-
-        {showMeasuringAnswer && useStickyAnswerFooter ? (
+        {showMeasuringAnswer ? (
           <MeasuringAnswerSection
             step={step}
             part="readout"
@@ -304,8 +272,7 @@ export function MeasuringPanel({
     </>
   );
 
-  const answerFooter =
-    showMeasuringAnswer && useStickyAnswerFooter ? (
+  const answerFooter = showMeasuringAnswer ? (
       <MeasuringAnswerSection
         step={step}
         part="actions"
@@ -328,51 +295,33 @@ export function MeasuringPanel({
       />
     ) : undefined;
 
-  const wizardContent = readOnly ? (
-    panelBody
-  ) : (
-    <WizardSwipeSurface
-      stepId={step}
-      stepIndex={stepIndex}
-      canGoBack={stepIndex > 0}
-      canGoNext={canSwipeNext}
-      onBack={goBack}
-      onNext={goNext}
-      embedded={embeddedWizard}
-    >
-      {panelBody}
-    </WizardSwipeSurface>
-  );
-
   return (
     <ToolPanelShell
       toolId="measuring"
-      fillHeight={useStickyAnswerFooter}
+      fillHeight
       stepper={
-        sandbox?.hideStepper ? undefined : (
-          <Stepper
-            nav={
-              readOnly
-                ? undefined
-                : {
-                    stepIndex,
-                    stepCount: steps.length,
-                    onBack: goBack,
-                    onNext: goNext,
-                    canGoNext,
-                  }
-            }
-          />
-        )
+        <Stepper
+          nav={{
+            stepIndex,
+            stepCount: steps.length,
+            onBack: goBack,
+            onNext: goNext,
+            canGoNext,
+          }}
+        />
       }
     >
-      <WizardPanelFrame
-        readOnly={readOnly}
-        scrollable={useStickyAnswerFooter}
-        stickyFooter={answerFooter}
-        error={error}
-      >
-        {wizardContent}
+      <WizardPanelFrame scrollable stickyFooter={answerFooter} error={error}>
+        <WizardSwipeSurface
+          stepId={step}
+          stepIndex={stepIndex}
+          canGoBack={stepIndex > 0}
+          canGoNext={canSwipeNext}
+          onBack={goBack}
+          onNext={goNext}
+        >
+          {panelBody}
+        </WizardSwipeSurface>
       </WizardPanelFrame>
     </ToolPanelShell>
   );

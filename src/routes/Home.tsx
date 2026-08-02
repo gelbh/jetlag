@@ -5,7 +5,6 @@ import { BootSplash } from "../components/ui/feedback/BootSplash";
 import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
 import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
 import {
-  HudGuideIcon,
   HudPlayIcon,
   HudAdminIcon,
   HudFriendsIcon,
@@ -215,13 +214,6 @@ export function Home() {
                       <HudAdminIcon className="size-5" />
                     </AppLink>
                   ) : null}
-                  <AppLink
-                    to="/tutorial"
-                    className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"
-                    aria-label="Open tutorial"
-                  >
-                    <HudGuideIcon className="size-5" />
-                  </AppLink>
                   <AppLink
                     to="/friends"
                     className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"
