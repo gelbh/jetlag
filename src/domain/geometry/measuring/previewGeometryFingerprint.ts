@@ -1,12 +1,5 @@
 import type { Feature, MultiPolygon, Polygon, Position } from "geojson";
 
-function ringsOf(geometry: Polygon | MultiPolygon): Position[][] {
-  if (geometry.type === "Polygon") {
-    return geometry.coordinates;
-  }
-  return geometry.coordinates.flatMap((polygon) => polygon);
-}
-
 /** Cheap publish signature for measuring preview polygons (avoids JSON.stringify). */
 export function previewGeometryFingerprint(
   feature: Feature<Polygon | MultiPolygon> | null,
@@ -15,7 +8,6 @@ export function previewGeometryFingerprint(
     return null;
   }
 
-  const rings = ringsOf(feature.geometry);
   let coordCount = 0;
   let minLng = Infinity;
   let maxLng = -Infinity;
@@ -24,28 +16,39 @@ export function previewGeometryFingerprint(
   let first: Position | undefined;
   let last: Position | undefined;
 
-  for (const ring of rings) {
-    for (const position of ring) {
-      const lng = position[0];
-      const lat = position[1];
-      if (first === undefined) first = position;
-      last = position;
-      coordCount += 1;
-      if (lng < minLng) minLng = lng;
-      if (lng > maxLng) maxLng = lng;
-      if (lat < minLat) minLat = lat;
-      if (lat > maxLat) maxLat = lat;
+  const visit = (position: Position) => {
+    const lng = position[0];
+    const lat = position[1];
+    if (first === undefined) first = position;
+    last = position;
+    coordCount += 1;
+    if (lng < minLng) minLng = lng;
+    if (lng > maxLng) maxLng = lng;
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+  };
+
+  const geometry = feature.geometry;
+  if (geometry.type === "Polygon") {
+    for (const ring of geometry.coordinates) {
+      for (const position of ring) visit(position);
+    }
+  } else {
+    for (const polygon of geometry.coordinates) {
+      for (const ring of polygon) {
+        for (const position of ring) visit(position);
+      }
     }
   }
 
   if (coordCount === 0 || first === undefined || last === undefined) {
-    return `${feature.geometry.type}:0`;
+    return `${geometry.type}:0`;
   }
 
   const round = (value: number) => value.toFixed(6);
 
   return [
-    feature.geometry.type,
+    geometry.type,
     round(minLng),
     round(minLat),
     round(maxLng),
