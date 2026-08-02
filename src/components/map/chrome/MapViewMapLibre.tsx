@@ -1,7 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, type RefObject } from "react";
 import Map, { type MapLayerMouseEvent, type MapRef } from "react-map-gl/maplibre";
 import { setWorkerUrl, type Map as MapLibreMap } from "maplibre-gl";
-import { LatLngBounds, type LatLngExpression } from "leaflet";
+import {
+  LatLngBounds,
+  latLngBounds,
+  type LatLngBoundsExpression,
+  type LatLngExpression,
+} from "leaflet";
 import "maplibre-gl/dist/maplibre-gl.css";
 import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import {
@@ -9,6 +14,16 @@ import {
   getMapLibreStyle,
 } from "../../../domain/map/mapBasemaps";
 import { isUsableMapBounds } from "../../../domain/geometry/gameArea/geometry";
+import { computeFramedCenterZoomMapLibre } from "../../../domain/map/computeFramedCenterZoomMapLibre";
+import { focusBoundsToLngLatBounds } from "../../../domain/map/focusBoundsToLngLatBounds";
+import { isLargeCameraJumpMapLibre } from "../../../domain/map/isLargeCameraJumpMapLibre";
+import { shouldApplyMapFocus } from "../../../domain/map/mapFocusPolicy";
+import {
+  MOTION_MAP_CAMERA_FLY_MS,
+  MOTION_MAP_CAMERA_MS,
+} from "../../../domain/device/motion/motionTokens";
+import { useMotionProfile } from "../../../hooks/motion/useMotionProfile";
+import { useMapLibreMap } from "../helpers/useMapLibreMap";
 import { MapChromeListener } from "./MapChromeListener";
 import { MapEngineProvider } from "./mapEngineContext";
 import { MapRecenterControl } from "./MapRecenterControl";
@@ -53,9 +68,166 @@ function leafletBoundsFromMapLibre(map: MapLibreMap): LatLngBounds {
   );
 }
 
+function MapFocus({
+  focusBounds,
+  focusMinZoom,
+  focusMaxZoom,
+  fitBoundsMode,
+  recenterToken = 0,
+  suppressChromeHideRef,
+  fitBoundsPadding: fitBoundsPaddingProp,
+  focusPaddingBias,
+  preferFly = false,
+}: {
+  focusBounds: LatLngBoundsExpression | null;
+  focusMinZoom?: number;
+  focusMaxZoom?: number;
+  fitBoundsMode: "once" | "always";
+  recenterToken: number;
+  suppressChromeHideRef?: RefObject<boolean>;
+  fitBoundsPadding?: [number, number];
+  focusPaddingBias?: number;
+  preferFly?: boolean;
+}) {
+  const mapRef = useMapLibreMap();
+  const { prefersReducedMotion, lowPowerMode } = useMotionProfile();
+  const hasFittedRef = useRef(false);
+  const lastRecenterRef = useRef(recenterToken);
+  const animate = !prefersReducedMotion && !lowPowerMode;
+  const padY = fitBoundsPaddingProp?.[0] ?? 32;
+  const padX = fitBoundsPaddingProp?.[1] ?? 32;
+
+  useEffect(() => {
+    const map = mapRef.getMap();
+    const handleDragStart = () => {
+      map.stop();
+      if (suppressChromeHideRef) {
+        suppressChromeHideRef.current = false;
+      }
+    };
+
+    map.on("dragstart", handleDragStart);
+    return () => {
+      map.off("dragstart", handleDragStart);
+    };
+  }, [mapRef, suppressChromeHideRef]);
+
+  useEffect(() => {
+    if (!focusBounds) {
+      return;
+    }
+
+    if (
+      !shouldApplyMapFocus({
+        fitBoundsMode,
+        hasFitted: hasFittedRef.current,
+        recenterToken,
+        lastRecenterToken: lastRecenterRef.current,
+      })
+    ) {
+      return;
+    }
+
+    const map = mapRef.getMap();
+    map.resize();
+
+    const padding = {
+      top: padY,
+      left: padX,
+      right: padX,
+      bottom: padY + (focusPaddingBias ?? 0),
+    };
+
+    const leafletBounds =
+      focusBounds instanceof LatLngBounds
+        ? focusBounds
+        : latLngBounds(focusBounds);
+    if (!isUsableMapBounds(leafletBounds)) {
+      return;
+    }
+
+    const lngLatBounds = focusBoundsToLngLatBounds(leafletBounds);
+    const framed = computeFramedCenterZoomMapLibre(
+      map,
+      lngLatBounds,
+      padding,
+      focusMinZoom,
+      focusMaxZoom,
+    );
+    if (!framed) {
+      return;
+    }
+
+    lastRecenterRef.current = recenterToken;
+    hasFittedRef.current = true;
+
+    if (suppressChromeHideRef) {
+      suppressChromeHideRef.current = true;
+    }
+
+    const onMoveEnd = () => {
+      if (suppressChromeHideRef) {
+        suppressChromeHideRef.current = false;
+      }
+      map.off("moveend", onMoveEnd);
+    };
+
+    map.on("moveend", onMoveEnd);
+
+    const { center, zoom } = framed;
+
+    if (!animate) {
+      map.jumpTo({ center, zoom });
+      return () => {
+        map.stop();
+        map.off("moveend", onMoveEnd);
+        if (suppressChromeHideRef) {
+          suppressChromeHideRef.current = false;
+        }
+      };
+    }
+
+    if (isLargeCameraJumpMapLibre(map, center, zoom, preferFly)) {
+      map.flyTo({
+        center,
+        zoom,
+        duration: MOTION_MAP_CAMERA_FLY_MS,
+      });
+    } else {
+      map.easeTo({
+        center,
+        zoom,
+        duration: MOTION_MAP_CAMERA_MS,
+      });
+    }
+
+    return () => {
+      map.stop();
+      map.off("moveend", onMoveEnd);
+      if (suppressChromeHideRef) {
+        suppressChromeHideRef.current = false;
+      }
+    };
+  }, [
+    animate,
+    focusBounds,
+    focusMaxZoom,
+    focusMinZoom,
+    fitBoundsMode,
+    padX,
+    padY,
+    focusPaddingBias,
+    mapRef,
+    preferFly,
+    recenterToken,
+    suppressChromeHideRef,
+  ]);
+
+  return null;
+}
+
 /**
- * MapLibre shell: basemap + chrome controls + click/bounds bridge.
- * Camera/focus (`MapFocus`) stays Leaflet-only until Slice 4.
+ * MapLibre shell: basemap + chrome + click/bounds + camera/focus parity.
  */
 export function MapViewMapLibre({
   center = [51.505, -0.09],
@@ -71,6 +243,14 @@ export function MapViewMapLibre({
   mapKey,
   chromeHudRef,
   suppressChromeHideRef,
+  focusBounds = null,
+  focusMinZoom,
+  focusMaxZoom,
+  fitBoundsMode = "always",
+  fitBoundsPadding,
+  focusPaddingBias,
+  focusPreferFly,
+  recenterToken = 0,
   showZoomControl,
   zoomControlInset = "dock",
   onMapStyleChange,
@@ -182,6 +362,17 @@ export function MapViewMapLibre({
           onClick={handleClick}
         >
           <MapEngineProvider engine="maplibre">
+            <MapFocus
+              focusBounds={focusBounds ?? null}
+              focusMinZoom={focusMinZoom}
+              focusMaxZoom={focusMaxZoom}
+              fitBoundsMode={fitBoundsMode}
+              recenterToken={recenterToken}
+              suppressChromeHideRef={suppressChromeHideRef}
+              fitBoundsPadding={fitBoundsPadding}
+              focusPaddingBias={focusPaddingBias}
+              preferFly={focusPreferFly}
+            />
             {chromeHudRef ? (
               <MapChromeListener
                 chromeHudRef={chromeHudRef}
