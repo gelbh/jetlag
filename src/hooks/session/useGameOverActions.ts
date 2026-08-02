@@ -3,6 +3,10 @@ import { LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotatio
 import { useSessionExit } from "../session/useSessionExit";
 import { resetSessionForRematch } from "../../services/session/sessionRematch";
 import { clearLiveLocationOnLeave } from "../../services/session/clearLiveLocationOnLeave";
+import {
+  allowPlayerLocationPublishes,
+  blockPlayerLocationPublishes,
+} from "../../services/session/playerLocationPublishGate";
 import { ensureAnonymousUser } from "../../services/core/firebase/firebase";
 import { useGameOver } from "./useGameOver";
 
@@ -44,6 +48,7 @@ export function useGameOverActions(
 
     void (async () => {
       if (session.id !== LOCAL_SESSION_ID) {
+        blockPlayerLocationPublishes();
         try {
           const user = await ensureAnonymousUser();
           await clearLiveLocationOnLeave({
@@ -65,7 +70,7 @@ export function useGameOverActions(
           closeOverlays: overlay.closeSheet,
         });
       } catch {
-        // Navigation teardown failed; user may already be leaving.
+        allowPlayerLocationPublishes();
       }
     })();
   }, [exitSession, overlay.closeSheet, session]);
