@@ -1,8 +1,6 @@
 //! Spatial Voronoi (Wave-2). Local equirectangular planar frame + voronator
 //! (d3-delaunay dual) clipped to a finite axis-aligned envelope.
 
-use core::fmt::Write as _;
-use serde::Deserialize;
 use serde_json::Value;
 use voronator::delaunator::Point as VPoint;
 use voronator::VoronoiDiagram;
@@ -13,14 +11,12 @@ const METERS_PER_DEGREE_LNG_AT_EQUATOR: f64 = 111_320.0;
 const EXTENT_MARGIN_MULTIPLIER: f64 = 3.0;
 /// Floor margin for tightly clustered sites (tentacle/matching disk headroom).
 const MIN_EXTENT_MARGIN_METERS: f64 = 50_000.0;
-/// Lng/lat digits in GeoJSON (~0.1 m at mid-latitudes).
-const COORD_PREC: usize = 7;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone)]
 struct SiteIn {
     lng: f64,
     lat: f64,
-    #[serde(default)]
+    #[cfg_attr(not(test), allow(dead_code))]
     properties: Value,
 }
 
@@ -35,29 +31,6 @@ fn meters_per_degree_lng(lat_degrees: f64) -> f64 {
     } else {
         scale
     }
-}
-
-fn dedupe_sites(sites: &[SiteIn]) -> Vec<SiteIn> {
-    let mut seen = std::collections::HashSet::new();
-    let mut out = Vec::with_capacity(sites.len());
-    for site in sites {
-        let key = (
-            (site.lng * 1e9).round() as i64,
-            (site.lat * 1e9).round() as i64,
-        );
-        if seen.insert(key) {
-            out.push(site.clone());
-        }
-    }
-    out
-}
-
-fn push_coord(buf: &mut String, value: f64) -> Result<(), String> {
-    if !value.is_finite() {
-        return Err("voronoi: non-finite coordinate".into());
-    }
-    write!(buf, "{value:.COORD_PREC$}").map_err(|e| e.to_string())?;
-    Ok(())
 }
 
 fn voronoi_rings_for_points(
@@ -104,54 +77,9 @@ fn voronoi_rings_for_points(
     Ok(rings)
 }
 
-fn write_feature_collection_json(
-    working: &[SiteIn],
-    rings: &[Vec<PlanarPt>],
-    lng_scale: f64,
-) -> Result<String, String> {
-    let vertex_estimate: usize = rings.iter().map(|r| r.len()).sum();
-    let mut buf = String::with_capacity(64 + working.len() * 96 + vertex_estimate * 24);
-    buf.push_str(r#"{"type":"FeatureCollection","features":["#);
-
-    for (i, (site, ring)) in working.iter().zip(rings.iter()).enumerate() {
-        if i > 0 {
-            buf.push(',');
-        }
-        buf.push_str(r#"{"type":"Feature","properties":"#);
-        match &site.properties {
-            Value::Null => buf.push_str("{}"),
-            other => {
-                let props = serde_json::to_string(other).map_err(|e| e.to_string())?;
-                buf.push_str(&props);
-            }
-        }
-        buf.push_str(r#","geometry":{"type":"Polygon","coordinates":[["#);
-        for (j, &(x, y)) in ring.iter().enumerate() {
-            if j > 0 {
-                buf.push(',');
-            }
-            buf.push('[');
-            push_coord(&mut buf, x / lng_scale)?;
-            buf.push(',');
-            push_coord(&mut buf, y / METERS_PER_DEGREE_LAT)?;
-            buf.push(']');
-        }
-        buf.push_str("]]}}");
-    }
-
-    buf.push_str("]}");
-    Ok(buf)
-}
-
-/// Build a GeoJSON FeatureCollection of Voronoi cells for the given sites JSON.
-pub fn spatial_voronoi_from_sites_json(sites_json: &str) -> Result<String, String> {
-    let sites: Vec<SiteIn> =
-        serde_json::from_str(sites_json).map_err(|e| format!("sites: {e}"))?;
-    spatial_voronoi_feature_collection_json(&sites)
-}
-
-/// Packed rings for `coords = [lng0, lat0, lng1, lat1, …]` (unique sites).
+/// Packed rings for `coords = [lng0, lat0, lng1, lat1, …]`.
 /// Layout: for each cell — `vertex_count`, then `lng,lat` pairs (closed ring).
+/// Does **not** dedupe — caller must pass unique sites (TS wrapper matches SoT).
 pub fn spatial_voronoi_rings_from_coords(coords: &[f64]) -> Result<Vec<f64>, String> {
     if coords.is_empty() {
         return Ok(Vec::new());
@@ -167,14 +95,22 @@ pub fn spatial_voronoi_rings_from_coords(coords: &[f64]) -> Result<Vec<f64>, Str
             properties: Value::Null,
         })
         .collect();
-    let (working, rings, lng_scale) = spatial_voronoi_rings(&sites)?;
-    if working.len() != rings.len() {
+    for site in &sites {
+        if !site.lng.is_finite() || !site.lat.is_finite() {
+            return Err("voronoi: non-finite coordinate".into());
+        }
+    }
+    let (rings, lng_scale) = spatial_voronoi_compute(&sites)?;
+    if sites.len() != rings.len() {
         return Err("voronoi: ring count mismatch".into());
     }
     let mut out: Vec<f64> = Vec::with_capacity(rings.iter().map(|r| 1 + r.len() * 2).sum());
     for ring in &rings {
         out.push(ring.len() as f64);
         for &(x, y) in ring {
+            if !x.is_finite() || !y.is_finite() {
+                return Err("voronoi: non-finite coordinate".into());
+            }
             out.push(x / lng_scale);
             out.push(y / METERS_PER_DEGREE_LAT);
         }
@@ -182,24 +118,14 @@ pub fn spatial_voronoi_rings_from_coords(coords: &[f64]) -> Result<Vec<f64>, Str
     Ok(out)
 }
 
-fn spatial_voronoi_feature_collection_json(sites: &[SiteIn]) -> Result<String, String> {
+/// Compute planar Voronoi rings for sites as given (no dedupe).
+fn spatial_voronoi_compute(sites: &[SiteIn]) -> Result<(Vec<Vec<PlanarPt>>, f64), String> {
     if sites.is_empty() {
-        return Ok(r#"{"type":"FeatureCollection","features":[]}"#.to_string());
+        return Ok((Vec::new(), 1.0));
     }
-    let (working, rings, lng_scale) = spatial_voronoi_rings(sites)?;
-    write_feature_collection_json(&working, &rings, lng_scale)
-}
-
-fn spatial_voronoi_rings(
-    sites: &[SiteIn],
-) -> Result<(Vec<SiteIn>, Vec<Vec<PlanarPt>>, f64), String> {
-    let working = dedupe_sites(sites);
-    if working.is_empty() {
-        return Ok((working, Vec::new(), 1.0));
-    }
-    let mean_lat = working.iter().map(|s| s.lat).sum::<f64>() / working.len() as f64;
+    let mean_lat = sites.iter().map(|s| s.lat).sum::<f64>() / sites.len() as f64;
     let lng_scale = meters_per_degree_lng(mean_lat);
-    let points: Vec<PlanarPt> = working
+    let points: Vec<PlanarPt> = sites
         .iter()
         .map(|s| (s.lng * lng_scale, s.lat * METERS_PER_DEGREE_LAT))
         .collect();
@@ -220,11 +146,94 @@ fn spatial_voronoi_rings(
     let clip = (min_x - margin, min_y - margin, max_x + margin, max_y + margin);
 
     let rings = voronoi_rings_for_points(&points, clip)?;
-    Ok((working, rings, lng_scale))
+    Ok((rings, lng_scale))
+}
+
+#[cfg(test)]
+mod json_fixture {
+    use super::*;
+    use core::fmt::Write as _;
+
+    /// Lng/lat digits in GeoJSON (~0.1 m at mid-latitudes).
+    const COORD_PREC: usize = 7;
+
+    fn dedupe_sites(sites: &[SiteIn]) -> Vec<SiteIn> {
+        let mut seen = std::collections::HashSet::new();
+        let mut out = Vec::with_capacity(sites.len());
+        for site in sites {
+            let key = (
+                (site.lng * 1e9).round() as i64,
+                (site.lat * 1e9).round() as i64,
+            );
+            if seen.insert(key) {
+                out.push(site.clone());
+            }
+        }
+        out
+    }
+
+    fn push_coord(buf: &mut String, value: f64) -> Result<(), String> {
+        if !value.is_finite() {
+            return Err("voronoi: non-finite coordinate".into());
+        }
+        write!(buf, "{value:.COORD_PREC$}").map_err(|e| e.to_string())?;
+        Ok(())
+    }
+
+    fn write_feature_collection_json(
+        working: &[SiteIn],
+        rings: &[Vec<PlanarPt>],
+        lng_scale: f64,
+    ) -> Result<String, String> {
+        let vertex_estimate: usize = rings.iter().map(|r| r.len()).sum();
+        let mut buf = String::with_capacity(64 + working.len() * 96 + vertex_estimate * 24);
+        buf.push_str(r#"{"type":"FeatureCollection","features":["#);
+
+        for (i, (site, ring)) in working.iter().zip(rings.iter()).enumerate() {
+            if i > 0 {
+                buf.push(',');
+            }
+            buf.push_str(r#"{"type":"Feature","properties":"#);
+            match &site.properties {
+                Value::Null => buf.push_str("{}"),
+                other => {
+                    let props = serde_json::to_string(other).map_err(|e| e.to_string())?;
+                    buf.push_str(&props);
+                }
+            }
+            buf.push_str(r#","geometry":{"type":"Polygon","coordinates":[["#);
+            for (j, &(x, y)) in ring.iter().enumerate() {
+                if j > 0 {
+                    buf.push(',');
+                }
+                buf.push('[');
+                push_coord(&mut buf, x / lng_scale)?;
+                buf.push(',');
+                push_coord(&mut buf, y / METERS_PER_DEGREE_LAT)?;
+                buf.push(']');
+            }
+            buf.push_str("]]}}");
+        }
+
+        buf.push_str("]}");
+        Ok(buf)
+    }
+
+    pub(super) fn spatial_voronoi_feature_collection_json(
+        sites: &[SiteIn],
+    ) -> Result<String, String> {
+        if sites.is_empty() {
+            return Ok(r#"{"type":"FeatureCollection","features":[]}"#.to_string());
+        }
+        let working = dedupe_sites(sites);
+        let (rings, lng_scale) = spatial_voronoi_compute(&working)?;
+        write_feature_collection_json(&working, &rings, lng_scale)
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::json_fixture::spatial_voronoi_feature_collection_json;
     use super::*;
     use serde_json::json;
 
@@ -377,5 +386,26 @@ mod tests {
         }
         assert_eq!(cells, 4);
         assert_eq!(offset, packed.len());
+    }
+
+    #[test]
+    fn packed_rings_keep_near_duplicate_coords() {
+        // TS string keys keep both; rings path must not collapse via 1e9 rounding.
+        let coords = [-0.18, 51.44, -0.18, 51.44 + 4e-10, -0.12, 51.45];
+        let packed = spatial_voronoi_rings_from_coords(&coords).unwrap();
+        let mut offset = 0usize;
+        let mut cells = 0usize;
+        while offset < packed.len() {
+            let n = packed[offset] as usize;
+            offset += 1 + n * 2;
+            cells += 1;
+        }
+        assert_eq!(cells, 3);
+    }
+
+    #[test]
+    fn packed_rings_reject_non_finite() {
+        let err = spatial_voronoi_rings_from_coords(&[-0.18, f64::NAN]).unwrap_err();
+        assert!(err.contains("non-finite"));
     }
 }

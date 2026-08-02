@@ -1,20 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { geoSpatialVoronoiFromSites } from "./spatialVoronoi";
 import { KERNEL_WASM_READY } from "./kernelWasmReady";
-import { buildSpatialVoronoiFromRingsSync } from "./voronoiWasm";
+import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
 
 /**
- * Interleaved median: Wave-2 Gate A for the **production** Voronoi path.
- * WASM = rings export + TS FeatureCollection assemble (same as voronoiWasm.ts).
- * TS = geoSpatialVoronoiFromSites (objects only — no stringify).
+ * Interleaved median: Wave-2 Gate A for the production Voronoi path
+ * (`wasmBuildSpatialVoronoiFromSites` vs `geoSpatialVoronoiFromSites`).
  */
-function measureInterleavedMedianRatio(
+async function measureInterleavedMedianRatio(
   runTs: () => void,
-  runWasm: () => void,
+  runWasm: () => Promise<void>,
   iterations = 31,
-): number {
+): Promise<number> {
   const tsSamples: number[] = [];
   const wasmSamples: number[] = [];
   for (let i = 0; i < iterations; i += 1) {
@@ -22,7 +21,7 @@ function measureInterleavedMedianRatio(
     runTs();
     tsSamples.push(performance.now() - tsStart);
     const wasmStart = performance.now();
-    runWasm();
+    await runWasm();
     wasmSamples.push(performance.now() - wasmStart);
   }
   tsSamples.sort((a, b) => a - b);
@@ -47,22 +46,16 @@ describe("spatialVoronoiPerf", () => {
       { lng: -0.15, lat: 51.5, properties: { poiId: "north" } },
       { lng: -0.2, lat: 51.48, properties: { poiId: "far" } },
     ];
-    const wasmPkg = await import(
-      "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
-    );
-    const runWasm = () => {
-      buildSpatialVoronoiFromRingsSync(sites, (coords) =>
-        wasmPkg.build_spatial_voronoi_rings(coords),
-      );
-    };
-    runWasm();
+    await wasmBuildSpatialVoronoiFromSites(sites);
     geoSpatialVoronoiFromSites(sites);
 
-    const ratio = measureInterleavedMedianRatio(
+    const ratio = await measureInterleavedMedianRatio(
       () => {
         geoSpatialVoronoiFromSites(sites);
       },
-      runWasm,
+      async () => {
+        await wasmBuildSpatialVoronoiFromSites(sites);
+      },
     );
 
     if (KERNEL_WASM_READY.spatialVoronoi) {

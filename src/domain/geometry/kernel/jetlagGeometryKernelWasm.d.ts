@@ -41,7 +41,6 @@ declare module "*/jetlag_geometry_kernel.js" {
     gameAreaJson: string,
     voronoiCellsJson: string,
   ): unknown;
-  export function build_spatial_voronoi_json(sitesJson: string): unknown;
   export function build_spatial_voronoi_rings(
     coords: Float64Array | number[],
   ): Float64Array;

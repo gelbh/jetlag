@@ -79,30 +79,19 @@ function featureCollectionFromVoronoiRings<
   return { type: "FeatureCollection", features };
 }
 
-/** Sync path for perf gates (pkg already loaded). */
-export function buildSpatialVoronoiFromRingsSync<
+export async function wasmBuildSpatialVoronoiFromSites<
   T extends Record<string, unknown> = Record<string, unknown>,
->(
-  sites: Array<SpatialVoronoiSite<T>>,
-  buildRings: (coords: Float64Array) => ArrayLike<number>,
-): FeatureCollection {
+>(sites: Array<SpatialVoronoiSite<T>>): Promise<FeatureCollection> {
   const working = dedupeSpatialVoronoiSites(sites);
   if (working.length === 0) {
     return { type: "FeatureCollection", features: [] };
   }
-  const packed = buildRings(spatialVoronoiSitesToCoords(working));
-  return featureCollectionFromVoronoiRings(working, packed);
-}
-
-export async function wasmBuildSpatialVoronoiFromSites<
-  T extends Record<string, unknown> = Record<string, unknown>,
->(sites: Array<SpatialVoronoiSite<T>>): Promise<FeatureCollection> {
   const wasm = await loadKernelWasm();
-  return buildSpatialVoronoiFromRingsSync(sites, (coords) => {
-    const result = wasm.build_spatial_voronoi_rings(coords);
-    if (result == null || typeof (result as { length?: unknown }).length !== "number") {
-      throw new Error("Geometry kernel returned a non-array Voronoi rings payload");
-    }
-    return result as ArrayLike<number>;
-  });
+  const result = wasm.build_spatial_voronoi_rings(
+    spatialVoronoiSitesToCoords(working),
+  );
+  if (result == null || typeof (result as { length?: unknown }).length !== "number") {
+    throw new Error("Geometry kernel returned a non-array Voronoi rings payload");
+  }
+  return featureCollectionFromVoronoiRings(working, result as ArrayLike<number>);
 }
