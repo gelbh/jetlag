@@ -209,12 +209,14 @@ export function gameAreaCenter(gameArea: GameArea): LatLngTuple {
   return [(south + north) / 2, (west + east) / 2];
 }
 
-const WORLD_OUTSIDE_MASK_BOUNDS: BoundingBox = {
-  south: -85,
-  west: -180,
-  north: 85,
-  east: 180,
-};
+/** WebMercator-safe latitude clamp (MapLibre world mask). */
+const OUTSIDE_MASK_LAT_LIMIT = 85;
+/**
+ * Pad factor / floor for the outside-mask outer ring. Full-world rings
+ * (`±180×±85`) often fail to paint in MapLibre; a local padded bbox does.
+ */
+const OUTSIDE_MASK_PAD_FACTOR = 4;
+const OUTSIDE_MASK_MIN_PAD_DEG = 12;
 
 export function gameAreaWithoutInteriorRings(gameArea: GameArea): GameArea {
   if (gameArea.type === "MultiPolygon") {
@@ -242,8 +244,26 @@ export function gameAreaExteriorStrokeRings(gameArea: GameArea): LatLngTuple[][]
   return [exterior.map(([lng, lat]) => [lat, lng] as LatLngTuple)];
 }
 
+export function gameAreaOutsideMaskOuterBounds(gameArea: GameArea): BoundingBox {
+  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
+  const latPad = Math.max(
+    (north - south) * OUTSIDE_MASK_PAD_FACTOR,
+    OUTSIDE_MASK_MIN_PAD_DEG,
+  );
+  const lngPad = Math.max(
+    (east - west) * OUTSIDE_MASK_PAD_FACTOR,
+    OUTSIDE_MASK_MIN_PAD_DEG,
+  );
+  return {
+    south: Math.max(south - latPad, -OUTSIDE_MASK_LAT_LIMIT),
+    west: Math.max(west - lngPad, -180),
+    north: Math.min(north + latPad, OUTSIDE_MASK_LAT_LIMIT),
+    east: Math.min(east + lngPad, 180),
+  };
+}
+
 export function gameAreaOutsideMask(gameArea: GameArea): GameArea | null {
-  const { south, west, north, east } = WORLD_OUTSIDE_MASK_BOUNDS;
+  const { south, west, north, east } = gameAreaOutsideMaskOuterBounds(gameArea);
   const outer = bboxPolygon([west, south, east, north]);
   const result = safeDifference(outer, gameAreaToPolygon(gameArea));
   return result ? featureToGameArea(result) : null;

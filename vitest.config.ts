@@ -31,6 +31,8 @@ export default defineConfig({
       "scripts/**",
       "**/*.emulator.test.*",
       "src/test/emulator/**",
+      // Sibling git worktrees must not be collected from the primary clone.
+      ".worktrees/**",
     ],
     coverage: {
       provider: "v8",
