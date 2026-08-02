@@ -13,7 +13,10 @@ import {
   type MapViewportState,
 } from "../components/map/chrome/MapViewportTracker";
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
-import { isWizardPlacementStep } from "../components/tools/shared/wizard/toolWizardPlacementSteps";
+import {
+  isWizardPlacePhaseStep,
+  sheetSnapFromStepId,
+} from "../domain/wizard/phaseToSheetSnap";
 import { timeTrapForHider } from "../domain/expansion/timeTraps";
 import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
 import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
@@ -479,8 +482,11 @@ export function HiderMapScreen() {
 
   const handleHidingZoneStepChange = useCallback((stepId: HidingZoneStepId) => {
     setHidingZoneStepId(stepId);
-    setWizardPeeked(isWizardPlacementStep(stepId));
+    setWizardPeeked(sheetSnapFromStepId(stepId) === "peek");
   }, []);
+
+  const mapAttentionActive =
+    zoneTool.wizardOpen && isWizardPlacePhaseStep(hidingZoneStepId);
 
   const handleSearchThisArea = useCallback(() => {
     void zoneTool.searchStationsInArea(searchViewportBounds());
@@ -718,7 +724,10 @@ export function HiderMapScreen() {
       queuedWrites={syncStatus.queuedWrites}
       syncMessage={syncMessage}
     >
-    <div className="map-screen-shell">
+    <div
+      className="map-screen-shell"
+      data-map-attention={mapAttentionActive ? "true" : undefined}
+    >
       {inactiveChrome ? (
         <div
           aria-hidden

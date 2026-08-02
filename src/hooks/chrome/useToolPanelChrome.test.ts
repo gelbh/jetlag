@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import type { WizardSheetSnap } from "../../domain/wizard/phaseToSheetSnap";
 import { WIZARD_STEP_CHANGE_EVENT } from "../tools/useSyncWizardStepRef";
 import { useToolPanelChrome } from "./useToolPanelChrome";
 
@@ -56,13 +57,14 @@ describe("useToolPanelChrome", () => {
     expect(result.current.panelMinimized).toBe(false);
   });
 
-  it("auto-peeks while placing and keeps an explicit expand", () => {
+  it("auto-peeks on place-phase snap and keeps an explicit expand", () => {
     const { result, rerender } = renderHook(
-      ({ autoPeek }) => useToolPanelChrome("thermometer", { autoPeek }),
-      { initialProps: { autoPeek: false } },
+      ({ sheetSnap }: { sheetSnap: WizardSheetSnap }) =>
+        useToolPanelChrome("thermometer", { sheetSnap }),
+      { initialProps: { sheetSnap: "mid" as WizardSheetSnap } },
     );
 
-    rerender({ autoPeek: true });
+    rerender({ sheetSnap: "peek" });
     expect(result.current.userMinimized).toBe(true);
 
     act(() => {
@@ -70,10 +72,10 @@ describe("useToolPanelChrome", () => {
     });
     expect(result.current.userMinimized).toBe(false);
 
-    rerender({ autoPeek: true });
+    rerender({ sheetSnap: "peek" });
     expect(result.current.userMinimized).toBe(false);
 
-    rerender({ autoPeek: false });
+    rerender({ sheetSnap: "mid" });
     expect(result.current.userMinimized).toBe(false);
   });
 

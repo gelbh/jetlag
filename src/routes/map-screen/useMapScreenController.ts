@@ -21,6 +21,8 @@ import { useAdminBoundaryFeatures } from "../../hooks/map-screen/useAdminBoundar
 import { resolveToolDockEnabled } from "../../domain/session/rules";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useToolPanelChrome } from "../../hooks/chrome/useToolPanelChrome";
+import { useWizardSheetSnap } from "../../hooks/wizard/useWizardSheetSnap";
+import { isQuestionDockTool } from "../../domain/map/mapTools";
 import type { MapTool } from "../../state/sessionStore";
 import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
 import { buildPlacementCameraDraft } from "./shared/placementCameraDraft";
@@ -292,6 +294,8 @@ export function useMapScreenController() {
         zone: { vertices: zoneTool.draft.zoneVertices },
       });
 
+  const { sheetSnap, mapAttentionActive } = useWizardSheetSnap(activeTool);
+
   const {
     mapPanning,
     panelMinimized,
@@ -300,11 +304,8 @@ export function useMapScreenController() {
     handleMapPanStart,
     handleMapPanEnd,
   } = useToolPanelChrome(activeTool, {
-    // Thermometer needs an expanded wizard step before map taps; peeking on Manual pins blocks Next.
-    autoPeek:
-      tools.placementCrosshair &&
-      canSubmitQuestion &&
-      activeTool !== "thermometer",
+    sheetSnap:
+      activeTool !== "none" && isQuestionDockTool(activeTool) ? sheetSnap : "mid",
   });
   const isDesktopLayout = useDesktopLayout();
   const mapChromeControlInset: MapChromeControlInset =
@@ -484,6 +485,7 @@ export function useMapScreenController() {
     showPlacementRecenter: activeTool !== "none",
     mapChromeControlInset,
     placementCrosshair: tools.placementCrosshair,
+    mapAttentionActive,
     handleMapClick,
     handleMapViewportChange,
     handleMapPanStart,
