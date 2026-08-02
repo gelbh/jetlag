@@ -65,7 +65,10 @@ export function build_tentacle_elimination_region_json() {
 export function build_tentacle_poi_answer_elimination_region_json() {
   throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
 }
-export function build_spatial_voronoi_json() {
+export function build_spatial_voronoi_rings() {
+  throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
+}
+export function build_near_region_json() {
   throw new Error("jetlag-geometry-kernel pkg missing; run npm run wasm:build");
 }
 export default {};

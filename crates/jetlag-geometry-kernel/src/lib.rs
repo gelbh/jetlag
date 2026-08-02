@@ -35,7 +35,7 @@ use tentacle::{
 };
 use near_region::build_near_region as build_near_region_native;
 use types::{DiskSpecJson, EliminationUnionInputJson, NearRegionInputJson};
-use voronoi::spatial_voronoi_from_sites_json as spatial_voronoi_native;
+use voronoi::spatial_voronoi_rings_from_coords as spatial_voronoi_rings_native;
 use wasm_bindgen::prelude::*;
 
 fn js_err(msg: impl Into<String>) -> JsValue {
@@ -208,11 +208,12 @@ pub fn build_near_region_json(input_json: &str) -> Result<JsValue, JsValue> {
     ))
 }
 
-/// WASM export: spatial Voronoi cells for sites `[{lng,lat,properties},…]`.
+/// WASM export: packed Voronoi rings for `coords = [lng0,lat0,…]` (unique sites).
+/// Layout: per cell — vertex count, then lng/lat pairs (closed ring).
+/// Callers own uniqueness (TS wrapper dedupes); this path does not re-dedupe.
 #[wasm_bindgen]
-pub fn build_spatial_voronoi_json(sites_json: &str) -> Result<JsValue, JsValue> {
-    let json = spatial_voronoi_native(sites_json).map_err(js_err)?;
-    Ok(JsValue::from_str(&json))
+pub fn build_spatial_voronoi_rings(coords: &[f64]) -> Result<Vec<f64>, JsValue> {
+    spatial_voronoi_rings_native(coords).map_err(js_err)
 }
 
 /// WASM export: tentacle elimination within search disk. Anchor is `[lat,lng]` JSON.
