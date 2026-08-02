@@ -7,6 +7,7 @@ import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
 import { ViewOnlyQuestionBanner } from "./shared/readout/ViewOnlyQuestionBanner";
 import { ToolSection } from "./shared/panels/ToolSection";
 import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 import { RADAR_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
@@ -44,6 +45,7 @@ interface RadarPanelProps {
   isSubmitting?: boolean;
   viewOnly?: boolean;
   wizardStepRef?: RefObject<string>;
+  endGameActive?: boolean;
 }
 
 export function RadarPanel({
@@ -70,6 +72,7 @@ export function RadarPanel({
   isSubmitting = false,
   viewOnly = false,
   wizardStepRef,
+  endGameActive = false,
 }: RadarPanelProps) {
   const steps = stepsForMode(RADAR_STEPS, awaitHiderAnswer);
   const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
@@ -148,9 +151,9 @@ export function RadarPanel({
       {viewOnly ? <ViewOnlyQuestionBanner /> : null}
       {step === "distance" ? (
         <ToolSection first compact status="active">
-          <p className="text-xs text-ink-dim">
-            Radar tests your location at answer time, not your hiding zone.
-          </p>
+          {awaitHiderAnswer ? (
+            <QuestionTruthReferenceHint endGameActive={endGameActive} />
+          ) : null}
           <RadarDistancePicker
             radiusMeters={radiusMeters ?? 0}
             chooseCustom={chooseCustom}

@@ -50,6 +50,7 @@ export function useMatchingTool({
   refreshGps,
   ensurePointInGameArea,
   canSubmitQuestion = true,
+  endGameActive = false,
 }: UseMatchingToolParams) {
   const wizardStepRef = useRef("anchor");
   const finishPlacementRef = useRef(finishPlacement);
@@ -368,6 +369,7 @@ export function useMatchingTool({
         })
       }
       onPreviewCancel={() => setPreviewOpen(false)}
+      endGameActive={endGameActive}
     />
   );
 

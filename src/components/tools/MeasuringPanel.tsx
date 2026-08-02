@@ -34,6 +34,7 @@ import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 import { MEASURING_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
 interface MeasuringPanelProps {
   distanceUnit: DistanceUnit;
@@ -81,6 +82,7 @@ interface MeasuringPanelProps {
   costLabel?: string;
   isSubmitting?: boolean;
   wizardStepRef?: RefObject<string>;
+  endGameActive?: boolean;
 }
 
 export function MeasuringPanel({
@@ -125,6 +127,7 @@ export function MeasuringPanel({
   costLabel = "D3P1",
   isSubmitting = false,
   wizardStepRef,
+  endGameActive = false,
 }: MeasuringPanelProps) {
   const steps = stepsForMode(MEASURING_STEPS, awaitHiderAnswer);
   const { stepId: step, stepIndex, goNext, goBack, Stepper } = useToolWizard(
@@ -179,7 +182,11 @@ export function MeasuringPanel({
   const panelBody = (
     <>
         {step === "source" ? (
-          <MeasuringSourceStep
+          <>
+            {awaitHiderAnswer ? (
+              <QuestionTruthReferenceHint endGameActive={endGameActive} />
+            ) : null}
+            <MeasuringSourceStep
             measureFrom={measureFrom}
             optionChosen={optionChosen}
             usedMeasuringFromKinds={usedMeasuringFromKinds}
@@ -188,6 +195,7 @@ export function MeasuringPanel({
             locationCategory={locationCategory}
             onMeasureFromChange={onMeasureFromChange}
           />
+          </>
         ) : null}
 
         {step === "anchor" ? (

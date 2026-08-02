@@ -1,11 +1,17 @@
 import type { HiderTruthResult } from "../../domain/questions/ui";
+import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { GameReplyOption } from "../../domain/session/activity/sessionChat";
+import {
+  hiderTruthReferenceLabel,
+  hiderTruthReferenceLoadingLabel,
+} from "../tools/shared/questionTruthReferenceHint";
 import { LoadingReadout } from "../tools/shared/readout/LoadingReadout";
 
 interface HiderAnswerPickerProps {
   replyOptions: readonly GameReplyOption[];
   truth: HiderTruthResult | null;
   loading: boolean;
+  truthReferenceMode?: HiderTruthReferenceMode;
   onSelect: (option: GameReplyOption) => void;
 }
 
@@ -17,23 +23,27 @@ export function HiderAnswerPicker({
   replyOptions,
   truth,
   loading,
+  truthReferenceMode = "hidingZoneCenter",
   onSelect,
 }: HiderAnswerPickerProps) {
   const truthAvailable =
     truth !== null && !truth.unavailable && truth.replyId.length > 0;
   const gridClass =
     replyOptions.length > 2 ? "grid-cols-1" : "grid-cols-2";
+  const referenceLabel = hiderTruthReferenceLabel(truthReferenceMode);
 
   return (
     <div className="mt-3 space-y-2">
       {loading ? (
-        <LoadingReadout>Checking your station…</LoadingReadout>
+        <LoadingReadout>
+          {hiderTruthReferenceLoadingLabel(truthReferenceMode)}
+        </LoadingReadout>
       ) : truth?.unavailable ? (
         <p className="text-xs text-status-warning">{truth.label}</p>
       ) : truthAvailable ? (
         <p className="text-xs text-ink-secondary">
           <span className="font-semibold uppercase tracking-wide text-brand-blue">
-            At your station
+            {referenceLabel}
           </span>
           <span className="mx-1.5 text-ink-dim">·</span>
           <span className="text-ink">{truth.label}</span>
@@ -52,7 +62,7 @@ export function HiderAnswerPicker({
               onClick={() => onSelect(option)}
               aria-label={
                 isRecommended
-                  ? `${buttonLabel} (recommended at your station)`
+                  ? `${buttonLabel} (recommended ${referenceLabel.toLowerCase()})`
                   : buttonLabel
               }
               className={

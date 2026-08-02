@@ -50,6 +50,7 @@ export function useMeasuringTool({
   refreshGps,
   ensurePointInGameArea,
   canSubmitQuestion = true,
+  endGameActive = false,
 }: UseMeasuringToolParams) {
   const activeAnnotations = useMemo(
     () => annotations.filter(isActive),
@@ -173,6 +174,7 @@ export function useMeasuringTool({
       handleSearch={interactions.handleSearch}
       applySearchResult={interactions.applySearchResult}
       loadNearest={interactions.loadNearest}
+      endGameActive={endGameActive}
     />
   );
 

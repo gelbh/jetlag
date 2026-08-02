@@ -60,6 +60,7 @@ export function useThermometerTool({
   gpsError = null,
   refreshGps,
   ensurePointInGameArea,
+  endGameActive = false,
 }: UseThermometerToolParams) {
   const wizardStepRef = useRef("distance");
   const finishPlacementRef = useRef(finishPlacement);
@@ -386,6 +387,7 @@ export function useThermometerTool({
           config.panelError ?? session.error ?? gpsError ?? walkTracker.gpsError
         }
         wizardStepRef={wizardStepRef}
+        endGameActive={endGameActive}
       />
     ),
     walkCurrentPoint: walkTracker.currentPoint,

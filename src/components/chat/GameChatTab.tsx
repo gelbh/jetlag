@@ -6,6 +6,7 @@ import {
   questionAnswerDeadlineMs,
 } from "../../domain/questions";
 import type { HiderTruthResult } from "../../domain/questions/ui";
+import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import { mapToolDockShortLabel, isQuestionDockTool } from "../../domain/map/mapTools";
 import type { SessionMessageRecord } from "../../domain/session/activity/sessionChat";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
@@ -23,6 +24,7 @@ interface GameChatTabProps {
   senderUid: string;
   questionTruths?: ReadonlyMap<string, HiderTruthResult>;
   truthsLoading?: boolean;
+  truthReferenceMode?: HiderTruthReferenceMode;
   answerError?: string | null;
   onAnswerQuestion: (
     pendingQuestionId: string,
@@ -58,6 +60,7 @@ export function GameChatTab({
   senderUid,
   questionTruths,
   truthsLoading = false,
+  truthReferenceMode = "hidingZoneCenter",
   answerError = null,
   onAnswerQuestion,
   onDismissExpiredQuestion,
@@ -199,6 +202,7 @@ export function GameChatTab({
                       : null
                   }
                   loading={truthsLoading}
+                  truthReferenceMode={truthReferenceMode}
                   onSelect={(option) =>
                     void onAnswerQuestion(
                       message.pendingQuestionId!,

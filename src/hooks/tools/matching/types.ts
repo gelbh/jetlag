@@ -32,6 +32,7 @@ export interface UseMatchingToolParams {
   refreshGps: () => Promise<{ lat: number; lng: number }>;
   ensurePointInGameArea: (point: LatLngTuple) => boolean;
   canSubmitQuestion?: boolean;
+  endGameActive?: boolean;
 }
 
 export interface MatchingSessionConfig {
