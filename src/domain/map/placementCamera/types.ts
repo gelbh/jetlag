@@ -1,5 +1,5 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import type { LatLngBoundsExpression } from "leaflet";
+import type { MapBoundsExpression } from "../mapBounds";
 import type { BoundingBox } from "../../geometry/gameArea/gameAreaBounds";
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import type { GameArea } from "../annotations";
@@ -18,7 +18,7 @@ export type PlacementPhase =
   | "answered";
 
 export interface CameraTarget {
-  bounds: LatLngBoundsExpression;
+  bounds: MapBoundsExpression;
   minZoom?: number;
   maxZoom?: number;
   paddingBiasPx?: number;

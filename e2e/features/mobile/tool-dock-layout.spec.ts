@@ -171,7 +171,7 @@ test.describe("iPhone 13 PWA safe area", () => {
     const metrics = await page.evaluate(() => {
       const dock = document.querySelector(".jl-tool-dock");
       const bar = document.querySelector(".jl-tool-dock-bar");
-      const map = document.querySelector(".leaflet-container");
+      const map = document.querySelector(".maplibregl-map");
       const dockRect = dock?.getBoundingClientRect();
       const barRect = bar?.getBoundingClientRect();
       const mapRect = map?.getBoundingClientRect();

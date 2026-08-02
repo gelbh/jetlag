@@ -210,7 +210,7 @@ export function AdminMonitorGridWorkspace({
             enabled: true,
             handle: ".jl-ops-drag-handle",
             cancel:
-              "button,input,textarea,select,a,.jl-ops-tab,.leaflet-container,.leaflet-control",
+              "button,input,textarea,select,a,.jl-ops-tab,.maplibregl-map,.maplibregl-ctrl",
           }}
           resizeConfig={{
             enabled: true,
