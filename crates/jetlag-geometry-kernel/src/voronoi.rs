@@ -1,9 +1,7 @@
 //! Spatial Voronoi (Wave-2). Local equirectangular planar frame + voronator
 //! (d3-delaunay dual) clipped to a finite axis-aligned envelope.
-//!
-//! Output GeoJSON is hand-written with fixed-precision floats to keep the
-//! WASM↔JS string path competitive with d3-delaunay on small site sets.
 
+use core::fmt::Write as _;
 use serde::Deserialize;
 use serde_json::Value;
 use voronator::delaunator::Point as VPoint;
@@ -19,7 +17,6 @@ const MIN_EXTENT_MARGIN_METERS: f64 = 50_000.0;
 const COORD_PREC: usize = 7;
 
 #[derive(Debug, Clone, Deserialize)]
-#[cfg_attr(test, derive(serde::Serialize))]
 struct SiteIn {
     lng: f64,
     lat: f64,
@@ -55,146 +52,26 @@ fn dedupe_sites(sites: &[SiteIn]) -> Vec<SiteIn> {
     out
 }
 
-fn push_u64(buf: &mut String, mut value: u64) {
-    if value == 0 {
-        buf.push('0');
-        return;
-    }
-    let mut digits = [0u8; 20];
-    let mut n = 0;
-    while value > 0 {
-        digits[n] = (value % 10) as u8;
-        value /= 10;
-        n += 1;
-    }
-    while n > 0 {
-        n -= 1;
-        buf.push(char::from(b'0' + digits[n]));
-    }
-}
-
-fn push_f64(buf: &mut String, value: f64, prec: usize) {
+fn push_coord(buf: &mut String, value: f64) -> Result<(), String> {
     if !value.is_finite() {
-        buf.push('0');
-        return;
+        return Err("voronoi: non-finite coordinate".into());
     }
-    let scale = match prec {
-        5 => 100_000.0,
-        6 => 1_000_000.0,
-        7 => 10_000_000.0,
-        _ => 10f64.powi(prec as i32),
-    };
-    let mut scaled = (value * scale).round() as i64;
-    if scaled == 0 {
-        buf.push('0');
-        return;
-    }
-    if scaled < 0 {
-        buf.push('-');
-        scaled = -scaled;
-    }
-    let scale_i = scale as i64;
-    let int_part = (scaled / scale_i) as u64;
-    let mut frac = scaled % scale_i;
-    push_u64(buf, int_part);
-    if frac == 0 {
-        return;
-    }
-    buf.push('.');
-    let mut divisor = scale_i / 10;
-    while divisor > 0 && frac < divisor {
-        buf.push('0');
-        divisor /= 10;
-    }
-    while frac % 10 == 0 {
-        frac /= 10;
-    }
-    push_u64(buf, frac as u64);
+    write!(buf, "{value:.COORD_PREC$}").map_err(|e| e.to_string())?;
+    Ok(())
 }
 
-fn clip_rect_ring(clip: ClipRect) -> Vec<PlanarPt> {
-    let (min_x, min_y, max_x, max_y) = clip;
-    vec![
-        (min_x, min_y),
-        (max_x, min_y),
-        (max_x, max_y),
-        (min_x, max_y),
-        (min_x, min_y),
-    ]
-}
-
-fn bisect_clip_rect(a: PlanarPt, b: PlanarPt, clip: ClipRect) -> (Vec<PlanarPt>, Vec<PlanarPt>) {
-    let mid = ((a.0 + b.0) * 0.5, (a.1 + b.1) * 0.5);
-    let dx = b.0 - a.0;
-    let dy = b.1 - a.1;
-    let len = (dx * dx + dy * dy).sqrt().max(1.0);
-    let n_a = (-dx / len, -dy / len);
-    let n_b = (dx / len, dy / len);
-
-    let clip_half = |normal: PlanarPt| -> Vec<PlanarPt> {
-        let (min_x, min_y, max_x, max_y) = clip;
-        let corners = [
-            (min_x, min_y),
-            (max_x, min_y),
-            (max_x, max_y),
-            (min_x, max_y),
-        ];
-        let mut out = Vec::with_capacity(6);
-        let mut prev = corners[3];
-        let mut prev_inside = (prev.0 - mid.0) * normal.0 + (prev.1 - mid.1) * normal.1 >= 0.0;
-        for &curr in &corners {
-            let curr_inside = (curr.0 - mid.0) * normal.0 + (curr.1 - mid.1) * normal.1 >= 0.0;
-            if curr_inside {
-                if !prev_inside {
-                    let prev_d = (prev.0 - mid.0) * normal.0 + (prev.1 - mid.1) * normal.1;
-                    let curr_d = (curr.0 - mid.0) * normal.0 + (curr.1 - mid.1) * normal.1;
-                    let t = prev_d / (prev_d - curr_d);
-                    out.push((prev.0 + t * (curr.0 - prev.0), prev.1 + t * (curr.1 - prev.1)));
-                }
-                out.push(curr);
-            } else if prev_inside {
-                let prev_d = (prev.0 - mid.0) * normal.0 + (prev.1 - mid.1) * normal.1;
-                let curr_d = (curr.0 - mid.0) * normal.0 + (curr.1 - mid.1) * normal.1;
-                let t = prev_d / (prev_d - curr_d);
-                out.push((prev.0 + t * (curr.0 - prev.0), prev.1 + t * (curr.1 - prev.1)));
-            }
-            prev = curr;
-            prev_inside = curr_inside;
-        }
-        if out.len() < 3 {
-            return Vec::new();
-        }
-        let first = out[0];
-        out.push(first);
-        out
-    };
-
-    (clip_half(n_a), clip_half(n_b))
-}
-
-fn voronoi_rings_for_points(points: &[PlanarPt], clip: ClipRect) -> Result<Vec<Vec<PlanarPt>>, String> {
-    match points.len() {
-        0 => Ok(Vec::new()),
-        1 => Ok(vec![clip_rect_ring(clip)]),
-        2 => {
-            let (r0, r1) = bisect_clip_rect(points[0], points[1], clip);
-            if r0.is_empty() || r1.is_empty() {
-                return Err("voronoi: two-site clip produced empty cell".into());
-            }
-            Ok(vec![r0, r1])
-        }
-        _ => voronoi_rings_voronator(points, clip),
-    }
-}
-
-fn voronoi_rings_voronator(
+fn voronoi_rings_for_points(
     points: &[PlanarPt],
     clip: ClipRect,
 ) -> Result<Vec<Vec<PlanarPt>>, String> {
+    if points.is_empty() {
+        return Ok(Vec::new());
+    }
     let (min_x, min_y, max_x, max_y) = clip;
     let vpoints: Vec<VPoint> = points.iter().map(|&(x, y)| VPoint { x, y }).collect();
     let min = VPoint { x: min_x, y: min_y };
     let max = VPoint { x: max_x, y: max_y };
+    // voronator clips to [min,max] and handles 1–2 sites via its own helper corners.
     let diagram = VoronoiDiagram::new(&min, &max, &vpoints)
         .ok_or_else(|| "voronoi: collinear or degenerate input".to_string())?;
 
@@ -232,7 +109,6 @@ fn write_feature_collection_json(
     rings: &[Vec<PlanarPt>],
     lng_scale: f64,
 ) -> Result<String, String> {
-    // Rough capacity: ~80 bytes per ring vertex + properties.
     let vertex_estimate: usize = rings.iter().map(|r| r.len()).sum();
     let mut buf = String::with_capacity(64 + working.len() * 96 + vertex_estimate * 24);
     buf.push_str(r#"{"type":"FeatureCollection","features":["#);
@@ -255,9 +131,9 @@ fn write_feature_collection_json(
                 buf.push(',');
             }
             buf.push('[');
-            push_f64(&mut buf, x / lng_scale, COORD_PREC);
+            push_coord(&mut buf, x / lng_scale)?;
             buf.push(',');
-            push_f64(&mut buf, y / METERS_PER_DEGREE_LAT, COORD_PREC);
+            push_coord(&mut buf, y / METERS_PER_DEGREE_LAT)?;
             buf.push(']');
         }
         buf.push_str("]]}}");
@@ -280,10 +156,6 @@ fn spatial_voronoi_feature_collection_json(sites: &[SiteIn]) -> Result<String, S
     }
 
     let working = dedupe_sites(sites);
-    if working.is_empty() {
-        return Ok(r#"{"type":"FeatureCollection","features":[]}"#.to_string());
-    }
-
     let mean_lat = working.iter().map(|s| s.lat).sum::<f64>() / working.len() as f64;
     let lng_scale = meters_per_degree_lng(mean_lat);
     let points: Vec<PlanarPt> = working
@@ -307,14 +179,6 @@ fn spatial_voronoi_feature_collection_json(sites: &[SiteIn]) -> Result<String, S
     let clip = (min_x - margin, min_y - margin, max_x + margin, max_y + margin);
 
     let rings = voronoi_rings_for_points(&points, clip)?;
-    if rings.len() != working.len() {
-        return Err(format!(
-            "voronoi: cell count {} != site count {}",
-            rings.len(),
-            working.len()
-        ));
-    }
-
     write_feature_collection_json(&working, &rings, lng_scale)
 }
 
@@ -457,4 +321,3 @@ mod tests {
         assert_eq!(fc["features"].as_array().unwrap().len(), 4);
     }
 }
-
