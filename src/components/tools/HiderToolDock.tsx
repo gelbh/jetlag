@@ -64,6 +64,7 @@ export function HiderToolDock({
             <button
               type="button"
               onClick={onExpansion}
+              disabled={inactive}
               className="jl-tool-slot"
               aria-label="Expansion"
             >
@@ -91,6 +92,7 @@ export function HiderToolDock({
           <button
             type="button"
             onClick={onRecenter}
+            disabled={inactive}
             className="jl-tool-slot"
             aria-label="Recenter map on play area"
           >

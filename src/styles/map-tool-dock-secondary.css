@@ -1,7 +1,0 @@
-/* map-tool-dock-secondary.css — retired dual-row fold; island tokens live in map-bottom-chrome.css */
-
-:root {
-  --dock-secondary-height: 0px;
-  --dock-row-gap: 0px;
-  --dock-primary-content-height: var(--dock-island-height, 3.25rem);
-}

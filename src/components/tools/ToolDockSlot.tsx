@@ -116,6 +116,7 @@ interface ToolDockHistorySlotsProps {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  inactive?: boolean;
 }
 
 export function ToolDockHistorySlots({
@@ -123,16 +124,14 @@ export function ToolDockHistorySlots({
   canRedo,
   onUndo,
   onRedo,
+  inactive = false,
 }: ToolDockHistorySlotsProps) {
   return (
-    <div
-      className="jl-tool-dock-group jl-tool-dock-group-history"
-      aria-label="History"
-    >
+    <div className="jl-tool-dock-group jl-tool-dock-group-history">
       <MotionPressable
         type="button"
         onClick={onUndo}
-        disabled={!canUndo}
+        disabled={inactive || !canUndo}
         className="jl-tool-slot"
         aria-label="Undo last annotation"
       >
@@ -144,7 +143,7 @@ export function ToolDockHistorySlots({
       <MotionPressable
         type="button"
         onClick={onRedo}
-        disabled={!canRedo}
+        disabled={inactive || !canRedo}
         className="jl-tool-slot"
         aria-label="Redo last annotation"
       >
@@ -161,18 +160,21 @@ interface ToolDockWideActionsProps {
   drawMenuOpen: boolean;
   markupActive: boolean;
   onToggleDrawMenu: () => void;
+  inactive?: boolean;
 }
 
 export function ToolDockWideActions({
   drawMenuOpen,
   markupActive,
   onToggleDrawMenu,
+  inactive = false,
 }: ToolDockWideActionsProps) {
   return (
     <div className="jl-tool-dock-group jl-tool-dock-group-end">
       <MotionPressable
         type="button"
         onClick={onToggleDrawMenu}
+        disabled={inactive}
         className={`jl-tool-slot ${
           drawMenuOpen || markupActive ? "jl-tool-slot-active" : ""
         }`}

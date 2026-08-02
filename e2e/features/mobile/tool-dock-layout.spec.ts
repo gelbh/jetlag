@@ -167,10 +167,11 @@ test.describe("iPhone 13 PWA safe area", () => {
     page,
   }) => {
     const metrics = await page.evaluate(() => {
-      const dock = document.querySelector(".jl-map-bottom-chrome");
+      const host = document.querySelector(".jl-map-bottom-chrome-host");
+      const chrome = document.querySelector(".jl-map-bottom-chrome");
       const hunt = document.querySelector(".jl-map-island--hunt");
       const map = document.querySelector(".maplibregl-map");
-      const dockRect = dock?.getBoundingClientRect();
+      const hostRect = host?.getBoundingClientRect();
       const huntRect = hunt?.getBoundingClientRect();
       const mapRect = map?.getBoundingClientRect();
       const slots = [...document.querySelectorAll(".jl-tool-slot")].filter(
@@ -180,25 +181,26 @@ test.describe("iPhone 13 PWA safe area", () => {
         ...slots.map((el) => el.getBoundingClientRect().bottom),
         0,
       );
-      const dockStyle = dock ? getComputedStyle(dock) : null;
+      const hostStyle = host ? getComputedStyle(host) : null;
+      const chromeStyle = chrome ? getComputedStyle(chrome) : null;
       const huntStyle = hunt ? getComputedStyle(hunt) : null;
       return {
         viewportHeight: window.innerHeight,
-        dockBottom: dockRect?.bottom ?? 0,
+        dockBottom: hostRect?.bottom ?? 0,
         barHeight: huntRect?.height ?? 0,
         barBottom: huntRect?.bottom ?? 0,
         mapBottom: mapRect?.bottom ?? 0,
-        dockPaddingBottom: dockStyle
-          ? Number.parseFloat(dockStyle.paddingBottom)
+        dockPaddingBottom: chromeStyle
+          ? Number.parseFloat(chromeStyle.paddingBottom)
           : 0,
-        dockBottomOffset: dockStyle
-          ? Number.parseFloat(dockStyle.bottom)
+        dockBottomOffset: hostStyle
+          ? Number.parseFloat(hostStyle.bottom)
           : 0,
         barPaddingBottom: huntStyle
           ? Number.parseFloat(huntStyle.paddingBottom)
           : 0,
         lowestSlotBottom,
-        gapBelowDock: window.innerHeight - (dockRect?.bottom ?? 0),
+        gapBelowDock: window.innerHeight - (hostRect?.bottom ?? 0),
         deadSpaceBelowIcons:
           (huntRect?.bottom ?? 0) -
           lowestSlotBottom -
@@ -210,7 +212,7 @@ test.describe("iPhone 13 PWA safe area", () => {
 
     expect(metrics.backdropOnMap).toBeNull();
     expect(metrics.islandCount).toBeGreaterThanOrEqual(2);
-    // Wrapper chassis: flush to physical bottom, pad absorbs safe-area.
+    // Host chassis: flush to physical bottom; chrome pad absorbs safe-area.
     expect(metrics.dockBottomOffset).toBeLessThanOrEqual(1);
     expect(metrics.gapBelowDock).toBeLessThanOrEqual(2);
     expect(
@@ -233,18 +235,19 @@ test.describe("iPhone 13 PWA safe area", () => {
   }) => {
     await injectStandaloneDisplayMode(page);
     await page.reload();
-    await expect(page.locator(".jl-tool-dock")).toBeVisible();
+    await expect(page.locator(".jl-map-bottom-chrome-host")).toBeVisible();
     await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
 
     const metrics = await page.evaluate(() => {
-      const dock = document.querySelector(".jl-tool-dock");
-      const dockRect = dock?.getBoundingClientRect();
-      const dockStyle = dock ? getComputedStyle(dock) : null;
+      const host = document.querySelector(".jl-map-bottom-chrome-host");
+      const chrome = document.querySelector(".jl-map-bottom-chrome");
+      const hostRect = host?.getBoundingClientRect();
+      const chromeStyle = chrome ? getComputedStyle(chrome) : null;
       return {
         viewportHeight: window.innerHeight,
-        dockBottom: dockRect?.bottom ?? 0,
-        dockPaddingBottom: dockStyle
-          ? Number.parseFloat(dockStyle.paddingBottom)
+        dockBottom: hostRect?.bottom ?? 0,
+        dockPaddingBottom: chromeStyle
+          ? Number.parseFloat(chromeStyle.paddingBottom)
           : 0,
       };
     });

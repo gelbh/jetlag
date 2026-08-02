@@ -21,11 +21,34 @@ describe("MapBottomChrome", () => {
     ).toBeInTheDocument();
   });
 
-  it("omits history region when history is undefined", () => {
-    const { container } = render(
-      <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
-    );
-    expect(container.querySelector('[data-island="history"]')).toBeNull();
-    expect(container.querySelector('[data-island="hunt"]')).not.toBeNull();
-  });
+it("omits history region when history is undefined", () => {
+  const { container } = render(
+    <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
+  );
+  expect(container.querySelector('[data-island="history"]')).toBeNull();
+  expect(container.querySelector('[data-island="hunt"]')).not.toBeNull();
+});
+
+it("wraps phone chrome in a fixed host", () => {
+  const { container } = render(
+    <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
+  );
+  expect(container.querySelector(".jl-map-bottom-chrome-host")).not.toBeNull();
+  expect(
+    container.querySelector(".jl-map-bottom-chrome-host--rail"),
+  ).toBeNull();
+});
+
+it("marks chrome inactive without leaving islands clickable via CSS class", () => {
+  const { container } = render(
+    <MapBottomChrome
+      layout="phone"
+      inactive
+      hunt={<button type="button">Radar</button>}
+    />,
+  );
+  expect(
+    container.querySelector(".jl-map-bottom-chrome--inactive"),
+  ).not.toBeNull();
+});
 });

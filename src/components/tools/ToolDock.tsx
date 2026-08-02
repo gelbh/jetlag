@@ -105,85 +105,87 @@ export function ToolDock({
   };
 
   return (
-    <div
+    <MapBottomChrome
       ref={dockRef}
-      className={`jl-map-bottom-chrome-host${isRail ? " jl-map-bottom-chrome-host--rail" : ""}`}
+      layout={isRail ? "rail" : "phone"}
+      inactive={inactive}
       style={
         !isRail && viewportBottomInset > 0
           ? { bottom: `${viewportBottomInset}px` }
           : undefined
       }
-    >
-      <MapBottomChrome
-        layout={isRail ? "rail" : "phone"}
-        inactive={inactive}
-        history={
-          <ToolDockHistorySlots
-            canUndo={canUndo}
-            canRedo={canRedo}
-            onUndo={onUndo}
-            onRedo={onRedo}
-          />
-        }
-        hunt={
-          <div className="jl-map-island-hunt-inner">
-            {dockHighlight ? (
-              <div
-                aria-hidden={true}
-                className="jl-tool-dock-highlight"
-                style={{
-                  transform: `translate(${dockHighlight.x}px, ${dockHighlight.y}px)`,
-                  width: dockHighlight.width,
-                  height: dockHighlight.height,
-                }}
-              />
-            ) : null}
+      history={
+        <ToolDockHistorySlots
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onUndo={onUndo}
+          onRedo={onRedo}
+          inactive={inactive}
+        />
+      }
+      hunt={
+        <div className="jl-map-island-hunt-inner">
+          {dockHighlight ? (
             <div
-              ref={mainGroupRef}
-              className="jl-tool-dock-group jl-tool-dock-group-main"
-              aria-label="Question tools"
-            >
-              {visibleQuestionTools.map((toolId) => (
-                <ToolDockQuestionSlot
-                  key={toolId}
-                  toolId={toolId}
-                  activeTool={activeTool}
-                  canSubmitQuestion={canSubmitQuestion}
-                  onSelect={selectTool}
-                />
-              ))}
-            </div>
-            <ToolDockWideActions
-              drawMenuOpen={drawMenuOpen}
-              markupActive={markupActive}
-              onToggleDrawMenu={() => {
-                setDrawMenuOpen((open) => !open);
+              aria-hidden={true}
+              className="jl-tool-dock-highlight"
+              style={{
+                transform: `translate(${dockHighlight.x}px, ${dockHighlight.y}px)`,
+                width: dockHighlight.width,
+                height: dockHighlight.height,
               }}
             />
+          ) : null}
+          <div
+            ref={mainGroupRef}
+            className="jl-tool-dock-group jl-tool-dock-group-main"
+            aria-label="Question tools"
+          >
+            {visibleQuestionTools.map((toolId) => (
+              <ToolDockQuestionSlot
+                key={toolId}
+                toolId={toolId}
+                activeTool={activeTool}
+                canSubmitQuestion={canSubmitQuestion}
+                onSelect={selectTool}
+              />
+            ))}
           </div>
-        }
-        session={
-          <SessionIslandSlots
-            onOpenChat={onOpenChat}
-            onOpenLog={onOpenLog}
-            onOpenReportProblem={onOpenReportProblem}
-            onOpenSettings={onOpenSettings}
-            hasUnreadChat={hasUnreadChat}
-            unreadCount={unreadCount}
+          <ToolDockWideActions
+            drawMenuOpen={drawMenuOpen}
+            markupActive={markupActive}
             inactive={inactive}
-            canStartEndGame={canStartEndGame}
-            onStartEndGame={onStartEndGame}
-            canRequestFoundHider={canRequestFoundHider}
-            onRequestFoundHider={onRequestFoundHider}
+            onToggleDrawMenu={() => {
+              if (inactive) {
+                return;
+              }
+              setDrawMenuOpen((open) => !open);
+            }}
           />
-        }
-      />
-
-      <ToolDockDrawMenu
-        open={drawMenuVisible}
-        activeTool={activeTool}
-        onSelect={selectTool}
-      />
-    </div>
+        </div>
+      }
+      session={
+        <SessionIslandSlots
+          onOpenChat={onOpenChat}
+          onOpenLog={onOpenLog}
+          onOpenReportProblem={onOpenReportProblem}
+          onOpenSettings={onOpenSettings}
+          hasUnreadChat={hasUnreadChat}
+          unreadCount={unreadCount}
+          inactive={inactive}
+          canStartEndGame={canStartEndGame}
+          onStartEndGame={onStartEndGame}
+          canRequestFoundHider={canRequestFoundHider}
+          onRequestFoundHider={onRequestFoundHider}
+        />
+      }
+      overlay={
+        <ToolDockDrawMenu
+          open={drawMenuVisible}
+          activeTool={activeTool}
+          onSelect={selectTool}
+        />
+      }
+    />
   );
 }
