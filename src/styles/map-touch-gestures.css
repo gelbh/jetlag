@@ -1,0 +1,19 @@
+/*
+ * react-map-gl mounts a full-size `[mapboxgl-children]` sibling after the canvas.
+ * Inline `height: 100%` + default `touch-action: auto` lets the browser claim
+ * two-finger pinch (a no-op under `user-scalable=no`) instead of MapLibre.
+ * Keep the layer for portals/markers but pass gestures through to the canvas.
+ */
+.maplibregl-map > [mapboxgl-children] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: auto !important;
+  pointer-events: none;
+  touch-action: none;
+}
+
+.maplibregl-map > [mapboxgl-children] .maplibregl-marker,
+.maplibregl-map > [mapboxgl-children] .maplibregl-popup {
+  pointer-events: auto;
+}
