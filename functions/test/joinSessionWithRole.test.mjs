@@ -195,3 +195,34 @@ test("role switch vacates prior role secret with full replace", async () => {
   assert.equal(secrets.seeker, undefined);
   assert.ok(secrets.observer);
 });
+
+test("returning member same-role heal skips passcode and remaps leader", async () => {
+  const writes = [];
+  const secret = newRoleSecret();
+  const sessionData = {
+    status: "active",
+    hostUid: "host",
+    hostAppVersion: "0.1.0",
+    memberUids: ["host", "old-seeker"],
+    memberRoles: { host: "hider", "old-seeker": "seeker" },
+    roleGates: { version: 1, leaders: { hider: "host", seeker: "old-seeker" } },
+  };
+  const db = buildMockDb({ sessionData, secrets: { seeker: secret }, writes });
+
+  const result = await joinSessionWithRoleHandler(db, { uid: "new-seeker" }, {
+    code: "ABCD",
+    role: "seeker",
+    clientVersion: "0.2.0",
+    returningMemberUid: "old-seeker",
+    persistedMyUid: "old-seeker",
+  });
+
+  assert.equal(result.sessionId, "sess-1");
+  assert.equal(result.becameLeader, false);
+  assert.equal(result.rolePasscode, undefined);
+  assert.equal(sessionData.memberRoles["new-seeker"], "seeker");
+  assert.equal(sessionData.memberRoles["old-seeker"], undefined);
+  assert.equal(sessionData.roleGates.leaders.seeker, "new-seeker");
+  assert.ok(!sessionData.memberUids.includes("old-seeker"));
+  assert.ok(sessionData.memberUids.includes("new-seeker"));
+});

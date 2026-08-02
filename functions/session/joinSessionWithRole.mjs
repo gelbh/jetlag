@@ -68,7 +68,14 @@ function applyLeaderPromotionOnRoleSwitch({
   };
 }
 
-function assertRolePasscodeForJoin(role, memberRoles, uid, rolePasscode, secrets) {
+function assertRolePasscodeForJoin(
+  role,
+  memberRoles,
+  uid,
+  rolePasscode,
+  secrets,
+  returningMemberUid,
+) {
   if (role === "observer") {
     const normalized = normalizeRolePasscode(rolePasscode ?? "");
     if (!normalized) {
@@ -84,7 +91,12 @@ function assertRolePasscodeForJoin(role, memberRoles, uid, rolePasscode, secrets
     return { becameLeader: false, returnedPasscode: undefined, secretsPatch: null, roleGatesPatch: null };
   }
 
-  const alreadyInRole = memberRoles[uid] === role;
+  // Same-role silent heal/rejoin: returning member already holds this role under
+  // the prior uid (auth drift). Do not require a passcode to reclaim membership.
+  const alreadyInRole =
+    memberRoles[uid] === role ||
+    (typeof returningMemberUid === "string" &&
+      memberRoles[returningMemberUid] === role);
   if (alreadyInRole) {
     return { becameLeader: false, returnedPasscode: undefined, secretsPatch: null, roleGatesPatch: null };
   }
@@ -229,6 +241,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
             uid,
             rolePasscode,
             secrets,
+            returningMemberUid,
           );
 
     if (passcodeResult.secretsPatch) {
@@ -253,6 +266,15 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
       returningMemberUid,
       currentHostUid: hostUid,
     });
+
+    // Keep role leadership with the healed uid when auth drift remaps membership.
+    if (heal.removedUid != null) {
+      for (const gateRole of ["seeker", "hider"]) {
+        if (roleGates.leaders[gateRole] === heal.removedUid) {
+          roleGates.leaders[gateRole] = uid;
+        }
+      }
+    }
 
     const sessionUpdate = {
       memberUids: heal.memberUids,

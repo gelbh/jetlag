@@ -35,6 +35,7 @@ import {
   sessionVersionMismatchMessage,
 } from "../../domain/session/meta/sessionVersion";
 import { APP_VERSION } from "../../domain/device/changelog";
+import { clientEnvUsesFirebaseEmulator } from "../../config/env";
 import { getFirestoreDb } from "../core/firebase/firebase";
 import { forceRefreshIdToken } from "../core/auth/forceRefreshIdToken";
 import { reportJoinPermissionDenied } from "../core/analytics/sentry";
@@ -71,6 +72,30 @@ function sessionsCollection() {
 }
 function sessionCodeDoc(code: string) {
   return doc(getFirestoreDb(), "sessionCodes", code);
+}
+
+/**
+ * Best-effort rollback when role-gate init fails after session docs land.
+ * Host can end + delete the code; hard session delete is rules-denied.
+ */
+async function rollbackCreatedRemoteSession(
+  sessionId: string,
+  code: string,
+): Promise<void> {
+  try {
+    await updateDoc(doc(sessionsCollection(), sessionId), {
+      endedAt: new Date().toISOString(),
+      status: "ended",
+      code: deleteField(),
+    });
+  } catch {
+    // Prefer ending over leaving an active session without secrets.
+  }
+  try {
+    await deleteDoc(sessionCodeDoc(code));
+  } catch {
+    // Code reclaim still works once the session is ended.
+  }
 }
 
 /** True when a sessionCodes doc may be deleted and the code reused. */
@@ -454,10 +479,17 @@ export async function createRemoteSession(
     createdAt,
   });
 
+  // CI e2e / local emulator run auth+firestore+storage only — no Functions.
+  // Leave ungated (legacy join); design: sessions without roleGates stay open.
+  if (clientEnvUsesFirebaseEmulator()) {
+    return session;
+  }
+
   // Stamp roleGates + secrets together via callable (do not gate without secrets).
   try {
     await initSessionRoleGates(sessionRef.id);
   } catch (error) {
+    await rollbackCreatedRemoteSession(sessionRef.id, code);
     throw new Error(
       "Couldn't set up role codes for this session. Try creating again.",
       { cause: error },
