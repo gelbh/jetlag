@@ -13,6 +13,8 @@ import {
   scaleDashArray,
   useZoomAdaptiveWeight,
 } from "../../../hooks/map/useZoomAdaptiveWeight";
+import { useZoomCssScale } from "../../../hooks/map/useZoomCssScale";
+import { compensateZoomTransformWeight } from "../../../domain/map/zoomTransformCompensation";
 
 interface GameAreaMaskProps {
   gameArea: GameArea;
@@ -45,6 +47,7 @@ function renderGameAreaPolygons(
     weight?: number;
     fillColor?: string;
     fillOpacity?: number;
+    noClip?: boolean;
   },
 ) {
   if (area.type === "MultiPolygon") {
@@ -78,22 +81,33 @@ export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
   );
   const outsideTint = framing ? FRAMING_OUTSIDE_TINT : PLAY_OUTSIDE_TINT;
   const baseWeight = framing ? FRAMING_BASE_WEIGHT : PLAY_BASE_WEIGHT;
-  const weight = useZoomAdaptiveWeight(baseWeight);
+  const logicalWeight = useZoomAdaptiveWeight(baseWeight);
+  const cssScale = useZoomCssScale();
+  const weight = compensateZoomTransformWeight(logicalWeight, cssScale);
   const borderOptions = framing
     ? {
         color: MAP_ANNOTATION_COLORS.playArea,
         weight,
-        dashArray: scaleDashArray(FRAMING_DASH, weight, FRAMING_BASE_WEIGHT),
+        dashArray: scaleDashArray(
+          FRAMING_DASH,
+          logicalWeight,
+          FRAMING_BASE_WEIGHT,
+        ),
       }
     : {
         color: MAP_ANNOTATION_COLORS.playArea,
         weight,
       };
+  const outsideTintOptions = { ...outsideTint, noClip: true as const };
 
   return (
     <Fragment>
       {outsideMask
-        ? renderGameAreaPolygons(outsideMask, "outside-mask", outsideTint)
+        ? renderGameAreaPolygons(
+            outsideMask,
+            "outside-mask",
+            outsideTintOptions,
+          )
         : null}
       {exteriorStrokeRings.map((ring, index) => (
         <Polyline

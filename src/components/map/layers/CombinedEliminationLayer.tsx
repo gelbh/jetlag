@@ -79,19 +79,21 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
         <Fragment key={`combined-elimination-${index}`}>
           {overlayLayers.map((layer, layerIndex) => {
             const isTopLayer = layerIndex === overlayLayers.length - 1;
+            const pathOptions = {
+              ...layer,
+              noClip: true,
+              className:
+                pulsing && isTopLayer
+                  ? "annotation-pulse"
+                  : layer.className,
+            };
 
             return (
               <Polygon
                 key={`combined-elimination-${index}-${layerIndex}`}
                 positions={rings}
                 interactive={false}
-                pathOptions={{
-                  ...layer,
-                  className:
-                    pulsing && isTopLayer
-                      ? "annotation-pulse"
-                      : layer.className,
-                }}
+                pathOptions={pathOptions}
               />
             );
           })}

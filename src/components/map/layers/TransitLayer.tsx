@@ -1,6 +1,6 @@
 import { memo, useMemo } from "react";
 import L from "leaflet";
-import { Marker, Polyline, Popup } from "react-leaflet";
+import { Marker, Popup } from "react-leaflet";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import type {
@@ -14,6 +14,7 @@ import {
   filterTransitVehiclesForViewport,
   type MapViewportBounds,
 } from "../../../domain/map/transitViewport";
+import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import {
   getTransitStopIcon,
   getTransitVehicleIcon,
@@ -64,7 +65,7 @@ export const TransitLayer = memo(function TransitLayer({
   return (
     <>
       {visibleRoutes.map((route) => (
-        <Polyline
+        <CompensatedPolyline
           key={`route-${route.id}`}
           positions={route.positions as LatLngTuple[]}
           renderer={transitRouteRenderer}
@@ -78,7 +79,7 @@ export const TransitLayer = memo(function TransitLayer({
             {route.name}
             {route.ref ? ` (${route.ref})` : ""}
           </Popup>
-        </Polyline>
+        </CompensatedPolyline>
       ))}
 
       {visibleStops.map((stop) => (

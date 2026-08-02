@@ -20,6 +20,7 @@ export function renderMaskPolygon(
     weight: selected ? 3 : 0,
     fillColor: color,
     fillOpacity: 0.35,
+    noClip: true,
     className: pulsing ? "annotation-pulse" : undefined,
   };
 

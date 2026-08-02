@@ -1,7 +1,8 @@
-import { CircleMarker } from "react-leaflet";
+
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { TransitStation } from "../../../domain/session/hiding/hidingZone";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
 
 interface HidingZoneStationsLayerProps {
   stations: readonly TransitStation[];
@@ -21,7 +22,7 @@ export function HidingZoneStationsLayer({
         const isSelected = selectedStation?.id === station.id;
 
         return (
-          <CircleMarker
+          <CompensatedCircleMarker
             key={station.id}
             center={center}
             radius={isSelected ? 8 : 6}

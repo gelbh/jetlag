@@ -1,5 +1,7 @@
 import { Fragment, type ReactNode } from "react";
-import { Circle, CircleMarker, Polygon } from "react-leaflet";
+import { Polygon } from "react-leaflet";
+import { CompensatedCircle } from "./CompensatedCircle";
+import { CompensatedCircleMarker } from "./CompensatedCircleMarker";
 import type { PathOptions } from "leaflet";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import { polygonFeatureToLeafletPolygonGroups } from "../../../domain/geometry/gameArea/geometry";
@@ -44,7 +46,7 @@ export function renderPointRadiusAnnotation({
 
   return (
     <Fragment key={annotationId}>
-      <Circle
+      <CompensatedCircle
         center={center}
         radius={radiusMeters}
         interactive={selectionEnabled}
@@ -57,7 +59,7 @@ export function renderPointRadiusAnnotation({
         }}
         eventHandlers={clickHandler}
       />
-      <CircleMarker
+      <CompensatedCircleMarker
         center={center}
         radius={6}
         interactive={selectionEnabled}
@@ -119,8 +121,8 @@ export function renderEditCircleWithMarker({
 }): ReactNode {
   return (
     <>
-      <Circle center={center} radius={radiusMeters} pathOptions={circleOptions} />
-      <CircleMarker
+      <CompensatedCircle center={center} radius={radiusMeters} pathOptions={circleOptions} />
+      <CompensatedCircleMarker
         center={center}
         radius={markerRadius}
         pathOptions={{
@@ -146,7 +148,7 @@ export function renderEditPointMarker({
   strokeColor?: string;
 }): ReactNode {
   return (
-    <CircleMarker
+    <CompensatedCircleMarker
       center={center}
       radius={radius}
       pathOptions={{

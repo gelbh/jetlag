@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { CircleMarker, Tooltip } from "react-leaflet";
+import { Tooltip } from "react-leaflet";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import {
   clusterSeekerLocations,
@@ -8,6 +8,7 @@ import {
 } from "../../../domain/session/live/liveMapLocations";
 import type { PlayerLocationRecord } from "../../../domain/session/activity/sessionChat";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
 
 interface LiveSeekerLocationsLayerProps {
   locations: readonly PlayerLocationRecord[];
@@ -32,7 +33,7 @@ export function LiveSeekerLocationsLayer({
         const count = cluster.members.length;
 
         return (
-          <CircleMarker
+          <CompensatedCircleMarker
             key={locationClusterStableKey(cluster)}
             center={center}
             radius={isSelf ? 10 : 9}
@@ -48,7 +49,7 @@ export function LiveSeekerLocationsLayer({
             <Tooltip direction="top" offset={[0, -8]} opacity={0.95}>
               {clusterTooltipLabel(count, "seeker", isSelf)}
             </Tooltip>
-          </CircleMarker>
+          </CompensatedCircleMarker>
         );
       })}
     </>
