@@ -27,7 +27,7 @@ export function useMeasuringDraftState(
   annotations: AnnotationRecord[],
   sessionRules?: SessionRulesInput,
 ) {
-  const wizardStepRef = useRef("anchor");
+  const wizardStepRef = useRef("place");
   const seaLevelRequestIdRef = useRef(0);
   const coastlineRequestIdRef = useRef(0);
   const linearRequestIdRef = useRef(0);

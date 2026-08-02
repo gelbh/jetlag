@@ -27,8 +27,11 @@ import { ToolSection } from "./shared/panels/ToolSection";
 import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
-import { MATCHING_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
-import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
+import { MATCHING_WIZARD } from "./shared/wizard/toolStepUtils";
+import {
+  toolWizardPhasePrimaryNav,
+  toolWizardSwipeNext,
+} from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
@@ -93,21 +96,29 @@ export function MatchingPanel({
   onRetry,
   wizardStepRef,
 }: MatchingPanelProps) {
-  const steps = stepsForMode(MATCHING_STEPS, awaitHiderAnswer);
   const {
-    stepId: step,
-    stepIndex,
-    setStepIndex,
+    phaseId,
+    stepId,
+    phaseIndex,
+    configureIndex,
+    setPhaseIndex,
     goNext,
     goBack,
     Stepper,
-  } = useToolWizard(steps, { wizardStepRef });
-  const categoryStepIndex = steps.findIndex((item) => item.id === "category");
+  } = useToolWizard(MATCHING_WIZARD, {
+    wizardStepRef,
+    awaitHiderAnswer,
+    toolCommitLabel: awaitHiderAnswer
+      ? `Send to hiders (${costLabel})`
+      : "Add match question",
+    isSubmitting,
+  });
+  const configurePhaseIndex = MATCHING_WIZARD.phases.indexOf("configure");
 
   const handleCategoryChange = (nextCategoryId: MatchingCategoryId) => {
     onCategoryChange(nextCategoryId);
-    if (categoryStepIndex >= 0) {
-      setStepIndex(categoryStepIndex);
+    if (configurePhaseIndex >= 0) {
+      setPhaseIndex(configurePhaseIndex);
     }
   };
 
@@ -182,20 +193,26 @@ export function MatchingPanel({
     : null;
 
   const canGoNext =
-    (step === "anchor" && hasSeekerPoint && !loading) ||
-    (step === "category" && categoryAvailable && categoryChosen) ||
-    (step === "resolve" && resolveComplete && !loading);
-  const canSwipeNext = toolWizardSwipeNext(canGoNext, stepIndex, steps.length);
+    (phaseId === "place" && hasSeekerPoint && !loading) ||
+    (phaseId === "configure" &&
+      stepId === "category" &&
+      categoryAvailable &&
+      categoryChosen) ||
+    (phaseId === "configure" &&
+      stepId === "resolve" &&
+      resolveComplete &&
+      !loading);
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
 
   const matchingAnswerStepReadout =
-    step === "answer" && !nullAnswer && nearestFeatureSummary ? (
+    phaseId === "ask" && !nullAnswer && nearestFeatureSummary ? (
       <ResolvedReadout caption={featureCountLabel}>
         {nearestFeatureSummary}
       </ResolvedReadout>
     ) : null;
 
   const matchingAnswerStepActions =
-    step === "answer" ? (
+    phaseId === "ask" && !awaitHiderAnswer ? (
       <>
         <BinaryAnswerPicker
           value={answer}
@@ -208,32 +225,24 @@ export function MatchingPanel({
             The map shows the shaded area for your choice.
           </p>
         ) : null}
-        <button
-          type="button"
-          onClick={onCommit}
-          disabled={!canCommit}
-          aria-busy={isSubmitting}
-          className="btn-primary w-full disabled:opacity-40"
-        >
-          {isSubmitting ? "Sending…" : "Add match question"}
-        </button>
       </>
     ) : null;
 
-  const matchingResolveSendActions =
-    step === "resolve" && awaitHiderAnswer ? (
+  const matchingSendActions =
+    phaseId === "ask" && awaitHiderAnswer ? (
       <SendToHidersButton
         costLabel={costLabel}
         isSubmitting={isSubmitting}
         disabled={!canCommit}
         onClick={onCommit}
+        showButton={false}
         instruction="Hiders answer yes or no in game chat once you send this question."
       />
     ) : null;
 
   const panelBody = (
     <>
-      {step === "category" ? (
+      {phaseId === "configure" && stepId === "category" ? (
         <ToolSection first compact status="active">
           {awaitHiderAnswer ? (
             <QuestionTruthReferenceHint />
@@ -266,7 +275,7 @@ export function MatchingPanel({
         </ToolSection>
       ) : null}
 
-      {step === "anchor" ? (
+      {phaseId === "place" ? (
         <ToolSection first compact status="active">
           <AnchorControls
             gpsLoading={gpsLoading}
@@ -282,7 +291,7 @@ export function MatchingPanel({
         </ToolSection>
       ) : null}
 
-      {step === "resolve" ? (
+      {phaseId === "configure" && stepId === "resolve" ? (
         <ToolSection first compact status="active">
           {loadingIndicator}
           {nullAnswer && categoryId ? (
@@ -301,7 +310,7 @@ export function MatchingPanel({
         </ToolSection>
       ) : null}
 
-      {step === "answer" && matchingAnswerStepReadout ? (
+      {phaseId === "ask" && matchingAnswerStepReadout ? (
         <ToolSection first compact status="active">
           {matchingAnswerStepReadout}
         </ToolSection>
@@ -310,11 +319,7 @@ export function MatchingPanel({
   );
 
   const stickyFooterActions =
-    step === "answer"
-      ? matchingAnswerStepActions
-      : step === "resolve"
-        ? matchingResolveSendActions
-        : null;
+    matchingAnswerStepActions ?? matchingSendActions;
 
   const answerFooter = stickyFooterActions ? (
     <ToolSection first compact status="active">
@@ -329,11 +334,17 @@ export function MatchingPanel({
       stepper={
         <Stepper
           nav={{
-            stepIndex,
-            stepCount: steps.length,
+            canGoBack:
+              phaseIndex > 0 ||
+              (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
-            onNext: goNext,
-            canGoNext,
+            ...toolWizardPhasePrimaryNav({
+              phaseId,
+              goNext,
+              onCommit,
+              canGoNext,
+              canCommit,
+            }),
           }}
         />
       }
@@ -346,9 +357,9 @@ export function MatchingPanel({
         }
       >
         <WizardSwipeSurface
-          stepId={step}
-          stepIndex={stepIndex}
-          canGoBack={stepIndex > 0}
+          stepId={stepId}
+          stepIndex={phaseIndex}
+          canGoBack={phaseIndex > 0}
           canGoNext={canSwipeNext}
           onBack={goBack}
           onNext={goNext}

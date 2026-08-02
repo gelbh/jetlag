@@ -23,7 +23,7 @@ import {
 test.setTimeout(120_000);
 
 test.describe("multiplayer question tools", () => {
-  test("radar send to hiders stays in viewport on distance step", async ({
+  test("radar send to hiders stays in viewport on send step", async ({
     hostHider,
   }) => {
     const { hostPage } = hostHider;
@@ -33,6 +33,8 @@ test.describe("multiplayer question tools", () => {
     await waitForWizardNext(hostPage);
     await advanceWizard(hostPage);
     await selectFirstRadarDistance(hostPage);
+    await waitForWizardNext(hostPage);
+    await advanceWizard(hostPage);
     await expectSendToHidersInViewport(hostPage);
   });
 

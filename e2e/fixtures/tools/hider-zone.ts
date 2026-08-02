@@ -56,7 +56,7 @@ export async function confirmInitialHidingZoneAtStation(
   await openHidingZoneWizard(page);
   await advanceHidingZoneWizardToLocation(page);
   await selectTransitStation(page, stationName);
-  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
   await confirmHidingZone(page);
   await expect(page.getByRole("button", { name: "Play move" })).toBeVisible({
     timeout: 15_000,

@@ -91,7 +91,7 @@ export function useTentacleTool({
   armPlacement,
   canSubmitQuestion = true,
 }: UseTentacleToolParams) {
-  const wizardStepRef = useRef("anchor");
+  const wizardStepRef = useRef("place");
   const finishPlacementRef = useRef(finishPlacement);
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;
@@ -252,7 +252,7 @@ export function useTentacleTool({
         return false;
       }
 
-      if (wizardStepRef.current !== "anchor") {
+      if (wizardStepRef.current !== "place") {
         return false;
       }
 

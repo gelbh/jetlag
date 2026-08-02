@@ -18,36 +18,44 @@ export async function expandToolPanelIfPeeked(page: Page) {
   await expect(expand).toBeHidden({ timeout: 5_000 });
 }
 
-/** Reads "N of M" from the wizard stepper; throws while no counter is rendered. */
-export async function currentWizardStep(page: Page): Promise<number> {
-  const stepper = page.getByRole("list", { name: "Progress" }).first();
-  const text = await stepper.innerText();
-  const match = text.match(/(\d+) of \d+/);
-  if (!match) {
-    throw new Error(`Wizard stepper has no step counter: "${text}"`);
+/** Phase rail + configure continuum fingerprint for advance/retreat assertions. */
+export async function wizardNavFingerprint(page: Page): Promise<string> {
+  const phase = page
+    .getByRole("list", { name: "Wizard phases" })
+    .locator('[role="listitem"][aria-current="step"]');
+  const phaseLabel = (await phase.getAttribute("aria-label"))?.trim();
+  if (!phaseLabel) {
+    throw new Error("Wizard phase rail has no current phase");
   }
-  return Number(match[1]);
+
+  const continuum = page.getByRole("list", { name: "Configure steps" });
+  if (await continuum.isVisible().catch(() => false)) {
+    const text = await continuum.innerText();
+    const match = text.match(/(\d+) of \d+/);
+    return `${phaseLabel}:${match?.[1] ?? "0"}`;
+  }
+  return `${phaseLabel}:0`;
 }
 
-/** Clicks Next and verifies the click registered by watching the step counter. */
+/** Clicks Continue and verifies the click registered via phase/continuum change. */
 export async function advanceWizard(page: Page) {
   await expandToolPanelIfPeeked(page);
-  const before = await currentWizardStep(page);
-  const next = page.getByRole("button", { name: "Next" });
+  const before = await wizardNavFingerprint(page);
+  const next = page.getByRole("button", { name: "Continue" });
   await expect(next).toBeEnabled({ timeout: 15_000 });
   await next.click();
   await expect
-    .poll(() => currentWizardStep(page), { timeout: 15_000 })
-    .toBe(before + 1);
+    .poll(() => wizardNavFingerprint(page), { timeout: 15_000 })
+    .not.toBe(before);
 }
 
-/** Clicks Previous step and verifies the step counter decremented. */
+/** Clicks Previous step and verifies nav fingerprint changed. */
 export async function retreatWizard(page: Page) {
-  const before = await currentWizardStep(page);
+  const before = await wizardNavFingerprint(page);
   await page.getByRole("button", { name: "Previous step" }).click();
   await expect
-    .poll(() => currentWizardStep(page), { timeout: 15_000 })
-    .toBe(before - 1);
+    .poll(() => wizardNavFingerprint(page), { timeout: 15_000 })
+    .not.toBe(before);
 }
 
 /** Clicks an answer option and verifies the tap registered (aria-pressed). */
@@ -65,7 +73,7 @@ export async function waitForMapPlacementCrosshair(page: Page) {
 }
 
 export async function waitForWizardNext(page: Page) {
-  await expect(page.getByRole("button", { name: "Next" })).toBeEnabled({
+  await expect(page.getByRole("button", { name: "Continue" })).toBeEnabled({
     timeout: 60_000,
   });
 }
@@ -139,6 +147,8 @@ export async function sendRadarToHiders(page: Page) {
   await waitForWizardNext(page);
   await advanceWizard(page);
   await selectFirstRadarDistance(page);
+  await waitForWizardNext(page);
+  await advanceWizard(page);
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
@@ -168,6 +178,8 @@ export async function sendMatchingToHiders(page: Page) {
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForGeoLoadingIdle(page);
+  await waitForWizardNext(page);
+  await advanceWizard(page);
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
@@ -197,32 +209,49 @@ export async function sendMeasuringToHiders(page: Page) {
   await advanceWizard(page);
   await clickMapAt(page, 0.6, 0.4);
   await waitForGeoLoadingIdle(page);
+  await waitForWizardNext(page);
+  await advanceWizard(page);
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
 }
 
-export async function completeThermometerSolo(page: Page) {
+async function placeThermometerManualPins(page: Page) {
   await clickToolDockButton(page, "Thermometer");
   await page.getByRole("button", { name: "Manual pins" }).click();
-  await advanceWizard(page);
-  await clickMapAt(page, 0.35, 0.5);
-  await clickMapAt(page, 0.65, 0.5);
+  await waitForMapPlacementCrosshair(page);
+  // Span ~60% of the map so crow-flies exceeds the default 1/2 mi preset
+  // (0.35→0.65 landed at ~0.48 mi and tripped travelTooShort / canCommit).
+  await clickMapAt(page, 0.2, 0.5);
+  await clickMapAt(page, 0.8, 0.5);
+  await expandToolPanelIfPeeked(page);
+  await expect(page.getByText("Both pins are set.")).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(
+    page.getByText("Movement is shorter than the selected distance."),
+  ).toHaveCount(0);
   await waitForWizardNext(page);
   await advanceWizard(page);
+  await waitForWizardNext(page);
+  await advanceWizard(page);
+}
+
+export async function completeThermometerSolo(page: Page) {
+  await placeThermometerManualPins(page);
   await chooseAnswer(page, "Hotter");
-  await page.getByRole("button", { name: "Add thermometer" }).click();
+  const commit = page.getByRole("button", { name: "Add thermometer" });
+  await expect(commit).toHaveCount(1);
+  await expect(commit).toBeEnabled({ timeout: 15_000 });
+  await commit.click();
   await expectMapHasAnnotations(page);
   await expectEliminationMaskVisible(page);
 }
 
 export async function sendThermometerToHiders(page: Page) {
-  await clickToolDockButton(page, "Thermometer");
-  await page.getByRole("button", { name: "Manual pins" }).click();
-  await advanceWizard(page);
-  await clickMapAt(page, 0.35, 0.5);
-  await clickMapAt(page, 0.65, 0.5);
+  await placeThermometerManualPins(page);
   const sendButton = page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON });
+  await expect(sendButton).toHaveCount(1);
   await expect(sendButton).toBeEnabled({ timeout: 15_000 });
   await sendButton.click();
   await dismissActiveToolPanel(page);
@@ -262,6 +291,8 @@ export async function sendTentacleToHiders(page: Page) {
   await waitForWizardNext(page);
   await advanceWizard(page);
   await waitForGeoLoadingIdle(page);
+  await waitForWizardNext(page);
+  await advanceWizard(page);
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);

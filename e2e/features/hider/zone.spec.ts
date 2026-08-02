@@ -51,13 +51,13 @@ test.describe("hider flows", () => {
       timeout: 15_000,
     });
     await selectTransitStation(guestPage, "Dublin Central");
-    await guestPage.getByRole("button", { name: "Next" }).click();
+    await guestPage.getByRole("button", { name: "Continue" }).click();
     await confirmHidingZone(guestPage, true);
     await expect(guestPage.getByText(/different location/i)).toBeVisible();
 
     await guestPage.getByRole("button", { name: "Previous step" }).click();
     await selectTransitStation(guestPage, "North Station");
-    await guestPage.getByRole("button", { name: "Next" }).click();
+    await guestPage.getByRole("button", { name: "Continue" }).click();
     await confirmHidingZone(guestPage, true);
 
     await openChat(hostPage);

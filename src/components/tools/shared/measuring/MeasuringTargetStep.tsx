@@ -293,7 +293,7 @@ export function MeasuringAnswerSection({
 
   const actions =
     awaitHiderAnswer ? (
-      step === "target" ? (
+      step === "ask" ? (
         <SendToHidersButton
           costLabel={costLabel}
           isSubmitting={isSubmitting}
@@ -301,6 +301,7 @@ export function MeasuringAnswerSection({
             !hasAvailableMeasureOptions || !hasSeekerPoint || !hasTargetPoint
           }
           onClick={onCommit}
+          showButton={false}
           instruction="Hiders answer closer or further in game chat once you send this question."
         />
       ) : null
@@ -319,21 +320,6 @@ export function MeasuringAnswerSection({
             the question.
           </p>
         ) : null}
-        {step === "answer" ? (
-          <button
-            type="button"
-            onClick={onCommit}
-            disabled={
-              !hasAvailableMeasureOptions ||
-              !hasSeekerPoint ||
-              !hasTargetPoint ||
-              answer === null
-            }
-            className="btn-primary w-full disabled:opacity-40"
-          >
-            Add measure question
-          </button>
-        ) : null}
       </>
     );
 
@@ -341,7 +327,7 @@ export function MeasuringAnswerSection({
     return readout ? (
       <ToolSection
         compact
-        first={step === "answer"}
+        first={step === "ask"}
         status={answer !== null ? "complete" : "active"}
       >
         {readout}
@@ -353,7 +339,7 @@ export function MeasuringAnswerSection({
     return actions ? (
       <ToolSection
         compact
-        first={step === "answer"}
+        first={step === "ask"}
         status={answer !== null ? "complete" : "active"}
       >
         {actions}
@@ -364,7 +350,7 @@ export function MeasuringAnswerSection({
   return (
     <ToolSection
       compact
-      first={step === "answer"}
+      first={step === "ask"}
       status={answer !== null ? "complete" : "active"}
     >
       {readout}

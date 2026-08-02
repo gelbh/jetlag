@@ -51,7 +51,7 @@ export function useMatchingTool({
   ensurePointInGameArea,
   canSubmitQuestion = true,
 }: UseMatchingToolParams) {
-  const wizardStepRef = useRef("anchor");
+  const wizardStepRef = useRef("place");
   const finishPlacementRef = useRef(finishPlacement);
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;
@@ -213,7 +213,7 @@ export function useMatchingTool({
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
-      if (!active || wizardStepRef.current !== "anchor") {
+      if (!active || wizardStepRef.current !== "place") {
         return false;
       }
 
