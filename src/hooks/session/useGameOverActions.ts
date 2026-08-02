@@ -2,6 +2,8 @@ import { useCallback, useState } from "react";
 import { LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
 import { useSessionExit } from "../session/useSessionExit";
 import { resetSessionForRematch } from "../../services/session/sessionRematch";
+import { clearLiveLocationOnLeave } from "../../services/session/clearLiveLocationOnLeave";
+import { ensureAnonymousUser } from "../../services/core/firebase/firebase";
 import { useGameOver } from "./useGameOver";
 
 interface GameOverOverlay {
@@ -40,12 +42,28 @@ export function useGameOverActions(
       return;
     }
 
-    void exitSession({
-      reason: "leave",
-      sessionId: session.id,
-      replace: true,
-      closeOverlays: overlay.closeSheet,
-    });
+    void (async () => {
+      if (session.id !== LOCAL_SESSION_ID) {
+        try {
+          const user = await ensureAnonymousUser();
+          await clearLiveLocationOnLeave({
+            sessionId: session.id,
+            uid: user.uid,
+            role: session.memberRoles?.[user.uid] ?? "seeker",
+            pendingQuestions: [],
+          });
+        } catch {
+          // Best-effort pin clear; still leave home.
+        }
+      }
+
+      await exitSession({
+        reason: "leave",
+        sessionId: session.id,
+        replace: true,
+        closeOverlays: overlay.closeSheet,
+      });
+    })();
   }, [exitSession, overlay.closeSheet, session]);
 
   return {

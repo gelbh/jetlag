@@ -29,6 +29,7 @@ import type { PlayerTrailPointRecord } from "../../domain/game/playerTrail";
 import type { StartingLocationRecord } from "../../domain/game/startingLocation";
 import { listWalkingThermometerQuestionIds } from "../../domain/questions";
 import { getFirestoreDb } from "../core/firebase/firebase";
+import { arePlayerLocationPublishesBlocked } from "../session/playerLocationPublishGate";
 import { captureException } from "../core/analytics/sentry";
 import { emitQuestionCancelledActivity } from "../session/emitSessionActivity";
 import {
@@ -115,6 +116,9 @@ export async function writePlayerLocation(
   sessionId: string,
   location: PlayerLocationRecord,
 ): Promise<void> {
+  if (arePlayerLocationPublishesBlocked()) {
+    return;
+  }
   await setDoc(
     doc(playerLocationsCollection(sessionId), location.uid),
     buildPlayerLocationDocument(location),

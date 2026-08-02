@@ -1,5 +1,10 @@
+import { formatFreshnessAge } from "../../admin/formatAdminFreshness";
+
 /** Age at which a shared live pin is removed from the map. */
 export const LIVE_LOCATION_GONE_MS = 10 * 60 * 1000;
+
+/** Shared UI tick for opacity / last-seen refresh. */
+export const LIVE_LOCATION_FRESHNESS_TICK_MS = 15_000;
 
 export function liveLocationAgeMs(
   updatedAt: string,
@@ -39,15 +44,11 @@ export function formatLiveLocationLastSeen(
   updatedAt: string,
   nowMs: number,
 ): string {
-  const ageMs = liveLocationAgeMs(updatedAt, nowMs);
-  if (ageMs === null) {
+  const age = formatFreshnessAge(updatedAt, nowMs);
+  if (age === "never") {
     return "Last seen unknown";
   }
-  if (ageMs < 60_000) {
-    return "Last seen just now";
-  }
-  const minutes = Math.floor(ageMs / 60_000);
-  return `Last seen ${minutes}m ago`;
+  return `Last seen ${age}`;
 }
 
 /** Oldest (stalest) updatedAt among members, or null if empty. */
@@ -67,4 +68,23 @@ export function oldestLiveLocationUpdatedAt(
     }
   }
   return oldest;
+}
+
+export interface LiveClusterPresentation {
+  fillOpacity: number;
+  lastSeenLabel: string | null;
+}
+
+export function liveClusterPresentation(
+  updatedAts: readonly string[],
+  nowMs: number,
+): LiveClusterPresentation {
+  const oldestUpdatedAt = oldestLiveLocationUpdatedAt(updatedAts);
+  if (oldestUpdatedAt === null) {
+    return { fillOpacity: 0, lastSeenLabel: null };
+  }
+  return {
+    fillOpacity: liveLocationFillOpacity(oldestUpdatedAt, nowMs),
+    lastSeenLabel: formatLiveLocationLastSeen(oldestUpdatedAt, nowMs),
+  };
 }

@@ -6,19 +6,12 @@ import {
   type SessionRecord,
 } from "../../domain/map/annotations";
 import type { AnnotationRecord } from "../../domain/map/annotations";
-import {
-  listWalkingThermometerQuestionIds,
-} from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import {
   endRemoteSession,
   resetRemoteSession,
 } from "../../services/firestore/firestoreAnnotations";
-import {
-  cancelWalkingThermometersAndAnnounce,
-  deletePlayerLocation,
-} from "../../services/firestore/firestoreSessionExtras";
-import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
+import { clearLiveLocationOnLeave } from "../../services/session/clearLiveLocationOnLeave";
 import {
   clearSessionLocalArtifacts,
   teardownSessionUiState,
@@ -322,27 +315,14 @@ export function useMapSessionChrome({
 
     if (!isLocalSession && user) {
       try {
-        const walkIds = listWalkingThermometerQuestionIds(
+        await clearLiveLocationOnLeave({
+          sessionId: session.id,
+          uid: user.uid,
+          role: session.memberRoles?.[user.uid] ?? "seeker",
           pendingQuestions,
-          user.uid,
-        );
-        await cancelWalkingThermometersAndAnnounce(
-          session.id,
-          walkIds,
-          user.uid,
-          session.memberRoles?.[user.uid] ?? "seeker",
-          "left",
-        );
+        });
       } catch (error) {
         captureException(error);
-      }
-
-      try {
-        await deletePlayerLocation(session.id, user.uid);
-      } catch (error) {
-        if (!isFirestorePermissionDenied(error)) {
-          captureException(error);
-        }
       }
     }
 
