@@ -29,6 +29,15 @@ function normalizeFocusBounds(bounds: LatLngBoundsExpression): LatLngBounds {
   return bounds instanceof LatLngBounds ? bounds : latLngBounds(bounds);
 }
 
+/** Leaflet `stop()` reads pane position; unmount can already have torn the map down. */
+function safeLeafletMapStop(map: { stop: () => void }): void {
+  try {
+    map.stop();
+  } catch {
+    // Ignore teardown races during MapFocus cleanup.
+  }
+}
+
 function MapFocus({
   focusBounds,
   focusMinZoom,
@@ -62,7 +71,7 @@ function MapFocus({
 
   useEffect(() => {
     const handleDragStart = () => {
-      map.stop();
+      safeLeafletMapStop(map);
       if (suppressChromeHideRef) {
         suppressChromeHideRef.current = false;
       }
@@ -135,7 +144,7 @@ function MapFocus({
     if (!animate) {
       map.setView(center, zoom, { animate: false });
       return () => {
-        map.stop();
+        safeLeafletMapStop(map);
         map.off("moveend", onMoveEnd);
         if (suppressChromeHideRef) {
           suppressChromeHideRef.current = false;
@@ -150,7 +159,7 @@ function MapFocus({
     }
 
     return () => {
-      map.stop();
+      safeLeafletMapStop(map);
       map.off("moveend", onMoveEnd);
       if (suppressChromeHideRef) {
         suppressChromeHideRef.current = false;
