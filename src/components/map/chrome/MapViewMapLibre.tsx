@@ -73,7 +73,7 @@ function MapFocus({
   fitBoundsMode,
   recenterToken = 0,
   suppressChromeHideRef,
-  fitBoundsPadding = [32, 32],
+  fitBoundsPadding: fitBoundsPaddingProp,
   focusPaddingBias,
   preferFly = false,
 }: {
@@ -92,6 +92,8 @@ function MapFocus({
   const hasFittedRef = useRef(false);
   const lastRecenterRef = useRef(recenterToken);
   const animate = !prefersReducedMotion && !lowPowerMode;
+  const padY = fitBoundsPaddingProp?.[0] ?? 32;
+  const padX = fitBoundsPaddingProp?.[1] ?? 32;
 
   useEffect(() => {
     const map = mapRef.getMap();
@@ -131,7 +133,6 @@ function MapFocus({
 
     map.resize();
 
-    const [padY, padX] = fitBoundsPadding;
     const padding = {
       top: padY,
       left: padX,
@@ -178,7 +179,12 @@ function MapFocus({
 
     if (!animate) {
       map.jumpTo({ center, zoom });
-      return;
+      return () => {
+        map.off("moveend", onMoveEnd);
+        if (suppressChromeHideRef) {
+          suppressChromeHideRef.current = false;
+        }
+      };
     }
 
     if (isLargeCameraJumpMapLibre(map, center, zoom, preferFly)) {
@@ -194,13 +200,21 @@ function MapFocus({
         duration: MOTION_MAP_CAMERA_MS,
       });
     }
+
+    return () => {
+      map.off("moveend", onMoveEnd);
+      if (suppressChromeHideRef) {
+        suppressChromeHideRef.current = false;
+      }
+    };
   }, [
     animate,
     focusBounds,
     focusMaxZoom,
     focusMinZoom,
     fitBoundsMode,
-    fitBoundsPadding,
+    padX,
+    padY,
     focusPaddingBias,
     mapRef,
     preferFly,
