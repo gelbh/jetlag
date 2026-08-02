@@ -123,12 +123,6 @@ export function ToolDock({
           : undefined
       }
     >
-      <ToolDockDrawMenu
-        open={drawMenuVisible}
-        activeTool={activeTool}
-        onSelect={selectTool}
-      />
-
       <ToolDockOverflowMenu
         moreMenuOpen={moreMenuOpen}
         dismissOverflowMenus={dismissOverflowMenus}
@@ -218,6 +212,12 @@ export function ToolDock({
         hasUnreadChat={hasUnreadChat}
         unreadCount={unreadCount}
         inactive={inactive}
+      />
+
+      <ToolDockDrawMenu
+        open={drawMenuVisible}
+        activeTool={activeTool}
+        onSelect={selectTool}
       />
     </div>
   );

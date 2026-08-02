@@ -39,6 +39,9 @@ test.describe("mobile tool dock", () => {
       sheet.getByRole("button", { name: "Open chat" }),
     ).toHaveCount(0);
 
+    await page.keyboard.press("Escape");
+    await expect(sheet).toBeHidden();
+
     const sessionTools = page.getByLabel("Session tools");
     await expect(sessionTools).toBeVisible();
     await expect(
@@ -330,14 +333,15 @@ test.describe("landscape map-dominant chrome", () => {
   test("collapses the dock by default and reveals it from the chip", async ({
     page,
   }) => {
-    const dockBar = page.locator(".jl-tool-dock-bar");
-    await expect(dockBar).toBeHidden();
+    const dock = page.locator(".jl-tool-dock");
+    await expect(dock).toBeHidden();
 
     const chip = page.getByRole("button", { name: /Show map controls/i });
     await expect(chip).toBeVisible();
     await chip.click();
 
-    await expect(dockBar).toBeVisible();
+    await expect(dock).toBeVisible();
+    await expect(page.locator(".jl-tool-dock-bar")).toHaveCount(2);
     await expect(
       page.getByRole("button", { name: "Hide map controls" }),
     ).toBeVisible();

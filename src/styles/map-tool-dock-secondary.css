@@ -89,4 +89,9 @@
     align-items: stretch;
     justify-content: flex-start;
   }
+
+  /* Keep draw menu above the secondary bar (same stacking context as dock). */
+  .jl-tool-dock .jl-tool-menu-dock {
+    z-index: calc(var(--z-panel) + 1);
+  }
 }
