@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { isEndGameActive, isEndGamePending, isFoundHiderPending } from "../../domain/map/annotations";
 import { QUESTION_DOCK_TOOL_IDS } from "../../domain/map/mapTools";
 import { resolveToolDockEnabled } from "../../domain/session/rules";
@@ -13,6 +13,7 @@ import { GameOverChrome } from "../../components/session/game-over/GameOverChrom
 import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
 import { AppUpdateMapChip } from "../../components/ui/banners/AppUpdateMapChip";
 import { HotfixGraceChip } from "../../components/incident/HotfixGraceChip";
+import { ReportProblemSheet } from "../../components/incident/ReportProblemSheet";
 import { FirestorePersistenceBanner } from "../../components/session/banners/FirestorePersistenceBanner";
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { SessionLog } from "../../components/session/log/SessionLog";
@@ -276,6 +277,7 @@ export function MapScreenChrome({
   const isDesktop = useDesktopLayout();
   const toolLayout = isDesktop ? "rail" : "dock";
   const roleConfig = getMapScreenRoleConfig("seeker");
+  const [reportProblemOpen, setReportProblemOpen] = useState(false);
   const markAnnotationPulse = useAnnotationStore(
     (state) => state.markAnnotationPulse,
   );
@@ -391,6 +393,7 @@ export function MapScreenChrome({
       onUndo={handleUndoLastAnnotation}
       onRedo={handleRedoLastAnnotation}
       onOpenSettings={handleOpenSettings}
+      onOpenReportProblem={() => setReportProblemOpen(true)}
       onOpenChat={handleOpenChat}
       hasUnreadChat={hasUnreadChat}
       unreadCount={unreadCount}
@@ -532,6 +535,12 @@ export function MapScreenChrome({
             onLeaveSession: () => void handleLeaveSession(),
             expansionPackEnabled: session!.expansionPackEnabled === true,
           }}
+          onReportProblem={() => setReportProblemOpen(true)}
+        />
+
+        <ReportProblemSheet
+          open={reportProblemOpen}
+          onClose={() => setReportProblemOpen(false)}
         />
 
         {selectedAnnotation ? (

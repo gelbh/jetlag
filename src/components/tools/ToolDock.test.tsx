@@ -2,21 +2,23 @@ import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ToolDock } from "./ToolDock";
 import { ToolOverflowSheet } from "./ToolOverflowSheet";
+import { HiderToolDock } from "./HiderToolDock";
 import { renderWithRouter } from "../../test/renderWithRouter";
+
+const dockBase = {
+  activeTool: "none" as const,
+  onSelect: vi.fn(),
+  canUndo: false,
+  canRedo: false,
+  onUndo: vi.fn(),
+  onRedo: vi.fn(),
+  onOpenSettings: vi.fn(),
+  onOpenReportProblem: vi.fn(),
+};
 
 describe("ToolDock", () => {
   it("exposes question tools on the dock and markup tools in Draw", () => {
-    renderWithRouter(
-      <ToolDock
-        activeTool="none"
-        onSelect={vi.fn()}
-        canUndo={false}
-        canRedo={false}
-        onUndo={vi.fn()}
-        onRedo={vi.fn()}
-        onOpenSettings={vi.fn()}
-      />,
-    );
+    renderWithRouter(<ToolDock {...dockBase} />);
 
     expect(screen.getByRole("button", { name: "Matching" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Measuring" })).toBeInTheDocument();
@@ -29,16 +31,49 @@ describe("ToolDock", () => {
     expect(screen.getByRole("menuitem", { name: /Zone/i })).toBeInTheDocument();
   });
 
-  it("shows unread badge on chat and more buttons when hasUnreadChat is true", () => {
+  it("renders session tools on the secondary bar", () => {
+    const onOpenReportProblem = vi.fn();
+    const onOpenSettings = vi.fn();
+    const onOpenChat = vi.fn();
+
     renderWithRouter(
       <ToolDock
-        activeTool="none"
-        onSelect={vi.fn()}
-        canUndo={false}
-        canRedo={false}
-        onUndo={vi.fn()}
-        onRedo={vi.fn()}
-        onOpenSettings={vi.fn()}
+        {...dockBase}
+        onOpenReportProblem={onOpenReportProblem}
+        onOpenSettings={onOpenSettings}
+        onOpenChat={onOpenChat}
+      />,
+    );
+
+    expect(screen.getByLabelText("Session tools")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Report a problem" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open settings" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open chat" }));
+
+    expect(onOpenReportProblem).toHaveBeenCalledTimes(1);
+    expect(onOpenSettings).toHaveBeenCalledTimes(1);
+    expect(onOpenChat).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps Chat and Settings off the primary wide end", () => {
+    renderWithRouter(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
+
+    const primary = document.querySelector(
+      ".jl-tool-dock-bar:not(.jl-tool-dock-bar--secondary)",
+    );
+    expect(primary).not.toBeNull();
+    const primaryLabels = [
+      ...(primary?.querySelectorAll(".jl-tool-slot-label") ?? []),
+    ].map((node) => node.textContent?.trim() ?? "");
+    expect(primaryLabels).not.toContain("Chat");
+    expect(primaryLabels).not.toContain("Settings");
+    expect(primaryLabels).toContain("Draw");
+  });
+
+  it("shows unread badge on secondary chat only when hasUnreadChat is true", () => {
+    renderWithRouter(
+      <ToolDock
+        {...dockBase}
         onOpenChat={vi.fn()}
         hasUnreadChat
         unreadCount={1}
@@ -48,25 +83,13 @@ describe("ToolDock", () => {
     expect(
       screen.getByRole("button", { name: "Open chat, unread messages" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "More tools, unread chat" }),
-    ).toBeInTheDocument();
-    expect(document.querySelectorAll(".jl-unread-badge")).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "More tools" })).toBeInTheDocument();
+    expect(document.querySelectorAll(".jl-unread-badge")).toHaveLength(1);
   });
 
   it("hides unread badge when hasUnreadChat is false", () => {
     renderWithRouter(
-      <ToolDock
-        activeTool="none"
-        onSelect={vi.fn()}
-        canUndo={false}
-        canRedo={false}
-        onUndo={vi.fn()}
-        onRedo={vi.fn()}
-        onOpenSettings={vi.fn()}
-        onOpenChat={vi.fn()}
-        hasUnreadChat={false}
-      />,
+      <ToolDock {...dockBase} onOpenChat={vi.fn()} hasUnreadChat={false} />,
     );
 
     expect(screen.getByRole("button", { name: "Open chat" })).toBeInTheDocument();
@@ -75,25 +98,23 @@ describe("ToolDock", () => {
   });
 
   it("renders short plain labels on every dock slot", () => {
-    renderWithRouter(
-      <ToolDock
-        activeTool="none"
-        onSelect={vi.fn()}
-        canUndo={false}
-        canRedo={false}
-        onUndo={vi.fn()}
-        onRedo={vi.fn()}
-        onOpenSettings={vi.fn()}
-        onOpenChat={vi.fn()}
-      />,
-    );
+    renderWithRouter(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
 
     const labels = [...document.querySelectorAll(".jl-tool-slot-label")].map(
       (node) => node.textContent?.trim() ?? "",
     );
 
     expect(labels).toEqual(
-      expect.arrayContaining(["Match", "Measure", "Thermo", "Radar", "More"]),
+      expect.arrayContaining([
+        "Match",
+        "Measure",
+        "Thermo",
+        "Radar",
+        "More",
+        "Chat",
+        "Report",
+        "Settings",
+      ]),
     );
     for (const label of labels) {
       expect(label.length).toBeGreaterThan(0);
@@ -103,20 +124,42 @@ describe("ToolDock", () => {
 
   it("applies rail layout class when layout is rail", () => {
     const { container } = renderWithRouter(
-      <ToolDock
-        layout="rail"
-        activeTool="none"
-        onSelect={vi.fn()}
-        canUndo={false}
-        canRedo={false}
-        onUndo={vi.fn()}
-        onRedo={vi.fn()}
-        onOpenSettings={vi.fn()}
-      />,
+      <ToolDock {...dockBase} layout="rail" />,
     );
 
     expect(container.querySelector(".jl-tool-dock--rail")).not.toBeNull();
     expect(screen.getByRole("button", { name: "Radar" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Session tools")).toBeInTheDocument();
+  });
+});
+
+describe("HiderToolDock", () => {
+  it("keeps Chat and Settings on the secondary bar only", () => {
+    const onOpenReportProblem = vi.fn();
+    renderWithRouter(
+      <HiderToolDock
+        zoneLabel="Set zone"
+        onZoneAction={vi.fn()}
+        showExpansion={false}
+        onExpansion={vi.fn()}
+        onRecenter={vi.fn()}
+        onOpenChat={vi.fn()}
+        onOpenSettings={vi.fn()}
+        onOpenReportProblem={onOpenReportProblem}
+      />,
+    );
+
+    const primary = document.querySelector(
+      ".jl-tool-dock-bar:not(.jl-tool-dock-bar--secondary)",
+    );
+    const primaryLabels = [
+      ...(primary?.querySelectorAll(".jl-tool-slot-label") ?? []),
+    ].map((node) => node.textContent?.trim() ?? "");
+    expect(primaryLabels).not.toContain("Chat");
+    expect(primaryLabels).not.toContain("Settings");
+
+    fireEvent.click(screen.getByRole("button", { name: "Report a problem" }));
+    expect(onOpenReportProblem).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -130,30 +173,21 @@ describe("ToolOverflowSheet", () => {
     canRedo: false,
     onUndo: vi.fn(),
     onRedo: vi.fn(),
-    onOpenSettings: vi.fn(),
-    onOpenChat: vi.fn(),
   };
 
-  it("renders overflow rows with icons and hints", () => {
+  it("renders overflow rows without Chat or Settings", () => {
     renderWithRouter(<ToolOverflowSheet {...baseProps} />);
 
     expect(screen.getByRole("dialog", { name: "More tools" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Zone" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Pin" })).toBeInTheDocument();
     expect(screen.getByText("Draw a play boundary")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Open settings" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Open chat" })).toBeInTheDocument();
-  });
-
-  it("shows unread badge on chat row when hasUnreadChat is true", () => {
-    renderWithRouter(
-      <ToolOverflowSheet {...baseProps} hasUnreadChat unreadCount={1} />
-    );
-
     expect(
-      screen.getByRole("button", { name: "Open chat, unread messages" }),
-    ).toBeInTheDocument();
-    expect(document.querySelector(".jl-unread-badge")).toBeInTheDocument();
+      screen.queryByRole("button", { name: "Open settings" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Open chat" }),
+    ).not.toBeInTheDocument();
   });
 
   it("disables undo when canUndo is false", () => {

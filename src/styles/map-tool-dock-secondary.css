@@ -1,0 +1,89 @@
+/* map-tool-dock-secondary.css — dual-row session strip under the primary dock */
+
+:root {
+  --dock-secondary-height: 2.75rem;
+  --dock-row-gap: 0.125rem;
+  --dock-primary-content-height: 2.75rem;
+  /* Fold primary + secondary so --map-panel-bottom consumers clear both bars. */
+  --dock-content-height: calc(
+    var(--dock-primary-content-height) + var(--dock-row-gap) +
+      var(--dock-secondary-height)
+  );
+}
+
+@media (min-width: 28.01rem) {
+  :root {
+    --dock-primary-content-height: var(--dock-height);
+  }
+}
+
+@layer components {
+  .jl-tool-dock {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dock-row-gap);
+  }
+
+  .jl-tool-dock-bar--secondary {
+    min-height: var(--dock-secondary-height);
+    border-top-width: 2px;
+    border-top-style: solid;
+    border-top-color: var(--color-border);
+    box-shadow: none;
+  }
+
+  .jl-tool-dock-bar--secondary .jl-tool-dock-group-secondary {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    flex: 1;
+    justify-content: space-evenly;
+    gap: 0.25rem;
+  }
+
+  .jl-tool-dock-bar--secondary .jl-tool-slot {
+    color: var(--color-ink-muted);
+    min-height: 2.75rem;
+  }
+
+  .jl-tool-dock-bar--secondary .jl-tool-slot-label {
+    color: var(--color-ink-muted);
+  }
+
+  @container tool-dock (min-width: 28.01rem) {
+    .jl-tool-dock-bar:not(.jl-tool-dock-bar--secondary) {
+      min-height: var(--dock-height);
+    }
+  }
+
+  /* Desktop ops rail: stacked secondary under primary scroll column */
+  .jl-tool-dock--rail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--dock-row-gap);
+  }
+
+  .jl-tool-dock--rail .jl-tool-dock-bar:not(.jl-tool-dock-bar--secondary) {
+    flex: 1 1 auto;
+    height: auto;
+  }
+
+  .jl-tool-dock--rail .jl-tool-dock-bar--secondary {
+    flex: 0 0 auto;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    border-top: none;
+    border-right: 2px solid var(--color-border);
+    border-bottom: none;
+    border-left: 2px solid var(--color-border);
+    padding: 0.25rem;
+  }
+
+  .jl-tool-dock--rail .jl-tool-dock-group-secondary {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+}
