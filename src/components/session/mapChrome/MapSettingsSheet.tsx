@@ -93,6 +93,8 @@ export interface MapSettingsSessionProps {
   endGameBlocked?: boolean;
   expansionPackEnabled?: boolean;
   onReviewMapTools?: () => void;
+  session?: SessionRecord | null;
+  myUid?: string;
 }
 
 interface MapSettingsSheetProps {
@@ -263,6 +265,8 @@ export function MapSettingsSheet({
               setReportProblemOpen(true);
             }}
             onReviewMapTools={session.onReviewMapTools}
+            session={session.session}
+            myUid={session.myUid}
           />
         ) : null}
       </div>

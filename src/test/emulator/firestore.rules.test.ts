@@ -3137,4 +3137,69 @@ describe("firestore.rules", () => {
       );
     });
   });
+
+  describe("role passcodes", () => {
+    it("denies client membership join on gated sessions", async () => {
+      const host = testEnv.authenticatedContext("host-1");
+      await host
+        .firestore()
+        .collection("sessions")
+        .doc("session-gated")
+        .set(
+          sessionPayload("host-1", {
+            roleGates: { version: 1, leaders: { seeker: "host-1" } },
+          }),
+        );
+
+      const guest = testEnv.authenticatedContext("guest-1");
+      await assertFails(
+        guest
+          .firestore()
+          .collection("sessions")
+          .doc("session-gated")
+          .update({
+            memberUids: ["host-1", "guest-1"],
+            memberRoles: { "host-1": "seeker", "guest-1": "hider" },
+            memberAppVersions: { "guest-1": "0.2.1" },
+          }),
+      );
+    });
+
+    it("denies client reads of sessionRoleSecrets", async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await context
+          .firestore()
+          .collection("sessionRoleSecrets")
+          .doc("session-gated")
+          .set({ observer: { code: "OBSV", salt: "s", hash: "h" } });
+      });
+
+      const host = testEnv.authenticatedContext("host-1");
+      await assertFails(
+        host.firestore().collection("sessionRoleSecrets").doc("session-gated").get(),
+      );
+    });
+
+    it("still allows legacy membership join without roleGates", async () => {
+      const host = testEnv.authenticatedContext("host-1");
+      await host
+        .firestore()
+        .collection("sessions")
+        .doc("session-legacy")
+        .set(sessionPayload("host-1"));
+
+      const guest = testEnv.authenticatedContext("guest-1");
+      await assertSucceeds(
+        guest
+          .firestore()
+          .collection("sessions")
+          .doc("session-legacy")
+          .update({
+            memberUids: ["host-1", "guest-1"],
+            memberRoles: { "host-1": "seeker", "guest-1": "hider" },
+            memberAppVersions: { "guest-1": "0.2.1" },
+          }),
+      );
+    });
+  });
 });
