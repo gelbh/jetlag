@@ -7,17 +7,6 @@ import {
 } from "../../../domain/map/transitViewport";
 import { createThrottledPublisher } from "../helpers/mapViewportPublish";
 
-/** Mid-gesture viewport policy keyed by Leaflet event phase. */
-export const VIEWPORT_PUBLISH_BY_PHASE = {
-  move: "schedule",
-  zoom: "schedule",
-  moveend: "schedule",
-  dragend: "flush",
-  zoomend: "flush",
-} as const;
-
-export type ViewportPublishPhase = keyof typeof VIEWPORT_PUBLISH_BY_PHASE;
-
 export interface MapViewportState {
   bounds: MapViewportBounds;
   zoom: number;
@@ -38,6 +27,7 @@ export function MapViewportTracker({
 }: MapViewportTrackerProps) {
   const map = useMap();
   const panActiveRef = useRef(false);
+  const skipMoveEndScheduleRef = useRef(false);
   const onViewportChangeRef = useRef(onViewportChange);
   const publisherRef = useRef<ReturnType<typeof createThrottledPublisher> | null>(
     null,
@@ -83,6 +73,7 @@ export function MapViewportTracker({
     dragend: () => {
       notifyPanEnd();
       publisherRef.current?.flush();
+      skipMoveEndScheduleRef.current = true;
     },
     move: () => {
       publisherRef.current?.schedule();
@@ -92,9 +83,14 @@ export function MapViewportTracker({
     },
     moveend: () => {
       notifyPanEnd();
+      if (skipMoveEndScheduleRef.current) {
+        skipMoveEndScheduleRef.current = false;
+        return;
+      }
       publisherRef.current?.schedule();
     },
     zoomend: () => {
+      skipMoveEndScheduleRef.current = true;
       publisherRef.current?.flush();
     },
   });
