@@ -1,5 +1,10 @@
-import type { LatLngBounds, LatLngBoundsExpression } from "leaflet";
-import { latLng, latLngBounds } from "leaflet";
+import {
+  boundingBoxToBoundsExpression,
+  createMapBounds,
+  normalizeBoundsExpression,
+  type MapBounds,
+  type MapBoundsExpression,
+} from "../../map/mapBounds";
 import type { Feature, MultiPolygon, Polygon, Position } from "geojson";
 import bboxPolygon from "@turf/bbox-polygon";
 import turfCircle from "@turf/circle";
@@ -8,7 +13,6 @@ import type { GameArea } from "../../map/annotations";
 import {
   boundingBoxToGameArea,
   gameAreaToBoundingBox,
-  normalizeBoundingBox,
   type BoundingBox,
 } from "../gameArea/gameAreaBounds";
 import {
@@ -50,7 +54,7 @@ export function boundingBoxHasMinimumSpan(box: BoundingBox): boolean {
   );
 }
 
-export function isUsableMapBounds(bounds: LatLngBounds): boolean {
+export function isUsableMapBounds(bounds: MapBounds): boolean {
   const southWest = bounds.getSouthWest();
   const northEast = bounds.getNorthEast();
 
@@ -62,7 +66,7 @@ export function isUsableMapBounds(bounds: LatLngBounds): boolean {
   });
 }
 
-export function boundsToGameArea(bounds: LatLngBounds): GameArea {
+export function boundsToGameArea(bounds: MapBounds): GameArea {
   const southWest = bounds.getSouthWest();
   const northEast = bounds.getNorthEast();
 
@@ -102,22 +106,17 @@ export function verticesToGameArea(
   };
 }
 
-export function boundingBoxToLeafletBounds(box: BoundingBox): LatLngBounds {
-  const normalized = normalizeBoundingBox(box);
-  return latLngBounds(
-    latLng(normalized.south, normalized.west),
-    latLng(normalized.north, normalized.east),
-  );
+export function boundingBoxToMapBounds(box: BoundingBox): MapBounds {
+  return createMapBounds(normalizeBoundsExpression(boundingBoxToBoundsExpression(box)));
 }
+
+/** @deprecated Prefer `boundingBoxToMapBounds`. */
+export const boundingBoxToLeafletBounds = boundingBoxToMapBounds;
 
 export function gameAreaToBoundsExpression(
   gameArea: GameArea,
-): LatLngBoundsExpression {
-  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
-  return [
-    [south, west],
-    [north, east],
-  ];
+): MapBoundsExpression {
+  return boundingBoxToBoundsExpression(gameAreaToBoundingBox(gameArea));
 }
 
 export function placeToGameArea(place: {

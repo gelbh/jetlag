@@ -21,9 +21,8 @@ export async function clickMapCenter(page: Page) {
   await clickMapAt(page, 0.5, 0.5);
 }
 
-/** Leaflet or MapLibre map surface (dual-path until cutover). */
-export const MAP_CONTAINER_SELECTOR =
-  ".leaflet-container, .maplibregl-map";
+/** MapLibre map surface. */
+export const MAP_CONTAINER_SELECTOR = ".maplibregl-map";
 
 export async function clickMapAt(
   page: Page,
@@ -46,25 +45,73 @@ export async function clickMapAt(
   });
 }
 
-/** Fill color of the combined elimination mask (mapAnnotationColors.elimination). */
-const ELIMINATION_FILL = "#1D2835";
+async function countPersistedActiveAnnotations(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    try {
+      const raw = localStorage.getItem("jetlag-annotations");
+      if (!raw) {
+        return 0;
+      }
+      const parsed = JSON.parse(raw) as {
+        state?: { annotations?: Array<{ status?: string }> };
+      };
+      return (
+        parsed.state?.annotations?.filter((a) => a.status !== "deleted")
+          .length ?? 0
+      );
+    } catch {
+      return 0;
+    }
+  });
+}
+
+/** DOM markers (pins) plus persisted active annotations (canvas overlays). */
+export async function countMapAnnotations(page: Page): Promise<number> {
+  const markers = await page.locator(".maplibregl-marker").count();
+  const stored = await countPersistedActiveAnnotations(page);
+  return Math.max(markers, stored);
+}
 
 /** Committed, answered questions shade the map via the combined elimination mask. */
 export async function expectEliminationMaskVisible(page: Page) {
-  await expect(
-    page
-      .locator(`.leaflet-overlay-pane path[fill="${ELIMINATION_FILL}"]`)
-      .first(),
-  ).toBeVisible({ timeout: 15_000 });
+  await expect(page.locator(MAP_CONTAINER_SELECTOR).first()).toBeVisible({
+    timeout: 15_000,
+  });
+  await waitForMapTilesLoaded(page);
+  await expect
+    .poll(async () => {
+      const questionAnnotations = await page.evaluate(() => {
+        try {
+          const raw = localStorage.getItem("jetlag-annotations");
+          if (!raw) {
+            return 0;
+          }
+          const parsed = JSON.parse(raw) as {
+            state?: {
+              annotations?: Array<{ status?: string; type?: string }>;
+            };
+          };
+          return (
+            parsed.state?.annotations?.filter(
+              (a) =>
+                a.status !== "deleted" &&
+                a.type !== "pin" &&
+                a.type !== "zone",
+            ).length ?? 0
+          );
+        } catch {
+          return 0;
+        }
+      });
+      return questionAnnotations;
+    }, { timeout: 15_000 })
+    .toBeGreaterThan(0);
 }
 
 export async function expectMapHasAnnotations(page: Page, minCount = 1) {
-  const shapes = page.locator(".leaflet-overlay-pane .leaflet-interactive");
-  await shapes.first().waitFor({ state: "attached", timeout: 15_000 });
-  const count = await shapes.count();
-  if (count < minCount) {
-    throw new Error(`Expected at least ${minCount} map annotations, found ${count}.`);
-  }
+  await expect
+    .poll(() => countMapAnnotations(page), { timeout: 15_000 })
+    .toBeGreaterThanOrEqual(minCount);
 }
 
 export async function waitForMapTilesLoaded(page: Page) {
@@ -74,11 +121,9 @@ export async function waitForMapTilesLoaded(page: Page) {
   }
 
   await expect
-    .poll(
-      async () =>
-        page.locator(".leaflet-tile-loaded, .maplibregl-canvas").count(),
-      { timeout: 30_000 },
-    )
+    .poll(async () => page.locator(".maplibregl-canvas").count(), {
+      timeout: 30_000,
+    })
     .toBeGreaterThan(0);
 }
 

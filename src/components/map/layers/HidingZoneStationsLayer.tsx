@@ -1,7 +1,6 @@
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { TransitStation } from "../../../domain/session/hiding/hidingZone";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
-import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
+import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
 
 interface HidingZoneStationsLayerProps {
   stations: readonly TransitStation[];
@@ -17,29 +16,28 @@ export function HidingZoneStationsLayer({
   return (
     <>
       {stations.map((station) => {
-        const center: LatLngTuple = [station.lat, station.lng];
         const isSelected = selectedStation?.id === station.id;
 
         return (
-          <CompensatedCircleMarker
+          <MapLibreDotMarker
             key={station.id}
-            center={center}
-            radius={isSelected ? 8 : 6}
-            pathOptions={{
-              color: isSelected
+            latitude={station.lat}
+            longitude={station.lng}
+            radiusPx={isSelected ? 8 : 6}
+            borderColor={
+              isSelected
                 ? MAP_ANNOTATION_COLORS.strokeLight
-                : MAP_ANNOTATION_COLORS.hidingZone,
-              weight: isSelected ? 3 : 2,
-              fillColor: isSelected
+                : MAP_ANNOTATION_COLORS.hidingZone
+            }
+            borderWidth={isSelected ? 3 : 2}
+            fillColor={
+              isSelected
                 ? MAP_ANNOTATION_COLORS.hidingZoneOwn
-                : MAP_ANNOTATION_COLORS.hidingZone,
-              fillOpacity: isSelected ? 1 : 0.85,
-            }}
-            eventHandlers={{
-              click: (event) => {
-                event.originalEvent.stopPropagation();
-                onSelectStation(station);
-              },
+                : MAP_ANNOTATION_COLORS.hidingZone
+            }
+            opacity={isSelected ? 1 : 0.85}
+            onClick={() => {
+              onSelectStation(station);
             }}
           />
         );

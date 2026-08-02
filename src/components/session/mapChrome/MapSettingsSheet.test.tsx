@@ -76,11 +76,11 @@ describe("MapSettingsSheet", () => {
     expect(onMapStyleChange).toHaveBeenCalledWith("satellite");
   });
 
-  it("shows CARTO attribution for street basemap and Esri for satellite", () => {
+  it("shows OpenFreeMap attribution for street basemap and Esri for satellite", () => {
     renderWithRouter(<MapSettingsSheet {...baseProps} />);
 
     expect(
-      screen.getByText(/OpenStreetMap contributors · © CARTO/),
+      screen.getByText(/OpenStreetMap contributors · © OpenFreeMap/),
     ).toBeInTheDocument();
 
     renderWithRouter(
