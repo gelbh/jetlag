@@ -6,6 +6,7 @@ import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import type { MapDraftOverlay } from "../../../domain/map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { useMapEngine } from "../chrome/mapEngineContext";
+import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { renderGeoJsonPolygonGroups } from "../helpers/renderHelpers";
 
@@ -14,17 +15,6 @@ interface MapDraftLayerProps {
 }
 
 /** MapLibre Slice 2: polygons only; marker/circle/polyline land in Slice 3. */
-function parseDashArray(dash: string | undefined): number[] | undefined {
-  if (!dash) {
-    return undefined;
-  }
-  const parts = dash
-    .split(/\s+/)
-    .map((part) => Number(part))
-    .filter((n) => Number.isFinite(n) && n > 0);
-  return parts.length > 0 ? parts : undefined;
-}
-
 function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
   const c = MAP_ANNOTATION_COLORS;
 
@@ -32,7 +22,8 @@ function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
     <>
       {overlays.map((overlay) => {
         switch (overlay.kind) {
-          case "polygon":
+          case "polygon": {
+            const width = overlay.style?.weight ?? 1;
             return (
               <MapLibreGeoJsonOverlay
                 key={overlay.id}
@@ -44,12 +35,16 @@ function MapDraftLayerMapLibre({ overlays }: MapDraftLayerProps) {
                 }}
                 line={{
                   color: overlay.style?.color ?? c.boundary,
-                  width: overlay.style?.weight ?? 1,
+                  width,
                   opacity: overlay.style?.opacity ?? 1,
-                  dashArray: parseDashArray(overlay.style?.dashArray),
+                  dashArray: cssPxDashToMapLibre(
+                    overlay.style?.dashArray,
+                    width,
+                  ),
                 }}
               />
             );
+          }
           case "marker":
           case "circle":
           case "polyline":

@@ -87,32 +87,32 @@ function CombinedEliminationLayerMapLibre(
   }
 
   return (
-    <>
-      {overlayLayers.map((layer, layerIndex) => {
-        const paint = pathOptionsToMapLibrePaint(layer);
-        return (
-          <MapLibreGeoJsonOverlay
-            key={`combined-elimination-ml-${layerIndex}`}
-            id={`combined-elimination-${layerIndex}`}
-            data={combinedMask}
-            fill={paint.fill}
-            line={paint.line}
-          />
-        );
-      })}
-      {/* Static highlight stub — Leaflet uses CSS annotation-pulse; full pulse in later polish */}
-      {pulsing ? (
-        <MapLibreGeoJsonOverlay
-          id="combined-elimination-pulse"
-          data={combinedMask}
-          line={{
-            color: MAP_ANNOTATION_COLORS.strokeLight,
-            width: 2,
-            opacity: 0.8,
-          }}
-        />
-      ) : null}
-    </>
+    <MapLibreGeoJsonOverlay
+      id="combined-elimination"
+      data={combinedMask}
+      layers={[
+        ...overlayLayers.map((layer, layerIndex) => {
+          const paint = pathOptionsToMapLibrePaint(layer);
+          return {
+            id: `combined-elimination-${layerIndex}`,
+            fill: paint.fill,
+            line: paint.line,
+          };
+        }),
+        ...(pulsing
+          ? [
+              {
+                id: "combined-elimination-pulse",
+                line: {
+                  color: MAP_ANNOTATION_COLORS.strokeLight,
+                  width: 2,
+                  opacity: 0.8,
+                },
+              },
+            ]
+          : []),
+      ]}
+    />
   );
 }
 

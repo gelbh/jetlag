@@ -16,6 +16,7 @@ import {
 import { useMapEngine } from "../chrome/mapEngineContext";
 import { CompensatedPolygon } from "../helpers/CompensatedPolygon";
 import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
+import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
 import {
   MapLibreGeoJsonOverlay,
   polygonGeometryFeature,
@@ -44,8 +45,6 @@ const PLAY_OUTSIDE_TINT = {
 const FRAMING_BASE_WEIGHT = 3;
 const PLAY_BASE_WEIGHT = 2;
 const FRAMING_DASH = "8 6";
-/** MapLibre dasharray is multiples of line width; Leaflet uses CSS px ("8 6" at weight 3). */
-const FRAMING_DASH_ARRAY_MAPLIBRE = [8 / FRAMING_BASE_WEIGHT, 6 / FRAMING_BASE_WEIGHT];
 
 function exteriorStrokeFeatureCollection(
   rings: LatLngTuple[][],
@@ -132,7 +131,9 @@ function GameAreaMaskMapLibre({
           color: MAP_ANNOTATION_COLORS.playArea,
           width: baseWeight,
           opacity: 1,
-          dashArray: framing ? FRAMING_DASH_ARRAY_MAPLIBRE : undefined,
+          dashArray: framing
+            ? cssPxDashToMapLibre(FRAMING_DASH, baseWeight)
+            : undefined,
         }}
       />
     </>
