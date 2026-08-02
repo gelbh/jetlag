@@ -32,6 +32,32 @@ describe("useThermometerTool", () => {
     expect(result.current.draft.thermoB).toEqual([53.36, -6.25]);
   });
 
+  it("ignores manual map taps outside the place wizard step", () => {
+    const mocks = createToolHookMocks();
+    const { result } = renderHook(() =>
+      useThermometerTool({
+        active: true,
+        annotations: mocks.annotations,
+        sessionRules: { gameSize: "large" },
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        setMapError: mocks.setMapError,
+      }),
+    );
+
+    act(() => {
+      result.current.panel.props.onPlacementModeChange("manual");
+      result.current.panel.props.wizardStepRef.current = "configure";
+    });
+    act(() => {
+      expect(result.current.handleMapClick([53.35, -6.26])).toBe(false);
+    });
+
+    expect(result.current.draft.thermoA).toBeNull();
+    expect(result.current.draft.thermoB).toBeNull();
+  });
+
   it("commits a thermometer annotation when answer is set", async () => {
     const mocks = createToolHookMocks();
     const { result } = renderHook(() =>

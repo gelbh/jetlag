@@ -100,6 +100,7 @@ export function MatchingPanel({
     phaseId,
     stepId,
     phaseIndex,
+    phaseCount,
     configureIndex,
     setPhaseIndex,
     goNext,
@@ -202,7 +203,7 @@ export function MatchingPanel({
       stepId === "resolve" &&
       resolveComplete &&
       !loading);
-  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, 3);
+  const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, phaseCount);
 
   const matchingAnswerStepReadout =
     phaseId === "ask" && !nullAnswer && nearestFeatureSummary ? (
