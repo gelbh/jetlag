@@ -1,5 +1,3 @@
-import L from "leaflet";
-import { Marker } from "react-leaflet";
 import { Marker as MapLibreMarker } from "react-map-gl/maplibre";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
@@ -8,10 +6,6 @@ import {
   type DistanceUnit,
 } from "../../../domain/map/distance";
 import { distanceBetweenPoints } from "../../../domain/geometry/gameArea/geometry";
-import { matchMapEngine } from "../chrome/matchMapEngine";
-import { useMapEngine } from "../chrome/mapEngineContext";
-import { CompensatedCircleMarker } from "../helpers/CompensatedCircleMarker";
-import { CompensatedPolyline } from "../helpers/CompensatedPolyline";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
 import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
@@ -78,16 +72,7 @@ function buildThermometerWalkModel(
   };
 }
 
-function labelDivIcon(markup: MapHtmlMarkup, iconAnchor: [number, number]) {
-  return L.divIcon({
-    className: markup.className,
-    html: markup.html,
-    iconSize: [0, 0],
-    iconAnchor,
-  });
-}
-
-function ActiveThermometerWalkLayerMapLibre({
+export function ActiveThermometerWalkLayer({
   start,
   livePoint,
   targetDistanceMeters = null,
@@ -198,94 +183,4 @@ function ActiveThermometerWalkLayerMapLibre({
       </MapLibreMarker>
     </>
   );
-}
-
-function ActiveThermometerWalkLayerLeaflet({
-  start,
-  livePoint,
-  targetDistanceMeters = null,
-  mapStyle = "standard",
-  distanceUnit = "imperial",
-}: ActiveThermometerWalkLayerProps) {
-  if (!start || !livePoint) {
-    return null;
-  }
-
-  const model = buildThermometerWalkModel(
-    start,
-    livePoint,
-    targetDistanceMeters,
-    mapStyle,
-    distanceUnit,
-  );
-
-  return (
-    <>
-      <CompensatedPolyline
-        positions={[start, livePoint]}
-        pathOptions={{
-          color: model.axisColor,
-          weight: 4,
-          dashArray: "12 8",
-          opacity: 0.92,
-          lineCap: "round",
-        }}
-      />
-      <CompensatedPolyline
-        positions={[start, livePoint]}
-        pathOptions={{
-          color: model.liveColor,
-          weight: 2,
-          opacity: 0.5,
-          lineCap: "round",
-        }}
-      />
-      <CompensatedCircleMarker
-        center={start}
-        radius={7}
-        pathOptions={{
-          color: MAP_ANNOTATION_COLORS.strokeLight,
-          weight: 2,
-          fillColor: MAP_ANNOTATION_COLORS.thermometerA,
-          fillOpacity: 1,
-        }}
-      />
-      <Marker
-        position={start}
-        icon={labelDivIcon(model.startLabel, [0, 28])}
-        zIndexOffset={400}
-      />
-      <CompensatedCircleMarker
-        center={livePoint}
-        radius={9}
-        pathOptions={{
-          color: MAP_ANNOTATION_COLORS.strokeLight,
-          weight: 2,
-          fillColor: model.liveColor,
-          fillOpacity: 1,
-          className: "jl-thermometer-live-marker",
-        }}
-      />
-      <Marker
-        position={livePoint}
-        icon={labelDivIcon(model.liveLabel, [0, 28])}
-        zIndexOffset={401}
-      />
-      <Marker
-        position={model.midpoint}
-        icon={labelDivIcon(model.progressLabel, [0, 14])}
-        zIndexOffset={402}
-      />
-    </>
-  );
-}
-
-export function ActiveThermometerWalkLayer(
-  props: ActiveThermometerWalkLayerProps,
-) {
-  const engine = useMapEngine();
-  return matchMapEngine(engine, {
-    maplibre: () => <ActiveThermometerWalkLayerMapLibre {...props} />,
-    leaflet: () => <ActiveThermometerWalkLayerLeaflet {...props} />,
-  });
 }

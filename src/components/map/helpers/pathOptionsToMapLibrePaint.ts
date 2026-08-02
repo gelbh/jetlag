@@ -1,11 +1,11 @@
-import type { PathOptions } from "leaflet";
+import type { MapPathOptions } from "../../../domain/map/mapPathOptions";
 import type {
   MapLibreFillPaint,
   MapLibreLinePaint,
 } from "./MapLibreGeoJsonOverlay";
 
 /** Map Leaflet PathOptions onto MapLibre fill/line paint (no CSS zoom compensation). */
-export function pathOptionsToMapLibrePaint(opts: PathOptions): {
+export function pathOptionsToMapLibrePaint(opts: MapPathOptions): {
   fill: MapLibreFillPaint | null;
   line: MapLibreLinePaint | null;
 } {

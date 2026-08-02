@@ -1,4 +1,4 @@
-import type { LatLngBounds } from "leaflet";
+import type { MapBounds } from "../map/mapBounds";
 import type { LatLngTuple } from "../geometry/gameArea/geometry";
 import type {
   TransitRouteLine,
@@ -13,7 +13,7 @@ export interface MapViewportBounds {
   east: number;
 }
 
-export function latLngBoundsToViewport(bounds: LatLngBounds): MapViewportBounds {
+export function mapBoundsToViewport(bounds: MapBounds): MapViewportBounds {
   const southWest = bounds.getSouthWest();
   const northEast = bounds.getNorthEast();
 
@@ -24,6 +24,9 @@ export function latLngBoundsToViewport(bounds: LatLngBounds): MapViewportBounds 
     east: northEast.lng,
   };
 }
+
+/** @deprecated Prefer `mapBoundsToViewport`. */
+export const latLngBoundsToViewport = mapBoundsToViewport;
 
 function pointInViewport(
   lat: number,

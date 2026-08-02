@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import { useMap } from "react-leaflet";
+import { useMapLibreMap } from "../../components/map/helpers/useMapLibreMap";
 import { useAdminMonitorFocus } from "../../domain/admin/adminMonitorFocus";
 import { usePlayerLocationsSync } from "../../hooks/session/useSessionExtrasSync";
 import { useSessionStore } from "../../state/sessionStore";
 
 export function AdminMonitorPlayerFocus() {
-  const map = useMap();
+  const map = useMapLibreMap();
   const sessionId = useSessionStore((state) => state.session?.id);
   const locations = usePlayerLocationsSync(sessionId);
   const focusedPlayerUid = useAdminMonitorFocus((state) => state.focusedPlayerUid);
@@ -20,8 +20,10 @@ export function AdminMonitorPlayerFocus() {
       return;
     }
 
-    map.flyTo([location.lat, location.lng], Math.max(map.getZoom(), 14), {
-      duration: 0.5,
+    map.flyTo({
+      center: [location.lng, location.lat],
+      zoom: Math.max(map.getZoom(), 14),
+      duration: 500,
     });
   }, [focusedPlayerUid, locations, map]);
 

@@ -13,7 +13,6 @@ import {
   isMapTileHostname,
   isOpenFreeMapUrl,
 } from "./mapTileHosts";
-import { MAP_LIBRE_PLAY_READY } from "./mapLibrePlayReady";
 
 describe("mapBasemaps", () => {
   it("resolves light street to Carto voyager", () => {
@@ -43,11 +42,8 @@ describe("mapBasemaps", () => {
   });
 
   it("returns plain-text attribution for settings chrome", () => {
-    expect(getBasemapAttributionText("standard")).toContain("CARTO");
+    expect(getBasemapAttributionText("standard")).toContain("OpenFreeMap");
     expect(getBasemapAttributionText("satellite")).toContain("Esri");
-    expect(getBasemapAttributionText("standard", "maplibre")).toContain(
-      "OpenFreeMap",
-    );
   });
 
   it("resolves MapLibre OpenFreeMap styles and satellite raster style", () => {
@@ -64,9 +60,6 @@ describe("mapBasemaps", () => {
     }
   });
 
-  it("keeps MapLibre play gate off until overlay ports land", () => {
-    expect(MAP_LIBRE_PLAY_READY).toBe(false);
-  });
 });
 
 describe("mapTileHosts", () => {
