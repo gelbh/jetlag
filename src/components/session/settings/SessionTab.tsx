@@ -3,6 +3,8 @@ import type { NotificationPreferences } from "../../../domain/device/chrome/noti
 import { ShareCode } from "../identity/ShareCode";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 import { NotificationPreferencesSection } from "./NotificationPreferencesSection";
+import { RolePasscodeSettings } from "./RolePasscodeSettings";
+import type { SessionRecord } from "../../../domain/map/annotations";
 
 export interface MapSettingsSessionTabProps {
   sessionCode: string;
@@ -29,6 +31,8 @@ export interface MapSettingsSessionTabProps {
   onOpenCurseReference?: () => void;
   onReportProblem?: () => void;
   onReviewMapTools?: () => void;
+  session?: SessionRecord | null;
+  myUid?: string;
 }
 
 export function MapSettingsSessionTab({
@@ -54,6 +58,8 @@ export function MapSettingsSessionTab({
   onOpenCurseReference,
   onReportProblem,
   onReviewMapTools,
+  session,
+  myUid,
 }: MapSettingsSessionTabProps) {
   const [deviceSectionOpen, setDeviceSectionOpen] = useState(false);
   const [resetMenuOpen, setResetMenuOpen] = useState(false);
@@ -61,6 +67,10 @@ export function MapSettingsSessionTab({
   return (
     <div className="space-y-4">
       <ShareCode code={sessionCode} remote={remoteSession} />
+
+      {session && myUid ? (
+        <RolePasscodeSettings session={session} myUid={myUid} isHost={isHost} />
+      ) : null}
 
       <div className="space-y-2 border-t-2 border-border pt-4">
         <button
