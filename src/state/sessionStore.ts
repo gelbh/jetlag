@@ -38,6 +38,7 @@ const SESSION_RECORD_STRUCTURED_KEYS = [
   "customMeasureGeometries",
   "memberAppVersions",
   "opsMitigation",
+  "endGameTruthAnchors",
 ] as const satisfies readonly (keyof SessionRecord)[];
 
 type SessionRecordStructuredKey =

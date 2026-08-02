@@ -95,6 +95,20 @@ service cloud.firestore {
       return value == null || !(value is int) || (value >= 200 && value <= 50000);
     }
 
+    function validEndGameTruthAnchor(anchor) {
+      return anchor is map
+        && anchor.keys().hasOnly(['lat', 'lng', 'frozenAt'])
+        && anchor.lat is number
+        && anchor.lng is number
+        && anchor.frozenAt is string;
+    }
+
+    function validEndGameTruthAnchors(anchors) {
+      return anchors is map
+        && anchors.size() > 0
+        && anchors.size() <= 32;
+    }
+
     function membershipJoinFieldsStable() {
       return request.resource.data.code == resource.data.code
         && request.resource.data.gameArea == resource.data.gameArea
@@ -375,6 +389,7 @@ service cloud.firestore {
             'timerRunningSince',
             'endGameStartedAt',
             'endGameStartedByUid',
+            'endGameTruthAnchors',
             'endGameRequestedAt',
             'endGameRequestedByUid'
           ])
@@ -383,6 +398,7 @@ service cloud.firestore {
         && !('timerRunningSince' in request.resource.data)
         && !('endGameStartedAt' in request.resource.data)
         && !('endGameStartedByUid' in request.resource.data)
+        && !('endGameTruthAnchors' in request.resource.data)
         && !('endGameRequestedAt' in request.resource.data)
         && !('endGameRequestedByUid' in request.resource.data)
       ) || (
@@ -415,9 +431,10 @@ service cloud.firestore {
           || resource.data.endGameStartedAt == null
         )
         && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['endGameStartedAt', 'endGameStartedByUid', 'endGameRequestedAt', 'endGameRequestedByUid'])
+          .hasOnly(['endGameStartedAt', 'endGameStartedByUid', 'endGameTruthAnchors', 'endGameRequestedAt', 'endGameRequestedByUid'])
         && request.resource.data.endGameStartedAt is string
         && request.resource.data.endGameStartedByUid == request.auth.uid
+        && validEndGameTruthAnchors(request.resource.data.endGameTruthAnchors)
         && !('endGameRequestedAt' in request.resource.data)
         && !('endGameRequestedByUid' in request.resource.data)
         && request.resource.data.code == resource.data.code
@@ -474,9 +491,10 @@ service cloud.firestore {
           || resource.data.endGameRequestedAt is string
         )
         && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['endGameStartedAt', 'endGameStartedByUid', 'endGameRequestedAt', 'endGameRequestedByUid'])
+          .hasOnly(['endGameStartedAt', 'endGameStartedByUid', 'endGameTruthAnchors', 'endGameRequestedAt', 'endGameRequestedByUid'])
         && !('endGameStartedAt' in request.resource.data)
         && !('endGameStartedByUid' in request.resource.data)
+        && !('endGameTruthAnchors' in request.resource.data)
         && !('endGameRequestedAt' in request.resource.data)
         && !('endGameRequestedByUid' in request.resource.data)
         && request.resource.data.code == resource.data.code
@@ -517,7 +535,7 @@ service cloud.firestore {
           || resource.data.foundConfirmedAt == null
         )
         && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['foundConfirmedAt', 'foundConfirmedByUid', 'gameOutcome', 'foundRequestedAt', 'foundRequestedByUid', 'endGameStartedAt', 'endGameStartedByUid', 'endGameRequestedAt', 'endGameRequestedByUid'])
+          .hasOnly(['foundConfirmedAt', 'foundConfirmedByUid', 'gameOutcome', 'foundRequestedAt', 'foundRequestedByUid', 'endGameStartedAt', 'endGameStartedByUid', 'endGameTruthAnchors', 'endGameRequestedAt', 'endGameRequestedByUid'])
         && request.resource.data.foundConfirmedAt is string
         && request.resource.data.foundConfirmedByUid == request.auth.uid
         && request.resource.data.gameOutcome == 'found'
@@ -525,6 +543,7 @@ service cloud.firestore {
         && !('foundRequestedByUid' in request.resource.data)
         && !('endGameStartedAt' in request.resource.data)
         && !('endGameStartedByUid' in request.resource.data)
+        && !('endGameTruthAnchors' in request.resource.data)
         && !('endGameRequestedAt' in request.resource.data)
         && !('endGameRequestedByUid' in request.resource.data)
         && request.resource.data.code == resource.data.code

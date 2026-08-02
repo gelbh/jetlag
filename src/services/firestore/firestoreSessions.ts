@@ -937,10 +937,12 @@ export async function requestEndGameSession(
 export async function acceptEndGameSession(
   sessionId: string,
   acceptedByUid: string,
+  anchors: Record<string, { lat: number; lng: number; frozenAt: string }>,
 ): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), {
     endGameStartedAt: new Date().toISOString(),
     endGameStartedByUid: acceptedByUid,
+    endGameTruthAnchors: anchors,
     endGameRequestedAt: deleteField(),
     endGameRequestedByUid: deleteField(),
   });
@@ -963,6 +965,7 @@ export async function resetEndGameSession(sessionId: string): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), {
     endGameStartedAt: deleteField(),
     endGameStartedByUid: deleteField(),
+    endGameTruthAnchors: deleteField(),
     endGameRequestedAt: deleteField(),
     endGameRequestedByUid: deleteField(),
   });
@@ -990,6 +993,7 @@ export async function confirmFoundHiderSession(
     foundRequestedByUid: deleteField(),
     endGameStartedAt: deleteField(),
     endGameStartedByUid: deleteField(),
+    endGameTruthAnchors: deleteField(),
     endGameRequestedAt: deleteField(),
     endGameRequestedByUid: deleteField(),
   });
@@ -1041,6 +1045,7 @@ export async function resetRemoteSession(
     timerRunningSince: deleteField(),
     endGameStartedAt: deleteField(),
     endGameStartedByUid: deleteField(),
+    endGameTruthAnchors: deleteField(),
     endGameRequestedAt: deleteField(),
     endGameRequestedByUid: deleteField(),
   });

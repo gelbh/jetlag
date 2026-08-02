@@ -32,8 +32,10 @@ import type {
 import type { SessionCustomMeasureGeometry } from "../session/catalog/customMeasureGeometry";
 import type { RegionPackId } from "../regions/regionPack";
 import type { GameOutcome } from "../game/foundHider";
+import type { EndGameTruthAnchor } from "../questions/hiderTruth/resolveHiderTruthReference";
 
 export type { GameSize } from "../session/size/gameSize";
+export type { EndGameTruthAnchor } from "../questions/hiderTruth/resolveHiderTruthReference";
 export type { MemberRoles, PlayerRole } from "../session/players/playerRole";
 
 export type AnnotationType =
@@ -170,6 +172,7 @@ export interface SessionRecord {
   timerRunningSince?: string | null;
   endGameStartedAt?: string;
   endGameStartedByUid?: string;
+  endGameTruthAnchors?: Record<string, EndGameTruthAnchor>;
   endGameRequestedAt?: string;
   endGameRequestedByUid?: string;
   foundRequestedAt?: string;

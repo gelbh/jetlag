@@ -51,6 +51,16 @@ export const sessionDocumentSchema = z
     lastActiveAt: z.string().optional(),
     endGameStartedAt: z.string().optional(),
     endGameStartedByUid: z.string().optional(),
+    endGameTruthAnchors: z
+      .record(
+        z.string(),
+        z.object({
+          lat: z.number(),
+          lng: z.number(),
+          frozenAt: z.string(),
+        }),
+      )
+      .optional(),
     endGameRequestedAt: z.string().optional(),
     endGameRequestedByUid: z.string().optional(),
     foundRequestedAt: z.string().optional(),

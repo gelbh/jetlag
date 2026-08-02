@@ -1125,6 +1125,75 @@ describe("firestore.rules", () => {
         timerRunningSince: deleteField(),
         endGameStartedAt: deleteField(),
         endGameStartedByUid: deleteField(),
+        endGameTruthAnchors: deleteField(),
+        endGameRequestedAt: deleteField(),
+        endGameRequestedByUid: deleteField(),
+      }),
+    );
+  });
+
+  it("allows a hider to accept end game with truth anchors", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+          endGameRequestedAt: "2026-01-01T00:00:00.000Z",
+          endGameRequestedByUid: "host-1",
+        }),
+      });
+
+    const hider = testEnv.authenticatedContext("hider-1");
+    await assertSucceeds(
+      hider.firestore().collection("sessions").doc("session-1").update({
+        endGameStartedAt: "2026-01-01T00:01:00.000Z",
+        endGameStartedByUid: "hider-1",
+        endGameTruthAnchors: {
+          "hider-1": {
+            lat: 53.35,
+            lng: -6.26,
+            frozenAt: "2026-01-01T00:01:00.000Z",
+          },
+        },
+        endGameRequestedAt: deleteField(),
+        endGameRequestedByUid: deleteField(),
+      }),
+    );
+  });
+
+  it("allows the host to reset session progress with end-game anchors cleared", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1"),
+        timerAccumulatedMs: 120_000,
+        timerRunningSince: "2026-01-01T00:01:00.000Z",
+        endGameStartedAt: "2026-01-01T00:01:00.000Z",
+        endGameStartedByUid: "hider-1",
+        endGameTruthAnchors: {
+          "hider-1": {
+            lat: 53.35,
+            lng: -6.26,
+            frozenAt: "2026-01-01T00:01:00.000Z",
+          },
+        },
+      });
+
+    await assertSucceeds(
+      host.firestore().collection("sessions").doc("session-1").update({
+        sessionResetAt: "2026-01-02T00:00:00.000Z",
+        timerAccumulatedMs: 0,
+        timerRunningSince: deleteField(),
+        endGameStartedAt: deleteField(),
+        endGameStartedByUid: deleteField(),
+        endGameTruthAnchors: deleteField(),
         endGameRequestedAt: deleteField(),
         endGameRequestedByUid: deleteField(),
       }),
