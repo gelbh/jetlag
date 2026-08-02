@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
-import type {
-  AnnotationRecord,
-  GameArea,
-  SessionRecord,
+import {
+  type AnnotationRecord,
+  type GameArea,
+  type SessionRecord,
 } from "../../domain/map/annotations";
 import type { DistanceUnit } from "../../domain/map/distance";
 import { hasOpenPendingQuestion } from "../../domain/questions";

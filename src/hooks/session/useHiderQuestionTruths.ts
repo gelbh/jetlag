@@ -3,6 +3,7 @@ import {
   computeHiderTruthReplyAsync,
   type HiderTruthResult,
 } from "../../domain/questions/ui";
+import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { GameArea } from "../../domain/map/annotations";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
@@ -10,12 +11,15 @@ import { useLatestRequest } from "../forms/useLatestRequest";
 
 const EMPTY_TRUTHS = new Map<string, HiderTruthResult>();
 
-function stationCenterKey(stationCenter: LatLngTuple | null): string {
-  if (!stationCenter) {
-    return "none";
+function truthReferenceKey(
+  truthReference: LatLngTuple | null,
+  mode: HiderTruthReferenceMode,
+): string {
+  if (!truthReference) {
+    return `none:${mode}`;
   }
 
-  return `${stationCenter[0].toFixed(6)},${stationCenter[1].toFixed(6)}`;
+  return `${mode}:${truthReference[0].toFixed(6)},${truthReference[1].toFixed(6)}`;
 }
 
 function openPendingQuestions(
@@ -26,9 +30,12 @@ function openPendingQuestions(
 
 export function useHiderQuestionTruths(
   pendingQuestions: readonly PendingQuestionRecord[],
-  stationCenter: LatLngTuple | null,
+  truthReference: LatLngTuple | null,
   gameArea?: GameArea,
-  options?: { stationCenterReady?: boolean },
+  options?: {
+    truthReferenceReady?: boolean;
+    truthReferenceMode?: HiderTruthReferenceMode;
+  },
 ): {
   questionTruths: ReadonlyMap<string, HiderTruthResult>;
   loading: boolean;
@@ -53,15 +60,16 @@ export function useHiderQuestionTruths(
     [openQuestions],
   );
 
-  const stationKey = stationCenterKey(stationCenter);
-  const fetchKey = `${openQuestionKey}|${stationKey}`;
-  const stationCenterReady = options?.stationCenterReady ?? true;
+  const truthReferenceMode = options?.truthReferenceMode ?? "hidingZoneCenter";
+  const referenceKey = truthReferenceKey(truthReference, truthReferenceMode);
+  const fetchKey = `${openQuestionKey}|${referenceKey}`;
+  const truthReferenceReady = options?.truthReferenceReady ?? true;
   const loading =
     openQuestions.length > 0 &&
-    (!stationCenterReady || resolvedFetchKey !== fetchKey);
+    (!truthReferenceReady || resolvedFetchKey !== fetchKey);
 
   useEffect(() => {
-    if (openQuestions.length === 0 || !stationCenterReady) {
+    if (openQuestions.length === 0 || !truthReferenceReady) {
       return;
     }
 
@@ -72,7 +80,7 @@ export function useHiderQuestionTruths(
         openQuestions.map(async (question) => {
           const truth = await computeHiderTruthReplyAsync(
             question,
-            stationCenter,
+            truthReference,
             gameArea,
           );
           return [question.id, truth] as const;
@@ -98,9 +106,9 @@ export function useHiderQuestionTruths(
     beginRequest,
     isLatestRequest,
     openQuestions,
-    stationCenter,
+    truthReference,
     gameArea,
-    stationCenterReady,
+    truthReferenceReady,
   ]);
 
   return {

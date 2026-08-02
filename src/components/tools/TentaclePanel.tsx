@@ -22,6 +22,7 @@ import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 import { TENTACLE_STEPS, stepsForMode } from "./shared/wizard/toolStepUtils";
 import { toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
 interface TentaclePanelProps {
   gameSize: GameSize;
@@ -142,6 +143,9 @@ export function TentaclePanel({
     <>
       {step === "category" ? (
         <ToolSection first compact status="active">
+          {awaitHiderAnswer ? (
+            <QuestionTruthReferenceHint />
+          ) : null}
           <QuestionPromptBlock
             prompt={prompt}
             ruleSummary={

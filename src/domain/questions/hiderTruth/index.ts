@@ -16,7 +16,7 @@ export type { HiderTruthResult } from "./shared";
 
 export function computeHiderTruthReply(
   pending: PendingQuestionRecord,
-  /** Confirmed hiding-zone center (station location). Never live GPS. */
+  /** Resolved truth reference: zone center until end-game freeze. */
   stationCenter: LatLngTuple | null,
 ): HiderTruthResult | null {
   if (!stationCenter) {

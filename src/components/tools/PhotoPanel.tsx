@@ -9,6 +9,7 @@ import { CatalogExhaustedMessage } from "./shared/readout/CatalogExhaustedMessag
 import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
 import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
 import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 import { ToolSection } from "./shared/panels/ToolSection";
 
 interface PhotoPanelProps {
@@ -82,6 +83,7 @@ export function PhotoPanel({
           prompt={question.prompt}
           ruleSummary={question.ruleSummary}
         />
+        <QuestionTruthReferenceHint />
         <SendToHidersButton
           costLabel={costLabel}
           isSubmitting={isSubmitting}

@@ -17,6 +17,9 @@ export async function acceptEndGame(guestPage: Page) {
 }
 
 export async function declineEndGame(guestPage: Page) {
+  await expect(
+    guestPage.getByText("Seekers requested end game"),
+  ).toBeVisible({ timeout: 15_000 });
   await guestPage.getByRole("button", { name: "Decline" }).click();
 }
 

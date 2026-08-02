@@ -44,6 +44,10 @@ import {
 import type { MapViewportBounds } from "../domain/map/transitViewport";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/device/power/powerProfile";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
+import { resolveHiderTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
+import {
+  assembleEndGameAcceptAnchors,
+} from "../domain/session/hiding/endGameTruthAnchors";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
 import { useHidingZoneUidHeal } from "../hooks/session/useHidingZoneUidHeal";
@@ -64,6 +68,7 @@ import { useSessionDistanceUnit } from "../hooks/session/useSessionDistanceUnit"
 import { isEndGameActive, isEndGamePending, isFoundHiderPending, LOCAL_SESSION_ID } from "../domain/map/annotations";
 import {
   acceptEndGameSession,
+  clearEndGameRequestSession,
   confirmFoundHiderSession,
   resetEndGameSession,
   resetFoundHiderSession,
@@ -231,13 +236,30 @@ export function HiderMapScreen() {
     () => hiderStationCenter(myZone),
     [myZone],
   );
+  const truthReference = useMemo(() => {
+    if (!uid) {
+      return {
+        point: null as LatLngTuple | null,
+        mode: "unavailable" as const,
+      };
+    }
+
+    return resolveHiderTruthReference({
+      hiderUid: uid,
+      zoneCenter: stationCenter,
+      session,
+    });
+  }, [session, stationCenter, uid]);
   useHidingZoneUidHeal(sessionId, uid, hidingZones, persistedMyUid);
-  const stationCenterReady = authReady && uid !== null;
+  const truthReferenceReady = authReady && uid !== null;
   const { questionTruths, loading: truthsLoading } = useHiderQuestionTruths(
     pendingQuestions,
-    stationCenter,
+    truthReference.point,
     gameArea ?? undefined,
-    { stationCenterReady },
+    {
+      truthReferenceReady,
+      truthReferenceMode: truthReference.mode,
+    },
   );
 
   const liveLocationProfile = getPowerProfile(lowPowerMode).liveLocation;
@@ -289,12 +311,32 @@ export function HiderMapScreen() {
       return;
     }
 
+    const frozenAt = new Date().toISOString();
+    const confirmedHiderUids = confirmedHidingZones.map((zone) => zone.hiderUid);
+    const anchorsResult = assembleEndGameAcceptAnchors({
+      hiderUids: confirmedHiderUids,
+      hiderLocations,
+      localHiderUid: uid,
+      localPoint: liveLocationReading
+        ? { lat: liveLocationReading.lat, lng: liveLocationReading.lng }
+        : null,
+      frozenAt,
+    });
+
+    if ("missing" in anchorsResult) {
+      window.alert(
+        "Need a recent GPS location for every confirmed hider before starting end game.",
+      );
+      return;
+    }
+
     if (session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
       setSession(
         {
           ...session,
-          endGameStartedAt: new Date().toISOString(),
+          endGameStartedAt: frozenAt,
           endGameStartedByUid: uid,
+          endGameTruthAnchors: anchorsResult,
           endGameRequestedAt: undefined,
           endGameRequestedByUid: undefined,
         },
@@ -303,8 +345,15 @@ export function HiderMapScreen() {
       return;
     }
 
-    await acceptEndGameSession(session.id, uid);
-  }, [session, setSession, uid]);
+    await acceptEndGameSession(session.id, uid, anchorsResult, frozenAt);
+  }, [
+    confirmedHidingZones,
+    hiderLocations,
+    liveLocationReading,
+    session,
+    setSession,
+    uid,
+  ]);
 
   const handleAcceptFoundHider = useCallback(async () => {
     if (!session?.id || !uid || !isFoundHiderPending(session)) {
@@ -322,6 +371,7 @@ export function HiderMapScreen() {
           foundRequestedByUid: undefined,
           endGameStartedAt: undefined,
           endGameStartedByUid: undefined,
+          endGameTruthAnchors: undefined,
           endGameRequestedAt: undefined,
           endGameRequestedByUid: undefined,
         },
@@ -377,6 +427,7 @@ export function HiderMapScreen() {
           ...session,
           endGameStartedAt: undefined,
           endGameStartedByUid: undefined,
+          endGameTruthAnchors: undefined,
           endGameRequestedAt: undefined,
           endGameRequestedByUid: undefined,
         },
@@ -385,12 +436,17 @@ export function HiderMapScreen() {
       return;
     }
 
-    await resetEndGameSession(session.id);
+    if (isEndGamePending(session) && !isEndGameActive(session)) {
+      await clearEndGameRequestSession(session.id);
+    } else {
+      await resetEndGameSession(session.id);
+    }
     setSession(
       {
         ...session,
         endGameStartedAt: undefined,
         endGameStartedByUid: undefined,
+        endGameTruthAnchors: undefined,
         endGameRequestedAt: undefined,
         endGameRequestedByUid: undefined,
       },
@@ -587,6 +643,7 @@ export function HiderMapScreen() {
             zones={hidingZones}
             myUid={uid}
             memberUids={session?.memberUids}
+            session={session}
           />
           {zoneTool.wizardOpen &&
           hidingZoneStepId === "location" &&
@@ -788,10 +845,6 @@ export function HiderMapScreen() {
               return;
             }
 
-            const stationCenterForAnswer: LatLngTuple | null = myZone
-              ? [myZone.center.lat, myZone.center.lng]
-              : null;
-
             try {
               const user = await ensureAnonymousUser();
               await answerPendingQuestion(
@@ -811,7 +864,7 @@ export function HiderMapScreen() {
 
               const truth = await computeHiderTruthReplyAsync(
                 pending,
-                stationCenterForAnswer,
+                truthReference.point,
                 gameArea,
               );
               if (

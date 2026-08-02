@@ -61,6 +61,18 @@ export function sessionHasHiders(memberRoles: MemberRoles | undefined): boolean 
   return Object.values(memberRoles).some((role) => role === "hider");
 }
 
+export function hiderMemberUids(
+  memberRoles: MemberRoles | undefined,
+): string[] {
+  if (!memberRoles) {
+    return [];
+  }
+
+  return Object.entries(memberRoles)
+    .filter(([, role]) => role === "hider")
+    .map(([uid]) => uid);
+}
+
 export function playerRoleLabel(role: PlayerRole): string {
   switch (role) {
     case "seeker":

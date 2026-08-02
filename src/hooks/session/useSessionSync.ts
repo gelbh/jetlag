@@ -10,14 +10,20 @@ import {
 import {
   subscribeToRemoteAnnotations,
   subscribeToSession,
+  subscribeToEndGameTruthAnchors,
 } from "../../services/firestore/firestoreAnnotations";
 import { ANNOTATION_SYNC_MESSAGE_TYPE } from "../../services/session/backgroundSync";
 import { readOfflineQueueForSession } from "../../services/session/offlineQueue";
 import { flushOfflineQueue } from "../../services/session/flushOfflineQueue";
+import { resolvePlayerRole } from "../../domain/session/players/playerRole";
 
 
 export interface UseSessionSyncOptions {
   syncEnabled?: boolean;
+}
+
+function canReadEndGameTruthAnchors(role: string | null | undefined): boolean {
+  return role === "hider" || role === "observer" || role === "admin";
 }
 
 export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {}) {
@@ -51,7 +57,20 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
     const unsubscribe = subscribeToSession(
       session.id,
       (remoteSession) => {
-        setSession(remoteSession, myUid);
+        const previous = useSessionStore.getState().session;
+        const preservedAnchors =
+          remoteSession.endGameStartedAt &&
+          previous?.id === remoteSession.id &&
+          previous.endGameTruthAnchors
+            ? previous.endGameTruthAnchors
+            : undefined;
+        setSession(
+          {
+            ...remoteSession,
+            endGameTruthAnchors: preservedAnchors,
+          },
+          myUid,
+        );
       },
       (error) => {
         setLastSyncError(
@@ -63,6 +82,59 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
     return unsubscribe;
     // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
   }, [myUid, session?.id, setLastSyncError, setSession, syncEnabled]);
+
+  useEffect(() => {
+    if (
+      !syncEnabled ||
+      !session ||
+      session.id === LOCAL_SESSION_ID ||
+      !isFirebaseConfigured() ||
+      !myUid
+    ) {
+      return;
+    }
+
+    const role = resolvePlayerRole(session.memberRoles, myUid);
+    if (!canReadEndGameTruthAnchors(role)) {
+      return;
+    }
+
+    const sessionId = session.id;
+    const unsubscribe = subscribeToEndGameTruthAnchors(
+      sessionId,
+      (anchors) => {
+        const current = useSessionStore.getState().session;
+        if (!current || current.id !== sessionId) {
+          return;
+        }
+
+        if (!current.endGameStartedAt) {
+          if (current.endGameTruthAnchors !== undefined) {
+            setSession({ ...current, endGameTruthAnchors: undefined }, myUid);
+          }
+          return;
+        }
+
+        setSession({ ...current, endGameTruthAnchors: anchors }, myUid);
+      },
+      (error) => {
+        setLastSyncError(
+          error instanceof Error
+            ? error.message
+            : "End-game truth sync failed.",
+        );
+      },
+    );
+
+    return unsubscribe;
+  }, [
+    myUid,
+    session?.id,
+    session?.memberRoles,
+    setLastSyncError,
+    setSession,
+    syncEnabled,
+  ]);
 
   useEffect(() => {
     if (
