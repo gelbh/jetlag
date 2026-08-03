@@ -35,7 +35,7 @@ describe("createViewportTrackerHandlers", () => {
     expect(handlers.isPanActive()).toBe(false);
   });
 
-  it("ends an active pan when the publisher is disposed (tracker remount)", () => {
+  it("ends an active pan when disposed (tracker remount)", () => {
     const onUserPanEnd = vi.fn();
     const handlers = createViewportTrackerHandlers({
       publish: vi.fn(),
@@ -44,7 +44,7 @@ describe("createViewportTrackerHandlers", () => {
     });
 
     handlers.onDragStart();
-    handlers.disposePublisher();
+    handlers.dispose();
 
     expect(onUserPanEnd).toHaveBeenCalledTimes(1);
     expect(handlers.isPanActive()).toBe(false);

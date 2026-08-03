@@ -86,7 +86,7 @@ export function MapViewportTracker({
       map.off("moveend", handlers.onMoveEnd);
       map.off("zoomend", handlers.onZoomEnd);
       // Ends an in-flight pan so React mapPanning cannot stick across remount.
-      handlers.disposePublisher();
+      handlers.dispose();
     };
     // Callbacks are read via refs so mid-gesture identity churn cannot drop pan end.
   }, [map]);

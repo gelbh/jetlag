@@ -7,7 +7,8 @@ export interface ViewportTrackerHandlers {
   onZoom: () => void;
   onMoveEnd: () => void;
   onZoomEnd: () => void;
-  disposePublisher: () => void;
+  /** End active pan (if any) and cancel the viewport publisher. */
+  dispose: () => void;
   /** Test/helper: whether a user pan is currently active. */
   isPanActive: () => boolean;
 }
@@ -72,7 +73,7 @@ export function createViewportTrackerHandlers(options: {
       skipMoveEndSchedule = true;
       publisher.flush();
     },
-    disposePublisher: () => {
+    dispose: () => {
       notifyPanEnd();
       publisher.cancel();
     },

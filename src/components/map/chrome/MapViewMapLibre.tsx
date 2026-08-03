@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import Map, {
   AttributionControl,
   type MapRef,
@@ -92,7 +92,6 @@ function MapFocus({
   focusMaxZoom,
   fitBoundsMode,
   recenterToken = 0,
-  suppressChromeHideRef,
   fitBoundsPadding: fitBoundsPaddingProp,
   focusPaddingBias,
   preferFly = false,
@@ -102,7 +101,6 @@ function MapFocus({
   focusMaxZoom?: number;
   fitBoundsMode: "once" | "always";
   recenterToken: number;
-  suppressChromeHideRef?: RefObject<boolean>;
   fitBoundsPadding?: [number, number];
   focusPaddingBias?: number;
   preferFly?: boolean;
@@ -150,16 +148,13 @@ function MapFocus({
     const handleDragStart = () => {
       // Interrupt flyTo/easeTo only — never map.stop() (resets TouchPan/TouchZoom).
       stopMapCameraEase(map);
-      if (suppressChromeHideRef) {
-        suppressChromeHideRef.current = false;
-      }
     };
 
     map.on("dragstart", handleDragStart);
     return () => {
       map.off("dragstart", handleDragStart);
     };
-  }, [mapRef, suppressChromeHideRef]);
+  }, [mapRef]);
 
   // once-mode omits live bounds/zoom/bias from deps (refs) so identity churn
   // cannot abort an in-flight ease via effect cleanup — intentional.
@@ -216,14 +211,7 @@ function MapFocus({
     lastRecenterRef.current = recenterToken;
     hasFittedRef.current = true;
 
-    if (suppressChromeHideRef) {
-      suppressChromeHideRef.current = true;
-    }
-
     const onMoveEnd = () => {
-      if (suppressChromeHideRef) {
-        suppressChromeHideRef.current = false;
-      }
       map.off("moveend", onMoveEnd);
     };
 
@@ -239,9 +227,6 @@ function MapFocus({
         // (refs + presence), not from skipping this cleanup.
         stopMapCameraEase(map);
         map.off("moveend", onMoveEnd);
-        if (suppressChromeHideRef) {
-          suppressChromeHideRef.current = false;
-        }
       };
     }
 
@@ -264,12 +249,9 @@ function MapFocus({
     return () => {
       stopMapCameraEase(map);
       map.off("moveend", onMoveEnd);
-      if (suppressChromeHideRef) {
-        suppressChromeHideRef.current = false;
-      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- keys from mapFocusApplyDependencyKeys
-  }, [...applyDependencyKeys, mapRef, suppressChromeHideRef]);
+  }, [...applyDependencyKeys, mapRef]);
 
   return null;
 }
@@ -290,7 +272,6 @@ export function MapViewMapLibre({
   children,
   mapKey,
   chromeHudRef,
-  suppressChromeHideRef,
   focusBounds = null,
   focusMinZoom,
   focusMaxZoom,
@@ -439,7 +420,6 @@ export function MapViewMapLibre({
               focusMaxZoom={focusMaxZoom}
               fitBoundsMode={fitBoundsMode}
               recenterToken={recenterToken}
-              suppressChromeHideRef={suppressChromeHideRef}
               fitBoundsPadding={fitBoundsPadding}
               focusPaddingBias={focusPaddingBias}
               preferFly={focusPreferFly}

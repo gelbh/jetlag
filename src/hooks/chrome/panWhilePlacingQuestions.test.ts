@@ -134,10 +134,17 @@ describe("pan while placing questions", () => {
       }),
     );
 
-    act(() => {
-      chrome.result.current.handleMapPanStart();
-      chrome.result.current.handleMapPanEnd();
+    const handlers = createViewportTrackerHandlers({
+      publish: vi.fn(),
+      onUserPanStart: () => chrome.result.current.handleMapPanStart(),
+      onUserPanEnd: () => chrome.result.current.handleMapPanEnd(),
     });
+
+    act(() => {
+      handlers.onDragStart();
+      handlers.onDragEnd();
+    });
+    expect(chrome.result.current.mapPanning).toBe(false);
 
     act(() => {
       expect(

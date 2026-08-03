@@ -29,7 +29,6 @@ describe("mapScreenRoleConfig", () => {
       "mapFocusBounds",
       "mapShellRef",
       "chromeHudRef",
-      "suppressChromeHideRef",
       "seekerLocations",
       "chatMessages",
       "hasUnreadChat",

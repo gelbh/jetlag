@@ -32,44 +32,6 @@ describe("useThermometerTool", () => {
     expect(result.current.draft.thermoB).toEqual([53.36, -6.25]);
   });
 
-  it("accepts B after A when place-phase chrome pan-hides then restores", () => {
-    // Regression: thermo A → pan → B. Pan must not clear the draft or leave
-    // wizardStepRef off "place" (shared chrome path; finishPlacement unused).
-    const mocks = createToolHookMocks();
-    const { result } = renderHook(() =>
-      useThermometerTool({
-        active: true,
-        annotations: mocks.annotations,
-        sessionRules: { gameSize: "large" },
-        createAnnotation: mocks.createAnnotation,
-        distanceUnit: mocks.distanceUnit,
-        finishPlacement: mocks.finishPlacement,
-        setMapError: mocks.setMapError,
-      }),
-    );
-
-    act(() => {
-      result.current.panel.props.onPlacementModeChange("manual");
-    });
-    act(() => {
-      result.current.handleMapClick([53.35, -6.26]);
-    });
-    expect(result.current.draft.thermoA).toEqual([53.35, -6.26]);
-    expect(result.current.panel.props.wizardStepRef.current).toBe("place");
-
-    // Simulate shared chrome pan cycle (does not call finishPlacement / onClose).
-    expect(mocks.finishPlacement).not.toHaveBeenCalled();
-
-    act(() => {
-      expect(result.current.handleMapClick([53.36, -6.25])).toBe(true);
-    });
-
-    expect(result.current.draft.thermoA).toEqual([53.35, -6.26]);
-    expect(result.current.draft.thermoB).toEqual([53.36, -6.25]);
-    expect(mocks.finishPlacement).not.toHaveBeenCalled();
-    expect(result.current.panel.props.wizardStepRef.current).toBe("place");
-  });
-
   it("ignores manual map taps outside the place wizard step", () => {
     const mocks = createToolHookMocks();
     const { result } = renderHook(() =>

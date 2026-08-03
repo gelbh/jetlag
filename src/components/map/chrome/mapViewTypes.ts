@@ -25,7 +25,6 @@ export interface MapViewCoreProps {
 
 export interface MapViewMapLibreChromeProps {
   chromeHudRef?: RefObject<HTMLElement | null>;
-  suppressChromeHideRef?: RefObject<boolean>;
   focusBounds?: MapBoundsExpression | null;
   focusMinZoom?: number;
   focusMaxZoom?: number;
