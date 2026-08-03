@@ -125,8 +125,14 @@ describe("ToolDock", () => {
 
   it("omits Found and End unless eligible", () => {
     const { rerender } = renderWithRouter(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
-    expect(screen.queryByRole("button", { name: "Found hider" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Start end game" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Declare found hider" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: "Start end game — seekers entered the hiding zone",
+      }),
+    ).not.toBeInTheDocument();
 
     rerender(
       <ToolDock
@@ -138,8 +144,14 @@ describe("ToolDock", () => {
         onStartEndGame={vi.fn()}
       />,
     );
-    expect(screen.getByRole("button", { name: "Found hider" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Start end game" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Declare found hider" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "Start end game — seekers entered the hiding zone",
+      }),
+    ).toBeInTheDocument();
   });
 
   it("renders short plain labels on every dock slot", () => {
