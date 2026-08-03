@@ -21,7 +21,10 @@ import { isUsableMapBounds } from "../../../domain/geometry/gameArea/geometry";
 import { computeFramedCenterZoomMapLibre } from "../../../domain/map/computeFramedCenterZoomMapLibre";
 import { focusBoundsToLngLatBounds } from "../../../domain/map/focusBoundsToLngLatBounds";
 import { isLargeCameraJumpMapLibre } from "../../../domain/map/isLargeCameraJumpMapLibre";
-import { shouldApplyMapFocus } from "../../../domain/map/mapFocusPolicy";
+import {
+  shouldApplyMapFocus,
+  shouldStopMapFocusAnimation,
+} from "../../../domain/map/mapFocusPolicy";
 import { resolveMapPitchDegrees } from "../../../domain/map/resolveMapPitchDegrees";
 import { stopMapCameraEase } from "../../../domain/map/stopMapCameraEase";
 import {
@@ -111,6 +114,16 @@ function MapFocus({
   const { prefersReducedMotion, lowPowerMode } = useMotionProfile();
   const hasFittedRef = useRef(false);
   const lastRecenterRef = useRef(recenterToken);
+  const preferFlyRef = useRef(preferFly);
+  preferFlyRef.current = preferFly;
+  const focusBoundsRef = useRef(focusBounds);
+  focusBoundsRef.current = focusBounds;
+  const focusPaddingBiasRef = useRef(focusPaddingBias);
+  focusPaddingBiasRef.current = focusPaddingBias;
+  const focusMinZoomRef = useRef(focusMinZoom);
+  focusMinZoomRef.current = focusMinZoom;
+  const focusMaxZoomRef = useRef(focusMaxZoom);
+  focusMaxZoomRef.current = focusMaxZoom;
   const animate = !prefersReducedMotion && !lowPowerMode;
   const padY = fitBoundsPaddingProp?.[0] ?? 32;
   const padX = fitBoundsPaddingProp?.[1] ?? 32;
@@ -132,32 +145,45 @@ function MapFocus({
   }, [mapRef, suppressChromeHideRef]);
 
   useEffect(() => {
-    if (!focusBounds) {
+    // once-mode: read latest bounds from refs so identity churn / preferFly flips
+    // do not re-enter and abort an in-flight ease via effect cleanup.
+    const bounds =
+      fitBoundsMode === "always" ? focusBounds : focusBoundsRef.current;
+    if (!bounds) {
       return;
     }
 
-    if (
-      !shouldApplyMapFocus({
-        fitBoundsMode,
-        hasFitted: hasFittedRef.current,
-        recenterToken,
-        lastRecenterToken: lastRecenterRef.current,
-      })
-    ) {
+    const willApply = shouldApplyMapFocus({
+      fitBoundsMode,
+      hasFitted: hasFittedRef.current,
+      recenterToken,
+      lastRecenterToken: lastRecenterRef.current,
+    });
+    if (!willApply) {
+      // No cleanup — prior apply may still be animating.
       return;
     }
 
     const map = mapRef.getMap();
     map.resize();
 
+    const paddingBias =
+      fitBoundsMode === "always"
+        ? (focusPaddingBias ?? 0)
+        : (focusPaddingBiasRef.current ?? 0);
+    const minZoom =
+      fitBoundsMode === "always" ? focusMinZoom : focusMinZoomRef.current;
+    const maxZoom =
+      fitBoundsMode === "always" ? focusMaxZoom : focusMaxZoomRef.current;
+
     const padding = {
       top: padY,
       left: padX,
       right: padX,
-      bottom: padY + (focusPaddingBias ?? 0),
+      bottom: padY + paddingBias,
     };
 
-    const mapBounds = toMapBounds(focusBounds);
+    const mapBounds = toMapBounds(bounds);
     if (!isUsableMapBounds(mapBounds)) {
       return;
     }
@@ -167,8 +193,8 @@ function MapFocus({
       map,
       lngLatBounds,
       padding,
-      focusMinZoom,
-      focusMaxZoom,
+      minZoom,
+      maxZoom,
     );
     if (!framed) {
       return;
@@ -195,8 +221,10 @@ function MapFocus({
     if (!animate) {
       map.jumpTo({ center, zoom });
       return () => {
-        // Same as dragstart: cancel ease only — map.stop() resets active pinch/pan.
-        stopMapCameraEase(map);
+        if (shouldStopMapFocusAnimation({ willApply: true })) {
+          // Same as dragstart: cancel ease only — map.stop() resets active pinch/pan.
+          stopMapCameraEase(map);
+        }
         map.off("moveend", onMoveEnd);
         if (suppressChromeHideRef) {
           suppressChromeHideRef.current = false;
@@ -204,7 +232,9 @@ function MapFocus({
       };
     }
 
-    if (isLargeCameraJumpMapLibre(map, center, zoom, preferFly)) {
+    if (
+      isLargeCameraJumpMapLibre(map, center, zoom, preferFlyRef.current)
+    ) {
       map.flyTo({
         center,
         zoom,
@@ -219,7 +249,9 @@ function MapFocus({
     }
 
     return () => {
-      stopMapCameraEase(map);
+      if (shouldStopMapFocusAnimation({ willApply: true })) {
+        stopMapCameraEase(map);
+      }
       map.off("moveend", onMoveEnd);
       if (suppressChromeHideRef) {
         suppressChromeHideRef.current = false;
@@ -227,15 +259,15 @@ function MapFocus({
     };
   }, [
     animate,
-    focusBounds,
-    focusMaxZoom,
-    focusMinZoom,
+    // once-mode: presence only — identity churn must not abort in-flight ease.
+    fitBoundsMode === "always" ? focusBounds : focusBounds != null,
+    fitBoundsMode === "always" ? focusPaddingBias : null,
+    fitBoundsMode === "always" ? focusMaxZoom : null,
+    fitBoundsMode === "always" ? focusMinZoom : null,
     fitBoundsMode,
     padX,
     padY,
-    focusPaddingBias,
     mapRef,
-    preferFly,
     recenterToken,
     suppressChromeHideRef,
   ]);
