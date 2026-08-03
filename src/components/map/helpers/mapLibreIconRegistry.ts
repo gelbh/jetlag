@@ -42,13 +42,6 @@ export function transitVehicleIconId(mode: TransitRouteMode): string {
   return `jl-icon-transit-vehicle-${mode}`;
 }
 
-function isAlreadyExistsError(error: unknown): boolean {
-  return (
-    error instanceof Error &&
-    /an image named .+ already exists/i.test(error.message)
-  );
-}
-
 async function loadSvgImage(
   map: MapLibreMap,
   imageId: string,
@@ -70,26 +63,17 @@ async function loadSvgImage(
         img.onerror = () => reject(new Error(`Failed to decode ${imageId}`));
         img.src = url;
       });
-      // Re-check after async decode — concurrent register / style.load races.
+      // Skip addImage when another register won the race (MapLibre no-ops +
+      // error-events on duplicates; it does not throw).
       if (map.hasImage(imageId)) {
         return true;
       }
-      try {
-        map.addImage(imageId, image, { pixelRatio: 2 });
-      } catch (error) {
-        if (isAlreadyExistsError(error) || map.hasImage(imageId)) {
-          return true;
-        }
-        throw error;
-      }
-      return true;
+      map.addImage(imageId, image, { pixelRatio: 2 });
+      return map.hasImage(imageId);
     } finally {
       URL.revokeObjectURL(url);
     }
   } catch (error) {
-    if (isAlreadyExistsError(error) || map.hasImage(imageId)) {
-      return true;
-    }
     if (import.meta.env.DEV) {
       console.warn(`[map] marker image failed: ${imageId}`, error);
     }

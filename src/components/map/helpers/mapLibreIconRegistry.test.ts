@@ -12,25 +12,26 @@ type MockMap = {
   addImage: (id: string, _image: unknown, _opts?: unknown) => void;
   images: Set<string>;
   addImageCalls: string[];
-  alreadyExistsThrows: number;
+  duplicateAddAttempts: number;
 };
 
 function createMockMap(): MockMap {
   const images = new Set<string>();
   const addImageCalls: string[] = [];
-  const state = { alreadyExistsThrows: 0 };
+  const state = { duplicateAddAttempts: 0 };
   return {
     images,
     addImageCalls,
-    get alreadyExistsThrows() {
-      return state.alreadyExistsThrows;
+    get duplicateAddAttempts() {
+      return state.duplicateAddAttempts;
     },
     hasImage: (id) => images.has(id),
     addImage: (id) => {
-      // Match MapLibre: second addImage for the same id throws.
+      // MapLibre 6.x: duplicate addImage fires an error event and returns
+      // (does not throw). Count the bad call; do not add again.
       if (images.has(id)) {
-        state.alreadyExistsThrows += 1;
-        throw new Error(`An image named "${id}" already exists.`);
+        state.duplicateAddAttempts += 1;
+        return;
       }
       images.add(id);
       addImageCalls.push(id);
@@ -39,8 +40,8 @@ function createMockMap(): MockMap {
 }
 
 /**
- * Delayed decode so two overlapping registers can both pass the initial
- * hasImage check before either addImage runs (production race).
+ * Delayed decode so overlapping work can pass the initial hasImage check
+ * before either addImage runs (production race shape).
  */
 function withDelayedMockImage(run: () => Promise<void>) {
   const originalImage = globalThis.Image;
@@ -66,7 +67,7 @@ describe("mapLibreIconRegistry", () => {
     vi.restoreAllMocks();
   });
 
-  it("does not throw when concurrent registerMapLibreMarkerImages race on duplicate ids", async () => {
+  it("serializes concurrent registerMapLibreMarkerImages without duplicate addImage", async () => {
     // Production stack: mapLibreIconRegistry → addImage → Promise.all
     // (transit mode indices) when style.load overlaps mount register.
     const mock = createMockMap();
@@ -82,9 +83,9 @@ describe("mapLibreIconRegistry", () => {
     expect(mock.hasImage(JL_ICON_USER_LOCATION)).toBe(true);
     expect(mock.hasImage(transitModeIconId("rail"))).toBe(true);
     expect(mock.hasImage(transitVehicleIconId("bus"))).toBe(true);
-    // Without re-check + serialize, overlapping Promise.all registers hit
-    // MapLibre "already exists" (caught as load failure / console noise).
-    expect(mock.alreadyExistsThrows).toBe(0);
+    // Per-map registerInFlight queue is the control; duplicate addImage would
+    // be MapLibre console noise (error event), not a throw.
+    expect(mock.duplicateAddAttempts).toBe(0);
     expect(new Set(mock.addImageCalls).size).toBe(mock.addImageCalls.length);
   });
 });
