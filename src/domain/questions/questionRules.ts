@@ -60,7 +60,6 @@ export function formatDrawPickSummary(draw: number, keep: number): string {
   return `${drawLabel}, ${pickLabel}`;
 }
 
-/** Prose for sequential reuse: base DnPm shown once, times = useCount+1. */
 export function formatSequentialDrawPickSummary(
   baseCost: QuestionCardCost,
   useCount: number,
@@ -82,7 +81,6 @@ const QUESTION_TOOL_BASE_COST: Partial<
   photo: "D1P1",
 };
 
-/** Chat copy from stored scaled draw/keep + tool base cost. */
 export function formatPendingDrawPickSummary(
   toolType: PendingQuestionToolType,
   cardDraw: number,
@@ -94,12 +92,7 @@ export function formatPendingDrawPickSummary(
   }
 
   const { draw, keep } = BASE_COST_MULTIPLIERS[baseCost];
-  if (
-    draw <= 0 ||
-    keep <= 0 ||
-    cardDraw % draw !== 0 ||
-    cardKeep % keep !== 0
-  ) {
+  if (cardDraw % draw !== 0 || cardKeep % keep !== 0) {
     return formatDrawPickSummary(cardDraw, cardKeep);
   }
 
