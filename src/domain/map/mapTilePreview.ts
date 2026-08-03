@@ -1,11 +1,14 @@
-import {
-  getMapBasemap,
-  type MapBasemapDefinition,
-  type MapStyle,
-  type StreetBasemap,
-} from "./mapBasemaps";
+import type { MapStyle, StreetBasemap } from "./mapBasemaps";
 
 export const MAP_STYLE_PREVIEW_ZOOM = 15;
+
+export const MAP_STYLE_PREVIEW_ASSETS = {
+  standard: {
+    light: "/map-preview/street-light.svg",
+    dark: "/map-preview/street-dark.svg",
+  },
+  satellite: "/map-preview/satellite.svg",
+} as const;
 
 export function latLngToTileXY(
   lat: number,
@@ -23,24 +26,23 @@ export function latLngToTileXY(
   return { x, y };
 }
 
-export function buildMapTileUrl(
-  basemap: MapBasemapDefinition,
-  x: number,
-  y: number,
-  z: number,
+export function mapStylePreviewAssetUrl(
+  style: MapStyle,
+  streetBasemap: StreetBasemap = "light",
 ): string {
-  let url = basemap.url
-    .replace("{z}", String(z))
-    .replace("{x}", String(x))
-    .replace("{y}", String(y))
-    .replace("{r}", "");
-
-  if (basemap.subdomains) {
-    const index = (x + y + z) % basemap.subdomains.length;
-    url = url.replace("{s}", basemap.subdomains[index] ?? "a");
+  if (style === "satellite") {
+    return MAP_STYLE_PREVIEW_ASSETS.satellite;
   }
+  return MAP_STYLE_PREVIEW_ASSETS.standard[streetBasemap];
+}
 
-  return url;
+/** Four identical static preview tiles for the style-toggle 2×2 grid. */
+export function mapStylePreviewTileUrls(
+  style: MapStyle,
+  streetBasemap: StreetBasemap = "light",
+): string[] {
+  const asset = mapStylePreviewAssetUrl(style, streetBasemap);
+  return [asset, asset, asset, asset];
 }
 
 export function previewTileUrlsForStyle(
@@ -50,8 +52,10 @@ export function previewTileUrlsForStyle(
   zoom = MAP_STYLE_PREVIEW_ZOOM,
   streetBasemap: StreetBasemap = "light",
 ): string[] {
-  const { x, y } = latLngToTileXY(lat, lng, zoom);
-  return previewTileUrlsFromOrigin(style, x, y, zoom, streetBasemap);
+  void lat;
+  void lng;
+  void zoom;
+  return mapStylePreviewTileUrls(style, streetBasemap);
 }
 
 export function previewTileUrlsFromOrigin(
@@ -61,12 +65,8 @@ export function previewTileUrlsFromOrigin(
   zoom = MAP_STYLE_PREVIEW_ZOOM,
   streetBasemap: StreetBasemap = "light",
 ): string[] {
-  const basemap = getMapBasemap(style, streetBasemap);
-
-  return [
-    [x, y],
-    [x + 1, y],
-    [x, y + 1],
-    [x + 1, y + 1],
-  ].map(([tileX, tileY]) => buildMapTileUrl(basemap, tileX, tileY, zoom));
+  void x;
+  void y;
+  void zoom;
+  return mapStylePreviewTileUrls(style, streetBasemap);
 }
