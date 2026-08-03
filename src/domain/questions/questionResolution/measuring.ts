@@ -1,7 +1,9 @@
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
+import { assertMeasuringMultiPlaceBudget } from "../../geometry/measuring/measuringGeometryBudgets";
 import { buildMeasuringRegions, type MeasuringRegionInput } from "../../geometry/measuring/measuringRegions";
 import type { MeasuringAnswer } from "../measuringQuestions";
+import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 
 export function measuringAnswerFromReplyId(
@@ -28,12 +30,27 @@ export async function resolveMeasuringPendingQuestion(
 
   const regionInput = JSON.parse(measuringRegionInputJson) as Omit<
     MeasuringRegionInput,
-    "measuringAnswer"
-  >;
+    "measuringAnswer" | "gameArea"
+  > & { gameArea?: GameArea };
+
+  const measuringPlaces = measuringPlacesFromMetadata(
+    metadata,
+    regionInput.measuringPlaces,
+  );
+
+  if (regionInput.usesAllPlacesInArea) {
+    const budget = assertMeasuringMultiPlaceBudget(measuringPlaces.length);
+    if (!budget.ok) {
+      return null;
+    }
+  }
+
   const regions = await buildMeasuringRegions({
     ...regionInput,
+    measuringPlaces,
     measuringAnswer: answer,
-    gameArea: regionInput.gameArea ?? gameArea,
+    // Session play area wins; legacy embedded gameArea is ignored for size/safety.
+    gameArea,
   });
 
   if (!regions) {
