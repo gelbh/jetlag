@@ -17,6 +17,7 @@ import { closerFurtherAnswerOptions } from "../../../components/tools/shared/ans
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { emitQuestionAnsweredActivity } from "../../../services/session/emitSessionActivity";
+import { assertMeasuringGeometryBudget } from "../../../domain/geometry/measuring/measuringGeometryBudgets";
 import { buildStoredMeasuringRegionInput } from "./helpers";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 import type { MeasuringPreviews } from "./useMeasuringPreviews";
@@ -81,6 +82,18 @@ export function useMeasuringCommit({
 
   const performCommit = useCallback(async () => {
     if (!measuringSeekerPoint || measuringDistanceMeters === null) {
+      return;
+    }
+
+    const budget = assertMeasuringGeometryBudget({
+      measuringSubject,
+      measuringLocationCategory,
+      usesAllPlacesInArea,
+      placeCount: measuringPlaces.length,
+      linearSegments: resolvedCoastSegments,
+    });
+    if (!budget.ok) {
+      setMeasuringError(budget.message);
       return;
     }
 
@@ -332,6 +345,18 @@ export function useMeasuringCommit({
       return;
     }
 
+    const budget = assertMeasuringGeometryBudget({
+      measuringSubject,
+      measuringLocationCategory,
+      usesAllPlacesInArea,
+      placeCount: measuringPlaces.length,
+      linearSegments: resolvedCoastSegments,
+    });
+    if (!budget.ok) {
+      setMeasuringError(budget.message);
+      return;
+    }
+
     if (previewBeforeSend) {
       setPreviewOpen(true);
       return;
@@ -343,6 +368,7 @@ export function useMeasuringCommit({
     canSubmitQuestion,
     measureFromKind,
     measuringDistanceMeters,
+    measuringLocationCategory,
     measuringPlaces.length,
     measuringSeaLevelNearRegion,
     measuringSeaLevelNote,
@@ -352,6 +378,7 @@ export function useMeasuringCommit({
     performCommit,
     previewBeforeSend,
     regionPackId,
+    resolvedCoastSegments,
     setMeasuringError,
     setPreviewOpen,
     usesAllPlacesInArea,

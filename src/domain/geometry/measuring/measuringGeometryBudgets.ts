@@ -1,4 +1,9 @@
 import type { Feature, LineString } from "geojson";
+import {
+  isMeasuringLinearLocation,
+  type MeasuringLocationCategory,
+  type MeasuringSubject,
+} from "../../questions/measuringQuestions";
 
 /** Max places when measuring every site in the play area (HADK parks = 107). */
 export const MEASURING_MULTI_PLACE_MAX = 128;
@@ -42,4 +47,31 @@ export function countLineStringVertices(
     total += segment.geometry.coordinates.length;
   }
   return total;
+}
+
+/** Preview/commit/resolve gate for multi-place and linear measuring. */
+export function assertMeasuringGeometryBudget(input: {
+  measuringSubject: MeasuringSubject;
+  measuringLocationCategory: MeasuringLocationCategory | null;
+  usesAllPlacesInArea: boolean;
+  placeCount: number;
+  linearSegments: readonly Feature<LineString>[];
+}): MeasuringBudgetResult {
+  if (input.usesAllPlacesInArea) {
+    return assertMeasuringMultiPlaceBudget(input.placeCount);
+  }
+
+  if (
+    input.measuringSubject === "coastline" ||
+    isMeasuringLinearLocation(
+      input.measuringSubject,
+      input.measuringLocationCategory ?? undefined,
+    )
+  ) {
+    return assertMeasuringLinearVertexBudget(
+      countLineStringVertices(input.linearSegments),
+    );
+  }
+
+  return { ok: true };
 }

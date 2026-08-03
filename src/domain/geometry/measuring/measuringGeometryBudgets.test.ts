@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   MEASURING_LINEAR_MAX_VERTICES,
   MEASURING_MULTI_PLACE_MAX,
+  assertMeasuringGeometryBudget,
   assertMeasuringLinearVertexBudget,
   assertMeasuringMultiPlaceBudget,
   countLineStringVertices,
@@ -61,5 +62,40 @@ describe("measuringGeometryBudgets", () => {
         },
       ]),
     ).toBe(5);
+  });
+
+  it("gates multi-place via assertMeasuringGeometryBudget", () => {
+    expect(
+      assertMeasuringGeometryBudget({
+        measuringSubject: "location",
+        measuringLocationCategory: "park",
+        usesAllPlacesInArea: true,
+        placeCount: 129,
+        linearSegments: [],
+      }).ok,
+    ).toBe(false);
+  });
+
+  it("gates linear categories via prepared vertex count", () => {
+    const fatSegment = {
+      type: "Feature" as const,
+      properties: {},
+      geometry: {
+        type: "LineString" as const,
+        coordinates: Array.from({ length: MEASURING_LINEAR_MAX_VERTICES + 1 }, (_, i) => [
+          i * 0.0001,
+          0,
+        ]),
+      },
+    };
+    expect(
+      assertMeasuringGeometryBudget({
+        measuringSubject: "coastline",
+        measuringLocationCategory: null,
+        usesAllPlacesInArea: false,
+        placeCount: 0,
+        linearSegments: [fatSegment],
+      }).ok,
+    ).toBe(false);
   });
 });
