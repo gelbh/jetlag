@@ -85,22 +85,27 @@ test.describe("mobile tool dock", () => {
     expect(metrics.overflowSlots).toBe(0);
   });
 
-  test("side stack clears MapView zoom controls", async ({ page }) => {
-    await expect(page.locator(".jl-map-chrome-side-stack")).toHaveCount(1);
+  test("@smoke side stack clears MapView zoom controls", async ({ page }) => {
+    const sideStack = page.locator(".jl-map-chrome-side-stack");
+    const session = sideStack.locator("[data-island='session']");
+    await expect(sideStack).toHaveCount(1);
+    await expect(sideStack).toBeVisible();
+    await expect(session).toHaveCount(1);
+    await expect(session).toBeVisible();
     await expect(page.locator(".map-zoom-control")).toBeVisible();
 
     const metrics = await page.evaluate(() => {
       const side = document.querySelector(".jl-map-chrome-side-stack");
       const zoom = document.querySelector(".map-zoom-control");
-      const session = document.querySelector(
+      const sessionEl = document.querySelector(
         ".jl-map-chrome-side-stack [data-island='session']",
       );
-      if (!side || !zoom || !session) {
+      if (!side || !zoom || !sessionEl) {
         return { missing: true as const };
       }
       const sideRect = side.getBoundingClientRect();
       const zoomRect = zoom.getBoundingClientRect();
-      const sessionRect = session.getBoundingClientRect();
+      const sessionRect = sessionEl.getBoundingClientRect();
       const overlapX =
         Math.min(sideRect.right, zoomRect.right) -
         Math.max(sideRect.left, zoomRect.left);
