@@ -326,9 +326,8 @@ export function MapViewMapLibre({
     (showMapStyleToggle ?? Boolean(onMapStyleChange)) &&
     Boolean(onMapStyleChange);
   const styleControlInset = mapStyleControlInset ?? zoomControlInset;
-  const mapPitchEnabled = useMapStore((state) => state.mapPitchEnabled);
   const { lowPowerMode } = useMotionProfile();
-  const maxPitchDegrees = resolveMapPitchDegrees(mapPitchEnabled, lowPowerMode);
+  const maxPitchDegrees = resolveMapPitchDegrees(lowPowerMode);
   const pitchGesturesEnabled = interactive && maxPitchDegrees > 0;
 
   useEffect(() => {
