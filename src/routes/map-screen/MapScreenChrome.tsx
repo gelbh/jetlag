@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
-import { isEndGameActive, isEndGamePending, isFoundHiderPending } from "../../domain/map/annotations";
+import { isEndGameActive, isFoundHiderPending } from "../../domain/map/annotations";
 import { QUESTION_DOCK_TOOL_IDS } from "../../domain/map/mapTools";
 import { resolveToolDockEnabled } from "../../domain/session/rules";
 import { visibleRoleCodeRoles } from "../../domain/session/players/roleGates";
@@ -353,8 +353,6 @@ export function MapScreenChrome({
       queuedWrites={syncStatus.queuedWrites}
       message={syncMessage}
       endGameActive={isEndGameActive(session)}
-      endGamePending={isEndGamePending(session)}
-      endGameRequestedByUid={session!.endGameRequestedByUid}
       foundHiderPending={isFoundHiderPending(session)}
       foundRequestedByUid={session!.foundRequestedByUid}
       onDeclineFoundHider={() => void handleDeclineFoundHider()}

@@ -206,7 +206,7 @@ export function GameChatTab({
                       : null
                   }
                   loading={truthsLoading}
-                  truthReferenceMode={truthReferenceMode}
+                  truthReferenceMode={truthReferenceMode ?? "hidingZoneCenter"}
                   onSelect={(option) =>
                     void onAnswerQuestion(
                       message.pendingQuestionId!,

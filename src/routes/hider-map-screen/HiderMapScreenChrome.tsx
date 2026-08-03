@@ -44,7 +44,7 @@ import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
 import { SessionLog } from "../../components/session/log/SessionLog";
-import { isEndGameActive, isEndGamePending, isFoundHiderPending } from "../../domain/map/annotations";
+import { isEndGameActive, isFoundHiderPending } from "../../domain/map/annotations";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
@@ -345,8 +345,6 @@ export function HiderMapScreenChrome({
         pendingQuestions={pendingQuestions}
         closeTimerMenu={overlay.sheet !== "none" || zoneTool.wizardOpen}
         endGameActive={isEndGameActive(session)}
-        endGamePending={isEndGamePending(session)}
-        endGameRequestedByUid={session.endGameRequestedByUid}
         foundHiderPending={isFoundHiderPending(session)}
         foundRequestedByUid={session.foundRequestedByUid}
         myUid={uid ?? undefined}
@@ -521,8 +519,7 @@ export function HiderMapScreenChrome({
             session,
             myUid: uid ?? undefined,
             onClearMap,
-            endGameBlocked:
-              isEndGameActive(session) || isEndGamePending(session),
+            endGameBlocked: isEndGameActive(session),
             onExport: overlay.closeSheet,
             isHost,
             onResetBoard,

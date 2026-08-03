@@ -29,8 +29,6 @@ export {
   endRemoteSession,
   updateSessionTimer,
   updateSessionRules,
-  requestEndGameSession,
-  acceptEndGameSession,
   startEndGameSession,
   touchSessionLastActive,
   clearEndGameRequestSession,

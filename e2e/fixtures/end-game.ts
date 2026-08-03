@@ -1,26 +1,13 @@
 import { type Page, expect } from "@playwright/test";
 import { openSettings } from "./tools/navigation";
 
-export async function requestEndGame(hostPage: Page) {
+export async function startEndGameFromFoundStation(hostPage: Page) {
   hostPage.once("dialog", (dialog) => dialog.accept());
-  await hostPage.getByRole("button", { name: "Start end game" }).click();
-  await expect(
-    hostPage.getByText("Waiting for hider to accept end game"),
-  ).toBeVisible({ timeout: 15_000 });
-}
-
-export async function acceptEndGame(guestPage: Page) {
-  await expect(
-    guestPage.getByText("Seekers requested end game"),
-  ).toBeVisible({ timeout: 15_000 });
-  await guestPage.getByRole("button", { name: "Accept" }).click();
-}
-
-export async function declineEndGame(guestPage: Page) {
-  await expect(
-    guestPage.getByText("Seekers requested end game"),
-  ).toBeVisible({ timeout: 15_000 });
-  await guestPage.getByRole("button", { name: "Decline" }).click();
+  await hostPage
+    .getByRole("button", {
+      name: "Declare found hiding-zone station / start end game",
+    })
+    .click();
 }
 
 export async function expectEndGameStarted(hostPage: Page, guestPage: Page) {

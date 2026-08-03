@@ -98,7 +98,6 @@ export function useMapSessionActions({
     const frozenAt = new Date().toISOString();
     const anchorsResult = assembleEndGameStartAnchors({
       hiderUids: confirmedHidingZones.map((zone) => zone.hiderUid),
-      hidingPlaces: [],
       zoneCenters: confirmedHidingZones.map((zone) => ({
         uid: zone.hiderUid,
         lat: zone.center.lat,

@@ -50,10 +50,6 @@ import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/devi
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import { resolveHiderTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
-import {
-  parseGeometryJson,
-  pointFromGeometryFeature,
-} from "../domain/geometry/gameArea/geometryParsing";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
 import { useHidingZoneUidHeal } from "../hooks/session/useHidingZoneUidHeal";
 import { useHiderZoneTool } from "../hooks/session/useHiderZoneTool";
@@ -253,23 +249,25 @@ export function HiderMapScreen() {
     minIntervalMs: liveLocationProfile.minIntervalMs,
     minDistanceMeters: liveLocationProfile.minDistanceMeters,
   });
-  const openAskOrigin = useMemo((): LatLngTuple | null => {
-    const open = pendingQuestions.find(
-      (question) =>
-        question.status === "pending" || question.status === "walking",
-    );
-    if (!open) {
-      return null;
-    }
-    const feature = parseGeometryJson(open.placement.geometryJson);
-    return feature ? pointFromGeometryFeature(feature) : null;
-  }, [pendingQuestions]);
   const hidingPlace = useMemo((): LatLngTuple | null => {
     if (!liveLocationReading) {
       return null;
     }
     return [liveLocationReading.lat, liveLocationReading.lng];
   }, [liveLocationReading]);
+  const truthContext = useMemo(() => {
+    if (!uid) {
+      return null;
+    }
+    return {
+      hiderUid: uid,
+      zoneCenter: stationCenter,
+      hidingPlace,
+      zoneRadiusMeters: myZone?.radiusMeters ?? null,
+      session,
+    };
+  }, [hidingPlace, myZone?.radiusMeters, session, stationCenter, uid]);
+  // Map pin: zone-center / freeze (not per-ask). Per-ask resolution lives in useHiderQuestionTruths.
   const truthReference = useMemo(() => {
     if (!uid) {
       return {
@@ -282,21 +280,20 @@ export function HiderMapScreen() {
       hiderUid: uid,
       zoneCenter: stationCenter,
       hidingPlace,
-      askOrigin: openAskOrigin,
-      zoneRadiusMeters: myZone?.radiusMeters ?? null,
       session,
     });
-  }, [hidingPlace, myZone?.radiusMeters, openAskOrigin, session, stationCenter, uid]);
+  }, [hidingPlace, session, stationCenter, uid]);
   useHidingZoneUidHeal(sessionId, uid, hidingZones, persistedMyUid);
   const truthReferenceReady = authReady && uid !== null;
-  const { questionTruths, loading: truthsLoading } = useHiderQuestionTruths(
+  const {
+    questionTruths,
+    loading: truthsLoading,
+    primaryTruthReferenceMode,
+  } = useHiderQuestionTruths(
     pendingQuestions,
-    truthReference.point,
+    truthContext,
     gameArea ?? undefined,
-    {
-      truthReferenceReady,
-      truthReferenceMode: truthReference.mode,
-    },
+    { truthReferenceReady },
   );
   const hiderOutsideZone = useHiderZoneAdvisory({
     enabled:
@@ -852,7 +849,7 @@ export function HiderMapScreen() {
           sessionId: sessionId ?? "",
           questionTruths,
           truthsLoading,
-          truthReferenceMode: truthReference.mode,
+          truthReferenceMode: primaryTruthReferenceMode,
           answerError: chatAnswerError,
           onAnswerQuestion: async (
             pendingQuestionId,
