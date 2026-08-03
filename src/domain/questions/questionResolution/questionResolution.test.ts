@@ -28,6 +28,12 @@ import {
   resolveThermometerPendingQuestion,
   thermometerAnswerFromReplyId,
 } from "./thermometer";
+import exysHospitalTentacle from "../../geometry/tentacle/fixtures/exysHospitalTentacle.json";
+import {
+  TentacleGeometryBudgetError,
+  TENTACLE_POI_MAX,
+} from "../../geometry/tentacle/tentacleGeometryBudgets";
+import type { TentaclePoi } from "../../map/annotations";
 
 const gameArea: GameArea = {
   type: "Polygon",
@@ -403,6 +409,95 @@ describe("resolveTentaclePendingQuestion", () => {
 
     expect(resolved?.metadata.radiusMeters).toBe(largeRadius);
     expect(resolved?.metadata.tentacleAnswerRadiusMeters).toBe(largeRadius);
+  });
+
+  it("EXYS hospital tentacle resolves annotation with elim shade (not stuck answered)", async () => {
+    // Live: EXYS / a4ad8efe-90d3-46cb-a803-b37ef2e307e2 answered Q7989290, no annotation.
+    const dublinGameArea: GameArea = {
+      type: "Polygon",
+      coordinates: [
+        [
+          [-6.4, 53.2],
+          [-6.1, 53.2],
+          [-6.1, 53.5],
+          [-6.4, 53.5],
+          [-6.4, 53.2],
+        ],
+      ],
+    };
+    const pending = basePending({
+      id: exysHospitalTentacle.pendingQuestionId,
+      toolType: "tentacle",
+      status: "answered",
+      answer: exysHospitalTentacle.answerPoiId,
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "Point",
+            coordinates: [
+              exysHospitalTentacle.center.lng,
+              exysHospitalTentacle.center.lat,
+            ],
+          },
+        }),
+        metadata: {
+          radiusMeters: exysHospitalTentacle.radiusMeters,
+          poisJson: JSON.stringify(exysHospitalTentacle.pois),
+          centerJson: JSON.stringify(exysHospitalTentacle.center),
+          tentacleCategoryId: "hospital",
+        },
+      },
+    });
+
+    const resolved = await resolveTentaclePendingQuestion(
+      pending,
+      exysHospitalTentacle.answerPoiId,
+      dublinGameArea,
+    );
+
+    expect(resolved).not.toBeNull();
+    expect(resolved?.metadata.highlightedPoiId).toBe(
+      exysHospitalTentacle.answerPoiId,
+    );
+    expect(resolved?.metadata.tentacleEliminationJson).toBeTruthy();
+    expect(
+      JSON.parse(resolved!.metadata.tentacleEliminationJson as string),
+    ).toMatchObject({
+      geometry: { type: expect.stringMatching(/Polygon|MultiPolygon/) },
+    });
+  });
+
+  it("throws TentacleGeometryBudgetError for over-budget POI lists", async () => {
+    const overBudget: TentaclePoi[] = Array.from(
+      { length: TENTACLE_POI_MAX + 1 },
+      (_, index) => ({
+        id: `poi-${index}`,
+        name: `POI ${index}`,
+        lat: 51.45,
+        lng: -0.15 + index * 0.0001,
+        category: "museum",
+      }),
+    );
+    const pending = basePending({
+      toolType: "tentacle",
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-0.15, 51.45] },
+        }),
+        metadata: {
+          poisJson: JSON.stringify(overBudget),
+          centerJson: JSON.stringify({ lat: 51.45, lng: -0.15 }),
+        },
+      },
+    });
+
+    await expect(
+      resolveTentaclePendingQuestion(pending, "poi-0", gameArea),
+    ).rejects.toBeInstanceOf(TentacleGeometryBudgetError);
   });
 });
 
