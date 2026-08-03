@@ -90,7 +90,8 @@
     position: absolute;
     z-index: 3;
     right: max(0.5rem, env(safe-area-inset-right));
-    /* Sit above MapView zoom/recenter portal column (MapLibre context owns those). */
+    /* Sit above MapView zoom/recenter portal column (MapLibre context owns those).
+       Zoom controls positioned with same --map-chrome-zoom-stack-height token for alignment. */
     bottom: calc(
       var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem +
         var(--map-chrome-zoom-stack-height)
@@ -103,6 +104,7 @@
     max-height: var(--dock-island-height);
     overflow: hidden;
   }
+
 
   .jl-map-island {
     pointer-events: auto;
