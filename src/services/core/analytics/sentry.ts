@@ -299,6 +299,33 @@ export function capturePhotoUploadFailure(
   });
 }
 
+export function capturePendingResolveFailure(
+  error: unknown,
+  context: { toolType: string; pendingQuestionId?: string },
+): void {
+  if (import.meta.env.MODE === "test") {
+    return;
+  }
+
+  Sentry.withScope((scope) => {
+    scope.setTag("pending_resolve_failed", "true");
+    scope.setTag("toolType", context.toolType);
+    if (context.pendingQuestionId) {
+      scope.setExtra("pendingQuestionId", context.pendingQuestionId);
+    }
+    Sentry.addBreadcrumb({
+      category: "pending.resolve",
+      message: "Pending question resolve failed",
+      level: "error",
+      data: {
+        toolType: context.toolType,
+        pendingQuestionId: context.pendingQuestionId,
+      },
+    });
+    Sentry.captureException(error);
+  });
+}
+
 export function addPhotoUploadBreadcrumb(details: Record<string, unknown>): void {
   if (import.meta.env.MODE === "test") {
     return;

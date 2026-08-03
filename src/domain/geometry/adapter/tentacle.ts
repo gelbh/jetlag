@@ -13,6 +13,7 @@ import {
   getCachedVoronoiCellsAsync,
   tentacleSitesFingerprint,
 } from "../voronoi/voronoiCellCache";
+import { assertTentaclePoiBudget } from "../tentacle/tentacleGeometryBudgets";
 
 const POI_ANSWER_ELIMINATION_CACHE_MAX = 16;
 
@@ -122,6 +123,9 @@ export async function tentacleEliminationJsonForAnswer(params: {
   ) {
     return undefined;
   }
+
+  // Refuse heavy Voronoi/elim work — soft-fail cancel keeps the seeker tab alive.
+  assertTentaclePoiBudget(params.pois.length);
 
   const region = await buildTentaclePoiAnswerEliminationRegion(
     params.anchor,

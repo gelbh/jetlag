@@ -1,0 +1,180 @@
+{
+  "sessionCode": "EXYS",
+  "pendingQuestionId": "a4ad8efe-90d3-46cb-a803-b37ef2e307e2",
+  "answerPoiId": "Q7989290",
+  "radiusMeters": 2000,
+  "center": {
+    "lat": 53.3412189821658,
+    "lng": -6.258579411146144
+  },
+  "pois": [
+    {
+      "id": "3054671379",
+      "name": "The Rotunda Mosse House",
+      "lat": 53.3528721,
+      "lng": -6.2612535,
+      "category": "hospital"
+    },
+    {
+      "id": "22770493",
+      "name": "Royal Hospital Donnybrook",
+      "lat": 53.3250732,
+      "lng": -6.2480404,
+      "category": "hospital"
+    },
+    {
+      "id": "33005181",
+      "name": "Mater Misericordiae University Hospital",
+      "lat": 53.3592622,
+      "lng": -6.2671018,
+      "category": "hospital"
+    },
+    {
+      "id": "33005187",
+      "name": "Mater Private Hospital",
+      "lat": 53.3581067,
+      "lng": -6.2644738,
+      "category": "hospital"
+    },
+    {
+      "id": "48460622",
+      "name": "The Meath Primary Care Centre (Former Meath Hospital)",
+      "lat": 53.3357254,
+      "lng": -6.2701974,
+      "category": "hospital"
+    },
+    {
+      "id": "79498864",
+      "name": "Rotunda Hospital",
+      "lat": 53.3529786,
+      "lng": -6.2633433,
+      "category": "hospital"
+    },
+    {
+      "id": "137349173",
+      "name": "Children's Health Ireland at Temple Street",
+      "lat": 53.3570939,
+      "lng": -6.2615305,
+      "category": "hospital"
+    },
+    {
+      "id": "277289764",
+      "name": "Royal Victoria Eye and Ear Hospital",
+      "lat": 53.3328193,
+      "lng": -6.2556569,
+      "category": "hospital"
+    },
+    {
+      "id": "394470425",
+      "name": "The National Maternity Hospital",
+      "lat": 53.3401458,
+      "lng": -6.2457854,
+      "category": "hospital"
+    },
+    {
+      "id": "560423644",
+      "name": "Mater Private Hospital",
+      "lat": 53.3568602,
+      "lng": -6.2649614,
+      "category": "hospital"
+    },
+    {
+      "id": "Q18646129",
+      "name": "National Children's Hospital",
+      "lat": 53.3365,
+      "lng": -6.26289,
+      "category": "hospital"
+    },
+    {
+      "id": "Q25245632",
+      "name": "Saint Ultan's Children's Hospital",
+      "lat": 53.33083333,
+      "lng": -6.26111111,
+      "category": "hospital"
+    },
+    {
+      "id": "Q4681734",
+      "name": "Adelaide Hospital",
+      "lat": 53.3393,
+      "lng": -6.2682,
+      "category": "hospital"
+    },
+    {
+      "id": "Q5170823",
+      "name": "Cork Street Fever Hospital, Dublin",
+      "lat": 53.33888889,
+      "lng": -6.27694444,
+      "category": "hospital"
+    },
+    {
+      "id": "Q7528427",
+      "name": "Sir Patrick Dun's Hospital",
+      "lat": 53.338954,
+      "lng": -6.241174,
+      "category": "hospital"
+    },
+    {
+      "id": "Q6804305",
+      "name": "Meath Hospital",
+      "lat": 53.33666667,
+      "lng": -6.26694444,
+      "category": "hospital"
+    },
+    {
+      "id": "Q6185278",
+      "name": "Jervis Street Hospital, Dublin",
+      "lat": 53.348936,
+      "lng": -6.266276,
+      "category": "hospital"
+    },
+    {
+      "id": "Q15253081",
+      "name": "Mercer's Hospital",
+      "lat": 53.340704,
+      "lng": -6.263541,
+      "category": "hospital"
+    },
+    {
+      "id": "Q7373950",
+      "name": "Royal City of Dublin Hospital",
+      "lat": 53.333769,
+      "lng": -6.243982,
+      "category": "hospital"
+    },
+    {
+      "id": "Q7989290",
+      "name": "Westmoreland Lock Hospital",
+      "lat": 53.34614,
+      "lng": -6.25439,
+      "category": "hospital"
+    },
+    {
+      "id": "Q7374299",
+      "name": "Royal Hospital, Donnybrook",
+      "lat": 53.325,
+      "lng": -6.24861111,
+      "category": "hospital"
+    },
+    {
+      "id": "Q13156901",
+      "name": "National Maternity Hospital, Dublin",
+      "lat": 53.3402,
+      "lng": -6.2482,
+      "category": "hospital"
+    },
+    {
+      "id": "Q65089444",
+      "name": "Whitworth Hospital",
+      "lat": 53.35158,
+      "lng": -6.27636,
+      "category": "hospital"
+    },
+    {
+      "id": "Q65068704",
+      "name": "Richmond Surgical Hospital",
+      "lat": 53.3511,
+      "lng": -6.2786,
+      "category": "hospital"
+    }
+  ]
+}
