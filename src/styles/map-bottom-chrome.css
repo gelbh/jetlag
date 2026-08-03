@@ -371,8 +371,7 @@
 
 /*
  * Zoom left above satellite (MapView portals).
- * Lives here so impeccable write-hooks on map-chrome-controls.css do not block
- * the layout move; this file imports after map-chrome-controls in index.css.
+ * Cascade after map-chrome-controls.css (see index.css import order).
  */
 :root {
   --map-left-chrome-inset: max(0.75rem, env(safe-area-inset-left));
