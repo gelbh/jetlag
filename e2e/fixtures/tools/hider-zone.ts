@@ -8,6 +8,17 @@ export async function waitForHidingZoneWizard(page: Page) {
   await expect(methodStep.or(locationSearch)).toBeVisible({ timeout: 15_000 });
 }
 
+export async function searchStationsInArea(page: Page) {
+  const searchButton = page.getByRole("button", {
+    name: /Search stations in this area|Search this area/i,
+  });
+  await expect(searchButton).toBeVisible({ timeout: 10_000 });
+  await searchButton.click();
+  await expect(page.getByText(/Loading stations/i)).toBeHidden({
+    timeout: 30_000,
+  });
+}
+
 export async function advanceHidingZoneWizardToLocation(page: Page) {
   const methodTablist = page.getByRole("tablist", {
     name: "Hiding zone placement method",
@@ -23,9 +34,7 @@ export async function advanceHidingZoneWizardToLocation(page: Page) {
   await expect(page.getByPlaceholder("Search stations…")).toBeVisible({
     timeout: 15_000,
   });
-  await expect(page.getByText(/Loading stations/i)).toBeHidden({
-    timeout: 30_000,
-  });
+  await searchStationsInArea(page);
 }
 
 export async function openHidingZoneWizard(page: Page) {
@@ -35,6 +44,9 @@ export async function openHidingZoneWizard(page: Page) {
 
 export async function selectTransitStation(page: Page, name: string | RegExp) {
   const station = page.getByRole("button", { name });
+  if (!(await station.isVisible())) {
+    await searchStationsInArea(page);
+  }
   await expect(station).toBeVisible({ timeout: 10_000 });
   await station.click();
 }

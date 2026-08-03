@@ -19,7 +19,7 @@ test.describe("hider flows", () => {
     await openHidingZoneWizard(guestPage);
     await advanceHidingZoneWizardToLocation(guestPage);
     await expect(
-      guestPage.getByRole("button", { name: "Search this area" }),
+      guestPage.getByRole("button", { name: "Search stations in this area" }),
     ).toBeVisible();
     await expect(
       guestPage.getByRole("button", { name: "Dublin Central" }),
