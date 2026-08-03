@@ -122,7 +122,7 @@ it("marks chrome inactive without leaving islands clickable via CSS class", () =
       /@media\s*\(max-height:\s*430px\)\s*and\s*\(orientation:\s*landscape\)\s*\{[^}]*--map-chrome-zoom-stack-height:\s*6\.25rem/s,
     );
     expect(chromeCss).toMatch(
-      /\.jl-map-chrome-side-stack\s*\{[^}]*bottom:\s*calc\(\s*var\(--dock-island-height\)\s*\+\s*env\(safe-area-inset-bottom\)\s*\+\s*0\.75rem\s*\+\s*var\(--map-chrome-zoom-stack-height\)\s*\)/s,
+      /\.jl-map-chrome-side-stack\s*\{[^}]*bottom:\s*calc\(\s*var\(--dock-island-height\)\s*\+\s*env\(safe-area-inset-bottom\)\s*\+\s*0\.75rem\s*\+\s*var\(--map-chrome-zoom-stack-height\)\s*\+\s*0\.5rem\s*\)/s,
     );
     // Seeker still portals Zoom via MapView; do not reintroduce a silent calc fallback.
     expect(chromeCss).not.toMatch(/map-chrome-zoom-stack-height,\s*6\.25rem/);
