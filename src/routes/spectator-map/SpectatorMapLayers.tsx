@@ -17,6 +17,7 @@ import type { MapStyle } from "../../domain/map/mapBasemaps";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useAnnotationStore } from "../../state/annotationStore";
+import { useMapStore } from "../../state/sessionStore";
 
 type SpectatorMapLayersProps = {
   session: SessionRecord;
@@ -54,6 +55,7 @@ export function SpectatorMapLayers({
   const selectedAnnotationId = useAnnotationStore(
     (state) => state.selectedAnnotationId,
   );
+  const streetBasemap = useMapStore((state) => state.streetBasemap);
 
   return (
     <>
@@ -86,6 +88,7 @@ export function SpectatorMapLayers({
         gameArea={gameArea}
         sessionRules={sessionRules}
         mapStyle={effectiveBasemapStyle}
+        streetBasemap={streetBasemap}
       />
     </>
   );

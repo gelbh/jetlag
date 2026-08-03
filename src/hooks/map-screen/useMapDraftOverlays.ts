@@ -23,13 +23,14 @@ import {
 import { buildThermometerDraftOverlays } from "../../domain/questions/overlays/thermometer";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 import { getBoundaryPreviewStyle } from "../../domain/map/mapBoundaryOverlayStyle";
-import type { MapStyle } from "../../domain/map/mapBasemaps";
+import type { MapStyle, StreetBasemap } from "../../domain/map/mapBasemaps";
 import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/masks/emptyFeatures";
 
 export interface MapDraftOverlaySources {
   activeTool: MapTool;
   gameArea: GameArea;
   mapStyle: MapStyle;
+  streetBasemap?: StreetBasemap;
   radar: {
     center: LatLngTuple | null;
     radiusMeters: number;
@@ -82,9 +83,9 @@ export async function buildMapDraftOverlays(
 ): Promise<MapDraftOverlayResult> {
   const overlays: MapDraftOverlay[] = [];
   const eliminationFeatures: Feature<GeoPolygon | MultiPolygon>[] = [];
-  const { activeTool, gameArea, mapStyle } = sources;
+  const { activeTool, gameArea, mapStyle, streetBasemap = "light" } = sources;
   const c = MAP_ANNOTATION_COLORS;
-  const boundaryPreviewStyle = getBoundaryPreviewStyle(mapStyle);
+  const boundaryPreviewStyle = getBoundaryPreviewStyle(mapStyle, streetBasemap);
 
   const pushBoundary = (
     id: string,
@@ -388,6 +389,7 @@ export function useMapDraftOverlays(
     activeTool,
     gameArea,
     mapStyle,
+    streetBasemap = "light",
     radar,
     pin,
     tentacle,
@@ -425,6 +427,7 @@ export function useMapDraftOverlays(
     activeTool,
     gameArea,
     mapStyle,
+    streetBasemap,
     matching.boundaryPreview,
     matching.eliminationPreview,
     matching.nearestFeaturePoint,

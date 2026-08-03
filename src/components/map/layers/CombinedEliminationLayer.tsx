@@ -36,9 +36,10 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
   hidingZones = [],
 }: CombinedEliminationLayerProps) {
   const mapStyle = useMapStore((state) => state.mapStyle);
+  const streetBasemap = useMapStore((state) => state.streetBasemap);
   const overlayLayers = useMemo(
-    () => getEliminationOverlayLayers(mapStyle),
-    [mapStyle],
+    () => getEliminationOverlayLayers(mapStyle, streetBasemap),
+    [mapStyle, streetBasemap],
   );
 
   const endGameActive = isEndGameActive(session);

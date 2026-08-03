@@ -32,4 +32,11 @@ describe("getEliminationOverlayLayers", () => {
       fillOpacity: 0.52,
     });
   });
+
+  it("returns high-contrast layers on dark standard street basemap", () => {
+    const darkStandard = getEliminationOverlayLayers("standard", "dark");
+    const satellite = getEliminationOverlayLayers("satellite");
+
+    expect(darkStandard).toEqual(satellite);
+  });
 });
