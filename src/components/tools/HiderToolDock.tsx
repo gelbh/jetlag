@@ -15,6 +15,7 @@ interface HiderToolDockProps {
   onRecenter: () => void;
   onOpenChat: () => void;
   onOpenSettings: () => void;
+  onOpenCodes?: () => void;
   onOpenReportProblem: () => void;
   onOpenLog?: () => void;
   hasUnreadChat?: boolean;
@@ -33,6 +34,7 @@ export function HiderToolDock({
   onRecenter,
   onOpenChat,
   onOpenSettings,
+  onOpenCodes,
   onOpenReportProblem,
   onOpenLog,
   hasUnreadChat = false,
@@ -83,6 +85,7 @@ export function HiderToolDock({
           onOpenLog={onOpenLog}
           onOpenReportProblem={onOpenReportProblem}
           onOpenSettings={onOpenSettings}
+          onOpenCodes={onOpenCodes}
           hasUnreadChat={hasUnreadChat}
           unreadCount={unreadCount}
           inactive={inactive}
