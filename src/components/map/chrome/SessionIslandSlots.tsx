@@ -123,7 +123,7 @@ export function SessionIslandSlots({
           disabled={inactive}
           onClick={onRequestFoundHider}
           className="jl-tool-slot"
-          aria-label="Found hider"
+          aria-label="Declare found hider"
         >
           <span className="jl-tool-slot-icon" aria-hidden="true">
             ✓
@@ -138,7 +138,7 @@ export function SessionIslandSlots({
           disabled={inactive}
           onClick={onStartEndGame}
           className="jl-tool-slot"
-          aria-label="Start end game"
+          aria-label="Start end game — seekers entered the hiding zone"
         >
           <span className="jl-tool-slot-icon" aria-hidden="true">
             !

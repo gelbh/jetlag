@@ -1140,7 +1140,12 @@ export async function confirmFoundHiderSession(
     endGameRequestedAt: deleteField(),
     endGameRequestedByUid: deleteField(),
   });
-  await clearEndGameTruthAnchorsDoc(sessionId);
+  // Session outcome already persisted — cleanup must not surface as confirm failure.
+  try {
+    await clearEndGameTruthAnchorsDoc(sessionId);
+  } catch {
+    // Best-effort; anchors may already be absent or rules-denied after end.
+  }
   emitGameEndedActivity(
     sessionId,
     { outcome: "found", summary: "Hider found" },

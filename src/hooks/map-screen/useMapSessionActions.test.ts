@@ -1,10 +1,28 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   LOCAL_SESSION_ID,
   type SessionRecord,
 } from "../../domain/map/annotations";
 import { useMapSessionActions } from "./useMapSessionActions";
+
+vi.mock("../../services/core/firebase/firebase", () => ({
+  isFirebaseConfigured: () => true,
+}));
+
+const confirmFoundHiderSessionMock = vi.hoisted(() => vi.fn());
+const requestFoundHiderSessionMock = vi.hoisted(() => vi.fn());
+const resetFoundHiderSessionMock = vi.hoisted(() => vi.fn());
+
+vi.mock("../../services/firestore/firestoreAnnotations", () => ({
+  clearEndGameRequestSession: vi.fn(),
+  confirmFoundHiderSession: confirmFoundHiderSessionMock,
+  requestEndGameSession: vi.fn(),
+  requestFoundHiderSession: requestFoundHiderSessionMock,
+  resetEndGameSession: vi.fn(),
+  resetFoundHiderSession: resetFoundHiderSessionMock,
+  updateSessionRules: vi.fn(),
+}));
 
 const baseSession: SessionRecord = {
   id: LOCAL_SESSION_ID,
@@ -26,6 +44,12 @@ const baseSession: SessionRecord = {
 };
 
 describe("useMapSessionActions", () => {
+  beforeEach(() => {
+    confirmFoundHiderSessionMock.mockReset();
+    requestFoundHiderSessionMock.mockReset();
+    resetFoundHiderSessionMock.mockReset();
+  });
+
   it("blocks end game until a hiding zone is confirmed", () => {
     const { result } = renderHook(() =>
       useMapSessionActions({
@@ -139,6 +163,58 @@ describe("useMapSessionActions", () => {
         foundRequestedByUid: "host-1",
       }),
       "host-1",
+    );
+  });
+
+  it("alerts when remote found confirm fails instead of rejecting", async () => {
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    confirmFoundHiderSessionMock.mockRejectedValue(
+      new Error("Missing or insufficient permissions."),
+    );
+
+    const pendingSession: SessionRecord = {
+      ...baseSession,
+      id: "remote-session-1",
+      memberUids: ["host-1", "hider-1"],
+      foundRequestedAt: "2026-01-01T01:00:00.000Z",
+      foundRequestedByUid: "host-1",
+    };
+
+    const { result } = renderHook(() =>
+      useMapSessionActions({
+        session: pendingSession,
+        setSession: vi.fn(),
+        uid: "hider-1",
+        myRole: "hider",
+        isRemote: true,
+        gameRulesEditable: false,
+        timerHasStarted: true,
+        hidingZones: [
+          {
+            hiderUid: "hider-1",
+            sessionId: "remote-session-1",
+            stationId: "dublin-central",
+            stationName: "Dublin Central",
+            center: { lat: 53.35, lng: -6.26 },
+            radiusMeters: 500,
+            geometryJson: "{}",
+            status: "confirmed",
+            confirmedAt: "2026-01-01T00:00:00.000Z",
+          },
+        ],
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleConfirmFoundHider();
+    });
+
+    expect(confirmFoundHiderSessionMock).toHaveBeenCalledWith(
+      "remote-session-1",
+      "hider-1",
+    );
+    expect(alertSpy).toHaveBeenCalledWith(
+      "Could not confirm found hider. Check your connection and try again.",
     );
   });
 });

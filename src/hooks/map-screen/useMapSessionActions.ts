@@ -134,7 +134,11 @@ export function useMapSessionActions({
       return;
     }
 
-    await requestFoundHiderSession(session.id, uid);
+    try {
+      await requestFoundHiderSession(session.id, uid);
+    } catch {
+      window.alert("Could not declare found hider. Check your connection and try again.");
+    }
   }, [canRequestFoundHider, session, setSession, uid]);
 
   const handleConfirmFoundHider = useCallback(async () => {
@@ -167,7 +171,11 @@ export function useMapSessionActions({
       return;
     }
 
-    await confirmFoundHiderSession(session.id, uid);
+    try {
+      await confirmFoundHiderSession(session.id, uid);
+    } catch {
+      window.alert("Could not confirm found hider. Check your connection and try again.");
+    }
   }, [session, setSession, uid]);
 
   const handleDeclineFoundHider = useCallback(async () => {
@@ -187,15 +195,19 @@ export function useMapSessionActions({
       return;
     }
 
-    setSession(
-      {
-        ...session,
-        foundRequestedAt: undefined,
-        foundRequestedByUid: undefined,
-      },
-      uid,
-    );
-    await resetFoundHiderSession(session.id);
+    try {
+      await resetFoundHiderSession(session.id);
+      setSession(
+        {
+          ...session,
+          foundRequestedAt: undefined,
+          foundRequestedByUid: undefined,
+        },
+        uid,
+      );
+    } catch {
+      window.alert("Could not clear found hider request. Check your connection and try again.");
+    }
   }, [session, setSession, uid]);
 
   const handleResetEndGame = useCallback(async () => {
