@@ -126,7 +126,7 @@ export function ObserverMapScreen() {
         <ObserverMapScreenChrome
           session={controller.session}
           myRole={controller.myRole ?? "observer"}
-          myUid={controller.uid}
+          myUid={controller.uid ?? undefined}
           isHost={
             Boolean(controller.uid) &&
             controller.session.hostUid === controller.uid
