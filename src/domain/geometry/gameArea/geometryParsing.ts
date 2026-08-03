@@ -17,7 +17,7 @@ function isPointCoordinates(value: unknown): value is [number, number] {
 function isLineStringCoordinates(value: unknown): value is [number, number][] {
   return (
     Array.isArray(value) &&
-    value.length >= 1 &&
+    value.length >= 2 &&
     value.every((position) => isPointCoordinates(position))
   );
 }

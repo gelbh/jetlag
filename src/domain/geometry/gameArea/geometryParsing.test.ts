@@ -21,6 +21,15 @@ describe("geometryParsing", () => {
     expect(parsePointGeometry(json)).toBeNull();
   });
 
+  it("returns null for LineString with fewer than two positions", () => {
+    const json = JSON.stringify({
+      type: "Feature",
+      properties: {},
+      geometry: { type: "LineString", coordinates: [[-0.15, 51.45]] },
+    });
+    expect(parseGeometryJson(json)).toBeNull();
+  });
+
   it("returns null for non-Feature wrappers", () => {
     expect(
       parseGeometryJson(

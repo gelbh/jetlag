@@ -140,6 +140,13 @@ describe("isAskOriginInsideHidingZone", () => {
       isAskOriginInsideHidingZone(outsideAsk, zoneCenter, zoneRadiusMeters),
     ).toBe(false);
   });
+
+  it("rejects invalid zone radii", () => {
+    expect(isAskOriginInsideHidingZone(insideAsk, zoneCenter, -1)).toBe(false);
+    expect(isAskOriginInsideHidingZone(insideAsk, zoneCenter, Number.NaN)).toBe(
+      false,
+    );
+  });
 });
 
 describe("resolvePendingQuestionTruthReference", () => {
@@ -174,6 +181,24 @@ describe("resolvePendingQuestionTruthReference", () => {
     ).toEqual({ point: liveGps, mode: "hidingPlace" });
     expect(
       resolvePendingQuestionTruthReference(pendingAt(outsideAsk), context),
+    ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
+  });
+
+  it("falls back to zone center for empty photo geometryJson", () => {
+    const photoPending = {
+      id: "q-photo",
+      status: "pending",
+      placement: { geometryJson: "{}" },
+    } as PendingQuestionRecord;
+
+    expect(
+      resolvePendingQuestionTruthReference(photoPending, {
+        hiderUid: "hider-1",
+        zoneCenter,
+        hidingPlace: liveGps,
+        zoneRadiusMeters,
+        session: null,
+      }),
     ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
   });
 });
