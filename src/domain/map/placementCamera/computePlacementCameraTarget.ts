@@ -311,7 +311,7 @@ export function computePlacementCameraTarget(
   }
 
   if (ctx.phase === "idle") {
-    return playAreaCameraTarget(ctx, { forceReframe: true });
+    return playAreaCameraTarget(ctx);
   }
 
   switch (ctx.tool) {
