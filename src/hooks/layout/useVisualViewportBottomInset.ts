@@ -55,7 +55,6 @@ export function useVisualViewportBottomInset(enabled: boolean): number {
 
   useEffect(() => {
     if (!enabled) {
-      setInset(0);
       return;
     }
 
@@ -85,8 +84,12 @@ export function useVisualViewportBottomInset(enabled: boolean): number {
       window.removeEventListener("focusin", update);
       window.removeEventListener("pageshow", update);
       document.removeEventListener("visibilitychange", update);
+      // Drop any keyboard lift so a later enable starts from zero without
+      // a sync setState in the disabled-effect branch (lint + no mid-screen flash).
+      setInset(0);
     };
   }, [enabled]);
 
+  // When disabled, ignore stored inset so stale keyboard lift cannot lift chrome.
   return enabled ? inset : 0;
 }
