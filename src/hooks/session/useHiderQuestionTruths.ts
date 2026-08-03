@@ -21,6 +21,7 @@ const EMPTY_TRUTHS = new Map<string, HiderTruthResult>();
 function askOriginFromQuestion(
   question: PendingQuestionRecord,
 ): LatLngTuple | null {
+  // Photo pending questions use geometryJson "{}" — parse must return null, not throw.
   const feature = parseGeometryJson(question.placement.geometryJson);
   return feature ? pointFromGeometryFeature(feature) : null;
 }

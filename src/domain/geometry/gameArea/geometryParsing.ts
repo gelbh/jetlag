@@ -1,11 +1,26 @@
 import type { Feature, LineString, Point } from "geojson";
 import type { LatLngTuple } from "../core/types";
 
+function isGeometryFeature(
+  value: unknown,
+): value is Feature<Point | LineString> {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const geometry = (value as Feature).geometry;
+  return (
+    !!geometry &&
+    typeof geometry === "object" &&
+    typeof geometry.type === "string"
+  );
+}
+
 export function parseGeometryJson(
   geometryJson: string,
 ): Feature<Point | LineString> | null {
   try {
-    return JSON.parse(geometryJson) as Feature<Point | LineString>;
+    const parsed: unknown = JSON.parse(geometryJson);
+    return isGeometryFeature(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -13,7 +28,7 @@ export function parseGeometryJson(
 
 export function parsePointGeometry(geometryJson: string): LatLngTuple | null {
   const geometry = parseGeometryJson(geometryJson);
-  if (!geometry || geometry.geometry.type !== "Point") {
+  if (!geometry || geometry.geometry?.type !== "Point") {
     return null;
   }
 
@@ -26,7 +41,7 @@ export function parseLineEndpoints(geometryJson: string): {
   end: LatLngTuple;
 } | null {
   const geometry = parseGeometryJson(geometryJson);
-  if (!geometry || geometry.geometry.type !== "LineString") {
+  if (!geometry || geometry.geometry?.type !== "LineString") {
     return null;
   }
 
@@ -37,6 +52,9 @@ export function pointFromGeometryFeature(
   feature: Feature<Point | LineString>,
 ): LatLngTuple | null {
   const geom = feature.geometry;
+  if (!geom) {
+    return null;
+  }
   if (geom.type === "Point") {
     return [geom.coordinates[1], geom.coordinates[0]];
   }
