@@ -64,7 +64,7 @@
     "@fontsource/barlow-semi-condensed": "^5.2.7",
     "@fontsource/source-sans-3": "^5.2.9",
     "@sentry/capacitor": "^4.2.0",
-    "@sentry/react": "10.60.0",
+    "@sentry/react": "10.69.0",
     "@tmcw/togeojson": "^7.1.2",
     "@turf/area": "^7.3.5",
     "@turf/bbox": "^7.3.5",
@@ -88,7 +88,7 @@
     "comlink": "^4.4.2",
     "d3-delaunay": "^6.0.4",
     "date-fns": "^4.4.0",
-    "firebase": "^12.13.0",
+    "firebase": "^12.17.0",
     "flatbush": "^4.6.2",
     "geoflatbush": "^2.2.1",
     "geokdbush": "^2.1.0",
@@ -99,13 +99,13 @@
     "lru-cache": "^11.5.2",
     "maplibre-gl": "^6.1.0",
     "martinez-polygon-clipping": "^0.8.1",
-    "posthog-js": "^1.407.2",
+    "posthog-js": "^1.409.0",
     "rbush": "^4.0.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-grid-layout": "^2.2.3",
+    "react-grid-layout": "^2.2.4",
     "react-map-gl": "^8.1.2",
-    "react-router-dom": "^7.15.0",
+    "react-router-dom": "^7.18.2",
     "terra-draw": "^1.32.2",
     "terra-draw-maplibre-gl-adapter": "^1.4.1",
     "zod": "^4.4.3",
@@ -156,9 +156,9 @@
     "wrangler": "^4.114.0"
   },
   "optionalDependencies": {
-    "@rolldown/binding-darwin-arm64": "1.0.3",
-    "@rolldown/binding-darwin-x64": "1.0.3",
-    "@rolldown/binding-linux-x64-gnu": "1.0.3"
+    "@rolldown/binding-darwin-arm64": "1.2.1",
+    "@rolldown/binding-darwin-x64": "1.2.1",
+    "@rolldown/binding-linux-x64-gnu": "1.2.1"
   },
   "overrides": {
     "node-fetch": {
