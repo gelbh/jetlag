@@ -1,5 +1,6 @@
 import { useMemo, type ReactElement } from "react";
 import { Layer, Source } from "react-map-gl/maplibre";
+import type { ExpressionSpecification } from "maplibre-gl";
 import type {
   Feature,
   FeatureCollection,
@@ -12,9 +13,11 @@ export interface MapLibreFillPaint {
   fillOutlineColor?: string;
 }
 
+export type MapLibreLineWidth = number | ExpressionSpecification;
+
 export interface MapLibreLinePaint {
   color: string;
-  width?: number;
+  width?: MapLibreLineWidth;
   opacity?: number;
   dashArray?: number[];
 }

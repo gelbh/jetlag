@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, type RefObject } from "react";
-import Map, { type MapLayerMouseEvent, type MapRef } from "react-map-gl/maplibre";
+import Map, {
+  AttributionControl,
+  type MapLayerMouseEvent,
+  type MapRef,
+} from "react-map-gl/maplibre";
 import { setWorkerUrl, type Map as MapLibreMap } from "maplibre-gl";
 import {
   createMapBounds,
@@ -417,6 +421,7 @@ export function MapViewMapLibre({
               inset={zoomControlInset}
               suppressRef={suppressChromeHideRef}
             />
+            <AttributionControl compact position="bottom-left" />
             {onMapStyleChange ? (
               <MapStyleToggle
                 enabled={mapStyleToggleEnabled}

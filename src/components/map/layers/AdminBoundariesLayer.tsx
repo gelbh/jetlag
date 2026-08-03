@@ -1,5 +1,8 @@
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
-import { getAdminBoundaryStrokeStyle } from "../../../domain/map/mapBoundaryOverlayStyle";
+import {
+  getAdminBoundaryLineWidthExpression,
+  getAdminBoundaryStrokeStyle,
+} from "../../../domain/map/mapBoundaryOverlayStyle";
 import type { AdminBoundaryFeature } from "../../../hooks/map-screen/useAdminBoundaryFeatures";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { pathOptionsToMapLibrePaint } from "../helpers/pathOptionsToMapLibrePaint";
@@ -31,12 +34,19 @@ export function AdminBoundariesLayer({
           ...style,
           opacity: style.opacity ?? 0.5,
         });
+        const line =
+          paint.line == null
+            ? null
+            : {
+                ...paint.line,
+                width: getAdminBoundaryLineWidthExpression(entry.adminLevel),
+              };
         return (
           <MapLibreGeoJsonOverlay
             key={entry.id}
             id={`admin-boundary-${entry.id}`}
             data={entry.feature}
-            line={paint.line}
+            line={line}
           />
         );
       })}

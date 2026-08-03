@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { MAP_ANNOTATION_COLORS } from "./mapAnnotationColors";
 import {
+  getAdminBoundaryLineWidthExpression,
   getAdminBoundaryStrokeStyle,
   getBoundaryPreviewStyle,
 } from "./mapBoundaryOverlayStyle";
@@ -16,6 +17,16 @@ describe("getAdminBoundaryStrokeStyle", () => {
     const style = getAdminBoundaryStrokeStyle(8, "standard", "light");
 
     expect(style.color).toBe(MAP_ANNOTATION_COLORS.boundary);
+  });
+});
+
+describe("getAdminBoundaryLineWidthExpression", () => {
+  it("builds a zoom-interpolated line-width expression", () => {
+    const expression = getAdminBoundaryLineWidthExpression(8);
+
+    expect(expression[0]).toBe("interpolate");
+    expect(expression[2]).toEqual(["zoom"]);
+    expect(expression.at(-1)).toBeGreaterThan(0);
   });
 });
 

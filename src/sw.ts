@@ -17,8 +17,7 @@ import {
   ANNOTATION_SYNC_TAG,
 } from "./services/session/backgroundSync";
 import {
-  isCartoTileUrl,
-  isEsriWorldImageryTileUrl,
+  isEsriTileUrl,
   isOpenFreeMapUrl,
 } from "./domain/map/mapTileHosts";
 
@@ -40,20 +39,7 @@ registerRoute(
 );
 
 registerRoute(
-  ({ url }) => isCartoTileUrl(url.href),
-  new CacheFirst({
-    cacheName: "carto-voyager-tiles",
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 500,
-        maxAgeSeconds: 60 * 60 * 24 * 7,
-      }),
-    ],
-  }),
-);
-
-registerRoute(
-  ({ url }) => isEsriWorldImageryTileUrl(url.href),
+  ({ url }) => isEsriTileUrl(url.href),
   new CacheFirst({
     cacheName: "esri-satellite-tiles",
     plugins: [
