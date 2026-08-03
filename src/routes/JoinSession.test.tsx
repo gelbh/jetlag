@@ -9,14 +9,25 @@ import {
   waitForServerHiderRole,
   getRemoteSessionByIdFromServer,
 } from "../services/firestore/firestoreAnnotations";
+import type { RoleJoinRequest } from "../domain/session/players/joinRequest";
 
-const navigate = vi.fn();
-const mockIsFirebaseConfigured = vi.fn(() => false);
-const mockEnsureFreshAnonymousUser = vi.fn();
-const mockEnsureAnonymousUser = vi.fn();
-const mockRequestRoleJoin = vi.fn();
-const mockCancelRoleJoinRequest = vi.fn();
-const mockListenOwnJoinRequest = vi.fn();
+const {
+  navigate,
+  mockIsFirebaseConfigured,
+  mockEnsureFreshAnonymousUser,
+  mockEnsureAnonymousUser,
+  mockRequestRoleJoin,
+  mockCancelRoleJoinRequest,
+  mockListenOwnJoinRequest,
+} = vi.hoisted(() => ({
+  navigate: vi.fn(),
+  mockIsFirebaseConfigured: vi.fn(() => false),
+  mockEnsureFreshAnonymousUser: vi.fn(),
+  mockEnsureAnonymousUser: vi.fn(),
+  mockRequestRoleJoin: vi.fn(),
+  mockCancelRoleJoinRequest: vi.fn(),
+  mockListenOwnJoinRequest: vi.fn(() => () => undefined),
+}));
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
@@ -50,15 +61,14 @@ vi.mock("../services/session/rolePasscodeLifecycle", async () => {
   >("../services/session/rolePasscodeLifecycle");
   return {
     ...actual,
-    requestRoleJoin: (...args: unknown[]) => mockRequestRoleJoin(...args),
-    cancelRoleJoinRequest: (...args: unknown[]) =>
-      mockCancelRoleJoinRequest(...args),
+    requestRoleJoin: mockRequestRoleJoin,
+    cancelRoleJoinRequest: mockCancelRoleJoinRequest,
   };
 });
 
 vi.mock("../services/session/joinRequestListen", () => ({
-  listenOwnJoinRequest: (...args: unknown[]) =>
-    mockListenOwnJoinRequest(...args),
+  listenOwnJoinRequest: mockListenOwnJoinRequest,
+  listenLeaderJoinRequests: vi.fn(),
 }));
 
 const gatedPreviewSession = createTestRemoteSession({
@@ -79,6 +89,10 @@ const previewShapedSession = createTestRemoteSession({
   memberRoles: { "host-1": "hider", "seeker-1": "seeker" },
 });
 
+type JoinRequestChangeHandler = (
+  request: RoleJoinRequest | null,
+) => void;
+
 async function enterCodeAndWaitForPreview() {
   fireEvent.change(screen.getByPlaceholderText("ABCD"), {
     target: { value: "ABCD" },
@@ -91,8 +105,23 @@ async function enterCodeAndWaitForPreview() {
   });
 }
 
+async function waitForJoinRequestListener(): Promise<JoinRequestChangeHandler> {
+  await waitFor(() => {
+    expect(mockListenOwnJoinRequest).toHaveBeenCalledWith(
+      "sess-gated",
+      "req-1",
+      expect.any(Function),
+      expect.any(Function),
+    );
+  });
+  const onChange = mockListenOwnJoinRequest.mock.calls.at(-1)?.[2];
+  expect(onChange).toEqual(expect.any(Function));
+  return onChange as JoinRequestChangeHandler;
+}
+
 describe("JoinSession", () => {
   beforeEach(() => {
+    vi.useRealTimers();
     vi.clearAllMocks();
     clearJoinPreviewCacheForTests();
     mockIsFirebaseConfigured.mockReturnValue(false);
@@ -190,12 +219,7 @@ describe("JoinSession", () => {
       ).toBeInTheDocument();
     });
 
-    expect(mockListenOwnJoinRequest).toHaveBeenCalledWith(
-      "sess-gated",
-      "req-1",
-      expect.any(Function),
-      expect.any(Function),
-    );
+    await waitForJoinRequestListener();
 
     fireEvent.click(screen.getByRole("button", { name: "Cancel request" }));
 
@@ -214,24 +238,6 @@ describe("JoinSession", () => {
   it("restores the form when the leader declines", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     mockIsFirebaseConfigured.mockReturnValue(true);
-    let onChange:
-      | ((request: {
-          id: string;
-          sessionId: string;
-          requesterUid: string;
-          role: "hider";
-          status: string;
-          identityLabel: string;
-          createdAt: string;
-          expiresAt: string;
-        }) => void)
-      | null = null;
-    mockListenOwnJoinRequest.mockImplementation(
-      (_sessionId, _requestId, nextOnChange) => {
-        onChange = nextOnChange;
-        return () => undefined;
-      },
-    );
 
     renderWithRouter(<JoinSession />);
     await enterCodeAndWaitForPreview();
@@ -242,8 +248,10 @@ describe("JoinSession", () => {
       expect(screen.getByText("Waiting for hider leader…")).toBeInTheDocument();
     });
 
+    const onChange = await waitForJoinRequestListener();
+
     await act(async () => {
-      onChange?.({
+      onChange({
         id: "req-1",
         sessionId: "sess-gated",
         requesterUid: "user-1",
@@ -268,24 +276,6 @@ describe("JoinSession", () => {
   it("navigates to the map when the join request is accepted", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     mockIsFirebaseConfigured.mockReturnValue(true);
-    let onChange:
-      | ((request: {
-          id: string;
-          sessionId: string;
-          requesterUid: string;
-          role: "hider";
-          status: string;
-          identityLabel: string;
-          createdAt: string;
-          expiresAt: string;
-        }) => void)
-      | null = null;
-    mockListenOwnJoinRequest.mockImplementation(
-      (_sessionId, _requestId, nextOnChange) => {
-        onChange = nextOnChange;
-        return () => undefined;
-      },
-    );
     const joinedSession = createTestRemoteSession({
       ...gatedPreviewSession,
       memberUids: ["host-1", "seeker-1", "user-1"],
@@ -307,8 +297,10 @@ describe("JoinSession", () => {
       expect(screen.getByText("Waiting for hider leader…")).toBeInTheDocument();
     });
 
+    const onChange = await waitForJoinRequestListener();
+
     await act(async () => {
-      onChange?.({
+      onChange({
         id: "req-1",
         sessionId: "sess-gated",
         requesterUid: "user-1",
