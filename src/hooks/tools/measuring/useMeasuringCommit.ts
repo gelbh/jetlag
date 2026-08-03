@@ -17,6 +17,7 @@ import { closerFurtherAnswerOptions } from "../../../components/tools/shared/ans
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { emitQuestionAnsweredActivity } from "../../../services/session/emitSessionActivity";
+import { buildStoredMeasuringRegionInput } from "./helpers";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 import type { MeasuringPreviews } from "./useMeasuringPreviews";
 
@@ -93,8 +94,7 @@ export function useMeasuringCommit({
     const question = measuringQuestionFor(measuringSubject, locationCategory);
 
     if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
-      const regionInputWithoutAnswer = {
-        gameArea: measuringRegionInput.gameArea,
+      const regionInputWithoutAnswer = buildStoredMeasuringRegionInput({
         measuringSubject,
         measuringLocationCategory,
         measuringDistanceMeters,
@@ -103,7 +103,7 @@ export function useMeasuringCommit({
         measuringCoastSegments: resolvedCoastSegments,
         measuringSeaLevelNearRegion,
         usesAllPlacesInArea,
-      };
+      });
 
       const geometry: Feature<Point> = {
         type: "Feature",
