@@ -116,9 +116,11 @@ export function useHiderPendingPreviewEliminations({
     [annotations],
   );
 
+  const shouldComputePreview =
+    Boolean(gameArea) && replyIdByQuestionId.size > 0;
+
   useEffect(() => {
-    if (!gameArea || replyIdByQuestionId.size === 0) {
-      setPreviewEliminationFeatures([]);
+    if (!shouldComputePreview) {
       return;
     }
 
@@ -149,7 +151,12 @@ export function useHiderPendingPreviewEliminations({
     replyIdByQuestionId,
     replyKey,
     annotationKey,
+    shouldComputePreview,
   ]);
 
-  return { previewEliminationFeatures };
+  return {
+    previewEliminationFeatures: shouldComputePreview
+      ? previewEliminationFeatures
+      : [],
+  };
 }
