@@ -46,6 +46,7 @@ export function RoleCodeStamp({
         disabled={busy}
         onClick={onRegenerate}
         className="btn-secondary min-h-11 w-full"
+        aria-label={`Regenerate ${roleLabel}`}
       >
         Regenerate
       </button>
