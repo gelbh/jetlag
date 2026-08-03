@@ -106,7 +106,7 @@ describe("usePlacementMapFocus", () => {
     pinOverlays = (await buildMapDraftOverlays(pinSources)).overlays;
   });
 
-  it("frames play area when pin tool is idle with empty overlays", () => {
+  it("keeps default focus when pin tool is idle with empty overlays", () => {
     const { result } = renderHook(() =>
       usePlacementMapFocus({
         activeTool: "pin",
@@ -120,12 +120,11 @@ describe("usePlacementMapFocus", () => {
       }),
     );
 
-    expect(result.current.effectiveFocusBounds).not.toEqual(defaultBounds);
-    expect(result.current.placementRecenterToken).toBe(1);
-    expect(result.current.focusPaddingBias).toBeGreaterThan(300);
+    expect(result.current.effectiveFocusBounds).toEqual(defaultBounds);
+    expect(result.current.placementRecenterToken).toBe(0);
   });
 
-  it("bumps recenter token when activating pin with empty overlays", () => {
+  it("does not bump recenter token when activating pin with empty overlays", () => {
     const { result, rerender } = renderHook(
       ({ activeTool }: { activeTool: "none" | "pin" }) =>
         usePlacementMapFocus({
@@ -144,8 +143,7 @@ describe("usePlacementMapFocus", () => {
     expect(result.current.placementRecenterToken).toBe(0);
 
     rerender({ activeTool: "pin" });
-    expect(result.current.placementRecenterToken).toBeGreaterThan(0);
-    expect(result.current.focusPaddingBias).toBeGreaterThan(300);
+    expect(result.current.placementRecenterToken).toBe(0);
   });
 
   it("bumps recenter token when structural overlays change", () => {
@@ -174,9 +172,11 @@ describe("usePlacementMapFocus", () => {
       },
     );
 
+    expect(result.current.placementRecenterToken).toBe(0);
+
     rerender({ overlays: pinOverlays, draft: pinDraft });
 
-    expect(result.current.placementRecenterToken).toBe(2);
+    expect(result.current.placementRecenterToken).toBe(1);
     expect(result.current.focusPaddingBias).toBeGreaterThan(300);
     expect(result.current.effectiveFocusBounds).not.toEqual(defaultBounds);
   });
