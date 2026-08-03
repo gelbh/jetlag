@@ -45,4 +45,15 @@ describe("shouldApplyMapFocus", () => {
       }),
     ).toBe(true);
   });
+
+  it("skips once-mode when hasFitted and recenterToken unchanged", () => {
+    expect(
+      shouldApplyMapFocus({
+        fitBoundsMode: "once",
+        hasFitted: true,
+        recenterToken: 3,
+        lastRecenterToken: 3,
+      }),
+    ).toBe(false);
+  });
 });

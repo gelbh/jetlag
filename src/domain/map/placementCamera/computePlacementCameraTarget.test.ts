@@ -163,7 +163,20 @@ describe("computePlacementCameraTarget", () => {
     expect(boundsSpanMeters(target)).toBeGreaterThan(200);
   });
 
-  it("returns null when tool is idle", async () => {
+  it.each(["pin", "radar", "thermometer", "tentacle"] as const)(
+    "does not reframe when %s tool is idle (avoids click races)",
+    async (tool) => {
+      const sources = {
+        ...emptySources,
+        activeTool: tool,
+      };
+      const target = computePlacementCameraTarget(await buildContext(sources));
+
+      expect(target).toBeNull();
+    },
+  );
+
+  it("still returns null for tool none", async () => {
     expect(computePlacementCameraTarget(await buildContext(emptySources))).toBeNull();
   });
 
