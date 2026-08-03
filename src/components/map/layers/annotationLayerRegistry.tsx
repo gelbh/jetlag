@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- registry exports render helper alongside layer components */
 import turfCircle from "@turf/circle";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
