@@ -85,7 +85,7 @@ export function PwaInstallTipBanner() {
               className="btn-primary min-h-11 px-4 text-xs"
               onClick={dismiss}
             >
-              Got it
+              OK
             </button>
           )}
         </div>
