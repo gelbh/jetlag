@@ -121,8 +121,10 @@ function featureToElements(feature, family) {
     feature?.properties && typeof feature.properties === "object"
       ? feature.properties
       : {};
-  const tags = normalizeTags(properties.tags ?? properties);
-  const { type: osmType, id } = osmIdentity(properties);
+  const tags = normalizeTags(
+    properties.tags != null ? properties.tags : {},
+  );
+  const { id } = osmIdentity(properties);
   const geometry = feature?.geometry;
 
   if (family === "admin") {
@@ -171,7 +173,7 @@ function featureToElements(feature, family) {
     return [
       {
         type: "relation",
-        id: osmType === "relation" ? id : id,
+        id,
         tags,
         ...(center ? { center } : {}),
       },
@@ -267,6 +269,7 @@ function featureToElements(feature, family) {
     ];
   }
 
+  const { type: osmType } = osmIdentity(properties);
   return [
     {
       type: osmType,
