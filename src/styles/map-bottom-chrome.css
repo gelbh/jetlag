@@ -26,7 +26,7 @@
 
 @media (max-height: 430px) and (orientation: landscape) {
   :root {
-    --map-chrome-zoom-stack-height: 6.25rem;
+    --map-chrome-zoom-stack-height: 7rem;
   }
 }
 
@@ -100,6 +100,8 @@
     align-items: stretch;
     gap: var(--dock-island-gap);
     pointer-events: none;
+    max-height: var(--dock-island-height);
+    overflow: hidden;
   }
 
   .jl-map-island {
@@ -147,6 +149,12 @@
     flex: 0 0 auto;
     flex-direction: column;
     width: var(--map-chrome-side-width, 3.25rem);
+    height: fit-content;
+  }
+
+  .jl-map-chrome-side-stack .jl-map-island .jl-tool-dock-group-secondary {
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
   }
 
   /* Cap chip width so label text cannot inflate History over Hunt. */
