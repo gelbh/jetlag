@@ -10,6 +10,10 @@ export function parseSessionInviteCode(
   if (!raw) {
     return null;
   }
+  const letters = raw.toUpperCase().replace(/[^A-Z]/g, "");
+  if (letters.length !== 4) {
+    return null;
+  }
   const normalized = normalizeSessionCode(raw);
   return isValidSessionCode(normalized) ? normalized : null;
 }

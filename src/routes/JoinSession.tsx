@@ -150,10 +150,17 @@ export function JoinSession() {
 
   useEffect(() => {
     const next = parseSessionInviteCode(codeFromQuery);
+    /* eslint-disable react-hooks/set-state-in-effect -- sync join code when invite query changes */
+    setPreviewSession(null);
+    setPreviewPremium(false);
+    setLookupLoading(false);
+
     if (!next) {
+      if (codeFromQuery) {
+        setCode("");
+      }
       return;
     }
-    /* eslint-disable react-hooks/set-state-in-effect -- sync join code when invite query changes */
     setCode(next);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [codeFromQuery]);

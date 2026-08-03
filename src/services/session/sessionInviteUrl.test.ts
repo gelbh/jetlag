@@ -10,6 +10,7 @@ describe("parseSessionInviteCode", () => {
     expect(parseSessionInviteCode("abcd")).toBe("ABCD");
     expect(parseSessionInviteCode("WXYZ")).toBe("WXYZ");
     expect(parseSessionInviteCode("ab")).toBeNull();
+    expect(parseSessionInviteCode("ABCDE")).toBeNull();
     expect(parseSessionInviteCode(null)).toBeNull();
   });
 });

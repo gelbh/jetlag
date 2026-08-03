@@ -91,6 +91,24 @@ describe("ShareCode", () => {
     expect(copyToClipboard).not.toHaveBeenCalled();
   });
 
+  it("copies the join URL when native share fails", async () => {
+    const share = vi
+      .fn()
+      .mockRejectedValue(
+        new DOMException("Share unavailable", "NotAllowedError"),
+      );
+    vi.stubGlobal("navigator", { ...navigator, share });
+
+    renderWithRouter(<ShareCode code="WXYZ" remote />);
+    fireEvent.click(screen.getByRole("button", { name: "Invite friends" }));
+
+    await waitFor(() => {
+      expect(copyToClipboard).toHaveBeenCalledWith(
+        "https://play.example.com/join?code=WXYZ",
+      );
+    });
+  });
+
   it("shows failure feedback when copying the join link fails", async () => {
     vi.mocked(copyToClipboard).mockResolvedValue(false);
     vi.stubGlobal("navigator", { ...navigator, share: undefined });
