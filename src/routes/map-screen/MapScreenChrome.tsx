@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { isEndGameActive, isEndGamePending, isFoundHiderPending } from "../../domain/map/annotations";
 import { QUESTION_DOCK_TOOL_IDS } from "../../domain/map/mapTools";
 import { resolveToolDockEnabled } from "../../domain/session/rules";
-import { ledJoinRequestRoles } from "../../domain/session/players/roleGates";
+import { visibleRoleCodeRoles } from "../../domain/session/players/roleGates";
 import { ChatPanel } from "../../components/chat/ChatPanel";
 import { ContextualRail } from "../../components/map/chrome/ContextualRail";
 import {
@@ -391,8 +391,9 @@ export function MapScreenChrome({
 
   const canOpenCodes =
     Boolean(uid) &&
-    ledJoinRequestRoles({
+    visibleRoleCodeRoles({
       roleGates: session!.roleGates,
+      memberRoles: session!.memberRoles,
       myUid: uid ?? undefined,
       isHost,
     }).length > 0;

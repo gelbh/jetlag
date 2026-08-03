@@ -41,12 +41,34 @@ export function ledJoinRequestRoles(input: {
   return roles;
 }
 
+/** Roles whose passcode stamps the viewer may open (Codes sheet / Settings). */
 export function visibleRoleCodeRoles(input: {
   roleGates?: RoleGates | null;
+  memberRoles?: Record<string, PlayerRole | string>;
   myUid: string | undefined;
   isHost: boolean;
 }): JoinRequestRole[] {
-  return ledJoinRequestRoles(input);
+  if (
+    !input.myUid ||
+    !isSessionRoleGated({ roleGates: input.roleGates ?? undefined })
+  ) {
+    return [];
+  }
+
+  const roles: JoinRequestRole[] = [];
+  if (input.isHost) {
+    roles.push("observer");
+  }
+
+  const myRole = input.memberRoles?.[input.myUid];
+  if (
+    (myRole === "seeker" || myRole === "hider") &&
+    input.roleGates?.leaders?.[myRole] === input.myUid
+  ) {
+    roles.push(myRole);
+  }
+
+  return roles;
 }
 
 export function countMembersWithRole(
