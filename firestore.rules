@@ -107,22 +107,32 @@ service cloud.firestore {
     // Minimal checks only — session update rules are near the 1000-expression budget.
     // Anchors live under sessions/{id}/endGameTruth/anchors (hider/observer/admin only for reads).
     // Seeker/host direct start — validate every anchor value (keys() index, max 4).
-    function validSeekerEndGameTruthAnchorsMap(sessionId, anchors) {
+    // Prefer memberUids from the caller (resource.data on session update) to avoid sessionData()
+    // gets of large gameArea docs on the hot start path.
+    function validSeekerEndGameTruthAnchorsMapForMembers(memberUids, anchors) {
       return anchors is map
         && anchors.size() > 0
         && anchors.size() <= 4
-        && anchors.keys().hasOnly(sessionData(sessionId).memberUids)
+        && memberUids is list
+        && anchors.keys().hasOnly(memberUids)
         && validEndGameTruthAnchor(anchors[anchors.keys()[0]])
         && (anchors.size() < 2 || validEndGameTruthAnchor(anchors[anchors.keys()[1]]))
         && (anchors.size() < 3 || validEndGameTruthAnchor(anchors[anchors.keys()[2]]))
         && (anchors.size() < 4 || validEndGameTruthAnchor(anchors[anchors.keys()[3]]));
     }
 
+    function validSeekerEndGameTruthAnchorsMap(sessionId, anchors) {
+      return validSeekerEndGameTruthAnchorsMapForMembers(
+        sessionData(sessionId).memberUids,
+        anchors,
+      );
+    }
+
     function endGameTruthAnchorsDocPath(sessionId) {
       return /databases/$(database)/documents/sessions/$(sessionId)/endGameTruth/anchors;
     }
 
-    // Direct start only when freeze anchors already exist (same batch final-state OK).
+    // Direct start only when freeze anchors already exist (create anchors, then update session).
     function isEndGameStartUpdate(sessionId) {
       return (isSeekerOnSessionDoc() || isHostOnSessionDoc())
         && (
@@ -132,8 +142,8 @@ service cloud.firestore {
         && request.resource.data.endGameStartedAt is string
         && request.resource.data.endGameStartedByUid == request.auth.uid
         && exists(endGameTruthAnchorsDocPath(sessionId))
-        && validSeekerEndGameTruthAnchorsMap(
-          sessionId,
+        && validSeekerEndGameTruthAnchorsMapForMembers(
+          resource.data.memberUids,
           get(endGameTruthAnchorsDocPath(sessionId)).data.anchors,
         )
         && request.resource.data.diff(resource.data).affectedKeys()

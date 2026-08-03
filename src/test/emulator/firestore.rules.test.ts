@@ -1326,6 +1326,51 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows the client-shaped sequential found-station end-game start", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+          timerAccumulatedMs: 15_000,
+          timerRunningSince: "2026-01-01T00:00:15.000Z",
+          lastActiveAt: "2026-01-01T00:00:20.000Z",
+        }),
+      });
+
+    const anchors = {
+      "hider-1": {
+        lat: 53.35,
+        lng: -6.26,
+        frozenAt: "2026-01-01T00:01:00.000Z",
+      },
+    };
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("endGameTruth")
+        .doc("anchors")
+        .set({ anchors }),
+    );
+
+    await assertSucceeds(
+      host.firestore().collection("sessions").doc("session-1").update({
+        endGameStartedAt: "2026-01-01T00:01:00.000Z",
+        endGameStartedByUid: "host-1",
+        endGameTruthAnchors: deleteField(),
+        endGameRequestedAt: deleteField(),
+        endGameRequestedByUid: deleteField(),
+      }),
+    );
+  });
+
   it("denies starting end game without freeze anchors", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

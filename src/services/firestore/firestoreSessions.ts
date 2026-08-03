@@ -1057,19 +1057,24 @@ export async function startEndGameSession(
   anchors: Record<string, { lat: number; lng: number; frozenAt: string }>,
   endGameStartedAt: string = new Date().toISOString(),
 ): Promise<void> {
-  // Anchors create first so session start rules can require the freeze doc.
-  // Batch final-state evaluation still accepts both writes together.
-  const batch = writeBatch(getFirestoreDb());
-  batch.set(endGameTruthAnchorsDoc(sessionId), { anchors });
-  batch.update(doc(sessionsCollection(), sessionId), {
-    endGameStartedAt,
-    endGameStartedByUid: startedByUid,
-    // Strip any legacy session-doc anchors (coords belong in endGameTruth/anchors).
-    endGameTruthAnchors: deleteField(),
-    endGameRequestedAt: deleteField(),
-    endGameRequestedByUid: deleteField(),
-  });
-  await batch.commit();
+  // Sequential create-then-update: session start rules require the freeze doc to
+  // already exist. Same-batch exists()+get() against large session docs has denied
+  // the write in e2e (optimistic local banner, then permission error).
+  const anchorsRef = endGameTruthAnchorsDoc(sessionId);
+  try {
+    await setDoc(anchorsRef, { anchors });
+    await updateDoc(doc(sessionsCollection(), sessionId), {
+      endGameStartedAt,
+      endGameStartedByUid: startedByUid,
+      // Strip any legacy session-doc anchors (coords belong in endGameTruth/anchors).
+      endGameTruthAnchors: deleteField(),
+      endGameRequestedAt: deleteField(),
+      endGameRequestedByUid: deleteField(),
+    });
+  } catch (error) {
+    await clearEndGameTruthAnchorsDoc(sessionId);
+    throw error;
+  }
 }
 
 export async function touchSessionLastActive(sessionId: string): Promise<void> {

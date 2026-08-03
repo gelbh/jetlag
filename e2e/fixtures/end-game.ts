@@ -11,12 +11,24 @@ export async function startEndGameFromFoundStation(hostPage: Page) {
 }
 
 export async function expectEndGameStarted(hostPage: Page, guestPage: Page) {
-  await expect(hostPage.getByText("End game started")).toBeVisible({
-    timeout: 15_000,
-  });
-  await expect(guestPage.getByText("End game started")).toBeVisible({
-    timeout: 15_000,
-  });
+  // Assert both sides together so an optimistic local host banner cannot pass alone
+  // before the server write is accepted and synced to the hider.
+  await expect
+    .poll(
+      async () => {
+        const hostVisible = await hostPage
+          .getByText("End game started")
+          .isVisible()
+          .catch(() => false);
+        const guestVisible = await guestPage
+          .getByText("End game started")
+          .isVisible()
+          .catch(() => false);
+        return hostVisible && guestVisible;
+      },
+      { timeout: 30_000 },
+    )
+    .toBe(true);
 }
 
 export async function expectEndGameRestrictions(hostPage: Page) {
