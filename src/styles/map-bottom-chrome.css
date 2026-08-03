@@ -94,15 +94,13 @@
        Zoom controls positioned with same --map-chrome-zoom-stack-height token for alignment. */
     bottom: calc(
       var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem +
-        var(--map-chrome-zoom-stack-height)
+        var(--map-chrome-zoom-stack-height) + 0.5rem
     );
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: var(--dock-island-gap);
     pointer-events: none;
-    max-height: var(--dock-island-height);
-    overflow: hidden;
   }
 
 
