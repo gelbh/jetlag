@@ -37,6 +37,11 @@ function isSoftKeyboardEditable(target: EventTarget | null): boolean {
 }
 
 function readBottomInset(viewport: VisualViewport): number {
+  // Pinch-zoom shrinks visualViewport.height without a keyboard; Safari may
+  // still allow scale despite viewport meta. Do not lift chrome then.
+  if (viewport.scale > 1) {
+    return 0;
+  }
   const rawBottom = Math.max(
     0,
     window.innerHeight - viewport.height - viewport.offsetTop,

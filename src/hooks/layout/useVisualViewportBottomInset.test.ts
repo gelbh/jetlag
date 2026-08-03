@@ -5,20 +5,25 @@ import { useVisualViewportBottomInset } from "./useVisualViewportBottomInset";
 type ViewportMock = {
   height: number;
   offsetTop: number;
+  scale: number;
   addEventListener: ReturnType<typeof vi.fn>;
   removeEventListener: ReturnType<typeof vi.fn>;
   dispatch: (type: string) => void;
 };
 
+const initialInnerHeight = Object.getOwnPropertyDescriptor(window, "innerHeight");
+
 function mockVisualViewport(opts: {
   height: number;
   offsetTop?: number;
   innerHeight: number;
+  scale?: number;
 }): ViewportMock {
   const listeners = new Map<string, Set<EventListener>>();
   const viewport: ViewportMock = {
     height: opts.height,
     offsetTop: opts.offsetTop ?? 0,
+    scale: opts.scale ?? 1,
     addEventListener: vi.fn((type: string, listener: EventListener) => {
       const set = listeners.get(type) ?? new Set();
       set.add(listener);
@@ -49,6 +54,9 @@ describe("useVisualViewportBottomInset", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    if (initialInnerHeight) {
+      Object.defineProperty(window, "innerHeight", initialInnerHeight);
+    }
     document.body.innerHTML = "";
   });
 
@@ -159,5 +167,50 @@ describe("useVisualViewportBottomInset", () => {
       window.dispatchEvent(new Event("pageshow"));
     });
     expect(result.current).toBe(450);
+  });
+
+  it("ignores large inset when the visual viewport is pinch-zoomed", () => {
+    mockVisualViewport({ height: 400, innerHeight: 800, scale: 1.5 });
+    const input = document.createElement("input");
+    document.body.appendChild(input);
+    input.focus();
+
+    const { result } = renderHook(() => useVisualViewportBottomInset(true));
+    expect(result.current).toBe(0);
+  });
+
+  it("recomputes on visibilitychange after resume with focused input", () => {
+    const viewport = mockVisualViewport({ height: 400, innerHeight: 800 });
+    const input = document.createElement("input");
+    document.body.appendChild(input);
+    input.focus();
+
+    const { result } = renderHook(() => useVisualViewportBottomInset(true));
+    expect(result.current).toBe(400);
+
+    act(() => {
+      viewport.height = 350;
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    expect(result.current).toBe(450);
+  });
+
+  it("removes viewport listeners on unmount", () => {
+    const viewport = mockVisualViewport({ height: 400, innerHeight: 800 });
+    const input = document.createElement("input");
+    document.body.appendChild(input);
+    input.focus();
+
+    const { result, unmount } = renderHook(() =>
+      useVisualViewportBottomInset(true),
+    );
+    expect(result.current).toBe(400);
+    unmount();
+
+    act(() => {
+      viewport.height = 300;
+      viewport.dispatch("resize");
+    });
+    expect(viewport.removeEventListener).toHaveBeenCalled();
   });
 });
