@@ -311,33 +311,33 @@ service cloud.firestore {
     }
 
     function isFoundHiderDeclineUpdate() {
-      return resource.data.foundRequestedAt is string
-        && !('foundRequestedAt' in request.resource.data)
-        && !('foundRequestedByUid' in request.resource.data)
+      return isHiderOnSessionDoc()
+        && resource.data.foundRequestedAt is string
         && isSessionActive()
         && (
           !('foundConfirmedAt' in resource.data)
           || resource.data.foundConfirmedAt == null
         )
-        && isHiderOnSessionDoc()
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['foundRequestedAt', 'foundRequestedByUid'])
+        && !('foundRequestedAt' in request.resource.data)
+        && !('foundRequestedByUid' in request.resource.data)
         && sessionIdentityUnchanged();
     }
 
     function isFoundHiderCancelUpdate() {
-      return resource.data.foundRequestedAt is string
+      return isSeekerOnSessionDoc()
+        && resource.data.foundRequestedAt is string
         && resource.data.foundRequestedByUid == request.auth.uid
-        && !('foundRequestedAt' in request.resource.data)
-        && !('foundRequestedByUid' in request.resource.data)
         && isSessionActive()
         && (
           !('foundConfirmedAt' in resource.data)
           || resource.data.foundConfirmedAt == null
         )
-        && isSeekerOnSessionDoc()
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['foundRequestedAt', 'foundRequestedByUid'])
+        && !('foundRequestedAt' in request.resource.data)
+        && !('foundRequestedByUid' in request.resource.data)
         && sessionIdentityUnchanged();
     }
 
@@ -354,7 +354,8 @@ service cloud.firestore {
     }
 
     function isSessionProgressResetUpdate() {
-      return isHostOnSessionDoc()
+      return 'sessionResetAt' in request.resource.data
+        && isHostOnSessionDoc()
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly([
             'sessionResetAt',
@@ -378,7 +379,8 @@ service cloud.firestore {
     }
 
     function isTimerHostUpdate() {
-      return isHostOnSessionDoc()
+      return 'timerAccumulatedMs' in request.resource.data
+        && isHostOnSessionDoc()
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['timerAccumulatedMs', 'timerRunningSince'])
         && request.resource.data.timerAccumulatedMs is number
@@ -391,7 +393,8 @@ service cloud.firestore {
     }
 
     function isHostEndSessionUpdate() {
-      return isHostOnSessionDoc()
+      return 'endedAt' in request.resource.data
+        && isHostOnSessionDoc()
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['endedAt', 'code', 'status'])
         && request.resource.data.endedAt is string
@@ -663,7 +666,11 @@ service cloud.firestore {
           || hasHostAccess()
         );
 
-      allow update: if isEndGameDeclineUpdate()
+      // High-frequency paths first (single-key discriminators) so they never
+      // pay for Found/end-game helper evaluation under the 1000-expression cap.
+      allow update: if isTimerHostUpdate()
+        || isLastActiveAtUpdate()
+        || isEndGameDeclineUpdate()
         || isEndGameAcceptUpdate()
         || isEndGameRequestUpdate()
         || isEndGameCancelRequestUpdate()
@@ -672,9 +679,7 @@ service cloud.firestore {
         || isFoundHiderConfirmUpdate()
         || isFoundHiderDeclineUpdate()
         || isFoundHiderCancelUpdate()
-        || isLastActiveAtUpdate()
         || isSessionProgressResetUpdate()
-        || isTimerHostUpdate()
         || isHostEndSessionUpdate()
         || validSessionRulesUpdate(sessionId)
         || isLegacyMembershipJoinUpdate();
