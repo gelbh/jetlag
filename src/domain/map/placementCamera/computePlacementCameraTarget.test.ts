@@ -164,21 +164,21 @@ describe("computePlacementCameraTarget", () => {
     expect(boundsSpanMeters(target)).toBeGreaterThan(200);
   });
 
-  it("frames play area with forceReframe when pin tool is idle", async () => {
-    const sources = {
-      ...emptySources,
-      activeTool: "pin" as const,
-      pin: { point: null },
-    };
-    const target = computePlacementCameraTarget(await buildContext(sources));
+  it.each(["pin", "radar", "thermometer", "tentacle"] as const)(
+    "frames play area with forceReframe when %s tool is idle",
+    async (tool) => {
+      const sources = {
+        ...emptySources,
+        activeTool: tool,
+      };
+      const target = computePlacementCameraTarget(await buildContext(sources));
 
-    expect(target).not.toBeNull();
-    expect(target?.forceReframe).toBe(true);
-    expect(target?.paddingBiasPx).toBeGreaterThan(300);
-    expect(target?.bounds).toEqual(
-      boundsForPlayArea(DUBLIN_CITY_GAME_AREA),
-    );
-  });
+      expect(target).not.toBeNull();
+      expect(target?.forceReframe).toBe(true);
+      expect(target?.paddingBiasPx).toBeGreaterThan(300);
+      expect(target?.bounds).toEqual(boundsForPlayArea(DUBLIN_CITY_GAME_AREA));
+    },
+  );
 
   it("still returns null for tool none", async () => {
     expect(computePlacementCameraTarget(await buildContext(emptySources))).toBeNull();

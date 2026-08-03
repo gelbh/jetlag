@@ -22,6 +22,7 @@ import { computeFramedCenterZoomMapLibre } from "../../../domain/map/computeFram
 import { focusBoundsToLngLatBounds } from "../../../domain/map/focusBoundsToLngLatBounds";
 import { isLargeCameraJumpMapLibre } from "../../../domain/map/isLargeCameraJumpMapLibre";
 import { shouldApplyMapFocus } from "../../../domain/map/mapFocusPolicy";
+import { mapFocusApplyDependencyKeys } from "../../../domain/map/mapFocusApplyDeps";
 import { resolveMapPitchDegrees } from "../../../domain/map/resolveMapPitchDegrees";
 import { stopMapCameraEase } from "../../../domain/map/stopMapCameraEase";
 import {
@@ -119,13 +120,17 @@ function MapFocus({
   const animate = !prefersReducedMotion && !lowPowerMode;
   const padY = fitBoundsPaddingProp?.[0] ?? 32;
   const padX = fitBoundsPaddingProp?.[1] ?? 32;
-  // once-mode: presence only — identity churn must not abort in-flight ease.
-  const focusBoundsDep =
-    fitBoundsMode === "always" ? focusBounds : focusBounds != null;
-  const focusPaddingBiasDep =
-    fitBoundsMode === "always" ? focusPaddingBias : null;
-  const focusMaxZoomDep = fitBoundsMode === "always" ? focusMaxZoom : null;
-  const focusMinZoomDep = fitBoundsMode === "always" ? focusMinZoom : null;
+  const applyDependencyKeys = mapFocusApplyDependencyKeys({
+    fitBoundsMode,
+    animate,
+    focusBounds,
+    focusPaddingBias,
+    focusMaxZoom,
+    focusMinZoom,
+    padX,
+    padY,
+    recenterToken,
+  });
 
   useEffect(() => {
     preferFlyRef.current = preferFly;
@@ -264,19 +269,8 @@ function MapFocus({
         suppressChromeHideRef.current = false;
       }
     };
-  }, [
-    animate,
-    focusBoundsDep,
-    focusPaddingBiasDep,
-    focusMaxZoomDep,
-    focusMinZoomDep,
-    fitBoundsMode,
-    padX,
-    padY,
-    mapRef,
-    recenterToken,
-    suppressChromeHideRef,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keys from mapFocusApplyDependencyKeys
+  }, [...applyDependencyKeys, mapRef, suppressChromeHideRef]);
 
   return null;
 }
