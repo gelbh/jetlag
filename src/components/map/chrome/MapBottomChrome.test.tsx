@@ -69,6 +69,7 @@ it("marks chrome inactive without leaving islands clickable via CSS class", () =
     expect(bottom?.querySelector('[data-island="history"]')).not.toBeNull();
     expect(bottom?.querySelector('[data-island="hunt"]')).not.toBeNull();
     expect(bottom?.querySelector('[data-island="session"]')).toBeNull();
+    expect(bottom?.querySelector('[data-island="map-controls"]')).toBeNull();
     expect(side?.querySelector('[data-island="session"]')).not.toBeNull();
     expect(side?.querySelector('[data-island="map-controls"]')).not.toBeNull();
   });
