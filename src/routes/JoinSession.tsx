@@ -355,7 +355,7 @@ export function JoinSession() {
     const expiresInMs = Date.parse(pendingRequest.expiresAt) - Date.now();
     // setTimeout delays above 2^31-1 overflow and fire immediately.
     const MAX_TIMEOUT_MS = 2_147_483_647;
-    let expiryTimer: ReturnType<typeof window.setTimeout> | undefined;
+    let expiryTimer: number | undefined;
 
     if (Number.isFinite(expiresInMs) && expiresInMs <= MAX_TIMEOUT_MS) {
       if (expiresInMs <= 0) {
