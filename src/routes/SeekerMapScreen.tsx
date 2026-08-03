@@ -90,7 +90,10 @@ function SeekerMapScreenBody({
   );
 
   return (
-    <div className="map-screen-shell">
+    <div
+      className="map-screen-shell"
+      data-map-attention={controller.mapAttentionActive ? "true" : undefined}
+    >
       {inactiveChrome ? (
         <div
           aria-hidden

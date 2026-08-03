@@ -1,9 +1,9 @@
 import { type Page, expect } from "@playwright/test";
-import { clickOverflowToolButton, openSettings } from "./tools/navigation";
+import { openSettings } from "./tools/navigation";
 
 export async function requestEndGame(hostPage: Page) {
   hostPage.once("dialog", (dialog) => dialog.accept());
-  await clickOverflowToolButton(hostPage, "Start end game");
+  await hostPage.getByRole("button", { name: "Start end game" }).click();
   await expect(
     hostPage.getByText("Waiting for hider to accept end game"),
   ).toBeVisible({ timeout: 15_000 });

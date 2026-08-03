@@ -84,10 +84,22 @@ test.describe("layout regression @ default mobile", () => {
 
   test("@smoke map dock chrome stays in viewport", async ({ page }) => {
     await openMapWithLocalSession(page);
-    const more = page.getByRole("button", { name: "More tools" });
-    await expect(more).toBeVisible();
-    await assertMinTapTargets(more);
-    await assertInViewport(more);
+    const host = page.locator(".jl-map-bottom-chrome-host");
+    const history = page.locator('[data-island="history"]');
+    const hunt = page.locator('[data-island="hunt"]');
+    const session = page.locator('[data-island="session"]');
+    await expect(host).toBeVisible();
+    await expect(history).toBeVisible();
+    await expect(hunt).toBeVisible();
+    await expect(session).toBeVisible();
+    // Hunt chips may scroll offscreen; assert island chassis, not individual slots.
+    await assertInViewport(host);
+    await assertInViewport(history);
+    await assertInViewport(hunt);
+    await assertInViewport(session);
+    await assertMinTapTargets(
+      session.getByRole("button", { name: "Open settings" }),
+    );
     // Leaflet markers trip aria-command-name; layout smoke is chrome-only
     await assertLayoutSmoke(page, { exclude: [".maplibregl-map"] });
   });
