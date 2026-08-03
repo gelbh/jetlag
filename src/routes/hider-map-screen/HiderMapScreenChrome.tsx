@@ -91,6 +91,7 @@ export type HiderMapScreenChromeProps = {
   timer: SessionTimerState;
   timerSyncing: boolean;
   canControlTimer: boolean;
+  moveInProgress?: boolean;
   isRemote: boolean;
   hasUnreadChat: boolean;
   unreadCount: number;
@@ -208,6 +209,7 @@ export function HiderMapScreenChrome({
   timer,
   timerSyncing,
   canControlTimer,
+  moveInProgress = false,
   isRemote,
   hasUnreadChat,
   unreadCount,
@@ -337,6 +339,7 @@ export function HiderMapScreenChrome({
         onTimerPause={timer.pause}
         onTimerReset={timer.reset}
         timerControlsDisabled={!canControlTimer || inactiveChrome}
+        moveInProgress={moveInProgress}
         onOpenLog={onOpenLog}
         pendingQuestions={pendingQuestions}
         closeTimerMenu={overlay.sheet !== "none" || zoneTool.wizardOpen}

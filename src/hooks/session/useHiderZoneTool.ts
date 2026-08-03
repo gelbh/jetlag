@@ -16,6 +16,7 @@ import type { MapViewportBounds } from "../../domain/map/transitViewport";
 import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
 import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matching";
 import { writeHidingZone } from "../../services/firestore/firestoreSessionExtras";
+import { controlSessionTimerForMove } from "../../services/session/moveTimerControl";
 
 const MOVE_MIN_DISTANCE_METERS = 50;
 
@@ -28,6 +29,8 @@ interface UseHiderZoneToolParams {
   postSystemMessage: (text: string) => Promise<void>;
   pauseTimer: () => void;
   resumeTimer: () => void;
+  /** Host can write timer via client rules; non-host uses callable. */
+  canControlTimer?: boolean;
   ensureWriteAccess?: () => Promise<void>;
   writesEnabled?: boolean;
   mapPickEnabled?: boolean;
@@ -42,6 +45,7 @@ export function useHiderZoneTool({
   postSystemMessage,
   pauseTimer,
   resumeTimer,
+  canControlTimer = true,
   ensureWriteAccess,
   writesEnabled = true,
   mapPickEnabled = false,
@@ -144,6 +148,22 @@ export function useHiderZoneTool({
     resetWizardDraft();
   }, [resetWizardDraft]);
 
+  const pauseTimerForMove = useCallback(async () => {
+    if (canControlTimer) {
+      pauseTimer();
+      return;
+    }
+    await controlSessionTimerForMove(sessionId, "pause");
+  }, [canControlTimer, pauseTimer, sessionId]);
+
+  const resumeTimerForMove = useCallback(async () => {
+    if (canControlTimer) {
+      resumeTimer();
+      return;
+    }
+    await controlSessionTimerForMove(sessionId, "resume");
+  }, [canControlTimer, resumeTimer, sessionId]);
+
   const startMove = useCallback(async () => {
     if (!existingZone || !writesEnabled || !hiderUid) {
       return;
@@ -156,12 +176,12 @@ export function useHiderZoneTool({
       return;
     }
 
-    pauseTimer();
     setMoveMode(true);
     setWizardOpen(true);
     resetWizardDraft();
 
     try {
+      await pauseTimerForMove();
       await ensureWriteAccess?.();
       await postSystemMessage(
         "Move card played. Timer paused. Seekers must stay put. Hider is relocating.",
@@ -172,7 +192,11 @@ export function useHiderZoneTool({
         moveInProgress: true,
       });
     } catch (nextError) {
-      resumeTimer();
+      try {
+        await resumeTimerForMove();
+      } catch {
+        // Preserve the original Move failure; resume is best-effort.
+      }
       setMoveMode(false);
       setWizardOpen(false);
       setError(
@@ -187,10 +211,10 @@ export function useHiderZoneTool({
     ensureWriteAccess,
     existingZone,
     hiderUid,
-    pauseTimer,
+    pauseTimerForMove,
     postSystemMessage,
     resetWizardDraft,
-    resumeTimer,
+    resumeTimerForMove,
     sessionId,
     writesEnabled,
   ]);
@@ -312,13 +336,19 @@ export function useHiderZoneTool({
 
       await writeHidingZone(sessionId, zone);
 
-      if (moveMode) {
-        resumeTimer();
-      }
-
       setMoveMode(false);
       setWizardOpen(false);
       resetWizardDraft();
+
+      if (moveMode) {
+        try {
+          await resumeTimerForMove();
+        } catch {
+          setError(
+            "Zone saved, but the timer didn't resume. Ask the host to resume it.",
+          );
+        }
+      }
     } catch (nextError) {
       setError(
         isFirestorePermissionDenied(nextError)
@@ -339,7 +369,7 @@ export function useHiderZoneTool({
     moveMode,
     radiusMeters,
     resetWizardDraft,
-    resumeTimer,
+    resumeTimerForMove,
     selectedStation,
     sessionId,
     writesEnabled,

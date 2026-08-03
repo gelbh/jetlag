@@ -71,6 +71,8 @@ interface MapStatusRailProps {
   expanded?: boolean;
   /** Replace default in-header home ScreenNav (e.g. observer leave control). */
   headerLeading?: ReactNode;
+  /** Synced hiding-zone Move card — drives PHASE=MOVE in status chrome. */
+  moveInProgress?: boolean;
 }
 
 export function MapStatusRail({
@@ -118,6 +120,7 @@ export function MapStatusRail({
   onReturnToJoin,
   expanded = false,
   headerLeading,
+  moveInProgress = false,
 }: MapStatusRailProps) {
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
   const [syncMenuOpen, setSyncMenuOpen] = useState(false);
@@ -221,6 +224,7 @@ export function MapStatusRail({
             seekerLocations={seekerLocations}
             onCancelWalkingQuestion={onCancelWalkingQuestion}
             timerMenuOpen={showTimerMenu}
+            moveInProgress={moveInProgress}
             expanded={expanded}
             headerLeading={
               headerLeading ?? (

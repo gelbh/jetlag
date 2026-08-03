@@ -29,6 +29,7 @@ export {
 
 export {
   cancelRoleJoinRequest,
+  controlSessionTimerForMove,
   endSession,
   initSessionRoleGates,
   joinSessionWithRole,

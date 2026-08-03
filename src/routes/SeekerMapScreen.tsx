@@ -153,6 +153,7 @@ function SeekerMapScreenBody({
         timer={controller.timer}
         timerSyncing={controller.timerSyncing}
         canControlTimer={controller.canControlTimer}
+        confirmedHidingZones={controller.confirmedHidingZones}
         canUndoLastTool={controller.canUndoLastTool}
         canRedoLastTool={controller.canRedoLastTool}
         awaitHiderAnswer={controller.awaitHiderAnswer}

@@ -79,6 +79,7 @@ type MapScreenChromeProps = Pick<
   | "timer"
   | "timerSyncing"
   | "canControlTimer"
+  | "confirmedHidingZones"
   | "canUndoLastTool"
   | "canRedoLastTool"
   | "awaitHiderAnswer"
@@ -196,6 +197,7 @@ export function MapScreenChrome({
   timer,
   timerSyncing,
   canControlTimer,
+  confirmedHidingZones,
   canUndoLastTool,
   canRedoLastTool,
   awaitHiderAnswer,
@@ -374,6 +376,9 @@ export function MapScreenChrome({
       onTimerPause={timer.pause}
       onTimerReset={timer.reset}
       timerControlsDisabled={!canControlTimer || inactiveChrome}
+      moveInProgress={confirmedHidingZones.some(
+        (zone) => zone.moveInProgress === true,
+      )}
       onOpenLog={handleOpenLog}
       pendingQuestions={pendingQuestions}
       closeTimerMenu={

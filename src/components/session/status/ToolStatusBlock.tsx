@@ -37,6 +37,8 @@ interface ToolStatusBlockProps {
   onCancelWalkingQuestion?: (pendingQuestionId: string) => void;
   timerMenuOpen: boolean;
   onOpenTimerMenu: () => void;
+  /** Hider Play Move in progress — PHASE shows MOVE for all roles. */
+  moveInProgress?: boolean;
   /** Show role + mode inline (desktop ops status). */
   expanded?: boolean;
   /** Home / leave control rendered leading in the brand cell. */
@@ -47,9 +49,13 @@ function phaseLabel(
   timerHasStarted: boolean,
   sessionRules: SessionRulesInput,
   timerState: TimerState,
+  moveInProgress: boolean,
 ): string {
   if (!timerHasStarted) {
     return "—";
+  }
+  if (moveInProgress) {
+    return "MOVE";
   }
   const elapsed = computeElapsedMs(timerState);
   return isHidingPeriodActive(sessionRules, elapsed) ? "HIDE" : "SEEK";
@@ -73,14 +79,20 @@ export function ToolStatusBlock({
   onCancelWalkingQuestion,
   timerMenuOpen,
   onOpenTimerMenu,
+  moveInProgress = false,
   expanded = false,
   headerLeading,
 }: ToolStatusBlockProps) {
   void _activeTool;
   void expanded;
-  const phase = phaseLabel(timerHasStarted, sessionRules, timerState);
+  const phase = phaseLabel(
+    timerHasStarted,
+    sessionRules,
+    timerState,
+    moveInProgress,
+  );
   const phaseClass =
-    phase === "HIDE"
+    phase === "HIDE" || phase === "MOVE"
       ? "jl-status-header-value jl-status-header-value--action"
       : "jl-status-header-value";
 

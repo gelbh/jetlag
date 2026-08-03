@@ -30,6 +30,7 @@ interface ObserverMapScreenChromeProps {
   onLeave: () => void;
   /** When set with desktop layout, map fills the ops shell center slot. */
   mapSlot?: ReactNode;
+  moveInProgress?: boolean;
 }
 
 export function ObserverMapScreenChrome({
@@ -41,6 +42,7 @@ export function ObserverMapScreenChrome({
   overlay,
   onLeave,
   mapSlot,
+  moveInProgress = false,
 }: ObserverMapScreenChromeProps) {
   const roleConfig =
     myRole === "admin"
@@ -79,6 +81,7 @@ export function ObserverMapScreenChrome({
         onTimerPause={() => undefined}
         onTimerReset={() => undefined}
         timerControlsDisabled
+        moveInProgress={moveInProgress}
         expanded={isDesktop}
         myUid={myUid}
         isHost={isHost}
