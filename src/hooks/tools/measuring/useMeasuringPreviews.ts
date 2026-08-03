@@ -101,14 +101,17 @@ export function useMeasuringPreviews(
       linearSegments: previewRegionInput.measuringCoastSegments,
     });
 
-    if (!budget.ok) {
-      setMeasuringNearRegion(null);
-      setMeasuringEliminationPreview(null);
-      setMeasuringError(budget.message);
-      return;
-    }
-
     void (async () => {
+      if (!budget.ok) {
+        if (generation === generationRef.current) {
+          // Budget gate triggered: clear previews and set error message
+          setMeasuringNearRegion(null);
+          setMeasuringEliminationPreview(null);
+          setMeasuringError(budget.message);
+        }
+        return;
+      }
+
       let near: Feature<GeoPolygon | MultiPolygon> | null;
       try {
         near = await buildMeasuringBoundaryPreview(previewRegionInput);
