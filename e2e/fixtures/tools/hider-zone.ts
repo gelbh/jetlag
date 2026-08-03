@@ -12,7 +12,8 @@ export async function searchStationsInArea(page: Page) {
   const searchButton = page.getByRole("button", {
     name: /Search stations in this area|Search this area/i,
   });
-  await expect(searchButton).toBeVisible({ timeout: 10_000 });
+  await expect(searchButton).toBeVisible({ timeout: 15_000 });
+  await expect(searchButton).toBeEnabled();
   await searchButton.click();
   await expect(page.getByText(/Loading stations/i)).toBeHidden({
     timeout: 30_000,
