@@ -186,6 +186,19 @@ describe("JoinSession", () => {
     ).toBeInTheDocument();
   });
 
+  it("prefills a valid code from the invite query param", () => {
+    renderWithRouter(<JoinSession />, { route: "/join?code=wxyz" });
+
+    expect(screen.getByPlaceholderText("ABCD")).toHaveValue("WXYZ");
+  });
+
+  it("ignores an invalid invite query code", () => {
+    renderWithRouter(<JoinSession />, { route: "/join?code=AB" });
+
+    expect(screen.getByPlaceholderText("ABCD")).toHaveValue("");
+  });
+
+
   it("clears join loading when ensureFreshAnonymousUser times out", async () => {
     vi.useFakeTimers();
     mockIsFirebaseConfigured.mockReturnValue(true);

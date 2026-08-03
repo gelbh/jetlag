@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { useSubmitLock } from "../hooks/forms/useSubmitLock";
 import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
@@ -114,6 +115,7 @@ function joinRequestStatusMessage(status: JoinRequestStatus): string {
 
 export function JoinSession() {
   const navigate = useAppNavigate();
+  const [searchParams] = useSearchParams();
   const session = useSessionStore((state) => state.session);
   const myUid = useSessionStore((state) => state.myUid);
   const setSession = useSessionStore((state) => state.setSession);
@@ -141,6 +143,20 @@ export function JoinSession() {
     needsRolePasscode &&
     isJoinRequestRole(playerRole);
   const formBusy = joinBusy || requestBusy || pendingRequest != null;
+  const codeFromQuery = searchParams.get("code");
+
+  useEffect(() => {
+    if (!codeFromQuery) {
+      return;
+    }
+    const normalized = normalizeSessionCode(codeFromQuery);
+    if (!isValidSessionCode(normalized)) {
+      return;
+    }
+    /* eslint-disable react-hooks/set-state-in-effect -- prefill join code from invite deep link */
+    setCode(normalized);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [codeFromQuery]);
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
