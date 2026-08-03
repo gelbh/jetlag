@@ -141,7 +141,6 @@ export function JoinSession() {
   );
   const canRequestAccess =
     Boolean(previewSession) &&
-    isSessionRoleGated(previewSession) &&
     needsRolePasscode &&
     isJoinRequestRole(playerRole);
   const formBusy = joinBusy || requestBusy || pendingRequest != null;
@@ -359,6 +358,12 @@ export function JoinSession() {
     const expiresInMs = Date.parse(pendingRequest.expiresAt) - Date.now();
     const expiryTimer = window.setTimeout(
       () => {
+        if (!cancelled && !accepting) {
+          void cancelRoleJoinRequest(
+            pendingRequest.sessionId,
+            pendingRequest.requestId,
+          );
+        }
         finishTerminal("expired");
       },
       Math.max(0, expiresInMs),
