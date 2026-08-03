@@ -10,7 +10,6 @@ import {
   placementCameraDraftFromOverlaySources,
   resolvePlacementPhase,
   MAX_ZOOM_PIN,
-  boundsForPlayArea,
   type CameraTarget,
 } from "./index";
 
