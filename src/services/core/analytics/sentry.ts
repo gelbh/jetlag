@@ -265,23 +265,17 @@ export function captureException(error: unknown): void {
   Sentry.captureException(error);
 }
 
-/** Join/heal-only visibility for permission-denied (global beforeSend still drops raw Firebase denials). */
+/** Expected join/heal permission-denied — breadcrumb only (no Sentry issue). */
 export function reportJoinPermissionDenied(phase: "initial" | "retry"): void {
   if (import.meta.env.MODE === "test") {
     return;
   }
 
-  withSentryScope((scope) => {
-    scope.setTag("op", "join");
-    scope.setExtra("code", "permission-denied");
-    scope.setExtra("phase", phase);
-    Sentry.addBreadcrumb({
-      category: "join",
-      message: "Join permission denied",
-      level: "warning",
-      data: { op: "join", code: "permission-denied", phase },
-    });
-    Sentry.captureMessage("Join permission denied", "warning");
+  Sentry.addBreadcrumb({
+    category: "join",
+    message: "Join permission denied",
+    level: "warning",
+    data: { op: "join", code: "permission-denied", phase },
   });
 }
 
