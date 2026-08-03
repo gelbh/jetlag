@@ -1,5 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+
+function pendingIdsKey(pendingQuestions: readonly PendingQuestionRecord[]): string {
+  return pendingQuestions.map((question) => question.id).join("\0");
+}
 
 export function useSeekerOptimisticPendingOverlays(
   pendingQuestions: readonly PendingQuestionRecord[],
@@ -7,10 +11,35 @@ export function useSeekerOptimisticPendingOverlays(
   const [optimisticEntries, setOptimisticEntries] = useState<
     PendingQuestionRecord[]
   >([]);
+  const [ackedIds, setAckedIds] = useState(
+    () => new Set(pendingQuestions.map((question) => question.id)),
+  );
+  const [prevIdsKey, setPrevIdsKey] = useState(() =>
+    pendingIdsKey(pendingQuestions),
+  );
+  const nextIdsKey = pendingIdsKey(pendingQuestions);
+
+  if (nextIdsKey !== prevIdsKey) {
+    setPrevIdsKey(nextIdsKey);
+    let changed = false;
+    const next = new Set(ackedIds);
+    for (const question of pendingQuestions) {
+      if (!next.has(question.id)) {
+        next.add(question.id);
+        changed = true;
+      }
+    }
+    if (changed) {
+      setAckedIds(next);
+    }
+  }
 
   const registerOptimisticPending = useCallback(
     (entry: PendingQuestionRecord) => {
-      if (pendingQuestions.some((question) => question.id === entry.id)) {
+      if (
+        pendingQuestions.some((question) => question.id === entry.id) ||
+        ackedIds.has(entry.id)
+      ) {
         return;
       }
 
@@ -22,24 +51,17 @@ export function useSeekerOptimisticPendingOverlays(
         return [...previous, entry];
       });
     },
-    [pendingQuestions],
+    [ackedIds, pendingQuestions],
   );
-
-  useEffect(() => {
-    setOptimisticEntries((previous) => {
-      const next = previous.filter(
-        (entry) => !pendingQuestions.some((question) => question.id === entry.id),
-      );
-      return next.length === previous.length ? previous : next;
-    });
-  }, [pendingQuestions]);
 
   const unsyncedOptimisticQuestions = useMemo(
     () =>
       optimisticEntries.filter(
-        (entry) => !pendingQuestions.some((question) => question.id === entry.id),
+        (entry) =>
+          !pendingQuestions.some((question) => question.id === entry.id) &&
+          !ackedIds.has(entry.id),
       ),
-    [optimisticEntries, pendingQuestions],
+    [ackedIds, optimisticEntries, pendingQuestions],
   );
 
   const displayPendingQuestions = useMemo(

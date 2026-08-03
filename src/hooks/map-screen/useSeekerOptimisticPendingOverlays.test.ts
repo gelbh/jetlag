@@ -21,6 +21,23 @@ function optimisticEntry(id: string): PendingQuestionRecord {
 }
 
 describe("useSeekerOptimisticPendingOverlays", () => {
+  it("does not retain an entry when remote state arrives before registration", () => {
+    const entry = optimisticEntry("pq-remote-first");
+    const { result, rerender } = renderHook(
+      ({ pendingQuestions }: { pendingQuestions: PendingQuestionRecord[] }) =>
+        useSeekerOptimisticPendingOverlays(pendingQuestions),
+      { initialProps: { pendingQuestions: [entry] } },
+    );
+
+    act(() => {
+      result.current.registerOptimisticPending(entry);
+    });
+
+    rerender({ pendingQuestions: [] });
+
+    expect(result.current.displayPendingQuestions).toHaveLength(0);
+  });
+
   it("keeps unsynced optimistic questions until remote pending arrives", () => {
     const { result, rerender } = renderHook(
       ({ pendingQuestions }: { pendingQuestions: PendingQuestionRecord[] }) =>

@@ -124,11 +124,8 @@ export function useHiderPendingPreviewEliminations({
     generationRef.current = generation;
 
     if (!shouldComputePreview || !gameArea) {
-      setPreviewEliminationFeatures([]);
       return;
     }
-
-    setPreviewEliminationFeatures([]);
 
     void buildPendingPreviewEliminationFeatures(
       pendingQuestions,
