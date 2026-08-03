@@ -120,7 +120,7 @@ export function useHiderPendingPreviewEliminations({
     Boolean(gameArea) && replyIdByQuestionId.size > 0;
 
   useEffect(() => {
-    if (!shouldComputePreview) {
+    if (!shouldComputePreview || !gameArea) {
       return;
     }
 
