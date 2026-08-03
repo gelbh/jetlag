@@ -332,3 +332,34 @@ test("resolveRoleJoinRequest expired pending cannot accept", async () => {
   assert.equal(db._store["req-1"].status, "expired");
   assert.equal(sessionData.memberRoles.guest, undefined);
 });
+
+test("cancelRoleJoinRequest expired commits status before rejecting", async () => {
+  const sessionData = occupiedSeekerSession();
+  const db = buildMockDb({
+    sessionData,
+    requests: {
+      "req-1": {
+        requesterUid: "guest",
+        role: "seeker",
+        status: "pending",
+        identityLabel: "ada",
+        createdAt: "2026-08-03T12:00:00.000Z",
+        expiresAt: "2026-08-03T12:10:00.000Z",
+      },
+    },
+  });
+
+  await assert.rejects(
+    () =>
+      cancelRoleJoinRequestHandler(
+        db,
+        { uid: "guest" },
+        { sessionId: "sess-1", requestId: "req-1" },
+        Date.parse("2026-08-03T12:10:01.000Z"),
+      ),
+    (error) => error instanceof Error && error.message === JOIN_REQ_EXPIRED,
+  );
+
+  assert.equal(db._store["req-1"].status, "expired");
+  assert.ok(db._store["req-1"].resolvedAt);
+});

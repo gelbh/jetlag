@@ -12,7 +12,7 @@ import {
 } from "../../components/ui/brand/HudIcons";
 import { MotionPressable } from "../../components/motion/MotionPressable";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
-import { ledJoinRequestRoles } from "../../domain/session/players/roleGates";
+import { visibleRoleCodeRoles } from "../../domain/session/players/roleGates";
 import type { SessionRecord } from "../../domain/map/annotations";
 import type { UseMapOverlayStateResult } from "../../hooks/map/useMapOverlayState";
 import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
@@ -52,7 +52,7 @@ export function ObserverMapScreenChrome({
   const isAdmin = roleConfig.role === "admin";
   const canOpenCodes =
     Boolean(myUid) &&
-    ledJoinRequestRoles({
+    visibleRoleCodeRoles({
       roleGates: session.roleGates,
       myUid,
       isHost,
@@ -79,6 +79,8 @@ export function ObserverMapScreenChrome({
         onTimerReset={() => undefined}
         timerControlsDisabled
         expanded={isDesktop}
+        myUid={myUid}
+        isHost={isHost}
         headerLeading={
           <button
             type="button"
