@@ -102,3 +102,39 @@ export function assembleEndGameAcceptAnchors(input: {
     input.frozenAt,
   );
 }
+
+function locationsMapFromList(
+  locations: readonly { uid: string; lat: number; lng: number }[],
+): Map<string, PlayerLocationPoint> {
+  return playerLocationsByUid(locations);
+}
+
+/**
+ * Direct End Game start anchors: prefer usable hiding place, else zone center.
+ * Does not require hider Accept.
+ */
+export function assembleEndGameStartAnchors(input: {
+  hiderUids: readonly string[];
+  hidingPlaces: readonly { uid: string; lat: number; lng: number }[];
+  zoneCenters: readonly { uid: string; lat: number; lng: number }[];
+  frozenAt: string;
+}): Record<string, EndGameTruthAnchor> | { missing: string[] } {
+  const hidingByUid = locationsMapFromList(input.hidingPlaces);
+  const zoneByUid = locationsMapFromList(input.zoneCenters);
+  const preferred = new Map<string, PlayerLocationPoint>();
+
+  for (const hiderUid of input.hiderUids) {
+    const hidingPlace = hidingByUid.get(hiderUid);
+    if (isUsablePlayerLocation(hidingPlace)) {
+      preferred.set(hiderUid, hidingPlace);
+      continue;
+    }
+
+    const zoneCenter = zoneByUid.get(hiderUid);
+    if (isUsablePlayerLocation(zoneCenter)) {
+      preferred.set(hiderUid, zoneCenter);
+    }
+  }
+
+  return buildEndGameTruthAnchors(input.hiderUids, preferred, input.frozenAt);
+}

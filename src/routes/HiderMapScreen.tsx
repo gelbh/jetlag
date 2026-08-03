@@ -49,10 +49,11 @@ import type { MapViewportBounds } from "../domain/map/transitViewport";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/device/power/powerProfile";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import { resolveHiderTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
-import {
-  assembleEndGameAcceptAnchors,
-} from "../domain/session/hiding/endGameTruthAnchors";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
+import {
+  parseGeometryJson,
+  pointFromGeometryFeature,
+} from "../domain/geometry/gameArea/geometryParsing";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
 import { useHidingZoneUidHeal } from "../hooks/session/useHidingZoneUidHeal";
 import { useHiderZoneTool } from "../hooks/session/useHiderZoneTool";
@@ -71,7 +72,6 @@ import { getPowerProfile } from "../domain/device/power/powerProfile";
 import { useSessionDistanceUnit } from "../hooks/session/useSessionDistanceUnit";
 import { isEndGameActive, isEndGamePending, isFoundHiderPending, LOCAL_SESSION_ID } from "../domain/map/annotations";
 import {
-  acceptEndGameSession,
   clearEndGameRequestSession,
   confirmFoundHiderSession,
   resetEndGameSession,
@@ -247,6 +247,29 @@ export function HiderMapScreen() {
     () => hiderStationCenter(myZone),
     [myZone],
   );
+  const liveLocationProfile = getPowerProfile(lowPowerMode).liveLocation;
+  const { reading: liveLocationReading } = useLiveLocation(showCurrentLocation, {
+    highAccuracy: liveLocationProfile.highAccuracy,
+    minIntervalMs: liveLocationProfile.minIntervalMs,
+    minDistanceMeters: liveLocationProfile.minDistanceMeters,
+  });
+  const openAskOrigin = useMemo((): LatLngTuple | null => {
+    const open = pendingQuestions.find(
+      (question) =>
+        question.status === "pending" || question.status === "walking",
+    );
+    if (!open) {
+      return null;
+    }
+    const feature = parseGeometryJson(open.placement.geometryJson);
+    return feature ? pointFromGeometryFeature(feature) : null;
+  }, [pendingQuestions]);
+  const hidingPlace = useMemo((): LatLngTuple | null => {
+    if (!liveLocationReading) {
+      return null;
+    }
+    return [liveLocationReading.lat, liveLocationReading.lng];
+  }, [liveLocationReading]);
   const truthReference = useMemo(() => {
     if (!uid) {
       return {
@@ -258,9 +281,12 @@ export function HiderMapScreen() {
     return resolveHiderTruthReference({
       hiderUid: uid,
       zoneCenter: stationCenter,
+      hidingPlace,
+      askOrigin: openAskOrigin,
+      zoneRadiusMeters: myZone?.radiusMeters ?? null,
       session,
     });
-  }, [session, stationCenter, uid]);
+  }, [hidingPlace, myZone?.radiusMeters, openAskOrigin, session, stationCenter, uid]);
   useHidingZoneUidHeal(sessionId, uid, hidingZones, persistedMyUid);
   const truthReferenceReady = authReady && uid !== null;
   const { questionTruths, loading: truthsLoading } = useHiderQuestionTruths(
@@ -272,13 +298,6 @@ export function HiderMapScreen() {
       truthReferenceMode: truthReference.mode,
     },
   );
-
-  const liveLocationProfile = getPowerProfile(lowPowerMode).liveLocation;
-  const { reading: liveLocationReading } = useLiveLocation(showCurrentLocation, {
-    highAccuracy: liveLocationProfile.highAccuracy,
-    minIntervalMs: liveLocationProfile.minIntervalMs,
-    minDistanceMeters: liveLocationProfile.minDistanceMeters,
-  });
   const hiderOutsideZone = useHiderZoneAdvisory({
     enabled:
       showCurrentLocation &&
@@ -316,55 +335,6 @@ export function HiderMapScreen() {
       setSession(updatedSession, uid);
     }
   }, [session, setSession, uid]);
-
-  const handleAcceptEndGame = useCallback(async () => {
-    if (!session?.id || !uid || !isEndGamePending(session)) {
-      return;
-    }
-
-    const frozenAt = new Date().toISOString();
-    const confirmedHiderUids = confirmedHidingZones.map((zone) => zone.hiderUid);
-    const anchorsResult = assembleEndGameAcceptAnchors({
-      hiderUids: confirmedHiderUids,
-      hiderLocations,
-      localHiderUid: uid,
-      localPoint: liveLocationReading
-        ? { lat: liveLocationReading.lat, lng: liveLocationReading.lng }
-        : null,
-      frozenAt,
-    });
-
-    if ("missing" in anchorsResult) {
-      window.alert(
-        "Need a recent GPS location for every confirmed hider before starting end game.",
-      );
-      return;
-    }
-
-    if (session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
-      setSession(
-        {
-          ...session,
-          endGameStartedAt: frozenAt,
-          endGameStartedByUid: uid,
-          endGameTruthAnchors: anchorsResult,
-          endGameRequestedAt: undefined,
-          endGameRequestedByUid: undefined,
-        },
-        uid,
-      );
-      return;
-    }
-
-    await acceptEndGameSession(session.id, uid, anchorsResult, frozenAt);
-  }, [
-    confirmedHidingZones,
-    hiderLocations,
-    liveLocationReading,
-    session,
-    setSession,
-    uid,
-  ]);
 
   const handleAcceptFoundHider = useCallback(async () => {
     if (!session?.id || !uid || !isFoundHiderPending(session)) {
@@ -805,7 +775,6 @@ export function HiderMapScreen() {
         truthReveal={truthReveal}
         onDismissTruthReveal={dismissTruthReveal}
         onResetEndGame={handleResetEndGame}
-        onAcceptEndGame={handleAcceptEndGame}
         onAcceptFoundHider={handleAcceptFoundHider}
         onDeclineFoundHider={handleDeclineFoundHider}
         onOpenLog={openLogExclusive}
@@ -883,6 +852,7 @@ export function HiderMapScreen() {
           sessionId: sessionId ?? "",
           questionTruths,
           truthsLoading,
+          truthReferenceMode: truthReference.mode,
           answerError: chatAnswerError,
           onAnswerQuestion: async (
             pendingQuestionId,

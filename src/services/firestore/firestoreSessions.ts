@@ -1079,11 +1079,24 @@ export async function acceptEndGameSession(
   await batch.commit();
 }
 
+/** Seeker/host direct End Game start (no hider Accept). Clears legacy request fields. */
 export async function startEndGameSession(
   sessionId: string,
   startedByUid: string,
+  anchors: Record<string, { lat: number; lng: number; frozenAt: string }>,
+  endGameStartedAt: string = new Date().toISOString(),
 ): Promise<void> {
-  await requestEndGameSession(sessionId, startedByUid);
+  const batch = writeBatch(getFirestoreDb());
+  batch.update(doc(sessionsCollection(), sessionId), {
+    endGameStartedAt,
+    endGameStartedByUid: startedByUid,
+    // Strip any legacy session-doc anchors (coords belong in endGameTruth/anchors).
+    endGameTruthAnchors: deleteField(),
+    endGameRequestedAt: deleteField(),
+    endGameRequestedByUid: deleteField(),
+  });
+  batch.set(endGameTruthAnchorsDoc(sessionId), { anchors });
+  await batch.commit();
 }
 
 export async function touchSessionLastActive(sessionId: string): Promise<void> {

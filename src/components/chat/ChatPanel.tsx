@@ -1,4 +1,5 @@
 import type { SessionRulesInput } from "../../domain/session/rules";
+import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HiderTruthResult } from "../../domain/questions/ui";
 import type {
   PendingQuestionRecord,
@@ -24,6 +25,7 @@ interface ChatPanelProps {
   bottomClassName?: string;
   questionTruths?: ReadonlyMap<string, HiderTruthResult>;
   truthsLoading?: boolean;
+  truthReferenceMode?: HiderTruthReferenceMode;
   answerError?: string | null;
   onAnswerQuestion: (
     pendingQuestionId: string,
@@ -52,6 +54,7 @@ export function ChatPanel({
   bottomClassName = "jl-panel-above-dock",
   questionTruths,
   truthsLoading = false,
+  truthReferenceMode,
   answerError = null,
   onAnswerQuestion,
   onDismissExpiredQuestion,
@@ -78,6 +81,7 @@ export function ChatPanel({
       isHider={isHider}
       questionTruths={questionTruths}
       truthsLoading={truthsLoading}
+      truthReferenceMode={truthReferenceMode}
       answerError={answerError}
       onAnswerQuestion={onAnswerQuestion}
       onDismissExpiredQuestion={onDismissExpiredQuestion}

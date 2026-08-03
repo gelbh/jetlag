@@ -1338,6 +1338,73 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("allows a seeker to start end game directly without a prior request", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+        }),
+      });
+
+    await assertSucceeds(
+      host.firestore().collection("sessions").doc("session-1").update({
+        endGameStartedAt: "2026-01-01T00:01:00.000Z",
+        endGameStartedByUid: "host-1",
+        endGameTruthAnchors: deleteField(),
+        endGameRequestedAt: deleteField(),
+        endGameRequestedByUid: deleteField(),
+      }),
+    );
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("endGameTruth")
+        .doc("anchors")
+        .set({
+          anchors: {
+            "hider-1": {
+              lat: 53.35,
+              lng: -6.26,
+              frozenAt: "2026-01-01T00:01:00.000Z",
+            },
+          },
+        }),
+    );
+  });
+
+  it("denies a non-member from starting end game directly", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+        }),
+      });
+
+    const stranger = testEnv.authenticatedContext("stranger-1");
+    await assertFails(
+      stranger.firestore().collection("sessions").doc("session-1").update({
+        endGameStartedAt: "2026-01-01T00:01:00.000Z",
+        endGameStartedByUid: "stranger-1",
+        endGameTruthAnchors: deleteField(),
+        endGameRequestedAt: deleteField(),
+        endGameRequestedByUid: deleteField(),
+      }),
+    );
+  });
+
   it("allows the requester to cancel a pending end-game request", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host

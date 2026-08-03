@@ -138,12 +138,12 @@ export function SessionIslandSlots({
           disabled={inactive}
           onClick={onStartEndGame}
           className="jl-tool-slot"
-          aria-label="Start end game — seekers entered the hiding zone"
+          aria-label="Declare found hiding-zone station / start end game"
         >
           <span className="jl-tool-slot-icon" aria-hidden="true">
             !
           </span>
-          <span className="jl-tool-slot-label">End</span>
+          <span className="jl-tool-slot-label">Station</span>
         </MotionPressable>
       ) : null}
     </div>

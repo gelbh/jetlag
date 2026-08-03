@@ -48,6 +48,7 @@ import { isEndGameActive, isEndGamePending, isFoundHiderPending } from "../../do
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
 import { visibleRoleCodeRoles } from "../../domain/session/players/roleGates";
 import type { HiderTruthResult } from "../../domain/questions/ui";
@@ -99,7 +100,6 @@ export type HiderMapScreenChromeProps = {
   truthReveal: HiderTruthRevealState | null;
   onDismissTruthReveal: () => void;
   onResetEndGame: () => void;
-  onAcceptEndGame: () => void;
   onAcceptFoundHider: () => void;
   onDeclineFoundHider: () => void;
   onOpenLog: () => void;
@@ -184,6 +184,7 @@ export type HiderMapScreenChromeProps = {
     sessionId: string;
     questionTruths: ReadonlyMap<string, HiderTruthResult>;
     truthsLoading: boolean;
+    truthReferenceMode?: HiderTruthReferenceMode;
     answerError: string | null;
     onAnswerQuestion: (
       pendingQuestionId: string,
@@ -218,7 +219,6 @@ export function HiderMapScreenChrome({
   truthReveal,
   onDismissTruthReveal,
   onResetEndGame,
-  onAcceptEndGame,
   onAcceptFoundHider,
   onDeclineFoundHider,
   onOpenLog,
@@ -352,7 +352,6 @@ export function HiderMapScreenChrome({
         myUid={uid ?? undefined}
         isHost={isHost}
         onResetEndGame={() => void onResetEndGame()}
-        onAcceptEndGame={() => void onAcceptEndGame()}
         onAcceptFoundHider={() => void onAcceptFoundHider()}
         onDeclineFoundHider={() => void onDeclineFoundHider()}
         hiderOutsideZone={hiderOutsideZone}
@@ -463,6 +462,7 @@ export function HiderMapScreenChrome({
           isHider
           questionTruths={chat.questionTruths}
           truthsLoading={chat.truthsLoading}
+          truthReferenceMode={chat.truthReferenceMode}
           answerError={chat.answerError}
           onAnswerQuestion={chat.onAnswerQuestion}
         />
