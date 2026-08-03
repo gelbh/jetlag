@@ -1,6 +1,5 @@
-import { memo, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import type { FeatureCollection, LineString } from "geojson";
-import { Marker as MapLibreMarker, Popup as MapLibrePopup } from "react-map-gl/maplibre";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import type {
   TransitRealtimeSnapshot,
@@ -13,9 +12,19 @@ import {
   filterTransitVehiclesForViewport,
   type MapViewportBounds,
 } from "../../../domain/map/transitViewport";
+import { featureHitId } from "../helpers/mapFeatureHitTest";
+import { MapLibreFeaturePopup } from "../helpers/MapLibreFeaturePopup";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
-import { transitStopDivIcon } from "../icons/transitStopIcons";
-import { transitVehicleIconHtml } from "../icons/transitVehicleIconHtml";
+import {
+  transitModeIconId,
+  transitVehicleIconId,
+} from "../helpers/mapLibreIconRegistry";
+import {
+  symbolMarkerCollection,
+  type SymbolMarkerProps,
+} from "../helpers/mapMarkerFeatures";
+import { jlMarkerLayerId } from "../helpers/mapMarkerConstants";
+import { useMapFeatureHitTest } from "../helpers/MapFeatureHitTestContext";
 
 interface TransitLayerProps {
   staticData: TransitStaticData | null;
@@ -32,6 +41,8 @@ const MODE_COLORS: Record<TransitRouteMode, string> = {
   ferry: MAP_ANNOTATION_COLORS.transit.ferry,
   other: MAP_ANNOTATION_COLORS.transit.other,
 };
+
+const TRANSIT_HIT_PREFIX = jlMarkerLayerId("transit");
 
 export const TransitLayer = memo(function TransitLayer({
   staticData,
@@ -81,6 +92,43 @@ export const TransitLayer = memo(function TransitLayer({
     [liveData?.vehicles, viewport],
   );
 
+  const stopMarkers = useMemo((): SymbolMarkerProps[] => {
+    return visibleStops.map((stop) => ({
+      id: `stop-${stop.id}`,
+      lat: stop.lat,
+      lng: stop.lng,
+      iconImage: transitModeIconId(stop.mode),
+      iconSize: 1,
+      hitId: `stop-${stop.id}`,
+      hitKind: "transit-stop",
+    }));
+  }, [visibleStops]);
+
+  const vehicleMarkers = useMemo((): SymbolMarkerProps[] => {
+    return visibleVehicles.map((vehicle) => ({
+      id: `vehicle-${vehicle.id}`,
+      lat: vehicle.lat,
+      lng: vehicle.lng,
+      iconImage: transitVehicleIconId(vehicle.mode),
+      iconRotate: Math.round((vehicle.bearing ?? 0) / 15) * 15,
+      iconSize: 1,
+      hitId: `vehicle-${vehicle.id}`,
+      hitKind: "transit-vehicle",
+    }));
+  }, [visibleVehicles]);
+
+  useMapFeatureHitTest(
+    TRANSIT_HIT_PREFIX,
+    useCallback((result) => {
+      const hitId = featureHitId(result.feature);
+      if (hitId) {
+        setOpenPopupId(hitId);
+        return true;
+      }
+      return false;
+    }, []),
+  );
+
   if (!staticData && !liveData) {
     return null;
   }
@@ -108,57 +156,48 @@ export const TransitLayer = memo(function TransitLayer({
         );
       })}
 
-      {visibleStops.map((stop) => (
-        <MapLibreMarker
-          key={`stop-${stop.id}`}
-          latitude={stop.lat}
-          longitude={stop.lng}
-          anchor="center"
-          onClick={(event) => {
-            event.originalEvent.stopPropagation();
-            setOpenPopupId(`stop-${stop.id}`);
+      {stopMarkers.length > 0 ? (
+        <MapLibreGeoJsonOverlay
+          id={`${TRANSIT_HIT_PREFIX}-stops`}
+          data={symbolMarkerCollection(stopMarkers)}
+          symbol={{
+            layout: {
+              iconImage: ["get", "iconImage"],
+              iconSize: ["get", "iconSize"],
+              iconAllowOverlap: true,
+            },
           }}
-        >
-          <div
-            dangerouslySetInnerHTML={{ __html: transitStopDivIcon(stop.mode) }}
-          />
-        </MapLibreMarker>
-      ))}
+        />
+      ) : null}
 
-      {visibleVehicles.map((vehicle) => {
-        const html = transitVehicleIconHtml(
-          vehicle.bearing,
-          MODE_COLORS[vehicle.mode],
-        );
-        return (
-          <MapLibreMarker
-            key={`vehicle-${vehicle.id}`}
-            latitude={vehicle.lat}
-            longitude={vehicle.lng}
-            anchor="center"
-            onClick={(event) => {
-              event.originalEvent.stopPropagation();
-              setOpenPopupId(`vehicle-${vehicle.id}`);
-            }}
-          >
-            <div dangerouslySetInnerHTML={{ __html: html }} />
-          </MapLibreMarker>
-        );
-      })}
+      {vehicleMarkers.length > 0 ? (
+        <MapLibreGeoJsonOverlay
+          id={`${TRANSIT_HIT_PREFIX}-vehicles`}
+          data={symbolMarkerCollection(vehicleMarkers)}
+          symbol={{
+            layout: {
+              iconImage: ["get", "iconImage"],
+              iconRotate: ["get", "iconRotate"],
+              iconSize: ["get", "iconSize"],
+              iconAllowOverlap: true,
+            },
+          }}
+        />
+      ) : null}
 
       {openStop ? (
-        <MapLibrePopup
+        <MapLibreFeaturePopup
           latitude={openStop.lat}
           longitude={openStop.lng}
           closeOnClick={false}
           onClose={() => setOpenPopupId(null)}
         >
           {openStop.name}
-        </MapLibrePopup>
+        </MapLibreFeaturePopup>
       ) : null}
 
       {openVehicle ? (
-        <MapLibrePopup
+        <MapLibreFeaturePopup
           latitude={openVehicle.lat}
           longitude={openVehicle.lng}
           closeOnClick={false}
@@ -166,7 +205,7 @@ export const TransitLayer = memo(function TransitLayer({
         >
           {openVehicle.label}
           {openVehicle.routeRef ? ` · ${openVehicle.routeRef}` : ""}
-        </MapLibrePopup>
+        </MapLibreFeaturePopup>
       ) : null}
     </>
   );
