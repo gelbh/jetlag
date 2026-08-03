@@ -30,7 +30,6 @@ import {
   MOTION_MAP_CAMERA_MS,
 } from "../../../domain/device/motion/motionTokens";
 import { useMotionProfile } from "../../../hooks/motion/useMotionProfile";
-import { useMapStore } from "../../../state/mapStore";
 import { useMapLibreMap } from "../helpers/useMapLibreMap";
 import {
   MapFeatureHitTestBridge,
