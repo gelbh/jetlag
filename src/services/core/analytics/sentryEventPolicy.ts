@@ -35,7 +35,7 @@ export const JOIN_PERMISSION_DENIED_MESSAGE = "Join permission denied";
 export const CLIENT_SENTRY_IGNORE_ERRORS: Array<string | RegExp> = [
   "This operation was aborted",
   "App Check probe timed out",
-  /appCheck\/(?:initial-throttle|throttled)/i,
+  /appCheck\/(?:initial-throttle|throttled|fetch-network-error)/i,
   "Session already ended.",
   "Only the host can do that.",
   JOIN_PERMISSION_DENIED_MESSAGE,

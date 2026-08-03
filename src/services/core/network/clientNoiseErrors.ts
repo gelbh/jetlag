@@ -9,6 +9,8 @@ const BROWSER_EXTENSION_NOISE =
   /Invalid call to runtime\.sendMessage\(\)|Object Not Found Matching Id:/i;
 /** Soft App Check backoff codes (initial-throttle after 403, later throttled). */
 const APP_CHECK_SOFT_THROTTLE = /appCheck\/(?:initial-throttle|throttled)/i;
+/** Transient network disconnect while contacting App Check (not content-blocker). */
+const APP_CHECK_FETCH_NETWORK = /appCheck\/fetch-network-error/i;
 const APP_CHECK_PROBE_TIMED_OUT = /App Check probe timed out/i;
 const APP_CHECK_BLOCKED_FETCH =
   /failed to fetch|load failed|content[\s-]?blocker|ad[\s-]?blocker|request blocked/i;
@@ -46,6 +48,10 @@ export function isAppCheckInitialThrottleMessage(message: string): boolean {
   return APP_CHECK_SOFT_THROTTLE.test(message);
 }
 
+export function isAppCheckFetchNetworkErrorMessage(message: string): boolean {
+  return APP_CHECK_FETCH_NETWORK.test(message);
+}
+
 /**
  * Soft App Check probe outcomes that must not land as Sentry errors
  * (beforeSend safety net for uncaught leftovers).
@@ -54,6 +60,7 @@ export function isAppCheckSoftFailureMessage(message: string): boolean {
   return (
     APP_CHECK_PROBE_TIMED_OUT.test(message) ||
     isAppCheckInitialThrottleMessage(message) ||
+    isAppCheckFetchNetworkErrorMessage(message) ||
     isRecaptchaTimeoutMessage(message)
   );
 }
@@ -78,6 +85,11 @@ export function classifyAppCheckProbeFailure(
     return { soft: false, reason: "blocked", allowApp: false };
   }
   if (isAppCheckInitialThrottleMessage(outcome.message)) {
+    return { soft: true, reason: "error", allowApp: true };
+  }
+  // Transient App Check network errors include "Load failed" substrings that
+  // would otherwise match APP_CHECK_BLOCKED_FETCH — classify soft first.
+  if (isAppCheckFetchNetworkErrorMessage(outcome.message)) {
     return { soft: true, reason: "error", allowApp: true };
   }
   // Google script timeouts must not ContentBlocker + then vanish in beforeSend.
