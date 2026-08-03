@@ -1,11 +1,15 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import type { AnnotationRecord } from "../domain/map/annotations";
 import {
   LOCAL_SESSION_ID,
   createAnnotationId,
   migrateAnnotations,
 } from "../domain/map/annotations";
+import {
+  createSafeLocalStorage,
+  readSessionIdFromLocalStorage,
+} from "./safeLocalStorage";
 
 interface AnnotationState {
   annotations: AnnotationRecord[];
@@ -132,18 +136,9 @@ export const useAnnotationStore = create<AnnotationState>()(
     }),
     {
       name: "jetlag-annotations",
+      storage: createJSONStorage(() => createSafeLocalStorage()),
       partialize: (state) => {
-        let sessionId: string | undefined;
-        try {
-          const raw = localStorage.getItem("jetlag-session");
-          sessionId = raw
-            ? (JSON.parse(raw) as { state?: { session?: { id?: string } } })
-                .state?.session?.id
-            : undefined;
-        } catch {
-          sessionId = undefined;
-        }
-
+        const sessionId = readSessionIdFromLocalStorage();
         const annotations =
           sessionId === undefined
             ? state.annotations
