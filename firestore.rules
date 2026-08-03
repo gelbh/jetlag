@@ -132,15 +132,23 @@ service cloud.firestore {
       return /databases/$(database)/documents/sessions/$(sessionId)/endGameTruth/anchors;
     }
 
-    // Direct start only when freeze anchors already exist (create anchors, then update session).
+    // Shared by Found-hider + end-game start — define before callers.
+    function isSessionActive() {
+      return resource.data.status != 'ended'
+        && !('endedAt' in resource.data);
+    }
+
+    // Cheap key discriminator first so Found/lastActive updates never pay for
+    // exists()+get() under the 1000-expression cap (same pattern as Found-hider).
     function isEndGameStartUpdate(sessionId) {
-      return (isSeekerOnSessionDoc() || isHostOnSessionDoc())
+      return 'endGameStartedAt' in request.resource.data
+        && request.resource.data.endGameStartedAt is string
         && isSessionActive()
+        && (isSeekerOnSessionDoc() || isHostOnSessionDoc())
         && (
           !('endGameStartedAt' in resource.data)
           || resource.data.endGameStartedAt == null
         )
-        && request.resource.data.endGameStartedAt is string
         && request.resource.data.endGameStartedByUid == request.auth.uid
         && exists(endGameTruthAnchorsDocPath(sessionId))
         && validSeekerEndGameTruthAnchorsMapForMembers(
@@ -173,7 +181,16 @@ service cloud.firestore {
         && request.resource.data.memberRoles == resource.data.memberRoles;
     }
 
-    // Prefer resource.data (no get()) so end-game paths stay under the 1000-expression budget.
+    // Prefer resource.data (no get()) so end-game / Found paths stay under the
+    // 1000-expression budget (no sessionData() on these hot updates).
+    function isHiderOnSessionDoc() {
+      return isSignedIn()
+        && resource.data.memberUids is list
+        && request.auth.uid in resource.data.memberUids
+        && resource.data.memberRoles is map
+        && resource.data.memberRoles[request.auth.uid] == 'hider';
+    }
+
     function isSeekerOnSessionDoc() {
       return isSignedIn()
         && resource.data.memberUids is list
@@ -213,14 +230,6 @@ service cloud.firestore {
         && !('endGameRequestedAt' in request.resource.data)
         && !('endGameRequestedByUid' in request.resource.data)
         && sessionIdentityUnchanged();
-    }
-
-    // Found-hider paths: cheap key discriminators first so unrelated updates
-    // (lastActiveAt / join / rules) do not burn the 1000-expression budget.
-    // Early allow-update placement keeps confirm/request under the cap.
-    function isSessionActive() {
-      return resource.data.status != 'ended'
-        && !('endedAt' in resource.data);
     }
 
     function isFoundHiderRequestUpdate() {
@@ -634,16 +643,15 @@ service cloud.firestore {
           || hasHostAccess()
         );
 
-      // High-frequency paths first (single-key discriminators) so they never
-      // pay for Found/end-game helper evaluation under the 1000-expression cap.
+      // High-frequency + Found key discriminators before End Game start (exists/get).
       allow update: if isTimerHostUpdate()
         || isLastActiveAtUpdate()
-        || isEndGameStartUpdate(sessionId)
-        || isEndGameHostClearUpdate()
         || isFoundHiderRequestUpdate()
         || isFoundHiderConfirmUpdate()
         || isFoundHiderDeclineUpdate()
         || isFoundHiderCancelUpdate()
+        || isEndGameStartUpdate(sessionId)
+        || isEndGameHostClearUpdate()
         || isSessionProgressResetUpdate()
         || isHostEndSessionUpdate()
         || validSessionRulesUpdate(sessionId)
