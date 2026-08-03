@@ -12,8 +12,8 @@ export interface MapBasemapDefinition {
   overlays?: readonly MapBasemapDefinition[];
 }
 
-const CARTO_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+const OPENFREEMAP_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · © OpenFreeMap';
 
 const ESRI_ATTRIBUTION =
   "Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community";
@@ -21,38 +21,42 @@ const ESRI_ATTRIBUTION =
 const ESRI_ATTRIBUTION_TEXT =
   "Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community";
 
+export const ESRI_WORLD_IMAGERY_TILE_URL =
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+
+export const ESRI_REFERENCE_OVERLAY_TILE_URL =
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}";
+
+/** OpenFreeMap style URLs (no API key). Light locked to liberty after Slice 1 smoke. */
+export const OPENFREEMAP_STYLE_URLS = {
+  light: "https://tiles.openfreemap.org/styles/liberty",
+  dark: "https://tiles.openfreemap.org/styles/dark",
+} as const;
+
 const STREET_BASEMAPS = {
   light: {
     id: "street-light",
     label: "Map",
-    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-    attribution: CARTO_ATTRIBUTION,
+    url: OPENFREEMAP_STYLE_URLS.light,
+    attribution: OPENFREEMAP_ATTRIBUTION,
     maxZoom: 20,
-    subdomains: "abcd",
   },
   dark: {
     id: "street-dark",
     label: "Map",
-    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    attribution: CARTO_ATTRIBUTION,
+    url: OPENFREEMAP_STYLE_URLS.dark,
+    attribution: OPENFREEMAP_ATTRIBUTION,
     maxZoom: 20,
-    subdomains: "abcd",
   },
 } as const satisfies Record<StreetBasemap, MapBasemapDefinition>;
 
 const SATELLITE_BASEMAP = {
   id: "satellite",
   label: "Satellite",
-  url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  url: ESRI_WORLD_IMAGERY_TILE_URL,
   attribution: ESRI_ATTRIBUTION,
   maxZoom: 19,
 } as const satisfies MapBasemapDefinition;
-
-/** @deprecated Prefer getMapBasemap(style, streetBasemap). Kept for call sites mid-migration. */
-export const MAP_BASEMAPS = {
-  standard: STREET_BASEMAPS.light,
-  satellite: SATELLITE_BASEMAP,
-} as const;
 
 export function getStreetBasemap(
   streetBasemap: StreetBasemap = "light",
@@ -89,15 +93,9 @@ export function getBasemapAttributionText(style: MapStyle): string {
 }
 
 const OPENFREEMAP_ATTRIBUTION_TEXT =
-  "Map data © OpenStreetMap contributors · © OpenFreeMap";
+  "Map data © OpenStreetMap contributors (openstreetmap.org/copyright) · © OpenFreeMap";
 
-/** OpenFreeMap style URLs (no API key). Light locked to liberty after Slice 1 smoke. */
-export const OPENFREEMAP_STYLE_URLS = {
-  light: "https://tiles.openfreemap.org/styles/liberty",
-  dark: "https://tiles.openfreemap.org/styles/dark",
-} as const;
-
-/** Inline MapLibre style for Esri World Imagery (raster-only). */
+/** Inline MapLibre style for Esri World Imagery + reference labels (raster-only). */
 export type MapLibreSatelliteStyle = {
   version: 8;
   sources: {
@@ -108,11 +106,17 @@ export type MapLibreSatelliteStyle = {
       attribution?: string;
       maxzoom?: number;
     };
+    "esri-reference": {
+      type: "raster";
+      tiles: string[];
+      tileSize?: number;
+      maxzoom?: number;
+    };
   };
   layers: Array<{
     id: string;
     type: "raster";
-    source: "esri";
+    source: "esri" | "esri-reference";
   }>;
 };
 
@@ -132,8 +136,21 @@ export function getMapLibreStyle(
           attribution: ESRI_ATTRIBUTION_TEXT,
           maxzoom: SATELLITE_BASEMAP.maxZoom,
         },
+        "esri-reference": {
+          type: "raster",
+          tiles: [ESRI_REFERENCE_OVERLAY_TILE_URL],
+          tileSize: 256,
+          maxzoom: SATELLITE_BASEMAP.maxZoom,
+        },
       },
-      layers: [{ id: "esri-world-imagery", type: "raster", source: "esri" }],
+      layers: [
+        { id: "esri-world-imagery", type: "raster", source: "esri" },
+        {
+          id: "esri-reference-labels",
+          type: "raster",
+          source: "esri-reference",
+        },
+      ],
     };
   }
   return OPENFREEMAP_STYLE_URLS[streetBasemap];

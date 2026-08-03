@@ -1,0 +1,14 @@
+/* Compact MapLibre attribution — HUD styling for on-map credits */
+.maplibregl-ctrl-attrib {
+  display: block !important;
+  margin: 0 0 calc(var(--safe-area-bottom) + 0.25rem)
+    max(0.5rem, env(safe-area-inset-left));
+  max-width: min(14rem, calc(100vw - 6rem));
+  border-radius: var(--radius-hud-lg);
+  background: oklch(from var(--color-surface-deep) l c h / 0.82);
+  color: var(--color-ink-secondary);
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--color-ink);
+}
