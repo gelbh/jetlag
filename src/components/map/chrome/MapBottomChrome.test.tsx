@@ -92,7 +92,13 @@ it("marks chrome inactive without leaving islands clickable via CSS class", () =
       />,
     );
     expect(container.querySelector(".jl-map-bottom-chrome-host--rail")).not.toBeNull();
-    expect(container.querySelector(".jl-map-chrome-bottom-band")).not.toBeNull();
-    expect(container.querySelector(".jl-map-chrome-side-stack")).not.toBeNull();
+    const bottom = container.querySelector(".jl-map-chrome-bottom-band");
+    const side = container.querySelector(".jl-map-chrome-side-stack");
+    expect(bottom).not.toBeNull();
+    expect(side).not.toBeNull();
+    expect(bottom?.querySelector('[data-island="history"]')).not.toBeNull();
+    expect(bottom?.querySelector('[data-island="session"]')).toBeNull();
+    expect(side?.querySelector('[data-island="session"]')).not.toBeNull();
+    expect(side?.querySelector('[data-island="history"]')).toBeNull();
   });
 });

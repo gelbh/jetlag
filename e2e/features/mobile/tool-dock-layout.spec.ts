@@ -75,10 +75,16 @@ test.describe("mobile tool dock", () => {
   });
 
   test("hunt island does not use horizontal scroll", async ({ page }) => {
-    const overflowX = await page
-      .locator('[data-island="hunt"]')
-      .evaluate((el) => getComputedStyle(el).overflowX);
+    const hunt = page.locator('[data-island="hunt"]');
+    const overflowX = await hunt.evaluate((el) => getComputedStyle(el).overflowX);
     expect(overflowX === "visible" || overflowX === "clip").toBe(true);
+    const geometry = await hunt.evaluate((el) => ({
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+    }));
+    expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 1);
+    const metrics = await readToolDockOverflowMetrics(page);
+    expect(metrics.overflowSlots).toBe(0);
   });
 
   test("dock fits without clipping question tools", async ({ page }) => {

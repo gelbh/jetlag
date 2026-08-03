@@ -36,8 +36,9 @@
   z-index: var(--z-dock);
   display: flex;
   right: calc(
-    max(0.75rem, env(safe-area-inset-right)) +
-      var(--map-zoom-btn-size, 2.75rem) + 0.5rem
+    max(0.75rem, env(safe-area-inset-right))
+      + var(--map-zoom-btn-size, 2.75rem)
+      + 0.5rem
   );
   pointer-events: auto;
 }
@@ -195,8 +196,9 @@
 
   .map-recenter-control {
     right: calc(
-      max(0.75rem, env(safe-area-inset-right)) + var(--map-zoom-btn-size) +
-        0.5rem
+      max(0.75rem, env(safe-area-inset-right))
+        + var(--map-zoom-btn-size)
+        + 0.5rem
     );
   }
 

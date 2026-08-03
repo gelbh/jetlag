@@ -54,8 +54,9 @@
     display: block;
     width: 100%;
     min-height: calc(
-      var(--dock-island-height) + var(--map-chrome-band-gap) +
-        env(safe-area-inset-bottom)
+      var(--dock-island-height)
+        + var(--map-chrome-band-gap)
+        + env(safe-area-inset-bottom)
     );
     padding: 0.375rem max(var(--map-chrome-edge-gap), env(safe-area-inset-right))
       max(0.375rem, env(safe-area-inset-bottom))
@@ -97,8 +98,10 @@
     right: max(var(--map-chrome-edge-gap), env(safe-area-inset-right));
     /* Sit above MapView zoom/recenter portal column (MapLibre context owns those). */
     bottom: calc(
-      var(--dock-island-height) + env(safe-area-inset-bottom) +
-        var(--map-chrome-band-gap) + var(--map-chrome-zoom-stack-height)
+      var(--dock-island-height)
+        + env(safe-area-inset-bottom)
+        + var(--map-chrome-band-gap)
+        + var(--map-chrome-zoom-stack-height)
     );
     display: flex;
     flex-direction: column;
@@ -111,9 +114,11 @@
   @media (max-width: 28rem) {
     .jl-map-chrome-side-stack {
       bottom: calc(
-        var(--dock-island-height) + env(safe-area-inset-bottom) +
-          var(--map-chrome-band-gap) + var(--map-chrome-zoom-stack-height) +
-          2.5rem
+        var(--dock-island-height)
+          + env(safe-area-inset-bottom)
+          + var(--map-chrome-band-gap)
+          + var(--map-chrome-zoom-stack-height)
+          + 2.5rem
       );
     }
   }
@@ -230,8 +235,9 @@
     position: absolute;
     right: max(var(--map-chrome-edge-gap), env(safe-area-inset-right));
     bottom: calc(
-      var(--dock-island-height) + env(safe-area-inset-bottom) +
-        var(--map-chrome-band-gap)
+      var(--dock-island-height)
+        + env(safe-area-inset-bottom)
+        + var(--map-chrome-band-gap)
     );
     z-index: calc(var(--z-panel) + 1);
     /* Host is pe-none; islands re-enable PE — overlays must too. */
