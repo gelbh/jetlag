@@ -54,6 +54,9 @@ describe("useVisualViewportBottomInset", () => {
 
   it("returns 0 when enabled is false", () => {
     mockVisualViewport({ height: 400, innerHeight: 800 });
+    const input = document.createElement("input");
+    document.body.appendChild(input);
+    input.focus();
     const { result } = renderHook(() => useVisualViewportBottomInset(false));
     expect(result.current).toBe(0);
   });
@@ -64,7 +67,7 @@ describe("useVisualViewportBottomInset", () => {
     expect(result.current).toBe(0);
   });
 
-  it("applies inset when an input is focused", () => {
+  it("applies inset when a text input is focused", () => {
     mockVisualViewport({ height: 400, innerHeight: 800 });
     const input = document.createElement("input");
     document.body.appendChild(input);
@@ -72,6 +75,46 @@ describe("useVisualViewportBottomInset", () => {
 
     const { result } = renderHook(() => useVisualViewportBottomInset(true));
     expect(result.current).toBe(400);
+  });
+
+  it("applies inset for textarea and contenteditable", () => {
+    mockVisualViewport({ height: 400, innerHeight: 800 });
+    const textarea = document.createElement("textarea");
+    document.body.appendChild(textarea);
+    textarea.focus();
+    const { result, rerender } = renderHook(() =>
+      useVisualViewportBottomInset(true),
+    );
+    expect(result.current).toBe(400);
+
+    const editable = document.createElement("div");
+    editable.contentEditable = "true";
+    document.body.appendChild(editable);
+    act(() => {
+      editable.focus();
+      window.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+    });
+    rerender();
+    expect(result.current).toBe(400);
+  });
+
+  it("does not lift for checkbox, button, or select focus", () => {
+    const viewport = mockVisualViewport({ height: 400, innerHeight: 800 });
+    const { result } = renderHook(() => useVisualViewportBottomInset(true));
+
+    for (const el of [
+      Object.assign(document.createElement("input"), { type: "checkbox" }),
+      Object.assign(document.createElement("input"), { type: "button" }),
+      document.createElement("select"),
+    ]) {
+      document.body.appendChild(el);
+      act(() => {
+        el.focus();
+        window.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+        viewport.dispatch("resize");
+      });
+      expect(result.current).toBe(0);
+    }
   });
 
   it("returns 0 for sub-threshold raw inset even when focused", () => {
@@ -84,7 +127,7 @@ describe("useVisualViewportBottomInset", () => {
     expect(result.current).toBe(0);
   });
 
-  it("clears inset on blur and recomputes on visibilitychange", () => {
+  it("clears inset after blur via focusin to body and resize", () => {
     const viewport = mockVisualViewport({ height: 400, innerHeight: 800 });
     const input = document.createElement("input");
     document.body.appendChild(input);
@@ -95,12 +138,23 @@ describe("useVisualViewportBottomInset", () => {
 
     act(() => {
       input.blur();
-      document.dispatchEvent(new Event("visibilitychange"));
+      document.body.focus?.();
+      window.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+      viewport.dispatch("resize");
     });
     expect(result.current).toBe(0);
+  });
+
+  it("recomputes on pageshow after resume with focused input", () => {
+    const viewport = mockVisualViewport({ height: 400, innerHeight: 800 });
+    const input = document.createElement("input");
+    document.body.appendChild(input);
+    input.focus();
+
+    const { result } = renderHook(() => useVisualViewportBottomInset(true));
+    expect(result.current).toBe(400);
 
     act(() => {
-      input.focus();
       viewport.height = 350;
       window.dispatchEvent(new Event("pageshow"));
     });

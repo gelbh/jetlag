@@ -3,20 +3,24 @@ import { useEffect, useState } from "react";
 /** Ignore small visual-viewport offsets (iOS home indicator); treat as keyboard. */
 const KEYBOARD_INSET_THRESHOLD_PX = 100;
 
-const NON_TEXT_INPUT_TYPES = new Set([
-  "button",
-  "checkbox",
-  "radio",
-  "submit",
-  "reset",
-  "file",
-  "image",
-  "range",
-  "color",
-  "hidden",
+/**
+ * Input types that typically open a soft keyboard.
+ * Deliberately narrower than shortcut “typing target” checks (which also
+ * treat `select` / any `input` as blocking hotkeys) — select pickers must
+ * not lift map chrome.
+ */
+const SOFT_KEYBOARD_INPUT_TYPES = new Set([
+  "",
+  "text",
+  "search",
+  "email",
+  "tel",
+  "url",
+  "password",
+  "number",
 ]);
 
-function isTextEditable(target: EventTarget | null): boolean {
+function isSoftKeyboardEditable(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) {
     return false;
   }
@@ -26,11 +30,8 @@ function isTextEditable(target: EventTarget | null): boolean {
   if (target instanceof HTMLTextAreaElement) {
     return true;
   }
-  if (target instanceof HTMLSelectElement) {
-    return true;
-  }
   if (target instanceof HTMLInputElement) {
-    return !NON_TEXT_INPUT_TYPES.has(target.type);
+    return SOFT_KEYBOARD_INPUT_TYPES.has(target.type);
   }
   return false;
 }
@@ -43,7 +44,7 @@ function readBottomInset(viewport: VisualViewport): number {
   if (rawBottom < KEYBOARD_INSET_THRESHOLD_PX) {
     return 0;
   }
-  if (!isTextEditable(document.activeElement)) {
+  if (!isSoftKeyboardEditable(document.activeElement)) {
     return 0;
   }
   return rawBottom;
@@ -54,6 +55,7 @@ export function useVisualViewportBottomInset(enabled: boolean): number {
 
   useEffect(() => {
     if (!enabled) {
+      setInset(0);
       return;
     }
 
@@ -69,8 +71,11 @@ export function useVisualViewportBottomInset(enabled: boolean): number {
     update();
     viewport.addEventListener("resize", update);
     viewport.addEventListener("scroll", update);
+    // focusin is enough: blur moves focus to body, then resize/scroll or
+    // resume listeners re-read activeElement (avoid focusout timing races).
     window.addEventListener("focusin", update);
-    window.addEventListener("focusout", update);
+    // iOS Safari often reports a stale large inset after background→foreground
+    // until these fire; without them the dock can sit mid-screen.
     window.addEventListener("pageshow", update);
     document.addEventListener("visibilitychange", update);
 
@@ -78,7 +83,6 @@ export function useVisualViewportBottomInset(enabled: boolean): number {
       viewport.removeEventListener("resize", update);
       viewport.removeEventListener("scroll", update);
       window.removeEventListener("focusin", update);
-      window.removeEventListener("focusout", update);
       window.removeEventListener("pageshow", update);
       document.removeEventListener("visibilitychange", update);
     };
