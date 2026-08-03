@@ -1,13 +1,15 @@
 import turfCircle from "@turf/circle";
 import type { Feature, LineString } from "geojson";
+import { useMemo } from "react";
 import { GameAreaMask } from "./GameAreaMask";
 import type { GameArea } from "../../../domain/map/annotations";
 import type { FramingMode } from "../../../hooks/session/useGameAreaFraming";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
-import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
+import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
+import type { CircleMarkerProps } from "../helpers/mapMarkerFeatures";
 
 interface FramingPreviewLayersProps {
   gameArea: GameArea | null;
@@ -28,6 +30,33 @@ export function FramingPreviewLayers({
   circleRadiusMeters,
   polygonVertices,
 }: FramingPreviewLayersProps) {
+  const circleMarker = useMemo((): CircleMarkerProps[] => {
+    if (!circleCenter) {
+      return [];
+    }
+    return [
+      {
+        id: "framing-circle-center",
+        lat: circleCenter[0],
+        lng: circleCenter[1],
+        radiusPx: 8,
+        fillColor: MAP_ANNOTATION_COLORS.playArea,
+        borderColor: MAP_ANNOTATION_COLORS.strokeLight,
+      },
+    ];
+  }, [circleCenter]);
+
+  const vertexMarkers = useMemo((): CircleMarkerProps[] => {
+    return polygonVertices.map(([lat, lng], index) => ({
+      id: `framing-vertex-${index}`,
+      lat,
+      lng,
+      radiusPx: 6,
+      fillColor: MAP_ANNOTATION_COLORS.playArea,
+      borderColor: MAP_ANNOTATION_COLORS.strokeLight,
+    }));
+  }, [polygonVertices]);
+
   return (
     <>
       {gameArea ? <GameAreaMask gameArea={gameArea} framing /> : null}
@@ -51,12 +80,9 @@ export function FramingPreviewLayers({
               dashArray: cssPxDashToMapLibre(CIRCLE_DASH, PREVIEW_STROKE),
             }}
           />
-          <MapLibreDotMarker
-            latitude={circleCenter[0]}
-            longitude={circleCenter[1]}
-            radiusPx={8}
-            fillColor={MAP_ANNOTATION_COLORS.playArea}
-            borderColor={MAP_ANNOTATION_COLORS.strokeLight}
+          <MapLibrePointMarkers
+            id="framing-circle-center"
+            markers={circleMarker}
           />
         </>
       ) : null}
@@ -79,16 +105,10 @@ export function FramingPreviewLayers({
               dashArray: cssPxDashToMapLibre(POLYGON_DASH, PREVIEW_STROKE),
             }}
           />
-          {polygonVertices.map(([lat, lng], index) => (
-            <MapLibreDotMarker
-              key={`framing-vertex-${index}`}
-              latitude={lat}
-              longitude={lng}
-              radiusPx={6}
-              fillColor={MAP_ANNOTATION_COLORS.playArea}
-              borderColor={MAP_ANNOTATION_COLORS.strokeLight}
-            />
-          ))}
+          <MapLibrePointMarkers
+            id="framing-polygon-vertices"
+            markers={vertexMarkers}
+          />
         </>
       ) : null}
     </>

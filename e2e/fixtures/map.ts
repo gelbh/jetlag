@@ -64,11 +64,9 @@ async function countPersistedActiveAnnotations(page: Page): Promise<number> {
   });
 }
 
-/** DOM markers (pins) plus persisted active annotations (canvas overlays). */
+/** Persisted active annotations (GL pins no longer use DOM markers). */
 export async function countMapAnnotations(page: Page): Promise<number> {
-  const markers = await page.locator(".maplibregl-marker").count();
-  const stored = await countPersistedActiveAnnotations(page);
-  return Math.max(markers, stored);
+  return countPersistedActiveAnnotations(page);
 }
 
 /** Committed, answered questions shade the map via the combined elimination mask. */

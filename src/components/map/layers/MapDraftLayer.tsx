@@ -1,16 +1,22 @@
-import { memo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import turfCircle from "@turf/circle";
 import type { Feature, LineString } from "geojson";
-import { Popup as MapLibrePopup } from "react-map-gl/maplibre";
 import type { MapDraftOverlay } from "../../../domain/map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { featureHitId } from "../helpers/mapFeatureHitTest";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
-import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
+import { MapLibreFeaturePopup } from "../helpers/MapLibreFeaturePopup";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
+import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
+import type { CircleMarkerProps } from "../helpers/mapMarkerFeatures";
+import { jlMarkerLayerId } from "../helpers/mapMarkerConstants";
+import { useMapFeatureHitTest } from "../helpers/MapFeatureHitTestContext";
 
 interface MapDraftLayerProps {
   overlays: readonly MapDraftOverlay[];
 }
+
+const DRAFT_HIT_PREFIX = jlMarkerLayerId("draft");
 
 function draftPolylineFeature(
   positions: readonly [number, number][],
@@ -35,6 +41,48 @@ export const MapDraftLayer = memo(function MapDraftLayer({
       overlay.kind === "marker" &&
       overlay.id === openPopupId &&
       Boolean(overlay.popup),
+  );
+
+  const markerOverlays = useMemo(
+    () =>
+      overlays.filter(
+        (overlay): overlay is Extract<MapDraftOverlay, { kind: "marker" }> =>
+          overlay.kind === "marker",
+      ),
+    [overlays],
+  );
+
+  const draftMarkers = useMemo((): CircleMarkerProps[] => {
+    return markerOverlays.map((overlay) => {
+      const [lat, lng] = overlay.point;
+      return {
+        id: overlay.id,
+        lat,
+        lng,
+        radiusPx: overlay.style?.markerRadius ?? 8,
+        fillColor: overlay.style?.fillColor ?? c.pin,
+        borderColor: overlay.style?.color ?? c.strokeLight,
+        borderWidth: overlay.style?.weight ?? 2,
+        hitId: overlay.id,
+        hitKind: overlay.popup ? "draft-marker" : "draft-marker-no-popup",
+      };
+    });
+  }, [c.pin, c.strokeLight, markerOverlays]);
+
+  useMapFeatureHitTest(
+    DRAFT_HIT_PREFIX,
+    useCallback((result) => {
+      const hitId = featureHitId(result.feature);
+      if (!hitId) {
+        return false;
+      }
+      const overlay = markerOverlays.find((item) => item.id === hitId);
+      if (!overlay?.popup) {
+        return false;
+      }
+      setOpenPopupId((current) => (current === hitId ? null : hitId));
+      return true;
+    }, [markerOverlays]),
   );
 
   return (
@@ -64,32 +112,8 @@ export const MapDraftLayer = memo(function MapDraftLayer({
               />
             );
           }
-          case "marker": {
-            const [lat, lng] = overlay.point;
-            return (
-              <MapLibreDotMarker
-                key={overlay.id}
-                latitude={lat}
-                longitude={lng}
-                radiusPx={overlay.style?.markerRadius ?? 8}
-                fillColor={overlay.style?.fillColor ?? c.pin}
-                borderColor={overlay.style?.color ?? c.strokeLight}
-                borderWidth={overlay.style?.weight ?? 2}
-                className={
-                  overlay.style?.pulsing ? "draft-seeker-pulse" : undefined
-                }
-                onClick={
-                  overlay.popup
-                    ? () => {
-                        setOpenPopupId((current) =>
-                          current === overlay.id ? null : overlay.id,
-                        );
-                      }
-                    : undefined
-                }
-              />
-            );
-          }
+          case "marker":
+            return null;
           case "circle": {
             const [lat, lng] = overlay.center;
             const width = overlay.style?.weight ?? 2;
@@ -143,15 +167,20 @@ export const MapDraftLayer = memo(function MapDraftLayer({
           }
         }
       })}
+      <MapLibrePointMarkers
+        id="draft"
+        interactive
+        markers={draftMarkers}
+      />
       {openMarker ? (
-        <MapLibrePopup
+        <MapLibreFeaturePopup
           latitude={openMarker.point[0]}
           longitude={openMarker.point[1]}
           anchor="bottom"
           onClose={() => setOpenPopupId(null)}
         >
           {openMarker.popup}
-        </MapLibrePopup>
+        </MapLibreFeaturePopup>
       ) : null}
     </>
   );

@@ -22,10 +22,51 @@ export interface MapLibreLinePaint {
   dashArray?: number[];
 }
 
+export type MapLibreCircleRadius = number | ExpressionSpecification;
+
+export interface MapLibreCirclePaint {
+  radius: MapLibreCircleRadius;
+  color: string | ExpressionSpecification;
+  strokeColor?: string | ExpressionSpecification;
+  strokeWidth?: number | ExpressionSpecification;
+  opacity?: number | ExpressionSpecification;
+}
+
+export interface MapLibreSymbolSpec {
+  layout?: {
+    iconImage?: string | ExpressionSpecification;
+    iconRotate?: number | ExpressionSpecification;
+    iconSize?: number | ExpressionSpecification;
+    iconAllowOverlap?: boolean;
+    textField?: string | ExpressionSpecification;
+    textSize?: number | ExpressionSpecification;
+    textOffset?: ExpressionSpecification;
+    textAnchor?:
+      | "center"
+      | "left"
+      | "right"
+      | "top"
+      | "bottom"
+      | "top-left"
+      | "top-right"
+      | "bottom-left"
+      | "bottom-right";
+    textAllowOverlap?: boolean;
+  };
+  paint?: {
+    iconOpacity?: number | ExpressionSpecification;
+    textColor?: string | ExpressionSpecification;
+    textHaloColor?: string | ExpressionSpecification;
+    textHaloWidth?: number | ExpressionSpecification;
+  };
+}
+
 export interface MapLibreGeoJsonLayerSpec {
   id: string;
   fill?: MapLibreFillPaint | null;
   line?: MapLibreLinePaint | null;
+  circle?: MapLibreCirclePaint | null;
+  symbol?: MapLibreSymbolSpec | null;
 }
 
 function asFeatureCollection(
@@ -88,6 +129,78 @@ function paintLayersForSpec(
       />,
     );
   }
+  if (spec.circle) {
+    layers.push(
+      <Layer
+        key={`${spec.id}-circle`}
+        id={`${spec.id}-circle`}
+        type="circle"
+        beforeId={beforeId}
+        paint={{
+          "circle-radius": spec.circle.radius,
+          "circle-color": spec.circle.color,
+          ...(spec.circle.strokeColor
+            ? { "circle-stroke-color": spec.circle.strokeColor }
+            : {}),
+          ...(spec.circle.strokeWidth != null
+            ? { "circle-stroke-width": spec.circle.strokeWidth }
+            : {}),
+          ...(spec.circle.opacity != null
+            ? { "circle-opacity": spec.circle.opacity }
+            : {}),
+        }}
+      />,
+    );
+  }
+  if (spec.symbol) {
+    layers.push(
+      <Layer
+        key={`${spec.id}-symbol`}
+        id={`${spec.id}-symbol`}
+        type="symbol"
+        beforeId={beforeId}
+        layout={{
+          "icon-allow-overlap": spec.symbol.layout?.iconAllowOverlap ?? true,
+          "text-allow-overlap": spec.symbol.layout?.textAllowOverlap ?? true,
+          ...(spec.symbol.layout?.iconImage
+            ? { "icon-image": spec.symbol.layout.iconImage }
+            : {}),
+          ...(spec.symbol.layout?.iconRotate != null
+            ? { "icon-rotate": spec.symbol.layout.iconRotate }
+            : {}),
+          ...(spec.symbol.layout?.iconSize != null
+            ? { "icon-size": spec.symbol.layout.iconSize }
+            : {}),
+          ...(spec.symbol.layout?.textField
+            ? { "text-field": spec.symbol.layout.textField }
+            : {}),
+          ...(spec.symbol.layout?.textSize != null
+            ? { "text-size": spec.symbol.layout.textSize }
+            : {}),
+          ...(spec.symbol.layout?.textOffset
+            ? { "text-offset": spec.symbol.layout.textOffset }
+            : {}),
+          ...(spec.symbol.layout?.textAnchor
+            ? { "text-anchor": spec.symbol.layout.textAnchor }
+            : {}),
+        }}
+        paint={{
+          ...(spec.symbol.paint?.iconOpacity != null
+            ? { "icon-opacity": spec.symbol.paint.iconOpacity }
+            : {}),
+          ...(spec.symbol.paint?.textColor
+            ? { "text-color": spec.symbol.paint.textColor }
+            : {}),
+          ...(spec.symbol.paint?.textHaloColor
+            ? { "text-halo-color": spec.symbol.paint.textHaloColor }
+            : {}),
+          ...(spec.symbol.paint?.textHaloWidth != null
+            ? { "text-halo-width": spec.symbol.paint.textHaloWidth }
+            : {}),
+        }}
+      />,
+    );
+  }
   return layers;
 }
 
@@ -97,6 +210,8 @@ export function MapLibreGeoJsonOverlay({
   data,
   fill,
   line,
+  circle,
+  symbol,
   layers,
   beforeId,
 }: {
@@ -104,7 +219,9 @@ export function MapLibreGeoJsonOverlay({
   data: Feature | FeatureCollection | Geometry | null | undefined;
   fill?: MapLibreFillPaint | null;
   line?: MapLibreLinePaint | null;
-  /** Multiple fill/line pairs on one Source (same geometry). */
+  circle?: MapLibreCirclePaint | null;
+  symbol?: MapLibreSymbolSpec | null;
+  /** Multiple fill/line/circle/symbol pairs on one Source (same geometry). */
   layers?: readonly MapLibreGeoJsonLayerSpec[];
   beforeId?: string;
 }) {
@@ -117,11 +234,11 @@ export function MapLibreGeoJsonOverlay({
     if (layers && layers.length > 0) {
       return [...layers];
     }
-    if (fill || line) {
-      return [{ id, fill, line }];
+    if (fill || line || circle || symbol) {
+      return [{ id, fill, line, circle, symbol }];
     }
     return [];
-  }, [layers, fill, line, id]);
+  }, [layers, fill, line, circle, symbol, id]);
 
   if (
     !collection ||

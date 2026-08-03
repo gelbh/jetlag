@@ -1,9 +1,11 @@
-import { useState } from "react";
-import { Popup as MapLibrePopup } from "react-map-gl/maplibre";
+import { useCallback, useState } from "react";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
-import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
+import { MapLibreFeaturePopup } from "../helpers/MapLibreFeaturePopup";
+import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
+import { useMapFeatureHitTarget } from "../helpers/MapFeatureHitTestContext";
 
 interface PinAnnotationMarkerProps {
+  annotationId: string;
   lat: number;
   lng: number;
   color: string;
@@ -12,7 +14,10 @@ interface PinAnnotationMarkerProps {
   onSelect: () => void;
 }
 
+const PIN_LAYER_SUFFIX = "pin";
+
 export function PinAnnotationMarker({
+  annotationId,
   lat,
   lng,
   color,
@@ -22,32 +27,46 @@ export function PinAnnotationMarker({
 }: PinAnnotationMarkerProps) {
   const [popupOpen, setPopupOpen] = useState(false);
 
+  useMapFeatureHitTarget(
+    annotationId,
+    useCallback(() => {
+      if (!selectionEnabled) {
+        return false;
+      }
+      onSelect();
+      setPopupOpen(true);
+      return true;
+    }, [onSelect, selectionEnabled]),
+    selectionEnabled,
+  );
+
   return (
     <>
-      <MapLibreDotMarker
-        latitude={lat}
-        longitude={lng}
-        radiusPx={8}
-        fillColor={color}
-        borderColor={MAP_ANNOTATION_COLORS.strokeLight}
-        onClick={
-          selectionEnabled
-            ? () => {
-                onSelect();
-                setPopupOpen(true);
-              }
-            : undefined
-        }
+      <MapLibrePointMarkers
+        id={`${PIN_LAYER_SUFFIX}-${annotationId}`}
+        interactive={selectionEnabled}
+        markers={[
+          {
+            id: annotationId,
+            lat,
+            lng,
+            radiusPx: 8,
+            fillColor: color,
+            borderColor: MAP_ANNOTATION_COLORS.strokeLight,
+            hitId: annotationId,
+            hitKind: "pin",
+          },
+        ]}
       />
       {popupOpen ? (
-        <MapLibrePopup
+        <MapLibreFeaturePopup
           latitude={lat}
           longitude={lng}
           anchor="bottom"
           onClose={() => setPopupOpen(false)}
         >
           {label}
-        </MapLibrePopup>
+        </MapLibreFeaturePopup>
       ) : null}
     </>
   );

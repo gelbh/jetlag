@@ -15,8 +15,9 @@ import {
   type GeometryEditModel,
 } from "../helpers/buildGeometryEditModel";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
-import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
+import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
+import type { CircleMarkerProps } from "../helpers/mapMarkerFeatures";
 
 interface GeometryEditLayerProps {
   annotation: AnnotationRecord;
@@ -32,6 +33,21 @@ function editCircleFeature(
     steps: 64,
     units: "kilometers",
   }) as Feature<GeoPolygon>;
+}
+
+function editCenterMarker(
+  id: string,
+  center: LatLngTuple,
+  fillColor: string,
+): CircleMarkerProps {
+  return {
+    id,
+    lat: center[0],
+    lng: center[1],
+    radiusPx: 8,
+    fillColor,
+    borderColor: MAP_ANNOTATION_COLORS.strokeLight,
+  };
 }
 
 function MapLibreEditCircleWithMarker({
@@ -65,18 +81,72 @@ function MapLibreEditCircleWithMarker({
           dashArray: cssPxDashToMapLibre(dashArray, weight),
         }}
       />
-      <MapLibreDotMarker
-        latitude={center[0]}
-        longitude={center[1]}
-        radiusPx={8}
-        fillColor={markerFillColor}
-        borderColor={MAP_ANNOTATION_COLORS.strokeLight}
+      <MapLibrePointMarkers
+        id={`${id}-center`}
+        markers={[editCenterMarker(`${id}-center`, center, markerFillColor)]}
       />
     </>
   );
 }
 
-function renderGeometryEditMapLibre(model: GeometryEditModel) {
+function geometryEditMarkers(model: GeometryEditModel): CircleMarkerProps[] {
+  switch (model.kind) {
+    case "radar":
+    case "tentacle":
+      return [];
+    case "pin":
+      return [
+        {
+          id: "geometry-edit-pin",
+          lat: model.latitude,
+          lng: model.longitude,
+          radiusPx: 8,
+          fillColor: model.color,
+          borderColor: MAP_ANNOTATION_COLORS.strokeLight,
+        },
+      ];
+    case "thermometer":
+      return [
+        {
+          id: "geometry-edit-thermo-a",
+          lat: model.pointA[0],
+          lng: model.pointA[1],
+          radiusPx: 7,
+          fillColor: model.colorA,
+          borderColor: MAP_ANNOTATION_COLORS.strokeLight,
+        },
+        {
+          id: "geometry-edit-thermo-b",
+          lat: model.pointB[0],
+          lng: model.pointB[1],
+          radiusPx: 7,
+          fillColor: model.colorB,
+          borderColor: MAP_ANNOTATION_COLORS.strokeLight,
+        },
+      ];
+    case "zone":
+      return model.ringLatLng.slice(0, -1).map(([lat, lng], index) => ({
+        id: `geometry-edit-zone-${index}`,
+        lat,
+        lng,
+        radiusPx: 6,
+        fillColor: model.color,
+        borderColor: model.color,
+      }));
+    case "empty":
+      return [];
+    default: {
+      const _exhaustive: never = model;
+      void _exhaustive;
+      return [];
+    }
+  }
+}
+
+function renderGeometryEditMapLibre(
+  model: GeometryEditModel,
+  markers: CircleMarkerProps[],
+) {
   switch (model.kind) {
     case "radar":
       return (
@@ -135,41 +205,21 @@ function renderGeometryEditMapLibre(model: GeometryEditModel) {
         </>
       );
     case "pin":
-      return (
-        <MapLibreDotMarker
-          latitude={model.latitude}
-          longitude={model.longitude}
-          radiusPx={8}
-          fillColor={model.color}
-          borderColor={MAP_ANNOTATION_COLORS.strokeLight}
-        />
-      );
     case "thermometer":
       return (
         <>
-          <MapLibreGeoJsonOverlay
-            id="geometry-edit-thermo-line"
-            data={model.lineFeature}
-            line={{
-              color: model.axisColor,
-              width: 4,
-              dashArray: cssPxDashToMapLibre("6 6", 4),
-            }}
-          />
-          <MapLibreDotMarker
-            latitude={model.pointA[0]}
-            longitude={model.pointA[1]}
-            radiusPx={7}
-            fillColor={model.colorA}
-            borderColor={MAP_ANNOTATION_COLORS.strokeLight}
-          />
-          <MapLibreDotMarker
-            latitude={model.pointB[0]}
-            longitude={model.pointB[1]}
-            radiusPx={7}
-            fillColor={model.colorB}
-            borderColor={MAP_ANNOTATION_COLORS.strokeLight}
-          />
+          {model.kind === "thermometer" ? (
+            <MapLibreGeoJsonOverlay
+              id="geometry-edit-thermo-line"
+              data={model.lineFeature}
+              line={{
+                color: model.axisColor,
+                width: 4,
+                dashArray: cssPxDashToMapLibre("6 6", 4),
+              }}
+            />
+          ) : null}
+          <MapLibrePointMarkers id="geometry-edit-handles" markers={markers} />
         </>
       );
     case "zone":
@@ -188,16 +238,7 @@ function renderGeometryEditMapLibre(model: GeometryEditModel) {
               dashArray: cssPxDashToMapLibre("6 6", 2),
             }}
           />
-          {model.ringLatLng.slice(0, -1).map(([lat, lng], index) => (
-            <MapLibreDotMarker
-              key={`zone-edit-${index}`}
-              latitude={lat}
-              longitude={lng}
-              radiusPx={6}
-              fillColor={model.color}
-              borderColor={model.color}
-            />
-          ))}
+          <MapLibrePointMarkers id="geometry-edit-handles" markers={markers} />
         </>
       );
     case "empty":
@@ -220,5 +261,7 @@ export const GeometryEditLayer = memo(function GeometryEditLayer({
     [annotation, draftGeometry, gameArea],
   );
 
-  return renderGeometryEditMapLibre(model);
+  const markers = useMemo(() => geometryEditMarkers(model), [model]);
+
+  return renderGeometryEditMapLibre(model, markers);
 });

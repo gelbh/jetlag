@@ -1,15 +1,15 @@
 import turfCircle from "@turf/circle";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { SessionRecord } from "../../../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { resolveHiderTruthReference } from "../../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
-import { hiderTruthReferenceMapTooltip } from "../../tools/shared/questionTruthReferenceHint";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
-import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
+import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
+import type { CircleMarkerProps } from "../helpers/mapMarkerFeatures";
 
 interface HidingZonesLayerProps {
   zones: readonly HidingZoneRecord[];
@@ -61,6 +61,37 @@ export function HidingZonesLayer({
     ? zones.filter((zone) => memberSet.has(zone.hiderUid))
     : zones;
 
+  const referenceMarkers = useMemo((): CircleMarkerProps[] => {
+    const markers: CircleMarkerProps[] = [];
+    for (const zone of visibleZones) {
+      const center: LatLngTuple = [zone.center.lat, zone.center.lng];
+      const truthReference = resolveHiderTruthReference({
+        hiderUid: zone.hiderUid,
+        zoneCenter: center,
+        session,
+      });
+      const referencePoint = truthReference.point;
+      const showReferencePin =
+        zone.status === "confirmed" &&
+        referencePoint != null &&
+        truthReference.mode !== "unavailable";
+
+      if (showReferencePin) {
+        markers.push({
+          id: `hiding-truth-${zone.hiderUid}`,
+          lat: referencePoint[0],
+          lng: referencePoint[1],
+          radiusPx: 7,
+          borderColor: MAP_ANNOTATION_COLORS.strokeLight,
+          fillColor: MAP_ANNOTATION_COLORS.highlight,
+          hitKind: "hiding-truth",
+          hitId: zone.hiderUid,
+        });
+      }
+    }
+    return markers;
+  }, [session, visibleZones]);
+
   return (
     <>
       {visibleZones.map((zone) => {
@@ -81,17 +112,6 @@ export function HidingZonesLayer({
               units: "kilometers",
             });
 
-        const truthReference = resolveHiderTruthReference({
-          hiderUid: zone.hiderUid,
-          zoneCenter: center,
-          session,
-        });
-        const referencePoint = truthReference.point;
-        const showReferencePin =
-          zone.status === "confirmed" &&
-          referencePoint != null &&
-          truthReference.mode !== "unavailable";
-
         return (
           <Fragment key={zone.hiderUid}>
             <MapLibreGeoJsonOverlay
@@ -104,19 +124,15 @@ export function HidingZonesLayer({
                 dashArray: cssPxDashToMapLibre(dashArray, weight),
               }}
             />
-            {showReferencePin ? (
-              <MapLibreDotMarker
-                latitude={referencePoint[0]}
-                longitude={referencePoint[1]}
-                radiusPx={7}
-                borderColor={MAP_ANNOTATION_COLORS.strokeLight}
-                fillColor={MAP_ANNOTATION_COLORS.highlight}
-                title={hiderTruthReferenceMapTooltip(truthReference.mode)}
-              />
-            ) : null}
           </Fragment>
         );
       })}
+      {referenceMarkers.length > 0 ? (
+        <MapLibrePointMarkers
+          id="hiding-truth-pins"
+          markers={referenceMarkers}
+        />
+      ) : null}
     </>
   );
 }
