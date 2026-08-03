@@ -46,7 +46,7 @@ describe("shouldApplyMapFocus", () => {
     ).toBe(true);
   });
 
-  it("skips once-mode when token unchanged after fit (bounds identity churn)", () => {
+  it("skips once-mode when hasFitted and recenterToken unchanged", () => {
     expect(
       shouldApplyMapFocus({
         fitBoundsMode: "once",
