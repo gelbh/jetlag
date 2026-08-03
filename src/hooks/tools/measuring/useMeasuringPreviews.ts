@@ -1,6 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { GameArea } from "../../../domain/map/annotations";
+import { assertMeasuringGeometryBudget } from "../../../domain/geometry/measuring/measuringGeometryBudgets";
 import {
   buildMeasuringBoundaryPreview,
   buildMeasuringEliminationPreview,
@@ -25,6 +26,7 @@ export function useMeasuringPreviews(
     usesAllPlacesInArea,
     measuringSeaLevelEdgeCase,
     coastlineContextVersion,
+    setMeasuringError,
   } = draft;
 
   const resolvedCoastSegments = useMemo(() => {
@@ -91,7 +93,25 @@ export function useMeasuringPreviews(
     const generation = generationRef.current + 1;
     generationRef.current = generation;
 
+    const budget = assertMeasuringGeometryBudget({
+      measuringSubject: previewRegionInput.measuringSubject,
+      measuringLocationCategory: previewRegionInput.measuringLocationCategory,
+      usesAllPlacesInArea: previewRegionInput.usesAllPlacesInArea,
+      placeCount: previewRegionInput.measuringPlaces.length,
+      linearSegments: previewRegionInput.measuringCoastSegments,
+    });
+
     void (async () => {
+      if (!budget.ok) {
+        if (generation === generationRef.current) {
+          // Budget gate triggered: clear previews and set error message
+          setMeasuringNearRegion(null);
+          setMeasuringEliminationPreview(null);
+          setMeasuringError(budget.message);
+        }
+        return;
+      }
+
       let near: Feature<GeoPolygon | MultiPolygon> | null;
       try {
         near = await buildMeasuringBoundaryPreview(previewRegionInput);
@@ -123,7 +143,7 @@ export function useMeasuringPreviews(
         }
       }
     })();
-  }, [previewRegionInput]);
+  }, [previewRegionInput, setMeasuringError]);
 
   const measuringBoundaryPreview = useMemo(() => {
     if (
