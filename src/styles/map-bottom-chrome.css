@@ -26,7 +26,7 @@
 
 @media (max-height: 430px) and (orientation: landscape) {
   :root {
-    --map-chrome-zoom-stack-height: 7rem;
+    --map-chrome-zoom-stack-height: 6.25rem;
   }
 }
 
