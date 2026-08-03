@@ -234,6 +234,7 @@
   .jl-map-island--hunt-sparse .jl-tool-slot-label {
     overflow: visible;
     text-overflow: clip;
+  }
 
   .jl-map-island--session {
     color: var(--color-ink-secondary);
