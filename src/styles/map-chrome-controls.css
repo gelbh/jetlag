@@ -26,7 +26,7 @@
   z-index: var(--z-dock);
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: var(--map-zoom-stack-gap, 0.375rem);
   right: max(0.75rem, env(safe-area-inset-right));
   pointer-events: auto;
 }
@@ -35,15 +35,19 @@
   position: absolute;
   z-index: var(--z-dock);
   display: flex;
-  right: calc(max(0.75rem, env(safe-area-inset-right)) + 2.75rem + 0.5rem);
+  right: calc(
+    max(0.75rem, env(safe-area-inset-right))
+      + var(--map-zoom-btn-size, 2.75rem)
+      + 0.5rem
+  );
   pointer-events: auto;
 }
 
 .map-recenter-control__btn {
-  height: 2.75rem;
-  width: 2.75rem;
-  min-height: 2.75rem;
-  min-width: 2.75rem;
+  height: var(--map-zoom-btn-size, 2.75rem);
+  width: var(--map-zoom-btn-size, 2.75rem);
+  min-height: var(--map-zoom-btn-size, 2.75rem);
+  min-width: var(--map-zoom-btn-size, 2.75rem);
   box-shadow: none;
 }
 
@@ -116,10 +120,10 @@
 }
 
 .map-zoom-control__btn {
-  height: 2.75rem;
-  width: 2.75rem;
-  min-height: 2.75rem;
-  min-width: 2.75rem;
+  height: var(--map-zoom-btn-size, 2.75rem);
+  width: var(--map-zoom-btn-size, 2.75rem);
+  min-height: var(--map-zoom-btn-size, 2.75rem);
+  min-width: var(--map-zoom-btn-size, 2.75rem);
 }
 
 .map-zoom-control--dock,
@@ -168,6 +172,10 @@
 }
 
 @media (min-width: 40rem) {
+  :root {
+    --map-zoom-btn-size: 3rem;
+  }
+
   .map-style-control__btn {
     height: 3rem;
     width: 3rem;
@@ -180,21 +188,25 @@
   }
 
   .map-zoom-control__btn {
-    height: 3rem;
-    width: 3rem;
-    min-height: 3rem;
-    min-width: 3rem;
+    height: var(--map-zoom-btn-size);
+    width: var(--map-zoom-btn-size);
+    min-height: var(--map-zoom-btn-size);
+    min-width: var(--map-zoom-btn-size);
   }
 
   .map-recenter-control {
-    right: calc(max(0.75rem, env(safe-area-inset-right)) + 3rem + 0.5rem);
+    right: calc(
+      max(0.75rem, env(safe-area-inset-right))
+        + var(--map-zoom-btn-size)
+        + 0.5rem
+    );
   }
 
   .map-recenter-control__btn {
-    height: 3rem;
-    width: 3rem;
-    min-height: 3rem;
-    min-width: 3rem;
+    height: var(--map-zoom-btn-size);
+    width: var(--map-zoom-btn-size);
+    min-height: var(--map-zoom-btn-size);
+    min-width: var(--map-zoom-btn-size);
   }
 }
 
