@@ -250,10 +250,16 @@ service cloud.firestore {
     // Found-hider paths: cheap key discriminators first so unrelated updates
     // (lastActiveAt / join / rules) do not burn the 1000-expression budget.
     // Early allow-update placement keeps confirm/request under the cap.
+    function isSessionActive() {
+      return resource.data.status != 'ended'
+        && !('endedAt' in resource.data);
+    }
+
     function isFoundHiderRequestUpdate() {
       return 'foundRequestedAt' in request.resource.data
         && request.resource.data.foundRequestedAt is string
         && !('foundConfirmedAt' in request.resource.data)
+        && isSessionActive()
         && (
           !('foundRequestedAt' in resource.data)
           || resource.data.foundRequestedAt == null
@@ -273,6 +279,7 @@ service cloud.firestore {
       return 'foundConfirmedAt' in request.resource.data
         && request.resource.data.foundConfirmedAt is string
         && resource.data.foundRequestedAt is string
+        && isSessionActive()
         && (
           !('foundConfirmedAt' in resource.data)
           || resource.data.foundConfirmedAt == null
@@ -307,6 +314,7 @@ service cloud.firestore {
       return resource.data.foundRequestedAt is string
         && !('foundRequestedAt' in request.resource.data)
         && !('foundRequestedByUid' in request.resource.data)
+        && isSessionActive()
         && (
           !('foundConfirmedAt' in resource.data)
           || resource.data.foundConfirmedAt == null
@@ -322,6 +330,7 @@ service cloud.firestore {
         && resource.data.foundRequestedByUid == request.auth.uid
         && !('foundRequestedAt' in request.resource.data)
         && !('foundRequestedByUid' in request.resource.data)
+        && isSessionActive()
         && (
           !('foundConfirmedAt' in resource.data)
           || resource.data.foundConfirmedAt == null
@@ -337,8 +346,7 @@ service cloud.firestore {
         && isSignedIn()
         && resource.data.memberUids is list
         && request.auth.uid in resource.data.memberUids
-        && resource.data.status != 'ended'
-        && !('endedAt' in resource.data)
+        && isSessionActive()
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['lastActiveAt'])
         && lastActiveAtWithinGrace(request.resource.data.lastActiveAt)

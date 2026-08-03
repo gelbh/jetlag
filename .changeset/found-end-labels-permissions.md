@@ -2,4 +2,4 @@
 "jetlag": patch
 ---
 
-Found hider: hider Accept and seeker declare-found no longer fail with a permissions error; failed writes show an alert instead of an uncaught error.
+Found hider: declaring the hider found and confirming or declining that request no longer fail with a permissions error; failed writes show an alert instead of crashing silently.

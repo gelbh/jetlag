@@ -1724,6 +1724,87 @@ describe("firestore.rules", () => {
     );
   });
 
+  it("denies a non-requesting seeker from cancelling a found request", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1", "seeker-2"],
+          memberRoles: {
+            "host-1": "seeker",
+            "hider-1": "hider",
+            "seeker-2": "seeker",
+          },
+          foundRequestedAt: "2026-01-01T01:00:00.000Z",
+          foundRequestedByUid: "host-1",
+        }),
+      );
+
+    const otherSeeker = testEnv.authenticatedContext("seeker-2");
+    await assertFails(
+      otherSeeker.firestore().collection("sessions").doc("session-1").update({
+        foundRequestedAt: deleteField(),
+        foundRequestedByUid: deleteField(),
+      }),
+    );
+  });
+
+  it("denies a seeker from confirming found hider", async () => {
+    const host = testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+          foundRequestedAt: "2026-01-01T01:00:00.000Z",
+          foundRequestedByUid: "host-1",
+        }),
+      );
+
+    const seeker = testEnv.authenticatedContext("host-1");
+    await assertFails(
+      seeker.firestore().collection("sessions").doc("session-1").update({
+        foundConfirmedAt: "2026-01-01T01:05:00.000Z",
+        foundConfirmedByUid: "host-1",
+        gameOutcome: "found",
+        foundRequestedAt: deleteField(),
+        foundRequestedByUid: deleteField(),
+        endGameStartedAt: deleteField(),
+        endGameStartedByUid: deleteField(),
+        endGameTruthAnchors: deleteField(),
+        endGameRequestedAt: deleteField(),
+        endGameRequestedByUid: deleteField(),
+      }),
+    );
+  });
+
+  it("denies found request after the session has ended", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context.firestore().collection("sessions").doc("session-1").set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+          status: "ended",
+          endedAt: "2026-01-01T02:00:00.000Z",
+        }),
+      );
+    });
+
+    const seeker = testEnv.authenticatedContext("host-1");
+    await assertFails(
+      seeker.firestore().collection("sessions").doc("session-1").update({
+        foundRequestedAt: "2026-01-01T02:05:00.000Z",
+        foundRequestedByUid: "host-1",
+      }),
+    );
+  });
+
   it("rejects invalid annotation types", async () => {
     const host = testEnv.authenticatedContext("host-1");
     await host
