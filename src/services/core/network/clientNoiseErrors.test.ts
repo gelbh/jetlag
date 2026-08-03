@@ -119,7 +119,7 @@ describe("isBrowserExtensionNoiseMessage", () => {
 });
 
 describe("isAppCheckSoftFailureMessage", () => {
-  it("matches probe timeout, initial-throttle, throttled, and reCAPTCHA Timeout", () => {
+  it("matches probe timeout, initial-throttle, throttled, fetch-network, and reCAPTCHA Timeout", () => {
     expect(isAppCheckSoftFailureMessage("App Check probe timed out")).toBe(true);
     expect(
       isAppCheckSoftFailureMessage(
@@ -129,6 +129,11 @@ describe("isAppCheckSoftFailureMessage", () => {
     expect(
       isAppCheckSoftFailureMessage(
         "AppCheck: Requests throttled due to previous 403 error. Attempts allowed again after 20h:49m:23s (appCheck/throttled).",
+      ),
+    ).toBe(true);
+    expect(
+      isAppCheckSoftFailureMessage(
+        "FirebaseError: AppCheck: Fetch failed to connect to a network. Check Internet connection. Original error: Load failed (content-firebaseappcheck.googleapis.com). (appCheck/fetch-network-error).",
       ),
     ).toBe(true);
     expect(isAppCheckSoftFailureMessage("reCAPTCHA Timeout (b)")).toBe(true);
@@ -166,6 +171,12 @@ describe("classifyAppCheckProbeFailure", () => {
     ).toEqual({ soft: true, reason: "error", allowApp: true });
     expect(
       classifyAppCheckProbeFailure({ message: "reCAPTCHA Timeout (b)" }),
+    ).toEqual({ soft: true, reason: "error", allowApp: true });
+    expect(
+      classifyAppCheckProbeFailure({
+        message:
+          "FirebaseError: AppCheck: Fetch failed to connect to a network. Check Internet connection. Original error: Load failed (content-firebaseappcheck.googleapis.com). (appCheck/fetch-network-error).",
+      }),
     ).toEqual({ soft: true, reason: "error", allowApp: true });
     expect(
       classifyAppCheckProbeFailure({ message: "Failed to fetch" }),

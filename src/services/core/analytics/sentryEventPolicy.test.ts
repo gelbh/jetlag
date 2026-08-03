@@ -35,7 +35,7 @@ describe("classifyClientSentryEvent", () => {
     ).toBe("drop");
   });
 
-  it("drops soft App Check throttle and probe timeout", () => {
+  it("drops soft App Check throttle, probe timeout, and fetch-network-error", () => {
     expect(
       classifyClientSentryEvent(
         exc(
@@ -54,6 +54,14 @@ describe("classifyClientSentryEvent", () => {
     ).toBe("drop");
     expect(
       classifyClientSentryEvent(exc("Error", "App Check probe timed out")),
+    ).toBe("drop");
+    expect(
+      classifyClientSentryEvent(
+        exc(
+          "FirebaseError",
+          "AppCheck: Fetch failed to connect to a network. Check Internet connection. Original error: Load failed (content-firebaseappcheck.googleapis.com). (appCheck/fetch-network-error).",
+        ),
+      ),
     ).toBe("drop");
   });
 
