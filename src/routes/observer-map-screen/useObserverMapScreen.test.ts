@@ -58,6 +58,8 @@ vi.mock("../../hooks/map/useMapOverlayState", () => ({
     isSettingsOpen: false,
     openSettings: vi.fn(),
     closeSettings: vi.fn(),
+    isCodesOpen: false,
+    openCodes: vi.fn(),
   }),
 }));
 

@@ -419,7 +419,7 @@ export function useMapScreenController() {
     ],
   );
 
-  const { handleOpenChat, handleOpenSettings, handleOpenLog } =
+  const { handleOpenChat, handleOpenSettings, handleOpenLog, handleOpenCodes } =
     useMapOverlayActions({
       overlay,
       resetToolDrafts,
@@ -555,6 +555,7 @@ export function useMapScreenController() {
     handleOpenChat,
     handleOpenSettings,
     handleOpenLog,
+    handleOpenCodes,
     handleUndoLastAnnotation,
     handleRedoLastAnnotation,
     handleResetEndGame: sessionActions.handleResetEndGame,

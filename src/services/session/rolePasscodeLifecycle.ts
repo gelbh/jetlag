@@ -1,4 +1,6 @@
 import { httpsCallable } from "firebase/functions";
+import { APP_VERSION } from "../../domain/device/changelog";
+import type { JoinRequestRole } from "../../domain/session/players/joinRequest";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
 
@@ -17,6 +19,13 @@ export type RolePasscodeActionResult = {
   role: "seeker" | "hider" | "observer";
   rolePasscode: string;
 };
+
+export type RequestRoleJoinResult = {
+  requestId: string;
+  expiresAt: string;
+};
+
+export type ResolveRoleJoinDecision = "accept" | "decline";
 
 export async function joinSessionWithRole(input: {
   code: string;
@@ -102,6 +111,64 @@ export async function regenerateRolePasscode(
   return result.data;
 }
 
+export async function requestRoleJoin(
+  sessionId: string,
+  role: JoinRequestRole,
+): Promise<RequestRoleJoinResult> {
+  if (!isFirebaseConfigured()) {
+    throw new Error("Firebase is not configured.");
+  }
+
+  const functions = await getFirebaseFunctions();
+  const callable = httpsCallable<
+    { sessionId: string; role: JoinRequestRole; clientVersion: string },
+    RequestRoleJoinResult
+  >(functions, "requestRoleJoin");
+  const result = await callable({
+    sessionId,
+    role,
+    clientVersion: APP_VERSION,
+  });
+  return result.data;
+}
+
+export async function cancelRoleJoinRequest(
+  sessionId: string,
+  requestId: string,
+): Promise<void> {
+  if (!isFirebaseConfigured()) {
+    throw new Error("Firebase is not configured.");
+  }
+
+  const functions = await getFirebaseFunctions();
+  const callable = httpsCallable<
+    { sessionId: string; requestId: string },
+    { ok: boolean }
+  >(functions, "cancelRoleJoinRequest");
+  await callable({ sessionId, requestId });
+}
+
+export async function resolveRoleJoinRequest(
+  sessionId: string,
+  requestId: string,
+  decision: ResolveRoleJoinDecision,
+): Promise<void> {
+  if (!isFirebaseConfigured()) {
+    throw new Error("Firebase is not configured.");
+  }
+
+  const functions = await getFirebaseFunctions();
+  const callable = httpsCallable<
+    {
+      sessionId: string;
+      requestId: string;
+      decision: ResolveRoleJoinDecision;
+    },
+    { ok: boolean }
+  >(functions, "resolveRoleJoinRequest");
+  await callable({ sessionId, requestId, decision });
+}
+
 export function mapRolePasscodeJoinError(error: unknown): string {
   if (!(error instanceof Error)) {
     return "Couldn't join the session.";
@@ -119,4 +186,26 @@ export function mapRolePasscodeJoinError(error: unknown): string {
   }
 
   return message || "Couldn't join the session.";
+}
+
+export function mapJoinRequestError(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return "Couldn't send join request.";
+  }
+
+  const message = error.message;
+  if (message.includes("this side is empty")) {
+    return "This side is empty — join without a role code instead.";
+  }
+  if (message.includes("Session already ended")) {
+    return "That session has ended. Ask the host for a new code.";
+  }
+  if (message.includes("Session not found")) {
+    return "No session found for that code.";
+  }
+  if (message.includes("legacy join")) {
+    return "This session doesn't support join requests.";
+  }
+
+  return message || "Couldn't send join request.";
 }

@@ -1,15 +1,22 @@
 import { useCallback, useMemo, useState } from "react";
 
-export type MapSheetOverlay = "none" | "chat" | "settings" | "log";
+export type MapSheetOverlay =
+  | "none"
+  | "chat"
+  | "settings"
+  | "log"
+  | "codes";
 
 export interface UseMapOverlayStateResult {
   sheet: MapSheetOverlay;
   isChatOpen: boolean;
   isSettingsOpen: boolean;
   isLogOpen: boolean;
+  isCodesOpen: boolean;
   openChat: () => void;
   openSettings: () => void;
   openLog: () => void;
+  openCodes: () => void;
   openSheet: (sheet: MapSheetOverlay) => void;
   closeSheet: () => void;
 }
@@ -29,6 +36,10 @@ export function useMapOverlayState(): UseMapOverlayStateResult {
     setSheet("log");
   }, []);
 
+  const openCodes = useCallback(() => {
+    setSheet("codes");
+  }, []);
+
   const openSheet = useCallback((next: MapSheetOverlay) => {
     setSheet(next);
   }, []);
@@ -43,12 +54,22 @@ export function useMapOverlayState(): UseMapOverlayStateResult {
       isChatOpen: sheet === "chat",
       isSettingsOpen: sheet === "settings",
       isLogOpen: sheet === "log",
+      isCodesOpen: sheet === "codes",
       openChat,
       openSettings,
       openLog,
+      openCodes,
       openSheet,
       closeSheet,
     }),
-    [sheet, openChat, openSettings, openLog, openSheet, closeSheet],
+    [
+      sheet,
+      openChat,
+      openSettings,
+      openLog,
+      openCodes,
+      openSheet,
+      closeSheet,
+    ],
   );
 }

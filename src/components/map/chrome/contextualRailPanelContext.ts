@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-export type ContextualRailTab = "settings" | "chat" | "log";
+export type ContextualRailTab = "settings" | "chat" | "log" | "codes";
 
 export interface ContextualRailPanelContextValue {
   panelEl: HTMLElement | null;

@@ -196,6 +196,7 @@ function SeekerMapScreenBody({
         handleSelectTool={controller.handleSelectTool}
         handleOpenChat={controller.handleOpenChat}
         handleOpenSettings={controller.handleOpenSettings}
+        handleOpenCodes={controller.handleOpenCodes}
         handleOpenLog={controller.handleOpenLog}
         handleUndoLastAnnotation={controller.handleUndoLastAnnotation}
         handleRedoLastAnnotation={controller.handleRedoLastAnnotation}

@@ -5,6 +5,7 @@ import {
   HudGuideIcon,
   HudLeaderboardIcon,
   HudSettingsIcon,
+  HudStarIcon,
 } from "../../ui/brand/HudIcons";
 
 export interface SessionIslandSlotsProps {
@@ -12,6 +13,7 @@ export interface SessionIslandSlotsProps {
   onOpenLog?: () => void;
   onOpenReportProblem?: () => void;
   onOpenSettings?: () => void;
+  onOpenCodes?: () => void;
   hasUnreadChat?: boolean;
   unreadCount?: number;
   inactive?: boolean;
@@ -26,6 +28,7 @@ export function SessionIslandSlots({
   onOpenLog,
   onOpenReportProblem,
   onOpenSettings,
+  onOpenCodes,
   hasUnreadChat = false,
   unreadCount = 0,
   inactive = false,
@@ -81,6 +84,21 @@ export function SessionIslandSlots({
             <HudGuideIcon className="h-5 w-5 shrink-0" />
           </span>
           <span className="jl-tool-slot-label">Report</span>
+        </MotionPressable>
+      ) : null}
+
+      {onOpenCodes ? (
+        <MotionPressable
+          type="button"
+          disabled={inactive}
+          onClick={onOpenCodes}
+          className="jl-tool-slot"
+          aria-label="Open role codes"
+        >
+          <span className="jl-tool-slot-icon">
+            <HudStarIcon className="h-5 w-5 shrink-0" />
+          </span>
+          <span className="jl-tool-slot-label">Codes</span>
         </MotionPressable>
       ) : null}
 

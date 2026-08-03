@@ -7,6 +7,7 @@ interface UseMapOverlayActionsOptions {
     openChat: () => void;
     openSettings: () => void;
     openLog: () => void;
+    openCodes: () => void;
     openSheet: (sheet: MapSheetOverlay) => void;
   };
   resetToolDrafts: () => void;
@@ -49,11 +50,16 @@ export function useMapOverlayActions({
     [openOverlay],
   );
   const handleOpenLog = useCallback(() => openOverlay("log"), [openOverlay]);
+  const handleOpenCodes = useCallback(
+    () => openOverlay("codes"),
+    [openOverlay],
+  );
 
   return {
     openOverlay,
     handleOpenChat,
     handleOpenSettings,
     handleOpenLog,
+    handleOpenCodes,
   };
 }

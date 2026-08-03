@@ -12,6 +12,7 @@ const TAB_META: Record<ContextualRailTab, { label: string; short: string }> = {
   settings: { label: "Settings", short: "Settings" },
   chat: { label: "Chat", short: "Chat" },
   log: { label: "Log", short: "Log" },
+  codes: { label: "Codes", short: "Codes" },
 };
 
 export interface ContextualRailProps {

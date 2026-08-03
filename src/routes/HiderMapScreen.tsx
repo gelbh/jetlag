@@ -558,6 +558,15 @@ export function HiderMapScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- moveMode gates sheet openers during Play Move
   }, [overlay.openSettings, zoneTool.closeWizard, zoneTool.moveMode]);
 
+  const openCodesExclusive = useCallback(() => {
+    if (zoneTool.moveMode) {
+      return;
+    }
+    zoneTool.closeWizard();
+    overlay.openCodes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- moveMode gates sheet openers during Play Move
+  }, [overlay.openCodes, zoneTool.closeWizard, zoneTool.moveMode]);
+
   const handleMapPanStart = useCallback(() => {
     if (zoneTool.wizardOpen) {
       setWizardPeeked(true);
@@ -612,6 +621,7 @@ export function HiderMapScreen() {
     overlay.isChatOpen ||
     overlay.isSettingsOpen ||
     overlay.isLogOpen ||
+    overlay.isCodesOpen ||
     timeTrapSheetOpen;
 
   const mapLayers = (
@@ -797,6 +807,7 @@ export function HiderMapScreen() {
         onOpenWizard={openWizardExclusive}
         onOpenChat={openChatExclusive}
         onOpenSettings={openSettingsExclusive}
+        onOpenCodes={openCodesExclusive}
         onRecenter={() => setRecenterToken((value) => value + 1)}
         expansionPackEnabled={expansionPackEnabled}
         expansionMenuOpen={expansionMenuOpen}

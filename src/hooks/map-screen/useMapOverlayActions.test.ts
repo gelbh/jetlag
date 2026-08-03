@@ -8,6 +8,7 @@ describe("useMapOverlayActions", () => {
       openChat: vi.fn(),
       openSettings: vi.fn(),
       openLog: vi.fn(),
+      openCodes: vi.fn(),
       openSheet: vi.fn(),
     };
     const resetToolDrafts = vi.fn();

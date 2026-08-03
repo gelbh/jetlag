@@ -45,6 +45,23 @@ import {
   REPAIR_SESSION_NOT_FOUND,
   repairGhostHostHandler,
 } from "../session/repairGhostHost.mjs";
+import {
+  JOIN_REQ_EXPIRED,
+  JOIN_REQ_INVALID_DECISION,
+  JOIN_REQ_INVALID_ROLE,
+  JOIN_REQ_NOT_AUTHORIZED,
+  JOIN_REQ_NOT_FOUND,
+  JOIN_REQ_NOT_GATED,
+  JOIN_REQ_NOT_PENDING,
+  JOIN_REQ_NOT_REQUESTER,
+  JOIN_REQ_SESSION_ENDED,
+  JOIN_REQ_SESSION_NOT_FOUND,
+  JOIN_REQ_SIDE_EMPTY,
+  cancelRoleJoinRequestHandler,
+  requestRoleJoinHandler,
+  resolveRoleJoinRequestHandler,
+} from "../session/joinRequest.mjs";
+import { getAuth } from "firebase-admin/auth";
 
 const sentryDsnSecret = getSentryDsnSecret();
 
@@ -138,6 +155,46 @@ function mapRevealError(error) {
   }
   if (error.message === REVEAL_NOT_AUTHORIZED) {
     throw new HttpsError("permission-denied", "Not allowed to view that role code.");
+  }
+  throw error;
+}
+
+function mapJoinRequestError(error) {
+  if (!(error instanceof Error)) {
+    throw error;
+  }
+  if (error.message === JOIN_REQ_SESSION_NOT_FOUND) {
+    throw new HttpsError("not-found", "Session not found.");
+  }
+  if (error.message === JOIN_REQ_NOT_FOUND) {
+    throw new HttpsError("not-found", "Join request not found.");
+  }
+  if (error.message === JOIN_REQ_SESSION_ENDED) {
+    throw new HttpsError("failed-precondition", "Session already ended.");
+  }
+  if (error.message === JOIN_REQ_NOT_GATED) {
+    throw new HttpsError("failed-precondition", "Session uses legacy join.");
+  }
+  if (error.message === JOIN_REQ_SIDE_EMPTY) {
+    throw new HttpsError(
+      "failed-precondition",
+      "Join without a request — this side is empty.",
+    );
+  }
+  if (error.message === JOIN_REQ_INVALID_ROLE || error.message === JOIN_REQ_INVALID_DECISION) {
+    throw new HttpsError("invalid-argument", "Invalid join request.");
+  }
+  if (
+    error.message === JOIN_REQ_NOT_AUTHORIZED ||
+    error.message === JOIN_REQ_NOT_REQUESTER
+  ) {
+    throw new HttpsError("permission-denied", "Not allowed for this join request.");
+  }
+  if (error.message === JOIN_REQ_NOT_PENDING) {
+    throw new HttpsError("failed-precondition", "Join request is not pending.");
+  }
+  if (error.message === JOIN_REQ_EXPIRED) {
+    throw new HttpsError("failed-precondition", "Join request expired.");
   }
   throw error;
 }
@@ -306,6 +363,62 @@ export const repairGhostHost = onCall(
         throw new HttpsError("failed-precondition", "Session already ended.");
       }
       throw error;
+    }
+  }),
+);
+
+export const requestRoleJoin = onCall(
+  { secrets: [sentryDsnSecret], enforceAppCheck: true },
+  withSentryEventHandler(async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+
+    const db = getFirestore();
+
+    try {
+      return await requestRoleJoinHandler(
+        db,
+        request.auth,
+        getAuth(),
+        request.data,
+      );
+    } catch (error) {
+      mapJoinRequestError(error);
+    }
+  }),
+);
+
+export const cancelRoleJoinRequest = onCall(
+  { secrets: [sentryDsnSecret], enforceAppCheck: true },
+  withSentryEventHandler(async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+
+    const db = getFirestore();
+
+    try {
+      return await cancelRoleJoinRequestHandler(db, request.auth, request.data);
+    } catch (error) {
+      mapJoinRequestError(error);
+    }
+  }),
+);
+
+export const resolveRoleJoinRequest = onCall(
+  { secrets: [sentryDsnSecret], enforceAppCheck: true },
+  withSentryEventHandler(async (request) => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "Sign in required.");
+    }
+
+    const db = getFirestore();
+
+    try {
+      return await resolveRoleJoinRequestHandler(db, request.auth, request.data);
+    } catch (error) {
+      mapJoinRequestError(error);
     }
   }),
 );

@@ -28,6 +28,7 @@ export {
 } from "./handlers/triggers.mjs";
 
 export {
+  cancelRoleJoinRequest,
   endSession,
   initSessionRoleGates,
   joinSessionWithRole,
@@ -35,7 +36,9 @@ export {
   leaveSessionMembership,
   regenerateRolePasscode,
   repairGhostHost,
+  requestRoleJoin,
   resetSessionForRematch,
+  resolveRoleJoinRequest,
   revealRolePasscode,
 } from "./handlers/session.mjs";
 

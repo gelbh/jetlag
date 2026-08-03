@@ -34,6 +34,7 @@ interface ToolDockProps {
   onUndo: () => void;
   onRedo: () => void;
   onOpenSettings: () => void;
+  onOpenCodes?: () => void;
   onOpenReportProblem: () => void;
   onOpenChat?: () => void;
   onOpenLog?: () => void;
@@ -62,6 +63,7 @@ export function ToolDock({
   onUndo,
   onRedo,
   onOpenSettings,
+  onOpenCodes,
   onOpenReportProblem,
   onOpenChat,
   onOpenLog,
@@ -170,6 +172,7 @@ export function ToolDock({
           onOpenLog={onOpenLog}
           onOpenReportProblem={onOpenReportProblem}
           onOpenSettings={onOpenSettings}
+          onOpenCodes={onOpenCodes}
           hasUnreadChat={hasUnreadChat}
           unreadCount={unreadCount}
           inactive={inactive}
