@@ -63,7 +63,22 @@ test.describe("mobile tool dock", () => {
     await expect(page.locator('[data-island="history"]')).toHaveCount(1);
     await expect(page.locator('[data-island="hunt"]')).toHaveCount(1);
     await expect(page.locator('[data-island="session"]')).toHaveCount(1);
+    await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
+    await expect(page.locator(".jl-map-chrome-side-stack")).toHaveCount(1);
+    await expect(
+      page.locator(".jl-map-chrome-bottom-band [data-island='session']"),
+    ).toHaveCount(0);
+    await expect(
+      page.locator(".jl-map-chrome-side-stack [data-island='session']"),
+    ).toHaveCount(1);
     await expect(page.locator(".jl-tool-dock-bar--secondary")).toHaveCount(0);
+  });
+
+  test("hunt island does not use horizontal scroll", async ({ page }) => {
+    const overflowX = await page
+      .locator('[data-island="hunt"]')
+      .evaluate((el) => getComputedStyle(el).overflowX);
+    expect(overflowX === "visible" || overflowX === "clip").toBe(true);
   });
 
   test("dock fits without clipping question tools", async ({ page }) => {
