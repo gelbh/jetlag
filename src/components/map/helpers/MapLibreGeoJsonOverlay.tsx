@@ -12,9 +12,11 @@ export interface MapLibreFillPaint {
   fillOutlineColor?: string;
 }
 
+export type MapLibreLineWidth = number | readonly unknown[];
+
 export interface MapLibreLinePaint {
   color: string;
-  width?: number;
+  width?: MapLibreLineWidth;
   opacity?: number;
   dashArray?: number[];
 }

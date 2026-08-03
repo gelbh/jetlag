@@ -80,7 +80,7 @@ describe("MapSettingsSheet", () => {
     renderWithRouter(<MapSettingsSheet {...baseProps} />);
 
     expect(
-      screen.getByText(/OpenStreetMap contributors · © OpenFreeMap/),
+      screen.getByText(/OpenStreetMap contributors \(openstreetmap\.org\/copyright\)/),
     ).toBeInTheDocument();
 
     renderWithRouter(

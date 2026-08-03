@@ -25,12 +25,32 @@ const ADMIN_LEVEL_STROKE_OPACITY: Record<number, number> = {
 /** Reference zoom for admin stroke base weights (matches useZoomAdaptiveWeight). */
 const ADMIN_STROKE_REF_ZOOM = 12;
 
+const ADMIN_LINE_WIDTH_ZOOM_STOPS = [4, 8, 10, 12, 14, 16, 18, 20] as const;
+
+export type MapLibreLineWidthExpression = readonly [
+  "interpolate",
+  ["linear"],
+  ["zoom"],
+  ...number[],
+];
+
 function highContrastSurface(
   mapStyle: MapStyle,
   streetBasemap: StreetBasemap,
 ): boolean {
   const surface = getBasemapSurface(mapStyle, streetBasemap);
   return surface === "satellite" || surface === "dark";
+}
+
+export function getAdminBoundaryLineWidthExpression(
+  adminLevel: number,
+): MapLibreLineWidthExpression {
+  const baseWeight = ADMIN_LEVEL_STROKE_WEIGHT[adminLevel] ?? 1;
+  const stops = ADMIN_LINE_WIDTH_ZOOM_STOPS.flatMap((zoom) => [
+    zoom,
+    quantizeWeight(computeZoomAdaptiveWeight(baseWeight, zoom)),
+  ] as const);
+  return ["interpolate", ["linear"], ["zoom"], ...stops];
 }
 
 export function getAdminBoundaryStrokeStyle(
