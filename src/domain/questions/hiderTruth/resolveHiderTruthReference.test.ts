@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import {
   isAskOriginInsideHidingZone,
   resolveHiderTruthReference,
+  resolvePendingQuestionTruthReference,
 } from "./resolveHiderTruthReference";
 
 const zoneCenter: [number, number] = [51.45, -0.15];
@@ -137,5 +139,41 @@ describe("isAskOriginInsideHidingZone", () => {
     expect(
       isAskOriginInsideHidingZone(outsideAsk, zoneCenter, zoneRadiusMeters),
     ).toBe(false);
+  });
+});
+
+describe("resolvePendingQuestionTruthReference", () => {
+  function pendingAt(origin: [number, number]): PendingQuestionRecord {
+    return {
+      id: "q-1",
+      status: "pending",
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "Point",
+            coordinates: [origin[1], origin[0]],
+          },
+        }),
+      },
+    } as PendingQuestionRecord;
+  }
+
+  it("uses hiding place for in-zone asks and zone center outside", () => {
+    const context = {
+      hiderUid: "hider-1",
+      zoneCenter,
+      hidingPlace: liveGps,
+      zoneRadiusMeters,
+      session: null,
+    };
+
+    expect(
+      resolvePendingQuestionTruthReference(pendingAt(insideAsk), context),
+    ).toEqual({ point: liveGps, mode: "hidingPlace" });
+    expect(
+      resolvePendingQuestionTruthReference(pendingAt(outsideAsk), context),
+    ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
   });
 });

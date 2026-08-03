@@ -1,9 +1,14 @@
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import { haversineMeters } from "../../geometry/gameArea/distance";
 import {
+  parseGeometryJson,
+  pointFromGeometryFeature,
+} from "../../geometry/gameArea/geometryParsing";
+import {
   isEndGameActive,
   type SessionRecord,
 } from "../../map/annotations";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 
 export type { EndGameTruthAnchor } from "../../session/hiding/endGameTruthAnchors";
 
@@ -63,6 +68,30 @@ export function isAskOriginInsideHidingZone(
   }
 
   return haversineMeters(askOrigin, zoneCenter) <= zoneRadiusMeters;
+}
+
+export function askOriginFromPendingQuestion(
+  question: PendingQuestionRecord,
+): LatLngTuple | null {
+  // Photo pending questions use geometryJson "{}" — parse must return null, not throw.
+  const feature = parseGeometryJson(question.placement.geometryJson);
+  return feature ? pointFromGeometryFeature(feature) : null;
+}
+
+export type HiderQuestionTruthContextInput = Omit<
+  ResolveHiderTruthReferenceInput,
+  "askOrigin" | "originInsideZone"
+>;
+
+/** Per-question truth reference (in-zone → hiding place; map pin stays zone/freeze). */
+export function resolvePendingQuestionTruthReference(
+  question: PendingQuestionRecord,
+  context: HiderQuestionTruthContextInput,
+): HiderTruthReference {
+  return resolveHiderTruthReference({
+    ...context,
+    askOrigin: askOriginFromPendingQuestion(question),
+  });
 }
 
 export function resolveHiderTruthReference({

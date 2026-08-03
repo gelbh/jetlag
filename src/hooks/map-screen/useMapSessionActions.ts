@@ -95,6 +95,13 @@ export function useMapSessionActions({
       return;
     }
 
+    if (confirmedHidingZones.length > 4) {
+      window.alert(
+        "Could not start End Game — at most four confirmed hiding zones can freeze anchors.",
+      );
+      return;
+    }
+
     const frozenAt = new Date().toISOString();
     const anchorsResult = assembleEndGameStartAnchors({
       hiderUids: confirmedHidingZones.map((zone) => zone.hiderUid),

@@ -1,18 +1,48 @@
 import type { Feature, LineString, Point } from "geojson";
 import type { LatLngTuple } from "../core/types";
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function isPointCoordinates(value: unknown): value is [number, number] {
+  return (
+    Array.isArray(value) &&
+    value.length >= 2 &&
+    isFiniteNumber(value[0]) &&
+    isFiniteNumber(value[1])
+  );
+}
+
+function isLineStringCoordinates(value: unknown): value is [number, number][] {
+  return (
+    Array.isArray(value) &&
+    value.length >= 1 &&
+    value.every((position) => isPointCoordinates(position))
+  );
+}
+
 function isGeometryFeature(
   value: unknown,
 ): value is Feature<Point | LineString> {
   if (!value || typeof value !== "object") {
     return false;
   }
-  const geometry = (value as Feature).geometry;
-  return (
-    !!geometry &&
-    typeof geometry === "object" &&
-    typeof geometry.type === "string"
-  );
+  const feature = value as Feature;
+  if (feature.type !== "Feature") {
+    return false;
+  }
+  const geometry = feature.geometry;
+  if (!geometry || typeof geometry !== "object") {
+    return false;
+  }
+  if (geometry.type === "Point") {
+    return isPointCoordinates(geometry.coordinates);
+  }
+  if (geometry.type === "LineString") {
+    return isLineStringCoordinates(geometry.coordinates);
+  }
+  return false;
 }
 
 export function parseGeometryJson(

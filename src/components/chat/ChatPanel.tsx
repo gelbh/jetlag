@@ -25,7 +25,7 @@ interface ChatPanelProps {
   bottomClassName?: string;
   questionTruths?: ReadonlyMap<string, HiderTruthResult>;
   truthsLoading?: boolean;
-  truthReferenceMode?: HiderTruthReferenceMode;
+  truthReferenceModes?: ReadonlyMap<string, HiderTruthReferenceMode>;
   answerError?: string | null;
   onAnswerQuestion: (
     pendingQuestionId: string,
@@ -54,7 +54,7 @@ export function ChatPanel({
   bottomClassName = "jl-panel-above-dock",
   questionTruths,
   truthsLoading = false,
-  truthReferenceMode,
+  truthReferenceModes,
   answerError = null,
   onAnswerQuestion,
   onDismissExpiredQuestion,
@@ -81,7 +81,7 @@ export function ChatPanel({
       isHider={isHider}
       questionTruths={questionTruths}
       truthsLoading={truthsLoading}
-      truthReferenceMode={truthReferenceMode}
+      truthReferenceModes={truthReferenceModes}
       answerError={answerError}
       onAnswerQuestion={onAnswerQuestion}
       onDismissExpiredQuestion={onDismissExpiredQuestion}

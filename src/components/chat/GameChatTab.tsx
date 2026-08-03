@@ -24,7 +24,7 @@ interface GameChatTabProps {
   senderUid: string;
   questionTruths?: ReadonlyMap<string, HiderTruthResult>;
   truthsLoading?: boolean;
-  truthReferenceMode?: HiderTruthReferenceMode;
+  truthReferenceModes?: ReadonlyMap<string, HiderTruthReferenceMode>;
   answerError?: string | null;
   onAnswerQuestion: (
     pendingQuestionId: string,
@@ -60,7 +60,7 @@ export function GameChatTab({
   senderUid,
   questionTruths,
   truthsLoading = false,
-  truthReferenceMode,
+  truthReferenceModes,
   answerError = null,
   onAnswerQuestion,
   onDismissExpiredQuestion,
@@ -206,7 +206,11 @@ export function GameChatTab({
                       : null
                   }
                   loading={truthsLoading}
-                  truthReferenceMode={truthReferenceMode ?? "hidingZoneCenter"}
+                  truthReferenceMode={
+                    (message.pendingQuestionId
+                      ? truthReferenceModes?.get(message.pendingQuestionId)
+                      : undefined) ?? "hidingZoneCenter"
+                  }
                   onSelect={(option) =>
                     void onAnswerQuestion(
                       message.pendingQuestionId!,

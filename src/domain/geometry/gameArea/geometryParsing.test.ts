@@ -11,6 +11,24 @@ describe("geometryParsing", () => {
     expect(parsePointGeometry("{}")).toBeNull();
   });
 
+  it("returns null for Point geometry missing coordinates", () => {
+    const json = JSON.stringify({
+      type: "Feature",
+      properties: {},
+      geometry: { type: "Point" },
+    });
+    expect(parseGeometryJson(json)).toBeNull();
+    expect(parsePointGeometry(json)).toBeNull();
+  });
+
+  it("returns null for non-Feature wrappers", () => {
+    expect(
+      parseGeometryJson(
+        JSON.stringify({ type: "Point", coordinates: [-0.15, 51.45] }),
+      ),
+    ).toBeNull();
+  });
+
   it("does not throw when feature.geometry is missing", () => {
     expect(
       pointFromGeometryFeature({} as never),

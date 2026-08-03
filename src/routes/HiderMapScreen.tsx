@@ -48,7 +48,7 @@ import {
 import type { MapViewportBounds } from "../domain/map/transitViewport";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/device/power/powerProfile";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
-import { resolveHiderTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
+import { resolvePendingQuestionTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
 import { useHidingZoneUidHeal } from "../hooks/session/useHidingZoneUidHeal";
@@ -267,28 +267,12 @@ export function HiderMapScreen() {
       session,
     };
   }, [hidingPlace, myZone?.radiusMeters, session, stationCenter, uid]);
-  // Map pin: zone-center / freeze (not per-ask). Per-ask resolution lives in useHiderQuestionTruths.
-  const truthReference = useMemo(() => {
-    if (!uid) {
-      return {
-        point: null as LatLngTuple | null,
-        mode: "unavailable" as const,
-      };
-    }
-
-    return resolveHiderTruthReference({
-      hiderUid: uid,
-      zoneCenter: stationCenter,
-      hidingPlace,
-      session,
-    });
-  }, [hidingPlace, session, stationCenter, uid]);
   useHidingZoneUidHeal(sessionId, uid, hidingZones, persistedMyUid);
   const truthReferenceReady = authReady && uid !== null;
   const {
     questionTruths,
     loading: truthsLoading,
-    primaryTruthReferenceMode,
+    truthReferenceModes,
   } = useHiderQuestionTruths(
     pendingQuestions,
     truthContext,
@@ -849,7 +833,7 @@ export function HiderMapScreen() {
           sessionId: sessionId ?? "",
           questionTruths,
           truthsLoading,
-          truthReferenceMode: primaryTruthReferenceMode,
+          truthReferenceModes,
           answerError: chatAnswerError,
           onAnswerQuestion: async (
             pendingQuestionId,
@@ -889,9 +873,12 @@ export function HiderMapScreen() {
                   : undefined,
               );
 
+              const answerTruthReference = truthContext
+                ? resolvePendingQuestionTruthReference(pending, truthContext)
+                : { point: null as LatLngTuple | null };
               const truth = await computeHiderTruthReplyAsync(
                 pending,
-                truthReference.point,
+                answerTruthReference.point,
                 gameArea,
               );
               if (
