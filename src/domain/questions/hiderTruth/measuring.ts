@@ -7,6 +7,7 @@ import type { MeasuringRegionInput } from "../../geometry/measuring/measuringReg
 import { fetchElevations } from "@/services/geo/elevation";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { isMeasuringLinearLocation } from "../measuringQuestions";
+import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
 import {
   minDistanceToPlaces,
   resultFromReplyId,
@@ -25,12 +26,11 @@ export function truthMeasuringSync(
     return truthUnavailable();
   }
 
-  let regionInput: Omit<MeasuringRegionInput, "measuringAnswer">;
+  let regionInput: Omit<MeasuringRegionInput, "measuringAnswer" | "gameArea"> & {
+    gameArea?: MeasuringRegionInput["gameArea"];
+  };
   try {
-    regionInput = JSON.parse(regionInputJson) as Omit<
-      MeasuringRegionInput,
-      "measuringAnswer"
-    >;
+    regionInput = JSON.parse(regionInputJson) as typeof regionInput;
   } catch {
     return truthUnavailable();
   }
@@ -74,14 +74,12 @@ export function truthMeasuringSync(
   }
 
   if (regionInput.usesAllPlacesInArea) {
-    const stationDistance = minDistanceToPlaces(
-      stationCenter,
+    const measuringPlaces = measuringPlacesFromMetadata(
+      metadata,
       regionInput.measuringPlaces,
     );
-    const seekerDistance = minDistanceToPlaces(
-      seekerAnchor,
-      regionInput.measuringPlaces,
-    );
+    const stationDistance = minDistanceToPlaces(stationCenter, measuringPlaces);
+    const seekerDistance = minDistanceToPlaces(seekerAnchor, measuringPlaces);
 
     if (stationDistance === null || seekerDistance === null) {
       return truthUnavailable();

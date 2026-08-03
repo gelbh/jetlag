@@ -9,7 +9,10 @@ import nearestPointOnLine from "@turf/nearest-point-on-line";
 import simplify from "@turf/simplify";
 import Flatbush from "flatbush";
 import { around as geoflatbushAround } from "geoflatbush";
-import { unionPolygonFeatures } from "../masks/unionPolygonFeatures";
+import {
+  unionDiskSpecs,
+  unionPolygonFeatures,
+} from "../masks/unionPolygonFeatures";
 import type { GameArea } from "../../map/annotations";
 import { dispatchGeodesicLineBuffer } from "./geodesicLineBuffer";
 import { featureToGameAreaGeometry } from "../kernel/featureConvert";
@@ -605,33 +608,12 @@ export function buildMultiPlaceNearRegionTs(
     return buildLocationNearRegion(places[0], distanceMeters, gameArea);
   }
 
-  const bufferedFeatures: Feature<Polygon | MultiPolygon>[] = [];
-
-  for (const place of places) {
-    const buffered = turfCircle(turfPoint([place[1], place[0]]), distanceMeters / 1000, {
-      steps: NEAR_REGION_DISK_STEPS,
-      units: "kilometers",
-    });
-
-    if (
-      !buffered ||
-      (buffered.geometry.type !== "Polygon" &&
-        buffered.geometry.type !== "MultiPolygon")
-    ) {
-      continue;
-    }
-
-    bufferedFeatures.push(buffered as Feature<Polygon | MultiPolygon>);
-  }
-
-  if (bufferedFeatures.length === 0) {
-    return null;
-  }
-
-  const nearRegion =
-    bufferedFeatures.length === 1
-      ? bufferedFeatures[0]
-      : unionPolygonFeatures(bufferedFeatures);
+  const nearRegion = unionDiskSpecs(
+    places.map((center) => ({
+      center,
+      radiusMeters: distanceMeters,
+    })),
+  );
 
   if (
     !nearRegion ||

@@ -210,8 +210,8 @@ export function usePendingQuestionResolver({
           }
         } catch (error) {
           // Soft-fail: cancel once and keep the in-flight guard so reload/effect
-          // loops cannot re-enter resolve (tentacle/measuring OOM thrash). On
-          // reconnect, resolvingRef clears when sessionId changes.
+          // loops cannot re-enter resolve (tentacle/measuring OOM thrash). On reconnect,
+          // resolvingRef clears when sessionId changes, allowing one bounded retry.
           if (!annotationCreated) {
             try {
               await updatePendingQuestion(sessionId, pending.id, {
@@ -219,8 +219,12 @@ export function usePendingQuestionResolver({
               });
             } catch {
               // Cancel write failed — still keep the guard for this session mount.
+              // The guard will be cleared when sessionId changes (at line 127), allowing
+              // one retry on reconnect. This prevents transient failures from becoming permanent.
+              // Failure reporting continues below to ensure all errors are captured.
             }
           }
+          // Report failure regardless of annotation state to ensure error visibility
           capturePendingResolveFailure(error, {
             toolType: pending.toolType,
             pendingQuestionId: pending.id,

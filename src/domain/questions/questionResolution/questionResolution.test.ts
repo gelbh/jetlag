@@ -285,6 +285,78 @@ describe("resolveMeasuringPendingQuestion", () => {
     expect(resolved?.metadata.measuringAnswer).toBe("further");
     expect(resolved?.metadata.measuringBoundaryJson).toBeTruthy();
   });
+
+  it("builds measuring elim when region JSON omits gameArea", async () => {
+    const pending = basePending({
+      toolType: "measuring",
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-0.15, 51.45] },
+        }),
+        metadata: {
+          measuringRegionInputJson: JSON.stringify({
+            measuringSubject: "location",
+            measuringLocationCategory: "museum",
+            measuringDistanceMeters: 1000,
+            measuringTargetPoint: [51.44, -0.14],
+            measuringPlaces: [],
+            measuringCoastSegments: [],
+            measuringSeaLevelNearRegion: null,
+            usesAllPlacesInArea: false,
+          }),
+        },
+      },
+    });
+
+    const resolved = await resolveMeasuringPendingQuestion(
+      pending,
+      "further",
+      gameArea,
+    );
+
+    expect(resolved?.type).toBe("measuring");
+    expect(resolved?.metadata.measuringBoundaryJson).toBeTruthy();
+  });
+
+  it("hydrates all-places measuring from measuringPlacesJson", async () => {
+    const pending = basePending({
+      toolType: "measuring",
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-0.15, 51.45] },
+        }),
+        metadata: {
+          measuringPlacesJson: JSON.stringify([
+            { id: "a", name: "West", lat: 51.45, lng: -0.18 },
+            { id: "b", name: "East", lat: 51.45, lng: -0.12 },
+          ]),
+          measuringRegionInputJson: JSON.stringify({
+            measuringSubject: "location",
+            measuringLocationCategory: "airport",
+            measuringDistanceMeters: 2500,
+            measuringTargetPoint: null,
+            measuringPlaces: [],
+            measuringCoastSegments: [],
+            measuringSeaLevelNearRegion: null,
+            usesAllPlacesInArea: true,
+          }),
+        },
+      },
+    });
+
+    const resolved = await resolveMeasuringPendingQuestion(
+      pending,
+      "further",
+      gameArea,
+    );
+
+    expect(resolved?.type).toBe("measuring");
+    expect(resolved?.metadata.measuringBoundaryJson).toBeTruthy();
+  });
 });
 
 describe("resolveTentaclePendingQuestion", () => {

@@ -7,6 +7,7 @@ import {
   buildMeasuringBoundaryPreviewTs,
   type MeasuringRegionInput,
 } from "../../geometry/measuring/measuringRegions";
+import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { pushBoundaryOverlay, type OverlayBuildResult } from "./shared";
 
@@ -36,14 +37,19 @@ export function buildMeasuringOverlays(
     try {
       const regionInput = JSON.parse(regionInputJson) as Omit<
         MeasuringRegionInput,
-        "measuringAnswer"
-      >;
+        "measuringAnswer" | "gameArea"
+      > & { gameArea?: GameArea };
       pushBoundaryOverlay(
         overlays,
         `${prefix}-boundary`,
         buildMeasuringBoundaryPreviewTs({
           ...regionInput,
-          gameArea: regionInput.gameArea ?? gameArea,
+          measuringPlaces: measuringPlacesFromMetadata(
+            metadata,
+            regionInput.measuringPlaces,
+          ),
+          // Session play area wins over any legacy embedded gameArea.
+          gameArea,
         }),
         mapStyle,
         streetBasemap,
