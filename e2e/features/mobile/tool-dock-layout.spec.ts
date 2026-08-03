@@ -12,17 +12,22 @@ import {
   SIMULATED_SAFE_AREA_BOTTOM_PX,
   SIMULATED_SAFE_AREA_TOP_PX,
   clickViaEvaluate,
+  assertInViewport,
 } from "../../fixtures";
 import type { Page } from "@playwright/test";
 
 async function assertSideStackClearsZoom(page: Page) {
   const sideStack = page.locator(".jl-map-chrome-side-stack");
   const session = sideStack.locator("[data-island='session']");
+  const zoom = page.locator(".map-zoom-control");
   await expect(sideStack).toHaveCount(1);
   await expect(sideStack).toBeVisible();
   await expect(session).toHaveCount(1);
   await expect(session).toBeVisible();
-  await expect(page.locator(".map-zoom-control")).toBeVisible();
+  await expect(zoom).toBeVisible();
+  await assertInViewport(sideStack);
+  await assertInViewport(session);
+  await assertInViewport(zoom);
 
   const metrics = await page.evaluate(() => {
     const side = document.querySelector(".jl-map-chrome-side-stack");

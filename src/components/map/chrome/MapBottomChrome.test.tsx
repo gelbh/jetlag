@@ -126,5 +126,13 @@ it("marks chrome inactive without leaving islands clickable via CSS class", () =
     );
     // Seeker still portals Zoom via MapView; do not reintroduce a silent calc fallback.
     expect(chromeCss).not.toMatch(/map-chrome-zoom-stack-height,\s*6\.25rem/);
+
+    // Short-landscape must win when both media queries match (cascade order).
+    const narrowWidthOffset = chromeCss.indexOf("@media (max-width: 28rem)");
+    const shortLandscapeOffset = chromeCss.indexOf(
+      "@media (max-height: 430px) and (orientation: landscape)",
+    );
+    expect(narrowWidthOffset).toBeGreaterThan(-1);
+    expect(shortLandscapeOffset).toBeGreaterThan(narrowWidthOffset);
   });
 });
