@@ -14,30 +14,26 @@ describe("overpassEndpoints", () => {
   });
 
   it("lists private.coffee and omits kumi", () => {
-    assert.ok(
-      OVERPASS_ENDPOINTS.includes(
-        "https://overpass.private.coffee/api/interpreter",
-      ),
-    );
-    assert.equal(
-      OVERPASS_ENDPOINTS.some((u) => u.includes("kumi.systems")),
-      false,
-    );
+    const hosts = OVERPASS_ENDPOINTS.map((u) => overpassEndpointHost(u));
+    assert.ok(hosts.includes("overpass.private.coffee"));
+    assert.equal(hosts.includes("overpass.kumi.systems"), false);
   });
 
   it("adds Geofabrik paid peer only when key present", () => {
     const without = buildOverpassEndpointList({});
-    assert.equal(
-      without.some((u) => u.includes("overpass.geofabrik.de")),
-      false,
-    );
+    const withoutHosts = without.map((u) => overpassEndpointHost(u));
+    assert.equal(withoutHosts.includes("overpass.geofabrik.de"), false);
+
     const withKey = buildOverpassEndpointList({
       GEOFABRIK_OVERPASS_API_KEY: "test-key",
     });
-    assert.ok(
-      withKey.includes(
-        "https://overpass.geofabrik.de/test-key/api/interpreter",
-      ),
+    const geofabrikUrl = withKey.find(
+      (u) => overpassEndpointHost(u) === "overpass.geofabrik.de",
+    );
+    assert.ok(geofabrikUrl);
+    assert.equal(
+      geofabrikUrl,
+      "https://overpass.geofabrik.de/test-key/api/interpreter",
     );
   });
 
