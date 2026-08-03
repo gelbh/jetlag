@@ -48,6 +48,7 @@ export function HiderToolDock({
     <MapBottomChrome
       layout={isRail ? "rail" : "phone"}
       inactive={inactive}
+      huntDensity="sparse"
       hunt={
         <div className="jl-tool-dock-group jl-tool-dock-group-main">
           <MotionPressable
