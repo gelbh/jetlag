@@ -4,14 +4,30 @@
   /*
    * Island clearance: bottom hunt band + right side stack.
    * Replaces dual primary+secondary bar fold and bottom Session row.
+   * Zoom clearance: 7rem clears MapView Zoom on wide phones; ≤28rem needs 9rem
+   * for the +2rem dock inset bump; short landscape keeps the smaller stack so
+   * Session is not pushed under the status HUD when the dock is revealed.
    */
   --dock-island-height: 3.25rem;
   --dock-island-gap: 0.5rem;
   --map-chrome-side-width: 3.25rem;
+  --map-chrome-zoom-stack-height: 7rem;
   --dock-content-height: var(--dock-island-height);
   --dock-secondary-height: 0px;
   --dock-row-gap: 0px;
   --dock-primary-content-height: var(--dock-island-height);
+}
+
+@media (max-width: 28rem) {
+  :root {
+    --map-chrome-zoom-stack-height: 9rem;
+  }
+}
+
+@media (max-height: 430px) and (orientation: landscape) {
+  :root {
+    --map-chrome-zoom-stack-height: 6.25rem;
+  }
 }
 
 @media (min-width: 28.01rem) {
@@ -74,10 +90,11 @@
     position: absolute;
     z-index: 3;
     right: max(0.5rem, env(safe-area-inset-right));
-    /* Sit above MapView zoom/recenter portal column (MapLibre context owns those). */
+    /* Sit above MapView zoom/recenter portal column (MapLibre context owns those).
+       Zoom controls positioned with same --map-chrome-zoom-stack-height token for alignment. */
     bottom: calc(
       var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem +
-        var(--map-chrome-zoom-stack-height, 6.25rem)
+        var(--map-chrome-zoom-stack-height) + 0.5rem
     );
     display: flex;
     flex-direction: column;
@@ -85,6 +102,7 @@
     gap: var(--dock-island-gap);
     pointer-events: none;
   }
+
 
   .jl-map-island {
     pointer-events: auto;
@@ -131,6 +149,12 @@
     flex: 0 0 auto;
     flex-direction: column;
     width: var(--map-chrome-side-width, 3.25rem);
+    height: fit-content;
+  }
+
+  .jl-map-chrome-side-stack .jl-map-island .jl-tool-dock-group-secondary {
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
   }
 
   /* Cap chip width so label text cannot inflate History over Hunt. */
@@ -147,6 +171,28 @@
     flex: 0 0 auto;
     width: 2.75rem;
     max-width: 2.75rem;
+  }
+
+  @media (max-height: 430px) and (orientation: landscape) {
+    .jl-map-chrome-side-stack {
+      bottom: calc(
+        var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem +
+          var(--map-chrome-zoom-stack-height) + 1rem
+      );
+      max-height: calc(
+        100dvh - env(safe-area-inset-top) - 0.5rem -
+          var(--dock-island-height) - env(safe-area-inset-bottom) - 0.75rem -
+          var(--map-chrome-zoom-stack-height) - 1rem
+      );
+      overflow: hidden;
+    }
+
+    .jl-map-chrome-side-stack .jl-map-island--session,
+    .jl-map-chrome-side-stack .jl-map-island--map-controls {
+      flex: 1 1 0;
+      min-height: 0;
+      overflow-y: auto;
+    }
   }
 
   .jl-map-island--session {
