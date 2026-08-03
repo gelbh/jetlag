@@ -93,6 +93,13 @@ type JoinRequestChangeHandler = (
   request: RoleJoinRequest | null,
 ) => void;
 
+type ListenOwnJoinRequestCall = [
+  string,
+  string,
+  JoinRequestChangeHandler,
+  (error: Error) => void,
+];
+
 async function enterCodeAndWaitForPreview() {
   fireEvent.change(screen.getByPlaceholderText("ABCD"), {
     target: { value: "ABCD" },
@@ -114,9 +121,11 @@ async function waitForJoinRequestListener(): Promise<JoinRequestChangeHandler> {
       expect.any(Function),
     );
   });
-  const onChange = mockListenOwnJoinRequest.mock.calls.at(-1)?.[2];
-  expect(onChange).toEqual(expect.any(Function));
-  return onChange as JoinRequestChangeHandler;
+  const call = mockListenOwnJoinRequest.mock.calls.at(-1) as
+    | ListenOwnJoinRequestCall
+    | undefined;
+  expect(call?.[2]).toEqual(expect.any(Function));
+  return call![2];
 }
 
 describe("JoinSession", () => {
