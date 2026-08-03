@@ -164,4 +164,75 @@ describe("ToolStatusBlock", () => {
     expect(screen.getByText("CODE")).toBeInTheDocument();
     expect(screen.getByText("WXYZ").closest(".jl-stamp-code")).toBeTruthy();
   });
+
+  it("shows MOVE phase while a hider relocation is in progress", () => {
+    render(
+      <ToolStatusBlock
+        sessionCode="ABCD"
+        playerRole="seeker"
+        activeTool="none"
+        timerState={{ accumulatedMs: 60_000, runningSince: null }}
+        timerRunning={false}
+        timerHasStarted
+        timerSyncing={false}
+        canStartGame={false}
+        onStartGame={vi.fn()}
+        sessionRules={{ gameSize: "medium", hidingPeriodMinutes: 90 }}
+        pendingQuestions={[]}
+        timerMenuOpen={false}
+        onOpenTimerMenu={vi.fn()}
+        moveInProgress
+      />,
+    );
+
+    const phase = screen.getByText("MOVE");
+    expect(phase.classList.contains("jl-status-header-value--action")).toBe(true);
+    expect(screen.queryByText("HIDE")).not.toBeInTheDocument();
+    expect(screen.queryByText("SEEK")).not.toBeInTheDocument();
+  });
+
+  it("reverts PHASE to HIDE when moveInProgress clears during hiding", () => {
+    const { rerender } = render(
+      <ToolStatusBlock
+        sessionCode="ABCD"
+        playerRole="seeker"
+        activeTool="none"
+        timerState={{ accumulatedMs: 30_000, runningSince: Date.now() }}
+        timerRunning
+        timerHasStarted
+        timerSyncing={false}
+        canStartGame={false}
+        onStartGame={vi.fn()}
+        sessionRules={{ gameSize: "medium", hidingPeriodMinutes: 90 }}
+        pendingQuestions={[]}
+        timerMenuOpen={false}
+        onOpenTimerMenu={vi.fn()}
+        moveInProgress
+      />,
+    );
+
+    expect(screen.getByText("MOVE")).toBeInTheDocument();
+
+    rerender(
+      <ToolStatusBlock
+        sessionCode="ABCD"
+        playerRole="seeker"
+        activeTool="none"
+        timerState={{ accumulatedMs: 30_000, runningSince: Date.now() }}
+        timerRunning
+        timerHasStarted
+        timerSyncing={false}
+        canStartGame={false}
+        onStartGame={vi.fn()}
+        sessionRules={{ gameSize: "medium", hidingPeriodMinutes: 90 }}
+        pendingQuestions={[]}
+        timerMenuOpen={false}
+        onOpenTimerMenu={vi.fn()}
+        moveInProgress={false}
+      />,
+    );
+
+    expect(screen.getByText("HIDE")).toBeInTheDocument();
+    expect(screen.queryByText("MOVE")).not.toBeInTheDocument();
+  });
 });
