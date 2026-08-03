@@ -50,6 +50,7 @@ import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/devi
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import { resolvePendingQuestionTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
+import { useHiderPendingPreviewEliminations } from "../hooks/session/useHiderPendingPreviewEliminations";
 import { useHiderQuestionTruths } from "../hooks/session/useHiderQuestionTruths";
 import { useHidingZoneUidHeal } from "../hooks/session/useHidingZoneUidHeal";
 import { useHiderZoneTool } from "../hooks/session/useHiderZoneTool";
@@ -171,6 +172,9 @@ export function HiderMapScreen() {
     null,
   );
   const [chatAnswerError, setChatAnswerError] = useState<string | null>(null);
+  const [optimisticAnswers, setOptimisticAnswers] = useState<
+    ReadonlyMap<string, string>
+  >(() => new Map());
   const [mapViewport, setMapViewport] = useState<MapViewportState | null>(
     null,
   );
@@ -285,6 +289,14 @@ export function HiderMapScreen() {
     gameArea ?? undefined,
     { truthReferenceReady },
   );
+  const { previewEliminationFeatures } = useHiderPendingPreviewEliminations({
+    pendingQuestions,
+    questionTruths,
+    optimisticAnswers,
+    annotations,
+    gameArea,
+  });
+
   const hiderOutsideZone = useHiderZoneAdvisory({
     enabled:
       showCurrentLocation &&
@@ -625,6 +637,7 @@ export function HiderMapScreen() {
             gameArea={gameArea}
             selectedAnnotationId={selectedAnnotationId}
             layerVisibility={layerVisibility}
+            draftEliminationFeatures={previewEliminationFeatures}
             session={session}
             hidingZones={confirmedHidingZones}
           />
@@ -864,6 +877,12 @@ export function HiderMapScreen() {
             }
 
             try {
+              setOptimisticAnswers((previous) => {
+                const next = new Map(previous);
+                next.set(pendingQuestionId, selectedReply);
+                return next;
+              });
+
               const user = await ensureAnonymousUser();
               await answerPendingQuestion(
                 sessionId,
