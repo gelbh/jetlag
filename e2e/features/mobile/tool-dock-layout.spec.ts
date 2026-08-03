@@ -13,6 +13,54 @@ import {
   SIMULATED_SAFE_AREA_TOP_PX,
   clickViaEvaluate,
 } from "../../fixtures";
+import type { Page } from "@playwright/test";
+
+async function assertSideStackClearsZoom(page: Page) {
+  const sideStack = page.locator(".jl-map-chrome-side-stack");
+  const session = sideStack.locator("[data-island='session']");
+  await expect(sideStack).toHaveCount(1);
+  await expect(sideStack).toBeVisible();
+  await expect(session).toHaveCount(1);
+  await expect(session).toBeVisible();
+  await expect(page.locator(".map-zoom-control")).toBeVisible();
+
+  const metrics = await page.evaluate(() => {
+    const side = document.querySelector(".jl-map-chrome-side-stack");
+    const zoom = document.querySelector(".map-zoom-control");
+    const sessionEl = document.querySelector(
+      ".jl-map-chrome-side-stack [data-island='session']",
+    );
+    if (!side || !zoom || !sessionEl) {
+      return { missing: true as const };
+    }
+    const sideRect = side.getBoundingClientRect();
+    const zoomRect = zoom.getBoundingClientRect();
+    const sessionRect = sessionEl.getBoundingClientRect();
+    const overlapX =
+      Math.min(sideRect.right, zoomRect.right) -
+      Math.max(sideRect.left, zoomRect.left);
+    const overlapY =
+      Math.min(sideRect.bottom, zoomRect.bottom) -
+      Math.max(sideRect.top, zoomRect.top);
+    return {
+      missing: false as const,
+      intersects: overlapX > 1 && overlapY > 1,
+      sessionTop: sessionRect.top,
+      sessionBottom: sessionRect.bottom,
+      zoomTop: zoomRect.top,
+      gap: zoomRect.top - sessionRect.bottom,
+    };
+  });
+
+  expect(metrics.missing).toBe(false);
+  if (metrics.missing) {
+    return;
+  }
+  expect(metrics.intersects).toBe(false);
+  expect(metrics.sessionBottom).toBeLessThanOrEqual(metrics.zoomTop + 1);
+  expect(metrics.gap).toBeGreaterThanOrEqual(-1);
+  expect(metrics.sessionTop).toBeGreaterThanOrEqual(-1);
+}
 
 test.describe("mobile tool dock", () => {
   test.beforeEach(async ({ page }) => {
@@ -86,48 +134,10 @@ test.describe("mobile tool dock", () => {
   });
 
   test("@smoke side stack clears MapView zoom controls", async ({ page }) => {
-    const sideStack = page.locator(".jl-map-chrome-side-stack");
-    const session = sideStack.locator("[data-island='session']");
-    await expect(sideStack).toHaveCount(1);
-    await expect(sideStack).toBeVisible();
-    await expect(session).toHaveCount(1);
-    await expect(session).toBeVisible();
-    await expect(page.locator(".map-zoom-control")).toBeVisible();
-
-    const metrics = await page.evaluate(() => {
-      const side = document.querySelector(".jl-map-chrome-side-stack");
-      const zoom = document.querySelector(".map-zoom-control");
-      const sessionEl = document.querySelector(
-        ".jl-map-chrome-side-stack [data-island='session']",
-      );
-      if (!side || !zoom || !sessionEl) {
-        return { missing: true as const };
-      }
-      const sideRect = side.getBoundingClientRect();
-      const zoomRect = zoom.getBoundingClientRect();
-      const sessionRect = sessionEl.getBoundingClientRect();
-      const overlapX =
-        Math.min(sideRect.right, zoomRect.right) -
-        Math.max(sideRect.left, zoomRect.left);
-      const overlapY =
-        Math.min(sideRect.bottom, zoomRect.bottom) -
-        Math.max(sideRect.top, zoomRect.top);
-      return {
-        missing: false as const,
-        intersects: overlapX > 1 && overlapY > 1,
-        sessionBottom: sessionRect.bottom,
-        zoomTop: zoomRect.top,
-        gap: zoomRect.top - sessionRect.bottom,
-      };
-    });
-
-    expect(metrics.missing).toBe(false);
-    if (metrics.missing) {
-      return;
-    }
-    expect(metrics.intersects).toBe(false);
-    expect(metrics.sessionBottom).toBeLessThanOrEqual(metrics.zoomTop + 1);
-    expect(metrics.gap).toBeGreaterThanOrEqual(-1);
+    // Narrow portrait exercises --map-chrome-zoom-stack-height: 9rem (≤28rem).
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openMapWithLocalSession(page);
+    await assertSideStackClearsZoom(page);
   });
 
   test("dock fits without clipping question tools", async ({ page }) => {
@@ -411,6 +421,15 @@ test.describe("landscape map-dominant chrome", () => {
     await expect(
       page.getByRole("button", { name: "Hide map controls" }),
     ).toBeVisible();
+  });
+
+  test("@smoke side stack clears zoom after dock reveal in landscape", async ({
+    page,
+  }) => {
+    // Short landscape uses --map-chrome-zoom-stack-height: 6.25rem.
+    await page.getByRole("button", { name: /Show map controls/i }).click();
+    await expect(page.locator(".jl-tool-dock")).toBeVisible();
+    await assertSideStackClearsZoom(page);
   });
 });
 
