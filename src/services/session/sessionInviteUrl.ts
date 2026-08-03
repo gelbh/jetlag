@@ -34,7 +34,8 @@ export function resolveSessionInviteOrigin(
     const host = url.hostname.toLowerCase();
     if (
       host === "localhost" ||
-      host === "127.0.0.1" ||
+      host === "0.0.0.0" ||
+      /^127(?:\.\d{1,3}){3}$/.test(host) ||
       host === "::1" ||
       host === "[::1]"
     ) {

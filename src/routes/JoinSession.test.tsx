@@ -4,6 +4,7 @@ import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { JoinSession } from "./JoinSession";
 import { renderWithRouter } from "../test/renderWithRouter";
 import { RouteTransitionTestProvider } from "../test/RouteTransitionTestProvider";
+import { resetAllStores } from "../test/helpers/storeReset";
 import { createTestRemoteSession } from "../test/fixtures/sessions";
 import { clearJoinPreviewCacheForTests } from "../services/session/joinSessionPreviewCache";
 import {
@@ -104,6 +105,7 @@ const efghPreviewSession = createTestRemoteSession({
 });
 
 function renderJoinSessionAt(path: string) {
+  resetAllStores();
   const router = createMemoryRouter(
     [
       {

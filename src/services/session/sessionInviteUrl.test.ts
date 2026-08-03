@@ -32,6 +32,12 @@ describe("resolveSessionInviteOrigin", () => {
       resolveSessionInviteOrigin("http://127.0.0.1:5173", publicOrigin),
     ).toBe(publicOrigin);
     expect(
+      resolveSessionInviteOrigin("http://127.0.0.2:5173", publicOrigin),
+    ).toBe(publicOrigin);
+    expect(
+      resolveSessionInviteOrigin("http://0.0.0.0:5173", publicOrigin),
+    ).toBe(publicOrigin);
+    expect(
       resolveSessionInviteOrigin("https://[::1]", publicOrigin),
     ).toBe(publicOrigin);
     expect(
