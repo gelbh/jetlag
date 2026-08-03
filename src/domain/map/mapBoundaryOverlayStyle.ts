@@ -1,3 +1,4 @@
+import type { ExpressionSpecification } from "maplibre-gl";
 import type { MapPathOptions } from "./mapPathOptions";
 import type { MapStyle, StreetBasemap } from "./mapBasemaps";
 import { getBasemapSurface } from "./mapBasemaps";
@@ -27,13 +28,6 @@ const ADMIN_STROKE_REF_ZOOM = 12;
 
 const ADMIN_LINE_WIDTH_ZOOM_STOPS = [4, 8, 10, 12, 14, 16, 18, 20] as const;
 
-export type MapLibreLineWidthExpression = readonly [
-  "interpolate",
-  ["linear"],
-  ["zoom"],
-  ...number[],
-];
-
 function highContrastSurface(
   mapStyle: MapStyle,
   streetBasemap: StreetBasemap,
@@ -44,12 +38,12 @@ function highContrastSurface(
 
 export function getAdminBoundaryLineWidthExpression(
   adminLevel: number,
-): MapLibreLineWidthExpression {
+): ExpressionSpecification {
   const baseWeight = ADMIN_LEVEL_STROKE_WEIGHT[adminLevel] ?? 1;
   const stops = ADMIN_LINE_WIDTH_ZOOM_STOPS.flatMap((zoom) => [
     zoom,
     quantizeWeight(computeZoomAdaptiveWeight(baseWeight, zoom)),
-  ] as const);
+  ]);
   return ["interpolate", ["linear"], ["zoom"], ...stops];
 }
 
