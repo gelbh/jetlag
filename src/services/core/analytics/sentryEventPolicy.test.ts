@@ -37,6 +37,14 @@ describe("classifyClientSentryEvent", () => {
       ),
     ).toBe("drop");
     expect(
+      classifyClientSentryEvent(
+        exc(
+          "FirebaseError",
+          "AppCheck: Requests throttled due to previous 403 error. Attempts allowed again after 20h:49m:23s (appCheck/throttled).",
+        ),
+      ),
+    ).toBe("drop");
+    expect(
       classifyClientSentryEvent(exc("Error", "App Check probe timed out")),
     ).toBe("drop");
   });

@@ -33,7 +33,7 @@ const APP_CHECK_INVALID_SESSION = /Invalid session .*: Invalid input/i;
 export const CLIENT_SENTRY_IGNORE_ERRORS: Array<string | RegExp> = [
   "This operation was aborted",
   "App Check probe timed out",
-  /appCheck\/initial-throttle/i,
+  /appCheck\/(?:initial-throttle|throttled)/i,
   "Session already ended.",
   "Only the host can do that.",
 ];
