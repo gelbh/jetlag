@@ -336,13 +336,19 @@ export function useHiderZoneTool({
 
       await writeHidingZone(sessionId, zone);
 
-      if (moveMode) {
-        await resumeTimerForMove();
-      }
-
       setMoveMode(false);
       setWizardOpen(false);
       resetWizardDraft();
+
+      if (moveMode) {
+        try {
+          await resumeTimerForMove();
+        } catch {
+          setError(
+            "Zone saved, but the timer didn't resume. Ask the host to resume it.",
+          );
+        }
+      }
     } catch (nextError) {
       setError(
         isFirestorePermissionDenied(nextError)
