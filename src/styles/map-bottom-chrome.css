@@ -173,6 +173,28 @@
     max-width: 2.75rem;
   }
 
+  @media (max-height: 430px) and (orientation: landscape) {
+    .jl-map-chrome-side-stack {
+      bottom: calc(
+        var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem +
+          var(--map-chrome-zoom-stack-height) + 1rem
+      );
+      max-height: calc(
+        100dvh - env(safe-area-inset-top) - 0.5rem -
+          var(--dock-island-height) - env(safe-area-inset-bottom) - 0.75rem -
+          var(--map-chrome-zoom-stack-height) - 1rem
+      );
+      overflow: hidden;
+    }
+
+    .jl-map-chrome-side-stack .jl-map-island--session,
+    .jl-map-chrome-side-stack .jl-map-island--map-controls {
+      flex: 1 1 0;
+      min-height: 0;
+      overflow-y: auto;
+    }
+  }
+
   .jl-map-island--session {
     color: var(--color-ink-secondary);
   }
