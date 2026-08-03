@@ -19,6 +19,7 @@ import {
   markMapUsableAndMeasureReturn,
 } from "../../../domain/device/perf/playDayMarks";
 import { scheduleIdleBootWork } from "../../../domain/device/perf/scheduleAfterFirstPaint";
+import { DEFAULT_MAP_CENTER } from "../../../domain/map/defaultMapCenter";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../../domain/device/power/powerProfile";
 import { useWakeLock } from "../../../hooks/location/useWakeLock";
 import { useAnnotations } from "../../../hooks/map/useAnnotations";
@@ -302,7 +303,7 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
 
   const center = useMemo<LatLngTuple>(() => {
     if (!gameArea) {
-      return [51.505, -0.09];
+      return DEFAULT_MAP_CENTER;
     }
 
     return gameAreaCenter(gameArea);

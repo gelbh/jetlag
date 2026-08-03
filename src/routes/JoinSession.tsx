@@ -11,6 +11,7 @@ import {
 } from "../components/ui/layout/ScreenHeader";
 import { isPremiumSession } from "../domain/map/annotations";
 import {
+  SESSION_CODE_INPUT_PLACEHOLDER,
   isValidSessionCode,
   normalizeSessionCode,
 } from "../services/session/sessionCodes";
@@ -636,7 +637,7 @@ export function JoinSession() {
                   }
                   maxLength={4}
                   className="field-input mt-2 min-h-16 border-0 bg-transparent p-0 text-center font-mono text-4xl font-bold tracking-[0.45em] focus:outline-none"
-                  placeholder="ABCD"
+                  placeholder={SESSION_CODE_INPUT_PLACEHOLDER}
                   autoCapitalize="characters"
                   autoCorrect="off"
                   spellCheck={false}
