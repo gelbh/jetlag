@@ -12,9 +12,12 @@ import { HudErrorBanner } from "../../ui/banners/HudErrorBanner";
 import { userErrorFromSyncMessage } from "../../../domain/device/feedback/userErrors";
 import type { SessionRulesInput } from "../../../domain/session/rules";
 import type { PlayerRole } from "../../../domain/session/players/playerRole";
+import type { RoleGates } from "../../../domain/session/players/roleGates";
+import { useLeaderJoinRequests } from "../../../hooks/map-screen/useLeaderJoinRequests";
 import { EndGameAlert } from "../status/EndGameAlert";
 import { FoundHiderAlert } from "../status/FoundHiderAlert";
 import { HiderOutsideZoneAlert } from "../status/HiderOutsideZoneAlert";
+import { RoleJoinRequestAlert } from "../status/RoleJoinRequestAlert";
 import { SyncBlock } from "../status/SyncBlock";
 import { TimerBlock } from "../status/TimerBlock";
 import { ToolStatusBlock } from "../status/ToolStatusBlock";
@@ -22,6 +25,8 @@ import { SYNC_TONE_CLASSES, syncRailDisplay } from "../status/syncRailDisplay";
 
 interface MapStatusRailProps {
   sessionCode: string;
+  sessionId?: string | null;
+  roleGates?: RoleGates | null;
   sessionRules?: SessionRulesInput;
   playerRole?: PlayerRole;
   activeTool: MapTool;
@@ -70,6 +75,8 @@ interface MapStatusRailProps {
 
 export function MapStatusRail({
   sessionCode,
+  sessionId = null,
+  roleGates = null,
   sessionRules = { gameSize: "medium" },
   playerRole = "seeker",
   activeTool,
@@ -116,6 +123,17 @@ export function MapStatusRail({
   const [syncMenuOpen, setSyncMenuOpen] = useState(false);
   const [preloadMenuOpen, setPreloadMenuOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
+  const {
+    pendingJoinRequest,
+    joinRequestBusy,
+    handleAcceptJoinRequest,
+    handleDeclineJoinRequest,
+  } = useLeaderJoinRequests({
+    sessionId,
+    roleGates,
+    myUid,
+    isHost,
+  });
   const sync = syncRailDisplay(syncStatus, queuedWrites, message);
   const syncErrorDisplay = userErrorFromSyncMessage(message);
   const showTerminalBanner =
@@ -291,6 +309,13 @@ export function MapStatusRail({
           isHost={isHost}
           onAcceptFoundHider={onAcceptFoundHider}
           onDeclineFoundHider={onDeclineFoundHider}
+        />
+
+        <RoleJoinRequestAlert
+          request={pendingJoinRequest}
+          busy={joinRequestBusy}
+          onAccept={handleAcceptJoinRequest}
+          onDecline={handleDeclineJoinRequest}
         />
       </div>
     </div>

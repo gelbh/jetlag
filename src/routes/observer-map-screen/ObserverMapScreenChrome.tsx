@@ -45,6 +45,8 @@ export function ObserverMapScreenChrome({
     <div className={isDesktop ? "jl-status-rail--expanded" : undefined}>
       <MapStatusRail
         sessionCode={session.code}
+        sessionId={session.id}
+        roleGates={session.roleGates}
         sessionRules={session}
         playerRole={roleConfig.statusPlayerRole}
         activeTool="none"
