@@ -34,12 +34,14 @@ export function questionCostBreakdown(
   baseCost: QuestionCardCost,
   useCount: number,
 ): QuestionCostBreakdown {
-  const multiplier = useCount + 1;
+  const times = useCount + 1;
   const { draw, keep } = BASE_COST_MULTIPLIERS[baseCost];
-  const scaledDraw = draw * multiplier;
-  const scaledKeep = keep * multiplier;
+  const scaledDraw = draw * times;
+  const scaledKeep = keep * times;
+  const baseLabel = `D${draw}P${keep}`;
+  const label = times === 1 ? baseLabel : `${baseLabel} ×${times}`;
   return {
-    label: `D${scaledDraw}P${scaledKeep}`,
+    label,
     draw: scaledDraw,
     keep: scaledKeep,
   };
@@ -56,6 +58,57 @@ export function formatDrawPickSummary(draw: number, keep: number): string {
   const drawLabel = draw === 1 ? "Draw 1" : `Draw ${draw}`;
   const pickLabel = keep === 1 ? "pick 1" : `pick ${keep}`;
   return `${drawLabel}, ${pickLabel}`;
+}
+
+/** Prose for sequential reuse: base DnPm shown once, times = useCount+1. */
+export function formatSequentialDrawPickSummary(
+  baseCost: QuestionCardCost,
+  useCount: number,
+): string {
+  const { draw, keep } = BASE_COST_MULTIPLIERS[baseCost];
+  const baseSummary = formatDrawPickSummary(draw, keep);
+  const times = useCount + 1;
+  return times === 1 ? baseSummary : `${baseSummary} × ${times}`;
+}
+
+const QUESTION_TOOL_BASE_COST: Partial<
+  Record<PendingQuestionToolType, QuestionCardCost>
+> = {
+  matching: "D3P1",
+  measuring: "D3P1",
+  radar: "D2P1",
+  thermometer: "D2P1",
+  tentacle: "D4P2",
+  photo: "D1P1",
+};
+
+/** Chat copy from stored scaled draw/keep + tool base cost. */
+export function formatPendingDrawPickSummary(
+  toolType: PendingQuestionToolType,
+  cardDraw: number,
+  cardKeep: number,
+): string {
+  const baseCost = QUESTION_TOOL_BASE_COST[toolType];
+  if (!baseCost) {
+    return formatDrawPickSummary(cardDraw, cardKeep);
+  }
+
+  const { draw, keep } = BASE_COST_MULTIPLIERS[baseCost];
+  if (
+    draw <= 0 ||
+    keep <= 0 ||
+    cardDraw % draw !== 0 ||
+    cardKeep % keep !== 0
+  ) {
+    return formatDrawPickSummary(cardDraw, cardKeep);
+  }
+
+  const times = cardDraw / draw;
+  if (times !== cardKeep / keep || times < 1 || !Number.isInteger(times)) {
+    return formatDrawPickSummary(cardDraw, cardKeep);
+  }
+
+  return formatSequentialDrawPickSummary(baseCost, times - 1);
 }
 
 export function isCountablePendingQuestionStatus(
