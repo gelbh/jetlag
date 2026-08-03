@@ -366,6 +366,12 @@ export function MapViewMapLibre({
           }}
           style={{ width: "100%", height: "100%" }}
           mapStyle={style}
+          // Slice D eval (hardening): reuseMaps skipped — style toggles already
+          // call setStyle in-place (not remount); session remounts via mapKey are
+          // rare; reuseMaps risks stale GL/image state without a measured win.
+          // cooperativeGestures skipped — play maps are full-viewport; create-
+          // session framing uses a touch-none fixed-height shell; no scrollable
+          // embed that needs ctrl+scroll to protect page scroll.
           attributionControl={false}
           maxPitch={maxPitchDegrees}
           dragPan={interactive}
