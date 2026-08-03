@@ -106,7 +106,7 @@ describe("usePlacementMapFocus", () => {
     pinOverlays = (await buildMapDraftOverlays(pinSources)).overlays;
   });
 
-  it("uses default focus bounds until overlays change", () => {
+  it("keeps default focus when pin tool is idle with empty overlays", () => {
     const { result } = renderHook(() =>
       usePlacementMapFocus({
         activeTool: "pin",
@@ -122,7 +122,28 @@ describe("usePlacementMapFocus", () => {
 
     expect(result.current.effectiveFocusBounds).toEqual(defaultBounds);
     expect(result.current.placementRecenterToken).toBe(0);
-    expect(result.current.focusPaddingBias).toBeUndefined();
+  });
+
+  it("does not bump recenter token when activating pin with empty overlays", () => {
+    const { result, rerender } = renderHook(
+      ({ activeTool }: { activeTool: "none" | "pin" }) =>
+        usePlacementMapFocus({
+          activeTool,
+          draft: emptyDraft,
+          overlays: [],
+          eliminationFeatures: [],
+          gameArea: DUBLIN_CITY_GAME_AREA,
+          defaultFocusBounds: defaultBounds,
+          enabled: true,
+          panelMinimized: false,
+        }),
+      { initialProps: { activeTool: "none" as "none" | "pin" } },
+    );
+
+    expect(result.current.placementRecenterToken).toBe(0);
+
+    rerender({ activeTool: "pin" });
+    expect(result.current.placementRecenterToken).toBe(0);
   });
 
   it("bumps recenter token when structural overlays change", () => {
@@ -150,6 +171,8 @@ describe("usePlacementMapFocus", () => {
         },
       },
     );
+
+    expect(result.current.placementRecenterToken).toBe(0);
 
     rerender({ overlays: pinOverlays, draft: pinDraft });
 

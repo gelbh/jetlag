@@ -22,6 +22,7 @@ import { computeFramedCenterZoomMapLibre } from "../../../domain/map/computeFram
 import { focusBoundsToLngLatBounds } from "../../../domain/map/focusBoundsToLngLatBounds";
 import { isLargeCameraJumpMapLibre } from "../../../domain/map/isLargeCameraJumpMapLibre";
 import { shouldApplyMapFocus } from "../../../domain/map/mapFocusPolicy";
+import { mapFocusApplyDependencyKeys } from "../../../domain/map/mapFocusApplyDeps";
 import { resolveMapPitchDegrees } from "../../../domain/map/resolveMapPitchDegrees";
 import { stopMapCameraEase } from "../../../domain/map/stopMapCameraEase";
 import {
@@ -111,9 +112,39 @@ function MapFocus({
   const { prefersReducedMotion, lowPowerMode } = useMotionProfile();
   const hasFittedRef = useRef(false);
   const lastRecenterRef = useRef(recenterToken);
+  const preferFlyRef = useRef(preferFly);
+  const focusBoundsRef = useRef(focusBounds);
+  const focusPaddingBiasRef = useRef(focusPaddingBias);
+  const focusMinZoomRef = useRef(focusMinZoom);
+  const focusMaxZoomRef = useRef(focusMaxZoom);
   const animate = !prefersReducedMotion && !lowPowerMode;
   const padY = fitBoundsPaddingProp?.[0] ?? 32;
   const padX = fitBoundsPaddingProp?.[1] ?? 32;
+  const applyDependencyKeys = mapFocusApplyDependencyKeys({
+    fitBoundsMode,
+    animate,
+    focusBounds,
+    focusPaddingBias,
+    focusMaxZoom,
+    focusMinZoom,
+    padX,
+    padY,
+    recenterToken,
+  });
+
+  useEffect(() => {
+    preferFlyRef.current = preferFly;
+    focusBoundsRef.current = focusBounds;
+    focusPaddingBiasRef.current = focusPaddingBias;
+    focusMinZoomRef.current = focusMinZoom;
+    focusMaxZoomRef.current = focusMaxZoom;
+  }, [
+    preferFly,
+    focusBounds,
+    focusPaddingBias,
+    focusMinZoom,
+    focusMaxZoom,
+  ]);
 
   useEffect(() => {
     const map = mapRef.getMap();
@@ -131,33 +162,42 @@ function MapFocus({
     };
   }, [mapRef, suppressChromeHideRef]);
 
+  // once-mode omits live bounds/zoom/bias from deps (refs) so identity churn
+  // cannot abort an in-flight ease via effect cleanup — intentional.
   useEffect(() => {
-    if (!focusBounds) {
+    // Apply-time values always from refs (synced above). Deps differ by mode:
+    // once → presence/token only; always → live bounds/bias/zoom.
+    const bounds = focusBoundsRef.current;
+    if (!bounds) {
       return;
     }
 
-    if (
-      !shouldApplyMapFocus({
-        fitBoundsMode,
-        hasFitted: hasFittedRef.current,
-        recenterToken,
-        lastRecenterToken: lastRecenterRef.current,
-      })
-    ) {
+    const willApply = shouldApplyMapFocus({
+      fitBoundsMode,
+      hasFitted: hasFittedRef.current,
+      recenterToken,
+      lastRecenterToken: lastRecenterRef.current,
+    });
+    if (!willApply) {
+      // No cleanup — prior apply may still be animating.
       return;
     }
 
     const map = mapRef.getMap();
     map.resize();
 
+    const paddingBias = focusPaddingBiasRef.current ?? 0;
+    const minZoom = focusMinZoomRef.current;
+    const maxZoom = focusMaxZoomRef.current;
+
     const padding = {
       top: padY,
       left: padX,
       right: padX,
-      bottom: padY + (focusPaddingBias ?? 0),
+      bottom: padY + paddingBias,
     };
 
-    const mapBounds = toMapBounds(focusBounds);
+    const mapBounds = toMapBounds(bounds);
     if (!isUsableMapBounds(mapBounds)) {
       return;
     }
@@ -167,8 +207,8 @@ function MapFocus({
       map,
       lngLatBounds,
       padding,
-      focusMinZoom,
-      focusMaxZoom,
+      minZoom,
+      maxZoom,
     );
     if (!framed) {
       return;
@@ -196,6 +236,8 @@ function MapFocus({
       map.jumpTo({ center, zoom });
       return () => {
         // Same as dragstart: cancel ease only — map.stop() resets active pinch/pan.
+        // Survival across preferFly/bounds-identity churn comes from once-mode deps
+        // (refs + presence), not from skipping this cleanup.
         stopMapCameraEase(map);
         map.off("moveend", onMoveEnd);
         if (suppressChromeHideRef) {
@@ -204,7 +246,9 @@ function MapFocus({
       };
     }
 
-    if (isLargeCameraJumpMapLibre(map, center, zoom, preferFly)) {
+    if (
+      isLargeCameraJumpMapLibre(map, center, zoom, preferFlyRef.current)
+    ) {
       map.flyTo({
         center,
         zoom,
@@ -225,20 +269,8 @@ function MapFocus({
         suppressChromeHideRef.current = false;
       }
     };
-  }, [
-    animate,
-    focusBounds,
-    focusMaxZoom,
-    focusMinZoom,
-    fitBoundsMode,
-    padX,
-    padY,
-    focusPaddingBias,
-    mapRef,
-    preferFly,
-    recenterToken,
-    suppressChromeHideRef,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keys from mapFocusApplyDependencyKeys
+  }, [...applyDependencyKeys, mapRef, suppressChromeHideRef]);
 
   return null;
 }

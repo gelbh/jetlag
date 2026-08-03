@@ -109,7 +109,7 @@ export function usePlacementMapFocus({
       panelPeekHeightPx,
       selectedPoiId,
       walkActive,
-      viewportFrame,
+      // viewportFrame intentionally omitted — hysteresis only
     }),
     [
       activeTool,
@@ -120,7 +120,6 @@ export function usePlacementMapFocus({
       panelPeekHeightPx,
       phase,
       selectedPoiId,
-      viewportFrame,
       walkActive,
     ],
   );
