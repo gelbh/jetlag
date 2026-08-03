@@ -74,23 +74,20 @@ export function ObserverMapScreenChrome({
     </div>
   );
 
-  const huntIsland = isAdmin ? (
-    <div className="jl-tool-dock-group jl-tool-dock-group-main">
-      <AppLink
-        to="/admin"
-        className="jl-tool-slot no-underline"
-        aria-label="Open admin"
-      >
-        <span className="jl-tool-slot-icon">
-          <HudAdminIcon className="h-5 w-5 shrink-0" />
-        </span>
-        <span className="jl-tool-slot-label">Admin</span>
-      </AppLink>
-    </div>
-  ) : undefined;
-
   const sessionIsland = (
     <div className="jl-tool-dock-group jl-tool-dock-group-secondary">
+      {isAdmin ? (
+        <AppLink
+          to="/admin"
+          className="jl-tool-slot no-underline"
+          aria-label="Open admin"
+        >
+          <span className="jl-tool-slot-icon">
+            <HudAdminIcon className="h-5 w-5 shrink-0" />
+          </span>
+          <span className="jl-tool-slot-label">Admin</span>
+        </AppLink>
+      ) : null}
       <MotionPressable
         type="button"
         className={`jl-tool-slot${overlay.isChatOpen ? " jl-tool-slot-active" : ""}`}
@@ -119,7 +116,6 @@ export function ObserverMapScreenChrome({
   const toolChrome = (
     <MapBottomChrome
       layout={isDesktop ? "rail" : "phone"}
-      hunt={huntIsland}
       session={sessionIsland}
     />
   );

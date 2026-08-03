@@ -8,6 +8,14 @@
   --dock-island-height: 3.25rem;
   --dock-island-gap: 0.5rem;
   --map-chrome-side-width: 3.25rem;
+  --map-chrome-band-gap: 0.75rem;
+  --map-chrome-edge-gap: 0.5rem;
+  /* Shared with map-chrome-controls.css (.map-zoom-control sizing). */
+  --map-zoom-btn-size: 2.75rem;
+  --map-zoom-stack-gap: 0.375rem;
+  --map-chrome-zoom-stack-height: calc(
+    (var(--map-zoom-btn-size) * 2) + var(--map-zoom-stack-gap)
+  );
   --dock-content-height: var(--dock-island-height);
   --dock-secondary-height: 0px;
   --dock-row-gap: 0px;
@@ -46,10 +54,12 @@
     display: block;
     width: 100%;
     min-height: calc(
-      var(--dock-island-height) + 0.75rem + env(safe-area-inset-bottom)
+      var(--dock-island-height) + var(--map-chrome-band-gap) +
+        env(safe-area-inset-bottom)
     );
-    padding: 0.375rem max(0.5rem, env(safe-area-inset-right))
-      max(0.375rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+    padding: 0.375rem max(var(--map-chrome-edge-gap), env(safe-area-inset-right))
+      max(0.375rem, env(safe-area-inset-bottom))
+      max(var(--map-chrome-edge-gap), env(safe-area-inset-left));
     background: transparent;
     pointer-events: none;
     /* Neutralize legacy .jl-tool-dock fixed/opaque chassis when both classes apply */
@@ -66,24 +76,46 @@
     justify-content: flex-start;
     gap: var(--dock-island-gap);
     width: 100%;
-    /* Leave room for the right side stack (session + map controls). */
-    padding-right: calc(var(--map-chrome-side-width, 3.25rem) + 0.5rem);
+  }
+
+  .jl-map-chrome-bottom-band:empty,
+  .jl-map-chrome-side-stack:empty {
+    display: none;
+  }
+
+  /* Leave room for the right side stack when it has chips. */
+  .jl-map-bottom-chrome:has(.jl-map-chrome-side-stack:not(:empty))
+    .jl-map-chrome-bottom-band {
+    padding-right: calc(
+      var(--map-chrome-side-width) + var(--map-chrome-edge-gap)
+    );
   }
 
   .jl-map-chrome-side-stack {
     position: absolute;
     z-index: 3;
-    right: max(0.5rem, env(safe-area-inset-right));
+    right: max(var(--map-chrome-edge-gap), env(safe-area-inset-right));
     /* Sit above MapView zoom/recenter portal column (MapLibre context owns those). */
     bottom: calc(
-      var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem +
-        var(--map-chrome-zoom-stack-height, 6.25rem)
+      var(--dock-island-height) + env(safe-area-inset-bottom) +
+        var(--map-chrome-band-gap) + var(--map-chrome-zoom-stack-height)
     );
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: var(--dock-island-gap);
     pointer-events: none;
+  }
+
+  /* Mirror map-zoom-control--dock narrow boost so Session clears Zoom. */
+  @media (max-width: 28rem) {
+    .jl-map-chrome-side-stack {
+      bottom: calc(
+        var(--dock-island-height) + env(safe-area-inset-bottom) +
+          var(--map-chrome-band-gap) + var(--map-chrome-zoom-stack-height) +
+          2.5rem
+      );
+    }
   }
 
   .jl-map-island {
@@ -184,7 +216,7 @@
     margin-left: 0;
   }
 
-  .jl-map-island .jl-tool-dock-group-secondary {
+  .jl-map-chrome-side-stack .jl-tool-dock-group-secondary {
     display: flex;
     width: 100%;
     min-width: 0;
@@ -196,8 +228,11 @@
 
   .jl-map-bottom-chrome-host .jl-tool-menu-dock {
     position: absolute;
-    right: max(0.5rem, env(safe-area-inset-right));
-    bottom: calc(var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem);
+    right: max(var(--map-chrome-edge-gap), env(safe-area-inset-right));
+    bottom: calc(
+      var(--dock-island-height) + env(safe-area-inset-bottom) +
+        var(--map-chrome-band-gap)
+    );
     z-index: calc(var(--z-panel) + 1);
     /* Host is pe-none; islands re-enable PE — overlays must too. */
     pointer-events: auto;

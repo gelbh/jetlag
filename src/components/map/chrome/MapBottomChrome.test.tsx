@@ -73,11 +73,26 @@ it("marks chrome inactive without leaving islands clickable via CSS class", () =
     expect(side?.querySelector('[data-island="map-controls"]')).not.toBeNull();
   });
 
-  it("omits the side stack when session and map-controls are absent", () => {
+  it("keeps an empty side stack when session and map-controls are absent", () => {
     const { container } = render(
       <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
     );
-    expect(container.querySelector(".jl-map-chrome-side-stack")).toBeNull();
+    const side = container.querySelector(".jl-map-chrome-side-stack");
+    expect(side).not.toBeNull();
+    expect(side?.childElementCount).toBe(0);
     expect(container.querySelector(".jl-map-chrome-bottom-band")).not.toBeNull();
+  });
+
+  it("uses the same band/side wrappers on rail so CSS can flatten them", () => {
+    const { container } = render(
+      <MapBottomChrome
+        layout="rail"
+        history={<button type="button">Undo</button>}
+        session={<button type="button">Chat</button>}
+      />,
+    );
+    expect(container.querySelector(".jl-map-bottom-chrome-host--rail")).not.toBeNull();
+    expect(container.querySelector(".jl-map-chrome-bottom-band")).not.toBeNull();
+    expect(container.querySelector(".jl-map-chrome-side-stack")).not.toBeNull();
   });
 });
