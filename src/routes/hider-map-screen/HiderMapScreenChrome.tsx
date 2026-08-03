@@ -36,6 +36,7 @@ import { ReportProblemSheet } from "../../components/incident/ReportProblemSheet
 import { FirestorePersistenceBanner } from "../../components/session/banners/FirestorePersistenceBanner";
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
+import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet";
 import {
   HiderTruthRevealBanner,
 } from "../../components/session/banners/HiderTruthRevealBanner";
@@ -48,6 +49,7 @@ import { GameOverChrome } from "../../components/session/game-over/GameOverChrom
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
+import { ledJoinRequestRoles } from "../../domain/session/players/roleGates";
 import type { HiderTruthResult } from "../../domain/questions/ui";
 import { useAnnotationStore } from "../../state/annotationStore";
 
@@ -120,6 +122,7 @@ export type HiderMapScreenChromeProps = {
   onOpenWizard: () => void;
   onOpenChat: () => void;
   onOpenSettings: () => void;
+  onOpenCodes: () => void;
   onRecenter: () => void;
   expansionPackEnabled: boolean;
   expansionMenuOpen: boolean;
@@ -227,6 +230,7 @@ export function HiderMapScreenChrome({
   onOpenWizard,
   onOpenChat,
   onOpenSettings,
+  onOpenCodes,
   onRecenter,
   expansionPackEnabled,
   expansionMenuOpen,
@@ -286,6 +290,9 @@ export function HiderMapScreenChrome({
         return;
       case "log":
         onOpenLog();
+        return;
+      case "codes":
+        onOpenCodes();
         return;
       default: {
         const _exhaustive: never = tab;
@@ -356,6 +363,14 @@ export function HiderMapScreenChrome({
     </>
   );
 
+  const canOpenCodes =
+    Boolean(uid) &&
+    ledJoinRequestRoles({
+      roleGates: session.roleGates,
+      myUid: uid ?? undefined,
+      isHost,
+    }).length > 0;
+
   const toolDock = (
     <HiderToolDock
       layout={toolLayout}
@@ -379,6 +394,7 @@ export function HiderMapScreenChrome({
       onOpenChat={onOpenChat}
       onOpenLog={onOpenLog}
       onOpenSettings={onOpenSettings}
+      onOpenCodes={canOpenCodes ? onOpenCodes : undefined}
       onOpenReportProblem={() => {
         overlay.closeSheet();
         setReportProblemOpen(true);
@@ -519,6 +535,17 @@ export function HiderMapScreenChrome({
             setReportProblemOpen(true);
           }}
         />
+
+        {uid ? (
+          <RoleCodesSheet
+            key={overlay.isCodesOpen ? "codes-open" : "codes-closed"}
+            open={overlay.isCodesOpen}
+            onClose={overlay.closeSheet}
+            session={session}
+            myUid={uid}
+            isHost={isHost}
+          />
+        ) : null}
 
         <ReportProblemSheet
           open={reportProblemOpen}

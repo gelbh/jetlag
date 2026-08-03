@@ -23,12 +23,15 @@ export interface RolePasscodeSettingsProps {
   session: SessionRecord;
   myUid: string;
   isHost: boolean;
+  /** When true, omit section chrome (used inside RoleCodesSheet). */
+  embedded?: boolean;
 }
 
 export function RolePasscodeSettings({
   session,
   myUid,
   isHost,
+  embedded = false,
 }: RolePasscodeSettingsProps) {
   const [busyRole, setBusyRole] = useState<RevealRole | null>(null);
   const [revealedCodes, setRevealedCodes] = useState<
@@ -109,10 +112,18 @@ export function RolePasscodeSettings({
   };
 
   return (
-    <div className="space-y-3 border-t-2 border-border pt-4">
-      <p className="font-display text-xs font-semibold uppercase tracking-[0.12em] text-ink-muted">
-        Role codes
-      </p>
+    <div
+      className={
+        embedded
+          ? "space-y-3"
+          : "space-y-3 border-t-2 border-border pt-4"
+      }
+    >
+      {embedded ? null : (
+        <p className="font-display text-xs font-semibold uppercase tracking-[0.12em] text-ink-muted">
+          Role codes
+        </p>
+      )}
       {rows.map((role) => (
         <RoleCodeStamp
           key={role}

@@ -4,9 +4,15 @@ import { ContextualRail } from "../../components/map/chrome/ContextualRail";
 import type { ContextualRailTab } from "../../components/map/chrome/ContextualRailContext";
 import { MapBottomChrome } from "../../components/map/chrome/MapBottomChrome";
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
-import { HudAdminIcon, HudHomeIcon } from "../../components/ui/brand/HudIcons";
+import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet";
+import {
+  HudAdminIcon,
+  HudHomeIcon,
+  HudStarIcon,
+} from "../../components/ui/brand/HudIcons";
 import { MotionPressable } from "../../components/motion/MotionPressable";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
+import { ledJoinRequestRoles } from "../../domain/session/players/roleGates";
 import type { SessionRecord } from "../../domain/map/annotations";
 import type { UseMapOverlayStateResult } from "../../hooks/map/useMapOverlayState";
 import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
@@ -17,6 +23,8 @@ import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig
 interface ObserverMapScreenChromeProps {
   session: SessionRecord;
   myRole: PlayerRole;
+  myUid?: string;
+  isHost?: boolean;
   timer: ReturnType<typeof useSessionTimer>;
   overlay: UseMapOverlayStateResult;
   onLeave: () => void;
@@ -27,6 +35,8 @@ interface ObserverMapScreenChromeProps {
 export function ObserverMapScreenChrome({
   session,
   myRole,
+  myUid,
+  isHost = false,
   timer,
   overlay,
   onLeave,
@@ -40,6 +50,13 @@ export function ObserverMapScreenChrome({
     roleConfig.role === "admin" ? "Leave admin monitor" : "Leave observation";
   const isDesktop = useDesktopLayout();
   const isAdmin = roleConfig.role === "admin";
+  const canOpenCodes =
+    Boolean(myUid) &&
+    ledJoinRequestRoles({
+      roleGates: session.roleGates,
+      myUid,
+      isHost,
+    }).length > 0;
 
   const statusBar = (
     <div className={isDesktop ? "jl-status-rail--expanded" : undefined}>
@@ -112,6 +129,22 @@ export function ObserverMapScreenChrome({
       >
         <span className="jl-tool-slot-label">Log</span>
       </MotionPressable>
+      {canOpenCodes ? (
+        <MotionPressable
+          type="button"
+          className={`jl-tool-slot${overlay.isCodesOpen ? " jl-tool-slot-active" : ""}`}
+          aria-label="Open role codes"
+          aria-pressed={overlay.isCodesOpen}
+          onClick={() =>
+            overlay.isCodesOpen ? overlay.closeSheet() : overlay.openCodes()
+          }
+        >
+          <span className="jl-tool-slot-icon">
+            <HudStarIcon className="h-5 w-5 shrink-0" />
+          </span>
+          <span className="jl-tool-slot-label">Codes</span>
+        </MotionPressable>
+      ) : null}
     </div>
   );
 
@@ -122,9 +155,23 @@ export function ObserverMapScreenChrome({
     />
   );
 
+  const codesSheet =
+    myUid && canOpenCodes ? (
+      <RoleCodesSheet
+        key={overlay.isCodesOpen ? "codes-open" : "codes-closed"}
+        open={overlay.isCodesOpen}
+        onClose={overlay.closeSheet}
+        session={session}
+        myUid={myUid}
+        isHost={isHost}
+      />
+    ) : null;
+
   if (isDesktop && mapSlot) {
     const railActiveTab: ContextualRailTab | null =
-      overlay.sheet === "log" || overlay.sheet === "chat"
+      overlay.sheet === "log" ||
+      overlay.sheet === "chat" ||
+      overlay.sheet === "codes"
         ? overlay.sheet
         : null;
 
@@ -136,6 +183,9 @@ export function ObserverMapScreenChrome({
         case "chat":
           overlay.openChat();
           return;
+        case "codes":
+          overlay.openCodes();
+          return;
         case "settings":
           return;
         default: {
@@ -146,28 +196,38 @@ export function ObserverMapScreenChrome({
     };
 
     return (
-      <MapScreenChromeSlots
-        header={statusBar}
-        toolbar={toolChrome}
-        mapSlot={mapSlot}
-        contextual={
-          <ContextualRail
-            open={overlay.sheet === "log" || overlay.sheet === "chat"}
-            activeTab={railActiveTab}
-            onClose={overlay.closeSheet}
-            onSelectTab={handleSelectRailTab}
-            tabs={["log", "chat"]}
-          />
-        }
-      />
+      <>
+        <MapScreenChromeSlots
+          header={statusBar}
+          toolbar={toolChrome}
+          mapSlot={mapSlot}
+          contextual={
+            <ContextualRail
+              open={
+                overlay.sheet === "log" ||
+                overlay.sheet === "chat" ||
+                overlay.sheet === "codes"
+              }
+              activeTab={railActiveTab}
+              onClose={overlay.closeSheet}
+              onSelectTab={handleSelectRailTab}
+              tabs={["log", "chat"]}
+            />
+          }
+        />
+        {codesSheet}
+      </>
     );
   }
 
   return (
-    <MapScreenChromeSlots
-      layout="fragments"
-      header={statusBar}
-      toolbar={toolChrome}
-    />
+    <>
+      <MapScreenChromeSlots
+        layout="fragments"
+        header={statusBar}
+        toolbar={toolChrome}
+      />
+      {codesSheet}
+    </>
   );
 }
