@@ -1,3 +1,4 @@
+import { MapBottomChrome } from "../../components/map/chrome/MapBottomChrome";
 import { SessionTimerLabel } from "../../components/session/identity/SessionTimerLabel";
 import { SyncStatusBeacon } from "../../components/session/syncUi/SyncStatusDot";
 import { syncBeaconAriaLabel } from "../../components/session/status/syncRailDisplay";
@@ -57,19 +58,19 @@ export function AdminMapScreenChrome({
                 <p className="font-mono text-xs font-bold tracking-[0.18em] text-ink">
                   {session.code}
                 </p>
-                <p className="text-[0.6875rem] tabular-nums text-ink-muted">
+                <p className="text-[0.8125rem] tabular-nums text-ink-muted">
                   <SessionTimerLabel timerState={timer.timerState} />
                 </p>
               </div>
 
               <span
-                className="shrink-0 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-[0.6875rem] font-semibold uppercase tracking-wide text-brand-blue"
+                className="shrink-0 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-[0.8125rem] font-semibold uppercase tracking-wide text-brand-blue"
               >
                 {roleLabel}
               </span>
 
               <span
-                className="inline-flex shrink-0 items-center gap-1.5 text-[0.6875rem] font-semibold uppercase tracking-wide text-ink-muted"
+                className="inline-flex shrink-0 items-center gap-1.5 text-[0.8125rem] font-semibold uppercase tracking-wide text-ink-muted"
                 aria-label={syncBeaconAriaLabel(syncStatus)}
               >
                 <SyncStatusBeacon status={syncStatus} size="sm" />
@@ -99,11 +100,11 @@ export function AdminMapScreenChrome({
             <p className="font-mono text-xs font-bold tracking-[0.18em] text-ink">
               {session.code}
             </p>
-            <p className="text-[0.6875rem] tabular-nums text-ink-muted">
+            <p className="text-[0.8125rem] tabular-nums text-ink-muted">
               <SessionTimerLabel timerState={timer.timerState} />
             </p>
           </div>
-          <span className="shrink-0 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-[0.6875rem] font-semibold uppercase tracking-wide text-brand-blue">
+          <span className="shrink-0 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-[0.8125rem] font-semibold uppercase tracking-wide text-brand-blue">
             {roleLabel}
           </span>
           <button
@@ -171,38 +172,39 @@ export function AdminMapScreenChrome({
   );
 
   const toolbar = (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-dock)] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-      <div className="pointer-events-auto mx-auto flex max-w-xl flex-col gap-2">
-        <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
+    <MapBottomChrome
+      layout="phone"
+      hunt={
+        <div className="jl-tool-dock-group jl-tool-dock-group-main">
           <button
             type="button"
-            className={`min-h-9 flex-1 rounded-lg px-2.5 text-xs font-semibold uppercase tracking-wide ${
-              overlay.isLogOpen
-                ? "bg-action text-action-ink"
-                : "bg-surface-raised text-ink"
+            className={`jl-tool-slot${
+              overlay.isLogOpen ? " jl-tool-slot-active" : ""
             }`}
+            aria-label="Open session log"
+            aria-pressed={overlay.isLogOpen}
             onClick={() =>
               overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
             }
           >
-            Log
+            <span className="jl-tool-slot-label">Log</span>
           </button>
           <button
             type="button"
-            className={`min-h-9 flex-1 rounded-lg px-2.5 text-xs font-semibold uppercase tracking-wide ${
-              overlay.isChatOpen
-                ? "bg-action text-action-ink"
-                : "bg-surface-raised text-ink"
+            className={`jl-tool-slot${
+              overlay.isChatOpen ? " jl-tool-slot-active" : ""
             }`}
+            aria-label="Open chat"
+            aria-pressed={overlay.isChatOpen}
             onClick={() =>
               overlay.isChatOpen ? overlay.closeSheet() : overlay.openChat()
             }
           >
-            Chat
+            <span className="jl-tool-slot-label">Chat</span>
           </button>
         </div>
-      </div>
-    </div>
+      }
+    />
   );
 
   return (
