@@ -14,14 +14,14 @@ interface PendingQuestionLayerProps {
   gameArea: GameArea;
   sessionRules: SessionRulesInput;
   mapStyle?: MapStyle;
-  streetBasemap?: StreetBasemap;
+  streetBasemap: StreetBasemap;
 }
 
 export const PendingQuestionLayer = memo(function PendingQuestionLayer({
   pendingQuestions,
   gameArea,
   mapStyle = "standard",
-  streetBasemap = "light",
+  streetBasemap,
 }: PendingQuestionLayerProps) {
   const overlayKey = useMemo(
     () =>
