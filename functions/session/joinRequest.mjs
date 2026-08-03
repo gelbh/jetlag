@@ -236,6 +236,7 @@ export async function cancelRoleJoinRequestHandler(
     .collection("joinRequests")
     .doc(requestId);
 
+  let hasExpired = false;
   await db.runTransaction(async (tx) => {
     const requestSnap = await tx.get(requestRef);
     if (!requestSnap.exists) {
@@ -256,7 +257,8 @@ export async function cancelRoleJoinRequestHandler(
         status: "expired",
         resolvedAt: new Date(nowMs).toISOString(),
       });
-      throw new Error(JOIN_REQ_EXPIRED);
+      hasExpired = true;
+      return;
     }
 
     tx.update(requestRef, {
@@ -265,6 +267,10 @@ export async function cancelRoleJoinRequestHandler(
       resolvedByUid: uid,
     });
   });
+
+  if (hasExpired) {
+    throw new Error(JOIN_REQ_EXPIRED);
+  }
 
   return { ok: true };
 }
@@ -288,6 +294,7 @@ export async function resolveRoleJoinRequestHandler(
   const secretsRef = db.collection("sessionRoleSecrets").doc(sessionId);
   const requestRef = sessionRef.collection("joinRequests").doc(requestId);
 
+  let hasExpired = false;
   await db.runTransaction(async (tx) => {
     const sessionSnap = await tx.get(sessionRef);
     if (!sessionSnap.exists) {
@@ -319,7 +326,8 @@ export async function resolveRoleJoinRequestHandler(
         status: "expired",
         resolvedAt: new Date(nowMs).toISOString(),
       });
-      throw new Error(JOIN_REQ_EXPIRED);
+      hasExpired = true;
+      return;
     }
 
     const resolvedAt = new Date(nowMs).toISOString();
@@ -401,6 +409,10 @@ export async function resolveRoleJoinRequestHandler(
       resolvedByUid: uid,
     });
   });
+
+  if (hasExpired) {
+    throw new Error(JOIN_REQ_EXPIRED);
+  }
 
   return { ok: true };
 }

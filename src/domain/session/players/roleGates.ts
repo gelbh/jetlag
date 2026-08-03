@@ -41,6 +41,14 @@ export function ledJoinRequestRoles(input: {
   return roles;
 }
 
+export function visibleRoleCodeRoles(input: {
+  roleGates?: RoleGates | null;
+  myUid: string | undefined;
+  isHost: boolean;
+}): JoinRequestRole[] {
+  return ledJoinRequestRoles(input);
+}
+
 export function countMembersWithRole(
   memberRoles: Record<string, PlayerRole | string> | undefined,
   role: PlayerRole,

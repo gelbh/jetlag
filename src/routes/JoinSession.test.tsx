@@ -72,6 +72,13 @@ const gatedPreviewSession = createTestRemoteSession({
   },
 });
 
+const previewShapedSession = createTestRemoteSession({
+  id: "sess-preview-shaped",
+  code: "EFGH",
+  memberUids: ["host-1", "seeker-1"],
+  memberRoles: { "host-1": "hider", "seeker-1": "seeker" },
+});
+
 async function enterCodeAndWaitForPreview() {
   fireEvent.change(screen.getByPlaceholderText("ABCD"), {
     target: { value: "ABCD" },
@@ -320,6 +327,28 @@ describe("JoinSession", () => {
         "user-1",
       );
       expect(navigate).toHaveBeenCalledWith("/map");
+    });
+  });
+
+  it("shows request access button for preview-shaped session without roleGates", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    mockIsFirebaseConfigured.mockReturnValue(true);
+    vi.mocked(lookupRemoteSessionByCode).mockResolvedValue({
+      status: "found",
+      session: previewShapedSession,
+    });
+
+    renderWithRouter(<JoinSession />);
+    fireEvent.change(screen.getByPlaceholderText("ABCD"), {
+      target: { value: "EFGH" },
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Request access" })).toBeInTheDocument();
     });
   });
 });
