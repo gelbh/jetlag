@@ -135,7 +135,13 @@ export async function clickToolDockButton(page: Page, name: string) {
       el.click();
     }
   });
-  await expect(button).toHaveAttribute("aria-pressed", "true");
+  // Tool becomes active: for normal selection, aria-pressed="true".
+  // For preview-only mode (blocked by open question): tool activates and panel
+  // renders with ViewOnlyQuestionBanner, but aria-pressed stays false.
+  const isPreviewOnly = (await button.getAttribute("title"))?.includes("Preview only") ?? false;
+  if (!isPreviewOnly) {
+    await expect(button).toHaveAttribute("aria-pressed", "true");
+  }
 }
 
 export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
