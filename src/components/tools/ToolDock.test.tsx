@@ -34,6 +34,7 @@ describe("ToolDock", () => {
   it("renders session island tools including Log", () => {
     const onOpenReportProblem = vi.fn();
     const onOpenSettings = vi.fn();
+    const onOpenCodes = vi.fn();
     const onOpenChat = vi.fn();
     const onOpenLog = vi.fn();
 
@@ -42,6 +43,7 @@ describe("ToolDock", () => {
         {...dockBase}
         onOpenReportProblem={onOpenReportProblem}
         onOpenSettings={onOpenSettings}
+        onOpenCodes={onOpenCodes}
         onOpenChat={onOpenChat}
         onOpenLog={onOpenLog}
       />,
@@ -55,6 +57,9 @@ describe("ToolDock", () => {
       within(sessionTools).getByRole("button", { name: "Open settings" }),
     );
     fireEvent.click(
+      within(sessionTools).getByRole("button", { name: "Open role codes" }),
+    );
+    fireEvent.click(
       within(sessionTools).getByRole("button", { name: "Open chat" }),
     );
     fireEvent.click(
@@ -63,8 +68,18 @@ describe("ToolDock", () => {
 
     expect(onOpenReportProblem).toHaveBeenCalledTimes(1);
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
+    expect(onOpenCodes).toHaveBeenCalledTimes(1);
     expect(onOpenChat).toHaveBeenCalledTimes(1);
     expect(onOpenLog).toHaveBeenCalledTimes(1);
+  });
+
+  it("omits Codes from session island when onOpenCodes is omitted", () => {
+    renderWithRouter(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
+
+    const sessionTools = screen.getByLabelText("Session tools");
+    expect(
+      within(sessionTools).queryByRole("button", { name: "Open role codes" }),
+    ).not.toBeInTheDocument();
   });
 
   it("keeps Chat and Settings off the hunt island", () => {

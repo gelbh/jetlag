@@ -126,6 +126,11 @@ export function ObserverMapScreen() {
         <ObserverMapScreenChrome
           session={controller.session}
           myRole={controller.myRole ?? "observer"}
+          myUid={controller.uid}
+          isHost={
+            Boolean(controller.uid) &&
+            controller.session.hostUid === controller.uid
+          }
           timer={controller.timer}
           overlay={controller.overlay}
           onLeave={() => void handleLeave()}
