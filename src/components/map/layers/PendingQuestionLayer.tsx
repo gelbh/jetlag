@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import type { GameArea } from "../../../domain/map/annotations";
-import type { MapStyle } from "../../../domain/map/mapBasemaps";
+import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
 import type { SessionRulesInput } from "../../../domain/session/rules";
 import {
   buildPendingQuestionOverlays,
@@ -14,17 +14,19 @@ interface PendingQuestionLayerProps {
   gameArea: GameArea;
   sessionRules: SessionRulesInput;
   mapStyle?: MapStyle;
+  streetBasemap?: StreetBasemap;
 }
 
 export const PendingQuestionLayer = memo(function PendingQuestionLayer({
   pendingQuestions,
   gameArea,
   mapStyle = "standard",
+  streetBasemap = "light",
 }: PendingQuestionLayerProps) {
   const overlayKey = useMemo(
     () =>
-      `${mapStyle}|${pendingQuestions.map((question) => `${question.id}:${question.status}`).join(",")}`,
-    [mapStyle, pendingQuestions],
+      `${mapStyle}|${streetBasemap}|${pendingQuestions.map((question) => `${question.id}:${question.status}`).join(",")}`,
+    [mapStyle, streetBasemap, pendingQuestions],
   );
 
   const [overlayResults, setOverlayResults] = useState<
@@ -39,6 +41,7 @@ export const PendingQuestionLayer = memo(function PendingQuestionLayer({
       pendingQuestions,
       gameArea,
       mapStyle,
+      streetBasemap,
     )
       .then((results) => {
         if (!cancelled) {
@@ -56,7 +59,7 @@ export const PendingQuestionLayer = memo(function PendingQuestionLayer({
     return () => {
       cancelled = true;
     };
-  }, [gameArea, mapStyle, overlayKey, pendingQuestions]);
+  }, [gameArea, mapStyle, streetBasemap, overlayKey, pendingQuestions]);
 
   const overlays = useMemo(() => {
     if (loadedKey !== overlayKey) {

@@ -2,7 +2,7 @@ import turfCircle from "@turf/circle";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
 import { pointToolRadiusFromMetadata } from "../../../domain/map/annotations";
-import { polygonFeatureToLeafletRings } from "../../../domain/geometry/gameArea/geometry";
+import { polygonFeatureToRings } from "../../../domain/geometry/gameArea/geometry";
 import type { LayerVisibility } from "../../../state/sessionStore";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
@@ -165,7 +165,7 @@ export function renderAnnotationLayerItem({
   ) {
     const zonePolygon = annotation.geometry as Feature<GeoPolygon>;
     const weight = selected ? 4 : 2;
-    return polygonFeatureToLeafletRings(zonePolygon).map((ring, index) => (
+    return polygonFeatureToRings(zonePolygon).map((ring, index) => (
       <MapLibreGeoJsonOverlay
         key={`${annotation.id}-outline-${index}`}
         id={`annotation-${annotation.id}-zone-${index}`}

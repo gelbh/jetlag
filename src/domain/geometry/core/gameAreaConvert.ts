@@ -21,7 +21,7 @@ import {
 } from "../gameArea/gameAreaConstants";
 import { featureToGameArea, gameAreaToFeature } from "./featureConvert";
 import { safeDifference } from "./geodesicPrimitives";
-import type { GameAreaLeafletPositions, LatLngTuple } from "./types";
+import type { LatLngTuple } from "./types";
 
 export type { BoundingBox } from "../gameArea/gameAreaBounds";
 export {
@@ -110,9 +110,6 @@ export function boundingBoxToMapBounds(box: BoundingBox): MapBounds {
   return createMapBounds(normalizeBoundsExpression(boundingBoxToBoundsExpression(box)));
 }
 
-/** @deprecated Prefer `boundingBoxToMapBounds`. */
-export const boundingBoxToLeafletBounds = boundingBoxToMapBounds;
-
 export function gameAreaToBoundsExpression(
   gameArea: GameArea,
 ): MapBoundsExpression {
@@ -176,32 +173,6 @@ export function gameAreaToPolygon(
   gameArea: GameArea,
 ): Feature<Polygon | MultiPolygon> {
   return gameAreaToFeature(gameArea);
-}
-
-export function gameAreaToLeafletPositions(
-  gameArea: GameArea,
-): GameAreaLeafletPositions {
-  if (gameArea.type === "MultiPolygon") {
-    return gameArea.coordinates.map((polygon) =>
-      polygon.map((ring) =>
-        ring.map(([lng, lat]) => [lat, lng] as LatLngTuple),
-      ),
-    );
-  }
-
-  return gameArea.coordinates.map((ring) =>
-    ring.map(([lng, lat]) => [lat, lng] as LatLngTuple),
-  );
-}
-
-export function gameAreaToLeafletLatLngs(gameArea: GameArea): LatLngTuple[] {
-  const positions = gameAreaToLeafletPositions(gameArea);
-  if (Array.isArray(positions[0]?.[0])) {
-    const firstPolygon = positions[0] as LatLngTuple[][];
-    return firstPolygon[0] ?? [];
-  }
-
-  return positions as LatLngTuple[];
 }
 
 export function gameAreaCenter(gameArea: GameArea): LatLngTuple {
@@ -269,20 +240,6 @@ export function gameAreaOutsideMask(gameArea: GameArea): GameArea | null {
   return result ? featureToGameArea(result) : null;
 }
 
-export function polygonToLeafletLatLngs(
-  polygon: Feature<Polygon>,
-): LatLngTuple[][] {
-  const { coordinates } = polygon.geometry;
-
-  if (polygon.geometry.type === "Polygon") {
-    return coordinates.map((ring) =>
-      ring.map(([lng, lat]) => [lat, lng] as LatLngTuple),
-    );
-  }
-
-  return [];
-}
-
 export { featureToGameArea, gameAreaToFeature } from "./featureConvert";
 export {
   bearingDegrees,
@@ -296,4 +253,4 @@ export {
   buildRadarShadedRegion,
   isPointInGameArea,
 } from "./radarHalfPlane";
-export type { GameAreaLeafletPositions, LatLngTuple } from "./types";
+export type { LatLngTuple } from "./types";
