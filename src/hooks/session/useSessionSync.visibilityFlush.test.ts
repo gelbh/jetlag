@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useSessionStore } from "../../state/sessionStore";
 import { useSessionSync } from "./useSessionSync";
 
-const flushOfflineQueueMock = vi.fn(async (_sessionId: string) => ({
+const flushOfflineQueueMock = vi.fn(async () => ({
   remaining: 0,
   lastError: null as string | null,
 }));
