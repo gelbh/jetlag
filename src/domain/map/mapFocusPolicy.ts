@@ -18,15 +18,3 @@ export function shouldApplyMapFocus(args: {
   }
   return true;
 }
-
-/**
- * True when an existing MapFocus animation should be cancelled because a new
- * apply is starting. Cleanup must call stopMapCameraEase only when willApply is
- * true for this effect run (or on unmount of an effect that previously applied).
- * If willApply is false, leave any in-flight camera alone.
- */
-export function shouldStopMapFocusAnimation(args: {
-  willApply: boolean;
-}): boolean {
-  return args.willApply;
-}

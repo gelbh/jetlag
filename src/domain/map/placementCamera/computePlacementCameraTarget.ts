@@ -64,6 +64,24 @@ function buildTarget(
   };
 }
 
+function playAreaCameraTarget(
+  ctx: PlacementCameraContext,
+  options: {
+    forceReframe?: boolean;
+    /** When set, caps minZoom so a smaller feature stays in play-area context. */
+    contextBox?: ReturnType<typeof boundsForPinPoint>;
+  } = {},
+): CameraTarget {
+  return {
+    bounds: boundsForPlayArea(ctx.gameArea),
+    minZoom: options.contextBox
+      ? approximatePlayAreaContextMinZoom(ctx.gameArea, options.contextBox)
+      : undefined,
+    paddingBiasPx: ctx.panelPeekHeightPx + PANEL_PADDING_EXTRA_PX,
+    forceReframe: options.forceReframe ?? ctx.forceReframe,
+  };
+}
+
 function answeredEliminationTarget(
   ctx: PlacementCameraContext,
   forceReframe = true,
@@ -101,12 +119,10 @@ function computeRadarTarget(ctx: PlacementCameraContext): CameraTarget | null {
 
     const eliminationBox = boundsForGeoJsonFeatures(ctx.eliminationFeatures);
     if (eliminationBox) {
-      return {
-        bounds: boundsForPlayArea(ctx.gameArea),
-        minZoom: approximatePlayAreaContextMinZoom(ctx.gameArea, eliminationBox),
-        paddingBiasPx: ctx.panelPeekHeightPx + PANEL_PADDING_EXTRA_PX,
+      return playAreaCameraTarget(ctx, {
         forceReframe: true,
-      };
+        contextBox: eliminationBox,
+      });
     }
 
     return answeredEliminationTarget(ctx);
@@ -295,11 +311,7 @@ export function computePlacementCameraTarget(
   }
 
   if (ctx.phase === "idle") {
-    return {
-      bounds: boundsForPlayArea(ctx.gameArea),
-      paddingBiasPx: ctx.panelPeekHeightPx + PANEL_PADDING_EXTRA_PX,
-      forceReframe: true,
-    };
+    return playAreaCameraTarget(ctx, { forceReframe: true });
   }
 
   switch (ctx.tool) {

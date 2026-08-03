@@ -21,10 +21,7 @@ import { isUsableMapBounds } from "../../../domain/geometry/gameArea/geometry";
 import { computeFramedCenterZoomMapLibre } from "../../../domain/map/computeFramedCenterZoomMapLibre";
 import { focusBoundsToLngLatBounds } from "../../../domain/map/focusBoundsToLngLatBounds";
 import { isLargeCameraJumpMapLibre } from "../../../domain/map/isLargeCameraJumpMapLibre";
-import {
-  shouldApplyMapFocus,
-  shouldStopMapFocusAnimation,
-} from "../../../domain/map/mapFocusPolicy";
+import { shouldApplyMapFocus } from "../../../domain/map/mapFocusPolicy";
 import { resolveMapPitchDegrees } from "../../../domain/map/resolveMapPitchDegrees";
 import { stopMapCameraEase } from "../../../domain/map/stopMapCameraEase";
 import {
@@ -162,10 +159,10 @@ function MapFocus({
 
   // once-mode omits live bounds/zoom/bias from deps (refs) so identity churn
   // cannot abort an in-flight ease via effect cleanup — intentional.
-  /* eslint-disable react-hooks/exhaustive-deps -- once-mode MapFocus isolation */
   useEffect(() => {
-    const bounds =
-      fitBoundsMode === "always" ? focusBounds : focusBoundsRef.current;
+    // Apply-time values always from refs (synced above). Deps differ by mode:
+    // once → presence/token only; always → live bounds/bias/zoom.
+    const bounds = focusBoundsRef.current;
     if (!bounds) {
       return;
     }
@@ -184,14 +181,9 @@ function MapFocus({
     const map = mapRef.getMap();
     map.resize();
 
-    const paddingBias =
-      fitBoundsMode === "always"
-        ? (focusPaddingBias ?? 0)
-        : (focusPaddingBiasRef.current ?? 0);
-    const minZoom =
-      fitBoundsMode === "always" ? focusMinZoom : focusMinZoomRef.current;
-    const maxZoom =
-      fitBoundsMode === "always" ? focusMaxZoom : focusMaxZoomRef.current;
+    const paddingBias = focusPaddingBiasRef.current ?? 0;
+    const minZoom = focusMinZoomRef.current;
+    const maxZoom = focusMaxZoomRef.current;
 
     const padding = {
       top: padY,
@@ -238,10 +230,10 @@ function MapFocus({
     if (!animate) {
       map.jumpTo({ center, zoom });
       return () => {
-        if (shouldStopMapFocusAnimation({ willApply: true })) {
-          // Same as dragstart: cancel ease only — map.stop() resets active pinch/pan.
-          stopMapCameraEase(map);
-        }
+        // Same as dragstart: cancel ease only — map.stop() resets active pinch/pan.
+        // Survival across preferFly/bounds-identity churn comes from once-mode deps
+        // (refs + presence), not from skipping this cleanup.
+        stopMapCameraEase(map);
         map.off("moveend", onMoveEnd);
         if (suppressChromeHideRef) {
           suppressChromeHideRef.current = false;
@@ -266,9 +258,7 @@ function MapFocus({
     }
 
     return () => {
-      if (shouldStopMapFocusAnimation({ willApply: true })) {
-        stopMapCameraEase(map);
-      }
+      stopMapCameraEase(map);
       map.off("moveend", onMoveEnd);
       if (suppressChromeHideRef) {
         suppressChromeHideRef.current = false;
@@ -287,7 +277,6 @@ function MapFocus({
     recenterToken,
     suppressChromeHideRef,
   ]);
-  /* eslint-enable react-hooks/exhaustive-deps */
 
   return null;
 }

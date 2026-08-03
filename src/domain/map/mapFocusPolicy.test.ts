@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  shouldApplyMapFocus,
-  shouldStopMapFocusAnimation,
-} from "./mapFocusPolicy";
+import { shouldApplyMapFocus } from "./mapFocusPolicy";
 
 describe("shouldApplyMapFocus", () => {
   it("skips once-mode after a successful fit without a new recenter token", () => {
@@ -49,7 +46,7 @@ describe("shouldApplyMapFocus", () => {
     ).toBe(true);
   });
 
-  it("does not treat preferFly-only changes as a new apply when token unchanged", () => {
+  it("skips once-mode when token unchanged after fit (bounds identity churn)", () => {
     expect(
       shouldApplyMapFocus({
         fitBoundsMode: "once",
@@ -58,12 +55,5 @@ describe("shouldApplyMapFocus", () => {
         lastRecenterToken: 3,
       }),
     ).toBe(false);
-  });
-});
-
-describe("shouldStopMapFocusAnimation", () => {
-  it("stops previous animation only when a new apply will run", () => {
-    expect(shouldStopMapFocusAnimation({ willApply: true })).toBe(true);
-    expect(shouldStopMapFocusAnimation({ willApply: false })).toBe(false);
   });
 });
