@@ -151,6 +151,12 @@
     flex: 0 0 auto;
     flex-direction: column;
     width: var(--map-chrome-side-width, 3.25rem);
+    height: fit-content;
+  }
+
+  .jl-map-chrome-side-stack .jl-map-island .jl-tool-dock-group-secondary {
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
   }
 
   /* Cap chip width so label text cannot inflate History over Hunt. */
