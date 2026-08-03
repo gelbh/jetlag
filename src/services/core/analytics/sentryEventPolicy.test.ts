@@ -17,6 +17,14 @@ describe("classifyClientSentryEvent", () => {
         exc("QuotaExceededError", "The quota has been exceeded."),
       ),
     ).toBe("meter_quota");
+    expect(
+      classifyClientSentryEvent(
+        exc(
+          "QuotaExceededError",
+          "Failed to execute 'setItem' on 'Storage': Setting the value of 'jetlag-annotations' exceeded the quota.",
+        ),
+      ),
+    ).toBe("meter_quota");
   });
 
   it("drops AbortError aborted operation", () => {

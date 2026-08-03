@@ -1,11 +1,19 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAnnotationStore } from "./annotationStore";
 import { createTestPinAnnotation } from "../test/fixtures/sessions";
 import { resetAllStores } from "../test/helpers/storeReset";
 
+function quotaError(): DOMException {
+  return new DOMException("QuotaExceededError", "QuotaExceededError");
+}
+
 describe("annotationStore", () => {
   beforeEach(() => {
     resetAllStores();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("adds and upserts annotations", () => {
@@ -63,5 +71,38 @@ describe("annotationStore", () => {
     ]);
     useAnnotationStore.getState().clearAnnotationPulse("ann-1");
     expect(useAnnotationStore.getState().pulsingAnnotationIds).toEqual([]);
+  });
+
+  it("does not throw when persist hits localStorage quota", () => {
+    const created = useAnnotationStore.getState().addAnnotation({
+      type: "pin",
+      geometry: createTestPinAnnotation().geometry,
+      metadata: createTestPinAnnotation().metadata,
+    });
+    useAnnotationStore.getState().softDeleteAnnotation(created.id);
+
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(function mockSetItem(
+      this: Storage,
+      key,
+      value,
+    ) {
+      if (key !== "jetlag-annotations") {
+        return Storage.prototype.setItem.call(this, key, value);
+      }
+
+      const parsed = JSON.parse(value) as {
+        state: { annotations: { status: string }[] };
+      };
+      if (parsed.state.annotations.some((item) => item.status === "deleted")) {
+        throw quotaError();
+      }
+    });
+
+    expect(() =>
+      useAnnotationStore.getState().setSelectedAnnotationId(created.id),
+    ).not.toThrow();
+    expect(useAnnotationStore.getState().selectedAnnotationId).toBe(
+      created.id,
+    );
   });
 });

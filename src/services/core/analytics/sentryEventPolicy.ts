@@ -15,7 +15,8 @@ import { isExpectedSessionLeaveMessage } from "../../session/sessionLeaveErrors"
 
 export const QUOTA_SAMPLE_RATE = 0.05;
 
-const STORAGE_QUOTA_EXCEEDED = /quota has been exceeded/i;
+/** Chrome: "…exceeded the quota."; Firefox/WebKit often "quota has been exceeded". */
+const STORAGE_QUOTA_EXCEEDED = /exceeded the quota|quota has been exceeded/i;
 const FIRESTORE_PERMISSION_DENIED =
   /missing or insufficient permissions/i;
 const AUTH_NETWORK_FAILED = /auth\/network-request-failed/i;
