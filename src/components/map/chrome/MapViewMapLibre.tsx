@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, type RefObject } from "react";
 import Map, {
   AttributionControl,
-  type MapLayerMouseEvent,
   type MapRef,
 } from "react-map-gl/maplibre";
 import { setWorkerUrl, type Map as MapLibreMap } from "maplibre-gl";
@@ -32,6 +31,11 @@ import {
 import { useMotionProfile } from "../../../hooks/motion/useMotionProfile";
 import { useMapStore } from "../../../state/mapStore";
 import { useMapLibreMap } from "../helpers/useMapLibreMap";
+import {
+  MapFeatureHitTestBridge,
+  MapFeatureHitTestProvider,
+} from "../helpers/MapFeatureHitTestContext";
+import { useMapLibreMarkerImages } from "../helpers/mapLibreIconRegistry";
 import { MapChromeListener } from "./MapChromeListener";
 import { MapRecenterControl } from "./MapRecenterControl";
 import { MapStyleToggle } from "./MapStyleToggle";
@@ -65,6 +69,11 @@ function centerToLngLat(center: MapLatLng | undefined): [number, number] {
     );
   }
   return FALLBACK_LNGLAT;
+}
+
+function MapLibreMarkerImagesLoader() {
+  useMapLibreMarkerImages();
+  return null;
 }
 
 function mapBoundsFromMapLibre(map: MapLibreMap) {
@@ -336,13 +345,6 @@ export function MapViewMapLibre({
     [emitBounds],
   );
 
-  const handleClick = useCallback(
-    (event: MapLayerMouseEvent) => {
-      onMapClick?.(event.lngLat.lat, event.lngLat.lng);
-    },
-    [onMapClick],
-  );
-
   return (
     <div className={className ?? "h-full w-full"}>
       <div
@@ -364,6 +366,12 @@ export function MapViewMapLibre({
           }}
           style={{ width: "100%", height: "100%" }}
           mapStyle={style}
+          // Slice D eval (hardening): reuseMaps skipped — style toggles already
+          // call setStyle in-place (not remount); session remounts via mapKey are
+          // rare; reuseMaps risks stale GL/image state without a measured win.
+          // cooperativeGestures skipped — play maps are full-viewport; create-
+          // session framing uses a touch-none fixed-height shell; no scrollable
+          // embed that needs ctrl+scroll to protect page scroll.
           attributionControl={false}
           maxPitch={maxPitchDegrees}
           dragPan={interactive}
@@ -391,9 +399,11 @@ export function MapViewMapLibre({
           onMoveEnd={handleMoveEnd}
           onDragEnd={handleDragEnd}
           onZoomEnd={handleZoomEnd}
-          onClick={handleClick}
         >
-          <MapFocus
+          <MapFeatureHitTestProvider>
+            <MapLibreMarkerImagesLoader />
+            <MapFeatureHitTestBridge onMapClick={onMapClick} />
+            <MapFocus
               focusBounds={focusBounds ?? null}
               focusMinZoom={focusMinZoom}
               focusMaxZoom={focusMaxZoom}
@@ -433,6 +443,7 @@ export function MapViewMapLibre({
               />
             ) : null}
             {children}
+          </MapFeatureHitTestProvider>
         </Map>
       </div>
     </div>
