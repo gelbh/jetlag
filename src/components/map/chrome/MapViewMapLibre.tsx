@@ -445,21 +445,16 @@ export function MapViewMapLibre({
               preferFly={focusPreferFly}
             />
             {chromeHudRef ? (
-              <MapChromeListener
-                chromeHudRef={chromeHudRef}
-                suppressRef={suppressChromeHideRef}
-              />
+              <MapChromeListener chromeHudRef={chromeHudRef} />
             ) : null}
             <MapRecenterControl
               enabled={showRecenterControl ?? false}
               inset={zoomControlInset}
-              suppressRef={suppressChromeHideRef}
               onRecenter={onRecenter}
             />
             <MapZoomControl
               enabled={zoomControlEnabled}
               inset={zoomControlInset}
-              suppressRef={suppressChromeHideRef}
             />
             <AttributionControl compact position="bottom-left" />
             {onMapStyleChange ? (
@@ -469,7 +464,6 @@ export function MapViewMapLibre({
                 streetBasemap={streetBasemap}
                 onMapStyleChange={onMapStyleChange}
                 inset={styleControlInset}
-                suppressRef={suppressChromeHideRef}
               />
             ) : null}
             {children}

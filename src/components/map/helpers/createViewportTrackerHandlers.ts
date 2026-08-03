@@ -1,4 +1,3 @@
-import type { MutableRefObject } from "react";
 import { createThrottledPublisher } from "./mapViewportPublish";
 
 export interface ViewportTrackerHandlers {
@@ -9,21 +8,28 @@ export interface ViewportTrackerHandlers {
   onMoveEnd: () => void;
   onZoomEnd: () => void;
   disposePublisher: () => void;
+  /** Test/helper: whether a user pan is currently active. */
+  isPanActive: () => boolean;
 }
 
-/** Shared pan/publish state machine for Leaflet and MapLibre viewport trackers. */
+/**
+ * Shared pan/publish state machine for MapLibre viewport trackers.
+ *
+ * User `dragstart` always starts a pan. Placement-camera eases used to set a
+ * suppress ref that raced MapFocus's dragstart clear and skipped pan start,
+ * leaving chrome hide / `mapPanning` desynced after place-then-pan.
+ */
 export function createViewportTrackerHandlers(options: {
   publish: () => void;
   onUserPanStart?: () => void;
   onUserPanEnd?: () => void;
-  suppressPanRef?: MutableRefObject<boolean>;
 }): ViewportTrackerHandlers {
   let panActive = false;
   let skipMoveEndSchedule = false;
   const publisher = createThrottledPublisher(options.publish);
 
   const notifyPanStart = () => {
-    if (options.suppressPanRef?.current || panActive) {
+    if (panActive) {
       return;
     }
     panActive = true;
@@ -54,6 +60,7 @@ export function createViewportTrackerHandlers(options: {
       publisher.schedule();
     },
     onMoveEnd: () => {
+      // Safety: clear pan if dragend was missed (ease interrupt, remount, etc.).
       notifyPanEnd();
       if (skipMoveEndSchedule) {
         skipMoveEndSchedule = false;
@@ -66,7 +73,9 @@ export function createViewportTrackerHandlers(options: {
       publisher.flush();
     },
     disposePublisher: () => {
+      notifyPanEnd();
       publisher.cancel();
     },
+    isPanActive: () => panActive,
   };
 }

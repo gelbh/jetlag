@@ -151,7 +151,6 @@ export function MapScreenMapLayers({
           onViewportChange={handleMapViewportChange}
           onUserPanStart={handleMapPanStart}
           onUserPanEnd={handleMapPanEnd}
-          suppressPanRef={suppressChromeHideRef}
         />
         <GameAreaMask gameArea={gameArea!} />
         {transitEnabled && layerVisibility.transit ? (
