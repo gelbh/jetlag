@@ -1,6 +1,14 @@
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { MapBottomChrome } from "./MapBottomChrome";
+
+const chromeCss = readFileSync(
+  resolve(dirname(fileURLToPath(import.meta.url)), "../../../styles/map-bottom-chrome.css"),
+  "utf8",
+);
 
 describe("MapBottomChrome", () => {
   it("renders provided islands and omits empty ones", () => {
@@ -101,5 +109,14 @@ it("marks chrome inactive without leaving islands clickable via CSS class", () =
     expect(bottom?.querySelector('[data-island="session"]')).toBeNull();
     expect(side?.querySelector('[data-island="session"]')).not.toBeNull();
     expect(side?.querySelector('[data-island="history"]')).toBeNull();
+  });
+
+  it("clears the MapView zoom stack with a 9rem side-stack offset token", () => {
+    expect(chromeCss).toMatch(/--map-chrome-zoom-stack-height:\s*9rem/);
+    expect(chromeCss).toMatch(
+      /\.jl-map-chrome-side-stack\s*\{[^}]*var\(--map-chrome-zoom-stack-height\)/s,
+    );
+    // Seeker still portals Zoom via MapView; do not regress to the old 6.25rem fallback.
+    expect(chromeCss).not.toMatch(/map-chrome-zoom-stack-height,\s*6\.25rem/);
   });
 });

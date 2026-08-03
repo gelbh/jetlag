@@ -4,10 +4,12 @@
   /*
    * Island clearance: bottom hunt band + right side stack.
    * Replaces dual primary+secondary bar fold and bottom Session row.
+   * --map-chrome-zoom-stack-height clears MapView Zoom/Recenter (incl. ≤28rem dock bump).
    */
   --dock-island-height: 3.25rem;
   --dock-island-gap: 0.5rem;
   --map-chrome-side-width: 3.25rem;
+  --map-chrome-zoom-stack-height: 9rem;
   --dock-content-height: var(--dock-island-height);
   --dock-secondary-height: 0px;
   --dock-row-gap: 0px;
@@ -77,7 +79,7 @@
     /* Sit above MapView zoom/recenter portal column (MapLibre context owns those). */
     bottom: calc(
       var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem +
-        var(--map-chrome-zoom-stack-height, 6.25rem)
+        var(--map-chrome-zoom-stack-height)
     );
     display: flex;
     flex-direction: column;

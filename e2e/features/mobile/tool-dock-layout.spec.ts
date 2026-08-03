@@ -85,6 +85,46 @@ test.describe("mobile tool dock", () => {
     expect(metrics.overflowSlots).toBe(0);
   });
 
+  test("side stack clears MapView zoom controls", async ({ page }) => {
+    await expect(page.locator(".jl-map-chrome-side-stack")).toHaveCount(1);
+    await expect(page.locator(".map-zoom-control")).toBeVisible();
+
+    const metrics = await page.evaluate(() => {
+      const side = document.querySelector(".jl-map-chrome-side-stack");
+      const zoom = document.querySelector(".map-zoom-control");
+      const session = document.querySelector(
+        ".jl-map-chrome-side-stack [data-island='session']",
+      );
+      if (!side || !zoom || !session) {
+        return { missing: true as const };
+      }
+      const sideRect = side.getBoundingClientRect();
+      const zoomRect = zoom.getBoundingClientRect();
+      const sessionRect = session.getBoundingClientRect();
+      const overlapX =
+        Math.min(sideRect.right, zoomRect.right) -
+        Math.max(sideRect.left, zoomRect.left);
+      const overlapY =
+        Math.min(sideRect.bottom, zoomRect.bottom) -
+        Math.max(sideRect.top, zoomRect.top);
+      return {
+        missing: false as const,
+        intersects: overlapX > 1 && overlapY > 1,
+        sessionBottom: sessionRect.bottom,
+        zoomTop: zoomRect.top,
+        gap: zoomRect.top - sessionRect.bottom,
+      };
+    });
+
+    expect(metrics.missing).toBe(false);
+    if (metrics.missing) {
+      return;
+    }
+    expect(metrics.intersects).toBe(false);
+    expect(metrics.sessionBottom).toBeLessThanOrEqual(metrics.zoomTop + 1);
+    expect(metrics.gap).toBeGreaterThanOrEqual(-1);
+  });
+
   test("dock fits without clipping question tools", async ({ page }) => {
     const metrics = await readToolDockOverflowMetrics(page);
 
