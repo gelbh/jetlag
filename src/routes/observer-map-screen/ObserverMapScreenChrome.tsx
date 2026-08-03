@@ -54,6 +54,7 @@ export function ObserverMapScreenChrome({
     Boolean(myUid) &&
     visibleRoleCodeRoles({
       roleGates: session.roleGates,
+      memberRoles: session.memberRoles,
       myUid,
       isHost,
     }).length > 0;

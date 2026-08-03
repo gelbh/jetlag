@@ -15,10 +15,7 @@ import {
 } from "../services/session/sessionCodes";
 import { useSessionStore } from "../state/sessionStore";
 import type { PlayerRole } from "../domain/session/players/playerRole";
-import {
-  isSessionRoleGated,
-  joinRequiresRolePasscode,
-} from "../domain/session/players/roleGates";
+import { joinRequiresRolePasscode } from "../domain/session/players/roleGates";
 import {
   isJoinRequestExpired,
   type JoinRequestRole,
@@ -356,25 +353,31 @@ export function JoinSession() {
     );
 
     const expiresInMs = Date.parse(pendingRequest.expiresAt) - Date.now();
-    const expiryTimer = window.setTimeout(
-      () => {
-        if (!cancelled && !accepting) {
-          void cancelRoleJoinRequest(
-            pendingRequest.sessionId,
-            pendingRequest.requestId,
-          );
-        }
-        finishTerminal("expired");
-      },
-      Math.max(0, expiresInMs),
-    );
+    // setTimeout delays above 2^31-1 overflow and fire immediately.
+    const MAX_TIMEOUT_MS = 2_147_483_647;
+    const expiryTimer =
+      Number.isFinite(expiresInMs) &&
+      expiresInMs >= 0 &&
+      expiresInMs <= MAX_TIMEOUT_MS
+        ? window.setTimeout(() => {
+            if (!cancelled && !accepting) {
+              void cancelRoleJoinRequest(
+                pendingRequest.sessionId,
+                pendingRequest.requestId,
+              );
+            }
+            finishTerminal("expired");
+          }, expiresInMs)
+        : undefined;
 
     return () => {
       if (!accepting) {
         cancelled = true;
       }
       unsubscribe();
-      window.clearTimeout(expiryTimer);
+      if (expiryTimer !== undefined) {
+        window.clearTimeout(expiryTimer);
+      }
     };
   }, [navigate, pendingRequest, setSession]);
 
