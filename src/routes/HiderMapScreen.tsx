@@ -709,11 +709,13 @@ export function HiderMapScreen() {
             gameArea={gameArea}
             sessionRules={session}
             mapStyle={effectiveBasemapStyle}
+            streetBasemap={streetBasemap}
           />
           {showAdminBoundaries && !adminBoundaryLoading ? (
             <AdminBoundariesLayer
               features={adminBoundaryFeatures}
               mapStyle={effectiveBasemapStyle}
+              streetBasemap={streetBasemap}
             />
           ) : null}
           <LiveUserLocationLayer enabled={showCurrentLocation} lowPowerMode={lowPowerMode} />

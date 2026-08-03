@@ -252,6 +252,7 @@ export function useMapScreenController() {
         activeTool,
         gameArea: toolGameArea,
         mapStyle: effectiveBasemapStyle,
+        streetBasemap,
         radar: {
           center: radarTool.draft.radarCenter,
           radiusMeters: radarTool.draft.radarRadius,

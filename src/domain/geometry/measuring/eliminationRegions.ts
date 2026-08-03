@@ -117,7 +117,7 @@ function sanitizePolygonRings(rings: number[][][]): LatLngTuple[][] | null {
   return [exterior, ...holes];
 }
 
-export function polygonFeatureToLeafletPolygonGroups(
+export function polygonFeatureToPolygonGroups(
   feature: Feature<Polygon | MultiPolygon>,
 ): LatLngTuple[][][] {
   if (feature.geometry.type === "MultiPolygon") {
@@ -130,8 +130,8 @@ export function polygonFeatureToLeafletPolygonGroups(
   return polygon ? [polygon] : [];
 }
 
-export function polygonFeatureToLeafletRings(
+export function polygonFeatureToRings(
   feature: Feature<Polygon | MultiPolygon>,
 ): LatLngTuple[][] {
-  return polygonFeatureToLeafletPolygonGroups(feature).flat();
+  return polygonFeatureToPolygonGroups(feature).flat();
 }

@@ -2,7 +2,7 @@ import type { GameArea } from "../../map/annotations";
 import { parseGeometryJson, pointFromGeometryFeature } from "../../geometry/gameArea/geometryParsing";
 import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
-import type { MapStyle } from "../../map/mapBasemaps";
+import type { MapStyle, StreetBasemap } from "../../map/mapBasemaps";
 import { buildSameNearestRegion } from "../../geometry/measuring/matchingGeometry";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { deserializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
@@ -13,6 +13,7 @@ export async function buildMatchingOverlays(
   gameArea: GameArea,
   prefix: string,
   mapStyle: MapStyle,
+  streetBasemap: StreetBasemap = "light",
 ): Promise<OverlayBuildResult> {
   const metadata = question.placement.metadata;
   const geometry = parseGeometryJson(question.placement.geometryJson);
@@ -37,6 +38,7 @@ export async function buildMatchingOverlays(
       `${prefix}-boundary`,
       await buildSameNearestRegion(features, seekerFeatureId, gameArea),
       mapStyle,
+      streetBasemap,
     );
   }
 

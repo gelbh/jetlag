@@ -1,5 +1,5 @@
 import type { GameArea } from "../../map/annotations";
-import type { MapStyle } from "../../map/mapBasemaps";
+import type { MapStyle, StreetBasemap } from "../../map/mapBasemaps";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { pendingQuestionOverlayBuilders } from "../questionToolRegistry";
 import type { PendingQuestionOverlayResult } from "./shared";
@@ -10,6 +10,7 @@ export async function buildPendingQuestionOverlay(
   question: PendingQuestionRecord,
   gameArea: GameArea,
   mapStyle: MapStyle = "standard",
+  streetBasemap: StreetBasemap = "light",
 ): Promise<PendingQuestionOverlayResult | null> {
   if (question.status !== "pending") {
     return null;
@@ -23,7 +24,7 @@ export async function buildPendingQuestionOverlay(
   const prefix = `pending-${question.id}`;
   let result;
   try {
-    result = await builder(question, gameArea, prefix, mapStyle);
+    result = await builder(question, gameArea, prefix, mapStyle, streetBasemap);
   } catch {
     return null;
   }
@@ -43,10 +44,11 @@ export async function buildPendingQuestionOverlays(
   questions: readonly PendingQuestionRecord[],
   gameArea: GameArea,
   mapStyle: MapStyle = "standard",
+  streetBasemap: StreetBasemap = "light",
 ): Promise<PendingQuestionOverlayResult[]> {
   const results = await Promise.all(
     questions.map((question) =>
-      buildPendingQuestionOverlay(question, gameArea, mapStyle),
+      buildPendingQuestionOverlay(question, gameArea, mapStyle, streetBasemap),
     ),
   );
   return results.filter(

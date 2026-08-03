@@ -131,6 +131,3 @@ export function draftOverlayBoundsToMapBounds(
 
   return boundingBoxToBoundsExpression(box);
 }
-
-/** @deprecated Prefer `draftOverlayBoundsToMapBounds`. */
-export const draftOverlayBoundsToLeafletBounds = draftOverlayBoundsToMapBounds;

@@ -186,6 +186,7 @@ export function MapScreenMapLayers({
           gameArea={gameArea!}
           sessionRules={session!}
           mapStyle={effectiveBasemapStyle}
+          streetBasemap={streetBasemap}
         />
         {geometryEditAnnotation && geometryDraft ? (
           <GeometryEditLayer
@@ -199,6 +200,7 @@ export function MapScreenMapLayers({
           <AdminBoundariesLayer
             features={adminBoundaryFeatures}
             mapStyle={effectiveBasemapStyle}
+            streetBasemap={streetBasemap}
           />
         ) : null}
         <LiveUserLocationLayer

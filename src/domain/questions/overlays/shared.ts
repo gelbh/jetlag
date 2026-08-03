@@ -2,7 +2,7 @@ import type { Feature, MultiPolygon, Polygon } from "geojson";
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import { getBoundaryPreviewStyle } from "../../map/mapBoundaryOverlayStyle";
-import type { MapStyle } from "../../map/mapBasemaps";
+import type { MapStyle, StreetBasemap } from "../../map/mapBasemaps";
 
 export interface PendingQuestionOverlayResult {
   questionId: string;
@@ -20,6 +20,7 @@ export function pushBoundaryOverlay(
   id: string,
   feature: Feature<Polygon | MultiPolygon> | null,
   mapStyle: MapStyle,
+  streetBasemap: StreetBasemap = "light",
 ): void {
   if (!feature) {
     return;
@@ -30,6 +31,6 @@ export function pushBoundaryOverlay(
     id,
     feature,
     layer: "boundary",
-    style: getBoundaryPreviewStyle(mapStyle),
+    style: getBoundaryPreviewStyle(mapStyle, streetBasemap),
   });
 }
