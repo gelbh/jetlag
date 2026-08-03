@@ -1,11 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
+import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import type { TransitRouteMode } from "../../../domain/map/transit";
 import { transitStopDivIcon } from "../icons/transitStopIcons";
 import { userLocationIconHtml } from "../icons/userLocationIconHtml";
 import { useMapLibreMap } from "./useMapLibreMap";
 
+/** North-up cone sprite — rotate via MapLibre `icon-rotate`. */
 export const JL_ICON_USER_LOCATION = "jl-icon-user-location";
+/** Dot only (no heading). */
+export const JL_ICON_USER_LOCATION_PLAIN = "jl-icon-user-location-plain";
+/** Last-resort circle if SVG decode fails. */
 export const JL_ICON_USER_LOCATION_FALLBACK = "jl-icon-user-location-fallback";
 
 const TRANSIT_ICON_IDS: Record<TransitRouteMode, string> = {
@@ -16,6 +21,15 @@ const TRANSIT_ICON_IDS: Record<TransitRouteMode, string> = {
   ferry: "jl-icon-transit-ferry",
   other: "jl-icon-transit-other",
 };
+
+const TRANSIT_MODES: TransitRouteMode[] = [
+  "rail",
+  "metro",
+  "tram",
+  "bus",
+  "ferry",
+  "other",
+];
 
 export function transitModeIconId(mode: TransitRouteMode): string {
   return TRANSIT_ICON_IDS[mode];
@@ -51,7 +65,10 @@ async function loadSvgImage(
     } finally {
       URL.revokeObjectURL(url);
     }
-  } catch {
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.warn(`[map] marker image failed: ${imageId}`, error);
+    }
     return false;
   }
 }
@@ -64,18 +81,28 @@ function userLocationFallbackSvg(): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="8" fill="#4285F4" stroke="#fff" stroke-width="3"/></svg>`;
 }
 
-/** Load shared marker images into the MapLibre map (idempotent). */
+/** Load shared marker images into the MapLibre map (idempotent per style). */
 export async function registerMapLibreMarkerImages(
   map: MapLibreMap,
 ): Promise<void> {
-  const userOk = await loadSvgImage(
-    map,
-    JL_ICON_USER_LOCATION,
-    userLocationIconHtml(null),
-    48,
-    48,
-  );
-  if (!userOk) {
+  const userLoads = await Promise.all([
+    loadSvgImage(
+      map,
+      JL_ICON_USER_LOCATION,
+      // Cone baked north-up so `icon-rotate` can apply live heading.
+      userLocationIconHtml(0),
+      48,
+      48,
+    ),
+    loadSvgImage(
+      map,
+      JL_ICON_USER_LOCATION_PLAIN,
+      userLocationIconHtml(null),
+      48,
+      48,
+    ),
+  ]);
+  if (userLoads.some((ok) => !ok)) {
     await loadSvgImage(
       map,
       JL_ICON_USER_LOCATION_FALLBACK,
@@ -85,86 +112,49 @@ export async function registerMapLibreMarkerImages(
     );
   }
 
-  const modes: TransitRouteMode[] = [
-    "rail",
-    "metro",
-    "tram",
-    "bus",
-    "ferry",
-    "other",
-  ];
-  for (const mode of modes) {
-    await loadSvgImage(
-      map,
-      TRANSIT_ICON_IDS[mode],
-      transitStopDivIcon(mode),
-      20,
-      20,
-    );
-    await loadSvgImage(
-      map,
-      transitVehicleIconId(mode),
-      vehicleSvg("#888"),
-      14,
-      14,
-    );
-  }
+  await Promise.all(
+    TRANSIT_MODES.flatMap((mode) => [
+      loadSvgImage(
+        map,
+        TRANSIT_ICON_IDS[mode],
+        transitStopDivIcon(mode),
+        20,
+        20,
+      ),
+      loadSvgImage(
+        map,
+        transitVehicleIconId(mode),
+        vehicleSvg(MAP_ANNOTATION_COLORS.transit[mode]),
+        14,
+        14,
+      ),
+    ]),
+  );
 }
 
+/**
+ * Keep marker sprites registered across `setStyle` (basemap toggles clear images).
+ */
 export function useMapLibreMarkerImages(): void {
   const mapRef = useMapLibreMap();
-  const loadedRef = useRef(false);
 
   useEffect(() => {
     const map = mapRef.getMap();
-    if (loadedRef.current) {
-      return;
-    }
-
     let cancelled = false;
-    void registerMapLibreMarkerImages(map).then(() => {
-      if (!cancelled) {
-        loadedRef.current = true;
+
+    const register = () => {
+      if (cancelled) {
+        return;
       }
-    });
+      void registerMapLibreMarkerImages(map);
+    };
+
+    register();
+    map.on("style.load", register);
 
     return () => {
       cancelled = true;
+      map.off("style.load", register);
     };
   }, [mapRef]);
-}
-
-/** Hook that loads marker images when used outside a Map child (no throw). */
-export function useOptionalMapLibreMarkerImages(enabled: boolean): void {
-  const mapRef = useOptionalMapLibreMap();
-  const loadedRef = useRef(false);
-
-  useEffect(() => {
-    if (!enabled || !mapRef) {
-      return;
-    }
-    const map = mapRef.getMap();
-    if (loadedRef.current) {
-      return;
-    }
-
-    let cancelled = false;
-    void registerMapLibreMarkerImages(map).then(() => {
-      if (!cancelled) {
-        loadedRef.current = true;
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [enabled, mapRef]);
-}
-
-function useOptionalMapLibreMap() {
-  try {
-    return useMapLibreMap();
-  } catch {
-    return null;
-  }
 }

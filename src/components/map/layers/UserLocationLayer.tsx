@@ -2,7 +2,10 @@ import { useMemo } from "react";
 import turfCircle from "@turf/circle";
 import type { GeolocationReading } from "../../../services/core/location/geolocation";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
-import { JL_ICON_USER_LOCATION } from "../helpers/mapLibreIconRegistry";
+import {
+  JL_ICON_USER_LOCATION,
+  JL_ICON_USER_LOCATION_PLAIN,
+} from "../helpers/mapLibreIconRegistry";
 import { symbolMarkerCollection } from "../helpers/mapMarkerFeatures";
 
 interface UserLocationLayerProps {
@@ -37,7 +40,9 @@ export function UserLocationLayer({ reading }: UserLocationLayerProps) {
         id: "user-location",
         lat: reading.lat,
         lng: reading.lng,
-        iconImage: JL_ICON_USER_LOCATION,
+        iconImage: showHeading
+          ? JL_ICON_USER_LOCATION
+          : JL_ICON_USER_LOCATION_PLAIN,
         iconRotate: showHeading ? reading.heading! : 0,
         iconSize: 1,
       },
