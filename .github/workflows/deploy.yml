@@ -12,28 +12,73 @@ permissions:
   contents: read
 
 jobs:
-  verify:
+  changes:
     runs-on: ubuntu-latest
+    outputs:
+      light: ${{ steps.filter.outputs.light }}
+      code: ${{ steps.filter.outputs.code }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
+        id: filter
+        with:
+          filters: |
+            light:
+              - '.changeset/**'
+              - 'CHANGELOG.md'
+              - 'src/domain/device/changelog.ts'
+              - 'README.md'
+              - 'LICENSE'
+              - 'LICENSE.md'
+            code:
+              - '**'
+              - '!.changeset/**'
+              - '!CHANGELOG.md'
+              - '!src/domain/device/changelog.ts'
+              - '!README.md'
+              - '!LICENSE'
+              - '!LICENSE.md'
+
+  verify:
+    runs-on: ubuntu-latest
+    needs: [changes]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Light-path verify (changelog-only)
+        if: needs.changes.outputs.light == 'true' && needs.changes.outputs.code == 'false'
+        run: |
+          npm ci
+          npm run release:check
       - uses: ./.github/actions/setup-rust-wasm
+        if: needs.changes.outputs.code == 'true'
       - run: cargo test --locked -p jetlag-geometry-kernel
+        if: needs.changes.outputs.code == 'true'
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: needs.changes.outputs.code == 'true'
         with:
           node-version: 24
           cache: npm
       - run: npm ci
+        if: needs.changes.outputs.code == 'true'
       - run: npm run wasm:build
+        if: needs.changes.outputs.code == 'true'
       - run: npm run test:coverage
+        if: needs.changes.outputs.code == 'true'
       - run: npm run test:functions
+        if: needs.changes.outputs.code == 'true'
       - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        if: needs.changes.outputs.code == 'true'
         with:
           distribution: temurin
           java-version: "21"
       - run: npx playwright install --with-deps chromium
+        if: needs.changes.outputs.code == 'true'
       - name: Cache Firebase emulators
+        if: needs.changes.outputs.code == 'true'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.cache/firebase/emulators
@@ -41,16 +86,18 @@ jobs:
           restore-keys: |
             firebase-emulators-${{ runner.os }}-
       - run: npx firebase emulators:exec --project demo-jetlag --only auth,firestore,storage "npm run test:e2e:gate-smoke"
+        if: needs.changes.outputs.code == 'true'
       - run: npm run build
+        if: needs.changes.outputs.code == 'true'
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: failure()
+        if: needs.changes.outputs.code == 'true' && failure()
         with:
           name: playwright-report-gate-smoke
           path: playwright-report
 
   build:
     runs-on: ubuntu-latest
-    needs: [verify]
+    needs: [changes, verify]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
