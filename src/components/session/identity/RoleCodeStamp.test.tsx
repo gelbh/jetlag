@@ -56,7 +56,7 @@ describe("RoleCodeStamp", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Regenerate" }));
+    fireEvent.click(screen.getByRole("button", { name: /Regenerate Observer code/i }));
     expect(onRegenerate).toHaveBeenCalledTimes(1);
   });
 
@@ -75,6 +75,6 @@ describe("RoleCodeStamp", () => {
     expect(
       screen.getByRole("button", { name: /Reveal Seeker code/i }),
     ).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Regenerate" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Regenerate Seeker code/i })).toBeDisabled();
   });
 });

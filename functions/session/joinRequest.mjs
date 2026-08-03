@@ -41,11 +41,6 @@ export function buildJoinRequestIdentityLabel(input) {
     return username;
   }
 
-  const email = typeof input?.email === "string" ? input.email.trim() : "";
-  if (email) {
-    return email;
-  }
-
   return "Anonymous player";
 }
 
@@ -141,9 +136,8 @@ function applyLeaderPromotionOnRoleSwitch({
   };
 }
 
-async function resolveIdentityLabel(db, authAdmin, uid) {
+async function resolveIdentityLabel(db, uid) {
   let username = null;
-  let email = null;
 
   const profileSnap = await db
     .collection("users")
@@ -158,18 +152,7 @@ async function resolveIdentityLabel(db, authAdmin, uid) {
     }
   }
 
-  if (authAdmin && typeof authAdmin.getUser === "function") {
-    try {
-      const user = await authAdmin.getUser(uid);
-      if (typeof user?.email === "string") {
-        email = user.email;
-      }
-    } catch {
-      // Anonymous / missing Auth record — fall through to label defaults.
-    }
-  }
-
-  return buildJoinRequestIdentityLabel({ username, email });
+  return buildJoinRequestIdentityLabel({ username });
 }
 
 export async function requestRoleJoinHandler(
@@ -201,7 +184,7 @@ export async function requestRoleJoinHandler(
     }
   }
 
-  const identityLabel = await resolveIdentityLabel(db, authAdmin, uid);
+  const identityLabel = await resolveIdentityLabel(db, uid);
   const createdAt = new Date(nowMs).toISOString();
   const expiresAt = computeJoinRequestExpiresAt(nowMs);
   const requestRef = sessionRef.collection("joinRequests").doc();
