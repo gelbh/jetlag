@@ -49,7 +49,7 @@ import { GameOverChrome } from "../../components/session/game-over/GameOverChrom
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
-import { ledJoinRequestRoles } from "../../domain/session/players/roleGates";
+import { visibleRoleCodeRoles } from "../../domain/session/players/roleGates";
 import type { HiderTruthResult } from "../../domain/questions/ui";
 import { useAnnotationStore } from "../../state/annotationStore";
 
@@ -365,8 +365,9 @@ export function HiderMapScreenChrome({
 
   const canOpenCodes =
     Boolean(uid) &&
-    ledJoinRequestRoles({
+    visibleRoleCodeRoles({
       roleGates: session.roleGates,
+      memberRoles: session.memberRoles,
       myUid: uid ?? undefined,
       isHost,
     }).length > 0;

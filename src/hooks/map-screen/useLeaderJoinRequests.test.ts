@@ -22,7 +22,7 @@ describe("useLeaderJoinRequests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockListenLeaderJoinRequests.mockReturnValue(() => undefined);
-    mockResolveRoleJoinRequest.mockResolvedValue({ ok: true });
+    mockResolveRoleJoinRequest.mockResolvedValue(undefined);
   });
 
   it("returns empty when no sessionId", () => {

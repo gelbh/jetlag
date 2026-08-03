@@ -1,6 +1,9 @@
 import { useState } from "react";
 import type { SessionRecord } from "../../../domain/map/annotations";
-import { isSessionRoleGated } from "../../../domain/session/players/roleGates";
+import {
+  isSessionRoleGated,
+  visibleRoleCodeRoles,
+} from "../../../domain/session/players/roleGates";
 import { playerRoleLabel } from "../../../domain/session/players/playerRole";
 import { useCopyFeedback } from "../../../hooks/forms/useCopyFeedback";
 import {
@@ -44,19 +47,12 @@ export function RolePasscodeSettings({
     return null;
   }
 
-  const myRole = session.memberRoles?.[myUid];
-  const rows: RevealRole[] = [];
-
-  if (isHost) {
-    rows.push("observer");
-  }
-
-  if (
-    (myRole === "seeker" || myRole === "hider") &&
-    session.roleGates?.leaders?.[myRole] === myUid
-  ) {
-    rows.push(myRole);
-  }
+  const rows = visibleRoleCodeRoles({
+    roleGates: session.roleGates,
+    memberRoles: session.memberRoles,
+    myUid,
+    isHost,
+  });
 
   if (rows.length === 0) {
     return null;
