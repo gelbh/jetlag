@@ -195,16 +195,16 @@ export function useMapSessionActions({
       return;
     }
 
-    setSession(
-      {
-        ...session,
-        foundRequestedAt: undefined,
-        foundRequestedByUid: undefined,
-      },
-      uid,
-    );
     try {
       await resetFoundHiderSession(session.id);
+      setSession(
+        {
+          ...session,
+          foundRequestedAt: undefined,
+          foundRequestedByUid: undefined,
+        },
+        uid,
+      );
     } catch {
       window.alert("Could not clear found hider request. Check your connection and try again.");
     }
