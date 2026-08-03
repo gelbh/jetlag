@@ -14,11 +14,12 @@ import {
 
 function mockPermissions(state: PermissionState | null): void {
   if (state === null) {
-    vi.stubGlobal("navigator", {
+    const stubbedNavigator: Record<string, unknown> = {
       ...navigator,
       geolocation: navigator.geolocation,
-      permissions: undefined,
-    });
+    };
+    delete stubbedNavigator.permissions;
+    vi.stubGlobal("navigator", stubbedNavigator);
     return;
   }
 

@@ -267,6 +267,10 @@ describe("CreateSession", () => {
 
     await waitFor(() => {
       expect(requestLocationAccess).toHaveBeenCalledOnce();
+      expect(requestLocationAccess).toHaveBeenCalledWith({
+        highAccuracy: false,
+        userGesture: true,
+      });
     });
 
     fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {

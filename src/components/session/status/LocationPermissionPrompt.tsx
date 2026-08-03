@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLocation } from "react-router-dom";
 import {
   confirmAndRequestLocationAccess,
@@ -28,30 +28,45 @@ export function LocationPermissionPrompt() {
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [forceDenied, setForceDenied] = useState(false);
-
-  const refreshPermission = useCallback(async () => {
-    const next = await queryGeolocationPermission();
-    setPermission(next);
-  }, []);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const focusedForDemandRef = useRef(0);
 
   useEffect(() => {
     if (!onMap || ui.demand === 0) {
       return;
     }
-    void refreshPermission();
-  }, [onMap, refreshPermission, ui.confirmEpoch, ui.demand]);
+
+    let cancelled = false;
+    void queryGeolocationPermission().then((next) => {
+      if (!cancelled) {
+        setPermission(next);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [onMap, ui.confirmEpoch, ui.demand]);
 
   const denied = forceDenied || permission === "denied";
   const unavailable = permission === "unavailable";
   const confirmedLiveAccess = ui.confirmEpoch > 0 && !denied && !unavailable;
+  const visible =
+    onMap &&
+    ui.demand > 0 &&
+    permission !== null &&
+    permission !== "granted" &&
+    !confirmedLiveAccess;
 
-  if (
-    !onMap ||
-    ui.demand === 0 ||
-    permission === null ||
-    permission === "granted" ||
-    confirmedLiveAccess
-  ) {
+  useEffect(() => {
+    if (!visible || focusedForDemandRef.current === ui.demand) {
+      return;
+    }
+    focusedForDemandRef.current = ui.demand;
+    dialogRef.current?.focus();
+  }, [ui.demand, visible]);
+
+  if (!visible) {
     return null;
   }
 
@@ -72,7 +87,8 @@ export function LocationPermissionPrompt() {
     try {
       await confirmAndRequestLocationAccess({ highAccuracy: false });
       setForceDenied(false);
-      await refreshPermission();
+      const next = await queryGeolocationPermission();
+      setPermission(next);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : LOCATION_BLOCKED_MESSAGE;
@@ -80,7 +96,8 @@ export function LocationPermissionPrompt() {
       if (message === LOCATION_BLOCKED_MESSAGE) {
         setForceDenied(true);
       }
-      await refreshPermission();
+      const next = await queryGeolocationPermission();
+      setPermission(next);
     } finally {
       setBusy(false);
     }
@@ -93,7 +110,9 @@ export function LocationPermissionPrompt() {
       className="jl-map-banner-top pointer-events-auto fixed inset-x-3 z-[var(--z-panel)]"
     >
       <div
-        className="map-float-alert mx-auto max-w-xl border-2 border-highlight/40 bg-surface-deep px-3 py-3"
+        ref={dialogRef}
+        tabIndex={-1}
+        className="map-float-alert mx-auto max-w-xl border-2 border-highlight/40 bg-surface-deep px-3 py-3 outline-none"
         role="dialog"
         aria-labelledby="location-permission-prompt-title"
         aria-describedby="location-permission-prompt-body"
