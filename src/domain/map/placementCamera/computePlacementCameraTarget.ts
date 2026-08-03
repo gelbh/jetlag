@@ -311,7 +311,8 @@ export function computePlacementCameraTarget(
   }
 
   if (ctx.phase === "idle") {
-    return playAreaCameraTarget(ctx);
+    // Do not reframe on tool-open idle — camera motion races placement clicks.
+    return null;
   }
 
   switch (ctx.tool) {

@@ -165,7 +165,7 @@ describe("computePlacementCameraTarget", () => {
   });
 
   it.each(["pin", "radar", "thermometer", "tentacle"] as const)(
-    "frames play area without forcing reframe when %s tool is idle",
+    "does not reframe when %s tool is idle (avoids click races)",
     async (tool) => {
       const sources = {
         ...emptySources,
@@ -173,10 +173,7 @@ describe("computePlacementCameraTarget", () => {
       };
       const target = computePlacementCameraTarget(await buildContext(sources));
 
-      expect(target).not.toBeNull();
-      expect(target?.forceReframe).not.toBe(true);
-      expect(target?.paddingBiasPx).toBeGreaterThan(300);
-      expect(target?.bounds).toEqual(boundsForPlayArea(DUBLIN_CITY_GAME_AREA));
+      expect(target).toBeNull();
     },
   );
 
