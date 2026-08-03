@@ -1,9 +1,12 @@
 import { useMemo } from "react";
 import turfCircle from "@turf/circle";
-import { Marker as MapLibreMarker } from "react-map-gl/maplibre";
 import type { GeolocationReading } from "../../../services/core/location/geolocation";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
-import { userLocationIconHtml } from "../icons/userLocationIconHtml";
+import {
+  JL_ICON_USER_LOCATION,
+  JL_ICON_USER_LOCATION_PLAIN,
+} from "../helpers/mapLibreIconRegistry";
+import { symbolMarkerCollection } from "../helpers/mapMarkerFeatures";
 
 interface UserLocationLayerProps {
   reading: GeolocationReading | null;
@@ -24,11 +27,31 @@ export function UserLocationLayer({ reading }: UserLocationLayerProps) {
     });
   }, [reading]);
 
-  if (!reading || !accuracyFeature) {
+  const userSymbol = useMemo(() => {
+    if (!reading) {
+      return null;
+    }
+    const showHeading =
+      typeof reading.heading === "number" &&
+      Number.isFinite(reading.heading) &&
+      reading.heading >= 0;
+    return symbolMarkerCollection([
+      {
+        id: "user-location",
+        lat: reading.lat,
+        lng: reading.lng,
+        iconImage: showHeading
+          ? JL_ICON_USER_LOCATION
+          : JL_ICON_USER_LOCATION_PLAIN,
+        iconRotate: showHeading ? reading.heading! : 0,
+        iconSize: 1,
+      },
+    ]);
+  }, [reading]);
+
+  if (!reading || !accuracyFeature || !userSymbol) {
     return null;
   }
-
-  const html = userLocationIconHtml(reading.heading);
 
   return (
     <>
@@ -45,17 +68,18 @@ export function UserLocationLayer({ reading }: UserLocationLayerProps) {
           opacity: 1,
         }}
       />
-      <MapLibreMarker
-        latitude={reading.lat}
-        longitude={reading.lng}
-        anchor="center"
-        style={{ zIndex: 1000, pointerEvents: "none" }}
-      >
-        <div
-          className="user-location-icon"
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
-      </MapLibreMarker>
+      <MapLibreGeoJsonOverlay
+        id="user-location-pin"
+        data={userSymbol}
+        symbol={{
+          layout: {
+            iconImage: ["get", "iconImage"],
+            iconRotate: ["get", "iconRotate"],
+            iconSize: ["get", "iconSize"],
+            iconAllowOverlap: true,
+          },
+        }}
+      />
     </>
   );
 }
