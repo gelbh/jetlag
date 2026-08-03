@@ -77,9 +77,8 @@ test.describe("mobile tool dock", () => {
   test("hunt island does not use horizontal scroll", async ({ page }) => {
     const hunt = page.locator('[data-island="hunt"]');
     const overflowX = await hunt.evaluate((el) => getComputedStyle(el).overflowX);
-    expect(overflowX === "visible" || overflowX === "clip").toBe(true);
-    // Slot rects must stay in-viewport (overflow:visible can still report
-    // scrollWidth > clientWidth when children paint past the island box).
+    // hidden/clip/visible all OK — we must not use overflow-x: auto/scroll.
+    expect(["visible", "clip", "hidden"]).toContain(overflowX);
     const metrics = await readToolDockOverflowMetrics(page);
     expect(metrics.overflowSlots).toBe(0);
   });

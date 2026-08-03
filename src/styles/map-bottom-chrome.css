@@ -38,6 +38,16 @@
     bottom: 0;
     left: 0;
     pointer-events: none;
+    /* Tall enough that absolute side-stack stays inside the host box
+       (element screenshots / hit-testing). */
+    min-height: calc(
+      var(--dock-island-height)
+        + env(safe-area-inset-bottom)
+        + var(--map-chrome-band-gap)
+        + var(--map-chrome-zoom-stack-height)
+        + 2.5rem
+        + 14rem
+    );
   }
 
   .jl-map-bottom-chrome-host--rail {
