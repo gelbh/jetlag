@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 
 export function useSeekerOptimisticPendingOverlays(
@@ -10,6 +10,10 @@ export function useSeekerOptimisticPendingOverlays(
 
   const registerOptimisticPending = useCallback(
     (entry: PendingQuestionRecord) => {
+      if (pendingQuestions.some((question) => question.id === entry.id)) {
+        return;
+      }
+
       setOptimisticEntries((previous) => {
         if (previous.some((item) => item.id === entry.id)) {
           return previous;
@@ -18,8 +22,17 @@ export function useSeekerOptimisticPendingOverlays(
         return [...previous, entry];
       });
     },
-    [],
+    [pendingQuestions],
   );
+
+  useEffect(() => {
+    setOptimisticEntries((previous) => {
+      const next = previous.filter(
+        (entry) => !pendingQuestions.some((question) => question.id === entry.id),
+      );
+      return next.length === previous.length ? previous : next;
+    });
+  }, [pendingQuestions]);
 
   const unsyncedOptimisticQuestions = useMemo(
     () =>

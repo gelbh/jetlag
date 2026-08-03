@@ -59,7 +59,6 @@ export function useMapScreenTools({
   const [mapError, setMapError] = useState<string | null>(null);
   const [awaitingPlacement, setAwaitingPlacement] = useState(false);
   const awaitHiderAnswer = sessionHasHiders(session?.memberRoles);
-  const canSubmitQuestion = !hasOpenPendingQuestion(pendingQuestions);
   const {
     submitPendingQuestion,
     answerPendingQuestion,
@@ -70,6 +69,7 @@ export function useMapScreenTools({
   } = usePendingQuestionActions();
   const { displayPendingQuestions, registerOptimisticPending } =
     useSeekerOptimisticPendingOverlays(pendingQuestions);
+  const canSubmitQuestion = !hasOpenPendingQuestion(displayPendingQuestions);
 
   const finishPlacement = useCallback(() => {
     setActiveTool("none");

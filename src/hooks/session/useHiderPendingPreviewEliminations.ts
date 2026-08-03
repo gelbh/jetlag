@@ -120,12 +120,15 @@ export function useHiderPendingPreviewEliminations({
     Boolean(gameArea) && replyIdByQuestionId.size > 0;
 
   useEffect(() => {
+    const generation = generationRef.current + 1;
+    generationRef.current = generation;
+
     if (!shouldComputePreview || !gameArea) {
+      setPreviewEliminationFeatures([]);
       return;
     }
 
-    const generation = generationRef.current + 1;
-    generationRef.current = generation;
+    setPreviewEliminationFeatures([]);
 
     void buildPendingPreviewEliminationFeatures(
       pendingQuestions,

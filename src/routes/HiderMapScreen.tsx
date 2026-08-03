@@ -919,6 +919,13 @@ export function HiderMapScreen() {
                 setTruthReveal({ truth, selectedReply, selectedLabel });
               }
             } catch (error) {
+              setOptimisticAnswers((previous) => {
+                const next = new Map(previous);
+                if (next.get(pendingQuestionId) === selectedReply) {
+                  next.delete(pendingQuestionId);
+                }
+                return next;
+              });
               setChatAnswerError(
                 error instanceof Error
                   ? error.message

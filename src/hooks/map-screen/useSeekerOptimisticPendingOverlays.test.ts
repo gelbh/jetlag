@@ -39,5 +39,9 @@ describe("useSeekerOptimisticPendingOverlays", () => {
 
     expect(result.current.displayPendingQuestions).toHaveLength(1);
     expect(result.current.displayPendingQuestions[0]?.id).toBe("pq-local");
+
+    rerender({ pendingQuestions: [] });
+
+    expect(result.current.displayPendingQuestions).toHaveLength(0);
   });
 });
