@@ -111,12 +111,20 @@ it("marks chrome inactive without leaving islands clickable via CSS class", () =
     expect(side?.querySelector('[data-island="history"]')).toBeNull();
   });
 
-  it("clears the MapView zoom stack with a 9rem side-stack offset token", () => {
-    expect(chromeCss).toMatch(/--map-chrome-zoom-stack-height:\s*9rem/);
+  it("clears the MapView zoom stack with width/height-scoped offset tokens", () => {
+    expect(chromeCss).toMatch(
+      /:root\s*\{[^}]*--map-chrome-zoom-stack-height:\s*7rem/s,
+    );
+    expect(chromeCss).toMatch(
+      /@media\s*\(max-width:\s*28rem\)\s*\{[^}]*--map-chrome-zoom-stack-height:\s*9rem/s,
+    );
+    expect(chromeCss).toMatch(
+      /@media\s*\(max-height:\s*430px\)\s*and\s*\(orientation:\s*landscape\)\s*\{[^}]*--map-chrome-zoom-stack-height:\s*6\.25rem/s,
+    );
     expect(chromeCss).toMatch(
       /\.jl-map-chrome-side-stack\s*\{[^}]*var\(--map-chrome-zoom-stack-height\)/s,
     );
-    // Seeker still portals Zoom via MapView; do not regress to the old 6.25rem fallback.
+    // Seeker still portals Zoom via MapView; do not reintroduce a silent calc fallback.
     expect(chromeCss).not.toMatch(/map-chrome-zoom-stack-height,\s*6\.25rem/);
   });
 });
