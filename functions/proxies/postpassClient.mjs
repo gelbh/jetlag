@@ -37,10 +37,7 @@ export async function fetchPostpassGeoJson(sql) {
 
   if (!response.ok) {
     try {
-      const canceled = response.body?.cancel();
-      if (canceled != null && typeof canceled.then === "function") {
-        canceled.catch(() => {});
-      }
+      void response.body?.cancel()?.catch?.(() => {});
     } catch {
       // best-effort
     }

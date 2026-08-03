@@ -174,4 +174,19 @@ describe("postpassTranslate", () => {
     assert.match(sql, /postpass_polygon/i);
     assert.match(sql, /ST_MakeEnvelope/i);
   });
+
+  it("classifies measuring admin borders as linear, not admin polygons", () => {
+    const ql = `
+      [out:json][timeout:25];
+      (
+        way["boundary"="administrative"]["admin_level"="8"](53.2,-6.4,53.4,-6.1);
+      );
+      out geom;
+    `;
+    const c = classifyOverpassQuery(ql);
+    assert.equal(c.family, "linear");
+    const sql = buildPostpassSql(c);
+    assert.match(sql, /postpass_line/i);
+    assert.doesNotMatch(sql, /postpass_polygon/i);
+  });
 });

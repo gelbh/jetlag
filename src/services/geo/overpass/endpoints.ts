@@ -1,4 +1,5 @@
-// Parallel implementation: functions/proxies/overpassEndpoints.mjs (Cloud Functions runtime).
+// Public peer list mirrored in functions/proxies/overpassEndpoints.mjs.
+// Client has no paid Geofabrik peer or Postpass path (proxy-only).
 
 export const OVERPASS_USER_AGENT = "jetlag-map-companion/1.0";
 

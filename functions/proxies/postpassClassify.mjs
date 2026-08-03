@@ -79,21 +79,6 @@ export function classifyOverpassQuery(ql) {
   const around = extractAround(text);
 
   if (
-    text.includes('boundary"="administrative"') &&
-    text.includes("admin_level")
-  ) {
-    const adminPred = tags.find((p) => p.key === "admin_level" && p.op === "eq");
-    return {
-      family: "admin",
-      meta: {
-        adminLevel: adminPred?.value ?? null,
-        bbox,
-        tags,
-      },
-    };
-  }
-
-  if (
     text.includes('natural"="water"') &&
     (text.includes("waterway") || text.includes("place"))
   ) {
@@ -108,16 +93,38 @@ export function classifyOverpassQuery(ql) {
     return { family: "metro", meta: { around, bbox, tags } };
   }
 
+  // Measuring linear borders use way["boundary"="administrative"]… + out geom.
+  // Admin-division uses relation["boundary"="administrative"]… — require relation.
+  const isAdminRelation =
+    /relation\s*\[\s*"boundary"\s*=\s*"administrative"/i.test(text) &&
+    text.includes("admin_level");
+  const isLinearWayGeom =
+    /\bout\s+geom\b/i.test(text) &&
+    /way\s*\[/.test(text) &&
+    !text.includes('natural"="water"') &&
+    !text.includes('natural"="coastline"');
+
+  if (isLinearWayGeom && !isAdminRelation) {
+    return { family: "linear", meta: { bbox, tags } };
+  }
+
+  if (isAdminRelation) {
+    const adminPred = tags.find((p) => p.key === "admin_level" && p.op === "eq");
+    return {
+      family: "admin",
+      meta: {
+        adminLevel: adminPred?.value ?? null,
+        bbox,
+        tags,
+      },
+    };
+  }
+
   if (around) {
     return { family: "around", meta: { around, tags, bbox } };
   }
 
-  if (
-    /\bout\s+geom\b/i.test(text) &&
-    /way\s*\[/.test(text) &&
-    !text.includes('natural"="water"') &&
-    !text.includes('natural"="coastline"')
-  ) {
+  if (isLinearWayGeom) {
     return { family: "linear", meta: { bbox, tags } };
   }
 

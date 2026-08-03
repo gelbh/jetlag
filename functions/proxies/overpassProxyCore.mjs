@@ -13,10 +13,7 @@ import {
   readOverpassL2,
   writeOverpassL2,
 } from "./overpassSharedCache.mjs";
-import { classifyOverpassQuery } from "./postpassClassify.mjs";
-import { buildPostpassSql } from "./postpassSql.mjs";
-import { fetchPostpassGeoJson } from "./postpassClient.mjs";
-import { geoJsonToOverpassElements } from "./geoJsonToOverpassElements.mjs";
+import { tryPostpassForOverpassQuery } from "./postpassFailover.mjs";
 
 export const OVERPASS_FETCH_TIMEOUT_MS = 25_000;
 export const OVERPASS_CACHE_TTL_MS = 60 * 60 * 1000;
@@ -27,8 +24,8 @@ export function overpassCacheKey(query) {
   return createHash("sha256").update(query).digest("hex");
 }
 
-function logCache(result, tier) {
-  console.log(JSON.stringify({ type: "overpass_cache", result, tier }));
+function logCache(result, tier, extra = {}) {
+  console.log(JSON.stringify({ type: "overpass_cache", result, tier, ...extra }));
 }
 
 function isAbortOrTimeoutError(error) {
@@ -64,24 +61,15 @@ function logFailover(fields) {
   console.log(JSON.stringify({ type: "overpass_failover", ...fields }));
 }
 
-/**
- * @param {string} query
- * @returns {Promise<string | null>}
- */
-async function tryPostpassForOverpassQuery(query) {
-  const classification = classifyOverpassQuery(query);
-  if (!classification) {
-    return null;
+function cancelResponseBody(response) {
+  try {
+    const canceled = response.body?.cancel();
+    if (canceled != null && typeof canceled.then === "function") {
+      canceled.catch(() => {});
+    }
+  } catch {
+    // Best-effort: avoid holding unused upstream bodies across failover.
   }
-  const sql = buildPostpassSql(classification);
-  const fc = await fetchPostpassGeoJson(sql);
-  const normalized = geoJsonToOverpassElements(fc, classification.family);
-  logFailover({
-    backend: "postpass",
-    family: classification.family,
-    endpoint: "postpass.geofabrik.de",
-  });
-  return JSON.stringify(normalized);
 }
 
 export async function fetchOverpassWithFailover(query) {
@@ -111,14 +99,7 @@ export async function fetchOverpassWithFailover(query) {
       }
 
       logFailover({ backend: "overpass", endpoint: host, status: response.status });
-      try {
-        const canceled = response.body?.cancel();
-        if (canceled != null && typeof canceled.then === "function") {
-          canceled.catch(() => {});
-        }
-      } catch {
-        // Best-effort: avoid holding unused upstream bodies across failover.
-      }
+      cancelResponseBody(response);
       lastError = new Error(
         isTimeoutLikeOverpassStatus(response.status)
           ? "Overpass timed out."
@@ -170,7 +151,7 @@ export async function fetchCachedOverpassQuery(query, tier = "free") {
     }
     overpassResponseCache.set(l1Key, text);
     await writeOverpassL2(l2Key, text, "application/json");
-    logCache("miss", tier);
+    logCache("miss", tier, { backend: "overpass" });
     return text;
   } catch (error) {
     try {
@@ -178,11 +159,11 @@ export async function fetchCachedOverpassQuery(query, tier = "free") {
       if (postpassText != null) {
         overpassResponseCache.set(l1Key, postpassText);
         await writeOverpassL2(l2Key, postpassText, "application/json");
-        logCache("miss", tier);
+        logCache("miss", tier, { backend: "postpass" });
         return postpassText;
       }
     } catch {
-      // Fall through to stale L2 / original error.
+      // Logged in tryPostpassForOverpassQuery; fall through to stale L2.
     }
 
     const stale = await readOverpassL2(l2Key, { allowExpired: true });

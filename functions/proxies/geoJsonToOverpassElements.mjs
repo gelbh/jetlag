@@ -2,14 +2,6 @@
  * Normalize Postpass GeoJSON FeatureCollection → Overpass-shaped `{ elements }`.
  */
 
-let nextSyntheticWayId = -1;
-
-function takeSyntheticWayId() {
-  const id = nextSyntheticWayId;
-  nextSyntheticWayId -= 1;
-  return id;
-}
-
 /**
  * @param {unknown} tags
  * @returns {Record<string, string>}
@@ -44,7 +36,7 @@ function osmIdentity(properties) {
 }
 
 /**
- * @param {number[]} ring lon/lat pairs as [lon,lat]…
+ * @param {unknown} ring
  * @returns {Array<{ lat: number, lon: number }>}
  */
 function ringToGeometry(ring) {
@@ -58,7 +50,7 @@ function ringToGeometry(ring) {
 }
 
 /**
- * @param {GeoJSON.Geometry | null | undefined} geometry
+ * @param {object | null | undefined} geometry
  * @returns {{ lat: number, lon: number } | null}
  */
 function geometryCentroid(geometry) {
@@ -79,8 +71,7 @@ function geometryCentroid(geometry) {
     return { lat: mid.lat, lon: mid.lon };
   }
   if (geometry.type === "MultiLineString") {
-    const first = geometry.coordinates[0];
-    const pts = ringToGeometry(first);
+    const pts = ringToGeometry(geometry.coordinates[0]);
     if (pts.length === 0) return null;
     const mid = pts[Math.floor(pts.length / 2)];
     return { lat: mid.lat, lon: mid.lon };
@@ -97,8 +88,7 @@ function geometryCentroid(geometry) {
     return { lat: latSum / pts.length, lon: lonSum / pts.length };
   }
   if (geometry.type === "MultiPolygon") {
-    const firstPoly = geometry.coordinates[0];
-    const pts = ringToGeometry(firstPoly?.[0]);
+    const pts = ringToGeometry(geometry.coordinates[0]?.[0]);
     if (pts.length === 0) return null;
     let latSum = 0;
     let lonSum = 0;
@@ -112,60 +102,83 @@ function geometryCentroid(geometry) {
 }
 
 /**
- * @param {object} feature
- * @param {string} family
+ * @param {object} geometry
+ * @returns {unknown[]}
+ */
+function polygonExteriorRings(geometry) {
+  if (geometry?.type === "Polygon") {
+    return geometry.coordinates[0] ? [geometry.coordinates[0]] : [];
+  }
+  if (geometry?.type === "MultiPolygon") {
+    /** @type {unknown[]} */
+    const rings = [];
+    for (const poly of geometry.coordinates) {
+      if (poly?.[0]) rings.push(poly[0]);
+    }
+    return rings;
+  }
+  return [];
+}
+
+/**
+ * @param {object} geometry
+ * @param {number} relationId
+ * @param {Record<string, string>} tags
+ * @param {() => number} nextWayId
+ * @param {{ includeCenter?: boolean }} [opts]
  * @returns {object[]}
  */
-function featureToElements(feature, family) {
+function relationFromPolygonRings(geometry, relationId, tags, nextWayId, opts = {}) {
+  /** @type {object[]} */
+  const elements = [];
+  /** @type {Array<{ type: string, ref: number, role: string }>} */
+  const members = [];
+  for (const ring of polygonExteriorRings(geometry)) {
+    const wayGeom = ringToGeometry(ring);
+    if (wayGeom.length < 4) continue;
+    const wayId = nextWayId();
+    members.push({ type: "way", ref: wayId, role: "outer" });
+    elements.push({
+      type: "way",
+      id: wayId,
+      tags: {},
+      geometry: wayGeom,
+    });
+  }
+  const center = opts.includeCenter ? geometryCentroid(geometry) : null;
+  elements.unshift({
+    type: "relation",
+    id: relationId,
+    tags,
+    members,
+    ...(center ? { center } : {}),
+  });
+  return elements;
+}
+
+/**
+ * @param {object} feature
+ * @param {string} family
+ * @param {() => number} nextWayId
+ * @returns {object[]}
+ */
+function featureToElements(feature, family, nextWayId) {
   const properties =
     feature?.properties && typeof feature.properties === "object"
       ? feature.properties
       : {};
-  const tags = normalizeTags(
-    properties.tags != null ? properties.tags : {},
-  );
+  const tags = normalizeTags(properties.tags != null ? properties.tags : {});
   const { id } = osmIdentity(properties);
   const geometry = feature?.geometry;
 
   if (family === "admin") {
-    /** @type {object[]} */
-    const elements = [];
-    const rings = [];
-    if (geometry?.type === "Polygon") {
-      rings.push(geometry.coordinates[0]);
-    } else if (geometry?.type === "MultiPolygon") {
-      for (const poly of geometry.coordinates) {
-        if (poly?.[0]) {
-          rings.push(poly[0]);
-        }
-      }
-    }
-    /** @type {Array<{ type: string, ref: number, role: string }>} */
-    const members = [];
-    for (const ring of rings) {
-      const wayGeom = ringToGeometry(ring);
-      if (wayGeom.length < 4) continue;
-      const wayId = takeSyntheticWayId();
-      members.push({ type: "way", ref: wayId, role: "outer" });
-      elements.push({
-        type: "way",
-        id: wayId,
-        tags: {},
-        geometry: wayGeom,
-      });
-    }
-    const center = geometryCentroid(geometry);
-    elements.unshift({
-      type: "relation",
+    return relationFromPolygonRings(
+      geometry,
       id,
-      tags: {
-        boundary: "administrative",
-        ...tags,
-      },
-      members,
-      ...(center ? { center } : {}),
-    });
-    return elements;
+      { boundary: "administrative", ...tags },
+      nextWayId,
+      { includeCenter: true },
+    );
   }
 
   if (family === "metro") {
@@ -209,39 +222,11 @@ function featureToElements(feature, family) {
       family === "landmass" &&
       (geometry?.type === "Polygon" || geometry?.type === "MultiPolygon")
     ) {
-      const rings = [];
-      if (geometry.type === "Polygon") {
-        rings.push(geometry.coordinates[0]);
-      } else {
-        for (const poly of geometry.coordinates) {
-          if (poly?.[0]) rings.push(poly[0]);
-        }
-      }
-      /** @type {Array<{ type: string, ref: number, role: string }>} */
-      const members = [];
-      for (const ring of rings) {
-        const wayGeom = ringToGeometry(ring);
-        if (wayGeom.length < 4) continue;
-        const wayId = takeSyntheticWayId();
-        members.push({ type: "way", ref: wayId, role: "outer" });
-        elements.push({
-          type: "way",
-          id: wayId,
-          tags: {},
-          geometry: wayGeom,
-        });
-      }
-      elements.unshift({
-        type: "relation",
-        id,
-        tags,
-        members,
-      });
+      return relationFromPolygonRings(geometry, id, tags, nextWayId);
     }
     return elements;
   }
 
-  // places / around — prefer Point nodes; polygon → center node
   if (geometry?.type === "Point") {
     const [lon, lat] = geometry.coordinates;
     return [
@@ -285,14 +270,19 @@ function featureToElements(feature, family) {
  * @returns {{ elements: object[] }}
  */
 export function geoJsonToOverpassElements(featureCollection, family) {
-  nextSyntheticWayId = -1;
+  let nextId = -1;
+  const nextWayId = () => {
+    const id = nextId;
+    nextId -= 1;
+    return id;
+  };
   const features = Array.isArray(featureCollection?.features)
     ? featureCollection.features
     : [];
   /** @type {object[]} */
   const elements = [];
   for (const feature of features) {
-    elements.push(...featureToElements(feature, family));
+    elements.push(...featureToElements(feature, family, nextWayId));
   }
   return { elements };
 }

@@ -1,4 +1,5 @@
-// Parallel implementation: src/services/geo/overpass/endpoints.ts (Vite client).
+// Public peer list mirrored in src/services/geo/overpass/endpoints.ts (Vite).
+// Paid Geofabrik peer + status/Postpass failover are Functions-only.
 
 export const OVERPASS_USER_AGENT = "jetlag-map-companion/1.0";
 
