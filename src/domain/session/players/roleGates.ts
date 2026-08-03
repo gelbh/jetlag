@@ -1,4 +1,5 @@
 import type { SessionRecord } from "../../map/annotations";
+import type { JoinRequestRole } from "./joinRequest";
 import type { PlayerRole } from "./playerRole";
 
 export type RoleGates = {
@@ -13,6 +14,31 @@ export function isSessionRoleGated(
   session: Pick<SessionRecord, "roleGates"> | null | undefined,
 ): boolean {
   return session?.roleGates?.version === 1;
+}
+
+export function ledJoinRequestRoles(input: {
+  roleGates?: RoleGates | null;
+  myUid: string | undefined;
+  isHost: boolean;
+}): JoinRequestRole[] {
+  if (
+    !input.myUid ||
+    !isSessionRoleGated({ roleGates: input.roleGates ?? undefined })
+  ) {
+    return [];
+  }
+
+  const roles: JoinRequestRole[] = [];
+  if (input.roleGates?.leaders?.seeker === input.myUid) {
+    roles.push("seeker");
+  }
+  if (input.roleGates?.leaders?.hider === input.myUid) {
+    roles.push("hider");
+  }
+  if (input.isHost) {
+    roles.push("observer");
+  }
+  return roles;
 }
 
 export function countMembersWithRole(

@@ -13,6 +13,15 @@ vi.mock("../preload/GameAreaPreloadBeacon", () => ({
   GameAreaPreloadBeacon: () => null,
 }));
 
+vi.mock("../../../hooks/map-screen/useLeaderJoinRequests", () => ({
+  useLeaderJoinRequests: () => ({
+    pendingJoinRequest: null,
+    joinRequestBusy: false,
+    handleAcceptJoinRequest: vi.fn(),
+    handleDeclineJoinRequest: vi.fn(),
+  }),
+}));
+
 describe("MapStatusRail header home", () => {
   it("renders inline Home in the brand cell by default", () => {
     render(
