@@ -51,4 +51,33 @@ it("marks chrome inactive without leaving islands clickable via CSS class", () =
     container.querySelector(".jl-map-bottom-chrome--inactive"),
   ).not.toBeNull();
 });
+
+  it("puts history and hunt in the bottom band and session/map-controls in the side stack", () => {
+    const { container } = render(
+      <MapBottomChrome
+        layout="phone"
+        history={<button type="button">Undo</button>}
+        hunt={<button type="button">Radar</button>}
+        session={<button type="button">Chat</button>}
+        mapControls={<button type="button">Recenter map on play area</button>}
+      />,
+    );
+    const bottom = container.querySelector(".jl-map-chrome-bottom-band");
+    const side = container.querySelector(".jl-map-chrome-side-stack");
+    expect(bottom).not.toBeNull();
+    expect(side).not.toBeNull();
+    expect(bottom?.querySelector('[data-island="history"]')).not.toBeNull();
+    expect(bottom?.querySelector('[data-island="hunt"]')).not.toBeNull();
+    expect(bottom?.querySelector('[data-island="session"]')).toBeNull();
+    expect(side?.querySelector('[data-island="session"]')).not.toBeNull();
+    expect(side?.querySelector('[data-island="map-controls"]')).not.toBeNull();
+  });
+
+  it("omits the side stack when session and map-controls are absent", () => {
+    const { container } = render(
+      <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
+    );
+    expect(container.querySelector(".jl-map-chrome-side-stack")).toBeNull();
+    expect(container.querySelector(".jl-map-chrome-bottom-band")).not.toBeNull();
+  });
 });

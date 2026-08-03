@@ -74,19 +74,23 @@ export function ObserverMapScreenChrome({
     </div>
   );
 
-  const huntIsland = (
+  const huntIsland = isAdmin ? (
     <div className="jl-tool-dock-group jl-tool-dock-group-main">
-      <MotionPressable
-        type="button"
-        className={`jl-tool-slot${overlay.isLogOpen ? " jl-tool-slot-active" : ""}`}
-        aria-label="Open session log"
-        aria-pressed={overlay.isLogOpen}
-        onClick={() =>
-          overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
-        }
+      <AppLink
+        to="/admin"
+        className="jl-tool-slot no-underline"
+        aria-label="Open admin"
       >
-        <span className="jl-tool-slot-label">Log</span>
-      </MotionPressable>
+        <span className="jl-tool-slot-icon">
+          <HudAdminIcon className="h-5 w-5 shrink-0" />
+        </span>
+        <span className="jl-tool-slot-label">Admin</span>
+      </AppLink>
+    </div>
+  ) : undefined;
+
+  const sessionIsland = (
+    <div className="jl-tool-dock-group jl-tool-dock-group-secondary">
       <MotionPressable
         type="button"
         className={`jl-tool-slot${overlay.isChatOpen ? " jl-tool-slot-active" : ""}`}
@@ -98,18 +102,17 @@ export function ObserverMapScreenChrome({
       >
         <span className="jl-tool-slot-label">Chat</span>
       </MotionPressable>
-      {isAdmin ? (
-        <AppLink
-          to="/admin"
-          className="jl-tool-slot no-underline"
-          aria-label="Open admin"
-        >
-          <span className="jl-tool-slot-icon">
-            <HudAdminIcon className="h-5 w-5 shrink-0" />
-          </span>
-          <span className="jl-tool-slot-label">Admin</span>
-        </AppLink>
-      ) : null}
+      <MotionPressable
+        type="button"
+        className={`jl-tool-slot${overlay.isLogOpen ? " jl-tool-slot-active" : ""}`}
+        aria-label="Open session log"
+        aria-pressed={overlay.isLogOpen}
+        onClick={() =>
+          overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
+        }
+      >
+        <span className="jl-tool-slot-label">Log</span>
+      </MotionPressable>
     </div>
   );
 
@@ -117,6 +120,7 @@ export function ObserverMapScreenChrome({
     <MapBottomChrome
       layout={isDesktop ? "rail" : "phone"}
       hunt={huntIsland}
+      session={sessionIsland}
     />
   );
 
