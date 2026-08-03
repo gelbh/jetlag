@@ -1,5 +1,5 @@
 import type { GameArea } from "../map/annotations";
-import type { MapStyle } from "../map/mapBasemaps";
+import type { MapStyle, StreetBasemap } from "../map/mapBasemaps";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import type { PendingQuestionToolType } from "../session/activity/sessionChat";
 import { buildMatchingOverlays } from "./overlays/matching";
@@ -19,6 +19,7 @@ type OverlayBuilder = (
   gameArea: GameArea,
   prefix: string,
   mapStyle: MapStyle,
+  streetBasemap: StreetBasemap,
 ) => OverlayBuilderResult | Promise<OverlayBuilderResult>;
 
 export const pendingQuestionOverlayBuilders: Partial<
@@ -27,10 +28,10 @@ export const pendingQuestionOverlayBuilders: Partial<
   radar: (question, _gameArea, prefix) => buildRadarOverlays(question, prefix),
   thermometer: (question, _gameArea, prefix) =>
     buildThermometerOverlays(question, prefix),
-  matching: (question, gameArea, prefix, mapStyle) =>
-    buildMatchingOverlays(question, gameArea, prefix, mapStyle),
-  measuring: (question, gameArea, prefix, mapStyle) =>
-    buildMeasuringOverlays(question, gameArea, prefix, mapStyle),
+  matching: (question, gameArea, prefix, mapStyle, streetBasemap) =>
+    buildMatchingOverlays(question, gameArea, prefix, mapStyle, streetBasemap),
+  measuring: (question, gameArea, prefix, mapStyle, streetBasemap) =>
+    buildMeasuringOverlays(question, gameArea, prefix, mapStyle, streetBasemap),
   tentacle: (question, _gameArea, prefix) =>
     buildTentacleOverlays(question, prefix),
 };

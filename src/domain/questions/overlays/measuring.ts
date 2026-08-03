@@ -2,7 +2,7 @@ import type { GameArea } from "../../map/annotations";
 import { parseGeometryJson, pointFromGeometryFeature } from "../../geometry/gameArea/geometryParsing";
 import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
-import type { MapStyle } from "../../map/mapBasemaps";
+import type { MapStyle, StreetBasemap } from "../../map/mapBasemaps";
 import {
   buildMeasuringBoundaryPreviewTs,
   type MeasuringRegionInput,
@@ -15,6 +15,7 @@ export function buildMeasuringOverlays(
   gameArea: GameArea,
   prefix: string,
   mapStyle: MapStyle,
+  streetBasemap: StreetBasemap = "light",
 ): OverlayBuildResult {
   const metadata = question.placement.metadata;
   const regionInputJson = metadata.measuringRegionInputJson;
@@ -45,6 +46,7 @@ export function buildMeasuringOverlays(
           gameArea: regionInput.gameArea ?? gameArea,
         }),
         mapStyle,
+        streetBasemap,
       );
     } catch {
       // Corrupt region JSON: keep markers, skip boundary.
