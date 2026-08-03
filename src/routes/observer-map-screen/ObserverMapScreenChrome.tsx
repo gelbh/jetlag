@@ -74,30 +74,8 @@ export function ObserverMapScreenChrome({
     </div>
   );
 
-  const huntIsland = (
-    <div className="jl-tool-dock-group jl-tool-dock-group-main">
-      <MotionPressable
-        type="button"
-        className={`jl-tool-slot${overlay.isLogOpen ? " jl-tool-slot-active" : ""}`}
-        aria-label="Open session log"
-        aria-pressed={overlay.isLogOpen}
-        onClick={() =>
-          overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
-        }
-      >
-        <span className="jl-tool-slot-label">Log</span>
-      </MotionPressable>
-      <MotionPressable
-        type="button"
-        className={`jl-tool-slot${overlay.isChatOpen ? " jl-tool-slot-active" : ""}`}
-        aria-label="Open chat"
-        aria-pressed={overlay.isChatOpen}
-        onClick={() =>
-          overlay.isChatOpen ? overlay.closeSheet() : overlay.openChat()
-        }
-      >
-        <span className="jl-tool-slot-label">Chat</span>
-      </MotionPressable>
+  const sessionIsland = (
+    <div className="jl-tool-dock-group jl-tool-dock-group-secondary">
       {isAdmin ? (
         <AppLink
           to="/admin"
@@ -110,13 +88,35 @@ export function ObserverMapScreenChrome({
           <span className="jl-tool-slot-label">Admin</span>
         </AppLink>
       ) : null}
+      <MotionPressable
+        type="button"
+        className={`jl-tool-slot${overlay.isChatOpen ? " jl-tool-slot-active" : ""}`}
+        aria-label="Open chat"
+        aria-pressed={overlay.isChatOpen}
+        onClick={() =>
+          overlay.isChatOpen ? overlay.closeSheet() : overlay.openChat()
+        }
+      >
+        <span className="jl-tool-slot-label">Chat</span>
+      </MotionPressable>
+      <MotionPressable
+        type="button"
+        className={`jl-tool-slot${overlay.isLogOpen ? " jl-tool-slot-active" : ""}`}
+        aria-label="Open session log"
+        aria-pressed={overlay.isLogOpen}
+        onClick={() =>
+          overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
+        }
+      >
+        <span className="jl-tool-slot-label">Log</span>
+      </MotionPressable>
     </div>
   );
 
   const toolChrome = (
     <MapBottomChrome
       layout={isDesktop ? "rail" : "phone"}
-      hunt={huntIsland}
+      session={sessionIsland}
     />
   );
 

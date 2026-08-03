@@ -72,10 +72,16 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
           data-layout={layout}
           aria-disabled={inactive || undefined}
         >
-          {history ? <Island name="history">{history}</Island> : null}
-          {hunt ? <Island name="hunt">{hunt}</Island> : null}
-          {session ? <Island name="session">{session}</Island> : null}
-          {mapControls ? <Island name="map-controls">{mapControls}</Island> : null}
+          <div className="jl-map-chrome-bottom-band">
+            {history ? <Island name="history">{history}</Island> : null}
+            {hunt ? <Island name="hunt">{hunt}</Island> : null}
+          </div>
+          <div className="jl-map-chrome-side-stack">
+            {session ? <Island name="session">{session}</Island> : null}
+            {mapControls ? (
+              <Island name="map-controls">{mapControls}</Island>
+            ) : null}
+          </div>
         </div>
         {overlay}
       </div>

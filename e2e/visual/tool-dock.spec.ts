@@ -6,7 +6,7 @@ test.describe("mobile tool dock screenshots", () => {
   });
 
   test("@smoke matches compact closed dock", async ({ page }) => {
-    await expect(page.locator(".jl-map-bottom-chrome")).toHaveScreenshot(
+    await expect(page.locator(".jl-map-bottom-chrome-host")).toHaveScreenshot(
       "tool-dock-compact-closed.png",
     );
   });
@@ -26,7 +26,7 @@ test.describe("iPhone 14 Pro Max tool dock screenshots", () => {
   });
 
   test("matches compact dock screenshots at 430px", async ({ page }) => {
-    await expect(page.locator(".jl-map-bottom-chrome")).toHaveScreenshot(
+    await expect(page.locator(".jl-map-bottom-chrome-host")).toHaveScreenshot(
       "tool-dock-compact-14-pro-max.png",
     );
   });
@@ -45,7 +45,7 @@ test.describe("iPhone 13 PWA safe area screenshots", () => {
   });
 
   test("matches compact dock screenshot with safe area", async ({ page }) => {
-    await expect(page.locator(".jl-map-bottom-chrome")).toHaveScreenshot(
+    await expect(page.locator(".jl-map-bottom-chrome-host")).toHaveScreenshot(
       "tool-dock-compact-iphone13-safe-area.png",
     );
   });

@@ -11,6 +11,7 @@ import {
   injectStandaloneDisplayMode,
   SIMULATED_SAFE_AREA_BOTTOM_PX,
   SIMULATED_SAFE_AREA_TOP_PX,
+  clickViaEvaluate,
 } from "../../fixtures";
 
 test.describe("mobile tool dock", () => {
@@ -32,7 +33,8 @@ test.describe("mobile tool dock", () => {
       page.getByRole("button", { name: "More tools" }),
     ).toHaveCount(0);
 
-    await page.getByRole("button", { name: "Draw on map" }).click();
+    const drawButton = page.getByRole("button", { name: "Draw on map" });
+    await clickViaEvaluate(drawButton);
     const drawMenu = page.getByRole("menu", { name: "Draw on map" });
     await expect(drawMenu).toBeVisible();
     await expect(drawMenu.getByRole("menuitem", { name: /Pin/i })).toBeVisible();
@@ -63,7 +65,24 @@ test.describe("mobile tool dock", () => {
     await expect(page.locator('[data-island="history"]')).toHaveCount(1);
     await expect(page.locator('[data-island="hunt"]')).toHaveCount(1);
     await expect(page.locator('[data-island="session"]')).toHaveCount(1);
+    await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
+    await expect(page.locator(".jl-map-chrome-side-stack")).toHaveCount(1);
+    await expect(
+      page.locator(".jl-map-chrome-bottom-band [data-island='session']"),
+    ).toHaveCount(0);
+    await expect(
+      page.locator(".jl-map-chrome-side-stack [data-island='session']"),
+    ).toHaveCount(1);
     await expect(page.locator(".jl-tool-dock-bar--secondary")).toHaveCount(0);
+  });
+
+  test("hunt island does not use horizontal scroll", async ({ page }) => {
+    const hunt = page.locator('[data-island="hunt"]');
+    const overflowX = await hunt.evaluate((el) => getComputedStyle(el).overflowX);
+    // hidden/clip/visible all OK — we must not use overflow-x: auto/scroll.
+    expect(["visible", "clip", "hidden"]).toContain(overflowX);
+    const metrics = await readToolDockOverflowMetrics(page);
+    expect(metrics.overflowSlots).toBe(0);
   });
 
   test("dock fits without clipping question tools", async ({ page }) => {

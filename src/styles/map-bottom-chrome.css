@@ -2,11 +2,12 @@
 
 :root {
   /*
-   * Island clearance: single hunt/session band + safe-area padding on the host.
-   * Replaces dual primary+secondary bar fold.
+   * Island clearance: bottom hunt band + right side stack.
+   * Replaces dual primary+secondary bar fold and bottom Session row.
    */
   --dock-island-height: 3.25rem;
   --dock-island-gap: 0.5rem;
+  --map-chrome-side-width: 3.25rem;
   --dock-content-height: var(--dock-island-height);
   --dock-secondary-height: 0px;
   --dock-row-gap: 0px;
@@ -42,12 +43,11 @@
 
   .jl-map-bottom-chrome {
     position: relative;
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: var(--dock-island-gap);
+    display: block;
     width: 100%;
+    min-height: calc(
+      var(--dock-island-height) + 0.75rem + env(safe-area-inset-bottom)
+    );
     padding: 0.375rem max(0.5rem, env(safe-area-inset-right))
       max(0.375rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
     background: transparent;
@@ -57,6 +57,33 @@
     right: auto;
     bottom: auto;
     left: auto;
+  }
+
+  .jl-map-chrome-bottom-band {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: var(--dock-island-gap);
+    width: 100%;
+    /* Leave room for the right side stack (session + map controls). */
+    padding-right: calc(var(--map-chrome-side-width, 3.25rem) + 0.5rem);
+  }
+
+  .jl-map-chrome-side-stack {
+    position: absolute;
+    z-index: 3;
+    right: max(0.5rem, env(safe-area-inset-right));
+    /* Sit above MapView zoom/recenter portal column (MapLibre context owns those). */
+    bottom: calc(
+      var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem +
+        var(--map-chrome-zoom-stack-height, 6.25rem)
+    );
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--dock-island-gap);
+    pointer-events: none;
   }
 
   .jl-map-island {
@@ -89,27 +116,34 @@
     min-width: 0;
     justify-content: center;
     border-top: 3px solid var(--color-highlight);
-    /* Scroll tools inside the island; do not paint/hit-test over Session. */
-    overflow-x: auto;
-    overflow-y: hidden;
-    overscroll-behavior-x: contain;
-    scrollbar-width: thin;
+    /* Never horizontal-scroll question tools — shrink slots instead. */
+    overflow: visible;
   }
 
-  .jl-map-island--history,
-  .jl-map-island--session,
-  .jl-map-island--map-controls {
+  .jl-map-island--history {
     flex: 0 0 auto;
     position: relative;
     z-index: 2;
   }
 
-  /* Cap chip width so label text cannot inflate History/Session over Hunt. */
+  .jl-map-chrome-side-stack .jl-map-island--session,
+  .jl-map-chrome-side-stack .jl-map-island--map-controls {
+    flex: 0 0 auto;
+    flex-direction: column;
+    width: var(--map-chrome-side-width, 3.25rem);
+  }
+
+  /* Cap chip width so label text cannot inflate History over Hunt. */
   .jl-map-island--history .jl-tool-slot,
-  .jl-map-island--session .jl-tool-slot,
-  .jl-map-island--map-controls .jl-tool-slot,
   .jl-map-island .jl-tool-dock-group-main .jl-tool-slot,
   .jl-map-island .jl-tool-dock-group-end .jl-tool-slot {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 2.5rem;
+    max-width: 2.75rem;
+  }
+
+  .jl-map-chrome-side-stack .jl-tool-slot {
     flex: 0 0 auto;
     width: 2.75rem;
     max-width: 2.75rem;
@@ -124,22 +158,23 @@
     display: flex;
     align-items: stretch;
     gap: 0.25rem;
-    width: max-content;
-    min-width: 100%;
+    width: 100%;
+    min-width: 0;
   }
 
   .jl-map-island .jl-tool-dock-group {
     display: flex;
     align-items: stretch;
     gap: 0.25rem;
+    min-width: 0;
   }
 
   .jl-map-island .jl-tool-dock-group-main {
     position: relative;
     z-index: 1;
-    flex: 0 0 auto;
-    min-width: max-content;
-    justify-content: flex-start;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: space-evenly;
   }
 
   .jl-map-island .jl-tool-dock-group-end {
@@ -154,7 +189,8 @@
     width: 100%;
     min-width: 0;
     flex: 1;
-    justify-content: space-evenly;
+    flex-direction: column;
+    justify-content: flex-start;
     gap: 0.25rem;
   }
 
@@ -170,12 +206,19 @@
   /* Desktop ops rail: stack islands as sections */
   .jl-map-bottom-chrome--rail {
     position: relative;
+    display: flex;
     flex-direction: column;
     align-items: stretch;
     justify-content: flex-start;
     height: 100%;
+    min-height: 0;
     padding: 0.5rem;
     gap: 0.5rem;
+  }
+
+  .jl-map-bottom-chrome--rail .jl-map-chrome-bottom-band,
+  .jl-map-bottom-chrome--rail .jl-map-chrome-side-stack {
+    display: contents;
   }
 
   .jl-map-bottom-chrome--rail .jl-map-island {
@@ -209,6 +252,19 @@
   .jl-map-bottom-chrome--rail .jl-tool-dock-group-end .jl-tool-slot {
     width: auto;
     max-width: none;
+  }
+
+  /* Compact hunt tool slots on narrow mobile to fit all tools without scroll. */
+  @media (max-width: 28rem) {
+    .jl-map-island-hunt-inner {
+      gap: 0.125rem;
+    }
+
+    .jl-map-island .jl-tool-dock-group-main .jl-tool-slot,
+    .jl-map-island .jl-tool-dock-group-end .jl-tool-slot {
+      min-width: 1.875rem;
+      max-width: 2.5rem;
+    }
   }
 
   @media (max-height: 720px) {

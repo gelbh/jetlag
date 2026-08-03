@@ -174,21 +174,8 @@ export function AdminMapScreenChrome({
   const toolbar = (
     <MapBottomChrome
       layout="phone"
-      hunt={
-        <div className="jl-tool-dock-group jl-tool-dock-group-main">
-          <button
-            type="button"
-            className={`jl-tool-slot${
-              overlay.isLogOpen ? " jl-tool-slot-active" : ""
-            }`}
-            aria-label="Open session log"
-            aria-pressed={overlay.isLogOpen}
-            onClick={() =>
-              overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
-            }
-          >
-            <span className="jl-tool-slot-label">Log</span>
-          </button>
+      session={
+        <div className="jl-tool-dock-group jl-tool-dock-group-secondary">
           <button
             type="button"
             className={`jl-tool-slot${
@@ -201,6 +188,19 @@ export function AdminMapScreenChrome({
             }
           >
             <span className="jl-tool-slot-label">Chat</span>
+          </button>
+          <button
+            type="button"
+            className={`jl-tool-slot${
+              overlay.isLogOpen ? " jl-tool-slot-active" : ""
+            }`}
+            aria-label="Open session log"
+            aria-pressed={overlay.isLogOpen}
+            onClick={() =>
+              overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
+            }
+          >
+            <span className="jl-tool-slot-label">Log</span>
           </button>
         </div>
       }

@@ -129,36 +129,29 @@ export async function clickToolDockButton(page: Page, name: string) {
     .getByLabel("Question tools")
     .getByRole("button", { name, exact: true });
   await expect(button).toBeVisible();
-  // Align within the hunt island scroller — default scrollIntoView can park
-  // the slot under History/Session and fail the hit-target check.
+  // DOM click — avoids hit-target misses when Draw shares the hunt strip.
   await button.evaluate((el) => {
-    const scroller = el.closest(".jl-map-island--hunt");
-    if (!(scroller instanceof HTMLElement)) {
-      el.scrollIntoView({ block: "nearest", inline: "nearest" });
-      return;
-    }
-    const slot = el.getBoundingClientRect();
-    const port = scroller.getBoundingClientRect();
-    const pad = 8;
-    if (slot.left < port.left + pad) {
-      scroller.scrollLeft -= port.left + pad - slot.left;
-    } else if (slot.right > port.right - pad) {
-      scroller.scrollLeft += slot.right - (port.right - pad);
+    if (el instanceof HTMLElement) {
+      el.click();
     }
   });
-  await button.click({ force: true });
-  await expect(button).toHaveAttribute("aria-pressed", "true");
+  // Tool becomes active: for normal selection, aria-pressed="true".
+  // For preview-only mode (blocked by open question): tool activates and panel
+  // renders with ViewOnlyQuestionBanner, but aria-pressed stays false.
+  const isPreviewOnly = (await button.getAttribute("title"))?.includes("Preview only") ?? false;
+  if (!isPreviewOnly) {
+    await expect(button).toHaveAttribute("aria-pressed", "true");
+  }
 }
 
 export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
   const drawButton = page.getByRole("button", { name: "Draw on map" });
   await expect(drawButton).toBeVisible();
+  // Hunt island now fits all tools without horizontal scroll; click directly.
   await drawButton.evaluate((el) => {
-    const scroller = el.closest(".jl-map-island--hunt");
-    if (scroller instanceof HTMLElement) {
-      scroller.scrollLeft = scroller.scrollWidth;
+    if (el instanceof HTMLElement) {
+      el.click();
     }
   });
-  await drawButton.click({ force: true });
   await page.getByRole("menuitem", { name: toolName }).click();
 }

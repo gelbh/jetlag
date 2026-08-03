@@ -49,12 +49,8 @@ export async function readToolDockOverflowMetrics(
     return {
       barRight: chromeRect?.right ?? 0,
       viewportWidth,
-      // Hunt scrolls on narrow phones — layout boxes past the viewport are
-      // expected while clipped. Flag only non-hunt slots that leave the viewport.
+      // Hunt no longer scrolls — any tool slot past the viewport is a layout bug.
       overflowSlots: slots.filter((el) => {
-        if (el.closest(".jl-map-island--hunt")) {
-          return false;
-        }
         const rect = el.getBoundingClientRect();
         return rect.right > viewportWidth + 1 || rect.left < -1;
       }).length,
