@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Satellite preview">
+  <rect width="64" height="64" fill="#2d4a32"/>
+  <ellipse cx="22" cy="24" rx="14" ry="10" fill="#3a5c40"/>
+  <ellipse cx="46" cy="40" rx="16" ry="12" fill="#456848"/>
+  <path d="M8 52c12-6 24-4 36 2s16 8 20 6" stroke="#6b8f5a" stroke-width="3" fill="none"/>
+</svg>

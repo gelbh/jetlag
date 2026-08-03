@@ -4,6 +4,9 @@
 
 ### Improvements
 
+- Map: compact on-map attribution with OpenStreetMap copyright link
+- Map: satellite view shows place and boundary labels over imagery
+- Map: street basemap uses OpenFreeMap only; style toggle uses local preview thumbnails
 - Admin ops desk: Monitor map, roster, and rail panels are draggable and resizable inside each saved desk preset on wide layouts
 - Admin ops desk: drop stock Session watch / Incident triage / Ops overview presets; cold-start Scratch and keep only user-named layouts
 - Map landscape: collapse status rail and tool dock by default on phone/tablet landscape, with a mini timer chip (and sync text when unhealthy) to reveal full chrome on demand
@@ -14,6 +17,7 @@
 - Map status rail: ticker-band layout gives the timer column more room and compresses operation and phase fields
 - Map: play-area and admin boundary strokes scale with zoom so borders stay readable from country to street level
 - Privacy: name Nominatim, Esri, Open-Meteo, USGS, Transitland/TfL/CTA, Cloudflare, and Resend among third parties
+- Privacy: name OpenFreeMap instead of CARTO for street map tiles
 - Map settings: show Esri attribution when satellite basemap is selected
 - End-game disk elimination masks use the WASM geometry kernel when available (override with `jl.geometry.maskKernel=ts`)
 - Tentacle elimination shading now uses the Rust geometry kernel by default (override with `jl.geometry.maskKernel=ts`)
