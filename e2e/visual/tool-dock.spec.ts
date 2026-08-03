@@ -6,15 +6,15 @@ test.describe("mobile tool dock screenshots", () => {
   });
 
   test("@smoke matches compact closed dock", async ({ page }) => {
-    await expect(page.locator(".jl-tool-dock-bar")).toHaveScreenshot(
+    await expect(page.locator(".jl-map-bottom-chrome")).toHaveScreenshot(
       "tool-dock-compact-closed.png",
     );
   });
 
-  test("matches overflow sheet open", async ({ page }) => {
-    await page.getByRole("button", { name: "More tools" }).click();
-    await expect(page.getByRole("dialog", { name: "More tools" })).toHaveScreenshot(
-      "tool-overflow-sheet-open.png",
+  test("matches draw menu open", async ({ page }) => {
+    await page.getByRole("button", { name: "Draw on map" }).click();
+    await expect(page.getByRole("menu", { name: "Draw on map" })).toHaveScreenshot(
+      "tool-draw-menu-open.png",
     );
   });
 });
@@ -26,7 +26,7 @@ test.describe("iPhone 14 Pro Max tool dock screenshots", () => {
   });
 
   test("matches compact dock screenshots at 430px", async ({ page }) => {
-    await expect(page.locator(".jl-tool-dock-bar")).toHaveScreenshot(
+    await expect(page.locator(".jl-map-bottom-chrome")).toHaveScreenshot(
       "tool-dock-compact-14-pro-max.png",
     );
   });
@@ -45,7 +45,7 @@ test.describe("iPhone 13 PWA safe area screenshots", () => {
   });
 
   test("matches compact dock screenshot with safe area", async ({ page }) => {
-    await expect(page.locator(".jl-tool-dock-bar")).toHaveScreenshot(
+    await expect(page.locator(".jl-map-bottom-chrome")).toHaveScreenshot(
       "tool-dock-compact-iphone13-safe-area.png",
     );
   });

@@ -4,7 +4,6 @@ import type { MapTool } from "../../state/sessionStore";
 
 export function useToolDockMenus(dockRef: RefObject<HTMLDivElement | null>) {
   const [drawMenuOpen, setDrawMenuOpen] = useState(false);
-  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!drawMenuOpen) {
@@ -20,7 +19,6 @@ export function useToolDockMenus(dockRef: RefObject<HTMLDivElement | null>) {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setDrawMenuOpen(false);
-        setMoreMenuOpen(false);
       }
     };
 
@@ -32,31 +30,13 @@ export function useToolDockMenus(dockRef: RefObject<HTMLDivElement | null>) {
     };
   }, [drawMenuOpen, dockRef]);
 
-  useEffect(() => {
-    if (!moreMenuOpen) {
-      return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setMoreMenuOpen(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [moreMenuOpen]);
-
   const closeMenus = () => {
     setDrawMenuOpen(false);
-    setMoreMenuOpen(false);
   };
 
   return {
     drawMenuOpen,
     setDrawMenuOpen,
-    moreMenuOpen,
-    setMoreMenuOpen,
     closeMenus,
   };
 }

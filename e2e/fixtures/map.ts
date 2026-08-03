@@ -1,5 +1,4 @@
 import { type Page, expect } from "@playwright/test";
-import { clickViaEvaluate } from "./dom";
 
 /** Matches Playwright `use.geolocation` in playwright.config.ts */
 export const E2E_GEOLOCATION = { latitude: 53.35, longitude: -6.26 };
@@ -127,25 +126,41 @@ export async function waitForMapTilesLoaded(page: Page) {
     .toBeGreaterThan(0);
 }
 
-export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
-  const drawButton = page.getByRole("button", { name: "Draw on map" });
-  if (await drawButton.isVisible().catch(() => false)) {
-    await drawButton.click();
-    await page.getByRole("menuitem", { name: toolName }).click();
-    return;
-  }
-
-  await page.getByRole("button", { name: "More tools" }).click();
-  const sheet = page.getByRole("dialog", { name: "More tools" });
-  await sheet.waitFor({ state: "visible" });
-  const toolButton = sheet.getByRole("button", { name: toolName });
-  await expect(toolButton).toBeVisible();
-  await clickViaEvaluate(toolButton);
+export async function clickToolDockButton(page: Page, name: string) {
+  const button = page
+    .getByLabel("Question tools")
+    .getByRole("button", { name, exact: true });
+  await expect(button).toBeVisible();
+  // Align within the hunt island scroller — default scrollIntoView can park
+  // the slot under History/Session and fail the hit-target check.
+  await button.evaluate((el) => {
+    const scroller = el.closest(".jl-map-island--hunt");
+    if (!(scroller instanceof HTMLElement)) {
+      el.scrollIntoView({ block: "nearest", inline: "nearest" });
+      return;
+    }
+    const slot = el.getBoundingClientRect();
+    const port = scroller.getBoundingClientRect();
+    const pad = 8;
+    if (slot.left < port.left + pad) {
+      scroller.scrollLeft -= port.left + pad - slot.left;
+    } else if (slot.right > port.right - pad) {
+      scroller.scrollLeft += slot.right - (port.right - pad);
+    }
+  });
+  await button.click({ force: true });
+  await expect(button).toHaveAttribute("aria-pressed", "true");
 }
 
-export async function clickToolDockButton(page: Page, name: string) {
-  await page
-    .getByLabel("Question tools")
-    .getByRole("button", { name, exact: true })
-    .click();
+export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
+  const drawButton = page.getByRole("button", { name: "Draw on map" });
+  await expect(drawButton).toBeVisible();
+  await drawButton.evaluate((el) => {
+    const scroller = el.closest(".jl-map-island--hunt");
+    if (scroller instanceof HTMLElement) {
+      scroller.scrollLeft = scroller.scrollWidth;
+    }
+  });
+  await drawButton.click({ force: true });
+  await page.getByRole("menuitem", { name: toolName }).click();
 }

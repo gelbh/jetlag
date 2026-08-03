@@ -399,6 +399,7 @@ export function MapScreenChrome({
         setReportProblemOpen(true);
       }}
       onOpenChat={handleOpenChat}
+      onOpenLog={handleOpenLog}
       hasUnreadChat={hasUnreadChat}
       unreadCount={unreadCount}
       dismissOverflowMenus={overlay.sheet !== "none"}

@@ -17,7 +17,7 @@ export async function readVisibleToolDockLabelMetrics(
 ): Promise<ToolDockVisibleLabelMetrics[]> {
   return page.evaluate(() => {
     const labels = [
-      ...document.querySelectorAll(".jl-tool-dock-bar .jl-tool-slot-label"),
+      ...document.querySelectorAll(".jl-map-island .jl-tool-slot-label"),
     ];
     return labels
       .map((label) => {
@@ -40,17 +40,23 @@ export async function readToolDockOverflowMetrics(
   page: Page,
 ): Promise<ToolDockOverflowMetrics> {
   return page.evaluate(() => {
-    const bar = document.querySelector(".jl-tool-dock-bar");
-    const barRect = bar?.getBoundingClientRect();
+    const chrome = document.querySelector(".jl-map-bottom-chrome");
+    const chromeRect = chrome?.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
     const slots = [...document.querySelectorAll(".jl-tool-slot")].filter(
       (el) => el.getBoundingClientRect().width > 0,
     );
     return {
-      barRight: barRect?.right ?? 0,
-      viewportWidth: window.innerWidth,
+      barRight: chromeRect?.right ?? 0,
+      viewportWidth,
+      // Hunt scrolls on narrow phones — layout boxes past the viewport are
+      // expected while clipped. Flag only non-hunt slots that leave the viewport.
       overflowSlots: slots.filter((el) => {
+        if (el.closest(".jl-map-island--hunt")) {
+          return false;
+        }
         const rect = el.getBoundingClientRect();
-        return rect.right > (barRect?.right ?? 0) + 1;
+        return rect.right > viewportWidth + 1 || rect.left < -1;
       }).length,
     };
   });
@@ -63,9 +69,9 @@ export async function injectSimulatedSafeAreaBottom(
   await page.evaluate((bottomPx) => {
     const root = document.documentElement;
     root.style.setProperty("--safe-area-bottom", `${bottomPx}px`);
-    // Mirror env(safe-area-inset-bottom) for wrapper chassis CSS that reads env() directly.
     const sheet = document.getElementById("jl-e2e-safe-area-bottom");
     const css = `:root { --jl-e2e-safe-bottom: ${bottomPx}px; }
+.jl-map-bottom-chrome:not(.jl-map-bottom-chrome--rail),
 .jl-tool-dock:not(.jl-tool-dock--rail) {
   padding-bottom: ${bottomPx}px !important;
 }`;
@@ -87,7 +93,6 @@ export async function injectSimulatedSafeAreaTop(
   await page.evaluate((topPx) => {
     const root = document.documentElement;
     root.style.setProperty("--safe-area-top", `${topPx}px`);
-    // Mirror env(safe-area-inset-top) for components/CSS that read the env() directly.
     root.style.paddingTop = "0px";
     const sheet = document.getElementById("jl-e2e-safe-area-top");
     const css = `:root { --jl-e2e-safe-top: ${topPx}px; }
@@ -121,6 +126,7 @@ export async function injectStandaloneDisplayMode(page: Page) {
       const el = document.createElement("style");
       el.id = "jl-e2e-standalone-mode";
       el.textContent = `@media (display-mode: standalone) {
+  .jl-e2e-standalone .jl-map-bottom-chrome-host,
   .jl-e2e-standalone .jl-tool-dock:not(.jl-tool-dock--rail) {
     bottom: 0;
   }
@@ -134,6 +140,7 @@ export async function injectStandaloneDisplayMode(page: Page) {
     document.documentElement.classList.add("jl-e2e-standalone");
     const sheet = document.getElementById("jl-e2e-standalone-mode");
     const css = `@media (display-mode: standalone) {
+  .jl-e2e-standalone .jl-map-bottom-chrome-host,
   .jl-e2e-standalone .jl-tool-dock:not(.jl-tool-dock--rail) {
     bottom: 0;
   }

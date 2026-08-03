@@ -375,6 +375,7 @@ export function HiderMapScreenChrome({
       onExpansion={() => onExpansionMenuOpenChange(true)}
       onRecenter={onRecenter}
       onOpenChat={onOpenChat}
+      onOpenLog={onOpenLog}
       onOpenSettings={onOpenSettings}
       onOpenReportProblem={() => {
         overlay.closeSheet();
