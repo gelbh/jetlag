@@ -1,4 +1,4 @@
-import { type Page } from "@playwright/test";
+import { type Page, type Route } from "@playwright/test";
 import { isMapTileHostname } from "../../src/domain/map/mapTileHosts";
 import {
   resolveOverpassResponse,
@@ -51,6 +51,47 @@ function isMapTileHost(hostname: string): boolean {
   return isMapTileHostname(hostname);
 }
 
+/**
+ * E2E runs auth/firestore/storage only — not the functions emulator.
+ * Non-host Play Move pauses the timer via `controlSessionTimerForMove`; stub
+ * the callable so startMove does not roll back the wizard when :5001 is down.
+ */
+async function fulfillMoveTimerCallableIfMatched(
+  route: Route,
+  parsed: URL,
+): Promise<boolean> {
+  const isFunctionsEmulator =
+    (parsed.hostname === "127.0.0.1" || parsed.hostname === "localhost") &&
+    parsed.port === "5001";
+  if (
+    !isFunctionsEmulator ||
+    !parsed.pathname.includes("controlSessionTimerForMove")
+  ) {
+    return false;
+  }
+
+  let action: "pause" | "resume" = "pause";
+  try {
+    const body = JSON.parse(route.request().postData() ?? "{}") as {
+      data?: { action?: string };
+    };
+    if (body.data?.action === "resume") {
+      action = "resume";
+    }
+  } catch {
+    // Default to pause when the body is missing or malformed.
+  }
+
+  await route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      result: { ok: true, action, noop: true },
+    }),
+  });
+  return true;
+}
+
 export async function blockExternalAssets(
   page: Page,
   options: BlockExternalAssetsOptions = {},
@@ -60,15 +101,19 @@ export async function blockExternalAssets(
   await page.route("**/*", async (route) => {
     const url = route.request().url();
 
-    if (isLocalAppRequest(url)) {
-      await route.continue();
-      return;
-    }
-
     let parsed: URL;
     try {
       parsed = new URL(url);
     } catch {
+      await route.continue();
+      return;
+    }
+
+    if (await fulfillMoveTimerCallableIfMatched(route, parsed)) {
+      return;
+    }
+
+    if (isLocalAppRequest(url)) {
       await route.continue();
       return;
     }

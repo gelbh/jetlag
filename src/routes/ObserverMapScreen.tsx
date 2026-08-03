@@ -135,6 +135,9 @@ export function ObserverMapScreen() {
           overlay={controller.overlay}
           onLeave={() => void handleLeave()}
           mapSlot={isDesktop ? mapLayers : undefined}
+          moveInProgress={controller.hidingZones.some(
+            (zone) => zone.moveInProgress === true,
+          )}
         />
 
         {controller.syncStatus.lastSyncError ? (
