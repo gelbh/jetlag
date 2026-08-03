@@ -148,11 +148,7 @@ export function useMapScreenController() {
     cancelThermometerWalk,
   } = tools;
 
-  const {
-    handleCancelWalkingQuestion,
-    needsLocationPermission,
-    requestLocationPermission,
-  } = useMapScreenSeekerEffects({
+  const { handleCancelWalkingQuestion } = useMapScreenSeekerEffects({
     session,
     uid,
     myRole,
@@ -544,8 +540,6 @@ export function useMapScreenController() {
     hasUnreadChat,
     unreadCount,
     liveLocationError,
-    needsLocationPermission,
-    requestLocationPermission,
     isRemote,
     gameRulesEditable,
     draftAdvancedSettings: sessionActions.draftAdvancedSettings,

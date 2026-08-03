@@ -23,8 +23,7 @@ export function useHiderLocationSync({
 }: UseHiderLocationSyncParams) {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const profile = getPowerProfile(lowPowerMode).hiderLocationSync;
-  const { reading, error, needsPermissionPrompt, requestPermission } =
-    useLiveLocation(enabled, profile);
+  const { reading, error } = useLiveLocation(enabled, profile);
 
   useEffect(() => {
     if (
@@ -69,5 +68,5 @@ export function useHiderLocationSync({
       });
   }, [enabled, reading, sessionId, uid]);
 
-  return { error, needsPermissionPrompt, requestPermission };
+  return { error };
 }

@@ -4,7 +4,7 @@ import {
   createMockGeolocationPosition,
   mockGeolocation,
 } from "../../test/mocks/geolocation";
-import { resetLocationPermissionUiForTests } from "../../services/core/location/geolocation";
+import { resetLocationPermissionUiForTests } from "../../services/core/location/locationPermissionUi";
 import { useGeolocation } from "./useGeolocation";
 
 function mockPermissions(state: PermissionState): void {

@@ -158,11 +158,7 @@ export function HiderMapScreen() {
     notificationRole: "hider",
     authMode: "hider-anonymous",
   });
-  const {
-    error: hiderLocationSyncError,
-    needsPermissionPrompt: hiderNeedsLocationPermission,
-    requestPermission: requestHiderLocationPermission,
-  } = useHiderLocationSync({
+  const { error: hiderLocationSyncError } = useHiderLocationSync({
     sessionId,
     uid,
     enabled: true,
@@ -882,10 +878,6 @@ export function HiderMapScreen() {
           updateNotificationPreferences,
           enableNotifications,
           locationError,
-          needsLocationPermission: hiderNeedsLocationPermission,
-          onAllowLocation: () => {
-            void requestHiderLocationPermission();
-          },
         }}
         chat={{
           sessionId: sessionId ?? "",

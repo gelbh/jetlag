@@ -1,6 +1,10 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
-import { confirmAndRequestLocationAccess } from "../../services/core/location/geolocation";
+import {
+  getCurrentPosition,
+  queryGeolocationPermission,
+  requestLocationAccess,
+} from "../../services/core/location/geolocation";
 import {
   searchPlaces,
   type GeocodedPlace,
@@ -25,8 +29,24 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
   const userLocationRef = useRef<LatLngTuple | null>(null);
   const { beginRequest, isLatestRequest } = useLatestRequest();
 
+  // Silent bias only when already granted — never trigger the system prompt on mount.
+  useEffect(() => {
+    void (async () => {
+      const permission = await queryGeolocationPermission();
+      if (permission !== "granted") {
+        return;
+      }
+      try {
+        const reading = await getCurrentPosition({ highAccuracy: false });
+        userLocationRef.current = [reading.lat, reading.lng];
+      } catch {
+        userLocationRef.current = null;
+      }
+    })();
+  }, []);
+
   const requestLocationBias = useCallback(() => {
-    void confirmAndRequestLocationAccess({ highAccuracy: false })
+    void requestLocationAccess({ highAccuracy: false, userGesture: true })
       .then((reading) => {
         userLocationRef.current = [reading.lat, reading.lng];
       })

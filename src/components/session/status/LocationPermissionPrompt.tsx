@@ -2,31 +2,32 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { useLocation } from "react-router-dom";
 import {
   confirmAndRequestLocationAccess,
-  getLocationPermissionUiSnapshot,
   LOCATION_BLOCKED_MESSAGE,
   LOCATION_PERMISSION_REQUIRED_MESSAGE,
   queryGeolocationPermission,
-  subscribeLocationPermissionUi,
   type GeolocationPermissionState,
 } from "../../../services/core/location/geolocation";
+import {
+  getLocationPermissionUiSnapshot,
+  subscribeLocationPermissionUi,
+} from "../../../services/core/location/locationPermissionUi";
 import { HudBanner } from "../../ui/hud/HudBanner";
 
-function isMapPath(pathname: string): boolean {
-  return pathname === "/map" || pathname === "/hider" || pathname.startsWith("/map/");
-}
+const EMPTY_LOCATION_PERMISSION_UI = { demand: 0, confirmEpoch: 0 };
 
 export function LocationPermissionPrompt() {
   const location = useLocation();
-  const onMap = isMapPath(location.pathname);
+  const onMap = location.pathname === "/map";
   const ui = useSyncExternalStore(
     subscribeLocationPermissionUi,
     getLocationPermissionUiSnapshot,
-    () => ({ demand: 0, confirmEpoch: 0 }),
+    () => EMPTY_LOCATION_PERMISSION_UI,
   );
   const [permission, setPermission] =
-    useState<GeolocationPermissionState>("prompt");
+    useState<GeolocationPermissionState | null>(null);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [forceDenied, setForceDenied] = useState(false);
 
   const refreshPermission = useCallback(async () => {
     const next = await queryGeolocationPermission();
@@ -40,12 +41,20 @@ export function LocationPermissionPrompt() {
     void refreshPermission();
   }, [onMap, refreshPermission, ui.confirmEpoch, ui.demand]);
 
-  if (!onMap || ui.demand === 0 || permission === "granted") {
+  const denied = forceDenied || permission === "denied";
+  const unavailable = permission === "unavailable";
+  const confirmedLiveAccess = ui.confirmEpoch > 0 && !denied && !unavailable;
+
+  if (
+    !onMap ||
+    ui.demand === 0 ||
+    permission === null ||
+    permission === "granted" ||
+    confirmedLiveAccess
+  ) {
     return null;
   }
 
-  const denied = permission === "denied";
-  const unavailable = permission === "unavailable";
   const title = denied
     ? "Location blocked"
     : unavailable
@@ -62,11 +71,15 @@ export function LocationPermissionPrompt() {
     setActionError(null);
     try {
       await confirmAndRequestLocationAccess({ highAccuracy: false });
+      setForceDenied(false);
       await refreshPermission();
     } catch (error) {
-      setActionError(
-        error instanceof Error ? error.message : LOCATION_BLOCKED_MESSAGE,
-      );
+      const message =
+        error instanceof Error ? error.message : LOCATION_BLOCKED_MESSAGE;
+      setActionError(message);
+      if (message === LOCATION_BLOCKED_MESSAGE) {
+        setForceDenied(true);
+      }
       await refreshPermission();
     } finally {
       setBusy(false);
@@ -97,7 +110,7 @@ export function LocationPermissionPrompt() {
         >
           {body}
         </p>
-        {actionError ? (
+        {actionError && !denied ? (
           <p className="mt-2 text-sm text-status-error">{actionError}</p>
         ) : null}
         {denied || unavailable ? (
@@ -106,6 +119,7 @@ export function LocationPermissionPrompt() {
               type="button"
               disabled={busy || unavailable}
               onClick={() => {
+                setForceDenied(false);
                 void onAllow();
               }}
               className="btn-secondary min-h-10 flex-1 px-4 text-xs"

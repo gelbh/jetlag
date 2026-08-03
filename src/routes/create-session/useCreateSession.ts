@@ -53,7 +53,7 @@ import {
   listTransitMetros,
 } from "../../services/transit/transitCatalog";
 import { searchPlaces, type GeocodedPlace } from "../../services/geo/geocoding";
-import { confirmAndRequestLocationAccess } from "../../services/core/location/geolocation";
+import { requestLocationAccess } from "../../services/core/location/geolocation";
 import { APP_VERSION } from "../../domain/device/changelog";
 import { grantAccess, hasAccessClaim } from "../../services/core/auth/accessControl";
 import {
@@ -262,7 +262,7 @@ export function useCreateSession() {
   }, [framing.applyFocusToGameArea, presets, searchParams]);
 
   const requestLocationBias = useCallback(() => {
-    void confirmAndRequestLocationAccess({ highAccuracy: false })
+    void requestLocationAccess({ highAccuracy: false, userGesture: true })
       .then((reading) => {
         userLocationRef.current = [reading.lat, reading.lng];
       })

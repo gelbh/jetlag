@@ -10,7 +10,11 @@ vi.mock("../../services/geo/geocoding", () => ({
 }));
 
 vi.mock("../../services/core/location/geolocation", () => ({
-  confirmAndRequestLocationAccess: vi.fn(async () => {
+  queryGeolocationPermission: vi.fn(async () => "prompt" as const),
+  getCurrentPosition: vi.fn(async () => {
+    throw new Error("no gps");
+  }),
+  requestLocationAccess: vi.fn(async () => {
     throw new Error("no gps");
   }),
 }));

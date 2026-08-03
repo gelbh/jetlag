@@ -17,7 +17,7 @@ export function LiveUserLocationLayer({
   onError,
 }: LiveUserLocationLayerProps) {
   const profile = getPowerProfile(lowPowerMode).liveLocation;
-  const { reading, error, needsPermissionPrompt } = useLiveLocation(enabled, {
+  const { reading, error } = useLiveLocation(enabled, {
     highAccuracy: highAccuracy ? true : profile.highAccuracy,
     minIntervalMs: profile.minIntervalMs,
     minDistanceMeters: profile.minDistanceMeters,
@@ -26,12 +26,6 @@ export function LiveUserLocationLayer({
   useEffect(() => {
     onError?.(error);
   }, [error, onError]);
-
-  useEffect(() => {
-    if (needsPermissionPrompt) {
-      onError?.(null);
-    }
-  }, [needsPermissionPrompt, onError]);
 
   if (!enabled) {
     return null;

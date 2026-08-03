@@ -1,17 +1,18 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { haversineMeters } from "../../domain/geometry/gameArea/distance";
 import {
-  confirmAndRequestLocationAccess,
-  getLocationPermissionUiSnapshot,
   queryGeolocationPermission,
   requestLocationAccess,
-  retainLocationPermissionDemand,
-  subscribeLocationPermissionUi,
   unknownGeolocationErrorMessage,
   watchPosition,
   type GeolocationReading,
   LOCATION_BLOCKED_MESSAGE,
 } from "../../services/core/location/geolocation";
+import {
+  getLocationPermissionUiSnapshot,
+  retainLocationPermissionDemand,
+  subscribeLocationPermissionUi,
+} from "../../services/core/location/locationPermissionUi";
 
 interface UseLiveLocationOptions {
   highAccuracy?: boolean;
@@ -94,6 +95,9 @@ export function useLiveLocation(
           }
 
           setError(nextError.message);
+          if (nextError.message === LOCATION_BLOCKED_MESSAGE) {
+            setNeedsPermissionPrompt(false);
+          }
         },
         { highAccuracy },
       );
@@ -124,13 +128,12 @@ export function useLiveLocation(
           return;
         }
 
-        // CTA already ran getCurrentPosition under a user gesture — only watch.
+        // Map Allow CTA already obtained a reading under a user gesture.
         setNeedsPermissionPrompt(false);
         startWatch();
         return;
       }
 
-      // granted
       setNeedsPermissionPrompt(false);
 
       try {
@@ -165,21 +168,9 @@ export function useLiveLocation(
     };
   }, [confirmEpoch, enabled, highAccuracy, minDistanceMeters, minIntervalMs]);
 
-  const requestPermission = useCallback(async () => {
-    try {
-      await confirmAndRequestLocationAccess({ highAccuracy });
-      setNeedsPermissionPrompt(false);
-      setError(null);
-    } catch (nextError) {
-      setNeedsPermissionPrompt(false);
-      setError(unknownGeolocationErrorMessage(nextError));
-    }
-  }, [highAccuracy]);
-
   return {
     reading: enabled ? reading : null,
     error: enabled ? error : null,
     needsPermissionPrompt: enabled ? needsPermissionPrompt : false,
-    requestPermission,
   };
 }

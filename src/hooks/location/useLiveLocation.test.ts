@@ -4,7 +4,8 @@ import {
   createMockGeolocationPosition,
   mockGeolocation,
 } from "../../test/mocks/geolocation";
-import { resetLocationPermissionUiForTests } from "../../services/core/location/geolocation";
+import { confirmAndRequestLocationAccess } from "../../services/core/location/geolocation";
+import { resetLocationPermissionUiForTests } from "../../services/core/location/locationPermissionUi";
 import { useLiveLocation } from "./useLiveLocation";
 
 function mockPermissions(state: PermissionState): void {
@@ -68,7 +69,7 @@ describe("useLiveLocation", () => {
     expect(result.current.error).toBeNull();
 
     await act(async () => {
-      await result.current.requestPermission();
+      await confirmAndRequestLocationAccess({ highAccuracy: false });
     });
 
     await waitFor(() => {

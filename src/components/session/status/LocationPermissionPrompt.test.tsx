@@ -5,10 +5,7 @@ import {
   createMockGeolocationPosition,
   mockGeolocation,
 } from "../../../test/mocks/geolocation";
-import {
-  resetLocationPermissionUiForTests,
-  retainLocationPermissionDemand,
-} from "../../../services/core/location/geolocation";
+import { retainLocationPermissionDemand, resetLocationPermissionUiForTests } from "../../../services/core/location/locationPermissionUi";
 import { LocationPermissionPrompt } from "./LocationPermissionPrompt";
 
 function mockPermissions(state: PermissionState): void {
@@ -60,6 +57,28 @@ describe("LocationPermissionPrompt", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+  it("hides after a successful Allow when Permissions API stays prompt", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("prompt");
+    const release = retainLocationPermissionDemand();
+
+    render(
+      <MemoryRouter initialEntries={["/map"]}>
+        <LocationPermissionPrompt />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: /allow location/i }),
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    release();
+  });
+
   it("requests location from the Allow CTA", async () => {
     mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
     mockPermissions("prompt");
@@ -89,7 +108,7 @@ describe("LocationPermissionPrompt", () => {
     const release = retainLocationPermissionDemand();
 
     render(
-      <MemoryRouter initialEntries={["/hider"]}>
+      <MemoryRouter initialEntries={["/map"]}>
         <LocationPermissionPrompt />
       </MemoryRouter>,
     );

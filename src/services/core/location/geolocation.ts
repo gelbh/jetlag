@@ -1,3 +1,5 @@
+import { markLocationAccessConfirmed } from "./locationPermissionUi";
+
 export interface GeolocationReading {
   lat: number;
   lng: number;
@@ -86,63 +88,6 @@ export async function queryGeolocationPermission(): Promise<GeolocationPermissio
   return "prompt";
 }
 
-type LocationPermissionUiSnapshot = {
-  demand: number;
-  confirmEpoch: number;
-};
-
-let locationPermissionDemand = 0;
-let locationAccessConfirmEpoch = 0;
-let locationPermissionUiSnapshot: LocationPermissionUiSnapshot = {
-  demand: 0,
-  confirmEpoch: 0,
-};
-const locationPermissionUiListeners = new Set<() => void>();
-
-function emitLocationPermissionUi(): void {
-  locationPermissionUiSnapshot = {
-    demand: locationPermissionDemand,
-    confirmEpoch: locationAccessConfirmEpoch,
-  };
-  for (const listener of locationPermissionUiListeners) {
-    listener();
-  }
-}
-
-export function getLocationPermissionUiSnapshot(): LocationPermissionUiSnapshot {
-  return locationPermissionUiSnapshot;
-}
-
-export function subscribeLocationPermissionUi(onStoreChange: () => void): () => void {
-  locationPermissionUiListeners.add(onStoreChange);
-  return () => {
-    locationPermissionUiListeners.delete(onStoreChange);
-  };
-}
-
-/** Register that a live feature wants GPS. Banner watches aggregate demand. */
-export function retainLocationPermissionDemand(): () => void {
-  locationPermissionDemand += 1;
-  emitLocationPermissionUi();
-  return () => {
-    locationPermissionDemand = Math.max(0, locationPermissionDemand - 1);
-    emitLocationPermissionUi();
-  };
-}
-
-function markLocationAccessConfirmed(): void {
-  locationAccessConfirmEpoch += 1;
-  emitLocationPermissionUi();
-}
-
-/** Test-only reset for demand / confirm epoch. */
-export function resetLocationPermissionUiForTests(): void {
-  locationPermissionDemand = 0;
-  locationAccessConfirmEpoch = 0;
-  locationPermissionUiSnapshot = { demand: 0, confirmEpoch: 0 };
-  emitLocationPermissionUi();
-}
-
 export function getCurrentPosition(options?: {
   highAccuracy?: boolean;
 }): Promise<GeolocationReading> {
@@ -192,7 +137,10 @@ export async function requestLocationAccess(options?: {
   return getCurrentPosition(options);
 }
 
-/** CTA-only helper: runs the system prompt after an explicit Allow action. */
+/**
+ * Map Allow CTA helper: system prompt under a user gesture, then marks live-map
+ * GPS as confirmed so watches may start without re-prompting in-app.
+ */
 export async function confirmAndRequestLocationAccess(options?: {
   highAccuracy?: boolean;
 }): Promise<GeolocationReading> {

@@ -109,8 +109,6 @@ type MapScreenChromeProps = Pick<
   | "hasUnreadChat"
   | "unreadCount"
   | "liveLocationError"
-  | "needsLocationPermission"
-  | "requestLocationPermission"
   | "isRemote"
   | "gameRulesEditable"
   | "draftAdvancedSettings"
@@ -228,8 +226,6 @@ export function MapScreenChrome({
   hasUnreadChat,
   unreadCount,
   liveLocationError,
-  needsLocationPermission,
-  requestLocationPermission,
   isRemote,
   gameRulesEditable,
   draftAdvancedSettings,
@@ -517,10 +513,6 @@ export function MapScreenChrome({
             streetBasemap,
             onStreetBasemapChange: setStreetBasemap,
             locationError: liveLocationError,
-            needsLocationPermission,
-            onAllowLocation: () => {
-              void requestLocationPermission();
-            },
             transitEnabled,
             transitLiveEnabled,
             transitLiveSupported,

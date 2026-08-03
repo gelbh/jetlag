@@ -6,8 +6,6 @@ const useLiveLocationMock = vi.hoisted(() =>
   vi.fn(() => ({
     reading: null as { lat: number; lng: number; accuracy: number } | null,
     error: null as string | null,
-    needsPermissionPrompt: false,
-    requestPermission: vi.fn(async () => undefined),
   })),
 );
 
@@ -22,8 +20,6 @@ describe("useThermometerWalk", () => {
     useLiveLocationMock.mockReturnValue({
       reading: null,
       error: null,
-      needsPermissionPrompt: false,
-      requestPermission: vi.fn(),
     });
   });
 
@@ -42,8 +38,6 @@ describe("useThermometerWalk", () => {
         useLiveLocationMock.mockReturnValue({
           reading,
           error: null,
-          needsPermissionPrompt: false,
-          requestPermission: vi.fn(),
         });
         return useThermometerWalk({
           active: true,

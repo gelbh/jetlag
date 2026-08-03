@@ -5,8 +5,8 @@ import {
   LOCATION_BLOCKED_MESSAGE,
   queryGeolocationPermission,
   requestLocationAccess,
-  resetLocationPermissionUiForTests,
 } from "./geolocation";
+import { resetLocationPermissionUiForTests } from "./locationPermissionUi";
 import {
   createMockGeolocationPosition,
   mockGeolocation,
