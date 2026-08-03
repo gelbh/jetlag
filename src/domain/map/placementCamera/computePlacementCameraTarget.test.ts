@@ -10,6 +10,7 @@ import {
   placementCameraDraftFromOverlaySources,
   resolvePlacementPhase,
   MAX_ZOOM_PIN,
+  boundsForPlayArea,
   type CameraTarget,
 } from "./index";
 
@@ -163,7 +164,23 @@ describe("computePlacementCameraTarget", () => {
     expect(boundsSpanMeters(target)).toBeGreaterThan(200);
   });
 
-  it("returns null when tool is idle", async () => {
+  it("frames play area with forceReframe when pin tool is idle", async () => {
+    const sources = {
+      ...emptySources,
+      activeTool: "pin" as const,
+      pin: { point: null },
+    };
+    const target = computePlacementCameraTarget(await buildContext(sources));
+
+    expect(target).not.toBeNull();
+    expect(target?.forceReframe).toBe(true);
+    expect(target?.paddingBiasPx).toBeGreaterThan(300);
+    expect(target?.bounds).toEqual(
+      boundsForPlayArea(DUBLIN_CITY_GAME_AREA),
+    );
+  });
+
+  it("still returns null for tool none", async () => {
     expect(computePlacementCameraTarget(await buildContext(emptySources))).toBeNull();
   });
 

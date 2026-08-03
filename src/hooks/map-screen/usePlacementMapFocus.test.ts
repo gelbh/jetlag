@@ -106,7 +106,7 @@ describe("usePlacementMapFocus", () => {
     pinOverlays = (await buildMapDraftOverlays(pinSources)).overlays;
   });
 
-  it("uses default focus bounds until overlays change", () => {
+  it("frames play area when pin tool is idle with empty overlays", () => {
     const { result } = renderHook(() =>
       usePlacementMapFocus({
         activeTool: "pin",
@@ -120,9 +120,32 @@ describe("usePlacementMapFocus", () => {
       }),
     );
 
-    expect(result.current.effectiveFocusBounds).toEqual(defaultBounds);
+    expect(result.current.effectiveFocusBounds).not.toEqual(defaultBounds);
+    expect(result.current.placementRecenterToken).toBe(1);
+    expect(result.current.focusPaddingBias).toBeGreaterThan(300);
+  });
+
+  it("bumps recenter token when activating pin with empty overlays", () => {
+    const { result, rerender } = renderHook(
+      ({ activeTool }) =>
+        usePlacementMapFocus({
+          activeTool,
+          draft: emptyDraft,
+          overlays: [],
+          eliminationFeatures: [],
+          gameArea: DUBLIN_CITY_GAME_AREA,
+          defaultFocusBounds: defaultBounds,
+          enabled: true,
+          panelMinimized: false,
+        }),
+      { initialProps: { activeTool: "none" as const } },
+    );
+
     expect(result.current.placementRecenterToken).toBe(0);
-    expect(result.current.focusPaddingBias).toBeUndefined();
+
+    rerender({ activeTool: "pin" });
+    expect(result.current.placementRecenterToken).toBeGreaterThan(0);
+    expect(result.current.focusPaddingBias).toBeGreaterThan(300);
   });
 
   it("bumps recenter token when structural overlays change", () => {
@@ -153,7 +176,7 @@ describe("usePlacementMapFocus", () => {
 
     rerender({ overlays: pinOverlays, draft: pinDraft });
 
-    expect(result.current.placementRecenterToken).toBe(1);
+    expect(result.current.placementRecenterToken).toBe(2);
     expect(result.current.focusPaddingBias).toBeGreaterThan(300);
     expect(result.current.effectiveFocusBounds).not.toEqual(defaultBounds);
   });

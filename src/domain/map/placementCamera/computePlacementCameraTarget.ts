@@ -290,8 +290,16 @@ function computeZoneTarget(ctx: PlacementCameraContext): CameraTarget | null {
 export function computePlacementCameraTarget(
   ctx: PlacementCameraContext,
 ): CameraTarget | null {
-  if (ctx.phase === "idle" || ctx.tool === "none" || ctx.tool === "photo") {
+  if (ctx.tool === "none" || ctx.tool === "photo") {
     return null;
+  }
+
+  if (ctx.phase === "idle") {
+    return {
+      bounds: boundsForPlayArea(ctx.gameArea),
+      paddingBiasPx: ctx.panelPeekHeightPx + PANEL_PADDING_EXTRA_PX,
+      forceReframe: true,
+    };
   }
 
   switch (ctx.tool) {
