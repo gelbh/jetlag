@@ -1,14 +1,30 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createMockGeolocationPosition,
   mockGeolocation,
 } from "../../test/mocks/geolocation";
+import { resetLocationPermissionUiForTests } from "../../services/core/location/geolocation";
 import { useGeolocation } from "./useGeolocation";
 
+function mockPermissions(state: PermissionState): void {
+  Object.defineProperty(navigator, "permissions", {
+    configurable: true,
+    value: {
+      query: vi.fn(async () => ({ state })),
+    },
+  });
+}
+
 describe("useGeolocation", () => {
+  afterEach(() => {
+    resetLocationPermissionUiForTests();
+    vi.unstubAllGlobals();
+  });
+
   it("returns a reading when geolocation succeeds", async () => {
     mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("granted");
 
     const { result } = renderHook(() => useGeolocation());
 
@@ -26,6 +42,7 @@ describe("useGeolocation", () => {
 
   it("stores an error when permission is denied", async () => {
     mockGeolocation(null);
+    mockPermissions("denied");
 
     const { result } = renderHook(() => useGeolocation());
 

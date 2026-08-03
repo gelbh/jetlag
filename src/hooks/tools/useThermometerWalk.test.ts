@@ -6,6 +6,8 @@ const useLiveLocationMock = vi.hoisted(() =>
   vi.fn(() => ({
     reading: null as { lat: number; lng: number; accuracy: number } | null,
     error: null as string | null,
+    needsPermissionPrompt: false,
+    requestPermission: vi.fn(async () => undefined),
   })),
 );
 
@@ -17,7 +19,12 @@ describe("useThermometerWalk", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     useLiveLocationMock.mockReset();
-    useLiveLocationMock.mockReturnValue({ reading: null, error: null });
+    useLiveLocationMock.mockReturnValue({
+      reading: null,
+      error: null,
+      needsPermissionPrompt: false,
+      requestPermission: vi.fn(),
+    });
   });
 
   afterEach(() => {
@@ -32,7 +39,12 @@ describe("useThermometerWalk", () => {
     type Reading = { lat: number; lng: number; accuracy: number } | null;
     const { rerender, result } = renderHook(
       ({ reading }: { reading: Reading }) => {
-        useLiveLocationMock.mockReturnValue({ reading, error: null });
+        useLiveLocationMock.mockReturnValue({
+          reading,
+          error: null,
+          needsPermissionPrompt: false,
+          requestPermission: vi.fn(),
+        });
         return useThermometerWalk({
           active: true,
           startPoint,

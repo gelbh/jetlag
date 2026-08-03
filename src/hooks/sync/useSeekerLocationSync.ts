@@ -23,7 +23,8 @@ export function useSeekerLocationSync({
 }: UseSeekerLocationSyncParams) {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const profile = getPowerProfile(lowPowerMode).seekerLocationSync;
-  const { reading, error } = useLiveLocation(enabled, profile);
+  const { reading, error, needsPermissionPrompt, requestPermission } =
+    useLiveLocation(enabled, profile);
 
   useEffect(() => {
     if (
@@ -68,5 +69,5 @@ export function useSeekerLocationSync({
     });
   }, [enabled, reading, sessionId, uid]);
 
-  return { error };
+  return { error, needsPermissionPrompt, requestPermission };
 }

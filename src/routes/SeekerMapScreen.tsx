@@ -183,6 +183,8 @@ function SeekerMapScreenBody({
         hasUnreadChat={controller.hasUnreadChat}
         unreadCount={controller.unreadCount}
         liveLocationError={controller.liveLocationError}
+        needsLocationPermission={controller.needsLocationPermission}
+        requestLocationPermission={controller.requestLocationPermission}
         isRemote={controller.isRemote}
         gameRulesEditable={controller.gameRulesEditable}
         draftAdvancedSettings={controller.draftAdvancedSettings}

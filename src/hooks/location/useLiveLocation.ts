@@ -1,10 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { haversineMeters } from "../../domain/geometry/gameArea/distance";
 import {
+  confirmAndRequestLocationAccess,
+  getLocationPermissionUiSnapshot,
+  queryGeolocationPermission,
   requestLocationAccess,
+  retainLocationPermissionDemand,
+  subscribeLocationPermissionUi,
   unknownGeolocationErrorMessage,
   watchPosition,
   type GeolocationReading,
+  LOCATION_BLOCKED_MESSAGE,
 } from "../../services/core/location/geolocation";
 
 interface UseLiveLocationOptions {
@@ -24,12 +30,28 @@ export function useLiveLocation(
   } = options;
   const [reading, setReading] = useState<GeolocationReading | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [needsPermissionPrompt, setNeedsPermissionPrompt] = useState(false);
   const lastPublishRef = useRef<{ at: number; reading: GeolocationReading } | null>(
     null,
+  );
+  const confirmEpoch = useSyncExternalStore(
+    subscribeLocationPermissionUi,
+    () => getLocationPermissionUiSnapshot().confirmEpoch,
+    () => 0,
   );
 
   useEffect(() => {
     if (!enabled) {
+      return;
+    }
+    return retainLocationPermissionDemand();
+  }, [enabled]);
+
+  useEffect(() => {
+    if (!enabled) {
+      setReading(null);
+      setError(null);
+      setNeedsPermissionPrompt(false);
       return;
     }
 
@@ -57,7 +79,60 @@ export function useLiveLocation(
       setError(null);
     };
 
+    const startWatch = () => {
+      stopWatch = watchPosition(
+        (next) => {
+          if (cancelled) {
+            return;
+          }
+
+          publishReading(next);
+        },
+        (nextError) => {
+          if (cancelled) {
+            return;
+          }
+
+          setError(nextError.message);
+        },
+        { highAccuracy },
+      );
+    };
+
     const start = async () => {
+      const permission = await queryGeolocationPermission();
+      if (cancelled) {
+        return;
+      }
+
+      if (permission === "unavailable") {
+        setNeedsPermissionPrompt(false);
+        setError("Geolocation is not available on this device.");
+        return;
+      }
+
+      if (permission === "denied") {
+        setNeedsPermissionPrompt(false);
+        setError(LOCATION_BLOCKED_MESSAGE);
+        return;
+      }
+
+      if (permission === "prompt") {
+        if (confirmEpoch === 0) {
+          setNeedsPermissionPrompt(true);
+          setError(null);
+          return;
+        }
+
+        // CTA already ran getCurrentPosition under a user gesture — only watch.
+        setNeedsPermissionPrompt(false);
+        startWatch();
+        return;
+      }
+
+      // granted
+      setNeedsPermissionPrompt(false);
+
       try {
         const initial = await requestLocationAccess({ highAccuracy });
         if (cancelled) {
@@ -78,23 +153,7 @@ export function useLiveLocation(
         return;
       }
 
-      stopWatch = watchPosition(
-        (next) => {
-          if (cancelled) {
-            return;
-          }
-
-          publishReading(next);
-        },
-        (nextError) => {
-          if (cancelled) {
-            return;
-          }
-
-          setError(nextError.message);
-        },
-        { highAccuracy },
-      );
+      startWatch();
     };
 
     void start();
@@ -104,10 +163,23 @@ export function useLiveLocation(
       stopWatch?.();
       lastPublishRef.current = null;
     };
-  }, [enabled, highAccuracy, minDistanceMeters, minIntervalMs]);
+  }, [confirmEpoch, enabled, highAccuracy, minDistanceMeters, minIntervalMs]);
+
+  const requestPermission = useCallback(async () => {
+    try {
+      await confirmAndRequestLocationAccess({ highAccuracy });
+      setNeedsPermissionPrompt(false);
+      setError(null);
+    } catch (nextError) {
+      setNeedsPermissionPrompt(false);
+      setError(unknownGeolocationErrorMessage(nextError));
+    }
+  }, [highAccuracy]);
 
   return {
     reading: enabled ? reading : null,
     error: enabled ? error : null,
+    needsPermissionPrompt: enabled ? needsPermissionPrompt : false,
+    requestPermission,
   };
 }

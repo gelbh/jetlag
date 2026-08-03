@@ -84,7 +84,7 @@ export function useMapScreenSeekerEffects({
     postSystemMessage: postDeadlineSystemMessage,
   });
 
-  useSeekerLocationSync({
+  const seekerLocationSync = useSeekerLocationSync({
     sessionId: session?.id,
     uid,
     enabled: myRole === "seeker",
@@ -134,5 +134,9 @@ export function useMapScreenSeekerEffects({
     [cancelThermometerWalk, myRole, session, setMapError, uid],
   );
 
-  return { handleCancelWalkingQuestion };
+  return {
+    handleCancelWalkingQuestion,
+    needsLocationPermission: seekerLocationSync.needsPermissionPrompt,
+    requestLocationPermission: seekerLocationSync.requestPermission,
+  };
 }

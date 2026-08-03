@@ -178,6 +178,9 @@ export type HiderMapScreenChromeProps = {
       patch: Partial<NotificationPreferences>,
     ) => void;
     enableNotifications: () => Promise<boolean>;
+    locationError?: string | null;
+    needsLocationPermission?: boolean;
+    onAllowLocation?: () => void;
   };
   chat: {
     sessionId: string;
@@ -487,7 +490,9 @@ export function HiderMapScreenChrome({
             onMapStyleChange: mapSettings.setMapStyle,
             streetBasemap: mapSettings.streetBasemap,
             onStreetBasemapChange: mapSettings.setStreetBasemap,
-            locationError: null,
+            locationError: mapSettings.locationError ?? null,
+            needsLocationPermission: mapSettings.needsLocationPermission,
+            onAllowLocation: mapSettings.onAllowLocation,
             transitEnabled: false,
             transitLiveEnabled: false,
             transitLiveSupported: false,

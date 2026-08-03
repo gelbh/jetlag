@@ -22,6 +22,8 @@ export interface MapSettingsGeneralTabProps {
   streetBasemap: StreetBasemap;
   onStreetBasemapChange: (theme: StreetBasemap) => void;
   locationError?: string | null;
+  needsLocationPermission?: boolean;
+  onAllowLocation?: () => void;
   transitEnabled: boolean;
   transitLiveEnabled: boolean;
   transitLiveSupported: boolean;
@@ -55,6 +57,8 @@ export function MapSettingsGeneralTab({
   streetBasemap,
   onStreetBasemapChange,
   locationError,
+  needsLocationPermission = false,
+  onAllowLocation,
   transitEnabled,
   transitLiveEnabled,
   transitLiveSupported,
@@ -152,6 +156,23 @@ export function MapSettingsGeneralTab({
         </p>
       )}
 
+      {needsLocationPermission ? (
+        <div className="space-y-2 rounded-md border border-highlight/30 bg-surface px-3 py-2">
+          <p className="text-sm text-ink-secondary">
+            Allow location to show your pin and share with teammates. Your
+            browser will ask next.
+          </p>
+          {onAllowLocation ? (
+            <button
+              type="button"
+              className="btn-primary min-h-10 px-4 text-xs"
+              onClick={onAllowLocation}
+            >
+              Allow location
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       {locationError ? (
         <p className="text-sm text-status-error">{locationError}</p>
       ) : null}

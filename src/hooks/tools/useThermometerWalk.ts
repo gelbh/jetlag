@@ -52,11 +52,23 @@ export function useThermometerWalk({
     }
   }, [active]);
 
-  const { reading, error } = useLiveLocation(active && startPoint !== null, {
-    highAccuracy: true,
-    minIntervalMs: 750,
-    minDistanceMeters: 3,
-  });
+  const { reading, error, needsPermissionPrompt } = useLiveLocation(
+    active && startPoint !== null,
+    {
+      highAccuracy: true,
+      minIntervalMs: 750,
+      minDistanceMeters: 3,
+    },
+  );
+
+  useEffect(() => {
+    if (!active || !needsPermissionPrompt) {
+      return;
+    }
+    onErrorRef.current?.(
+      "Allow location access before starting the thermometer walk.",
+    );
+  }, [active, needsPermissionPrompt]);
 
   const distanceTraveledMeters = useMemo(() => {
     if (!startPoint || !currentPoint) {

@@ -22,6 +22,8 @@ vi.mock("../location/useLiveLocation", () => ({
   useLiveLocation: vi.fn(() => ({
     reading: { lat: 53.35, lng: -6.26, accuracy: 12 },
     error: null,
+    needsPermissionPrompt: false,
+    requestPermission: vi.fn(),
   })),
 }));
 

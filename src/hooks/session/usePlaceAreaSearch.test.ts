@@ -10,7 +10,7 @@ vi.mock("../../services/geo/geocoding", () => ({
 }));
 
 vi.mock("../../services/core/location/geolocation", () => ({
-  getCurrentPosition: vi.fn(async () => {
+  confirmAndRequestLocationAccess: vi.fn(async () => {
     throw new Error("no gps");
   }),
 }));

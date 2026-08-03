@@ -39,6 +39,8 @@ export interface MapSettingsGeneralProps {
   streetBasemap: StreetBasemap;
   onStreetBasemapChange: (theme: StreetBasemap) => void;
   locationError?: string | null;
+  needsLocationPermission?: boolean;
+  onAllowLocation?: () => void;
   transitEnabled: boolean;
   transitLiveEnabled: boolean;
   transitLiveSupported: boolean;
@@ -179,6 +181,8 @@ export function MapSettingsSheet({
             streetBasemap={general.streetBasemap}
             onStreetBasemapChange={general.onStreetBasemapChange}
             locationError={general.locationError}
+            needsLocationPermission={general.needsLocationPermission}
+            onAllowLocation={general.onAllowLocation}
             transitEnabled={general.transitEnabled}
             transitLiveEnabled={general.transitLiveEnabled}
             transitLiveSupported={general.transitLiveSupported}

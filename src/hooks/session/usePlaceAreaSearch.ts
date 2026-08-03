@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
-import { getCurrentPosition } from "../../services/core/location/geolocation";
+import { confirmAndRequestLocationAccess } from "../../services/core/location/geolocation";
 import {
   searchPlaces,
   type GeocodedPlace,
@@ -25,8 +25,8 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
   const userLocationRef = useRef<LatLngTuple | null>(null);
   const { beginRequest, isLatestRequest } = useLatestRequest();
 
-  useEffect(() => {
-    void getCurrentPosition({ highAccuracy: false })
+  const requestLocationBias = useCallback(() => {
+    void confirmAndRequestLocationAccess({ highAccuracy: false })
       .then((reading) => {
         userLocationRef.current = [reading.lat, reading.lng];
       })
@@ -121,5 +121,6 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
     handleSearch,
     applyPlace,
     resetSearch,
+    requestLocationBias,
   };
 }

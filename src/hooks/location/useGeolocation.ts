@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import {
-  getCurrentPosition,
+  confirmAndRequestLocationAccess,
   unknownGeolocationErrorMessage,
   type GeolocationReading,
 } from "../../services/core/location/geolocation";
@@ -15,7 +15,7 @@ export function useGeolocation() {
     setError(null);
 
     try {
-      const next = await getCurrentPosition();
+      const next = await confirmAndRequestLocationAccess();
       setReading(next);
       return next;
     } catch (nextError) {
