@@ -115,18 +115,34 @@ function MapFocus({
   const hasFittedRef = useRef(false);
   const lastRecenterRef = useRef(recenterToken);
   const preferFlyRef = useRef(preferFly);
-  preferFlyRef.current = preferFly;
   const focusBoundsRef = useRef(focusBounds);
-  focusBoundsRef.current = focusBounds;
   const focusPaddingBiasRef = useRef(focusPaddingBias);
-  focusPaddingBiasRef.current = focusPaddingBias;
   const focusMinZoomRef = useRef(focusMinZoom);
-  focusMinZoomRef.current = focusMinZoom;
   const focusMaxZoomRef = useRef(focusMaxZoom);
-  focusMaxZoomRef.current = focusMaxZoom;
   const animate = !prefersReducedMotion && !lowPowerMode;
   const padY = fitBoundsPaddingProp?.[0] ?? 32;
   const padX = fitBoundsPaddingProp?.[1] ?? 32;
+  // once-mode: presence only — identity churn must not abort in-flight ease.
+  const focusBoundsDep =
+    fitBoundsMode === "always" ? focusBounds : focusBounds != null;
+  const focusPaddingBiasDep =
+    fitBoundsMode === "always" ? focusPaddingBias : null;
+  const focusMaxZoomDep = fitBoundsMode === "always" ? focusMaxZoom : null;
+  const focusMinZoomDep = fitBoundsMode === "always" ? focusMinZoom : null;
+
+  useEffect(() => {
+    preferFlyRef.current = preferFly;
+    focusBoundsRef.current = focusBounds;
+    focusPaddingBiasRef.current = focusPaddingBias;
+    focusMinZoomRef.current = focusMinZoom;
+    focusMaxZoomRef.current = focusMaxZoom;
+  }, [
+    preferFly,
+    focusBounds,
+    focusPaddingBias,
+    focusMinZoom,
+    focusMaxZoom,
+  ]);
 
   useEffect(() => {
     const map = mapRef.getMap();
@@ -144,9 +160,10 @@ function MapFocus({
     };
   }, [mapRef, suppressChromeHideRef]);
 
+  // once-mode omits live bounds/zoom/bias from deps (refs) so identity churn
+  // cannot abort an in-flight ease via effect cleanup — intentional.
+  /* eslint-disable react-hooks/exhaustive-deps -- once-mode MapFocus isolation */
   useEffect(() => {
-    // once-mode: read latest bounds from refs so identity churn / preferFly flips
-    // do not re-enter and abort an in-flight ease via effect cleanup.
     const bounds =
       fitBoundsMode === "always" ? focusBounds : focusBoundsRef.current;
     if (!bounds) {
@@ -259,11 +276,10 @@ function MapFocus({
     };
   }, [
     animate,
-    // once-mode: presence only — identity churn must not abort in-flight ease.
-    fitBoundsMode === "always" ? focusBounds : focusBounds != null,
-    fitBoundsMode === "always" ? focusPaddingBias : null,
-    fitBoundsMode === "always" ? focusMaxZoom : null,
-    fitBoundsMode === "always" ? focusMinZoom : null,
+    focusBoundsDep,
+    focusPaddingBiasDep,
+    focusMaxZoomDep,
+    focusMinZoomDep,
     fitBoundsMode,
     padX,
     padY,
@@ -271,6 +287,7 @@ function MapFocus({
     recenterToken,
     suppressChromeHideRef,
   ]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return null;
 }
