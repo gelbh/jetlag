@@ -1,5 +1,5 @@
 import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_ON, type BundledGamePresetDefinition } from "./shared";
+import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { PRINCE_RUPERT_REGION_PACK_ID } from "../princeRupertRegionPack";
 
 export function princeRupertPresets(): BundledGamePresetDefinition[] {
@@ -20,7 +20,7 @@ export function princeRupertPresets(): BundledGamePresetDefinition[] {
       regionPackId: PRINCE_RUPERT_REGION_PACK_ID,
       hierarchy: baseHierarchy,
       distanceUnit: "metric",
-      advancedSettingsPatch: EXPANSION_ON,
+      advancedSettingsPatch: EXPANSION_OFF,
       transitMetroId: "prince-rupert",
     }),
   ];

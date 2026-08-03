@@ -1,5 +1,5 @@
 import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_ON, type BundledGamePresetDefinition } from "./shared";
+import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { OSAKA_REGION_PACK_ID } from "../osakaRegionPack";
 
 const OSAKA_WARDS = [
@@ -52,7 +52,7 @@ export function osakaPresets(): BundledGamePresetDefinition[] {
       regionPackId: OSAKA_REGION_PACK_ID,
       hierarchy: baseHierarchy,
       distanceUnit: "metric",
-      advancedSettingsPatch: EXPANSION_ON,
+      advancedSettingsPatch: EXPANSION_OFF,
     }),
     ...OSAKA_WARDS.map(
       (ward) => attachPlayArea({
@@ -64,7 +64,7 @@ export function osakaPresets(): BundledGamePresetDefinition[] {
         subregionId: ward.id,
         hierarchy: wardHierarchy,
         distanceUnit: "metric",
-        advancedSettingsPatch: EXPANSION_ON,
+        advancedSettingsPatch: EXPANSION_OFF,
        }),
     ),
   ];
