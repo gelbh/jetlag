@@ -122,19 +122,7 @@
     gap: 0.125rem;
   }
 
-  @container tool-dock (max-width: 28rem) {
-    .jl-tool-dock-group-history,
-    .jl-tool-dock-divider-history {
-      display: none;
-    }
-  }
-
-  @media (max-width: 28rem) {
-    .jl-tool-dock-group-history,
-    .jl-tool-dock-divider-history {
-      display: none;
-    }
-  }
+  /* History lives in .jl-map-island; do not collapse it on narrow viewports. */
 
 
   .jl-tool-dock-group-end {

@@ -18,29 +18,28 @@ test.describe("mobile tool dock", () => {
     await openMapWithLocalSession(page);
   });
 
-  test("hides undo in the dock and exposes it in the overflow sheet", async ({
+  test("exposes history, draw, and session islands without a More sheet", async ({
     page,
   }) => {
-    const historyGroup = page.getByLabel("History");
-    await expect(historyGroup).toBeHidden();
-
-    await page.getByRole("button", { name: "More tools" }).click();
-    const sheet = page.getByRole("dialog", { name: "More tools" });
-    await expect(sheet).toBeVisible();
+    await expect(page.getByLabel("History")).toBeVisible();
     await expect(
-      sheet.getByRole("button", { name: "Undo last annotation" }),
+      page.getByRole("button", { name: "Undo last annotation" }),
     ).toBeVisible();
-    await expect(sheet.getByRole("button", { name: "Redo last annotation" })).toBeVisible();
-    await expect(sheet.getByText("Draw a play boundary")).toBeVisible();
     await expect(
-      sheet.getByRole("button", { name: "Open settings" }),
-    ).toHaveCount(0);
+      page.getByRole("button", { name: "Draw on map" }),
+    ).toBeVisible();
     await expect(
-      sheet.getByRole("button", { name: "Open chat" }),
+      page.getByRole("button", { name: "More tools" }),
     ).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Draw on map" }).click();
+    const drawMenu = page.getByRole("menu", { name: "Draw on map" });
+    await expect(drawMenu).toBeVisible();
+    await expect(drawMenu.getByRole("menuitem", { name: /Pin/i })).toBeVisible();
+    await expect(drawMenu.getByRole("menuitem", { name: /Zone/i })).toBeVisible();
 
     await page.keyboard.press("Escape");
-    await expect(sheet).toBeHidden();
+    await expect(drawMenu).toBeHidden();
 
     const sessionTools = page.getByLabel("Session tools");
     await expect(sessionTools).toBeVisible();
@@ -51,6 +50,9 @@ test.describe("mobile tool dock", () => {
       sessionTools.getByRole("button", { name: /^Open chat/ }),
     ).toBeVisible();
     await expect(
+      sessionTools.getByRole("button", { name: "Open session log" }),
+    ).toBeVisible();
+    await expect(
       sessionTools.getByRole("button", { name: "Report a problem" }),
     ).toBeVisible();
     await sessionTools.getByRole("button", { name: "Report a problem" }).click();
@@ -58,8 +60,10 @@ test.describe("mobile tool dock", () => {
       page.getByRole("dialog", { name: "Report problem" }),
     ).toBeVisible();
 
-    const barCount = await page.locator(".jl-tool-dock-bar").count();
-    expect(barCount).toBe(2);
+    await expect(page.locator('[data-island="history"]')).toHaveCount(1);
+    await expect(page.locator('[data-island="hunt"]')).toHaveCount(1);
+    await expect(page.locator('[data-island="session"]')).toHaveCount(1);
+    await expect(page.locator(".jl-tool-dock-bar--secondary")).toHaveCount(0);
   });
 
   test("dock fits without clipping question tools", async ({ page }) => {
@@ -84,7 +88,7 @@ test.describe("mobile tool dock", () => {
       expect(label.slotHeight).toBeGreaterThanOrEqual(43);
     }
     expect(labels.some((label) => label.text === "Match")).toBe(true);
-    expect(labels.some((label) => label.text === "More")).toBe(true);
+    expect(labels.some((label) => label.text === "Draw")).toBe(true);
   });
 
   test("shows short labels on every visible dock slot at 390px", async ({
@@ -101,24 +105,16 @@ test.describe("mobile tool dock", () => {
       expect(label.text.length).toBeGreaterThan(0);
     }
     expect(labels.some((label) => label.text === "Measure")).toBe(true);
-    expect(labels.some((label) => label.text === "More")).toBe(true);
+    expect(labels.some((label) => label.text === "Draw")).toBe(true);
   });
 
-  test("supports undo from the overflow sheet after placing a pin", async ({
+  test("supports undo from the history island after placing a pin", async ({
     page,
   }) => {
     await placePin(page);
-    await page.getByRole("button", { name: "More tools" }).click();
-    await page
-      .getByRole("dialog", { name: "More tools" })
-      .getByRole("button", { name: "Undo last annotation" })
-      .click();
-
-    await page.getByRole("button", { name: "More tools" }).click();
+    await page.getByRole("button", { name: "Undo last annotation" }).click();
     await expect(
-      page
-        .getByRole("dialog", { name: "More tools" })
-        .getByRole("button", { name: "Redo last annotation" }),
+      page.getByRole("button", { name: "Redo last annotation" }),
     ).toBeEnabled();
   });
 });
@@ -129,24 +125,26 @@ test.describe("iPhone 14 Pro Max tool dock", () => {
     await openMapWithLocalSession(page);
   });
 
-  test("renders primary and secondary dock bars without a duplicate stack", async ({ page }) => {
-    await expect(page.locator(".jl-tool-dock-bar")).toHaveCount(2);
+  test("renders floating islands without a dual-row dock", async ({ page }) => {
+    await expect(page.locator('[data-island="hunt"]')).toHaveCount(1);
+    await expect(page.locator('[data-island="session"]')).toHaveCount(1);
+    await expect(page.locator(".jl-tool-dock-bar--secondary")).toHaveCount(0);
 
     const metrics = await page.evaluate(() => {
-      const bars = [...document.querySelectorAll(".jl-tool-dock-bar")];
-      const dock = document.querySelector(".jl-tool-dock");
+      const hunt = document.querySelector('[data-island="hunt"]');
+      const dock = document.querySelector(".jl-map-bottom-chrome");
       const dockRect = dock?.getBoundingClientRect();
-      const barRect = bars[0]?.getBoundingClientRect();
+      const huntRect = hunt?.getBoundingClientRect();
       return {
-        barCount: bars.length,
+        islandCount: document.querySelectorAll("[data-island]").length,
         viewportHeight: window.innerHeight,
-        barBottom: barRect?.bottom ?? 0,
+        huntBottom: huntRect?.bottom ?? 0,
         dockBottom: dockRect?.bottom ?? 0,
       };
     });
 
-    expect(metrics.barCount).toBe(2);
-    expect(metrics.barBottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
+    expect(metrics.islandCount).toBeGreaterThanOrEqual(2);
+    expect(metrics.huntBottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
     expect(metrics.dockBottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
   });
 
@@ -169,11 +167,12 @@ test.describe("iPhone 13 PWA safe area", () => {
     page,
   }) => {
     const metrics = await page.evaluate(() => {
-      const dock = document.querySelector(".jl-tool-dock");
-      const bar = document.querySelector(".jl-tool-dock-bar");
+      const host = document.querySelector(".jl-map-bottom-chrome-host");
+      const chrome = document.querySelector(".jl-map-bottom-chrome");
+      const hunt = document.querySelector(".jl-map-island--hunt");
       const map = document.querySelector(".maplibregl-map");
-      const dockRect = dock?.getBoundingClientRect();
-      const barRect = bar?.getBoundingClientRect();
+      const hostRect = host?.getBoundingClientRect();
+      const huntRect = hunt?.getBoundingClientRect();
       const mapRect = map?.getBoundingClientRect();
       const slots = [...document.querySelectorAll(".jl-tool-slot")].filter(
         (el) => el.getBoundingClientRect().width > 0,
@@ -182,37 +181,38 @@ test.describe("iPhone 13 PWA safe area", () => {
         ...slots.map((el) => el.getBoundingClientRect().bottom),
         0,
       );
-      const dockStyle = dock ? getComputedStyle(dock) : null;
-      const barStyle = bar ? getComputedStyle(bar) : null;
+      const hostStyle = host ? getComputedStyle(host) : null;
+      const chromeStyle = chrome ? getComputedStyle(chrome) : null;
+      const huntStyle = hunt ? getComputedStyle(hunt) : null;
       return {
         viewportHeight: window.innerHeight,
-        dockBottom: dockRect?.bottom ?? 0,
-        barHeight: barRect?.height ?? 0,
-        barBottom: barRect?.bottom ?? 0,
+        dockBottom: hostRect?.bottom ?? 0,
+        barHeight: huntRect?.height ?? 0,
+        barBottom: huntRect?.bottom ?? 0,
         mapBottom: mapRect?.bottom ?? 0,
-        dockPaddingBottom: dockStyle
-          ? Number.parseFloat(dockStyle.paddingBottom)
+        dockPaddingBottom: chromeStyle
+          ? Number.parseFloat(chromeStyle.paddingBottom)
           : 0,
-        dockBottomOffset: dockStyle
-          ? Number.parseFloat(dockStyle.bottom)
+        dockBottomOffset: hostStyle
+          ? Number.parseFloat(hostStyle.bottom)
           : 0,
-        barPaddingBottom: barStyle
-          ? Number.parseFloat(barStyle.paddingBottom)
+        barPaddingBottom: huntStyle
+          ? Number.parseFloat(huntStyle.paddingBottom)
           : 0,
         lowestSlotBottom,
-        gapBelowDock: window.innerHeight - (dockRect?.bottom ?? 0),
+        gapBelowDock: window.innerHeight - (hostRect?.bottom ?? 0),
         deadSpaceBelowIcons:
-          (barRect?.bottom ?? 0) -
+          (huntRect?.bottom ?? 0) -
           lowestSlotBottom -
-          (barStyle ? Number.parseFloat(barStyle.paddingBottom) : 0),
-        barCount: document.querySelectorAll(".jl-tool-dock-bar").length,
+          (huntStyle ? Number.parseFloat(huntStyle.paddingBottom) : 0),
+        islandCount: document.querySelectorAll("[data-island]").length,
         backdropOnMap: document.querySelector(".app-entry-backdrop"),
       };
     });
 
     expect(metrics.backdropOnMap).toBeNull();
-    expect(metrics.barCount).toBe(2);
-    // Wrapper chassis: flush to physical bottom, pad absorbs safe-area.
+    expect(metrics.islandCount).toBeGreaterThanOrEqual(2);
+    // Host chassis: flush to physical bottom; chrome pad absorbs safe-area.
     expect(metrics.dockBottomOffset).toBeLessThanOrEqual(1);
     expect(metrics.gapBelowDock).toBeLessThanOrEqual(2);
     expect(
@@ -221,12 +221,12 @@ test.describe("iPhone 13 PWA safe area", () => {
     expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(
       SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
     );
-    // Forbidden: safe-area pad inside the bordered bar (reverted stripe).
+    // Forbidden: safe-area pad inside the bordered island (reverted stripe).
     expect(metrics.barPaddingBottom).toBeLessThanOrEqual(6);
     expect(Math.abs(metrics.mapBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
       2,
     );
-    expect(metrics.barHeight).toBeLessThanOrEqual(64);
+    expect(metrics.barHeight).toBeLessThanOrEqual(72);
     expect(metrics.deadSpaceBelowIcons).toBeLessThanOrEqual(8);
   });
 
@@ -235,18 +235,19 @@ test.describe("iPhone 13 PWA safe area", () => {
   }) => {
     await injectStandaloneDisplayMode(page);
     await page.reload();
-    await expect(page.locator(".jl-tool-dock")).toBeVisible();
+    await expect(page.locator(".jl-map-bottom-chrome-host")).toBeVisible();
     await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
 
     const metrics = await page.evaluate(() => {
-      const dock = document.querySelector(".jl-tool-dock");
-      const dockRect = dock?.getBoundingClientRect();
-      const dockStyle = dock ? getComputedStyle(dock) : null;
+      const host = document.querySelector(".jl-map-bottom-chrome-host");
+      const chrome = document.querySelector(".jl-map-bottom-chrome");
+      const hostRect = host?.getBoundingClientRect();
+      const chromeStyle = chrome ? getComputedStyle(chrome) : null;
       return {
         viewportHeight: window.innerHeight,
-        dockBottom: dockRect?.bottom ?? 0,
-        dockPaddingBottom: dockStyle
-          ? Number.parseFloat(dockStyle.paddingBottom)
+        dockBottom: hostRect?.bottom ?? 0,
+        dockPaddingBottom: chromeStyle
+          ? Number.parseFloat(chromeStyle.paddingBottom)
           : 0,
       };
     });
@@ -341,7 +342,8 @@ test.describe("landscape map-dominant chrome", () => {
     await chip.click();
 
     await expect(dock).toBeVisible();
-    await expect(page.locator(".jl-tool-dock-bar")).toHaveCount(2);
+    await expect(page.locator('[data-island="hunt"]')).toHaveCount(1);
+    await expect(page.locator('[data-island="session"]')).toHaveCount(1);
     await expect(
       page.getByRole("button", { name: "Hide map controls" }),
     ).toBeVisible();

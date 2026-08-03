@@ -2,8 +2,10 @@ import type { ReactNode } from "react";
 import { AppLink } from "../../components/navigation/AppLink";
 import { ContextualRail } from "../../components/map/chrome/ContextualRail";
 import type { ContextualRailTab } from "../../components/map/chrome/ContextualRailContext";
+import { MapBottomChrome } from "../../components/map/chrome/MapBottomChrome";
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
-import { HudHomeIcon } from "../../components/ui/brand/HudIcons";
+import { HudAdminIcon, HudHomeIcon } from "../../components/ui/brand/HudIcons";
+import { MotionPressable } from "../../components/motion/MotionPressable";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { SessionRecord } from "../../domain/map/annotations";
 import type { UseMapOverlayStateResult } from "../../hooks/map/useMapOverlayState";
@@ -37,6 +39,7 @@ export function ObserverMapScreenChrome({
   const leaveLabel =
     roleConfig.role === "admin" ? "Leave admin monitor" : "Leave observation";
   const isDesktop = useDesktopLayout();
+  const isAdmin = roleConfig.role === "admin";
 
   const statusBar = (
     <div className={isDesktop ? "jl-status-rail--expanded" : undefined}>
@@ -71,88 +74,50 @@ export function ObserverMapScreenChrome({
     </div>
   );
 
-  const logChatActions = (
-    <>
-      <button
+  const huntIsland = (
+    <div className="jl-tool-dock-group jl-tool-dock-group-main">
+      <MotionPressable
         type="button"
-        className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-semibold uppercase tracking-wide ${
-          overlay.isLogOpen
-            ? "bg-action text-action-ink"
-            : "bg-surface-raised text-ink"
-        }`}
+        className={`jl-tool-slot${overlay.isLogOpen ? " jl-tool-slot-active" : ""}`}
+        aria-label="Open session log"
+        aria-pressed={overlay.isLogOpen}
         onClick={() =>
           overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
         }
       >
-        Log
-      </button>
-      <button
+        <span className="jl-tool-slot-label">Log</span>
+      </MotionPressable>
+      <MotionPressable
         type="button"
-        className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-semibold uppercase tracking-wide ${
-          overlay.isChatOpen
-            ? "bg-action text-action-ink"
-            : "bg-surface-raised text-ink"
-        }`}
+        className={`jl-tool-slot${overlay.isChatOpen ? " jl-tool-slot-active" : ""}`}
+        aria-label="Open chat"
+        aria-pressed={overlay.isChatOpen}
         onClick={() =>
           overlay.isChatOpen ? overlay.closeSheet() : overlay.openChat()
         }
       >
-        Chat
-      </button>
-      {roleConfig.role === "admin" ? (
+        <span className="jl-tool-slot-label">Chat</span>
+      </MotionPressable>
+      {isAdmin ? (
         <AppLink
           to="/admin"
-          className="btn-secondary inline-flex min-h-11 items-center px-3 text-sm"
+          className="jl-tool-slot no-underline"
+          aria-label="Open admin"
         >
-          Admin
-        </AppLink>
-      ) : null}
-    </>
-  );
-
-  const toolRail = (
-    <div className="desktop-ops-observer-rail">
-      <button
-        type="button"
-        className={`desktop-ops-observer-rail__btn${
-          overlay.isLogOpen ? " desktop-ops-observer-rail__btn--active" : ""
-        }`}
-        onClick={() =>
-          overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
-        }
-      >
-        Log
-      </button>
-      <button
-        type="button"
-        className={`desktop-ops-observer-rail__btn${
-          overlay.isChatOpen ? " desktop-ops-observer-rail__btn--active" : ""
-        }`}
-        onClick={() =>
-          overlay.isChatOpen ? overlay.closeSheet() : overlay.openChat()
-        }
-      >
-        Chat
-      </button>
-      {roleConfig.role === "admin" ? (
-        <AppLink
-          to="/admin"
-          className="desktop-ops-observer-rail__btn mt-auto no-underline"
-        >
-          Admin
+          <span className="jl-tool-slot-icon">
+            <HudAdminIcon className="h-5 w-5 shrink-0" />
+          </span>
+          <span className="jl-tool-slot-label">Admin</span>
         </AppLink>
       ) : null}
     </div>
   );
 
-  const mobileToolbar = (
-    <div className="jl-map-mobile-toolbar pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-dock)] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-      <div className="pointer-events-auto mx-auto flex max-w-xl flex-col gap-2">
-        <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
-          {logChatActions}
-        </div>
-      </div>
-    </div>
+  const toolChrome = (
+    <MapBottomChrome
+      layout={isDesktop ? "rail" : "phone"}
+      hunt={huntIsland}
+    />
   );
 
   if (isDesktop && mapSlot) {
@@ -181,7 +146,7 @@ export function ObserverMapScreenChrome({
     return (
       <MapScreenChromeSlots
         header={statusBar}
-        toolbar={toolRail}
+        toolbar={toolChrome}
         mapSlot={mapSlot}
         contextual={
           <ContextualRail
@@ -200,7 +165,7 @@ export function ObserverMapScreenChrome({
     <MapScreenChromeSlots
       layout="fragments"
       header={statusBar}
-      toolbar={mobileToolbar}
+      toolbar={toolChrome}
     />
   );
 }
