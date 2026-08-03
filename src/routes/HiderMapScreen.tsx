@@ -244,11 +244,17 @@ export function HiderMapScreen() {
     [myZone],
   );
   const liveLocationProfile = getPowerProfile(lowPowerMode).liveLocation;
-  const { reading: liveLocationReading } = useLiveLocation(showCurrentLocation, {
-    highAccuracy: liveLocationProfile.highAccuracy,
-    minIntervalMs: liveLocationProfile.minIntervalMs,
-    minDistanceMeters: liveLocationProfile.minDistanceMeters,
-  });
+  const needsTruthLocation = pendingQuestions.some(
+    (question) => question.status === "pending",
+  );
+  const { reading: liveLocationReading } = useLiveLocation(
+    showCurrentLocation || needsTruthLocation,
+    {
+      highAccuracy: liveLocationProfile.highAccuracy,
+      minIntervalMs: liveLocationProfile.minIntervalMs,
+      minDistanceMeters: liveLocationProfile.minDistanceMeters,
+    },
+  );
   const hidingPlace = useMemo((): LatLngTuple | null => {
     if (!liveLocationReading) {
       return null;

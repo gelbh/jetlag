@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   parseGeometryJson,
+  parseLineEndpoints,
   parsePointGeometry,
   pointFromGeometryFeature,
 } from "./geometryParsing";
@@ -28,6 +29,24 @@ describe("geometryParsing", () => {
       geometry: { type: "LineString", coordinates: [[-0.15, 51.45]] },
     });
     expect(parseGeometryJson(json)).toBeNull();
+  });
+
+  it("parses endpoints for a valid LineString", () => {
+    const json = JSON.stringify({
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          [-0.15, 51.45],
+          [-0.14, 51.46],
+        ],
+      },
+    });
+    expect(parseLineEndpoints(json)).toEqual({
+      start: [51.45, -0.15],
+      end: [51.46, -0.14],
+    });
   });
 
   it("returns null for non-Feature wrappers", () => {

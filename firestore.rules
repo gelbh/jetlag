@@ -124,7 +124,7 @@ service cloud.firestore {
     function validSeekerEndGameTruthAnchorsMap(sessionId, anchors) {
       return validSeekerEndGameTruthAnchorsMapForMembers(
         sessionData(sessionId).memberUids,
-        anchors,
+        anchors
       );
     }
 
@@ -135,6 +135,7 @@ service cloud.firestore {
     // Direct start only when freeze anchors already exist (create anchors, then update session).
     function isEndGameStartUpdate(sessionId) {
       return (isSeekerOnSessionDoc() || isHostOnSessionDoc())
+        && isSessionActive()
         && (
           !('endGameStartedAt' in resource.data)
           || resource.data.endGameStartedAt == null
@@ -144,7 +145,7 @@ service cloud.firestore {
         && exists(endGameTruthAnchorsDocPath(sessionId))
         && validSeekerEndGameTruthAnchorsMapForMembers(
           resource.data.memberUids,
-          get(endGameTruthAnchorsDocPath(sessionId)).data.anchors,
+          get(endGameTruthAnchorsDocPath(sessionId)).data.anchors
         )
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly([

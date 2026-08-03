@@ -1061,8 +1061,10 @@ export async function startEndGameSession(
   // already exist. Same-batch exists()+get() against large session docs has denied
   // the write in e2e (optimistic local banner, then permission error).
   const anchorsRef = endGameTruthAnchorsDoc(sessionId);
+  let anchorsWritten = false;
   try {
     await setDoc(anchorsRef, { anchors });
+    anchorsWritten = true;
     await updateDoc(doc(sessionsCollection(), sessionId), {
       endGameStartedAt,
       endGameStartedByUid: startedByUid,
@@ -1072,7 +1074,10 @@ export async function startEndGameSession(
       endGameRequestedByUid: deleteField(),
     });
   } catch (error) {
-    await clearEndGameTruthAnchorsDoc(sessionId);
+    // Only roll back an anchors doc this call created — do not delete a prior freeze.
+    if (anchorsWritten) {
+      await clearEndGameTruthAnchorsDoc(sessionId);
+    }
     throw error;
   }
 }

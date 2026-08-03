@@ -139,6 +139,7 @@ describe("isAskOriginInsideHidingZone", () => {
     expect(
       isAskOriginInsideHidingZone(outsideAsk, zoneCenter, zoneRadiusMeters),
     ).toBe(false);
+    expect(isAskOriginInsideHidingZone(zoneCenter, zoneCenter, 0)).toBe(true);
   });
 
   it("rejects invalid zone radii", () => {
