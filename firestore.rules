@@ -413,6 +413,27 @@ service cloud.firestore {
         && request.auth.uid == sessionData(sessionId).hostUid;
     }
 
+    function canApproveRoleJoinRequest(sessionId, role) {
+      return role == 'observer'
+        ? isSessionHost(sessionId)
+        : (
+          isSignedIn()
+          && 'roleGates' in sessionData(sessionId)
+          && sessionData(sessionId).roleGates is map
+          && 'leaders' in sessionData(sessionId).roleGates
+          && sessionData(sessionId).roleGates.leaders is map
+          && sessionData(sessionId).roleGates.leaders[role] == request.auth.uid
+        );
+    }
+
+    function canReadJoinRequest(sessionId) {
+      return isSignedIn()
+        && (
+          resource.data.requesterUid == request.auth.uid
+          || canApproveRoleJoinRequest(sessionId, resource.data.role)
+        );
+    }
+
     function isSeekerLocationDoc(data) {
       return !('role' in data) || data.role == 'seeker';
     }
@@ -652,6 +673,11 @@ service cloud.firestore {
 
       match /startingLocations/{uid} {
         allow read: if isSessionMember(sessionId);
+        allow write: if false;
+      }
+
+      match /joinRequests/{requestId} {
+        allow read: if canReadJoinRequest(sessionId);
         allow write: if false;
       }
 
