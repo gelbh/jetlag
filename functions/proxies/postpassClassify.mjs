@@ -82,14 +82,18 @@ export function classifyOverpassQuery(ql) {
     text.includes('natural"="water"') &&
     (text.includes("waterway") || text.includes("place"))
   ) {
+    // Fail closed: landmass needs a bbox (never unbounded PostGIS).
+    if (!bbox) return null;
     return { family: "landmass", meta: { bbox, tags, around } };
   }
 
   if (text.includes('natural"="coastline"')) {
+    if (!bbox) return null;
     return { family: "coastline", meta: { bbox, tags, around } };
   }
 
   if (/route\s*~\s*"subway/i.test(text) || text.includes('route"~"subway')) {
+    if (!around && !bbox) return null;
     return { family: "metro", meta: { around, bbox, tags } };
   }
 
@@ -105,10 +109,12 @@ export function classifyOverpassQuery(ql) {
     !text.includes('natural"="coastline"');
 
   if (isLinearWayGeom && !isAdminRelation) {
+    if (!bbox) return null;
     return { family: "linear", meta: { bbox, tags } };
   }
 
   if (isAdminRelation) {
+    if (!bbox) return null;
     const adminPred = tags.find((p) => p.key === "admin_level" && p.op === "eq");
     return {
       family: "admin",
@@ -125,10 +131,12 @@ export function classifyOverpassQuery(ql) {
   }
 
   if (isLinearWayGeom) {
+    if (!bbox) return null;
     return { family: "linear", meta: { bbox, tags } };
   }
 
   if (/\bout\s+center\b/i.test(text)) {
+    if (!bbox && !around) return null;
     return { family: "places", meta: { bbox, tags, around } };
   }
 

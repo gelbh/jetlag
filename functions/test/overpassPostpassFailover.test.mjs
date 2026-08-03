@@ -67,4 +67,41 @@ describe("overpass Postpass failover", () => {
     await fetchCachedOverpassQuery("[out:json];out;");
     assert.equal(postpassCalls, 0);
   });
+
+  it("empty Postpass is not cached as a successful miss", async () => {
+    clearOverpassCachesForTests();
+    const query = `[out:json][timeout:25];(node["amenity"="cafe"](53.3,-6.3,53.4,-6.2););out center 200;`;
+    globalThis.fetch = async (url) => {
+      const u = String(url);
+      if (u.includes("postpass.geofabrik.de")) {
+        return new Response(
+          JSON.stringify({ type: "FeatureCollection", features: [] }),
+          { status: 200 },
+        );
+      }
+      if (u.includes("/api/status")) {
+        return new Response("Slot available after: 0\n", { status: 200 });
+      }
+      return new Response("", { status: 503 });
+    };
+    await assert.rejects(() => fetchCachedOverpassQuery(query));
+
+    let postpassCalls = 0;
+    globalThis.fetch = async (url) => {
+      const u = String(url);
+      if (u.includes("postpass.geofabrik.de")) {
+        postpassCalls += 1;
+        return new Response(
+          JSON.stringify({ type: "FeatureCollection", features: [] }),
+          { status: 200 },
+        );
+      }
+      if (u.includes("/api/status")) {
+        return new Response("Slot available after: 0\n", { status: 200 });
+      }
+      return new Response("", { status: 503 });
+    };
+    await assert.rejects(() => fetchCachedOverpassQuery(query));
+    assert.equal(postpassCalls, 1);
+  });
 });

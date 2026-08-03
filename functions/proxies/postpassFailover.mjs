@@ -28,6 +28,16 @@ export async function tryPostpassForOverpassQuery(query) {
     const sql = buildPostpassSql(classification);
     const fc = await fetchPostpassGeoJson(sql);
     const normalized = geoJsonToOverpassElements(fc, classification.family);
+    // Empty Postpass must not poison L1/L2 or skip stale Overpass L2.
+    if (!Array.isArray(normalized.elements) || normalized.elements.length === 0) {
+      logFailover({
+        backend: "postpass",
+        family: classification.family,
+        endpoint: "postpass.geofabrik.de",
+        error: "empty",
+      });
+      return null;
+    }
     logFailover({
       backend: "postpass",
       family: classification.family,

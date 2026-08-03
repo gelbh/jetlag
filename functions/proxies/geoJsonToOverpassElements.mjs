@@ -206,23 +206,39 @@ function featureToElements(feature, family, nextWayId) {
         elements.push({ type: "way", id, tags, geometry: wayGeom });
       }
     } else if (geometry?.type === "MultiLineString") {
-      let part = 0;
       for (const line of geometry.coordinates) {
         const wayGeom = ringToGeometry(line);
         if (wayGeom.length < 2) continue;
         elements.push({
           type: "way",
-          id: id + part,
+          id: nextWayId(),
           tags,
           geometry: wayGeom,
         });
-        part += 1;
       }
     } else if (
       family === "landmass" &&
       (geometry?.type === "Polygon" || geometry?.type === "MultiPolygon")
     ) {
-      return relationFromPolygonRings(geometry, id, tags, nextWayId);
+      const place = tags.place;
+      const isIsland = place === "island" || place === "islet";
+      if (isIsland) {
+        // Labels need relation/way + center; keep tagged relation.
+        return relationFromPolygonRings(geometry, id, tags, nextWayId, {
+          includeCenter: true,
+        });
+      }
+      // Water obstacles: client only reads tagged ways with geometry.
+      for (const ring of polygonExteriorRings(geometry)) {
+        const wayGeom = ringToGeometry(ring);
+        if (wayGeom.length < 4) continue;
+        elements.push({
+          type: "way",
+          id: nextWayId(),
+          tags,
+          geometry: wayGeom,
+        });
+      }
     }
     return elements;
   }

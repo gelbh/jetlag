@@ -172,7 +172,45 @@ describe("postpassTranslate", () => {
     const sql = buildPostpassSql(c);
     assert.match(sql, /postpass_line/i);
     assert.match(sql, /postpass_polygon/i);
+    assert.match(sql, /natural.*=.*water|water.*natural/i);
+    assert.match(sql, /waterway/);
     assert.match(sql, /ST_MakeEnvelope/i);
+  });
+
+  it("normalizes landmass water polygons to tagged ways", () => {
+    const { elements } = geoJsonToOverpassElements(
+      {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: {
+              osm_type: "W",
+              osm_id: 9,
+              tags: { natural: "water" },
+            },
+            geometry: {
+              type: "Polygon",
+              coordinates: [
+                [
+                  [-6.3, 53.3],
+                  [-6.2, 53.3],
+                  [-6.2, 53.35],
+                  [-6.3, 53.35],
+                  [-6.3, 53.3],
+                ],
+              ],
+            },
+          },
+        ],
+      },
+      "landmass",
+    );
+    const waterWays = elements.filter(
+      (e) => e.type === "way" && e.tags?.natural === "water",
+    );
+    assert.equal(waterWays.length, 1);
+    assert.ok(waterWays[0].geometry?.length >= 4);
   });
 
   it("classifies measuring admin borders as linear, not admin polygons", () => {
@@ -188,5 +226,10 @@ describe("postpassTranslate", () => {
     const sql = buildPostpassSql(c);
     assert.match(sql, /postpass_line/i);
     assert.doesNotMatch(sql, /postpass_polygon/i);
+  });
+
+  it("fails closed when places QL has no bbox or around", () => {
+    const c = classifyOverpassQuery(`[out:json];(node["amenity"="cafe"];);out center;`);
+    assert.equal(c, null);
   });
 });

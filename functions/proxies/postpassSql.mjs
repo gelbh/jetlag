@@ -71,42 +71,47 @@ export function buildPostpassSql(classification) {
 
   switch (family) {
     case "admin": {
+      if (!bbox) {
+        throw new Error("Postpass admin SQL requires bbox.");
+      }
       const wheres = [
         `tags->>'boundary' = 'administrative'`,
         meta.adminLevel != null
           ? `tags->>'admin_level' = ${sqlStringLiteral(String(meta.adminLevel))}`
           : `tags ? 'admin_level'`,
+        `geom && ${envelopeSql(bbox)}`,
       ];
-      if (bbox) {
-        wheres.push(`geom && ${envelopeSql(bbox)}`);
-      }
       return selectSql("postpass_polygon", wheres);
     }
     case "coastline": {
-      const wheres = [`tags->>'natural' = 'coastline'`];
-      if (bbox) {
-        wheres.push(`geom && ${envelopeSql(bbox)}`);
+      if (!bbox) {
+        throw new Error("Postpass coastline SQL requires bbox.");
       }
-      return selectSql("postpass_line", wheres);
+      return selectSql("postpass_line", [
+        `tags->>'natural' = 'coastline'`,
+        `geom && ${envelopeSql(bbox)}`,
+      ]);
     }
     case "landmass": {
-      // Prefer polygon islands; waterways also hit line table via a second query
-      // is out of scope for single-SQL v1 — polygon + line water tags on polygon table
-      // miss rivers. Emit line query covering water/waterway; islands via place tags
-      // use polygon. Combined via UNION ALL.
-      const lineWheres = [
-        `(tags->>'natural' = 'water' OR tags->>'waterway' ~ '^(river|canal|dock)$')`,
-      ];
-      const polyWheres = [`tags->>'place' ~ '^(island|islet)$'`];
-      if (bbox) {
-        const env = envelopeSql(bbox);
-        lineWheres.push(`geom && ${env}`);
-        polyWheres.push(`geom && ${env}`);
+      // Closed water (lakes) lives on postpass_polygon; rivers on postpass_line.
+      // Islands are polygons with place=island|islet.
+      if (!bbox) {
+        throw new Error("Postpass landmass SQL requires bbox.");
       }
-      return [
-        selectSql("postpass_line", lineWheres),
-        selectSql("postpass_polygon", polyWheres),
-      ].join(" UNION ALL ");
+      const env = envelopeSql(bbox);
+      const waterwayLine = selectSql("postpass_line", [
+        `tags->>'waterway' ~ '^(river|canal|dock)$'`,
+        `geom && ${env}`,
+      ]);
+      const waterPoly = selectSql("postpass_polygon", [
+        `tags->>'natural' = 'water'`,
+        `geom && ${env}`,
+      ]);
+      const islandPoly = selectSql("postpass_polygon", [
+        `tags->>'place' ~ '^(island|islet)$'`,
+        `geom && ${env}`,
+      ]);
+      return [waterwayLine, waterPoly, islandPoly].join(" UNION ALL ");
     }
     case "metro": {
       const wheres = [
@@ -116,22 +121,26 @@ export function buildPostpassSql(classification) {
         wheres.push(dwithinSql(around));
       } else if (bbox) {
         wheres.push(`geom && ${envelopeSql(bbox)}`);
+      } else {
+        throw new Error("Postpass metro SQL requires around or bbox.");
       }
       return selectSql("postpass_line", wheres, 40);
     }
     case "around": {
-      const wheres = tagWhereClauses(tags);
-      if (around) {
-        wheres.push(dwithinSql(around));
+      if (!around) {
+        throw new Error("Postpass around SQL requires around.");
       }
+      const wheres = [...tagWhereClauses(tags), dwithinSql(around)];
       return selectSql("postpass_point", wheres, 40);
     }
     case "linear": {
-      const wheres = tagWhereClauses(tags);
-      if (bbox) {
-        wheres.push(`geom && ${envelopeSql(bbox)}`);
+      if (!bbox) {
+        throw new Error("Postpass linear SQL requires bbox.");
       }
-      return selectSql("postpass_line", wheres);
+      return selectSql("postpass_line", [
+        ...tagWhereClauses(tags),
+        `geom && ${envelopeSql(bbox)}`,
+      ]);
     }
     case "places": {
       const wheres = tagWhereClauses(tags);
@@ -139,6 +148,8 @@ export function buildPostpassSql(classification) {
         wheres.push(`geom && ${envelopeSql(bbox)}`);
       } else if (around) {
         wheres.push(dwithinSql(around));
+      } else {
+        throw new Error("Postpass places SQL requires bbox or around.");
       }
       return selectSql("postpass_point", wheres, 200);
     }
