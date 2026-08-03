@@ -248,8 +248,12 @@ export function MapLibreGeoJsonOverlay({
     return null;
   }
 
+  // react-map-gl Source asserts props.id === prevProps.id (JETLAG-3A). Remount
+  // when the MapLibre source id changes so the fiber never mutates id in place.
+  const sourceId = `${id}-src`;
+
   return (
-    <Source id={`${id}-src`} type="geojson" data={collection}>
+    <Source key={sourceId} id={sourceId} type="geojson" data={collection}>
       {resolvedLayers.flatMap((spec) => paintLayersForSpec(spec, beforeId))}
     </Source>
   );
