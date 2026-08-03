@@ -127,7 +127,7 @@ describe("usePlacementMapFocus", () => {
 
   it("bumps recenter token when activating pin with empty overlays", () => {
     const { result, rerender } = renderHook(
-      ({ activeTool }) =>
+      ({ activeTool }: { activeTool: "none" | "pin" }) =>
         usePlacementMapFocus({
           activeTool,
           draft: emptyDraft,
@@ -138,7 +138,7 @@ describe("usePlacementMapFocus", () => {
           enabled: true,
           panelMinimized: false,
         }),
-      { initialProps: { activeTool: "none" as const } },
+      { initialProps: { activeTool: "none" as "none" | "pin" } },
     );
 
     expect(result.current.placementRecenterToken).toBe(0);
