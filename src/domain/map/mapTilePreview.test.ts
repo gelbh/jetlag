@@ -1,30 +1,35 @@
 import { describe, expect, it } from "vitest";
 import {
-  buildMapTileUrl,
   latLngToTileXY,
+  mapStylePreviewAssetUrl,
+  mapStylePreviewTileUrls,
   previewTileUrlsForStyle,
   previewTileUrlsFromOrigin,
 } from "./mapTilePreview";
-import { MAP_BASEMAPS } from "./mapBasemaps";
 
 describe("mapTilePreview", () => {
   it("converts London center to stable tile coordinates at zoom 15", () => {
     expect(latLngToTileXY(51.505, -0.09, 15)).toEqual({ x: 16375, y: 10896 });
   });
 
-  it("builds carto tile urls with subdomain rotation", () => {
-    const url = buildMapTileUrl(MAP_BASEMAPS.standard, 16375, 10896, 15);
-
-    expect(url).toMatch(
-      /^https:\/\/[abcd]\.basemaps\.cartocdn\.com\/rastertiles\/voyager\/15\/16375\/10896\.png$/,
+  it("uses static street preview assets instead of remote tile URLs", () => {
+    expect(mapStylePreviewAssetUrl("standard", "light")).toBe(
+      "/map-preview/street-light.svg",
+    );
+    expect(mapStylePreviewAssetUrl("standard", "dark")).toBe(
+      "/map-preview/street-dark.svg",
+    );
+    expect(mapStylePreviewAssetUrl("satellite", "light")).toBe(
+      "/map-preview/satellite.svg",
     );
   });
 
-  it("builds esri satellite tile urls", () => {
-    const url = buildMapTileUrl(MAP_BASEMAPS.satellite, 16375, 10896, 15);
+  it("returns four static preview tiles for the style-toggle grid", () => {
+    const urls = mapStylePreviewTileUrls("standard", "dark");
 
-    expect(url).toBe(
-      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/15/10896/16375",
+    expect(urls).toHaveLength(4);
+    expect(urls.every((url) => url === "/map-preview/street-dark.svg")).toBe(
+      true,
     );
   });
 
@@ -32,13 +37,17 @@ describe("mapTilePreview", () => {
     const urls = previewTileUrlsForStyle("satellite", 51.505, -0.09);
 
     expect(urls).toHaveLength(4);
-    expect(urls.every((url) => url.includes("World_Imagery"))).toBe(true);
+    expect(urls.every((url) => url === "/map-preview/satellite.svg")).toBe(
+      true,
+    );
   });
 
-  it("builds dark street preview tiles when streetBasemap is dark", () => {
-    const urls = previewTileUrlsFromOrigin("standard", 16375, 10896, 15, "dark");
+  it("ignores tile origin for static preview assets", () => {
+    const urls = previewTileUrlsFromOrigin("standard", 16375, 10896, 15, "light");
 
     expect(urls).toHaveLength(4);
-    expect(urls.every((url) => url.includes("dark_all"))).toBe(true);
+    expect(urls.every((url) => url === "/map-preview/street-light.svg")).toBe(
+      true,
+    );
   });
 });
