@@ -46,6 +46,13 @@ import {
   repairGhostHostHandler,
 } from "../session/repairGhostHost.mjs";
 import {
+  controlSessionTimerForMoveHandler,
+  MOVE_TIMER_INVALID_ACTION,
+  MOVE_TIMER_NOT_HIDER,
+  MOVE_TIMER_SESSION_ENDED,
+  MOVE_TIMER_SESSION_NOT_FOUND,
+} from "../session/controlSessionTimerForMove.mjs";
+import {
   JOIN_REQ_EXPIRED,
   JOIN_REQ_INVALID_DECISION,
   JOIN_REQ_INVALID_ROLE,
@@ -419,6 +426,48 @@ export const resolveRoleJoinRequest = onCall(
       return await resolveRoleJoinRequestHandler(db, request.auth, request.data);
     } catch (error) {
       mapJoinRequestError(error);
+    }
+  }),
+);
+
+function mapMoveTimerError(error) {
+  if (!(error instanceof Error)) {
+    throw error;
+  }
+  if (error.message === MOVE_TIMER_SESSION_NOT_FOUND) {
+    throw new HttpsError("not-found", "Session not found.");
+  }
+  if (error.message === MOVE_TIMER_SESSION_ENDED) {
+    throw new HttpsError("failed-precondition", "Session already ended.");
+  }
+  if (error.message === MOVE_TIMER_NOT_HIDER) {
+    throw new HttpsError(
+      "permission-denied",
+      "Only a confirmed hider can control the timer for Move.",
+    );
+  }
+  if (error.message === MOVE_TIMER_INVALID_ACTION) {
+    throw new HttpsError("invalid-argument", "action must be pause or resume.");
+  }
+  throw error;
+}
+
+export const controlSessionTimerForMove = onCall(
+  { secrets: [sentryDsnSecret], enforceAppCheck: true },
+  withSentryEventHandler(async (request) => {
+    const { uid, sessionId } = requireAuthSessionId(request);
+    const action = request.data?.action;
+    const db = getFirestore();
+
+    try {
+      return await controlSessionTimerForMoveHandler(
+        db,
+        uid,
+        sessionId,
+        action,
+      );
+    } catch (error) {
+      mapMoveTimerError(error);
     }
   }),
 );

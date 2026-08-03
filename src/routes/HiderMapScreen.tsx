@@ -472,6 +472,7 @@ export function HiderMapScreen() {
     postSystemMessage: postGameSystem,
     pauseTimer: timer.pause,
     resumeTimer: timer.start,
+    canControlTimer,
     ensureWriteAccess: ensureHiderWriteAccess,
     writesEnabled: authReady && Boolean(uid),
     mapPickEnabled,
@@ -777,6 +778,7 @@ export function HiderMapScreen() {
         timer={timer}
         timerSyncing={timerSyncing}
         canControlTimer={canControlTimer}
+        moveInProgress={hidingZones.some((zone) => zone.moveInProgress === true)}
         isRemote={isRemote}
         hasUnreadChat={hasUnreadChat}
         unreadCount={unreadCount}
