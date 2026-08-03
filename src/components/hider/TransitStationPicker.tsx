@@ -63,7 +63,7 @@ export function TransitStationPicker({
 
   const hintCopy =
     stations.length === 0 && !stationsLoading && !stationsError
-      ? "Pan the map, then search this area."
+      ? "Pan the map, then search stations in this area — or tap a station on the map after searching."
       : "Or tap a station on the map to select it.";
 
   return (
@@ -82,7 +82,7 @@ export function TransitStationPicker({
         disabled={searchDisabled}
         className={`${searchButtonClass} w-full shrink-0 disabled:opacity-50`}
       >
-        Search this area
+        Search stations in this area
       </button>
       {stationsLoading ? (
         <LoadingReadout>Loading stations…</LoadingReadout>

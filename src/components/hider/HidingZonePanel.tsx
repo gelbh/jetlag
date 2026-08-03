@@ -55,7 +55,7 @@ function stepPrompt(
         title: "Pick new location",
         body: manualMode
           ? "Timer is paused. Tap inside the play area to place your new zone."
-          : "Timer is paused. Pick a different transit station for your new zone.",
+          : "Timer is paused. Search stations in this area, or tap a different station on the map.",
       };
     }
 
@@ -77,7 +77,7 @@ function stepPrompt(
       title: manualMode ? "Place on map" : "Pick station",
       body: manualMode
         ? "Tap inside the play area to set your zone center."
-        : "Search or tap a transit station in the play area.",
+        : "Search stations in this area, or tap a station on the map.",
     };
   }
 
@@ -146,19 +146,6 @@ export function HidingZonePanel({
   useEffect(() => {
     onStepChange(legacyStepId);
   }, [legacyStepId, onStepChange]);
-
-  useEffect(() => {
-    if (!wizardOpen || zoneTool.manualMode || phaseId !== "place") {
-      return;
-    }
-
-    onSearchThisArea();
-  }, [
-    onSearchThisArea,
-    phaseId,
-    wizardOpen,
-    zoneTool.manualMode,
-  ]);
 
   const prompt = stepPrompt(legacyStepId, moveMode, zoneTool.manualMode);
   const methodSegmentValue = zoneTool.methodChosen

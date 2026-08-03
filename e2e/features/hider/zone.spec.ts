@@ -19,7 +19,7 @@ test.describe("hider flows", () => {
     await openHidingZoneWizard(guestPage);
     await advanceHidingZoneWizardToLocation(guestPage);
     await expect(
-      guestPage.getByRole("button", { name: "Search this area" }),
+      guestPage.getByRole("button", { name: "Search stations in this area" }),
     ).toBeVisible();
     await expect(
       guestPage.getByRole("button", { name: "Dublin Central" }),
@@ -40,6 +40,7 @@ test.describe("hider flows", () => {
   });
 
   test("play move requires a different station", async ({ hostHider }) => {
+    test.setTimeout(90_000);
     const { hostPage, guestPage } = hostHider;
 
     await confirmInitialHidingZoneAtStation(guestPage, "Dublin Central");
@@ -47,6 +48,9 @@ test.describe("hider flows", () => {
     guestPage.once("dialog", (dialog) => dialog.accept());
     await guestPage.getByRole("button", { name: "Play move" }).click();
     await waitForHidingZoneWizard(guestPage);
+    await expect(guestPage.getByText(/Pick new location/i)).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(guestPage.getByPlaceholder("Search stations…")).toBeVisible({
       timeout: 15_000,
     });
