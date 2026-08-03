@@ -153,8 +153,8 @@
     min-width: 0;
     justify-content: center;
     border-top: 3px solid var(--color-highlight);
-    /* Never horizontal-scroll question tools — shrink slots instead. */
-    overflow: visible;
+    /* Clip overflow so Draw + question slots share width without overlap. */
+    overflow: hidden;
   }
 
   .jl-map-island--history {
@@ -176,7 +176,7 @@
   .jl-map-island .jl-tool-dock-group-end .jl-tool-slot {
     flex: 1 1 0;
     width: auto;
-    min-width: 2.5rem;
+    min-width: 2rem;
     max-width: 2.75rem;
   }
 
