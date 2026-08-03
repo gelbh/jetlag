@@ -119,11 +119,16 @@ describe("isBrowserExtensionNoiseMessage", () => {
 });
 
 describe("isAppCheckSoftFailureMessage", () => {
-  it("matches probe timeout, initial-throttle, and reCAPTCHA Timeout", () => {
+  it("matches probe timeout, initial-throttle, throttled, and reCAPTCHA Timeout", () => {
     expect(isAppCheckSoftFailureMessage("App Check probe timed out")).toBe(true);
     expect(
       isAppCheckSoftFailureMessage(
         "AppCheck: 403 error. Attempts allowed again after 01d:00m:00s (appCheck/initial-throttle).",
+      ),
+    ).toBe(true);
+    expect(
+      isAppCheckSoftFailureMessage(
+        "AppCheck: Requests throttled due to previous 403 error. Attempts allowed again after 20h:49m:23s (appCheck/throttled).",
       ),
     ).toBe(true);
     expect(isAppCheckSoftFailureMessage("reCAPTCHA Timeout (b)")).toBe(true);
@@ -134,6 +139,7 @@ describe("isAppCheckSoftFailureMessage", () => {
       isAppCheckSoftFailureMessage("App Check probe returned empty token"),
     ).toBe(false);
     expect(isAppCheckSoftFailureMessage("initial-throttle alone")).toBe(false);
+    expect(isAppCheckSoftFailureMessage("throttled alone")).toBe(false);
   });
 });
 
