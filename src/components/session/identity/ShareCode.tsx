@@ -1,5 +1,10 @@
+import { useState } from "react";
 import { useCopyFeedback } from "../../../hooks/forms/useCopyFeedback";
-import { buildSessionInviteUrl } from "../../../domain/session/join/sessionInviteUrl";
+import crawlPolicy from "../../../domain/seo/seoCrawlPolicy.json";
+import {
+  buildSessionInviteUrl,
+  resolveSessionInviteOrigin,
+} from "../../../services/session/sessionInviteUrl";
 
 interface ShareCodeProps {
   code: string;
@@ -11,20 +16,29 @@ function canNativeShare(): boolean {
   return typeof navigator !== "undefined" && typeof navigator.share === "function";
 }
 
+function resolveInviteUrl(code: string): string | null {
+  const currentOrigin =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : crawlPolicy.siteOrigin;
+  const origin = resolveSessionInviteOrigin(
+    currentOrigin,
+    crawlPolicy.siteOrigin,
+  );
+  return buildSessionInviteUrl(origin, code);
+}
+
 export function ShareCode({
   code,
   remote = false,
   compact = false,
 }: ShareCodeProps) {
   const { status: copyStatus, copy } = useCopyFeedback();
-  const { status: linkCopyStatus, copy: copyLink } = useCopyFeedback();
-
-  const inviteUrl =
-    remote && typeof window !== "undefined"
-      ? buildSessionInviteUrl(window.location.origin, code)
-      : null;
+  const [copyTarget, setCopyTarget] = useState<"code" | "link">("code");
+  const inviteUrl = remote ? resolveInviteUrl(code) : null;
 
   const handleCopyCode = async () => {
+    setCopyTarget("code");
     await copy(code);
   };
 
@@ -32,7 +46,8 @@ export function ShareCode({
     if (!inviteUrl) {
       return;
     }
-    await copyLink(inviteUrl);
+    setCopyTarget("link");
+    await copy(inviteUrl);
   };
 
   const handleInvite = async () => {
@@ -56,7 +71,8 @@ export function ShareCode({
       }
     }
 
-    await copyLink(inviteUrl);
+    setCopyTarget("link");
+    await copy(inviteUrl);
   };
 
   if (compact) {
@@ -75,16 +91,16 @@ export function ShareCode({
 
   const feedback =
     copyStatus === "copied"
-      ? "Copied to clipboard."
+      ? copyTarget === "link"
+        ? "Join link copied."
+        : "Copied to clipboard."
       : copyStatus === "failed"
-        ? "Copy failed. Select and copy manually."
-        : linkCopyStatus === "copied"
-          ? "Join link copied."
-          : linkCopyStatus === "failed"
-            ? "Couldn't copy the join link."
-            : remote
-              ? "Tap code to copy. Invite friends with the join link."
-              : "Tap code to copy. Local-only session for solo play.";
+        ? copyTarget === "link"
+          ? "Couldn't copy the join link."
+          : "Copy failed. Select and copy manually."
+        : remote
+          ? "Tap code to copy. Invite friends with the join link."
+          : "Tap code to copy. Local-only session for solo play.";
 
   return (
     <div className="space-y-3">
@@ -98,7 +114,9 @@ export function ShareCode({
         >
           <span className="jl-stamp-code text-3xl tracking-[0.35em]">{code}</span>
         </button>
-        <p className="mt-2 text-xs text-ink-dim">{feedback}</p>
+        <p className="mt-2 text-xs text-ink-dim" role="status" aria-live="polite">
+          {feedback}
+        </p>
       </div>
 
       {inviteUrl ? (

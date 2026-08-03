@@ -14,6 +14,7 @@ import {
   isValidSessionCode,
   normalizeSessionCode,
 } from "../services/session/sessionCodes";
+import { parseSessionInviteCode } from "../services/session/sessionInviteUrl";
 import { useSessionStore } from "../state/sessionStore";
 import type { PlayerRole } from "../domain/session/players/playerRole";
 import { joinRequiresRolePasscode } from "../domain/session/players/roleGates";
@@ -119,7 +120,10 @@ export function JoinSession() {
   const session = useSessionStore((state) => state.session);
   const myUid = useSessionStore((state) => state.myUid);
   const setSession = useSessionStore((state) => state.setSession);
-  const [code, setCode] = useState("");
+  const codeFromQuery = searchParams.get("code");
+  const [code, setCode] = useState(
+    () => parseSessionInviteCode(codeFromQuery) ?? "",
+  );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { isSubmitting, runLocked } = useSubmitLock();
@@ -143,18 +147,14 @@ export function JoinSession() {
     needsRolePasscode &&
     isJoinRequestRole(playerRole);
   const formBusy = joinBusy || requestBusy || pendingRequest != null;
-  const codeFromQuery = searchParams.get("code");
 
   useEffect(() => {
-    if (!codeFromQuery) {
+    const next = parseSessionInviteCode(codeFromQuery);
+    if (!next) {
       return;
     }
-    const normalized = normalizeSessionCode(codeFromQuery);
-    if (!isValidSessionCode(normalized)) {
-      return;
-    }
-    /* eslint-disable react-hooks/set-state-in-effect -- prefill join code from invite deep link */
-    setCode(normalized);
+    /* eslint-disable react-hooks/set-state-in-effect -- sync join code when invite query changes */
+    setCode(next);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [codeFromQuery]);
 

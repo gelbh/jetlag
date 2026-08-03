@@ -12,9 +12,9 @@ describe("ShareCode", () => {
   beforeEach(() => {
     vi.mocked(copyToClipboard).mockReset();
     vi.mocked(copyToClipboard).mockResolvedValue(true);
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: { origin: "https://play.example.com" },
+    vi.stubGlobal("location", {
+      ...window.location,
+      origin: "https://play.example.com",
     });
   });
 
@@ -59,6 +59,23 @@ describe("ShareCode", () => {
       );
     });
     expect(screen.getByText("Join link copied.")).toBeInTheDocument();
+  });
+
+  it("uses the public site origin for localhost WebView hosts", async () => {
+    vi.stubGlobal("location", {
+      ...window.location,
+      origin: "https://localhost",
+    });
+    vi.stubGlobal("navigator", { ...navigator, share: undefined });
+
+    renderWithRouter(<ShareCode code="WXYZ" remote />);
+    fireEvent.click(screen.getByRole("button", { name: "Copy join link" }));
+
+    await waitFor(() => {
+      expect(copyToClipboard).toHaveBeenCalledWith(
+        "https://jetlag.gelbhart.dev/join?code=WXYZ",
+      );
+    });
   });
 
   it("hides invite actions for local-only sessions", () => {
