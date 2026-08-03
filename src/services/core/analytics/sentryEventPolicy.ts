@@ -28,6 +28,7 @@ const RECAPTCHA_ALREADY_RENDERED = /reCAPTCHA has already been rendered/i;
 const VIEW_TRANSITION_ABORTED =
   /Transition was aborted because of invalid state/i;
 const APP_CHECK_INVALID_SESSION = /Invalid session .*: Invalid input/i;
+export const JOIN_PERMISSION_DENIED_MESSAGE = "Join permission denied";
 
 /** Belt-and-suspenders for Sentry.init ignoreErrors — high-volume drop subset only (not the full classify matrix; not canaries). */
 export const CLIENT_SENTRY_IGNORE_ERRORS: Array<string | RegExp> = [
@@ -36,6 +37,7 @@ export const CLIENT_SENTRY_IGNORE_ERRORS: Array<string | RegExp> = [
   /appCheck\/(?:initial-throttle|throttled)/i,
   "Session already ended.",
   "Only the host can do that.",
+  JOIN_PERMISSION_DENIED_MESSAGE,
 ];
 
 export type SentryEventLike = {
@@ -156,11 +158,13 @@ export function classifyClientSentryEvent(
     }
   }
 
-  if (
-    typeof event.message === "string" &&
-    isGenericClientNoiseMessage(event.message)
-  ) {
-    return "drop";
+  if (typeof event.message === "string") {
+    if (event.message === JOIN_PERMISSION_DENIED_MESSAGE) {
+      return "drop";
+    }
+    if (isGenericClientNoiseMessage(event.message)) {
+      return "drop";
+    }
   }
 
   return "send";

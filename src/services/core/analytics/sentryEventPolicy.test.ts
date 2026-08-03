@@ -80,6 +80,15 @@ describe("classifyClientSentryEvent", () => {
     ).toBe("drop");
   });
 
+  it("drops expected join permission-denied captureMessage", () => {
+    expect(
+      classifyClientSentryEvent({
+        message: "Join permission denied",
+        level: "warning",
+      }),
+    ).toBe("drop");
+  });
+
   it("keeps module script import failure and WebKit Load failed", () => {
     expect(
       classifyClientSentryEvent(
