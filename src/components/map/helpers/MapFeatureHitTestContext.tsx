@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- context module pairs provider with hooks */
 import {
   createContext,
   useCallback,
@@ -10,7 +11,6 @@ import {
 import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
 import {
   dispatchMapFeatureHit,
-  featureHitId,
   queryJlMarkerFeatures,
   type MapFeatureHitHandler,
   type MapFeatureHitResult,
@@ -99,7 +99,10 @@ export function useMapFeatureHitTest(
 ) {
   const ctx = useOptionalMapFeatureHitTestContext();
   const handlerRef = useRef(handler);
-  handlerRef.current = handler;
+
+  useEffect(() => {
+    handlerRef.current = handler;
+  }, [handler]);
 
   useEffect(() => {
     if (!ctx) {
@@ -118,7 +121,10 @@ export function useMapFeatureHitTarget(
 ) {
   const ctx = useOptionalMapFeatureHitTestContext();
   const handlerRef = useRef(handler);
-  handlerRef.current = handler;
+
+  useEffect(() => {
+    handlerRef.current = handler;
+  }, [handler]);
 
   useEffect(() => {
     if (!ctx || !enabled) {
@@ -156,5 +162,3 @@ export function MapFeatureHitTestBridge({
 
   return null;
 }
-
-export { featureHitId };
