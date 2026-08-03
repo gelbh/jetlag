@@ -4,10 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useSessionStore } from "../../state/sessionStore";
 import { useSessionSync } from "./useSessionSync";
 
-const flushOfflineQueueMock = vi.fn(async () => ({
-  remaining: 0,
-  lastError: null as string | null,
-}));
+const flushOfflineQueueMock = vi.fn(async (sessionId: string) => {
+  void sessionId;
+  return {
+    remaining: 0,
+    lastError: null as string | null,
+  };
+});
 
 vi.mock("../../services/core/firebase/firebase", () => ({
   getFirestoreDb: vi.fn(),
