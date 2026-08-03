@@ -389,7 +389,11 @@ export function HiderMapScreen() {
       return;
     }
 
-    await confirmFoundHiderSession(session.id, uid);
+    try {
+      await confirmFoundHiderSession(session.id, uid);
+    } catch {
+      window.alert("Could not confirm found hider. Check your connection and try again.");
+    }
   }, [session, setSession, uid]);
 
   const handleDeclineFoundHider = useCallback(async () => {
@@ -417,7 +421,11 @@ export function HiderMapScreen() {
       },
       uid,
     );
-    await resetFoundHiderSession(session.id);
+    try {
+      await resetFoundHiderSession(session.id);
+    } catch {
+      window.alert("Could not clear found hider request. Check your connection and try again.");
+    }
   }, [session, setSession, uid]);
 
   const handleResetEndGame = useCallback(async () => {

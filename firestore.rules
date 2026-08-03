@@ -247,6 +247,104 @@ service cloud.firestore {
         && sessionIdentityUnchanged();
     }
 
+    // Found-hider paths: cheap key discriminators first so unrelated updates
+    // (lastActiveAt / join / rules) do not burn the 1000-expression budget.
+    // Early allow-update placement keeps confirm/request under the cap.
+    function isFoundHiderRequestUpdate() {
+      return 'foundRequestedAt' in request.resource.data
+        && request.resource.data.foundRequestedAt is string
+        && !('foundConfirmedAt' in request.resource.data)
+        && (
+          !('foundRequestedAt' in resource.data)
+          || resource.data.foundRequestedAt == null
+        )
+        && (
+          !('foundConfirmedAt' in resource.data)
+          || resource.data.foundConfirmedAt == null
+        )
+        && isSeekerOnSessionDoc()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['foundRequestedAt', 'foundRequestedByUid'])
+        && request.resource.data.foundRequestedByUid == request.auth.uid
+        && sessionIdentityUnchanged();
+    }
+
+    function isFoundHiderConfirmUpdate() {
+      return 'foundConfirmedAt' in request.resource.data
+        && request.resource.data.foundConfirmedAt is string
+        && resource.data.foundRequestedAt is string
+        && (
+          !('foundConfirmedAt' in resource.data)
+          || resource.data.foundConfirmedAt == null
+        )
+        && isHiderOnSessionDoc()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'foundConfirmedAt',
+            'foundConfirmedByUid',
+            'gameOutcome',
+            'foundRequestedAt',
+            'foundRequestedByUid',
+            'endGameStartedAt',
+            'endGameStartedByUid',
+            'endGameTruthAnchors',
+            'endGameRequestedAt',
+            'endGameRequestedByUid'
+          ])
+        && request.resource.data.foundConfirmedByUid == request.auth.uid
+        && request.resource.data.gameOutcome == 'found'
+        && !('foundRequestedAt' in request.resource.data)
+        && !('foundRequestedByUid' in request.resource.data)
+        && !('endGameStartedAt' in request.resource.data)
+        && !('endGameStartedByUid' in request.resource.data)
+        && !('endGameTruthAnchors' in request.resource.data)
+        && !('endGameRequestedAt' in request.resource.data)
+        && !('endGameRequestedByUid' in request.resource.data)
+        && sessionIdentityUnchanged();
+    }
+
+    function isFoundHiderDeclineUpdate() {
+      return resource.data.foundRequestedAt is string
+        && !('foundRequestedAt' in request.resource.data)
+        && !('foundRequestedByUid' in request.resource.data)
+        && (
+          !('foundConfirmedAt' in resource.data)
+          || resource.data.foundConfirmedAt == null
+        )
+        && isHiderOnSessionDoc()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['foundRequestedAt', 'foundRequestedByUid'])
+        && sessionIdentityUnchanged();
+    }
+
+    function isFoundHiderCancelUpdate() {
+      return resource.data.foundRequestedAt is string
+        && resource.data.foundRequestedByUid == request.auth.uid
+        && !('foundRequestedAt' in request.resource.data)
+        && !('foundRequestedByUid' in request.resource.data)
+        && (
+          !('foundConfirmedAt' in resource.data)
+          || resource.data.foundConfirmedAt == null
+        )
+        && isSeekerOnSessionDoc()
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['foundRequestedAt', 'foundRequestedByUid'])
+        && sessionIdentityUnchanged();
+    }
+
+    function isLastActiveAtUpdate() {
+      return 'lastActiveAt' in request.resource.data
+        && isSignedIn()
+        && resource.data.memberUids is list
+        && request.auth.uid in resource.data.memberUids
+        && resource.data.status != 'ended'
+        && !('endedAt' in resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['lastActiveAt'])
+        && lastActiveAtWithinGrace(request.resource.data.lastActiveAt)
+        && sessionIdentityUnchanged();
+    }
+
     function isSessionProgressResetUpdate() {
       return isHostOnSessionDoc()
         && request.resource.data.diff(resource.data).affectedKeys()
@@ -562,114 +660,16 @@ service cloud.firestore {
         || isEndGameRequestUpdate()
         || isEndGameCancelRequestUpdate()
         || isEndGameHostClearUpdate()
+        || isFoundHiderRequestUpdate()
+        || isFoundHiderConfirmUpdate()
+        || isFoundHiderDeclineUpdate()
+        || isFoundHiderCancelUpdate()
+        || isLastActiveAtUpdate()
         || isSessionProgressResetUpdate()
         || isTimerHostUpdate()
         || isHostEndSessionUpdate()
-        || validSessionRulesUpdate(sessionId) || (
-        isLegacyMembershipJoinUpdate()
-      ) || (
-        isSessionMember(sessionId)
-        && resource.data.status != 'ended'
-        && !('endedAt' in resource.data)
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.memberRoles == resource.data.memberRoles
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastActiveAt'])
-        && lastActiveAtWithinGrace(request.resource.data.lastActiveAt)
-      ) || (
-        isSeekerMember(sessionId)
-        && (
-          !('foundConfirmedAt' in resource.data)
-          || resource.data.foundConfirmedAt == null
-        )
-        && (
-          !('foundRequestedAt' in resource.data)
-          || resource.data.foundRequestedAt == null
-        )
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['foundRequestedAt', 'foundRequestedByUid'])
-        && request.resource.data.foundRequestedAt is string
-        && request.resource.data.foundRequestedByUid == request.auth.uid
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.memberRoles == resource.data.memberRoles
-      ) || (
-        isHiderMember(sessionId)
-        && resource.data.foundRequestedAt is string
-        && (
-          !('foundConfirmedAt' in resource.data)
-          || resource.data.foundConfirmedAt == null
-        )
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['foundConfirmedAt', 'foundConfirmedByUid', 'gameOutcome', 'foundRequestedAt', 'foundRequestedByUid', 'endGameStartedAt', 'endGameStartedByUid', 'endGameTruthAnchors', 'endGameRequestedAt', 'endGameRequestedByUid'])
-        && request.resource.data.foundConfirmedAt is string
-        && request.resource.data.foundConfirmedByUid == request.auth.uid
-        && request.resource.data.gameOutcome == 'found'
-        && !('foundRequestedAt' in request.resource.data)
-        && !('foundRequestedByUid' in request.resource.data)
-        && !('endGameStartedAt' in request.resource.data)
-        && !('endGameStartedByUid' in request.resource.data)
-        && !('endGameTruthAnchors' in request.resource.data)
-        && !('endGameRequestedAt' in request.resource.data)
-        && !('endGameRequestedByUid' in request.resource.data)
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.memberRoles == resource.data.memberRoles
-      ) || (
-        isHiderMember(sessionId)
-        && resource.data.foundRequestedAt is string
-        && (
-          !('foundConfirmedAt' in resource.data)
-          || resource.data.foundConfirmedAt == null
-        )
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['foundRequestedAt', 'foundRequestedByUid'])
-        && !('foundRequestedAt' in request.resource.data)
-        && !('foundRequestedByUid' in request.resource.data)
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.memberRoles == resource.data.memberRoles
-      ) || (
-        isSeekerMember(sessionId)
-        && resource.data.foundRequestedAt is string
-        && resource.data.foundRequestedByUid == request.auth.uid
-        && (
-          !('foundConfirmedAt' in resource.data)
-          || resource.data.foundConfirmedAt == null
-        )
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['foundRequestedAt', 'foundRequestedByUid'])
-        && !('foundRequestedAt' in request.resource.data)
-        && !('foundRequestedByUid' in request.resource.data)
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.hidingZoneRadiusMeters == resource.data.hidingZoneRadiusMeters
-        && request.resource.data.memberRoles == resource.data.memberRoles
-      );
+        || validSessionRulesUpdate(sessionId)
+        || isLegacyMembershipJoinUpdate();
 
       match /startingLocations/{uid} {
         allow read: if isSessionMember(sessionId);
