@@ -141,12 +141,11 @@ export async function clickToolDockButton(page: Page, name: string) {
 export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
   const drawButton = page.getByRole("button", { name: "Draw on map" });
   await expect(drawButton).toBeVisible();
+  // Hunt island now fits all tools without horizontal scroll; click directly.
   await drawButton.evaluate((el) => {
-    const scroller = el.closest(".jl-map-island--hunt");
-    if (scroller instanceof HTMLElement) {
-      scroller.scrollLeft = scroller.scrollWidth;
+    if (el instanceof HTMLElement) {
+      el.click();
     }
   });
-  await drawButton.click({ force: true });
   await page.getByRole("menuitem", { name: toolName }).click();
 }

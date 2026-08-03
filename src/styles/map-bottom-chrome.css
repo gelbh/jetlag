@@ -310,4 +310,17 @@
       max-height: min(40dvh, 22rem);
     }
   }
+
+  /* Compact hunt tool slots on narrow mobile to fit all tools without scroll. */
+  @media (max-width: 28rem) {
+    .jl-map-island-hunt-inner {
+      gap: 0.125rem;
+    }
+
+    .jl-map-island .jl-tool-dock-group-main .jl-tool-slot,
+    .jl-map-island .jl-tool-dock-group-end .jl-tool-slot {
+      min-width: 1.875rem;
+      max-width: 2.5rem;
+    }
+  }
 }

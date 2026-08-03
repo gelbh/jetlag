@@ -92,11 +92,18 @@ test.describe("layout regression @ default mobile", () => {
     await expect(history).toBeVisible();
     await expect(hunt).toBeVisible();
     await expect(session).toBeVisible();
-    // Hunt chips may scroll offscreen; assert island chassis, not individual slots.
+    // All islands and their tool slots stay in viewport on mobile layouts.
     await assertInViewport(host);
     await assertInViewport(history);
     await assertInViewport(hunt);
     await assertInViewport(session);
+    // Session island lives in the right-stack, not the bottom band.
+    await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
+    await expect(page.locator(".jl-map-chrome-side-stack")).toHaveCount(1);
+    await expect(
+      page.locator(".jl-map-chrome-side-stack [data-island='session']"),
+    ).toHaveCount(1);
+    // Verify tap targets on session controls.
     await assertMinTapTargets(
       session.getByRole("button", { name: "Open settings" }),
     );
