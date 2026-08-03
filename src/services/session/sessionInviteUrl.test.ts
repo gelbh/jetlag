@@ -31,8 +31,14 @@ describe("resolveSessionInviteOrigin", () => {
       resolveSessionInviteOrigin("http://127.0.0.1:5173", publicOrigin),
     ).toBe(publicOrigin);
     expect(
+      resolveSessionInviteOrigin("https://[::1]", publicOrigin),
+    ).toBe(publicOrigin);
+    expect(
       resolveSessionInviteOrigin("capacitor://localhost", publicOrigin),
     ).toBe(publicOrigin);
+    expect(resolveSessionInviteOrigin("not a url", publicOrigin)).toBe(
+      publicOrigin,
+    );
   });
 });
 

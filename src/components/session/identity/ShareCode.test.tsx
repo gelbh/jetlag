@@ -78,6 +78,31 @@ describe("ShareCode", () => {
     });
   });
 
+  it("does not fall back to clipboard when native share is cancelled", async () => {
+    const share = vi
+      .fn()
+      .mockRejectedValue(new DOMException("Share canceled", "AbortError"));
+    vi.stubGlobal("navigator", { ...navigator, share });
+
+    renderWithRouter(<ShareCode code="WXYZ" remote />);
+    fireEvent.click(screen.getByRole("button", { name: "Invite friends" }));
+
+    await waitFor(() => expect(share).toHaveBeenCalled());
+    expect(copyToClipboard).not.toHaveBeenCalled();
+  });
+
+  it("shows failure feedback when copying the join link fails", async () => {
+    vi.mocked(copyToClipboard).mockResolvedValue(false);
+    vi.stubGlobal("navigator", { ...navigator, share: undefined });
+
+    renderWithRouter(<ShareCode code="WXYZ" remote />);
+    fireEvent.click(screen.getByRole("button", { name: "Copy join link" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Couldn't copy the join link.")).toBeInTheDocument();
+    });
+  });
+
   it("hides invite actions for local-only sessions", () => {
     renderWithRouter(<ShareCode code="WXYZ" remote={false} />);
     expect(

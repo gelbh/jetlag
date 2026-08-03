@@ -98,7 +98,7 @@ export function ShareCode({
         ? copyTarget === "link"
           ? "Couldn't copy the join link."
           : "Copy failed. Select and copy manually."
-        : remote
+        : inviteUrl
           ? "Tap code to copy. Invite friends with the join link."
           : "Tap code to copy. Local-only session for solo play.";
 

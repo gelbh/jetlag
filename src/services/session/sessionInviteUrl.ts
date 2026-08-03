@@ -28,7 +28,12 @@ export function resolveSessionInviteOrigin(
       return publicOrigin;
     }
     const host = url.hostname.toLowerCase();
-    if (host === "localhost" || host === "127.0.0.1" || host === "[::1]") {
+    if (
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host === "::1" ||
+      host === "[::1]"
+    ) {
       return publicOrigin;
     }
     return currentOrigin.replace(/\/+$/, "");
