@@ -82,6 +82,10 @@ export interface PlacementCameraContext {
   panelPeekHeightPx: number;
   selectedPoiId?: string | null;
   walkActive?: boolean;
+  /**
+   * Viewport hysteresis input for `shouldReframeWithHysteresis` only.
+   * Not read by `computePlacementCameraTarget`.
+   */
   viewportFrame?: PlacementViewportFrame | null;
   forceReframe?: boolean;
 }
