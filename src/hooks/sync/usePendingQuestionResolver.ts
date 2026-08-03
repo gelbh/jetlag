@@ -25,6 +25,7 @@ import {
   getPendingQuestionStatus,
   updatePendingQuestion,
 } from "../../services/firestore/firestoreSessionExtras";
+import { capturePendingResolveFailure } from "../../services/core/analytics/sentry";
 import {
   answerSummaryFromPendingReply,
   emitPhotoAnsweredActivity,
@@ -207,12 +208,23 @@ export function usePendingQuestionResolver({
               answeredLate: Boolean(pending.answeredLate),
             });
           }
-        } catch {
-          // Keep the guard if the annotation already landed so a retry cannot
-          // append a second local/remote annotation for the same question.
+        } catch (error) {
+          // Soft-fail: cancel once and keep the in-flight guard so reload/effect
+          // loops cannot re-enter resolve (tentacle/measuring OOM thrash). On
+          // reconnect, resolvingRef clears when sessionId changes.
           if (!annotationCreated) {
-            resolvingRef.current.delete(pending.id);
+            try {
+              await updatePendingQuestion(sessionId, pending.id, {
+                status: "cancelled",
+              });
+            } catch {
+              // Cancel write failed — still keep the guard for this session mount.
+            }
           }
+          capturePendingResolveFailure(error, {
+            toolType: pending.toolType,
+            pendingQuestionId: pending.id,
+          });
         }
       })();
     }

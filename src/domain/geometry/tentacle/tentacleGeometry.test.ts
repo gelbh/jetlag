@@ -17,6 +17,11 @@ import {
   tentacleEliminationJsonForAnswer,
 } from "./tentacleGeometry";
 import { resolveVoronoiCellPoiId } from "../voronoi/voronoiCellSiteId";
+import exysHospitalTentacle from "./fixtures/exysHospitalTentacle.json";
+import {
+  TentacleGeometryBudgetError,
+  TENTACLE_POI_MAX,
+} from "./tentacleGeometryBudgets";
 
 const oneMileMeters = milesToMeters(1);
 const POLYGON_OR_MULTIPOLYGON = /Polygon|MultiPolygon/;
@@ -245,6 +250,73 @@ describe("tentacleGeometry", () => {
         expect(booleanPointInPolygon(nearOther, region)).toBe(true);
       }
     }
+  });
+
+  it("EXYS 24-hospital tentacle resolves elim shade with answered site clear", async () => {
+    // Live pending a4ad8efe-90d3-46cb-a803-b37ef2e307e2 / session EXYS (stuck answered, no shade).
+    clearVoronoiCellCacheForTests();
+    clearTentacleEliminationCacheForTests();
+
+    const pois = exysHospitalTentacle.pois as TentaclePoi[];
+    const dublinGameArea: GameArea = {
+      type: "Polygon",
+      coordinates: [
+        [
+          [-6.4, 53.2],
+          [-6.1, 53.2],
+          [-6.1, 53.5],
+          [-6.4, 53.5],
+          [-6.4, 53.2],
+        ],
+      ],
+    };
+    const anchor: [number, number] = [
+      exysHospitalTentacle.center.lat,
+      exysHospitalTentacle.center.lng,
+    ];
+    const answeredId = exysHospitalTentacle.answerPoiId;
+    const answered = pois.find((poi) => poi.id === answeredId);
+    expect(answered).toBeDefined();
+
+    const json = await tentacleEliminationJsonForAnswer({
+      anchor,
+      radiusMeters: exysHospitalTentacle.radiusMeters,
+      pois,
+      answeredPoiId: answeredId,
+      outOfReach: false,
+      gameArea: dublinGameArea,
+    });
+
+    expect(json).toBeDefined();
+    const region = JSON.parse(json!) as Feature<Polygon | MultiPolygon>;
+    expect(region.geometry.type).toMatch(POLYGON_OR_MULTIPOLYGON);
+
+    const answeredPoint = turfPoint([answered!.lng, answered!.lat]);
+    expect(booleanPointInPolygon(answeredPoint, region)).toBe(false);
+  });
+
+  it("refuses elim JSON when POI count exceeds the hard budget", async () => {
+    const overBudget: TentaclePoi[] = Array.from(
+      { length: TENTACLE_POI_MAX + 1 },
+      (_, index) => ({
+        id: `poi-${index}`,
+        name: `POI ${index}`,
+        lat: 51.45 + index * 0.0001,
+        lng: -0.15 + index * 0.0001,
+        category: "museum",
+      }),
+    );
+
+    await expect(
+      tentacleEliminationJsonForAnswer({
+        anchor: [51.45, -0.15],
+        radiusMeters: oneMileMeters,
+        pois: overBudget,
+        answeredPoiId: "poi-0",
+        outOfReach: false,
+        gameArea: sampleGameArea,
+      }),
+    ).rejects.toBeInstanceOf(TentacleGeometryBudgetError);
   });
 
   it("Dublin-like 8-POI grid: answered site stays clear, every other site is shaded", async () => {
