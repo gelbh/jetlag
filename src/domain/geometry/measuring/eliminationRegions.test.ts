@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import { polygonFeatureToLeafletPolygonGroups } from "./eliminationRegions";
+import { polygonFeatureToPolygonGroups } from "./eliminationRegions";
 
-describe("polygonFeatureToLeafletPolygonGroups", () => {
+describe("polygonFeatureToPolygonGroups", () => {
   it("filters null and invalid coordinates from rings", () => {
     const feature: Feature<Polygon> = {
       type: "Feature",
@@ -21,7 +21,7 @@ describe("polygonFeatureToLeafletPolygonGroups", () => {
       },
     };
 
-    const groups = polygonFeatureToLeafletPolygonGroups(feature);
+    const groups = polygonFeatureToPolygonGroups(feature);
 
     expect(groups).toHaveLength(1);
     expect(groups[0][0]).toEqual([
@@ -53,7 +53,7 @@ describe("polygonFeatureToLeafletPolygonGroups", () => {
       },
     };
 
-    expect(polygonFeatureToLeafletPolygonGroups(feature)).toEqual([]);
+    expect(polygonFeatureToPolygonGroups(feature)).toEqual([]);
   });
 
   it("filters NaN and Infinity coordinates from multipolygons", () => {
@@ -83,7 +83,7 @@ describe("polygonFeatureToLeafletPolygonGroups", () => {
       },
     };
 
-    const groups = polygonFeatureToLeafletPolygonGroups(feature);
+    const groups = polygonFeatureToPolygonGroups(feature);
 
     expect(groups).toHaveLength(1);
     expect(groups[0][0]).toEqual([
@@ -105,6 +105,6 @@ describe("polygonFeatureToLeafletPolygonGroups", () => {
       },
     };
 
-    expect(polygonFeatureToLeafletPolygonGroups(feature)).toEqual([]);
+    expect(polygonFeatureToPolygonGroups(feature)).toEqual([]);
   });
 });
