@@ -4,7 +4,8 @@ import { clusterNearbyPoints } from "../../../domain/session/live/liveMapLocatio
 import { isLiveLocationGone } from "../../../domain/session/live/liveLocationFreshness";
 import { useLiveLocationNowMs } from "../../../hooks/map/useLiveLocationNowMs";
 import { buildLiveClusterPaint } from "../helpers/liveClusterPaint";
-import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
+import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
+import type { CircleMarkerProps } from "../helpers/mapMarkerFeatures";
 
 interface LivePlayerLocationsLayerProps {
   locations: readonly PlayerLocationRecord[];
@@ -18,30 +19,24 @@ export function LivePlayerLocationsLayer({
   role,
 }: LivePlayerLocationsLayerProps) {
   const nowMs = useLiveLocationNowMs();
-  const paints = useMemo(() => {
+  const markers = useMemo((): CircleMarkerProps[] => {
     const fresh = locations.filter(
       (location) => !isLiveLocationGone(location.updatedAt, nowMs),
     );
-    return clusterNearbyPoints(fresh).map((cluster) =>
-      buildLiveClusterPaint(cluster, role, myUid, nowMs),
-    );
+    return clusterNearbyPoints(fresh).map((cluster) => {
+      const paint = buildLiveClusterPaint(cluster, role, myUid, nowMs);
+      return {
+        id: paint.key,
+        lat: paint.lat,
+        lng: paint.lng,
+        radiusPx: paint.radius,
+        borderColor: paint.borderColor,
+        borderWidth: paint.borderWidth,
+        fillColor: paint.fillColor,
+        opacity: paint.fillOpacity,
+      };
+    });
   }, [locations, myUid, nowMs, role]);
 
-  return (
-    <>
-      {paints.map((paint) => (
-        <MapLibreDotMarker
-          key={paint.key}
-          latitude={paint.lat}
-          longitude={paint.lng}
-          radiusPx={paint.radius}
-          borderColor={paint.borderColor}
-          borderWidth={paint.borderWidth}
-          fillColor={paint.fillColor}
-          opacity={paint.fillOpacity}
-          title={paint.label}
-        />
-      ))}
-    </>
-  );
+  return <MapLibrePointMarkers id="live-players" markers={markers} />;
 }

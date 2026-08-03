@@ -6,8 +6,10 @@ import { polygonFeatureToRings } from "../../../domain/geometry/gameArea/geometr
 import type { LayerVisibility } from "../../../state/sessionStore";
 import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
-import { MapLibreDotMarker } from "../helpers/MapLibreDotMarker";
+import { useCallback } from "react";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
+import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
+import { useMapFeatureHitTarget } from "../helpers/MapFeatureHitTestContext";
 import { PinAnnotationMarker } from "./PinAnnotationMarker";
 
 interface RenderAnnotationLayerItemParams {
@@ -19,7 +21,7 @@ interface RenderAnnotationLayerItemParams {
   selectAnnotation: () => void;
 }
 
-function pointRadiusAnnotation({
+function PointRadiusAnnotationLayer({
   annotationId,
   center,
   radiusMeters,
@@ -51,6 +53,18 @@ function pointRadiusAnnotation({
     units: "kilometers",
   });
 
+  useMapFeatureHitTarget(
+    annotationId,
+    useCallback(() => {
+      if (!selectionEnabled) {
+        return false;
+      }
+      selectAnnotation();
+      return true;
+    }, [selectAnnotation, selectionEnabled]),
+    selectionEnabled,
+  );
+
   return (
     <>
       <MapLibreGeoJsonOverlay
@@ -63,19 +77,21 @@ function pointRadiusAnnotation({
           dashArray: cssPxDashToMapLibre(dashArray, weight),
         }}
       />
-      <MapLibreDotMarker
-        latitude={lat}
-        longitude={lng}
-        radiusPx={6}
-        fillColor={markerFillColor}
-        borderColor={MAP_ANNOTATION_COLORS.strokeLight}
-        onClick={
-          selectionEnabled
-            ? () => {
-                selectAnnotation();
-              }
-            : undefined
-        }
+      <MapLibrePointMarkers
+        id={`annotation-${annotationId}-center`}
+        markers={[
+          {
+            id: `${annotationId}-center`,
+            lat,
+            lng,
+            radiusPx: 6,
+            fillColor: markerFillColor,
+            borderColor: MAP_ANNOTATION_COLORS.strokeLight,
+            hitId: annotationId,
+            hitKind: "annotation-center",
+          },
+        ]}
+        interactive={selectionEnabled}
       />
     </>
   );
@@ -113,18 +129,21 @@ export function renderAnnotationLayerItem({
   ) {
     const [lng, lat] = annotation.geometry.geometry.coordinates;
     const radiusMeters = pointToolRadiusFromMetadata(annotation.metadata);
-    return pointRadiusAnnotation({
-      annotationId: annotation.id,
-      center: [lat, lng],
-      radiusMeters,
-      selected,
-      selectionEnabled,
-      selectAnnotation,
-      markerFillColor: MAP_ANNOTATION_COLORS.radar,
-      strokeColor: MAP_ANNOTATION_COLORS.radar,
-      fillColor: MAP_ANNOTATION_COLORS.radar,
-      fillOpacity: 0.08,
-    });
+    return (
+      <PointRadiusAnnotationLayer
+        key={annotation.id}
+        annotationId={annotation.id}
+        center={[lat, lng]}
+        radiusMeters={radiusMeters}
+        selected={selected}
+        selectionEnabled={selectionEnabled}
+        selectAnnotation={selectAnnotation}
+        markerFillColor={MAP_ANNOTATION_COLORS.radar}
+        strokeColor={MAP_ANNOTATION_COLORS.radar}
+        fillColor={MAP_ANNOTATION_COLORS.radar}
+        fillOpacity={0.08}
+      />
+    );
   }
 
   if (
@@ -133,19 +152,22 @@ export function renderAnnotationLayerItem({
   ) {
     const [lng, lat] = annotation.geometry.geometry.coordinates;
     const radiusMeters = pointToolRadiusFromMetadata(annotation.metadata);
-    return pointRadiusAnnotation({
-      annotationId: annotation.id,
-      center: [lat, lng],
-      radiusMeters,
-      selected,
-      selectionEnabled,
-      selectAnnotation,
-      markerFillColor: MAP_ANNOTATION_COLORS.tentacle,
-      strokeColor: MAP_ANNOTATION_COLORS.tentacleAccent,
-      fillColor: MAP_ANNOTATION_COLORS.tentacle,
-      fillOpacity: 0.06,
-      dashArray: "6 6",
-    });
+    return (
+      <PointRadiusAnnotationLayer
+        key={annotation.id}
+        annotationId={annotation.id}
+        center={[lat, lng]}
+        radiusMeters={radiusMeters}
+        selected={selected}
+        selectionEnabled={selectionEnabled}
+        selectAnnotation={selectAnnotation}
+        markerFillColor={MAP_ANNOTATION_COLORS.tentacle}
+        strokeColor={MAP_ANNOTATION_COLORS.tentacleAccent}
+        fillColor={MAP_ANNOTATION_COLORS.tentacle}
+        fillOpacity={0.06}
+        dashArray="6 6"
+      />
+    );
   }
 
   if (
@@ -193,6 +215,7 @@ export function renderAnnotationLayerItem({
     return (
       <PinAnnotationMarker
         key={annotation.id}
+        annotationId={annotation.id}
         lat={lat}
         lng={lng}
         color={color}
