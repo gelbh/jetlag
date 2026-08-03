@@ -2,6 +2,7 @@ import * as Sentry from "@sentry/capacitor";
 import * as SentryReact from "@sentry/react";
 import { getClientEnv } from "../../../config/env";
 import { APP_VERSION } from "../../../domain/device/changelog";
+import type { StorageEstimateSnapshot } from "../../../domain/device/pwa/pwaStorageBudget";
 import {
   applyClientSentryDisposition,
   CLIENT_SENTRY_IGNORE_ERRORS,
@@ -391,6 +392,21 @@ export function addAppResumeBreadcrumb(context: AppResumeContext): void {
     message: "App resumed",
     level: "info",
     data: context,
+  });
+}
+
+export function addPwaStoragePressureBreadcrumb(
+  snapshot: StorageEstimateSnapshot,
+): void {
+  if (import.meta.env.MODE === "test") {
+    return;
+  }
+
+  Sentry.addBreadcrumb({
+    category: "pwa.storage",
+    message: "PWA storage over soft cap",
+    level: "warning",
+    data: snapshot,
   });
 }
 

@@ -14,7 +14,10 @@ import {
 } from "../../services/firestore/firestoreAnnotations";
 import { ANNOTATION_SYNC_MESSAGE_TYPE } from "../../services/session/backgroundSync";
 import { readOfflineQueueForSession } from "../../services/session/offlineQueue";
+import { reportStoragePressureIfHigh } from "../../domain/device/pwa/pwaStorageBudget";
+import { addPwaStoragePressureBreadcrumb } from "../../services/core/analytics/sentry";
 import { flushOfflineQueue } from "../../services/session/flushOfflineQueue";
+import { bindOfflineQueueResumeFlush } from "../../services/session/sessionResumeFlush";
 import { resolvePlayerRole } from "../../domain/session/players/playerRole";
 
 
@@ -239,6 +242,11 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
         return;
       }
 
+      void reportStoragePressureIfHigh({
+        source: "client",
+        onPressure: addPwaStoragePressureBreadcrumb,
+      });
+
       const pendingForSession = await readOfflineQueueForSession(sessionId);
       if (disposed) {
         return;
@@ -268,6 +276,10 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
       void flushQueue();
     };
 
+    const unbindResumeFlush = bindOfflineQueueResumeFlush(() => {
+      void flushQueue();
+    });
+
     window.addEventListener("online", handleOnline);
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.addEventListener(
@@ -283,6 +295,7 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
 
     return () => {
       disposed = true;
+      unbindResumeFlush();
       window.removeEventListener("online", handleOnline);
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.removeEventListener(

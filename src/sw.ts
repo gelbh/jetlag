@@ -20,6 +20,11 @@ import {
   isEsriTileUrl,
   isOpenFreeMapUrl,
 } from "./domain/map/mapTileHosts";
+import {
+  PWA_TILE_CACHE_MAX_AGE_SECONDS,
+  PWA_TILE_CACHE_MAX_ENTRIES,
+  reportStoragePressureIfHigh,
+} from "./domain/device/pwa/pwaStorageBudget";
 
 declare let self: ServiceWorkerGlobalScope;
 
@@ -44,8 +49,8 @@ registerRoute(
     cacheName: "esri-satellite-tiles",
     plugins: [
       new ExpirationPlugin({
-        maxEntries: 500,
-        maxAgeSeconds: 60 * 60 * 24 * 7,
+        maxEntries: PWA_TILE_CACHE_MAX_ENTRIES,
+        maxAgeSeconds: PWA_TILE_CACHE_MAX_AGE_SECONDS,
       }),
     ],
   }),
@@ -57,8 +62,8 @@ registerRoute(
     cacheName: "openfreemap-tiles",
     plugins: [
       new ExpirationPlugin({
-        maxEntries: 500,
-        maxAgeSeconds: 60 * 60 * 24 * 7,
+        maxEntries: PWA_TILE_CACHE_MAX_ENTRIES,
+        maxAgeSeconds: PWA_TILE_CACHE_MAX_AGE_SECONDS,
       }),
     ],
   }),
@@ -76,6 +81,10 @@ registerRoute(
     ],
   }),
 );
+
+self.addEventListener("activate", (event: ExtendableEvent) => {
+  event.waitUntil(reportStoragePressureIfHigh({ source: "sw" }));
+});
 
 self.addEventListener("message", (event: ExtendableMessageEvent) => {
   if (event.data?.type === "SKIP_WAITING") {
