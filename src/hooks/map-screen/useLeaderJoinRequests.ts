@@ -42,7 +42,6 @@ export function useLeaderJoinRequests({
 
   useEffect(() => {
     if (!enabled || !sessionId) {
-      setRequests((prev) => (prev.length === 0 ? prev : []));
       return;
     }
 
@@ -56,6 +55,8 @@ export function useLeaderJoinRequests({
     );
   }, [enabled, roles, sessionId]);
 
+  const activeRequests = enabled ? requests : [];
+
   useEffect(() => {
     if (!enabled) {
       return;
@@ -67,13 +68,13 @@ export function useLeaderJoinRequests({
 
   const pendingRequest = useMemo(() => {
     return (
-      requests.find(
+      activeRequests.find(
         (request) =>
           request.status === "pending" &&
           !isJoinRequestExpired(request, nowMs),
       ) ?? null
     );
-  }, [nowMs, requests]);
+  }, [nowMs, activeRequests]);
 
   const resolve = useCallback(
     async (decision: "accept" | "decline") => {

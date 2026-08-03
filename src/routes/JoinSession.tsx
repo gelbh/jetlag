@@ -355,20 +355,34 @@ export function JoinSession() {
     const expiresInMs = Date.parse(pendingRequest.expiresAt) - Date.now();
     // setTimeout delays above 2^31-1 overflow and fire immediately.
     const MAX_TIMEOUT_MS = 2_147_483_647;
-    const expiryTimer =
-      Number.isFinite(expiresInMs) &&
-      expiresInMs >= 0 &&
-      expiresInMs <= MAX_TIMEOUT_MS
-        ? window.setTimeout(() => {
-            if (!cancelled && !accepting) {
-              void cancelRoleJoinRequest(
-                pendingRequest.sessionId,
-                pendingRequest.requestId,
-              );
-            }
-            finishTerminal("expired");
-          }, expiresInMs)
-        : undefined;
+    let expiryTimer: ReturnType<typeof window.setTimeout> | undefined;
+
+    if (Number.isFinite(expiresInMs) && expiresInMs <= MAX_TIMEOUT_MS) {
+      if (expiresInMs <= 0) {
+        // Already expired or expiry time is in the past
+        if (!cancelled && !accepting) {
+          void cancelRoleJoinRequest(
+            pendingRequest.sessionId,
+            pendingRequest.requestId,
+          ).catch(() => {
+            // Ignore errors if cancellation fails
+          });
+        }
+        finishTerminal("expired");
+      } else {
+        expiryTimer = window.setTimeout(() => {
+          if (!cancelled && !accepting) {
+            void cancelRoleJoinRequest(
+              pendingRequest.sessionId,
+              pendingRequest.requestId,
+            ).catch(() => {
+              // Ignore errors if cancellation fails
+            });
+          }
+          finishTerminal("expired");
+        }, expiresInMs);
+      }
+    }
 
     return () => {
       if (!accepting) {
