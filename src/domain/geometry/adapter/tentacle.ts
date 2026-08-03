@@ -13,6 +13,10 @@ import {
   getCachedVoronoiCellsAsync,
   tentacleSitesFingerprint,
 } from "../voronoi/voronoiCellCache";
+import {
+  assertTentaclePoiBudget,
+  TentacleGeometryBudgetError,
+} from "../tentacle/tentacleGeometryBudgets";
 
 const POI_ANSWER_ELIMINATION_CACHE_MAX = 16;
 
@@ -121,6 +125,12 @@ export async function tentacleEliminationJsonForAnswer(params: {
     params.pois.length === 0
   ) {
     return undefined;
+  }
+
+  const budget = assertTentaclePoiBudget(params.pois.length);
+  if (!budget.ok) {
+    // Refuse heavy Voronoi/elim work — soft-fail cancel keeps the seeker tab alive.
+    throw new TentacleGeometryBudgetError(params.pois.length);
   }
 
   const region = await buildTentaclePoiAnswerEliminationRegion(

@@ -181,4 +181,68 @@ describe("usePendingQuestionResolver", () => {
       { status: "resolved", resolvedAnnotationId: "pq-radar-1" },
     );
   });
+
+  it("cancels pending when resolve throws and does not retry", async () => {
+    // Soft-fail: answered forever + re-resolve thrash crashed EXYS seeker tabs.
+    const radarPending: PendingQuestionRecord = {
+      id: "pq-radar-fail",
+      sessionId: "session-1",
+      toolType: "radar",
+      createdByUid: "seeker-1",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      status: "answered",
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-0.15, 51.45] },
+        }),
+        metadata: { radiusKm: 1 },
+      },
+      replyOptions: [
+        { id: "yes", label: "Yes" },
+        { id: "no", label: "No" },
+      ],
+      promptText: "Radar?",
+      answer: "yes",
+    };
+
+    updatePendingQuestion.mockResolvedValue(undefined);
+    createAnnotation.mockRejectedValue(new Error("resolve boom"));
+
+    const { rerender } = renderHook(
+      ({ pendingQuestions }) =>
+        usePendingQuestionResolver({
+          sessionId: "session-1",
+          enabled: true,
+          pendingQuestions,
+          createAnnotation,
+          gameArea,
+        }),
+      { initialProps: { pendingQuestions: [radarPending] } },
+    );
+
+    await waitFor(() => {
+      expect(updatePendingQuestion).toHaveBeenCalledWith(
+        "session-1",
+        "pq-radar-fail",
+        { status: "cancelled" },
+      );
+    });
+
+    expect(createAnnotation).toHaveBeenCalledTimes(1);
+
+    rerender({ pendingQuestions: [{ ...radarPending }] });
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(createAnnotation).toHaveBeenCalledTimes(1);
+    expect(
+      updatePendingQuestion.mock.calls.filter(
+        (call) => call[2]?.status === "cancelled",
+      ),
+    ).toHaveLength(1);
+  });
 });
