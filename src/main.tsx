@@ -13,6 +13,7 @@ import {
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
+import { PWA_MARK_NAV, markPlayDay } from "./domain/device/perf/playDayMarks.ts";
 import { installE2EBridgeIfConfigured } from "./test/e2eBridge";
 import "./index.css";
 
@@ -21,6 +22,7 @@ initAnalytics();
 initSentry();
 
 function renderApp() {
+  markPlayDay(PWA_MARK_NAV);
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       <App />

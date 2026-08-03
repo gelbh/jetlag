@@ -38,6 +38,10 @@ import {
   setChunkReloadContextGetter,
 } from "./domain/device/updates/lazyWithChunkRetry";
 import { removeBootSplash } from "./domain/device/chrome/bootSplash";
+import {
+  PWA_MARK_APP_READY,
+  markPlayDay,
+} from "./domain/device/perf/playDayMarks";
 import { notifyAppNeedRefresh } from "./domain/device/updates/serviceWorkerRefresh";
 import { useEdgeSwipeBack } from "./hooks/navigation/useEdgeSwipeBack";
 import { useRouteSeo } from "./hooks/navigation/useRouteSeo";
@@ -142,6 +146,7 @@ function AppErrorFallback() {
 export default function App() {
   useLayoutEffect(() => {
     removeBootSplash();
+    markPlayDay(PWA_MARK_APP_READY);
   }, []);
 
   useEffect(() => {
