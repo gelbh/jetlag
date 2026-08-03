@@ -27,10 +27,13 @@ export function readSessionIdFromLocalStorage(
 ): string | undefined {
   try {
     const raw = storage.getItem(JETLAG_SESSION_KEY);
-    return raw
-      ? (JSON.parse(raw) as { state?: { session?: { id?: string } } }).state
-          ?.session?.id
-      : undefined;
+    if (!raw) {
+      return undefined;
+    }
+    const sessionId = (
+      JSON.parse(raw) as { state?: { session?: { id?: unknown } } }
+    ).state?.session?.id;
+    return typeof sessionId === "string" ? sessionId : undefined;
   } catch {
     return undefined;
   }
@@ -133,7 +136,10 @@ export function safeSetItemForAnnotations(
   }
 
   const base = withoutDeleted !== value ? withoutDeleted : value;
-  const sessionScoped = keepSessionAnnotations(base);
+  const sessionScoped = keepSessionAnnotations(
+    base,
+    readSessionIdFromLocalStorage(storage),
+  );
   if (sessionScoped !== base && trySetItem(storage, name, sessionScoped) === "ok") {
     return;
   }
