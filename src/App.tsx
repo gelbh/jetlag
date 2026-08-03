@@ -18,15 +18,8 @@ import { LocationPermissionPrompt } from "./components/session/status/LocationPe
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { AppCheckProbeGate } from "./components/ui/feedback/AppCheckProbeGate";
 import { AppErrorPage } from "./components/ui/feedback/AppErrorPage";
-import { AppResumeWatchdog } from "./components/ui/AppResumeWatchdog";
 import { Home } from "./routes/Home";
-import { AdminOpsDesk } from "./components/admin/AdminOpsDesk";
-import { JoinSession } from "./routes/JoinSession";
-import { Feedback } from "./routes/Feedback";
-import { NotFound } from "./routes/NotFound";
-import { Privacy } from "./routes/Privacy";
-import { Premium } from "./routes/Premium";
-import { Terms } from "./routes/Terms";
+import { scheduleIdleBootWork } from "./domain/device/perf/scheduleAfterFirstPaint";
 import {
   CHUNK_RELOAD_CLEAR_MS,
   clearBootReloadFlag,
@@ -52,13 +45,21 @@ import { RouteProgressChrome } from "./navigation/RouteProgressChrome";
 import { AppGlobalActivity } from "./navigation/AppGlobalActivity";
 import { RouteTransitionProvider } from "./navigation/RouteTransitionContext";
 import {
+  AdminOpsDeskLazy,
+  AppResumeWatchdogLazy,
   CreateSessionLazy,
+  FeedbackLazy,
   FriendsLazy,
   GamePresetEditorLazy,
   GamePresetListLazy,
+  JoinSessionLazy,
   LeaderboardLazy,
   MapScreenLazy,
+  NotFoundLazy,
+  PremiumLazy,
+  PrivacyLazy,
   StatsLazy,
+  TermsLazy,
 } from "./navigation/routePreloaders";
 
 function RouteFallback() {
@@ -77,6 +78,10 @@ function RouteFallback() {
 
 function LazyRoute({ children }: { children: ReactNode }) {
   return <Suspense fallback={<RouteFallback />}>{children}</Suspense>;
+}
+
+function LazyRouteQuiet({ children }: { children: ReactNode }) {
+  return <Suspense fallback={null}>{children}</Suspense>;
 }
 
 function AnalyticsPageViewTracker() {
@@ -150,7 +155,9 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    pruneStaleTimerSessions();
+    scheduleIdleBootWork(() => {
+      pruneStaleTimerSessions();
+    });
   }, []);
 
   useEffect(() => {
@@ -178,7 +185,9 @@ export default function App() {
             <AnalyticsPageViewTracker />
             <RouteSeoTracker />
             <ChunkReloadContextBinder />
-            <AppResumeWatchdog />
+            <LazyRouteQuiet>
+              <AppResumeWatchdogLazy />
+            </LazyRouteQuiet>
             <AppUpdateBanner />
             <AnalyticsConsentBanner />
             <AppEntryBackdrop />
@@ -187,7 +196,14 @@ export default function App() {
               <LocationPermissionPrompt />
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/feedback" element={<Feedback />} />
+                <Route
+                  path="/feedback"
+                  element={
+                    <LazyRoute>
+                      <FeedbackLazy />
+                    </LazyRoute>
+                  }
+                />
                 <Route
                   path="/stats"
                   element={
@@ -212,9 +228,30 @@ export default function App() {
                     </LazyRoute>
                   }
                 />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/premium" element={<Premium />} />
+                <Route
+                  path="/privacy"
+                  element={
+                    <LazyRoute>
+                      <PrivacyLazy />
+                    </LazyRoute>
+                  }
+                />
+                <Route
+                  path="/terms"
+                  element={
+                    <LazyRoute>
+                      <TermsLazy />
+                    </LazyRoute>
+                  }
+                />
+                <Route
+                  path="/premium"
+                  element={
+                    <LazyRoute>
+                      <PremiumLazy />
+                    </LazyRoute>
+                  }
+                />
                 <Route
                   path="/create"
                   element={
@@ -223,12 +260,37 @@ export default function App() {
                     </LazyRoute>
                   }
                 />
-                <Route path="/join" element={<JoinSession />} />
-                <Route path="/admin" element={<AdminOpsDesk />} />
-                <Route path="/admin/incidents" element={<AdminOpsDesk />} />
+                <Route
+                  path="/join"
+                  element={
+                    <LazyRoute>
+                      <JoinSessionLazy />
+                    </LazyRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <LazyRoute>
+                      <AdminOpsDeskLazy />
+                    </LazyRoute>
+                  }
+                />
+                <Route
+                  path="/admin/incidents"
+                  element={
+                    <LazyRoute>
+                      <AdminOpsDeskLazy />
+                    </LazyRoute>
+                  }
+                />
                 <Route
                   path="/admin/incidents/:incidentId"
-                  element={<AdminOpsDesk />}
+                  element={
+                    <LazyRoute>
+                      <AdminOpsDeskLazy />
+                    </LazyRoute>
+                  }
                 />
                 <Route
                   path="/presets"
@@ -265,7 +327,14 @@ export default function App() {
                   }
                 />
                 <Route path="/tutorial" element={<Navigate to="/" replace />} />
-                <Route path="*" element={<NotFound />} />
+                <Route
+                  path="*"
+                  element={
+                    <LazyRoute>
+                      <NotFoundLazy />
+                    </LazyRoute>
+                  }
+                />
               </Routes>
             </div>
             </AppCheckProbeGate>

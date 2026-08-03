@@ -4,29 +4,49 @@ import "@fontsource/source-sans-3/600.css";
 import "@fontsource/barlow-semi-condensed/600.css";
 import "@fontsource/barlow-semi-condensed/700.css";
 import { unregisterDevServiceWorkers } from "./domain/device/updates/unregisterDevServiceWorkers.ts";
-import { initAnalytics } from "./services/core/analytics/analytics.ts";
-import { initSentry, setBootstrapTag } from "./services/core/analytics/sentry.ts";
 import {
-  isFirebaseConfigured,
-  startAuthBootstrap,
-} from "./services/core/firebase/firebase.ts";
+  scheduleAfterFirstPaint,
+} from "./domain/device/perf/scheduleAfterFirstPaint.ts";
+import { PWA_MARK_NAV, markPlayDay } from "./domain/device/perf/playDayMarks.ts";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
-import { PWA_MARK_NAV, markPlayDay } from "./domain/device/perf/playDayMarks.ts";
 import { installE2EBridgeIfConfigured } from "./test/e2eBridge";
 import "./index.css";
 
 installE2EBridgeIfConfigured();
-initAnalytics();
-initSentry();
+
+function scheduleDeferredObservability(): void {
+  scheduleAfterFirstPaint(() => {
+    void import("./services/core/analytics/sentry.ts").then(
+      ({ initSentry, setBootstrapTag }) => {
+        setBootstrapTag("render");
+        initSentry();
+      },
+    );
+    void import("./services/core/analytics/analytics.ts").then(({ initAnalytics }) => {
+      initAnalytics();
+    });
+  });
+}
 
 function renderApp() {
   markPlayDay(PWA_MARK_NAV);
-  createRoot(document.getElementById("root")!).render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
+  void import("./App.tsx").then(({ default: App }) => {
+    createRoot(document.getElementById("root")!).render(
+      <StrictMode>
+        <App />
+      </StrictMode>,
+    );
+  });
+}
+
+function startDeferredAuthBootstrap(): void {
+  void import("./services/core/firebase/firebase.ts").then(
+    ({ isFirebaseConfigured, startAuthBootstrap }) => {
+      if (isFirebaseConfigured()) {
+        startAuthBootstrap();
+      }
+    },
   );
 }
 
@@ -36,10 +56,7 @@ void unregisterDevServiceWorkers().then((cleared) => {
     return;
   }
 
-  setBootstrapTag("render");
   renderApp();
-
-  if (isFirebaseConfigured()) {
-    startAuthBootstrap();
-  }
+  startDeferredAuthBootstrap();
+  scheduleDeferredObservability();
 });
