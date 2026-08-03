@@ -31,12 +31,22 @@ const TRANSIT_MODES: TransitRouteMode[] = [
   "other",
 ];
 
+/** Serialize overlapping register() across mount + style.load per map. */
+const registerInFlight = new WeakMap<MapLibreMap, Promise<void>>();
+
 export function transitModeIconId(mode: TransitRouteMode): string {
   return TRANSIT_ICON_IDS[mode];
 }
 
 export function transitVehicleIconId(mode: TransitRouteMode): string {
   return `jl-icon-transit-vehicle-${mode}`;
+}
+
+function isAlreadyExistsError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    /an image named .+ already exists/i.test(error.message)
+  );
 }
 
 async function loadSvgImage(
@@ -60,12 +70,26 @@ async function loadSvgImage(
         img.onerror = () => reject(new Error(`Failed to decode ${imageId}`));
         img.src = url;
       });
-      map.addImage(imageId, image, { pixelRatio: 2 });
+      // Re-check after async decode — concurrent register / style.load races.
+      if (map.hasImage(imageId)) {
+        return true;
+      }
+      try {
+        map.addImage(imageId, image, { pixelRatio: 2 });
+      } catch (error) {
+        if (isAlreadyExistsError(error) || map.hasImage(imageId)) {
+          return true;
+        }
+        throw error;
+      }
       return true;
     } finally {
       URL.revokeObjectURL(url);
     }
   } catch (error) {
+    if (isAlreadyExistsError(error) || map.hasImage(imageId)) {
+      return true;
+    }
     if (import.meta.env.DEV) {
       console.warn(`[map] marker image failed: ${imageId}`, error);
     }
@@ -81,8 +105,7 @@ function userLocationFallbackSvg(): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="8" fill="#4285F4" stroke="#fff" stroke-width="3"/></svg>`;
 }
 
-/** Load shared marker images into the MapLibre map (idempotent per style). */
-export async function registerMapLibreMarkerImages(
+async function registerMapLibreMarkerImagesOnce(
   map: MapLibreMap,
 ): Promise<void> {
   const userLoads = await Promise.all([
@@ -130,6 +153,25 @@ export async function registerMapLibreMarkerImages(
       ),
     ]),
   );
+}
+
+/** Load shared marker images into the MapLibre map (idempotent per style). */
+export async function registerMapLibreMarkerImages(
+  map: MapLibreMap,
+): Promise<void> {
+  const previous = registerInFlight.get(map) ?? Promise.resolve();
+  const next = previous
+    .catch(() => undefined)
+    .then(() => registerMapLibreMarkerImagesOnce(map));
+  registerInFlight.set(
+    map,
+    next.finally(() => {
+      if (registerInFlight.get(map) === next) {
+        registerInFlight.delete(map);
+      }
+    }),
+  );
+  await next;
 }
 
 /**
