@@ -40,19 +40,23 @@ export async function readToolDockOverflowMetrics(
   page: Page,
 ): Promise<ToolDockOverflowMetrics> {
   return page.evaluate(() => {
-    const bar =
-      document.querySelector(".jl-map-island--hunt") ??
-      document.querySelector(".jl-map-bottom-chrome");
-    const barRect = bar?.getBoundingClientRect();
+    const chrome = document.querySelector(".jl-map-bottom-chrome");
+    const chromeRect = chrome?.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
     const slots = [...document.querySelectorAll(".jl-tool-slot")].filter(
       (el) => el.getBoundingClientRect().width > 0,
     );
     return {
-      barRight: barRect?.right ?? 0,
-      viewportWidth: window.innerWidth,
+      barRight: chromeRect?.right ?? 0,
+      viewportWidth,
+      // Hunt scrolls on narrow phones — layout boxes past the viewport are
+      // expected while clipped. Flag only non-hunt slots that leave the viewport.
       overflowSlots: slots.filter((el) => {
+        if (el.closest(".jl-map-island--hunt")) {
+          return false;
+        }
         const rect = el.getBoundingClientRect();
-        return rect.right > (barRect?.right ?? 0) + 1;
+        return rect.right > viewportWidth + 1 || rect.left < -1;
       }).length,
     };
   });

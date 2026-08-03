@@ -89,12 +89,30 @@
     min-width: 0;
     justify-content: center;
     border-top: 3px solid var(--color-highlight);
+    /* Scroll tools inside the island; do not paint/hit-test over Session. */
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
   }
 
   .jl-map-island--history,
   .jl-map-island--session,
   .jl-map-island--map-controls {
     flex: 0 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Cap chip width so label text cannot inflate History/Session over Hunt. */
+  .jl-map-island--history .jl-tool-slot,
+  .jl-map-island--session .jl-tool-slot,
+  .jl-map-island--map-controls .jl-tool-slot,
+  .jl-map-island .jl-tool-dock-group-main .jl-tool-slot,
+  .jl-map-island .jl-tool-dock-group-end .jl-tool-slot {
+    flex: 0 0 auto;
+    width: 2.75rem;
+    max-width: 2.75rem;
   }
 
   .jl-map-island--session {
@@ -106,8 +124,8 @@
     display: flex;
     align-items: stretch;
     gap: 0.25rem;
-    width: 100%;
-    min-width: 0;
+    width: max-content;
+    min-width: 100%;
   }
 
   .jl-map-island .jl-tool-dock-group {
@@ -119,9 +137,16 @@
   .jl-map-island .jl-tool-dock-group-main {
     position: relative;
     z-index: 1;
-    min-width: 0;
-    flex: 1;
-    justify-content: space-evenly;
+    flex: 0 0 auto;
+    min-width: max-content;
+    justify-content: flex-start;
+  }
+
+  .jl-map-island .jl-tool-dock-group-end {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    margin-left: 0;
   }
 
   .jl-map-island .jl-tool-dock-group-secondary {
@@ -160,12 +185,30 @@
 
   .jl-map-bottom-chrome--rail .jl-map-island--hunt {
     flex: 1 1 auto;
+    overflow: visible;
   }
 
   .jl-map-bottom-chrome--rail .jl-tool-dock-group,
   .jl-map-bottom-chrome--rail .jl-map-island-hunt-inner {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .jl-map-bottom-chrome--rail .jl-map-island-hunt-inner {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .jl-map-bottom-chrome--rail .jl-tool-dock-group-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .jl-map-bottom-chrome--rail .jl-tool-dock-group-main .jl-tool-slot,
+  .jl-map-bottom-chrome--rail .jl-tool-dock-group-end .jl-tool-slot {
+    width: auto;
+    max-width: none;
   }
 
   @media (max-height: 720px) {
