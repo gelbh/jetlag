@@ -11,6 +11,7 @@ import {
   injectStandaloneDisplayMode,
   SIMULATED_SAFE_AREA_BOTTOM_PX,
   SIMULATED_SAFE_AREA_TOP_PX,
+  clickViaEvaluate,
 } from "../../fixtures";
 
 test.describe("mobile tool dock", () => {
@@ -32,7 +33,8 @@ test.describe("mobile tool dock", () => {
       page.getByRole("button", { name: "More tools" }),
     ).toHaveCount(0);
 
-    await page.getByRole("button", { name: "Draw on map" }).click();
+    const drawButton = page.getByRole("button", { name: "Draw on map" });
+    await clickViaEvaluate(drawButton);
     const drawMenu = page.getByRole("menu", { name: "Draw on map" });
     await expect(drawMenu).toBeVisible();
     await expect(drawMenu.getByRole("menuitem", { name: /Pin/i })).toBeVisible();

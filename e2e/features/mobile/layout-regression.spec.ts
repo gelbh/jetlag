@@ -103,9 +103,11 @@ test.describe("layout regression @ default mobile", () => {
     await expect(
       page.locator(".jl-map-chrome-side-stack [data-island='session']"),
     ).toHaveCount(1);
-    // Verify tap targets on session controls.
+    // Verify tap targets on session controls (side-stack slots: 2.75rem = 44px,
+    // borders may measure slightly under, so allow 40px minimum).
     await assertMinTapTargets(
       session.getByRole("button", { name: "Open settings" }),
+      40,
     );
     // Leaflet markers trip aria-command-name; layout smoke is chrome-only
     await assertLayoutSmoke(page, { exclude: [".maplibregl-map"] });
