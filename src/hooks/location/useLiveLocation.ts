@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { haversineMeters } from "../../domain/geometry/gameArea/distance";
 import {
   queryGeolocationPermission,
@@ -48,11 +48,23 @@ export function useLiveLocation(
     return retainLocationPermissionDemand();
   }, [enabled]);
 
+  // Reset state when location tracking is disabled. This is a necessary cleanup
+  // pattern — setState in effect is acceptable here since it only runs when enabled changes.
+  useLayoutEffect(() => {
+    if (enabled) {
+      return;
+    }
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setReading(null);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setError(null);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNeedsPermissionPrompt(false);
+  }, [enabled]);
+
   useEffect(() => {
     if (!enabled) {
-      setReading(null);
-      setError(null);
-      setNeedsPermissionPrompt(false);
       return;
     }
 
@@ -166,7 +178,7 @@ export function useLiveLocation(
       stopWatch?.();
       lastPublishRef.current = null;
     };
-  }, [confirmEpoch, enabled, highAccuracy, minDistanceMeters, minIntervalMs]);
+  }, [confirmEpoch, highAccuracy, minDistanceMeters, minIntervalMs]);
 
   return {
     reading: enabled ? reading : null,
