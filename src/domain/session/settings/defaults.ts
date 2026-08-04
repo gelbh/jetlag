@@ -57,6 +57,7 @@ export function defaultAdvancedSessionSettings(
     customLocationPins: [],
     customMeasureGeometries: [],
     expansionPackEnabled: false,
+    boardEconomyEnabled: false,
     customQuestionPackEnabled: false,
     previewQuestionBeforeSend: false,
   };
@@ -120,6 +121,7 @@ export function advancedSettingsFromSession(
     customLocationPins: session.customLocationPins ?? [],
     customMeasureGeometries: session.customMeasureGeometries ?? [],
     expansionPackEnabled: session.expansionPackEnabled === true,
+    boardEconomyEnabled: session.boardEconomyEnabled === true,
     customQuestionPackEnabled: session.customQuestionPackEnabled === true,
     previewQuestionBeforeSend: session.previewQuestionBeforeSend === true,
   };

@@ -95,6 +95,8 @@ export function sessionRulesPatchFromAdvancedSettings(
     patch.expansionPackEnabled = true;
   }
 
+  // boardEconomyEnabled is written only via ops-admin updateBoardEconomyEnabled.
+
   if (settings.customQuestionPackEnabled) {
     patch.customQuestionPackEnabled = true;
   }
@@ -183,6 +185,10 @@ export function mergeSessionRulesPatch(
       patch.expansionPackEnabled !== undefined
         ? patch.expansionPackEnabled
         : session.expansionPackEnabled,
+    boardEconomyEnabled:
+      patch.boardEconomyEnabled !== undefined
+        ? patch.boardEconomyEnabled
+        : session.boardEconomyEnabled,
     customQuestionPackEnabled:
       patch.customQuestionPackEnabled !== undefined
         ? patch.customQuestionPackEnabled
@@ -214,6 +220,7 @@ export function sessionRecordFromAdvancedSettings(
     | "customLocationPins"
     | "customMeasureGeometries"
     | "expansionPackEnabled"
+    | "boardEconomyEnabled"
     | "customQuestionPackEnabled"
     | "previewQuestionBeforeSend"
   >,

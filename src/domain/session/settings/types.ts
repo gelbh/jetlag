@@ -31,6 +31,7 @@ export interface AdvancedSessionSettingsValue {
   customLocationPins: readonly SessionCustomLocationPin[];
   customMeasureGeometries: readonly SessionCustomMeasureGeometry[];
   expansionPackEnabled: boolean;
+  boardEconomyEnabled: boolean;
   customQuestionPackEnabled: boolean;
   previewQuestionBeforeSend: boolean;
 }
@@ -56,6 +57,7 @@ export type SessionRulesPatch = Pick<
   | "regionPackSubregionId"
   | "bundledGeoRevision"
   | "expansionPackEnabled"
+  | "boardEconomyEnabled"
   | "customQuestionPackEnabled"
   | "previewQuestionBeforeSend"
   | "gameAreaLabel"

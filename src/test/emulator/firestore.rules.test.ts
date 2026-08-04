@@ -3608,4 +3608,160 @@ describe("firestore.rules", () => {
       );
     });
   });
+
+  describe("boardEconomyEnabled ops gate", () => {
+    it("rejects non-ops host enabling boardEconomyEnabled", async () => {
+      const host = testEnv.authenticatedContext("host-1");
+      await host
+        .firestore()
+        .collection("sessions")
+        .doc("session-be-1")
+        .set(sessionPayload("host-1"));
+
+      await assertFails(
+        host
+          .firestore()
+          .collection("sessions")
+          .doc("session-be-1")
+          .update({ boardEconomyEnabled: true }),
+      );
+    });
+
+    it("allows ops admin member to enable boardEconomyEnabled before timer", async () => {
+      const host = testEnv.authenticatedContext("host-1");
+      await host
+        .firestore()
+        .collection("sessions")
+        .doc("session-be-2")
+        .set(
+          sessionPayload("host-1", {
+            memberUids: ["host-1", "admin-1"],
+            memberRoles: { "host-1": "seeker", "admin-1": "observer" },
+          }),
+        );
+
+      const admin = adminContext(testEnv);
+      await assertSucceeds(
+        admin
+          .firestore()
+          .collection("sessions")
+          .doc("session-be-2")
+          .update({ boardEconomyEnabled: true }),
+      );
+    });
+
+    it("denies boardEconomy state writes when flag is false", async () => {
+      const host = testEnv.authenticatedContext("host-1", {
+        // hider host
+      });
+      await host
+        .firestore()
+        .collection("sessions")
+        .doc("session-be-3")
+        .set(
+          sessionPayload("host-1", {
+            memberRoles: { "host-1": "hider" },
+            boardEconomyEnabled: false,
+          }),
+        );
+
+      await assertFails(
+        host
+          .firestore()
+          .collection("sessions")
+          .doc("session-be-3")
+          .collection("boardEconomy")
+          .doc("state")
+          .set({
+            deck: [],
+            hand: [],
+            discard: [],
+            handLimit: 6,
+            activeCurses: [],
+            updatedAt: "2026-01-01T00:00:00.000Z",
+          }),
+      );
+    });
+
+    it("allows hider boardEconomy state write when flag is true", async () => {
+      const host = testEnv.authenticatedContext("host-1");
+      await host
+        .firestore()
+        .collection("sessions")
+        .doc("session-be-4")
+        .set(
+          sessionPayload("host-1", {
+            memberUids: ["host-1", "admin-1", "seeker-1"],
+            memberRoles: {
+              "host-1": "hider",
+              "admin-1": "observer",
+              "seeker-1": "seeker",
+            },
+          }),
+        );
+
+      const admin = adminContext(testEnv);
+      await assertSucceeds(
+        admin
+          .firestore()
+          .collection("sessions")
+          .doc("session-be-4")
+          .update({ boardEconomyEnabled: true }),
+      );
+
+      await assertSucceeds(
+        host
+          .firestore()
+          .collection("sessions")
+          .doc("session-be-4")
+          .collection("boardEconomy")
+          .doc("state")
+          .set({
+            deck: [],
+            hand: [],
+            discard: [],
+            handLimit: 6,
+            activeCurses: [],
+            updatedAt: "2026-01-01T00:00:00.000Z",
+          }),
+      );
+
+      const seeker = testEnv.authenticatedContext("seeker-1");
+      await assertFails(
+        seeker
+          .firestore()
+          .collection("sessions")
+          .doc("session-be-4")
+          .collection("boardEconomy")
+          .doc("state")
+          .get(),
+      );
+      await assertFails(
+        seeker
+          .firestore()
+          .collection("sessions")
+          .doc("session-be-4")
+          .collection("boardEconomy")
+          .doc("state")
+          .set({
+            deck: [],
+            hand: [],
+            discard: [],
+            handLimit: 6,
+            activeCurses: [],
+            updatedAt: "2026-01-01T00:00:01.000Z",
+          }),
+      );
+      const stranger = testEnv.authenticatedContext("stranger-1");
+      await assertFails(
+        stranger
+          .firestore()
+          .collection("sessions")
+          .doc("session-be-4")
+          .collection("boardEconomy")
+          .doc("state")
+          .get(),
+      );
+    });
+  });
 });

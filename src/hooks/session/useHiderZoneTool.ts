@@ -34,6 +34,10 @@ interface UseHiderZoneToolParams {
   ensureWriteAccess?: () => Promise<void>;
   writesEnabled?: boolean;
   mapPickEnabled?: boolean;
+  /** Board economy: require a Move card in hand before starting relocate. */
+  hasMoveCard?: () => boolean;
+  /** Board economy: discard Move (and hand) after relocate write succeeds. */
+  consumeMoveCard?: () => Promise<void>;
 }
 
 export function useHiderZoneTool({
@@ -49,6 +53,8 @@ export function useHiderZoneTool({
   ensureWriteAccess,
   writesEnabled = true,
   mapPickEnabled = false,
+  hasMoveCard,
+  consumeMoveCard,
 }: UseHiderZoneToolParams) {
   const [stations, setStations] = useState<TransitStation[]>([]);
   const [stationsLoading, setStationsLoading] = useState(false);
@@ -176,6 +182,13 @@ export function useHiderZoneTool({
       return;
     }
 
+    if (hasMoveCard && !hasMoveCard()) {
+      window.alert(
+        "Board economy: you need a Move card in hand before relocating.",
+      );
+      return;
+    }
+
     setMoveMode(true);
     setWizardOpen(true);
     resetWizardDraft();
@@ -191,6 +204,9 @@ export function useHiderZoneTool({
         hiderUid,
         moveInProgress: true,
       });
+      if (consumeMoveCard) {
+        await consumeMoveCard();
+      }
     } catch (nextError) {
       try {
         await resumeTimerForMove();
@@ -208,8 +224,10 @@ export function useHiderZoneTool({
       );
     }
   }, [
+    consumeMoveCard,
     ensureWriteAccess,
     existingZone,
+    hasMoveCard,
     hiderUid,
     pauseTimerForMove,
     postSystemMessage,
