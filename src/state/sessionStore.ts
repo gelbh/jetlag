@@ -63,6 +63,7 @@ const SESSION_RECORD_SCALAR_KEYS = [
   "regionPackSubregionId",
   "bundledGeoRevision",
   "expansionPackEnabled",
+  "boardEconomyEnabled",
   "customQuestionPackEnabled",
   "previewQuestionBeforeSend",
   "tier",

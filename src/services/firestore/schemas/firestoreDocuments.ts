@@ -39,6 +39,7 @@ export const sessionDocumentSchema = z
     regionPackSubregionId: z.string().optional(),
     bundledGeoRevision: z.number().int().positive().optional(),
     expansionPackEnabled: z.boolean().optional(),
+    boardEconomyEnabled: z.boolean().optional(),
     customQuestionPackEnabled: z.boolean().optional(),
     previewQuestionBeforeSend: z.boolean().optional(),
     tier: z.enum(["free", "premium"]).optional(),

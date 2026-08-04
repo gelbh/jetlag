@@ -537,6 +537,27 @@ service cloud.firestore {
         || memberRole(sessionId) == 'admin';
     }
 
+    function isBoardEconomyFlagUpdate(sessionId) {
+      // Ops email admin only — session role `admin` is not sufficient (isAdmin()).
+      return isAdmin()
+        && isSessionMember(sessionId)
+        && timerNeverStarted(resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['boardEconomyEnabled'])
+        && request.resource.data.boardEconomyEnabled is bool
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.gameArea == resource.data.gameArea
+        && request.resource.data.hostUid == resource.data.hostUid
+        && request.resource.data.memberUids == resource.data.memberUids
+        && request.resource.data.tier == resource.data.tier
+        && request.resource.data.gameSize == resource.data.gameSize
+        && request.resource.data.memberRoles == resource.data.memberRoles;
+    }
+
+    function boardEconomyEnabledOnSession(sessionId) {
+      return sessionData(sessionId).boardEconomyEnabled == true;
+    }
+
     function validSessionRulesUpdate(sessionId) {
       return isSessionHost(sessionId)
         && timerNeverStarted(resource.data)
@@ -638,6 +659,12 @@ service cloud.firestore {
         && !('requiredMinAppVersionSetAt' in request.resource.data)
         && !('requiredMinAppVersionGraceSeconds' in request.resource.data)
         && !('opsMitigation' in request.resource.data)
+        // Ops-admin board economy: default off; only ops admin may create with true.
+        && (
+          !('boardEconomyEnabled' in request.resource.data)
+          || request.resource.data.boardEconomyEnabled == false
+          || isAdmin()
+        )
         && (
           request.resource.data.tier == 'free'
           || hasHostAccess()
@@ -654,6 +681,7 @@ service cloud.firestore {
         || isEndGameHostClearUpdate()
         || isSessionProgressResetUpdate()
         || isHostEndSessionUpdate()
+        || isBoardEconomyFlagUpdate(sessionId)
         || validSessionRulesUpdate(sessionId)
         || isLegacyMembershipJoinUpdate();
 
@@ -892,6 +920,29 @@ service cloud.firestore {
           && request.resource.data.center.lng is number
           && request.resource.data.bonusMinutes is number
           && request.resource.data.placedAt is string;
+        allow delete: if false;
+      }
+
+      // Frozen shape: sessions/{id}/boardEconomy/state — hider-private when enabled.
+      match /boardEconomy/{docId} {
+        allow read: if docId == 'state'
+          && boardEconomyEnabledOnSession(sessionId)
+          && isHiderMember(sessionId);
+        allow create, update: if docId == 'state'
+          && boardEconomyEnabledOnSession(sessionId)
+          && isHiderMember(sessionId)
+          && request.resource.data.deck is list
+          && request.resource.data.hand is list
+          && request.resource.data.discard is list
+          && request.resource.data.handLimit is number
+          && request.resource.data.handLimit >= 6
+          && request.resource.data.handLimit <= 12
+          && request.resource.data.deck.size() <= 120
+          && request.resource.data.hand.size() <= 12
+          && request.resource.data.discard.size() <= 120
+          && request.resource.data.activeCurses is list
+          && request.resource.data.activeCurses.size() <= 30
+          && request.resource.data.updatedAt is string;
         allow delete: if false;
       }
 

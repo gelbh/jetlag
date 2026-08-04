@@ -20,6 +20,8 @@ import {
 } from "../domain/wizard/phaseToSheetSnap";
 import { timeTrapForHider } from "../domain/expansion/timeTraps";
 import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
+import { useBoardEconomy } from "../hooks/session/useBoardEconomy";
+import { HiderHandSheet } from "../components/session/board/HiderHandSheet";
 import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
 import type { HiderTruthRevealState } from "../components/session/banners/HiderTruthRevealBanner";
 import { useDesktopLayout } from "../hooks/layout/useDesktopLayout";
@@ -225,6 +227,13 @@ export function HiderMapScreen() {
   });
   const timeTraps = useTimeTrapsSync(sessionId);
   const expansionPackEnabled = session?.expansionPackEnabled === true;
+  const boardEconomyEnabled = session?.boardEconomyEnabled === true;
+  const [handSheetOpen, setHandSheetOpen] = useState(false);
+  const boardEconomy = useBoardEconomy({
+    sessionId: sessionId ?? null,
+    enabled: boardEconomyEnabled,
+    seed: sessionId ?? null,
+  });
   const [expansionMenuOpen, setExpansionMenuOpen] = useState(false);
   const [timeTrapSheetOpen, setTimeTrapSheetOpen] = useState(false);
   const [timeTrapPeeked, setTimeTrapPeeked] = useState(false);
@@ -460,6 +469,17 @@ export function HiderMapScreen() {
     ensureWriteAccess: ensureHiderWriteAccess,
     writesEnabled: authReady && Boolean(uid),
     mapPickEnabled,
+    hasMoveCard: boardEconomyEnabled
+      ? () => Boolean(boardEconomy.state?.hand.some((c) => c.def.kind === "move"))
+      : undefined,
+    consumeMoveCard: boardEconomyEnabled
+      ? async () => {
+          const move = boardEconomy.state?.hand.find((c) => c.def.kind === "move");
+          if (move) {
+            await boardEconomy.runMove(move.instanceId);
+          }
+        }
+      : undefined,
   });
 
   const searchViewportBounds = useCallback((): MapViewportBounds => {
@@ -899,6 +919,15 @@ export function HiderMapScreen() {
                   : undefined,
               );
 
+              if (!deadlineExpired && boardEconomyEnabled) {
+                await boardEconomy.applyAnswerReward(
+                  pending.toolType,
+                  pending.cardDraw,
+                  pending.cardKeep,
+                );
+                setHandSheetOpen(true);
+              }
+
               const answerTruthReference = truthContext
                 ? resolvePendingQuestionTruthReference(pending, truthContext)
                 : { point: null as LatLngTuple | null };
@@ -935,6 +964,34 @@ export function HiderMapScreen() {
           },
         }}
       />
+      {boardEconomyEnabled && boardEconomy.state ? (
+        <>
+          <button
+            type="button"
+            className="pointer-events-auto absolute bottom-[calc(var(--map-chrome-bottom)+4.5rem)] left-1/2 z-[var(--z-map-chrome)] min-h-11 -translate-x-1/2 rounded-full border-2 border-border bg-surface-raised px-4 text-sm font-semibold text-ink shadow-md"
+            onClick={() => setHandSheetOpen(true)}
+          >
+            Hand {boardEconomy.state.hand.length}/{boardEconomy.state.handLimit}
+          </button>
+          <HiderHandSheet
+            open={handSheetOpen}
+            onClose={() => setHandSheetOpen(false)}
+            state={boardEconomy.state}
+            gameSize={session?.gameSize ?? "medium"}
+            mustDiscard={boardEconomy.mustDiscard}
+            onDiscard={(id) => void boardEconomy.discardCards([id])}
+            onPlayExpand={(id, power) =>
+              void boardEconomy.runExpandHand(id, power)
+            }
+            onPlayDiscardDraw={(powerId, discardIds, drawN) =>
+              void boardEconomy.runDiscardDraw(powerId, discardIds, drawN)
+            }
+            onPlayCurse={(id) => void boardEconomy.runPlayCurse(id)}
+            onClearCurse={(id) => void boardEconomy.runClearCurse(id)}
+            onPlayMove={(id) => void boardEconomy.runMove(id)}
+          />
+        </>
+      ) : null}
     </div>
     </MapLandscapeChromeShell>
   );

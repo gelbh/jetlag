@@ -206,6 +206,9 @@ export function sessionRulesPatchToFirestore(
   if (typeof patch.expansionPackEnabled === "boolean") {
     payload.expansionPackEnabled = patch.expansionPackEnabled;
   }
+  if (typeof patch.boardEconomyEnabled === "boolean") {
+    payload.boardEconomyEnabled = patch.boardEconomyEnabled;
+  }
   if (typeof patch.customQuestionPackEnabled === "boolean") {
     payload.customQuestionPackEnabled = patch.customQuestionPackEnabled;
   }
@@ -357,6 +360,10 @@ export function deserializeSessionFromFirestore(
     expansionPackEnabled:
       typeof document.expansionPackEnabled === "boolean"
         ? document.expansionPackEnabled
+        : undefined,
+    boardEconomyEnabled:
+      typeof document.boardEconomyEnabled === "boolean"
+        ? document.boardEconomyEnabled
         : undefined,
     customQuestionPackEnabled:
       typeof document.customQuestionPackEnabled === "boolean"
