@@ -88,8 +88,12 @@ export function useMapSessionActions({
       return;
     }
 
+    const economyChecklist =
+      session.boardEconomyEnabled === true
+        ? "\n\nRulebook checklist:\n• Seekers have entered the hiding zone\n• Seekers are off transit\n• Hider is in a publicly accessible spot\n• Spot is within 3 m of a marked path or road"
+        : "";
     const confirmed = window.confirm(
-      "Found station?\n\nConfirm seekers found the hiding-zone station (center) and left transit. End Game starts immediately — the hider must stay put until found. No hider accept needed.",
+      `Found station?\n\nConfirm seekers found the hiding-zone station (center) and left transit. End Game starts immediately — the hider must stay put until found. No hider accept needed.${economyChecklist}`,
     );
     if (!confirmed) {
       return;
