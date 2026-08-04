@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { ChatUnreadBadge } from "../../chat/ChatUnreadBadge";
 import {
   HudChatIcon,
@@ -9,6 +10,8 @@ import {
 import { MapChromeControl } from "./MapChromeControl";
 
 export interface SessionIslandSlotsProps {
+  /** Draw / markup control — lives on the RIGHT session dock, not bottom-middle. */
+  drawSlot?: ReactNode;
   onOpenChat?: () => void;
   onOpenLog?: () => void;
   onOpenReportProblem?: () => void;
@@ -24,6 +27,7 @@ export interface SessionIslandSlotsProps {
 }
 
 export function SessionIslandSlots({
+  drawSlot,
   onOpenChat,
   onOpenLog,
   onOpenReportProblem,
@@ -39,6 +43,7 @@ export function SessionIslandSlots({
 }: SessionIslandSlotsProps) {
   return (
     <div className="jl-tool-dock-group jl-tool-dock-group-secondary">
+      {drawSlot}
       {onOpenChat ? (
         <MapChromeControl
           variant="slot"

@@ -5,22 +5,13 @@ export type MapBottomChromeLayout = "phone" | "rail";
 /** Seeker multi-tool Hunt (`tools`) vs hider 1–2 chip content-sized island (`sparse`). */
 export type MapBottomChromeHuntDensity = "tools" | "sparse";
 
-export type MapBottomChromeIslandName =
-  | "history-start"
-  | "history-end"
-  | "hunt"
-  | "session"
-  | "map-controls";
+export type MapBottomChromeIslandName = "hunt" | "session" | "map-controls";
 
 export interface MapBottomChromeProps {
   layout?: MapBottomChromeLayout;
   inactive?: boolean;
   /** Default `tools` — full-width hunt shrink for many question chips. */
   huntDensity?: MapBottomChromeHuntDensity;
-  /** Undo bookend (far left of the bottom band). */
-  historyStart?: ReactNode;
-  /** Redo bookend (far right of the bottom band, after Hunt). */
-  historyEnd?: ReactNode;
   hunt?: ReactNode;
   session?: ReactNode;
   mapControls?: ReactNode;
@@ -32,8 +23,6 @@ export interface MapBottomChromeProps {
 }
 
 const ISLAND_ARIA: Record<MapBottomChromeIslandName, string> = {
-  "history-start": "Undo",
-  "history-end": "Redo",
   hunt: "Hunt tools",
   session: "Session tools",
   "map-controls": "Map controls",
@@ -69,8 +58,6 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
       layout = "phone",
       inactive = false,
       huntDensity = "tools",
-      historyStart,
-      historyEnd,
       hunt,
       session,
       mapControls,
@@ -96,16 +83,10 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
           aria-disabled={inactive || undefined}
         >
           <div className="jl-map-chrome-bottom-band">
-            {historyStart ? (
-              <Island name="history-start">{historyStart}</Island>
-            ) : null}
             {hunt ? (
               <Island name="hunt" huntDensity={huntDensity}>
                 {hunt}
               </Island>
-            ) : null}
-            {historyEnd ? (
-              <Island name="history-end">{historyEnd}</Island>
             ) : null}
           </div>
           <div className="jl-map-chrome-side-stack">
