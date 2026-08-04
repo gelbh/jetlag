@@ -40,7 +40,6 @@ export const MAP_SCREEN_CONTROLLER_CORE_KEYS = [
   "mapFocusBounds",
   "mapShellRef",
   "chromeHudRef",
-  "suppressChromeHideRef",
   "seekerLocations",
   "chatMessages",
   "hasUnreadChat",

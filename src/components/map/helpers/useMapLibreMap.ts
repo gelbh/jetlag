@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type MutableRefObject } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMap, type MapRef } from "react-map-gl/maplibre";
 import {
   latLngToTileXY,
@@ -18,9 +18,7 @@ export function useMapLibreMap(): MapRef {
   return current;
 }
 
-export function useMapLibreInteracting(
-  suppressRef?: MutableRefObject<boolean>,
-): boolean {
+export function useMapLibreInteracting(): boolean {
   const map = useMapLibreMap();
   const [interacting, setInteracting] = useState(false);
   const countRef = useRef(0);
@@ -33,10 +31,6 @@ export function useMapLibreInteracting(
     };
 
     const start = () => {
-      if (suppressRef?.current) {
-        return;
-      }
-
       countRef.current += 1;
       if (countRef.current === 1) {
         setInteracting(true);
@@ -68,7 +62,7 @@ export function useMapLibreInteracting(
       countRef.current = 0;
       setInteracting(false);
     };
-  }, [map, suppressRef]);
+  }, [map]);
 
   return interacting;
 }

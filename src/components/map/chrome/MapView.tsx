@@ -27,7 +27,6 @@ function pickMapLibreProps(props: MapViewProps): MapViewMapLibreProps {
     mapKey: props.mapKey,
     children: props.children,
     chromeHudRef: props.chromeHudRef,
-    suppressChromeHideRef: props.suppressChromeHideRef,
     focusBounds: props.focusBounds,
     focusMinZoom: props.focusMinZoom,
     focusMaxZoom: props.focusMaxZoom,
