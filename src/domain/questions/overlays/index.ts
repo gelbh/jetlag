@@ -5,6 +5,12 @@ import { pendingQuestionOverlayBuilders } from "../questionToolRegistry";
 import type { PendingQuestionOverlayResult } from "./shared";
 
 export type { PendingQuestionOverlayResult } from "./shared";
+export {
+  buildPendingPreviewEliminationFeature,
+  buildPendingPreviewEliminationFeatures,
+  pendingQuestionHasResolvedAnnotation,
+} from "./pendingPreviewElimination";
+export type { PendingPreviewEliminationInput } from "./pendingPreviewElimination";
 
 export async function buildPendingQuestionOverlay(
   question: PendingQuestionRecord,

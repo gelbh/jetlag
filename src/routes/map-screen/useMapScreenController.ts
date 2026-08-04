@@ -145,6 +145,7 @@ export function useMapScreenController() {
     ensurePointInGameArea,
     postSystemMessage,
     cancelThermometerWalk,
+    displayPendingQuestions,
   } = tools;
 
   const { handleCancelWalkingQuestion } = useMapScreenSeekerEffects({
@@ -448,6 +449,7 @@ export function useMapScreenController() {
     sessionRules,
     annotations,
     pendingQuestions,
+    mapPendingQuestions: displayPendingQuestions,
     pendingWrites,
     distanceUnit,
     mapStyle,
