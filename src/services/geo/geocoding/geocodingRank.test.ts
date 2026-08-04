@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { GeocodedPlace } from "./index";
 import {
   formatPlaceSearchSubtitle,

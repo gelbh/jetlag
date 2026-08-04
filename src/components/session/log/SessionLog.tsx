@@ -1,5 +1,5 @@
-import { type AnnotationRecord } from "../../../domain/map/annotations";
-import { useSessionActivityLog } from "../../../hooks/session/useSessionActivityLog";
+import { type AnnotationRecord } from "@/domain/map/annotations";
+import { useSessionActivityLog } from "@/hooks/session/useSessionActivityLog";
 import { SheetHeader } from "../../ui/sheets/SheetHeader";
 import { SheetHost } from "../../ui/sheets/SheetHost";
 import { SessionLogBody } from "./SessionLogBody";

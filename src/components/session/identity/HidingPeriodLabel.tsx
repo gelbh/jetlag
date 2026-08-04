@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import type { SessionRulesInput } from "../../../domain/session/rules";
+import type { SessionRulesInput } from "@/domain/session/rules";
 import {
   formatHidingPeriodCountdown,
   hidingPeriodRemainingMs,
-} from "../../../domain/session/hiding/hidingPeriod";
+} from "@/domain/session/hiding/hidingPeriod";
 import {
   computeElapsedMs,
   isTimerRunning,
   type TimerState,
-} from "../../../domain/session/timer/timer";
+} from "@/domain/session/timer/timer";
 
 interface HidingPeriodLabelProps {
   sessionRules: SessionRulesInput;

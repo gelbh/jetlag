@@ -6,8 +6,8 @@ import {
   type MeasuringFromKind,
   type MeasuringLocationCategory,
   type MeasuringSubject,
-} from "../../../../domain/questions";
-import { GroupedSelectField } from "../../../ui/forms/GroupedSelectField";
+} from "@/domain/questions";
+import { GroupedSelectField } from "@/components/ui/forms/GroupedSelectField";
 import { CatalogExhaustedMessage } from "../readout/CatalogExhaustedMessage";
 import { QuestionPromptBlock } from "../controls/QuestionPromptBlock";
 import { ToolSection } from "../panels/ToolSection";

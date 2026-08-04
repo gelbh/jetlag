@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
-import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
+import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
-} from "../../../domain/geometry/measuring/matchingGeometry";
+} from "@/domain/geometry/measuring/matchingGeometry";
 import {
   deserializeMatchingFeatures,
   serializeMatchingFeatures,
-} from "../../../domain/geo/matchingAdapters";
+} from "@/domain/geo/matchingAdapters";
 import {
   matchingQuestionFor,
   type MatchingAnswer,
-} from "../../../domain/questions";
+} from "@/domain/questions";
 import { BinaryAnswerPicker } from "../shared/answers/BinaryAnswerPicker";
 import { yesNoAnswerOptions } from "../shared/answers/binaryAnswerOptions";
 import { QuestionPromptBlock } from "../shared/controls/QuestionPromptBlock";

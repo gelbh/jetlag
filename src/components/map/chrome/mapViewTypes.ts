@@ -3,8 +3,8 @@ import type {
   MapBounds,
   MapBoundsExpression,
   MapLatLng,
-} from "../../../domain/map/mapBounds";
-import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
+} from "@/domain/map/mapBounds";
+import type { MapStyle, StreetBasemap } from "@/domain/map/mapBasemaps";
 import type { MapZoomControlInset } from "./MapZoomControl";
 
 /** MapLibre map surface props. */

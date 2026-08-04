@@ -1,9 +1,9 @@
-import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
+import type { MapStyle, StreetBasemap } from "@/domain/map/mapBasemaps";
 import {
   getAdminBoundaryLineWidthExpression,
   getAdminBoundaryStrokeStyle,
-} from "../../../domain/map/mapBoundaryOverlayStyle";
-import type { AdminBoundaryFeature } from "../../../hooks/map-screen/useAdminBoundaryFeatures";
+} from "@/domain/map/mapBoundaryOverlayStyle";
+import type { AdminBoundaryFeature } from "@/hooks/map-screen/useAdminBoundaryFeatures";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { pathOptionsToMapLibrePaint } from "../helpers/pathOptionsToMapLibrePaint";
 

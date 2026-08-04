@@ -1,8 +1,8 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import turfCircle from "@turf/circle";
 import type { Feature, LineString } from "geojson";
-import type { MapDraftOverlay } from "../../../domain/map/mapDraftOverlay";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import type { MapDraftOverlay } from "@/domain/map/mapDraftOverlay";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { featureHitId } from "../helpers/mapFeatureHitTest";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
 import { MapLibreFeaturePopup } from "../helpers/MapLibreFeaturePopup";

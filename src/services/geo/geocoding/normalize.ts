@@ -1,6 +1,6 @@
-import type { GameArea } from "../../../domain/map/annotations";
-import { normalizeBoundingBox } from "../../../domain/geometry/gameArea/gameAreaBounds";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
+import { normalizeBoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   computeApproximateAreaSqMi,
   placeCategoryLabel,
@@ -84,7 +84,7 @@ async function geoJsonToGameArea(
     return undefined;
   }
 
-  const { simplifyGameArea } = await import("../../../domain/geometry/gameArea/geometry");
+  const { simplifyGameArea } = await import("@/domain/geometry/gameArea/geometry");
 
   if (geojson.type === "Polygon") {
     return simplifyGameArea({

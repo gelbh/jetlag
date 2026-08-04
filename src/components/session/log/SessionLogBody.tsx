@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { isActive, type AnnotationRecord } from "../../../domain/map/annotations";
+import { isActive, type AnnotationRecord } from "@/domain/map/annotations";
 import {
   activityAnnotationId,
   sessionActivitySummary,
@@ -7,7 +7,7 @@ import {
   sortActivityEventsDesc,
   type SessionActivityEvent,
   type SessionActivityType,
-} from "../../../domain/session/activity/sessionActivityLog";
+} from "@/domain/session/activity/sessionActivityLog";
 
 interface SessionLogBodyProps {
   events: readonly SessionActivityEvent[];

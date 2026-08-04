@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createTestRemoteSession } from "../../../test/fixtures/sessions";
+import { createTestRemoteSession } from "@/test/fixtures/sessions";
 import { RoleCodesSheet } from "./RoleCodesSheet";
 
 const revealRolePasscode = vi.fn();

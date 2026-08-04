@@ -1,13 +1,13 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import type { GameArea } from "../../../domain/map/annotations";
-import { assertMeasuringGeometryBudget } from "../../../domain/geometry/measuring/measuringGeometryBudgets";
+import type { GameArea } from "@/domain/map/annotations";
+import { assertMeasuringGeometryBudget } from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import {
   buildMeasuringBoundaryPreview,
   buildMeasuringEliminationPreview,
-} from "../../../domain/geometry/measuring/measuringRegions";
-import { previewGeometryFingerprint } from "../../../domain/geometry/measuring/previewGeometryFingerprint";
-import { getCachedPreparedCoastlineSegments } from "../../../services/geo/overpass/coastline";
+} from "@/domain/geometry/measuring/measuringRegions";
+import { previewGeometryFingerprint } from "@/domain/geometry/measuring/previewGeometryFingerprint";
+import { getCachedPreparedCoastlineSegments } from "@/services/geo/overpass/coastline";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 
 export function useMeasuringPreviews(

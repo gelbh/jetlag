@@ -7,9 +7,9 @@ import type {
   Point,
   Polygon as GeoPolygon,
 } from "geojson";
-import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
+import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   buildGeometryEditModel,
   type GeometryEditModel,

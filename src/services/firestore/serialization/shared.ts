@@ -1,8 +1,8 @@
-import type { GameArea } from "../../../domain/map/annotations";
+import type { GameArea } from "@/domain/map/annotations";
 import {
   boundingBoxToGameArea,
   gameAreaToBoundingBox,
-} from "../../../domain/geometry/gameArea/gameAreaBounds";
+} from "@/domain/geometry/gameArea/gameAreaBounds";
 import { parseFirestoreDocument } from "../zodConverter";
 import { firestoreGameAreaSchema } from "../schemas/firestoreDocuments";
 

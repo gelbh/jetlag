@@ -1,12 +1,12 @@
 import { useMemo } from "react";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import {
   formatThermometerWalkProgress,
   type DistanceUnit,
-} from "../../../domain/map/distance";
-import { distanceBetweenPoints } from "../../../domain/geometry/gameArea/geometry";
-import { getBasemapSurface } from "../../../domain/map/mapBasemaps";
+} from "@/domain/map/distance";
+import { distanceBetweenPoints } from "@/domain/geometry/gameArea/geometry";
+import { getBasemapSurface } from "@/domain/map/mapBasemaps";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";

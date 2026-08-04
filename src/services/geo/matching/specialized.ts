@@ -1,5 +1,5 @@
-import type { MatchingFeature } from "../../../domain/geo/types";
-import type { AdminDivisionFeature } from "../../../domain/geo/types";
+import type { MatchingFeature } from "@/domain/geo/types";
+import type { AdminDivisionFeature } from "@/domain/geo/types";
 
 function stationNameLength(name: string): number {
   return name.length;

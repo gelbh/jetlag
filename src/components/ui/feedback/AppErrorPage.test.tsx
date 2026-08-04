@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { renderWithRouter } from "../../../test/renderWithRouter";
+import { renderWithRouter } from "@/test/renderWithRouter";
 import { AppErrorPage } from "./AppErrorPage";
 
 describe("AppErrorPage", () => {

@@ -1,9 +1,9 @@
-import type { GameArea } from "../../../domain/map/annotations";
-import { distanceBetweenPoints, isPointInGameArea, type LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import type { MeasuringLocationCategory } from "../../../domain/questions";
-import type { TentacleExtendedCategoryId } from "../../../domain/questions";
-import type { TentaclePoi } from "../../../domain/map/annotations";
-import type { RegionPackId } from "../../../domain/regions/regionPack";
+import type { GameArea } from "@/domain/map/annotations";
+import { distanceBetweenPoints, isPointInGameArea, type LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { MeasuringLocationCategory } from "@/domain/questions";
+import type { TentacleExtendedCategoryId } from "@/domain/questions";
+import type { TentaclePoi } from "@/domain/map/annotations";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 import type { MeasuringPlace } from "./measuringPlaces";
 import {
   sanitizeBundledPoiPlaces,

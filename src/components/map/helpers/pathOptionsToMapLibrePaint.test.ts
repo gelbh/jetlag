@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { pathOptionsToMapLibrePaint } from "./pathOptionsToMapLibrePaint";
 
 describe("pathOptionsToMapLibrePaint", () => {

@@ -1,9 +1,9 @@
-import type { GameArea } from "../../../domain/map/annotations";
-import type { TransitStation } from "../../../domain/session/hiding/hidingZone";
-import { gameAreaToBoundingBox } from "../../../domain/geometry/gameArea/geometry";
-import { intersectBoundingBoxes } from "../../../domain/geometry/gameArea/gameAreaBounds";
-import type { MatchingFeature } from "../../../domain/geo/types";
-import type { MapViewportBounds } from "../../../domain/map/transitViewport";
+import type { GameArea } from "@/domain/map/annotations";
+import type { TransitStation } from "@/domain/session/hiding/hidingZone";
+import { gameAreaToBoundingBox } from "@/domain/geometry/gameArea/geometry";
+import { intersectBoundingBoxes } from "@/domain/geometry/gameArea/gameAreaBounds";
+import type { MatchingFeature } from "@/domain/geo/types";
+import type { MapViewportBounds } from "@/domain/map/transitViewport";
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import {
   buildTransitStopOverpassQuery,

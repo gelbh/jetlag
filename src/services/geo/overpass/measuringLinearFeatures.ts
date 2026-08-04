@@ -1,22 +1,22 @@
 import type { Feature, LineString } from "geojson";
-import type { GameArea } from "../../../domain/map/annotations";
+import type { GameArea } from "@/domain/map/annotations";
 import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
-} from "../../../domain/session/catalog/sessionCustomContent";
+} from "@/domain/session/catalog/sessionCustomContent";
 import {
   gameAreaToBoundingBox,
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
   type LatLngTuple,
   type PreparedLinearSegments,
-} from "../../../domain/geometry/gameArea/geometry";
+} from "@/domain/geometry/gameArea/geometry";
 import {
   measuringLinearOverpassSelectors,
   measuringLocationLabel,
   type MeasuringFromKind,
-} from "../../../domain/questions";
-import type { RegionPackId } from "../../../domain/regions/regionPack";
+} from "@/domain/questions";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 import {
   getOrFetchCached,
   linearSegmentsCacheKey,

@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import type { PlayerLocationRecord } from "../../../domain/session/activity/sessionChat";
-import { clusterNearbyPoints } from "../../../domain/session/live/liveMapLocations";
-import { isLiveLocationGone } from "../../../domain/session/live/liveLocationFreshness";
-import { useLiveLocationNowMs } from "../../../hooks/map/useLiveLocationNowMs";
+import type { PlayerLocationRecord } from "@/domain/session/activity/sessionChat";
+import { clusterNearbyPoints } from "@/domain/session/live/liveMapLocations";
+import { isLiveLocationGone } from "@/domain/session/live/liveLocationFreshness";
+import { useLiveLocationNowMs } from "@/hooks/map/useLiveLocationNowMs";
 import { buildLiveClusterPaint } from "../helpers/liveClusterPaint";
 import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
 import type { CircleMarkerProps } from "../helpers/mapMarkerFeatures";

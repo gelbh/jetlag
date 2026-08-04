@@ -1,11 +1,11 @@
-import type { TentaclePoi } from "../../../../domain/map/annotations";
-import type { DistanceUnit } from "../../../../domain/map/distance";
+import type { TentaclePoi } from "@/domain/map/annotations";
+import type { DistanceUnit } from "@/domain/map/distance";
 import {
   TENTACLE_NOT_WITHIN_REACH_LABEL,
   tentacleHiderAnswerClipboardText,
   type TentacleExtendedCategoryId,
-} from "../../../../domain/questions";
-import { useCopyFeedback } from "../../../../hooks/forms/useCopyFeedback";
+} from "@/domain/questions";
+import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
 import { ListSelectRow } from "../controls/ListSelectRow";
 import { ToolSection } from "../panels/ToolSection";
 

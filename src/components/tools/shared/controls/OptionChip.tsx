@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ChoiceButton } from "../../../ui/forms/ChoiceButton";
+import { ChoiceButton } from "@/components/ui/forms/ChoiceButton";
 
 interface OptionChipProps {
   selected: boolean;

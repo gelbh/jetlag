@@ -25,7 +25,7 @@ vi.mock("./firebase", () => ({
 
 describe("firebase lazy modules", () => {
   afterEach(async () => {
-    const { clientEnvUsesFirebaseEmulator } = await import("../../../config/env");
+    const { clientEnvUsesFirebaseEmulator } = await import("@/config/env");
     vi.mocked(clientEnvUsesFirebaseEmulator).mockReturnValue(false);
     const { resetFirebaseStorageForTests } = await import("./firebaseStorage");
     const { resetFirebaseFunctionsForTests } = await import(
@@ -60,7 +60,7 @@ describe("firebase lazy modules", () => {
   });
 
   it("connects functions to the emulator when enabled", async () => {
-    const { clientEnvUsesFirebaseEmulator } = await import("../../../config/env");
+    const { clientEnvUsesFirebaseEmulator } = await import("@/config/env");
     vi.mocked(clientEnvUsesFirebaseEmulator).mockReturnValue(true);
 
     const { getFirebaseFunctions } = await import("./firebaseFunctions");

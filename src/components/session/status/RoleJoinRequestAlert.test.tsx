@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { RoleJoinRequest } from "../../../domain/session/players/joinRequest";
+import type { RoleJoinRequest } from "@/domain/session/players/joinRequest";
 import { RoleJoinRequestAlert } from "./RoleJoinRequestAlert";
 
 function pendingRequest(

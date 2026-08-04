@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { SheetHeader } from "../../../ui/sheets/SheetHeader";
+import { SheetHeader } from "@/components/ui/sheets/SheetHeader";
 
 interface EditSheetFrameProps {
   title: string;
