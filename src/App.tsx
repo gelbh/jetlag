@@ -14,6 +14,7 @@ import { AnalyticsConsentBanner } from "./components/ui/banners/AnalyticsConsent
 import { AppUpdateBanner } from "./components/ui/banners/AppUpdateBanner";
 import { AppUpdateProvider } from "./components/ui/banners/AppUpdateProvider";
 import { LowBatteryPrompt } from "./components/session/banners/LowBatteryPrompt";
+import { LocationPermissionPrompt } from "./components/session/status/LocationPermissionPrompt";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { AppCheckProbeGate } from "./components/ui/feedback/AppCheckProbeGate";
 import { AppErrorPage } from "./components/ui/feedback/AppErrorPage";
@@ -178,6 +179,7 @@ export default function App() {
             <AppEntryBackdrop />
             <div className="jl-scroll app-scroll-root">
               <LowBatteryPrompt />
+              <LocationPermissionPrompt />
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/feedback" element={<Feedback />} />

@@ -158,11 +158,18 @@ export function HiderMapScreen() {
     notificationRole: "hider",
     authMode: "hider-anonymous",
   });
-  useHiderLocationSync({
+  const { error: hiderLocationSyncError } = useHiderLocationSync({
     sessionId,
     uid,
     enabled: true,
   });
+  const [liveLocationError, setLiveLocationError] = useState<string | null>(
+    null,
+  );
+  const handleLiveLocationError = useCallback((error: string | null) => {
+    setLiveLocationError(error);
+  }, []);
+  const locationError = liveLocationError ?? hiderLocationSyncError;
   const [recenterToken, setRecenterToken] = useState(0);
   const [truthReveal, setTruthReveal] = useState<HiderTruthRevealState | null>(
     null,
@@ -737,7 +744,11 @@ export function HiderMapScreen() {
               streetBasemap={streetBasemap}
             />
           ) : null}
-          <LiveUserLocationLayer enabled={showCurrentLocation} lowPowerMode={lowPowerMode} />
+          <LiveUserLocationLayer
+            enabled={showCurrentLocation}
+            lowPowerMode={lowPowerMode}
+            onError={handleLiveLocationError}
+          />
         </MapViewWithLandscapeInset>
       </div>
   );
@@ -866,6 +877,7 @@ export function HiderMapScreen() {
           notificationPreferences,
           updateNotificationPreferences,
           enableNotifications,
+          locationError,
         }}
         chat={{
           sessionId: sessionId ?? "",

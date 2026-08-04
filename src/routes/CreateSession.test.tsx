@@ -41,6 +41,12 @@ vi.mock("../services/geo/geocoding", () => ({
 }));
 
 vi.mock("../services/core/location/geolocation", () => ({
+  requestLocationAccess: vi.fn().mockResolvedValue({
+    lat: 53.35,
+    lng: -6.26,
+    accuracy: null,
+    heading: null,
+  }),
   getCurrentPosition: vi.fn().mockResolvedValue({
     lat: 53.35,
     lng: -6.26,
@@ -102,7 +108,10 @@ vi.mock("../services/geo/elevation/seaLevelProgressive", () => ({
 const navigate = vi.fn();
 beforeEach(async () => {
   navigate.mockReset();
-  const { getCurrentPosition } = await import("../services/core/location/geolocation");
+  const { requestLocationAccess, getCurrentPosition } = await import(
+    "../services/core/location/geolocation"
+  );
+  vi.mocked(requestLocationAccess).mockClear();
   vi.mocked(getCurrentPosition).mockClear();
   vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
     cb(0);
@@ -234,26 +243,34 @@ describe("CreateSession", () => {
   });
 
   it("does not request geolocation on mount", async () => {
-    const { getCurrentPosition } = await import("../services/core/location/geolocation");
+    const { requestLocationAccess } = await import(
+      "../services/core/location/geolocation"
+    );
 
     renderWithRouter(<CreateSession />);
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Use my location" })).toBeInTheDocument();
     });
-    expect(getCurrentPosition).not.toHaveBeenCalled();
+    expect(requestLocationAccess).not.toHaveBeenCalled();
   });
 
   it("passes user location into place search after Use my location", async () => {
     const { searchPlaces } = await import("../services/geo/geocoding");
-    const { getCurrentPosition } = await import("../services/core/location/geolocation");
+    const { requestLocationAccess } = await import(
+      "../services/core/location/geolocation"
+    );
 
     renderWithRouter(<CreateSession />);
 
     fireEvent.click(screen.getByRole("button", { name: "Use my location" }));
 
     await waitFor(() => {
-      expect(getCurrentPosition).toHaveBeenCalledOnce();
+      expect(requestLocationAccess).toHaveBeenCalledOnce();
+      expect(requestLocationAccess).toHaveBeenCalledWith({
+        highAccuracy: false,
+        userGesture: true,
+      });
     });
 
     fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
