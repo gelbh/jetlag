@@ -11,8 +11,9 @@ import type { MapTool } from "../../state/sessionStore";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
 import {
-  ToolDockHistorySlots,
   ToolDockQuestionSlot,
+  ToolDockRedoSlot,
+  ToolDockUndoSlot,
   ToolDockWideActions,
 } from "./ToolDockSlot";
 import { ToolDockDrawMenu } from "./ToolDockOverflowMenu";
@@ -116,11 +117,16 @@ export function ToolDock({
           ? { bottom: `${viewportBottomInset}px` }
           : undefined
       }
-      history={
-        <ToolDockHistorySlots
+      historyStart={
+        <ToolDockUndoSlot
           canUndo={canUndo}
-          canRedo={canRedo}
           onUndo={onUndo}
+          inactive={inactive}
+        />
+      }
+      historyEnd={
+        <ToolDockRedoSlot
+          canRedo={canRedo}
           onRedo={onRedo}
           inactive={inactive}
         />
@@ -152,18 +158,18 @@ export function ToolDock({
                 onSelect={selectTool}
               />
             ))}
+            <ToolDockWideActions
+              drawMenuOpen={drawMenuOpen}
+              markupActive={markupActive}
+              inactive={inactive}
+              onToggleDrawMenu={() => {
+                if (inactive) {
+                  return;
+                }
+                setDrawMenuOpen((open) => !open);
+              }}
+            />
           </div>
-          <ToolDockWideActions
-            drawMenuOpen={drawMenuOpen}
-            markupActive={markupActive}
-            inactive={inactive}
-            onToggleDrawMenu={() => {
-              if (inactive) {
-                return;
-              }
-              setDrawMenuOpen((open) => !open);
-            }}
-          />
         </div>
       }
       session={

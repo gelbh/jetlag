@@ -111,44 +111,59 @@ export function ToolDockMarkupMenuItem({
   );
 }
 
-interface ToolDockHistorySlotsProps {
-  canUndo: boolean;
-  canRedo: boolean;
-  onUndo: () => void;
-  onRedo: () => void;
+interface ToolDockHistoryBookendProps {
   inactive?: boolean;
 }
 
-export function ToolDockHistorySlots({
+interface ToolDockUndoSlotProps extends ToolDockHistoryBookendProps {
+  canUndo: boolean;
+  onUndo: () => void;
+}
+
+interface ToolDockRedoSlotProps extends ToolDockHistoryBookendProps {
+  canRedo: boolean;
+  onRedo: () => void;
+}
+
+export function ToolDockUndoSlot({
   canUndo,
-  canRedo,
   onUndo,
-  onRedo,
   inactive = false,
-}: ToolDockHistorySlotsProps) {
+}: ToolDockUndoSlotProps) {
   return (
     <div className="jl-tool-dock-group jl-tool-dock-group-history">
       <MotionPressable
         type="button"
         onClick={onUndo}
         disabled={inactive || !canUndo}
-        className="jl-tool-slot"
+        className="jl-tool-slot jl-tool-slot--history-bookend"
         aria-label="Undo last annotation"
       >
         <span className="jl-tool-slot-icon">
-          <HudUndoIcon className="h-5 w-5" />
+          <HudUndoIcon className="h-4 w-4" />
         </span>
         <span className="jl-tool-slot-label">Undo</span>
       </MotionPressable>
+    </div>
+  );
+}
+
+export function ToolDockRedoSlot({
+  canRedo,
+  onRedo,
+  inactive = false,
+}: ToolDockRedoSlotProps) {
+  return (
+    <div className="jl-tool-dock-group jl-tool-dock-group-history">
       <MotionPressable
         type="button"
         onClick={onRedo}
         disabled={inactive || !canRedo}
-        className="jl-tool-slot"
+        className="jl-tool-slot jl-tool-slot--history-bookend"
         aria-label="Redo last annotation"
       >
         <span className="jl-tool-slot-icon">
-          <HudRedoIcon className="h-5 w-5" />
+          <HudRedoIcon className="h-4 w-4" />
         </span>
         <span className="jl-tool-slot-label">Redo</span>
       </MotionPressable>
@@ -170,24 +185,22 @@ export function ToolDockWideActions({
   inactive = false,
 }: ToolDockWideActionsProps) {
   return (
-    <div className="jl-tool-dock-group jl-tool-dock-group-end">
-      <MotionPressable
-        type="button"
-        onClick={onToggleDrawMenu}
-        disabled={inactive}
-        className={`jl-tool-slot ${
-          drawMenuOpen || markupActive ? "jl-tool-slot-active" : ""
-        }`}
-        aria-label="Draw on map"
-        aria-expanded={drawMenuOpen}
-        aria-haspopup="menu"
-        title="Zone and pin"
-      >
-        <span className="jl-tool-slot-icon">
-          <HudDrawIcon className="h-5 w-5" />
-        </span>
-        <span className="jl-tool-slot-label">Draw</span>
-      </MotionPressable>
-    </div>
+    <MotionPressable
+      type="button"
+      onClick={onToggleDrawMenu}
+      disabled={inactive}
+      className={`jl-tool-slot ${
+        drawMenuOpen || markupActive ? "jl-tool-slot-active" : ""
+      }`}
+      aria-label="Draw on map"
+      aria-expanded={drawMenuOpen}
+      aria-haspopup="menu"
+      title="Zone and pin"
+    >
+      <span className="jl-tool-slot-icon">
+        <HudDrawIcon className="h-5 w-5" />
+      </span>
+      <span className="jl-tool-slot-label">Draw</span>
+    </MotionPressable>
   );
 }

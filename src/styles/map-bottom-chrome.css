@@ -143,10 +143,19 @@
     overflow: visible;
   }
 
-  .jl-map-island--history {
+  /* Undo / Redo bookends — smaller than Hunt chips; do not grow. */
+  .jl-map-island--history-start,
+  .jl-map-island--history-end {
     flex: 0 0 auto;
     position: relative;
     z-index: 2;
+    padding: 0.125rem;
+  }
+
+  .jl-map-bottom-chrome--history-bookends:not(.jl-map-bottom-chrome--rail)
+    .jl-map-island--hunt {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .jl-map-chrome-side-stack .jl-map-island--session,
@@ -162,14 +171,21 @@
     flex-shrink: 0 !important;
   }
 
-  /* Cap chip width so label text cannot inflate History over Hunt. */
-  .jl-map-island--history .jl-tool-slot,
-  .jl-map-island .jl-tool-dock-group-main .jl-tool-slot,
-  .jl-map-island .jl-tool-dock-group-end .jl-tool-slot {
+  /* Bookend chips stay compact; Hunt question+Draw chips share equal width. */
+  .jl-map-island--history-start .jl-tool-slot,
+  .jl-map-island--history-end .jl-tool-slot {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 2rem;
+    max-width: 2.25rem;
+    padding: 0.125rem 0.0625rem;
+  }
+
+  .jl-map-island .jl-tool-dock-group-main .jl-tool-slot {
     flex: 1 1 0;
     width: auto;
     min-width: 2.5rem;
-    max-width: 2.75rem;
+    max-width: none;
   }
 
   .jl-map-chrome-side-stack .jl-tool-slot {
@@ -227,8 +243,7 @@
     justify-content: flex-start;
   }
 
-  .jl-map-island--hunt-sparse .jl-tool-dock-group-main .jl-tool-slot,
-  .jl-map-island--hunt-sparse .jl-tool-dock-group-end .jl-tool-slot {
+  .jl-map-island--hunt-sparse .jl-tool-dock-group-main .jl-tool-slot {
     flex: 0 0 auto;
     width: auto;
     min-width: 2.75rem;
@@ -267,13 +282,6 @@
     flex: 1 1 auto;
     min-width: 0;
     justify-content: space-evenly;
-  }
-
-  .jl-map-island .jl-tool-dock-group-end {
-    position: relative;
-    z-index: 1;
-    flex: 0 0 auto;
-    margin-left: 0;
   }
 
   .jl-map-island .jl-tool-dock-group-secondary {
@@ -340,8 +348,7 @@
     width: 100%;
   }
 
-  .jl-map-bottom-chrome--rail .jl-tool-dock-group-main .jl-tool-slot,
-  .jl-map-bottom-chrome--rail .jl-tool-dock-group-end .jl-tool-slot {
+  .jl-map-bottom-chrome--rail .jl-tool-dock-group-main .jl-tool-slot {
     width: auto;
     max-width: none;
   }
@@ -352,15 +359,13 @@
       gap: 0.125rem;
     }
 
-    .jl-map-island .jl-tool-dock-group-main .jl-tool-slot,
-    .jl-map-island .jl-tool-dock-group-end .jl-tool-slot {
+    .jl-map-island .jl-tool-dock-group-main .jl-tool-slot {
       min-width: 1.875rem;
-      max-width: 2.5rem;
+      max-width: none;
     }
 
     /* Sparse hider chips keep content width (Set zone / Expansion). */
-    .jl-map-island--hunt-sparse .jl-tool-dock-group-main .jl-tool-slot,
-    .jl-map-island--hunt-sparse .jl-tool-dock-group-end .jl-tool-slot {
+    .jl-map-island--hunt-sparse .jl-tool-dock-group-main .jl-tool-slot {
       min-width: 2.75rem;
       max-width: none;
     }

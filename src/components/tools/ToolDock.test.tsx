@@ -196,6 +196,26 @@ describe("ToolDock", () => {
     expect(document.querySelector(".jl-tool-dock-bar--secondary")).toBeNull();
     expect(document.querySelector('[data-island="session"]')).not.toBeNull();
   });
+
+  it("places Undo left and Redo right of Hunt in the bottom band", () => {
+    renderWithRouter(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
+
+    const bottom = document.querySelector(".jl-map-chrome-bottom-band");
+    expect(bottom).not.toBeNull();
+    const bandIslands = [
+      ...(bottom?.querySelectorAll("[data-island]") ?? []),
+    ].map((el) => el.getAttribute("data-island"));
+    expect(bandIslands).toEqual(["history-start", "hunt", "history-end"]);
+
+    expect(screen.getByRole("button", { name: "Undo last annotation" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Redo last annotation" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Undo")).toBeInTheDocument();
+    expect(screen.getByLabelText("Redo")).toBeInTheDocument();
+
+    const hunt = document.querySelector('[data-island="hunt"]');
+    expect(hunt?.querySelector('[aria-label="Undo last annotation"]')).toBeNull();
+    expect(hunt?.querySelector('[aria-label="Redo last annotation"]')).toBeNull();
+  });
 });
 
 describe("HiderToolDock", () => {

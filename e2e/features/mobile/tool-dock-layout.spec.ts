@@ -83,9 +83,13 @@ test.describe("mobile tool dock", () => {
   test("exposes history, draw, and session islands without a More sheet", async ({
     page,
   }) => {
-    await expect(page.getByLabel("History")).toBeVisible();
+    await expect(page.getByLabel("Undo")).toBeVisible();
+    await expect(page.getByLabel("Redo")).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Undo last annotation" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Redo last annotation" }),
     ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Draw on map" }),
@@ -123,8 +127,12 @@ test.describe("mobile tool dock", () => {
       page.getByRole("dialog", { name: "Report problem" }),
     ).toBeVisible();
 
-    await expect(page.locator('[data-island="history"]')).toHaveCount(1);
+    await expect(page.locator('[data-island="history-start"]')).toHaveCount(1);
+    await expect(page.locator('[data-island="history-end"]')).toHaveCount(1);
     await expect(page.locator('[data-island="hunt"]')).toHaveCount(1);
+    await expect(
+      page.locator(".jl-map-chrome-bottom-band [data-island]"),
+    ).toHaveCount(3);
     await expect(page.locator('[data-island="session"]')).toHaveCount(1);
     await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
     await expect(page.locator(".jl-map-chrome-side-stack")).toHaveCount(1);
