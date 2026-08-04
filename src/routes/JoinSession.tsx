@@ -1,4 +1,6 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { useSubmitLock } from "../hooks/forms/useSubmitLock";
@@ -11,8 +13,11 @@ import {
   screenHeaderOffsetClassName,
 } from "../components/ui/layout/ScreenHeader";
 import {
+  joinSessionFormSchema,
+  type JoinSessionFormValues,
+} from "../domain/session/join/joinSessionForm";
+import {
   SESSION_CODE_INPUT_PLACEHOLDER,
-  isValidSessionCode,
   normalizeSessionCode,
 } from "../services/session/sessionCodes";
 import { parseSessionInviteCode } from "../services/session/sessionInviteUrl";
@@ -113,17 +118,24 @@ export function JoinSession() {
   const myUid = useSessionStore((state) => state.myUid);
   const setSession = useSessionStore((state) => state.setSession);
   const codeFromQuery = searchParams.get("code");
-  const [code, setCode] = useState(
-    () => parseSessionInviteCode(codeFromQuery) ?? "",
-  );
+  const { control, watch, setValue, handleSubmit } =
+    useForm<JoinSessionFormValues>({
+      resolver: zodResolver(joinSessionFormSchema),
+      defaultValues: {
+        code: parseSessionInviteCode(codeFromQuery) ?? "",
+        playerRole: "hider",
+        rolePasscode: "",
+      },
+      mode: "onSubmit",
+    });
+  const code = watch("code");
+  const playerRole = watch("playerRole");
   /** When invite query is removed, keep typed code but suppress cached preview. */
   const [suppressPreview, setSuppressPreview] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { isSubmitting, runLocked } = useSubmitLock();
   const joinBusy = loading || isSubmitting;
-  const [playerRole, setPlayerRole] = useState<PlayerRole>("hider");
-  const [rolePasscode, setRolePasscode] = useState("");
   const [pendingRequest, setPendingRequest] = useState<PendingJoinRequest | null>(
     null,
   );
@@ -151,25 +163,25 @@ export function JoinSession() {
     if (!next) {
       if (codeFromQuery) {
         setSuppressPreview(false);
-        setCode("");
+        setValue("code", "");
       } else {
         setSuppressPreview(true);
       }
       return;
     }
     setSuppressPreview(false);
-    setCode(next);
+    setValue("code", next);
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [codeFromQuery]);
+  }, [codeFromQuery, setValue]);
 
   useEffect(() => {
     if (!existingRole) {
       return;
     }
     /* eslint-disable react-hooks/set-state-in-effect -- adopt membership role from preview */
-    setPlayerRole(existingRole);
+    setValue("playerRole", existingRole);
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [existingRole]);
+  }, [existingRole, setValue]);
 
   useEffect(() => {
     if (!pendingRequest) {
@@ -356,94 +368,109 @@ export function JoinSession() {
   };
 
   const handleJoin = () =>
-    void runLocked(async () => {
-    const normalized = normalizeSessionCode(code);
-    if (!isValidSessionCode(normalized)) {
-      setError("Enter a 4-letter session code.");
-      return;
-    }
+    void handleSubmit(
+      (values) =>
+        void runLocked(async () => {
+          const normalized = values.code;
+          setLoading(true);
+          setError(null);
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      if (!isFirebaseConfigured()) {
-        setError("Firebase is not configured. Create a local session instead.");
-        return;
-      }
-
-      await withTimeout(
-        (async () => {
-          const user = await retryAsync(() => ensureFreshAnonymousUser());
-          const joinOptions =
-            session?.code === normalized && myUid
-              ? {
-                  returningMemberUid: myUid,
-                  persistedMyUid: myUid,
-                  rolePasscode: rolePasscode || undefined,
-                }
-              : { rolePasscode: rolePasscode || undefined };
-          const result = await retryAsync(() =>
-            joinRemoteSessionByCode(
-              normalized,
-              user.uid,
-              playerRole,
-              APP_VERSION,
-              joinOptions,
-            ),
-          );
-          if (result.status === "missing") {
-            setError("No session found for that code.");
-            return;
-          }
-
-          if (result.status === "ended") {
-            setError("That session has ended. Ask the host for a new code.");
-            return;
-          }
-
-          if (result.status === "incompatible") {
-            setError(
-              sessionVersionMismatchMessage(result.hostVersion, APP_VERSION),
-            );
-            return;
-          }
-
-          let joinedSession = result.session;
-          if (playerRole === "hider") {
-            const confirmed = await waitForServerHiderRole(
-              joinedSession.id,
-              user.uid,
-            );
-            if (!confirmed || confirmed.memberRoles?.[user.uid] !== "hider") {
+          try {
+            if (!isFirebaseConfigured()) {
               setError(
-                "Couldn't confirm your hider role. Wait a moment and try again.",
+                "Firebase is not configured. Create a local session instead.",
               );
               return;
             }
-            joinedSession = confirmed;
-          }
 
-          await enterJoinedSession(
-            joinedSession,
-            user.uid,
-            playerRole,
-            result.rolePasscode,
-          );
-        })(),
-        VERIFY_SESSION_TIMEOUT_MS,
-        VERIFY_SESSION_TIMEOUT_MESSAGE,
-      );
-    } catch (nextError) {
-      setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Couldn't join that session.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  });
+            await withTimeout(
+              (async () => {
+                const user = await retryAsync(() => ensureFreshAnonymousUser());
+                const joinOptions =
+                  session?.code === normalized && myUid
+                    ? {
+                        returningMemberUid: myUid,
+                        persistedMyUid: myUid,
+                        rolePasscode: values.rolePasscode || undefined,
+                      }
+                    : { rolePasscode: values.rolePasscode || undefined };
+                const result = await retryAsync(() =>
+                  joinRemoteSessionByCode(
+                    normalized,
+                    user.uid,
+                    values.playerRole,
+                    APP_VERSION,
+                    joinOptions,
+                  ),
+                );
+                if (result.status === "missing") {
+                  setError("No session found for that code.");
+                  return;
+                }
+
+                if (result.status === "ended") {
+                  setError(
+                    "That session has ended. Ask the host for a new code.",
+                  );
+                  return;
+                }
+
+                if (result.status === "incompatible") {
+                  setError(
+                    sessionVersionMismatchMessage(
+                      result.hostVersion,
+                      APP_VERSION,
+                    ),
+                  );
+                  return;
+                }
+
+                let joinedSession = result.session;
+                if (values.playerRole === "hider") {
+                  const confirmed = await waitForServerHiderRole(
+                    joinedSession.id,
+                    user.uid,
+                  );
+                  if (
+                    !confirmed ||
+                    confirmed.memberRoles?.[user.uid] !== "hider"
+                  ) {
+                    setError(
+                      "Couldn't confirm your hider role. Wait a moment and try again.",
+                    );
+                    return;
+                  }
+                  joinedSession = confirmed;
+                }
+
+                await enterJoinedSession(
+                  joinedSession,
+                  user.uid,
+                  values.playerRole,
+                  result.rolePasscode,
+                );
+              })(),
+              VERIFY_SESSION_TIMEOUT_MS,
+              VERIFY_SESSION_TIMEOUT_MESSAGE,
+            );
+          } catch (nextError) {
+            setError(
+              nextError instanceof Error
+                ? nextError.message
+                : "Couldn't join that session.",
+            );
+          } finally {
+            setLoading(false);
+          }
+        }),
+      (fieldErrors) => {
+        setError(
+          fieldErrors.code?.message ??
+            fieldErrors.rolePasscode?.message ??
+            "Check the join form and try again.",
+        );
+      },
+    )();
 
   const handleRequestAccess = () =>
     void runLocked(async () => {
@@ -539,21 +566,32 @@ export function JoinSession() {
             </>
           ) : (
             <>
-              <TextField
-                id="join-session-code"
-                label="Code"
-                labelClassName="field-label font-display text-xs uppercase tracking-[0.12em]"
-                inputClassName="field-input mt-2 min-h-16 border-0 bg-transparent p-0 text-center font-mono text-4xl font-bold tracking-[0.45em] focus:outline-none"
-                value={code}
-                onChange={(event) => {
-                  setSuppressPreview(false);
-                  setCode(normalizeSessionCode(event.target.value));
-                }}
-                maxLength={4}
-                placeholder={SESSION_CODE_INPUT_PLACEHOLDER}
-                autoCapitalize="characters"
-                autoCorrect="off"
-                spellCheck={false}
+              <Controller
+                name="code"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    id="join-session-code"
+                    label="Code"
+                    labelClassName="field-label font-display text-xs uppercase tracking-[0.12em]"
+                    inputClassName="field-input mt-2 min-h-16 border-0 bg-transparent p-0 text-center font-mono text-4xl font-bold tracking-[0.45em] focus:outline-none"
+                    value={field.value}
+                    onChange={(event) => {
+                      setSuppressPreview(false);
+                      field.onChange(
+                        normalizeSessionCode(event.target.value),
+                      );
+                    }}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                    maxLength={4}
+                    placeholder={SESSION_CODE_INPUT_PLACEHOLDER}
+                    autoCapitalize="characters"
+                    autoCorrect="off"
+                    spellCheck={false}
+                  />
+                )}
               />
 
               {previewPremium ? (
@@ -565,36 +603,53 @@ export function JoinSession() {
                 <p className="text-sm text-ink-dim">Checking session…</p>
               ) : null}
 
-              <RolePicker
-                value={playerRole}
-                onChange={(role) => {
-                  track(ANALYTICS_EVENTS.role_selected, {
-                    role,
-                    surface: "join",
-                  });
-                  setPlayerRole(role);
-                  setRolePasscode("");
-                }}
-                disabled={formBusy}
-                includeObserver
+              <Controller
+                name="playerRole"
+                control={control}
+                render={({ field }) => (
+                  <RolePicker
+                    value={field.value}
+                    onChange={(role) => {
+                      track(ANALYTICS_EVENTS.role_selected, {
+                        role,
+                        surface: "join",
+                      });
+                      field.onChange(role);
+                      setValue("rolePasscode", "");
+                    }}
+                    disabled={formBusy}
+                    includeObserver
+                  />
+                )}
               />
 
               {needsRolePasscode ? (
                 <div>
-                  <TextField
-                    id="join-session-role-code"
-                    label="Role code"
-                    labelClassName="field-label font-display text-xs uppercase tracking-[0.12em]"
-                    inputClassName="field-input mt-2 min-h-12 w-full text-center font-mono text-2xl font-bold tracking-[0.35em]"
-                    value={rolePasscode}
-                    onChange={(event) =>
-                      setRolePasscode(normalizeRolePasscode(event.target.value))
-                    }
-                    maxLength={4}
-                    placeholder="Team code"
-                    autoCapitalize="characters"
-                    autoCorrect="off"
-                    spellCheck={false}
+                  <Controller
+                    name="rolePasscode"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        id="join-session-role-code"
+                        label="Role code"
+                        labelClassName="field-label font-display text-xs uppercase tracking-[0.12em]"
+                        inputClassName="field-input mt-2 min-h-12 w-full text-center font-mono text-2xl font-bold tracking-[0.35em]"
+                        value={field.value}
+                        onChange={(event) =>
+                          field.onChange(
+                            normalizeRolePasscode(event.target.value),
+                          )
+                        }
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                        maxLength={4}
+                        placeholder="Team code"
+                        autoCapitalize="characters"
+                        autoCorrect="off"
+                        spellCheck={false}
+                      />
+                    )}
                   />
                   <span className="mt-2 block text-xs normal-case tracking-normal text-ink-muted">
                     {playerRole === "observer"
