@@ -29,6 +29,7 @@ import {
   MOTION_MAP_CAMERA_FLY_MS,
   MOTION_MAP_CAMERA_MS,
 } from "../../../domain/device/motion/motionTokens";
+import { mapLibreRuntimeOptions } from "../../../domain/device/perf/mapLibreRuntimeOptions";
 import { useMotionProfile } from "../../../hooks/motion/useMotionProfile";
 import { useMapLibreMap } from "../helpers/useMapLibreMap";
 import {
@@ -309,6 +310,7 @@ export function MapViewMapLibre({
   const { lowPowerMode } = useMotionProfile();
   const maxPitchDegrees = resolveMapPitchDegrees(lowPowerMode);
   const pitchGesturesEnabled = interactive && maxPitchDegrees > 0;
+  const runtimeOptions = mapLibreRuntimeOptions(lowPowerMode);
 
   useEffect(() => {
     onBoundsChangeRef.current = onBoundsChange;
@@ -377,6 +379,8 @@ export function MapViewMapLibre({
           }}
           style={{ width: "100%", height: "100%" }}
           mapStyle={style}
+          fadeDuration={runtimeOptions.fadeDuration}
+          maxTileCacheSize={runtimeOptions.maxTileCacheSize}
           // Slice D eval (hardening): reuseMaps skipped — style toggles already
           // call setStyle in-place (not remount); session remounts via mapKey are
           // rare; reuseMaps risks stale GL/image state without a measured win.

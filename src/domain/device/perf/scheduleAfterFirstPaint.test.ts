@@ -54,12 +54,16 @@ describe("scheduleIdleBootWork", () => {
       cb({ didTimeout: false, timeRemaining: () => 50 } as IdleDeadline);
       return 1;
     });
+    const cancelIdle = vi.fn();
     vi.stubGlobal("requestIdleCallback", idle);
+    vi.stubGlobal("cancelIdleCallback", cancelIdle);
 
-    scheduleIdleBootWork(callback);
+    const cancel = scheduleIdleBootWork(callback);
 
     expect(idle).toHaveBeenCalledWith(callback, { timeout: 2_000 });
     expect(callback).toHaveBeenCalledTimes(1);
+    cancel();
+    expect(cancelIdle).toHaveBeenCalledWith(1);
   });
 
   it("falls back to setTimeout when idle callback is missing", () => {
@@ -67,11 +71,12 @@ describe("scheduleIdleBootWork", () => {
     vi.stubGlobal("requestIdleCallback", undefined);
     const callback = vi.fn();
 
-    scheduleIdleBootWork(callback);
+    const cancel = scheduleIdleBootWork(callback);
 
     expect(callback).not.toHaveBeenCalled();
+    cancel();
     vi.runAllTimers();
-    expect(callback).toHaveBeenCalledTimes(1);
+    expect(callback).not.toHaveBeenCalled();
     vi.useRealTimers();
   });
 });
