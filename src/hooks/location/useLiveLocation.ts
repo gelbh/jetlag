@@ -1,11 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { haversineMeters } from "../../domain/geometry/gameArea/distance";
 import {
+  queryGeolocationPermission,
   requestLocationAccess,
   unknownGeolocationErrorMessage,
   watchPosition,
   type GeolocationReading,
+  LOCATION_BLOCKED_MESSAGE,
 } from "../../services/core/location/geolocation";
+import {
+  getLocationPermissionUiSnapshot,
+  retainLocationPermissionDemand,
+  subscribeLocationPermissionUi,
+} from "../../services/core/location/locationPermissionUi";
 
 interface UseLiveLocationOptions {
   highAccuracy?: boolean;
@@ -24,9 +31,37 @@ export function useLiveLocation(
   } = options;
   const [reading, setReading] = useState<GeolocationReading | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [needsPermissionPrompt, setNeedsPermissionPrompt] = useState(false);
   const lastPublishRef = useRef<{ at: number; reading: GeolocationReading } | null>(
     null,
   );
+  const confirmEpoch = useSyncExternalStore(
+    subscribeLocationPermissionUi,
+    () => getLocationPermissionUiSnapshot().confirmEpoch,
+    () => 0,
+  );
+
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+    return retainLocationPermissionDemand();
+  }, [enabled]);
+
+  // Reset state when location tracking is disabled. This is a necessary cleanup
+  // pattern — setState in effect is acceptable here since it only runs when enabled changes.
+  useLayoutEffect(() => {
+    if (enabled) {
+      return;
+    }
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setReading(null);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setError(null);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNeedsPermissionPrompt(false);
+  }, [enabled]);
 
   useEffect(() => {
     if (!enabled) {
@@ -57,7 +92,62 @@ export function useLiveLocation(
       setError(null);
     };
 
+    const startWatch = () => {
+      stopWatch = watchPosition(
+        (next) => {
+          if (cancelled) {
+            return;
+          }
+
+          publishReading(next);
+        },
+        (nextError) => {
+          if (cancelled) {
+            return;
+          }
+
+          setError(nextError.message);
+          if (nextError.message === LOCATION_BLOCKED_MESSAGE) {
+            setNeedsPermissionPrompt(false);
+          }
+        },
+        { highAccuracy },
+      );
+    };
+
     const start = async () => {
+      const permission = await queryGeolocationPermission();
+      if (cancelled) {
+        return;
+      }
+
+      if (permission === "unavailable") {
+        setNeedsPermissionPrompt(false);
+        setError("Geolocation is not available on this device.");
+        return;
+      }
+
+      if (permission === "denied") {
+        setNeedsPermissionPrompt(false);
+        setError(LOCATION_BLOCKED_MESSAGE);
+        return;
+      }
+
+      if (permission === "prompt") {
+        if (confirmEpoch === 0) {
+          setNeedsPermissionPrompt(true);
+          setError(null);
+          return;
+        }
+
+        // Map Allow CTA already obtained a reading under a user gesture.
+        setNeedsPermissionPrompt(false);
+        startWatch();
+        return;
+      }
+
+      setNeedsPermissionPrompt(false);
+
       try {
         const initial = await requestLocationAccess({ highAccuracy });
         if (cancelled) {
@@ -78,23 +168,7 @@ export function useLiveLocation(
         return;
       }
 
-      stopWatch = watchPosition(
-        (next) => {
-          if (cancelled) {
-            return;
-          }
-
-          publishReading(next);
-        },
-        (nextError) => {
-          if (cancelled) {
-            return;
-          }
-
-          setError(nextError.message);
-        },
-        { highAccuracy },
-      );
+      startWatch();
     };
 
     void start();
@@ -104,10 +178,11 @@ export function useLiveLocation(
       stopWatch?.();
       lastPublishRef.current = null;
     };
-  }, [enabled, highAccuracy, minDistanceMeters, minIntervalMs]);
+  }, [confirmEpoch, highAccuracy, minDistanceMeters, minIntervalMs]);
 
   return {
     reading: enabled ? reading : null,
     error: enabled ? error : null,
+    needsPermissionPrompt: enabled ? needsPermissionPrompt : false,
   };
 }
