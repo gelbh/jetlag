@@ -286,11 +286,11 @@ export function radarQuestionPrompt(
 }
 
 export function radarInsideFromAnswer(answer: RadarAnswer): boolean {
-  return answer === "no";
+  return answer === "yes";
 }
 
 export function radarAnswerFromInside(inside: boolean): RadarAnswer {
-  return inside ? "no" : "yes";
+  return inside ? "yes" : "no";
 }
 
 export function isRadarPresetRadius(radiusMeters: number): boolean {

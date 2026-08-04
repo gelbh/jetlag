@@ -43,10 +43,10 @@ describe("radarQuestions", () => {
   });
 
   it("maps yes/no answers to inside shading", () => {
-    expect(radarInsideFromAnswer("yes")).toBe(false);
-    expect(radarInsideFromAnswer("no")).toBe(true);
-    expect(radarAnswerFromInside(false)).toBe("yes");
-    expect(radarAnswerFromInside(true)).toBe("no");
+    expect(radarInsideFromAnswer("yes")).toBe(true);
+    expect(radarInsideFromAnswer("no")).toBe(false);
+    expect(radarAnswerFromInside(true)).toBe("yes");
+    expect(radarAnswerFromInside(false)).toBe("no");
   });
 
   it("summarizes answered and legacy radar annotations", () => {
@@ -63,7 +63,7 @@ describe("radarQuestions", () => {
       metadata: {
         createdAt: "2026-01-01T00:00:00.000Z",
         radiusMeters: milesToMeters(3),
-        inside: false,
+        inside: true,
       },
     };
 
