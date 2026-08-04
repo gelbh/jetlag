@@ -5,7 +5,7 @@ inputs:
   wasm-pack-version:
     description: wasm-pack release version (no leading v)
     required: false
-    default: "0.13.1"
+    default: "0.15.0"
 
 runs:
   using: composite
