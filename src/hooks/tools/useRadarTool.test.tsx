@@ -69,7 +69,7 @@ describe("useRadarTool", () => {
     expect(mocks.createAnnotation).toHaveBeenCalledWith(
       expect.objectContaining({
         type: "radar",
-        metadata: expect.objectContaining({ inside: false }),
+        metadata: expect.objectContaining({ inside: true }),
       }),
     );
   });

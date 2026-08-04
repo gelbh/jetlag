@@ -5,6 +5,8 @@ import {
   formatAnswerCountdown,
   formatDrawPickSummary,
   formatExpiredAnswerCountdown,
+  formatPendingDrawPickSummary,
+  formatSequentialDrawPickSummary,
   hasOpenPendingQuestion,
   isQuestionAnswerDeadlineExpired,
   questionAnswerDeadlineMs,
@@ -17,11 +19,11 @@ import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 describe("questionRules", () => {
   it("scales card costs by reuse count", () => {
     expect(questionCostLabel("D3P1", 0)).toBe("D3P1");
-    expect(questionCostLabel("D3P1", 1)).toBe("D6P2");
-    expect(questionCostLabel("D2P1", 1)).toBe("D4P2");
-    expect(questionCostLabel("D4P2", 2)).toBe("D12P6");
+    expect(questionCostLabel("D3P1", 1)).toBe("D3P1 ×2");
+    expect(questionCostLabel("D2P1", 1)).toBe("D2P1 ×2");
+    expect(questionCostLabel("D4P2", 2)).toBe("D4P2 ×3");
     expect(questionCostLabel("D1P1", 0)).toBe("D1P1");
-    expect(questionCostLabel("D1P1", 2)).toBe("D3P3");
+    expect(questionCostLabel("D1P1", 2)).toBe("D1P1 ×3");
   });
 
   it("returns cost breakdown with draw and keep counts", () => {
@@ -31,7 +33,7 @@ describe("questionRules", () => {
       keep: 1,
     });
     expect(questionCostBreakdown("D3P1", 1)).toEqual({
-      label: "D6P2",
+      label: "D3P1 ×2",
       draw: 6,
       keep: 2,
     });
@@ -41,6 +43,17 @@ describe("questionRules", () => {
     expect(formatDrawPickSummary(1, 1)).toBe("Draw 1, pick 1");
     expect(formatDrawPickSummary(2, 1)).toBe("Draw 2, pick 1");
     expect(formatDrawPickSummary(6, 2)).toBe("Draw 6, pick 2");
+    expect(formatSequentialDrawPickSummary("D3P1", 0)).toBe("Draw 3, pick 1");
+    expect(formatSequentialDrawPickSummary("D3P1", 1)).toBe(
+      "Draw 3, pick 1 × 2",
+    );
+    expect(formatPendingDrawPickSummary("radar", 2, 1)).toBe("Draw 2, pick 1");
+    expect(formatPendingDrawPickSummary("radar", 4, 2)).toBe(
+      "Draw 2, pick 1 × 2",
+    );
+    expect(formatPendingDrawPickSummary("tentacle", 4, 2)).toBe(
+      "Draw 4, pick 2",
+    );
   });
 
   it("detects open pending questions", () => {

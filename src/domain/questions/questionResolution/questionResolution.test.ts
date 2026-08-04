@@ -106,11 +106,11 @@ describe("resolveRadarPendingQuestion", () => {
     const resolved = resolveRadarPendingQuestion(pending, "yes");
 
     expect(resolved.type).toBe("radar");
-    expect(resolved.metadata.inside).toBe(false);
+    expect(resolved.metadata.inside).toBe(true);
     expect(resolved.metadata.color).toBe(MAP_ANNOTATION_COLORS.radar);
   });
 
-  it("marks inside when hider answered no", () => {
+  it("marks outside when hider answered no", () => {
     const pending = basePending({
       placement: {
         geometryJson: JSON.stringify({
@@ -123,7 +123,7 @@ describe("resolveRadarPendingQuestion", () => {
     });
 
     const resolved = resolveRadarPendingQuestion(pending, "no");
-    expect(resolved.metadata.inside).toBe(true);
+    expect(resolved.metadata.inside).toBe(false);
   });
 });
 
