@@ -6,6 +6,7 @@ import {
   useMapLibreInteracting,
   useMapLibreMap,
 } from "../helpers/useMapLibreMap";
+import { MapChromeControl } from "./MapChromeControl";
 
 export type MapRecenterControlInset = MapChromeControlInset;
 
@@ -33,15 +34,13 @@ export function MapRecenterControl({
       className={`map-recenter-control map-recenter-control--${inset}`}
       data-map-interacting={interacting ? "true" : undefined}
     >
-      <button
-        type="button"
-        className="map-recenter-control__btn hud-chrome"
-        onClick={onRecenter}
+      <MapChromeControl
+        className="map-recenter-control__btn"
         aria-label="Recenter on question"
         title="Recenter on question"
-      >
-        <HudRefreshIcon className="h-5 w-5" />
-      </button>
+        onClick={onRecenter}
+        icon={<HudRefreshIcon className="h-5 w-5" />}
+      />
     </div>,
     portalTarget,
   );
