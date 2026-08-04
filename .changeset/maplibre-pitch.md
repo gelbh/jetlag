@@ -2,4 +2,4 @@
 "jetlag": patch
 ---
 
-Map settings: optional tilted MapLibre view (off by default); low power keeps the map flat
+Map: two-finger tilt is available for interactive maps when low-power mode is off (starts flat); low-power mode keeps the map flat

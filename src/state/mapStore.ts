@@ -22,35 +22,32 @@ const DEFAULT_LAYER_VISIBILITY: LayerVisibility = {
 };
 
 export const useMapStore = create<{
-  activeTool: MapTool;
-  transitEnabled: boolean;
-  transitLiveEnabled: boolean;
-  transitRouteFilter: TransitRouteFilter;
-  showCurrentLocation: boolean;
-  showAdminBoundaries: boolean;
-  keepScreenAwake: boolean;
-  lowPowerMode: boolean;
-  /** MapLibre tilt gestures; default flat. */
-  mapPitchEnabled: boolean;
-  notificationPreferences: NotificationPreferences;
-  distanceUnit: DistanceUnit;
-  mapStyle: MapStyle;
-  streetBasemap: StreetBasemap;
-  layerVisibility: LayerVisibility;
-  setActiveTool: (tool: MapTool) => void;
-  setTransitEnabled: (enabled: boolean) => void;
-  setTransitLiveEnabled: (enabled: boolean) => void;
-  setTransitRouteFilter: (filter: TransitRouteFilter) => void;
-  setShowCurrentLocation: (enabled: boolean) => void;
-  setShowAdminBoundaries: (enabled: boolean) => void;
-  setKeepScreenAwake: (enabled: boolean) => void;
-  setLowPowerMode: (enabled: boolean) => void;
-  setMapPitchEnabled: (enabled: boolean) => void;
-  setNotificationPreferences: (preferences: NotificationPreferences) => void;
-  setDistanceUnit: (unit: DistanceUnit) => void;
-  setMapStyle: (style: MapStyle) => void;
-  setStreetBasemap: (streetBasemap: StreetBasemap) => void;
-  setLayerVisibility: (layer: keyof LayerVisibility, visible: boolean) => void;
+  activeTool: MapTool,
+  transitEnabled: boolean,
+  transitLiveEnabled: boolean,
+  transitRouteFilter: TransitRouteFilter,
+  showCurrentLocation: boolean,
+  showAdminBoundaries: boolean,
+  keepScreenAwake: boolean,
+  lowPowerMode: boolean,
+  notificationPreferences: NotificationPreferences,
+  distanceUnit: DistanceUnit,
+  mapStyle: MapStyle,
+  streetBasemap: StreetBasemap,
+  layerVisibility: LayerVisibility,
+  setActiveTool: (tool: MapTool) => void,
+  setTransitEnabled: (enabled: boolean) => void,
+  setTransitLiveEnabled: (enabled: boolean) => void,
+  setTransitRouteFilter: (filter: TransitRouteFilter) => void,
+  setShowCurrentLocation: (enabled: boolean) => void,
+  setShowAdminBoundaries: (enabled: boolean) => void,
+  setKeepScreenAwake: (enabled: boolean) => void,
+  setLowPowerMode: (enabled: boolean) => void,
+  setNotificationPreferences: (preferences: NotificationPreferences) => void,
+  setDistanceUnit: (unit: DistanceUnit) => void,
+  setMapStyle: (style: MapStyle) => void,
+  setStreetBasemap: (streetBasemap: StreetBasemap) => void,
+  setLayerVisibility: (layer: keyof LayerVisibility, visible: boolean) => void,
 }>()(
   persist(
     (set) => ({
@@ -62,7 +59,6 @@ export const useMapStore = create<{
       showAdminBoundaries: false,
       keepScreenAwake: false,
       lowPowerMode: false,
-      mapPitchEnabled: false,
       notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
       distanceUnit: "imperial",
       mapStyle: "standard",
@@ -80,7 +76,6 @@ export const useMapStore = create<{
         set({ showAdminBoundaries }),
       setKeepScreenAwake: (keepScreenAwake) => set({ keepScreenAwake }),
       setLowPowerMode: (lowPowerMode) => set({ lowPowerMode }),
-      setMapPitchEnabled: (mapPitchEnabled) => set({ mapPitchEnabled }),
       setNotificationPreferences: (notificationPreferences) =>
         set({ notificationPreferences }),
       setDistanceUnit: (distanceUnit) => set({ distanceUnit }),
@@ -109,7 +104,6 @@ export const useMapStore = create<{
             persisted.streetBasemap === "light"
               ? persisted.streetBasemap
               : "light",
-          mapPitchEnabled: persisted.mapPitchEnabled === true,
           showCurrentLocation: true,
           showAdminBoundaries: persisted.showAdminBoundaries ?? false,
           layerVisibility: {
@@ -121,7 +115,6 @@ export const useMapStore = create<{
       partialize: (state) => ({
         keepScreenAwake: state.keepScreenAwake,
         lowPowerMode: state.lowPowerMode,
-        mapPitchEnabled: state.mapPitchEnabled,
         notificationPreferences: state.notificationPreferences,
         distanceUnit: state.distanceUnit,
         mapStyle: state.mapStyle,
