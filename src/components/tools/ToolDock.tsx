@@ -11,9 +11,8 @@ import type { MapTool } from "../../state/sessionStore";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
 import {
+  ToolDockHistoryBookend,
   ToolDockQuestionSlot,
-  ToolDockRedoSlot,
-  ToolDockUndoSlot,
   ToolDockWideActions,
 } from "./ToolDockSlot";
 import { ToolDockDrawMenu } from "./ToolDockOverflowMenu";
@@ -118,16 +117,18 @@ export function ToolDock({
           : undefined
       }
       historyStart={
-        <ToolDockUndoSlot
-          canUndo={canUndo}
-          onUndo={onUndo}
+        <ToolDockHistoryBookend
+          kind="undo"
+          canAct={canUndo}
+          onAct={onUndo}
           inactive={inactive}
         />
       }
       historyEnd={
-        <ToolDockRedoSlot
-          canRedo={canRedo}
-          onRedo={onRedo}
+        <ToolDockHistoryBookend
+          kind="redo"
+          canAct={canRedo}
+          onAct={onRedo}
           inactive={inactive}
         />
       }

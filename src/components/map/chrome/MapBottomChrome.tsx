@@ -82,7 +82,6 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
   ) {
     const isRail = layout === "rail";
     const sparseHunt = huntDensity === "sparse";
-    const hasHistoryBookends = Boolean(historyStart || historyEnd);
 
     return (
       <div
@@ -91,10 +90,9 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
         style={isRail ? undefined : style}
       >
         <div
-          className={`jl-map-bottom-chrome jl-tool-dock${isRail ? " jl-map-bottom-chrome--rail jl-tool-dock--rail" : ""}${inactive ? " jl-map-bottom-chrome--inactive" : ""}${sparseHunt ? " jl-map-bottom-chrome--hunt-sparse" : ""}${hasHistoryBookends ? " jl-map-bottom-chrome--history-bookends" : ""}${className ? ` ${className}` : ""}`}
+          className={`jl-map-bottom-chrome jl-tool-dock${isRail ? " jl-map-bottom-chrome--rail jl-tool-dock--rail" : ""}${inactive ? " jl-map-bottom-chrome--inactive" : ""}${sparseHunt ? " jl-map-bottom-chrome--hunt-sparse" : ""}${className ? ` ${className}` : ""}`}
           data-layout={layout}
           data-hunt-density={huntDensity}
-          data-history-bookends={hasHistoryBookends ? "true" : undefined}
           aria-disabled={inactive || undefined}
         >
           <div className="jl-map-chrome-bottom-band">

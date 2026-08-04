@@ -152,12 +152,6 @@
     padding: 0.125rem;
   }
 
-  .jl-map-bottom-chrome--history-bookends:not(.jl-map-bottom-chrome--rail)
-    .jl-map-island--hunt {
-    flex: 1 1 auto;
-    min-width: 0;
-  }
-
   .jl-map-chrome-side-stack .jl-map-island--session,
   .jl-map-chrome-side-stack .jl-map-island--map-controls {
     flex: 0 0 auto;
@@ -171,14 +165,15 @@
     flex-shrink: 0 !important;
   }
 
-  /* Bookend chips stay compact; Hunt question+Draw chips share equal width. */
+  /* Bookend chips stay compact (below Hunt equal chips) but ≥40px tap floor. */
   .jl-map-island--history-start .jl-tool-slot,
   .jl-map-island--history-end .jl-tool-slot {
     flex: 0 0 auto;
-    width: auto;
-    min-width: 2rem;
-    max-width: 2.25rem;
-    padding: 0.125rem 0.0625rem;
+    width: 2.5rem;
+    min-width: 2.5rem;
+    max-width: 2.5rem;
+    min-height: 2.5rem;
+    padding: 0.125rem;
   }
 
   .jl-map-island .jl-tool-dock-group-main .jl-tool-slot {

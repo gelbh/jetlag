@@ -111,63 +111,39 @@ export function ToolDockMarkupMenuItem({
   );
 }
 
+type ToolDockHistoryKind = "undo" | "redo";
+
 interface ToolDockHistoryBookendProps {
+  kind: ToolDockHistoryKind;
+  canAct: boolean;
+  onAct: () => void;
   inactive?: boolean;
 }
 
-interface ToolDockUndoSlotProps extends ToolDockHistoryBookendProps {
-  canUndo: boolean;
-  onUndo: () => void;
-}
-
-interface ToolDockRedoSlotProps extends ToolDockHistoryBookendProps {
-  canRedo: boolean;
-  onRedo: () => void;
-}
-
-export function ToolDockUndoSlot({
-  canUndo,
-  onUndo,
+export function ToolDockHistoryBookend({
+  kind,
+  canAct,
+  onAct,
   inactive = false,
-}: ToolDockUndoSlotProps) {
+}: ToolDockHistoryBookendProps) {
+  const isUndo = kind === "undo";
   return (
-    <div className="jl-tool-dock-group jl-tool-dock-group-history">
-      <MotionPressable
-        type="button"
-        onClick={onUndo}
-        disabled={inactive || !canUndo}
-        className="jl-tool-slot jl-tool-slot--history-bookend"
-        aria-label="Undo last annotation"
-      >
-        <span className="jl-tool-slot-icon">
+    <MotionPressable
+      type="button"
+      onClick={onAct}
+      disabled={inactive || !canAct}
+      className="jl-tool-slot"
+      aria-label={isUndo ? "Undo last annotation" : "Redo last annotation"}
+    >
+      <span className="jl-tool-slot-icon">
+        {isUndo ? (
           <HudUndoIcon className="h-4 w-4" />
-        </span>
-        <span className="jl-tool-slot-label">Undo</span>
-      </MotionPressable>
-    </div>
-  );
-}
-
-export function ToolDockRedoSlot({
-  canRedo,
-  onRedo,
-  inactive = false,
-}: ToolDockRedoSlotProps) {
-  return (
-    <div className="jl-tool-dock-group jl-tool-dock-group-history">
-      <MotionPressable
-        type="button"
-        onClick={onRedo}
-        disabled={inactive || !canRedo}
-        className="jl-tool-slot jl-tool-slot--history-bookend"
-        aria-label="Redo last annotation"
-      >
-        <span className="jl-tool-slot-icon">
+        ) : (
           <HudRedoIcon className="h-4 w-4" />
-        </span>
-        <span className="jl-tool-slot-label">Redo</span>
-      </MotionPressable>
-    </div>
+        )}
+      </span>
+      <span className="jl-tool-slot-label">{isUndo ? "Undo" : "Redo"}</span>
+    </MotionPressable>
   );
 }
 

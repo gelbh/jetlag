@@ -183,12 +183,13 @@ describe("MapBottomChrome", () => {
     expect(hunt?.classList.contains("jl-map-island--hunt-sparse")).toBe(true);
   });
 
-  it("sizes bookend islands as non-growing and hunt as flex fill when history is present", () => {
+  it("sizes bookend islands as non-growing and hunt chips as equal flex", () => {
     expect(chromeCss).toMatch(
       /\.jl-map-island--history-start,\s*\.jl-map-island--history-end\s*\{[^}]*flex:\s*0\s+0\s+auto/s,
     );
     expect(chromeCss).toMatch(
-      /\.jl-map-island--hunt\s*\{[^}]*flex:\s*1\s+1\s+auto/s,
+      /\.jl-map-island\s+\.jl-tool-dock-group-main\s+\.jl-tool-slot\s*\{[^}]*flex:\s*1\s+1\s+0/s,
     );
+    expect(chromeCss).not.toMatch(/history-bookends/);
   });
 });
