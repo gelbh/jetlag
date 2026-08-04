@@ -29,6 +29,8 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Improvements",
         items: [
+          "PWA: home-screen icons use PNG for sharper installs on iPhone and Android",
+          "PWA: in-app tip guides Add to Home Screen on iOS and install on Android Chrome",
           "Map: compact on-map attribution with OpenStreetMap copyright link",
           "Map: satellite view shows place and boundary labels over imagery",
           "Map: street basemap uses OpenFreeMap only; style toggle uses local preview thumbnails",
