@@ -1,4 +1,4 @@
-import { useEffect, useRef, type MutableRefObject } from "react";
+import { useEffect, useRef } from "react";
 import type { MapRef } from "react-map-gl/maplibre";
 import type { MapViewportBounds } from "../../../domain/map/transitViewport";
 import { createViewportTrackerHandlers } from "../helpers/createViewportTrackerHandlers";
@@ -13,7 +13,6 @@ interface MapViewportTrackerProps {
   onViewportChange: (viewport: MapViewportState | null) => void;
   onUserPanStart?: () => void;
   onUserPanEnd?: () => void;
-  suppressPanRef?: MutableRefObject<boolean>;
 }
 
 function publishViewportMapLibre(
@@ -46,22 +45,30 @@ export function MapViewportTracker({
   onViewportChange,
   onUserPanStart,
   onUserPanEnd,
-  suppressPanRef,
 }: MapViewportTrackerProps) {
   const map = useMapLibreMap();
   const onViewportChangeRef = useRef(onViewportChange);
+  const onUserPanStartRef = useRef(onUserPanStart);
+  const onUserPanEndRef = useRef(onUserPanEnd);
 
   useEffect(() => {
     onViewportChangeRef.current = onViewportChange;
   }, [onViewportChange]);
 
   useEffect(() => {
+    onUserPanStartRef.current = onUserPanStart;
+  }, [onUserPanStart]);
+
+  useEffect(() => {
+    onUserPanEndRef.current = onUserPanEnd;
+  }, [onUserPanEnd]);
+
+  useEffect(() => {
     const handlers = createViewportTrackerHandlers({
       publish: () =>
         publishViewportMapLibre(map, onViewportChangeRef.current),
-      onUserPanStart,
-      onUserPanEnd,
-      suppressPanRef,
+      onUserPanStart: () => onUserPanStartRef.current?.(),
+      onUserPanEnd: () => onUserPanEndRef.current?.(),
     });
 
     map.on("dragstart", handlers.onDragStart);
@@ -78,9 +85,11 @@ export function MapViewportTracker({
       map.off("zoom", handlers.onZoom);
       map.off("moveend", handlers.onMoveEnd);
       map.off("zoomend", handlers.onZoomEnd);
-      handlers.disposePublisher();
+      // Ends an in-flight pan so React mapPanning cannot stick across remount.
+      handlers.dispose();
     };
-  }, [map, onUserPanStart, onUserPanEnd, suppressPanRef]);
+    // Callbacks are read via refs so mid-gesture identity churn cannot drop pan end.
+  }, [map]);
 
   useEffect(() => {
     publishViewportMapLibre(map, onViewportChange);

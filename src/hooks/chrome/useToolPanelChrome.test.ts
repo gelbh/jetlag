@@ -100,4 +100,41 @@ describe("useToolPanelChrome", () => {
     expect(result.current.userMinimized).toBe(true);
     expect(result.current.panelMinimized).toBe(true);
   });
+
+  it("keeps place-phase peek after a pan cycle (tool stays open)", () => {
+    const { result } = renderHook(() =>
+      useToolPanelChrome("thermometer", { sheetSnap: "peek" }),
+    );
+
+    expect(result.current.userMinimized).toBe(true);
+
+    act(() => {
+      result.current.handleMapPanStart();
+    });
+    expect(result.current.mapPanning).toBe(true);
+
+    act(() => {
+      result.current.handleMapPanEnd();
+    });
+
+    expect(result.current.mapPanning).toBe(false);
+    expect(result.current.userMinimized).toBe(true);
+    expect(result.current.panelMinimized).toBe(true);
+  });
+
+  it("clears stuck mapPanning when the active tool changes", () => {
+    const { result, rerender } = renderHook(
+      ({ tool }: { tool: "thermometer" | "none" }) =>
+        useToolPanelChrome(tool),
+      { initialProps: { tool: "thermometer" as "thermometer" | "none" } },
+    );
+
+    act(() => {
+      result.current.handleMapPanStart();
+    });
+    expect(result.current.mapPanning).toBe(true);
+
+    rerender({ tool: "none" });
+    expect(result.current.mapPanning).toBe(false);
+  });
 });

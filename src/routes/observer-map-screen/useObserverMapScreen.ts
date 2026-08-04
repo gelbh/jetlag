@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { MapViewportState } from "../../components/map/chrome/MapViewportTracker";
 import {
   gameAreaCenter,
@@ -29,7 +29,6 @@ export function useObserverMapScreen() {
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const overlay = useMapOverlayState();
   const distanceUnit = useSessionDistanceUnit();
-  const suppressChromeHideRef = useRef(false);
   const [mapViewport, setMapViewport] = useState<MapViewportState | null>(null);
 
   const spectatorRole = myRole === "admin" || myRole === "observer" ? myRole : "observer";
@@ -128,7 +127,6 @@ export function useObserverMapScreen() {
     authReady,
     timer,
     overlay,
-    suppressChromeHideRef,
     mapViewport,
     setMapViewport,
     activeThermometerWalk,
