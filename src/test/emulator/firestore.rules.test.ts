@@ -3691,8 +3691,12 @@ describe("firestore.rules", () => {
         .doc("session-be-4")
         .set(
           sessionPayload("host-1", {
-            memberUids: ["host-1", "admin-1"],
-            memberRoles: { "host-1": "hider", "admin-1": "observer" },
+            memberUids: ["host-1", "admin-1", "seeker-1"],
+            memberRoles: {
+              "host-1": "hider",
+              "admin-1": "observer",
+              "seeker-1": "seeker",
+            },
           }),
         );
 
@@ -3720,6 +3724,17 @@ describe("firestore.rules", () => {
             activeCurses: [],
             updatedAt: "2026-01-01T00:00:00.000Z",
           }),
+      );
+
+      const seeker = testEnv.authenticatedContext("seeker-1");
+      await assertFails(
+        seeker
+          .firestore()
+          .collection("sessions")
+          .doc("session-be-4")
+          .collection("boardEconomy")
+          .doc("state")
+          .get(),
       );
     });
   });

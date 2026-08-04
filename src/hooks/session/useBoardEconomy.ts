@@ -74,19 +74,20 @@ export function useBoardEconomy(params: {
       cardDraw?: number,
       cardKeep?: number,
     ) => {
-      if (!state || !enabled) {
+      if (!enabled || !sessionId || !seed) {
         return null;
       }
       const cycles = rewardCyclesFromPendingCost(toolType, cardDraw, cardKeep);
       if (!cycles) {
         return null;
       }
-      const { state: rewarded } = applySequentialRewards(state, cycles);
+      const current = await ensureBoardEconomyState(sessionId, seed);
+      const { state: rewarded } = applySequentialRewards(current, cycles);
       const limit = enforceHandLimit(rewarded.hand, rewarded.handLimit);
       await persist(rewarded);
       return limit;
     },
-    [enabled, persist, state],
+    [enabled, persist, seed, sessionId],
   );
 
   const discardCards = useCallback(

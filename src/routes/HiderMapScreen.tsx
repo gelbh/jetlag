@@ -469,14 +469,15 @@ export function HiderMapScreen() {
     ensureWriteAccess: ensureHiderWriteAccess,
     writesEnabled: authReady && Boolean(uid),
     mapPickEnabled,
+    hasMoveCard: boardEconomyEnabled
+      ? () => Boolean(boardEconomy.state?.hand.some((c) => c.def.kind === "move"))
+      : undefined,
     consumeMoveCard: boardEconomyEnabled
       ? async () => {
           const move = boardEconomy.state?.hand.find((c) => c.def.kind === "move");
-          if (!move) {
-            return false;
+          if (move) {
+            await boardEconomy.runMove(move.instanceId);
           }
-          await boardEconomy.runMove(move.instanceId);
-          return true;
         }
       : undefined,
   });
@@ -981,6 +982,9 @@ export function HiderMapScreen() {
             onDiscard={(id) => void boardEconomy.discardCards([id])}
             onPlayExpand={(id, power) =>
               void boardEconomy.runExpandHand(id, power)
+            }
+            onPlayDiscardDraw={(powerId, discardIds, drawN) =>
+              void boardEconomy.runDiscardDraw(powerId, discardIds, drawN)
             }
             onPlayCurse={(id) => void boardEconomy.runPlayCurse(id)}
             onClearCurse={(id) => void boardEconomy.runClearCurse(id)}

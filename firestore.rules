@@ -923,20 +923,25 @@ service cloud.firestore {
         allow delete: if false;
       }
 
-      // Frozen shape: sessions/{id}/boardEconomy/state — see boardEconomy domain.
+      // Frozen shape: sessions/{id}/boardEconomy/state — hider-private when enabled.
       match /boardEconomy/{docId} {
-        allow read: if isSessionMember(sessionId)
-          && boardEconomyEnabledOnSession(sessionId);
-        allow create, update: if boardEconomyEnabledOnSession(sessionId)
-          && (
-            isHiderMember(sessionId)
-            || isSessionHost(sessionId)
-          )
+        allow read: if docId == 'state'
+          && boardEconomyEnabledOnSession(sessionId)
+          && isHiderMember(sessionId);
+        allow create, update: if docId == 'state'
+          && boardEconomyEnabledOnSession(sessionId)
+          && isHiderMember(sessionId)
           && request.resource.data.deck is list
           && request.resource.data.hand is list
           && request.resource.data.discard is list
           && request.resource.data.handLimit is number
+          && request.resource.data.handLimit >= 6
+          && request.resource.data.handLimit <= 12
+          && request.resource.data.deck.size() <= 120
+          && request.resource.data.hand.size() <= 12
+          && request.resource.data.discard.size() <= 120
           && request.resource.data.activeCurses is list
+          && request.resource.data.activeCurses.size() <= 30
           && request.resource.data.updatedAt is string;
         allow delete: if false;
       }

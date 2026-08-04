@@ -58,7 +58,9 @@ export function rewardCyclesFromPendingCost(
     cardKeep % unit.keep === 0 &&
     cardDraw / unit.draw === cardKeep / unit.keep
   ) {
-    const times = cardDraw / unit.draw;
+    // Cap reuse multiplier — unbounded cardDraw from a hostile client must not
+    // drain the deck in one answer.
+    const times = Math.min(10, cardDraw / unit.draw);
     return Array.from({ length: times }, () => ({ ...unit }));
   }
   return cycles;

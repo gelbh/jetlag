@@ -8,14 +8,25 @@ import type {
 import { timeBonusMinutesForGameSize } from "../../../domain/boardEconomy";
 import type { GameSize } from "../../../domain/session/size/gameSize";
 
+const POWER_UP_LABELS: Record<string, string> = {
+  veto: "Veto",
+  randomize: "Randomize",
+  duplicate: "Duplicate",
+  discard1Draw2: "Discard 1, draw 2",
+  discard2Draw3: "Discard 2, draw 3",
+  discard3Draw4: "Discard 3, draw 4",
+  expandHand1: "Draw 1, expand hand +1",
+  expandHand2: "Draw 1, expand hand +2",
+};
+
 function cardLabel(card: BoardCardInstance, gameSize: GameSize): string {
   switch (card.def.kind) {
     case "timeBonus":
       return `Time +${timeBonusMinutesForGameSize(card.def.durations, gameSize)} min`;
     case "powerUp":
-      return `Power-up: ${card.def.id}`;
+      return POWER_UP_LABELS[card.def.id] ?? card.def.id;
     case "curse":
-      return `Curse: ${card.def.id}`;
+      return `Curse of ${card.def.id.replace(/-/g, " ")}`;
     case "move":
       return "Move";
     default: {
@@ -33,6 +44,7 @@ export function HiderHandSheet({
   mustDiscard,
   onDiscard,
   onPlayExpand,
+  onPlayDiscardDraw,
   onPlayCurse,
   onClearCurse,
   onPlayMove,
@@ -44,6 +56,11 @@ export function HiderHandSheet({
   mustDiscard: number;
   onDiscard: (instanceId: string) => void;
   onPlayExpand: (instanceId: string, id: "expandHand1" | "expandHand2") => void;
+  onPlayDiscardDraw: (
+    powerUpInstanceId: string,
+    discardInstanceIds: readonly string[],
+    drawN: number,
+  ) => void;
   onPlayCurse: (instanceId: string) => void;
   onClearCurse: (instanceId: string) => void;
   onPlayMove: (instanceId: string) => void;
@@ -75,6 +92,13 @@ export function HiderHandSheet({
               (card.def.id === "expandHand1" || card.def.id === "expandHand2")
                 ? (card.def.id as Extract<PowerUpId, "expandHand1" | "expandHand2">)
                 : null;
+            const discardDraw =
+              card.def.kind === "powerUp" &&
+              (card.def.id === "discard1Draw2" ||
+                card.def.id === "discard2Draw3" ||
+                card.def.id === "discard3Draw4")
+                ? card.def.id
+                : null;
             return (
               <li
                 key={card.instanceId}
@@ -98,6 +122,34 @@ export function HiderHandSheet({
                       type="button"
                       className="min-h-11 px-2 text-sm text-ink-secondary underline"
                       onClick={() => onPlayExpand(card.instanceId, expandId)}
+                    >
+                      Play
+                    </button>
+                  ) : null}
+                  {discardDraw ? (
+                    <button
+                      type="button"
+                      className="min-h-11 px-2 text-sm text-ink-secondary underline"
+                      onClick={() => {
+                        const need =
+                          discardDraw === "discard1Draw2"
+                            ? 1
+                            : discardDraw === "discard2Draw3"
+                              ? 2
+                              : 3;
+                        const drawN = need + 1;
+                        const others = state.hand
+                          .filter((c) => c.instanceId !== card.instanceId)
+                          .slice(0, need)
+                          .map((c) => c.instanceId);
+                        if (others.length < need) {
+                          window.alert(
+                            `Need ${need} other card(s) in hand to discard.`,
+                          );
+                          return;
+                        }
+                        onPlayDiscardDraw(card.instanceId, others, drawN);
+                      }}
                     >
                       Play
                     </button>

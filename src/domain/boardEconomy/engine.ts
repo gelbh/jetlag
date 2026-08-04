@@ -77,8 +77,9 @@ export function createInitialBoardEconomyState(seed: string): BoardEconomyState 
 }
 
 /**
- * Draw `drawN` from deck top; keep first `keepM` (caller may reorder drawn
- * before calling — here keep = first M of drawn). Rest go to discarded.
+ * Draw `drawN` from deck top; keep first `keepM`.
+ * v1 simplification: keep order is deck order (no interactive pick UI yet).
+ * Caller may reorder `drawn` before a future choose-keep API.
  */
 export function drawKeep(
   deck: readonly BoardCardInstance[],
@@ -223,8 +224,8 @@ export function playExpandHand(
     ...next,
     handLimit: handLimitAfterExpand(next.handLimit, powerUpId),
   };
-  const drawN = powerUpId === "expandHand1" ? 1 : 1;
-  const result = drawKeep(next.deck, next.hand, drawN, drawN);
+  // Both expand cards draw/keep 1 (rulebook: "Draw 1, expand …").
+  const result = drawKeep(next.deck, next.hand, 1, 1);
   return {
     ...next,
     deck: result.deck,
