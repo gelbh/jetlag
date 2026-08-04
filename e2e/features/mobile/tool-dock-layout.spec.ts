@@ -83,8 +83,8 @@ test.describe("mobile tool dock", () => {
   test("exposes history, draw, and session islands without a More sheet", async ({
     page,
   }) => {
-    await expect(page.getByLabel("Undo")).toBeVisible();
-    await expect(page.getByLabel("Redo")).toBeVisible();
+    await expect(page.getByRole("group", { name: "Undo" })).toBeVisible();
+    await expect(page.getByRole("group", { name: "Redo" })).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Undo last annotation" }),
     ).toBeVisible();

@@ -209,8 +209,8 @@ describe("ToolDock", () => {
 
     expect(screen.getByRole("button", { name: "Undo last annotation" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Redo last annotation" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Undo")).toBeInTheDocument();
-    expect(screen.getByLabelText("Redo")).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Undo" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Redo" })).toBeInTheDocument();
 
     const hunt = document.querySelector('[data-island="hunt"]');
     expect(hunt?.querySelector('[aria-label="Undo last annotation"]')).toBeNull();
