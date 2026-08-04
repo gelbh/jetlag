@@ -3,7 +3,6 @@ import type { TransitRouteFilter } from "../../../domain/map/transit";
 import type { DistanceUnit } from "../../../domain/map/distance";
 import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
 import { effectiveMapStyle } from "../../../domain/device/power/powerProfile";
-import { useMapStore } from "../../../state/mapStore";
 import { SegmentControl } from "../../ui/forms/SegmentControl";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 
@@ -74,8 +73,6 @@ export function MapSettingsGeneralTab({
   onTransitRouteFilterChange,
 }: MapSettingsGeneralTabProps) {
   const displayedMapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
-  const mapPitchEnabled = useMapStore((state) => state.mapPitchEnabled);
-  const setMapPitchEnabled = useMapStore((state) => state.setMapPitchEnabled);
 
   return (
     <div className="space-y-3">
@@ -89,16 +86,6 @@ export function MapSettingsGeneralTab({
         description="Reference outlines for admin divisions in the play area. Finer levels draw lighter."
         checked={showAdminBoundaries}
         onChange={onShowAdminBoundariesChange}
-      />
-      <SettingsToggleRow
-        label="Tilted map view"
-        description={
-          lowPowerMode
-            ? "Low power mode keeps the map flat. Turn it off to allow tilt."
-            : "Two-finger drag to tilt the map. Off by default."
-        }
-        checked={mapPitchEnabled}
-        onChange={setMapPitchEnabled}
       />
 
       <SegmentControl

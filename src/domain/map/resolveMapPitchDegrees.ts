@@ -1,14 +1,13 @@
-/** Max MapLibre camera pitch when the settings toggle is on and low-power is off. */
+/** Max MapLibre camera pitch when low-power is off. */
 export const MAP_PITCH_MAX_DEGREES = 60;
 
 /**
- * Allowed max pitch for MapLibre: flat (0) unless pitch is enabled and not low-power.
+ * Allowed max pitch for MapLibre: flat (0) in low-power; otherwise max tilt.
  */
 export function resolveMapPitchDegrees(
-  enabled: boolean,
   lowPower: boolean,
 ): 0 | typeof MAP_PITCH_MAX_DEGREES {
-  if (!enabled || lowPower) {
+  if (lowPower) {
     return 0;
   }
   return MAP_PITCH_MAX_DEGREES;
