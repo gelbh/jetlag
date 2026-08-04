@@ -135,4 +135,34 @@ it("marks chrome inactive without leaving islands clickable via CSS class", () =
     expect(narrowWidthOffset).toBeGreaterThan(-1);
     expect(shortLandscapeOffset).toBeGreaterThan(narrowWidthOffset);
   });
+
+  it("defaults hunt density to tools and omits sparse modifiers", () => {
+    const { container } = render(
+      <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
+    );
+    const chrome = container.querySelector(".jl-map-bottom-chrome");
+    expect(chrome?.getAttribute("data-hunt-density")).toBe("tools");
+    expect(
+      container.querySelector(".jl-map-bottom-chrome--hunt-sparse"),
+    ).toBeNull();
+    expect(container.querySelector(".jl-map-island--hunt-sparse")).toBeNull();
+  });
+
+  it("applies sparse hunt density modifiers", () => {
+    const { container } = render(
+      <MapBottomChrome
+        layout="phone"
+        huntDensity="sparse"
+        hunt={<button type="button">Set zone</button>}
+      />,
+    );
+    const chrome = container.querySelector(".jl-map-bottom-chrome");
+    expect(chrome?.getAttribute("data-hunt-density")).toBe("sparse");
+    expect(
+      container.querySelector(".jl-map-bottom-chrome--hunt-sparse"),
+    ).not.toBeNull();
+    const hunt = container.querySelector('[data-island="hunt"]');
+    expect(hunt?.getAttribute("data-hunt-density")).toBe("sparse");
+    expect(hunt?.classList.contains("jl-map-island--hunt-sparse")).toBe(true);
+  });
 });
