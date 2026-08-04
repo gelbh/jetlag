@@ -1,5 +1,10 @@
 import { MATCHING_CATEGORIES } from "../../questions/matchingQuestions";
-import { MEASURING_CATALOG } from "../../questions/measuringQuestions";
+import {
+  BASE_MEASURING_CATALOG,
+  CUSTOM_PACK_GATED_MEASURING_IDS,
+  MEASURING_CATALOG,
+  isCustomPackGatedMeasuringId,
+} from "../../questions/measuringQuestions";
 import {
   CUSTOM_QUESTION_PACK_MATCHING,
   CUSTOM_QUESTION_PACK_MEASURING,
@@ -37,7 +42,7 @@ function withRegionPackMeasuringLabels(
 }
 
 export const BASE_MATCHING_CATEGORY_COUNT = 20;
-export const BASE_MEASURING_CATALOG_COUNT = 23;
+export const BASE_MEASURING_CATALOG_COUNT = 20;
 
 export function isExpansionPackEnabled(
   session: SessionRulesInput,
@@ -62,7 +67,13 @@ export function baseMatchingCategories(): readonly MatchingCategoryDefinition[] 
 }
 
 export function baseMeasuringCatalog(): readonly MeasuringCatalogOption[] {
-  return MEASURING_CATALOG;
+  return BASE_MEASURING_CATALOG;
+}
+
+export function customPackGatedMeasuringOptions(): MeasuringCatalogOption[] {
+  return CUSTOM_PACK_GATED_MEASURING_IDS.map(
+    (id) => MEASURING_CATALOG.find((option) => option.id === id)!,
+  );
 }
 
 export function availableMatchingCategories(
@@ -87,7 +98,7 @@ export function availableMeasuringCatalog(
 ): MeasuringCatalogOption[] {
   const base = [...baseMeasuringCatalog()];
   const pack = isCustomQuestionPackEnabled(session)
-    ? [...CUSTOM_QUESTION_PACK_MEASURING]
+    ? [...customPackGatedMeasuringOptions(), ...CUSTOM_QUESTION_PACK_MEASURING]
     : [];
   const hostCustom = (session.customCategories ?? []).map(
     customCategoryToMeasuringOption,
@@ -135,6 +146,10 @@ export function isCategoryInDefaultPicker(
     return isCustomQuestionPackEnabled(session);
   }
 
+  if (isCustomPackGatedMeasuringId(categoryId)) {
+    return isCustomQuestionPackEnabled(session);
+  }
+
   if (categoryId.startsWith("custom:")) {
     return (session.customCategories ?? []).some(
       (category) => category.id === categoryId,
@@ -147,8 +162,9 @@ export function isCategoryInDefaultPicker(
     );
   }
 
-  return baseMatchingCategories().some(
-    (category) => category.id === categoryId,
+  return (
+    baseMatchingCategories().some((category) => category.id === categoryId) ||
+    baseMeasuringCatalog().some((option) => option.id === categoryId)
   );
 }
 

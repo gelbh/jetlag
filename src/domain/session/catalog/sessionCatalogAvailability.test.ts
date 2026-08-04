@@ -31,6 +31,10 @@ describe("sessionCatalogAvailability", () => {
     expect(measuringIds.some((id) => isCustomQuestionPackCategoryId(id))).toBe(
       false,
     );
+    expect(measuringIds).toHaveLength(BASE_MEASURING_CATALOG_COUNT);
+    expect(measuringIds).not.toContain("admin3_border");
+    expect(measuringIds).not.toContain("admin4_border");
+    expect(measuringIds).not.toContain("custom_place");
   });
 
   it("includes custom pack categories when the host enables the pack", () => {
@@ -44,11 +48,16 @@ describe("sessionCatalogAvailability", () => {
         isCustomQuestionPackCategoryId(category.id),
       ),
     ).toBe(true);
-    expect(
-      availableMeasuringCatalog(session).some((option) =>
-        isCustomQuestionPackCategoryId(option.id),
-      ),
-    ).toBe(true);
+    const measuringIds = availableMeasuringCatalog(session).map(
+      (option) => option.id,
+    );
+    expect(measuringIds.some((id) => isCustomQuestionPackCategoryId(id))).toBe(
+      true,
+    );
+    expect(measuringIds).toContain("admin3_border");
+    expect(measuringIds).toContain("admin4_border");
+    expect(measuringIds).toContain("custom_place");
+    expect(measuringIds.length).toBeGreaterThanOrEqual(23);
   });
 
   it("gates pack categories in the default picker helper", () => {
@@ -63,6 +72,15 @@ describe("sessionCatalogAvailability", () => {
     ).toBe(true);
     expect(
       isCategoryInDefaultPicker("commercial_airport", { gameSize: "medium" }),
+    ).toBe(true);
+    expect(
+      isCategoryInDefaultPicker("custom_place", { gameSize: "medium" }),
+    ).toBe(false);
+    expect(
+      isCategoryInDefaultPicker("custom_place", {
+        gameSize: "medium",
+        customQuestionPackEnabled: true,
+      }),
     ).toBe(true);
   });
 });

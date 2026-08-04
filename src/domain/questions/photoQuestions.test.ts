@@ -7,6 +7,7 @@ import {
   photoCategoriesForGameSize,
   photoCategoryUseCount,
   photoQuestionPrompt,
+  photoRuleSummaryForUnit,
   usedPhotoCategoryIds,
 } from "./photoQuestions";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
@@ -42,6 +43,23 @@ describe("photoQuestions", () => {
     expect(photoQuestionPrompt("tree")).toBe("Send me a photo of a tree.");
     expect(photoQuestionPrompt("five_buildings")).toBe(
       "Send me a photo of 5 buildings.",
+    );
+  });
+
+  it("uses edition-aware photo rule summaries", () => {
+    expect(photoRuleSummaryForUnit("park", "imperial")).toContain("5 feet");
+    expect(photoRuleSummaryForUnit("park", "metric")).toContain("2 m");
+    expect(photoRuleSummaryForUnit("place_of_worship", "imperial")).toContain(
+      "5' x 5'",
+    );
+    expect(photoRuleSummaryForUnit("place_of_worship", "metric")).toContain(
+      "2 m × 2 m",
+    );
+    expect(photoQuestionPrompt("half_mile_streets_traced", "imperial")).toContain(
+      "½ mile",
+    );
+    expect(photoQuestionPrompt("half_mile_streets_traced", "metric")).toContain(
+      "1 km",
     );
   });
 

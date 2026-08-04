@@ -406,8 +406,29 @@ export const DEFAULT_MEASURING_FROM_KIND: MeasuringLocationCategory = "zoo";
 export const MEASURE_RULE_SUMMARY =
   "Set your anchor, then pick what you're measuring from. The shade uses your distance to that target.";
 
+/** Measuring options kept in the full catalog but gated behind custom question pack. */
+export const CUSTOM_PACK_GATED_MEASURING_IDS = [
+  "admin3_border",
+  "admin4_border",
+  "custom_place",
+] as const;
+
+export type CustomPackGatedMeasuringId =
+  (typeof CUSTOM_PACK_GATED_MEASURING_IDS)[number];
+
+export function isCustomPackGatedMeasuringId(
+  id: string,
+): id is CustomPackGatedMeasuringId {
+  return (CUSTOM_PACK_GATED_MEASURING_IDS as readonly string[]).includes(id);
+}
+
+/** Book measuring catalog (20) — excludes custom-pack-gated extras. */
+export const BASE_MEASURING_CATALOG = MEASURING_CATALOG.filter(
+  (option) => !isCustomPackGatedMeasuringId(option.id),
+);
+
 export const COASTLINE_DEFINITION =
-  "A coastline is where land meets the ocean, a great lake, or a body of water that flows into the ocean or a great lake. That waterway must stay at least one mile wide along its whole route.";
+  "A coastline is where land meets the ocean, a great lake, or a body of water that flows into the ocean or a great lake. That waterway must stay at least 2 km wide along its whole route.";
 
 export const COASTLINE_MEASURING_QUESTION: MeasuringQuestionDefinition = {
   subject: "coastline",
