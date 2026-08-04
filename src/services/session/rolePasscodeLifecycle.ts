@@ -77,26 +77,75 @@ export async function leaveSessionMembership(sessionId: string): Promise<void> {
   await callable({ sessionId });
 }
 
+type RevealRole = RolePasscodeActionResult["role"];
+
+const revealCache = new Map<string, RolePasscodeActionResult>();
+const revealInflight = new Map<string, Promise<RolePasscodeActionResult>>();
+
+function revealCacheKey(sessionId: string, role: RevealRole): string {
+  return `${sessionId}:${role}`;
+}
+
+/** Test-only: drop session-scoped reveal memoization. */
+export function clearRolePasscodeRevealCache(): void {
+  revealCache.clear();
+  revealInflight.clear();
+}
+
+/**
+ * Warm the reveal path without exposing the code in UI.
+ * Dedupes with in-flight / cached reveals for the same session+role.
+ */
+export function prefetchRolePasscode(
+  sessionId: string,
+  role: RevealRole,
+): void {
+  void revealRolePasscode(sessionId, role).catch(() => {
+    // Prefetch is best-effort; tap Reveal surfaces the error.
+  });
+}
+
 export async function revealRolePasscode(
   sessionId: string,
-  role: "seeker" | "hider" | "observer",
+  role: RevealRole,
 ): Promise<RolePasscodeActionResult> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");
   }
 
-  const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<
-    { sessionId: string; role: typeof role },
-    RolePasscodeActionResult
-  >(functions, "revealRolePasscode");
-  const result = await callable({ sessionId, role });
-  return result.data;
+  const key = revealCacheKey(sessionId, role);
+  const cached = revealCache.get(key);
+  if (cached) {
+    return cached;
+  }
+
+  const inflight = revealInflight.get(key);
+  if (inflight) {
+    return inflight;
+  }
+
+  const promise = (async () => {
+    const functions = await getFirebaseFunctions();
+    const callable = httpsCallable<
+      { sessionId: string; role: RevealRole },
+      RolePasscodeActionResult
+    >(functions, "revealRolePasscode");
+    const result = await callable({ sessionId, role });
+    revealCache.set(key, result.data);
+    return result.data;
+  })();
+
+  revealInflight.set(key, promise);
+  try {
+    return await promise;
+  } finally {
+    revealInflight.delete(key);
+  }
 }
 
 export async function regenerateRolePasscode(
   sessionId: string,
-  role: "seeker" | "hider" | "observer",
+  role: RevealRole,
 ): Promise<RolePasscodeActionResult> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");
@@ -104,10 +153,11 @@ export async function regenerateRolePasscode(
 
   const functions = await getFirebaseFunctions();
   const callable = httpsCallable<
-    { sessionId: string; role: typeof role },
+    { sessionId: string; role: RevealRole },
     RolePasscodeActionResult
   >(functions, "regenerateRolePasscode");
   const result = await callable({ sessionId, role });
+  revealCache.set(revealCacheKey(sessionId, role), result.data);
   return result.data;
 }
 

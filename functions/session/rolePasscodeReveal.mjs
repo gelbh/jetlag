@@ -52,15 +52,18 @@ export async function revealRolePasscodeHandler(db, uid, sessionId, role) {
   const sessionRef = db.collection("sessions").doc(sessionId);
   const secretsRef = db.collection("sessionRoleSecrets").doc(sessionId);
 
+  // Overlap session + secrets reads — auth still gates on session before return.
+  const secretsPromise = secretsRef.get();
   const sessionSnap = await sessionRef.get();
   if (!sessionSnap.exists) {
+    void secretsPromise.catch(() => {});
     throw new Error(REVEAL_SESSION_NOT_FOUND);
   }
 
   const data = sessionSnap.data() ?? {};
   assertRevealAuthorized(data, uid, role);
 
-  const secretsSnap = await secretsRef.get();
+  const secretsSnap = await secretsPromise;
   const secret = secretsSnap.exists ? secretsSnap.data()?.[role] : null;
   const code = typeof secret?.code === "string" ? secret.code : null;
   if (!code) {

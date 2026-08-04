@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   cancelRoleJoinRequest,
+  clearRolePasscodeRevealCache,
   initSessionRoleGates,
   joinSessionWithRole,
   leaveSessionMembership,
@@ -30,6 +31,7 @@ vi.mock("../../domain/device/changelog", () => ({
 describe("rolePasscodeLifecycle", () => {
   beforeEach(() => {
     httpsCallable.mockReset();
+    clearRolePasscodeRevealCache();
   });
 
   it("calls joinSessionWithRole with the join payload", async () => {
@@ -75,6 +77,33 @@ describe("rolePasscodeLifecycle", () => {
 
     expect(reveal).toHaveBeenCalledWith({ sessionId: "sess-1", role: "observer" });
     expect(regenerate).toHaveBeenCalledWith({ sessionId: "sess-1", role: "seeker" });
+  });
+
+  it("memoizes reveal results and coalesces in-flight requests", async () => {
+    let resolveReveal: ((value: { data: { role: "seeker"; rolePasscode: string } }) => void) | undefined;
+    const reveal = vi.fn(
+      () =>
+        new Promise<{ data: { role: "seeker"; rolePasscode: string } }>((resolve) => {
+          resolveReveal = resolve;
+        }),
+    );
+    httpsCallable.mockReturnValue(reveal);
+
+    const first = revealRolePasscode("sess-1", "seeker");
+    const second = revealRolePasscode("sess-1", "seeker");
+    await vi.waitFor(() => {
+      expect(reveal).toHaveBeenCalledTimes(1);
+    });
+
+    resolveReveal?.({ data: { role: "seeker", rolePasscode: "ABCD" } });
+    await expect(first).resolves.toEqual({ role: "seeker", rolePasscode: "ABCD" });
+    await expect(second).resolves.toEqual({ role: "seeker", rolePasscode: "ABCD" });
+
+    await expect(revealRolePasscode("sess-1", "seeker")).resolves.toEqual({
+      role: "seeker",
+      rolePasscode: "ABCD",
+    });
+    expect(reveal).toHaveBeenCalledTimes(1);
   });
 
   it("calls initSessionRoleGates for host bootstrap", async () => {
