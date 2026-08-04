@@ -124,8 +124,7 @@
 }
 
 .map-zoom-control--dock,
-.map-style-control--dock,
-.map-recenter-control--dock {
+.map-style-control--dock {
   bottom: calc(
     var(--dock-total-height) + var(--chrome-gap-above-dock) +
       var(--safe-area-bottom) + 0.5rem
@@ -133,27 +132,23 @@
 }
 
 .map-zoom-control--chrome-hidden,
-.map-style-control--chrome-hidden,
-.map-recenter-control--chrome-hidden {
+.map-style-control--chrome-hidden {
   bottom: calc(var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem);
 }
 
 .map-zoom-control--safe-area,
-.map-style-control--safe-area,
-.map-recenter-control--safe-area {
+.map-style-control--safe-area {
   bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
 
 .map-zoom-control--container,
-.map-style-control--container,
-.map-recenter-control--container {
+.map-style-control--container {
   /* Token SoT: --dock-height in base.css (do not re-hardcode 4.25rem). */
   bottom: var(--dock-height);
 }
 
 .map-zoom-control--hider-actions,
-.map-style-control--hider-actions,
-.map-recenter-control--hider-actions {
+.map-style-control--hider-actions {
   bottom: calc(
     var(--hider-action-bar-height) + var(--chrome-gap-above-dock) + 0.5rem
   );

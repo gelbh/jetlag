@@ -369,7 +369,7 @@
   bottom: calc(
     var(--dock-total-height) + var(--chrome-gap-above-dock) +
       var(--safe-area-bottom) + 0.5rem + var(--map-style-control-size) +
-      var(--map-left-chrome-gap) + var(--map-zoom-btn-size) +
+      var(--map-left-chrome-gap) + var(--map-zoom-btn-size, 2.75rem) +
       var(--map-left-chrome-gap)
   );
 }
@@ -389,7 +389,7 @@
   bottom: calc(
     var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem +
       var(--map-style-control-size) + var(--map-left-chrome-gap) +
-      var(--map-zoom-btn-size) + var(--map-left-chrome-gap)
+      var(--map-zoom-btn-size, 2.75rem) + var(--map-left-chrome-gap)
   );
 }
 
@@ -407,7 +407,7 @@
 .map-recenter-control--safe-area {
   bottom: calc(
     max(0.75rem, env(safe-area-inset-bottom)) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap) + var(--map-zoom-btn-size) +
+      var(--map-left-chrome-gap) + var(--map-zoom-btn-size, 2.75rem) +
       var(--map-left-chrome-gap)
   );
 }
@@ -424,8 +424,9 @@
 
 .map-recenter-control--container {
   bottom: calc(
-    4.25rem + var(--map-style-control-size) + var(--map-left-chrome-gap) +
-      var(--map-zoom-btn-size) + var(--map-left-chrome-gap)
+    var(--dock-height) + var(--map-style-control-size) +
+      var(--map-left-chrome-gap) + var(--map-zoom-btn-size, 2.75rem) +
+      var(--map-left-chrome-gap)
   );
 }
 
@@ -446,7 +447,7 @@
   bottom: calc(
     var(--hider-action-bar-height) + var(--chrome-gap-above-dock) + 0.5rem +
       var(--map-style-control-size) + var(--map-left-chrome-gap) +
-      var(--map-zoom-btn-size) + var(--map-left-chrome-gap)
+      var(--map-zoom-btn-size, 2.75rem) + var(--map-left-chrome-gap)
   );
 }
 
@@ -475,7 +476,7 @@
   bottom: calc(
     var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem +
       var(--map-style-control-size) + var(--map-left-chrome-gap) +
-      var(--map-zoom-btn-size) + var(--map-left-chrome-gap)
+      var(--map-zoom-btn-size, 2.75rem) + var(--map-left-chrome-gap)
   );
 }
 
@@ -506,7 +507,7 @@
     bottom: calc(
       var(--dock-total-height) + var(--chrome-gap-above-dock) +
         var(--safe-area-bottom) + 2.5rem + var(--map-style-control-size) +
-        var(--map-left-chrome-gap) + var(--map-zoom-btn-size) +
+        var(--map-left-chrome-gap) + var(--map-zoom-btn-size, 2.75rem) +
         var(--map-left-chrome-gap)
     );
   }
