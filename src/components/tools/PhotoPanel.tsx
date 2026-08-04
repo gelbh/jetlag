@@ -1,9 +1,11 @@
 import {
   isPhotoCategoryAvailableForGameSize,
   photoCategoriesForGameSize,
+  photoCategoryLabelForUnit,
   photoQuestionFor,
   type PhotoCategoryId,
 } from "../../domain/questions";
+import type { DistanceUnit } from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import { CatalogExhaustedMessage } from "./shared/readout/CatalogExhaustedMessage";
 import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
@@ -14,6 +16,7 @@ import { ToolSection } from "./shared/panels/ToolSection";
 
 interface PhotoPanelProps {
   gameSize: GameSize;
+  distanceUnit?: DistanceUnit;
   categoryId: PhotoCategoryId;
   usedCategoryIds: ReadonlySet<PhotoCategoryId>;
   costLabel: string;
@@ -27,6 +30,7 @@ interface PhotoPanelProps {
 
 export function PhotoPanel({
   gameSize,
+  distanceUnit = "imperial",
   categoryId,
   usedCategoryIds,
   costLabel,
@@ -40,7 +44,7 @@ export function PhotoPanel({
   const availableCategories = photoCategoriesForGameSize(gameSize).filter(
     (category) => !usedCategoryIds.has(category.id),
   );
-  const question = photoQuestionFor(categoryId);
+  const question = photoQuestionFor(categoryId, distanceUnit);
   const canCommit =
     canSubmitQuestion &&
     availableCategories.length > 0 &&
@@ -73,7 +77,7 @@ export function PhotoPanel({
             >
               {availableCategories.map((category) => (
                 <option key={category.id} value={category.id}>
-                  {category.label}
+                  {photoCategoryLabelForUnit(category.id, distanceUnit)}
                 </option>
               ))}
             </select>

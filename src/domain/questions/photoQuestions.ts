@@ -1,3 +1,5 @@
+import type { DistanceUnit } from "../map/distance";
+import { resolveDistanceUnit } from "../map/distancePresets";
 import type { GameSize } from "../session/size/gameSize";
 import { firstUnusedCatalogOption } from "../session/tools/toolSessionOptions";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
@@ -234,24 +236,94 @@ export function photoCategoriesForGameSize(
   return PHOTO_CATEGORIES.filter((category) => category.phase <= maxPhase);
 }
 
-export function photoQuestionPrompt(categoryId: PhotoCategoryId): string {
+/** Metric edition overrides; omit a field to keep the imperial catalog string. */
+const METRIC_PHOTO_COPY: Partial<
+  Record<
+    PhotoCategoryId,
+    Partial<Pick<PhotoCategoryDefinition, "label" | "promptNoun" | "ruleSummary">>
+  >
+> = {
+  park: {
+    ruleSummary:
+      "No zoom, perpendicular to ground. Must stand 2 m from any obstruction.",
+  },
+  place_of_worship: {
+    ruleSummary:
+      "2 m × 2 m section with 3 distinct elements. The litmus test: can someone match it if they visit the spot?",
+  },
+  train_platform: {
+    ruleSummary: "2 m × 2 m section with 3 distinct elements.",
+  },
+  half_mile_streets_traced: {
+    label: "1 km of Streets Traced",
+    promptNoun: "1 km of streets traced",
+  },
+};
+
+function photoCopyForUnit(
+  categoryId: PhotoCategoryId,
+  unit: DistanceUnit,
+): PhotoCategoryDefinition {
   const category = getPhotoCategory(categoryId);
-  return `Send me a photo of ${category.promptNoun}.`;
+  if (resolveDistanceUnit(unit) !== "metric") {
+    return category;
+  }
+  const metric = METRIC_PHOTO_COPY[categoryId];
+  if (!metric) {
+    return category;
+  }
+  return {
+    ...category,
+    label: metric.label ?? category.label,
+    promptNoun: metric.promptNoun ?? category.promptNoun,
+    ruleSummary: metric.ruleSummary ?? category.ruleSummary,
+  };
+}
+
+export function photoCategoryLabelForUnit(
+  categoryId: PhotoCategoryId,
+  unit: DistanceUnit = "imperial",
+): string {
+  return photoCopyForUnit(categoryId, unit).label;
+}
+
+export function photoPromptNounForUnit(
+  categoryId: PhotoCategoryId,
+  unit: DistanceUnit = "imperial",
+): string {
+  return photoCopyForUnit(categoryId, unit).promptNoun;
+}
+
+export function photoRuleSummaryForUnit(
+  categoryId: PhotoCategoryId,
+  unit: DistanceUnit = "imperial",
+): string {
+  return photoCopyForUnit(categoryId, unit).ruleSummary;
+}
+
+export function photoQuestionPrompt(
+  categoryId: PhotoCategoryId,
+  unit: DistanceUnit = "imperial",
+): string {
+  return `Send me a photo of ${photoPromptNounForUnit(categoryId, unit)}.`;
 }
 
 export function photoQuestionFor(
   categoryId: PhotoCategoryId,
+  unit: DistanceUnit = "imperial",
 ): { category: PhotoCategoryId; prompt: string; ruleSummary: string } {
-  const category = getPhotoCategory(categoryId);
   return {
     category: categoryId,
-    prompt: photoQuestionPrompt(categoryId),
-    ruleSummary: category.ruleSummary,
+    prompt: photoQuestionPrompt(categoryId, unit),
+    ruleSummary: photoRuleSummaryForUnit(categoryId, unit),
   };
 }
 
-export function photoQuestionLabel(categoryId: PhotoCategoryId): string {
-  return `Photo · ${photoCategoryLabel(categoryId).toLowerCase()}`;
+export function photoQuestionLabel(
+  categoryId: PhotoCategoryId,
+  unit: DistanceUnit = "imperial",
+): string {
+  return `Photo · ${photoCategoryLabelForUnit(categoryId, unit).toLowerCase()}`;
 }
 
 export function readPhotoCategoryId(

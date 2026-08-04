@@ -188,6 +188,7 @@ export function GameChatTab({
                   sessionId={sessionId}
                   pendingQuestion={pending}
                   messageId={message.id}
+                  distanceUnit={sessionRules.distanceUnit}
                   deadlineExpired={expired}
                   onAnswerQuestion={onAnswerQuestion}
                 />

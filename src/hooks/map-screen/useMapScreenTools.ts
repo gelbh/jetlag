@@ -174,6 +174,7 @@ export function useMapScreenTools({
   const photoTool = usePhotoTool({
     active: activeTool === "photo",
     gameSize: session?.gameSize ?? "medium",
+    distanceUnit,
     pendingQuestions,
     awaitHiderAnswer,
     submitPendingQuestion: awaitHiderAnswer

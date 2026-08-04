@@ -82,7 +82,7 @@ export const MEASURING_GROUPS = [
   label: string;
 }>;
 
-export const MEASURING_CATALOG = [
+export const BASE_MEASURING_CATALOG = [
   {
     id: "commercial_airport",
     groupId: "transit",
@@ -160,32 +160,6 @@ export const MEASURING_CATALOG = [
     targetKind: "linear",
     overpassSelectors: [],
     linearSelectors: ['["boundary"="administrative"]["admin_level"="6"]'],
-    supportsSearch: false,
-    supportsNearest: false,
-    supportsMapTarget: false,
-  },
-  {
-    id: "admin3_border",
-    groupId: "borders",
-    label: "3rd admin. div. border",
-    promptNoun: "a third-level administrative division border",
-    subject: "location",
-    targetKind: "linear",
-    overpassSelectors: [],
-    linearSelectors: ['["boundary"="administrative"]["admin_level"="8"]'],
-    supportsSearch: false,
-    supportsNearest: false,
-    supportsMapTarget: false,
-  },
-  {
-    id: "admin4_border",
-    groupId: "borders",
-    label: "4th admin. div. border",
-    promptNoun: "a fourth-level administrative division border",
-    subject: "location",
-    targetKind: "linear",
-    overpassSelectors: [],
-    linearSelectors: ['["boundary"="administrative"]["admin_level"="9"]'],
     supportsSearch: false,
     supportsNearest: false,
     supportsMapTarget: false,
@@ -345,19 +319,6 @@ export const MEASURING_CATALOG = [
     supportsMapTarget: true,
   },
   {
-    id: "custom_place",
-    groupId: "poi",
-    label: "Custom place",
-    promptNoun: "this place",
-    subject: "location",
-    targetKind: "point",
-    overpassSelectors: [],
-    linearSelectors: [],
-    supportsSearch: true,
-    supportsNearest: false,
-    supportsMapTarget: true,
-  },
-  {
     id: "hospital",
     groupId: "public_utilities",
     label: "Hospital",
@@ -401,13 +362,74 @@ export const MEASURING_CATALOG = [
   },
 ] as const satisfies ReadonlyArray<MeasuringCatalogOption>;
 
+/** Book-adjacent measuring extras; available only with custom question pack. */
+export const CUSTOM_PACK_GATED_MEASURING = [
+  {
+    id: "admin3_border",
+    groupId: "borders",
+    label: "3rd admin. div. border",
+    promptNoun: "a third-level administrative division border",
+    subject: "location",
+    targetKind: "linear",
+    overpassSelectors: [],
+    linearSelectors: ['["boundary"="administrative"]["admin_level"="8"]'],
+    supportsSearch: false,
+    supportsNearest: false,
+    supportsMapTarget: false,
+  },
+  {
+    id: "admin4_border",
+    groupId: "borders",
+    label: "4th admin. div. border",
+    promptNoun: "a fourth-level administrative division border",
+    subject: "location",
+    targetKind: "linear",
+    overpassSelectors: [],
+    linearSelectors: ['["boundary"="administrative"]["admin_level"="9"]'],
+    supportsSearch: false,
+    supportsNearest: false,
+    supportsMapTarget: false,
+  },
+  {
+    id: "custom_place",
+    groupId: "poi",
+    label: "Custom place",
+    promptNoun: "this place",
+    subject: "location",
+    targetKind: "point",
+    overpassSelectors: [],
+    linearSelectors: [],
+    supportsSearch: true,
+    supportsNearest: false,
+    supportsMapTarget: true,
+  },
+] as const satisfies ReadonlyArray<MeasuringCatalogOption>;
+
+export const MEASURING_CATALOG = [
+  ...BASE_MEASURING_CATALOG,
+  ...CUSTOM_PACK_GATED_MEASURING,
+] as const satisfies ReadonlyArray<MeasuringCatalogOption>;
+
 export const DEFAULT_MEASURING_FROM_KIND: MeasuringLocationCategory = "zoo";
 
 export const MEASURE_RULE_SUMMARY =
   "Set your anchor, then pick what you're measuring from. The shade uses your distance to that target.";
 
+export const CUSTOM_PACK_GATED_MEASURING_IDS =
+  CUSTOM_PACK_GATED_MEASURING.map((option) => option.id);
+
+export type CustomPackGatedMeasuringId =
+  (typeof CUSTOM_PACK_GATED_MEASURING_IDS)[number];
+
+export function isCustomPackGatedMeasuringId(
+  id: string,
+): id is CustomPackGatedMeasuringId {
+  return (CUSTOM_PACK_GATED_MEASURING_IDS as readonly string[]).includes(id);
+}
+
+/** Printed rulebook coastline width (2 km) for both editions — not mile/km dual copy. */
 export const COASTLINE_DEFINITION =
-  "A coastline is where land meets the ocean, a great lake, or a body of water that flows into the ocean or a great lake. That waterway must stay at least one mile wide along its whole route.";
+  "A coastline is where land meets the ocean, a great lake, or a body of water that flows into the ocean or a great lake. That waterway must stay at least 2 km wide along its whole route.";
 
 export const COASTLINE_MEASURING_QUESTION: MeasuringQuestionDefinition = {
   subject: "coastline",

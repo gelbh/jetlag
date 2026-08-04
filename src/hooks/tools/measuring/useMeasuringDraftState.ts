@@ -136,7 +136,8 @@ export function useMeasuringDraftState(
       }
 
       const nextKind =
-        firstAvailableMeasuringFromKind(usedKinds) ?? DEFAULT_MEASURING_FROM_KIND;
+        firstAvailableMeasuringFromKind(usedKinds, measuringCatalog) ??
+        DEFAULT_MEASURING_FROM_KIND;
       const next = applyMeasuringFromKind(nextKind);
 
       setMeasuringSeekerPoint(null);
@@ -161,7 +162,7 @@ export function useMeasuringDraftState(
       setMeasuringPlaces([]);
       setMeasuringOptionChosen(false);
     },
-    [usedMeasuringFromKindsSet],
+    [measuringCatalog, usedMeasuringFromKindsSet],
   );
 
   return {

@@ -7,18 +7,18 @@ export const METRIC_HIDING_ZONE_RADIUS_METERS: Record<
   "smallMedium" | "large",
   number
 > = {
-  smallMedium: 400,
-  large: 800,
+  smallMedium: 500,
+  large: 1000,
 };
 
 /** Official metric edition radar presets (m). */
 export const METRIC_RADAR_PRESET_METERS = [
-  500, 1000, 2000, 5000, 10_000, 20_000, 50_000, 100_000, 200_000,
+  500, 1000, 2000, 5000, 10_000, 15_000, 40_000, 80_000, 160_000,
 ] as const;
 
 /** Official metric edition thermometer presets (m). */
 export const METRIC_THERMOMETER_PRESET_METERS = [
-  1000, 10_000, 25_000, 50_000,
+  1000, 5000, 15_000, 75_000,
 ] as const;
 
 /** Official metric edition tentacle radii (m). */
@@ -38,8 +38,8 @@ export const IMPERIAL_RADAR_PRESET_MILES = [
 export const IMPERIAL_THERMOMETER_PRESET_MILES = [0.5, 3, 10, 50] as const;
 
 export const GAME_SIZE_THRESHOLDS_SQ_KM = {
-  medium: 260,
-  large: 2_600,
+  medium: 250,
+  large: 2_500,
 } as const;
 
 /** Session availability and game-size preset checks. */

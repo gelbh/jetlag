@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PhotoPanel } from "../../components/tools/PhotoPanel";
+import type { DistanceUnit } from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import {
   firstAvailablePhotoCategoryId,
@@ -21,6 +22,7 @@ import type { PendingQuestionRecord } from "../../domain/session/activity/sessio
 interface UsePhotoToolParams {
   active: boolean;
   gameSize: GameSize;
+  distanceUnit?: DistanceUnit;
   pendingQuestions: readonly PendingQuestionRecord[];
   awaitHiderAnswer?: boolean;
   submitPendingQuestion?: (
@@ -40,6 +42,7 @@ interface UsePhotoToolParams {
 export function usePhotoTool({
   active,
   gameSize,
+  distanceUnit = "imperial",
   pendingQuestions,
   awaitHiderAnswer = false,
   submitPendingQuestion,
@@ -105,7 +108,7 @@ export function usePhotoTool({
     }
 
     await submitPendingQuestion({
-      promptText: photoQuestionPrompt(categoryId),
+      promptText: photoQuestionPrompt(categoryId, distanceUnit),
       replyOptions: [...PHOTO_REPLY_OPTIONS],
       placement: {
         geometryJson: JSON.stringify({
@@ -127,6 +130,7 @@ export function usePhotoTool({
     cardDraw,
     cardKeep,
     categoryId,
+    distanceUnit,
     finishPlacement,
     senderUid,
     sessionId,
@@ -141,6 +145,7 @@ export function usePhotoTool({
     active && awaitHiderAnswer ? (
       <PhotoPanel
         gameSize={gameSize}
+        distanceUnit={distanceUnit}
         categoryId={categoryId}
         usedCategoryIds={usedCategories}
         costLabel={costLabel}

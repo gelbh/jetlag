@@ -13,7 +13,7 @@ import { gameAreaToBoundingBox } from "../../geometry/gameArea/gameAreaBounds";
 export type GameSize = "small" | "medium" | "large";
 
 export const HIDING_ZONE_RADIUS_MIN_METERS = 100;
-export const HIDING_ZONE_RADIUS_MAX_METERS = 800;
+export const HIDING_ZONE_RADIUS_MAX_METERS = 1000;
 export const HIDING_ZONE_RADIUS_BUS_PRESET_METERS = 250;
 
 const SQ_METERS_PER_SQ_MILE = 2_589_988.110336;
@@ -150,11 +150,11 @@ export function formatHidingZoneRadiusLabel(
   const resolved = resolveDistanceUnit(unit);
 
   if (resolved === "metric") {
-    if (Math.abs(radiusMeters - 400) < 5) {
-      return "400 m";
+    if (Math.abs(radiusMeters - 500) < 5) {
+      return "500 m";
     }
-    if (Math.abs(radiusMeters - 800) < 5) {
-      return "800 m";
+    if (Math.abs(radiusMeters - 1000) < 5) {
+      return "1 km";
     }
     if (radiusMeters >= 1000) {
       return `${(radiusMeters / 1000).toFixed(1)} km`;
@@ -187,8 +187,8 @@ export function gameSizeLabel(
   const hidingRadiusLabel =
     resolved === "metric"
       ? size === "large"
-        ? "800 m"
-        : "400 m"
+        ? "1 km"
+        : "500 m"
       : size === "large"
         ? "½ mile"
         : "¼ mile";
@@ -199,7 +199,7 @@ export function gameSizeLabel(
         label: "Small",
         summary:
           resolved === "metric"
-            ? "Town or neighborhood, 400 m hiding zones"
+            ? "Town or neighborhood, 500 m hiding zones"
             : "Town or neighborhood, ¼ mi hiding zones",
         hidingRadiusLabel,
       };
@@ -208,7 +208,7 @@ export function gameSizeLabel(
         label: "Medium",
         summary:
           resolved === "metric"
-            ? "City or metro area, 400 m hiding zones"
+            ? "City or metro area, 500 m hiding zones"
             : "City or metro area, ¼ mi hiding zones",
         hidingRadiusLabel,
       };
@@ -217,7 +217,7 @@ export function gameSizeLabel(
         label: "Large",
         summary:
           resolved === "metric"
-            ? "Region or country, 800 m hiding zones"
+            ? "Region or country, 1 km hiding zones"
             : "Region or country, ½ mi hiding zones",
         hidingRadiusLabel,
       };

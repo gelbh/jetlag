@@ -1,19 +1,21 @@
 import { useState } from "react";
 import {
-  getPhotoCategory,
   PHOTO_CANNOT_ANSWER_LABEL,
   PHOTO_SENT_EXTERNALLY_LABEL,
   PHOTO_UPLOAD_OUTAGE_NOTICE,
   photoAnswerSelectedReply,
+  photoRuleSummaryForUnit,
   readPhotoCategoryId,
   type PhotoAnswer,
 } from "../../domain/questions";
+import type { DistanceUnit } from "../../domain/map/distance";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 
 interface PhotoAnswerUploaderProps {
   sessionId: string;
   pendingQuestion: PendingQuestionRecord;
   messageId: string;
+  distanceUnit?: DistanceUnit;
   deadlineExpired?: boolean;
   onAnswerQuestion: (
     pendingQuestionId: string,
@@ -27,6 +29,7 @@ interface PhotoAnswerUploaderProps {
 export function PhotoAnswerUploader({
   pendingQuestion,
   messageId,
+  distanceUnit = "imperial",
   deadlineExpired = false,
   onAnswerQuestion,
 }: PhotoAnswerUploaderProps) {
@@ -34,7 +37,7 @@ export function PhotoAnswerUploader({
   const [error, setError] = useState<string | null>(null);
   const categoryId = readPhotoCategoryId(pendingQuestion);
   const ruleSummary = categoryId
-    ? getPhotoCategory(categoryId).ruleSummary
+    ? photoRuleSummaryForUnit(categoryId, distanceUnit)
     : null;
 
   const submitAnswer = async (answer: PhotoAnswer) => {
