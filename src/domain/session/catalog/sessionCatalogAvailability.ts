@@ -12,10 +12,7 @@ import {
 import type { MatchingCategoryDefinition } from "../../questions/matchingQuestions";
 import type { MeasuringCatalogOption } from "../../questions/measuringQuestions";
 import { customCategoryToMatchingDefinition } from "../../questions/matchingQuestions";
-import {
-  customCategoryToMeasuringOption,
-  resolveMeasuringCatalogOption,
-} from "./sessionCustomCatalog";
+import { customCategoryToMeasuringOption } from "./sessionCustomCatalog";
 import type { SessionCustomMeasureGeometry } from "./customMeasureGeometry";
 import { customMeasureGeometryToMeasuringOption } from "./customMeasureGeometryCatalog";
 import { applyRegionPackMatchingLabels } from "../../regions/regionPackLabels";
@@ -122,10 +119,6 @@ export function resolveAvailableMeasuringOption(
   session: SessionRulesInput,
 ): MeasuringCatalogOption | null {
   return (
-    resolveMeasuringCatalogOption(
-      kind as Parameters<typeof resolveMeasuringCatalogOption>[0],
-      session.customCategories ?? [],
-    ) ??
     availableMeasuringCatalog(session).find((option) => option.id === kind) ??
     null
   );

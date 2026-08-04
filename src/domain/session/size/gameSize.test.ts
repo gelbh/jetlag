@@ -85,6 +85,8 @@ describe("gameSize", () => {
 
   it("formats custom hiding zone radius labels", () => {
     expect(formatHidingZoneRadiusLabel(250, "metric")).toBe("250 m");
+    expect(formatHidingZoneRadiusLabel(500, "metric")).toBe("500 m");
+    expect(formatHidingZoneRadiusLabel(1000, "metric")).toBe("1 km");
     expect(formatHidingZoneRadiusLabel(milesToMeters(0.25))).toBe("¼ mile");
   });
 });

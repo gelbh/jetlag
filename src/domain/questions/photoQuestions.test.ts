@@ -55,6 +55,12 @@ describe("photoQuestions", () => {
     expect(photoRuleSummaryForUnit("place_of_worship", "metric")).toContain(
       "2 m × 2 m",
     );
+    expect(photoRuleSummaryForUnit("train_platform", "metric")).toContain(
+      "2 m × 2 m",
+    );
+    expect(photoRuleSummaryForUnit("tree", "metric")).toBe(
+      photoRuleSummaryForUnit("tree", "imperial"),
+    );
     expect(photoQuestionPrompt("half_mile_streets_traced", "imperial")).toContain(
       "½ mile",
     );

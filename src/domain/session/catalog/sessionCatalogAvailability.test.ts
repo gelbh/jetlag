@@ -6,6 +6,7 @@ import {
   BASE_MATCHING_CATEGORY_COUNT,
   BASE_MEASURING_CATALOG_COUNT,
   isCategoryInDefaultPicker,
+  resolveAvailableMeasuringOption,
 } from "./sessionCatalogAvailability";
 import { isCustomQuestionPackCategoryId } from "../../questions/customQuestionPack";
 
@@ -82,5 +83,22 @@ describe("sessionCatalogAvailability", () => {
         customQuestionPackEnabled: true,
       }),
     ).toBe(true);
+  });
+
+  it("resolves measuring options only from the available catalog", () => {
+    expect(
+      resolveAvailableMeasuringOption("custom_place", { gameSize: "medium" }),
+    ).toBeNull();
+    expect(
+      resolveAvailableMeasuringOption("custom_place", {
+        gameSize: "medium",
+        customQuestionPackEnabled: true,
+      })?.id,
+    ).toBe("custom_place");
+    expect(
+      resolveAvailableMeasuringOption("commercial_airport", {
+        gameSize: "medium",
+      })?.id,
+    ).toBe("commercial_airport");
   });
 });
