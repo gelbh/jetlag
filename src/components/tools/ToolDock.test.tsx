@@ -82,7 +82,7 @@ describe("ToolDock", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("keeps Chat and Settings off the hunt island", () => {
+  it("keeps Chat, Settings, and Draw off the hunt island", () => {
     renderWithRouter(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
 
     const hunt = document.querySelector('[data-island="hunt"]');
@@ -93,7 +93,9 @@ describe("ToolDock", () => {
     expect(huntLabels).not.toContain("Chat");
     expect(huntLabels).not.toContain("Settings");
     expect(huntLabels).not.toContain("Report");
-    expect(huntLabels).toContain("Draw");
+    expect(huntLabels).not.toContain("Draw");
+    expect(huntLabels).toContain("Undo");
+    expect(huntLabels).toContain("Redo");
   });
 
   it("shows unread badge on session chat only when hasUnreadChat is true", () => {
@@ -163,6 +165,8 @@ describe("ToolDock", () => {
 
     expect(labels).toEqual(
       expect.arrayContaining([
+        "Undo",
+        "Redo",
         "Match",
         "Measure",
         "Thermo",
@@ -197,7 +201,7 @@ describe("ToolDock", () => {
     expect(document.querySelector('[data-island="session"]')).not.toBeNull();
   });
 
-  it("places Undo left and Redo right of Hunt and routes history actions", () => {
+  it("places Undo and Redo with question tools in hunt and Draw on the session dock", () => {
     const onUndo = vi.fn();
     const onRedo = vi.fn();
     renderWithRouter(
@@ -216,16 +220,30 @@ describe("ToolDock", () => {
     const bandIslands = [
       ...(bottom?.querySelectorAll("[data-island]") ?? []),
     ].map((el) => el.getAttribute("data-island"));
-    expect(bandIslands).toEqual(["history-start", "hunt", "history-end"]);
-
-    const undo = screen.getByRole("button", { name: "Undo last annotation" });
-    const redo = screen.getByRole("button", { name: "Redo last annotation" });
-    expect(screen.getByRole("group", { name: "Undo" })).toBeInTheDocument();
-    expect(screen.getByRole("group", { name: "Redo" })).toBeInTheDocument();
+    expect(bandIslands).toEqual(["hunt"]);
+    expect(document.querySelector('[data-island="history-start"]')).toBeNull();
+    expect(document.querySelector('[data-island="history-end"]')).toBeNull();
 
     const hunt = document.querySelector('[data-island="hunt"]');
-    expect(hunt?.querySelector('[aria-label="Undo last annotation"]')).toBeNull();
-    expect(hunt?.querySelector('[aria-label="Redo last annotation"]')).toBeNull();
+    const undo = within(hunt as HTMLElement).getByRole("button", {
+      name: "Undo last annotation",
+    });
+    const redo = within(hunt as HTMLElement).getByRole("button", {
+      name: "Redo last annotation",
+    });
+    expect(
+      within(hunt as HTMLElement).queryByRole("button", { name: "Draw on map" }),
+    ).toBeNull();
+
+    const sessionTools = screen.getByLabelText("Session tools");
+    expect(
+      within(sessionTools).getByRole("button", { name: "Draw on map" }),
+    ).toBeInTheDocument();
+
+    const huntLabels = [
+      ...(hunt?.querySelectorAll(".jl-tool-slot-label") ?? []),
+    ].map((node) => node.textContent?.trim() ?? "");
+    expect(huntLabels.slice(0, 2)).toEqual(["Undo", "Redo"]);
 
     fireEvent.click(undo);
     fireEvent.click(redo);
@@ -233,7 +251,7 @@ describe("ToolDock", () => {
     expect(onRedo).toHaveBeenCalledTimes(1);
   });
 
-  it("disables unavailable and inactive history bookends", () => {
+  it("disables unavailable and inactive history slots", () => {
     const { rerender } = renderWithRouter(
       <ToolDock {...dockBase} canUndo={false} canRedo={false} />,
     );

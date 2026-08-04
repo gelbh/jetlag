@@ -22,53 +22,27 @@ describe("MapBottomChrome", () => {
     render(
       <MapBottomChrome
         layout="phone"
-        historyStart={<button type="button">Undo</button>}
-        historyEnd={<button type="button">Redo</button>}
         hunt={<button type="button">Radar</button>}
         session={<button type="button">Chat</button>}
         mapControls={<button type="button">Recenter map on play area</button>}
       />,
     );
-    expect(screen.getByRole("button", { name: "Undo" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Redo" })).toBeInTheDocument();
-    expect(screen.getByRole("group", { name: "Undo" })).toBeInTheDocument();
-    expect(screen.getByRole("group", { name: "Redo" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Radar" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Chat" })).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Recenter map on play area" }),
     ).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Hunt tools" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Session tools" })).toBeInTheDocument();
   });
 
-  it("omits history bookends when historyStart/historyEnd are undefined", () => {
+  it("omits history bookend islands (undo/redo live inside hunt)", () => {
     const { container } = render(
       <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
     );
     expect(container.querySelector('[data-island="history-start"]')).toBeNull();
     expect(container.querySelector('[data-island="history-end"]')).toBeNull();
     expect(container.querySelector('[data-island="hunt"]')).not.toBeNull();
-  });
-
-  it("renders a single bookend when only one history prop is set", () => {
-    const { container, rerender } = render(
-      <MapBottomChrome
-        layout="phone"
-        historyStart={<button type="button">Undo</button>}
-        hunt={<button type="button">Radar</button>}
-      />,
-    );
-    expect(container.querySelector('[data-island="history-start"]')).not.toBeNull();
-    expect(container.querySelector('[data-island="history-end"]')).toBeNull();
-
-    rerender(
-      <MapBottomChrome
-        layout="phone"
-        historyEnd={<button type="button">Redo</button>}
-        hunt={<button type="button">Radar</button>}
-      />,
-    );
-    expect(container.querySelector('[data-island="history-start"]')).toBeNull();
-    expect(container.querySelector('[data-island="history-end"]')).not.toBeNull();
   });
 
   it("wraps phone chrome in a fixed host", () => {
@@ -94,12 +68,10 @@ describe("MapBottomChrome", () => {
     ).not.toBeNull();
   });
 
-  it("puts history bookends and hunt in the bottom band and session/map-controls in the side stack", () => {
+  it("puts hunt in the bottom band and session/map-controls in the side stack", () => {
     const { container } = render(
       <MapBottomChrome
         layout="phone"
-        historyStart={<button type="button">Undo</button>}
-        historyEnd={<button type="button">Redo</button>}
         hunt={<button type="button">Radar</button>}
         session={<button type="button">Chat</button>}
         mapControls={<button type="button">Recenter map on play area</button>}
@@ -109,9 +81,7 @@ describe("MapBottomChrome", () => {
     const side = container.querySelector(".jl-map-chrome-side-stack");
     expect(bottom).not.toBeNull();
     expect(side).not.toBeNull();
-    expect(bottom?.querySelector('[data-island="history-start"]')).not.toBeNull();
     expect(bottom?.querySelector('[data-island="hunt"]')).not.toBeNull();
-    expect(bottom?.querySelector('[data-island="history-end"]')).not.toBeNull();
     expect(bottom?.querySelector('[data-island="session"]')).toBeNull();
     expect(bottom?.querySelector('[data-island="map-controls"]')).toBeNull();
     expect(side?.querySelector('[data-island="session"]')).not.toBeNull();
@@ -120,7 +90,7 @@ describe("MapBottomChrome", () => {
     const bandIslands = [
       ...(bottom?.querySelectorAll("[data-island]") ?? []),
     ].map((el) => el.getAttribute("data-island"));
-    expect(bandIslands).toEqual(["history-start", "hunt", "history-end"]);
+    expect(bandIslands).toEqual(["hunt"]);
   });
 
   it("keeps an empty side stack when session and map-controls are absent", () => {
@@ -137,8 +107,7 @@ describe("MapBottomChrome", () => {
     const { container } = render(
       <MapBottomChrome
         layout="rail"
-        historyStart={<button type="button">Undo</button>}
-        historyEnd={<button type="button">Redo</button>}
+        hunt={<button type="button">Radar</button>}
         session={<button type="button">Chat</button>}
       />,
     );
@@ -147,12 +116,9 @@ describe("MapBottomChrome", () => {
     const side = container.querySelector(".jl-map-chrome-side-stack");
     expect(bottom).not.toBeNull();
     expect(side).not.toBeNull();
-    expect(bottom?.querySelector('[data-island="history-start"]')).not.toBeNull();
-    expect(bottom?.querySelector('[data-island="history-end"]')).not.toBeNull();
+    expect(bottom?.querySelector('[data-island="hunt"]')).not.toBeNull();
     expect(bottom?.querySelector('[data-island="session"]')).toBeNull();
     expect(side?.querySelector('[data-island="session"]')).not.toBeNull();
-    expect(side?.querySelector('[data-island="history-start"]')).toBeNull();
-    expect(side?.querySelector('[data-island="history-end"]')).toBeNull();
   });
 
   it("clears the MapView Recenter portal with width/height-scoped offset tokens", () => {
@@ -214,14 +180,15 @@ describe("MapBottomChrome", () => {
     expect(hunt?.classList.contains("jl-map-island--hunt-sparse")).toBe(true);
   });
 
-  it("sizes bookend islands as non-growing and hunt chips as equal flex", () => {
-    expect(chromeCss).toMatch(
-      /\.jl-map-island--history-start,\s*\.jl-map-island--history-end\s*\{[^}]*flex:\s*0\s+0\s+auto/s,
-    );
+  it("sizes hunt chips as equal flex without edge history islands", () => {
+    expect(chromeCss).not.toMatch(/\.jl-map-island--history-start/);
+    expect(chromeCss).not.toMatch(/\.jl-map-island--history-end/);
     expect(chromeCss).toMatch(
       /\.jl-map-island\s+\.jl-tool-dock-group-main\s+\.jl-tool-slot\s*\{[^}]*flex:\s*1\s+1\s+0/s,
     );
-    expect(chromeCss).not.toMatch(/history-bookends/);
+    expect(chromeCss).toMatch(
+      /\.jl-map-chrome-bottom-band\s*\{[^}]*justify-content:\s*center/s,
+    );
   });
 
   it("anchors container-inset map controls to --dock-height token", () => {
