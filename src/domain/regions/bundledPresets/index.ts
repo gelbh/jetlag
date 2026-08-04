@@ -14,7 +14,7 @@ import { defaultAdvancedSessionSettings } from "../../session/tools/advancedSess
 import { recommendGameSizeFromPlayAreaSquareMiles } from "../../session/size/gameSize";
 
 export type { BundledGamePresetDefinition } from "./shared";
-export { EXPANSION_ON, titleCase } from "./shared";
+export { EXPANSION_OFF, titleCase } from "./shared";
 
 export const BUNDLED_GAME_PRESET_DEFINITIONS: readonly BundledGamePresetDefinition[] =
   [

@@ -1,5 +1,5 @@
 import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_ON, type BundledGamePresetDefinition } from "./shared";
+import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { LUCERNE_REGION_PACK_ID } from "../lucerneRegionPack";
 import { ZURICH_REGION_PACK_ID } from "../zurichRegionPack";
 
@@ -22,7 +22,7 @@ export function swissPresets(): BundledGamePresetDefinition[] {
         { id: "canton-zurich", category: "Canton", name: "Zürich" },
       ],
       distanceUnit: "metric",
-      advancedSettingsPatch: EXPANSION_ON,
+      advancedSettingsPatch: EXPANSION_OFF,
     }),
     attachPlayArea({
       id: "bundled:zurich-city",
@@ -38,7 +38,7 @@ export function swissPresets(): BundledGamePresetDefinition[] {
         { id: "zurich-city", category: "City", name: "Zürich city" },
       ],
       distanceUnit: "metric",
-      advancedSettingsPatch: EXPANSION_ON,
+      advancedSettingsPatch: EXPANSION_OFF,
     }),
     attachPlayArea({
       id: "bundled:lucerne-metro",
@@ -53,7 +53,7 @@ export function swissPresets(): BundledGamePresetDefinition[] {
         { id: "lucerne-metro", category: "Metro", name: "Lucerne" },
       ],
       distanceUnit: "metric",
-      advancedSettingsPatch: EXPANSION_ON,
+      advancedSettingsPatch: EXPANSION_OFF,
     }),
   ];
 }

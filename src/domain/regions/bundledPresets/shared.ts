@@ -17,8 +17,8 @@ export interface BundledGamePresetDefinition {
   playAreaSquareMiles: number;
 }
 
-export const EXPANSION_ON: Partial<AdvancedSessionSettingsValue> = {
-  expansionPackEnabled: true,
+export const EXPANSION_OFF: Partial<AdvancedSessionSettingsValue> = {
+  expansionPackEnabled: false,
   customQuestionPackEnabled: false,
 };
 

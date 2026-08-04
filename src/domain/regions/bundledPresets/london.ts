@@ -1,5 +1,5 @@
 import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_ON, titleCase, type BundledGamePresetDefinition } from "./shared";
+import { EXPANSION_OFF, titleCase, type BundledGamePresetDefinition } from "./shared";
 import { LONDON_REGION_PACK_ID } from "../londonRegionPack";
 
 const LONDON_BOROUGH_IDS = [
@@ -61,7 +61,7 @@ export function londonPresets(): BundledGamePresetDefinition[] {
       regionPackId: LONDON_REGION_PACK_ID,
       hierarchy: baseHierarchy,
       distanceUnit: "metric",
-      advancedSettingsPatch: EXPANSION_ON,
+      advancedSettingsPatch: EXPANSION_OFF,
       transitMetroId: "london",
     }),
     ...LONDON_BOROUGH_IDS.map(
@@ -74,7 +74,7 @@ export function londonPresets(): BundledGamePresetDefinition[] {
         subregionId: boroughId,
         hierarchy: boroughHierarchy,
         distanceUnit: "metric",
-        advancedSettingsPatch: EXPANSION_ON,
+        advancedSettingsPatch: EXPANSION_OFF,
         transitMetroId: "london",
        }),
     ),

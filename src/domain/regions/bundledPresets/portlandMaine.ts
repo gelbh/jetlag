@@ -1,5 +1,5 @@
 import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_ON, type BundledGamePresetDefinition } from "./shared";
+import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { PORTLAND_MAINE_REGION_PACK_ID } from "../portlandMaineRegionPack";
 
 const PORTLAND_MAINE_DISTRICTS = [
@@ -33,7 +33,7 @@ export function portlandMainePresets(): BundledGamePresetDefinition[] {
       regionPackId: PORTLAND_MAINE_REGION_PACK_ID,
       hierarchy: baseHierarchy,
       distanceUnit: "imperial",
-      advancedSettingsPatch: EXPANSION_ON,
+      advancedSettingsPatch: EXPANSION_OFF,
       transitMetroId: "portland-maine",
     }),
     ...PORTLAND_MAINE_DISTRICTS.map(
@@ -46,7 +46,7 @@ export function portlandMainePresets(): BundledGamePresetDefinition[] {
         subregionId: district.id,
         hierarchy: districtHierarchy,
         distanceUnit: "imperial",
-        advancedSettingsPatch: EXPANSION_ON,
+        advancedSettingsPatch: EXPANSION_OFF,
         transitMetroId: "portland-maine",
        }),
     ),

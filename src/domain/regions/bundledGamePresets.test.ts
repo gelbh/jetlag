@@ -50,19 +50,24 @@ describe("bundledGamePresets", () => {
   });
 
   it("applies preset tuning to bundled game presets", () => {
-    const nyc = buildBundledGamePresets().find((preset) => preset.id === "bundled:nyc");
+    const presets = buildBundledGamePresets();
+    expect(
+      presets.every((preset) => preset.advancedSettings.expansionPackEnabled === false),
+    ).toBe(true);
+
+    const nyc = presets.find((preset) => preset.id === "bundled:nyc");
     expect(nyc?.distanceUnit).toBe("imperial");
     expect(nyc?.transitMetroId).toBe("nyc");
-    expect(nyc?.advancedSettings.expansionPackEnabled).toBe(true);
+    expect(nyc?.advancedSettings.expansionPackEnabled).toBe(false);
 
-    const portlandMaine = buildBundledGamePresets().find(
+    const portlandMaine = presets.find(
       (preset) => preset.id === "bundled:portland-maine",
     );
     expect(portlandMaine?.distanceUnit).toBe("imperial");
     expect(portlandMaine?.transitMetroId).toBe("portland-maine");
     expect(portlandMaine?.regionPackId).toBe("portland-maine");
 
-    const princeRupert = buildBundledGamePresets().find(
+    const princeRupert = presets.find(
       (preset) => preset.id === "bundled:prince-rupert",
     );
     expect(princeRupert?.distanceUnit).toBe("metric");
