@@ -643,6 +643,9 @@ export function HiderMapScreen() {
           focusBounds={mapFocusBounds}
           fitBoundsMode="once"
           recenterToken={recenterToken}
+          showRecenterControl
+          recenterAriaLabel="Recenter map on play area"
+          onRecenter={() => setRecenterToken((value) => value + 1)}
           onMapClick={handleMapClick}
           className="h-full w-full"
         >
@@ -819,7 +822,6 @@ export function HiderMapScreen() {
         onOpenChat={openChatExclusive}
         onOpenSettings={openSettingsExclusive}
         onOpenCodes={openCodesExclusive}
-        onRecenter={() => setRecenterToken((value) => value + 1)}
         expansionPackEnabled={expansionPackEnabled}
         expansionMenuOpen={expansionMenuOpen}
         onExpansionMenuOpenChange={setExpansionMenuOpen}

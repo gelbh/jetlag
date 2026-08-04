@@ -267,7 +267,7 @@ describe("ToolDock", () => {
 });
 
 describe("HiderToolDock", () => {
-  it("puts Recenter on map controls and session tools on the session island", () => {
+  it("keeps hider tools in the bottom-middle hunt island and session on the side", () => {
     const onOpenReportProblem = vi.fn();
     renderWithRouter(
       <HiderToolDock
@@ -275,7 +275,6 @@ describe("HiderToolDock", () => {
         onZoneAction={vi.fn()}
         showExpansion={false}
         onExpansion={vi.fn()}
-        onRecenter={vi.fn()}
         onOpenChat={vi.fn()}
         onOpenLog={vi.fn()}
         onOpenSettings={vi.fn()}
@@ -287,15 +286,17 @@ describe("HiderToolDock", () => {
     const huntLabels = [
       ...(hunt?.querySelectorAll(".jl-tool-slot-label") ?? []),
     ].map((node) => node.textContent?.trim() ?? "");
+    expect(huntLabels).toEqual(["Set zone"]);
     expect(huntLabels).not.toContain("Chat");
     expect(huntLabels).not.toContain("Report");
     expect(huntLabels).not.toContain("Settings");
     expect(huntLabels).not.toContain("Recenter");
 
+    // Map controls (Recenter) live on the left MapView stack — not in bottom chrome.
+    expect(document.querySelector('[data-island="map-controls"]')).toBeNull();
     expect(
-      screen.getByRole("button", { name: "Recenter map on play area" }),
-    ).toBeInTheDocument();
-    expect(document.querySelector('[data-island="map-controls"]')).not.toBeNull();
+      screen.queryByRole("button", { name: "Recenter map on play area" }),
+    ).toBeNull();
 
     const sessionTools = screen.getByLabelText("Session tools");
     expect(
@@ -322,7 +323,6 @@ describe("HiderToolDock", () => {
         onZoneAction={vi.fn()}
         showExpansion
         onExpansion={vi.fn()}
-        onRecenter={vi.fn()}
         onOpenChat={vi.fn()}
         onOpenLog={vi.fn()}
         onOpenSettings={vi.fn()}

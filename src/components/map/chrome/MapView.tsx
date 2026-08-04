@@ -42,6 +42,7 @@ function pickMapLibreProps(props: MapViewProps): MapViewMapLibreProps {
     mapStyleControlInset: props.mapStyleControlInset,
     showRecenterControl: props.showRecenterControl,
     onRecenter: props.onRecenter,
+    recenterAriaLabel: props.recenterAriaLabel,
   };
 }
 

@@ -10,9 +10,15 @@ export async function openChat(page: Page) {
   await dismissActiveToolPanel(page);
   await dismissMapOnboarding(page);
 
+  // Hider chat uses jl-panel-hider-wizard above the dock; if still mounted after
+  // dismiss (exit animation / bare Close), treat chat as already open.
+  if (await page.getByLabel("Chat tabs").isVisible().catch(() => false)) {
+    return;
+  }
+
   const dockChat = page.getByRole("button", { name: "Open chat" });
   if (await dockChat.isVisible().catch(() => false)) {
-    await dockChat.click();
+    await dockChat.click({ force: true });
     return;
   }
 
@@ -20,7 +26,7 @@ export async function openChat(page: Page) {
     name: "Open chat, unread messages",
   });
   if (await unreadChat.isVisible().catch(() => false)) {
-    await unreadChat.click();
+    await unreadChat.click({ force: true });
     return;
   }
 

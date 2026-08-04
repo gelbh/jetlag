@@ -290,6 +290,7 @@ export function MapViewMapLibre({
   mapStyleControlInset,
   showRecenterControl,
   onRecenter,
+  recenterAriaLabel,
 }: MapViewMapLibreProps) {
   const mapRef = useRef<MapRef>(null);
   const onBoundsChangeRef = useRef(onBoundsChange);
@@ -437,6 +438,7 @@ export function MapViewMapLibre({
               enabled={showRecenterControl ?? false}
               inset={zoomControlInset}
               onRecenter={onRecenter}
+              ariaLabel={recenterAriaLabel}
             />
             <MapZoomControl
               enabled={zoomControlEnabled}

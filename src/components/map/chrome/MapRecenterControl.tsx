@@ -14,12 +14,15 @@ interface MapRecenterControlProps {
   enabled: boolean;
   inset?: MapChromeControlInset;
   onRecenter?: () => void;
+  /** Accessible name + title (play-area vs question placement). */
+  ariaLabel?: string;
 }
 
 export function MapRecenterControl({
   enabled,
   inset = "dock",
   onRecenter,
+  ariaLabel = "Recenter on question",
 }: MapRecenterControlProps) {
   const map = useMapLibreMap();
   const portalTarget = useMemo(() => map.getContainer(), [map]);
@@ -36,8 +39,8 @@ export function MapRecenterControl({
     >
       <MapChromeControl
         className="map-recenter-control__btn"
-        aria-label="Recenter on question"
-        title="Recenter on question"
+        aria-label={ariaLabel}
+        title={ariaLabel}
         onClick={onRecenter}
         icon={<HudRefreshIcon className="h-5 w-5" />}
       />
