@@ -5,12 +5,14 @@ import { RoleCodesSheet } from "./RoleCodesSheet";
 
 const revealRolePasscode = vi.fn();
 const regenerateRolePasscode = vi.fn();
+const prefetchRolePasscode = vi.fn();
 const copy = vi.fn();
 
 vi.mock("../../../services/session/rolePasscodeLifecycle", () => ({
   revealRolePasscode: (...args: unknown[]) => revealRolePasscode(...args),
   regenerateRolePasscode: (...args: unknown[]) =>
     regenerateRolePasscode(...args),
+  prefetchRolePasscode: (...args: unknown[]) => prefetchRolePasscode(...args),
 }));
 
 vi.mock("../../../hooks/forms/useCopyFeedback", () => ({

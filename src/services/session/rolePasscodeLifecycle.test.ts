@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   cancelRoleJoinRequest,
+  clearRolePasscodeRevealWarm,
   initSessionRoleGates,
   joinSessionWithRole,
   leaveSessionMembership,
@@ -30,6 +31,7 @@ vi.mock("../../domain/device/changelog", () => ({
 describe("rolePasscodeLifecycle", () => {
   beforeEach(() => {
     httpsCallable.mockReset();
+    clearRolePasscodeRevealWarm();
   });
 
   it("calls joinSessionWithRole with the join payload", async () => {
@@ -75,6 +77,75 @@ describe("rolePasscodeLifecycle", () => {
 
     expect(reveal).toHaveBeenCalledWith({ sessionId: "sess-1", role: "observer" });
     expect(regenerate).toHaveBeenCalledWith({ sessionId: "sess-1", role: "seeker" });
+  });
+
+  it("coalesces in-flight reveal requests without durable memoization", async () => {
+    let resolveReveal: ((value: { data: { role: "seeker"; rolePasscode: string } }) => void) | undefined;
+    const reveal = vi.fn(
+      () =>
+        new Promise<{ data: { role: "seeker"; rolePasscode: string } }>((resolve) => {
+          resolveReveal = resolve;
+        }),
+    );
+    httpsCallable.mockReturnValue(reveal);
+
+    const first = revealRolePasscode("sess-1", "seeker");
+    const second = revealRolePasscode("sess-1", "seeker");
+    await vi.waitFor(() => {
+      expect(reveal).toHaveBeenCalledTimes(1);
+    });
+
+    resolveReveal?.({ data: { role: "seeker", rolePasscode: "ABCD" } });
+    await expect(first).resolves.toEqual({ role: "seeker", rolePasscode: "ABCD" });
+    await expect(second).resolves.toEqual({ role: "seeker", rolePasscode: "ABCD" });
+
+    const revealAgain = vi.fn(async () => ({
+      data: { role: "seeker" as const, rolePasscode: "EFGH" },
+    }));
+    httpsCallable.mockReturnValue(revealAgain);
+    await expect(revealRolePasscode("sess-1", "seeker")).resolves.toEqual({
+      role: "seeker",
+      rolePasscode: "EFGH",
+    });
+    expect(revealAgain).toHaveBeenCalledTimes(1);
+  });
+
+  it("abandons warm reveal when regenerating so late prefetch cannot win", async () => {
+    let resolvePrefetch: ((value: { data: { role: "seeker"; rolePasscode: string } }) => void) | undefined;
+    const prefetchReveal = vi.fn(
+      () =>
+        new Promise<{ data: { role: "seeker"; rolePasscode: string } }>((resolve) => {
+          resolvePrefetch = resolve;
+        }),
+    );
+    const regenerate = vi.fn(async () => ({
+      data: { role: "seeker" as const, rolePasscode: "NEW1" },
+    }));
+    const revealAfter = vi.fn(async () => ({
+      data: { role: "seeker" as const, rolePasscode: "NEW1" },
+    }));
+
+    httpsCallable.mockReturnValueOnce(prefetchReveal);
+    const warm = revealRolePasscode("sess-1", "seeker");
+    await vi.waitFor(() => {
+      expect(prefetchReveal).toHaveBeenCalledTimes(1);
+    });
+
+    httpsCallable.mockReturnValueOnce(regenerate);
+    await expect(regenerateRolePasscode("sess-1", "seeker")).resolves.toEqual({
+      role: "seeker",
+      rolePasscode: "NEW1",
+    });
+
+    resolvePrefetch?.({ data: { role: "seeker", rolePasscode: "OLD1" } });
+    await expect(warm).resolves.toEqual({ role: "seeker", rolePasscode: "OLD1" });
+
+    httpsCallable.mockReturnValueOnce(revealAfter);
+    await expect(revealRolePasscode("sess-1", "seeker")).resolves.toEqual({
+      role: "seeker",
+      rolePasscode: "NEW1",
+    });
+    expect(revealAfter).toHaveBeenCalledTimes(1);
   });
 
   it("calls initSessionRoleGates for host bootstrap", async () => {
