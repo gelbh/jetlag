@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import { MotionSheet } from "../../motion/MotionSheet";
 import { SheetHeader } from "../../ui/sheets/SheetHeader";
 import type {
@@ -58,19 +58,7 @@ function discardNeed(id: PowerUpId): number | null {
   }
 }
 
-export function HiderHandSheet({
-  open,
-  onClose,
-  state,
-  gameSize,
-  mustDiscard,
-  onDiscard,
-  onPlayExpand,
-  onPlayDiscardDraw,
-  onPlayCurse,
-  onClearCurse,
-  onPlayMove,
-}: {
+type HiderHandSheetProps = {
   open: boolean;
   onClose: () => void;
   state: BoardEconomyState;
@@ -86,7 +74,28 @@ export function HiderHandSheet({
   onPlayCurse: (instanceId: string) => void;
   onClearCurse: (instanceId: string) => void;
   onPlayMove: (instanceId: string) => void;
-}) {
+};
+
+/** Mount-gated so selection draft resets each open without an effect. */
+export function HiderHandSheet(props: HiderHandSheetProps) {
+  if (!props.open) {
+    return null;
+  }
+  return <HiderHandSheetOpen {...props} />;
+}
+
+function HiderHandSheetOpen({
+  onClose,
+  state,
+  gameSize,
+  mustDiscard,
+  onDiscard,
+  onPlayExpand,
+  onPlayDiscardDraw,
+  onPlayCurse,
+  onClearCurse,
+  onPlayMove,
+}: HiderHandSheetProps) {
   const [pendingDiscardDraw, setPendingDiscardDraw] = useState<{
     powerUpInstanceId: string;
     need: number;
@@ -95,18 +104,6 @@ export function HiderHandSheet({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [actionError, setActionError] = useState<string | null>(null);
   const errorId = useId();
-
-  useEffect(() => {
-    if (!open) {
-      setPendingDiscardDraw(null);
-      setSelectedIds([]);
-      setActionError(null);
-    }
-  }, [open]);
-
-  if (!open) {
-    return null;
-  }
 
   const toggleSelect = (instanceId: string) => {
     setSelectedIds((prev) =>
@@ -118,7 +115,7 @@ export function HiderHandSheet({
 
   return (
     <MotionSheet
-      open={open}
+      open
       onClose={onClose}
       ariaLabel="Hider hand"
       sheetClassName="mx-auto max-w-lg"

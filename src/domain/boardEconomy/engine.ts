@@ -255,7 +255,7 @@ export function playDiscardDrawPowerUp(
   if (requiredDiscard < 0 || discardInstanceIds.length !== requiredDiscard) {
     return state;
   }
-  let next = discardFromHand(state, [
+  const next = discardFromHand(state, [
     powerUpInstanceId,
     ...discardInstanceIds,
   ]);

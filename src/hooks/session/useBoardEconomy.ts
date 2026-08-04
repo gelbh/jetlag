@@ -28,11 +28,13 @@ export function useBoardEconomy(params: {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- clear subscription state when disabled */
     if (!enabled || !sessionId || !seed) {
       setState(null);
       setReady(false);
       return;
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
     let unsub: (() => void) | undefined;
     let cancelled = false;
     void (async () => {
