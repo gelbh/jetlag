@@ -195,6 +195,47 @@
     }
   }
 
+  /*
+   * Hider sparse Hunt: content-sized floating island centered in the bottom
+   * band (History absent). Seeker `tools` density keeps flex:1 shrink.
+   */
+  .jl-map-bottom-chrome--hunt-sparse:not(.jl-map-bottom-chrome--rail)
+    .jl-map-chrome-bottom-band {
+    justify-content: center;
+  }
+
+  .jl-map-bottom-chrome--hunt-sparse:not(.jl-map-bottom-chrome--rail)
+    .jl-map-island--hunt-sparse {
+    flex: 0 0 auto;
+    width: max-content;
+    max-width: 100%;
+    min-width: 0;
+    margin-inline: auto;
+    overflow: visible;
+  }
+
+  .jl-map-bottom-chrome--hunt-sparse:not(.jl-map-bottom-chrome--rail)
+    .jl-map-island--hunt-sparse
+    .jl-tool-dock-group-main {
+    flex: 0 0 auto;
+    min-width: max-content;
+    justify-content: flex-start;
+  }
+
+  .jl-map-island--hunt-sparse .jl-tool-dock-group-main .jl-tool-slot,
+  .jl-map-island--hunt-sparse .jl-tool-dock-group-end .jl-tool-slot {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 2.75rem;
+    max-width: none;
+    padding-inline: 0.375rem;
+  }
+
+  .jl-map-island--hunt-sparse .jl-tool-slot-label {
+    overflow: visible;
+    text-overflow: clip;
+  }
+
   .jl-map-island--session {
     color: var(--color-ink-secondary);
   }
@@ -310,6 +351,13 @@
     .jl-map-island .jl-tool-dock-group-end .jl-tool-slot {
       min-width: 1.875rem;
       max-width: 2.5rem;
+    }
+
+    /* Sparse hider chips keep content width (Set zone / Expansion). */
+    .jl-map-island--hunt-sparse .jl-tool-dock-group-main .jl-tool-slot,
+    .jl-map-island--hunt-sparse .jl-tool-dock-group-end .jl-tool-slot {
+      min-width: 2.75rem;
+      max-width: none;
     }
   }
 
