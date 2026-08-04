@@ -2,14 +2,11 @@ import { deleteField } from "firebase/firestore";
 import {
   assertFails,
   assertSucceeds,
-  type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
 import { describe, expect, it } from "vitest";
 import {
   bindRulesTestEnv,
-  adminContext,
   sessionPayload,
-  annotationPayload,
 } from "./helpers";
 
 describe("firestore.rules — sessions", () => {

@@ -1,7 +1,6 @@
 import {
   assertFails,
   assertSucceeds,
-  type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
 import {
