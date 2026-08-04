@@ -11,3 +11,9 @@ export const TransitLayer = lazyWithChunkRetry(() =>
     default: module.TransitLayer,
   })),
 );
+
+export const AdminBoundariesLayer = lazyWithChunkRetry(() =>
+  import("../../components/map/layers/AdminBoundariesLayer").then((module) => ({
+    default: module.AdminBoundariesLayer,
+  })),
+);

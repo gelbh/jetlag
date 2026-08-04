@@ -5,12 +5,11 @@ import { GeometryEditLayer } from "../../components/map/layers/GeometryEditLayer
 import { GameAreaMask } from "../../components/map/layers/GameAreaMask";
 import { MapView } from "../../components/map/chrome/MapView";
 import { MapDraftLayer } from "../../components/map/layers/MapDraftLayer";
-import { AdminBoundariesLayer } from "../../components/map/layers/AdminBoundariesLayer";
 import { LiveUserLocationLayer } from "../../components/map/layers/LiveUserLocationLayer";
 import { MapViewportTracker } from "../../components/map/chrome/MapViewportTracker";
 import { ActiveThermometerWalkLayer } from "../../components/map/layers/ActiveThermometerWalkLayer";
 import { PendingQuestionLayer } from "../../components/map/layers/PendingQuestionLayer";
-import { TransitLayer } from "./lazyImports";
+import { AdminBoundariesLayer, TransitLayer } from "./lazyImports";
 import type { MapScreenController } from "./useMapScreenController";
 
 type MapScreenMapLayersProps = Pick<
@@ -193,11 +192,13 @@ export function MapScreenMapLayers({
         ) : null}
         <MapDraftLayer overlays={mapDraftOverlays} />
         {showAdminBoundaries && !adminBoundaryLoading ? (
-          <AdminBoundariesLayer
-            features={adminBoundaryFeatures}
-            mapStyle={effectiveBasemapStyle}
-            streetBasemap={streetBasemap}
-          />
+          <Suspense fallback={null}>
+            <AdminBoundariesLayer
+              features={adminBoundaryFeatures}
+              mapStyle={effectiveBasemapStyle}
+              streetBasemap={streetBasemap}
+            />
+          </Suspense>
         ) : null}
         <LiveUserLocationLayer
           enabled={showCurrentLocation}

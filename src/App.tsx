@@ -155,7 +155,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    scheduleIdleBootWork(() => {
+    return scheduleIdleBootWork(() => {
       pruneStaleTimerSessions();
     });
   }, []);
