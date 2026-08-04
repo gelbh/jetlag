@@ -3,6 +3,7 @@ import type { AnnotationRecord } from "../map/annotations";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { buildCatalogHelpers } from "./catalogHelpers";
 import {
+  BASE_MEASURING_CATALOG,
   BODY_OF_WATER_MEASURING_QUESTION,
   COASTLINE_MEASURING_QUESTION,
   DEFAULT_MEASURING_FROM_KIND,
@@ -31,11 +32,15 @@ export type {
 } from "./measuring/measuringCatalog";
 
 export {
+  BASE_MEASURING_CATALOG,
   BODY_OF_WATER_DEFINITION,
   BODY_OF_WATER_MEASURING_QUESTION,
   COASTLINE_DEFINITION,
   COASTLINE_MEASURING_QUESTION,
+  CUSTOM_PACK_GATED_MEASURING,
+  CUSTOM_PACK_GATED_MEASURING_IDS,
   DEFAULT_MEASURING_FROM_KIND,
+  isCustomPackGatedMeasuringId,
   MEASURING_CATALOG,
   MEASURING_GROUPS,
   MEASURE_RULE_SUMMARY,
@@ -273,9 +278,10 @@ export function usedMeasuringFromKinds(
 
 export function firstAvailableMeasuringFromKind(
   usedKinds: ReadonlySet<MeasuringFromKind>,
+  catalog: readonly MeasuringCatalogOption[] = BASE_MEASURING_CATALOG,
 ): MeasuringFromKind | null {
   return measuringCatalogHelpers.firstAvailableFromCatalog(
-    MEASURING_CATALOG,
+    catalog,
     usedKinds,
   );
 }

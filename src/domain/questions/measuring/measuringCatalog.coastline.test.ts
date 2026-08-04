@@ -1,0 +1,30 @@
+import { describe, expect, it } from "vitest";
+import {
+  BASE_MEASURING_CATALOG,
+  COASTLINE_DEFINITION,
+  CUSTOM_PACK_GATED_MEASURING,
+  CUSTOM_PACK_GATED_MEASURING_IDS,
+  MEASURING_CATALOG,
+} from "./measuringCatalog";
+
+describe("measuringCatalog rulebook alignment", () => {
+  it("defines coastline width as 2 km", () => {
+    expect(COASTLINE_DEFINITION).toContain("2 km");
+    expect(COASTLINE_DEFINITION.toLowerCase()).not.toContain("one mile");
+  });
+
+  it("composes book base measuring catalog with pack-gated extras", () => {
+    expect(BASE_MEASURING_CATALOG).toHaveLength(20);
+    expect(CUSTOM_PACK_GATED_MEASURING).toHaveLength(3);
+    expect(MEASURING_CATALOG).toHaveLength(23);
+    expect(MEASURING_CATALOG).toEqual([
+      ...BASE_MEASURING_CATALOG,
+      ...CUSTOM_PACK_GATED_MEASURING,
+    ]);
+    expect([...CUSTOM_PACK_GATED_MEASURING_IDS]).toEqual([
+      "admin3_border",
+      "admin4_border",
+      "custom_place",
+    ]);
+  });
+});

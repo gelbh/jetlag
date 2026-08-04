@@ -217,8 +217,8 @@ export function gameSizeRulesSummary(
   const hidingZoneLabel =
     resolved === "metric"
       ? gameSize === "large"
-        ? "800 m hiding zones"
-        : "400 m hiding zones"
+        ? "1 km hiding zones"
+        : "500 m hiding zones"
       : gameSize === "large"
         ? "½ mi hiding zones"
         : "¼ mi hiding zones";
@@ -237,13 +237,7 @@ export function gameSizeRulesSummary(
   const maxThermo = thermoPresets[thermoPresets.length - 1] ?? 0;
   const thermometerMaxLabel =
     resolved === "metric"
-      ? maxThermo >= 50_000
-        ? "Thermo up to 50 km"
-        : maxThermo >= 25_000
-          ? "Thermo up to 25 km"
-          : maxThermo >= 10_000
-            ? "Thermo up to 10 km"
-            : "Thermo up to 1 km"
+      ? `Thermo up to ${Math.round(maxThermo / 1000)} km`
       : maxThermo >= milesToMeters(50)
         ? "Thermo up to 50 mi"
         : maxThermo >= milesToMeters(10)

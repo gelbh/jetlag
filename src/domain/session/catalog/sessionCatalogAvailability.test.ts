@@ -6,6 +6,7 @@ import {
   BASE_MATCHING_CATEGORY_COUNT,
   BASE_MEASURING_CATALOG_COUNT,
   isCategoryInDefaultPicker,
+  resolveAvailableMeasuringOption,
 } from "./sessionCatalogAvailability";
 import { isCustomQuestionPackCategoryId } from "../../questions/customQuestionPack";
 
@@ -31,6 +32,10 @@ describe("sessionCatalogAvailability", () => {
     expect(measuringIds.some((id) => isCustomQuestionPackCategoryId(id))).toBe(
       false,
     );
+    expect(measuringIds).toHaveLength(BASE_MEASURING_CATALOG_COUNT);
+    expect(measuringIds).not.toContain("admin3_border");
+    expect(measuringIds).not.toContain("admin4_border");
+    expect(measuringIds).not.toContain("custom_place");
   });
 
   it("includes custom pack categories when the host enables the pack", () => {
@@ -44,11 +49,16 @@ describe("sessionCatalogAvailability", () => {
         isCustomQuestionPackCategoryId(category.id),
       ),
     ).toBe(true);
-    expect(
-      availableMeasuringCatalog(session).some((option) =>
-        isCustomQuestionPackCategoryId(option.id),
-      ),
-    ).toBe(true);
+    const measuringIds = availableMeasuringCatalog(session).map(
+      (option) => option.id,
+    );
+    expect(measuringIds.some((id) => isCustomQuestionPackCategoryId(id))).toBe(
+      true,
+    );
+    expect(measuringIds).toContain("admin3_border");
+    expect(measuringIds).toContain("admin4_border");
+    expect(measuringIds).toContain("custom_place");
+    expect(measuringIds.length).toBeGreaterThanOrEqual(23);
   });
 
   it("gates pack categories in the default picker helper", () => {
@@ -64,5 +74,31 @@ describe("sessionCatalogAvailability", () => {
     expect(
       isCategoryInDefaultPicker("commercial_airport", { gameSize: "medium" }),
     ).toBe(true);
+    expect(
+      isCategoryInDefaultPicker("custom_place", { gameSize: "medium" }),
+    ).toBe(false);
+    expect(
+      isCategoryInDefaultPicker("custom_place", {
+        gameSize: "medium",
+        customQuestionPackEnabled: true,
+      }),
+    ).toBe(true);
+  });
+
+  it("resolves measuring options only from the available catalog", () => {
+    expect(
+      resolveAvailableMeasuringOption("custom_place", { gameSize: "medium" }),
+    ).toBeNull();
+    expect(
+      resolveAvailableMeasuringOption("custom_place", {
+        gameSize: "medium",
+        customQuestionPackEnabled: true,
+      })?.id,
+    ).toBe("custom_place");
+    expect(
+      resolveAvailableMeasuringOption("commercial_airport", {
+        gameSize: "medium",
+      })?.id,
+    ).toBe("commercial_airport");
   });
 });

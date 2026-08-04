@@ -1,6 +1,6 @@
 import { type RefObject } from "react";
 import {
-  MEASURING_CATALOG,
+  BASE_MEASURING_CATALOG,
   MEASURING_GROUPS,
   measuringSupportsSearch,
   measuringTargetKind,
@@ -157,7 +157,7 @@ export function MeasuringPanel({
   const isCoastline = targetKind === "coastline";
   const isSeaLevel = targetKind === "sea_level";
   const allowsSearch = measuringSupportsSearch(measureFrom);
-  const measureCatalog = catalogOptions ?? MEASURING_CATALOG;
+  const measureCatalog = catalogOptions ?? BASE_MEASURING_CATALOG;
   const hasAvailableMeasureOptions = MEASURING_GROUPS.some((group) =>
     measureCatalog.some(
       (option) =>
