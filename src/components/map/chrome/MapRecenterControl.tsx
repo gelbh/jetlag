@@ -35,6 +35,7 @@ export function MapRecenterControl({
       data-map-interacting={interacting ? "true" : undefined}
     >
       <MapChromeControl
+        className="map-recenter-control__btn"
         aria-label="Recenter on question"
         title="Recenter on question"
         onClick={onRecenter}

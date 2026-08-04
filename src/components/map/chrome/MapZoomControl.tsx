@@ -47,6 +47,7 @@ export function MapZoomControl({
       data-map-interacting={interacting ? "true" : undefined}
     >
       <MapChromeControl
+        className="map-zoom-control__btn"
         aria-label="Zoom in"
         title="Zoom in"
         disabled={zoom >= map.getMaxZoom()}
@@ -54,6 +55,7 @@ export function MapZoomControl({
         icon={<HudPlusIcon className="h-5 w-5" />}
       />
       <MapChromeControl
+        className="map-zoom-control__btn"
         aria-label="Zoom out"
         title="Zoom out"
         disabled={zoom <= map.getMinZoom()}

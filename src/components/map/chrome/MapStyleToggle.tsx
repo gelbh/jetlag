@@ -60,7 +60,9 @@ export function MapStyleToggle({
       data-map-interacting={interacting ? "true" : undefined}
     >
       <MapChromeControl
-        className="map-style-control__btn"
+        className={`map-style-control__btn${
+          satelliteActive ? " map-style-control__btn--active" : ""
+        }`}
         pressed={satelliteActive}
         onClick={() => onMapStyleChange(nextStyle)}
         aria-label={label}

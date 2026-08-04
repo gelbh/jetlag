@@ -34,6 +34,21 @@ describe("MapChromeControl", () => {
     expect(button).toHaveClass("map-chrome-control--pressed", "hud-chrome-active");
   });
 
+  it("keeps legacy floating size classes via className", () => {
+    render(
+      <MapChromeControl
+        className="map-zoom-control__btn"
+        aria-label="Zoom in"
+        icon={<span>+</span>}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Zoom in" })).toHaveClass(
+      "map-chrome-control",
+      "map-zoom-control__btn",
+    );
+  });
+
   it("renders a side-dock slot with icon and label", () => {
     render(
       <MapChromeControl
