@@ -246,4 +246,35 @@ describe("HiderToolDock", () => {
     expect(onOpenReportProblem).toHaveBeenCalledTimes(1);
     expect(document.querySelector(".jl-tool-dock-bar--secondary")).toBeNull();
   });
+
+  it("uses sparse hunt density with full Set zone and Expansion labels", () => {
+    renderWithRouter(
+      <HiderToolDock
+        zoneLabel="Set zone"
+        onZoneAction={vi.fn()}
+        showExpansion
+        onExpansion={vi.fn()}
+        onRecenter={vi.fn()}
+        onOpenChat={vi.fn()}
+        onOpenLog={vi.fn()}
+        onOpenSettings={vi.fn()}
+        onOpenReportProblem={vi.fn()}
+      />,
+    );
+
+    const chrome = document.querySelector(".jl-map-bottom-chrome");
+    expect(chrome?.getAttribute("data-hunt-density")).toBe("sparse");
+    expect(
+      document.querySelector(".jl-map-bottom-chrome--hunt-sparse"),
+    ).not.toBeNull();
+
+    const hunt = document.querySelector('[data-island="hunt"]');
+    expect(hunt?.getAttribute("data-hunt-density")).toBe("sparse");
+    const huntLabels = [
+      ...(hunt?.querySelectorAll(".jl-tool-slot-label") ?? []),
+    ].map((node) => node.textContent?.trim() ?? "");
+    expect(huntLabels).toEqual(["Set zone", "Expansion"]);
+    expect(screen.getByRole("button", { name: "Set zone" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Expansion" })).toBeInTheDocument();
+  });
 });
