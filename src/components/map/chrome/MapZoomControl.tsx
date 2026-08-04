@@ -6,6 +6,7 @@ import {
   useMapLibreInteracting,
   useMapLibreMap,
 } from "../helpers/useMapLibreMap";
+import { MapChromeControl } from "./MapChromeControl";
 
 export type MapZoomControlInset = MapChromeControlInset;
 
@@ -45,26 +46,20 @@ export function MapZoomControl({
       className={`map-zoom-control map-zoom-control--${inset}`}
       data-map-interacting={interacting ? "true" : undefined}
     >
-      <button
-        type="button"
-        className="map-zoom-control__btn hud-chrome"
-        onClick={() => map.zoomIn()}
-        disabled={zoom >= map.getMaxZoom()}
+      <MapChromeControl
         aria-label="Zoom in"
         title="Zoom in"
-      >
-        <HudPlusIcon className="h-5 w-5" />
-      </button>
-      <button
-        type="button"
-        className="map-zoom-control__btn hud-chrome"
-        onClick={() => map.zoomOut()}
-        disabled={zoom <= map.getMinZoom()}
+        disabled={zoom >= map.getMaxZoom()}
+        onClick={() => map.zoomIn()}
+        icon={<HudPlusIcon className="h-5 w-5" />}
+      />
+      <MapChromeControl
         aria-label="Zoom out"
         title="Zoom out"
-      >
-        <HudMinusIcon className="h-5 w-5" />
-      </button>
+        disabled={zoom <= map.getMinZoom()}
+        onClick={() => map.zoomOut()}
+        icon={<HudMinusIcon className="h-5 w-5" />}
+      />
     </div>,
     portalTarget,
   );

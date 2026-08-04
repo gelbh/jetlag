@@ -16,7 +16,7 @@ import {
   HudToolIcon,
   HudZoneIcon,
 } from "../map/icons/ToolIcons";
-import { MotionPressable } from "../motion/MotionPressable";
+import { MapChromeControl } from "../map/chrome/MapChromeControl";
 
 interface ToolDockQuestionSlotProps {
   toolId: (typeof QUESTION_DOCK_TOOL_IDS)[number];
@@ -41,24 +41,20 @@ export function ToolDockQuestionSlot({
     !canSubmitQuestion && QUESTION_DOCK_TOOL_IDS.includes(toolId);
 
   return (
-    <MotionPressable
-      type="button"
+    <MapChromeControl
+      variant="slot"
       disabled={!entry.enabled}
       onClick={() => onSelect(activeTool === toolId ? "none" : toolId)}
-      className={`jl-tool-slot ${active ? "jl-tool-slot-active" : ""}`}
+      pressed={active}
       aria-label={entry.name}
-      aria-pressed={active}
       title={
         blockedByOpenQuestion
           ? "Preview only — finish the open question before sending"
           : (mapToolDockMenuHint(entry) ?? entry.name)
       }
-    >
-      <span className="jl-tool-slot-icon">
-        <HudToolIcon tool={toolId} className="h-5 w-5 shrink-0" />
-      </span>
-      <span className="jl-tool-slot-label">{mapToolDockShortLabel(toolId)}</span>
-    </MotionPressable>
+      icon={<HudToolIcon tool={toolId} className="h-5 w-5 shrink-0" />}
+      label={mapToolDockShortLabel(toolId)}
+    />
   );
 }
 
@@ -128,22 +124,20 @@ export function ToolDockHistoryBookend({
 }: ToolDockHistoryBookendProps) {
   const isUndo = kind === "undo";
   return (
-    <MotionPressable
-      type="button"
+    <MapChromeControl
+      variant="slot"
       onClick={onAct}
       disabled={inactive || !canAct}
-      className="jl-tool-slot"
       aria-label={isUndo ? "Undo last annotation" : "Redo last annotation"}
-    >
-      <span className="jl-tool-slot-icon">
-        {isUndo ? (
+      icon={
+        isUndo ? (
           <HudUndoIcon className="h-4 w-4" />
         ) : (
           <HudRedoIcon className="h-4 w-4" />
-        )}
-      </span>
-      <span className="jl-tool-slot-label">{isUndo ? "Undo" : "Redo"}</span>
-    </MotionPressable>
+        )
+      }
+      label={isUndo ? "Undo" : "Redo"}
+    />
   );
 }
 
@@ -161,22 +155,17 @@ export function ToolDockWideActions({
   inactive = false,
 }: ToolDockWideActionsProps) {
   return (
-    <MotionPressable
-      type="button"
+    <MapChromeControl
+      variant="slot"
       onClick={onToggleDrawMenu}
       disabled={inactive}
-      className={`jl-tool-slot ${
-        drawMenuOpen || markupActive ? "jl-tool-slot-active" : ""
-      }`}
+      pressed={drawMenuOpen || markupActive}
       aria-label="Draw on map"
       aria-expanded={drawMenuOpen}
       aria-haspopup="menu"
       title="Zone and pin"
-    >
-      <span className="jl-tool-slot-icon">
-        <HudDrawIcon className="h-5 w-5" />
-      </span>
-      <span className="jl-tool-slot-label">Draw</span>
-    </MotionPressable>
+      icon={<HudDrawIcon className="h-5 w-5" />}
+      label="Draw"
+    />
   );
 }

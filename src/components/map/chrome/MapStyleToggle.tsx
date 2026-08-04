@@ -12,6 +12,7 @@ import {
   useMapLibreMap,
   useMapLibrePreviewTileOrigin,
 } from "../helpers/useMapLibreMap";
+import { MapChromeControl } from "./MapChromeControl";
 
 interface MapStyleToggleProps {
   enabled: boolean;
@@ -58,14 +59,11 @@ export function MapStyleToggle({
       className={`map-style-control map-style-control--${inset}`}
       data-map-interacting={interacting ? "true" : undefined}
     >
-      <button
-        type="button"
-        className={`map-style-control__btn hud-chrome ${
-          satelliteActive ? "map-style-control__btn--active" : ""
-        }`}
+      <MapChromeControl
+        className="map-style-control__btn"
+        pressed={satelliteActive}
         onClick={() => onMapStyleChange(nextStyle)}
         aria-label={label}
-        aria-pressed={satelliteActive}
         title={label}
       >
         <span className="map-style-control__preview">
@@ -85,7 +83,7 @@ export function MapStyleToggle({
             {previewBasemap.label}
           </span>
         </span>
-      </button>
+      </MapChromeControl>
     </div>,
     portalTarget,
   );
