@@ -6,6 +6,14 @@ import { markRouteImportWarm } from "./routeWarmState";
 export const importMapScreen = () =>
   import("../routes/MapScreen").then((m) => ({ default: m.MapScreen }));
 
+/** Warm MapLibre shell chunk ahead of MapView's React.lazy boundary. */
+export const mapShellWarmers = {
+  importMapViewMapLibre: () =>
+    import("../components/map/chrome/MapViewMapLibre").then((m) => ({
+      default: m.MapViewMapLibre,
+    })),
+};
+
 export const importCreateSession = () =>
   import("../routes/CreateSession").then((m) => ({ default: m.CreateSession }));
 
@@ -124,7 +132,12 @@ export async function preloadRoute(path: string): Promise<void> {
   const normalizedPath = normalizeRoutePath(path);
   const loaderKey = lazyRouteLoaderKey(path);
   if (loaderKey) {
-    await routeImporter[loaderKey]();
+    const routeLoad = routeImporter[loaderKey]();
+    if (loaderKey === "importMapScreen") {
+      // Best-effort shell warm; must not block MapScreen warm marking.
+      void mapShellWarmers.importMapViewMapLibre().catch(() => undefined);
+    }
+    await routeLoad;
     markRouteImportWarm(normalizedPath);
   }
 }

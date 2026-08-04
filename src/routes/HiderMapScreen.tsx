@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useMemo, useRef, useState } from "react";
 import { AppNavigate } from "../navigation/AppNavigate";
 import { MapLibreGeoJsonOverlay } from "../components/map/helpers/MapLibreGeoJsonOverlay";
 import { cssPxDashToMapLibre } from "../components/map/helpers/cssPxDashToMapLibre";
@@ -36,8 +36,8 @@ import {
   resolveMyHidingZone,
 } from "../domain/session/hiding/hidingZone";
 import { DEFAULT_SESSION_RULES } from "../domain/session/rules";
-import { AdminBoundariesLayer } from "../components/map/layers/AdminBoundariesLayer";
 import { useAdminBoundaryFeatures } from "../hooks/map-screen/useAdminBoundaryFeatures";
+import { AdminBoundariesLayer } from "./map-screen/lazyImports";
 import {
   fallbackGameArea,
   gameAreaCenter,
@@ -695,11 +695,13 @@ export function HiderMapScreen() {
             streetBasemap={streetBasemap}
           />
           {showAdminBoundaries && !adminBoundaryLoading ? (
-            <AdminBoundariesLayer
-              features={adminBoundaryFeatures}
-              mapStyle={effectiveBasemapStyle}
-              streetBasemap={streetBasemap}
-            />
+            <Suspense fallback={null}>
+              <AdminBoundariesLayer
+                features={adminBoundaryFeatures}
+                mapStyle={effectiveBasemapStyle}
+                streetBasemap={streetBasemap}
+              />
+            </Suspense>
           ) : null}
           <LiveUserLocationLayer
             enabled={showCurrentLocation}
