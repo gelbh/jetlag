@@ -1,7 +1,5 @@
-import { useState, type ReactElement } from "react";
-import { ReportProblemSheet } from "../../../components/incident/ReportProblemSheet";
-import { RoleCodesSheet } from "../../../components/session/settings/RoleCodesSheet";
 import type { SessionRecord } from "../../../domain/map/annotations";
+import { RoleCodesSheet } from "../../../components/session/settings/RoleCodesSheet";
 
 export type MapScreenRoleCodesSheetProps = {
   session: SessionRecord;
@@ -34,27 +32,4 @@ export function MapScreenRoleCodesSheet({
       isHost={isHost}
     />
   );
-}
-
-/**
- * Report-problem sheet + opener used by role docks/settings.
- * Closes the active overlay before opening so sheets do not stack.
- */
-export function useMapScreenReportProblemSheet(closeOverlays: () => void): {
-  openReportProblem: () => void;
-  reportProblemSheet: ReactElement;
-} {
-  const [reportProblemOpen, setReportProblemOpen] = useState(false);
-  return {
-    openReportProblem: () => {
-      closeOverlays();
-      setReportProblemOpen(true);
-    },
-    reportProblemSheet: (
-      <ReportProblemSheet
-        open={reportProblemOpen}
-        onClose={() => setReportProblemOpen(false)}
-      />
-    ),
-  };
 }
