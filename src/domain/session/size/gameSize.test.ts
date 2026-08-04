@@ -79,7 +79,8 @@ describe("gameSize", () => {
 
   it("clamps custom hiding zone radius", () => {
     expect(clampHidingZoneRadiusMeters(50)).toBe(100);
-    expect(clampHidingZoneRadiusMeters(900)).toBe(800);
+    expect(clampHidingZoneRadiusMeters(900)).toBe(900);
+    expect(clampHidingZoneRadiusMeters(1200)).toBe(1000);
   });
 
   it("formats custom hiding zone radius labels", () => {
