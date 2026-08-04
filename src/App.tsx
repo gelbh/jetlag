@@ -20,6 +20,7 @@ import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { AppCheckProbeGate } from "./components/ui/feedback/AppCheckProbeGate";
 import { AppErrorPage } from "./components/ui/feedback/AppErrorPage";
 import { Home } from "./routes/Home";
+import { JoinSession } from "./routes/JoinSession";
 import { scheduleIdleBootWork } from "./domain/device/perf/scheduleAfterFirstPaint";
 import {
   CHUNK_RELOAD_CLEAR_MS,
@@ -53,7 +54,6 @@ import {
   FriendsLazy,
   GamePresetEditorLazy,
   GamePresetListLazy,
-  JoinSessionLazy,
   LeaderboardLazy,
   MapScreenLazy,
   NotFoundLazy,
@@ -262,14 +262,7 @@ export default function App() {
                     </LazyRoute>
                   }
                 />
-                <Route
-                  path="/join"
-                  element={
-                    <LazyRoute>
-                      <JoinSessionLazy />
-                    </LazyRoute>
-                  }
-                />
+                <Route path="/join" element={<JoinSession />} />
                 <Route
                   path="/admin"
                   element={

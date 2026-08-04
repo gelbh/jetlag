@@ -40,9 +40,6 @@ export const importAdminOpsDesk = () =>
 export const importFeedback = () =>
   import("../routes/Feedback").then((m) => ({ default: m.Feedback }));
 
-export const importJoinSession = () =>
-  import("../routes/JoinSession").then((m) => ({ default: m.JoinSession }));
-
 export const importPrivacy = () =>
   import("../routes/Privacy").then((m) => ({ default: m.Privacy }));
 
@@ -70,7 +67,6 @@ export const routeImporter = {
   importLeaderboard,
   importAdminOpsDesk,
   importFeedback,
-  importJoinSession,
   importPrivacy,
   importPremium,
   importTerms,
@@ -86,7 +82,6 @@ export const FriendsLazy = lazyWithChunkRetry(importFriends);
 export const LeaderboardLazy = lazyWithChunkRetry(importLeaderboard);
 export const AdminOpsDeskLazy = lazyWithChunkRetry(importAdminOpsDesk);
 export const FeedbackLazy = lazyWithChunkRetry(importFeedback);
-export const JoinSessionLazy = lazyWithChunkRetry(importJoinSession);
 export const PrivacyLazy = lazyWithChunkRetry(importPrivacy);
 export const PremiumLazy = lazyWithChunkRetry(importPremium);
 export const TermsLazy = lazyWithChunkRetry(importTerms);

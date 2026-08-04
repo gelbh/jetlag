@@ -1,4 +1,5 @@
 const PRESET_EDIT_PATH_RE = /^\/presets\/[^/]+\/edit$/;
+const ADMIN_PATH_RE = /^\/admin(?:\/|$)/;
 
 const LAZY_ROUTE_PATHS = new Set([
   "/map",
@@ -6,6 +7,14 @@ const LAZY_ROUTE_PATHS = new Set([
   "/presets",
   "/presets/new",
   "/presets/:id/edit",
+  "/admin",
+  "/feedback",
+  "/privacy",
+  "/terms",
+  "/premium",
+  "/stats",
+  "/friends",
+  "/leaderboard",
 ]);
 
 export function normalizeRoutePath(path: string): string {
@@ -19,17 +28,32 @@ export function normalizeRoutePath(path: string): string {
 }
 
 export function isLazyRoute(path: string): boolean {
-  return LAZY_ROUTE_PATHS.has(normalizeRoutePath(path));
+  const normalizedPath = normalizeRoutePath(path);
+  if (LAZY_ROUTE_PATHS.has(normalizedPath)) {
+    return true;
+  }
+  return ADMIN_PATH_RE.test(normalizedPath);
 }
 
 export type LazyRouteLoaderKey =
   | "importMapScreen"
   | "importCreateSession"
   | "importGamePresetList"
-  | "importGamePresetEditor";
+  | "importGamePresetEditor"
+  | "importAdminOpsDesk"
+  | "importFeedback"
+  | "importPrivacy"
+  | "importPremium"
+  | "importTerms"
+  | "importStats"
+  | "importFriends"
+  | "importLeaderboard";
 
 export function lazyRouteLoaderKey(path: string): LazyRouteLoaderKey | undefined {
   const normalizedPath = normalizeRoutePath(path);
+  if (ADMIN_PATH_RE.test(normalizedPath)) {
+    return "importAdminOpsDesk";
+  }
   switch (normalizedPath) {
     case "/map":
       return "importMapScreen";
@@ -40,6 +64,20 @@ export function lazyRouteLoaderKey(path: string): LazyRouteLoaderKey | undefined
     case "/presets/new":
     case "/presets/:id/edit":
       return "importGamePresetEditor";
+    case "/feedback":
+      return "importFeedback";
+    case "/privacy":
+      return "importPrivacy";
+    case "/premium":
+      return "importPremium";
+    case "/terms":
+      return "importTerms";
+    case "/stats":
+      return "importStats";
+    case "/friends":
+      return "importFriends";
+    case "/leaderboard":
+      return "importLeaderboard";
     default:
       return undefined;
   }
