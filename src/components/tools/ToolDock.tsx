@@ -11,9 +11,9 @@ import type { MapTool } from "../../state/sessionStore";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
 import {
-  ToolDockHistoryBookend,
+  ToolDockDrawControl,
+  ToolDockHistorySlot,
   ToolDockQuestionSlot,
-  ToolDockWideActions,
 } from "./ToolDockSlot";
 import { ToolDockDrawMenu } from "./ToolDockOverflowMenu";
 import {
@@ -116,22 +116,6 @@ export function ToolDock({
           ? { bottom: `${viewportBottomInset}px` }
           : undefined
       }
-      historyStart={
-        <ToolDockHistoryBookend
-          kind="undo"
-          canAct={canUndo}
-          onAct={onUndo}
-          inactive={inactive}
-        />
-      }
-      historyEnd={
-        <ToolDockHistoryBookend
-          kind="redo"
-          canAct={canRedo}
-          onAct={onRedo}
-          inactive={inactive}
-        />
-      }
       hunt={
         <div className="jl-map-island-hunt-inner">
           {dockHighlight ? (
@@ -148,8 +132,20 @@ export function ToolDock({
           <div
             ref={mainGroupRef}
             className="jl-tool-dock-group jl-tool-dock-group-main"
-            aria-label="Question tools"
+            aria-label="History and question tools"
           >
+            <ToolDockHistorySlot
+              kind="undo"
+              canAct={canUndo}
+              onAct={onUndo}
+              inactive={inactive}
+            />
+            <ToolDockHistorySlot
+              kind="redo"
+              canAct={canRedo}
+              onAct={onRedo}
+              inactive={inactive}
+            />
             {visibleQuestionTools.map((toolId) => (
               <ToolDockQuestionSlot
                 key={toolId}
@@ -159,7 +155,13 @@ export function ToolDock({
                 onSelect={selectTool}
               />
             ))}
-            <ToolDockWideActions
+          </div>
+        </div>
+      }
+      session={
+        <SessionIslandSlots
+          drawSlot={
+            <ToolDockDrawControl
               drawMenuOpen={drawMenuOpen}
               markupActive={markupActive}
               inactive={inactive}
@@ -170,11 +172,7 @@ export function ToolDock({
                 setDrawMenuOpen((open) => !open);
               }}
             />
-          </div>
-        </div>
-      }
-      session={
-        <SessionIslandSlots
+          }
           onOpenChat={onOpenChat}
           onOpenLog={onOpenLog}
           onOpenReportProblem={onOpenReportProblem}

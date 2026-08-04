@@ -80,25 +80,25 @@ test.describe("mobile tool dock", () => {
     await openMapWithLocalSession(page);
   });
 
-  test("exposes history, draw, and session islands without a More sheet", async ({
+  test("@smoke exposes history in hunt, draw on session, without a More sheet", async ({
     page,
   }) => {
-    await expect(page.getByRole("group", { name: "Undo" })).toBeVisible();
-    await expect(page.getByRole("group", { name: "Redo" })).toBeVisible();
+    const hunt = page.locator('[data-island="hunt"]');
+    await expect(hunt).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Undo last annotation" }),
+      hunt.getByRole("button", { name: "Undo last annotation" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Redo last annotation" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Draw on map" }),
+      hunt.getByRole("button", { name: "Redo last annotation" }),
     ).toBeVisible();
     await expect(
       page.getByRole("button", { name: "More tools" }),
     ).toHaveCount(0);
 
-    const drawButton = page.getByRole("button", { name: "Draw on map" });
+    const sessionTools = page.getByLabel("Session tools");
+    await expect(sessionTools).toBeVisible();
+    const drawButton = sessionTools.getByRole("button", { name: "Draw on map" });
+    await expect(drawButton).toBeVisible();
     await clickViaEvaluate(drawButton);
     const drawMenu = page.getByRole("menu", { name: "Draw on map" });
     await expect(drawMenu).toBeVisible();
@@ -108,8 +108,6 @@ test.describe("mobile tool dock", () => {
     await page.keyboard.press("Escape");
     await expect(drawMenu).toBeHidden();
 
-    const sessionTools = page.getByLabel("Session tools");
-    await expect(sessionTools).toBeVisible();
     await expect(
       sessionTools.getByRole("button", { name: "Open settings" }),
     ).toBeVisible();
@@ -127,15 +125,15 @@ test.describe("mobile tool dock", () => {
       page.getByRole("dialog", { name: "Report problem" }),
     ).toBeVisible();
 
-    await expect(page.locator('[data-island="history-start"]')).toHaveCount(1);
-    await expect(page.locator('[data-island="history-end"]')).toHaveCount(1);
+    await expect(page.locator('[data-island="history-start"]')).toHaveCount(0);
+    await expect(page.locator('[data-island="history-end"]')).toHaveCount(0);
     await expect(page.locator('[data-island="hunt"]')).toHaveCount(1);
     const bandOrder = await page
       .locator(".jl-map-chrome-bottom-band [data-island]")
       .evaluateAll((nodes) =>
         nodes.map((node) => node.getAttribute("data-island")),
       );
-    expect(bandOrder).toEqual(["history-start", "hunt", "history-end"]);
+    expect(bandOrder).toEqual(["hunt"]);
     await expect(page.locator('[data-island="session"]')).toHaveCount(1);
     await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
     await expect(page.locator(".jl-map-chrome-side-stack")).toHaveCount(1);
@@ -206,7 +204,7 @@ test.describe("mobile tool dock", () => {
     expect(labels.some((label) => label.text === "Draw")).toBe(true);
   });
 
-  test("supports undo from the history island after placing a pin", async ({
+  test("supports undo from the hunt island after placing a pin", async ({
     page,
   }) => {
     await placePin(page);

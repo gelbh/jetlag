@@ -85,19 +85,21 @@ test.describe("layout regression @ default mobile", () => {
   test("@smoke map dock chrome stays in viewport", async ({ page }) => {
     await openMapWithLocalSession(page);
     const host = page.locator(".jl-map-bottom-chrome-host");
-    const historyStart = page.locator('[data-island="history-start"]');
-    const historyEnd = page.locator('[data-island="history-end"]');
     const hunt = page.locator('[data-island="hunt"]');
     const session = page.locator('[data-island="session"]');
     await expect(host).toBeVisible();
-    await expect(historyStart).toBeVisible();
-    await expect(historyEnd).toBeVisible();
     await expect(hunt).toBeVisible();
     await expect(session).toBeVisible();
+    await expect(page.locator('[data-island="history-start"]')).toHaveCount(0);
+    await expect(page.locator('[data-island="history-end"]')).toHaveCount(0);
+    await expect(
+      hunt.getByRole("button", { name: "Undo last annotation" }),
+    ).toBeVisible();
+    await expect(
+      session.getByRole("button", { name: "Draw on map" }),
+    ).toBeVisible();
     // All islands and their tool slots stay in viewport on mobile layouts.
     await assertInViewport(host);
-    await assertInViewport(historyStart);
-    await assertInViewport(historyEnd);
     await assertInViewport(hunt);
     await assertInViewport(session);
     // Session island lives in the right-stack, not the bottom band.
