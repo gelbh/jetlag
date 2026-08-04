@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import {
-  formatDrawPickSummary,
   formatExpiredAnswerCountdown,
+  formatPendingDrawPickSummary,
   questionAnswerDeadlineMs,
 } from "../../domain/questions";
 import type { HiderTruthResult } from "../../domain/questions/ui";
@@ -156,7 +156,11 @@ export function GameChatTab({
               pending?.cardDraw != null &&
               pending?.cardKeep != null ? (
                 <p className="mt-1 text-xs text-ink-dim">
-                  {formatDrawPickSummary(pending.cardDraw, pending.cardKeep)}
+                  {formatPendingDrawPickSummary(
+                    pending.toolType,
+                    pending.cardDraw,
+                    pending.cardKeep,
+                  )}
                 </p>
               ) : null}
               {walking ? (
