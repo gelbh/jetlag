@@ -3,7 +3,7 @@ import { useMap, type MapRef } from "react-map-gl/maplibre";
 import {
   latLngToTileXY,
   MAP_STYLE_PREVIEW_ZOOM,
-} from "../../../domain/map/mapTilePreview";
+} from "@/domain/map/mapTilePreview";
 export interface PreviewTileOrigin {
   x: number;
   y: number;

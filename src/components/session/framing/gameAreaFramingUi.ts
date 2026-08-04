@@ -1,4 +1,4 @@
-import type { FramingMode } from "../../../hooks/session/useGameAreaFraming";
+import type { FramingMode } from "@/hooks/session/useGameAreaFraming";
 
 export const FRAMING_MODE_OPTIONS: ReadonlyArray<{
   value: FramingMode;

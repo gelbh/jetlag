@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
-import type { TransitRouteMode } from "../../../domain/map/transit";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import type { TransitRouteMode } from "@/domain/map/transit";
 import { transitStopDivIcon } from "../icons/transitStopIcons";
 import { userLocationIconHtml } from "../icons/userLocationIconHtml";
 import { useMapLibreMap } from "./useMapLibreMap";

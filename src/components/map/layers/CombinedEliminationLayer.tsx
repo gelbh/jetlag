@@ -4,15 +4,15 @@ import type {
   AnnotationRecord,
   GameArea,
   SessionRecord,
-} from "../../../domain/map/annotations";
-import { isEndGameActive } from "../../../domain/map/annotations";
-import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
-import { annotationHasEliminationFeature } from "../../../domain/geometry/masks/combinedEliminationMask";
-import { EMPTY_GEOJSON_FEATURES } from "../../../domain/geometry/masks/emptyFeatures";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
-import { getEliminationOverlayLayers } from "../../../domain/map/mapEliminationOverlayStyle";
-import { useCombinedEliminationMask } from "../../../hooks/map/useCombinedEliminationMask";
-import { useMapStore } from "../../../state/sessionStore";
+} from "@/domain/map/annotations";
+import { isEndGameActive } from "@/domain/map/annotations";
+import type { HidingZoneRecord } from "@/domain/session/hiding/hidingZone";
+import { annotationHasEliminationFeature } from "@/domain/geometry/masks/combinedEliminationMask";
+import { EMPTY_GEOJSON_FEATURES } from "@/domain/geometry/masks/emptyFeatures";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import { getEliminationOverlayLayers } from "@/domain/map/mapEliminationOverlayStyle";
+import { useCombinedEliminationMask } from "@/hooks/map/useCombinedEliminationMask";
+import { useMapStore } from "@/state/sessionStore";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { pathOptionsToMapLibrePaint } from "../helpers/pathOptionsToMapLibrePaint";
 

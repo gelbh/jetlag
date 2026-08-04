@@ -7,14 +7,14 @@ import type {
   Point,
   Polygon as GeoPolygon,
 } from "geojson";
-import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
-import { DEFAULT_RADIUS_METERS } from "../../../domain/map/distance";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
+import { DEFAULT_RADIUS_METERS } from "@/domain/map/distance";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import {
   gameAreaToPolygon,
   safeDifference,
   type LatLngTuple,
-} from "../../../domain/geometry/gameArea/geometry";
+} from "@/domain/geometry/gameArea/geometry";
 
 const TENTACLE_CIRCLE_STEPS = 64;
 

@@ -1,11 +1,11 @@
 /* eslint-disable react-refresh/only-export-components -- registry exports render helper alongside layer components */
 import turfCircle from "@turf/circle";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
-import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
-import { pointToolRadiusFromMetadata } from "../../../domain/map/annotations";
-import { polygonFeatureToRings } from "../../../domain/geometry/gameArea/geometry";
-import type { LayerVisibility } from "../../../state/sessionStore";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
+import { pointToolRadiusFromMetadata } from "@/domain/map/annotations";
+import { polygonFeatureToRings } from "@/domain/geometry/gameArea/geometry";
+import type { LayerVisibility } from "@/state/sessionStore";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
 import { useCallback } from "react";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";

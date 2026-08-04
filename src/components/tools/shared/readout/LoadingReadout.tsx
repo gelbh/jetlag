@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { LoadingSpinnerRing } from "../../../ui/feedback/LoadingSpinner";
+import { LoadingSpinnerRing } from "@/components/ui/feedback/LoadingSpinner";
 
 type LoadingReadoutVariant = "default" | "dim";
 

@@ -1,11 +1,11 @@
 import { useId, useState } from "react";
-import { CHANGELOG, type ChangelogEntry } from "../../../domain/device/changelog";
+import { CHANGELOG, type ChangelogEntry } from "@/domain/device/changelog";
 import {
   groupChangelogEntries,
   type ChangelogNode,
   type MajorGroupNode,
   type MinorGroupNode,
-} from "../../../domain/device/chrome/groupChangelog";
+} from "@/domain/device/chrome/groupChangelog";
 import { MotionSheet } from "../../motion/MotionSheet";
 import { SheetHeader } from "./SheetHeader";
 

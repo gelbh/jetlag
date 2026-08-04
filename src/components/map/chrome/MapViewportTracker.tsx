@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { MapRef } from "react-map-gl/maplibre";
-import type { MapViewportBounds } from "../../../domain/map/transitViewport";
+import type { MapViewportBounds } from "@/domain/map/transitViewport";
 import { createViewportTrackerHandlers } from "../helpers/createViewportTrackerHandlers";
 import { useMapLibreMap } from "../helpers/useMapLibreMap";
 

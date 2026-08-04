@@ -1,4 +1,4 @@
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 
 /** Shared HTML for transit vehicle pins (Leaflet DivIcon + MapLibre). */
 export function transitVehicleIconHtml(

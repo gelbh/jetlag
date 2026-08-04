@@ -1,5 +1,5 @@
-import type { RoleJoinRequest } from "../../../domain/session/players/joinRequest";
-import { playerRoleLabel } from "../../../domain/session/players/playerRole";
+import type { RoleJoinRequest } from "@/domain/session/players/joinRequest";
+import { playerRoleLabel } from "@/domain/session/players/playerRole";
 import { MapFloatAlertPanel } from "../../ui/banners/MapFloatAlert";
 
 interface RoleJoinRequestAlertProps {

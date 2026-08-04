@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
-import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
+import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import {
   DEFAULT_RADIUS_METERS,
   formatPresetDistance,
   type DistanceUnit,
-} from "../../../domain/map/distance";
-import { tentacleEliminationJsonForAnswer } from "../../../domain/geometry/tentacle/tentacleGeometry";
+} from "@/domain/map/distance";
+import { tentacleEliminationJsonForAnswer } from "@/domain/geometry/tentacle/tentacleGeometry";
 import {
   tentacleCategoryIdForAnnotation,
   tentacleQuestionPrompt,
   type TentacleExtendedCategoryId,
-} from "../../../domain/questions";
+} from "@/domain/questions";
 import { QuestionPromptBlock } from "../shared/controls/QuestionPromptBlock";
 import { TentacleAnswerPicker } from "../shared/answers/TentacleAnswerPicker";
 import { ToolSection } from "../shared/panels/ToolSection";

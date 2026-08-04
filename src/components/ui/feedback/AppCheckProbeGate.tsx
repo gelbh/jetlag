@@ -1,9 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { useAuthBootstrapReady } from "../../../hooks/app/useAuthBootstrapReady";
+import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
 import {
   probeAppCheckAvailability,
   type AppCheckProbeResult,
-} from "../../../services/core/firebase/appCheckProbe";
+} from "@/services/core/firebase/appCheckProbe";
 import { ContentBlockerErrorPage } from "./ContentBlockerErrorPage";
 
 /**

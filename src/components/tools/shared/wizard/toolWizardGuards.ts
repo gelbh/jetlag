@@ -1,4 +1,4 @@
-import type { ToolWizardPhaseId } from "../../../../domain/wizard/toolWizardPhases";
+import type { ToolWizardPhaseId } from "@/domain/wizard/toolWizardPhases";
 
 export function toolWizardSwipeNext(
   canGoNext: boolean,

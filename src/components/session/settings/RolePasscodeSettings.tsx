@@ -1,15 +1,15 @@
 import { useState } from "react";
-import type { SessionRecord } from "../../../domain/map/annotations";
+import type { SessionRecord } from "@/domain/map/annotations";
 import {
   isSessionRoleGated,
   visibleRoleCodeRoles,
-} from "../../../domain/session/players/roleGates";
-import { playerRoleLabel } from "../../../domain/session/players/playerRole";
-import { useCopyFeedback } from "../../../hooks/forms/useCopyFeedback";
+} from "@/domain/session/players/roleGates";
+import { playerRoleLabel } from "@/domain/session/players/playerRole";
+import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
 import {
   regenerateRolePasscode,
   revealRolePasscode,
-} from "../../../services/session/rolePasscodeLifecycle";
+} from "@/services/session/rolePasscodeLifecycle";
 import { RoleCodeStamp } from "../identity/RoleCodeStamp";
 
 type RevealRole = "seeker" | "hider" | "observer";

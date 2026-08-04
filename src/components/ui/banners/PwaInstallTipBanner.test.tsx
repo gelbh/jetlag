@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PwaInstallTipBanner } from "./PwaInstallTipBanner";
-import { PWA_INSTALL_TIP_DISMISS_KEY } from "../../../domain/device/pwa/pwaInstallTipStorage";
+import { PWA_INSTALL_TIP_DISMISS_KEY } from "@/domain/device/pwa/pwaInstallTipStorage";
 
 vi.mock("../../../domain/device/pwa/isStandalonePwa", () => ({
   isStandalonePwa: vi.fn(() => false),
