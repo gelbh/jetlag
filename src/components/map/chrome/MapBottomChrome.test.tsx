@@ -9,6 +9,13 @@ const chromeCss = readFileSync(
   resolve(dirname(fileURLToPath(import.meta.url)), "../../../styles/map-bottom-chrome.css"),
   "utf8",
 );
+const controlsCss = readFileSync(
+  resolve(
+    dirname(fileURLToPath(import.meta.url)),
+    "../../../styles/map-chrome-controls.css",
+  ),
+  "utf8",
+);
 
 describe("MapBottomChrome", () => {
   it("renders provided islands and omits empty ones", () => {
@@ -215,5 +222,14 @@ describe("MapBottomChrome", () => {
       /\.jl-map-island\s+\.jl-tool-dock-group-main\s+\.jl-tool-slot\s*\{[^}]*flex:\s*1\s+1\s+0/s,
     );
     expect(chromeCss).not.toMatch(/history-bookends/);
+  });
+
+  it("anchors container-inset map controls to --dock-height token", () => {
+    expect(controlsCss).toMatch(
+      /\.map-zoom-control--container,\s*\.map-style-control--container,\s*\.map-recenter-control--container\s*\{[^}]*bottom:\s*var\(--dock-height\)/s,
+    );
+    expect(controlsCss).not.toMatch(
+      /\.map-zoom-control--container[^}]*bottom:\s*4\.25rem/s,
+    );
   });
 });

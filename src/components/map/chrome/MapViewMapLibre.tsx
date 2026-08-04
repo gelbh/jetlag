@@ -17,6 +17,10 @@ import {
   getBasemapSurface,
   getMapLibreStyle,
 } from "../../../domain/map/mapBasemaps";
+import {
+  DEFAULT_MAP_CENTER,
+  DEFAULT_MAP_LNGLAT,
+} from "../../../domain/map/defaultMapCenter";
 import { isUsableMapBounds } from "../../../domain/geometry/gameArea/geometry";
 import { computeFramedCenterZoomMapLibre } from "../../../domain/map/computeFramedCenterZoomMapLibre";
 import { focusBoundsToLngLatBounds } from "../../../domain/map/focusBoundsToLngLatBounds";
@@ -45,11 +49,9 @@ import type { MapViewMapLibreProps } from "./mapViewTypes";
 
 setWorkerUrl(mapLibreWorkerUrl);
 
-const FALLBACK_LNGLAT: [number, number] = [-0.09, 51.505];
-
 function centerToLngLat(center: MapLatLng | undefined): [number, number] {
   if (center == null) {
-    return FALLBACK_LNGLAT;
+    return DEFAULT_MAP_LNGLAT;
   }
   if (Array.isArray(center)) {
     const [lat, lng] = center;
@@ -69,7 +71,7 @@ function centerToLngLat(center: MapLatLng | undefined): [number, number] {
       `MapViewMapLibre: unsupported LatLngExpression ${String(center)}`,
     );
   }
-  return FALLBACK_LNGLAT;
+  return DEFAULT_MAP_LNGLAT;
 }
 
 function MapLibreMarkerImagesLoader() {
@@ -261,7 +263,7 @@ function MapFocus({
  * MapLibre shell: basemap + chrome + click/bounds + camera/focus parity.
  */
 export function MapViewMapLibre({
-  center = [51.505, -0.09],
+  center = DEFAULT_MAP_CENTER,
   zoom = 13,
   className,
   mapStyle = "standard",
