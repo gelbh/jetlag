@@ -14,6 +14,10 @@ import {
   gameAreaToBoundsExpression,
   type LatLngTuple,
 } from "../../../domain/geometry/gameArea/geometry";
+import {
+  PWA_MARK_MAP_USABLE,
+  markPlayDay,
+} from "../../../domain/device/perf/playDayMarks";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../../domain/device/power/powerProfile";
 import { useWakeLock } from "../../../hooks/location/useWakeLock";
 import { useAnnotations } from "../../../hooks/map/useAnnotations";
@@ -259,6 +263,14 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
   ]);
 
   useEnsureSessionMembership();
+
+  useEffect(() => {
+    if (!playAreaReady) {
+      return;
+    }
+
+    markPlayDay(PWA_MARK_MAP_USABLE);
+  }, [playAreaReady]);
 
   useEffect(() => {
     if (pulsingAnnotationIds.length === 0) {
