@@ -5,6 +5,7 @@ import { useSubmitLock } from "../hooks/forms/useSubmitLock";
 import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
 import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
 import { InlineError } from "../components/ui/banners/InlineError";
+import { TextField } from "../components/ui/forms/TextField";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
@@ -628,21 +629,21 @@ export function JoinSession() {
             </>
           ) : (
             <>
-              <label className="field-label font-display text-xs uppercase tracking-[0.12em]">
-                Code
-                <input
-                  value={code}
-                  onChange={(event) =>
-                    setCode(normalizeSessionCode(event.target.value))
-                  }
-                  maxLength={4}
-                  className="field-input mt-2 min-h-16 border-0 bg-transparent p-0 text-center font-mono text-4xl font-bold tracking-[0.45em] focus:outline-none"
-                  placeholder={SESSION_CODE_INPUT_PLACEHOLDER}
-                  autoCapitalize="characters"
-                  autoCorrect="off"
-                  spellCheck={false}
-                />
-              </label>
+              <TextField
+                id="join-session-code"
+                label="Code"
+                labelClassName="field-label font-display text-xs uppercase tracking-[0.12em]"
+                inputClassName="field-input mt-2 min-h-16 border-0 bg-transparent p-0 text-center font-mono text-4xl font-bold tracking-[0.45em] focus:outline-none"
+                value={code}
+                onChange={(event) =>
+                  setCode(normalizeSessionCode(event.target.value))
+                }
+                maxLength={4}
+                placeholder={SESSION_CODE_INPUT_PLACEHOLDER}
+                autoCapitalize="characters"
+                autoCorrect="off"
+                spellCheck={false}
+              />
 
               {previewPremium ? (
                 <p className="font-display text-xs font-semibold uppercase tracking-wide text-status-info">
@@ -668,15 +669,17 @@ export function JoinSession() {
               />
 
               {needsRolePasscode ? (
-                <label className="field-label font-display text-xs uppercase tracking-[0.12em]">
-                  Role code
-                  <input
+                <div>
+                  <TextField
+                    id="join-session-role-code"
+                    label="Role code"
+                    labelClassName="field-label font-display text-xs uppercase tracking-[0.12em]"
+                    inputClassName="field-input mt-2 min-h-12 w-full text-center font-mono text-2xl font-bold tracking-[0.35em]"
                     value={rolePasscode}
                     onChange={(event) =>
                       setRolePasscode(normalizeRolePasscode(event.target.value))
                     }
                     maxLength={4}
-                    className="field-input mt-2 min-h-12 w-full text-center font-mono text-2xl font-bold tracking-[0.35em]"
                     placeholder="Team code"
                     autoCapitalize="characters"
                     autoCorrect="off"
@@ -687,7 +690,7 @@ export function JoinSession() {
                       ? "Ask the host for the observer code."
                       : "Leave blank if you're first on that side; otherwise ask a teammate for the role code."}
                   </span>
-                </label>
+                </div>
               ) : null}
 
               <MotionPressable
