@@ -6,6 +6,7 @@ import {
   photoAnswerSelectedReply,
   photoCategoriesForGameSize,
   photoCategoryUseCount,
+  photoCategoryLabelForUnit,
   photoQuestionPrompt,
   photoRuleSummaryForUnit,
   usedPhotoCategoryIds,
@@ -67,6 +68,9 @@ describe("photoQuestions", () => {
     expect(photoQuestionPrompt("half_mile_streets_traced", "metric")).toContain(
       "1 km",
     );
+    expect(
+      photoCategoryLabelForUnit("half_mile_streets_traced", "metric"),
+    ).toBe("1 km of Streets Traced");
   });
 
   it("tracks used categories from pending questions", () => {
