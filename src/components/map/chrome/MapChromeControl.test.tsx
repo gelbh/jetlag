@@ -68,14 +68,52 @@ describe("MapChromeControl", () => {
     expect(screen.getByText("Recenter")).toHaveClass("jl-tool-slot-label");
   });
 
+  it("fires clicks and honors disabled for side-dock slots", () => {
+    const onClick = vi.fn();
+    const { rerender } = render(
+      <MapChromeControl
+        variant="slot"
+        aria-label="Open chat"
+        icon={<span>chat</span>}
+        label="Chat"
+        onClick={onClick}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Open chat" }));
+    expect(onClick).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <MapChromeControl
+        variant="slot"
+        aria-label="Open chat"
+        icon={<span>chat</span>}
+        label="Chat"
+        disabled
+        onClick={onClick}
+      />,
+    );
+
+    const button = screen.getByRole("button", { name: "Open chat" });
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
   it("prefers children over icon/label slots", () => {
     render(
-      <MapChromeControl aria-label="Custom">
+      <MapChromeControl
+        aria-label="Custom"
+        icon={<span data-testid="fallback-icon">icon</span>}
+        label="Fallback"
+      >
         <span data-testid="custom-body">preview</span>
       </MapChromeControl>,
     );
 
     expect(screen.getByTestId("custom-body")).toBeInTheDocument();
+    expect(screen.queryByTestId("fallback-icon")).not.toBeInTheDocument();
+    expect(screen.queryByText("Fallback")).not.toBeInTheDocument();
   });
 
   it("honors disabled", () => {
