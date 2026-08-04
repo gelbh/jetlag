@@ -614,6 +614,7 @@ export function HiderMapScreen() {
   );
 
   const isDesktop = useDesktopLayout();
+  const chromeHudRef = useRef<HTMLDivElement>(null);
 
   if (!session || !gameArea) {
     return <AppNavigate to="/" replace />;
@@ -633,6 +634,7 @@ export function HiderMapScreen() {
       <div className="absolute inset-0">
         <MapViewWithLandscapeInset
           isDesktop={isDesktop}
+          chromeHudRef={chromeHudRef}
           key={session.id}
           mapKey={session.id}
           mapStyle={effectiveBasemapStyle}
@@ -782,6 +784,7 @@ export function HiderMapScreen() {
         hasMyZone={Boolean(myZone)}
         uid={uid}
         isHost={isHost}
+        chromeHudRef={chromeHudRef}
         mapSlot={isDesktop ? mapLayersContent : undefined}
         annotations={annotations}
         pendingQuestions={pendingQuestions}
