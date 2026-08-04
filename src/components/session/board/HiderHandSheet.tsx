@@ -1,3 +1,4 @@
+import { useEffect, useId, useState } from "react";
 import { MotionSheet } from "../../motion/MotionSheet";
 import { SheetHeader } from "../../ui/sheets/SheetHeader";
 import type {
@@ -36,6 +37,27 @@ function cardLabel(card: BoardCardInstance, gameSize: GameSize): string {
   }
 }
 
+function discardNeed(id: PowerUpId): number | null {
+  switch (id) {
+    case "discard1Draw2":
+      return 1;
+    case "discard2Draw3":
+      return 2;
+    case "discard3Draw4":
+      return 3;
+    case "veto":
+    case "randomize":
+    case "duplicate":
+    case "expandHand1":
+    case "expandHand2":
+      return null;
+    default: {
+      const _exhaustive: never = id;
+      return _exhaustive;
+    }
+  }
+}
+
 export function HiderHandSheet({
   open,
   onClose,
@@ -65,9 +87,34 @@ export function HiderHandSheet({
   onClearCurse: (instanceId: string) => void;
   onPlayMove: (instanceId: string) => void;
 }) {
+  const [pendingDiscardDraw, setPendingDiscardDraw] = useState<{
+    powerUpInstanceId: string;
+    need: number;
+    drawN: number;
+  } | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const errorId = useId();
+
+  useEffect(() => {
+    if (!open) {
+      setPendingDiscardDraw(null);
+      setSelectedIds([]);
+      setActionError(null);
+    }
+  }, [open]);
+
   if (!open) {
     return null;
   }
+
+  const toggleSelect = (instanceId: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(instanceId)
+        ? prev.filter((id) => id !== instanceId)
+        : [...prev, instanceId],
+    );
+  };
 
   return (
     <MotionSheet
@@ -85,6 +132,22 @@ export function HiderHandSheet({
             ? ` — discard or play ${mustDiscard} more`
             : ""}
         </p>
+        {pendingDiscardDraw ? (
+          <p className="text-sm text-ink-secondary" role="status">
+            Select {pendingDiscardDraw.need} card
+            {pendingDiscardDraw.need === 1 ? "" : "s"} to discard (
+            {selectedIds.length}/{pendingDiscardDraw.need}), then confirm.
+          </p>
+        ) : null}
+        {actionError ? (
+          <p
+            id={errorId}
+            role="alert"
+            className="text-sm text-status-error"
+          >
+            {actionError}
+          </p>
+        ) : null}
         <ul className="space-y-2">
           {state.hand.map((card) => {
             const expandId =
@@ -92,23 +155,33 @@ export function HiderHandSheet({
               (card.def.id === "expandHand1" || card.def.id === "expandHand2")
                 ? (card.def.id as Extract<PowerUpId, "expandHand1" | "expandHand2">)
                 : null;
-            const discardDraw =
-              card.def.kind === "powerUp" &&
-              (card.def.id === "discard1Draw2" ||
-                card.def.id === "discard2Draw3" ||
-                card.def.id === "discard3Draw4")
-                ? card.def.id
-                : null;
+            const discardNeedCount =
+              card.def.kind === "powerUp" ? discardNeed(card.def.id) : null;
+            const selecting = pendingDiscardDraw !== null;
+            const isPowerUpBeingPlayed =
+              pendingDiscardDraw?.powerUpInstanceId === card.instanceId;
+            const selectable =
+              selecting && !isPowerUpBeingPlayed;
+            const selected = selectedIds.includes(card.instanceId);
+
             return (
               <li
                 key={card.instanceId}
                 className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-hud-md)] border border-border px-3 py-2"
               >
-                <span className="text-sm text-ink">
+                <label className="flex min-h-11 flex-1 items-center gap-2 text-sm text-ink">
+                  {selectable ? (
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={() => toggleSelect(card.instanceId)}
+                      className="h-4 w-4"
+                    />
+                  ) : null}
                   {cardLabel(card, gameSize)}
-                </span>
+                </label>
                 <span className="flex flex-wrap gap-2">
-                  {mustDiscard > 0 ? (
+                  {mustDiscard > 0 && !selecting ? (
                     <button
                       type="button"
                       className="min-h-11 px-2 text-sm text-ink-secondary underline"
@@ -117,7 +190,7 @@ export function HiderHandSheet({
                       Discard
                     </button>
                   ) : null}
-                  {expandId ? (
+                  {!selecting && expandId ? (
                     <button
                       type="button"
                       className="min-h-11 px-2 text-sm text-ink-secondary underline"
@@ -126,35 +199,33 @@ export function HiderHandSheet({
                       Play
                     </button>
                   ) : null}
-                  {discardDraw ? (
+                  {!selecting && discardNeedCount !== null ? (
                     <button
                       type="button"
                       className="min-h-11 px-2 text-sm text-ink-secondary underline"
                       onClick={() => {
-                        const need =
-                          discardDraw === "discard1Draw2"
-                            ? 1
-                            : discardDraw === "discard2Draw3"
-                              ? 2
-                              : 3;
-                        const drawN = need + 1;
-                        const others = state.hand
-                          .filter((c) => c.instanceId !== card.instanceId)
-                          .slice(0, need)
-                          .map((c) => c.instanceId);
-                        if (others.length < need) {
-                          window.alert(
-                            `Need ${need} other card(s) in hand to discard.`,
+                        const others = state.hand.filter(
+                          (c) => c.instanceId !== card.instanceId,
+                        ).length;
+                        if (others < discardNeedCount) {
+                          setActionError(
+                            `Need ${discardNeedCount} other card(s) in hand to discard.`,
                           );
                           return;
                         }
-                        onPlayDiscardDraw(card.instanceId, others, drawN);
+                        setActionError(null);
+                        setPendingDiscardDraw({
+                          powerUpInstanceId: card.instanceId,
+                          need: discardNeedCount,
+                          drawN: discardNeedCount + 1,
+                        });
+                        setSelectedIds([]);
                       }}
                     >
                       Play
                     </button>
                   ) : null}
-                  {card.def.kind === "curse" ? (
+                  {!selecting && card.def.kind === "curse" ? (
                     <button
                       type="button"
                       className="min-h-11 px-2 text-sm text-ink-secondary underline"
@@ -163,7 +234,7 @@ export function HiderHandSheet({
                       Play curse
                     </button>
                   ) : null}
-                  {card.def.kind === "move" ? (
+                  {!selecting && card.def.kind === "move" ? (
                     <button
                       type="button"
                       className="min-h-11 px-2 text-sm text-ink-secondary underline"
@@ -177,6 +248,38 @@ export function HiderHandSheet({
             );
           })}
         </ul>
+        {pendingDiscardDraw ? (
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="btn-secondary min-h-11 flex-1"
+              onClick={() => {
+                setPendingDiscardDraw(null);
+                setSelectedIds([]);
+                setActionError(null);
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn-primary min-h-11 flex-1"
+              disabled={selectedIds.length !== pendingDiscardDraw.need}
+              onClick={() => {
+                onPlayDiscardDraw(
+                  pendingDiscardDraw.powerUpInstanceId,
+                  selectedIds,
+                  pendingDiscardDraw.drawN,
+                );
+                setPendingDiscardDraw(null);
+                setSelectedIds([]);
+                setActionError(null);
+              }}
+            >
+              Confirm discard
+            </button>
+          </div>
+        ) : null}
         {state.activeCurses.filter((c) => !c.cleared).length > 0 ? (
           <div className="space-y-2 border-t border-border pt-3">
             <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">

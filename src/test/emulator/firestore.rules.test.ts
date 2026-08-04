@@ -3736,6 +3736,32 @@ describe("firestore.rules", () => {
           .doc("state")
           .get(),
       );
+      await assertFails(
+        seeker
+          .firestore()
+          .collection("sessions")
+          .doc("session-be-4")
+          .collection("boardEconomy")
+          .doc("state")
+          .set({
+            deck: [],
+            hand: [],
+            discard: [],
+            handLimit: 6,
+            activeCurses: [],
+            updatedAt: "2026-01-01T00:00:01.000Z",
+          }),
+      );
+      const stranger = testEnv.authenticatedContext("stranger-1");
+      await assertFails(
+        stranger
+          .firestore()
+          .collection("sessions")
+          .doc("session-be-4")
+          .collection("boardEconomy")
+          .doc("state")
+          .get(),
+      );
     });
   });
 });

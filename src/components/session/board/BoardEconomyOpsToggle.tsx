@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { updateBoardEconomyEnabled } from "../../../services/firestore/boardEconomy";
 
 /** Ops-admin only. Must not render unless useAdminAccessState().state === "admin". */
@@ -15,6 +15,7 @@ export function BoardEconomyOpsToggle({
 }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const errorId = useId();
 
   return (
     <fieldset
@@ -29,6 +30,7 @@ export function BoardEconomyOpsToggle({
           type="checkbox"
           checked={enabled}
           disabled={disabled || pending}
+          aria-describedby={error ? errorId : undefined}
           onChange={(event) => {
             const next = event.target.checked;
             setPending(true);
@@ -50,7 +52,11 @@ export function BoardEconomyOpsToggle({
         Default off. Only your ops admin account can enable this. Public hosts
         never see this control.
       </p>
-      {error ? <p className="text-xs text-status-error">{error}</p> : null}
+      {error ? (
+        <p id={errorId} role="alert" className="text-xs text-status-error">
+          {error}
+        </p>
+      ) : null}
     </fieldset>
   );
 }
