@@ -142,19 +142,20 @@ export function ToolDockHistorySlot({
   );
 }
 
-interface ToolDockWideActionsProps {
+interface ToolDockDrawControlProps {
   drawMenuOpen: boolean;
   markupActive: boolean;
   onToggleDrawMenu: () => void;
   inactive?: boolean;
 }
 
-export function ToolDockWideActions({
+/** Draw / markup control for the RIGHT session dock. */
+export function ToolDockDrawControl({
   drawMenuOpen,
   markupActive,
   onToggleDrawMenu,
   inactive = false,
-}: ToolDockWideActionsProps) {
+}: ToolDockDrawControlProps) {
   return (
     <MapChromeControl
       variant="slot"

@@ -11,9 +11,9 @@ import type { MapTool } from "../../state/sessionStore";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
 import {
+  ToolDockDrawControl,
   ToolDockHistorySlot,
   ToolDockQuestionSlot,
-  ToolDockWideActions,
 } from "./ToolDockSlot";
 import { ToolDockDrawMenu } from "./ToolDockOverflowMenu";
 import {
@@ -161,7 +161,7 @@ export function ToolDock({
       session={
         <SessionIslandSlots
           drawSlot={
-            <ToolDockWideActions
+            <ToolDockDrawControl
               drawMenuOpen={drawMenuOpen}
               markupActive={markupActive}
               inactive={inactive}
