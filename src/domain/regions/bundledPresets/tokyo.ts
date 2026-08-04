@@ -1,5 +1,5 @@
 import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_ON, type BundledGamePresetDefinition } from "./shared";
+import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { TOKYO_REGION_PACK_ID } from "../tokyoRegionPack";
 
 const TOKYO_WARDS = [
@@ -51,7 +51,7 @@ export function tokyoPresets(): BundledGamePresetDefinition[] {
       regionPackId: TOKYO_REGION_PACK_ID,
       hierarchy: baseHierarchy,
       distanceUnit: "metric",
-      advancedSettingsPatch: EXPANSION_ON,
+      advancedSettingsPatch: EXPANSION_OFF,
     }),
     ...TOKYO_WARDS.map(
       (ward) => attachPlayArea({
@@ -63,7 +63,7 @@ export function tokyoPresets(): BundledGamePresetDefinition[] {
         subregionId: ward.id,
         hierarchy: wardHierarchy,
         distanceUnit: "metric",
-        advancedSettingsPatch: EXPANSION_ON,
+        advancedSettingsPatch: EXPANSION_OFF,
        }),
     ),
   ];

@@ -1,5 +1,5 @@
 import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_ON, type BundledGamePresetDefinition } from "./shared";
+import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { DUBLIN_REGION_PACK_ID } from "../dublinRegionPack";
 
 export function dublinPresets(): BundledGamePresetDefinition[] {
@@ -27,7 +27,7 @@ export function dublinPresets(): BundledGamePresetDefinition[] {
       regionPackId: DUBLIN_REGION_PACK_ID,
       hierarchy: dublinHierarchy,
       distanceUnit: "metric",
-      advancedSettingsPatch: EXPANSION_ON,
+      advancedSettingsPatch: EXPANSION_OFF,
       transitMetroId: "dublin",
     }),
     attachPlayArea({
@@ -40,7 +40,7 @@ export function dublinPresets(): BundledGamePresetDefinition[] {
       subregionId: "dcc",
       hierarchy: councilHierarchy,
       distanceUnit: "metric",
-      advancedSettingsPatch: EXPANSION_ON,
+      advancedSettingsPatch: EXPANSION_OFF,
       transitMetroId: "dublin",
     }),
     attachPlayArea({
@@ -53,7 +53,7 @@ export function dublinPresets(): BundledGamePresetDefinition[] {
       subregionId: "fingal",
       hierarchy: councilHierarchy,
       distanceUnit: "metric",
-      advancedSettingsPatch: EXPANSION_ON,
+      advancedSettingsPatch: EXPANSION_OFF,
       transitMetroId: "dublin",
     }),
     attachPlayArea({
@@ -66,7 +66,7 @@ export function dublinPresets(): BundledGamePresetDefinition[] {
       subregionId: "sdcc",
       hierarchy: councilHierarchy,
       distanceUnit: "metric",
-      advancedSettingsPatch: EXPANSION_ON,
+      advancedSettingsPatch: EXPANSION_OFF,
       transitMetroId: "dublin",
     }),
     attachPlayArea({
@@ -79,7 +79,7 @@ export function dublinPresets(): BundledGamePresetDefinition[] {
       subregionId: "dlr",
       hierarchy: councilHierarchy,
       distanceUnit: "metric",
-      advancedSettingsPatch: EXPANSION_ON,
+      advancedSettingsPatch: EXPANSION_OFF,
       transitMetroId: "dublin",
     }),
   ];

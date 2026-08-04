@@ -1,5 +1,5 @@
 import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_ON, type BundledGamePresetDefinition } from "./shared";
+import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { NYC_REGION_PACK_ID } from "../nycRegionPack";
 
 const NYC_BOROUGHS = [
@@ -33,7 +33,7 @@ export function nycPresets(): BundledGamePresetDefinition[] {
       regionPackId: NYC_REGION_PACK_ID,
       hierarchy: baseHierarchy,
       distanceUnit: "imperial",
-      advancedSettingsPatch: EXPANSION_ON,
+      advancedSettingsPatch: EXPANSION_OFF,
       transitMetroId: "nyc",
     }),
     ...NYC_BOROUGHS.map(
@@ -46,7 +46,7 @@ export function nycPresets(): BundledGamePresetDefinition[] {
         subregionId: borough.id,
         hierarchy: boroughHierarchy,
         distanceUnit: "imperial",
-        advancedSettingsPatch: EXPANSION_ON,
+        advancedSettingsPatch: EXPANSION_OFF,
         transitMetroId: "nyc",
        }),
     ),
