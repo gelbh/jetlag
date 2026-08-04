@@ -67,7 +67,7 @@ function SeekerMapScreenBody({
       seekerLocations={controller.seekerLocations}
       uid={controller.uid}
       activeThermometerWalk={controller.activeThermometerWalk}
-      pendingQuestions={controller.pendingQuestions}
+      pendingQuestions={controller.mapPendingQuestions}
       geometryEditAnnotation={controller.geometryEditAnnotation}
       geometryDraft={controller.geometryDraft}
       mapDraftOverlays={controller.mapDraftOverlays}

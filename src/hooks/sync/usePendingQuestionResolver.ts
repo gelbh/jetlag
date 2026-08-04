@@ -1,25 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import { isStaleAfterReset } from "../../domain/session/meta/sessionReset";
-import {
-  radarAnswerFromReplyId,
-  resolveRadarPendingQuestion,
-} from "../../domain/questions/ui";
-import {
-  resolveThermometerPendingQuestion,
-  thermometerAnswerFromReplyId,
-} from "../../domain/questions/ui";
-import {
-  resolveMeasuringPendingQuestion,
-  measuringAnswerFromReplyId,
-} from "../../domain/questions/ui";
-import {
-  resolveMatchingPendingQuestion,
-  matchingAnswerFromReplyId,
-} from "../../domain/questions/ui";
-import {
-  resolveTentaclePendingQuestion,
-} from "../../domain/questions/ui";
+import { resolvePendingAnnotationFromReply } from "../../domain/questions/questionResolution/resolvePendingAnnotationFromReply";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import {
   getPendingQuestionStatus,
@@ -51,66 +33,13 @@ async function resolvePendingQuestion(
   gameArea: GameArea,
 ): Promise<Omit<AnnotationRecord, "id" | "sessionId" | "status"> | null> {
   const answer = pending.answer;
-
-  switch (pending.toolType) {
-    case "radar": {
-      const radarAnswer =
-        typeof answer === "string"
-          ? radarAnswerFromReplyId(answer)
-          : radarAnswerFromReplyId(String(answer));
-      if (!radarAnswer) {
-        return null;
-      }
-
-      return resolveRadarPendingQuestion(pending, radarAnswer);
-    }
-    case "thermometer": {
-      const thermoAnswer =
-        typeof answer === "string"
-          ? thermometerAnswerFromReplyId(answer)
-          : thermometerAnswerFromReplyId(String(answer));
-      if (!thermoAnswer) {
-        return null;
-      }
-
-      return resolveThermometerPendingQuestion(pending, thermoAnswer);
-    }
-    case "measuring": {
-      const measuringAnswer =
-        typeof answer === "string"
-          ? measuringAnswerFromReplyId(answer)
-          : measuringAnswerFromReplyId(String(answer));
-      if (!measuringAnswer) {
-        return null;
-      }
-
-      return resolveMeasuringPendingQuestion(pending, measuringAnswer, gameArea);
-    }
-    case "matching": {
-      const matchingAnswer =
-        typeof answer === "string"
-          ? matchingAnswerFromReplyId(answer)
-          : matchingAnswerFromReplyId(String(answer));
-      if (!matchingAnswer) {
-        return null;
-      }
-
-      return await resolveMatchingPendingQuestion(
-        pending,
-        matchingAnswer,
-        gameArea,
-      );
-    }
-    case "tentacle": {
-      const tentacleAnswer =
-        typeof answer === "string" ? answer : String(answer);
-      return resolveTentaclePendingQuestion(pending, tentacleAnswer, gameArea);
-    }
-    case "photo":
-      return null;
-    default:
-      return null;
+  const replyId =
+    typeof answer === "string" ? answer : answer != null ? String(answer) : "";
+  if (!replyId) {
+    return null;
   }
+
+  return resolvePendingAnnotationFromReply(pending, replyId, gameArea);
 }
 
 export function usePendingQuestionResolver({

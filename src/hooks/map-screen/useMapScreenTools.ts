@@ -23,6 +23,7 @@ import { useThermometerTool } from "../tools/useThermometerTool";
 import { useZoneTool } from "../tools/useZoneTool";
 import type { MapTool } from "../../state/sessionStore";
 import { useHeavyMapToolsState } from "./useHeavyMapToolsState";
+import { useSeekerOptimisticPendingOverlays } from "./useSeekerOptimisticPendingOverlays";
 
 interface UseMapScreenToolsParams {
   session: SessionRecord | null;
@@ -58,7 +59,6 @@ export function useMapScreenTools({
   const [mapError, setMapError] = useState<string | null>(null);
   const [awaitingPlacement, setAwaitingPlacement] = useState(false);
   const awaitHiderAnswer = sessionHasHiders(session?.memberRoles);
-  const canSubmitQuestion = !hasOpenPendingQuestion(pendingQuestions);
   const {
     submitPendingQuestion,
     answerPendingQuestion,
@@ -67,6 +67,9 @@ export function useMapScreenTools({
     cancelThermometerWalk,
     dismissExpiredPendingQuestion,
   } = usePendingQuestionActions();
+  const { displayPendingQuestions, registerOptimisticPending } =
+    useSeekerOptimisticPendingOverlays(pendingQuestions);
+  const canSubmitQuestion = !hasOpenPendingQuestion(displayPendingQuestions);
 
   const finishPlacement = useCallback(() => {
     setActiveTool("none");
@@ -102,15 +105,32 @@ export function useMapScreenTools({
         return;
       }
 
-      return submitPendingQuestion({
+      const pendingQuestionId = await submitPendingQuestion({
         ...input,
         sessionId: session.id,
         senderUid: uid,
         senderRole: "seeker",
         toolType,
       });
+      if (pendingQuestionId) {
+        registerOptimisticPending({
+          id: pendingQuestionId,
+          sessionId: session.id,
+          toolType,
+          createdByUid: uid,
+          createdAt: new Date().toISOString(),
+          status: input.status ?? "pending",
+          placement: input.placement,
+          replyOptions: input.replyOptions,
+          promptText: input.promptText,
+          cardDraw: input.cardDraw,
+          cardKeep: input.cardKeep,
+        });
+      }
+
+      return pendingQuestionId;
     },
-    [session, submitPendingQuestion, uid],
+    [registerOptimisticPending, session, submitPendingQuestion, uid],
   );
 
   const completeThermometerWalkForSession = useCallback(
@@ -301,6 +321,7 @@ export function useMapScreenTools({
     ensurePointInGameArea,
     awaitHiderAnswer,
     canSubmitQuestion,
+    displayPendingQuestions,
     submitToolQuestion,
     answerPendingQuestion,
     postSystemMessage,
