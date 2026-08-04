@@ -12,6 +12,9 @@ const LAZY_ROUTE_PATHS = new Set([
   "/privacy",
   "/terms",
   "/premium",
+  "/stats",
+  "/friends",
+  "/leaderboard",
 ]);
 
 export function normalizeRoutePath(path: string): string {
@@ -21,15 +24,15 @@ export function normalizeRoutePath(path: string): string {
     return "/presets/:id/edit";
   }
 
-  if (ADMIN_PATH_RE.test(base)) {
-    return "/admin";
-  }
-
   return base || "/";
 }
 
 export function isLazyRoute(path: string): boolean {
-  return LAZY_ROUTE_PATHS.has(normalizeRoutePath(path));
+  const normalizedPath = normalizeRoutePath(path);
+  if (LAZY_ROUTE_PATHS.has(normalizedPath)) {
+    return true;
+  }
+  return ADMIN_PATH_RE.test(normalizedPath);
 }
 
 export type LazyRouteLoaderKey =
@@ -41,10 +44,16 @@ export type LazyRouteLoaderKey =
   | "importFeedback"
   | "importPrivacy"
   | "importPremium"
-  | "importTerms";
+  | "importTerms"
+  | "importStats"
+  | "importFriends"
+  | "importLeaderboard";
 
 export function lazyRouteLoaderKey(path: string): LazyRouteLoaderKey | undefined {
   const normalizedPath = normalizeRoutePath(path);
+  if (ADMIN_PATH_RE.test(normalizedPath)) {
+    return "importAdminOpsDesk";
+  }
   switch (normalizedPath) {
     case "/map":
       return "importMapScreen";
@@ -55,8 +64,6 @@ export function lazyRouteLoaderKey(path: string): LazyRouteLoaderKey | undefined
     case "/presets/new":
     case "/presets/:id/edit":
       return "importGamePresetEditor";
-    case "/admin":
-      return "importAdminOpsDesk";
     case "/feedback":
       return "importFeedback";
     case "/privacy":
@@ -65,6 +72,12 @@ export function lazyRouteLoaderKey(path: string): LazyRouteLoaderKey | undefined
       return "importPremium";
     case "/terms":
       return "importTerms";
+    case "/stats":
+      return "importStats";
+    case "/friends":
+      return "importFriends";
+    case "/leaderboard":
+      return "importLeaderboard";
     default:
       return undefined;
   }

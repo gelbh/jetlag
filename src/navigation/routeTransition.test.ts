@@ -109,11 +109,22 @@ describe("isLazyRoute", () => {
     expect(isLazyRoute("/privacy")).toBe(true);
     expect(isLazyRoute("/terms")).toBe(true);
     expect(isLazyRoute("/premium")).toBe(true);
+    expect(isLazyRoute("/stats")).toBe(true);
+    expect(isLazyRoute("/friends")).toBe(true);
+    expect(isLazyRoute("/leaderboard")).toBe(true);
   });
 
   it("marks eager routes as not lazy", () => {
     expect(isLazyRoute("/")).toBe(false);
     expect(isLazyRoute("/join")).toBe(false);
+  });
+
+  it("keeps nested admin paths distinct in normalizeRoutePath", () => {
+    expect(normalizeRoutePath("/admin")).toBe("/admin");
+    expect(normalizeRoutePath("/admin/incidents")).toBe("/admin/incidents");
+    expect(normalizeRoutePath("/admin/incidents/abc")).toBe(
+      "/admin/incidents/abc",
+    );
   });
 });
 
