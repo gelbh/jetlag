@@ -148,6 +148,7 @@ export function ToolDock({
           <div
             ref={mainGroupRef}
             className="jl-tool-dock-group jl-tool-dock-group-main"
+            aria-label="Question tools"
           >
             {visibleQuestionTools.map((toolId) => (
               <ToolDockQuestionSlot
