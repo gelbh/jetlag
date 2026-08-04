@@ -83,22 +83,32 @@ export function withLocalHiderLocationOverride(
   return locationsByUid;
 }
 
-/** Assemble accept-time anchors from confirmed-zone hiders + optional local GPS override. */
-export function assembleEndGameAcceptAnchors(input: {
+/**
+ * Direct End Game start anchors: prefer usable hiding place, else zone center.
+ * Does not require hider Accept. Seekers typically pass zone centers only.
+ */
+export function assembleEndGameStartAnchors(input: {
   hiderUids: readonly string[];
-  hiderLocations: readonly { uid: string; lat: number; lng: number }[];
-  localHiderUid: string | null;
-  localPoint: PlayerLocationPoint | null;
+  hidingPlaces?: readonly { uid: string; lat: number; lng: number }[];
+  zoneCenters: readonly { uid: string; lat: number; lng: number }[];
   frozenAt: string;
 }): Record<string, EndGameTruthAnchor> | { missing: string[] } {
-  const locationsByUid = withLocalHiderLocationOverride(
-    playerLocationsByUid(input.hiderLocations),
-    input.localHiderUid,
-    input.localPoint,
-  );
-  return buildEndGameTruthAnchors(
-    input.hiderUids,
-    locationsByUid,
-    input.frozenAt,
-  );
+  const hidingByUid = playerLocationsByUid(input.hidingPlaces ?? []);
+  const zoneByUid = playerLocationsByUid(input.zoneCenters);
+  const preferred = new Map<string, PlayerLocationPoint>();
+
+  for (const hiderUid of input.hiderUids) {
+    const hidingPlace = hidingByUid.get(hiderUid);
+    if (isUsablePlayerLocation(hidingPlace)) {
+      preferred.set(hiderUid, hidingPlace);
+      continue;
+    }
+
+    const zoneCenter = zoneByUid.get(hiderUid);
+    if (isUsablePlayerLocation(zoneCenter)) {
+      preferred.set(hiderUid, zoneCenter);
+    }
+  }
+
+  return buildEndGameTruthAnchors(input.hiderUids, preferred, input.frozenAt);
 }

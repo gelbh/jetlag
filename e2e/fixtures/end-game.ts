@@ -1,35 +1,34 @@
 import { type Page, expect } from "@playwright/test";
 import { openSettings } from "./tools/navigation";
 
-export async function requestEndGame(hostPage: Page) {
+export async function startEndGameFromFoundStation(hostPage: Page) {
   hostPage.once("dialog", (dialog) => dialog.accept());
-  await hostPage.getByRole("button", { name: "Start end game" }).click();
-  await expect(
-    hostPage.getByText("Waiting for hider to accept end game"),
-  ).toBeVisible({ timeout: 15_000 });
-}
-
-export async function acceptEndGame(guestPage: Page) {
-  await expect(
-    guestPage.getByText("Seekers requested end game"),
-  ).toBeVisible({ timeout: 15_000 });
-  await guestPage.getByRole("button", { name: "Accept" }).click();
-}
-
-export async function declineEndGame(guestPage: Page) {
-  await expect(
-    guestPage.getByText("Seekers requested end game"),
-  ).toBeVisible({ timeout: 15_000 });
-  await guestPage.getByRole("button", { name: "Decline" }).click();
+  await hostPage
+    .getByRole("button", {
+      name: "Declare found hiding-zone station / start end game",
+    })
+    .click();
 }
 
 export async function expectEndGameStarted(hostPage: Page, guestPage: Page) {
-  await expect(hostPage.getByText("End game started")).toBeVisible({
-    timeout: 15_000,
-  });
-  await expect(guestPage.getByText("End game started")).toBeVisible({
-    timeout: 15_000,
-  });
+  // Assert both sides together so an optimistic local host banner cannot pass alone
+  // before the server write is accepted and synced to the hider.
+  await expect
+    .poll(
+      async () => {
+        const hostVisible = await hostPage
+          .getByText("End game started")
+          .isVisible()
+          .catch(() => false);
+        const guestVisible = await guestPage
+          .getByText("End game started")
+          .isVisible()
+          .catch(() => false);
+        return hostVisible && guestVisible;
+      },
+      { timeout: 30_000 },
+    )
+    .toBe(true);
 }
 
 export async function expectEndGameRestrictions(hostPage: Page) {

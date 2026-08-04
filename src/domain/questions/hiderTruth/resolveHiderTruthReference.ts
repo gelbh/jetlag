@@ -1,12 +1,19 @@
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
+import { haversineMeters } from "../../geometry/gameArea/distance";
+import {
+  parseGeometryJson,
+  pointFromGeometryFeature,
+} from "../../geometry/gameArea/geometryParsing";
 import {
   isEndGameActive,
   type SessionRecord,
 } from "../../map/annotations";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 
 export type { EndGameTruthAnchor } from "../../session/hiding/endGameTruthAnchors";
 
 export type HiderTruthReferenceMode =
+  | "hidingPlace"
   | "hidingZoneCenter"
   | "endGameFreeze"
   | "unavailable";
@@ -14,6 +21,13 @@ export type HiderTruthReferenceMode =
 export interface ResolveHiderTruthReferenceInput {
   hiderUid: string;
   zoneCenter: LatLngTuple | null;
+  /** Live / last-known hiding place (hider GPS). */
+  hidingPlace?: LatLngTuple | null;
+  /** Seeker ask / placement origin used to decide in-zone truth. */
+  askOrigin?: LatLngTuple | null;
+  /** Precomputed; when omitted, derived from askOrigin + zone when radius known. */
+  originInsideZone?: boolean;
+  zoneRadiusMeters?: number | null;
   session:
     | Pick<SessionRecord, "endGameStartedAt" | "endGameTruthAnchors">
     | null
@@ -34,9 +48,59 @@ function isUsableLatLng(lat: unknown, lng: unknown): lat is number {
   );
 }
 
+function isUsablePoint(point: LatLngTuple | null | undefined): point is LatLngTuple {
+  return point != null && isUsableLatLng(point[0], point[1]);
+}
+
+export function isAskOriginInsideHidingZone(
+  askOrigin: LatLngTuple | null | undefined,
+  zoneCenter: LatLngTuple | null | undefined,
+  zoneRadiusMeters: number | null | undefined,
+): boolean {
+  if (
+    !isUsablePoint(askOrigin) ||
+    !isUsablePoint(zoneCenter) ||
+    typeof zoneRadiusMeters !== "number" ||
+    !Number.isFinite(zoneRadiusMeters) ||
+    zoneRadiusMeters < 0
+  ) {
+    return false;
+  }
+
+  return haversineMeters(askOrigin, zoneCenter) <= zoneRadiusMeters;
+}
+
+export function askOriginFromPendingQuestion(
+  question: PendingQuestionRecord,
+): LatLngTuple | null {
+  // Photo pending questions use geometryJson "{}" — parse must return null, not throw.
+  const feature = parseGeometryJson(question.placement.geometryJson);
+  return feature ? pointFromGeometryFeature(feature) : null;
+}
+
+export type HiderQuestionTruthContextInput = Omit<
+  ResolveHiderTruthReferenceInput,
+  "askOrigin" | "originInsideZone"
+>;
+
+/** Per-question truth reference (in-zone → hiding place; map pin stays zone/freeze). */
+export function resolvePendingQuestionTruthReference(
+  question: PendingQuestionRecord,
+  context: HiderQuestionTruthContextInput,
+): HiderTruthReference {
+  return resolveHiderTruthReference({
+    ...context,
+    askOrigin: askOriginFromPendingQuestion(question),
+  });
+}
+
 export function resolveHiderTruthReference({
   hiderUid,
   zoneCenter,
+  hidingPlace = null,
+  askOrigin = null,
+  originInsideZone,
+  zoneRadiusMeters = null,
   session,
 }: ResolveHiderTruthReferenceInput): HiderTruthReference {
   if (isEndGameActive(session)) {
@@ -51,7 +115,15 @@ export function resolveHiderTruthReference({
     return { point: null, mode: "unavailable" };
   }
 
-  if (zoneCenter) {
+  const insideZone =
+    originInsideZone ??
+    isAskOriginInsideHidingZone(askOrigin, zoneCenter, zoneRadiusMeters);
+
+  if (insideZone && isUsablePoint(hidingPlace)) {
+    return { point: hidingPlace, mode: "hidingPlace" };
+  }
+
+  if (isUsablePoint(zoneCenter)) {
     return { point: zoneCenter, mode: "hidingZoneCenter" };
   }
 

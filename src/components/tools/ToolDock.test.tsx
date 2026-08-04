@@ -130,7 +130,7 @@ describe("ToolDock", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", {
-        name: "Start end game — seekers entered the hiding zone",
+        name: "Declare found hiding-zone station / start end game",
       }),
     ).not.toBeInTheDocument();
 
@@ -147,11 +147,11 @@ describe("ToolDock", () => {
     expect(
       screen.getByRole("button", { name: "Declare found hider" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", {
-        name: "Start end game — seekers entered the hiding zone",
-      }),
-    ).toBeInTheDocument();
+    const stationButton = screen.getByRole("button", {
+      name: "Declare found hiding-zone station / start end game",
+    });
+    expect(stationButton).toBeInTheDocument();
+    expect(within(stationButton).getByText("Station")).toBeInTheDocument();
   });
 
   it("renders short plain labels on every dock slot", () => {

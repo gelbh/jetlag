@@ -44,10 +44,11 @@ import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
 import { SessionLog } from "../../components/session/log/SessionLog";
-import { isEndGameActive, isEndGamePending, isFoundHiderPending } from "../../domain/map/annotations";
+import { isEndGameActive, isFoundHiderPending } from "../../domain/map/annotations";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
 import { visibleRoleCodeRoles } from "../../domain/session/players/roleGates";
 import type { HiderTruthResult } from "../../domain/questions/ui";
@@ -99,7 +100,6 @@ export type HiderMapScreenChromeProps = {
   truthReveal: HiderTruthRevealState | null;
   onDismissTruthReveal: () => void;
   onResetEndGame: () => void;
-  onAcceptEndGame: () => void;
   onAcceptFoundHider: () => void;
   onDeclineFoundHider: () => void;
   onOpenLog: () => void;
@@ -184,6 +184,7 @@ export type HiderMapScreenChromeProps = {
     sessionId: string;
     questionTruths: ReadonlyMap<string, HiderTruthResult>;
     truthsLoading: boolean;
+    truthReferenceModes?: ReadonlyMap<string, HiderTruthReferenceMode>;
     answerError: string | null;
     onAnswerQuestion: (
       pendingQuestionId: string,
@@ -218,7 +219,6 @@ export function HiderMapScreenChrome({
   truthReveal,
   onDismissTruthReveal,
   onResetEndGame,
-  onAcceptEndGame,
   onAcceptFoundHider,
   onDeclineFoundHider,
   onOpenLog,
@@ -345,14 +345,11 @@ export function HiderMapScreenChrome({
         pendingQuestions={pendingQuestions}
         closeTimerMenu={overlay.sheet !== "none" || zoneTool.wizardOpen}
         endGameActive={isEndGameActive(session)}
-        endGamePending={isEndGamePending(session)}
-        endGameRequestedByUid={session.endGameRequestedByUid}
         foundHiderPending={isFoundHiderPending(session)}
         foundRequestedByUid={session.foundRequestedByUid}
         myUid={uid ?? undefined}
         isHost={isHost}
         onResetEndGame={() => void onResetEndGame()}
-        onAcceptEndGame={() => void onAcceptEndGame()}
         onAcceptFoundHider={() => void onAcceptFoundHider()}
         onDeclineFoundHider={() => void onDeclineFoundHider()}
         hiderOutsideZone={hiderOutsideZone}
@@ -463,6 +460,7 @@ export function HiderMapScreenChrome({
           isHider
           questionTruths={chat.questionTruths}
           truthsLoading={chat.truthsLoading}
+          truthReferenceModes={chat.truthReferenceModes}
           answerError={chat.answerError}
           onAnswerQuestion={chat.onAnswerQuestion}
         />
@@ -521,8 +519,7 @@ export function HiderMapScreenChrome({
             session,
             myUid: uid ?? undefined,
             onClearMap,
-            endGameBlocked:
-              isEndGameActive(session) || isEndGamePending(session),
+            endGameBlocked: isEndGameActive(session),
             onExport: overlay.closeSheet,
             isHost,
             onResetBoard,

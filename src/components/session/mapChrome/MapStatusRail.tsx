@@ -47,15 +47,12 @@ interface MapStatusRailProps {
   pendingQuestions?: readonly PendingQuestionRecord[];
   closeTimerMenu?: boolean;
   showPreloadBanner?: boolean;
-  endGamePending?: boolean;
   endGameActive?: boolean;
-  endGameRequestedByUid?: string;
   myUid?: string;
   hostUid?: string | null;
   seekerLocations?: readonly PlayerLocationRecord[];
   onCancelWalkingQuestion?: (pendingQuestionId: string) => void;
   isHost?: boolean;
-  onAcceptEndGame?: () => void;
   onResetEndGame?: () => void;
   foundHiderPending?: boolean;
   foundRequestedByUid?: string;
@@ -100,14 +97,11 @@ export function MapStatusRail({
   closeTimerMenu = false,
   showPreloadBanner = false,
   endGameActive = false,
-  endGamePending = false,
-  endGameRequestedByUid,
   myUid,
   hostUid = null,
   seekerLocations = [],
   onCancelWalkingQuestion,
   isHost = false,
-  onAcceptEndGame,
   onResetEndGame,
   foundHiderPending = false,
   foundRequestedByUid,
@@ -295,13 +289,8 @@ export function MapStatusRail({
         {hiderOutsideZone ? <HiderOutsideZoneAlert /> : null}
 
         <EndGameAlert
-          endGamePending={endGamePending}
           endGameActive={endGameActive}
-          playerRole={playerRole}
-          endGameRequestedByUid={endGameRequestedByUid}
-          myUid={myUid}
           isHost={isHost}
-          onAcceptEndGame={onAcceptEndGame}
           onResetEndGame={onResetEndGame}
         />
 

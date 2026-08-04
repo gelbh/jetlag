@@ -3,24 +3,17 @@ import {
   computeHiderTruthReplyAsync,
   type HiderTruthResult,
 } from "../../domain/questions/ui";
-import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
+import {
+  resolvePendingQuestionTruthReference,
+  type HiderQuestionTruthContextInput,
+  type HiderTruthReferenceMode,
+} from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { GameArea } from "../../domain/map/annotations";
-import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { useLatestRequest } from "../forms/useLatestRequest";
 
 const EMPTY_TRUTHS = new Map<string, HiderTruthResult>();
-
-function truthReferenceKey(
-  truthReference: LatLngTuple | null,
-  mode: HiderTruthReferenceMode,
-): string {
-  if (!truthReference) {
-    return `none:${mode}`;
-  }
-
-  return `${mode}:${truthReference[0].toFixed(6)},${truthReference[1].toFixed(6)}`;
-}
+const EMPTY_MODES = new Map<string, HiderTruthReferenceMode>();
 
 function openPendingQuestions(
   pendingQuestions: readonly PendingQuestionRecord[],
@@ -28,17 +21,20 @@ function openPendingQuestions(
   return pendingQuestions.filter((question) => question.status === "pending");
 }
 
+export type HiderQuestionTruthContext = HiderQuestionTruthContextInput;
+
 export function useHiderQuestionTruths(
   pendingQuestions: readonly PendingQuestionRecord[],
-  truthReference: LatLngTuple | null,
+  truthContext: HiderQuestionTruthContext | null,
   gameArea?: GameArea,
   options?: {
     truthReferenceReady?: boolean;
-    truthReferenceMode?: HiderTruthReferenceMode;
   },
 ): {
   questionTruths: ReadonlyMap<string, HiderTruthResult>;
   loading: boolean;
+  /** Per open question id → reference mode for picker labels. */
+  truthReferenceModes: ReadonlyMap<string, HiderTruthReferenceMode>;
 } {
   const [questionTruths, setQuestionTruths] = useState<
     ReadonlyMap<string, HiderTruthResult>
@@ -51,6 +47,16 @@ export function useHiderQuestionTruths(
     [pendingQuestions],
   );
 
+  const contextKey = truthContext
+    ? [
+        truthContext.hiderUid,
+        truthContext.zoneCenter?.join(",") ?? "none",
+        truthContext.hidingPlace?.join(",") ?? "none",
+        String(truthContext.zoneRadiusMeters ?? "none"),
+        truthContext.session?.endGameStartedAt ?? "none",
+      ].join("|")
+    : "none";
+
   const openQuestionKey = useMemo(
     () =>
       openQuestions
@@ -60,27 +66,44 @@ export function useHiderQuestionTruths(
     [openQuestions],
   );
 
-  const truthReferenceMode = options?.truthReferenceMode ?? "hidingZoneCenter";
-  const referenceKey = truthReferenceKey(truthReference, truthReferenceMode);
-  const fetchKey = `${openQuestionKey}|${referenceKey}`;
+  const truthReferenceModes = useMemo(() => {
+    if (!truthContext || openQuestions.length === 0) {
+      return EMPTY_MODES;
+    }
+    const modes = new Map<string, HiderTruthReferenceMode>();
+    for (const question of openQuestions) {
+      modes.set(
+        question.id,
+        resolvePendingQuestionTruthReference(question, truthContext).mode,
+      );
+    }
+    return modes;
+  }, [openQuestions, truthContext]);
+
+  const fetchKey = `${openQuestionKey}|${contextKey}`;
   const truthReferenceReady = options?.truthReferenceReady ?? true;
   const loading =
     openQuestions.length > 0 &&
     (!truthReferenceReady || resolvedFetchKey !== fetchKey);
 
   useEffect(() => {
-    if (openQuestions.length === 0 || !truthReferenceReady) {
+    if (openQuestions.length === 0 || !truthReferenceReady || !truthContext) {
       return;
     }
 
     const requestId = beginRequest();
+    const context = truthContext;
 
     void (async () => {
       const entries = await Promise.all(
         openQuestions.map(async (question) => {
+          const reference = resolvePendingQuestionTruthReference(
+            question,
+            context,
+          );
           const truth = await computeHiderTruthReplyAsync(
             question,
-            truthReference,
+            reference.point,
             gameArea,
           );
           return [question.id, truth] as const;
@@ -106,7 +129,7 @@ export function useHiderQuestionTruths(
     beginRequest,
     isLatestRequest,
     openQuestions,
-    truthReference,
+    truthContext,
     gameArea,
     truthReferenceReady,
   ]);
@@ -114,5 +137,7 @@ export function useHiderQuestionTruths(
   return {
     questionTruths: openQuestions.length === 0 ? EMPTY_TRUTHS : questionTruths,
     loading: openQuestions.length === 0 ? false : loading,
+    truthReferenceModes:
+      openQuestions.length === 0 ? EMPTY_MODES : truthReferenceModes,
   };
 }
