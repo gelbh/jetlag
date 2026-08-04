@@ -164,6 +164,8 @@ export interface SessionRecord {
   regionPackSubregionId?: string;
   bundledGeoRevision?: number;
   expansionPackEnabled?: boolean;
+  /** Ops-admin-only hider deck simulation. Default false. */
+  boardEconomyEnabled?: boolean;
   customQuestionPackEnabled?: boolean;
   previewQuestionBeforeSend?: boolean;
   tier?: SessionTier;
