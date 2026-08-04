@@ -30,7 +30,6 @@ import {
   MOTION_MAP_CAMERA_MS,
 } from "../../../domain/device/motion/motionTokens";
 import { useMotionProfile } from "../../../hooks/motion/useMotionProfile";
-import { useMapStore } from "../../../state/mapStore";
 import { useMapLibreMap } from "../helpers/useMapLibreMap";
 import {
   MapFeatureHitTestBridge,
@@ -326,9 +325,8 @@ export function MapViewMapLibre({
     (showMapStyleToggle ?? Boolean(onMapStyleChange)) &&
     Boolean(onMapStyleChange);
   const styleControlInset = mapStyleControlInset ?? zoomControlInset;
-  const mapPitchEnabled = useMapStore((state) => state.mapPitchEnabled);
   const { lowPowerMode } = useMotionProfile();
-  const maxPitchDegrees = resolveMapPitchDegrees(mapPitchEnabled, lowPowerMode);
+  const maxPitchDegrees = resolveMapPitchDegrees(lowPowerMode);
   const pitchGesturesEnabled = interactive && maxPitchDegrees > 0;
 
   useEffect(() => {
