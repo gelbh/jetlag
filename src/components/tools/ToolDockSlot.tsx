@@ -109,19 +109,20 @@ export function ToolDockMarkupMenuItem({
 
 type ToolDockHistoryKind = "undo" | "redo";
 
-interface ToolDockHistoryBookendProps {
+interface ToolDockHistorySlotProps {
   kind: ToolDockHistoryKind;
   canAct: boolean;
   onAct: () => void;
   inactive?: boolean;
 }
 
-export function ToolDockHistoryBookend({
+/** Undo/redo chip for the bottom-middle hunt group (equal size with question tools). */
+export function ToolDockHistorySlot({
   kind,
   canAct,
   onAct,
   inactive = false,
-}: ToolDockHistoryBookendProps) {
+}: ToolDockHistorySlotProps) {
   const isUndo = kind === "undo";
   return (
     <MapChromeControl
@@ -131,9 +132,9 @@ export function ToolDockHistoryBookend({
       aria-label={isUndo ? "Undo last annotation" : "Redo last annotation"}
       icon={
         isUndo ? (
-          <HudUndoIcon className="h-4 w-4" />
+          <HudUndoIcon className="h-5 w-5" />
         ) : (
-          <HudRedoIcon className="h-4 w-4" />
+          <HudRedoIcon className="h-5 w-5" />
         )
       }
       label={isUndo ? "Undo" : "Redo"}

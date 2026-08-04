@@ -1,4 +1,4 @@
-/* map-bottom-chrome.css — floating History · Hunt · Session · Map-controls islands */
+/* map-bottom-chrome.css — floating Hunt (history+questions) · Session · Map-controls */
 
 :root {
   /*
@@ -84,7 +84,7 @@
     display: flex;
     flex-direction: row;
     align-items: flex-end;
-    justify-content: flex-start;
+    justify-content: center;
     gap: var(--dock-island-gap);
     width: 100%;
     /* Leave room for the right side stack (session + map controls). */
@@ -143,15 +143,6 @@
     overflow: visible;
   }
 
-  /* Undo / Redo bookends — smaller than Hunt chips; do not grow. */
-  .jl-map-island--history-start,
-  .jl-map-island--history-end {
-    flex: 0 0 auto;
-    position: relative;
-    z-index: 2;
-    padding: 0.125rem;
-  }
-
   .jl-map-chrome-side-stack .jl-map-island--session,
   .jl-map-chrome-side-stack .jl-map-island--map-controls {
     flex: 0 0 auto;
@@ -165,17 +156,7 @@
     flex-shrink: 0 !important;
   }
 
-  /* Bookend chips stay compact (below Hunt equal chips) but ≥40px tap floor. */
-  .jl-map-island--history-start .jl-tool-slot,
-  .jl-map-island--history-end .jl-tool-slot {
-    flex: 0 0 auto;
-    width: 2.5rem;
-    min-width: 2.5rem;
-    max-width: 2.5rem;
-    min-height: 2.5rem;
-    padding: 0.125rem;
-  }
-
+  /* Undo, Redo, and question tools share equal flex in the bottom-middle group. */
   .jl-map-island .jl-tool-dock-group-main .jl-tool-slot {
     flex: 1 1 0;
     width: auto;
