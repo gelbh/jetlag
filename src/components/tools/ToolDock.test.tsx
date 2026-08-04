@@ -90,7 +90,6 @@ describe("ToolDock", () => {
     const huntLabels = [
       ...(hunt?.querySelectorAll(".jl-tool-slot-label") ?? []),
     ].map((node) => node.textContent?.trim() ?? "");
-    expect(huntLabels).toEqual(["Set zone"]);
     expect(huntLabels).not.toContain("Chat");
     expect(huntLabels).not.toContain("Settings");
     expect(huntLabels).not.toContain("Report");
@@ -287,6 +286,7 @@ describe("HiderToolDock", () => {
     const huntLabels = [
       ...(hunt?.querySelectorAll(".jl-tool-slot-label") ?? []),
     ].map((node) => node.textContent?.trim() ?? "");
+    expect(huntLabels).toEqual(["Set zone"]);
     expect(huntLabels).not.toContain("Chat");
     expect(huntLabels).not.toContain("Report");
     expect(huntLabels).not.toContain("Settings");
