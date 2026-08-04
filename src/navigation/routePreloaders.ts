@@ -24,6 +24,34 @@ export const importFriends = () =>
 export const importLeaderboard = () =>
   import("../routes/Leaderboard").then((m) => ({ default: m.Leaderboard }));
 
+export const importAdminOpsDesk = () =>
+  import("../components/admin/AdminOpsDesk").then((m) => ({
+    default: m.AdminOpsDesk,
+  }));
+
+export const importFeedback = () =>
+  import("../routes/Feedback").then((m) => ({ default: m.Feedback }));
+
+export const importJoinSession = () =>
+  import("../routes/JoinSession").then((m) => ({ default: m.JoinSession }));
+
+export const importPrivacy = () =>
+  import("../routes/Privacy").then((m) => ({ default: m.Privacy }));
+
+export const importPremium = () =>
+  import("../routes/Premium").then((m) => ({ default: m.Premium }));
+
+export const importTerms = () =>
+  import("../routes/Terms").then((m) => ({ default: m.Terms }));
+
+export const importNotFound = () =>
+  import("../routes/NotFound").then((m) => ({ default: m.NotFound }));
+
+export const importAppResumeWatchdog = () =>
+  import("../components/ui/AppResumeWatchdog").then((m) => ({
+    default: m.AppResumeWatchdog,
+  }));
+
 export const routeImporter = {
   importMapScreen,
   importCreateSession,
@@ -32,6 +60,13 @@ export const routeImporter = {
   importStats,
   importFriends,
   importLeaderboard,
+  importAdminOpsDesk,
+  importFeedback,
+  importJoinSession,
+  importPrivacy,
+  importPremium,
+  importTerms,
+  importNotFound,
 };
 
 export const MapScreenLazy = lazyWithChunkRetry(importMapScreen);
@@ -41,6 +76,14 @@ export const GamePresetEditorLazy = lazyWithChunkRetry(importGamePresetEditor);
 export const StatsLazy = lazyWithChunkRetry(importStats);
 export const FriendsLazy = lazyWithChunkRetry(importFriends);
 export const LeaderboardLazy = lazyWithChunkRetry(importLeaderboard);
+export const AdminOpsDeskLazy = lazyWithChunkRetry(importAdminOpsDesk);
+export const FeedbackLazy = lazyWithChunkRetry(importFeedback);
+export const JoinSessionLazy = lazyWithChunkRetry(importJoinSession);
+export const PrivacyLazy = lazyWithChunkRetry(importPrivacy);
+export const PremiumLazy = lazyWithChunkRetry(importPremium);
+export const TermsLazy = lazyWithChunkRetry(importTerms);
+export const NotFoundLazy = lazyWithChunkRetry(importNotFound);
+export const AppResumeWatchdogLazy = lazyWithChunkRetry(importAppResumeWatchdog);
 
 export { isLazyRoute, normalizeRoutePath } from "./routeMetadata";
 
