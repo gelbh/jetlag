@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { SessionRecord } from "@/domain/map/annotations";
 import {
   isSessionRoleGated,
@@ -7,6 +7,7 @@ import {
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
 import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
 import {
+  prefetchRolePasscode,
   regenerateRolePasscode,
   revealRolePasscode,
 } from "@/services/session/rolePasscodeLifecycle";
@@ -43,18 +44,32 @@ export function RolePasscodeSettings({
   const [error, setError] = useState<string | null>(null);
   const { status: copyStatus, copy } = useCopyFeedback();
 
-  if (!isSessionRoleGated(session)) {
-    return null;
-  }
+  const gated = isSessionRoleGated(session);
+  const rows = gated
+    ? visibleRoleCodeRoles({
+        roleGates: session.roleGates,
+        memberRoles: session.memberRoles,
+        myUid,
+        isHost,
+      })
+    : [];
 
-  const rows = visibleRoleCodeRoles({
-    roleGates: session.roleGates,
-    memberRoles: session.memberRoles,
-    myUid,
-    isHost,
-  });
+  useEffect(() => {
+    if (!isSessionRoleGated(session)) {
+      return;
+    }
+    const warmRoles = visibleRoleCodeRoles({
+      roleGates: session.roleGates,
+      memberRoles: session.memberRoles,
+      myUid,
+      isHost,
+    });
+    for (const role of warmRoles) {
+      prefetchRolePasscode(session.id, role);
+    }
+  }, [session, myUid, isHost]);
 
-  if (rows.length === 0) {
+  if (!gated || rows.length === 0) {
     return null;
   }
 

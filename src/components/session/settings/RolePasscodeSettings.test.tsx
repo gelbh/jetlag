@@ -5,12 +5,14 @@ import { RolePasscodeSettings } from "./RolePasscodeSettings";
 
 const revealRolePasscode = vi.fn();
 const regenerateRolePasscode = vi.fn();
+const prefetchRolePasscode = vi.fn();
 const copy = vi.fn();
 
 vi.mock("../../../services/session/rolePasscodeLifecycle", () => ({
   revealRolePasscode: (...args: unknown[]) => revealRolePasscode(...args),
   regenerateRolePasscode: (...args: unknown[]) =>
     regenerateRolePasscode(...args),
+  prefetchRolePasscode: (...args: unknown[]) => prefetchRolePasscode(...args),
 }));
 
 vi.mock("../../../hooks/forms/useCopyFeedback", () => ({
@@ -34,6 +36,7 @@ describe("RolePasscodeSettings", () => {
   beforeEach(() => {
     revealRolePasscode.mockReset();
     regenerateRolePasscode.mockReset();
+    prefetchRolePasscode.mockReset();
     copy.mockReset();
     copy.mockResolvedValue(undefined);
   });
@@ -50,6 +53,7 @@ describe("RolePasscodeSettings", () => {
     );
 
     expect(screen.getAllByText("••••").length).toBeGreaterThan(0);
+    expect(prefetchRolePasscode).toHaveBeenCalledWith("sess-1", "seeker");
 
     fireEvent.click(
       screen.getByRole("button", { name: /Reveal Seeker code/i }),
