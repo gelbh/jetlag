@@ -2,11 +2,8 @@ import { describe, expect, it } from "vitest";
 import { mapLibreRuntimeOptions } from "./mapLibreRuntimeOptions";
 
 describe("mapLibreRuntimeOptions", () => {
-  it("keeps default fade and tile cache when not low-power", () => {
-    expect(mapLibreRuntimeOptions(false)).toEqual({
-      fadeDuration: 300,
-      maxTileCacheSize: 100,
-    });
+  it("omits overrides when not low-power (keep MapLibre defaults)", () => {
+    expect(mapLibreRuntimeOptions(false)).toEqual({});
   });
 
   it("cuts fade and tile cache in low-power", () => {

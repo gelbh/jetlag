@@ -379,8 +379,7 @@ export function MapViewMapLibre({
           }}
           style={{ width: "100%", height: "100%" }}
           mapStyle={style}
-          fadeDuration={runtimeOptions.fadeDuration}
-          maxTileCacheSize={runtimeOptions.maxTileCacheSize}
+          {...runtimeOptions}
           // Slice D eval (hardening): reuseMaps skipped — style toggles already
           // call setStyle in-place (not remount); session remounts via mapKey are
           // rare; reuseMaps risks stale GL/image state without a measured win.
