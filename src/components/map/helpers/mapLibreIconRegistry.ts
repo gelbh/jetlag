@@ -31,6 +31,9 @@ const TRANSIT_MODES: TransitRouteMode[] = [
   "other",
 ];
 
+/** Serialize overlapping register() across mount + style.load per map. */
+const registerInFlight = new WeakMap<MapLibreMap, Promise<void>>();
+
 export function transitModeIconId(mode: TransitRouteMode): string {
   return TRANSIT_ICON_IDS[mode];
 }
@@ -60,8 +63,13 @@ async function loadSvgImage(
         img.onerror = () => reject(new Error(`Failed to decode ${imageId}`));
         img.src = url;
       });
+      // Skip addImage when another register won the race (MapLibre no-ops +
+      // error-events on duplicates; it does not throw).
+      if (map.hasImage(imageId)) {
+        return true;
+      }
       map.addImage(imageId, image, { pixelRatio: 2 });
-      return true;
+      return map.hasImage(imageId);
     } finally {
       URL.revokeObjectURL(url);
     }
@@ -81,8 +89,7 @@ function userLocationFallbackSvg(): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="8" fill="#4285F4" stroke="#fff" stroke-width="3"/></svg>`;
 }
 
-/** Load shared marker images into the MapLibre map (idempotent per style). */
-export async function registerMapLibreMarkerImages(
+async function registerMapLibreMarkerImagesOnce(
   map: MapLibreMap,
 ): Promise<void> {
   const userLoads = await Promise.all([
@@ -130,6 +137,25 @@ export async function registerMapLibreMarkerImages(
       ),
     ]),
   );
+}
+
+/** Load shared marker images into the MapLibre map (idempotent per style). */
+export async function registerMapLibreMarkerImages(
+  map: MapLibreMap,
+): Promise<void> {
+  const previous = registerInFlight.get(map) ?? Promise.resolve();
+  const next = previous
+    .catch(() => undefined)
+    .then(() => registerMapLibreMarkerImagesOnce(map));
+  registerInFlight.set(
+    map,
+    next.finally(() => {
+      if (registerInFlight.get(map) === next) {
+        registerInFlight.delete(map);
+      }
+    }),
+  );
+  await next;
 }
 
 /**
