@@ -17,7 +17,10 @@ describe("useThermometerWalk", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     useLiveLocationMock.mockReset();
-    useLiveLocationMock.mockReturnValue({ reading: null, error: null });
+    useLiveLocationMock.mockReturnValue({
+      reading: null,
+      error: null,
+    });
   });
 
   afterEach(() => {
@@ -32,7 +35,10 @@ describe("useThermometerWalk", () => {
     type Reading = { lat: number; lng: number; accuracy: number } | null;
     const { rerender, result } = renderHook(
       ({ reading }: { reading: Reading }) => {
-        useLiveLocationMock.mockReturnValue({ reading, error: null });
+        useLiveLocationMock.mockReturnValue({
+          reading,
+          error: null,
+        });
         return useThermometerWalk({
           active: true,
           startPoint,
